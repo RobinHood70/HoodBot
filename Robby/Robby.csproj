@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{16A4F00F-11B3-4049-89D2-09C9B6B53C83}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>RobinHood70.Robby</RootNamespace>
+    <AssemblyName>Robby</AssemblyName>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>..\Testing.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>bin\Debug\Robby.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>Robby.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Pages\Category.cs" />
+    <Compile Include="Design\CacheDictionary.cs" />
+    <Compile Include="Design\PageLoadOptions.cs" />
+    <Compile Include="Pages\FileRevision.cs" />
+    <Compile Include="Design\IWikiTitle.cs" />
+    <Compile Include="InterwikiTitle.cs" />
+    <Compile Include="Design\PageBuilder.cs" />
+    <Compile Include="Design\PageBuilderBase.cs" />
+    <Compile Include="Pages\CategoryTitle.cs" />
+    <Compile Include="Design\IWikiTitleComparerFullPageName.cs" />
+    <Compile Include="Design\IWikiTitleComparerKey.cs" />
+    <Compile Include="Design\IWikiTitleComparerNamespacePageName.cs" />
+    <Compile Include="Design\Extensions.cs" />
+    <Compile Include="Enumerations.cs" />
+    <Compile Include="Design\IMessageSource.cs" />
+    <Compile Include="MagicWord.cs" />
+    <Compile Include="MediaWikiNamespaces.cs" />
+    <Compile Include="Namespace.cs" />
+    <Compile Include="NamespaceCollection.cs" />
+    <Compile Include="Pages\Message.cs" />
+    <Compile Include="Pages\Page.cs" />
+    <Compile Include="PageCollection.cs" />
+    <Compile Include="Design\TitleCollectionBase.cs" />
+    <Compile Include="RecentChangesOptions.cs" />
+    <Compile Include="RedirectTitle.cs" />
+    <Compile Include="TitleCollection.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Revision.cs" />
+    <Compile Include="Pages\RevisionCollection.cs" />
+    <Compile Include="Site.cs" />
+    <Compile Include="SiteCapabilities.cs" />
+    <Compile Include="Title.cs" />
+    <Compile Include="Design\IWikiTitleEqualityComparer.cs" />
+    <Compile Include="Design\IWikiTitleEqualityComparerFull.cs" />
+    <Compile Include="UnexpectedResultException.cs" />
+    <Compile Include="WarningEventArgs.cs" />
+    <Compile Include="Pages\FilePage.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="Robby.pfx" />
+    <None Include="Robby.ruleset" />
+    <AdditionalFiles Include="stylecop.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="CustomDictionary.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\Shared\Shared.csproj">
+      <Project>{24f1785b-804e-4e66-9f7e-3898f45306a1}</Project>
+      <Name>Shared</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WallE\WallE.csproj">
+      <Project>{f338af86-4502-4121-b032-092ca727d51b}</Project>
+      <Name>WallE</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\..\..\NuGet\StyleCop.Analyzers.1.1.0-beta001\analyzers\dotnet\cs\Newtonsoft.Json.dll" />
+    <Analyzer Include="..\..\..\NuGet\StyleCop.Analyzers.1.1.0-beta001\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
+    <Analyzer Include="..\..\..\NuGet\StyleCop.Analyzers.1.1.0-beta001\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

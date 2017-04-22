@@ -1,0 +1,511 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F338AF86-4502-4121-B032-092CA727D51B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>RobinHood70.WallE</RootNamespace>
+    <AssemblyName>WallE</AssemblyName>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <CodeAnalysisCulture>en-CA</CodeAnalysisCulture>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisIgnoreGeneratedCode>true</CodeAnalysisIgnoreGeneratedCode>
+    <Prefer32Bit>false</Prefer32Bit>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>..\Main.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>bin\Debug\WallE.XML</DocumentationFile>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>WallE.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Base\AllTransclusionsInput.cs" />
+    <Compile Include="Base\AllRedirectsInput.cs" />
+    <Compile Include="Base\AllImagesItem.cs" />
+    <Compile Include="Base\AllFileUsagesInput.cs" />
+    <Compile Include="Base\AllLinksItem.cs" />
+    <Compile Include="Base\AllMessagesItem.cs" />
+    <Compile Include="Base\AllUsersItem.cs" />
+    <Compile Include="Base\BacklinksItem.cs" />
+    <Compile Include="Base\BlocksResult.cs" />
+    <Compile Include="Base\CategoryMembersItem.cs" />
+    <Compile Include="Base\DeletedRevisionsItem.cs" />
+    <Compile Include="Base\DownloadInput.cs" />
+    <Compile Include="Base\EmailUserInput.cs" />
+    <Compile Include="Base\ExternalUrlUsageItem.cs" />
+    <Compile Include="Base\FileArchiveItem.cs" />
+    <Compile Include="Base\FileRepositoryInfoItem.cs" />
+    <Compile Include="Base\Interfaces and Abstract Classes\IAllLinksInput.cs" />
+    <Compile Include="Base\ImageInfoItem.cs" />
+    <Compile Include="Base\ImageRotateItem.cs" />
+    <Compile Include="Base\ImportInput.cs" />
+    <Compile Include="Base\ImportItem.cs" />
+    <Compile Include="Base\InterwikiBacklinksItem.cs" />
+    <Compile Include="Base\LanguageBacklinksItem.cs" />
+    <Compile Include="Base\LogEventsItem.cs" />
+    <Compile Include="Base\ManageTagsInput.cs" />
+    <Compile Include="Base\ManageTagsResult.cs" />
+    <Compile Include="Base\MergeHistoryInput.cs" />
+    <Compile Include="Base\MergeHistoryResult.cs" />
+    <Compile Include="Base\OpenSearchItem.cs" />
+    <Compile Include="Base\OptionsInput.cs" />
+    <Compile Include="Base\PageItem.cs" />
+    <Compile Include="Base\PageSetResult.cs" />
+    <Compile Include="Base\PagesWithPropertyItem.cs" />
+    <Compile Include="Base\ParameterInfoItem.cs" />
+    <Compile Include="Base\ParseInput.cs" />
+    <Compile Include="Base\PatrolInput.cs" />
+    <Compile Include="Base\PatrolResult.cs" />
+    <Compile Include="Base\ProtectedTitlesItem.cs" />
+    <Compile Include="Base\ProtectInput.cs" />
+    <Compile Include="Base\ProtectInputItem.cs" />
+    <Compile Include="Base\ProtectResult.cs" />
+    <Compile Include="Base\ProtectResultItem.cs" />
+    <Compile Include="Base\QueryPageResult.cs" />
+    <Compile Include="Base\RecentChangesItem.cs" />
+    <Compile Include="Base\ResetPasswordInput.cs" />
+    <Compile Include="Base\Interfaces and Abstract Classes\ITitleOnly.cs" />
+    <Compile Include="Base\OpenSearchInput.cs" />
+    <Compile Include="Base\ParameterInfoInput.cs" />
+    <Compile Include="Base\EmailUserResult.cs" />
+    <Compile Include="Base\PageInfo.cs" />
+    <Compile Include="Base\ExamplesItem.cs" />
+    <Compile Include="Base\RawMessageInfo.cs" />
+    <Compile Include="Base\ParametersItem.cs" />
+    <Compile Include="Base\InformationItem.cs" />
+    <Compile Include="Base\MessageItem.cs" />
+    <Compile Include="Base\ParseCategoriesItem.cs" />
+    <Compile Include="Base\ParseLinksItem.cs" />
+    <Compile Include="Base\ParseResult.cs" />
+    <Compile Include="Base\ResetPasswordResult.cs" />
+    <Compile Include="Base\RevisionDeleteInput.cs" />
+    <Compile Include="Base\RevisionDeleteItem.cs" />
+    <Compile Include="Base\RevisionDeleteResult.cs" />
+    <Compile Include="Base\AllRevisionsItem.cs" />
+    <Compile Include="Base\RollbackInput.cs" />
+    <Compile Include="Base\RollbackResult.cs" />
+    <Compile Include="Base\SearchResult.cs" />
+    <Compile Include="Base\SearchResultItem.cs" />
+    <Compile Include="Base\SectionsItem.cs" />
+    <Compile Include="Base\SetNotificationTimestampInput.cs" />
+    <Compile Include="Base\SetNotificationTimestampItem.cs" />
+    <Compile Include="Base\TagInput.cs" />
+    <Compile Include="Base\TagItem.cs" />
+    <Compile Include="Base\TagsItem.cs" />
+    <Compile Include="Base\UnblockInput.cs" />
+    <Compile Include="Base\UnblockResult.cs" />
+    <Compile Include="Base\UndeleteInput.cs" />
+    <Compile Include="Base\UndeleteResult.cs" />
+    <Compile Include="Base\UploadInput.cs" />
+    <Compile Include="Base\UserContributionsItem.cs" />
+    <Compile Include="Base\UserRightsInput.cs" />
+    <Compile Include="Base\UserRightsResult.cs" />
+    <Compile Include="Base\UsersItem.cs" />
+    <Compile Include="Base\WatchInput.cs" />
+    <Compile Include="Base\WatchItem.cs" />
+    <Compile Include="Base\WatchlistItem.cs" />
+    <Compile Include="Base\WatchlistRawItem.cs" />
+    <Compile Include="Base\WikiTitleItem.cs" />
+    <Compile Include="Clients\Async\IFormClientAsync.cs" />
+    <Compile Include="Clients\Async\SimpleClientAsync.cs" />
+    <Compile Include="Clients\Async\SimpleClientAsyncRetryHandler.cs" />
+    <Compile Include="Clients\Async\ThrottledClientAsync.cs" />
+    <Compile Include="Clients\DelayEventArgs.cs" />
+    <Compile Include="Base\RequestEventArgs.cs" />
+    <Compile Include="Clients\IMediaWikiClient.cs" />
+    <Compile Include="Clients\SimpleClient.cs" />
+    <Compile Include="Base\ResponseEventArgs.cs" />
+    <Compile Include="Clients\ThrottledClient.cs" />
+    <Compile Include="Clients\ClientShared.cs" />
+    <Compile Include="Design\ChecksumException.cs" />
+    <Compile Include="Base\ImageLimitsItem.cs" />
+    <Compile Include="Design\FlagFilter.cs" />
+    <Compile Include="Design\StopException.cs" />
+    <Compile Include="Base\ErrorItem.cs" />
+    <Compile Include="Design\WarningEventArgs.cs" />
+    <Compile Include="Design\WikiException.cs" />
+    <Compile Include="Eve\ITokenManager.cs" />
+    <Compile Include="Eve\Modules\ActionBlock.cs" />
+    <Compile Include="Eve\Modules\ActionCheckToken.cs" />
+    <Compile Include="Eve\Modules\ActionClearHasMsg.cs" />
+    <Compile Include="Eve\Modules\ActionCompare.cs" />
+    <Compile Include="Eve\Modules\ActionCreateAccount.cs" />
+    <Compile Include="Eve\Modules\ActionDelete.cs" />
+    <Compile Include="Eve\Modules\ActionEdit.cs" />
+    <Compile Include="Eve\Modules\ActionEmailUser.cs" />
+    <Compile Include="Eve\Modules\ActionExpandTemplates.cs" />
+    <Compile Include="Eve\Modules\ActionFeedContributions.cs" />
+    <Compile Include="Eve\Modules\ActionFeedRecentChanges.cs" />
+    <Compile Include="Eve\Modules\ActionFeedWatchlist.cs" />
+    <Compile Include="Eve\Modules\ActionFileRevert.cs" />
+    <Compile Include="Eve\Modules\ActionHelp.cs" />
+    <Compile Include="Eve\Modules\ActionImageRotate.cs" />
+    <Compile Include="Eve\Modules\ActionImport.cs" />
+    <Compile Include="Eve\Modules\ActionLogin.cs" />
+    <Compile Include="Eve\Modules\ActionLogout.cs" />
+    <Compile Include="Eve\Modules\ActionManageTags.cs" />
+    <Compile Include="Eve\Modules\ActionMergeHistory.cs" />
+    <Compile Include="Eve\Modules\ActionModule.cs" />
+    <Compile Include="Eve\Modules\ActionModulePageSet.cs" />
+    <Compile Include="Eve\Modules\ActionMove.cs" />
+    <Compile Include="Eve\Modules\ActionOpenSearch.cs" />
+    <Compile Include="Eve\Modules\ActionOptions.cs" />
+    <Compile Include="Eve\Modules\ActionParamInfo.cs" />
+    <Compile Include="Eve\Modules\ActionParse.cs" />
+    <Compile Include="Eve\Modules\ActionPatrol.cs" />
+    <Compile Include="Eve\Modules\ActionProtect.cs" />
+    <Compile Include="Eve\Modules\ActionPurge.cs" />
+    <Compile Include="Eve\Modules\ActionQuery.cs" />
+    <Compile Include="Eve\Modules\ActionResetPassword.cs" />
+    <Compile Include="Eve\Modules\ActionRevisionDelete.cs" />
+    <Compile Include="Eve\Modules\ActionRollback.cs" />
+    <Compile Include="Eve\Modules\ActionRsd.cs" />
+    <Compile Include="Eve\Modules\ActionSetNotificationTimestamp.cs" />
+    <Compile Include="Eve\Modules\ActionTag.cs" />
+    <Compile Include="Eve\Modules\ActionTokens.cs" />
+    <Compile Include="Eve\Modules\ActionUnblock.cs" />
+    <Compile Include="Eve\Modules\ActionUndelete.cs" />
+    <Compile Include="Eve\Modules\ActionUpload.cs" />
+    <Compile Include="Eve\Modules\ActionUserRights.cs" />
+    <Compile Include="Eve\Modules\ActionWatch.cs" />
+    <Compile Include="Eve\Modules\ContinueModule1.cs" />
+    <Compile Include="Eve\Modules\ContinueModule2.cs" />
+    <Compile Include="Eve\Modules\ContinueModuleBase.cs" />
+    <Compile Include="Eve\Modules\ContinueModuleUnknown.cs" />
+    <Compile Include="Eve\Modules\IActionModule.cs" />
+    <Compile Include="Eve\Modules\IGeneratorModule.cs" />
+    <Compile Include="Eve\Modules\IModule.cs" />
+    <Compile Include="Eve\Modules\IModuleFactory.cs" />
+    <Compile Include="Eve\Modules\IPageSetInternal.cs" />
+    <Compile Include="Eve\Modules\IPropertyModule.cs" />
+    <Compile Include="Eve\Modules\IQueryModule.cs" />
+    <Compile Include="Eve\Modules\IQueryPageSet.cs" />
+    <Compile Include="Eve\Modules\JTokenImageInfo.cs" />
+    <Compile Include="Eve\Modules\JTokenLogEvent.cs" />
+    <Compile Include="Eve\Modules\ListAllCategories.cs" />
+    <Compile Include="Eve\Modules\ListAllDeletedRevisions.cs" />
+    <Compile Include="Eve\Modules\ListAllImages.cs" />
+    <Compile Include="Eve\Modules\ListAllLinks.cs" />
+    <Compile Include="Eve\Modules\ListAllPages.cs" />
+    <Compile Include="Eve\Modules\ListAllRevisions.cs" />
+    <Compile Include="Eve\Modules\ListAllUsers.cs" />
+    <Compile Include="Eve\Modules\ListBacklinks.cs" />
+    <Compile Include="Eve\Modules\ListBlocks.cs" />
+    <Compile Include="Eve\Modules\ListCategoryMembers.cs" />
+    <Compile Include="Eve\Modules\ListDeletedRevs.cs" />
+    <Compile Include="Eve\Modules\ListExtUrlUsage.cs" />
+    <Compile Include="Eve\Modules\ListFileArchive.cs" />
+    <Compile Include="Eve\Modules\ListInterwikiBacklinks.cs" />
+    <Compile Include="Eve\Modules\ListLanguageBacklinks.cs" />
+    <Compile Include="Eve\Modules\ListLogEvents.cs" />
+    <Compile Include="Eve\Modules\ListModule.cs" />
+    <Compile Include="Eve\Modules\ListPagePropertyNames.cs" />
+    <Compile Include="Eve\Modules\ListPagesWithProp.cs" />
+    <Compile Include="Eve\Modules\ListPrefixSearch.cs" />
+    <Compile Include="Eve\Modules\ListProtectedTitles.cs" />
+    <Compile Include="Eve\Modules\ListQueryPage.cs" />
+    <Compile Include="Eve\Modules\ListRandom.cs" />
+    <Compile Include="Eve\Modules\ListRecentChanges.cs" />
+    <Compile Include="Eve\Modules\ListSearch.cs" />
+    <Compile Include="Eve\Modules\ListTags.cs" />
+    <Compile Include="Eve\Modules\ListUserContribs.cs" />
+    <Compile Include="Eve\Modules\ListUsers.cs" />
+    <Compile Include="Eve\Modules\ListWatchlist.cs" />
+    <Compile Include="Eve\Modules\ListWatchlistRaw.cs" />
+    <Compile Include="Eve\Modules\MetaAllMessages.cs" />
+    <Compile Include="Eve\Modules\MetaFileRepoInfo.cs" />
+    <Compile Include="Eve\Modules\MetaSiteInfo.cs" />
+    <Compile Include="Eve\Modules\MetaTokens.cs" />
+    <Compile Include="Eve\Modules\MetaUserInfo.cs" />
+    <Compile Include="Eve\Modules\ModuleCollection.cs" />
+    <Compile Include="Eve\Modules\ModuleFactory.cs" />
+    <Compile Include="Eve\Modules\NullObject.cs" />
+    <Compile Include="Eve\Modules\OptionsInputInternal.cs" />
+    <Compile Include="Eve\Modules\ParsingExtensions.cs" />
+    <Compile Include="Eve\Modules\PropCategories.cs" />
+    <Compile Include="Eve\Modules\PropCategoryInfo.cs" />
+    <Compile Include="Eve\Modules\PropContributors.cs" />
+    <Compile Include="Eve\Modules\PropDeletedRevisions.cs" />
+    <Compile Include="Eve\Modules\PropDuplicateFiles.cs" />
+    <Compile Include="Eve\Modules\PropExternalLinks.cs" />
+    <Compile Include="Eve\Modules\PropFileUsage.cs" />
+    <Compile Include="Eve\Modules\PropImageInfo.cs" />
+    <Compile Include="Eve\Modules\PropImages.cs" />
+    <Compile Include="Eve\Modules\PropInfo.cs" />
+    <Compile Include="Eve\Modules\PropInterwikiLinks.cs" />
+    <Compile Include="Eve\Modules\PropLanguageLinks.cs" />
+    <Compile Include="Eve\Modules\PropLinks.cs" />
+    <Compile Include="Eve\Modules\PropLinksBase.cs" />
+    <Compile Include="Eve\Modules\PropLinksHere.cs" />
+    <Compile Include="Eve\Modules\PropListModule.cs" />
+    <Compile Include="Eve\Modules\PropModule.cs" />
+    <Compile Include="Eve\Modules\PropPageProperties.cs" />
+    <Compile Include="Eve\Modules\PropRedirects.cs" />
+    <Compile Include="Eve\Modules\PropRevisions.cs" />
+    <Compile Include="Eve\Modules\PropStashImageInfo.cs" />
+    <Compile Include="Eve\Modules\PropTemplates.cs" />
+    <Compile Include="Eve\Modules\PropTranscludedIn.cs" />
+    <Compile Include="Eve\Modules\QueryInput.cs" />
+    <Compile Include="Eve\Modules\QueryModule.cs" />
+    <Compile Include="Eve\Modules\UploadInputInternal.cs" />
+    <Compile Include="Eve\TokenManagerAction.cs" />
+    <Compile Include="Eve\TokenManagerFunctions.cs" />
+    <Compile Include="Eve\TokenManagerMeta.cs" />
+    <Compile Include="Eve\TokenManagerOriginal.cs" />
+    <Compile Include="Eve\TokensInput.cs" />
+    <Compile Include="Eve\WikiAbstractionLayer.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="Base\Interfaces and Abstract Classes\IGeneratorInput.cs" />
+    <Compile Include="Base\PurgeInput.cs" />
+    <Compile Include="Base\PurgeResult.cs" />
+    <Compile Include="Base\CategoryInfoInput.cs" />
+    <Compile Include="Base\ImageRotateInput.cs" />
+    <Compile Include="Base\Interfaces and Abstract Classes\PageSetInputBase.cs" />
+    <Compile Include="Base\CustomResult.cs" />
+    <Compile Include="Base\MediaWikiGlobal.cs" />
+    <Compile Include="Base\ExtendedMetadataItem.cs" />
+    <Compile Include="Base\CaptchaEventArgs.cs" />
+    <Compile Include="Base\WarningsItem.cs" />
+    <Compile Include="Base\Interfaces and Abstract Classes\ITitle.cs" />
+    <Compile Include="Base\AllDeletedRevisionsInput.cs" />
+    <Compile Include="Base\AllRevisionsInput.cs" />
+    <Compile Include="Base\CompareInput.cs" />
+    <Compile Include="Base\CompareResult.cs" />
+    <Compile Include="Base\DeleteInput.cs" />
+    <Compile Include="Base\DeleteResult.cs" />
+    <Compile Include="Base\InterwikiLinksInput.cs" />
+    <Compile Include="Base\LinksInput.cs" />
+    <Compile Include="Base\PageSetInput.cs" />
+    <Compile Include="Base\PageSetRedirectItem.cs" />
+    <Compile Include="Base\RedirectsItem.cs" />
+    <Compile Include="Base\CategoryInfoResult.cs" />
+    <Compile Include="Base\ContributorItem.cs" />
+    <Compile Include="Base\DuplicateFileItem.cs" />
+    <Compile Include="Base\FileUsageItem.cs" />
+    <Compile Include="Base\FileUsageInput.cs" />
+    <Compile Include="Base\InterwikiTitleItem.cs" />
+    <Compile Include="Base\LinksHereItem.cs" />
+    <Compile Include="Base\LinksHereInput.cs" />
+    <Compile Include="Base\RedirectsInput.cs" />
+    <Compile Include="Base\DeletedRevisionsInput.cs" />
+    <Compile Include="Base\RevisionsInput.cs" />
+    <Compile Include="Base\TranscludedInItem.cs" />
+    <Compile Include="Base\TranscludedInInput.cs" />
+    <Compile Include="Base\CheckTokenInput.cs" />
+    <Compile Include="Base\CheckTokenResult.cs" />
+    <Compile Include="Base\CreateAccountInput.cs" />
+    <Compile Include="Base\CreateAccountResult.cs" />
+    <Compile Include="Base\ExpandTemplatesInput.cs" />
+    <Compile Include="Base\ExpandTemplatesResult.cs" />
+    <Compile Include="Base\FeedContributionsInput.cs" />
+    <Compile Include="Base\FeedRecentChangesInput.cs" />
+    <Compile Include="Base\FeedWatchlistInput.cs" />
+    <Compile Include="Base\FileRepositoryInfoInput.cs" />
+    <Compile Include="Base\FileRevertInput.cs" />
+    <Compile Include="Base\FileRevertResult.cs" />
+    <Compile Include="Base\HelpInput.cs" />
+    <Compile Include="Base\HelpResult.cs" />
+    <Compile Include="Base\ExtensionItem.cs" />
+    <Compile Include="Base\InterwikiMapItem.cs" />
+    <Compile Include="Base\LanguageItem.cs" />
+    <Compile Include="Base\LibrariesItem.cs" />
+    <Compile Include="Base\RestrictionsItem.cs" />
+    <Compile Include="Base\SubscribedHooksItem.cs" />
+    <Compile Include="Base\SkinsItem.cs" />
+    <Compile Include="Base\SpecialPageAliasesItem.cs" />
+    <Compile Include="Base\Interfaces and Abstract Classes\IMaxLaggable.cs" />
+    <Compile Include="Base\AllImagesInput.cs" />
+    <Compile Include="Base\AllPagesInput.cs" />
+    <Compile Include="Base\AllUsersInput.cs" />
+    <Compile Include="Base\BacklinksInput.cs" />
+    <Compile Include="Base\BlocksInput.cs" />
+    <Compile Include="Base\CategoryMembersInput.cs" />
+    <Compile Include="Base\ListDeletedRevisionsInput.cs" />
+    <Compile Include="Base\ExternalUrlUsageInput.cs" />
+    <Compile Include="Base\FileArchiveInput.cs" />
+    <Compile Include="Base\Interfaces and Abstract Classes\ILimitableInput.cs" />
+    <Compile Include="Base\AllCategoriesInput.cs" />
+    <Compile Include="Base\AllLinksInput.cs" />
+    <Compile Include="Base\AllCategoriesItem.cs" />
+    <Compile Include="Base\Interfaces and Abstract Classes\IUser.cs" />
+    <Compile Include="Base\LanguageBacklinksInput.cs" />
+    <Compile Include="Base\InterwikiBacklinksInput.cs" />
+    <Compile Include="Base\Interfaces and Abstract Classes\ILogEvents.cs" />
+    <Compile Include="Base\PagePropertyNamesInput.cs" />
+    <Compile Include="Base\PagesWithPropertyInput.cs" />
+    <Compile Include="Base\PrefixSearchInput.cs" />
+    <Compile Include="Base\ProtectedTitlesInput.cs" />
+    <Compile Include="Base\QueryPageInput.cs" />
+    <Compile Include="Base\QueryPageItem.cs" />
+    <Compile Include="Base\LogEventsInput.cs" />
+    <Compile Include="Base\RecentChangesInput.cs" />
+    <Compile Include="Base\SearchInput.cs" />
+    <Compile Include="Base\TagsInput.cs" />
+    <Compile Include="Base\UserContributionsInput.cs" />
+    <Compile Include="Base\UsersInput.cs" />
+    <Compile Include="Base\WatchlistInput.cs" />
+    <Compile Include="Base\WatchlistRawInput.cs" />
+    <Compile Include="Globals.cs" />
+    <Compile Include="Base\Interfaces and Abstract Classes\IPropertyInput.cs" />
+    <Compile Include="Base\LanguageLinksItem.cs" />
+    <Compile Include="Base\MoveResult.cs" />
+    <Compile Include="Base\MoveItem.cs" />
+    <Compile Include="Base\RandomInput.cs" />
+    <Compile Include="Base\RevisionsItem.cs" />
+    <Compile Include="RequestBuilder\FileParameter.cs" />
+    <Compile Include="RequestBuilder\FormatParameter.cs" />
+    <Compile Include="RequestBuilder\HiddenParameter.cs" />
+    <Compile Include="RequestBuilder\IParameter.cs" />
+    <Compile Include="RequestBuilder\IParameterVisitor.cs" />
+    <Compile Include="RequestBuilder\MultipartResult.cs" />
+    <Compile Include="RequestBuilder\Parameter.cs" />
+    <Compile Include="RequestBuilder\ParameterCollection.cs" />
+    <Compile Include="RequestBuilder\PipedListParameter.cs" />
+    <Compile Include="RequestBuilder\PipedParameter.cs" />
+    <Compile Include="RequestBuilder\Request.cs" />
+    <Compile Include="RequestBuilder\RequestVisitorDisplay.cs" />
+    <Compile Include="RequestBuilder\RequestVisitorHttpContentMultipart.cs" />
+    <Compile Include="RequestBuilder\RequestVisitorHttpContentUrl.cs" />
+    <Compile Include="RequestBuilder\RequestVisitorMultipart.cs" />
+    <Compile Include="RequestBuilder\RequestVisitorUrl.cs" />
+    <Compile Include="RequestBuilder\StringParameter.cs" />
+    <Compile Include="Properties\Messages.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Messages.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Base\AssertEditInput.cs" />
+    <Compile Include="Base\LagItem.cs" />
+    <Compile Include="Base\MagicWordsItem.cs" />
+    <Compile Include="Base\NamespacesItem.cs" />
+    <Compile Include="Base\SiteInfoResult.cs" />
+    <Compile Include="Base\NamespaceAliasesItem.cs" />
+    <Compile Include="Base\LoginResult.cs" />
+    <Compile Include="Base\AllMessagesInput.cs" />
+    <Compile Include="Base\EditResult.cs" />
+    <Compile Include="Base\CategoriesInput.cs" />
+    <Compile Include="Base\ContributorsInput.cs" />
+    <Compile Include="Base\DuplicateFilesInput.cs" />
+    <Compile Include="Base\ExternalLinksInput.cs" />
+    <Compile Include="Base\ImageInfoInput.cs" />
+    <Compile Include="Base\ImagesInput.cs" />
+    <Compile Include="Base\InfoInput.cs" />
+    <Compile Include="Base\LanguageLinksInput.cs" />
+    <Compile Include="Base\Interfaces and Abstract Classes\ILinksInput.cs" />
+    <Compile Include="Base\PagePropertiesInput.cs" />
+    <Compile Include="Base\Interfaces and Abstract Classes\IRevisionsInput.cs" />
+    <Compile Include="Base\TemplatesInput.cs" />
+    <Compile Include="Base\LoginInput.cs" />
+    <Compile Include="Base\MoveInput.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Base\EditInput.cs" />
+    <Compile Include="Base\SiteInfoInput.cs" />
+    <Compile Include="Base\Interfaces and Abstract Classes\IWikiAbstractionLayer.cs" />
+    <Compile Include="Base\CategoriesItem.cs" />
+    <Compile Include="Base\ProtectionsItem.cs" />
+    <Compile Include="Base\StatisticsInfo.cs" />
+    <Compile Include="Base\UserGroupsItem.cs" />
+    <Compile Include="Base\StashImageInfoInput.cs" />
+    <Compile Include="Base\UploadResult.cs" />
+    <Compile Include="Base\ChangeableGroupsInfo.cs" />
+    <Compile Include="Base\BlockInput.cs" />
+    <Compile Include="Base\BlockResult.cs" />
+    <Compile Include="Base\UserInfoResult.cs" />
+    <Compile Include="Base\UserInfoInput.cs" />
+    <Compile Include="Base\RateLimitInfo.cs" />
+    <Compile Include="Base\RateLimitsItem.cs" />
+    <Compile Include="Properties\EveMessages.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EveMessages.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="stylecop.json" />
+    <None Include="packages.config" />
+    <None Include="WallE.pfx" />
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="CustomDictionary.xml">
+      <SubType>Designer</SubType>
+    </CodeAnalysisDictionary>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Messages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Messages.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\EveMessages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>EveMessages.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\..\NuGet\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.WebRequest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\Shared\Shared.csproj">
+      <Project>{24f1785b-804e-4e66-9f7e-3898f45306a1}</Project>
+      <Name>Shared</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\..\..\NuGet\StyleCop.Analyzers.1.1.0-beta001\analyzers\dotnet\cs\Newtonsoft.Json.dll" />
+    <Analyzer Include="..\..\..\NuGet\StyleCop.Analyzers.1.1.0-beta001\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
+    <Analyzer Include="..\..\..\NuGet\StyleCop.Analyzers.1.1.0-beta001\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+  </Target>
+  <!-- <Import Project="$(MSBuildExtensionsPath)\StyleCop\v4.7\StyleCop.targets" /> -->
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

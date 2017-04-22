@@ -1,0 +1,6 @@
+﻿WikiName	WikiUri	NormalUserName	NormalUserPassword	AdminUserName	AdminUserPassword	ReadInterval	WriteInterval	SecretKeyIfKnown
+W28	http://rob-centos/w28/api.php	Test User	password	RobinHood70	password	0	0	ca80572b121a7f39b3f2710474b8be5df6e290b2c48d3d77d99a1d6d97ddea47
+W27	http://rob-centos/w27/api.php	Test User	password	RobinHood70	password	0	0	
+W26	http://rob-centos/w26/api.php	Test User	password	RobinHood70	password	0	0	
+W24	http://rob-centos/w24/api.php	Test User	password	RobinHood70	password	0	0	
+W16	http://rob-centos/w16/api.php	Test User	password	RobinHood70	password	0	0	

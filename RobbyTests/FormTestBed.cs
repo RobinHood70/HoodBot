@@ -1,0 +1,440 @@
+﻿namespace RobinHood70.Robby.Tests
+{
+	using System;
+	using System.Collections.Generic;
+	using System.Diagnostics;
+	using System.Diagnostics.CodeAnalysis;
+	using System.IO;
+	using System.Security.Cryptography;
+	using System.Text;
+	using System.Windows.Forms;
+	using Design;
+	using Pages;
+	using Robby;
+	using Tests.MetaTemplate;
+	using WallE.Base;
+	using WallE.Clients;
+	using WallE.Eve;
+	using WallE.RequestBuilder;
+	using static Globals;
+
+	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "By design, though could potentially use a rewrite per TODO, below")]
+	public partial class FormTestBed : Form
+	{
+		#region Fields
+		private Site adminSite;
+		private int indent = 0;
+		private Site site;
+		#endregion
+
+		#region Constructors
+		[SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Unless I'm missing something, I think CA is just confused here.")]
+		public FormTestBed() => this.InitializeComponent();
+		#endregion
+
+		#region Public Static Methods
+		public static void DebugResponseEventHandler(IWikiAbstractionLayer sender, ResponseEventArgs e)
+		{
+			ThrowNull(sender, nameof(sender));
+			ThrowNull(e, nameof(e));
+			Debug.WriteLine(e.Response, sender.ToString());
+		}
+
+		public static void DebugShowDelay(IMediaWikiClient sender, DelayEventArgs e)
+		{
+			ThrowNull(sender, nameof(sender));
+			ThrowNull(e, nameof(e));
+			var aborted = string.Empty;
+
+			if (e.Cancel)
+			{
+				aborted = "Aborted ";
+			}
+
+			Debug.WriteLine($"{aborted}Delay: {e.DelayTime} milliseconds. Reason: {e.Reason}", sender.ToString());
+		}
+
+		public static void DebugShowRequest(IWikiAbstractionLayer sender, RequestEventArgs e)
+		{
+			ThrowNull(sender, nameof(sender));
+			ThrowNull(e, nameof(e));
+			Debug.WriteLine(e.Request.ToString(), sender.ToString());
+		}
+
+		public static void DebugWarningEventHandler(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs e)
+		{
+			ThrowNull(sender, nameof(sender));
+			ThrowNull(e, nameof(e));
+			Debug.WriteLine($"Warning ({e.Warning.Code}): {e.Warning.Info}", sender.ToString());
+		}
+		#endregion
+
+		#region Tests and Related
+		public void AllMessagesTest()
+		{
+			var titles = new TitleCollection(this.site);
+			titles.AddMessages(Filter.Only);
+			foreach (var message in titles)
+			{
+				Debug.WriteLine(message.FullPageName);
+			}
+
+			Debug.WriteLine(titles.Count);
+		}
+
+		public void Assert(bool condition, string message)
+		{
+			if (!condition)
+			{
+				this.AppendResults(message);
+			}
+		}
+
+		public void CheckCollection<T>(IReadOnlyCollection<T> collection, string name)
+		{
+			if (collection == null)
+			{
+				this.AppendResults($"Collection {name} is null");
+				return;
+			}
+
+			if (collection.Count == 0)
+			{
+				this.AppendResults($"Collection {name} has no members");
+			}
+		}
+
+		public void CheckForNull(object check, string name)
+		{
+			if (check == null)
+			{
+				this.AppendResults($"{name} is null");
+			}
+		}
+
+		public void CheckPagesResult(IReadOnlyList<PageItem> pages)
+		{
+			ThrowNull(pages, nameof(pages));
+			this.CheckCollection(pages, "pages");
+			if (pages != null)
+			{
+				if (pages.Count == 0)
+				{
+					this.AppendResults("No pages in output");
+				}
+				else
+				{
+					this.CheckCollection(pages[0].Revisions, "Revisions");
+				}
+			}
+		}
+
+		public void CategoryTest()
+		{
+			var titles = new TitleCollection(this.site);
+			titles.AddCategories("Arena-A", "Arena-J");
+			foreach (var title in titles)
+			{
+				Debug.WriteLine(title.FullPageName);
+			}
+		}
+
+		public void DuplicateFilesTest()
+		{
+			var pageCollection = new PageCollection(this.site);
+			pageCollection.AddDuplicateFiles(new[] { "File:ON-icon-ava-Defensive Scroll Bonus I.png" });
+			foreach (var page in pageCollection)
+			{
+				Debug.WriteLine(page.FullPageName);
+			}
+		}
+
+		public void NamespaceTests()
+		{
+			var nss = this.site.Namespaces;
+			this.Assert(nss["template"].Id == 10, "String indexing not working.");
+			this.Assert(nss[0] == nss[MediaWikiNamespaces.Main] && nss[0] == nss[string.Empty], "Equivalent namespaces aren't.");
+			this.Assert(nss[MediaWikiNamespaces.File] == "Image", "Namespace equals string failed.");
+			this.Assert(nss[MediaWikiNamespaces.Template].Id == MediaWikiNamespaces.Template, "Namespace equals enum failed.");
+
+			nss.AddToNames("Main", this.site.Namespaces[MediaWikiNamespaces.Main]);
+			this.Assert(nss["main"].Id == 0, "Main namespace does not appear to have been added.");
+		}
+
+		public void PageCollectionFromCategoriesTest()
+		{
+			var sourcePages = new TitleCollection(this.site, "Main Page");
+			var pageCollection = new PageCollection(this.site);
+			pageCollection.AddPageCategories(sourcePages);
+			foreach (var page in pageCollection)
+			{
+				this.Assert(page.Namespace.Id == MediaWikiNamespaces.Category, "A page in the returned collection isn't a category.");
+			}
+		}
+
+		public void PageCollectionFromQueryPage()
+		{
+			var pageCollection = new PageCollection(this.site);
+			foreach (var page in pageCollection)
+			{
+				Debug.WriteLine(page.FullPageName);
+			}
+		}
+
+		public void PagesCategoriesOnTests()
+		{
+			var pages = new PageCollection(this.site) { LoadOptions = PageLoadOptions.None };
+			var categoryTitles = new TitleCollection(this.site, "API:Categories", "API:Purge");
+			pages.AddPageCategories(categoryTitles, Filter.All);
+			foreach (var page in pages)
+			{
+				Debug.WriteLine(page.FullPageName);
+			}
+		}
+
+		public void PageTests()
+		{
+			var pages = new PageCollection(this.site);
+			pages.AddTitles("MediaWiki:1movedto2");
+			foreach (var page in pages)
+			{
+				Debug.WriteLine($"Invalid: {page.Invalid}; Missing: {page.Missing}; Text: {page.Text}");
+			}
+
+			this.Assert(Page.Exists(this.site, "Main Page"), "Main Page not detected as existing.");
+			this.Assert(!Page.Exists(this.site, "This page does not exist"), "Non-existent page detected as existing.");
+			this.Assert(new Title(this.site, "Template:Test").IsSameAs(new Page(this.site, "Template:Test")), "Title and Page should be equal, but aren't.");
+		}
+
+		public void PageTypeTests()
+		{
+			var loadOptions = new PageLoadOptions(PageModules.All) { ImageRevisionCount = 5 };
+			var pageCollection = new PageCollection(this.site, loadOptions);
+			pageCollection.AddTitles("Category:All Pages Missing Data", "Category:Categories", "Oblivion:Oblivion", "File:ZeniMax Online Studios logo.jpg");
+			foreach (var page in pageCollection)
+			{
+				Debug.Write(page.FullPageName + " is a ");
+				if (page is FilePage fp)
+				{
+					Debug.WriteLine($"file page. ");
+					foreach (var fileRevision in fp.FileRevisions)
+					{
+						Debug.WriteLine($"  Image Dimensions = {fileRevision.Width} x {fileRevision.Height}, Size = {fileRevision.FileSize}");
+					}
+				}
+				else if (page is Category cp)
+				{
+					Debug.WriteLine($"category page. Hidden: {cp.Hidden}, Total items: {cp.FullCount}");
+				}
+				else
+				{
+					Debug.WriteLine("regular page.");
+				}
+			}
+		}
+
+		public void RedirectTargetTests()
+		{
+			var target = this.site.GetRedirectTarget("#REDIRECT [[Template:Hello]]");
+			this.Assert(target.FullPageName == "Template:Hello", "Incorrect template target.");
+
+			target = this.site.GetRedirectTarget("#WEITERLEITUNG [[Template:Hello|Stupid text]]][[Flower]]");
+			this.Assert(target.FullPageName == "Template:Hello", "Incorrect template target.");
+
+			target = this.site.GetRedirectTarget(" #REDIRECT [[Hello world]]");
+			this.Assert(target != null, "Incorrectly detected a malformed redirect.");
+		}
+
+		public void TemplateTransclusionTest()
+		{
+			var titleCollection = new TitleCollection(this.site);
+			titleCollection.AddTemplateTransclusions();
+			foreach (var title in titleCollection)
+			{
+				Debug.WriteLine(title.FullPageName);
+			}
+		}
+
+		public void TitleTests()
+		{
+			this.Assert(Title.Fixup("Hello\u200E\u200F\u202A\u202B\u202C\u202D\u202E_\xA0\u1680\u180E\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u2028\u2029\u202F\u205F\u3000World") == "Hello                    World", "Text was not fully stripped and/or replaced.");
+			this.Assert(Title.PipeTrick("(Test)") == "(Test)", "PipeTrick failed for (Test).");
+			this.Assert(Title.PipeTrick("Hello (Test)") == "Hello", "PipeTrick failed for Hello (Test).");
+			this.Assert(Title.PipeTrick("Hello (Test), Goodbye") == "Hello", "PipeTrick failed for Hello (Test), Goodbye.");
+			this.Assert(Title.PipeTrick("Hello, Goodbye (Test)") == "Hello, Goodbye", "PipeTrick failed for Hello, Goodbye (Test).");
+			this.Assert(Title.NameFromParts(this.site.Namespaces[10], "!", null) == "Template:!", "NameFromParts failed for Template:!");
+			this.Assert(Title.NameFromParts(this.site.Namespaces[0], "Main Page", "Test") == "Main Page#Test", "NameFromParts failed for Main Page#Test.");
+
+			var title = new Title(this.site, "Template:!");
+			this.Assert(title.Namespace.Id == 10, "Namespace was incorrect for Template:!.");
+			this.Assert(title.PageName == "!", "PageName was incorrect for Template:!.");
+			this.Assert(title.SubjectPage.FullPageName == "Template:!", "SubjectPage was incorrect for Template:!.");
+			this.Assert(title.TalkPage.FullPageName == "Template talk:!", "TalkPage was incorrect for Template:!.");
+		}
+
+		public void TitlesAllPagesTests()
+		{
+			var titles = new TitleCollection(this.site);
+			var sw = new Stopwatch();
+			sw.Start();
+			titles.AddNamespace(MediaWikiNamespaces.Template, Filter.All, "A", "C");
+			Debug.WriteLine("Count: " + titles.Count);
+			titles.Clear();
+			titles.AddNamespace(MediaWikiNamespaces.Template, Filter.All, "A", "B");
+			Debug.WriteLine("Count: " + titles.Count);
+			titles.AddNamespace(MediaWikiNamespaces.Template, Filter.All, "A", "C");
+			Debug.WriteLine("Count: " + titles.Count);
+			Debug.WriteLine("Time: " + sw.ElapsedMilliseconds);
+			foreach (var title in titles)
+			{
+				Debug.WriteLine(title.PageName);
+			}
+		}
+
+		public void UploadRandomImage(string destinationName)
+		{
+			if (this.site.ServerName != "rob-centos")
+			{
+				throw new InvalidOperationException("You're uploading porn to a wiki that's not yours, dumbass!");
+			}
+
+			var rand = new Random();
+			var files = Directory.GetFiles(@"C:\Users\rmorl\Pictures\Screen Saver Pics\", "*.jpg"); // Only select from jpgs so we don't have to worry about extension type.
+			var fileName = files[rand.Next(files.Length)];
+			this.site.Upload(fileName, destinationName, "Test upload");
+		}
+		#endregion
+
+		#region Private Static Methods
+		private static string GetHmac(string message, string key)
+		{
+			var sb = new StringBuilder(64);
+			var encoding = Encoding.UTF8;
+			var keyBytes = encoding.GetBytes(key);
+			var messageBytes = encoding.GetBytes(message);
+			byte[] hash;
+			using (var hmacsha1 = new HMACSHA1(keyBytes))
+			{
+				hash = hmacsha1.ComputeHash(messageBytes);
+			}
+
+			foreach (var b in hash)
+			{
+				sb.Append(b.ToString("X2"));
+			}
+
+			return sb.ToString().ToLowerInvariant();
+		}
+		#endregion
+
+		#region Private Methods
+		private void AppendResults(string message)
+		{
+			message = new string(' ', this.indent) + message + Environment.NewLine;
+			if (this.textBoxResults.InvokeRequired)
+			{
+				this.textBoxResults.Invoke(new Action<string>(this.AppendResults), message);
+			}
+			else
+			{
+				this.textBoxResults.AppendText(message);
+			}
+		}
+
+		private void ButtonClear_Click(object sender, EventArgs e) => this.textBoxResults.Clear();
+
+		private void ButtonQuick_Click(object sender, EventArgs e)
+		{
+			this.ButtonQuick.Enabled = false;
+			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
+			this.DoGlobalSetup(wikiInfo);
+
+			this.PageTests();
+
+			this.DoGlobalTeardown(wikiInfo);
+			this.ButtonQuick.Enabled = true;
+		}
+
+		private void DoGlobalSetup(WikiInfo wikiInfo)
+		{
+			IMediaWikiClient baseClient = new SimpleClient(wikiInfo.UserName, @"D:\Data\WallE\cookies.dat");
+			var client = (wikiInfo.ReadInterval == 0 && wikiInfo.WriteInterval == 0)
+				? baseClient
+				: new ThrottledClient(baseClient, TimeSpan.FromMilliseconds(wikiInfo.ReadInterval), TimeSpan.FromMilliseconds(wikiInfo.WriteInterval));
+			//// client.RequestingDelay += DebugShowDelay;
+
+			var wal = new WikiAbstractionLayer(client, wikiInfo.Uri);
+			wal.SendingRequest += DebugShowRequest;
+			wal.WarningOccurred += DebugWarningEventHandler;
+			wal.StopCheckMethods &= ~StopCheckMethods.Assert;
+			//// wal.ResponseReceived += DebugResponseEventHandler;
+
+			if (wikiInfo.Name.Contains("UESP"))
+			{
+				wal.ModuleFactory.RegisterProperty<VariablesInput>(PropVariables.CreateInstance);
+				wal.ModuleFactory.RegisterGenerator<VariablesInput>(PropVariables.CreateInstance);
+			}
+
+			this.site = new Site(wal);
+			this.site.WarningOccurred += Robby.Site.DebugWarningEventHandler;
+			this.site.Login(wikiInfo.UserName, wikiInfo.Password);
+
+			if (wikiInfo.AdminUserName != null)
+			{
+				var adminClient = new SimpleClient(null, @"D:\Data\WallE\cookiesAdmin.dat")
+				{
+					Name = "Admin",
+				};
+				wal = new WikiAbstractionLayer(adminClient, wikiInfo.Uri);
+				wal.SendingRequest += DebugShowRequest;
+				wal.WarningOccurred += DebugWarningEventHandler;
+				wal.Assert = null;
+				wal.StopCheckMethods &= ~StopCheckMethods.Assert;
+				this.adminSite = new Site(wal);
+				this.adminSite.WarningOccurred += Robby.Site.DebugWarningEventHandler;
+				this.adminSite.Login(wikiInfo.AdminUserName, wikiInfo.AdminPassword);
+				this.RunJobs(wikiInfo.SecretKey);
+			}
+		}
+
+		private void DoGlobalTeardown(WikiInfo wikiInfo)
+		{
+			this.RunJobs(wikiInfo.SecretKey);
+			this.site = null;
+			this.adminSite = null;
+		}
+
+		private void FormTestBed_Load(object sender, EventArgs e)
+		{
+			foreach (var line in File.ReadAllLines("WikiList.txt"))
+			{
+				this.ComboBoxWiki.Items.Add(new WikiInfo(line));
+			}
+
+			if (this.ComboBoxWiki.Items.Count > 0)
+			{
+				this.ComboBoxWiki.SelectedIndex = 0;
+			}
+		}
+
+		private void RunJobs(string secretKey)
+		{
+			if (this.adminSite?.AbstractionLayer is WikiAbstractionLayer wal && secretKey.Length > 0)
+			{
+				var path = this.adminSite.GetArticlePath(string.Empty);
+				var request = new Request(path, RequestType.Post, false);
+				var message = request
+					.Add("async", true)
+					.Add("maxjobs", 1000)
+					.Add("sigexpiry", (int)(DateTime.UtcNow.AddSeconds(5) - new DateTime(1970, 1, 1)).TotalSeconds)
+					.Add("tasks", "jobs")
+					.Add("title", "Special:RunJobs")
+					.ToString();
+				message = message.Substring(message.IndexOf('?') + 1);
+				request.Add("signature", GetHmac(message, secretKey));
+				wal.SendRequest(request);
+			}
+		}
+		#endregion
+	}
+}

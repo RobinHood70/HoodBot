@@ -1,0 +1,71 @@
+﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
+namespace RobinHood70.WallE.Eve.Modules
+{
+	using System;
+	using Base;
+	using Design;
+	using Newtonsoft.Json.Linq;
+	using RequestBuilder;
+	using static RobinHood70.Globals;
+
+	// HACK: Much of this module remains untested, as there is virtually no documentation on it, and example outputs were mostly impossible to find.
+	public class ActionExpandTemplates : ActionModule<ExpandTemplatesInput, ExpandTemplatesResult>
+	{
+		#region Constructors
+		public ActionExpandTemplates(WikiAbstractionLayer wal)
+			: base(wal)
+		{
+		}
+		#endregion
+
+		#region Public Override Properties
+		public override int MinimumVersion { get; } = 112;
+
+		public override string Name { get; } = "expandtemplates";
+		#endregion
+
+		#region Protected Override Properties
+		protected override RequestType RequestType { get; } = RequestType.Get;
+		#endregion
+
+		#region Protected Override Methods
+		protected override void BuildRequestLocal(Request request, ExpandTemplatesInput input)
+		{
+			ThrowNull(request, nameof(request));
+			ThrowNull(input, nameof(input));
+			var prop = FlagFilter
+				.Check(this.SiteVersion, input.Properties)
+				.FilterBefore(126, ExpandTemplatesProperties.Modules | ExpandTemplatesProperties.JsConfigVars)
+				.FilterBefore(125, ExpandTemplatesProperties.Properties)
+				.Value;
+			request
+				.AddIfNotNull("text", input.Text)
+				.AddIfNotNull("title", input.Title)
+				.AddIfPositive("revid", input.RevisionId)
+				.Add("includecomments", input.IncludeComments)
+				.AddFlagsIf("prop", prop, this.SiteVersion >= 124)
+				.AddIf("generatexml", input.Properties.HasFlag(ExpandTemplatesProperties.ParseTree), this.SiteVersion < 124);
+		}
+
+		protected override ExpandTemplatesResult DeserializeResult(JToken result)
+		{
+			ThrowNull(result, nameof(result));
+			var output = new ExpandTemplatesResult()
+			{
+				ParseTree = (string)result["parsetree"],
+				WikiText = (string)result["wikitext"],
+				Categories = result["categories"].AsReadOnlyList<string>(),
+				Properties = result["properties"].AsBCDictionary(),
+				Volatile = result["volatile"].AsBCBool(),
+			};
+			output.TimeToLive = TimeSpan.FromSeconds((int?)result["ttl"] ?? 0);
+			output.Modules = result["modules"].AsReadOnlyList<string>();
+			output.ModuleScripts = result["modulescripts"].AsReadOnlyList<string>();
+			output.ModuleStyles = result["modulestyles"].AsReadOnlyList<string>();
+			output.JavaScriptConfigVariables = result["jsconfigvars"].AsReadOnlyDictionary<string, string>();
+
+			return output;
+		}
+		#endregion
+	}
+}

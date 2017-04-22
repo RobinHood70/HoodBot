@@ -1,0 +1,51 @@
+﻿Titles
+IReadOnlyList<BacklinksItem> Backlinks(BacklinksInput input);
+IReadOnlyList<CategoryMembersItem> CategoryMembers(CategoryMembersInput input);
+IReadOnlyList<ProtectedTitlesItem> ProtectedTitles(ProtectedTitlesInput input);
+PageSetResult<PurgeResult> Purge(PurgeInput input);
+SearchResult Search(SearchInput input);
+PageSetResult<WatchItem> Watch(WatchInput input);
+API:Contributors|contributors
+API:Extlinks|extlinks
+API:Images|images
+API:Iwlinks|iwlinks
+API:Langlinks|langlinks
+API:Linkshere|linkshere
+API:Redirects|redirects
+API:Transcludedin|transcludedin
+
+Page
+DeleteResult Delete(DeleteInput input);
+MoveResult Move(MoveInput input);
+ProtectResult Protect(ProtectInput input);
+
+File
+API:Duplicatefiles|duplicatefiles
+API:Fileusage|fileusage
+
+
+Users
+IReadOnlyList<AllUsersItem> AllUsers(AllUsersInput input);
+IReadOnlyList<UsersItem> Users(UsersInput input);
+Contributors
+
+User
+BlockResult Block(BlockInput input);
+EmailUserResult EmailUser(EmailUserInput input);
+UnblockResult Unblock(UnblockInput input);
+IReadOnlyList<UserContributionsItem> UserContributions(UserContributionsInput input);
+UserInfoResult UserInfo(UserInfoInput input);
+UserRightsResult UserRights(UserRightsInput input);
+IReadOnlyList<WatchlistItem> Watchlist(WatchlistInput input);
+IReadOnlyList<WatchlistRawItem> WatchlistRaw(WatchlistRawInput input);
+
+Site
+IReadOnlyList<BlocksResult> Blocks(BlocksInput input);
+bool ClearHasMessage();
+IReadOnlyDictionary<string name, string message> Messages(... per TitlesCollection)
+IReadOnlyList<PagePropertyNamesItem> PagePropertyNames(PagePropertyNamesInput input);
+PatrolResult Patrol(PatrolInput input);
+QueryPageResult QueryPage(QueryPageInput input);
+IReadOnlyList<RecentChangesItem> RecentChanges(RecentChangesInput input);
+string Rsd();
+UploadResult Upload(UploadInput input);

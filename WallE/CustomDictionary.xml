@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Dictionary>
+  <Words>
+    <Recognized>
+      <Word>api</Word>
+      <Word>avg</Word>
+      <Word>bot</Word>
+      <Word>bot's</Word>
+      <Word>captcha</Word>
+      <Word>contribs</Word>
+      <Word>csrf</Word>
+      <Word>deserializer</Word>
+      <Word>emailable</Word>
+      <Word>globals</Word>
+      <Word>hhvm</Word>
+      <Word>implementor</Word>
+      <Word>interwiki</Word>
+      <Word>ip</Word>
+      <Word>js</Word>
+      <Word>laggable</Word>
+      <Word>md</Word>
+      <Word>ms</Word>
+      <Word>msg</Word>
+      <Word>php</Word>
+      <Word>reblock</Word>
+      <Word>repl</Word>
+      <Word>sapi</Word>
+      <Word>sha</Word>
+      <Word>subcat</Word>
+      <Word>ttl</Word>
+      <Word>transcluded</Word>
+      <Word>transcluding</Word>
+      <Word>transclusions</Word>
+      <Word>unwatch</Word>
+      <Word>vars</Word>
+      <Word>wal</Word>
+      <Word>watchlist</Word>
+      <Word>wiki</Word>
+    </Recognized>
+    <DiscreteExceptions>
+      <Term>AssertOr</Term>
+    </DiscreteExceptions>
+  </Words>
+</Dictionary>
