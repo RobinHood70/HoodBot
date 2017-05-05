@@ -3,8 +3,9 @@ namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
 	using System.Globalization;
-	using static Globals;
-	using static RobinHood70.Globals;
+	using WikiCommon;
+	using static ProjectGlobals;
+	using static WikiCommon.Globals;
 
 	public enum ListType
 	{

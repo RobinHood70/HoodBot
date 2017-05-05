@@ -6,7 +6,8 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Design;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
-	using static RobinHood70.Globals;
+	using WikiCommon;
+	using static WikiCommon.Globals;
 
 	internal class ListUserContribs : ListModule<UserContributionsInput, UserContributionsItem>, IGeneratorModule
 	{
@@ -52,12 +53,12 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIf("dir", "newer", input.SortAscending)
 				.Add("namespace", input.Namespaces)
 				.AddFlags("prop", prop)
-				.AddFilterOptionPiped("show", "minor", input.FilterMinor)
-				.AddFilterOptionPipedIf("show", "new", input.FilterNew, this.SiteVersion >= 123)
-				.AddFilterOptionPiped("show", "patrolled", input.FilterPatrolled)
-				.AddFilterOptionPipedIf("show", "top", input.FilterTop, this.SiteVersion >= 123)
+				.AddFilterPiped("show", "minor", input.FilterMinor)
+				.AddFilterPipedIf("show", "new", input.FilterNew, this.SiteVersion >= 123)
+				.AddFilterPiped("show", "patrolled", input.FilterPatrolled)
+				.AddFilterPipedIf("show", "top", input.FilterTop, this.SiteVersion >= 123)
 				.AddIfNotNull("tag", input.Tag)
-				.Add("toponly", input.FilterTop == FilterOption.Only && this.SiteVersion >= 118 && this.SiteVersion < 123)
+				.Add("toponly", input.FilterTop == Filter.Only && this.SiteVersion >= 118 && this.SiteVersion < 123)
 				.Add("limit", this.Limit);
 		}
 

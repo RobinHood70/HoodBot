@@ -7,8 +7,9 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Design;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
+	using WikiCommon;
 	using static Properties.EveMessages;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	internal class MetaSiteInfo : QueryModule<SiteInfoInput, SiteInfoResult>
 	{
@@ -69,7 +70,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			request
 				.AddFlags("prop", prop)
-				.AddFilterOptionPipedIf("filteriw", "local", input.FilterLocalInterwiki, prop.HasFlag(SiteInfoProperties.InterwikiMap))
+				.AddFilterPipedIf("filteriw", "local", input.FilterLocalInterwiki, prop.HasFlag(SiteInfoProperties.InterwikiMap))
 				.AddIf("showalldb", input.ShowAllDatabases, prop.HasFlag(SiteInfoProperties.DbReplLag))
 				.AddIf("numberingroup", input.ShowNumberInGroup, prop.HasFlag(SiteInfoProperties.UserGroups))
 				.AddIfNotNullIf("inlanguagecode", input.InterwikiLanguageCode, prop.HasFlag(SiteInfoProperties.InterwikiMap));

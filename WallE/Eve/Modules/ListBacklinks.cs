@@ -6,8 +6,9 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Base;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
+	using WikiCommon;
 	using static Properties.EveMessages;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	internal class ListBacklinks : ListModule<BacklinksInput, BacklinksItem>, IGeneratorModule
 	{
@@ -84,7 +85,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("ns", input.Namespace)
 				.AddIf("dir", "descending", input.SortDescending)
 				.AddIf("redirect", input.Redirect, this.LinkType != BacklinksTypes.ImageUsage)
-				.AddFilterOptionText("filterredir", "redirects", "nonredirects", input.FilterRedirects)
+				.AddFilterText("filterredir", "redirects", "nonredirects", input.FilterRedirects)
 				.Add("limit", this.Limit);
 		}
 

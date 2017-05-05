@@ -2,7 +2,8 @@
 {
 	using System.Text.RegularExpressions;
 	using Design;
-	using static Globals;
+	using WikiCommon;
+	using static WikiCommon.Globals;
 
 	/// <summary>Provides a holder for simple titles, and provides several information and manipulation functions.</summary>
 	public class Title : IWikiTitle

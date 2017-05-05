@@ -3,8 +3,8 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Text;
-	using static Globals;
-	using static RobinHood70.Globals;
+	using static ProjectGlobals;
+	using static WikiCommon.Globals;
 
 	// Because this is an internal class, we take a few shortcuts in that not everything is UrlEncoded when we know that it never needs to be within the context of the project.
 	internal class RequestVisitorUrl : IParameterVisitor

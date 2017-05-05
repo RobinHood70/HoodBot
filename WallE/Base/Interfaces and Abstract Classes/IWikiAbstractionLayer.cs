@@ -5,6 +5,7 @@
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
 	using Design;
+	using WikiCommon;
 
 	#region Public Enumerations
 

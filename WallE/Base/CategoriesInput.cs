@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
+	using WikiCommon;
 
 	#region Public Enumerations
 	[Flags]
@@ -21,7 +22,7 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public IEnumerable<string> Categories { get; set; }
 
-		public FilterOption FilterHidden { get; set; }
+		public Filter FilterHidden { get; set; }
 
 		public int Limit { get; set; }
 

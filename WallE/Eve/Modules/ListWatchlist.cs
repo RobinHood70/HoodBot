@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Design;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	internal class ListWatchlist : ListModule<WatchlistInput, WatchlistItem>, IGeneratorModule
 	{
@@ -61,11 +61,11 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIfNotNull(input.ExcludeUser ? "excludeuser" : "user", input.User)
 				.AddIf("dir", "newer", input.SortAscending)
 				.AddFlags("prop", prop)
-				.AddFilterOptionPiped("show", "minor", input.FilterMinor)
-				.AddFilterOptionPiped("show", "bot", input.FilterBot)
-				.AddFilterOptionPiped("show", "anon", input.FilterAnonymous)
-				.AddFilterOptionPiped("show", "patrolled", input.FilterPatrolled)
-				.AddFilterOptionPipedIf("show", "unread", input.FilterUnread, this.SiteVersion >= 124)
+				.AddFilterPiped("show", "minor", input.FilterMinor)
+				.AddFilterPiped("show", "bot", input.FilterBot)
+				.AddFilterPiped("show", "anon", input.FilterAnonymous)
+				.AddFilterPiped("show", "patrolled", input.FilterPatrolled)
+				.AddFilterPipedIf("show", "unread", input.FilterUnread, this.SiteVersion >= 124)
 				.AddIf("type", input.Type, this.SiteVersion >= 122)
 				.AddIfNotNull("owner", input.Owner)
 				.AddHiddenIfNotNull("token", input.Token)

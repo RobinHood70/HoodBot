@@ -1,10 +1,10 @@
-﻿namespace RobinHood70
+﻿namespace RobinHood70.WikiCommon
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using System.Globalization;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	/// <summary>Extension methods for a variety of types.</summary>
 	public static class Extensions

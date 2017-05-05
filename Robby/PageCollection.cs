@@ -4,9 +4,9 @@
 	using System.Collections.Generic;
 	using Design;
 	using Pages;
-	using WallE;
 	using WallE.Base;
-	using static Globals;
+	using WikiCommon;
+	using static WikiCommon.Globals;
 
 	public class PageCollection : TitleCollectionBase<Page>, IMessageSource
 	{
@@ -73,23 +73,23 @@
 
 		public void AddAllCategories(string from, string to) => this.FillFromPageSet(new AllCategoriesInput { From = from, To = to });
 
-		public void AddCategoryMembers(string category) => this.AddCategoryMembers(category, CategoryMemberTypes.All);
+		public void AddCategoryMembers(string category) => this.AddCategoryMembers(category, CategoryTypes.All);
 
-		public void AddCategoryMembers(string category, CategoryMemberTypes categoryTypes)
+		public void AddCategoryMembers(string category, CategoryTypes categoryTypes)
 		{
 			var cat = Title.ForcedNamespace(this.Site, MediaWikiNamespaces.Category, category);
 			this.FillFromPageSet(new CategoryMembersInput(cat.FullPageName)
 			{
-				Type = (CategoryTypes)categoryTypes,
+				Type = categoryTypes,
 			});
 		}
 
-		public void AddCategoryMembers(string category, CategoryMemberTypes categoryTypes, string fromPrefix, string toPrefix)
+		public void AddCategoryMembers(string category, CategoryTypes categoryTypes, string fromPrefix, string toPrefix)
 		{
 			var cat = Title.ForcedNamespace(this.Site, MediaWikiNamespaces.Category, category);
 			this.FillFromPageSet(new CategoryMembersInput(cat.FullPageName)
 			{
-				Type = (CategoryTypes)categoryTypes,
+				Type = categoryTypes,
 				StartSortKeyPrefix = fromPrefix,
 				EndSortKeyPrefix = toPrefix,
 			});
@@ -113,9 +113,9 @@
 
 		public void AddFileUsage(IEnumerable<IWikiTitle> titles) => this.FillFromPageSet(new FileUsageInput(), titles);
 
-		public void AddFileUsage(IEnumerable<IWikiTitle> titles, Filter redirects) => this.FillFromPageSet(new FileUsageInput() { FilterRedirects = (FilterOption)redirects }, titles);
+		public void AddFileUsage(IEnumerable<IWikiTitle> titles, Filter redirects) => this.FillFromPageSet(new FileUsageInput() { FilterRedirects = redirects }, titles);
 
-		public void AddFileUsage(IEnumerable<IWikiTitle> titles, Filter redirects, IEnumerable<int> namespaces) => this.FillFromPageSet(new FileUsageInput() { Namespaces = namespaces, FilterRedirects = (FilterOption)redirects }, titles);
+		public void AddFileUsage(IEnumerable<IWikiTitle> titles, Filter redirects, IEnumerable<int> namespaces) => this.FillFromPageSet(new FileUsageInput() { Namespaces = namespaces, FilterRedirects = redirects }, titles);
 
 		public void AddFromLinksOnPage(IEnumerable<IWikiTitle> titles) => this.AddFromLinksOnPage(titles, null);
 
@@ -133,17 +133,17 @@
 
 		public void AddLinksToNamespace(int ns, string from, string to) => this.FillFromPageSet(new AllLinksInput() { Namespace = ns, From = from, To = to });
 
-		public void AddNamespace(int ns, Filter redirects) => this.FillFromPageSet(new AllPagesInput { FilterRedirects = (FilterOption)redirects, Namespace = ns });
+		public void AddNamespace(int ns, Filter redirects) => this.FillFromPageSet(new AllPagesInput { FilterRedirects = redirects, Namespace = ns });
 
-		public void AddNamespace(int ns, Filter redirects, string prefix) => this.FillFromPageSet(new AllPagesInput { FilterRedirects = (FilterOption)redirects, Namespace = ns, Prefix = prefix });
+		public void AddNamespace(int ns, Filter redirects, string prefix) => this.FillFromPageSet(new AllPagesInput { FilterRedirects = redirects, Namespace = ns, Prefix = prefix });
 
-		public void AddNamespace(int ns, Filter redirects, string fromPage, string toPage) => this.FillFromPageSet(new AllPagesInput { FilterRedirects = (FilterOption)redirects, From = fromPage, Namespace = ns, To = toPage });
+		public void AddNamespace(int ns, Filter redirects, string fromPage, string toPage) => this.FillFromPageSet(new AllPagesInput { FilterRedirects = redirects, From = fromPage, Namespace = ns, To = toPage });
 
 		public void AddPageCategories(IEnumerable<IWikiTitle> titles) => this.FillFromPageSet(new CategoriesInput(), titles);
 
-		public void AddPageCategories(IEnumerable<IWikiTitle> titles, Filter hidden) => this.FillFromPageSet(new CategoriesInput { FilterHidden = (FilterOption)hidden }, titles);
+		public void AddPageCategories(IEnumerable<IWikiTitle> titles, Filter hidden) => this.FillFromPageSet(new CategoriesInput { FilterHidden = hidden }, titles);
 
-		public void AddPageCategories(IEnumerable<IWikiTitle> titles, Filter hidden, IEnumerable<string> limitTo) => this.FillFromPageSet(new CategoriesInput { Categories = limitTo, FilterHidden = (FilterOption)hidden }, titles);
+		public void AddPageCategories(IEnumerable<IWikiTitle> titles, Filter hidden, IEnumerable<string> limitTo) => this.FillFromPageSet(new CategoriesInput { Categories = limitTo, FilterHidden = hidden }, titles);
 
 		public void AddPagesWithProperty(string property) => this.FillFromPageSet(new PagesWithPropertyInput(property));
 
@@ -173,7 +173,7 @@
 
 		public void AddRecentChanges(string tag) => this.FillFromPageSet(new RecentChangesInput() { Tag = tag });
 
-		public void AddRecentChanges(RecentChangesTypes types) => this.FillFromPageSet(new RecentChangesInput() { Types = (ChangeTypes)types });
+		public void AddRecentChanges(RecentChangesTypes types) => this.FillFromPageSet(new RecentChangesInput() { Types = types });
 
 		public void AddRecentChanges(RecentChangesFilters showOnly, RecentChangesFilters hide) => this.AddRecentChanges(new RecentChangesOptions() { ShowOnly = showOnly, Hide = hide });
 
@@ -199,12 +199,12 @@
 				ExcludeUser = options.ExcludeUser,
 				Namespace = options.Namespace,
 				Tag = options.Tag,
-				Types = (ChangeTypes)options.Types,
-				FilterAnonymous = FlagToFilterOption(options.ShowOnly, options.Hide, RecentChangesFilters.Anonymous),
-				FilterBot = FlagToFilterOption(options.ShowOnly, options.Hide, RecentChangesFilters.Bot),
-				FilterMinor = FlagToFilterOption(options.ShowOnly, options.Hide, RecentChangesFilters.Minor),
-				FilterPatrolled = FlagToFilterOption(options.ShowOnly, options.Hide, RecentChangesFilters.Patrolled),
-				FilterRedirects = FlagToFilterOption(options.ShowOnly, options.Hide, RecentChangesFilters.Redirect),
+				Types = options.Types,
+				FilterAnonymous = FlagToFilter(options.ShowOnly, options.Hide, RecentChangesFilters.Anonymous),
+				FilterBot = FlagToFilter(options.ShowOnly, options.Hide, RecentChangesFilters.Bot),
+				FilterMinor = FlagToFilter(options.ShowOnly, options.Hide, RecentChangesFilters.Minor),
+				FilterPatrolled = FlagToFilter(options.ShowOnly, options.Hide, RecentChangesFilters.Patrolled),
+				FilterRedirects = FlagToFilter(options.ShowOnly, options.Hide, RecentChangesFilters.Redirect),
 			};
 
 			this.FillFromPageSet(input);
@@ -229,9 +229,9 @@
 
 		public void AddSearchResults(string search, IEnumerable<int> namespaces) => this.FillFromPageSet(new SearchInput(search) { Namespaces = namespaces });
 
-		public void AddSearchResults(string search, WhatToSearch whatToSearch) => this.FillFromPageSet(new SearchInput(search) { What = (SearchWhat)whatToSearch });
+		public void AddSearchResults(string search, WhatToSearch whatToSearch) => this.FillFromPageSet(new SearchInput(search) { What = whatToSearch });
 
-		public void AddSearchResults(string search, WhatToSearch whatToSearch, IEnumerable<int> namespaces) => this.FillFromPageSet(new SearchInput(search) { Namespaces = namespaces, What = (SearchWhat)whatToSearch });
+		public void AddSearchResults(string search, WhatToSearch whatToSearch, IEnumerable<int> namespaces) => this.FillFromPageSet(new SearchInput(search) { Namespaces = namespaces, What = whatToSearch });
 
 		public void AddTemplateTransclusions() => this.FillFromPageSet(new AllTransclusionsInput());
 
@@ -303,10 +303,10 @@
 		#endregion
 
 		#region Private Static Methods
-		private static FilterOption FlagToFilterOption(Enum showOnly, Enum hide, Enum flag) =>
-			hide.HasFlag(flag) ? FilterOption.Filter :
-			showOnly.HasFlag(flag) ? FilterOption.Only :
-			FilterOption.All;
+		private static Filter FlagToFilter(Enum showOnly, Enum hide, Enum flag) =>
+			hide.HasFlag(flag) ? Filter.Filter :
+			showOnly.HasFlag(flag) ? Filter.Only :
+			Filter.All;
 		#endregion
 
 		#region Private Methods

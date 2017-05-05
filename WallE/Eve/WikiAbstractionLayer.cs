@@ -11,9 +11,10 @@
 	using Design;
 	using Modules;
 	using Newtonsoft.Json;
-	using RobinHood70.WallE.RequestBuilder;
+	using WallE.RequestBuilder;
+	using WikiCommon;
 	using static Properties.EveMessages;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	/// <summary>An API-based implementation of the <see cref="IWikiAbstractionLayer" /> interface.</summary>
 	/// <seealso cref="IWikiAbstractionLayer" />

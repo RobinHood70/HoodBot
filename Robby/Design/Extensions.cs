@@ -2,7 +2,7 @@
 {
 	using System.Collections.Generic;
 	using Design;
-	using WallE;
+	using WikiCommon;
 
 	/// <summary>Provides extensions across the entire project.</summary>
 	public static class Extensions

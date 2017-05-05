@@ -3,7 +3,7 @@
 	using System;
 	using System.Runtime.Serialization;
 	using static Properties.Messages;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	/// <summary>The exception that is thrown when a stop has been requested via the wiki.</summary>
 	/// <remarks>Typical sources of this exception are a change to the logged-in user's talk page, the user changing or being logged out unexpectedly, or via a custom stop check method.</remarks>

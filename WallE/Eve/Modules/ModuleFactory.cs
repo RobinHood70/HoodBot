@@ -3,7 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using Base;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	/// <summary>Concrete implementation of <see cref="IModuleFactory"/>.</summary>
 	/// <seealso cref="IModuleFactory" />

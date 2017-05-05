@@ -4,7 +4,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Base;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	public abstract class PropLinksBase<TInput> : PropListModule<TInput, ITitle>
 		where TInput : class, ILinksInput

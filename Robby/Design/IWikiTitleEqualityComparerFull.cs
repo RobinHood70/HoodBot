@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System.Collections.Generic;
-	using static Globals;
+	using static WikiCommon.Globals;
 
 	public class IWikiTitleEqualityComparerFull : IEqualityComparer<IWikiTitle>
 	{

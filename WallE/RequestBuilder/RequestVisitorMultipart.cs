@@ -4,8 +4,8 @@
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Text;
-	using static Globals;
-	using static RobinHood70.Globals;
+	using static ProjectGlobals;
+	using static WikiCommon.Globals;
 
 	internal class RequestVisitorMultipart : IParameterVisitor
 	{

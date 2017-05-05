@@ -2,7 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
-	using static Globals;
+	using static ProjectGlobals;
 
 	public enum HelpFormat
 	{

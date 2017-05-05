@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby.Pages
 {
-	using RobinHood70.Robby.Design;
-	using RobinHood70.WallE.Base;
+	using Robby.Design;
+	using WallE.Base;
 
 	public class Message : Page
 	{

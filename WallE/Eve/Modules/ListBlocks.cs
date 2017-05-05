@@ -5,7 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Base;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	internal class ListBlocks : ListModule<BlocksInput, BlocksResult>
 	{
@@ -40,10 +40,10 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("users", input.Users)
 				.AddIfNotNull("ip", input.IP?.ToString())
 				.AddFlags("prop", input.Properties)
-				.AddFilterOptionPiped("show", "account", input.FilterAccount)
-				.AddFilterOptionPiped("show", "ip", input.FilterIP)
-				.AddFilterOptionPiped("show", "range", input.FilterRange)
-				.AddFilterOptionPiped("show", "temp", input.FilterTemporary)
+				.AddFilterPiped("show", "account", input.FilterAccount)
+				.AddFilterPiped("show", "ip", input.FilterIP)
+				.AddFilterPiped("show", "range", input.FilterRange)
+				.AddFilterPiped("show", "temp", input.FilterTemporary)
 				.Add("limit", this.Limit);
 		}
 

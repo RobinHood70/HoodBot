@@ -42,14 +42,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
     <Reference Include="System.Web" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Pages\Category.cs" />
@@ -96,7 +91,6 @@
     <Compile Include="Pages\FilePage.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="Robby.pfx" />
     <None Include="Robby.ruleset" />
     <AdditionalFiles Include="stylecop.json" />
@@ -111,19 +105,14 @@
     <CodeAnalysisDictionary Include="CustomDictionary.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Shared\Shared\Shared.csproj">
-      <Project>{24f1785b-804e-4e66-9f7e-3898f45306a1}</Project>
-      <Name>Shared</Name>
-    </ProjectReference>
     <ProjectReference Include="..\WallE\WallE.csproj">
       <Project>{f338af86-4502-4121-b032-092ca727d51b}</Project>
       <Name>WallE</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\..\..\NuGet\StyleCop.Analyzers.1.1.0-beta001\analyzers\dotnet\cs\Newtonsoft.Json.dll" />
-    <Analyzer Include="..\..\..\NuGet\StyleCop.Analyzers.1.1.0-beta001\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
-    <Analyzer Include="..\..\..\NuGet\StyleCop.Analyzers.1.1.0-beta001\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
+    <ProjectReference Include="..\WikiCommon\WikiCommon.csproj">
+      <Project>{64878636-CB8C-434E-A03D-B3946216FC7F}</Project>
+      <Name>WikiCommon</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
+	using WikiCommon;
 
 	#region Public Enumerations
 	[Flags]
@@ -22,16 +23,6 @@ namespace RobinHood70.WallE.Base
 	{
 		SortKey,
 		Timestamp
-	}
-
-	[Flags]
-	public enum CategoryTypes
-	{
-		None = 0,
-		Page = 1,
-		Subcat = 1 << 1,
-		File = 1 << 2,
-		All = Page | Subcat | File
 	}
 	#endregion
 

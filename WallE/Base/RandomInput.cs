@@ -2,11 +2,12 @@
 namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
+	using WikiCommon;
 
 	public class RandomInput : ILimitableInput, IGeneratorInput
 	{
 		#region Public Properties
-		public FilterOption FilterRedirects { get; }
+		public Filter FilterRedirects { get; }
 
 		public int Limit { get; set; }
 

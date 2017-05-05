@@ -1,6 +1,8 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
+	using WikiCommon;
+
 	public class FeedWatchlistInput
 	{
 		#region Public Properties
@@ -12,15 +14,15 @@ namespace RobinHood70.WallE.Base
 
 		public string FeedFormat { get; set; }
 
-		public FilterOption FilterAnonymous { get; set; }
+		public Filter FilterAnonymous { get; set; }
 
-		public FilterOption FilterBot { get; set; }
+		public Filter FilterBot { get; set; }
 
-		public FilterOption FilterMinor { get; set; }
+		public Filter FilterMinor { get; set; }
 
-		public FilterOption FilterPatrolled { get; set; }
+		public Filter FilterPatrolled { get; set; }
 
-		public FilterOption FilterUnread { get; set; }
+		public Filter FilterUnread { get; set; }
 
 		public int Hours { get; set; }
 

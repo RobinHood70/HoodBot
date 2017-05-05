@@ -15,7 +15,8 @@
 	using Design;
 	using Eve;
 	using RequestBuilder;
-	using static RobinHood70.Globals;
+	using WikiCommon;
+	using static WikiCommon.Globals;
 
 	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "By design, though could potentially use a rewrite per TODO, below")]
 	public partial class FormTestBed : Form
@@ -656,7 +657,7 @@
 			this.Edit("Test Redirect 1", "#REDIRECT [[Test Page 1]]", "Create redirect");
 			this.UploadRandomImage("Test Image 1.jpg");
 			this.StartStopwatch("Backlinks");
-			var input = new BacklinksInput("Test Page 1", BacklinksTypes.Backlinks) { FilterRedirects = FilterOption.All };
+			var input = new BacklinksInput("Test Page 1", BacklinksTypes.Backlinks) { FilterRedirects = Filter.All };
 			var result = this.wiki.Backlinks(input);
 			var pages = this.wiki.LoadPages(new PageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
@@ -667,7 +668,7 @@
 
 			this.CheckPagesResult(pages);
 
-			input = new BacklinksInput("File:Test Image 1.jpg", BacklinksTypes.EmbeddedIn) { FilterRedirects = FilterOption.All };
+			input = new BacklinksInput("File:Test Image 1.jpg", BacklinksTypes.EmbeddedIn) { FilterRedirects = Filter.All };
 			result = this.wiki.Backlinks(input);
 			pages = this.wiki.LoadPages(new PageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
@@ -678,7 +679,7 @@
 
 			this.CheckPagesResult(pages);
 
-			input = new BacklinksInput("File:Test Image 1.jpg", BacklinksTypes.ImageUsage) { FilterRedirects = FilterOption.All };
+			input = new BacklinksInput("File:Test Image 1.jpg", BacklinksTypes.ImageUsage) { FilterRedirects = Filter.All };
 			result = this.wiki.Backlinks(input);
 			pages = this.wiki.LoadPages(new PageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
@@ -689,7 +690,7 @@
 
 			this.CheckPagesResult(pages);
 
-			input = new BacklinksInput("File:Test Image 1.jpg", BacklinksTypes.All) { FilterRedirects = FilterOption.All };
+			input = new BacklinksInput("File:Test Image 1.jpg", BacklinksTypes.All) { FilterRedirects = Filter.All };
 			result = this.wiki.Backlinks(input);
 			this.CheckCollection(result, "result");
 			if (result.Count > 0)

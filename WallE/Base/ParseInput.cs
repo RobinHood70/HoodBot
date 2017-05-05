@@ -2,7 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	#region Public Enumerations
 	[Flags]

@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.Robby
 {
 	using System;
+	using WikiCommon;
 
 	public class RecentChangesOptions
 	{

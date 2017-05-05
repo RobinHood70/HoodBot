@@ -10,8 +10,9 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Design;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
+	using WikiCommon;
 	using static Properties.EveMessages;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	/// <summary>Any other API-related items that didn't warrant creation of their own static class.</summary>
 	internal static class ParsingExtensions

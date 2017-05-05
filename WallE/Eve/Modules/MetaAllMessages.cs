@@ -5,7 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Base;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	internal class MetaAllMessages : ListModule<AllMessagesInput, AllMessagesItem>
 	{
@@ -41,7 +41,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("includelocal", input.IncludeLocal)
 				.Add("args", input.Arguments)
 				.AddIfNotNull("filter", input.Filter)
-				.AddFilterOptionText("customised", "modified", "unmodified", input.FilterModified)
+				.AddFilterText("customised", "modified", "unmodified", input.FilterModified)
 				.AddIfNotNull("lang", input.LanguageCode)
 				.AddIfNotNull("from", input.MessageFrom)
 				.AddIfNotNull("to", input.MessageTo)

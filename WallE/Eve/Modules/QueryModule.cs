@@ -6,7 +6,8 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Base;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
-	using static RobinHood70.Globals;
+	using WikiCommon;
+	using static WikiCommon.Globals;
 
 	// TODO: Consider allowing modules to remove inappropriate inputs/outputs from modules when in generator mode. Easiest implementation is probably to allow normal Build, then implement a RemoveForGenerator virtual method that will come along behind after the build and remove inappropriate parameters from the request.
 	public abstract class QueryModule<TInput, TOutput> : IQueryModule

@@ -5,7 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Base;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	internal class ListRecentChanges : ListModule<RecentChangesInput, RecentChangesItem>, IGeneratorModule
 	{
@@ -48,11 +48,11 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIfNotNull(input.ExcludeUser ? "excludeuser" : "user", input.User)
 				.AddIfNotNull("tag", input.Tag)
 				.AddFlags("type", input.Types)
-				.AddFilterOptionPiped("show", "anon", input.FilterAnonymous)
-				.AddFilterOptionPiped("show", "bot", input.FilterBot)
-				.AddFilterOptionPiped("show", "minor", input.FilterMinor)
-				.AddFilterOptionPiped("show", "patrolled", input.FilterPatrolled)
-				.AddFilterOptionPiped("show", "redirect", input.FilterRedirects)
+				.AddFilterPiped("show", "anon", input.FilterAnonymous)
+				.AddFilterPiped("show", "bot", input.FilterBot)
+				.AddFilterPiped("show", "minor", input.FilterMinor)
+				.AddFilterPiped("show", "patrolled", input.FilterPatrolled)
+				.AddFilterPiped("show", "redirect", input.FilterRedirects)
 				.AddFlags("prop", input.Properties)
 				.AddIf("token", TokensInput.Patrol, input.GetPatrolToken && this.SiteVersion < 124)
 				.Add("toponly", input.TopOnly)

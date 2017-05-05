@@ -3,9 +3,10 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
-	using static Globals;
+	using WikiCommon;
+	using static ProjectGlobals;
 	using static Properties.EveMessages;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	public class EditInput
 	{

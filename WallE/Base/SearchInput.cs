@@ -4,16 +4,10 @@ namespace RobinHood70.WallE.Base
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
-	using static Globals;
+	using WikiCommon;
+	using static ProjectGlobals;
 
 	#region Public Enumerations
-	public enum SearchWhat
-	{
-		Title,
-		Text,
-		NearMatch
-	}
-
 	[SuppressMessage("Microsoft.Naming", "CA1714:FlagsEnumsShouldHavePluralNames", Justification = "Collective term")]
 	[Flags]
 	public enum SearchInfo
@@ -73,7 +67,7 @@ namespace RobinHood70.WallE.Base
 
 		public string Search { get; }
 
-		public SearchWhat What { get; set; }
+		public WhatToSearch What { get; set; }
 		#endregion
 	}
 }

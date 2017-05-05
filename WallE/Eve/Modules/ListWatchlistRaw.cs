@@ -4,7 +4,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Base;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	internal class ListWatchlistRaw : ListModule<WatchlistRawInput, WatchlistRawItem>, IGeneratorModule
 	{
@@ -43,7 +43,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			request
 				.Add("namespace", input.Namespaces)
 				.AddFlags("prop", input.Properties)
-				.AddFilterOptionPiped("show", "changed", input.FilterChanged)
+				.AddFilterPiped("show", "changed", input.FilterChanged)
 				.AddIfNotNullIf("owner", input.Owner, this.SiteVersion >= 117)
 				.AddHiddenIf("token", input.Token, this.SiteVersion >= 117)
 				.AddIf("dir", "descending", input.SortDescending)

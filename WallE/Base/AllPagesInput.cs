@@ -1,16 +1,18 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
+	using WikiCommon;
+
 	public class AllPagesInput : ILimitableInput, IGeneratorInput
 	{
 		#region Public Properties
-		public FilterOption FilterCascading { get; set; }
+		public Filter FilterCascading { get; set; }
 
-		public FilterOption FilterIndefinite { get; set; }
+		public Filter FilterIndefinite { get; set; }
 
-		public FilterOption FilterLanguageLinks { get; set; }
+		public Filter FilterLanguageLinks { get; set; }
 
-		public FilterOption FilterRedirects { get; set; }
+		public Filter FilterRedirects { get; set; }
 
 		public string From { get; set; }
 

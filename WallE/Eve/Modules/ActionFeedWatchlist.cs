@@ -5,7 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Base;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	public class ActionFeedWatchlist : ActionModule<FeedWatchlistInput, CustomResult>
 	{
@@ -42,11 +42,11 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIfNotNull("wltoken", input.Token)
 				.AddIfNotNull("wlexcludeuser", input.ExcludeUser)
 				.Add("wltype", input.Types)
-				.AddFilterOptionPiped("wlshow", "minor", input.FilterMinor)
-				.AddFilterOptionPiped("wlshow", "bot", input.FilterBot)
-				.AddFilterOptionPiped("wlshow", "anon", input.FilterAnonymous)
-				.AddFilterOptionPiped("wlshow", "patrolled", input.FilterPatrolled)
-				.AddFilterOptionPiped("wlshow", "unread", input.FilterUnread)
+				.AddFilterPiped("wlshow", "minor", input.FilterMinor)
+				.AddFilterPiped("wlshow", "bot", input.FilterBot)
+				.AddFilterPiped("wlshow", "anon", input.FilterAnonymous)
+				.AddFilterPiped("wlshow", "patrolled", input.FilterPatrolled)
+				.AddFilterPiped("wlshow", "unread", input.FilterUnread)
 				.AddIf("linktodiffs", input.LinkToDiffs, this.SiteVersion >= 117 && this.SiteVersion < 124);
 		}
 

@@ -85,13 +85,13 @@
     <Content Include="WikiListExample.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Shared\Shared\Shared.csproj">
-      <Project>{24f1785b-804e-4e66-9f7e-3898f45306a1}</Project>
-      <Name>Shared</Name>
-    </ProjectReference>
     <ProjectReference Include="..\WallE\WallE.csproj">
       <Project>{f338af86-4502-4121-b032-092ca727d51b}</Project>
       <Name>WallE</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WikiCommon\WikiCommon.csproj">
+      <Project>{64878636-CB8C-434E-A03D-B3946216FC7F}</Project>
+      <Name>WikiCommon</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

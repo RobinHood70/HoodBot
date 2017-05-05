@@ -8,8 +8,9 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Design;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
+	using WikiCommon;
 	using static Properties.EveMessages;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	public class ActionQuery : ActionModulePageSet<QueryInput, PageItem>, IQueryPageSet
 	{

@@ -4,7 +4,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Base;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	internal class ListAllPages : ListModule<AllPagesInput, WikiTitleItem>, IGeneratorModule
 	{
@@ -37,16 +37,16 @@ namespace RobinHood70.WallE.Eve.Modules
 			request
 				.AddIfNotNull("from", input.From)
 				.AddIfNotNull("to", input.To)
-				.AddFilterOptionText("prfiltercascade", "cascading", "noncascading", input.FilterCascading)
-				.AddFilterOptionText("filterlanglinks", "withlanglinks", "withoutlanglinks", input.FilterLanguageLinks)
-				.AddFilterOptionText("filterredir", "redirect", "nonredirects", input.FilterRedirects)
+				.AddFilterText("prfiltercascade", "cascading", "noncascading", input.FilterCascading)
+				.AddFilterText("filterlanglinks", "withlanglinks", "withoutlanglinks", input.FilterLanguageLinks)
+				.AddFilterText("filterredir", "redirect", "nonredirects", input.FilterRedirects)
 				.AddIf("maxsize", input.MaximumSize, input.MaximumSize >= 0)
 				.AddIf("minsize", input.MinimumSize, input.MinimumSize >= 0)
 				.Add("namespace", input.Namespace)
 				.AddIfNotNull("prefix", input.Prefix)
 				.AddIfNotNull("prlevel", input.ProtectionLevel)
 				.AddIfNotNull("prtype", input.ProtectionType)
-				.AddFilterOptionText("prexpiry", "indefinite", "definite", input.FilterIndefinite)
+				.AddFilterText("prexpiry", "indefinite", "definite", input.FilterIndefinite)
 				.AddIf("dir", "descending", input.SortDescending)
 				.Add("limit", this.Limit);
 		}

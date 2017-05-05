@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
+	using WikiCommon;
 
 	#region Public Enumerations
 	[Flags]
@@ -34,13 +35,13 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public DateTime? End { get; set; }
 
-		public FilterOption FilterMinor { get; set; }
+		public Filter FilterMinor { get; set; }
 
-		public FilterOption FilterNew { get; set; }
+		public Filter FilterNew { get; set; }
 
-		public FilterOption FilterPatrolled { get; set; }
+		public Filter FilterPatrolled { get; set; }
 
-		public FilterOption FilterTop { get; set; }
+		public Filter FilterTop { get; set; }
 
 		public int Limit { get; set; }
 

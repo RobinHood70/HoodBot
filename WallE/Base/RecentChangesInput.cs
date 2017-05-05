@@ -2,19 +2,9 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
+	using WikiCommon;
 
 	#region Public Enumerations
-	[Flags]
-	public enum ChangeTypes
-	{
-		None = 0,
-		Edit = 1,
-		External = 1 << 1,
-		New = 1 << 2,
-		Log = 1 << 3,
-		All = Edit | External | New | Log
-	}
-
 	[Flags]
 	public enum RecentChangesProperties
 	{
@@ -44,15 +34,15 @@ namespace RobinHood70.WallE.Base
 
 		public bool ExcludeUser { get; set; }
 
-		public FilterOption FilterAnonymous { get; set; }
+		public Filter FilterAnonymous { get; set; }
 
-		public FilterOption FilterBot { get; set; }
+		public Filter FilterBot { get; set; }
 
-		public FilterOption FilterMinor { get; set; }
+		public Filter FilterMinor { get; set; }
 
-		public FilterOption FilterPatrolled { get; set; }
+		public Filter FilterPatrolled { get; set; }
 
-		public FilterOption FilterRedirects { get; set; }
+		public Filter FilterRedirects { get; set; }
 
 		public bool GetPatrolToken { get; set; }
 
@@ -74,7 +64,7 @@ namespace RobinHood70.WallE.Base
 
 		public bool TopOnly { get; set; }
 
-		public ChangeTypes Types { get; set; }
+		public RecentChangesTypes Types { get; set; }
 
 		public string User { get; set; }
 		#endregion

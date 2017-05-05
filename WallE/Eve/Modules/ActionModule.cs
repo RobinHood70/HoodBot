@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
 	using static Properties.EveMessages;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	public abstract class ActionModule<TInput, TOutput> : IActionModule<TInput, TOutput>
 		where TInput : class

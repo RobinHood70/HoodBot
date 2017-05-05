@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
+	using WikiCommon;
 
 	#region Public Enumerations
 	[Flags]
@@ -35,15 +36,15 @@ namespace RobinHood70.WallE.Base
 
 		public bool ExcludeUser { get; set; }
 
-		public FilterOption FilterAnonymous { get; set; }
+		public Filter FilterAnonymous { get; set; }
 
-		public FilterOption FilterBot { get; set; }
+		public Filter FilterBot { get; set; }
 
-		public FilterOption FilterMinor { get; set; }
+		public Filter FilterMinor { get; set; }
 
-		public FilterOption FilterPatrolled { get; set; }
+		public Filter FilterPatrolled { get; set; }
 
-		public FilterOption FilterUnread { get; set; }
+		public Filter FilterUnread { get; set; }
 
 		public int Limit { get; set; }
 

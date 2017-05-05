@@ -4,7 +4,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Base;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	internal class ListAllImages : ListModule<AllImagesInput, AllImagesItem>, IGeneratorModule
 	{
@@ -49,7 +49,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIf("maxsize", input.MaximumSize, input.MaximumSize >= 0)
 				.AddIfNotNull("sha1", input.Sha1)
 				.AddIfNotNull("user", input.User)
-				.AddFilterOptionText("filterbots", "bots", "nobots", input.FilterBots)
+				.AddFilterText("filterbots", "bots", "nobots", input.FilterBots)
 				.AddIfNotNull("mime", input.MimeType?.ToLowerInvariant())
 				.Add("limit", this.Limit);
 		}

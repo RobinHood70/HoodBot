@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
+	using WikiCommon;
 
 	#region Public Enumerations
 	[Flags]
@@ -28,7 +29,7 @@ namespace RobinHood70.WallE.Base
 		// TODO: Check the difference between Properties and ShowChanged when Internet is back up.
 		public WatchlistRawProperties Properties { get; set; }
 
-		public FilterOption FilterChanged { get; set; }
+		public Filter FilterChanged { get; set; }
 
 		public bool SortDescending { get; set; }
 

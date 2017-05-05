@@ -3,7 +3,8 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using Base;
 	using RequestBuilder;
-	using static RobinHood70.Globals;
+	using WikiCommon;
+	using static WikiCommon.Globals;
 
 	internal class PropLinks : PropLinksBase<LinksInput>, IGeneratorModule
 	{

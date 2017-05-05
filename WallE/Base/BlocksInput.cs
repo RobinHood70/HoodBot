@@ -4,6 +4,7 @@ namespace RobinHood70.WallE.Base
 	using System;
 	using System.Collections.Generic;
 	using System.Net;
+	using WikiCommon;
 
 	#region Public Enumerations
 	[Flags]
@@ -39,13 +40,13 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public DateTime? End { get; set; }
 
-		public FilterOption FilterAccount { get; set; }
+		public Filter FilterAccount { get; set; }
 
-		public FilterOption FilterIP { get; set; }
+		public Filter FilterIP { get; set; }
 
-		public FilterOption FilterRange { get; set; }
+		public Filter FilterRange { get; set; }
 
-		public FilterOption FilterTemporary { get; set; }
+		public Filter FilterTemporary { get; set; }
 
 		public IEnumerable<long> Ids { get; set; }
 

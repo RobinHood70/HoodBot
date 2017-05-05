@@ -4,7 +4,8 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Base;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
-	using static RobinHood70.Globals;
+	using WikiCommon;
+	using static WikiCommon.Globals;
 
 	// For the time being, the complexity involved in implementing FileUsage, LinksHere, Redirects, and TranscludedIn as derived modules is just not worth it in C#. MediaWiki gets away with it much more easily due to the fact that it's mostly working with strings, along with PHP's looser type system. It may become more worthwhile to implement these modules as inherited in the future, however, or do it like the Revisions classes do and have a static base builder/deserializer but remain otherwise uninherited.
 	internal class PropFileUsage : PropListModule<FileUsageInput, FileUsageItem>, IGeneratorModule
@@ -40,7 +41,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			request
 				.AddFlags("prop", input.Properties)
 				.Add("namespace", input.Namespaces)
-				.AddFilterOptionPiped("show", "redirect", input.FilterRedirects)
+				.AddFilterPiped("show", "redirect", input.FilterRedirects)
 				.Add("limit", this.Limit);
 		}
 

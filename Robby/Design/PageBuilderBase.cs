@@ -3,7 +3,7 @@
 	using System.Collections.Generic;
 	using Pages;
 	using WallE.Base;
-	using static Globals;
+	using static WikiCommon.Globals;
 
 	public abstract class PageBuilderBase
 	{

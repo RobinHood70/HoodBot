@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
+	using WikiCommon;
 
 	#region Public Enumerations
 	[Flags]
@@ -18,7 +19,7 @@ namespace RobinHood70.WallE.Base
 	public class RedirectsInput : IPropertyInput, ILimitableInput, IGeneratorInput
 	{
 		#region Public Properties
-		public FilterOption FilterFragments { get; set; }
+		public Filter FilterFragments { get; set; }
 
 		public int Limit { get; set; }
 

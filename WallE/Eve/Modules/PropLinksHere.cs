@@ -4,7 +4,8 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Base;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
-	using static RobinHood70.Globals;
+	using WikiCommon;
+	using static WikiCommon.Globals;
 
 	internal class PropLinksHere : PropListModule<LinksHereInput, LinksHereItem>, IGeneratorModule
 	{
@@ -39,7 +40,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			request
 				.AddFlags("prop", input.Properties)
 				.Add("namespace", input.Namespaces)
-				.AddFilterOptionPiped("show", "redirect", input.FilterRedirects)
+				.AddFilterPiped("show", "redirect", input.FilterRedirects)
 				.Add("limit", this.Limit);
 		}
 

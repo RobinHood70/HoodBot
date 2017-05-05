@@ -2,6 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
+	using WikiCommon;
 
 	#region Public Enumerations
 	[Flags]
@@ -37,7 +38,7 @@ namespace RobinHood70.WallE.Base
 	public class SiteInfoInput
 	{
 		#region Public Properties
-		public FilterOption FilterLocalInterwiki { get; set; }
+		public Filter FilterLocalInterwiki { get; set; }
 
 		public string InterwikiLanguageCode { get; set; }
 

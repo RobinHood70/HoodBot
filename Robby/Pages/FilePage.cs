@@ -4,7 +4,7 @@
 	using System.Collections.Generic;
 	using Design;
 	using WallE.Base;
-	using static Globals;
+	using static WikiCommon.Globals;
 
 	public class FilePage : Page
 	{

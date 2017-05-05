@@ -2,7 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using static Properties.Messages;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	public class ImageLimitsItem
 	{

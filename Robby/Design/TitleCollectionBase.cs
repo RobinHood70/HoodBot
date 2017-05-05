@@ -4,8 +4,9 @@
 	using System.Collections;
 	using System.Collections.Generic;
 	using Design;
-	using static Globals;
+	using WikiCommon;
 	using static Properties.Resources;
+	using static WikiCommon.Globals;
 
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "I prefer abstract classes to end in Base.")]
 	public abstract class TitleCollectionBase<TTitle> : IList<TTitle>

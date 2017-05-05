@@ -2,8 +2,8 @@
 {
 	using System.Collections.Generic;
 	using System.Net.Http;
-	using static Globals;
-	using static RobinHood70.Globals;
+	using static ProjectGlobals;
+	using static WikiCommon.Globals;
 
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", Justification = "Disposed of by caller.")]
 	internal class RequestVisitorHttpContentMultipart : IParameterVisitor

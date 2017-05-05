@@ -4,7 +4,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System.Collections.Generic;
 	using Base;
 	using Newtonsoft.Json.Linq;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	// Property modules will be called repeatedly as each page's data is parsed. Input values will be stable between iterations, but the output being worked on may not. Do not persist output data between calls.
 	// See ListModuleBase for comments on methods they have in common.

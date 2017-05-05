@@ -4,7 +4,7 @@
 	using System.Runtime.Serialization;
 	using System.Security.Permissions;
 	using static Properties.Messages;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	/// <summary>The exception thrown when the wiki returns an error instead of the expected result.</summary>
 	/// <seealso cref="Exception" />

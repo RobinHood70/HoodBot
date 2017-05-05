@@ -9,8 +9,9 @@
 	using Design;
 	using Pages;
 	using WallE.Base;
-	using static Globals;
+	using WikiCommon;
 	using static Properties.Resources;
+	using static WikiCommon.Globals;
 
 	public class Site : IMessageSource
 	{

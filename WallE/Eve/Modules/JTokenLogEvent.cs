@@ -8,6 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System.Text.RegularExpressions;
 	using Base;
 	using Newtonsoft.Json.Linq;
+	using WikiCommon;
 
 	internal static class JTokenLogEvent
 	{

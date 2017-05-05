@@ -16,7 +16,8 @@
 	using WallE.Clients;
 	using WallE.Eve;
 	using WallE.RequestBuilder;
-	using static Globals;
+	using WikiCommon;
+	using static WikiCommon.Globals;
 
 	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "By design, though could potentially use a rewrite per TODO, below")]
 	public partial class FormTestBed : Form

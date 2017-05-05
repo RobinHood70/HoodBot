@@ -2,6 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
+	using WikiCommon;
 
 	#region Public Enumerations
 	public enum AllImagesSort
@@ -17,7 +18,7 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public DateTime? End { get; set; }
 
-		public FilterOption FilterBots { get; set; }
+		public Filter FilterBots { get; set; }
 
 		public string From { get; set; }
 

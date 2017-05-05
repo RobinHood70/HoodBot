@@ -4,7 +4,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System;
 	using System.Collections.ObjectModel;
 	using static Properties.Messages;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	public class ModuleCollection<TModule> : KeyedCollection<string, TModule>
 		where TModule : class, IModule

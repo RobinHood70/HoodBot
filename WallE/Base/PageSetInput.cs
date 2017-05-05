@@ -2,7 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	public class PageSetInput : PageSetInputBase, ILimitableInput
 	{

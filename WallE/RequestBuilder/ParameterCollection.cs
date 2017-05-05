@@ -6,8 +6,9 @@
 	using System.Collections.ObjectModel;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
+	using WikiCommon;
 	using static Properties.Messages;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	/// <summary>Provides an easy-to-use parameter dictionary which maintains insertion order.</summary>
 	/// <seealso cref="KeyedCollection{TKey, TItem}" />
@@ -170,45 +171,45 @@
 			return this;
 		}
 
-		/// <summary>Adds a toggled FilterOption parameter if the value is not All. The name of the parameter is fixed, and the value emitted is either <c>trueValue</c> or <c>!trueValue</c>, depending on the value of the filter.</summary>
+		/// <summary>Adds a toggled Filter parameter if the value is not All. The name of the parameter is fixed, and the value emitted is either <c>trueValue</c> or <c>!trueValue</c>, depending on the value of the filter.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="trueValue">The true value.</param>
-		/// <param name="filterOption">The filter variable.</param>
+		/// <param name="filter">The filter variable.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public ParameterCollection AddFilterOptionPiped(string name, string trueValue, FilterOption filterOption)
+		public ParameterCollection AddFilterPiped(string name, string trueValue, Filter filter)
 		{
-			switch (filterOption)
+			switch (filter)
 			{
-				case FilterOption.Only:
+				case Filter.Only:
 					return this.Add(name, new string[] { trueValue });
-				case FilterOption.Filter:
+				case Filter.Filter:
 					return this.Add(name, new string[] { '!' + trueValue });
 				default:
 					return this;
 			}
 		}
 
-		/// <summary>Adds a toggled FilterOption parameter if the value is not All and the condition is true. The name of the parameter is fixed, and the value emitted is either <c>trueValue</c> or <c>!trueValue</c>, depending on the value of the filter.</summary>
+		/// <summary>Adds a toggled Filter parameter if the value is not All and the condition is true. The name of the parameter is fixed, and the value emitted is either <c>trueValue</c> or <c>!trueValue</c>, depending on the value of the filter.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="trueValue">The true value.</param>
-		/// <param name="filterOption">The filter variable.</param>
+		/// <param name="filter">The filter variable.</param>
 		/// <param name="condition">The condition to check.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public ParameterCollection AddFilterOptionPipedIf(string name, string trueValue, FilterOption filterOption, bool condition) => condition ? this.AddFilterOptionPiped(name, trueValue, filterOption) : this;
+		public ParameterCollection AddFilterPipedIf(string name, string trueValue, Filter filter, bool condition) => condition ? this.AddFilterPiped(name, trueValue, filter) : this;
 
-		/// <summary>Adds a text-based FilterOption parameter if the value is not All. The name of the parameter is fixed, and the value emitted is either <c>onlyName</c> or <c>filterName</c>, depending on the value of the filter.</summary>
+		/// <summary>Adds a text-based Filter parameter if the value is not All. The name of the parameter is fixed, and the value emitted is either <c>onlyName</c> or <c>filterName</c>, depending on the value of the filter.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="onlyName">The text to emit when the filter is set to Only.</param>
 		/// <param name="filterName">The text to emit when the filter is set to Filter.</param>
-		/// <param name="filterOption">The filter variable.</param>
+		/// <param name="filter">The filter variable.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public ParameterCollection AddFilterOptionText(string name, string onlyName, string filterName, FilterOption filterOption)
+		public ParameterCollection AddFilterText(string name, string onlyName, string filterName, Filter filter)
 		{
-			switch (filterOption)
+			switch (filter)
 			{
-				case FilterOption.Only:
+				case Filter.Only:
 					return this.Add(name, onlyName);
-				case FilterOption.Filter:
+				case Filter.Filter:
 					return this.Add(name, filterName);
 				default:
 					return this;

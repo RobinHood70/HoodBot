@@ -5,7 +5,8 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Base;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
-	using static RobinHood70.Globals;
+	using WikiCommon;
+	using static WikiCommon.Globals;
 
 	// MWVERSION 1.29 - note that filterredir=all is simulated below 1.26 and will not produce the same distribution of redirects and non-redirects.
 	internal class ListRandom : ListModule<RandomInput, WikiTitleItem>, IGeneratorModule
@@ -38,9 +39,9 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(input, nameof(input));
 			request
 				.Add("namespace", input.Namespaces)
-				.AddIf("filterredir", "redirects", input.FilterRedirects == FilterOption.Only && this.SiteVersion >= 126)
-				.AddIf("filterredir", "all", input.FilterRedirects == FilterOption.All && this.SiteVersion >= 126)
-				.AddIf("redirect", input.FilterRedirects == FilterOption.Only || (input.FilterRedirects == FilterOption.All && new Random().NextDouble() < 0.5), this.SiteVersion < 126)
+				.AddIf("filterredir", "redirects", input.FilterRedirects == Filter.Only && this.SiteVersion >= 126)
+				.AddIf("filterredir", "all", input.FilterRedirects == Filter.All && this.SiteVersion >= 126)
+				.AddIf("redirect", input.FilterRedirects == Filter.Only || (input.FilterRedirects == Filter.All && new Random().NextDouble() < 0.5), this.SiteVersion < 126)
 				.Add("limit", this.Limit);
 		}
 

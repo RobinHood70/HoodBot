@@ -6,7 +6,8 @@
 	using WallE.Eve;
 	using WallE.Eve.Modules;
 	using WallE.RequestBuilder;
-	using static Globals;
+	using WikiCommon;
+	using static WikiCommon.Globals;
 
 	public class PropVariables : PropListModule<VariablesInput, VariablesResult>, IGeneratorModule
 	{

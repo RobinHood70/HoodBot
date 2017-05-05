@@ -11,10 +11,11 @@
 	using System.Text;
 	using System.Threading;
 	using Design;
+	using WikiCommon;
 	using static System.Net.HttpStatusCode;
 	using static ClientShared;
 	using static Properties.Messages;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	/// <summary>This class provides basic HTTP and cookie handling, with MediaWiki maxlag support.</summary>
 	/// <seealso cref="IMediaWikiClient" />

@@ -5,7 +5,8 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Base;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
-	using static RobinHood70.Globals;
+	using WikiCommon;
+	using static WikiCommon.Globals;
 
 	internal class PropCategories : PropListModule<CategoriesInput, CategoriesItem>, IGeneratorModule
 	{
@@ -39,7 +40,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(input, nameof(input));
 			request
 				.AddFlags("prop", input.Properties)
-				.AddFilterOptionPiped("show", "hidden", input.FilterHidden)
+				.AddFilterPiped("show", "hidden", input.FilterHidden)
 				.Add("categories", input.Categories)
 				.AddIf("dir", "descending", input.SortDescending)
 				.Add("limit", this.Limit);

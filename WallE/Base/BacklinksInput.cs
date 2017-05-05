@@ -1,19 +1,8 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
-	using System;
-	using static RobinHood70.Globals;
-
-	#region Public Enumerations
-	[Flags]
-	public enum BacklinksTypes
-	{
-		Backlinks = 1,
-		EmbeddedIn = 1 << 1,
-		ImageUsage = 1 << 2,
-		All = Backlinks | EmbeddedIn | ImageUsage
-	}
-	#endregion
+	using WikiCommon;
+	using static WikiCommon.Globals;
 
 	public class BacklinksInput : ILimitableInput, IGeneratorInput
 	{
@@ -46,7 +35,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public FilterOption FilterRedirects { get; set; }
+		public Filter FilterRedirects { get; set; }
 
 		public int Limit { get; set; }
 

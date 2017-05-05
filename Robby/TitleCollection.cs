@@ -3,9 +3,9 @@
 	using System;
 	using System.Collections.Generic;
 	using Design;
-	using WallE;
 	using WallE.Base;
-	using static Globals;
+	using WikiCommon;
+	using static WikiCommon.Globals;
 
 	/// <summary>A collection of Title objects.</summary>
 	/// <remarks>This collection class functions similar to a KeyedCollection, but automatically overwrites existing items with new ones. Because Title objects don't support changing item keys, neither does this.</remarks>
@@ -55,13 +55,11 @@
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class from individual Title items.</summary>
 		/// <param name="titles">The original Title collection.</param>
 		/// <returns>A Title-only copy of the original collection.</returns>
-		/// <remarks>This constructor performs a deep copy of the original collection.</remarks>
 		public static TitleCollection CopyFrom(params Title[] titles) => CopyFrom(titles as IEnumerable<Title>);
 
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class from another Title collection.</summary>
 		/// <param name="titles">The original Title collection.</param>
 		/// <returns>A Title-only copy of the original collection.</returns>
-		/// <remarks>This constructor performs a deep copy of the original collection.</remarks>
 		public static TitleCollection CopyFrom(IEnumerable<Title> titles)
 		{
 			ThrowNull(titles, nameof(titles));
@@ -109,6 +107,11 @@
 					this.Add(new Title(title));
 				}
 			}
+		}
+
+		public void AddBacklinks(string title, BacklinksTypes linkTypes)
+		{
+			var input = new BacklinksInput(title, linkTypes);
 		}
 
 		public void AddCategories() => this.AddCategories(null);
@@ -212,28 +215,28 @@
 
 		public void AddMessages(Filter modifiedMessages)
 		{
-			var input = new AllMessagesInput() { FilterModified = (FilterOption)modifiedMessages };
+			var input = new AllMessagesInput() { FilterModified = modifiedMessages };
 			var result = this.Site.AbstractionLayer.AllMessages(input);
 			this.FillFromTitleItems(result);
 		}
 
 		public void AddMessages(Filter modifiedMessages, IEnumerable<string> messages)
 		{
-			var input = new AllMessagesInput() { FilterModified = (FilterOption)modifiedMessages, Messages = messages };
+			var input = new AllMessagesInput() { FilterModified = modifiedMessages, Messages = messages };
 			var result = this.Site.AbstractionLayer.AllMessages(input);
 			this.FillFromTitleItems(result);
 		}
 
 		public void AddMessages(Filter modifiedMessages, string prefix)
 		{
-			var input = new AllMessagesInput() { FilterModified = (FilterOption)modifiedMessages, Prefix = prefix };
+			var input = new AllMessagesInput() { FilterModified = modifiedMessages, Prefix = prefix };
 			var result = this.Site.AbstractionLayer.AllMessages(input);
 			this.FillFromTitleItems(result);
 		}
 
 		public void AddMessages(Filter modifiedMessages, string from, string to)
 		{
-			var input = new AllMessagesInput() { FilterModified = (FilterOption)modifiedMessages, MessageFrom = from, MessageTo = to };
+			var input = new AllMessagesInput() { FilterModified = modifiedMessages, MessageFrom = from, MessageTo = to };
 			var result = this.Site.AbstractionLayer.AllMessages(input);
 			this.FillFromTitleItems(result);
 		}
@@ -244,7 +247,7 @@
 		{
 			var input = new AllPagesInput()
 			{
-				FilterRedirects = (FilterOption)redirects,
+				FilterRedirects = redirects,
 				Namespace = ns,
 				Prefix = startsWith,
 			};
@@ -255,7 +258,7 @@
 		{
 			var input = new AllPagesInput()
 			{
-				FilterRedirects = (FilterOption)redirects,
+				FilterRedirects = redirects,
 				From = fromPage,
 				Namespace = ns,
 				To = toPage,

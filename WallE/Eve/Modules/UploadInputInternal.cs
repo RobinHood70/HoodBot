@@ -4,7 +4,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System;
 	using System.IO;
 	using Base;
-	using static RobinHood70.Globals;
+	using static WikiCommon.Globals;
 
 	public class UploadInputInternal
 	{

@@ -8,7 +8,7 @@
 	using WallE.Base;
 	using WallE.Clients;
 	using WallE.Eve;
-	using static Globals;
+	using static WikiCommon.Globals;
 
 	public enum EntryPoint
 	{

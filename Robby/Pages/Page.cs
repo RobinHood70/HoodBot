@@ -4,8 +4,9 @@
 	using System.Collections.Generic;
 	using Design;
 	using WallE.Base;
-	using static Globals;
+	using WikiCommon;
 	using static Properties.Resources;
+	using static WikiCommon.Globals;
 
 	public class Page : Title, IMessageSource
 	{

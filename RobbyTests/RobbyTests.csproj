@@ -89,10 +89,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Shared\Shared\Shared.csproj">
-      <Project>{24F1785B-804E-4E66-9F7E-3898F45306A1}</Project>
-      <Name>Shared</Name>
-    </ProjectReference>
     <ProjectReference Include="..\WallE\WallE.csproj">
       <Project>{f338af86-4502-4121-b032-092ca727d51b}</Project>
       <Name>WallE</Name>
@@ -100,6 +96,10 @@
     <ProjectReference Include="..\Robby\Robby.csproj">
       <Project>{16a4f00f-11b3-4049-89d2-09c9b6b53c83}</Project>
       <Name>Robby</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WikiCommon\WikiCommon.csproj">
+      <Project>{64878636-cb8c-434e-a03d-b3946216fc7f}</Project>
+      <Name>WikiCommon</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

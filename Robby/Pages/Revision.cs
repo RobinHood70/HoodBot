@@ -2,7 +2,7 @@
 {
 	using System;
 	using WallE.Base;
-	using static Globals;
+	using static WikiCommon.Globals;
 
 	public class Revision
 	{

@@ -5,8 +5,8 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Base;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
-	using static Globals;
-	using static RobinHood70.Globals;
+	using static ProjectGlobals;
+	using static WikiCommon.Globals;
 
 	public class ActionLogin : ActionModule<LoginInput, LoginResult>
 	{
