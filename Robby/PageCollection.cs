@@ -73,6 +73,12 @@
 
 		public void AddAllCategories(string from, string to) => this.FillFromPageSet(new AllCategoriesInput { From = from, To = to });
 
+		public void AddBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles) => this.AddBacklinks(new BacklinksInput(title, linkTypes) { Redirect = includeRedirectedTitles });
+
+		public void AddBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles, Filter redirects) => this.AddBacklinks(new BacklinksInput(title, linkTypes) { FilterRedirects = redirects, Redirect = includeRedirectedTitles });
+
+		public void AddBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles, Filter redirects, int ns) => this.AddBacklinks(new BacklinksInput(title, linkTypes) { FilterRedirects = redirects, Namespace = ns, Redirect = includeRedirectedTitles });
+
 		public void AddCategoryMembers(string category) => this.AddCategoryMembers(category, CategoryTypes.All);
 
 		public void AddCategoryMembers(string category, CategoryTypes categoryTypes)
@@ -310,6 +316,21 @@
 		#endregion
 
 		#region Private Methods
+		private void AddBacklinks(BacklinksInput input)
+		{
+#pragma warning disable IDE0007
+			foreach (BacklinksTypes type in input.LinkTypes.GetUniqueFlags())
+#pragma warning restore IDE0007
+			{
+				this.FillFromPageSet(new BacklinksInput(input.Title, type)
+				{
+					FilterRedirects = input.FilterRedirects,
+					Namespace = input.Namespace,
+					Redirect = input.Redirect,
+				});
+			}
+		}
+
 		private void FillFromPageSet(IEnumerable<IWikiTitle> titles) => this.FillFromPageSet(new PageSetInput(titles.AsFullPageNames()), this.LoadOptions);
 
 		private void FillFromPageSet(IGeneratorInput generator) => this.FillFromPageSet(new PageSetInput(generator), this.LoadOptions);

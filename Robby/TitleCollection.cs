@@ -109,245 +109,142 @@
 			}
 		}
 
-		public void AddBacklinks(string title, BacklinksTypes linkTypes)
+		public void AddBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles) => this.AddBacklinks(new BacklinksInput(title, linkTypes) { Redirect = includeRedirectedTitles });
+
+		public void AddBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles, Filter redirects) => this.AddBacklinks(new BacklinksInput(title, linkTypes) { FilterRedirects = redirects, Redirect = includeRedirectedTitles });
+
+		public void AddBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles, Filter redirects, int ns) => this.AddBacklinks(new BacklinksInput(title, linkTypes) { FilterRedirects = redirects, Namespace = ns, Redirect = includeRedirectedTitles });
+
+		public void AddCategories() => this.AddCategories(new AllCategoriesInput { Properties = AllCategoriesProperties.All });
+
+		public void AddCategories(string prefix) => this.AddCategories(new AllCategoriesInput { Prefix = prefix, Properties = AllCategoriesProperties.All });
+
+		public void AddCategories(string from, string to) => this.AddCategories(new AllCategoriesInput { From = from, To = to, Properties = AllCategoriesProperties.Hidden });
+
+		public void AddFiles(string user) => this.AddFiles(new AllImagesInput { User = user });
+
+		public void AddFiles(string from, string to) => this.AddFiles(new AllImagesInput { From = from, To = to });
+
+		public void AddFiles(DateTime? start, DateTime? end) => this.AddFiles(new AllImagesInput { Start = start, End = end });
+
+		public void AddFileUsage() => this.AddFileUsage(new AllFileUsagesInput());
+
+		public void AddFileUsage(string prefix) => this.AddFileUsage(new AllFileUsagesInput { Prefix = prefix });
+
+		public void AddFileUsage(string from, string to) => this.AddFileUsage(new AllFileUsagesInput { From = from, To = to });
+
+		public void AddLinksToNamespace(int ns) => this.AddLinksToNamespace(new AllLinksInput { Namespace = ns });
+
+		public void AddLinksToNamespace(int ns, string prefix) => this.AddLinksToNamespace(new AllLinksInput { Namespace = ns, Prefix = prefix });
+
+		public void AddLinksToNamespace(int ns, string from, string to) => this.AddLinksToNamespace(new AllLinksInput { Namespace = ns, From = from, To = to });
+
+		public void AddMessages(Filter modifiedMessages) => this.AddMessages(new AllMessagesInput { FilterModified = modifiedMessages });
+
+		public void AddMessages(Filter modifiedMessages, IEnumerable<string> messages) => this.AddMessages(new AllMessagesInput { FilterModified = modifiedMessages, Messages = messages });
+
+		public void AddMessages(Filter modifiedMessages, string prefix) => this.AddMessages(new AllMessagesInput { FilterModified = modifiedMessages, Prefix = prefix });
+
+		public void AddMessages(Filter modifiedMessages, string from, string to) => this.AddMessages(new AllMessagesInput { FilterModified = modifiedMessages, MessageFrom = from, MessageTo = to });
+
+		public void AddNamespace(int ns, Filter redirects) => this.AddNamespace(new AllPagesInput { Namespace = ns, FilterRedirects = redirects });
+
+		public void AddNamespace(int ns, Filter redirects, string startsWith) => this.AddNamespace(new AllPagesInput { FilterRedirects = redirects, Namespace = ns, Prefix = startsWith });
+
+		public void AddNamespace(int ns, Filter redirects, string fromPage, string toPage) => this.AddNamespace(new AllPagesInput() { FilterRedirects = redirects, From = fromPage, Namespace = ns, To = toPage });
+
+		public void AddRedirectsToNamespace(int ns) => this.AddRedirectsToNamespace(new AllRedirectsInput { Namespace = ns });
+
+		public void AddRedirectsToNamespace(int ns, string prefix) => this.AddRedirectsToNamespace(new AllRedirectsInput { Namespace = ns, Prefix = prefix });
+
+		public void AddRedirectsToNamespace(int ns, string from, string to) => this.AddRedirectsToNamespace(new AllRedirectsInput { Namespace = ns, From = from, To = to });
+
+		public void AddRevisions(DateTime? start, DateTime? end) => this.AddRevisions(new AllRevisionsInput { Start = start, End = end });
+
+		public void AddRevisions(DateTime start, bool newer) => this.AddRevisions(start, newer, 0);
+
+		public void AddRevisions(DateTime start, bool newer, int count) => this.AddRevisions(new AllRevisionsInput { Start = start, SortAscending = newer, MaxItems = count });
+
+		public void AddTemplateTransclusions() => this.AddTemplateTransclusions(new AllTransclusionsInput());
+
+		public void AddTemplateTransclusions(string prefix) => this.AddTemplateTransclusions(new AllTransclusionsInput { Prefix = prefix });
+
+		public void AddTemplateTransclusions(string from, string to) => this.AddTemplateTransclusions(new AllTransclusionsInput { From = from, To = to });
+
+		public void AddTransclusionsOfNamespace(int ns) => this.AddTransclusionsOfNamespace(new AllTransclusionsInput { Namespace = ns });
+
+		public void AddTransclusionsOfNamespace(int ns, string prefix) => this.AddTransclusionsOfNamespace(new AllTransclusionsInput { Namespace = ns, Prefix = prefix });
+
+		public void AddTransclusionsOfNamespace(int ns, string from, string to) => this.AddTransclusionsOfNamespace(new AllTransclusionsInput { Namespace = ns, From = from, To = to });
+		#endregion
+
+		#region Private Methods
+		private void AddBacklinks(BacklinksInput input)
 		{
-			var input = new BacklinksInput(title, linkTypes);
+			var result = this.Site.AbstractionLayer.Backlinks(input);
+			this.FillFromTitleItems(result);
 		}
 
-		public void AddCategories() => this.AddCategories(null);
-
-		public void AddCategories(string prefix)
+		private void AddCategories(AllCategoriesInput input)
 		{
-			var input = new AllCategoriesInput()
-			{
-				Prefix = prefix,
-				Properties = AllCategoriesProperties.Hidden,
-			};
 			var result = this.Site.AbstractionLayer.AllCategories(input);
 			this.FillFromTitleItems(result);
 		}
 
-		public void AddCategories(string from, string to)
+		private void AddFiles(AllImagesInput input)
 		{
-			var input = new AllCategoriesInput()
-			{
-				From = from,
-				To = to,
-				Properties = AllCategoriesProperties.Hidden,
-			};
-			var result = this.Site.AbstractionLayer.AllCategories(input);
-			this.FillFromTitleItems(result);
-		}
-
-		public void AddFiles(string user)
-		{
-			var input = new AllImagesInput
-			{
-				User = user,
-			};
 			var result = this.Site.AbstractionLayer.AllImages(input);
 			this.FillFromTitleItems(result);
 		}
 
-		public void AddFiles(string from, string to)
+		private void AddFileUsage(AllFileUsagesInput input)
 		{
-			var input = new AllImagesInput
-			{
-				From = from,
-				To = to,
-			};
-			var result = this.Site.AbstractionLayer.AllImages(input);
-			this.FillFromTitleItems(result);
-		}
-
-		public void AddFiles(DateTime? start, DateTime? end)
-		{
-			var input = new AllImagesInput
-			{
-				Start = start,
-				End = end,
-			};
-			var result = this.Site.AbstractionLayer.AllImages(input);
-			this.FillFromTitleItems(result);
-		}
-
-		public void AddFileUsage()
-		{
-			var input = new AllFileUsagesInput();
 			var result = this.Site.AbstractionLayer.AllFileUsages(input);
 			this.FillFromTitleItems(result);
 		}
 
-		public void AddFileUsage(string prefix)
+		private void AddLinksToNamespace(AllLinksInput input)
 		{
-			var input = new AllFileUsagesInput() { Prefix = prefix };
-			var result = this.Site.AbstractionLayer.AllFileUsages(input);
-			this.FillFromTitleItems(result);
-		}
-
-		public void AddFileUsage(string from, string to)
-		{
-			var input = new AllFileUsagesInput() { From = from, To = to };
-			var result = this.Site.AbstractionLayer.AllFileUsages(input);
-			this.FillFromTitleItems(result);
-		}
-
-		public void AddLinksToNamespace(int ns)
-		{
-			var input = new AllLinksInput() { Namespace = ns };
 			var result = this.Site.AbstractionLayer.AllLinks(input);
 			this.FillFromTitleItems(result);
 		}
 
-		public void AddLinksToNamespace(int ns, string prefix)
+		private void AddMessages(AllMessagesInput input)
 		{
-			var input = new AllLinksInput() { Namespace = ns, Prefix = prefix };
-			var result = this.Site.AbstractionLayer.AllLinks(input);
-			this.FillFromTitleItems(result);
-		}
-
-		public void AddLinksToNamespace(int ns, string from, string to)
-		{
-			var input = new AllLinksInput() { Namespace = ns, From = from, To = to };
-			var result = this.Site.AbstractionLayer.AllLinks(input);
-			this.FillFromTitleItems(result);
-		}
-
-		public void AddMessages(Filter modifiedMessages)
-		{
-			var input = new AllMessagesInput() { FilterModified = modifiedMessages };
 			var result = this.Site.AbstractionLayer.AllMessages(input);
 			this.FillFromTitleItems(result);
 		}
 
-		public void AddMessages(Filter modifiedMessages, IEnumerable<string> messages)
+		private void AddNamespace(AllPagesInput input)
 		{
-			var input = new AllMessagesInput() { FilterModified = modifiedMessages, Messages = messages };
-			var result = this.Site.AbstractionLayer.AllMessages(input);
-			this.FillFromTitleItems(result);
-		}
-
-		public void AddMessages(Filter modifiedMessages, string prefix)
-		{
-			var input = new AllMessagesInput() { FilterModified = modifiedMessages, Prefix = prefix };
-			var result = this.Site.AbstractionLayer.AllMessages(input);
-			this.FillFromTitleItems(result);
-		}
-
-		public void AddMessages(Filter modifiedMessages, string from, string to)
-		{
-			var input = new AllMessagesInput() { FilterModified = modifiedMessages, MessageFrom = from, MessageTo = to };
-			var result = this.Site.AbstractionLayer.AllMessages(input);
-			this.FillFromTitleItems(result);
-		}
-
-		public void AddNamespace(int ns, Filter redirects) => this.AddNamespace(ns, redirects, null, null);
-
-		public void AddNamespace(int ns, Filter redirects, string startsWith)
-		{
-			var input = new AllPagesInput()
-			{
-				FilterRedirects = redirects,
-				Namespace = ns,
-				Prefix = startsWith,
-			};
-			this.FillFromTitleItems(this.Site.AbstractionLayer.AllPages(input));
-		}
-
-		public void AddNamespace(int ns, Filter redirects, string fromPage, string toPage)
-		{
-			var input = new AllPagesInput()
-			{
-				FilterRedirects = redirects,
-				From = fromPage,
-				Namespace = ns,
-				To = toPage,
-			};
 			var result = this.Site.AbstractionLayer.AllPages(input);
 			this.FillFromTitleItems(result);
 		}
 
-		public void AddRedirectsToNamespace(int ns)
+		private void AddRedirectsToNamespace(AllRedirectsInput input)
 		{
-			var input = new AllRedirectsInput() { Namespace = ns };
 			var result = this.Site.AbstractionLayer.AllRedirects(input);
 			this.FillFromTitleItems(result);
 		}
 
-		public void AddRedirectsToNamespace(int ns, string prefix)
+		private void AddRevisions(AllRevisionsInput input)
 		{
-			var input = new AllRedirectsInput() { Namespace = ns, Prefix = prefix };
-			var result = this.Site.AbstractionLayer.AllRedirects(input);
-			this.FillFromTitleItems(result);
-		}
-
-		public void AddRedirectsToNamespace(int ns, string from, string to)
-		{
-			var input = new AllRedirectsInput() { Namespace = ns, From = from, To = to };
-			var result = this.Site.AbstractionLayer.AllRedirects(input);
-			this.FillFromTitleItems(result);
-		}
-
-		public void AddRevisions(DateTime? start, DateTime? end)
-		{
-			var input = new AllRevisionsInput() { Start = start, End = end };
 			var result = this.Site.AbstractionLayer.AllRevisions(input);
 			this.FillFromTitleItems(result);
 		}
 
-		public void AddRevisions(DateTime start, bool newer) => this.AddRevisions(start, newer, 0);
-
-		public void AddRevisions(DateTime start, bool newer, int count)
+		private void AddTemplateTransclusions(AllTransclusionsInput input)
 		{
-			var input = new AllRevisionsInput { Start = start, SortAscending = newer, MaxItems = count };
-			var result = this.Site.AbstractionLayer.AllRevisions(input);
-			this.FillFromTitleItems(result);
-		}
-
-		public void AddTemplateTransclusions()
-		{
-			var input = new AllTransclusionsInput();
 			var result = this.Site.AbstractionLayer.AllTransclusions(input);
 			this.FillFromTitleItems(result);
 		}
 
-		public void AddTemplateTransclusions(string prefix)
+		private void AddTransclusionsOfNamespace(AllTransclusionsInput input)
 		{
-			var input = new AllTransclusionsInput() { Prefix = prefix };
 			var result = this.Site.AbstractionLayer.AllTransclusions(input);
 			this.FillFromTitleItems(result);
 		}
 
-		public void AddTemplateTransclusions(string from, string to)
-		{
-			var input = new AllTransclusionsInput() { From = from, To = to };
-			var result = this.Site.AbstractionLayer.AllTransclusions(input);
-			this.FillFromTitleItems(result);
-		}
-
-		public void AddTransclusionsOfNamespace(int ns)
-		{
-			var input = new AllTransclusionsInput() { Namespace = ns };
-			var result = this.Site.AbstractionLayer.AllTransclusions(input);
-			this.FillFromTitleItems(result);
-		}
-
-		public void AddTransclusionsOfNamespace(int ns, string prefix)
-		{
-			var input = new AllTransclusionsInput() { Namespace = ns, Prefix = prefix };
-			var result = this.Site.AbstractionLayer.AllTransclusions(input);
-			this.FillFromTitleItems(result);
-		}
-
-		public void AddTransclusionsOfNamespace(int ns, string from, string to)
-		{
-			var input = new AllTransclusionsInput() { Namespace = ns, From = from, To = to };
-			var result = this.Site.AbstractionLayer.AllTransclusions(input);
-			this.FillFromTitleItems(result);
-		}
-		#endregion
-
-		#region Private Methods
 		private void FillFromTitleItems(IEnumerable<ITitleOnly> result)
 		{
 			foreach (var item in result)
