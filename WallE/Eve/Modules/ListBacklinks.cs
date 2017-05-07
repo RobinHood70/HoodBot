@@ -84,7 +84,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIf("pageid", input.PageId, input.Title == null)
 				.Add("ns", input.Namespace)
 				.AddIf("dir", "descending", input.SortDescending)
-				.AddIf("redirect", input.Redirect, this.LinkType != BacklinksTypes.ImageUsage)
+				.AddIf("redirect", input.Redirect, this.LinkType != BacklinksTypes.EmbeddedIn)
 				.AddFilterText("filterredir", "redirects", "nonredirects", input.FilterRedirects)
 				.Add("limit", this.Limit);
 		}
