@@ -9,7 +9,7 @@
 	using static WikiCommon.Globals;
 
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "I prefer abstract classes to end in Base.")]
-	public abstract class TitleCollectionBase<TTitle> : IList<TTitle>
+	public abstract class TitleCollectionBase<TTitle> : IList<TTitle>, IReadOnlyCollection<TTitle>
 		where TTitle : IWikiTitle
 	{
 		#region Fields
