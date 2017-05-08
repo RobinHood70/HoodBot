@@ -82,7 +82,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			request
 				.AddIfNotNull("title", input.Title)
 				.AddIf("pageid", input.PageId, input.Title == null)
-				.Add("ns", input.Namespace)
+				.Add("namespace", input.Namespace)
 				.AddIf("dir", "descending", input.SortDescending)
 				.AddIf("redirect", input.Redirect, this.LinkType != BacklinksTypes.EmbeddedIn)
 				.AddFilterText("filterredir", "redirects", "nonredirects", input.FilterRedirects)
