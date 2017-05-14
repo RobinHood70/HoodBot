@@ -26,13 +26,13 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Protected Override Properties
 		protected override StopCheckMethods StopMethods { get; } = StopCheckMethods.None;
-
-		protected override void BuildRequestLocal(Request request, NullObject input)
-		{
-		}
 		#endregion
 
 		#region Protected Override Methods
+		protected override void BuildRequestLocal(Request request, NullObject input)
+		{
+		}
+
 		protected override NullObject DeserializeResult(JToken result) => NullObject.Null;
 		#endregion
 	}
