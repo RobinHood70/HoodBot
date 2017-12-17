@@ -56,9 +56,9 @@
     <Compile Include="Design\PageBuilder.cs" />
     <Compile Include="Design\PageBuilderBase.cs" />
     <Compile Include="Pages\CategoryTitle.cs" />
-    <Compile Include="Design\IWikiTitleComparerFullPageName.cs" />
-    <Compile Include="Design\IWikiTitleComparerKey.cs" />
-    <Compile Include="Design\IWikiTitleComparerNamespacePageName.cs" />
+    <Compile Include="Design\WikiTitleComparerFullPageName.cs" />
+    <Compile Include="Design\WikiTitleComparerKey.cs" />
+    <Compile Include="Design\WikiTitleComparerNamespacePageName.cs" />
     <Compile Include="Design\Extensions.cs" />
     <Compile Include="Enumerations.cs" />
     <Compile Include="Design\IMessageSource.cs" />
@@ -84,8 +84,8 @@
     <Compile Include="Site.cs" />
     <Compile Include="SiteCapabilities.cs" />
     <Compile Include="Title.cs" />
-    <Compile Include="Design\IWikiTitleEqualityComparer.cs" />
-    <Compile Include="Design\IWikiTitleEqualityComparerFull.cs" />
+    <Compile Include="Design\WikiTitleEqualityComparer.cs" />
+    <Compile Include="Design\WikiTitleEqualityComparerFull.cs" />
     <Compile Include="UnexpectedResultException.cs" />
     <Compile Include="WarningEventArgs.cs" />
     <Compile Include="Pages\FilePage.cs" />

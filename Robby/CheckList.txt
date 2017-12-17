@@ -1,5 +1,4 @@
 ﻿Titles
-IReadOnlyList<BacklinksItem> Backlinks(BacklinksInput input);
 IReadOnlyList<CategoryMembersItem> CategoryMembers(CategoryMembersInput input);
 IReadOnlyList<ProtectedTitlesItem> ProtectedTitles(ProtectedTitlesInput input);
 PageSetResult<PurgeResult> Purge(PurgeInput input);

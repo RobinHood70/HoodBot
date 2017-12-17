@@ -68,6 +68,16 @@
 			ThrowNull(e, nameof(e));
 			Debug.WriteLine($"Warning ({e.Warning.Code}): {e.Warning.Info}", sender.ToString());
 		}
+
+		public static void DumpTitles(IReadOnlyCollection<Title> titles)
+		{
+			foreach (var entry in titles)
+			{
+				Debug.WriteLine(entry.FullPageName);
+			}
+
+			Debug.WriteLine(titles.Count);
+		}
 		#endregion
 
 		#region Tests and Related
@@ -75,12 +85,7 @@
 		{
 			var titles = new TitleCollection(this.site);
 			titles.AddMessages(Filter.Only);
-			foreach (var message in titles)
-			{
-				Debug.WriteLine(message.FullPageName);
-			}
-
-			Debug.WriteLine(titles.Count);
+			DumpTitles(titles);
 		}
 
 		public void Assert(bool condition, string message)
@@ -89,6 +94,22 @@
 			{
 				this.AppendResults(message);
 			}
+		}
+
+		public void BacklinksTests()
+		{
+			var titles = new TitleCollection(this.site);
+			titles.AddBacklinks("Oblivion:Oblivion", BacklinksTypes.Backlinks | BacklinksTypes.EmbeddedIn, true, Filter.All, MediaWikiNamespaces.Template);
+			this.CheckCollection(titles, "Backlinks");
+			DumpTitles(titles);
+		}
+
+		public void CategoryMembersTests()
+		{
+			var titles = new TitleCollection(this.site);
+			titles.AddCategoryMembers("Marked for Deletion", true, CategoryTypes.All);
+			this.CheckCollection(titles, "CategoryMembers");
+			DumpTitles(titles);
 		}
 
 		public void CheckCollection<T>(IReadOnlyCollection<T> collection, string name)
@@ -130,24 +151,18 @@
 			}
 		}
 
-		public void CategoryTest()
+		public void CategoryTests()
 		{
 			var titles = new TitleCollection(this.site);
 			titles.AddCategories("Arena-A", "Arena-J");
-			foreach (var title in titles)
-			{
-				Debug.WriteLine(title.FullPageName);
-			}
+			DumpTitles(titles);
 		}
 
-		public void DuplicateFilesTest()
+		public void DuplicateFilesTests()
 		{
 			var pageCollection = new PageCollection(this.site);
 			pageCollection.AddDuplicateFiles(new[] { "File:ON-icon-ava-Defensive Scroll Bonus I.png" });
-			foreach (var page in pageCollection)
-			{
-				Debug.WriteLine(page.FullPageName);
-			}
+			DumpTitles(pageCollection);
 		}
 
 		public void NamespaceTests()
@@ -176,10 +191,8 @@
 		public void PageCollectionFromQueryPage()
 		{
 			var pageCollection = new PageCollection(this.site);
-			foreach (var page in pageCollection)
-			{
-				Debug.WriteLine(page.FullPageName);
-			}
+			pageCollection.AddQueryPage("Mostlinked");
+			DumpTitles(pageCollection);
 		}
 
 		public void PagesCategoriesOnTests()
@@ -187,10 +200,7 @@
 			var pages = new PageCollection(this.site) { LoadOptions = PageLoadOptions.None };
 			var categoryTitles = new TitleCollection(this.site, "API:Categories", "API:Purge");
 			pages.AddPageCategories(categoryTitles, Filter.All);
-			foreach (var page in pages)
-			{
-				Debug.WriteLine(page.FullPageName);
-			}
+			DumpTitles(pages);
 		}
 
 		public void PageTests()
@@ -250,10 +260,7 @@
 		{
 			var titleCollection = new TitleCollection(this.site);
 			titleCollection.AddTemplateTransclusions();
-			foreach (var title in titleCollection)
-			{
-				Debug.WriteLine(title.FullPageName);
-			}
+			DumpTitles(titleCollection);
 		}
 
 		public void TitleTests()
@@ -350,7 +357,7 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			this.PageTests();
+			this.CategoryMembersTests();
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;

@@ -23,9 +23,6 @@
 	[Flags]
 	public enum CategoryTypes
 	{
-		/// <summary>Default value when unspecified</summary>
-		None = 0,
-
 		/// <summary>Regular pages</summary>
 		Page = 1,
 

@@ -100,7 +100,7 @@
 				this.LoadExtras(new PageLoadOptions(PageModules.Templates));
 			}
 
-			var templates = new HashSet<Title>(this.Templates, new IWikiTitleEqualityComparer());
+			var templates = new HashSet<Title>(this.Templates, new WikiTitleEqualityComparer());
 			templates.IntersectWith(this.Site.DisambiguationTemplates);
 			return templates.Count > 0;
 		}

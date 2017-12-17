@@ -109,6 +109,10 @@
 			}
 		}
 
+		public void AddBacklinks(string title) => this.AddBacklinks(title, BacklinksTypes.Backlinks | BacklinksTypes.EmbeddedIn, true);
+
+		public void AddBacklinks(string title, BacklinksTypes linkTypes) => this.AddBacklinks(title, linkTypes, true);
+
 		public void AddBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles) => this.AddBacklinks(new BacklinksInput(title, linkTypes) { Redirect = includeRedirectedTitles });
 
 		public void AddBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles, Filter redirects) => this.AddBacklinks(new BacklinksInput(title, linkTypes) { FilterRedirects = redirects, Redirect = includeRedirectedTitles });
@@ -120,6 +124,31 @@
 		public void AddCategories(string prefix) => this.AddCategories(new AllCategoriesInput { Prefix = prefix, Properties = AllCategoriesProperties.All });
 
 		public void AddCategories(string from, string to) => this.AddCategories(new AllCategoriesInput { From = from, To = to, Properties = AllCategoriesProperties.Hidden });
+
+		public void AddCategoryMembers(string category, bool recurse) => this.AddCategoryMembers(category, recurse, CategoryTypes.All);
+
+		public void AddCategoryMembers(string category, bool recurse, CategoryTypes categoryTypes)
+		{
+			var cat = Title.ForcedNamespace(this.Site, MediaWikiNamespaces.Category, category);
+			HashSet<Title> recursionSet = null;
+			if (recurse)
+			{
+				recursionSet = new HashSet<Title>(new WikiTitleEqualityComparer());
+			}
+
+			this.AddCategoryMembers(new CategoryMembersInput(cat.FullPageName) { Type = categoryTypes }, recursionSet);
+		}
+
+		public void AddCategoryMembers(string category, CategoryTypes categoryTypes, string fromPrefix, string toPrefix)
+		{
+			var cat = Title.ForcedNamespace(this.Site, MediaWikiNamespaces.Category, category);
+			this.AddCategoryMembers(new CategoryMembersInput(cat.FullPageName)
+			{
+				Type = categoryTypes,
+				StartSortKeyPrefix = fromPrefix,
+				EndSortKeyPrefix = toPrefix,
+			}, null);
+		}
 
 		public void AddFiles(string user) => this.AddFiles(new AllImagesInput { User = user });
 
@@ -189,6 +218,34 @@
 		{
 			var result = this.Site.AbstractionLayer.AllCategories(input);
 			this.FillFromTitleItems(result);
+		}
+
+		private void AddCategoryMembers(CategoryMembersInput input, HashSet<Title> recursionSet)
+		{
+			var result = this.Site.AbstractionLayer.CategoryMembers(input);
+			this.FillFromTitleItems(result);
+
+			if (recursionSet != null)
+			{
+				recursionSet.Add(new Title(this.Site, input.Title));
+
+				var copy = new HashSet<Title>(this);
+				foreach (var item in copy)
+				{
+					if (item.Namespace.Id == MediaWikiNamespaces.Category && !recursionSet.Contains(item))
+					{
+						recursionSet.Add(item);
+						var newInput = new CategoryMembersInput(item.FullPageName)
+						{
+							Type = input.Type,
+							StartSortKeyPrefix = input.StartSortKeyPrefix,
+							EndSortKeyPrefix = input.EndSortKeyPrefix
+						};
+
+						this.AddCategoryMembers(newInput, recursionSet);
+					}
+				}
+			}
 		}
 
 		private void AddFiles(AllImagesInput input)
