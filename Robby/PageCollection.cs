@@ -79,15 +79,21 @@
 
 		public void AddBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles, Filter redirects, int ns) => this.AddBacklinks(new BacklinksInput(title, linkTypes) { FilterRedirects = redirects, Namespace = ns, Redirect = includeRedirectedTitles });
 
-		public void AddCategoryMembers(string category) => this.AddCategoryMembers(category, CategoryTypes.All);
+		public void AddCategoryMembers(string category, bool recurse) => this.AddCategoryMembers(category, recurse, CategoryTypes.All);
 
-		public void AddCategoryMembers(string category, CategoryTypes categoryTypes)
+		public void AddCategoryMembers(string category, bool recurse, CategoryTypes categoryTypes)
 		{
 			var cat = Title.ForcedNamespace(this.Site, MediaWikiNamespaces.Category, category);
-			this.FillFromPageSet(new CategoryMembersInput(cat.FullPageName)
+			HashSet<Title> recursionSet = null;
+			if (recurse)
+			{
+				recursionSet = new HashSet<Title>(new WikiTitleEqualityComparer());
+			}
+
+			this.AddCategoryMembers(new CategoryMembersInput(cat.FullPageName)
 			{
 				Type = categoryTypes,
-			});
+			}, recursionSet);
 		}
 
 		public void AddCategoryMembers(string category, CategoryTypes categoryTypes, string fromPrefix, string toPrefix)
@@ -328,6 +334,32 @@
 					Namespace = input.Namespace,
 					Redirect = input.Redirect,
 				});
+			}
+		}
+
+		private void AddCategoryMembers(CategoryMembersInput input, HashSet<Title> recursionSet)
+		{
+			this.FillFromPageSet(input);
+			if (recursionSet != null)
+			{
+				recursionSet.Add(new Title(this.Site, input.Title));
+
+				var copy = new HashSet<Title>(this);
+				foreach (var item in copy)
+				{
+					if (item.Namespace.Id == MediaWikiNamespaces.Category && !recursionSet.Contains(item))
+					{
+						recursionSet.Add(item);
+						var newInput = new CategoryMembersInput(item.FullPageName)
+						{
+							Type = input.Type,
+							StartSortKeyPrefix = input.StartSortKeyPrefix,
+							EndSortKeyPrefix = input.EndSortKeyPrefix
+						};
+
+						this.AddCategoryMembers(newInput, recursionSet);
+					}
+				}
 			}
 		}
 
