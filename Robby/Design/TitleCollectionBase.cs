@@ -143,7 +143,7 @@
 
 		public void RemoveAt(int index) => this.RemoveItem(index);
 
-		public void Sort() => (this.items as List<IWikiTitle>).Sort(new IWikiTitleComparerKey());
+		public void Sort() => (this.items as List<IWikiTitle>).Sort(new WikiTitleComparerKey());
 
 		public void Sort(Comparison<IWikiTitle> comparison) => (this.items as List<IWikiTitle>).Sort(comparison);
 

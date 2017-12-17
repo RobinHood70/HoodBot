@@ -3,7 +3,7 @@
 	using System.Collections.Generic;
 	using static WikiCommon.Globals;
 
-	public class IWikiTitleEqualityComparer : IEqualityComparer<IWikiTitle>
+	public class WikiTitleEqualityComparer : IEqualityComparer<IWikiTitle>
 	{
 		public bool Equals(IWikiTitle x, IWikiTitle y) =>
 			x == null ? x == y :
