@@ -3,10 +3,10 @@
 	using System;
 	using System.Collections.Generic;
 
-	public class WikiTitleComparerNamespacePageName : IComparer<Title>
+	public class WikiTitleComparerNamespacePageName : IComparer<IWikiTitle>
 	{
 		#region Public Methods
-		public int Compare(Title x, Title y)
+		public int Compare(IWikiTitle x, IWikiTitle y)
 		{
 			if (x == null)
 			{
