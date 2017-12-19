@@ -43,7 +43,7 @@
 
 		public PageBuilderBase PageBuilder { get; set; }
 
-		public IReadOnlyDictionary<string, Title> TitleMap { get; }
+		public IReadOnlyDictionary<string, Title> TitleMap => this.titleMap;
 		#endregion
 
 		#region Public Indexers
@@ -51,12 +51,9 @@
 		{
 			get
 			{
-				if (!this.TryGetValue(key, out var retval))
+				if (!this.TryGetValue(key, out var retval) && !this.TryGetValue(this.titleMap[key].FullPageName, out retval))
 				{
-					if (!this.TryGetValue(this.titleMap[key].FullPageName, out retval))
-					{
-						throw new KeyNotFoundException();
-					}
+					throw new KeyNotFoundException();
 				}
 
 				return retval;
@@ -271,27 +268,9 @@
 		public void AddWatchlistFull() => this.FillFromPageSet(new WatchlistRawInput());
 
 		public void AddWatchlistFull(string owner, string token) => this.FillFromPageSet(new WatchlistRawInput() { Owner = owner, Token = token });
-		#endregion
 
-		#region Public Override Methods
-		public override void Clear()
+		public void PopulateTitleMap(IPageSetResult result)
 		{
-			base.Clear();
-			this.titleMap.Clear();
-		}
-		#endregion
-
-		#region Protected Methods
-		protected virtual void FillFromPageSet(PageSetInput pageSetInput, PageLoadOptions options)
-		{
-			ThrowNull(pageSetInput, nameof(pageSetInput));
-			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, this.PageBuilder.GetPropertyInputs(options), this.PageBuilder.CreatePageItem);
-			foreach (var item in result)
-			{
-				var page = this.PageBuilder.BuildPage(this.Site, item.Value, options);
-				this[page.Key] = page; // Not using add because we could be loading duplicate pages.
-			}
-
 			foreach (var item in result.Converted)
 			{
 				this.titleMap[item.Key] = new Title(this.Site, item.Value);
@@ -311,6 +290,30 @@
 			{
 				this.titleMap[item.Key] = new RedirectTitle(this.Site, item.Value);
 			}
+		}
+		#endregion
+
+		#region Public Override Methods
+		public override void Clear()
+		{
+			base.Clear();
+			this.titleMap.Clear();
+		}
+		#endregion
+
+		#region Protected Methods
+		protected virtual void FillFromPageSet(PageSetInput pageSetInput, PageLoadOptions options)
+		{
+			ThrowNull(pageSetInput, nameof(pageSetInput));
+			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, this.PageBuilder.GetPropertyInputs(options), this.PageBuilder.CreatePageItem);
+			foreach (var item in result)
+			{
+				var page = this.PageBuilder.BuildPage(this.Site, item.Value);
+				page.LoadOptions = options;
+				this[page.Key] = page; // Not using add because we could be loading duplicate pages.
+			}
+
+			this.PopulateTitleMap(result);
 		}
 		#endregion
 
