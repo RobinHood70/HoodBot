@@ -19,7 +19,7 @@ namespace RobinHood70.Robby.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -106,7 +106,7 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} were not previously loaded when calling the {1} method. It is more efficient to add this module to a Load or LoadHistory command and load everything at once..
+        ///   Looks up a localized string similar to You must load {0} when calling the {1} method..
         /// </summary>
         internal static string ModuleNotLoaded {
             get {

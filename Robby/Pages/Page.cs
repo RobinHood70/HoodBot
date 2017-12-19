@@ -80,8 +80,7 @@
 				// Disambiguator is 1.21+, so we don't need to worry about the fact that page properties are 1.17+.
 				if (!this.LoadOptions.Modules.HasFlag(PageModules.Properties))
 				{
-					this.Site.PublishWarning(this, CurrentCulture(ModuleNotLoaded, nameof(PageModules.Properties), nameof(this.IsDisambiguation)));
-					this.LoadExtras(new PageLoadOptions(PageModules.Properties));
+					throw new InvalidOperationException(CurrentCulture(ModuleNotLoaded, nameof(PageModules.Properties), nameof(this.IsDisambiguation)));
 				}
 
 				return this.Properties.ContainsKey("disambiguation");
@@ -89,8 +88,7 @@
 
 			if (!this.LoadOptions.Modules.HasFlag(PageModules.Templates))
 			{
-				this.Site.PublishWarning(this, CurrentCulture(ModuleNotLoaded, nameof(PageModules.Templates), nameof(this.IsDisambiguation)));
-				this.LoadExtras(new PageLoadOptions(PageModules.Templates));
+				throw new InvalidOperationException(CurrentCulture(ModuleNotLoaded, nameof(PageModules.Templates), nameof(this.IsDisambiguation)));
 			}
 
 			var templates = new HashSet<Title>(this.Templates, new WikiTitleEqualityComparer());
@@ -268,16 +266,6 @@
 					templates.Add(new Title(this.Site, link.Title));
 				}
 			}
-		}
-
-		private void LoadExtras(PageLoadOptions options)
-		{
-			options.Modules &= ~(PageModules.Info | PageModules.Revisions | PageModules.Custom);
-			var tempInputs = this.Site.PageBuilder.GetPropertyInputs(options);
-			var pageSetInput = new PageSetInput(new[] { this.FullPageName });
-			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, tempInputs);
-			this.GetExtraCollections(result.First());
-			this.LoadOptions.Modules |= options.Modules;
 		}
 
 		private void Reload()
