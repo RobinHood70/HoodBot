@@ -7,6 +7,15 @@
 	using WikiCommon;
 	using static WikiCommon.Globals;
 
+	#region Public Enumerations
+	public enum PurgeMethod
+	{
+		Normal = PurgeUpdateMethod.Normal,
+		LinkUpdate = PurgeUpdateMethod.LinkUpdate,
+		RecursiveLinkUpdate = PurgeUpdateMethod.RecursiveLinkUpdate
+	}
+	#endregion
+
 	/// <summary>A collection of Title objects.</summary>
 	/// <remarks>This collection class functions similar to a KeyedCollection, but automatically overwrites existing items with new ones. Because Title objects don't support changing item keys, neither does this.</remarks>
 	public class TitleCollection : TitleCollectionBase<Title>
@@ -213,6 +222,22 @@
 		public void AddTransclusionsOfNamespace(int ns, string prefix) => this.AddTransclusionsOfNamespace(new AllTransclusionsInput { Namespace = ns, Prefix = prefix });
 
 		public void AddTransclusionsOfNamespace(int ns, string from, string to) => this.AddTransclusionsOfNamespace(new AllTransclusionsInput { Namespace = ns, From = from, To = to });
+
+		public bool Purge(PurgeMethod method)
+		{
+			var titles = ((IEnumerable<IWikiTitle>)this).AsFullPageNames();
+			var input = new PurgeInput(titles) { Method = (PurgeUpdateMethod)method };
+			var result = this.Site.AbstractionLayer.Purge(input);
+			foreach (var item in result)
+			{
+				if (!item.Value.Flags.HasFlag(PurgeFlags.Purged))
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
 		#endregion
 
 		#region Private Methods
