@@ -1,6 +1,4 @@
 ﻿Titles
-IReadOnlyList<CategoryMembersItem> CategoryMembers(CategoryMembersInput input);
-IReadOnlyList<ProtectedTitlesItem> ProtectedTitles(ProtectedTitlesInput input);
 PageSetResult<PurgeResult> Purge(PurgeInput input);
 SearchResult Search(SearchInput input);
 PageSetResult<WatchItem> Watch(WatchInput input);

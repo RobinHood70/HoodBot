@@ -244,6 +244,14 @@
 			}
 		}
 
+		public void ProtectedTitlesTests()
+		{
+			var titles = new TitleCollection(this.site);
+			titles.AddProtectedTitles();
+			this.CheckCollection(titles, "ProtectedTitles");
+			DumpTitles(titles);
+		}
+
 		public void RedirectTargetTests()
 		{
 			var target = this.site.GetRedirectTarget("#REDIRECT [[Template:Hello]]");
@@ -357,7 +365,7 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			this.CategoryMembersTests();
+			this.ProtectedTitlesTests();
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;

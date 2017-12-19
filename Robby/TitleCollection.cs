@@ -182,6 +182,14 @@
 
 		public void AddNamespace(int ns, Filter redirects, string fromPage, string toPage) => this.AddNamespace(new AllPagesInput() { FilterRedirects = redirects, From = fromPage, Namespace = ns, To = toPage });
 
+		public void AddProtectedTitles() => this.AddProtectedTitles(new ProtectedTitlesInput());
+
+		public void AddProtectedTitles(IEnumerable<int> namespaces) => this.AddProtectedTitles(new ProtectedTitlesInput() { Namespaces = namespaces });
+
+		public void AddProtectedTitles(IEnumerable<string> levels) => this.AddProtectedTitles(new ProtectedTitlesInput() { Levels = levels });
+
+		public void AddProtectedTitles(IEnumerable<int> namespaces, IEnumerable<string> levels) => this.AddProtectedTitles(new ProtectedTitlesInput() { Namespaces = namespaces, Levels = levels });
+
 		public void AddRedirectsToNamespace(int ns) => this.AddRedirectsToNamespace(new AllRedirectsInput { Namespace = ns });
 
 		public void AddRedirectsToNamespace(int ns, string prefix) => this.AddRedirectsToNamespace(new AllRedirectsInput { Namespace = ns, Prefix = prefix });
@@ -275,6 +283,12 @@
 		private void AddNamespace(AllPagesInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllPages(input);
+			this.FillFromTitleItems(result);
+		}
+
+		private void AddProtectedTitles(ProtectedTitlesInput input)
+		{
+			var result = this.Site.AbstractionLayer.ProtectedTitles(input);
 			this.FillFromTitleItems(result);
 		}
 
