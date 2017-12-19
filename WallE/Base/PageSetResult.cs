@@ -5,7 +5,7 @@ namespace RobinHood70.WallE.Base
 	using System.Collections.ObjectModel;
 
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Project naming convention takes precedence.")]
-	public class PageSetResult<T> : ReadOnlyDictionary<string, T>
+	public class PageSetResult<T> : ReadOnlyDictionary<string, T>, IPageSetResult
 		where T : ITitle
 	{
 		#region Constructors
