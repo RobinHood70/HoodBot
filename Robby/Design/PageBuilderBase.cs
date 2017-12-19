@@ -8,10 +8,10 @@
 	public abstract class PageBuilderBase
 	{
 		#region Public Methods
-		public Page BuildPage(Site site, PageItem pageItem, PageLoadOptions options)
+		public Page BuildPage(Site site, PageItem pageItem)
 		{
 			ThrowNull(pageItem, nameof(pageItem));
-			var page = this.CreatePage(site, pageItem.Namespace.Value, pageItem.Title, options);
+			var page = this.CreatePage(site, pageItem.Namespace.Value, pageItem.Title);
 			this.Populate(page, pageItem);
 			return page;
 		}
@@ -109,7 +109,7 @@
 		#endregion
 
 		#region Public Abstract Methods
-		public abstract Page CreatePage(Site site, int ns, string title, PageLoadOptions options);
+		public abstract Page CreatePage(Site site, int ns, string title);
 
 		public abstract PageItem CreatePageItem();
 		#endregion

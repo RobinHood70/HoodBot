@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using Design;
 	using WallE.Base;
 	using static WikiCommon.Globals;
 
@@ -10,8 +9,8 @@
 	{
 		private List<FileRevision> fileRevisions = new List<FileRevision>();
 
-		public FilePage(Site site, string title, PageLoadOptions loadOptions)
-			: base(site, title, loadOptions)
+		public FilePage(Site site, string title)
+			: base(site, title)
 		{
 		}
 

@@ -1,14 +1,13 @@
 ﻿namespace RobinHood70.Robby.Pages
 {
-	using Robby.Design;
 	using WallE.Base;
 
 	public class Message : Page
 	{
 		private string defaultMessage = null;
 
-		public Message(Site site, string fullPageName, PageLoadOptions loadOptions)
-			: base(site, fullPageName, loadOptions)
+		public Message(Site site, string fullPageName)
+			: base(site, fullPageName)
 		{
 		}
 

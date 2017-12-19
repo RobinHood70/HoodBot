@@ -1,13 +1,12 @@
 ﻿namespace RobinHood70.Robby.Pages
 {
-	using Design;
 	using WallE.Base;
 	using static WikiCommon.Globals;
 
 	public class Category : Page
 	{
-		public Category(Site site, string fullPageName, PageLoadOptions loadOptions)
-			: base(site, fullPageName, loadOptions)
+		public Category(Site site, string fullPageName)
+			: base(site, fullPageName)
 		{
 		}
 

@@ -9,22 +9,21 @@
 	public class PageBuilder : PageBuilderBase
 	{
 		#region Public Override Methods
-		public override Page CreatePage(Site site, int ns, string title, PageLoadOptions options)
+		public override Page CreatePage(Site site, int ns, string title)
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(title, nameof(title));
-			ThrowNull(options, nameof(options));
 			switch (ns)
 			{
 				case MediaWikiNamespaces.MediaWiki:
-					return new Message(site, title, options);
+					return new Message(site, title);
 				case MediaWikiNamespaces.File:
-					return new FilePage(site, title, options);
+					return new FilePage(site, title);
 				case MediaWikiNamespaces.Category:
-					return new Category(site, title, options);
+					return new Category(site, title);
 			}
 
-			return new Page(site, title, options);
+			return new Page(site, title);
 		}
 
 		public override PageItem CreatePageItem() => new PageItem();

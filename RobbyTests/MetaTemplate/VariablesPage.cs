@@ -7,8 +7,8 @@
 	public class VariablesPage : Page
 	{
 		#region Constructors
-		public VariablesPage(Site site, string fullPageName, PageLoadOptions loadOptions)
-			: base(site, fullPageName, loadOptions)
+		public VariablesPage(Site site, string fullPageName)
+			: base(site, fullPageName)
 		{
 		}
 		#endregion

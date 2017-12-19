@@ -30,13 +30,6 @@
 			: base(title)
 		{
 		}
-
-		public Page(Site site, string fullPageName, PageLoadOptions loadOptions)
-			: base(site, fullPageName)
-		{
-			ThrowNull(loadOptions, nameof(loadOptions));
-			this.LoadOptions = loadOptions;
-		}
 		#endregion
 
 		#region Public Events
