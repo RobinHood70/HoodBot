@@ -55,7 +55,7 @@
 			ThrowNull(pageName, nameof(pageName));
 			this.Site = site;
 			this.Namespace = site.Namespaces[ns];
-			this.PageName = this.Namespace.CaseSensitive ? Fixup(pageName) : Fixup(pageName).UpperFirst();
+			this.PageName = this.Namespace.CaseSensitive ? Normalize(pageName) : Normalize(pageName).UpperFirst();
 			this.Key = this.FullPageName;
 		}
 
@@ -139,11 +139,6 @@
 
 		#region Public Static Methods
 
-		/// <summary>Removes bidirectional text markers and replaces space-like characters with spaces.</summary>
-		/// <param name="text">The text to fix up.</param>
-		/// <returns>The original text with bidirectional text markers removed and space-like characters converted to spaces.</returns>
-		public static string Fixup(string text) => spaceText.Replace(bidiText.Replace(text, string.Empty), " ").Trim();
-
 		/// <summary>Identical to the constructor with the same signature, but allows that the page name may have the namespace prepended to it and compensates accordingly.</summary>
 		/// <param name="site">The site to which this title belongs.</param>
 		/// <param name="ns">The namespace to which the page belongs.</param>
@@ -166,6 +161,11 @@
 		/// <param name="fragment">The fragment (section title/anchor) to include.</param>
 		/// <returns>The full name of the page from the namespace and page name, accounting for Main space.</returns>
 		public static string NameFromParts(Namespace ns, string pageName, string fragment) => ns?.DecoratedName + pageName + (fragment == null ? string.Empty : "#" + fragment);
+
+		/// <summary>Removes bidirectional text markers and replaces space-like characters with spaces.</summary>
+		/// <param name="text">The text to normalize.</param>
+		/// <returns>The original text with bidirectional text markers removed and space-like characters converted to spaces.</returns>
+		public static string Normalize(string text) => spaceText.Replace(bidiText.Replace(text, string.Empty), " ").Trim();
 
 		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		/// <param name="pageName">The name of the page, without namespace or fragment text.</param>
@@ -228,7 +228,7 @@
 			}
 
 			split = pageName.Split(new char[] { '#' }, 2);
-			this.PageName = this.Namespace.CaseSensitive ? Fixup(pageName) : Fixup(pageName).UpperFirst();
+			this.PageName = this.Namespace.CaseSensitive ? Normalize(pageName) : Normalize(pageName).UpperFirst();
 		}
 		#endregion
 	}
