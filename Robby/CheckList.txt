@@ -1,5 +1,4 @@
 ﻿Titles
-PageSetResult<PurgeResult> Purge(PurgeInput input);
 SearchResult Search(SearchInput input);
 PageSetResult<WatchItem> Watch(WatchInput input);
 API:Contributors|contributors

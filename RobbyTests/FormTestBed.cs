@@ -275,6 +275,16 @@
 			DumpTitles(titles);
 		}
 
+		public void PurgeTests()
+		{
+			var titles = new TitleCollection(this.Wiki, "User:RobinHood70");
+			var result = titles.Purge(PurgeMethod.Normal);
+			foreach (var page in result)
+			{
+				Debug.WriteLine("Purged: " + page.FullPageName);
+			}
+		}
+
 		public void RedirectTargetTests()
 		{
 			var target = this.Wiki.GetRedirectTarget("#REDIRECT [[Template:Hello]]");
@@ -388,7 +398,7 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			this.MetaTemplateTests();
+			this.PurgeTests();
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;

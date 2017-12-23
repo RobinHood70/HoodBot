@@ -5,6 +5,7 @@
 	using Design;
 	using WallE.Base;
 	using WikiCommon;
+	using static Properties.Resources;
 	using static WikiCommon.Globals;
 
 	#region Public Enumerations
@@ -18,7 +19,7 @@
 
 	/// <summary>A collection of Title objects.</summary>
 	/// <remarks>This collection class functions similar to a KeyedCollection, but automatically overwrites existing items with new ones. Because Title objects don't support changing item keys, neither does this.</remarks>
-	public class TitleCollection : TitleCollectionBase<Title>
+	public class TitleCollection : TitleCollectionBase<Title>, IEnumerable<Title>, IMessageSource
 	{
 		#region Constructors
 		public TitleCollection(Site site)
@@ -231,7 +232,32 @@
 			retval.AddTitles(this);
 			return retval;
 		}
-#endregion
+
+		public PageCollection Purge() => this.Purge(PurgeMethod.Normal);
+
+		public PageCollection Purge(PurgeMethod method)
+		{
+			var retval = new PageCollection(this.Site);
+			var input = new PurgeInput(this.AsFullPageNames()) { Method = (PurgeUpdateMethod)method };
+			var result = this.Site.AbstractionLayer.Purge(input);
+			retval.PopulateTitleMap(result);
+			foreach (var item in result)
+			{
+				var purgePage = item.Value;
+				var flags = purgePage.Flags;
+				if (flags.HasFlag(PurgeFlags.Purged))
+				{
+					retval.Add(this.Site.PageBuilder.CreatePage(this.Site, purgePage.Namespace.Value, purgePage.Title));
+				}
+				else if (!purgePage.Flags.HasFlag(PurgeFlags.Missing))
+				{
+					this.Site.PublishWarning(this, CurrentCulture(PurgeFailed, purgePage.Title));
+				}
+			}
+
+			return retval;
+		}
+		#endregion
 
 		#region Private Methods
 		private void AddBacklinks(BacklinksInput input)
