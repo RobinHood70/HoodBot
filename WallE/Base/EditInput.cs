@@ -88,7 +88,7 @@ namespace RobinHood70.WallE.Base
 
 		public bool Redirect { get; set; }
 
-		public int? Section { get; set; } = -1;
+		public int? Section { get; set; }
 
 		public string SectionTitle { get; set; }
 
