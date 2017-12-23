@@ -37,9 +37,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				request.Remove("titles");
 				request.Remove("converttitles");
 				request.Remove("redirects");
-				request
-					.Add("title", input.Values[0])
-					.Add("uselang", "fr-ca");
+				request.Add("title", input.Values[0]);
 			}
 
 			request
@@ -55,7 +53,32 @@ namespace RobinHood70.WallE.Eve.Modules
 				result.GetFlag("missing", WatchFlags.Missing) |
 				result.GetFlag("unwatched", WatchFlags.Unwatched) |
 				result.GetFlag("watched", WatchFlags.Watched);
+			page.Namespace = FindNamespace(page.Title);
 			this.Pages.Add(page);
+		}
+		#endregion
+
+		#region Private Methods
+		private int? FindNamespace(string title)
+		{
+			var nsSplit = title.Split(new[] { ':' });
+			if (nsSplit.Length == 1)
+			{
+				// No colon, so it's in Main space.
+				return 0;
+			}
+
+			var nsText = nsSplit[0];
+			foreach (var ns in this.Wal.Namespaces)
+			{
+				if (nsText == ns.Value.Name)
+				{
+					return ns.Key;
+				}
+			}
+
+			// Found a colon, but no names matched, so it must actually be in Main space.
+			return 0;
 		}
 		#endregion
 	}
