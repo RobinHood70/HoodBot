@@ -160,18 +160,6 @@
 
 		public void AddPrefixSearchResults(string prefix, IEnumerable<int> namespaces) => this.FillFromPageSet(new PrefixSearchInput(prefix) { Namespaces = namespaces });
 
-		public void AddPrefixSearchResults(string prefix, IEnumerable<Namespace> namespaces)
-		{
-			ThrowNull(namespaces, nameof(namespaces));
-			var list = new List<int>();
-			foreach (var ns in namespaces)
-			{
-				list.Add(ns.Id);
-			}
-
-			this.AddPrefixSearchResults(prefix, list);
-		}
-
 		public void AddQueryPage(string page) => this.FillFromPageSet(new QueryPageInput(page));
 
 		public void AddQueryPage(string page, IReadOnlyDictionary<string, string> parameters) => this.FillFromPageSet(new QueryPageInput(page) { Parameters = parameters });
