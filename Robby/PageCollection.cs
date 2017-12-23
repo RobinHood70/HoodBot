@@ -222,13 +222,13 @@
 
 		public void AddRevisions(DateTime start, bool newer, int count) => this.FillFromPageSet(new AllRevisionsInput { Start = start, SortAscending = newer, MaxItems = count }, new PageLoadOptions(this.LoadOptions.Modules | PageModules.Revisions, start, newer, count));
 
-		public void AddSearchResults(string search) => this.FillFromPageSet(new SearchInput(search));
+		public void AddSearchResults(string search) => this.FillFromPageSet(new SearchInput(search) { Properties = SearchProperties.None });
 
-		public void AddSearchResults(string search, IEnumerable<int> namespaces) => this.FillFromPageSet(new SearchInput(search) { Namespaces = namespaces });
+		public void AddSearchResults(string search, IEnumerable<int> namespaces) => this.FillFromPageSet(new SearchInput(search) { Namespaces = namespaces, Properties = SearchProperties.None });
 
-		public void AddSearchResults(string search, WhatToSearch whatToSearch) => this.FillFromPageSet(new SearchInput(search) { What = whatToSearch });
+		public void AddSearchResults(string search, WhatToSearch whatToSearch) => this.FillFromPageSet(new SearchInput(search) { What = whatToSearch, Properties = SearchProperties.None });
 
-		public void AddSearchResults(string search, WhatToSearch whatToSearch, IEnumerable<int> namespaces) => this.FillFromPageSet(new SearchInput(search) { Namespaces = namespaces, What = whatToSearch });
+		public void AddSearchResults(string search, WhatToSearch whatToSearch, IEnumerable<int> namespaces) => this.FillFromPageSet(new SearchInput(search) { Namespaces = namespaces, What = whatToSearch, Properties = SearchProperties.None });
 
 		public void AddTemplateTransclusions() => this.FillFromPageSet(new AllTransclusionsInput());
 
