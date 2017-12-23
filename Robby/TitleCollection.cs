@@ -212,6 +212,14 @@
 
 		public void AddRevisions(DateTime start, bool newer, int count) => this.AddRevisions(new AllRevisionsInput { Start = start, SortAscending = newer, MaxItems = count });
 
+		public void AddSearchResults(string search) => this.AddSearchResults(new SearchInput(search) { Properties = SearchProperties.None });
+
+		public void AddSearchResults(string search, IEnumerable<int> namespaces) => this.AddSearchResults(new SearchInput(search) { Namespaces = namespaces, Properties = SearchProperties.None });
+
+		public void AddSearchResults(string search, WhatToSearch whatToSearch) => this.AddSearchResults(new SearchInput(search) { What = whatToSearch, Properties = SearchProperties.None });
+
+		public void AddSearchResults(string search, WhatToSearch whatToSearch, IEnumerable<int> namespaces) => this.AddSearchResults(new SearchInput(search) { Namespaces = namespaces, What = whatToSearch, Properties = SearchProperties.None });
+
 		public void AddTemplateTransclusions() => this.AddTemplateTransclusions(new AllTransclusionsInput());
 
 		public void AddTemplateTransclusions(string prefix) => this.AddTemplateTransclusions(new AllTransclusionsInput { Prefix = prefix });
@@ -345,6 +353,12 @@
 		private void AddRevisions(AllRevisionsInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllRevisions(input);
+			this.FillFromTitleItems(result);
+		}
+
+		private void AddSearchResults(SearchInput input)
+		{
+			var result = this.Site.AbstractionLayer.Search(input);
 			this.FillFromTitleItems(result);
 		}
 

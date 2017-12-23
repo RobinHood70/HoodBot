@@ -1,5 +1,4 @@
 ﻿Titles
-SearchResult Search(SearchInput input);
 PageSetResult<WatchItem> Watch(WatchInput input);
 API:Contributors|contributors
 API:Extlinks|extlinks

@@ -24,5 +24,22 @@
 			}
 		}
 		#endregion
+
+		#region IEnumerable<Namespace> Extensions
+		public static IEnumerable<int> AsIds(this IEnumerable<Namespace> namespaces)
+		{
+			if (namespaces != null)
+			{
+				foreach (var ns in namespaces)
+				{
+					// Most possible calls to this won't want Special and Media namespaces, so assume we should ignore those ones.
+					if (ns.Id >= 0)
+					{
+						yield return ns.Id;
+					}
+				}
+			}
+		}
+		#endregion
 	}
 }

@@ -297,6 +297,13 @@
 			this.Assert(target != null, "Incorrectly detected a malformed redirect.");
 		}
 
+		public void SearchTests()
+		{
+			var titles = new TitleCollection(this.Wiki);
+			titles.AddSearchResults("aleph", WhatToSearch.Title, this.Wiki.Namespaces.AsIds());
+			DumpTitles(titles);
+		}
+
 		public void TemplateTransclusionTest()
 		{
 			var titleCollection = new TitleCollection(this.Wiki);
@@ -398,7 +405,7 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			this.PurgeTests();
+			this.SearchTests();
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;
