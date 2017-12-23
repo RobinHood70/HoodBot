@@ -279,10 +279,7 @@
 		{
 			var titles = new TitleCollection(this.Wiki, "User:RobinHood70");
 			var result = titles.Purge(PurgeMethod.Normal);
-			foreach (var page in result)
-			{
-				Debug.WriteLine("Purged: " + page.FullPageName);
-			}
+			DumpTitles(result);
 		}
 
 		public void RedirectTargetTests()
@@ -359,6 +356,20 @@
 			var fileName = files[rand.Next(files.Length)];
 			this.Wiki.Upload(fileName, destinationName, "Test upload");
 		}
+
+		public void WatchTests()
+		{
+			var titles = new TitleCollection(this.Wiki, "User:RobinHood70");
+			var result = titles.Watch();
+			DumpTitles(result);
+		}
+
+		public void UnwatchTests()
+		{
+			var titles = new TitleCollection(this.Wiki, "User:RobinHood70");
+			var result = titles.Unwatch();
+			DumpTitles(result);
+		}
 		#endregion
 
 		#region Private Static Methods
@@ -405,7 +416,7 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			this.SearchTests();
+			this.UnwatchTests();
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;

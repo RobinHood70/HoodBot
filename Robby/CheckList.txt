@@ -1,5 +1,4 @@
 ﻿Titles
-PageSetResult<WatchItem> Watch(WatchInput input);
 API:Contributors|contributors
 API:Extlinks|extlinks
 API:Images|images

@@ -245,9 +245,10 @@
 
 		public PageCollection Purge(PurgeMethod method)
 		{
-			var retval = new PageCollection(this.Site);
 			var input = new PurgeInput(this.AsFullPageNames()) { Method = (PurgeUpdateMethod)method };
 			var result = this.Site.AbstractionLayer.Purge(input);
+
+			var retval = new PageCollection(this.Site);
 			retval.PopulateTitleMap(result);
 			foreach (var item in result)
 			{
@@ -265,6 +266,10 @@
 
 			return retval;
 		}
+
+		public PageCollection Watch() => this.Watch(true);
+
+		public PageCollection Unwatch() => this.Watch(false);
 		#endregion
 
 		#region Private Methods
@@ -380,6 +385,28 @@
 			{
 				this.Add(new Title(this.Site, item.Title));
 			}
+		}
+
+		private PageCollection Watch(bool watch)
+		{
+			var input = new WatchInput(this.AsFullPageNames()) { Unwatch = !watch };
+			var result = this.Site.AbstractionLayer.Watch(input);
+
+			var retval = new PageCollection(this.Site);
+			retval.PopulateTitleMap(result);
+			foreach (var item in result)
+			{
+				var watchPage = item.Value;
+				var flags = watchPage.Flags;
+				if (flags.HasFlag(WatchFlags.Watched) || flags.HasFlag(WatchFlags.Unwatched))
+				{
+					retval.Add(this.Site.PageBuilder.CreatePage(this.Site, watchPage.Namespace.Value, watchPage.Title));
+				}
+
+				// WatchFlags has no invalid value so, unlike Purge, no warnings are raised here.
+			}
+
+			return retval;
 		}
 		#endregion
 	}
