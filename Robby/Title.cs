@@ -2,10 +2,11 @@
 {
 	using System.Text.RegularExpressions;
 	using Design;
+	using RobinHood70.WallE.Base;
 	using WikiCommon;
 	using static WikiCommon.Globals;
 
-	/// <summary>Provides a holder for simple titles, and provides several information and manipulation functions.</summary>
+	/// <summary>Provides a light-weight holder for titles and provides several information and manipulation functions.</summary>
 	public class Title : IWikiTitle
 	{
 		#region Constants
@@ -180,6 +181,17 @@
 		#endregion
 
 		#region Public Methods
+
+		public bool Delete(string reason)
+		{
+			var input = new DeleteInput(this.FullPageName)
+			{
+				Reason = reason
+			};
+
+			var result = this.Site.AbstractionLayer.Delete(input);
+			return result.LogId > 0;
+		}
 
 		/// <summary>Functionally equivalent to Equals(Title), but IEquatable breaks spectacularly on non-sealed types, so is not implemented.</summary>
 		/// <param name="title">The title, or derived type, to compare to.</param>

@@ -1,15 +1,4 @@
-﻿Titles
-API:Contributors|contributors
-API:Extlinks|extlinks
-API:Images|images
-API:Iwlinks|iwlinks
-API:Langlinks|langlinks
-API:Linkshere|linkshere
-API:Redirects|redirects
-API:Transcludedin|transcludedin
-
-Page
-DeleteResult Delete(DeleteInput input);
+﻿Title
 MoveResult Move(MoveInput input);
 ProtectResult Protect(ProtectInput input);
 
@@ -43,3 +32,15 @@ QueryPageResult QueryPage(QueryPageInput input);
 IReadOnlyList<RecentChangesItem> RecentChanges(RecentChangesInput input);
 string Rsd();
 UploadResult Upload(UploadInput input);
+
+Titles
+/* In retrospect, I don't think it makes sense to include any of these at all, but I'll leave this list here for now for future reconsideration. This idea for most of these was that they would return custom results based on an input set of titles.
+API:Contributors|contributors
+API:Extlinks|extlinks
+API:Images|images
+API:Iwlinks|iwlinks
+API:Langlinks|langlinks
+API:Linkshere|linkshere
+API:Redirects|redirects
+API:Transcludedin|transcludedin
+

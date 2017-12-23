@@ -23,7 +23,6 @@
 	public partial class FormTestBed : Form
 	{
 		#region Fields
-		private Site adminSite;
 		private int indent = 0;
 		#endregion
 
@@ -33,6 +32,8 @@
 		#endregion
 
 		#region Public Properties
+		public Site AdminWiki { get; private set; }
+
 		public Site Wiki { get; private set; }
 		#endregion
 
@@ -159,6 +160,16 @@
 			var titles = new TitleCollection(this.Wiki);
 			titles.AddCategories("Arena-A", "Arena-J");
 			DumpTitles(titles);
+		}
+
+		public void DeleteTests()
+		{
+			var page = new Page(this.AdminWiki, "Delete Test")
+			{
+				Text = "Test page to be deleted."
+			};
+			page.Save("Create test page", false);
+			page.Delete("Delete test page");
 		}
 
 		public void DuplicateFilesTests()
@@ -416,7 +427,7 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			this.UnwatchTests();
+			this.DeleteTests();
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;
@@ -462,9 +473,9 @@
 				wal.WarningOccurred += DebugWarningEventHandler;
 				wal.Assert = null;
 				wal.StopCheckMethods &= ~StopCheckMethods.Assert;
-				this.adminSite = new Site(wal);
-				this.adminSite.WarningOccurred += Robby.Site.DebugWarningEventHandler;
-				this.adminSite.Login(wikiInfo.AdminUserName, wikiInfo.AdminPassword);
+				this.AdminWiki = new Site(wal);
+				this.AdminWiki.WarningOccurred += Robby.Site.DebugWarningEventHandler;
+				this.AdminWiki.Login(wikiInfo.AdminUserName, wikiInfo.AdminPassword);
 				this.RunJobs(wikiInfo.SecretKey);
 			}
 		}
@@ -473,7 +484,7 @@
 		{
 			this.RunJobs(wikiInfo.SecretKey);
 			this.Wiki = null;
-			this.adminSite = null;
+			this.AdminWiki = null;
 		}
 
 		private void FormTestBed_Load(object sender, EventArgs e)
@@ -491,9 +502,9 @@
 
 		private void RunJobs(string secretKey)
 		{
-			if (this.adminSite?.AbstractionLayer is WikiAbstractionLayer wal && secretKey.Length > 0)
+			if (this.AdminWiki?.AbstractionLayer is WikiAbstractionLayer wal && secretKey.Length > 0)
 			{
-				var path = this.adminSite.GetArticlePath(string.Empty);
+				var path = this.AdminWiki.GetArticlePath(string.Empty);
 				var request = new Request(path, RequestType.Post, false);
 				var message = request
 					.Add("async", true)
