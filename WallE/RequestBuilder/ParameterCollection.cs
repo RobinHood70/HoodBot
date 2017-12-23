@@ -216,6 +216,8 @@
 			}
 		}
 
+		// TODO: Add AddFlags that distinguishes between None and Default and sends empty parameter for None instead of nothing. Update all relevant calls and flag values as appropriate.
+
 		/// <summary>Adds a flags parameter as a pipe-separated string, provided at least one flag is set. The text added will be the same as the enumeration value name, converted to lower-case.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="values">The parameter values.</param>
