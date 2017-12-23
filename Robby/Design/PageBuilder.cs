@@ -33,10 +33,6 @@
 		protected override void AddCustomPropertyInputs(IList<IPropertyInput> propertyInputs)
 		{
 		}
-
-		protected override void PopulateCustom(Page page, PageItem pageItem)
-		{
-		}
 		#endregion
 	}
 }

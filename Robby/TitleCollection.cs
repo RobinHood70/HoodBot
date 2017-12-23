@@ -223,22 +223,15 @@
 
 		public void AddTransclusionsOfNamespace(int ns, string from, string to) => this.AddTransclusionsOfNamespace(new AllTransclusionsInput { Namespace = ns, From = from, To = to });
 
-		public bool Purge(PurgeMethod method)
-		{
-			var titles = ((IEnumerable<IWikiTitle>)this).AsFullPageNames();
-			var input = new PurgeInput(titles) { Method = (PurgeUpdateMethod)method };
-			var result = this.Site.AbstractionLayer.Purge(input);
-			foreach (var item in result)
-			{
-				if (!item.Value.Flags.HasFlag(PurgeFlags.Purged))
-				{
-					return false;
-				}
-			}
+		public PageCollection Load() => this.Load(this.Site.DefaultLoadOptions);
 
-			return true;
+		public PageCollection Load(PageLoadOptions options)
+		{
+			var retval = new PageCollection(this.Site, options);
+			retval.AddTitles(this);
+			return retval;
 		}
-		#endregion
+#endregion
 
 		#region Private Methods
 		private void AddBacklinks(BacklinksInput input)

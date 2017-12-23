@@ -152,7 +152,7 @@
 		}
 
 		// Assumes title-related properties have already been provided in the constructor.
-		public virtual void Populate(PageItem pageItem)
+		public void Populate(PageItem pageItem)
 		{
 			ThrowNull(pageItem, nameof(pageItem));
 			var flags = pageItem.Flags;
@@ -274,7 +274,7 @@
 			var propertyInputs = builder.GetPropertyInputs(this.LoadOptions);
 			var pageSetInput = new PageSetInput(new[] { this.FullPageName });
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, propertyInputs, builder.CreatePageItem);
-			builder.Populate(this, result.First());
+			this.Populate(result.First());
 			this.OnLoaded();
 		}
 		#endregion

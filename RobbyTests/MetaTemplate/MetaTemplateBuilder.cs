@@ -20,17 +20,6 @@
 			ThrowNull(propertyInputs, nameof(propertyInputs));
 			propertyInputs.Add(new VariablesInput());
 		}
-
-		protected override void PopulateCustom(Page page, PageItem pageItem)
-		{
-			var varPage = page as VariablesPage;
-			var varPageItem = pageItem as VariablesPageItem;
-			var dictionary = varPage.VariableSets as Dictionary<string, VariablesResult>;
-			foreach (var item in varPageItem.Variables)
-			{
-				dictionary[item.Subset ?? string.Empty] = item;
-			}
-		}
 		#endregion
 	}
 }

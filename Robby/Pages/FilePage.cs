@@ -18,11 +18,9 @@
 
 		public FileRevision LatestFileRevision { get; private set; }
 
-		public override void Populate(PageItem pageItem)
+		protected override void PopulateCustomResults(PageItem pageItem)
 		{
 			ThrowNull(pageItem, nameof(pageItem));
-			base.Populate(pageItem);
-
 			this.fileRevisions.Clear();
 			if (pageItem.ImageInfoEntries != null)
 			{

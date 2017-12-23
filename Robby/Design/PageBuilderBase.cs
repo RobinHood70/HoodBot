@@ -8,14 +8,6 @@
 	public abstract class PageBuilderBase
 	{
 		#region Public Methods
-		public Page BuildPage(Site site, PageItem pageItem)
-		{
-			ThrowNull(pageItem, nameof(pageItem));
-			var page = this.CreatePage(site, pageItem.Namespace.Value, pageItem.Title);
-			this.Populate(page, pageItem);
-			return page;
-		}
-
 		public IList<IPropertyInput> GetPropertyInputs(PageLoadOptions options)
 		{
 			ThrowNull(options, nameof(options));
@@ -98,14 +90,6 @@
 
 			return propertyInputs;
 		}
-
-		public void Populate(Page page, PageItem pageItem)
-		{
-			ThrowNull(page, nameof(page));
-			ThrowNull(pageItem, nameof(pageItem));
-			page.Populate(pageItem);
-			this.PopulateCustom(page, pageItem);
-		}
 		#endregion
 
 		#region Public Abstract Methods
@@ -116,8 +100,6 @@
 
 		#region Protected Abstract Methods
 		protected abstract void AddCustomPropertyInputs(IList<IPropertyInput> propertyInputs);
-
-		protected abstract void PopulateCustom(Page page, PageItem pageItem);
 		#endregion
 
 	}

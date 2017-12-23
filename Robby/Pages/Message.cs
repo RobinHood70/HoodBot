@@ -26,15 +26,11 @@
 			protected set => this.defaultMessage = value;
 		}
 
-		public override void Populate(PageItem pageItem)
+		protected override void PopulateCustomResults(PageItem pageItem)
 		{
 			if (pageItem.Flags.HasFlag(PageFlags.Missing))
 			{
 				this.LoadDefault();
-			}
-			else
-			{
-				base.Populate(pageItem);
 			}
 		}
 

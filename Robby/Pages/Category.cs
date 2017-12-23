@@ -20,11 +20,9 @@
 
 		public int SubcategoryCount { get; private set; }
 
-		public override void Populate(PageItem pageItem)
+		protected override void PopulateCustomResults(PageItem pageItem)
 		{
 			ThrowNull(pageItem, nameof(pageItem));
-			base.Populate(pageItem);
-
 			var catInfo = pageItem.CategoryInfo;
 			if (catInfo != null)
 			{

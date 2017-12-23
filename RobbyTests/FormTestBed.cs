@@ -25,12 +25,15 @@
 		#region Fields
 		private Site adminSite;
 		private int indent = 0;
-		private Site site;
 		#endregion
 
 		#region Constructors
 		[SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Unless I'm missing something, I think CA is just confused here.")]
 		public FormTestBed() => this.InitializeComponent();
+		#endregion
+
+		#region Public Properties
+		public Site Wiki { get; private set; }
 		#endregion
 
 		#region Public Static Methods
@@ -83,7 +86,7 @@
 		#region Tests and Related
 		public void AllMessagesTest()
 		{
-			var titles = new TitleCollection(this.site);
+			var titles = new TitleCollection(this.Wiki);
 			titles.AddMessages(Filter.Only);
 			DumpTitles(titles);
 		}
@@ -98,7 +101,7 @@
 
 		public void BacklinksTests()
 		{
-			var titles = new TitleCollection(this.site);
+			var titles = new TitleCollection(this.Wiki);
 			titles.AddBacklinks("Oblivion:Oblivion", BacklinksTypes.Backlinks | BacklinksTypes.EmbeddedIn, true, Filter.All, MediaWikiNamespaces.Template);
 			this.CheckCollection(titles, "Backlinks");
 			DumpTitles(titles);
@@ -106,7 +109,7 @@
 
 		public void CategoryMembersTests()
 		{
-			var titles = new TitleCollection(this.site);
+			var titles = new TitleCollection(this.Wiki);
 			titles.AddCategoryMembers("Marked for Deletion", true, CategoryTypes.All);
 			this.CheckCollection(titles, "CategoryMembers");
 			DumpTitles(titles);
@@ -153,34 +156,54 @@
 
 		public void CategoryTests()
 		{
-			var titles = new TitleCollection(this.site);
+			var titles = new TitleCollection(this.Wiki);
 			titles.AddCategories("Arena-A", "Arena-J");
 			DumpTitles(titles);
 		}
 
 		public void DuplicateFilesTests()
 		{
-			var pageCollection = new PageCollection(this.site);
+			var pageCollection = new PageCollection(this.Wiki);
 			pageCollection.AddDuplicateFiles(new[] { "File:ON-icon-ava-Defensive Scroll Bonus I.png" });
 			DumpTitles(pageCollection);
 		}
 
+		public void MetaTemplateTests()
+		{
+			this.Wiki.DefaultLoadOptions = new PageLoadOptions(PageModules.Info | PageModules.Revisions | PageModules.Custom);
+			var titles = new TitleCollection(this.Wiki, "Legends:Adoring Fan");
+			var pages = titles.Load();
+			foreach (var page in pages)
+			{
+				var metaPage = page as VariablesPage;
+				Debug.WriteLine(metaPage.PageName);
+				foreach (var metavarSet in metaPage.VariableSets)
+				{
+					Debug.WriteLine("Subset: " + metavarSet.Key ?? "<none>");
+					foreach (var metavar in metavarSet.Value)
+					{
+						Debug.WriteLine($"  {metavar.Key} = {metavar.Value}");
+					}
+				}
+			}
+		}
+
 		public void NamespaceTests()
 		{
-			var nss = this.site.Namespaces;
+			var nss = this.Wiki.Namespaces;
 			this.Assert(nss["template"].Id == 10, "String indexing not working.");
 			this.Assert(nss[0] == nss[MediaWikiNamespaces.Main] && nss[0] == nss[string.Empty], "Equivalent namespaces aren't.");
 			this.Assert(nss[MediaWikiNamespaces.File] == "Image", "Namespace equals string failed.");
 			this.Assert(nss[MediaWikiNamespaces.Template].Id == MediaWikiNamespaces.Template, "Namespace equals enum failed.");
 
-			nss.AddToNames("Main", this.site.Namespaces[MediaWikiNamespaces.Main]);
+			nss.AddToNames("Main", this.Wiki.Namespaces[MediaWikiNamespaces.Main]);
 			this.Assert(nss["main"].Id == 0, "Main namespace does not appear to have been added.");
 		}
 
 		public void PageCollectionFromCategoriesTest()
 		{
-			var sourcePages = new TitleCollection(this.site, "Main Page");
-			var pageCollection = new PageCollection(this.site);
+			var sourcePages = new TitleCollection(this.Wiki, "Main Page");
+			var pageCollection = new PageCollection(this.Wiki);
 			pageCollection.AddPageCategories(sourcePages);
 			foreach (var page in pageCollection)
 			{
@@ -190,37 +213,37 @@
 
 		public void PageCollectionFromQueryPage()
 		{
-			var pageCollection = new PageCollection(this.site);
+			var pageCollection = new PageCollection(this.Wiki);
 			pageCollection.AddQueryPage("Mostlinked");
 			DumpTitles(pageCollection);
 		}
 
 		public void PagesCategoriesOnTests()
 		{
-			var pages = new PageCollection(this.site) { LoadOptions = PageLoadOptions.None };
-			var categoryTitles = new TitleCollection(this.site, "API:Categories", "API:Purge");
+			var pages = new PageCollection(this.Wiki) { LoadOptions = PageLoadOptions.None };
+			var categoryTitles = new TitleCollection(this.Wiki, "API:Categories", "API:Purge");
 			pages.AddPageCategories(categoryTitles, Filter.All);
 			DumpTitles(pages);
 		}
 
 		public void PageTests()
 		{
-			var pages = new PageCollection(this.site);
+			var pages = new PageCollection(this.Wiki);
 			pages.AddTitles("MediaWiki:1movedto2");
 			foreach (var page in pages)
 			{
 				Debug.WriteLine($"Invalid: {page.Invalid}; Missing: {page.Missing}; Text: {page.Text}");
 			}
 
-			this.Assert(Page.Exists(this.site, "Main Page"), "Main Page not detected as existing.");
-			this.Assert(!Page.Exists(this.site, "This page does not exist"), "Non-existent page detected as existing.");
-			this.Assert(new Title(this.site, "Template:Test").IsSameAs(new Page(this.site, "Template:Test")), "Title and Page should be equal, but aren't.");
+			this.Assert(Page.Exists(this.Wiki, "Main Page"), "Main Page not detected as existing.");
+			this.Assert(!Page.Exists(this.Wiki, "This page does not exist"), "Non-existent page detected as existing.");
+			this.Assert(new Title(this.Wiki, "Template:Test").IsSameAs(new Page(this.Wiki, "Template:Test")), "Title and Page should be equal, but aren't.");
 		}
 
 		public void PageTypeTests()
 		{
 			var loadOptions = new PageLoadOptions(PageModules.All) { ImageRevisionCount = 5 };
-			var pageCollection = new PageCollection(this.site, loadOptions);
+			var pageCollection = new PageCollection(this.Wiki, loadOptions);
 			pageCollection.AddTitles("Category:All Pages Missing Data", "Category:Categories", "Oblivion:Oblivion", "File:ZeniMax Online Studios logo.jpg");
 			foreach (var page in pageCollection)
 			{
@@ -246,7 +269,7 @@
 
 		public void ProtectedTitlesTests()
 		{
-			var titles = new TitleCollection(this.site);
+			var titles = new TitleCollection(this.Wiki);
 			titles.AddProtectedTitles();
 			this.CheckCollection(titles, "ProtectedTitles");
 			DumpTitles(titles);
@@ -254,19 +277,19 @@
 
 		public void RedirectTargetTests()
 		{
-			var target = this.site.GetRedirectTarget("#REDIRECT [[Template:Hello]]");
+			var target = this.Wiki.GetRedirectTarget("#REDIRECT [[Template:Hello]]");
 			this.Assert(target.FullPageName == "Template:Hello", "Incorrect template target.");
 
-			target = this.site.GetRedirectTarget("#WEITERLEITUNG [[Template:Hello|Stupid text]]][[Flower]]");
+			target = this.Wiki.GetRedirectTarget("#WEITERLEITUNG [[Template:Hello|Stupid text]]][[Flower]]");
 			this.Assert(target.FullPageName == "Template:Hello", "Incorrect template target.");
 
-			target = this.site.GetRedirectTarget(" #REDIRECT [[Hello world]]");
+			target = this.Wiki.GetRedirectTarget(" #REDIRECT [[Hello world]]");
 			this.Assert(target != null, "Incorrectly detected a malformed redirect.");
 		}
 
 		public void TemplateTransclusionTest()
 		{
-			var titleCollection = new TitleCollection(this.site);
+			var titleCollection = new TitleCollection(this.Wiki);
 			titleCollection.AddTemplateTransclusions();
 			DumpTitles(titleCollection);
 		}
@@ -278,10 +301,10 @@
 			this.Assert(Title.PipeTrick("Hello (Test)") == "Hello", "PipeTrick failed for Hello (Test).");
 			this.Assert(Title.PipeTrick("Hello (Test), Goodbye") == "Hello", "PipeTrick failed for Hello (Test), Goodbye.");
 			this.Assert(Title.PipeTrick("Hello, Goodbye (Test)") == "Hello, Goodbye", "PipeTrick failed for Hello, Goodbye (Test).");
-			this.Assert(Title.NameFromParts(this.site.Namespaces[10], "!", null) == "Template:!", "NameFromParts failed for Template:!");
-			this.Assert(Title.NameFromParts(this.site.Namespaces[0], "Main Page", "Test") == "Main Page#Test", "NameFromParts failed for Main Page#Test.");
+			this.Assert(Title.NameFromParts(this.Wiki.Namespaces[10], "!", null) == "Template:!", "NameFromParts failed for Template:!");
+			this.Assert(Title.NameFromParts(this.Wiki.Namespaces[0], "Main Page", "Test") == "Main Page#Test", "NameFromParts failed for Main Page#Test.");
 
-			var title = new Title(this.site, "Template:!");
+			var title = new Title(this.Wiki, "Template:!");
 			this.Assert(title.Namespace.Id == 10, "Namespace was incorrect for Template:!.");
 			this.Assert(title.PageName == "!", "PageName was incorrect for Template:!.");
 			this.Assert(title.SubjectPage.FullPageName == "Template:!", "SubjectPage was incorrect for Template:!.");
@@ -290,7 +313,7 @@
 
 		public void TitlesAllPagesTests()
 		{
-			var titles = new TitleCollection(this.site);
+			var titles = new TitleCollection(this.Wiki);
 			var sw = new Stopwatch();
 			sw.Start();
 			titles.AddNamespace(MediaWikiNamespaces.Template, Filter.All, "A", "C");
@@ -309,7 +332,7 @@
 
 		public void UploadRandomImage(string destinationName)
 		{
-			if (this.site.ServerName != "rob-centos")
+			if (this.Wiki.ServerName != "rob-centos")
 			{
 				throw new InvalidOperationException("You're uploading porn to a wiki that's not yours, dumbass!");
 			}
@@ -317,7 +340,7 @@
 			var rand = new Random();
 			var files = Directory.GetFiles(@"C:\Users\rmorl\Pictures\Screen Saver Pics\", "*.jpg"); // Only select from jpgs so we don't have to worry about extension type.
 			var fileName = files[rand.Next(files.Length)];
-			this.site.Upload(fileName, destinationName, "Test upload");
+			this.Wiki.Upload(fileName, destinationName, "Test upload");
 		}
 		#endregion
 
@@ -365,7 +388,7 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			this.ProtectedTitlesTests();
+			this.MetaTemplateTests();
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;
@@ -391,9 +414,14 @@
 				wal.ModuleFactory.RegisterGenerator<VariablesInput>(PropVariables.CreateInstance);
 			}
 
-			this.site = new Site(wal);
-			this.site.WarningOccurred += Robby.Site.DebugWarningEventHandler;
-			this.site.Login(wikiInfo.UserName, wikiInfo.Password);
+			this.Wiki = new Site(wal);
+			this.Wiki.WarningOccurred += Robby.Site.DebugWarningEventHandler;
+			this.Wiki.Login(wikiInfo.UserName, wikiInfo.Password);
+
+			if (wikiInfo.Name.Contains("UESP"))
+			{
+				this.Wiki.PageBuilder = new MetaTemplateBuilder();
+			}
 
 			if (wikiInfo.AdminUserName != null)
 			{
@@ -416,7 +444,7 @@
 		private void DoGlobalTeardown(WikiInfo wikiInfo)
 		{
 			this.RunJobs(wikiInfo.SecretKey);
-			this.site = null;
+			this.Wiki = null;
 			this.adminSite = null;
 		}
 

@@ -69,7 +69,7 @@
 
 		public NamespaceCollection Namespaces { get; private set; }
 
-		public PageBuilder PageBuilder { get; set; }
+		public PageBuilderBase PageBuilder { get; set; }
 
 		public string ServerName { get; private set; }
 

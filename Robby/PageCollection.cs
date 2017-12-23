@@ -308,7 +308,8 @@
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, this.PageBuilder.GetPropertyInputs(options), this.PageBuilder.CreatePageItem);
 			foreach (var item in result)
 			{
-				var page = this.PageBuilder.BuildPage(this.Site, item.Value);
+				var page = this.PageBuilder.CreatePage(this.Site, item.Value.Namespace.Value, item.Value.Title);
+				page.Populate(item.Value);
 				page.LoadOptions = options;
 				this[page.Key] = page; // Not using add because we could be loading duplicate pages.
 			}
