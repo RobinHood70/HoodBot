@@ -3,21 +3,44 @@
 	using System;
 	using System.Collections.Generic;
 	using WallE.Base;
+	using static WikiCommon.Extensions;
 	using static WikiCommon.Globals;
 
 	public class FilePage : Page
 	{
+		#region Fields
 		private List<FileRevision> fileRevisions = new List<FileRevision>();
+		#endregion
 
+		#region Constructors
 		public FilePage(Site site, string title)
 			: base(site, title)
 		{
 		}
+		#endregion
 
+		#region Public Properties
 		public IReadOnlyCollection<FileRevision> FileRevisions => this.fileRevisions;
 
 		public FileRevision LatestFileRevision { get; private set; }
+		#endregion
 
+		#region Public Methods
+		public IEnumerable<string> FindDuplicateFiles() => FindDuplicateFiles(true);
+
+		public IEnumerable<string> FindDuplicateFiles(bool localOnly)
+		{
+			var propModule = new DuplicateFilesInput();
+			var pageSet = new PageSetInput(new[] { this.FullPageName });
+			var result = this.Site.AbstractionLayer.LoadPages(pageSet, new[] { propModule });
+			foreach (var dupe in result.First().DuplicateFiles)
+			{
+				yield return dupe.Name;
+			}
+		}
+		#endregion
+
+		#region Protected Override Methods
 		protected override void PopulateCustomResults(PageItem pageItem)
 		{
 			ThrowNull(pageItem, nameof(pageItem));
@@ -47,5 +70,6 @@
 				}
 			}
 		}
+		#endregion
 	}
 }

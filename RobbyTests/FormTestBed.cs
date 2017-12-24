@@ -73,14 +73,16 @@
 			Debug.WriteLine($"Warning ({e.Warning.Code}): {e.Warning.Info}", sender.ToString());
 		}
 
-		public static void DumpTitles(IReadOnlyCollection<Title> titles)
+		public static void DumpTitles(IEnumerable<Title> titles)
 		{
+			var count = 0;
 			foreach (var entry in titles)
 			{
 				Debug.WriteLine(entry.FullPageName);
+				count++;
 			}
 
-			Debug.WriteLine(titles.Count);
+			Debug.WriteLine(count);
 		}
 		#endregion
 
@@ -174,9 +176,15 @@
 
 		public void DuplicateFilesTests()
 		{
+			const string duped = "File:ON-icon-ava-Defensive Scroll Bonus I.png";
 			var pageCollection = new PageCollection(this.Wiki);
-			pageCollection.AddDuplicateFiles(new[] { "File:ON-icon-ava-Defensive Scroll Bonus I.png" });
+			pageCollection.AddDuplicateFiles(new[] { duped });
 			DumpTitles(pageCollection);
+
+			var filePage = new FilePage(this.Wiki, duped);
+			var result = filePage.FindDuplicateFiles();
+			var files = new TitleCollection(this.Wiki, MediaWikiNamespaces.File, result);
+			DumpTitles(files);
 		}
 
 		public void MetaTemplateTests()
@@ -453,7 +461,7 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			this.ProtectTests();
+			this.DuplicateFilesTests();
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;
