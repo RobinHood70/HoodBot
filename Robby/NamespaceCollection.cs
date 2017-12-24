@@ -6,7 +6,7 @@
 	using static WikiCommon.Globals;
 
 	/// <summary>Read-only Namespace dictionary that can be referenced by id and all valid names for the namespace.</summary>
-	public class NamespaceCollection : IReadOnlyCollection<Namespace>, IEnumerable<int>
+	public class NamespaceCollection : IReadOnlyCollection<Namespace>
 	{
 		#region Constructors
 
@@ -27,6 +27,21 @@
 		#endregion
 
 		#region Public Properties
+
+		/// <summary>Gets the namespace collection as a collection of their IDs, but excluding the special namespaces.</summary>
+		public IEnumerable<int> All
+		{
+			get
+			{
+				foreach (var ns in this)
+				{
+					if (ns.Id >= 0)
+					{
+						yield return ns.Id;
+					}
+				}
+			}
+		}
 
 		/// <summary>Gets the namespace collection as a collection of their IDs.</summary>
 		public IEnumerable<int> AsIds => this.IdsDictionary.Keys;
@@ -113,14 +128,6 @@
 		/// <returns>True if the collection contains the desired namespace.</returns>
 		/// <exception cref="ArgumentNullException">The name is null.</exception>
 		public bool TryGetValue(string name, out Namespace value) => this.NamesDictionary.TryGetValue(name, out value);
-
-		IEnumerator<int> IEnumerable<int>.GetEnumerator()
-		{
-			foreach (var ns in this)
-			{
-				yield return ns.Id;
-			}
-		}
 		#endregion
 	}
 }
