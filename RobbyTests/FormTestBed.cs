@@ -342,7 +342,7 @@
 		public void SearchTests()
 		{
 			var titles = new TitleCollection(this.Wiki);
-			titles.AddSearchResults("aleph", WhatToSearch.Title, this.Wiki.Namespaces.AsIds());
+			titles.AddSearchResults("aleph", WhatToSearch.Title, this.Wiki.Namespaces);
 			DumpTitles(titles);
 		}
 
