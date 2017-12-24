@@ -398,6 +398,13 @@
 			}
 		}
 
+		public void UnwatchTests()
+		{
+			var titles = new TitleCollection(this.Wiki, "User:RobinHood70");
+			var result = titles.Unwatch();
+			DumpTitles(result);
+		}
+
 		public void UploadRandomImage(string destinationName)
 		{
 			if (this.Wiki.ServerName != "rob-centos")
@@ -411,17 +418,16 @@
 			this.Wiki.Upload(fileName, destinationName, "Test upload");
 		}
 
+		public void UserMessageTests()
+		{
+			var user = new User(this.Wiki, "RobinHood70");
+			user.NewTalkPageMessage("Test Message", "Hi there!", "Create a test message.");
+		}
+
 		public void WatchTests()
 		{
 			var titles = new TitleCollection(this.Wiki, "User:RobinHood70");
 			var result = titles.Watch();
-			DumpTitles(result);
-		}
-
-		public void UnwatchTests()
-		{
-			var titles = new TitleCollection(this.Wiki, "User:RobinHood70");
-			var result = titles.Unwatch();
 			DumpTitles(result);
 		}
 		#endregion
@@ -470,7 +476,7 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			this.FileUsagesTests();
+			this.UserMessageTests();
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;
