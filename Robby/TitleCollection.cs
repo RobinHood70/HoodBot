@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using Design;
+	using Pages;
 	using WallE.Base;
 	using WikiCommon;
 	using static Properties.Resources;
@@ -389,10 +390,20 @@
 
 		private PageCollection Watch(bool watch)
 		{
+			var retval = new PageCollection(this.Site);
+			if (!this.Site.AllowEditing)
+			{
+				foreach (var item in this)
+				{
+					retval.Add(this.Site.PageBuilder.CreatePage(this.Site, item.Namespace.Id, item.FullPageName));
+				}
+
+				return retval;
+			}
+
 			var input = new WatchInput(this.AsFullPageNames()) { Unwatch = !watch };
 			var result = this.Site.AbstractionLayer.Watch(input);
 
-			var retval = new PageCollection(this.Site);
 			retval.PopulateTitleMap(result);
 			foreach (var item in result)
 			{
