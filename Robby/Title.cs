@@ -265,7 +265,17 @@
 			};
 
 			var retval = new Dictionary<string, string>();
-			var result = this.Site.AbstractionLayer.Move(input);
+			MoveResult result;
+			try
+			{
+				result = this.Site.AbstractionLayer.Move(input);
+			}
+			catch (WikiException e)
+			{
+				this.Site.PublishWarning(this, e.Info);
+				return null;
+			}
+
 			foreach (var item in result)
 			{
 				if (item.Error != null)

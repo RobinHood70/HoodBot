@@ -199,6 +199,17 @@
 			}
 		}
 
+		public void MoveTests()
+		{
+			var page = new Page(this.AdminWiki, "Move Wrong Page Test")
+			{
+				Text = "Test page to be moved " + DateTime.UtcNow.ToString()
+			};
+			page.Save("Create test page", false);
+
+			Debug.WriteLine(page.Move("Move Test", "Move test page", true));
+		}
+
 		public void NamespaceTests()
 		{
 			var nss = this.Wiki.Namespaces;
