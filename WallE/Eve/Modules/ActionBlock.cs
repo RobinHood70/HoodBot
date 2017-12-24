@@ -38,14 +38,14 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("expiry", input.Expiry)
 				.AddIfNotNullIf("expiry", input.ExpiryRelative, input.Expiry == null)
 				.AddIfNotNull("reason", input.Reason)
-				.Add("anononly", input.AnonymousOnly)
-				.Add("nocreate", input.NoCreate)
-				.Add("autoblock", input.AutoBlock)
-				.Add("noemail", input.NoEmail)
-				.Add("hidename", input.HideName)
-				.Add("allowusertalk", input.AllowUserTalk)
-				.Add("reblock", input.Reblock)
-				.Add("watchuser", input.WatchUser)
+				.Add("anononly", input.Flags.HasFlag(BlockUserFlags.AnonymousOnly))
+				.Add("nocreate", input.Flags.HasFlag(BlockUserFlags.NoCreate))
+				.Add("autoblock", input.Flags.HasFlag(BlockUserFlags.AutoBlock))
+				.Add("noemail", input.Flags.HasFlag(BlockUserFlags.NoEmail))
+				.Add("hidename", input.Flags.HasFlag(BlockUserFlags.HideName))
+				.Add("allowusertalk", input.Flags.HasFlag(BlockUserFlags.AllowUserTalk))
+				.Add("reblock", input.Flags.HasFlag(BlockUserFlags.Reblock))
+				.Add("watchuser", input.Flags.HasFlag(BlockUserFlags.WatchUser))
 				.AddHidden("token", input.Token);
 		}
 
