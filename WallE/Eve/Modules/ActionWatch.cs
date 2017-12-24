@@ -61,23 +61,20 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Private Methods
 		private int? FindNamespace(string title)
 		{
-			var nsSplit = title.Split(new[] { ':' });
-			if (nsSplit.Length == 1)
+			var nsSplit = title.Split(new[] { ':' }, 2);
+			if (nsSplit.Length == 2)
 			{
-				// No colon, so it's in Main space.
-				return 0;
-			}
-
-			var nsText = nsSplit[0];
-			foreach (var ns in this.Wal.Namespaces)
-			{
-				if (nsText == ns.Value.Name)
+				var nsText = nsSplit[0];
+				foreach (var ns in this.Wal.Namespaces)
 				{
-					return ns.Key;
+					if (nsText == ns.Value.Name)
+					{
+						return ns.Key;
+					}
 				}
 			}
 
-			// Found a colon, but no names matched, so it must actually be in Main space.
+			// No namespaces matched, or title didn't have a colon, so it must be in Main space.
 			return 0;
 		}
 		#endregion
