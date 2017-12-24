@@ -186,6 +186,7 @@
 
 		public bool Delete(string reason)
 		{
+			ThrowNull(reason, nameof(reason));
 			if (!this.Site.AllowEditing)
 			{
 				return true;
@@ -275,7 +276,7 @@
 		#region Private Methods
 		private void SetNames(string fullName)
 		{
-			var split = fullName.Split(new char[] { ':' }, 2);
+			var split = fullName.Split(new[] { ':' }, 2);
 			string pageName;
 			if (split.Length == 2 && this.Site.Namespaces.TryGetValue(split[0], out var ns))
 			{
