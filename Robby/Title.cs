@@ -374,6 +374,23 @@
 		public override string ToString() => this.FullPageName;
 		#endregion
 
+		#region Private Static Methods
+		private static string ProtectionWord(ProtectionLevel level)
+		{
+			switch (level)
+			{
+				case ProtectionLevel.None:
+					return "all";
+				case ProtectionLevel.Semi:
+					return "autoconfirmed";
+				case ProtectionLevel.Full:
+					return "sysop";
+			}
+
+			return null;
+		}
+		#endregion
+
 		#region Private Methods
 		private bool Protect(string reason, ICollection<ProtectInputItem> protections)
 		{
@@ -395,21 +412,6 @@
 			var result = this.Site.AbstractionLayer.Protect(input);
 
 			return result.Protections.Count == protections.Count;
-		}
-
-		private string ProtectionWord(ProtectionLevel level)
-		{
-			switch (level)
-			{
-				case ProtectionLevel.None:
-					return "all";
-				case ProtectionLevel.Semi:
-					return "autoconfirmed";
-				case ProtectionLevel.Full:
-					return "sysop";
-			}
-
-			return null;
 		}
 
 		private void SetNames(string fullName)
