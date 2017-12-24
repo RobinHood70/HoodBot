@@ -186,6 +186,11 @@
 
 		public bool Delete(string reason)
 		{
+			if (!this.Site.AllowEditing)
+			{
+				return true;
+			}
+
 			var input = new DeleteInput(this.FullPageName)
 			{
 				Reason = reason
