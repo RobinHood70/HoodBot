@@ -187,6 +187,15 @@
 			DumpTitles(files);
 		}
 
+		public void FileUsagesTests()
+		{
+			const string used = "File:EnwiktwatchlistCapture.PNG";
+			var filePage = new FilePage(this.Wiki, used);
+			var result = filePage.FileUsage();
+			var files = new TitleCollection(this.Wiki, result);
+			DumpTitles(files);
+		}
+
 		public void MetaTemplateTests()
 		{
 			this.Wiki.DefaultLoadOptions = new PageLoadOptions(PageModules.Info | PageModules.Revisions | PageModules.Custom);
@@ -461,7 +470,7 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			this.DuplicateFilesTests();
+			this.FileUsagesTests();
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;

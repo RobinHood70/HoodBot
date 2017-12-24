@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.WikiCommon;
 	using WallE.Base;
 	using static WikiCommon.Extensions;
 	using static WikiCommon.Globals;
@@ -26,6 +27,23 @@
 		#endregion
 
 		#region Public Methods
+		public IEnumerable<string> FileUsage() => FileUsage(this.Site.Namespaces.All, Filter.All);
+
+		public IEnumerable<string> FileUsage(IEnumerable<int> namespaces, Filter filterRedirects)
+		{
+			var propModule = new FileUsageInput
+			{
+				Namespaces = namespaces,
+				FilterRedirects = filterRedirects
+			};
+			var pageSet = new PageSetInput(new[] { this.FullPageName });
+			var result = this.Site.AbstractionLayer.LoadPages(pageSet, new[] { propModule });
+			foreach (var usage in result.First().FileUsages)
+			{
+				yield return usage.Title;
+			}
+		}
+
 		public IEnumerable<string> FindDuplicateFiles() => FindDuplicateFiles(true);
 
 		public IEnumerable<string> FindDuplicateFiles(bool localOnly)
