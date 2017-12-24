@@ -278,6 +278,21 @@
 			}
 		}
 
+		public void ProtectTests()
+		{
+			var title = new Title(this.AdminWiki, "Create Protection Test");
+			title.CreateProtect("Test create protection", ProtectionLevel.Full, DateTime.Now + new TimeSpan(0, 1, 0));
+			title.CreateUnprotect("Test create unprotection");
+
+			var page = new Page(this.AdminWiki, "Protection Test Page")
+			{
+				Text = "Protection test page: " + DateTime.UtcNow.ToString()
+			};
+			page.Save("Create test page", false);
+			page.Protect("Test protection", ProtectionLevel.Full, ProtectionLevel.Semi, null);
+			page.Unprotect("Test unprotection", true, true);
+		}
+
 		public void ProtectedTitlesTests()
 		{
 			var titles = new TitleCollection(this.Wiki);
@@ -427,7 +442,7 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			this.DeleteTests();
+			this.ProtectTests();
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;

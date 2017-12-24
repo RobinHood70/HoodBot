@@ -1,8 +1,4 @@
-﻿Title
-MoveResult Move(MoveInput input);
-ProtectResult Protect(ProtectInput input);
-
-File
+﻿File
 API:Duplicatefiles|duplicatefiles
 API:Fileusage|fileusage
 

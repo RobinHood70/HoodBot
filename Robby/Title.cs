@@ -1,12 +1,22 @@
 ﻿namespace RobinHood70.Robby
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Text.RegularExpressions;
 	using Design;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Design;
 	using WikiCommon;
 	using static Properties.Resources;
 	using static WikiCommon.Globals;
+
+	public enum ProtectionLevel
+	{
+		NoChange,
+		None,
+		Semi,
+		Full,
+	}
 
 	/// <summary>Provides a light-weight holder for titles and provides several information and manipulation functions.</summary>
 	public class Title : IWikiTitle, IMessageSource
@@ -184,6 +194,23 @@
 
 		#region Public Methods
 
+		public bool CreateProtect(string reason, ProtectionLevel protectionLevel, DateTime expiry)
+		{
+			if (protectionLevel != ProtectionLevel.NoChange)
+			{
+				var protection = new ProtectInputItem("create", ProtectionWord(protectionLevel)) { Expiry = expiry };
+				return this.Protect(reason, new[] { protection });
+			}
+
+			return false;
+		}
+
+		public bool CreateUnprotect(string reason)
+		{
+			var protection = new ProtectInputItem("create", ProtectionWord(ProtectionLevel.None));
+			return this.Protect(reason, new[] { protection });
+		}
+
 		public bool Delete(string reason)
 		{
 			ThrowNull(reason, nameof(reason));
@@ -257,12 +284,76 @@
 
 		public Dictionary<string, string> Move(Title to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect) => this.Move(to.FullPageName, reason, moveTalk, moveSubpages, suppressRedirect);
 
+		public bool Protect(string reason, ProtectionLevel createProtection, string relativeExpiry)
+		{
+			if (createProtection != ProtectionLevel.NoChange)
+			{
+				var protection = new ProtectInputItem("create", ProtectionWord(createProtection)) { ExpiryRelative = relativeExpiry };
+				return this.Protect(reason, new[] { protection });
+			}
+
+			return false;
+		}
+
+		public bool Protect(string reason, ProtectionLevel editProtection, ProtectionLevel moveProtection, DateTime expiry)
+		{
+			var protections = new List<ProtectInputItem>(2);
+			if (editProtection != ProtectionLevel.NoChange)
+			{
+				protections.Add(new ProtectInputItem("edit", ProtectionWord(editProtection)) { Expiry = expiry });
+			}
+
+			if (moveProtection != ProtectionLevel.NoChange)
+			{
+				protections.Add(new ProtectInputItem("move", ProtectionWord(moveProtection)) { Expiry = expiry });
+			}
+
+			return this.Protect(reason, protections);
+		}
+
+		public bool Protect(string reason, ProtectionLevel editProtection, ProtectionLevel moveProtection, string relativeExpiry)
+		{
+			if (relativeExpiry == null)
+			{
+				relativeExpiry = "indefinite";
+			}
+
+			var protections = new List<ProtectInputItem>(2);
+			if (editProtection != ProtectionLevel.NoChange)
+			{
+				protections.Add(new ProtectInputItem("edit", ProtectionWord(editProtection)) { ExpiryRelative = relativeExpiry });
+			}
+
+			if (moveProtection != ProtectionLevel.NoChange)
+			{
+				protections.Add(new ProtectInputItem("move", ProtectionWord(moveProtection)) { ExpiryRelative = relativeExpiry });
+			}
+
+			return this.Protect(reason, protections);
+		}
+
 		/// <summary>Renames the title.</summary>
 		/// <param name="fullName">The full page name to rename to.</param>
 		public void Rename(string fullName)
 		{
 			ThrowNull(fullName, nameof(fullName));
 			this.SetNames(fullName);
+		}
+
+		public bool Unprotect(string reason, bool editUnprotect, bool moveUnprotect)
+		{
+			var protections = new List<ProtectInputItem>(3);
+			if (editUnprotect)
+			{
+				protections.Add(new ProtectInputItem("edit", ProtectionWord(ProtectionLevel.None)));
+			}
+
+			if (moveUnprotect)
+			{
+				protections.Add(new ProtectInputItem("move", ProtectionWord(ProtectionLevel.None)));
+			}
+
+			return this.Protect(reason, protections);
 		}
 		#endregion
 
@@ -274,6 +365,43 @@
 		#endregion
 
 		#region Private Methods
+		private bool Protect(string reason, ICollection<ProtectInputItem> protections)
+		{
+			if (protections.Count == 0)
+			{
+				return false;
+			}
+
+			if (!this.Site.AllowEditing)
+			{
+				return true;
+			}
+
+			var input = new ProtectInput(this.FullPageName)
+			{
+				Protections = protections,
+				Reason = reason
+			};
+			var result = this.Site.AbstractionLayer.Protect(input);
+
+			return result.Protections.Count == protections.Count;
+		}
+
+		private string ProtectionWord(ProtectionLevel level)
+		{
+			switch (level)
+			{
+				case ProtectionLevel.None:
+					return "all";
+				case ProtectionLevel.Semi:
+					return "autoconfirmed";
+				case ProtectionLevel.Full:
+					return "sysop";
+			}
+
+			return null;
+		}
+
 		private void SetNames(string fullName)
 		{
 			var split = fullName.Split(new[] { ':' }, 2);

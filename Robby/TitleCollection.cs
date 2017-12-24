@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using Design;
-	using Pages;
 	using WallE.Base;
 	using WikiCommon;
 	using static Properties.Resources;
