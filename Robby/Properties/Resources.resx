@@ -136,10 +136,10 @@
     <value>You must load {0} when calling the {1} method.</value>
   </data>
   <data name="MovePageWarning" xml:space="preserve">
-    <value>Moving page [[{0}]] to [[{1}]] only partially succeeded.</value>
+    <value>Moving page [[{0}]] to [[{1}]] failed: {{2}}</value>
   </data>
   <data name="PurgeFailed" xml:space="preserve">
-    <value>Purge failed for [[{0}]]</value>
+    <value>Purge failed for [[{0}]].</value>
   </data>
   <data name="UnexpectedResult" xml:space="preserve">
     <value>{0} returned an unexpected result: {1}</value>

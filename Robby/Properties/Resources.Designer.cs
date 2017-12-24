@@ -115,7 +115,7 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Moving page [[{0}]] to [[{1}]] only partially succeeded..
+        ///   Looks up a localized string similar to Moving page [[{0}]] to [[{1}]] failed: {{2}}.
         /// </summary>
         internal static string MovePageWarning {
             get {
@@ -124,7 +124,7 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Purge failed for [[{0}]].
+        ///   Looks up a localized string similar to Purge failed for [[{0}]]..
         /// </summary>
         internal static string PurgeFailed {
             get {

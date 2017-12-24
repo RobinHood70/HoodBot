@@ -116,41 +116,6 @@
 			this.Reload();
 		}
 
-		public void Move(string toPage, string reason) => this.Move(toPage, reason, true, true, true);
-
-		public void Move(string toPage, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
-		{
-			ThrowNull(toPage, nameof(toPage));
-			ThrowNull(reason, nameof(reason));
-			if (!this.Site.AllowEditing)
-			{
-				return;
-			}
-
-			var input = new MoveInput(this.FullPageName, toPage)
-			{
-				IgnoreWarnings = true,
-				MoveSubpages = moveSubpages,
-				MoveTalk = moveTalk,
-				NoRedirect = suppressRedirect,
-				Reason = reason,
-			};
-			var result = this.Site.AbstractionLayer.Move(input);
-
-			var errors = false;
-			foreach (var page in result)
-			{
-				errors |= page.Error != null;
-			}
-
-			if (errors)
-			{
-				this.Site.PublishWarning(this, CurrentCulture(MovePageWarning, this.FullPageName, toPage));
-			}
-
-			this.Rename(toPage);
-		}
-
 		// Assumes title-related properties have already been provided in the constructor.
 		public void Populate(PageItem pageItem)
 		{

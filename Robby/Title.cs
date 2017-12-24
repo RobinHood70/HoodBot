@@ -1,13 +1,15 @@
 ﻿namespace RobinHood70.Robby
 {
+	using System.Collections.Generic;
 	using System.Text.RegularExpressions;
 	using Design;
 	using RobinHood70.WallE.Base;
 	using WikiCommon;
+	using static Properties.Resources;
 	using static WikiCommon.Globals;
 
 	/// <summary>Provides a light-weight holder for titles and provides several information and manipulation functions.</summary>
-	public class Title : IWikiTitle
+	public class Title : IWikiTitle, IMessageSource
 	{
 		#region Constants
 		// The following is taken from DefaultSettings::$wgLegalTitleChars and always assumes the default setting. I believe this is emitted as part of API:Siteinfo, but I wouldn't trust any kind of automated conversion, so better to just leave it as default, which is what 99.99% of wikis will probably use.
@@ -206,6 +208,48 @@
 			this.Site == title.Site &&
 			this.Namespace == title.Namespace &&
 			this.PageName == title.PageName;
+
+		public Dictionary<string, string> Move(string to, string reason, bool suppressRedirect) => this.Move(to, reason, false, false, suppressRedirect);
+
+		public Dictionary<string, string> Move(Title to, string reason, bool suppressRedirect) => this.Move(to.FullPageName, reason, false, false, suppressRedirect);
+
+		public Dictionary<string, string> Move(string to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
+		{
+			ThrowNull(to, nameof(to));
+			ThrowNull(reason, nameof(reason));
+			if (!this.Site.AllowEditing)
+			{
+				return new Dictionary<string, string> { [this.FullPageName] = to };
+			}
+
+			var input = new MoveInput(this.FullPageName, to)
+			{
+				IgnoreWarnings = true,
+				MoveSubpages = moveSubpages,
+				MoveTalk = moveTalk,
+				NoRedirect = suppressRedirect,
+				Reason = reason
+			};
+
+			var retval = new Dictionary<string, string>();
+			var result = this.Site.AbstractionLayer.Move(input);
+			foreach (var item in result)
+			{
+				if (item.Error != null)
+				{
+					this.Site.PublishWarning(this, CurrentCulture(MovePageWarning, this.FullPageName, to, item.Error.Info));
+				}
+				else
+				{
+					retval.Add(item.From, item.To);
+				}
+			}
+
+			this.Rename(to);
+			return retval;
+		}
+
+		public Dictionary<string, string> Move(Title to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect) => this.Move(to.FullPageName, reason, moveTalk, moveSubpages, suppressRedirect);
 
 		/// <summary>Renames the title.</summary>
 		/// <param name="fullName">The full page name to rename to.</param>
