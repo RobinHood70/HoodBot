@@ -65,13 +65,13 @@ namespace RobinHood70.WallE.Eve.Modules
 				Expiry = result["expiry"].AsDate(),
 				Reason = (string)result["reason"],
 				Flags =
-				result.GetFlag("allowusertalk", BlockFlags.AllowUserTalk) |
-				result.GetFlag("anononly", BlockFlags.AnonymousOnly) |
-				result.GetFlag("autoblock", BlockFlags.AutoBlock) |
-				result.GetFlag("automatic", BlockFlags.Automatic) |
-				result.GetFlag("hidden", BlockFlags.Hidden) |
-				result.GetFlag("nocreate", BlockFlags.NoCreate) |
-				result.GetFlag("noemail", BlockFlags.NoEmail),
+				result.GetFlag("allowusertalk", BlocksFlags.AllowUserTalk) |
+				result.GetFlag("anononly", BlocksFlags.AnonymousOnly) |
+				result.GetFlag("autoblock", BlocksFlags.AutoBlock) |
+				result.GetFlag("automatic", BlocksFlags.Automatic) |
+				result.GetFlag("hidden", BlocksFlags.Hidden) |
+				result.GetFlag("nocreate", BlocksFlags.NoCreate) |
+				result.GetFlag("noemail", BlocksFlags.NoEmail),
 				RangeStart = (string)result["rangestart"],
 				RangeEnd = (string)result["rangeend"],
 			};

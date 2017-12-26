@@ -5,7 +5,7 @@ namespace RobinHood70.WallE.Base
 
 	#region Public Enumerations
 	[Flags]
-	public enum BlockFlags
+	public enum BlocksFlags
 	{
 		None = 0,
 		AllowUserTalk = 1,
@@ -27,7 +27,7 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Expiry { get; set; }
 
-		public BlockFlags Flags { get; set; }
+		public BlocksFlags Flags { get; set; }
 
 		public long Id { get; set; }
 
