@@ -182,19 +182,19 @@
 			return retval.AsReadOnly();
 		}
 
-		public IReadOnlyList<string> GetActiveUsers() => this.GetUsers(new AllUsersInput { ActiveUsersOnly = true });
+		public IReadOnlyList<string> GetUsers(bool onlyActiveUsers, bool onlyUsersWithEdits) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits });
 
-		public IReadOnlyList<string> GetUsers(string prefix) => this.GetUsers(new AllUsersInput { Prefix = prefix });
+		public IReadOnlyList<string> GetUsers(bool onlyActiveUsers, bool onlyUsersWithEdits, string prefix) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits , Prefix = prefix });
 
-		public IReadOnlyList<string> GetUsers(string from, string to) => this.GetUsers(new AllUsersInput { From = from, To = to });
+		public IReadOnlyList<string> GetUsers(bool onlyActiveUsers, bool onlyUsersWithEdits, string from, string to) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, From = from, To = to });
 
-		public IReadOnlyList<string> GetUsersInGroups(params string[] groups) => this.GetUsersInGroups(groups as IEnumerable<string>);
+		public IReadOnlyList<string> GetUsersInGroups(bool onlyActiveUsers, bool onlyUsersWithEdits, params string[] groups) => this.GetUsersInGroups(onlyActiveUsers, onlyUsersWithEdits, groups as IEnumerable<string>);
 
-		public IReadOnlyList<string> GetUsersInGroups(IEnumerable<string> groups) => this.GetUsers(new AllUsersInput { Groups = groups });
+		public IReadOnlyList<string> GetUsersInGroups(bool onlyActiveUsers, bool onlyUsersWithEdits, IEnumerable<string> groups) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Groups = groups });
 
-		public IReadOnlyList<string> GetUsersWithRights(params string[] rights) => this.GetUsersWithRights(rights as IEnumerable<string>);
+		public IReadOnlyList<string> GetUsersWithRights(bool onlyActiveUsers, bool onlyUsersWithEdits, params string[] rights) => this.GetUsersWithRights(onlyActiveUsers, onlyUsersWithEdits, rights as IEnumerable<string>);
 
-		public IReadOnlyList<string> GetUsersWithRights(IEnumerable<string> rights) => this.GetUsers(new AllUsersInput { Rights = rights });
+		public IReadOnlyList<string> GetUsersWithRights(bool onlyActiveUsers, bool onlyUsersWithEdits, IEnumerable<string> rights) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Rights = rights });
 
 		public void Login(string userName, string password) => this.Login(userName, password, null);
 
