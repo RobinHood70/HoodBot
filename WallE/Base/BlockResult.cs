@@ -17,6 +17,8 @@ namespace RobinHood70.WallE.Base
 		public string User { get; set; }
 
 		public long UserId { get; set; }
+
+		public bool WatchUser { get; set; }
 		#endregion
 	}
 }

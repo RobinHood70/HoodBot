@@ -11,11 +11,9 @@ namespace RobinHood70.WallE.Base
 		AllowUserTalk = 1,
 		AnonymousOnly = 1 << 1,
 		AutoBlock = 1 << 2,
-		HideName = 1 << 3,
+		Hidden = 1 << 3,
 		NoCreate = 1 << 4,
 		NoEmail = 1 << 5,
-		WatchUser = 1 << 6,
-		Reblock = 1 << 7,
 	}
 	#endregion
 
@@ -36,11 +34,15 @@ namespace RobinHood70.WallE.Base
 
 		public string Reason { get; set; }
 
+		public bool Reblock { get; set; }
+
 		public string Token { get; set; }
 
 		public string User { get; }
 
 		public long UserId { get; }
+
+		public bool WatchUser { get; }
 		#endregion
 	}
 }

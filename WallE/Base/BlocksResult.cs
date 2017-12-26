@@ -3,31 +3,18 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 
-	#region Public Enumerations
-	[Flags]
-	public enum BlocksFlags
-	{
-		None = 0,
-		AllowUserTalk = 1,
-		AnonymousOnly = 1 << 1,
-		AutoBlock = 1 << 2,
-		Automatic = 1 << 3,
-		Hidden = 1 << 4,
-		NoCreate = 1 << 5,
-		NoEmail = 1 << 6
-	}
-	#endregion
-
 	public class BlocksResult
 	{
 		#region Public Properties
+		public bool Automatic { get; set; }
+
 		public string By { get; set; }
 
 		public long ById { get; set; }
 
 		public DateTime? Expiry { get; set; }
 
-		public BlocksFlags Flags { get; set; }
+		public BlockUserFlags Flags { get; set; }
 
 		public long Id { get; set; }
 

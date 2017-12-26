@@ -64,14 +64,14 @@ namespace RobinHood70.WallE.Eve.Modules
 				Timestamp = (DateTime?)result["timestamp"],
 				Expiry = result["expiry"].AsDate(),
 				Reason = (string)result["reason"],
+				Automatic = result["automatic"].AsBCBool(),
 				Flags =
-				result.GetFlag("allowusertalk", BlocksFlags.AllowUserTalk) |
-				result.GetFlag("anononly", BlocksFlags.AnonymousOnly) |
-				result.GetFlag("autoblock", BlocksFlags.AutoBlock) |
-				result.GetFlag("automatic", BlocksFlags.Automatic) |
-				result.GetFlag("hidden", BlocksFlags.Hidden) |
-				result.GetFlag("nocreate", BlocksFlags.NoCreate) |
-				result.GetFlag("noemail", BlocksFlags.NoEmail),
+				result.GetFlag("allowusertalk", BlockUserFlags.AllowUserTalk) |
+				result.GetFlag("anononly", BlockUserFlags.AnonymousOnly) |
+				result.GetFlag("autoblock", BlockUserFlags.AutoBlock) |
+				result.GetFlag("hidden", BlockUserFlags.Hidden) |
+				result.GetFlag("nocreate", BlockUserFlags.NoCreate) |
+				result.GetFlag("noemail", BlockUserFlags.NoEmail),
 				RangeStart = (string)result["rangestart"],
 				RangeEnd = (string)result["rangeend"],
 			};

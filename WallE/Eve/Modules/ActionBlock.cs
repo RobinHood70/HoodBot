@@ -42,10 +42,10 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("nocreate", input.Flags.HasFlag(BlockUserFlags.NoCreate))
 				.Add("autoblock", input.Flags.HasFlag(BlockUserFlags.AutoBlock))
 				.Add("noemail", input.Flags.HasFlag(BlockUserFlags.NoEmail))
-				.Add("hidename", input.Flags.HasFlag(BlockUserFlags.HideName))
+				.Add("hidename", input.Flags.HasFlag(BlockUserFlags.Hidden))
 				.Add("allowusertalk", input.Flags.HasFlag(BlockUserFlags.AllowUserTalk))
-				.Add("reblock", input.Flags.HasFlag(BlockUserFlags.Reblock))
-				.Add("watchuser", input.Flags.HasFlag(BlockUserFlags.WatchUser))
+				.Add("reblock", input.Reblock)
+				.Add("watchuser", input.WatchUser)
 				.AddHidden("token", input.Token);
 		}
 
@@ -61,14 +61,14 @@ namespace RobinHood70.WallE.Eve.Modules
 			var id = (string)result["id"];
 			output.Id = string.IsNullOrEmpty(id) ? 0 : (long)result["id"];
 			output.Reason = (string)result["reason"];
+			output.WatchUser = result["watchuser"].AsBCBool();
 			output.Flags =
 				result.GetFlag("allowusertalk", BlockUserFlags.AllowUserTalk) |
 				result.GetFlag("anononly", BlockUserFlags.AnonymousOnly) |
 				result.GetFlag("autoblock", BlockUserFlags.AutoBlock) |
-				result.GetFlag("hidename", BlockUserFlags.HideName) |
+				result.GetFlag("hidename", BlockUserFlags.Hidden) |
 				result.GetFlag("nocreate", BlockUserFlags.NoCreate) |
-				result.GetFlag("noemail", BlockUserFlags.NoEmail) |
-				result.GetFlag("watchuser", BlockUserFlags.WatchUser);
+				result.GetFlag("noemail", BlockUserFlags.NoEmail);
 
 			return output;
 		}
