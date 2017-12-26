@@ -163,6 +163,39 @@
 			return target.Success ? new Title(this, target.Value) : null;
 		}
 
+		public IReadOnlyList<User> GetUserInformation(params string[] users) => this.GetUserInformation(users as IEnumerable<string>);
+
+		public IReadOnlyList<User> GetUserInformation(IEnumerable<string> users)
+		{
+			var input = new UsersInput(users)
+			{
+				Properties = UsersProperties.All
+			};
+			var result = this.AbstractionLayer.Users(input);
+			var retval = new List<User>(result.Count);
+			foreach (var item in result)
+			{
+				var user = new User(this, item);
+				retval.Add(user);
+			}
+
+			return retval.AsReadOnly();
+		}
+
+		public IReadOnlyList<string> GetActiveUsers() => this.GetUsers(new AllUsersInput { ActiveUsersOnly = true });
+
+		public IReadOnlyList<string> GetUsers(string prefix) => this.GetUsers(new AllUsersInput { Prefix = prefix });
+
+		public IReadOnlyList<string> GetUsers(string from, string to) => this.GetUsers(new AllUsersInput { From = from, To = to });
+
+		public IReadOnlyList<string> GetUsersInGroups(params string[] groups) => this.GetUsersInGroups(groups as IEnumerable<string>);
+
+		public IReadOnlyList<string> GetUsersInGroups(IEnumerable<string> groups) => this.GetUsers(new AllUsersInput { Groups = groups });
+
+		public IReadOnlyList<string> GetUsersWithRights(params string[] rights) => this.GetUsersWithRights(rights as IEnumerable<string>);
+
+		public IReadOnlyList<string> GetUsersWithRights(IEnumerable<string> rights) => this.GetUsers(new AllUsersInput { Rights = rights });
+
 		public void Login(string userName, string password) => this.Login(userName, password, null);
 
 		public virtual void Login(string userName, string password, string domain)
@@ -326,6 +359,19 @@
 			}
 
 			return retval.AsReadOnly();
+		}
+
+		private IReadOnlyList<string> GetUsers(AllUsersInput input)
+		{
+			input.Properties = AllUsersProperties.None;
+			var result = this.AbstractionLayer.AllUsers(input);
+			var retval = new List<string>(result.Count);
+			foreach (var item in result)
+			{
+				retval.Add(item.Name);
+			}
+
+			return retval;
 		}
 
 		/// <summary>Forwards warning events from the abstraction layer to the site.</summary>

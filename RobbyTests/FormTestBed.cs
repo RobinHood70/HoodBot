@@ -445,6 +445,23 @@
 			Debug.WriteLine(result);
 		}
 
+		public void UserFullInfoTests()
+		{
+			var userLoad = new User(this.Wiki, "RobinHood70");
+			userLoad.Load();
+			Debug.WriteLine(string.Join(",", userLoad.Groups));
+			Debug.WriteLine(userLoad.Gender.UpperFirst());
+
+			var users = this.Wiki.GetUserInformation("RobinHood70", "Test User");
+			foreach (var user in users)
+			{
+				Debug.Write('\n');
+				Debug.WriteLine(user.Name);
+				Debug.WriteLine(string.Join(",", user.Groups));
+				Debug.WriteLine(user.Gender.UpperFirst());
+			}
+		}
+
 		public void UserMessageTests()
 		{
 			var user = new User(this.Wiki, "RobinHood70");
@@ -510,7 +527,7 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			this.UserWatchlistTests();
+			this.UserFullInfoTests();
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;

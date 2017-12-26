@@ -1,8 +1,4 @@
-﻿Users
-IReadOnlyList<AllUsersItem> AllUsers(AllUsersInput input);
-IReadOnlyList<UsersItem> Users(UsersInput input);
-
-Site
+﻿Site
 IReadOnlyList<BlocksResult> Blocks(BlocksInput input);
 bool ClearHasMessage();
 IReadOnlyList<PagePropertyNamesItem> PagePropertyNames(PagePropertyNamesInput input);

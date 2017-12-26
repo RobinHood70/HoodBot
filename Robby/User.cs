@@ -30,17 +30,45 @@
 		public User(Site site, string name)
 		{
 			ThrowNull(site, nameof(site));
+			ThrowNull(name, nameof(name));
 			this.Site = site;
 			this.Name = Title.Normalize(name);
 			this.Page = new Title(site, MediaWikiNamespaces.User, name);
 			this.TalkPage = this.Page.TalkPage;
 		}
+
+		public User (Site site, UsersItem user)
+			: this(site, user.Name)
+		{
+			ThrowNull(user, nameof(user));
+			this.SetInfo(user);
+		}
 		#endregion
 
 		#region Public Properties
+		public string BlockedBy { get; private set; }
+
+		public DateTime BlockExpiry { get; private set; }
+
+		public string BlockReason { get; private set; }
+
+		public DateTime BlockTimestamp { get; private set; }
+
+		public long EditCount { get; private set; }
+
+		public bool Emailable { get; private set; }
+
+		public string Gender { get; private set; }
+
+		public IReadOnlyList<string> Groups { get; private set; }
+
 		public string Name { get; }
 
 		public Title Page { get; }
+
+		public DateTime Registration { get; private set; }
+
+		public IReadOnlyList<string> Rights { get; private set; }
 
 		public Site Site { get; }
 
@@ -87,6 +115,7 @@
 			return result.Result;
 		}
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Method performs a time-consuming operation.")]
 		public IReadOnlyList<Contribution> GetContributions()
 		{
 			var input = new UserContributionsInput(new[] { this.Name });
@@ -116,6 +145,17 @@
 			}
 
 			return retval;
+		}
+
+		public void Load()
+		{
+			var input = new UsersInput(new[] { this.Name })
+			{
+				Properties = UsersProperties.All
+			};
+			var result = this.Site.AbstractionLayer.Users(input);
+			var user = result.First();
+			this.SetInfo(user);
 		}
 
 		public void NewTalkPageMessage(string header, string message, string editSummary)
@@ -162,6 +202,20 @@
 			var result = this.Site.AbstractionLayer.Block(input);
 			return result.Id != 0;
 		}
-#endregion
+
+		private void SetInfo(UsersItem user)
+		{
+			this.BlockedBy = user.BlockedBy;
+			this.BlockExpiry = user.BlockExpiry ?? DateTime.MinValue;
+			this.BlockReason = user.BlockReason;
+			this.BlockTimestamp = user.BlockTimestamp ?? DateTime.MinValue;
+			this.EditCount = user.EditCount;
+			this.Emailable = user.Flags.HasFlag(UserFlags.Emailable);
+			this.Gender = user.Gender;
+			this.Groups = user.Groups;
+			this.Registration = user.Registration ?? DateTime.MinValue;
+			this.Rights = user.Rights;
+		}
+		#endregion
 	}
 }
