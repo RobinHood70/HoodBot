@@ -2,23 +2,10 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.Robby.Pages;
 	using RobinHood70.WallE.Base;
 	using WikiCommon;
 	using static WikiCommon.Globals;
-
-	#region Public Enumerations
-	[Flags]
-	public enum BlockFlags
-	{
-		None = 0,
-		AllowUserTalk = BlockUserFlags.AllowUserTalk,
-		AnonymousOnly = BlockUserFlags.AnonymousOnly,
-		AutoBlock = BlockUserFlags.AutoBlock,
-		NoCreate = BlockUserFlags.NoCreate,
-		NoEmail = BlockUserFlags.NoEmail,
-		Reblock = BlockUserFlags.Reblock,
-	}
-	#endregion
 
 	public class User
 	{
@@ -46,13 +33,7 @@
 		#endregion
 
 		#region Public Properties
-		public string BlockedBy { get; private set; }
-
-		public DateTime BlockExpiry { get; private set; }
-
-		public string BlockReason { get; private set; }
-
-		public DateTime BlockTimestamp { get; private set; }
+		public Block BlockInfo { get; private set; }
 
 		public long EditCount { get; private set; }
 
@@ -76,24 +57,26 @@
 		#endregion
 
 		#region Public Methods
-		public bool Block(string reason, BlockFlags flags, DateTime expiry)
+		public bool Block(string reason, BlockFlags flags, DateTime expiry, bool reblock)
 		{
 			var input = new BlockInput(this.Name)
 			{
 				Expiry = expiry,
 				Flags = (BlockUserFlags)flags,
-				Reason = reason,
+				Reason = reason,		
+				Reblock = reblock,
 			};
 			return this.Block(input);
 		}
 
-		public bool Block(string reason, BlockFlags flags, string relativeExpiry)
+		public bool Block(string reason, BlockFlags flags, string relativeExpiry, bool reblock)
 		{
 			var input = new BlockInput(this.Name)
 			{
 				ExpiryRelative = relativeExpiry,
 				Flags = (BlockUserFlags)flags,
 				Reason = reason,
+				Reblock = reblock,
 			};
 			return this.Block(input);
 		}
@@ -205,10 +188,7 @@
 
 		private void SetInfo(UsersItem user)
 		{
-			this.BlockedBy = user.BlockedBy;
-			this.BlockExpiry = user.BlockExpiry ?? DateTime.MinValue;
-			this.BlockReason = user.BlockReason;
-			this.BlockTimestamp = user.BlockTimestamp ?? DateTime.MinValue;
+			this.BlockInfo = new Block(user.Name, user.BlockedBy, user.BlockReason, user.BlockTimestamp ?? DateTime.MinValue, user.BlockExpiry ?? DateTime.MaxValue, BlockFlags.Unknown);
 			this.EditCount = user.EditCount;
 			this.Emailable = user.Flags.HasFlag(UserFlags.Emailable);
 			this.Gender = user.Gender;
