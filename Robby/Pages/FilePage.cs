@@ -52,7 +52,7 @@
 
 		public IReadOnlyList<string> FindDuplicateFiles(bool localOnly)
 		{
-			var propModule = new DuplicateFilesInput();
+			var propModule = new DuplicateFilesInput() { LocalOnly = localOnly };
 			var pageSet = new PageSetInput(new[] { this.FullPageName });
 			var result = this.Site.AbstractionLayer.LoadPages(pageSet, new[] { propModule });
 			var page = result.First();
