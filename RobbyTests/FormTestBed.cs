@@ -468,6 +468,15 @@
 			user.NewTalkPageMessage("Test Message", "Hi there!", "Create a test message.");
 		}
 
+		public void UsersTests()
+		{
+			Debug.WriteLine("Active Users: {0}", this.Wiki.GetUsers(true, false).Count);
+			Debug.WriteLine("Sysops: {0}", this.Wiki.GetUsersInGroups(false, false, "sysop").Count);
+			Debug.WriteLine("API High Limits: {0}", this.Wiki.GetUsersWithRights(false, false, "apihighlimits").Count);
+			Debug.WriteLine("API High Limits with edits: {0}", this.Wiki.GetUsersWithRights(false, true, "apihighlimits").Count);
+			Debug.WriteLine("API High Limits that are active: {0}", this.Wiki.GetUsersWithRights(true, false, "apihighlimits").Count);
+		}
+
 		public void UserWatchlistTests()
 		{
 			var user = new User(this.AdminWiki, "RobinHood70");
@@ -527,7 +536,7 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			this.UserFullInfoTests();
+			this.UsersTests();
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;
