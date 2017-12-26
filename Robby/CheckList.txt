@@ -1,22 +1,10 @@
 ﻿Users
 IReadOnlyList<AllUsersItem> AllUsers(AllUsersInput input);
 IReadOnlyList<UsersItem> Users(UsersInput input);
-Contributors
-
-User
-BlockResult Block(BlockInput input);
-EmailUserResult EmailUser(EmailUserInput input);
-UnblockResult Unblock(UnblockInput input);
-IReadOnlyList<UserContributionsItem> UserContributions(UserContributionsInput input);
-UserInfoResult UserInfo(UserInfoInput input);
-UserRightsResult UserRights(UserRightsInput input);
-IReadOnlyList<WatchlistItem> Watchlist(WatchlistInput input);
-IReadOnlyList<WatchlistRawItem> WatchlistRaw(WatchlistRawInput input);
 
 Site
 IReadOnlyList<BlocksResult> Blocks(BlocksInput input);
 bool ClearHasMessage();
-IReadOnlyDictionary<string name, string message> Messages(... per TitlesCollection)
 IReadOnlyList<PagePropertyNamesItem> PagePropertyNames(PagePropertyNamesInput input);
 PatrolResult Patrol(PatrolInput input);
 QueryPageResult QueryPage(QueryPageInput input);
@@ -24,8 +12,9 @@ IReadOnlyList<RecentChangesItem> RecentChanges(RecentChangesInput input);
 string Rsd();
 UploadResult Upload(UploadInput input);
 
+// In retrospect, I don't think it makes sense to include any of these, but I'll leave this list here for now for future reconsideration. 
 Titles
-/* In retrospect, I don't think it makes sense to include any of these at all, but I'll leave this list here for now for future reconsideration. This idea for most of these was that they would return custom results based on an input set of titles.
+// The idea for most of these was that they would return custom results based on an input set of titles.
 API:Contributors|contributors
 API:Extlinks|extlinks
 API:Images|images
@@ -35,3 +24,7 @@ API:Linkshere|linkshere
 API:Redirects|redirects
 API:Transcludedin|transcludedin
 
+User
+UserInfoResult UserInfo(UserInfoInput input);
+UserRightsResult UserRights(UserRightsInput input);
+IReadOnlyList<WatchlistItem> Watchlist(WatchlistInput input);

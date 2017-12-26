@@ -418,6 +418,46 @@
 			this.Wiki.Upload(fileName, destinationName, "Test upload");
 		}
 
+		public void UserBlockTests()
+		{
+			var user = new User(this.AdminWiki, "Test User");
+			user.Block("Because he's a bad person", Robby.BlockFlags.AutoBlock | Robby.BlockFlags.Reblock | Robby.BlockFlags.AllowUserTalk, "5 minutes");
+			user.Unblock("Because he's a good person");
+		}
+
+		public void UserContributionsTests()
+		{
+			var user = new User(this.Wiki, "RobinHood70");
+			var result = user.GetContributions();
+			var titles = new HashSet<string>();
+			foreach (var item in result)
+			{
+				titles.Add(item.Title.FullPageName);
+			}
+
+			Debug.WriteLine($"{result.Count} contributions on {titles.Count} pages");
+		}
+
+		public void UserEmailTests()
+		{
+			var user = new User(this.Wiki, "RobinHood70");
+			var result = user.Email("This is a test e-mail.", true);
+			Debug.WriteLine(result);
+		}
+
+		public void UserMessageTests()
+		{
+			var user = new User(this.Wiki, "RobinHood70");
+			user.NewTalkPageMessage("Test Message", "Hi there!", "Create a test message.");
+		}
+
+		public void UserWatchlistTests()
+		{
+			var user = new User(this.AdminWiki, "RobinHood70");
+			var result = user.GetWatchlist("625ff6a84caa118b313fab35cbdf75f356cb93b8", this.Wiki.Namespaces.Ids);
+			Debug.WriteLine($"RobinHood70 has {result.Count} pages in his watchlist.");
+		}
+
 		public void WatchTests()
 		{
 			var titles = new TitleCollection(this.Wiki, "User:RobinHood70");
@@ -470,6 +510,7 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
+			this.UserWatchlistTests();
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;

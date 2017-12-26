@@ -50,6 +50,7 @@
     <Compile Include="Pages\Category.cs" />
     <Compile Include="Design\CacheDictionary.cs" />
     <Compile Include="Design\PageLoadOptions.cs" />
+    <Compile Include="Contribution.cs" />
     <Compile Include="Pages\FileRevision.cs" />
     <Compile Include="Design\IWikiTitle.cs" />
     <Compile Include="InterwikiTitle.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="Design\WikiTitleEqualityComparer.cs" />
     <Compile Include="Design\WikiTitleEqualityComparerFull.cs" />
     <Compile Include="UnexpectedResultException.cs" />
+    <Compile Include="User.cs" />
     <Compile Include="WarningEventArgs.cs" />
     <Compile Include="Pages\FilePage.cs" />
   </ItemGroup>

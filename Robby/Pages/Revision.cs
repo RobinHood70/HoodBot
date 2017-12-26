@@ -19,24 +19,28 @@
 			this.Timestamp = revisionData.Timestamp.Value;
 			this.User = revisionData.User;
 		}
+
+		protected internal Revision()
+		{
+		}
 		#endregion
 
 		#region Public Properties
-		public bool Anonymous { get; }
+		public bool Anonymous { get; protected set; }
 
-		public string Comment { get; }
+		public string Comment { get; protected set; }
 
-		public long Id { get; }
+		public long Id { get; protected set; }
 
-		public bool Minor { get; }
+		public bool Minor { get; protected set; }
 
-		public long ParentId { get; }
+		public long ParentId { get; protected set; }
 
-		public string Text { get; }
+		public string Text { get; protected set; }
 
-		public DateTime Timestamp { get; }
+		public DateTime Timestamp { get; protected set; }
 
-		public string User { get; }
+		public string User { get; protected set; }
 		#endregion
 	}
 }
