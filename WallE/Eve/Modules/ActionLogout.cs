@@ -33,6 +33,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
+		// In older versions of MediaWiki, logout returns an empty array, so handle that.
+		protected override NullObject DeserializeCustom(JToken result) => NullObject.Null;
+
 		protected override NullObject DeserializeResult(JToken result) => NullObject.Null;
 		#endregion
 	}
