@@ -188,7 +188,7 @@
 
 		private void SetInfo(UsersItem user)
 		{
-			this.BlockInfo = new Block(user.Name, user.BlockedBy, user.BlockReason, user.BlockTimestamp ?? DateTime.MinValue, user.BlockExpiry ?? DateTime.MaxValue, BlockFlags.Unknown);
+			this.BlockInfo = new Block(user.Name, user.BlockedBy, user.BlockReason, user.BlockTimestamp ?? DateTime.MinValue, user.BlockExpiry ?? DateTime.MaxValue, BlockFlags.Unknown, false);
 			this.EditCount = user.EditCount;
 			this.Emailable = user.Flags.HasFlag(UserFlags.Emailable);
 			this.Gender = user.Gender;

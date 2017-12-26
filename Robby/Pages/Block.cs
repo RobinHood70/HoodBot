@@ -7,20 +7,21 @@
 	[Flags]
 	public enum BlockFlags
 	{
-		Unknown = -1,
 		None = BlockUserFlags.None,
 		AccountCreationDisabled = BlockUserFlags.NoCreate,
 		AnonymousOnly = BlockUserFlags.AnonymousOnly,
 		AutoBlock = BlockUserFlags.AutoBlock,
 		EmailDisabled = BlockUserFlags.NoEmail,
 		UserTalk = BlockUserFlags.AllowUserTalk,
+		Unknown = 0x40000000,
 	}
 	#endregion
 
 	public class Block
 	{
-		public Block(string user, string by, string reason, DateTime startTime, DateTime expiry, BlockFlags flags)
+		public Block(string user, string by, string reason, DateTime startTime, DateTime expiry, BlockFlags flags, bool automatic)
 		{
+			this.Automatic = automatic;
 			this.BlockedBy = by;
 			this.Expiry = expiry;
 			this.Flags = flags;
@@ -28,6 +29,8 @@
 			this.StartTime = startTime;
 			this.User = user;
 		}
+
+		public bool Automatic { get; }
 
 		public string BlockedBy { get; }
 

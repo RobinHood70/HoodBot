@@ -109,6 +109,18 @@
 			return new Uri(this.articlePath.Replace("$1", articleName).TrimEnd('/'));
 		}
 
+		public IReadOnlyList<Block> GetBlocks() => this.GetBlocks(new BlocksInput() { Properties = BlocksProperties.All });
+
+		public IReadOnlyList<Block> GetBlocks(Filter filterAccount, Filter filterIP, Filter filterRange, Filter filterTemporary) => this.GetBlocks(new BlocksInput() { FilterAccount = filterAccount, FilterIP = filterIP, FilterRange = filterRange, FilterTemporary = filterTemporary, Properties = BlocksProperties.All });
+
+		public IReadOnlyList<Block> GetBlocks(DateTime start, DateTime end) => this.GetBlocks(new BlocksInput() { Start = start, End = end, Properties = BlocksProperties.All });
+
+		public IReadOnlyList<Block> GetBlocks(DateTime start, DateTime end, Filter filterAccount, Filter filterIP, Filter filterRange, Filter filterTemporary) => this.GetBlocks(new BlocksInput() { Start = start, End = end, FilterAccount = filterAccount, FilterIP = filterIP, FilterRange = filterRange, FilterTemporary = filterTemporary, Properties = BlocksProperties.All });
+
+		public IReadOnlyList<Block> GetBlocks(IEnumerable<string> users) => this.GetBlocks(new BlocksInput(users) { Properties = BlocksProperties.All });
+
+		public IReadOnlyList<Block> GetBlocks(IPAddress ip) => this.GetBlocks(new BlocksInput(ip) { Properties = BlocksProperties.All });
+
 		public string GetMessage(string message, IEnumerable<string> arguments)
 		{
 			var messages = this.GetMessages(new[] { message }, arguments);
@@ -346,6 +358,18 @@
 		#endregion
 
 		#region Private Methods
+
+		private IReadOnlyList<Block> GetBlocks(BlocksInput input)
+		{
+			var result = this.AbstractionLayer.Blocks(input);
+			var retval = new List<Block>(result.Count);
+			foreach (var item in result)
+			{
+				retval.Add(new Block(item.User ?? (item.RangeStart + '-' + item.RangeEnd), item.By, item.Reason, item.Timestamp ?? DateTime.MinValue, item.Expiry ?? DateTime.MaxValue, (BlockFlags)item.Flags, item.Automatic));
+			}
+
+			return retval;
+		}
 
 		private IReadOnlyDictionary<string, Message> GetMessages(AllMessagesInput input)
 		{
