@@ -20,8 +20,6 @@
 		// bool IsIdenticalTo(IWikiTitle title);
 
 		// bool IsSameAs(IWikiTitle title);
-
-		// void Rename(string fullName);
 		#endregion
 	}
 }
