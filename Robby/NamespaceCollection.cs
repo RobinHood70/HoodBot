@@ -39,11 +39,11 @@
 		{
 			get
 			{
-				foreach (var ns in this)
+				foreach (var id in this.IdsDictionary.Keys)
 				{
-					if (ns.Id >= 0)
+					if (id >= 0)
 					{
-						yield return ns.Id;
+						yield return id;
 					}
 				}
 			}
