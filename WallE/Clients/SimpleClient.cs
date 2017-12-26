@@ -378,29 +378,27 @@
 				catch (WebException ex)
 				{
 					response = ex.Response as HttpWebResponse;
-					if (response == null)
+					if (response != null)
 					{
-						throw;
-					}
+						if (PerSessionUnsafeHeaderParsing(ex))
+						{
+							this.useV10 = true;
+							continue;
+						}
 
-					if (PerSessionUnsafeHeaderParsing(ex))
-					{
-						this.useV10 = true;
-						continue;
-					}
-
-					switch (response.StatusCode)
-					{
-						case RequestTimeout:
-						case BadGateway:
-						case GatewayTimeout:
-						case (HttpStatusCode)509:
-							break;
-						case ServiceUnavailable:
-							maxLag = true;
-							break;
-						default:
-							throw;
+						switch (response.StatusCode)
+						{
+							case RequestTimeout:
+							case BadGateway:
+							case GatewayTimeout:
+							case (HttpStatusCode)509:
+								break;
+							case ServiceUnavailable:
+								maxLag = true;
+								break;
+							default:
+								throw;
+						}
 					}
 
 					if (retriesRemaining == 0)
