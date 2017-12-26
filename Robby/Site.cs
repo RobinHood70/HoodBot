@@ -109,6 +109,36 @@
 			return new Uri(this.articlePath.Replace("$1", articleName).TrimEnd('/'));
 		}
 
+		public string GetMessage(string message, IEnumerable<string> arguments)
+		{
+			var messages = this.GetMessages(new[] { message }, arguments);
+			return messages[message].Text;
+		}
+
+		public IReadOnlyDictionary<string, Message> GetMessages(IEnumerable<string> messages, IEnumerable<string> arguments) => this.GetMessages(new AllMessagesInput
+		{
+			Messages = messages,
+			Arguments = arguments,
+		});
+
+		public string GetParsedMessage(string message, IEnumerable<string> arguments) => this.GetParsedMessage(message, arguments, null);
+
+		public string GetParsedMessage(string message, IEnumerable<string> arguments, Title title)
+		{
+			var messages = this.GetParsedMessages(new[] { message }, arguments, title);
+			return messages[message].Text;
+		}
+
+		public IReadOnlyDictionary<string, Message> GetParsedMessages(IEnumerable<string> messages, IEnumerable<string> arguments) => this.GetParsedMessages(messages, arguments, null);
+
+		public IReadOnlyDictionary<string, Message> GetParsedMessages(IEnumerable<string> messages, IEnumerable<string> arguments, Title title) => this.GetMessages(new AllMessagesInput
+		{
+			Messages = messages,
+			Arguments = arguments,
+			EnableParser = true,
+			EnableParserTitle = title?.FullPageName,
+		});
+
 		public virtual Title GetRedirectTarget(string text)
 		{
 			if (text != null)
@@ -283,6 +313,20 @@
 		#endregion
 
 		#region Private Methods
+
+		private IReadOnlyDictionary<string, Message> GetMessages(AllMessagesInput input)
+		{
+			var result = this.AbstractionLayer.AllMessages(input);
+			var retval = new Dictionary<string, Message>();
+			foreach (var item in result)
+			{
+				var message = new Message(this, MediaWikiNamespaces.MediaWiki, item.Name);
+				message.Populate(item);
+				retval.Add(item.Name, message);
+			}
+
+			return retval.AsReadOnly();
+		}
 
 		/// <summary>Forwards warning events from the abstraction layer to the site.</summary>
 		/// <param name="sender">The sending abstraction layer.</param>
