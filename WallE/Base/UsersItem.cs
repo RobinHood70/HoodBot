@@ -5,13 +5,6 @@ namespace RobinHood70.WallE.Base
 	using System.Collections.Generic;
 
 	#region Public Enumerations
-	public enum Gender
-	{
-		Unknown,
-		Male,
-		Female
-	}
-
 	[Flags]
 	public enum UserFlags
 	{
@@ -44,7 +37,7 @@ namespace RobinHood70.WallE.Base
 
 		public UserFlags Flags { get; set; }
 
-		public Gender Gender { get; set; }
+		public string Gender { get; set; }
 
 		public IReadOnlyList<string> Groups { get; set; }
 
