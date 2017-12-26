@@ -350,7 +350,7 @@
 		private IReadOnlyDictionary<string, Message> GetMessages(AllMessagesInput input)
 		{
 			var result = this.AbstractionLayer.AllMessages(input);
-			var retval = new Dictionary<string, Message>();
+			var retval = new Dictionary<string, Message>(result.Count);
 			foreach (var item in result)
 			{
 				var message = new Message(this, MediaWikiNamespaces.MediaWiki, item.Name);

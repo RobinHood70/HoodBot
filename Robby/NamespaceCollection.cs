@@ -35,7 +35,7 @@
 		public int Count => this.IdsDictionary.Count;
 
 		/// <summary>Gets the namespace collection as a collection of their IDs, but excluding the special namespaces.</summary>
-		public IEnumerable<int> Ids
+		public IEnumerable<int> RegularIds
 		{
 			get
 			{

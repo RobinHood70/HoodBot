@@ -27,9 +27,9 @@
 		#endregion
 
 		#region Public Methods
-		public IEnumerable<string> FileUsage() => FileUsage(this.Site.Namespaces.Ids, Filter.All);
+		public IReadOnlyList<string> FileUsage() => FileUsage(this.Site.Namespaces.RegularIds, Filter.All);
 
-		public IEnumerable<string> FileUsage(IEnumerable<int> namespaces, Filter filterRedirects)
+		public IReadOnlyList<string> FileUsage(IEnumerable<int> namespaces, Filter filterRedirects)
 		{
 			var propModule = new FileUsageInput
 			{
@@ -38,23 +38,31 @@
 			};
 			var pageSet = new PageSetInput(new[] { this.FullPageName });
 			var result = this.Site.AbstractionLayer.LoadPages(pageSet, new[] { propModule });
-			foreach (var usage in result.First().FileUsages)
+			var page = result.First();
+			var retval = new List<string>(page.FileUsages.Count);
+			foreach (var usage in page.FileUsages)
 			{
-				yield return usage.Title;
+				retval.Add(usage.Title);
 			}
+
+			return retval.AsReadOnly();
 		}
 
-		public IEnumerable<string> FindDuplicateFiles() => FindDuplicateFiles(true);
+		public IReadOnlyList<string> FindDuplicateFiles() => FindDuplicateFiles(true);
 
-		public IEnumerable<string> FindDuplicateFiles(bool localOnly)
+		public IReadOnlyList<string> FindDuplicateFiles(bool localOnly)
 		{
 			var propModule = new DuplicateFilesInput();
 			var pageSet = new PageSetInput(new[] { this.FullPageName });
 			var result = this.Site.AbstractionLayer.LoadPages(pageSet, new[] { propModule });
-			foreach (var dupe in result.First().DuplicateFiles)
+			var page = result.First();
+			var retval = new List<string>(page.DuplicateFiles.Count);
+			foreach (var dupe in page.DuplicateFiles)
 			{
-				yield return dupe.Name;
+				retval.Add(dupe.Name);
 			}
+
+			return retval.AsReadOnly();
 		}
 		#endregion
 

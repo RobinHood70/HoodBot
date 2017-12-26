@@ -351,7 +351,7 @@
 		public void SearchTests()
 		{
 			var titles = new TitleCollection(this.Wiki);
-			titles.AddSearchResults("aleph", WhatToSearch.Title, this.Wiki.Namespaces.Ids);
+			titles.AddSearchResults("aleph", WhatToSearch.Title, this.Wiki.Namespaces.RegularIds);
 			DumpTitles(titles);
 		}
 
@@ -471,7 +471,7 @@
 		public void UserWatchlistTests()
 		{
 			var user = new User(this.AdminWiki, "RobinHood70");
-			var result = user.GetWatchlist("625ff6a84caa118b313fab35cbdf75f356cb93b8", this.Wiki.Namespaces.Ids);
+			var result = user.GetWatchlist("625ff6a84caa118b313fab35cbdf75f356cb93b8", this.Wiki.Namespaces.RegularIds);
 			Debug.WriteLine($"RobinHood70 has {result.Count} pages in his watchlist.");
 		}
 
