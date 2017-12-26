@@ -26,9 +26,9 @@
 		#region Public Properties
 		public int Count => this.cache?.Count ?? 0;
 
-		public IReadOnlyCollection<TKey> Keys => this.cache.Keys;
+		public IEnumerable<TKey> Keys => this.cache.Keys;
 
-		public IReadOnlyCollection<TValue> Values => this.cache.Values;
+		public IEnumerable<TValue> Values => this.cache.Values;
 
 		public int Size
 		{
