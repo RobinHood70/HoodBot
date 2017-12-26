@@ -28,8 +28,14 @@
 
 		#region Public Properties
 
+		/// <summary>Gets the namespace collection as a collection of their IDs.</summary>
+		public IEnumerable<int> AllIds => this.IdsDictionary.Keys;
+
+		/// <summary>Gets the number of namespaces in the collection.</summary>
+		public int Count => this.IdsDictionary.Count;
+
 		/// <summary>Gets the namespace collection as a collection of their IDs, but excluding the special namespaces.</summary>
-		public IEnumerable<int> All
+		public IEnumerable<int> Ids
 		{
 			get
 			{
@@ -42,12 +48,6 @@
 				}
 			}
 		}
-
-		/// <summary>Gets the namespace collection as a collection of their IDs.</summary>
-		public IEnumerable<int> AsIds => this.IdsDictionary.Keys;
-
-		/// <summary>Gets the number of namespaces in the collection.</summary>
-		public int Count => this.IdsDictionary.Count;
 		#endregion
 
 		#region Protected Properties

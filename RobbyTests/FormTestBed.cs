@@ -351,7 +351,7 @@
 		public void SearchTests()
 		{
 			var titles = new TitleCollection(this.Wiki);
-			titles.AddSearchResults("aleph", WhatToSearch.Title, this.Wiki.Namespaces.All);
+			titles.AddSearchResults("aleph", WhatToSearch.Title, this.Wiki.Namespaces.Ids);
 			DumpTitles(titles);
 		}
 
@@ -418,12 +418,6 @@
 			this.Wiki.Upload(fileName, destinationName, "Test upload");
 		}
 
-		public void UserMessageTests()
-		{
-			var user = new User(this.Wiki, "RobinHood70");
-			user.NewTalkPageMessage("Test Message", "Hi there!", "Create a test message.");
-		}
-
 		public void WatchTests()
 		{
 			var titles = new TitleCollection(this.Wiki, "User:RobinHood70");
@@ -476,7 +470,6 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			this.UserMessageTests();
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;

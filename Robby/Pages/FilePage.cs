@@ -27,7 +27,7 @@
 		#endregion
 
 		#region Public Methods
-		public IEnumerable<string> FileUsage() => FileUsage(this.Site.Namespaces.All, Filter.All);
+		public IEnumerable<string> FileUsage() => FileUsage(this.Site.Namespaces.Ids, Filter.All);
 
 		public IEnumerable<string> FileUsage(IEnumerable<int> namespaces, Filter filterRedirects)
 		{
