@@ -1,5 +1,4 @@
 ﻿Site
-QueryPageResult QueryPage(QueryPageInput input);
 IReadOnlyList<RecentChangesItem> RecentChanges(RecentChangesInput input);
 string Rsd();
 
