@@ -110,6 +110,30 @@
 			DumpTitles(titles);
 		}
 
+		public void BlocksTests()
+		{
+			var result = this.Wiki.GetBlocks(new[] { "RobinHood70", "HoodBot", "HotnBOThered", "Dagoth Ur" });
+			foreach (var item in result)
+			{
+				var expiry = item.Expiry == DateTime.MaxValue ? "indefinite" : item.Expiry.ToString();
+				Debug.WriteLine($"{item.User} blocked by {item.BlockedBy} on {item.StartTime}. Expires: {expiry}");
+			}
+
+			result = this.Wiki.GetBlocks(Filter.Only, Filter.All, Filter.All, Filter.All);
+			var set = new HashSet<string>();
+			foreach (var item in result)
+			{
+				set.Add(item.User);
+			}
+
+			var list = new List<string>(set);
+			list.Sort();
+			foreach (var item in list)
+			{
+				Debug.WriteLine(item);
+			}
+		}
+
 		public void CategoryMembersTests()
 		{
 			var titles = new TitleCollection(this.Wiki);
@@ -536,7 +560,7 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			this.UsersTests();
+			this.BlocksTests();
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;
