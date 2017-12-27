@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using RobinHood70.Robby.Pages;
 	using RobinHood70.WallE.Base;
 	using static WikiCommon.Globals;
 
@@ -25,8 +24,8 @@
 
 			this.New = contribution.Flags.HasFlag(UserContributionFlags.New);
 			this.Patrolled = contribution.Flags.HasFlag(UserContributionFlags.Patrolled);
-			this.Size = contribution.Size;
-			this.SizeDifference = contribution.SizeDifference;
+			this.NewSize = contribution.Size;
+			this.OldSize = contribution.Size - contribution.SizeDifference;
 			this.Tags = contribution.Tags;
 		}
 
@@ -36,9 +35,9 @@
 
 		public bool Patrolled { get; }
 
-		public int Size { get; }
+		public int NewSize { get; }
 
-		public int SizeDifference { get; }
+		public int OldSize { get; }
 
 		public IReadOnlyList<string> Tags { get; }
 
