@@ -448,7 +448,7 @@
 			}
 
 			var index = this.GetArticlePath(this.userTalkSpace + ":" + this.UserName);
-			return string.IsNullOrEmpty(this.Client.Get(new Uri(index)));
+			return !string.IsNullOrEmpty(this.Client.Get(new Uri(index)));
 		}
 
 		/// <summary>Compares two revisions or pages using the <a href="https://www.mediawiki.org/wiki/API:Compare">Compare</a> API module.</summary>
