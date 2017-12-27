@@ -155,6 +155,22 @@
 			EnableParserTitle = title?.FullPageName,
 		});
 
+		public IReadOnlyList<RecentChange> GetRecentChanges() => this.GetRecentChanges(new RecentChangesInput());
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime start, DateTime end) => this.GetRecentChanges(new RecentChangesInput() { Start = start, End = end });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime start, DateTime end, Filter filterAnonymous, Filter filterBot, Filter filterMinor, Filter filterPatrolled, Filter filterRedirects) => this.GetRecentChanges(new RecentChangesInput() { Start = start, End = end, FilterAnonymous = filterAnonymous, FilterBot = filterBot, FilterMinor = filterMinor, FilterPatrolled = filterPatrolled, FilterRedirects = filterRedirects });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(int count, bool startFromOldest) => this.GetRecentChanges(new RecentChangesInput() { MaxItems = count, SortAscending = startFromOldest });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(int count, bool startFromOldest, Filter filterAnonymous, Filter filterBot, Filter filterMinor, Filter filterPatrolled, Filter filterRedirects) => this.GetRecentChanges(new RecentChangesInput() { MaxItems = count, SortAscending = startFromOldest, FilterAnonymous = filterAnonymous, FilterBot = filterBot, FilterMinor = filterMinor, FilterPatrolled = filterPatrolled, FilterRedirects = filterRedirects });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(string tag) => this.GetRecentChanges(new RecentChangesInput() { Tag = tag });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(string user, bool allButThis) => this.GetRecentChanges(new RecentChangesInput() { User = user, ExcludeUser = allButThis });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(IEnumerable<string> types) => this.GetRecentChanges(new RecentChangesInput() { Types = types });
+
 		public virtual Title GetRedirectTarget(string text)
 		{
 			if (text != null)
@@ -391,6 +407,18 @@
 			}
 
 			return retval.AsReadOnly();
+		}
+
+		private IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesInput input)
+		{
+			var result = this.AbstractionLayer.RecentChanges(input);
+			var retval = new List<RecentChange>(result.Count);
+			foreach (var item in result)
+			{
+				retval.Add(new RecentChange(this, item));
+			}
+
+			return retval;
 		}
 
 		private IReadOnlyList<string> GetUsers(AllUsersInput input)

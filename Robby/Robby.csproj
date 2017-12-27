@@ -72,6 +72,7 @@
     <Compile Include="Pages\Page.cs" />
     <Compile Include="PageCollection.cs" />
     <Compile Include="Design\TitleCollectionBase.cs" />
+    <Compile Include="RecentChange.cs" />
     <Compile Include="RecentChangesOptions.cs" />
     <Compile Include="RedirectTitle.cs" />
     <Compile Include="TitleCollection.cs" />
