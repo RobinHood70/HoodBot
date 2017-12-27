@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Base
 
 	#region Public Enumerations
 	[Flags]
-	public enum RecentChangeFlags
+	public enum RecentChangesFlags
 	{
 		None = 0,
 		Bot = 1,
@@ -24,7 +24,7 @@ namespace RobinHood70.WallE.Base
 
 		public IReadOnlyDictionary<string, object> ExtraData { get; set; }
 
-		public RecentChangeFlags Flags { get; set; }
+		public RecentChangesFlags Flags { get; set; }
 
 		public long Id { get; set; }
 

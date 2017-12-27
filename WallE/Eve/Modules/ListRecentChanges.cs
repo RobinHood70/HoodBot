@@ -75,10 +75,10 @@ namespace RobinHood70.WallE.Eve.Modules
 			item.RecentChangeType = (string)result["type"];
 			item.Id = (long?)result["rcid"] ?? 0;
 			item.Flags =
-				result.GetFlag("bot", RecentChangeFlags.Bot) |
-				result.GetFlag("minor", RecentChangeFlags.Minor) |
-				result.GetFlag("new", RecentChangeFlags.New) |
-				result.GetFlag("redirect", RecentChangeFlags.Redirect);
+				result.GetFlag("bot", RecentChangesFlags.Bot) |
+				result.GetFlag("minor", RecentChangesFlags.Minor) |
+				result.GetFlag("new", RecentChangesFlags.New) |
+				result.GetFlag("redirect", RecentChangesFlags.Redirect);
 			item.OldLength = (int?)result["oldlen"] ?? 0;
 			item.NewLength = (int?)result["newlen"] ?? 0;
 			item.PatrolToken = (string)result["patroltoken"];
