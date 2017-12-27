@@ -47,7 +47,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Pages\Block.cs" />
+    <Compile Include="Block.cs" />
     <Compile Include="Pages\Category.cs" />
     <Compile Include="Design\CacheDictionary.cs" />
     <Compile Include="Design\PageLoadOptions.cs" />

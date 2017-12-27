@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.Robby.Pages
+﻿namespace RobinHood70.Robby
 {
 	using System;
 	using RobinHood70.WallE.Base;
