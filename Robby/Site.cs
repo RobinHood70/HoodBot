@@ -89,6 +89,8 @@
 		#endregion
 
 		#region Public Methods
+		public bool ClearMessage() => this.AbstractionLayer.ClearHasMessage();
+
 		public virtual void DownloadFile(string resource, string fileName) => this.AbstractionLayer.Download(new DownloadInput(resource, fileName));
 
 		public void DownloadFile(Uri uri, string fileName) => this.DownloadFile(uri?.OriginalString, fileName);
