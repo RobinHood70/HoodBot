@@ -81,8 +81,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Pages\Revision.cs" />
-    <Compile Include="Pages\RevisionCollection.cs" />
+    <Compile Include="Revision.cs" />
+    <Compile Include="RevisionCollection.cs" />
     <Compile Include="Site.cs" />
     <Compile Include="SiteCapabilities.cs" />
     <Compile Include="Title.cs" />
