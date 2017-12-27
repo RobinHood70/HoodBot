@@ -135,6 +135,8 @@
 			Arguments = arguments,
 		});
 
+		public IReadOnlyList<string> PagePropertyNames => this.AbstractionLayer.PagePropertyNames(new PagePropertyNamesInput());
+
 		public string GetParsedMessage(string message, IEnumerable<string> arguments) => this.GetParsedMessage(message, arguments, null);
 
 		public string GetParsedMessage(string message, IEnumerable<string> arguments, Title title)
