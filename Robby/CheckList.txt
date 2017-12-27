@@ -1,5 +1,4 @@
 ﻿Site
-IReadOnlyList<BlocksResult> Blocks(BlocksInput input);
 bool ClearHasMessage();
 IReadOnlyList<PagePropertyNamesItem> PagePropertyNames(PagePropertyNamesInput input);
 PatrolResult Patrol(PatrolInput input);
