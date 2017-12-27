@@ -162,7 +162,7 @@
 
 		public void AddQueryPage(string page) => this.FillFromPageSet(new QueryPageInput(page));
 
-		public void AddQueryPage(string page, IReadOnlyDictionary<string, string> parameters) => this.FillFromPageSet(new QueryPageInput(page) { Parameters = parameters });
+		public void AddQueryPage(string page, IEnumerable<KeyValuePair<string, string>> parameters) => this.FillFromPageSet(new QueryPageInput(page) { Parameters = parameters });
 
 		public void AddRecentChanges() => this.AddRecentChanges(new RecentChangesOptions());
 
