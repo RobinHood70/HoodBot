@@ -200,6 +200,10 @@
 
 		public void AddProtectedTitles(IEnumerable<int> namespaces, IEnumerable<string> levels) => this.AddProtectedTitles(new ProtectedTitlesInput() { Namespaces = namespaces, Levels = levels });
 
+		public void AddQueryPage(string pageName) => this.AddQueryPage(new QueryPageInput(pageName));
+
+		public void AddQueryPage(string pageName, IEnumerable<KeyValuePair<string, string>> parameters) => this.AddQueryPage(new QueryPageInput(pageName) { Parameters = parameters });
+
 		public void AddRedirectsToNamespace(int ns) => this.AddRedirectsToNamespace(new AllRedirectsInput { Namespace = ns });
 
 		public void AddRedirectsToNamespace(int ns, string prefix) => this.AddRedirectsToNamespace(new AllRedirectsInput { Namespace = ns, Prefix = prefix });
@@ -346,6 +350,12 @@
 		private void AddProtectedTitles(ProtectedTitlesInput input)
 		{
 			var result = this.Site.AbstractionLayer.ProtectedTitles(input);
+			this.FillFromTitleItems(result);
+		}
+
+		private void AddQueryPage(QueryPageInput input)
+		{
+			var result = this.Site.AbstractionLayer.QueryPage(input);
 			this.FillFromTitleItems(result);
 		}
 
