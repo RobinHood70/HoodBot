@@ -2,7 +2,6 @@
 QueryPageResult QueryPage(QueryPageInput input);
 IReadOnlyList<RecentChangesItem> RecentChanges(RecentChangesInput input);
 string Rsd();
-UploadResult Upload(UploadInput input);
 
 // In retrospect, I don't think it makes sense to include any of these, but I'll leave this list here for now for future reconsideration. 
 Titles
