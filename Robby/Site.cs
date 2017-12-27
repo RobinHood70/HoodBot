@@ -365,7 +365,7 @@
 			var retval = new List<Block>(result.Count);
 			foreach (var item in result)
 			{
-				retval.Add(new Block(item.User ?? (item.RangeStart + '-' + item.RangeEnd), item.By, item.Reason, item.Timestamp ?? DateTime.MinValue, item.Expiry ?? DateTime.MaxValue, (BlockFlags)item.Flags, item.Automatic));
+				retval.Add(new Block(item.User, item.By, item.Reason, item.Timestamp ?? DateTime.MinValue, item.Expiry ?? DateTime.MaxValue, (BlockFlags)item.Flags, item.Automatic));
 			}
 
 			return retval;
