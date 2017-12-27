@@ -40,8 +40,8 @@ namespace RobinHood70.WallE.Eve.Modules
 			request
 				.Add("namespace", input.Namespaces)
 				.AddIf("filterredir", "redirects", input.FilterRedirects == Filter.Only && this.SiteVersion >= 126)
-				.AddIf("filterredir", "all", input.FilterRedirects == Filter.All && this.SiteVersion >= 126)
-				.AddIf("redirect", input.FilterRedirects == Filter.Only || (input.FilterRedirects == Filter.All && new Random().NextDouble() < 0.5), this.SiteVersion < 126)
+				.AddIf("filterredir", "all", input.FilterRedirects == Filter.Any && this.SiteVersion >= 126)
+				.AddIf("redirect", input.FilterRedirects == Filter.Only || (input.FilterRedirects == Filter.Any && new Random().NextDouble() < 0.5), this.SiteVersion < 126)
 				.Add("limit", this.Limit);
 		}
 

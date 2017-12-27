@@ -308,9 +308,9 @@
 
 		#region Private Static Methods
 		private static Filter FlagToFilter(Enum showOnly, Enum hide, Enum flag) =>
-			hide.HasFlag(flag) ? Filter.Filter :
+			hide.HasFlag(flag) ? Filter.Exclude :
 			showOnly.HasFlag(flag) ? Filter.Only :
-			Filter.All;
+			Filter.Any;
 		#endregion
 
 		#region Private Methods

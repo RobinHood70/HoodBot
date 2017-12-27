@@ -27,7 +27,7 @@
 		#endregion
 
 		#region Public Methods
-		public IReadOnlyList<string> FileUsage() => FileUsage(this.Site.Namespaces.RegularIds, Filter.All);
+		public IReadOnlyList<string> FileUsage() => FileUsage(this.Site.Namespaces.RegularIds, Filter.Any);
 
 		public IReadOnlyList<string> FileUsage(IEnumerable<int> namespaces, Filter filterRedirects)
 		{

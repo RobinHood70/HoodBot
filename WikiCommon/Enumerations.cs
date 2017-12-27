@@ -41,13 +41,13 @@
 	public enum Filter
 	{
 		/// <summary>No filter.</summary>
-		All = Tristate.Unknown,
+		Any = Tristate.Unknown,
 
 		/// <summary>Only include these results (e.g., redirects only).</summary>
 		Only = Tristate.True,
 
-		/// <summary>Filter out these results (e.g., non-redirects only).</summary>
-		Filter = Tristate.False,
+		/// <summary>Filter out these results (e.g., everything except redirects).</summary>
+		Exclude = Tristate.False,
 	}
 
 	/// <summary>The types of entries that appear in Recent Changes</summary>

@@ -105,7 +105,7 @@
 		public void BacklinksTests()
 		{
 			var titles = new TitleCollection(this.Wiki);
-			titles.AddBacklinks("Oblivion:Oblivion", BacklinksTypes.Backlinks | BacklinksTypes.EmbeddedIn, true, Filter.All, MediaWikiNamespaces.Template);
+			titles.AddBacklinks("Oblivion:Oblivion", BacklinksTypes.Backlinks | BacklinksTypes.EmbeddedIn, true, Filter.Any, MediaWikiNamespaces.Template);
 			this.CheckCollection(titles, "Backlinks");
 			DumpTitles(titles);
 		}
@@ -119,7 +119,7 @@
 				Debug.WriteLine($"{item.User} blocked by {item.BlockedBy} on {item.StartTime}. Expires: {expiry}");
 			}
 
-			result = this.Wiki.GetBlocks(Filter.Only, Filter.All, Filter.All, Filter.All);
+			result = this.Wiki.GetBlocks(Filter.Only, Filter.Any, Filter.Exclude, Filter.Any);
 			var set = new HashSet<string>();
 			foreach (var item in result)
 			{
@@ -285,7 +285,7 @@
 		{
 			var pages = new PageCollection(this.Wiki) { LoadOptions = PageLoadOptions.None };
 			var categoryTitles = new TitleCollection(this.Wiki, "API:Categories", "API:Purge");
-			pages.AddPageCategories(categoryTitles, Filter.All);
+			pages.AddPageCategories(categoryTitles, Filter.Any);
 			DumpTitles(pages);
 		}
 
@@ -408,12 +408,12 @@
 			var titles = new TitleCollection(this.Wiki);
 			var sw = new Stopwatch();
 			sw.Start();
-			titles.AddNamespace(MediaWikiNamespaces.Template, Filter.All, "A", "C");
+			titles.AddNamespace(MediaWikiNamespaces.Template, Filter.Any, "A", "C");
 			Debug.WriteLine("Count: " + titles.Count);
 			titles.Clear();
-			titles.AddNamespace(MediaWikiNamespaces.Template, Filter.All, "A", "B");
+			titles.AddNamespace(MediaWikiNamespaces.Template, Filter.Any, "A", "B");
 			Debug.WriteLine("Count: " + titles.Count);
-			titles.AddNamespace(MediaWikiNamespaces.Template, Filter.All, "A", "C");
+			titles.AddNamespace(MediaWikiNamespaces.Template, Filter.Any, "A", "C");
 			Debug.WriteLine("Count: " + titles.Count);
 			Debug.WriteLine("Time: " + sw.ElapsedMilliseconds);
 			foreach (var title in titles)

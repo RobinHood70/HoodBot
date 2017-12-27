@@ -182,7 +182,7 @@
 			{
 				case Filter.Only:
 					return this.Add(name, new string[] { trueValue });
-				case Filter.Filter:
+				case Filter.Exclude:
 					return this.Add(name, new string[] { '!' + trueValue });
 				default:
 					return this;
@@ -209,7 +209,7 @@
 			{
 				case Filter.Only:
 					return this.Add(name, onlyName);
-				case Filter.Filter:
+				case Filter.Exclude:
 					return this.Add(name, filterName);
 				default:
 					return this;

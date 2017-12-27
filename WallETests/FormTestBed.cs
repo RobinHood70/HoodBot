@@ -657,7 +657,7 @@
 			this.Edit("Test Redirect 1", "#REDIRECT [[Test Page 1]]", "Create redirect");
 			this.UploadRandomImage("Test Image 1.jpg");
 			this.StartStopwatch("Backlinks");
-			var input = new BacklinksInput("Test Page 1", BacklinksTypes.Backlinks) { FilterRedirects = Filter.All };
+			var input = new BacklinksInput("Test Page 1", BacklinksTypes.Backlinks) { FilterRedirects = Filter.Any };
 			var result = this.wiki.Backlinks(input);
 			var pages = this.wiki.LoadPages(new PageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
@@ -668,7 +668,7 @@
 
 			this.CheckPagesResult(pages);
 
-			input = new BacklinksInput("File:Test Image 1.jpg", BacklinksTypes.EmbeddedIn) { FilterRedirects = Filter.All };
+			input = new BacklinksInput("File:Test Image 1.jpg", BacklinksTypes.EmbeddedIn) { FilterRedirects = Filter.Any };
 			result = this.wiki.Backlinks(input);
 			pages = this.wiki.LoadPages(new PageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
@@ -679,7 +679,7 @@
 
 			this.CheckPagesResult(pages);
 
-			input = new BacklinksInput("File:Test Image 1.jpg", BacklinksTypes.ImageUsage) { FilterRedirects = Filter.All };
+			input = new BacklinksInput("File:Test Image 1.jpg", BacklinksTypes.ImageUsage) { FilterRedirects = Filter.Any };
 			result = this.wiki.Backlinks(input);
 			pages = this.wiki.LoadPages(new PageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
@@ -690,7 +690,7 @@
 
 			this.CheckPagesResult(pages);
 
-			input = new BacklinksInput("File:Test Image 1.jpg", BacklinksTypes.All) { FilterRedirects = Filter.All };
+			input = new BacklinksInput("File:Test Image 1.jpg", BacklinksTypes.All) { FilterRedirects = Filter.Any };
 			result = this.wiki.Backlinks(input);
 			this.CheckCollection(result, "result");
 			if (result.Count > 0)
