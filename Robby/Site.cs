@@ -229,6 +229,10 @@
 
 		public virtual void Logout() => this.AbstractionLayer.Logout();
 
+		public bool Patrol(long rcid) => this.Patrol(new PatrolInput(rcid));
+
+		public bool PatrolRevision(long revid) => this.Patrol(PatrolInput.FromRevisionId(revid));
+
 		public virtual void PublishWarning(IMessageSource sender, string warning) => this.WarningOccurred?.Invoke(this, new WarningEventArgs(sender, warning));
 
 		/// <summary>Upload a file to the wiki.</summary>
@@ -400,6 +404,12 @@
 			}
 
 			return retval;
+		}
+
+		private bool Patrol(PatrolInput input)
+		{
+			var result = this.AbstractionLayer.Patrol(input);
+			return result.Title != null;
 		}
 
 		/// <summary>Forwards warning events from the abstraction layer to the site.</summary>

@@ -1,5 +1,4 @@
 ﻿Site
-PatrolResult Patrol(PatrolInput input);
 QueryPageResult QueryPage(QueryPageInput input);
 IReadOnlyList<RecentChangesItem> RecentChanges(RecentChangesInput input);
 string Rsd();
