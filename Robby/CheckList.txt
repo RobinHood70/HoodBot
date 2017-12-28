@@ -1,7 +1,4 @@
-﻿Site
-string Rsd();
-
-// In retrospect, I don't think it makes sense to include any of these, but I'll leave this list here for now for future reconsideration. 
+﻿// In retrospect, I don't think it makes sense to include any of these, but I'll leave this list here for now for future reconsideration. 
 Titles
 // The idea for most of these was that they would return custom results based on an input set of titles.
 API:Contributors|contributors
@@ -17,3 +14,6 @@ User
 UserInfoResult UserInfo(UserInfoInput input);
 UserRightsResult UserRights(UserRightsInput input);
 IReadOnlyList<WatchlistItem> Watchlist(WatchlistInput input);
+
+Site
+string Rsd();
