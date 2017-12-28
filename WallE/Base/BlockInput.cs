@@ -2,20 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
-
-	#region Public Enumerations
-	[Flags]
-	public enum BlockUserFlags
-	{
-		None = 0,
-		AllowUserTalk = 1,
-		AnonymousOnly = 1 << 1,
-		AutoBlock = 1 << 2,
-		Hidden = 1 << 3,
-		NoCreate = 1 << 4,
-		NoEmail = 1 << 5,
-	}
-	#endregion
+	using RobinHood70.WikiCommon;
 
 	public class BlockInput
 	{
@@ -30,7 +17,7 @@ namespace RobinHood70.WallE.Base
 
 		public string ExpiryRelative { get; set; }
 
-		public BlockUserFlags Flags { get; set; }
+		public BlockFlags Flags { get; set; }
 
 		public string Reason { get; set; }
 

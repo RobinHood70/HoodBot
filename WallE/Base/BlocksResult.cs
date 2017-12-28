@@ -2,6 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
+	using RobinHood70.WikiCommon;
 
 	public class BlocksResult
 	{
@@ -14,7 +15,7 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Expiry { get; set; }
 
-		public BlockUserFlags Flags { get; set; }
+		public BlockFlags Flags { get; set; }
 
 		public long Id { get; set; }
 

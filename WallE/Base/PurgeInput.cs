@@ -2,13 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
-
-	public enum PurgeUpdateMethod
-	{
-		Normal,
-		LinkUpdate,
-		RecursiveLinkUpdate
-	}
+	using RobinHood70.WikiCommon;
 
 	public class PurgeInput : PageSetInputBase
 	{
@@ -40,7 +34,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public PurgeUpdateMethod Method { get; set; }
+		public PurgeMethod Method { get; set; }
 		#endregion
 
 		#region Public Static Methods

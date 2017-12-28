@@ -4,6 +4,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Base;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
+	using RobinHood70.WikiCommon;
 	using static WikiCommon.Globals;
 
 	public class ActionPurge : ActionModulePageSet<PurgeInput, PurgeResult>
@@ -31,8 +32,8 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(request, nameof(request));
 			ThrowNull(input, nameof(input));
 			request
-				.AddIf("forcelinkupdate", input.Method == PurgeUpdateMethod.LinkUpdate, this.SiteVersion >= 118)
-				.AddIf("forcerecursivelinkupdate", input.Method == PurgeUpdateMethod.RecursiveLinkUpdate, this.SiteVersion >= 122);
+				.AddIf("forcelinkupdate", input.Method == PurgeMethod.LinkUpdate, this.SiteVersion >= 118)
+				.AddIf("forcerecursivelinkupdate", input.Method == PurgeMethod.RecursiveLinkUpdate, this.SiteVersion >= 122);
 		}
 
 		protected override void DeserializePage(JToken result, PurgeResult page)

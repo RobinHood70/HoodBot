@@ -61,7 +61,7 @@
 			var input = new BlockInput(this.Name)
 			{
 				Expiry = expiry,
-				Flags = (BlockUserFlags)flags,
+				Flags = flags,
 				Reason = reason,		
 				Reblock = reblock,
 			};
@@ -73,7 +73,7 @@
 			var input = new BlockInput(this.Name)
 			{
 				ExpiryRelative = relativeExpiry,
-				Flags = (BlockUserFlags)flags,
+				Flags = flags,
 				Reason = reason,
 				Reblock = reblock,
 			};
@@ -187,7 +187,7 @@
 
 		private void SetInfo(UsersItem user)
 		{
-			this.BlockInfo = new Block(user.Name, user.BlockedBy, user.BlockReason, user.BlockTimestamp ?? DateTime.MinValue, user.BlockExpiry ?? DateTime.MaxValue, BlockFlags.Unknown, false);
+			this.BlockInfo = new Block(user.Name, user.BlockedBy, user.BlockReason, user.BlockTimestamp ?? DateTime.MinValue, user.BlockExpiry ?? DateTime.MaxValue, BlockFlags.None, false);
 			this.EditCount = user.EditCount;
 			this.Emailable = user.Flags.HasFlag(UserFlags.Emailable);
 			this.Gender = user.Gender;

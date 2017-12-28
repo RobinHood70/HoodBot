@@ -169,7 +169,7 @@
 
 		public IReadOnlyList<RecentChange> GetRecentChanges(string user, bool allButThis) => this.GetRecentChanges(new RecentChangesInput() { User = user, ExcludeUser = allButThis });
 
-		public IReadOnlyList<RecentChange> GetRecentChanges(IEnumerable<string> types) => this.GetRecentChanges(new RecentChangesInput() { Types = types });
+		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesInput() { Types = types });
 
 		public virtual Title GetRedirectTarget(string text)
 		{
@@ -389,7 +389,7 @@
 			var retval = new List<Block>(result.Count);
 			foreach (var item in result)
 			{
-				retval.Add(new Block(item.User, item.By, item.Reason, item.Timestamp ?? DateTime.MinValue, item.Expiry ?? DateTime.MaxValue, (BlockFlags)item.Flags, item.Automatic));
+				retval.Add(new Block(item.User, item.By, item.Reason, item.Timestamp ?? DateTime.MinValue, item.Expiry ?? DateTime.MaxValue, item.Flags, item.Automatic));
 			}
 
 			return retval;

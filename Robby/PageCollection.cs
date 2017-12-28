@@ -162,6 +162,7 @@
 
 		public void AddQueryPage(string page) => this.FillFromPageSet(new QueryPageInput(page));
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Design supports any Dictionary-like construct, which is not otherwise possible.")]
 		public void AddQueryPage(string page, IEnumerable<KeyValuePair<string, string>> parameters) => this.FillFromPageSet(new QueryPageInput(page) { Parameters = parameters });
 
 		public void AddRecentChanges() => this.AddRecentChanges(new RecentChangesOptions());

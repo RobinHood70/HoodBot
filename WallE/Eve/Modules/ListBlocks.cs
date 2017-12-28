@@ -5,6 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Base;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
+	using RobinHood70.WikiCommon;
 	using static WikiCommon.Globals;
 
 	internal class ListBlocks : ListModule<BlocksInput, BlocksResult>
@@ -66,12 +67,12 @@ namespace RobinHood70.WallE.Eve.Modules
 				Reason = (string)result["reason"],
 				Automatic = result["automatic"].AsBCBool(),
 				Flags =
-				result.GetFlag("allowusertalk", BlockUserFlags.AllowUserTalk) |
-				result.GetFlag("anononly", BlockUserFlags.AnonymousOnly) |
-				result.GetFlag("autoblock", BlockUserFlags.AutoBlock) |
-				result.GetFlag("hidden", BlockUserFlags.Hidden) |
-				result.GetFlag("nocreate", BlockUserFlags.NoCreate) |
-				result.GetFlag("noemail", BlockUserFlags.NoEmail),
+				result.GetFlag("allowusertalk", BlockFlags.AllowUserTalk) |
+				result.GetFlag("anononly", BlockFlags.AnonymousOnly) |
+				result.GetFlag("autoblock", BlockFlags.AutoBlock) |
+				result.GetFlag("hidden", BlockFlags.Hidden) |
+				result.GetFlag("nocreate", BlockFlags.NoCreate) |
+				result.GetFlag("noemail", BlockFlags.NoEmail),
 				RangeStart = (string)result["rangestart"],
 				RangeEnd = (string)result["rangeend"],
 			};

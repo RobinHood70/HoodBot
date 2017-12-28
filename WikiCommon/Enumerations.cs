@@ -1,4 +1,6 @@
-﻿namespace RobinHood70.WikiCommon
+﻿/// <summary>This namespace houses common elements between WallE and Robby.</summary>
+/// <remarks>It's a bit of a kludge to do it this way, and for so few, I may go back to the double defines (i.e., enum members in Robby are defined as equivalent enum members from WallE and cast as needed). This has the problem of name overlap, though, requiring either that unique names are used, or that fully-qualified names are used in some instances.</remarks>
+namespace RobinHood70.WikiCommon
 {
 	using System;
 
@@ -17,6 +19,18 @@
 
 		/// <summary>All</summary>
 		All = Backlinks | EmbeddedIn | ImageUsage
+	}
+
+	[Flags]
+	public enum BlockFlags
+	{
+		None = 0,
+		AllowUserTalk = 1,
+		AnonymousOnly = 1 << 1,
+		AutoBlock = 1 << 2,
+		Hidden = 1 << 3,
+		NoCreate = 1 << 4,
+		NoEmail = 1 << 5,
 	}
 
 	/// <summary>The page groupings within a category.</summary>
@@ -48,6 +62,13 @@
 
 		/// <summary>Filter out these results (e.g., everything except redirects).</summary>
 		Exclude = Tristate.False,
+	}
+
+	public enum PurgeMethod
+	{
+		Normal,
+		LinkUpdate,
+		RecursiveLinkUpdate
 	}
 
 	/// <summary>The types of entries that appear in Recent Changes</summary>

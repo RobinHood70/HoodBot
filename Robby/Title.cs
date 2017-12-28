@@ -10,6 +10,7 @@
 	using static Properties.Resources;
 	using static WikiCommon.Globals;
 
+	#region Public Enumerations
 	public enum ProtectionLevel
 	{
 		NoChange,
@@ -17,6 +18,7 @@
 		Semi,
 		Full,
 	}
+	#endregion
 
 	/// <summary>Provides a light-weight holder for titles and provides several information and manipulation functions.</summary>
 	public class Title : IWikiTitle, IMessageSource

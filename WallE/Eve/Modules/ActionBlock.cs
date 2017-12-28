@@ -5,6 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Design;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
+	using RobinHood70.WikiCommon;
 	using static Properties.EveMessages;
 	using static WikiCommon.Globals;
 
@@ -38,12 +39,12 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("expiry", input.Expiry)
 				.AddIfNotNullIf("expiry", input.ExpiryRelative, input.Expiry == null)
 				.AddIfNotNull("reason", input.Reason)
-				.Add("anononly", input.Flags.HasFlag(BlockUserFlags.AnonymousOnly))
-				.Add("nocreate", input.Flags.HasFlag(BlockUserFlags.NoCreate))
-				.Add("autoblock", input.Flags.HasFlag(BlockUserFlags.AutoBlock))
-				.Add("noemail", input.Flags.HasFlag(BlockUserFlags.NoEmail))
-				.Add("hidename", input.Flags.HasFlag(BlockUserFlags.Hidden))
-				.Add("allowusertalk", input.Flags.HasFlag(BlockUserFlags.AllowUserTalk))
+				.Add("anononly", input.Flags.HasFlag(BlockFlags.AnonymousOnly))
+				.Add("nocreate", input.Flags.HasFlag(BlockFlags.NoCreate))
+				.Add("autoblock", input.Flags.HasFlag(BlockFlags.AutoBlock))
+				.Add("noemail", input.Flags.HasFlag(BlockFlags.NoEmail))
+				.Add("hidename", input.Flags.HasFlag(BlockFlags.Hidden))
+				.Add("allowusertalk", input.Flags.HasFlag(BlockFlags.AllowUserTalk))
 				.Add("reblock", input.Reblock)
 				.Add("watchuser", input.WatchUser)
 				.AddHidden("token", input.Token);
@@ -63,12 +64,12 @@ namespace RobinHood70.WallE.Eve.Modules
 			output.Reason = (string)result["reason"];
 			output.WatchUser = result["watchuser"].AsBCBool();
 			output.Flags =
-				result.GetFlag("allowusertalk", BlockUserFlags.AllowUserTalk) |
-				result.GetFlag("anononly", BlockUserFlags.AnonymousOnly) |
-				result.GetFlag("autoblock", BlockUserFlags.AutoBlock) |
-				result.GetFlag("hidename", BlockUserFlags.Hidden) |
-				result.GetFlag("nocreate", BlockUserFlags.NoCreate) |
-				result.GetFlag("noemail", BlockUserFlags.NoEmail);
+				result.GetFlag("allowusertalk", BlockFlags.AllowUserTalk) |
+				result.GetFlag("anononly", BlockFlags.AnonymousOnly) |
+				result.GetFlag("autoblock", BlockFlags.AutoBlock) |
+				result.GetFlag("hidename", BlockFlags.Hidden) |
+				result.GetFlag("nocreate", BlockFlags.NoCreate) |
+				result.GetFlag("noemail", BlockFlags.NoEmail);
 
 			return output;
 		}

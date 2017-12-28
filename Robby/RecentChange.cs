@@ -4,15 +4,6 @@
 	using System.Collections.Generic;
 	using RobinHood70.WallE.Base;
 
-	public enum RecentChangeFlags
-	{
-		None = RecentChangesFlags.None,
-		Bot = RecentChangesFlags.Bot,
-		Minor = RecentChangesFlags.Minor,
-		New = RecentChangesFlags.None,
-		Redirect = RecentChangesFlags.Redirect
-	}
-
 	public class RecentChange
 	{
 		public RecentChange(Site site, RecentChangesItem recentChange)
@@ -21,7 +12,7 @@
 			this.Anonymous = recentChange.UserId == 0;
 			this.Comment = recentChange.Comment;
 			this.Id = recentChange.Id;
-			this.Flags = (RecentChangeFlags)recentChange.Flags;
+			this.Flags = recentChange.Flags;
 			this.LogAction = recentChange.LogAction;
 			this.LogType = recentChange.LogType;
 			this.NewSize = recentChange.NewLength;
@@ -39,7 +30,7 @@
 
 		public string Comment { get; }
 
-		public RecentChangeFlags Flags { get; }
+		public RecentChangesFlags Flags { get; }
 
 		public long Id { get; }
 

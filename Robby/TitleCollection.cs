@@ -8,15 +8,6 @@
 	using static Properties.Resources;
 	using static WikiCommon.Globals;
 
-	#region Public Enumerations
-	public enum PurgeMethod
-	{
-		Normal = PurgeUpdateMethod.Normal,
-		LinkUpdate = PurgeUpdateMethod.LinkUpdate,
-		RecursiveLinkUpdate = PurgeUpdateMethod.RecursiveLinkUpdate
-	}
-	#endregion
-
 	/// <summary>A collection of Title objects.</summary>
 	/// <remarks>This collection class functions similar to a KeyedCollection, but automatically overwrites existing items with new ones. Because Title objects don't support changing item keys, neither does this.</remarks>
 	public class TitleCollection : TitleCollectionBase<Title>, IEnumerable<Title>, IMessageSource
@@ -202,6 +193,7 @@
 
 		public void AddQueryPage(string pageName) => this.AddQueryPage(new QueryPageInput(pageName));
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Design supports any Dictionary-like construct, which is not otherwise possible.")]
 		public void AddQueryPage(string pageName, IEnumerable<KeyValuePair<string, string>> parameters) => this.AddQueryPage(new QueryPageInput(pageName) { Parameters = parameters });
 
 		public void AddRedirectsToNamespace(int ns) => this.AddRedirectsToNamespace(new AllRedirectsInput { Namespace = ns });
@@ -249,7 +241,7 @@
 
 		public PageCollection Purge(PurgeMethod method)
 		{
-			var input = new PurgeInput(this.AsFullPageNames()) { Method = (PurgeUpdateMethod)method };
+			var input = new PurgeInput(this.AsFullPageNames()) { Method = method };
 			var result = this.Site.AbstractionLayer.Purge(input);
 
 			var retval = new PageCollection(this.Site);

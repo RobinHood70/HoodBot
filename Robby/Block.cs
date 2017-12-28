@@ -1,21 +1,7 @@
 ﻿namespace RobinHood70.Robby
 {
 	using System;
-	using RobinHood70.WallE.Base;
-
-	#region Public Enumerations
-	[Flags]
-	public enum BlockFlags
-	{
-		None = BlockUserFlags.None,
-		AccountCreationDisabled = BlockUserFlags.NoCreate,
-		AnonymousOnly = BlockUserFlags.AnonymousOnly,
-		AutoBlock = BlockUserFlags.AutoBlock,
-		EmailDisabled = BlockUserFlags.NoEmail,
-		UserTalk = BlockUserFlags.AllowUserTalk,
-		Unknown = 0x40000000,
-	}
-	#endregion
+	using RobinHood70.WikiCommon;
 
 	public class Block
 	{
