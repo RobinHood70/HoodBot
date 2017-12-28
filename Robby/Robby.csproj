@@ -22,7 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>true</RunCodeAnalysis>
-    <CodeAnalysisRuleSet>..\Testing.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\Main.ruleset</CodeAnalysisRuleSet>
     <DocumentationFile>bin\Debug\Robby.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
