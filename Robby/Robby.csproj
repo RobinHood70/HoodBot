@@ -62,7 +62,7 @@
     <Compile Include="Design\WikiTitleComparerKey.cs" />
     <Compile Include="Design\WikiTitleComparerNamespacePageName.cs" />
     <Compile Include="Design\Extensions.cs" />
-    <Compile Include="Enumerations.cs" />
+    <Compile Include="Filters.cs" />
     <Compile Include="Design\IMessageSource.cs" />
     <Compile Include="MagicWord.cs" />
     <Compile Include="MediaWikiNamespaces.cs" />

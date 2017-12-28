@@ -360,6 +360,12 @@
 			DumpTitles(result);
 		}
 
+		public void RecentChangesTests()
+		{
+			var result = this.Wiki.GetRecentChanges();
+			Debug.WriteLine(result.Count);
+		}
+
 		public void RedirectTargetTests()
 		{
 			var target = this.Wiki.GetRedirectTarget("#REDIRECT [[Template:Hello]]");

@@ -7,6 +7,7 @@
 	using WallE.Base;
 	using WikiCommon;
 	using static WikiCommon.Globals;
+	using static Filters;
 
 	public class PageCollection : TitleCollectionBase<Page>, IMessageSource
 	{
@@ -165,7 +166,7 @@
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Design supports any Dictionary-like construct, which is not otherwise possible.")]
 		public void AddQueryPage(string page, IEnumerable<KeyValuePair<string, string>> parameters) => this.FillFromPageSet(new QueryPageInput(page) { Parameters = parameters });
 
-		public void AddRecentChanges() => this.AddRecentChanges(new RecentChangesOptions());
+		public void AddRecentChanges() => this.FillFromPageSet(new RecentChangesInput());
 
 		public void AddRecentChanges(int ns) => this.FillFromPageSet(new RecentChangesInput() { Namespace = ns });
 
@@ -178,6 +179,8 @@
 		public void AddRecentChanges(RecentChangesFilters showOnly, RecentChangesFilters hide, RecentChangesTypes types) => this.AddRecentChanges(new RecentChangesOptions() { ShowOnly = showOnly, Hide = hide, Types = types });
 
 		public void AddRecentChanges(DateTime? start, DateTime? end) => this.FillFromPageSet(new RecentChangesInput() { Start = start, End = end });
+
+		public void AddRecentChanges(DateTime? start, DateTime? end, RecentChangesFilters showOnly, RecentChangesFilters hide, RecentChangesTypes types) => this.AddRecentChanges(new RecentChangesOptions() { Start = start, End = end, ShowOnly = showOnly, Hide = hide, Types = types });
 
 		public void AddRecentChanges(DateTime start, bool newer) => this.AddRecentChanges(start, newer, 0);
 
@@ -305,13 +308,6 @@
 
 			this.PopulateTitleMap(result);
 		}
-		#endregion
-
-		#region Private Static Methods
-		private static Filter FlagToFilter(Enum showOnly, Enum hide, Enum flag) =>
-			hide.HasFlag(flag) ? Filter.Exclude :
-			showOnly.HasFlag(flag) ? Filter.Only :
-			Filter.Any;
 		#endregion
 
 		#region Private Methods

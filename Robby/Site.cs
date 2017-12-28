@@ -10,6 +10,7 @@
 	using Pages;
 	using WallE.Base;
 	using WikiCommon;
+	using static Filters;
 	using static Properties.Resources;
 	using static WikiCommon.Globals;
 
@@ -157,19 +158,48 @@
 
 		public IReadOnlyList<RecentChange> GetRecentChanges() => this.GetRecentChanges(new RecentChangesInput());
 
-		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime start, DateTime end) => this.GetRecentChanges(new RecentChangesInput() { Start = start, End = end });
-
-		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime start, DateTime end, Filter filterAnonymous, Filter filterBot, Filter filterMinor, Filter filterPatrolled, Filter filterRedirects) => this.GetRecentChanges(new RecentChangesInput() { Start = start, End = end, FilterAnonymous = filterAnonymous, FilterBot = filterBot, FilterMinor = filterMinor, FilterPatrolled = filterPatrolled, FilterRedirects = filterRedirects });
-
-		public IReadOnlyList<RecentChange> GetRecentChanges(int count, bool startFromOldest) => this.GetRecentChanges(new RecentChangesInput() { MaxItems = count, SortAscending = startFromOldest });
-
-		public IReadOnlyList<RecentChange> GetRecentChanges(int count, bool startFromOldest, Filter filterAnonymous, Filter filterBot, Filter filterMinor, Filter filterPatrolled, Filter filterRedirects) => this.GetRecentChanges(new RecentChangesInput() { MaxItems = count, SortAscending = startFromOldest, FilterAnonymous = filterAnonymous, FilterBot = filterBot, FilterMinor = filterMinor, FilterPatrolled = filterPatrolled, FilterRedirects = filterRedirects });
+		public IReadOnlyList<RecentChange> GetRecentChanges(int ns) => this.GetRecentChanges(new RecentChangesInput() { Namespace = ns });
 
 		public IReadOnlyList<RecentChange> GetRecentChanges(string tag) => this.GetRecentChanges(new RecentChangesInput() { Tag = tag });
 
-		public IReadOnlyList<RecentChange> GetRecentChanges(string user, bool allButThis) => this.GetRecentChanges(new RecentChangesInput() { User = user, ExcludeUser = allButThis });
-
 		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesInput() { Types = types });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesFilters showOnly, RecentChangesFilters hide) => this.GetRecentChanges(new RecentChangesOptions() { ShowOnly = showOnly, Hide = hide });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesFilters showOnly, RecentChangesFilters hide, RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesOptions() { ShowOnly = showOnly, Hide = hide, Types = types });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime? start, DateTime? end) => this.GetRecentChanges(new RecentChangesInput() { Start = start, End = end });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime? start, DateTime? end, RecentChangesFilters showOnly, RecentChangesFilters hide, RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesOptions() { Start = start, End = end, ShowOnly = showOnly, Hide = hide, Types = types });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime start, bool newer) => this.GetRecentChanges(start, newer, 0);
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime start, bool newer, int count) => this.GetRecentChanges(new RecentChangesInput() { Start = start, SortAscending = newer, MaxItems = count });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(string user, bool exclude) => this.GetRecentChanges(new RecentChangesInput() { User = user, ExcludeUser = exclude });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesOptions options)
+		{
+			ThrowNull(options, nameof(options));
+			var input = new RecentChangesInput()
+			{
+				Start = options.Start,
+				End = options.End,
+				SortAscending = options.Newer,
+				User = options.User,
+				ExcludeUser = options.ExcludeUser,
+				Namespace = options.Namespace,
+				Tag = options.Tag,
+				Types = options.Types,
+				FilterAnonymous = FlagToFilter(options.ShowOnly, options.Hide, RecentChangesFilters.Anonymous),
+				FilterBot = FlagToFilter(options.ShowOnly, options.Hide, RecentChangesFilters.Bot),
+				FilterMinor = FlagToFilter(options.ShowOnly, options.Hide, RecentChangesFilters.Minor),
+				FilterPatrolled = FlagToFilter(options.ShowOnly, options.Hide, RecentChangesFilters.Patrolled),
+				FilterRedirects = FlagToFilter(options.ShowOnly, options.Hide, RecentChangesFilters.Redirect),
+			};
+
+			return this.GetRecentChanges(input);
+		}
 
 		public virtual Title GetRedirectTarget(string text)
 		{
