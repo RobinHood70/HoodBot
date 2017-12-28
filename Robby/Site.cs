@@ -10,10 +10,10 @@
 	using Pages;
 	using WallE.Base;
 	using WikiCommon;
-	using static Filters;
 	using static Properties.Resources;
 	using static WikiCommon.Globals;
 
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Sufficiently maintainable for now. Could conceivably split off the GetX() methods if needed, I suppose.")]
 	public class Site : IMessageSource
 	{
 		#region Fields

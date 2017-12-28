@@ -7,7 +7,6 @@
 	using WallE.Base;
 	using WikiCommon;
 	using static WikiCommon.Globals;
-	using static Filters;
 
 	public class PageCollection : TitleCollectionBase<Page>, IMessageSource
 	{

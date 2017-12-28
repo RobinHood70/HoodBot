@@ -66,6 +66,21 @@
 		/// <returns>An empty read-only dictionary.</returns>
 		public static IReadOnlyDictionary<TKey, TValue> EmptyReadOnlyDictionary<TKey, TValue>() => new ReadOnlyDictionary<TKey, TValue>(new Dictionary<TKey, TValue>());
 
+		/// <summary>Converts paired show/hide flag enumerations to a Filter object.</summary>
+		/// <param name="showOnly">Show only these types of entries.</param>
+		/// <param name="hide">Hide these types of entries.</param>
+		/// <param name="flag">Type of entry to convert to a Filter.</param>
+		/// <returns>A Filter object that's set to Any if not set in either enum, Exclude if set in the hide enum (or both), and Only if set in the showOnly enum.</returns>
+		public static Filter FlagToFilter(Enum showOnly, Enum hide, Enum flag)
+		{
+			ThrowNull(showOnly, nameof(showOnly));
+			ThrowNull(hide, nameof(hide));
+			ThrowNull(flag, nameof(flag));
+			return hide.HasFlag(flag) ? Filter.Exclude :
+				showOnly.HasFlag(flag) ? Filter.Only :
+				Filter.Any;
+		}
+
 		/// <summary>Convenience method so that CurrentCulture and Invariant are all in the same class for both traditional and formattable strings, and are used the same way.</summary>
 		/// <param name="invariantText">The text to format.</param>
 		/// <param name="values">The values of any parameters in the <paramref name="invariantText"/> parameter.</param>
