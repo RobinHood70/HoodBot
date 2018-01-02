@@ -49,7 +49,6 @@
   <ItemGroup>
     <Compile Include="Block.cs" />
     <Compile Include="Pages\Category.cs" />
-    <Compile Include="Design\CacheDictionary.cs" />
     <Compile Include="Design\PageLoadOptions.cs" />
     <Compile Include="Contribution.cs" />
     <Compile Include="Pages\FileRevision.cs" />
