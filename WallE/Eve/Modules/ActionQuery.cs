@@ -15,7 +15,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	public class ActionQuery : ActionModulePageSet<QueryInput, PageItem>, IQueryPageSet
 	{
 		#region Fields
-		private Func<PageItem> pageItemFactory;
+		private readonly Func<PageItem> pageItemFactory;
 		private MetaUserInfo userModule;
 		#endregion
 

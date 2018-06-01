@@ -6,8 +6,8 @@
 	public class Namespace
 	{
 		#region Fields
-		private HashSet<string> allNames = new HashSet<string>();
-		private NamespaceFlags flags;
+		private readonly HashSet<string> allNames = new HashSet<string>();
+		private readonly NamespaceFlags flags;
 		#endregion
 
 		#region Constructors

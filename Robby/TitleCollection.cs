@@ -143,12 +143,13 @@
 		public void AddCategoryMembers(string category, CategoryTypes categoryTypes, string fromPrefix, string toPrefix)
 		{
 			var cat = Title.ForcedNamespace(this.Site, MediaWikiNamespaces.Category, category);
-			this.AddCategoryMembers(new CategoryMembersInput(cat.FullPageName)
-			{
-				Type = categoryTypes,
-				StartSortKeyPrefix = fromPrefix,
-				EndSortKeyPrefix = toPrefix,
-			}, null);
+			this.AddCategoryMembers(
+				new CategoryMembersInput(cat.FullPageName)
+				{
+					Type = categoryTypes,
+					StartSortKeyPrefix = fromPrefix,
+					EndSortKeyPrefix = toPrefix,
+				}, null);
 		}
 
 		public void AddFiles(string user) => this.AddFiles(new AllImagesInput { User = user });

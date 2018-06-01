@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.Robby.Pages
 {
 	using WallE.Base;
+	using static WikiCommon.Globals;
 
 	public class Message : Page
 	{
@@ -30,6 +31,7 @@
 		#region Public Methods
 		public void Populate(AllMessagesItem item)
 		{
+			ThrowNull(item, nameof(item));
 			this.Invalid = false;
 			this.Customized = item.Flags.HasFlag(MessageFlags.Customized);
 			this.DefaultMissing = item.Flags.HasFlag(MessageFlags.DefaultMissing);
@@ -43,6 +45,7 @@
 		#region Protected Override Methods
 		protected override void PopulateCustomResults(PageItem pageItem)
 		{
+			ThrowNull(pageItem, nameof(pageItem));
 			if (pageItem.Flags.HasFlag(PageFlags.Missing))
 			{
 				this.LoadDefault();

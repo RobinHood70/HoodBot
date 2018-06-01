@@ -17,7 +17,7 @@ namespace RobinHood70.WallE.Clients.Async
 	public class SimpleClientAsync : IFormClientAsync, IDisposable
 	{
 		#region Fields
-		private string cookiesLocation;
+		private readonly string cookiesLocation;
 		private bool disposed;
 		private SimpleClientAsyncRetryHandler handler;
 		private HttpClient httpClient;

@@ -387,7 +387,7 @@
 
 		/// <summary>Retrieves page titles that are creation-protected. Corresponds to the <a href="https://www.mediawiki.org/wiki/API:Protectedtitles">Protectedtitles</a> API module.</summary>
 		/// <param name="input">The input parameters.</param>
-		/// <returns>A list of creation-protected articles</returns>
+		/// <returns>A list of creation-protected articles.</returns>
 		IReadOnlyList<ProtectedTitlesItem> ProtectedTitles(ProtectedTitlesInput input);
 
 		/// <summary>Returns data corresponding to the <a href="https://www.mediawiki.org/wiki/API:Purge">Purge</a> API module.</summary>

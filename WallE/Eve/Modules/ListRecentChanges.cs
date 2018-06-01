@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	internal class ListRecentChanges : ListModule<RecentChangesInput, RecentChangesItem>, IGeneratorModule
 	{
 		#region Static Fields
-		private static HashSet<string> knownProps = new HashSet<string>
+		private static readonly HashSet<string> KnownProps = new HashSet<string>
 		{
 			"actionhidden", "anon", "bot", "comment", "commenthidden", "logaction", "logid", "logtype", "minor", "new", "newlen", "ns", "old_revid", "oldlen", "pageid", "parsedcomment", "patroltoken", "patrolled", "rcid", "redirect", "revid", "suppressed", "tags", "timestamp", "title", "type", "user", "userhidden", "userid",
 		};
@@ -70,7 +70,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			var item = new RecentChangesItem();
 			var logType = (string)result["logtype"];
 			var logAction = (string)result["logaction"];
-			result.ParseLogEvent(item, logType, logAction, knownProps, false);
+			result.ParseLogEvent(item, logType, logAction, KnownProps, false);
 			item.Tags = result.AsReadOnlyList<string>("tags");
 			item.RecentChangeType = (string)result["type"];
 			item.Id = (long?)result["rcid"] ?? 0;

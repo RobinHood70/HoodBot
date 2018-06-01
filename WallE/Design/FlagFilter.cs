@@ -27,8 +27,8 @@ namespace RobinHood70.WallE.Design
 		where T : IConvertible
 	{
 		#region Fields
+		private readonly int siteVersion;
 		private ulong longValue;
-		private int siteVersion;
 		#endregion
 
 		#region Constructors

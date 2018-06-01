@@ -38,7 +38,7 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>Robby.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>SharedKey.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -93,9 +93,10 @@
     <Compile Include="Pages\FilePage.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Robby.pfx" />
+    <None Include="packages.config" />
     <None Include="Robby.ruleset" />
     <AdditionalFiles Include="stylecop.json" />
+    <None Include="SharedKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -115,6 +116,10 @@
       <Project>{64878636-CB8C-434E-A03D-B3946216FC7F}</Project>
       <Name>WikiCommon</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\..\..\NuGet\StyleCop.Analyzers.1.1.0-beta007\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
+    <Analyzer Include="..\..\..\NuGet\StyleCop.Analyzers.1.1.0-beta007\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

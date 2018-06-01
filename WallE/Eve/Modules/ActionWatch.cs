@@ -53,7 +53,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				result.GetFlag("missing", WatchFlags.Missing) |
 				result.GetFlag("unwatched", WatchFlags.Unwatched) |
 				result.GetFlag("watched", WatchFlags.Watched);
-			page.Namespace = FindNamespace(page.Title);
+			page.Namespace = this.FindNamespace(page.Title);
 			this.Pages.Add(page);
 		}
 		#endregion

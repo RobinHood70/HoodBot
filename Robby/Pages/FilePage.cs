@@ -10,7 +10,7 @@
 	public class FilePage : Page
 	{
 		#region Fields
-		private List<FileRevision> fileRevisions = new List<FileRevision>();
+		private readonly List<FileRevision> fileRevisions = new List<FileRevision>();
 		#endregion
 
 		#region Constructors
@@ -27,7 +27,7 @@
 		#endregion
 
 		#region Public Methods
-		public IReadOnlyList<string> FileUsage() => FileUsage(this.Site.Namespaces.RegularIds, Filter.Any);
+		public IReadOnlyList<string> FileUsage() => this.FileUsage(this.Site.Namespaces.RegularIds, Filter.Any);
 
 		public IReadOnlyList<string> FileUsage(IEnumerable<int> namespaces, Filter filterRedirects)
 		{
@@ -48,7 +48,7 @@
 			return retval.AsReadOnly();
 		}
 
-		public IReadOnlyList<string> FindDuplicateFiles() => FindDuplicateFiles(true);
+		public IReadOnlyList<string> FindDuplicateFiles() => this.FindDuplicateFiles(true);
 
 		public IReadOnlyList<string> FindDuplicateFiles(bool localOnly)
 		{

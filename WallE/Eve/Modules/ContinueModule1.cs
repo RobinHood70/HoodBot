@@ -13,9 +13,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Fields
+		private readonly SortedSet<string> modules = new SortedSet<string>();
 		private string currentGeneratorValue;
 		private string savedGeneratorValue;
-		private SortedSet<string> modules = new SortedSet<string>();
 		#endregion
 
 		#region Public Override Methods

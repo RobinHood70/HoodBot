@@ -8,12 +8,13 @@
 	using static Properties.Resources;
 	using static WikiCommon.Globals;
 
-	/// <summary></summary>
-	/// <seealso cref="RobinHood70.Robby.Title" />
-	/// <seealso cref="RobinHood70.Robby.IMessageSource" />
+	/// <summary>Represents a wiki page.</summary>
+	/// <seealso cref="Title" />
+	/// <seealso cref="IMessageSource" />
 	public class Page : Title, IMessageSource
 	{
 		#region Constructors
+
 		/// <summary>Initializes a new instance of the <see cref="Page"/> class based on site and page name.</summary>
 		/// <param name="site">The site.</param>
 		/// <param name="fullPageName">Full name of the page.</param>
@@ -52,11 +53,13 @@
 		#endregion
 
 		#region Public Events
+
 		/// <summary>Occurs when the page is loaded.</summary>
 		public event StrongEventHandler<Page, EventArgs> PageLoaded;
 		#endregion
 
 		#region Public Properties
+
 		/// <summary>Gets the page categories, if they were requested in the last load operation.</summary>
 		/// <value>The categories the page is listed in.</value>
 		public IReadOnlyList<CategoryTitle> Categories { get; } = new List<CategoryTitle>();
@@ -131,14 +134,16 @@
 		#endregion
 
 		#region Public Static Methods
+
 		/// <summary>Returns a value indicating whether the page exists.</summary>
 		/// <param name="site">The site.</param>
 		/// <param name="fullName">The full name.</param>
-		/// <returns></returns>
+		/// <returns>A value indicating whether the page exists.</returns>
 		public static bool CheckExistence(Site site, string fullName) => new Page(site, fullName).CheckExistence();
 		#endregion
 
 		#region Public Methods
+
 		/// <summary>Returns a value indicating if the page exists. This will trigger a Load operation, if necessary.</summary>
 		/// <returns><c>true</c> if the page exists; otherwise <c>false</c>.</returns>
 		public bool CheckExistence()
@@ -196,12 +201,12 @@
 			this.Reload();
 		}
 
-		// Assumes title-related properties have already been provided in the constructor.
 		/// <summary>Populates page data from the specified WallE PageItem.</summary>
 		/// <param name="pageItem">The page item.</param>
 		/// <remarks>This item is publicly available so it can be called from other load-like routines if necessary, such as from a PageCollection's bulk load.</remarks>
 		public void Populate(PageItem pageItem)
 		{
+			// Assumes title-related properties have already been provided in the constructor.
 			ThrowNull(pageItem, nameof(pageItem));
 			var flags = pageItem.Flags;
 			var revs = this.Revisions;
@@ -308,6 +313,7 @@
 		#endregion
 
 		#region Protected Virtual Methods
+
 		/// <summary>When overridden in a derived class, allows custom property inputs to be specified as necessary.</summary>
 		protected virtual void BuildCustomPropertyInputs()
 		{
@@ -324,6 +330,7 @@
 		#endregion
 
 		#region Private Methods
+
 		/// <summary>Reloads the page with the current load options.</summary>
 		private void Reload()
 		{

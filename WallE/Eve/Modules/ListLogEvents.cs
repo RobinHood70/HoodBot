@@ -10,12 +10,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	internal class ListLogEvents : ListModule<LogEventsInput, LogEventsItem>
 	{
 		#region Static Fields
-		private static HashSet<string> knownProps = new HashSet<string>
+		private static readonly HashSet<string> KnownProps = new HashSet<string>
 		{
 			"action", "actionhidden", "anon", "comment", "commenthidden", "logid", "logpage", "ns", "pageid", "parsedcomment", "suppressed", "tags", "timestamp", "title", "type", "user", "userhidden", "userid",
 		};
 
-		private bool getUserId;
+		private readonly bool getUserId;
 		#endregion
 
 		#region Constructors
@@ -66,7 +66,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			var item = new LogEventsItem();
 			var logType = (string)result["type"];
 			var logAction = (string)result["action"];
-			result.ParseLogEvent(item, logType, logAction, knownProps, this.getUserId);
+			result.ParseLogEvent(item, logType, logAction, KnownProps, this.getUserId);
 			item.LogPageId = (long?)result["logpage"] ?? 0;
 			item.Tags = result.AsReadOnlyList<string>("tags");
 

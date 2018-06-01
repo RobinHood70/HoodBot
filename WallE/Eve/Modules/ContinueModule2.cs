@@ -16,7 +16,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Fields
-		private bool supportsBatch;
+		private readonly bool supportsBatch;
 		#endregion
 
 		#region Constructors

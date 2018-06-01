@@ -28,9 +28,9 @@
 		#endregion
 
 		#region Fields
+		private readonly List<ErrorItem> warnings = new List<ErrorItem>();
 		private string articlePath;
 		private string userTalkSpace;
-		private List<ErrorItem> warnings = new List<ErrorItem>();
 		#endregion
 
 		#region Constructors
@@ -894,7 +894,7 @@
 
 		/// <summary>Retrieves page titles that are creation-protected using the <a href="https://www.mediawiki.org/wiki/API:Protectedtitles">Protectedtitles</a> API module.</summary>
 		/// <param name="input">The input parameters.</param>
-		/// <returns>A list of creation-protected articles</returns>
+		/// <returns>A list of creation-protected articles.</returns>
 		public IReadOnlyList<ProtectedTitlesItem> ProtectedTitles(ProtectedTitlesInput input) => this.RunListQuery(new ListProtectedTitles(this, input));
 
 		/// <summary>Returns data from the <a href="https://www.mediawiki.org/wiki/API:Purge">Purge</a> API module.</summary>

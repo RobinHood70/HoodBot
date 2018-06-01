@@ -12,14 +12,14 @@ namespace RobinHood70.WallE.Eve.Modules
 	internal class ListWatchlist : ListModule<WatchlistInput, WatchlistItem>, IGeneratorModule
 	{
 		#region Static Fields
-		private static HashSet<string> knownProps = new HashSet<string>
+		private static readonly HashSet<string> KnownProps = new HashSet<string>
 		{
 			"actionhidden", "anon", "bot", "comment", "commenthidden", "logaction", "logid", "logtype", "minor", "new", "newlen", "notificationtimestamp", "ns", "old_revid", "oldlen", "pageid", "parsedcomment", "patrolled", "revid", "suppressed", "timestamp", "title", "type", "unpatrolled", "user", "userhidden", "userid",
 		};
 		#endregion
 
 		#region Fields
-		private string continueName;
+		private readonly string continueName;
 		#endregion
 
 		#region Constructors
@@ -86,7 +86,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			};
 			var logType = (string)result["logtype"];
 			var logAction = (string)result["logaction"];
-			result.ParseLogEvent(item, logType, logAction, knownProps, false);
+			result.ParseLogEvent(item, logType, logAction, KnownProps, false);
 			item.RevisionId = (long?)result["revid"] ?? 0;
 			item.OldRevisionId = (long?)result["old_revid"] ?? 0;
 			item.Flags =

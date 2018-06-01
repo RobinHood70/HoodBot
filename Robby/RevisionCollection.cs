@@ -7,7 +7,7 @@
 	public class RevisionCollection : IReadOnlyCollection<Revision>
 	{
 		#region Fields
-		private Dictionary<long, Revision> revisions = new Dictionary<long, Revision>();
+		private readonly Dictionary<long, Revision> revisions = new Dictionary<long, Revision>();
 		#endregion
 
 		#region Constructors

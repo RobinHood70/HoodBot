@@ -253,8 +253,7 @@
 			var newKey = this.Prefix + name;
 			if (this.TryGetItem(newKey, out IParameter param))
 			{
-				var piped = param as PipedParameter;
-				if (piped == null)
+				if (!(param is PipedParameter piped))
 				{
 					throw new InvalidOperationException(CurrentCulture(NotAPipedParameter, name));
 				}

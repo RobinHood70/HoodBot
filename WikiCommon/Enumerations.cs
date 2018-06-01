@@ -113,7 +113,7 @@ namespace RobinHood70.WikiCommon
 		Redirect = 1 << 4,
 	}
 
-	/// <summary>The types of entries that appear in Recent Changes</summary>
+	/// <summary>The types of entries that appear in Recent Changes.</summary>
 	[Flags]
 	public enum RecentChangesTypes
 	{
@@ -150,7 +150,7 @@ namespace RobinHood70.WikiCommon
 		False
 	}
 
-	/// <summary>Represents the possible search types</summary>
+	/// <summary>Represents the possible search types.</summary>
 	public enum WhatToSearch
 	{
 		/// <summary>Search titles only</summary>

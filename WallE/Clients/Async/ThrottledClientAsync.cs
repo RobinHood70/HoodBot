@@ -11,9 +11,9 @@ namespace RobinHood70.WallE.Clients.Async
 	public class ThrottledClientAsync : IFormClientAsync
 	{
 		#region Fields
-		private IFormClientAsync baseClient;
+		private readonly IFormClientAsync baseClient;
+		private readonly Stopwatch stopwatch = new Stopwatch();
 		private bool firstRequest = true;
-		private Stopwatch stopwatch;
 		#endregion
 
 		#region Constructors
@@ -25,11 +25,9 @@ namespace RobinHood70.WallE.Clients.Async
 		public ThrottledClientAsync(IFormClientAsync baseClient, TimeSpan readInterval, TimeSpan writeInterval)
 		{
 			this.baseClient = baseClient;
-			this.stopwatch = new Stopwatch();
-			this.stopwatch.Start();
-
 			this.ReadInterval = readInterval;
 			this.WriteInterval = writeInterval;
+			this.stopwatch.Start();
 		}
 		#endregion
 

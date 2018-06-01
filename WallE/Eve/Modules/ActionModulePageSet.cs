@@ -14,13 +14,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		where TOutput : ITitle, new()
 	{
 		#region Fields
-		private HashSet<long> badRevisionIds = new HashSet<long>();
-		private Dictionary<string, string> converted = new Dictionary<string, string>();
+		private readonly HashSet<long> badRevisionIds = new HashSet<long>();
+		private readonly Dictionary<string, string> converted = new Dictionary<string, string>();
+		private readonly Dictionary<string, InterwikiTitleItem> interwiki = new Dictionary<string, InterwikiTitleItem>();
+		private readonly Dictionary<string, string> normalized = new Dictionary<string, string>();
+		private readonly Dictionary<string, PageSetRedirectItem> redirects = new Dictionary<string, PageSetRedirectItem>();
 		private bool done;
-		private Dictionary<string, InterwikiTitleItem> interwiki = new Dictionary<string, InterwikiTitleItem>();
-		private Dictionary<string, string> normalized = new Dictionary<string, string>();
 		private int offset;
-		private Dictionary<string, PageSetRedirectItem> redirects = new Dictionary<string, PageSetRedirectItem>();
 		private List<string> values;
 		#endregion
 

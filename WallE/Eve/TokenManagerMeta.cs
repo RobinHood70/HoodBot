@@ -13,7 +13,7 @@
 		#region Fields
 
 		// Can't be static in this version, since Login will be removed for MW 1.24-1.27
-		private HashSet<string> validTypes = new HashSet<string>
+		private readonly HashSet<string> validTypes = new HashSet<string>
 		{
 			Csrf,
 			Login,
@@ -23,8 +23,8 @@
 			Watch,
 		};
 
-		private Dictionary<string, string> sessionTokens = new Dictionary<string, string>(6);
-		private WikiAbstractionLayer wal;
+		private readonly Dictionary<string, string> sessionTokens = new Dictionary<string, string>(6);
+		private readonly WikiAbstractionLayer wal;
 		#endregion
 
 		#region Constructors
@@ -55,7 +55,7 @@
 		#region Private Methods
 		private string AnyToken(string type)
 		{
-			if (!this.sessionTokens.TryGetValue(type, out string retval))
+			if (!this.sessionTokens.TryGetValue(type, out var retval))
 			{
 				// Ask for all session tokens unless a login token has been requested.
 				var tokensInput = type == Login ? new TokensInput(new string[] { type }) : new TokensInput(this.validTypes);

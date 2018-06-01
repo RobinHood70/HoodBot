@@ -74,7 +74,7 @@
 		/// <summary>Copies the enumerable into a new IReadOnlyList&lt;T>, regardless of whether or not it already is one.</summary>
 		/// <typeparam name="T">The type of the original enumerable.</typeparam>
 		/// <param name="list">The original enumerable.</param>
-		/// <returns>The original enumerable cast to an IReadOnlyList&lt;T></returns>
+		/// <returns>The original enumerable cast to an IReadOnlyList&lt;T>.</returns>
 		public static IReadOnlyList<T> AsNewReadOnlyList<T>(this IEnumerable<T> list) => new List<T>(list ?? new T[0]);
 
 		/// <summary>Casts the enumerable to an IReadOnlyCollection if possible, or creates a new one if needed.</summary>
@@ -107,7 +107,7 @@
 		#region IFormattable Methods
 
 		/// <summary>Convenience method to format any IFormattable value as an invariant value.</summary>
-		/// <typeparam name="T">Any IFormattable</typeparam>
+		/// <typeparam name="T">Any IFormattable.</typeparam>
 		/// <param name="value">The value to format.</param>
 		/// <returns>The value as an invariant string.</returns>
 		public static string ToStringInvariant<T>(this T value)

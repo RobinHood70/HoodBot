@@ -9,8 +9,8 @@
 	public class ThrottledClient : IMediaWikiClient
 	{
 		#region Fields
-		private IMediaWikiClient baseClient;
-		private Stopwatch stopwatch;
+		private readonly IMediaWikiClient baseClient;
+		private readonly Stopwatch stopwatch = new Stopwatch();
 		#endregion
 
 		#region Constructors
@@ -29,11 +29,9 @@
 		public ThrottledClient(IMediaWikiClient baseClient, TimeSpan readInterval, TimeSpan writeInterval)
 		{
 			this.baseClient = baseClient;
-			this.stopwatch = new Stopwatch();
-			this.stopwatch.Start();
-
 			this.ReadInterval = readInterval;
 			this.WriteInterval = writeInterval;
+			this.stopwatch.Start();
 		}
 		#endregion
 

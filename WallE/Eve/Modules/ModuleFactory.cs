@@ -10,9 +10,9 @@
 	public class ModuleFactory : IModuleFactory
 	{
 		#region Fields
-		private Dictionary<Type, GeneratorFactoryMethod> generators = new Dictionary<Type, GeneratorFactoryMethod>();
-		private Dictionary<Type, PropertyFactoryMethod> properties = new Dictionary<Type, PropertyFactoryMethod>();
-		private WikiAbstractionLayer wal;
+		private readonly Dictionary<Type, GeneratorFactoryMethod> generators = new Dictionary<Type, GeneratorFactoryMethod>();
+		private readonly Dictionary<Type, PropertyFactoryMethod> properties = new Dictionary<Type, PropertyFactoryMethod>();
+		private readonly WikiAbstractionLayer wal;
 		#endregion
 
 		#region Constructors

@@ -12,10 +12,10 @@ namespace RobinHood70.WallE.Eve.Modules
 	internal class ListQueryPage : ListModule<QueryPageInput, QueryPageItem>, IGeneratorModule
 	{
 		#region Fields
+		private readonly string queryPage;
 		private bool cached;
 		private DateTime? cachedTimestamp;
 		private int maxResults;
-		private string queryPage;
 		#endregion
 
 		#region Constructors

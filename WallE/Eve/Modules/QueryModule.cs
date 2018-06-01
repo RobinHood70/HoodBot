@@ -19,8 +19,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Fields
-		private int maxItems;
-		private int requestedLimit;
+		private readonly int maxItems;
+		private readonly int requestedLimit;
 		#endregion
 
 		#region Constructors

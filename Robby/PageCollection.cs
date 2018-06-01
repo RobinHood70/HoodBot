@@ -11,7 +11,7 @@
 	public class PageCollection : TitleCollectionBase<Page>, IMessageSource
 	{
 		#region Fields
-		private Dictionary<string, Title> titleMap = new Dictionary<string, Title>();
+		private readonly Dictionary<string, Title> titleMap = new Dictionary<string, Title>();
 		#endregion
 
 		#region Constructors
@@ -87,10 +87,11 @@
 				recursionSet = new HashSet<Title>(new WikiTitleEqualityComparer());
 			}
 
-			this.AddCategoryMembers(new CategoryMembersInput(cat.FullPageName)
-			{
-				Type = categoryTypes,
-			}, recursionSet);
+			this.AddCategoryMembers(
+				new CategoryMembersInput(cat.FullPageName)
+				{
+					Type = categoryTypes,
+				}, recursionSet);
 		}
 
 		public void AddCategoryMembers(string category, CategoryTypes categoryTypes, string fromPrefix, string toPrefix)
@@ -262,6 +263,7 @@
 
 		public void PopulateTitleMap(IPageSetResult result)
 		{
+			ThrowNull(result, nameof(result));
 			foreach (var item in result.Converted)
 			{
 				this.titleMap[item.Key] = new Title(this.Site, item.Value);

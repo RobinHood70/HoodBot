@@ -12,7 +12,7 @@ namespace RobinHood70.WallE.Clients.Async
 	public class SimpleClientAsyncRetryHandler : DelegatingHandler
 	{
 		#region Fields
-		private SimpleClientAsync parent;
+		private readonly SimpleClientAsync parent;
 		#endregion
 
 		#region Constructors

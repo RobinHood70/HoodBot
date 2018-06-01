@@ -11,19 +11,19 @@ namespace RobinHood70.WallE.Base
 	public class EditInput
 	{
 		#region Constructors
-		public EditInput(string title, string text)
+		public EditInput(string title, string txt)
 		{
 			ThrowNullOrWhiteSpace(title, nameof(title));
-			ThrowNull(text, nameof(text));
+			ThrowNull(txt, nameof(txt));
 			this.Title = title;
-			this.Text = text;
+			this.Text = txt;
 		}
 
-		public EditInput(long pageId, string text)
+		public EditInput(long pageId, string txt)
 		{
-			ThrowNull(text, nameof(text));
+			ThrowNull(txt, nameof(txt));
 			this.PageId = pageId;
-			this.Text = text;
+			this.Text = txt;
 		}
 
 		public EditInput(string title, string prependText, string appendText)

@@ -3,11 +3,13 @@
 	using System;
 	using System.Collections.Generic;
 	using RobinHood70.WallE.Base;
+	using static WikiCommon.Globals;
 
 	public class RecentChange
 	{
 		public RecentChange(Site site, RecentChangesItem recentChange)
 		{
+			ThrowNull(recentChange, nameof(recentChange));
 			this.Title = new Title(site, recentChange.Title);
 			this.Anonymous = recentChange.UserId == 0;
 			this.Comment = recentChange.Comment;

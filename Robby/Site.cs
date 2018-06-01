@@ -17,9 +17,9 @@
 	public class Site : IMessageSource
 	{
 		#region Fields
+		private readonly Dictionary<string, MagicWord> magicWords = new Dictionary<string, MagicWord>();
 		private string articlePath;
 		private HashSet<Title> disambiguationTemplates = null;
-		private Dictionary<string, MagicWord> magicWords = new Dictionary<string, MagicWord>();
 		private Regex redirectTargetFinder;
 		#endregion
 
@@ -130,27 +130,27 @@
 			return messages[message].Text;
 		}
 
-		public IReadOnlyDictionary<string, Message> GetMessages(IEnumerable<string> messages, IEnumerable<string> arguments) => this.GetMessages(new AllMessagesInput
+		public IReadOnlyDictionary<string, Message> GetMessages(IEnumerable<string> msgs, IEnumerable<string> arguments) => this.GetMessages(new AllMessagesInput
 		{
-			Messages = messages,
+			Messages = msgs,
 			Arguments = arguments,
 		});
 
-		public IReadOnlyList<string> PagePropertyNames => this.AbstractionLayer.PagePropertyNames(new PagePropertyNamesInput());
+		public IReadOnlyList<string> PagePropertyNames() => this.AbstractionLayer.PagePropertyNames(new PagePropertyNamesInput());
 
-		public string GetParsedMessage(string message, IEnumerable<string> arguments) => this.GetParsedMessage(message, arguments, null);
+		public string GetParsedMessage(string msg, IEnumerable<string> arguments) => this.GetParsedMessage(msg, arguments, null);
 
-		public string GetParsedMessage(string message, IEnumerable<string> arguments, Title title)
+		public string GetParsedMessage(string msg, IEnumerable<string> arguments, Title title)
 		{
-			var messages = this.GetParsedMessages(new[] { message }, arguments, title);
-			return messages[message].Text;
+			var messages = this.GetParsedMessages(new[] { msg }, arguments, title);
+			return messages[msg].Text;
 		}
 
-		public IReadOnlyDictionary<string, Message> GetParsedMessages(IEnumerable<string> messages, IEnumerable<string> arguments) => this.GetParsedMessages(messages, arguments, null);
+		public IReadOnlyDictionary<string, Message> GetParsedMessages(IEnumerable<string> msgs, IEnumerable<string> arguments) => this.GetParsedMessages(msgs, arguments, null);
 
-		public IReadOnlyDictionary<string, Message> GetParsedMessages(IEnumerable<string> messages, IEnumerable<string> arguments, Title title) => this.GetMessages(new AllMessagesInput
+		public IReadOnlyDictionary<string, Message> GetParsedMessages(IEnumerable<string> msgs, IEnumerable<string> arguments, Title title) => this.GetMessages(new AllMessagesInput
 		{
-			Messages = messages,
+			Messages = msgs,
 			Arguments = arguments,
 			EnableParser = true,
 			EnableParserTitle = title?.FullPageName,
@@ -246,7 +246,7 @@
 
 		public IReadOnlyList<string> GetUsers(bool onlyActiveUsers, bool onlyUsersWithEdits) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits });
 
-		public IReadOnlyList<string> GetUsers(bool onlyActiveUsers, bool onlyUsersWithEdits, string prefix) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits , Prefix = prefix });
+		public IReadOnlyList<string> GetUsers(bool onlyActiveUsers, bool onlyUsersWithEdits, string prefix) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Prefix = prefix });
 
 		public IReadOnlyList<string> GetUsers(bool onlyActiveUsers, bool onlyUsersWithEdits, string from, string to) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, From = from, To = to });
 

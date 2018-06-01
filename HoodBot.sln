@@ -16,6 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Robby\CheckList.txt = Robby\CheckList.txt
 		LICENSE = LICENSE
 		Main.ruleset = Main.ruleset
+		SharedKey.pfx = SharedKey.pfx
 		Testing.ruleset = Testing.ruleset
 	EndProjectSection
 EndProject
@@ -50,5 +51,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {966198A1-A0BD-422E-863A-9B95A5EAA4A5}
 	EndGlobalSection
 EndGlobal

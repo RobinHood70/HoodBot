@@ -298,8 +298,8 @@
 				Debug.WriteLine($"Invalid: {page.Invalid}; Missing: {page.Missing}; Text: {page.Text}");
 			}
 
-			this.Assert(Page.Exists(this.Wiki, "Main Page"), "Main Page not detected as existing.");
-			this.Assert(!Page.Exists(this.Wiki, "This page does not exist"), "Non-existent page detected as existing.");
+			this.Assert(Page.CheckExistence(this.Wiki, "Main Page"), "Main Page not detected as existing.");
+			this.Assert(!Page.CheckExistence(this.Wiki, "This page does not exist"), "Non-existent page detected as existing.");
 			this.Assert(new Title(this.Wiki, "Template:Test").IsSameAs(new Page(this.Wiki, "Template:Test")), "Title and Page should be equal, but aren't.");
 		}
 

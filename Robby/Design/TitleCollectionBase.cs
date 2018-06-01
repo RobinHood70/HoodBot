@@ -13,8 +13,8 @@
 		where TTitle : IWikiTitle
 	{
 		#region Fields
-		private Dictionary<string, TTitle> dictionary = new Dictionary<string, TTitle>();
-		private List<TTitle> items = new List<TTitle>();
+		private readonly Dictionary<string, TTitle> dictionary = new Dictionary<string, TTitle>();
+		private readonly List<TTitle> items = new List<TTitle>();
 		#endregion
 
 		#region Constructors

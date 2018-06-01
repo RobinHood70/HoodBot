@@ -246,7 +246,7 @@
 
 		public Dictionary<string, string> Move(string to, string reason, bool suppressRedirect) => this.Move(to, reason, false, false, suppressRedirect);
 
-		public Dictionary<string, string> Move(Title to, string reason, bool suppressRedirect) => this.Move(to.FullPageName, reason, false, false, suppressRedirect);
+		public Dictionary<string, string> Move(Title to, string reason, bool suppressRedirect) => this.Move(to?.FullPageName, reason, false, false, suppressRedirect);
 
 		public Dictionary<string, string> Move(string to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
 		{
@@ -294,7 +294,7 @@
 			return retval;
 		}
 
-		public Dictionary<string, string> Move(Title to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect) => this.Move(to.FullPageName, reason, moveTalk, moveSubpages, suppressRedirect);
+		public Dictionary<string, string> Move(Title to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect) => this.Move(to?.FullPageName, reason, moveTalk, moveSubpages, suppressRedirect);
 
 		public bool Protect(string reason, ProtectionLevel createProtection, string relativeExpiry)
 		{

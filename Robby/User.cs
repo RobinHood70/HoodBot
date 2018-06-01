@@ -23,8 +23,8 @@
 			this.TalkPage = this.Page.TalkPage;
 		}
 
-		public User (Site site, UsersItem user)
-			: this(site, user.Name)
+		public User(Site site, UsersItem user)
+			: this(site, user?.Name)
 		{
 			ThrowNull(user, nameof(user));
 			this.SetInfo(user);
@@ -62,7 +62,7 @@
 			{
 				Expiry = expiry,
 				Flags = flags,
-				Reason = reason,		
+				Reason = reason,
 				Reblock = reblock,
 			};
 			return this.Block(input);
@@ -140,21 +140,22 @@
 			this.SetInfo(user);
 		}
 
-		public void NewTalkPageMessage(string header, string message, string editSummary)
+		public void NewTalkPageMessage(string header, string msg, string editSummary)
 		{
 			if (!this.Site.AllowEditing)
 			{
 				return;
 			}
 
-			message = message.Trim();
-			if (!message.Contains("~~~"))
+			ThrowNull(msg, nameof(msg));
+			msg = msg.Trim();
+			if (!msg.Contains("~~~"))
 			{
 				// If at least the name wasn't found in the message, then add a normal signature.
-				message += " ~~~~";
+				msg += " ~~~~";
 			}
 
-			var input = new EditInput(this.TalkPage.FullPageName, message)
+			var input = new EditInput(this.TalkPage.FullPageName, msg)
 			{
 				Bot = true,
 				Minor = Tristate.False,

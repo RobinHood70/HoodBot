@@ -12,7 +12,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	internal class ListUserContribs : ListModule<UserContributionsInput, UserContributionsItem>, IGeneratorModule
 	{
 		#region Fields
-		private string continueName;
+		private readonly string continueName;
 		#endregion
 
 		#region Constructors

@@ -22,8 +22,8 @@
 	public class SimpleClient : IMediaWikiClient
 	{
 		#region Fields
+		private readonly string cookiesLocation;
 		private CookieContainer cookieContainer;
-		private string cookiesLocation;
 		private bool useV10 = false;
 		#endregion
 
@@ -108,7 +108,7 @@
 		/// <value>The retry delay.</value>
 		public TimeSpan RetryDelay { get; set; } = TimeSpan.FromSeconds(10);
 
-		/// <summary>Gets or sets the User-Agent string to be sent with each request. If not specified, or if contact info is specified, a default User-Agent string similar to</summary>
+		/// <summary>Gets or sets the User-Agent string to be sent with each request. If not specified, or if contact info is specified, a default User-Agent string similar to.</summary>
 		/// <value>The user agent.</value>
 		public string UserAgent { get; set; }
 		#endregion
@@ -414,7 +414,7 @@
 				}
 				else
 				{
-					if (int.TryParse(retryHeader, out int retryAfter))
+					if (int.TryParse(retryHeader, out var retryAfter))
 					{
 						this.RequestDelay(TimeSpan.FromSeconds(retryAfter), maxLag ? DelayReason.MaxLag : DelayReason.Error);
 					}

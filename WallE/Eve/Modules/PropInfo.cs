@@ -13,7 +13,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	internal class PropInfo : PropModule<InfoInput>
 	{
 		#region Fields
-		private Dictionary<string, bool> baseActions = new Dictionary<string, bool>();
+		private readonly Dictionary<string, bool> baseActions = new Dictionary<string, bool>();
 		#endregion
 
 		#region Constructors
