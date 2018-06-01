@@ -20,7 +20,8 @@ namespace RobinHood70.WikiCommon
 		All = Backlinks | EmbeddedIn | ImageUsage
 	}
 
-	/// <summary>Block options.</summary>
+	/// <summary>Block options. These represent options which can be set by the blocking user or returned by the wiki when retrieving block info.</summary>
+	/// <remarks>This enumeration does not include values that can only be altered by the wiki itself, such as whether the block was automatic.</remarks>
 	[Flags]
 	public enum BlockFlags
 	{
