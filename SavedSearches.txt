@@ -1,0 +1,6 @@
+Because modern versions of VS no longer support macros in any meaningful way, this file will be used to save useful searches.
+
+== Docs on One Line ==
+Search Options: Regex
+Search: <(.*?)>\r\s*///\s*(.*?)\r\s*/// </\1>
+Replace: <$1>$2</$1>
