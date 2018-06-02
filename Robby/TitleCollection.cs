@@ -253,7 +253,7 @@
 				var flags = purgePage.Flags;
 				if (flags.HasFlag(PurgeFlags.Purged))
 				{
-					retval.Add(this.Site.PageBuilder.CreatePage(this.Site, purgePage.Namespace.Value, purgePage.Title));
+					retval.Add(this.Site.PageCreator.CreatePage(this.Site, purgePage.Namespace.Value, purgePage.Title));
 				}
 				else if (!purgePage.Flags.HasFlag(PurgeFlags.Missing))
 				{
@@ -397,7 +397,7 @@
 			{
 				foreach (var item in this)
 				{
-					retval.Add(this.Site.PageBuilder.CreatePage(this.Site, item.Namespace.Id, item.FullPageName));
+					retval.Add(this.Site.PageCreator.CreatePage(this.Site, item.Namespace.Id, item.FullPageName));
 				}
 
 				return retval;
@@ -413,7 +413,7 @@
 				var flags = watchPage.Flags;
 				if (flags.HasFlag(WatchFlags.Watched) || flags.HasFlag(WatchFlags.Unwatched))
 				{
-					retval.Add(this.Site.PageBuilder.CreatePage(this.Site, watchPage.Namespace.Value, watchPage.Title));
+					retval.Add(this.Site.PageCreator.CreatePage(this.Site, watchPage.Namespace.Value, watchPage.Title));
 				}
 
 				// WatchFlags has no invalid value so, unlike Purge, no warnings are raised here.

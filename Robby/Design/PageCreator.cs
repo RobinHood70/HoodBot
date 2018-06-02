@@ -5,9 +5,15 @@
 	using WallE.Base;
 	using static WikiCommon.Globals;
 
-	public abstract class PageBuilder
+	/// <summary>Provides a base class for creating Page objects. This serves as a go-between for customized page extensions in WallE and Robby.</summary>
+	public abstract class PageCreator
 	{
 		#region Public Methods
+
+		/// <summary>Gets regular and custom property inputs.</summary>
+		/// <param name="options">Page load options.</param>
+		/// <returns>A list of property inputs, including any customized property inputs required.</returns>
+		/// <seealso cref="AddCustomPropertyInputs"/>
 		public IList<IPropertyInput> GetPropertyInputs(PageLoadOptions options)
 		{
 			ThrowNull(options, nameof(options));
@@ -93,12 +99,23 @@
 		#endregion
 
 		#region Public Abstract Methods
+
+		/// <summary>Creates a page.</summary>
+		/// <param name="site">The site the page is from.</param>
+		/// <param name="ns">The namespace of the page.</param>
+		/// <param name="title">The title of the page.</param>
+		/// <returns>A fully populated Page object.</returns>
 		public abstract Page CreatePage(Site site, int ns, string title);
 
+		/// <summary>Creates a page item.</summary>
+		/// <returns>A new PageItem for use by WallE.</returns>
 		public abstract PageItem CreatePageItem();
 		#endregion
 
 		#region Protected Abstract Methods
+
+		/// <summary>Adds any custom property inputs.</summary>
+		/// <param name="propertyInputs">The property inputs.</param>
 		protected abstract void AddCustomPropertyInputs(IList<IPropertyInput> propertyInputs);
 		#endregion
 

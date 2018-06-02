@@ -30,18 +30,18 @@
 		{
 		}
 
-		public PageCollection(Site site, PageLoadOptions options, PageBuilder builder)
+		public PageCollection(Site site, PageLoadOptions options, PageCreator creator)
 			: base(site)
 		{
 			this.LoadOptions = options ?? site.DefaultLoadOptions;
-			this.PageBuilder = builder ?? site.PageBuilder;
+			this.PageCreator = creator ?? site.PageCreator;
 		}
 		#endregion
 
 		#region Public Properties
 		public PageLoadOptions LoadOptions { get; set; }
 
-		public PageBuilder PageBuilder { get; set; }
+		public PageCreator PageCreator { get; set; }
 
 		public IReadOnlyDictionary<string, Title> TitleMap => this.titleMap;
 		#endregion
@@ -298,10 +298,10 @@
 		protected virtual void FillFromPageSet(DefaultPageSetInput pageSetInput, PageLoadOptions options)
 		{
 			ThrowNull(pageSetInput, nameof(pageSetInput));
-			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, this.PageBuilder.GetPropertyInputs(options), this.PageBuilder.CreatePageItem);
+			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, this.PageCreator.GetPropertyInputs(options), this.PageCreator.CreatePageItem);
 			foreach (var item in result)
 			{
-				var page = this.PageBuilder.CreatePage(this.Site, item.Value.Namespace.Value, item.Value.Title);
+				var page = this.PageCreator.CreatePage(this.Site, item.Value.Namespace.Value, item.Value.Title);
 				page.Populate(item.Value);
 				page.LoadOptions = options;
 				this[page.Key] = page; // Not using add because we could be loading duplicate pages.

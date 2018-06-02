@@ -54,8 +54,8 @@
     <Compile Include="Pages\FileRevision.cs" />
     <Compile Include="Design\IWikiTitle.cs" />
     <Compile Include="InterwikiTitle.cs" />
-    <Compile Include="Design\DefaultPageBuilder.cs" />
-    <Compile Include="Design\PageBuilder.cs" />
+    <Compile Include="Design\DefaultPageCreator.cs" />
+    <Compile Include="Design\PageCreator.cs" />
     <Compile Include="Pages\CategoryTitle.cs" />
     <Compile Include="Design\WikiTitleComparerFullPageName.cs" />
     <Compile Include="Design\WikiTitleComparerKey.cs" />

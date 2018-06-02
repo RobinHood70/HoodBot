@@ -5,7 +5,7 @@
 
 	public class Message : Page
 	{
-		// TODO: Message has different data loaded depending whether it's a faked page or a genuine message. Is this a good idea? Loading all data would require calls to both Load and AllMessages, which could be a undesirable in the PageBuilder. Might be a better idea to split this into Message and MessagePage objects depending on behaviour desired, with Message being custom and light-weight.
+		// TODO: Message has different data loaded depending whether it's a faked page or a genuine message. Is this a good idea? Loading all data would require calls to both Load and AllMessages, which could be a undesirable in the PageCreator. Might be a better idea to split this into Message and MessagePage objects depending on behaviour desired, with Message being custom and light-weight.
 		#region Constructors
 		public Message(Site site, string fullPageName)
 			: base(site, fullPageName)

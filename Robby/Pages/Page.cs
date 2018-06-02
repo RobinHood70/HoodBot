@@ -35,9 +35,7 @@
 		/// <param name="site">The site to which this title belongs.</param>
 		/// <param name="ns">The namespace to which the page belongs.</param>
 		/// <param name="pageName">The name (only) of the page.</param>
-		/// <remarks>
-		/// Absolutely no cleanup or checking is performed when using this version of the constructor. All values are assumed to already have been validated.
-		/// </remarks>
+		/// <remarks>Absolutely no cleanup or checking is performed when using this version of the constructor. All values are assumed to already have been validated.</remarks>
 		public Page(Site site, int ns, string pageName)
 			: base(site, ns, pageName)
 		{
@@ -333,10 +331,10 @@
 		/// <summary>Reloads the page with the current load options.</summary>
 		private void Reload()
 		{
-			var builder = this.Site.PageBuilder;
-			var propertyInputs = builder.GetPropertyInputs(this.LoadOptions);
+			var creator = this.Site.PageCreator;
+			var propertyInputs = creator.GetPropertyInputs(this.LoadOptions);
 			var pageSetInput = new DefaultPageSetInput(new[] { this.FullPageName });
-			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, propertyInputs, builder.CreatePageItem);
+			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, propertyInputs, creator.CreatePageItem);
 			this.Populate(result.First());
 			this.Loaded = true;
 			this.OnLoaded();

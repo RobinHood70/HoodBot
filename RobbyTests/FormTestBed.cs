@@ -598,7 +598,7 @@
 
 			if (wikiInfo.Name.Contains("UESP"))
 			{
-				this.Wiki.PageBuilder = new MetaTemplateBuilder();
+				this.Wiki.PageCreator = new MetaTemplateBuilder();
 			}
 
 			if (wikiInfo.AdminUserName != null)
