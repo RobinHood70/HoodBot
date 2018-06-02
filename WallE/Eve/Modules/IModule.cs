@@ -19,7 +19,7 @@
 
 		/// <summary>Gets the module's prefix, as specified in the MediaWiki API.</summary>
 		/// <value>The module's prefix.</value>
-		string Prefix { get; }
+		string FullPrefix { get; }
 		#endregion
 	}
 }

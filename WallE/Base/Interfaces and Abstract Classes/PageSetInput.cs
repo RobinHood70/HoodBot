@@ -14,7 +14,7 @@ namespace RobinHood70.WallE.Base
 		RevisionIds
 	}
 
-	public abstract class PageSetInputBase
+	public abstract class PageSetInput
 	{
 		#region Fields
 		private static Dictionary<ListType, string> listNames = new Dictionary<ListType, string>()
@@ -26,11 +26,11 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Constructors
-		protected PageSetInputBase()
+		protected PageSetInput()
 		{
 		}
 
-		protected PageSetInputBase(PageSetInputBase input)
+		protected PageSetInput(PageSetInput input)
 		{
 			ThrowNull(input, nameof(input));
 			this.ConvertTitles = input.ConvertTitles;
@@ -40,28 +40,28 @@ namespace RobinHood70.WallE.Base
 			this.Values = input.Values;
 		}
 
-		protected PageSetInputBase(IEnumerable<string> titles)
+		protected PageSetInput(IEnumerable<string> titles)
 		{
 			ThrowNullOrWhiteSpace(titles, nameof(titles));
 			this.ListType = ListType.Titles;
 			this.Values = titles.AsReadOnlyList();
 		}
 
-		protected PageSetInputBase(IGeneratorInput generatorInput)
+		protected PageSetInput(IGeneratorInput generatorInput)
 		{
 			ThrowNull(generatorInput, nameof(generatorInput));
 			this.GeneratorInput = generatorInput;
 			this.Values = new string[0];
 		}
 
-		protected PageSetInputBase(IGeneratorInput generatorInput, IEnumerable<string> titles)
+		protected PageSetInput(IGeneratorInput generatorInput, IEnumerable<string> titles)
 			: this(titles)
 		{
 			ThrowNull(generatorInput, nameof(generatorInput));
 			this.GeneratorInput = generatorInput;
 		}
 
-		protected PageSetInputBase(IEnumerable<long> ids, ListType listType)
+		protected PageSetInput(IEnumerable<long> ids, ListType listType)
 		{
 			ThrowNull(ids, nameof(ids));
 			this.ListType = listType;
@@ -74,7 +74,7 @@ namespace RobinHood70.WallE.Base
 			this.Values = list;
 		}
 
-		protected PageSetInputBase(IGeneratorInput generatorInput, IEnumerable<long> ids, ListType listType)
+		protected PageSetInput(IGeneratorInput generatorInput, IEnumerable<long> ids, ListType listType)
 			: this(ids, listType) => this.GeneratorInput = generatorInput;
 		#endregion
 

@@ -35,11 +35,11 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Virtual Properties
-		public virtual string Prefix { get; } = string.Empty;
+		public virtual string FullPrefix { get; } = string.Empty;
 		#endregion
 
 		#region Protected Properties
-		protected ContinueModuleBase ContinueModule { get; set; }
+		protected ContinueModule ContinueModule { get; set; }
 
 #if DEBUG
 		protected Request Request { get; private set; }
@@ -82,7 +82,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIf("assertuser", wal.UserName, this.StopMethods.HasFlag(StopCheckMethods.UserNameCheck) && this.SiteVersion >= 128)
 				.AddIf("maxlag", wal.MaxLag, wal.SupportsMaxLag && wal.MaxLag != 0) // Can be -1 for testing, so check != 0 rather than > 0
 				.Add("curtimestamp", this.SiteVersion >= 124)
-				.Prefix = this.Prefix;
+				.Prefix = this.FullPrefix;
 			this.BuildRequestLocal(request, input);
 			request.Prefix = string.Empty;
 			this.ContinueModule?.BuildRequest(request);

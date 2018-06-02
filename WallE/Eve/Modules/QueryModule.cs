@@ -65,7 +65,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		// Unlike Action modules, Query modules cannot return results directly during their Submit phase, so we store them here until the client requests them. Setter is protected so that Prop modules can set current page as needed.
 		public TOutput Output { get; protected set; }
 
-		public virtual string Prefix => (this.IsGenerator ? "g" : string.Empty) + this.BasePrefix;
+		public virtual string FullPrefix => (this.IsGenerator ? "g" : string.Empty) + this.Prefix;
 
 		public WikiAbstractionLayer Wal { get; }
 		#endregion
@@ -88,9 +88,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Abstract Properties
-		protected abstract string BasePrefix { get; }
-
 		protected abstract string ModuleType { get; }
+
+		protected abstract string Prefix { get; }
 		#endregion
 
 		#region Protected Virtual Properties
@@ -108,7 +108,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				request.AddForced(this.ModuleType, new[] { this.Name });
 			}
 
-			request.Prefix = this.Prefix;
+			request.Prefix = this.FullPrefix;
 			this.BuildRequestLocal(request, this.Input);
 			request.Prefix = string.Empty;
 		}
@@ -131,7 +131,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			if (from == this.Name)
 			{
 				var match = limitFinder.Match(text);
-				if (match != null && match.Groups["module"].Value == this.Prefix)
+				if (match != null && match.Groups["module"].Value == this.FullPrefix)
 				{
 					this.ModuleLimit = int.Parse(match.Groups["limit"].Value, CultureInfo.InvariantCulture);
 					return true;

@@ -18,19 +18,19 @@ namespace RobinHood70.WallE.Eve.Modules
 			switch (input.LinkType)
 			{
 				case AllLinksTypes.Links:
-					this.BasePrefix = "al";
+					this.Prefix = "al";
 					this.Name = "alllinks";
 					break;
 				case AllLinksTypes.FileUsages:
-					this.BasePrefix = "af";
+					this.Prefix = "af";
 					this.Name = "allfileusages";
 					break;
 				case AllLinksTypes.Redirects:
-					this.BasePrefix = "ar";
+					this.Prefix = "ar";
 					this.Name = "allredirects";
 					break;
 				case AllLinksTypes.Transclusions:
-					this.BasePrefix = "at";
+					this.Prefix = "at";
 					this.Name = "alltransclusions";
 					break;
 				default:
@@ -46,7 +46,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Properties
-		protected override string BasePrefix { get; }
+		protected override string Prefix { get; }
 		#endregion
 
 		#region Public Static Methods

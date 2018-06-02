@@ -3,7 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
 
-	public class ImageRotateInput : PageSetInputBase
+	public class ImageRotateInput : PageSetInput
 	{
 		#region Constructors
 		public ImageRotateInput(IEnumerable<string> titles, int rotation)

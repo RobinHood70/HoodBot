@@ -26,7 +26,7 @@
 
 		/// <summary>Creates a new continuation module.</summary>
 		/// <returns>A continuation module appropriate to the version of the wiki in use.</returns>
-		ContinueModuleBase CreateContinue();
+		ContinueModule CreateContinue();
 
 		/// <summary>Creates a generator module from the relevant input.</summary>
 		/// <typeparam name="TInput">The type of the input.</typeparam>

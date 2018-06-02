@@ -22,7 +22,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		public override string Name { get; } = "login";
 
-		public override string Prefix { get; } = "lg";
+		public override string FullPrefix { get; } = "lg";
 		#endregion
 
 		#region Protected Override Properties

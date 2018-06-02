@@ -637,7 +637,7 @@
 		/// <param name="propertyInputs"><para>A collection of any combination of property inputs. Built-in property inputs include: <see cref="CategoriesInput" />, <see cref="CategoryInfoInput" />, <see cref="ContributorsInput" />, <see cref="DeletedRevisionsInput" />, <see cref="DuplicateFilesInput" />, <see cref="ExternalLinksInput" />, <see cref="FileUsageInput" />, <see cref="ImageInfoInput" />, <see cref="ImagesInput" />, <see cref="InfoInput" />, <see cref="InterwikiLinksInput" />, <see cref="LanguageLinksInput" />, <see cref="LinksHereInput" />, <see cref="PagePropertiesInput" />, <see cref="RedirectsInput" />, <see cref="RevisionsInput" />, <see cref="StashImageInfoInput" />, and <see cref="TranscludedInInput" />.</para>
 		/// <para>A typical, simple collection would include an InfoInput and a RevisionsInput, which would fetch basic information about the page, along with the latest revision.</para></param>
 		/// <returns>A list of pages based on the pageSetInput parameter with the information for each of the property inputs.</returns>
-		public PageSetResult<PageItem> LoadPages(PageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs)
+		public PageSetResult<PageItem> LoadPages(DefaultPageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs)
 		{
 			ThrowNull(pageSetInput, nameof(pageSetInput));
 			return new ActionQuery(this, DefaultPageFactory).SubmitPageSet(new QueryInput(this, pageSetInput, propertyInputs));
@@ -649,7 +649,7 @@
 		/// <para>A typical, simple collection would include an InfoInput and a RevisionsInput, which would fetch basic information about the page, along with the latest revision.</para></param>
 		/// <param name="pageFactory">A factory method which creates an object derived from PageItem.</param>
 		/// <returns>A list of pages based on the <paramref name="pageSetInput" /> parameter with the information determined by each of the property inputs.</returns>
-		public PageSetResult<PageItem> LoadPages(PageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs, Func<PageItem> pageFactory)
+		public PageSetResult<PageItem> LoadPages(DefaultPageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs, Func<PageItem> pageFactory)
 		{
 			ThrowNull(pageSetInput, nameof(pageSetInput));
 			return new ActionQuery(this, pageFactory).SubmitPageSet(new QueryInput(this, pageSetInput, propertyInputs));

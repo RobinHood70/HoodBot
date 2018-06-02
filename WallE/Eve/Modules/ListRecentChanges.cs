@@ -28,7 +28,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		public override string Name { get; } = "recentchanges";
 
-		protected override string BasePrefix { get; } = "rc";
+		protected override string Prefix { get; } = "rc";
 		#endregion
 
 		#region Public Static Methods

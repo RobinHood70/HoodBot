@@ -4,7 +4,7 @@ namespace RobinHood70.WallE.Base
 	using System.Collections.Generic;
 
 	// IMPNOTE: Uselang is not implemented. It only ever existed in 1.21-1.24 and served little purpose but to localize a single return message with little info of any value.
-	public class WatchInput : PageSetInputBase
+	public class WatchInput : PageSetInput
 	{
 		#region Constructors
 		public WatchInput(IEnumerable<string> titles)

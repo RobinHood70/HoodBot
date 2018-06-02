@@ -32,9 +32,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Override Properties
-		protected override string BasePrefix { get; } = "si";
-
 		protected override string ModuleType { get; } = "meta";
+
+		protected override string Prefix { get; } = "si";
 		#endregion
 
 		#region Public Override Methods

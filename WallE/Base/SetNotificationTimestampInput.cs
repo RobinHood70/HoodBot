@@ -5,7 +5,7 @@ namespace RobinHood70.WallE.Base
 	using System.Collections.Generic;
 
 	// NOTE: This class does not use custom constructors beyond those required for PageSetInputBase. In theory, only one of NewerThanRevisionId, Timestamp, and ToRevisionId should actually be specified at the same time. I can't even imagine what that would look like combined with the existing constructors and static functions.
-	public class SetNotificationTimestampInput : PageSetInputBase
+	public class SetNotificationTimestampInput : PageSetInput
 	{
 		#region Constructors
 		public SetNotificationTimestampInput()

@@ -26,7 +26,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Public Override Properties
 		protected override string ModuleType => "meta";
 
-		protected override string BasePrefix { get; } = "fri";
+		protected override string Prefix { get; } = "fri";
 
 		protected override string ResultName { get; } = "repos";
 		#endregion

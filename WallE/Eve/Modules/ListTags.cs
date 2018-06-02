@@ -22,7 +22,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Properties
-		protected override string BasePrefix { get; } = "tg";
+		protected override string Prefix { get; } = "tg";
 		#endregion
 
 		#region Public Override Methods

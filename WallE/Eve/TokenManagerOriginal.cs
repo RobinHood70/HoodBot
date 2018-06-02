@@ -29,16 +29,16 @@
 		#region Public Methods
 		public void Clear() => this.SessionTokens.Clear();
 
-		public string RollbackToken(long pageId) => this.GetToken(PageSetInput.FromPageIds(new long[] { pageId }));
+		public string RollbackToken(long pageId) => this.GetToken(DefaultPageSetInput.FromPageIds(new long[] { pageId }));
 
-		public string RollbackToken(string title) => this.GetToken(new PageSetInput(new string[] { title }));
+		public string RollbackToken(string title) => this.GetToken(new DefaultPageSetInput(new string[] { title }));
 
 		public virtual string SessionToken(string type)
 		{
 			type = TokenManagerFunctions.ValidateTokenType(ValidTypes, type, Csrf, Edit);
 			if (!this.SessionTokens.TryGetValue(type, out string retval))
 			{
-				var pageSetInput = new PageSetInput(new string[] { ":" }); // This is a hack that MW sees as a legitimate page name that will never actually be found. Fixed in later versions, but works nicely for pre-1.20 since we don't have an actual page name.
+				var pageSetInput = new DefaultPageSetInput(new string[] { ":" }); // This is a hack that MW sees as a legitimate page name that will never actually be found. Fixed in later versions, but works nicely for pre-1.20 since we don't have an actual page name.
 				var propInfoInput = new InfoInput { Tokens = new[] { Edit, Watch } };
 				var input = new RecentChangesInput { GetPatrolToken = true, MaxItems = 1 };
 				var recentChanges = new ListRecentChanges(this.Wal, input);
@@ -84,7 +84,7 @@
 		#endregion
 
 		#region Private Methods
-		private string GetToken(PageSetInput pageSetInput)
+		private string GetToken(DefaultPageSetInput pageSetInput)
 		{
 			var revisions = new RevisionsInput() { GetRollbackToken = true };
 			var pages = this.Wal.LoadPages(pageSetInput, new IPropertyInput[] { revisions });

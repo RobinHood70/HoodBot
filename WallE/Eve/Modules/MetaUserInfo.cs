@@ -26,9 +26,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Properties
-		protected override string BasePrefix { get; } = "ui";
-
 		protected override string ModuleType { get; } = "meta";
+
+		protected override string Prefix { get; } = "ui";
 		#endregion
 
 		#region Protected Override Methods

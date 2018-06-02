@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static WikiCommon.Globals;
 
 	public abstract class ActionModulePageSet<TInput, TOutput> : ActionModule<TInput, IReadOnlyList<TOutput>>, IPageSetInternal
-		where TInput : PageSetInputBase
+		where TInput : PageSetInput
 		where TOutput : ITitle, new()
 	{
 		#region Fields
@@ -93,7 +93,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				if (match.Success)
 				{
 					var parameter = match.Groups["parameter"].Value;
-					if (PageSetInputBase.AllTypes.Contains(parameter))
+					if (PageSetInput.AllTypes.Contains(parameter))
 					{
 						this.done = false;
 						this.MaximumListSize = int.Parse(match.Groups["sizelimit"].Value, CultureInfo.InvariantCulture);

@@ -5,10 +5,10 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
 
-	public abstract class ContinueModuleBase
+	public abstract class ContinueModule
 	{
 		#region Constructors
-		protected ContinueModuleBase()
+		protected ContinueModule()
 		{
 		}
 		#endregion
@@ -38,7 +38,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		public virtual void OnSubmit(IPageSetInternal pageSet)
 		{
 			var generator = pageSet?.Generator;
-			this.GeneratorContinue = generator?.Prefix + generator?.ContinueName;
+			this.GeneratorContinue = generator?.FullPrefix + generator?.ContinueName;
 		}
 		#endregion
 	}

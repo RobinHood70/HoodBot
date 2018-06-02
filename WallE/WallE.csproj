@@ -202,7 +202,7 @@
     <Compile Include="Eve\Modules\ActionWatch.cs" />
     <Compile Include="Eve\Modules\ContinueModule1.cs" />
     <Compile Include="Eve\Modules\ContinueModule2.cs" />
-    <Compile Include="Eve\Modules\ContinueModuleBase.cs" />
+    <Compile Include="Eve\Modules\ContinueModule.cs" />
     <Compile Include="Eve\Modules\ContinueModuleUnknown.cs" />
     <Compile Include="Eve\Modules\IActionModule.cs" />
     <Compile Include="Eve\Modules\IGeneratorModule.cs" />
@@ -292,7 +292,7 @@
     <Compile Include="Base\PurgeResult.cs" />
     <Compile Include="Base\CategoryInfoInput.cs" />
     <Compile Include="Base\ImageRotateInput.cs" />
-    <Compile Include="Base\Interfaces and Abstract Classes\PageSetInputBase.cs" />
+    <Compile Include="Base\Interfaces and Abstract Classes\PageSetInput.cs" />
     <Compile Include="Base\CustomResult.cs" />
     <Compile Include="Base\MediaWikiGlobal.cs" />
     <Compile Include="Base\ExtendedMetadataItem.cs" />
@@ -307,7 +307,7 @@
     <Compile Include="Base\DeleteResult.cs" />
     <Compile Include="Base\InterwikiLinksInput.cs" />
     <Compile Include="Base\LinksInput.cs" />
-    <Compile Include="Base\PageSetInput.cs" />
+    <Compile Include="Base\DefaultPageSetInput.cs" />
     <Compile Include="Base\PageSetRedirectItem.cs" />
     <Compile Include="Base\RedirectsItem.cs" />
     <Compile Include="Base\CategoryInfoResult.cs" />

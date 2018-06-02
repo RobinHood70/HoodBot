@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static Properties.EveMessages;
 	using static WikiCommon.Globals;
 
-	internal class ContinueModule2 : ContinueModuleBase
+	internal class ContinueModule2 : ContinueModule
 	{
 		#region Public Constants
 		public const int BatchVersion = 126;

@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static WikiCommon.Globals;
 
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "All inputs have Input suffix, even when collections.")]
-	public class QueryInput : PageSetInput
+	public class QueryInput : DefaultPageSetInput
 	{
 		#region Constructors
 		public QueryInput(params IQueryModule[] modules)
@@ -27,7 +27,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			this.PropertyModules = new ModuleCollection<IPropertyModule>();
 		}
 
-		public QueryInput(WikiAbstractionLayer wal, PageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs)
+		public QueryInput(WikiAbstractionLayer wal, DefaultPageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs)
 			: base(pageSetInput)
 		{
 			ThrowNull(wal, nameof(wal));
@@ -40,7 +40,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		/// <param name="pageSetInput">Page set information.</param>
 		/// <param name="propertyInputs">Inputs for the property modules to use.</param>
 		/// <param name="queryModules">Non-query modules to use.</param>
-		public QueryInput(WikiAbstractionLayer wal, PageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs, IEnumerable<IQueryModule> queryModules)
+		public QueryInput(WikiAbstractionLayer wal, DefaultPageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs, IEnumerable<IQueryModule> queryModules)
 			: this(wal, pageSetInput, propertyInputs)
 		{
 			ThrowNullRefCollection(queryModules, nameof(queryModules));

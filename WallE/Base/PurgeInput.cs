@@ -4,7 +4,7 @@ namespace RobinHood70.WallE.Base
 	using System.Collections.Generic;
 	using RobinHood70.WikiCommon;
 
-	public class PurgeInput : PageSetInputBase
+	public class PurgeInput : PageSetInput
 	{
 		#region Constructors
 		public PurgeInput(IEnumerable<string> titles)

@@ -295,7 +295,7 @@
 		/// <param name="propertyInputs"><para>A collection of any combination of property inputs. Built-in property inputs include: <see cref="CategoriesInput"/>, <see cref="CategoryInfoInput"/>, <see cref="ContributorsInput"/>, <see cref="DeletedRevisionsInput"/>, <see cref="DuplicateFilesInput"/>, <see cref="ExternalLinksInput"/>, <see cref="FileUsageInput"/>, <see cref="ImageInfoInput"/>, <see cref="ImagesInput"/>, <see cref="InfoInput"/>, <see cref="InterwikiLinksInput"/>, <see cref="LanguageLinksInput"/>, <see cref="LinksHereInput"/>, <see cref="PagePropertiesInput"/>, <see cref="RedirectsInput"/>, <see cref="RevisionsInput"/>, <see cref="StashImageInfoInput"/>, and <see cref="TranscludedInInput"/>.</para>
 		/// <para>A typical, simple collection would include an InfoInput and a RevisionsInput, which would fetch basic information about the page, along with the latest revision.</para></param>
 		/// <returns>A list of pages based on the pageSetInput parameter with the information for each of the property inputs.</returns>
-		PageSetResult<PageItem> LoadPages(PageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs);
+		PageSetResult<PageItem> LoadPages(DefaultPageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs);
 
 		/// <summary>Loads page information. Incorporates the various API <a href="https://www.mediawiki.org/wiki/API:Properties">property</a> modules.</summary>
 		/// <param name="pageSetInput">A pageset input which specifies a list of page titles, page IDs, revision IDs, or a generator.</param>
@@ -304,7 +304,7 @@
 		/// <param name="pageFactory">A factory method which creates an object derived from PageItem.</param>
 		/// <returns>A list of pages based on the <paramref name="pageSetInput"/> parameter with the information determined by each of the property inputs.</returns>
 		// Making this a generic method looked very nice from this end, but caused no end of headaches from the client end, so I switched it to a factory-based call instead.
-		PageSetResult<PageItem> LoadPages(PageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs, Func<PageItem> pageFactory);
+		PageSetResult<PageItem> LoadPages(DefaultPageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs, Func<PageItem> pageFactory);
 
 		/// <summary>Returns data corresponding to the <a href="https://www.mediawiki.org/wiki/API:Logevents">Logevents</a> API module.</summary>
 		/// <param name="input">The input parameters.</param>

@@ -46,7 +46,7 @@
 
 		/// <summary>Creates a new continuation module.</summary>
 		/// <returns>A continuation module appropriate to the version of the wiki in use.</returns>
-		public ContinueModuleBase CreateContinue()
+		public ContinueModule CreateContinue()
 		{
 			switch (this.wal.ContinueVersion)
 			{

@@ -32,7 +32,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Override Properties
-		protected override string BasePrefix { get; } = "rv";
+		protected override string Prefix { get; } = "rv";
 		#endregion
 
 		#region Public Static Methods

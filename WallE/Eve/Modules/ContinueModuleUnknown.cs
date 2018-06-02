@@ -5,7 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RequestBuilder;
 	using static WikiCommon.Globals;
 
-	internal class ContinueModuleUnknown : ContinueModuleBase
+	internal class ContinueModuleUnknown : ContinueModule
 	{
 		#region Protected Override Methods
 		public override void BuildRequest(Request request)

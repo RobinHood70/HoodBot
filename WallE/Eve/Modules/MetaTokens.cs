@@ -22,9 +22,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Properties
-		protected override string BasePrefix { get; } = string.Empty;
-
 		protected override string ModuleType { get; } = "meta";
+
+		protected override string Prefix { get; } = string.Empty;
 		#endregion
 
 		#region Protected Override Methods
