@@ -105,7 +105,7 @@
 			});
 		}
 
-		public void AddDuplicateFiles(IEnumerable<string> titles) => this.FillFromPageSet(new DuplicateFilesInput(), new Titles(this.Site, MediaWikiNamespaces.File, titles));
+		public void AddDuplicateFiles(IEnumerable<string> titles) => this.FillFromPageSet(new DuplicateFilesInput(), new TitleCollection(this.Site, MediaWikiNamespaces.File, titles));
 
 		public void AddDuplicateFiles(IEnumerable<IWikiTitle> titles) => this.FillFromPageSet(new DuplicateFilesInput(), titles);
 
@@ -244,7 +244,7 @@
 
 		public void AddTitles(params string[] titles) => this.AddTitles(titles as IEnumerable<string>);
 
-		public void AddTitles(IEnumerable<string> titles) => this.FillFromPageSet(new Titles(this.Site, titles));
+		public void AddTitles(IEnumerable<string> titles) => this.FillFromPageSet(new TitleCollection(this.Site, titles));
 
 		public void AddTransclusionsOfNamespace(int ns) => this.FillFromPageSet(new AllTransclusionsInput() { Namespace = ns });
 
