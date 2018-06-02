@@ -6,11 +6,11 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RequestBuilder;
 	using static WikiCommon.Globals;
 
-	public abstract class PropLinksBase<TInput> : PropListModule<TInput, ITitle>
+	public abstract class PropListLinks<TInput> : PropListModule<TInput, ITitle>
 		where TInput : class, ILinksInput
 	{
 		#region Constructors
-		protected PropLinksBase(WikiAbstractionLayer wal, TInput input)
+		protected PropListLinks(WikiAbstractionLayer wal, TInput input)
 			: base(wal, input)
 		{
 		}

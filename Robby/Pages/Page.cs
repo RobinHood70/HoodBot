@@ -335,7 +335,7 @@
 		{
 			var builder = this.Site.PageBuilder;
 			var propertyInputs = builder.GetPropertyInputs(this.LoadOptions);
-			var pageSetInput = new PageSetInput(new[] { this.FullPageName });
+			var pageSetInput = new DefaultPageSetInput(new[] { this.FullPageName });
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, propertyInputs, builder.CreatePageItem);
 			this.Populate(result.First());
 			this.Loaded = true;

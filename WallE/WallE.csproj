@@ -267,7 +267,7 @@
     <Compile Include="Eve\Modules\PropInterwikiLinks.cs" />
     <Compile Include="Eve\Modules\PropLanguageLinks.cs" />
     <Compile Include="Eve\Modules\PropLinks.cs" />
-    <Compile Include="Eve\Modules\PropLinksBase.cs" />
+    <Compile Include="Eve\Modules\PropListLinks.cs" />
     <Compile Include="Eve\Modules\PropLinksHere.cs" />
     <Compile Include="Eve\Modules\PropListModule.cs" />
     <Compile Include="Eve\Modules\PropModule.cs" />

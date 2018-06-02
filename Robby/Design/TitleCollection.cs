@@ -8,8 +8,7 @@
 	using static Properties.Resources;
 	using static WikiCommon.Globals;
 
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "I prefer abstract classes to end in Base.")]
-	public abstract class TitleCollectionBase<TTitle> : IList<TTitle>, IReadOnlyCollection<TTitle>
+	public abstract class TitleCollection<TTitle> : IList<TTitle>, IReadOnlyCollection<TTitle>
 		where TTitle : IWikiTitle
 	{
 		#region Fields
@@ -18,7 +17,7 @@
 		#endregion
 
 		#region Constructors
-		protected TitleCollectionBase([ValidatedNotNull] Site site)
+		protected TitleCollection([ValidatedNotNull] Site site)
 		{
 			ThrowNull(site, nameof(site));
 			this.Site = site;

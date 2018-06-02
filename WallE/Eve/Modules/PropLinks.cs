@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using WikiCommon;
 	using static WikiCommon.Globals;
 
-	internal class PropLinks : PropLinksBase<LinksInput>, IGeneratorModule
+	internal class PropLinks : PropListLinks<LinksInput>, IGeneratorModule
 	{
 		#region Constructors
 		public PropLinks(WikiAbstractionLayer wal, LinksInput input)

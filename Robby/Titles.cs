@@ -10,15 +10,15 @@
 
 	/// <summary>A collection of Title objects.</summary>
 	/// <remarks>This collection class functions similar to a KeyedCollection, but automatically overwrites existing items with new ones. Because Title objects don't support changing item keys, neither does this.</remarks>
-	public class TitleCollection : TitleCollectionBase<Title>, IEnumerable<Title>, IMessageSource
+	public class Titles : TitleCollection<Title>, IEnumerable<Title>, IMessageSource
 	{
 		#region Constructors
-		public TitleCollection(Site site)
+		public Titles(Site site)
 			: base(site)
 		{
 		}
 
-		public TitleCollection(Site site, IEnumerable<string> titles)
+		public Titles(Site site, IEnumerable<string> titles)
 			: base(site)
 		{
 			ThrowNull(titles, nameof(titles));
@@ -29,12 +29,12 @@
 			}
 		}
 
-		public TitleCollection(Site site, params string[] titles)
+		public Titles(Site site, params string[] titles)
 			: this(site, titles as IEnumerable<string>)
 		{
 		}
 
-		public TitleCollection(Site site, int ns, IEnumerable<string> titles)
+		public Titles(Site site, int ns, IEnumerable<string> titles)
 			: base(site)
 		{
 			ThrowNull(titles, nameof(titles));
@@ -45,7 +45,7 @@
 			}
 		}
 
-		public TitleCollection(Site site, int ns, params string[] titles)
+		public Titles(Site site, int ns, params string[] titles)
 			: this(site, ns, titles as IEnumerable<string>)
 		{
 		}
@@ -53,15 +53,15 @@
 
 		#region Public Static Methods
 
-		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class from individual Title items.</summary>
+		/// <summary>Initializes a new instance of the <see cref="Titles"/> class from individual Title items.</summary>
 		/// <param name="titles">The original Title collection.</param>
 		/// <returns>A Title-only copy of the original collection.</returns>
-		public static TitleCollection CopyFrom(params Title[] titles) => CopyFrom(titles as IEnumerable<Title>);
+		public static Titles CopyFrom(params Title[] titles) => CopyFrom(titles as IEnumerable<Title>);
 
-		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class from another Title collection.</summary>
+		/// <summary>Initializes a new instance of the <see cref="Titles"/> class from another Title collection.</summary>
 		/// <param name="titles">The original Title collection.</param>
 		/// <returns>A Title-only copy of the original collection.</returns>
-		public static TitleCollection CopyFrom(IEnumerable<Title> titles)
+		public static Titles CopyFrom(IEnumerable<Title> titles)
 		{
 			ThrowNull(titles, nameof(titles));
 			Site site = null;
@@ -76,7 +76,7 @@
 				throw new InvalidOperationException("Source collection is empty - TitleCollection could not be initialized.");
 			}
 
-			var output = new TitleCollection(site);
+			var output = new Titles(site);
 			foreach (var title in titles)
 			{
 				var newTitle = new Title(title);

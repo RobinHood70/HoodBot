@@ -8,7 +8,7 @@
 	using WikiCommon;
 	using static WikiCommon.Globals;
 
-	public class PageCollection : TitleCollectionBase<Page>
+	public class PageCollection : TitleCollection<Page>
 	{
 		#region Fields
 		private readonly Dictionary<string, Title> titleMap = new Dictionary<string, Title>();
@@ -30,7 +30,7 @@
 		{
 		}
 
-		public PageCollection(Site site, PageLoadOptions options, PageBuilderBase builder)
+		public PageCollection(Site site, PageLoadOptions options, PageBuilder builder)
 			: base(site)
 		{
 			this.LoadOptions = options ?? site.DefaultLoadOptions;
@@ -41,7 +41,7 @@
 		#region Public Properties
 		public PageLoadOptions LoadOptions { get; set; }
 
-		public PageBuilderBase PageBuilder { get; set; }
+		public PageBuilder PageBuilder { get; set; }
 
 		public IReadOnlyDictionary<string, Title> TitleMap => this.titleMap;
 		#endregion
@@ -105,7 +105,7 @@
 			});
 		}
 
-		public void AddDuplicateFiles(IEnumerable<string> titles) => this.FillFromPageSet(new DuplicateFilesInput(), new TitleCollection(this.Site, MediaWikiNamespaces.File, titles));
+		public void AddDuplicateFiles(IEnumerable<string> titles) => this.FillFromPageSet(new DuplicateFilesInput(), new Titles(this.Site, MediaWikiNamespaces.File, titles));
 
 		public void AddDuplicateFiles(IEnumerable<IWikiTitle> titles) => this.FillFromPageSet(new DuplicateFilesInput(), titles);
 
@@ -218,7 +218,7 @@
 		public void AddRedirectsToNamespace(int ns, string from, string to) => this.FillFromPageSet(new AllRedirectsInput() { Namespace = ns, From = from, To = to });
 
 		// Note that while RevisionsInput() can be used as a generator, I have not implemented it because I can think of no situation in which it would be useful to populate a PageCollection given the existing revisions methods.
-		public void AddRevisionIds(IEnumerable<long> ids) => this.FillFromPageSet(PageSetInput.FromRevisionIds(ids), this.LoadOptions);
+		public void AddRevisionIds(IEnumerable<long> ids) => this.FillFromPageSet(DefaultPageSetInput.FromRevisionIds(ids), this.LoadOptions);
 
 		public void AddRevisions(DateTime? start, DateTime? end) => this.FillFromPageSet(new AllRevisionsInput() { Start = start, End = end }, new PageLoadOptions(this.LoadOptions.Modules | PageModules.Revisions, start, end));
 
@@ -244,7 +244,7 @@
 
 		public void AddTitles(params string[] titles) => this.AddTitles(titles as IEnumerable<string>);
 
-		public void AddTitles(IEnumerable<string> titles) => this.FillFromPageSet(new TitleCollection(this.Site, titles));
+		public void AddTitles(IEnumerable<string> titles) => this.FillFromPageSet(new Titles(this.Site, titles));
 
 		public void AddTransclusionsOfNamespace(int ns) => this.FillFromPageSet(new AllTransclusionsInput() { Namespace = ns });
 
@@ -295,7 +295,7 @@
 		#endregion
 
 		#region Protected Methods
-		protected virtual void FillFromPageSet(PageSetInput pageSetInput, PageLoadOptions options)
+		protected virtual void FillFromPageSet(DefaultPageSetInput pageSetInput, PageLoadOptions options)
 		{
 			ThrowNull(pageSetInput, nameof(pageSetInput));
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, this.PageBuilder.GetPropertyInputs(options), this.PageBuilder.CreatePageItem);
@@ -353,13 +353,13 @@
 			}
 		}
 
-		private void FillFromPageSet(IEnumerable<IWikiTitle> titles) => this.FillFromPageSet(new PageSetInput(titles.AsFullPageNames()), this.LoadOptions);
+		private void FillFromPageSet(IEnumerable<IWikiTitle> titles) => this.FillFromPageSet(new DefaultPageSetInput(titles.AsFullPageNames()), this.LoadOptions);
 
-		private void FillFromPageSet(IGeneratorInput generator) => this.FillFromPageSet(new PageSetInput(generator), this.LoadOptions);
+		private void FillFromPageSet(IGeneratorInput generator) => this.FillFromPageSet(new DefaultPageSetInput(generator), this.LoadOptions);
 
-		private void FillFromPageSet(IGeneratorInput generator, PageLoadOptions options) => this.FillFromPageSet(new PageSetInput(generator), options);
+		private void FillFromPageSet(IGeneratorInput generator, PageLoadOptions options) => this.FillFromPageSet(new DefaultPageSetInput(generator), options);
 
-		private void FillFromPageSet(IGeneratorInput generator, IEnumerable<IWikiTitle> titles) => this.FillFromPageSet(new PageSetInput(generator, titles.AsFullPageNames()), this.LoadOptions);
+		private void FillFromPageSet(IGeneratorInput generator, IEnumerable<IWikiTitle> titles) => this.FillFromPageSet(new DefaultPageSetInput(generator, titles.AsFullPageNames()), this.LoadOptions);
 		#endregion
 	}
 }

@@ -27,7 +27,7 @@
 		public Site(IWikiAbstractionLayer wiki)
 		{
 			this.DefaultLoadOptions = new PageLoadOptions(PageModules.Simple);
-			this.PageBuilder = new PageBuilder();
+			this.PageBuilder = new DefaultPageBuilder();
 			this.AbstractionLayer = wiki;
 			this.AbstractionLayer.WarningOccurred += this.Wiki_WarningOccurred;
 		}
@@ -70,7 +70,7 @@
 
 		public NamespaceCollection Namespaces { get; private set; }
 
-		public PageBuilderBase PageBuilder { get; set; }
+		public PageBuilder PageBuilder { get; set; }
 
 		public string ServerName { get; private set; }
 

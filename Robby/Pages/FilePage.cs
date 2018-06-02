@@ -36,7 +36,7 @@
 				Namespaces = namespaces,
 				FilterRedirects = filterRedirects
 			};
-			var pageSet = new PageSetInput(new[] { this.FullPageName });
+			var pageSet = new DefaultPageSetInput(new[] { this.FullPageName });
 			var result = this.Site.AbstractionLayer.LoadPages(pageSet, new[] { propModule });
 			var page = result.First();
 			var retval = new List<string>(page.FileUsages.Count);
@@ -53,7 +53,7 @@
 		public IReadOnlyList<string> FindDuplicateFiles(bool localOnly)
 		{
 			var propModule = new DuplicateFilesInput() { LocalOnly = localOnly };
-			var pageSet = new PageSetInput(new[] { this.FullPageName });
+			var pageSet = new DefaultPageSetInput(new[] { this.FullPageName });
 			var result = this.Site.AbstractionLayer.LoadPages(pageSet, new[] { propModule });
 			var page = result.First();
 			var retval = new List<string>(page.DuplicateFiles.Count);

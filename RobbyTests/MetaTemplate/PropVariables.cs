@@ -25,7 +25,7 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override string BasePrefix => "mv";
+		protected override string Prefix => "mv";
 		#endregion
 
 		#region Public Static Methods

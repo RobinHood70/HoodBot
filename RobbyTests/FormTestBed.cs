@@ -89,7 +89,7 @@
 		#region Tests and Related
 		public void AllMessagesTest()
 		{
-			var titles = new TitleCollection(this.Wiki);
+			var titles = new Titles(this.Wiki);
 			titles.AddMessages(Filter.Only);
 			DumpTitles(titles);
 		}
@@ -104,7 +104,7 @@
 
 		public void BacklinksTests()
 		{
-			var titles = new TitleCollection(this.Wiki);
+			var titles = new Titles(this.Wiki);
 			titles.AddBacklinks("Oblivion:Oblivion", BacklinksTypes.Backlinks | BacklinksTypes.EmbeddedIn, true, Filter.Any, MediaWikiNamespaces.Template);
 			this.CheckCollection(titles, "Backlinks");
 			DumpTitles(titles);
@@ -136,7 +136,7 @@
 
 		public void CategoryMembersTests()
 		{
-			var titles = new TitleCollection(this.Wiki);
+			var titles = new Titles(this.Wiki);
 			titles.AddCategoryMembers("Marked for Deletion", true, CategoryTypes.All);
 			this.CheckCollection(titles, "CategoryMembers");
 			DumpTitles(titles);
@@ -183,7 +183,7 @@
 
 		public void CategoryTests()
 		{
-			var titles = new TitleCollection(this.Wiki);
+			var titles = new Titles(this.Wiki);
 			titles.AddCategories("Arena-A", "Arena-J");
 			DumpTitles(titles);
 		}
@@ -207,7 +207,7 @@
 
 			var filePage = new FilePage(this.Wiki, duped);
 			var result = filePage.FindDuplicateFiles();
-			var files = new TitleCollection(this.Wiki, MediaWikiNamespaces.File, result);
+			var files = new Titles(this.Wiki, MediaWikiNamespaces.File, result);
 			DumpTitles(files);
 		}
 
@@ -216,14 +216,14 @@
 			const string used = "File:EnwiktwatchlistCapture.PNG";
 			var filePage = new FilePage(this.Wiki, used);
 			var result = filePage.FileUsage();
-			var files = new TitleCollection(this.Wiki, result);
+			var files = new Titles(this.Wiki, result);
 			DumpTitles(files);
 		}
 
 		public void MetaTemplateTests()
 		{
 			this.Wiki.DefaultLoadOptions = new PageLoadOptions(PageModules.Info | PageModules.Revisions | PageModules.Custom);
-			var titles = new TitleCollection(this.Wiki, "Legends:Adoring Fan");
+			var titles = new Titles(this.Wiki, "Legends:Adoring Fan");
 			var pages = titles.Load();
 			foreach (var page in pages)
 			{
@@ -265,7 +265,7 @@
 
 		public void PageCollectionFromCategoriesTest()
 		{
-			var sourcePages = new TitleCollection(this.Wiki, "Main Page");
+			var sourcePages = new Titles(this.Wiki, "Main Page");
 			var pageCollection = new PageCollection(this.Wiki);
 			pageCollection.AddPageCategories(sourcePages);
 			foreach (var page in pageCollection)
@@ -284,7 +284,7 @@
 		public void PagesCategoriesOnTests()
 		{
 			var pages = new PageCollection(this.Wiki) { LoadOptions = PageLoadOptions.None };
-			var categoryTitles = new TitleCollection(this.Wiki, "API:Categories", "API:Purge");
+			var categoryTitles = new Titles(this.Wiki, "API:Categories", "API:Purge");
 			pages.AddPageCategories(categoryTitles, Filter.Any);
 			DumpTitles(pages);
 		}
@@ -347,7 +347,7 @@
 
 		public void ProtectedTitlesTests()
 		{
-			var titles = new TitleCollection(this.Wiki);
+			var titles = new Titles(this.Wiki);
 			titles.AddProtectedTitles();
 			this.CheckCollection(titles, "ProtectedTitles");
 			DumpTitles(titles);
@@ -355,7 +355,7 @@
 
 		public void PurgeTests()
 		{
-			var titles = new TitleCollection(this.Wiki, "User:RobinHood70");
+			var titles = new Titles(this.Wiki, "User:RobinHood70");
 			var result = titles.Purge(PurgeMethod.Normal);
 			DumpTitles(result);
 		}
@@ -380,14 +380,14 @@
 
 		public void SearchTests()
 		{
-			var titles = new TitleCollection(this.Wiki);
+			var titles = new Titles(this.Wiki);
 			titles.AddSearchResults("aleph", WhatToSearch.Title, this.Wiki.Namespaces.RegularIds);
 			DumpTitles(titles);
 		}
 
 		public void TemplateTransclusionTest()
 		{
-			var titleCollection = new TitleCollection(this.Wiki);
+			var titleCollection = new Titles(this.Wiki);
 			titleCollection.AddTemplateTransclusions();
 			DumpTitles(titleCollection);
 		}
@@ -411,7 +411,7 @@
 
 		public void TitlesAllPagesTests()
 		{
-			var titles = new TitleCollection(this.Wiki);
+			var titles = new Titles(this.Wiki);
 			var sw = new Stopwatch();
 			sw.Start();
 			titles.AddNamespace(MediaWikiNamespaces.Template, Filter.Any, "A", "C");
@@ -430,7 +430,7 @@
 
 		public void UnwatchTests()
 		{
-			var titles = new TitleCollection(this.Wiki, "User:RobinHood70");
+			var titles = new Titles(this.Wiki, "User:RobinHood70");
 			var result = titles.Unwatch();
 			DumpTitles(result);
 		}
@@ -516,7 +516,7 @@
 
 		public void WatchTests()
 		{
-			var titles = new TitleCollection(this.Wiki, "User:RobinHood70");
+			var titles = new Titles(this.Wiki, "User:RobinHood70");
 			var result = titles.Watch();
 			DumpTitles(result);
 		}

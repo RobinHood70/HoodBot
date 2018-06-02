@@ -530,7 +530,7 @@
 			this.StartStopwatch("AllImages");
 			var input = new AllImagesInput();
 			var result = this.wiki.AllImages(input);
-			var pages = this.wiki.LoadPages(new PageSetInput(input), DefaultPageProperties);
+			var pages = this.wiki.LoadPages(new DefaultPageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
 			if (result.Count > 0)
 			{
@@ -574,7 +574,7 @@
 			this.StartStopwatch("AllFileUsages");
 			var input = new AllFileUsagesInput();
 			var result = this.wiki.AllFileUsages(input);
-			var pages = this.wiki.LoadPages(new PageSetInput(input), DefaultPageProperties);
+			var pages = this.wiki.LoadPages(new DefaultPageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
 			if (result != null)
 			{
@@ -595,7 +595,7 @@
 			this.StartStopwatch("AllLinks");
 			var input = new AllLinksInput();
 			var result = this.wiki.AllLinks(input);
-			var pages = this.wiki.LoadPages(new PageSetInput(input), DefaultPageProperties);
+			var pages = this.wiki.LoadPages(new DefaultPageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "output");
 			if (result != null)
 			{
@@ -616,7 +616,7 @@
 			this.StartStopwatch("AllRedirects");
 			var input = new AllRedirectsInput();
 			var result = this.wiki.AllRedirects(input);
-			var pages = this.wiki.LoadPages(new PageSetInput(input), DefaultPageProperties);
+			var pages = this.wiki.LoadPages(new DefaultPageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
 			if (result != null)
 			{
@@ -637,7 +637,7 @@
 			this.StartStopwatch("AllTransclusions");
 			var input = new AllTransclusionsInput() { Namespace = 0 };
 			var result = this.wiki.AllTransclusions(input);
-			var pages = this.wiki.LoadPages(new PageSetInput(input), DefaultPageProperties);
+			var pages = this.wiki.LoadPages(new DefaultPageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
 			if (result.Count > 0)
 			{
@@ -659,7 +659,7 @@
 			this.StartStopwatch("Backlinks");
 			var input = new BacklinksInput("Test Page 1", BacklinksTypes.Backlinks) { FilterRedirects = Filter.Any };
 			var result = this.wiki.Backlinks(input);
-			var pages = this.wiki.LoadPages(new PageSetInput(input), DefaultPageProperties);
+			var pages = this.wiki.LoadPages(new DefaultPageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
 			if (result.Count > 0)
 			{
@@ -670,7 +670,7 @@
 
 			input = new BacklinksInput("File:Test Image 1.jpg", BacklinksTypes.EmbeddedIn) { FilterRedirects = Filter.Any };
 			result = this.wiki.Backlinks(input);
-			pages = this.wiki.LoadPages(new PageSetInput(input), DefaultPageProperties);
+			pages = this.wiki.LoadPages(new DefaultPageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
 			if (result.Count > 0)
 			{
@@ -681,7 +681,7 @@
 
 			input = new BacklinksInput("File:Test Image 1.jpg", BacklinksTypes.ImageUsage) { FilterRedirects = Filter.Any };
 			result = this.wiki.Backlinks(input);
-			pages = this.wiki.LoadPages(new PageSetInput(input), DefaultPageProperties);
+			pages = this.wiki.LoadPages(new DefaultPageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
 			if (result.Count > 0)
 			{
@@ -706,7 +706,7 @@
 			this.StartStopwatch("Categories");
 			var input = new AllCategoriesInput() { From = "Test", To = "Tesz" };
 			var result = this.wiki.AllCategories(input);
-			var pages = this.wiki.LoadPages(new PageSetInput(input), DefaultPageProperties);
+			var pages = this.wiki.LoadPages(new DefaultPageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
 			if (result.Count > 0)
 			{
@@ -835,7 +835,7 @@
 			};
 			this.adminWiki.MergeHistory(input);
 			var revisionsInput = new RevisionsInput() { MaxItems = 3 };
-			var pageSetInput = new PageSetInput(new string[] { testPage2 });
+			var pageSetInput = new DefaultPageSetInput(new string[] { testPage2 });
 			var pageResult = this.wiki.LoadPages(pageSetInput, new IPropertyInput[] { revisionsInput });
 			this.Assert(pageResult.Count == 1, "Incorrect number of pages loaded.");
 			this.Assert(pageResult.First().Revisions.Count == 2, "Incorrect number of revisions loaded.");

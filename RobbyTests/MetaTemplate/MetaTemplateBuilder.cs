@@ -6,7 +6,7 @@
 	using WallE.Base;
 	using static WikiCommon.Globals;
 
-	public class MetaTemplateBuilder : PageBuilderBase
+	public class MetaTemplateBuilder : PageBuilder
 	{
 		#region Public Override Methods
 		public override Page CreatePage(Site site, int ns, string title) => new VariablesPage(site, title);
