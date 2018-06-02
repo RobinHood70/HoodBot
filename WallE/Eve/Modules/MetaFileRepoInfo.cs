@@ -17,13 +17,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 122;
 
 		public override string Name { get; } = "filerepoinfo";
 		#endregion
 
 		#region Public Override Properties
+		protected override string ModuleType => "meta";
+
 		protected override string BasePrefix { get; } = "fri";
 
 		protected override string ResultName { get; } = "repos";
