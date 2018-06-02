@@ -8,7 +8,7 @@
 	using WikiCommon;
 	using static WikiCommon.Globals;
 
-	public class PageCollection : TitleCollectionBase<Page>, IMessageSource
+	public class PageCollection : TitleCollectionBase<Page>
 	{
 		#region Fields
 		private readonly Dictionary<string, Title> titleMap = new Dictionary<string, Title>();

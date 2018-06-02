@@ -10,8 +10,7 @@
 
 	/// <summary>Represents a wiki page.</summary>
 	/// <seealso cref="Title" />
-	/// <seealso cref="IMessageSource" />
-	public class Page : Title, IMessageSource
+	public class Page : Title
 	{
 		#region Constructors
 
