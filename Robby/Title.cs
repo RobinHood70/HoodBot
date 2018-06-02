@@ -230,19 +230,19 @@
 			return result.LogId > 0;
 		}
 
-		/// <summary>Functionally equivalent to Equals(Title), but IEquatable breaks spectacularly on non-sealed types, so is not implemented.</summary>
-		/// <param name="title">The title, or derived type, to compare to.</param>
-		/// <returns>True if all of Site, Namespace, PageName, and Key are identical between the two Titles.</returns>
-		public bool IsIdenticalTo(IWikiTitle title) => this.IsSameAs(title) && this.Key == title?.Key;
-
 		/// <summary>Checks to see if this Title resolves to the same page as another Title. Key is ignored.</summary>
 		/// <param name="title">The title, or derived type, to compare to.</param>
 		/// <returns>True if all of Site, Namespace, and PageName are identical between the two Titles.</returns>
-		public bool IsSameAs(IWikiTitle title) =>
+		public bool IsSameTitle(IWikiTitle title) =>
 			title != null &&
 			this.Site == title.Site &&
 			this.Namespace == title.Namespace &&
 			this.PageName == title.PageName;
+
+		/// <summary>Functionally equivalent to Equals(Title), but IEquatable breaks spectacularly on non-sealed types, so is not implemented.</summary>
+		/// <param name="title">The title, or derived type, to compare to.</param>
+		/// <returns>True if all of Site, Namespace, PageName, and Key are identical between the two Titles.</returns>
+		public bool IsSameTitleAndKey(IWikiTitle title) => this.IsSameTitle(title) && this.Key == title?.Key;
 
 		public Dictionary<string, string> Move(string to, string reason, bool suppressRedirect) => this.Move(to, reason, false, false, suppressRedirect);
 
