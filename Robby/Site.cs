@@ -90,11 +90,11 @@
 		#endregion
 
 		#region Public Methods
-		public bool ClearMessage() => this.AbstractionLayer.ClearHasMessage();
-
-		public virtual void DownloadFile(string resource, string fileName) => this.AbstractionLayer.Download(new DownloadInput(resource, fileName));
+		public virtual bool ClearMessage() => this.AbstractionLayer.ClearHasMessage();
 
 		public void DownloadFile(Uri uri, string fileName) => this.DownloadFile(uri?.OriginalString, fileName);
+
+		public virtual void DownloadFile(string resource, string fileName) => this.AbstractionLayer.Download(new DownloadInput(resource, fileName));
 
 		public virtual Uri GetArticlePath(string articleName)
 		{
@@ -112,17 +112,17 @@
 			return new Uri(this.articlePath.Replace("$1", articleName).TrimEnd('/'));
 		}
 
-		public IReadOnlyList<Block> GetBlocks() => this.GetBlocks(new BlocksInput() { Properties = BlocksProperties.All });
+		public virtual IReadOnlyList<Block> GetBlocks() => this.GetBlocks(new BlocksInput() { Properties = BlocksProperties.All });
 
-		public IReadOnlyList<Block> GetBlocks(Filter filterAccount, Filter filterIP, Filter filterRange, Filter filterTemporary) => this.GetBlocks(new BlocksInput() { FilterAccount = filterAccount, FilterIP = filterIP, FilterRange = filterRange, FilterTemporary = filterTemporary, Properties = BlocksProperties.All });
+		public virtual IReadOnlyList<Block> GetBlocks(Filter filterAccount, Filter filterIP, Filter filterRange, Filter filterTemporary) => this.GetBlocks(new BlocksInput() { FilterAccount = filterAccount, FilterIP = filterIP, FilterRange = filterRange, FilterTemporary = filterTemporary, Properties = BlocksProperties.All });
 
-		public IReadOnlyList<Block> GetBlocks(DateTime start, DateTime end) => this.GetBlocks(new BlocksInput() { Start = start, End = end, Properties = BlocksProperties.All });
+		public virtual IReadOnlyList<Block> GetBlocks(DateTime start, DateTime end) => this.GetBlocks(new BlocksInput() { Start = start, End = end, Properties = BlocksProperties.All });
 
-		public IReadOnlyList<Block> GetBlocks(DateTime start, DateTime end, Filter filterAccount, Filter filterIP, Filter filterRange, Filter filterTemporary) => this.GetBlocks(new BlocksInput() { Start = start, End = end, FilterAccount = filterAccount, FilterIP = filterIP, FilterRange = filterRange, FilterTemporary = filterTemporary, Properties = BlocksProperties.All });
+		public virtual IReadOnlyList<Block> GetBlocks(DateTime start, DateTime end, Filter filterAccount, Filter filterIP, Filter filterRange, Filter filterTemporary) => this.GetBlocks(new BlocksInput() { Start = start, End = end, FilterAccount = filterAccount, FilterIP = filterIP, FilterRange = filterRange, FilterTemporary = filterTemporary, Properties = BlocksProperties.All });
 
-		public IReadOnlyList<Block> GetBlocks(IEnumerable<string> users) => this.GetBlocks(new BlocksInput(users) { Properties = BlocksProperties.All });
+		public virtual IReadOnlyList<Block> GetBlocks(IEnumerable<string> users) => this.GetBlocks(new BlocksInput(users) { Properties = BlocksProperties.All });
 
-		public IReadOnlyList<Block> GetBlocks(IPAddress ip) => this.GetBlocks(new BlocksInput(ip) { Properties = BlocksProperties.All });
+		public virtual IReadOnlyList<Block> GetBlocks(IPAddress ip) => this.GetBlocks(new BlocksInput(ip) { Properties = BlocksProperties.All });
 
 		public string GetMessage(string message, IEnumerable<string> arguments)
 		{
@@ -130,13 +130,13 @@
 			return messages[message].Text;
 		}
 
-		public IReadOnlyDictionary<string, Message> GetMessages(IEnumerable<string> msgs, IEnumerable<string> arguments) => this.GetMessages(new AllMessagesInput
+		public virtual IReadOnlyDictionary<string, Message> GetMessages(IEnumerable<string> msgs, IEnumerable<string> arguments) => this.GetMessages(new AllMessagesInput
 		{
 			Messages = msgs,
 			Arguments = arguments,
 		});
 
-		public IReadOnlyList<string> PagePropertyNames() => this.AbstractionLayer.PagePropertyNames(new PagePropertyNamesInput());
+		public virtual IReadOnlyList<string> PagePropertyNames() => this.AbstractionLayer.PagePropertyNames(new PagePropertyNamesInput());
 
 		public string GetParsedMessage(string msg, IEnumerable<string> arguments) => this.GetParsedMessage(msg, arguments, null);
 
@@ -148,7 +148,7 @@
 
 		public IReadOnlyDictionary<string, Message> GetParsedMessages(IEnumerable<string> msgs, IEnumerable<string> arguments) => this.GetParsedMessages(msgs, arguments, null);
 
-		public IReadOnlyDictionary<string, Message> GetParsedMessages(IEnumerable<string> msgs, IEnumerable<string> arguments, Title title) => this.GetMessages(new AllMessagesInput
+		public virtual IReadOnlyDictionary<string, Message> GetParsedMessages(IEnumerable<string> msgs, IEnumerable<string> arguments, Title title) => this.GetMessages(new AllMessagesInput
 		{
 			Messages = msgs,
 			Arguments = arguments,
@@ -156,29 +156,29 @@
 			EnableParserTitle = title?.FullPageName,
 		});
 
-		public IReadOnlyList<RecentChange> GetRecentChanges() => this.GetRecentChanges(new RecentChangesInput());
+		public IReadOnlyList<RecentChange> GetRecentChanges() => this.GetRecentChanges(new RecentChangesOptions());
 
-		public IReadOnlyList<RecentChange> GetRecentChanges(int ns) => this.GetRecentChanges(new RecentChangesInput() { Namespace = ns });
+		public IReadOnlyList<RecentChange> GetRecentChanges(int ns) => this.GetRecentChanges(new RecentChangesOptions() { Namespace = ns });
 
-		public IReadOnlyList<RecentChange> GetRecentChanges(string tag) => this.GetRecentChanges(new RecentChangesInput() { Tag = tag });
+		public IReadOnlyList<RecentChange> GetRecentChanges(string tag) => this.GetRecentChanges(new RecentChangesOptions() { Tag = tag });
 
-		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesInput() { Types = types });
+		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesOptions() { Types = types });
 
 		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesFilters showOnly, RecentChangesFilters hide) => this.GetRecentChanges(new RecentChangesOptions() { ShowOnly = showOnly, Hide = hide });
 
 		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesFilters showOnly, RecentChangesFilters hide, RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesOptions() { ShowOnly = showOnly, Hide = hide, Types = types });
 
-		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime? start, DateTime? end) => this.GetRecentChanges(new RecentChangesInput() { Start = start, End = end });
+		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime? start, DateTime? end) => this.GetRecentChanges(new RecentChangesOptions() { Start = start, End = end });
 
 		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime? start, DateTime? end, RecentChangesFilters showOnly, RecentChangesFilters hide, RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesOptions() { Start = start, End = end, ShowOnly = showOnly, Hide = hide, Types = types });
 
 		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime start, bool newer) => this.GetRecentChanges(start, newer, 0);
 
-		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime start, bool newer, int count) => this.GetRecentChanges(new RecentChangesInput() { Start = start, SortAscending = newer, MaxItems = count });
+		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime start, bool newer, int count) => this.GetRecentChanges(new RecentChangesOptions() { Start = start, Newer = newer, Count = count });
 
-		public IReadOnlyList<RecentChange> GetRecentChanges(string user, bool exclude) => this.GetRecentChanges(new RecentChangesInput() { User = user, ExcludeUser = exclude });
+		public IReadOnlyList<RecentChange> GetRecentChanges(string user, bool exclude) => this.GetRecentChanges(new RecentChangesOptions() { User = user, ExcludeUser = exclude });
 
-		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesOptions options)
+		public virtual IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesOptions options)
 		{
 			ThrowNull(options, nameof(options));
 			var input = new RecentChangesInput()
@@ -196,6 +196,7 @@
 				FilterMinor = FlagToFilter(options.ShowOnly, options.Hide, RecentChangesFilters.Minor),
 				FilterPatrolled = FlagToFilter(options.ShowOnly, options.Hide, RecentChangesFilters.Patrolled),
 				FilterRedirects = FlagToFilter(options.ShowOnly, options.Hide, RecentChangesFilters.Redirect),
+				MaxItems = options.Count,
 			};
 
 			return this.GetRecentChanges(input);
@@ -227,7 +228,7 @@
 
 		public IReadOnlyList<User> GetUserInformation(params string[] users) => this.GetUserInformation(users as IEnumerable<string>);
 
-		public IReadOnlyList<User> GetUserInformation(IEnumerable<string> users)
+		public virtual IReadOnlyList<User> GetUserInformation(IEnumerable<string> users)
 		{
 			var input = new UsersInput(users)
 			{
@@ -244,19 +245,19 @@
 			return retval.AsReadOnly();
 		}
 
-		public IReadOnlyList<string> GetUsers(bool onlyActiveUsers, bool onlyUsersWithEdits) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits });
+		public virtual IReadOnlyList<string> GetUsers(bool onlyActiveUsers, bool onlyUsersWithEdits) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits });
 
-		public IReadOnlyList<string> GetUsers(bool onlyActiveUsers, bool onlyUsersWithEdits, string prefix) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Prefix = prefix });
+		public virtual IReadOnlyList<string> GetUsers(bool onlyActiveUsers, bool onlyUsersWithEdits, string prefix) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Prefix = prefix });
 
-		public IReadOnlyList<string> GetUsers(bool onlyActiveUsers, bool onlyUsersWithEdits, string from, string to) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, From = from, To = to });
+		public virtual IReadOnlyList<string> GetUsers(bool onlyActiveUsers, bool onlyUsersWithEdits, string from, string to) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, From = from, To = to });
 
 		public IReadOnlyList<string> GetUsersInGroups(bool onlyActiveUsers, bool onlyUsersWithEdits, params string[] groups) => this.GetUsersInGroups(onlyActiveUsers, onlyUsersWithEdits, groups as IEnumerable<string>);
 
-		public IReadOnlyList<string> GetUsersInGroups(bool onlyActiveUsers, bool onlyUsersWithEdits, IEnumerable<string> groups) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Groups = groups });
+		public virtual IReadOnlyList<string> GetUsersInGroups(bool onlyActiveUsers, bool onlyUsersWithEdits, IEnumerable<string> groups) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Groups = groups });
 
 		public IReadOnlyList<string> GetUsersWithRights(bool onlyActiveUsers, bool onlyUsersWithEdits, params string[] rights) => this.GetUsersWithRights(onlyActiveUsers, onlyUsersWithEdits, rights as IEnumerable<string>);
 
-		public IReadOnlyList<string> GetUsersWithRights(bool onlyActiveUsers, bool onlyUsersWithEdits, IEnumerable<string> rights) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Rights = rights });
+		public virtual IReadOnlyList<string> GetUsersWithRights(bool onlyActiveUsers, bool onlyUsersWithEdits, IEnumerable<string> rights) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Rights = rights });
 
 		public void Login(string userName, string password) => this.Login(userName, password, null);
 
@@ -275,9 +276,9 @@
 
 		public virtual void Logout() => this.AbstractionLayer.Logout();
 
-		public bool Patrol(long rcid) => this.Patrol(new PatrolInput(rcid));
+		public virtual bool Patrol(long rcid) => this.Patrol(new PatrolInput(rcid));
 
-		public bool PatrolRevision(long revid) => this.Patrol(PatrolInput.FromRevisionId(revid));
+		public virtual bool PatrolRevision(long revid) => this.Patrol(PatrolInput.FromRevisionId(revid));
 
 		public virtual void PublishWarning(IMessageSource sender, string warning) => this.WarningOccurred?.Invoke(this, new WarningEventArgs(sender, warning));
 

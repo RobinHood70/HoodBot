@@ -5,6 +5,8 @@
 
 	public class RecentChangesOptions
 	{
+		public int Count { get; internal set; }
+
 		public DateTime? End { get; set; }
 
 		public bool ExcludeUser { get; set; }
