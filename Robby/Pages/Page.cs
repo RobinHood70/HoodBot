@@ -14,7 +14,7 @@
 	{
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="Page"/> class based on site and page name.</summary>
+		/// <summary>Initializes a new instance of the <see cref="Page" /> class based on site and page name.</summary>
 		/// <param name="site">The site the page is from.</param>
 		/// <param name="fullPageName">Full name of the page.</param>
 		public Page(Site site, string fullPageName)
@@ -22,7 +22,7 @@
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="Page"/> class based on site, page name, and an arbitrary key.</summary>
+		/// <summary>Initializes a new instance of the <see cref="Page" /> class based on site, page name, and an arbitrary key.</summary>
 		/// <param name="site">The site the page is from.</param>
 		/// <param name="fullPageName">Full name of the page.</param>
 		/// <param name="key">The key.</param>
@@ -31,7 +31,7 @@
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="Page"/> class based on site, namespace id, and the page name without a namespace.</summary>
+		/// <summary>Initializes a new instance of the <see cref="Page" /> class based on site, namespace id, and the page name without a namespace.</summary>
 		/// <param name="site">The site the page is from.</param>
 		/// <param name="ns">The namespace to which the page belongs.</param>
 		/// <param name="pageName">The name (only) of the page.</param>
@@ -41,7 +41,7 @@
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="Page"/> class from another IWikiTitle-based object.</summary>
+		/// <summary>Initializes a new instance of the <see cref="Page" /> class from another IWikiTitle-based object.</summary>
 		/// <param name="title">The Title object to copy from.</param>
 		public Page(IWikiTitle title)
 			: base(title)
@@ -61,11 +61,11 @@
 		/// <value>The categories the page is listed in.</value>
 		public IReadOnlyList<CategoryTitle> Categories { get; } = new List<CategoryTitle>();
 
-		/// <summary>Gets a value indicating whether this <see cref="Page"/> exists.</summary>
+		/// <summary>Gets a value indicating whether this <see cref="Page" /> exists.</summary>
 		/// <value><c>true</c> if the page exists; otherwise, <c>false</c>.</value>
 		public bool Exists => !this.Missing && !this.Invalid;
 
-		/// <summary>Gets or sets a value indicating whether this <see cref="Page"/> is invalid.</summary>
+		/// <summary>Gets or sets a value indicating whether this <see cref="Page" /> is invalid.</summary>
 		/// <value><c>true</c> if invalid; otherwise, <c>false</c>.</value>
 		public bool Invalid { get; protected set; }
 
@@ -73,7 +73,7 @@
 		/// <value>The links used on the page.</value>
 		public IReadOnlyList<Title> Links { get; } = new List<Title>();
 
-		/// <summary>Gets a value indicating whether this <see cref="Page"/> has been loaded.</summary>
+		/// <summary>Gets a value indicating whether this <see cref="Page" /> has been loaded.</summary>
 		/// <value><c>true</c> if loaded; otherwise, <c>false</c>.</value>
 		public bool Loaded { get; private set; }
 
@@ -81,11 +81,11 @@
 		/// <value>The load options.</value>
 		public PageLoadOptions LoadOptions { get; set; }
 
-		/// <summary>Gets or sets a value indicating whether this <see cref="Page"/> is missing.</summary>
+		/// <summary>Gets or sets a value indicating whether this <see cref="Page" /> is missing.</summary>
 		/// <value><c>true</c> if the page is missing; otherwise, <c>false</c>.</value>
 		public bool Missing { get; protected set; } = true;
 
-		/// <summary>Gets or sets a value indicating whether this <see cref="Page"/> is new.</summary>
+		/// <summary>Gets or sets a value indicating whether this <see cref="Page" /> is new.</summary>
 		/// <value><c>true</c> if the page is new; otherwise, <c>false</c>.</value>
 		public bool New { get; protected set; }
 
@@ -93,7 +93,7 @@
 		/// <value>The list of page properties.</value>
 		public IReadOnlyDictionary<string, string> Properties { get; } = new Dictionary<string, string>();
 
-		/// <summary>Gets or sets a value indicating whether this <see cref="Page"/> is a redirect.</summary>
+		/// <summary>Gets or sets a value indicating whether this <see cref="Page" /> is a redirect.</summary>
 		/// <value><c>true</c> if the page is a redirect; otherwise, <c>false</c>.</value>
 		public bool Redirect { get; protected set; }
 
@@ -113,7 +113,7 @@
 		/// <value>The page text.</value>
 		public string Text { get; set; }
 
-		/// <summary>Gets a value indicating whether the <see cref="Text"/> property has been modified.</summary>
+		/// <summary>Gets a value indicating whether the <see cref="Text" /> property has been modified.</summary>
 		/// <value><c>true</c> if the text no longer matches the first revision; otherwise, <c>false</c>.</value>
 		/// <remarks>This is currently simply a shortcut property to compare the Text with Revisions[0]. This may not be an accurate reflection of modification status when loading a specific revision range or in other unusual circumstances.</remarks>
 		public bool TextModified

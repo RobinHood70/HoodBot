@@ -46,8 +46,8 @@
 		#region IDictionary<TKey, TValue> Methods
 
 		/// <summary>Convenience method to convert a dictionary to read-only.</summary>
-		/// <typeparam name="TKey">The key-type of the <paramref name="dictionary"/> (inferred).</typeparam>
-		/// <typeparam name="TValue">The value-type of the <paramref name="dictionary"/> (inferred).</typeparam>
+		/// <typeparam name="TKey">The key-type of the <paramref name="dictionary" /> (inferred).</typeparam>
+		/// <typeparam name="TValue">The value-type of the <paramref name="dictionary" /> (inferred).</typeparam>
 		/// <param name="dictionary">The dictionary to convert.</param>
 		/// <returns>A read-only dictionary based on the provided dictionary. If the input was null, an empty read-only dictionary is returned.</returns>
 		public static ReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue> dictionary) => new ReadOnlyDictionary<TKey, TValue>(dictionary ?? new Dictionary<TKey, TValue>());

@@ -29,22 +29,22 @@
 
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="SimpleClient"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="SimpleClient" /> class.</summary>
 		public SimpleClient()
 			: this(null)
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="SimpleClient"/> class with contact information for the User-Agent string.</summary>
+		/// <summary>Initializes a new instance of the <see cref="SimpleClient" /> class with contact information for the User-Agent string.</summary>
 		/// <param name="contactInfo">The contact info to be displayed - typically, an e-mail address or user name on the target wiki.</param>
 		public SimpleClient(string contactInfo)
 			: this(contactInfo, null)
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="SimpleClient"/> class with contact information for the User-Agent string.</summary>
+		/// <summary>Initializes a new instance of the <see cref="SimpleClient" /> class with contact information for the User-Agent string.</summary>
 		/// <param name="contactInfo">The contact info to be displayed - typically, an e-mail address or user name on the target wiki.</param>
-		/// <param name="cookiesLocation">The location and file name to store cookies in across sessions. If null, the default location specified in <see cref="DefaultCookiesLocation"/> will be used.</param>
+		/// <param name="cookiesLocation">The location and file name to store cookies in across sessions. If null, the default location specified in <see cref="DefaultCookiesLocation" /> will be used.</param>
 		public SimpleClient(string contactInfo, string cookiesLocation)
 		{
 			if (HasMono && OnWindows && (DefaultAcceptEncoding.Contains("gzip") || DefaultAcceptEncoding.Contains("deflate")))
@@ -274,7 +274,7 @@
 		#region Protected Virtual Methods
 
 		/// <summary>Raises the <see cref="E:RequestingDelay" /> event.</summary>
-		/// <param name="e">The <see cref="DelayEventArgs"/> instance containing the event data.</param>
+		/// <param name="e">The <see cref="DelayEventArgs" /> instance containing the event data.</param>
 		protected virtual void OnRequestingDelay(DelayEventArgs e) => this.RequestingDelay?.Invoke(this, e);
 		#endregion
 

@@ -37,7 +37,7 @@
 
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="Title"/> class using the site and full page name.</summary>
+		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the site and full page name.</summary>
 		/// <param name="site">The site this title is from.</param>
 		/// <param name="fullName">The full name of the page.</param>
 		public Title(Site site, string fullName)
@@ -45,7 +45,7 @@
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="Title"/> class using the site and full page name.</summary>
+		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the site and full page name.</summary>
 		/// <param name="site">The site this title is from.</param>
 		/// <param name="fullName">The page name, including the namespace.</param>
 		/// <param name="key">The key to use when indexing this page.</param>
@@ -59,7 +59,7 @@
 			this.Key = key ?? this.FullPageName;
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="Title"/> class using the site and full page name.</summary>
+		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the site and full page name.</summary>
 		/// <param name="site">The site this title is from.</param>
 		/// <param name="ns">The namespace to which the page belongs.</param>
 		/// <param name="pageName">The name (only) of the page.</param>
@@ -74,7 +74,7 @@
 			this.Key = this.FullPageName;
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="Title"/> class, copying the information from another Title object.</summary>
+		/// <summary>Initializes a new instance of the <see cref="Title" /> class, copying the information from another Title object.</summary>
 		/// <param name="title">The Title object to copy from.</param>
 		public Title(IWikiTitle title)
 		{

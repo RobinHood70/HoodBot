@@ -52,12 +52,12 @@
 
 		#region Public Static Methods
 
-		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class from individual Title items.</summary>
+		/// <summary>Initializes a new instance of the <see cref="TitleCollection" /> class from individual Title items.</summary>
 		/// <param name="titles">The original Title collection.</param>
 		/// <returns>A Title-only copy of the original collection.</returns>
 		public static TitleCollection CopyFrom(params Title[] titles) => CopyFrom(titles as IEnumerable<Title>);
 
-		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class from another Title collection.</summary>
+		/// <summary>Initializes a new instance of the <see cref="TitleCollection" /> class from another Title collection.</summary>
 		/// <param name="titles">The original Title collection.</param>
 		/// <returns>A Title-only copy of the original collection.</returns>
 		public static TitleCollection CopyFrom(IEnumerable<Title> titles)

@@ -35,7 +35,7 @@
 
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="WikiAbstractionLayer"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="WikiAbstractionLayer" /> class.</summary>
 		/// <param name="client">The client.</param>
 		/// <param name="uri">The URI.</param>
 		[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "As above.")]
@@ -160,7 +160,7 @@
 
 		/// <summary>Gets or sets the module factory.</summary>
 		/// <value>The module factory.</value>
-		/// <seealso cref="IModuleFactory"/>
+		/// <seealso cref="IModuleFactory" />
 		public IModuleFactory ModuleFactory { get; set; }
 
 		/// <summary>Gets or sets the namespace collection for the site.</summary>
@@ -196,8 +196,8 @@
 
 		/// <summary>Gets or sets the base URI used for all requests. This should be the full URI to api.php (e.g., <c>https://en.wikipedia.org/w/api.php</c>).</summary>
 		/// <value>The URI to use as a base.</value>
-		/// <remarks>This should normally be set only by the constructor and the <see cref="MakeUriSecure(bool)"/> routine, but is left as settable by derived classes, should customization be needed.</remarks>
-		/// <seealso cref="WikiAbstractionLayer(IMediaWikiClient, Uri)"/>
+		/// <remarks>This should normally be set only by the constructor and the <see cref="MakeUriSecure(bool)" /> routine, but is left as settable by derived classes, should customization be needed.</remarks>
+		/// <seealso cref="WikiAbstractionLayer(IMediaWikiClient, Uri)" />
 		public Uri Uri { get; protected set; }
 
 		/// <summary>Gets or sets the language to use for responses from the wiki.</summary>
@@ -345,7 +345,7 @@
 		/// <summary>Returns data from the <a href="https://www.mediawiki.org/wiki/API:Alllinks">Alllinks</a> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>A list of links.</returns>
-		/// <exception cref="ArgumentException">Thrown if <paramref name="input"/>.LinkType is set to None or contains only numeric values outside the flag values.</exception>
+		/// <exception cref="ArgumentException">Thrown if <paramref name="input" />.LinkType is set to None or contains only numeric values outside the flag values.</exception>
 		public IReadOnlyList<AllLinksItem> AllLinks(AllLinksInput input) => this.RunListQuery(new ListAllLinks(this, input));
 
 		/// <summary>Returns data from the <a href="https://www.mediawiki.org/wiki/API:Allmessages">Allmessages</a> API module.</summary>

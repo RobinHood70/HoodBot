@@ -35,7 +35,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			this.PageSetQuery = true;
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="QueryInput"/> class for combining multiple standard query modules with a pageset query module.</summary>
+		/// <summary>Initializes a new instance of the <see cref="QueryInput" /> class for combining multiple standard query modules with a pageset query module.</summary>
 		/// <param name="wal">The calling abstraction layer.</param>
 		/// <param name="pageSetInput">Page set information.</param>
 		/// <param name="propertyInputs">Inputs for the property modules to use.</param>

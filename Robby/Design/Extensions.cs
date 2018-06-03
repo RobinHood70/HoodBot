@@ -17,7 +17,7 @@
 
 		#region IEnumerable<IWikiTitle> Extensions
 
-		/// <summary>Converts a series of <see cref="IWikiTitle"/> objects to their full page names.</summary>
+		/// <summary>Converts a series of <see cref="IWikiTitle" /> objects to their full page names.</summary>
 		/// <param name="titles">The titles to convert.</param>
 		/// <returns>The full page names for the titles.</returns>
 		public static IEnumerable<string> AsFullPageNames(this IEnumerable<IWikiTitle> titles)

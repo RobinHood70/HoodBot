@@ -51,7 +51,7 @@
 
 		/// <summary>Convenience method so that CurrentCulture and Invariant are all in the same class for both traditional and formattable strings, and are used the same way.</summary>
 		/// <param name="text">The text to format.</param>
-		/// <param name="values">The values of any parameters in the <paramref name="text"/> parameter.</param>
+		/// <param name="values">The values of any parameters in the <paramref name="text" /> parameter.</param>
 		/// <returns>The formatted text.</returns>
 		public static string CurrentCulture(string text, params object[] values) => string.Format(CultureInfo.CurrentCulture, text, values);
 
@@ -83,7 +83,7 @@
 
 		/// <summary>Convenience method so that CurrentCulture and Invariant are all in the same class for both traditional and formattable strings, and are used the same way.</summary>
 		/// <param name="invariantText">The text to format.</param>
-		/// <param name="values">The values of any parameters in the <paramref name="invariantText"/> parameter.</param>
+		/// <param name="values">The values of any parameters in the <paramref name="invariantText" /> parameter.</param>
 		/// <returns>The formatted text.</returns>
 		/// <remarks>Note that the name of the input parameter is changed so rules will not identify it as needing localization, since invariant strings generally don't.</remarks>
 		public static string Invariant(string invariantText, params object[] values) => string.Format(CultureInfo.InvariantCulture, invariantText, values);
@@ -97,7 +97,7 @@
 		/// <summary>Throws an exception if the input value is null.</summary>
 		/// <param name="nullable">The value that may be null.</param>
 		/// <param name="name">The name of the parameter in the original method.</param>
-		/// <exception cref="ArgumentNullException">Thrown if <paramref name="nullable"/> is null.</exception>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="nullable" /> is null.</exception>
 		public static void ThrowNull([ValidatedNotNull] object nullable, string name)
 		{
 			if (nullable == null)

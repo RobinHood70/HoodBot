@@ -461,7 +461,7 @@
 			}
 		}
 
-		/// <summary>Tries to get the named item from the parameter collection. Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)"/>.</summary>
+		/// <summary>Tries to get the named item from the parameter collection. Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="item">The item.</param>
 		/// <returns><c>true</c> if the item was found; otherwise <c>false</c>.</returns>

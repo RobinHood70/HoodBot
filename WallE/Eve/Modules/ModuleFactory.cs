@@ -5,7 +5,7 @@
 	using Base;
 	using static WikiCommon.Globals;
 
-	/// <summary>Concrete implementation of <see cref="IModuleFactory"/>.</summary>
+	/// <summary>Concrete implementation of <see cref="IModuleFactory" />.</summary>
 	/// <seealso cref="IModuleFactory" />
 	public class ModuleFactory : IModuleFactory
 	{
@@ -17,7 +17,7 @@
 
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="ModuleFactory"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="ModuleFactory" /> class.</summary>
 		/// <param name="wal">The parent wiki abstraction layer.</param>
 		public ModuleFactory(WikiAbstractionLayer wal) => this.wal = wal;
 		#endregion

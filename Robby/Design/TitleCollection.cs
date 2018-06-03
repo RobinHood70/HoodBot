@@ -23,7 +23,7 @@
 
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="TitleCollection{TTitle}"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="TitleCollection{TTitle}" /> class.</summary>
 		/// <param name="site">The site the titles are from. All titles in a collection must belong to the same site.</param>
 		protected TitleCollection([ValidatedNotNull] Site site)
 		{
@@ -114,7 +114,7 @@
 
 		/// <summary>Adds multiple titles to the <see cref="TitleCollection">collection</see> at once.</summary>
 		/// <param name="titles">The titles to add.</param>
-		/// <remarks>This method is for convenience only. Unlike the equivalent <see cref="List{T}"/> function, it simply calls <see cref="Add(TTitle)"/> repeatedly and provides no performance benefit.</remarks>
+		/// <remarks>This method is for convenience only. Unlike the equivalent <see cref="List{T}" /> function, it simply calls <see cref="Add(TTitle)" /> repeatedly and provides no performance benefit.</remarks>
 		public void AddRange(IEnumerable<TTitle> titles)
 		{
 			if (titles != null)
@@ -205,19 +205,19 @@
 		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> by key.</summary>
 		public void Sort() => this.Sort(new WikiTitleComparerKey());
 
-		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> using the specified <see cref="T:System.Comparison{T}"/>.</summary>
+		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> using the specified <see cref="T:System.Comparison{T}" />.</summary>
 		/// <param name="comparison">The comparison.</param>
 		public void Sort(Comparison<IWikiTitle> comparison) => (this.items as List<IWikiTitle>).Sort(comparison);
 
-		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> using the specified <see cref="T:System.IComparer{T}"/>.</summary>
+		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> using the specified <see cref="T:System.IComparer{T}" />.</summary>
 		/// <param name="comparer">The comparer.</param>
 		public void Sort(IComparer<IWikiTitle> comparer) => (this.items as List<IWikiTitle>).Sort(comparer);
 
-		/// <summary>Comparable to <see cref="M:System.Collections.Generic.Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)"/>, attempts to get the value associated with the specified key..</summary>
+		/// <summary>Comparable to <see cref="M:System.Collections.Generic.Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key..</summary>
 		/// <param name="key">The key of the value to get.</param>
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
 		/// <returns><see langword="true" /> if the <see cref="TitleCollection">collection</see> contains an element with the specified key; otherwise, <see langword="false" />.</returns>
-		/// <exception cref="T:System.ArgumentNullException"><paramref name="key"/> is <see langword="null"/>.</exception>
+		/// <exception cref="T:System.ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
 		public bool TryGetValue(string key, out TTitle value) => this.dictionary.TryGetValue(key, out value);
 		#endregion
 
@@ -236,8 +236,8 @@
 		/// <summary>Inserts an item into the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="index">The index to insert at.</param>
 		/// <param name="item">The item.</param>
-		/// <exception cref="T:System.InvalidOperationException">The <see cref="P:IWikiTitle.Site"/> property of the item does not match the <see cref="P:TitleCollection{TTitle}.Site"/> property of the collection.</exception>
-		/// <remarks>This method underlies the <see cref="M:Insert(int, TTitle)"/> method and, like <see cref="M:System.Collections.ObjectModel.Collection{T}.InsertItem(int, T)"/>, can be overridden in derived classes.</remarks>
+		/// <exception cref="T:System.InvalidOperationException">The <see cref="P:IWikiTitle.Site" /> property of the item does not match the <see cref="P:TitleCollection{TTitle}.Site" /> property of the collection.</exception>
+		/// <remarks>This method underlies the <see cref="M:Insert(int, TTitle)" /> method and, like <see cref="M:System.Collections.ObjectModel.Collection{T}.InsertItem(int, T)" />, can be overridden in derived classes.</remarks>
 		protected virtual void InsertItem(int index, TTitle item)
 		{
 			ThrowNull(item, nameof(item));
@@ -252,8 +252,8 @@
 
 		/// <summary>Removes the item at a specific index in the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="index">The index of the item to remove.</param>
-		/// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is equal to or higher than the number of items in the collection.</exception>
-		/// <remarks>This method underlies the <see cref="M:RobinHood70.Robby.TitleCollection{TTitle}.RemoveAt(int)"/> method and, like <see cref="M:System.Collections.ObjectModel.Collection{T}.RemoveItem(int)"/>, can be overridden in derived classes.</remarks>
+		/// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index" /> is equal to or higher than the number of items in the collection.</exception>
+		/// <remarks>This method underlies the <see cref="M:RobinHood70.Robby.TitleCollection{TTitle}.RemoveAt(int)" /> method and, like <see cref="M:System.Collections.ObjectModel.Collection{T}.RemoveItem(int)" />, can be overridden in derived classes.</remarks>
 		protected virtual void RemoveItem(int index)
 		{
 			if (index >= this.items.Count)

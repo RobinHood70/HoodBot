@@ -6,7 +6,7 @@
 	{
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="StringParameter"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="StringParameter" /> class.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		public StringParameter(string name, string value)

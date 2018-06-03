@@ -6,7 +6,7 @@
 	{
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="FileParameter"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="FileParameter" /> class.</summary>
 		/// <param name="name">The name.</param>
 		/// <param name="fileName">Name of the file.</param>
 		/// <param name="fileData">The file data.</param>

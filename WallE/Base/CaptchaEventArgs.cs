@@ -11,7 +11,7 @@
 	{
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="CaptchaEventArgs"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="CaptchaEventArgs" /> class.</summary>
 		/// <param name="data">The Captcha data provided by the wiki.</param>
 		/// <param name="solution">The solution to the Captcha provided by the client.</param>
 		public CaptchaEventArgs(IReadOnlyDictionary<string, string> data, IDictionary<string, string> solution)

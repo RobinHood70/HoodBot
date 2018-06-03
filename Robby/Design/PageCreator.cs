@@ -13,7 +13,7 @@
 		/// <summary>Gets regular and custom property inputs.</summary>
 		/// <param name="options">Page load options.</param>
 		/// <returns>A list of property inputs, including any customized property inputs required.</returns>
-		/// <seealso cref="AddCustomPropertyInputs"/>
+		/// <seealso cref="AddCustomPropertyInputs" />
 		public IList<IPropertyInput> GetPropertyInputs(PageLoadOptions options)
 		{
 			ThrowNull(options, nameof(options));

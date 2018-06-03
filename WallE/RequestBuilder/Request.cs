@@ -26,7 +26,7 @@
 	{
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="Request"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="Request" /> class.</summary>
 		/// <param name="baseUri">The base URI.</param>
 		/// <param name="requestType">The request type.</param>
 		/// <param name="supportsUnitSeparator">if set to <c>true</c> [supports unit separator].</param>
@@ -45,7 +45,7 @@
 		/// <value><c>true</c> if the wiki supports \x1F unit separators; otherwise, <c>false</c>.</value>
 		public bool SupportsUnitSeparator { get; } = false;
 
-		/// <summary>Gets or sets the request type. Defaults to <see cref="RequestType.Get"/>.</summary>
+		/// <summary>Gets or sets the request type. Defaults to <see cref="RequestType.Get" />.</summary>
 		/// <value>The requesty type.</value>
 		public RequestType Type { get; set; }
 

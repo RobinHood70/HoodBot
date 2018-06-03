@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Base
 	{
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="RequestEventArgs"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="RequestEventArgs" /> class.</summary>
 		/// <param name="request">The request object being submitted.</param>
 		public RequestEventArgs(Request request) => this.Request = request;
 		#endregion

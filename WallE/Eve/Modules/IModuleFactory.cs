@@ -6,13 +6,13 @@
 
 	#region Public Delegates
 
-	/// <summary>Represents a method which creates a new <see cref="IGeneratorModule"/>.</summary>
+	/// <summary>Represents a method which creates a new <see cref="IGeneratorModule" />.</summary>
 	/// <param name="wal">The parent abstraction layer.</param>
 	/// <param name="input">The generator input.</param>
 	/// <returns>A new generator module based on the input.</returns>
 	public delegate IGeneratorModule GeneratorFactoryMethod(WikiAbstractionLayer wal, IGeneratorInput input);
 
-	/// <summary>Represents a method which creates a new <see cref="IPropertyModule"/>.</summary>
+	/// <summary>Represents a method which creates a new <see cref="IPropertyModule" />.</summary>
 	/// <param name="wal">The parent abstraction layer.</param>
 	/// <param name="input">The property input.</param>
 	/// <returns>A new property module based on the input.</returns>
@@ -37,10 +37,10 @@
 
 		/// <summary>Creates property modules from the provided inputs.</summary>
 		/// <param name="propertyInputs">The property inputs.</param>
-		/// <returns>A set of modules that corresponds to the provided inputs. If <paramref name="propertyInputs"/> is null, returns an empty collection.</returns>
+		/// <returns>A set of modules that corresponds to the provided inputs. If <paramref name="propertyInputs" /> is null, returns an empty collection.</returns>
 		ModuleCollection<IPropertyModule> CreateModules(IEnumerable<IPropertyInput> propertyInputs);
 
-		/// <summary>Registers a generator factory method for use with <see cref="CreateGenerator{TInput}(TInput)"/>.</summary>
+		/// <summary>Registers a generator factory method for use with <see cref="CreateGenerator{TInput}(TInput)" />.</summary>
 		/// <typeparam name="T">The type of generator input that the factory method handles.</typeparam>
 		/// <param name="generatorFactoryMethod">The generator factory method.</param>
 		/// <returns>The current module factory (fluent interface).</returns>
@@ -48,7 +48,7 @@
 		IModuleFactory RegisterGenerator<T>(GeneratorFactoryMethod generatorFactoryMethod)
 			where T : IGeneratorInput;
 
-		/// <summary>Registers a property factory method for use with <see cref="CreateModules(IEnumerable{IPropertyInput})"/>.</summary>
+		/// <summary>Registers a property factory method for use with <see cref="CreateModules(IEnumerable{IPropertyInput})" />.</summary>
 		/// <typeparam name="T">The type of property input that the factory method handles.</typeparam>
 		/// <param name="propertyFactoryMethod">The property factory method.</param>
 		/// <returns>The current module factory (fluent interface).</returns>

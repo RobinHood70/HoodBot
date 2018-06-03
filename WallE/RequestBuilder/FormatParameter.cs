@@ -7,7 +7,7 @@
 	{
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="FormatParameter"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="FormatParameter" /> class.</summary>
 		/// <param name="value">The value.</param>
 		public FormatParameter(string value)
 			: base("format", value)

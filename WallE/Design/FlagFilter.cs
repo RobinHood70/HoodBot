@@ -33,7 +33,7 @@ namespace RobinHood70.WallE.Design
 
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="FlagFilter{T}"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="FlagFilter{T}" /> class.</summary>
 		/// <param name="siteVersion">The site version.</param>
 		/// <param name="originalValue">The original value.</param>
 		public FlagFilter(int siteVersion, T originalValue)

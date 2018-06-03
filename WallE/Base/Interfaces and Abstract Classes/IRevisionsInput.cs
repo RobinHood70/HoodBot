@@ -32,7 +32,7 @@ namespace RobinHood70.WallE.Base
 
 		/// <summary>Gets or sets the revision ID to compare a diff to.</summary>
 		/// <value>The ID to compare to.</value>
-		/// <remarks>This can be an integer or any of the <see cref="MediaWikiGlobal"/> DiffTo constants.</remarks>
+		/// <remarks>This can be an integer or any of the <see cref="MediaWikiGlobal" /> DiffTo constants.</remarks>
 		int? DiffTo { get; set; }
 
 		string DiffToText { get; set; }

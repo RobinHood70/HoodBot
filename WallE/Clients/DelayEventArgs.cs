@@ -8,7 +8,7 @@
 	{
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="DelayEventArgs"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="DelayEventArgs" /> class.</summary>
 		/// <param name="delayTime">How long to delay.</param>
 		/// <param name="reason">The reason/source of the delay.</param>
 		public DelayEventArgs(TimeSpan delayTime, DelayReason reason)

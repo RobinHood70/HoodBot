@@ -291,7 +291,7 @@
 
 		/// <summary>Upload a file to the wiki.</summary>
 		/// <param name="fileName">The full path and filename of the file to upload.</param>
-		/// <param name="destinationName">The bare name (i.e., do not include "File:") of the file to upload to on the wiki. Set to null to use the filename from the <paramref name="fileName"/> parameter.</param>
+		/// <param name="destinationName">The bare name (i.e., do not include "File:") of the file to upload to on the wiki. Set to null to use the filename from the <paramref name="fileName" /> parameter.</param>
 		/// <param name="editSummary">The edit summary for the upload.</param>
 		/// <remarks>The destination filename will be the same as the local filename.</remarks>
 		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
@@ -299,9 +299,9 @@
 
 		/// <summary>Upload a file to the wiki.</summary>
 		/// <param name="fileName">The full path and filename of the file to upload.</param>
-		/// <param name="destinationName">The bare name (i.e., do not include "File:") of the file to upload to on the wiki. Set to null to use the filename from the <paramref name="fileName"/> parameter.</param>
+		/// <param name="destinationName">The bare name (i.e., do not include "File:") of the file to upload to on the wiki. Set to null to use the filename from the <paramref name="fileName" /> parameter.</param>
 		/// <param name="editSummary">The edit summary for the upload.</param>
-		/// <param name="pageText">Full page text for the File page. This should include the license, categories, and anything else required. Set to null to allow the wiki to generate the page text (normally just the <paramref name="editSummary"/>).</param>
+		/// <param name="pageText">Full page text for the File page. This should include the license, categories, and anything else required. Set to null to allow the wiki to generate the page text (normally just the <paramref name="editSummary" />).</param>
 		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
 		public virtual void Upload(string fileName, string destinationName, string editSummary, string pageText)
 		{

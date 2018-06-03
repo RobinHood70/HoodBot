@@ -7,7 +7,7 @@
 	{
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="Parameter{T}"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="Parameter{T}" /> class.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		protected Parameter(string name, T value)

@@ -8,7 +8,7 @@
 	{
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="PipedParameter"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="PipedParameter" /> class.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="values">The parameter values. Any duplicates in the input will be ignored.</param>
 		public PipedParameter(string name, IEnumerable<string> values)

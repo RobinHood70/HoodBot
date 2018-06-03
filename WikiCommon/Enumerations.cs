@@ -138,7 +138,7 @@ namespace RobinHood70.WikiCommon
 	}
 
 	/// <summary>Represents a binary value which also allows for an unknown state.</summary>
-	/// <remarks>This is used in preference to a <see cref="Nullable{Boolean}"/> due to the fact that it is both smaller and makes the code much clearer.</remarks>
+	/// <remarks>This is used in preference to a <see cref="Nullable{Boolean}" /> due to the fact that it is both smaller and makes the code much clearer.</remarks>
 	public enum Tristate
 	{
 		/// <summary>An unknown or unassigned value.</summary>
