@@ -133,9 +133,7 @@
 		public DateTime? CurrentTimestamp { get; protected internal set; }
 
 		/// <summary>Gets or sets the custom stop check function.</summary>
-		/// <value>
-		/// A function which returns true if the bot should stop what it's doing.
-		/// </value>
+		/// <value>A function which returns true if the bot should stop what it's doing.</value>
 		public Func<bool> CustomStopCheck { get; set; }
 
 		/// <summary>Gets or sets the detected format version.</summary>
@@ -186,7 +184,7 @@
 		public StopCheckMethods StopCheckMethods { get; set; } = StopCheckMethods.UserNameCheck | StopCheckMethods.TalkCheckQuery | StopCheckMethods.TalkCheckNonQuery;
 
 		/// <summary>Gets or sets a value indicating whether the site supports <a href="https://www.mediawiki.org/wiki/Manual:Maxlag_parameter">maxlag checking</a>.</summary>
-		/// <value><c>true</c> if the site supports <c>maxlag</c> checking; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true" /> if the site supports <c>maxlag</c> checking; otherwise, <see langword="false" />.</value>
 		/// <remarks>This should not normally need to be set, but is left as settable by derived classes, should customization be needed.</remarks>
 		public bool SupportsMaxLag { get; protected set; } = true; // No harm in trying until we know for sure.
 
@@ -213,7 +211,7 @@
 		public string UserName { get; protected set; }
 
 		/// <summary>Gets or sets a value indicating whether to use UTF-8 encoding for responses.</summary>
-		/// <value><c>true</c> to use UTF-8; otherwise, <c>false</c>. Defaults to <c>true</c>.</value>
+		/// <value><see langword="true" /> to use UTF-8; otherwise, <see langword="false" />. Defaults to <see langword="true" />.</value>
 		public bool Utf8 { get; set; } = true;
 
 		/// <summary>Gets a list of all warnings.</summary>
@@ -224,7 +222,7 @@
 		#region Protected Internal Properties
 
 		/// <summary>Gets or sets a value indicating whether to break recursion during the AfterSubmit cycle.</summary>
-		/// <value><c>true</c> to skip the AfterSubmit cycle, thus breaking recursion; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true" /> to skip the AfterSubmit cycle, thus breaking recursion; otherwise, <see langword="false" />.</value>
 		/// <remarks>Custom stop checks might rely on calls to additional modules in order to determine whether the bot should stop. Since these each have their own AfterSubmit process, the entire check would become recursive. The AfterSubmit routine manages this variable to ensure that stop checks are only performed at the top-most level. When set to true, the routine returns immediately without performing any additional stop checks.</remarks>
 		protected internal bool BreakRecursionAfterSubmit { get; set; }
 		#endregion
@@ -245,7 +243,7 @@
 		public string GetArticlePath(string pageName) => pageName == null ? null : this.articlePath.Replace("$1", WebUtility.UrlEncode(pageName.Replace(' ', '_')));
 
 		/// <summary>Makes the URI secure.</summary>
-		/// <param name="https">If set to <c>true</c>, forces the URI to be a secure URI (https://); if false, forces it to be insecure (http://).</param>
+		/// <param name="https">If set to <see langword="true" />, forces the URI to be a secure URI (https://); if false, forces it to be insecure (http://).</param>
 		public void MakeUriSecure(bool https)
 		{
 			var urib = new UriBuilder(this.Uri)
@@ -301,7 +299,7 @@
 		public void ClearWarnings() => this.warnings.Clear();
 
 		/// <summary>Determines whether the API is enabled (even if read-only) on the current wiki.</summary>
-		/// <returns><c>true</c> if the interface is enabled; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true" /> if the interface is enabled; otherwise, <see langword="false" />.</returns>
 		/// <remarks>This function will normally need to communicate with the wiki to determine the return value. Since that consumes significantly more time than a simple property check, it's implemented as a function rather than a property.</remarks>
 		public bool IsEnabled()
 		{
@@ -1126,27 +1124,19 @@
 
 		#region Protected Virtual Methods
 
-		/// <summary>
-		/// Raises the <see cref="E:CaptchaChallenge" /> event.
-		/// </summary>
+		/// <summary>Raises the <see cref="E:CaptchaChallenge" /> event.</summary>
 		/// <param name="e">The <see cref="CaptchaEventArgs" /> instance containing the event data.</param>
 		protected virtual void OnCaptchaChallenge(CaptchaEventArgs e) => this.CaptchaChallenge?.Invoke(this, e);
 
-		/// <summary>
-		/// Raises the <see cref="E:ResponseReceived" /> event.
-		/// </summary>
+		/// <summary>Raises the <see cref="E:ResponseReceived" /> event.</summary>
 		/// <param name="e">The <see cref="ResponseEventArgs" /> instance containing the event data.</param>
 		protected virtual void OnResponseReceived(ResponseEventArgs e) => this.ResponseReceived?.Invoke(this, e);
 
-		/// <summary>
-		/// Raises the <see cref="E:SendingRequest" /> event.
-		/// </summary>
+		/// <summary>Raises the <see cref="E:SendingRequest" /> event.</summary>
 		/// <param name="e">The <see cref="RequestEventArgs" /> instance containing the event data.</param>
 		protected virtual void OnSendingRequest(RequestEventArgs e) => this.SendingRequest?.Invoke(this, e);
 
-		/// <summary>
-		/// Raises the <see cref="E:WarningOccurred" /> event.
-		/// </summary>
+		/// <summary>Raises the <see cref="E:WarningOccurred" /> event.</summary>
 		/// <param name="e">The <see cref="WarningEventArgs" /> instance containing the event data.</param>
 		protected virtual void OnWarningOccurred(WarningEventArgs e) => this.WarningOccurred?.Invoke(this, e);
 		#endregion

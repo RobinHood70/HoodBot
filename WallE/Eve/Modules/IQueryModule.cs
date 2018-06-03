@@ -10,7 +10,7 @@
 		#region Public Properties
 
 		/// <summary>Gets a value indicating whether the module is allowed to continue parsing results.</summary>
-		/// <value><c>true</c> if parsing should continue; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true" /> if parsing should continue; otherwise, <see langword="false" />.</value>
 		bool ContinueParsing { get; }
 
 		/// <summary>Gets or sets the upper limit of items this module can request.</summary>
@@ -18,7 +18,7 @@
 		int ModuleLimit { get; set; }
 
 		/// <summary>Gets or sets a value indicating whether this instance is generator.</summary>
-		/// <value><c>true</c> if this instance is generator; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true" /> if this instance is generator; otherwise, <see langword="false" />.</value>
 		bool IsGenerator { get; set; }
 		#endregion
 
@@ -36,7 +36,7 @@
 		/// <summary>Handles any warnings returned by the wiki.</summary>
 		/// <param name="from">Where the warning originated.</param>
 		/// <param name="text">The text of the warning.</param>
-		/// <returns><c>true</c> if the warning was handled and does not need to be dealt with in any other way; <c>false</c> if it remains unhandled.</returns>
+		/// <returns><see langword="true" /> if the warning was handled and does not need to be dealt with in any other way; <see langword="false" /> if it remains unhandled.</returns>
 		bool HandleWarning(string from, string text);
 		#endregion
 	}

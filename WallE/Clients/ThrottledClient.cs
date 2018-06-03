@@ -48,7 +48,7 @@
 		#region Public Properties
 
 		/// <summary>Gets a value indicating whether the last request was a POST request.</summary>
-		/// <value><c>true</c> if the last request was a POST request; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true" /> if the last request was a POST request; otherwise, <see langword="false" />.</value>
 		public bool? LastWasPost { get; private set; }
 
 		/// <summary>Gets or sets the minimum time to wait between a GET request and the request after it.</summary>

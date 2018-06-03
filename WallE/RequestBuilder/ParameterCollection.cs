@@ -464,7 +464,7 @@
 		/// <summary>Tries to get the named item from the parameter collection. Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="item">The item.</param>
-		/// <returns><c>true</c> if the item was found; otherwise <c>false</c>.</returns>
+		/// <returns><see langword="true" /> if the item was found; otherwise <see langword="false" />.</returns>
 		public bool TryGetItem(string name, out IParameter item)
 		{
 			if (this.Dictionary == null)

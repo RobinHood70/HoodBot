@@ -62,11 +62,11 @@
 		public IReadOnlyList<CategoryTitle> Categories { get; } = new List<CategoryTitle>();
 
 		/// <summary>Gets a value indicating whether this <see cref="Page" /> exists.</summary>
-		/// <value><c>true</c> if the page exists; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true" /> if the page exists; otherwise, <see langword="false" />.</value>
 		public bool Exists => !this.Missing && !this.Invalid;
 
 		/// <summary>Gets or sets a value indicating whether this <see cref="Page" /> is invalid.</summary>
-		/// <value><c>true</c> if invalid; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true" /> if invalid; otherwise, <see langword="false" />.</value>
 		public bool Invalid { get; protected set; }
 
 		/// <summary>Gets the links on the page, if they were requested in the last load operation.</summary>
@@ -74,7 +74,7 @@
 		public IReadOnlyList<Title> Links { get; } = new List<Title>();
 
 		/// <summary>Gets a value indicating whether this <see cref="Page" /> has been loaded.</summary>
-		/// <value><c>true</c> if loaded; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true" /> if loaded; otherwise, <see langword="false" />.</value>
 		public bool Loaded { get; private set; }
 
 		/// <summary>Gets or sets the load options.</summary>
@@ -82,11 +82,11 @@
 		public PageLoadOptions LoadOptions { get; set; }
 
 		/// <summary>Gets or sets a value indicating whether this <see cref="Page" /> is missing.</summary>
-		/// <value><c>true</c> if the page is missing; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true" /> if the page is missing; otherwise, <see langword="false" />.</value>
 		public bool Missing { get; protected set; } = true;
 
 		/// <summary>Gets or sets a value indicating whether this <see cref="Page" /> is new.</summary>
-		/// <value><c>true</c> if the page is new; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true" /> if the page is new; otherwise, <see langword="false" />.</value>
 		public bool New { get; protected set; }
 
 		/// <summary>Gets the page properties, if they were requested in the last load operation.</summary>
@@ -94,7 +94,7 @@
 		public IReadOnlyDictionary<string, string> Properties { get; } = new Dictionary<string, string>();
 
 		/// <summary>Gets or sets a value indicating whether this <see cref="Page" /> is a redirect.</summary>
-		/// <value><c>true</c> if the page is a redirect; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true" /> if the page is a redirect; otherwise, <see langword="false" />.</value>
 		public bool Redirect { get; protected set; }
 
 		/// <summary>Gets the page revisions, if they were requested in the last load operation.</summary>
@@ -114,7 +114,7 @@
 		public string Text { get; set; }
 
 		/// <summary>Gets a value indicating whether the <see cref="Text" /> property has been modified.</summary>
-		/// <value><c>true</c> if the text no longer matches the first revision; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true" /> if the text no longer matches the first revision; otherwise, <see langword="false" />.</value>
 		/// <remarks>This is currently simply a shortcut property to compare the Text with Revisions[0]. This may not be an accurate reflection of modification status when loading a specific revision range or in other unusual circumstances.</remarks>
 		public bool TextModified
 		{
@@ -142,7 +142,7 @@
 		#region Public Methods
 
 		/// <summary>Returns a value indicating if the page exists. This will trigger a Load operation, if necessary.</summary>
-		/// <returns><c>true</c> if the page exists; otherwise <c>false</c>.</returns>
+		/// <returns><see langword="true" /> if the page exists; otherwise <see langword="false" />.</returns>
 		public bool CheckExistence()
 		{
 			if (!this.Loaded)
@@ -154,7 +154,7 @@
 		}
 
 		/// <summary>Determines whether the page represents a disambiguation page.</summary>
-		/// <returns><c>true</c> if this instance is disambiguation; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true" /> if this instance is disambiguation; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="InvalidOperationException">Thrown if the page properties (MW 1.21+) or templates (MW 1.20-) weren't loaded prior to checking.</exception>
 		public bool IsDisambiguation()
 		{

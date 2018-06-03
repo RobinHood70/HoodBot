@@ -29,7 +29,7 @@
 		/// <summary>Initializes a new instance of the <see cref="Request" /> class.</summary>
 		/// <param name="baseUri">The base URI.</param>
 		/// <param name="requestType">The request type.</param>
-		/// <param name="supportsUnitSeparator">if set to <c>true</c> [supports unit separator].</param>
+		/// <param name="supportsUnitSeparator">if set to <see langword="true" /> [supports unit separator].</param>
 		public Request(Uri baseUri, RequestType requestType, bool supportsUnitSeparator)
 		{
 			ThrowNull(baseUri, nameof(baseUri));
@@ -42,7 +42,7 @@
 		#region Public Properties
 
 		/// <summary>Gets a value indicating whether the wiki supports \x1F unit separators.</summary>
-		/// <value><c>true</c> if the wiki supports \x1F unit separators; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true" /> if the wiki supports \x1F unit separators; otherwise, <see langword="false" />.</value>
 		public bool SupportsUnitSeparator { get; } = false;
 
 		/// <summary>Gets or sets the request type. Defaults to <see cref="RequestType.Get" />.</summary>

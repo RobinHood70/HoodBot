@@ -75,7 +75,7 @@
 		StopCheckMethods StopCheckMethods { get; }
 
 		/// <summary>Gets a value indicating whether the site supports <a href="https://www.mediawiki.org/wiki/Manual:Maxlag_parameter">maxlag checking</a>.</summary>
-		/// <value><c>true</c> if the site supports <c>maxlag</c> checking; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true" /> if the site supports <c>maxlag</c> checking; otherwise, <see langword="false" />.</value>
 		bool SupportsMaxLag { get; }
 
 		/// <summary>Gets the name of the current user.</summary>
@@ -99,7 +99,7 @@
 		void ClearWarnings();
 
 		/// <summary>Determines whether the relevant interface for this abstraction layer is enabled on the current wiki.</summary>
-		/// <returns><c>true</c> if the interface is enabled; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true" /> if the interface is enabled; otherwise, <see langword="false" />.</returns>
 		/// <remarks>This function will normally need to communicate with the wiki to determine the return value. Since that consumes significantly more time than a simple property check, it's implemented as a function rather than a property.</remarks>
 		[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Performs a time-consuming operation.")]
 		bool IsEnabled();

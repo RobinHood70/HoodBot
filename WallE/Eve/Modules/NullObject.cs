@@ -21,7 +21,7 @@
 
 		/// <summary>Determines whether the specified <see cref="object" /> is equal to this instance.</summary>
 		/// <param name="obj">The <see cref="object" /> to compare with this instance.</param>
-		/// <returns><c>true</c> if the specified <see cref="object" /> is equal to this instance; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true" /> if the specified <see cref="object" /> is equal to this instance; otherwise, <see langword="false" />.</returns>
 		/// <remarks>All instances of a NullObject are deemed to match all others.</remarks>
 		public override bool Equals(object obj) => obj is NullObject;
 
