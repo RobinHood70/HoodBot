@@ -13,6 +13,11 @@
 				throw new ArgumentNullException(nameof(tabSeparatedValues), "Value read from file is null. This should never happen.");
 			}
 
+			if (tabSeparatedValues.Trim().Length == 0)
+			{
+				return;
+			}
+
 			var split = tabSeparatedValues.Split(new char[] { '\t' }, StringSplitOptions.None);
 			if (split.Length != 9)
 			{
