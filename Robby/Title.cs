@@ -38,7 +38,7 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="Title"/> class using the site and full page name.</summary>
-		/// <param name="site">The site to which this title belongs.</param>
+		/// <param name="site">The site this title is from.</param>
 		/// <param name="fullName">The full name of the page.</param>
 		public Title(Site site, string fullName)
 			: this(site, fullName, null)
@@ -46,7 +46,7 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Title"/> class using the site and full page name.</summary>
-		/// <param name="site">The site to which this title belongs.</param>
+		/// <param name="site">The site this title is from.</param>
 		/// <param name="fullName">The page name, including the namespace.</param>
 		/// <param name="key">The key to use when indexing this page.</param>
 		/// <remarks>Absolutely no cleanup or checking is performed when using this version of the constructor. All values are assumed to already have been validated.</remarks>
@@ -60,7 +60,7 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Title"/> class using the site and full page name.</summary>
-		/// <param name="site">The site to which this title belongs.</param>
+		/// <param name="site">The site this title is from.</param>
 		/// <param name="ns">The namespace to which the page belongs.</param>
 		/// <param name="pageName">The name (only) of the page.</param>
 		/// <remarks>Absolutely no cleanup or checking is performed when using this version of the constructor. All values are assumed to already have been validated.</remarks>
@@ -154,8 +154,8 @@
 
 		#region Public Static Methods
 
-		/// <summary>Identical to the constructor with the same signature, but allows that the page name may have the namespace prepended to it and compensates accordingly.</summary>
-		/// <param name="site">The site to which this title belongs.</param>
+		/// <summary>Identical to the constructor with the same signature, but allows that the page name may or may not have the namespace prepended to it and adjusts accordingly.</summary>
+		/// <param name="site">The site this title is from.</param>
 		/// <param name="ns">The namespace to which the page belongs.</param>
 		/// <param name="pageName">The name of the page, with or without the corresponding namespace prefix.</param>
 		/// <returns>A Title object with the given name in the given namespace.</returns>

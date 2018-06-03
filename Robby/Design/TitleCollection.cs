@@ -24,7 +24,7 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection{TTitle}"/> class.</summary>
-		/// <param name="site">The site the titles belong to. All titles in a collection must belong to the same site.</param>
+		/// <param name="site">The site the titles are from. All titles in a collection must belong to the same site.</param>
 		protected TitleCollection([ValidatedNotNull] Site site)
 		{
 			ThrowNull(site, nameof(site));

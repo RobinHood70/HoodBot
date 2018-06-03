@@ -15,7 +15,7 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="Page"/> class based on site and page name.</summary>
-		/// <param name="site">The site.</param>
+		/// <param name="site">The site the page is from.</param>
 		/// <param name="fullPageName">Full name of the page.</param>
 		public Page(Site site, string fullPageName)
 			: base(site, fullPageName, null)
@@ -23,7 +23,7 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Page"/> class based on site, page name, and an arbitrary key.</summary>
-		/// <param name="site">The site.</param>
+		/// <param name="site">The site the page is from.</param>
 		/// <param name="fullPageName">Full name of the page.</param>
 		/// <param name="key">The key.</param>
 		public Page(Site site, string fullPageName, string key)
@@ -32,7 +32,7 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Page"/> class based on site, namespace id, and the page name without a namespace.</summary>
-		/// <param name="site">The site to which this title belongs.</param>
+		/// <param name="site">The site the page is from.</param>
 		/// <param name="ns">The namespace to which the page belongs.</param>
 		/// <param name="pageName">The name (only) of the page.</param>
 		/// <remarks>Absolutely no cleanup or checking is performed when using this version of the constructor. All values are assumed to already have been validated.</remarks>
@@ -133,7 +133,7 @@
 		#region Public Static Methods
 
 		/// <summary>Returns a value indicating whether the page exists.</summary>
-		/// <param name="site">The site.</param>
+		/// <param name="site">The site to search on.</param>
 		/// <param name="fullName">The full name.</param>
 		/// <returns>A value indicating whether the page exists.</returns>
 		public static bool CheckExistence(Site site, string fullName) => new Page(site, fullName).CheckExistence();
