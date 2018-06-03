@@ -206,28 +206,25 @@
 			// Assumes title-related properties have already been provided in the constructor.
 			ThrowNull(pageItem, nameof(pageItem));
 			var flags = pageItem.Flags;
-			var revs = this.Revisions;
-			revs.Clear();
-			(this.Categories as List<CategoryTitle>).Clear();
-			(this.Links as List<Title>).Clear();
-			(this.Properties as Dictionary<string, string>).Clear();
-			(this.Templates as List<Title>).Clear();
 
 			var categories = this.Categories as List<CategoryTitle>;
+			categories.Clear();
 			foreach (var category in pageItem.Categories)
 			{
 				categories.Add(new CategoryTitle(this.Site, category.Title, category.SortKey, category.Hidden));
 			}
 
 			var links = this.Links as List<Title>;
+			links.Clear();
 			foreach (var link in pageItem.Links)
 			{
 				links.Add(new Title(this.Site, link.Title));
 			}
 
+			var properties = this.Properties as Dictionary<string, string>;
+			properties.Clear();
 			if (pageItem.Properties?.Count > 0)
 			{
-				var properties = this.Properties as Dictionary<string, string>;
 				properties.Clear();
 				foreach (var property in pageItem.Properties)
 				{
@@ -235,9 +232,10 @@
 				}
 			}
 
+			var templates = this.Templates as List<Title>;
+			templates.Clear();
 			if (pageItem.Templates.Count > 0)
 			{
-				var templates = this.Templates as List<Title>;
 				templates.Clear();
 				foreach (var link in pageItem.Templates)
 				{
@@ -245,6 +243,8 @@
 				}
 			}
 
+			var revs = this.Revisions;
+			revs.Clear();
 			foreach (var rev in pageItem.Revisions)
 			{
 				revs.Add(new Revision(rev));
