@@ -9,7 +9,6 @@
 	using static WikiCommon.Globals;
 
 	/// <summary>A collection of Title objects.</summary>
-	/// <remarks>This collection class functions similar to a KeyedCollection, but automatically overwrites existing items with new ones. Because Title objects don't support changing item keys, neither does this.</remarks>
 	public class TitleCollection : TitleCollection<Title>, IEnumerable<Title>, IMessageSource
 	{
 		#region Constructors

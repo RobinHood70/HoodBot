@@ -97,6 +97,7 @@
 		/// <summary>Throws an exception if the input value is null.</summary>
 		/// <param name="nullable">The value that may be null.</param>
 		/// <param name="name">The name of the parameter in the original method.</param>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="nullable"/> is null.</exception>
 		public static void ThrowNull([ValidatedNotNull] object nullable, string name)
 		{
 			if (nullable == null)
