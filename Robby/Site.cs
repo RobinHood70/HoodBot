@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.Globalization;
 	using System.IO;
 	using System.Net;
 	using System.Text.RegularExpressions;
@@ -30,6 +31,33 @@
 			this.PageCreator = new DefaultPageCreator();
 			this.AbstractionLayer = wiki;
 			this.AbstractionLayer.WarningOccurred += this.Wiki_WarningOccurred;
+
+			// Try to figure out wiki culture; otherwise revert to CurrentCulture.
+			if (!string.IsNullOrWhiteSpace(wiki.LanguageCode))
+			{
+				var testLanguage = wiki.LanguageCode;
+				do
+				{
+					try
+					{
+						this.Culture = new CultureInfo(wiki.LanguageCode);
+					}
+					catch (CultureNotFoundException)
+					{
+						var lastDash = testLanguage.LastIndexOf('-');
+						if (lastDash > -1)
+						{
+							testLanguage = testLanguage.Substring(0, lastDash);
+						}
+					}
+				}
+				while (this.Culture == null && testLanguage.Length > 0);
+			}
+
+			if (this.Culture == null)
+			{
+				this.Culture = CultureInfo.CurrentCulture;
+			}
 		}
 		#endregion
 
@@ -46,6 +74,8 @@
 		public bool AllowEditing { get; set; } = true;
 
 		public bool CaseSensitive { get; private set; }
+
+		public CultureInfo Culture { get; set; }
 
 		public PageLoadOptions DefaultLoadOptions { get; set; }
 

@@ -70,6 +70,10 @@
 		/// <value>The flags. See <see cref="SiteInfoFlags" />.</value>
 		SiteInfoFlags Flags { get; }
 
+		/// <summary>Gets or sets the site language code.</summary>
+		/// <value>The language code.</value>
+		string LanguageCode { get; set; }
+
 		/// <summary>Gets the various methods to check to see if a stop has been requested.</summary>
 		/// <value>The stop methods.</value>
 		StopCheckMethods StopCheckMethods { get; }

@@ -146,6 +146,10 @@
 		/// <remarks>This should not normally need to be set, but is left as settable by derived classes, should customization be needed.</remarks>
 		public SiteInfoFlags Flags { get; protected set; }
 
+		/// <summary>Gets or sets the site language code.</summary>
+		/// <value>The language code.</value>
+		public string LanguageCode { get; set; }
+
 		/// <summary>Gets or sets the maximum size of the page set.</summary>
 		/// <value>The maximum size of the page set.</value>
 		/// <remarks>This should not normally need to be set, as the bot will adjust automatically as needed. However, if you know in advance that you will be logged in as a user with lower limits (typically anyone who isn't a bot or admin), then you can save some overhead by lowering this to 50, rather than the default 500.</remarks>
@@ -1153,6 +1157,7 @@
 			var siteInfo = infoModule.Output;
 
 			this.Flags = siteInfo.Flags;
+			this.LanguageCode = siteInfo.Language;
 			this.Script = siteInfo.Script;
 			var dict = new Dictionary<int, NamespacesItem>();
 			foreach (var ns in siteInfo.Namespaces)
