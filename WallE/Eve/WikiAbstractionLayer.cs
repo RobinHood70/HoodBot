@@ -170,10 +170,6 @@
 		/// <value>The path of index.php relative to the document root.</value>
 		public string Script { get; protected set; }
 
-		/// <summary>Gets or sets the site information flags.</summary>
-		/// <value>The site information flags.</value>
-		public SiteInfoFlags SiteInfoFlags { get; protected set; }
-
 		/// <summary>Gets or sets the detected site version.</summary>
 		/// <value>The MediaWiki version for the site, expressed as an integer (i.e., MW 1.23 = 123).</value>
 		/// <remarks>This should not normally need to be set, but is left as settable by derived classes, should customization be needed.</remarks>
@@ -1180,8 +1176,6 @@
 
 			this.articlePath = path;
 			this.SupportsMaxLag = siteInfo.LagInfo?.Count > 0 && siteInfo.LagInfo[0].Lag != -1;
-
-			this.SiteInfoFlags = siteInfo.Flags;
 			var versionFudged = Regex.Replace(siteInfo.Generator, @"[^0-9\.]", ".").TrimStart('.');
 			var versionSplit = versionFudged.Split('.');
 			var siteVersion = int.Parse(versionSplit[0], CultureInfo.InvariantCulture) * 100 + int.Parse(versionSplit[1], CultureInfo.InvariantCulture);

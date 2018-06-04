@@ -43,7 +43,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("deletedonly", input.DeletedOnly)
 				.Add("toponly", input.TopOnly)
 				.Add("newonly", input.NewOnly)
-				.AddIf("showsizediff", input.ShowSizeDifference, !this.Wal.SiteInfoFlags.HasFlag(SiteInfoFlags.MiserMode));
+				.AddIf("showsizediff", input.ShowSizeDifference, !this.Wal.Flags.HasFlag(SiteInfoFlags.MiserMode));
 		}
 
 		protected override CustomResult DeserializeCustom(string result) => new CustomResult(result);
