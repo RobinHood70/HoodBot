@@ -104,7 +104,7 @@
 				{
 					var fileRevision = new FileRevision(
 						bitDepth: imageInfoEntry.BitDepth,
-						fileSize: imageInfoEntry.Size,
+						size: imageInfoEntry.Size,
 						height: imageInfoEntry.Height,
 						width: imageInfoEntry.Width,
 						comment: imageInfoEntry.Comment,
