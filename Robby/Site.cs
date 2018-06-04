@@ -127,11 +127,15 @@
 
 		public virtual IReadOnlyList<Block> GetBlocks(IPAddress ip) => this.GetBlocks(new BlocksInput(ip) { Properties = BlocksProperties.All });
 
-		public string GetMessage(string message, params string[] arguments)
+		public string GetMessage(string message, params string[] arguments) => this.GetMessage(message, arguments as IEnumerable<string>);
+
+		public string GetMessage(string message, IEnumerable<string> arguments)
 		{
 			var messages = this.GetMessages(new[] { message }, arguments);
 			return messages[message].Text;
 		}
+
+		public IReadOnlyDictionary<string, Message> GetMessages(IEnumerable<string> msgs, params string[] arguments) => this.GetMessages(msgs, arguments as IEnumerable<string>);
 
 		public virtual IReadOnlyDictionary<string, Message> GetMessages(IEnumerable<string> msgs, IEnumerable<string> arguments) => this.GetMessages(new AllMessagesInput
 		{
