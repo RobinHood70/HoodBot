@@ -566,7 +566,8 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			this.BlocksTests();
+			var messages = this.Wiki.GetMessages(new[] { "Aboutsite" }, new string[0]);
+			this.textBoxResults.AppendText(messages["Aboutsite"].Text);
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;

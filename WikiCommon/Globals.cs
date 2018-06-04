@@ -81,6 +81,35 @@
 				Filter.Any;
 		}
 
+		/// <summary>Attempts to figure out the culture associated with the language code, falling back progressively through parent languages.</summary>
+		/// <param name="languageCode">The language code to try.</param>
+		/// <returns>The nearest CultureInfo possible to the given <paramref name="languageCode"/> or null if nothing is found.</returns>
+		public static CultureInfo GetCulture(string languageCode)
+		{
+			// Try to figure out wiki culture; otherwise revert to CurrentCulture.
+			if (!string.IsNullOrWhiteSpace(languageCode))
+			{
+				do
+				{
+					try
+					{
+						return new CultureInfo(languageCode);
+					}
+					catch (CultureNotFoundException)
+					{
+						var lastDash = languageCode.LastIndexOf('-');
+						if (lastDash > -1)
+						{
+							languageCode = languageCode.Substring(0, lastDash);
+						}
+					}
+				}
+				while (languageCode.Length > 0);
+			}
+
+			return null;
+		}
+
 		/// <summary>Convenience method so that CurrentCulture and Invariant are all in the same class for both traditional and formattable strings, and are used the same way.</summary>
 		/// <param name="invariantText">The text to format.</param>
 		/// <param name="values">The values of any parameters in the <paramref name="invariantText" /> parameter.</param>
@@ -94,6 +123,27 @@
 		// Copy of the same-named method from the FormattableString code so that all culture methods are in the same library.
 		public static string Invariant(FormattableString formattable) => formattable?.ToString(CultureInfo.InvariantCulture);
 
+		/// <summary>Normalizes the name of the message using the same process MediaWiki uses internally.</summary>
+		/// <param name="name">The name.</param>
+		/// <param name="culture">The culture to use to convert the first letter from upper-case to lower-case, if needed.</param>
+		/// <returns>The input name with spaces converted to underscores and the first character converted to lower-case.</returns>
+		public static string NormalizeMessageName(string name, CultureInfo culture)
+		{
+			ThrowNull(culture, nameof(culture));
+			if (!string.IsNullOrEmpty(name))
+			{
+				name = name.Replace(' ', '_');
+
+				// We have no knowledge of the wiki's culture, and doing so is complex and would probably be somewhat unreliable, so guess by using current culture.
+				if (char.IsUpper(name[0]))
+				{
+					name = name.Length == 1 ? culture.TextInfo.ToLower(name[0]).ToString() : culture.TextInfo.ToLower(name[0]) + name.Substring(1);
+				}
+			}
+
+			return name;
+		}
+
 		/// <summary>Throws an exception if the input value is null.</summary>
 		/// <param name="nullable">The value that may be null.</param>
 		/// <param name="name">The name of the parameter in the original method.</param>
@@ -104,6 +154,27 @@
 			{
 				throw new ArgumentNullException(name);
 			}
+		}
+
+		/// <summary>This reverses the process of <see cref="NormalizeMessageName(string, CultureInfo)"/>, making a message name look more like the page name.</summary>
+		/// <param name="name">The name to convert.</param>
+		/// <param name="culture">The culture to use to convert the first letter from lower-case to upper-case, if needed.</param>
+		/// <returns>The input name with underscores converted to spaces and the first character converted to upper-case.</returns>
+		public static string UnnormalizeMessageName(string name, CultureInfo culture)
+		{
+			ThrowNull(culture, nameof(culture));
+			if (!string.IsNullOrEmpty(name))
+			{
+				name = name.Replace('_', ' ');
+
+				// We have no knowledge of the wiki's culture, and doing so is complex and would probably be somewhat unreliable, so guess by using current culture.
+				if (char.IsLower(name[0]))
+				{
+					name = name.Length == 1 ? culture.TextInfo.ToUpper(name[0]).ToString() : culture.TextInfo.ToUpper(name[0]) + name.Substring(1);
+				}
+			}
+
+			return name;
 		}
 		#endregion
 	}

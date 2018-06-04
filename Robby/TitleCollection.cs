@@ -330,7 +330,10 @@
 		private void AddMessages(AllMessagesInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllMessages(input);
-			this.FillFromTitleItems(result);
+			foreach (var item in result)
+			{
+				this.Add(new Title(this.Site, UnnormalizeMessageName(item.Name, this.Site.Culture)));
+			}
 		}
 
 		private void AddNamespace(AllPagesInput input)

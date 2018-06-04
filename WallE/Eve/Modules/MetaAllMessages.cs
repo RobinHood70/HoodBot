@@ -9,6 +9,10 @@ namespace RobinHood70.WallE.Eve.Modules
 
 	internal class MetaAllMessages : ListModule<AllMessagesInput, AllMessagesItem>
 	{
+		#region Fields
+		private string languageCode;
+		#endregion
+
 		#region Constructors
 		public MetaAllMessages(WikiAbstractionLayer wal, AllMessagesInput input)
 			: base(wal, input)
@@ -16,13 +20,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 112;
 
 		public override string Name { get; } = "allmessages";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string ModuleType { get; } = "meta";
 
 		protected override string Prefix { get; } = "am";
@@ -33,6 +37,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(request, nameof(request));
 			ThrowNull(input, nameof(input));
+			this.languageCode = input.LanguageCode;
 			request
 				.Add("messages", input.Messages)
 				.AddFlags("prop", input.Properties)
@@ -67,26 +72,14 @@ namespace RobinHood70.WallE.Eve.Modules
 				Name = (string)result["name"],
 			};
 
-			item.NormalizedName = (string)result["normalizedname"] ?? Normalize(item.Name);
-			return item;
-		}
-		#endregion
-
-		#region Private Methods
-		private static string Normalize(string name)
-		{
-			// Fakes the normalization process using a similar technique.
-			if (!string.IsNullOrEmpty(name))
+			item.NormalizedName = (string)result["normalizedname"];
+			if (item.NormalizedName == null)
 			{
-				name = name.Replace(' ', '_');
-				if (char.IsUpper(name[0]))
-				{
-					// We have no knowledge of the wiki's culture, and doing so is complex and would probably be somewhat unreliable, so guess by using current culture.
-					name = name.Length == 1 ? char.ToLower(name[0], CultureInfo.CurrentCulture).ToString() : char.ToLower(name[0], CultureInfo.CurrentCulture) + name.Substring(1);
-				}
+				var ci = GetCulture(this.languageCode ?? this.Wal.LanguageCode) ?? CultureInfo.CurrentCulture;
+				item.NormalizedName = NormalizeMessageName(item.Name, ci);
 			}
 
-			return name;
+			return item;
 		}
 		#endregion
 	}

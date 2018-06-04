@@ -348,6 +348,7 @@
 
 		/// <summary>Returns data from the <a href="https://www.mediawiki.org/wiki/API:Allmessages">Allmessages</a> API module.</summary>
 		/// <param name="input">The input parameters.</param>
+		/// <remarks>Prior to MediaWiki 1.26, NormalizedName will be derived automatically from the name of the message. If the first letter is upper-case, it will be converted to lower-case using the LanguageCode, if recognized by Windows, or the CurrentCulture if not.</remarks>
 		/// <returns>A list of messages.</returns>
 		public IReadOnlyList<AllMessagesItem> AllMessages(AllMessagesInput input) => this.RunListQuery(new MetaAllMessages(this, input));
 

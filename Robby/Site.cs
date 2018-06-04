@@ -31,33 +31,6 @@
 			this.PageCreator = new DefaultPageCreator();
 			this.AbstractionLayer = wiki;
 			this.AbstractionLayer.WarningOccurred += this.Wiki_WarningOccurred;
-
-			// Try to figure out wiki culture; otherwise revert to CurrentCulture.
-			if (!string.IsNullOrWhiteSpace(wiki.LanguageCode))
-			{
-				var testLanguage = wiki.LanguageCode;
-				do
-				{
-					try
-					{
-						this.Culture = new CultureInfo(wiki.LanguageCode);
-					}
-					catch (CultureNotFoundException)
-					{
-						var lastDash = testLanguage.LastIndexOf('-');
-						if (lastDash > -1)
-						{
-							testLanguage = testLanguage.Substring(0, lastDash);
-						}
-					}
-				}
-				while (this.Culture == null && testLanguage.Length > 0);
-			}
-
-			if (this.Culture == null)
-			{
-				this.Culture = CultureInfo.CurrentCulture;
-			}
 		}
 		#endregion
 
@@ -154,7 +127,7 @@
 
 		public virtual IReadOnlyList<Block> GetBlocks(IPAddress ip) => this.GetBlocks(new BlocksInput(ip) { Properties = BlocksProperties.All });
 
-		public string GetMessage(string message, IEnumerable<string> arguments)
+		public string GetMessage(string message, params string[] arguments)
 		{
 			var messages = this.GetMessages(new[] { message }, arguments);
 			return messages[message].Text;
@@ -371,6 +344,7 @@
 		{
 			var siteInfo = this.AbstractionLayer.SiteInfo(new SiteInfoInput() { Properties = SiteInfoProperties.General | SiteInfoProperties.Namespaces | SiteInfoProperties.NamespaceAliases | SiteInfoProperties.MagicWords });
 			this.CaseSensitive = siteInfo.Flags.HasFlag(SiteInfoFlags.CaseSensitive);
+			this.Culture = GetCulture(siteInfo.Language) ?? CultureInfo.CurrentCulture;
 			this.Name = siteInfo.SiteName;
 			this.ServerName = siteInfo.ServerName;
 			this.Version = siteInfo.Generator;
@@ -462,9 +436,7 @@
 			var retval = new Dictionary<string, Message>(result.Count);
 			foreach (var item in result)
 			{
-				var message = new Message(this, MediaWikiNamespaces.MediaWiki, item.Name);
-				message.Populate(item);
-				retval.Add(item.Name, message);
+				retval.Add(item.Name, new Message(this, item));
 			}
 
 			return retval.AsReadOnly();
