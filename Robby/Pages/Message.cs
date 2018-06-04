@@ -28,8 +28,8 @@
 		public string NormalizedName { get; private set; }
 		#endregion
 
-		#region Public Methods
-		public void Populate(AllMessagesItem item)
+		#region Protected Internal Methods
+		protected internal void Populate(AllMessagesItem item)
 		{
 			ThrowNull(item, nameof(item));
 			this.Invalid = false;
