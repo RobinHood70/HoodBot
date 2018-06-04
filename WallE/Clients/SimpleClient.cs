@@ -208,6 +208,9 @@
 						return;
 					}
 				}
+				catch (DirectoryNotFoundException)
+				{
+				}
 				catch (FileNotFoundException)
 				{
 				}
