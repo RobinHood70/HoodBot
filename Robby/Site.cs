@@ -369,7 +369,7 @@
 			foreach (var item in siteInfo.Namespaces)
 			{
 				allAliases.TryGetValue(item.Id, out var aliases);
-				namespaces.Add(new Namespace(item, aliases));
+				namespaces.Add(new Namespace(this, item, aliases));
 			}
 
 			this.Namespaces = new NamespaceCollection(namespaces);
