@@ -431,7 +431,6 @@
 				this.Namespace = this.Site.Namespaces[MediaWikiNamespaces.Main];
 			}
 
-			split = pageName.Split(new char[] { '#' }, 2);
 			this.PageName = this.Namespace.CaseSensitive ? Normalize(pageName) : Normalize(pageName).UpperFirst();
 		}
 		#endregion
