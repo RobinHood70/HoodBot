@@ -47,6 +47,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BacklinkTitle.cs" />
     <Compile Include="Block.cs" />
     <Compile Include="Pages\Category.cs" />
     <Compile Include="Design\PageLoadOptions.cs" />

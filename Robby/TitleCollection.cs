@@ -272,7 +272,18 @@
 		private void AddBacklinks(BacklinksInput input)
 		{
 			var result = this.Site.AbstractionLayer.Backlinks(input);
-			this.FillFromTitleItems(result);
+			foreach (var item in result)
+			{
+				var mainTitle = new Title(this.Site, item.Title, null);
+				this.Add(mainTitle);
+				if (item.Redirects != null)
+				{
+					foreach (var redirectedItem in item.Redirects)
+					{
+						this.Add(new BacklinkTitle(this.Site, redirectedItem.Title, mainTitle));
+					}
+				}
+			}
 		}
 
 		private void AddCategories(AllCategoriesInput input)
