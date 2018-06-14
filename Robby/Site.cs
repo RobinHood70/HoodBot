@@ -93,9 +93,82 @@
 		#endregion
 
 		#region Public Methods
-		public virtual bool ClearMessage() => this.AbstractionLayer.ClearHasMessage();
-
 		public void DownloadFile(Uri uri, string fileName) => this.DownloadFile(uri?.OriginalString, fileName);
+
+		public string GetMessage(string message, params string[] arguments) => this.GetMessage(message, arguments as IEnumerable<string>);
+
+		public string GetMessage(string message, IEnumerable<string> arguments)
+		{
+			var messages = this.GetMessages(new[] { message }, arguments);
+			return messages[message].Text;
+		}
+
+		public IReadOnlyDictionary<string, Message> GetMessages(IEnumerable<string> msgs, params string[] arguments) => this.GetMessages(msgs, arguments as IEnumerable<string>);
+
+		public string GetParsedMessage(string msg, IEnumerable<string> arguments) => this.GetParsedMessage(msg, arguments, null);
+
+		public string GetParsedMessage(string msg, IEnumerable<string> arguments, Title title)
+		{
+			var messages = this.GetParsedMessages(new[] { msg }, arguments, title);
+			return messages[msg].Text;
+		}
+
+		public IReadOnlyDictionary<string, Message> GetParsedMessages(IEnumerable<string> msgs, IEnumerable<string> arguments) => this.GetParsedMessages(msgs, arguments, null);
+
+		public IReadOnlyList<RecentChange> GetRecentChanges() => this.GetRecentChanges(new RecentChangesOptions());
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(int ns) => this.GetRecentChanges(new RecentChangesOptions() { Namespace = ns });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(string tag) => this.GetRecentChanges(new RecentChangesOptions() { Tag = tag });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesOptions() { Types = types });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesFilters showOnly, RecentChangesFilters hide) => this.GetRecentChanges(new RecentChangesOptions() { ShowOnly = showOnly, Hide = hide });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesFilters showOnly, RecentChangesFilters hide, RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesOptions() { ShowOnly = showOnly, Hide = hide, Types = types });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime? start, DateTime? end) => this.GetRecentChanges(new RecentChangesOptions() { Start = start, End = end });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime? start, DateTime? end, RecentChangesFilters showOnly, RecentChangesFilters hide, RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesOptions() { Start = start, End = end, ShowOnly = showOnly, Hide = hide, Types = types });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime start, bool newer) => this.GetRecentChanges(start, newer, 0);
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime start, bool newer, int count) => this.GetRecentChanges(new RecentChangesOptions() { Start = start, Newer = newer, Count = count });
+
+		public IReadOnlyList<RecentChange> GetRecentChanges(string user, bool exclude) => this.GetRecentChanges(new RecentChangesOptions() { User = user, ExcludeUser = exclude });
+
+		public IReadOnlyList<User> GetUserInformation(params string[] users) => this.GetUserInformation(users as IEnumerable<string>);
+
+		public IReadOnlyList<string> GetUsersInGroups(bool onlyActiveUsers, bool onlyUsersWithEdits, params string[] groups) => this.GetUsersInGroups(onlyActiveUsers, onlyUsersWithEdits, groups as IEnumerable<string>);
+
+		public IReadOnlyList<string> GetUsersWithRights(bool onlyActiveUsers, bool onlyUsersWithEdits, params string[] rights) => this.GetUsersWithRights(onlyActiveUsers, onlyUsersWithEdits, rights as IEnumerable<string>);
+
+		public void Login(string userName, string password) => this.Login(userName, password, null);
+
+		public Namespace NamespaceFromName(string fullName)
+		{
+			var split = fullName.Split(new[] { ':' }, 2);
+			return (split.Length == 2 && this.Namespaces.TryGetValue(split[0], out var ns)) ? ns : this.Namespaces[MediaWikiNamespaces.Main];
+		}
+
+		/// <summary>Upload a file to the wiki.</summary>
+		/// <param name="fileName">The full path and filename of the file to upload.</param>
+		/// <param name="editSummary">The edit summary for the upload.</param>
+		/// <remarks>The destination filename will be the same as the local filename.</remarks>
+		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
+		public void Upload(string fileName, string editSummary) => this.Upload(fileName, null, editSummary, null);
+
+		/// <summary>Upload a file to the wiki.</summary>
+		/// <param name="fileName">The full path and filename of the file to upload.</param>
+		/// <param name="destinationName">The bare name (i.e., do not include "File:") of the file to upload to on the wiki. Set to null to use the filename from the <paramref name="fileName" /> parameter.</param>
+		/// <param name="editSummary">The edit summary for the upload.</param>
+		/// <remarks>The destination filename will be the same as the local filename.</remarks>
+		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
+		public void Upload(string fileName, string destinationName, string editSummary) => this.Upload(fileName, destinationName, editSummary, null);
+		#endregion
+
+		#region Public Virtual Methods
+		public virtual bool ClearMessage() => this.AbstractionLayer.ClearHasMessage();
 
 		public virtual void DownloadFile(string resource, string fileName) => this.AbstractionLayer.Download(new DownloadInput(resource, fileName));
 
@@ -127,16 +200,6 @@
 
 		public virtual IReadOnlyList<Block> GetBlocks(IPAddress ip) => this.GetBlocks(new BlocksInput(ip) { Properties = BlocksProperties.All });
 
-		public string GetMessage(string message, params string[] arguments) => this.GetMessage(message, arguments as IEnumerable<string>);
-
-		public string GetMessage(string message, IEnumerable<string> arguments)
-		{
-			var messages = this.GetMessages(new[] { message }, arguments);
-			return messages[message].Text;
-		}
-
-		public IReadOnlyDictionary<string, Message> GetMessages(IEnumerable<string> msgs, params string[] arguments) => this.GetMessages(msgs, arguments as IEnumerable<string>);
-
 		public virtual IReadOnlyDictionary<string, Message> GetMessages(IEnumerable<string> msgs, IEnumerable<string> arguments) => this.GetMessages(new AllMessagesInput
 		{
 			Messages = msgs,
@@ -145,16 +208,6 @@
 
 		public virtual IReadOnlyList<string> PagePropertyNames() => this.AbstractionLayer.PagePropertyNames(new PagePropertyNamesInput());
 
-		public string GetParsedMessage(string msg, IEnumerable<string> arguments) => this.GetParsedMessage(msg, arguments, null);
-
-		public string GetParsedMessage(string msg, IEnumerable<string> arguments, Title title)
-		{
-			var messages = this.GetParsedMessages(new[] { msg }, arguments, title);
-			return messages[msg].Text;
-		}
-
-		public IReadOnlyDictionary<string, Message> GetParsedMessages(IEnumerable<string> msgs, IEnumerable<string> arguments) => this.GetParsedMessages(msgs, arguments, null);
-
 		public virtual IReadOnlyDictionary<string, Message> GetParsedMessages(IEnumerable<string> msgs, IEnumerable<string> arguments, Title title) => this.GetMessages(new AllMessagesInput
 		{
 			Messages = msgs,
@@ -162,28 +215,6 @@
 			EnableParser = true,
 			EnableParserTitle = title?.FullPageName,
 		});
-
-		public IReadOnlyList<RecentChange> GetRecentChanges() => this.GetRecentChanges(new RecentChangesOptions());
-
-		public IReadOnlyList<RecentChange> GetRecentChanges(int ns) => this.GetRecentChanges(new RecentChangesOptions() { Namespace = ns });
-
-		public IReadOnlyList<RecentChange> GetRecentChanges(string tag) => this.GetRecentChanges(new RecentChangesOptions() { Tag = tag });
-
-		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesOptions() { Types = types });
-
-		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesFilters showOnly, RecentChangesFilters hide) => this.GetRecentChanges(new RecentChangesOptions() { ShowOnly = showOnly, Hide = hide });
-
-		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesFilters showOnly, RecentChangesFilters hide, RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesOptions() { ShowOnly = showOnly, Hide = hide, Types = types });
-
-		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime? start, DateTime? end) => this.GetRecentChanges(new RecentChangesOptions() { Start = start, End = end });
-
-		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime? start, DateTime? end, RecentChangesFilters showOnly, RecentChangesFilters hide, RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesOptions() { Start = start, End = end, ShowOnly = showOnly, Hide = hide, Types = types });
-
-		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime start, bool newer) => this.GetRecentChanges(start, newer, 0);
-
-		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime start, bool newer, int count) => this.GetRecentChanges(new RecentChangesOptions() { Start = start, Newer = newer, Count = count });
-
-		public IReadOnlyList<RecentChange> GetRecentChanges(string user, bool exclude) => this.GetRecentChanges(new RecentChangesOptions() { User = user, ExcludeUser = exclude });
 
 		public virtual IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesOptions options)
 		{
@@ -233,8 +264,6 @@
 			return target.Success ? new Title(this, target.Value) : null;
 		}
 
-		public IReadOnlyList<User> GetUserInformation(params string[] users) => this.GetUserInformation(users as IEnumerable<string>);
-
 		public virtual IReadOnlyList<User> GetUserInformation(IEnumerable<string> users)
 		{
 			var input = new UsersInput(users)
@@ -258,15 +287,9 @@
 
 		public virtual IReadOnlyList<string> GetUsers(bool onlyActiveUsers, bool onlyUsersWithEdits, string from, string to) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, From = from, To = to });
 
-		public IReadOnlyList<string> GetUsersInGroups(bool onlyActiveUsers, bool onlyUsersWithEdits, params string[] groups) => this.GetUsersInGroups(onlyActiveUsers, onlyUsersWithEdits, groups as IEnumerable<string>);
-
 		public virtual IReadOnlyList<string> GetUsersInGroups(bool onlyActiveUsers, bool onlyUsersWithEdits, IEnumerable<string> groups) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Groups = groups });
 
-		public IReadOnlyList<string> GetUsersWithRights(bool onlyActiveUsers, bool onlyUsersWithEdits, params string[] rights) => this.GetUsersWithRights(onlyActiveUsers, onlyUsersWithEdits, rights as IEnumerable<string>);
-
 		public virtual IReadOnlyList<string> GetUsersWithRights(bool onlyActiveUsers, bool onlyUsersWithEdits, IEnumerable<string> rights) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Rights = rights });
-
-		public void Login(string userName, string password) => this.Login(userName, password, null);
 
 		public virtual void Login(string userName, string password, string domain)
 		{
@@ -288,21 +311,6 @@
 		public virtual bool PatrolRevision(long revid) => this.Patrol(PatrolInput.FromRevisionId(revid));
 
 		public virtual void PublishWarning(IMessageSource sender, string warning) => this.WarningOccurred?.Invoke(this, new WarningEventArgs(sender, warning));
-
-		/// <summary>Upload a file to the wiki.</summary>
-		/// <param name="fileName">The full path and filename of the file to upload.</param>
-		/// <param name="editSummary">The edit summary for the upload.</param>
-		/// <remarks>The destination filename will be the same as the local filename.</remarks>
-		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
-		public void Upload(string fileName, string editSummary) => this.Upload(fileName, null, editSummary, null);
-
-		/// <summary>Upload a file to the wiki.</summary>
-		/// <param name="fileName">The full path and filename of the file to upload.</param>
-		/// <param name="destinationName">The bare name (i.e., do not include "File:") of the file to upload to on the wiki. Set to null to use the filename from the <paramref name="fileName" /> parameter.</param>
-		/// <param name="editSummary">The edit summary for the upload.</param>
-		/// <remarks>The destination filename will be the same as the local filename.</remarks>
-		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
-		public void Upload(string fileName, string destinationName, string editSummary) => this.Upload(fileName, destinationName, editSummary, null);
 
 		/// <summary>Upload a file to the wiki.</summary>
 		/// <param name="fileName">The full path and filename of the file to upload.</param>
