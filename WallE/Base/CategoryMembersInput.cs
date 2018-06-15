@@ -4,6 +4,7 @@ namespace RobinHood70.WallE.Base
 	using System;
 	using System.Collections.Generic;
 	using WikiCommon;
+	using static WikiCommon.Globals;
 
 	#region Public Enumerations
 	[Flags]
@@ -32,6 +33,26 @@ namespace RobinHood70.WallE.Base
 		public CategoryMembersInput(string title) => this.Title = title;
 
 		public CategoryMembersInput(long pageId) => this.PageId = pageId;
+
+		public CategoryMembersInput(CategoryMembersInput copy)
+		{
+			ThrowNull(copy, nameof(copy));
+			this.End = copy.End;
+			this.EndHexSortKey = copy.EndHexSortKey;
+			this.EndSortKeyPrefix = copy.EndSortKeyPrefix;
+			this.Limit = copy.Limit;
+			this.MaxItems = copy.MaxItems;
+			this.Namespaces = copy.Namespaces;
+			this.PageId = copy.PageId;
+			this.Properties = copy.Properties;
+			this.Sort = copy.Sort;
+			this.SortDescending = copy.SortDescending;
+			this.Start = copy.Start;
+			this.StartHexSortKey = copy.StartHexSortKey;
+			this.StartSortKeyPrefix = copy.StartSortKeyPrefix;
+			this.Title = copy.Title;
+			this.Type = copy.Type;
+		}
 		#endregion
 
 		#region Public Properties
@@ -63,7 +84,7 @@ namespace RobinHood70.WallE.Base
 
 		public string Title { get; }
 
-		public CategoryTypes Type { get; set; }
+		public CategoryMemberTypes Type { get; set; }
 		#endregion
 	}
 }
