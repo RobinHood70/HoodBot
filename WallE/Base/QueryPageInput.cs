@@ -21,8 +21,7 @@ namespace RobinHood70.WallE.Base
 
 		public string Page { get; }
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Design supports any Dictionary-like construct, which is not otherwise possible.")]
-		public IEnumerable<KeyValuePair<string, string>> Parameters { get; set; }
+		public IReadOnlyDictionary<string, string> Parameters { get; set; }
 		#endregion
 	}
 }
