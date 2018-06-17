@@ -194,44 +194,26 @@
 		{
 			// Assumes title-related properties have already been provided in the constructor.
 			ThrowNull(pageItem, nameof(pageItem));
-			var flags = pageItem.Flags;
 
-			var categories = this.Categories as List<CategoryTitle>;
-			categories.Clear();
-			foreach (var category in pageItem.Categories)
+			// None
+			this.PopulateFlags(pageItem.Flags.HasFlag(PageFlags.Invalid), pageItem.Flags.HasFlag(PageFlags.Missing));
+
+			// Info
+			var info = pageItem.Info;
+			if (info == null)
 			{
-				categories.Add(new CategoryTitle(this.Site, category.Title, category.SortKey, category.Hidden));
+				this.New = false;
+				this.Redirect = false;
+				this.StartTimestamp = this.Site.AbstractionLayer.CurrentTimestamp;
+			}
+			else
+			{
+				this.New = info.Flags.HasFlag(PageInfoFlags.New);
+				this.Redirect = info.Flags.HasFlag(PageInfoFlags.Redirect);
+				this.StartTimestamp = pageItem.Info.StartTimestamp;
 			}
 
-			var links = this.Links as List<Title>;
-			links.Clear();
-			foreach (var link in pageItem.Links)
-			{
-				links.Add(new Title(this.Site, link.Title));
-			}
-
-			var properties = this.Properties as Dictionary<string, string>;
-			properties.Clear();
-			if (pageItem.Properties?.Count > 0)
-			{
-				properties.Clear();
-				foreach (var property in pageItem.Properties)
-				{
-					properties.Add(property.Key, property.Value);
-				}
-			}
-
-			var templates = this.Templates as List<Title>;
-			templates.Clear();
-			if (pageItem.Templates.Count > 0)
-			{
-				templates.Clear();
-				foreach (var link in pageItem.Templates)
-				{
-					templates.Add(new Title(this.Site, link.Title));
-				}
-			}
-
+			// Revisions
 			var revs = this.Revisions;
 			revs.Clear();
 			foreach (var rev in pageItem.Revisions)
@@ -247,20 +229,8 @@
 					rev.User));
 			}
 
-			this.Invalid = flags.HasFlag(PageFlags.Invalid);
-			this.Missing = flags.HasFlag(PageFlags.Missing);
-			this.StartTimestamp = this.Site.AbstractionLayer.CurrentTimestamp;
-
-			var info = pageItem.Info;
-			if (info == null)
+			if (info != null)
 			{
-				this.New = false;
-				this.Redirect = false;
-			}
-			else
-			{
-				this.New = info.Flags.HasFlag(PageInfoFlags.New);
-				this.Redirect = info.Flags.HasFlag(PageInfoFlags.Redirect);
 				try
 				{
 					revs.Current = revs[info.LastRevisionId];
@@ -268,11 +238,52 @@
 				}
 				catch (KeyNotFoundException)
 				{
-					// We don't set revs.Current here because it will either have been set internally by .Add or set by a successful try.
+					// Blank the text, since it's not the current page text. We don't set revs.Current here because it will either have been set internally by .Add or set by a successful try.
 					this.Text = null;
 				}
 			}
 
+			// Links
+			var links = this.Links as List<Title>;
+			links.Clear();
+			foreach (var link in pageItem.Links)
+			{
+				links.Add(new Title(this.Site, link.Title));
+			}
+
+			// Properties
+			var properties = this.Properties as Dictionary<string, string>;
+			properties.Clear();
+			if (pageItem.Properties?.Count > 0)
+			{
+				properties.Clear();
+				foreach (var property in pageItem.Properties)
+				{
+					properties.Add(property.Key, property.Value);
+				}
+			}
+
+			// Templates
+			var templates = this.Templates as List<Title>;
+			templates.Clear();
+			if (pageItem.Templates.Count > 0)
+			{
+				templates.Clear();
+				foreach (var link in pageItem.Templates)
+				{
+					templates.Add(new Title(this.Site, link.Title));
+				}
+			}
+
+			// Categories
+			var categories = this.Categories as List<CategoryTitle>;
+			categories.Clear();
+			foreach (var category in pageItem.Categories)
+			{
+				categories.Add(new CategoryTitle(this.Site, category.Title, category.SortKey, category.Hidden));
+			}
+
+			// Custom
 			this.PopulateCustomResults(pageItem);
 		}
 
