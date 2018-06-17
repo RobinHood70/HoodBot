@@ -12,11 +12,17 @@
 	public class TitleCollection : TitleCollection<Title>, IEnumerable<Title>, IMessageSource
 	{
 		#region Constructors
+
+		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class.</summary>
+		/// <param name="site">The site the titles are from. All titles in a collection must belong to the same site.</param>
 		public TitleCollection(Site site)
 			: base(site)
 		{
 		}
 
+		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class with a specific list of titles.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="titles">The titles.</param>
 		public TitleCollection(Site site, IEnumerable<string> titles)
 			: base(site)
 		{
@@ -28,22 +34,32 @@
 			}
 		}
 
+		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class with a specific list of titles.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="titles">The titles.</param>
 		public TitleCollection(Site site, params string[] titles)
 			: this(site, titles as IEnumerable<string>)
 		{
 		}
 
+		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class with a specific list of titles in a given namespace.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="ns">The namespace the titles are in.</param>
+		/// <param name="titles">The titles. Namespace text is optional and will be stripped if provided.</param>
 		public TitleCollection(Site site, int ns, IEnumerable<string> titles)
 			: base(site)
 		{
 			ThrowNull(titles, nameof(titles));
 			foreach (var item in titles)
 			{
-				var newTitle = Title.ForcedNamespace(site, ns, item);
-				this.Add(newTitle);
+				this.Add(Title.ForcedNamespace(site, ns, item));
 			}
 		}
 
+		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class with a specific list of titles in a given namespace.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="ns">The namespace the titles are in.</param>
+		/// <param name="titles">The titles. Namespace text is optional and will be stripped if provided.</param>
 		public TitleCollection(Site site, int ns, params string[] titles)
 			: this(site, ns, titles as IEnumerable<string>)
 		{
@@ -87,18 +103,10 @@
 		#endregion
 
 		#region Public Methods
-		public void Add(params string[] titles) => this.Add(titles as IEnumerable<string>);
 
-		public void Add(IEnumerable<string> titles)
-		{
-			ThrowNull(titles, nameof(titles));
-			foreach (var title in titles)
-			{
-				this.Add(new Title(this.Site, title));
-			}
-		}
-
-		public void Add(IEnumerable<IWikiTitle> titles)
+		/// <summary>Adds a <em>copy</em> of the provided titles to the collection. The copies added will be standard <see cref="Title"/> objects regardless of the original type.</summary>
+		/// <param name="titles">The titles to add.</param>
+		public void AddCopy(IEnumerable<IWikiTitle> titles)
 		{
 			if (titles != null)
 			{
@@ -109,127 +117,54 @@
 			}
 		}
 
-		public void AddBacklinks(string title) => this.AddBacklinks(title, BacklinksTypes.Backlinks | BacklinksTypes.EmbeddedIn, true);
-
-		public void AddBacklinks(string title, BacklinksTypes linkTypes) => this.AddBacklinks(title, linkTypes, true);
-
-		public void AddBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles) => this.AddBacklinks(new BacklinksInput(title, linkTypes) { Redirect = includeRedirectedTitles });
-
-		public void AddBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles, Filter redirects) => this.AddBacklinks(new BacklinksInput(title, linkTypes) { FilterRedirects = redirects, Redirect = includeRedirectedTitles });
-
-		public void AddBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles, Filter redirects, int ns) => this.AddBacklinks(new BacklinksInput(title, linkTypes) { FilterRedirects = redirects, Namespace = ns, Redirect = includeRedirectedTitles });
-
-		public void AddCategories() => this.AddCategories(new AllCategoriesInput { Properties = AllCategoriesProperties.All });
-
-		public void AddCategories(string prefix) => this.AddCategories(new AllCategoriesInput { Prefix = prefix, Properties = AllCategoriesProperties.All });
-
-		public void AddCategories(string from, string to) => this.AddCategories(new AllCategoriesInput { From = from, To = to, Properties = AllCategoriesProperties.Hidden });
-
-		public void AddCategoryMembers(string category, bool recurse) => this.AddCategoryMembers(category, recurse, CategoryTypes.All);
-
-		public void AddCategoryMembers(string category, bool recurse, CategoryTypes categoryTypes)
-		{
-			var cat = Title.ForcedNamespace(this.Site, MediaWikiNamespaces.Category, category);
-			HashSet<Title> recursionSet = null;
-			if (recurse)
-			{
-				recursionSet = new HashSet<Title>(new WikiTitleEqualityComparer());
-			}
-
-			this.AddCategoryMembers(new CategoryMembersInput(cat.FullPageName) { Type = categoryTypes }, recursionSet);
-		}
-
-		public void AddCategoryMembers(string category, CategoryTypes categoryTypes, string fromPrefix, string toPrefix)
-		{
-			var cat = Title.ForcedNamespace(this.Site, MediaWikiNamespaces.Category, category);
-			this.AddCategoryMembers(
-				new CategoryMembersInput(cat.FullPageName)
-				{
-					Type = categoryTypes,
-					StartSortKeyPrefix = fromPrefix,
-					EndSortKeyPrefix = toPrefix,
-				}, null);
-		}
-
-		public void AddFiles(string user) => this.AddFiles(new AllImagesInput { User = user });
-
-		public void AddFiles(string from, string to) => this.AddFiles(new AllImagesInput { From = from, To = to });
-
-		public void AddFiles(DateTime? start, DateTime? end) => this.AddFiles(new AllImagesInput { Start = start, End = end });
-
-		public void AddFileUsage() => this.AddFileUsage(new AllFileUsagesInput());
-
-		public void AddFileUsage(string prefix) => this.AddFileUsage(new AllFileUsagesInput { Prefix = prefix });
-
-		public void AddFileUsage(string from, string to) => this.AddFileUsage(new AllFileUsagesInput { From = from, To = to });
-
-		public void AddLinksToNamespace(int ns) => this.AddLinksToNamespace(new AllLinksInput { Namespace = ns });
-
-		public void AddLinksToNamespace(int ns, string prefix) => this.AddLinksToNamespace(new AllLinksInput { Namespace = ns, Prefix = prefix });
-
-		public void AddLinksToNamespace(int ns, string from, string to) => this.AddLinksToNamespace(new AllLinksInput { Namespace = ns, From = from, To = to });
-
+		/// <summary>Converts all MediaWiki messages to titles based on their modification status and adds them to the collection.</summary>
+		/// <param name="modifiedMessages">Filter for whether the messages have been modified.</param>
 		public void AddMessages(Filter modifiedMessages) => this.AddMessages(new AllMessagesInput { FilterModified = modifiedMessages });
 
+		/// <summary>Converts specific MediaWiki messages to titles based on their modification status and adds them to the collection.</summary>
+		/// <param name="modifiedMessages">Filter for whether the messages have been modified.</param>
+		/// <param name="messages">The messages to load.</param>
 		public void AddMessages(Filter modifiedMessages, IEnumerable<string> messages) => this.AddMessages(new AllMessagesInput { FilterModified = modifiedMessages, Messages = messages });
 
+		/// <summary>Converts MediaWiki messages beginning with the specified prefix to titles based on their modification status and adds them to the collection.</summary>
+		/// <param name="modifiedMessages">Filter for whether the messages have been modified.</param>
+		/// <param name="prefix">The prefix of the categories to load.</param>
 		public void AddMessages(Filter modifiedMessages, string prefix) => this.AddMessages(new AllMessagesInput { FilterModified = modifiedMessages, Prefix = prefix });
 
+		/// <summary>Converts MediaWiki messages within the given range to titles based on their modification status and adds them to the collection.</summary>
+		/// <param name="modifiedMessages">Filter for whether the messages have been modified.</param>
+		/// <param name="from">The message to start loading at (inclusive). The message specified does not have to exist.</param>
+		/// <param name="to">The message to stop loading at (inclusive). The category message does not have to exist.</param>
 		public void AddMessages(Filter modifiedMessages, string from, string to) => this.AddMessages(new AllMessagesInput { FilterModified = modifiedMessages, MessageFrom = from, MessageTo = to });
 
-		public void AddNamespace(int ns, Filter redirects) => this.AddNamespace(new AllPagesInput { Namespace = ns, FilterRedirects = redirects });
-
-		public void AddNamespace(int ns, Filter redirects, string startsWith) => this.AddNamespace(new AllPagesInput { FilterRedirects = redirects, Namespace = ns, Prefix = startsWith });
-
-		public void AddNamespace(int ns, Filter redirects, string fromPage, string toPage) => this.AddNamespace(new AllPagesInput() { FilterRedirects = redirects, From = fromPage, Namespace = ns, To = toPage });
-
+		/// <summary>Adds all protected titles to the collection.</summary>
 		public void AddProtectedTitles() => this.AddProtectedTitles(new ProtectedTitlesInput());
 
+		/// <summary>Adds all protected titles in the given namespaces to the collection.</summary>
+		/// <param name="namespaces">The namespaces to load from.</param>
 		public void AddProtectedTitles(IEnumerable<int> namespaces) => this.AddProtectedTitles(new ProtectedTitlesInput() { Namespaces = namespaces });
 
+		/// <summary>Adds all protected titles of the specified levels to the collection.</summary>
+		/// <param name="levels">The levels of titles to load (typically, one of: "autoconfirmed" or "sysop").</param>
 		public void AddProtectedTitles(IEnumerable<string> levels) => this.AddProtectedTitles(new ProtectedTitlesInput() { Levels = levels });
 
+		/// <summary>Adds all protected titles of the specified levels in the given namespaces to the collection.</summary>
+		/// <param name="namespaces">The namespaces to load from.</param>
+		/// <param name="levels">The levels of titles to load (typically, one of: "autoconfirmed" or "sysop").</param>
 		public void AddProtectedTitles(IEnumerable<int> namespaces, IEnumerable<string> levels) => this.AddProtectedTitles(new ProtectedTitlesInput() { Namespaces = namespaces, Levels = levels });
 
-		public void AddQueryPage(string pageName) => this.AddQueryPage(new QueryPageInput(pageName));
-
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Design supports any Dictionary-like construct, which is not otherwise possible.")]
-		public void AddQueryPage(string pageName, IEnumerable<KeyValuePair<string, string>> parameters) => this.AddQueryPage(new QueryPageInput(pageName) { Parameters = parameters });
-
-		public void AddRedirectsToNamespace(int ns) => this.AddRedirectsToNamespace(new AllRedirectsInput { Namespace = ns });
-
-		public void AddRedirectsToNamespace(int ns, string prefix) => this.AddRedirectsToNamespace(new AllRedirectsInput { Namespace = ns, Prefix = prefix });
-
-		public void AddRedirectsToNamespace(int ns, string from, string to) => this.AddRedirectsToNamespace(new AllRedirectsInput { Namespace = ns, From = from, To = to });
-
-		public void AddRevisions(DateTime? start, DateTime? end) => this.AddRevisions(new AllRevisionsInput { Start = start, End = end });
-
-		public void AddRevisions(DateTime start, bool newer) => this.AddRevisions(start, newer, 0);
-
-		public void AddRevisions(DateTime start, bool newer, int count) => this.AddRevisions(new AllRevisionsInput { Start = start, SortAscending = newer, MaxItems = count });
-
-		public void AddSearchResults(string search) => this.AddSearchResults(new SearchInput(search) { Properties = SearchProperties.None });
-
-		public void AddSearchResults(string search, IEnumerable<int> namespaces) => this.AddSearchResults(new SearchInput(search) { Namespaces = namespaces, Properties = SearchProperties.None });
-
-		public void AddSearchResults(string search, WhatToSearch whatToSearch) => this.AddSearchResults(new SearchInput(search) { What = whatToSearch, Properties = SearchProperties.None });
-
-		public void AddSearchResults(string search, WhatToSearch whatToSearch, IEnumerable<int> namespaces) => this.AddSearchResults(new SearchInput(search) { Namespaces = namespaces, What = whatToSearch, Properties = SearchProperties.None });
-
-		public void AddTemplateTransclusions() => this.AddTemplateTransclusions(new AllTransclusionsInput());
-
-		public void AddTemplateTransclusions(string prefix) => this.AddTemplateTransclusions(new AllTransclusionsInput { Prefix = prefix });
-
-		public void AddTemplateTransclusions(string from, string to) => this.AddTemplateTransclusions(new AllTransclusionsInput { From = from, To = to });
-
-		public void AddTransclusionsOfNamespace(int ns) => this.AddTransclusionsOfNamespace(new AllTransclusionsInput { Namespace = ns });
-
-		public void AddTransclusionsOfNamespace(int ns, string prefix) => this.AddTransclusionsOfNamespace(new AllTransclusionsInput { Namespace = ns, Prefix = prefix });
-
-		public void AddTransclusionsOfNamespace(int ns, string from, string to) => this.AddTransclusionsOfNamespace(new AllTransclusionsInput { Namespace = ns, From = from, To = to });
-
+		/// <summary>Loads all pages in the collection.</summary>
+		/// <returns>A <see cref="PageCollection"/> containing the specified pages, including status information for pages that could not be loaded.</returns>
 		public PageCollection Load() => this.Load(this.Site.DefaultLoadOptions);
 
+		/// <summary>Loads the specified information for all pages in the collection.</summary>
+		/// <param name="modules">The page modules to load, using their default options.</param>
+		/// <returns>A <see cref="PageCollection"/> containing the specified pages, including status information for pages that could not be loaded.</returns>
+		public PageCollection Load(PageModules modules) => this.Load(new PageLoadOptions(modules));
+
+		/// <summary>Loads the specified information for all pages in the collection.</summary>
+		/// <param name="options">The page load options.</param>
+		/// <returns>A <see cref="PageCollection"/> containing the specified pages, including status information for pages that could not be loaded.</returns>
 		public PageCollection Load(PageLoadOptions options)
 		{
 			var retval = new PageCollection(this.Site, options);
@@ -237,39 +172,43 @@
 			return retval;
 		}
 
+		/// <summary>Purges all pages in the collection.</summary>
+		/// <returns>A page collection with the results of the purge.</returns>
 		public PageCollection Purge() => this.Purge(PurgeMethod.Normal);
 
-		public PageCollection Purge(PurgeMethod method)
-		{
-			var input = new PurgeInput(this.AsFullPageNames()) { Method = method };
-			var result = this.Site.AbstractionLayer.Purge(input);
+		/// <summary>Purges all pages in the collection.</summary>
+		/// <param name="method">The method.</param>
+		/// <returns>A page collection with the results of the purge.</returns>
+		public PageCollection Purge(PurgeMethod method) => this.Purge(new PurgeInput(this.FullPageNames) { Method = method });
 
-			var retval = new PageCollection(this.Site);
-			retval.PopulateTitleMap(result);
-			foreach (var item in result)
-			{
-				var purgePage = item.Value;
-				var flags = purgePage.Flags;
-				if (flags.HasFlag(PurgeFlags.Purged))
-				{
-					retval.Add(this.Site.PageCreator.CreatePage(this.Site, purgePage.Namespace.Value, purgePage.Title));
-				}
-				else if (!purgePage.Flags.HasFlag(PurgeFlags.Missing))
-				{
-					this.Site.PublishWarning(this, CurrentCulture(PurgeFailed, purgePage.Title));
-				}
-			}
+		/// <summary>Watches all pages in the collection.</summary>
+		/// <returns>A page collection with the watch results.</returns>
+		public PageCollection Watch() => this.Watch(new WatchInput(this.FullPageNames) { Unwatch = false });
 
-			return retval;
-		}
-
-		public PageCollection Watch() => this.Watch(true);
-
-		public PageCollection Unwatch() => this.Watch(false);
+		/// <summary>Unwatches all pages in the collection.</summary>
+		/// <returns>A page collection with the unwatch results.</returns>
+		public PageCollection Unwatch() => this.Watch(new WatchInput(this.FullPageNames) { Unwatch = true });
 		#endregion
 
-		#region Private Methods
-		private void AddBacklinks(BacklinksInput input)
+		#region Public Override Methods
+
+		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
+		/// <param name="titles">The titles to add.</param>
+		public override void Add(IEnumerable<string> titles)
+		{
+			ThrowNull(titles, nameof(titles));
+			foreach (var title in titles)
+			{
+				this.Add(new Title(this.Site, title));
+			}
+		}
+		#endregion
+
+		#region Protected Override Methods
+
+		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected override void AddBacklinks(BacklinksInput input)
 		{
 			var result = this.Site.AbstractionLayer.Backlinks(input);
 			foreach (var item in result)
@@ -286,59 +225,149 @@
 			}
 		}
 
-		private void AddCategories(AllCategoriesInput input)
+		/// <summary>Adds a set of category pages to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected override void AddCategories(AllCategoriesInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllCategories(input);
 			this.FillFromTitleItems(result);
 		}
 
-		private void AddCategoryMembers(CategoryMembersInput input, HashSet<Title> recursionSet)
+		/// <summary>Adds category members to the collection, potentially including subcategories and their members.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="recurse">if set to <c>true</c> load the entire category tree recursively.</param>
+		protected override void AddCategoryMembers(CategoryMembersInput input, bool recurse)
 		{
-			var result = this.Site.AbstractionLayer.CategoryMembers(input);
-			this.FillFromTitleItems(result);
-
-			if (recursionSet != null)
+			ThrowNull(input, nameof(input));
+			if (recurse)
 			{
-				recursionSet.Add(new Title(this.Site, input.Title));
-
-				var copy = new HashSet<Title>(this);
-				foreach (var item in copy)
-				{
-					if (item.Namespace.Id == MediaWikiNamespaces.Category && !recursionSet.Contains(item))
-					{
-						recursionSet.Add(item);
-						var newInput = new CategoryMembersInput(item.FullPageName)
-						{
-							Type = input.Type,
-							StartSortKeyPrefix = input.StartSortKeyPrefix,
-							EndSortKeyPrefix = input.EndSortKeyPrefix
-						};
-
-						this.AddCategoryMembers(newInput, recursionSet);
-					}
-				}
+				this.FillFromTitleItems(this.Site.AbstractionLayer.CategoryMembers(input));
+			}
+			else
+			{
+				this.FillFromTitleItems(input, new HashSet<IWikiTitle>());
 			}
 		}
 
-		private void AddFiles(AllImagesInput input)
+		/// <summary>Adds files to the collection, based on optionally file-specific parameters.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected override void AddFiles(AllImagesInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllImages(input);
 			this.FillFromTitleItems(result);
 		}
 
-		private void AddFileUsage(AllFileUsagesInput input)
+		/// <summary>Adds files that are in use to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected override void AddFileUsage(AllFileUsagesInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllFileUsages(input);
 			this.FillFromTitleItems(result);
 		}
 
-		private void AddLinksToNamespace(AllLinksInput input)
+		/// <summary>Adds pages that link to a given namespace.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected override void AddLinksToNamespace(AllLinksInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllLinks(input);
 			this.FillFromTitleItems(result);
 		}
 
-		private void AddMessages(AllMessagesInput input)
+		/// <summary>Adds pages from a given namespace to the collection. Parameters allow filtering to a specific range of pages.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected override void AddNamespace(AllPagesInput input)
+		{
+			var result = this.Site.AbstractionLayer.AllPages(input);
+			this.FillFromTitleItems(result);
+		}
+
+		/// <summary>Adds pages with a given property to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected override void AddPagesWithProperty(PagesWithPropertyInput input)
+		{
+			var result = this.Site.AbstractionLayer.PagesWithProperty(input);
+			this.FillFromTitleItems(result);
+		}
+
+		/// <summary>Adds prefix-search results to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected override void AddPrefixSearchResults(PrefixSearchInput input)
+		{
+			var result = this.Site.AbstractionLayer.PrefixSearch(input);
+			this.FillFromTitleItems(result);
+		}
+
+		/// <summary>Adds query page results to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <remarks>Query pages are a subset of Special pages that conform to a specific standard. You can find a list by using the Help feature of the API (<c>/api.php?action=help&amp;modules=query+querypage</c>). Note that a few of these (e.g., ListDuplicatedFiles) have API equivalents that are more functional and produce the same or more detailed results.</remarks>
+		protected override void AddQueryPage(QueryPageInput input)
+		{
+			var result = this.Site.AbstractionLayer.QueryPage(input);
+			this.FillFromTitleItems(result);
+		}
+
+		/// <summary>Adds recent changes pages to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected override void AddRecentChanges(RecentChangesInput input)
+		{
+			var result = this.Site.AbstractionLayer.RecentChanges(input);
+			this.FillFromTitleItems(result);
+		}
+
+		/// <summary>Adds redirects to a namespace to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected override void AddRedirectsToNamespace(AllRedirectsInput input)
+		{
+			var result = this.Site.AbstractionLayer.AllRedirects(input);
+			this.FillFromTitleItems(result);
+		}
+
+		/// <summary>Adds pages from a range of revisions to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected override void AddRevisions(AllRevisionsInput input)
+		{
+			var result = this.Site.AbstractionLayer.AllRevisions(input);
+			this.FillFromTitleItems(result);
+		}
+
+		/// <summary>Adds search results to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected override void AddSearchResults(SearchInput input)
+		{
+			var result = this.Site.AbstractionLayer.Search(input);
+			this.FillFromTitleItems(result);
+		}
+
+		/// <summary>Adds pages with template transclusions to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected override void AddTransclusions(AllTransclusionsInput input)
+		{
+			var result = this.Site.AbstractionLayer.AllTransclusions(input);
+			this.FillFromTitleItems(result);
+		}
+
+		/// <summary>Adds changed watchlist pages to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected override void AddWatchlistChanged(WatchlistInput input)
+		{
+			var result = this.Site.AbstractionLayer.Watchlist(input);
+			this.FillFromTitleItems(result);
+		}
+
+		/// <summary>Adds raw watchlist pages to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected override void AddWatchlistRaw(WatchlistRawInput input)
+		{
+			var result = this.Site.AbstractionLayer.WatchlistRaw(input);
+			this.FillFromTitleItems(result);
+		}
+		#endregion
+
+		#region Protected Virtual Methods
+
+		/// <summary>Converts MediaWiki messages to titles and adds them to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected virtual void AddMessages(AllMessagesInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllMessages(input);
 			foreach (var item in result)
@@ -347,54 +376,68 @@
 			}
 		}
 
-		private void AddNamespace(AllPagesInput input)
-		{
-			var result = this.Site.AbstractionLayer.AllPages(input);
-			this.FillFromTitleItems(result);
-		}
-
-		private void AddProtectedTitles(ProtectedTitlesInput input)
+		/// <summary>Adds creation-protected titles (pages that are protected but don't exist) to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected virtual void AddProtectedTitles(ProtectedTitlesInput input)
 		{
 			var result = this.Site.AbstractionLayer.ProtectedTitles(input);
 			this.FillFromTitleItems(result);
 		}
 
-		private void AddQueryPage(QueryPageInput input)
+		/// <summary>Purges all pages in the collection.</summary>
+		/// <param name="input">The input.</param>
+		/// <returns>A page collection with the results of the purge.</returns>
+		protected virtual PageCollection Purge(PurgeInput input)
 		{
-			var result = this.Site.AbstractionLayer.QueryPage(input);
-			this.FillFromTitleItems(result);
+			var result = this.Site.AbstractionLayer.Purge(input);
+			var retval = new PageCollection(this.Site, result);
+			foreach (var item in result)
+			{
+				var purgePage = item.Value;
+				var flags = purgePage.Flags;
+				var page = this.Site.PageCreator.CreatePage(this.Site, purgePage.Title);
+				page.PopulateFlags(flags.HasFlag(PurgeFlags.Invalid), flags.HasFlag(PurgeFlags.Missing));
+
+				retval.Add(page);
+			}
+
+			return retval;
 		}
 
-		private void AddRedirectsToNamespace(AllRedirectsInput input)
+		/// <summary>Watches or unwatches all pages in the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <returns>A page collection with the watch/unwatch results.</returns>
+		protected virtual PageCollection Watch(WatchInput input)
 		{
-			var result = this.Site.AbstractionLayer.AllRedirects(input);
-			this.FillFromTitleItems(result);
-		}
+			PageCollection retval;
+			if (!this.Site.AllowEditing)
+			{
+				retval = new PageCollection(this.Site);
+				foreach (var item in this)
+				{
+					retval.Add(this.Site.PageCreator.CreatePage(this.Site, item.FullPageName));
+				}
 
-		private void AddRevisions(AllRevisionsInput input)
-		{
-			var result = this.Site.AbstractionLayer.AllRevisions(input);
-			this.FillFromTitleItems(result);
-		}
+				return retval;
+			}
 
-		private void AddSearchResults(SearchInput input)
-		{
-			var result = this.Site.AbstractionLayer.Search(input);
-			this.FillFromTitleItems(result);
-		}
+			var result = this.Site.AbstractionLayer.Watch(input);
+			retval = new PageCollection(this.Site, result);
+			foreach (var item in result)
+			{
+				var watchPage = item.Value;
+				var flags = watchPage.Flags;
+				var page = this.Site.PageCreator.CreatePage(this.Site, watchPage.Title);
+				page.PopulateFlags(false, flags.HasFlag(WatchFlags.Missing));
 
-		private void AddTemplateTransclusions(AllTransclusionsInput input)
-		{
-			var result = this.Site.AbstractionLayer.AllTransclusions(input);
-			this.FillFromTitleItems(result);
-		}
+				retval.Add(page);
+			}
 
-		private void AddTransclusionsOfNamespace(AllTransclusionsInput input)
-		{
-			var result = this.Site.AbstractionLayer.AllTransclusions(input);
-			this.FillFromTitleItems(result);
+			return retval;
 		}
+		#endregion
 
+		#region Private Methods
 		private void FillFromTitleItems(IEnumerable<ITitleOnly> result)
 		{
 			foreach (var item in result)
@@ -403,37 +446,37 @@
 			}
 		}
 
-		private PageCollection Watch(bool watch)
+		private void FillFromTitleItems(CategoryMembersInput input, HashSet<IWikiTitle> categoryTree)
 		{
-			var retval = new PageCollection(this.Site);
-			if (!this.Site.AllowEditing)
+			if (!categoryTree.Add(new Title(this.Site, input.Title)))
 			{
-				foreach (var item in this)
-				{
-					retval.Add(this.Site.PageCreator.CreatePage(this.Site, item.Namespace.Id, item.FullPageName));
-				}
-
-				return retval;
+				return;
 			}
 
-			var input = new WatchInput(this.AsFullPageNames()) { Unwatch = !watch };
-			var result = this.Site.AbstractionLayer.Watch(input);
-
-			retval.PopulateTitleMap(result);
+			var newInput = new CategoryMembersInput(input);
+			newInput.Properties |= CategoryMembersProperties.Title | CategoryMembersProperties.Type;
+			newInput.Type = newInput.Type | CategoryMemberTypes.Subcat;
+			var result = this.Site.AbstractionLayer.CategoryMembers(newInput);
 			foreach (var item in result)
 			{
-				var watchPage = item.Value;
-				var flags = watchPage.Flags;
-				if (flags.HasFlag(WatchFlags.Watched) || flags.HasFlag(WatchFlags.Unwatched))
+				var title = new Title(this.Site, item.Title);
+				if (input.Type.HasFlag(item.Type))
 				{
-					retval.Add(this.Site.PageCreator.CreatePage(this.Site, watchPage.Namespace.Value, watchPage.Title));
+					this.Add(title);
 				}
 
-				// WatchFlags has no invalid value so, unlike Purge, no warnings are raised here.
+				if (item.Type == CategoryMemberTypes.Subcat)
+				{
+					var recurseInput = new CategoryMembersInput(item.Title)
+					{
+						Properties = newInput.Properties,
+						Type = newInput.Type,
+					};
+					this.FillFromTitleItems(recurseInput, categoryTree);
+				}
 			}
-
-			return retval;
 		}
+
 		#endregion
 	}
 }

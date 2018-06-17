@@ -102,10 +102,9 @@
 
 		/// <summary>Creates a page.</summary>
 		/// <param name="site">The site the page is from.</param>
-		/// <param name="ns">The namespace of the page.</param>
 		/// <param name="title">The title of the page.</param>
 		/// <returns>A fully populated Page object.</returns>
-		public abstract Page CreatePage(Site site, int ns, string title);
+		public abstract Page CreatePage(Site site, string title);
 
 		/// <summary>Creates a page item.</summary>
 		/// <returns>A new PageItem for use by WallE.</returns>

@@ -14,14 +14,13 @@
 
 		/// <summary>Creates a page.</summary>
 		/// <param name="site">The site the page is from.</param>
-		/// <param name="ns">The namespace of the page.</param>
 		/// <param name="title">The title of the page.</param>
 		/// <returns>A fully populated Page object.</returns>
-		public override Page CreatePage(Site site, int ns, string title)
+		public override Page CreatePage(Site site, string title)
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(title, nameof(title));
-			switch (ns)
+			switch (site.NamespaceFromName(title).Id)
 			{
 				case MediaWikiNamespaces.MediaWiki:
 					return new Message(site, title);

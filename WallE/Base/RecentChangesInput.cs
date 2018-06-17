@@ -2,6 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
+	using System.Collections.Generic;
 	using WikiCommon;
 
 	#region Public Enumerations
@@ -36,7 +37,7 @@ namespace RobinHood70.WallE.Base
 
 		public Filter FilterAnonymous { get; set; }
 
-		public Filter FilterBot { get; set; }
+		public Filter FilterBots { get; set; }
 
 		public Filter FilterMinor { get; set; }
 
@@ -52,7 +53,7 @@ namespace RobinHood70.WallE.Base
 
 		public int MaxItems { get; set; }
 
-		public int? Namespace { get; set; }
+		public IEnumerable<int> Namespaces { get; set; }
 
 		public RecentChangesProperties Properties { get; set; }
 

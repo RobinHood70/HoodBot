@@ -116,18 +116,7 @@
 		/// <summary>Gets a value indicating whether the <see cref="Text" /> property has been modified.</summary>
 		/// <value><see langword="true" /> if the text no longer matches the first revision; otherwise, <see langword="false" />.</value>
 		/// <remarks>This is currently simply a shortcut property to compare the Text with Revisions[0]. This may not be an accurate reflection of modification status when loading a specific revision range or in other unusual circumstances.</remarks>
-		public bool TextModified
-		{
-			get
-			{
-				if (this.Revisions.Count > 0)
-				{
-					return this.Text != this.Revisions[0].Text;
-				}
-
-				return false;
-			}
-		}
+		public bool TextModified => this.Revisions.Count > 0 ? this.Text != this.Revisions[0].Text : !string.IsNullOrWhiteSpace(this.Text);
 		#endregion
 
 		#region Public Static Methods
@@ -141,7 +130,7 @@
 
 		#region Public Methods
 
-		/// <summary>Returns a value indicating if the page exists. This will trigger a Load operation, if necessary.</summary>
+		/// <summary>Returns a value indicating if the page exists. This will trigger a Load operation if necessary.</summary>
 		/// <returns><see langword="true" /> if the page exists; otherwise <see langword="false" />.</returns>
 		public bool CheckExistence()
 		{
@@ -200,7 +189,7 @@
 
 		/// <summary>Populates page data from the specified WallE PageItem.</summary>
 		/// <param name="pageItem">The page item.</param>
-		/// <remarks>This item is publicly available so it can be called from other load-like routines if necessary, such as from a PageCollection's bulk load.</remarks>
+		/// <remarks>This item is publicly available so it can be called from other load-like routines if necessary, such as from a PageCollection's LoadPages routine.</remarks>
 		public void Populate(PageItem pageItem)
 		{
 			// Assumes title-related properties have already been provided in the constructor.
@@ -247,7 +236,15 @@
 			revs.Clear();
 			foreach (var rev in pageItem.Revisions)
 			{
-				revs.Add(new Revision(rev));
+				revs.Add(new Revision(
+					rev.Flags.HasFlag(RevisionFlags.Anonymous),
+					rev.Comment,
+					rev.RevisionId,
+					rev.Flags.HasFlag(RevisionFlags.Minor),
+					rev.ParentId,
+					rev.Content,
+					rev.Timestamp,
+					rev.User));
 			}
 
 			this.Invalid = flags.HasFlag(PageFlags.Invalid);
@@ -279,6 +276,15 @@
 			this.PopulateCustomResults(pageItem);
 		}
 
+		/// <summary>Populates only flag data. This is useful for results that return more than straight titles, but less than full page data (e.g., Purge, Watch).</summary>
+		/// <param name="invalid">Whether the page is invalid.</param>
+		/// <param name="missing">Whether the page is missing.</param>
+		public void PopulateFlags(bool invalid, bool missing)
+		{
+			this.Invalid = invalid;
+			this.Missing = missing;
+		}
+
 		/// <summary>Saves the page.</summary>
 		/// <param name="editSummary">The edit summary.</param>
 		/// <param name="isMinor">Whether the edit should be marked as minor.</param>
@@ -301,7 +307,7 @@
 				BaseTimestamp = this.Revisions?.Current?.Timestamp,
 				StartTimestamp = this.StartTimestamp,
 				Bot = isBotEdit,
-				Minor = isMinor.ToTristate(),
+				Minor = isMinor ? Tristate.True : Tristate.False,
 				Recreate = recreateIfJustDeleted,
 				Summary = editSummary,
 			};

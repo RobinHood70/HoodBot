@@ -49,7 +49,7 @@ namespace RobinHood70.WikiCommon
 
 	/// <summary>The page groupings within a category.</summary>
 	[Flags]
-	public enum CategoryTypes
+	public enum CategoryMemberTypes
 	{
 		/// <summary>Regular pages</summary>
 		Page = 1,
@@ -68,14 +68,14 @@ namespace RobinHood70.WikiCommon
 	/// <remarks>This is an alias for Tristate, but is much clearer in its intent than having True/False/Unknown values.</remarks>
 	public enum Filter
 	{
-		/// <summary>No filter.</summary>
-		Any = Tristate.Unknown,
+		/// <summary>Include all results; do not filter.</summary>
+		Any,
 
-		/// <summary>Only include these results (e.g., redirects only).</summary>
-		Only = Tristate.True,
+		/// <summary>Include only these results. Note that in cases where </summary>
+		Only,
 
-		/// <summary>Filter out these results (e.g., everything except redirects).</summary>
-		Exclude = Tristate.False,
+		/// <summary>Exclude these results.</summary>
+		Exclude,
 	}
 
 	/// <summary>The methods to use to purge pages.</summary>
@@ -89,29 +89,6 @@ namespace RobinHood70.WikiCommon
 
 		/// <summary>Purge the specified pages and anything that links to or recursively transcludes them.</summary>
 		RecursiveLinkUpdate
-	}
-
-	/// <summary>Options to show or hide for Recent Changes functions.</summary>
-	[Flags]
-	public enum RecentChangesFilters
-	{
-		/// <summary>Use default behaviour and show everything.</summary>
-		None = 0,
-
-		/// <summary>Filter edits based on whether they were made by an anonymous (IP) user or a logged-in user.</summary>
-		Anonymous = 1,
-
-		/// <summary>Filter edits based on whether they were made by a bot.</summary>
-		Bot = 1 << 1,
-
-		/// <summary>Filter edits based on whether they're minor.</summary>
-		Minor = 1 << 2,
-
-		/// <summary>Filter edits based on patrol status.</summary>
-		Patrolled = 1 << 3,
-
-		/// <summary>Filter edits based on whether they're redirects.</summary>
-		Redirect = 1 << 4,
 	}
 
 	/// <summary>The types of entries that appear in Recent Changes.</summary>

@@ -105,6 +105,12 @@
 
 		public IReadOnlyDictionary<string, Message> GetMessages(IEnumerable<string> msgs, params string[] arguments) => this.GetMessages(msgs, arguments as IEnumerable<string>);
 
+		public string GetPageText(string pageName)
+		{
+			var result = new TitleCollection(this, pageName).Load();
+			return result.Count == 1 ? result[0].Text : null;
+		}
+
 		public string GetParsedMessage(string msg, IEnumerable<string> arguments) => this.GetParsedMessage(msg, arguments, null);
 
 		public string GetParsedMessage(string msg, IEnumerable<string> arguments, Title title)
@@ -117,19 +123,19 @@
 
 		public IReadOnlyList<RecentChange> GetRecentChanges() => this.GetRecentChanges(new RecentChangesOptions());
 
-		public IReadOnlyList<RecentChange> GetRecentChanges(int ns) => this.GetRecentChanges(new RecentChangesOptions() { Namespace = ns });
+		public IReadOnlyList<RecentChange> GetRecentChanges(IEnumerable<int> namespaces) => this.GetRecentChanges(new RecentChangesOptions() { Namespaces = namespaces });
 
 		public IReadOnlyList<RecentChange> GetRecentChanges(string tag) => this.GetRecentChanges(new RecentChangesOptions() { Tag = tag });
 
 		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesOptions() { Types = types });
 
-		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesFilters showOnly, RecentChangesFilters hide) => this.GetRecentChanges(new RecentChangesOptions() { ShowOnly = showOnly, Hide = hide });
+		public IReadOnlyList<RecentChange> GetRecentChanges(Filter anonymous, Filter bots, Filter minor, Filter patrolled, Filter redirects) => this.GetRecentChanges(new RecentChangesOptions() { Anonymous = anonymous, Bots = bots, Minor = minor, Patrolled = patrolled, Redirects = redirects });
 
-		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesFilters showOnly, RecentChangesFilters hide, RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesOptions() { ShowOnly = showOnly, Hide = hide, Types = types });
+		public IReadOnlyList<RecentChange> GetRecentChanges(Filter anonymous, Filter bots, Filter minor, Filter patrolled, Filter redirects, RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesOptions() { Anonymous = anonymous, Bots = bots, Minor = minor, Patrolled = patrolled, Redirects = redirects, Types = types });
 
 		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime? start, DateTime? end) => this.GetRecentChanges(new RecentChangesOptions() { Start = start, End = end });
 
-		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime? start, DateTime? end, RecentChangesFilters showOnly, RecentChangesFilters hide, RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesOptions() { Start = start, End = end, ShowOnly = showOnly, Hide = hide, Types = types });
+		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime? start, DateTime? end, Filter anonymous, Filter bots, Filter minor, Filter patrolled, Filter redirects, RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesOptions() { Start = start, End = end, Anonymous = anonymous, Bots = bots, Minor = minor, Patrolled = patrolled, Redirects = redirects, Types = types });
 
 		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime start, bool newer) => this.GetRecentChanges(start, newer, 0);
 
@@ -147,8 +153,16 @@
 
 		public Namespace NamespaceFromName(string fullName)
 		{
-			var split = fullName.Split(new[] { ':' }, 2);
-			return (split.Length == 2 && this.Namespaces.TryGetValue(split[0], out var ns)) ? ns : this.Namespaces[MediaWikiNamespaces.Main];
+			if (fullName != null)
+			{
+				var split = fullName.Split(new[] { ':' }, 2);
+				if (split.Length == 2 && this.Namespaces.TryGetValue(split[0], out var ns))
+				{
+					return ns;
+				}
+			}
+
+			return this.Namespaces[MediaWikiNamespaces.Main];
 		}
 
 		/// <summary>Upload a file to the wiki.</summary>
@@ -219,25 +233,7 @@
 		public virtual IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesOptions options)
 		{
 			ThrowNull(options, nameof(options));
-			var input = new RecentChangesInput()
-			{
-				Start = options.Start,
-				End = options.End,
-				SortAscending = options.Newer,
-				User = options.User,
-				ExcludeUser = options.ExcludeUser,
-				Namespace = options.Namespace,
-				Tag = options.Tag,
-				Types = options.Types,
-				FilterAnonymous = FlagToFilter(options.ShowOnly, options.Hide, RecentChangesFilters.Anonymous),
-				FilterBot = FlagToFilter(options.ShowOnly, options.Hide, RecentChangesFilters.Bot),
-				FilterMinor = FlagToFilter(options.ShowOnly, options.Hide, RecentChangesFilters.Minor),
-				FilterPatrolled = FlagToFilter(options.ShowOnly, options.Hide, RecentChangesFilters.Patrolled),
-				FilterRedirects = FlagToFilter(options.ShowOnly, options.Hide, RecentChangesFilters.Redirect),
-				MaxItems = options.Count,
-			};
-
-			return this.GetRecentChanges(input);
+			return this.GetRecentChanges(options.ToWallEInput);
 		}
 
 		public virtual Title GetRedirectTarget(string text)

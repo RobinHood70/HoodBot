@@ -161,13 +161,9 @@
 		/// <returns>A Title object with the given name in the given namespace.</returns>
 		public static Title ForcedNamespace(Site site, int ns, string pageName)
 		{
-			var retval = new Title(site, pageName);
-			if (retval.Namespace.Id != ns)
-			{
-				retval = new Title(site, ns, pageName);
-			}
-
-			return retval;
+			ThrowNull(site, nameof(site));
+			ThrowNull(pageName, nameof(pageName));
+			return site.NamespaceFromName(pageName) == ns ? new Title(site, pageName) : new Title(site, ns, pageName);
 		}
 
 		/// <summary>Builds the full name of the page from the namespace and page name, accounting for Main space.</summary>
@@ -229,6 +225,10 @@
 			var result = this.Site.AbstractionLayer.Delete(input);
 			return result.LogId > 0;
 		}
+
+		public bool Equals(IWikiTitle other) =>
+			other == null ? false :
+			this.Namespace.Equals(other.Namespace) && this.PageName.Equals(other.PageName);
 
 		/// <summary>Checks to see if this Title resolves to the same page as another Title. Key is ignored.</summary>
 		/// <param name="title">The title, or derived type, to compare to.</param>

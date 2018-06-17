@@ -136,8 +136,8 @@
 
 		public void CategoryMembersTests()
 		{
-			var titles = new TitleCollection(this.Wiki);
-			titles.AddCategoryMembers("Marked for Deletion", true, CategoryTypes.All);
+			var titles = new PageCollection(this.Wiki);
+			titles.AddCategoryMembers("Books-Images", CategoryMemberTypes.File, true);
 			this.CheckCollection(titles, "CategoryMembers");
 			DumpTitles(titles);
 		}
@@ -202,7 +202,7 @@
 		{
 			const string duped = "File:ON-icon-ava-Defensive Scroll Bonus I.png";
 			var pageCollection = new PageCollection(this.Wiki);
-			pageCollection.AddDuplicateFiles(new[] { duped });
+			pageCollection.AddDuplicateFiles(new TitleCollection(this.Wiki, duped));
 			DumpTitles(pageCollection);
 
 			var filePage = new FilePage(this.Wiki, duped);
@@ -388,7 +388,7 @@
 		public void TemplateTransclusionTest()
 		{
 			var titleCollection = new TitleCollection(this.Wiki);
-			titleCollection.AddTemplateTransclusions();
+			titleCollection.AddTransclusions();
 			DumpTitles(titleCollection);
 		}
 
@@ -566,8 +566,7 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			var messages = this.Wiki.GetMessages(new[] { "Aboutsite" }, new string[0]);
-			this.textBoxResults.AppendText(messages["Aboutsite"].Text);
+			this.CategoryMembersTests();
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;

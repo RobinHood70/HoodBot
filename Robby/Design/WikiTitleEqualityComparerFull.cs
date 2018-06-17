@@ -8,8 +8,8 @@
 		public bool Equals(IWikiTitle x, IWikiTitle y) =>
 			x == null ? x == y :
 			y == null ? false :
-			x.Key == y.Key && x.Namespace == y.Namespace && x.PageName == y.PageName;
+			x.Namespace.Equals(y.Namespace) && x.PageName.Equals(y.PageName) && x.Key.Equals(y.Key);
 
-		public int GetHashCode(IWikiTitle obj) => obj == null ? 0 : CompositeHashCode(obj.Key.GetHashCode(), obj.Namespace.GetHashCode(), obj.PageName.GetHashCode());
+		public int GetHashCode(IWikiTitle obj) => obj == null ? 0 : CompositeHashCode(obj.Namespace.GetHashCode(), obj.PageName.GetHashCode(), obj.Key.GetHashCode());
 	}
 }

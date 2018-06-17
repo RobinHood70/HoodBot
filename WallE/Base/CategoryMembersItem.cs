@@ -2,6 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
+	using RobinHood70.WikiCommon;
 
 	public class CategoryMembersItem : ITitle
 	{
@@ -18,7 +19,7 @@ namespace RobinHood70.WallE.Base
 
 		public string Title { get; set; }
 
-		public string Type { get; set; }
+		public CategoryMemberTypes Type { get; set; }
 		#endregion
 
 		#region Public Override Methods

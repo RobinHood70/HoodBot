@@ -9,7 +9,7 @@
 	public class MetaTemplateBuilder : PageCreator
 	{
 		#region Public Override Methods
-		public override Page CreatePage(Site site, int ns, string title) => new VariablesPage(site, title);
+		public override Page CreatePage(Site site, string title) => new VariablesPage(site, title);
 
 		public override PageItem CreatePageItem() => new VariablesPageItem();
 		#endregion

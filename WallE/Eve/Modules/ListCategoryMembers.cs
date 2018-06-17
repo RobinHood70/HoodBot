@@ -2,13 +2,24 @@
 namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
+	using System.Collections.Generic;
 	using Base;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
+	using RobinHood70.WikiCommon;
 	using static WikiCommon.Globals;
 
 	internal class ListCategoryMembers : ListModule<CategoryMembersInput, CategoryMembersItem>, IGeneratorModule
 	{
+		#region Static Fields
+		private static Dictionary<string, CategoryMemberTypes> typeLookup = new Dictionary<string, CategoryMemberTypes>
+		{
+			["file"] = CategoryMemberTypes.File,
+			["page"] = CategoryMemberTypes.Page,
+			["subcat"] = CategoryMemberTypes.Subcat
+		};
+		#endregion
+
 		#region Constructors
 		public ListCategoryMembers(WikiAbstractionLayer wal, CategoryMembersInput input)
 			: base(wal, input)
@@ -66,7 +77,11 @@ namespace RobinHood70.WallE.Eve.Modules
 			item.SortKey = (string)result["sortkey"];
 			item.SortKeyPrefix = (string)result["sortkeyprefix"];
 			item.Timestamp = (DateTime?)result["timestamp"];
-			item.Type = (string)result["type"];
+			var typeText = (string)result["type"];
+			if (typeText != null && typeLookup.TryGetValue(typeText, out var itemType))
+			{
+				item.Type = itemType;
+			}
 
 			return item;
 		}
