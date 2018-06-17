@@ -21,8 +21,7 @@
 				  0,
 				  null,
 				  contribution?.Timestamp,
-				  contribution?.User
-				  )
+				  contribution?.User)
 		{
 			ThrowNull(contribution, nameof(contribution));
 			this.Title = new Title(site, contribution.Title);

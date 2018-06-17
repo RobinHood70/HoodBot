@@ -10,12 +10,17 @@
 	using WallE.Eve;
 	using static WikiCommon.Globals;
 
+	/// <summary>Methods by which the wiki can be accessed.</summary>
 	public enum EntryPoint
 	{
+		/// <summary>Index.php access.</summary>
 		Index,
+
+		/// <summary>API access.</summary>
 		Api
 	}
 
+	/// <summary>Represents what the site is capable of at a basic level.</summary>
 	public class SiteCapabilities
 	{
 		#region Static Fields
@@ -31,16 +36,30 @@
 		#endregion
 
 		#region Public Properties
+
+		/// <summary>Gets the Uri to the API entry point.</summary>
+		/// <value>The API entry point.</value>
 		public Uri Api { get; private set; }
 
+		/// <summary>Gets the Uri to the index.php entry point.</summary>
+		/// <value>The index.php entry point.</value>
 		public Uri Index { get; private set; }
 
+		/// <summary>Gets the entry points for read access.</summary>
+		/// <value>The entry points for read access.</value>
 		public EntryPoint ReadEntryPoint { get; private set; }
 
+		/// <summary>Gets the entry points for write access.</summary>
+		/// <value>The entry points for write access.</value>
 		public EntryPoint WriteEntryPoint { get; private set; }
 		#endregion
 
 		#region Public Static Methods
+
+		/// <summary>Initializes a new instance of the <see cref="SiteCapabilities"/> class and gets all relevant information from the site.</summary>
+		/// <param name="client">The <see cref="IMediaWikiClient"/> client to be used to access the site.</param>
+		/// <param name="anyPage">Any page on the wiki.</param>
+		/// <returns>A new instance of the <see cref="SiteCapabilities"/> class with information about the site's capabilities.</returns>
 		public static SiteCapabilities Get(IMediaWikiClient client, Uri anyPage)
 		{
 			ThrowNull(client, nameof(client));
