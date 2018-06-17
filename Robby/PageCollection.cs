@@ -237,9 +237,7 @@
 		/// <param name="input">The input parameters.</param>
 		protected override void AddCategories(AllCategoriesInput input) => this.LoadPages(input);
 
-		/// <summary>
-		/// Adds category members to the collection, potentially including subcategories and their members.
-		/// </summary>
+		/// <summary>Adds category members to the collection, potentially including subcategories and their members.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="recurse">if set to <c>true</c> load the entire category tree recursively.</param>
 		protected override void AddCategoryMembers(CategoryMembersInput input, bool recurse)
