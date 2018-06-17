@@ -163,7 +163,7 @@
 				throw new InvalidOperationException(CurrentCulture(ModuleNotLoaded, nameof(PageModules.Templates), nameof(this.IsDisambiguation)));
 			}
 
-			var templates = new HashSet<Title>(this.Templates, new WikiTitleEqualityComparer());
+			var templates = new HashSet<Title>(this.Templates);
 			templates.IntersectWith(this.Site.DisambiguationTemplates);
 			return templates.Count > 0;
 		}

@@ -412,7 +412,7 @@
 			}
 
 			text = page.Text.Trim();
-			this.disambiguationTemplates = new HashSet<Title>(new WikiTitleEqualityComparer());
+			this.disambiguationTemplates = new HashSet<Title>();
 			if (page.Links.Count == 0)
 			{
 				this.disambiguationTemplates.Add(new Title(this, text));

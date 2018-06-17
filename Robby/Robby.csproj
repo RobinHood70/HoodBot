@@ -85,9 +85,7 @@
     <Compile Include="Site.cs" />
     <Compile Include="SiteCapabilities.cs" />
     <Compile Include="Title.cs" />
-    <Compile Include="Design\WikiTitleEqualityComparer.cs" />
     <Compile Include="Design\WikiTitleEqualityComparerFull.cs" />
-    <Compile Include="UnexpectedResultException.cs" />
     <Compile Include="User.cs" />
     <Compile Include="WarningEventArgs.cs" />
     <Compile Include="Pages\FilePage.cs" />
