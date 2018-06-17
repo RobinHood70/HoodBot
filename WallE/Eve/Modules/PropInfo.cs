@@ -74,17 +74,27 @@ namespace RobinHood70.WallE.Eve.Modules
 				Language = (string)parent["pagelanguage"],
 				Touched = parent["touched"].AsDate(),
 				LastRevisionId = (long?)parent["lastrevid"] ?? 0,
+				Flags =
+					parent.GetFlag("new", PageInfoFlags.New) |
+					parent.GetFlag("readable", PageInfoFlags.Readable) |
+					parent.GetFlag("redirect", PageInfoFlags.Redirect) |
+					parent.GetFlag("watched", PageInfoFlags.Watched),
+				Length = (int?)parent["length"] ?? 0,
+				StartTimestamp = parent["starttimestamp"].AsDate(),
+				RestrictionTypes = parent.AsReadOnlyList<string>("restrictiontypes"),
+				Watchers = (long?)parent["watchers"] ?? 0,
+				NotificationTimestamp = parent["notificationtimestamp"].AsDate(),
+				TalkId = (long?)parent["talkid"] ?? 0,
+				SubjectId = (long?)parent["subjectid"] ?? 0,
+				FullUrl = (Uri)parent["fullurl"],
+				EditUrl = (Uri)parent["editurl"],
+				CanonicalUrl = (Uri)parent["canonicalurl"],
+				Preload = (string)parent["preload"],
+				DisplayTitle = (string)parent["displaytitle"],
 			};
+
 			var counter = parent["counter"];
 			info.Counter = counter?.Type == JTokenType.Integer ? (long?)parent["counter"] ?? -1 : -1;
-			info.Length = (int?)parent["length"] ?? 0;
-			info.Flags =
-				parent.GetFlag("new", PageInfoFlags.New) |
-				parent.GetFlag("readable", PageInfoFlags.Readable) |
-				parent.GetFlag("redirect", PageInfoFlags.Redirect) |
-				parent.GetFlag("watched", PageInfoFlags.Watched);
-			info.StartTimestamp = parent["starttimestamp"].AsDate();
-			this.Wal.CurrentTimestamp = info.StartTimestamp;
 
 			var tokens = new Dictionary<string, string>();
 #pragma warning disable IDE0007 // Use implicit type
@@ -119,16 +129,6 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			info.Protections = protections;
-			info.RestrictionTypes = parent.AsReadOnlyList<string>("restrictiontypes");
-			info.Watchers = (long?)parent["watchers"] ?? 0;
-			info.NotificationTimestamp = parent["notificationtimestamp"].AsDate();
-			info.TalkId = (long?)parent["talkid"] ?? 0;
-			info.SubjectId = (long?)parent["subjectid"] ?? 0;
-			info.FullUrl = (Uri)parent["fullurl"];
-			info.EditUrl = (Uri)parent["editurl"];
-			info.CanonicalUrl = (Uri)parent["canonicalurl"];
-			info.Preload = (string)parent["preload"];
-			info.DisplayTitle = (string)parent["displaytitle"];
 
 			// Ensure that all inputs have an output so we get consistent results between JSON1 and JSON2. To cover the corner case where some extension gives unexpected outputs that don't match the input actions, or multiple outputs for a single input, I've done this as two separate loops. It is assumed that the programmer will be aware of what they're looking for should these cases ever occur, and will not be fooled by extraneous false values under the original input actions.
 			var testActions = new Dictionary<string, bool>(this.baseActions);
@@ -145,6 +145,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			info.TestActions = testActions;
 			output.Info = info;
+			this.Wal.CurrentTimestamp = info.StartTimestamp;
 		}
 
 		protected override void DeserializeResult(JToken result, PageItem output)
