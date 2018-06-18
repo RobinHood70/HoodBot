@@ -495,20 +495,20 @@
 			return new ActionDelete(this).Submit(input);
 		}
 
-		/// <summary>Downloads the specified resource (usually a URI) to a file.</summary>
+		/// <summary>Returns data from the <a href="https://www.mediawiki.org/wiki/API:Deletedrevisions">Deletedrevisions</a> API module.</summary>
 		/// <param name="input">The input parameters.</param>
-		/// <remarks>This is not part of the API, but since Upload is, it makes sense to provide its counterpart.</remarks>
+		/// <returns>A list of deleted revisions.</returns>
+		public IReadOnlyList<DeletedRevisionsItem> DeletedRevisions(ListDeletedRevisionsInput input) => this.RunListQuery(new ListDeletedRevs(this, input));
+
+		/// <summary>Downloads the specified URI to a file.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <remarks>This is not part of the API, but since Upload is, it makes sense to provide its counterpart so the end-user is not left accessing Client directly.</remarks>
 		public void Download(DownloadInput input)
 		{
 			ThrowNull(input, nameof(input));
 			var uri = new Uri(input.Resource);
 			this.Client.DownloadFile(uri, input.FileName);
 		}
-
-		/// <summary>Returns data from the <a href="https://www.mediawiki.org/wiki/API:Deletedrevisions">Deletedrevisions</a> API module.</summary>
-		/// <param name="input">The input parameters.</param>
-		/// <returns>A list of deleted revisions.</returns>
-		public IReadOnlyList<DeletedRevisionsItem> DeletedRevisions(ListDeletedRevisionsInput input) => this.RunListQuery(new ListDeletedRevs(this, input));
 
 		/// <summary>Edits a page using the <a href="https://www.mediawiki.org/wiki/API:Edit">Edit</a> API module.</summary>
 		/// <param name="input">The input parameters.</param>
