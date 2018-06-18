@@ -7,7 +7,10 @@
 	/// <seealso cref="RobinHood70.Robby.Title" />
 	public class InterwikiTitle : Title
 	{
-		internal InterwikiTitle(Site site, InterwikiTitleItem baseItem)
+		/// <summary>Initializes a new instance of the <see cref="InterwikiTitle"/> class.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="baseItem">The <see cref="InterwikiTitleItem"/> to initialize from.</param>
+		protected internal InterwikiTitle(Site site, InterwikiTitleItem baseItem)
 			: base(site, baseItem.Title)
 		{
 			this.Prefix = baseItem.InterwikiPrefix;

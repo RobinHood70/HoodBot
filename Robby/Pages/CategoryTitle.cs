@@ -11,7 +11,7 @@
 		/// <param name="fullCategoryName">Full name of the category.</param>
 		/// <param name="sortKey">The sort key.</param>
 		/// <param name="hidden">if set to <see langword="true" /> if the category is hidden.</param>
-		internal CategoryTitle(Site site, string fullCategoryName, string sortKey, bool hidden)
+		protected internal CategoryTitle(Site site, string fullCategoryName, string sortKey, bool hidden)
 			: base(site, fullCategoryName)
 		{
 			this.Hidden = hidden;

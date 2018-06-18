@@ -12,7 +12,7 @@
 
 		/// <summary>Initializes a new instance of the <see cref="NamespaceCollection" /> class.</summary>
 		/// <param name="namespaces">An enumeration of all namespace objects.</param>
-		public NamespaceCollection(IEnumerable<Namespace> namespaces)
+		protected internal NamespaceCollection(IEnumerable<Namespace> namespaces)
 		{
 			ThrowNull(namespaces, nameof(namespaces));
 			foreach (var ns in namespaces)

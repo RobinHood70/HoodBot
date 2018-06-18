@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.Robby
 {
-	using System;
 	using System.Collections.Generic;
 	using RobinHood70.WallE.Base;
 	using static WikiCommon.Globals;
@@ -9,10 +8,12 @@
 	/// <seealso cref="RobinHood70.Robby.Revision" />
 	public class Contribution : Revision
 	{
+		#region Constructors
+
 		/// <summary>Initializes a new instance of the <see cref="Contribution" /> class.</summary>
 		/// <param name="site">The site the contribution is from.</param>
 		/// <param name="contribution">The contribution.</param>
-		public Contribution(Site site, UserContributionsItem contribution)
+		protected internal Contribution(Site site, UserContributionsItem contribution)
 			: base(
 				  contribution?.UserId == 0,
 				  contribution?.Comment,
@@ -31,6 +32,9 @@
 			this.OldSize = contribution.Size - contribution.SizeDifference;
 			this.Tags = contribution.Tags;
 		}
+		#endregion
+
+		#region Public Properties
 
 		/// <summary>Gets the namespaceof the contribution.</summary>
 		/// <value>The namespace.</value>
@@ -59,5 +63,6 @@
 		/// <summary>Gets the page title.</summary>
 		/// <value>The title.</value>
 		public Title Title { get; }
+		#endregion
 	}
 }

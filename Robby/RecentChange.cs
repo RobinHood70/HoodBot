@@ -7,7 +7,10 @@
 
 	public class RecentChange
 	{
-		public RecentChange(Site site, RecentChangesItem recentChange)
+		/// <summary>Initializes a new instance of the <see cref="RecentChange"/> class.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="recentChange">The <see cref="RecentChangesItem"/> to initialize from.</param>
+		protected internal RecentChange(Site site, RecentChangesItem recentChange)
 		{
 			ThrowNull(recentChange, nameof(recentChange));
 			this.Title = new Title(site, recentChange.Title);

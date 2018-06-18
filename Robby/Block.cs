@@ -6,7 +6,17 @@
 	/// <summary>Stores all information about a wiki block.</summary>
 	public class Block
 	{
-		internal Block(string user, string by, string reason, DateTime startTime, DateTime expiry, BlockFlags flags, bool automatic)
+		#region Constructors
+
+		/// <summary>Initializes a new instance of the <see cref="Block"/> class.</summary>
+		/// <param name="user">The blocked user.</param>
+		/// <param name="by">Who the block was performed by.</param>
+		/// <param name="reason">The reason for the block.</param>
+		/// <param name="startTime">The start time of the block.</param>
+		/// <param name="expiry">When the block expires.</param>
+		/// <param name="flags">The block flags.</param>
+		/// <param name="automatic">if set to <c>true</c>, indicates that this was an auto-block by the wiki itself.</param>
+		protected internal Block(string user, string by, string reason, DateTime startTime, DateTime expiry, BlockFlags flags, bool automatic)
 		{
 			this.Automatic = automatic;
 			this.BlockedBy = by;
@@ -16,6 +26,7 @@
 			this.StartTime = startTime;
 			this.User = user;
 		}
+		#endregion
 
 		/// <summary>Gets a value indicating whether whether the block was made automatically by the wiki software.</summary>
 		public bool Automatic { get; }

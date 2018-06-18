@@ -6,7 +6,9 @@
 	/// <summary>Represents a MediaWiki magic word.</summary>
 	public class MagicWord
 	{
-		internal MagicWord(MagicWordsItem word)
+		/// <summary>Initializes a new instance of the <see cref="MagicWord"/> class.</summary>
+		/// <param name="word">The <see cref="MagicWordsItem"/> to initialize from.</param>
+		protected internal MagicWord(MagicWordsItem word)
 		{
 			// Assumes dictionary will hold Id.
 			this.CaseSensitive = word.CaseSensitive;

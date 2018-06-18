@@ -6,7 +6,10 @@
 	/// <seealso cref="RobinHood70.Robby.Title" />
 	public class RedirectTitle : Title
 	{
-		internal RedirectTitle(Site site, PageSetRedirectItem baseItem)
+		/// <summary>Initializes a new instance of the <see cref="RedirectTitle"/> class.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="baseItem">The <see cref="PageSetRedirectItem"/> to initialize from.</param>
+		protected internal RedirectTitle(Site site, PageSetRedirectItem baseItem)
 			: base(site, baseItem?.Title)
 		{
 			this.Fragment = baseItem.Fragment;

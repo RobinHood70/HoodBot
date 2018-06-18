@@ -19,7 +19,7 @@
 		/// <param name="text">The revision text.</param>
 		/// <param name="timestamp">When the revision was made.</param>
 		/// <param name="user">The user who made the revision.</param>
-		public Revision(bool anonymous, string comment, long id, bool minor, long parentId, string text, DateTime? timestamp, string user)
+		protected internal Revision(bool anonymous, string comment, long id, bool minor, long parentId, string text, DateTime? timestamp, string user)
 		{
 			this.Anonymous = anonymous;
 			this.Comment = comment;
