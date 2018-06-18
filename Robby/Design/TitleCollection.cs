@@ -215,7 +215,7 @@
 		/// <summary>Adds a range of files to the collection based on the most recent version.</summary>
 		/// <param name="start">The date to start at (inclusive).</param>
 		/// <param name="end">The date to end at (inclusive).</param>
-		public void AddFiles(DateTime? start, DateTime? end) => this.AddFiles(new AllImagesInput { Start = start, End = end });
+		public void AddFiles(DateTime start, DateTime end) => this.AddFiles(new AllImagesInput { Start = start, End = end });
 
 		/// <summary>Adds all files that are in use to the collection.</summary>
 		public void AddFileUsage() => this.AddFileUsage(new AllFileUsagesInput { Unique = true });
