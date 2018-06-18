@@ -23,11 +23,11 @@
 			this.TalkPage = this.Page.TalkPage;
 		}
 
-		public User(Site site, UsersItem user)
+		protected internal User(Site site, UsersItem user)
 			: this(site, user?.Name)
 		{
 			ThrowNull(user, nameof(user));
-			this.SetInfo(user);
+			this.Populate(user);
 		}
 		#endregion
 
@@ -137,7 +137,7 @@
 			};
 			var result = this.Site.AbstractionLayer.Users(input);
 			var user = result.First();
-			this.SetInfo(user);
+			this.Populate(user);
 		}
 
 		public void NewTalkPageMessage(string header, string msg, string editSummary)
@@ -203,7 +203,7 @@
 			return result.Id != 0;
 		}
 
-		private void SetInfo(UsersItem user)
+		private void Populate(UsersItem user)
 		{
 			this.BlockInfo = new Block(user.Name, user.BlockedBy, user.BlockReason, user.BlockTimestamp ?? DateTime.MinValue, user.BlockExpiry ?? DateTime.MaxValue, BlockFlags.None, false);
 			this.EditCount = user.EditCount;
