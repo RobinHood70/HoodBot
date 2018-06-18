@@ -696,8 +696,7 @@
 			}
 
 			var assert = this.Assert;
-			assert = null;
-			var login = new ActionLogin(this);
+			this.Assert = null;
 			if (this.SiteVersion >= 127)
 			{
 				input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Login);
@@ -708,6 +707,7 @@
 			LoginResult output;
 			do
 			{
+				var login = new ActionLogin(this);
 				output = login.Submit(input);
 				switch (output.Result)
 				{
