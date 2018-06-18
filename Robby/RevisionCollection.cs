@@ -11,6 +11,7 @@
 		#endregion
 
 		#region Constructors
+
 		/// <summary>Initializes a new instance of the <see cref="RevisionCollection"/> class.</summary>
 		protected internal RevisionCollection()
 		{
