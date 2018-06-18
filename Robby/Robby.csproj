@@ -87,6 +87,7 @@
     <Compile Include="Title.cs" />
     <Compile Include="Design\WikiTitleEqualityComparerFull.cs" />
     <Compile Include="User.cs" />
+    <Compile Include="EditIgnoredEventArgs.cs" />
     <Compile Include="WarningEventArgs.cs" />
     <Compile Include="Pages\FilePage.cs" />
   </ItemGroup>

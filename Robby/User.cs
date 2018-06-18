@@ -144,6 +144,13 @@
 		{
 			if (!this.Site.AllowEditing)
 			{
+				this.Site.PublishIgnoredEdit(this, new Dictionary<string, object>
+				{
+					[nameof(header)] = header,
+					[nameof(msg)] = msg,
+					[nameof(editSummary)] = editSummary,
+				});
+
 				return;
 			}
 
@@ -169,6 +176,16 @@
 
 		public bool Unblock(string reason)
 		{
+			if (!this.Site.AllowEditing)
+			{
+				this.Site.PublishIgnoredEdit(this, new Dictionary<string, object>
+				{
+					[nameof(reason)] = reason,
+				});
+
+				return true;
+			}
+
 			var input = new UnblockInput(this.Name)
 			{
 				Reason = reason

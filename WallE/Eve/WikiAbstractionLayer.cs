@@ -500,7 +500,7 @@
 		/// <returns>A list of deleted revisions.</returns>
 		public IReadOnlyList<DeletedRevisionsItem> DeletedRevisions(ListDeletedRevisionsInput input) => this.RunListQuery(new ListDeletedRevs(this, input));
 
-		/// <summary>Downloads the specified URI to a file.</summary>
+		/// <summary>Downloads the specified resource (typically, a Uri) to a file.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <remarks>This is not part of the API, but since Upload is, it makes sense to provide its counterpart so the end-user is not left accessing Client directly.</remarks>
 		public void Download(DownloadInput input)

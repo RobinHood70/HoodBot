@@ -305,7 +305,7 @@
 
 		public void PageTypeTests()
 		{
-			var loadOptions = new PageLoadOptions(PageModules.All) { ImageRevisionCount = 5 };
+			var loadOptions = new PageLoadOptions(PageModules.All) { FileRevisionCount = 5 };
 			var pageCollection = new PageCollection(this.Wiki, loadOptions);
 			pageCollection.AddTitles("Category:All Pages Missing Data", "Category:Categories", "Oblivion:Oblivion", "File:ZeniMax Online Studios logo.jpg");
 			foreach (var page in pageCollection)
@@ -566,7 +566,7 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			this.CategoryMembersTests();
+			this.Wiki.DownloadFile("Example.jpg", @"D:\bla\");
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;
@@ -598,7 +598,7 @@
 
 			if (wikiInfo.Name.Contains("UESP"))
 			{
-				this.Wiki.PageCreator = new MetaTemplateBuilder();
+				// this.Wiki.PageCreator = new MetaTemplateBuilder();
 			}
 
 			if (wikiInfo.AdminUserName != null)

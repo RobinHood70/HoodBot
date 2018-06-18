@@ -79,6 +79,7 @@
 
 		/// <summary>Gets or sets the load options.</summary>
 		/// <value>The load options.</value>
+		/// <remarks>If you need to detect disambiguations, you should include Properties for wikis using Disambiguator or Templates for those that aren't. These are not loaded by default.</remarks>
 		public PageLoadOptions LoadOptions { get; set; }
 
 		/// <summary>Gets or sets a value indicating whether this <see cref="Page" /> is missing.</summary>
@@ -165,6 +166,7 @@
 
 			var templates = new HashSet<Title>(this.Templates);
 			templates.IntersectWith(this.Site.DisambiguationTemplates);
+
 			return templates.Count > 0;
 		}
 
@@ -299,18 +301,33 @@
 		/// <summary>Saves the page.</summary>
 		/// <param name="editSummary">The edit summary.</param>
 		/// <param name="isMinor">Whether the edit should be marked as minor.</param>
-		public void Save(string editSummary, bool isMinor) => this.Save(editSummary, isMinor, true, false);
+		/// <returns><c>true</c> if the page was changed; otherwise <c>false</c>.</returns>
+		public bool Save(string editSummary, bool isMinor) => this.Save(editSummary, isMinor, true, false);
 
 		/// <summary>Saves the page with full options.</summary>
 		/// <param name="editSummary">The edit summary.</param>
 		/// <param name="isMinor">Whether the edit should be marked as minor.</param>
 		/// <param name="isBotEdit">Whether the edit should be marked as a bot edit.</param>
 		/// <param name="recreateIfJustDeleted">Whether to recreate the page if it was deleted since being loaded.</param>
-		public void Save(string editSummary, bool isMinor, bool isBotEdit, bool recreateIfJustDeleted)
+		/// <returns><c>true</c> if the page was changed; otherwise <c>false</c>.</returns>
+		public bool Save(string editSummary, bool isMinor, bool isBotEdit, bool recreateIfJustDeleted)
 		{
+			if (!this.TextModified)
+			{
+				return false;
+			}
+
 			if (!this.Site.AllowEditing)
 			{
-				return;
+				this.Site.PublishIgnoredEdit(this, new Dictionary<string, object>
+				{
+					[nameof(editSummary)] = editSummary,
+					[nameof(isMinor)] = isMinor,
+					[nameof(isBotEdit)] = isBotEdit,
+					[nameof(recreateIfJustDeleted)] = recreateIfJustDeleted,
+				});
+
+				return true;
 			}
 
 			var input = new EditInput(this.FullPageName, this.Text)
@@ -322,7 +339,8 @@
 				Recreate = recreateIfJustDeleted,
 				Summary = editSummary,
 			};
-			this.Site.AbstractionLayer.Edit(input);
+			var result = this.Site.AbstractionLayer.Edit(input);
+			return result.Result == "Success";
 		}
 		#endregion
 

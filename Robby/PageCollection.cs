@@ -45,7 +45,7 @@
 		/// <summary>Initializes a new instance of the <see cref="PageCollection"/> class.</summary>
 		/// <param name="site">The site the pages are from. All pages in a collection must belong to the same site.</param>
 		/// <param name="options">A <see cref="PageLoadOptions"/> object initialized with a set of modules. Using this constructor allows you to customize some options.</param>
-		/// <param name="creator">A custom page creator. Use this to create Page items that include page data from custom API property modules. On Wikipedia, for example, this might be used to create pages that include geographic coordinates from the GeoData exstension.</param>
+		/// <param name="creator">A custom page creator. Use this to create Page items that include page data from custom property modules. On Wikipedia, for example, this might be used to create pages that include geographic coordinates from the GeoData exstension.</param>
 		public PageCollection(Site site, PageLoadOptions options, PageCreator creator)
 			: base(site)
 		{

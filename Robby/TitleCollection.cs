@@ -412,6 +412,11 @@
 			PageCollection retval;
 			if (!this.Site.AllowEditing)
 			{
+				this.Site.PublishIgnoredEdit(this, new Dictionary<string, object>
+				{
+					[nameof(input)] = input,
+				});
+
 				retval = new PageCollection(this.Site);
 				foreach (var item in this)
 				{

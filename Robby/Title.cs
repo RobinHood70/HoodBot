@@ -214,6 +214,10 @@
 			ThrowNull(reason, nameof(reason));
 			if (!this.Site.AllowEditing)
 			{
+				this.Site.PublishIgnoredEdit(this, new Dictionary<string, object>
+				{
+					[nameof(reason)] = reason,
+				});
 				return true;
 			}
 
@@ -254,6 +258,15 @@
 			ThrowNull(reason, nameof(reason));
 			if (!this.Site.AllowEditing)
 			{
+				this.Site.PublishIgnoredEdit(this, new Dictionary<string, object>
+				{
+					[nameof(to)] = to,
+					[nameof(reason)] = reason,
+					[nameof(moveTalk)] = moveTalk,
+					[nameof(moveSubpages)] = moveSubpages,
+					[nameof(suppressRedirect)] = suppressRedirect,
+				});
+
 				return new Dictionary<string, string> { [this.FullPageName] = to };
 			}
 
@@ -290,7 +303,7 @@
 				}
 			}
 
-			this.Rename(to);
+			this.SetNames(to);
 			return retval;
 		}
 
@@ -344,17 +357,9 @@
 			return this.Protect(reason, protections);
 		}
 
-		/// <summary>Renames the title.</summary>
-		/// <param name="fullName">The full page name to rename to.</param>
-		public void Rename(string fullName)
-		{
-			ThrowNull(fullName, nameof(fullName));
-			this.SetNames(fullName);
-		}
-
 		public bool Unprotect(string reason, bool editUnprotect, bool moveUnprotect)
 		{
-			var protections = new List<ProtectInputItem>(3);
+			var protections = new List<ProtectInputItem>(2);
 			if (editUnprotect)
 			{
 				protections.Add(new ProtectInputItem("edit", ProtectionWord(ProtectionLevel.None)));
@@ -374,6 +379,30 @@
 		/// <summary>Returns a string that represents the current Title.</summary>
 		/// <returns>A string that represents the current object.</returns>
 		public override string ToString() => this.FullPageName;
+		#endregion
+
+		#region Protected Virtual Methods
+
+		/// <summary>Sets the namespace and page name, given a full page name.</summary>
+		/// <param name="fullPageName">The full name.</param>
+		protected virtual void SetNames(string fullPageName)
+		{
+			ThrowNull(fullPageName, nameof(fullPageName));
+			var split = fullPageName.Split(new[] { ':' }, 2);
+			string pageName;
+			if (split.Length == 2 && this.Site.Namespaces.TryGetValue(split[0], out var ns))
+			{
+				pageName = split[1].TrimStart();
+				this.Namespace = ns;
+			}
+			else
+			{
+				pageName = fullPageName;
+				this.Namespace = this.Site.Namespaces[MediaWikiNamespaces.Main];
+			}
+
+			this.PageName = this.Namespace.CaseSensitive ? Normalize(pageName) : Normalize(pageName).UpperFirst();
+		}
 		#endregion
 
 		#region Private Static Methods
@@ -403,6 +432,12 @@
 
 			if (!this.Site.AllowEditing)
 			{
+				this.Site.PublishIgnoredEdit(this, new Dictionary<string, object>
+				{
+					[nameof(reason)] = reason,
+					[nameof(protections)] = protections,
+				});
+
 				return true;
 			}
 
@@ -414,24 +449,6 @@
 			var result = this.Site.AbstractionLayer.Protect(input);
 
 			return result.Protections.Count == protections.Count;
-		}
-
-		private void SetNames(string fullName)
-		{
-			var split = fullName.Split(new[] { ':' }, 2);
-			string pageName;
-			if (split.Length == 2 && this.Site.Namespaces.TryGetValue(split[0], out var ns))
-			{
-				pageName = split[1].TrimStart();
-				this.Namespace = ns;
-			}
-			else
-			{
-				pageName = fullName;
-				this.Namespace = this.Site.Namespaces[MediaWikiNamespaces.Main];
-			}
-
-			this.PageName = this.Namespace.CaseSensitive ? Normalize(pageName) : Normalize(pageName).UpperFirst();
 		}
 		#endregion
 	}

@@ -36,7 +36,8 @@
 		/// <summary>Downloads a file directly to disk instead of returning it as a string.</summary>
 		/// <param name="uri">The URI to download from.</param>
 		/// <param name="fileName">The filename to save to.</param>
-		void DownloadFile(Uri uri, string fileName);
+		/// <returns><c>true</c> if the download succeeded; otherwise <c>false</c>.</returns>
+		bool DownloadFile(Uri uri, string fileName);
 
 		/// <summary>Gets the text of the result returned by the given URI.</summary>
 		/// <param name="uri">The URI to get.</param>

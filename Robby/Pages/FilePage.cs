@@ -49,10 +49,16 @@
 				return;
 			}
 
-			var attributes = File.GetAttributes(fileName);
-			if (attributes.HasFlag(FileAttributes.Directory))
+			try
 			{
-				fileName = Path.Combine(fileName, this.PageName);
+				var attributes = File.GetAttributes(fileName);
+				if (attributes.HasFlag(FileAttributes.Directory))
+				{
+					fileName = Path.Combine(fileName, this.PageName);
+				}
+			}
+			catch (FileNotFoundException)
+			{
 			}
 
 			this.Site.Download(this.fileRevisions[0].Uri.OriginalString, fileName);
