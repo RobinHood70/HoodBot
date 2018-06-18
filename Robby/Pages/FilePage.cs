@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.IO;
 	using RobinHood70.WikiCommon;
 	using WallE.Base;
 	using static WikiCommon.Extensions;
@@ -38,6 +39,24 @@
 		#endregion
 
 		#region Public Methods
+
+		/// <summary>Downloads the file to the specified location.</summary>
+		/// <param name="fileName">Name of the file to download to. This will be overwritten if it exists. If fileName represents a path, the page name will be used as the file name.</param>
+		public void Download(string fileName)
+		{
+			if (this.fileRevisions.Count == 0)
+			{
+				return;
+			}
+
+			var attributes = File.GetAttributes(fileName);
+			if (attributes.HasFlag(FileAttributes.Directory))
+			{
+				fileName = Path.Combine(fileName, this.PageName);
+			}
+
+			this.Site.Download(this.fileRevisions[0].Uri.OriginalString, fileName);
+		}
 
 		/// <summary>Finds all pages the file is used on.</summary>
 		/// <returns>A list of <see cref="T:RobinHood70.Robby.Title"/>s that the file is used on.</returns>
