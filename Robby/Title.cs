@@ -116,10 +116,10 @@
 		public string LabelName => PipeTrick(this.PageName);
 
 		/// <summary>Gets the namespace object for the title.</summary>
-		public Namespace Namespace { get; private set; }
+		public Namespace Namespace { get; protected set; }
 
-		/// <summary>Gets the value corresponding to {{PAGENAME}}.</summary>
-		public string PageName { get; private set; }
+		/// <summary>Gets or sets the value corresponding to {{PAGENAME}}.</summary>
+		public string PageName { get; protected set; }
 
 		/// <summary>Gets the site the title is intended for.</summary>
 		public Site Site { get; }

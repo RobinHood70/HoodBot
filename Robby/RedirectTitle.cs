@@ -16,6 +16,20 @@
 			this.Interwiki = baseItem.Interwiki;
 		}
 
+		/// <summary>Initializes a new instance of the <see cref="RedirectTitle"/> class.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="title">The title to initialize from. It is assumed that the redirect is local, possibly with a fragment; no interwiki parsing is performed.</param>
+		protected internal RedirectTitle(Site site, string title)
+			: base(site, title)
+		{
+			var split = this.PageName.Split(new[] { '#' }, 2);
+			if (split.Length == 2)
+			{
+				this.PageName = split[0];
+				this.Fragment = split[1];
+			}
+		}
+
 		/// <summary>Gets the redirect fragment, if any.</summary>
 		/// <value>The fragment.</value>
 		public string Fragment { get; }
