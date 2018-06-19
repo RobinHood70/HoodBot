@@ -21,7 +21,7 @@
 	#endregion
 
 	/// <summary>Provides a light-weight holder for titles and provides several information and manipulation functions.</summary>
-	public class Title : IWikiTitle, IMessageSource
+	public class Title : IWikiTitle, IEquatable<Title>, IMessageSource
 	{
 		#region Constants
 		// The following is taken from DefaultSettings::$wgLegalTitleChars and always assumes the default setting. I believe this is emitted as part of API:Siteinfo, but I wouldn't trust any kind of automated conversion, so better to just leave it as default, which is what 99.99% of wikis will probably use.
@@ -115,7 +115,7 @@
 		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		public string LabelName => PipeTrick(this.PageName);
 
-		/// <summary>Gets the namespace object for the title.</summary>
+		/// <summary>Gets or sets the namespace object for the title.</summary>
 		public Namespace Namespace { get; protected set; }
 
 		/// <summary>Gets or sets the value corresponding to {{PAGENAME}}.</summary>
@@ -230,7 +230,7 @@
 			return result.LogId > 0;
 		}
 
-		public bool Equals(IWikiTitle other) =>
+		public bool Equals(Title other) =>
 			other == null ? false :
 			this.Namespace.Equals(other.Namespace) && this.PageName.Equals(other.PageName);
 
@@ -385,7 +385,7 @@
 
 		/// <summary>Sets the namespace and page name, given a full page name.</summary>
 		/// <param name="fullPageName">The full name.</param>
-		protected virtual void SetNames(string fullPageName)
+		private void SetNames(string fullPageName)
 		{
 			ThrowNull(fullPageName, nameof(fullPageName));
 			var split = fullPageName.Split(new[] { ':' }, 2);
