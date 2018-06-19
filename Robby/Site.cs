@@ -44,10 +44,11 @@
 		#region Events
 
 		/// <summary>Occurs when an edit is ignored due to the <see cref="AllowEditing"/> flag being false.</summary>
+		/// <remarks>This functions as a message bus, so only the Site object will ever flag an ignored edit. This allows easy logging of all ignored edits.</remarks>
 		public event StrongEventHandler<Site, EditIgnoredEventArgs> EditIgnored;
 
 		/// <summary>Occurs when a warning should be sent to the user.</summary>
-		/// <remarks>This functions as an aggregate event, so only the Site object will ever raise a warning. Warnings should be explicit enough about what occurred to determine any other information required. The true sending object is available as part of the event arguments if needed.</remarks>
+		/// <remarks>This functions as a message bus, so only the Site object will ever raise a warning. Warnings should be explicit enough about what occurred to determine any other information required. The true sending object is available as part of the event arguments, if needed.</remarks>
 		public event StrongEventHandler<Site, WarningEventArgs> WarningOccurred;
 		#endregion
 
@@ -88,16 +89,16 @@
 		/// <value><c>true</c> if the Disambiguator extension is available; otherwise, <c>false</c>.</value>
 		public bool DisambiguatorAvailable { get; private set; }
 
-		/// <summary>Gets a list of current magic words on the site.</summary>
+		/// <summary>Gets a list of current magic words on the wiki.</summary>
 		/// <value>The magic words.</value>
 		public IReadOnlyDictionary<string, MagicWord> MagicWords => this.magicWords;
 
-		/// <summary>Gets the site name.</summary>
-		/// <value>The name of the site.</value>
+		/// <summary>Gets the wiki name.</summary>
+		/// <value>The name of the wiki.</value>
 		public string Name { get; private set; }
 
-		/// <summary>Gets the site namespaces.</summary>
-		/// <value>The site namespaces.</value>
+		/// <summary>Gets the wiki namespaces.</summary>
+		/// <value>the wiki namespaces.</value>
 		public NamespaceCollection Namespaces { get; private set; }
 
 		/// <summary>Gets or sets the page creator.</summary>
@@ -140,7 +141,7 @@
 		/// <remarks><paramref name="resource"/> is not a <see cref="Uri"/> in order to satisfy <see cref="IWikiAbstractionLayer"/>'s agnosticism. In practice, however, it will almost certainly always be one.</remarks>
 		public void Download(string resource, string fileName) => this.Download(new DownloadInput(resource, fileName));
 
-		/// <summary>Downloads the most recent version of a file from the site.</summary>
+		/// <summary>Downloads the most recent version of a file from the wiki.</summary>
 		/// <param name="pageName">Name of the page. You do not have to specify the File namespace, but you may if it's convenient.</param>
 		/// <param name="fileName">Name of the file.</param>
 		public void DownloadFile(string pageName, string fileName)
@@ -152,6 +153,46 @@
 				filePage.Download(fileName);
 			}
 		}
+
+		/// <summary>Gets all active blocks.</summary>
+		/// <returns>All active blocks</returns>
+		public IReadOnlyList<Block> GetBlocks() => this.GetBlocks(new BlocksInput());
+
+		/// <summary>Gets active blocks filtered by the specified set of attributes.</summary>
+		/// <param name="account">Filter account blocks.</param>
+		/// <param name="ip">Filter IP blocks.</param>
+		/// <param name="range">Filter range blocks.</param>
+		/// <param name="temporary">Filter temporary blocks.</param>
+		/// <returns>Active blocks filtered by the specified set of attributes.</returns>
+		/// <remarks>Filters intersect with one another, so <c>account := Filter.Only, temporary := Filter.Only</c> gives all temporary account blocks, while <c>account := Filter.Only, temporary := Filter.Exclude</c> gives all permanent account blocks. Note: there is no checking for nonsensical filters, so filters such as <c>account := Filter.Only, ip := Filter.Only</c> will succeed but won't return any results. By contrast, <c>account := Filter.Exclude, ip := Filter.Exclude</c> returns the same results as <c>range := Filter.Only</c>.</remarks>
+		public IReadOnlyList<Block> GetBlocks(Filter account, Filter ip, Filter range, Filter temporary) => this.GetBlocks(new BlocksInput() { FilterAccount = account, FilterIP = ip, FilterRange = range, FilterTemporary = temporary });
+
+		/// <summary>Gets active blocks filtered by the date when they were placed or last updated.</summary>
+		/// <param name="start">The start date.</param>
+		/// <param name="end">The end date.</param>
+		/// <returns>Active blocks filtered by the date when they were placed or last updated.</returns>
+		public IReadOnlyList<Block> GetBlocks(DateTime start, DateTime end) => this.GetBlocks(new BlocksInput() { Start = start, End = end });
+
+		/// <summary>Gets active blocks filtered by the date when they were placed or last update and the specified set of attributes.</summary>
+		/// <param name="start">The start date.</param>
+		/// <param name="end">The end date.</param>
+		/// <param name="account">Filter account blocks.</param>
+		/// <param name="ip">Filter IP blocks.</param>
+		/// <param name="range">Filter range blocks.</param>
+		/// <param name="temporary">Filter temporary blocks.</param>
+		/// <returns>Active blocks filtered by the date when they were placed or last update and the specified set of attributes.</returns>
+		/// <remarks>Filters intersect with one another, so <c>account := Filter.Only, temporary := Filter.Only</c> gives all temporary account blocks, while <c>account := Filter.Only, temporary := Filter.Exclude</c> gives all permanent account blocks. Note: there is no checking for nonsensical filters, so filters such as <c>account := Filter.Only, ip := Filter.Only</c> will succeed but won't return any results. By contrast, <c>account := Filter.Exclude, ip := Filter.Exclude</c> returns the same results as <c>range := Filter.Only</c>.</remarks>
+		public IReadOnlyList<Block> GetBlocks(DateTime start, DateTime end, Filter account, Filter ip, Filter range, Filter temporary) => this.GetBlocks(new BlocksInput() { Start = start, End = end, FilterAccount = account, FilterIP = ip, FilterRange = range, FilterTemporary = temporary });
+
+		/// <summary>Gets active blocks for the specified set of users.</summary>
+		/// <param name="users">The users.</param>
+		/// <returns>Active blocks for the specified set of users.</returns>
+		public IReadOnlyList<Block> GetBlocks(IEnumerable<string> users) => this.GetBlocks(new BlocksInput(users));
+
+		/// <summary>Gets active blocks for the specified IP address.</summary>
+		/// <param name="ip">The IP address.</param>
+		/// <returns>Active blocks for the specified IP address.</returns>
+		public IReadOnlyList<Block> GetBlocks(IPAddress ip) => this.GetBlocks(new BlocksInput(ip));
 
 		/// <summary>Gets a message from MediaWiki space.</summary>
 		/// <param name="message">The message.</param>
@@ -172,8 +213,22 @@
 		/// <summary>Gets multiple messages from MediaWiki space.</summary>
 		/// <param name="messages">The messages.</param>
 		/// <param name="arguments">Optional arguments to substitute into the messages.</param>
-		/// <returns>The text of the message.</returns>
+		/// <returns>A read-only dictionary of the specified arguments with their associated Message objects.</returns>
 		public IReadOnlyDictionary<string, Message> GetMessages(IEnumerable<string> messages, params string[] arguments) => this.GetMessages(messages, arguments as IEnumerable<string>);
+
+		/// <summary>Gets multiple messages from MediaWiki space.</summary>
+		/// <param name="messages">The messages.</param>
+		/// <param name="arguments">Optional arguments to substitute into the messages.</param>
+		/// <returns>A read-only dictionary of the specified arguments with their associated Message objects.</returns>
+		public IReadOnlyDictionary<string, Message> GetMessages(IEnumerable<string> messages, IEnumerable<string> arguments) => this.GetMessages(new AllMessagesInput
+		{
+			Messages = messages,
+			Arguments = arguments,
+		});
+
+		/// <summary>Gets all page property names in use on the wiki.</summary>
+		/// <returns>All page property names on the wiki.</returns>
+		public IReadOnlyList<string> GetPagePropertyNames() => this.AbstractionLayer.PagePropertyNames(new PagePropertyNamesInput());
 
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="pageName">Name of the page.</param>
@@ -204,280 +259,89 @@
 		/// <summary>Gets multiple messages from MediaWiki space with any magic words and the like parsed into text.</summary>
 		/// <param name="messages">The messages.</param>
 		/// <param name="arguments">Optional arguments to substitute into the message.</param>
-		/// <returns>The text of the message.</returns>
+		/// <returns>A read-only dictionary of the specified arguments with their associated Message objects.</returns>
 		public IReadOnlyDictionary<string, Message> GetParsedMessages(IEnumerable<string> messages, IEnumerable<string> arguments) => this.GetParsedMessages(messages, arguments, null);
 
-		/// <summary>Gets the recent changes.</summary>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public IReadOnlyList<RecentChange> GetRecentChanges() => this.GetRecentChanges(new RecentChangesOptions());
-
-		/// <summary>Gets the recent changes.</summary>
-		/// <param name="namespaces">The namespaces.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public IReadOnlyList<RecentChange> GetRecentChanges(IEnumerable<int> namespaces) => this.GetRecentChanges(new RecentChangesOptions() { Namespaces = namespaces });
-
-		/// <summary>Gets the recent changes.</summary>
-		/// <param name="tag">The tag.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public IReadOnlyList<RecentChange> GetRecentChanges(string tag) => this.GetRecentChanges(new RecentChangesOptions() { Tag = tag });
-
-		/// <summary>Gets the recent changes.</summary>
-		/// <param name="types">The types.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesOptions() { Types = types });
-
-		/// <summary>Gets the recent changes.</summary>
-		/// <param name="anonymous">The anonymous.</param>
-		/// <param name="bots">The bots.</param>
-		/// <param name="minor">The minor.</param>
-		/// <param name="patrolled">The patrolled.</param>
-		/// <param name="redirects">The redirects.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public IReadOnlyList<RecentChange> GetRecentChanges(Filter anonymous, Filter bots, Filter minor, Filter patrolled, Filter redirects) => this.GetRecentChanges(new RecentChangesOptions() { Anonymous = anonymous, Bots = bots, Minor = minor, Patrolled = patrolled, Redirects = redirects });
-
-		/// <summary>Gets the recent changes.</summary>
-		/// <param name="anonymous">The anonymous.</param>
-		/// <param name="bots">The bots.</param>
-		/// <param name="minor">The minor.</param>
-		/// <param name="patrolled">The patrolled.</param>
-		/// <param name="redirects">The redirects.</param>
-		/// <param name="types">The types.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public IReadOnlyList<RecentChange> GetRecentChanges(Filter anonymous, Filter bots, Filter minor, Filter patrolled, Filter redirects, RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesOptions() { Anonymous = anonymous, Bots = bots, Minor = minor, Patrolled = patrolled, Redirects = redirects, Types = types });
-
-		/// <summary>Gets the recent changes.</summary>
-		/// <param name="start">The start.</param>
-		/// <param name="end">The end.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime? start, DateTime? end) => this.GetRecentChanges(new RecentChangesOptions() { Start = start, End = end });
-
-		/// <summary>Gets the recent changes.</summary>
-		/// <param name="start">The start.</param>
-		/// <param name="end">The end.</param>
-		/// <param name="anonymous">The anonymous.</param>
-		/// <param name="bots">The bots.</param>
-		/// <param name="minor">The minor.</param>
-		/// <param name="patrolled">The patrolled.</param>
-		/// <param name="redirects">The redirects.</param>
-		/// <param name="types">The types.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime? start, DateTime? end, Filter anonymous, Filter bots, Filter minor, Filter patrolled, Filter redirects, RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesOptions() { Start = start, End = end, Anonymous = anonymous, Bots = bots, Minor = minor, Patrolled = patrolled, Redirects = redirects, Types = types });
-
-		/// <summary>Gets the recent changes.</summary>
-		/// <param name="start">The start.</param>
-		/// <param name="newer">if set to <c>true</c> [newer].</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime start, bool newer) => this.GetRecentChanges(start, newer, 0);
-
-		/// <summary>Gets the recent changes.</summary>
-		/// <param name="start">The start.</param>
-		/// <param name="newer">if set to <c>true</c> [newer].</param>
-		/// <param name="count">The count.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime start, bool newer, int count) => this.GetRecentChanges(new RecentChangesOptions() { Start = start, Newer = newer, Count = count });
-
-		/// <summary>Gets the recent changes.</summary>
-		/// <param name="user">The user.</param>
-		/// <param name="exclude">if set to <c>true</c> [exclude].</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public IReadOnlyList<RecentChange> GetRecentChanges(string user, bool exclude) => this.GetRecentChanges(new RecentChangesOptions() { User = user, ExcludeUser = exclude });
-
-		/// <summary>Gets the user information.</summary>
-		/// <param name="users">The users.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public IReadOnlyList<User> GetUserInformation(params string[] users) => this.GetUserInformation(users as IEnumerable<string>);
-
-		/// <summary>Gets the users in groups.</summary>
-		/// <param name="onlyActiveUsers">if set to <c>true</c> [only active users].</param>
-		/// <param name="onlyUsersWithEdits">if set to <c>true</c> [only users with edits].</param>
-		/// <param name="groups">The groups.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public IReadOnlyList<string> GetUsersInGroups(bool onlyActiveUsers, bool onlyUsersWithEdits, params string[] groups) => this.GetUsersInGroups(onlyActiveUsers, onlyUsersWithEdits, groups as IEnumerable<string>);
-
-		/// <summary>Gets the users with rights.</summary>
-		/// <param name="onlyActiveUsers">if set to <c>true</c> [only active users].</param>
-		/// <param name="onlyUsersWithEdits">if set to <c>true</c> [only users with edits].</param>
-		/// <param name="rights">The rights.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public IReadOnlyList<string> GetUsersWithRights(bool onlyActiveUsers, bool onlyUsersWithEdits, params string[] rights) => this.GetUsersWithRights(onlyActiveUsers, onlyUsersWithEdits, rights as IEnumerable<string>);
-
-		/// <summary>Logins the specified user name.</summary>
-		/// <param name="userName">Name of the user. This can be null if you wish to edit anonymously.</param>
-		/// <param name="password">The password.</param>
-		public void Login(string userName, string password) => this.Login(userName, password, null);
-
-		/// <summary>Namespaces from name.</summary>
-		/// <param name="fullName">The full name.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public Namespace NamespaceFromName(string fullName)
-		{
-			if (fullName != null)
-			{
-				var split = fullName.Split(new[] { ':' }, 2);
-				if (split.Length == 2 && this.Namespaces.TryGetValue(split[0], out var ns))
-				{
-					return ns;
-				}
-			}
-
-			return this.Namespaces[MediaWikiNamespaces.Main];
-		}
-
-		/// <summary>Upload a file to the wiki.</summary>
-		/// <param name="fileName">The full path and filename of the file to upload.</param>
-		/// <param name="editSummary">The edit summary for the upload.</param>
-		/// <remarks>The destination filename will be the same as the local filename.</remarks>
-		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
-		public void Upload(string fileName, string editSummary) => this.Upload(fileName, null, editSummary, null);
-
-		/// <summary>Upload a file to the wiki.</summary>
-		/// <param name="fileName">The full path and filename of the file to upload.</param>
-		/// <param name="destinationName">The bare name (i.e., do not include "File:") of the file to upload to on the wiki. Set to null to use the filename from the <paramref name="fileName" /> parameter.</param>
-		/// <param name="editSummary">The edit summary for the upload.</param>
-		/// <remarks>The destination filename will be the same as the local filename.</remarks>
-		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
-		public void Upload(string fileName, string destinationName, string editSummary) => this.Upload(fileName, destinationName, editSummary, null);
-		#endregion
-
-		#region Public Virtual Methods
-
-		/// <summary>Clears the message.</summary>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public virtual bool ClearMessage()
-		{
-			if (!this.AllowEditing)
-			{
-				this.PublishIgnoredEdit(this, null);
-				return true;
-			}
-
-			return this.AbstractionLayer.ClearHasMessage();
-		}
-
-		/// <summary>Gets the article path.</summary>
-		/// <param name="articleName">Name of the article.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public virtual Uri GetArticlePath(string articleName)
-		{
-			// Could be done as a one-liner, but split out for easier maintenance and debugging.
-			if (string.IsNullOrWhiteSpace(articleName))
-			{
-				articleName = string.Empty;
-			}
-			else
-			{
-				articleName = articleName.Replace(' ', '_');
-				articleName = WebUtility.UrlEncode(articleName);
-			}
-
-			return new Uri(this.articlePath.Replace("$1", articleName).TrimEnd('/'));
-		}
-
-		/// <summary>Gets the blocks.</summary>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public virtual IReadOnlyList<Block> GetBlocks() => this.GetBlocks(new BlocksInput() { Properties = BlocksProperties.All });
-
-		/// <summary>Gets the blocks.</summary>
-		/// <param name="filterAccount">The filter account.</param>
-		/// <param name="filterIP">The filter ip.</param>
-		/// <param name="filterRange">The filter range.</param>
-		/// <param name="filterTemporary">The filter temporary.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public virtual IReadOnlyList<Block> GetBlocks(Filter filterAccount, Filter filterIP, Filter filterRange, Filter filterTemporary) => this.GetBlocks(new BlocksInput() { FilterAccount = filterAccount, FilterIP = filterIP, FilterRange = filterRange, FilterTemporary = filterTemporary, Properties = BlocksProperties.All });
-
-		/// <summary>Gets the blocks.</summary>
-		/// <param name="start">The start.</param>
-		/// <param name="end">The end.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public virtual IReadOnlyList<Block> GetBlocks(DateTime start, DateTime end) => this.GetBlocks(new BlocksInput() { Start = start, End = end, Properties = BlocksProperties.All });
-
-		/// <summary>Gets the blocks.</summary>
-		/// <param name="start">The start.</param>
-		/// <param name="end">The end.</param>
-		/// <param name="filterAccount">The filter account.</param>
-		/// <param name="filterIP">The filter ip.</param>
-		/// <param name="filterRange">The filter range.</param>
-		/// <param name="filterTemporary">The filter temporary.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public virtual IReadOnlyList<Block> GetBlocks(DateTime start, DateTime end, Filter filterAccount, Filter filterIP, Filter filterRange, Filter filterTemporary) => this.GetBlocks(new BlocksInput() { Start = start, End = end, FilterAccount = filterAccount, FilterIP = filterIP, FilterRange = filterRange, FilterTemporary = filterTemporary, Properties = BlocksProperties.All });
-
-		/// <summary>Gets the blocks.</summary>
-		/// <param name="users">The users.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public virtual IReadOnlyList<Block> GetBlocks(IEnumerable<string> users) => this.GetBlocks(new BlocksInput(users) { Properties = BlocksProperties.All });
-
-		/// <summary>Gets the blocks.</summary>
-		/// <param name="ip">The ip.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public virtual IReadOnlyList<Block> GetBlocks(IPAddress ip) => this.GetBlocks(new BlocksInput(ip) { Properties = BlocksProperties.All });
-
-		/// <summary>Gets multiple messages from MediaWiki space.</summary>
+		/// <summary>Gets multiple messages from MediaWiki space with any magic words and the like parsed into text.</summary>
 		/// <param name="messages">The messages.</param>
-		/// <param name="arguments">Optional arguments to substitute into the messages.</param>
-		/// <returns>The text of the message.</returns>
-		public virtual IReadOnlyDictionary<string, Message> GetMessages(IEnumerable<string> messages, IEnumerable<string> arguments) => this.GetMessages(new AllMessagesInput
+		/// <param name="arguments">Optional arguments to substitute into the message.</param>
+		/// <param name="title">The title to use for parsing.</param>
+		/// <returns>A read-only dictionary of the specified arguments with their associated Message objects.</returns>
+		public IReadOnlyDictionary<string, Message> GetParsedMessages(IEnumerable<string> messages, IEnumerable<string> arguments, Title title) => this.GetMessages(new AllMessagesInput
 		{
 			Messages = messages,
-			Arguments = arguments,
-		});
-
-		/// <summary>Pages the property names.</summary>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public virtual IReadOnlyList<string> PagePropertyNames() => this.AbstractionLayer.PagePropertyNames(new PagePropertyNamesInput());
-
-		/// <summary>Gets the parsed messages.</summary>
-		/// <param name="msgs">The MSGS.</param>
-		/// <param name="arguments">The arguments.</param>
-		/// <param name="title">The title.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public virtual IReadOnlyDictionary<string, Message> GetParsedMessages(IEnumerable<string> msgs, IEnumerable<string> arguments, Title title) => this.GetMessages(new AllMessagesInput
-		{
-			Messages = msgs,
 			Arguments = arguments,
 			EnableParser = true,
 			EnableParserTitle = title?.FullPageName,
 		});
 
-		/// <summary>Gets the recent changes.</summary>
-		/// <param name="options">The options.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
+		/// <summary>Gets all recent changes.</summary>
+		/// <returns>A read-only list of all recent changes.</returns>
+		public IReadOnlyList<RecentChange> GetRecentChanges() => this.GetRecentChanges(new RecentChangesOptions());
+
+		/// <summary>Gets recent changes within the specified namespaces.</summary>
+		/// <param name="namespaces">The namespaces.</param>
+		/// <returns>A read-only list of recent changes within the specified namespaces.</returns>
+		public IReadOnlyList<RecentChange> GetRecentChanges(IEnumerable<int> namespaces) => this.GetRecentChanges(new RecentChangesOptions() { Namespaces = namespaces });
+
+		/// <summary>Gets recent changes with the specified tag.</summary>
+		/// <param name="tag">The tag.</param>
+		/// <returns>A read-only list of recent changes with the specified tag.</returns>
+		public IReadOnlyList<RecentChange> GetRecentChanges(string tag) => this.GetRecentChanges(new RecentChangesOptions() { Tag = tag });
+
+		/// <summary>Gets recent changes of the specified types.</summary>
+		/// <param name="types">The types to return.</param>
+		/// <returns>A read-only list of recent changes of the specified types.</returns>
+		public IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesOptions() { Types = types });
+
+		/// <summary>Gets recent changes filtered by a set of attributes.</summary>
+		/// <param name="anonymous">Filter anonymous edits.</param>
+		/// <param name="bots">Filter bot edits.</param>
+		/// <param name="minor">Filter minor edits.</param>
+		/// <param name="patrolled">Filter patrolled edits.</param>
+		/// <param name="redirects">Filter redirects.</param>
+		/// <returns>A read-only list of recent changes with the specified attributes.</returns>
+		/// <remarks>Filters intersect with one another, so <c>bots := Filter.Only, minor := Filter.Only</c> gives all minor bot edits, while <c>bots := Filter.Only, minor := Filter.Exclude</c> gives all bot edits which are <em>not</em> minor. Note: there is no checking for nonsensical filters. On most wikis, for example, anonymous minor edits are oxymoronic and will produce no results, but since configuration changes or extensions might allow this combination, the request will be sent to the wiki regardless.</remarks>
+		public IReadOnlyList<RecentChange> GetRecentChanges(Filter anonymous, Filter bots, Filter minor, Filter patrolled, Filter redirects) => this.GetRecentChanges(new RecentChangesOptions() { Anonymous = anonymous, Bots = bots, Minor = minor, Patrolled = patrolled, Redirects = redirects });
+
+		/// <summary>Gets recent changes between two dates.</summary>
+		/// <param name="start">The start date.</param>
+		/// <param name="end">The end date.</param>
+		/// <returns>A read-only list of recent changes between the specified dates.</returns>
+		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime start, DateTime end) => this.GetRecentChanges(new RecentChangesOptions() { Start = start, End = end });
+
+		/// <summary>Gets recent changes before or after the specified date.</summary>
+		/// <param name="start">The start date.</param>
+		/// <param name="newer">if set to <c>true</c>, returns changes from the specified date and newer; otherwise, it returns changes from the specified date and older.</param>
+		/// <returns>A read-only list of recent changes before or after the specified date.</returns>
+		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime start, bool newer) => this.GetRecentChanges(start, newer, 0);
+
+		/// <summary>Gets the specified number of recent changes before or after the specified date.</summary>
+		/// <param name="start">The start date.</param>
+		/// <param name="newer">if set to <c>true</c>, returns changes from the specified date and newer; otherwise, it returns changes from the specified date and older.</param>
+		/// <param name="count">The number of recent changes to get.</param>
+		/// <returns>A read-only list of recent changes before or after the specified date.</returns>
+		public IReadOnlyList<RecentChange> GetRecentChanges(DateTime start, bool newer, int count) => this.GetRecentChanges(new RecentChangesOptions() { Start = start, Newer = newer, Count = count });
+
+		/// <summary>Gets recent changes from or excluding the specified user.</summary>
+		/// <param name="user">The user.</param>
+		/// <param name="exclude">if set to <c>true</c>, get all recent changes <em>except</em> those from the specified user.</param>
+		/// <returns>A read-only list of recent changes from or excluding the specified user.</returns>
+		public IReadOnlyList<RecentChange> GetRecentChanges(string user, bool exclude) => this.GetRecentChanges(new RecentChangesOptions() { User = user, ExcludeUser = exclude });
+
+		/// <summary>Gets recent changes according to a customized set of filter options.</summary>
+		/// <param name="options">The filter options to apply.</param>
+		/// <returns>A read-only list of recent changes that conform to the options specified.</returns>
 		public virtual IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesOptions options)
 		{
 			ThrowNull(options, nameof(options));
 			return this.GetRecentChanges(options.ToWallEInput);
 		}
 
-		/// <summary>Gets the redirect target.</summary>
-		/// <param name="text">The text.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public virtual Title GetRedirectTarget(string text)
+		/// <summary>Gets the redirect target from the page text.</summary>
+		/// <param name="text">The text to parse.</param>
+		/// <returns>A <see cref="RedirectTitle"/> with the parsed redirect.</returns>
+		public virtual RedirectTitle GetRedirectFromText(string text)
 		{
 			if (text != null)
 			{
@@ -494,125 +358,128 @@
 				}
 
 				// Regex originally taken from WikitextContent.php --> '!^\s*:?\s*\[{2}(.*?)(?:\|.*?)?\]{2}\s*!'
-				this.redirectTargetFinder = new Regex("^(" + string.Join("|", list) + @")\s*:?\s*\[{2}(?<target>.*?)(\|.*?)?\]{2}", redirect.CaseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
+				this.redirectTargetFinder = new Regex("^(" + string.Join("|", list) + @")\s*:?\s*\[\[(?<target>.*?)(\|.*?)?\]\]", redirect.CaseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
 			}
 
 			var target = this.redirectTargetFinder.Match(text).Groups["target"];
-			return target.Success ? new Title(this, target.Value) : null;
+			return target.Success ? new RedirectTitle(this, target.Value) : null;
 		}
 
-		/// <summary>Gets the user information.</summary>
+		/// <summary>Gets public information about the specified users.</summary>
 		/// <param name="users">The users.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public virtual IReadOnlyList<User> GetUserInformation(IEnumerable<string> users)
-		{
-			var input = new UsersInput(users)
-			{
-				Properties = UsersProperties.All
-			};
-			var result = this.AbstractionLayer.Users(input);
-			var retval = new List<User>(result.Count);
-			foreach (var item in result)
-			{
-				var user = new User(this, item);
-				retval.Add(user);
-			}
+		/// <returns>A list of <see cref="User"/> objects for the specified users.</returns>
+		public IReadOnlyList<User> GetUserInformation(params string[] users) => this.GetUserInformation(users as IEnumerable<string>);
 
-			return retval.AsReadOnly();
-		}
+		/// <summary>Gets public information about the specified users.</summary>
+		/// <param name="users">The users.</param>
+		/// <returns>A list of <see cref="User"/> objects for the specified users.</returns>
+		public IReadOnlyList<User> GetUserInformation(IEnumerable<string> users) => this.GetUserInformation(new UsersInput(users) { Properties = UsersProperties.All });
 
-		/// <summary>Gets the users.</summary>
-		/// <param name="onlyActiveUsers">if set to <c>true</c> [only active users].</param>
-		/// <param name="onlyUsersWithEdits">if set to <c>true</c> [only users with edits].</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public virtual IReadOnlyList<string> GetUsers(bool onlyActiveUsers, bool onlyUsersWithEdits) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits });
+		/// <summary>Gets all users on the wiki.</summary>
+		/// <param name="onlyActiveUsers">if set to <c>true</c>, only active users will be returned.</param>
+		/// <param name="onlyUsersWithEdits">if set to <c>true</c>, only users with edits will be returned.</param>
+		/// <returns>A list of users based on the specified criteria.</returns>
+		public IReadOnlyList<User> GetUsers(bool onlyActiveUsers, bool onlyUsersWithEdits) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits });
 
-		/// <summary>Gets the users.</summary>
-		/// <param name="onlyActiveUsers">if set to <c>true</c> [only active users].</param>
-		/// <param name="onlyUsersWithEdits">if set to <c>true</c> [only users with edits].</param>
+		/// <summary>Gets users whose names start with the specified prefix.</summary>
+		/// <param name="onlyActiveUsers">if set to <c>true</c>, only active users will be returned.</param>
+		/// <param name="onlyUsersWithEdits">if set to <c>true</c>, only users with edits will be returned.</param>
 		/// <param name="prefix">The prefix.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public virtual IReadOnlyList<string> GetUsers(bool onlyActiveUsers, bool onlyUsersWithEdits, string prefix) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Prefix = prefix });
+		/// <returns>A list of users based on the specified criteria.</returns>
+		public IReadOnlyList<User> GetUsers(bool onlyActiveUsers, bool onlyUsersWithEdits, string prefix) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Prefix = prefix });
 
-		/// <summary>Gets the users.</summary>
-		/// <param name="onlyActiveUsers">if set to <c>true</c> [only active users].</param>
-		/// <param name="onlyUsersWithEdits">if set to <c>true</c> [only users with edits].</param>
-		/// <param name="from">From.</param>
-		/// <param name="to">To.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public virtual IReadOnlyList<string> GetUsers(bool onlyActiveUsers, bool onlyUsersWithEdits, string from, string to) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, From = from, To = to });
+		/// <summary>Gets users whose names fall within the specified range.</summary>
+		/// <param name="onlyActiveUsers">if set to <c>true</c>, only active users will be returned.</param>
+		/// <param name="onlyUsersWithEdits">if set to <c>true</c>, only users with edits will be returned.</param>
+		/// <param name="from">The name to start at (inclusive). The name specified does not have to exist.</param>
+		/// <param name="to">The name to stop at (inclusive). The name specified does not have to exist.</param>
+		/// <returns>A list of users based on the specified criteria.</returns>
+		public IReadOnlyList<User> GetUsers(bool onlyActiveUsers, bool onlyUsersWithEdits, string from, string to) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, From = from, To = to });
 
-		/// <summary>Gets the users in groups.</summary>
-		/// <param name="onlyActiveUsers">if set to <c>true</c> [only active users].</param>
-		/// <param name="onlyUsersWithEdits">if set to <c>true</c> [only users with edits].</param>
+		/// <summary>Gets the users that belong to the specified groups.</summary>
+		/// <param name="onlyActiveUsers">if set to <c>true</c>, only active users will be retrieved.</param>
+		/// <param name="onlyUsersWithEdits">if set to <c>true</c>, only users with edits will be retrieved.</param>
 		/// <param name="groups">The groups.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public virtual IReadOnlyList<string> GetUsersInGroups(bool onlyActiveUsers, bool onlyUsersWithEdits, IEnumerable<string> groups) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Groups = groups });
+		/// <returns>A list of <see cref="User"/> objects for users in the specified groups.</returns>
+		public IReadOnlyList<User> GetUsersInGroups(bool onlyActiveUsers, bool onlyUsersWithEdits, params string[] groups) => this.GetUsersInGroups(onlyActiveUsers, onlyUsersWithEdits, groups as IEnumerable<string>);
 
-		/// <summary>Gets the users with rights.</summary>
-		/// <param name="onlyActiveUsers">if set to <c>true</c> [only active users].</param>
-		/// <param name="onlyUsersWithEdits">if set to <c>true</c> [only users with edits].</param>
+		/// <summary>Gets users that belong to the specified groups.</summary>
+		/// <param name="onlyActiveUsers">if set to <c>true</c>, only active users will be retrieved.</param>
+		/// <param name="onlyUsersWithEdits">if set to <c>true</c>, only users with edits will be retrieved.</param>
+		/// <param name="groups">The groups.</param>
+		/// <returns>A list of <see cref="User"/> objects for users in the specified groups.</returns>
+		public IReadOnlyList<User> GetUsersInGroups(bool onlyActiveUsers, bool onlyUsersWithEdits, IEnumerable<string> groups) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Groups = groups });
+
+		/// <summary>Gets users that have the specified rights.</summary>
+		/// <param name="onlyActiveUsers">if set to <c>true</c>, only active users will be retrieved.</param>
+		/// <param name="onlyUsersWithEdits">if set to <c>true</c>, only users with edits will be retrieved.</param>
 		/// <param name="rights">The rights.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public virtual IReadOnlyList<string> GetUsersWithRights(bool onlyActiveUsers, bool onlyUsersWithEdits, IEnumerable<string> rights) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Rights = rights });
+		/// <returns>A list of <see cref="User"/> objects for users with the specified rights.</returns>
+		public IReadOnlyList<User> GetUsersWithRights(bool onlyActiveUsers, bool onlyUsersWithEdits, params string[] rights) => this.GetUsersWithRights(onlyActiveUsers, onlyUsersWithEdits, rights as IEnumerable<string>);
 
-		/// <summary>Logs the specified user into the wiki.</summary>
-		/// <param name="userName">Name of the user. May be null.</param>
+		/// <summary>Gets users that have the specified rights.</summary>
+		/// <param name="onlyActiveUsers">if set to <c>true</c>, only active users will be retrieved.</param>
+		/// <param name="onlyUsersWithEdits">if set to <c>true</c>, only users with edits will be retrieved.</param>
+		/// <param name="rights">The rights.</param>
+		/// <returns>A list of <see cref="User"/> objects for users with the specified rights.</returns>
+		public IReadOnlyList<User> GetUsersWithRights(bool onlyActiveUsers, bool onlyUsersWithEdits, IEnumerable<string> rights) => this.GetUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Rights = rights });
+
+		/// <summary>Logs the specified user into the wiki and loads necessary information for proper functioning of the class.</summary>
+		/// <param name="userName">Name of the user. This can be null if you wish to edit anonymously.</param>
+		/// <param name="password">The password.</param>
+		/// <exception cref="UnauthorizedAccessException">Thrown if there was an error logging into the wiki (which typically denotes that the user had the wrong password or does not have permission to log in).</exception>
+		/// <remarks>Even if you wish to edit anonymously, you <em>must</em> still log in by passing <see langword="null" /> for the <paramref name="userName" /> parameter.</remarks>
+		public void Login(string userName, string password) => this.Login(new LoginInput(userName, password));
+
+		/// <summary>Logs the specified user into the wiki and loads necessary information for proper functioning of the class.</summary>
+		/// <param name="userName">Name of the user. This can be null if you wish to edit anonymously.</param>
 		/// <param name="password">The password.</param>
 		/// <param name="domain">The domain.</param>
 		/// <exception cref="UnauthorizedAccessException">Thrown if there was an error logging into the wiki (which typically denotes that the user had the wrong password or does not have permission to log in).</exception>
 		/// <remarks>Even if you wish to edit anonymously, you <em>must</em> still log in by passing <see langword="null" /> for the <paramref name="userName" /> parameter.</remarks>
-		public virtual void Login(string userName, string password, string domain)
+		public void Login(string userName, string password, string domain) => this.Login(new LoginInput(userName, password) { Domain = domain });
+
+		/// <summary>Determine the namespace of the name provided.</summary>
+		/// <param name="fullName">The full page name.</param>
+		/// <returns>The namespace of the name, if found; otherwise, the main namespace.</returns>
+		public Namespace NamespaceFromName(string fullName)
 		{
-			var input = new LoginInput(userName, password) { Domain = domain };
-			var result = this.AbstractionLayer.Login(input);
-			if (userName != null && result.Result != "Success")
+			if (fullName != null)
 			{
-				this.Clear();
-				throw new UnauthorizedAccessException(CurrentCulture(LoginFailed, result.Reason));
+				var split = fullName.Split(new[] { ':' }, 2);
+				if (split.Length == 2 && this.Namespaces.TryGetValue(split[0], out var ns))
+				{
+					return ns;
+				}
 			}
 
-			this.UserName = result.User;
-			this.GetInfo();
+			return this.Namespaces[MediaWikiNamespaces.Main];
 		}
 
-		/// <summary>Logs the user out.</summary>
-		public virtual void Logout()
-		{
-			this.Clear();
-			this.AbstractionLayer.Logout();
-		}
+		/// <summary>Patrols the specified Recent Changes ID.</summary>
+		/// <param name="rcid">The RCID.</param>
+		/// <returns><c>true</c> if the edit was successfully patrolled; otherwise, <c>false</c>.</returns>
+		public bool Patrol(long rcid) => this.Patrol(new PatrolInput(rcid));
 
-		/// <summary>Patrols the specified rcid.</summary>
-		/// <param name="rcid">The rcid.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public virtual bool Patrol(long rcid) => this.Patrol(new PatrolInput(rcid));
+		/// <summary>Patrols the specified revision ID.</summary>
+		/// <param name="revid">The revision ID.</param>
+		/// <returns><c>true</c> if the edit was successfully patrolled; otherwise, <c>false</c>.</returns>
+		public bool PatrolRevision(long revid) => this.Patrol(PatrolInput.FromRevisionId(revid));
 
-		/// <summary>Patrols the revision.</summary>
-		/// <param name="revid">The revid.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
-		public virtual bool PatrolRevision(long revid) => this.Patrol(PatrolInput.FromRevisionId(revid));
+		/// <summary>Upload a file to the wiki.</summary>
+		/// <param name="fileName">The full path and filename of the file to upload.</param>
+		/// <param name="editSummary">The edit summary for the upload.</param>
+		/// <remarks>The destination filename will be the same as the local filename.</remarks>
+		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
+		public void Upload(string fileName, string editSummary) => this.Upload(fileName, null, editSummary, null);
 
-		/// <summary>Can be called any time an edit is deliberately ignored to publish the related event.</summary>
-		/// <param name="sender">The real sender of the event.</param>
-		/// <param name="parameters">The parameters.</param>
-		/// <param name="caller">The caller (populated automatically with caller name).</param>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Does not make sense to do so for CallerMemberName.")]
-		public virtual void PublishIgnoredEdit(object sender, IReadOnlyDictionary<string, object> parameters, [CallerMemberName] string caller = null) => this.EditIgnored.Invoke(this, new EditIgnoredEventArgs(sender, caller, parameters));
-
-		/// <summary>Publishes the warning.</summary>
-		/// <param name="sender">The sender.</param>
-		/// <param name="warning">The warning.</param>
-		/// <autogeneratedoc />
-		public virtual void PublishWarning(IMessageSource sender, string warning) => this.WarningOccurred?.Invoke(this, new WarningEventArgs(sender, warning));
+		/// <summary>Upload a file to the wiki.</summary>
+		/// <param name="fileName">The full path and filename of the file to upload.</param>
+		/// <param name="destinationName">The bare name (i.e., do not include "File:") of the file to upload to on the wiki. Set to null to use the filename from the <paramref name="fileName" /> parameter.</param>
+		/// <param name="editSummary">The edit summary for the upload.</param>
+		/// <remarks>The destination filename will be the same as the local filename.</remarks>
+		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
+		public void Upload(string fileName, string destinationName, string editSummary) => this.Upload(fileName, destinationName, editSummary, null);
 
 		/// <summary>Upload a file to the wiki.</summary>
 		/// <param name="fileName">The full path and filename of the file to upload.</param>
@@ -620,7 +487,7 @@
 		/// <param name="editSummary">The edit summary for the upload.</param>
 		/// <param name="pageText">Full page text for the File page. This should include the license, categories, and anything else required. Set to null to allow the wiki to generate the page text (normally just the <paramref name="editSummary" />).</param>
 		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
-		public virtual void Upload(string fileName, string destinationName, string editSummary, string pageText)
+		public void Upload(string fileName, string destinationName, string editSummary, string pageText)
 		{
 			if (!this.AllowEditing)
 			{
@@ -654,9 +521,63 @@
 					uploadInput.Text = pageText;
 				}
 
-				this.AbstractionLayer.Upload(uploadInput);
+				this.Upload(uploadInput);
 			}
 		}
+		#endregion
+
+		#region Public Virtual Methods
+
+		/// <summary>Clears the bot's "has message" flag.</summary>
+		/// <returns><c>true</c> if the flag was successfully cleared; otherwise, <c>false</c>.</returns>
+		public virtual bool ClearMessage()
+		{
+			if (!this.AllowEditing)
+			{
+				this.PublishIgnoredEdit(this, null);
+				return true;
+			}
+
+			return this.AbstractionLayer.ClearHasMessage();
+		}
+
+		/// <summary>Gets the article path.</summary>
+		/// <param name="articleName">Name of the article.</param>
+		/// <returns>A full Uri to the article.</returns>
+		public virtual Uri GetArticlePath(string articleName)
+		{
+			// Could be done as a one-liner, but split out for easier maintenance and debugging.
+			if (string.IsNullOrWhiteSpace(articleName))
+			{
+				articleName = string.Empty;
+			}
+			else
+			{
+				articleName = articleName.Replace(' ', '_');
+				articleName = WebUtility.UrlEncode(articleName);
+			}
+
+			return new Uri(this.articlePath.Replace("$1", articleName).TrimEnd('/'));
+		}
+
+		/// <summary>Logs the user out.</summary>
+		public virtual void Logout()
+		{
+			this.Clear();
+			this.AbstractionLayer.Logout();
+		}
+
+		/// <summary>Can be called any time an edit is deliberately ignored to publish the related event.</summary>
+		/// <param name="sender">The sending object.</param>
+		/// <param name="parameters">A dictionary of parameters that were sent to the calling method.</param>
+		/// <param name="caller">The calling method (populated automatically with caller name).</param>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Does not make sense to do so for CallerMemberName.")]
+		public virtual void PublishIgnoredEdit(object sender, IReadOnlyDictionary<string, object> parameters, [CallerMemberName] string caller = null) => this.EditIgnored.Invoke(this, new EditIgnoredEventArgs(sender, caller, parameters));
+
+		/// <summary>Publishes a warning.</summary>
+		/// <param name="sender">The sending object.</param>
+		/// <param name="warning">The warning.</param>
+		public virtual void PublishWarning(IMessageSource sender, string warning) => this.WarningOccurred?.Invoke(this, new WarningEventArgs(sender, warning));
 		#endregion
 
 		#region Protected Virtual Methods
@@ -665,8 +586,12 @@
 		/// <param name="input">The input parameters.</param>
 		protected virtual void Download(DownloadInput input) => this.AbstractionLayer.Download(input);
 
+		/// <summary>Gets active blocks as specified by the input parameters.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <returns>A read-only list of <see cref="Block"/> objects, as specified by the input parameters.</returns>
 		protected virtual IReadOnlyList<Block> GetBlocks(BlocksInput input)
 		{
+			input.Properties = BlocksProperties.User | BlocksProperties.By | BlocksProperties.Timestamp | BlocksProperties.Expiry | BlocksProperties.Reason | BlocksProperties.Flags;
 			var result = this.AbstractionLayer.Blocks(input);
 			var retval = new List<Block>(result.Count);
 			foreach (var item in result)
@@ -731,6 +656,9 @@
 			this.DisambiguatorAvailable = this.magicWords.ContainsKey("disambiguation");
 		}
 
+		/// <summary>Gets one or more messages from MediaWiki space.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <returns>A read-only dictionary of message names and their associated <see cref="Message"/> objects, as specified by the input parameters.</returns>
 		protected virtual IReadOnlyDictionary<string, Message> GetMessages(AllMessagesInput input)
 		{
 			var result = this.AbstractionLayer.AllMessages(input);
@@ -743,6 +671,9 @@
 			return retval.AsReadOnly();
 		}
 
+		/// <summary>Gets recent changes as specified by the input parameters.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <returns>A read-only list of <see cref="RecentChange"/> objects, as specified by the input parameters.</returns>
 		protected virtual IReadOnlyList<RecentChange> GetRecentChanges(RecentChangesInput input)
 		{
 			var result = this.AbstractionLayer.RecentChanges(input);
@@ -755,15 +686,34 @@
 			return retval;
 		}
 
-		protected virtual IReadOnlyList<string> GetUsers(AllUsersInput input)
+		/// <summary>Gets user information as specified by the input parameters.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <returns>A read-only list of <see cref="User"/> objects, as specified by the input parameters.</returns>
+		protected virtual IReadOnlyList<User> GetUserInformation(UsersInput input)
+		{
+			var result = this.AbstractionLayer.Users(input);
+			var retval = new List<User>(result.Count);
+			foreach (var item in result)
+			{
+				var user = new User(this, item);
+				retval.Add(user);
+			}
+
+			return retval.AsReadOnly();
+		}
+
+		/// <summary>Gets a list of users on the wiki, as specified by the input parameters.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <returns>A read-only list of <see cref="User"/> objects, as specified by the input parameters.</returns>
+		protected virtual IReadOnlyList<User> GetUsers(AllUsersInput input)
 		{
 			ThrowNull(input, nameof(input));
 			input.Properties = AllUsersProperties.None;
 			var result = this.AbstractionLayer.AllUsers(input);
-			var retval = new List<string>(result.Count);
+			var retval = new List<User>(result.Count);
 			foreach (var item in result)
 			{
-				retval.Add(item.Name);
+				retval.Add(new User(this, item.Name));
 			}
 
 			return retval;
@@ -791,12 +741,27 @@
 			return this.disambiguationTemplates;
 		}
 
-		/// <summary>
-		/// Patrols the specified input.
-		/// </summary>
-		/// <param name="input">The input.</param>
-		/// <returns></returns>
-		/// <autogeneratedoc />
+		/// <summary>Logs the specified user into the wiki and loads necessary information for proper functioning of the class.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <exception cref="UnauthorizedAccessException">Thrown if there was an error logging into the wiki (which typically denotes that the user had the wrong password or does not have permission to log in).</exception>
+		/// <remarks>Even if you wish to edit anonymously, you <em>must</em> still log in by passing <see langword="null" /> for the user name.</remarks>
+		protected virtual void Login(LoginInput input)
+		{
+			var result = this.AbstractionLayer.Login(input);
+			if (input.UserName != null && result.Result != "Success")
+			{
+				this.Clear();
+				throw new UnauthorizedAccessException(CurrentCulture(LoginFailed, result.Reason));
+			}
+
+			this.UserName = result.User;
+			this.GetInfo();
+
+		}
+
+		/// <summary>Patrols the specified Recent Changes ID.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <returns><c>true</c> if the edit was successfully patrolled; otherwise, <c>false</c>.</returns>
 		protected virtual bool Patrol(PatrolInput input)
 		{
 			if (!this.AllowEditing)
@@ -812,6 +777,11 @@
 			var result = this.AbstractionLayer.Patrol(input);
 			return result.Title != null;
 		}
+
+		/// <summary>Uploads a file.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <returns><c>true</c> if the file was successfully uploaded.</returns>
+		protected virtual bool Upload(UploadInput input) => this.AbstractionLayer.Upload(input).Result == "Success";
 		#endregion
 
 		#region Private Methods
@@ -830,7 +800,7 @@
 			this.Version = null;
 		}
 
-		/// <summary>Forwards warning events from the abstraction layer to the site.</summary>
+		/// <summary>Forwards warning events from the abstraction layer to the wiki.</summary>
 		/// <param name="sender">The sending abstraction layer.</param>
 		/// <param name="eventArgs">The event arguments.</param>
 		private void Wiki_WarningOccurred(IWikiAbstractionLayer sender, /* Overlapping type names, so must use full name here */ WallE.Design.WarningEventArgs eventArgs)

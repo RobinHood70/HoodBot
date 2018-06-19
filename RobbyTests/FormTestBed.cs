@@ -368,13 +368,13 @@
 
 		public void RedirectTargetTests()
 		{
-			var target = this.Wiki.GetRedirectTarget("#REDIRECT [[Template:Hello]]");
+			var target = this.Wiki.GetRedirectFromText("#REDIRECT [[Template:Hello]]");
 			this.Assert(target.FullPageName == "Template:Hello", "Incorrect template target.");
 
-			target = this.Wiki.GetRedirectTarget("#WEITERLEITUNG [[Template:Hello|Stupid text]]][[Flower]]");
+			target = this.Wiki.GetRedirectFromText("#WEITERLEITUNG [[Template:Hello|Stupid text]]][[Flower]]");
 			this.Assert(target.FullPageName == "Template:Hello", "Incorrect template target.");
 
-			target = this.Wiki.GetRedirectTarget(" #REDIRECT [[Hello world]]");
+			target = this.Wiki.GetRedirectFromText(" #REDIRECT [[Hello world]]");
 			this.Assert(target != null, "Incorrectly detected a malformed redirect.");
 		}
 
