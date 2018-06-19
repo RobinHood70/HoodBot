@@ -2,6 +2,7 @@
 {
 	using System.Collections.Generic;
 	using WallE.Base;
+	using static WikiCommon.Globals;
 
 	/// <summary>Represents a MediaWiki magic word.</summary>
 	public class MagicWord
@@ -11,6 +12,7 @@
 		protected internal MagicWord(MagicWordsItem word)
 		{
 			// Assumes dictionary will hold Id.
+			ThrowNull(word, nameof(word));
 			this.CaseSensitive = word.CaseSensitive;
 			this.Aliases = new HashSet<string>(word.Aliases);
 		}
