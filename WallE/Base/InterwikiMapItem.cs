@@ -27,11 +27,11 @@ namespace RobinHood70.WallE.Base
 
 		public InterwikiMapFlags Flags { get; set; }
 
+		public string Path { get; set; }
+
 		public string Prefix { get; set; }
 
 		public string SiteName { get; set; }
-
-		public Uri Url { get; set; }
 
 		public string WikiId { get; set; }
 		#endregion
