@@ -30,7 +30,6 @@
 		#region Fields
 		private readonly List<ErrorItem> warnings = new List<ErrorItem>();
 		private string articlePath;
-		private string userTalkSpace;
 		#endregion
 
 		#region Constructors
@@ -441,12 +440,7 @@
 			{
 			}
 
-			if (this.userTalkSpace == null)
-			{
-				this.userTalkSpace = this.Namespaces[(int)DefaultNamespace.UserTalk].Name;
-			}
-
-			var index = this.GetArticlePath(this.userTalkSpace + ":" + this.UserName);
+			var index = this.GetArticlePath(this.Namespaces[MediaWikiNamespaces.UserTalk].Name + ":" + this.UserName);
 			return !string.IsNullOrEmpty(this.Client.Get(new Uri(index)));
 		}
 

@@ -63,7 +63,6 @@
     <Compile Include="Design\WikiTitleComparerNamespacePageName.cs" />
     <Compile Include="Design\IMessageSource.cs" />
     <Compile Include="MagicWord.cs" />
-    <Compile Include="MediaWikiNamespaces.cs" />
     <Compile Include="Namespace.cs" />
     <Compile Include="NamespaceCollection.cs" />
     <Compile Include="Pages\Message.cs" />

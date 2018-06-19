@@ -5,30 +5,6 @@ namespace RobinHood70.WallE.Base
 	using System.Globalization;
 
 	#region Public Enumerations
-	public enum DefaultNamespace
-	{
-		Media = -2,
-		Special,
-		Main,
-		Talk,
-		User,
-		UserTalk,
-		Project,
-		ProjectTalk,
-		File,
-		FileTalk,
-		MediaWiki,
-		MediaWikiTalk,
-		Template,
-		TemplateTalk,
-		Help,
-		HelpTalk,
-		Category,
-		CategoryTalk,
-		Image = File,
-		ImageTalk = FileTalk
-	}
-
 	[Flags]
 	public enum ImageProperties
 	{

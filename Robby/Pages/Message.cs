@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.Robby.Pages
 {
 	using WallE.Base;
+	using WikiCommon;
 	using static WikiCommon.Globals;
 
 	/// <summary>Stores a MediaWiki page along with associated data.</summary>

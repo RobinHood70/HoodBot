@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.Robby
+﻿namespace RobinHood70.WikiCommon
 {
 	/// <summary>This class acts as an Enum, but with no need for casting to and from ints for Namespace IDs. Similar classes can be created for specific wikis, if desired.</summary>
 	public static class MediaWikiNamespaces

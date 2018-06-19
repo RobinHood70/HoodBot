@@ -2,6 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
+	using WikiCommon;
 	using static Properties.Messages;
 	using static WikiCommon.Globals;
 
@@ -14,7 +15,7 @@ namespace RobinHood70.WallE.Base
 
 		public int? Namespace
 		{
-			get => (int?)DefaultNamespace.Category;
+			get => MediaWikiNamespaces.Category;
 			set => throw new InvalidOperationException(CurrentCulture(NotSettable));
 		}
 
