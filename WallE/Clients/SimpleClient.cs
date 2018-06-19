@@ -8,6 +8,7 @@
 	using System.Net.Configuration;
 	using System.Reflection;
 	using System.Runtime.Serialization.Formatters.Binary;
+	using System.Security;
 	using System.Text;
 	using System.Threading;
 	using Design;
@@ -192,7 +193,16 @@
 					File.WriteAllBytes(fileName, retval);
 					return true;
 				}
-				catch
+				catch (IOException)
+				{
+				}
+				catch (UnauthorizedAccessException)
+				{
+				}
+				catch (NotSupportedException)
+				{
+				}
+				catch (SecurityException)
 				{
 				}
 			}
