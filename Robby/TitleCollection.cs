@@ -133,8 +133,8 @@
 
 		/// <summary>Converts MediaWiki messages within the given range to titles based on their modification status and adds them to the collection.</summary>
 		/// <param name="modifiedMessages">Filter for whether the messages have been modified.</param>
-		/// <param name="from">The message to start loading at (inclusive). The message specified does not have to exist.</param>
-		/// <param name="to">The message to stop loading at (inclusive). The category message does not have to exist.</param>
+		/// <param name="from">The message to start at (inclusive). The message specified does not have to exist.</param>
+		/// <param name="to">The message to stop at (inclusive). The message specified does not have to exist.</param>
 		public void AddMessages(Filter modifiedMessages, string from, string to) => this.AddMessages(new AllMessagesInput { FilterModified = modifiedMessages, MessageFrom = from, MessageTo = to });
 
 		/// <summary>Adds all protected titles to the collection.</summary>

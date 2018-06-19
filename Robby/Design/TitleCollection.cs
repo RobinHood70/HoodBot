@@ -168,8 +168,8 @@
 		public void AddCategories(string prefix) => this.AddCategories(new AllCategoriesInput { Prefix = prefix });
 
 		/// <summary>Adds a set of category pages to the collection.</summary>
-		/// <param name="from">The category to start loading at (inclusive). The category specified does not have to exist.</param>
-		/// <param name="to">The category to stop loading at (inclusive). The category specified does not have to exist.</param>
+		/// <param name="from">The category to start at (inclusive). The category specified does not have to exist.</param>
+		/// <param name="to">The category to stop at (inclusive). The category specified does not have to exist.</param>
 		public void AddCategories(string from, string to) => this.AddCategories(new AllCategoriesInput { From = from, To = to });
 
 		/// <summary>Adds category members to the collection, potentially including subcategories and their members.</summary>
@@ -186,7 +186,7 @@
 		/// <summary>Adds category members of the specified type and within the specified range to the collection, potentially including subcategories and their members.</summary>
 		/// <param name="category">The category.</param>
 		/// <param name="categoryMemberTypes">The category member types to load.</param>
-		/// <param name="from">The category member to start from (inclusive). The member specified does not have to exist.</param>
+		/// <param name="from">The category member to start at (inclusive). The member specified does not have to exist.</param>
 		/// <param name="to">The category member to stop at (inclusive). The member specified does not have to exist.</param>
 		/// <param name="loadSubcategories">if set to <c>true</c> recurses through subcategories.</param>
 		/// <remarks>If subcategories are loaded, they will be limited to the <paramref name="categoryMemberTypes"/> requested. However, they will <em>not</em> be limited by the <paramref name="from"/> and <paramref name="to"/> parameters.</remarks>
@@ -208,7 +208,7 @@
 		public void AddFiles(string user) => this.AddFiles(new AllImagesInput { User = user });
 
 		/// <summary>Adds a range of files to the collection.</summary>
-		/// <param name="from">The file name to start from (inclusive).</param>
+		/// <param name="from">The file name to start at (inclusive).</param>
 		/// <param name="to">The file name to end at (inclusive).</param>
 		public void AddFiles(string from, string to) => this.AddFiles(new AllImagesInput { From = from, To = to });
 
@@ -225,7 +225,7 @@
 		public void AddFileUsage(string prefix) => this.AddFileUsage(new AllFileUsagesInput { Prefix = prefix, Unique = true });
 
 		/// <summary>Adds a range of in-use files to the collection.</summary>
-		/// <param name="from">The file name to start from (inclusive).</param>
+		/// <param name="from">The file name to start at (inclusive).</param>
 		/// <param name="to">The file name to end at (inclusive).</param>
 		public void AddFileUsage(string from, string to) => this.AddFileUsage(new AllFileUsagesInput { From = from, To = to, Unique = true });
 
@@ -240,7 +240,7 @@
 
 		/// <summary>Adds pages that link to a given namespace within a given range to the collection.</summary>
 		/// <param name="ns">The namespace.</param>
-		/// <param name="from">The page name to start from (inclusive).</param>
+		/// <param name="from">The page name to start at (inclusive).</param>
 		/// <param name="to">The page name to end at (inclusive).</param>
 		public void AddLinksToNamespace(int ns, string from, string to) => this.AddLinksToNamespace(new AllLinksInput { Namespace = ns, From = from, To = to });
 
@@ -258,7 +258,7 @@
 		/// <summary>Adds pages in the given the namespace to the collection.</summary>
 		/// <param name="ns">The namespace.</param>
 		/// <param name="redirects">Whether or not to include pages that are redirects.</param>
-		/// <param name="from">The page name to start from (inclusive).</param>
+		/// <param name="from">The page name to start at (inclusive).</param>
 		/// <param name="to">The page name to end at (inclusive).</param>
 		public void AddNamespace(int ns, Filter redirects, string from, string to) => this.AddNamespace(new AllPagesInput { FilterRedirects = redirects, From = from, Namespace = ns, To = to });
 
@@ -365,8 +365,8 @@
 
 		/// <summary>Adds redirects to a namespace to the collection.</summary>
 		/// <param name="ns">The namespace.</param>
-		/// <param name="from">The page to start loading at (inclusive). The page specified does not have to exist.</param>
-		/// <param name="to">The page to stop loading at (inclusive). The page specified does not have to exist.</param>
+		/// <param name="from">The page to start at (inclusive). The page specified does not have to exist.</param>
+		/// <param name="to">The page to stop at (inclusive). The page specified does not have to exist.</param>
 		public void AddRedirectsToNamespace(int ns, string from, string to) => this.AddRedirectsToNamespace(new AllRedirectsInput { Namespace = ns, From = from, To = to });
 
 		/// <summary>Adds pages from a range of revisions to the collection.</summary>
