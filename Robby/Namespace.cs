@@ -161,7 +161,7 @@
 		/// <returns><see langword="true" /> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false" />.</returns>
 		public bool Equals(Namespace other) => other == null ? false : this.Site.Equals(other.Site) && this.Id.Equals(other.Id);
 
-		/// <summary>Indicates whether the id of the current object is equal to the given integer.</summary>
+		/// <summary>Indicates whether the ID of the current object is equal to the given integer.</summary>
 		/// <param name="other">An object to compare with this object.</param>
 		/// <returns><see langword="true" /> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false" />.</returns>
 		public bool Equals(int other) => this.Id == other;

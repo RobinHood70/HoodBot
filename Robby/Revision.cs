@@ -13,9 +13,9 @@
 		/// <summary>Initializes a new instance of the <see cref="Revision" /> class.</summary>
 		/// <param name="anonymous">Whether the revision was made by an anonymous user.</param>
 		/// <param name="comment">The revision comment.</param>
-		/// <param name="id">The revision id.</param>
+		/// <param name="id">The revision ID.</param>
 		/// <param name="minor">Whether the revision is minor.</param>
-		/// <param name="parentId">The parent revision id.</param>
+		/// <param name="parentId">The parent revision ID.</param>
 		/// <param name="text">The revision text.</param>
 		/// <param name="timestamp">When the revision was made.</param>
 		/// <param name="user">The user who made the revision.</param>
@@ -42,15 +42,15 @@
 		/// <value>The comment.</value>
 		public string Comment { get; }
 
-		/// <summary>Gets the revision id.</summary>
-		/// <value>The revision id.</value>
+		/// <summary>Gets the revision ID.</summary>
+		/// <value>The revision ID.</value>
 		public long Id { get; }
 
 		/// <summary>Gets a value indicating whether this <see cref="Revision" /> is minor.</summary>
 		/// <value><see langword="true" /> if it's minor; otherwise, <see langword="false" />.</value>
 		public bool Minor { get; }
 
-		/// <summary>Gets the parent (previous) revision id.</summary>
+		/// <summary>Gets the parent (previous) revision ID.</summary>
 		/// <value>The parent identifier.</value>
 		public long ParentId { get; }
 

@@ -96,8 +96,8 @@
 		/// <value>The date to retrieve revisions from.</value>
 		public DateTime? RevisionFrom { get; set; }
 
-		/// <summary>Gets or sets the id to retrieve revisions from.</summary>
-		/// <value>The id to retrieve revisions from.</value>
+		/// <summary>Gets or sets the ID to retrieve revisions from.</summary>
+		/// <value>The ID to retrieve revisions from.</value>
 		public long RevisionFromId { get; set; }
 
 		/// <summary>Gets or sets a value indicating whether to retrieve revisions in ascending order if only a From or To option is provided.</summary>
@@ -108,8 +108,8 @@
 		/// <value>The date to retrieve revisions to.</value>
 		public DateTime? RevisionTo { get; set; }
 
-		/// <summary>Gets or sets the id to retrieve revisions to.</summary>
-		/// <value>The id to retrieve revisions to.</value>
+		/// <summary>Gets or sets the ID to retrieve revisions to.</summary>
+		/// <value>The ID to retrieve revisions to.</value>
 		public long RevisionToId { get; set; }
 		#endregion
 	}

@@ -171,8 +171,8 @@
 		/// <param name="namespaces">Limit the results to these namespaces.</param>
 		public void AddPageTransclusions(IEnumerable<IWikiTitle> titles, IEnumerable<int> namespaces) => this.AddPageTransclusions(new TemplatesInput() { Namespaces = namespaces }, titles);
 
-		/// <summary>Adds pages with the specified revision ids to the collection.</summary>
-		/// <param name="ids">The ids.</param>
+		/// <summary>Adds pages with the specified revision IDs to the collection.</summary>
+		/// <param name="ids">The IDs.</param>
 		// Note that while RevisionsInput() can be used as a generator, I have not implemented it because I can think of no situation in which it would be useful to populate a PageCollection given the existing revisions methods.
 		public void AddRevisionIds(IEnumerable<long> ids) => this.AddRevisionIds(this.LoadOptions, ids);
 
@@ -338,9 +338,9 @@
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
 		protected virtual void AddPageTransclusions(TemplatesInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(input, titles);
 
-		/// <summary>Adds pages to the collection from their revision ids.</summary>
+		/// <summary>Adds pages to the collection from their revision IDs.</summary>
 		/// <param name="options">The page load options.</param>
-		/// <param name="revisionIds">The revision ids.</param>
+		/// <param name="revisionIds">The revision IDs.</param>
 		protected virtual void AddRevisionIds(PageLoadOptions options, IEnumerable<long> revisionIds) => this.LoadPages(options, DefaultPageSetInput.FromRevisionIds(revisionIds));
 
 		/// <summary>Adds pages to the collection from a series of titles.</summary>

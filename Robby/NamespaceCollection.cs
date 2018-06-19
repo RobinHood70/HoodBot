@@ -5,7 +5,7 @@
 	using System.Collections.Generic;
 	using static WikiCommon.Globals;
 
-	/// <summary>Read-only Namespace dictionary that can be referenced by id and all valid names for the namespace.</summary>
+	/// <summary>Read-only Namespace dictionary that can be referenced by ID and all valid names for the namespace.</summary>
 	public class NamespaceCollection : IReadOnlyCollection<Namespace>
 	{
 		#region Constructors
@@ -52,7 +52,7 @@
 
 		#region Protected Properties
 
-		/// <summary>Gets the id lookup dictionary of the collection.</summary>
+		/// <summary>Gets the ID lookup dictionary of the collection.</summary>
 		protected SortedList<int, Namespace> IdsDictionary { get; } = new SortedList<int, Namespace>();
 
 		/// <summary>Gets the name lookup dictionary of the collection.</summary>
@@ -62,7 +62,7 @@
 		#region Public Indexers
 
 		/// <summary>Gets the element with the specified key.</summary>
-		/// <param name="id">The id of the namespace.</param>
+		/// <param name="id">The ID of the namespace.</param>
 		/// <returns>The element with the specified key. If an element with the specified key is not found, an exception is thrown.</returns>
 		/// <exception cref="KeyNotFoundException">An element with the specified key does not exist in the collection.</exception>
 		public Namespace this[int id] => this.IdsDictionary[id];
@@ -79,7 +79,7 @@
 
 		/// <summary>This function can be used to register alternate names that may be useful for coding purposes. It will add the name to its own internal list of names, as well as the namespace's AllNames collection, but not the Aliases collection.</summary>
 		/// <param name="name">The name to be added (e.g., "Main").</param>
-		/// <param name="id">The id of the namespace to associate the name with.</param>
+		/// <param name="id">The ID of the namespace to associate the name with.</param>
 		public void AddToNames(string name, int id) => this.AddToNames(name, this.IdsDictionary[id]);
 
 		/// <summary>This function can be used to register alternate names that may be useful for coding purposes. It will add the name to its own internal list of names, as well as the namespace's AllNames collection, but not the Aliases collection.</summary>

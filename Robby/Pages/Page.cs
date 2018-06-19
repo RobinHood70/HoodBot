@@ -31,7 +31,7 @@
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="Page" /> class based on site, namespace id, and the page name without a namespace.</summary>
+		/// <summary>Initializes a new instance of the <see cref="Page" /> class based on site, namespace ID, and the page name without a namespace.</summary>
 		/// <param name="site">The site the page is from.</param>
 		/// <param name="ns">The namespace to which the page belongs.</param>
 		/// <param name="pageName">The name (only) of the page.</param>

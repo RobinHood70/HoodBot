@@ -172,7 +172,7 @@
     <value>the current username changed unexpectedly</value>
   </data>
   <data name="WatchNotSupported" xml:space="preserve">
-    <value>MediaWiki 1.22 and below support watching titles only. Please do not use a generator, page ids, or revision ids.</value>
+    <value>MediaWiki 1.22 and below support watching titles only. Please do not use a generator, page IDs, or revision IDs.</value>
   </data>
   <data name="CollectionInvalid" xml:space="preserve">
     <value>An item in the collection {0} was null (or whitespace only for strings), or there were no items in the collection.</value>

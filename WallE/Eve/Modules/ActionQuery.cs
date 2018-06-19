@@ -358,8 +358,8 @@ namespace RobinHood70.WallE.Eve.Modules
 				var search = pageName ?? FakeTitleFromId(pageId);
 				if (search == null)
 				{
-					// Some generators can return missing pages with no title (or id?), most commonly when links tables are out of date and need refreshLinks.php run on them. If we get one of these, skip to the next page.
-					// Unsure if page id is also not returned, so switching to a throw for now rather than skipping.
+					// Some generators can return missing pages with no title (or ID?), most commonly when links tables are out of date and need refreshLinks.php run on them. If we get one of these, skip to the next page.
+					// Unsure if page ID is also not returned, so switching to a throw for now rather than skipping.
 					throw new FormatException();
 
 					// return;

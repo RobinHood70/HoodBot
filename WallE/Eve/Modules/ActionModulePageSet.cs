@@ -118,7 +118,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			page.Title = (string)result["title"] ?? FakeTitleFromId(pageId);
 			if (page.Title == null)
 			{
-				// In older versions of MediaWiki, some generators could return missing pages with no title or id, most commonly when links tables were out of date and needed refreshLinks.php run on them. If we get one of these, skip to the next page, there's nothing else we can do.
+				// In older versions of MediaWiki, some generators could return missing pages with no title or ID, most commonly when links tables were out of date and needed refreshLinks.php run on them. If we get one of these, skip to the next page, there's nothing else we can do.
 				return;
 			}
 
