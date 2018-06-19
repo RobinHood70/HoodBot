@@ -3,7 +3,7 @@
 	using System;
 
 	/// <summary>Interface for Title-like objects.</summary>
-	public interface IWikiTitle : IEquatable<IWikiTitle>
+	public interface IWikiTitle
 	{
 		#region Properties
 
