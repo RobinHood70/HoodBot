@@ -11,8 +11,8 @@
 		protected internal BacklinkTitle(Site site, string fullName, Title redirectTitle)
 			: base(site, fullName) => this.RedirectTitle = redirectTitle;
 
-		/// <summary>Gets the redirect this title was redirected through.</summary>
-		/// <value>The redirect this title was redirected through.</value>
+		/// <summary>Gets the title of the redirect page that links to this page.</summary>
+		/// <value>The title of the redirect page that links to this page.</value>
 		public Title RedirectTitle { get; }
 	}
 }
