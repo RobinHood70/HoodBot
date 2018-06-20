@@ -348,6 +348,8 @@
 		protected virtual void LoadPages(PageLoadOptions options, DefaultPageSetInput pageSetInput)
 		{
 			ThrowNull(pageSetInput, nameof(pageSetInput));
+			pageSetInput.ConvertTitles = options.ConvertTitles;
+			pageSetInput.Redirects = options.FollowRedirects;
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, this.PageCreator.GetPropertyInputs(options), this.PageCreator.CreatePageItem);
 			foreach (var item in result)
 			{

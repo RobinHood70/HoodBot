@@ -61,6 +61,16 @@
 		/// <summary>Initializes a new instance of the <see cref="PageLoadOptions"/> class with a custom set of modules.</summary>
 		/// <param name="modules">The modules to load.</param>
 		public PageLoadOptions(PageModules modules) => this.Modules = modules;
+
+		/// <summary>Initializes a new instance of the <see cref="PageLoadOptions"/> class. This is a <em>partial</em> copy constructor which only copies the non-module-related options.</summary>
+		/// <param name="copy">The load options to copy from.</param>
+		/// <param name="newModules">The new set of modules.</param>
+		public PageLoadOptions(PageLoadOptions copy, PageModules newModules)
+			: this(newModules)
+		{
+			this.ConvertTitles = copy.ConvertTitles;
+			this.FollowRedirects = copy.FollowRedirects;
+		}
 		#endregion
 
 		#region Public Static Properties
@@ -80,9 +90,17 @@
 
 		#region Public Properties
 
+		/// <summary>Gets or sets a value indicating whether to convert titles to other language variants when necessary.</summary>
+		/// <value><c>true</c> to convert titles; otherwise, <c>false</c>.</value>
+		public bool ConvertTitles { get; set; }
+
 		/// <summary>Gets or sets the number of File revisions to retrieve.</summary>
 		/// <value>The number of File revisions to be retrieved.</value>
 		public int FileRevisionCount { get; set; }
+
+		/// <summary>Gets or sets a value indicating whether to follow redirects.</summary>
+		/// <value><c>true</c> if redirects should be followed; otherwise, <c>false</c>.</value>
+		public bool FollowRedirects { get; set; }
 
 		/// <summary>Gets the modules to load.</summary>
 		/// <value>The modules to load.</value>
