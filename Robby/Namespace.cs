@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Globalization;
 	using WallE.Base;
+	using WikiCommon;
 	using static WikiCommon.Globals;
 
 	/// <summary>Represents a MediaWiki namespace for a specific site.</summary>
@@ -14,6 +15,8 @@
 		private readonly HashSet<string> allNames;
 		private readonly HashSet<string> addedNames;
 		private readonly HashSet<string> baseNames;
+		private readonly int subjectSpaceId;
+		private readonly int? talkSpaceId;
 		#endregion
 
 		#region Constructors
@@ -22,16 +25,19 @@
 			ThrowNull(site, nameof(site));
 			this.Site = site;
 			this.Id = ns.Id;
-			this.SubjectSpaceId = ns.Id >= 0 ? ns.Id & 0x7ffffffe : ns.Id;
-			this.TalkSpaceId = ns.Id >= 0 ? new int?(ns.Id | 1) : null;
+
+			// We can't actually populate SubjectSpace and TalkSpace here because they may not both be present in Site.Namespaces at this time, so only populate the local variables.
+			this.subjectSpaceId = ns.Id >= MediaWikiNamespaces.Main ? ns.Id & 0x7ffffffe : ns.Id;
+			this.talkSpaceId = ns.Id >= MediaWikiNamespaces.Main ? new int?(ns.Id | 1) : null;
 
 			this.AllowsSubpages = ns.Flags.HasFlag(NamespaceFlags.Subpages);
 			this.CaseSensitive = ns.Flags.HasFlag(NamespaceFlags.CaseSensitive);
-			this.ContentSpace = ns.Flags.HasFlag(NamespaceFlags.ContentSpace);
+			this.IsContentSpace = ns.Flags.HasFlag(NamespaceFlags.ContentSpace);
 
 			this.Name = ns.Name;
 			this.CanonicalName = ns.CanonicalName;
-			this.DecoratedName = ns.Id == 0 ? string.Empty : ns.Name + ':';
+			this.DecoratedName = this.Id == MediaWikiNamespaces.Main ? string.Empty : this.Name + ':';
+			this.LinkName = (this.Id == MediaWikiNamespaces.File || this.Id == MediaWikiNamespaces.Category ? ":" : string.Empty) + this.DecoratedName;
 			this.Aliases = aliases == null ? new List<string>() : new List<string>(aliases);
 
 			this.addedNames = new HashSet<string>(site.EqualityComparerInsensitive);
@@ -63,25 +69,31 @@
 		/// <value><c>true</c> if the first letter of the namespace name is case-sensitive; otherwise, <c>false</c>.</value>
 		public bool CaseSensitive { get; }
 
-		/// <summary>Gets a value indicating whether this namespace is counted as content space.</summary>
-		/// <value><c>true</c> if this namespace is counted as content space; otherwise, <c>false</c>.</value>
-		public bool ContentSpace { get; }
-
-		/// <summary>Gets the decorated name of the namespace.</summary>
-		/// <value>The decorated name of the namespace, which is the primary name with a trailing colon; in Main space, this is an empty string.</value>
-		public string DecoratedName { get; }
+		/// <summary>Gets or sets the decorated name of the namespace.</summary>
+		/// <value>The decorated name of the namespace.</value>
+		/// <remarks>By default, this is the primary name with a trailing colon for most namespaces; in Main space, however, it's an empty string. It is publicly settable for special cases.</remarks>
+		public string DecoratedName { get; set; }
 
 		/// <summary>Gets the MediaWiki ID for the namespace.</summary>
 		/// <value>The MediaWiki ID for the namespace.</value>
 		public int Id { get; }
 
+		/// <summary>Gets a value indicating whether this namespace is counted as content space.</summary>
+		/// <value><c>true</c> if this namespace is counted as content space; otherwise, <c>false</c>.</value>
+		public bool IsContentSpace { get; }
+
 		/// <summary>Gets a value indicating whether this instance is subject space.</summary>
 		/// <value><c>true</c> if this instance is a subject namespace; otherwise, <c>false</c>.</value>
-		public bool IsSubjectSpace => this.Id == this.SubjectSpaceId;
+		public bool IsSubjectSpace => this.Id == this.subjectSpaceId;
 
 		/// <summary>Gets a value indicating whether this instance is talk space.</summary>
 		/// <value><c>true</c> if this instance is talk namespace; otherwise, <c>false</c>.</value>
-		public bool IsTalkSpace => this.Id == this.TalkSpaceId;
+		public bool IsTalkSpace => this.Id == this.talkSpaceId;
+
+		/// <summary>Gets or sets the name to be used in links.</summary>
+		/// <value>The name of the namespace as used in a link.</value>
+		/// <remarks>By default, in Category and File space, a colon will automatically be prepended to skip the magic linking and use normal linking instead. It is left publicly settable for special cases.</remarks>
+		public string LinkName { get; set; }
 
 		/// <summary>Gets the primary name of the namespace.</summary>
 		/// <value>The primary name of the namespace.</value>
@@ -93,11 +105,11 @@
 
 		/// <summary>Gets the MediaWiki ID for the subject space.</summary>
 		/// <value>The MediaWiki ID for the subject space.</value>
-		public int SubjectSpaceId { get; }
+		public Namespace SubjectSpace => this.Site.Namespaces[this.subjectSpaceId];
 
 		/// <summary>Gets the MediaWiki ID for the talk space, if applicable.</summary>
 		/// <value>The MediaWiki ID for the talk space, if applicable; otherwise, <c>null</c>.</value>
-		public int? TalkSpaceId { get; }
+		public Namespace TalkSpace => this.talkSpaceId == null ? null : this.Site.Namespaces[this.talkSpaceId.Value];
 		#endregion
 
 		#region Public Operators

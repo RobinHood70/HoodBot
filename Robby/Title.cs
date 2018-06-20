@@ -128,7 +128,7 @@
 		public Site Site => this.Namespace.Site;
 
 		/// <summary>Gets a Title object for this Title's corresponding subject page. If this Title is a subject page, returns itself.</summary>
-		public Title SubjectPage => this.Namespace.IsSubjectSpace ? this : new Title(this.Site, this.Namespace.SubjectSpaceId, this.PageName);
+		public Title SubjectPage => this.Namespace.IsSubjectSpace ? this : new Title(this.Site, this.Namespace.SubjectSpace.Id, this.PageName);
 
 		/// <summary>Gets the value corresponding to {{SUBPAGENAME}}.</summary>
 		public string SubpageName
@@ -150,9 +150,9 @@
 
 		/// <summary>Gets a Title object for this Title's corresponding subject page. If this Title is a talk page, returns itself. Returns null for pages which have no associated talk page.</summary>
 		public Title TalkPage =>
-			this.Namespace.TalkSpaceId == null ? null
+			this.Namespace.TalkSpace == null ? null
 			: this.Namespace.IsTalkSpace ? this
-			: new Title(this.Site, this.Namespace.TalkSpaceId.Value, this.PageName);
+			: new Title(this.Site, this.Namespace.TalkSpace.Id, this.PageName);
 		#endregion
 
 		#region Public Static Methods
