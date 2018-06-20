@@ -375,9 +375,9 @@ namespace RobinHood70.WallE.Eve.Modules
 						Language = (string)result["language"],
 						LinkText = (string)result["linktext"],
 						SiteName = (string)result["sitename"],
-						Path = (string)result["url"],
+						Url = (string)result["url"],
 						WikiId = (string)result["wikiid"],
-						ApiUrl = (Uri)result["api"],
+						ApiUrl = (string)result["api"],
 					};
 					outputList.Add(item);
 				}

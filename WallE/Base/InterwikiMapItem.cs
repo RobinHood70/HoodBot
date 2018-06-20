@@ -19,7 +19,7 @@ namespace RobinHood70.WallE.Base
 	public class InterwikiMapItem
 	{
 		#region Public Properties
-		public Uri ApiUrl { get; set; }
+		public string ApiUrl { get; set; }
 
 		public string Language { get; set; }
 
@@ -27,11 +27,11 @@ namespace RobinHood70.WallE.Base
 
 		public InterwikiMapFlags Flags { get; set; }
 
-		public string Path { get; set; }
-
 		public string Prefix { get; set; }
 
 		public string SiteName { get; set; }
+
+		public string Url { get; set; }
 
 		public string WikiId { get; set; }
 		#endregion

@@ -239,7 +239,7 @@
 		/// <param name="pageName">The name of the page.</param>
 		/// <returns>An string representing either an absolute or relative URI to the article.</returns>
 		/// <remarks>This does not return a Uri object because the article path may be relative, which is not supported by the C# Uri class. Although this function could certainly be made to provide a fixed Uri, that might not be what the caller wants, so the caller is left to interpret the result value as they wish.</remarks>
-		public string GetArticlePath(string pageName) => pageName == null ? null : this.articlePath.Replace("$1", WebUtility.UrlEncode(pageName.Replace(' ', '_')));
+		public Uri GetArticlePath(string pageName) => pageName == null ? null : new Uri(this.articlePath.Replace("$1", pageName.Replace(' ', '_')));
 
 		/// <summary>Makes the URI secure.</summary>
 		/// <param name="https">If set to <see langword="true" />, forces the URI to be a secure URI (https://); if false, forces it to be insecure (http://).</param>
@@ -269,10 +269,8 @@
 					response = this.Client.Post(request.Uri, result.ContentType, result.Data);
 					break;
 				default:
-					var urib = new UriBuilder(request.Uri)
-					{
-						Query = RequestVisitorUrl.Build(request),
-					};
+					var query = RequestVisitorUrl.Build(request);
+					var urib = new UriBuilder(request.Uri) { Query = query };
 					response = this.Client.Get(urib.Uri);
 					break;
 			}
@@ -441,7 +439,7 @@
 			}
 
 			var index = this.GetArticlePath(this.Namespaces[MediaWikiNamespaces.UserTalk].Name + ":" + this.UserName);
-			return !string.IsNullOrEmpty(this.Client.Get(new Uri(index)));
+			return !string.IsNullOrEmpty(this.Client.Get(index));
 		}
 
 		/// <summary>Compares two revisions or pages using the <a href="https://www.mediawiki.org/wiki/API:Compare">Compare</a> API module.</summary>

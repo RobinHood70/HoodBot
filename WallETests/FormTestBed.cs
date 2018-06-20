@@ -461,8 +461,7 @@
 					throw new InvalidOperationException("Admin login failed!");
 				}
 
-				var path = this.adminWiki.GetArticlePath(string.Empty).TrimEnd('/');
-				this.indexPath = new Uri(path);
+				this.indexPath = this.adminWiki.GetArticlePath(string.Empty);
 
 				this.RunJobs();
 			}
