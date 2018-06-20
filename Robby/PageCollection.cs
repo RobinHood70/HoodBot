@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.Robby
 {
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using Design;
 	using Pages;
 	using WallE.Base;
@@ -13,8 +14,7 @@
 	public class PageCollection : TitleCollection<Page>
 	{
 		#region Fields
-		private readonly Dictionary<string, FullTitle> interwikiTitles = new Dictionary<string, FullTitle>();
-		private readonly Dictionary<string, Title> titleMap = new Dictionary<string, Title>();
+		private readonly Dictionary<string, TitleParts> titleMap = new Dictionary<string, TitleParts>();
 		#endregion
 
 		#region Constructors
@@ -67,11 +67,6 @@
 
 		#region Public Properties
 
-		/// <summary>Gets a dictionary of interwiki titles that could not be handled by the current site.</summary>
-		/// <value>The interwiki titles.</value>
-		/// <remarks>These are excluded from the regular <see cref="TitleMap"/> because they do not correspond to pages on the current site.</remarks>
-		public IReadOnlyDictionary<string, FullTitle> InterwikiTitles => this.interwikiTitles;
-
 		/// <summary>Gets or sets the load options.</summary>
 		/// <value>The load options.</value>
 		public PageLoadOptions LoadOptions { get; set; }
@@ -86,7 +81,7 @@
 		/// <para>The title map allows mapping from the original name you provided for a page to the actual title that was returned. If, for example, you requested "Main Page" and got redirected to "Main page", there would be an entry in the title map indicating that. Not all titles in the title map will necessarily appear in the result set. For example, if you provided an interwiki title, the result set most likely won't include that, but the title map will still include an InterwikiTitle result for it.</para>
 		/// <para>The title map is largely for informational purposes. When accessing items in the collection, it will automatically check the title map and attempt to return the correct result.</para>
 		/// </remarks>
-		public IReadOnlyDictionary<string, Title> TitleMap => this.titleMap;
+		public IReadOnlyDictionary<string, TitleParts> TitleMap => this.titleMap;
 		#endregion
 
 		#region Public Indexers
@@ -199,16 +194,15 @@
 			ThrowNull(titles, nameof(titles));
 			foreach (var title in titles)
 			{
-				var newTitle = new Title(this.Site, title);
-				this.Add(this.PageCreator.CreatePage(this.Site, newTitle.FullPageName));
+				var titleParts = new TitleParts(this.Site, title);
+				this.Add(this.PageCreator.CreatePage(titleParts));
 			}
 		}
 
-		/// <summary>Removes all items from the <see cref="T:RobinHood70.Robby.TitleCollection">collection</see>, as well as those in the <see cref="InterwikiTitles"/> and <see cref="TitleMap"/>.</summary>
+		/// <summary>Removes all items from the <see cref="T:RobinHood70.Robby.TitleCollection">collection</see>, as well as those in the <see cref="TitleMap"/>.</summary>
 		public override void Clear()
 		{
 			base.Clear();
-			this.interwikiTitles.Clear();
 			this.titleMap.Clear();
 		}
 		#endregion
@@ -357,7 +351,8 @@
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, this.PageCreator.GetPropertyInputs(options), this.PageCreator.CreatePageItem);
 			foreach (var item in result)
 			{
-				var page = this.PageCreator.CreatePage(this.Site, item.Value.Title);
+				var titleParts = new TitleParts(this.Site, item.Value.Title);
+				var page = this.PageCreator.CreatePage(titleParts);
 				page.Populate(item.Value);
 				page.LoadOptions = options;
 				this[page.Key] = page; // Not using add because we could be loading duplicate pages.
@@ -373,7 +368,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			ThrowNull(categoryTree, nameof(categoryTree));
-			if (!categoryTree.Add(new Title(this.Site, input.Title)))
+			if (!categoryTree.Add(new TitleParts(this.Site, input.Title)))
 			{
 				return;
 			}
@@ -386,7 +381,8 @@
 			this.PopulateMapCollections(result);
 			foreach (var item in result)
 			{
-				var page = this.PageCreator.CreatePage(this.Site, item.Value.Title);
+				var titleParts = new TitleParts(this.Site, item.Value.Title);
+				var page = this.PageCreator.CreatePage(titleParts);
 				page.Populate(item.Value);
 				page.LoadOptions = this.LoadOptions;
 				if (input.Type.HasFlag(CategoryMemberTypes.Subcat) || page.Namespace.Id != MediaWikiNamespaces.Category)
@@ -429,31 +425,26 @@
 		{
 			foreach (var item in result.Interwiki)
 			{
-				this.interwikiTitles[item.Key] = new FullTitle(this.Site, item.Value);
+				var titleParts = new TitleParts(this.Site, item.Value.Title);
+				Debug.Assert(titleParts.Interwiki.Prefix != item.Value.InterwikiPrefix, "Interwiki prefixes didn't match.", titleParts.Interwiki.Prefix + " != " + item.Value.InterwikiPrefix);
+				this.titleMap[item.Key] = titleParts;
 			}
 
 			foreach (var item in result.Converted)
 			{
-				this.titleMap[item.Key] = new Title(this.Site, item.Value);
+				this.titleMap[item.Key] = new TitleParts(this.Site, item.Value);
 			}
 
 			foreach (var item in result.Normalized)
 			{
-				this.titleMap[item.Key] = new Title(this.Site, item.Value);
+				this.titleMap[item.Key] = new TitleParts(this.Site, item.Value);
 			}
 
 			foreach (var item in result.Redirects)
 			{
 				// Move interwiki redirects to InterwikiTitles collection, since lookups would try to redirect to a local page with the same name.
 				var value = item.Value;
-				if (value.Interwiki == null)
-				{
-					this.titleMap[item.Key] = new Title(this.Site, value.Title);
-				}
-				else
-				{
-					this.interwikiTitles[item.Key] = new FullTitle(this.Site, value);
-				}
+				this.titleMap[item.Key] = new TitleParts(this.Site, value.Interwiki, value.Title, value.Fragment);
 			}
 		}
 		#endregion

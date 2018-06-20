@@ -14,24 +14,22 @@
 		#region Public Override Methods
 
 		/// <summary>Creates a page.</summary>
-		/// <param name="site">The site the page is from.</param>
-		/// <param name="title">The title of the page.</param>
+		/// <param name="wikiTitle">The <see cref="IWikiTitle" /> object that represents the page to create.</param>
 		/// <returns>A fully populated Page object.</returns>
-		public override Page CreatePage(Site site, string title)
+		public override Page CreatePage(IWikiTitle wikiTitle)
 		{
-			ThrowNull(site, nameof(site));
-			ThrowNull(title, nameof(title));
-			switch (site.NamespaceFromName(title).Id)
+			ThrowNull(wikiTitle, nameof(wikiTitle));
+			switch (wikiTitle.Namespace.Id)
 			{
 				case MediaWikiNamespaces.MediaWiki:
-					return new Message(site, title);
+					return new Message(wikiTitle.Namespace.Site, wikiTitle.PageName);
 				case MediaWikiNamespaces.File:
-					return new FilePage(site, title);
+					return new FilePage(wikiTitle.Namespace.Site, wikiTitle.PageName);
 				case MediaWikiNamespaces.Category:
-					return new Category(site, title);
+					return new Category(wikiTitle.Namespace.Site, wikiTitle.PageName);
 			}
 
-			return new Page(site, title);
+			return new Page(wikiTitle);
 		}
 
 		/// <summary>Creates a page item.</summary>

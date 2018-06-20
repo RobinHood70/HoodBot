@@ -98,6 +98,33 @@
 				this.PageName = this.Namespace.CaseSensitive ? nameRemaining : nameRemaining.UpperFirst();
 			}
 		}
+
+		// Designed for data coming directly from MediaWiki. Assumes all values are appropriate and pre-trimmed - only does namespace parsing. interWiki and fragment may be null; fullPageName may not.
+		internal TitleParts(Site site, string interWiki, string fullPageName, string fragment)
+		{
+			ThrowNull(fullPageName, nameof(fullPageName));
+			if (interWiki != null)
+			{
+				this.Interwiki = site.InterwikiMap[interWiki];
+			}
+
+			var split = fullPageName.Split(new[] { ':' }, 2);
+			if (site.Namespaces.TryGetValue(split[0], out var ns))
+			{
+				this.Namespace = ns;
+				this.PageName = split[1];
+			}
+			else
+			{
+				this.Namespace = site.Namespaces[MediaWikiNamespaces.Main];
+				this.PageName = fullPageName;
+			}
+
+			if (fragment != null)
+			{
+				this.Fragment = fragment;
+			}
+		}
 		#endregion
 
 		#region Public Properties

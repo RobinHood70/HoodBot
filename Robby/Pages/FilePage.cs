@@ -20,9 +20,9 @@
 
 		/// <summary>Initializes a new instance of the <see cref="FilePage"/> class.</summary>
 		/// <param name="site">The site the file is from.</param>
-		/// <param name="fullPageName">Full name of the page.</param>
-		public FilePage(Site site, string fullPageName)
-			: base(site, fullPageName)
+		/// <param name="pageName">The page name (<em>without</em> the leading namespace).</param>
+		public FilePage(Site site, string pageName)
+			: base(site, MediaWikiNamespaces.File, pageName)
 		{
 		}
 		#endregion

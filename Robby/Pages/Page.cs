@@ -18,16 +18,7 @@
 		/// <param name="site">The site the page is from.</param>
 		/// <param name="fullPageName">Full name of the page.</param>
 		public Page(Site site, string fullPageName)
-			: base(site, fullPageName, null)
-		{
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="Page" /> class based on site, page name, and an arbitrary key.</summary>
-		/// <param name="site">The site the page is from.</param>
-		/// <param name="fullPageName">Full name of the page.</param>
-		/// <param name="key">The key.</param>
-		public Page(Site site, string fullPageName, string key)
-			: base(site, fullPageName, key)
+			: base(site, fullPageName)
 		{
 		}
 
@@ -282,7 +273,7 @@
 			categories.Clear();
 			foreach (var category in pageItem.Categories)
 			{
-				categories.Add(new CategoryTitle(this.Site, category.Title, category.SortKey, category.Hidden));
+				categories.Add(new CategoryTitle(new TitleParts(this.Site, category.Title), category.SortKey, category.Hidden));
 			}
 
 			// Custom

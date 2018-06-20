@@ -1,4 +1,6 @@
-﻿namespace RobinHood70.Robby.Pages
+﻿using RobinHood70.Robby.Design;
+
+namespace RobinHood70.Robby.Pages
 {
 	/// <summary>Stores information about a category link. This includes the sort key and whether or not the category is hidden.</summary>
 	/// <seealso cref="RobinHood70.Robby.Title" />
@@ -7,12 +9,11 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="CategoryTitle"/> class.</summary>
-		/// <param name="site">The site the category is from.</param>
-		/// <param name="fullCategoryName">Full name of the category.</param>
+		/// <param name="wikiTitle">The <see cref="IWikiTitle"/> that represents the category.</param>
 		/// <param name="sortKey">The sort key.</param>
 		/// <param name="hidden">if set to <see langword="true" /> if the category is hidden.</param>
-		protected internal CategoryTitle(Site site, string fullCategoryName, string sortKey, bool hidden)
-			: base(site, fullCategoryName)
+		protected internal CategoryTitle(IWikiTitle wikiTitle, string sortKey, bool hidden)
+			: base(wikiTitle)
 		{
 			this.Hidden = hidden;
 			this.SortKey = sortKey;

@@ -375,8 +375,8 @@
 
 		/// <summary>Gets the redirect target from the page text.</summary>
 		/// <param name="text">The text to parse.</param>
-		/// <returns>A <see cref="FullTitle"/> with the parsed redirect.</returns>
-		public virtual FullTitle GetRedirectFromText(string text)
+		/// <returns>A <see cref="TitleParts"/> object with the parsed redirect.</returns>
+		public virtual TitleParts GetRedirectFromText(string text)
 		{
 			ThrowNull(text, nameof(text));
 			if (this.redirectTargetFinder == null)
@@ -394,7 +394,7 @@
 
 			var target = this.redirectTargetFinder.Match(text).Groups["target"];
 
-			return target.Success ? new FullTitle(this, target.Value) : null;
+			return target.Success ? new TitleParts(this, target.Value) : null;
 		}
 
 		/// <summary>Gets public information about the specified users.</summary>
@@ -470,23 +470,6 @@
 		/// <exception cref="UnauthorizedAccessException">Thrown if there was an error logging into the wiki (which typically denotes that the user had the wrong password or does not have permission to log in).</exception>
 		/// <remarks>Even if you wish to edit anonymously, you <em>must</em> still log in by passing <see langword="null" /> for the <paramref name="userName" /> parameter.</remarks>
 		public void Login(string userName, string password, string domain) => this.Login(new LoginInput(userName, password) { Domain = domain });
-
-		/// <summary>Determine the namespace of the name provided.</summary>
-		/// <param name="fullName">The full page name.</param>
-		/// <returns>The namespace of the name, if found; otherwise, the main namespace.</returns>
-		public Namespace NamespaceFromName(string fullName)
-		{
-			if (fullName != null)
-			{
-				var split = fullName.Split(new[] { ':' }, 2);
-				if (split.Length == 2 && this.Namespaces.TryGetValue(split[0], out var ns))
-				{
-					return ns;
-				}
-			}
-
-			return this.Namespaces[MediaWikiNamespaces.Main];
-		}
 
 		/// <summary>Patrols the specified Recent Changes ID.</summary>
 		/// <param name="rcid">The RCID.</param>

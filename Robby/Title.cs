@@ -37,21 +37,12 @@
 
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the site and full page name.</summary>
 		/// <param name="site">The site this title is from.</param>
-		/// <param name="fullName">The full name of the page.</param>
-		public Title(Site site, string fullName)
-			: this(site, fullName, null)
-		{
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the site and full page name.</summary>
-		/// <param name="site">The site this title is from.</param>
-		/// <param name="fullPageName">The page name, including the namespace.</param>
-		/// <param name="key">The key to use when indexing this page.</param>
-		/// <remarks>Absolutely no cleanup or checking is performed when using this version of the constructor. All values are assumed to already have been validated.</remarks>
-		public Title(Site site, string fullPageName, string key)
+		/// <param name="fullPageName">The full name of the page.</param>
+		public Title(Site site, string fullPageName)
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(fullPageName, nameof(fullPageName));
+			this.Key = fullPageName;
 			var titleParts = new TitleParts(site, fullPageName);
 			if (titleParts.Interwiki != null && !titleParts.Interwiki.LocalWiki)
 			{
@@ -60,7 +51,6 @@
 
 			this.Namespace = titleParts.Namespace;
 			this.PageName = titleParts.PageName;
-			this.Key = key ?? this.FullPageName;
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the site and full page name.</summary>
@@ -166,7 +156,20 @@
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(pageName, nameof(pageName));
-			return site.NamespaceFromName(pageName) == ns ? new Title(site, pageName) : new Title(site, ns, pageName);
+			var titleParts = new TitleParts(site, pageName);
+			if (titleParts.Namespace != ns)
+			{
+				if (titleParts.Namespace == MediaWikiNamespaces.Main)
+				{
+					titleParts.Namespace = site.Namespaces[ns];
+				}
+				else
+				{
+					titleParts = new TitleParts(site, site.Namespaces[ns].DecoratedName + pageName);
+				}
+			}
+
+			return new Title(titleParts);
 		}
 
 		/// <summary>Builds the full name of the page from the namespace and page name, accounting for Main space.</summary>

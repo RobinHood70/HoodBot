@@ -1,17 +1,18 @@
 ﻿namespace RobinHood70.Robby.Pages
 {
 	using WallE.Base;
+	using WikiCommon;
 	using static WikiCommon.Globals;
 
 	/// <summary>In addition to regular page data, stores information about a category.</summary>
-	/// <seealso cref="RobinHood70.Robby.Pages.Page" />
+	/// <seealso cref="Page" />
 	public class Category : Page
 	{
 		/// <summary>Initializes a new instance of the <see cref="Category" /> class.</summary>
 		/// <param name="site">The site the category is from.</param>
-		/// <param name="fullPageName">Full name of the page.</param>
-		public Category(Site site, string fullPageName)
-			: base(site, fullPageName)
+		/// <param name="pageName">The page name (<em>without</em> the leading namespace).</param>
+		public Category(Site site, string pageName)
+			: base(site, MediaWikiNamespaces.Category, pageName)
 		{
 		}
 

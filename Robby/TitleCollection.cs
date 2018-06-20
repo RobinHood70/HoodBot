@@ -213,7 +213,7 @@
 			var result = this.Site.AbstractionLayer.Backlinks(input);
 			foreach (var item in result)
 			{
-				var mainTitle = new Title(this.Site, item.Title, null);
+				var mainTitle = new Title(this.Site, item.Title);
 				this.Add(mainTitle);
 				if (item.Redirects != null)
 				{
@@ -397,7 +397,7 @@
 			{
 				var purgePage = item.Value;
 				var flags = purgePage.Flags;
-				var page = this.Site.PageCreator.CreatePage(this.Site, purgePage.Title);
+				var page = this.Site.PageCreator.CreatePage(new TitleParts(this.Site, purgePage.Title));
 				page.PopulateFlags(flags.HasFlag(PurgeFlags.Invalid), flags.HasFlag(PurgeFlags.Missing));
 
 				retval.Add(page);
@@ -422,7 +422,7 @@
 				retval = new PageCollection(this.Site);
 				foreach (var item in this)
 				{
-					retval.Add(this.Site.PageCreator.CreatePage(this.Site, item.FullPageName));
+					retval.Add(this.Site.PageCreator.CreatePage(new TitleParts(this.Site, item.FullPageName)));
 				}
 
 				return retval;
@@ -434,7 +434,7 @@
 			{
 				var watchPage = item.Value;
 				var flags = watchPage.Flags;
-				var page = this.Site.PageCreator.CreatePage(this.Site, watchPage.Title);
+				var page = this.Site.PageCreator.CreatePage(new TitleParts(this.Site, watchPage.Title));
 				page.PopulateFlags(false, flags.HasFlag(WatchFlags.Missing));
 
 				retval.Add(page);

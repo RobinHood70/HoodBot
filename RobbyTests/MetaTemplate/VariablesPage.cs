@@ -3,13 +3,14 @@
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using Pages;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 
 	public class VariablesPage : Page
 	{
 		#region Constructors
-		public VariablesPage(Site site, string fullPageName)
-			: base(site, fullPageName)
+		public VariablesPage(IWikiTitle wikiTitle)
+			: base(wikiTitle)
 		{
 		}
 		#endregion

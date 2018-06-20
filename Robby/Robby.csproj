@@ -51,7 +51,6 @@
     <Compile Include="Block.cs" />
     <Compile Include="Design\TitleParts.cs" />
     <Compile Include="FirstInsensitiveEqualityComparer.cs" />
-    <Compile Include="FullTitle.cs" />
     <Compile Include="InterwikiEntry.cs" />
     <Compile Include="InterwikiMap.cs" />
     <Compile Include="Pages\Category.cs" />

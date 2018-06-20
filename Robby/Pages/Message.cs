@@ -13,9 +13,9 @@
 
 		/// <summary>Initializes a new instance of the <see cref="Message"/> class.</summary>
 		/// <param name="site">The site the page is from.</param>
-		/// <param name="fullPageName">Full name of the page.</param>
-		protected internal Message(Site site, string fullPageName)
-			: base(site, fullPageName)
+		/// <param name="pageName">The page name (<em>without</em> the leading namespace).</param>
+		protected internal Message(Site site, string pageName)
+			: base(site, MediaWikiNamespaces.MediaWiki, pageName)
 		{
 		}
 
