@@ -19,7 +19,7 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="TitleParts"/> class.</summary>
-		/// <param name="site">The site.</param>
+		/// <param name="site">The site the title is from.</param>
 		/// <param name="fullPageName">Full name of the page.</param>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
 		public TitleParts(Site site, string fullPageName)
@@ -106,21 +106,34 @@
 		/// <value>The fragment.</value>
 		public string Fragment { get; }
 
+		/// <summary>Gets the full name of the page.</summary>
+		/// <value>The full name of the page.</value>
+		/// <remarks>This value is constructed from the Namespace.DecoratedName property and the PageName property.</remarks>
 		public string FullPageName => this.Namespace?.DecoratedName + this.PageName;
 
 		/// <summary>Gets the interwiki prefix.</summary>
 		/// <value>The interwiki prefix.</value>
 		public InterwikiEntry Interwiki { get; }
 
+		/// <summary>Gets the key to use in dictionary lookups. This is the full page name provided when the object was constructed.</summary>
+		/// <value>The key.</value>
 		public string Key { get; }
 
+		/// <summary>Gets the namespace the page is in.</summary>
+		/// <value>The namespace.</value>
 		public Namespace Namespace { get; }
 
+		/// <summary>Gets the name of the page without the namespace.</summary>
+		/// <value>The name of the page without the namespace.</value>
 		public string PageName { get; }
 		#endregion
 
 		#region Public Static Methods
 
+		/// <summary>HTML-decodes the specified text.</summary>
+		/// <param name="text">The text.</param>
+		/// <returns>The HTML-decoded text.</returns>
+		/// <remarks>This is provided as a separate function for future-proofing, since Microsoft has historically provided several (often flawed) methods of URL and HTML encoding/decoding. This way, calls to it remain consistent even if the underlying method changes or bug fixes need to be added.</remarks>
 		public static string Decode(string text) => WebUtility.HtmlDecode(text);
 
 		/// <summary>Removes bidirectional text markers and replaces space-like characters with spaces.</summary>
@@ -130,6 +143,9 @@
 		#endregion
 
 		#region Public Overrides
+
+		/// <summary>Returns a <see cref="string" /> that represents this instance.</summary>
+		/// <returns>A <see cref="string" /> that represents this instance.</returns>
 		public override string ToString()
 		{
 			var retval = string.Empty;
