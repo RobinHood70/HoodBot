@@ -102,30 +102,30 @@
 
 		#region Public Properties
 
-		/// <summary>Gets the title's fragment (the section or ID to scroll to).</summary>
+		/// <summary>Gets or sets the title's fragment (the section or ID to scroll to).</summary>
 		/// <value>The fragment.</value>
-		public string Fragment { get; }
+		public string Fragment { get; set; }
 
 		/// <summary>Gets the full name of the page.</summary>
 		/// <value>The full name of the page.</value>
-		/// <remarks>This value is constructed from the Namespace.DecoratedName property and the PageName property.</remarks>
+		/// <remarks>This value is always constructed from the Namespace.DecoratedName property and the PageName property and can only be changed by changing those values.</remarks>
 		public string FullPageName => this.Namespace?.DecoratedName + this.PageName;
 
-		/// <summary>Gets the interwiki prefix.</summary>
+		/// <summary>Gets or sets the interwiki prefix.</summary>
 		/// <value>The interwiki prefix.</value>
-		public InterwikiEntry Interwiki { get; }
+		public InterwikiEntry Interwiki { get; set; }
 
-		/// <summary>Gets the key to use in dictionary lookups. This is the full page name provided when the object was constructed.</summary>
+		/// <summary>Gets or sets the key to use in dictionary lookups. By default, this is the full page name provided when the object was constructed.</summary>
 		/// <value>The key.</value>
-		public string Key { get; }
+		public string Key { get; set; }
 
-		/// <summary>Gets the namespace the page is in.</summary>
+		/// <summary>Gets or sets the namespace the page is in.</summary>
 		/// <value>The namespace.</value>
-		public Namespace Namespace { get; }
+		public Namespace Namespace { get; set; }
 
-		/// <summary>Gets the name of the page without the namespace.</summary>
+		/// <summary>Gets or sets the name of the page without the namespace.</summary>
 		/// <value>The name of the page without the namespace.</value>
-		public string PageName { get; }
+		public string PageName { get; set; }
 		#endregion
 
 		#region Public Static Methods
