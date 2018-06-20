@@ -254,13 +254,13 @@
 		public void NamespaceTests()
 		{
 			var nss = this.Wiki.Namespaces;
-			this.Assert(nss["template"].Id == 10, "String indexing not working.");
+			this.Assert(nss["template"].Id == MediaWikiNamespaces.Template, "String indexing not working.");
 			this.Assert(nss[0] == nss[MediaWikiNamespaces.Main] && nss[0] == nss[string.Empty], "Equivalent namespaces aren't.");
 			this.Assert(nss[MediaWikiNamespaces.File].Contains("Image"), "Namespace.Contains failed.");
 			this.Assert(nss[MediaWikiNamespaces.Template] == MediaWikiNamespaces.Template, "Namespace equals integer failed.");
 
 			nss.AddToNames("Main", this.Wiki.Namespaces[MediaWikiNamespaces.Main]);
-			this.Assert(nss["main"].Id == 0, "Main namespace does not appear to have been added.");
+			this.Assert(nss["main"].Id == MediaWikiNamespaces.Main, "Main namespace does not appear to have been added.");
 		}
 
 		public void PageCollectionFromCategoriesTest()
@@ -398,11 +398,11 @@
 			this.Assert(Title.PipeTrick("Hello (Test)") == "Hello", "PipeTrick failed for Hello (Test).");
 			this.Assert(Title.PipeTrick("Hello (Test), Goodbye") == "Hello", "PipeTrick failed for Hello (Test), Goodbye.");
 			this.Assert(Title.PipeTrick("Hello, Goodbye (Test)") == "Hello, Goodbye", "PipeTrick failed for Hello, Goodbye (Test).");
-			this.Assert(Title.NameFromParts(this.Wiki.Namespaces[10], "!", null) == "Template:!", "NameFromParts failed for Template:!");
-			this.Assert(Title.NameFromParts(this.Wiki.Namespaces[0], "Main Page", "Test") == "Main Page#Test", "NameFromParts failed for Main Page#Test.");
+			this.Assert(Title.NameFromParts(this.Wiki.Namespaces[MediaWikiNamespaces.Template], "!", null) == "Template:!", "NameFromParts failed for Template:!");
+			this.Assert(Title.NameFromParts(this.Wiki.Namespaces[MediaWikiNamespaces.Main], "Main Page", "Test") == "Main Page#Test", "NameFromParts failed for Main Page#Test.");
 
 			var title = new Title(this.Wiki, "Template:!");
-			this.Assert(title.Namespace.Id == 10, "Namespace was incorrect for Template:!.");
+			this.Assert(title.Namespace.Id == MediaWikiNamespaces.Template, "Namespace was incorrect for Template:!.");
 			this.Assert(title.PageName == "!", "PageName was incorrect for Template:!.");
 			this.Assert(title.SubjectPage.FullPageName == "Template:!", "SubjectPage was incorrect for Template:!.");
 			this.Assert(title.TalkPage.FullPageName == "Template talk:!", "TalkPage was incorrect for Template:!.");
