@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Globalization;
 	using WallE.Base;
 	using WikiCommon;
 	using static WikiCommon.Globals;
