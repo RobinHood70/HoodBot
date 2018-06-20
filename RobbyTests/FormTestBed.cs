@@ -256,8 +256,8 @@
 			var nss = this.Wiki.Namespaces;
 			this.Assert(nss["template"].Id == 10, "String indexing not working.");
 			this.Assert(nss[0] == nss[MediaWikiNamespaces.Main] && nss[0] == nss[string.Empty], "Equivalent namespaces aren't.");
-			this.Assert(nss[MediaWikiNamespaces.File] == "Image", "Namespace equals string failed.");
-			this.Assert(nss[MediaWikiNamespaces.Template].Id == MediaWikiNamespaces.Template, "Namespace equals enum failed.");
+			this.Assert(nss[MediaWikiNamespaces.File].Contains("Image"), "Namespace.Contains failed.");
+			this.Assert(nss[MediaWikiNamespaces.Template] == MediaWikiNamespaces.Template, "Namespace equals integer failed.");
 
 			nss.AddToNames("Main", this.Wiki.Namespaces[MediaWikiNamespaces.Main]);
 			this.Assert(nss["main"].Id == 0, "Main namespace does not appear to have been added.");
@@ -394,7 +394,6 @@
 
 		public void TitleTests()
 		{
-			this.Assert(Title.Normalize("Hello\u200E\u200F\u202A\u202B\u202C\u202D\u202E_\xA0\u1680\u180E\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u2028\u2029\u202F\u205F\u3000World") == "Hello                    World", "Text was not fully stripped and/or replaced.");
 			this.Assert(Title.PipeTrick("(Test)") == "(Test)", "PipeTrick failed for (Test).");
 			this.Assert(Title.PipeTrick("Hello (Test)") == "Hello", "PipeTrick failed for Hello (Test).");
 			this.Assert(Title.PipeTrick("Hello (Test), Goodbye") == "Hello", "PipeTrick failed for Hello (Test), Goodbye.");
@@ -407,6 +406,21 @@
 			this.Assert(title.PageName == "!", "PageName was incorrect for Template:!.");
 			this.Assert(title.SubjectPage.FullPageName == "Template:!", "SubjectPage was incorrect for Template:!.");
 			this.Assert(title.TalkPage.FullPageName == "Template talk:!", "TalkPage was incorrect for Template:!.");
+		}
+
+		public void TitlePartsTests()
+		{
+			this.Assert(TitleParts.Normalize("Hello\u200E\u200F\u202A\u202B\u202C\u202D\u202E_\xA0\u1680\u180E\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u2028\u2029\u202F\u205F\u3000World") == "Hello                    World", "Text was not fully stripped and/or replaced.");
+			var validNames = new[] { "Sandbox", "A \"B\"", "A 'B'", ".com", "~", "\"", "'", "Talk:Sandbox", "Talk:Foo:Sandbox", "File:Example.svg", "File_talk:Example.svg", "Foo/.../Sandbox", "Sandbox/...", "A~~", ":A" };
+			var invalidNames = new[] { "Talk:File:Testjpg" };
+
+			var title = new TitleParts(this.Wiki, ":eN:sKyRiM:skyrim#Modding");
+			this.Assert(title.Interwiki.Prefix == "en", "Incorrect interwiki");
+			this.Assert(title.Namespace.Name == "Skyrim", "Incorrect namespace");
+			this.Assert(title.PageName == "Skyrim", "Incorrect pagename");
+			this.Assert(title.Fragment == "Modding", "Incorrect fragment");
+			this.Assert(title.FullPageName == "Skyrim:Skyrim", "Incorrect full page name");
+			this.Assert(title.Key == "Skyrim:Skyrim", "Incorrect key");
 		}
 
 		public void TitlesAllPagesTests()
@@ -566,7 +580,7 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			this.Wiki.DownloadFile("Example.jpg", @"D:\bla\");
+			this.TitlePartsTests();
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;

@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 	using WallE.Base;
 	using static WikiCommon.Globals;
 
@@ -10,16 +11,16 @@
 	public class Namespace : IEquatable<Namespace>, IEquatable<int>
 	{
 		#region Fields
-		private readonly HashSet<string> allNames = new HashSet<string>();
+		private readonly HashSet<string> allNames;
+		private readonly HashSet<string> addedNames;
+		private readonly HashSet<string> baseNames;
 		#endregion
 
 		#region Constructors
-		internal Namespace(Site site, NamespacesItem ns, List<string> aliases)
+		internal Namespace(Site site, NamespacesItem ns, IEnumerable<string> aliases)
 		{
 			ThrowNull(site, nameof(site));
-
 			this.Site = site;
-
 			this.Id = ns.Id;
 			this.SubjectSpaceId = ns.Id >= 0 ? ns.Id & 0x7ffffffe : ns.Id;
 			this.TalkSpaceId = ns.Id >= 0 ? new int?(ns.Id | 1) : null;
@@ -31,23 +32,16 @@
 			this.Name = ns.Name;
 			this.CanonicalName = ns.CanonicalName;
 			this.DecoratedName = ns.Id == 0 ? string.Empty : ns.Name + ':';
+			this.Aliases = aliases == null ? new List<string>() : new List<string>(aliases);
 
-			this.AddName(ns.Name);
-			this.AddName(ns.CanonicalName);
-			if (aliases == null)
+			this.addedNames = new HashSet<string>(site.EqualityComparerInsensitive);
+			this.baseNames = new HashSet<string>(this.Aliases, site.EqualityComparerInsensitive)
 			{
-				this.Aliases = new List<string>();
-			}
-			else
-			{
-				this.Aliases = aliases.AsReadOnly();
-				foreach (var item in aliases)
-				{
-					this.AddName(item);
-				}
-			}
-
-			this.allNames.TrimExcess();
+				ns.Name,
+				ns.CanonicalName
+			};
+			this.baseNames.TrimExcess();
+			this.allNames = new HashSet<string>(this.baseNames, site.EqualityComparerInsensitive);
 		}
 		#endregion
 
@@ -56,11 +50,6 @@
 		/// <summary>Gets a list of aliases for the namespace (e.g., "WP" for "Wikipedia" space).</summary>
 		/// <value>The aliases for the namespace, as defined by the specific MediaWiki installation.</value>
 		public IReadOnlyList<string> Aliases { get; }
-
-		/// <summary>Gets a collection of all names that can be used to refer to the namespace.</summary>
-		/// <value>A collection of all names that can be used to refer to the namespace.</value>
-		/// <remarks>This collection is case-sensitive and should normally include all valid case variants based on the first letter.</remarks>
-		public IReadOnlyCollection<string> AllNames => this.allNames;
 
 		/// <summary>Gets a value indicating whether the namespace allows subpages.</summary>
 		/// <value><c>true</c> if the namespace allows subpages; otherwise, <c>false</c>.</value>
@@ -86,6 +75,14 @@
 		/// <value>The MediaWiki ID for the namespace.</value>
 		public int Id { get; }
 
+		/// <summary>Gets a value indicating whether this instance is subject space.</summary>
+		/// <value><c>true</c> if this instance is a subject namespace; otherwise, <c>false</c>.</value>
+		public bool IsSubjectSpace => this.Id == this.SubjectSpaceId;
+
+		/// <summary>Gets a value indicating whether this instance is talk space.</summary>
+		/// <value><c>true</c> if this instance is talk namespace; otherwise, <c>false</c>.</value>
+		public bool IsTalkSpace => this.Id == this.TalkSpaceId;
+
 		/// <summary>Gets the primary name of the namespace.</summary>
 		/// <value>The primary name of the namespace.</value>
 		public string Name { get; }
@@ -109,25 +106,13 @@
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
 		/// <returns><c>true</c> if string is equal to any of the names representing the namespace.</returns>
-		public static bool operator ==(Namespace left, string right) => left?.allNames.Contains(right) ?? false;
+		public static bool operator ==(Namespace left, Namespace right) => left?.Site == right?.Site && left?.Id == right?.Id;
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
-		/// <returns><c>true</c> if string is equal to any of the names representing the namespace.</returns>
-		public static bool operator ==(string left, Namespace right) => right?.allNames.Contains(left) ?? false;
-
-		/// <summary>Implements the operator !=.</summary>
-		/// <param name="left">The left-hand side of the comparison.</param>
-		/// <param name="right">The right-hand side of the comparison.</param>
-		/// <returns><c>true</c> if string is not equal to any of the names representing the namespace.</returns>
-		public static bool operator !=(Namespace left, string right) => !left?.allNames.Contains(right) ?? true;
-
-		/// <summary>Implements the operator !=.</summary>
-		/// <param name="left">The left-hand side of the comparison.</param>
-		/// <param name="right">The right-hand side of the comparison.</param>
-		/// <returns><c>true</c> if string is not equal to any of the names representing the namespace.</returns>
-		public static bool operator !=(string left, Namespace right) => right?.allNames.Contains(left) ?? true;
+		/// <returns><c>true</c> if the namespace Site or Id are not equal.</returns>
+		public static bool operator !=(Namespace left, Namespace right) => !(left == right);
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
@@ -156,6 +141,41 @@
 
 		#region Public Methods
 
+		/// <summary>Adds a name to the lookup list.</summary>
+		/// <param name="name">The name.</param>
+		public void AddName(string name)
+		{
+			if (!this.allNames.Contains(name))
+			{
+				this.addedNames.Add(name);
+				this.allNames.Add(name);
+			}
+		}
+
+		/// <summary>Capitalizes the page name based on the namespace's case-sensitivity.</summary>
+		/// <param name="pageName">Name of the page.</param>
+		/// <returns>If the namespace isn't case sensitive, and the page name begins with a lower-case letter, returns the capitalized version of the page name; otherwise, the page name is returned unaltered.</returns>
+		public string CapitalizePageName(string pageName)
+		{
+			ThrowNull(pageName, nameof(pageName));
+			if (this.CaseSensitive || pageName.Length == 0)
+			{
+				return pageName;
+			}
+
+			if (char.IsLower(pageName[0]))
+			{
+				return pageName.Length == 1 ? char.ToUpper(pageName[0], this.Site.Culture).ToString() : char.ToUpper(pageName[0], this.Site.Culture) + pageName.Substring(1);
+			}
+
+			return pageName;
+		}
+
+		/// <summary>Determines whether the name specified is in the list of names for this namespace.</summary>
+		/// <param name="name">The name to locate.</param>
+		/// <returns><c>true</c> if the name list for the namespace contains the specified name; otherwise, <c>false</c>.</returns>
+		public bool Contains(string name) => this.allNames.Contains(name);
+
 		/// <summary>Indicates whether the current object is equal to another object of the same type.</summary>
 		/// <param name="other">An object to compare with this object.</param>
 		/// <returns><see langword="true" /> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false" />.</returns>
@@ -165,6 +185,16 @@
 		/// <param name="other">An object to compare with this object.</param>
 		/// <returns><see langword="true" /> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false" />.</returns>
 		public bool Equals(int other) => this.Id == other;
+
+		/// <summary>Removes a name from the lookup list. Only names that have been previously added can be removed.</summary>
+		/// <param name="name">The name.</param>
+		public void RemoveName(string name)
+		{
+			if (this.addedNames.Remove(name))
+			{
+				this.allNames.Remove(name);
+			}
+		}
 		#endregion
 
 		#region Public Override Methods
@@ -185,22 +215,6 @@
 		/// <summary>Returns a <see cref="string" /> that represents this instance using the primary name of the namespace.</summary>
 		/// <returns>A <see cref="string" /> that represents this instance.</returns>
 		public override string ToString() => this.Name;
-		#endregion
-
-		#region Internal Methods
-		internal string AddName(string name)
-		{
-			this.allNames.Add(name);
-			if (!this.CaseSensitive && name.Length > 0)
-			{
-				var lowerName = this.Site.Culture.TextInfo.ToLower(name[0]) + (name.Length == 1 ? string.Empty : name.Substring(1));
-				this.allNames.Add(lowerName);
-
-				return lowerName;
-			}
-
-			return name;
-		}
 		#endregion
 	}
 }

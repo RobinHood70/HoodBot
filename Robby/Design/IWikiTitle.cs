@@ -22,10 +22,6 @@
 		/// <summary>Gets the name of the page without the namespace.</summary>
 		/// <value>The name of the page without the namespace.</value>
 		string PageName { get; }
-
-		/// <summary>Gets the site the page is on.</summary>
-		/// <value>The site.</value>
-		Site Site { get; }
 		#endregion
 	}
 }

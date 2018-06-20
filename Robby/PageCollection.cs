@@ -13,7 +13,7 @@
 	public class PageCollection : TitleCollection<Page>
 	{
 		#region Fields
-		private readonly Dictionary<string, InterwikiTitle> interwikiMap = new Dictionary<string, InterwikiTitle>();
+		private readonly Dictionary<string, FullTitle> interwikiTitles = new Dictionary<string, FullTitle>();
 		private readonly Dictionary<string, Title> titleMap = new Dictionary<string, Title>();
 		#endregion
 
@@ -68,9 +68,9 @@
 		#region Public Properties
 
 		/// <summary>Gets a dictionary of interwiki titles that could not be handled by the current site.</summary>
-		/// <value>The interwiki map.</value>
+		/// <value>The interwiki titles.</value>
 		/// <remarks>These are excluded from the regular <see cref="TitleMap"/> because they do not correspond to pages on the current site.</remarks>
-		public IReadOnlyDictionary<string, InterwikiTitle> InterwikiMap => this.interwikiMap;
+		public IReadOnlyDictionary<string, FullTitle> InterwikiTitles => this.interwikiTitles;
 
 		/// <summary>Gets or sets the load options.</summary>
 		/// <value>The load options.</value>
@@ -204,11 +204,11 @@
 			}
 		}
 
-		/// <summary>Removes all items from the <see cref="T:RobinHood70.Robby.TitleCollection">collection</see>, as well as those in the <see cref="InterwikiMap"/> and <see cref="TitleMap"/>.</summary>
+		/// <summary>Removes all items from the <see cref="T:RobinHood70.Robby.TitleCollection">collection</see>, as well as those in the <see cref="InterwikiTitles"/> and <see cref="TitleMap"/>.</summary>
 		public override void Clear()
 		{
 			base.Clear();
-			this.interwikiMap.Clear();
+			this.interwikiTitles.Clear();
 			this.titleMap.Clear();
 		}
 		#endregion
@@ -429,7 +429,7 @@
 		{
 			foreach (var item in result.Interwiki)
 			{
-				this.interwikiMap[item.Key] = new InterwikiTitle(this.Site, item.Value);
+				this.interwikiTitles[item.Key] = new FullTitle(this.Site, item.Value);
 			}
 
 			foreach (var item in result.Converted)
@@ -444,7 +444,16 @@
 
 			foreach (var item in result.Redirects)
 			{
-				this.titleMap[item.Key] = new RedirectTitle(this.Site, item.Value);
+				// Move interwiki redirects to InterwikiTitles collection, since lookups would try to redirect to a local page with the same name.
+				var value = item.Value;
+				if (value.Interwiki == null)
+				{
+					this.titleMap[item.Key] = new Title(this.Site, value.Title);
+				}
+				else
+				{
+					this.interwikiTitles[item.Key] = new FullTitle(this.Site, value);
+				}
 			}
 		}
 		#endregion

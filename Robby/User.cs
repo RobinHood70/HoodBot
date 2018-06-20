@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using WikiCommon;
 	using static WikiCommon.Globals;
@@ -18,7 +19,7 @@
 			ThrowNull(site, nameof(site));
 			ThrowNull(name, nameof(name));
 			this.Site = site;
-			this.Name = Title.Normalize(name);
+			this.Name = TitleParts.Normalize(name);
 			this.Page = new Title(site, MediaWikiNamespaces.User, name);
 			this.TalkPage = this.Page.TalkPage;
 		}

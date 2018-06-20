@@ -648,7 +648,7 @@
 		protected virtual void InsertItem(int index, TTitle item)
 		{
 			ThrowNull(item, nameof(item));
-			if (item.Site != this.Site)
+			if (item.Namespace.Site != this.Site)
 			{
 				throw new InvalidOperationException(CurrentCulture(InvalidSite));
 			}

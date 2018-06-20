@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ArticleNameInvalid" xml:space="preserve">
-    <value>Article name cannot be blank.</value>
-  </data>
   <data name="InvalidSite" xml:space="preserve">
     <value>You attempted to use an object from one site with an object from another.</value>
   </data>
@@ -131,6 +128,15 @@
   </data>
   <data name="MovePageWarning" xml:space="preserve">
     <value>Moving page [[{0}]] to [[{1}]] failed: {{2}}</value>
+  </data>
+  <data name="PageNameInterwiki" xml:space="preserve">
+    <value>Invalid page name: [[{0}]]. Page is an interwiki link that doesn't resolve to the local wiki.</value>
+  </data>
+  <data name="TitleDoubleNamespace" xml:space="preserve">
+    <value>The title cannot be in Talk namespace and followed immediately by another namespace or interwiki prefix.</value>
+  </data>
+  <data name="TitleInvalid" xml:space="preserve">
+    <value>The title name cannot be blank.</value>
   </data>
   <data name="Warning" xml:space="preserve">
     <value>Warning ({0}): {1}</value>

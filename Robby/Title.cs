@@ -31,8 +31,6 @@
 		#region Fields
 		private static Regex labelCommaRemover = new Regex(@"\ *([,，]" + TitleChars + @"*?)\Z", RegexOptions.Compiled);
 		private static Regex labelParenthesesRemover = new Regex(@"\ *(\(" + TitleChars + @"*?\)|（" + TitleChars + @"*?）)\Z", RegexOptions.Compiled);
-		private static Regex bidiText = new Regex(@"[\u200E\u200F\u202A\u202B\u202C\u202D\u202E]", RegexOptions.Compiled); // Taken from MediaWikIWikiTitleCodec->splitTitleString, then converted to Unicode
-		private static Regex spaceText = new Regex(@"[ _\xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]", RegexOptions.Compiled); // as above, but already Unicode in MW code
 		#endregion
 
 		#region Constructors
@@ -47,15 +45,21 @@
 
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the site and full page name.</summary>
 		/// <param name="site">The site this title is from.</param>
-		/// <param name="fullName">The page name, including the namespace.</param>
+		/// <param name="fullPageName">The page name, including the namespace.</param>
 		/// <param name="key">The key to use when indexing this page.</param>
 		/// <remarks>Absolutely no cleanup or checking is performed when using this version of the constructor. All values are assumed to already have been validated.</remarks>
-		public Title(Site site, string fullName, string key)
+		public Title(Site site, string fullPageName, string key)
 		{
 			ThrowNull(site, nameof(site));
-			ThrowNull(fullName, nameof(fullName));
-			this.Site = site;
-			this.SetNames(fullName);
+			ThrowNull(fullPageName, nameof(fullPageName));
+			var titleParts = new TitleParts(site, fullPageName);
+			if (titleParts.Interwiki != null && !titleParts.Interwiki.LocalWiki)
+			{
+				throw new ArgumentException(CurrentCulture(PageNameInterwiki));
+			}
+
+			this.Namespace = titleParts.Namespace;
+			this.PageName = titleParts.PageName;
 			this.Key = key ?? this.FullPageName;
 		}
 
@@ -68,9 +72,9 @@
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(pageName, nameof(pageName));
-			this.Site = site;
+			pageName = pageName.Normalize();
 			this.Namespace = site.Namespaces[ns];
-			this.PageName = this.Namespace.CaseSensitive ? Normalize(pageName) : Normalize(pageName).UpperFirst();
+			this.PageName = this.Namespace.CaseSensitive ? pageName : pageName.UpperFirst();
 			this.Key = this.FullPageName;
 		}
 
@@ -79,7 +83,6 @@
 		public Title(IWikiTitle title)
 		{
 			ThrowNull(title, nameof(title));
-			this.Site = title.Site;
 			this.Namespace = title.Namespace;
 			this.PageName = title.PageName;
 			this.Key = title.Key;
@@ -110,7 +113,7 @@
 		public string FullPageName => this.Namespace.DecoratedName + this.PageName;
 
 		/// <summary>Gets the original, unaltered key to use for dictionaries and the like.</summary>
-		public virtual string Key { get; }
+		public string Key { get; }
 
 		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		public string LabelName => PipeTrick(this.PageName);
@@ -122,10 +125,10 @@
 		public string PageName { get; protected set; }
 
 		/// <summary>Gets the site the title is intended for.</summary>
-		public Site Site { get; }
+		public Site Site => this.Namespace.Site;
 
 		/// <summary>Gets a Title object for this Title's corresponding subject page. If this Title is a subject page, returns itself.</summary>
-		public Title SubjectPage => this.Namespace.Id == this.Namespace.SubjectSpaceId ? this : new Title(this.Site, this.Namespace.SubjectSpaceId, this.PageName);
+		public Title SubjectPage => this.Namespace.IsSubjectSpace ? this : new Title(this.Site, this.Namespace.SubjectSpaceId, this.PageName);
 
 		/// <summary>Gets the value corresponding to {{SUBPAGENAME}}.</summary>
 		public string SubpageName
@@ -148,7 +151,7 @@
 		/// <summary>Gets a Title object for this Title's corresponding subject page. If this Title is a talk page, returns itself. Returns null for pages which have no associated talk page.</summary>
 		public Title TalkPage =>
 			this.Namespace.TalkSpaceId == null ? null
-			: this.Namespace.Id == this.Namespace.TalkSpaceId.Value ? this
+			: this.Namespace.IsTalkSpace ? this
 			: new Title(this.Site, this.Namespace.TalkSpaceId.Value, this.PageName);
 		#endregion
 
@@ -171,12 +174,7 @@
 		/// <param name="pageName">The page name.</param>
 		/// <param name="fragment">The fragment (section title/anchor) to include.</param>
 		/// <returns>The full name of the page from the namespace and page name, accounting for Main space.</returns>
-		public static string NameFromParts(Namespace ns, string pageName, string fragment) => ns?.DecoratedName + pageName + (fragment == null ? string.Empty : "#" + fragment);
-
-		/// <summary>Removes bidirectional text markers and replaces space-like characters with spaces.</summary>
-		/// <param name="text">The text to normalize.</param>
-		/// <returns>The original text with bidirectional text markers removed and space-like characters converted to spaces.</returns>
-		public static string Normalize(string text) => spaceText.Replace(bidiText.Replace(text, string.Empty), " ").Trim();
+		public static string NameFromParts(Namespace ns, string pageName, string fragment) => ns.DecoratedName + pageName + (fragment == null ? string.Empty : "#" + fragment);
 
 		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		/// <param name="pageName">The name of the page, without namespace or fragment text.</param>
@@ -239,7 +237,6 @@
 		/// <returns>True if all of Site, Namespace, and PageName are identical between the two Titles.</returns>
 		public bool IsSameTitle(IWikiTitle title) =>
 			title != null &&
-			this.Site == title.Site &&
 			this.Namespace == title.Namespace &&
 			this.PageName == title.PageName;
 
@@ -303,7 +300,10 @@
 				}
 			}
 
-			this.SetNames(to);
+			var titleParts = new TitleParts(this.Site, to);
+			this.Namespace = titleParts.Namespace;
+			this.PageName = titleParts.PageName;
+
 			return retval;
 		}
 
@@ -379,30 +379,6 @@
 		/// <summary>Returns a string that represents the current Title.</summary>
 		/// <returns>A string that represents the current object.</returns>
 		public override string ToString() => this.FullPageName;
-		#endregion
-
-		#region Protected Virtual Methods
-
-		/// <summary>Sets the namespace and page name, given a full page name.</summary>
-		/// <param name="fullPageName">The full name.</param>
-		private void SetNames(string fullPageName)
-		{
-			ThrowNull(fullPageName, nameof(fullPageName));
-			var split = fullPageName.Split(new[] { ':' }, 2);
-			string pageName;
-			if (split.Length == 2 && this.Site.Namespaces.TryGetValue(split[0], out var ns))
-			{
-				pageName = split[1].TrimStart();
-				this.Namespace = ns;
-			}
-			else
-			{
-				pageName = fullPageName;
-				this.Namespace = this.Site.Namespaces[MediaWikiNamespaces.Main];
-			}
-
-			this.PageName = this.Namespace.CaseSensitive ? Normalize(pageName) : Normalize(pageName).UpperFirst();
-		}
 		#endregion
 
 		#region Private Static Methods

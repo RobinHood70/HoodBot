@@ -61,15 +61,6 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Article name cannot be blank..
-        /// </summary>
-        internal static string ArticleNameInvalid {
-            get {
-                return ResourceManager.GetString("ArticleNameInvalid", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to You attempted to use an object from one site with an object from another..
         /// </summary>
         internal static string InvalidSite {
@@ -102,6 +93,33 @@ namespace RobinHood70.Robby.Properties {
         internal static string MovePageWarning {
             get {
                 return ResourceManager.GetString("MovePageWarning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid page name: [[{0}]]. Page is an interwiki link that doesn&apos;t resolve to the local wiki..
+        /// </summary>
+        internal static string PageNameInterwiki {
+            get {
+                return ResourceManager.GetString("PageNameInterwiki", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The title cannot be in Talk namespace and followed immediately by another namespace or interwiki prefix..
+        /// </summary>
+        internal static string TitleDoubleNamespace {
+            get {
+                return ResourceManager.GetString("TitleDoubleNamespace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The title name cannot be blank..
+        /// </summary>
+        internal static string TitleInvalid {
+            get {
+                return ResourceManager.GetString("TitleInvalid", resourceCulture);
             }
         }
         

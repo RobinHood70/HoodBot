@@ -22,6 +22,7 @@
 	{
 		#region Fields
 		private readonly Dictionary<string, MagicWord> magicWords = new Dictionary<string, MagicWord>();
+
 		private string articlePath;
 		private CultureInfo culture = CultureInfo.CurrentCulture;
 		private HashSet<Title> disambiguationTemplates = null;
@@ -72,7 +73,12 @@
 		public CultureInfo Culture
 		{
 			get => this.culture;
-			set => this.culture = value ?? CultureInfo.CurrentCulture;
+			set
+			{
+				this.culture = value ?? CultureInfo.CurrentCulture;
+				this.EqualityComparerFirst = new FirstInsensitiveEqualityComparer(value);
+				this.EqualityComparerInsensitive = StringComparer.Create(value, true);
+			}
 		}
 
 		/// <summary>Gets or sets the default load options.</summary>
@@ -89,9 +95,27 @@
 		/// <value><c>true</c> if the Disambiguator extension is available; otherwise, <c>false</c>.</value>
 		public bool DisambiguatorAvailable { get; private set; }
 
+		/// <summary>Gets or sets the EqualityComparer for first-letter case-insensitive comparison.</summary>
+		/// <value>The first-letter case-insensitive EqualityComparer.</value>
+		/// <remarks>This provides a central, consistent comparer for anything that is site-aware. It will be based on the wiki's culture as soon as the culture has been retrieved.</remarks>
+		public IEqualityComparer<string> EqualityComparerFirst { get; protected set; }
+
+		/// <summary>Gets or sets the EqualityComparer for case-insensitive comparison.</summary>
+		/// <value>The case-insensitive EqualityComparer.</value>
+		/// <remarks>This provides a central, consistent comparer for anything that is site-aware.</remarks>
+		public IEqualityComparer<string> EqualityComparerInsensitive { get; protected set; }
+
+		/// <summary>Gets the interwiki map.</summary>
+		/// <value>The interwiki map.</value>
+		public InterwikiMap InterwikiMap { get; private set; }
+
 		/// <summary>Gets a list of current magic words on the wiki.</summary>
 		/// <value>The magic words.</value>
 		public IReadOnlyDictionary<string, MagicWord> MagicWords => this.magicWords;
+
+		/// <summary>Gets the main page of the site.</summary>
+		/// <value>The main page.</value>
+		public string MainPage { get; private set; }
 
 		/// <summary>Gets the wiki name.</summary>
 		/// <value>The name of the wiki.</value>
@@ -154,8 +178,19 @@
 			}
 		}
 
+		/// <summary>Gets the article path.</summary>
+		/// <param name="articleName">Name of the article.</param>
+		/// <returns>A full Uri to the article.</returns>
+		public Uri GetArticlePath(string articleName) => this.GetArticlePath(articleName, null);
+
+		/// <summary>Gets the article path.</summary>
+		/// <param name="articleName">Name of the article.</param>
+		/// <param name="fragment">The fragment to jump to. May be null.</param>
+		/// <returns>A full Uri to the article.</returns>
+		public virtual Uri GetArticlePath(string articleName, string fragment) => this.GetArticlePath(this.articlePath, articleName, fragment);
+
 		/// <summary>Gets all active blocks.</summary>
-		/// <returns>All active blocks</returns>
+		/// <returns>All active blocks.</returns>
 		public IReadOnlyList<Block> GetBlocks() => this.GetBlocks(new BlocksInput());
 
 		/// <summary>Gets active blocks filtered by the specified set of attributes.</summary>
@@ -195,19 +230,19 @@
 		public IReadOnlyList<Block> GetBlocks(IPAddress ip) => this.GetBlocks(new BlocksInput(ip));
 
 		/// <summary>Gets a message from MediaWiki space.</summary>
-		/// <param name="message">The message.</param>
+		/// <param name="msg">The message.</param>
 		/// <param name="arguments">Optional arguments to substitute into the message.</param>
 		/// <returns>The text of the message.</returns>
-		public string GetMessage(string message, params string[] arguments) => this.GetMessage(message, arguments as IEnumerable<string>);
+		public string GetMessage(string msg, params string[] arguments) => this.GetMessage(msg, arguments as IEnumerable<string>);
 
 		/// <summary>Gets a message from MediaWiki space.</summary>
-		/// <param name="message">The message.</param>
+		/// <param name="msg">The message.</param>
 		/// <param name="arguments">Optional arguments to substitute into the message.</param>
 		/// <returns>The text of the message.</returns>
-		public string GetMessage(string message, IEnumerable<string> arguments)
+		public string GetMessage(string msg, IEnumerable<string> arguments)
 		{
-			var messages = this.GetMessages(new[] { message }, arguments);
-			return messages[message].Text;
+			var messages = this.GetMessages(new[] { msg }, arguments);
+			return messages[msg].Text;
 		}
 
 		/// <summary>Gets multiple messages from MediaWiki space.</summary>
@@ -240,20 +275,20 @@
 		}
 
 		/// <summary>Gets a message from MediaWiki space with any magic words and the like parsed into text.</summary>
-		/// <param name="message">The message.</param>
+		/// <param name="msg">The message.</param>
 		/// <param name="arguments">Optional arguments to substitute into the message.</param>
 		/// <returns>The text of the message.</returns>
-		public string GetParsedMessage(string message, IEnumerable<string> arguments) => this.GetParsedMessage(message, arguments, null);
+		public string GetParsedMessage(string msg, IEnumerable<string> arguments) => this.GetParsedMessage(msg, arguments, null);
 
 		/// <summary>Gets a message from MediaWiki space with any magic words and the like parsed into text.</summary>
-		/// <param name="message">The message.</param>
+		/// <param name="msg">The message.</param>
 		/// <param name="arguments">Optional arguments to substitute into the message.</param>
 		/// <param name="title">The title to use for parsing.</param>
 		/// <returns>The text of the message.</returns>
-		public string GetParsedMessage(string message, IEnumerable<string> arguments, Title title)
+		public string GetParsedMessage(string msg, IEnumerable<string> arguments, Title title)
 		{
-			var messages = this.GetParsedMessages(new[] { message }, arguments, title);
-			return messages[message].Text;
+			var messages = this.GetParsedMessages(new[] { msg }, arguments, title);
+			return messages[msg].Text;
 		}
 
 		/// <summary>Gets multiple messages from MediaWiki space with any magic words and the like parsed into text.</summary>
@@ -340,14 +375,10 @@
 
 		/// <summary>Gets the redirect target from the page text.</summary>
 		/// <param name="text">The text to parse.</param>
-		/// <returns>A <see cref="RedirectTitle"/> with the parsed redirect.</returns>
-		public virtual RedirectTitle GetRedirectFromText(string text)
+		/// <returns>A <see cref="FullTitle"/> with the parsed redirect.</returns>
+		public virtual FullTitle GetRedirectFromText(string text)
 		{
-			if (text != null)
-			{
-				return null;
-			}
-
+			ThrowNull(text, nameof(text));
 			if (this.redirectTargetFinder == null)
 			{
 				var list = new List<string>();
@@ -362,7 +393,8 @@
 			}
 
 			var target = this.redirectTargetFinder.Match(text).Groups["target"];
-			return target.Success ? new RedirectTitle(this, target.Value) : null;
+
+			return target.Success ? new FullTitle(this, target.Value) : null;
 		}
 
 		/// <summary>Gets public information about the specified users.</summary>
@@ -542,22 +574,31 @@
 		}
 
 		/// <summary>Gets the article path.</summary>
+		/// <param name="unparsedPath">The unparsed path. This can be a local article path or an interwiki path.</param>
 		/// <param name="articleName">Name of the article.</param>
+		/// <param name="fragment">The fragment to jump to. May be null.</param>
 		/// <returns>A full Uri to the article.</returns>
-		public virtual Uri GetArticlePath(string articleName)
+		/// <exception cref="ArgumentException">Article name is invalid.</exception>
+		public virtual Uri GetArticlePath(string unparsedPath, string articleName, string fragment)
 		{
-			// Could be done as a one-liner, but split out for easier maintenance and debugging.
+			// Used to use WebUtility.UrlEncode, but Uri seems to auto-encode, so removed for now. Discussion in some places of different parts of .NET encoding differently, so may need to re-instate later. See https://stackoverflow.com/a/47877559/502255 for example.
 			if (string.IsNullOrWhiteSpace(articleName))
 			{
-				articleName = string.Empty;
-			}
-			else
-			{
-				articleName = articleName.Replace(' ', '_');
-				articleName = WebUtility.UrlEncode(articleName);
+				throw new ArgumentException(CurrentCulture(TitleInvalid));
 			}
 
-			return new Uri(this.articlePath.Replace("$1", articleName).TrimEnd('/'));
+			if (string.IsNullOrEmpty(unparsedPath))
+			{
+				unparsedPath = this.articlePath;
+			}
+
+			var fullPath = unparsedPath.Replace("$1", articleName.Replace(' ', '_')).TrimEnd('/');
+			if (fragment != null)
+			{
+				fullPath += '#' + fragment;
+			}
+
+			return new Uri(articleName);
 		}
 
 		/// <summary>Logs the user out.</summary>
@@ -591,6 +632,7 @@
 		/// <returns>A read-only list of <see cref="Block"/> objects, as specified by the input parameters.</returns>
 		protected virtual IReadOnlyList<Block> GetBlocks(BlocksInput input)
 		{
+			ThrowNull(input, nameof(input));
 			input.Properties = BlocksProperties.User | BlocksProperties.By | BlocksProperties.Timestamp | BlocksProperties.Expiry | BlocksProperties.Reason | BlocksProperties.Flags;
 			var result = this.AbstractionLayer.Blocks(input);
 			var retval = new List<Block>(result.Count);
@@ -605,9 +647,10 @@
 		/// <summary>Gets all site information required for proper functioning of the framework.</summary>
 		protected virtual void GetInfo()
 		{
-			var siteInfo = this.AbstractionLayer.SiteInfo(new SiteInfoInput() { Properties = SiteInfoProperties.General | SiteInfoProperties.Namespaces | SiteInfoProperties.NamespaceAliases | SiteInfoProperties.MagicWords });
+			var siteInfo = this.AbstractionLayer.SiteInfo(new SiteInfoInput() { Properties = SiteInfoProperties.General | SiteInfoProperties.Namespaces | SiteInfoProperties.NamespaceAliases | SiteInfoProperties.MagicWords | SiteInfoProperties.InterwikiMap });
 			this.CaseSensitive = siteInfo.Flags.HasFlag(SiteInfoFlags.CaseSensitive);
 			this.Culture = GetCulture(siteInfo.Language);
+			this.MainPage = siteInfo.MainPage;
 			this.Name = siteInfo.SiteName;
 			this.ServerName = siteInfo.ServerName;
 			this.Version = siteInfo.Generator;
@@ -631,7 +674,7 @@
 				namespaces.Add(new Namespace(this, item, aliases));
 			}
 
-			this.Namespaces = new NamespaceCollection(namespaces);
+			this.Namespaces = new NamespaceCollection(namespaces, this.EqualityComparerInsensitive);
 
 			var path = siteInfo.ArticlePath;
 			if (path.StartsWith("/", StringComparison.Ordinal))
@@ -654,6 +697,17 @@
 			}
 
 			this.DisambiguatorAvailable = this.magicWords.ContainsKey("disambiguation");
+
+			var server = siteInfo.Server; // Used to help determine if interwiki is local
+			var interwikiList = new List<InterwikiEntry>();
+			foreach (var item in siteInfo.InterwikiMap)
+			{
+				var entry = new InterwikiEntry(item);
+				entry.GuessLocalWikiFromServer(server);
+				interwikiList.Add(entry);
+			}
+
+			this.InterwikiMap = new InterwikiMap(interwikiList);
 		}
 
 		/// <summary>Gets one or more messages from MediaWiki space.</summary>
@@ -742,21 +796,24 @@
 		}
 
 		/// <summary>Logs the specified user into the wiki and loads necessary information for proper functioning of the class.</summary>
-		/// <param name="input">The input parameters.</param>
+		/// <param name="input">The input parameters. May be null.</param>
 		/// <exception cref="UnauthorizedAccessException">Thrown if there was an error logging into the wiki (which typically denotes that the user had the wrong password or does not have permission to log in).</exception>
-		/// <remarks>Even if you wish to edit anonymously, you <em>must</em> still log in by passing <see langword="null" /> for the user name.</remarks>
+		/// <remarks>Even if you wish to edit anonymously, you <em>must</em> still log in by passing <see langword="null" /> for the input.</remarks>
 		protected virtual void Login(LoginInput input)
 		{
-			var result = this.AbstractionLayer.Login(input);
-			if (input.UserName != null && result.Result != "Success")
+			if (input?.UserName != null)
 			{
-				this.Clear();
-				throw new UnauthorizedAccessException(CurrentCulture(LoginFailed, result.Reason));
+				var result = this.AbstractionLayer.Login(input);
+				if (result.Result != "Success")
+				{
+					this.Clear();
+					throw new UnauthorizedAccessException(CurrentCulture(LoginFailed, result.Reason));
+				}
+
+				this.UserName = result.User;
 			}
 
-			this.UserName = result.User;
 			this.GetInfo();
-
 		}
 
 		/// <summary>Patrols the specified Recent Changes ID.</summary>
@@ -793,6 +850,7 @@
 			this.CaseSensitive = false;
 			this.Culture = CultureInfo.CurrentCulture;
 			this.DisambiguatorAvailable = false;
+			this.MainPage = null;
 			this.Name = null;
 			this.Namespaces = null;
 			this.ServerName = null;

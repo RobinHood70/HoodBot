@@ -372,7 +372,9 @@
 			var result = this.Site.AbstractionLayer.AllMessages(input);
 			foreach (var item in result)
 			{
-				this.Add(new Title(this.Site, UnnormalizeMessageName(item.Name, this.Site.Culture)));
+				var name = item.Name.Replace('_', ' ');
+				name = this.Site.Namespaces[MediaWikiNamespaces.MediaWiki].CapitalizePageName(name);
+				this.Add(new Title(this.Site, MediaWikiNamespaces.MediaWiki, name));
 			}
 		}
 

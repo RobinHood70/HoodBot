@@ -12,15 +12,21 @@
 
 		/// <summary>Initializes a new instance of the <see cref="NamespaceCollection" /> class.</summary>
 		/// <param name="namespaces">An enumeration of all namespace objects.</param>
-		protected internal NamespaceCollection(IEnumerable<Namespace> namespaces)
+		/// <param name="comparer">The site's case-insensitive EqualityComparer.</param>
+		internal NamespaceCollection(IEnumerable<Namespace> namespaces, IEqualityComparer<string> comparer)
 		{
+			// CONSIDER: Implementing namespace-specific case-sensitivity, which is supported by the wiki software, though rarely used.
 			ThrowNull(namespaces, nameof(namespaces));
+			var names = new Dictionary<string, Namespace>(comparer);
+			this.NamesDictionary = names;
 			foreach (var ns in namespaces)
 			{
 				this.IdsDictionary.Add(ns.Id, ns);
-				foreach (var name in ns.AllNames)
+				names[ns.Name] = ns;
+				names[ns.CanonicalName] = ns;
+				foreach (var name in ns.Aliases)
 				{
-					this.NamesDictionary.Add(name, ns);
+					names[name] = ns;
 				}
 			}
 		}
@@ -56,7 +62,7 @@
 		protected SortedList<int, Namespace> IdsDictionary { get; } = new SortedList<int, Namespace>();
 
 		/// <summary>Gets the name lookup dictionary of the collection.</summary>
-		protected Dictionary<string, Namespace> NamesDictionary { get; } = new Dictionary<string, Namespace>();
+		protected Dictionary<string, Namespace> NamesDictionary { get; }
 		#endregion
 
 		#region Public Indexers
@@ -90,11 +96,8 @@
 			ThrowNull(name, nameof(name));
 			ThrowNull(ns, nameof(ns));
 			this.NamesDictionary.Add(name, ns);
-			var otherName = ns.AddName(name);
-			if (otherName != null)
-			{
-				this.NamesDictionary.Add(otherName, ns);
-			}
+			ns.AddName(name);
+			this.NamesDictionary.Add(name, ns);
 		}
 
 		/// <summary>Determines whether the collection contains an element with the specified key.</summary>
