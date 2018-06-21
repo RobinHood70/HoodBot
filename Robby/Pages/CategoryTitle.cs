@@ -1,7 +1,7 @@
-﻿using RobinHood70.Robby.Design;
-
-namespace RobinHood70.Robby.Pages
+﻿namespace RobinHood70.Robby.Pages
 {
+	using RobinHood70.Robby.Design;
+
 	/// <summary>Stores information about a category link. This includes the sort key and whether or not the category is hidden.</summary>
 	/// <seealso cref="RobinHood70.Robby.Title" />
 	public class CategoryTitle : Title
@@ -12,7 +12,7 @@ namespace RobinHood70.Robby.Pages
 		/// <param name="wikiTitle">The <see cref="IWikiTitle"/> that represents the category.</param>
 		/// <param name="sortKey">The sort key.</param>
 		/// <param name="hidden">if set to <see langword="true" /> if the category is hidden.</param>
-		protected internal CategoryTitle(IWikiTitle wikiTitle, string sortKey, bool hidden)
+		internal CategoryTitle(IWikiTitle wikiTitle, string sortKey, bool hidden)
 			: base(wikiTitle)
 		{
 			this.Hidden = hidden;
