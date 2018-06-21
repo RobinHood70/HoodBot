@@ -35,10 +35,8 @@
 		/// <param name="wiki">The <see cref="IWikiAbstractionLayer"/> to use. This controls whether the API is used or some other access method.</param>
 		public Site(IWikiAbstractionLayer wiki)
 		{
-			this.DefaultLoadOptions = PageLoadOptions.Default;
-			this.PageCreator = new DefaultPageCreator();
+			wiki.WarningOccurred += this.Wiki_WarningOccurred;
 			this.AbstractionLayer = wiki;
-			this.AbstractionLayer.WarningOccurred += this.Wiki_WarningOccurred;
 		}
 		#endregion
 
@@ -84,7 +82,7 @@
 		/// <summary>Gets or sets the default load options.</summary>
 		/// <value>The default load options.</value>
 		/// <remarks>If you need to detect disambiguations, you should consider setting this to include Properties for wikis using Disambiguator or Templates for those that aren't.</remarks>
-		public PageLoadOptions DefaultLoadOptions { get; set; }
+		public PageLoadOptions DefaultLoadOptions { get; set; } = PageLoadOptions.Default;
 
 		/// <summary>Gets the list of disambiguation templates on wikis that aren't using Disambiguator.</summary>
 		/// <value>The disambiguation templates.</value>
@@ -128,7 +126,7 @@
 		/// <summary>Gets or sets the page creator.</summary>
 		/// <value>The page creator.</value>
 		/// <remarks>A PageCreator is an abstract factory which serves as a bridge between customized PageItem types from WallE and the corresponding custom Page type for Robby.</remarks>
-		public PageCreator PageCreator { get; set; }
+		public PageCreator PageCreator { get; set; } = PageCreator.Default;
 
 		/// <summary>Gets the name of the server—typically, the base URL.</summary>
 		/// <value>The name of the server.</value>

@@ -58,7 +58,6 @@
     <Compile Include="Contribution.cs" />
     <Compile Include="Pages\FileRevision.cs" />
     <Compile Include="Design\IWikiTitle.cs" />
-    <Compile Include="Design\DefaultPageCreator.cs" />
     <Compile Include="Design\PageCreator.cs" />
     <Compile Include="Pages\CategoryTitle.cs" />
     <Compile Include="Design\WikiTitleComparerFullPageName.cs" />
