@@ -119,14 +119,20 @@
 		/// <summary>Converts the first character of a string to upper-case.</summary>
 		/// <param name="text">The string to alter.</param>
 		/// <returns>A copy of the original string, with the first charcter converted to upper-case.</returns>
-		public static string UpperFirst(this string text)
+		public static string UpperFirst(this string text) => UpperFirst(text, CultureInfo.InvariantCulture);
+
+		/// <summary>Converts the first character of a string to upper-case.</summary>
+		/// <param name="text">The string to alter.</param>
+		/// <param name="culture">The culture to use for converting the first character to upper-case.</param>
+		/// <returns>A copy of the original string, with the first charcter converted to upper-case.</returns>
+		public static string UpperFirst(this string text, CultureInfo culture)
 		{
 			if (string.IsNullOrEmpty(text))
 			{
 				return text;
 			}
 
-			var retval = char.ToUpperInvariant(text[0]).ToString();
+			var retval = char.ToUpper(text[0], culture).ToString();
 			if (text.Length > 1)
 			{
 				retval += text.Substring(1);
