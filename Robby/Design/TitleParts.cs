@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System;
-	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Net;
 	using System.Text.RegularExpressions;
 	using WikiCommon;
@@ -74,9 +74,18 @@
 					}
 					else
 					{
+						this.Namespace = site.Namespaces[MediaWikiNamespaces.Main];
 						nameRemaining = split[1].TrimStart() + ':' + split[2];
 					}
 				}
+				else
+				{
+					this.Namespace = site.Namespaces[MediaWikiNamespaces.Main];
+				}
+			}
+			else
+			{
+				this.Namespace = site.Namespaces[MediaWikiNamespaces.Main];
 			}
 
 			if (this.Namespace == MediaWikiNamespaces.Talk)
@@ -100,10 +109,13 @@
 				this.PageName = nameRemaining;
 			}
 
-			if (!this.Namespace.CaseSensitive)
+			// Do not change page name if Namespace is null (meaning it's a non-local interwiki or there was a parsing failure).
+			if (!this.Namespace?.CaseSensitive ?? false)
 			{
 				this.PageName = this.PageName.UpperFirst(site.Culture);
 			}
+
+			Debug.Assert(this.Interwiki != null || this.Namespace != null, "Neither Interwiki nor Namespace were assigned.");
 		}
 
 		// Designed for data coming directly from MediaWiki. Assumes all values are appropriate and pre-trimmed - only does namespace parsing. interWiki and fragment may be null; fullPageName may not.
