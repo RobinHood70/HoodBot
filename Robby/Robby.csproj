@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="BacklinkTitle.cs" />
     <Compile Include="Block.cs" />
+    <Compile Include="Design\DefaultPageCreator.cs" />
     <Compile Include="Design\Extensions.cs" />
     <Compile Include="Design\TitleParts.cs" />
     <Compile Include="FirstInsensitiveEqualityComparer.cs" />
