@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System;
+	using static WikiCommon.Globals;
 
 	#region Public Enumerations
 
@@ -68,6 +69,7 @@
 		public PageLoadOptions(PageLoadOptions copy, PageModules newModules)
 			: this(newModules)
 		{
+			ThrowNull(copy, nameof(copy));
 			this.ConvertTitles = copy.ConvertTitles;
 			this.FollowRedirects = copy.FollowRedirects;
 		}

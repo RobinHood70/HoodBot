@@ -8,6 +8,7 @@
 	using static WikiCommon.Globals;
 
 	/// <summary>A collection of Title objects.</summary>
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling is a factor of using classes to handle complex inputs and is unavoidable.")]
 	public class TitleCollection : TitleCollection<Title>, IEnumerable<Title>, IMessageSource
 	{
 		#region Constructors

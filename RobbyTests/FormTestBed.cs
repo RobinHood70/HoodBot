@@ -410,16 +410,25 @@
 		public void TitlePartsTests()
 		{
 			this.Assert(TitleParts.Normalize("Hello\u200E\u200F\u202A\u202B\u202C\u202D\u202E_\xA0\u1680\u180E\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u2028\u2029\u202F\u205F\u3000World") == "Hello                    World", "Text was not fully stripped and/or replaced.");
-			var validNames = new[] { "Sandbox", "A \"B\"", "A 'B'", ".com", "~", "\"", "'", "Talk:Sandbox", "Talk:Foo:Sandbox", "File:Example.svg", "File_talk:Example.svg", "Foo/.../Sandbox", "Sandbox/...", "A~~", ":A" };
-			var invalidNames = new[] { "Talk:File:Testjpg" };
-
 			var title = new TitleParts(this.Wiki, ":eN:sKyRiM:skyrim#Modding");
 			this.Assert(title.Interwiki.Prefix == "en", "Incorrect interwiki");
 			this.Assert(title.Namespace.Name == "Skyrim", "Incorrect namespace");
 			this.Assert(title.PageName == "Skyrim", "Incorrect pagename");
 			this.Assert(title.Fragment == "Modding", "Incorrect fragment");
 			this.Assert(title.FullPageName == "Skyrim:Skyrim", "Incorrect full page name");
-			this.Assert(title.Key == "Skyrim:Skyrim", "Incorrect key");
+			this.Assert(title.Key == ":eN:sKyRiM:skyrim#Modding", "Incorrect key");
+
+			var caught = false;
+			try
+			{
+				title = new TitleParts(this.Wiki, "Talk:File:Test.jpg");
+			}
+			catch (ArgumentException)
+			{
+				caught = true;
+			}
+
+			this.Assert(caught, "Error not caught");
 		}
 
 		public void TitlesAllPagesTests()
@@ -493,7 +502,7 @@
 			var userLoad = new User(this.Wiki, "RobinHood70");
 			userLoad.Load();
 			Debug.WriteLine(string.Join(",", userLoad.Groups));
-			Debug.WriteLine(userLoad.Gender.UpperFirst());
+			Debug.WriteLine(userLoad.Gender);
 
 			var users = this.Wiki.LoadUserInformation("RobinHood70", "Test User");
 			foreach (var user in users)
@@ -501,7 +510,7 @@
 				Debug.Write('\n');
 				Debug.WriteLine(user.Name);
 				Debug.WriteLine(string.Join(",", user.Groups));
-				Debug.WriteLine(user.Gender.UpperFirst());
+				Debug.WriteLine(user.Gender);
 			}
 		}
 
@@ -579,13 +588,7 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			var titles = new TitleCollection(this.Wiki, "User:RobinHood70/Mem");
-			var pages = titles.Load(new PageLoadOptions() { FollowRedirects = true });
-			foreach (var title in pages.TitleMap)
-			{
-				var value = title.Value;
-				Debug.WriteLine($"{title.Key} maps to Interwiki: {value.Interwiki.Prefix}, Namespace: {value.Namespace.Name}, PageName: {value.PageName}, Fragment: {value.Fragment}");
-			}
+			this.TitlePartsTests();
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;

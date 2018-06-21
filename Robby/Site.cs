@@ -35,6 +35,7 @@
 		/// <param name="wiki">The <see cref="IWikiAbstractionLayer"/> to use. This controls whether the API is used or some other access method.</param>
 		public Site(IWikiAbstractionLayer wiki)
 		{
+			ThrowNull(wiki, nameof(wiki));
 			wiki.WarningOccurred += this.Wiki_WarningOccurred;
 			this.AbstractionLayer = wiki;
 		}
@@ -676,7 +677,7 @@
 			var doGuess = true;
 			foreach (var item in siteInfo.InterwikiMap)
 			{
-				if (item.Flags.HasFlag(InterwikiMapFlags.Local))
+				if (item.Flags.HasFlag(InterwikiMapFlags.LocalInterwiki))
 				{
 					doGuess = false;
 					break;

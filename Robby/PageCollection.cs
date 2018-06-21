@@ -138,10 +138,10 @@
 		}
 
 		/// <summary>Adds pages with the specified revision IDs to the collection.</summary>
-		/// <param name="ids">The IDs.</param>
+		/// <param name="revisionIds">The IDs.</param>
 		/// <remarks>General information about the pages for the revision ids specified will always be loaded, regardless of the LoadOptions setting, though the revisions themselves may not be if the collection's load options would filter them out.</remarks>
 		// Note that while RevisionsInput() can be used as a generator, I have not implemented it because I can think of no situation in which it would be useful to populate a PageCollection given the existing revisions methods.
-		public override void AddRevisionIds(IEnumerable<long> ids) => this.LoadPages(this.LoadOptions, DefaultPageSetInput.FromRevisionIds(ids));
+		public override void AddRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(this.LoadOptions, DefaultPageSetInput.FromRevisionIds(revisionIds));
 
 		/// <summary>Removes all items from the <see cref="T:RobinHood70.Robby.TitleCollection">collection</see>, as well as those in the <see cref="TitleMap"/>.</summary>
 		public override void Clear()
@@ -286,6 +286,7 @@
 		/// <param name="pageSetInput">The page set input.</param>
 		protected virtual void LoadPages(PageLoadOptions options, DefaultPageSetInput pageSetInput)
 		{
+			ThrowNull(options, nameof(options));
 			ThrowNull(pageSetInput, nameof(pageSetInput));
 			pageSetInput.ConvertTitles = options.ConvertTitles;
 			pageSetInput.Redirects = options.FollowRedirects;

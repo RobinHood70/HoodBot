@@ -64,7 +64,7 @@
 			ThrowNull(pageName, nameof(pageName));
 			pageName = pageName.Normalize();
 			this.Namespace = site.Namespaces[ns];
-			this.PageName = this.Namespace.CaseSensitive ? pageName : pageName.UpperFirst();
+			this.PageName = this.Namespace.CaseSensitive ? pageName : pageName.UpperFirst(this.Namespace.Site.Culture);
 			this.Key = this.FullPageName;
 		}
 
@@ -177,7 +177,7 @@
 		/// <param name="pageName">The page name.</param>
 		/// <param name="fragment">The fragment (section title/anchor) to include.</param>
 		/// <returns>The full name of the page from the namespace and page name, accounting for Main space.</returns>
-		public static string NameFromParts(Namespace ns, string pageName, string fragment) => ns.DecoratedName + pageName + (fragment == null ? string.Empty : "#" + fragment);
+		public static string NameFromParts(Namespace ns, string pageName, string fragment) => ns?.DecoratedName + pageName + (fragment == null ? string.Empty : "#" + fragment);
 
 		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		/// <param name="pageName">The name of the page, without namespace or fragment text.</param>

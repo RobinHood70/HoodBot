@@ -65,16 +65,16 @@
 
 		/// <summary>Finds all pages the file is used on.</summary>
 		/// <returns>A list of <see cref="T:RobinHood70.Robby.Title"/>s that the file is used on.</returns>
-		public TitleCollection FileUsage() => this.FileUsage(this.Site.Namespaces.RegularIds, Filter.Any);
+		public TitleCollection FileUsage() => this.FileUsage(Filter.Any, this.Site.Namespaces.RegularIds);
 
 		/// <summary>Finds all pages the file is used on within the given namespaces and optionally filters out redirects.</summary>
-		/// <param name="namespaces">The namespaces to search.</param>
 		/// <param name="filterRedirects">Filter redirects out of the result set.</param>
+		/// <param name="namespaces">The namespaces to search.</param>
 		/// <returns>A list of <see cref="T:RobinHood70.Robby.Title"/>s that the file is used on.</returns>
-		public TitleCollection FileUsage(IEnumerable<int> namespaces, Filter filterRedirects)
+		public TitleCollection FileUsage(Filter filterRedirects, IEnumerable<int> namespaces)
 		{
 			var titles = new TitleCollection(this.Site);
-			titles.AddFileUsage(new[] { this });
+			titles.AddFileUsage(new[] { this }, filterRedirects, namespaces);
 
 			return titles;
 		}
@@ -89,7 +89,7 @@
 		public TitleCollection FindDuplicateFiles(bool localOnly)
 		{
 			var titles = new TitleCollection(this.Site);
-			titles.AddDuplicateFiles(new[] { this });
+			titles.AddDuplicateFiles(new[] { this }, localOnly);
 
 			return titles;
 		}

@@ -204,15 +204,18 @@
 		/// <remarks>It is assumed that the namespace for the second page name is equal to the current one, or at least that they have the same case-sensitivy.</remarks>
 		public bool PageNameEquals(string pageName1, string pageName2)
 		{
+			ThrowNull(pageName1, nameof(pageName1));
+			ThrowNull(pageName2, nameof(pageName2));
 			if (pageName1.Length != pageName2.Length)
 			{
 				// Quick check to rule out most cases before we do string building.
 				return false;
 			}
 
+			var siteCulture = this.Site.Culture;
 			return this.CaseSensitive
 				? pageName1 == pageName2
-				: pageName1.UpperFirst() == pageName2.UpperFirst();
+				: pageName1.UpperFirst(siteCulture) == pageName2.UpperFirst(siteCulture);
 		}
 
 		/// <summary>Removes a name from the lookup list. Only names that have been previously added can be removed.</summary>
