@@ -83,7 +83,7 @@
 
 		public string Email(string body, bool ccMe)
 		{
-			defaultSubject = defaultSubject ?? this.Site.GetParsedMessage("defemailsubject", new[] { this.Site.UserName });
+			defaultSubject = defaultSubject ?? this.Site.LoadParsedMessage("defemailsubject", new[] { this.Site.UserName });
 			return this.Email(defaultSubject, body, ccMe);
 		}
 

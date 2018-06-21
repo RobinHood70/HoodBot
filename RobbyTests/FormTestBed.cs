@@ -112,14 +112,14 @@
 
 		public void BlocksTests()
 		{
-			var result = this.Wiki.GetBlocks(new[] { "RobinHood70", "HoodBot", "HotnBOThered", "Dagoth Ur" });
+			var result = this.Wiki.LoadBlocks(new[] { "RobinHood70", "HoodBot", "HotnBOThered", "Dagoth Ur" });
 			foreach (var item in result)
 			{
 				var expiry = item.Expiry == DateTime.MaxValue ? "indefinite" : item.Expiry.ToString();
 				Debug.WriteLine($"{item.User} blocked by {item.BlockedBy} on {item.StartTime}. Expires: {expiry}");
 			}
 
-			result = this.Wiki.GetBlocks(Filter.Only, Filter.Any, Filter.Exclude, Filter.Any);
+			result = this.Wiki.LoadBlocks(Filter.Only, Filter.Any, Filter.Exclude, Filter.Any);
 			var set = new HashSet<string>();
 			foreach (var item in result)
 			{
@@ -361,7 +361,7 @@
 
 		public void RecentChangesTests()
 		{
-			var result = this.Wiki.GetRecentChanges();
+			var result = this.Wiki.LoadRecentChanges();
 			Debug.WriteLine(result.Count);
 		}
 
@@ -495,7 +495,7 @@
 			Debug.WriteLine(string.Join(",", userLoad.Groups));
 			Debug.WriteLine(userLoad.Gender.UpperFirst());
 
-			var users = this.Wiki.GetUserInformation("RobinHood70", "Test User");
+			var users = this.Wiki.LoadUserInformation("RobinHood70", "Test User");
 			foreach (var user in users)
 			{
 				Debug.Write('\n');
@@ -513,11 +513,11 @@
 
 		public void UsersTests()
 		{
-			Debug.WriteLine("Active Users: {0}", this.Wiki.GetUsers(true, false).Count);
-			Debug.WriteLine("Sysops: {0}", this.Wiki.GetUsersInGroups(false, false, "sysop").Count);
-			Debug.WriteLine("API High Limits: {0}", this.Wiki.GetUsersWithRights(false, false, "apihighlimits").Count);
-			Debug.WriteLine("API High Limits with edits: {0}", this.Wiki.GetUsersWithRights(false, true, "apihighlimits").Count);
-			Debug.WriteLine("API High Limits that are active: {0}", this.Wiki.GetUsersWithRights(true, false, "apihighlimits").Count);
+			Debug.WriteLine("Active Users: {0}", this.Wiki.LoadUsers(true, false).Count);
+			Debug.WriteLine("Sysops: {0}", this.Wiki.LoadUsersInGroups(false, false, "sysop").Count);
+			Debug.WriteLine("API High Limits: {0}", this.Wiki.LoadUsersWithRights(false, false, "apihighlimits").Count);
+			Debug.WriteLine("API High Limits with edits: {0}", this.Wiki.LoadUsersWithRights(false, true, "apihighlimits").Count);
+			Debug.WriteLine("API High Limits that are active: {0}", this.Wiki.LoadUsersWithRights(true, false, "apihighlimits").Count);
 		}
 
 		public void UserWatchlistTests()
