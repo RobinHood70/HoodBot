@@ -81,7 +81,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				RevisionId = (long?)result["revid"] ?? 0,
 			};
 			var redirects = new Dictionary<string, PageSetRedirectItem>();
-			result["redirects"].GetRedirects(redirects);
+			result["redirects"].GetRedirects(redirects, this.Wal);
 			output.Redirects = redirects.AsReadOnly();
 			output.Text = (string)result["text"];
 			output.ParsedSummary = (string)result["parsedsummary"].AsBCSubContent();

@@ -145,6 +145,11 @@
 		/// <remarks>This should not normally need to be set, but is left as settable by derived classes, should customization be needed.</remarks>
 		public SiteInfoFlags Flags { get; protected set; }
 
+		/// <summary>Gets the interwiki prefixes.</summary>
+		/// <value>A hashset of all interwiki prefixes, to allow <see cref="PageSetRedirectItem.Interwiki"/> emulation for MW 1.24 and below.</value>
+		/// <remarks>For some bizarre reason, there is no read-only collection in C# that implements the Contains method, so this is left as a writable HashSet, since it's the fastest lookup.</remarks>
+		public HashSet<string> InterwikiPrefixes { get; } = new HashSet<string>(StringComparer.Create(CultureInfo.InvariantCulture, true));
+
 		/// <summary>Gets or sets the site language code.</summary>
 		/// <value>The language code.</value>
 		public string LanguageCode { get; set; }
@@ -1138,7 +1143,7 @@
 		private void GetBasicSiteInfo()
 		{
 			// So far, SiteInfoProperties.Namespaces only required to fix bug in API:Search < 1.25 and for ClearHasMessage < 1.24
-			var infoModule = new MetaSiteInfo(this, new SiteInfoInput() { Properties = SiteInfoProperties.General | SiteInfoProperties.DbReplLag | SiteInfoProperties.Namespaces });
+			var infoModule = new MetaSiteInfo(this, new SiteInfoInput() { Properties = SiteInfoProperties.General | SiteInfoProperties.DbReplLag | SiteInfoProperties.Namespaces | SiteInfoProperties.InterwikiMap });
 			var userModule = new MetaUserInfo(this, new UserInfoInput());
 			var queryInput = new QueryInput(infoModule, userModule);
 			var query = new ActionQuery(this);
@@ -1170,6 +1175,11 @@
 				}
 
 				path = siteInfo.BasePage.Substring(0, articleBaseIndex) + path;
+			}
+
+			foreach (var interwiki in siteInfo.InterwikiMap)
+			{
+				this.InterwikiPrefixes.Add(interwiki.Prefix);
 			}
 
 			this.articlePath = path;

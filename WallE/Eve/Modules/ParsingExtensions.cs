@@ -177,7 +177,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			return output;
 		}
 
-		public static void GetRedirects(this JToken result, Dictionary<string, PageSetRedirectItem> redirects)
+		public static void GetRedirects(this JToken result, Dictionary<string, PageSetRedirectItem> redirects, WikiAbstractionLayer wal)
 		{
 			if (result != null)
 			{
@@ -188,6 +188,15 @@ namespace RobinHood70.WallE.Eve.Modules
 					toPage.Title = (string)item["to"];
 					toPage.Fragment = (string)item["tofragment"];
 					toPage.Interwiki = (string)item["tointerwiki"];
+					if (toPage.Interwiki == null && wal.SiteVersion < 125)
+					{
+						var titleSplit = toPage.Title.TrimStart(':').Split(new[] { ':' }, 2);
+						if (titleSplit.Length == 2 && wal.InterwikiPrefixes.Contains(titleSplit[0]))
+						{
+							toPage.Interwiki = titleSplit[0];
+							toPage.Title = titleSplit[1];
+						}
+					}
 
 					var gi = item.ToObject<Dictionary<string, object>>();
 					gi.Remove("from");

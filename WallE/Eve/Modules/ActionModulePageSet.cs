@@ -145,7 +145,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			result["normalized"].AddToDictionary(this.normalized, "from", "to");
-			result["redirects"].GetRedirects(this.redirects);
+			result["redirects"].GetRedirects(this.redirects, this.Wal);
 		}
 		#endregion
 
