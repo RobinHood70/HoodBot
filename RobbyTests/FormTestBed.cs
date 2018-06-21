@@ -206,8 +206,7 @@
 			DumpTitles(pageCollection);
 
 			var filePage = new FilePage(this.Wiki, duped);
-			var result = filePage.FindDuplicateFiles();
-			var files = new TitleCollection(this.Wiki, MediaWikiNamespaces.File, result);
+			var files = filePage.FindDuplicateFiles();
 			DumpTitles(files);
 		}
 
@@ -580,7 +579,13 @@
 			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			this.DoGlobalSetup(wikiInfo);
 
-			this.TitlePartsTests();
+			var titles = new TitleCollection(this.Wiki, "User:RobinHood70/Mem");
+			var pages = titles.Load(new PageLoadOptions() { FollowRedirects = true });
+			foreach (var title in pages.TitleMap)
+			{
+				var value = title.Value;
+				Debug.WriteLine($"{title.Key} maps to Interwiki: {value.Interwiki.Prefix}, Namespace: {value.Namespace.Name}, PageName: {value.PageName}, Fragment: {value.Fragment}");
+			}
 
 			this.DoGlobalTeardown(wikiInfo);
 			this.ButtonQuick.Enabled = true;
