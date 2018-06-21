@@ -44,12 +44,6 @@
 		/// <summary>Gets the interwiki prefix.</summary>
 		/// <value>The interwiki prefix.</value>
 		public string Prefix { get; }
-
-		/// <summary>Checks if two Interwiki entries are functionally equivalent.</summary>
-		/// <param name="first">The first interwiki entry.</param>
-		/// <param name="second">The second interwiki entry.</param>
-		/// <returns><c>true</c> if both interwiki entries are the same object, have the same path, or both equate to the local wiki (either explicitly or by being null).</returns>
-		public static bool LocalOrEqual(InterwikiEntry first, InterwikiEntry second) => (first == second) || (first == null & second.LocalWiki) || (second == null && first.LocalWiki) || (first.LocalWiki && second.LocalWiki) || first.Path == second.Path;
 		#endregion
 
 		#region Public Methods
