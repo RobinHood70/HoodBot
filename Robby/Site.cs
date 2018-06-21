@@ -20,6 +20,15 @@
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Sufficiently maintainable for now. Could conceivably split off the LoadX() methods if needed, I suppose.")]
 	public class Site : IMessageSource
 	{
+		#region Constants
+		private const SiteInfoProperties NeededSiteInfo =
+			SiteInfoProperties.General |
+			SiteInfoProperties.Namespaces |
+			SiteInfoProperties.NamespaceAliases |
+			SiteInfoProperties.MagicWords |
+			SiteInfoProperties.InterwikiMap;
+		#endregion
+
 		#region Fields
 		private readonly Dictionary<string, MagicWord> magicWords = new Dictionary<string, MagicWord>();
 
@@ -36,8 +45,21 @@
 		public Site(IWikiAbstractionLayer wiki)
 		{
 			ThrowNull(wiki, nameof(wiki));
-			wiki.WarningOccurred += this.Wiki_WarningOccurred;
+			wiki.Initializing += this.AbstractionLayer_Initializing;
+			wiki.Initialized += this.AbstractionLayer_Initialized;
+			wiki.WarningOccurred += this.AbstractionLayer_WarningOccurred;
 			this.AbstractionLayer = wiki;
+		}
+		#endregion
+
+		#region Finalizer
+
+		/// <summary>Finalizes an instance of the <see cref="Site"/> class.</summary>
+		~Site()
+		{
+			this.AbstractionLayer.WarningOccurred -= this.AbstractionLayer_WarningOccurred;
+			this.AbstractionLayer.Initialized -= this.AbstractionLayer_Initialized;
+			this.AbstractionLayer.Initializing -= this.AbstractionLayer_Initializing;
 		}
 		#endregion
 
@@ -621,40 +643,23 @@
 		}
 
 		/// <summary>Gets all site information required for proper functioning of the framework.</summary>
-		protected virtual void LoadInfo()
+		/// <summary>Parses all site information that's needed internally for the Site object to work.</summary>
+		/// <param name="siteInfo">The site information.</param>
+		protected virtual void ParseInternalSiteInfo(SiteInfoResult siteInfo)
 		{
-			var siteInfo = this.AbstractionLayer.SiteInfo(new SiteInfoInput() { Properties = SiteInfoProperties.General | SiteInfoProperties.Namespaces | SiteInfoProperties.NamespaceAliases | SiteInfoProperties.MagicWords | SiteInfoProperties.InterwikiMap });
+			ThrowNull(siteInfo, nameof(siteInfo));
+
+			// General
 			this.CaseSensitive = siteInfo.Flags.HasFlag(SiteInfoFlags.CaseSensitive);
 			this.Culture = GetCulture(siteInfo.Language);
 			this.MainPage = siteInfo.MainPage;
 			this.Name = siteInfo.SiteName;
 			this.ServerName = siteInfo.ServerName;
 			this.Version = siteInfo.Generator;
-
-			var allAliases = new Dictionary<int, List<string>>();
-			foreach (var item in siteInfo.NamespaceAliases)
-			{
-				if (!allAliases.TryGetValue(item.Id, out var list))
-				{
-					list = new List<string>();
-					allAliases.Add(item.Id, list);
-				}
-
-				list.Add(item.Alias);
-			}
-
-			var namespaces = new List<Namespace>(siteInfo.Namespaces.Count);
-			foreach (var item in siteInfo.Namespaces)
-			{
-				allAliases.TryGetValue(item.Id, out var aliases);
-				namespaces.Add(new Namespace(this, item, aliases));
-			}
-
-			this.Namespaces = new NamespaceCollection(namespaces, this.EqualityComparerInsensitive);
-
 			var path = siteInfo.ArticlePath;
 			if (path.StartsWith("/", StringComparison.Ordinal))
 			{
+				// If article path is relative, figure out the absolute address.
 				var repl = path.Substring(0, path.IndexOf("$1", StringComparison.Ordinal));
 				var articleBaseIndex = siteInfo.BasePage.IndexOf(repl, StringComparison.Ordinal);
 				if (articleBaseIndex < 0)
@@ -667,6 +672,30 @@
 
 			this.articlePath = path;
 
+			// NamespaceAliases
+			var allAliases = new Dictionary<int, List<string>>();
+			foreach (var item in siteInfo.NamespaceAliases)
+			{
+				if (!allAliases.TryGetValue(item.Id, out var list))
+				{
+					list = new List<string>();
+					allAliases.Add(item.Id, list);
+				}
+
+				list.Add(item.Alias);
+			}
+
+			// Namespaces
+			var namespaces = new List<Namespace>(siteInfo.Namespaces.Count);
+			foreach (var item in siteInfo.Namespaces)
+			{
+				allAliases.TryGetValue(item.Id, out var aliases);
+				namespaces.Add(new Namespace(this, item, aliases));
+			}
+
+			this.Namespaces = new NamespaceCollection(namespaces, this.EqualityComparerInsensitive);
+
+			// MagicWords
 			foreach (var word in siteInfo.MagicWords)
 			{
 				this.magicWords.Add(word.Name, new MagicWord(word));
@@ -674,6 +703,7 @@
 
 			this.DisambiguatorAvailable = this.magicWords.ContainsKey("disambiguation");
 
+			// InterwikiMap
 			var doGuess = true;
 			foreach (var item in siteInfo.InterwikiMap)
 			{
@@ -791,19 +821,21 @@
 		/// <remarks>Even if you wish to edit anonymously, you <em>must</em> still log in by passing <see langword="null" /> for the input.</remarks>
 		protected virtual void Login(LoginInput input)
 		{
-			if (input?.UserName != null)
+			var result = this.AbstractionLayer.Login(input);
+			if (result.Result != "Success")
 			{
-				var result = this.AbstractionLayer.Login(input);
-				if (result.Result != "Success")
-				{
-					this.Clear();
-					throw new UnauthorizedAccessException(CurrentCulture(LoginFailed, result.Reason));
-				}
-
-				this.UserName = result.User;
+				this.Clear();
+				throw new UnauthorizedAccessException(CurrentCulture(LoginFailed, result.Reason));
 			}
 
-			this.LoadInfo();
+			this.UserName = result.User;
+
+			// This should never happen with co-initialization, but just in case there's a massive change to the abstraction layer, make sure we have all the info we need.
+			if (this.Version == null)
+			{
+				var siteInfo = this.AbstractionLayer.SiteInfo(new SiteInfoInput() { Properties = NeededSiteInfo });
+				this.ParseInternalSiteInfo(siteInfo);
+			}
 		}
 
 		/// <summary>Patrols the specified Recent Changes ID.</summary>
@@ -832,6 +864,26 @@
 		#endregion
 
 		#region Private Methods
+
+		// Parse co-initialization results.
+		private void AbstractionLayer_Initialized(IWikiAbstractionLayer sender, InitializationEventArgs eventArgs) => this.ParseInternalSiteInfo(eventArgs.Result);
+
+		// Setup co-initialization to avoid near-duplicate requests with AbstractionLayer.
+		private void AbstractionLayer_Initializing(IWikiAbstractionLayer sender, InitializationEventArgs eventArgs)
+		{
+			eventArgs.Input.Properties |= NeededSiteInfo;
+			eventArgs.Input.FilterLocalInterwiki = Filter.Any;
+		}
+
+		/// <summary>Forwards warning events from the abstraction layer to the wiki.</summary>
+		/// <param name="sender">The sending abstraction layer.</param>
+		/// <param name="eventArgs">The event arguments.</param>
+		private void AbstractionLayer_WarningOccurred(IWikiAbstractionLayer sender, /* Overlapping type names, so must use full name here */ WallE.Design.WarningEventArgs eventArgs)
+		{
+			var warning = eventArgs.Warning;
+			this.PublishWarning(this, "(" + warning.Code + ") " + warning.Info);
+		}
+
 		private void Clear()
 		{
 			this.articlePath = null;
@@ -846,15 +898,6 @@
 			this.ServerName = null;
 			this.UserName = null;
 			this.Version = null;
-		}
-
-		/// <summary>Forwards warning events from the abstraction layer to the wiki.</summary>
-		/// <param name="sender">The sending abstraction layer.</param>
-		/// <param name="eventArgs">The event arguments.</param>
-		private void Wiki_WarningOccurred(IWikiAbstractionLayer sender, /* Overlapping type names, so must use full name here */ WallE.Design.WarningEventArgs eventArgs)
-		{
-			var warning = eventArgs.Warning;
-			this.PublishWarning(this, "(" + warning.Code + ") " + warning.Info);
 		}
 		#endregion
 	}

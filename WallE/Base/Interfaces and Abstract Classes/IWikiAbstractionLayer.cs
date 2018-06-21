@@ -49,9 +49,11 @@
 		event StrongEventHandler<IWikiAbstractionLayer, CaptchaEventArgs> CaptchaChallenge;
 
 		/// <summary>Occurs after initialization data has been loaded and processed.</summary>
+		/// <remarks>Subscribers to this event should assume that they may get more information back than what they requested (e.g., all interwiki info instead of local only), and filter out any data that they do not require.</remarks>
 		event StrongEventHandler<IWikiAbstractionLayer, InitializationEventArgs> Initialized;
 
 		/// <summary>Occurs when the wiki is about to load initialization data.</summary>
+		/// <remarks>Subscribers to this event have the opportunity to request additional SiteInfo data over what the base abstraction layer and any other layers require. It is the subscriber's responsibility to ensure that they're always requesting a superset of the information required and do not inadvertently prevent another subscriber from getting the information it requires. Most settings should be OR'd together with previous values and Filter settings should be set to Any in the event of a conflict. If there's a conflict in the interwiki language code, you will not be able to use co-initialization and should issue a separate SiteInfo request.</remarks>
 		event StrongEventHandler<IWikiAbstractionLayer, InitializationEventArgs> Initializing;
 
 		/// <summary>Occurs when a warning is issued by the wiki.</summary>

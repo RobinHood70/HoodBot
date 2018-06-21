@@ -26,6 +26,11 @@
 		internal const int LimitSmall1 = 50;
 		internal const int LimitSmall2 = 500;
 		internal const string ApiDisabledCode = "apidisabled";
+		private const SiteInfoProperties NeededSiteInfo =
+			SiteInfoProperties.General |
+			SiteInfoProperties.DbReplLag |
+			SiteInfoProperties.Namespaces |
+			SiteInfoProperties.InterwikiMap;
 		#endregion
 
 		#region Fields
@@ -700,7 +705,7 @@
 			}
 
 			string botPasswordName = null;
-			if (input.UserName != null)
+			if (!string.IsNullOrEmpty(input.UserName))
 			{
 				var userNameSplit = input.UserName.Split('@');
 				botPasswordName = userNameSplit[userNameSplit.Length - 1];
@@ -1184,11 +1189,11 @@
 		{
 			// So far, SiteInfoProperties.Namespaces only required to fix bug in API:Search < 1.25 and for ClearHasMessage < 1.24
 			// Similarly, InterwikiMap is only required to emulate PageSet redirects' tointerwiki property for < 1.25.
-			var siteInput = new SiteInfoInput() { Properties = SiteInfoProperties.General | SiteInfoProperties.DbReplLag | SiteInfoProperties.Namespaces | SiteInfoProperties.InterwikiMap };
+			var siteInput = new SiteInfoInput() { Properties = NeededSiteInfo };
 			this.OnInitializing(new InitializationEventArgs(siteInput, null));
 
 			// Ensure settings we care about haven't been messed with.
-			siteInput.Properties |= SiteInfoProperties.General | SiteInfoProperties.DbReplLag | SiteInfoProperties.Namespaces | SiteInfoProperties.InterwikiMap;
+			siteInput.Properties |= NeededSiteInfo;
 			siteInput.FilterLocalInterwiki = Filter.Any;
 
 			var infoModule = new MetaSiteInfo(this, siteInput);
@@ -1202,16 +1207,10 @@
 
 			var siteInfo = infoModule.Output;
 
+			// General
 			this.Flags = siteInfo.Flags;
 			this.LanguageCode = siteInfo.Language;
 			this.Script = siteInfo.Script;
-			var dict = new Dictionary<int, NamespacesItem>();
-			foreach (var ns in siteInfo.Namespaces)
-			{
-				dict.Add(ns.Id, ns);
-			}
-
-			this.Namespaces = dict.AsReadOnly();
 			var path = siteInfo.ArticlePath;
 			if (path.StartsWith("/", StringComparison.Ordinal))
 			{
@@ -1225,18 +1224,31 @@
 				path = siteInfo.BasePage.Substring(0, articleBaseIndex) + path;
 			}
 
-			foreach (var interwiki in siteInfo.InterwikiMap)
-			{
-				this.InterwikiPrefixes.Add(interwiki.Prefix);
-			}
-
 			this.articlePath = path;
-			this.SupportsMaxLag = siteInfo.LagInfo?.Count > 0 && siteInfo.LagInfo[0].Lag != -1;
 			var versionFudged = Regex.Replace(siteInfo.Generator, @"[^0-9\.]", ".").TrimStart('.');
 			var versionSplit = versionFudged.Split('.');
 			var siteVersion = int.Parse(versionSplit[0], CultureInfo.InvariantCulture) * 100 + int.Parse(versionSplit[1], CultureInfo.InvariantCulture);
 			this.SiteVersion = siteVersion;
 
+			// Namespaces
+			var dict = new Dictionary<int, NamespacesItem>();
+			foreach (var ns in siteInfo.Namespaces)
+			{
+				dict.Add(ns.Id, ns);
+			}
+
+			this.Namespaces = dict.AsReadOnly();
+
+			// Interwiki
+			foreach (var interwiki in siteInfo.InterwikiMap)
+			{
+				this.InterwikiPrefixes.Add(interwiki.Prefix);
+			}
+
+			// DbReplLag
+			this.SupportsMaxLag = siteInfo.LagInfo?.Count > 0 && siteInfo.LagInfo[0].Lag != -1;
+
+			// Other (not SiteInfo-related)
 			if (this.TokenManager == null)
 			{
 				this.TokenManager =
