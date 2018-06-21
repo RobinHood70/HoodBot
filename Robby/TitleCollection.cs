@@ -165,10 +165,17 @@
 		/// <summary>Loads the specified information for all pages in the collection.</summary>
 		/// <param name="options">The page load options.</param>
 		/// <returns>A <see cref="PageCollection"/> containing the specified pages, including status information for pages that could not be loaded.</returns>
-		public PageCollection Load(PageLoadOptions options)
+		public PageCollection Load(PageLoadOptions options) => this.Load(options, this.Site.PageCreator);
+
+		/// <summary>Loads the specified information for all pages in the collection using the specified PageCreator.</summary>
+		/// <param name="options">The page load options.</param>
+		/// <param name="pageCreator">The page creator to use for this job only.</param>
+		/// <returns>A <see cref="PageCollection" /> containing the specified pages, including status information for pages that could not be loaded.</returns>
+		public PageCollection Load(PageLoadOptions options, PageCreator pageCreator)
 		{
-			var retval = new PageCollection(this.Site, options);
+			var retval = new PageCollection(this.Site, options, pageCreator);
 			retval.AddTitles(this);
+
 			return retval;
 		}
 
