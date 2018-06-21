@@ -5,7 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Design;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
-	using RobinHood70.WikiCommon;
+	using WikiCommon;
 	using static Properties.EveMessages;
 	using static WikiCommon.Globals;
 

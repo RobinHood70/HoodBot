@@ -1,6 +1,6 @@
 ﻿namespace RobinHood70.Robby.Pages
 {
-	using RobinHood70.Robby.Design;
+	using Design;
 
 	/// <summary>Stores information about a category link. This includes the sort key and whether or not the category is hidden.</summary>
 	/// <seealso cref="RobinHood70.Robby.Title" />

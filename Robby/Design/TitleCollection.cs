@@ -4,7 +4,7 @@
 	using System.Collections;
 	using System.Collections.Generic;
 	using Design;
-	using RobinHood70.WallE.Base;
+	using WallE.Base;
 	using WikiCommon;
 	using static Properties.Resources;
 	using static WikiCommon.Globals;
@@ -651,8 +651,8 @@
 		/// <param name="index">The zero-based index of the item to remove.</param>
 		public void RemoveAt(int index) => this.RemoveItem(index);
 
-		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> by key.</summary>
-		public void Sort() => this.Sort(new WikiTitleComparerKey());
+		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> by namespace, then pagename.</summary>
+		public void Sort() => this.Sort(new WikiTitleComparerNamespacePageName());
 
 		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> using the specified <see cref="T:System.Comparison{T}" />.</summary>
 		/// <param name="comparison">The comparison.</param>

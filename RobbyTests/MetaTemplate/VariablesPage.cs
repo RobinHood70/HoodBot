@@ -3,8 +3,8 @@
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using Pages;
-	using RobinHood70.Robby.Design;
-	using RobinHood70.WallE.Base;
+	using Robby.Design;
+	using WallE.Base;
 
 	public class VariablesPage : Page
 	{

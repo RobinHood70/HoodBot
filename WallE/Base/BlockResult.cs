@@ -2,7 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
-	using RobinHood70.WikiCommon;
+	using WikiCommon;
 
 	public class BlockResult
 	{

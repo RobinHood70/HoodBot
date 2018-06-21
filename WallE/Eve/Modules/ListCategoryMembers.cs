@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Base;
 	using Newtonsoft.Json.Linq;
 	using RequestBuilder;
-	using RobinHood70.WikiCommon;
+	using WikiCommon;
 	using static WikiCommon.Globals;
 
 	internal class ListCategoryMembers : ListModule<CategoryMembersInput, CategoryMembersItem>, IGeneratorModule

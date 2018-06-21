@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby
 {
 	using System.Collections.Generic;
-	using RobinHood70.WallE.Base;
+	using WallE.Base;
 	using static WikiCommon.Globals;
 
 	/// <summary>Stores information about a single user contribution.</summary>

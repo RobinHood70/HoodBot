@@ -3,8 +3,8 @@
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
-	using RobinHood70.WikiCommon;
 	using WallE.Base;
+	using WikiCommon;
 	using static WikiCommon.Globals;
 
 	/// <summary>Represents a file on the wiki. Includes all page data as well as file revisions and file-specific methods.</summary>

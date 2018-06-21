@@ -2,7 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using RobinHood70.WallE.Base;
+	using WallE.Base;
 	using static WikiCommon.Globals;
 
 	public class RecentChange

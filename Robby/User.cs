@@ -2,8 +2,8 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using RobinHood70.Robby.Design;
-	using RobinHood70.WallE.Base;
+	using Design;
+	using WallE.Base;
 	using WikiCommon;
 	using static WikiCommon.Globals;
 
