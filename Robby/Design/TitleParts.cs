@@ -46,7 +46,7 @@
 				if (site.Namespaces.TryGetValue(key, out var ns))
 				{
 					this.Namespace = ns;
-					nameRemaining = split[1].TrimStart() + (split.Length == 3 ? split[2] : string.Empty);
+					nameRemaining = split[1].TrimStart() + (split.Length == 3 ? ':' + split[2] : string.Empty);
 				}
 				else if (site.InterwikiMap.TryGetItem(key, out var iw))
 				{
@@ -67,12 +67,14 @@
 								this.Namespace = mainPage.Namespace;
 								this.PageName = mainPage.PageName;
 								this.Fragment = mainPage.Fragment;
+
+								return;
 							}
 						}
 					}
 					else
 					{
-						nameRemaining = split[1].TrimStart() + split[2];
+						nameRemaining = split[1].TrimStart() + ':' + split[2];
 					}
 				}
 			}
@@ -90,12 +92,17 @@
 			split = nameRemaining.Split(new[] { '#' }, 2);
 			if (split.Length == 2)
 			{
-				this.PageName = this.Namespace.CaseSensitive ? split[0] : split[0].UpperFirst();
+				this.PageName = split[0];
 				this.Fragment = split[1];
 			}
 			else
 			{
-				this.PageName = this.Namespace.CaseSensitive ? nameRemaining : nameRemaining.UpperFirst();
+				this.PageName = nameRemaining;
+			}
+
+			if (!this.Namespace.CaseSensitive)
+			{
+				this.PageName = this.PageName.UpperFirst(site.Culture);
 			}
 		}
 
