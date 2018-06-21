@@ -72,6 +72,7 @@
     <Compile Include="Base\ImportInput.cs" />
     <Compile Include="Base\ImportItem.cs" />
     <Compile Include="Base\Interfaces and Abstract Classes\IPageSetResult.cs" />
+    <Compile Include="Base\InitializationEventArgs.cs" />
     <Compile Include="Base\InterwikiBacklinksItem.cs" />
     <Compile Include="Base\LanguageBacklinksItem.cs" />
     <Compile Include="Base\LogEventsItem.cs" />

@@ -144,19 +144,22 @@ namespace RobinHood70.WallE.Eve.Modules
 				throw new StopException(CustomStopCheckFailed);
 			}
 
-			var userOutput = this.userModule.Output;
-			if (this.StopMethods.HasFlag(StopCheckMethods.UserNameCheck) && this.SiteVersion < 128 && this.Wal.UserName != userOutput.Name)
+			var userOutput = this.userModule?.Output;
+			if (userOutput != null)
 			{
-				this.Wal.BreakRecursionAfterSubmit = false;
+				if (this.StopMethods.HasFlag(StopCheckMethods.UserNameCheck) && this.SiteVersion < 128 && this.Wal.UserName != userOutput.Name)
+				{
+					this.Wal.BreakRecursionAfterSubmit = false;
 
-				// Used to check if username has unexpectedly changed, indicating that the bot has been logged out (or conceivably logged in) unexpectedly.
-				throw new StopException(UserNameChanged);
-			}
+					// Used to check if username has unexpectedly changed, indicating that the bot has been logged out (or conceivably logged in) unexpectedly.
+					throw new StopException(UserNameChanged);
+				}
 
-			if (this.StopMethods.HasFlag(StopCheckMethods.TalkCheckQuery) && userOutput.Flags.HasFlag(UserInfoFlags.HasMessage))
-			{
-				this.Wal.BreakRecursionAfterSubmit = false;
-				throw new StopException(TalkPageChanged);
+				if (this.StopMethods.HasFlag(StopCheckMethods.TalkCheckQuery) && userOutput.Flags.HasFlag(UserInfoFlags.HasMessage))
+				{
+					this.Wal.BreakRecursionAfterSubmit = false;
+					throw new StopException(TalkPageChanged);
+				}
 			}
 
 			this.Wal.BreakRecursionAfterSubmit = false;
@@ -317,12 +320,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Private Methods
 		private void CheckActiveModules(QueryInput input)
 		{
-			// This could be a pagset query that's just getting a list of pages and nothing else, so no need to check if we have property modules. If it isn't a pageset query, though, throw an error because "action=query" on its own is not useful, and is clearly an error in the input.
-			if (input.Modules.Count == 0 && !input.PageSetQuery)
-			{
-				throw new InvalidOperationException(InvalidQuery);
-			}
-
 			if (input.Modules.Count > 0 || input.PropertyModules.Count > 0)
 			{
 				// Check if any modules are active. This is done before adding/merging the UserModule, since that would always make it appear that there's an active module.

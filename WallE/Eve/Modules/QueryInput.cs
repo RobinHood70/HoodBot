@@ -18,10 +18,16 @@ namespace RobinHood70.WallE.Eve.Modules
 		public QueryInput(IEnumerable<IQueryModule> modules)
 			: base() // Specified explicitly so VS can track the call, otherwise PageSetInput() appears unused when it's actually not.
 		{
-			ThrowNullRefCollection(modules, nameof(modules));
-			foreach (var module in modules)
+			// An empty query is still valid, so allow for that possibility.
+			if (modules != null)
 			{
-				this.Modules.Add(module);
+				foreach (var module in modules)
+				{
+					if (module != null)
+					{
+						this.Modules.Add(module);
+					}
+				}
 			}
 
 			this.PropertyModules = new ModuleCollection<IPropertyModule>();

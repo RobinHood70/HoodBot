@@ -195,10 +195,13 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				return this.Deserialize(jsonResponse);
 			}
-			else
+			else if (jsonResponse.Type != JTokenType.Array || (jsonResponse as JArray).Count > 0)
 			{
+				// Deserialize unless it was just an empty array.
 				return this.DeserializeCustom(jsonResponse);
 			}
+
+			return null;
 		}
 		#endregion
 
@@ -209,7 +212,17 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Virtual Methods
-		protected virtual TOutput DeserializeCustom(string result) => throw new WikiException(CurrentCulture(ResultInvalid));
+		protected virtual TOutput DeserializeCustom(string result)
+		{
+			if (result != null && result.Contains("$wgEnableAPI"))
+			{
+				throw WikiException.General(WikiAbstractionLayer.ApiDisabledCode, CurrentCulture(ApiDisabled));
+			}
+			else
+			{
+				throw new WikiException(CurrentCulture(ResultInvalid));
+			}
+		}
 
 		// This version is for responses like OpenSearch where the Json should be valid, but is an array rather than an object.
 		protected virtual TOutput DeserializeCustom(JToken result) => throw new WikiException(CurrentCulture(ResultInvalid));

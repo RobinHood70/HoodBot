@@ -70,6 +70,15 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The API is disabled on this wiki..
+        /// </summary>
+        internal static string ApiDisabled {
+            get {
+                return ResourceManager.GetString("ApiDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A session token was requested for rollback or userrights on a wiki where these are not session tokens..
         /// </summary>
         internal static string BadTokenRequest {
