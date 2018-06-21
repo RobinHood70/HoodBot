@@ -197,6 +197,24 @@
 		/// <returns><see langword="true" /> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false" />.</returns>
 		public bool Equals(int other) => this.Id == other;
 
+		/// <summary>Checks if two page names are the same, based on the case-sensitivity for the namespace.</summary>
+		/// <param name="pageName1">The page name to check.</param>
+		/// <param name="pageName2">The page name to compare to.</param>
+		/// <returns><see langword="true" /> if the two string are considered the same; otherwise <see langword="false" />.</returns>
+		/// <remarks>It is assumed that the namespace for the second page name is equal to the current one, or at least that they have the same case-sensitivy.</remarks>
+		public bool PageNameEquals(string pageName1, string pageName2)
+		{
+			if (pageName1.Length != pageName2.Length)
+			{
+				// Quick check to rule out most cases before we do string building.
+				return false;
+			}
+
+			return this.CaseSensitive
+				? pageName1 == pageName2
+				: pageName1.UpperFirst() == pageName2.UpperFirst();
+		}
+
 		/// <summary>Removes a name from the lookup list. Only names that have been previously added can be removed.</summary>
 		/// <param name="name">The name.</param>
 		public void RemoveName(string name)

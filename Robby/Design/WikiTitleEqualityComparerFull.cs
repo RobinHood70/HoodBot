@@ -14,7 +14,7 @@
 		public override bool Equals(IWikiTitle x, IWikiTitle y) =>
 			x == null ? x == y :
 			y == null ? false :
-			x.Namespace.Equals(y.Namespace) && x.PageName.Equals(y.PageName) && x.Key.Equals(y.Key);
+			x.Namespace.Equals(y.Namespace) && x.Namespace.PageNameEquals(x.PageName, y.PageName) && x.Key.Equals(y.Key);
 
 		/// <summary>Returns a hash code for this instance.</summary>
 		/// <param name="obj">The object.</param>

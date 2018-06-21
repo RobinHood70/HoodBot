@@ -74,7 +74,6 @@
 			set
 			{
 				this.culture = value ?? CultureInfo.CurrentCulture;
-				this.EqualityComparerFirst = new FirstInsensitiveEqualityComparer(value);
 				this.EqualityComparerInsensitive = StringComparer.Create(value, true);
 			}
 		}
@@ -92,11 +91,6 @@
 		/// <summary>Gets a value indicating whether the Disambiguator extension is available.</summary>
 		/// <value><c>true</c> if the Disambiguator extension is available; otherwise, <c>false</c>.</value>
 		public bool DisambiguatorAvailable { get; private set; }
-
-		/// <summary>Gets or sets the EqualityComparer for first-letter case-insensitive comparison.</summary>
-		/// <value>The first-letter case-insensitive EqualityComparer.</value>
-		/// <remarks>This provides a central, consistent comparer for anything that is site-aware. It will be based on the wiki's culture as soon as the culture has been retrieved.</remarks>
-		public IEqualityComparer<string> EqualityComparerFirst { get; protected set; }
 
 		/// <summary>Gets or sets the EqualityComparer for case-insensitive comparison.</summary>
 		/// <value>The case-insensitive EqualityComparer.</value>

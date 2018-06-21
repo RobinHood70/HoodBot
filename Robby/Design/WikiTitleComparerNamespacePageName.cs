@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby.Design
 {
-	using System;
 	using System.Collections.Generic;
+	using WikiCommon;
 
 	/// <summary>An IWikiTitle comparer to sort by namespace and page name.</summary>
 	/// <seealso cref="System.Collections.Generic.IComparer{T}" />
@@ -51,7 +51,10 @@
 				return 1;
 			}
 
-			return string.Compare(x.PageName, y.PageName, StringComparison.Ordinal);
+			var siteCulture = x.Namespace.Site.Culture;
+			return x.Namespace.CaseSensitive
+				? string.Compare(x.PageName, y.PageName, true, siteCulture)
+				: string.Compare(x.PageName.UpperFirst(siteCulture), y.PageName.UpperFirst(siteCulture), true, siteCulture);
 		}
 		#endregion
 	}

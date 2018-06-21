@@ -4,8 +4,8 @@
 	using System.Collections.Generic;
 	using System.Text.RegularExpressions;
 	using Design;
-	using RobinHood70.WallE.Base;
-	using RobinHood70.WallE.Design;
+	using WallE.Base;
+	using WallE.Design;
 	using WikiCommon;
 	using static Properties.Resources;
 	using static WikiCommon.Globals;
@@ -233,7 +233,7 @@
 
 		public bool Equals(Title other) =>
 			other == null ? false :
-			this.Namespace.Equals(other.Namespace) && this.PageName.Equals(other.PageName);
+			this.Namespace.Equals(other.Namespace) && this.Namespace.PageNameEquals(this.PageName, other.PageName);
 
 		/// <summary>Checks to see if this Title resolves to the same page as another Title. Key is ignored.</summary>
 		/// <param name="title">The title, or derived type, to compare to.</param>
