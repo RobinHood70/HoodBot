@@ -109,68 +109,6 @@
 
 		#region Public Methods
 
-		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
-		/// <param name="titles">The titles to find duplicates of.</param>
-		public void AddDuplicateFiles(IEnumerable<IWikiTitle> titles) => this.AddDuplicateFiles(new DuplicateFilesInput(), titles);
-
-		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
-		/// <param name="titles">The titles.</param>
-		public void AddFileUsage(IEnumerable<IWikiTitle> titles) => this.AddFileUsage(new FileUsageInput(), titles);
-
-		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
-		/// <param name="titles">The titles.</param>
-		/// <param name="redirects">Filter for redirects.</param>
-		public void AddFileUsage(IEnumerable<IWikiTitle> titles, Filter redirects) => this.AddFileUsage(new FileUsageInput() { FilterRedirects = redirects }, titles);
-
-		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
-		/// <param name="titles">The titles.</param>
-		/// <param name="redirects">Filter for redirects.</param>
-		/// <param name="namespaces">The namespaces to limit results to.</param>
-		public void AddFileUsage(IEnumerable<IWikiTitle> titles, Filter redirects, IEnumerable<int> namespaces) => this.AddFileUsage(new FileUsageInput() { Namespaces = namespaces, FilterRedirects = redirects }, titles);
-
-		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
-		/// <param name="titles">The titles whose categories should be loaded.</param>
-		public void AddPageCategories(IEnumerable<IWikiTitle> titles) => this.AddPageCategories(new CategoriesInput(), titles);
-
-		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
-		/// <param name="titles">The titles whose categories should be loaded.</param>
-		/// <param name="hidden">Filter for hidden categories.</param>
-		public void AddPageCategories(IEnumerable<IWikiTitle> titles, Filter hidden) => this.AddPageCategories(new CategoriesInput { FilterHidden = hidden }, titles);
-
-		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
-		/// <param name="titles">The titles whose categories should be loaded.</param>
-		/// <param name="hidden">Filter for hidden categories.</param>
-		/// <param name="limitTo">Limit the results to these categories.</param>
-		public void AddPageCategories(IEnumerable<IWikiTitle> titles, Filter hidden, IEnumerable<string> limitTo) => this.AddPageCategories(new CategoriesInput { Categories = limitTo, FilterHidden = hidden }, titles);
-
-		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
-		/// <param name="titles">The titles whose categories should be loaded.</param>
-		public void AddPageLinks(IEnumerable<IWikiTitle> titles) => this.AddPageLinks(titles, null);
-
-		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
-		/// <param name="titles">The titles whose categories should be loaded.</param>
-		/// <param name="namespaces">The namespaces to limit results to.</param>
-		public void AddPageLinks(IEnumerable<IWikiTitle> titles, IEnumerable<int> namespaces) => this.AddPageLinks(new LinksInput() { Namespaces = namespaces }, titles);
-
-		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
-		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		public void AddPageTransclusions(IEnumerable<IWikiTitle> titles) => this.AddPageTransclusions(new TemplatesInput(), titles);
-
-		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
-		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		/// <param name="limitTo">Limit the results to these transclusions.</param>
-		public void AddPageTransclusions(IEnumerable<IWikiTitle> titles, IEnumerable<string> limitTo) => this.AddPageTransclusions(new TemplatesInput() { Templates = limitTo }, titles);
-
-		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
-		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		/// <param name="namespaces">Limit the results to these namespaces.</param>
-		public void AddPageTransclusions(IEnumerable<IWikiTitle> titles, IEnumerable<int> namespaces) => this.AddPageTransclusions(new TemplatesInput() { Namespaces = namespaces }, titles);
-
-		/// <summary>Adds pages with the specified revision IDs to the collection.</summary>
-		/// <param name="ids">The IDs.</param>
-		// Note that while RevisionsInput() can be used as a generator, I have not implemented it because I can think of no situation in which it would be useful to populate a PageCollection given the existing revisions methods.
-		public void AddRevisionIds(IEnumerable<long> ids) => this.AddRevisionIds(this.LoadOptions, ids);
-
 		/// <summary>Adds pages to the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>
 		public void AddTitles(params string[] titles) => this.AddTitles(new TitleCollection(this.Site, titles));
@@ -198,6 +136,12 @@
 				this.Add(this.PageCreator.CreatePage(titleParts));
 			}
 		}
+
+		/// <summary>Adds pages with the specified revision IDs to the collection.</summary>
+		/// <param name="ids">The IDs.</param>
+		/// <remarks>General information about the pages for the revision ids specified will always be loaded, regardless of the LoadOptions setting, though the revisions themselves may not be if the collection's load options would filter them out.</remarks>
+		// Note that while RevisionsInput() can be used as a generator, I have not implemented it because I can think of no situation in which it would be useful to populate a PageCollection given the existing revisions methods.
+		public override void AddRevisionIds(IEnumerable<long> ids) => this.LoadPages(this.LoadOptions, DefaultPageSetInput.FromRevisionIds(ids));
 
 		/// <summary>Removes all items from the <see cref="T:RobinHood70.Robby.TitleCollection">collection</see>, as well as those in the <see cref="TitleMap"/>.</summary>
 		public override void Clear()
@@ -247,6 +191,11 @@
 			}
 		}
 
+		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles to find duplicates of.</param>
+		protected override void AddDuplicateFiles(DuplicateFilesInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(input, titles);
+
 		/// <summary>Adds files to the collection, based on optionally file-specific parameters.</summary>
 		/// <param name="input">The input parameters.</param>
 		protected override void AddFiles(AllImagesInput input) => this.LoadPages(input);
@@ -255,6 +204,11 @@
 		/// <param name="input">The input parameters.</param>
 		protected override void AddFileUsage(AllFileUsagesInput input) => this.LoadPages(input);
 
+		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles.</param>
+		protected override void AddFileUsage(FileUsageInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(input, titles);
+
 		/// <summary>Adds pages that link to a given namespace.</summary>
 		/// <param name="input">The input parameters.</param>
 		protected override void AddLinksToNamespace(AllLinksInput input) => this.LoadPages(input);
@@ -262,6 +216,21 @@
 		/// <summary>Adds pages from a given namespace to the collection. Parameters allow filtering to a specific range of pages.</summary>
 		/// <param name="input">The input parameters.</param>
 		protected override void AddNamespace(AllPagesInput input) => this.LoadPages(input);
+
+		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles whose categories should be loaded.</param>
+		protected override void AddPageCategories(CategoriesInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(input, titles);
+
+		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles whose categories should be loaded.</param>
+		protected override void AddPageLinks(LinksInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(input, titles);
+
+		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles whose transclusions should be loaded.</param>
+		protected override void AddPageTransclusions(TemplatesInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages with a given property to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -307,40 +276,10 @@
 
 		#region Protected Virtual Methods
 
-		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
-		/// <param name="input">The input parameters.</param>
-		/// <param name="titles">The titles to find duplicates of.</param>
-		protected virtual void AddDuplicateFiles(DuplicateFilesInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(input, titles);
-
-		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
-		/// <param name="input">The input parameters.</param>
-		/// <param name="titles">The titles.</param>
-		protected virtual void AddFileUsage(FileUsageInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(input, titles);
-
-		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
-		/// <param name="input">The input parameters.</param>
-		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected virtual void AddPageCategories(CategoriesInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(input, titles);
-
-		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
-		/// <param name="input">The input parameters.</param>
-		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected virtual void AddPageLinks(LinksInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(input, titles);
-
-		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
-		/// <param name="input">The input parameters.</param>
-		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected virtual void AddPageTransclusions(TemplatesInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(input, titles);
-
-		/// <summary>Adds pages to the collection from their revision IDs.</summary>
-		/// <param name="options">The page load options.</param>
-		/// <param name="revisionIds">The revision IDs.</param>
-		protected virtual void AddRevisionIds(PageLoadOptions options, IEnumerable<long> revisionIds) => this.LoadPages(options, DefaultPageSetInput.FromRevisionIds(revisionIds));
-
 		/// <summary>Adds pages to the collection from a series of titles.</summary>
 		/// <param name="options">The page load options.</param>
 		/// <param name="titles">The titles.</param>
-		protected virtual void AddTitles(PageLoadOptions options, IEnumerable<IWikiTitle> titles) => this.LoadPages(options, new DefaultPageSetInput(FullPageNamesOf(titles)));
+		protected virtual void AddTitles(PageLoadOptions options, IEnumerable<IWikiTitle> titles) => this.LoadPages(options, new DefaultPageSetInput(titles.ToFullPageNames()));
 
 		/// <summary>Loads pages from the wiki based on a page set specifier.</summary>
 		/// <param name="options">The page load options.</param>
@@ -405,23 +344,10 @@
 		}
 		#endregion
 
-		#region Private Static Methods
-		private static IEnumerable<string> FullPageNamesOf(IEnumerable<IWikiTitle> titles)
-		{
-			if (titles != null)
-			{
-				foreach (var title in titles)
-				{
-					yield return title.FullPageName;
-				}
-			}
-		}
-		#endregion
-
 		#region Private Methods
 		private void LoadPages(IGeneratorInput generator) => this.LoadPages(this.LoadOptions, new DefaultPageSetInput(generator));
 
-		private void LoadPages(IGeneratorInput generator, IEnumerable<IWikiTitle> titles) => this.LoadPages(this.LoadOptions, new DefaultPageSetInput(generator, FullPageNamesOf(titles)));
+		private void LoadPages(IGeneratorInput generator, IEnumerable<IWikiTitle> titles) => this.LoadPages(this.LoadOptions, new DefaultPageSetInput(generator, titles.ToFullPageNames()));
 
 		private void PopulateMapCollections(IPageSetResult result)
 		{

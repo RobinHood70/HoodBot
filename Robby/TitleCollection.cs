@@ -5,7 +5,6 @@
 	using Design;
 	using WallE.Base;
 	using WikiCommon;
-	using static Properties.Resources;
 	using static WikiCommon.Globals;
 
 	/// <summary>A collection of Title objects.</summary>
@@ -179,15 +178,15 @@
 		/// <summary>Purges all pages in the collection.</summary>
 		/// <param name="method">The method.</param>
 		/// <returns>A page collection with the results of the purge.</returns>
-		public PageCollection Purge(PurgeMethod method) => this.Purge(new PurgeInput(this.FullPageNames) { Method = method });
+		public PageCollection Purge(PurgeMethod method) => this.Purge(new PurgeInput(this.ToFullPageNames()) { Method = method });
 
 		/// <summary>Watches all pages in the collection.</summary>
 		/// <returns>A page collection with the watch results.</returns>
-		public PageCollection Watch() => this.Watch(new WatchInput(this.FullPageNames) { Unwatch = false });
+		public PageCollection Watch() => this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = false });
 
 		/// <summary>Unwatches all pages in the collection.</summary>
 		/// <returns>A page collection with the unwatch results.</returns>
-		public PageCollection Unwatch() => this.Watch(new WatchInput(this.FullPageNames) { Unwatch = true });
+		public PageCollection Unwatch() => this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = true });
 		#endregion
 
 		#region Public Override Methods
@@ -202,6 +201,10 @@
 				this.Add(new Title(this.Site, title));
 			}
 		}
+
+		/// <summary>Adds pages to the collection from their revision IDs.</summary>
+		/// <param name="revisionIds">The revision IDs.</param>
+		public override void AddRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(DefaultPageSetInput.FromRevisionIds(revisionIds));
 		#endregion
 
 		#region Protected Override Methods
@@ -249,6 +252,11 @@
 			}
 		}
 
+		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles to find duplicates of.</param>
+		protected override void AddDuplicateFiles(DuplicateFilesInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(new DefaultPageSetInput(input, titles.ToFullPageNames()));
+
 		/// <summary>Adds files to the collection, based on optionally file-specific parameters.</summary>
 		/// <param name="input">The input parameters.</param>
 		protected override void AddFiles(AllImagesInput input)
@@ -264,6 +272,11 @@
 			var result = this.Site.AbstractionLayer.AllFileUsages(input);
 			this.FillFromTitleItems(result);
 		}
+
+		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles.</param>
+		protected override void AddFileUsage(FileUsageInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(new DefaultPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages that link to a given namespace.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -281,6 +294,16 @@
 			this.FillFromTitleItems(result);
 		}
 
+		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles whose categories should be loaded.</param>
+		protected override void AddPageCategories(CategoriesInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(new DefaultPageSetInput(input, titles.ToFullPageNames()));
+
+		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles whose categories should be loaded.</param>
+		protected override void AddPageLinks(LinksInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(new DefaultPageSetInput(input, titles.ToFullPageNames()));
+
 		/// <summary>Adds pages with a given property to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		protected override void AddPagesWithProperty(PagesWithPropertyInput input)
@@ -288,6 +311,11 @@
 			var result = this.Site.AbstractionLayer.PagesWithProperty(input);
 			this.FillFromTitleItems(result);
 		}
+
+		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles whose transclusions should be loaded.</param>
+		protected override void AddPageTransclusions(TemplatesInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(new DefaultPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds prefix-search results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -365,6 +393,19 @@
 
 		#region Protected Virtual Methods
 
+		/// <summary>Loads pages from the wiki based on a page set specifier.</summary>
+		/// <param name="pageSetInput">The pageset inputs.</param>
+		protected virtual void LoadPages(DefaultPageSetInput pageSetInput)
+		{
+			ThrowNull(pageSetInput, nameof(pageSetInput));
+			var loadOptions = new PageLoadOptions(this.Site.DefaultLoadOptions, PageModules.Info);
+			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, PageCreator.Default.GetPropertyInputs(loadOptions), PageCreator.Default.CreatePageItem);
+			foreach (var item in result)
+			{
+				this.Add(new Title(this.Site, item.Value.Title));
+			}
+		}
+
 		/// <summary>Converts MediaWiki messages to titles and adds them to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		protected virtual void AddMessages(AllMessagesInput input)
@@ -422,7 +463,7 @@
 				retval = new PageCollection(this.Site);
 				foreach (var item in this)
 				{
-					retval.Add(this.Site.PageCreator.CreatePage(new TitleParts(this.Site, item.FullPageName)));
+					retval.Add(PageCreator.Default.CreatePage(new TitleParts(this.Site, item.FullPageName)));
 				}
 
 				return retval;
@@ -434,7 +475,7 @@
 			{
 				var watchPage = item.Value;
 				var flags = watchPage.Flags;
-				var page = this.Site.PageCreator.CreatePage(new TitleParts(this.Site, watchPage.Title));
+				var page = PageCreator.Default.CreatePage(new TitleParts(this.Site, watchPage.Title));
 				page.PopulateFlags(false, flags.HasFlag(WatchFlags.Missing));
 
 				retval.Add(page);
@@ -483,7 +524,6 @@
 				}
 			}
 		}
-
 		#endregion
 	}
 }

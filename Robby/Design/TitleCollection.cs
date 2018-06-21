@@ -35,19 +35,6 @@
 
 		#region Public Properties
 
-		/// <summary>Gets the full page names for the collection.</summary>
-		/// <returns>The full page names for the titles.</returns>
-		public IEnumerable<string> FullPageNames
-		{
-			get
-			{
-				foreach (var title in this)
-				{
-					yield return title.FullPageName;
-				}
-			}
-		}
-
 		/// <summary>Gets the number of elements contained in the <see cref="TitleCollection">collection</see>.</summary>
 		public int Count => this.items.Count;
 
@@ -203,6 +190,15 @@
 				loadSubcategories);
 		}
 
+		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
+		/// <param name="titles">The titles to find duplicates of.</param>
+		public void AddDuplicateFiles(IEnumerable<IWikiTitle> titles) => this.AddDuplicateFiles(titles, false);
+
+		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
+		/// <param name="titles">The titles to find duplicates of.</param>
+		/// <param name="localOnly">if set to <c>true</c> [local only].</param>
+		public void AddDuplicateFiles(IEnumerable<IWikiTitle> titles, bool localOnly) => this.AddDuplicateFiles(new DuplicateFilesInput() { LocalOnly = localOnly }, titles);
+
 		/// <summary>Adds files uploaded by the specified user to the collection.</summary>
 		/// <param name="user">The user.</param>
 		public void AddFiles(string user) => this.AddFiles(new AllImagesInput { User = user });
@@ -228,6 +224,21 @@
 		/// <param name="from">The file name to start at (inclusive).</param>
 		/// <param name="to">The file name to end at (inclusive).</param>
 		public void AddFileUsage(string from, string to) => this.AddFileUsage(new AllFileUsagesInput { From = from, To = to, Unique = true });
+
+		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
+		/// <param name="titles">The titles.</param>
+		public void AddFileUsage(IEnumerable<IWikiTitle> titles) => this.AddFileUsage(new FileUsageInput(), titles);
+
+		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
+		/// <param name="titles">The titles.</param>
+		/// <param name="redirects">Filter for redirects.</param>
+		public void AddFileUsage(IEnumerable<IWikiTitle> titles, Filter redirects) => this.AddFileUsage(new FileUsageInput() { FilterRedirects = redirects }, titles);
+
+		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
+		/// <param name="titles">The titles.</param>
+		/// <param name="redirects">Filter for redirects.</param>
+		/// <param name="namespaces">The namespaces to limit results to.</param>
+		public void AddFileUsage(IEnumerable<IWikiTitle> titles, Filter redirects, IEnumerable<int> namespaces) => this.AddFileUsage(new FileUsageInput() { Namespaces = namespaces, FilterRedirects = redirects }, titles);
 
 		/// <summary>Adds pages that link to a given namespace to the collection.</summary>
 		/// <param name="ns">The namespace.</param>
@@ -262,9 +273,47 @@
 		/// <param name="to">The page name to end at (inclusive).</param>
 		public void AddNamespace(int ns, Filter redirects, string from, string to) => this.AddNamespace(new AllPagesInput { FilterRedirects = redirects, From = from, Namespace = ns, To = to });
 
+		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
+		/// <param name="titles">The titles whose categories should be loaded.</param>
+		public void AddPageCategories(IEnumerable<IWikiTitle> titles) => this.AddPageCategories(new CategoriesInput(), titles);
+
+		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
+		/// <param name="titles">The titles whose categories should be loaded.</param>
+		/// <param name="hidden">Filter for hidden categories.</param>
+		public void AddPageCategories(IEnumerable<IWikiTitle> titles, Filter hidden) => this.AddPageCategories(new CategoriesInput { FilterHidden = hidden }, titles);
+
+		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
+		/// <param name="titles">The titles whose categories should be loaded.</param>
+		/// <param name="hidden">Filter for hidden categories.</param>
+		/// <param name="limitTo">Limit the results to these categories.</param>
+		public void AddPageCategories(IEnumerable<IWikiTitle> titles, Filter hidden, IEnumerable<string> limitTo) => this.AddPageCategories(new CategoriesInput { Categories = limitTo, FilterHidden = hidden }, titles);
+
+		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
+		/// <param name="titles">The titles whose categories should be loaded.</param>
+		public void AddPageLinks(IEnumerable<IWikiTitle> titles) => this.AddPageLinks(titles, null);
+
+		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
+		/// <param name="titles">The titles whose categories should be loaded.</param>
+		/// <param name="namespaces">The namespaces to limit results to.</param>
+		public void AddPageLinks(IEnumerable<IWikiTitle> titles, IEnumerable<int> namespaces) => this.AddPageLinks(new LinksInput() { Namespaces = namespaces }, titles);
+
 		/// <summary>Adds pages with a given page property (e.g., notrail, breadCrumbTrail) to the collection.</summary>
 		/// <param name="property">The property to find.</param>
 		public void AddPagesWithProperty(string property) => this.AddPagesWithProperty(new PagesWithPropertyInput(property));
+
+		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
+		/// <param name="titles">The titles whose transclusions should be loaded.</param>
+		public void AddPageTransclusions(IEnumerable<IWikiTitle> titles) => this.AddPageTransclusions(new TemplatesInput(), titles);
+
+		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
+		/// <param name="titles">The titles whose transclusions should be loaded.</param>
+		/// <param name="limitTo">Limit the results to these transclusions.</param>
+		public void AddPageTransclusions(IEnumerable<IWikiTitle> titles, IEnumerable<string> limitTo) => this.AddPageTransclusions(new TemplatesInput() { Templates = limitTo }, titles);
+
+		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
+		/// <param name="titles">The titles whose transclusions should be loaded.</param>
+		/// <param name="namespaces">Limit the results to these namespaces.</param>
+		public void AddPageTransclusions(IEnumerable<IWikiTitle> titles, IEnumerable<int> namespaces) => this.AddPageTransclusions(new TemplatesInput() { Namespaces = namespaces }, titles);
 
 		/// <summary>Adds prefix-search results to the collection.</summary>
 		/// <param name="prefix">The prefix to search for.</param>
@@ -626,6 +675,10 @@
 		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
 		/// <param name="titles">The titles to add.</param>
 		public abstract void Add(IEnumerable<string> titles);
+
+		/// <summary>Adds pages to the collection from their revision IDs.</summary>
+		/// <param name="revisionIds">The revision IDs.</param>
+		public abstract void AddRevisionIds(IEnumerable<long> revisionIds);
 		#endregion
 
 		#region Public Virtual Methods
@@ -688,6 +741,11 @@
 		/// <param name="recurse">if set to <c>true</c> load the entire category tree recursively.</param>
 		protected abstract void AddCategoryMembers(CategoryMembersInput input, bool recurse);
 
+		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles to find duplicates of.</param>
+		protected abstract void AddDuplicateFiles(DuplicateFilesInput input, IEnumerable<IWikiTitle> titles);
+
 		/// <summary>Adds files to the collection, based on optionally file-specific parameters.</summary>
 		/// <param name="input">The input parameters.</param>
 		protected abstract void AddFiles(AllImagesInput input);
@@ -695,6 +753,11 @@
 		/// <summary>Adds files that are in use to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		protected abstract void AddFileUsage(AllFileUsagesInput input);
+
+		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles.</param>
+		protected abstract void AddFileUsage(FileUsageInput input, IEnumerable<IWikiTitle> titles);
 
 		/// <summary>Adds pages that link to a given namespace.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -704,9 +767,24 @@
 		/// <param name="input">The input parameters.</param>
 		protected abstract void AddNamespace(AllPagesInput input);
 
+		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles whose categories should be loaded.</param>
+		protected abstract void AddPageCategories(CategoriesInput input, IEnumerable<IWikiTitle> titles);
+
+		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles whose categories should be loaded.</param>
+		protected abstract void AddPageLinks(LinksInput input, IEnumerable<IWikiTitle> titles);
+
 		/// <summary>Adds pages with a given property to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		protected abstract void AddPagesWithProperty(PagesWithPropertyInput input);
+
+		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles whose transclusions should be loaded.</param>
+		protected abstract void AddPageTransclusions(TemplatesInput input, IEnumerable<IWikiTitle> titles);
 
 		/// <summary>Adds prefix-search results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>

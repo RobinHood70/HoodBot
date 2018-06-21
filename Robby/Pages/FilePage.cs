@@ -5,7 +5,6 @@
 	using System.IO;
 	using RobinHood70.WikiCommon;
 	using WallE.Base;
-	using static WikiCommon.Extensions;
 	using static WikiCommon.Globals;
 
 	/// <summary>Represents a file on the wiki. Includes all page data as well as file revisions and file-specific methods.</summary>
@@ -66,51 +65,33 @@
 
 		/// <summary>Finds all pages the file is used on.</summary>
 		/// <returns>A list of <see cref="T:RobinHood70.Robby.Title"/>s that the file is used on.</returns>
-		public IReadOnlyList<Title> FileUsage() => this.FileUsage(this.Site.Namespaces.RegularIds, Filter.Any);
+		public TitleCollection FileUsage() => this.FileUsage(this.Site.Namespaces.RegularIds, Filter.Any);
 
 		/// <summary>Finds all pages the file is used on within the given namespaces and optionally filters out redirects.</summary>
 		/// <param name="namespaces">The namespaces to search.</param>
 		/// <param name="filterRedirects">Filter redirects out of the result set.</param>
 		/// <returns>A list of <see cref="T:RobinHood70.Robby.Title"/>s that the file is used on.</returns>
-		public IReadOnlyList<Title> FileUsage(IEnumerable<int> namespaces, Filter filterRedirects)
+		public TitleCollection FileUsage(IEnumerable<int> namespaces, Filter filterRedirects)
 		{
-			var propModule = new FileUsageInput
-			{
-				Namespaces = namespaces,
-				FilterRedirects = filterRedirects
-			};
-			var pageSet = new DefaultPageSetInput(new[] { this.FullPageName });
-			var result = this.Site.AbstractionLayer.LoadPages(pageSet, new[] { propModule });
-			var page = result.First();
-			var retval = new List<Title>(page.FileUsages.Count);
-			foreach (var usage in page.FileUsages)
-			{
-				retval.Add(new Title(this.Site, usage.Title));
-			}
+			var titles = new TitleCollection(this.Site);
+			titles.AddFileUsage(new[] { this });
 
-			return retval.AsReadOnly();
+			return titles;
 		}
 
 		/// <summary>Finds any files on the wiki that are duplicates of this one.</summary>
-		/// <returns>A list of duplicate file names (names only, no namespace).</returns>
-		public IReadOnlyList<string> FindDuplicateFiles() => this.FindDuplicateFiles(true);
+		/// <returns>A list of duplicate file titles.</returns>
+		public TitleCollection FindDuplicateFiles() => this.FindDuplicateFiles(true);
 
 		/// <summary>Finds any files on the wiki that are duplicates of this one.</summary>
 		/// <param name="localOnly">if set to <c>true</c>, only searches on the local wiki, ignoring shared repositories like Wikimedia Commons.</param>
-		/// <returns>A list of duplicate file names (names only, no namespace).</returns>
-		public IReadOnlyList<string> FindDuplicateFiles(bool localOnly)
+		/// <returns>A collection of duplicate file titles.</returns>
+		public TitleCollection FindDuplicateFiles(bool localOnly)
 		{
-			var propModule = new DuplicateFilesInput() { LocalOnly = localOnly };
-			var pageSet = new DefaultPageSetInput(new[] { this.FullPageName });
-			var result = this.Site.AbstractionLayer.LoadPages(pageSet, new[] { propModule });
-			var page = result.First();
-			var retval = new List<string>(page.DuplicateFiles.Count);
-			foreach (var dupe in page.DuplicateFiles)
-			{
-				retval.Add(dupe.Name);
-			}
+			var titles = new TitleCollection(this.Site);
+			titles.AddDuplicateFiles(new[] { this });
 
-			return retval.AsReadOnly();
+			return titles;
 		}
 		#endregion
 
