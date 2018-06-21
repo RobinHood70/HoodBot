@@ -48,7 +48,7 @@
 					this.Namespace = ns;
 					nameRemaining = split[1].TrimStart() + (split.Length == 3 ? split[2] : string.Empty);
 				}
-				else if (site.InterwikiMap.TryGetItem(key.ToLower(site.Culture), out var iw))
+				else if (site.InterwikiMap.TryGetItem(key, out var iw))
 				{
 					this.Interwiki = iw;
 					if (iw.LocalWiki && site.Namespaces.TryGetValue(split[1].Trim(), out ns))

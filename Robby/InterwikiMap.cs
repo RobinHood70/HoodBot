@@ -1,6 +1,8 @@
 ﻿namespace RobinHood70.Robby
 {
+	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 	using WikiCommon;
 
 	/// <summary>Represents the MediaWiki interwiki map.</summary>
@@ -13,7 +15,7 @@
 		/// <summary>Initializes a new instance of the <see cref="InterwikiMap"/> class.</summary>
 		/// <param name="items">The items.</param>
 		public InterwikiMap(IEnumerable<InterwikiEntry> items)
-			: base(items)
+			: base(items, StringComparer.Create(CultureInfo.InvariantCulture, true))
 		{
 		}
 		#endregion
