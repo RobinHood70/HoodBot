@@ -380,7 +380,7 @@
 		{
 			HttpWebResponse response = null;
 			int retriesRemaining;
-			for (retriesRemaining = this.Retries; retriesRemaining > 0; retriesRemaining--)
+			for (retriesRemaining = this.Retries; retriesRemaining >= 0; retriesRemaining--)
 			{
 				var request = this.CreateRequest(uri, method);
 				if (postData?.Length > 0)
@@ -393,11 +393,11 @@
 					}
 				}
 
-				var maxLag = false;
+				var doMaxLagCheck = false;
 				try
 				{
 					response = request.GetResponse() as HttpWebResponse;
-					maxLag = true;
+					doMaxLagCheck = true;
 				}
 				catch (WebException ex)
 				{
@@ -418,7 +418,7 @@
 							case (HttpStatusCode)509:
 								break;
 							case ServiceUnavailable:
-								maxLag = true;
+								doMaxLagCheck = true;
 								break;
 							default:
 								throw;
@@ -427,33 +427,44 @@
 
 					if (retriesRemaining == 0)
 					{
-						throw new WikiException("HTTP request failed. " + GetResponseText(response));
+						throw;
 					}
 				}
 
 				var retryHeader = response?.Headers[HttpResponseHeader.RetryAfter];
+				var retryAfter = 0;
 				if (retryHeader == null)
 				{
-					break;
-				}
-				else
-				{
-					if (int.TryParse(retryHeader, out var retryAfter))
+					if (doMaxLagCheck)
 					{
-						this.RequestDelay(TimeSpan.FromSeconds(retryAfter), maxLag ? DelayReason.MaxLag : DelayReason.Error);
+						// We got a response with no retry header, therefore it was a successful response. Stop retrying.
+						break;
 					}
+
+					retryAfter = (int)this.RetryDelay.TotalSeconds;
+				}
+				else if (!int.TryParse(retryHeader, out retryAfter))
+				{
+					retryAfter = (int)this.RetryDelay.TotalSeconds;
+				}
+
+				if (retryAfter > 0)
+				{
+					this.RequestDelay(TimeSpan.FromSeconds(retryAfter), doMaxLagCheck ? DelayReason.MaxLag : DelayReason.Error);
 				}
 			}
 
-			var retval = GetResponseText(response);
-#pragma warning disable IDE0007 // Use implicit type
-			foreach (Cookie cookie in response.Cookies)
-#pragma warning restore IDE0007 // Use implicit type
+			if (response.Cookies != null)
 			{
-				this.cookieContainer.Add(cookie);
+#pragma warning disable IDE0007 // Use implicit type
+				foreach (Cookie cookie in response.Cookies)
+#pragma warning restore IDE0007 // Use implicit type
+				{
+					this.cookieContainer.Add(cookie);
+				}
 			}
 
-			return retval;
+			return GetResponseText(response);
 		}
 		#endregion
 	}
