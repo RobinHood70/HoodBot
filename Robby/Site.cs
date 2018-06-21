@@ -679,12 +679,26 @@
 
 			this.DisambiguatorAvailable = this.magicWords.ContainsKey("disambiguation");
 
+			var doGuess = true;
+			foreach (var item in siteInfo.InterwikiMap)
+			{
+				if (item.Flags.HasFlag(InterwikiMapFlags.Local))
+				{
+					doGuess = false;
+					break;
+				}
+			}
+
 			var server = siteInfo.Server; // Used to help determine if interwiki is local
 			var interwikiList = new List<InterwikiEntry>();
 			foreach (var item in siteInfo.InterwikiMap)
 			{
 				var entry = new InterwikiEntry(item);
-				entry.GuessLocalWikiFromServer(server);
+				if (doGuess)
+				{
+					entry.GuessLocalWikiFromServer(server);
+				}
+
 				interwikiList.Add(entry);
 			}
 
