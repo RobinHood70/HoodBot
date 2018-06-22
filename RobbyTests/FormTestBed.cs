@@ -410,7 +410,7 @@
 
 		public void TitlePartsTests()
 		{
-			this.Assert(TitleParts.Normalize("Hello\u200E\u200F\u202A\u202B\u202C\u202D\u202E_\xA0\u1680\u180E\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u2028\u2029\u202F\u205F\u3000World") == "Hello                    World", "Text was not fully stripped and/or replaced.");
+			this.Assert(TitleParts.DecodeAndNormalize("Hello\u200E\u200F\u202A\u202B\u202C\u202D\u202E_\xA0\u1680\u180E\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u2028\u2029\u202F\u205F\u3000&amp;World") == "Hello                    &World", "Text was not fully stripped and/or replaced.");
 			var title = new TitleParts(this.Wiki, ":eN:sKyRiM:skyrim#Modding");
 			this.Assert(title.Interwiki.Prefix == "en", "Incorrect interwiki");
 			this.Assert(title.Namespace.Name == "Skyrim", "Incorrect namespace");

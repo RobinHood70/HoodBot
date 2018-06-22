@@ -27,7 +27,7 @@
 			ThrowNull(site, nameof(site));
 			ThrowNull(fullPageName, nameof(fullPageName));
 			this.Key = fullPageName;
-			var nameRemaining = Normalize(Decode(fullPageName));
+			var nameRemaining = DecodeAndNormalize(fullPageName);
 			if (nameRemaining.Length > 0 && nameRemaining[0] == ':')
 			{
 				// this.Namespace = site.Namespaces[MediaWikiNamespaces.Main];
@@ -176,16 +176,10 @@
 
 		#region Public Static Methods
 
-		/// <summary>HTML-decodes the specified text.</summary>
-		/// <param name="text">The text.</param>
-		/// <returns>The HTML-decoded text.</returns>
-		/// <remarks>This is provided as a separate function for future-proofing, since Microsoft has historically provided several (often flawed) methods of URL and HTML encoding/decoding. This way, calls to it remain consistent even if the underlying method changes or bug fixes need to be added.</remarks>
-		public static string Decode(string text) => WebUtility.HtmlDecode(text);
-
-		/// <summary>Removes bidirectional text markers and replaces space-like characters with spaces.</summary>
-		/// <param name="text">The text to normalize.</param>
+		/// <summary>HTML-decodes the specified text, removes bidirectional text markers, and replaces space-like characters with spaces.</summary>
+		/// <param name="text">The text to decode and normalize.</param>
 		/// <returns>The original text with bidirectional text markers removed and space-like characters converted to spaces.</returns>
-		public static string Normalize(string text) => spaceText.Replace(bidiText.Replace(text, string.Empty), " ").Trim();
+		public static string DecodeAndNormalize(string text) => spaceText.Replace(bidiText.Replace(WebUtility.HtmlDecode(text), string.Empty), " ").Trim();
 		#endregion
 
 		#region Public Overrides
