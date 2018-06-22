@@ -248,7 +248,7 @@
 
 		/// <summary>POSTs text data and retrieves the result.</summary>
 		/// <param name="uri">The URI to POST data to.</param>
-		/// <param name="contentType">The text of the content type. Typicially <code>x-www-form-urlencoded</code> or <code>multipart/form-data (...)</code>, but there is no restriction on values.</param>
+		/// <param name="contentType">The text of the content type. Typicially <c>x-www-form-urlencoded</c> or <c>multipart/form-data (...)</c>, but there is no restriction on values.</param>
 		/// <param name="postData">The text to POST.</param>
 		/// <returns>The text of the result.</returns>
 		public string Post(Uri uri, string contentType, byte[] postData) => this.SendRequest(uri, "POST", contentType, postData);
