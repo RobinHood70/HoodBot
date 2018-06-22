@@ -251,7 +251,7 @@
 		public ParameterCollection AddForced(string name, IEnumerable<string> values)
 		{
 			var newKey = this.Prefix + name;
-			if (this.TryGetItem(newKey, out IParameter param))
+			if (this.TryGetValue(newKey, out IParameter param))
 			{
 				if (!(param is PipedParameter piped))
 				{
@@ -461,29 +461,30 @@
 			}
 		}
 
-		/// <summary>Tries to get the named item from the parameter collection. Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />.</summary>
-		/// <param name="name">The parameter name.</param>
-		/// <param name="item">The item.</param>
-		/// <returns><see langword="true" /> if the item was found; otherwise <see langword="false" />.</returns>
-		public bool TryGetItem(string name, out IParameter item)
+		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
+		/// <param name="key">The key of the value to get.</param>
+		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
+		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
+		public bool TryGetValue(string key, out IParameter value)
 		{
 			if (this.Dictionary == null)
 			{
 				foreach (var testItem in this)
 				{
-					if (this.GetKeyForItem(testItem) == name)
+					if (this.GetKeyForItem(testItem) == key)
 					{
-						item = testItem;
+						value = testItem;
 						return true;
 					}
 				}
 			}
 			else
 			{
-				return this.Dictionary.TryGetValue(name, out item);
+				return this.Dictionary.TryGetValue(key, out value);
 			}
 
-			item = null;
+			value = null;
 			return false;
 		}
 		#endregion

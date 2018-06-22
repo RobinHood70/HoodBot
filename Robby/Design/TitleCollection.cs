@@ -662,11 +662,11 @@
 		/// <param name="comparer">The comparer.</param>
 		public void Sort(IComparer<IWikiTitle> comparer) => (this.items as List<IWikiTitle>).Sort(comparer);
 
-		/// <summary>Comparable to <see cref="M:System.Collections.Generic.Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key..</summary>
+		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
 		/// <param name="key">The key of the value to get.</param>
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
-		/// <returns><see langword="true" /> if the <see cref="TitleCollection">collection</see> contains an element with the specified key; otherwise, <see langword="false" />.</returns>
-		/// <exception cref="T:System.ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
+		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
 		public bool TryGetValue(string key, out TTitle value) => this.dictionary.TryGetValue(key, out value);
 		#endregion
 

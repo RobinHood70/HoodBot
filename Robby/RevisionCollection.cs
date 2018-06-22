@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.Robby
 {
+	using System;
 	using System.Collections;
 	using System.Collections.Generic;
 
@@ -35,7 +36,12 @@
 
 		IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-		public bool TryGetValue(long key, out Revision revision) => this.revisions.TryGetValue(key, out revision);
+		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the revision associated with the specified ID.</summary>
+		/// <param name="id">The ID of the revision to get.</param>
+		/// <param name="value">When this method returns, contains the revision with the specified ID, if found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
+		/// <returns><see langword="true" /> if the collection contains a revision with the specified ID; otherwise, <see langword="false" />.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="id" /> is <see langword="null" />.</exception>
+		public bool TryGetValue(long id, out Revision value) => this.revisions.TryGetValue(id, out value);
 		#endregion
 
 		#region Internal Methods

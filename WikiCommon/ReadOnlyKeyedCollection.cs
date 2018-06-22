@@ -19,18 +19,14 @@
 
 		#region Constructors
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ReadOnlyKeyedCollection{TKey, TItem}" /> class that uses the default equality comparer.
-		/// </summary>
+		/// <summary>Initializes a new instance of the <see cref="ReadOnlyKeyedCollection{TKey, TItem}" /> class that uses the default equality comparer.</summary>
 		/// <param name="items">The items.</param>
 		protected ReadOnlyKeyedCollection(IEnumerable<TItem> items)
 			: this(items, null)
 		{
 		}
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ReadOnlyKeyedCollection{TKey, TItem}" /> class that uses the specified equality comparer.
-		/// </summary>
+		/// <summary>Initializes a new instance of the <see cref="ReadOnlyKeyedCollection{TKey, TItem}" /> class that uses the specified equality comparer.</summary>
 		/// <param name="items">The items.</param>
 		/// <param name="comparer">The implementation of the <see cref="IEqualityComparer{TKey}" /> generic interface to use when comparing keys, or null to use the default equality comparer for the type of the key, obtained from <see cref="EqualityComparer{TKey}.Default" />.</param>
 		protected ReadOnlyKeyedCollection(IEnumerable<TItem> items, IEqualityComparer<TKey> comparer)
@@ -103,12 +99,12 @@
 		/// <returns>An <see cref="T:System.Collections.IEnumerator" /> object that can be used to iterate through the collection.</returns>
 		IEnumerator IEnumerable.GetEnumerator() => this.items.GetEnumerator();
 
-		/// <summary>Gets the item associated with the specified key.</summary>
+		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key..</summary>
 		/// <param name="key">The key of the value to get.</param>
-		/// <param name="item">When this method returns, contains the item associated with the specified key, if the key is found; otherwise, the default value for the type of the item parameter. This parameter is passed uninitialized.</param>
-		/// <returns><c>true</c> if the <see cref="Dictionary{TKey, TValue}"/> contains an element with the specified key; otherwise, <c>false</c>.</returns>
-		/// <exception cref="ArgumentNullException">key is null.</exception>
-		public bool TryGetItem(TKey key, out TItem item) => this.Dictionary.TryGetValue(key, out item);
+		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
+		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
+		public bool TryGetValue(TKey key, out TItem value) => this.Dictionary.TryGetValue(key, out value);
 		#endregion
 
 		#region Protected Abstract Methods

@@ -169,7 +169,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(input, nameof(input));
 			base.BeforeSubmit(input);
-			if (input.PropertyModules.TryGetItem("revisions", out PropRevisions revModule) && revModule.IsRevisionRange)
+			if (input.PropertyModules.TryGetValue("revisions", out PropRevisions revModule) && revModule.IsRevisionRange)
 			{
 				this.MaximumListSize = 1;
 			}
@@ -191,7 +191,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				bool useExisting;
 
 				// If a MetaUserInfo module already exists, remove it (so as not to corrupt its input data) and replace it with a merged copy of ours and the original.
-				if (newInput.Modules.TryGetItem("userinfo", out MetaUserInfo userInfo))
+				if (newInput.Modules.TryGetValue("userinfo", out MetaUserInfo userInfo))
 				{
 					userInfoInput = userInfo.Input;
 					useExisting = true;
@@ -269,11 +269,11 @@ namespace RobinHood70.WallE.Eve.Modules
 				foreach (JProperty limit in limits)
 #pragma warning restore IDE0007 // Use implicit type
 				{
-					if (modules.TryGetItem(limit.Name, out var module))
+					if (modules.TryGetValue(limit.Name, out var module))
 					{
 						module.ModuleLimit = (int)limit.Value;
 					}
-					else if (propModules.TryGetItem(limit.Name, out var propModule))
+					else if (propModules.TryGetValue(limit.Name, out var propModule))
 					{
 						propModule.ModuleLimit = (int)limit.Value;
 					}
@@ -284,7 +284,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			var watchlistRaw = parent[ListWatchlistRaw.ModuleName];
 			if (watchlistRaw != null)
 			{
-				if (modules.TryGetItem(ListWatchlistRaw.ModuleName, out ListWatchlistRaw watchlistModule))
+				if (modules.TryGetValue(ListWatchlistRaw.ModuleName, out ListWatchlistRaw watchlistModule))
 				{
 					watchlistModule.Deserialize(parent);
 				}
@@ -362,7 +362,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					// return;
 				}
 
-				if (!pages.TryGetItem(search, out var item))
+				if (!pages.TryGetValue(search, out var item))
 				{
 					if (this.ItemsRemaining == 0)
 					{
@@ -392,7 +392,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		private class KeyedPages : KeyedCollection<string, PageItem>
 		{
 			#region Public Methods
-			public bool TryGetItem(string key, out PageItem item)
+			public bool TryGetValue(string key, out PageItem item)
 			{
 				if (this.Dictionary != null)
 				{

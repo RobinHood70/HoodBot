@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		where TModule : class, IModule
 	{
 		#region Public Methods
-		public bool TryGetItem(string name, out TModule item)
+		public bool TryGetValue(string name, out TModule item)
 		{
 			if (this.Dictionary == null)
 			{
@@ -32,10 +32,10 @@ namespace RobinHood70.WallE.Eve.Modules
 			return false;
 		}
 
-		public bool TryGetItem<TOutput>(string name, out TOutput item)
+		public bool TryGetValue<TOutput>(string name, out TOutput item)
 			where TOutput : class, TModule
 		{
-			if (this.TryGetItem(name, out TModule foundItem))
+			if (this.TryGetValue(name, out TModule foundItem))
 			{
 				item = foundItem as TOutput;
 				return item == null ? throw new InvalidOperationException(CurrentCulture(IncorrectModuleType, name, typeof(TOutput).Name, foundItem.GetType().Name)) : true;
