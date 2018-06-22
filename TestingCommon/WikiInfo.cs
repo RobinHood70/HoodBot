@@ -1,7 +1,9 @@
-﻿namespace RobinHood70.Robby.Tests
+﻿namespace RobinHood70.TestingCommon
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Globalization;
+	using System.IO;
 
 	public class WikiInfo
 	{
@@ -54,6 +56,19 @@
 		public string UserName { get; set; }
 
 		public int WriteInterval { get; set; }
+		#endregion
+
+		#region Public Static Methods
+		public static IEnumerable<WikiInfo> LoadFile()
+		{
+			var retval = new List<WikiInfo>();
+			foreach (var line in File.ReadAllLines("WikiList.txt"))
+			{
+				retval.Add(new WikiInfo(line));
+			}
+
+			return retval;
+		}
 		#endregion
 
 		#region Public Override Methods

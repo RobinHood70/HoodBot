@@ -11,6 +11,7 @@
 	using Design;
 	using Pages;
 	using Robby;
+	using RobinHood70.TestingCommon;
 	using Tests.MetaTemplate;
 	using WallE.Base;
 	using WallE.Clients;
@@ -650,9 +651,10 @@
 
 		private void FormTestBed_Load(object sender, EventArgs e)
 		{
-			foreach (var line in File.ReadAllLines("WikiList.txt"))
+			var allWikiInfo = WikiInfo.LoadFile();
+			foreach (var item in allWikiInfo)
 			{
-				this.ComboBoxWiki.Items.Add(new WikiInfo(line));
+				this.ComboBoxWiki.Items.Add(item);
 			}
 
 			if (this.ComboBoxWiki.Items.Count > 0)

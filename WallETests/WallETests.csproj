@@ -57,11 +57,8 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WikiInfo.cs" />
     <AdditionalFiles Include="stylecop.json" />
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="packages.config" />
     <None Include="SharedKey.pfx" />
   </ItemGroup>
   <ItemGroup>
@@ -81,12 +78,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="WikiList.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="WikiListExample.txt" />
-  </ItemGroup>
-  <ItemGroup>
+    <ProjectReference Include="..\TestingCommon\TestingCommon.csproj">
+      <Project>{c1e4b0f3-2ba5-4b13-ad1e-033b84a6ece0}</Project>
+      <Name>TestingCommon</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WallE\WallE.csproj">
       <Project>{f338af86-4502-4121-b032-092ca727d51b}</Project>
       <Name>WallE</Name>
@@ -97,8 +92,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Analyzer Include="..\..\..\NuGet\StyleCop.Analyzers.1.1.0-beta007\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
-    <Analyzer Include="..\..\..\NuGet\StyleCop.Analyzers.1.1.0-beta007\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
+    <Analyzer Include="..\..\..\NuGet\StyleCop.Analyzers.1.1.0-beta008\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
+    <Analyzer Include="..\..\..\NuGet\StyleCop.Analyzers.1.1.0-beta008\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

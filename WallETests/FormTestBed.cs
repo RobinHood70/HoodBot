@@ -15,6 +15,7 @@
 	using Design;
 	using Eve;
 	using RequestBuilder;
+	using TestingCommon;
 	using WikiCommon;
 	using static WikiCommon.Globals;
 
@@ -339,7 +340,7 @@
 			}
 		}
 
-		private void ComboBoxWiki_SelectedIndexChanged(object sender, EventArgs e) => this.wikiInfo = (WikiInfo)this.ComboBoxWiki.SelectedItem;
+		private void ComboBoxWiki_SelectedIndexChanged(object sender, EventArgs e) => this.wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 
 		private void DoGlobalSetup()
 		{
@@ -425,9 +426,10 @@
 
 		private void FormTestBed_Load(object sender, EventArgs e)
 		{
-			foreach (var line in File.ReadAllLines("WikiList.txt"))
+			var allWikiInfo = WikiInfo.LoadFile();
+			foreach (WikiInfo item in allWikiInfo)
 			{
-				this.ComboBoxWiki.Items.Add(new WikiInfo(line));
+				this.ComboBoxWiki.Items.Add(item);
 			}
 
 			if (this.ComboBoxWiki.Items.Count > 0)
