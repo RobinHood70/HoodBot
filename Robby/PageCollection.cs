@@ -138,7 +138,7 @@
 
 		/// <summary>Adds pages with the specified revision IDs to the collection.</summary>
 		/// <param name="revisionIds">The IDs.</param>
-		/// <remarks>General information about the pages for the revision ids specified will always be loaded, regardless of the LoadOptions setting, though the revisions themselves may not be if the collection's load options would filter them out.</remarks>
+		/// <remarks>General information about the pages for the revision IDs specified will always be loaded, regardless of the LoadOptions setting, though the revisions themselves may not be if the collection's load options would filter them out.</remarks>
 		// Note that while RevisionsInput() can be used as a generator, I have not implemented it because I can think of no situation in which it would be useful to populate a PageCollection given the existing revisions methods.
 		public override void AddRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(this.LoadOptions, DefaultPageSetInput.FromRevisionIds(revisionIds));
 
