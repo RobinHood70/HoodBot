@@ -9,7 +9,6 @@
 	using System.Runtime.CompilerServices;
 	using System.Text.RegularExpressions;
 	using Design;
-	using Pages;
 	using WallE.Base;
 	using WikiCommon;
 	using static Properties.Resources;
@@ -487,7 +486,7 @@
 		public void Login(string userName, string password, string domain) => this.Login(new LoginInput(userName, password) { Domain = domain });
 
 		/// <summary>Patrols the specified Recent Changes ID.</summary>
-		/// <param name="rcid">The RCID.</param>
+		/// <param name="rcid">The Recent Change ID.</param>
 		/// <returns><c>true</c> if the edit was successfully patrolled; otherwise, <c>false</c>.</returns>
 		public bool Patrol(long rcid) => this.Patrol(new PatrolInput(rcid));
 

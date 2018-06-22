@@ -2,7 +2,6 @@
 {
 	using System.Collections.Generic;
 	using Design;
-	using Pages;
 	using WallE.Base;
 	using static WikiCommon.Globals;
 

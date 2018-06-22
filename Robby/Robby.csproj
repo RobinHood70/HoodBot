@@ -54,13 +54,13 @@
     <Compile Include="Design\TitleParts.cs" />
     <Compile Include="InterwikiEntry.cs" />
     <Compile Include="InterwikiMap.cs" />
-    <Compile Include="Pages\Category.cs" />
+    <Compile Include="Category.cs" />
     <Compile Include="Design\PageLoadOptions.cs" />
     <Compile Include="Contribution.cs" />
-    <Compile Include="Pages\FileRevision.cs" />
+    <Compile Include="FileRevision.cs" />
     <Compile Include="Design\IWikiTitle.cs" />
     <Compile Include="Design\PageCreator.cs" />
-    <Compile Include="Pages\CategoryTitle.cs" />
+    <Compile Include="CategoryTitle.cs" />
     <Compile Include="Design\WikiTitleComparerFullPageName.cs" />
     <Compile Include="Design\WikiTitleComparerKey.cs" />
     <Compile Include="Design\WikiTitleComparerNamespacePageName.cs" />
@@ -68,8 +68,8 @@
     <Compile Include="MagicWord.cs" />
     <Compile Include="Namespace.cs" />
     <Compile Include="NamespaceCollection.cs" />
-    <Compile Include="Pages\Message.cs" />
-    <Compile Include="Pages\Page.cs" />
+    <Compile Include="Message.cs" />
+    <Compile Include="Page.cs" />
     <Compile Include="PageCollection.cs" />
     <Compile Include="Design\TitleCollection.cs" />
     <Compile Include="RecentChange.cs" />
@@ -90,7 +90,7 @@
     <Compile Include="User.cs" />
     <Compile Include="EditIgnoredEventArgs.cs" />
     <Compile Include="WarningEventArgs.cs" />
-    <Compile Include="Pages\FilePage.cs" />
+    <Compile Include="FilePage.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">

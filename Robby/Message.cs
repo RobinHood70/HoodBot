@@ -1,11 +1,11 @@
-﻿namespace RobinHood70.Robby.Pages
+﻿namespace RobinHood70.Robby
 {
 	using WallE.Base;
 	using WikiCommon;
 	using static WikiCommon.Globals;
 
 	/// <summary>Stores a MediaWiki page along with associated data.</summary>
-	/// <seealso cref="RobinHood70.Robby.Pages.Page" />
+	/// <seealso cref="RobinHood70.Robby.Page" />
 	public class Message : Page
 	{
 		// TODO: Message has different data loaded depending whether it's a faked page or a genuine message. Is this a good idea? Loading all data would require calls to both Load and AllMessages, which could be a undesirable in the PageCreator. Might be a better idea to split this into Message and MessagePage objects depending on behaviour desired, with Message being custom and light-weight.

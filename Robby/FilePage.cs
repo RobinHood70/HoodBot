@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.Robby.Pages
+﻿namespace RobinHood70.Robby
 {
 	using System;
 	using System.Collections.Generic;
@@ -8,7 +8,7 @@
 	using static WikiCommon.Globals;
 
 	/// <summary>Represents a file on the wiki. Includes all page data as well as file revisions and file-specific methods.</summary>
-	/// <seealso cref="RobinHood70.Robby.Pages.Page" />
+	/// <seealso cref="RobinHood70.Robby.Page" />
 	public class FilePage : Page
 	{
 		#region Fields

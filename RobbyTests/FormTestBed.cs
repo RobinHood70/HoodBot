@@ -9,7 +9,6 @@
 	using System.Text;
 	using System.Windows.Forms;
 	using Design;
-	using Pages;
 	using Robby;
 	using RobinHood70.TestingCommon;
 	using Tests.MetaTemplate;
