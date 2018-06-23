@@ -23,7 +23,6 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Page" /> class based on site, namespace ID, and the page name without a namespace.</summary>
-		/// <param name="site">The site the page is from.</param>
 		/// <param name="ns">The namespace to which the page belongs.</param>
 		/// <param name="pageName">The name (only) of the page.</param>
 		/// <remarks>Absolutely no cleanup or checking is performed when using this version of the constructor. All values are assumed to already have been validated.</remarks>
