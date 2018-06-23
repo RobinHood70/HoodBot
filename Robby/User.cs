@@ -20,7 +20,7 @@
 			ThrowNull(name, nameof(name));
 			this.Site = site;
 			this.Name = TitleParts.DecodeAndNormalize(name);
-			this.Page = new Title(site, MediaWikiNamespaces.User, name);
+			this.Page = new Title(site.Namespaces[MediaWikiNamespaces.User], name);
 			this.TalkPage = this.Page.TalkPage;
 		}
 

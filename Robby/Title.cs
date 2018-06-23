@@ -11,11 +11,20 @@
 	using static WikiCommon.Globals;
 
 	#region Public Enumerations
+
+	/// <summary>The possible protection levels on a standard wiki.</summary>
 	public enum ProtectionLevel
 	{
+		/// <summary>Do not make any changes to the protection.</summary>
 		NoChange,
+
+		/// <summary>Remove the protection.</summary>
 		None,
+
+		/// <summary>Change to semi-protection.</summary>
 		Semi,
+
+		/// <summary>Change to full-protection.</summary>
 		Full,
 	}
 	#endregion
@@ -54,16 +63,15 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the site and full page name.</summary>
-		/// <param name="site">The site this title is from.</param>
 		/// <param name="ns">The namespace to which the page belongs.</param>
 		/// <param name="pageName">The name (only) of the page.</param>
 		/// <remarks>Absolutely no cleanup or checking is performed when using this version of the constructor. All values are assumed to already have been validated.</remarks>
-		public Title(Site site, int ns, string pageName)
+		public Title(Namespace ns, string pageName)
 		{
-			ThrowNull(site, nameof(site));
+			ThrowNull(ns, nameof(ns));
 			ThrowNull(pageName, nameof(pageName));
 			pageName = pageName.Normalize();
-			this.Namespace = site.Namespaces[ns];
+			this.Namespace = ns;
 			this.PageName = this.Namespace.CaseSensitive ? pageName : pageName.UpperFirst(this.Namespace.Site.Culture);
 			this.Key = this.FullPageName;
 		}
@@ -82,6 +90,7 @@
 		#region Public Properties
 
 		/// <summary>Gets the value corresponding to {{BASEPAGENAME}}.</summary>
+		/// <value>The name of the base page.</value>
 		public string BasePageName
 		{
 			get
@@ -100,27 +109,36 @@
 		}
 
 		/// <summary>Gets the value corresponding to {{FULLPAGENAME}}.</summary>
+		/// <value>The full name of the page.</value>
 		public string FullPageName => this.Namespace.DecoratedName + this.PageName;
 
 		/// <summary>Gets the original, unaltered key to use for dictionaries and the like.</summary>
+		/// <value>The key.</value>
 		public string Key { get; }
 
 		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
+		/// <value>The name of the label.</value>
 		public string LabelName => PipeTrick(this.PageName);
 
 		/// <summary>Gets or sets the namespace object for the title.</summary>
+		/// <value>The namespace.</value>
 		public Namespace Namespace { get; protected set; }
 
 		/// <summary>Gets or sets the value corresponding to {{PAGENAME}}.</summary>
+		/// <value>The name of the page without the namespace.</value>
 		public string PageName { get; protected set; }
 
-		/// <summary>Gets the site the title is intended for.</summary>
+		/// <summary>Gets the site the Title is from.</summary>
+		/// <value>The site the Title is from.</value>
 		public Site Site => this.Namespace.Site;
 
-		/// <summary>Gets a Title object for this Title's corresponding subject page. If this Title is a subject page, returns itself.</summary>
-		public Title SubjectPage => this.Namespace.IsSubjectSpace ? this : new Title(this.Site, this.Namespace.SubjectSpace.Id, this.PageName);
+		/// <summary>Gets a Title object for this Title's corresponding subject page.</summary>
+		/// <value>The subject page.</value>
+		/// <remarks>If this Title is a subject page, returns itself.</remarks>
+		public Title SubjectPage => this.Namespace.IsSubjectSpace ? this : new Title(this.Namespace.SubjectSpace, this.PageName);
 
 		/// <summary>Gets the value corresponding to {{SUBPAGENAME}}.</summary>
+		/// <value>The name of the subpage.</value>
 		public string SubpageName
 		{
 			get
@@ -138,34 +156,35 @@
 			}
 		}
 
-		/// <summary>Gets a Title object for this Title's corresponding subject page. If this Title is a talk page, returns itself. Returns null for pages which have no associated talk page.</summary>
+		/// <summary>Gets a Title object for this Title's corresponding subject page.</summary>
+		/// <value>The talk page.</value>
+		/// <remarks>If this Title is a talk page, the Title returned will be itself. Returns null for pages which have no associated talk page.</remarks>
 		public Title TalkPage =>
 			this.Namespace.TalkSpace == null ? null
 			: this.Namespace.IsTalkSpace ? this
-			: new Title(this.Site, this.Namespace.TalkSpace.Id, this.PageName);
+			: new Title(this.Namespace.TalkSpace, this.PageName);
 		#endregion
 
 		#region Public Static Methods
 
 		/// <summary>Identical to the constructor with the same signature, but allows that the page name may or may not have the namespace prepended to it and adjusts accordingly.</summary>
-		/// <param name="site">The site this title is from.</param>
 		/// <param name="ns">The namespace to which the page belongs.</param>
 		/// <param name="pageName">The name of the page, with or without the corresponding namespace prefix.</param>
 		/// <returns>A Title object with the given name in the given namespace.</returns>
-		public static Title ForcedNamespace(Site site, int ns, string pageName)
+		public static Title ForcedNamespace(Namespace ns, string pageName)
 		{
-			ThrowNull(site, nameof(site));
+			ThrowNull(ns, nameof(ns));
 			ThrowNull(pageName, nameof(pageName));
-			var titleParts = new TitleParts(site, pageName);
+			var titleParts = new TitleParts(ns.Site, pageName);
 			if (titleParts.Namespace != ns)
 			{
 				if (titleParts.Namespace == MediaWikiNamespaces.Main)
 				{
-					titleParts.Namespace = site.Namespaces[ns];
+					titleParts.Namespace = ns;
 				}
 				else
 				{
-					titleParts = new TitleParts(site, site.Namespaces[ns].DecoratedName + pageName);
+					titleParts = new TitleParts(ns.Site, ns.DecoratedName + pageName);
 				}
 			}
 
@@ -193,23 +212,66 @@
 
 		#region Public Methods
 
-		public bool CreateProtect(string reason, ProtectionLevel protectionLevel, DateTime expiry)
+		/// <summary>Protects a non-existent page from being created.</summary>
+		/// <param name="reason">The reason for the create-protection.</param>
+		/// <param name="createProtection">The protection level.</param>
+		/// <param name="expiry">The expiry date and time.</param>
+		/// <returns><c>true</c> if the title's create-protection was set to the specified values.</returns>
+		public bool CreateProtect(string reason, ProtectionLevel createProtection, DateTime expiry) => this.CreateProtect(reason, ProtectionWord(createProtection), expiry);
+
+		/// <summary>Protects a non-existent page from being created.</summary>
+		/// <param name="reason">The reason for the create-protection.</param>
+		/// <param name="createProtection">The protection level.</param>
+		/// <param name="expiry">The expiry date and time.</param>
+		/// <returns><c>true</c> if the title's create-protection was set to the specified values.</returns>
+		/// <remarks>This version allows custom create-protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="CreateProtect(string, ProtectionLevel, DateTime)"/> version of this call.</remarks>
+		public bool CreateProtect(string reason, string createProtection, DateTime expiry)
 		{
-			if (protectionLevel != ProtectionLevel.NoChange)
+			if (createProtection != null)
 			{
-				var protection = new ProtectInputItem("create", ProtectionWord(protectionLevel)) { Expiry = expiry };
+				var protection = new ProtectInputItem("create", createProtection) { Expiry = expiry };
 				return this.Protect(reason, new[] { protection });
 			}
 
 			return false;
 		}
 
+		/// <summary>Protects a non-existent page from being created.</summary>
+		/// <param name="reason">The reason for the create-protection.</param>
+		/// <param name="createProtection">The protection level.</param>
+		/// <param name="relativeExpiry">The relative expiry date and time (e.g., "2 weeks").</param>
+		/// <returns><c>true</c> if the title's create-protection was set to the specified values.</returns>
+		public bool CreateProtect(string reason, ProtectionLevel createProtection, string relativeExpiry) => this.CreateProtect(reason, ProtectionWord(createProtection), relativeExpiry);
+
+		/// <summary>Protects a non-existent page from being created.</summary>
+		/// <param name="reason">The reason for the create-protection.</param>
+		/// <param name="createProtection">The protection level.</param>
+		/// <param name="relativeExpiry">The relative expiry date and time (e.g., "2 weeks").</param>
+		/// <returns><c>true</c> if the title's create-protection was set to the specified values.</returns>
+		/// <remarks>This version allows custom create-protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="CreateProtect(string, ProtectionLevel, string)"/> version of this call.</remarks>
+		public bool CreateProtect(string reason, string createProtection, string relativeExpiry)
+		{
+			if (createProtection != null)
+			{
+				var protection = new ProtectInputItem("create", createProtection) { ExpiryRelative = relativeExpiry };
+				return this.Protect(reason, new[] { protection });
+			}
+
+			return false;
+		}
+
+		/// <summary>Unprotects the title.</summary>
+		/// <param name="reason">The reason for the unprotection.</param>
+		/// <returns><c>true</c> if the title's creation protection was removed.</returns>
 		public bool CreateUnprotect(string reason)
 		{
 			var protection = new ProtectInputItem("create", ProtectionWord(ProtectionLevel.None));
 			return this.Protect(reason, new[] { protection });
 		}
 
+		/// <summary>Deletes the title for the specified reason.</summary>
+		/// <param name="reason">The reason for the deletion.</param>
+		/// <returns><c>truee</c> if the title was successfully deleted.</returns>
 		public bool Delete(string reason)
 		{
 			ThrowNull(reason, nameof(reason));
@@ -231,6 +293,9 @@
 			return result.LogId > 0;
 		}
 
+		/// <summary>Indicates whether the current Title is equal to another Title.</summary>
+		/// <param name="other">A Title to compare with this object.</param>
+		/// <returns><see langword="true" /> if the current Title is equal to the <paramref name="other" /> Title; otherwise, <see langword="false" />.</returns>
 		public bool Equals(Title other) =>
 			other == null ? false :
 			this.Namespace.Equals(other.Namespace) && this.Namespace.PageNameEquals(this.PageName, other.PageName);
@@ -248,10 +313,27 @@
 		/// <returns>True if all of Site, Namespace, PageName, and Key are identical between the two Titles.</returns>
 		public bool IsSameTitleAndKey(IWikiTitle title) => this.IsSameTitle(title) && this.Key == title?.Key;
 
+		/// <summary>Moves the title to the name specified.</summary>
+		/// <param name="to">The location to move the title to.</param>
+		/// <param name="reason">The reason for the move.</param>
+		/// <param name="suppressRedirect">if set to <c>true</c>, suppress the redirect that would normally be created.</param>
+		/// <returns><c>truee</c> if the title was successfully moved.</returns>
 		public Dictionary<string, string> Move(string to, string reason, bool suppressRedirect) => this.Move(to, reason, false, false, suppressRedirect);
 
+		/// <summary>Moves the title to the name specified.</summary>
+		/// <param name="to">The location to move the title to.</param>
+		/// <param name="reason">The reason for the move.</param>
+		/// <param name="suppressRedirect">if set to <c>true</c>, suppress the redirect that would normally be created.</param>
+		/// <returns><c>truee</c> if the title was successfully moved.</returns>
 		public Dictionary<string, string> Move(Title to, string reason, bool suppressRedirect) => this.Move(to?.FullPageName, reason, false, false, suppressRedirect);
 
+		/// <summary>Moves the title to the name specified.</summary>
+		/// <param name="to">The location to move the title to.</param>
+		/// <param name="reason">The reason for the move.</param>
+		/// <param name="moveTalk">if set to <c>true</c>, moves the talk page as well as the original page.</param>
+		/// <param name="moveSubpages">if set to <c>true</c>, moves all sub-pages of the original page.</param>
+		/// <param name="suppressRedirect">if set to <c>true</c>, suppress the redirect that would normally be created.</param>
+		/// <returns><c>truee</c> if the title was successfully moved.</returns>
 		public Dictionary<string, string> Move(string to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
 		{
 			ThrowNull(to, nameof(to));
@@ -310,71 +392,92 @@
 			return retval;
 		}
 
+		/// <summary>Moves the title to the name specified.</summary>
+		/// <param name="to">The location to move the title to.</param>
+		/// <param name="reason">The reason for the move.</param>
+		/// <param name="moveTalk">if set to <c>true</c>, moves the talk page as well as the original page.</param>
+		/// <param name="moveSubpages">if set to <c>true</c>, moves all sub-pages of the original page.</param>
+		/// <param name="suppressRedirect">if set to <c>true</c>, suppress the redirect that would normally be created.</param>
+		/// <returns><c>truee</c> if the title was successfully moved.</returns>
 		public Dictionary<string, string> Move(Title to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect) => this.Move(to?.FullPageName, reason, moveTalk, moveSubpages, suppressRedirect);
 
-		public bool Protect(string reason, ProtectionLevel createProtection, string relativeExpiry)
-		{
-			if (createProtection != ProtectionLevel.NoChange)
-			{
-				var protection = new ProtectInputItem("create", ProtectionWord(createProtection)) { ExpiryRelative = relativeExpiry };
-				return this.Protect(reason, new[] { protection });
-			}
+		/// <summary>Protects the title.</summary>
+		/// <param name="reason">The reason for the protection.</param>
+		/// <param name="editProtection">The edit-protection level.</param>
+		/// <param name="moveProtection">The move-protection level.</param>
+		/// <param name="expiry">The expiry date and time.</param>
+		/// <returns><c>true</c> if all protections were set to the specified values.</returns>
+		public bool Protect(string reason, ProtectionLevel editProtection, ProtectionLevel moveProtection, DateTime expiry) => this.Protect(reason, ProtectionWord(editProtection), ProtectionWord(moveProtection), expiry);
 
-			return false;
-		}
+		/// <summary>Protects the title.</summary>
+		/// <param name="reason">The reason for the protection.</param>
+		/// <param name="editProtection">The edit-protection level.</param>
+		/// <param name="moveProtection">The move-protection level.</param>
+		/// <param name="relativeExpiry">The relative expiry date and time (e.g., "2 weeks").</param>
+		/// <returns><c>true</c> if all protections were set to the specified values.</returns>
+		public bool Protect(string reason, ProtectionLevel editProtection, ProtectionLevel moveProtection, string relativeExpiry) => this.Protect(reason, ProtectionWord(editProtection), ProtectionWord(moveProtection), relativeExpiry);
 
-		public bool Protect(string reason, ProtectionLevel editProtection, ProtectionLevel moveProtection, DateTime expiry)
+		/// <summary>Protects the title.</summary>
+		/// <param name="reason">The reason for the protection.</param>
+		/// <param name="editProtection">The edit-protection level.</param>
+		/// <param name="moveProtection">The move-protection level.</param>
+		/// <param name="expiry">The expiry date and time.</param>
+		/// <returns><c>true</c> if all protections were set to the specified values.</returns>
+		/// <remarks>This version allows custom protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="Protect(string, ProtectionLevel, ProtectionLevel, DateTime)"/> version of this call.</remarks>
+		public bool Protect(string reason, string editProtection, string moveProtection, DateTime expiry)
 		{
 			var protections = new List<ProtectInputItem>(2);
-			if (editProtection != ProtectionLevel.NoChange)
+			if (editProtection != null)
 			{
-				protections.Add(new ProtectInputItem("edit", ProtectionWord(editProtection)) { Expiry = expiry });
+				protections.Add(new ProtectInputItem("edit", editProtection) { Expiry = expiry });
 			}
 
-			if (moveProtection != ProtectionLevel.NoChange)
+			if (moveProtection != null)
 			{
-				protections.Add(new ProtectInputItem("move", ProtectionWord(moveProtection)) { Expiry = expiry });
+				protections.Add(new ProtectInputItem("move", moveProtection) { Expiry = expiry });
 			}
 
 			return this.Protect(reason, protections);
 		}
 
-		public bool Protect(string reason, ProtectionLevel editProtection, ProtectionLevel moveProtection, string relativeExpiry)
+		/// <summary>Protects the title.</summary>
+		/// <param name="reason">The reason for the protection.</param>
+		/// <param name="editProtection">The edit-protection level.</param>
+		/// <param name="moveProtection">The move-protection level.</param>
+		/// <param name="relativeExpiry">The relative expiry date and time (e.g., "2 weeks").</param>
+		/// <returns><c>true</c> if all protections were set to the specified values.</returns>
+		/// <remarks>This version allows custom protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="Protect(string, ProtectionLevel, ProtectionLevel, string)"/> version of this call.</remarks>
+		public bool Protect(string reason, string editProtection, string moveProtection, string relativeExpiry)
 		{
 			if (relativeExpiry == null)
 			{
-				relativeExpiry = "indefinite";
+				relativeExpiry = "infinite";
 			}
 
 			var protections = new List<ProtectInputItem>(2);
-			if (editProtection != ProtectionLevel.NoChange)
+			if (editProtection != null)
 			{
-				protections.Add(new ProtectInputItem("edit", ProtectionWord(editProtection)) { ExpiryRelative = relativeExpiry });
+				protections.Add(new ProtectInputItem("edit", editProtection) { ExpiryRelative = relativeExpiry });
 			}
 
-			if (moveProtection != ProtectionLevel.NoChange)
+			if (moveProtection != null)
 			{
-				protections.Add(new ProtectInputItem("move", ProtectionWord(moveProtection)) { ExpiryRelative = relativeExpiry });
+				protections.Add(new ProtectInputItem("move", moveProtection) { ExpiryRelative = relativeExpiry });
 			}
 
 			return this.Protect(reason, protections);
 		}
 
-		public bool Unprotect(string reason, bool editUnprotect, bool moveUnprotect)
-		{
-			var protections = new List<ProtectInputItem>(2);
-			if (editUnprotect)
-			{
-				protections.Add(new ProtectInputItem("edit", ProtectionWord(ProtectionLevel.None)));
-			}
-
-			if (moveUnprotect)
-			{
-				protections.Add(new ProtectInputItem("move", ProtectionWord(ProtectionLevel.None)));
-			}
-
-			return this.Protect(reason, protections);
-		}
+		/// <summary>Unprotects the title for the specified reason.</summary>
+		/// <param name="reason">The reason.</param>
+		/// <param name="editUnprotect">if set to <c>true</c>, removes edit protection.</param>
+		/// <param name="moveUnprotect">if set to <c>true</c>, removes move protection.</param>
+		/// <returns><c>true</c> if title was successfully unprotected.</returns>
+		public bool Unprotect(string reason, bool editUnprotect, bool moveUnprotect) => this.Protect(
+			reason,
+			editUnprotect ? ProtectionLevel.None : ProtectionLevel.NoChange,
+			moveUnprotect ? ProtectionLevel.None : ProtectionLevel.NoChange,
+			null);
 		#endregion
 
 		#region Public Override Methods
@@ -384,21 +487,30 @@
 		public override string ToString() => this.FullPageName;
 		#endregion
 
-		#region Private Static Methods
-		private static string ProtectionWord(ProtectionLevel level)
-		{
-			switch (level)
-			{
-				case ProtectionLevel.None:
-					return "all";
-				case ProtectionLevel.Semi:
-					return "autoconfirmed";
-				case ProtectionLevel.Full:
-					return "sysop";
-			}
+		#region Protected Methods
 
-			return null;
+		/// <summary>Protects the title based on the specified input.</summary>
+		/// <param name="input">The input.</param>
+		/// <returns><c>true</c> if all protections were set to the specified values.</returns>
+		protected virtual bool Protect(ProtectInput input)
+		{
+			ThrowNull(input, nameof(input));
+			var inputCount = new List<ProtectInputItem>(input.Protections).Count;
+			var result = this.Site.AbstractionLayer.Protect(input);
+
+			// This is a simple count comparison, because matching up inputs and outputs would be more intensive and should not be necessary, barring any breaking changes to the MediaWiki protection algorithm.
+			return result.Protections.Count == inputCount;
 		}
+		#endregion
+
+		#region Private Static Methods
+
+		// A dictionary is probably overkill for three items.
+		private static string ProtectionWord(ProtectionLevel level) =>
+			level == ProtectionLevel.None ? "all" :
+			level == ProtectionLevel.Semi ? "autoconfirmed" :
+			level == ProtectionLevel.Full ? "sysop" :
+			null;
 		#endregion
 
 		#region Private Methods
@@ -425,9 +537,8 @@
 				Protections = protections,
 				Reason = reason
 			};
-			var result = this.Site.AbstractionLayer.Protect(input);
 
-			return result.Protections.Count == protections.Count;
+			return this.Protect(input);
 		}
 		#endregion
 	}

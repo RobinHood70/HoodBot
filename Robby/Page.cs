@@ -27,8 +27,8 @@
 		/// <param name="ns">The namespace to which the page belongs.</param>
 		/// <param name="pageName">The name (only) of the page.</param>
 		/// <remarks>Absolutely no cleanup or checking is performed when using this version of the constructor. All values are assumed to already have been validated.</remarks>
-		public Page(Site site, int ns, string pageName)
-			: base(site, ns, pageName)
+		public Page(Namespace ns, string pageName)
+			: base(ns, pageName)
 		{
 		}
 

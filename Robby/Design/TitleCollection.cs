@@ -179,7 +179,7 @@
 		/// <remarks>If subcategories are loaded, they will be limited to the <paramref name="categoryMemberTypes"/> requested. However, they will <em>not</em> be limited by the <paramref name="from"/> and <paramref name="to"/> parameters.</remarks>
 		public void AddCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, string from, string to, bool loadSubcategories)
 		{
-			var cat = Title.ForcedNamespace(this.Site, MediaWikiNamespaces.Category, category);
+			var cat = Title.ForcedNamespace(this.Site.Namespaces[MediaWikiNamespaces.Category], category);
 			this.AddCategoryMembers(
 				new CategoryMembersInput(cat.FullPageName)
 				{

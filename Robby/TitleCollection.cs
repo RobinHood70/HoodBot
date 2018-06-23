@@ -43,25 +43,24 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class with a specific list of titles in a given namespace.</summary>
-		/// <param name="site">The site.</param>
 		/// <param name="ns">The namespace the titles are in.</param>
 		/// <param name="titles">The titles. Namespace text is optional and will be stripped if provided.</param>
-		public TitleCollection(Site site, int ns, IEnumerable<string> titles)
-			: base(site)
+		public TitleCollection(Namespace ns, IEnumerable<string> titles)
+			: base(ns?.Site)
 		{
+			ThrowNull(ns, nameof(ns));
 			ThrowNull(titles, nameof(titles));
 			foreach (var item in titles)
 			{
-				this.Add(Title.ForcedNamespace(site, ns, item));
+				this.Add(Title.ForcedNamespace(ns, item));
 			}
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class with a specific list of titles in a given namespace.</summary>
-		/// <param name="site">The site.</param>
 		/// <param name="ns">The namespace the titles are in.</param>
 		/// <param name="titles">The titles. Namespace text is optional and will be stripped if provided.</param>
-		public TitleCollection(Site site, int ns, params string[] titles)
-			: this(site, ns, titles as IEnumerable<string>)
+		public TitleCollection(Namespace ns, params string[] titles)
+			: this(ns, titles as IEnumerable<string>)
 		{
 		}
 		#endregion
@@ -423,7 +422,7 @@
 			{
 				var name = item.Name.Replace('_', ' ');
 				name = this.Site.Namespaces[MediaWikiNamespaces.MediaWiki].CapitalizePageName(name);
-				this.Add(new Title(this.Site, MediaWikiNamespaces.MediaWiki, name));
+				this.Add(new Title(this.Site.Namespaces[MediaWikiNamespaces.MediaWiki], name));
 			}
 		}
 
