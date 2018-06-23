@@ -37,7 +37,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				foreach (var protection in input.Protections)
 				{
-					protections.Add(Invariant((System.FormattableString)$"{protection.Type}={protection.Level}"));
+					protections.Add(protection.Type + '=' + protection.Level);
 					var resolvedExpiry = protection.Expiry.ToMediaWiki() ?? protection.ExpiryRelative ?? "infinite"; // Only use infinite (as empty string) if both are null
 					expiry.Add(resolvedExpiry);
 				}
