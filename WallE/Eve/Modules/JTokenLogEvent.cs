@@ -13,7 +13,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	internal static class JTokenLogEvent
 	{
 		#region Fields
-		private static Regex protectionFinder = new Regex(@"\[(?<action>.*?)=(?<restrictions>.*?)] \((?<indef>indefinite|infinity|never)?(expires (?<expiry>.*?) \(UTC\))?\)", RegexOptions.Compiled);
+		private static Regex protectionFinder = new Regex(@"\[(?<action>[^=]*?)=(?<restrictions>[^\]]*?)\] \((?<indef>indefinite|infinit[ey]|never)?(expires (?<expiry>.*?) \(UTC\))?\)", RegexOptions.Compiled);
 		#endregion
 
 		#region Internal Extension Methods
