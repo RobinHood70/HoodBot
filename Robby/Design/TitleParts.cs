@@ -26,7 +26,6 @@
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(fullPageName, nameof(fullPageName));
-			this.Key = fullPageName;
 			var nameRemaining = DecodeAndNormalize(fullPageName);
 			if (nameRemaining.Length > 0 && nameRemaining[0] == ':')
 			{
@@ -115,6 +114,8 @@
 				this.PageName = this.PageName.UpperFirst(site.Culture);
 			}
 
+			this.Key = this.ToString();
+
 			Debug.Assert(this.Interwiki != null || this.Namespace != null, "Neither Interwiki nor Namespace were assigned.");
 		}
 
@@ -161,7 +162,7 @@
 		/// <value>The interwiki prefix.</value>
 		public InterwikiEntry Interwiki { get; set; }
 
-		/// <summary>Gets or sets the key to use in dictionary lookups. By default, this is the full page name provided when the object was constructed.</summary>
+		/// <summary>Gets or sets the key to use in dictionary lookups. By default, this is the full page name provided when the object was constructed, including the Interwiki and Fragment portions.</summary>
 		/// <value>The key.</value>
 		public string Key { get; set; }
 

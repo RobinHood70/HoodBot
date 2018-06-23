@@ -29,7 +29,7 @@
 	}
 	#endregion
 
-	/// <summary>Provides a light-weight holder for titles and provides several information and manipulation functions.</summary>
+	/// <summary>Provides a light-weight holder for titles with several information and manipulation functions.</summary>
 	public class Title : IWikiTitle, IEquatable<Title>, IMessageSource
 	{
 		#region Constants
@@ -51,7 +51,6 @@
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(fullPageName, nameof(fullPageName));
-			this.Key = fullPageName;
 			var titleParts = new TitleParts(site, fullPageName);
 			if (titleParts.Interwiki != null && !titleParts.Interwiki.LocalWiki)
 			{
@@ -60,30 +59,31 @@
 
 			this.Namespace = titleParts.Namespace;
 			this.PageName = titleParts.PageName;
+			this.Key = this.FullPageName;
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the site and full page name.</summary>
+		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the namespace and page name.</summary>
 		/// <param name="ns">The namespace to which the page belongs.</param>
-		/// <param name="pageName">The name (only) of the page.</param>
-		/// <remarks>Absolutely no cleanup or checking is performed when using this version of the constructor. All values are assumed to already have been validated.</remarks>
+		/// <param name="pageName">The name of the page without the namespace.</param>
 		public Title(Namespace ns, string pageName)
 		{
 			ThrowNull(ns, nameof(ns));
 			ThrowNull(pageName, nameof(pageName));
 			pageName = pageName.Normalize();
 			this.Namespace = ns;
-			this.PageName = this.Namespace.CaseSensitive ? pageName : pageName.UpperFirst(this.Namespace.Site.Culture);
+			this.PageName = ns.CaseSensitive ? pageName : pageName.UpperFirst(ns.Site.Culture);
 			this.Key = this.FullPageName;
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="Title" /> class, copying the information from another Title object.</summary>
+		/// <summary>Initializes a new instance of the <see cref="Title" /> class, copying the information from another <see cref="IWikiTitle"/> object.</summary>
 		/// <param name="title">The Title object to copy from.</param>
+		/// <remarks>Note that the Key property will be set to the new full page name, regardless of the original item's key.</remarks>
 		public Title(IWikiTitle title)
 		{
 			ThrowNull(title, nameof(title));
 			this.Namespace = title.Namespace;
 			this.PageName = title.PageName;
-			this.Key = title.Key;
+			this.Key = this.FullPageName;
 		}
 		#endregion
 
@@ -112,9 +112,9 @@
 		/// <value>The full name of the page.</value>
 		public string FullPageName => this.Namespace.DecoratedName + this.PageName;
 
-		/// <summary>Gets the original, unaltered key to use for dictionaries and the like.</summary>
+		/// <summary>Gets or sets the key to use in dictionary lookups. By default, this is the full page name at the time of object initialization, after being normalized.</summary>
 		/// <value>The key.</value>
-		public string Key { get; }
+		public string Key { get; set; }
 
 		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		/// <value>The name of the label.</value>
