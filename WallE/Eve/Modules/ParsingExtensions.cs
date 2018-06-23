@@ -340,10 +340,10 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				case null:
 				case "":
+				case "indefinite":
 				case "infinite":
 				case "infinity":
 				case "never":
-				case "indefinite":
 					return null;
 				default:
 					if (dateText.EndsWith("Z", StringComparison.Ordinal))
