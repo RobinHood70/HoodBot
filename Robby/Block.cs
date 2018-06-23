@@ -29,24 +29,31 @@
 		#endregion
 
 		/// <summary>Gets a value indicating whether whether the block was made automatically by the wiki software.</summary>
+		/// <value><c>true</c> if it was an automatic block; otherwise, <c>false</c>.</value>
 		public bool Automatic { get; }
 
 		/// <summary>Gets the blocking user.</summary>
+		/// <value>The user this user was blocked by.</value>
 		public string BlockedBy { get; }
 
 		/// <summary>Gets the date and time the block expires. DateTime.Max is used to represent an indefinite block.</summary>
+		/// <value>The date and time the block expires.</value>
 		public DateTime Expiry { get; }
 
 		/// <summary>Gets the block flags.</summary>
+		/// <value>The block flags.</value>
 		public BlockFlags Flags { get; }
 
 		/// <summary>Gets the reason the user was blocked.</summary>
+		/// <value>The reason the user was blocked.</value>
 		public string Reason { get; }
 
-		/// <summary>Gets the time when the block was placed.</summary>
+		/// <summary>Gets the time when the block was placed. DateTime.Min is used to represent unknown start times (usually only on very old or damaged wikis).</summary>
+		/// <value>The start time of the block.</value>
 		public DateTime StartTime { get; }
 
-		/// <summary>Gets the user who was blocked. DateTime.Min is used to represent unknown start times (usually only on very old or damaged wikis).</summary>
+		/// <summary>Gets the user who was blocked.</summary>
+		/// <value>The user who was blocked.</value>
 		public string User { get; }
 	}
 }

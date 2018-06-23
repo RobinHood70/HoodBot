@@ -35,12 +35,15 @@
 		#region Public Properties
 
 		/// <summary>Gets the namespace collection as a collection of their IDs.</summary>
+		/// <value>The namespace collection as a collection of their IDs.</value>
 		public IEnumerable<int> AllIds => this.IdsDictionary.Keys;
 
 		/// <summary>Gets the number of namespaces in the collection.</summary>
+		/// <value>The number of namespaces in the collection.</value>
 		public int Count => this.IdsDictionary.Count;
 
-		/// <summary>Gets the namespace collection as a collection of their IDs, but excluding the special namespaces.</summary>
+		/// <summary>Gets the namespace collection as a collection of their IDs, excluding the special namespaces.</summary>
+		/// <value>The namespace collection as a collection of their IDs, excluding the special namespaces.</value>
 		public IEnumerable<int> RegularIds
 		{
 			get
@@ -58,10 +61,12 @@
 
 		#region Protected Properties
 
-		/// <summary>Gets the ID lookup dictionary of the collection.</summary>
+		/// <summary>Gets the ID dictionary of the collection.</summary>
+		/// <value>The ID dictionary.</value>
 		protected SortedList<int, Namespace> IdsDictionary { get; } = new SortedList<int, Namespace>();
 
-		/// <summary>Gets the name lookup dictionary of the collection.</summary>
+		/// <summary>Gets the name dictionary of the collection.</summary>
+		/// <value>The name dictionary.</value>
 		protected Dictionary<string, Namespace> NamesDictionary { get; }
 		#endregion
 

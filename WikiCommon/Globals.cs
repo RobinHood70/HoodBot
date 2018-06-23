@@ -23,9 +23,11 @@
 		#region Public Properties
 
 		/// <summary>Gets a value indicating whether the current project is using <a href="http://www.mono-project.com/">Mono</a>.</summary>
+		/// <value><c>true</c> if this instance is running on Mono; otherwise, <c>false</c>.</value>
 		public static bool HasMono { get; } = Type.GetType("Mono.Runtime") != null;
 
 		/// <summary>Gets a value indicating whether the current project is running on Windows.</summary>
+		/// <value><c>true</c> if running on Windows; otherwise, <c>false</c>.</value>
 		public static bool OnWindows { get; } = Environment.OSVersion.Platform < PlatformID.Unix;
 		#endregion
 

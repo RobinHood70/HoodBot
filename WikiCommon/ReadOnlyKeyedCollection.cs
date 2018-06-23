@@ -39,6 +39,7 @@
 		#region Public Properties
 
 		/// <summary>Gets the number of elements in the collection.</summary>
+		/// <value>The number of elements in the collection.</value>
 		public int Count => this.items.Count;
 
 		/// <summary>Gets the generic equality comparer that is used to determine equality of keys in the collection.</summary>

@@ -21,7 +21,8 @@
 
 		#region Public Properties
 
-		/// <summary>Gets the number of elements in the collection.</summary>
+		/// <summary>Gets the number of revisions in the collection.</summary>
+		/// <value>The number of revisions in the collection.</value>
 		public int Count => this.revisions.Count;
 
 		/// <summary>Gets or sets the current revision.</summary>

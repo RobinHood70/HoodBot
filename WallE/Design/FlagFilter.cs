@@ -46,6 +46,7 @@ namespace RobinHood70.WallE.Design
 		#region Public Properties
 
 		/// <summary>Gets the current flags value, with any filters applied to this point.</summary>
+		/// <value>The current flags value, with any filters applied to this point.</value>
 		public T Value => (T)Enum.ToObject(typeof(T), this.longValue);
 		#endregion
 

@@ -7,19 +7,24 @@
 	{
 		#region Properties
 
-		/// <summary>Gets or sets the list of revision IDs that could not be found on the wiki.</summary>
+		/// <summary>Gets or sets the revision IDs that could not be found on the wiki.</summary>
+		/// <value>The bad revision ids.</value>
 		IReadOnlyList<long> BadRevisionIds { get; set; }
 
-		/// <summary>Gets or sets the list of page titles that were converted.</summary>
+		/// <summary>Gets or sets the page titles that were language-variant converted.</summary>
+		/// <value>The page titles that were language-variant converted.</value>
 		IReadOnlyDictionary<string, string> Converted { get; set; }
 
-		/// <summary>Gets or sets the list of page titles that resolved to Interwiki links.</summary>
+		/// <summary>Gets or sets the page titles that resolved to interwiki links.</summary>
+		/// <value>The page titles that resolved to interwiki links.</value>
 		IReadOnlyDictionary<string, InterwikiTitleItem> Interwiki { get; set; }
 
-		/// <summary>Gets or sets the list of page titles that were normalized (e.g., underscores converted to spaces).</summary>
+		/// <summary>Gets or sets the page titles that were normalized (e.g., underscores converted to spaces).</summary>
+		/// <value>The page titles that were normalized.</value>
 		IReadOnlyDictionary<string, string> Normalized { get; set; }
 
-		/// <summary>Gets or sets the list of page titles that were redirects.</summary>
+		/// <summary>Gets or sets the page titles that were redirects.</summary>
+		/// <value>The page titles that were redirects.</value>
 		IReadOnlyDictionary<string, PageSetRedirectItem> Redirects { get; set; }
 		#endregion
 	}

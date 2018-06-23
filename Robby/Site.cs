@@ -80,7 +80,8 @@
 		public IWikiAbstractionLayer AbstractionLayer { get; }
 
 		/// <summary>Gets or sets a value indicating whether methods that would alter the wiki should be allowed.</summary>
-		/// <remarks>If set to false, most methods will silently fail, indicating success whenever possible.</remarks>
+		/// <value><c>true</c> if editing should be allowed; otherwise, <c>false</c>.</value>
+		/// <remarks>If set to false, most methods will silently fail, indicating success whenever possible. This is mostly intended for testing new bot jobs without risking any unintended edits.</remarks>
 		public bool AllowEditing { get; set; } = true;
 
 		/// <summary>Gets a value indicating whether the first letter of titles is case-sensitive.</summary>

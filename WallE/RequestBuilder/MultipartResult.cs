@@ -13,9 +13,11 @@
 		}
 
 		/// <summary>Gets the value for the HTML <c>Content-Type</c> header.</summary>
+		/// <value>The HTML content type.</value>
 		public string ContentType { get; }
 
 		/// <summary>Gets the byte data to send.</summary>
+		/// <value>The byte data to send.</value>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "Not intended for use by caller, just to be passed along.")]
 		public byte[] Data { get; }
 	}

@@ -36,9 +36,11 @@
 		#region Public Properties
 
 		/// <summary>Gets the number of elements contained in the <see cref="TitleCollection">collection</see>.</summary>
+		/// <value>The number of elements contained in the <see cref="TitleCollection">collection</see>.</value>
 		public int Count => this.items.Count;
 
 		/// <summary>Gets a value indicating whether the <see cref="TitleCollection">collection</see> is read-only.</summary>
+		/// <value><c>true</c> if the collection is read-only.</value>
 		public bool IsReadOnly { get; } = false;
 
 		/// <summary>Gets the site for the collection.</summary>
