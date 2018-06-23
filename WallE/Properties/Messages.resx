@@ -144,7 +144,7 @@ Info: {1}</value>
     <value>You cannot search for an empty string.</value>
   </data>
   <data name="MonoCreateZStreamBug" xml:space="preserve">
-    <value>You appear to have the mono CreateZStream bug. Please see http://stackoverflow.com/a/32958861/502255 to fix the issue before using this library. Alternatively, you can set the static FormClient.DefaultAcceptEncoding to null or an empty string before creating a FormClient instance.</value>
+    <value>You appear to have the mono CreateZStream bug. Please see http://stackoverflow.com/a/32958861/502255 to fix the issue before using this library. Alternatively, you can set the static DefaultAcceptEncoding to null or an empty string before creating an instance of this client.</value>
   </data>
   <data name="NotAPipedParameter" xml:space="preserve">
     <value>There was an attempt to add a piped parameter value, but an existing value with the same name ({0}) exists and is not a piped parameter.</value>

@@ -48,6 +48,7 @@
 		/// <param name="cookiesLocation">The location and file name to store cookies in across sessions. If null, the default location specified in <see cref="DefaultCookiesLocation" /> will be used.</param>
 		public SimpleClient(string contactInfo, string cookiesLocation)
 		{
+			// Test for the Mono Z-Stream bug on Windows: http://stackoverflow.com/a/32958861/502255
 			if (HasMono && OnWindows && (DefaultAcceptEncoding.Contains("gzip") || DefaultAcceptEncoding.Contains("deflate")))
 			{
 				try
