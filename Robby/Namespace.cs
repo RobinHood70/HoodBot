@@ -7,8 +7,7 @@
 	using static WikiCommon.Globals;
 
 	/// <summary>Represents a MediaWiki namespace for a specific site.</summary>
-	/// <seealso cref="System.IEquatable{T}" />
-	public class Namespace : IEquatable<Namespace>, IEquatable<int>
+	public class Namespace
 	{
 		#region Fields
 		private readonly HashSet<string> allNames;
@@ -186,16 +185,6 @@
 		/// <param name="name">The name to locate.</param>
 		/// <returns><c>true</c> if the name list for the namespace contains the specified name; otherwise, <c>false</c>.</returns>
 		public bool Contains(string name) => this.allNames.Contains(name);
-
-		/// <summary>Indicates whether the current object is equal to another object of the same type.</summary>
-		/// <param name="other">An object to compare with this object.</param>
-		/// <returns><see langword="true" /> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false" />.</returns>
-		public bool Equals(Namespace other) => other == null ? false : this.Site.Equals(other.Site) && this.Id.Equals(other.Id);
-
-		/// <summary>Indicates whether the ID of the current object is equal to the given integer.</summary>
-		/// <param name="other">An object to compare with this object.</param>
-		/// <returns><see langword="true" /> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false" />.</returns>
-		public bool Equals(int other) => this.Id == other;
 
 		/// <summary>Checks if two page names are the same, based on the case-sensitivity for the namespace.</summary>
 		/// <param name="pageName1">The page name to check.</param>
