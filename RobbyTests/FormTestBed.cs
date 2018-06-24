@@ -416,7 +416,6 @@
 			this.Assert(title.PageName == "Skyrim", "Incorrect pagename");
 			this.Assert(title.Fragment == "Modding", "Incorrect fragment");
 			this.Assert(title.FullPageName == "Skyrim:Skyrim", "Incorrect full page name");
-			this.Assert(title.Key == ":eN:sKyRiM:skyrim#Modding", "Incorrect key");
 
 			var caught = false;
 			try

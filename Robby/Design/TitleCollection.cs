@@ -15,7 +15,7 @@
 	/// <seealso cref="System.Collections.Generic.IReadOnlyCollection{TTitle}" />
 	/// <remarks>This collection class functions similarly to a KeyedCollection, but automatically overwrites existing items with new ones. Because IWikiTitle objects don't support changing item keys, neither does this.</remarks>
 	public abstract class TitleCollection<TTitle> : IList<TTitle>, IReadOnlyCollection<TTitle>
-		where TTitle : IWikiTitle
+		where TTitle : Title
 	{
 		#region Fields
 		private readonly Dictionary<string, TTitle> dictionary = new Dictionary<string, TTitle>();

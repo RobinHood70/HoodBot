@@ -30,7 +30,7 @@
 	#endregion
 
 	/// <summary>Provides a light-weight holder for titles with several information and manipulation functions.</summary>
-	public class Title : IWikiTitle, IEquatable<Title>, IMessageSource
+	public class Title : IWikiTitle, IMessageSource
 	{
 		#region Constants
 		// The following is taken from DefaultSettings::$wgLegalTitleChars and always assumes the default setting. I believe this is emitted as part of API:Siteinfo, but I wouldn't trust any kind of automated conversion, so better to just leave it as default, which is what 99.99% of wikis will probably use.
@@ -112,9 +112,9 @@
 		/// <value>The full name of the page.</value>
 		public string FullPageName => this.Namespace.DecoratedName + this.PageName;
 
-		/// <summary>Gets or sets the key to use in dictionary lookups. By default, this is the full page name at the time of object initialization, after being normalized.</summary>
+		/// <summary>Gets the key to use in dictionary lookups. This is identical to FullPageName (after any decoding and normalization), but unlike FullPagename, cannot be modified after being set.</summary>
 		/// <value>The key.</value>
-		public string Key { get; set; }
+		public string Key { get; }
 
 		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		/// <value>The name of the label.</value>
@@ -293,25 +293,19 @@
 			return result.LogId > 0;
 		}
 
-		/// <summary>Indicates whether the current Title is equal to another Title.</summary>
-		/// <param name="other">A Title to compare with this object.</param>
-		/// <returns><see langword="true" /> if the current Title is equal to the <paramref name="other" /> Title; otherwise, <see langword="false" />.</returns>
-		public bool Equals(Title other) =>
-			other == null ? false :
-			this.Namespace.Equals(other.Namespace) && this.Namespace.PageNameEquals(this.PageName, other.PageName);
-
-		/// <summary>Checks to see if this Title resolves to the same page as another Title. Key is ignored.</summary>
-		/// <param name="title">The title, or derived type, to compare to.</param>
-		/// <returns>True if all of Site, Namespace, and PageName are identical between the two Titles.</returns>
-		public bool IsSameTitle(IWikiTitle title) =>
-			title != null &&
-			this.Namespace == title.Namespace &&
-			this.PageName == title.PageName;
-
 		/// <summary>Functionally equivalent to Equals(Title), but IEquatable breaks spectacularly on non-sealed types, so is not implemented.</summary>
 		/// <param name="title">The title, or derived type, to compare to.</param>
 		/// <returns>True if all of Site, Namespace, PageName, and Key are identical between the two Titles.</returns>
-		public bool IsSameTitleAndKey(IWikiTitle title) => this.IsSameTitle(title) && this.Key == title?.Key;
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "IsSameTitle will return false if this is null, which will then short-circuit the remainder of the comparison.")]
+		public bool IsIdentical(Title title) => this.IsSameTitle(title) && this.Key == title.Key;
+
+		/// <summary>Checks to see if this Title resolves to the same page as another <see cref="IWikiTitle"/>.</summary>
+		/// <param name="title">The title, or derived type, to compare to.</param>
+		/// <returns>True if the Namespace and PageName are identical between the two Titles.</returns>
+		public bool IsSameTitle(IWikiTitle title) =>
+			title != null &&
+			this.Namespace == title.Namespace &&
+			this.Namespace.PageNameEquals(this.PageName, title.PageName);
 
 		/// <summary>Moves the title to the name specified.</summary>
 		/// <param name="to">The location to move the title to.</param>

@@ -62,7 +62,6 @@
     <Compile Include="Design\PageCreator.cs" />
     <Compile Include="CategoryTitle.cs" />
     <Compile Include="Design\WikiTitleComparerFullPageName.cs" />
-    <Compile Include="Design\WikiTitleComparerKey.cs" />
     <Compile Include="Design\WikiTitleComparerNamespacePageName.cs" />
     <Compile Include="Design\IMessageSource.cs" />
     <Compile Include="MagicWord.cs" />
@@ -86,7 +85,7 @@
     <Compile Include="Site.cs" />
     <Compile Include="SiteCapabilities.cs" />
     <Compile Include="Title.cs" />
-    <Compile Include="Design\WikiTitleEqualityComparerFull.cs" />
+    <Compile Include="Design\WikiTitleEqualityComparer.cs" />
     <Compile Include="User.cs" />
     <Compile Include="EditIgnoredEventArgs.cs" />
     <Compile Include="WarningEventArgs.cs" />

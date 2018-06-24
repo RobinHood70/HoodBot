@@ -11,10 +11,6 @@
 		/// <value>The full name of the page.</value>
 		string FullPageName { get; }
 
-		/// <summary>Gets the key to use in dictionary lookups. Usually, this is the same as the full page name before any page moves or redirects were applied.</summary>
-		/// <value>The key.</value>
-		string Key { get; }
-
 		/// <summary>Gets the namespace the page is in.</summary>
 		/// <value>The namespace.</value>
 		Namespace Namespace { get; }
