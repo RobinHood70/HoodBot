@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.Robby
 {
+	// TODO: Review access rights project-wide.
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
@@ -312,6 +313,12 @@
 			var result = new TitleCollection(this, pageName).Load();
 			return result.Count == 1 ? result[0].Text : null;
 		}
+
+		/// <summary>Gets a message from MediaWiki space with any magic words and the like parsed into text.</summary>
+		/// <param name="msg">The message.</param>
+		/// <param name="arguments">Optional arguments to substitute into the message.</param>
+		/// <returns>The text of the message.</returns>
+		public string LoadParsedMessage(string msg, params string[] arguments) => this.LoadParsedMessage(msg, arguments as IEnumerable<string>, null);
 
 		/// <summary>Gets a message from MediaWiki space with any magic words and the like parsed into text.</summary>
 		/// <param name="msg">The message.</param>
