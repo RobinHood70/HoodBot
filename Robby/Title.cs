@@ -239,21 +239,21 @@
 		/// <summary>Protects a non-existent page from being created.</summary>
 		/// <param name="reason">The reason for the create-protection.</param>
 		/// <param name="createProtection">The protection level.</param>
-		/// <param name="relativeExpiry">The relative expiry date and time (e.g., "2 weeks").</param>
+		/// <param name="duration">The duration of the create-protection (e.g., "2 weeks").</param>
 		/// <returns><c>true</c> if the title's create-protection was set to the specified values.</returns>
-		public bool CreateProtect(string reason, ProtectionLevel createProtection, string relativeExpiry) => this.CreateProtect(reason, ProtectionWord(createProtection), relativeExpiry);
+		public bool CreateProtect(string reason, ProtectionLevel createProtection, string duration) => this.CreateProtect(reason, ProtectionWord(createProtection), duration);
 
 		/// <summary>Protects a non-existent page from being created.</summary>
 		/// <param name="reason">The reason for the create-protection.</param>
 		/// <param name="createProtection">The protection level.</param>
-		/// <param name="relativeExpiry">The relative expiry date and time (e.g., "2 weeks").</param>
+		/// <param name="duration">The duration of the create-protection (e.g., "2 weeks").</param>
 		/// <returns><c>true</c> if the title's create-protection was set to the specified values.</returns>
 		/// <remarks>This version allows custom create-protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="CreateProtect(string, ProtectionLevel, string)"/> version of this call.</remarks>
-		public bool CreateProtect(string reason, string createProtection, string relativeExpiry)
+		public bool CreateProtect(string reason, string createProtection, string duration)
 		{
 			if (createProtection != null)
 			{
-				var protection = new ProtectInputItem("create", createProtection) { ExpiryRelative = relativeExpiry };
+				var protection = new ProtectInputItem("create", createProtection) { ExpiryRelative = duration };
 				return this.Protect(reason, new[] { protection });
 			}
 
@@ -407,9 +407,9 @@
 		/// <param name="reason">The reason for the protection.</param>
 		/// <param name="editProtection">The edit-protection level.</param>
 		/// <param name="moveProtection">The move-protection level.</param>
-		/// <param name="relativeExpiry">The relative expiry date and time (e.g., "2 weeks").</param>
+		/// <param name="duration">The duration of the protection (e.g., "2 weeks").</param>
 		/// <returns><c>true</c> if all protections were set to the specified values.</returns>
-		public bool Protect(string reason, ProtectionLevel editProtection, ProtectionLevel moveProtection, string relativeExpiry) => this.Protect(reason, ProtectionWord(editProtection), ProtectionWord(moveProtection), relativeExpiry);
+		public bool Protect(string reason, ProtectionLevel editProtection, ProtectionLevel moveProtection, string duration) => this.Protect(reason, ProtectionWord(editProtection), ProtectionWord(moveProtection), duration);
 
 		/// <summary>Protects the title.</summary>
 		/// <param name="reason">The reason for the protection.</param>
@@ -438,25 +438,25 @@
 		/// <param name="reason">The reason for the protection.</param>
 		/// <param name="editProtection">The edit-protection level.</param>
 		/// <param name="moveProtection">The move-protection level.</param>
-		/// <param name="relativeExpiry">The relative expiry date and time (e.g., "2 weeks").</param>
+		/// <param name="duration">The duration of the protection (e.g., "2 weeks").</param>
 		/// <returns><c>true</c> if all protections were set to the specified values.</returns>
 		/// <remarks>This version allows custom protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="Protect(string, ProtectionLevel, ProtectionLevel, string)"/> version of this call.</remarks>
-		public bool Protect(string reason, string editProtection, string moveProtection, string relativeExpiry)
+		public bool Protect(string reason, string editProtection, string moveProtection, string duration)
 		{
-			if (relativeExpiry == null)
+			if (duration == null)
 			{
-				relativeExpiry = "infinite";
+				duration = "infinite";
 			}
 
 			var protections = new List<ProtectInputItem>(2);
 			if (editProtection != null)
 			{
-				protections.Add(new ProtectInputItem("edit", editProtection) { ExpiryRelative = relativeExpiry });
+				protections.Add(new ProtectInputItem("edit", editProtection) { ExpiryRelative = duration });
 			}
 
 			if (moveProtection != null)
 			{
-				protections.Add(new ProtectInputItem("move", moveProtection) { ExpiryRelative = relativeExpiry });
+				protections.Add(new ProtectInputItem("move", moveProtection) { ExpiryRelative = duration });
 			}
 
 			return this.Protect(reason, protections);
