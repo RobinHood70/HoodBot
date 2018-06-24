@@ -118,7 +118,7 @@
 
 		/// <summary>Adds pages to the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>
-		public void AddTitles(IEnumerable<IWikiTitle> titles) => this.AddTitles(this.LoadOptions, titles);
+		public void AddTitles(IEnumerable<ISimpleTitle> titles) => this.AddTitles(this.LoadOptions, titles);
 		#endregion
 
 		#region Public Override Methods
@@ -186,14 +186,14 @@
 			}
 			else
 			{
-				this.LoadPages(input, new HashSet<IWikiTitle>());
+				this.LoadPages(input, new HashSet<ISimpleTitle>());
 			}
 		}
 
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles to find duplicates of.</param>
-		protected override void AddDuplicateFiles(DuplicateFilesInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(input, titles);
+		protected override void AddDuplicateFiles(DuplicateFilesInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds files to the collection, based on optionally file-specific parameters.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -206,7 +206,7 @@
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected override void AddFileUsage(FileUsageInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(input, titles);
+		protected override void AddFileUsage(FileUsageInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages that link to a given namespace.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -219,17 +219,17 @@
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected override void AddPageCategories(CategoriesInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(input, titles);
+		protected override void AddPageCategories(CategoriesInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected override void AddPageLinks(LinksInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(input, titles);
+		protected override void AddPageLinks(LinksInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected override void AddPageTransclusions(TemplatesInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(input, titles);
+		protected override void AddPageTransclusions(TemplatesInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages with a given property to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -278,7 +278,7 @@
 		/// <summary>Adds pages to the collection from a series of titles.</summary>
 		/// <param name="options">The page load options.</param>
 		/// <param name="titles">The titles.</param>
-		protected virtual void AddTitles(PageLoadOptions options, IEnumerable<IWikiTitle> titles) => this.LoadPages(options, new DefaultPageSetInput(titles.ToFullPageNames()));
+		protected virtual void AddTitles(PageLoadOptions options, IEnumerable<ISimpleTitle> titles) => this.LoadPages(options, new DefaultPageSetInput(titles.ToFullPageNames()));
 
 		/// <summary>Loads pages from the wiki based on a page set specifier.</summary>
 		/// <param name="options">The page load options.</param>
@@ -305,7 +305,7 @@
 		/// <summary>Loads category pages recursively.</summary>
 		/// <param name="input">The input.</param>
 		/// <param name="categoryTree">A hashet used to track which categories have already been loaded. This avoids loading the same category if it appears in the tree more than once, and breaks possible recursion loops.</param>
-		protected virtual void LoadPages(CategoryMembersInput input, HashSet<IWikiTitle> categoryTree)
+		protected virtual void LoadPages(CategoryMembersInput input, HashSet<ISimpleTitle> categoryTree)
 		{
 			ThrowNull(input, nameof(input));
 			ThrowNull(categoryTree, nameof(categoryTree));
@@ -347,7 +347,7 @@
 		#region Private Methods
 		private void LoadPages(IGeneratorInput generator) => this.LoadPages(this.LoadOptions, new DefaultPageSetInput(generator));
 
-		private void LoadPages(IGeneratorInput generator, IEnumerable<IWikiTitle> titles) => this.LoadPages(this.LoadOptions, new DefaultPageSetInput(generator, titles.ToFullPageNames()));
+		private void LoadPages(IGeneratorInput generator, IEnumerable<ISimpleTitle> titles) => this.LoadPages(this.LoadOptions, new DefaultPageSetInput(generator, titles.ToFullPageNames()));
 
 		private void PopulateMapCollections(IPageSetResult result)
 		{

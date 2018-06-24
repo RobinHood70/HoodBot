@@ -8,8 +8,8 @@
 	public class VariablesPage : Page
 	{
 		#region Constructors
-		public VariablesPage(IWikiTitle wikiTitle)
-			: base(wikiTitle)
+		public VariablesPage(ISimpleTitle simpleTitle)
+			: base(simpleTitle)
 		{
 		}
 		#endregion

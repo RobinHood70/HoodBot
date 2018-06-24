@@ -51,6 +51,7 @@
     <Compile Include="Block.cs" />
     <Compile Include="Design\DefaultPageCreator.cs" />
     <Compile Include="Design\Extensions.cs" />
+    <Compile Include="Design\IFullTitle.cs" />
     <Compile Include="Design\TitleParts.cs" />
     <Compile Include="InterwikiEntry.cs" />
     <Compile Include="InterwikiMap.cs" />
@@ -58,12 +59,13 @@
     <Compile Include="Design\PageLoadOptions.cs" />
     <Compile Include="Contribution.cs" />
     <Compile Include="FileRevision.cs" />
-    <Compile Include="Design\IWikiTitle.cs" />
+    <Compile Include="Design\ISimpleTitle.cs" />
     <Compile Include="Design\PageCreator.cs" />
     <Compile Include="CategoryTitle.cs" />
-    <Compile Include="Design\WikiTitleComparerFullPageName.cs" />
-    <Compile Include="Design\WikiTitleComparerNamespacePageName.cs" />
+    <Compile Include="Design\FullPageNameComparer.cs" />
+    <Compile Include="Design\SimpleTitleComparer.cs" />
     <Compile Include="Design\IMessageSource.cs" />
+    <Compile Include="Design\IKeyedTitle.cs" />
     <Compile Include="MagicWord.cs" />
     <Compile Include="Namespace.cs" />
     <Compile Include="NamespaceCollection.cs" />
@@ -85,7 +87,7 @@
     <Compile Include="Site.cs" />
     <Compile Include="SiteCapabilities.cs" />
     <Compile Include="Title.cs" />
-    <Compile Include="Design\WikiTitleEqualityComparer.cs" />
+    <Compile Include="Design\SimpleTitleEqualityComparer.cs" />
     <Compile Include="User.cs" />
     <Compile Include="EditIgnoredEventArgs.cs" />
     <Compile Include="WarningEventArgs.cs" />

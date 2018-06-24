@@ -3,9 +3,9 @@
 	using System.Collections.Generic;
 	using WikiCommon;
 
-	/// <summary>An IWikiTitle comparer to sort by namespace and page name.</summary>
+	/// <summary>An ISimpleTitle comparer to sort by namespace and page name.</summary>
 	/// <seealso cref="System.Collections.Generic.IComparer{T}" />
-	public class WikiTitleComparerNamespacePageName : IComparer<IWikiTitle>
+	public class SimpleTitleComparer : IComparer<ISimpleTitle>
 	{
 		#region Public Methods
 
@@ -13,7 +13,7 @@
 		/// <param name="x">The first object to compare.</param>
 		/// <param name="y">The second object to compare.</param>
 		/// <returns>A signed integer that indicates the relative values of <paramref name="x" /> and <paramref name="y" />.</returns>
-		public int Compare(IWikiTitle x, IWikiTitle y)
+		public int Compare(ISimpleTitle x, ISimpleTitle y)
 		{
 			if (x == null)
 			{

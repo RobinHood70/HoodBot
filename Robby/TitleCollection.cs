@@ -105,7 +105,7 @@
 
 		/// <summary>Adds a <em>copy</em> of the provided titles to the collection. The copies added will be standard <see cref="Title"/> objects regardless of the original type.</summary>
 		/// <param name="titles">The titles to add.</param>
-		public void AddCopy(IEnumerable<IWikiTitle> titles)
+		public void AddCopy(IEnumerable<ISimpleTitle> titles)
 		{
 			if (titles != null)
 			{
@@ -255,14 +255,14 @@
 			}
 			else
 			{
-				this.FillFromTitleItems(input, new HashSet<IWikiTitle>());
+				this.FillFromTitleItems(input, new HashSet<ISimpleTitle>());
 			}
 		}
 
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles to find duplicates of.</param>
-		protected override void AddDuplicateFiles(DuplicateFilesInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(new DefaultPageSetInput(input, titles.ToFullPageNames()));
+		protected override void AddDuplicateFiles(DuplicateFilesInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new DefaultPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds files to the collection, based on optionally file-specific parameters.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -283,7 +283,7 @@
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected override void AddFileUsage(FileUsageInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(new DefaultPageSetInput(input, titles.ToFullPageNames()));
+		protected override void AddFileUsage(FileUsageInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new DefaultPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages that link to a given namespace.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -304,12 +304,12 @@
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected override void AddPageCategories(CategoriesInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(new DefaultPageSetInput(input, titles.ToFullPageNames()));
+		protected override void AddPageCategories(CategoriesInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new DefaultPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected override void AddPageLinks(LinksInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(new DefaultPageSetInput(input, titles.ToFullPageNames()));
+		protected override void AddPageLinks(LinksInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new DefaultPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages with a given property to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -322,7 +322,7 @@
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected override void AddPageTransclusions(TemplatesInput input, IEnumerable<IWikiTitle> titles) => this.LoadPages(new DefaultPageSetInput(input, titles.ToFullPageNames()));
+		protected override void AddPageTransclusions(TemplatesInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new DefaultPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds prefix-search results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -501,7 +501,7 @@
 			}
 		}
 
-		private void FillFromTitleItems(CategoryMembersInput input, HashSet<IWikiTitle> categoryTree)
+		private void FillFromTitleItems(CategoryMembersInput input, HashSet<ISimpleTitle> categoryTree)
 		{
 			if (!categoryTree.Add(new Title(this.Site, input.Title)))
 			{

@@ -31,9 +31,9 @@
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="Page" /> class from another IWikiTitle-based object.</summary>
+		/// <summary>Initializes a new instance of the <see cref="Page" /> class from another ISimpleTitle-based object.</summary>
 		/// <param name="title">The Title object to copy from.</param>
-		public Page(IWikiTitle title)
+		public Page(ISimpleTitle title)
 			: base(title)
 		{
 		}

@@ -9,10 +9,10 @@
 	using static WikiCommon.Globals;
 
 	/// <summary>Splits a page name into its constituent parts.</summary>
-	public class TitleParts : IWikiTitle
+	public class TitleParts : IFullTitle, ISimpleTitle
 	{
 		#region Static Fields
-		private static Regex bidiText = new Regex(@"[\u200E\u200F\u202A\u202B\u202C\u202D\u202E]", RegexOptions.Compiled); // Taken from MediaWikIWikiTitleCodec->splitTitleString, then converted to Unicode
+		private static Regex bidiText = new Regex(@"[\u200E\u200F\u202A\u202B\u202C\u202D\u202E]", RegexOptions.Compiled); // Taken from MediaWikiTitleCodec->splitTitleString, then converted to Unicode
 		private static Regex spaceText = new Regex(@"[ _\xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]", RegexOptions.Compiled); // as above, but already Unicode in MW code
 		#endregion
 
@@ -160,6 +160,10 @@
 		/// <value>The interwiki prefix.</value>
 		public InterwikiEntry Interwiki { get; set; }
 
+		/// <summary>Gets a value indicating whether this instance is identical to the local wiki.</summary>
+		/// <value><c>true</c> if this instance is local wiki; otherwise, <c>false</c>.</value>
+		public bool IsLocalWiki => this.Interwiki == null || this.Interwiki.LocalWiki;
+
 		/// <summary>Gets or sets the namespace the page is in.</summary>
 		/// <value>The namespace.</value>
 		public Namespace Namespace { get; set; }
@@ -175,6 +179,30 @@
 		/// <param name="text">The text to decode and normalize.</param>
 		/// <returns>The original text with bidirectional text markers removed and space-like characters converted to spaces.</returns>
 		public static string DecodeAndNormalize(string text) => spaceText.Replace(bidiText.Replace(WebUtility.HtmlDecode(text), string.Empty), " ").Trim();
+		#endregion
+
+		#region Public Methods
+
+		/// <summary>Indicates whether the current title is equal to another title based on Interwiki, Namespace, PageName, and Fragment.</summary>
+		/// <param name="other">A title to compare with this one.</param>
+		/// <returns><c>true</c> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <c>false</c>.</returns>
+		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
+		public bool FullEquals(IFullTitle other) =>
+			other != null &&
+			this.Interwiki == other.Interwiki &&
+			this.Namespace == other.Namespace &&
+			this.Namespace.PageNameEquals(this.PageName, other.PageName) &&
+			this.Fragment == other.Fragment;
+
+		/// <summary>Indicates whether the current title is equal to another title based on Namespace and PageName only.</summary>
+		/// <param name="other">A title to compare with this one.</param>
+		/// <returns><c>true</c> if the current title is equivalent to the local wiki and the title is equal to the <paramref name="other" /> parameter, ignoring the Fragment property; otherwise, <c>false</c>.</returns>
+		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
+		public bool SimpleEquals(ISimpleTitle other) =>
+			other != null &&
+			this.IsLocalWiki &&
+			this.Namespace == other.Namespace &&
+			this.Namespace.PageNameEquals(this.PageName, other.PageName);
 		#endregion
 
 		#region Public Overrides

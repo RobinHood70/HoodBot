@@ -8,7 +8,7 @@
 	public class MetaTemplateBuilder : PageCreator
 	{
 		#region Public Override Methods
-		public override Page CreatePage(IWikiTitle wikiTitle) => new VariablesPage(wikiTitle);
+		public override Page CreatePage(ISimpleTitle simpleTitle) => new VariablesPage(simpleTitle);
 
 		public override PageItem CreatePageItem() => new VariablesPageItem();
 		#endregion

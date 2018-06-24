@@ -30,7 +30,7 @@
 	#endregion
 
 	/// <summary>Provides a light-weight holder for titles with several information and manipulation functions.</summary>
-	public class Title : IWikiTitle, IMessageSource
+	public class Title : IKeyedTitle, IMessageSource
 	{
 		#region Constants
 		// The following is taken from DefaultSettings::$wgLegalTitleChars and always assumes the default setting. I believe this is emitted as part of API:Siteinfo, but I wouldn't trust any kind of automated conversion, so better to just leave it as default, which is what 99.99% of wikis will probably use.
@@ -75,10 +75,10 @@
 			this.Key = this.FullPageName;
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="Title" /> class, copying the information from another <see cref="IWikiTitle"/> object.</summary>
+		/// <summary>Initializes a new instance of the <see cref="Title" /> class, copying the information from another <see cref="ISimpleTitle"/> object.</summary>
 		/// <param name="title">The Title object to copy from.</param>
 		/// <remarks>Note that the Key property will be set to the new full page name, regardless of the original item's key.</remarks>
-		public Title(IWikiTitle title)
+		public Title(ISimpleTitle title)
 		{
 			ThrowNull(title, nameof(title));
 			this.Namespace = title.Namespace;
@@ -293,19 +293,21 @@
 			return result.LogId > 0;
 		}
 
-		/// <summary>Functionally equivalent to Equals(Title), but IEquatable breaks spectacularly on non-sealed types, so is not implemented.</summary>
-		/// <param name="title">The title, or derived type, to compare to.</param>
-		/// <returns>True if all of Site, Namespace, PageName, and Key are identical between the two Titles.</returns>
+		/// <summary>Indicates whether the current title is equal to another title based on Namespace, PageName, and Key.</summary>
+		/// <param name="other">A title to compare with this one.</param>
+		/// <returns><c>true</c> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <c>false</c>.</returns>
+		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "IsSameTitle will return false if this is null, which will then short-circuit the remainder of the comparison.")]
-		public bool IsIdentical(Title title) => this.IsSameTitle(title) && this.Key == title.Key;
+		public bool KeyedEquals(IKeyedTitle other) => this.SimpleEquals(other) && this.Key == other.Key;
 
-		/// <summary>Checks to see if this Title resolves to the same page as another <see cref="IWikiTitle"/>.</summary>
-		/// <param name="title">The title, or derived type, to compare to.</param>
-		/// <returns>True if the Namespace and PageName are identical between the two Titles.</returns>
-		public bool IsSameTitle(IWikiTitle title) =>
-			title != null &&
-			this.Namespace == title.Namespace &&
-			this.Namespace.PageNameEquals(this.PageName, title.PageName);
+		/// <summary>Indicates whether the current title is equal to another title based on Namespace and PageName only.</summary>
+		/// <param name="other">A title to compare with this one.</param>
+		/// <returns><c>true</c> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <c>false</c>.</returns>
+		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
+		public bool SimpleEquals(ISimpleTitle other) =>
+			other != null &&
+			this.Namespace == other.Namespace &&
+			this.Namespace.PageNameEquals(this.PageName, other.PageName);
 
 		/// <summary>Moves the title to the name specified.</summary>
 		/// <param name="to">The location to move the title to.</param>

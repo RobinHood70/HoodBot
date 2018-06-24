@@ -107,9 +107,9 @@
 		#region Public Abstract Methods
 
 		/// <summary>Creates a page.</summary>
-		/// <param name="wikiTitle">The <see cref="IWikiTitle"/> object that represents the page to create.</param>
+		/// <param name="simpleTitle">The <see cref="ISimpleTitle"/> object that represents the page to create.</param>
 		/// <returns>A fully populated Page object.</returns>
-		public abstract Page CreatePage(IWikiTitle wikiTitle);
+		public abstract Page CreatePage(ISimpleTitle simpleTitle);
 
 		/// <summary>Creates a page item.</summary>
 		/// <returns>A new PageItem for use by WallE.</returns>

@@ -9,11 +9,11 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="CategoryTitle"/> class.</summary>
-		/// <param name="wikiTitle">The <see cref="IWikiTitle"/> that represents the category.</param>
+		/// <param name="simpleTitle">The <see cref="ISimpleTitle"/> that represents the category.</param>
 		/// <param name="sortKey">The sort key.</param>
 		/// <param name="hidden">if set to <see langword="true" /> if the category is hidden.</param>
-		internal CategoryTitle(IWikiTitle wikiTitle, string sortKey, bool hidden)
-			: base(wikiTitle)
+		internal CategoryTitle(ISimpleTitle simpleTitle, string sortKey, bool hidden)
+			: base(simpleTitle)
 		{
 			this.Hidden = hidden;
 			this.SortKey = sortKey;
