@@ -15,7 +15,7 @@
 				throw new ArgumentNullException(nameof(tabSeparatedValues), "Value read from file is null. This should never happen.");
 			}
 
-			if (tabSeparatedValues.Trim().Length == 0)
+			if (string.IsNullOrWhiteSpace(tabSeparatedValues))
 			{
 				return;
 			}
