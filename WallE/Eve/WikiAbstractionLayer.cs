@@ -312,6 +312,91 @@
 		/// <summary>Clears the warning list.</summary>
 		public void ClearWarnings() => this.warnings.Clear();
 
+		/// <summary>Initializes any needed information without trying to login.</summary>
+		public void Initialize()
+		{
+			// So far, SiteInfoProperties.Namespaces only required to fix bug in API:Search < 1.25 and for ClearHasMessage < 1.24
+			// Similarly, InterwikiMap is only required to emulate PageSet redirects' tointerwiki property for < 1.25.
+			var siteInput = new SiteInfoInput() { Properties = NeededSiteInfo };
+			this.OnInitializing(new InitializationEventArgs(siteInput, null));
+
+			// Ensure settings we care about haven't been messed with.
+			siteInput.Properties |= NeededSiteInfo;
+			siteInput.FilterLocalInterwiki = Filter.Any;
+
+			var infoModule = new MetaSiteInfo(this, siteInput);
+			var userModule = new MetaUserInfo(this, new UserInfoInput());
+			var queryInput = new QueryInput(infoModule, userModule);
+			var query = new ActionQuery(this);
+			query.SubmitContinued(queryInput);
+
+			this.UserId = userModule.Output.Id;
+			this.UserName = userModule.Output.Name;
+
+			var siteInfo = infoModule.Output;
+
+			// General
+			this.Flags = siteInfo.Flags;
+			this.LanguageCode = siteInfo.Language;
+			this.Script = siteInfo.Script;
+			var path = siteInfo.ArticlePath;
+			if (path.StartsWith("/", StringComparison.Ordinal))
+			{
+				var repl = path.Substring(0, path.IndexOf("$1", StringComparison.Ordinal));
+				var articleBaseIndex = siteInfo.BasePage.IndexOf(repl, StringComparison.Ordinal);
+				if (articleBaseIndex < 0)
+				{
+					articleBaseIndex = siteInfo.BasePage.IndexOf("/", siteInfo.BasePage.IndexOf("//", StringComparison.Ordinal) + 2, StringComparison.Ordinal);
+				}
+
+				path = siteInfo.BasePage.Substring(0, articleBaseIndex) + path;
+			}
+
+			this.articlePath = path;
+			var versionFudged = Regex.Replace(siteInfo.Generator, @"[^0-9\.]", ".").TrimStart('.');
+			var versionSplit = versionFudged.Split('.');
+			var siteVersion = int.Parse(versionSplit[0], CultureInfo.InvariantCulture) * 100 + int.Parse(versionSplit[1], CultureInfo.InvariantCulture);
+			this.SiteVersion = siteVersion;
+
+			// Namespaces
+			var dict = new Dictionary<int, NamespacesItem>();
+			foreach (var ns in siteInfo.Namespaces)
+			{
+				dict.Add(ns.Id, ns);
+			}
+
+			this.Namespaces = dict.AsReadOnly();
+
+			// Interwiki
+			foreach (var interwiki in siteInfo.InterwikiMap)
+			{
+				this.InterwikiPrefixes.Add(interwiki.Prefix);
+			}
+
+			// DbReplLag
+			this.SupportsMaxLag = siteInfo.LagInfo?.Count > 0 && siteInfo.LagInfo[0].Lag != -1;
+
+			// Other (not SiteInfo-related)
+			if (this.TokenManager == null)
+			{
+				this.TokenManager =
+					siteVersion >= TokenManagerMeta.MinimumVersion ? new TokenManagerMeta(this) :
+					siteVersion >= TokenManagerAction.MinimumVersion ? new TokenManagerAction(this) :
+					new TokenManagerOriginal(this) as ITokenManager;
+			}
+			else
+			{
+				this.TokenManager.Clear();
+			}
+
+			if (this.ContinueVersion == 0)
+			{
+				this.ContinueVersion = siteVersion >= ContinueModule2.MinimumVersion ? 2 : 1;
+			}
+
+			this.OnInitialized(new InitializationEventArgs(siteInput, siteInfo));
+		}
+
 		/// <summary>Determines whether the API is enabled (even if read-only) on the current wiki.</summary>
 		/// <returns><see langword="true" /> if the interface is enabled; otherwise, <see langword="false" />.</returns>
 		/// <remarks>This function will normally need to communicate with the wiki to determine the return value. Since that consumes significantly more time than a simple property check, it's implemented as a function rather than a property.</remarks>
@@ -1185,90 +1270,6 @@
 		#endregion
 
 		#region Private Methods
-		private void Initialize()
-		{
-			// So far, SiteInfoProperties.Namespaces only required to fix bug in API:Search < 1.25 and for ClearHasMessage < 1.24
-			// Similarly, InterwikiMap is only required to emulate PageSet redirects' tointerwiki property for < 1.25.
-			var siteInput = new SiteInfoInput() { Properties = NeededSiteInfo };
-			this.OnInitializing(new InitializationEventArgs(siteInput, null));
-
-			// Ensure settings we care about haven't been messed with.
-			siteInput.Properties |= NeededSiteInfo;
-			siteInput.FilterLocalInterwiki = Filter.Any;
-
-			var infoModule = new MetaSiteInfo(this, siteInput);
-			var userModule = new MetaUserInfo(this, new UserInfoInput());
-			var queryInput = new QueryInput(infoModule, userModule);
-			var query = new ActionQuery(this);
-			query.SubmitContinued(queryInput);
-
-			this.UserId = userModule.Output.Id;
-			this.UserName = userModule.Output.Name;
-
-			var siteInfo = infoModule.Output;
-
-			// General
-			this.Flags = siteInfo.Flags;
-			this.LanguageCode = siteInfo.Language;
-			this.Script = siteInfo.Script;
-			var path = siteInfo.ArticlePath;
-			if (path.StartsWith("/", StringComparison.Ordinal))
-			{
-				var repl = path.Substring(0, path.IndexOf("$1", StringComparison.Ordinal));
-				var articleBaseIndex = siteInfo.BasePage.IndexOf(repl, StringComparison.Ordinal);
-				if (articleBaseIndex < 0)
-				{
-					articleBaseIndex = siteInfo.BasePage.IndexOf("/", siteInfo.BasePage.IndexOf("//", StringComparison.Ordinal) + 2, StringComparison.Ordinal);
-				}
-
-				path = siteInfo.BasePage.Substring(0, articleBaseIndex) + path;
-			}
-
-			this.articlePath = path;
-			var versionFudged = Regex.Replace(siteInfo.Generator, @"[^0-9\.]", ".").TrimStart('.');
-			var versionSplit = versionFudged.Split('.');
-			var siteVersion = int.Parse(versionSplit[0], CultureInfo.InvariantCulture) * 100 + int.Parse(versionSplit[1], CultureInfo.InvariantCulture);
-			this.SiteVersion = siteVersion;
-
-			// Namespaces
-			var dict = new Dictionary<int, NamespacesItem>();
-			foreach (var ns in siteInfo.Namespaces)
-			{
-				dict.Add(ns.Id, ns);
-			}
-
-			this.Namespaces = dict.AsReadOnly();
-
-			// Interwiki
-			foreach (var interwiki in siteInfo.InterwikiMap)
-			{
-				this.InterwikiPrefixes.Add(interwiki.Prefix);
-			}
-
-			// DbReplLag
-			this.SupportsMaxLag = siteInfo.LagInfo?.Count > 0 && siteInfo.LagInfo[0].Lag != -1;
-
-			// Other (not SiteInfo-related)
-			if (this.TokenManager == null)
-			{
-				this.TokenManager =
-					siteVersion >= TokenManagerMeta.MinimumVersion ? new TokenManagerMeta(this) :
-					siteVersion >= TokenManagerAction.MinimumVersion ? new TokenManagerAction(this) :
-					new TokenManagerOriginal(this) as ITokenManager;
-			}
-			else
-			{
-				this.TokenManager.Clear();
-			}
-
-			if (this.ContinueVersion == 0)
-			{
-				this.ContinueVersion = siteVersion >= ContinueModule2.MinimumVersion ? 2 : 1;
-			}
-
-			this.OnInitialized(new InitializationEventArgs(siteInput, siteInfo));
-		}
-
 		private IReadOnlyList<TOutput> RunListQuery<TInput, TOutput>(ListModule<TInput, TOutput> module)
 			where TInput : class
 			where TOutput : class
