@@ -50,6 +50,9 @@
     <AssemblyOriginatorKeyFile>SharedKey.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Base\AllTransclusionsInput.cs" />
     <Compile Include="Base\AllRedirectsInput.cs" />
     <Compile Include="Base\AllImagesItem.cs" />

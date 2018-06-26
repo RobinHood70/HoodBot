@@ -40,6 +40,9 @@
     <AssemblyOriginatorKeyFile>SharedKey.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Enumerations.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Globals.cs" />

@@ -49,6 +49,9 @@
     <AssemblyOriginatorKeyFile>SharedKey.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="FormTestBed.cs">
       <SubType>Form</SubType>
     </Compile>

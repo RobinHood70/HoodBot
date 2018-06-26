@@ -47,6 +47,9 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs">
+      <Link>GlobalAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="BacklinkTitle.cs" />
     <Compile Include="Block.cs" />
     <Compile Include="Design\DefaultPageCreator.cs" />
