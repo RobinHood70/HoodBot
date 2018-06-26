@@ -190,6 +190,10 @@
 		/// <value>The path of index.php relative to the document root.</value>
 		public string Script { get; protected set; }
 
+		/// <summary>Gets or sets the name of the site.</summary>
+		/// <value>The name of the site.</value>
+		public string SiteName { get; protected set; }
+
 		/// <summary>Gets or sets the detected site version.</summary>
 		/// <value>The MediaWiki version for the site, expressed as an integer (i.e., MW 1.23 = 123).</value>
 		/// <remarks>This should not normally need to be set, but is left as settable by derived classes, should customization be needed.</remarks>
