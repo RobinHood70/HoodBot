@@ -82,11 +82,11 @@
 		/// <value>The language code.</value>
 		string LanguageCode { get; set; }
 
-		/// <summary>Gets or sets the name of the site.</summary>
+		/// <summary>Gets the name of the site.</summary>
 		/// <value>The name of the site.</value>
 		string SiteName { get; }
 
-		/// <summary>Gets or sets the detected site version.</summary>
+		/// <summary>Gets the detected site version.</summary>
 		/// <value>The MediaWiki version for the site, expressed as an integer (i.e., MW 1.23 = 123).</value>
 		/// <remarks>This should not normally need to be set, but is left as settable by derived classes, should customization be needed.</remarks>
 		int SiteVersion { get; }
