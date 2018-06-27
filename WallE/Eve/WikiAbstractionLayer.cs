@@ -342,6 +342,7 @@
 			// General
 			this.Flags = siteInfo.Flags;
 			this.LanguageCode = siteInfo.Language;
+			this.SiteName = siteInfo.SiteName;
 			this.Script = siteInfo.Script;
 			var path = siteInfo.ArticlePath;
 			if (path.StartsWith("/", StringComparison.Ordinal))
