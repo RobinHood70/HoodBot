@@ -13,6 +13,9 @@
 	/// <summary>Methods by which the wiki can be accessed.</summary>
 	public enum EntryPoint
 	{
+		/// <summary>No access point was found.</summary>
+		None,
+
 		/// <summary>Index.php access.</summary>
 		Index,
 
@@ -41,6 +44,10 @@
 		/// <value>The API entry point.</value>
 		public Uri Api { get; private set; }
 
+		/// <summary>Gets the current user.</summary>
+		/// <value>The current user, if any; otherwise, null.</value>
+		public string CurrentUser { get; private set; }
+
 		/// <summary>Gets the Uri to the index.php entry point.</summary>
 		/// <value>The index.php entry point.</value>
 		public Uri Index { get; private set; }
@@ -48,6 +55,14 @@
 		/// <summary>Gets the entry points for read access.</summary>
 		/// <value>The entry points for read access.</value>
 		public EntryPoint ReadEntryPoint { get; private set; }
+
+		/// <summary>Gets the name of the wiki.</summary>
+		/// <value>The name of the wiki.</value>
+		public string SiteName { get; private set; }
+
+		/// <summary>Gets a value indicating whether the site supports the <c>maxlag</c> parameter for speed throttling.</summary>
+		/// <value><c>true</c> if the site supports <c>maxlag</c>; otherwise, <c>false</c>.</value>
+		public bool SupportsMaxLag { get; private set; }
 
 		/// <summary>Gets the entry points for write access.</summary>
 		/// <value>The entry points for write access.</value>
@@ -64,6 +79,7 @@
 		{
 			ThrowNull(client, nameof(client));
 			ThrowNull(anyPage, nameof(anyPage));
+
 			var result = new SiteCapabilities();
 			var fullHost = anyPage.Scheme + "://" + anyPage.Host;
 			var tryPath = anyPage.AbsoluteUri;
@@ -76,13 +92,20 @@
 
 			if (offset >= 0)
 			{
+				tryLoc = tryPath;
 				tryPath = tryPath.Substring(0, offset + 1);
 			}
 
 			if (!tryPath.EndsWith("/", StringComparison.Ordinal))
 			{
 				/* If it doesn't look like a php page or blank path, try various methods of figuring out the php locations. */
-				var pageData = client.Get(anyPage);
+				var pageData = TryGet(client, anyPage);
+				if (pageData == null)
+				{
+					// Web page given could not be accessed, so abort.
+					return result;
+				}
+
 				var rsdLink = findRsdLink.Match(pageData);
 				if (rsdLink.Success)
 				{
@@ -133,13 +156,17 @@
 				var api = new WikiAbstractionLayer(client, new Uri(tryLoc));
 				if (api.IsEnabled())
 				{
-					result.Api = new Uri(tryPath);
-					result.Index = new Uri(fullHost + api.Script);
+					api.Initialize();
+					result.Api = api.Uri;
+					result.Index = string.IsNullOrWhiteSpace(api.Script) ? null : new Uri(fullHost + api.Script);
+					result.SiteName = api.SiteName;
 					result.ReadEntryPoint = EntryPoint.Api;
-					if (api.Flags.HasFlag(SiteInfoFlags.WriteApi))
-					{
-						result.WriteEntryPoint = EntryPoint.Api;
-					}
+					result.SupportsMaxLag = api.SupportsMaxLag;
+					result.CurrentUser = api.UserId == 0 ? null : api.UserName;
+					result.WriteEntryPoint =
+						api.Flags.HasFlag(SiteInfoFlags.WriteApi) ? EntryPoint.Api :
+						result.Index == null ? EntryPoint.None :
+						EntryPoint.Index;
 
 					// API gave us everything we need, so skip trying index.php.
 					return result;
@@ -148,19 +175,30 @@
 
 			// Last resort
 			tryLoc = tryPath + "index.php";
-			try
-			{
-				client.Get(new Uri(tryLoc)); // We don't care about the result at this point, only whether it's a valid link.
+			var tryUri = new Uri(tryLoc);
 
-				// If no exception was caught, then the link appears to be good, so set it. Other values should still be set to default, and can stay that way.
-				result.Index = new Uri(tryPath);
-			}
-			catch (WebException)
+			// We don't care about the result, only whether it's a valid link.
+			if (TryGet(client, tryUri) != null)
 			{
+				result.Index = tryUri;
+				result.ReadEntryPoint = EntryPoint.Index;
+				result.WriteEntryPoint = EntryPoint.Index;
 			}
 
 			return result;
 		}
 		#endregion
+
+		private static string TryGet(IMediaWikiClient client, Uri uri)
+		{
+			try
+			{
+				return client.Get(uri);
+			}
+			catch (WebException)
+			{
+				return null;
+			}
+		}
 	}
 }
