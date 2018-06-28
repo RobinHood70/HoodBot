@@ -32,9 +32,18 @@
 		private static Regex findPhpLink = new Regex(@"href=""(?<scriptpath>/([!#$&-;=?-\[\]_a-z~]|%[0-9a-fA-F]{2})+?)?/(api|index).php");
 		#endregion
 
+		#region Fields
+		private readonly IMediaWikiClient client;
+		#endregion
+
 		#region Constructors
-		private SiteCapabilities()
+
+		/// <summary>Initializes a new instance of the <see cref="SiteCapabilities"/> class.</summary>
+		/// <param name="client">The <see cref="IMediaWikiClient"/> client to be used to access the site.</param>
+		public SiteCapabilities(IMediaWikiClient client)
 		{
+			ThrowNull(client, nameof(client));
+			this.client = client;
 		}
 		#endregion
 
@@ -69,18 +78,16 @@
 		public EntryPoint WriteEntryPoint { get; private set; }
 		#endregion
 
-		#region Public Static Methods
+		#region Public Methods
 
-		/// <summary>Initializes a new instance of the <see cref="SiteCapabilities"/> class and gets all relevant information from the site.</summary>
-		/// <param name="client">The <see cref="IMediaWikiClient"/> client to be used to access the site.</param>
+		/// <summary>Gets all relevant information from the site.</summary>
 		/// <param name="anyPage">Any page on the wiki.</param>
-		/// <returns>A new instance of the <see cref="SiteCapabilities"/> class with information about the site's capabilities.</returns>
-		public static SiteCapabilities Get(IMediaWikiClient client, Uri anyPage)
+		/// <remarks>This can be called multiple times with different URIs to get information for different wikis. Previous information will be cleared with each new call.</remarks>
+		public void Get(Uri anyPage)
 		{
-			ThrowNull(client, nameof(client));
 			ThrowNull(anyPage, nameof(anyPage));
 
-			var result = new SiteCapabilities();
+			this.Clear();
 			var fullHost = anyPage.Scheme + "://" + anyPage.Host;
 			var tryPath = anyPage.AbsoluteUri;
 			string tryLoc = null;
@@ -99,11 +106,11 @@
 			if (!tryPath.EndsWith("/", StringComparison.Ordinal))
 			{
 				/* If it doesn't look like a php page or blank path, try various methods of figuring out the php locations. */
-				var pageData = TryGet(client, anyPage);
+				var pageData = this.TryGet(anyPage);
 				if (pageData == null)
 				{
 					// Web page given could not be accessed, so abort.
-					return result;
+					return;
 				}
 
 				var rsdLink = findRsdLink.Match(pageData);
@@ -115,7 +122,7 @@
 						rsdLinkFixed = anyPage.Scheme + ':' + rsdLinkFixed;
 					}
 
-					var rsdInfo = client.Get(new Uri(rsdLinkFixed));
+					var rsdInfo = this.client.Get(new Uri(rsdLinkFixed));
 					var rsd = XDocument.Parse(rsdInfo);
 					var ns = rsd.Root.GetDefaultNamespace();
 					foreach (var descendant in rsd.Descendants(ns + "api"))
@@ -124,7 +131,7 @@
 						{
 							tryLoc = (string)descendant.Attribute("apiLink");
 							tryLoc = HttpUtility.HtmlDecode(tryLoc);
-							tryPath = tryLoc.Substring(0, tryLoc.LastIndexOf('/'));
+							tryPath = tryLoc.Substring(0, tryLoc.LastIndexOf('/') + 1);
 							break;
 						}
 					}
@@ -153,52 +160,79 @@
 			if (tryLoc != null)
 			{
 				// Something above gave us a tentative api.php link, so try it.
-				var api = new WikiAbstractionLayer(client, new Uri(tryLoc));
+				var api = new WikiAbstractionLayer(this.client, new Uri(tryLoc));
 				if (api.IsEnabled())
 				{
 					api.Initialize();
-					result.Api = api.Uri;
-					result.Index = string.IsNullOrWhiteSpace(api.Script) ? null : new Uri(fullHost + api.Script);
-					result.SiteName = api.SiteName;
-					result.ReadEntryPoint = EntryPoint.Api;
-					result.SupportsMaxLag = api.SupportsMaxLag;
-					result.CurrentUser = api.UserId == 0 ? null : api.UserName;
-					result.WriteEntryPoint =
+					this.Api = api.Uri;
+					this.Index = string.IsNullOrWhiteSpace(api.Script) ? null : new Uri(fullHost + api.Script);
+					this.SiteName = api.SiteName;
+					this.ReadEntryPoint = EntryPoint.Api;
+					this.SupportsMaxLag = api.SupportsMaxLag;
+					this.CurrentUser = api.UserId == 0 ? null : api.UserName;
+					this.WriteEntryPoint =
 						api.Flags.HasFlag(SiteInfoFlags.WriteApi) ? EntryPoint.Api :
-						result.Index == null ? EntryPoint.None :
+						this.Index == null ? EntryPoint.None :
 						EntryPoint.Index;
 
 					// API gave us everything we need, so skip trying index.php.
-					return result;
+					return;
 				}
 			}
 
 			// Last resort
-			tryLoc = tryPath + "index.php";
+			tryLoc = tryPath + "index.php?maxlag=-1";
 			var tryUri = new Uri(tryLoc);
 
 			// We don't care about the result, only whether it's a valid link.
-			if (TryGet(client, tryUri) != null)
+			this.client.RequestingDelay += this.Client_RequestingDelay;
+			if (this.TryGet(tryUri) != null)
 			{
-				result.Index = tryUri;
-				result.ReadEntryPoint = EntryPoint.Index;
-				result.WriteEntryPoint = EntryPoint.Index;
+				this.Index = tryUri;
+				this.ReadEntryPoint = EntryPoint.Index;
+				this.WriteEntryPoint = EntryPoint.Index;
+
+				// TODO: Add more information retrieval for index.php if abstraction layer is ever written for it.
 			}
 
-			return result;
+			this.client.RequestingDelay -= this.Client_RequestingDelay;
+
+			return;
 		}
 		#endregion
 
-		private static string TryGet(IMediaWikiClient client, Uri uri)
+		#region Private Methods
+		private void Clear()
+		{
+			this.Api = null;
+			this.CurrentUser = null;
+			this.Index = null;
+			this.ReadEntryPoint = EntryPoint.None;
+			this.SiteName = null;
+			this.SupportsMaxLag = false;
+			this.WriteEntryPoint = EntryPoint.None;
+		}
+
+		private void Client_RequestingDelay(IMediaWikiClient sender, DelayEventArgs eventArgs)
+		{
+			if (eventArgs.Reason == DelayReason.MaxLag)
+			{
+				eventArgs.Cancel = true;
+				this.SupportsMaxLag = true;
+			}
+		}
+
+		private string TryGet(Uri uri)
 		{
 			try
 			{
-				return client.Get(uri);
+				return this.client.Get(uri);
 			}
 			catch (WebException)
 			{
 				return null;
 			}
 		}
+		#endregion
 	}
 }
