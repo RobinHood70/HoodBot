@@ -3,8 +3,8 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
-	using RequestBuilder;
-	using static WikiCommon.Globals;
+	using RobinHood70.WallE.RequestBuilder;
+	using static RobinHood70.WikiCommon.Globals;
 
 	internal class ContinueModule1 : ContinueModule
 	{

@@ -5,9 +5,9 @@
 	using System.Text.RegularExpressions;
 	using System.Web;
 	using System.Xml.Linq;
-	using WallE.Base;
-	using WallE.Clients;
-	using WallE.Eve;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Clients;
+	using RobinHood70.WallE.Eve;
 	using static WikiCommon.Globals;
 
 	/// <summary>Methods by which the wiki can be accessed.</summary>

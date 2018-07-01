@@ -3,11 +3,11 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.Collections.Generic;
-	using Base;
 	using Newtonsoft.Json.Linq;
-	using RequestBuilder;
-	using static Properties.EveMessages;
-	using static WikiCommon.Globals;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.RequestBuilder;
+	using static RobinHood70.WallE.Properties.EveMessages;
+	using static RobinHood70.WikiCommon.Globals;
 
 	internal class ListQueryPage : ListModule<QueryPageInput, QueryPageItem>, IGeneratorModule
 	{

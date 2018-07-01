@@ -3,11 +3,11 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System.Collections.Generic;
 	using System.Globalization;
-	using Base;
 	using Newtonsoft.Json.Linq;
-	using RequestBuilder;
-	using WikiCommon;
-	using static WikiCommon.Globals;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.RequestBuilder;
+	using RobinHood70.WikiCommon;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public abstract class ActionModulePageSet<TInput, TOutput> : ActionModule<TInput, IReadOnlyList<TOutput>>, IPageSetInternal
 		where TInput : PageSetInput

@@ -3,8 +3,8 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.IO;
-	using Base;
-	using static WikiCommon.Globals;
+	using RobinHood70.WallE.Base;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public class UploadInputInternal
 	{

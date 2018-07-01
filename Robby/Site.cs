@@ -9,14 +9,14 @@
 	using System.Net;
 	using System.Runtime.CompilerServices;
 	using System.Text.RegularExpressions;
-	using Design;
-	using WallE.Base;
-	using WikiCommon;
+	using RobinHood70.Robby.Design;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WikiCommon;
 	using static Properties.Resources;
 	using static WikiCommon.Globals;
 
 	/// <summary>Represents a single wiki site.</summary>
-	/// <seealso cref="RobinHood70.Robby.IMessageSource" />
+	/// <seealso cref="IMessageSource" />
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Sufficiently maintainable for now. Could conceivably split off the LoadX() methods if needed, I suppose.")]
 	public class Site : IMessageSource
 	{

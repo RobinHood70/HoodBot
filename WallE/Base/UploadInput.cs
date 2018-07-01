@@ -4,8 +4,8 @@ namespace RobinHood70.WallE.Base
 	using System;
 	using System.ComponentModel;
 	using System.IO;
-	using static Properties.Messages;
-	using static WikiCommon.Globals;
+	using static RobinHood70.WallE.Properties.Messages;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public class UploadInput
 	{

@@ -2,10 +2,10 @@
 namespace RobinHood70.WallE.Eve.Modules
 {
 	using System.Collections.Generic;
-	using Base;
 	using Newtonsoft.Json.Linq;
-	using RequestBuilder;
-	using static WikiCommon.Globals;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.RequestBuilder;
+	using static RobinHood70.WikiCommon.Globals;
 
 	// IMPNOTE: Result is slightly reformatted from the API to provide a straight-forward collection of pages that were moved.
 	public class ActionMove : ActionModule<MoveInput, MoveResult>

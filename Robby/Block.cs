@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby
 {
 	using System;
-	using WikiCommon;
+	using RobinHood70.WikiCommon;
 
 	/// <summary>Stores all information about a wiki block.</summary>
 	public class Block

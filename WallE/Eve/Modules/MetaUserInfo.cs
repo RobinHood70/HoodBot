@@ -4,11 +4,11 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System;
 	using System.Collections.Generic;
 	using System.Globalization;
-	using Base;
-	using Design;
 	using Newtonsoft.Json.Linq;
-	using RequestBuilder;
-	using static WikiCommon.Globals;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Design;
+	using RobinHood70.WallE.RequestBuilder;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public class MetaUserInfo : QueryModule<UserInfoInput, UserInfoResult>
 	{

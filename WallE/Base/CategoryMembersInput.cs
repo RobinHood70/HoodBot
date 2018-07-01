@@ -3,8 +3,8 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
-	using WikiCommon;
-	using static WikiCommon.Globals;
+	using RobinHood70.WikiCommon;
+	using static RobinHood70.WikiCommon.Globals;
 
 	#region Public Enumerations
 	[Flags]

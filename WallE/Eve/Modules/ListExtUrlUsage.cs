@@ -1,10 +1,10 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
-	using Base;
 	using Newtonsoft.Json.Linq;
-	using RequestBuilder;
-	using static WikiCommon.Globals;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.RequestBuilder;
+	using static RobinHood70.WikiCommon.Globals;
 
 	internal class ListExtUrlUsage : ListModule<ExternalUrlUsageInput, ExternalUrlUsageItem>, IGeneratorModule
 	{

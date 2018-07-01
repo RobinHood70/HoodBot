@@ -4,7 +4,7 @@
 	using System.Collections.Generic;
 	using System.Globalization;
 	using System.Text.RegularExpressions;
-	using WikiCommon;
+	using RobinHood70.WikiCommon;
 
 	/// <summary>This class allows Captcha data to be passed back to the user, solved, and then the solution returned to the wiki.</summary>
 	public class CaptchaEventArgs : EventArgs

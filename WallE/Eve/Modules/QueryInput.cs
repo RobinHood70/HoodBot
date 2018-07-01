@@ -2,9 +2,9 @@
 namespace RobinHood70.WallE.Eve.Modules
 {
 	using System.Collections.Generic;
-	using Base;
-	using static ProjectGlobals;
-	using static WikiCommon.Globals;
+	using RobinHood70.WallE.Base;
+	using static RobinHood70.WallE.ProjectGlobals;
+	using static RobinHood70.WikiCommon.Globals;
 
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "All inputs have Input suffix, even when collections.")]
 	public class QueryInput : DefaultPageSetInput

@@ -2,7 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using WallE.Base;
+	using RobinHood70.WallE.Base;
 	using static WikiCommon.Globals;
 
 	/// <summary>Stores information about a Recent Change entry.</summary>

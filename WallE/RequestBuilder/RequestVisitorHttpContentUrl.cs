@@ -3,8 +3,8 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Net.Http;
-	using static ProjectGlobals;
-	using static WikiCommon.Globals;
+	using static RobinHood70.WallE.ProjectGlobals;
+	using static RobinHood70.WikiCommon.Globals;
 
 	internal class RequestVisitorHttpContentUrl : IParameterVisitor
 	{

@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby
 {
 	using System;
-	using WallE.Base;
+	using RobinHood70.WallE.Base;
 	using static WikiCommon.Globals;
 
 	/// <summary>Stores all information related to a specific revision.</summary>

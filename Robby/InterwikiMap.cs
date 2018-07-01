@@ -3,7 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Globalization;
-	using WikiCommon;
+	using RobinHood70.WikiCommon;
 
 	/// <summary>Represents the MediaWiki interwiki map.</summary>
 	/// <seealso cref="RobinHood70.WikiCommon.ReadOnlyKeyedCollection{TKey, TItem}" />

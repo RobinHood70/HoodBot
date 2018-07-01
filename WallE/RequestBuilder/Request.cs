@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.WallE.RequestBuilder
 {
 	using System;
-	using static WikiCommon.Globals;
+	using static RobinHood70.WikiCommon.Globals;
 
 	#region Public Enumerations
 

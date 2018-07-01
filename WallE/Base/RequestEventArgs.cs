@@ -2,7 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
-	using RequestBuilder;
+	using RobinHood70.WallE.RequestBuilder;
 
 	/// <summary>EventArgs used for the GettingResult event.</summary>
 	public class RequestEventArgs : EventArgs

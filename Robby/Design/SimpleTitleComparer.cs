@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System.Collections.Generic;
-	using WikiCommon;
+	using RobinHood70.WikiCommon;
 
 	/// <summary>An ISimpleTitle comparer to sort by namespace and page name.</summary>
 	/// <seealso cref="System.Collections.Generic.IComparer{T}" />

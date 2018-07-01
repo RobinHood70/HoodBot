@@ -3,7 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
-	using static Properties.Messages;
+	using static RobinHood70.WallE.Properties.Messages;
 
 	public enum SearchProfile
 	{

@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.WallE.Design
 {
 	using System;
-	using Base;
+	using RobinHood70.WallE.Base;
 
 	/// <summary>Event arguments for MediaWiki warnings.</summary>
 	/// <seealso cref="EventArgs" />

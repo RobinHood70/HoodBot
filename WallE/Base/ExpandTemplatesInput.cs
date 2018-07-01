@@ -2,7 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
-	using static ProjectGlobals;
+	using static RobinHood70.WallE.ProjectGlobals;
 
 	[Flags]
 	public enum ExpandTemplatesProperties

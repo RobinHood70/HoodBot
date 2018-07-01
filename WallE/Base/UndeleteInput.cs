@@ -3,7 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
-	using static ProjectGlobals;
+	using static RobinHood70.WallE.ProjectGlobals;
 
 	public class UndeleteInput
 	{

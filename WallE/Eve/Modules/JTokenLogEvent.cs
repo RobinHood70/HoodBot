@@ -6,9 +6,9 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.Text.RegularExpressions;
-	using Base;
 	using Newtonsoft.Json.Linq;
-	using WikiCommon;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WikiCommon;
 
 	internal static class JTokenLogEvent
 	{

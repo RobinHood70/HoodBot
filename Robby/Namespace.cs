@@ -2,8 +2,8 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using WallE.Base;
-	using WikiCommon;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WikiCommon;
 	using static WikiCommon.Globals;
 
 	/// <summary>Represents a MediaWiki namespace for a specific site.</summary>

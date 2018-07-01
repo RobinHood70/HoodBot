@@ -2,8 +2,8 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using WallE.Base;
-	using WikiCommon;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WikiCommon;
 
 	/// <summary>Stores options for a Recent Changes filter. This can be used to create a Recent Changes query that's more complex than allowed by the other built-in methods, as well as being used internally by those methods.</summary>
 	public class RecentChangesOptions

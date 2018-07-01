@@ -10,9 +10,9 @@ namespace RobinHood70.WallE.Clients.Async
 	using System.Runtime.Serialization.Formatters.Binary;
 	using System.Security;
 	using System.Threading.Tasks;
-	using WallE.RequestBuilder;
-	using WikiCommon;
-	using static WikiCommon.Globals;
+	using RobinHood70.WallE.RequestBuilder;
+	using RobinHood70.WikiCommon;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public class SimpleClientAsync : IFormClientAsync, IDisposable
 	{

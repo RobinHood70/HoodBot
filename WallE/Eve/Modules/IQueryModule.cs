@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
-	using RequestBuilder;
+	using RobinHood70.WallE.RequestBuilder;
 
 	/// <summary>Specifies the set of properties and methods required by all query module implementations.</summary>
 	/// <seealso cref="IModule" />

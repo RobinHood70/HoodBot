@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.WallE.Eve
 {
 	using System.Collections.Generic;
-	using Base;
-	using Modules;
-	using static TokensInput;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Eve.Modules;
+	using static RobinHood70.WallE.Eve.TokensInput;
 
 	internal class TokenManagerOriginal : ITokenManager
 	{

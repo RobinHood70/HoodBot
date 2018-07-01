@@ -6,9 +6,9 @@
 	using System.Collections.ObjectModel;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
-	using WikiCommon;
-	using static Properties.Messages;
-	using static WikiCommon.Globals;
+	using RobinHood70.WikiCommon;
+	using static RobinHood70.WallE.Properties.Messages;
+	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Provides an easy-to-use parameter dictionary which maintains insertion order.</summary>
 	/// <seealso cref="KeyedCollection{TKey, TItem}" />

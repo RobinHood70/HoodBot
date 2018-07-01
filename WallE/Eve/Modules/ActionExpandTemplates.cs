@@ -2,11 +2,11 @@
 namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
-	using Base;
-	using Design;
 	using Newtonsoft.Json.Linq;
-	using RequestBuilder;
-	using static WikiCommon.Globals;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Design;
+	using RobinHood70.WallE.RequestBuilder;
+	using static RobinHood70.WikiCommon.Globals;
 
 	// HACK: Much of this module remains untested, as there is virtually no documentation on it, and example outputs were mostly impossible to find.
 	public class ActionExpandTemplates : ActionModule<ExpandTemplatesInput, ExpandTemplatesResult>

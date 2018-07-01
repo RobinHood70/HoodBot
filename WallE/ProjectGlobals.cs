@@ -5,9 +5,9 @@
 	using System.Globalization;
 	using System.Security.Cryptography;
 	using System.Text;
-	using WallE.RequestBuilder;
-	using static Properties.EveMessages;
-	using static WikiCommon.Globals;
+	using RobinHood70.WallE.RequestBuilder;
+	using static RobinHood70.WallE.Properties.EveMessages;
+	using static RobinHood70.WikiCommon.Globals;
 
 	internal static class ProjectGlobals
 	{

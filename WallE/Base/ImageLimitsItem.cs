@@ -1,8 +1,8 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
-	using static Properties.Messages;
-	using static WikiCommon.Globals;
+	using static RobinHood70.WallE.Properties.Messages;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public class ImageLimitsItem
 	{

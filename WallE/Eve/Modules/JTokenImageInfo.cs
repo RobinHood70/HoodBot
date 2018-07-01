@@ -3,8 +3,8 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.Collections.Generic;
-	using Base;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.WallE.Base;
 
 	internal static class JTokenImageInfo
 	{

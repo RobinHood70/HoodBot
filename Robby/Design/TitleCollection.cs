@@ -3,9 +3,9 @@
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
-	using Design;
-	using WallE.Base;
-	using WikiCommon;
+	using RobinHood70.Robby.Design;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WikiCommon;
 	using static Properties.Resources;
 	using static WikiCommon.Globals;
 

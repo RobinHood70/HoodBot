@@ -2,7 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using static Properties.EveMessages;
+	using static RobinHood70.WallE.Properties.EveMessages;
 
 	internal static class TokenManagerFunctions
 	{

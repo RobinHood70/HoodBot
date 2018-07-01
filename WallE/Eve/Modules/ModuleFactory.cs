@@ -2,8 +2,8 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using Base;
-	using static WikiCommon.Globals;
+	using RobinHood70.WallE.Base;
+	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Concrete implementation of <see cref="IModuleFactory" />.</summary>
 	/// <seealso cref="IModuleFactory" />

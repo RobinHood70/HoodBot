@@ -3,12 +3,12 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.Collections.Generic;
-	using Base;
-	using Design;
 	using Newtonsoft.Json.Linq;
-	using RequestBuilder;
-	using WikiCommon;
-	using static WikiCommon.Globals;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Design;
+	using RobinHood70.WallE.RequestBuilder;
+	using RobinHood70.WikiCommon;
+	using static RobinHood70.WikiCommon.Globals;
 
 	// MWVERSION: 1.28
 	public class ActionParse : ActionModule<ParseInput, ParseResult>

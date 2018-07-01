@@ -2,7 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
-	using WikiCommon;
+	using RobinHood70.WikiCommon;
 
 	public class CategoryMembersItem : ITitle
 	{

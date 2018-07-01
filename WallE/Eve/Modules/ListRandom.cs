@@ -2,11 +2,11 @@
 namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
-	using Base;
 	using Newtonsoft.Json.Linq;
-	using RequestBuilder;
-	using WikiCommon;
-	using static WikiCommon.Globals;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.RequestBuilder;
+	using RobinHood70.WikiCommon;
+	using static RobinHood70.WikiCommon.Globals;
 
 	// MWVERSION 1.29 - note that filterredir=all is simulated below 1.26 and will not produce the same distribution of redirects and non-redirects.
 	internal class ListRandom : ListModule<RandomInput, WikiTitleItem>, IGeneratorModule

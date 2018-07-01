@@ -6,15 +6,14 @@
 	using System.Globalization;
 	using System.Net;
 	using System.Text.RegularExpressions;
-	using Base;
-	using Clients;
-	using Design;
-	using Modules;
-	using Newtonsoft.Json;
-	using WallE.RequestBuilder;
-	using WikiCommon;
-	using static Properties.EveMessages;
-	using static WikiCommon.Globals;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Clients;
+	using RobinHood70.WallE.Design;
+	using RobinHood70.WallE.Eve.Modules;
+	using RobinHood70.WallE.RequestBuilder;
+	using RobinHood70.WikiCommon;
+	using static RobinHood70.WallE.Properties.EveMessages;
+	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>An API-based implementation of the <see cref="IWikiAbstractionLayer" /> interface.</summary>
 	/// <seealso cref="IWikiAbstractionLayer" />

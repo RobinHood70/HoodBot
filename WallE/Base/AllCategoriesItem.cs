@@ -2,9 +2,9 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
-	using WikiCommon;
-	using static Properties.Messages;
-	using static WikiCommon.Globals;
+	using RobinHood70.WikiCommon;
+	using static RobinHood70.WallE.Properties.Messages;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public class AllCategoriesItem : ITitle
 	{

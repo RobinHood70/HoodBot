@@ -4,8 +4,8 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
-	using Design;
-	using WikiCommon;
+	using RobinHood70.WallE.Design;
+	using RobinHood70.WikiCommon;
 
 	#region Public Enumerations
 

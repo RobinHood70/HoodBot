@@ -3,13 +3,13 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.IO;
-	using Base;
-	using Design;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
-	using RequestBuilder;
-	using static Properties.EveMessages;
-	using static WikiCommon.Globals;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Design;
+	using RobinHood70.WallE.RequestBuilder;
+	using static RobinHood70.WallE.Properties.EveMessages;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public abstract class ActionModule<TInput, TOutput> : IActionModule<TInput, TOutput>
 		where TInput : class

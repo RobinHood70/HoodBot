@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System.Collections.Generic;
-	using WallE.Base;
-	using WikiCommon;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WikiCommon;
 	using static WikiCommon.Globals;
 
 	/// <summary>The default page creation mechanism.</summary>

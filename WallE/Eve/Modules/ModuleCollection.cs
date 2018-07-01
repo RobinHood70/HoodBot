@@ -3,8 +3,8 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.Collections.ObjectModel;
-	using static Properties.Messages;
-	using static WikiCommon.Globals;
+	using static RobinHood70.WallE.Properties.Messages;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public class ModuleCollection<TModule> : KeyedCollection<string, TModule>
 		where TModule : class, IModule

@@ -3,8 +3,8 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Text;
-	using static ProjectGlobals;
-	using static WikiCommon.Globals;
+	using static RobinHood70.WallE.ProjectGlobals;
+	using static RobinHood70.WikiCommon.Globals;
 
 	// Escaping in this class is only at the Uri level rather than the Data level because it produces much cleaner output which any browser will fix up, if needed, when the request is put through.
 	internal class RequestVisitorDisplay : IParameterVisitor

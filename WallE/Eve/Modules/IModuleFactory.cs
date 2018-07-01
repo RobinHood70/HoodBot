@@ -2,7 +2,7 @@
 {
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
-	using Base;
+	using RobinHood70.WallE.Base;
 
 	#region Public Delegates
 

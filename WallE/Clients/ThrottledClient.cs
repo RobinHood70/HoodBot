@@ -2,7 +2,7 @@
 {
 	using System;
 	using System.Diagnostics;
-	using WikiCommon;
+	using RobinHood70.WikiCommon;
 
 	/// <summary>This class wraps around any other <see cref="IMediaWikiClient" /> providing simple throttling based on whether the previous request was a GET request or a POST request.</summary>
 	/// <seealso cref="IMediaWikiClient" />

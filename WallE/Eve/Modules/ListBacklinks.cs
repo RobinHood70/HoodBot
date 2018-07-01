@@ -3,12 +3,12 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.Collections.Generic;
-	using Base;
 	using Newtonsoft.Json.Linq;
-	using RequestBuilder;
-	using WikiCommon;
-	using static Properties.EveMessages;
-	using static WikiCommon.Globals;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.RequestBuilder;
+	using RobinHood70.WikiCommon;
+	using static RobinHood70.WallE.Properties.EveMessages;
+	using static RobinHood70.WikiCommon.Globals;
 
 	internal class ListBacklinks : ListModule<BacklinksInput, BacklinksItem>, IGeneratorModule
 	{

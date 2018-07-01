@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Clients.Async
 	using System.Net;
 	using System.Net.Http;
 	using System.Threading.Tasks;
-	using WikiCommon;
+	using RobinHood70.WikiCommon;
 
 	public class ThrottledClientAsync : IFormClientAsync
 	{

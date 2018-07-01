@@ -4,7 +4,7 @@
 	using System.Diagnostics;
 	using System.Net;
 	using System.Text.RegularExpressions;
-	using WikiCommon;
+	using RobinHood70.WikiCommon;
 	using static Properties.Resources;
 	using static WikiCommon.Globals;
 
