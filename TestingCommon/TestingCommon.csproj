@@ -56,9 +56,6 @@
     <Compile Include="WikiInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="WikiList.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="WikiListExample.txt" />
   </ItemGroup>
   <ItemGroup>

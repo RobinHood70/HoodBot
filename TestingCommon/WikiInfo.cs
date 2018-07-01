@@ -62,7 +62,7 @@
 		public static IEnumerable<WikiInfo> LoadFile()
 		{
 			var retval = new List<WikiInfo>();
-			foreach (var line in File.ReadAllLines("WikiList.txt"))
+			foreach (var line in File.ReadAllLines(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "HoodBot", "WikiList.txt")))
 			{
 				retval.Add(new WikiInfo(line));
 			}
