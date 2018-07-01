@@ -20,7 +20,7 @@
 		public override string SessionToken(string type)
 		{
 			type = TokenManagerFunctions.ValidateTokenType(ValidTypes, type, Csrf, Edit);
-			if (!this.SessionTokens.TryGetValue(type, out string retval))
+			if (!this.SessionTokens.TryGetValue(type, out var retval))
 			{
 				var action = new ActionTokens(this.Wal);
 				var tokensInput = new TokensInput(ValidTypes);

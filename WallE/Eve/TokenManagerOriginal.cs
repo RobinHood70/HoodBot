@@ -36,7 +36,7 @@
 		public virtual string SessionToken(string type)
 		{
 			type = TokenManagerFunctions.ValidateTokenType(ValidTypes, type, Csrf, Edit);
-			if (!this.SessionTokens.TryGetValue(type, out string retval))
+			if (!this.SessionTokens.TryGetValue(type, out var retval))
 			{
 				var pageSetInput = new DefaultPageSetInput(new string[] { ":" }); // This is a hack that MW sees as a legitimate page name that will never actually be found. Fixed in later versions, but works nicely for pre-1.20 since we don't have an actual page name.
 				var propInfoInput = new InfoInput { Tokens = new[] { Edit, Watch } };
