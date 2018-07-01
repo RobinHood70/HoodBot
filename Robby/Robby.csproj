@@ -101,7 +101,6 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Robby.ruleset" />
     <AdditionalFiles Include="stylecop.json" />
     <None Include="SharedKey.pfx" />
   </ItemGroup>
