@@ -10,13 +10,13 @@
 	using System.Text;
 	using System.Threading;
 	using System.Windows.Forms;
-	using Base;
-	using Clients;
-	using Design;
-	using Eve;
-	using RequestBuilder;
-	using TestingCommon;
-	using WikiCommon;
+	using RobinHood70.TestingCommon;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Clients;
+	using RobinHood70.WallE.Design;
+	using RobinHood70.WallE.Eve;
+	using RobinHood70.WallE.RequestBuilder;
+	using RobinHood70.WikiCommon;
 	using static WikiCommon.Globals;
 
 	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "By design, though could potentially use a rewrite per TODO, below")]

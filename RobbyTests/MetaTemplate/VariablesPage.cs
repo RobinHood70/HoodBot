@@ -2,8 +2,8 @@
 {
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
-	using Robby.Design;
-	using WallE.Base;
+	using RobinHood70.Robby.Design;
+	using RobinHood70.WallE.Base;
 
 	public class VariablesPage : Page
 	{

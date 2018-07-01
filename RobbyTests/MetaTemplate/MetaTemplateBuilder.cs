@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.Robby.Tests.MetaTemplate
 {
 	using System.Collections.Generic;
-	using Design;
-	using WallE.Base;
+	using RobinHood70.Robby.Design;
+	using RobinHood70.WallE.Base;
 	using static WikiCommon.Globals;
 
 	public class MetaTemplateBuilder : PageCreator

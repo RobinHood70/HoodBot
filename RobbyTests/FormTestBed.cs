@@ -8,15 +8,15 @@
 	using System.Security.Cryptography;
 	using System.Text;
 	using System.Windows.Forms;
-	using Design;
-	using Robby;
+	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Tests.MetaTemplate;
 	using RobinHood70.TestingCommon;
-	using Tests.MetaTemplate;
-	using WallE.Base;
-	using WallE.Clients;
-	using WallE.Eve;
-	using WallE.RequestBuilder;
-	using WikiCommon;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Clients;
+	using RobinHood70.WallE.Eve;
+	using RobinHood70.WallE.RequestBuilder;
+	using RobinHood70.WikiCommon;
 	using static WikiCommon.Globals;
 
 	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "By design, though could potentially use a rewrite per TODO, below")]

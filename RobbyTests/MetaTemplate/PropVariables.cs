@@ -2,11 +2,11 @@
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
-	using WallE.Base;
-	using WallE.Eve;
-	using WallE.Eve.Modules;
-	using WallE.RequestBuilder;
-	using WikiCommon;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Eve;
+	using RobinHood70.WallE.Eve.Modules;
+	using RobinHood70.WallE.RequestBuilder;
+	using RobinHood70.WikiCommon;
 	using static WikiCommon.Globals;
 
 	public class PropVariables : PropListModule<VariablesInput, VariablesResult>, IGeneratorModule

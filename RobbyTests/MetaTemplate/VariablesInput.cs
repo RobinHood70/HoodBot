@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby.Tests.MetaTemplate
 {
 	using System.Collections.Generic;
-	using WallE.Base;
+	using RobinHood70.WallE.Base;
 
 	public class VariablesInput : IPropertyInput, ILimitableInput, IGeneratorInput
 	{
