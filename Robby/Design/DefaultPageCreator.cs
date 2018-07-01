@@ -6,7 +6,7 @@
 	using static WikiCommon.Globals;
 
 	/// <summary>The default page creation mechanism.</summary>
-	/// <seealso cref="RobinHood70.Robby.Design.PageCreator" />
+	/// <seealso cref="PageCreator" />
 	public class DefaultPageCreator : PageCreator
 	{
 		#region Public Override Methods
@@ -25,9 +25,9 @@
 					return new FilePage(simpleTitle.Namespace.Site, simpleTitle.PageName);
 				case MediaWikiNamespaces.Category:
 					return new Category(simpleTitle.Namespace.Site, simpleTitle.PageName);
+				default:
+					return new Page(simpleTitle);
 			}
-
-			return new Page(simpleTitle);
 		}
 
 		/// <summary>Creates a page item.</summary>
