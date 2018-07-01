@@ -57,11 +57,6 @@
 		/// <returns>The formatted text.</returns>
 		public static string CurrentCulture(string text, params object[] values) => string.Format(CultureInfo.CurrentCulture, text, values);
 
-		/// <summary>Convenience method so that CurrentCulture and Invariant are all in the same class for both traditional and formattable strings, and are used the same way.</summary>
-		/// <param name="formattable">A formattable string.</param>
-		/// <returns>The formatted text.</returns>
-		public static string CurrentCulture(FormattableString formattable) => formattable?.ToString(CultureInfo.CurrentCulture);
-
 		/// <summary>Creates an empty read-only dictionary of the specified type.</summary>
 		/// <typeparam name="TKey">The key type.</typeparam>
 		/// <typeparam name="TValue">The value type.</typeparam>
@@ -111,13 +106,6 @@
 
 			return null;
 		}
-
-		/// <summary>Convenience method so that CurrentCulture and Invariant are all in the same class for both traditional and formattable strings, and are used the same way.</summary>
-		/// <param name="invariantText">The text to format.</param>
-		/// <param name="values">The values of any parameters in the <paramref name="invariantText" /> parameter.</param>
-		/// <returns>The formatted text.</returns>
-		/// <remarks>Note that the name of the input parameter is changed so rules will not identify it as needing localization, since invariant strings generally don't.</remarks>
-		public static string Invariant(string invariantText, params object[] values) => string.Format(CultureInfo.InvariantCulture, invariantText, values);
 
 		/// <summary>Convenience method so that CurrentCulture and Invariant are all in the same class for both traditional and formattable strings, and are used the same way.</summary>
 		/// <param name="formattable">A formattable string.</param>

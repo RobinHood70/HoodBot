@@ -945,7 +945,7 @@
 					}
 					else
 					{
-						change.Add(Invariant((FormattableString)$"{changeItem.Key}={changeItem.Value}"));
+						change.Add(Invariant($"{changeItem.Key}={changeItem.Value}"));
 					}
 				}
 

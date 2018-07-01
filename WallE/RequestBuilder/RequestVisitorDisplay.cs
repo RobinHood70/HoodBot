@@ -51,7 +51,7 @@
 				request.Type == RequestType.Post ? "POST" :
 				"POST (multipart)";
 
-			return Invariant((FormattableString)$"{methodText}: {request.Uri}?{query}");
+			return Invariant($"{methodText}: {request.Uri}?{query}");
 		}
 
 		public void Visit(FileParameter parameter) => this.builder.Append("<filedata>");

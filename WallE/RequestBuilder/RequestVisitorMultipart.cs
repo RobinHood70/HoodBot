@@ -100,7 +100,7 @@
 				return;
 			}
 
-			var data = Invariant((FormattableString)$"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{parameter.Name}\"; filename=\"{parameter.FileName}\";\r\nContent-Type: application/octet-stream\r\n\r\n");
+			var data = Invariant($"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{parameter.Name}\"; filename=\"{parameter.FileName}\";\r\nContent-Type: application/octet-stream\r\n\r\n");
 			this.stream.Write(encoding.GetBytes(data), 0, encoding.GetByteCount(data));
 			this.stream.Write(parameter.Value, 0, parameter.Value.Length);
 		}
@@ -160,7 +160,7 @@
 				return;
 			}
 
-			var postData = Invariant((FormattableString)$"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{name}\"\r\n\r\n{value}");
+			var postData = Invariant($"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{name}\"\r\n\r\n{value}");
 			this.stream.Write(encoding.GetBytes(postData), 0, encoding.GetByteCount(postData));
 		}
 		#endregion
