@@ -15,12 +15,6 @@
 		public MainWindow()
 		{
 			Globals.ContactInfo = "robinhood70@live.ca";
-			if (Globals.ApplicationDataPath != null)
-			{
-				// Ignored if the path already exists, so just create it.
-				Directory.CreateDirectory(Globals.ApplicationDataPath);
-			}
-
 			this.DataContext = this.mainViewModel;
 			this.InitializeComponent();
 			this.WikiCombo.DataContext = WikiInfoViewModel.Load();
