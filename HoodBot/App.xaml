@@ -1,0 +1,6 @@
+﻿<Application x:Class="RobinHood70.HoodBot.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Startup="Application_Startup"
+			 StartupUri="MainWindow.xaml">
+</Application>

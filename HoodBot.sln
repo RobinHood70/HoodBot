@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WikiCommon", "WikiCommon\Wi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestingCommon", "TestingCommon\TestingCommon.csproj", "{C1E4B0F3-2BA5-4B13-AD1E-033B84A6ECE0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoodBot", "HoodBot\HoodBot.csproj", "{67BF70DF-F8D7-49F0-A6A2-DFFC7C8FF55E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,6 +58,10 @@ Global
 		{C1E4B0F3-2BA5-4B13-AD1E-033B84A6ECE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1E4B0F3-2BA5-4B13-AD1E-033B84A6ECE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1E4B0F3-2BA5-4B13-AD1E-033B84A6ECE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67BF70DF-F8D7-49F0-A6A2-DFFC7C8FF55E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67BF70DF-F8D7-49F0-A6A2-DFFC7C8FF55E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67BF70DF-F8D7-49F0-A6A2-DFFC7C8FF55E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67BF70DF-F8D7-49F0-A6A2-DFFC7C8FF55E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

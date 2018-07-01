@@ -1,0 +1,130 @@
+﻿<Window x:Class="RobinHood70.HoodBot.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:properties="clr-namespace:RobinHood70.HoodBot.Properties"
+        mc:Ignorable="d"
+        Title="{x:Static properties:Resources.HoodBotMainWindow}"
+		Width="600" Height="500" FontSize="14">
+	<Window.Resources>
+		<Style TargetType="Button">
+			<Setter Property="Width" Value="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"/>
+			<Setter Property="Padding" Value="0"/>
+		</Style>
+		<Style TargetType="DockPanel">
+			<Setter Property="LastChildFill" Value="True"/>
+		</Style>
+		<Style TargetType="ProgressBar">
+			<Setter Property="Height" Value="{Binding ActualHeight, ElementName=WikiCombo}"/>
+		</Style>
+		<Style TargetType="TextBlock">
+			<Setter Property="TextWrapping" Value="WrapWithOverflow"/>
+			<Setter Property="VerticalAlignment" Value="Center"/>
+		</Style>
+		<Style TargetType="Viewbox">
+			<Setter Property="Margin" Value="3"/>
+			<Setter Property="Stretch" Value="Uniform"/>
+		</Style>
+		<Style x:Key="SpeedText" TargetType="TextBlock">
+			<Setter Property="FontFamily" Value="WebDings"/>
+			<Setter Property="HorizontalAlignment" Value="Center"/>
+		</Style>
+	</Window.Resources>
+	<Grid Margin="10" >
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*"/>
+			<ColumnDefinition Width="10"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="auto"/>
+			<RowDefinition Height="10"/>
+			<RowDefinition Height="2*"/>
+			<RowDefinition Height="10"/>
+			<RowDefinition Height="1*"/>
+			<RowDefinition Height="10"/>
+			<RowDefinition Height="auto"/>
+			<RowDefinition Height="10"/>
+			<RowDefinition Height="auto"/>
+		</Grid.RowDefinitions>
+		<DockPanel Grid.Row="0" Grid.Column="0">
+			<TextBlock DockPanel.Dock="Left" Text="{x:Static properties:Resources.Wiki}"/>
+			<Button DockPanel.Dock="Right"
+					Height="{Binding ActualHeight, ElementName=WikiCombo}"
+					HorizontalAlignment="Center"
+					VerticalAlignment="Center"
+					Click="EditWikiList_Click">
+				<Viewbox Margin="2">
+					<TextBlock Text="!" FontFamily="WingDings" HorizontalAlignment="Center"/>
+				</Viewbox>
+			</Button>
+			<ComboBox x:Name="WikiCombo"
+					  Margin="10,0,10,0"
+					  DisplayMemberPath="DisplayName"
+					  ItemsSource="{Binding AllWikis}"
+					  SelectedValue="{Binding CurrentValue}"
+					  SelectedValuePath="DisplayName"/>
+		</DockPanel>
+		<DockPanel Grid.Row="0" Grid.Column="2">
+			<TextBlock DockPanel.Dock="Left" Text="{x:Static properties:Resources.Password}"/>
+			<PasswordBox Margin="10,0,0,0"/>
+		</DockPanel>
+		<DockPanel Grid.Row="2" Grid.Column="0" LastChildFill="True">
+			<TextBlock DockPanel.Dock="Top" Text="{x:Static properties:Resources.AvailableJobs}"/>
+			<TreeView/>
+		</DockPanel>
+		<DockPanel Grid.Row="2" Grid.Column="2">
+			<DockPanel.Background>
+				<ImageBrush ImageSource="HoodBot.png" Opacity="{Binding BotPicOpacity}" Stretch="Uniform"/>
+			</DockPanel.Background>
+			<TextBlock DockPanel.Dock="Top" Text="{x:Static properties:Resources.RequiredInfo}"/>
+			<StackPanel x:Name="JobParameters" Orientation="Vertical"/>
+		</DockPanel>
+		<TextBox x:Name="Status" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" VerticalScrollBarVisibility="Auto"/>
+		<ProgressBar Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Height="{Binding ActualHeight, ElementName=WikiCombo}" Maximum="{Binding OverallProgressMax, Mode=OneWay}" Value="{Binding OverallProgress, Mode=OneWay}"/>
+		<Grid Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="3">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="auto"/>
+				<ColumnDefinition Width="10"/>
+				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="10"/>
+				<ColumnDefinition Width="auto"/>
+				<ColumnDefinition Width="10"/>
+				<ColumnDefinition Width="auto"/>
+				<ColumnDefinition Width="10"/>
+				<ColumnDefinition Width="auto"/>
+				<ColumnDefinition Width="10"/>
+				<ColumnDefinition Width="auto"/>
+			</Grid.ColumnDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="auto"/>
+				<RowDefinition Height="auto"/>
+			</Grid.RowDefinitions>
+			<TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" Text="{x:Static properties:Resources.EstimatedCompletion}"/>
+			<TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding Eta, Mode=OneWay, StringFormat=T}"/>
+			<TextBlock Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" Text="{x:Static properties:Resources.EstimatedCompletionUTC}"/>
+			<TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding UtcEta, Mode=OneWay, StringFormat=T}"/>
+			<Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="4" Click="PlayButton_Click">
+				<Viewbox>
+					<TextBlock Text="4" Style="{StaticResource SpeedText}"/>
+				</Viewbox>
+			</Button>
+			<Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="6">
+				<Viewbox>
+					<TextBlock Text=":" Style="{StaticResource SpeedText}"/>
+				</Viewbox>
+			</Button>
+			<Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="8">
+				<Viewbox>
+					<TextBlock Text=";" Style="{StaticResource SpeedText}"/>
+				</Viewbox>
+			</Button>
+			<Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="10">
+				<Viewbox>
+					<TextBlock Text="&lt;" Style="{StaticResource SpeedText}"/>
+				</Viewbox>
+			</Button>
+		</Grid>
+	</Grid>
+</Window>
