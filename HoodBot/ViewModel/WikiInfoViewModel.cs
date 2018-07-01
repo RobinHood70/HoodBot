@@ -15,14 +15,28 @@
 	public class WikiInfoViewModel : IWikiInfo, IEditableObject, INotifyPropertyChanged
 	{
 		#region Fields
-		private string currentValue;
+		[NonSerialized]
 		private PasswordBox passwordBox;
 
+		[NonSerialized]
+		private string currentValue;
+
+		[NonSerialized]
 		private Uri api;
+
+		[NonSerialized]
 		private string displayName;
+
+		[NonSerialized]
 		private string pwd;
+
+		[NonSerialized]
 		private int readThrottling;
+
+		[NonSerialized]
 		private string userName;
+
+		[NonSerialized]
 		private int writeThrottling;
 		#endregion
 
@@ -172,7 +186,7 @@
 
 		public void Save()
 		{
-			var output = JsonConvert.SerializeObject(this);
+			var output = JsonConvert.SerializeObject(this, Formatting.Indented, new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Ignore });
 			File.WriteAllText(Globals.WikiListLocation, output);
 		}
 		#endregion
