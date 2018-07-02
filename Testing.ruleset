@@ -4,14 +4,15 @@
   <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
     <Rule Id="CA1009" Action="None" />
     <Rule Id="CA1014" Action="None" />
+    <Rule Id="CA1020" Action="None" />
+    <Rule Id="CA1056" Action="None" />
     <Rule Id="CA1057" Action="None" />
     <Rule Id="CA1062" Action="None" />
     <Rule Id="CA1303" Action="None" />
     <Rule Id="CA1305" Action="None" />
     <Rule Id="CA1308" Action="None" />
-    <Rule Id="CA1700" Action="None" />
-    <Rule Id="CA1701" Action="Warning" />
-    <Rule Id="CA1702" Action="Warning" />
+    <Rule Id="CA1701" Action="None" />
+    <Rule Id="CA1702" Action="None" />
     <Rule Id="CA1703" Action="None" />
     <Rule Id="CA1704" Action="None" />
     <Rule Id="CA1716" Action="None" />
@@ -23,10 +24,10 @@
   </Rules>
   <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
     <Rule Id="CS1591" Action="None" />
+    <Rule Id="CS8020" Action="Info" />
   </Rules>
   <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp.EditorFeatures" RuleNamespace="Microsoft.CodeAnalysis.CSharp.EditorFeatures">
     <Rule Id="IDE0032" Action="Info" />
-    <Rule Id="IDE0032WithoutSuggestion" Action="Info" />
   </Rules>
   <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp.Features" RuleNamespace="Microsoft.CodeAnalysis.CSharp.Features">
     <Rule Id="IDE0001" Action="Info" />
@@ -101,7 +102,6 @@
     <Rule Id="IDE1006WithoutSuggestion" Action="Info" />
   </Rules>
   <Rules AnalyzerId="Microsoft.CodeAnalysis.Features" RuleNamespace="Microsoft.CodeAnalysis.Features">
-    <Rule Id="IDE0010" Action="Info" />
     <Rule Id="IDE0010WithoutSuggestion" Action="Info" />
     <Rule Id="IDE0033" Action="Info" />
     <Rule Id="IDE0033WithoutSuggestion" Action="Info" />
@@ -109,7 +109,9 @@
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
     <Rule Id="SA0001" Action="None" />
     <Rule Id="SA1124" Action="None" />
+    <Rule Id="SA1217" Action="None" />
     <Rule Id="SA1407" Action="None" />
+    <Rule Id="SA1412" Action="Warning" />
     <Rule Id="SA1413" Action="None" />
     <Rule Id="SA1515" Action="None" />
     <Rule Id="SA1600" Action="None" />
@@ -120,6 +122,7 @@
     <Rule Id="SA1606" Action="None" />
     <Rule Id="SA1607" Action="None" />
     <Rule Id="SA1608" Action="None" />
+    <Rule Id="SA1609" Action="Warning" />
     <Rule Id="SA1610" Action="None" />
     <Rule Id="SA1611" Action="None" />
     <Rule Id="SA1612" Action="None" />
@@ -146,10 +149,6 @@
     <Rule Id="SA1638" Action="None" />
     <Rule Id="SA1640" Action="None" />
     <Rule Id="SA1641" Action="None" />
-    <Rule Id="SA1642" Action="None" />
-    <Rule Id="SA1643" Action="None" />
-    <Rule Id="SA1648" Action="None" />
-    <Rule Id="SA1649" Action="None" />
-    <Rule Id="SA1651" Action="None" />
+    <Rule Id="SA1652" Action="None" />
   </Rules>
 </RuleSet>
