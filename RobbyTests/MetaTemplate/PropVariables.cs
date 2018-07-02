@@ -7,7 +7,7 @@
 	using RobinHood70.WallE.Eve.Modules;
 	using RobinHood70.WallE.RequestBuilder;
 	using RobinHood70.WikiCommon;
-	using static WikiCommon.Globals;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public class PropVariables : PropListModule<VariablesInput, VariablesResult>, IGeneratorModule
 	{

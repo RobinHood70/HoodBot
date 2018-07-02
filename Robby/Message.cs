@@ -2,7 +2,7 @@
 {
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using static WikiCommon.Globals;
+	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Stores a MediaWiki page along with associated data.</summary>
 	/// <seealso cref="RobinHood70.Robby.Page" />

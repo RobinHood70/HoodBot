@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby
 {
 	using RobinHood70.WallE.Base;
-	using static WikiCommon.Globals;
+	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Represents information about an interwiki entry.</summary>
 	public class InterwikiEntry

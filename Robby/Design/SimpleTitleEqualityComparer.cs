@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System.Collections.Generic;
-	using static WikiCommon.Globals;
+	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>An ISimpleTitle equality comparer to determine equality based on the Namespace and PageName only.</summary>
 	/// <seealso cref="System.Collections.Generic.EqualityComparer{T}" />

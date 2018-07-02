@@ -3,7 +3,7 @@
 	using System.Collections.Generic;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
-	using static WikiCommon.Globals;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public class MetaTemplateBuilder : PageCreator
 	{

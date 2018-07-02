@@ -3,7 +3,7 @@
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
-	using static WikiCommon.Globals;
+	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Read-only Namespace dictionary that can be referenced by ID and all valid names for the namespace.</summary>
 	public class NamespaceCollection : IReadOnlyCollection<Namespace>

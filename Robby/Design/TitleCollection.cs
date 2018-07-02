@@ -6,8 +6,8 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using static Properties.Resources;
-	using static WikiCommon.Globals;
+	using static RobinHood70.Robby.Properties.Resources;
+	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Provides a base class to manipulate a collection of titles.</summary>
 	/// <typeparam name="TTitle">The type of the title.</typeparam>

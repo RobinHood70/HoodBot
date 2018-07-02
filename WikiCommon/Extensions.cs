@@ -4,7 +4,7 @@
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using System.Globalization;
-	using static WikiCommon.Globals;
+	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Extension methods for a variety of types.</summary>
 	public static class Extensions

@@ -17,7 +17,7 @@
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WallE.RequestBuilder;
 	using RobinHood70.WikiCommon;
-	using static WikiCommon.Globals;
+	using static RobinHood70.WikiCommon.Globals;
 
 	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "By design, though could potentially use a rewrite per TODO, below")]
 	public partial class FormTestBed : Form

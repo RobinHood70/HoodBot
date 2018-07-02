@@ -3,7 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using RobinHood70.WallE.Base;
-	using static WikiCommon.Globals;
+	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Stores information about a Recent Change entry.</summary>
 	public class RecentChange

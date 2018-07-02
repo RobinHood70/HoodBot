@@ -5,8 +5,8 @@
 	using System.Net;
 	using System.Text.RegularExpressions;
 	using RobinHood70.WikiCommon;
-	using static Properties.Resources;
-	using static WikiCommon.Globals;
+	using static RobinHood70.Robby.Properties.Resources;
+	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Splits a page name into its constituent parts.</summary>
 	public class TitleParts : IFullTitle, ISimpleTitle

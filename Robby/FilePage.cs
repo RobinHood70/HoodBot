@@ -5,7 +5,7 @@
 	using System.IO;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using static WikiCommon.Globals;
+	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Represents a file on the wiki. Includes all page data as well as file revisions and file-specific methods.</summary>
 	/// <seealso cref="RobinHood70.Robby.Page" />
