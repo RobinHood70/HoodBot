@@ -132,9 +132,6 @@
   <data name="InputNonUnique" xml:space="preserve">
     <value>The flags input must contain only a single flag.</value>
   </data>
-  <data name="InvalidQuery" xml:space="preserve">
-    <value>A query was submitted with no modules.</value>
-  </data>
   <data name="InvalidUserRightsRequest" xml:space="preserve">
     <value>For MediaWiki version 1.23 only, you must specify a user name rather than a user ID for the UserRights function, or provide your own token. The API for that version allowed user IDs to be used, but provided no way to get a token by user ID, nor to get a user name from the user ID.</value>
   </data>

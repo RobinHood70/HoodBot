@@ -124,15 +124,6 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A query was submitted with no modules..
-        /// </summary>
-        internal static string InvalidQuery {
-            get {
-                return ResourceManager.GetString("InvalidQuery", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to For MediaWiki version 1.23 only, you must specify a user name rather than a user ID for the UserRights function, or provide your own token. The API for that version allowed user IDs to be used, but provided no way to get a token by user ID, nor to get a user name from the user ID..
         /// </summary>
         internal static string InvalidUserRightsRequest {
