@@ -878,8 +878,8 @@
 		// Setup co-initialization to avoid near-duplicate requests with AbstractionLayer.
 		private void AbstractionLayer_Initializing(IWikiAbstractionLayer sender, InitializationEventArgs eventArgs)
 		{
-			eventArgs.Input.Properties |= NeededSiteInfo;
-			eventArgs.Input.FilterLocalInterwiki = Filter.Any;
+			eventArgs.Properties = NeededSiteInfo;
+			eventArgs.FilterLocalInterwiki = Filter.Any;
 		}
 
 		/// <summary>Forwards warning events from the abstraction layer to the wiki.</summary>

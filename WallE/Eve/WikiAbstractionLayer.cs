@@ -320,14 +320,20 @@
 		{
 			// So far, SiteInfoProperties.Namespaces only required to fix bug in API:Search < 1.25 and for ClearHasMessage < 1.24
 			// Similarly, InterwikiMap is only required to emulate PageSet redirects' tointerwiki property for < 1.25.
-			var siteInput = new SiteInfoInput() { Properties = NeededSiteInfo };
-			this.OnInitializing(new InitializationEventArgs(siteInput, null));
+			var eventArgs = new InitializationEventArgs(new SiteInfoInput() { Properties = NeededSiteInfo }, null);
+			this.OnInitializing(eventArgs);
 
-			// Ensure settings we care about haven't been messed with.
-			siteInput.Properties |= NeededSiteInfo;
-			siteInput.FilterLocalInterwiki = Filter.Any;
+			// Create input from return values in eventArgs
+			var siteInfoInput = new SiteInfoInput()
+			{
+				FilterLocalInterwiki = eventArgs.FilterLocalInterwiki,
+				InterwikiLanguageCode = eventArgs.InterwikiLanguageCode,
+				Properties = eventArgs.Properties,
+				ShowAllDatabases = eventArgs.ShowAllDatabases,
+				ShowNumberInGroup = eventArgs.ShowNumberInGroup
+			};
 
-			var infoModule = new MetaSiteInfo(this, siteInput);
+			var infoModule = new MetaSiteInfo(this, siteInfoInput);
 			var userModule = new MetaUserInfo(this, new UserInfoInput());
 			var queryInput = new QueryInput(infoModule, userModule);
 			var query = new ActionQuery(this);
@@ -398,7 +404,7 @@
 				this.ContinueVersion = siteVersion >= ContinueModule2.MinimumVersion ? 2 : 1;
 			}
 
-			this.OnInitialized(new InitializationEventArgs(siteInput, siteInfo));
+			this.OnInitialized(new InitializationEventArgs(siteInfoInput, siteInfo));
 		}
 
 		/// <summary>Determines whether the API is enabled (even if read-only) on the current wiki.</summary>

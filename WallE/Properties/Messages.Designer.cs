@@ -133,6 +133,15 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The interwiki language can only have a single value. Once it is set to a non-null value, it cannot be changed. Issue a separate SiteInfo request if different parts of your application require different languages..
+        /// </summary>
+        internal static string SiteInfoLanguageConflict {
+            get {
+                return ResourceManager.GetString("SiteInfoLanguageConflict", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A stop was requested because {0}..
         /// </summary>
         internal static string StopRequested {
