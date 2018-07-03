@@ -20,6 +20,7 @@
 		/// <param name="result">The SiteInfo result.</param>
 		public InitializationEventArgs(SiteInfoInput input, SiteInfoResult result)
 		{
+			ThrowNull(input, nameof(input));
 			this.filterLocalInterwiki = input.FilterLocalInterwiki;
 			this.interwikiLanguageCode = input.InterwikiLanguageCode;
 			this.properties = input.Properties;
