@@ -64,14 +64,17 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>StrongKeyNoPassword.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\..\NuGet\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -94,10 +97,17 @@
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="EncryptingJsonConverter.cs" />
-    <Compile Include="Globals.cs" />
     <Compile Include="IWikiInfo.cs" />
-    <Compile Include="Jobs\IWikiJob.cs" />
+    <Compile Include="Jobs\JobInfoAttribute.cs" />
+    <Compile Include="PasswordHelper.cs" />
+    <Compile Include="ViewModel\JobNode.cs" />
+    <Compile Include="ViewModel\JobNodeCollection.cs" />
+    <Compile Include="Jobs\JobParameterAttribute.cs" />
+    <Compile Include="Jobs\OneJob.cs" />
     <Compile Include="Jobs\Tasks\IWikiTask.cs" />
+    <Compile Include="Jobs\Tasks\OneTask.cs" />
+    <Compile Include="Jobs\Tasks\ProgressEventArgs.cs" />
+    <Compile Include="Jobs\Tasks\TaskEventArgs.cs" />
     <Compile Include="Jobs\Tasks\WikiTask.cs" />
     <Compile Include="Jobs\WikiJob.cs" />
     <Compile Include="NumericUpDown.xaml.cs">
@@ -115,7 +125,11 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="ViewModel\MainViewModel.cs" />
-    <Compile Include="ViewModel\WikiInfoViewModel.cs" />
+    <Compile Include="ViewModel\Notifier.cs" />
+    <Compile Include="ViewModel\RelayCommand.cs" />
+    <Compile Include="ViewModel\RelayCommand{T}.cs" />
+    <Compile Include="ViewModel\EditWindowViewModel.cs" />
+    <Compile Include="WikiList.cs" />
     <Compile Include="WikiInfo.cs" />
     <Page Include="EditWikiList.xaml">
       <SubType>Designer</SubType>
@@ -147,7 +161,6 @@
     </Compile>
     <None Include="packages.config" />
     <AdditionalFiles Include="stylecop.json" />
-    <None Include="StrongKeyNoPassword.snk" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

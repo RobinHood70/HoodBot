@@ -166,7 +166,7 @@
     <value>Supprimer</value>
   </data>
   <data name="RequiredInfo" xml:space="preserve">
-    <value>Information réquise :</value>
+    <value>Paramètres du tâche</value>
   </data>
   <data name="Save" xml:space="preserve">
     <value>Sauvegarder</value>

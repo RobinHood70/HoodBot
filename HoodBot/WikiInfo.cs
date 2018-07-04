@@ -20,5 +20,9 @@
 
 		public int WriteThrottling { get; set; }
 		#endregion
+
+		#region Public Override Methods
+		public override string ToString() => this.DisplayName;
+		#endregion
 	}
 }

@@ -205,7 +205,7 @@ namespace RobinHood70.HoodBot.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Required Info:.
+        ///   Looks up a localized string similar to Job Parameters.
         /// </summary>
         public static string RequiredInfo {
             get {

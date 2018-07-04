@@ -2,9 +2,10 @@
 {
 	using RobinHood70.Robby;
 
-	// Shell for testing purposes.
 	public interface IWikiTask
 	{
-		void AddToTitles(TitleCollection titles);
+		Site Site { get; }
+
+		void Execute();
 	}
 }
