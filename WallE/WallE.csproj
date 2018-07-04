@@ -30,6 +30,7 @@
     <CodeAnalysisRuleSet>..\Main.ruleset</CodeAnalysisRuleSet>
     <DocumentationFile>bin\Debug\WallE.XML</DocumentationFile>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>

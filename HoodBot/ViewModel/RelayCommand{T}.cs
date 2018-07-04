@@ -21,10 +21,10 @@
 
 		public bool CanExecute(T parameter) => this.canExecute == null ? true : this.canExecute(parameter);
 
-		public bool CanExecute(object parameter) => this.CanExecute(parameter is null && typeof(T).IsValueType ? default(T) : (T)parameter);
+		public bool CanExecute(object parameter) => this.CanExecute(parameter is null && typeof(T).IsValueType ? default : (T)parameter);
 
 		public void Execute(T parameter) => this.action(parameter);
 
-		public void Execute(object parameter) => this.Execute(parameter is null && typeof(T).IsValueType ? default(T) : (T)parameter);
+		public void Execute(object parameter) => this.Execute(parameter is null && typeof(T).IsValueType ? default : (T)parameter);
 	}
 }

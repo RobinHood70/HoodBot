@@ -137,7 +137,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			return null;
 		}
 
-		public static T GetFlag<T>(this JToken result, string nodeName, T value) => result[nodeName].AsBCBool() ? value : default(T);
+		public static T GetFlag<T>(this JToken result, string nodeName, T value) => result[nodeName].AsBCBool() ? value : default;
 
 		public static List<InterwikiTitleItem> GetInterwikiLinks(this JToken result)
 		{
