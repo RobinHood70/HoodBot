@@ -16,7 +16,7 @@ namespace RobinHood70.WallE.Design
 		/// <param name="originalValue">The value to filter.</param>
 		/// <returns>The input value with any relevant flags cleared.</returns>
 		public static FlagFilter<T> Check<T>(int siteVersion, T originalValue)
-			where T : IConvertible => new FlagFilter<T>(siteVersion, originalValue);
+			where T : Enum => new FlagFilter<T>(siteVersion, originalValue);
 		#endregion
 	}
 
@@ -24,7 +24,7 @@ namespace RobinHood70.WallE.Design
 	/// <typeparam name="T">The type of the flags filter to be checked.</typeparam>
 	[CLSCompliant(false)]
 	public sealed class FlagFilter<T>
-		where T : IConvertible
+		where T : Enum, IConvertible // IConvertible is apparently not implied by Enum unless declared explicity; add it so we don't have to do "as IConvertible" everywhere.
 	{
 		#region Fields
 		private readonly int siteVersion;
