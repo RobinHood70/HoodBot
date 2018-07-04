@@ -82,8 +82,9 @@
 
 		/// <summary>Gets all relevant information from the site.</summary>
 		/// <param name="anyPage">Any page on the wiki.</param>
+		/// <returns><c>true</c> if the wiki capabailities were successfully loaded; otherwise <c>false</c>.</returns>
 		/// <remarks>This can be called multiple times with different URIs to get information for different wikis. Previous information will be cleared with each new call.</remarks>
-		public void Get(Uri anyPage)
+		public bool Get(Uri anyPage)
 		{
 			ThrowNull(anyPage, nameof(anyPage));
 
@@ -110,7 +111,7 @@
 				if (pageData == null)
 				{
 					// Web page given could not be accessed, so abort.
-					return;
+					return false;
 				}
 
 				var rsdLink = findRsdLink.Match(pageData);
@@ -176,7 +177,7 @@
 						EntryPoint.Index;
 
 					// API gave us everything we need, so skip trying index.php.
-					return;
+					return true;
 				}
 			}
 
@@ -193,11 +194,12 @@
 				this.WriteEntryPoint = EntryPoint.Index;
 
 				// TODO: Add more information retrieval for index.php if abstraction layer is ever written for it.
+				return true;
 			}
 
 			this.client.RequestingDelay -= this.Client_RequestingDelay;
 
-			return;
+			return false;
 		}
 		#endregion
 
