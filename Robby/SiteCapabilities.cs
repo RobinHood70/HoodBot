@@ -86,10 +86,11 @@
 		/// <remarks>This can be called multiple times with different URIs to get information for different wikis. Previous information will be cleared with each new call.</remarks>
 		public bool Get(Uri anyPage)
 		{
+			// TODO: Convert to use URIs and related objects instead of strings whenever possible.
 			ThrowNull(anyPage, nameof(anyPage));
 
 			this.Clear();
-			var fullHost = anyPage.Scheme + "://" + anyPage.Host;
+			var fullHost = new UriBuilder(anyPage.Scheme, anyPage.Host).Uri;
 			var tryPath = anyPage.AbsoluteUri;
 			string tryLoc = null;
 			var offset = tryPath.IndexOf("/index.php", StringComparison.Ordinal);
@@ -166,7 +167,13 @@
 				{
 					api.Initialize();
 					this.Api = api.Uri;
-					this.Index = string.IsNullOrWhiteSpace(api.Script) ? null : new Uri(fullHost + api.Script);
+					Uri index = null;
+					if (!string.IsNullOrWhiteSpace(api.Script))
+					{
+						Uri.TryCreate(fullHost, api.Script, out index);
+					}
+
+					this.Index = index;
 					this.SiteName = api.SiteName;
 					this.ReadEntryPoint = EntryPoint.Api;
 					this.SupportsMaxLag = api.SupportsMaxLag;
