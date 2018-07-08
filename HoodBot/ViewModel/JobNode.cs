@@ -2,7 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Collections.ObjectModel;
+	using System.Reflection;
 	using static RobinHood70.WikiCommon.Globals;
 
 	public sealed class JobNode : Notifier, IComparable<JobNode>, IEquatable<JobNode>
@@ -12,26 +12,30 @@
 		#endregion
 
 		#region Constructors
-		public JobNode(string name)
-			: this(name, null)
+		public JobNode(string name, ConstructorInfo constructor)
+			: this(name, constructor, null)
 		{
 		}
 
-		public JobNode(string name, JobNode parent)
+		public JobNode(string name, ConstructorInfo constructor, JobNode parent)
 		{
+			ThrowNull(name, nameof(name));
+			this.Constructor = constructor;
 			this.Name = name;
 			this.Parent = parent;
 			this.isChecked = false;
 		}
 
-		public JobNode(string name, JobNode parent, string firstChild)
-			: this(name, parent) => this.Children = new ObservableCollection<JobNode>
+		public JobNode(string name, ConstructorInfo constructor, JobNode parent, string firstChild)
+			: this(name, null, parent) => this.Children = new SortedSet<JobNode>
 			{
-				new JobNode(firstChild, this)
+				new JobNode(firstChild, constructor, this)
 			};
 		#endregion
 
 		#region Public Properties
+		public ConstructorInfo Constructor { get; }
+
 		public bool? IsChecked
 		{
 			get => this.isChecked;
@@ -87,9 +91,11 @@
 			}
 		}
 
-		public IList<JobNode> Children { get; }
+		public ICollection<JobNode> Children { get; }
 
 		public string Name { get; }
+
+		public Dictionary<string, object> Parameters { get; private set; }
 
 		public JobNode Parent { get; }
 		#endregion
@@ -129,15 +135,34 @@
 			other.Children is null && this.Children?.Count > 0 ? -1 :
 			string.Compare(this.Name, other.Name, StringComparison.Ordinal);
 
-		public bool Equals(JobNode other) =>
-			other is null ? false :
-			this.Name == other.Name && this.Children == other.Children;
+		public bool Equals(JobNode other)
+		{
+			if (other is null)
+			{
+				return false;
+			}
+
+			if (this.Name != other.Name || this.Parent != other.Parent)
+			{
+				return false;
+			}
+
+			if (this.Children == null)
+			{
+				return other.Children == null;
+			}
+
+			var childSet = new HashSet<JobNode>(this.Children);
+			return childSet.SetEquals(new HashSet<JobNode>(other.Children));
+		}
+
+		public void InitializeParameters() => this.Parameters = new Dictionary<string, object>();
 		#endregion
 
 		#region Public Override Methods
 		public override bool Equals(object obj) => ReferenceEquals(this, obj) || this.Equals(obj as JobNode);
 
-		public override int GetHashCode() => CompositeHashCode(this.Name.GetHashCode(), this.Children?.GetHashCode() ?? 0);
+		public override int GetHashCode() => CompositeHashCode(this.Parent, this.Name, this.Children);
 		#endregion
 	}
 }

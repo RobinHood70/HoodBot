@@ -99,13 +99,18 @@
     </Compile>
     <Compile Include="EncryptingJsonConverter.cs" />
     <Compile Include="IWikiInfo.cs" />
-    <Compile Include="Jobs\JobInfoAttribute.cs" />
+    <Compile Include="Jobs\Design\AsyncInfo.cs" />
+    <Compile Include="Jobs\Design\JobConstructorEqualityComparer.cs" />
+    <Compile Include="Jobs\Design\JobInfoAttribute.cs" />
+    <Compile Include="Jobs\Design\PauseToken.cs" />
+    <Compile Include="Jobs\Design\PauseTokenSource.cs" />
+    <Compile Include="Jobs\Design\WikiRunner.cs" />
+    <Compile Include="Jobs\TaskJob.cs" />
     <Compile Include="PasswordHelper.cs" />
     <Compile Include="ViewModel\JobNode.cs" />
     <Compile Include="ViewModel\JobNodeCollection.cs" />
-    <Compile Include="Jobs\JobParameterAttribute.cs" />
+    <Compile Include="Jobs\Design\JobParameterAttribute.cs" />
     <Compile Include="Jobs\OneJob.cs" />
-    <Compile Include="Jobs\Tasks\IWikiTask.cs" />
     <Compile Include="Jobs\Tasks\OneTask.cs" />
     <Compile Include="Jobs\Tasks\ProgressEventArgs.cs" />
     <Compile Include="Jobs\Tasks\TaskEventArgs.cs" />

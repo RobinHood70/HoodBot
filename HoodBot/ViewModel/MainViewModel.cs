@@ -4,12 +4,16 @@
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.IO;
-	using System.Threading.Tasks;
+	using System.Threading;
+	using System.Windows;
+	using System.Windows.Media;
 	using RobinHood70.HoodBot.Jobs;
+	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Clients;
 	using RobinHood70.WallE.Eve;
 	using static System.Environment;
+	using static RobinHood70.HoodBot.Properties.Resources;
 
 	public class MainViewModel : Notifier
 	{
@@ -17,23 +21,30 @@
 		private const string ContactInfo = "robinhood70@live.ca";
 		#endregion
 
+		#region Static Fields
+		private static readonly Brush ProgressBarGreen = new SolidColorBrush(Color.FromArgb(255, 6, 176, 37));
+		private static readonly Brush ProgressBarYellow = new SolidColorBrush(Color.FromArgb(255, 255, 240, 0));
+		#endregion
+
 		#region Fields
 		private readonly IMediaWikiClient client;
 		private readonly string dataFolder;
-		private readonly IReadOnlyList<object> extraParameters = new List<object>();
+		private readonly IProgress<double> progressMonitor;
+		private readonly IProgress<string> statusMonitor;
 
 		private double botPicOpacity = 1;
-		private int completedLoops;
-		private int completedTasks;
+		private CancellationTokenSource canceller;
+		private double completedJobs;
 		private WikiInfo currentItem;
 		private DateTime? eta;
+		private bool executing;
 		private DateTime jobStarted;
-		private int numberOfLoops = 1;
-		private int numberOfTasks = 1;
 		private double overallProgress;
 		private double overallProgressMax = 1;
 		private string password;
+		private PauseTokenSource pauser;
 		private WikiInfo previousItem;
+		private Brush progressBarColor = ProgressBarGreen;
 		private Site site;
 		#endregion
 
@@ -44,6 +55,9 @@
 			this.client = new SimpleClient(ContactInfo, Path.Combine(this.dataFolder, "Cookies.dat"));
 			this.KnownWikis = WikiList.Load(Path.Combine(this.dataFolder, "WikiList.json"));
 			this.CurrentItem = this.KnownWikis.LastSelectedItem;
+
+			this.progressMonitor = new Progress<double>(this.ProgressChanged);
+			this.statusMonitor = new Progress<string>(this.StatusChanged);
 		}
 		#endregion
 
@@ -54,7 +68,7 @@
 		#region Public Properties
 		public double BotPicOpacity
 		{
-			get => 1; // this.botPicOpacity;
+			get => this.botPicOpacity;
 			private set => this.Set(ref this.botPicOpacity, value, nameof(this.BotPicOpacity));
 		}
 
@@ -73,6 +87,8 @@
 		public RelayCommand EditWikiList => new RelayCommand(this.OpenEditWindow);
 
 		public DateTime? Eta => this.eta?.ToLocalTime();
+
+		public JobNodeCollection JobTree { get; } = new JobNodeCollection();
 
 		public WikiList KnownWikis { get; }
 
@@ -96,6 +112,16 @@
 
 		public RelayCommand Play => new RelayCommand(this.ExecuteJobs);
 
+		public RelayCommand Pause => new RelayCommand(this.PauseJobs);
+
+		public Brush ProgressBarColor
+		{
+			get => this.progressBarColor;
+			set => this.Set(ref this.progressBarColor, value, nameof(this.ProgressBarColor));
+		}
+
+		public RelayCommand Stop => new RelayCommand(this.CancelJobs);
+
 		public DateTime? UtcEta
 		{
 			get => this.eta;
@@ -109,102 +135,116 @@
 		}
 		#endregion
 
-		#region Internal Properties
-		public JobNodeCollection JobList { get; } = new JobNodeCollection();
-		#endregion
-
-		#region Public Methods
-		public void SetBotPicOpacity(bool hasControls) => this.BotPicOpacity = hasControls ? 0.3 : 1;
-
-		public void UpdateEta()
+		#region Internal Methods
+		internal void GetParameters(JobNode jobNode)
 		{
-			if (this.completedTasks > this.numberOfTasks)
+			if (jobNode.IsChecked == false)
 			{
-				Debug.WriteLine("Warning: JobProgress exceeds JobProgressMax - ignored");
 				return;
 			}
 
-			if (this.completedLoops > this.numberOfLoops)
+			var jobParameters = jobNode.Parameters;
+			if (jobParameters == null)
 			{
-				Debug.WriteLine("Warning: TaskProgress exceeds TaskProgressMax - ignored");
-				return;
+				jobNode.InitializeParameters();
+				jobParameters = jobNode.Parameters;
 			}
 
-			var progress = this.numberOfLoops * this.completedTasks + this.completedLoops;
-			if (progress > 0)
+			var wantedParameters = jobNode.Constructor.GetParameters();
+			this.SetBotPicOpacity(wantedParameters.Length > 2);
+			foreach (var parameter in wantedParameters)
 			{
-				var progressMax = this.numberOfTasks * this.numberOfLoops;
-				var timeDiff = DateTime.UtcNow - this.jobStarted;
-				var completionTime = TimeSpan.FromTicks(timeDiff.Ticks * progressMax / progress);
-
-				this.OverallProgress = progress;
-				this.OverallProgressMax = this.numberOfTasks * this.numberOfLoops;
-
-				if (timeDiff.TotalSeconds >= 5)
+				var paramInfos = parameter.GetCustomAttributes(typeof(JobParameterAttribute), true);
+				var paramInfo = (paramInfos.Length == 1 ? paramInfos[0] : null) as JobParameterAttribute;
+				switch (parameter.ParameterType.Name)
 				{
-					this.UtcEta = this.jobStarted + completionTime;
+					case "Site":
+					case "AsyncInfo":
+						break;
+					default:
+						if (!jobParameters.TryGetValue(parameter.Name, out var value))
+						{
+							value = paramInfo.DefaultValue;
+							jobParameters.Add(parameter.Name, value);
+						}
+
+						Debug.WriteLine($"Want parameter {parameter.Name} ({parameter.ParameterType.Name}={value})");
+
+						break;
 				}
 			}
 		}
 		#endregion
 
 		#region Private Methods
+		private void CancelJobs()
+		{
+			this.canceller?.Cancel();
+			this.Reset();
+			this.PauseJobs(false);
+		}
+
 		private async void ExecuteJobs()
 		{
+			if (this.executing)
+			{
+				return;
+			}
+
+			this.executing = true;
 			this.SetupWiki();
-			var job = new OneJob(this.site);
-			job.Completed += this.Job_Completed;
-			job.ProgressChanged += this.Job_ProgressChanged;
-			job.Started += this.Job_Started;
-			job.TaskStarted += this.Job_TaskStarted;
-			var task = Task.Run(() => { job.Execute(); });
-			await task;
-			job.TaskStarted -= this.Job_TaskStarted;
-			job.Started -= this.Job_Started;
-			job.ProgressChanged -= this.Job_ProgressChanged;
-			job.Completed -= this.Job_Completed;
-		}
+			this.completedJobs = 0;
 
-		private void Job_Completed(WikiJob sender, EventArgs eventArgs)
-		{
-			if (this.completedTasks != this.numberOfTasks - 1)
+			var equalityComparer = new JobConstructorEqualityComparer();
+			var jobList = new List<JobNode>(this.JobTree.GetCheckedJobs());
+			if (jobList.Count > 1)
 			{
-				Debug.WriteLine($"Warning: Last JobProgress did not end at JobProgressMax: {this.completedTasks + 1} / {this.numberOfTasks}");
+				// Remove any duplicate jobs based on Constructor equality. Simple bubble-sort style algorithm is sufficient due to small size.
+				for (var outerLoop = 0; outerLoop < jobList.Count - 1; outerLoop++)
+				{
+					for (var innerLoop = jobList.Count - 1; innerLoop > outerLoop; innerLoop--)
+					{
+						if (equalityComparer.Equals(jobList[innerLoop], jobList[outerLoop]))
+						{
+							jobList.RemoveAt(innerLoop);
+						}
+					}
+				}
 			}
 
-			this.completedTasks = 0;
-			this.completedLoops = 0;
-			this.numberOfTasks = 1;
-			this.numberOfLoops = 1;
-			this.OverallProgress = 0;
-			this.UtcEta = null;
-		}
+			this.OverallProgressMax = jobList.Count;
 
-		private void Job_ProgressChanged(WikiJob sender, Jobs.Tasks.ProgressEventArgs eventArgs)
-		{
-			this.completedLoops = eventArgs.Progress;
-			this.numberOfLoops = eventArgs.ProgressMaximum;
-			this.UpdateEta();
-		}
-
-		private void Job_Started(WikiJob sender, EventArgs eventArgs)
-		{
-			this.numberOfTasks = sender.Tasks.Count;
-			this.numberOfLoops = 1;
-			this.completedTasks = -1;
-			this.jobStarted = DateTime.UtcNow;
-			this.OverallProgress = 0;
-		}
-
-		private void Job_TaskStarted(WikiJob sender, Jobs.Tasks.TaskEventArgs eventArgs)
-		{
-			if (this.completedTasks >= 0 && this.completedLoops != this.numberOfLoops)
+			using (var cancelSource = new CancellationTokenSource())
 			{
-				Debug.WriteLine("Warning: Last TaskProgress did not end at TaskProgressMax");
-			}
+				this.canceller = cancelSource;
+				this.pauser = new PauseTokenSource();
 
-			this.completedLoops = 0;
-			this.completedTasks++;
+				var job = new OneJob(this.site, new AsyncInfo(this.canceller.Token, this.pauser.Token, this.progressMonitor, this.statusMonitor));
+				try
+				{
+					this.ProgressBarColor = ProgressBarGreen;
+					this.jobStarted = DateTime.UtcNow;
+					await job.Execute();
+					this.completedJobs++;
+					this.Reset();
+				}
+				catch (OperationCanceledException)
+				{
+					this.Reset();
+					MessageBox.Show(JobCancelled, nameof(HoodBot), MessageBoxButton.OK, MessageBoxImage.Information);
+				}
+				catch (Exception e)
+				{
+					MessageBox.Show(e.GetType().Name + ": " + e.Message, e.Source, MessageBoxButton.OK, MessageBoxImage.Error);
+					this.Reset(); // Deliberately placed after messagebox so approximate progress can be guaged.
+				}
+				finally
+				{
+					this.pauser = null;
+					this.canceller = null;
+					this.executing = false;
+				}
+			}
 		}
 
 		private void OpenEditWindow()
@@ -218,6 +258,33 @@
 
 			this.CurrentItem = this.KnownWikis.LastSelectedItem;
 		}
+
+		private void PauseJobs() => this.PauseJobs(!this.pauser.IsPaused);
+
+		private void PauseJobs(bool isPaused)
+		{
+			this.pauser.IsPaused = isPaused;
+			this.ProgressBarColor = isPaused ? ProgressBarYellow : ProgressBarGreen;
+		}
+
+		private void ProgressChanged(double e)
+		{
+			this.OverallProgress = this.completedJobs + e;
+			var timeDiff = DateTime.UtcNow - this.jobStarted;
+			if (this.OverallProgress > 0 && timeDiff.TotalSeconds >= 5)
+			{
+				var completionTime = TimeSpan.FromTicks((long)(timeDiff.Ticks * this.OverallProgressMax / this.OverallProgress));
+				this.UtcEta = this.jobStarted + completionTime;
+			}
+		}
+
+		private void Reset()
+		{
+			this.OverallProgress = 0;
+			this.UtcEta = null;
+		}
+
+		private void SetBotPicOpacity(bool hasControls) => this.BotPicOpacity = hasControls ? 0.3 : 1;
 
 		private void SetupWiki()
 		{
@@ -235,6 +302,8 @@
 				this.site.Login(wikiInfo.UserName, this.Password ?? wikiInfo.Password);
 			}
 		}
+
+		private void StatusChanged(string obj) => throw new NotImplementedException();
 		#endregion
 	}
 }

@@ -1,48 +1,27 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System;
-	using System.Collections.Generic;
+	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Tasks;
 	using RobinHood70.Robby;
 
-	[JobInfo("You Had One Job!", "|UESP | Generic | Generic")]
-	public class OneJob : WikiJob
+	public class OneJob : TaskJob
 	{
-		public OneJob(Site site)
-			: base(site)
+		[JobInfo("You Had One Job!", "|UESP")]
+		public OneJob(Site site, AsyncInfo asyncInfo)
+			: base(site, asyncInfo)
 		{
-			var random = new Random();
-			var numTasks = random.Next(1, 5);
-			var tasks = new List<WikiTask>();
+			var numTasks = new Random().Next(2, 5);
 			for (var i = 0; i < numTasks; i++)
 			{
-				tasks.Add(new OneTask(this));
+				this.Tasks.Add(new OneTask(this));
 			}
-
-			this.Tasks = tasks;
 		}
 
-		public override void Execute()
+		[JobInfo("You Had Another Job!", "|Maintenance")]
+		public OneJob(Site site, AsyncInfo asyncInfo, [JobParameter("Do nothing?", 5)] int doNothing)
+			: base(site, asyncInfo)
 		{
-			this.OnStarted(EventArgs.Empty);
-			foreach (var task in this.Tasks)
-			{
-				task.Started += this.Task_Started;
-				task.ProgressChanged += this.Task_ProgressChanged;
-				task.Completed += this.Task_Completed;
-				task.Execute();
-				task.Completed -= this.Task_Completed;
-				task.ProgressChanged -= this.Task_ProgressChanged;
-				task.Started -= this.Task_Started;
-			}
-
-			this.OnCompleted(EventArgs.Empty);
 		}
-
-		private void Task_Completed(WikiTask sender, EventArgs eventArgs) => this.OnTaskCompleted(new TaskEventArgs(this, sender));
-
-		private void Task_ProgressChanged(WikiTask sender, ProgressEventArgs eventArgs) => this.OnProgressChanged(new ProgressEventArgs(eventArgs.Progress, eventArgs.ProgressMaximum, sender));
-
-		private void Task_Started(WikiTask sender, EventArgs eventArgs) => this.OnTaskStarted(new TaskEventArgs(this, sender));
 	}
 }

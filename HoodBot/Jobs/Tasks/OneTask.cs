@@ -1,28 +1,29 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Tasks
 {
 	using System;
-	using System.Threading;
+	using System.Threading.Tasks;
 
 	public class OneTask : WikiTask
 	{
-		public OneTask(IWikiTask parent)
+		public OneTask(WikiRunner parent)
 			: base(parent)
 		{
 		}
 
-		public override void Execute()
+		public override async Task Execute()
 		{
 			this.OnStarted(EventArgs.Empty);
-			Thread.Sleep(500);
+			await Task.Delay(500);
 			var numLoops = new Random().Next(1, 100);
 			this.ProgressMaximum = numLoops;
 			for (var taskProgress = 0; taskProgress < numLoops; taskProgress++)
 			{
-				Thread.Sleep(100);
+				await Task.Delay(100);
 				this.Progress++;
+				await this.UpdateJobProgress();
 			}
 
-			this.OnFinished(EventArgs.Empty);
+			this.OnCompleted(EventArgs.Empty);
 		}
 	}
 }

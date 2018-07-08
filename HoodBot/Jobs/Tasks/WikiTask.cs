@@ -1,63 +1,26 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Tasks
 {
 	using System;
-	using RobinHood70.Robby;
-	using RobinHood70.WikiCommon;
 
-	public abstract class WikiTask : IWikiTask
+	public abstract class WikiTask : WikiRunner
 	{
-		#region Fields
-		private int progress;
-		private int progressMax;
-		#endregion
-
-		protected WikiTask(IWikiTask parent)
+		#region Constructors
+		protected WikiTask(WikiRunner parent)
+			: base(parent.Site)
 		{
 			this.Parent = parent;
 			this.Job = (parent as WikiJob) ?? (parent as WikiTask).Job;
-			this.Site = parent.Site;
 		}
+		#endregion
 
-		public event StrongEventHandler<WikiTask, EventArgs> Completed;
+		#region Public Properties
+		public WikiJob Job { get; } // Top-level Job object.
 
-		public event StrongEventHandler<WikiTask, ProgressEventArgs> ProgressChanged;
+		public WikiRunner Parent { get; } // Immediate parent, in the event of task nesting.
+		#endregion
 
-		public event StrongEventHandler<WikiTask, EventArgs> Started;
-
-		public WikiJob Job { get; }
-
-		public IWikiTask Parent { get; }
-
-		public Site Site { get; }
-
-		public int Progress
-		{
-			get => this.progress;
-			protected set
-			{
-				this.progress = value;
-				this.OnProgressChanged(new ProgressEventArgs(value, this.progressMax));
-			}
-		}
-
-		public int ProgressMaximum
-		{
-			get => this.progressMax;
-			protected set
-			{
-				this.progressMax = value;
-				this.OnProgressChanged(new ProgressEventArgs(this.progress, value));
-			}
-		}
-
-		Site IWikiTask.Site { get; }
-
-		public abstract void Execute();
-
-		protected virtual void OnFinished(EventArgs e) => this.Completed?.Invoke(this, e);
-
-		protected virtual void OnProgressChanged(ProgressEventArgs e) => this.ProgressChanged?.Invoke(this, e);
-
-		protected virtual void OnStarted(EventArgs e) => this.Started?.Invoke(this, e);
+		#region Internal Methods
+		internal void SetAsyncInfoWithIntercept(Progress<double> taskProgressIntercept) => this.AsyncInfo = this.Parent.AsyncInfo.With(taskProgressIntercept);
+		#endregion
 	}
 }

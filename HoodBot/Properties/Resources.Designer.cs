@@ -88,7 +88,7 @@ namespace RobinHood70.HoodBot.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Available Jobs:.
+        ///   Looks up a localized string similar to Available Jobs.
         /// </summary>
         public static string AvailableJobs {
             get {
@@ -165,6 +165,15 @@ namespace RobinHood70.HoodBot.Properties {
         public static string InvalidWikiInfo {
             get {
                 return ResourceManager.GetString("InvalidWikiInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Job cancelled!.
+        /// </summary>
+        public static string JobCancelled {
+            get {
+                return ResourceManager.GetString("JobCancelled", resourceCulture);
             }
         }
         

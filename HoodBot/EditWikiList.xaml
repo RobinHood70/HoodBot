@@ -8,7 +8,7 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:properties="clr-namespace:RobinHood70.HoodBot.Properties"
 	Title="{x:Static properties:Resources.EditWikiList}"
-	FontSize="14"
+	Style="{StaticResource GlobalWindowStyle}"
 	mc:Ignorable="d">
 	<Window.Resources>
 		<Style TargetType="{x:Type Button}">
@@ -20,9 +20,9 @@
 	</Window.DataContext>
 	<Grid Margin="10">
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="*" />
+			<ColumnDefinition Width="2*" />
 			<ColumnDefinition Width="10" />
-			<ColumnDefinition Width="*" />
+			<ColumnDefinition Width="3*" />
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="*" />

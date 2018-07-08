@@ -1,54 +1,35 @@
 ﻿namespace RobinHood70.HoodBot.ViewModel
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
+	using System.Diagnostics;
+	using System.Reflection;
 	using RobinHood70.HoodBot.Jobs;
+	using RobinHood70.HoodBot.Jobs.Design;
 
 	public class JobNodeCollection : KeyedCollection<string, JobNode>
 	{
 		public JobNodeCollection()
 		{
-			foreach (var jobInfo in JobInfoAttribute.FindAll())
+			var wikiJobType = typeof(WikiJob);
+			var allNodes = new HashSet<JobNode>();
+			foreach (var type in Assembly.GetCallingAssembly().GetTypes())
 			{
-				if (jobInfo.Groups == null)
+				if (type.IsSubclassOf(wikiJobType))
 				{
-					this.Add(new JobNode(jobInfo.Name));
-				}
-				else
-				{
-					foreach (var group in jobInfo.Groups)
+					foreach (var constructor in type.GetConstructors(BindingFlags.Public | BindingFlags.Instance))
 					{
-						if (string.IsNullOrEmpty(group))
-						{
-							this.Add(new JobNode(jobInfo.Name));
-						}
-						else
-						{
-							// For now, this only supports a single level of children, but it was designed to support a full tree if needed. Parsing code for group names with slashes/dots would need to be added here.
-							if (!this.TryGetValue(group, out var node))
-							{
-								this.Add(new JobNode(group, null, jobInfo.Name));
-							}
-							else
-							{
-								node.Children.Add(new JobNode(jobInfo.Name, node));
-							}
-						}
+						this.AddConstructor(constructor, allNodes);
 					}
 				}
 			}
 
-			this.Sort();
+			(this.Items as List<JobNode>).Sort();
 		}
 
 		#region Public Methods
-		public void Sort()
-		{
-			if (this.Items is List<JobNode> items)
-			{
-				items.Sort();
-			}
-		}
+		public IEnumerable<JobNode> GetCheckedJobs() => GetCheckedJobs(this);
 
 		public bool TryGetValue(string key, out JobNode item)
 		{
@@ -73,6 +54,77 @@
 
 		#region Protected Override Methods
 		protected override string GetKeyForItem(JobNode item) => item?.Name;
+		#endregion
+
+		#region Private Static Methods
+		private static void CheckAndAdd(ICollection<JobNode> jobs, JobNode jobNode, HashSet<JobNode> allNodes)
+		{
+			Debug.WriteLine($"Parent: {jobNode.Parent?.Name}, Name: {jobNode.Name}, Constructor: {jobNode.Constructor}, Children Count: {jobNode.Children?.Count}");
+			if (allNodes.Add(jobNode))
+			{
+				jobs.Add(jobNode);
+			}
+			else
+			{
+				throw new InvalidOperationException($"Job {jobNode.Name} has duplicate group {jobNode.Parent?.Name ?? "<Main List>"}.");
+			}
+		}
+
+		private static IEnumerable<JobNode> GetCheckedJobs(ICollection<JobNode> jobs)
+		{
+			foreach (var job in jobs)
+			{
+				if (job.Children != null)
+				{
+					foreach (var childJob in GetCheckedJobs(job.Children))
+					{
+						yield return childJob;
+					}
+				}
+
+				if (job.IsChecked == true && job.Constructor != null)
+				{
+					yield return job;
+				}
+			}
+		}
+		#endregion
+
+		#region Private Methods
+		private void AddConstructor(ConstructorInfo constructor, HashSet<JobNode> allNodes)
+		{
+			var jobInfo = constructor.GetCustomAttribute<JobInfoAttribute>();
+			if (jobInfo == null)
+			{
+				return;
+			}
+
+			if (jobInfo.Groups == null)
+			{
+				CheckAndAdd(this, new JobNode(jobInfo.Name, constructor), allNodes);
+				return;
+			}
+
+			foreach (var group in jobInfo.Groups)
+			{
+				if (string.IsNullOrEmpty(group))
+				{
+					CheckAndAdd(this, new JobNode(jobInfo.Name, constructor), allNodes);
+				}
+				else
+				{
+					// For now, this only expects a single level of children, but it was designed to support a full tree if needed. Parsing code for group names with slashes/dots would need to be added here.
+					if (!this.TryGetValue(group, out var node))
+					{
+						CheckAndAdd(this, new JobNode(group, constructor, null, jobInfo.Name), allNodes);
+					}
+					else
+					{
+						CheckAndAdd(node.Children, new JobNode(jobInfo.Name, constructor, node), allNodes);
+					}
+				}
+			}
+		}
 		#endregion
 	}
 }

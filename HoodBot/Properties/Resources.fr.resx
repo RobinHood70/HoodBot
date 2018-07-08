@@ -127,7 +127,7 @@
     <value>Lien à l'IPA :</value>
   </data>
   <data name="AvailableJobs" xml:space="preserve">
-    <value>Tâches disponibles :</value>
+    <value>Tâches disponibles</value>
   </data>
   <data name="EditWikiList" xml:space="preserve">
     <value>Modifier la liste de wikis</value>
@@ -152,6 +152,9 @@
   </data>
   <data name="InvalidWikiInfo" xml:space="preserve">
     <value>Au moins, le nom du wiki et le lien à l'IPA doivent être remplis.</value>
+  </data>
+  <data name="JobCancelled" xml:space="preserve">
+    <value>Tâche annulé !</value>
   </data>
   <data name="NoAppDataPath" xml:space="preserve">
     <value>L'application n'a pas pu démarrer car la répertoire ApplicationDate n'a pas pu être créé. Voir InnerException pour plus de détails.</value>

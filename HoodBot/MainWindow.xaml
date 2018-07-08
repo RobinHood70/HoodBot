@@ -9,9 +9,8 @@
 	xmlns:vm="clr-namespace:RobinHood70.HoodBot.ViewModel"
 	x:Name="mainWindow"
 	Title="{x:Static properties:Resources.HoodBotMainWindow}"
-	Width="600"
-	Height="500"
-	FontSize="14"
+	Height="600"
+	Style="{StaticResource GlobalWindowStyle}"
 	mc:Ignorable="d">
 	<Window.Resources>
 		<Style TargetType="Button">
@@ -84,7 +83,7 @@
 				VerticalAlignment="Stretch"
 				HorizontalContentAlignment="Stretch"
 				VerticalContentAlignment="Stretch"
-				Command="{Binding Path=EditWikiList}">
+				Command="{Binding EditWikiList}">
 				<TextBlock
 					HorizontalAlignment="Center"
 					FontFamily="WingDings"
@@ -99,7 +98,7 @@
 			</Grid.ColumnDefinitions>
 			<Grid.RowDefinitions>
 				<RowDefinition Height="auto" />
-				<RowDefinition Height="10" />
+				<RowDefinition Height="3" />
 				<RowDefinition Height="auto" />
 			</Grid.RowDefinitions>
 			<TextBlock
@@ -125,8 +124,11 @@
 			Grid.Row="2"
 			Grid.Column="0"
 			LastChildFill="True">
-			<TextBlock DockPanel.Dock="Top" Text="{x:Static properties:Resources.AvailableJobs}" />
-			<TreeView ItemsSource="{Binding JobList, Mode=OneTime}">
+			<TextBlock
+				HorizontalAlignment="Center"
+				DockPanel.Dock="Top"
+				Text="{x:Static properties:Resources.AvailableJobs}" />
+			<TreeView ItemsSource="{Binding JobTree, Mode=OneTime}" SelectedItemChanged="TreeView_SelectedItemChanged">
 				<TreeView.ItemTemplate>
 					<HierarchicalDataTemplate DataType="{x:Type vm:JobNodeCollection}" ItemsSource="{Binding Children, Mode=OneTime}">
 						<StackPanel Orientation="Horizontal">
@@ -147,18 +149,23 @@
 			Grid.Row="2"
 			Grid.Column="2"
 			LastChildFill="True">
+			<DockPanel.Background>
+				<ImageBrush
+					ImageSource="HoodBot.png"
+					Opacity="{Binding BotPicOpacity, FallbackValue=1, Mode=OneWay}"
+					Stretch="Uniform" />
+			</DockPanel.Background>
 			<TextBlock
 				HorizontalAlignment="Center"
 				DockPanel.Dock="Top"
-				Text="{x:Static properties:Resources.RequiredInfo}" />
-			<StackPanel x:Name="JobParameters" Orientation="Vertical">
-				<StackPanel.Background>
-					<ImageBrush
-						ImageSource="HoodBot.png"
-						Opacity="{Binding BotPicOpacity, FallbackValue=1}"
-						Stretch="Uniform" />
-				</StackPanel.Background>
-			</StackPanel>
+				Text="{x:Static properties:Resources.RequiredInfo}"
+				Visibility="Hidden" />
+			<Border
+				BorderBrush="Gray"
+				BorderThickness="1"
+				Visibility="Hidden">
+				<StackPanel x:Name="JobParameters" Orientation="Vertical" />
+			</Border>
 		</DockPanel>
 		<TextBox
 			x:Name="Status"
@@ -170,6 +177,7 @@
 			Grid.Row="6"
 			Grid.Column="0"
 			Grid.ColumnSpan="3"
+			Foreground="{Binding ProgressBarColor}"
 			Maximum="{Binding OverallProgressMax, Mode=OneWay}"
 			Value="{Binding OverallProgress, Mode=OneWay}" />
 		<Grid
@@ -180,8 +188,6 @@
 				<ColumnDefinition Width="auto" />
 				<ColumnDefinition Width="10" />
 				<ColumnDefinition Width="*" />
-				<ColumnDefinition Width="10" />
-				<ColumnDefinition Width="auto" />
 				<ColumnDefinition Width="10" />
 				<ColumnDefinition Width="auto" />
 				<ColumnDefinition Width="10" />
@@ -215,7 +221,7 @@
 				Grid.Row="0"
 				Grid.RowSpan="2"
 				Grid.Column="4"
-				Command="{Binding Path=Play}">
+				Command="{Binding Play}">
 				<Viewbox>
 					<TextBlock Style="{StaticResource SpeedText}" Text="4" />
 				</Viewbox>
@@ -223,15 +229,8 @@
 			<Button
 				Grid.Row="0"
 				Grid.RowSpan="2"
-				Grid.Column="6">
-				<Viewbox>
-					<TextBlock Style="{StaticResource SpeedText}" Text=":" />
-				</Viewbox>
-			</Button>
-			<Button
-				Grid.Row="0"
-				Grid.RowSpan="2"
-				Grid.Column="8">
+				Grid.Column="6"
+				Command="{Binding Pause}">
 				<Viewbox>
 					<TextBlock Style="{StaticResource SpeedText}" Text=";" />
 				</Viewbox>
@@ -239,7 +238,8 @@
 			<Button
 				Grid.Row="0"
 				Grid.RowSpan="2"
-				Grid.Column="10">
+				Grid.Column="8"
+				Command="{Binding Stop}">
 				<Viewbox>
 					<TextBlock Style="{StaticResource SpeedText}" Text="&lt;" />
 				</Viewbox>
