@@ -19,6 +19,6 @@
 		/// <summary>Returns a hash code for this instance.</summary>
 		/// <param name="obj">The object.</param>
 		/// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
-		public override int GetHashCode(ISimpleTitle obj) => obj == null ? 0 : CompositeHashCode(obj.Namespace.GetHashCode(), obj.PageName.GetHashCode());
+		public override int GetHashCode(ISimpleTitle obj) => obj == null ? 0 : CompositeHashCode(obj.Namespace, obj.PageName);
 	}
 }

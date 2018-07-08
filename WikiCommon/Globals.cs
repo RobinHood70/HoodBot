@@ -36,15 +36,15 @@
 		/// <summary>Generates a generic hash code based on multiple input hash codes.</summary>
 		/// <param name="hashCodes">Hash codes from constitutent types.</param>
 		/// <returns>An integer that is likely to be a good hash code for the combined values.</returns>
-		public static int CompositeHashCode(params int[] hashCodes)
+		public static int CompositeHashCode(params object[] hashCodes)
 		{
 			ThrowNull(hashCodes, nameof(hashCodes));
 			unchecked
 			{
 				var hash = -2128831035;
-				for (var i = 0; i < hashCodes.Length; i++)
+				foreach (var obj in hashCodes)
 				{
-					hash = (hash * 16777219) ^ hashCodes[i];
+					hash = (hash * 16777219) ^ obj?.GetHashCode() ?? 0;
 				}
 
 				return hash;
