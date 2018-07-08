@@ -170,7 +170,10 @@
 					Uri index = null;
 					if (!string.IsNullOrWhiteSpace(api.Script))
 					{
-						Uri.TryCreate(fullHost, api.Script, out index);
+						index = new UriBuilder(fullHost)
+						{
+							Path = api.Script
+						}.Uri;
 					}
 
 					this.Index = index;
