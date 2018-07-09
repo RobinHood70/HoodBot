@@ -9,7 +9,6 @@
 	xmlns:vm="clr-namespace:RobinHood70.HoodBot.ViewModel"
 	x:Name="mainWindow"
 	Title="{x:Static properties:Resources.HoodBotMainWindow}"
-	Height="600"
 	Style="{StaticResource GlobalWindowStyle}"
 	mc:Ignorable="d">
 	<Window.Resources>
