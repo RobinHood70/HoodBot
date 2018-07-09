@@ -88,7 +88,7 @@
 
 		public DateTime? Eta => this.eta?.ToLocalTime();
 
-		public JobNodeCollection JobTree { get; } = new JobNodeCollection();
+		public JobNode JobTree { get; } = new JobNode();
 
 		public WikiList KnownWikis { get; }
 

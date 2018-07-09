@@ -108,7 +108,6 @@
     <Compile Include="Jobs\TaskJob.cs" />
     <Compile Include="PasswordHelper.cs" />
     <Compile Include="ViewModel\JobNode.cs" />
-    <Compile Include="ViewModel\JobNodeCollection.cs" />
     <Compile Include="Jobs\Design\JobParameterAttribute.cs" />
     <Compile Include="Jobs\OneJob.cs" />
     <Compile Include="Jobs\Tasks\OneTask.cs" />

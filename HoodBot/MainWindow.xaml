@@ -127,9 +127,9 @@
 				HorizontalAlignment="Center"
 				DockPanel.Dock="Top"
 				Text="{x:Static properties:Resources.AvailableJobs}" />
-			<TreeView ItemsSource="{Binding JobTree, Mode=OneTime}" SelectedItemChanged="TreeView_SelectedItemChanged">
+			<TreeView ItemsSource="{Binding JobTree.Children, Mode=OneTime}" SelectedItemChanged="TreeView_SelectedItemChanged">
 				<TreeView.ItemTemplate>
-					<HierarchicalDataTemplate DataType="{x:Type vm:JobNodeCollection}" ItemsSource="{Binding Children, Mode=OneTime}">
+					<HierarchicalDataTemplate DataType="{x:Type vm:JobNode}" ItemsSource="{Binding Children, Mode=OneTime}">
 						<StackPanel Orientation="Horizontal">
 							<Viewbox Height="{Binding FontSize, ElementName=mainWindow}">
 								<CheckBox

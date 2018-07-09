@@ -2,7 +2,10 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Reflection;
+	using RobinHood70.HoodBot.Jobs;
+	using RobinHood70.HoodBot.Jobs.Design;
 	using static RobinHood70.WikiCommon.Globals;
 
 	public sealed class JobNode : Notifier, IComparable<JobNode>, IEquatable<JobNode>
@@ -12,25 +15,46 @@
 		#endregion
 
 		#region Constructors
-		public JobNode(string name, ConstructorInfo constructor)
-			: this(name, constructor, null)
+		public JobNode()
 		{
+			var wikiJobType = typeof(WikiJob);
+			this.Children = new SortedSet<JobNode>();
+			foreach (var type in Assembly.GetCallingAssembly().GetTypes())
+			{
+				if (type.IsSubclassOf(wikiJobType))
+				{
+					foreach (var constructor in type.GetConstructors(BindingFlags.Public | BindingFlags.Instance))
+					{
+						this.ValidateAndAdd(constructor);
+					}
+				}
+			}
 		}
 
-		public JobNode(string name, ConstructorInfo constructor, JobNode parent)
+		public JobNode(JobNode parent, string groupName)
 		{
-			ThrowNull(name, nameof(name));
-			this.Constructor = constructor;
-			this.Name = name;
+			ThrowNull(parent, nameof(parent));
+			ThrowNull(groupName, nameof(groupName));
+			Debug.WriteLine($"Adding Group {groupName} to {parent.Name ?? "<ROOT>"}, Children Count: {parent.Children?.Count}");
+			this.Children = new SortedSet<JobNode>();
+			this.Name = groupName;
 			this.Parent = parent;
 			this.isChecked = false;
 		}
 
-		public JobNode(string name, ConstructorInfo constructor, JobNode parent, string firstChild)
-			: this(name, null, parent) => this.Children = new SortedSet<JobNode>
-			{
-				new JobNode(firstChild, constructor, this)
-			};
+		public JobNode(JobNode parent, ConstructorInfo constructor)
+		{
+			ThrowNull(parent, nameof(parent));
+			ThrowNull(constructor, nameof(constructor));
+			var jobName = constructor.GetCustomAttribute<JobInfoAttribute>().Name;
+			var constructorName = constructor.DeclaringType.Name + constructor.ToString().Replace("Void .ctor", string.Empty).Replace("RobinHood70.Robby.", string.Empty).Replace("RobinHood70.HoodBot.Jobs.Design.", string.Empty);
+			Debug.WriteLine($"Adding Job {jobName} with constructor {constructorName} to {parent.Name ?? "<ROOT>"}, Children Count: {parent.Children?.Count}");
+
+			this.Constructor = constructor;
+			this.Name = jobName;
+			this.Parent = parent;
+			this.isChecked = false;
+		}
 		#endregion
 
 		#region Public Properties
@@ -91,7 +115,7 @@
 			}
 		}
 
-		public ICollection<JobNode> Children { get; }
+		public SortedSet<JobNode> Children { get; }
 
 		public string Name { get; }
 
@@ -156,6 +180,25 @@
 			return childSet.SetEquals(new HashSet<JobNode>(other.Children));
 		}
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Longer operation than a simple fetch.")]
+		public IEnumerable<JobNode> GetCheckedJobs()
+		{
+			if (this.Children != null)
+			{
+				foreach (var job in this.Children)
+				{
+					if (job.Constructor == null)
+					{
+						job.GetCheckedJobs();
+					}
+					else if (job.IsChecked == true)
+					{
+						yield return job;
+					}
+				}
+			}
+		}
+
 		public void InitializeParameters() => this.Parameters = new Dictionary<string, object>();
 		#endregion
 
@@ -163,6 +206,54 @@
 		public override bool Equals(object obj) => ReferenceEquals(this, obj) || this.Equals(obj as JobNode);
 
 		public override int GetHashCode() => CompositeHashCode(this.Parent, this.Name, this.Children);
+		#endregion
+
+		#region Private Methods
+		private void AddConstructor(ConstructorInfo constructor) => this.Children.Add(new JobNode(this, constructor));
+
+		private void ValidateAndAdd(ConstructorInfo constructor)
+		{
+			var jobInfo = constructor.GetCustomAttribute<JobInfoAttribute>();
+			if (jobInfo == null)
+			{
+				return;
+			}
+
+			var groups = jobInfo.Groups;
+			if (groups == null)
+			{
+				this.AddConstructor(constructor);
+				return;
+			}
+
+			foreach (var group in groups)
+			{
+				if (string.IsNullOrEmpty(group))
+				{
+					this.AddConstructor(constructor);
+				}
+				else
+				{
+					var addedToGroup = false;
+					foreach (var child in this.Children)
+					{
+						if (child.Name == group)
+						{
+							child.AddConstructor(constructor);
+							addedToGroup = true;
+							break;
+						}
+					}
+
+					if (!addedToGroup)
+					{
+						var child = new JobNode(this, group);
+						this.Children.Add(child);
+						child.AddConstructor(constructor);
+					}
+				}
+			}
+		}
 		#endregion
 	}
 }
