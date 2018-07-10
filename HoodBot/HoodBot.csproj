@@ -112,8 +112,6 @@
     <Compile Include="ViewModel\ConstructorParameter.cs" />
     <Compile Include="ViewModel\JobNode.cs" />
     <Compile Include="Jobs\Design\JobParameterAttribute.cs" />
-    <Compile Include="Jobs\OneJob.cs" />
-    <Compile Include="Jobs\Tasks\OneTask.cs" />
     <Compile Include="Jobs\Tasks\ProgressEventArgs.cs" />
     <Compile Include="Jobs\Tasks\TaskEventArgs.cs" />
     <Compile Include="Jobs\Tasks\WikiTask.cs" />
