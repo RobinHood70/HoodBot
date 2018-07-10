@@ -13,8 +13,5 @@
 		public object DefaultValue { get; }
 
 		public string Label { get; }
-
-		// Bad coding practice, but saves creating a separate type for almost the same info.
-		internal object CurrentValue { get; set; }
 	}
 }

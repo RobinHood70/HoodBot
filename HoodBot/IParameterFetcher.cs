@@ -4,6 +4,8 @@
 
 	internal interface IParameterFetcher
 	{
+		void ClearParameters();
+
 		void GetParameter(ConstructorParameter parameter);
 
 		void SetParameter(ConstructorParameter parameter);

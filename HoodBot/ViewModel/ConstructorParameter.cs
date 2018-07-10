@@ -7,11 +7,12 @@
 	public sealed class ConstructorParameter : IEquatable<ConstructorParameter>
 	{
 		#region Constructors
-		public ConstructorParameter(string label, ParameterInfo info)
+		public ConstructorParameter(string label, ParameterInfo info, object value)
 		{
 			this.Label = label ?? UnCamelCase(info.Name);
 			this.Name = info.Name;
 			this.Type = info.ParameterType;
+			this.Value = value;
 		}
 		#endregion
 

@@ -47,7 +47,7 @@
 				task.SetAsyncInfoWithIntercept(this.taskProgressIntercept);
 				await task.Execute();
 				this.Progress = ++progress;
-				await this.UpdateJobProgress();
+				await this.UpdateProgress();
 			}
 
 			this.OnCompleted(EventArgs.Empty);

@@ -108,6 +108,7 @@
     <Compile Include="Jobs\Design\WikiRunner.cs" />
     <Compile Include="Jobs\TaskJob.cs" />
     <Compile Include="PasswordHelper.cs" />
+    <Compile Include="ScrollingTextBox.cs" />
     <Compile Include="ViewModel\ConstructorParameter.cs" />
     <Compile Include="ViewModel\JobNode.cs" />
     <Compile Include="Jobs\Design\JobParameterAttribute.cs" />

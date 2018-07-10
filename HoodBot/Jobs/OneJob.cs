@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Tasks;
 	using RobinHood70.Robby;
@@ -21,10 +20,17 @@
 		}
 
 		[JobInfo("You Had Another Job!", "|Maintenance")]
-		public OneJob(Site site, AsyncInfo asyncInfo, [JobParameter(null)] IEnumerable<string> inUSAToday)
-			: base(site, asyncInfo)
+		public OneJob(Site site, AsyncInfo asyncInfo, IEnumerable<string> inUSAToday, [JobParameter(null, true)] bool iCanHazCheeseburger, [JobParameter("The answer", 42)] int theAnswerToLifeTheUniverseAndEverything)
+			: this(site, asyncInfo)
 		{
-			Debug.WriteLine(string.Join(", ", inUSAToday));
+			foreach (var value in inUSAToday)
+			{
+				this.UpdateStatusWriteLine(value);
+			}
+
+			this.UpdateProgressWriteLine(iCanHazCheeseburger.ToString());
+			this.UpdateProgressWrite("The answer to life, the universe, and everything is ");
+			this.UpdateProgressWriteLine(theAnswerToLifeTheUniverseAndEverything.ToString());
 		}
 	}
 }

@@ -45,6 +45,7 @@
 		private WikiInfo previousItem;
 		private Brush progressBarColor = ProgressBarGreen;
 		private Site site;
+		private string status;
 		#endregion
 
 		#region Constructors
@@ -119,6 +120,12 @@
 			set => this.Set(ref this.progressBarColor, value, nameof(this.ProgressBarColor));
 		}
 
+		public string Status
+		{
+			get => this.status;
+			set => this.Set(ref this.status, value, nameof(this.Status));
+		}
+
 		public RelayCommand Stop => new RelayCommand(this.CancelJobs);
 
 		public DateTime? UtcEta
@@ -152,6 +159,7 @@
 			}
 
 			this.JobParameterVisibility = jobNode.Parameters?.Count > 0 ? Visibility.Visible : Visibility.Hidden;
+			this.ParameterFetcher.ClearParameters();
 			foreach (var param in jobNode.Parameters)
 			{
 				this.ParameterFetcher.GetParameter(param);
@@ -180,6 +188,8 @@
 			this.PauseJobs(false);
 		}
 
+		private void ClearStatus() => this.Status = string.Empty;
+
 		private async void ExecuteJobs()
 		{
 			if (this.executing)
@@ -188,9 +198,6 @@
 			}
 
 			this.executing = true;
-			this.SetupWiki();
-			this.completedJobs = 0;
-
 			var equalityComparer = new JobConstructorEqualityComparer();
 			var jobList = new List<JobNode>(this.JobTree.GetCheckedJobs());
 
@@ -214,6 +221,9 @@
 				}
 			}
 
+			this.ClearStatus();
+			this.InitializeSite();
+			this.completedJobs = 0;
 			this.OverallProgressMax = jobList.Count;
 
 			using (var cancelSource = new CancellationTokenSource())
@@ -260,6 +270,23 @@
 			}
 		}
 
+		private void InitializeSite()
+		{
+			var wikiInfo = this.CurrentItem;
+			if (wikiInfo == null)
+			{
+				throw new InvalidOperationException("No wiki has been selected.");
+			}
+
+			if (wikiInfo != this.previousItem)
+			{
+				this.previousItem = wikiInfo;
+				var wal = new WikiAbstractionLayer(this.client, wikiInfo.Api);
+				this.site = new Site(wal);
+				this.site.Login(wikiInfo.UserName, this.Password ?? wikiInfo.Password);
+			}
+		}
+
 		private void OpenEditWindow()
 		{
 			var editWindow = new EditWikiList();
@@ -297,24 +324,7 @@
 			this.UtcEta = null;
 		}
 
-		private void SetupWiki()
-		{
-			var wikiInfo = this.CurrentItem;
-			if (wikiInfo == null)
-			{
-				throw new InvalidOperationException("No wiki has been selected.");
-			}
-
-			if (wikiInfo != this.previousItem)
-			{
-				this.previousItem = wikiInfo;
-				var wal = new WikiAbstractionLayer(this.client, wikiInfo.Api);
-				this.site = new Site(wal);
-				this.site.Login(wikiInfo.UserName, this.Password ?? wikiInfo.Password);
-			}
-		}
-
-		private void StatusChanged(string obj) => throw new NotImplementedException();
+		private void StatusChanged(string text) => this.Status += text;
 		#endregion
 	}
 }

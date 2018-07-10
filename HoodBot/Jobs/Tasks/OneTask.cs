@@ -20,7 +20,7 @@
 			{
 				await Task.Delay(100);
 				this.Progress++;
-				await this.UpdateJobProgress();
+				await this.UpdateProgressWriteLine("Quality is job #" + taskProgress.ToString());
 			}
 
 			this.OnCompleted(EventArgs.Empty);

@@ -214,20 +214,17 @@
 					case "AsyncInfo":
 						break;
 					default:
-						if (paramInfo.DefaultValue != null)
+						object value = null;
+						if (paramInfo?.DefaultValue != null)
 						{
-							paramInfo.CurrentValue = paramInfo.DefaultValue;
+							value = paramInfo.DefaultValue;
 						}
 						else if (paramType.IsValueType)
 						{
-							paramInfo.CurrentValue = Activator.CreateInstance(paramType);
-						}
-						else
-						{
-							paramInfo.CurrentValue = null;
+							value = Activator.CreateInstance(paramType);
 						}
 
-						parameters.Add(new ConstructorParameter(paramInfo.Label, parameter));
+						parameters.Add(new ConstructorParameter(paramInfo?.Label, parameter, value));
 						break;
 				}
 			}

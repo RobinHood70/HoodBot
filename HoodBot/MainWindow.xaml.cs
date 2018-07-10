@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections;
-	using System.Diagnostics;
 	using System.Windows;
 	using System.Windows.Controls;
 	using RobinHood70.HoodBot.ViewModel;
@@ -17,42 +16,53 @@
 			vm.ParameterFetcher = this;
 		}
 
+		public void ClearParameters()
+		{
+			this.JobParameters.Children.Clear();
+			this.JobParameters.RowDefinitions.Clear();
+		}
+
 		public void GetParameter(ConstructorParameter parameter)
 		{
-			var name = parameter.Name;
-			var label = parameter.Label;
 			var valueType = parameter.Type;
-			var value = parameter.Value;
-			Debug.WriteLine($"Got request for parameter {label} of type {valueType} with current value of {value}.");
-			var stackPanel = this.JobParameters.Children;
-			stackPanel.Clear();
-			var dockPanel = new DockPanel();
-			stackPanel.Add(dockPanel);
+			var grid = this.JobParameters;
+			if (grid.RowDefinitions.Count > 0)
+			{
+				grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(10) });
+			}
 
-			var controls = dockPanel.Children;
-			controls.Add(new TextBlock() { Text = parameter.Label + (valueType == typeof(bool) ? '?' : ':') });
+			grid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
+			var lastRow = grid.RowDefinitions.Count - 1;
 
-			UIElement controlToAdd = null;
+			var labelControl = new TextBlock() { Text = parameter.Label + (valueType == typeof(bool) ? '?' : ':') };
+			Grid.SetColumn(labelControl, 0);
+			Grid.SetRow(labelControl, lastRow);
+			grid.Children.Add(labelControl);
+
+			Control controlToAdd = null;
 			if (valueType == typeof(bool))
 			{
-				controlToAdd = new CheckBox() { IsChecked = (bool)value };
+				controlToAdd = new CheckBox() { IsChecked = (bool)parameter.Value };
 			}
 			else if (typeof(IFormattable).IsAssignableFrom(valueType))
 			{
-				controlToAdd = new TextBox() { Text = (value as IFormattable).ToString() };
+				controlToAdd = new TextBox() { Text = (parameter.Value as IFormattable).ToString() };
 			}
 			else if (typeof(IEnumerable).IsAssignableFrom(valueType))
 			{
-				controlToAdd = new TextBox() { Text = string.Join(Environment.NewLine, value), AcceptsReturn = true };
+				controlToAdd = new TextBox() { Text = string.Join(Environment.NewLine, parameter.Value), AcceptsReturn = true };
+				labelControl.VerticalAlignment = VerticalAlignment.Top;
 			}
 			else
 			{
 				throw new NotSupportedException($"Here we are, trying to handle a {valueType.Name}!");
 			}
 
-			controlToAdd.SetValue(NameProperty, name);
-			this.RegisterName(name, controlToAdd);
-			controls.Add(controlToAdd);
+			Grid.SetColumn(controlToAdd, 2);
+			Grid.SetRow(controlToAdd, lastRow);
+			controlToAdd.Name = parameter.Name;
+			this.RegisterName(parameter.Name, controlToAdd);
+			grid.Children.Add(controlToAdd);
 		}
 
 		public void SetParameter(ConstructorParameter parameter)
