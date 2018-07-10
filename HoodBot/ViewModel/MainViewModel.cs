@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.IO;
 	using System.Threading;
 	using System.Windows;
@@ -32,12 +31,12 @@
 		private readonly IProgress<double> progressMonitor;
 		private readonly IProgress<string> statusMonitor;
 
-		private double botPicOpacity = 1;
 		private CancellationTokenSource canceller;
 		private double completedJobs;
 		private WikiInfo currentItem;
 		private DateTime? eta;
 		private bool executing;
+		private Visibility jobParameterVisibility = Visibility.Hidden;
 		private DateTime jobStarted;
 		private double overallProgress;
 		private double overallProgressMax = 1;
@@ -66,12 +65,6 @@
 		#endregion
 
 		#region Public Properties
-		public double BotPicOpacity
-		{
-			get => this.botPicOpacity;
-			private set => this.Set(ref this.botPicOpacity, value, nameof(this.BotPicOpacity));
-		}
-
 		public WikiInfo CurrentItem
 		{
 			get => this.currentItem;
@@ -87,6 +80,12 @@
 		public RelayCommand EditWikiList => new RelayCommand(this.OpenEditWindow);
 
 		public DateTime? Eta => this.eta?.ToLocalTime();
+
+		public Visibility JobParameterVisibility
+		{
+			get => this.jobParameterVisibility;
+			private set => this.Set(ref this.jobParameterVisibility, value, nameof(this.JobParameterVisibility));
+		}
 
 		public JobNode JobTree { get; } = new JobNode();
 
@@ -135,43 +134,40 @@
 		}
 		#endregion
 
+		#region Internal Properties
+		internal IParameterFetcher ParameterFetcher { get; set; }
+		#endregion
+
 		#region Internal Methods
 		internal void GetParameters(JobNode jobNode)
 		{
-			if (jobNode.IsChecked == false)
+			if (jobNode?.Constructor == null)
 			{
 				return;
 			}
 
-			var jobParameters = jobNode.Parameters;
-			if (jobParameters == null)
+			if (jobNode.Parameters == null)
 			{
 				jobNode.InitializeParameters();
-				jobParameters = jobNode.Parameters;
 			}
 
-			var wantedParameters = jobNode.Constructor.GetParameters();
-			this.SetBotPicOpacity(wantedParameters.Length > 2);
-			foreach (var parameter in wantedParameters)
+			this.JobParameterVisibility = jobNode.Parameters?.Count > 0 ? Visibility.Visible : Visibility.Hidden;
+			foreach (var param in jobNode.Parameters)
 			{
-				var paramInfos = parameter.GetCustomAttributes(typeof(JobParameterAttribute), true);
-				var paramInfo = (paramInfos.Length == 1 ? paramInfos[0] : null) as JobParameterAttribute;
-				switch (parameter.ParameterType.Name)
-				{
-					case "Site":
-					case "AsyncInfo":
-						break;
-					default:
-						if (!jobParameters.TryGetValue(parameter.Name, out var value))
-						{
-							value = paramInfo.DefaultValue;
-							jobParameters.Add(parameter.Name, value);
-						}
+				this.ParameterFetcher.GetParameter(param);
+			}
+		}
 
-						Debug.WriteLine($"Want parameter {parameter.Name} ({parameter.ParameterType.Name}={value})");
+		internal void SetParameters(JobNode jobNode)
+		{
+			if (jobNode?.Constructor == null || ((jobNode.Parameters?.Count ?? 0) == 0))
+			{
+				return;
+			}
 
-						break;
-				}
+			foreach (var param in jobNode.Parameters)
+			{
+				this.ParameterFetcher.SetParameter(param);
 			}
 		}
 		#endregion
@@ -197,6 +193,12 @@
 
 			var equalityComparer = new JobConstructorEqualityComparer();
 			var jobList = new List<JobNode>(this.JobTree.GetCheckedJobs());
+
+			if (jobList.Count == 0)
+			{
+				return;
+			}
+
 			if (jobList.Count > 1)
 			{
 				// Remove any duplicate jobs based on Constructor equality. Simple bubble-sort style algorithm is sufficient due to small size.
@@ -219,31 +221,42 @@
 				this.canceller = cancelSource;
 				this.pauser = new PauseTokenSource();
 
-				var job = new OneJob(this.site, new AsyncInfo(this.canceller.Token, this.pauser.Token, this.progressMonitor, this.statusMonitor));
-				try
+				foreach (var jobNode in jobList)
 				{
-					this.ProgressBarColor = ProgressBarGreen;
-					this.jobStarted = DateTime.UtcNow;
-					await job.Execute();
-					this.completedJobs++;
-					this.Reset();
+					var objectList = new List<object>
+					{
+						this.site,
+						new AsyncInfo(this.canceller.Token, this.pauser.Token, this.progressMonitor, this.statusMonitor)
+					};
+					foreach (var param in jobNode.Parameters)
+					{
+						objectList.Add(param.Value);
+					}
+
+					var job = jobNode.Constructor.Invoke(objectList.ToArray()) as WikiJob;
+					try
+					{
+						this.ProgressBarColor = ProgressBarGreen;
+						this.jobStarted = DateTime.UtcNow;
+						await job.Execute();
+						this.completedJobs++;
+					}
+					catch (OperationCanceledException)
+					{
+						MessageBox.Show(JobCancelled, nameof(HoodBot), MessageBoxButton.OK, MessageBoxImage.Information);
+						break;
+					}
+					catch (Exception e)
+					{
+						MessageBox.Show(e.GetType().Name + ": " + e.Message, e.Source, MessageBoxButton.OK, MessageBoxImage.Error);
+						break;
+					}
 				}
-				catch (OperationCanceledException)
-				{
-					this.Reset();
-					MessageBox.Show(JobCancelled, nameof(HoodBot), MessageBoxButton.OK, MessageBoxImage.Information);
-				}
-				catch (Exception e)
-				{
-					MessageBox.Show(e.GetType().Name + ": " + e.Message, e.Source, MessageBoxButton.OK, MessageBoxImage.Error);
-					this.Reset(); // Deliberately placed after messagebox so approximate progress can be guaged.
-				}
-				finally
-				{
-					this.pauser = null;
-					this.canceller = null;
-					this.executing = false;
-				}
+
+				this.Reset();
+				this.pauser = null;
+				this.canceller = null;
+				this.executing = false;
 			}
 		}
 
@@ -283,8 +296,6 @@
 			this.OverallProgress = 0;
 			this.UtcEta = null;
 		}
-
-		private void SetBotPicOpacity(bool hasControls) => this.BotPicOpacity = hasControls ? 0.3 : 1;
 
 		private void SetupWiki()
 		{

@@ -23,10 +23,15 @@
 				return true;
 			}
 
-			// If constructors are equal, parameter names and counts should be equal as well.
-			foreach (var param in x.Parameters)
+			if (x.Parameters.Count != y.Parameters.Count)
 			{
-				if (param.Value != y.Parameters[param.Key])
+				return false;
+			}
+
+			// If constructors are equal, parameter names and counts should be equal as well.
+			for (var i = 0; i < x.Parameters.Count; i++)
+			{
+				if (x.Parameters[i] != y.Parameters[i])
 				{
 					return false;
 				}

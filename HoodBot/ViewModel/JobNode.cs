@@ -119,7 +119,7 @@
 
 		public string Name { get; }
 
-		public Dictionary<string, object> Parameters { get; private set; }
+		public IReadOnlyList<ConstructorParameter> Parameters { get; private set; }
 
 		public JobNode Parent { get; }
 		#endregion
@@ -199,7 +199,41 @@
 			}
 		}
 
-		public void InitializeParameters() => this.Parameters = new Dictionary<string, object>();
+		public void InitializeParameters()
+		{
+			var parameters = new List<ConstructorParameter>();
+			var wantedParameters = this.Constructor.GetParameters();
+			foreach (var parameter in wantedParameters)
+			{
+				var paramInfos = parameter.GetCustomAttributes(typeof(JobParameterAttribute), true);
+				var paramType = parameter.ParameterType;
+				var paramInfo = (paramInfos.Length == 1 ? paramInfos[0] : null) as JobParameterAttribute;
+				switch (parameter.ParameterType.Name)
+				{
+					case "Site":
+					case "AsyncInfo":
+						break;
+					default:
+						if (paramInfo.DefaultValue != null)
+						{
+							paramInfo.CurrentValue = paramInfo.DefaultValue;
+						}
+						else if (paramType.IsValueType)
+						{
+							paramInfo.CurrentValue = Activator.CreateInstance(paramType);
+						}
+						else
+						{
+							paramInfo.CurrentValue = null;
+						}
+
+						parameters.Add(new ConstructorParameter(paramInfo.Label, parameter));
+						break;
+				}
+			}
+
+			this.Parameters = parameters;
+		}
 		#endregion
 
 		#region Public Override Methods

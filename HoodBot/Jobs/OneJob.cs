@@ -1,6 +1,8 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System;
+	using System.Collections.Generic;
+	using System.Diagnostics;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Tasks;
 	using RobinHood70.Robby;
@@ -19,9 +21,10 @@
 		}
 
 		[JobInfo("You Had Another Job!", "|Maintenance")]
-		public OneJob(Site site, AsyncInfo asyncInfo, [JobParameter("Do nothing?", 5)] int doNothing)
+		public OneJob(Site site, AsyncInfo asyncInfo, [JobParameter(null)] IEnumerable<string> inUSAToday)
 			: base(site, asyncInfo)
 		{
+			Debug.WriteLine(string.Join(", ", inUSAToday));
 		}
 	}
 }

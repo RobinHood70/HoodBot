@@ -98,6 +98,7 @@
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="EncryptingJsonConverter.cs" />
+    <Compile Include="IParameterFetcher.cs" />
     <Compile Include="IWikiInfo.cs" />
     <Compile Include="Jobs\Design\AsyncInfo.cs" />
     <Compile Include="Jobs\Design\JobConstructorEqualityComparer.cs" />
@@ -107,6 +108,7 @@
     <Compile Include="Jobs\Design\WikiRunner.cs" />
     <Compile Include="Jobs\TaskJob.cs" />
     <Compile Include="PasswordHelper.cs" />
+    <Compile Include="ViewModel\ConstructorParameter.cs" />
     <Compile Include="ViewModel\JobNode.cs" />
     <Compile Include="Jobs\Design\JobParameterAttribute.cs" />
     <Compile Include="Jobs\OneJob.cs" />
