@@ -675,6 +675,21 @@
 		/// <param name="comparer">The comparer.</param>
 		public void Sort(IComparer<ISimpleTitle> comparer) => (this.items as List<ISimpleTitle>).Sort(comparer);
 
+		/// <summary>Enumerates the page names of the collection.</summary>
+		/// <returns>The page names of the collection as full page names.</returns>
+		public IEnumerable<string> ToStringEnumerable() => this.ToStringEnumerable(MediaWikiNamespaces.Main);
+
+		/// <summary>Enumerates the page names of the collection assuming a specific namespace.</summary>
+		/// <param name="ns">The namespace ID.</param>
+		/// <returns>The page names of the collection assuming that no namespace is equivalent to the provided namespace (as in template calls).</returns>
+		public IEnumerable<string> ToStringEnumerable(int ns)
+		{
+			foreach (var title in this)
+			{
+				yield return title.Namespace.AssumedName(ns) + title.PageName;
+			}
+		}
+
 		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
 		/// <param name="key">The key of the value to get.</param>
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>

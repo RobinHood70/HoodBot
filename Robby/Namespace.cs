@@ -161,6 +161,11 @@
 			}
 		}
 
+		/// <summary>Gets a name that's suitable for cases when a namespace is assumed, such as template calls.</summary>
+		/// <param name="ns">The namespace ID.</param>
+		/// <returns>An empty string if the namespace ID provided matches the current namespace ID; otherwise, returns the canonical namespace name with a colon.</returns>
+		public string AssumedName(int ns) => this.Id == ns ? string.Empty : (this.Name + ':');
+
 		/// <summary>Capitalizes the page name based on the namespace's case-sensitivity.</summary>
 		/// <param name="pageName">Name of the page.</param>
 		/// <returns>If the namespace isn't case sensitive, and the page name begins with a lower-case letter, returns the capitalized version of the page name; otherwise, the page name is returned unaltered.</returns>
