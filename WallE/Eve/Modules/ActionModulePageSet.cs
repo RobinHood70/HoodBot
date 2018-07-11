@@ -185,6 +185,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 
 				var currentGroup = this.values.GetRange(this.offset, listSize);
+				this.offset += listSize;
 
 				// Several generators also use titles/pageids/revids, so emit them if present, whether or not there's a generator.
 				request.Add(input.TypeName, currentGroup);
