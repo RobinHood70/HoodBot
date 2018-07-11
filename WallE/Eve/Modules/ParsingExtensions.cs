@@ -242,8 +242,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			if (revision.Sha1.TrimStart('0').Length == 0)
 			{
-				// If it's all zeroes, switch it to null. Unclear what causes this, but it has been observed.
-				System.Diagnostics.Debug.WriteLine($"Sha1 for revision {revision.RevisionId} was all zeroes.");
+				// If it's all zeroes, switch it to null and ignore it. This is caused by SHA-1 values beginning with either 0x or 0b, as documented here: https://bugs.php.net/bug.php?id=50175 and https://bugs.php.net/bug.php?id=55398.
 				revision.Sha1 = null;
 			}
 			else if (revision.Sha1 != null && revision.Content != null && revision.Content.GetHash(HashType.Sha1) != revision.Sha1)
