@@ -240,7 +240,13 @@ namespace RobinHood70.WallE.Eve.Modules
 				UserId = (long?)result["userid"] ?? -1,
 			};
 
-			if (revision.Sha1 != null && revision.Content != null && revision.Content.GetHash(HashType.Sha1) != revision.Sha1)
+			if (revision.Sha1.TrimStart('0').Length == 0)
+			{
+				// If it's all zeroes, switch it to null. Unclear what causes this, but it has been observed.
+				System.Diagnostics.Debug.WriteLine($"Sha1 for revision {revision.RevisionId} was all zeroes.");
+				revision.Sha1 = null;
+			}
+			else if (revision.Sha1 != null && revision.Content != null && revision.Content.GetHash(HashType.Sha1) != revision.Sha1)
 			{
 				// TODO: This was changed from a warning to an exception. Consider whether to handle the exception in Eve or hand it off to the caller.
 				throw new ChecksumException(CurrentCulture(RevisionSha1Failed, revision.RevisionId, pageTitle));
