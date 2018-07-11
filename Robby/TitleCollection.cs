@@ -209,6 +209,18 @@
 			}
 		}
 
+		/// <summary>Adds the specified titles to the collection, coercing them to the given namespace.</summary>
+		/// <param name="ns">The namespace.</param>
+		/// <param name="titles">The titles to add, with or without the leading namespace text.</param>
+		public override void Add(int ns, IEnumerable<string> titles)
+		{
+			ThrowNull(titles, nameof(titles));
+			foreach (var title in titles)
+			{
+				this.Add(new Title(this.Site.Namespaces[ns], title));
+			}
+		}
+
 		/// <summary>Adds pages to the collection from their revision IDs.</summary>
 		/// <param name="revisionIds">The revision IDs.</param>
 		public override void AddRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(DefaultPageSetInput.FromRevisionIds(revisionIds));

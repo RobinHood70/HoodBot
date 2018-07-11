@@ -119,6 +119,11 @@
 		/// <param name="titles">The titles.</param>
 		public void Add(params string[] titles) => this.Add(titles as IEnumerable<string>);
 
+		/// <summary>Adds the specified titles to the collection, coercing them to the given namespace.</summary>
+		/// <param name="ns">The namespace.</param>
+		/// <param name="names">The page names, with or without the leading namespace text.</param>
+		public void Add(int ns, params string[] names) => this.Add(ns, names as IEnumerable<string>);
+
 		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
 		/// <param name="title">The title.</param>
 		public void AddBacklinks(string title) => this.AddBacklinks(title, BacklinksTypes.Backlinks | BacklinksTypes.EmbeddedIn, true, Filter.Any);
@@ -133,6 +138,12 @@
 		/// <param name="linkTypes">The link types of the pages to retrieve.</param>
 		/// <param name="includeRedirectedTitles">if set to <c>true</c>, pages linking to <paramref name="title"/> via a redirect will be included.</param>
 		public void AddBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles) => this.AddBacklinks(title, linkTypes, includeRedirectedTitles, Filter.Any);
+
+		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
+		/// <param name="title">The title.</param>
+		/// <param name="linkTypes">The link types of the pages to retrieve.</param>
+		/// <param name="redirects">Whether or not to include redirects in the results.</param>
+		public void AddBacklinks(string title, BacklinksTypes linkTypes, Filter redirects) => this.AddBacklinks(new BacklinksInput(title, linkTypes) { FilterRedirects = redirects });
 
 		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
 		/// <param name="title">The title.</param>
@@ -677,6 +688,11 @@
 		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
 		/// <param name="titles">The titles to add.</param>
 		public abstract void Add(IEnumerable<string> titles);
+
+		/// <summary>Adds the specified titles to the collection, coercing them to the given namespace.</summary>
+		/// <param name="ns">The namespace.</param>
+		/// <param name="titles">The titles to add, with or without the leading namespace text.</param>
+		public abstract void Add(int ns, IEnumerable<string> titles);
 
 		/// <summary>Adds pages to the collection from their revision IDs.</summary>
 		/// <param name="revisionIds">The revision IDs.</param>

@@ -9,7 +9,7 @@
 
 	/// <summary>Represents a collection of pages, with methods to request additional pages from the site.</summary>
 	/// <remarks>Generally speaking, a PageCollection represents data that's returned from the site, although there's nothing preventing you from creating a PageCollection to store your own newly created pages, either. In most such cases, however, it's better to create and save one page at a time than to store the entire set in memory.</remarks>
-	/// <seealso cref="RobinHood70.Robby.TitleCollection{TTitle}" />
+	/// <seealso cref="Robby.TitleCollection{TTitle}" />
 	public class PageCollection : TitleCollection<Page>
 	{
 		#region Fields
@@ -132,6 +132,29 @@
 			foreach (var title in titles)
 			{
 				var titleParts = new TitleParts(this.Site, title);
+				this.Add(this.PageCreator.CreatePage(titleParts));
+			}
+		}
+
+		/// <summary>Adds the specified titles to the collection, coercing them to the given namespace.</summary>
+		/// <param name="ns">The namespace.</param>
+		/// <param name="titles">The titles to add, with or without the leading namespace text.</param>
+		public override void Add(int ns, IEnumerable<string> titles)
+		{
+			ThrowNull(titles, nameof(titles));
+			foreach (var title in titles)
+			{
+				var titleParts = new TitleParts(this.Site, title);
+				if (titleParts.Namespace.Id == MediaWikiNamespaces.Main)
+				{
+					titleParts.Namespace = this.Site.Namespaces[ns];
+				}
+				else if (titleParts.Namespace.Id != ns)
+				{
+					titleParts.Namespace = this.Site.Namespaces[ns];
+					titleParts.PageName = title;
+				}
+
 				this.Add(this.PageCreator.CreatePage(titleParts));
 			}
 		}
