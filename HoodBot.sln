@@ -28,6 +28,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestingCommon", "TestingCom
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoodBot", "HoodBot\HoodBot.csproj", "{67BF70DF-F8D7-49F0-A6A2-DFFC7C8FF55E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WikiClasses", "WikiClasses\WikiClasses.csproj", "{AD688255-64E2-451C-A32F-85877B7BDEF0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,10 @@ Global
 		{67BF70DF-F8D7-49F0-A6A2-DFFC7C8FF55E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{67BF70DF-F8D7-49F0-A6A2-DFFC7C8FF55E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67BF70DF-F8D7-49F0-A6A2-DFFC7C8FF55E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD688255-64E2-451C-A32F-85877B7BDEF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD688255-64E2-451C-A32F-85877B7BDEF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD688255-64E2-451C-A32F-85877B7BDEF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD688255-64E2-451C-A32F-85877B7BDEF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
