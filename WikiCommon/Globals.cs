@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using System.Globalization;
+	using System.Text.RegularExpressions;
 
 	#region Public Delegates
 
@@ -20,6 +21,12 @@
 	/// <summary>Global helper methods that are useful in a variety of scenarios.</summary>
 	public static class Globals
 	{
+		#region Static Fields
+		private static readonly Regex BidiText = new Regex(@"[\u200E\u200F\u202A\u202B\u202C\u202D\u202E]", RegexOptions.Compiled); // Taken from MediaWikiTitleCodec->splitTitleString, then converted to Unicode
+		private static readonly Regex SpaceText = new Regex(@"[ _\xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]", RegexOptions.Compiled); // as above, but already Unicode in MW code
+		private static readonly Regex SpaceTextHtml = new Regex(@"(&(#32|#x20|nbsp);|[ _\xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000])"); // as above, but already Unicode in MW code, modified to add HTML spaces
+		#endregion
+
 		#region Public Properties
 
 		/// <summary>Gets a value indicating whether the current project is using <a href="http://www.mono-project.com/">Mono</a>.</summary>
@@ -56,6 +63,11 @@
 		/// <param name="values">The values of any parameters in the <paramref name="text" /> parameter.</param>
 		/// <returns>The formatted text.</returns>
 		public static string CurrentCulture(string text, params object[] values) => string.Format(CultureInfo.CurrentCulture, text, values);
+
+		/// <summary>HTML-decodes the specified text, removes bidirectional text markers, and replaces space-like characters with spaces.</summary>
+		/// <param name="text">The text to decode and normalize.</param>
+		/// <returns>The original text with bidirectional text markers removed and space-like characters converted to spaces.</returns>
+		public static string DecodeAndNormalize(string text) => ReplaceSpaces(RemoveInivisibleCharacters(text), false).Trim();
 
 		/// <summary>Creates an empty read-only dictionary of the specified type.</summary>
 		/// <typeparam name="TKey">The key type.</typeparam>
@@ -133,6 +145,17 @@
 
 			return name;
 		}
+
+		/// <summary>Removes invisible characters from the text.</summary>
+		/// <param name="text">The text.</param>
+		/// <returns>The provided text with any invisible characters removed.</returns>
+		public static string RemoveInivisibleCharacters(string text) => BidiText.Replace(text, string.Empty);
+
+		/// <summary>Replaces any space-like characters with spaces, optionally including basic HTML entities without fully decoding the text.</summary>
+		/// <param name="text">The text.</param>
+		/// <param name="includeHtmlEntities">if set to <c>true</c> also replaces <c>&amp;#32;</c>, <c>&amp;#x20;</c> and <c>&amp;nbsp;</c>.</param>
+		/// <returns>The provided text with anything resembling a space converted to a normal space.</returns>
+		public static string ReplaceSpaces(string text, bool includeHtmlEntities) => (includeHtmlEntities ? SpaceTextHtml : SpaceText).Replace(text, " ");
 
 		/// <summary>Throws an exception if the input value is null.</summary>
 		/// <param name="nullable">The value that may be null.</param>

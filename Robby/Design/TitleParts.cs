@@ -2,8 +2,6 @@
 {
 	using System;
 	using System.Diagnostics;
-	using System.Net;
-	using System.Text.RegularExpressions;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.Robby.Properties.Resources;
 	using static RobinHood70.WikiCommon.Globals;
@@ -11,11 +9,6 @@
 	/// <summary>Splits a page name into its constituent parts.</summary>
 	public class TitleParts : IFullTitle, ISimpleTitle
 	{
-		#region Static Fields
-		private static Regex bidiText = new Regex(@"[\u200E\u200F\u202A\u202B\u202C\u202D\u202E]", RegexOptions.Compiled); // Taken from MediaWikiTitleCodec->splitTitleString, then converted to Unicode
-		private static Regex spaceText = new Regex(@"[ _\xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]", RegexOptions.Compiled); // as above, but already Unicode in MW code
-		#endregion
-
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="TitleParts"/> class.</summary>
@@ -178,7 +171,7 @@
 		/// <summary>HTML-decodes the specified text, removes bidirectional text markers, and replaces space-like characters with spaces.</summary>
 		/// <param name="text">The text to decode and normalize.</param>
 		/// <returns>The original text with bidirectional text markers removed and space-like characters converted to spaces.</returns>
-		public static string DecodeAndNormalize(string text) => spaceText.Replace(bidiText.Replace(WebUtility.HtmlDecode(text), string.Empty), " ").Trim();
+		public static string DecodeAndNormalize(string text) => Globals.DecodeAndNormalize(text);
 		#endregion
 
 		#region Public Methods
