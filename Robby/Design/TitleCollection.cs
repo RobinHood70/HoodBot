@@ -705,9 +705,9 @@
 		public abstract void Add(IEnumerable<string> titles);
 
 		/// <summary>Adds the specified titles to the collection, coercing them to the given namespace.</summary>
-		/// <param name="ns">The namespace.</param>
+		/// <param name="defaultNamespace">The namespace.</param>
 		/// <param name="titles">The titles to add, with or without the leading namespace text.</param>
-		public abstract void Add(int ns, IEnumerable<string> titles);
+		public abstract void Add(int defaultNamespace, IEnumerable<string> titles);
 
 		/// <summary>Adds pages to the collection from their revision IDs.</summary>
 		/// <param name="revisionIds">The revision IDs.</param>
