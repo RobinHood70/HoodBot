@@ -62,6 +62,21 @@
 			this.Key = this.FullPageName;
 		}
 
+		/// <summary>Initializes a new instance of the <see cref="Title" /> class, assuming the  and page name.</summary>
+		/// <param name="site">The site this title is from.</param>
+		/// <param name="defaultNamespace">The namespace the title should be assumed to be in, unless indicated otherwise.</param>
+		/// <param name="pageName">The name of the page without the namespace.</param>
+		public Title(Site site, int defaultNamespace, string pageName)
+		{
+			ThrowNull(site, nameof(site));
+			ThrowNull(pageName, nameof(pageName));
+			pageName = pageName.Normalize();
+			var titleParts = new TitleParts(site, defaultNamespace, pageName);
+			this.Namespace = titleParts.Namespace;
+			this.PageName = titleParts.PageName;
+			this.Key = this.FullPageName;
+		}
+
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the namespace and page name.</summary>
 		/// <param name="ns">The namespace to which the page belongs.</param>
 		/// <param name="pageName">The name of the page without the namespace.</param>

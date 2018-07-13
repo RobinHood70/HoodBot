@@ -16,10 +16,20 @@
 		/// <param name="fullPageName">Full name of the page.</param>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
 		public TitleParts(Site site, string fullPageName)
+			: this(site, MediaWikiNamespaces.Main, fullPageName)
+		{
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="TitleParts"/> class.</summary>
+		/// <param name="site">The site the title is from.</param>
+		/// <param name="defaultNamespace">The namespace the title should be assumed to be in, unless indicated otherwise.</param>
+		/// <param name="pageName">Full name of the page.</param>
+		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
+		public TitleParts(Site site, int defaultNamespace, string pageName)
 		{
 			ThrowNull(site, nameof(site));
-			ThrowNull(fullPageName, nameof(fullPageName));
-			var nameRemaining = DecodeAndNormalize(fullPageName);
+			ThrowNull(pageName, nameof(pageName));
+			var nameRemaining = DecodeAndNormalize(pageName);
 			if (nameRemaining.Length > 0 && nameRemaining[0] == ':')
 			{
 				// this.Namespace = site.Namespaces[MediaWikiNamespaces.Main];
@@ -52,7 +62,7 @@
 							var mainPageName = site.MainPage ?? "Main Page";
 
 							// Make sure we're not recursing with a horribly unlikely Main Page.
-							if (mainPageName != fullPageName)
+							if (mainPageName != pageName)
 							{
 								var mainPage = new TitleParts(site, site.MainPage ?? "Main Page");
 								this.Interwiki = mainPage.Interwiki;
@@ -72,12 +82,12 @@
 				}
 				else
 				{
-					this.Namespace = site.Namespaces[MediaWikiNamespaces.Main];
+					this.Namespace = site.Namespaces[defaultNamespace];
 				}
 			}
 			else
 			{
-				this.Namespace = site.Namespaces[MediaWikiNamespaces.Main];
+				this.Namespace = site.Namespaces[defaultNamespace];
 			}
 
 			if (this.Namespace == MediaWikiNamespaces.Talk)
