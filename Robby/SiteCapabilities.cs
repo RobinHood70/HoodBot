@@ -91,7 +91,7 @@
 
 			this.Clear();
 			var fullHost = new UriBuilder(anyPage.Scheme, anyPage.Host).Uri;
-			var tryPath = anyPage.AbsoluteUri;
+			var tryPath = anyPage.AbsolutePath;
 			string tryLoc = null;
 			var offset = tryPath.IndexOf("/index.php", StringComparison.Ordinal);
 			if (offset == -1)
@@ -101,7 +101,7 @@
 
 			if (offset >= 0)
 			{
-				tryLoc = tryPath;
+				tryLoc = new Uri(fullHost, tryPath.Replace("index.php", "api.php")).ToString();
 				tryPath = tryPath.Substring(0, offset + 1);
 			}
 
@@ -161,33 +161,39 @@
 
 			if (tryLoc != null)
 			{
-				// Something above gave us a tentative api.php link, so try it.
-				var api = new WikiAbstractionLayer(this.client, new Uri(tryLoc));
-				if (api.IsEnabled())
+				try
 				{
-					api.Initialize();
-					this.Api = api.Uri;
-					Uri index = null;
-					if (!string.IsNullOrWhiteSpace(api.Script))
+					// Something above gave us a tentative api.php link, so try it.
+					var api = new WikiAbstractionLayer(this.client, new Uri(tryLoc));
+					if (api.IsEnabled())
 					{
-						index = new UriBuilder(fullHost)
+						api.Initialize();
+						this.Api = api.Uri;
+						Uri index = null;
+						if (!string.IsNullOrWhiteSpace(api.Script))
 						{
-							Path = api.Script
-						}.Uri;
+							index = new UriBuilder(fullHost)
+							{
+								Path = api.Script
+							}.Uri;
+						}
+
+						this.Index = index;
+						this.SiteName = api.SiteName;
+						this.ReadEntryPoint = EntryPoint.Api;
+						this.SupportsMaxLag = api.SupportsMaxLag;
+						this.CurrentUser = api.UserId == 0 ? null : api.UserName;
+						this.WriteEntryPoint =
+							api.Flags.HasFlag(SiteInfoFlags.WriteApi) ? EntryPoint.Api :
+							this.Index == null ? EntryPoint.None :
+							EntryPoint.Index;
+
+						// API gave us everything we need, so skip trying index.php.
+						return true;
 					}
-
-					this.Index = index;
-					this.SiteName = api.SiteName;
-					this.ReadEntryPoint = EntryPoint.Api;
-					this.SupportsMaxLag = api.SupportsMaxLag;
-					this.CurrentUser = api.UserId == 0 ? null : api.UserName;
-					this.WriteEntryPoint =
-						api.Flags.HasFlag(SiteInfoFlags.WriteApi) ? EntryPoint.Api :
-						this.Index == null ? EntryPoint.None :
-						EntryPoint.Index;
-
-					// API gave us everything we need, so skip trying index.php.
-					return true;
+				}
+				catch (WebException)
+				{
 				}
 			}
 
