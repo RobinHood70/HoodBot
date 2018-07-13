@@ -92,7 +92,7 @@
 			this.Clear();
 			var fullHost = new UriBuilder(anyPage.Scheme, anyPage.Host).Uri;
 			var tryPath = anyPage.AbsolutePath;
-			string tryLoc = null;
+			Uri tryLoc = null;
 			var offset = tryPath.IndexOf("/index.php", StringComparison.Ordinal);
 			if (offset == -1)
 			{
@@ -101,7 +101,9 @@
 
 			if (offset >= 0)
 			{
-				tryLoc = new Uri(fullHost, tryPath.Replace("index.php", "api.php")).ToString();
+				var urib = new UriBuilder(fullHost);
+				urib.Path = tryPath.Replace("index.php", "api.php");
+				tryLoc = urib.Uri;
 				tryPath = tryPath.Substring(0, offset + 1);
 			}
 
@@ -131,9 +133,9 @@
 					{
 						if ((bool)descendant.Attribute("preferred"))
 						{
-							tryLoc = (string)descendant.Attribute("apiLink");
-							tryLoc = HttpUtility.HtmlDecode(tryLoc);
-							tryPath = tryLoc.Substring(0, tryLoc.LastIndexOf('/') + 1);
+							var apiLink = HttpUtility.HtmlDecode((string)descendant.Attribute("apiLink"));
+							tryLoc = new Uri(apiLink);
+							tryPath = apiLink.Substring(0, apiLink.LastIndexOf('/') + 1);
 							break;
 						}
 					}
@@ -145,7 +147,7 @@
 					{
 						// Should occur only in 1.16
 						tryPath = foundScript.Groups["serverpath"].Value + foundScript.Groups["scriptpath"].Value + '/';
-						tryLoc = tryPath + "api.php";
+						tryLoc = new Uri(tryPath + "api.php");
 					}
 					else
 					{
@@ -153,7 +155,7 @@
 						if (foundPhpLink.Success)
 						{
 							tryPath = fullHost + foundPhpLink.Groups["scriptpath"].Value + '/';
-							tryLoc = tryPath + "api.php";
+							tryLoc = new Uri(tryPath + "api.php");
 						}
 					}
 				}
@@ -164,7 +166,7 @@
 				try
 				{
 					// Something above gave us a tentative api.php link, so try it.
-					var api = new WikiAbstractionLayer(this.client, new Uri(tryLoc));
+					var api = new WikiAbstractionLayer(this.client, tryLoc);
 					if (api.IsEnabled())
 					{
 						api.Initialize();
@@ -198,14 +200,13 @@
 			}
 
 			// Last resort
-			tryLoc = tryPath + "index.php?maxlag=-1";
-			var tryUri = new Uri(tryLoc);
+			tryLoc = new Uri(tryPath + "index.php?maxlag=-1");
 
 			// We don't care about the result, only whether it's a valid link.
 			this.client.RequestingDelay += this.Client_RequestingDelay;
-			if (this.TryGet(tryUri) != null)
+			if (this.TryGet(tryLoc) != null)
 			{
-				this.Index = tryUri;
+				this.Index = tryLoc;
 				this.ReadEntryPoint = EntryPoint.Index;
 				this.WriteEntryPoint = EntryPoint.Index;
 
