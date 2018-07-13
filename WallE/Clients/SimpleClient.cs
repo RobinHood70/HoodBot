@@ -13,7 +13,6 @@
 	using System.Threading;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon;
-	using static System.Net.HttpStatusCode;
 	using static RobinHood70.WallE.Clients.ClientShared;
 	using static RobinHood70.WallE.Properties.Messages;
 	using static RobinHood70.WikiCommon.Globals;
@@ -143,68 +142,29 @@
 		{
 			ThrowNull(uri, nameof(uri));
 			ThrowNull(fileName, nameof(fileName));
-			HttpWebResponse response = null;
-			int retriesRemaining;
-			for (retriesRemaining = this.Retries; retriesRemaining > 0; retriesRemaining--)
+			using (var response = this.SendRequest(uri, "GET", null, null))
 			{
-				var request = this.CreateRequest(uri, "GET");
-				try
+				this.CheckDelay(response, false);
+				var retval = GetResponseData(response);
+				if (retval != null)
 				{
-					response = request.GetResponse() as HttpWebResponse;
-					break;
-				}
-				catch (WebException ex)
-				{
-					response = ex.Response as HttpWebResponse;
-					if (response == null)
+					try
 					{
-						throw;
+						File.WriteAllBytes(fileName, retval);
+						return true;
 					}
-
-					if (PerSessionUnsafeHeaderParsing(ex))
+					catch (IOException)
 					{
-						this.useV10 = true;
-						continue;
 					}
-
-					switch (response.StatusCode)
+					catch (UnauthorizedAccessException)
 					{
-						case RequestTimeout:
-						case BadGateway:
-						case GatewayTimeout:
-						case (HttpStatusCode)509:
-						case ServiceUnavailable:
-							break;
-						default:
-							throw;
 					}
-
-					if (retriesRemaining == 0)
+					catch (NotSupportedException)
 					{
-						throw new WikiException("HTTP request failed. " + GetResponseText(response));
 					}
-				}
-			}
-
-			var retval = GetResponseData(response);
-			if (retval != null)
-			{
-				try
-				{
-					File.WriteAllBytes(fileName, retval);
-					return true;
-				}
-				catch (IOException)
-				{
-				}
-				catch (UnauthorizedAccessException)
-				{
-				}
-				catch (NotSupportedException)
-				{
-				}
-				catch (SecurityException)
-				{
+					catch (SecurityException)
+					{
+					}
 				}
 			}
 
@@ -214,7 +174,14 @@
 		/// <summary>Gets the text of the result returned by the given URI.</summary>
 		/// <param name="uri">The URI to get.</param>
 		/// <returns>The text of the result.</returns>
-		public string Get(Uri uri) => this.SendRequest(uri, "GET", null, null);
+		public string Get(Uri uri)
+		{
+			using (var response = this.SendRequest(uri, "GET", null, null))
+			{
+				this.CheckDelay(response, true);
+				return GetResponseText(response);
+			}
+		}
 
 		/// <summary>Retrieves cookies from persistent storage.</summary>
 		public void LoadCookies()
@@ -245,14 +212,28 @@
 		/// <param name="uri">The URI to POST data to.</param>
 		/// <param name="postData">The text to POST.</param>
 		/// <returns>The text of the result.</returns>
-		public string Post(Uri uri, string postData) => this.SendRequest(uri, "POST", FormUrlEncoded, Encoding.UTF8.GetBytes(postData));
+		public string Post(Uri uri, string postData)
+		{
+			using (var response = this.SendRequest(uri, "POST", FormUrlEncoded, Encoding.UTF8.GetBytes(postData)))
+			{
+				this.CheckDelay(response, true);
+				return GetResponseText(response);
+			}
+		}
 
 		/// <summary>POSTs text data and retrieves the result.</summary>
 		/// <param name="uri">The URI to POST data to.</param>
 		/// <param name="contentType">The text of the content type. Typicially <c>x-www-form-urlencoded</c> or <c>multipart/form-data (...)</c>, but there is no restriction on values.</param>
 		/// <param name="postData">The text to POST.</param>
 		/// <returns>The text of the result.</returns>
-		public string Post(Uri uri, string contentType, byte[] postData) => this.SendRequest(uri, "POST", contentType, postData);
+		public string Post(Uri uri, string contentType, byte[] postData)
+		{
+			using (var response = this.SendRequest(uri, "POST", contentType, postData))
+			{
+				this.CheckDelay(response, true);
+				return GetResponseText(response);
+			}
+		}
 
 		/// <summary>This method is used both to throttle clients as well as to forward any wiki-requested delays, such as from maxlag. Clients should respect any delays requested by the wiki unless they expect to abort the procedure, or for testing.</summary>
 		/// <param name="delayTime">The amount of time to delay for.</param>
@@ -356,6 +337,34 @@
 		#endregion
 
 		#region Private Methods
+		private void CheckDelay(HttpWebResponse response, bool maxLagPossible)
+		{
+			var maxLagged = maxLagPossible && (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.ServiceUnavailable);
+			var retryAfter = TimeSpan.Zero;
+			var retryHeader = response?.Headers[HttpResponseHeader.RetryAfter];
+			if (retryHeader == null)
+			{
+				if (maxLagged)
+				{
+					maxLagged = false;
+				}
+
+				if (response.StatusCode != HttpStatusCode.OK)
+				{
+					retryAfter = this.RetryDelay;
+				}
+			}
+			else
+			{
+				retryAfter = int.TryParse(retryHeader, out var retrySeconds) ? TimeSpan.FromSeconds(retrySeconds) : this.RetryDelay;
+			}
+
+			if (retryAfter != TimeSpan.Zero)
+			{
+				this.RequestDelay(retryAfter, maxLagged ? DelayReason.MaxLag : DelayReason.Error);
+			}
+		}
+
 		private HttpWebRequest CreateRequest(Uri uri, string method)
 		{
 			var request = WebRequest.Create(uri) as HttpWebRequest;
@@ -363,26 +372,24 @@
 			request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
 			request.CookieContainer = this.cookieContainer;
 			request.Headers[HttpRequestHeader.AcceptEncoding] = "gzip,deflate";
+			request.KeepAlive = !this.useV10;
 			request.Method = method;
+			request.ProtocolVersion = this.useV10 ? HttpVersion.Version10 : HttpVersion.Version11;
 			request.Proxy.Credentials = CredentialCache.DefaultCredentials;
-			request.Timeout = 60000;
+			request.Timeout = 10000;
 			request.UseDefaultCredentials = true;
 			request.UserAgent = this.UserAgent;
-			if (this.useV10)
-			{
-				request.KeepAlive = false;
-				request.ProtocolVersion = HttpVersion.Version10;
-			}
 
 			return request;
 		}
 
-		private string SendRequest(Uri uri, string method, string contentType, byte[] postData)
+		private HttpWebResponse SendRequest(Uri uri, string method, string contentType, byte[] postData)
 		{
-			HttpWebResponse response = null;
+			HttpWebResponse retval = null;
 			int retriesRemaining;
 			for (retriesRemaining = this.Retries; retriesRemaining >= 0; retriesRemaining--)
 			{
+				// Do not try to optiimize this out of the loop. A new request must be created every time or else the response returned will be the same response as the previous loop.
 				var request = this.CreateRequest(uri, method);
 				if (postData?.Length > 0)
 				{
@@ -394,16 +401,16 @@
 					}
 				}
 
-				var doMaxLagCheck = false;
 				try
 				{
-					response = request.GetResponse() as HttpWebResponse;
-					doMaxLagCheck = true;
+					retval = request.GetResponse() as HttpWebResponse;
+					break;
 				}
 				catch (WebException ex)
 				{
-					response = ex.Response as HttpWebResponse;
-					if (response != null)
+					retval?.Dispose();
+					retval = null;
+					if (ex.Response is HttpWebResponse response)
 					{
 						if (PerSessionUnsafeHeaderParsing(ex))
 						{
@@ -413,14 +420,20 @@
 
 						switch (response.StatusCode)
 						{
-							case RequestTimeout:
-							case BadGateway:
-							case GatewayTimeout:
+							// These can all be retried.
+							case HttpStatusCode.RequestTimeout:
+							case HttpStatusCode.BadGateway:
+							case HttpStatusCode.GatewayTimeout:
 							case (HttpStatusCode)509:
 								break;
-							case ServiceUnavailable:
-								doMaxLagCheck = true;
+
+							// This should not be retried, since it likely indicates a maxlag condition.
+							case HttpStatusCode.ServiceUnavailable:
+								retval = response;
+								retriesRemaining = -1; // End loop, but don't throw.
 								break;
+
+							// Anything else should not be retried.
 							default:
 								throw;
 						}
@@ -431,41 +444,19 @@
 						throw;
 					}
 				}
-
-				var retryHeader = response?.Headers[HttpResponseHeader.RetryAfter];
-				var retryAfter = 0;
-				if (retryHeader == null)
-				{
-					if (doMaxLagCheck)
-					{
-						// We got a response with no retry header, therefore it was a successful response. Stop retrying.
-						break;
-					}
-
-					retryAfter = (int)this.RetryDelay.TotalSeconds;
-				}
-				else if (!int.TryParse(retryHeader, out retryAfter))
-				{
-					retryAfter = (int)this.RetryDelay.TotalSeconds;
-				}
-
-				if (retryAfter > 0)
-				{
-					this.RequestDelay(TimeSpan.FromSeconds(retryAfter), doMaxLagCheck ? DelayReason.MaxLag : DelayReason.Error);
-				}
 			}
 
-			if (response.Cookies != null)
+			if (retval?.Cookies != null)
 			{
 #pragma warning disable IDE0007 // Use implicit type
-				foreach (Cookie cookie in response.Cookies)
+				foreach (Cookie cookie in retval.Cookies)
 #pragma warning restore IDE0007 // Use implicit type
 				{
 					this.cookieContainer.Add(cookie);
 				}
 			}
 
-			return GetResponseText(response);
+			return retval;
 		}
 		#endregion
 	}
