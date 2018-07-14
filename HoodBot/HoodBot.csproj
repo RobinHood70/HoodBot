@@ -103,10 +103,19 @@
     <Compile Include="Jobs\Design\AsyncInfo.cs" />
     <Compile Include="Jobs\Design\JobConstructorEqualityComparer.cs" />
     <Compile Include="Jobs\Design\JobInfoAttribute.cs" />
+    <Compile Include="Jobs\Design\JobParameterFileAttribute.cs" />
     <Compile Include="Jobs\Design\PauseToken.cs" />
     <Compile Include="Jobs\Design\PauseTokenSource.cs" />
+    <Compile Include="Jobs\VoidJob.cs" />
     <Compile Include="Jobs\Design\WikiRunner.cs" />
+    <Compile Include="Jobs\GetTemplateUsage.cs" />
     <Compile Include="Jobs\TaskJob.cs" />
+    <Compile Include="Jobs\TaskResults\TemplateCollection.cs" />
+    <Compile Include="Jobs\TaskResults\TemplateUsage.cs" />
+    <Compile Include="Jobs\TaskResults\TemplateUsageRow.cs" />
+    <Compile Include="Jobs\Tasks\BuildRedirectList.cs" />
+    <Compile Include="Jobs\Tasks\GetTemplatePages.cs" />
+    <Compile Include="Jobs\Tasks\ITaskResult{T}.cs" />
     <Compile Include="PasswordHelper.cs" />
     <Compile Include="ScrollingTextBox.cs" />
     <Compile Include="ViewModel\ConstructorParameter.cs" />
@@ -203,6 +212,10 @@
     <ProjectReference Include="..\WallE\WallE.csproj">
       <Project>{F338AF86-4502-4121-B032-092CA727D51B}</Project>
       <Name>WallE</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WikiClasses\WikiClasses.csproj">
+      <Project>{ad688255-64e2-451c-a32f-85877b7bdef0}</Project>
+      <Name>WikiClasses</Name>
     </ProjectReference>
     <ProjectReference Include="..\WikiCommon\WikiCommon.csproj">
       <Project>{64878636-cb8c-434e-a03d-b3946216fc7f}</Project>

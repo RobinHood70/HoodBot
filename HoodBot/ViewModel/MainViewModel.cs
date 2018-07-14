@@ -2,8 +2,11 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.ComponentModel;
+	using System.Diagnostics;
 	using System.IO;
 	using System.Threading;
+	using System.Threading.Tasks;
 	using System.Windows;
 	using System.Windows.Media;
 	using RobinHood70.HoodBot.Jobs;
@@ -53,6 +56,7 @@
 		{
 			this.dataFolder = Path.Combine(GetFolderPath(SpecialFolder.LocalApplicationData, SpecialFolderOption.Create), nameof(HoodBot));
 			this.client = new SimpleClient(ContactInfo, Path.Combine(this.dataFolder, "Cookies.dat"));
+			this.client.RequestingDelay += this.Client_RequestingDelay;
 			this.KnownWikis = WikiList.Load(Path.Combine(this.dataFolder, "WikiList.json"));
 			this.CurrentItem = this.KnownWikis.LastSelectedItem;
 
@@ -61,8 +65,18 @@
 		}
 		#endregion
 
-		#region Destrctor
-		~MainViewModel() => this.KnownWikis.Save();
+		#region Destructor
+		~MainViewModel()
+		{
+			this.KnownWikis.Save();
+			if (this.site != null)
+			{
+				(this.site.AbstractionLayer as WikiAbstractionLayer).SendingRequest -= Wal_SendingRequest;
+				(this.site.AbstractionLayer as WikiAbstractionLayer).WarningOccurred -= Wal_WarningOccurred;
+			}
+
+			this.client.RequestingDelay -= this.Client_RequestingDelay;
+		}
 		#endregion
 
 		#region Public Properties
@@ -135,7 +149,7 @@
 			{
 				if (this.Set(ref this.eta, value, nameof(this.UtcEta)))
 				{
-					this.OnPropertyChanged(nameof(this.Eta));
+					this.OnPropertyChanged(new PropertyChangedEventArgs(nameof(this.Eta)));
 				}
 			}
 		}
@@ -159,7 +173,6 @@
 			}
 
 			this.JobParameterVisibility = jobNode.Parameters?.Count > 0 ? Visibility.Visible : Visibility.Hidden;
-			this.ParameterFetcher.ClearParameters();
 			foreach (var param in jobNode.Parameters)
 			{
 				this.ParameterFetcher.GetParameter(param);
@@ -180,6 +193,24 @@
 		}
 		#endregion
 
+		#region Private Static Methods
+		private static string FormatTimeSpan(TimeSpan allJobsTimer)
+		{
+			var retval = allJobsTimer.ToString(@"h\h\ mm\m\ ss\.f");
+			retval = retval.TrimStart('0', ':', 'h', 'm', ' ').TrimEnd('0', '.');
+			if (retval.Length == 0 || retval[0] == '.')
+			{
+				retval = '0' + retval;
+			}
+
+			return retval + 's';
+		}
+
+		private static void Wal_SendingRequest(WallE.Base.IWikiAbstractionLayer sender, WallE.Base.RequestEventArgs eventArgs) => Debug.WriteLine(eventArgs.Request.ToString(), sender.ToString());
+
+		private static void Wal_WarningOccurred(WallE.Base.IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"Warning ({eventArgs.Warning.Code}): {eventArgs.Warning.Info}", sender.ToString());
+		#endregion
+
 		#region Private Methods
 		private void CancelJobs()
 		{
@@ -190,6 +221,28 @@
 
 		private void ClearStatus() => this.Status = string.Empty;
 
+		private void Client_RequestingDelay(IMediaWikiClient sender, DelayEventArgs eventArgs)
+		{
+			this.StatusChanged($"{eventArgs.Reason} delay requested for {eventArgs.DelayTime}. {eventArgs.Description}{NewLine}");
+			App.WpfYield();
+		}
+
+		private WikiJob ConstructJob(JobNode jobNode)
+		{
+			var objectList = new List<object>
+			{
+				this.site,
+				new AsyncInfo(this.canceller.Token, this.pauser.Token, this.progressMonitor, this.statusMonitor)
+			};
+
+			foreach (var param in jobNode.Parameters)
+			{
+				objectList.Add(param.Value);
+			}
+
+			return jobNode.Constructor.Invoke(objectList.ToArray()) as WikiJob;
+		}
+
 		private async void ExecuteJobs()
 		{
 			if (this.executing)
@@ -198,16 +251,63 @@
 			}
 
 			this.executing = true;
-			var equalityComparer = new JobConstructorEqualityComparer();
-			var jobList = new List<JobNode>(this.JobTree.GetCheckedJobs());
-
+			var jobList = this.GetJobList();
 			if (jobList.Count == 0)
 			{
+				this.executing = false;
 				return;
 			}
 
+			var allJobsTimer = new Stopwatch();
+			allJobsTimer.Start();
+			this.ClearStatus();
+			this.InitializeSite();
+			this.completedJobs = 0;
+			this.OverallProgressMax = jobList.Count;
+			using (var cancelSource = new CancellationTokenSource())
+			{
+				this.canceller = cancelSource;
+				this.pauser = new PauseTokenSource();
+
+				foreach (var jobNode in jobList)
+				{
+					var job = this.ConstructJob(jobNode);
+					try
+					{
+						this.ProgressBarColor = ProgressBarGreen;
+						this.jobStarted = DateTime.UtcNow;
+						await Task.Run(job.Execute).ConfigureAwait(false);
+						this.completedJobs++;
+					}
+					catch (OperationCanceledException)
+					{
+						MessageBox.Show(JobCancelled, nameof(HoodBot), MessageBoxButton.OK, MessageBoxImage.Information);
+						break;
+					}
+					catch (Exception e)
+					{
+						MessageBox.Show(e.GetType().Name + ": " + e.Message, e.Source, MessageBoxButton.OK, MessageBoxImage.Error);
+						Debug.WriteLine(e.StackTrace);
+						break;
+					}
+				}
+
+				this.pauser = null;
+				this.canceller = null;
+			}
+
+			this.Reset();
+			this.StatusChanged("Total time for last run: " + FormatTimeSpan(allJobsTimer.Elapsed));
+			this.executing = false;
+		}
+
+		private List<JobNode> GetJobList()
+		{
+			var jobList = new List<JobNode>(this.JobTree.GetCheckedJobs());
 			if (jobList.Count > 1)
 			{
+				var equalityComparer = new JobConstructorEqualityComparer();
+
 				// Remove any duplicate jobs based on Constructor equality. Simple bubble-sort style algorithm is sufficient due to small size.
 				for (var outerLoop = 0; outerLoop < jobList.Count - 1; outerLoop++)
 				{
@@ -221,53 +321,7 @@
 				}
 			}
 
-			this.ClearStatus();
-			this.InitializeSite();
-			this.completedJobs = 0;
-			this.OverallProgressMax = jobList.Count;
-
-			using (var cancelSource = new CancellationTokenSource())
-			{
-				this.canceller = cancelSource;
-				this.pauser = new PauseTokenSource();
-
-				foreach (var jobNode in jobList)
-				{
-					var objectList = new List<object>
-					{
-						this.site,
-						new AsyncInfo(this.canceller.Token, this.pauser.Token, this.progressMonitor, this.statusMonitor)
-					};
-					foreach (var param in jobNode.Parameters)
-					{
-						objectList.Add(param.Value);
-					}
-
-					var job = jobNode.Constructor.Invoke(objectList.ToArray()) as WikiJob;
-					try
-					{
-						this.ProgressBarColor = ProgressBarGreen;
-						this.jobStarted = DateTime.UtcNow;
-						await job.Execute();
-						this.completedJobs++;
-					}
-					catch (OperationCanceledException)
-					{
-						MessageBox.Show(JobCancelled, nameof(HoodBot), MessageBoxButton.OK, MessageBoxImage.Information);
-						break;
-					}
-					catch (Exception e)
-					{
-						MessageBox.Show(e.GetType().Name + ": " + e.Message, e.Source, MessageBoxButton.OK, MessageBoxImage.Error);
-						break;
-					}
-				}
-
-				this.Reset();
-				this.pauser = null;
-				this.canceller = null;
-				this.executing = false;
-			}
+			return jobList;
 		}
 
 		private void InitializeSite()
@@ -280,8 +334,19 @@
 
 			if (wikiInfo != this.previousItem)
 			{
+				if (this.site != null)
+				{
+					(this.site.AbstractionLayer as WikiAbstractionLayer).SendingRequest -= Wal_SendingRequest;
+					(this.site.AbstractionLayer as WikiAbstractionLayer).WarningOccurred -= Wal_WarningOccurred;
+				}
+
 				this.previousItem = wikiInfo;
-				var wal = new WikiAbstractionLayer(this.client, wikiInfo.Api);
+				var wal = new WikiAbstractionLayer(this.client, wikiInfo.Api)
+				{
+					MaxLag = wikiInfo.MaxLag
+				};
+				wal.SendingRequest += Wal_SendingRequest;
+				wal.WarningOccurred += Wal_WarningOccurred;
 				this.site = new Site(wal);
 				this.site.Login(wikiInfo.UserName, this.Password ?? wikiInfo.Password);
 			}
@@ -303,25 +368,33 @@
 
 		private void PauseJobs(bool isPaused)
 		{
-			this.pauser.IsPaused = isPaused;
-			this.ProgressBarColor = isPaused ? ProgressBarYellow : ProgressBarGreen;
+			if (this.pauser != null)
+			{
+				this.pauser.IsPaused = isPaused;
+				this.ProgressBarColor = isPaused ? ProgressBarYellow : ProgressBarGreen;
+			}
 		}
 
 		private void ProgressChanged(double e)
 		{
 			this.OverallProgress = this.completedJobs + e;
 			var timeDiff = DateTime.UtcNow - this.jobStarted;
-			if (this.OverallProgress > 0 && timeDiff.TotalSeconds >= 5)
+			if (this.OverallProgress > 0 && timeDiff.TotalSeconds > 0)
 			{
-				var completionTime = TimeSpan.FromTicks((long)(timeDiff.Ticks * this.OverallProgressMax / this.OverallProgress));
-				this.UtcEta = this.jobStarted + completionTime;
+				this.UtcEta = this.jobStarted + TimeSpan.FromTicks((long)(timeDiff.Ticks * this.OverallProgressMax / this.OverallProgress));
 			}
 		}
 
 		private void Reset()
 		{
+			App.WpfYield();
+			this.ClearStatus();
 			this.OverallProgress = 0;
+			this.OverallProgressMax = 1;
 			this.UtcEta = null;
+
+			this.completedJobs = 0;
+			this.jobStarted = DateTime.MinValue;
 		}
 
 		private void StatusChanged(string text) => this.Status += text;

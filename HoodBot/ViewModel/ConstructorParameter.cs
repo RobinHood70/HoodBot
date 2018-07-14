@@ -3,20 +3,37 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Reflection;
+	using RobinHood70.HoodBot.Jobs.Design;
 
 	public sealed class ConstructorParameter : IEquatable<ConstructorParameter>
 	{
 		#region Constructors
-		public ConstructorParameter(string label, ParameterInfo info, object value)
+		public ConstructorParameter(ParameterInfo parameter)
 		{
-			this.Label = label ?? UnCamelCase(info.Name);
-			this.Name = info.Name;
-			this.Type = info.ParameterType;
-			this.Value = value;
+			var attributes = parameter.GetCustomAttributes(typeof(JobParameterAttribute), true);
+			if (attributes.Length > 1)
+			{
+				throw new InvalidOperationException($"Multiple JobParameterAttribute derivatives specified on parameter \"{parameter.Name}\" in constructor: {FormatMember(parameter)}");
+			}
+
+			this.Attribute = attributes.Length == 1 ? attributes[0] as JobParameterAttribute : null;
+			this.Label = this.Attribute?.Label ?? UnCamelCase(parameter.Name);
+			this.Name = parameter.Name;
+			this.Type = parameter.ParameterType;
+			if (this.Attribute?.DefaultValue != null)
+			{
+				this.Value = this.Attribute.DefaultValue;
+			}
+			else if (parameter.ParameterType.IsValueType)
+			{
+				this.Value = Activator.CreateInstance(parameter.ParameterType);
+			}
 		}
 		#endregion
 
 		#region Public Properties
+		public JobParameterAttribute Attribute { get; }
+
 		public string Label { get; }
 
 		public string Name { get; }
@@ -39,6 +56,14 @@
 		#endregion
 
 		#region Private Static Methods
+		private static string FormatMember(ParameterInfo parameter) => parameter.Member.ToString()
+			.Substring(5)
+			.Replace("System.", string.Empty)
+			.Replace("Collections.Generic.", string.Empty)
+			.Replace("Collections.ObjectModel.", string.Empty)
+			.Replace("RobinHood70.Robby.", string.Empty)
+			.Replace("RobinHood70.HoodBot.Jobs.Design.", string.Empty);
+
 		private static string UnCamelCase(string name)
 		{
 			name = char.ToUpperInvariant(name[0]) + (name.Length > 1 ? name.Substring(1) : string.Empty);

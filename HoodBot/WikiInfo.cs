@@ -9,6 +9,9 @@
 
 		public string DisplayName { get; set; }
 
+		// TODO: Add this to forms and saved data. Hard-coded for now.
+		public int MaxLag { get; set; } = 5;
+
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 		[Newtonsoft.Json.JsonConverter(typeof(EncryptingJsonConverter), "¡ʇᴉ ǝʇɐɔsnɟqO")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

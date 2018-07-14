@@ -16,12 +16,6 @@
 			vm.ParameterFetcher = this;
 		}
 
-		public void ClearParameters()
-		{
-			this.JobParameters.Children.Clear();
-			this.JobParameters.RowDefinitions.Clear();
-		}
-
 		public void GetParameter(ConstructorParameter parameter)
 		{
 			var valueType = parameter.Type;
@@ -46,11 +40,20 @@
 			}
 			else if (typeof(IFormattable).IsAssignableFrom(valueType))
 			{
-				controlToAdd = new TextBox() { Text = (parameter.Value as IFormattable).ToString() };
+				controlToAdd = new TextBox() { Text = (parameter.Value as IFormattable).ToString(), AcceptsReturn = false };
 			}
 			else if (typeof(IEnumerable).IsAssignableFrom(valueType))
 			{
-				controlToAdd = new TextBox() { Text = string.Join(Environment.NewLine, parameter.Value), AcceptsReturn = true };
+				var textValue = string.Empty;
+				if (parameter.Value is IEnumerable parameterValues)
+				{
+					foreach (var value in parameterValues)
+					{
+						textValue += value.ToString();
+					}
+				}
+
+				controlToAdd = new TextBox() { Text = textValue, AcceptsReturn = true };
 				labelControl.VerticalAlignment = VerticalAlignment.Top;
 			}
 			else
@@ -69,6 +72,11 @@
 		{
 			var valueType = parameter.Type;
 			var control = this.JobParameters.FindName(parameter.Name);
+			if (control == null)
+			{
+				return;
+			}
+
 			if (valueType == typeof(bool))
 			{
 				parameter.Value = (control as CheckBox).IsChecked;
@@ -101,9 +109,21 @@
 		private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
 		{
 			// TODO: Consider changing to attached property to be fully MVVM compliant.
+			this.JobParameters.Children.Clear();
+			this.JobParameters.RowDefinitions.Clear();
+
 			var tv = sender as TreeView;
 			var vm = tv.DataContext as MainViewModel;
-			vm.SetParameters(e.OldValue as JobNode);
+			var oldNode = e.OldValue as JobNode;
+			if (oldNode != null)
+			{
+				vm.SetParameters(oldNode);
+				foreach (var param in oldNode.Parameters)
+				{
+					this.UnregisterName(param.Name);
+				}
+			}
+
 			vm.GetParameters(e.NewValue as JobNode);
 		}
 
@@ -111,7 +131,7 @@
 		{
 			// TODO: Consider changing to attached property to be fully MVVM compliant.
 			var tv = sender as TreeView;
-			var item = (e.OriginalSource as CheckBox).DataContext as JobNode;
+			var item = (e.OriginalSource as FrameworkElement).DataContext as JobNode;
 			if (tv.ItemContainerGenerator.ContainerFromItem(item) is TreeViewItem tvItem)
 			{
 				tvItem.IsSelected = true;

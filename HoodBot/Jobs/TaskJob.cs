@@ -2,7 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Threading.Tasks;
+	using System.Diagnostics;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Tasks;
 	using RobinHood70.Robby;
@@ -37,20 +37,15 @@
 		#endregion
 
 		#region Public Methods
-		public override async Task Execute()
+		protected sealed override void Main()
 		{
-			this.OnStarted(EventArgs.Empty);
 			this.ProgressMaximum = this.Tasks.Count;
-			var progress = 0; // this.Progress will be modified throughout the job by the task progress monitor, so we have to track it independently here.
 			foreach (var task in this.Tasks)
 			{
 				task.SetAsyncInfoWithIntercept(this.taskProgressIntercept);
-				await task.Execute();
-				this.Progress = ++progress;
-				await this.UpdateProgress();
+				task.Execute();
+				this.IncrementProgress();
 			}
-
-			this.OnCompleted(EventArgs.Empty);
 		}
 		#endregion
 

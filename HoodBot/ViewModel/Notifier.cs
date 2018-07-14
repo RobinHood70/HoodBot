@@ -10,7 +10,7 @@
 		#endregion
 
 		#region Protected Virtual Methods
-		protected virtual void OnPropertyChanged(string propertyName) => this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+		protected virtual void OnPropertyChanged(PropertyChangedEventArgs e) => this.PropertyChanged?.Invoke(this, e);
 		#endregion
 
 		#region Protected Methods
@@ -21,7 +21,7 @@
 			if (retval)
 			{
 				field = value;
-				this.OnPropertyChanged(propertyName);
+				this.OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
 			}
 
 			return retval;

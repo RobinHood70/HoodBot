@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
+	using System;
 	using System.Threading.Tasks;
 
-	// Original was a struct, but converted it to a class, since it's not really a value type and should not support anything but reference equality.
-	public class PauseToken
+	public struct PauseToken : IEquatable<PauseToken>
 	{
 		#region Fields
 		private readonly PauseTokenSource source;
@@ -13,12 +13,30 @@
 		internal PauseToken(PauseTokenSource source) => this.source = source;
 		#endregion
 
+		#region Public Static Properties
+		public static PauseToken None { get; } = default;
+		#endregion
+
 		#region Public Properties
 		public bool IsPaused => this.source?.IsPaused ?? false;
 		#endregion
 
+		#region Public Operators
+		public static bool operator ==(PauseToken left, PauseToken right) => left.Equals(right);
+
+		public static bool operator !=(PauseToken left, PauseToken right) => !left.Equals(right);
+		#endregion
+
 		#region Public Methods
+		public bool Equals(PauseToken other) => this.source == other.source;
+
 		public Task WaitWhilePausedAsync() => this.IsPaused ? this.source.WaitWhilePausedAsync() : PauseTokenSource.CompletedTask;
+		#endregion
+
+		#region Public Override Methods
+		public override bool Equals(object obj) => obj is PauseToken ? this.Equals((PauseToken)obj) : false;
+
+		public override int GetHashCode() => this.source?.GetHashCode() ?? 0;
 		#endregion
 	}
 }

@@ -205,26 +205,13 @@
 			var wantedParameters = this.Constructor.GetParameters();
 			foreach (var parameter in wantedParameters)
 			{
-				var paramInfos = parameter.GetCustomAttributes(typeof(JobParameterAttribute), true);
-				var paramType = parameter.ParameterType;
-				var paramInfo = (paramInfos.Length == 1 ? paramInfos[0] : null) as JobParameterAttribute;
 				switch (parameter.ParameterType.Name)
 				{
 					case "Site":
 					case "AsyncInfo":
 						break;
 					default:
-						object value = null;
-						if (paramInfo?.DefaultValue != null)
-						{
-							value = paramInfo.DefaultValue;
-						}
-						else if (paramType.IsValueType)
-						{
-							value = Activator.CreateInstance(paramType);
-						}
-
-						parameters.Add(new ConstructorParameter(paramInfo?.Label, parameter, value));
+						parameters.Add(new ConstructorParameter(parameter));
 						break;
 				}
 			}
