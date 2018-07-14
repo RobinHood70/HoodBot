@@ -17,6 +17,8 @@
 	using static RobinHood70.WallE.Properties.Messages;
 	using static RobinHood70.WikiCommon.Globals;
 
+	// TODO: Add cancellation token possibilities.
+
 	/// <summary>This class provides basic HTTP and cookie handling, with MediaWiki maxlag support.</summary>
 	/// <seealso cref="IMediaWikiClient" />
 	public class SimpleClient : IMediaWikiClient
@@ -142,9 +144,8 @@
 		{
 			ThrowNull(uri, nameof(uri));
 			ThrowNull(fileName, nameof(fileName));
-			using (var response = this.SendRequest(uri, "GET", null, null))
+			using (var response = this.SendRequest(uri, "GET", null, null, false))
 			{
-				this.CheckDelay(response, false);
 				var retval = GetResponseData(response);
 				if (retval != null)
 				{
@@ -176,9 +177,8 @@
 		/// <returns>The text of the result.</returns>
 		public string Get(Uri uri)
 		{
-			using (var response = this.SendRequest(uri, "GET", null, null))
+			using (var response = this.SendRequest(uri, "GET", null, null, true))
 			{
-				this.CheckDelay(response, true);
 				return GetResponseText(response);
 			}
 		}
@@ -214,9 +214,8 @@
 		/// <returns>The text of the result.</returns>
 		public string Post(Uri uri, string postData)
 		{
-			using (var response = this.SendRequest(uri, "POST", FormUrlEncoded, Encoding.UTF8.GetBytes(postData)))
+			using (var response = this.SendRequest(uri, "POST", FormUrlEncoded, Encoding.UTF8.GetBytes(postData), true))
 			{
-				this.CheckDelay(response, true);
 				return GetResponseText(response);
 			}
 		}
@@ -228,9 +227,8 @@
 		/// <returns>The text of the result.</returns>
 		public string Post(Uri uri, string contentType, byte[] postData)
 		{
-			using (var response = this.SendRequest(uri, "POST", contentType, postData))
+			using (var response = this.SendRequest(uri, "POST", contentType, postData, true))
 			{
-				this.CheckDelay(response, true);
 				return GetResponseText(response);
 			}
 		}
@@ -337,34 +335,6 @@
 		#endregion
 
 		#region Private Methods
-		private void CheckDelay(HttpWebResponse response, bool maxLagPossible)
-		{
-			var maxLagged = maxLagPossible && (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.ServiceUnavailable);
-			var retryAfter = TimeSpan.Zero;
-			var retryHeader = response?.Headers[HttpResponseHeader.RetryAfter];
-			if (retryHeader == null)
-			{
-				if (maxLagged)
-				{
-					maxLagged = false;
-				}
-
-				if (response.StatusCode != HttpStatusCode.OK)
-				{
-					retryAfter = this.RetryDelay;
-				}
-			}
-			else
-			{
-				retryAfter = int.TryParse(retryHeader, out var retrySeconds) ? TimeSpan.FromSeconds(retrySeconds) : this.RetryDelay;
-			}
-
-			if (retryAfter != TimeSpan.Zero)
-			{
-				this.RequestDelay(retryAfter, maxLagged ? DelayReason.MaxLag : DelayReason.Error);
-			}
-		}
-
 		private HttpWebRequest CreateRequest(Uri uri, string method)
 		{
 			var request = WebRequest.Create(uri) as HttpWebRequest;
@@ -383,9 +353,9 @@
 			return request;
 		}
 
-		private HttpWebResponse SendRequest(Uri uri, string method, string contentType, byte[] postData)
+		private HttpWebResponse SendRequest(Uri uri, string method, string contentType, byte[] postData, bool checkMaxLag)
 		{
-			HttpWebResponse retval = null;
+			HttpWebResponse response = null;
 			int retriesRemaining;
 			for (retriesRemaining = this.Retries; retriesRemaining >= 0; retriesRemaining--)
 			{
@@ -403,39 +373,44 @@
 
 				try
 				{
-					retval = request.GetResponse() as HttpWebResponse;
-					break;
+					response = request.GetResponse() as HttpWebResponse;
+					if (!checkMaxLag || !this.CheckDelay(response))
+					{
+						if (response.Cookies != null)
+						{
+#pragma warning disable IDE0007 // Use implicit type
+							foreach (Cookie cookie in response.Cookies)
+#pragma warning restore IDE0007 // Use implicit type
+							{
+								this.cookieContainer.Add(cookie);
+							}
+						}
+
+						return response;
+					}
+
+					response?.Dispose();
+					response = null;
 				}
 				catch (WebException ex)
 				{
-					retval?.Dispose();
-					retval = null;
-					if (ex.Response is HttpWebResponse response)
+					response?.Dispose();
+					response = null;
+					if (PerSessionUnsafeHeaderParsing(ex))
 					{
-						if (PerSessionUnsafeHeaderParsing(ex))
+						this.useV10 = true;
+						continue;
+					}
+
+					if (ex.Response is HttpWebResponse errorResponse)
+					{
+						using (ex.Response)
 						{
-							this.useV10 = true;
-							continue;
-						}
-
-						switch (response.StatusCode)
-						{
-							// These can all be retried.
-							case HttpStatusCode.RequestTimeout:
-							case HttpStatusCode.BadGateway:
-							case HttpStatusCode.GatewayTimeout:
-							case (HttpStatusCode)509:
-								break;
-
-							// This should not be retried, since it likely indicates a maxlag condition.
-							case HttpStatusCode.ServiceUnavailable:
-								retval = response;
-								retriesRemaining = -1; // End loop, but don't throw.
-								break;
-
-							// Anything else should not be retried.
-							default:
+							if (!this.CheckDelay(errorResponse))
+							{
+								// If we didn't get a retry header or a retriable error, then throw the error.
 								throw;
+							}
 						}
 					}
 
@@ -446,17 +421,51 @@
 				}
 			}
 
-			if (retval?.Cookies != null)
+			throw new WikiException("Excessive lag!");
+		}
+
+		private bool CheckDelay(HttpWebResponse response)
+		{
+			var retryAfter = TimeSpan.Zero;
+			var retryHeader = response?.Headers[HttpResponseHeader.RetryAfter];
+			if (retryHeader == null)
 			{
-#pragma warning disable IDE0007 // Use implicit type
-				foreach (Cookie cookie in retval.Cookies)
-#pragma warning restore IDE0007 // Use implicit type
+				// If we didn't get a retry header, check if the response status code indicates a retriable error. If so, use the client's RetryDelay value.
+				switch (response.StatusCode)
 				{
-					this.cookieContainer.Add(cookie);
+					case HttpStatusCode.RequestTimeout:
+					case HttpStatusCode.BadGateway:
+					case HttpStatusCode.GatewayTimeout:
+					case (HttpStatusCode)509:
+					case HttpStatusCode.ServiceUnavailable:
+						retryAfter = this.RetryDelay;
+						break;
+					default:
+						break;
 				}
 			}
+			else
+			{
+				// Regardless of status code, if we got a retry header, retry after that amount of time.
+				retryAfter = int.TryParse(retryHeader, out var retrySeconds) ? TimeSpan.FromSeconds(retrySeconds) : this.RetryDelay;
+			}
 
-			return retval;
+			if (retryAfter != TimeSpan.Zero)
+			{
+				var maxlag = response?.Headers["X-Database-Lag"];
+				if (maxlag == null)
+				{
+					this.RequestDelay(retryAfter, DelayReason.Error);
+				}
+				else
+				{
+					this.RequestDelay(retryAfter, DelayReason.MaxLag);
+				}
+
+				return true;
+			}
+
+			return false;
 		}
 		#endregion
 	}
