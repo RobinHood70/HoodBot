@@ -57,6 +57,7 @@
     <Compile Include="Design\DefaultPageCreator.cs" />
     <Compile Include="Design\Extensions.cs" />
     <Compile Include="Design\IFullTitle.cs" />
+    <Compile Include="Design\TitleComparer{T}.cs" />
     <Compile Include="Design\TitleParts.cs" />
     <Compile Include="InterwikiEntry.cs" />
     <Compile Include="InterwikiMap.cs" />
@@ -68,7 +69,6 @@
     <Compile Include="Design\PageCreator.cs" />
     <Compile Include="CategoryTitle.cs" />
     <Compile Include="Design\FullPageNameComparer.cs" />
-    <Compile Include="Design\SimpleTitleComparer.cs" />
     <Compile Include="Design\IMessageSource.cs" />
     <Compile Include="Design\IKeyedTitle.cs" />
     <Compile Include="MagicWord.cs" />

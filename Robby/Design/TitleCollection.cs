@@ -665,15 +665,15 @@
 		public void RemoveAt(int index) => this.RemoveItem(index);
 
 		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> by namespace, then pagename.</summary>
-		public void Sort() => this.Sort(new SimpleTitleComparer());
+		public void Sort() => this.Sort(new TitleComparer<TTitle>());
 
 		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> using the specified <see cref="T:System.Comparison{T}" />.</summary>
 		/// <param name="comparison">The comparison.</param>
-		public void Sort(Comparison<ISimpleTitle> comparison) => (this.items as List<ISimpleTitle>).Sort(comparison);
+		public void Sort(Comparison<TTitle> comparison) => this.items.Sort(comparison);
 
 		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> using the specified <see cref="T:System.IComparer{T}" />.</summary>
 		/// <param name="comparer">The comparer.</param>
-		public void Sort(IComparer<ISimpleTitle> comparer) => (this.items as List<ISimpleTitle>).Sort(comparer);
+		public void Sort(IComparer<TTitle> comparer) => this.items.Sort(comparer);
 
 		/// <summary>Enumerates the page names of the collection.</summary>
 		/// <returns>The page names of the collection as full page names.</returns>

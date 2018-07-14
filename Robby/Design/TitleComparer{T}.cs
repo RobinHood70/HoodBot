@@ -3,9 +3,11 @@
 	using System.Collections.Generic;
 	using RobinHood70.WikiCommon;
 
-	/// <summary>An ISimpleTitle comparer to sort by namespace and page name.</summary>
+	/// <summary>An ISimpleTitle comparer which sorts by namespace and page name.</summary>
+	/// <typeparam name="T">The item types to compare. Must implement ISimpleTitle.</typeparam>
 	/// <seealso cref="System.Collections.Generic.IComparer{T}" />
-	public class SimpleTitleComparer : IComparer<ISimpleTitle>
+	public class TitleComparer<T> : IComparer<T>
+		where T : ISimpleTitle
 	{
 		#region Public Methods
 
@@ -13,7 +15,7 @@
 		/// <param name="x">The first object to compare.</param>
 		/// <param name="y">The second object to compare.</param>
 		/// <returns>A signed integer that indicates the relative values of <paramref name="x" /> and <paramref name="y" />.</returns>
-		public int Compare(ISimpleTitle x, ISimpleTitle y)
+		public int Compare(T x, T y)
 		{
 			if (x == null)
 			{
