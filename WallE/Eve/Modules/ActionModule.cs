@@ -24,10 +24,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Public Properties
-		public string ContinueName { get; } = "continue";
-		#endregion
-
 		#region Public Abstract Properties
 		public abstract int MinimumVersion { get; }
 

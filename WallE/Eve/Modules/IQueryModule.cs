@@ -9,6 +9,10 @@
 	{
 		#region Public Properties
 
+		/// <summary>Gets the name of the continue parameter for the module.</summary>
+		/// <value>The name of the continue parameter for the module.</value>
+		string ContinueName { get; }
+
 		/// <summary>Gets a value indicating whether the module is allowed to continue parsing results.</summary>
 		/// <value><see langword="true" /> if parsing should continue; otherwise, <see langword="false" />.</value>
 		bool ContinueParsing { get; }
