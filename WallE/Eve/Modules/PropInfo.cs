@@ -67,6 +67,12 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(parent, nameof(parent));
 			ThrowNull(output, nameof(output));
+			if (output.Info != null)
+			{
+				// We already have an Info from a previous query - do not overwrite it, as the results would be empty and produce invalid information. If needed, this could also be converted to check presense of each response field individually.
+				return;
+			}
+
 			output.GetWikiTitle(parent);
 			var info = new PageInfo()
 			{
