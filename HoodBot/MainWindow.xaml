@@ -9,6 +9,8 @@
 	xmlns:vm="clr-namespace:RobinHood70.HoodBot.ViewModel"
 	x:Name="mainWindow"
 	Title="{x:Static properties:Resources.HoodBotMainWindow}"
+	Width="900"
+	Height="750"
 	Style="{StaticResource GlobalWindowStyle}"
 	mc:Ignorable="d">
 	<Window.Resources>
@@ -187,9 +189,9 @@
 					</StackPanel.Resources>
 					<Grid x:Name="JobParameters">
 						<Grid.ColumnDefinitions>
-							<ColumnDefinition Width="auto" />
+							<ColumnDefinition Width="2*" />
 							<ColumnDefinition Width="10" />
-							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="3*" />
 						</Grid.ColumnDefinitions>
 					</Grid>
 				</StackPanel>
