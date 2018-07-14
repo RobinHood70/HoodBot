@@ -35,8 +35,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Properties
-		protected ContinueModule ContinueModule { get; set; }
-
 #if DEBUG
 		protected Request Request { get; private set; }
 
@@ -81,7 +79,6 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Prefix = this.FullPrefix;
 			this.BuildRequestLocal(request, input);
 			request.Prefix = string.Empty;
-			this.ContinueModule?.BuildRequest(request);
 
 			return request;
 		}
@@ -98,9 +95,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			return null;
 		}
-		#endregion
 
-		#region Public Virtual Methods
 		public TOutput Submit(TInput input)
 		{
 			this.Wal.ClearWarnings();
@@ -112,41 +107,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Methods
-		protected virtual void AddWarning(string from, string text) => this.Wal.AddWarning(from, text);
-
-		protected virtual void AfterSubmit()
-		{
-			// Changes here may also need to be reflected in ActionQuery.AfterSubmit(), which cannot call this without triggering a second talk check.
-			if (this.Wal.BreakRecursionAfterSubmit)
-			{
-				// Necessary because the custom stop check would become recursive if it called on any other modules.
-				return;
-			}
-
-			this.Wal.BreakRecursionAfterSubmit = true;
-			if (this.StopMethods.HasFlag(StopCheckMethods.Custom) && (this.Wal.CustomStopCheck?.Invoke() == true))
-			{
-				this.Wal.BreakRecursionAfterSubmit = false;
-				throw new StopException(CustomStopCheckFailed);
-			}
-
-			if (this.StopMethods.HasFlag(StopCheckMethods.TalkCheckNonQuery))
-			{
-				var input = new UserInfoInput() { Properties = UserInfoProperties.HasMsg };
-				this.Wal.UserInfo(input);
-			}
-
-			this.Wal.BreakRecursionAfterSubmit = false;
-		}
-
-		protected virtual void BeforeSubmit(TInput input)
-		{
-			if (this.SiteVersion != 0 && this.MinimumVersion > this.SiteVersion)
-			{
-				throw new InvalidOperationException(CurrentCulture(ActionNotSupported, this.GetType().Name));
-			}
-		}
-
 		protected TOutput SubmitInternal(TInput input)
 		{
 			var request = this.CreateRequest(input);
@@ -208,6 +168,41 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Virtual Methods
+		protected virtual void AddWarning(string from, string text) => this.Wal.AddWarning(from, text);
+
+		protected virtual void AfterSubmit()
+		{
+			// Changes here may also need to be reflected in ActionQuery.AfterSubmit(), which cannot call this without triggering a second talk check.
+			if (this.Wal.BreakRecursionAfterSubmit)
+			{
+				// Necessary because the custom stop check would become recursive if it called on any other modules.
+				return;
+			}
+
+			this.Wal.BreakRecursionAfterSubmit = true;
+			if (this.StopMethods.HasFlag(StopCheckMethods.Custom) && (this.Wal.CustomStopCheck?.Invoke() == true))
+			{
+				this.Wal.BreakRecursionAfterSubmit = false;
+				throw new StopException(CustomStopCheckFailed);
+			}
+
+			if (this.StopMethods.HasFlag(StopCheckMethods.TalkCheckNonQuery))
+			{
+				var input = new UserInfoInput() { Properties = UserInfoProperties.HasMsg };
+				this.Wal.UserInfo(input);
+			}
+
+			this.Wal.BreakRecursionAfterSubmit = false;
+		}
+
+		protected virtual void BeforeSubmit(TInput input)
+		{
+			if (this.SiteVersion != 0 && this.MinimumVersion > this.SiteVersion)
+			{
+				throw new InvalidOperationException(CurrentCulture(ActionNotSupported, this.GetType().Name));
+			}
+		}
+
 		protected virtual TOutput DeserializeCustom(string result)
 		{
 			if (result != null && result.Contains("$wgEnableAPI"))
@@ -256,13 +251,6 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			this.Wal.CurrentTimestamp = (DateTime?)parent["curtimestamp"];
-			var newVersion = this.ContinueModule?.Deserialize(parent) ?? 0;
-			if (newVersion != 0)
-			{
-				this.Wal.ContinueVersion = newVersion;
-				this.ContinueModule = this.Wal.ModuleFactory.CreateContinue();
-				this.ContinueModule.Deserialize(parent);
-			}
 		}
 		#endregion
 	}

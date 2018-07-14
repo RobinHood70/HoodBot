@@ -19,6 +19,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		private readonly Dictionary<string, InterwikiTitleItem> interwiki = new Dictionary<string, InterwikiTitleItem>();
 		private readonly Dictionary<string, string> normalized = new Dictionary<string, string>();
 		private readonly Dictionary<string, PageSetRedirectItem> redirects = new Dictionary<string, PageSetRedirectItem>();
+
 		private bool done;
 		private int offset;
 		private List<string> values;
@@ -36,9 +37,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Properties
-		protected virtual int CurrentListSize => this.MaximumListSize;
+		protected ContinueModule ContinueModule { get; set; }
 
 		protected int MaximumListSize { get; set; }
+		#endregion
+
+		#region Protected Virtual Properties
+		protected virtual int CurrentListSize => this.MaximumListSize;
 
 		protected virtual IList<TOutput> Pages { get; } = new List<TOutput>();
 		#endregion
@@ -105,6 +110,10 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			return false;
 		}
+		#endregion
+
+		#region Protected Static Methods
+		protected static string FakeTitleFromId(long? pageId) => pageId.HasValue ? '#' + pageId.Value.ToStringInvariant() : null;
 		#endregion
 
 		#region Protected Methods
@@ -200,12 +209,21 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIf("redirects", input.Redirects, input.ListType != ListType.RevisionIds);
 
 			this.BuildRequestPageSet(request, input);
+			request.Prefix = string.Empty;
+			this.ContinueModule.BuildRequest(request);
 		}
 
 		protected override void DeserializeParent(JToken parent)
 		{
 			ThrowNull(parent, nameof(parent));
 			base.DeserializeParent(parent);
+			var newVersion = this.ContinueModule.Deserialize(parent);
+			if (newVersion != 0)
+			{
+				this.Wal.ContinueVersion = newVersion;
+				this.ContinueModule = this.Wal.ModuleFactory.CreateContinue();
+				this.ContinueModule.Deserialize(parent);
+			}
 
 			// This is a fugly workaround for the fact that modules other than queries will have the pageset data at the parent level, while query has it at the child level. I couldn't figure out a better way to do it (other than to simply ignore it and check for results that will never be there).
 			if (!(this is ActionQuery))
@@ -225,10 +243,6 @@ namespace RobinHood70.WallE.Eve.Modules
 			// PageSets don't actually return a value here, instead returning it in Pages, so return null instead.
 			return null;
 		}
-		#endregion
-
-		#region Private Static Methods
-		private static string FakeTitleFromId(long? pageId) => pageId == null ? null : "#" + pageId.Value.ToStringInvariant();
 		#endregion
 	}
 }
