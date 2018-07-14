@@ -209,15 +209,15 @@
 			}
 		}
 
-		/// <summary>Adds the specified titles to the collection, coercing them to the given namespace.</summary>
-		/// <param name="ns">The namespace.</param>
+		/// <summary>Adds the specified titles to the collection, assuming that they are in the provided namespace if no other namespace is specified.</summary>
+		/// <param name="defaultNamespace">The default namespace.</param>
 		/// <param name="titles">The titles to add, with or without the leading namespace text.</param>
-		public override void Add(int ns, IEnumerable<string> titles)
+		public override void Add(int defaultNamespace, IEnumerable<string> titles)
 		{
 			ThrowNull(titles, nameof(titles));
 			foreach (var title in titles)
 			{
-				this.Add(new Title(this.Site.Namespaces[ns], title));
+				this.Add(new Title(this.Site.Namespaces[defaultNamespace], title));
 			}
 		}
 

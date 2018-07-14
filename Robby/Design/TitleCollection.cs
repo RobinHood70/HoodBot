@@ -119,10 +119,10 @@
 		/// <param name="titles">The titles.</param>
 		public void Add(params string[] titles) => this.Add(titles as IEnumerable<string>);
 
-		/// <summary>Adds the specified titles to the collection, coercing them to the given namespace.</summary>
-		/// <param name="ns">The namespace.</param>
+		/// <summary>Adds the specified titles to the collection, assuming that they are in the provided namespace if no other namespace is specified.</summary>
+		/// <param name="defaultNamespae">The default namespace.</param>
 		/// <param name="names">The page names, with or without the leading namespace text.</param>
-		public void Add(int ns, params string[] names) => this.Add(ns, names as IEnumerable<string>);
+		public void Add(int defaultNamespae, params string[] names) => this.Add(defaultNamespae, names as IEnumerable<string>);
 
 		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
 		/// <param name="title">The title.</param>
@@ -704,8 +704,8 @@
 		/// <param name="titles">The titles to add.</param>
 		public abstract void Add(IEnumerable<string> titles);
 
-		/// <summary>Adds the specified titles to the collection, coercing them to the given namespace.</summary>
-		/// <param name="defaultNamespace">The namespace.</param>
+		/// <summary>Adds the specified titles to the collection, assuming that they are in the provided namespace if no other namespace is specified.</summary>
+		/// <param name="defaultNamespace">The default namespace.</param>
 		/// <param name="titles">The titles to add, with or without the leading namespace text.</param>
 		public abstract void Add(int defaultNamespace, IEnumerable<string> titles);
 

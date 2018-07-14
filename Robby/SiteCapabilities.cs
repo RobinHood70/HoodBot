@@ -101,8 +101,10 @@
 
 			if (offset >= 0)
 			{
-				var urib = new UriBuilder(fullHost);
-				urib.Path = tryPath.Replace("index.php", "api.php");
+				var urib = new UriBuilder(fullHost)
+				{
+					Path = tryPath.Replace("index.php", "api.php")
+				};
 				tryLoc = urib.Uri;
 				tryPath = tryPath.Substring(0, offset + 1);
 			}
