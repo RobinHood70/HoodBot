@@ -269,7 +269,11 @@ namespace RobinHood70.WallE.Eve.Modules
 				foreach (JProperty limit in limits)
 #pragma warning restore IDE0007 // Use implicit type
 				{
-					if (modules.TryGetValue(limit.Name, out var module))
+					if (this.Generator.Name == limit.Name)
+					{
+						this.Generator.ModuleLimit = (int)limit.Value;
+					}
+					else if (modules.TryGetValue(limit.Name, out var module))
 					{
 						module.ModuleLimit = (int)limit.Value;
 					}
