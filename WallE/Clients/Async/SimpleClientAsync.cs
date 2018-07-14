@@ -153,15 +153,16 @@ namespace RobinHood70.WallE.Clients.Async
 		/// <summary>This method is used both to throttle clients as well as to respect any wiki-requested delays, such as from maxlag. Clients should respect any delays requested unless they expect to abort the procedure or for testing.</summary>
 		/// <param name="delayTime">The amount of time to delay for.</param>
 		/// <param name="reason">The reason for the delay, as specified by the caller. At this point, the value is entirely arbitrary. This may be changed in the future.</param>
+		/// <param name="description">The human-readable description of the reason for the delay.</param>
 		/// <returns>A value indicating whether or not the delay was respected.</returns>
-		public async Task<bool> RequestDelayAsync(TimeSpan delayTime, DelayReason reason)
+		public async Task<bool> RequestDelayAsync(TimeSpan delayTime, DelayReason reason, string description)
 		{
 			if (delayTime <= TimeSpan.Zero)
 			{
 				return true;
 			}
 
-			var e = new DelayEventArgs(delayTime, reason);
+			var e = new DelayEventArgs(delayTime, reason, description);
 			this.OnRequestingDelay(e);
 			if (e.Cancel)
 			{

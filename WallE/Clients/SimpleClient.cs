@@ -236,15 +236,16 @@
 		/// <summary>This method is used both to throttle clients as well as to forward any wiki-requested delays, such as from maxlag. Clients should respect any delays requested by the wiki unless they expect to abort the procedure, or for testing.</summary>
 		/// <param name="delayTime">The amount of time to delay for.</param>
 		/// <param name="reason">The reason for the delay, as specified by the caller.</param>
+		/// <param name="description">The human-readable reason for the delay, as specified by the caller.</param>
 		/// <returns>A value indicating whether or not the delay was respected.</returns>
-		public bool RequestDelay(TimeSpan delayTime, DelayReason reason)
+		public bool RequestDelay(TimeSpan delayTime, DelayReason reason, string description)
 		{
 			if (delayTime <= TimeSpan.Zero)
 			{
 				return true;
 			}
 
-			var e = new DelayEventArgs(delayTime, reason);
+			var e = new DelayEventArgs(delayTime, reason, description);
 			this.OnRequestingDelay(e);
 			if (e.Cancel)
 			{
@@ -455,11 +456,11 @@
 				var maxlag = response?.Headers["X-Database-Lag"];
 				if (maxlag == null)
 				{
-					this.RequestDelay(retryAfter, DelayReason.Error);
+					this.RequestDelay(retryAfter, DelayReason.Error, response.StatusDescription);
 				}
 				else
 				{
-					this.RequestDelay(retryAfter, DelayReason.MaxLag);
+					this.RequestDelay(retryAfter, DelayReason.MaxLag, "Database lag: " + maxlag + " seconds.");
 				}
 
 				return true;

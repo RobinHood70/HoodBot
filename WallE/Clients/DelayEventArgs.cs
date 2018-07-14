@@ -11,8 +11,10 @@
 		/// <summary>Initializes a new instance of the <see cref="DelayEventArgs" /> class.</summary>
 		/// <param name="delayTime">How long to delay.</param>
 		/// <param name="reason">The reason/source of the delay.</param>
-		public DelayEventArgs(TimeSpan delayTime, DelayReason reason)
+		/// <param name="description">The human-readable description or the reason for the delay.</param>
+		public DelayEventArgs(TimeSpan delayTime, DelayReason reason, string description)
 		{
+			this.Description = description;
 			this.DelayTime = delayTime;
 			this.Reason = reason;
 		}
@@ -23,6 +25,10 @@
 		/// <summary>Gets the delay time.</summary>
 		/// <value>The delay time.</value>
 		public TimeSpan DelayTime { get; }
+
+		/// <summary>Gets the human-readable description of the delay reason.</summary>
+		/// <value>The description.</value>
+		public string Description { get; }
 
 		/// <summary>Gets the reason for the delay.</summary>
 		/// <value>The reason for the delay.</value>

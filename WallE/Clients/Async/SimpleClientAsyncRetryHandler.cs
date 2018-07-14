@@ -62,7 +62,7 @@ namespace RobinHood70.WallE.Clients.Async
 					reason = DelayReason.MaxLag;
 				}
 
-				await this.parent.RequestDelayAsync(retryAfter, reason).ConfigureAwait(false);
+				await this.parent.RequestDelayAsync(retryAfter, reason, retval.ReasonPhrase).ConfigureAwait(false);
 			}
 
 			return retval;

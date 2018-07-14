@@ -70,7 +70,7 @@ namespace RobinHood70.WallE.Clients.Async
 			return retval;
 		}
 
-		public Task<bool> RequestDelayAsync(TimeSpan delayTime, DelayReason reason) => this.baseClient.RequestDelayAsync(delayTime, reason);
+		public Task<bool> RequestDelayAsync(TimeSpan delayTime, DelayReason reason, string description) => this.baseClient.RequestDelayAsync(delayTime, reason, description);
 
 		public void SaveCookies() => this.baseClient.SaveCookies();
 		#endregion
@@ -88,7 +88,7 @@ namespace RobinHood70.WallE.Clients.Async
 				if (delayTime > this.stopwatch.Elapsed)
 				{
 					// If delayInterval is zero, this will be skipped automatically because StopWatch.Elapsed must be at least 0, so no need to check for that.
-					return this.RequestDelayAsync(delayTime - this.stopwatch.Elapsed, DelayReason.ClientThrottled);
+					return this.RequestDelayAsync(delayTime - this.stopwatch.Elapsed, DelayReason.ClientThrottled, "Throttled");
 				}
 			}
 

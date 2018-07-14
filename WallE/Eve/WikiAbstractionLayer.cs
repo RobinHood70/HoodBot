@@ -853,7 +853,7 @@
 						break;
 					case "Throttled":
 						var delayTime = output.WaitTime.Add(TimeSpan.FromMilliseconds(500)); // Add an extra 500 milliseconds because in practice, waiting the exact amount of time often failed due to slight variations in time between the wiki server and the local computer.
-						if (this.Client.RequestDelay(delayTime, DelayReason.LoginThrottled))
+						if (this.Client.RequestDelay(delayTime, DelayReason.LoginThrottled, "Login throttled"))
 						{
 							retries--;
 						}

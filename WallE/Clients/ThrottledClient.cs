@@ -127,8 +127,9 @@
 		/// <summary>This method is used both to throttle clients as well as to forward any wiki-requested delays, such as from maxlag. Clients should respect any delays requested by the wiki unless they expect to abort the procedure, or for testing.</summary>
 		/// <param name="delayTime">The amount of time to delay for.</param>
 		/// <param name="reason">The reason for the delay, as specified by the caller.</param>
+		/// <param name="description">The human-readable reason for the delay, as specified by the caller.</param>
 		/// <returns>A value indicating whether or not the delay was respected.</returns>
-		public bool RequestDelay(TimeSpan delayTime, DelayReason reason) => this.baseClient.RequestDelay(delayTime, reason);
+		public bool RequestDelay(TimeSpan delayTime, DelayReason reason, string description) => this.baseClient.RequestDelay(delayTime, reason, description);
 
 		/// <summary>Saves all cookies to persistent storage.</summary>
 		public void SaveCookies() => this.baseClient.SaveCookies();
@@ -147,7 +148,7 @@
 			var delayTime =
 				this.LastWasPost == null ? TimeSpan.Zero :
 				(this.LastWasPost.Value ? this.WriteInterval : this.ReadInterval) - this.stopwatch.Elapsed;
-			return delayTime > TimeSpan.Zero ? this.RequestDelay(delayTime, DelayReason.ClientThrottled) : true;
+			return delayTime > TimeSpan.Zero ? this.RequestDelay(delayTime, DelayReason.ClientThrottled, "Throttled") : true;
 		}
 		#endregion
 	}
