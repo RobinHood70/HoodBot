@@ -431,6 +431,16 @@
 			return null;
 		}
 
+		public void ForceNames()
+		{
+			var anon = 0;
+			foreach (var param in this.AnonymousOnly)
+			{
+				anon++;
+				param.Name = anon.ToString();
+			}
+		}
+
 		public int GetAnonymousPosition(Parameter input)
 		{
 			ThrowNull(input, nameof(input));
