@@ -51,7 +51,7 @@
 				var hash = -2128831035;
 				foreach (var obj in hashCodes)
 				{
-					hash = (hash * 16777219) ^ obj?.GetHashCode() ?? 0;
+					hash = (hash * 16777219) ^ (obj?.GetHashCode() ?? 0);
 				}
 
 				return hash;
