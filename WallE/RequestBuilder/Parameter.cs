@@ -9,12 +9,7 @@
 
 		/// <summary>Initializes a new instance of the <see cref="Parameter{T}" /> class.</summary>
 		/// <param name="name">The parameter name.</param>
-		/// <param name="value">The parameter value.</param>
-		protected Parameter(string name, T value)
-		{
-			this.Name = name;
-			this.Value = value;
-		}
+		protected Parameter(string name) => this.Name = name;
 		#endregion
 
 		#region IParameter Properties
@@ -26,9 +21,9 @@
 
 		#region Public Properties
 
-		/// <summary>Gets the value of the parameter.</summary>
+		/// <summary>Gets or sets the value of the parameter.</summary>
 		/// <value>The value of the parameter.</value>
-		public T Value { get; }
+		public T Value { get; protected set; }
 		#endregion
 
 		#region IParameter Methods

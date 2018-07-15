@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.WallE.RequestBuilder
 {
 	using System.Collections.Generic;
+	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Represents a parameter with collection of unique values, normally separated by pipe characters.</summary>
 	/// <seealso cref="Parameter{T}" />
@@ -12,8 +13,10 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="values">The parameter values. Any duplicates in the input will be ignored.</param>
 		public PipedParameter(string name, IEnumerable<string> values)
-			: base(name, new HashSet<string>(values))
+			: base(name)
 		{
+			ThrowNull(values, nameof(values));
+			this.Value = new HashSet<string>(values);
 		}
 		#endregion
 

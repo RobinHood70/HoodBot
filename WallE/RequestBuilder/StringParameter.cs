@@ -9,10 +9,9 @@
 		/// <summary>Initializes a new instance of the <see cref="StringParameter" /> class.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
+		/// <remarks><c>null</c> is a valid value for this parameter type, so no input validation is performed.</remarks>
 		public StringParameter(string name, string value)
-			: base(name, value)
-		{
-		}
+			: base(name) => this.Value = value;
 		#endregion
 
 		#region Public Override Methods

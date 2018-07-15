@@ -1,5 +1,7 @@
 ﻿namespace RobinHood70.WallE.RequestBuilder
 {
+	using static RobinHood70.WikiCommon.Globals;
+
 	/// <summary>Represents a parameter with file information.</summary>
 	/// <seealso cref="Parameter{T}" />
 	public class FileParameter : Parameter<byte[]>
@@ -11,7 +13,12 @@
 		/// <param name="fileName">Name of the file.</param>
 		/// <param name="fileData">The file data.</param>
 		public FileParameter(string name, string fileName, byte[] fileData)
-			: base(name, fileData) => this.FileName = fileName;
+			: base(name)
+		{
+			ThrowNull(fileData, nameof(fileData));
+			this.FileName = fileName;
+			this.Value = fileData;
+		}
 		#endregion
 
 		#region Public Properties
