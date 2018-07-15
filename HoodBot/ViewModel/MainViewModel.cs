@@ -232,7 +232,7 @@
 			var objectList = new List<object>
 			{
 				this.site,
-				new AsyncInfo(this.canceller.Token, this.pauser.Token, this.progressMonitor, this.statusMonitor)
+				new AsyncInfo(this.progressMonitor, this.statusMonitor, this.pauser.Token, this.canceller.Token)
 			};
 
 			foreach (var param in jobNode.Parameters)

@@ -5,7 +5,7 @@
 
 	public class AsyncInfo
 	{
-		public AsyncInfo(CancellationToken cancellationToken, PauseToken pauseToken, IProgress<double> progressMonitor, IProgress<string> statusMonitor)
+		public AsyncInfo(IProgress<double> progressMonitor, IProgress<string> statusMonitor, PauseToken pauseToken, CancellationToken cancellationToken)
 		{
 			this.CancellationToken = cancellationToken;
 			this.PauseToken = pauseToken;
@@ -23,6 +23,6 @@
 
 		public IProgress<string> StatusMonitor { get; }
 
-		public AsyncInfo With(IProgress<double> newProgressMonitor) => new AsyncInfo(this.CancellationToken, this.PauseToken, newProgressMonitor, this.StatusMonitor);
+		public AsyncInfo With(IProgress<double> newProgressMonitor) => new AsyncInfo(newProgressMonitor, this.StatusMonitor, this.PauseToken, this.CancellationToken);
 	}
 }
