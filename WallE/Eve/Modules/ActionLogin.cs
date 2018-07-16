@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WallE.ProjectGlobals;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionLogin : ActionModule<LoginInput, LoginResult>
+	internal class ActionLogin : ActionModule<LoginInput, LoginResult>
 	{
 		#region Constructors
 		public ActionLogin(WikiAbstractionLayer wal)

@@ -5,14 +5,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.RequestBuilder;
-	using RobinHood70.WikiCommon;
 	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class PropRevisions : PropListModule<RevisionsInput, RevisionsItem>, IGeneratorModule
 	{
 		#region Constructors
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "1", Justification = "Validated in base class.")]
 		public PropRevisions(WikiAbstractionLayer wal, RevisionsInput input)
 			: base(wal, input) => this.IsRevisionRange =
 				input.Start != null ||
@@ -62,9 +60,9 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override RevisionsItem GetItem(JToken result) => result.GetRevision(this.Output.Title);
 
-		protected override void GetResultsFromCurrentPage() => this.ResetMyList(this.Output.Revisions);
+		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Revisions);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.Revisions = this.MyList.AsNewReadOnlyList();
+		protected override void SetResultsOnCurrentPage() => this.Output.Revisions = this.Items;
 		#endregion
 	}
 }

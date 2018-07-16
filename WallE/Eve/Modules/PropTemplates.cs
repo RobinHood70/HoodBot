@@ -3,7 +3,6 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.RequestBuilder;
-	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class PropTemplates : PropListLinks<TemplatesInput>, IGeneratorModule
@@ -15,13 +14,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 111;
 
 		public override string Name { get; } = "templates";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "tl";
 		#endregion
 
@@ -40,9 +39,9 @@ namespace RobinHood70.WallE.Eve.Modules
 			base.BuildRequestLocal(request, input);
 		}
 
-		protected override void GetResultsFromCurrentPage() => this.ResetMyList(this.Output.Templates);
+		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Templates);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.Templates = this.MyList.AsNewReadOnlyList();
+		protected override void SetResultsOnCurrentPage() => this.Output.Templates = this.Items;
 		#endregion
 	}
 }

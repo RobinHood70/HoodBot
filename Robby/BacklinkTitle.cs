@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby
 {
 	/// <summary>Represents a backlink title which has been redirected from another title.</summary>
-	/// <seealso cref="RobinHood70.Robby.Title" />
+	/// <seealso cref="Title" />
 	public class BacklinkTitle : Title
 	{
 		/// <summary>Initializes a new instance of the <see cref="BacklinkTitle"/> class.</summary>

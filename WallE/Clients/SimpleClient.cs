@@ -278,7 +278,7 @@
 
 		#region Protected Virtual Methods
 
-		/// <summary>Raises the <see cref="E:RequestingDelay" /> event.</summary>
+		/// <summary>Raises the <see cref="RequestingDelay" /> event.</summary>
 		/// <param name="e">The <see cref="DelayEventArgs" /> instance containing the event data.</param>
 		protected virtual void OnRequestingDelay(DelayEventArgs e) => this.RequestingDelay?.Invoke(this, e);
 		#endregion
@@ -323,7 +323,7 @@
 			// Adapted from http://stackoverflow.com/a/8523437/502255
 			var assembly = Assembly.GetAssembly(typeof(SettingsSection));
 			var type = assembly?.GetType("System.Net.Configuration.SettingsSectionInternal");
-			var section = type?.InvokeMember("Section", BindingFlags.Static | BindingFlags.GetProperty | BindingFlags.NonPublic, null, null, new object[0], CultureInfo.InvariantCulture);
+			var section = type?.InvokeMember("Section", BindingFlags.Static | BindingFlags.GetProperty | BindingFlags.NonPublic, null, null, Array.Empty<object>(), CultureInfo.InvariantCulture);
 			var useUnsafeHeaderParsing = type?.GetField("useUnsafeHeaderParsing", BindingFlags.NonPublic | BindingFlags.Instance);
 			if (section != null && useUnsafeHeaderParsing != null)
 			{
@@ -379,9 +379,7 @@
 					{
 						if (response.Cookies != null)
 						{
-#pragma warning disable IDE0007 // Use implicit type
-							foreach (Cookie cookie in response.Cookies)
-#pragma warning restore IDE0007 // Use implicit type
+							foreach (var cookie in response.Cookies.Cast<Cookie>())
 							{
 								this.cookieContainer.Add(cookie);
 							}

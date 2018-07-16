@@ -1,8 +1,6 @@
 ﻿namespace RobinHood70.Robby
 {
 	using System;
-	using RobinHood70.WallE.Base;
-	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Stores all information related to a specific revision.</summary>
 	/// <remarks>Revisions can apply to users or pages. Pages store title information at the parent level, thus they are not included in the base Revision object.</remarks>

@@ -3,6 +3,7 @@
 	using System.Collections.Generic;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Eve.Modules;
+	using RobinHood70.WikiCommon;
 	using static RobinHood70.WallE.Eve.TokensInput;
 
 	internal class TokenManagerOriginal : ITokenManager
@@ -29,21 +30,22 @@
 		#region Public Methods
 		public void Clear() => this.SessionTokens.Clear();
 
-		public string RollbackToken(long pageId) => this.GetToken(DefaultPageSetInput.FromPageIds(new long[] { pageId }));
+		public string RollbackToken(long pageId) => this.GetRollbackToken(QueryPageSetInput.FromPageIds(new long[] { pageId }));
 
-		public string RollbackToken(string title) => this.GetToken(new DefaultPageSetInput(new string[] { title }));
+		public string RollbackToken(string title) => this.GetRollbackToken(new QueryPageSetInput(new string[] { title }));
 
 		public virtual string SessionToken(string type)
 		{
 			type = TokenManagerFunctions.ValidateTokenType(ValidTypes, type, Csrf, Edit);
 			if (!this.SessionTokens.TryGetValue(type, out var retval))
 			{
-				var pageSetInput = new DefaultPageSetInput(new string[] { ":" }); // This is a hack that MW sees as a legitimate page name that will never actually be found. Fixed in later versions, but works nicely for pre-1.20 since we don't have an actual page name.
+				var pageSetInput = new QueryPageSetInput(new string[] { ":" }); // This is a hack that MW sees as a legitimate page name that will never actually be found. Fixed in later versions, but works nicely for pre-1.20 since we don't have an actual page name.
 				var propInfoInput = new InfoInput { Tokens = new[] { Edit, Watch } };
 				var input = new RecentChangesInput { GetPatrolToken = true, MaxItems = 1 };
 				var recentChanges = new ListRecentChanges(this.Wal, input);
-				var queryInput = new QueryInput(this.Wal, pageSetInput, new[] { propInfoInput }, new[] { recentChanges });
-				var pageSet = new ActionQuery(this.Wal, WikiAbstractionLayer.DefaultPageFactory).SubmitPageSet(queryInput);
+				var propertyModules = this.Wal.ModuleFactory.CreateModules(new[] { propInfoInput });
+				var queryInput = new QueryInput(pageSetInput, propertyModules, new[] { recentChanges });
+				var pageSet = this.Wal.RunPageSetQuery(queryInput);
 				var rc = recentChanges.Output;
 
 				foreach (var page in pageSet)
@@ -84,19 +86,11 @@
 		#endregion
 
 		#region Private Methods
-		private string GetToken(DefaultPageSetInput pageSetInput)
+		private string GetRollbackToken(QueryPageSetInput pageSetInput)
 		{
 			var revisions = new RevisionsInput() { GetRollbackToken = true };
-			var pages = this.Wal.LoadPages(pageSetInput, new IPropertyInput[] { revisions });
-			foreach (var page in pages)
-			{
-				foreach (var revision in page.Value.Revisions)
-				{
-					return revision.RollbackToken;
-				}
-			}
-
-			return null;
+			var pages = this.Wal.LoadPages(pageSetInput, new[] { revisions });
+			return pages.First()?.Revisions.First()?.RollbackToken;
 		}
 		#endregion
 	}

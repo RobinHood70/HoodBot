@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionTag : ActionModule<TagInput, IReadOnlyList<TagItem>>
+	internal class ActionTag : ActionModule<TagInput, IReadOnlyList<TagItem>>
 	{
 		#region Constructors
 		public ActionTag(WikiAbstractionLayer wal)

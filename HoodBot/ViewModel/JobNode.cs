@@ -47,8 +47,6 @@
 			ThrowNull(parent, nameof(parent));
 			ThrowNull(constructor, nameof(constructor));
 			var jobName = constructor.GetCustomAttribute<JobInfoAttribute>().Name;
-			var constructorName = constructor.DeclaringType.Name + constructor.ToString().Replace("Void .ctor", string.Empty).Replace("RobinHood70.Robby.", string.Empty).Replace("RobinHood70.HoodBot.Jobs.Design.", string.Empty);
-			Debug.WriteLine($"Adding Job {jobName} with constructor {constructorName} to {parent.Name ?? "<ROOT>"}, Children Count: {parent.Children?.Count}");
 
 			this.Constructor = constructor;
 			this.Name = jobName;
@@ -224,6 +222,8 @@
 		public override bool Equals(object obj) => ReferenceEquals(this, obj) || this.Equals(obj as JobNode);
 
 		public override int GetHashCode() => CompositeHashCode(this.Parent, this.Name, this.Children);
+
+		public override string ToString() => this.Name;
 		#endregion
 
 		#region Private Methods

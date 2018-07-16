@@ -19,12 +19,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		public bool Continues { get; protected set; }
 		#endregion
 
-		#region Protected Internal Properties
-		protected internal string GeneratorContinue { get; set; } = string.Empty;
-		#endregion
-
 		#region Protected Properties
 		protected Dictionary<string, string> ContinueEntries { get; } = new Dictionary<string, string>();
+
+		protected string GeneratorContinue { get; set; } = string.Empty;
 		#endregion
 
 		#region Public Abstract Methods
@@ -35,7 +33,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Virtual Methods
-		public virtual void OnSubmit(IPageSetInternal pageSet)
+		public virtual void BeforePageSetSubmit(IPageSetGenerator pageSet)
 		{
 			var generator = pageSet?.Generator;
 			this.GeneratorContinue = generator?.FullPrefix + generator?.ContinueName;

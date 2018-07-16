@@ -27,7 +27,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		public override int MinimumVersion { get; } = 109;
 
 		public override string Name { get; } = "recentchanges";
+		#endregion
 
+		#region Protected Override Methods
 		protected override string Prefix { get; } = "rc";
 		#endregion
 
@@ -71,7 +73,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			var logType = (string)result["logtype"];
 			var logAction = (string)result["logaction"];
 			result.ParseLogEvent(item, logType, logAction, KnownProps, false);
-			item.Tags = result.AsReadOnlyList<string>("tags");
+			item.Tags = result["tags"].AsReadOnlyList<string>();
 			item.RecentChangeType = (string)result["type"];
 			item.Id = (long?)result["rcid"] ?? 0;
 			item.Flags =

@@ -12,8 +12,11 @@ namespace RobinHood70.WallE.Eve.Modules
 
 	internal class ListBacklinks : ListModule<BacklinksInput, BacklinksItem>, IGeneratorModule
 	{
+		#region Fields
+		private readonly BacklinksTypes linkType;
+		#endregion
+
 		#region Contructors
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "1", Justification = "Validated in base class.")]
 		public ListBacklinks(WikiAbstractionLayer wal, BacklinksInput input)
 			: base(wal, input)
 		{
@@ -22,22 +25,18 @@ namespace RobinHood70.WallE.Eve.Modules
 				throw new ArgumentException(InputNonUnique);
 			}
 
-			this.LinkType = input.LinkTypes;
+			this.linkType = input.LinkTypes;
 		}
 		#endregion
 
-		#region Public Properties
-		public BacklinksTypes LinkType { get; set; }
-		#endregion
-
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 109;
 
 		public override string Name
 		{
 			get
 			{
-				switch (this.LinkType)
+				switch (this.linkType)
 				{
 					default:
 					case BacklinksTypes.Backlinks:
@@ -51,12 +50,12 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix
 		{
 			get
 			{
-				switch (this.LinkType)
+				switch (this.linkType)
 				{
 					default:
 					case BacklinksTypes.Backlinks:
@@ -84,7 +83,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIf("pageid", input.PageId, input.Title == null)
 				.Add("namespace", input.Namespace)
 				.AddIf("dir", "descending", input.SortDescending)
-				.AddIf("redirect", input.Redirect, this.LinkType != BacklinksTypes.EmbeddedIn)
+				.AddIf("redirect", input.Redirect, this.linkType != BacklinksTypes.EmbeddedIn)
 				.AddFilterText("filterredir", "redirects", "nonredirects", input.FilterRedirects)
 				.Add("limit", this.Limit);
 		}
@@ -96,10 +95,11 @@ namespace RobinHood70.WallE.Eve.Modules
 				return null;
 			}
 
-			var item = new BacklinksItem();
-			item.GetWikiTitle(result);
-			item.IsRedirect = result["redirect"].AsBCBool();
-			item.Type = this.Input.LinkTypes;
+			var item = new BacklinksItem
+			{
+				IsRedirect = result["redirect"].AsBCBool(),
+				Type = this.Input.LinkTypes
+			}.GetWikiTitle(result);
 
 			var redirLinks = result["redirlinks"];
 			if (redirLinks != null)

@@ -16,13 +16,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 125;
 
 		public override string Name { get; } = "allrevisions";
 		#endregion
 
-		#region Public Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "arv";
 		#endregion
 
@@ -48,8 +48,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				return null;
 			}
 
-			var item = new AllRevisionsItem();
-			item.GetWikiTitle(result);
+			var item = new AllRevisionsItem().GetWikiTitle(result);
 
 			var revisions = new List<RevisionsItem>();
 			foreach (var revisionNode in result["revisions"])

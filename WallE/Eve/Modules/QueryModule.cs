@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using System.Globalization;
 	using System.Text.RegularExpressions;
 	using Newtonsoft.Json.Linq;
@@ -47,30 +48,35 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Properties
-		public virtual string ContinueName { get; } = "continue";
-
-		public virtual bool ContinueParsing => this.ItemsRemaining > 0;
 
 		// Unlike Action modules, Query modules cannot take inputs during their BuildRequest phase, so we take them as part of the constructor and store them here until they're needed.
-		public TInput Input { get; private set; }
-
-		public bool IsGenerator { get; set; } = false;
-
-		public abstract int MinimumVersion { get; }
+		public TInput Input { get; }
 
 		public int ModuleLimit { get; set; } = int.MaxValue;
-
-		public abstract string Name { get; }
 
 		// Unlike Action modules, Query modules cannot return results directly during their Submit phase, so we store them here until the client requests them. Setter is protected so that Prop modules can set current page as needed.
 		public TOutput Output { get; protected set; }
 
-		public virtual string FullPrefix => (this.IsGenerator ? "g" : string.Empty) + this.Prefix;
-
 		public WikiAbstractionLayer Wal { get; }
 		#endregion
 
+		#region Public Abstract Properties
+		public abstract int MinimumVersion { get; }
+
+		public abstract string Name { get; }
+		#endregion
+
+		#region Public Virtual Properties
+		public virtual string ContinueName { get; } = "continue";
+
+		public virtual bool ContinueParsing => this.ItemsRemaining > 0;
+
+		public virtual string FullPrefix => (this.IsGenerator ? "g" : string.Empty) + this.Prefix;
+		#endregion
+
 		#region Protected Properties
+		protected bool IsGenerator { get; set; } = false;
+
 		protected int ItemsRemaining { get; set; }
 
 		protected string Limit
@@ -81,8 +87,6 @@ namespace RobinHood70.WallE.Eve.Modules
 				return limit == -1 ? "max" : limit.ToStringInvariant();
 			}
 		}
-
-		protected int LoopCount { get; set; } = 1;
 
 		protected int SiteVersion { get; }
 		#endregion
@@ -96,6 +100,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Virtual Properties
 
 		protected virtual string ResultName => this.Name;
+		#endregion
+
+		#region Public Methods
+
+		// Technically, this could be copied to each IGeneratorInput module, to ensure that *only* generator modules can be set as such, but that seems a little silly. We'll just throw an error if this isn't a generator.
+		// TODO: Check if this can be moved to the interface once C# 8 is released.
+		public void SetAsGenerator() => this.IsGenerator = this is IGeneratorModule ? true : throw new InvalidOperationException(CurrentCulture(Properties.EveMessages.NotAGenerator));
 		#endregion
 
 		#region Public Virtual Methods

@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionImport : ActionModule<ImportInput, IReadOnlyList<ImportItem>>
+	internal class ActionImport : ActionModule<ImportInput, IReadOnlyList<ImportItem>>
 	{
 		#region Constructors
 		public ActionImport(WikiAbstractionLayer wal)
@@ -55,10 +55,13 @@ namespace RobinHood70.WallE.Eve.Modules
 			var output = new List<ImportItem>();
 			foreach (var item in result)
 			{
-				var import = new ImportItem();
-				import.GetWikiTitle(item);
-				import.Invalid = item["invalid"].AsBCBool();
-				import.Revisions = (int?)item["revisions"] ?? 0;
+				var import = new ImportItem
+				{
+					Invalid = item["invalid"].AsBCBool(),
+					Namespace = (int?)result["ns"],
+					Revisions = (int?)item["revisions"] ?? 0,
+					Title = (string)result["title"]
+				};
 
 				output.Add(import);
 			}

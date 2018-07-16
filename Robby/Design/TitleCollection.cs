@@ -78,7 +78,7 @@
 		/// <summary>Gets or sets the <see cref="ISimpleTitle">Title</see> with the specified key.</summary>
 		/// <param name="key">The key.</param>
 		/// <returns>The <see cref="ISimpleTitle">Title</see>.</returns>
-		/// <remarks>Like a <see cref="T:System.Collections.Generic.Dictionary{TKey, TValue}"/>, this indexer will add a new entry if the requested entry isn't found.</remarks>
+		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry if the requested entry isn't found.</remarks>
 		public virtual TTitle this[string key]
 		{
 			get => this.dictionary[key];
@@ -524,8 +524,8 @@
 		/// <returns><see langword="true" /> if the collection contains an item with the specified key; otherwise, <see langword="true" />.</returns>
 		public bool Contains(string key) => this.dictionary.ContainsKey(key);
 
-		/// <summary>Copies the elements of the <see cref="TitleCollection">collection</see> to an <see cref="T:System.Array" />, starting at a particular <see cref="T:System.Array" /> index.</summary>
-		/// <param name="array">The one-dimensional <see cref="T:System.Array" /> that is the destination of the elements copied from <see cref="TitleCollection">collection</see>. The <see cref="T:System.Array" /> must have zero-based indexing.</param>
+		/// <summary>Copies the elements of the <see cref="TitleCollection">collection</see> to an <see cref="Array" />, starting at a particular <see cref="Array" /> index.</summary>
+		/// <param name="array">The one-dimensional <see cref="Array" /> that is the destination of the elements copied from <see cref="TitleCollection">collection</see>. The <see cref="Array" /> must have zero-based indexing.</param>
 		/// <param name="arrayIndex">The zero-based index in <paramref name="array" /> at which copying begins.</param>
 		public void CopyTo(TTitle[] array, int arrayIndex) => this.items.CopyTo(array, arrayIndex);
 
@@ -667,11 +667,11 @@
 		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> by namespace, then pagename.</summary>
 		public void Sort() => this.Sort(new TitleComparer<TTitle>());
 
-		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> using the specified <see cref="T:System.Comparison{T}" />.</summary>
+		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> using the specified <see cref="Comparison{T}" />.</summary>
 		/// <param name="comparison">The comparison.</param>
 		public void Sort(Comparison<TTitle> comparison) => this.items.Sort(comparison);
 
-		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> using the specified <see cref="T:System.IComparer{T}" />.</summary>
+		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> using the specified <see cref="IComparer{T}" />.</summary>
 		/// <param name="comparer">The comparer.</param>
 		public void Sort(IComparer<TTitle> comparer) => this.items.Sort(comparer);
 
@@ -729,8 +729,8 @@
 		/// <summary>Inserts an item into the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="index">The index to insert at.</param>
 		/// <param name="item">The item.</param>
-		/// <exception cref="T:System.InvalidOperationException">The item's site does not match the collection's site.</exception>
-		/// <remarks>This method underlies the <see cref="M:Insert(int, TTitle)" /> method and, like <see cref="M:System.Collections.ObjectModel.Collection{T}.InsertItem(int, T)" />, can be overridden in derived classes.</remarks>
+		/// <exception cref="InvalidOperationException">The item's site does not match the collection's site.</exception>
+		/// <remarks>This method underlies the <see cref="Insert(int, TTitle)" /> method and, like <see cref="System.Collections.ObjectModel.Collection{T}.InsertItem(int, T)" />, can be overridden in derived classes.</remarks>
 		protected virtual void InsertItem(int index, TTitle item)
 		{
 			ThrowNull(item, nameof(item));
@@ -745,8 +745,8 @@
 
 		/// <summary>Removes the item at a specific index in the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="index">The index of the item to remove.</param>
-		/// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index" /> is equal to or higher than the number of items in the collection.</exception>
-		/// <remarks>This method underlies the <see cref="M:RobinHood70.Robby.TitleCollection{TTitle}.RemoveAt(int)" /> method and, like <see cref="M:System.Collections.ObjectModel.Collection{T}.RemoveItem(int)" />, can be overridden in derived classes.</remarks>
+		/// <exception cref="ArgumentOutOfRangeException"><paramref name="index" /> is equal to or higher than the number of items in the collection.</exception>
+		/// <remarks>This method underlies the <see cref="RemoveAt(int)" /> method and, like <see cref="System.Collections.ObjectModel.Collection{T}.RemoveItem(int)" />, can be overridden in derived classes.</remarks>
 		protected virtual void RemoveItem(int index)
 		{
 			if (index >= this.items.Count)

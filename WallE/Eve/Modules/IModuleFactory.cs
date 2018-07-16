@@ -37,8 +37,8 @@
 
 		/// <summary>Creates property modules from the provided inputs.</summary>
 		/// <param name="propertyInputs">The property inputs.</param>
-		/// <returns>A set of modules that corresponds to the provided inputs. If <paramref name="propertyInputs" /> is null, returns an empty collection.</returns>
-		ModuleCollection<IPropertyModule> CreateModules(IEnumerable<IPropertyInput> propertyInputs);
+		/// <returns>A set of modules that corresponds to the provided inputs. If <paramref name="propertyInputs" /> is null, this should return an empty collection.</returns>
+		IEnumerable<IPropertyModule> CreateModules(IEnumerable<IPropertyInput> propertyInputs);
 
 		/// <summary>Registers a generator factory method for use with <see cref="CreateGenerator{TInput}(TInput)" />.</summary>
 		/// <typeparam name="T">The type of generator input that the factory method handles.</typeparam>

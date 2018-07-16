@@ -15,13 +15,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 113;
 
 		public override string Name { get; } = "categoryinfo";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "ci";
 		#endregion
 
@@ -39,7 +39,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(result, nameof(result));
 			ThrowNull(output, nameof(output));
 
-			var categoryInfo = new CategoryInfoResult()
+			output.CategoryInfo = new CategoryInfoResult()
 			{
 				Files = (int)result["files"],
 				Pages = (int)result["pages"],
@@ -47,7 +47,6 @@ namespace RobinHood70.WallE.Eve.Modules
 				Subcategories = (int)result["subcats"],
 				Hidden = result["hidden"].AsBCBool(),
 			};
-			output.CategoryInfo = categoryInfo;
 		}
 		#endregion
 	}

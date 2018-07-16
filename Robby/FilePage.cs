@@ -8,7 +8,7 @@
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Represents a file on the wiki. Includes all page data as well as file revisions and file-specific methods.</summary>
-	/// <seealso cref="RobinHood70.Robby.Page" />
+	/// <seealso cref="Page" />
 	public class FilePage : Page
 	{
 		#region Fields
@@ -64,13 +64,13 @@
 		}
 
 		/// <summary>Finds all pages the file is used on.</summary>
-		/// <returns>A list of <see cref="T:RobinHood70.Robby.Title"/>s that the file is used on.</returns>
+		/// <returns>A list of <see cref="Title"/>s that the file is used on.</returns>
 		public TitleCollection FileUsage() => this.FileUsage(Filter.Any, this.Site.Namespaces.RegularIds);
 
 		/// <summary>Finds all pages the file is used on within the given namespaces and optionally filters out redirects.</summary>
 		/// <param name="filterRedirects">Filter redirects out of the result set.</param>
 		/// <param name="namespaces">The namespaces to search.</param>
-		/// <returns>A list of <see cref="T:RobinHood70.Robby.Title"/>s that the file is used on.</returns>
+		/// <returns>A list of <see cref="Title"/>s that the file is used on.</returns>
 		public TitleCollection FileUsage(Filter filterRedirects, IEnumerable<int> namespaces)
 		{
 			var titles = new TitleCollection(this.Site);

@@ -29,7 +29,7 @@ namespace RobinHood70.WallE.Base
 
 		public UsersInput(IEnumerable<long> userIds)
 		{
-			ThrowNullCollection(userIds, nameof(userIds));
+			ThrowCollectionEmpty(userIds, nameof(userIds));
 			this.UserIds = userIds;
 		}
 		#endregion

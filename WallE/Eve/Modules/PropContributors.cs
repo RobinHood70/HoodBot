@@ -4,7 +4,6 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.RequestBuilder;
-	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class PropContributors : PropListModule<ContributorsInput, ContributorItem>
@@ -16,13 +15,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 123;
 
 		public override string Name { get; } = "contributors";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "pc";
 		#endregion
 
@@ -47,24 +46,17 @@ namespace RobinHood70.WallE.Eve.Modules
 			output.AnonContributors = (int?)parent["anoncontributors"] ?? 0;
 		}
 
-		protected override ContributorItem GetItem(JToken result)
-		{
-			if (result == null)
-			{
-				return null;
-			}
-
-			var item = new ContributorItem()
+		protected override ContributorItem GetItem(JToken result) => result == null
+			? null
+			: new ContributorItem()
 			{
 				Name = (string)result["name"],
 				UserId = (long)result["userid"],
 			};
-			return item;
-		}
 
-		protected override void GetResultsFromCurrentPage() => this.ResetMyList(this.Output.Contributors);
+		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Contributors);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.Contributors = this.MyList.AsNewReadOnlyList();
+		protected override void SetResultsOnCurrentPage() => this.Output.Contributors = this.Items;
 		#endregion
 	}
 }

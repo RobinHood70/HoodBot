@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionUndelete : ActionModule<UndeleteInput, UndeleteResult>
+	internal class ActionUndelete : ActionModule<UndeleteInput, UndeleteResult>
 	{
 		#region Constructors
 		public ActionUndelete(WikiAbstractionLayer wal)

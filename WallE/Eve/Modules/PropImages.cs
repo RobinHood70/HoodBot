@@ -4,7 +4,6 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.RequestBuilder;
-	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class PropImages : PropListModule<ImagesInput, ITitle>, IGeneratorModule
@@ -16,13 +15,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 111;
 
 		public override string Name { get; } = "images";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "im";
 		#endregion
 
@@ -45,9 +44,9 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override ITitle GetItem(JToken result) => result.GetWikiTitle();
 
-		protected override void GetResultsFromCurrentPage() => this.ResetMyList(this.Output.Images);
+		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Images);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.Images = this.MyList.AsNewReadOnlyList();
+		protected override void SetResultsOnCurrentPage() => this.Output.Images = this.Items;
 		#endregion
 	}
 }

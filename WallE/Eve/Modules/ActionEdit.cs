@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionEdit : ActionModule<EditInput, EditResult>
+	internal class ActionEdit : ActionModule<EditInput, EditResult>
 	{
 		#region Constructors
 		public ActionEdit(WikiAbstractionLayer wal)
@@ -17,16 +17,16 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Public Properties
-		public IReadOnlyDictionary<string, string> CaptchaData { get; private set; } = EmptyReadOnlyDictionary<string, string>();
-
-		public Dictionary<string, string> CaptchaSolution { get; } = new Dictionary<string, string>();
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion { get; } = 113;
 
 		public override string Name { get; } = "edit";
+		#endregion
+
+		#region Internal Properties
+		internal IReadOnlyDictionary<string, string> CaptchaData { get; private set; } = EmptyReadOnlyDictionary<string, string>();
+
+		internal Dictionary<string, string> CaptchaSolution { get; } = new Dictionary<string, string>();
 		#endregion
 
 		#region Protected Override Properties
@@ -91,7 +91,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				NewRevisionId = (long?)result["newrevid"] ?? 0,
 				NewTimestamp = (DateTime?)result["newtimestamp"],
 			};
-			this.CaptchaData = result.AsReadOnlyDictionary<string, string>("captcha");
+			this.CaptchaData = result["captcha"].AsReadOnlyDictionary<string, string>();
 
 			return output;
 		}

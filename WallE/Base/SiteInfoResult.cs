@@ -36,23 +36,23 @@ namespace RobinHood70.WallE.Base
 
 		public SkinsItem DefaultSkin { get; set; } = new SkinsItem();
 
-		public IReadOnlyList<ExtensionItem> Extensions { get; set; } = new ExtensionItem[0];
+		public IReadOnlyList<ExtensionItem> Extensions { get; set; } = Array.Empty<ExtensionItem>();
 
-		public IReadOnlyList<string> ExtensionTags { get; set; } = new string[0];
+		public IReadOnlyList<string> ExtensionTags { get; set; } = Array.Empty<string>();
 
-		public IReadOnlyList<string> ExternalImages { get; set; } = new string[0];
+		public IReadOnlyList<string> ExternalImages { get; set; } = Array.Empty<string>();
 
-		public IReadOnlyList<string> FallbackLanguages { get; set; } = new string[0];
+		public IReadOnlyList<string> FallbackLanguages { get; set; } = Array.Empty<string>();
 
 		public string Fallback8BitEncoding { get; set; }
 
 		public string Favicon { get; set; }
 
-		public IReadOnlyList<string> FileExtensions { get; set; } = new string[0];
+		public IReadOnlyList<string> FileExtensions { get; set; } = Array.Empty<string>();
 
 		public SiteInfoFlags Flags { get; set; }
 
-		public IReadOnlyList<string> FunctionHooks { get; set; } = new string[0];
+		public IReadOnlyList<string> FunctionHooks { get; set; } = Array.Empty<string>();
 
 		public string Generator { get; set; }
 
@@ -64,17 +64,17 @@ namespace RobinHood70.WallE.Base
 
 		public IReadOnlyDictionary<string, ImageLimitsItem> ImageLimits { get; set; } = EmptyReadOnlyDictionary<string, ImageLimitsItem>();
 
-		public IReadOnlyList<InterwikiMapItem> InterwikiMap { get; set; } = new InterwikiMapItem[0];
+		public IReadOnlyList<InterwikiMapItem> InterwikiMap { get; set; } = Array.Empty<InterwikiMapItem>();
 
-		public IReadOnlyList<LagItem> LagInfo { get; set; } = new LagItem[0];
+		public IReadOnlyList<LagItem> LagInfo { get; set; } = Array.Empty<LagItem>();
 
 		public string Language { get; set; }
 
-		public IReadOnlyList<LanguageItem> Languages { get; set; } = new LanguageItem[0];
+		public IReadOnlyList<LanguageItem> Languages { get; set; } = Array.Empty<LanguageItem>();
 
 		public string LegalTitleChars { get; set; }
 
-		public IReadOnlyList<LibrariesItem> Libraries { get; set; } = new LibrariesItem[0];
+		public IReadOnlyList<LibrariesItem> Libraries { get; set; } = Array.Empty<LibrariesItem>();
 
 		public string LinkPrefix { get; set; }
 
@@ -84,21 +84,21 @@ namespace RobinHood70.WallE.Base
 
 		public string Logo { get; set; }
 
-		public IReadOnlyList<MagicWordsItem> MagicWords { get; set; } = new MagicWordsItem[0];
+		public IReadOnlyList<MagicWordsItem> MagicWords { get; set; } = Array.Empty<MagicWordsItem>();
 
 		public string MainPage { get; set; }
 
 		public long MaxUploadSize { get; set; }
 
-		public IReadOnlyList<NamespacesItem> Namespaces { get; set; } = new NamespacesItem[0];
+		public IReadOnlyList<NamespacesItem> Namespaces { get; set; } = Array.Empty<NamespacesItem>();
 
-		public IReadOnlyList<NamespaceAliasesItem> NamespaceAliases { get; set; } = new NamespaceAliasesItem[0];
+		public IReadOnlyList<NamespaceAliasesItem> NamespaceAliases { get; set; } = Array.Empty<NamespaceAliasesItem>();
 
 		public string PhpSapi { get; set; }
 
 		public string PhpVersion { get; set; }
 
-		public IReadOnlyList<string> Protocols { get; set; } = new string[0];
+		public IReadOnlyList<string> Protocols { get; set; } = Array.Empty<string>();
 
 		public bool ReadOnly { get; set; }
 
@@ -122,13 +122,13 @@ namespace RobinHood70.WallE.Base
 
 		/// <summary>Gets or sets the list of subscribed hooks for the ShowHooks option.</summary>
 		/// <value>A collection of subscribed hook information.</value>
-		public IReadOnlyList<SubscribedHooksItem> SubscribedHooks { get; set; } = new SubscribedHooksItem[0];
+		public IReadOnlyList<SubscribedHooksItem> SubscribedHooks { get; set; } = Array.Empty<SubscribedHooksItem>();
 
 		public string SiteName { get; set; }
 
-		public IReadOnlyList<SkinsItem> Skins { get; set; } = new SkinsItem[0];
+		public IReadOnlyList<SkinsItem> Skins { get; set; } = Array.Empty<SkinsItem>();
 
-		public IReadOnlyList<SpecialPageAliasesItem> SpecialPageAliases { get; set; } = new SpecialPageAliasesItem[0];
+		public IReadOnlyList<SpecialPageAliasesItem> SpecialPageAliases { get; set; } = Array.Empty<SpecialPageAliasesItem>();
 
 		public StatisticsInfo Statistics { get; set; } = new StatisticsInfo();
 
@@ -140,16 +140,16 @@ namespace RobinHood70.WallE.Base
 
 		public string TimeZone { get; set; }
 
-		public IReadOnlyList<UserGroupsItem> UserGroups { get; set; } = new UserGroupsItem[0];
+		public IReadOnlyList<UserGroupsItem> UserGroups { get; set; } = Array.Empty<UserGroupsItem>();
 
-		public IReadOnlyList<string> Variables { get; set; } = new string[0];
+		public IReadOnlyList<string> Variables { get; set; } = Array.Empty<string>();
 
 		public string VariantArticlePath { get; set; }
 
 		/// <summary>Gets or sets the list of language variants.</summary>
 		/// <value>The list of language variants.</value>
 		/// <remarks>Language names are <i>not</i> included, even when returned by the wiki. This is to keep this collection compatible with the related Fallback collection and because of the unlikelihood of ever needing that information in a bot.</remarks>
-		public IReadOnlyList<string> Variants { get; set; } = new string[0];
+		public IReadOnlyList<string> Variants { get; set; } = Array.Empty<string>();
 
 		public string WikiId { get; set; }
 		#endregion

@@ -5,7 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.RequestBuilder;
 
-	public class ActionLogout : ActionModule<NullObject, NullObject> // Both values are dummy types here, since Logout is the exception to the rule, taking no input and providing no result.
+	internal class ActionLogout : ActionModule<NullObject, NullObject> // Both values are dummy types here, since Logout is the exception to the rule, taking no input and providing no result.
 	{
 		#region Constructors
 		public ActionLogout(WikiAbstractionLayer wal)

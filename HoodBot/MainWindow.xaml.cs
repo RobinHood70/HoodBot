@@ -5,6 +5,7 @@
 	using System.Windows;
 	using System.Windows.Controls;
 	using RobinHood70.HoodBot.ViewModel;
+	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Interaction logic for MainWindow.xaml.</summary>
 	public partial class MainWindow : Window, IParameterFetcher
@@ -18,6 +19,7 @@
 
 		public void GetParameter(ConstructorParameter parameter)
 		{
+			ThrowNull(parameter, nameof(parameter));
 			var valueType = parameter.Type;
 			var grid = this.JobParameters;
 			if (grid.RowDefinitions.Count > 0)
@@ -70,6 +72,7 @@
 
 		public void SetParameter(ConstructorParameter parameter)
 		{
+			ThrowNull(parameter, nameof(parameter));
 			var valueType = parameter.Type;
 			var control = this.JobParameters.FindName(parameter.Name);
 			if (control == null)

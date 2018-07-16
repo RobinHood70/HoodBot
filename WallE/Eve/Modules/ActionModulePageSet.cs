@@ -1,18 +1,24 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Globalization;
+	using System.Text.RegularExpressions;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.RequestBuilder;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public abstract class ActionModulePageSet<TInput, TOutput> : ActionModule<TInput, IReadOnlyList<TOutput>>, IPageSetInternal
+	public abstract class ActionModulePageSet<TInput, TOutput> : ActionModule<TInput, IReadOnlyList<TOutput>>, IPageSetGenerator
 		where TInput : PageSetInput
 		where TOutput : ITitle, new()
 	{
+		#region Static Fields
+		private static readonly Regex TooManyFinder = new Regex(@"Too many values .*?'(?<parameter>.*?)'.*?limit is (?<sizelimit>[0-9]+)", RegexOptions.Compiled);
+		#endregion
+
 		#region Fields
 		private readonly HashSet<long> badRevisionIds = new HashSet<long>();
 		private readonly Dictionary<string, string> converted = new Dictionary<string, string>();
@@ -62,7 +68,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		public PageSetResult<TOutput> SubmitPageSet(TInput input)
 		{
 			this.MaximumListSize = this.Wal.MaximumPageSetSize;
-			this.values = new List<string>(input.Values ?? new string[0]);
+			this.values = new List<string>(input.Values ?? Array.Empty<string>());
 			if (input.GeneratorInput != null)
 			{
 				this.Generator = this.Wal.ModuleFactory.CreateGenerator(input.GeneratorInput);
@@ -71,7 +77,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			this.Wal.ClearWarnings();
 			this.BeforeSubmit(input);
 			this.ContinueModule = this.Wal.ModuleFactory.CreateContinue();
-			this.ContinueModule.OnSubmit(this);
+			this.ContinueModule.BeforePageSetSubmit(this);
 			this.offset = 0;
 
 			do
@@ -94,7 +100,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			if (from == this.Name)
 			{
-				var match = ParsingExtensions.TooManyFinder.Match(text);
+				var match = TooManyFinder.Match(text);
 				if (match.Success)
 				{
 					var parameter = match.Groups["parameter"].Value;
@@ -146,14 +152,14 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 			}
 
-			result["converted"].AddToDictionary(this.converted, "from", "to");
+			AddToDictionary(result["converted"], this.converted);
 			var links = result["interwiki"].GetInterwikiLinks();
 			foreach (var link in links)
 			{
 				this.interwiki.Add(link.Title, link);
 			}
 
-			result["normalized"].AddToDictionary(this.normalized, "from", "to");
+			AddToDictionary(result["normalized"], this.normalized);
 			result["redirects"].GetRedirects(this.redirects, this.Wal);
 		}
 		#endregion
@@ -244,5 +250,24 @@ namespace RobinHood70.WallE.Eve.Modules
 			return null;
 		}
 		#endregion
+
+		#region Private Static Methods
+		private static void AddToDictionary<TKey, TValue>(JToken token, IDictionary<TKey, TValue> dict)
+		{
+			if (token != null)
+			{
+				foreach (var item in token)
+				{
+					if (item["from"] != null)
+					{
+						var key = item["from"].Value<TKey>();
+						var value = item["to"].Value<TValue>();
+						dict.Add(key, value);
+					}
+				}
+			}
+		}
+		#endregion
+
 	}
 }

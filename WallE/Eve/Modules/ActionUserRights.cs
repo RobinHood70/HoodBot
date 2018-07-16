@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionUserRights : ActionModule<UserRightsInput, UserRightsResult>
+	internal class ActionUserRights : ActionModule<UserRightsInput, UserRightsResult>
 	{
 		#region Constructors
 		public ActionUserRights(WikiAbstractionLayer wal)

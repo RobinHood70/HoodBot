@@ -5,7 +5,6 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.RequestBuilder;
-	using RobinHood70.WikiCommon;
 	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -18,13 +17,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 125;
 
 		public override string Name { get; } = "deletedrevisions";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "drv";
 		#endregion
 
@@ -34,7 +33,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		public static PropDeletedRevisions CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropDeletedRevisions(wal, input as DeletedRevisionsInput);
 		#endregion
 
-		#region Public Override Methods
+		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, DeletedRevisionsInput input)
 		{
 			if (this.IsGenerator && this.SiteVersion < 125)
@@ -52,9 +51,9 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override RevisionsItem GetItem(JToken result) => result.GetRevision(this.Output.Title);
 
-		protected override void GetResultsFromCurrentPage() => this.ResetMyList(this.Output.DeletedRevisions);
+		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.DeletedRevisions);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.DeletedRevisions = this.MyList.AsNewReadOnlyList();
+		protected override void SetResultsOnCurrentPage() => this.Output.DeletedRevisions = this.Items;
 		#endregion
 	}
 }

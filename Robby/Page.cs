@@ -358,7 +358,7 @@
 		{
 			var creator = this.Site.PageCreator;
 			var propertyInputs = creator.GetPropertyInputs(this.LoadOptions);
-			var pageSetInput = new DefaultPageSetInput(new[] { this.FullPageName }) { ConvertTitles = this.LoadOptions.ConvertTitles, Redirects = this.LoadOptions.FollowRedirects };
+			var pageSetInput = new QueryPageSetInput(new[] { this.FullPageName }) { ConvertTitles = this.LoadOptions.ConvertTitles, Redirects = this.LoadOptions.FollowRedirects };
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, propertyInputs, creator.CreatePageItem);
 			this.Populate(result.First());
 			this.Loaded = true;

@@ -104,7 +104,7 @@
 					sb.Append('|');
 					if (name.Length > 0)
 					{
-						sb.Append("(?i:" + Regex.Escape(name[0].ToString()) + ")");
+						sb.Append("(?i:" + Regex.Escape(name.Substring(0, 1)) + ")");
 						if (name.Length > 1)
 						{
 							var nameRemainder = Regex.Escape(name.Substring(1));

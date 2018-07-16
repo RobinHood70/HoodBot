@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionCheckToken : ActionModule<CheckTokenInput, CheckTokenResult>
+	internal class ActionCheckToken : ActionModule<CheckTokenInput, CheckTokenResult>
 	{
 		#region Constructors
 		public ActionCheckToken(WikiAbstractionLayer wal)

@@ -97,7 +97,7 @@
 		public IEnumerator<TItem> GetEnumerator() => this.items.GetEnumerator();
 
 		/// <summary>Returns an enumerator that iterates through a collection.</summary>
-		/// <returns>An <see cref="T:System.Collections.IEnumerator" /> object that can be used to iterate through the collection.</returns>
+		/// <returns>An <see cref="IEnumerator" /> object that can be used to iterate through the collection.</returns>
 		IEnumerator IEnumerable.GetEnumerator() => this.items.GetEnumerator();
 
 		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key..</summary>

@@ -9,9 +9,13 @@ namespace RobinHood70.WallE.Eve.Modules
 	// Property modules will be called repeatedly as each page's data is parsed. Input values will be stable between iterations, but the output being worked on may not. Do not persist output data between calls.
 	// See ListModuleBase for comments on methods they have in common.
 	public abstract class PropListModule<TInput, TItem> : PropModule<TInput>
-		where TInput : class
+		where TInput : class, IPropertyInput
 		where TItem : class
 	{
+		#region Fields
+		private readonly List<TItem> myList = new List<TItem>();
+		#endregion
+
 		#region Constructors
 		protected PropListModule(WikiAbstractionLayer wal, TInput input)
 			: base(wal, input)
@@ -20,7 +24,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Properties
-		protected IList<TItem> MyList { get; } = new List<TItem>();
+		protected IReadOnlyList<TItem> Items => this.myList.AsReadOnly();
 		#endregion
 
 		#region Public Override Methods
@@ -36,17 +40,16 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Methods
-		protected void ResetMyList(IEnumerable<TItem> add)
+		protected void ResetItems(IEnumerable<TItem> add)
 		{
 			ThrowNull(add, nameof(add));
-			var list = this.MyList;
-			list.Clear();
+			this.myList.Clear();
 			foreach (var item in add)
 			{
-				list.Add(item);
+				this.myList.Add(item);
 			}
 
-			this.SetItemsRemaining(list.Count);
+			this.SetItemsRemaining(this.myList.Count);
 		}
 		#endregion
 
@@ -63,19 +66,17 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(result, nameof(result));
 			ThrowNull(output, nameof(output));
-
-			if (this.ItemsRemaining > 0)
+			using (var enumeration = (result as IEnumerable<JToken>).GetEnumerator())
 			{
-				var list = this.MyList;
-				foreach (var node in result)
+				while (this.ItemsRemaining > 0 && enumeration.MoveNext())
 				{
-					var item = this.GetItem(node);
+					var item = this.GetItem(enumeration.Current);
 					if (item != null)
 					{
-						list.Add(item);
-						if (this.ItemsRemaining > 0 && this.ItemsRemaining < int.MaxValue)
+						this.myList.Add(item);
+						if (this.ItemsRemaining != int.MaxValue)
 						{
-							this.ItemsRemaining -= this.LoopCount;
+							this.ItemsRemaining--;
 						}
 					}
 				}

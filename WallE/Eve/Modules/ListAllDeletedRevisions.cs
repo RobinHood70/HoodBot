@@ -52,8 +52,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				return null;
 			}
 
-			var item = new AllRevisionsItem();
-			item.GetWikiTitle(result);
+			var item = new AllRevisionsItem().GetWikiTitle(result);
 
 			var revisions = new List<RevisionsItem>();
 			foreach (var revisionNode in result["revisions"])

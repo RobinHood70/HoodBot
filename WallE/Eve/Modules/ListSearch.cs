@@ -3,7 +3,6 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
@@ -33,7 +32,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		public override string Name { get; } = "search";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "sr";
 		#endregion
 
@@ -42,7 +41,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Methods
-		public SearchResult AsSearchTitleCollection() =>
+		public SearchResult AsSearchResult() =>
 			new SearchResult(this.Output)
 			{
 				Suggestion = this.suggestion,
@@ -51,7 +50,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Methods
-		[SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Not a normalization")]
 		protected override void BuildRequestLocal(Request request, SearchInput input)
 		{
 			ThrowNull(request, nameof(request));
@@ -97,6 +95,9 @@ namespace RobinHood70.WallE.Eve.Modules
 				WordCount = (int?)result["wordcount"] ?? 0,
 				Timestamp = (DateTime?)result["timestamp"],
 				TitleSnippet = (string)result["title"],
+				RedirectSnippet = (string)result["redirectsnippet"],
+				SectionTitle = (string)result["sectiontitle"],
+				SectionSnippet = (string)result["sectionsnippet"],
 			};
 			var redirectTitle = result["redirecttitle"];
 			if (redirectTitle != null)
@@ -119,10 +120,6 @@ namespace RobinHood70.WallE.Eve.Modules
 					item.RedirectTitle = (string)redirectTitle;
 				}
 			}
-
-			item.RedirectSnippet = (string)result["redirectsnippet"];
-			item.SectionTitle = (string)result["sectiontitle"];
-			item.SectionSnippet = (string)result["sectionsnippet"];
 
 			return item;
 		}

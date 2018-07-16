@@ -142,6 +142,15 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An attempt was made to call SetAsGenerator() on a module that cannot be a generator. Please do not call this method yourself; let the framework do it when approprirate..
+        /// </summary>
+        internal static string NotAGenerator {
+            get {
+                return ResourceManager.GetString("NotAGenerator", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} is not a string value..
         /// </summary>
         internal static string NotAString {

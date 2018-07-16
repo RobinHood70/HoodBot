@@ -17,14 +17,10 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Constructors
 		public ListUserContribs(WikiAbstractionLayer wal, UserContributionsInput input)
-			: base(wal, input)
-		{
-			var userList = input.Users.AsReadOnlyList();
-			this.continueName = this.SiteVersion < 114 || (input.UserPrefix == null && userList.Count == 1 && this.SiteVersion < 123) ? "start" : "continue";
-		}
+			: base(wal, input) => this.continueName = this.SiteVersion < 114 || (input.UserPrefix == null && input.Users.HasItems() && this.SiteVersion < 123) ? "start" : "continue";
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override string ContinueName => this.continueName;
 
 		public override int MinimumVersion { get; } = 109;
@@ -32,7 +28,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		public override string Name { get; } = "usercontribs";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "uc";
 		#endregion
 
@@ -62,37 +58,30 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override UserContributionsItem GetItem(JToken result)
-		{
-			if (result == null)
+		protected override UserContributionsItem GetItem(JToken result) => result == null
+			? null
+			: new UserContributionsItem
 			{
-				return null;
-			}
-
-			var item = new UserContributionsItem();
-			item.GetWikiTitle(result);
-			item.Flags =
-				result.GetFlag("commenthidden", UserContributionFlags.CommentHidden) |
-				result.GetFlag("minor", UserContributionFlags.Minor) |
-				result.GetFlag("new", UserContributionFlags.New) |
-				result.GetFlag("patrolled", UserContributionFlags.Patrolled) |
-				result.GetFlag("suppressed", UserContributionFlags.Suppressed) |
-				result.GetFlag("texthidden", UserContributionFlags.TextHidden) |
-				result.GetFlag("top", UserContributionFlags.Top) |
-				result.GetFlag("userhidden", UserContributionFlags.UserHidden);
-			item.UserId = (long)result["userid"];
-			item.User = (string)result["user"];
-			item.RevisionId = (long?)result["revid"] ?? 0;
-			item.ParentId = (long?)result["parentid"] ?? 0;
-			item.Timestamp = (DateTime?)result["timestamp"];
-			item.Comment = (string)result["comment"];
-			item.ParsedComment = (string)result["parsedcomment"];
-			item.Size = (int?)result["size"] ?? 0;
-			item.SizeDifference = (int?)result["sizediff"] ?? 0;
-			item.Tags = result.AsReadOnlyList<string>("tags");
-
-			return item;
-		}
+				Flags =
+					result.GetFlag("commenthidden", UserContributionFlags.CommentHidden) |
+					result.GetFlag("minor", UserContributionFlags.Minor) |
+					result.GetFlag("new", UserContributionFlags.New) |
+					result.GetFlag("patrolled", UserContributionFlags.Patrolled) |
+					result.GetFlag("suppressed", UserContributionFlags.Suppressed) |
+					result.GetFlag("texthidden", UserContributionFlags.TextHidden) |
+					result.GetFlag("top", UserContributionFlags.Top) |
+					result.GetFlag("userhidden", UserContributionFlags.UserHidden),
+				UserId = (long)result["userid"],
+				User = (string)result["user"],
+				RevisionId = (long?)result["revid"] ?? 0,
+				ParentId = (long?)result["parentid"] ?? 0,
+				Timestamp = (DateTime?)result["timestamp"],
+				Comment = (string)result["comment"],
+				ParsedComment = (string)result["parsedcomment"],
+				Size = (int?)result["size"] ?? 0,
+				SizeDifference = (int?)result["sizediff"] ?? 0,
+				Tags = result["tags"].AsReadOnlyList<string>()
+			}.GetWikiTitle(result);
 		#endregion
 	}
 }

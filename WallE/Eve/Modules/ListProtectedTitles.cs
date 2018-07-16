@@ -17,13 +17,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 115;
 
 		public override string Name { get; } = "protectedtitles";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "pt";
 		#endregion
 
@@ -31,7 +31,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		public static ListProtectedTitles CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new ListProtectedTitles(wal, input as ProtectedTitlesInput);
 		#endregion
 
-		#region Public Override Methods
+		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ProtectedTitlesInput input)
 		{
 			ThrowNull(request, nameof(request));
@@ -51,14 +51,9 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override ProtectedTitlesItem GetItem(JToken result)
-		{
-			if (result == null)
-			{
-				return null;
-			}
-
-			var item = new ProtectedTitlesItem()
+		protected override ProtectedTitlesItem GetItem(JToken result) => result == null
+			? null
+			: new ProtectedTitlesItem()
 			{
 				Namespace = (int?)result["ns"],
 				Title = (string)result["title"],
@@ -70,8 +65,6 @@ namespace RobinHood70.WallE.Eve.Modules
 				Expiry = result["expiry"].AsDate(),
 				Level = (string)result["level"],
 			};
-			return item;
-		}
 		#endregion
 	}
 }

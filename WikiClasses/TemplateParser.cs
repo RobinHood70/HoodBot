@@ -184,11 +184,11 @@
 
 		private Token GetToken()
 		{
-			var letter = this.Text[this.Index];
-			if (char.IsWhiteSpace(letter))
+			var letter = this.Text.Substring(this.Index, 1);
+			if (char.IsWhiteSpace(letter[0]))
 			{
 				this.Index++;
-				return new Token(letter.ToString(), true);
+				return new Token(letter, true);
 			}
 
 			// Traditional loop rather than foreach for speed, since GetToken is called repeatedly.
@@ -221,7 +221,7 @@
 			}
 
 			this.Index++;
-			return new Token(letter.ToString(), false);
+			return new Token(letter, false);
 		}
 
 		private Parameter ParseParameter(bool ignoreWhiteSpaceRules)

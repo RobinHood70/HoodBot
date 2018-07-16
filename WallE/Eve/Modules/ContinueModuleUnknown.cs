@@ -7,29 +7,17 @@ namespace RobinHood70.WallE.Eve.Modules
 
 	internal class ContinueModuleUnknown : ContinueModule
 	{
-		#region Protected Override Methods
+		#region Public Override Methods
 		public override void BuildRequest(Request request)
 		{
 			ThrowNull(request, nameof(request));
 			request.Add(ContinueModule2.Name);
 		}
 
-		public override int Deserialize(JToken parent)
-		{
-			if (parent != null)
-			{
-				if (parent[ContinueModule2.Name] != null)
-				{
-					return 2;
-				}
-				else if (parent[ContinueModule1.Name] != null)
-				{
-					return 1;
-				}
-			}
-
-			return 0;
-		}
+		public override int Deserialize(JToken parent) =>
+			parent == null ? 0 :
+			parent[ContinueModule2.Name] != null ? 2 :
+			parent[ContinueModule1.Name] != null ? 1 : 0;
 		#endregion
 	}
 }

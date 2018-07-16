@@ -44,9 +44,9 @@ namespace RobinHood70.WallE.Base
 
 		public string Preload { get; set; }
 
-		public IReadOnlyList<ProtectionsItem> Protections { get; set; } = new ProtectionsItem[0];
+		public IReadOnlyList<ProtectionsItem> Protections { get; set; } = Array.Empty<ProtectionsItem>();
 
-		public IReadOnlyList<string> RestrictionTypes { get; set; } = new string[0];
+		public IReadOnlyList<string> RestrictionTypes { get; set; } = Array.Empty<string>();
 
 		public DateTime? StartTimestamp { get; set; }
 

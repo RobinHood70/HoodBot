@@ -17,8 +17,6 @@ namespace RobinHood70.WallE.Base
 	public class UserInfoResult
 	{
 		#region Public Properties
-		public IReadOnlyDictionary<string, double> AcceptLanguages { get; set; }
-
 		public string BlockedBy { get; set; }
 
 		public long BlockedById { get; set; }

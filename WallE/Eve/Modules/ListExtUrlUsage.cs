@@ -15,13 +15,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 111;
 
 		public override string Name { get; } = "exturlusage";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "eu";
 		#endregion
 
@@ -43,19 +43,12 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override ExternalUrlUsageItem GetItem(JToken result)
-		{
-			if (result == null)
+		protected override ExternalUrlUsageItem GetItem(JToken result) => result == null
+			? null
+			: new ExternalUrlUsageItem
 			{
-				return null;
-			}
-
-			var item = new ExternalUrlUsageItem();
-			item.GetWikiTitle(result);
-			item.Url = (string)result["url"];
-
-			return item;
-		}
+				Url = (string)result["url"]
+			}.GetWikiTitle(result);
 		#endregion
 	}
 }

@@ -16,17 +16,17 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 117;
 
 		public override string Name { get; } = "filearchive";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "fa";
 		#endregion
 
-		#region Public Override Methods
+		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, FileArchiveInput input)
 		{
 			ThrowNull(request, nameof(request));
@@ -53,12 +53,15 @@ namespace RobinHood70.WallE.Eve.Modules
 				return null;
 			}
 
-			var item = new FileArchiveItem();
+			// Not using GetWikiTitle because PageId uses non-standard name.
+			var item = new FileArchiveItem
+			{
+				Name = (string)result["name"],
+				Namespace = (int?)result["ns"],
+				PageId = (long?)result["id"] ?? 0,
+				Title = (string)result["title"]
+			};
 			result.ParseImageInfo(item);
-			item.PageId = (long?)result["id"] ?? 0;
-			item.Name = (string)result["name"];
-			item.Namespace = (int?)result["ns"];
-			item.Title = (string)result["title"];
 
 			return item;
 		}

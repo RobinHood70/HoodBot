@@ -3,7 +3,7 @@
 	using System.Collections.Generic;
 
 	/// <summary>This is a simple wrapper around an enumerable string which acts as a pseudo-enumeration of string constants for tokens.</summary>
-	public class TokensInput
+	internal class TokensInput
 	{
 		#region Constructors
 

@@ -3,8 +3,10 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System.Collections.Generic;
 
-	public interface IQueryPageSet : IPageSetInternal
+	internal interface IQueryPageSet : IPageSetGenerator
 	{
-		HashSet<string> DisabledModules { get; }
+		#region Properties
+		HashSet<string> InactiveModules { get; }
+		#endregion
 	}
 }

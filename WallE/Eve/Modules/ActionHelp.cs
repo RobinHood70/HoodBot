@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WikiCommon.Globals;
 
 	// MW: 1.27
-	public class ActionHelp : ActionModule<HelpInput, HelpResult>
+	internal class ActionHelp : ActionModule<HelpInput, HelpResult>
 	{
 		#region Constructors
 		public ActionHelp(WikiAbstractionLayer wal)
@@ -18,7 +18,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 0;
 
 		public override string Name { get; } = "help";

@@ -70,6 +70,8 @@
 		/// <returns>The current collection (fluent interface).</returns>
 		public ParameterCollection Add(string name, string fileName, byte[] value)
 		{
+			ThrowNull(name, nameof(name));
+			ThrowNull(fileName, nameof(fileName));
 			if (value != null)
 			{
 				this.Add(new FileParameter(this.Prefix + name, fileName, value));
@@ -108,6 +110,7 @@
 		/// <returns>The current collection (fluent interface).</returns>
 		public ParameterCollection Add(string name, string value)
 		{
+			ThrowNull(name, nameof(name));
 			this.Add(new StringParameter(this.Prefix + name, value));
 			return this;
 		}
@@ -139,7 +142,7 @@
 		public ParameterCollection Add(string name, IEnumerable<string> values)
 		{
 			// Do not add if values is empty.
-			if (values?.AsReadOnlyCollection().Count > 0)
+			if (values.HasItems())
 			{
 				this.AddForced(name, values);
 			}
@@ -178,6 +181,7 @@
 		/// <returns>The current collection (fluent interface).</returns>
 		public ParameterCollection AddFilterPiped(string name, string trueValue, Filter filter)
 		{
+			ThrowNull(trueValue, nameof(trueValue));
 			switch (filter)
 			{
 				case Filter.Only:
@@ -250,6 +254,8 @@
 		/// <returns>The current collection (fluent interface).</returns>
 		public ParameterCollection AddForced(string name, IEnumerable<string> values)
 		{
+			ThrowNull(name, nameof(name));
+			ThrowNull(values, nameof(values));
 			var newKey = this.Prefix + name;
 			if (this.TryGetValue(newKey, out IParameter param))
 			{
@@ -273,6 +279,7 @@
 		/// <returns>The current collection (fluent interface).</returns>
 		public ParameterCollection AddFormat(string value)
 		{
+			ThrowNull(value, nameof(value));
 			this.Add(new FormatParameter(value));
 			return this;
 		}
@@ -283,6 +290,8 @@
 		/// <returns>The current collection (fluent interface).</returns>
 		public ParameterCollection AddHidden(string name, string value)
 		{
+			ThrowNull(name, nameof(name));
+			ThrowNull(value, nameof(value)); // Unlike regular Add, there is no condition in which this should be null.
 			this.Add(new HiddenParameter(this.Prefix + name, value));
 			return this;
 		}
@@ -417,12 +426,14 @@
 		/// <returns>The current collection (fluent interface).</returns>
 		public ParameterCollection AddIfPositiveIf(string name, long value, bool condition) => condition && value > 0 ? this.Add(name, value) : this;
 
-		/// <summary>Adds an enumerable string parameter. Duplicate values will be emitted unaltered.</summary>
+		/// <summary>Adds an enumerable string parameter. Unlike the regular enumerable version of Add, duplicate values will be emitted unaltered.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="values">The values.</param>
 		/// <returns>The current collection (fluent interface).</returns>
 		public ParameterCollection AddList(string name, IEnumerable<string> values)
 		{
+			ThrowNull(name, nameof(name));
+			ThrowNull(values, nameof(values));
 			this.Add(new PipedListParameter(name, values));
 			return this;
 		}

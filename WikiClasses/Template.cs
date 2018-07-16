@@ -437,7 +437,7 @@
 			foreach (var param in this.AnonymousOnly)
 			{
 				anon++;
-				param.Name = anon.ToString();
+				param.Name = anon.ToStringInvariant();
 			}
 		}
 
@@ -783,7 +783,7 @@
 				}
 				else
 				{
-					retval += "(?i:" + Regex.Escape(name[0].ToString()) + ")";
+					retval += "(?i:" + Regex.Escape(name.Substring(0, 1)) + ")";
 					if (name.Length > 1)
 					{
 						retval += Regex.Escape(name.Substring(1)).Replace(@"\ ", @"[_\ ]+");

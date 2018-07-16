@@ -15,17 +15,17 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 121;
 
 		public override string Name { get; } = "pageswithprop";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "pwp";
 		#endregion
 
-		#region Public Override Methods
+		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, PagesWithPropertyInput input)
 		{
 			ThrowNull(request, nameof(request));
@@ -37,19 +37,12 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override PagesWithPropertyItem GetItem(JToken result)
-		{
-			if (result == null)
+		protected override PagesWithPropertyItem GetItem(JToken result) => result == null
+			? null
+			: new PagesWithPropertyItem
 			{
-				return null;
-			}
-
-			var item = new PagesWithPropertyItem();
-			item.GetWikiTitle(result);
-			item.Value = (string)result["value"];
-
-			return item;
-		}
+				Value = (string)result["value"]
+			}.GetWikiTitle(result);
 		#endregion
 	}
 }

@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WikiCommon.Globals;
 
 	// MWVERSION: 1.28
-	public class ActionResetPassword : ActionModule<ResetPasswordInput, ResetPasswordResult>
+	internal class ActionResetPassword : ActionModule<ResetPasswordInput, ResetPasswordResult>
 	{
 		#region Constructors
 		public ActionResetPassword(WikiAbstractionLayer wal)
@@ -26,7 +26,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override RequestType RequestType { get; } = RequestType.Post;
 		#endregion
 
-		#region Public Override Methods
+		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ResetPasswordInput input)
 		{
 			ThrowNull(request, nameof(request));

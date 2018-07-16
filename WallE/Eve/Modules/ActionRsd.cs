@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionRsd : ActionModule<NullObject, CustomResult>
+	internal class ActionRsd : ActionModule<NullObject, CustomResult>
 	{
 		#region Constructors
 		public ActionRsd(WikiAbstractionLayer wal)

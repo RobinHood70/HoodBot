@@ -8,14 +8,14 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.RequestBuilder;
-	using RobinHood70.WikiCommon;
 	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionQuery : ActionModulePageSet<QueryInput, PageItem>, IQueryPageSet
+	internal class ActionQuery : ActionModulePageSet<QueryInput, PageItem>, IQueryPageSet
 	{
 		#region Fields
 		private readonly Func<PageItem> pageItemFactory;
+
 		private MetaUserInfo userModule;
 		#endregion
 
@@ -30,11 +30,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Properties
-		public HashSet<string> DisabledModules { get; } = new HashSet<string>();
-
-		public QueryInput Input { get; private set; }
-
-		public int ItemsRemaining { get; set; }
+		public HashSet<string> InactiveModules { get; } = new HashSet<string>();
 		#endregion
 
 		#region Public Override Properties
@@ -43,12 +39,18 @@ namespace RobinHood70.WallE.Eve.Modules
 		public override string Name { get; } = "query";
 		#endregion
 
+		#region Protected Properties
+		protected int ItemsRemaining { get; private set; }
+
+		protected QueryInput Input { get; private set; }
+		#endregion
+
 		#region Protected Override Properties
 		protected override bool Continues
 		{
 			get
 			{
-				var continueParsing = this.ItemsRemaining != 0 || !this.ContinueModule.BatchComplete;
+				var continueParsing = this.ItemsRemaining > 0 || !this.ContinueModule.BatchComplete;
 				if (continueParsing)
 				{
 					// Little point in short-circuiting this beyond the initial check since module count will be small, so just run through all of them.
@@ -62,20 +64,10 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 		}
 
-		protected override int CurrentListSize
-		{
-			get
-			{
-				if (this.ItemsRemaining == int.MaxValue || this.ItemsRemaining + 10 > this.MaximumListSize)
-				{
-					return this.MaximumListSize;
-				}
-				else
-				{
-					return this.ItemsRemaining <= 5 ? 10 : this.ItemsRemaining + 10;
-				}
-			}
-		}
+		protected override int CurrentListSize =>
+			(this.ItemsRemaining == int.MaxValue || this.ItemsRemaining + 10 > this.MaximumListSize)
+			? this.MaximumListSize
+			: (this.ItemsRemaining <= 5 ? 10 : this.ItemsRemaining + 10);
 
 		protected override IList<PageItem> Pages { get; } = new KeyedPages();
 
@@ -117,7 +109,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					return;
 				}
 
-				foreach (var module in this.Input.Modules)
+				foreach (var module in this.Input.QueryModules)
 				{
 					if (module.HandleWarning(from, text))
 					{
@@ -191,7 +183,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				bool useExisting;
 
 				// If a MetaUserInfo module already exists, remove it (so as not to corrupt its input data) and replace it with a merged copy of ours and the original.
-				if (newInput.Modules.TryGetValue("userinfo", out MetaUserInfo userInfo))
+				if (newInput.QueryModules.TryGetValue("userinfo", out MetaUserInfo userInfo))
 				{
 					userInfoInput = userInfo.Input;
 					useExisting = true;
@@ -213,7 +205,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 				if (!useExisting)
 				{
-					newInput.Modules.Add(userInfo);
+					newInput.QueryModules.Add(userInfo);
 				}
 			}
 
@@ -226,23 +218,16 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(input, nameof(input));
 			foreach (var module in this.Input.PropertyModules)
 			{
-				if (!this.DisabledModules.Contains(module.Name))
+				if (!this.InactiveModules.Contains(module.Name))
 				{
 					module.BuildRequest(request);
 				}
 			}
 
-			foreach (var module in this.Input.Modules)
+			foreach (var module in this.Input.QueryModules)
 			{
 				module.BuildRequest(request);
 			}
-
-			/*
-			if (this.userModule != null && this.Wal.UserId > 0)
-			{
-				this.userModule.BuildRequest(request);
-			}
-			*/
 
 			request.Add("iwurl", input.GetInterwikiUrls);
 		}
@@ -260,26 +245,27 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(parent, nameof(parent));
 			base.DeserializeParent(parent);
-			var modules = this.Input.Modules;
+			var modules = this.Input.QueryModules;
 			var propModules = this.Input.PropertyModules;
 			var limits = parent["limits"];
 			if (limits != null)
 			{
-#pragma warning disable IDE0007 // Use implicit type
-				foreach (JProperty limit in limits)
-#pragma warning restore IDE0007 // Use implicit type
+				foreach (var limit in limits.Children<JProperty>())
 				{
-					if (this.Generator.Name == limit.Name)
+					var value = (int)limit.Value;
+					if (this.Generator?.Name == limit.Name)
 					{
-						this.Generator.ModuleLimit = (int)limit.Value;
+						this.Generator.ModuleLimit = value;
 					}
-					else if (modules.TryGetValue(limit.Name, out var module))
+
+					// Should not be an "else if" because generator could be the same type as another module.
+					if (modules.TryGetValue(limit.Name, out var module))
 					{
-						module.ModuleLimit = (int)limit.Value;
+						module.ModuleLimit = value;
 					}
 					else if (propModules.TryGetValue(limit.Name, out var propModule))
 					{
-						propModule.ModuleLimit = (int)limit.Value;
+						propModule.ModuleLimit = value;
 					}
 				}
 			}
@@ -308,7 +294,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 			}
 
-			foreach (var module in this.Input.Modules)
+			foreach (var module in this.Input.QueryModules)
 			{
 				module.Deserialize(result);
 			}
@@ -317,14 +303,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Private Static Methods
-		private static string FakeTitleFromId(long? pageId) => pageId == null ? null : "#" + ((long)pageId).ToStringInvariant();
-		#endregion
-
 		#region Private Methods
 		private void CheckActiveModules(QueryInput input)
 		{
-			if (input.Modules.Count > 0 || input.PropertyModules.Count > 0)
+			if (input.QueryModules.Count > 0 || input.PropertyModules.Count > 0)
 			{
 				// Check if any modules are active. This is done before adding/merging the UserModule, since that would always make it appear that there's an active module.
 				var hasActiveModule = false;
@@ -354,9 +336,8 @@ namespace RobinHood70.WallE.Eve.Modules
 			foreach (var page in result)
 			{
 				var innerResult = this.Wal.DetectedFormatVersion == 2 ? page : page?.First;
-				var pageName = (string)innerResult["title"];
 				var pageId = (long?)innerResult["pageid"];
-				var search = pageName ?? FakeTitleFromId(pageId);
+				var search = (string)innerResult["title"] ?? FakeTitleFromId(pageId);
 				if (search == null)
 				{
 					// Some generators can return missing pages with no title (or ID?), most commonly when links tables are out of date and need refreshLinks.php run on them. If we get one of these, skip to the next page.
@@ -368,7 +349,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 				if (!pages.TryGetValue(search, out var item))
 				{
-					if (this.ItemsRemaining == 0)
+					if (this.ItemsRemaining <= 0)
 					{
 						// If we've hit our limit, stop creating new pages, but we still need to check existing ones in case they're continued pages from previous results.
 						continue;
@@ -417,7 +398,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 			#endregion
 
-			#region Public Override Methods
+			#region Protected Override Methods
 			protected override string GetKeyForItem(PageItem item) => item?.Title;
 			#endregion
 		}

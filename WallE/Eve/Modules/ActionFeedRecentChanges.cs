@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionFeedRecentChanges : ActionModule<FeedRecentChangesInput, CustomResult>
+	internal class ActionFeedRecentChanges : ActionModule<FeedRecentChangesInput, CustomResult>
 	{
 		#region Constructors
 		public ActionFeedRecentChanges(WikiAbstractionLayer wal)

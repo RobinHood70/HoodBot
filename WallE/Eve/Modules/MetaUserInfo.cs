@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class MetaUserInfo : QueryModule<UserInfoInput, UserInfoResult>
+	internal class MetaUserInfo : QueryModule<UserInfoInput, UserInfoResult>
 	{
 		#region Constructors
 		public MetaUserInfo(WikiAbstractionLayer wal, UserInfoInput input)
@@ -19,13 +19,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 111;
 
 		public override string Name { get; } = "userinfo";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string ModuleType { get; } = "meta";
 
 		protected override string Prefix { get; } = "ui";
@@ -50,18 +50,6 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(result, nameof(result));
 			ThrowNull(output, nameof(output));
 
-			// Not sure there's much value in this, given that the bot doesn't emit this header, nor does the API do anything with it even if it did, but it's here for completeness in case someone wants to add it and then intercept it again in a custom IClient.
-			var token = result["acceptlang"];
-			var acceptLanguages = new Dictionary<string, double>();
-			if (token != null)
-			{
-				foreach (var lang in token)
-				{
-					acceptLanguages.Add((string)lang.AsBCContent("code"), (double)lang["q"]);
-				}
-			}
-
-			output.AcceptLanguages = acceptLanguages;
 			output.BlockExpiry = result["blockexpiry"].AsDate();
 			output.BlockId = (long?)result["blockid"] ?? 0;
 			output.BlockReason = (string)result["blockreason"];
@@ -69,13 +57,13 @@ namespace RobinHood70.WallE.Eve.Modules
 			output.BlockedBy = (string)result["blockedby"];
 			output.BlockedById = (long?)result["blockedbyid"] ?? 0;
 
-			token = result["changeablegroups"];
+			var token = result["changeablegroups"];
 			var changeableGroups = new ChangeableGroupsInfo()
 			{
-				Add = token.AsReadOnlyList<string>("add"),
-				AddSelf = token.AsReadOnlyList<string>("add-self"),
-				Remove = token.AsReadOnlyList<string>("remove"),
-				RemoveSelf = token.AsReadOnlyList<string>("remove-self"),
+				Add = token["add"].AsReadOnlyList<string>(),
+				AddSelf = token["add-self"].AsReadOnlyList<string>(),
+				Remove = token["remove"].AsReadOnlyList<string>(),
+				RemoveSelf = token["remove-self"].AsReadOnlyList<string>(),
 			};
 			output.ChangeableGroups = changeableGroups;
 			output.EditCount = (long?)result["editcount"] ?? -1;
@@ -84,9 +72,9 @@ namespace RobinHood70.WallE.Eve.Modules
 			output.Flags =
 				result.GetFlag("anon", UserInfoFlags.Anonymous) |
 				result.GetFlag("messages", UserInfoFlags.HasMessage);
-			output.Groups = result.AsReadOnlyList<string>("groups");
+			output.Groups = result["groups"].AsReadOnlyList<string>();
 			output.Id = (long?)result["id"] ?? -1;
-			output.ImplicitGroups = result.AsReadOnlyList<string>("implicitgroups");
+			output.ImplicitGroups = result["implicitgroups"].AsReadOnlyList<string>();
 			output.Name = (string)result["name"];
 
 			var options = result["options"];
@@ -97,9 +85,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			token = result["ratelimits"];
 			if (token != null)
 			{
-#pragma warning disable IDE0007 // Use implicit type
-				foreach (JProperty entry in token)
-#pragma warning restore IDE0007 // Use implicit type
+				foreach (var entry in token.Children<JProperty>())
 				{
 					rateLimits.Add(entry.Name, GetRateLimits(entry.Value));
 				}
@@ -108,7 +94,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			output.RateLimits = rateLimits;
 			output.RealName = (string)result["realname"];
 			output.RegistrationDate = result["registrationdate"].AsDate();
-			output.Rights = result.AsReadOnlyList<string>("rights");
+			output.Rights = result["rights"].AsReadOnlyList<string>();
 			var unreadCount = (string)result["unreadcount"] ?? "-1";
 			if (unreadCount.EndsWith("+", StringComparison.Ordinal))
 			{
@@ -133,20 +119,13 @@ namespace RobinHood70.WallE.Eve.Modules
 			return rateLimits;
 		}
 
-		private static RateLimitInfo GetRateLimit(JToken value)
-		{
-			if (value == null)
-			{
-				return null;
-			}
-
-			var rateLimit = new RateLimitInfo()
+		private static RateLimitInfo GetRateLimit(JToken value) => value == null
+			? null
+			: new RateLimitInfo()
 			{
 				Hits = (int)value["hits"],
 				Seconds = (int)value["seconds"],
 			};
-			return rateLimit;
-		}
 		#endregion
 	}
 }

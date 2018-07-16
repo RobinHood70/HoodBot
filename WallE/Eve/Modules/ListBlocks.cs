@@ -17,13 +17,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 112;
 
 		public override string Name { get; } = "blocks";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "bk";
 		#endregion
 
@@ -47,14 +47,9 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override BlocksResult GetItem(JToken result)
-		{
-			if (result == null)
-			{
-				return null;
-			}
-
-			var item = new BlocksResult()
+		protected override BlocksResult GetItem(JToken result) => result == null
+			? null
+			: new BlocksResult()
 			{
 				Id = (long?)result["id"] ?? 0,
 				User = (string)result["user"],
@@ -75,8 +70,6 @@ namespace RobinHood70.WallE.Eve.Modules
 				RangeStart = (string)result["rangestart"],
 				RangeEnd = (string)result["rangeend"],
 			};
-			return item;
-		}
 		#endregion
 	}
 }

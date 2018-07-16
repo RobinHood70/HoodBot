@@ -5,7 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 	// Property modules will be called repeatedly as each page's data is parsed. Input values will be stable between iterations, but the output being worked on may not. Do not persist output data between calls.
 	public abstract class PropModule<TInput> : QueryModule<TInput, PageItem>, IPropertyModule
-		where TInput : class
+		where TInput : class, IPropertyInput
 	{
 		#region Constructors
 		protected PropModule(WikiAbstractionLayer wal, TInput input)
@@ -14,7 +14,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string ModuleType { get; } = "prop";
 		#endregion
 

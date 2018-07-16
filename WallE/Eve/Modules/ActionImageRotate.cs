@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionImageRotate : ActionModulePageSet<ImageRotateInput, ImageRotateItem>
+	internal class ActionImageRotate : ActionModulePageSet<ImageRotateInput, ImageRotateItem>
 	{
 		#region Constructors
 		public ActionImageRotate(WikiAbstractionLayer wal)

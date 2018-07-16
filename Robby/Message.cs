@@ -5,7 +5,7 @@
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Stores a MediaWiki page along with associated data.</summary>
-	/// <seealso cref="RobinHood70.Robby.Page" />
+	/// <seealso cref="Page" />
 	public class Message : Page
 	{
 		// TODO: Message has different data loaded depending whether it's a faked page or a genuine message. Is this a good idea? Loading all data would require calls to both Load and AllMessages, which could be a undesirable in the PageCreator. Might be a better idea to split this into Message and MessagePage objects depending on behaviour desired, with Message being custom and light-weight.
@@ -34,7 +34,7 @@
 
 		/// <summary>Gets the default message.</summary>
 		/// <value>The default message.</value>
-		/// <remarks>If the message has been loaded via any of the <see cref="T:Site" /> GetMessage-related methods, this will contain the default version of the message, even if it has since been customized.</remarks>
+		/// <remarks>If the message has been loaded via any of the <see cref="Site" /> GetMessage-related methods, this will contain the default version of the message, even if it has since been customized.</remarks>
 		public string DefaultMessage { get; private set; }
 
 		/// <summary>Gets a value indicating whether the default value was missing.</summary>

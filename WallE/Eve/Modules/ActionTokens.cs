@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionTokens : ActionModule<TokensInput, IReadOnlyDictionary<string, string>>
+	internal class ActionTokens : ActionModule<TokensInput, IReadOnlyDictionary<string, string>>
 	{
 		#region Constructors
 		public ActionTokens(WikiAbstractionLayer wal)
@@ -37,13 +37,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(result, nameof(result));
 			var output = new Dictionary<string, string>();
-#pragma warning disable IDE0007 // Use implicit type
-			foreach (JProperty token in result)
-#pragma warning restore IDE0007 // Use implicit type
-			{
-				var value = (string)token.Value;
-				output.Add(token.Name, value);
-			}
+			result.AddPropertiesToDictionary(output);
 
 			return output;
 		}

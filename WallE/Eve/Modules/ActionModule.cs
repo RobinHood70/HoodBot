@@ -237,9 +237,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			var warnings = parent["warnings"];
 			if (warnings != null)
 			{
-#pragma warning disable IDE0007 // Use implicit type
-				foreach (JProperty warning in warnings)
-#pragma warning restore IDE0007 // Use implicit type
+				foreach (var warning in warnings.Children<JProperty>())
 				{
 					var description = (string)warning.First.AsBCContent("warnings");
 

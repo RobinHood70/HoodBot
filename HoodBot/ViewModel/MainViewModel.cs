@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Diagnostics;
+	using System.Globalization;
 	using System.IO;
 	using System.Threading;
 	using System.Threading.Tasks;
@@ -196,7 +197,7 @@
 		#region Private Static Methods
 		private static string FormatTimeSpan(TimeSpan allJobsTimer)
 		{
-			var retval = allJobsTimer.ToString(@"h\h\ mm\m\ ss\.f");
+			var retval = allJobsTimer.ToString(@"h\h\ mm\m\ ss\.f", CultureInfo.CurrentCulture);
 			retval = retval.TrimStart('0', ':', 'h', 'm', ' ').TrimEnd('0', '.');
 			if (retval.Length == 0 || retval[0] == '.')
 			{

@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionProtect : ActionModule<ProtectInput, ProtectResult>
+	internal class ActionProtect : ActionModule<ProtectInput, ProtectResult>
 	{
 		#region Constructors
 		public ActionProtect(WikiAbstractionLayer wal)
@@ -72,7 +72,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				foreach (var protection in protections)
 				{
 					var item = new ProtectResultItem();
-					var kvp = (JProperty)protection.First;
+					var kvp = protection.First as JProperty;
 					item.Type = kvp.Name;
 					item.Level = (string)kvp.Value;
 					item.Expiry = protection["expiry"].AsDate();

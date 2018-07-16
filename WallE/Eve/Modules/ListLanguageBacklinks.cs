@@ -15,13 +15,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 118;
 
 		public override string Name { get; } = "langbacklinks";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "lbl";
 		#endregion
 
@@ -29,7 +29,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		public static ListLanguageBacklinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new ListLanguageBacklinks(wal, input as LanguageBacklinksInput);
 		#endregion
 
-		#region Public Override Methods
+		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, LanguageBacklinksInput input)
 		{
 			ThrowNull(request, nameof(request));
@@ -42,21 +42,14 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override LanguageBacklinksItem GetItem(JToken result)
-		{
-			if (result == null)
+		protected override LanguageBacklinksItem GetItem(JToken result) => result == null
+			? null
+			: new LanguageBacklinksItem
 			{
-				return null;
-			}
-
-			var item = new LanguageBacklinksItem();
-			item.GetWikiTitle(result);
-			item.IsRedirect = result["redirect"].AsBCBool();
-			item.LanguageCode = (string)result["lllang"];
-			item.LanguageTitle = (string)result["lltitle"];
-
-			return item;
-		}
+				IsRedirect = result["redirect"].AsBCBool(),
+				LanguageCode = (string)result["lllang"],
+				LanguageTitle = (string)result["lltitle"]
+			}.GetWikiTitle(result);
 		#endregion
 	}
 }

@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionEmailUser : ActionModule<EmailUserInput, EmailUserResult>
+	internal class ActionEmailUser : ActionModule<EmailUserInput, EmailUserResult>
 	{
 		#region Constructors
 		public ActionEmailUser(WikiAbstractionLayer wal)

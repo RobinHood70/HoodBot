@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WikiCommon.Globals;
 
 	// IMPNOTE: Result is slightly reformatted from the API to provide a straight-forward collection of pages that were moved.
-	public class ActionMove : ActionModule<MoveInput, MoveResult>
+	internal class ActionMove : ActionModule<MoveInput, MoveResult>
 	{
 		#region Constructors
 		public ActionMove(WikiAbstractionLayer wal)
@@ -66,7 +66,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Private Methods
+		#region Private Static Methods
 		private static void DeserializeMove(JToken result, IList<MoveItem> output, string prefix)
 		{
 			if (result[prefix + "from"] != null)

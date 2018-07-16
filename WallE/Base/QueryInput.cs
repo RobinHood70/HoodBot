@@ -1,13 +1,12 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
-namespace RobinHood70.WallE.Eve.Modules
+namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
-	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Eve.Modules;
 	using static RobinHood70.WallE.ProjectGlobals;
-	using static RobinHood70.WikiCommon.Globals;
 
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "All inputs have Input suffix, even when collections.")]
-	public class QueryInput : DefaultPageSetInput
+	public class QueryInput : QueryPageSetInput
 	{
 		#region Constructors
 		public QueryInput(params IQueryModule[] modules)
@@ -25,7 +24,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					if (module != null)
 					{
-						this.Modules.Add(module);
+						this.QueryModules.Add(module);
 					}
 				}
 			}
@@ -33,26 +32,28 @@ namespace RobinHood70.WallE.Eve.Modules
 			this.PropertyModules = new ModuleCollection<IPropertyModule>();
 		}
 
-		public QueryInput(WikiAbstractionLayer wal, DefaultPageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs)
+		public QueryInput(QueryPageSetInput pageSetInput, IEnumerable<IPropertyModule> propertyModules)
 			: base(pageSetInput)
 		{
-			ThrowNull(wal, nameof(wal));
-			this.PropertyModules = wal.ModuleFactory.CreateModules(propertyInputs);
+			ThrowCollectionHasNullItems(propertyModules, nameof(propertyModules));
 			this.PageSetQuery = true;
+			foreach (var module in propertyModules)
+			{
+				this.PropertyModules.Add(module);
+			}
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="QueryInput" /> class for combining multiple standard query modules with a pageset query module.</summary>
-		/// <param name="wal">The calling abstraction layer.</param>
 		/// <param name="pageSetInput">Page set information.</param>
-		/// <param name="propertyInputs">Inputs for the property modules to use.</param>
-		/// <param name="queryModules">Non-query modules to use.</param>
-		public QueryInput(WikiAbstractionLayer wal, DefaultPageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs, IEnumerable<IQueryModule> queryModules)
-			: this(wal, pageSetInput, propertyInputs)
+		/// <param name="propertyModules">Property modules to use.</param>
+		/// <param name="queryModules">Non-pageset query modules to use.</param>
+		public QueryInput(QueryPageSetInput pageSetInput, IEnumerable<IPropertyModule> propertyModules, IEnumerable<IQueryModule> queryModules)
+			: this(pageSetInput, propertyModules)
 		{
-			ThrowNullRefCollection(queryModules, nameof(queryModules));
+			ThrowCollectionHasNullItems(queryModules, nameof(queryModules));
 			foreach (var module in queryModules)
 			{
-				this.Modules.Add(module);
+				this.QueryModules.Add(module);
 			}
 		}
 
@@ -60,18 +61,19 @@ namespace RobinHood70.WallE.Eve.Modules
 			: base(input)
 		{
 			this.GetInterwikiUrls = input.GetInterwikiUrls;
-			this.Modules = input.Modules;
+			this.QueryModules = input.QueryModules;
 			this.PageSetQuery = input.PageSetQuery;
 			this.PropertyModules = input.PropertyModules;
 		}
 		#endregion
 
-		#region Public Properties
-		public IEnumerable<IQueryModule> AllModules
+		// All properties are internal because anything else risks modification in mid-query.
+		#region Internal Properties
+		internal IEnumerable<IQueryModule> AllModules
 		{
 			get
 			{
-				foreach (var module in this.Modules)
+				foreach (var module in this.QueryModules)
 				{
 					yield return module;
 				}
@@ -83,13 +85,13 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 		}
 
-		public bool GetInterwikiUrls { get; set; }
+		internal bool GetInterwikiUrls { get; set; }
 
-		public ModuleCollection<IQueryModule> Modules { get; } = new ModuleCollection<IQueryModule>();
+		internal bool PageSetQuery { get; }
 
-		public ModuleCollection<IPropertyModule> PropertyModules { get; }
+		internal ModuleCollection<IPropertyModule> PropertyModules { get; } = new ModuleCollection<IPropertyModule>();
 
-		public bool PageSetQuery { get; }
+		internal ModuleCollection<IQueryModule> QueryModules { get; } = new ModuleCollection<IQueryModule>();
 		#endregion
 	}
 }

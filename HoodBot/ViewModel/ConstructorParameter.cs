@@ -4,12 +4,14 @@
 	using System.Collections.Generic;
 	using System.Reflection;
 	using RobinHood70.HoodBot.Jobs.Design;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public sealed class ConstructorParameter : IEquatable<ConstructorParameter>
 	{
 		#region Constructors
 		public ConstructorParameter(ParameterInfo parameter)
 		{
+			ThrowNull(parameter, nameof(parameter));
 			var attributes = parameter.GetCustomAttributes(typeof(JobParameterAttribute), true);
 			if (attributes.Length > 1)
 			{
@@ -53,6 +55,14 @@
 
 			return this.Label == other.Label && this.Name == other.Name && this.Type == other.Type && this.Value == other.Value;
 		}
+		#endregion
+
+		#region Public Override Methods
+		public override bool Equals(object obj) => this.Equals(obj as ConstructorParameter);
+
+		public override int GetHashCode() => CompositeHashCode(this.Label, this.Name, this.Type, this.Value);
+
+		public override string ToString() => this.Type.Name + ' ' + this.Name;
 		#endregion
 
 		#region Private Static Methods

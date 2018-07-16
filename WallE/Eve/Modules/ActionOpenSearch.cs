@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionOpenSearch : ActionModule<OpenSearchInput, IReadOnlyList<OpenSearchItem>>
+	internal class ActionOpenSearch : ActionModule<OpenSearchInput, IReadOnlyList<OpenSearchItem>>
 	{
 		#region Constructors
 		public ActionOpenSearch(WikiAbstractionLayer wal)
@@ -17,17 +17,17 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Public Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 125;
 
 		public override string Name { get; } = "opensearch";
 		#endregion
 
-		#region Protected Properties
+		#region Protected Override Properties
 		protected override RequestType RequestType { get; } = RequestType.Get;
 		#endregion
 
-		#region Protected Methods
+		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, OpenSearchInput input)
 		{
 			ThrowNull(request, nameof(request));

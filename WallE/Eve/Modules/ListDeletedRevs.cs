@@ -17,13 +17,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 112;
 
 		public override string Name { get; } = "deletedrevs";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "dr";
 		#endregion
 
@@ -62,9 +62,10 @@ namespace RobinHood70.WallE.Eve.Modules
 				return null;
 			}
 
-			var item = new DeletedRevisionsItem();
-			item.GetWikiTitle(result);
-			item.DeletedRevisionsToken = (string)result["token"];
+			var item = new DeletedRevisionsItem
+			{
+				DeletedRevisionsToken = (string)result["token"]
+			}.GetWikiTitle(result);
 
 			var revisions = new List<RevisionsItem>();
 			foreach (var revisionNode in result["revisions"])

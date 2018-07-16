@@ -15,17 +15,17 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 116;
 
 		public override string Name { get; } = "tags";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "tg";
 		#endregion
 
-		#region Public Override Methods
+		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, TagsInput input)
 		{
 			ThrowNull(request, nameof(request));
@@ -38,22 +38,15 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override TagsItem GetItem(JToken result)
-		{
-			if (result == null)
-			{
-				return null;
-			}
-
-			var item = new TagsItem()
+		protected override TagsItem GetItem(JToken result) => result == null
+			? null
+			: new TagsItem()
 			{
 				Name = (string)result["name"],
 				DisplayName = (string)result["displayname"],
 				Description = (string)result["description"],
 				HitCount = (int?)result["hitcount"] ?? 0,
 			};
-			return item;
-		}
 		#endregion
 	}
 }

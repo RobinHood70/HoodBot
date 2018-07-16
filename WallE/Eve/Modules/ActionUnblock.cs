@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WikiCommon.Globals;
 
 	// MWVERSION: 1.29
-	public class ActionUnblock : ActionModule<UnblockInput, UnblockResult>
+	internal class ActionUnblock : ActionModule<UnblockInput, UnblockResult>
 	{
 		#region Constructors
 		public ActionUnblock(WikiAbstractionLayer wal)

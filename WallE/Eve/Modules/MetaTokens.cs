@@ -15,13 +15,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 120;
 
 		public override string Name { get; } = "tokens";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string ModuleType { get; } = "meta";
 
 		protected override string Prefix { get; } = string.Empty;
@@ -39,12 +39,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(result, nameof(result));
 			ThrowNull(output, nameof(output));
-#pragma warning disable IDE0007 // Use implicit type
-			foreach (JProperty token in result)
-#pragma warning restore IDE0007 // Use implicit type
-			{
-				output.Add(token.Name, (string)token.Value);
-			}
+			result.AddPropertiesToDictionary(output);
 		}
 		#endregion
 	}

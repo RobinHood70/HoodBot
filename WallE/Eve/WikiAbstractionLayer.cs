@@ -272,6 +272,29 @@
 			this.Uri = urib.Uri;
 		}
 
+		/// <summary>Runs the query specified by the input.</summary>
+		/// <param name="input">The input.</param>
+		/// <remarks>This function is used internally, but also made available externally for special situations.</remarks>
+		public void RunQuery(QueryInput input) => new ActionQuery(this).Submit(input);
+
+		/// <summary>Runs the continuable query specified by the input.</summary>
+		/// <param name="input">The input.</param>
+		/// <remarks>This function is used internally, but also made available externally for special situations.</remarks>
+		public void RunContinuableQuery(QueryInput input) => new ActionQuery(this).SubmitContinued(input);
+
+		/// <summary>Runs the pageset query specified by the input.</summary>
+		/// <param name="input">The input.</param>
+		/// <remarks>This function is used internally, but also made available externally for special situations.</remarks>
+		/// <returns>A list of <see cref="PageItem"/>s.</returns>
+		public PageSetResult<PageItem> RunPageSetQuery(QueryInput input) => this.RunPageSetQuery(input, DefaultPageFactory);
+
+		/// <summary>Runs the pageset query specified by the input.</summary>
+		/// <param name="input">The input.</param>
+		/// <param name="pageFactory">The factory method to use to generate PageItem derivatives.</param>
+		/// <remarks>This function is used internally, but also made available externally for special situations.</remarks>
+		/// <returns>A list of <see cref="PageItem"/>s of the specified underlying type.</returns>
+		public PageSetResult<PageItem> RunPageSetQuery(QueryInput input, Func<PageItem> pageFactory) => new ActionQuery(this, pageFactory).SubmitPageSet(input);
+
 		/// <summary>Converts the given request into an HTML request and submits it to the site.</summary>
 		/// <param name="request">The request.</param>
 		/// <returns>The site's response to the request.</returns>
@@ -335,9 +358,7 @@
 
 			var infoModule = new MetaSiteInfo(this, siteInfoInput);
 			var userModule = new MetaUserInfo(this, new UserInfoInput());
-			var queryInput = new QueryInput(infoModule, userModule);
-			var query = new ActionQuery(this);
-			query.SubmitContinued(queryInput);
+			this.RunContinuableQuery(new QueryInput(infoModule, userModule));
 
 			this.UserId = userModule.Output.Id;
 			this.UserName = userModule.Output.Name;
@@ -422,7 +443,7 @@
 			try
 			{
 				this.StopCheckMethods = StopCheckMethods.None;
-				new ActionQuery(this).Submit(new QueryInput());
+				this.RunQuery(new QueryInput());
 
 				return true;
 			}
@@ -518,17 +539,12 @@
 		{
 			ThrowNull(input, nameof(input));
 			var modules = new List<ListBacklinks>();
-#pragma warning disable IDE0007 // Use implicit type
-			foreach (BacklinksTypes type in input.LinkTypes.GetUniqueFlags())
-#pragma warning restore IDE0007 // Use implicit type
+			foreach (var type in input.LinkTypes.GetUniqueFlags())
 			{
 				modules.Add(new ListBacklinks(this, new BacklinksInput(input, type)));
 			}
 
-			var queryInput = new QueryInput(modules);
-			var query = new ActionQuery(this);
-			query.SubmitContinued(queryInput);
-
+			this.RunContinuableQuery(new QueryInput(modules));
 			var output = new HashSet<BacklinksItem>(new BacklinksOutputComparer());
 			foreach (var module in modules)
 			{
@@ -765,10 +781,12 @@
 		/// <param name="propertyInputs"><para>A collection of any combination of property inputs. Built-in property inputs include: <see cref="CategoriesInput" />, <see cref="CategoryInfoInput" />, <see cref="ContributorsInput" />, <see cref="DeletedRevisionsInput" />, <see cref="DuplicateFilesInput" />, <see cref="ExternalLinksInput" />, <see cref="FileUsageInput" />, <see cref="ImageInfoInput" />, <see cref="ImagesInput" />, <see cref="InfoInput" />, <see cref="InterwikiLinksInput" />, <see cref="LanguageLinksInput" />, <see cref="LinksHereInput" />, <see cref="PagePropertiesInput" />, <see cref="RedirectsInput" />, <see cref="RevisionsInput" />, <see cref="StashImageInfoInput" />, and <see cref="TranscludedInInput" />.</para>
 		/// <para>A typical, simple collection would include an InfoInput and a RevisionsInput, which would fetch basic information about the page, along with the latest revision.</para></param>
 		/// <returns>A list of pages based on the pageSetInput parameter with the information for each of the property inputs.</returns>
-		public PageSetResult<PageItem> LoadPages(DefaultPageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs)
+		public PageSetResult<PageItem> LoadPages(QueryPageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs)
 		{
 			ThrowNull(pageSetInput, nameof(pageSetInput));
-			return new ActionQuery(this, DefaultPageFactory).SubmitPageSet(new QueryInput(this, pageSetInput, propertyInputs));
+			ThrowNull(propertyInputs, nameof(propertyInputs));
+			var propertyModules = this.ModuleFactory.CreateModules(propertyInputs);
+			return this.RunPageSetQuery(new QueryInput(pageSetInput, propertyModules));
 		}
 
 		/// <summary>Loads page information. Incorporates the various API <a href="https://www.mediawiki.org/wiki/API:Properties">property</a> modules.</summary>
@@ -777,10 +795,13 @@
 		/// <para>A typical, simple collection would include an InfoInput and a RevisionsInput, which would fetch basic information about the page, along with the latest revision.</para></param>
 		/// <param name="pageFactory">A factory method which creates an object derived from PageItem.</param>
 		/// <returns>A list of pages based on the <paramref name="pageSetInput" /> parameter with the information determined by each of the property inputs.</returns>
-		public PageSetResult<PageItem> LoadPages(DefaultPageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs, Func<PageItem> pageFactory)
+		public PageSetResult<PageItem> LoadPages(QueryPageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs, Func<PageItem> pageFactory)
 		{
 			ThrowNull(pageSetInput, nameof(pageSetInput));
-			return new ActionQuery(this, pageFactory).SubmitPageSet(new QueryInput(this, pageSetInput, propertyInputs));
+			ThrowNull(propertyInputs, nameof(propertyInputs));
+			ThrowNull(pageFactory, nameof(pageFactory));
+			var propertyModules = this.ModuleFactory.CreateModules(propertyInputs);
+			return this.RunPageSetQuery(new QueryInput(pageSetInput, propertyModules), pageFactory);
 		}
 
 		/// <summary>Returns data from the <a href="https://www.mediawiki.org/wiki/API:Logevents">Logevents</a> API module.</summary>
@@ -1035,12 +1056,10 @@
 		/// <returns>A list of pages titles and, when available, the related value. Other fields will be returned as a set of name-value pairs in the <see cref="QueryPageItem.DatabaseResults" /> dictionary.</returns>
 		public QueryPageResult QueryPage(QueryPageInput input)
 		{
-			var query = new ActionQuery(this);
 			var module = new ListQueryPage(this, input);
-			var queryInput = new QueryInput(module);
-			query.SubmitContinued(queryInput);
+			this.RunContinuableQuery(new QueryInput(module));
 
-			return module.AsQueryPageTitleCollection();
+			return module.AsQueryPageResult();
 		}
 
 		/// <summary>Returns data from the <a href="https://www.mediawiki.org/wiki/API:Random">Random</a> API module.</summary>
@@ -1098,12 +1117,10 @@
 		/// <seealso cref="PrefixSearch" />
 		public SearchResult Search(SearchInput input)
 		{
-			var query = new ActionQuery(this);
 			var module = new ListSearch(this, input);
-			var queryInput = new QueryInput(module);
-			query.SubmitContinued(queryInput);
+			this.RunContinuableQuery(new QueryInput(module));
 
-			return module.AsSearchTitleCollection();
+			return module.AsSearchResult();
 		}
 
 		/// <summary>Sets the notification timestamp for watched pages, marking revisions as being read/unread using the <a href="https://www.mediawiki.org/wiki/API:Setnotificationtimestamp">Setnotificationtimestamp</a> API module.</summary>
@@ -1119,7 +1136,7 @@
 		/// <summary>Returns information about the site using the <a href="https://www.mediawiki.org/wiki/API:Siteinfo">Siteinfo</a> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>The requested site information.</returns>
-		public SiteInfoResult SiteInfo(SiteInfoInput input) => this.RunQuery(new MetaSiteInfo(this, input));
+		public SiteInfoResult SiteInfo(SiteInfoInput input) => this.RunModuleQuery(new MetaSiteInfo(this, input));
 
 		/// <summary>Returns information about <a href="https://www.mediawiki.org/wiki/Manual:UploadStash">stashed</a> files using the <a href="https://www.mediawiki.org/wiki/API:Stashimageinfo">Stashimageinfo</a> API module.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -1188,7 +1205,7 @@
 		/// <summary>Returns information about the current user using the <a href="https://www.mediawiki.org/wiki/API:Userinfo">Userinfo</a> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>Information about the current user.</returns>
-		public UserInfoResult UserInfo(UserInfoInput input) => this.RunQuery(new MetaUserInfo(this, input));
+		public UserInfoResult UserInfo(UserInfoInput input) => this.RunModuleQuery(new MetaUserInfo(this, input));
 
 		/// <summary>Adds or removes user rights (based on rights groups) using the <a href="https://www.mediawiki.org/wiki/API:Userrights">Userrights</a> API module.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -1254,27 +1271,27 @@
 
 		#region Protected Virtual Methods
 
-		/// <summary>Raises the <see cref="E:CaptchaChallenge" /> event.</summary>
+		/// <summary>Raises the <see cref="CaptchaChallenge" /> event.</summary>
 		/// <param name="e">The <see cref="CaptchaEventArgs" /> instance containing the event data.</param>
 		protected virtual void OnCaptchaChallenge(CaptchaEventArgs e) => this.CaptchaChallenge?.Invoke(this, e);
 
-		/// <summary>Raises the <see cref="E:Initialized" /> event.</summary>
+		/// <summary>Raises the <see cref="Initialized" /> event.</summary>
 		/// <param name="e">The <see cref="InitializationEventArgs"/> instance containing the event data.</param>
 		protected virtual void OnInitialized(InitializationEventArgs e) => this.Initialized?.Invoke(this, e);
 
-		/// <summary>Raises the <see cref="E:Initializing" /> event.</summary>
+		/// <summary>Raises the <see cref="Initializing" /> event.</summary>
 		/// <param name="e">The <see cref="InitializationEventArgs"/> instance containing the event data.</param>
 		protected virtual void OnInitializing(InitializationEventArgs e) => this.Initializing?.Invoke(this, e);
 
-		/// <summary>Raises the <see cref="E:ResponseReceived" /> event.</summary>
+		/// <summary>Raises the <see cref="ResponseReceived" /> event.</summary>
 		/// <param name="e">The <see cref="ResponseEventArgs" /> instance containing the event data.</param>
 		protected virtual void OnResponseReceived(ResponseEventArgs e) => this.ResponseReceived?.Invoke(this, e);
 
-		/// <summary>Raises the <see cref="E:SendingRequest" /> event.</summary>
+		/// <summary>Raises the <see cref="SendingRequest" /> event.</summary>
 		/// <param name="e">The <see cref="RequestEventArgs" /> instance containing the event data.</param>
 		protected virtual void OnSendingRequest(RequestEventArgs e) => this.SendingRequest?.Invoke(this, e);
 
-		/// <summary>Raises the <see cref="E:WarningOccurred" /> event.</summary>
+		/// <summary>Raises the <see cref="WarningOccurred" /> event.</summary>
 		/// <param name="e">The <see cref="WarningEventArgs" /> instance containing the event data.</param>
 		protected virtual void OnWarningOccurred(WarningEventArgs e) => this.WarningOccurred?.Invoke(this, e);
 		#endregion
@@ -1282,23 +1299,13 @@
 		#region Private Methods
 		private IReadOnlyList<TOutput> RunListQuery<TInput, TOutput>(ListModule<TInput, TOutput> module)
 			where TInput : class
-			where TOutput : class
-		{
-			var query = new ActionQuery(this);
-			var input = new QueryInput(module);
-			query.SubmitContinued(input);
+			where TOutput : class => this.RunModuleQuery(module).AsReadOnlyList();
 
-			return module.Output.AsReadOnlyList();
-		}
-
-		private TOutput RunQuery<TInput, TOutput>(QueryModule<TInput, TOutput> module)
+		private TOutput RunModuleQuery<TInput, TOutput>(QueryModule<TInput, TOutput> module)
 			where TInput : class
 			where TOutput : class
 		{
-			var query = new ActionQuery(this);
-			var input = new QueryInput(module);
-			query.SubmitContinued(input);
-
+			this.RunContinuableQuery(new QueryInput(module));
 			return module.Output;
 		}
 

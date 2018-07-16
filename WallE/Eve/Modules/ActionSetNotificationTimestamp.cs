@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionSetNotificationTimestamp : ActionModulePageSet<SetNotificationTimestampInput, SetNotificationTimestampItem>
+	internal class ActionSetNotificationTimestamp : ActionModulePageSet<SetNotificationTimestampInput, SetNotificationTimestampItem>
 	{
 		#region Constructors
 		public ActionSetNotificationTimestamp(WikiAbstractionLayer wal)

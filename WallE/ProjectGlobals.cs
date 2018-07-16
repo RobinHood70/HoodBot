@@ -6,6 +6,7 @@
 	using System.Security.Cryptography;
 	using System.Text;
 	using RobinHood70.WallE.RequestBuilder;
+	using RobinHood70.WikiCommon;
 	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -92,26 +93,18 @@
 
 		public static string GetHash(this string data, HashType hashType) => GetHash(Encoding.UTF8.GetBytes(data ?? string.Empty), hashType);
 
-		public static void ThrowNullCollection<T>(IEnumerable<T> collection, string paramName)
+		public static void ThrowCollectionEmpty<T>(IEnumerable<T> collection, string paramName)
 		{
-			if (collection == null)
+			if (!collection.HasItems())
 			{
-				throw new ArgumentNullException(paramName);
-			}
-
-			using (var enumerator = collection.GetEnumerator())
-			{
-				if (!enumerator.MoveNext())
-				{
-					throw new ArgumentException(CurrentCulture(CollectionInvalid, paramName));
-				}
+				throw new ArgumentException(CurrentCulture(CollectionInvalid, paramName));
 			}
 		}
 
-		public static void ThrowNullRefCollection<T>(IEnumerable<T> collection, string paramName)
+		public static void ThrowCollectionHasNullItems<T>(IEnumerable<T> collection, string paramName)
 			where T : class
 		{
-			ThrowNullCollection(collection, paramName);
+			ThrowCollectionEmpty(collection, paramName);
 			foreach (var item in collection)
 			{
 				if (item == null)

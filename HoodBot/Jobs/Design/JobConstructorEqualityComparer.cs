@@ -8,12 +8,22 @@
 	{
 		public bool Equals(JobNode x, JobNode y)
 		{
+			if (x == null)
+			{
+				return y == null;
+			}
+
+			if (y == null)
+			{
+				return false;
+			}
+
 			if (x.Constructor == null)
 			{
 				return y.Constructor != null;
 			}
 
-			if (x.Constructor != y?.Constructor)
+			if (x.Constructor != y.Constructor)
 			{
 				return false;
 			}
@@ -40,6 +50,6 @@
 			return true;
 		}
 
-		public int GetHashCode(JobNode obj) => CompositeHashCode(obj.Constructor, obj.Parameters);
+		public int GetHashCode(JobNode obj) => obj == null ? 0 : CompositeHashCode(obj.Constructor, obj.Parameters);
 	}
 }

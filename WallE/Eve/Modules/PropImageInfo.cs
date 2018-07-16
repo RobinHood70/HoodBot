@@ -5,7 +5,6 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.RequestBuilder;
-	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class PropImageInfo : PropListModule<ImageInfoInput, ImageInfoItem>
@@ -17,13 +16,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 111;
 
 		public override string Name { get; } = "imageinfo";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "ii";
 		#endregion
 
@@ -69,9 +68,9 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override ImageInfoItem GetItem(JToken result) => result.ParseImageInfo();
 
-		protected override void GetResultsFromCurrentPage() => this.ResetMyList(this.Output.ImageInfoEntries);
+		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.ImageInfoEntries);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.ImageInfoEntries = this.MyList.AsNewReadOnlyList();
+		protected override void SetResultsOnCurrentPage() => this.Output.ImageInfoEntries = this.Items;
 		#endregion
 	}
 }

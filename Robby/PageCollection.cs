@@ -85,11 +85,11 @@
 
 		#region Public Indexers
 
-		/// <summary>Gets or sets the <see cref="T:Page"/> with the specified key.</summary>
+		/// <summary>Gets or sets the <see cref="Page"/> with the specified key.</summary>
 		/// <param name="key">The key.</param>
-		/// <returns>The requested <see cref="T:Page"/>.</returns>
-		/// <exception cref="T:KeyNotFoundException">Thrown if the page cannot be found either by the name requested or via the substitute name in the <see cref="P:PageCollection.TitleMap"/>.</exception>
-		/// <remarks>Like a <see cref="T:System.Collections.Generic.Dictionary{TKey, TValue}"/>, this indexer will add a new entry if the requested entry isn't found.</remarks>
+		/// <returns>The requested <see cref="Page"/>.</returns>
+		/// <exception cref="KeyNotFoundException">Thrown if the page cannot be found either by the name requested or via the substitute name in the <see cref="TitleMap"/>.</exception>
+		/// <remarks>Like a <see cref="System.Collections.Generic.Dictionary{TKey, TValue}"/>, this indexer will add a new entry if the requested entry isn't found.</remarks>
 		public override Page this[string key]
 		{
 			get
@@ -163,9 +163,9 @@
 		/// <param name="revisionIds">The IDs.</param>
 		/// <remarks>General information about the pages for the revision IDs specified will always be loaded, regardless of the LoadOptions setting, though the revisions themselves may not be if the collection's load options would filter them out.</remarks>
 		// Note that while RevisionsInput() can be used as a generator, I have not implemented it because I can think of no situation in which it would be useful to populate a PageCollection given the existing revisions methods.
-		public override void AddRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(this.LoadOptions, DefaultPageSetInput.FromRevisionIds(revisionIds));
+		public override void AddRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(this.LoadOptions, QueryPageSetInput.FromRevisionIds(revisionIds));
 
-		/// <summary>Removes all items from the <see cref="T:RobinHood70.Robby.TitleCollection">collection</see>, as well as those in the <see cref="TitleMap"/>.</summary>
+		/// <summary>Removes all items from the <see cref="TitleCollection">collection</see>, as well as those in the <see cref="TitleMap"/>.</summary>
 		public override void Clear()
 		{
 			base.Clear();
@@ -180,9 +180,7 @@
 		protected override void AddBacklinks(BacklinksInput input)
 		{
 			ThrowNull(input, nameof(input));
-#pragma warning disable IDE0007
-			foreach (BacklinksTypes type in input.LinkTypes.GetUniqueFlags())
-#pragma warning restore IDE0007
+			foreach (var type in input.LinkTypes.GetUniqueFlags())
 			{
 				this.LoadPages(new BacklinksInput(input.Title, type)
 				{
@@ -301,12 +299,12 @@
 		/// <summary>Adds pages to the collection from a series of titles.</summary>
 		/// <param name="options">The page load options.</param>
 		/// <param name="titles">The titles.</param>
-		protected virtual void AddTitles(PageLoadOptions options, IEnumerable<ISimpleTitle> titles) => this.LoadPages(options, new DefaultPageSetInput(titles.ToFullPageNames()));
+		protected virtual void AddTitles(PageLoadOptions options, IEnumerable<ISimpleTitle> titles) => this.LoadPages(options, new QueryPageSetInput(titles.ToFullPageNames()));
 
 		/// <summary>Loads pages from the wiki based on a page set specifier.</summary>
 		/// <param name="options">The page load options.</param>
 		/// <param name="pageSetInput">The page set input.</param>
-		protected virtual void LoadPages(PageLoadOptions options, DefaultPageSetInput pageSetInput)
+		protected virtual void LoadPages(PageLoadOptions options, QueryPageSetInput pageSetInput)
 		{
 			ThrowNull(options, nameof(options));
 			ThrowNull(pageSetInput, nameof(pageSetInput));
@@ -341,7 +339,7 @@
 			newInput.Properties |= CategoryMembersProperties.Title | CategoryMembersProperties.Type;
 			newInput.Type = newInput.Type | CategoryMemberTypes.Subcat;
 
-			var result = this.Site.AbstractionLayer.LoadPages(new DefaultPageSetInput(newInput), this.PageCreator.GetPropertyInputs(this.LoadOptions), this.PageCreator.CreatePageItem);
+			var result = this.Site.AbstractionLayer.LoadPages(new QueryPageSetInput(newInput), this.PageCreator.GetPropertyInputs(this.LoadOptions), this.PageCreator.CreatePageItem);
 			this.PopulateMapCollections(result);
 			foreach (var item in result)
 			{
@@ -368,9 +366,9 @@
 		#endregion
 
 		#region Private Methods
-		private void LoadPages(IGeneratorInput generator) => this.LoadPages(this.LoadOptions, new DefaultPageSetInput(generator));
+		private void LoadPages(IGeneratorInput generator) => this.LoadPages(this.LoadOptions, new QueryPageSetInput(generator));
 
-		private void LoadPages(IGeneratorInput generator, IEnumerable<ISimpleTitle> titles) => this.LoadPages(this.LoadOptions, new DefaultPageSetInput(generator, titles.ToFullPageNames()));
+		private void LoadPages(IGeneratorInput generator, IEnumerable<ISimpleTitle> titles) => this.LoadPages(this.LoadOptions, new QueryPageSetInput(generator, titles.ToFullPageNames()));
 
 		private void PopulateMapCollections(IPageSetResult result)
 		{

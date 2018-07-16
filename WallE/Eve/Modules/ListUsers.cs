@@ -16,17 +16,17 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 112;
 
 		public override string Name { get; } = "users";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "us";
 		#endregion
 
-		#region Public Override Methods
+		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, UsersInput input)
 		{
 			ThrowNull(request, nameof(request));
@@ -49,15 +49,17 @@ namespace RobinHood70.WallE.Eve.Modules
 				return null;
 			}
 
-			var item = new UsersItem();
-			result.GetUser(item);
-			item.Flags =
+			var item = new UsersItem
+			{
+				Flags =
 				result.GetFlag("emailable", UserFlags.Emailable) |
 				result.GetFlag("interwiki", UserFlags.Interwiki) |
 				result.GetFlag("invalid", UserFlags.Invalid) |
-				result.GetFlag("missing", UserFlags.Missing);
-			item.Gender = (string)result["gender"];
-			item.Token = (string)result["userrightstoken"];
+				result.GetFlag("missing", UserFlags.Missing),
+				Gender = (string)result["gender"],
+				Token = (string)result["userrightstoken"]
+			};
+			result.GetUser(item);
 
 			return item;
 		}

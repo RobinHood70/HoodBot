@@ -27,13 +27,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 111;
 
 		public override string Name { get; } = "categorymembers";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "cm";
 		#endregion
 
@@ -41,7 +41,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		public static ListCategoryMembers CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new ListCategoryMembers(wal, input as CategoryMembersInput);
 		#endregion
 
-		#region Public Override Methods
+		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, CategoryMembersInput input)
 		{
 			ThrowNull(request, nameof(request));
@@ -72,11 +72,13 @@ namespace RobinHood70.WallE.Eve.Modules
 				return null;
 			}
 
-			var item = new CategoryMembersItem();
-			item.GetWikiTitle(result);
-			item.SortKey = (string)result["sortkey"];
-			item.SortKeyPrefix = (string)result["sortkeyprefix"];
-			item.Timestamp = (DateTime?)result["timestamp"];
+			var item = new CategoryMembersItem
+			{
+				SortKey = (string)result["sortkey"],
+				SortKeyPrefix = (string)result["sortkeyprefix"],
+				Timestamp = (DateTime?)result["timestamp"]
+			}.GetWikiTitle(result);
+
 			var typeText = (string)result["type"];
 			if (typeText != null && typeLookup.TryGetValue(typeText, out var itemType))
 			{

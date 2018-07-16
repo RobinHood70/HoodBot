@@ -15,13 +15,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 113;
 
 		public override string Name { get; } = "allimages";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "ai";
 		#endregion
 
@@ -68,8 +68,6 @@ namespace RobinHood70.WallE.Eve.Modules
 				Title = (string)result["title"],
 			};
 			result.ParseImageInfo(item);
-			item.Url = (string)result["url"];
-			item.DescriptionUrl = (string)result["descriptionurl"];
 
 			return item;
 		}

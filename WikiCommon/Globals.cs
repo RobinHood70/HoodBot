@@ -135,11 +135,9 @@
 			if (!string.IsNullOrEmpty(name))
 			{
 				name = name.Replace(' ', '_');
-
-				// We have no knowledge of the wiki's culture, and doing so is complex and would probably be somewhat unreliable, so guess by using current culture.
 				if (char.IsUpper(name[0]))
 				{
-					name = name.Length == 1 ? culture.TextInfo.ToLower(name[0]).ToString() : culture.TextInfo.ToLower(name[0]) + name.Substring(1);
+					name = name.Substring(0, 1).ToLower(culture) + (name.Length > 1 ? name.Substring(1) : string.Empty);
 				}
 			}
 
@@ -176,18 +174,7 @@
 		public static string UnnormalizeMessageName(string name, CultureInfo culture)
 		{
 			ThrowNull(culture, nameof(culture));
-			if (!string.IsNullOrEmpty(name))
-			{
-				name = name.Replace('_', ' ');
-
-				// We have no knowledge of the wiki's culture, and doing so is complex and would probably be somewhat unreliable, so guess by using current culture.
-				if (char.IsLower(name[0]))
-				{
-					name = name.Length == 1 ? culture.TextInfo.ToUpper(name[0]).ToString() : culture.TextInfo.ToUpper(name[0]) + name.Substring(1);
-				}
-			}
-
-			return name;
+			return string.IsNullOrEmpty(name) ? name : name.Replace('_', ' ').UpperFirst(culture);
 		}
 		#endregion
 	}

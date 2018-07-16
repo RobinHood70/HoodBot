@@ -4,7 +4,6 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.RequestBuilder;
-	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class PropRedirects : PropListModule<RedirectsInput, RedirectsItem>, IGeneratorModule
@@ -16,13 +15,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 124;
 
 		public override string Name { get; } = "redirects";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "rd";
 		#endregion
 
@@ -44,23 +43,16 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override RedirectsItem GetItem(JToken result)
-		{
-			if (result == null)
+		protected override RedirectsItem GetItem(JToken result) => result == null
+			? null
+			: new RedirectsItem
 			{
-				return null;
-			}
+				Fragment = (string)result["fragment"]
+			}.GetWikiTitle(result);
 
-			var item = new RedirectsItem();
-			item.GetWikiTitle(result);
-			item.Fragment = (string)result["fragment"];
+		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Redirects);
 
-			return item;
-		}
-
-		protected override void GetResultsFromCurrentPage() => this.ResetMyList(this.Output.Redirects);
-
-		protected override void SetResultsOnCurrentPage() => this.Output.Redirects = this.MyList.AsNewReadOnlyList();
+		protected override void SetResultsOnCurrentPage() => this.Output.Redirects = this.Items;
 		#endregion
 	}
 }

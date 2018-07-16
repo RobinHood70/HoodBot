@@ -6,7 +6,7 @@
 	using RobinHood70.WikiCommon;
 
 	/// <summary>Represents the MediaWiki interwiki map.</summary>
-	/// <seealso cref="RobinHood70.WikiCommon.ReadOnlyKeyedCollection{TKey, TItem}" />
+	/// <seealso cref="ReadOnlyKeyedCollection{TKey, TItem}" />
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Same name as MediaWiki.")]
 	public class InterwikiMap : ReadOnlyKeyedCollection<string, InterwikiEntry>
 	{

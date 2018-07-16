@@ -38,6 +38,7 @@
 		#endregion
 
 		#region Public Static Methods
+#if DEBUG
 		public static void DebugResponseEventHandler(IWikiAbstractionLayer sender, ResponseEventArgs e)
 		{
 			ThrowNull(sender, nameof(sender));
@@ -72,9 +73,11 @@
 			ThrowNull(e, nameof(e));
 			Debug.WriteLine($"Warning ({e.Warning.Code}): {e.Warning.Info}", sender.ToString());
 		}
+#endif
 
 		public static void DumpTitles(IEnumerable<Title> titles)
 		{
+#if DEBUG
 			var count = 0;
 			foreach (var entry in titles)
 			{
@@ -83,10 +86,11 @@
 			}
 
 			Debug.WriteLine(count);
+#endif
 		}
-		#endregion
+#endregion
 
-		#region Tests and Related
+#region Tests and Related
 		public void AllMessagesTest()
 		{
 			var titles = new TitleCollection(this.Wiki);
@@ -541,9 +545,9 @@
 			var result = titles.Watch();
 			DumpTitles(result);
 		}
-		#endregion
+#endregion
 
-		#region Private Static Methods
+#region Private Static Methods
 		private static string GetHmac(string message, string key)
 		{
 			var sb = new StringBuilder(64);
@@ -563,9 +567,9 @@
 
 			return sb.ToString().ToLowerInvariant();
 		}
-		#endregion
+#endregion
 
-		#region Private Methods
+#region Private Methods
 		private void AppendResults(string message)
 		{
 			message = new string(' ', this.indent) + message + Environment.NewLine;
@@ -602,8 +606,10 @@
 			//// client.RequestingDelay += DebugShowDelay;
 
 			var wal = new WikiAbstractionLayer(client, wikiInfo.Uri);
+#if DEBUG
 			wal.SendingRequest += DebugShowRequest;
 			wal.WarningOccurred += DebugWarningEventHandler;
+#endif
 			wal.StopCheckMethods &= ~StopCheckMethods.Assert;
 			//// wal.ResponseReceived += DebugResponseEventHandler;
 
@@ -628,10 +634,14 @@
 				{
 					Name = "Admin",
 				};
-				wal = new WikiAbstractionLayer(adminClient, wikiInfo.Uri);
+				wal = new WikiAbstractionLayer(adminClient, wikiInfo.Uri)
+				{
+					Assert = null
+				};
+#if DEBUG
 				wal.SendingRequest += DebugShowRequest;
 				wal.WarningOccurred += DebugWarningEventHandler;
-				wal.Assert = null;
+#endif
 				wal.StopCheckMethods &= ~StopCheckMethods.Assert;
 				this.AdminWiki = new Site(wal);
 				this.AdminWiki.WarningOccurred += Robby.Site.DebugWarningEventHandler;
@@ -679,6 +689,6 @@
 				wal.SendRequest(request);
 			}
 		}
-		#endregion
+#endregion
 	}
 }

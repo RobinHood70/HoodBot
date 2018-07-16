@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WikiCommon.Globals;
 
 	// MW: 1.27
-	public class ActionFileRevert : ActionModule<FileRevertInput, FileRevertResult>
+	internal class ActionFileRevert : ActionModule<FileRevertInput, FileRevertResult>
 	{
 		#region Constructors
 		public ActionFileRevert(WikiAbstractionLayer wal)
@@ -17,7 +17,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 118;
 
 		public override string Name { get; } = "filerevert";

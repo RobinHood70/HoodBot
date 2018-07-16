@@ -183,4 +183,7 @@
   <data name="ApiDisabled" xml:space="preserve">
     <value>The API is disabled on this wiki.</value>
   </data>
+  <data name="NotAGenerator" xml:space="preserve">
+    <value>An attempt was made to call SetAsGenerator() on a module that cannot be a generator. Please do not call this method yourself; let the framework do it when approprirate.</value>
+  </data>
 </root>

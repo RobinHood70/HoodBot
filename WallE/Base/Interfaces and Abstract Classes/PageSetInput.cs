@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Globalization;
 	using RobinHood70.WikiCommon;
@@ -51,7 +52,7 @@ namespace RobinHood70.WallE.Base
 		{
 			ThrowNull(generatorInput, nameof(generatorInput));
 			this.GeneratorInput = generatorInput;
-			this.Values = new string[0];
+			this.Values = Array.Empty<string>();
 		}
 
 		protected PageSetInput(IGeneratorInput generatorInput, IEnumerable<string> titles)

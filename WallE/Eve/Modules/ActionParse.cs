@@ -11,7 +11,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WikiCommon.Globals;
 
 	// MWVERSION: 1.28
-	public class ActionParse : ActionModule<ParseInput, ParseResult>
+	internal class ActionParse : ActionModule<ParseInput, ParseResult>
 	{
 		#region Constructors
 		public ActionParse(WikiAbstractionLayer wal)
@@ -20,7 +20,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Public Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 112;
 
 		public override string Name { get; } = "parse";
@@ -31,6 +31,17 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Override Methods
+		protected override void AddWarning(string from, string text)
+		{
+			ThrowNull(text, nameof(text));
+
+			// 1.26 and 1.27 always emit a warning when the Modules property is specified, even though only one section of it is deprecated, so swallow that.
+			if (!text.StartsWith("modulemessages", StringComparison.Ordinal))
+			{
+				base.AddWarning(from, text);
+			}
+		}
+
 		protected override void BuildRequestLocal(Request request, ParseInput input)
 		{
 			ThrowNull(request, nameof(request));
@@ -166,9 +177,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					string name = null;
 					var limits = new List<decimal>();
-#pragma warning disable IDE0007 // Use implicit type
-					foreach (JProperty limitResult in entry)
-#pragma warning restore IDE0007 // Use implicit type
+					foreach (var limitResult in entry.Children<JProperty>())
 					{
 						if (limitResult.Name == "name")
 						{
@@ -189,17 +198,6 @@ namespace RobinHood70.WallE.Eve.Modules
 			output.ParseTree = (string)result["parsetree"];
 
 			return output;
-		}
-
-		protected override void AddWarning(string from, string text)
-		{
-			ThrowNull(text, nameof(text));
-
-			// 1.26 and 1.27 always emit a warning when the Modules property is specified, even though only one section of it is deprecated, so swallow that.
-			if (!text.StartsWith("modulemessages", StringComparison.Ordinal))
-			{
-				base.AddWarning(from, text);
-			}
 		}
 		#endregion
 

@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionClearHasMsg : ActionModule<NullObject, CustomResult>
+	internal class ActionClearHasMsg : ActionModule<NullObject, CustomResult>
 	{
 		#region Constructors
 		public ActionClearHasMsg(WikiAbstractionLayer wal)

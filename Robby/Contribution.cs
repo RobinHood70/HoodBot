@@ -5,7 +5,7 @@
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Stores information about a single user contribution.</summary>
-	/// <seealso cref="RobinHood70.Robby.Revision" />
+	/// <seealso cref="Revision" />
 	public class Contribution : Revision
 	{
 		#region Constructors

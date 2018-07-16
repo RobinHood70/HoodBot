@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionDelete : ActionModule<DeleteInput, DeleteResult>
+	internal class ActionDelete : ActionModule<DeleteInput, DeleteResult>
 	{
 		#region Constructors
 		public ActionDelete(WikiAbstractionLayer wal)
@@ -25,7 +25,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override RequestType RequestType { get; } = RequestType.Post;
 		#endregion
 
-		#region Public Override Methods
+		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, DeleteInput input)
 		{
 			ThrowNull(request, nameof(request));

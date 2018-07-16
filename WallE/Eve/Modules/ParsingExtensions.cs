@@ -5,7 +5,6 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using System.Globalization;
-	using System.Text.RegularExpressions;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
@@ -17,24 +16,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	/// <summary>Any other API-related items that didn't warrant creation of their own static class.</summary>
 	internal static class ParsingExtensions
 	{
-		#region Fields
-		internal static Regex TooManyFinder { get; } = new Regex(@"Too many values .*?'(?<parameter>.*?)'.*?limit is (?<sizelimit>[0-9]+)", RegexOptions.Compiled);
-		#endregion
-
 		#region JToken Methods
-		public static void AddToDictionary<TKey, TValue>(this JToken token, IDictionary<TKey, TValue> dict, string keyName, string valueName)
+		public static void AddPropertiesToDictionary(this JToken result, IDictionary<string, string> dict)
 		{
-			if (token != null)
+			foreach (var node in result.Children<JProperty>())
 			{
-				foreach (var item in token)
-				{
-					if (item[keyName] != null)
-					{
-						var key = item[keyName].Value<TKey>();
-						var value = item[valueName].Value<TValue>();
-						dict.Add(key, value);
-					}
-				}
+				dict.Add(node.Name, (string)node.Value);
 			}
 		}
 
@@ -63,12 +50,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 				else
 				{
-#pragma warning disable IDE0007 // Use implicit type
-					foreach (JProperty entry in token)
-#pragma warning restore IDE0007 // Use implicit type
-					{
-						dict.Add(entry.Name, (string)entry.Value);
-					}
+					token.AddPropertiesToDictionary(dict);
 				}
 			}
 
@@ -79,49 +61,11 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		public static DateTime? AsDate(this JToken date) => ((string)date).AsDate();
 
-		public static IReadOnlyList<T> AsReadOnlyList<T>(this JToken token) => token?.Values<T>().AsReadOnlyList() ?? new List<T>();
+		public static IReadOnlyList<T> AsReadOnlyList<T>(this JToken token) => token?.Values<T>().AsReadOnlyList() ?? Array.Empty<T>();
 
-		public static IReadOnlyList<T> AsReadOnlyList<T>(this JToken token, string key)
-		{
-			if (token == null)
-			{
-				return new T[0];
-			}
-
-			var node = token[key];
-			if (node == null)
-			{
-				return new T[0];
-			}
-
-			return node.Values<T>().AsReadOnlyList();
-		}
-
-		public static IReadOnlyDictionary<TKey, TValue> AsReadOnlyDictionary<TKey, TValue>(this JToken token)
-		{
-			if (token == null)
-			{
-				return EmptyReadOnlyDictionary<TKey, TValue>();
-			}
-
-			return token.ToObject<Dictionary<TKey, TValue>>().AsReadOnly();
-		}
-
-		public static IReadOnlyDictionary<TKey, TValue> AsReadOnlyDictionary<TKey, TValue>(this JToken token, string key)
-		{
-			if (token == null)
-			{
-				return EmptyReadOnlyDictionary<TKey, TValue>();
-			}
-
-			var node = token[key];
-			if (node == null)
-			{
-				return EmptyReadOnlyDictionary<TKey, TValue>();
-			}
-
-			return node.ToObject<Dictionary<TKey, TValue>>().AsReadOnly();
-		}
+		public static IReadOnlyDictionary<TKey, TValue> AsReadOnlyDictionary<TKey, TValue>(this JToken token) => token == null
+			? EmptyReadOnlyDictionary<TKey, TValue>()
+			: token.ToObject<Dictionary<TKey, TValue>>().AsReadOnly();
 
 		public static ErrorItem GetError(this JToken result) => GetError(result, "code", "info");
 
@@ -159,14 +103,9 @@ namespace RobinHood70.WallE.Eve.Modules
 			return output;
 		}
 
-		public static LanguageLinksItem GetLanguageLink(this JToken result)
-		{
-			if (result == null)
-			{
-				return null;
-			}
-
-			var output = new LanguageLinksItem()
+		public static LanguageLinksItem GetLanguageLink(this JToken result) => result == null
+			? null
+			: new LanguageLinksItem()
 			{
 				Language = (string)result["lang"],
 				Url = (Uri)result["url"],
@@ -174,8 +113,6 @@ namespace RobinHood70.WallE.Eve.Modules
 				Autonym = (string)result["autonym"],
 				Title = (string)result["title"],
 			};
-			return output;
-		}
 
 		public static void GetRedirects(this JToken result, Dictionary<string, PageSetRedirectItem> redirects, WikiAbstractionLayer wal)
 		{
@@ -234,7 +171,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				RollbackToken = (string)result["rollbacktoken"],
 				Sha1 = (string)result["sha1"],
 				Size = (long?)result["size"] ?? 0,
-				Tags = result.AsReadOnlyList<string>("tags"),
+				Tags = result["tags"].AsReadOnlyList<string>(),
 				Timestamp = (DateTime?)result["timestamp"],
 				User = (string)result["user"],
 				UserId = (long?)result["userid"] ?? -1,
@@ -270,8 +207,8 @@ namespace RobinHood70.WallE.Eve.Modules
 			// ListAllUsers returns an empty string, ListUsers returns null, so check for both.
 			var regDate = (string)result["registration"];
 			user.Registration = string.IsNullOrEmpty(regDate) ? null : (DateTime?)result["registration"];
-			user.Groups = result.AsReadOnlyList<string>("groups");
-			user.ImplicitGroups = result.AsReadOnlyList<string>("implicitgroups");
+			user.Groups = result["groups"].AsReadOnlyList<string>();
+			user.ImplicitGroups = result["implicitgroups"].AsReadOnlyList<string>();
 			var rights = result["rights"];
 			if (rights != null)
 			{
@@ -308,28 +245,18 @@ namespace RobinHood70.WallE.Eve.Modules
 			return list.AsReadOnly();
 		}
 
-		public static WikiTitleItem GetWikiTitle(this JToken result)
-		{
-			var title = new WikiTitleItem();
-			title.GetWikiTitle(result);
-			return title;
-		}
+		public static WikiTitleItem GetWikiTitle(this JToken result) => new WikiTitleItem().GetWikiTitle(result);
 		#endregion
 
 		#region ITitle Methods
-		public static void GetWikiTitle(this ITitle title, JToken result)
+		public static T GetWikiTitle<T>(this T title, JToken result)
+			where T : ITitle
 		{
 			title.Namespace = (int?)result["ns"];
 			title.PageId = (long?)result["pageid"] ?? 0;
 			title.Title = (string)result["title"];
-		}
-		#endregion
 
-		#region ITitleOnly Methods
-		public static void GetWikiTitle(this ITitleOnly title, JToken result)
-		{
-			title.Namespace = (int?)result["ns"];
-			title.Title = (string)result["title"];
+			return title;
 		}
 		#endregion
 

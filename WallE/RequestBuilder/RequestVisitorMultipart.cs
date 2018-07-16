@@ -41,7 +41,7 @@
 			};
 
 			// Boundary is kept short at the expense of scanning data and possibly having to regenerate boundary multiple times until a valid one is found. Wiki uploads are generally < 1MB, however, so this is not expected to be a major concern. Each time one is rejected, boundary length is increased to reduce chance of another rejection.
-			var formData = new byte[0];
+			var formData = Array.Empty<byte>();
 			string contentType;
 			var boundaryLength = RandomBoundaryStartLength;
 			do

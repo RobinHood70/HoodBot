@@ -12,13 +12,16 @@
 		public JobInfoAttribute(string name, string groupsText)
 			: this(name)
 		{
-			var groupSplit = groupsText.Split('|');
-			for (var i = 0; i < groupSplit.Length; i++)
+			if (!string.IsNullOrWhiteSpace(groupsText))
 			{
-				groupSplit[i] = groupSplit[i].Trim();
-			}
+				var groupSplit = groupsText.Split('|');
+				for (var i = 0; i < groupSplit.Length; i++)
+				{
+					groupSplit[i] = groupSplit[i].Trim();
+				}
 
-			this.Groups = groupSplit;
+				this.Groups = groupSplit;
+			}
 		}
 
 		public IEnumerable<string> Groups { get; }

@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionCreateAccount : ActionModule<CreateAccountInput, CreateAccountResult>
+	internal class ActionCreateAccount : ActionModule<CreateAccountInput, CreateAccountResult>
 	{
 		#region Fields
 		private string token;
@@ -20,16 +20,16 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Public Properties
-		public IReadOnlyDictionary<string, string> CaptchaData { get; private set; } = EmptyReadOnlyDictionary<string, string>();
-
-		public Dictionary<string, string> CaptchaSolution { get; } = new Dictionary<string, string>();
-		#endregion
-
 		#region Public Override Properties
 		public override int MinimumVersion { get; } = 121;
 
 		public override string Name { get; } = "createaccount";
+		#endregion
+
+		#region Internal Properties
+		internal IReadOnlyDictionary<string, string> CaptchaData { get; private set; } = EmptyReadOnlyDictionary<string, string>();
+
+		internal Dictionary<string, string> CaptchaSolution { get; } = new Dictionary<string, string>();
 		#endregion
 
 		#region Protected Override Properties
@@ -75,7 +75,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				this.token = (string)result["token"];
 			}
 
-			this.CaptchaData = result.AsReadOnlyDictionary<string, string>("captcha");
+			this.CaptchaData = result["captcha"].AsReadOnlyDictionary<string, string>();
 			return output;
 		}
 		#endregion

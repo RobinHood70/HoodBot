@@ -2,6 +2,7 @@
 {
 	using System.Windows;
 	using System.Windows.Controls;
+	using static RobinHood70.WikiCommon.Globals;
 
 	// Taken from https://www.wpftutorial.net/PasswordBox.html
 	public static class PasswordHelper
@@ -20,13 +21,29 @@
 		#endregion
 
 		#region Public Methods
-		public static bool GetAttach(DependencyObject dp) => (bool)dp.GetValue(AttachProperty);
+		public static bool GetAttach(DependencyObject dp)
+		{
+			ThrowNull(dp, nameof(dp));
+			return (bool)dp.GetValue(AttachProperty);
+		}
 
-		public static string GetPassword(DependencyObject dp) => (string)dp.GetValue(PasswordProperty);
+		public static string GetPassword(DependencyObject dp)
+		{
+			ThrowNull(dp, nameof(dp));
+			return (string)dp.GetValue(PasswordProperty);
+		}
 
-		public static void SetAttach(DependencyObject dp, bool value) => dp.SetValue(AttachProperty, value);
+		public static void SetAttach(DependencyObject dp, bool value)
+		{
+			ThrowNull(dp, nameof(dp));
+			dp.SetValue(AttachProperty, value);
+		}
 
-		public static void SetPassword(DependencyObject dp, string value) => dp.SetValue(PasswordProperty, value);
+		public static void SetPassword(DependencyObject dp, string value)
+		{
+			ThrowNull(dp, nameof(dp));
+			dp.SetValue(PasswordProperty, value);
+		}
 		#endregion
 
 		#region Private Methods

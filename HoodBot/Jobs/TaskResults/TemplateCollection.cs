@@ -4,6 +4,7 @@
 	using System.Text.RegularExpressions;
 	using RobinHood70.Robby;
 	using RobinHood70.WikiClasses;
+	using RobinHood70.WikiCommon;
 
 	public class TemplateCollection : List<TemplateUsageRow>
 	{
@@ -20,7 +21,7 @@
 			{
 				var find = Template.Find(allNames);
 				var matches = find.Matches(page.Text);
-				foreach (Match match in matches)
+				foreach (var match in matches.Cast<Match>())
 				{
 					var template = new Template(match.Value);
 					template.ForceNames();

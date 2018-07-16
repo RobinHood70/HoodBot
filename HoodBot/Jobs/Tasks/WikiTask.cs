@@ -1,13 +1,15 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Tasks
 {
 	using System;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public abstract class WikiTask : WikiRunner
 	{
 		#region Constructors
 		protected WikiTask(WikiRunner parent)
-			: base(parent.Site)
+			: base(parent?.Site)
 		{
+			ThrowNull(parent, nameof(parent));
 			this.Parent = parent;
 			this.Job = (parent as WikiJob) ?? (parent as WikiTask).Job;
 		}

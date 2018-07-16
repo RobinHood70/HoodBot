@@ -3,6 +3,8 @@ namespace RobinHood70.WikiCommon
 {
 	using System;
 
+	#region Public Enumerations
+
 	/// <summary>The types of backlinks.</summary>
 	[Flags]
 	public enum BacklinksTypes
@@ -140,4 +142,5 @@ namespace RobinHood70.WikiCommon
 		/// <summary>Search text for near matches</summary>
 		NearMatch
 	}
+	#endregion
 }

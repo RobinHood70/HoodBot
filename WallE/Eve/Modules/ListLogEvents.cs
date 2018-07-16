@@ -23,14 +23,13 @@ namespace RobinHood70.WallE.Eve.Modules
 			: base(wal, input) => this.getUserId = input.Properties.HasFlag(LogEventsProperties.UserId);
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 109;
 
 		public override string Name { get; } = "logevents";
-
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "le";
 		#endregion
 
@@ -68,7 +67,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			var logAction = (string)result["action"];
 			result.ParseLogEvent(item, logType, logAction, KnownProps, this.getUserId);
 			item.LogPageId = (long?)result["logpage"] ?? 0;
-			item.Tags = result.AsReadOnlyList<string>("tags");
+			item.Tags = result["tags"].AsReadOnlyList<string>();
 
 			return item;
 		}

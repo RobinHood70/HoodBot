@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	/// <summary>Represents full title information, including interwiki, namespace, page name, and fragment.</summary>
-	/// <seealso cref="RobinHood70.Robby.Design.ISimpleTitle" />
+	/// <seealso cref="ISimpleTitle" />
 	public interface IFullTitle : ISimpleTitle
 	{
 		/// <summary>Gets the fragment.</summary>

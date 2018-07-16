@@ -3,7 +3,7 @@
 	using RobinHood70.Robby.Design;
 
 	/// <summary>Stores information about a category link. This includes the sort key and whether or not the category is hidden.</summary>
-	/// <seealso cref="RobinHood70.Robby.Title" />
+	/// <seealso cref="Title" />
 	public class CategoryTitle : Title
 	{
 		#region Constructors

@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionWatch : ActionModulePageSet<WatchInput, WatchItem>
+	internal class ActionWatch : ActionModulePageSet<WatchInput, WatchItem>
 	{
 		#region Constructors
 		public ActionWatch(WikiAbstractionLayer wal)

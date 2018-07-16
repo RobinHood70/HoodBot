@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WikiCommon.Globals;
 
 	// MWVERSION: 1.28
-	public class ActionParamInfo : ActionModule<ParameterInfoInput, IReadOnlyDictionary<string, ParameterInfoItem>>
+	internal class ActionParamInfo : ActionModule<ParameterInfoInput, IReadOnlyDictionary<string, ParameterInfoItem>>
 	{
 		#region Static Fields
 		private static HashSet<string> formatModuleValues = new HashSet<string> { "json", "jsonfm", "php", "phpfm", "wddx", "wddxfm", "xml", "xmlfm", "yaml", "yamlfm", "rawfm", "txt", "txtfm", "dbg", "dbgfm", "dump", "dumpfm", "none" };
@@ -180,7 +180,7 @@ namespace RobinHood70.WallE.Eve.Modules
 								}
 								else
 								{
-									parameter.TypeValues = new string[0];
+									parameter.TypeValues = Array.Empty<string>();
 									parameter.Type = (string)parameterNode["type"];
 								}
 							}
@@ -222,7 +222,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Private Methods
+		#region Private Static Methods
 		private static RawMessageInfo GetMessages(JToken node)
 		{
 			var retval = new RawMessageInfo();

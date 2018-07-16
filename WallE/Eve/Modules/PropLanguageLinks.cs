@@ -4,7 +4,6 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.RequestBuilder;
-	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class PropLanguageLinks : PropListModule<LanguageLinksInput, LanguageLinksItem>
@@ -16,13 +15,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 111;
 
 		public override string Name { get; } = "langlinks";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "ll";
 		#endregion
 
@@ -47,9 +46,9 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override LanguageLinksItem GetItem(JToken result) => result.GetLanguageLink();
 
-		protected override void GetResultsFromCurrentPage() => this.ResetMyList(this.Output.LanguageLinks);
+		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.LanguageLinks);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.LanguageLinks = this.MyList.AsNewReadOnlyList();
+		protected override void SetResultsOnCurrentPage() => this.Output.LanguageLinks = this.Items;
 		#endregion
 	}
 }

@@ -40,7 +40,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Public Override Methods
 		public override bool HandleWarning(string from, string text)
 		{
-			if (this.SiteVersion == 0 && from == "main" && text != null && text.Contains("formatversion"))
+			if (this.SiteVersion == 0 && from == "main" && text?.Contains("formatversion") == true)
 			{
 				this.Wal.DetectedFormatVersion = 1;
 				return true;
@@ -83,8 +83,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override void DeserializeParent(JToken parent, SiteInfoResult output)
 		{
 			// Because this module can continue in non-standard fashion (each module will either appear in whole or not at all), we need to ensure that outputs are only written to if necessary.
-			var wal = this.Wal;
-			GetGeneral(parent, output, wal);
+			GetGeneral(parent, output, this.Wal);
 			GetNamespaces(parent, output);
 			GetNamespaceAliases(parent, output);
 			GetSpecialPageAliases(parent, output);
@@ -95,7 +94,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			GetUserGroups(parent, output);
 			GetFileExtensions(parent, output);
 			GetLibraries(parent, output);
-			GetExtensions(parent, output, wal);
+			GetExtensions(parent, output, this.Wal);
 			GetRightsInfo(parent, output);
 			GetRestrictions(parent, output);
 			GetLanguages(parent, output);
@@ -157,7 +156,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					};
 					try
 					{
-						item.DescriptionMessageParameters = result.AsReadOnlyList<string>("descriptionmsgparams");
+						item.DescriptionMessageParameters = result["descriptionmsgparams"].AsReadOnlyList<string>();
 					}
 					catch (InvalidCastException)
 					{
@@ -224,7 +223,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				output.BasePage = (string)result["base"];
 				output.DbType = (string)result["dbtype"];
 				output.DbVersion = (string)result["dbversion"];
-				output.ExternalImages = result.AsReadOnlyList<string>("externalimages");
+				output.ExternalImages = result["externalimages"].AsReadOnlyList<string>();
 				output.Fallback8BitEncoding = (string)result["fallback8bitEncoding"];
 
 				var fallback = new List<string>();
@@ -437,7 +436,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					var item = new MagicWordsItem()
 					{
 						Name = (string)result["name"],
-						Aliases = result.AsReadOnlyList<string>("aliases"),
+						Aliases = result["aliases"].AsReadOnlyList<string>(),
 						CaseSensitive = result["case-sensitive"].AsBCBool(),
 					};
 					outputList.Add(item);
@@ -511,10 +510,10 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				var item = new RestrictionsItem()
 				{
-					CascadingLevels = node.AsReadOnlyList<string>("cascadinglevels"),
-					Levels = node.AsReadOnlyList<string>("levels"),
-					SemiProtectedLevels = node.AsReadOnlyList<string>("semiprotectedlevels"),
-					Types = node.AsReadOnlyList<string>("types"),
+					CascadingLevels = node["cascadinglevels"].AsReadOnlyList<string>(),
+					Levels = node["levels"].AsReadOnlyList<string>(),
+					SemiProtectedLevels = node["semiprotectedlevels"].AsReadOnlyList<string>(),
+					Types = node["types"].AsReadOnlyList<string>(),
 				};
 				output.Restrictions = item;
 			}
@@ -545,7 +544,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					var subscribers = result["subscribers"];
 					if (subscribers.Type == JTokenType.Array)
 					{
-						item.Subscribers = result.AsReadOnlyList<string>("subscribers");
+						item.Subscribers = result["subscribers"].AsReadOnlyList<string>();
 					}
 					else if (subscribers.Type == JTokenType.Object && subscribers["scribunto"] != null)
 					{
@@ -601,7 +600,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					var item = new SpecialPageAliasesItem()
 					{
 						RealName = (string)result["realname"],
-						Aliases = result.AsReadOnlyList<string>("aliases"),
+						Aliases = result["aliases"].AsReadOnlyList<string>(),
 					};
 					outputList.Add(item);
 				}
@@ -643,11 +642,11 @@ namespace RobinHood70.WallE.Eve.Modules
 					{
 						Name = (string)result["name"],
 						Number = (long?)result["number"] ?? -1,
-						Rights = result.AsReadOnlyList<string>("rights"),
-						Add = result.AsReadOnlyList<string>("add"),
-						AddSelf = result.AsReadOnlyList<string>("add-self"),
-						Remove = result.AsReadOnlyList<string>("remove"),
-						RemoveSelf = result.AsReadOnlyList<string>("remove-self"),
+						Rights = result["rights"].AsReadOnlyList<string>(),
+						Add = result["add"].AsReadOnlyList<string>(),
+						AddSelf = result["add-self"].AsReadOnlyList<string>(),
+						Remove = result["remove"].AsReadOnlyList<string>(),
+						RemoveSelf = result["remove-self"].AsReadOnlyList<string>(),
 					};
 					outputList.Add(item);
 				}

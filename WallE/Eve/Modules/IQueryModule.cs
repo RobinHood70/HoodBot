@@ -7,7 +7,7 @@
 	/// <seealso cref="IModule" />
 	public interface IQueryModule : IModule
 	{
-		#region Public Properties
+		#region Properties
 
 		/// <summary>Gets the name of the continue parameter for the module.</summary>
 		/// <value>The name of the continue parameter for the module.</value>
@@ -20,10 +20,6 @@
 		/// <summary>Gets or sets the upper limit of items this module can request.</summary>
 		/// <value>The limit of items this module can request.</value>
 		int ModuleLimit { get; set; }
-
-		/// <summary>Gets or sets a value indicating whether this instance is generator.</summary>
-		/// <value><see langword="true" /> if this instance is generator; otherwise, <see langword="false" />.</value>
-		bool IsGenerator { get; set; }
 		#endregion
 
 		#region Methods

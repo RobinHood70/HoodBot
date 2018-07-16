@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionPatrol : ActionModule<PatrolInput, PatrolResult>
+	internal class ActionPatrol : ActionModule<PatrolInput, PatrolResult>
 	{
 		#region Constructors
 		public ActionPatrol(WikiAbstractionLayer wal)
@@ -40,11 +40,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override PatrolResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new PatrolResult();
-			output.GetWikiTitle(result);
-			output.RecentChangesId = (int?)result["rcid"] ?? 0;
-
-			return output;
+			return new PatrolResult
+			{
+				RecentChangesId = (int?)result["rcid"] ?? 0
+			}.GetWikiTitle(result);
 		}
 		#endregion
 	}

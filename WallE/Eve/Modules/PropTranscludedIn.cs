@@ -4,7 +4,6 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.RequestBuilder;
-	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class PropTranscludedIn : PropListModule<TranscludedInInput, TranscludedInItem>, IGeneratorModule
@@ -16,13 +15,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 124;
 
 		public override string Name { get; } = "transcludedin";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "ti";
 		#endregion
 
@@ -44,23 +43,16 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override TranscludedInItem GetItem(JToken result)
-		{
-			if (result == null)
+		protected override TranscludedInItem GetItem(JToken result) => result == null
+			? null
+			: new TranscludedInItem
 			{
-				return null;
-			}
+				Redirect = result["redirect"].AsBCBool()
+			}.GetWikiTitle(result);
 
-			var item = new TranscludedInItem();
-			item.GetWikiTitle(result);
-			item.Redirect = result["redirect"].AsBCBool();
+		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.TranscludedIn);
 
-			return item;
-		}
-
-		protected override void GetResultsFromCurrentPage() => this.ResetMyList(this.Output.TranscludedIn);
-
-		protected override void SetResultsOnCurrentPage() => this.Output.TranscludedIn = this.MyList.AsNewReadOnlyList();
+		protected override void SetResultsOnCurrentPage() => this.Output.TranscludedIn = this.Items;
 		#endregion
 	}
 }

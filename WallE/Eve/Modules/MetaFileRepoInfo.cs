@@ -23,7 +23,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		public override string Name { get; } = "filerepoinfo";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string ModuleType => "meta";
 
 		protected override string Prefix { get; } = "fri";
@@ -65,10 +65,9 @@ namespace RobinHood70.WallE.Eve.Modules
 				ThumbUrl = (string)result["thumbUrl"],
 				Url = (string)result["url"],
 			};
+
 			var otherInfo = new Dictionary<string, string>();
-#pragma warning disable IDE0007 // Use implicit type
-			foreach (JProperty otherNode in result)
-#pragma warning restore IDE0007 // Use implicit type
+			foreach (var otherNode in result.Children<JProperty>())
 			{
 				var ignoreWords = new SortedSet<string>() { "apiurl", "articleurl", "descBaseUrl", "descriptionCacheExpiry", "displayname", "favicon", "fetchDescription", "initialCapital", "local", "name", "rootUrl", "scriptDirUrl", "scriptExtension", "thumbUrl", "url" };
 				if (!ignoreWords.Contains(otherNode.Name))

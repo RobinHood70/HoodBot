@@ -177,12 +177,7 @@
 				return pageName;
 			}
 
-			if (char.IsLower(pageName[0]))
-			{
-				return pageName.Length == 1 ? char.ToUpper(pageName[0], this.Site.Culture).ToString() : char.ToUpper(pageName[0], this.Site.Culture) + pageName.Substring(1);
-			}
-
-			return pageName;
+			return pageName.UpperFirst(this.Site.Culture);
 		}
 
 		/// <summary>Determines whether the name specified is in the list of names for this namespace.</summary>

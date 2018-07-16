@@ -3,7 +3,7 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System.Collections.Generic;
 
-	public class OptionsInputInternal
+	internal class OptionsInputInternal
 	{
 		#region Public Properties
 		public IEnumerable<string> Change { get; set; }

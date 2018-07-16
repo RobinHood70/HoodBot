@@ -47,8 +47,8 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="WikiException" /> class.</summary>
-		/// <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo" /> that holds the serialized object data about the exception being thrown.</param>
-		/// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext" /> that contains contextual information about the source or destination.</param>
+		/// <param name="info">The <see cref="SerializationInfo" /> that holds the serialized object data about the exception being thrown.</param>
+		/// <param name="context">The <see cref="StreamingContext" /> that contains contextual information about the source or destination.</param>
 		protected WikiException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
@@ -82,9 +82,9 @@
 
 		#region Public Override Methods
 
-		/// <summary>Sets the <see cref="T:System.Runtime.Serialization.SerializationInfo" /> with information about the exception.</summary>
-		/// <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo" /> that holds the serialized object data about the exception being thrown.</param>
-		/// <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext" /> that contains contextual information about the source or destination.</param>
+		/// <summary>Sets the <see cref="SerializationInfo" /> with information about the exception.</summary>
+		/// <param name="info">The <see cref="SerializationInfo" /> that holds the serialized object data about the exception being thrown.</param>
+		/// <param name="context">The <see cref="StreamingContext" /> that contains contextual information about the source or destination.</param>
 		[SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{

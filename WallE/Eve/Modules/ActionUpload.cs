@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class ActionUpload : ActionModule<UploadInputInternal, UploadResult>
+	internal class ActionUpload : ActionModule<UploadInputInternal, UploadResult>
 	{
 		#region Fields
 		private bool continued = false;
@@ -73,9 +73,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			var warnings = result["warnings"];
 			if (warnings != null)
 			{
-#pragma warning disable IDE0007 // Use implicit type
-				foreach (JProperty prop in warnings)
-#pragma warning restore IDE0007 // Use implicit type
+				foreach (var prop in warnings.Children<JProperty>())
 				{
 					var name = prop.Name;
 					var value = prop.Value;

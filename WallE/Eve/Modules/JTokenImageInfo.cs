@@ -71,9 +71,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			var dict = new Dictionary<string, ExtendedMetadataItem>();
 			if (list != null)
 			{
-#pragma warning disable IDE0007 // Use implicit type
-				foreach (JProperty item in list)
-#pragma warning restore IDE0007 // Use implicit type
+				foreach (var item in list.Children<JProperty>())
 				{
 					var name = item.Name;
 					var itemValue = item.Value;

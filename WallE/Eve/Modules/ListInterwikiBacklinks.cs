@@ -15,17 +15,17 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 117;
 
 		public override string Name { get; } = "iwbacklinks";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "iwbl";
 		#endregion
 
-		#region Public Override Methods
+		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, InterwikiBacklinksInput input)
 		{
 			ThrowNull(request, nameof(request));
@@ -38,21 +38,14 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override InterwikiBacklinksItem GetItem(JToken result)
-		{
-			if (result == null)
+		protected override InterwikiBacklinksItem GetItem(JToken result) => result == null
+			? null
+			: new InterwikiBacklinksItem
 			{
-				return null;
-			}
-
-			var item = new InterwikiBacklinksItem();
-			item.GetWikiTitle(result);
-			item.IsRedirect = result["redirect"].AsBCBool();
-			item.InterwikiPrefix = (string)result["iwprefix"];
-			item.InterwikiTitle = (string)result["iwtitle"];
-
-			return item;
-		}
+				IsRedirect = result["redirect"].AsBCBool(),
+				InterwikiPrefix = (string)result["iwprefix"],
+				InterwikiTitle = (string)result["iwtitle"]
+			}.GetWikiTitle(result);
 		#endregion
 	}
 }

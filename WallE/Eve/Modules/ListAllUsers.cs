@@ -15,17 +15,17 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 111;
 
 		public override string Name { get; } = "allusers";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "au";
 		#endregion
 
-		#region Public Override Methods
+		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, AllUsersInput input)
 		{
 			ThrowNull(request, nameof(request));
@@ -50,9 +50,11 @@ namespace RobinHood70.WallE.Eve.Modules
 				return null;
 			}
 
-			var item = new AllUsersItem();
+			var item = new AllUsersItem
+			{
+				RecentActions = (int?)result["recentactions"] ?? (int?)result["recenteditcount"] ?? 0
+			};
 			result.GetUser(item);
-			item.RecentActions = (int?)result["recentactions"] ?? (int?)result["recenteditcount"] ?? 0;
 
 			return item;
 		}

@@ -9,28 +9,17 @@ namespace RobinHood70.WallE.Eve.Modules
 	internal class ContinueModule1 : ContinueModule
 	{
 		#region Public Constants
-		internal const string Name = "query-continue";
+		public const string Name = "query-continue";
 		#endregion
 
 		#region Fields
-		private readonly SortedSet<string> modules = new SortedSet<string>();
+		private readonly HashSet<string> modules = new HashSet<string>();
+
 		private string currentGeneratorValue;
 		private string savedGeneratorValue;
 		#endregion
 
 		#region Public Override Methods
-		public override void OnSubmit(IPageSetInternal pageSet)
-		{
-			base.OnSubmit(pageSet);
-			if (pageSet is IQueryPageSet queryPageSet)
-			{
-				queryPageSet.DisabledModules.Clear();
-				queryPageSet.DisabledModules.UnionWith(this.modules);
-			}
-		}
-		#endregion
-
-		#region Protected Override Methods
 		public override void BuildRequest(Request request)
 		{
 			ThrowNull(request, nameof(request));
@@ -51,47 +40,56 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		public override int Deserialize(JToken parent)
 		{
-			if (parent != null)
+			var result = parent?[Name];
+			if (result == null || result.Type == JTokenType.Null)
 			{
-				// True by default for cases when there's no query-continue in the result and therefore DeserializeMain() isn't called.
-				this.BatchComplete = true;
-				var result = parent[Name];
-				if (result != null && result.Type != JTokenType.Null)
+				return 0;
+			}
+
+			// True by default for cases when there's no query-continue in the result and therefore DeserializeMain() isn't called.
+			this.BatchComplete = true;
+			this.Continues = true;
+			this.ContinueEntries.Clear();
+			this.modules.Clear();
+			foreach (var module in result.Children<JProperty>())
+			{
+				foreach (var param in module.Value.Children<JProperty>())
 				{
-					this.Continues = true;
-					this.ContinueEntries.Clear();
-					this.modules.Clear();
-#pragma warning disable IDE0007 // Use implicit type
-					foreach (JProperty module in result)
+					if (param.Name == this.GeneratorContinue)
 					{
-						foreach (JProperty param in module.Value)
-#pragma warning restore IDE0007 // Use implicit type
-						{
-							if (param.Name == this.GeneratorContinue)
-							{
-								this.savedGeneratorValue = (string)param.Value;
-							}
-							else
-							{
-								if (this.GeneratorContinue.Length > 0)
-								{
-									this.BatchComplete = false;
-								}
-
-								this.modules.Add(module.Name);
-								this.ContinueEntries[param.Name] = (string)param.Value;
-							}
-						}
+						this.savedGeneratorValue = (string)param.Value;
 					}
-
-					if (this.BatchComplete)
+					else
 					{
-						this.currentGeneratorValue = this.savedGeneratorValue;
+						if (this.GeneratorContinue.Length > 0)
+						{
+							this.BatchComplete = false;
+						}
+
+						this.modules.Add(module.Name);
+						this.ContinueEntries[param.Name] = (string)param.Value;
 					}
 				}
 			}
 
+			if (this.BatchComplete)
+			{
+				this.currentGeneratorValue = this.savedGeneratorValue;
+			}
+
 			return 0;
+		}
+		#endregion
+
+		#region Protected Internal Override Methods
+		public override void BeforePageSetSubmit(IPageSetGenerator pageSet)
+		{
+			base.BeforePageSetSubmit(pageSet);
+			if (pageSet is IQueryPageSet queryPageSet)
+			{
+				queryPageSet.InactiveModules.Clear();
+				queryPageSet.InactiveModules.UnionWith(this.modules);
+			}
 		}
 		#endregion
 	}

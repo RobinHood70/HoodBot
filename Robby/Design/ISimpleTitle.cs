@@ -1,7 +1,5 @@
 ﻿namespace RobinHood70.Robby.Design
 {
-	using System;
-
 	/// <summary>Interface for Title-like objects.</summary>
 	public interface ISimpleTitle
 	{

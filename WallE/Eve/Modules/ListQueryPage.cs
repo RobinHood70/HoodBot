@@ -23,7 +23,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			: base(wal, input) => this.queryPage = input.Page;
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override string ContinueName { get; } = "offset";
 
 		public override int MinimumVersion { get; } = 118;
@@ -31,7 +31,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		public override string Name { get; } = "querypage";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "qp";
 		#endregion
 
@@ -40,7 +40,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Methods
-		public QueryPageResult AsQueryPageTitleCollection() =>
+		public QueryPageResult AsQueryPageResult() =>
 			new QueryPageResult(this.Output)
 			{
 				Cached = this.cached,
@@ -49,7 +49,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			};
 		#endregion
 
-		#region Public Override Methods
+		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, QueryPageInput input)
 		{
 			ThrowNull(request, nameof(request));
@@ -84,23 +84,16 @@ namespace RobinHood70.WallE.Eve.Modules
 			base.DeserializeResult(result, output);
 		}
 
-		protected override QueryPageItem GetItem(JToken result)
-		{
-			if (result == null)
-			{
-				return null;
-			}
-
-			var item = new QueryPageItem()
+		protected override QueryPageItem GetItem(JToken result) => result == null
+			? null
+			: new QueryPageItem()
 			{
 				Namespace = (int?)result["ns"],
 				Title = (string)result["title"],
 				Timestamp = (DateTime?)result["timestamp"],
 				Value = (string)result["value"],
-				DatabaseResults = result.AsReadOnlyDictionary<string, string>("databaseResults"),
+				DatabaseResults = result["databaseResults"].AsReadOnlyDictionary<string, string>()
 			};
-			return item;
-		}
 		#endregion
 	}
 }

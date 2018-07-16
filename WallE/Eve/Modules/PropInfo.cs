@@ -23,13 +23,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 0;
 
 		public override string Name { get; } = "info";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "in";
 		#endregion
 
@@ -60,7 +60,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddFlags("prop", prop)
 				.AddIf("testactions", input.TestActions, this.SiteVersion >= 125)
 				.Add("token", input.Tokens)
-				.Add("token", input.Tokens.AsReadOnlyCollection().Count == 0 && this.SiteVersion < 124); // Since AddPiped will filter out null values, ensure timestamp is requested if tokens are null but timestamp is requested.
+				.Add("token", !input.Tokens.HasItems() && this.SiteVersion < 124); // Since enumerable version of add will filter out null values, ensure timestamp is requested if tokens are null/empty.
 		}
 
 		protected override void DeserializeParent(JToken parent, PageItem output)
@@ -87,7 +87,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					parent.GetFlag("watched", PageInfoFlags.Watched),
 				Length = (int?)parent["length"] ?? 0,
 				StartTimestamp = parent["starttimestamp"].AsDate(),
-				RestrictionTypes = parent.AsReadOnlyList<string>("restrictiontypes"),
+				RestrictionTypes = parent["restrictiontypes"].AsReadOnlyList<string>(),
 				Watchers = (long?)parent["watchers"] ?? 0,
 				NotificationTimestamp = parent["notificationtimestamp"].AsDate(),
 				TalkId = (long?)parent["talkid"] ?? 0,
@@ -103,9 +103,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			info.Counter = counter?.Type == JTokenType.Integer ? (long?)parent["counter"] ?? -1 : -1;
 
 			var tokens = new Dictionary<string, string>();
-#pragma warning disable IDE0007 // Use implicit type
-			foreach (JProperty token in parent)
-#pragma warning restore IDE0007 // Use implicit type
+			foreach (var token in parent.Children<JProperty>())
 			{
 				if (token.Name.EndsWith("token", StringComparison.Ordinal))
 				{
@@ -136,14 +134,12 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			info.Protections = protections;
 
-			// Ensure that all inputs have an output so we get consistent results between JSON1 and JSON2. To cover the corner case where some extension gives unexpected outputs that don't match the input actions, or multiple outputs for a single input, I've done this as two separate loops. It is assumed that the programmer will be aware of what they're looking for should these cases ever occur, and will not be fooled by extraneous false values under the original input actions.
+			// Ensure that all inputs have an output so we get consistent results between JSON1 and JSON2. To cover the corner case where some extension gives unexpected outputs that don't match the input actions, or multiple outputs for a single input, I've initialized the dictionary from the input actions, then updated from there. It is assumed that the programmer will be aware of what they're looking for should these cases ever occur, and will not be bothered by extraneous false values beyond the original input actions.
 			var testActions = new Dictionary<string, bool>(this.baseActions);
 			var testActionsNode = parent["actions"];
 			if (testActionsNode != null)
 			{
-#pragma warning disable IDE0007 // Use implicit type
-				foreach (JProperty prop in testActionsNode)
-#pragma warning restore IDE0007 // Use implicit type
+				foreach (var prop in testActionsNode.Children<JProperty>())
 				{
 					testActions[prop.Name] = prop.Value.AsBCBool();
 				}

@@ -15,13 +15,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Protected Internal Override Properties
+		#region Public Override Properties
 		public override int MinimumVersion { get; } = 123;
 
 		public override string Name { get; } = "prefixsearch";
 		#endregion
 
-		#region Public Override Properties
+		#region Protected Override Properties
 		protected override string Prefix { get; } = "ps";
 		#endregion
 
@@ -29,7 +29,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		public static ListPrefixSearch CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new ListPrefixSearch(wal, input as PrefixSearchInput);
 		#endregion
 
-		#region Public Override Methods
+		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, PrefixSearchInput input)
 		{
 			ThrowNull(request, nameof(request));

@@ -7,7 +7,7 @@
 
 	/// <summary>Concrete implementation of <see cref="IModuleFactory" />.</summary>
 	/// <seealso cref="IModuleFactory" />
-	public class ModuleFactory : IModuleFactory
+	internal class ModuleFactory : IModuleFactory
 	{
 		#region Fields
 		private readonly Dictionary<Type, GeneratorFactoryMethod> generators = new Dictionary<Type, GeneratorFactoryMethod>();
@@ -26,22 +26,23 @@
 
 		/// <summary>Creates property modules from the provided inputs.</summary>
 		/// <param name="propertyInputs">The property inputs.</param>
-		/// <returns>A set of modules that corresponds to the provided inputs. If <paramref name="propertyInputs" /> is null, returns an empty collection.</returns>
-		public ModuleCollection<IPropertyModule> CreateModules(IEnumerable<IPropertyInput> propertyInputs)
+		/// <returns>A set of modules that corresponds to the provided inputs.</returns>
+		public IEnumerable<IPropertyModule> CreateModules(IEnumerable<IPropertyInput> propertyInputs)
 		{
-			var modules = new ModuleCollection<IPropertyModule>();
 			if (propertyInputs != null)
 			{
 				foreach (var propertyInput in propertyInputs)
 				{
 					if (this.properties.TryGetValue(propertyInput.GetType(), out var factoryMethod))
 					{
-						modules.Add(factoryMethod(this.wal, propertyInput));
+						yield return factoryMethod(this.wal, propertyInput);
+					}
+					else
+					{
+						throw new EntryPointNotFoundException(CurrentCulture(Properties.EveMessages.ParameterInvalid, nameof(this.CreateModules), propertyInput.GetType().Name));
 					}
 				}
 			}
-
-			return modules;
 		}
 
 		/// <summary>Creates a new continuation module.</summary>
@@ -67,7 +68,7 @@
 			where TInput : class, IGeneratorInput
 		{
 			var generator = this.generators[input.GetType()](this.wal, input);
-			generator.IsGenerator = true;
+			generator.SetAsGenerator();
 
 			return generator;
 		}
