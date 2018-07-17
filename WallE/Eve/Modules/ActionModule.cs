@@ -8,6 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.RequestBuilder;
+	using RobinHood70.WikiCommon;
 	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -241,7 +242,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					var description = (string)warning.First.AsBCContent("warnings");
 
-					foreach (var line in description.Split('\n'))
+					foreach (var line in description.Split(TextArrays.LineFeed))
 					{
 						this.AddWarning(warning.Name, line);
 					}

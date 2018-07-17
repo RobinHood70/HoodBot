@@ -5,6 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.RequestBuilder;
+	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class ActionWatch : ActionModulePageSet<WatchInput, WatchItem>
@@ -61,7 +62,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Private Methods
 		private int? FindNamespace(string title)
 		{
-			var nsSplit = title.Split(new[] { ':' }, 2);
+			var nsSplit = title.Split(TextArrays.Colon, 2);
 			if (nsSplit.Length == 2)
 			{
 				var nsText = nsSplit[0];

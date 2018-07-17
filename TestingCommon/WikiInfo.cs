@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Globalization;
 	using System.IO;
+	using RobinHood70.WikiCommon;
 
 	public class WikiInfo
 	{
@@ -20,7 +21,7 @@
 				return;
 			}
 
-			var split = tabSeparatedValues.Split(new char[] { '\t' }, StringSplitOptions.None);
+			var split = tabSeparatedValues.Split(TextArrays.Tab, StringSplitOptions.None);
 			if (split.Length != 9)
 			{
 				throw new ArgumentException($"Incorrect number of values in tab-separated string: {tabSeparatedValues}");

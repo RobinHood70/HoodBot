@@ -127,7 +127,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					toPage.Interwiki = (string)item["tointerwiki"];
 					if (toPage.Interwiki == null && wal.SiteVersion < 125)
 					{
-						var titleSplit = toPage.Title.TrimStart(':').Split(new[] { ':' }, 2);
+						var titleSplit = toPage.Title.TrimStart(TextArrays.Colon).Split(TextArrays.Colon, 2);
 						if (titleSplit.Length == 2 && wal.InterwikiPrefixes.Contains(titleSplit[0]))
 						{
 							toPage.Interwiki = titleSplit[0];

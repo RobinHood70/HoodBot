@@ -174,7 +174,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 				var ids = (string)values[valOffset.ToStringInvariant()];
 				var logIds = new List<long>();
-				foreach (var value in ids.Split(','))
+				foreach (var value in ids.Split(TextArrays.Comma))
 				{
 					logIds.Add(long.Parse(value, CultureInfo.InvariantCulture));
 				}
@@ -274,12 +274,12 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		private static RevisionDeleteTypes LogEventGetRDType(string param)
 		{
-			var info = param.Split('=');
+			var info = param.Split(TextArrays.EqualsSign);
 			var type = info[info.Length - 1];
 			return (RevisionDeleteTypes)int.Parse(type, CultureInfo.InvariantCulture);
 		}
 
-		private static IReadOnlyList<string> ParseRights(string value) => value.Split(new string[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
+		private static IReadOnlyList<string> ParseRights(string value) => value.Split(TextArrays.CommaSpace, StringSplitOptions.RemoveEmptyEntries);
 		#endregion
 	}
 }

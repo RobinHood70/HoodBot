@@ -8,6 +8,10 @@
 
 	internal class TokenManagerOriginal : ITokenManager
 	{
+		#region Static Fields
+		private static readonly string[] DummyPage = { ":" }; // This is a hack that MW sees as a legitimate page name that will never actually be found. Fixed in later versions, but works nicely for pre-1.20 since we don't have an actual page name.
+		#endregion
+
 		#region Constructors
 		public TokenManagerOriginal(WikiAbstractionLayer wal) => this.Wal = wal;
 		#endregion
@@ -39,7 +43,7 @@
 			type = TokenManagerFunctions.ValidateTokenType(ValidTypes, type, Csrf, Edit);
 			if (!this.SessionTokens.TryGetValue(type, out var retval))
 			{
-				var pageSetInput = new QueryPageSetInput(new string[] { ":" }); // This is a hack that MW sees as a legitimate page name that will never actually be found. Fixed in later versions, but works nicely for pre-1.20 since we don't have an actual page name.
+				var pageSetInput = new QueryPageSetInput(DummyPage);
 				var propInfoInput = new InfoInput { Tokens = new[] { Edit, Watch } };
 				var input = new RecentChangesInput { GetPatrolToken = true, MaxItems = 1 };
 				var recentChanges = new ListRecentChanges(this.Wal, input);

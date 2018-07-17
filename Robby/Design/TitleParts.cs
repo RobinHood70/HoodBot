@@ -31,7 +31,7 @@
 				throw new ArgumentException(CurrentCulture(TitleInvalid));
 			}
 
-			var split = nameRemaining.Split(new[] { ':' }, 3);
+			var split = nameRemaining.Split(TextArrays.Colon, 3);
 			if (split.Length >= 2)
 			{
 				var key = split[0].TrimEnd();
@@ -82,7 +82,7 @@
 
 			if (this.Namespace == MediaWikiNamespaces.Talk)
 			{
-				split = nameRemaining.TrimStart().Split(new[] { ':' }, 2);
+				split = nameRemaining.TrimStart().Split(TextArrays.Colon, 2);
 				var nsTest = split[0].TrimEnd();
 				if (split.Length == 2 && (site.Namespaces.Contains(nsTest) || site.InterwikiMap.Contains(nsTest)))
 				{
@@ -90,7 +90,7 @@
 				}
 			}
 
-			split = nameRemaining.Split(new[] { '#' }, 2);
+			split = nameRemaining.Split(TextArrays.Octothorp, 2);
 			if (split.Length == 2)
 			{
 				this.PageName = split[0];
@@ -119,7 +119,7 @@
 				this.Interwiki = site.InterwikiMap[interWiki];
 			}
 
-			var split = fullPageName.Split(new[] { ':' }, 2);
+			var split = fullPageName.Split(TextArrays.Colon, 2);
 			if (site.Namespaces.TryGetValue(split[0], out var ns))
 			{
 				this.Namespace = ns;

@@ -5,8 +5,9 @@
 	using System.Windows;
 	using System.Windows.Controls;
 	using RobinHood70.HoodBot.ViewModel;
-	using static RobinHood70.WikiCommon.Globals;
+	using RobinHood70.WikiCommon;
 	using static RobinHood70.HoodBot.Properties.Resources;
+	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Interaction logic for MainWindow.xaml.</summary>
 	public partial class MainWindow : Window, IParameterFetcher
@@ -101,7 +102,7 @@
 				}
 				else if (typeof(IEnumerable).IsAssignableFrom(valueType))
 				{
-					parameter.Value = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+					parameter.Value = text.Split(TextArrays.EnvironmentNewLine, StringSplitOptions.None);
 				}
 				else
 				{

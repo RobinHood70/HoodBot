@@ -386,8 +386,8 @@
 			}
 
 			this.articlePath = path;
-			var versionFudged = Regex.Replace(siteInfo.Generator, @"[^0-9\.]", ".").TrimStart('.');
-			var versionSplit = versionFudged.Split('.');
+			var versionFudged = Regex.Replace(siteInfo.Generator, @"[^0-9\.]", ".").TrimStart(TextArrays.Period);
+			var versionSplit = versionFudged.Split(TextArrays.Period);
 			var siteVersion = int.Parse(versionSplit[0], CultureInfo.InvariantCulture) * 100 + int.Parse(versionSplit[1], CultureInfo.InvariantCulture);
 			this.SiteVersion = siteVersion;
 
@@ -825,7 +825,7 @@
 			string botPasswordName = null;
 			if (!string.IsNullOrEmpty(input.UserName))
 			{
-				var userNameSplit = input.UserName.Split('@');
+				var userNameSplit = input.UserName.Split(TextArrays.At);
 				botPasswordName = userNameSplit[userNameSplit.Length - 1];
 			}
 

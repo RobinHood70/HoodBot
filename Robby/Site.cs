@@ -29,6 +29,10 @@
 			SiteInfoProperties.InterwikiMap;
 		#endregion
 
+		#region Static Fields
+		private static readonly string[] DefaultRedirect = { "#REDIRECT" };
+		#endregion
+
 		#region Fields
 		private readonly Dictionary<string, MagicWord> magicWords = new Dictionary<string, MagicWord>();
 
@@ -214,7 +218,7 @@
 			if (this.redirectTargetFinder == null)
 			{
 				var list = new List<string>();
-				var redirects = this.MagicWords.TryGetValue("redirect", out var redirect) ? new HashSet<string>(redirect.Aliases) : new HashSet<string> { "#REDIRECT" };
+				var redirects = new HashSet<string>(this.MagicWords.TryGetValue("redirect", out var redirect) ? redirect.Aliases : DefaultRedirect);
 				foreach (var redirWord in redirects)
 				{
 					list.Add(Regex.Escape(redirWord));

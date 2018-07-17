@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Text;
 	using System.Text.RegularExpressions;
+	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
 	public class WikiLink
@@ -23,7 +24,7 @@
 				link = link.Trim();
 			}
 
-			var split = link.Split(new[] { '|' }, 2);
+			var split = link.Split(TextArrays.Pipe, 2);
 			var page = split[0];
 			if (split.Length == 2)
 			{
@@ -36,7 +37,7 @@
 				page = page.Substring(1);
 			}
 
-			split = page.Split(new[] { ':' }, 2);
+			split = page.Split(TextArrays.Colon, 2);
 			if (split.Length == 1)
 			{
 				this.Namespace = string.Empty;
@@ -53,7 +54,7 @@
 			}
 			else
 			{
-				var fragmentSplit = pageName.Split(new[] { '#' }, 2);
+				var fragmentSplit = pageName.Split(TextArrays.Octothorp, 2);
 				this.PageName = fragmentSplit[0];
 				if (fragmentSplit.Length == 2)
 				{
@@ -90,7 +91,7 @@
 
 		public string PageName { get; set; }
 
-		public string RootPage => this.Namespace + ':' + this.PageName.Split(new[] { '/' }, 2)[0];
+		public string RootPage => this.Namespace + ':' + this.PageName.Split(TextArrays.Slash, 2)[0];
 		#endregion
 
 		#region Public Static Methods
@@ -143,7 +144,7 @@
 			value[1] == '[' &&
 			value[value.Length - 2] == ']' &&
 			value[value.Length - 1] == ']' &&
-			value.Substring(2, value.Length - 4).IndexOfAny(new[] { '[', ']' }) == -1;
+			value.Substring(2, value.Length - 4).IndexOfAny(TextArrays.SquareBrackets) == -1;
 
 		public static Regex LinkFinder() => LinkFinder(null, null, null, null, null);
 
@@ -237,7 +238,7 @@
 			else
 			{
 				retval = this.PageName ?? string.Empty;
-				var split = retval.Split(new[] { ',' }, 2);
+				var split = retval.Split(TextArrays.Comma, 2);
 				if (split.Length == 1)
 				{
 					var lastIndex = retval.LastIndexOf('(');

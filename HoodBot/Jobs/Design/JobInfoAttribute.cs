@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.WikiCommon;
 
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments", Justification = "Replaces an array, which would be tagged as non-CLS compliant.")]
 	[AttributeUsage(AttributeTargets.Constructor)]
@@ -14,7 +15,7 @@
 		{
 			if (!string.IsNullOrWhiteSpace(groupsText))
 			{
-				var groupSplit = groupsText.Split('|');
+				var groupSplit = groupsText.Split(TextArrays.Pipe);
 				for (var i = 0; i < groupSplit.Length; i++)
 				{
 					groupSplit[i] = groupSplit[i].Trim();

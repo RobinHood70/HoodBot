@@ -6,6 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.RequestBuilder;
+	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
 	// MW: 1.27
@@ -44,7 +45,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				var queryModules = new SortedSet<string>();
 				foreach (var module in input.Modules)
 				{
-					var submodule = module.Split(new char[] { '+' }, 2, StringSplitOptions.None);
+					var submodule = module.Split(TextArrays.Plus, 2, StringSplitOptions.None);
 					if (submodule.Length == 2 && submodule[0].Trim() == "query")
 					{
 						queryModules.Add(submodule[1].Trim());

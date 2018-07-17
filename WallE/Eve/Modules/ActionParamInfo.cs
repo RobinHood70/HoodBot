@@ -6,18 +6,20 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.RequestBuilder;
+	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
 	// MWVERSION: 1.28
 	internal class ActionParamInfo : ActionModule<ParameterInfoInput, IReadOnlyDictionary<string, ParameterInfoItem>>
 	{
 		#region Static Fields
-		private static HashSet<string> formatModuleValues = new HashSet<string> { "json", "jsonfm", "php", "phpfm", "wddx", "wddxfm", "xml", "xmlfm", "yaml", "yamlfm", "rawfm", "txt", "txtfm", "dbg", "dbgfm", "dump", "dumpfm", "none" };
+		private static readonly HashSet<string> FormatModuleValues = new HashSet<string> { "json", "jsonfm", "php", "phpfm", "wddx", "wddxfm", "xml", "xmlfm", "yaml", "yamlfm", "rawfm", "txt", "txtfm", "dbg", "dbgfm", "dump", "dumpfm", "none" };
+		private static readonly string[] ModuleTypes125 = { "querymodules", "formatmodules", "mainmodule", "pagesetmodule" };
 		#endregion
 
 		#region Constructors
 		public ActionParamInfo(WikiAbstractionLayer wal)
-			: base(wal)
+				: base(wal)
 		{
 		}
 		#endregion
@@ -62,14 +64,14 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					pagesetModule = true;
 				}
-				else if (formatModuleValues.Contains(module) && this.SiteVersion >= 119)
+				else if (FormatModuleValues.Contains(module) && this.SiteVersion >= 119)
 				{
 					// This will mis-handle custom format modules on older wikis, but this possibility is insanely remote, so I don't feel the need to code for it.
 					formatModules.Add(module);
 				}
 				else if (module.StartsWith("query+", StringComparison.Ordinal))
 				{
-					queryModules.Add(module.Split(new char[] { '+' }, 2)[1]);
+					queryModules.Add(module.Split(TextArrays.Plus, 2)[1]);
 				}
 				else
 				{
@@ -92,7 +94,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			var moduleTypes = new List<string>() { "modules" };
 			if (this.SiteVersion < 125)
 			{
-				moduleTypes.AddRange(new string[] { "querymodules", "formatmodules", "mainmodule", "pagesetmodule" });
+				moduleTypes.AddRange(ModuleTypes125);
 			}
 
 			foreach (var moduleType in moduleTypes)

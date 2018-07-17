@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Text;
+	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
 	// This is a "dumb" parser class that is rather convoluted at times, but is smaller and (from a certain POV) simpler than building a full-fledged parse tree.
@@ -89,7 +90,7 @@
 				{
 					var list = new List<KeyValuePair<string, int>>(defaultNames);
 					list.Sort((x, y) => y.Value.CompareTo(x.Value));
-					var whiteSpace = list[0].Key.Split('|');
+					var whiteSpace = list[0].Key.Split(TextArrays.Pipe);
 					template.DefaultNameFormat.LeadingWhiteSpace = whiteSpace[0];
 					template.DefaultNameFormat.TrailingWhiteSpace = whiteSpace[1];
 				}
@@ -98,7 +99,7 @@
 				{
 					var list = new List<KeyValuePair<string, int>>(defaultValues);
 					list.Sort((x, y) => y.Value.CompareTo(x.Value));
-					var whiteSpace = list[0].Key.Split('|');
+					var whiteSpace = list[0].Key.Split(TextArrays.Pipe);
 					template.DefaultValueFormat.LeadingWhiteSpace = whiteSpace[0];
 					template.DefaultValueFormat.TrailingWhiteSpace = whiteSpace[1];
 				}
@@ -172,7 +173,7 @@
 				{
 					// If all WhiteSpace, assume that anything from \n or \r onwards is trailing WhiteSpace.
 					templateString.Value = string.Empty;
-					var newLine = templateString.LeadingWhiteSpace.IndexOfAny(new char[] { '\n', '\r' });
+					var newLine = templateString.LeadingWhiteSpace.IndexOfAny(TextArrays.NewLineChars);
 					if (newLine >= 0)
 					{
 						templateString.TrailingWhiteSpace = templateString.LeadingWhiteSpace.Substring(newLine);

@@ -55,6 +55,7 @@
     <Compile Include="MediaWikiNamespaces.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReadOnlyKeyedCollection.cs" />
+    <Compile Include="TextArrays.cs" />
     <Compile Include="ValidatedNotNullAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
