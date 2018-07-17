@@ -59,7 +59,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.DuplicateFiles);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.DuplicateFiles = this.GetResult();
+		protected override void SetResultsOnCurrentPage() => this.Output.DuplicateFiles = this.CopyList();
 		#endregion
 	}
 }

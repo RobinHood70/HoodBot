@@ -57,7 +57,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.TranscludedIn);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.TranscludedIn = this.GetResult();
+		protected override void SetResultsOnCurrentPage() => this.Output.TranscludedIn = this.CopyList();
 		#endregion
 	}
 }

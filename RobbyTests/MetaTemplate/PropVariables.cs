@@ -59,7 +59,7 @@
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems((this.Output as VariablesPageItem).Variables);
 
-		protected override void SetResultsOnCurrentPage() => (this.Output as VariablesPageItem).Variables = this.GetResult();
+		protected override void SetResultsOnCurrentPage() => (this.Output as VariablesPageItem).Variables = this.CopyList();
 		#endregion
 	}
 }

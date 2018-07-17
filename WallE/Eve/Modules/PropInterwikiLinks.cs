@@ -55,7 +55,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.InterwikiLinks);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.InterwikiLinks = this.GetResult();
+		protected override void SetResultsOnCurrentPage() => this.Output.InterwikiLinks = this.CopyList();
 		#endregion
 	}
 }

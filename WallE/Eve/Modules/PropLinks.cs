@@ -46,7 +46,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Links);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.Links = this.GetResult();
+		protected override void SetResultsOnCurrentPage() => this.Output.Links = this.CopyList();
 		#endregion
 	}
 }

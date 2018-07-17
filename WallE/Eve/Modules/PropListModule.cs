@@ -43,7 +43,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Methods
 
 		// Makes a copy of the list or else we just end up handing out the same collection to everything.
-		protected IReadOnlyList<TItem> GetResult() => new List<TItem>(this.myList).AsReadOnly();
+		protected IReadOnlyList<TItem> CopyList() => new List<TItem>(this.myList).AsReadOnly();
 
 		protected void ResetItems(IEnumerable<TItem> add)
 		{

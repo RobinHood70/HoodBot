@@ -58,7 +58,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.DeletedRevisions);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.DeletedRevisions = this.GetResult();
+		protected override void SetResultsOnCurrentPage() => this.Output.DeletedRevisions = this.CopyList();
 		#endregion
 	}
 }

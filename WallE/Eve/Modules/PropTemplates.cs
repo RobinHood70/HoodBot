@@ -46,7 +46,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Templates);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.Templates = this.GetResult();
+		protected override void SetResultsOnCurrentPage() => this.Output.Templates = this.CopyList();
 		#endregion
 	}
 }

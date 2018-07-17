@@ -51,7 +51,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Images);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.Images = this.GetResult();
+		protected override void SetResultsOnCurrentPage() => this.Output.Images = this.CopyList();
 		#endregion
 	}
 }
