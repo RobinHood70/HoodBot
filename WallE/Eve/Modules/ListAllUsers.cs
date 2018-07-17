@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ListAllUsers(WikiAbstractionLayer wal, AllUsersInput input)
-			: base(wal, input)
+			: base(wal, input, null)
 		{
 		}
 		#endregion

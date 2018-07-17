@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public PropCategoryInfo(WikiAbstractionLayer wal, CategoryInfoInput input)
-			: base(wal, input)
+			: base(wal, input, null)
 		{
 		}
 		#endregion

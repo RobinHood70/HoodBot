@@ -22,7 +22,12 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Constructors
 		public ListCategoryMembers(WikiAbstractionLayer wal, CategoryMembersInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		public ListCategoryMembers(WikiAbstractionLayer wal, CategoryMembersInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -38,7 +43,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListCategoryMembers CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new ListCategoryMembers(wal, input as CategoryMembersInput);
+		public static ListCategoryMembers CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListCategoryMembers(wal, input as CategoryMembersInput, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods

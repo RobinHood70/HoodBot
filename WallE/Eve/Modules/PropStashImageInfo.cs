@@ -13,7 +13,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public PropStashImageInfo(WikiAbstractionLayer wal, StashImageInfoInput input)
-		: base(wal, input)
+		: base(wal, input, null)
 		{
 		}
 		#endregion

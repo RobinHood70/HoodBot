@@ -10,7 +10,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public PropImages(WikiAbstractionLayer wal, ImagesInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		public PropImages(WikiAbstractionLayer wal, ImagesInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -26,7 +31,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropImages CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new PropImages(wal, input as ImagesInput);
+		public static PropImages CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropImages(wal, input as ImagesInput, pageSetGenerator);
 
 		public static PropImages CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropImages(wal, input as ImagesInput);
 		#endregion
@@ -46,7 +51,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Images);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.Images = this.Items;
+		protected override void SetResultsOnCurrentPage() => this.Output.Images = this.Result();
 		#endregion
 	}
 }

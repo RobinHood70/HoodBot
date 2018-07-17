@@ -10,8 +10,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		where TItem : class
 	{
 		#region Constructors
-		protected ListModule(WikiAbstractionLayer wal, TInput input)
-			: base(wal, input, new List<TItem>())
+		protected ListModule(WikiAbstractionLayer wal, TInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, new List<TItem>(), pageSetGenerator)
 		{
 		}
 		#endregion

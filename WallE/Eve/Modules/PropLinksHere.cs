@@ -10,7 +10,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public PropLinksHere(WikiAbstractionLayer wal, LinksHereInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		public PropLinksHere(WikiAbstractionLayer wal, LinksHereInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -26,7 +31,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropLinksHere CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new PropLinksHere(wal, input as LinksHereInput);
+		public static PropLinksHere CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropLinksHere(wal, input as LinksHereInput, pageSetGenerator);
 
 		public static PropLinksHere CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropLinksHere(wal, input as LinksHereInput);
 		#endregion
@@ -52,7 +57,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.LinksHere);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.LinksHere = this.Items;
+		protected override void SetResultsOnCurrentPage() => this.Output.LinksHere = this.Result();
 		#endregion
 	}
 }

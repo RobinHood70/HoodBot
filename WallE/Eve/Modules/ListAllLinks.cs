@@ -13,28 +13,30 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ListAllLinks(WikiAbstractionLayer wal, IAllLinksInput input)
-			: base(wal, input)
+			: this(wal, input, null)
 		{
-			switch (input.LinkType)
+		}
+
+		public ListAllLinks(WikiAbstractionLayer wal, IAllLinksInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
+		{
+			var linkType = input.LinkType;
+			switch (linkType)
 			{
 				case AllLinksTypes.Links:
-					this.Prefix = "al";
-					this.Name = "alllinks";
+					(this.Prefix, this.Name) = ("al", "alllinks");
 					break;
 				case AllLinksTypes.FileUsages:
-					this.Prefix = "af";
-					this.Name = "allfileusages";
+					(this.Prefix, this.Name) = ("af", "allfileusages");
 					break;
 				case AllLinksTypes.Redirects:
-					this.Prefix = "ar";
-					this.Name = "allredirects";
+					(this.Prefix, this.Name) = ("ar", "allredirects");
 					break;
 				case AllLinksTypes.Transclusions:
-					this.Prefix = "at";
-					this.Name = "alltransclusions";
+					(this.Prefix, this.Name) = ("at", "alltransclusions");
 					break;
 				default:
-					throw new ArgumentException(CurrentCulture(input.LinkType.IsUniqueFlag() ? ParameterInvalid : InputNonUnique, nameof(ListAllLinks), input.LinkType));
+					throw new ArgumentException(CurrentCulture(linkType.IsUniqueFlag() ? ParameterInvalid : InputNonUnique, nameof(ListAllLinks), linkType));
 			}
 		}
 		#endregion
@@ -50,7 +52,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListAllLinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new ListAllLinks(wal, input as IAllLinksInput);
+		public static ListAllLinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListAllLinks(wal, input as IAllLinksInput, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods

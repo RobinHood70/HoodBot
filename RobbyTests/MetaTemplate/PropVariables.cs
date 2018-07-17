@@ -12,7 +12,12 @@
 	{
 		#region Constructors
 		public PropVariables(WikiAbstractionLayer wal, VariablesInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		public PropVariables(WikiAbstractionLayer wal, VariablesInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -28,7 +33,7 @@
 		#endregion
 
 		#region Public Static Methods
-		public static PropVariables CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new PropVariables(wal, input as VariablesInput);
+		public static PropVariables CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropVariables(wal, input as VariablesInput, pageSetGenerator);
 
 		public static PropVariables CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropVariables(wal, input as VariablesInput);
 		#endregion
@@ -54,7 +59,7 @@
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems((this.Output as VariablesPageItem).Variables);
 
-		protected override void SetResultsOnCurrentPage() => (this.Output as VariablesPageItem).Variables = this.Items;
+		protected override void SetResultsOnCurrentPage() => (this.Output as VariablesPageItem).Variables = this.Result();
 		#endregion
 	}
 }

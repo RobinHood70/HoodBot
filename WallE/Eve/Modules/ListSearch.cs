@@ -18,8 +18,12 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Constructors
 		public ListSearch(WikiAbstractionLayer wal, SearchInput input)
+			: this(wal, input, null)
+		{
+		}
 
-			: base(wal, input)
+		public ListSearch(WikiAbstractionLayer wal, SearchInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -37,7 +41,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListSearch CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new ListSearch(wal, input as SearchInput);
+		public static ListSearch CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListSearch(wal, input as SearchInput, pageSetGenerator);
 		#endregion
 
 		#region Public Methods

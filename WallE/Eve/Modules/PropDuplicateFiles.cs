@@ -10,7 +10,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public PropDuplicateFiles(WikiAbstractionLayer wal, DuplicateFilesInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		public PropDuplicateFiles(WikiAbstractionLayer wal, DuplicateFilesInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -26,7 +31,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropDuplicateFiles CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new PropDuplicateFiles(wal, input as DuplicateFilesInput);
+		public static PropDuplicateFiles CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropDuplicateFiles(wal, input as DuplicateFilesInput, pageSetGenerator);
 
 		public static PropDuplicateFiles CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropDuplicateFiles(wal, input as DuplicateFilesInput);
 		#endregion
@@ -54,7 +59,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.DuplicateFiles);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.DuplicateFiles = this.Items;
+		protected override void SetResultsOnCurrentPage() => this.Output.DuplicateFiles = this.Result();
 		#endregion
 	}
 }

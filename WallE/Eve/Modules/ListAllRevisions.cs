@@ -11,7 +11,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ListAllRevisions(WikiAbstractionLayer wal, AllRevisionsInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		public ListAllRevisions(WikiAbstractionLayer wal, AllRevisionsInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -27,7 +32,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListAllRevisions CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new ListAllRevisions(wal, input as AllRevisionsInput);
+		public static ListAllRevisions CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListAllRevisions(wal, input as AllRevisionsInput, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods

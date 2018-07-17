@@ -18,7 +18,12 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Constructors
 		public ListRecentChanges(WikiAbstractionLayer wal, RecentChangesInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		public ListRecentChanges(WikiAbstractionLayer wal, RecentChangesInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -34,7 +39,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListRecentChanges CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new ListRecentChanges(wal, input as RecentChangesInput);
+		public static ListRecentChanges CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListRecentChanges(wal, input as RecentChangesInput, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods

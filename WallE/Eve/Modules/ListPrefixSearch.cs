@@ -10,7 +10,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ListPrefixSearch(WikiAbstractionLayer wal, PrefixSearchInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		public ListPrefixSearch(WikiAbstractionLayer wal, PrefixSearchInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -26,7 +31,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListPrefixSearch CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new ListPrefixSearch(wal, input as PrefixSearchInput);
+		public static ListPrefixSearch CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListPrefixSearch(wal, input as PrefixSearchInput, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods

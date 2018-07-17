@@ -15,7 +15,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public MetaSiteInfo(WikiAbstractionLayer wal, SiteInfoInput input)
-			: base(wal, input, new SiteInfoResult())
+			: base(wal, input, new SiteInfoResult(), null)
 		{
 		}
 		#endregion

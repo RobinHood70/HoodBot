@@ -10,7 +10,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ListAllImages(WikiAbstractionLayer wal, AllImagesInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		public ListAllImages(WikiAbstractionLayer wal, AllImagesInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -26,7 +31,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListAllImages CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new ListAllImages(wal, input as AllImagesInput);
+		public static ListAllImages CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListAllImages(wal, input as AllImagesInput, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods

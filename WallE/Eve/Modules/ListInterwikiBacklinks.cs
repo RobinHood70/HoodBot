@@ -10,7 +10,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ListInterwikiBacklinks(WikiAbstractionLayer wal, InterwikiBacklinksInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		public ListInterwikiBacklinks(WikiAbstractionLayer wal, InterwikiBacklinksInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -23,6 +28,10 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Protected Override Properties
 		protected override string Prefix { get; } = "iwbl";
+		#endregion
+
+		#region Public Static Methods
+		public static ListInterwikiBacklinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListInterwikiBacklinks(wal, input as InterwikiBacklinksInput, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods

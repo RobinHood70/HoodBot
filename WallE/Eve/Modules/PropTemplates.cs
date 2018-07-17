@@ -9,7 +9,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public PropTemplates(WikiAbstractionLayer wal, TemplatesInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		public PropTemplates(WikiAbstractionLayer wal, TemplatesInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -25,7 +30,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropTemplates CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new PropTemplates(wal, input as TemplatesInput);
+		public static PropTemplates CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropTemplates(wal, input as TemplatesInput, pageSetGenerator);
 
 		public static PropTemplates CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropTemplates(wal, input as TemplatesInput);
 		#endregion
@@ -41,7 +46,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Templates);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.Templates = this.Items;
+		protected override void SetResultsOnCurrentPage() => this.Output.Templates = this.Result();
 		#endregion
 	}
 }

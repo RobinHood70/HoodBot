@@ -48,7 +48,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.LanguageLinks);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.LanguageLinks = this.Items;
+		protected override void SetResultsOnCurrentPage() => this.Output.LanguageLinks = this.Result();
 		#endregion
 	}
 }

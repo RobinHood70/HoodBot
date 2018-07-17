@@ -20,7 +20,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Constructors
 		public ListLogEvents(WikiAbstractionLayer wal, LogEventsInput input)
-			: base(wal, input) => this.getUserId = input.Properties.HasFlag(LogEventsProperties.UserId);
+			: base(wal, input, null) => this.getUserId = input.Properties.HasFlag(LogEventsProperties.UserId);
 		#endregion
 
 		#region Public Override Properties

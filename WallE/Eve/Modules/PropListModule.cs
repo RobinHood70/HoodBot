@@ -18,13 +18,19 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Constructors
 		protected PropListModule(WikiAbstractionLayer wal, TInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		protected PropListModule(WikiAbstractionLayer wal, TInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
 
-		#region Protected Properties
-		protected IReadOnlyList<TItem> Items => this.myList.AsReadOnly();
+		#region Protected Methods
+		// Makes a copy of the list or else we just end up handing out the same collection to everything.
+		protected IReadOnlyList<TItem> Result() => new List<TItem>(this.myList).AsReadOnly();
 		#endregion
 
 		#region Public Override Methods

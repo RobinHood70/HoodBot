@@ -12,7 +12,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public PropDeletedRevisions(WikiAbstractionLayer wal, DeletedRevisionsInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		public PropDeletedRevisions(WikiAbstractionLayer wal, DeletedRevisionsInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -28,7 +33,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropDeletedRevisions CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new PropDeletedRevisions(wal, input as DeletedRevisionsInput);
+		public static PropDeletedRevisions CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropDeletedRevisions(wal, input as DeletedRevisionsInput, pageSetGenerator);
 
 		public static PropDeletedRevisions CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropDeletedRevisions(wal, input as DeletedRevisionsInput);
 		#endregion
@@ -53,7 +58,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.DeletedRevisions);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.DeletedRevisions = this.Items;
+		protected override void SetResultsOnCurrentPage() => this.Output.DeletedRevisions = this.Result();
 		#endregion
 	}
 }
