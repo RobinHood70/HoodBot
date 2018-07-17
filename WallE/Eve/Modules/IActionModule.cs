@@ -6,7 +6,7 @@
 	/// <summary>Specifies the set of properties and methods required by all action module implementations.</summary>
 	/// <typeparam name="TInput">The type of the input.</typeparam>
 	/// <typeparam name="TOutput">The type of the output.</typeparam>
-	public interface IActionModule<TInput, out TOutput> : IModule
+	public interface IActionModule<TInput, TOutput> : IModule
 	{
 		#region Methods
 
