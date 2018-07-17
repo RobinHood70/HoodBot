@@ -414,8 +414,6 @@
 			}
 		}
 
-		public Parameter FindFirst(string names) => this.FindFirst(names?.Split('|'));
-
 		public Parameter FindFirst(params string[] names)
 		{
 			ThrowNull(names, nameof(names));
