@@ -4,7 +4,6 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
-	using System.Diagnostics;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
@@ -364,8 +363,6 @@ namespace RobinHood70.WallE.Eve.Modules
 						this.ItemsRemaining--;
 					}
 				}
-
-				Debug.WriteLine($"Searched for: {search}, got: {item.Title}");
 
 				foreach (var module in this.Input.PropertyModules)
 				{
