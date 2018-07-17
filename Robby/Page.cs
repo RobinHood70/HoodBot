@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
@@ -233,6 +234,7 @@
 					// Debug.WriteLine($"Revision {info.LastRevisionId} not found on {pageItem.Title}. Should it have been? Current revision for page is {revs.Current?.Id}.");
 
 					// Blank the text, since it's not the current page text. We don't set revs.Current here because it will either have been set internally by .Add or set by a successful try.
+					Debug.WriteLine($"Revision {info.LastRevisionId} not found on {pageItem.Title}. Should it have been? Current revision for page is {revs.Current?.Id}.");
 					this.Text = null;
 				}
 			}
