@@ -14,7 +14,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public MetaUserInfo(WikiAbstractionLayer wal, UserInfoInput input)
-			: base(wal, input, new UserInfoResult())
+			: base(wal, input, new UserInfoResult(), null)
 		{
 		}
 		#endregion
@@ -60,10 +60,10 @@ namespace RobinHood70.WallE.Eve.Modules
 			var token = result["changeablegroups"];
 			var changeableGroups = new ChangeableGroupsInfo()
 			{
-				Add = token["add"].AsReadOnlyList<string>(),
-				AddSelf = token["add-self"].AsReadOnlyList<string>(),
-				Remove = token["remove"].AsReadOnlyList<string>(),
-				RemoveSelf = token["remove-self"].AsReadOnlyList<string>(),
+				Add = token?["add"].AsReadOnlyList<string>(),
+				AddSelf = token?["add-self"].AsReadOnlyList<string>(),
+				Remove = token?["remove"].AsReadOnlyList<string>(),
+				RemoveSelf = token?["remove-self"].AsReadOnlyList<string>(),
 			};
 			output.ChangeableGroups = changeableGroups;
 			output.EditCount = (long?)result["editcount"] ?? -1;

@@ -129,6 +129,9 @@
   <data name="AvailableJobs" xml:space="preserve">
     <value>Available Jobs</value>
   </data>
+  <data name="DelayRequested" xml:space="preserve">
+    <value>{0} delay requested for {1}. {2}</value>
+  </data>
   <data name="EditWikiList" xml:space="preserve">
     <value>Edit Wiki List</value>
   </data>
@@ -176,6 +179,9 @@
   </data>
   <data name="Undo" xml:space="preserve">
     <value>Undo</value>
+  </data>
+  <data name="UnhandledConstructorParameter" xml:space="preserve">
+    <value>Constructor parameter of type {0} is unhandled!</value>
   </data>
   <data name="UserName" xml:space="preserve">
     <value>User Name:</value>

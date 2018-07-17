@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public PropPageProperties(WikiAbstractionLayer wal, PagePropertiesInput input)
-			: base(wal, input)
+			: base(wal, input, null)
 		{
 		}
 		#endregion

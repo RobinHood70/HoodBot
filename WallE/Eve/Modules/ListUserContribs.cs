@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ListUserContribs : ListModule<UserContributionsInput, UserContributionsItem>, IGeneratorModule
+	internal class ListUserContribs : ListModule<UserContributionsInput, UserContributionsItem>
 	{
 		#region Fields
 		private readonly string continueName;
@@ -17,7 +17,12 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Constructors
 		public ListUserContribs(WikiAbstractionLayer wal, UserContributionsInput input)
-			: base(wal, input) => this.continueName = this.SiteVersion < 114 || (input.UserPrefix == null && input.Users.HasItems() && this.SiteVersion < 123) ? "start" : "continue";
+			: this(wal, input, null)
+		{
+		}
+
+		public ListUserContribs(WikiAbstractionLayer wal, UserContributionsInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator) => this.continueName = this.SiteVersion < 114 || (input.UserPrefix == null && input.Users.HasItems() && this.SiteVersion < 123) ? "start" : "continue";
 		#endregion
 
 		#region Public Override Properties

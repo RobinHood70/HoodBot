@@ -56,7 +56,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Contributors);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.Contributors = this.Items;
+		protected override void SetResultsOnCurrentPage() => this.Output.Contributors = this.GetResult();
 		#endregion
 	}
 }

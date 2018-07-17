@@ -17,6 +17,7 @@
 	using RobinHood70.WallE.Eve;
 	using static System.Environment;
 	using static RobinHood70.HoodBot.Properties.Resources;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public class MainViewModel : Notifier
 	{
@@ -224,7 +225,7 @@
 
 		private void Client_RequestingDelay(IMediaWikiClient sender, DelayEventArgs eventArgs)
 		{
-			this.StatusChanged($"{eventArgs.Reason} delay requested for {eventArgs.DelayTime}. {eventArgs.Description}{NewLine}");
+			this.StatusChanged(CurrentCulture(DelayRequested, eventArgs.Reason, eventArgs.DelayTime, eventArgs.Description) + NewLine);
 			App.WpfYield();
 		}
 

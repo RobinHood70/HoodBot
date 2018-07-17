@@ -11,7 +11,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public PropCategories(WikiAbstractionLayer wal, CategoriesInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		public PropCategories(WikiAbstractionLayer wal, CategoriesInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -27,7 +32,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropCategories CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new PropCategories(wal, input as CategoriesInput);
+		public static PropCategories CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropCategories(wal, input as CategoriesInput, pageSetGenerator);
 
 		public static PropCategories CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropCategories(wal, input as CategoriesInput);
 		#endregion
@@ -59,7 +64,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Categories);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.Categories = this.Items;
+		protected override void SetResultsOnCurrentPage() => this.Output.Categories = this.GetResult();
 		#endregion
 	}
 }

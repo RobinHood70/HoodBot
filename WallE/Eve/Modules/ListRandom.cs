@@ -13,7 +13,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ListRandom(WikiAbstractionLayer wal, RandomInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		public ListRandom(WikiAbstractionLayer wal, RandomInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -29,7 +34,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListRandom CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new ListRandom(wal, input as RandomInput);
+		public static ListRandom CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListRandom(wal, input as RandomInput, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods

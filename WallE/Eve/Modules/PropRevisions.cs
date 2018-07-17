@@ -12,7 +12,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public PropRevisions(WikiAbstractionLayer wal, RevisionsInput input)
-			: base(wal, input) => this.IsRevisionRange =
+			: this(wal, input, null)
+		{
+		}
+
+		public PropRevisions(WikiAbstractionLayer wal, RevisionsInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator) => this.IsRevisionRange =
 				input.Start != null ||
 				input.End != null ||
 				input.StartId > 0 ||
@@ -34,7 +39,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropRevisions CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new PropRevisions(wal, input as RevisionsInput);
+		public static PropRevisions CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropRevisions(wal, input as RevisionsInput, pageSetGenerator);
 
 		public static PropRevisions CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropRevisions(wal, input as RevisionsInput);
 		#endregion
@@ -62,7 +67,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Revisions);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.Revisions = this.Items;
+		protected override void SetResultsOnCurrentPage() => this.Output.Revisions = this.GetResult();
 		#endregion
 	}
 }

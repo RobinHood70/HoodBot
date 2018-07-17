@@ -18,15 +18,12 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Contructors
 		public ListBacklinks(WikiAbstractionLayer wal, BacklinksInput input)
-			: base(wal, input)
+			: this(wal, input, null)
 		{
-			if (!input.LinkTypes.IsUniqueFlag())
-			{
-				throw new ArgumentException(InputNonUnique);
-			}
-
-			this.linkType = input.LinkTypes;
 		}
+
+		public ListBacklinks(WikiAbstractionLayer wal, BacklinksInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator) => this.linkType = input.LinkTypes.IsUniqueFlag() ? input.LinkTypes : throw new ArgumentException(InputNonUnique);
 		#endregion
 
 		#region Public Override Properties
@@ -70,7 +67,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListBacklinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new ListBacklinks(wal, input as BacklinksInput);
+		public static ListBacklinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListBacklinks(wal, input as BacklinksInput, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods

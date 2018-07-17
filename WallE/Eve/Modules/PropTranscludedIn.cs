@@ -10,7 +10,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public PropTranscludedIn(WikiAbstractionLayer wal, TranscludedInInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		public PropTranscludedIn(WikiAbstractionLayer wal, TranscludedInInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -26,7 +31,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropTranscludedIn CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new PropTranscludedIn(wal, input as TranscludedInInput);
+		public static PropTranscludedIn CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropTranscludedIn(wal, input as TranscludedInInput, pageSetGenerator);
 
 		public static PropTranscludedIn CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropTranscludedIn(wal, input as TranscludedInInput);
 		#endregion
@@ -52,7 +57,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.TranscludedIn);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.TranscludedIn = this.Items;
+		protected override void SetResultsOnCurrentPage() => this.Output.TranscludedIn = this.GetResult();
 		#endregion
 	}
 }

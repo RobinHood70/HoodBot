@@ -97,6 +97,15 @@ namespace RobinHood70.HoodBot.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} delay requested for {1}. {2}.
+        /// </summary>
+        public static string DelayRequested {
+            get {
+                return ResourceManager.GetString("DelayRequested", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Edit Wiki List.
         /// </summary>
         public static string EditWikiList {
@@ -237,6 +246,15 @@ namespace RobinHood70.HoodBot.Properties {
         public static string Undo {
             get {
                 return ResourceManager.GetString("Undo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Constructor parameter of type {0} is unhandled!.
+        /// </summary>
+        public static string UnhandledConstructorParameter {
+            get {
+                return ResourceManager.GetString("UnhandledConstructorParameter", resourceCulture);
             }
         }
         

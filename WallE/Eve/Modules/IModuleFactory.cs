@@ -9,8 +9,9 @@
 	/// <summary>Represents a method which creates a new <see cref="IGeneratorModule" />.</summary>
 	/// <param name="wal">The parent abstraction layer.</param>
 	/// <param name="input">The generator input.</param>
+	/// <param name="pageSetGenerator">The parent pageset.</param>
 	/// <returns>A new generator module based on the input.</returns>
-	public delegate IGeneratorModule GeneratorFactoryMethod(WikiAbstractionLayer wal, IGeneratorInput input);
+	public delegate IGeneratorModule GeneratorFactoryMethod(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator);
 
 	/// <summary>Represents a method which creates a new <see cref="IPropertyModule" />.</summary>
 	/// <param name="wal">The parent abstraction layer.</param>
@@ -31,8 +32,9 @@
 		/// <summary>Creates a generator module from the relevant input.</summary>
 		/// <typeparam name="TInput">The type of the input.</typeparam>
 		/// <param name="input">The generator input.</param>
+		/// <param name="pageSetGenerator">The parent.</param>
 		/// <returns>A module which corresponds to the input and has its IsGenerator property set.</returns>
-		IGeneratorModule CreateGenerator<TInput>(TInput input)
+		IGeneratorModule CreateGenerator<TInput>(TInput input, IPageSetGenerator pageSetGenerator)
 			where TInput : class, IGeneratorInput;
 
 		/// <summary>Creates property modules from the provided inputs.</summary>
@@ -40,7 +42,7 @@
 		/// <returns>A set of modules that corresponds to the provided inputs. If <paramref name="propertyInputs" /> is null, this should return an empty collection.</returns>
 		IEnumerable<IPropertyModule> CreateModules(IEnumerable<IPropertyInput> propertyInputs);
 
-		/// <summary>Registers a generator factory method for use with <see cref="CreateGenerator{TInput}(TInput)" />.</summary>
+		/// <summary>Registers a generator factory method for use with <see cref="CreateGenerator{TInput}(TInput, IPageSetGenerator)" />.</summary>
 		/// <typeparam name="T">The type of generator input that the factory method handles.</typeparam>
 		/// <param name="generatorFactoryMethod">The generator factory method.</param>
 		/// <returns>The current module factory (fluent interface).</returns>

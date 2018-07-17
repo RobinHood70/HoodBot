@@ -12,7 +12,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ListBlocks(WikiAbstractionLayer wal, BlocksInput input)
-			: base(wal, input)
+			: base(wal, input, null)
 		{
 		}
 		#endregion

@@ -11,7 +11,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		protected PropListLinks(WikiAbstractionLayer wal, TInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		protected PropListLinks(WikiAbstractionLayer wal, TInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion

@@ -10,7 +10,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ListExtUrlUsage(WikiAbstractionLayer wal, ExternalUrlUsageInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		public ListExtUrlUsage(WikiAbstractionLayer wal, ExternalUrlUsageInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -26,7 +31,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListExtUrlUsage CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new ListExtUrlUsage(wal, input as ExternalUrlUsageInput);
+		public static ListExtUrlUsage CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListExtUrlUsage(wal, input as ExternalUrlUsageInput, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods

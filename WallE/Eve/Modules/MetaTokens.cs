@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public MetaTokens(WikiAbstractionLayer wal, TokensInput input)
-			: base(wal, input, new Dictionary<string, string>())
+			: base(wal, input, new Dictionary<string, string>(), null)
 		{
 		}
 		#endregion

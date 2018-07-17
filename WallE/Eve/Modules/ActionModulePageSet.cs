@@ -71,7 +71,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			this.values = new List<string>(input.Values ?? Array.Empty<string>());
 			if (input.GeneratorInput != null)
 			{
-				this.Generator = this.Wal.ModuleFactory.CreateGenerator(input.GeneratorInput);
+				this.Generator = this.Wal.ModuleFactory.CreateGenerator(input.GeneratorInput, this);
 			}
 
 			this.Wal.ClearWarnings();

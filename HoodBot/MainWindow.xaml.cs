@@ -6,6 +6,7 @@
 	using System.Windows.Controls;
 	using RobinHood70.HoodBot.ViewModel;
 	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.HoodBot.Properties.Resources;
 
 	/// <summary>Interaction logic for MainWindow.xaml.</summary>
 	public partial class MainWindow : Window, IParameterFetcher
@@ -60,7 +61,7 @@
 			}
 			else
 			{
-				throw new NotSupportedException($"Here we are, trying to handle a {valueType.Name}!");
+				throw new NotSupportedException(CurrentCulture(UnhandledConstructorParameter, valueType.Name));
 			}
 
 			Grid.SetColumn(controlToAdd, 2);
@@ -104,7 +105,7 @@
 				}
 				else
 				{
-					throw new NotSupportedException($"Here we are, trying to handle a {valueType.Name}!");
+					throw new NotSupportedException(CurrentCulture(UnhandledConstructorParameter, valueType.Name));
 				}
 			}
 		}

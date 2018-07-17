@@ -10,7 +10,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public PropRedirects(WikiAbstractionLayer wal, RedirectsInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		public PropRedirects(WikiAbstractionLayer wal, RedirectsInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -26,7 +31,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropRedirects CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new PropRedirects(wal, input as RedirectsInput);
+		public static PropRedirects CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropRedirects(wal, input as RedirectsInput, pageSetGenerator);
 
 		public static PropRedirects CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropRedirects(wal, input as RedirectsInput);
 		#endregion
@@ -52,7 +57,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Redirects);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.Redirects = this.Items;
+		protected override void SetResultsOnCurrentPage() => this.Output.Redirects = this.GetResult();
 		#endregion
 	}
 }

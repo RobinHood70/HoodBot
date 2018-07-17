@@ -1,7 +1,6 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
-	using System;
 	using System.Globalization;
 	using System.Text.RegularExpressions;
 	using Newtonsoft.Json.Linq;
@@ -22,10 +21,12 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Fields
 		private readonly int maxItems;
 		private readonly int requestedLimit;
+
+		private readonly IPageSetGenerator pageSetGenerator;
 		#endregion
 
 		#region Constructors
-		protected QueryModule([ValidatedNotNull] WikiAbstractionLayer wal, [ValidatedNotNull] TInput input, TOutput output)
+		protected QueryModule([ValidatedNotNull] WikiAbstractionLayer wal, [ValidatedNotNull] TInput input, TOutput output, IPageSetGenerator pageSetGenerator)
 		{
 			ThrowNull(wal, nameof(wal));
 			ThrowNull(input, nameof(input));
@@ -44,6 +45,8 @@ namespace RobinHood70.WallE.Eve.Modules
 				this.maxItems = 0;
 				this.requestedLimit = 0;
 			}
+
+			this.pageSetGenerator = pageSetGenerator;
 		}
 		#endregion
 
@@ -75,7 +78,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Properties
-		protected bool IsGenerator { get; set; } = false;
+		protected bool IsGenerator => this.pageSetGenerator?.Generator == this;
 
 		protected int ItemsRemaining { get; set; }
 
@@ -100,13 +103,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Virtual Properties
 
 		protected virtual string ResultName => this.Name;
-		#endregion
-
-		#region Public Methods
-
-		// Technically, this could be copied to each IGeneratorInput module, to ensure that *only* generator modules can be set as such, but that seems a little silly. We'll just throw an error if this isn't a generator.
-		// TODO: Check if this can be moved to the interface once C# 8 is released.
-		public void SetAsGenerator() => this.IsGenerator = this is IGeneratorModule ? true : throw new InvalidOperationException(CurrentCulture(Properties.EveMessages.NotAGenerator));
 		#endregion
 
 		#region Public Virtual Methods

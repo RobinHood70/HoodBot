@@ -101,10 +101,10 @@
 			}
 		}
 
+		/*
 		public static void ThrowCollectionHasNullItems<T>(IEnumerable<T> collection, string paramName)
 			where T : class
 		{
-			ThrowCollectionEmpty(collection, paramName);
 			foreach (var item in collection)
 			{
 				if (item == null)
@@ -113,6 +113,7 @@
 				}
 			}
 		}
+		*/
 
 		public static void ThrowNullOrWhiteSpace(IEnumerable<string> collection, string paramName)
 		{

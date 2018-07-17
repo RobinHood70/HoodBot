@@ -74,6 +74,12 @@
 
 			private void WriteFile(TemplateCollection allTemplates)
 			{
+				if (allTemplates.Count == 0)
+				{
+					this.StatusWriteLine("No template calls found!");
+					return;
+				}
+
 				using (var file = new StreamWriter(this.location))
 				{
 					var output = new string[allTemplates.HeaderOrder.Count + 2];

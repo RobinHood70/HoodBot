@@ -63,17 +63,12 @@
 		/// <summary>Creates a generator module from the relevant input.</summary>
 		/// <typeparam name="TInput">The type of the input.</typeparam>
 		/// <param name="input">The generator input.</param>
+		/// <param name="pageSetGenerator">The parent pageset.</param>
 		/// <returns>A module which corresponds to the input and has its IsGenerator property set.</returns>
-		public IGeneratorModule CreateGenerator<TInput>(TInput input)
-			where TInput : class, IGeneratorInput
-		{
-			var generator = this.generators[input.GetType()](this.wal, input);
-			generator.SetAsGenerator();
+		public IGeneratorModule CreateGenerator<TInput>(TInput input, IPageSetGenerator pageSetGenerator)
+			where TInput : class, IGeneratorInput => this.generators[input.GetType()](this.wal, input, pageSetGenerator);
 
-			return generator;
-		}
-
-		/// <summary>Registers a generator factory method for use with <see cref="CreateGenerator{TInput}(TInput)" />.</summary>
+		/// <summary>Registers a generator factory method for use with <see cref="CreateGenerator{TInput}(TInput, IPageSetGenerator)" />.</summary>
 		/// <typeparam name="T">The type of generator input that the factory method handles.</typeparam>
 		/// <param name="generatorFactoryMethod">The generator factory method.</param>
 		/// <returns>The current module factory (fluent interface).</returns>

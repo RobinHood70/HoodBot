@@ -11,7 +11,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public PropFileUsage(WikiAbstractionLayer wal, FileUsageInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		public PropFileUsage(WikiAbstractionLayer wal, FileUsageInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -27,7 +32,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropFileUsage CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new PropFileUsage(wal, input as FileUsageInput);
+		public static PropFileUsage CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropFileUsage(wal, input as FileUsageInput, pageSetGenerator);
 
 		public static PropFileUsage CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropFileUsage(wal, input as FileUsageInput);
 		#endregion
@@ -53,7 +58,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.FileUsages);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.FileUsages = this.Items;
+		protected override void SetResultsOnCurrentPage() => this.Output.FileUsages = this.GetResult();
 		#endregion
 	}
 }

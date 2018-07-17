@@ -12,7 +12,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ListProtectedTitles(WikiAbstractionLayer wal, ProtectedTitlesInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		public ListProtectedTitles(WikiAbstractionLayer wal, ProtectedTitlesInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -28,7 +33,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListProtectedTitles CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new ListProtectedTitles(wal, input as ProtectedTitlesInput);
+		public static ListProtectedTitles CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListProtectedTitles(wal, input as ProtectedTitlesInput, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods

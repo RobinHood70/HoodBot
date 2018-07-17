@@ -3,9 +3,8 @@ namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
 	using RobinHood70.WallE.Eve.Modules;
-	using static RobinHood70.WallE.ProjectGlobals;
 
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "All inputs have Input suffix, even when collections.")]
+	// [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "All inputs have Input suffix, even when collections.")]
 	public class QueryInput : QueryPageSetInput
 	{
 		#region Constructors
@@ -14,33 +13,11 @@ namespace RobinHood70.WallE.Base
 		{
 		}
 
-		public QueryInput(IEnumerable<IQueryModule> modules)
-			: base() // Specified explicitly so VS can track the call, otherwise PageSetInput() appears unused when it's actually not.
-		{
-			// An empty query is still valid, so allow for that possibility.
-			if (modules != null)
-			{
-				foreach (var module in modules)
-				{
-					if (module != null)
-					{
-						this.QueryModules.Add(module);
-					}
-				}
-			}
-
-			this.PropertyModules = new ModuleCollection<IPropertyModule>();
-		}
+		public QueryInput(IEnumerable<IQueryModule> queryModules) => this.PopulateModules(null, queryModules);
 
 		public QueryInput(QueryPageSetInput pageSetInput, IEnumerable<IPropertyModule> propertyModules)
-			: base(pageSetInput)
+			: this(pageSetInput, propertyModules, null)
 		{
-			ThrowCollectionHasNullItems(propertyModules, nameof(propertyModules));
-			this.PageSetQuery = true;
-			foreach (var module in propertyModules)
-			{
-				this.PropertyModules.Add(module);
-			}
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="QueryInput" /> class for combining multiple standard query modules with a pageset query module.</summary>
@@ -48,13 +25,10 @@ namespace RobinHood70.WallE.Base
 		/// <param name="propertyModules">Property modules to use.</param>
 		/// <param name="queryModules">Non-pageset query modules to use.</param>
 		public QueryInput(QueryPageSetInput pageSetInput, IEnumerable<IPropertyModule> propertyModules, IEnumerable<IQueryModule> queryModules)
-			: this(pageSetInput, propertyModules)
+			: base(pageSetInput)
 		{
-			ThrowCollectionHasNullItems(queryModules, nameof(queryModules));
-			foreach (var module in queryModules)
-			{
-				this.QueryModules.Add(module);
-			}
+			this.PageSetQuery = true;
+			this.PopulateModules(propertyModules, queryModules);
 		}
 
 		internal QueryInput(QueryInput input)
@@ -92,6 +66,34 @@ namespace RobinHood70.WallE.Base
 		internal ModuleCollection<IPropertyModule> PropertyModules { get; } = new ModuleCollection<IPropertyModule>();
 
 		internal ModuleCollection<IQueryModule> QueryModules { get; } = new ModuleCollection<IQueryModule>();
+		#endregion
+
+		#region Private Methods
+		private void PopulateModules(IEnumerable<IPropertyModule> propertyModules, IEnumerable<IQueryModule> queryModules)
+		{
+			if (propertyModules != null)
+			{
+				foreach (var module in propertyModules)
+				{
+					if (module != null)
+					{
+						this.PropertyModules.Add(module);
+					}
+				}
+			}
+
+			// An empty query is still valid, so allow for that possibility.
+			if (queryModules != null)
+			{
+				foreach (var module in queryModules)
+				{
+					if (module != null)
+					{
+						this.QueryModules.Add(module);
+					}
+				}
+			}
+		}
 		#endregion
 	}
 }

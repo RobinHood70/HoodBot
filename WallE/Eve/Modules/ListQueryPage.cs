@@ -20,7 +20,12 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Constructors
 		public ListQueryPage(WikiAbstractionLayer wal, QueryPageInput input)
-			: base(wal, input) => this.queryPage = input.Page;
+			: this(wal, input, null)
+		{
+		}
+
+		public ListQueryPage(WikiAbstractionLayer wal, QueryPageInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator) => this.queryPage = input.Page;
 		#endregion
 
 		#region Public Override Properties
@@ -36,7 +41,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListQueryPage CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input) => new ListQueryPage(wal, input as QueryPageInput);
+		public static ListQueryPage CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListQueryPage(wal, input as QueryPageInput, pageSetGenerator);
 		#endregion
 
 		#region Public Methods

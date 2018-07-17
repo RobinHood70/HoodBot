@@ -223,13 +223,15 @@
 
 			if (info != null)
 			{
-				try
+				if (revs.TryGetValue(info.LastRevisionId, out var revision))
 				{
 					revs.Current = revs[info.LastRevisionId];
 					this.Text = revs.Current.Text;
 				}
-				catch (KeyNotFoundException)
+				else
 				{
+					// Debug.WriteLine($"Revision {info.LastRevisionId} not found on {pageItem.Title}. Should it have been? Current revision for page is {revs.Current?.Id}.");
+
 					// Blank the text, since it's not the current page text. We don't set revs.Current here because it will either have been set internally by .Add or set by a successful try.
 					this.Text = null;
 				}
@@ -258,13 +260,9 @@
 			// Templates
 			var templates = this.Templates as List<Title>;
 			templates.Clear();
-			if (pageItem.Templates.Count > 0)
+			foreach (var link in pageItem.Templates)
 			{
-				templates.Clear();
-				foreach (var link in pageItem.Templates)
-				{
-					templates.Add(new Title(this.Site, link.Title));
-				}
+				templates.Add(new Title(this.Site, link.Title));
 			}
 
 			// Categories

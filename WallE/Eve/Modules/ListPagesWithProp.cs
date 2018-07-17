@@ -10,7 +10,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ListPagesWithProp(WikiAbstractionLayer wal, PagesWithPropertyInput input)
-			: base(wal, input)
+			: this(wal, input, null)
+		{
+		}
+
+		public ListPagesWithProp(WikiAbstractionLayer wal, PagesWithPropertyInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -23,6 +28,10 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Protected Override Properties
 		protected override string Prefix { get; } = "pwp";
+		#endregion
+
+		#region Public Static Methods
+		public static ListPagesWithProp CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListPagesWithProp(wal, input as PagesWithPropertyInput, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods

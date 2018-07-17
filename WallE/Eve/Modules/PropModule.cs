@@ -8,8 +8,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		where TInput : class, IPropertyInput
 	{
 		#region Constructors
-		protected PropModule(WikiAbstractionLayer wal, TInput input)
-			: base(wal, input, null)
+		protected PropModule(WikiAbstractionLayer wal, TInput input, IPageSetGenerator pageSetGenerator)
+			: base(wal, input, null, pageSetGenerator)
 		{
 		}
 		#endregion
