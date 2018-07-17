@@ -184,7 +184,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 			else if (revision.Sha1 != null && revision.Content != null && revision.Content.GetHash(HashType.Sha1) != revision.Sha1)
 			{
-				// TODO: This was changed from a warning to an exception. Consider whether to handle the exception in Eve or hand it off to the caller.
+				// CONSIDER: This was changed from a warning to an exception. Should it be handled in Eve or allowed to fall through to the caller?
 				throw new ChecksumException(CurrentCulture(RevisionSha1Failed, revision.RevisionId, pageTitle));
 			}
 

@@ -17,7 +17,7 @@
 	using static RobinHood70.WallE.Properties.Messages;
 	using static RobinHood70.WikiCommon.Globals;
 
-	// TODO: Add cancellation token possibilities.
+	// TODO: Add cancellation token possibilities so requests can be cancelled if they're failing without waiting for all retries.
 
 	/// <summary>This class provides basic HTTP and cookie handling, with MediaWiki maxlag support.</summary>
 	/// <seealso cref="IMediaWikiClient" />

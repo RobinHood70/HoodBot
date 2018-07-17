@@ -18,6 +18,8 @@ namespace RobinHood70.WallE.Base
 	public class WatchlistRawInput : ILimitableInput, IGeneratorInput
 	{
 		#region Public Properties
+		public Filter FilterChanged { get; set; }
+
 		public int Limit { get; set; }
 
 		public int MaxItems { get; set; }
@@ -26,10 +28,7 @@ namespace RobinHood70.WallE.Base
 
 		public string Owner { get; set; }
 
-		// TODO: Check the difference between Properties and ShowChanged when Internet is back up.
 		public WatchlistRawProperties Properties { get; set; }
-
-		public Filter FilterChanged { get; set; }
 
 		public bool SortDescending { get; set; }
 

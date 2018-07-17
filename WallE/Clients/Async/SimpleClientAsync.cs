@@ -14,6 +14,7 @@ namespace RobinHood70.WallE.Clients.Async
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
+	// TODO: Synchronize with changes to SimpleClient
 	public class SimpleClientAsync : IFormClientAsync, IDisposable
 	{
 		#region Fields
