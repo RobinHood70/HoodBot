@@ -533,9 +533,9 @@
 				});
 			}
 		}
-#endregion
+		#endregion
 
-#region Tests
+		#region Tests
 		private void AllImagesTests()
 		{
 			this.StartStopwatch("AllImages");
@@ -896,9 +896,9 @@
 			this.StartStopwatch("Options");
 			var input = new OptionsInput();
 			var change = new Dictionary<string, string>
-{
-{ "ccmeonemails", "false" },
-};
+			{
+				["ccmeonemails"] = "false",
+			};
 			input.Change = change;
 			this.wiki.Options(input);
 
@@ -1235,6 +1235,6 @@
 
 			this.ShowStopwatch();
 		}
-#endregion
+		#endregion
 	}
 }
