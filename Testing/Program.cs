@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WallE.Tests
+﻿namespace RobinHood70.Testing
 {
 	using System;
 	using System.Windows.Forms;

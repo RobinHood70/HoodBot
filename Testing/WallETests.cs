@@ -1,40 +1,32 @@
-﻿namespace RobinHood70.WallE.Tests
+﻿namespace RobinHood70.Testing
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
-	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
-	using System.Net.Http;
-	using System.Security.Cryptography;
-	using System.Text;
+	using System.Linq;
 	using System.Threading;
-	using System.Windows.Forms;
-	using RobinHood70.TestingCommon;
 	using RobinHood70.WallE.Base;
-	using RobinHood70.WallE.Clients;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Eve;
-	using RobinHood70.WallE.RequestBuilder;
 	using RobinHood70.WikiCommon;
+	using static RobinHood70.Testing.TestingCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
-	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "By design, though could potentially use a rewrite per TODO, below")]
-	public partial class FormTestBed : Form
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Coupling is a necessity of the fact that we're using classes for inputs.")]
+	public class WallETests : TestRunner, ITestRunner
 	{
 		#region Fields
 		private WikiAbstractionLayer adminWiki;
-		private int indent = 0;
-		private Uri indexPath;
-		private Stopwatch sw = new Stopwatch();
-		private int timePos;
-		private WikiAbstractionLayer wiki;
-		private WikiInfo wikiInfo;
+		private WikiAbstractionLayer normalWiki;
+
+		private LoginInput reLoginInput;
 		#endregion
 
 		#region Constructors
-		[SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Unless I'm missing something, I think CA is just confused here.")]
-		public FormTestBed() => this.InitializeComponent();
+		public WallETests(ITestForm parentForm, WikiInfo wikiInfo)
+			: base(parentForm, wikiInfo)
+		{
+		}
 		#endregion
 
 		#region Public Static Properties
@@ -63,207 +55,37 @@
 		};
 		#endregion
 
-		#region Public Static Methods
-#if DEBUG
-		public static void DebugResponseEventHandler(IWikiAbstractionLayer sender, ResponseEventArgs e)
+		#region Public Override Methods
+		public void Relogin()
 		{
-			ThrowNull(sender, nameof(sender));
-			ThrowNull(e, nameof(e));
-			Debug.WriteLine(e.Response, sender.ToString());
-		}
-
-		public static void DebugShowDelay(IMediaWikiClient sender, DelayEventArgs e)
-		{
-			ThrowNull(sender, nameof(sender));
-			ThrowNull(e, nameof(e));
-			var aborted = string.Empty;
-
-			if (e.Cancel)
+			var result = this.normalWiki.Login(this.reLoginInput);
+			if (result.UserId == 0)
 			{
-				aborted = "Aborted ";
-			}
-
-			Debug.WriteLine($"{aborted}Delay: {e.DelayTime} milliseconds. Reason: {e.Reason}", sender.ToString());
-		}
-
-		public static void DebugShowRequest(IWikiAbstractionLayer sender, RequestEventArgs e)
-		{
-			ThrowNull(sender, nameof(sender));
-			ThrowNull(e, nameof(e));
-			Debug.WriteLine("{0} - {1}", sender.UserName, e.Request);
-		}
-
-		public static void DebugWarningEventHandler(IWikiAbstractionLayer sender, WarningEventArgs e)
-		{
-			ThrowNull(sender, nameof(sender));
-			ThrowNull(e, nameof(e));
-			Debug.WriteLine($"Warning ({e.Warning.Code}): {e.Warning.Info}", sender.ToString());
-		}
-#endif
-		#endregion
-
-		#region Private Static Methods
-		private static string GetHmac(string message, string key)
-		{
-			var sb = new StringBuilder(64);
-			var encoding = Encoding.UTF8;
-			var keyBytes = encoding.GetBytes(key);
-			var messageBytes = encoding.GetBytes(message);
-			byte[] hash;
-			using (var hmacsha1 = new HMACSHA1(keyBytes))
-			{
-				hash = hmacsha1.ComputeHash(messageBytes);
-			}
-
-			foreach (var b in hash)
-			{
-				sb.Append(b.ToString("X2"));
-			}
-
-			return sb.ToString().ToLowerInvariant();
-		}
-		#endregion
-
-		#region Private Methods
-		/*
-		private void BlockChanger(object sender, EventArgs e)
-		{
-		const int NumYears = 1;
-
-		this.ButtonQuick.Enabled = false;
-		var wiki = this.WikiInfo;
-		this.DoGlobalSetup(wiki.Uri, wiki.UserName, wiki.Password, true);
-		Global.wiki.ClearHasMessage();
-
-		try
-		{
-		var blocksInput = new BlocksInput();
-		blocksInput.Properties = BlocksProperties.Expiry | BlocksProperties.Flags | BlocksProperties.Reason | BlocksProperties.Timestamp | BlocksProperties.User;
-		blocksInput.ShowAccount = false;
-		blocksInput.ShowIP = true;
-		blocksInput.ShowRange = false;
-		blocksInput.ShowTemp = false;
-
-		var comparer = CultureInfo.InvariantCulture.CompareInfo;
-
-		var blocks = Global.wiki.BlocksLoad(blocksInput);
-		foreach (var block in blocks)
-		{
-		if (comparer.IndexOf(block.Reason, "proxy", CompareOptions.IgnoreCase) >= 0 && comparer.IndexOf(block.Reason, "tor", CompareOptions.IgnoreCase) == -1)
-		{
-		continue;
-		}
-
-		if (block.Timestamp.Value <= DateTime.Now.AddYears(-NumYears))
-		{
-		var unblock = new UserUnblockInput(block.User);
-		unblock.Reason = "Remove infinite IP block";
-		Global.wiki.UserUnblock(unblock);
-		}
-		else
-		{
-		var newBlock = new UserBlockInput(block.User);
-		newBlock.AllowUserTalk = block.AllowUserTalk;
-		newBlock.AnonymousOnly = block.AnonymousOnly;
-		newBlock.AutoBlock = block.AutoBlock;
-		newBlock.Expiry = block.Timestamp.Value.AddYears(NumYears);
-		newBlock.NoCreate = block.NoCreate;
-		newBlock.NoEmail = false;
-		newBlock.Reason = "Re-block with finite block length";
-		newBlock.Reblock = true;
-		newBlock.User = block.User;
-
-		Global.wiki.UserBlock(newBlock);
-		}
-
-		FormTestBed.CheckTalkPage();
-		}
-		}
-		catch (WikiException ex)
-		{
-		MessageBox.Show(ex.ErrorInfo, ex.ErrorCode);
-		}
-
-		Global.wiki.SiteLogout();
-		this.ButtonQuick.Enabled = true;
-		}
-
-		private static void CheckTalkPage()
-		{
-		var userInfo = Global.wiki.UserGetInfo(new UserInfoInput(UserInfoProperties.HasMsg));
-		}
-		*/
-
-		private void AppendResults(string message)
-		{
-			message = new string(' ', this.indent) + message + Environment.NewLine;
-			if (this.textBoxResults.InvokeRequired)
-			{
-				this.textBoxResults.Invoke(new Action<string>(this.AppendResults), message);
-			}
-			else
-			{
-				this.textBoxResults.AppendText(message);
+				throw new InvalidOperationException("User login failed: " + result.Reason);
 			}
 		}
 
-		private void Assert(bool condition, string message)
+		public override void Teardown()
 		{
-			if (!condition)
+			if (this.adminWiki != null && !string.IsNullOrEmpty(this.WikiInfo.SecretKey))
 			{
-				this.AppendResults(message);
+				RunJobs(this.adminWiki, this.WikiInfo.SecretKey);
 			}
+
+			this.normalWiki = null;
+			this.adminWiki = null;
 		}
 
-		private void AssertBeforeVersion(int version, bool condition, string message)
+		public override void RunOne()
 		{
-			if (this.wiki.SiteVersion < version)
+		}
+
+		public override void RunAll()
+		{
+			if (this.normalWiki.Uri.Host == "rob-centos")
 			{
-				this.Assert(condition, message);
-			}
-		}
-
-		private void AssertBetweenVersions(int minVersion, int maxVersion, bool condition, string message)
-		{
-			if (this.wiki.SiteVersion >= minVersion && this.wiki.SiteVersion <= maxVersion)
-			{
-				this.Assert(condition, message);
-			}
-		}
-
-		private void AssertVersion(int version, bool condition, string message)
-		{
-			if (this.wiki.SiteVersion >= version)
-			{
-				this.Assert(condition, message);
-			}
-		}
-
-		private void ButtonClear_Click(object sender, EventArgs e) => this.textBoxResults.Clear();
-
-		private void ButtonQuick_Click(object sender, EventArgs e)
-		{
-			// const string PageName = "Albert Einstein";
-			this.ButtonQuick.Enabled = false;
-			this.DoGlobalSetup();
-			this.Login();
-
-			this.DoGlobalTeardown();
-			this.ButtonQuick.Enabled = true;
-		}
-
-		private void ButtonRunAll_Click(object sender, EventArgs e)
-		{
-			this.ButtonRunAll.Enabled = false;
-
-			this.DoGlobalSetup();
-			if (this.wiki.Uri.Host == "rob-centos")
-			{
-				this.wiki.Logout(); // Since we're logged in by default now, specifically log out for the tests.
 				this.LoginTests();
 			}
-
-			this.Login();
 
 			this.TokenTests();
 			this.SiteInfoTests();
@@ -297,30 +119,41 @@
 			this.UndeleteTests();
 			this.UserRightsTests();
 			this.WatchTests();
-
-			this.DoGlobalTeardown();
-			this.ButtonRunAll.Enabled = true;
 		}
 
-		private void CheckCollection<T>(IReadOnlyCollection<T> collection, string name)
+		public override void Setup()
 		{
-			if (collection == null)
+			this.reLoginInput = new LoginInput(this.WikiInfo.UserName, this.WikiInfo.Password);
+			this.normalWiki = this.SetupWal(this.WikiInfo, false);
+			if (this.WikiInfo.AdminUserName != null)
 			{
-				this.AppendResults($"Collection {name} is null");
-				return;
+				this.adminWiki = this.SetupWal(this.WikiInfo, true);
 			}
+		}
+		#endregion
 
-			if (collection.Count == 0)
+		#region Private Methods
+		private void AssertBeforeVersion(int version, bool condition, string message)
+		{
+			if (this.normalWiki.SiteVersion < version)
 			{
-				this.AppendResults($"Collection {name} has no members");
+				this.Assert(condition, message);
 			}
 		}
 
-		private void CheckForNull(object check, string name)
+		private void AssertBetweenVersions(int minVersion, int maxVersion, bool condition, string message)
 		{
-			if (check == null)
+			if (this.normalWiki.SiteVersion >= minVersion && this.normalWiki.SiteVersion <= maxVersion)
 			{
-				this.AppendResults($"{name} is null");
+				this.Assert(condition, message);
+			}
+		}
+
+		private void AssertVersion(int version, bool condition, string message)
+		{
+			if (this.normalWiki.SiteVersion >= version)
+			{
+				this.Assert(condition, message);
 			}
 		}
 
@@ -333,85 +166,13 @@
 			{
 				if (pages.Count == 0)
 				{
-					this.AppendResults("No pages in output");
+					this.ParentForm.AppendResults("No pages in output");
 				}
 				else
 				{
 					this.CheckCollection(pages.First().Revisions, "Revisions");
 				}
 			}
-		}
-
-		private void ComboBoxWiki_SelectedIndexChanged(object sender, EventArgs e) => this.wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
-
-		private void DoGlobalSetup()
-		{
-			IMediaWikiClient client;
-			var baseClient = new SimpleClient(null, @"D:\Data\WallE\cookies.dat")
-			{
-				Name = "Normal",
-			};
-			if (this.wikiInfo.ReadInterval == 0 && this.wikiInfo.WriteInterval == 0)
-			{
-				client = baseClient;
-			}
-			else
-			{
-				client = new ThrottledClient(baseClient, TimeSpan.FromMilliseconds(this.wikiInfo.ReadInterval), TimeSpan.FromMilliseconds(this.wikiInfo.WriteInterval));
-			}
-
-			//// client.ResponseReceived += DebugResponseEventHandler;
-			//// client.RequestingDelay += DebugShowDelay;
-
-			var wal = new WikiAbstractionLayer(client, this.wikiInfo.Uri)
-			{
-				Assert = null
-			};
-#if DEBUG
-			wal.SendingRequest += DebugShowRequest;
-			wal.WarningOccurred += DebugWarningEventHandler;
-#endif
-			wal.StopCheckMethods = wal.StopCheckMethods & ~StopCheckMethods.Assert;
-			try
-			{
-				var result = wal.IsEnabled();
-				if (!result)
-				{
-					throw new InvalidOperationException("API not enabled");
-				}
-			}
-			catch (HttpRequestException)
-			{
-				// Wiki is down.
-				throw;
-			}
-
-			this.wiki = wal;
-
-			if (this.wikiInfo.AdminUserName != null)
-			{
-				var adminClient = new SimpleClient(null, @"D:\Data\WallE\cookiesAdmin.dat")
-				{
-					Name = "Admin",
-				};
-				wal = new WikiAbstractionLayer(adminClient, this.wikiInfo.Uri)
-				{
-					Assert = null
-				};
-#if DEBUG
-				wal.SendingRequest += DebugShowRequest;
-				wal.WarningOccurred += DebugWarningEventHandler;
-#endif
-				wal.StopCheckMethods = wal.StopCheckMethods & ~StopCheckMethods.Assert;
-				this.adminWiki = wal;
-			}
-		}
-
-		private void DoGlobalTeardown()
-		{
-			this.RunJobs();
-			this.wiki = null;
-			this.adminWiki = null;
 		}
 
 		private DeleteResult Delete(string title) => this.Delete(title, "Remove previous test");
@@ -430,91 +191,29 @@
 			return null;
 		}
 
-		private EditResult Edit(string title, string content, string summary) => this.wiki.Edit(new EditInput(title, content) { Summary = summary });
+		private EditResult Edit(string title, string content, string summary) => this.normalWiki.Edit(new EditInput(title, content) { Summary = summary });
 
 		private EditResult EditAdmin(string title, string content, string summary) => this.adminWiki.Edit(new EditInput(title, content) { Summary = summary });
 
-		private void FormTestBed_Load(object sender, EventArgs e)
+		private WikiAbstractionLayer SetupWal(WikiInfo wikiInfo, bool useAdmin)
 		{
-			var allWikiInfo = WikiInfo.LoadFile();
-			foreach (WikiInfo item in allWikiInfo)
-			{
-				this.ComboBoxWiki.Items.Add(item);
-			}
+			var wal = GetAbstractionLayer(this.WikiInfo, useAdmin);
+			wal.SendingRequest += DebugShowRequest;
+			// wal.WarningOccurred += DebugWarningEventHandler;
+			// wal.ResponseReceived += DebugResponseEventHandler;
+			wal.Login(useAdmin ? new LoginInput(this.WikiInfo.AdminUserName, this.WikiInfo.AdminPassword) : this.reLoginInput);
 
-			if (this.ComboBoxWiki.Items.Count > 0)
-			{
-				this.ComboBoxWiki.SelectedIndex = 0;
-			}
+			return wal;
 		}
 
-		private void Insert(string message)
-		{
-			this.textBoxResults.Text = this.textBoxResults.Text.Insert(this.timePos, message);
-			this.textBoxResults.SelectionStart = this.textBoxResults.Text.Length;
-			this.textBoxResults.ScrollToCaret();
-		}
-
-		private void Login()
-		{
-			var loginInput = new LoginInput(this.wikiInfo.UserName, this.wikiInfo.Password);
-			var result = this.wiki.Login(loginInput);
-			if (result.UserId == 0)
-			{
-				throw new InvalidOperationException("User login failed: " + result.Reason);
-			}
-
-			if (this.wikiInfo.AdminUserName != null)
-			{
-				loginInput = new LoginInput(this.wikiInfo.AdminUserName, this.wikiInfo.AdminPassword);
-				result = this.adminWiki.Login(loginInput);
-				if (result.UserId == 0)
-				{
-					throw new InvalidOperationException("Admin login failed!");
-				}
-
-				this.indexPath = this.adminWiki.GetArticlePath(string.Empty);
-
-				this.RunJobs();
-			}
-		}
-
-		private void RunJobs()
-		{
-			if (this.wikiInfo.SecretKey.Length > 0)
-			{
-				var request = new Request(this.indexPath, RequestType.Post, false);
-				var message = request
-					.Add("async", true)
-					.Add("maxjobs", 1000)
-					.Add("sigexpiry", (int)(DateTime.UtcNow.AddSeconds(5) - new DateTime(1970, 1, 1)).TotalSeconds)
-					.Add("tasks", "jobs")
-					.Add("title", "Special:RunJobs")
-					.ToString();
-				message = message.Substring(message.IndexOf('?') + 1);
-				request.Add("signature", GetHmac(message, this.wikiInfo.SecretKey));
-				this.adminWiki.SendRequest(request);
-			}
-		}
-
-		private void ShowStopwatch()
-		{
-			this.indent -= 2;
-			this.Insert(Invariant($": {this.sw.ElapsedMilliseconds} ms"));
-			this.sw.Stop();
-		}
-
-		private void StartStopwatch(string testName)
-		{
-			this.AppendResults(testName);
-			this.timePos = this.textBoxResults.Text.Length - 2;
-			this.indent += 2;
-			this.sw.Restart();
-		}
+		private void TeardownWal(WikiAbstractionLayer wal) =>
+			// wal.ResponseReceived -= DebugResponseEventHandler;
+			// wal.WarningOccurred -= DebugWarningEventHandler;
+			wal.SendingRequest -= DebugShowRequest;
 
 		private void UploadRandomImage(string destinationName)
 		{
-			if (this.wiki.Uri.Host != "rob-centos")
+			if (this.normalWiki.Uri.Host != "rob-centos")
 			{
 				throw new InvalidOperationException("You're uploading porn to a wiki that's not yours, dumbass!");
 			}
@@ -525,7 +224,7 @@
 
 			using (var upload = new FileStream(fileName, FileMode.Open))
 			{
-				this.wiki.Upload(new UploadInput(destinationName, upload)
+				this.normalWiki.Upload(new UploadInput(destinationName, upload)
 				{
 					IgnoreWarnings = true,
 					Comment = "My comment",
@@ -538,10 +237,10 @@
 		#region Tests
 		private void AllImagesTests()
 		{
-			this.StartStopwatch("AllImages");
+			this.ParentForm.StartStopwatch("AllImages");
 			var input = new AllImagesInput();
-			var result = this.wiki.AllImages(input);
-			var pages = this.wiki.LoadPages(new QueryPageSetInput(input), DefaultPageProperties);
+			var result = this.normalWiki.AllImages(input);
+			var pages = this.normalWiki.LoadPages(new QueryPageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
 			if (result.Count > 0)
 			{
@@ -549,43 +248,43 @@
 			}
 
 			this.CheckPagesResult(pages);
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void AllMessagesTests()
 		{
 			const string Message = "about";
 
-			this.StartStopwatch("AllMessages");
+			this.ParentForm.StartStopwatch("AllMessages");
 			var input = new AllMessagesInput() { Messages = new List<string>() { Message }, LanguageCode = "bpy", IncludeLocal = true };
-			var result = this.wiki.AllMessages(input);
+			var result = this.normalWiki.AllMessages(input);
 			var resultFirst = result[0];
 			if (resultFirst.Flags.HasFlag(MessageFlags.Missing))
 			{
-				this.AppendResults($"Failed to get '{Message}' message");
+				this.ParentForm.AppendResults($"Failed to get '{Message}' message");
 			}
 
 			if (resultFirst.Content != "বারে")
 			{
-				this.AppendResults("Text mismatch");
+				this.ParentForm.AppendResults("Text mismatch");
 			}
 
 			input = new AllMessagesInput() { MessageFrom = "about", MessageTo = "aboutsite", LanguageCode = "en", IncludeLocal = true };
-			result = this.wiki.AllMessages(input);
+			result = this.normalWiki.AllMessages(input);
 			if (result.Count == 0)
 			{
-				this.AppendResults("message range had no messages");
+				this.ParentForm.AppendResults("message range had no messages");
 			}
 
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void AllFileUsagesTests()
 		{
-			this.StartStopwatch("AllFileUsages");
+			this.ParentForm.StartStopwatch("AllFileUsages");
 			var input = new AllFileUsagesInput();
-			var result = this.wiki.AllFileUsages(input);
-			var pages = this.wiki.LoadPages(new QueryPageSetInput(input), DefaultPageProperties);
+			var result = this.normalWiki.AllFileUsages(input);
+			var pages = this.normalWiki.LoadPages(new QueryPageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
 			if (result != null)
 			{
@@ -598,15 +297,15 @@
 			}
 
 			this.CheckPagesResult(pages);
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void AllLinksTest()
 		{
-			this.StartStopwatch("AllLinks");
+			this.ParentForm.StartStopwatch("AllLinks");
 			var input = new AllLinksInput();
-			var result = this.wiki.AllLinks(input);
-			var pages = this.wiki.LoadPages(new QueryPageSetInput(input), DefaultPageProperties);
+			var result = this.normalWiki.AllLinks(input);
+			var pages = this.normalWiki.LoadPages(new QueryPageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "output");
 			if (result != null)
 			{
@@ -619,15 +318,15 @@
 			}
 
 			this.CheckPagesResult(pages);
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void AllRedirectsTest()
 		{
-			this.StartStopwatch("AllRedirects");
+			this.ParentForm.StartStopwatch("AllRedirects");
 			var input = new AllRedirectsInput();
-			var result = this.wiki.AllRedirects(input);
-			var pages = this.wiki.LoadPages(new QueryPageSetInput(input), DefaultPageProperties);
+			var result = this.normalWiki.AllRedirects(input);
+			var pages = this.normalWiki.LoadPages(new QueryPageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
 			if (result != null)
 			{
@@ -640,15 +339,15 @@
 			}
 
 			this.CheckPagesResult(pages);
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void AllTransclusionsTest()
 		{
-			this.StartStopwatch("AllTransclusions");
+			this.ParentForm.StartStopwatch("AllTransclusions");
 			var input = new AllTransclusionsInput() { Namespace = 0 };
-			var result = this.wiki.AllTransclusions(input);
-			var pages = this.wiki.LoadPages(new QueryPageSetInput(input), DefaultPageProperties);
+			var result = this.normalWiki.AllTransclusions(input);
+			var pages = this.normalWiki.LoadPages(new QueryPageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
 			if (result.Count > 0)
 			{
@@ -656,7 +355,7 @@
 			}
 
 			this.CheckPagesResult(pages);
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void BacklinksTests()
@@ -667,10 +366,10 @@
 			this.Edit("Category:Test Pages", "This is the category for test pages.", "Create category");
 			this.Edit("Test Redirect 1", "#REDIRECT [[Test Page 1]]", "Create redirect");
 			this.UploadRandomImage("Test Image 1.jpg");
-			this.StartStopwatch("Backlinks");
+			this.ParentForm.StartStopwatch("Backlinks");
 			var input = new BacklinksInput("Test Page 1", BacklinksTypes.Backlinks) { FilterRedirects = Filter.Any };
-			var result = this.wiki.Backlinks(input);
-			var pages = this.wiki.LoadPages(new QueryPageSetInput(input), DefaultPageProperties);
+			var result = this.normalWiki.Backlinks(input);
+			var pages = this.normalWiki.LoadPages(new QueryPageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
 			if (result.Count > 0)
 			{
@@ -680,8 +379,8 @@
 			this.CheckPagesResult(pages);
 
 			input = new BacklinksInput("File:Test Image 1.jpg", BacklinksTypes.EmbeddedIn) { FilterRedirects = Filter.Any };
-			result = this.wiki.Backlinks(input);
-			pages = this.wiki.LoadPages(new QueryPageSetInput(input), DefaultPageProperties);
+			result = this.normalWiki.Backlinks(input);
+			pages = this.normalWiki.LoadPages(new QueryPageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
 			if (result.Count > 0)
 			{
@@ -691,8 +390,8 @@
 			this.CheckPagesResult(pages);
 
 			input = new BacklinksInput("File:Test Image 1.jpg", BacklinksTypes.ImageUsage) { FilterRedirects = Filter.Any };
-			result = this.wiki.Backlinks(input);
-			pages = this.wiki.LoadPages(new QueryPageSetInput(input), DefaultPageProperties);
+			result = this.normalWiki.Backlinks(input);
+			pages = this.normalWiki.LoadPages(new QueryPageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
 			if (result.Count > 0)
 			{
@@ -702,22 +401,22 @@
 			this.CheckPagesResult(pages);
 
 			input = new BacklinksInput("File:Test Image 1.jpg", BacklinksTypes.All) { FilterRedirects = Filter.Any };
-			result = this.wiki.Backlinks(input);
+			result = this.normalWiki.Backlinks(input);
 			this.CheckCollection(result, "result");
 			if (result.Count > 0)
 			{
 				this.CheckForNull(result[0].Title, "Title");
 			}
 
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void CategoriesTests()
 		{
-			this.StartStopwatch("Categories");
+			this.ParentForm.StartStopwatch("Categories");
 			var input = new AllCategoriesInput() { From = "Test", To = "Tesz" };
-			var result = this.wiki.AllCategories(input);
-			var pages = this.wiki.LoadPages(new QueryPageSetInput(input), DefaultPageProperties);
+			var result = this.normalWiki.AllCategories(input);
+			var pages = this.normalWiki.LoadPages(new QueryPageSetInput(input), DefaultPageProperties);
 			this.CheckCollection(result, "result");
 			if (result.Count > 0)
 			{
@@ -725,16 +424,16 @@
 			}
 
 			this.CheckPagesResult(pages);
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void EmailUserTests()
 		{
-			this.StartStopwatch("Email");
+			this.ParentForm.StartStopwatch("Email");
 			var input = new EmailUserInput("RobinHood70", "This is a test.") { Subject = "Test Subject", CCMe = true };
 			try
 			{
-				var result = this.wiki.EmailUser(input);
+				var result = this.normalWiki.EmailUser(input);
 				this.Assert(result.Result == "Success", "E-mail user failed.");
 			}
 			catch (WikiException ex)
@@ -742,7 +441,7 @@
 				this.Assert(true, ex.Message);
 			}
 
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void ImageRotateTests()
@@ -750,44 +449,46 @@
 			const string imageName = "Test Image 1.jpg";
 			this.UploadRandomImage(imageName);
 
-			this.StartStopwatch("ImageRotate");
+			this.ParentForm.StartStopwatch("ImageRotate");
 			var input = new ImageRotateInput(new[] { imageName }, 90);
-			var result = this.wiki.ImageRotate(input);
+			var result = this.normalWiki.ImageRotate(input);
 			this.Assert(result.Count == 1, "Incorrect number of results.");
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void ImportTests()
 		{
 			this.Delete("IngameEnding.as", "Remove previous test.");
 
-			this.StartStopwatch("Import");
+			this.ParentForm.StartStopwatch("Import");
 			var input = new ImportInput() { Xml = File.ReadAllText(@"D:\Data\WallE\Wiki26-20161214202753.xml"), FullHistory = true, Summary = "Test Import" };
 			var result = this.adminWiki.Import(input);
 			this.Assert(result.Count > 0, "No results after import.");
 			this.Assert(result[0].Invalid == false, "Import result was invalid.");
 			this.Assert(result[0].Revisions > 0, "Import revision count is 0.");
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void LoginTests()
 		{
-			this.StartStopwatch("Login");
-			var input = new LoginInput(this.wikiInfo.UserName, "Bad password");
-			var result = this.wiki.Login(input);
+			this.normalWiki.Logout(); // Since we're logged in by default now, specifically log out for these tests.
+			this.ParentForm.StartStopwatch("Login");
+			var input = new LoginInput(this.reLoginInput.UserName, "Bad password");
+			var result = this.normalWiki.Login(input);
 			if (result.Result != "WrongPass" && result.Result != "Failed")
 			{
-				this.AppendResults($"Login did not detect an incorrect password. User: {result.User}");
+				this.ParentForm.AppendResults($"Login did not detect an incorrect password. User: {result.User}");
 			}
 
 			input = new LoginInput("Nobody", "this will fail");
-			result = this.wiki.Login(input);
+			result = this.normalWiki.Login(input);
 			if (result.Result != "NotExists" && result.Result != "Failed")
 			{
-				this.AppendResults($"Login did not detect a non-existent user. User: {result.User}");
+				this.ParentForm.AppendResults($"Login did not detect a non-existent user. User: {result.User}");
 			}
 
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
+			this.Relogin();
 		}
 
 		private void ManageTagsTests()
@@ -804,7 +505,7 @@
 			{
 			}
 
-			this.StartStopwatch("ManageTags");
+			this.ParentForm.StartStopwatch("ManageTags");
 			try
 			{
 				input = new ManageTagsInput(TagOperation.Create, tagName) { Reason = "Test tag" };
@@ -826,7 +527,7 @@
 				this.Assert(true, "Delete tag threw an exception: " + ex.Info);
 			}
 
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void MergeHistoryTests()
@@ -839,7 +540,7 @@
 			Thread.Sleep(2000);
 			this.Edit(testPage2, Invariant($"This is test edit #2.{DateTime.UtcNow}"), "Test edit");
 
-			this.StartStopwatch("Merge");
+			this.ParentForm.StartStopwatch("Merge");
 			var input = new MergeHistoryInput(testPage1, testPage2)
 			{
 				Reason = "Testing",
@@ -847,10 +548,10 @@
 			this.adminWiki.MergeHistory(input);
 			var revisionsInput = new RevisionsInput() { MaxItems = 3 };
 			var pageSetInput = new QueryPageSetInput(new string[] { testPage2 });
-			var pageResult = this.wiki.LoadPages(pageSetInput, new IPropertyInput[] { revisionsInput });
+			var pageResult = this.normalWiki.LoadPages(pageSetInput, new IPropertyInput[] { revisionsInput });
 			this.Assert(pageResult.Count == 1, "Incorrect number of pages loaded.");
 			this.Assert(pageResult.First().Revisions.Count == 2, "Incorrect number of revisions loaded.");
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void MoveTests()
@@ -866,7 +567,7 @@
 			this.Edit("User:" + pageNameWrong + "/Subpage", Invariant($"This is a test sub-edit.{DateTime.UtcNow}"), "Test edit");
 			this.Edit("User talk:" + pageNameWrong + "/Subpage", Invariant($"This is a test sub-comment.{DateTime.UtcNow}"), "Test edit");
 
-			this.StartStopwatch("Move");
+			this.ParentForm.StartStopwatch("Move");
 			var input = new MoveInput("User:" + pageNameWrong, "User:" + pageNameRight)
 			{
 				MoveSubpages = true,
@@ -875,7 +576,7 @@
 				Reason = "Test move",
 			};
 
-			var result = this.wiki.Move(input);
+			var result = this.normalWiki.Move(input);
 			if (result.Count == 4)
 			{
 				this.Assert(result[0].Error == null, "Move main page threw an error.");
@@ -888,30 +589,30 @@
 				this.Assert(true, "Wrong number of results.");
 			}
 
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void OptionsTests()
 		{
-			this.StartStopwatch("Options");
+			this.ParentForm.StartStopwatch("Options");
 			var input = new OptionsInput();
 			var change = new Dictionary<string, string>
 			{
 				["ccmeonemails"] = "false",
 			};
 			input.Change = change;
-			this.wiki.Options(input);
+			this.normalWiki.Options(input);
 
 			change["ccmeonemails"] = "true";
-			this.wiki.Options(input);
-			this.ShowStopwatch();
+			this.normalWiki.Options(input);
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void ParameterInfoTests()
 		{
-			this.StartStopwatch("ParameterInfo");
+			this.ParentForm.StartStopwatch("ParameterInfo");
 			var input = new ParameterInfoInput(new string[] { "block", "clientlogin", "expandtemplates", "main", "query", "query+deletedrevs" }) { HelpFormat = HelpFormat.Raw };
-			var result = this.wiki.ParameterInfo(input);
+			var result = this.normalWiki.ParameterInfo(input);
 			var module = result["block"];
 			this.AssertVersion(127, module.Parameters["user"].Type == "user", "'User' parameter for 'block' module is not of 'user' type.");
 			this.AssertBeforeVersion(127, module.Parameters["user"].Type == "string", "'User' parameter for 'block' module is not of 'string' type.");
@@ -941,16 +642,16 @@
 			module = result["deletedrevs"];
 			this.AssertVersion(125, module.Flags == (ModuleFlags.Deprecated | ModuleFlags.ReadRights), "Incorrect flags for 'deletedrevs' module.");
 			this.AssertVersion(125, module.Parameters["start"].Type == "timestamp" && module.Parameters["start"].Information[0].Text.RawMessages[0].Parameters.Count == 2, "Num value appears to have been processed in that whole nested mess in 'deletedrevs' module.");
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void ParseTests()
 		{
-			this.StartStopwatch("Parse");
+			this.ParentForm.StartStopwatch("Parse");
 			var input = ParseInput.FromText("{{Test}} Hello {{subst:Test}} [[Category:Test]] [[File:Test.jpg|64px]] [[Main Page]]");
 			input.ContentModel = "wikitext";
 			input.Properties = ParseProperties.All;
-			var result = this.wiki.Parse(input);
+			var result = this.normalWiki.Parse(input);
 			this.CheckCollection(result.Categories, nameof(result.Categories));
 			this.CheckForNull(result.CategoriesHtml, nameof(result.CategoriesHtml));
 			this.CheckForNull(result.DisplayTitle, nameof(result.DisplayTitle));
@@ -964,26 +665,26 @@
 			this.CheckForNull(result.Text, nameof(result.Text));
 			this.CheckForNull(result.Title, nameof(result.Title));
 			this.CheckForNull(result.WikiText, nameof(result.WikiText));
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void PatrolTests()
 		{
 			var editResult = this.Edit("Test Patrol 1", Invariant($"Test page: {DateTime.UtcNow}"), "Test edit");
-			var recentChangesResult = this.wiki.RecentChanges(new RecentChangesInput() { MaxItems = 1, Properties = RecentChangesProperties.Ids, User = this.wiki.UserName });
+			var recentChangesResult = this.normalWiki.RecentChanges(new RecentChangesInput() { MaxItems = 1, Properties = RecentChangesProperties.Ids, User = this.normalWiki.UserName });
 			var rcid = recentChangesResult[0].Id;
 
-			this.StartStopwatch("Patrol");
-			var input = this.wiki.SiteVersion < 122 ? new PatrolInput(rcid) : PatrolInput.FromRevisionId(editResult.NewRevisionId);
+			this.ParentForm.StartStopwatch("Patrol");
+			var input = this.normalWiki.SiteVersion < 122 ? new PatrolInput(rcid) : PatrolInput.FromRevisionId(editResult.NewRevisionId);
 			var result = this.adminWiki.Patrol(input);
 			this.Assert(result.RecentChangesId == rcid, "Returned rcid didn't match expected rcid.");
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void ProtectTests()
 		{
 			this.Edit("Test Protect 1", Invariant($"Protected page: {DateTime.UtcNow}"), "Test edit");
-			this.StartStopwatch("Protect");
+			this.ParentForm.StartStopwatch("Protect");
 			var input = new ProtectInput("Test Protect 1") { Reason = "Test Protect" };
 			var protections = new List<ProtectInputItem>
 			{
@@ -1000,16 +701,16 @@
 			protections.Add(new ProtectInputItem("edit", "all"));
 			protections.Add(new ProtectInputItem("move", "all"));
 			result = this.adminWiki.Protect(input);
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void PurgeTests()
 		{
-			this.StartStopwatch("Purge");
+			this.ParentForm.StartStopwatch("Purge");
 			var input = new PurgeInput(new[] { "Main Page" });
-			var result = this.wiki.Purge(input);
+			var result = this.normalWiki.Purge(input);
 			this.Assert(result.Count == 1, "Purge returned the wrong number of results.");
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void RevisionDeleteTests()
@@ -1017,13 +718,13 @@
 			this.Edit("Test RevisionDelete", "Test deletable: " + DateTime.UtcNow.ToStringInvariant(), "This should get revdel'd");
 			var editResult = this.Edit("Test RevisionDelete", "Test keepable: " + DateTime.UtcNow.ToStringInvariant(), "This should stay");
 
-			this.StartStopwatch("RevisionDelete");
+			this.ParentForm.StartStopwatch("RevisionDelete");
 			var input = new RevisionDeleteInput(RevisionDeleteType.Revision, new long[] { editResult.OldRevisionId }) { Hide = RevisionDeleteProperties.All, Reason = "Because" };
 			var result = this.adminWiki.RevisionDelete(input);
 
 			this.Assert(result.Status == "Success", "Hide revisions was not successful.");
 			this.Assert(result[0].Id == editResult.OldRevisionId, "Ids didn't match.");
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void RollbackTests()
@@ -1033,8 +734,8 @@
 			this.Edit("Test Rollback", "Vandalism edit 2", "I am vandalizing ur wiki");
 			this.Edit("Test Rollback", "Vandalism edit 3", "I am vandalizing ur wiki");
 
-			this.StartStopwatch("Rollback");
-			var input = new RollbackInput("Test Rollback", this.wiki.UserName) { Summary = "Rollback test vandalism" };
+			this.ParentForm.StartStopwatch("Rollback");
+			var input = new RollbackInput("Test Rollback", this.normalWiki.UserName) { Summary = "Rollback test vandalism" };
 			var result = this.adminWiki.Rollback(input);
 
 			this.Assert(result.RevisionId > result.OldRevisionId, "RevisionId should be greather than OldRevisionId");
@@ -1049,35 +750,35 @@
 			{
 			}
 
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void RsdTests()
 		{
-			this.StartStopwatch("Rsd");
-			var result = this.wiki.Rsd();
+			this.ParentForm.StartStopwatch("Rsd");
+			var result = this.normalWiki.Rsd();
 			this.Assert(result.StartsWith("<?xml", StringComparison.Ordinal), "Rsd result was not XML.");
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void ResetPasswordTests()
 		{
-			this.StartStopwatch("ResetPassword");
+			this.ParentForm.StartStopwatch("ResetPassword");
 			var input = ResetPasswordInput.FromEmail("robinhood70@live.ca");
 			input.Capture = true;
 			var result = this.adminWiki.ResetPassword(input);
 			this.CheckForNull(result.Status, nameof(result.Status));
 			this.CheckCollection(result.Passwords, nameof(result.Passwords));
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void SetNotificationTimestampTests()
 		{
-			this.StartStopwatch("SetNotificationTimestamp");
+			this.ParentForm.StartStopwatch("SetNotificationTimestamp");
 
 			// Full watchlist version
 			var input = new SetNotificationTimestampInput() { Timestamp = DateTime.Now - TimeSpan.FromHours(1) };
-			var result = this.wiki.SetNotificationTimestamp(input);
+			var result = this.normalWiki.SetNotificationTimestamp(input);
 			if (result.Count == 1)
 			{
 				this.Assert(Math.Abs((result.First().NotificationTimestamp.Value - input.Timestamp.Value).TotalSeconds) <= 1, "Timestamps didn't match");
@@ -1091,16 +792,16 @@
 			this.Edit("Test Page 1", "Page 1", "SetNotificationTimestamp test page");
 			this.Edit("Test Page 2", "[[Test Page 1]]", "SetNotificationTimestamp test page");
 			input = new SetNotificationTimestampInput(new string[] { "Test Page 1", "Test Page 2" });
-			result = this.wiki.SetNotificationTimestamp(input);
+			result = this.normalWiki.SetNotificationTimestamp(input);
 			this.Assert(result.Count == 2, "Incorrect number of pages returned");
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void SiteInfoTests()
 		{
-			this.StartStopwatch("SiteInfo");
+			this.ParentForm.StartStopwatch("SiteInfo");
 			var input = new SiteInfoInput { Properties = SiteInfoProperties.All };
-			var result = this.wiki.SiteInfo(input);
+			var result = this.normalWiki.SiteInfo(input);
 			this.CheckForNull(result.BasePage, "BasePage");
 			this.CheckForNull(result.MainPage, "MainPage");
 			this.CheckForNull(result.SiteName, "SiteName");
@@ -1109,7 +810,7 @@
 			this.CheckCollection(result.MagicWords, "MagicWords");
 			this.CheckCollection(result.NamespaceAliases, "NamespaceAliases");
 			this.CheckCollection(result.Namespaces, "Namespaces");
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void TagsTests()
@@ -1124,11 +825,11 @@
 			}
 
 			var editInput = new EditInput("Test Tag 1", "Testing tagging: " + DateTime.UtcNow.ToString()) { Summary = "Test" };
-			var editResult = this.wiki.Edit(editInput);
+			var editResult = this.normalWiki.Edit(editInput);
 
-			this.StartStopwatch("Tags");
+			this.ParentForm.StartStopwatch("Tags");
 			var input = new TagInput() { RevisionIds = new[] { editResult.NewRevisionId, 0L }, Add = new[] { tagName } };
-			var result = this.wiki.Tag(input);
+			var result = this.normalWiki.Tag(input);
 			this.Assert(result.Count == 1, "Unexpected number of results returned: " + result.Count.ToString());
 			if (result.Count == 1)
 			{
@@ -1136,25 +837,25 @@
 				this.Assert(result[1].Error.Code == "nosuchrevid", "Didn't get the expected error message.");
 			}
 
-			result = this.wiki.Tag(input);
+			result = this.normalWiki.Tag(input);
 			this.Assert(result[0].NoOperation, "Result was not NoOperation.");
 
 			input = new TagInput() { RevisionIds = new[] { editResult.NewRevisionId }, Remove = new[] { tagName } };
-			result = this.wiki.Tag(input);
+			result = this.normalWiki.Tag(input);
 			this.Assert(result[0].Removed.Count == 1, "Incorrect number of tags removed.");
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void TokenTests()
 		{
-			this.StartStopwatch("Tokens");
-			var token = this.wiki.TokenManager.SessionToken("csrf");
+			this.ParentForm.StartStopwatch("Tokens");
+			var token = this.normalWiki.TokenManager.SessionToken("csrf");
 			if (token == null)
 			{
-				this.AppendResults("No CSRF token available");
+				this.ParentForm.AppendResults("No CSRF token available");
 			}
 
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void UndeleteTests()
@@ -1163,25 +864,25 @@
 			this.Edit(pageName, "Please don't delete this page! " + DateTime.UtcNow.ToString(), "Delete this page!");
 			this.Delete(pageName, "Confusing - delete the page");
 
-			this.StartStopwatch("Undelete");
+			this.ParentForm.StartStopwatch("Undelete");
 			var result = this.adminWiki.Undelete(new UndeleteInput(pageName) { Reason = "Confusing - undelete the page" });
 			this.Assert(result.Revisions > 0, "Undelete didn't undelete anything!");
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void UserInfoTests()
 		{
-			this.StartStopwatch("UserInfo");
+			this.ParentForm.StartStopwatch("UserInfo");
 			var input = new UserInfoInput { Properties = UserInfoProperties.All };
-			var result = this.wiki.UserInfo(input);
+			var result = this.normalWiki.UserInfo(input);
 			if (result.Id == 0)
 			{
-				this.AppendResults("Failed to get UserId");
+				this.ParentForm.AppendResults("Failed to get UserId");
 			}
 
-			if (result.Name != this.wiki.UserName)
+			if (result.Name != this.normalWiki.UserName)
 			{
-				this.AppendResults("Bot name does not match UserInfo name");
+				this.ParentForm.AppendResults("Bot name does not match UserInfo name");
 			}
 
 			this.CheckCollection(result.Groups, "Groups");
@@ -1195,34 +896,34 @@
 				result = this.adminWiki.UserInfo(input);
 				if (result.Id == 0)
 				{
-					this.AppendResults("Failed to get Admin UserId");
+					this.ParentForm.AppendResults("Failed to get Admin UserId");
 				}
 
 				if (result.Name != this.adminWiki.UserName)
 				{
-					this.AppendResults("Admin name does not match UserInfo name");
+					this.ParentForm.AppendResults("Admin name does not match UserInfo name");
 				}
 			}
 
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 
 		private void UserRightsTests()
 		{
-			var input = new UserRightsInput(this.wiki.UserName) { Add = new[] { "bot" }, Reason = "I am a bot!" };
+			var input = new UserRightsInput(this.normalWiki.UserName) { Add = new[] { "bot" }, Reason = "I am a bot!" };
 			var result = this.adminWiki.UserRights(input);
 			this.Assert(result.Added.Count > 0 && result.Added[0] == "bot", "Bot right was not added.");
 
-			input = new UserRightsInput(this.wiki.UserName) { Remove = new[] { "bot" }, Reason = "I am NOT a bot!" };
+			input = new UserRightsInput(this.normalWiki.UserName) { Remove = new[] { "bot" }, Reason = "I am NOT a bot!" };
 			result = this.adminWiki.UserRights(input);
 			this.Assert(result.Removed.Count > 0 && result.Removed[0] == "bot", "Bot right was not added.");
 		}
 
 		private void WatchTests()
 		{
-			this.StartStopwatch("Watch");
+			this.ParentForm.StartStopwatch("Watch");
 			var input = new WatchInput(new[] { "Main Page", "Main Page2" }) { Unwatch = true };
-			var result = this.wiki.Watch(input);
+			var result = this.normalWiki.Watch(input);
 			if (result.Count == 2)
 			{
 				this.Assert(result["Main Page"].Flags.HasFlag(WatchFlags.Unwatched), "Incorect flags value for Main Page.");
@@ -1233,7 +934,7 @@
 				this.Assert(true, "Incorrect number of results.");
 			}
 
-			this.ShowStopwatch();
+			this.ParentForm.ShowStopwatch();
 		}
 		#endregion
 	}

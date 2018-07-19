@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.Robby.Tests.MetaTemplate
+﻿namespace RobinHood70.Testing.MetaTemplate
 {
 	using System.Collections.Generic;
 	using RobinHood70.WallE.Base;

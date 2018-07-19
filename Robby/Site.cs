@@ -3,7 +3,6 @@
 	// TODO: Review access rights project-wide.
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.Globalization;
 	using System.IO;
 	using System.Net;
@@ -161,20 +160,6 @@
 		/// <summary>Gets the MediaWiki version of the wiki.</summary>
 		/// <value>The MediaWiki version of the wiki.</value>
 		public string Version { get; private set; }
-		#endregion
-
-		#region Public Static Methods
-
-		/// <summary>A convenience method for debugging, this simply outputs all warnings to any Debug trace listeners (e.g., the Debug Output window).</summary>
-		/// <param name="sender">The sender.</param>
-		/// <param name="e">The <see cref="WarningEventArgs"/> instance containing the event data.</param>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "RobinHood70.Robby.Globals.CurrentCulture(System.String,System.Object[])", Justification = "I'm allowing English only here because it's only intended for debugging.")]
-		public static void DebugWarningEventHandler(Site sender, WarningEventArgs e)
-		{
-			ThrowNull(sender, nameof(sender));
-			ThrowNull(e, nameof(e));
-			Debug.WriteLine(CurrentCulture(Warning, e.Sender.GetType(), e.Warning), sender.ToString());
-		}
 		#endregion
 
 		#region Public Methods

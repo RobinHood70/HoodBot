@@ -1,45 +1,30 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F551C181-5F7D-4441-B074-2C97ECA295CB}</ProjectGuid>
+    <ProjectGuid>{C1E4B0F3-2BA5-4B13-AD1E-033B84A6ECE0}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RobinHood70.Robby.Tests</RootNamespace>
-    <AssemblyName>RobbyTests</AssemblyName>
+    <RootNamespace>RobinHood70.Testing</RootNamespace>
+    <AssemblyName>Testing</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>DEBUG;CODE_ANALYSIS;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>..\Testing.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
-    <Prefer32Bit>true</Prefer32Bit>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>..\Testing.ruleset</CodeAnalysisRuleSet>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
@@ -48,44 +33,55 @@
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>SharedKey.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
-  <PropertyGroup />
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="TestingCommon.cs" />
     <Compile Include="FormTestBed.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormTestBed.designer.cs">
+    <Compile Include="FormTestBed.Designer.cs">
       <DependentUpon>FormTestBed.cs</DependentUpon>
     </Compile>
-    <Compile Include="MetaTemplate\MetaTemplateBuilder.cs" />
-    <Compile Include="MetaTemplate\VariablesPage.cs" />
-    <Compile Include="MetaTemplate\VariablesInput.cs" />
-    <Compile Include="MetaTemplate\VariablesResult.cs" />
-    <Compile Include="MetaTemplate\VariablesPageItem.cs" />
+    <Compile Include="ITestForm.cs" />
+    <Compile Include="ITestRunner.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="MetaTemplate\MetaTemplateBuilder.cs" />
     <Compile Include="MetaTemplate\PropVariables.cs" />
-    <EmbeddedResource Include="FormTestBed.resx">
-      <DependentUpon>FormTestBed.cs</DependentUpon>
-    </EmbeddedResource>
+    <Compile Include="MetaTemplate\VariablesInput.cs" />
+    <Compile Include="MetaTemplate\VariablesPage.cs" />
+    <Compile Include="MetaTemplate\VariablesPageItem.cs" />
+    <Compile Include="MetaTemplate\VariablesResult.cs" />
+    <Compile Include="RobbyTests.cs" />
+    <Compile Include="TestRunner.cs" />
+    <Compile Include="WallETests.cs" />
+    <Compile Include="WikiInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="WikiListExample.txt" />
+  </ItemGroup>
+  <ItemGroup>
     <AdditionalFiles Include="..\stylecop.json">
       <Link>stylecop.json</Link>
     </AdditionalFiles>
@@ -93,36 +89,26 @@
     <None Include="SharedKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.0-beta008\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.0-beta008\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TestingCommon\TestingCommon.csproj">
-      <Project>{c1e4b0f3-2ba5-4b13-ad1e-033b84a6ece0}</Project>
-      <Name>TestingCommon</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WallE\WallE.csproj">
-      <Project>{f338af86-4502-4121-b032-092ca727d51b}</Project>
-      <Name>WallE</Name>
+    <ProjectReference Include="..\HoodBot\HoodBot.csproj">
+      <Project>{67bf70df-f8d7-49f0-a6a2-dffc7c8ff55e}</Project>
+      <Name>HoodBot</Name>
     </ProjectReference>
     <ProjectReference Include="..\Robby\Robby.csproj">
       <Project>{16a4f00f-11b3-4049-89d2-09c9b6b53c83}</Project>
       <Name>Robby</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WallE\WallE.csproj">
+      <Project>{f338af86-4502-4121-b032-092ca727d51b}</Project>
+      <Name>WallE</Name>
     </ProjectReference>
     <ProjectReference Include="..\WikiCommon\WikiCommon.csproj">
       <Project>{64878636-cb8c-434e-a03d-b3946216fc7f}</Project>
       <Name>WikiCommon</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.0-beta008\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
-    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.0-beta008\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

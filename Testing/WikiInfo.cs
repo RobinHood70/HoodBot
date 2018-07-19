@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.TestingCommon
+﻿namespace RobinHood70.Testing
 {
 	using System;
 	using System.Collections.Generic;

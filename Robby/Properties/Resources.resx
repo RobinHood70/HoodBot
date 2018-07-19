@@ -138,7 +138,4 @@
   <data name="TitleInvalid" xml:space="preserve">
     <value>The title name cannot be blank.</value>
   </data>
-  <data name="Warning" xml:space="preserve">
-    <value>Warning ({0}): {1}</value>
-  </data>
 </root>

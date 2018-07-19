@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WallE.Tests
+﻿namespace RobinHood70.Testing
 {
 	public partial class FormTestBed
 	{
@@ -52,7 +52,6 @@
 			this.ComboBoxWiki.Name = "ComboBoxWiki";
 			this.ComboBoxWiki.Size = new System.Drawing.Size(371, 21);
 			this.ComboBoxWiki.TabIndex = 0;
-			this.ComboBoxWiki.SelectedIndexChanged += new System.EventHandler(this.ComboBoxWiki_SelectedIndexChanged);
 			// 
 			// textBoxResults
 			// 

@@ -122,14 +122,5 @@ namespace RobinHood70.Robby.Properties {
                 return ResourceManager.GetString("TitleInvalid", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Warning ({0}): {1}.
-        /// </summary>
-        internal static string Warning {
-            get {
-                return ResourceManager.GetString("Warning", resourceCulture);
-            }
-        }
     }
 }

@@ -1,7 +1,8 @@
-﻿namespace RobinHood70.Robby.Tests.MetaTemplate
+﻿namespace RobinHood70.Testing.MetaTemplate
 {
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
+	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 
