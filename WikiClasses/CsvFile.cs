@@ -22,8 +22,6 @@
 			? this.rows.Count > 0 ? this.rows.Count - 1 : 0
 			: this.rows.Count;
 
-		public int ColumnCount { get; private set; }
-
 		public IEnumerable<CsvRow> DataRows
 		{
 			get
@@ -82,9 +80,7 @@
 		#endregion
 
 		#region Public Methods
-		public CsvRow Add(IEnumerable<object> fields) => this.Add(fields, false);
-
-		public CsvRow Add(IEnumerable<object> fields, bool autoExpand)
+		public CsvRow Add(IEnumerable<object> fields)
 		{
 			ThrowNull(fields, nameof(fields));
 			var list = new List<string>();
@@ -93,18 +89,14 @@
 				list.Add(item.ToString());
 			}
 
-			return this.Add(list, autoExpand);
+			return this.Add(list);
 		}
 
-		public CsvRow Add(params string[] fields) => this.Add(fields, false);
+		public CsvRow Add(params string[] fields) => this.Add(fields as IEnumerable<string>);
 
-		public CsvRow Add(bool autoExpand, params string[] fields) => this.Add(fields, autoExpand);
-
-		public CsvRow Add(IEnumerable<string> fields) => this.Add(fields, false);
-
-		public CsvRow Add(IEnumerable<string> fields, bool autoExpand)
+		public CsvRow Add(IEnumerable<string> fields)
 		{
-			var row = new CsvRow(fields, this.nameMap, autoExpand);
+			var row = new CsvRow(fields, this.nameMap);
 			this.Add(row);
 			return row;
 		}
@@ -112,15 +104,6 @@
 		public void Add(CsvRow item)
 		{
 			ThrowNull(item, nameof(item));
-			if (this.ColumnCount == 0)
-			{
-				this.ColumnCount = item.Count;
-			}
-			else if (this.ColumnCount != item.Count)
-			{
-				throw new InvalidOperationException("New row does not have the same number of fields as current rows.");
-			}
-
 			this.Insert(this.rows.Count, item);
 		}
 
@@ -133,27 +116,20 @@
 				this.nameMap.Add(name, this.nameMap.Count);
 				this.HeaderRow.Add(name);
 			}
-
-			foreach (var row in this.DataRows)
-			{
-				row.Add(string.Empty);
-			}
-
-			this.ColumnCount++;
 		}
 
 		public void AddHeader(params string[] fieldNames) => this.AddHeader(fieldNames as IEnumerable<string>);
 
 		public void AddHeader(IEnumerable<string> fieldNames)
 		{
-			if (this.HasHeader && this.rows.Count > 0)
+			if (this.hasHeader && this.rows.Count > 0)
 			{
-				throw new InvalidOperationException();
+				throw new InvalidOperationException("File already has a header.");
 			}
 
-			var headerFields = new List<string>(fieldNames);
-			this.HasHeader = true;
-			this.Insert(0, new CsvRow(headerFields, this.nameMap, false));
+			var header = new CsvRow(new List<string>(fieldNames), this.nameMap);
+			this.hasHeader = true;
+			this.Insert(0, header); // Automatically triggers a refresh of nameMap.
 		}
 
 		public void Clear()
@@ -169,15 +145,6 @@
 		public void Insert(int index, CsvRow item)
 		{
 			ThrowNull(item, nameof(item));
-			if (this.ColumnCount == 0)
-			{
-				this.ColumnCount = item.Count;
-			}
-			else if (this.ColumnCount != item.Count)
-			{
-				throw new InvalidOperationException("New row does not have the same number of fields as current rows.");
-			}
-
 			this.rows.Insert(index, item);
 			if (index == 0 && this.HasHeader)
 			{
@@ -320,49 +287,32 @@
 			}
 		}
 
-		public void WriteRow(StreamWriter stream, IReadOnlyList<string> row)
-		{
-			var specialList = new List<char> { '\n', '\r', '\u2028', '\u2029', this.FieldSeparator };
-			if (this.EscapeCharacter.HasValue)
-			{
-				specialList.Add(this.EscapeCharacter.Value);
-			}
-
-			if (this.FieldDelimiter.HasValue)
-			{
-				specialList.Add(this.FieldDelimiter.Value);
-			}
-
-			var specialChars = specialList.ToArray();
-			var rewriteFields = new List<string>(row.Count);
-			foreach (var field in row)
-			{
-				if (field.IndexOfAny(specialChars) == -1)
-				{
-					rewriteFields.Add(field);
-				}
-				else
-				{
-					(var addDelimiter, var newField) = this.RewriteField(field);
-					if (addDelimiter && this.FieldDelimiter.HasValue)
-					{
-						rewriteFields.Add(this.FieldDelimiter.Value + newField + this.FieldDelimiter.Value);
-					}
-					else
-					{
-						rewriteFields.Add(newField);
-					}
-				}
-			}
-
-			stream.WriteLine(string.Join(this.FieldSeparator.ToString(CultureInfo.InvariantCulture), rewriteFields));
-		}
+		public void WriteRow(StreamWriter streamWriter, IEnumerable<string> row) => this.InternalWriteRow(streamWriter, row, 0, this.GetSpecialCharacters());
 
 		public void WriteStream(StreamWriter stream)
 		{
+			// We're allowing rows to be ragged internally, so figure out the highest column count and use that. If a header is specified, that always takes priority. Count could, of course, just be assumed from the first row, but even in a large list, the scan is very quick, so there's no reason not to.
+			int columnCount;
+			if (this.HasHeader)
+			{
+				columnCount = this.HeaderRow.Count;
+			}
+			else
+			{
+				columnCount = 0;
+				foreach (var row in this)
+				{
+					if (row.Count > columnCount)
+					{
+						columnCount = row.Count;
+					}
+				}
+			}
+
+			var specialChars = this.GetSpecialCharacters();
 			foreach (var row in this)
 			{
-				this.WriteRow(stream, row);
+				this.InternalWriteRow(stream, row, columnCount, specialChars);
 			}
 		}
 		#endregion
@@ -376,6 +326,43 @@
 		#endregion
 
 		#region Private Methods
+		private char[] GetSpecialCharacters()
+		{
+			var specialList = new List<char> { '\n', '\r', '\u2028', '\u2029', this.FieldSeparator };
+			if (this.EscapeCharacter.HasValue)
+			{
+				specialList.Add(this.EscapeCharacter.Value);
+			}
+
+			if (this.FieldDelimiter.HasValue)
+			{
+				specialList.Add(this.FieldDelimiter.Value);
+			}
+
+			return specialList.ToArray();
+		}
+
+		private void InternalWriteRow(StreamWriter streamWriter, IEnumerable<string> row, int columnCount, char[] specialChars)
+		{
+			var rewriteFields = new List<string>(columnCount);
+			if (columnCount == 0)
+			{
+				columnCount = int.MaxValue;
+			}
+
+			var columnNumber = 0;
+			foreach (var field in row)
+			{
+				if (columnNumber < columnCount)
+				{
+					rewriteFields.Add(field.IndexOfAny(specialChars) == -1 ? field : this.RewriteField(field));
+					columnNumber++;
+				}
+			}
+
+			streamWriter.WriteLine(string.Join(this.FieldSeparator.ToString(CultureInfo.InvariantCulture), rewriteFields));
+		}
+
 		private void ResetHeader()
 		{
 			this.nameMap.Clear();
@@ -389,7 +376,7 @@
 			}
 		}
 
-		private (bool addDelimiter, string newField) RewriteField(string field)
+		private string RewriteField(string field)
 		{
 			var addDelimiter = false;
 			var sb = new StringBuilder();
@@ -434,7 +421,7 @@
 				}
 			}
 
-			return (addDelimiter, sb.ToString());
+			return (addDelimiter && this.FieldDelimiter.HasValue) ? this.FieldDelimiter.Value + sb.ToString() + this.FieldDelimiter.Value : sb.ToString();
 		}
 		#endregion
 	}

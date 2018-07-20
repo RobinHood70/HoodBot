@@ -12,28 +12,24 @@
 		#endregion
 
 		#region Constructors
-		internal CsvRow(IEnumerable<string> fields, IReadOnlyDictionary<string, int> nameMap, bool autoExpand)
+		internal CsvRow(IEnumerable<string> fields, IReadOnlyDictionary<string, int> nameMap)
 		{
-			var newFields = new List<string>(fields);
-			if (autoExpand && nameMap?.Count > 0)
+			if (nameMap?.Count > 0)
 			{
-				var maxValue = nameMap.Count;
-				foreach (var value in nameMap.Values)
-				{
-					// In a properly formed nameMap, nothing should change here, but to be on the safe side, we check for the highest value in the nameMap index. The reverse, having fields.Count > nameMap.Count is inherently an error, so we don't check for that.
-					if (value > maxValue)
-					{
-						maxValue = value + 1; // Plus one since we're ultimately comparing against a count, not an index.
-					}
-				}
-
-				while (newFields.Count < maxValue)
+				var newFields = new List<string>(nameMap.Count);
+				newFields.AddRange(fields);
+				while (newFields.Count < nameMap.Count)
 				{
 					newFields.Add(string.Empty);
 				}
+
+				this.fields = newFields;
+			}
+			else
+			{
+				this.fields = new List<string>(fields);
 			}
 
-			this.fields = newFields;
 			this.nameMap = nameMap;
 		}
 		#endregion

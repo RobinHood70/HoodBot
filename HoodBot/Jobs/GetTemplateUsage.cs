@@ -97,7 +97,7 @@
 
 				foreach (var template in allTemplates)
 				{
-					var row = csvFile.Add(true, template.Page, template.Template.Name);
+					var row = csvFile.Add(template.Page, template.Template.Name);
 					foreach (var param in template.Template)
 					{
 						row[param.Name] = param.Value;
