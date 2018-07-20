@@ -1,11 +1,11 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System.Collections.Generic;
-	using System.IO;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.TaskResults;
 	using RobinHood70.HoodBot.Jobs.Tasks;
 	using RobinHood70.Robby;
+	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
 
 	public class GetTemplateUsage : TaskJob
@@ -70,7 +70,15 @@
 				}
 				else if (!string.IsNullOrWhiteSpace(this.location))
 				{
-					this.WriteFile(allTemplates);
+					try
+					{
+						this.WriteFile(allTemplates);
+					}
+					catch (System.IO.IOException e)
+					{
+						this.StatusWriteLine("Couldn't save file!");
+						this.StatusWriteLine(e.Message);
+					}
 				}
 
 				this.IncrementProgress();
@@ -78,31 +86,25 @@
 
 			private void WriteFile(TemplateCollection allTemplates)
 			{
-				using (var file = new StreamWriter(this.location))
+				var csvFile = new CsvFile();
+				var output = new List<string>(allTemplates.HeaderOrder.Count + 2)
 				{
-					var output = new string[allTemplates.HeaderOrder.Count + 2];
-					output[0] = "Page";
-					output[1] = "Template Name";
-					foreach (var header in allTemplates.HeaderOrder)
+					"Page",
+					"Template Name"
+				};
+				output.AddRange(allTemplates.HeaderOrder.Keys);
+				csvFile.AddHeader(output);
+
+				foreach (var template in allTemplates)
+				{
+					var row = csvFile.Add(true, template.Page, template.Template.Name);
+					foreach (var param in template.Template)
 					{
-						output[header.Value + 2] = header.Key;
-					}
-
-					file.WriteLine(string.Join("\t", output));
-
-					foreach (var row in allTemplates)
-					{
-						output = new string[allTemplates.HeaderOrder.Count + 2];
-						output[0] = row.Page;
-						output[1] = row.Template.Name;
-						foreach (var param in row.Template)
-						{
-							output[allTemplates.HeaderOrder[param.Name] + 2] = param.Value;
-						}
-
-						file.WriteLine(string.Join("\t", output));
+						row[param.Name] = param.Value;
 					}
 				}
+
+				csvFile.WriteFile(this.location);
 			}
 		}
 		#endregion
