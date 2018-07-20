@@ -274,10 +274,10 @@
 				foreach (var jobNode in jobList)
 				{
 					var job = this.ConstructJob(jobNode);
+					this.ProgressBarColor = ProgressBarGreen;
+					this.jobStarted = DateTime.UtcNow;
 					try
 					{
-						this.ProgressBarColor = ProgressBarGreen;
-						this.jobStarted = DateTime.UtcNow;
 						await Task.Run(job.Execute).ConfigureAwait(false);
 						this.completedJobs++;
 					}

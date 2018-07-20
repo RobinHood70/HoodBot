@@ -10,7 +10,7 @@
 	using RobinHood70.WallE.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal static class TestingCommon
+	public static class TestingCommon
 	{
 		#region Debug Methods
 #if DEBUG

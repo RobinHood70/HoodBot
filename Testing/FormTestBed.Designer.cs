@@ -26,8 +26,8 @@
 			this.ComboBoxWiki = new System.Windows.Forms.ComboBox();
 			this.textBoxResults = new System.Windows.Forms.TextBox();
 			this.TopButtonsPanel = new System.Windows.Forms.TableLayoutPanel();
-			this.ButtonClear = new System.Windows.Forms.Button();
 			this.ButtonQuick = new System.Windows.Forms.Button();
+			this.ButtonClear = new System.Windows.Forms.Button();
 			this.TopButtonsPanel.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -87,6 +87,17 @@
 			this.TopButtonsPanel.Size = new System.Drawing.Size(371, 23);
 			this.TopButtonsPanel.TabIndex = 6;
 			// 
+			// ButtonQuick
+			// 
+			this.ButtonQuick.Location = new System.Drawing.Point(0, 0);
+			this.ButtonQuick.Margin = new System.Windows.Forms.Padding(0);
+			this.ButtonQuick.Name = "ButtonQuick";
+			this.ButtonQuick.Size = new System.Drawing.Size(83, 23);
+			this.ButtonQuick.TabIndex = 1;
+			this.ButtonQuick.Text = "Quick Test";
+			this.ButtonQuick.UseVisualStyleBackColor = true;
+			this.ButtonQuick.Click += new System.EventHandler(this.ButtonQuick_Click);
+			// 
 			// ButtonClear
 			// 
 			this.ButtonClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -99,17 +110,6 @@
 			this.ButtonClear.UseVisualStyleBackColor = true;
 			this.ButtonClear.Click += new System.EventHandler(this.ButtonClear_Click);
 			// 
-			// ButtonQuick
-			// 
-			this.ButtonQuick.Location = new System.Drawing.Point(0, 0);
-			this.ButtonQuick.Margin = new System.Windows.Forms.Padding(0);
-			this.ButtonQuick.Name = "ButtonQuick";
-			this.ButtonQuick.Size = new System.Drawing.Size(83, 23);
-			this.ButtonQuick.TabIndex = 1;
-			this.ButtonQuick.Text = "Quick Test";
-			this.ButtonQuick.UseVisualStyleBackColor = true;
-			this.ButtonQuick.Click += new System.EventHandler(this.ButtonQuick_Click);
-			// 
 			// FormTestBed
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -121,7 +121,7 @@
 			this.MinimumSize = new System.Drawing.Size(275, 39);
 			this.Name = "FormTestBed";
 			this.Padding = new System.Windows.Forms.Padding(12);
-			this.Text = "WallE Test Bed";
+			this.Text = "Test Bed";
 			this.Load += new System.EventHandler(this.FormTestBed_Load);
 			this.TopButtonsPanel.ResumeLayout(false);
 			this.ResumeLayout(false);

@@ -4,6 +4,7 @@
 	using System.Diagnostics.CodeAnalysis;
 	using System.Text;
 	using System.Text.RegularExpressions;
+	using static RobinHood70.WikiCommon.Globals;
 
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
 	public class Parameter
@@ -29,12 +30,14 @@
 		}
 
 		public Parameter(TemplateString name, TemplateString value)
-			: this(name, value, name.Value.Length == 0)
+			: this(name, value, (name?.Value.Length ?? 0) == 0)
 		{
 		}
 
 		public Parameter(TemplateString name, TemplateString value, bool anonymous)
 		{
+			ThrowNull(name, nameof(name));
+			ThrowNull(value, nameof(value));
 			this.FullName = name;
 			this.FullValue = value;
 			this.Anonymous = anonymous;

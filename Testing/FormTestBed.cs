@@ -55,8 +55,7 @@
 		private void ButtonQuick_Click(object sender, EventArgs e)
 		{
 			this.ButtonQuick.Enabled = false;
-			ITestRunner test = new RobbyTests(this, this.ComboBoxWiki.SelectedItem as WikiInfo);
-			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
+			ITestRunner test = new WikiClassesTests(this, this.ComboBoxWiki.SelectedItem as WikiInfo);
 			test.Setup();
 			test.RunOne();
 			test.Teardown();
@@ -67,7 +66,6 @@
 		{
 			this.ButtonRunAll.Enabled = false;
 			ITestRunner tests = new WallETests(this, this.ComboBoxWiki.SelectedItem as WikiInfo);
-			var wikiInfo = this.ComboBoxWiki.SelectedItem as WikiInfo;
 			tests.Setup();
 			tests.RunAll();
 			tests.Teardown();

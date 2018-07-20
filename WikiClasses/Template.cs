@@ -10,6 +10,7 @@
 	using System.Text.RegularExpressions;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.WikiClasses.Properties.Resources;
 
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
 	[SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Template is a more meaningful name.")]
@@ -190,6 +191,7 @@
 
 		public static Template FindTemplate(Regex finder, string text)
 		{
+			ThrowNull(finder, nameof(finder));
 			var match = finder.Match(text);
 			if (match.Success)
 			{
@@ -312,7 +314,7 @@
 				var newPos = this.GetAnonymousPosition(param);
 				if (newPos != position)
 				{
-					throw new InvalidOperationException(Invariant($"Anonymizing parameter {param.Name} put it into position {newPos} instead of {position}."));
+					throw new InvalidOperationException(CurrentCulture(AnonymizeBad, param.Name, newPos, position));
 				}
 			}
 		}
@@ -619,12 +621,15 @@
 
 		public void RemoveEmpty(params string[] names)
 		{
-			foreach (var name in names)
+			if (names != null)
 			{
-				var param = this[name];
-				if (param != null && param.Value.Length == 0)
+				foreach (var name in names)
 				{
-					this.Remove(param);
+					var param = this[name];
+					if (param != null && param.Value.Length == 0)
+					{
+						this.Remove(param);
+					}
 				}
 			}
 		}
@@ -661,7 +666,7 @@
 		{
 			ThrowNull(name, nameof(name));
 			var param = this[name];
-			if (param != null)
+			if (param != null && values != null)
 			{
 				foreach (var value in values)
 				{
@@ -685,7 +690,7 @@
 				}
 				else
 				{
-					throw new InvalidOperationException(CurrentCulture($"Parameter \"{to}\" already exists."));
+					throw new InvalidOperationException(CurrentCulture(ParameterExists, to));
 				}
 			}
 		}

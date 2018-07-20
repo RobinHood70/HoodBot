@@ -72,7 +72,10 @@
 				RunJobs(this.adminWiki, this.WikiInfo.SecretKey);
 			}
 
+			TeardownWal(this.normalWiki);
 			this.normalWiki = null;
+
+			TeardownWal(this.adminWiki);
 			this.adminWiki = null;
 		}
 
@@ -124,12 +127,19 @@
 		public override void Setup()
 		{
 			this.reLoginInput = new LoginInput(this.WikiInfo.UserName, this.WikiInfo.Password);
-			this.normalWiki = this.SetupWal(this.WikiInfo, false);
+			this.normalWiki = this.SetupWal(false);
 			if (this.WikiInfo.AdminUserName != null)
 			{
-				this.adminWiki = this.SetupWal(this.WikiInfo, true);
+				this.adminWiki = this.SetupWal(true);
 			}
 		}
+		#endregion
+
+		#region Private Static Methods
+		private static void TeardownWal(WikiAbstractionLayer wal) =>
+			// wal.ResponseReceived -= DebugResponseEventHandler;
+			// wal.WarningOccurred -= DebugWarningEventHandler;
+			wal.SendingRequest -= DebugShowRequest;
 		#endregion
 
 		#region Private Methods
@@ -195,7 +205,7 @@
 
 		private EditResult EditAdmin(string title, string content, string summary) => this.adminWiki.Edit(new EditInput(title, content) { Summary = summary });
 
-		private WikiAbstractionLayer SetupWal(WikiInfo wikiInfo, bool useAdmin)
+		private WikiAbstractionLayer SetupWal(bool useAdmin)
 		{
 			var wal = GetAbstractionLayer(this.WikiInfo, useAdmin);
 			wal.SendingRequest += DebugShowRequest;
@@ -205,11 +215,6 @@
 
 			return wal;
 		}
-
-		private void TeardownWal(WikiAbstractionLayer wal) =>
-			// wal.ResponseReceived -= DebugResponseEventHandler;
-			// wal.WarningOccurred -= DebugWarningEventHandler;
-			wal.SendingRequest -= DebugShowRequest;
 
 		private void UploadRandomImage(string destinationName)
 		{

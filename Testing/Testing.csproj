@@ -27,14 +27,26 @@
     <CodeAnalysisRuleSet>..\Testing.ruleset</CodeAnalysisRuleSet>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
-  <PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+		<DebugSymbols>true</DebugSymbols>
+		<DebugType>full</DebugType>
+		<Optimize>false</Optimize>
+		<OutputPath>bin\Debug\</OutputPath>
+		<DefineConstants>DEBUG;CODE_ANALYSIS;TRACE</DefineConstants>
+		<ErrorReport>prompt</ErrorReport>
+		<WarningLevel>4</WarningLevel>
+		<RunCodeAnalysis>true</RunCodeAnalysis>
+		<CodeAnalysisRuleSet>..\Testing.ruleset</CodeAnalysisRuleSet>
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+	<PropertyGroup>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>SharedKey.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject />
+    <StartupObject>RobinHood70.Testing.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -76,6 +88,7 @@
     <Compile Include="RobbyTests.cs" />
     <Compile Include="TestRunner.cs" />
     <Compile Include="WallETests.cs" />
+    <Compile Include="WikiClassesTests.cs" />
     <Compile Include="WikiInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -105,10 +118,19 @@
       <Project>{f338af86-4502-4121-b032-092ca727d51b}</Project>
       <Name>WallE</Name>
     </ProjectReference>
+    <ProjectReference Include="..\WikiClasses\WikiClasses.csproj">
+      <Project>{AD688255-64E2-451C-A32F-85877B7BDEF0}</Project>
+      <Name>WikiClasses</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WikiCommon\WikiCommon.csproj">
       <Project>{64878636-cb8c-434e-a03d-b3946216fc7f}</Project>
       <Name>WikiCommon</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="FormTestBed.resx">
+      <DependentUpon>FormTestBed.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -14,9 +14,8 @@
 
 		protected override void Main()
 		{
-			var progressMax = 5;
-			this.ProgressMaximum = progressMax;
-			for (var i = 1; i <= progressMax; i++)
+			this.ProgressMaximum = 5;
+			for (var i = 1; i <= this.ProgressMaximum; i++)
 			{
 				this.StatusWrite($"Job {i}: Start...");
 				Thread.Sleep(199);
