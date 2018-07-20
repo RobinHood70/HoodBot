@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Tasks;
 	using RobinHood70.Robby;
@@ -41,15 +42,15 @@
 			this.ProgressMaximum = this.Tasks.Count;
 			foreach (var task in this.Tasks)
 			{
-				//// var sw = new Stopwatch();
-				//// sw.Start();
+				var sw = new Stopwatch();
+				sw.Start();
 
 				task.SetAsyncInfoWithIntercept(this.taskProgressIntercept);
 				task.Execute();
 				this.IncrementProgress();
 
-				//// sw.Stop();
-				//// Debug.WriteLine($"{task.GetType().Name}: {sw.ElapsedMilliseconds}");
+				sw.Stop();
+				Debug.WriteLine($"{task.GetType().Name}: {sw.ElapsedMilliseconds}");
 			}
 		}
 		#endregion
