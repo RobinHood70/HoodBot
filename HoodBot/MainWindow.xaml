@@ -76,7 +76,7 @@
 				Grid.Column="2"
 				VerticalAlignment="Center"
 				DisplayMemberPath="DisplayName"
-				ItemsSource="{Binding KnownWikis.Wikis}"
+				ItemsSource="{Binding BotSettings.Wikis}"
 				SelectedItem="{Binding CurrentItem}" />
 			<Button
 				Grid.Column="4"
@@ -84,7 +84,7 @@
 				VerticalAlignment="Stretch"
 				HorizontalContentAlignment="Stretch"
 				VerticalContentAlignment="Stretch"
-				Command="{Binding EditWikiList}">
+				Command="{Binding EditSettings}">
 				<TextBlock
 					HorizontalAlignment="Center"
 					FontFamily="WingDings"
@@ -168,7 +168,8 @@
 				BorderBrush="Gray"
 				BorderThickness="1"
 				LostFocus="JobParametersBorder_LostFocus"
-				Visibility="{Binding JobParameterVisibility, Mode=OneWay}">
+				Visibility="Visible">
+				<!--  {Binding JobParameterVisibility, Mode=OneWay}  -->
 				<Border.Background>
 					<SolidColorBrush Opacity="0.9" Color="#FFFFFFFF" />
 				</Border.Background>

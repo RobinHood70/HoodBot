@@ -13,6 +13,7 @@
 	using RobinHood70.HoodBot.Jobs;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
+	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
 	using RobinHood70.WallE.Eve;
 	using static System.Environment;
@@ -32,7 +33,7 @@
 
 		#region Fields
 		private readonly IMediaWikiClient client;
-		private readonly string dataFolder;
+		private readonly string appDataFolder;
 		private readonly IProgress<double> progressMonitor;
 		private readonly IProgress<string> statusMonitor;
 
@@ -56,11 +57,11 @@
 		#region Constructors
 		public MainViewModel()
 		{
-			this.dataFolder = Path.Combine(GetFolderPath(SpecialFolder.LocalApplicationData, SpecialFolderOption.Create), nameof(HoodBot));
-			this.client = new SimpleClient(ContactInfo, Path.Combine(this.dataFolder, "Cookies.dat"));
+			this.appDataFolder = Path.Combine(GetFolderPath(SpecialFolder.LocalApplicationData, SpecialFolderOption.Create), nameof(HoodBot));
+			this.client = new SimpleClient(ContactInfo, Path.Combine(this.appDataFolder, "Cookies.dat"));
 			this.client.RequestingDelay += this.Client_RequestingDelay;
-			this.KnownWikis = WikiList.Load(Path.Combine(this.dataFolder, "WikiList.json"));
-			this.CurrentItem = this.KnownWikis.LastSelectedItem;
+			this.BotSettings = BotSettings.Load(Path.Combine(this.appDataFolder, "Settings.json"));
+			this.CurrentItem = this.BotSettings.LastSelectedWiki;
 
 			this.progressMonitor = new Progress<double>(this.ProgressChanged);
 			this.statusMonitor = new Progress<string>(this.StatusChanged);
@@ -70,11 +71,11 @@
 		#region Destructor
 		~MainViewModel()
 		{
-			this.KnownWikis.Save();
+			this.BotSettings.Save();
 			if (this.site != null)
 			{
-				(this.site.AbstractionLayer as WikiAbstractionLayer).SendingRequest -= Wal_SendingRequest;
-				(this.site.AbstractionLayer as WikiAbstractionLayer).WarningOccurred -= Wal_WarningOccurred;
+				(this.site.AbstractionLayer as WikiAbstractionLayer).SendingRequest -= WalSendingRequest;
+				(this.site.AbstractionLayer as WikiAbstractionLayer).WarningOccurred -= WalWarningOccurred;
 			}
 
 			this.client.RequestingDelay -= this.Client_RequestingDelay;
@@ -89,12 +90,12 @@
 			{
 				if (this.Set(ref this.currentItem, value, nameof(this.CurrentItem)))
 				{
-					this.KnownWikis.UpdateLastSelected(value);
+					this.BotSettings.UpdateLastSelected(value);
 				}
 			}
 		}
 
-		public RelayCommand EditWikiList => new RelayCommand(this.OpenEditWindow);
+		public RelayCommand EditSettings => new RelayCommand(this.OpenEditWindow);
 
 		public DateTime? Eta => this.eta?.ToLocalTime();
 
@@ -106,7 +107,7 @@
 
 		public JobNode JobTree { get; } = new JobNode();
 
-		public WikiList KnownWikis { get; }
+		public BotSettings BotSettings { get; }
 
 		public double OverallProgress
 		{
@@ -161,6 +162,16 @@
 		internal IParameterFetcher ParameterFetcher { get; set; }
 		#endregion
 
+		#region Public Static Methods (DEBUG only)
+#if DEBUG
+		public static void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine(sender + " Response: " + eventArgs.Response);
+
+		public static void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine(eventArgs.Request.ToString(), sender.ToString());
+
+		public static void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"Warning ({eventArgs.Warning.Code}): {eventArgs.Warning.Info}", sender.ToString());
+#endif
+		#endregion
+
 		#region Internal Methods
 		internal void GetParameters(JobNode jobNode)
 		{
@@ -207,10 +218,6 @@
 
 			return retval + 's';
 		}
-
-		private static void Wal_SendingRequest(WallE.Base.IWikiAbstractionLayer sender, WallE.Base.RequestEventArgs eventArgs) => Debug.WriteLine(eventArgs.Request.ToString(), sender.ToString());
-
-		private static void Wal_WarningOccurred(WallE.Base.IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"Warning ({eventArgs.Warning.Code}): {eventArgs.Warning.Info}", sender.ToString());
 		#endregion
 
 		#region Private Methods
@@ -221,7 +228,7 @@
 			this.PauseJobs(false);
 		}
 
-		private void ClearStatus() => this.Status = string.Empty;
+		private void ClearStatus() => this.Status = string.Empty; // TODO: Removed from Reset, so add to a button or maybe only on Play.
 
 		private void Client_RequestingDelay(IMediaWikiClient sender, DelayEventArgs eventArgs)
 		{
@@ -239,7 +246,15 @@
 
 			foreach (var param in jobNode.Parameters)
 			{
-				objectList.Add(param.Value);
+				if (param.Attribute is JobParameterFileAttribute && param.Value is string value)
+				{
+					value = value.Replace("%BotData%", this.BotSettings.BotDataFolder);
+					objectList.Add(ExpandEnvironmentVariables(value));
+				}
+				else
+				{
+					objectList.Add(param.Value);
+				}
 			}
 
 			return jobNode.Constructor.Invoke(objectList.ToArray()) as WikiJob;
@@ -338,8 +353,8 @@
 			{
 				if (this.site != null)
 				{
-					(this.site.AbstractionLayer as WikiAbstractionLayer).SendingRequest -= Wal_SendingRequest;
-					(this.site.AbstractionLayer as WikiAbstractionLayer).WarningOccurred -= Wal_WarningOccurred;
+					(this.site.AbstractionLayer as WikiAbstractionLayer).SendingRequest -= WalSendingRequest;
+					(this.site.AbstractionLayer as WikiAbstractionLayer).WarningOccurred -= WalWarningOccurred;
 				}
 
 				this.previousItem = wikiInfo;
@@ -347,8 +362,10 @@
 				{
 					MaxLag = wikiInfo.MaxLag
 				};
-				wal.SendingRequest += Wal_SendingRequest;
-				wal.WarningOccurred += Wal_WarningOccurred;
+
+				// wal.SendingRequest += WalSendingRequest;
+				// wal.ResponseReceived += WalResponseRecieved;
+				wal.WarningOccurred += WalWarningOccurred;
 				this.site = new Site(wal);
 				this.site.Login(wikiInfo.UserName, this.Password ?? wikiInfo.Password);
 			}
@@ -356,14 +373,14 @@
 
 		private void OpenEditWindow()
 		{
-			var editWindow = new EditWikiList();
-			var view = editWindow.DataContext as EditWindowViewModel;
+			var editWindow = new EditSettings();
+			var view = editWindow.DataContext as SettingsViewModel;
 			view.Client = this.client;
-			view.KnownWikis = this.KnownWikis;
-			view.CurrentItem = this.KnownWikis.LastSelectedItem;
+			view.BotSettings = this.BotSettings;
+			view.CurrentItem = this.BotSettings.LastSelectedWiki;
 			editWindow.ShowDialog();
 
-			this.CurrentItem = this.KnownWikis.LastSelectedItem;
+			this.CurrentItem = this.BotSettings.LastSelectedWiki;
 		}
 
 		private void PauseJobs() => this.PauseJobs(!this.pauser.IsPaused);
@@ -390,7 +407,6 @@
 		private void Reset()
 		{
 			App.WpfYield();
-			this.ClearStatus();
 			this.OverallProgress = 0;
 			this.OverallProgressMax = 1;
 			this.UtcEta = null;

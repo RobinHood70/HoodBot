@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="Rules for WallE" Description="Custom Rules for WallE." ToolsVersion="15.0">
+  <Include Path="main.ruleset" Action="Default" />
+  <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
+    <Rule Id="CA1056" Action="None" />
+    <Rule Id="CA1716" Action="None" />
+    <Rule Id="CA1721" Action="None" />
+    <Rule Id="CA1726" Action="None" />
+  </Rules>
+</RuleSet>

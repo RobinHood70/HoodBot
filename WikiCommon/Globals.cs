@@ -161,7 +161,7 @@
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="nullable" /> is null.</exception>
 		public static void ThrowNull([ValidatedNotNull] object nullable, string name)
 		{
-			if (nullable == null)
+			if (nullable is null)
 			{
 				throw new ArgumentNullException(name);
 			}

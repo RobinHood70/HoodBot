@@ -167,6 +167,10 @@
 		/// <value>The language code.</value>
 		public string LanguageCode { get; set; }
 
+		/// <summary>Gets or sets the maximum length of get requests for a given site. Get requests that are longer than this will be sent as POST requests instead.</summary>
+		/// <value>The maximum length of get requests.</value>
+		public int MaximumGetLength { get; set; } = 8100;
+
 		/// <summary>Gets or sets the maximum size of the page set.</summary>
 		/// <value>The maximum size of the page set.</value>
 		/// <remarks>This should not normally need to be set, as the bot will adjust automatically as needed. However, if you know in advance that you will be logged in as a user with lower limits (typically anyone who isn't a bot or admin), then you can save some overhead by lowering this to 50, rather than the default 500.</remarks>
@@ -316,7 +320,7 @@
 				default:
 					var query = RequestVisitorUrl.Build(request);
 					var urib = new UriBuilder(request.Uri) { Query = query };
-					response = this.Client.Get(urib.Uri);
+					response = urib.Uri.OriginalString.Length < this.MaximumGetLength ? this.Client.Get(urib.Uri) : this.Client.Post(request.Uri, RequestVisitorUrl.Build(request));
 					break;
 			}
 

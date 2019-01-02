@@ -246,6 +246,7 @@
 
 		public void ReadStream(StreamReader stream)
 		{
+			ThrowNull(stream, nameof(stream));
 			do
 			{
 				var row = this.ReadRow(stream);

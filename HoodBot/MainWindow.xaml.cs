@@ -42,6 +42,10 @@
 			{
 				controlToAdd = new CheckBox() { IsChecked = (bool)parameter.Value };
 			}
+			//// else if (parameter.Attribute is JobParameterFileAttribute fileAttribute)
+			//// {
+			////	controlToAdd = new FileTextBox();
+			//// }
 			else if (typeof(IFormattable).IsAssignableFrom(valueType))
 			{
 				controlToAdd = new TextBox() { Text = (parameter.Value as IFormattable).ToString(), AcceptsReturn = false };

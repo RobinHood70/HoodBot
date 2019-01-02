@@ -129,11 +129,14 @@
   <data name="AvailableJobs" xml:space="preserve">
     <value>Available Jobs</value>
   </data>
+  <data name="BotDataFolder" xml:space="preserve">
+    <value>Data Folder:</value>
+  </data>
   <data name="DelayRequested" xml:space="preserve">
     <value>{0} delay requested for {1}. {2}</value>
   </data>
-  <data name="EditWikiList" xml:space="preserve">
-    <value>Edit Wiki List</value>
+  <data name="EditSettings" xml:space="preserve">
+    <value>Edit Settings</value>
   </data>
   <data name="Error" xml:space="preserve">
     <value>Error</value>

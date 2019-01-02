@@ -360,7 +360,7 @@
 			int retriesRemaining;
 			for (retriesRemaining = this.Retries; retriesRemaining >= 0; retriesRemaining--)
 			{
-				// Do not try to optiimize this out of the loop. A new request must be created every time or else the response returned will be the same response as the previous loop.
+				// Do not try to optimize this out of the loop. A new request must be created every time or else the response returned will be the same response as the previous loop.
 				var request = this.CreateRequest(uri, method);
 				if (postData?.Length > 0)
 				{

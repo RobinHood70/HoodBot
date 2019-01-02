@@ -257,7 +257,7 @@
 			ThrowNull(name, nameof(name));
 			ThrowNull(values, nameof(values));
 			var newKey = this.Prefix + name;
-			if (this.TryGetValue(newKey, out IParameter param))
+			if (this.TryGetValue(newKey, out var param))
 			{
 				if (!(param is PipedParameter piped))
 				{

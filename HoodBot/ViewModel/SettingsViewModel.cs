@@ -7,13 +7,14 @@
 	using RobinHood70.WallE.Clients;
 	using static RobinHood70.HoodBot.Properties.Resources;
 
-	public class EditWindowViewModel : Notifier, IWikiInfo, IEditableObject
+	public class SettingsViewModel : Notifier, IWikiInfo, IEditableObject
 	{
 		#region Fields
 		private Uri api;
+		private string botDataFolder;
+		private BotSettings botSettings;
 		private WikiInfo currentItem;
 		private string displayName;
-		private WikiList knownWikis;
 		private string password;
 		private int readThrottling;
 		private string userName;
@@ -31,6 +32,18 @@
 
 		public RelayCommand<string> AutoFill => new RelayCommand<string>(this.Fill);
 
+		public string BotDataFolder
+		{
+			get => this.botDataFolder;
+			set => this.Set(ref this.botDataFolder, value, nameof(this.BotDataFolder));
+		}
+
+		public BotSettings BotSettings
+		{
+			get => this.botSettings;
+			set => this.Set(ref this.botSettings, value, nameof(this.BotSettings));
+		}
+
 		public IMediaWikiClient Client { get; set; }
 
 		public WikiInfo CurrentItem
@@ -47,12 +60,6 @@
 		{
 			get => this.displayName;
 			set => this.Set(ref this.displayName, value, nameof(this.DisplayName));
-		}
-
-		public WikiList KnownWikis
-		{
-			get => this.knownWikis;
-			set => this.Set(ref this.knownWikis, value, nameof(this.KnownWikis));
 		}
 
 		public string Password
@@ -105,12 +112,12 @@
 			if (wikiInfo == null)
 			{
 				wikiInfo = new WikiInfo();
-				this.KnownWikis.Wikis.Add(wikiInfo);
+				this.BotSettings.Wikis.Add(wikiInfo);
 			}
 
 			CopyWikiInfo(this, wikiInfo);
 			this.currentItem = wikiInfo;
-			this.KnownWikis.Save();
+			this.BotSettings.Save();
 		}
 		#endregion
 
@@ -131,7 +138,7 @@
 				CopyWikiInfo(wikiInfo, this);
 			}
 
-			this.KnownWikis.UpdateLastSelected(wikiInfo);
+			this.BotSettings.UpdateLastSelected(wikiInfo);
 		}
 		#endregion
 
@@ -194,7 +201,7 @@
 		{
 			if (this.CurrentItem != null)
 			{
-				this.KnownWikis.Remove(this.CurrentItem);
+				this.BotSettings.RemoveWiki(this.CurrentItem);
 			}
 		}
 		#endregion

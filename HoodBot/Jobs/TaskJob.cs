@@ -26,10 +26,7 @@
 				}
 			}
 		}
-		#endregion
 
-		#region Destructors
-		~TaskJob() => this.taskProgressIntercept.ProgressChanged -= this.TaskProgressIntercept_ProgressChanged;
 		#endregion
 
 		#region Protected Properties

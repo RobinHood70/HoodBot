@@ -17,13 +17,25 @@
 			AsyncInfo asyncInfo,
 			IEnumerable<string> templateNames,
 			[JobParameter(DefaultValue = true)] bool respectRedirects,
-			[JobParameterFile(Overwrite = true)] string location)
+			[JobParameterFile(Overwrite = true, DefaultValue = @"%BotData%\%templateName%.txt")] string location)
 			: base(site, asyncInfo)
 		{
+			var tempNames = new List<string>();
+			foreach (var templateName in templateNames)
+			{
+				tempNames.AddRange(templateName.Split('|'));
+			}
+
 			var templates = new TitleCollection(this.Site)
 			{
-				{ MediaWikiNamespaces.Template, templateNames }
+				{ MediaWikiNamespaces.Template, tempNames }
 			};
+
+			if (templates.Count > 0)
+			{
+				location = location?.Replace("%templateName%", templates[0].PageName);
+			}
+
 			var redirectList = new TitleCollection(this.Site);
 			if (respectRedirects)
 			{
@@ -73,10 +85,11 @@
 					try
 					{
 						this.WriteFile(allTemplates);
+						this.StatusWriteLine("File saved to " + this.location);
 					}
 					catch (System.IO.IOException e)
 					{
-						this.StatusWriteLine("Couldn't save file!");
+						this.StatusWriteLine("Couldn't save file to " + this.location);
 						this.StatusWriteLine(e.Message);
 					}
 				}

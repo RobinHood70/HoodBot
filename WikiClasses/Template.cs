@@ -12,6 +12,7 @@
 	using static RobinHood70.WikiCommon.Globals;
 	using static RobinHood70.WikiClasses.Properties.Resources;
 
+	// TODO: Investigate why trailing empty parameters are being removed. Copy back to HnB.
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
 	[SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Template is a more meaningful name.")]
 	public class Template : IList<Parameter>

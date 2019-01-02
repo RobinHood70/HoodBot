@@ -79,7 +79,7 @@
 		{
 			// Behaviour here mirrors that of List<T>, which only removes the first instance of item, not all instances.
 			var comparer = this.Comparer;
-			foreach (T otherItem in this)
+			foreach (var otherItem in this)
 			{
 				if (comparer.Equals(item, otherItem))
 				{

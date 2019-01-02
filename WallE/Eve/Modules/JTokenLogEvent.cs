@@ -93,53 +93,47 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Private Methods
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "Complexity warning is a lie. To be fixed in an upcoming Roslyn update.")]
 		private static Dictionary<string, object> GetExtraData(string type, string action, Dictionary<string, object> values)
 		{
 			// Used to be a switch, but converted to if/else if block because that's what happens internally anyway, and CA1502 was falsely triggering with bizarrely high complexities on the string switch.
 			var dict = new Dictionary<string, object>();
-			if (type == "block")
+			switch (type)
 			{
-				ExtraDataBlock(dict, values, action);
-			}
-			else if (type == "delete" || type == "suppress")
-			{
-				ExtraDataDelete(dict, values, action);
-			}
-			else if (type == "merge")
-			{
-				ExtraDataMerge(dict, values);
-			}
-			else if (type == "move")
-			{
-				ExtraDataMove(dict, values);
-			}
-			else if (type == "newusers")
-			{
-				ExtraDataNewUsers(dict, values);
-			}
-			else if (type == "pagelang")
-			{
-				ExtraDataPageLanguage(dict, values);
-			}
-			else if (type == "patrol")
-			{
-				ExtraDataPatrol(dict, values);
-			}
-			else if (type == "protect")
-			{
-				ExtraDataProtect(dict, values, action);
-			}
-			else if (type == "rights")
-			{
-				ExtraDataRights(dict, values);
-			}
-			else if (type == "upload")
-			{
-				ExtraDataUpload(dict, values);
-			}
-			else
-			{
-				dict = values;
+				case "block":
+					ExtraDataBlock(dict, values, action);
+					break;
+				case "delete":
+				case "suppress":
+					ExtraDataDelete(dict, values, action);
+					break;
+				case "merge":
+					ExtraDataMerge(dict, values);
+					break;
+				case "move":
+					ExtraDataMove(dict, values);
+					break;
+				case "newusers":
+					ExtraDataNewUsers(dict, values);
+					break;
+				case "pagelang":
+					ExtraDataPageLanguage(dict, values);
+					break;
+				case "patrol":
+					ExtraDataPatrol(dict, values);
+					break;
+				case "protect":
+					ExtraDataProtect(dict, values, action);
+					break;
+				case "rights":
+					ExtraDataRights(dict, values);
+					break;
+				case "upload":
+					ExtraDataUpload(dict, values);
+					break;
+				default:
+					dict = values;
+					break;
 			}
 
 			return dict;

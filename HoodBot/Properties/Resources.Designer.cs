@@ -97,6 +97,15 @@ namespace RobinHood70.HoodBot.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Data Folder:.
+        /// </summary>
+        public static string BotDataFolder {
+            get {
+                return ResourceManager.GetString("BotDataFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} delay requested for {1}. {2}.
         /// </summary>
         public static string DelayRequested {
@@ -106,11 +115,11 @@ namespace RobinHood70.HoodBot.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Edit Wiki List.
+        ///   Looks up a localized string similar to Edit Settings.
         /// </summary>
-        public static string EditWikiList {
+        public static string EditSettings {
             get {
-                return ResourceManager.GetString("EditWikiList", resourceCulture);
+                return ResourceManager.GetString("EditSettings", resourceCulture);
             }
         }
         

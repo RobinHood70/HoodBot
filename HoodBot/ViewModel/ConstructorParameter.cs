@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 	using System.Reflection;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using static RobinHood70.WikiCommon.Globals;
@@ -46,15 +47,9 @@
 		#endregion
 
 		#region Public Methods
-		public bool Equals(ConstructorParameter other)
-		{
-			if (other == null)
-			{
-				return false;
-			}
-
-			return this.Label == other.Label && this.Name == other.Name && this.Type == other.Type && this.Value == other.Value;
-		}
+		public bool Equals(ConstructorParameter other) => other == null
+			? false
+			: this.Label == other.Label && this.Name == other.Name && this.Type == other.Type && this.Value == other.Value;
 		#endregion
 
 		#region Public Override Methods
@@ -86,7 +81,7 @@
 				if (char.IsUpper(c) && !lastWasCapital)
 				{
 					words.Add(word);
-					word = c.ToString();
+					word = c.ToString(CultureInfo.InvariantCulture);
 					lastWasCapital = true;
 					didWordBreak = true;
 				}
