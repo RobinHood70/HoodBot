@@ -37,7 +37,7 @@
 				{
 					try
 					{
-						csvFile.ReadStream(stream);
+						csvFile.ReadText(stream);
 						csvFile.HasHeader = hasHeader;
 
 						Debug.WriteLine("Header: " + (csvFile.HeaderRow == null ? "<null>" : string.Join(",", csvFile.HeaderRow)));

@@ -3,8 +3,10 @@
 	using System.Collections;
 	using System.Collections.Generic;
 
+	/// <summary>Represents a single row in a <see cref="CsvFile"/>.</summary>
+	/// <remarks>Once created, the number of values in a row may not be changed.</remarks>
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Not intuitive to refer to this as a collection.")]
-	public class CsvRow : IList<string>, IReadOnlyList<string>, IReadOnlyCollection<string>, IEnumerable<string>
+	public class CsvRow : IReadOnlyList<string>, IReadOnlyCollection<string>, IEnumerable<string>
 	{
 		#region Fields
 		private readonly IReadOnlyDictionary<string, int> nameMap;
@@ -12,18 +14,31 @@
 		#endregion
 
 		#region Constructors
+		internal CsvRow(IReadOnlyDictionary<string, int> nameMap)
+		{
+			this.fields = new List<string>(nameMap.Count);
+			for (var i = 0; i < nameMap.Count; i++)
+			{
+				this.fields[i] = string.Empty;
+			}
+
+			this.nameMap = nameMap;
+		}
+
 		internal CsvRow(IEnumerable<string> fields, IReadOnlyDictionary<string, int> nameMap)
 		{
 			if (nameMap?.Count > 0)
 			{
-				var newFields = new List<string>(nameMap.Count);
-				newFields.AddRange(fields);
-				while (newFields.Count < nameMap.Count)
+				this.fields = new List<string>(nameMap.Count);
+				foreach (var field in fields)
 				{
-					newFields.Add(string.Empty);
+					this.fields.Add(field);
 				}
 
-				this.fields = newFields;
+				for (var i = this.fields.Count; i < nameMap.Count; i++)
+				{
+					this.fields[i] = string.Empty;
+				}
 			}
 			else
 			{
@@ -35,18 +50,26 @@
 		#endregion
 
 		#region Public Properties
-		public int Count => this.fields.Count;
 
-		public bool IsReadOnly { get; } = false;
+		/// <summary>Gets the number of fields in the row.</summary>
+		public int Count => this.fields.Count;
 		#endregion
 
 		#region Public Indexers
+
+		/// <summary>Gets or sets the field (as a <see cref="string"/>) at the specified index.</summary>
+		/// <param name="index">The index of the field.</param>
+		/// <returns>The field value, formatted as a <see cref="string"/>.</returns>
 		public string this[int index]
 		{
 			get => this.fields[index];
 			set => this.fields[index] = value;
 		}
 
+		/// <summary>Gets or sets the <see cref="string"/> with the specified field name.</summary>
+		/// <param name="fieldName">Name of the field.</param>
+		/// <returns>The field value, formatted as a <see cref="string"/>.</returns>
+		/// <exception cref="KeyNotFoundException">Thrown when there are no columns with the provided field name.</exception>
 		public string this[string fieldName]
 		{
 			get
@@ -72,23 +95,10 @@
 		#endregion
 
 		#region Public Methods
-		public void Add(string item) => this.fields.Add(item);
 
-		public void Clear() => this.fields.Clear();
-
-		public bool Contains(string item) => this.fields.Contains(item);
-
-		public void CopyTo(string[] array, int arrayIndex) => this.fields.CopyTo(array, arrayIndex);
-
+		/// <summary>Returns an enumerator that iterates through the collection.</summary>
+		/// <returns>An enumerator that can be used to iterate through the collection.</returns>
 		public IEnumerator<string> GetEnumerator() => this.fields.GetEnumerator();
-
-		public int IndexOf(string item) => this.fields.IndexOf(item);
-
-		public void Insert(int index, string item) => this.fields.Insert(index, item);
-
-		public bool Remove(string item) => this.fields.Remove(item);
-
-		public void RemoveAt(int index) => this.fields.RemoveAt(index);
 
 		IEnumerator IEnumerable.GetEnumerator() => this.fields.GetEnumerator();
 		#endregion
