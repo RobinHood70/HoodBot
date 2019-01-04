@@ -9,6 +9,11 @@
 	// This is a "dumb" parser class that is rather convoluted at times, but is smaller and (from a certain POV) simpler than building a full-fledged parse tree.
 	public class TemplateParser
 	{
+		#region Private Constants
+		private const string ParameterSeparators = "|=";
+		private const string PipeString = "|";
+		#endregion
+
 		#region Fields
 		private static Pair[] searchStrings =
 		{
@@ -21,11 +26,7 @@
 		#endregion
 
 		#region Constructors
-		public TemplateParser(string text)
-		{
-			this.Index = 0;
-			this.Text = text;
-		}
+		public TemplateParser(string text) => this.Text = text;
 		#endregion
 
 		#region Private Enumerations
@@ -40,7 +41,7 @@
 		#endregion
 
 		#region Public Properties
-		public int Index { get; private set; }
+		public int Index { get; private set; } = 0;
 
 		public string Text { get; }
 		#endregion
@@ -49,7 +50,7 @@
 		public void ParseIntoTemplate(Template template, bool ignoreWhiteSpaceRules)
 		{
 			ThrowNull(template, nameof(template));
-			this.GetString("|", template.FullName);
+			this.GetString(PipeString, template.FullName);
 			while (this.Index < this.Text.Length)
 			{
 				template.Add(this.ParseParameter(ignoreWhiteSpaceRules));
@@ -64,7 +65,7 @@
 					string key;
 					if (!parameter.Anonymous)
 					{
-						key = parameter.FullName.LeadingWhiteSpace + "|" + parameter.FullName.TrailingWhiteSpace;
+						key = parameter.FullName.LeadingWhiteSpace + PipeString + parameter.FullName.TrailingWhiteSpace;
 						if (defaultNames.ContainsKey(key))
 						{
 							defaultNames[key]++;
@@ -75,7 +76,7 @@
 						}
 					}
 
-					key = parameter.FullValue.LeadingWhiteSpace + "|" + parameter.FullValue.TrailingWhiteSpace;
+					key = parameter.FullValue.LeadingWhiteSpace + PipeString + parameter.FullValue.TrailingWhiteSpace;
 					if (defaultValues.ContainsKey(key))
 					{
 						defaultValues[key]++;
@@ -108,29 +109,22 @@
 		#endregion
 
 		#region Private Methods
-		private TemplateString GetString(string delimiters)
+		private TemplateString GetString(string delimiters, TemplateString templateString)
 		{
-			var retval = new TemplateString();
-			this.GetString(delimiters, retval);
-			return retval;
-		}
-
-		private void GetString(string delimiters, TemplateString templateString)
-		{
+			// TODO: Re-examine - this got kludgey after fixing empty last parameter bug.
 			var builder = new StringBuilder(20);
-			var foundDelimiter = this.Index >= this.Text.Length;
+			var foundDelimiter = !(this.Index < this.Text.Length);
 			while (!foundDelimiter)
 			{
-				var nextToken = this.GetToken();
-				while (this.Index < this.Text.Length && nextToken.IsWhiteSpace)
+				var nextToken = this.PeekToken(this.Index);
+				while (nextToken.IsWhiteSpace && this.Index < this.Text.Length)
 				{
+					this.Index += nextToken.Text.Length;
 					builder.Append(nextToken.Text);
-					nextToken = this.GetToken();
-				}
-
-				if (nextToken.IsWhiteSpace)
-				{
-					builder.Append(nextToken.Text);
+					if (this.Index < this.Text.Length)
+					{
+						nextToken = this.PeekToken(this.Index);
+					}
 				}
 
 				if (builder.Length > 0)
@@ -140,27 +134,31 @@
 				}
 
 				var startOfWhiteSpace = 0;
-				foundDelimiter = delimiters.IndexOf(nextToken.Text[0]) != -1;
-				while (this.Index < this.Text.Length && !foundDelimiter)
+				if (this.Index < this.Text.Length)
 				{
-					builder.Append(nextToken.Text);
-					if (!nextToken.IsWhiteSpace)
-					{
-						startOfWhiteSpace = builder.Length;
-					}
-
-					nextToken = this.GetToken();
 					foundDelimiter = delimiters.IndexOf(nextToken.Text[0]) != -1;
-				}
-
-				if (!foundDelimiter)
-				{
-					builder.Append(nextToken.Text);
-					if (!nextToken.IsWhiteSpace)
+					while (!foundDelimiter)
 					{
-						startOfWhiteSpace = builder.Length;
-					}
+						builder.Append(nextToken.Text);
+						if (!nextToken.IsWhiteSpace)
+						{
+							startOfWhiteSpace = builder.Length;
+						}
 
+						this.Index += nextToken.Text.Length;
+						if (this.Index < this.Text.Length)
+						{
+							nextToken = this.PeekToken(this.Index);
+							foundDelimiter = delimiters.IndexOf(nextToken.Text[0]) != -1;
+						}
+						else
+						{
+							foundDelimiter = true;
+						}
+					}
+				}
+				else
+				{
 					foundDelimiter = true;
 				}
 
@@ -181,57 +179,19 @@
 					}
 				}
 			}
-		}
 
-		private Token GetToken()
-		{
-			var letter = this.Text.Substring(this.Index, 1);
-			if (char.IsWhiteSpace(letter[0]))
-			{
-				this.Index++;
-				return new Token(letter, true);
-			}
-
-			// Traditional loop rather than foreach for speed, since GetToken is called repeatedly.
-			for (var i = 0; i < searchStrings.Length; i++)
-			{
-				var pair = searchStrings[i];
-				var startLength = pair.Start.Length;
-				if (string.Compare(pair.Start, 0, this.Text, this.Index, startLength, StringComparison.Ordinal) == 0)
-				{
-					var index = this.Index;
-					this.Index += startLength;
-					var match = false;
-					do
-					{
-						this.GetToken();
-						match = string.Compare(pair.Terminator, 0, this.Text, this.Index, pair.Terminator.Length, StringComparison.Ordinal) == 0;
-					}
-					while (this.Index <= (this.Text.Length - pair.Terminator.Length) && !match);
-
-					if (match)
-					{
-						this.Index += pair.Terminator.Length;
-						return new Token(this.Text.Substring(index, this.Index - index), pair.CountsAsWhiteSpace);
-					}
-					else
-					{
-						this.Index = index;
-					}
-				}
-			}
-
-			this.Index++;
-			return new Token(letter, false);
+			return templateString;
 		}
 
 		private Parameter ParseParameter(bool ignoreWhiteSpaceRules)
 		{
-			var valueString = this.GetString("|=");
-			if (this.Index > 0 && this.Text[this.Index - 1] == '=')
+			this.Index++; // We are always sitting on a pipe when this is called, so skip past it.
+			var valueString = this.GetString(ParameterSeparators, new TemplateString());
+			if (this.Index < this.Text.Length && this.Text[this.Index] == '=')
 			{
 				var nameString = valueString;
-				valueString = this.GetString("|");
+				this.Index++; // We are now guaranteed to be sitting on an equals sign, so skip past that.
+				valueString = this.GetString(PipeString, new TemplateString());
 				return new Parameter(nameString, valueString);
 			}
 
@@ -242,6 +202,47 @@
 
 			// Unnamed parameter, and we're not ignoring rules, so stuff all WhiteSpace back into the value.
 			return new Parameter(valueString.Build());
+		}
+
+		private Token PeekToken(int index)
+		{
+			var letter = this.Text[index];
+			if (char.IsWhiteSpace(letter))
+			{
+				return new Token(letter.ToString(), true);
+			}
+
+			// Traditional loop rather than foreach for speed, since GetToken is called repeatedly.
+			for (var i = 0; i < searchStrings.Length; i++)
+			{
+				var pair = searchStrings[i];
+				var startLength = pair.Start.Length;
+				if (string.Compare(pair.Start, 0, this.Text, index, startLength, StringComparison.Ordinal) == 0)
+				{
+					var indexEnd = index + startLength;
+					if (pair.CountsAsWhiteSpace)
+					{
+						indexEnd = this.Text.IndexOf(pair.Terminator, indexEnd, StringComparison.Ordinal);
+						return indexEnd == -1 ? new Token(this.Text.Substring(index), false) : new Token(this.Text.Substring(index, indexEnd - index + pair.Terminator.Length), pair.CountsAsWhiteSpace);
+					}
+
+					var match = false;
+					while (indexEnd < (this.Text.Length - pair.Terminator.Length) && !match)
+					{
+						var nextToken = this.PeekToken(indexEnd);
+						indexEnd += nextToken.Text.Length;
+						match = string.Compare(pair.Terminator, 0, this.Text, indexEnd, pair.Terminator.Length, StringComparison.Ordinal) == 0;
+					}
+
+					if (match)
+					{
+						indexEnd += pair.Terminator.Length;
+						return new Token(this.Text.Substring(index, indexEnd - index), pair.CountsAsWhiteSpace);
+					}
+				}
+			}
+
+			return new Token(letter.ToString(), false);
 		}
 		#endregion
 
@@ -275,6 +276,8 @@
 			public string Text { get; }
 
 			public bool IsWhiteSpace { get; }
+
+			public override string ToString() => this.Text;
 		}
 		#endregion
 	}

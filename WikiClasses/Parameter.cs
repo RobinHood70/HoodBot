@@ -95,20 +95,30 @@
 		#endregion
 
 		#region Public Methods
-		public void Anonymize(string nameIfNeeded)
+		public bool Anonymize(string nameIfNeeded)
 		{
 			if (equalsFinder.Replace(this.Value, string.Empty).Contains("="))
 			{
-				// Can't anonymize because it contains an equals sign, so number it and force number to display instead.
-				this.Name = nameIfNeeded;
-				this.Anonymous = false;
+				// Can't anonymize because it contains an equals sign, so use provided label instead.
+				if (this.Name != nameIfNeeded || this.Anonymous)
+				{
+					this.Rename(nameIfNeeded);
+					this.Anonymous = false;
+					return true;
+				}
 			}
 			else
 			{
-				this.Anonymous = true;
-				this.FullValue.LeadingWhiteSpace = string.Empty;
-				this.FullValue.TrailingWhiteSpace = string.Empty;
+				if (!this.Anonymous || (this.FullValue.LeadingWhiteSpace?.Length + this.FullValue.TrailingWhiteSpace?.Length) > 0)
+				{
+					this.Anonymous = true;
+					this.FullValue.LeadingWhiteSpace = string.Empty;
+					this.FullValue.TrailingWhiteSpace = string.Empty;
+					return true;
+				}
 			}
+
+			return false;
 		}
 
 		public void Build(StringBuilder builder)
@@ -125,6 +135,19 @@
 		public Parameter Copy() => new Parameter(this.FullName.Copy(), this.FullValue.Copy(), this.Anonymous);
 
 		public void Escape() => this.Value = Escape(this.Value);
+
+		public bool Rename(string newName)
+		{
+			if (this.Name != newName)
+			{
+				this.Anonymous = false;
+				this.FullName.Value = newName;
+
+				return true;
+			}
+
+			return false;
+		}
 
 		public void Trim()
 		{

@@ -12,7 +12,6 @@
 	using static RobinHood70.WikiCommon.Globals;
 	using static RobinHood70.WikiClasses.Properties.Resources;
 
-	// TODO: Investigate why trailing empty parameters are being removed. Copy back to HnB.
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
 	[SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Template is a more meaningful name.")]
 	public class Template : IList<Parameter>
@@ -177,7 +176,9 @@
 
 		public static Regex Find(string regexBefore, IEnumerable<string> names, string regexAfter) => Find(regexBefore, names, regexAfter, RegexOptions.None, 10);
 
-		public static Regex Find(string regexBefore, IEnumerable<string> names, string regexAfter, RegexOptions options, int findTimeout) => new Regex(InternalRegexText(regexBefore, RegexName(names), regexAfter), options, TimeSpan.FromSeconds(findTimeout));
+		public static Regex Find(string regexBefore, IEnumerable<string> names, string regexAfter, RegexOptions options, int findTimeout) => FindRaw(regexBefore, RegexName(names), regexAfter, options, findTimeout);
+
+		public static Regex FindRaw(string regexBefore, string regexNames, string regexAfter, RegexOptions options, int findTimeout) => new Regex(InternalRegexText(regexBefore, regexNames, regexAfter), options, TimeSpan.FromSeconds(findTimeout));
 
 		public static Template FindTemplate(string name, string text)
 		{
@@ -306,18 +307,44 @@
 			return parameter;
 		}
 
-		public void Anonymize(string name, int position)
+		public bool Anonymize(string name, int position)
 		{
+			var retval = false;
 			var param = this[name];
 			if (param != null)
 			{
-				param.Anonymize(position.ToStringInvariant());
-				var newPos = this.GetAnonymousPosition(param);
-				if (newPos != position)
+				retval = param.Anonymize(position.ToStringInvariant());
+				if (retval)
 				{
-					throw new InvalidOperationException(CurrentCulture(AnonymizeBad, param.Name, newPos, position));
+					var newPos = this.GetAnonymousPosition(param);
+					if (newPos != position)
+					{
+						throw new InvalidOperationException(Invariant($"Anonymizing parameter {param.Name} put it into position {newPos} instead of {position}."));
+					}
 				}
 			}
+
+			return retval;
+		}
+
+		public bool Anonymize(string name, int position, string label)
+		{
+			var retval = false;
+			var param = this[name];
+			if (param != null)
+			{
+				retval |= param.Anonymize(label);
+				if (param.Anonymous)
+				{
+					var newPos = this.GetAnonymousPosition(param);
+					if (newPos != position)
+					{
+						throw new InvalidOperationException(CurrentCulture(AnonymizeBad, param.Name, newPos, position));
+					}
+				}
+			}
+
+			return retval;
 		}
 
 		public void Build(StringBuilder builder)
@@ -416,6 +443,8 @@
 				}
 			}
 		}
+
+		public Parameter FindFirst(string names) => this.FindFirst(names?.Split('|'));
 
 		public Parameter FindFirst(params string[] names)
 		{
@@ -597,13 +626,16 @@
 
 		public bool Remove(Parameter item) => this.parameters.Remove(item);
 
-		public void Remove(params string[] names)
+		public bool Remove(params string[] names)
 		{
 			ThrowNull(names, nameof(names));
+			var retval = false;
 			foreach (var name in names)
 			{
-				this.Remove(this[name]);
+				retval |= this.Remove(this[name]);
 			}
+
+			return retval;
 		}
 
 		public void RemoveAt(int index) => this.parameters.RemoveAt(index);
@@ -679,21 +711,23 @@
 			}
 		}
 
-		public void RenameParameter(string from, string to) => this.RenameParameter(this[from], to);
+		public bool RenameParameter(string from, string to) => this.RenameParameter(this[from], to);
 
-		public void RenameParameter(Parameter from, string to)
+		public bool RenameParameter(Parameter from, string to)
 		{
 			if (from != null)
 			{
 				if (this[to] == null)
 				{
-					from.Name = to;
+					return from.Rename(to);
 				}
 				else
 				{
 					throw new InvalidOperationException(CurrentCulture(ParameterExists, to));
 				}
 			}
+
+			return false;
 		}
 
 		public void Sort(params string[] sortOrder)
@@ -742,6 +776,7 @@
 		{
 			var retval = string.Concat(
 				@"(?<!{)",
+				@"(?<template>",
 				@"{{\s*",
 				escapedName,
 				@"(\s|<)*",
@@ -755,7 +790,7 @@
 				@")*",
 				@"(?(Depth)(?!))",
 				@")*",
-				@"\s*}}");
+				@"\s*}})");
 
 			if (regexBefore != null)
 			{
