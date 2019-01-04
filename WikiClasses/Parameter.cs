@@ -6,34 +6,50 @@
 	using System.Text.RegularExpressions;
 	using static RobinHood70.WikiCommon.Globals;
 
+	/// <summary>Represents a template parameter.</summary>
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
 	public class Parameter
 	{
 		#region Static Fields
-		private static Regex equalsFinder = new Regex(@"(&#x3b|&#61;|\{\{=}}|<nowiki>=</nowiki>)", RegexOptions.IgnoreCase);
+		private static Regex equalsFinder = new Regex(@"(&#(x3b|61);|\{\{=}}|<nowiki>=</nowiki>)", RegexOptions.IgnoreCase);
 		#endregion
 
 		#region Constructors
+
+		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
+		/// <param name="value">The parameter value.</param>
 		public Parameter(string value)
 			: this(new TemplateString(), new TemplateString(value), true)
 		{
 		}
 
+		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
+		/// <param name="value">The full parameter value, including any leading and trailing whitespace.</param>
 		public Parameter(TemplateString value)
 			: this(new TemplateString(), value, true)
 		{
 		}
 
+		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
+		/// <param name="name">The parameter name.</param>
+		/// <param name="value">The parameter value.</param>
 		public Parameter(string name, string value)
 			: this(new TemplateString(name), new TemplateString(value), name.Length == 0)
 		{
 		}
 
+		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
+		/// <param name="name">The full parameter name, including any leading and trailing whitespace.</param>
+		/// <param name="value">The full parameter value, including any leading and trailing whitespace.</param>
 		public Parameter(TemplateString name, TemplateString value)
 			: this(name, value, (name?.Value.Length ?? 0) == 0)
 		{
 		}
 
+		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
+		/// <param name="name">The full parameter name, including any leading and trailing whitespace.</param>
+		/// <param name="value">The full parameter value, including any leading and trailing whitespace.</param>
+		/// <param name="anonymous">Whether the parameter should be treated as anonymous. This overrides automatic detection based on name.</param>
 		public Parameter(TemplateString name, TemplateString value, bool anonymous)
 		{
 			ThrowNull(name, nameof(name));
@@ -45,18 +61,32 @@
 		#endregion
 
 		#region Public Properties
+
+		/// <summary>Gets a value indicating whether this <see cref="Parameter"/> is anonymous.</summary>
+		/// <value>
+		///   <c>true</c> if anonymous; otherwise, <c>false</c>.</value>
 		public bool Anonymous { get; private set; }
 
+		/// <summary>Gets the full name.</summary>
+		/// <value>The full parameter name, including any leading or trailing whitespace.</value>
 		public TemplateString FullName { get; internal set; }
 
+		/// <summary>Gets the full value.</summary>
+		/// <value>The full parameter value, including any leading or trailing whitespace.</value>
 		public TemplateString FullValue { get; internal set; }
 
+		/// <summary>Gets or sets the name.</summary>
+		/// <value>The parameter name.</value>
+		/// <remarks>This is a convenience property, equivalent to <c>this.FullName.Value</c>.</remarks>
 		public string Name
 		{
 			get => this.FullName.Value;
 			set => this.FullName.Value = value;
 		}
 
+		/// <summary>Gets or sets the value.</summary>
+		/// <value>The parameter value.</value>
+		/// <remarks>This is a convenience property, equivalent to <c>this.FullValue.Value</c>.</remarks>
 		public string Value
 		{
 			get => this.FullValue.Value;
@@ -87,14 +117,30 @@
 		#endregion
 
 		#region Public Static Methods
+
+		/// <summary>Escapes the specified text.</summary>
+		/// <param name="text">The text to escape.</param>
+		/// <returns>The same as the input value, with <i>all</i> equals signs replaced by the HTML entity <c>&#61;</c>.</returns>
+		/// <remarks>This is currently a dumb replace. If you need something more intelligent, for example something that handles equals signs in embedded templates and image links, you will have to implement it yourself.</remarks>
 		public static string Escape(string text) => text?.Replace("=", "&#61;");
 
-		public static bool IsNullOrEmpty(Parameter faction) => faction == null || faction.Value.Length == 0;
+		/// <summary>Determines whether the provided parameter is null or has an empty value.</summary>
+		/// <param name="parameter">The parameter.</param>
+		/// <returns><c>true</c> if the parameter is null or its value is an empty string; otherwise, <c>false</c>.</returns>
+		public static bool IsNullOrEmpty(Parameter parameter) => parameter == null || parameter.Value.Length == 0;
 
+		/// <summary>Unescapes the specified text, converting common equivalents of equals signs to an actual equals sign.</summary>
+		/// <param name="text">The text to unescape.</param>
+		/// <returns>The same as the input value, with any of the following converted back to an equals sign: <c>&#x3b;</c>, <c>&#61;</c>, <c>{{=}}</c>, <c>&lt;nowiki>=&lt;/nowiki></c>.</returns>
 		public static string Unescape(string text) => equalsFinder.Replace(text, "=");
 		#endregion
 
 		#region Public Methods
+
+		/// <summary>Anonymizes the specified parameter.</summary>
+		/// <param name="nameIfNeeded">The name for the parameter if anonymization is not possible.</param>
+		/// <returns><c>true</c> if any changes were made to the parameter (whether anonymization or renaming); otherwise <c>false</c>.</returns>
+		/// <remarks>The name provided will override the current name, if one exists, for consistency of results. For example, if you are anonymizing the "image" parameter to be the first unnamed parameter, but it contains an unescaped equals sign, you can provide "1" as the parameter to ensure that the name "image" is changed, even if a name is still required.</remarks>
 		public bool Anonymize(string nameIfNeeded)
 		{
 			if (equalsFinder.Replace(this.Value, string.Empty).Contains("="))
@@ -121,6 +167,8 @@
 			return false;
 		}
 
+		/// <summary>Builds the parameter text using the specified builder.</summary>
+		/// <param name="builder">The builder.</param>
 		public void Build(StringBuilder builder)
 		{
 			if (!this.Anonymous)
@@ -132,10 +180,17 @@
 			this.FullValue.Build(builder);
 		}
 
+		/// <summary>Creates a deep copy of the parameter.</summary>
+		/// <returns>A second parameter with the same property values.</returns>
 		public Parameter Copy() => new Parameter(this.FullName.Copy(), this.FullValue.Copy(), this.Anonymous);
 
+		/// <summary>Escapes the parameter value as per the static <see cref="Escape(string)"/> method.</summary>
 		public void Escape() => this.Value = Escape(this.Value);
 
+		/// <summary>Renames the parameter to the specified name.</summary>
+		/// <param name="newName">The new name.</param>
+		/// <returns><c>true</c> if the parameter name changed; otherwise <c>false</c>.</returns>
+		/// <remarks>Renaming a parameter sets <see cref="Anonymous"/> to false unless the new name is identical to the old one.</remarks>
 		public bool Rename(string newName)
 		{
 			if (this.Name != newName)
@@ -149,17 +204,37 @@
 			return false;
 		}
 
+		/// <summary>Trims both the name and value of the parameter.</summary>
 		public void Trim()
+		{
+			this.TrimName();
+			this.TrimValue();
+		}
+
+		/// <summary>Trims the parameter name.</summary>
+		public void TrimName()
+		{
+			this.FullName.LeadingWhiteSpace = string.Empty;
+			this.FullName.TrailingWhiteSpace = string.Empty;
+			this.FullName.Value = this.FullValue.Value.Trim();
+		}
+
+		/// <summary>Trims the parameter value.</summary>
+		public void TrimValue()
 		{
 			this.FullValue.LeadingWhiteSpace = string.Empty;
 			this.FullValue.TrailingWhiteSpace = string.Empty;
 			this.FullValue.Value = this.FullValue.Value.Trim();
 		}
 
+		/// <summary>Unescapes the parameter value as per the static <see cref="Unescape(string)"/> method.</summary>
 		public void Unescape() => this.Value = Unescape(this.Value);
 		#endregion
 
 		#region Public Override Methods
+
+		/// <summary>Converts the parameter to&nbsp;its equivalent wiki text.</summary>
+		/// <returns>A <see cref="string"/> that represents this instance.</returns>
 		public override string ToString()
 		{
 			if (this.Anonymous)

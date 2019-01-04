@@ -574,7 +574,7 @@
 				{
 					if (anonsPerLine == -1)
 					{
-						param.Trim();
+						param.TrimValue();
 					}
 					else if (anonsPerLine > 0)
 					{
@@ -596,7 +596,7 @@
 						}
 						else
 						{
-							param.Trim();
+							param.TrimValue();
 						}
 					}
 				}
