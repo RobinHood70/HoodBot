@@ -7,6 +7,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public class GetTemplateUsage : TaskJob
 	{
@@ -20,6 +21,8 @@
 			[JobParameterFile(Overwrite = true, DefaultValue = @"%BotData%\%templateName%.txt")] string location)
 			: base(site, asyncInfo)
 		{
+			ThrowNull(templateNames, nameof(templateNames));
+
 			var tempNames = new List<string>();
 			foreach (var templateName in templateNames)
 			{
