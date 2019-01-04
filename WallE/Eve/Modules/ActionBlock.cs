@@ -39,12 +39,12 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("expiry", input.Expiry)
 				.AddIfNotNullIf("expiry", input.ExpiryRelative, input.Expiry == null)
 				.AddIfNotNull("reason", input.Reason)
-				.Add("anononly", input.Flags.HasFlag(BlockOptions.AnonymousOnly))
-				.Add("nocreate", input.Flags.HasFlag(BlockOptions.NoCreate))
-				.Add("autoblock", input.Flags.HasFlag(BlockOptions.AutoBlock))
-				.Add("noemail", input.Flags.HasFlag(BlockOptions.NoEmail))
-				.Add("hidename", input.Flags.HasFlag(BlockOptions.Hidden))
-				.Add("allowusertalk", input.Flags.HasFlag(BlockOptions.AllowUserTalk))
+				.Add("anononly", input.Flags.HasFlag(BlockFlags.AnonymousOnly))
+				.Add("nocreate", input.Flags.HasFlag(BlockFlags.NoCreate))
+				.Add("autoblock", input.Flags.HasFlag(BlockFlags.AutoBlock))
+				.Add("noemail", input.Flags.HasFlag(BlockFlags.NoEmail))
+				.Add("hidename", input.Flags.HasFlag(BlockFlags.Hidden))
+				.Add("allowusertalk", input.Flags.HasFlag(BlockFlags.AllowUserTalk))
 				.Add("reblock", input.Reblock)
 				.Add("watchuser", input.WatchUser)
 				.AddHidden("token", input.Token);
@@ -64,12 +64,12 @@ namespace RobinHood70.WallE.Eve.Modules
 			output.Reason = (string)result["reason"];
 			output.WatchUser = result["watchuser"].AsBCBool();
 			output.Flags =
-				result.GetFlag("allowusertalk", BlockOptions.AllowUserTalk) |
-				result.GetFlag("anononly", BlockOptions.AnonymousOnly) |
-				result.GetFlag("autoblock", BlockOptions.AutoBlock) |
-				result.GetFlag("hidename", BlockOptions.Hidden) |
-				result.GetFlag("nocreate", BlockOptions.NoCreate) |
-				result.GetFlag("noemail", BlockOptions.NoEmail);
+				result.GetFlag("allowusertalk", BlockFlags.AllowUserTalk) |
+				result.GetFlag("anononly", BlockFlags.AnonymousOnly) |
+				result.GetFlag("autoblock", BlockFlags.AutoBlock) |
+				result.GetFlag("hidename", BlockFlags.Hidden) |
+				result.GetFlag("nocreate", BlockFlags.NoCreate) |
+				result.GetFlag("noemail", BlockFlags.NoEmail);
 
 			return output;
 		}

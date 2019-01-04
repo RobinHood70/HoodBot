@@ -95,16 +95,16 @@
 
 		/// <summary>Blocks the specified user.</summary>
 		/// <param name="reason">The reason for the block.</param>
-		/// <param name="options">The block flags.</param>
+		/// <param name="flags">The block flags.</param>
 		/// <param name="expiry">The date and time the block should expire.</param>
 		/// <param name="reblock">if set to <c>true</c>, reblocks the user with the new block settings.</param>
 		/// <returns><c>true</c> if the block was successful.</returns>
-		public bool Block(string reason, BlockOptions options, DateTime expiry, bool reblock)
+		public bool Block(string reason, BlockFlags flags, DateTime expiry, bool reblock)
 		{
 			var input = new BlockInput(this.Name)
 			{
 				Expiry = expiry,
-				Flags = options,
+				Flags = flags,
 				Reason = reason,
 				Reblock = reblock,
 			};
@@ -113,16 +113,16 @@
 
 		/// <summary>Blocks the specified user.</summary>
 		/// <param name="reason">The reason for the block.</param>
-		/// <param name="options">The block flags.</param>
+		/// <param name="flags">The block flags.</param>
 		/// <param name="duration">The duration of the block (e.g., "2 weeks").</param>
 		/// <param name="reblock">if set to <c>true</c>, reblocks the user with the new block settings.</param>
 		/// <returns><c>true</c> if the block was successful.</returns>
-		public bool Block(string reason, BlockOptions options, string duration, bool reblock)
+		public bool Block(string reason, BlockFlags flags, string duration, bool reblock)
 		{
 			var input = new BlockInput(this.Name)
 			{
 				ExpiryRelative = duration,
-				Flags = options,
+				Flags = flags,
 				Reason = reason,
 				Reblock = reblock,
 			};
@@ -310,7 +310,7 @@
 
 		private void Populate(UsersItem user)
 		{
-			this.BlockInfo = new Block(user.Name, user.BlockedBy, user.BlockReason, user.BlockTimestamp ?? DateTime.MinValue, user.BlockExpiry ?? DateTime.MaxValue, BlockOptions.None, false);
+			this.BlockInfo = new Block(user.Name, user.BlockedBy, user.BlockReason, user.BlockTimestamp ?? DateTime.MinValue, user.BlockExpiry ?? DateTime.MaxValue, BlockFlags.None, false);
 			this.EditCount = user.EditCount;
 			this.Emailable = user.Flags.HasFlag(UserFlags.Emailable);
 			this.Gender = user.Gender;

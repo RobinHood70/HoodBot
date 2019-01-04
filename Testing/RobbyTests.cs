@@ -445,7 +445,7 @@
 		internal void UserBlockTests()
 		{
 			var user = new User(this.adminWiki, "Test User");
-			user.Block("Because he's a bad person", BlockOptions.AutoBlock | BlockOptions.AllowUserTalk, "5 minutes", true);
+			user.Block("Because he's a bad person", BlockFlags.AutoBlock | BlockFlags.AllowUserTalk, "5 minutes", true);
 			user.Unblock("Because he's a good person");
 		}
 

@@ -14,14 +14,14 @@
 		/// <param name="reason">The reason for the block.</param>
 		/// <param name="startTime">The start time of the block.</param>
 		/// <param name="expiry">When the block expires.</param>
-		/// <param name="options">The block flags.</param>
+		/// <param name="flags">The block flags.</param>
 		/// <param name="automatic">if set to <c>true</c>, indicates that this was an auto-block by the wiki itself.</param>
-		protected internal Block(string user, string by, string reason, DateTime startTime, DateTime expiry, BlockOptions options, bool automatic)
+		protected internal Block(string user, string by, string reason, DateTime startTime, DateTime expiry, BlockFlags flags, bool automatic)
 		{
 			this.Automatic = automatic;
 			this.BlockedBy = by;
 			this.Expiry = expiry;
-			this.Flags = options;
+			this.Flags = flags;
 			this.Reason = reason;
 			this.StartTime = startTime;
 			this.User = user;
@@ -40,9 +40,9 @@
 		/// <value>The date and time the block expires.</value>
 		public DateTime Expiry { get; }
 
-		/// <summary>Gets the block flags.</summary>
-		/// <value>The block flags.</value>
-		public BlockOptions Flags { get; }
+		/// <summary>Gets the block options.</summary>
+		/// <value>The block options.</value>
+		public BlockFlags Flags { get; }
 
 		/// <summary>Gets the reason the user was blocked.</summary>
 		/// <value>The reason the user was blocked.</value>

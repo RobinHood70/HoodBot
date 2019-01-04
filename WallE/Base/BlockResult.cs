@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public DateTime? Expiry { get; set; }
 
-		public BlockOptions Flags { get; set; }
+		public BlockFlags Flags { get; set; }
 
 		public long Id { get; set; }
 

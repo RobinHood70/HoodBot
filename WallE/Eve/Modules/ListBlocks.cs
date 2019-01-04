@@ -61,12 +61,12 @@ namespace RobinHood70.WallE.Eve.Modules
 				Reason = (string)result["reason"],
 				Automatic = result["automatic"].AsBCBool(),
 				Flags =
-					result.GetFlag("allowusertalk", BlockOptions.AllowUserTalk) |
-					result.GetFlag("anononly", BlockOptions.AnonymousOnly) |
-					result.GetFlag("autoblock", BlockOptions.AutoBlock) |
-					result.GetFlag("hidden", BlockOptions.Hidden) |
-					result.GetFlag("nocreate", BlockOptions.NoCreate) |
-					result.GetFlag("noemail", BlockOptions.NoEmail),
+					result.GetFlag("allowusertalk", BlockFlags.AllowUserTalk) |
+					result.GetFlag("anononly", BlockFlags.AnonymousOnly) |
+					result.GetFlag("autoblock", BlockFlags.AutoBlock) |
+					result.GetFlag("hidden", BlockFlags.Hidden) |
+					result.GetFlag("nocreate", BlockFlags.NoCreate) |
+					result.GetFlag("noemail", BlockFlags.NoEmail),
 				RangeStart = (string)result["rangestart"],
 				RangeEnd = (string)result["rangeend"],
 			};

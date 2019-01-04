@@ -80,8 +80,6 @@
 		/// <param name="hide">Hide these types of entries.</param>
 		/// <param name="flag">Type of entry to convert to a Filter.</param>
 		/// <returns>A Filter object that's set to Any if not set in either enum, Exclude if set in the hide enum (or both), and Only if set in the showOnly enum.</returns>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "flag", Justification = "Designed to operate specifically on flag values, therefore 'flag' is appropriate terminology.")]
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Flag", Justification = "Designed to operate specifically on flag values, therefore 'flag' is appropriate terminology.")]
 		public static Filter FlagToFilter(Enum showOnly, Enum hide, Enum flag)
 		{
 			ThrowNull(showOnly, nameof(showOnly));
