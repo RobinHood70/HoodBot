@@ -164,11 +164,11 @@
 
 		#region Public Static Methods (DEBUG only)
 #if DEBUG
-		public static void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine(sender + " Response: " + eventArgs.Response);
+		public static void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{sender?.SiteName} Response: {eventArgs?.Response}");
 
-		public static void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine(eventArgs.Request.ToString(), sender.ToString());
+		public static void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{sender?.SiteName} Request: {eventArgs?.Request}");
 
-		public static void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"Warning ({eventArgs.Warning.Code}): {eventArgs.Warning.Info}", sender.ToString());
+		public static void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"{sender?.SiteName} Warning: ({eventArgs?.Warning.Code}) {eventArgs?.Warning.Info}");
 #endif
 		#endregion
 
