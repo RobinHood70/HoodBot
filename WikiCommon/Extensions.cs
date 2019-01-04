@@ -16,6 +16,8 @@
 		/// <typeparam name="T">The enumeration type.</typeparam>
 		/// <param name="flagValue">The flags enumeration value to enumerate.</param>
 		/// <returns>An enumeration of every single-bit value in the specified flags enumeration.</returns>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "flag", Justification = "Designed to operate specifically on flag values, therefore 'flag' is appropriate terminology.")]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Flag", Justification = "Designed to operate specifically on flag values, therefore 'flag' is appropriate terminology.")]
 		public static IEnumerable<T> GetUniqueFlags<T>(this T flagValue)
 			where T : Enum
 		{
@@ -38,6 +40,8 @@
 		/// <summary>Determines whether or not an enum represents a single-bit flag value.</summary>
 		/// <param name="flagValue">The flags enumeration value to check.</param>
 		/// <returns>True if the flag value represents a single-bit value.</returns>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "flag", Justification = "Designed to operate specifically on flag values, therefore 'flag' is appropriate terminology.")]
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Flag", Justification = "Designed to operate specifically on flag values, therefore 'flag' is appropriate terminology.")]
 		public static bool IsUniqueFlag(this Enum flagValue)
 		{
 			var numericFlags = Convert.ToUInt64(flagValue, CultureInfo.InvariantCulture);

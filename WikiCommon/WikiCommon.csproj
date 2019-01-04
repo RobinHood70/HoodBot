@@ -23,7 +23,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>..\WallE\WallEExtraRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\Main.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <DocumentationFile>bin\Debug\WikiCommon.xml</DocumentationFile>
     <LangVersion>latest</LangVersion>

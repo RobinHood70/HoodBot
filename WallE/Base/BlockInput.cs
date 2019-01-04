@@ -17,7 +17,7 @@ namespace RobinHood70.WallE.Base
 
 		public string ExpiryRelative { get; set; }
 
-		public BlockFlags Flags { get; set; }
+		public BlockOptions Flags { get; set; }
 
 		public string Reason { get; set; }
 
