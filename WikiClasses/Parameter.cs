@@ -58,6 +58,18 @@
 			this.FullValue = value;
 			this.Anonymous = anonymous;
 		}
+
+		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class from an existing one.</summary>
+		/// <param name="copy">The instance to copy.</param>
+		/// <remarks>This is a deep copy.</remarks>
+		protected Parameter(Parameter copy)
+		{
+			ThrowNull(copy, nameof(copy));
+			this.FullName = copy.FullName.Clone();
+			this.FullValue = copy.FullValue.Clone();
+			this.Anonymous = copy.Anonymous;
+		}
+
 		#endregion
 
 		#region Public Properties
@@ -77,7 +89,7 @@
 
 		/// <summary>Gets or sets the name.</summary>
 		/// <value>The parameter name.</value>
-		/// <remarks>This is a convenience property, equivalent to <c>this.FullName.Value</c>.</remarks>
+		/// <remarks>This is a convenience property, equivalent to <c>FullName.Value</c>.</remarks>
 		public string Name
 		{
 			get => this.FullName.Value;
@@ -125,9 +137,9 @@
 		public static string Escape(string text) => text?.Replace("=", "&#61;");
 
 		/// <summary>Determines whether the provided parameter is null or has an empty value.</summary>
-		/// <param name="parameter">The parameter.</param>
+		/// <param name="item">The item to check.</param>
 		/// <returns><c>true</c> if the parameter is null or its value is an empty string; otherwise, <c>false</c>.</returns>
-		public static bool IsNullOrEmpty(Parameter parameter) => parameter == null || parameter.Value.Length == 0;
+		public static bool IsNullOrEmpty(Parameter item) => item == null || item.Value.Length == 0;
 
 		/// <summary>Unescapes the specified text, converting common equivalents of equals signs to an actual equals sign.</summary>
 		/// <param name="text">The text to unescape.</param>
@@ -180,9 +192,9 @@
 			this.FullValue.Build(builder);
 		}
 
-		/// <summary>Creates a deep copy of the parameter.</summary>
-		/// <returns>A second parameter with the same property values.</returns>
-		public Parameter Copy() => new Parameter(this.FullName.Copy(), this.FullValue.Copy(), this.Anonymous);
+		/// <summary>Clones this instance.</summary>
+		/// <returns>A deep copy of this instance.</returns>
+		public Parameter DeepClone() => new Parameter(this);
 
 		/// <summary>Escapes the parameter value as per the static <see cref="Escape(string)"/> method.</summary>
 		public void Escape() => this.Value = Escape(this.Value);
@@ -205,26 +217,14 @@
 		}
 
 		/// <summary>Trims both the name and value of the parameter.</summary>
-		public void Trim()
-		{
-			this.TrimName();
-			this.TrimValue();
-		}
+		public void Trim() => this.Trim(true);
 
-		/// <summary>Trims the parameter name.</summary>
-		public void TrimName()
+		/// <summary>Trims both the name and value of the parameter.</summary>
+		/// <param name="trimText">Whether to trim the text of the name and value or just clear the whitespace properties of each.</param>
+		public void Trim(bool trimText)
 		{
-			this.FullName.LeadingWhiteSpace = string.Empty;
-			this.FullName.TrailingWhiteSpace = string.Empty;
-			this.FullName.Value = this.FullValue.Value.Trim();
-		}
-
-		/// <summary>Trims the parameter value.</summary>
-		public void TrimValue()
-		{
-			this.FullValue.LeadingWhiteSpace = string.Empty;
-			this.FullValue.TrailingWhiteSpace = string.Empty;
-			this.FullValue.Value = this.FullValue.Value.Trim();
+			this.FullName.Trim(trimText);
+			this.FullValue.Trim(trimText);
 		}
 
 		/// <summary>Unescapes the parameter value as per the static <see cref="Unescape(string)"/> method.</summary>
@@ -235,15 +235,7 @@
 
 		/// <summary>Converts the parameter to its equivalent wiki text.</summary>
 		/// <returns>A <see cref="string"/> that represents this instance.</returns>
-		public override string ToString()
-		{
-			if (this.Anonymous)
-			{
-				return this.FullValue.Build();
-			}
-
-			return this.FullName.Build() + "=" + this.FullValue.Build();
-		}
+		public override string ToString() => this.Anonymous ? this.FullValue.ToString(true) : this.FullName.ToString(true) + "=" + this.FullValue.ToString(true);
 		#endregion
 	}
 }

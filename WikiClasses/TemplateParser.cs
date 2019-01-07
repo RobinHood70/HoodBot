@@ -6,15 +6,15 @@
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
-	// This is a "dumb" parser class that is rather convoluted at times, but is smaller and (from a certain POV) simpler than building a full-fledged parse tree.
-	public class TemplateParser
+	// This is a "dumb" helper class to parse template text into a Template object. While rather convoluted at times, it's smaller and simpler than building a full-fledged parse tree.
+	internal class TemplateParser
 	{
 		#region Private Constants
 		private const string ParameterSeparators = "|=";
 		private const string PipeString = "|";
 		#endregion
 
-		#region Fields
+		#region Static Fields
 		private static Pair[] searchStrings =
 		{
 				new Pair("<!--", "-->", true),
@@ -25,8 +25,13 @@
 		};
 		#endregion
 
+		#region Fields
+		private readonly string text;
+		private int index;
+		#endregion
+
 		#region Constructors
-		public TemplateParser(string text) => this.Text = text;
+		public TemplateParser(string text) => this.text = text;
 		#endregion
 
 		#region Private Enumerations
@@ -40,18 +45,12 @@
 		}
 		#endregion
 
-		#region Public Properties
-		public int Index { get; private set; } = 0;
-
-		public string Text { get; }
-		#endregion
-
 		#region Public Methods
 		public void ParseIntoTemplate(Template template, bool ignoreWhiteSpaceRules)
 		{
 			ThrowNull(template, nameof(template));
 			this.GetString(PipeString, template.FullName);
-			while (this.Index < this.Text.Length)
+			while (this.index < this.text.Length)
 			{
 				template.Add(this.ParseParameter(ignoreWhiteSpaceRules));
 			}
@@ -113,17 +112,17 @@
 		{
 			// TODO: Re-examine - this got kludgey after fixing empty last parameter bug.
 			var builder = new StringBuilder(20);
-			var foundDelimiter = !(this.Index < this.Text.Length);
+			var foundDelimiter = !(this.index < this.text.Length);
 			while (!foundDelimiter)
 			{
-				var nextToken = this.PeekToken(this.Index);
-				while (nextToken.IsWhiteSpace && this.Index < this.Text.Length)
+				var nextToken = this.PeekToken(this.index);
+				while (nextToken.IsWhiteSpace && this.index < this.text.Length)
 				{
-					this.Index += nextToken.Text.Length;
+					this.index += nextToken.Text.Length;
 					builder.Append(nextToken.Text);
-					if (this.Index < this.Text.Length)
+					if (this.index < this.text.Length)
 					{
-						nextToken = this.PeekToken(this.Index);
+						nextToken = this.PeekToken(this.index);
 					}
 				}
 
@@ -134,7 +133,7 @@
 				}
 
 				var startOfWhiteSpace = 0;
-				if (this.Index < this.Text.Length)
+				if (this.index < this.text.Length)
 				{
 					foundDelimiter = delimiters.IndexOf(nextToken.Text[0]) != -1;
 					while (!foundDelimiter)
@@ -145,10 +144,10 @@
 							startOfWhiteSpace = builder.Length;
 						}
 
-						this.Index += nextToken.Text.Length;
-						if (this.Index < this.Text.Length)
+						this.index += nextToken.Text.Length;
+						if (this.index < this.text.Length)
 						{
-							nextToken = this.PeekToken(this.Index);
+							nextToken = this.PeekToken(this.index);
 							foundDelimiter = delimiters.IndexOf(nextToken.Text[0]) != -1;
 						}
 						else
@@ -185,12 +184,12 @@
 
 		private Parameter ParseParameter(bool ignoreWhiteSpaceRules)
 		{
-			this.Index++; // We are always sitting on a pipe when this is called, so skip past it.
+			this.index++; // We are always sitting on a pipe when this is called, so skip past it.
 			var valueString = this.GetString(ParameterSeparators, new TemplateString());
-			if (this.Index < this.Text.Length && this.Text[this.Index] == '=')
+			if (this.index < this.text.Length && this.text[this.index] == '=')
 			{
 				var nameString = valueString;
-				this.Index++; // We are now guaranteed to be sitting on an equals sign, so skip past that.
+				this.index++; // We are now guaranteed to be sitting on an equals sign, so skip past that.
 				valueString = this.GetString(PipeString, new TemplateString());
 				return new Parameter(nameString, valueString);
 			}
@@ -200,13 +199,13 @@
 				return new Parameter(valueString);
 			}
 
-			// Unnamed parameter, and we're not ignoring rules, so stuff all WhiteSpace back into the value.
-			return new Parameter(valueString.Build());
+			// Unnamed parameter, and we're not ignoring rules, so stuff all whitespace back into the value.
+			return new Parameter(valueString.ToString(true));
 		}
 
-		private Token PeekToken(int index)
+		private Token PeekToken(int peekIndex)
 		{
-			var letter = this.Text[index];
+			var letter = this.text[peekIndex];
 			if (char.IsWhiteSpace(letter))
 			{
 				return new Token(letter.ToString(), true);
@@ -217,27 +216,27 @@
 			{
 				var pair = searchStrings[i];
 				var startLength = pair.Start.Length;
-				if (string.Compare(pair.Start, 0, this.Text, index, startLength, StringComparison.Ordinal) == 0)
+				if (string.Compare(pair.Start, 0, this.text, peekIndex, startLength, StringComparison.Ordinal) == 0)
 				{
-					var indexEnd = index + startLength;
+					var indexEnd = peekIndex + startLength;
 					if (pair.CountsAsWhiteSpace)
 					{
-						indexEnd = this.Text.IndexOf(pair.Terminator, indexEnd, StringComparison.Ordinal);
-						return indexEnd == -1 ? new Token(this.Text.Substring(index), false) : new Token(this.Text.Substring(index, indexEnd - index + pair.Terminator.Length), pair.CountsAsWhiteSpace);
+						indexEnd = this.text.IndexOf(pair.Terminator, indexEnd, StringComparison.Ordinal);
+						return indexEnd == -1 ? new Token(this.text.Substring(peekIndex), false) : new Token(this.text.Substring(peekIndex, indexEnd - peekIndex + pair.Terminator.Length), pair.CountsAsWhiteSpace);
 					}
 
 					var match = false;
-					while (indexEnd < (this.Text.Length - pair.Terminator.Length) && !match)
+					while (indexEnd < (this.text.Length - pair.Terminator.Length) && !match)
 					{
 						var nextToken = this.PeekToken(indexEnd);
 						indexEnd += nextToken.Text.Length;
-						match = string.Compare(pair.Terminator, 0, this.Text, indexEnd, pair.Terminator.Length, StringComparison.Ordinal) == 0;
+						match = string.Compare(pair.Terminator, 0, this.text, indexEnd, pair.Terminator.Length, StringComparison.Ordinal) == 0;
 					}
 
 					if (match)
 					{
 						indexEnd += pair.Terminator.Length;
-						return new Token(this.Text.Substring(index, indexEnd - index), pair.CountsAsWhiteSpace);
+						return new Token(this.text.Substring(peekIndex, indexEnd - peekIndex), pair.CountsAsWhiteSpace);
 					}
 				}
 			}
