@@ -116,7 +116,8 @@
 					var row = csvFile.Add(template.Page, template.Template.Name);
 					foreach (var param in template.Template)
 					{
-						row[param.Name] = param.Value;
+						// For now, we're assuming that trimming trailing lines from anon parameters is desirable, but could be made optional if needed.
+						row[param.Name] = param.Anonymous ? param.Value.TrimEnd(new[] { '\r', '\n' }) : param.Value;
 					}
 				}
 
