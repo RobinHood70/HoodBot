@@ -37,7 +37,7 @@
 
 				for (var i = this.fields.Count; i < nameMap.Count; i++)
 				{
-					this.fields[i] = string.Empty;
+					this.fields.Add(string.Empty);
 				}
 			}
 			else
