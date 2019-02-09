@@ -63,7 +63,7 @@
 		#region Internal Methods
 		internal void Add(Revision revision)
 		{
-			this.revisions.Add(revision.Id, revision);
+			this.revisions[revision.Id] = revision;
 			if (this.Current == null || revision.Id > this.Current.Id)
 			{
 				this.Current = revision;
