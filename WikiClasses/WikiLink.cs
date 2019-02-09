@@ -133,6 +133,19 @@
 
 		#region Public Static Methods
 
+		/// <summary>Finds all links within the given text.</summary>
+		/// <param name="text">The text to search.</param>
+		/// <returns>An enumeration of all links within the text.</returns>
+		/// <remarks>No location information is included, so this is most useful when you simply need to scan links rather than alter them.</remarks>
+		public static IEnumerable<WikiLink> FindAllLinks(string text)
+		{
+			var matches = LinkFinder().Matches(text);
+			foreach (Match match in matches)
+			{
+				yield return new WikiLink(match);
+			}
+		}
+
 		/// <summary>Determines whether the specified value is a valid link.</summary>
 		/// <param name="value">The value to check.</param>
 		/// <returns><c>true</c> if the specified value appears to be a link; otherwise, <c>false</c>.</returns>
