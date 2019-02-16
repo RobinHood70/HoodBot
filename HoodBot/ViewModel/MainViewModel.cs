@@ -62,7 +62,6 @@
 			this.client.RequestingDelay += this.Client_RequestingDelay;
 			this.BotSettings = BotSettings.Load(Path.Combine(this.appDataFolder, "Settings.json"));
 			this.CurrentItem = this.BotSettings.LastSelectedWiki;
-
 			this.progressMonitor = new Progress<double>(this.ProgressChanged);
 			this.statusMonitor = new Progress<string>(this.StatusChanged);
 		}
@@ -72,12 +71,7 @@
 		~MainViewModel()
 		{
 			this.BotSettings.Save();
-			if (this.site != null)
-			{
-				(this.site.AbstractionLayer as WikiAbstractionLayer).SendingRequest -= WalSendingRequest;
-				(this.site.AbstractionLayer as WikiAbstractionLayer).WarningOccurred -= WalWarningOccurred;
-			}
-
+			this.ResetSite();
 			this.client.RequestingDelay -= this.Client_RequestingDelay;
 		}
 		#endregion
@@ -232,7 +226,7 @@
 
 		private void Client_RequestingDelay(IMediaWikiClient sender, DelayEventArgs eventArgs)
 		{
-			this.StatusChanged(CurrentCulture(DelayRequested, eventArgs.Reason, eventArgs.DelayTime, eventArgs.Description) + NewLine);
+			this.StatusChanged(NewLine + CurrentCulture(DelayRequested, eventArgs.Reason, eventArgs.DelayTime.TotalSeconds + "s", eventArgs.Description));
 			App.WpfYield();
 		}
 
@@ -246,15 +240,7 @@
 
 			foreach (var param in jobNode.Parameters)
 			{
-				if (param.Attribute is JobParameterFileAttribute && param.Value is string value)
-				{
-					value = value.Replace("%BotData%", this.BotSettings.BotDataFolder);
-					objectList.Add(ExpandEnvironmentVariables(value));
-				}
-				else
-				{
-					objectList.Add(param.Value);
-				}
+				objectList.Add(param.Attribute is JobParameterFileAttribute && param.Value is string value ? ExpandEnvironmentVariables(value) : param.Value);
 			}
 
 			return jobNode.Constructor.Invoke(objectList.ToArray()) as WikiJob;
@@ -291,6 +277,7 @@
 					var job = this.ConstructJob(jobNode);
 					this.ProgressBarColor = ProgressBarGreen;
 					this.jobStarted = DateTime.UtcNow;
+					this.StatusChanged(NewLine + "Starting " + jobNode.Name);
 					try
 					{
 						await Task.Run(job.Execute).ConfigureAwait(false);
@@ -314,7 +301,7 @@
 			}
 
 			this.Reset();
-			this.StatusChanged("Total time for last run: " + FormatTimeSpan(allJobsTimer.Elapsed));
+			this.StatusChanged(NewLine + "Total time for last run: " + FormatTimeSpan(allJobsTimer.Elapsed));
 			this.executing = false;
 		}
 
@@ -351,19 +338,16 @@
 
 			if (wikiInfo != this.previousItem)
 			{
-				if (this.site != null)
-				{
-					(this.site.AbstractionLayer as WikiAbstractionLayer).SendingRequest -= WalSendingRequest;
-					(this.site.AbstractionLayer as WikiAbstractionLayer).WarningOccurred -= WalWarningOccurred;
-				}
-
+				this.ResetSite();
 				this.previousItem = wikiInfo;
 				var wal = new WikiAbstractionLayer(this.client, wikiInfo.Api)
 				{
-					MaxLag = wikiInfo.MaxLag
+					Assert = "bot",
+					MaxLag = wikiInfo.MaxLag,
+					StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery
 				};
 
-				// wal.SendingRequest += WalSendingRequest;
+				// wal.SendingRequest += this.WalSendingRequest;
 				// wal.ResponseReceived += WalResponseRecieved;
 				wal.WarningOccurred += WalWarningOccurred;
 				this.site = new Site(wal);
@@ -415,7 +399,19 @@
 			this.jobStarted = DateTime.MinValue;
 		}
 
-		private void StatusChanged(string text) => this.Status += text;
+		private void ResetSite()
+		{
+			// Unsubscribe before resetting site object, per
+			// https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/events/how-to-subscribe-to-and-unsubscribe-from-events#unsubscribing
+			if (this.site != null)
+			{
+				(this.site.AbstractionLayer as WikiAbstractionLayer).SendingRequest -= WalSendingRequest;
+				(this.site.AbstractionLayer as WikiAbstractionLayer).WarningOccurred -= WalWarningOccurred;
+				this.site = null;
+			}
+		}
+
+		private void StatusChanged(string text) => this.Status += this.Status.Length == 0 ? text.TrimStart() : text;
 		#endregion
 	}
 }
