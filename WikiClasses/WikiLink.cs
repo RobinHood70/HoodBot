@@ -194,7 +194,8 @@
 		/// <returns>A <see cref="Regex"/> that finds all links matching the values provided. Note that this will match, for example, any of the pagenames given in any of the namespaces given.</returns>
 		public static Regex LinkFinderRaw(string regexBefore, string regexNamespaces, string regexPageNames, string regexDisplayTexts, string regexAfter)
 		{
-			const string regexWild = ".*?";
+			const string regexWild = @"[^#\|\]]*?";
+			const string regexWildNamespace = @"[^:#\|\]]*?";
 			if (regexBefore != null)
 			{
 				regexBefore = @"(?<before>" + regexBefore + ")";
@@ -202,7 +203,7 @@
 
 			if (regexNamespaces == null)
 			{
-				regexNamespaces = regexWild;
+				regexNamespaces = regexWildNamespace;
 			}
 
 			if (regexPageNames == null)
@@ -224,7 +225,7 @@
 			var nsOptional = regexNamespaces == regexWild ? "?" : string.Empty;
 			var displayOptional = regexDisplayTexts == regexWild ? "?" : string.Empty;
 
-			return new Regex(regexBefore + @"\[\[(?<pre>:)?\s*((?<namespace>" + regexNamespaces + "):)" + nsOptional + @"(?<pagename>" + regexPageNames + @")(\#(?<fragment>.*?))?(\s*\|\s*(?<displaytext>" + regexDisplayTexts + @"))" + displayOptional + @"\s*]]" + regexAfter);
+			return new Regex(regexBefore + @"\[\[(?<pre>:)?\s*((?<namespace>" + regexNamespaces + "):)" + nsOptional + @"(?<pagename>" + regexPageNames + @")?(\#(?<fragment>.*?))?(\s*\|\s*(?<displaytext>" + regexDisplayTexts + @"))" + displayOptional + @"\s*]]" + regexAfter);
 		}
 		#endregion
 
