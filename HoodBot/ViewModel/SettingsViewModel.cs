@@ -98,7 +98,7 @@
 		{
 		}
 
-		public void CancelEdit() => this.UpdateSelection(null);
+		public void CancelEdit() => this.UpdateSelection(this.BotSettings.LastSelectedWiki);
 
 		public void EndEdit()
 		{
