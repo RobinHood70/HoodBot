@@ -7,12 +7,27 @@
 
 	public class BotSettings
 	{
+		#region Fields
+		private string botDataFolder;
+		#endregion
+
 		#region Constructors
 		public BotSettings(string location) => this.Location = location;
 		#endregion
 
 		#region Public Properties
-		public string BotDataFolder { get; set; }
+		public string BotDataFolder
+		{
+			get => this.botDataFolder;
+			set
+			{
+				if (value != null)
+				{
+					this.botDataFolder = value;
+					Environment.SetEnvironmentVariable("BotData", value);
+				}
+			}
+		}
 
 		public int LastSelectedOffset { get; set; }
 

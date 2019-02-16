@@ -123,7 +123,11 @@
 			<Slider
 				Grid.Row="8"
 				Grid.Column="2"
+				AutoToolTipPlacement="TopLeft"
+				AutoToolTipPrecision="0"
+				IsSnapToTickEnabled="True"
 				Maximum="10000"
+				TickFrequency="100"
 				Value="{Binding ReadThrottling}" />
 			<TextBlock
 				Grid.Row="10"
@@ -132,7 +136,11 @@
 			<Slider
 				Grid.Row="10"
 				Grid.Column="2"
+				AutoToolTipPlacement="TopLeft"
+				AutoToolTipPrecision="0"
+				IsSnapToTickEnabled="True"
 				Maximum="10000"
+				TickFrequency="100"
 				Value="{Binding WriteThrottling}" />
 			<StackPanel
 				Grid.Row="12"
