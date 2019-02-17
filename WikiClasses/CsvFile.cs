@@ -52,6 +52,11 @@
 		///   <c>true</c> if a delimiter character should be emitted twice; <c>false</c> if it should be escaped instead.</value>
 		public bool DoubleUpDelimiters { get; set; } = true;
 
+		/// <summary>Gets or sets the text to emit if a field is present but is an empty string.</summary>
+		/// <value>The text to use for empty fields.</value>
+		/// <remarks>If this field is null, empty fields will be treated the same as null fields. If it's an empty string, two field delimiters will be emitted with nothing between them. For any other value, that value will be emitted, with field delimiters emitted (or not) as normal.</remarks>
+		public string EmptyFieldText { get; set; } = string.Empty;
+
 		/// <summary>Gets or sets the escape character.</summary>
 		/// <value>The escape character.</value>
 		public char? EscapeCharacter { get; set; } = null;
@@ -153,7 +158,7 @@
 
 		/// <summary>Adds a header with the specified field names.</summary>
 		/// <param name="fieldNames">The field names.</param>
-		public void AddHeader(IEnumerable<string> fieldNames) => this.AddHeader(new CsvRow(new List<string>(fieldNames), this.nameMap));
+		public void AddHeader(IEnumerable<string> fieldNames) => this.AddHeader(new CsvRow(fieldNames, this.nameMap));
 
 		/// <summary>Adds the specified row object as a header.</summary>
 		/// <param name="header">The row to add.</param>
@@ -218,7 +223,7 @@
 		public CsvRow ReadRow(TextReader reader)
 		{
 			ThrowNull(reader, nameof(reader));
-			var row = new CsvRow(this.nameMap);
+			var row = new CsvRow(null, this.nameMap);
 			var field = new StringBuilder();
 			var fieldNum = 0;
 			var insideQuotes = false;
@@ -469,7 +474,10 @@
 			{
 				if (columnNumber < columnCount)
 				{
-					rewriteFields.Add(field.IndexOfAny(specialChars) == -1 ? field : this.RewriteField(field));
+					rewriteFields.Add(
+						field == null ? string.Empty :
+						(field.Length > 0 && field.IndexOfAny(specialChars) == -1) ? field :
+						this.RewriteField(field));
 					columnNumber++;
 				}
 			}
@@ -492,8 +500,17 @@
 
 		private string RewriteField(string field)
 		{
-			var addDelimiter = false;
 			var sb = new StringBuilder();
+			if (field.Length == 0)
+			{
+				field = this.EmptyFieldText;
+				if (field == null)
+				{
+					return string.Empty;
+				}
+			}
+
+			var addDelimiter = field.Length == 0;
 			foreach (var character in field)
 			{
 				if (character == this.FieldDelimiter)

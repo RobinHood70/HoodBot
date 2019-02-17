@@ -10,42 +10,19 @@
 	{
 		#region Fields
 		private readonly IReadOnlyDictionary<string, int> nameMap;
-		private readonly IList<string> fields;
+		private readonly List<string> fields;
 		#endregion
 
 		#region Constructors
-		internal CsvRow(IReadOnlyDictionary<string, int> nameMap)
-		{
-			this.fields = new List<string>(nameMap.Count);
-			for (var i = 0; i < nameMap.Count; i++)
-			{
-				this.fields[i] = string.Empty;
-			}
-
-			this.nameMap = nameMap;
-		}
-
 		internal CsvRow(IEnumerable<string> fields, IReadOnlyDictionary<string, int> nameMap)
 		{
-			if (nameMap?.Count > 0)
-			{
-				this.fields = new List<string>(nameMap.Count);
-				foreach (var field in fields)
-				{
-					this.fields.Add(field);
-				}
-
-				for (var i = this.fields.Count; i < nameMap.Count; i++)
-				{
-					this.fields.Add(string.Empty);
-				}
-			}
-			else
-			{
-				this.fields = new List<string>(fields);
-			}
-
+			this.fields = fields == null ? new List<string>(nameMap.Count) : new List<string>(fields);
 			this.nameMap = nameMap;
+			if (nameMap?.Count > this.fields.Count)
+			{
+				this.fields.Capacity = nameMap.Count;
+				this.fields.AddRange(new string[nameMap.Count - this.fields.Count]);
+			}
 		}
 		#endregion
 
