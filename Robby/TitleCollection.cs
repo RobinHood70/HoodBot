@@ -11,6 +11,11 @@
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling is a factor of using classes to handle complex inputs and is unavoidable.")]
 	public class TitleCollection : TitleCollection<Title>, IEnumerable<Title>, IMessageSource
 	{
+		#region Fields
+		private IEnumerable<int> loadPageLimitations = null;
+		private LimitationType loadPageLimitationType = LimitationType.None;
+		#endregion
+
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class.</summary>
@@ -173,6 +178,11 @@
 		public PageCollection Load(PageLoadOptions options, PageCreator pageCreator)
 		{
 			var retval = new PageCollection(this.Site, options, pageCreator);
+			if (this.loadPageLimitations != null)
+			{
+				retval.SetLimitations(this.loadPageLimitations, this.loadPageLimitationType);
+			}
+
 			retval.AddTitles(this);
 
 			return retval;
@@ -186,6 +196,16 @@
 		/// <param name="method">The method.</param>
 		/// <returns>A page collection with the results of the purge.</returns>
 		public PageCollection Purge(PurgeMethod method) => this.Purge(new PurgeInput(this.ToFullPageNames()) { Method = method });
+
+		/// <summary>Sets namespace limitations for the Load() methods.</summary>
+		/// <param name="namespaceLimitations">The namespace limitations to apply to the PageCollection returned.</param>
+		/// <param name="limitationType">Type of the limitation.</param>
+		/// <remarks>Currently, this applies only to the <see cref="PageCollection"/> returned by the various <see cref="Load()"/> methods. The <see cref="Purge()"/>, <see cref="Watch()"/>, and <see cref="Unwatch()"/> methods always return unfiltered results.</remarks>
+		public void SetNamespaceLimitations(IEnumerable<int> namespaceLimitations, LimitationType limitationType)
+		{
+			this.loadPageLimitations = namespaceLimitations;
+			this.loadPageLimitationType = limitationType;
+		}
 
 		/// <summary>Watches all pages in the collection.</summary>
 		/// <returns>A page collection with the watch results.</returns>
@@ -452,7 +472,11 @@
 		protected virtual PageCollection Purge(PurgeInput input)
 		{
 			var result = this.Site.AbstractionLayer.Purge(input);
-			var retval = new PageCollection(this.Site, result);
+			var retval = new PageCollection(this.Site, result)
+			{
+				LimitationType = LimitationType.None
+			};
+
 			foreach (var item in result)
 			{
 				var purgePage = item.Value;
@@ -479,7 +503,7 @@
 					[nameof(input)] = input,
 				});
 
-				retval = new PageCollection(this.Site);
+				retval = PageCollection.Unlimited(this.Site);
 				foreach (var item in this)
 				{
 					retval.Add(PageCreator.Default.CreatePage(new TitleParts(this.Site, item.FullPageName)));
@@ -489,7 +513,11 @@
 			}
 
 			var result = this.Site.AbstractionLayer.Watch(input);
-			retval = new PageCollection(this.Site, result);
+			retval = new PageCollection(this.Site, result)
+			{
+				LimitationType = LimitationType.None
+			};
+
 			foreach (var item in result)
 			{
 				var watchPage = item.Value;
