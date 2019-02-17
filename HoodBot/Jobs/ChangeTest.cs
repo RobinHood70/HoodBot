@@ -12,7 +12,7 @@
 		{
 		}
 
-		protected override void Main()
+		protected override void MainJob()
 		{
 			var titles = new TitleCollection(this.Site, "User:RobinHood70", "User talk:RobinHood70");
 			var pages = titles.Load();

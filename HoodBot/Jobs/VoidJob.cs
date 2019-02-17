@@ -12,7 +12,7 @@
 		{
 		}
 
-		protected override void Main()
+		protected override void MainJob()
 		{
 			this.ProgressMaximum = 5;
 			for (var i = 1; i <= this.ProgressMaximum; i++)

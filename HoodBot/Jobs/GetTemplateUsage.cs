@@ -9,7 +9,7 @@
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class GetTemplateUsage : TaskJob
+	public class GetTemplateUsage : WikiJob
 	{
 		#region Constructors
 		[JobInfo("Template Usage")]
@@ -22,7 +22,6 @@
 			: base(site, asyncInfo)
 		{
 			ThrowNull(templateNames, nameof(templateNames));
-
 			var tempNames = new List<string>();
 			foreach (var templateName in templateNames)
 			{
@@ -39,19 +38,25 @@
 				location = location?.Replace("%templateName%", templates[0].PageName);
 			}
 
-			var redirectList = new TitleCollection(this.Site);
+			var allNames = new TitleCollection(this.Site);
 			if (respectRedirects)
 			{
-				this.Tasks.Add(new BuildRedirectList(this, templates, redirectList));
+				this.Tasks.Add(new BuildRedirectList(this, templates, allNames));
 			}
 			else
 			{
-				redirectList.AddCopy(templates);
+				allNames.AddCopy(templates);
 			}
 
 			var pageList = PageCollection.Unlimited(this.Site);
-			this.Tasks.Add(new GetTemplatePages(this, redirectList, respectRedirects, pageList));
-			this.Tasks.Add(new LocalExportTask(this, redirectList, pageList, location));
+			this.Tasks.Add(new GetTemplatePages(this, allNames, respectRedirects, pageList));
+			this.Tasks.Add(new LocalExportTask(this, allNames, pageList, location));
+		}
+		#endregion
+
+		#region Protected Override Methods
+		protected override void MainJob()
+		{
 		}
 		#endregion
 
@@ -102,7 +107,10 @@
 
 			private void WriteFile(TemplateCollection allTemplates)
 			{
-				var csvFile = new CsvFile();
+				var csvFile = new CsvFile()
+				{
+					EmptyFieldText = " "
+				};
 				var output = new List<string>(allTemplates.HeaderOrder.Count + 2)
 				{
 					"Page",
