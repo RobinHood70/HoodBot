@@ -49,7 +49,7 @@
 				redirectList.AddCopy(templates);
 			}
 
-			var pageList = new PageCollection(this.Site);
+			var pageList = PageCollection.Unlimited(this.Site);
 			this.Tasks.Add(new GetTemplatePages(this, templates, respectRedirects, pageList));
 			this.Tasks.Add(new LocalExportTask(this, redirectList, pageList, location));
 		}
