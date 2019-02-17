@@ -63,7 +63,7 @@
 			this.BotSettings = BotSettings.Load(Path.Combine(this.appDataFolder, "Settings.json"));
 			this.CurrentItem = this.BotSettings.LastSelectedWiki;
 			this.progressMonitor = new Progress<double>(this.ProgressChanged);
-			this.statusMonitor = new Progress<string>(this.StatusChanged);
+			this.statusMonitor = new Progress<string>(this.StatusWrite);
 		}
 		#endregion
 
@@ -226,7 +226,7 @@
 
 		private void Client_RequestingDelay(IMediaWikiClient sender, DelayEventArgs eventArgs)
 		{
-			this.StatusChanged(NewLine + CurrentCulture(DelayRequested, eventArgs.Reason, eventArgs.DelayTime.TotalSeconds + "s", eventArgs.Description));
+			this.StatusWriteLine(CurrentCulture(DelayRequested, eventArgs.Reason, eventArgs.DelayTime.TotalSeconds + "s", eventArgs.Description));
 			App.WpfYield();
 		}
 
@@ -277,7 +277,7 @@
 					var job = this.ConstructJob(jobNode);
 					this.ProgressBarColor = ProgressBarGreen;
 					this.jobStarted = DateTime.UtcNow;
-					this.StatusChanged(NewLine + "Starting " + jobNode.Name);
+					this.StatusWriteLine("Starting " + jobNode.Name);
 					try
 					{
 						await Task.Run(job.Execute).ConfigureAwait(false);
@@ -301,7 +301,7 @@
 			}
 
 			this.Reset();
-			this.StatusChanged(NewLine + "Total time for last run: " + FormatTimeSpan(allJobsTimer.Elapsed));
+			this.StatusWriteLine("Total time for last run: " + FormatTimeSpan(allJobsTimer.Elapsed));
 			this.executing = false;
 		}
 
@@ -342,7 +342,7 @@
 				this.previousItem = wikiInfo;
 				var wal = new WikiAbstractionLayer(this.client, wikiInfo.Api)
 				{
-					Assert = "bot",
+					// Assert = "bot",
 					MaxLag = wikiInfo.MaxLag,
 					StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery
 				};
@@ -411,7 +411,9 @@
 			}
 		}
 
-		private void StatusChanged(string text) => this.Status += this.Status.Length == 0 ? text.TrimStart() : text;
+		private void StatusWrite(string text) => this.Status += this.Status.Length == 0 ? text.TrimStart() : text;
+
+		private void StatusWriteLine(string status) => this.StatusWrite(status + NewLine);
 		#endregion
 	}
 }

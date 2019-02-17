@@ -50,7 +50,7 @@
 			}
 
 			var pageList = PageCollection.Unlimited(this.Site);
-			this.Tasks.Add(new GetTemplatePages(this, templates, respectRedirects, pageList));
+			this.Tasks.Add(new GetTemplatePages(this, redirectList, respectRedirects, pageList));
 			this.Tasks.Add(new LocalExportTask(this, redirectList, pageList, location));
 		}
 		#endregion
