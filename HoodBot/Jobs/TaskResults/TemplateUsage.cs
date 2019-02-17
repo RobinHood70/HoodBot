@@ -5,17 +5,21 @@
 
 	public class TemplateUsage
 	{
+		#region Constructors
 		public TemplateUsage(IEnumerable<string> allNames, TitleCollection templates, PageCollection pages)
 		{
 			this.AllNames = allNames;
 			this.Pages = pages;
 			this.Templates = templates;
 		}
+		#endregion
 
-		public IEnumerable<string> AllNames { get; internal set; }
+		#region Public Properties
+		public IEnumerable<string> AllNames { get; }
 
 		public PageCollection Pages { get; }
 
 		public TitleCollection Templates { get; }
+		#endregion
 	}
 }
