@@ -32,7 +32,7 @@
 			}
 			else
 			{
-				this.ProgressMaximum++;
+				this.ProgressMaximum += this.templates.Count;
 
 				// Pages for multiple templates could overlap significantly, so figure out which pages to load first, then load by title.
 				var fullList = new TitleCollection(this.Site);
