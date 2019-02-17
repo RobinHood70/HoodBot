@@ -45,7 +45,36 @@
 		}
 		#endregion
 
-		#region IDictionary<TKey, TValue> Methods
+		#region ICollection<T> Extensions
+
+		/// <summary>Adds one collection of items to another.</summary>
+		/// <typeparam name="T">The type of items.</typeparam>
+		/// <param name="original">The original collection.</param>
+		/// <param name="collection">The collection to be added.</param>
+		public static void AddRange<T>(this ICollection<T> original, IEnumerable<T> collection)
+		{
+			ThrowNull(original, nameof(original));
+			if (collection != null)
+			{
+				if (original is List<T> list)
+				{
+					list.AddRange(collection);
+				}
+				else
+				{
+					using (var enumerator = collection.GetEnumerator())
+					{
+						while (enumerator.MoveNext())
+						{
+							original.Add(enumerator.Current);
+						}
+					}
+				}
+			}
+		}
+		#endregion
+
+		#region IDictionary<TKey, TValue> Extensions
 
 		/// <summary>Convenience method to convert a dictionary to read-only.</summary>
 		/// <typeparam name="TKey">The key-type of the <paramref name="dictionary" /> (inferred).</typeparam>
@@ -71,7 +100,7 @@
 		}
 		#endregion
 
-		#region IEnumerable<T> Methods
+		#region IEnumerable<T> Extensions
 
 		/// <summary>Casts the enumerable to an IReadOnlyCollection if possible, or creates a new one if needed.</summary>
 		/// <typeparam name="T">The type of the original enumerable.</typeparam>
@@ -100,7 +129,7 @@
 		}
 		#endregion
 
-		#region IEnumerable Methods
+		#region IEnumerable Extensions
 
 		/// <summary>Nearly identical to Linq's Cast method, but limited to classes for better performance.</summary>
 		/// <typeparam name="T">The type to convert to.</typeparam>
@@ -123,7 +152,7 @@
 		public static bool HasItems(this IEnumerable list) => list?.GetEnumerator().MoveNext() ?? false;
 		#endregion
 
-		#region IFormattable Methods
+		#region IFormattable Extensions
 
 		/// <summary>Convenience method to format any IFormattable value as an invariant value.</summary>
 		/// <typeparam name="T">Any IFormattable.</typeparam>

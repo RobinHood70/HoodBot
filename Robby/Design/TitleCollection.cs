@@ -357,9 +357,12 @@
 		{
 			if (titles != null)
 			{
-				foreach (var title in titles)
+				using (var enumerator = titles.GetEnumerator())
 				{
-					this.Add(title);
+					while (enumerator.MoveNext())
+					{
+						this.Add(enumerator.Current);
+					}
 				}
 			}
 		}

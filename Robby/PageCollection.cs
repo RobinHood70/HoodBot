@@ -199,10 +199,7 @@
 			if (namespaceLimitations != null)
 			{
 				this.NamespaceLimitations.Clear();
-				foreach (var item in namespaceLimitations)
-				{
-					this.NamespaceLimitations.Add(item);
-				}
+				this.NamespaceLimitations.AddRange(namespaceLimitations);
 			}
 		}
 		#endregion

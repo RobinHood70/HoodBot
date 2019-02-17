@@ -49,11 +49,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(add, nameof(add));
 			this.myList.Clear();
-			foreach (var item in add)
-			{
-				this.myList.Add(item);
-			}
-
+			this.myList.AddRange(add);
 			this.SetItemsRemaining(this.myList.Count);
 		}
 		#endregion
