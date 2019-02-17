@@ -69,12 +69,12 @@
 
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection" /> class from individual Title items.</summary>
 		/// <param name="titles">The original Title collection.</param>
-		/// <returns>A Title-only copy of the original collection.</returns>
+		/// <returns>A Title-only copy of the original collection. Note that this creates all new Titles based on the original objects' namespace, page name, and key.</returns>
 		public static TitleCollection CopyFrom(params Title[] titles) => CopyFrom(titles as IEnumerable<Title>);
 
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection" /> class from another Title collection.</summary>
 		/// <param name="titles">The original Title collection.</param>
-		/// <returns>A Title-only copy of the original collection.</returns>
+		/// <returns>A Title-only copy of the original collection. Note that this creates all new Titles based on the original objects' namespace, page name, and key.</returns>
 		public static TitleCollection CopyFrom(IEnumerable<Title> titles)
 		{
 			ThrowNull(titles, nameof(titles));
