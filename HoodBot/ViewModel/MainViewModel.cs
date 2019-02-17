@@ -413,7 +413,7 @@
 
 		private void StatusWrite(string text) => this.Status += this.Status.Length == 0 ? text.TrimStart() : text;
 
-		private void StatusWriteLine(string status) => this.StatusWrite(status + NewLine);
+		private void StatusWriteLine(string text) => this.StatusWrite(text + NewLine);
 		#endregion
 	}
 }

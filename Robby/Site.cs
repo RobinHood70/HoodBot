@@ -765,8 +765,7 @@
 			var retval = new List<User>(result.Count);
 			foreach (var item in result)
 			{
-				var user = new User(this, item);
-				retval.Add(user);
+				retval.Add(new User(this, item));
 			}
 
 			return retval.AsReadOnly();
