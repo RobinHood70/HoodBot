@@ -730,7 +730,7 @@
 		/// <param name="index">The index to insert at.</param>
 		/// <param name="item">The item.</param>
 		/// <exception cref="InvalidOperationException">The item's site does not match the collection's site.</exception>
-		/// <remarks>This method underlies the <see cref="Insert(int, TTitle)" /> method and, like <see cref="System.Collections.ObjectModel.Collection{T}.InsertItem(int, T)" />, can be overridden in derived classes.</remarks>
+		/// <remarks>This method underlies all methods that insert pages into the collection, and can be overridden in derived classes.</remarks>
 		protected virtual void InsertItem(int index, TTitle item)
 		{
 			ThrowNull(item, nameof(item));
