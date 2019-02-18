@@ -30,12 +30,19 @@
 		protected IList<WikiTask> Tasks { get; } = new List<WikiTask>();
 		#endregion
 
-		#region Public Methods
-		protected sealed override void Main()
+		#region Protected Override Methods
+		protected override void Main()
 		{
 			this.ProgressMaximum = this.Tasks.Count + 1;
 			this.MainJob();
-			this.IncrementProgress();
+			this.Progress++;
+			this.RunTasks();
+		}
+		#endregion
+
+		#region Protected Virtual Methods
+		protected virtual void RunTasks()
+		{
 			foreach (var task in this.Tasks)
 			{
 				var sw = new Stopwatch();
@@ -43,7 +50,7 @@
 
 				task.SetAsyncInfoWithIntercept(this.taskProgressIntercept);
 				task.Execute();
-				this.IncrementProgress();
+				this.Progress++;
 
 				sw.Stop();
 				Debug.WriteLine($"{task.GetType().Name}: {sw.ElapsedMilliseconds}");
@@ -51,7 +58,7 @@
 		}
 		#endregion
 
-		#region Public Override Methods
+		#region Public Abstract Methods
 		protected abstract void MainJob();
 		#endregion
 

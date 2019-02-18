@@ -20,7 +20,7 @@
 				this.StatusWrite($"Job {i}: Start...");
 				Thread.Sleep(199);
 				this.StatusWriteLine("End");
-				this.IncrementProgress();
+				this.Progress++;
 			}
 		}
 	}

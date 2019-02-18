@@ -1,13 +1,19 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Tasks
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Threading;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 
 	public abstract class WikiRunner
 	{
+		#region Fields
+		private int progress = 0;
+		#endregion
+
 		#region Constructors
 		protected WikiRunner(Site site) => this.Site = site;
 		#endregion
@@ -21,11 +27,53 @@
 		#region Public Properties
 		public AsyncInfo AsyncInfo { get; protected set; }
 
-		public int Progress { get; set; }
+		public int Progress
+		{
+			get => this.progress;
+			set
+			{
+				this.progress = value;
+				this.UpdateProgress();
+			}
+		}
 
 		public int ProgressMaximum { get; set; }
 
 		public Site Site { get; }
+		#endregion
+
+		#region Public Methods
+		public static TitleCollection BuildRedirectList(IEnumerable<Title> titles)
+		{
+			var retval = TitleCollection.CopyFrom(titles);
+
+			// Loop until nothing new is added.
+			var pagesToCheck = new HashSet<Title>(retval, new SimpleTitleEqualityComparer());
+			var alreadyChecked = new HashSet<Title>(new SimpleTitleEqualityComparer());
+			do
+			{
+				foreach (var page in pagesToCheck)
+				{
+					retval.AddBacklinks(page.FullPageName, BacklinksTypes.Backlinks, true, Filter.Only);
+				}
+
+				alreadyChecked.UnionWith(pagesToCheck);
+				pagesToCheck.Clear();
+				pagesToCheck.UnionWith(retval);
+				pagesToCheck.ExceptWith(alreadyChecked);
+			}
+			while (pagesToCheck.Count > 0);
+
+			return retval;
+		}
+
+		public PageCollection FollowRedirects(IEnumerable<Title> titles)
+		{
+			var originalsFollowed = PageCollection.Unlimited(this.Site, new PageLoadOptions(PageModules.None) { FollowRedirects = true });
+			originalsFollowed.AddTitles(titles);
+
+			return originalsFollowed;
+		}
 		#endregion
 
 		#region Public Virtual Methods
@@ -55,12 +103,6 @@
 			{
 				cancel.ThrowIfCancellationRequested();
 			}
-		}
-
-		protected void IncrementProgress()
-		{
-			this.Progress++;
-			this.UpdateProgress();
 		}
 
 		protected virtual void OnCompleted(EventArgs e) => this.Completed?.Invoke(this, e);

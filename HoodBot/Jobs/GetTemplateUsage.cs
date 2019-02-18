@@ -11,6 +11,12 @@
 
 	public class GetTemplateUsage : WikiJob
 	{
+		#region Fields
+		private readonly string location;
+		private readonly IReadOnlyList<string> originalTemplateNames;
+		private readonly bool respectRedirects;
+		#endregion
+
 		#region Constructors
 		[JobInfo("Template Usage")]
 		public GetTemplateUsage(
@@ -22,115 +28,97 @@
 			: base(site, asyncInfo)
 		{
 			ThrowNull(templateNames, nameof(templateNames));
-			var tempNames = new List<string>();
+			this.respectRedirects = respectRedirects;
+			var allTemplateNames = new List<string>();
 			foreach (var templateName in templateNames)
 			{
-				tempNames.AddRange(templateName.Split('|'));
+				allTemplateNames.AddRange(templateName.Split('|'));
 			}
 
-			var templates = new TitleCollection(this.Site)
-			{
-				{ MediaWikiNamespaces.Template, tempNames }
-			};
-
-			if (templates.Count > 0)
-			{
-				location = location?.Replace("%templateName%", templates[0].PageName);
-			}
-
-			var allNames = new TitleCollection(this.Site);
-			if (respectRedirects)
-			{
-				this.Tasks.Add(new BuildRedirectList(this, templates, allNames));
-			}
-			else
-			{
-				allNames.AddCopy(templates);
-			}
-
-			var pageList = PageCollection.Unlimited(this.Site);
-			this.Tasks.Add(new GetTemplatePages(this, allNames, respectRedirects, pageList));
-			this.Tasks.Add(new LocalExportTask(this, allNames, pageList, location));
+			this.location = location.Replace("%templateName%", allTemplateNames[0]);
+			this.originalTemplateNames = allTemplateNames;
 		}
 		#endregion
 
 		#region Protected Override Methods
 		protected override void MainJob()
 		{
+			this.ProgressMaximum = 3;
+			var templates = new TitleCollection(this.Site.Namespaces[MediaWikiNamespaces.Template], this.originalTemplateNames);
+			TitleCollection allTemplateNames;
+			if (this.respectRedirects)
+			{
+				this.StatusWriteLine("Loading template redirects");
+				templates = TitleCollection.CopyFrom(this.FollowRedirects(templates));
+				allTemplateNames = BuildRedirectList(templates);
+				this.ProgressMaximum++;
+				this.Progress++;
+			}
+			else
+			{
+				allTemplateNames = templates;
+			}
+
+			this.StatusWriteLine("Loading pages");
+			var results = PageCollection.Unlimited(this.Site);
+			results.AddPageTranscludedIn(templates);
+			this.Progress++;
+			this.StatusWriteLine("Exporting");
+			this.ExportResults(allTemplateNames, results, this.location);
+			this.Progress++;
+			// this.Tasks.Add(new LocalExportTask(this, allNames, pageList, this.location));
 		}
 		#endregion
 
-		#region Private Classes
-		private class LocalExportTask : WikiTask
+		#region Private Methods
+		private void ExportResults(TitleCollection allTemplateNames, PageCollection results, string location)
 		{
-			private readonly string location;
-			private readonly PageCollection pages;
-			private readonly TitleCollection redirectList;
-
-			public LocalExportTask(WikiRunner parent, TitleCollection redirectList, PageCollection pages, string location)
-				: base(parent)
+			var allNames = new List<string>(allTemplateNames.ToStringEnumerable(MediaWikiNamespaces.Template));
+			var allTemplates = TemplateCollection.GetTemplates(allNames, results);
+			if (allTemplates.Count == 0)
 			{
-				this.location = location;
-				this.pages = pages;
-				this.redirectList = redirectList;
+				this.StatusWriteLine("No template calls found!");
 			}
-
-			protected override void Main()
+			else if (!string.IsNullOrWhiteSpace(this.location))
 			{
-				this.StatusWriteLine("Exporting");
-				this.ProgressMaximum = 2;
-
-				var allNames = new List<string>(this.redirectList.ToStringEnumerable(MediaWikiNamespaces.Template));
-				var allTemplates = TemplateCollection.GetTemplates(allNames, this.pages);
-				this.IncrementProgress();
-
-				if (allTemplates.Count == 0)
+				try
 				{
-					this.StatusWriteLine("No template calls found!");
+					this.WriteFile(allTemplates);
+					this.StatusWriteLine("File saved to " + location);
 				}
-				else if (!string.IsNullOrWhiteSpace(this.location))
+				catch (System.IO.IOException e)
 				{
-					try
-					{
-						this.WriteFile(allTemplates);
-						this.StatusWriteLine("File saved to " + this.location);
-					}
-					catch (System.IO.IOException e)
-					{
-						this.StatusWriteLine("Couldn't save file to " + this.location);
-						this.StatusWriteLine(e.Message);
-					}
+					this.StatusWriteLine("Couldn't save file to " + location);
+					this.StatusWriteLine(e.Message);
 				}
-
-				this.IncrementProgress();
 			}
+		}
 
-			private void WriteFile(TemplateCollection allTemplates)
+		private void WriteFile(TemplateCollection allTemplates)
+		{
+			var csvFile = new CsvFile()
 			{
-				var csvFile = new CsvFile()
-				{
-					EmptyFieldText = " "
-				};
-				var output = new List<string>(allTemplates.HeaderOrder.Count + 2)
+				EmptyFieldText = " "
+			};
+			var output = new List<string>(allTemplates.HeaderOrder.Count + 2)
 				{
 					"Page",
 					"Template Name"
 				};
-				output.AddRange(allTemplates.HeaderOrder.Keys);
-				csvFile.AddHeader(output);
+			output.AddRange(allTemplates.HeaderOrder.Keys);
+			csvFile.AddHeader(output);
 
-				foreach (var template in allTemplates)
+			foreach (var template in allTemplates)
+			{
+				var row = csvFile.Add(template.Page, template.Template.Name);
+				foreach (var param in template.Template)
 				{
-					var row = csvFile.Add(template.Page, template.Template.Name);
-					foreach (var param in template.Template)
-					{
-						// For now, we're assuming that trimming trailing lines from anon parameters is desirable, but could be made optional if needed.
-						row[param.Name] = param.Anonymous ? param.Value.TrimEnd(new[] { '\r', '\n' }) : param.Value;
-					}
+					// For now, we're assuming that trimming trailing lines from anon parameters is desirable, but could be made optional if needed.
+					row[param.Name] = param.Anonymous ? param.Value.TrimEnd(new[] { '\r', '\n' }) : param.Value;
 				}
-
-				csvFile.WriteFile(this.location);
 			}
+
+			csvFile.WriteFile(this.location);
 		}
 		#endregion
 	}
