@@ -201,17 +201,12 @@
 		#endregion
 
 		#region Private Static Methods
-		private static string FormatTimeSpan(TimeSpan allJobsTimer)
-		{
-			var retval = allJobsTimer.ToString(@"h\h\ mm\m\ ss\.f", CultureInfo.CurrentCulture);
-			retval = retval.TrimStart('0', ':', 'h', 'm', ' ').TrimEnd('0', '.');
-			if (retval.Length == 0 || retval[0] == '.')
-			{
-				retval = '0' + retval;
-			}
-
-			return retval + 's';
-		}
+		private static string FormatTimeSpan(TimeSpan allJobsTimer) => allJobsTimer.ToString(@"h\h\ m\m\ s\.f\s", CultureInfo.CurrentCulture)
+			.Replace("0h", string.Empty)
+			.Replace(" 0m", string.Empty)
+			.Replace(".0", string.Empty)
+			.Replace(" 0s", string.Empty)
+			.Trim();
 		#endregion
 
 		#region Private Methods
@@ -347,7 +342,7 @@
 					StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery
 				};
 
-				// wal.SendingRequest += this.WalSendingRequest;
+				// wal.SendingRequest += WalSendingRequest;
 				// wal.ResponseReceived += WalResponseRecieved;
 				wal.WarningOccurred += WalWarningOccurred;
 				this.site = new Site(wal);
