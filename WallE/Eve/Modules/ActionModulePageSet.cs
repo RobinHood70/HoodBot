@@ -200,7 +200,6 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 
 				var currentGroup = this.values.GetRange(this.offset, listSize);
-				this.offset += listSize;
 
 				// Several generators also use titles/pageids/revids, so emit them if present, whether or not there's a generator.
 				request.Add(input.TypeName, currentGroup);
@@ -229,6 +228,11 @@ namespace RobinHood70.WallE.Eve.Modules
 				this.Wal.ContinueVersion = newVersion;
 				this.ContinueModule = this.Wal.ModuleFactory.CreateContinue();
 				this.ContinueModule.Deserialize(parent);
+			}
+
+			if (!this.done && this.ContinueModule.BatchComplete && !this.ContinueModule.Continues)
+			{
+				this.offset += this.CurrentListSize;
 			}
 
 			// This is a fugly workaround for the fact that modules other than queries will have the pageset data at the parent level, while query has it at the child level. I couldn't figure out a better way to do it (other than to simply ignore it and check for results that will never be there).
