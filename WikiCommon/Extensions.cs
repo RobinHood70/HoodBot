@@ -104,28 +104,55 @@
 
 		/// <summary>Casts the enumerable to an IReadOnlyCollection if possible, or creates a new one if needed.</summary>
 		/// <typeparam name="T">The type of the original enumerable.</typeparam>
-		/// <param name="list">The enumerable to convert.</param>
+		/// <param name="collection">The enumerable to convert.</param>
 		/// <returns>The existing enumerable as an IReadOnlyCollection or a new list.</returns>
-		public static IReadOnlyCollection<T> AsReadOnlyCollection<T>(this IEnumerable<T> list) => list.HasItems() ? list as IReadOnlyCollection<T> ?? new List<T>(list) : Array.Empty<T>();
+		public static IReadOnlyCollection<T> AsReadOnlyCollection<T>(this IEnumerable<T> collection) => collection.HasItems() ? collection as IReadOnlyCollection<T> ?? new List<T>(collection) : Array.Empty<T>();
 
 		/// <summary>Casts the enumerable to an IReadOnlyList if possible, or creates a new one if needed.</summary>
 		/// <typeparam name="T">The type of the original enumerable.</typeparam>
-		/// <param name="list">The enumerable to convert.</param>
+		/// <param name="collection">The enumerable to convert.</param>
 		/// <returns>The existing enumerable as an IReadOnlyList or a new list.</returns>
-		public static IReadOnlyList<T> AsReadOnlyList<T>(this IEnumerable<T> list) => list.HasItems() ? list as IReadOnlyList<T> ?? new List<T>(list) : Array.Empty<T>();
+		public static IReadOnlyList<T> AsReadOnlyList<T>(this IEnumerable<T> collection) => collection.HasItems() ? collection as IReadOnlyList<T> ?? new List<T>(collection) : Array.Empty<T>();
 
-		/// <summary>Gets the first item in an enumeration without adding a stupid amount of other Linq things that are really REALLY annoying at design time.</summary>
-		/// <typeparam name="T">The type of the enumerable.</typeparam>
-		/// <param name="list">The enumerable from which to retrieve the first value.</param>
+		/// <summary>Gets the first item of the collection.</summary>
+		/// <typeparam name="T">The collection type.</typeparam>
+		/// <param name="collection">The collection to enumerate.</param>
 		/// <returns>The first value in the enumerable, or throws an error.</returns>
 		/// <exception cref="KeyNotFoundException">The list was empty.</exception>
-		public static T First<T>(this IEnumerable<T> list)
+		public static T First<T>(this IEnumerable<T> collection)
 		{
-			ThrowNull(list, nameof(list));
-			using (var enumerator = list.GetEnumerator())
+			ThrowNull(collection, nameof(collection));
+			using (var enumerator = collection.GetEnumerator())
 			{
 				return enumerator.MoveNext() ? enumerator.Current : throw new KeyNotFoundException();
 			}
+		}
+
+		/// <summary>  Gets the first item of the collection, or the default value for the type.</summary>
+		/// <typeparam name="T">The collection type.</typeparam>
+		/// <param name="collection">The collection to enumerate.</param>
+		/// <returns>The first item in the collection or <see langword="default"/>.</returns>
+		public static T FirstOrDefault<T>(this IEnumerable<T> collection) => FirstOrDefault(collection, default);
+
+		/// <summary>Gets the first item of the collection, or the specified default value.</summary>
+		/// <typeparam name="T">The collection type.</typeparam>
+		/// <param name="collection">The collection to enumerate.</param>
+		/// <param name="defaultValue">The default value to use if the collection is empty.</param>
+		/// <returns>The first item in the collection or the specified default value.</returns>
+		public static T FirstOrDefault<T>(this IEnumerable<T> collection, T defaultValue)
+		{
+			if (collection != null)
+			{
+				using (var enumerator = collection.GetEnumerator())
+				{
+					if (enumerator.MoveNext())
+					{
+						return enumerator.Current;
+					}
+				}
+			}
+
+			return defaultValue;
 		}
 		#endregion
 
