@@ -37,6 +37,12 @@
 		/// <summary>Load the list of categories in which this page is categorized.</summary>
 		CategoryInfo = 1 << 7,
 
+		/// <summary>Load the list of backlinks to the page. When part of a pageset, this allows getting backlinks for multiple pages at once.</summary>
+		LinksHere = 1 << 8,
+
+		/// <summary>Load the list of transclusions of this page. When part of a pageset, this allows getting transclusions for multiple pages at once.</summary>
+		TranscludedIn = 1 << 9,
+
 		/// <summary>Load custom page information. Use this in conjunction with a custom PageCreator to control when your custom information is retrieved.</summary>
 		Custom = 1 << 15,
 
@@ -44,7 +50,7 @@
 		Default = Info | Revisions,
 
 		/// <summary>Load everything Robby is capable of handling.</summary>
-		All = Categories | CategoryInfo | FileInfo | Info | Links | Properties | Revisions | Templates | Custom
+		All = Categories | CategoryInfo | FileInfo | Info | Links | LinksHere | Properties | Revisions | Templates | TranscludedIn | Custom
 	}
 	#endregion
 

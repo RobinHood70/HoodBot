@@ -160,6 +160,13 @@
 		/// <returns>A new PageCollection with all namespace limitations disabled.</returns>
 		/// <remarks>This is a simple shortcut method to create PageCollections where limitations can safely be ignored.</remarks>
 		public static PageCollection Unlimited(Site site) => new PageCollection(site) { LimitationType = LimitationType.None };
+
+		/// <summary>Initializes a new instance of the PageCollection class with no namespace limitations.</summary>
+		/// <param name="site">The site the pages are from. All pages in a collection must belong to the same site.</param>
+		/// <param name="options">A <see cref="PageLoadOptions"/> object initialized with a set of modules. Using this constructor allows you to customize some options.</param>
+		/// <returns>A new PageCollection with all namespace limitations disabled.</returns>
+		/// <remarks>This is a simple shortcut method to create PageCollections where limitations can safely be ignored.</remarks>
+		public static PageCollection Unlimited(Site site, PageLoadOptions options) => new PageCollection(site, options) { LimitationType = LimitationType.None };
 		#endregion
 
 		#region Public Methods
@@ -330,10 +337,20 @@
 		/// <param name="titles">The titles whose categories should be loaded.</param>
 		protected override void AddPageLinks(LinksInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
 
+		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles whose backlinks should be loaded.</param>
+		protected override void AddPageLinksHere(LinksHereInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
+
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
 		protected override void AddPageTransclusions(TemplatesInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
+
+		/// <summary>Adds pages that transclude the given titles to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles whose transclusions should be loaded.</param>
+		protected override void AddPageTranscludedIn(TranscludedInInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages with a given property to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -419,6 +436,7 @@
 				this[page.Key] = page; // Not using add because we could be loading duplicate pages.
 			}
 
+			this.ReapplyLimitations(); // Not the ideal way of doing this, but probably the most straight-forward. Other option would be to filter for duplicates first via a HashSet or similar, then add to the collection.
 			this.PopulateMapCollections(result);
 		}
 

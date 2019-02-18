@@ -81,7 +81,7 @@
     <Compile Include="Message.cs" />
     <Compile Include="Page.cs" />
     <Compile Include="PageCollection.cs" />
-    <Compile Include="Design\TitleCollection.cs" />
+    <Compile Include="Design\TitleCollection{TTitle}.cs" />
     <Compile Include="RecentChange.cs" />
     <Compile Include="RecentChangesOptions.cs" />
     <Compile Include="TitleCollection.cs" />

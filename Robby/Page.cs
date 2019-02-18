@@ -63,6 +63,10 @@
 		/// <value>The links used on the page.</value>
 		public IReadOnlyList<Title> Links { get; } = new List<Title>();
 
+		/// <summary>Gets the links on the page, if they were requested in the last load operation.</summary>
+		/// <value>The links used on the page.</value>
+		public IReadOnlyList<Title> LinksHere { get; } = new List<Title>();
+
 		/// <summary>Gets a value indicating whether this <see cref="Page" /> has been loaded.</summary>
 		/// <value><see langword="true" /> if loaded; otherwise, <see langword="false" />.</value>
 		public bool Loaded { get; private set; }
@@ -108,6 +112,10 @@
 		/// <value><see langword="true" /> if the text no longer matches the first revision; otherwise, <see langword="false" />.</value>
 		/// <remarks>This is currently simply a shortcut property to compare the Text with Revisions[0]. This may not be an accurate reflection of modification status when loading a specific revision range or in other unusual circumstances.</remarks>
 		public bool TextModified => this.Revisions.Count > 0 ? this.Text != this.Revisions[0].Text : !string.IsNullOrWhiteSpace(this.Text);
+
+		/// <summary>Gets the links on the page, if they were requested in the last load operation.</summary>
+		/// <value>The links used on the page.</value>
+		public IReadOnlyList<Title> TranscludedIn { get; } = new List<Title>();
 		#endregion
 
 		#region Public Static Methods
@@ -245,6 +253,14 @@
 				links.Add(new Title(this.Site, link.Title));
 			}
 
+			// LinksHere
+			var linksHere = this.LinksHere as List<Title>;
+			linksHere.Clear();
+			foreach (var linkHere in pageItem.LinksHere)
+			{
+				linksHere.Add(new Title(this.Site, linkHere.Title));
+			}
+
 			// Properties
 			var properties = this.Properties as Dictionary<string, string>;
 			properties.Clear();
@@ -263,6 +279,14 @@
 			foreach (var link in pageItem.Templates)
 			{
 				templates.Add(new Title(this.Site, link.Title));
+			}
+
+			// TranscludedIn
+			var transcludedIn = this.TranscludedIn as List<Title>;
+			transcludedIn.Clear();
+			foreach (var transclusionHere in pageItem.TranscludedIn)
+			{
+				transcludedIn.Add(new Title(this.Site, transclusionHere.Title));
 			}
 
 			// Categories

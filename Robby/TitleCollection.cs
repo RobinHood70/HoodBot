@@ -83,18 +83,13 @@
 		public static TitleCollection CopyFrom(IEnumerable<Title> titles)
 		{
 			ThrowNull(titles, nameof(titles));
-			Site site = null;
-			foreach (var title in titles)
-			{
-				site = site ?? title.Site;
-				break;
-			}
-
-			if (site == null)
+			var first = titles.FirstOrDefault();
+			if (first == null)
 			{
 				throw new InvalidOperationException("Source collection is empty - TitleCollection could not be initialized.");
 			}
 
+			var site = first.Site;
 			var output = new TitleCollection(site);
 			foreach (var title in titles)
 			{
@@ -343,6 +338,11 @@
 		/// <param name="titles">The titles whose categories should be loaded.</param>
 		protected override void AddPageLinks(LinksInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
+		/// <summary>Adds pages that link to the given titles to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles.</param>
+		protected override void AddPageLinksHere(LinksHereInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+
 		/// <summary>Adds pages with a given property to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		protected override void AddPagesWithProperty(PagesWithPropertyInput input)
@@ -350,6 +350,11 @@
 			var result = this.Site.AbstractionLayer.PagesWithProperty(input);
 			this.FillFromTitleItems(result);
 		}
+
+		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles whose transclusions should be loaded.</param>
+		protected override void AddPageTranscludedIn(TranscludedInInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>

@@ -310,9 +310,17 @@
 		/// <param name="namespaces">The namespaces to limit results to.</param>
 		public void AddPageLinks(IEnumerable<ISimpleTitle> titles, IEnumerable<int> namespaces) => this.AddPageLinks(new LinksInput() { Namespaces = namespaces }, titles);
 
+		/// <summary>Adds pages that link to the given titles to the collection.</summary>
+		/// <param name="titles">The titles.</param>
+		public void AddPageLinksHere(IEnumerable<ISimpleTitle> titles) => this.AddPageLinksHere(new LinksHereInput(), titles);
+
 		/// <summary>Adds pages with a given page property (e.g., notrail, breadCrumbTrail) to the collection.</summary>
 		/// <param name="property">The property to find.</param>
 		public void AddPagesWithProperty(string property) => this.AddPagesWithProperty(new PagesWithPropertyInput(property));
+
+		/// <summary>Adds pages that transclude the given titles to the collection.</summary>
+		/// <param name="titles">The titles.</param>
+		public void AddPageTranscludedIn(IEnumerable<ISimpleTitle> titles) => this.AddPageTranscludedIn(new TranscludedInInput(), titles);
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
@@ -353,19 +361,7 @@
 		/// <summary>Adds multiple titles to the <see cref="TitleCollection">collection</see> at once.</summary>
 		/// <param name="titles">The titles to add.</param>
 		/// <remarks>This method is for convenience only. Unlike the equivalent <see cref="List{T}" /> function, it simply calls <see cref="Add(TTitle)" /> repeatedly and provides no performance benefit.</remarks>
-		public void AddRange(IEnumerable<TTitle> titles)
-		{
-			if (titles != null)
-			{
-				using (var enumerator = titles.GetEnumerator())
-				{
-					while (enumerator.MoveNext())
-					{
-						this.Add(enumerator.Current);
-					}
-				}
-			}
-		}
+		public void AddRange(IEnumerable<TTitle> titles) => WikiCommon.Extensions.AddRange(this, titles);
 
 		/// <summary>Adds all available recent changes pages to the collection.</summary>
 		public void AddRecentChanges() => this.AddRecentChanges(new RecentChangesInput());
@@ -678,6 +674,19 @@
 		/// <param name="comparer">The comparer.</param>
 		public void Sort(IComparer<TTitle> comparer) => this.items.Sort(comparer);
 
+		/// <summary>Returns the contents of the collection as a read-only list of strings containing the full page names of each item.</summary>
+		/// <returns>A read-only list of strings containing the full page names of each item.</returns>
+		public IReadOnlyList<string> ToFullPageNames()
+		{
+			var retval = new List<string>(this.Count);
+			foreach (var title in this)
+			{
+				retval.Add(title.FullPageName);
+			}
+
+			return retval.AsReadOnly();
+		}
+
 		/// <summary>Enumerates the page names of the collection.</summary>
 		/// <returns>The page names of the collection as full page names.</returns>
 		public IEnumerable<string> ToStringEnumerable() => this.ToStringEnumerable(MediaWikiNamespaces.Main);
@@ -813,9 +822,19 @@
 		/// <param name="titles">The titles whose categories should be loaded.</param>
 		protected abstract void AddPageLinks(LinksInput input, IEnumerable<ISimpleTitle> titles);
 
+		/// <summary>Adds pages that link to the given pages.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles.</param>
+		protected abstract void AddPageLinksHere(LinksHereInput input, IEnumerable<ISimpleTitle> titles);
+
 		/// <summary>Adds pages with a given property to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		protected abstract void AddPagesWithProperty(PagesWithPropertyInput input);
+
+		/// <summary>Adds pages that transclude the given pages.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <param name="titles">The titles.</param>
+		protected abstract void AddPageTranscludedIn(TranscludedInInput input, IEnumerable<ISimpleTitle> titles);
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>

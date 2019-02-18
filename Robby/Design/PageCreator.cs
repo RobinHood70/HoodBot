@@ -30,6 +30,32 @@
 				propertyInputs.Add(new CategoriesInput());
 			}
 
+			if (whatToLoad.HasFlag(PageModules.CategoryInfo))
+			{
+				propertyInputs.Add(new CategoryInfoInput());
+			}
+
+			if (whatToLoad.HasFlag(PageModules.Custom))
+			{
+				this.AddCustomPropertyInputs(propertyInputs);
+			}
+
+			if (whatToLoad.HasFlag(PageModules.FileInfo))
+			{
+				propertyInputs.Add(new ImageInfoInput()
+				{
+					MaxItems = options.FileRevisionCount,
+					Properties =
+						ImageProperties.BitDepth |
+						ImageProperties.Comment |
+						ImageProperties.Mime |
+						ImageProperties.Size |
+						ImageProperties.Timestamp |
+						ImageProperties.Url |
+						ImageProperties.User,
+				});
+			}
+
 			if (whatToLoad.HasFlag(PageModules.Info))
 			{
 				propertyInputs.Add(new InfoInput());
@@ -38,6 +64,11 @@
 			if (whatToLoad.HasFlag(PageModules.Links))
 			{
 				propertyInputs.Add(new LinksInput());
+			}
+
+			if (whatToLoad.HasFlag(PageModules.LinksHere))
+			{
+				propertyInputs.Add(new LinksHereInput());
 			}
 
 			if (whatToLoad.HasFlag(PageModules.Properties))
@@ -74,30 +105,9 @@
 				propertyInputs.Add(new TemplatesInput());
 			}
 
-			if (whatToLoad.HasFlag(PageModules.FileInfo))
+			if (whatToLoad.HasFlag(PageModules.TranscludedIn))
 			{
-				propertyInputs.Add(new ImageInfoInput()
-				{
-					MaxItems = options.FileRevisionCount,
-					Properties =
-						ImageProperties.BitDepth |
-						ImageProperties.Comment |
-						ImageProperties.Mime |
-						ImageProperties.Size |
-						ImageProperties.Timestamp |
-						ImageProperties.Url |
-						ImageProperties.User,
-				});
-			}
-
-			if (whatToLoad.HasFlag(PageModules.CategoryInfo))
-			{
-				propertyInputs.Add(new CategoryInfoInput());
-			}
-
-			if (whatToLoad.HasFlag(PageModules.Custom))
-			{
-				this.AddCustomPropertyInputs(propertyInputs);
+				propertyInputs.Add(new TranscludedInInput());
 			}
 
 			return propertyInputs;
