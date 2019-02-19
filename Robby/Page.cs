@@ -313,46 +313,43 @@
 		/// <summary>Saves the page.</summary>
 		/// <param name="editSummary">The edit summary.</param>
 		/// <param name="isMinor">Whether the edit should be marked as minor.</param>
-		/// <returns><c>true</c> if the page was changed; otherwise <c>false</c>.</returns>
-		public bool Save(string editSummary, bool isMinor) => this.Save(editSummary, isMinor, true, false);
+		/// <returns>A value indicating the change status of the edit.</returns>
+		public ChangeResults Save(string editSummary, bool isMinor) => this.Save(editSummary, isMinor, true, false);
 
 		/// <summary>Saves the page with full options.</summary>
 		/// <param name="editSummary">The edit summary.</param>
 		/// <param name="isMinor">Whether the edit should be marked as minor.</param>
 		/// <param name="isBotEdit">Whether the edit should be marked as a bot edit.</param>
 		/// <param name="recreateIfJustDeleted">Whether to recreate the page if it was deleted since being loaded.</param>
-		/// <returns><c>true</c> if the page was changed; otherwise <c>false</c>.</returns>
-		public bool Save(string editSummary, bool isMinor, bool isBotEdit, bool recreateIfJustDeleted)
+		/// <returns>A value indicating the change status of the edit.</returns>
+		public ChangeResults Save(string editSummary, bool isMinor, bool isBotEdit, bool recreateIfJustDeleted)
 		{
 			if (!this.TextModified)
 			{
-				return false;
+				return ChangeResults.Ignored;
 			}
 
-			if (!this.Site.AllowEditing)
+			var changeArgs = new PageTextChangeArgs(this, nameof(this.Save), editSummary, isMinor, isBotEdit, recreateIfJustDeleted);
+			var retval = this.Site.PublishPageTextChange(changeArgs);
+			if (retval == ChangeResults.Successful && this.TextModified)
 			{
-				this.Site.PublishIgnoredEdit(this, new Dictionary<string, object>
+				var input = new EditInput(this.FullPageName, this.Text)
 				{
-					[nameof(editSummary)] = editSummary,
-					[nameof(isMinor)] = isMinor,
-					[nameof(isBotEdit)] = isBotEdit,
-					[nameof(recreateIfJustDeleted)] = recreateIfJustDeleted,
-				});
-
-				return true;
+					BaseTimestamp = this.Revisions?.Current?.Timestamp,
+					StartTimestamp = this.StartTimestamp,
+					Bot = changeArgs.BotEdit,
+					Minor = changeArgs.Minor ? Tristate.True : Tristate.False,
+					Recreate = changeArgs.RecreateIfJustDeleted,
+					Summary = changeArgs.EditSummary,
+				};
+				var result = this.Site.AbstractionLayer.Edit(input);
+				if (result.Result != "Success")
+				{
+					retval |= ChangeResults.Failed;
+				}
 			}
 
-			var input = new EditInput(this.FullPageName, this.Text)
-			{
-				BaseTimestamp = this.Revisions?.Current?.Timestamp,
-				StartTimestamp = this.StartTimestamp,
-				Bot = isBotEdit,
-				Minor = isMinor ? Tristate.True : Tristate.False,
-				Recreate = recreateIfJustDeleted,
-				Summary = editSummary,
-			};
-			var result = this.Site.AbstractionLayer.Edit(input);
-			return result.Result == "Success";
+			return retval;
 		}
 		#endregion
 
@@ -368,9 +365,6 @@
 		protected virtual void PopulateCustomResults(PageItem pageItem)
 		{
 		}
-
-		/// <summary>This should be called whenever the page is loaded.</summary>
-		protected virtual void OnLoaded() => this.PageLoaded?.Invoke(this, EventArgs.Empty);
 		#endregion
 
 		#region Private Methods
@@ -384,7 +378,7 @@
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, propertyInputs, creator.CreatePageItem);
 			this.Populate(result.First());
 			this.Loaded = true;
-			this.OnLoaded();
+			this.PageLoaded?.Invoke(this, EventArgs.Empty);
 		}
 		#endregion
 	}

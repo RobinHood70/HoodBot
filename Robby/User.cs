@@ -98,8 +98,8 @@
 		/// <param name="flags">The block flags.</param>
 		/// <param name="expiry">The date and time the block should expire.</param>
 		/// <param name="reblock">if set to <c>true</c>, reblocks the user with the new block settings.</param>
-		/// <returns><c>true</c> if the block was successful.</returns>
-		public bool Block(string reason, BlockFlags flags, DateTime expiry, bool reblock)
+		/// <returns>A value indicating the change status of the block.</returns>
+		public ChangeResults Block(string reason, BlockFlags flags, DateTime expiry, bool reblock)
 		{
 			var input = new BlockInput(this.Name)
 			{
@@ -116,8 +116,8 @@
 		/// <param name="flags">The block flags.</param>
 		/// <param name="duration">The duration of the block (e.g., "2 weeks").</param>
 		/// <param name="reblock">if set to <c>true</c>, reblocks the user with the new block settings.</param>
-		/// <returns><c>true</c> if the block was successful.</returns>
-		public bool Block(string reason, BlockFlags flags, string duration, bool reblock)
+		/// <returns>A value indicating the change status of the block.</returns>
+		public ChangeResults Block(string reason, BlockFlags flags, string duration, bool reblock)
 		{
 			var input = new BlockInput(this.Name)
 			{
@@ -132,35 +132,58 @@
 		/// <summary>Emails the user.</summary>
 		/// <param name="body">The e-mail body.</param>
 		/// <param name="ccMe">if set to <c>true</c>, sends a copy of the e-mail to the bot's e-mail account.</param>
-		/// <returns>A warning message if there was a problem with sending the e-mail; otherwise null.</returns>
+		/// <param name="emailResult">The result of the e-mail. If successful, this will be the e-mail in its entirety; if not, this will be the result code.</param>
+		/// <returns>A value indicating the change status of the e-mail.</returns>
 		/// <remarks>The subject of the e-mail will be the wiki default.</remarks>
-		public string Email(string body, bool ccMe)
+		public ChangeResults Email(string body, bool ccMe, out string emailResult)
 		{
 			defaultSubject = defaultSubject ?? this.Site.LoadParsedMessage("defemailsubject").Replace("$1", this.Site.UserName);
-			return this.Email(defaultSubject, body, ccMe);
+			return this.Email(defaultSubject, body, ccMe, out emailResult);
 		}
 
 		/// <summary>Emails the user.</summary>
 		/// <param name="subject">The subject line for the e-mail if not the wiki default.</param>
 		/// <param name="body">The e-mail body.</param>
 		/// <param name="ccMe">if set to <c>true</c>, sends a copy of the e-mail to the bot's e-mail account.</param>
-		/// <returns>"Success" if the e-mail was sent successfully or a warning message if there was a problem.</returns>
-		public string Email(string subject, string body, bool ccMe)
+		/// <param name="emailResult">The result of the e-mail. If successful, this will be the e-mail in its entirety; if not, this will be the result code.</param>
+		/// <returns>A value indicating the change status of the e-mail.</returns>
+		public ChangeResults Email(string subject, string body, bool ccMe, out string emailResult)
 		{
 			if (this.loaded && !this.Emailable)
 			{
 				// Don't ask the wiki what the result will be if we already know we can't e-mail them. Load the e-mail disabled message if we don't already have it and just return that.
 				emailDisabled = emailDisabled ?? this.Site.LoadParsedMessage("usermaildisabled");
-				return emailDisabled;
+				emailResult = emailDisabled;
+				return ChangeResults.Failed;
 			}
 
-			var input = new EmailUserInput(this.Name, body)
+			var retval = this.Site.PublishChange(this, new Dictionary<string, object>
 			{
-				CCMe = ccMe,
-				Subject = subject
-			};
-			var result = this.Site.AbstractionLayer.EmailUser(input);
-			return result.Message ?? result.Result;
+				[nameof(subject)] = subject,
+				[nameof(body)] = body,
+				[nameof(ccMe)] = ccMe,
+			});
+			if (retval == ChangeResults.Successful)
+			{
+				var input = new EmailUserInput(this.Name, body)
+				{
+					CCMe = ccMe,
+					Subject = subject
+				};
+				var result = this.Site.AbstractionLayer.EmailUser(input);
+				if (result.Result != "Success")
+				{
+					retval |= ChangeResults.Failed;
+				}
+
+				emailResult = result.Message ?? result.Result;
+			}
+			else
+			{
+				emailResult = null;
+			}
+
+			return retval;
 		}
 
 		// CONSIDER: Adding more GetContributions() and GetWatchlist() options.
@@ -242,20 +265,9 @@
 		/// <param name="header">The section header.</param>
 		/// <param name="msg">The message.</param>
 		/// <param name="editSummary">The edit summary.</param>
-		public void NewTalkPageMessage(string header, string msg, string editSummary)
+		/// <returns>A value indicating the change status of posting the new talk page message.</returns>
+		public ChangeResults NewTalkPageMessage(string header, string msg, string editSummary)
 		{
-			if (!this.Site.AllowEditing)
-			{
-				this.Site.PublishIgnoredEdit(this, new Dictionary<string, object>
-				{
-					[nameof(header)] = header,
-					[nameof(msg)] = msg,
-					[nameof(editSummary)] = editSummary,
-				});
-
-				return;
-			}
-
 			ThrowNull(msg, nameof(msg));
 			msg = msg.Trim();
 			if (!msg.Contains("~~~"))
@@ -264,48 +276,84 @@
 				msg += " ~~~~";
 			}
 
-			var input = new EditInput(this.TalkPage.FullPageName, msg)
+			var retval = this.Site.PublishChange(this, new Dictionary<string, object>
 			{
-				Bot = true,
-				Minor = Tristate.False,
-				Recreate = true,
-				Section = -1,
-				SectionTitle = header,
-				Summary = editSummary,
-			};
-			this.Site.AbstractionLayer.Edit(input);
+				[nameof(header)] = header,
+				[nameof(msg)] = msg,
+				[nameof(editSummary)] = editSummary,
+			});
+
+			if (retval == ChangeResults.Successful)
+			{
+				var input = new EditInput(this.TalkPage.FullPageName, msg)
+				{
+					Bot = true,
+					Minor = Tristate.False,
+					Recreate = true,
+					Section = -1,
+					SectionTitle = header,
+					Summary = editSummary,
+				};
+				var result = this.Site.AbstractionLayer.Edit(input);
+				if (result.Result != "Success")
+				{
+					retval |= ChangeResults.Failed;
+				}
+			}
+
+			return retval;
 		}
 
 		/// <summary>Unblocks the user for the specified reason.</summary>
 		/// <param name="reason">The unblock reason.</param>
-		/// <returns><c>true</c> if the user was successfully unblocked.</returns>
-		public bool Unblock(string reason)
+		/// <returns>A value indicating the change status of the unblock.</returns>
+		public ChangeResults Unblock(string reason)
 		{
-			if (!this.Site.AllowEditing)
+			var retval = this.Site.PublishChange(this, new Dictionary<string, object>
 			{
-				this.Site.PublishIgnoredEdit(this, new Dictionary<string, object>
-				{
-					[nameof(reason)] = reason,
-				});
+				[nameof(reason)] = reason,
+			});
 
-				return true;
+			if (retval == ChangeResults.Successful)
+			{
+				var input = new UnblockInput(this.Name)
+				{
+					Reason = reason
+				};
+				var result = this.Site.AbstractionLayer.Unblock(input);
+
+				if (result.Id == 0)
+				{
+					retval |= ChangeResults.Failed;
+				}
 			}
 
-			var input = new UnblockInput(this.Name)
-			{
-				Reason = reason
-			};
-			var result = this.Site.AbstractionLayer.Unblock(input);
-
-			return result.Id != 0;
+			return retval;
 		}
 		#endregion
 
 		#region Private Methods
-		private bool Block(BlockInput input)
+		private ChangeResults Block(BlockInput input)
 		{
-			var result = this.Site.AbstractionLayer.Block(input);
-			return result.Id != 0;
+			var retval = this.Site.PublishChange(this, new Dictionary<string, object>
+			{
+				[nameof(input.User)] = input.User,
+				[nameof(input.Reason)] = input.Reason,
+				[nameof(input.Expiry)] = input.Expiry,
+				[nameof(input.Expiry)] = input.ExpiryRelative,
+				[nameof(input.Flags)] = input.Flags,
+				[nameof(input.Reblock)] = input.Reblock,
+			});
+			if (retval == ChangeResults.Successful)
+			{
+				var result = this.Site.AbstractionLayer.Block(input);
+				if (result.Id == 0)
+				{
+					retval |= ChangeResults.Failed;
+				}
+			}
+
+			return retval;
 		}
 
 		private void Populate(UsersItem user)

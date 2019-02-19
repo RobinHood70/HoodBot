@@ -171,6 +171,17 @@
 
 		#region Public Methods
 
+		/// <summary>Creates a new page using the collection's <see cref="PageCreator"/> and adds it to the collection.</summary>
+		/// <param name="title">The title of the page to create.</param>
+		/// <returns>The page that was created.</returns>
+		/// <remarks>If the page title specified represents a page already in the collection, that page will be overwritten.</remarks>
+		public Page AddNewPage(string title)
+		{
+			var page = this.CreatePage(title);
+			this[page.Key] = page;
+			return page;
+		}
+
 		/// <summary>Adds pages to the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>
 		public void AddTitles(params string[] titles) => this.AddTitles(new TitleCollection(this.Site, titles));
@@ -182,6 +193,11 @@
 		/// <summary>Adds pages to the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>
 		public void AddTitles(IEnumerable<ISimpleTitle> titles) => this.AddTitles(this.LoadOptions, titles);
+
+		/// <summary>Creates a new page using the collection's <see cref="PageCreator"/>.</summary>
+		/// <param name="title">The title of the page to create.</param>
+		/// <returns>The page that was created.</returns>
+		public Page CreatePage(string title) => this.PageCreator.CreatePage(new TitleParts(this.Site, title));
 
 		/// <summary>Reapplies the namespace limitations in <see cref="NamespaceLimitations"/> to the existing collection.</summary>
 		public void ReapplyLimitations()
@@ -221,8 +237,7 @@
 			ThrowNull(titles, nameof(titles));
 			foreach (var title in titles)
 			{
-				var titleParts = new TitleParts(this.Site, title);
-				this.Add(this.PageCreator.CreatePage(titleParts));
+				this.AddNewPage(title);
 			}
 		}
 
@@ -249,6 +264,18 @@
 			}
 		}
 
+		/// <summary>Adds new pages based on an existing <see cref="ISimpleTitle"/> collection.</summary>
+		/// <param name="titles">The titles to be added.</param>
+		public override void AddFrom(IEnumerable<ISimpleTitle> titles)
+		{
+			ThrowNull(titles, nameof(titles));
+			foreach (var title in titles)
+			{
+				var page = this.PageCreator.CreatePage(title);
+				this[page.Key] = page;
+			}
+		}
+
 		/// <summary>Adds pages with the specified revision IDs to the collection.</summary>
 		/// <param name="revisionIds">The IDs.</param>
 		/// <remarks>General information about the pages for the revision IDs specified will always be loaded, regardless of the LoadOptions setting, though the revisions themselves may not be if the collection's load options would filter them out.</remarks>
@@ -260,6 +287,43 @@
 		{
 			base.Clear();
 			this.titleMap.Clear();
+		}
+		#endregion
+
+		#region Internal Static Methods
+
+		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
+		/// <param name="site">The site.</param>
+		/// <returns>A new PageCollection with no namespace limitations, load options set to none, and creating only default pages rather than user-specified.</returns>
+		internal static PageCollection UnlimitedDefault(Site site) => new PageCollection(site, PageLoadOptions.None, PageCreator.Default) { LimitationType = LimitationType.None };
+		#endregion
+
+		#region Internal Methods
+		internal void PopulateMapCollections(IPageSetResult result)
+		{
+			foreach (var item in result.Interwiki)
+			{
+				var titleParts = new TitleParts(this.Site, item.Value.Title);
+				Debug.Assert(titleParts.Interwiki.Prefix != item.Value.InterwikiPrefix, "Interwiki prefixes didn't match.", titleParts.Interwiki.Prefix + " != " + item.Value.InterwikiPrefix);
+				this.titleMap[item.Key] = titleParts;
+			}
+
+			foreach (var item in result.Converted)
+			{
+				this.titleMap[item.Key] = new TitleParts(this.Site, item.Value);
+			}
+
+			foreach (var item in result.Normalized)
+			{
+				this.titleMap[item.Key] = new TitleParts(this.Site, item.Value);
+			}
+
+			foreach (var item in result.Redirects)
+			{
+				// Move interwiki redirects to InterwikiTitles collection, since lookups would try to redirect to a local page with the same name.
+				var value = item.Value;
+				this.titleMap[item.Key] = new TitleParts(this.Site, value.Interwiki, value.Title, value.Fragment);
+			}
 		}
 		#endregion
 
@@ -429,11 +493,9 @@
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, this.PageCreator.GetPropertyInputs(options), this.PageCreator.CreatePageItem);
 			foreach (var item in result)
 			{
-				var titleParts = new TitleParts(this.Site, item.Value.Title);
-				var page = this.PageCreator.CreatePage(titleParts);
+				var page = this.AddNewPage(item.Value.Title);
 				page.Populate(item.Value);
 				page.LoadOptions = options;
-				this[page.Key] = page; // Not using add because we could be loading duplicate pages.
 			}
 
 			this.ReapplyLimitations(); // Not the ideal way of doing this, but probably the most straight-forward. Other option would be to filter for duplicates first via a HashSet or similar, then add to the collection.
@@ -460,8 +522,7 @@
 			this.PopulateMapCollections(result);
 			foreach (var item in result)
 			{
-				var titleParts = new TitleParts(this.Site, item.Value.Title);
-				var page = this.PageCreator.CreatePage(titleParts);
+				var page = this.CreatePage(item.Value.Title);
 				page.Populate(item.Value);
 				page.LoadOptions = this.LoadOptions;
 				if (input.Type.HasFlag(CategoryMemberTypes.Subcat) || page.Namespace.Id != MediaWikiNamespaces.Category)
@@ -486,33 +547,6 @@
 		private void LoadPages(IGeneratorInput generator) => this.LoadPages(this.LoadOptions, new QueryPageSetInput(generator));
 
 		private void LoadPages(IGeneratorInput generator, IEnumerable<ISimpleTitle> titles) => this.LoadPages(this.LoadOptions, new QueryPageSetInput(generator, titles.ToFullPageNames()));
-
-		private void PopulateMapCollections(IPageSetResult result)
-		{
-			foreach (var item in result.Interwiki)
-			{
-				var titleParts = new TitleParts(this.Site, item.Value.Title);
-				Debug.Assert(titleParts.Interwiki.Prefix != item.Value.InterwikiPrefix, "Interwiki prefixes didn't match.", titleParts.Interwiki.Prefix + " != " + item.Value.InterwikiPrefix);
-				this.titleMap[item.Key] = titleParts;
-			}
-
-			foreach (var item in result.Converted)
-			{
-				this.titleMap[item.Key] = new TitleParts(this.Site, item.Value);
-			}
-
-			foreach (var item in result.Normalized)
-			{
-				this.titleMap[item.Key] = new TitleParts(this.Site, item.Value);
-			}
-
-			foreach (var item in result.Redirects)
-			{
-				// Move interwiki redirects to InterwikiTitles collection, since lookups would try to redirect to a local page with the same name.
-				var value = item.Value;
-				this.titleMap[item.Key] = new TitleParts(this.Site, value.Interwiki, value.Title, value.Fragment);
-			}
-		}
 		#endregion
 	}
 }

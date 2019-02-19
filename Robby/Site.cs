@@ -14,6 +14,24 @@
 	using static RobinHood70.Robby.Properties.Resources;
 	using static RobinHood70.WikiCommon.Globals;
 
+	/// <summary>Describes the result of an attempted change to the site.</summary>
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1008:EnumsShouldHaveZeroValue", Justification = "Successful is more meaningful in this context.")]
+	[Flags]
+	public enum ChangeResults
+	{
+		/// <summary>The change to the wiki was successful.</summary>
+		Successful = 0,
+
+		/// <summary>The change to the wiki was ignored due to AllowEditing being set to false.</summary>
+		Ignored = 1,
+
+		/// <summary>During the appropriate event, a subscriber requested that the attempted change be cancelled.</summary>
+		Cancelled = 1 << 1,
+
+		/// <summary>The wiki reported that the method failed, either partly or completely, depending on the method.</summary>
+		Failed = 1 << 2,
+	}
+
 	/// <summary>Represents a single wiki site.</summary>
 	/// <seealso cref="IMessageSource" />
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Sufficiently maintainable for now. Could conceivably split off the LoadX() methods if needed, I suppose.")]
@@ -68,12 +86,16 @@
 
 		#region Events
 
-		/// <summary>Occurs when an edit is ignored due to the <see cref="AllowEditing"/> flag being false.</summary>
-		/// <remarks>This functions as a message bus, so only the Site object will ever flag an ignored edit. This allows easy logging of all ignored edits.</remarks>
-		public event StrongEventHandler<Site, EditIgnoredEventArgs> EditIgnored;
+		/// <summary>Occurs when a change is about to be made to the wiki. Subscribers have the option to indicate if they need the change to be cancelled.</summary>
+		public event StrongEventHandler<Site, ChangeArgs> Changing;
+
+		/// <summary>Occurs after the PageTextChanging event when a page is about to be edited on the wiki.</summary>
+		public event StrongEventHandler<Site, PagePreviewArgs> PagePreview;
+
+		/// <summary>Occurs when a page is about to be edited on the wiki. Subscribers may make additional changes to the page, or indicate if they need the change to be cancelled.</summary>
+		public event StrongEventHandler<Site, PageTextChangeArgs> PageTextChanging;
 
 		/// <summary>Occurs when a warning should be sent to the user.</summary>
-		/// <remarks>This functions as a message bus, so only the Site object will ever raise a warning. Warnings should be explicit enough about what occurred to determine any other information required. The true sending object is available as part of the event arguments, if needed.</remarks>
 		public event StrongEventHandler<Site, WarningEventArgs> WarningOccurred;
 		#endregion
 
@@ -484,20 +506,55 @@
 
 		/// <summary>Patrols the specified Recent Changes ID.</summary>
 		/// <param name="rcid">The Recent Change ID.</param>
-		/// <returns><c>true</c> if the edit was successfully patrolled; otherwise, <c>false</c>.</returns>
-		public bool Patrol(long rcid) => this.Patrol(new PatrolInput(rcid));
+		/// <returns>A value indicating the change status of the patrol.</returns>
+		public ChangeResults Patrol(long rcid)
+		{
+			var retval = this.PublishChange(this, new Dictionary<string, object>
+			{
+				[nameof(rcid)] = rcid,
+			});
+
+			if (retval == ChangeResults.Successful)
+			{
+				var result = this.Patrol(new PatrolInput(rcid));
+				if (result.Title == null)
+				{
+					retval |= ChangeResults.Failed;
+				}
+			}
+
+			return retval;
+		}
 
 		/// <summary>Patrols the specified revision ID.</summary>
 		/// <param name="revid">The revision ID.</param>
-		/// <returns><c>true</c> if the edit was successfully patrolled; otherwise, <c>false</c>.</returns>
-		public bool PatrolRevision(long revid) => this.Patrol(PatrolInput.FromRevisionId(revid));
+		/// <returns>A value indicating the change status of the patrol.</returns>
+		public ChangeResults PatrolRevision(long revid)
+		{
+			var retval = this.PublishChange(this, new Dictionary<string, object>
+			{
+				[nameof(revid)] = revid,
+			});
+
+			if (retval == ChangeResults.Successful)
+			{
+				var result = this.Patrol(PatrolInput.FromRevisionId(revid));
+				if (result.Title == null)
+				{
+					retval |= ChangeResults.Failed;
+				}
+			}
+
+			return retval;
+		}
 
 		/// <summary>Upload a file to the wiki.</summary>
 		/// <param name="fileName">The full path and filename of the file to upload.</param>
 		/// <param name="editSummary">The edit summary for the upload.</param>
 		/// <remarks>The destination filename will be the same as the local filename.</remarks>
 		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
-		public void Upload(string fileName, string editSummary) => this.Upload(fileName, null, editSummary, null);
+		/// <returns>A value indicating the change status of the upload.</returns>
+		public ChangeResults Upload(string fileName, string editSummary) => this.Upload(fileName, null, editSummary, null);
 
 		/// <summary>Upload a file to the wiki.</summary>
 		/// <param name="fileName">The full path and filename of the file to upload.</param>
@@ -505,7 +562,8 @@
 		/// <param name="editSummary">The edit summary for the upload.</param>
 		/// <remarks>The destination filename will be the same as the local filename.</remarks>
 		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
-		public void Upload(string fileName, string destinationName, string editSummary) => this.Upload(fileName, destinationName, editSummary, null);
+		/// <returns>A value indicating the change status of the upload.</returns>
+		public ChangeResults Upload(string fileName, string destinationName, string editSummary) => this.Upload(fileName, destinationName, editSummary, null);
 
 		/// <summary>Upload a file to the wiki.</summary>
 		/// <param name="fileName">The full path and filename of the file to upload.</param>
@@ -513,42 +571,43 @@
 		/// <param name="editSummary">The edit summary for the upload.</param>
 		/// <param name="pageText">Full page text for the File page. This should include the license, categories, and anything else required. Set to null to allow the wiki to generate the page text (normally just the <paramref name="editSummary" />).</param>
 		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
-		public void Upload(string fileName, string destinationName, string editSummary, string pageText)
+		/// <returns>A value indicating the change status of the upload.</returns>
+		public ChangeResults Upload(string fileName, string destinationName, string editSummary, string pageText)
 		{
-			if (!this.AllowEditing)
+			var retval = this.PublishChange(this, new Dictionary<string, object>
 			{
-				this.PublishIgnoredEdit(this, new Dictionary<string, object>
-				{
-					[nameof(fileName)] = fileName,
-					[nameof(destinationName)] = destinationName,
-					[nameof(editSummary)] = editSummary,
-					[nameof(pageText)] = pageText,
-				});
+				[nameof(fileName)] = fileName,
+				[nameof(destinationName)] = destinationName,
+				[nameof(editSummary)] = editSummary,
+				[nameof(pageText)] = pageText,
+			});
 
-				return;
-			}
-
-			var checkedName = Path.GetFileName(fileName); // Always access this, even if we don't need it, as a means of checking validity.
-			if (string.IsNullOrWhiteSpace(destinationName))
+			if (retval == ChangeResults.Successful)
 			{
-				destinationName = checkedName;
-			}
-
-			using (var upload = new FileStream(checkedName, FileMode.Open))
-			{
-				var uploadInput = new UploadInput(destinationName, upload)
+				var checkedName = Path.GetFileName(fileName); // Always access this, even if we don't need it, as a means of checking validity.
+				if (string.IsNullOrWhiteSpace(destinationName))
 				{
-					IgnoreWarnings = true,
-					Comment = editSummary,
-				};
-
-				if (pageText != null)
-				{
-					uploadInput.Text = pageText;
+					destinationName = checkedName;
 				}
 
-				this.Upload(uploadInput);
+				using (var upload = new FileStream(checkedName, FileMode.Open))
+				{
+					var uploadInput = new UploadInput(destinationName, upload)
+					{
+						IgnoreWarnings = true,
+						Comment = editSummary,
+					};
+
+					if (pageText != null)
+					{
+						uploadInput.Text = pageText;
+					}
+
+					this.Upload(uploadInput);
+				}
 			}
+
+			return retval;
 		}
 		#endregion
 
@@ -556,15 +615,15 @@
 
 		/// <summary>Clears the bot's "has message" flag.</summary>
 		/// <returns><c>true</c> if the flag was successfully cleared; otherwise, <c>false</c>.</returns>
-		public virtual bool ClearMessage()
+		public virtual ChangeResults ClearMessage()
 		{
-			if (!this.AllowEditing)
+			var retval = this.PublishChange(this, null);
+			if (retval == ChangeResults.Successful && !this.AbstractionLayer.ClearHasMessage())
 			{
-				this.PublishIgnoredEdit(this, null);
-				return true;
+				retval |= ChangeResults.Failed;
 			}
 
-			return this.AbstractionLayer.ClearHasMessage();
+			return retval;
 		}
 
 		/// <summary>Gets the article path.</summary>
@@ -602,12 +661,45 @@
 			this.AbstractionLayer.Logout();
 		}
 
-		/// <summary>Can be called any time an edit is deliberately ignored to publish the related event.</summary>
+		/// <summary>Raises the Changing event with the supplied arguments and indicates what actions should be taken.</summary>
 		/// <param name="sender">The sending object.</param>
 		/// <param name="parameters">A dictionary of parameters that were sent to the calling method.</param>
 		/// <param name="caller">The calling method (populated automatically with caller name).</param>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Does not make sense to do so for CallerMemberName.")]
-		public virtual void PublishIgnoredEdit(object sender, IReadOnlyDictionary<string, object> parameters, [CallerMemberName] string caller = null) => this.EditIgnored.Invoke(this, new EditIgnoredEventArgs(sender, caller, parameters));
+		/// <returns>A value indicating the actions that should take place.</returns>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
+		public virtual ChangeResults PublishChange(object sender, IReadOnlyDictionary<string, object> parameters, [CallerMemberName] string caller = null)
+		{
+			var changeArgs = new ChangeArgs(sender, caller, parameters);
+			this.Changing.Invoke(this, changeArgs);
+			var retval = this.AllowEditing ? ChangeResults.Successful : ChangeResults.Ignored;
+			if (changeArgs.CancelChange)
+			{
+				retval |= ChangeResults.Cancelled;
+			}
+
+			return retval;
+		}
+
+		/// <summary>Raises the PageTextChanging event with the supplied arguments and indicates what actions should be taken.</summary>
+		/// <param name="changeArgs">The arguments involved in changing the page. The caller is responsible for creating the object so that it can get the various return values out of it when after the event.</param>
+		/// <returns>A value indicating the actions that should take place.</returns>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
+		public virtual ChangeResults PublishPageTextChange(PageTextChangeArgs changeArgs)
+		{
+			ThrowNull(changeArgs, nameof(changeArgs));
+			this.PageTextChanging?.Invoke(this, changeArgs);
+			var retval = this.AllowEditing ? ChangeResults.Successful : ChangeResults.Ignored;
+			if (changeArgs.CancelChange)
+			{
+				retval |= ChangeResults.Cancelled;
+			}
+			else
+			{
+				this.PagePreview?.Invoke(this, new PagePreviewArgs(changeArgs));
+			}
+
+			return retval;
+		}
 
 		/// <summary>Publishes a warning.</summary>
 		/// <param name="sender">The sending object.</param>
@@ -636,6 +728,113 @@
 			}
 
 			return retval;
+		}
+
+		/// <summary>Loads the disambiguation templates for wikis that don't use Disambiguator.</summary>
+		/// <returns>A collection of titles of disambiguation templates.</returns>
+		protected virtual ICollection<Title> LoadDisambiguationTemplates()
+		{
+			this.disambiguationTemplates = new HashSet<Title>();
+			var page = new Page(this.Namespaces[MediaWikiNamespaces.MediaWiki], "Disambiguationspage");
+			page.Load(PageModules.Default | PageModules.Links);
+			if (!page.Missing)
+			{
+				if (page.Links.Count == 0)
+				{
+					this.disambiguationTemplates.Add(new Title(this, page.Text.Trim()));
+				}
+				else
+				{
+					this.disambiguationTemplates.UnionWith(page.Links);
+				}
+			}
+
+			return this.disambiguationTemplates;
+		}
+
+		/// <summary>Gets one or more messages from MediaWiki space.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <returns>A read-only dictionary of message names and their associated <see cref="Message"/> objects, as specified by the input parameters.</returns>
+		protected virtual IReadOnlyDictionary<string, Message> LoadMessages(AllMessagesInput input)
+		{
+			var result = this.AbstractionLayer.AllMessages(input);
+			var retval = new Dictionary<string, Message>(result.Count);
+			foreach (var item in result)
+			{
+				retval.Add(item.Name, new Message(this, item));
+			}
+
+			return retval.AsReadOnly();
+		}
+
+		/// <summary>Gets recent changes as specified by the input parameters.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <returns>A read-only list of <see cref="RecentChange"/> objects, as specified by the input parameters.</returns>
+		protected virtual IReadOnlyList<RecentChange> LoadRecentChanges(RecentChangesInput input)
+		{
+			var result = this.AbstractionLayer.RecentChanges(input);
+			var retval = new List<RecentChange>(result.Count);
+			foreach (var item in result)
+			{
+				retval.Add(new RecentChange(this, item));
+			}
+
+			return retval;
+		}
+
+		/// <summary>Gets user information as specified by the input parameters.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <returns>A read-only list of <see cref="User"/> objects, as specified by the input parameters.</returns>
+		protected virtual IReadOnlyList<User> LoadUserInformation(UsersInput input)
+		{
+			var result = this.AbstractionLayer.Users(input);
+			var retval = new List<User>(result.Count);
+			foreach (var item in result)
+			{
+				retval.Add(new User(this, item));
+			}
+
+			return retval.AsReadOnly();
+		}
+
+		/// <summary>Gets a list of users on the wiki, as specified by the input parameters.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <returns>A read-only list of <see cref="User"/> objects, as specified by the input parameters.</returns>
+		protected virtual IReadOnlyList<User> LoadUsers(AllUsersInput input)
+		{
+			ThrowNull(input, nameof(input));
+			input.Properties = AllUsersProperties.None;
+			var result = this.AbstractionLayer.AllUsers(input);
+			var retval = new List<User>(result.Count);
+			foreach (var item in result)
+			{
+				retval.Add(new User(this, item.Name));
+			}
+
+			return retval;
+		}
+
+		/// <summary>Logs the specified user into the wiki and loads necessary information for proper functioning of the class.</summary>
+		/// <param name="input">The input parameters. May be null.</param>
+		/// <exception cref="UnauthorizedAccessException">Thrown if there was an error logging into the wiki (which typically denotes that the user had the wrong password or does not have permission to log in).</exception>
+		/// <remarks>Even if you wish to edit anonymously, you <em>must</em> still log in by passing <see langword="null" /> for the input.</remarks>
+		protected virtual void Login(LoginInput input)
+		{
+			var result = this.AbstractionLayer.Login(input);
+			if (result.Result != "Success")
+			{
+				this.Clear();
+				throw new UnauthorizedAccessException(CurrentCulture(LoginFailed, result.Reason));
+			}
+
+			this.UserName = result.User;
+
+			// This should never happen with co-initialization, but just in case there's a massive change to the abstraction layer, make sure we have all the info we need.
+			if (this.Version == null)
+			{
+				var siteInfo = this.AbstractionLayer.SiteInfo(new SiteInfoInput() { Properties = NeededSiteInfo });
+				this.ParseInternalSiteInfo(siteInfo);
+			}
 		}
 
 		/// <summary>Gets all site information required for proper functioning of the framework.</summary>
@@ -726,131 +925,10 @@
 			this.InterwikiMap = new InterwikiMap(interwikiList);
 		}
 
-		/// <summary>Gets one or more messages from MediaWiki space.</summary>
-		/// <param name="input">The input parameters.</param>
-		/// <returns>A read-only dictionary of message names and their associated <see cref="Message"/> objects, as specified by the input parameters.</returns>
-		protected virtual IReadOnlyDictionary<string, Message> LoadMessages(AllMessagesInput input)
-		{
-			var result = this.AbstractionLayer.AllMessages(input);
-			var retval = new Dictionary<string, Message>(result.Count);
-			foreach (var item in result)
-			{
-				retval.Add(item.Name, new Message(this, item));
-			}
-
-			return retval.AsReadOnly();
-		}
-
-		/// <summary>Gets recent changes as specified by the input parameters.</summary>
-		/// <param name="input">The input parameters.</param>
-		/// <returns>A read-only list of <see cref="RecentChange"/> objects, as specified by the input parameters.</returns>
-		protected virtual IReadOnlyList<RecentChange> LoadRecentChanges(RecentChangesInput input)
-		{
-			var result = this.AbstractionLayer.RecentChanges(input);
-			var retval = new List<RecentChange>(result.Count);
-			foreach (var item in result)
-			{
-				retval.Add(new RecentChange(this, item));
-			}
-
-			return retval;
-		}
-
-		/// <summary>Gets user information as specified by the input parameters.</summary>
-		/// <param name="input">The input parameters.</param>
-		/// <returns>A read-only list of <see cref="User"/> objects, as specified by the input parameters.</returns>
-		protected virtual IReadOnlyList<User> LoadUserInformation(UsersInput input)
-		{
-			var result = this.AbstractionLayer.Users(input);
-			var retval = new List<User>(result.Count);
-			foreach (var item in result)
-			{
-				retval.Add(new User(this, item));
-			}
-
-			return retval.AsReadOnly();
-		}
-
-		/// <summary>Gets a list of users on the wiki, as specified by the input parameters.</summary>
-		/// <param name="input">The input parameters.</param>
-		/// <returns>A read-only list of <see cref="User"/> objects, as specified by the input parameters.</returns>
-		protected virtual IReadOnlyList<User> LoadUsers(AllUsersInput input)
-		{
-			ThrowNull(input, nameof(input));
-			input.Properties = AllUsersProperties.None;
-			var result = this.AbstractionLayer.AllUsers(input);
-			var retval = new List<User>(result.Count);
-			foreach (var item in result)
-			{
-				retval.Add(new User(this, item.Name));
-			}
-
-			return retval;
-		}
-
-		/// <summary>Loads the disambiguation templates for wikis that don't use Disambiguator.</summary>
-		/// <returns>A collection of titles of disambiguation templates.</returns>
-		protected virtual ICollection<Title> LoadDisambiguationTemplates()
-		{
-			this.disambiguationTemplates = new HashSet<Title>();
-			var page = new Page(this.Namespaces[MediaWikiNamespaces.MediaWiki], "Disambiguationspage");
-			page.Load(PageModules.Default | PageModules.Links);
-			if (!page.Missing)
-			{
-				if (page.Links.Count == 0)
-				{
-					this.disambiguationTemplates.Add(new Title(this, page.Text.Trim()));
-				}
-				else
-				{
-					this.disambiguationTemplates.UnionWith(page.Links);
-				}
-			}
-
-			return this.disambiguationTemplates;
-		}
-
-		/// <summary>Logs the specified user into the wiki and loads necessary information for proper functioning of the class.</summary>
-		/// <param name="input">The input parameters. May be null.</param>
-		/// <exception cref="UnauthorizedAccessException">Thrown if there was an error logging into the wiki (which typically denotes that the user had the wrong password or does not have permission to log in).</exception>
-		/// <remarks>Even if you wish to edit anonymously, you <em>must</em> still log in by passing <see langword="null" /> for the input.</remarks>
-		protected virtual void Login(LoginInput input)
-		{
-			var result = this.AbstractionLayer.Login(input);
-			if (result.Result != "Success")
-			{
-				this.Clear();
-				throw new UnauthorizedAccessException(CurrentCulture(LoginFailed, result.Reason));
-			}
-
-			this.UserName = result.User;
-
-			// This should never happen with co-initialization, but just in case there's a massive change to the abstraction layer, make sure we have all the info we need.
-			if (this.Version == null)
-			{
-				var siteInfo = this.AbstractionLayer.SiteInfo(new SiteInfoInput() { Properties = NeededSiteInfo });
-				this.ParseInternalSiteInfo(siteInfo);
-			}
-		}
-
 		/// <summary>Patrols the specified Recent Changes ID.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns><c>true</c> if the edit was successfully patrolled; otherwise, <c>false</c>.</returns>
-		protected virtual bool Patrol(PatrolInput input)
-		{
-			if (!this.AllowEditing)
-			{
-				this.PublishIgnoredEdit(this, new Dictionary<string, object>
-				{
-					[nameof(input)] = input,
-				});
-
-				return true;
-			}
-
-			var result = this.AbstractionLayer.Patrol(input);
-			return result.Title != null;
-		}
+		protected virtual PatrolResult Patrol(PatrolInput input) => this.AbstractionLayer.Patrol(input);
 
 		/// <summary>Uploads a file.</summary>
 		/// <param name="input">The input parameters.</param>

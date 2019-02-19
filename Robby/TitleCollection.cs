@@ -103,19 +103,6 @@
 
 		#region Public Methods
 
-		/// <summary>Adds a <em>copy</em> of the provided titles to the collection. The copies added will be standard <see cref="Title"/> objects regardless of the original type.</summary>
-		/// <param name="titles">The titles to add.</param>
-		public void AddCopy(IEnumerable<ISimpleTitle> titles)
-		{
-			if (titles != null)
-			{
-				foreach (var title in titles)
-				{
-					this.Add(new Title(title));
-				}
-			}
-		}
-
 		/// <summary>Converts all MediaWiki messages to titles based on their modification status and adds them to the collection.</summary>
 		/// <param name="modifiedMessages">Filter for whether the messages have been modified.</param>
 		public void AddMessages(Filter modifiedMessages) => this.AddMessages(new AllMessagesInput { FilterModified = modifiedMessages });
@@ -184,18 +171,41 @@
 		}
 
 		/// <summary>Purges all pages in the collection.</summary>
-		/// <returns>A page collection with the results of the purge.</returns>
-		public PageCollection Purge() => this.Purge(PurgeMethod.Normal);
+		/// <param name="purgeResults">A page collection with the results of the purge.</param>
+		/// <returns>A value indicating the change status of the purge.</returns>
+		public ChangeResults Purge(PageCollection purgeResults) => this.Purge(PurgeMethod.Normal, out purgeResults);
 
 		/// <summary>Purges all pages in the collection.</summary>
 		/// <param name="method">The method.</param>
-		/// <returns>A page collection with the results of the purge.</returns>
-		public PageCollection Purge(PurgeMethod method) => this.Purge(new PurgeInput(this.ToFullPageNames()) { Method = method });
+		/// <param name="purgeResults">A page collection with the results of the purge.</param>
+		/// <returns>A value indicating the change status of the purge.</returns>
+		public ChangeResults Purge(PurgeMethod method, out PageCollection purgeResults)
+		{
+			var retval = this.Site.PublishChange(this, new Dictionary<string, object>
+			{
+				[nameof(method)] = method,
+			});
+
+			if (retval == ChangeResults.Successful)
+			{
+				purgeResults = this.Purge(new PurgeInput(this.ToFullPageNames()) { Method = method });
+				if (purgeResults.Count < this.Count)
+				{
+					retval |= ChangeResults.Failed;
+				}
+			}
+			else
+			{
+				purgeResults = PageCollection.Unlimited(this.Site);
+			}
+
+			return retval;
+		}
 
 		/// <summary>Sets namespace limitations for the Load() methods.</summary>
 		/// <param name="namespaceLimitations">The namespace limitations to apply to the PageCollection returned.</param>
 		/// <param name="limitationType">Type of the limitation.</param>
-		/// <remarks>Currently, this applies only to the <see cref="PageCollection"/> returned by the various <see cref="Load()"/> methods. The <see cref="Purge()"/>, <see cref="Watch()"/>, and <see cref="Unwatch()"/> methods always return unfiltered results.</remarks>
+		/// <remarks>Currently, this applies only to the <see cref="PageCollection"/> returned by the various <see cref="Load()"/> methods. The <see cref="Purge(PageCollection)"/>, <see cref="Watch(out PageCollection)"/>, and <see cref="Unwatch(out PageCollection)"/> methods always return unfiltered results.</remarks>
 		public void SetNamespaceLimitations(IEnumerable<int> namespaceLimitations, LimitationType limitationType)
 		{
 			this.loadPageLimitations = namespaceLimitations;
@@ -203,12 +213,54 @@
 		}
 
 		/// <summary>Watches all pages in the collection.</summary>
-		/// <returns>A page collection with the watch results.</returns>
-		public PageCollection Watch() => this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = false });
+		/// <param name="watchResults">A page collection with the watch results.</param>
+		/// <returns>A value indicating the change status of the watch.</returns>
+		public ChangeResults Watch(out PageCollection watchResults)
+		{
+			PageCollection pages;
+			var retval = this.Site.PublishChange(this, new Dictionary<string, object>());
+			if (retval.HasFlag(ChangeResults.Ignored))
+			{
+				pages = PageCollection.UnlimitedDefault(this.Site);
+				pages.AddFrom(this);
+			}
+			else
+			{
+				pages = this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = false });
+				if (pages.Count < this.Count)
+				{
+					retval |= ChangeResults.Failed;
+				}
+			}
+
+			watchResults = pages;
+			return retval;
+		}
 
 		/// <summary>Unwatches all pages in the collection.</summary>
-		/// <returns>A page collection with the unwatch results.</returns>
-		public PageCollection Unwatch() => this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = true });
+		/// <param name="unwatchResults">A page collection with the unwatch results.</param>
+		/// <returns>A value indicating the change status of the unwatch.</returns>
+		public ChangeResults Unwatch(out PageCollection unwatchResults)
+		{
+			PageCollection pages;
+			var retval = this.Site.PublishChange(this, new Dictionary<string, object>());
+			if (retval.HasFlag(ChangeResults.Ignored))
+			{
+				pages = PageCollection.UnlimitedDefault(this.Site);
+				pages.AddFrom(this);
+			}
+			else
+			{
+				pages = this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = true });
+				if (pages.Count < this.Count)
+				{
+					retval |= ChangeResults.Failed;
+				}
+			}
+
+			unwatchResults = pages;
+			return retval;
+		}
 		#endregion
 
 		#region Public Override Methods
@@ -233,6 +285,20 @@
 			foreach (var title in titles)
 			{
 				this.Add(new Title(this.Site.Namespaces[defaultNamespace], title));
+			}
+		}
+
+		/// <summary>Adds new objects to the collection based on an existing <see cref="T:RobinHood70.Robby.Design.ISimpleTitle"/> collection.</summary>
+		/// <param name="titles">The titles to be added.</param>
+		/// <remarks>All items added are newly created, even if the type of the titles provided matches those in the collection.</remarks>
+		public override void AddFrom(IEnumerable<ISimpleTitle> titles)
+		{
+			if (titles != null)
+			{
+				foreach (var title in titles)
+				{
+					this.Add(new Title(title));
+				}
 			}
 		}
 
@@ -437,19 +503,6 @@
 
 		#region Protected Virtual Methods
 
-		/// <summary>Loads pages from the wiki based on a page set specifier.</summary>
-		/// <param name="pageSetInput">The pageset inputs.</param>
-		protected virtual void LoadPages(QueryPageSetInput pageSetInput)
-		{
-			ThrowNull(pageSetInput, nameof(pageSetInput));
-			var loadOptions = new PageLoadOptions(this.Site.DefaultLoadOptions, PageModules.Info);
-			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, PageCreator.Default.GetPropertyInputs(loadOptions), PageCreator.Default.CreatePageItem);
-			foreach (var item in result)
-			{
-				this.Add(new Title(this.Site, item.Value.Title));
-			}
-		}
-
 		/// <summary>Converts MediaWiki messages to titles and adds them to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		protected virtual void AddMessages(AllMessagesInput input)
@@ -471,25 +524,33 @@
 			this.FillFromTitleItems(result);
 		}
 
+		/// <summary>Loads pages from the wiki based on a page set specifier.</summary>
+		/// <param name="pageSetInput">The pageset inputs.</param>
+		protected virtual void LoadPages(QueryPageSetInput pageSetInput)
+		{
+			ThrowNull(pageSetInput, nameof(pageSetInput));
+			var loadOptions = new PageLoadOptions(this.Site.DefaultLoadOptions, PageModules.Info);
+			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, PageCreator.Default.GetPropertyInputs(loadOptions), PageCreator.Default.CreatePageItem);
+			foreach (var item in result)
+			{
+				this.Add(new Title(this.Site, item.Value.Title));
+			}
+		}
+
 		/// <summary>Purges all pages in the collection.</summary>
 		/// <param name="input">The input.</param>
-		/// <returns>A page collection with the results of the purge.</returns>
+		/// <returns>A <see cref="PageCollection"/> with the purge results.</returns>
 		protected virtual PageCollection Purge(PurgeInput input)
 		{
 			var result = this.Site.AbstractionLayer.Purge(input);
-			var retval = new PageCollection(this.Site, result)
-			{
-				LimitationType = LimitationType.None
-			};
-
+			var retval = PageCollection.UnlimitedDefault(this.Site);
+			retval.PopulateMapCollections(result);
 			foreach (var item in result)
 			{
 				var purgePage = item.Value;
 				var flags = purgePage.Flags;
-				var page = this.Site.PageCreator.CreatePage(new TitleParts(this.Site, purgePage.Title));
+				var page = retval.AddNewPage(purgePage.Title);
 				page.PopulateFlags(flags.HasFlag(PurgeFlags.Invalid), flags.HasFlag(PurgeFlags.Missing));
-
-				retval.Add(page);
 			}
 
 			return retval;
@@ -497,43 +558,21 @@
 
 		/// <summary>Watches or unwatches all pages in the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		/// <returns>A page collection with the watch/unwatch results.</returns>
+		/// <returns>A <see cref="PageCollection"/> with the watch/unwatch results.</returns>
 		protected virtual PageCollection Watch(WatchInput input)
 		{
-			PageCollection retval;
-			if (!this.Site.AllowEditing)
-			{
-				this.Site.PublishIgnoredEdit(this, new Dictionary<string, object>
-				{
-					[nameof(input)] = input,
-				});
-
-				retval = PageCollection.Unlimited(this.Site);
-				foreach (var item in this)
-				{
-					retval.Add(PageCreator.Default.CreatePage(new TitleParts(this.Site, item.FullPageName)));
-				}
-
-				return retval;
-			}
-
+			var pages = PageCollection.UnlimitedDefault(this.Site);
 			var result = this.Site.AbstractionLayer.Watch(input);
-			retval = new PageCollection(this.Site, result)
-			{
-				LimitationType = LimitationType.None
-			};
-
+			pages.PopulateMapCollections(result);
 			foreach (var item in result)
 			{
 				var watchPage = item.Value;
 				var flags = watchPage.Flags;
-				var page = PageCreator.Default.CreatePage(new TitleParts(this.Site, watchPage.Title));
+				var page = pages.AddNewPage(watchPage.Title);
 				page.PopulateFlags(false, flags.HasFlag(WatchFlags.Missing));
-
-				retval.Add(page);
 			}
 
-			return retval;
+			return pages;
 		}
 		#endregion
 

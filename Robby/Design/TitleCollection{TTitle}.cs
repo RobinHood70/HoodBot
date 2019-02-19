@@ -674,19 +674,6 @@
 		/// <param name="comparer">The comparer.</param>
 		public void Sort(IComparer<TTitle> comparer) => this.items.Sort(comparer);
 
-		/// <summary>Returns the contents of the collection as a read-only list of strings containing the full page names of each item.</summary>
-		/// <returns>A read-only list of strings containing the full page names of each item.</returns>
-		public IReadOnlyList<string> ToFullPageNames()
-		{
-			var retval = new List<string>(this.Count);
-			foreach (var title in this)
-			{
-				retval.Add(title.FullPageName);
-			}
-
-			return retval.AsReadOnly();
-		}
-
 		/// <summary>Enumerates the page names of the collection.</summary>
 		/// <returns>The page names of the collection as full page names.</returns>
 		public IEnumerable<string> ToStringEnumerable() => this.ToStringEnumerable(MediaWikiNamespaces.Main);
@@ -720,6 +707,11 @@
 		/// <param name="defaultNamespace">The default namespace.</param>
 		/// <param name="titles">The titles to add, with or without the leading namespace text.</param>
 		public abstract void Add(int defaultNamespace, IEnumerable<string> titles);
+
+		/// <summary>Adds new objects to the collection based on an existing <see cref="ISimpleTitle"/> collection.</summary>
+		/// <param name="titles">The titles to be added.</param>
+		/// <remarks>All items added are newly created, even if the type of the titles provided matches those in the collection.</remarks>
+		public abstract void AddFrom(IEnumerable<ISimpleTitle> titles);
 
 		/// <summary>Adds pages to the collection from their revision IDs.</summary>
 		/// <param name="revisionIds">The revision IDs.</param>
