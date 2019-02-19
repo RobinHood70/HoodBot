@@ -8,6 +8,8 @@
 	/// <seealso cref="Page" />
 	public class Category : Page
 	{
+		#region Constructors
+
 		/// <summary>Initializes a new instance of the <see cref="Category" /> class.</summary>
 		/// <param name="site">The site the category is from.</param>
 		/// <param name="pageName">The page name (<em>without</em> the leading namespace).</param>
@@ -15,6 +17,9 @@
 			: base(site?.Namespaces[MediaWikiNamespaces.Category], pageName)
 		{
 		}
+		#endregion
+
+		#region Public Properties
 
 		/// <summary>Gets the number of files in the category.</summary>
 		/// <value>The file count.</value>
@@ -35,6 +40,9 @@
 		/// <summary>Gets the subcategory count.</summary>
 		/// <value>The subcategory count.</value>
 		public int SubcategoryCount { get; private set; }
+		#endregion
+
+		#region Protected Override Methods
 
 		/// <summary>When overridden in a derived class, populates custom page properties with custom data from the WallE PageItem.</summary>
 		/// <param name="pageItem">The page item.</param>
@@ -51,5 +59,6 @@
 				this.SubcategoryCount = catInfo.Subcategories;
 			}
 		}
+		#endregion
 	}
 }
