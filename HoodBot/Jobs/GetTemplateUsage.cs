@@ -63,7 +63,7 @@
 
 			this.StatusWriteLine("Loading pages");
 			var results = PageCollection.Unlimited(this.Site);
-			results.AddPageTranscludedIn(templates);
+			results.GetPageTranscludedIn(templates);
 			this.Progress++;
 			Thread.Yield();
 			Thread.Sleep(1000);

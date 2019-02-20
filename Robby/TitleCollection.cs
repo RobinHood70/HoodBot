@@ -105,39 +105,39 @@
 
 		/// <summary>Converts all MediaWiki messages to titles based on their modification status and adds them to the collection.</summary>
 		/// <param name="modifiedMessages">Filter for whether the messages have been modified.</param>
-		public void AddMessages(Filter modifiedMessages) => this.AddMessages(new AllMessagesInput { FilterModified = modifiedMessages });
+		public void GetMessages(Filter modifiedMessages) => this.GetMessages(new AllMessagesInput { FilterModified = modifiedMessages });
 
 		/// <summary>Converts specific MediaWiki messages to titles based on their modification status and adds them to the collection.</summary>
 		/// <param name="modifiedMessages">Filter for whether the messages have been modified.</param>
 		/// <param name="messages">The messages to load.</param>
-		public void AddMessages(Filter modifiedMessages, IEnumerable<string> messages) => this.AddMessages(new AllMessagesInput { FilterModified = modifiedMessages, Messages = messages });
+		public void GetMessages(Filter modifiedMessages, IEnumerable<string> messages) => this.GetMessages(new AllMessagesInput { FilterModified = modifiedMessages, Messages = messages });
 
 		/// <summary>Converts MediaWiki messages beginning with the specified prefix to titles based on their modification status and adds them to the collection.</summary>
 		/// <param name="modifiedMessages">Filter for whether the messages have been modified.</param>
 		/// <param name="prefix">The prefix of the categories to load.</param>
-		public void AddMessages(Filter modifiedMessages, string prefix) => this.AddMessages(new AllMessagesInput { FilterModified = modifiedMessages, Prefix = prefix });
+		public void GetMessages(Filter modifiedMessages, string prefix) => this.GetMessages(new AllMessagesInput { FilterModified = modifiedMessages, Prefix = prefix });
 
 		/// <summary>Converts MediaWiki messages within the given range to titles based on their modification status and adds them to the collection.</summary>
 		/// <param name="modifiedMessages">Filter for whether the messages have been modified.</param>
 		/// <param name="from">The message to start at (inclusive). The message specified does not have to exist.</param>
 		/// <param name="to">The message to stop at (inclusive). The message specified does not have to exist.</param>
-		public void AddMessages(Filter modifiedMessages, string from, string to) => this.AddMessages(new AllMessagesInput { FilterModified = modifiedMessages, MessageFrom = from, MessageTo = to });
+		public void GetMessages(Filter modifiedMessages, string from, string to) => this.GetMessages(new AllMessagesInput { FilterModified = modifiedMessages, MessageFrom = from, MessageTo = to });
 
 		/// <summary>Adds all protected titles to the collection.</summary>
-		public void AddProtectedTitles() => this.AddProtectedTitles(new ProtectedTitlesInput());
+		public void GetProtectedTitles() => this.GetProtectedTitles(new ProtectedTitlesInput());
 
 		/// <summary>Adds all protected titles in the given namespaces to the collection.</summary>
 		/// <param name="namespaces">The namespaces to load from.</param>
-		public void AddProtectedTitles(IEnumerable<int> namespaces) => this.AddProtectedTitles(new ProtectedTitlesInput() { Namespaces = namespaces });
+		public void GetProtectedTitles(IEnumerable<int> namespaces) => this.GetProtectedTitles(new ProtectedTitlesInput() { Namespaces = namespaces });
 
 		/// <summary>Adds all protected titles of the specified levels to the collection.</summary>
 		/// <param name="levels">The levels of titles to load (typically, one of: "autoconfirmed" or "sysop").</param>
-		public void AddProtectedTitles(IEnumerable<string> levels) => this.AddProtectedTitles(new ProtectedTitlesInput() { Levels = levels });
+		public void GetProtectedTitles(IEnumerable<string> levels) => this.GetProtectedTitles(new ProtectedTitlesInput() { Levels = levels });
 
 		/// <summary>Adds all protected titles of the specified levels in the given namespaces to the collection.</summary>
 		/// <param name="namespaces">The namespaces to load from.</param>
 		/// <param name="levels">The levels of titles to load (typically, one of: "autoconfirmed" or "sysop").</param>
-		public void AddProtectedTitles(IEnumerable<int> namespaces, IEnumerable<string> levels) => this.AddProtectedTitles(new ProtectedTitlesInput() { Namespaces = namespaces, Levels = levels });
+		public void GetProtectedTitles(IEnumerable<int> namespaces, IEnumerable<string> levels) => this.GetProtectedTitles(new ProtectedTitlesInput() { Namespaces = namespaces, Levels = levels });
 
 		/// <summary>Loads all pages in the collection.</summary>
 		/// <returns>A <see cref="PageCollection"/> containing the specified pages, including status information for pages that could not be loaded.</returns>
@@ -304,14 +304,14 @@
 
 		/// <summary>Adds pages to the collection from their revision IDs.</summary>
 		/// <param name="revisionIds">The revision IDs.</param>
-		public override void AddRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(QueryPageSetInput.FromRevisionIds(revisionIds));
+		public override void GetRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(QueryPageSetInput.FromRevisionIds(revisionIds));
 		#endregion
 
 		#region Protected Override Methods
 
 		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddBacklinks(BacklinksInput input)
+		protected override void GetBacklinks(BacklinksInput input)
 		{
 			var result = this.Site.AbstractionLayer.Backlinks(input);
 			foreach (var item in result)
@@ -330,7 +330,7 @@
 
 		/// <summary>Adds a set of category pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddCategories(AllCategoriesInput input)
+		protected override void GetCategories(AllCategoriesInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllCategories(input);
 			this.FillFromTitleItems(result);
@@ -339,7 +339,7 @@
 		/// <summary>Adds category members to the collection, potentially including subcategories and their members.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="recurse">if set to <c>true</c> load the entire category tree recursively.</param>
-		protected override void AddCategoryMembers(CategoryMembersInput input, bool recurse)
+		protected override void GetCategoryMembers(CategoryMembersInput input, bool recurse)
 		{
 			ThrowNull(input, nameof(input));
 			if (recurse)
@@ -355,11 +355,11 @@
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles to find duplicates of.</param>
-		protected override void AddDuplicateFiles(DuplicateFilesInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetDuplicateFiles(DuplicateFilesInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds files to the collection, based on optionally file-specific parameters.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddFiles(AllImagesInput input)
+		protected override void GetFiles(AllImagesInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllImages(input);
 			this.FillFromTitleItems(result);
@@ -367,7 +367,7 @@
 
 		/// <summary>Adds files that are in use to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddFileUsage(AllFileUsagesInput input)
+		protected override void GetFileUsage(AllFileUsagesInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllFileUsages(input);
 			this.FillFromTitleItems(result);
@@ -376,11 +376,11 @@
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected override void AddFileUsage(FileUsageInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetFileUsage(FileUsageInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages that link to a given namespace.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddLinksToNamespace(AllLinksInput input)
+		protected override void GetLinksToNamespace(AllLinksInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllLinks(input);
 			this.FillFromTitleItems(result);
@@ -388,7 +388,7 @@
 
 		/// <summary>Adds pages from a given namespace to the collection. Parameters allow filtering to a specific range of pages.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddNamespace(AllPagesInput input)
+		protected override void GetNamespace(AllPagesInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllPages(input);
 			this.FillFromTitleItems(result);
@@ -397,21 +397,21 @@
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected override void AddPageCategories(CategoriesInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetPageCategories(CategoriesInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected override void AddPageLinks(LinksInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetPageLinks(LinksInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages that link to the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected override void AddPageLinksHere(LinksHereInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetPageLinksHere(LinksHereInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages with a given property to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddPagesWithProperty(PagesWithPropertyInput input)
+		protected override void GetPagesWithProperty(PagesWithPropertyInput input)
 		{
 			var result = this.Site.AbstractionLayer.PagesWithProperty(input);
 			this.FillFromTitleItems(result);
@@ -420,16 +420,16 @@
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected override void AddPageTranscludedIn(TranscludedInInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetPageTranscludedIn(TranscludedInInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected override void AddPageTransclusions(TemplatesInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetPageTransclusions(TemplatesInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds prefix-search results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddPrefixSearchResults(PrefixSearchInput input)
+		protected override void GetPrefixSearchResults(PrefixSearchInput input)
 		{
 			var result = this.Site.AbstractionLayer.PrefixSearch(input);
 			this.FillFromTitleItems(result);
@@ -438,7 +438,7 @@
 		/// <summary>Adds query page results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <remarks>Query pages are a subset of Special pages that conform to a specific standard. You can find a list by using the Help feature of the API (<c>/api.php?action=help&amp;modules=query+querypage</c>). Note that a few of these (e.g., ListDuplicatedFiles) have API equivalents that are more functional and produce the same or more detailed results.</remarks>
-		protected override void AddQueryPage(QueryPageInput input)
+		protected override void GetQueryPage(QueryPageInput input)
 		{
 			var result = this.Site.AbstractionLayer.QueryPage(input);
 			this.FillFromTitleItems(result);
@@ -446,7 +446,7 @@
 
 		/// <summary>Adds recent changes pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddRecentChanges(RecentChangesInput input)
+		protected override void GetRecentChanges(RecentChangesInput input)
 		{
 			var result = this.Site.AbstractionLayer.RecentChanges(input);
 			this.FillFromTitleItems(result);
@@ -454,7 +454,7 @@
 
 		/// <summary>Adds redirects to a namespace to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddRedirectsToNamespace(AllRedirectsInput input)
+		protected override void GetRedirectsToNamespace(AllRedirectsInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllRedirects(input);
 			this.FillFromTitleItems(result);
@@ -462,7 +462,7 @@
 
 		/// <summary>Adds pages from a range of revisions to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddRevisions(AllRevisionsInput input)
+		protected override void GetRevisions(AllRevisionsInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllRevisions(input);
 			this.FillFromTitleItems(result);
@@ -470,7 +470,7 @@
 
 		/// <summary>Adds search results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddSearchResults(SearchInput input)
+		protected override void GetSearchResults(SearchInput input)
 		{
 			var result = this.Site.AbstractionLayer.Search(input);
 			this.FillFromTitleItems(result);
@@ -478,7 +478,7 @@
 
 		/// <summary>Adds pages with template transclusions to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddTransclusions(AllTransclusionsInput input)
+		protected override void GetTransclusions(AllTransclusionsInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllTransclusions(input);
 			this.FillFromTitleItems(result);
@@ -486,7 +486,7 @@
 
 		/// <summary>Adds changed watchlist pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddWatchlistChanged(WatchlistInput input)
+		protected override void GetWatchlistChanged(WatchlistInput input)
 		{
 			var result = this.Site.AbstractionLayer.Watchlist(input);
 			this.FillFromTitleItems(result);
@@ -494,7 +494,7 @@
 
 		/// <summary>Adds raw watchlist pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddWatchlistRaw(WatchlistRawInput input)
+		protected override void GetWatchlistRaw(WatchlistRawInput input)
 		{
 			var result = this.Site.AbstractionLayer.WatchlistRaw(input);
 			this.FillFromTitleItems(result);
@@ -505,7 +505,7 @@
 
 		/// <summary>Converts MediaWiki messages to titles and adds them to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected virtual void AddMessages(AllMessagesInput input)
+		protected virtual void GetMessages(AllMessagesInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllMessages(input);
 			foreach (var item in result)
@@ -518,7 +518,7 @@
 
 		/// <summary>Adds creation-protected titles (pages that are protected but don't exist) to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected virtual void AddProtectedTitles(ProtectedTitlesInput input)
+		protected virtual void GetProtectedTitles(ProtectedTitlesInput input)
 		{
 			var result = this.Site.AbstractionLayer.ProtectedTitles(input);
 			this.FillFromTitleItems(result);

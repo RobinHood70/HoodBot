@@ -122,14 +122,14 @@
 		internal void AllMessagesTest()
 		{
 			var titles = new TitleCollection(this.normalWiki);
-			titles.AddMessages(Filter.Only);
+			titles.GetMessages(Filter.Only);
 			DumpTitles(titles);
 		}
 
 		internal void BacklinksTests()
 		{
 			var titles = new TitleCollection(this.normalWiki);
-			titles.AddBacklinks("Oblivion:Oblivion", BacklinksTypes.Backlinks | BacklinksTypes.EmbeddedIn, true, Filter.Any, MediaWikiNamespaces.Template);
+			titles.GetBacklinks("Oblivion:Oblivion", BacklinksTypes.Backlinks | BacklinksTypes.EmbeddedIn, true, Filter.Any, MediaWikiNamespaces.Template);
 			this.CheckCollection(titles, "Backlinks");
 			DumpTitles(titles);
 		}
@@ -161,7 +161,7 @@
 		internal void CategoryMembersTests()
 		{
 			var titles = new PageCollection(this.normalWiki);
-			titles.AddCategoryMembers("Books-Images", CategoryMemberTypes.File, true);
+			titles.GetCategoryMembers("Books-Images", CategoryMemberTypes.File, true);
 			this.CheckCollection(titles, "CategoryMembers");
 			DumpTitles(titles);
 		}
@@ -169,7 +169,7 @@
 		internal void CategoryTests()
 		{
 			var titles = new TitleCollection(this.normalWiki);
-			titles.AddCategories("Arena-A", "Arena-J");
+			titles.GetCategories("Arena-A", "Arena-J");
 			DumpTitles(titles);
 		}
 
@@ -187,7 +187,7 @@
 		{
 			const string duped = "File:ON-icon-ava-Defensive Scroll Bonus I.png";
 			var pageCollection = new PageCollection(this.normalWiki);
-			pageCollection.AddDuplicateFiles(new TitleCollection(this.normalWiki, duped));
+			pageCollection.GetDuplicateFiles(new TitleCollection(this.normalWiki, duped));
 			DumpTitles(pageCollection);
 
 			var filePage = new FilePage(this.normalWiki, duped);
@@ -255,7 +255,7 @@
 		{
 			var sourcePages = new TitleCollection(this.normalWiki, "Main Page");
 			var pageCollection = new PageCollection(this.normalWiki);
-			pageCollection.AddPageCategories(sourcePages);
+			pageCollection.GetPageCategories(sourcePages);
 			foreach (var page in pageCollection)
 			{
 				this.Assert(page.Namespace.Id == MediaWikiNamespaces.Category, "A page in the returned collection isn't a category.");
@@ -266,7 +266,7 @@
 		{
 			var pages = new PageCollection(this.normalWiki) { LoadOptions = PageLoadOptions.None };
 			var categoryTitles = new TitleCollection(this.normalWiki, "API:Categories", "API:Purge");
-			pages.AddPageCategories(categoryTitles, Filter.Any);
+			pages.GetPageCategories(categoryTitles, Filter.Any);
 			DumpTitles(pages);
 		}
 
@@ -329,7 +329,7 @@
 		internal void ProtectedTitlesTests()
 		{
 			var titles = new TitleCollection(this.normalWiki);
-			titles.AddProtectedTitles();
+			titles.GetProtectedTitles();
 			this.CheckCollection(titles, "ProtectedTitles");
 			DumpTitles(titles);
 		}
@@ -363,14 +363,14 @@
 		internal void SearchTests()
 		{
 			var titles = new TitleCollection(this.normalWiki);
-			titles.AddSearchResults("aleph", WhatToSearch.Title, this.normalWiki.Namespaces.RegularIds);
+			titles.GetSearchResults("aleph", WhatToSearch.Title, this.normalWiki.Namespaces.RegularIds);
 			DumpTitles(titles);
 		}
 
 		internal void TemplateTransclusionTest()
 		{
 			var titleCollection = new TitleCollection(this.normalWiki);
-			titleCollection.AddTransclusions();
+			titleCollection.GetTransclusions();
 			DumpTitles(titleCollection);
 		}
 
@@ -418,12 +418,12 @@
 			var titles = new TitleCollection(this.normalWiki);
 			var sw = new Stopwatch();
 			sw.Start();
-			titles.AddNamespace(MediaWikiNamespaces.Template, Filter.Any, "A", "C");
+			titles.GetNamespace(MediaWikiNamespaces.Template, Filter.Any, "A", "C");
 			Debug.WriteLine("Count: " + titles.Count);
 			titles.Clear();
-			titles.AddNamespace(MediaWikiNamespaces.Template, Filter.Any, "A", "B");
+			titles.GetNamespace(MediaWikiNamespaces.Template, Filter.Any, "A", "B");
 			Debug.WriteLine("Count: " + titles.Count);
-			titles.AddNamespace(MediaWikiNamespaces.Template, Filter.Any, "A", "C");
+			titles.GetNamespace(MediaWikiNamespaces.Template, Filter.Any, "A", "C");
 			Debug.WriteLine("Count: " + titles.Count);
 			Debug.WriteLine("Time: " + sw.ElapsedMilliseconds);
 			foreach (var title in titles)
@@ -557,7 +557,7 @@
 		private void PageCollectionFromQueryPage()
 		{
 			var pageCollection = new PageCollection(this.normalWiki);
-			pageCollection.AddQueryPage("Mostlinked");
+			pageCollection.GetQueryPage("Mostlinked");
 			DumpTitles(pageCollection);
 		}
 		#endregion

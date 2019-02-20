@@ -10,7 +10,7 @@
 			this.LogPage = new Page(this.Site, this.User.Page.FullPageName + "/Log");
 		}
 
-		/// <summary>Gets the user's log page. By default, this will be the "/Log" subpage of the logged-in user's page.</summary>
+		/// <summary>Gets or sets the user's log page. By default, this will be the "/Log" subpage of the logged-in user's page.</summary>
 		/// <value>The log page.</value>
 		public Page LogPage { get; set; }
 
@@ -18,7 +18,7 @@
 
 		public User User => this.Site.User;
 
-		public static UserFunctions CreateInstance(Site site) => new UserFunctions(site);
+		public static UserFunctions CreateDefaultInstance(Site site) => new UserFunctions(site);
 
 		public virtual void BeginLogEntry()
 		{

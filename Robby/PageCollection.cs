@@ -276,18 +276,18 @@
 			}
 		}
 
-		/// <summary>Adds pages with the specified revision IDs to the collection.</summary>
-		/// <param name="revisionIds">The IDs.</param>
-		/// <remarks>General information about the pages for the revision IDs specified will always be loaded, regardless of the LoadOptions setting, though the revisions themselves may not be if the collection's load options would filter them out.</remarks>
-		// Note that while RevisionsInput() can be used as a generator, I have not implemented it because I can think of no situation in which it would be useful to populate a PageCollection given the existing revisions methods.
-		public override void AddRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(this.LoadOptions, QueryPageSetInput.FromRevisionIds(revisionIds));
-
 		/// <summary>Removes all items from the <see cref="TitleCollection">collection</see>, as well as those in the <see cref="TitleMap"/>.</summary>
 		public override void Clear()
 		{
 			base.Clear();
 			this.titleMap.Clear();
 		}
+
+		/// <summary>Adds pages with the specified revision IDs to the collection.</summary>
+		/// <param name="revisionIds">The IDs.</param>
+		/// <remarks>General information about the pages for the revision IDs specified will always be loaded, regardless of the LoadOptions setting, though the revisions themselves may not be if the collection's load options would filter them out.</remarks>
+		// Note that while RevisionsInput() can be used as a generator, I have not implemented it because I can think of no situation in which it would be useful to populate a PageCollection given the existing revisions methods.
+		public override void GetRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(this.LoadOptions, QueryPageSetInput.FromRevisionIds(revisionIds));
 		#endregion
 
 		#region Internal Static Methods
@@ -331,7 +331,7 @@
 
 		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddBacklinks(BacklinksInput input)
+		protected override void GetBacklinks(BacklinksInput input)
 		{
 			ThrowNull(input, nameof(input));
 			foreach (var type in input.LinkTypes.GetUniqueFlags())
@@ -347,12 +347,12 @@
 
 		/// <summary>Adds a set of category pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddCategories(AllCategoriesInput input) => this.LoadPages(input);
+		protected override void GetCategories(AllCategoriesInput input) => this.LoadPages(input);
 
 		/// <summary>Adds category members to the collection, potentially including subcategories and their members.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="recurse">if set to <c>true</c> load the entire category tree recursively.</param>
-		protected override void AddCategoryMembers(CategoryMembersInput input, bool recurse)
+		protected override void GetCategoryMembers(CategoryMembersInput input, bool recurse)
 		{
 			ThrowNull(input, nameof(input));
 			if (recurse)
@@ -368,94 +368,94 @@
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles to find duplicates of.</param>
-		protected override void AddDuplicateFiles(DuplicateFilesInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
+		protected override void GetDuplicateFiles(DuplicateFilesInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds files to the collection, based on optionally file-specific parameters.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddFiles(AllImagesInput input) => this.LoadPages(input);
+		protected override void GetFiles(AllImagesInput input) => this.LoadPages(input);
 
 		/// <summary>Adds files that are in use to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddFileUsage(AllFileUsagesInput input) => this.LoadPages(input);
+		protected override void GetFileUsage(AllFileUsagesInput input) => this.LoadPages(input);
 
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected override void AddFileUsage(FileUsageInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
+		protected override void GetFileUsage(FileUsageInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages that link to a given namespace.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddLinksToNamespace(AllLinksInput input) => this.LoadPages(input);
+		protected override void GetLinksToNamespace(AllLinksInput input) => this.LoadPages(input);
 
 		/// <summary>Adds pages from a given namespace to the collection. Parameters allow filtering to a specific range of pages.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddNamespace(AllPagesInput input) => this.LoadPages(input);
+		protected override void GetNamespace(AllPagesInput input) => this.LoadPages(input);
 
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected override void AddPageCategories(CategoriesInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
+		protected override void GetPageCategories(CategoriesInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected override void AddPageLinks(LinksInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
+		protected override void GetPageLinks(LinksInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose backlinks should be loaded.</param>
-		protected override void AddPageLinksHere(LinksHereInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
+		protected override void GetPageLinksHere(LinksHereInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected override void AddPageTransclusions(TemplatesInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
+		protected override void GetPageTransclusions(TemplatesInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages that transclude the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected override void AddPageTranscludedIn(TranscludedInInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
+		protected override void GetPageTranscludedIn(TranscludedInInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages with a given property to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddPagesWithProperty(PagesWithPropertyInput input) => this.LoadPages(input);
+		protected override void GetPagesWithProperty(PagesWithPropertyInput input) => this.LoadPages(input);
 
 		/// <summary>Adds prefix-search results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddPrefixSearchResults(PrefixSearchInput input) => this.LoadPages(input);
+		protected override void GetPrefixSearchResults(PrefixSearchInput input) => this.LoadPages(input);
 
 		/// <summary>Adds query page results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <remarks>Query pages are a subset of Special pages that conform to a specific standard. You can find a list by using the Help feature of the API (<c>/api.php?action=help&amp;modules=query+querypage</c>). Note that a few of these (e.g., ListDuplicatedFiles) have API equivalents that are more functional and produce the same or more detailed results.</remarks>
-		protected override void AddQueryPage(QueryPageInput input) => this.LoadPages(input);
+		protected override void GetQueryPage(QueryPageInput input) => this.LoadPages(input);
 
 		/// <summary>Adds recent changes pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddRecentChanges(RecentChangesInput input) => this.LoadPages(input);
+		protected override void GetRecentChanges(RecentChangesInput input) => this.LoadPages(input);
 
 		/// <summary>Adds redirects to a namespace to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddRedirectsToNamespace(AllRedirectsInput input) => this.LoadPages(input);
+		protected override void GetRedirectsToNamespace(AllRedirectsInput input) => this.LoadPages(input);
 
 		/// <summary>Adds pages from a range of revisions to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddRevisions(AllRevisionsInput input) => this.LoadPages(input);
+		protected override void GetRevisions(AllRevisionsInput input) => this.LoadPages(input);
 
 		/// <summary>Adds search results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddSearchResults(SearchInput input) => this.LoadPages(input);
+		protected override void GetSearchResults(SearchInput input) => this.LoadPages(input);
 
 		/// <summary>Adds pages with template transclusions to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddTransclusions(AllTransclusionsInput input) => this.LoadPages(input);
+		protected override void GetTransclusions(AllTransclusionsInput input) => this.LoadPages(input);
 
 		/// <summary>Adds changed watchlist pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddWatchlistChanged(WatchlistInput input) => this.LoadPages(input);
+		protected override void GetWatchlistChanged(WatchlistInput input) => this.LoadPages(input);
 
 		/// <summary>Adds raw watchlist pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void AddWatchlistRaw(WatchlistRawInput input) => this.LoadPages(input);
+		protected override void GetWatchlistRaw(WatchlistRawInput input) => this.LoadPages(input);
 
 		/// <summary>Inserts an item into the <see cref="PageCollection">collection</see>.</summary>
 		/// <param name="index">The index to insert at.</param>

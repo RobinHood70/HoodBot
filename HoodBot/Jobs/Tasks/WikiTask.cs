@@ -56,7 +56,7 @@
 			{
 				foreach (var page in pagesToCheck)
 				{
-					retval.AddBacklinks(page.FullPageName, BacklinksTypes.Backlinks, true, Filter.Only);
+					retval.GetBacklinks(page.FullPageName, BacklinksTypes.Backlinks, true, Filter.Only);
 				}
 
 				alreadyChecked.UnionWith(pagesToCheck);

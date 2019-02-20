@@ -124,395 +124,6 @@
 		/// <param name="names">The page names, with or without the leading namespace text.</param>
 		public void Add(int defaultNamespace, params string[] names) => this.Add(defaultNamespace, names as IEnumerable<string>);
 
-		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
-		/// <param name="title">The title.</param>
-		public void AddBacklinks(string title) => this.AddBacklinks(title, BacklinksTypes.Backlinks | BacklinksTypes.EmbeddedIn, true, Filter.Any);
-
-		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
-		/// <param name="title">The title.</param>
-		/// <param name="linkTypes">The link types of the pages to retrieve.</param>
-		public void AddBacklinks(string title, BacklinksTypes linkTypes) => this.AddBacklinks(title, linkTypes, true, Filter.Any);
-
-		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
-		/// <param name="title">The title.</param>
-		/// <param name="linkTypes">The link types of the pages to retrieve.</param>
-		/// <param name="includeRedirectedTitles">if set to <c>true</c>, pages linking to <paramref name="title"/> via a redirect will be included.</param>
-		public void AddBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles) => this.AddBacklinks(title, linkTypes, includeRedirectedTitles, Filter.Any);
-
-		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
-		/// <param name="title">The title.</param>
-		/// <param name="linkTypes">The link types of the pages to retrieve.</param>
-		/// <param name="redirects">Whether or not to include redirects in the results.</param>
-		public void AddBacklinks(string title, BacklinksTypes linkTypes, Filter redirects) => this.AddBacklinks(new BacklinksInput(title, linkTypes) { FilterRedirects = redirects });
-
-		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
-		/// <param name="title">The title.</param>
-		/// <param name="linkTypes">The link types of the pages to retrieve.</param>
-		/// <param name="includeRedirectedTitles">if set to <c>true</c>, pages linking to <paramref name="title"/> via a redirect will be included.</param>
-		/// <param name="redirects">Whether or not to include redirects in the results.</param>
-		public void AddBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles, Filter redirects) => this.AddBacklinks(new BacklinksInput(title, linkTypes) { FilterRedirects = redirects, Redirect = includeRedirectedTitles });
-
-		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
-		/// <param name="title">The title.</param>
-		/// <param name="linkTypes">The link types of the pages to retrieve.</param>
-		/// <param name="includeRedirectedTitles">if set to <c>true</c>, pages linking to <paramref name="title"/> via a redirect will be included.</param>
-		/// <param name="redirects">Whether or not to include redirects in the results.</param>
-		/// <param name="ns">The namespace to limit the results to.</param>
-		public void AddBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles, Filter redirects, int ns) => this.AddBacklinks(new BacklinksInput(title, linkTypes) { FilterRedirects = redirects, Namespace = ns, Redirect = includeRedirectedTitles });
-
-		/// <summary>Adds a set of category pages to the collection.</summary>
-		public void AddCategories() => this.AddCategories(new AllCategoriesInput());
-
-		/// <summary>Adds a set of category pages that start with the specified prefix to the collection.</summary>
-		/// <param name="prefix">The prefix of the categories to load.</param>
-		public void AddCategories(string prefix) => this.AddCategories(new AllCategoriesInput { Prefix = prefix });
-
-		/// <summary>Adds a set of category pages to the collection.</summary>
-		/// <param name="from">The category to start at (inclusive). The category specified does not have to exist.</param>
-		/// <param name="to">The category to stop at (inclusive). The category specified does not have to exist.</param>
-		public void AddCategories(string from, string to) => this.AddCategories(new AllCategoriesInput { From = from, To = to });
-
-		/// <summary>Adds category members to the collection, potentially including subcategories and their members.</summary>
-		/// <param name="category">The category.</param>
-		/// <param name="recurse">if set to <c>true</c> recurses through subcategories.</param>
-		public void AddCategoryMembers(string category, bool recurse) => this.AddCategoryMembers(category, CategoryMemberTypes.All, null, null, recurse);
-
-		/// <summary>Adds category members of the specified type to the collection, potentially including subcategories and their members.</summary>
-		/// <param name="category">The category.</param>
-		/// <param name="categoryMemberTypes">The category member types to load.</param>
-		/// <param name="recurse">if set to <c>true</c> recurses through subcategories.</param>
-		public void AddCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, bool recurse) => this.AddCategoryMembers(category, categoryMemberTypes, null, null, recurse);
-
-		/// <summary>Adds category members of the specified type and within the specified range to the collection, potentially including subcategories and their members.</summary>
-		/// <param name="category">The category.</param>
-		/// <param name="categoryMemberTypes">The category member types to load.</param>
-		/// <param name="from">The category member to start at (inclusive). The member specified does not have to exist.</param>
-		/// <param name="to">The category member to stop at (inclusive). The member specified does not have to exist.</param>
-		/// <param name="loadSubcategories">if set to <c>true</c> recurses through subcategories.</param>
-		/// <remarks>If subcategories are loaded, they will be limited to the <paramref name="categoryMemberTypes"/> requested. However, they will <em>not</em> be limited by the <paramref name="from"/> and <paramref name="to"/> parameters.</remarks>
-		public void AddCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, string from, string to, bool loadSubcategories)
-		{
-			var cat = Title.ForcedNamespace(this.Site.Namespaces[MediaWikiNamespaces.Category], category);
-			this.AddCategoryMembers(
-				new CategoryMembersInput(cat.FullPageName)
-				{
-					Type = categoryMemberTypes,
-					StartSortKeyPrefix = from,
-					EndSortKeyPrefix = to,
-				},
-				loadSubcategories);
-		}
-
-		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
-		/// <param name="titles">The titles to find duplicates of.</param>
-		public void AddDuplicateFiles(IEnumerable<ISimpleTitle> titles) => this.AddDuplicateFiles(titles, false);
-
-		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
-		/// <param name="titles">The titles to find duplicates of.</param>
-		/// <param name="localOnly">if set to <c>true</c> [local only].</param>
-		public void AddDuplicateFiles(IEnumerable<ISimpleTitle> titles, bool localOnly) => this.AddDuplicateFiles(new DuplicateFilesInput() { LocalOnly = localOnly }, titles);
-
-		/// <summary>Adds files uploaded by the specified user to the collection.</summary>
-		/// <param name="user">The user.</param>
-		public void AddFiles(string user) => this.AddFiles(new AllImagesInput { User = user });
-
-		/// <summary>Adds a range of files to the collection.</summary>
-		/// <param name="from">The file name to start at (inclusive).</param>
-		/// <param name="to">The file name to end at (inclusive).</param>
-		public void AddFiles(string from, string to) => this.AddFiles(new AllImagesInput { From = from, To = to });
-
-		/// <summary>Adds a range of files to the collection based on the most recent version.</summary>
-		/// <param name="start">The date to start at (inclusive).</param>
-		/// <param name="end">The date to end at (inclusive).</param>
-		public void AddFiles(DateTime start, DateTime end) => this.AddFiles(new AllImagesInput { Start = start, End = end });
-
-		/// <summary>Adds all files that are in use to the collection.</summary>
-		public void AddFileUsage() => this.AddFileUsage(new AllFileUsagesInput { Unique = true });
-
-		/// <summary>Adds in-use files that have a given prefix to the collection.</summary>
-		/// <param name="prefix">The prefix of the files to load.</param>
-		public void AddFileUsage(string prefix) => this.AddFileUsage(new AllFileUsagesInput { Prefix = prefix, Unique = true });
-
-		/// <summary>Adds a range of in-use files to the collection.</summary>
-		/// <param name="from">The file name to start at (inclusive).</param>
-		/// <param name="to">The file name to end at (inclusive).</param>
-		public void AddFileUsage(string from, string to) => this.AddFileUsage(new AllFileUsagesInput { From = from, To = to, Unique = true });
-
-		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
-		/// <param name="titles">The titles.</param>
-		public void AddFileUsage(IEnumerable<ISimpleTitle> titles) => this.AddFileUsage(new FileUsageInput(), titles);
-
-		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
-		/// <param name="titles">The titles.</param>
-		/// <param name="redirects">Filter for redirects.</param>
-		public void AddFileUsage(IEnumerable<ISimpleTitle> titles, Filter redirects) => this.AddFileUsage(new FileUsageInput() { FilterRedirects = redirects }, titles);
-
-		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
-		/// <param name="titles">The titles.</param>
-		/// <param name="redirects">Filter for redirects.</param>
-		/// <param name="namespaces">The namespaces to limit results to.</param>
-		public void AddFileUsage(IEnumerable<ISimpleTitle> titles, Filter redirects, IEnumerable<int> namespaces) => this.AddFileUsage(new FileUsageInput() { Namespaces = namespaces, FilterRedirects = redirects }, titles);
-
-		/// <summary>Adds pages that link to a given namespace to the collection.</summary>
-		/// <param name="ns">The namespace.</param>
-		public void AddLinksToNamespace(int ns) => this.AddLinksToNamespace(new AllLinksInput { Namespace = ns });
-
-		/// <summary>Adds pages that link to a given namespace and begin with a certain prefix to the collection.</summary>
-		/// <param name="ns">The namespace.</param>
-		/// <param name="prefix">The prefix of the pages to load.</param>
-		public void AddLinksToNamespace(int ns, string prefix) => this.AddLinksToNamespace(new AllLinksInput { Namespace = ns, Prefix = prefix });
-
-		/// <summary>Adds pages that link to a given namespace within a given range to the collection.</summary>
-		/// <param name="ns">The namespace.</param>
-		/// <param name="from">The page name to start at (inclusive).</param>
-		/// <param name="to">The page name to end at (inclusive).</param>
-		public void AddLinksToNamespace(int ns, string from, string to) => this.AddLinksToNamespace(new AllLinksInput { Namespace = ns, From = from, To = to });
-
-		/// <summary>Adds pages in the given the namespace to the collection.</summary>
-		/// <param name="ns">The namespace.</param>
-		/// <param name="redirects">Whether or not to include pages that are redirects.</param>
-		public void AddNamespace(int ns, Filter redirects) => this.AddNamespace(new AllPagesInput { FilterRedirects = redirects, Namespace = ns });
-
-		/// <summary>Adds pages in the given the namespace to the collection.</summary>
-		/// <param name="ns">The namespace.</param>
-		/// <param name="redirects">Whether or not to include pages that are redirects.</param>
-		/// <param name="prefix">The prefix of the pages to load.</param>
-		public void AddNamespace(int ns, Filter redirects, string prefix) => this.AddNamespace(new AllPagesInput { FilterRedirects = redirects, Namespace = ns, Prefix = prefix });
-
-		/// <summary>Adds pages in the given the namespace to the collection.</summary>
-		/// <param name="ns">The namespace.</param>
-		/// <param name="redirects">Whether or not to include pages that are redirects.</param>
-		/// <param name="from">The page name to start at (inclusive).</param>
-		/// <param name="to">The page name to end at (inclusive).</param>
-		public void AddNamespace(int ns, Filter redirects, string from, string to) => this.AddNamespace(new AllPagesInput { FilterRedirects = redirects, From = from, Namespace = ns, To = to });
-
-		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
-		/// <param name="titles">The titles whose categories should be loaded.</param>
-		public void AddPageCategories(IEnumerable<ISimpleTitle> titles) => this.AddPageCategories(new CategoriesInput(), titles);
-
-		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
-		/// <param name="titles">The titles whose categories should be loaded.</param>
-		/// <param name="hidden">Filter for hidden categories.</param>
-		public void AddPageCategories(IEnumerable<ISimpleTitle> titles, Filter hidden) => this.AddPageCategories(new CategoriesInput { FilterHidden = hidden }, titles);
-
-		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
-		/// <param name="titles">The titles whose categories should be loaded.</param>
-		/// <param name="hidden">Filter for hidden categories.</param>
-		/// <param name="limitTo">Limit the results to these categories.</param>
-		public void AddPageCategories(IEnumerable<ISimpleTitle> titles, Filter hidden, IEnumerable<string> limitTo) => this.AddPageCategories(new CategoriesInput { Categories = limitTo, FilterHidden = hidden }, titles);
-
-		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
-		/// <param name="titles">The titles whose categories should be loaded.</param>
-		public void AddPageLinks(IEnumerable<ISimpleTitle> titles) => this.AddPageLinks(titles, null);
-
-		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
-		/// <param name="titles">The titles whose categories should be loaded.</param>
-		/// <param name="namespaces">The namespaces to limit results to.</param>
-		public void AddPageLinks(IEnumerable<ISimpleTitle> titles, IEnumerable<int> namespaces) => this.AddPageLinks(new LinksInput() { Namespaces = namespaces }, titles);
-
-		/// <summary>Adds pages that link to the given titles to the collection.</summary>
-		/// <param name="titles">The titles.</param>
-		public void AddPageLinksHere(IEnumerable<ISimpleTitle> titles) => this.AddPageLinksHere(new LinksHereInput(), titles);
-
-		/// <summary>Adds pages with a given page property (e.g., notrail, breadCrumbTrail) to the collection.</summary>
-		/// <param name="property">The property to find.</param>
-		public void AddPagesWithProperty(string property) => this.AddPagesWithProperty(new PagesWithPropertyInput(property));
-
-		/// <summary>Adds pages that transclude the given titles to the collection.</summary>
-		/// <param name="titles">The titles.</param>
-		public void AddPageTranscludedIn(IEnumerable<ISimpleTitle> titles) => this.AddPageTranscludedIn(new TranscludedInInput(), titles);
-
-		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
-		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		public void AddPageTransclusions(IEnumerable<ISimpleTitle> titles) => this.AddPageTransclusions(new TemplatesInput(), titles);
-
-		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
-		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		/// <param name="limitTo">Limit the results to these transclusions.</param>
-		public void AddPageTransclusions(IEnumerable<ISimpleTitle> titles, IEnumerable<string> limitTo) => this.AddPageTransclusions(new TemplatesInput() { Templates = limitTo }, titles);
-
-		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
-		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		/// <param name="namespaces">Limit the results to these namespaces.</param>
-		public void AddPageTransclusions(IEnumerable<ISimpleTitle> titles, IEnumerable<int> namespaces) => this.AddPageTransclusions(new TemplatesInput() { Namespaces = namespaces }, titles);
-
-		/// <summary>Adds prefix-search results to the collection.</summary>
-		/// <param name="prefix">The prefix to search for.</param>
-		/// <remarks>As noted on the API page for PrefixSearch, this is <em>not</em> the same as other prefix-based methods in that it doesn't strictly look for pages to start with the same literal letters. It's run through the installed search engine instead, and may include such things as word substitution, spelling correction, etc.</remarks>
-		public void AddPrefixSearchResults(string prefix) => this.AddPrefixSearchResults(new PrefixSearchInput(prefix));
-
-		/// <summary>Adds prefix-search results to the collection.</summary>
-		/// <param name="prefix">The prefix to search for.</param>
-		/// <param name="namespaces">The namespaces to search in.</param>
-		/// <remarks>As noted on the API page for PrefixSearch, this is <em>not</em> the same as other prefix-based methods in that it doesn't strictly look for pages to start with the same literal letters. It's run through the installed search engine instead, and may include such things as word substitution, spelling correction, etc.</remarks>
-		public void AddPrefixSearchResults(string prefix, IEnumerable<int> namespaces) => this.AddPrefixSearchResults(new PrefixSearchInput(prefix) { Namespaces = namespaces });
-
-		/// <summary>Adds query page results to the collection.</summary>
-		/// <param name="page">The query-page-compatible module.</param>
-		/// <remarks>Query pages are a subset of Special pages that conform to a specific standard. You can find a list by using the Help feature of the API (<c>/api.php?action=help&amp;modules=query+querypage</c>). Note that a few of these (e.g., ListDuplicatedFiles) have API equivalents that are more functional and produce the same or more detailed results.</remarks>
-		public void AddQueryPage(string page) => this.AddQueryPage(new QueryPageInput(page));
-
-		/// <summary>Adds query page results to the collection.</summary>
-		/// <param name="page">The query-page-compatible module.</param>
-		/// <param name="parameters">The custom parameters to provide to the query page module.</param>
-		/// <remarks>Query pages are a subset of Special pages that conform to a specific standard. You can find a list by using the Help feature of the API (<c>/api.php?action=help&amp;modules=query+querypage</c>). Note that a few of these (e.g., ListDuplicatedFiles) have API equivalents that are more functional and produce the same or more detailed results.</remarks>
-		public void AddQueryPage(string page, IReadOnlyDictionary<string, string> parameters) => this.AddQueryPage(new QueryPageInput(page) { Parameters = parameters });
-
-		/// <summary>Adds multiple titles to the <see cref="TitleCollection">collection</see> at once.</summary>
-		/// <param name="titles">The titles to add.</param>
-		/// <remarks>This method is for convenience only. Unlike the equivalent <see cref="List{T}" /> function, it simply calls <see cref="Add(TTitle)" /> repeatedly and provides no performance benefit.</remarks>
-		public void AddRange(IEnumerable<TTitle> titles) => WikiCommon.Extensions.AddRange(this, titles);
-
-		/// <summary>Adds all available recent changes pages to the collection.</summary>
-		public void AddRecentChanges() => this.AddRecentChanges(new RecentChangesInput());
-
-		/// <summary>Adds recent changes pages to the collection, filtered to one or more namespaces.</summary>
-		/// <param name="namespaces">The namespaces to limit results to.</param>
-		public void AddRecentChanges(IEnumerable<int> namespaces) => this.AddRecentChanges(new RecentChangesInput { Namespaces = namespaces, });
-
-		/// <summary>Adds recent changes pages to the collection, filtered to a specific tag.</summary>
-		/// <param name="tag">A tag to limit results to.</param>
-		public void AddRecentChanges(string tag) => this.AddRecentChanges(new RecentChangesInput { Tag = tag });
-
-		/// <summary>Adds recent changes pages to the collection, filtered to the specified types of changes.</summary>
-		/// <param name="types">The types of changes to limit results to.</param>
-		public void AddRecentChanges(RecentChangesTypes types) => this.AddRecentChanges(new RecentChangesInput { Types = types });
-
-		/// <summary>Adds recent changes pages to the collection, filtered based on properties of the change.</summary>
-		/// <param name="anonymous">Include anonymous edits in the results.</param>
-		/// <param name="bots">Include bot edits in the results.</param>
-		/// <param name="minor">Include minor edits in the results.</param>
-		/// <param name="patrolled">Include patrolled edits in the results.</param>
-		/// <param name="redirects">Include redirects in the results.</param>
-		public void AddRecentChanges(Filter anonymous, Filter bots, Filter minor, Filter patrolled, Filter redirects) => this.AddRecentChanges(new RecentChangesInput { FilterAnonymous = anonymous, FilterBots = bots, FilterMinor = minor, FilterPatrolled = patrolled, FilterRedirects = redirects });
-
-		/// <summary>Adds recent changes pages to the collection, filtered to a date range.</summary>
-		/// <param name="start">The date to start at (inclusive).</param>
-		/// <param name="end">The date to end at (inclusive).</param>
-		public void AddRecentChanges(DateTime? start, DateTime? end) => this.AddRecentChanges(new RecentChangesInput { Start = start, End = end });
-
-		/// <summary>Adds recent changes pages to the collection starting at a given date and time and moving forward or backward from there.</summary>
-		/// <param name="start">The date to start at (inclusive).</param>
-		/// <param name="newer">if set to <c>true</c>, changes from the start date to the most recent will be returned; otherwise, changes from the start date to the oldest will be returned.</param>
-		public void AddRecentChanges(DateTime start, bool newer) => this.AddRecentChanges(start, newer, 0);
-
-		/// <summary>Adds a specified number of recent changes pages to the collection starting at a given date and time and moving forward or backward from there.</summary>
-		/// <param name="start">The date to start at (inclusive).</param>
-		/// <param name="newer">if set to <c>true</c>, changes from the start date to the most recent will be returned; otherwise, changes from the start date to the oldest will be returned.</param>
-		/// <param name="count">The number of changes to return.</param>
-		public void AddRecentChanges(DateTime start, bool newer, int count) => this.AddRecentChanges(new RecentChangesInput { Start = start, SortAscending = newer, MaxItems = count });
-
-		/// <summary>Adds recent changes pages from a specific user, or excluding that user, to the collection.</summary>
-		/// <param name="user">The user.</param>
-		/// <param name="exclude">if set to <c>true</c> returns changes by everyone other than the user.</param>
-		public void AddRecentChanges(string user, bool exclude) => this.AddRecentChanges(new RecentChangesInput { User = user, ExcludeUser = exclude });
-
-		/// <summary>Adds recent changes pages to the collection based on complex criteria.</summary>
-		/// <param name="options">The options to be applied to the results.</param>
-		public void AddRecentChanges(RecentChangesOptions options)
-		{
-			ThrowNull(options, nameof(options));
-			this.AddRecentChanges(options.ToWallEInput);
-		}
-
-		/// <summary>Adds redirects to a namespace to the collection.</summary>
-		/// <param name="ns">The namespace.</param>
-		public void AddRedirectsToNamespace(int ns) => this.AddRedirectsToNamespace(new AllRedirectsInput { Namespace = ns });
-
-		/// <summary>Adds redirects to a namespace to the collection.</summary>
-		/// <param name="ns">The namespace.</param>
-		/// <param name="prefix">The prefix of the pages to load.</param>
-		public void AddRedirectsToNamespace(int ns, string prefix) => this.AddRedirectsToNamespace(new AllRedirectsInput { Namespace = ns, Prefix = prefix });
-
-		/// <summary>Adds redirects to a namespace to the collection.</summary>
-		/// <param name="ns">The namespace.</param>
-		/// <param name="from">The page to start at (inclusive). The page specified does not have to exist.</param>
-		/// <param name="to">The page to stop at (inclusive). The page specified does not have to exist.</param>
-		public void AddRedirectsToNamespace(int ns, string from, string to) => this.AddRedirectsToNamespace(new AllRedirectsInput { Namespace = ns, From = from, To = to });
-
-		/// <summary>Adds pages from a range of revisions to the collection.</summary>
-		/// <param name="start">The date to start at (inclusive).</param>
-		/// <param name="newer">if set to <c>true</c>, revisions from the start date to the most recent will be returned; otherwise, changes from the start date to the oldest will be returned.</param>
-		public void AddRevisions(DateTime start, bool newer) => this.AddRevisions(start, newer, 0);
-
-		/// <summary>Adds pages from a range of revisions to the collection.</summary>
-		/// <param name="start">The date to start at (inclusive).</param>
-		/// <param name="newer">if set to <c>true</c>, revisions from the start date to the most recent will be returned; otherwise, changes from the start date to the oldest will be returned.</param>
-		/// <param name="count">The number of revisions to return.</param>
-		public void AddRevisions(DateTime start, bool newer, int count) => this.AddRevisions(new AllRevisionsInput { Start = start, SortAscending = newer, MaxItems = count });
-
-		/// <summary>Adds search results to the collection.</summary>
-		/// <param name="search">What to search for.</param>
-		public void AddSearchResults(string search) => this.AddSearchResults(new SearchInput(search) { Properties = SearchProperties.None });
-
-		/// <summary>Adds search results to the collection.</summary>
-		/// <param name="search">What to search for.</param>
-		/// <param name="namespaces">The namespaces to search in.</param>
-		public void AddSearchResults(string search, IEnumerable<int> namespaces) => this.AddSearchResults(new SearchInput(search) { Namespaces = namespaces, Properties = SearchProperties.None });
-
-		/// <summary>Adds search results to the collection.</summary>
-		/// <param name="search">What to search for.</param>
-		/// <param name="whatToSearch">Whether to search the title, text, or use a near-match search.</param>
-		/// <remarks>Not all search engines support all <paramref name="whatToSearch"/> options.</remarks>
-		public void AddSearchResults(string search, WhatToSearch whatToSearch) => this.AddSearchResults(new SearchInput(search) { What = whatToSearch, Properties = SearchProperties.None });
-
-		/// <summary>Adds search results to the collection.</summary>
-		/// <param name="search">What to search for.</param>
-		/// <param name="whatToSearch">Whether to search the title, text, or use a near-match search.</param>
-		/// <param name="namespaces">The namespaces to search in.</param>
-		/// <remarks>Not all search engines support all <paramref name="whatToSearch"/> options.</remarks>
-		public void AddSearchResults(string search, WhatToSearch whatToSearch, IEnumerable<int> namespaces) => this.AddSearchResults(new SearchInput(search) { Namespaces = namespaces, What = whatToSearch, Properties = SearchProperties.None });
-
-		/// <summary>Adds all pages with transclusions to the collection.</summary>
-		/// <remarks>Note that the templates do not have to exist; only the transclusion itself needs to exist. Similarly, a template that has no transclusions at all would not appear in the results.</remarks>
-		public void AddTransclusions() => this.AddTransclusions(new AllTransclusionsInput());
-
-		/// <summary>Adds all pages with  transclusions in the given namespace to the collection.</summary>
-		/// <param name="ns">The namespace.</param>
-		/// <remarks>Unlike other namespace-specific methods, the namespace for this method applies to the transclusions to search for, <em>not</em> the pages to return. For example, a namespace value of 0 would find all transclusions of main-space pages, even if the transclusion itself is in Help space, for instance. Note that the transcluded pages do not have to exist; only the transclusion itself needs to exist. Similarly, a page that has no transclusions at all would not appear in the results.</remarks>
-		public void AddTransclusions(int ns) => this.AddTransclusions(new AllTransclusionsInput { Namespace = ns });
-
-		/// <summary>Adds pages with transclusions that begin with the given prefix to the collection.</summary>
-		/// <param name="prefix">The prefix of the template transclusions to include.</param>
-		/// <remarks>Unlike other prefix methods, the prefix for this method applies to the template transclusion to search for, <em>not</em> the pages to return. For example, a prefix of "Unsigned" would find transclusions for all templates which start with "Unsigned", such as "Unsigned", "Unsigned2", "Unsinged IP", and so forth. Also note that the transcluded pages do not have to exist; only the transclusion itself needs to exist. Similarly, a page that has no transclusions at all would not appear in the results.</remarks>
-		public void AddTransclusions(string prefix) => this.AddTransclusions(new AllTransclusionsInput { Prefix = prefix });
-
-		/// <summary>Adds pages with transclusions that are in the given namespace and begin with the given prefix to the collection.</summary>
-		/// <param name="ns">The namespace.</param>
-		/// <param name="prefix">The prefix of the template transclusions to include.</param>
-		/// <remarks>Unlike other namespace and prefix methods, the namespace and prefix for this method apply to the template transclusion to search for, <em>not</em> the pages to return. For example, a namespace of 2 and prefix of "Robby" would find transclusions of all user pages for users with names starting with "Robby". Also note that the transcluded pages do not have to exist; only the transclusion itself needs to exist. Similarly, a page that has no transclusions at all would not appear in the results.</remarks>
-		public void AddTransclusions(int ns, string prefix) => this.AddTransclusions(new AllTransclusionsInput { Namespace = ns, Prefix = prefix });
-
-		/// <summary>Adds pages with transclusions within a certain range to the collection.</summary>
-		/// <param name="from">The template to start at (inclusive). The template specified does not have to exist.</param>
-		/// <param name="to">The template to stop at (inclusive). The template specified does not have to exist.</param>
-		/// <remarks>Unlike other page-range methods, the range for this method applies to the template transclusion to search for, <em>not</em> the pages to return. For example, a range of "Uns" to "Unt" would find all "Unsigned" templates, as well as "Unstable" and "Unsure" templatea if there were transclusions to them. Also note that the transcluded pages do not have to exist; only the transclusion itself needs to exist. Similarly, a page that has no transclusions at all would not appear in the results.</remarks>
-		public void AddTransclusions(string from, string to) => this.AddTransclusions(new AllTransclusionsInput { From = from, To = to });
-
-		/// <summary>Adds pages with transclusions that are in the given namespace and within a certain range to the collection.</summary>
-		/// <param name="ns">The namespace.</param>
-		/// <param name="from">The template to start at (inclusive). The template specified does not have to exist.</param>
-		/// <param name="to">The template to stop at (inclusive). The template specified does not have to exist.</param>
-		/// <remarks>Unlike other namespace and page-range methods, the namespace and range for this method apply to the template transclusion to search for, <em>not</em> the pages to return. For example, a namespace of 2 and a range of "Rob" to "Roc" would find transclusions of all user pages for users with names between "Rob" and "Roc". Also note that the transcluded pages do not have to exist; only the transclusion itself needs to exist. Similarly, a page that has no transclusions at all would not appear in the results.</remarks>
-		public void AddTransclusions(int ns, string from, string to) => this.AddTransclusions(new AllTransclusionsInput { Namespace = ns, From = from, To = to });
-
-		/// <summary>Adds changed watchlist pages to the collection.</summary>
-		// Only basic full-watchlist functionality is implemented because I don't think watchlists are commonly used by the type of bot this framework is geared towards. If more functionality is desired, it's easy enough to add.
-		public void AddWatchlistChanged() => this.AddWatchlistChanged(new WatchlistInput());
-
-		/// <summary>Adds changed watchlist pages to the collection for a specific user, given their watchlist token.</summary>
-		/// <param name="owner">The watchlist owner.</param>
-		/// <param name="token">The watchlist token.</param>
-		public void AddWatchlistChanged(string owner, string token) => this.AddWatchlistChanged(new WatchlistInput { Owner = owner, Token = token });
-
-		/// <summary>Adds raw watchlist pages to the collection.</summary>
-		public void AddWatchlistRaw() => this.AddWatchlistRaw(new WatchlistRawInput());
-
-		/// <summary>Adds raw watchlist pages to the collection for a specific user, given their watchlist token.</summary>
-		/// <param name="owner">The watchlist owner.</param>
-		/// <param name="token">The watchlist token.</param>
-		public void AddWatchlistRaw(string owner, string token) => this.AddWatchlistRaw(new WatchlistRawInput { Owner = owner, Token = token });
-
 		/// <summary>Determines whether the <see cref="TitleCollection">collection</see> contains a specific value.</summary>
 		/// <param name="item">The object to locate in the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns><see langword="true" /> if <paramref name="item" /> is found in the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />.</returns>
@@ -564,6 +175,94 @@
 		/// <param name="namespaces">The namespaces to filter to.</param>
 		public void FilterToNamespaces(params int[] namespaces) => this.FilterToNamespaces(namespaces as IEnumerable<int>);
 
+		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
+		/// <param name="title">The title.</param>
+		public void GetBacklinks(string title) => this.GetBacklinks(title, BacklinksTypes.Backlinks | BacklinksTypes.EmbeddedIn, true, Filter.Any);
+
+		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
+		/// <param name="title">The title.</param>
+		/// <param name="linkTypes">The link types of the pages to retrieve.</param>
+		public void GetBacklinks(string title, BacklinksTypes linkTypes) => this.GetBacklinks(title, linkTypes, true, Filter.Any);
+
+		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
+		/// <param name="title">The title.</param>
+		/// <param name="linkTypes">The link types of the pages to retrieve.</param>
+		/// <param name="includeRedirectedTitles">if set to <c>true</c>, pages linking to <paramref name="title"/> via a redirect will be included.</param>
+		public void GetBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles) => this.GetBacklinks(title, linkTypes, includeRedirectedTitles, Filter.Any);
+
+		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
+		/// <param name="title">The title.</param>
+		/// <param name="linkTypes">The link types of the pages to retrieve.</param>
+		/// <param name="redirects">Whether or not to include redirects in the results.</param>
+		public void GetBacklinks(string title, BacklinksTypes linkTypes, Filter redirects) => this.GetBacklinks(new BacklinksInput(title, linkTypes) { FilterRedirects = redirects });
+
+		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
+		/// <param name="title">The title.</param>
+		/// <param name="linkTypes">The link types of the pages to retrieve.</param>
+		/// <param name="includeRedirectedTitles">if set to <c>true</c>, pages linking to <paramref name="title"/> via a redirect will be included.</param>
+		/// <param name="redirects">Whether or not to include redirects in the results.</param>
+		public void GetBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles, Filter redirects) => this.GetBacklinks(new BacklinksInput(title, linkTypes) { FilterRedirects = redirects, Redirect = includeRedirectedTitles });
+
+		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
+		/// <param name="title">The title.</param>
+		/// <param name="linkTypes">The link types of the pages to retrieve.</param>
+		/// <param name="includeRedirectedTitles">if set to <c>true</c>, pages linking to <paramref name="title"/> via a redirect will be included.</param>
+		/// <param name="redirects">Whether or not to include redirects in the results.</param>
+		/// <param name="ns">The namespace to limit the results to.</param>
+		public void GetBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles, Filter redirects, int ns) => this.GetBacklinks(new BacklinksInput(title, linkTypes) { FilterRedirects = redirects, Namespace = ns, Redirect = includeRedirectedTitles });
+
+		/// <summary>Adds a set of category pages to the collection.</summary>
+		public void GetCategories() => this.GetCategories(new AllCategoriesInput());
+
+		/// <summary>Adds a set of category pages that start with the specified prefix to the collection.</summary>
+		/// <param name="prefix">The prefix of the categories to load.</param>
+		public void GetCategories(string prefix) => this.GetCategories(new AllCategoriesInput { Prefix = prefix });
+
+		/// <summary>Adds a set of category pages to the collection.</summary>
+		/// <param name="from">The category to start at (inclusive). The category specified does not have to exist.</param>
+		/// <param name="to">The category to stop at (inclusive). The category specified does not have to exist.</param>
+		public void GetCategories(string from, string to) => this.GetCategories(new AllCategoriesInput { From = from, To = to });
+
+		/// <summary>Adds category members to the collection, potentially including subcategories and their members.</summary>
+		/// <param name="category">The category.</param>
+		/// <param name="recurse">if set to <c>true</c> recurses through subcategories.</param>
+		public void GetCategoryMembers(string category, bool recurse) => this.GetCategoryMembers(category, CategoryMemberTypes.All, null, null, recurse);
+
+		/// <summary>Adds category members of the specified type to the collection, potentially including subcategories and their members.</summary>
+		/// <param name="category">The category.</param>
+		/// <param name="categoryMemberTypes">The category member types to load.</param>
+		/// <param name="recurse">if set to <c>true</c> recurses through subcategories.</param>
+		public void GetCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, bool recurse) => this.GetCategoryMembers(category, categoryMemberTypes, null, null, recurse);
+
+		/// <summary>Adds category members of the specified type and within the specified range to the collection, potentially including subcategories and their members.</summary>
+		/// <param name="category">The category.</param>
+		/// <param name="categoryMemberTypes">The category member types to load.</param>
+		/// <param name="from">The category member to start at (inclusive). The member specified does not have to exist.</param>
+		/// <param name="to">The category member to stop at (inclusive). The member specified does not have to exist.</param>
+		/// <param name="loadSubcategories">if set to <c>true</c> recurses through subcategories.</param>
+		/// <remarks>If subcategories are loaded, they will be limited to the <paramref name="categoryMemberTypes"/> requested. However, they will <em>not</em> be limited by the <paramref name="from"/> and <paramref name="to"/> parameters.</remarks>
+		public void GetCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, string from, string to, bool loadSubcategories)
+		{
+			var cat = Title.ForcedNamespace(this.Site.Namespaces[MediaWikiNamespaces.Category], category);
+			this.GetCategoryMembers(
+				new CategoryMembersInput(cat.FullPageName)
+				{
+					Type = categoryMemberTypes,
+					StartSortKeyPrefix = from,
+					EndSortKeyPrefix = to,
+				},
+				loadSubcategories);
+		}
+
+		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
+		/// <param name="titles">The titles to find duplicates of.</param>
+		public void GetDuplicateFiles(IEnumerable<ISimpleTitle> titles) => this.GetDuplicateFiles(titles, false);
+
+		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
+		/// <param name="titles">The titles to find duplicates of.</param>
+		/// <param name="localOnly">if set to <c>true</c> [local only].</param>
+		public void GetDuplicateFiles(IEnumerable<ISimpleTitle> titles, bool localOnly) => this.GetDuplicateFiles(new DuplicateFilesInput() { LocalOnly = localOnly }, titles);
+
 		/// <summary>Returns an enumerator that iterates through the collection.</summary>
 		/// <returns>An enumerator that can be used to iterate through the collection.</returns>
 		public IEnumerator<TTitle> GetEnumerator() => this.items.GetEnumerator();
@@ -571,6 +270,307 @@
 		/// <summary>Returns an enumerator that iterates through the collection.</summary>
 		/// <returns>An enumerator that can be used to iterate through the collection.</returns>
 		IEnumerator IEnumerable.GetEnumerator() => this.items.GetEnumerator();
+
+		/// <summary>Adds files uploaded by the specified user to the collection.</summary>
+		/// <param name="user">The user.</param>
+		public void GetFiles(string user) => this.GetFiles(new AllImagesInput { User = user });
+
+		/// <summary>Adds a range of files to the collection.</summary>
+		/// <param name="from">The file name to start at (inclusive).</param>
+		/// <param name="to">The file name to end at (inclusive).</param>
+		public void GetFiles(string from, string to) => this.GetFiles(new AllImagesInput { From = from, To = to });
+
+		/// <summary>Adds a range of files to the collection based on the most recent version.</summary>
+		/// <param name="start">The date to start at (inclusive).</param>
+		/// <param name="end">The date to end at (inclusive).</param>
+		public void GetFiles(DateTime start, DateTime end) => this.GetFiles(new AllImagesInput { Start = start, End = end });
+
+		/// <summary>Adds all files that are in use to the collection.</summary>
+		public void GetFileUsage() => this.GetFileUsage(new AllFileUsagesInput { Unique = true });
+
+		/// <summary>Adds in-use files that have a given prefix to the collection.</summary>
+		/// <param name="prefix">The prefix of the files to load.</param>
+		public void GetFileUsage(string prefix) => this.GetFileUsage(new AllFileUsagesInput { Prefix = prefix, Unique = true });
+
+		/// <summary>Adds a range of in-use files to the collection.</summary>
+		/// <param name="from">The file name to start at (inclusive).</param>
+		/// <param name="to">The file name to end at (inclusive).</param>
+		public void GetFileUsage(string from, string to) => this.GetFileUsage(new AllFileUsagesInput { From = from, To = to, Unique = true });
+
+		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
+		/// <param name="titles">The titles.</param>
+		public void GetFileUsage(IEnumerable<ISimpleTitle> titles) => this.GetFileUsage(new FileUsageInput(), titles);
+
+		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
+		/// <param name="titles">The titles.</param>
+		/// <param name="redirects">Filter for redirects.</param>
+		public void GetFileUsage(IEnumerable<ISimpleTitle> titles, Filter redirects) => this.GetFileUsage(new FileUsageInput() { FilterRedirects = redirects }, titles);
+
+		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
+		/// <param name="titles">The titles.</param>
+		/// <param name="redirects">Filter for redirects.</param>
+		/// <param name="namespaces">The namespaces to limit results to.</param>
+		public void GetFileUsage(IEnumerable<ISimpleTitle> titles, Filter redirects, IEnumerable<int> namespaces) => this.GetFileUsage(new FileUsageInput() { Namespaces = namespaces, FilterRedirects = redirects }, titles);
+
+		/// <summary>Adds pages that link to a given namespace to the collection.</summary>
+		/// <param name="ns">The namespace.</param>
+		public void GetLinksToNamespace(int ns) => this.GetLinksToNamespace(new AllLinksInput { Namespace = ns });
+
+		/// <summary>Adds pages that link to a given namespace and begin with a certain prefix to the collection.</summary>
+		/// <param name="ns">The namespace.</param>
+		/// <param name="prefix">The prefix of the pages to load.</param>
+		public void GetLinksToNamespace(int ns, string prefix) => this.GetLinksToNamespace(new AllLinksInput { Namespace = ns, Prefix = prefix });
+
+		/// <summary>Adds pages that link to a given namespace within a given range to the collection.</summary>
+		/// <param name="ns">The namespace.</param>
+		/// <param name="from">The page name to start at (inclusive).</param>
+		/// <param name="to">The page name to end at (inclusive).</param>
+		public void GetLinksToNamespace(int ns, string from, string to) => this.GetLinksToNamespace(new AllLinksInput { Namespace = ns, From = from, To = to });
+
+		/// <summary>Adds pages in the given the namespace to the collection.</summary>
+		/// <param name="ns">The namespace.</param>
+		/// <param name="redirects">Whether or not to include pages that are redirects.</param>
+		public void GetNamespace(int ns, Filter redirects) => this.GetNamespace(new AllPagesInput { FilterRedirects = redirects, Namespace = ns });
+
+		/// <summary>Adds pages in the given the namespace to the collection.</summary>
+		/// <param name="ns">The namespace.</param>
+		/// <param name="redirects">Whether or not to include pages that are redirects.</param>
+		/// <param name="prefix">The prefix of the pages to load.</param>
+		public void GetNamespace(int ns, Filter redirects, string prefix) => this.GetNamespace(new AllPagesInput { FilterRedirects = redirects, Namespace = ns, Prefix = prefix });
+
+		/// <summary>Adds pages in the given the namespace to the collection.</summary>
+		/// <param name="ns">The namespace.</param>
+		/// <param name="redirects">Whether or not to include pages that are redirects.</param>
+		/// <param name="from">The page name to start at (inclusive).</param>
+		/// <param name="to">The page name to end at (inclusive).</param>
+		public void GetNamespace(int ns, Filter redirects, string from, string to) => this.GetNamespace(new AllPagesInput { FilterRedirects = redirects, From = from, Namespace = ns, To = to });
+
+		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
+		/// <param name="titles">The titles whose categories should be loaded.</param>
+		public void GetPageCategories(IEnumerable<ISimpleTitle> titles) => this.GetPageCategories(new CategoriesInput(), titles);
+
+		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
+		/// <param name="titles">The titles whose categories should be loaded.</param>
+		/// <param name="hidden">Filter for hidden categories.</param>
+		public void GetPageCategories(IEnumerable<ISimpleTitle> titles, Filter hidden) => this.GetPageCategories(new CategoriesInput { FilterHidden = hidden }, titles);
+
+		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
+		/// <param name="titles">The titles whose categories should be loaded.</param>
+		/// <param name="hidden">Filter for hidden categories.</param>
+		/// <param name="limitTo">Limit the results to these categories.</param>
+		public void GetPageCategories(IEnumerable<ISimpleTitle> titles, Filter hidden, IEnumerable<string> limitTo) => this.GetPageCategories(new CategoriesInput { Categories = limitTo, FilterHidden = hidden }, titles);
+
+		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
+		/// <param name="titles">The titles whose categories should be loaded.</param>
+		public void GetPageLinks(IEnumerable<ISimpleTitle> titles) => this.GetPageLinks(titles, null);
+
+		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
+		/// <param name="titles">The titles whose categories should be loaded.</param>
+		/// <param name="namespaces">The namespaces to limit results to.</param>
+		public void GetPageLinks(IEnumerable<ISimpleTitle> titles, IEnumerable<int> namespaces) => this.GetPageLinks(new LinksInput() { Namespaces = namespaces }, titles);
+
+		/// <summary>Adds pages that link to the given titles to the collection.</summary>
+		/// <param name="titles">The titles.</param>
+		public void GetPageLinksHere(IEnumerable<ISimpleTitle> titles) => this.GetPageLinksHere(new LinksHereInput(), titles);
+
+		/// <summary>Adds pages with a given page property (e.g., notrail, breadCrumbTrail) to the collection.</summary>
+		/// <param name="property">The property to find.</param>
+		public void GetPagesWithProperty(string property) => this.GetPagesWithProperty(new PagesWithPropertyInput(property));
+
+		/// <summary>Adds pages that transclude the given titles to the collection.</summary>
+		/// <param name="titles">The titles.</param>
+		public void GetPageTranscludedIn(IEnumerable<ISimpleTitle> titles) => this.GetPageTranscludedIn(new TranscludedInInput(), titles);
+
+		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
+		/// <param name="titles">The titles whose transclusions should be loaded.</param>
+		public void GetPageTransclusions(IEnumerable<ISimpleTitle> titles) => this.GetPageTransclusions(new TemplatesInput(), titles);
+
+		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
+		/// <param name="titles">The titles whose transclusions should be loaded.</param>
+		/// <param name="limitTo">Limit the results to these transclusions.</param>
+		public void GetPageTransclusions(IEnumerable<ISimpleTitle> titles, IEnumerable<string> limitTo) => this.GetPageTransclusions(new TemplatesInput() { Templates = limitTo }, titles);
+
+		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
+		/// <param name="titles">The titles whose transclusions should be loaded.</param>
+		/// <param name="namespaces">Limit the results to these namespaces.</param>
+		public void GetPageTransclusions(IEnumerable<ISimpleTitle> titles, IEnumerable<int> namespaces) => this.GetPageTransclusions(new TemplatesInput() { Namespaces = namespaces }, titles);
+
+		/// <summary>Adds prefix-search results to the collection.</summary>
+		/// <param name="prefix">The prefix to search for.</param>
+		/// <remarks>As noted on the API page for PrefixSearch, this is <em>not</em> the same as other prefix-based methods in that it doesn't strictly look for pages to start with the same literal letters. It's run through the installed search engine instead, and may include such things as word substitution, spelling correction, etc.</remarks>
+		public void GetPrefixSearchResults(string prefix) => this.GetPrefixSearchResults(new PrefixSearchInput(prefix));
+
+		/// <summary>Adds prefix-search results to the collection.</summary>
+		/// <param name="prefix">The prefix to search for.</param>
+		/// <param name="namespaces">The namespaces to search in.</param>
+		/// <remarks>As noted on the API page for PrefixSearch, this is <em>not</em> the same as other prefix-based methods in that it doesn't strictly look for pages to start with the same literal letters. It's run through the installed search engine instead, and may include such things as word substitution, spelling correction, etc.</remarks>
+		public void GetPrefixSearchResults(string prefix, IEnumerable<int> namespaces) => this.GetPrefixSearchResults(new PrefixSearchInput(prefix) { Namespaces = namespaces });
+
+		/// <summary>Adds query page results to the collection.</summary>
+		/// <param name="page">The query-page-compatible module.</param>
+		/// <remarks>Query pages are a subset of Special pages that conform to a specific standard. You can find a list by using the Help feature of the API (<c>/api.php?action=help&amp;modules=query+querypage</c>). Note that a few of these (e.g., ListDuplicatedFiles) have API equivalents that are more functional and produce the same or more detailed results.</remarks>
+		public void GetQueryPage(string page) => this.GetQueryPage(new QueryPageInput(page));
+
+		/// <summary>Adds query page results to the collection.</summary>
+		/// <param name="page">The query-page-compatible module.</param>
+		/// <param name="parameters">The custom parameters to provide to the query page module.</param>
+		/// <remarks>Query pages are a subset of Special pages that conform to a specific standard. You can find a list by using the Help feature of the API (<c>/api.php?action=help&amp;modules=query+querypage</c>). Note that a few of these (e.g., ListDuplicatedFiles) have API equivalents that are more functional and produce the same or more detailed results.</remarks>
+		public void GetQueryPage(string page, IReadOnlyDictionary<string, string> parameters) => this.GetQueryPage(new QueryPageInput(page) { Parameters = parameters });
+
+		/// <summary>Adds multiple titles to the <see cref="TitleCollection">collection</see> at once.</summary>
+		/// <param name="titles">The titles to add.</param>
+		/// <remarks>This method is for convenience only. Unlike the equivalent <see cref="List{T}" /> function, it simply calls <see cref="Add(TTitle)" /> repeatedly and provides no performance benefit.</remarks>
+		public void AddRange(IEnumerable<TTitle> titles) => WikiCommon.Extensions.AddRange(this, titles);
+
+		/// <summary>Adds all available recent changes pages to the collection.</summary>
+		public void GetRecentChanges() => this.GetRecentChanges(new RecentChangesInput());
+
+		/// <summary>Adds recent changes pages to the collection, filtered to one or more namespaces.</summary>
+		/// <param name="namespaces">The namespaces to limit results to.</param>
+		public void GetRecentChanges(IEnumerable<int> namespaces) => this.GetRecentChanges(new RecentChangesInput { Namespaces = namespaces, });
+
+		/// <summary>Adds recent changes pages to the collection, filtered to a specific tag.</summary>
+		/// <param name="tag">A tag to limit results to.</param>
+		public void GetRecentChanges(string tag) => this.GetRecentChanges(new RecentChangesInput { Tag = tag });
+
+		/// <summary>Adds recent changes pages to the collection, filtered to the specified types of changes.</summary>
+		/// <param name="types">The types of changes to limit results to.</param>
+		public void GetRecentChanges(RecentChangesTypes types) => this.GetRecentChanges(new RecentChangesInput { Types = types });
+
+		/// <summary>Adds recent changes pages to the collection, filtered based on properties of the change.</summary>
+		/// <param name="anonymous">Include anonymous edits in the results.</param>
+		/// <param name="bots">Include bot edits in the results.</param>
+		/// <param name="minor">Include minor edits in the results.</param>
+		/// <param name="patrolled">Include patrolled edits in the results.</param>
+		/// <param name="redirects">Include redirects in the results.</param>
+		public void GetRecentChanges(Filter anonymous, Filter bots, Filter minor, Filter patrolled, Filter redirects) => this.GetRecentChanges(new RecentChangesInput { FilterAnonymous = anonymous, FilterBots = bots, FilterMinor = minor, FilterPatrolled = patrolled, FilterRedirects = redirects });
+
+		/// <summary>Adds recent changes pages to the collection, filtered to a date range.</summary>
+		/// <param name="start">The date to start at (inclusive).</param>
+		/// <param name="end">The date to end at (inclusive).</param>
+		public void GetRecentChanges(DateTime? start, DateTime? end) => this.GetRecentChanges(new RecentChangesInput { Start = start, End = end });
+
+		/// <summary>Adds recent changes pages to the collection starting at a given date and time and moving forward or backward from there.</summary>
+		/// <param name="start">The date to start at (inclusive).</param>
+		/// <param name="newer">if set to <c>true</c>, changes from the start date to the most recent will be returned; otherwise, changes from the start date to the oldest will be returned.</param>
+		public void GetRecentChanges(DateTime start, bool newer) => this.GetRecentChanges(start, newer, 0);
+
+		/// <summary>Adds a specified number of recent changes pages to the collection starting at a given date and time and moving forward or backward from there.</summary>
+		/// <param name="start">The date to start at (inclusive).</param>
+		/// <param name="newer">if set to <c>true</c>, changes from the start date to the most recent will be returned; otherwise, changes from the start date to the oldest will be returned.</param>
+		/// <param name="count">The number of changes to return.</param>
+		public void GetRecentChanges(DateTime start, bool newer, int count) => this.GetRecentChanges(new RecentChangesInput { Start = start, SortAscending = newer, MaxItems = count });
+
+		/// <summary>Adds recent changes pages from a specific user, or excluding that user, to the collection.</summary>
+		/// <param name="user">The user.</param>
+		/// <param name="exclude">if set to <c>true</c> returns changes by everyone other than the user.</param>
+		public void GetRecentChanges(string user, bool exclude) => this.GetRecentChanges(new RecentChangesInput { User = user, ExcludeUser = exclude });
+
+		/// <summary>Adds recent changes pages to the collection based on complex criteria.</summary>
+		/// <param name="options">The options to be applied to the results.</param>
+		public void GetRecentChanges(RecentChangesOptions options)
+		{
+			ThrowNull(options, nameof(options));
+			this.GetRecentChanges(options.ToWallEInput);
+		}
+
+		/// <summary>Adds redirects to a namespace to the collection.</summary>
+		/// <param name="ns">The namespace.</param>
+		public void GetRedirectsToNamespace(int ns) => this.GetRedirectsToNamespace(new AllRedirectsInput { Namespace = ns });
+
+		/// <summary>Adds redirects to a namespace to the collection.</summary>
+		/// <param name="ns">The namespace.</param>
+		/// <param name="prefix">The prefix of the pages to load.</param>
+		public void GetRedirectsToNamespace(int ns, string prefix) => this.GetRedirectsToNamespace(new AllRedirectsInput { Namespace = ns, Prefix = prefix });
+
+		/// <summary>Adds redirects to a namespace to the collection.</summary>
+		/// <param name="ns">The namespace.</param>
+		/// <param name="from">The page to start at (inclusive). The page specified does not have to exist.</param>
+		/// <param name="to">The page to stop at (inclusive). The page specified does not have to exist.</param>
+		public void GetRedirectsToNamespace(int ns, string from, string to) => this.GetRedirectsToNamespace(new AllRedirectsInput { Namespace = ns, From = from, To = to });
+
+		/// <summary>Adds pages from a range of revisions to the collection.</summary>
+		/// <param name="start">The date to start at (inclusive).</param>
+		/// <param name="newer">if set to <c>true</c>, revisions from the start date to the most recent will be returned; otherwise, changes from the start date to the oldest will be returned.</param>
+		public void GetRevisions(DateTime start, bool newer) => this.GetRevisions(start, newer, 0);
+
+		/// <summary>Adds pages from a range of revisions to the collection.</summary>
+		/// <param name="start">The date to start at (inclusive).</param>
+		/// <param name="newer">if set to <c>true</c>, revisions from the start date to the most recent will be returned; otherwise, changes from the start date to the oldest will be returned.</param>
+		/// <param name="count">The number of revisions to return.</param>
+		public void GetRevisions(DateTime start, bool newer, int count) => this.GetRevisions(new AllRevisionsInput { Start = start, SortAscending = newer, MaxItems = count });
+
+		/// <summary>Adds search results to the collection.</summary>
+		/// <param name="search">What to search for.</param>
+		public void GetSearchResults(string search) => this.GetSearchResults(new SearchInput(search) { Properties = SearchProperties.None });
+
+		/// <summary>Adds search results to the collection.</summary>
+		/// <param name="search">What to search for.</param>
+		/// <param name="namespaces">The namespaces to search in.</param>
+		public void GetSearchResults(string search, IEnumerable<int> namespaces) => this.GetSearchResults(new SearchInput(search) { Namespaces = namespaces, Properties = SearchProperties.None });
+
+		/// <summary>Adds search results to the collection.</summary>
+		/// <param name="search">What to search for.</param>
+		/// <param name="whatToSearch">Whether to search the title, text, or use a near-match search.</param>
+		/// <remarks>Not all search engines support all <paramref name="whatToSearch"/> options.</remarks>
+		public void GetSearchResults(string search, WhatToSearch whatToSearch) => this.GetSearchResults(new SearchInput(search) { What = whatToSearch, Properties = SearchProperties.None });
+
+		/// <summary>Adds search results to the collection.</summary>
+		/// <param name="search">What to search for.</param>
+		/// <param name="whatToSearch">Whether to search the title, text, or use a near-match search.</param>
+		/// <param name="namespaces">The namespaces to search in.</param>
+		/// <remarks>Not all search engines support all <paramref name="whatToSearch"/> options.</remarks>
+		public void GetSearchResults(string search, WhatToSearch whatToSearch, IEnumerable<int> namespaces) => this.GetSearchResults(new SearchInput(search) { Namespaces = namespaces, What = whatToSearch, Properties = SearchProperties.None });
+
+		/// <summary>Adds all pages with transclusions to the collection.</summary>
+		/// <remarks>Note that the templates do not have to exist; only the transclusion itself needs to exist. Similarly, a template that has no transclusions at all would not appear in the results.</remarks>
+		public void GetTransclusions() => this.GetTransclusions(new AllTransclusionsInput());
+
+		/// <summary>Adds all pages with  transclusions in the given namespace to the collection.</summary>
+		/// <param name="ns">The namespace.</param>
+		/// <remarks>Unlike other namespace-specific methods, the namespace for this method applies to the transclusions to search for, <em>not</em> the pages to return. For example, a namespace value of 0 would find all transclusions of main-space pages, even if the transclusion itself is in Help space, for instance. Note that the transcluded pages do not have to exist; only the transclusion itself needs to exist. Similarly, a page that has no transclusions at all would not appear in the results.</remarks>
+		public void GetTransclusions(int ns) => this.GetTransclusions(new AllTransclusionsInput { Namespace = ns });
+
+		/// <summary>Adds pages with transclusions that begin with the given prefix to the collection.</summary>
+		/// <param name="prefix">The prefix of the template transclusions to include.</param>
+		/// <remarks>Unlike other prefix methods, the prefix for this method applies to the template transclusion to search for, <em>not</em> the pages to return. For example, a prefix of "Unsigned" would find transclusions for all templates which start with "Unsigned", such as "Unsigned", "Unsigned2", "Unsinged IP", and so forth. Also note that the transcluded pages do not have to exist; only the transclusion itself needs to exist. Similarly, a page that has no transclusions at all would not appear in the results.</remarks>
+		public void GetTransclusions(string prefix) => this.GetTransclusions(new AllTransclusionsInput { Prefix = prefix });
+
+		/// <summary>Adds pages with transclusions that are in the given namespace and begin with the given prefix to the collection.</summary>
+		/// <param name="ns">The namespace.</param>
+		/// <param name="prefix">The prefix of the template transclusions to include.</param>
+		/// <remarks>Unlike other namespace and prefix methods, the namespace and prefix for this method apply to the template transclusion to search for, <em>not</em> the pages to return. For example, a namespace of 2 and prefix of "Robby" would find transclusions of all user pages for users with names starting with "Robby". Also note that the transcluded pages do not have to exist; only the transclusion itself needs to exist. Similarly, a page that has no transclusions at all would not appear in the results.</remarks>
+		public void GetTransclusions(int ns, string prefix) => this.GetTransclusions(new AllTransclusionsInput { Namespace = ns, Prefix = prefix });
+
+		/// <summary>Adds pages with transclusions within a certain range to the collection.</summary>
+		/// <param name="from">The template to start at (inclusive). The template specified does not have to exist.</param>
+		/// <param name="to">The template to stop at (inclusive). The template specified does not have to exist.</param>
+		/// <remarks>Unlike other page-range methods, the range for this method applies to the template transclusion to search for, <em>not</em> the pages to return. For example, a range of "Uns" to "Unt" would find all "Unsigned" templates, as well as "Unstable" and "Unsure" templatea if there were transclusions to them. Also note that the transcluded pages do not have to exist; only the transclusion itself needs to exist. Similarly, a page that has no transclusions at all would not appear in the results.</remarks>
+		public void GetTransclusions(string from, string to) => this.GetTransclusions(new AllTransclusionsInput { From = from, To = to });
+
+		/// <summary>Adds pages with transclusions that are in the given namespace and within a certain range to the collection.</summary>
+		/// <param name="ns">The namespace.</param>
+		/// <param name="from">The template to start at (inclusive). The template specified does not have to exist.</param>
+		/// <param name="to">The template to stop at (inclusive). The template specified does not have to exist.</param>
+		/// <remarks>Unlike other namespace and page-range methods, the namespace and range for this method apply to the template transclusion to search for, <em>not</em> the pages to return. For example, a namespace of 2 and a range of "Rob" to "Roc" would find transclusions of all user pages for users with names between "Rob" and "Roc". Also note that the transcluded pages do not have to exist; only the transclusion itself needs to exist. Similarly, a page that has no transclusions at all would not appear in the results.</remarks>
+		public void GetTransclusions(int ns, string from, string to) => this.GetTransclusions(new AllTransclusionsInput { Namespace = ns, From = from, To = to });
+
+		/// <summary>Adds changed watchlist pages to the collection.</summary>
+		// Only basic full-watchlist functionality is implemented because I don't think watchlists are commonly used by the type of bot this framework is geared towards. If more functionality is desired, it's easy enough to add.
+		public void GetWatchlistChanged() => this.GetWatchlistChanged(new WatchlistInput());
+
+		/// <summary>Adds changed watchlist pages to the collection for a specific user, given their watchlist token.</summary>
+		/// <param name="owner">The watchlist owner.</param>
+		/// <param name="token">The watchlist token.</param>
+		public void GetWatchlistChanged(string owner, string token) => this.GetWatchlistChanged(new WatchlistInput { Owner = owner, Token = token });
+
+		/// <summary>Adds raw watchlist pages to the collection.</summary>
+		public void GetWatchlistRaw() => this.GetWatchlistRaw(new WatchlistRawInput());
+
+		/// <summary>Adds raw watchlist pages to the collection for a specific user, given their watchlist token.</summary>
+		/// <param name="owner">The watchlist owner.</param>
+		/// <param name="token">The watchlist token.</param>
+		public void GetWatchlistRaw(string owner, string token) => this.GetWatchlistRaw(new WatchlistRawInput { Owner = owner, Token = token });
 
 		/// <summary>Determines the index of a specific item in the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="item">The item to locate in the <see cref="TitleCollection">collection</see>.</param>
@@ -715,7 +715,7 @@
 
 		/// <summary>Adds pages to the collection from their revision IDs.</summary>
 		/// <param name="revisionIds">The revision IDs.</param>
-		public abstract void AddRevisionIds(IEnumerable<long> revisionIds);
+		public abstract void GetRevisionIds(IEnumerable<long> revisionIds);
 		#endregion
 
 		#region Public Virtual Methods
@@ -767,108 +767,108 @@
 
 		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected abstract void AddBacklinks(BacklinksInput input);
+		protected abstract void GetBacklinks(BacklinksInput input);
 
 		/// <summary>Adds a set of category pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected abstract void AddCategories(AllCategoriesInput input);
+		protected abstract void GetCategories(AllCategoriesInput input);
 
 		/// <summary>Adds category members to the collection, potentially including subcategories and their members.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="recurse">if set to <c>true</c> load the entire category tree recursively.</param>
-		protected abstract void AddCategoryMembers(CategoryMembersInput input, bool recurse);
+		protected abstract void GetCategoryMembers(CategoryMembersInput input, bool recurse);
 
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles to find duplicates of.</param>
-		protected abstract void AddDuplicateFiles(DuplicateFilesInput input, IEnumerable<ISimpleTitle> titles);
+		protected abstract void GetDuplicateFiles(DuplicateFilesInput input, IEnumerable<ISimpleTitle> titles);
 
 		/// <summary>Adds files to the collection, based on optionally file-specific parameters.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected abstract void AddFiles(AllImagesInput input);
+		protected abstract void GetFiles(AllImagesInput input);
 
 		/// <summary>Adds files that are in use to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected abstract void AddFileUsage(AllFileUsagesInput input);
+		protected abstract void GetFileUsage(AllFileUsagesInput input);
 
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected abstract void AddFileUsage(FileUsageInput input, IEnumerable<ISimpleTitle> titles);
+		protected abstract void GetFileUsage(FileUsageInput input, IEnumerable<ISimpleTitle> titles);
 
 		/// <summary>Adds pages that link to a given namespace.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected abstract void AddLinksToNamespace(AllLinksInput input);
+		protected abstract void GetLinksToNamespace(AllLinksInput input);
 
 		/// <summary>Adds pages from a given namespace to the collection. Parameters allow filtering to a specific range of pages.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected abstract void AddNamespace(AllPagesInput input);
+		protected abstract void GetNamespace(AllPagesInput input);
 
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected abstract void AddPageCategories(CategoriesInput input, IEnumerable<ISimpleTitle> titles);
+		protected abstract void GetPageCategories(CategoriesInput input, IEnumerable<ISimpleTitle> titles);
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected abstract void AddPageLinks(LinksInput input, IEnumerable<ISimpleTitle> titles);
+		protected abstract void GetPageLinks(LinksInput input, IEnumerable<ISimpleTitle> titles);
 
 		/// <summary>Adds pages that link to the given pages.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected abstract void AddPageLinksHere(LinksHereInput input, IEnumerable<ISimpleTitle> titles);
+		protected abstract void GetPageLinksHere(LinksHereInput input, IEnumerable<ISimpleTitle> titles);
 
 		/// <summary>Adds pages with a given property to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected abstract void AddPagesWithProperty(PagesWithPropertyInput input);
+		protected abstract void GetPagesWithProperty(PagesWithPropertyInput input);
 
 		/// <summary>Adds pages that transclude the given pages.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected abstract void AddPageTranscludedIn(TranscludedInInput input, IEnumerable<ISimpleTitle> titles);
+		protected abstract void GetPageTranscludedIn(TranscludedInInput input, IEnumerable<ISimpleTitle> titles);
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected abstract void AddPageTransclusions(TemplatesInput input, IEnumerable<ISimpleTitle> titles);
+		protected abstract void GetPageTransclusions(TemplatesInput input, IEnumerable<ISimpleTitle> titles);
 
 		/// <summary>Adds prefix-search results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected abstract void AddPrefixSearchResults(PrefixSearchInput input);
+		protected abstract void GetPrefixSearchResults(PrefixSearchInput input);
 
 		/// <summary>Adds query page results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <remarks>Query pages are a subset of Special pages that conform to a specific standard. You can find a list by using the Help feature of the API (<c>/api.php?action=help&amp;modules=query+querypage</c>). Note that a few of these (e.g., ListDuplicatedFiles) have API equivalents that are more functional and produce the same or more detailed results.</remarks>
-		protected abstract void AddQueryPage(QueryPageInput input);
+		protected abstract void GetQueryPage(QueryPageInput input);
 
 		/// <summary>Adds recent changes pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected abstract void AddRecentChanges(RecentChangesInput input);
+		protected abstract void GetRecentChanges(RecentChangesInput input);
 
 		/// <summary>Adds redirects to a namespace to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected abstract void AddRedirectsToNamespace(AllRedirectsInput input);
+		protected abstract void GetRedirectsToNamespace(AllRedirectsInput input);
 
 		/// <summary>Adds pages from a range of revisions to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected abstract void AddRevisions(AllRevisionsInput input);
+		protected abstract void GetRevisions(AllRevisionsInput input);
 
 		/// <summary>Adds search results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected abstract void AddSearchResults(SearchInput input);
+		protected abstract void GetSearchResults(SearchInput input);
 
 		/// <summary>Adds pages with template transclusions to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected abstract void AddTransclusions(AllTransclusionsInput input);
+		protected abstract void GetTransclusions(AllTransclusionsInput input);
 
 		/// <summary>Adds changed watchlist pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected abstract void AddWatchlistChanged(WatchlistInput input);
+		protected abstract void GetWatchlistChanged(WatchlistInput input);
 
 		/// <summary>Adds raw watchlist pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected abstract void AddWatchlistRaw(WatchlistRawInput input);
+		protected abstract void GetWatchlistRaw(WatchlistRawInput input);
 		#endregion
 	}
 }

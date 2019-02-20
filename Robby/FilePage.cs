@@ -74,7 +74,7 @@
 		public TitleCollection FileUsage(Filter filterRedirects, IEnumerable<int> namespaces)
 		{
 			var titles = new TitleCollection(this.Site);
-			titles.AddFileUsage(new[] { this }, filterRedirects, namespaces);
+			titles.GetFileUsage(new[] { this }, filterRedirects, namespaces);
 
 			return titles;
 		}
@@ -89,7 +89,7 @@
 		public TitleCollection FindDuplicateFiles(bool localOnly)
 		{
 			var titles = new TitleCollection(this.Site);
-			titles.AddDuplicateFiles(new[] { this }, localOnly);
+			titles.GetDuplicateFiles(new[] { this }, localOnly);
 
 			return titles;
 		}

@@ -1019,7 +1019,7 @@
 				!UserFunctionsClasses.TryGetValue(string.Concat(this.ServerName, '/'), out factory) &&
 				!UserFunctionsClasses.TryGetValue(string.Concat('/', this.User.Name), out factory))
 			{
-				factory = UserFunctions.CreateInstance;
+				factory = UserFunctions.CreateDefaultInstance;
 			}
 
 			return factory(this);
