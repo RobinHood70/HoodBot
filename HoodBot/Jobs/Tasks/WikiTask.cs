@@ -1,28 +1,133 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Tasks
 {
 	using System;
+	using System.Collections.Generic;
+	using System.Diagnostics;
+	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
+	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public abstract class WikiTask : WikiRunner
+	public abstract class WikiTask
 	{
 		#region Constructors
-		protected WikiTask(WikiRunner parent)
-			: base(parent?.Site)
+		protected WikiTask(WikiTask parent)
 		{
 			ThrowNull(parent, nameof(parent));
+			this.Site = parent.Site;
 			this.Parent = parent;
-			this.Job = (parent as WikiJob) ?? (parent as WikiTask).Job;
+			this.Job = parent.Job ?? (parent as WikiJob);
 		}
+
+		protected WikiTask(Site site) => this.Site = site;
+		#endregion
+
+		#region Public Events
+		public event StrongEventHandler<WikiTask, EventArgs> Completed;
+
+		public event StrongEventHandler<WikiTask, EventArgs> RunningTasks;
+
+		public event StrongEventHandler<WikiTask, EventArgs> Started;
 		#endregion
 
 		#region Public Properties
 		public WikiJob Job { get; } // Top-level Job object.
 
-		public WikiRunner Parent { get; } // Immediate parent, in the event of task nesting.
+		public WikiTask Parent { get; } // Immediate parent, in the event of task nesting.
+
+		public int ProgressMaximum { get; protected set; } = 1;
+
+		public Site Site { get; }
 		#endregion
 
-		#region Internal Methods
-		internal void SetAsyncInfoWithIntercept(Progress<double> taskProgressIntercept) => this.AsyncInfo = this.Parent.AsyncInfo.With(taskProgressIntercept);
+		#region Protected Properties
+		protected IList<WikiTask> Tasks { get; } = new List<WikiTask>(); // Might want this to be public so edit tasks can be added by caller.
+		#endregion
+
+		#region Public Methods
+		public static TitleCollection BuildRedirectList(IEnumerable<Title> titles)
+		{
+			var retval = TitleCollection.CopyFrom(titles);
+
+			// Loop until nothing new is added.
+			var pagesToCheck = new HashSet<Title>(retval, new SimpleTitleEqualityComparer());
+			var alreadyChecked = new HashSet<Title>(new SimpleTitleEqualityComparer());
+			do
+			{
+				foreach (var page in pagesToCheck)
+				{
+					retval.AddBacklinks(page.FullPageName, BacklinksTypes.Backlinks, true, Filter.Only);
+				}
+
+				alreadyChecked.UnionWith(pagesToCheck);
+				pagesToCheck.Clear();
+				pagesToCheck.UnionWith(retval);
+				pagesToCheck.ExceptWith(alreadyChecked);
+			}
+			while (pagesToCheck.Count > 0);
+
+			return retval;
+		}
+
+		public PageCollection FollowRedirects(IEnumerable<Title> titles)
+		{
+			var originalsFollowed = PageCollection.Unlimited(this.Site, new PageLoadOptions(PageModules.None) { FollowRedirects = true });
+			originalsFollowed.AddTitles(titles);
+
+			return originalsFollowed;
+		}
+
+		public int GetProgressEstimate()
+		{
+			if (this.Tasks == null)
+			{
+				return this.ProgressMaximum;
+			}
+
+			var total = this.ProgressMaximum;
+			foreach (var task in this.Tasks)
+			{
+				total += task.GetProgressEstimate();
+			}
+
+			return total;
+		}
+		#endregion
+
+		#region Public Methods
+		public virtual void Execute()
+		{
+			this.OnStarted();
+			this.ProgressMaximum = this.GetProgressEstimate();
+			this.Main();
+			this.OnRunningTasks();
+			this.RunTasks();
+			this.OnCompleted();
+		}
+		#endregion
+
+		#region Protected Abstract Methods
+		protected abstract void Main();
+		#endregion
+
+		#region Protected Virtual Methods
+		protected virtual void OnCompleted() => this.Completed?.Invoke(this, EventArgs.Empty);
+
+		protected virtual void OnRunningTasks() => this.RunningTasks?.Invoke(this, EventArgs.Empty);
+
+		protected virtual void OnStarted() => this.Started?.Invoke(this, EventArgs.Empty);
+
+		protected virtual void RunTasks()
+		{
+			foreach (var task in this.Tasks)
+			{
+				var sw = new Stopwatch();
+				sw.Start();
+				task.Execute();
+				sw.Stop();
+				Debug.WriteLine($"{task.GetType().Name}: {sw.ElapsedMilliseconds}");
+			}
+		}
 		#endregion
 	}
 }

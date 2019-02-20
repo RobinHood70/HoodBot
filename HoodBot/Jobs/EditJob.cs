@@ -1,16 +1,32 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Tasks;
 	using RobinHood70.Robby;
+	using RobinHood70.WikiCommon;
 
-	public class EditJob : WikiJob
+	public abstract class EditJob : WikiJob
 	{
-		public EditJob(Site site, AsyncInfo asyncInfo, params WikiTask[] tasks)
+		protected EditJob(Site site, AsyncInfo asyncInfo, params WikiTask[] tasks)
 			: base(site, asyncInfo, tasks)
 		{
 		}
 
-		protected override void MainJob() => throw new System.NotImplementedException();
+		public event StrongEventHandler<EditJob, Page> Saving;
+
+		public event StrongEventHandler<EditJob, Page> Saved;
+
+		protected override void OnCompleted()
+		{
+			this.Site.UserFunctions.EndLogEntry();
+			base.OnCompleted();
+		}
+
+		protected override void OnStarted()
+		{
+			base.OnStarted();
+			this.Site.UserFunctions.BeginLogEntry();
+		}
 	}
 }

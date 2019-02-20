@@ -4,17 +4,14 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 
-	public class VoidJob : WikiJob
+	public class VoidJob : EditJob
 	{
 		[JobInfo("Do Nothing")]
 		public VoidJob(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
-		{
-		}
+			: base(site, asyncInfo) => this.ProgressMaximum = 5;
 
-		protected override void MainJob()
+		protected override void Main()
 		{
-			this.ProgressMaximum = 5;
 			for (var i = 1; i <= this.ProgressMaximum; i++)
 			{
 				this.StatusWrite($"Job {i}: Start...");

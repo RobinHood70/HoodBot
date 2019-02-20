@@ -124,13 +124,13 @@
     <Compile Include="Jobs\Design\PauseTokenSource.cs" />
     <Compile Include="Jobs\EditJob.cs" />
     <Compile Include="Jobs\VoidJob.cs" />
-    <Compile Include="Jobs\Design\WikiRunner.cs" />
     <Compile Include="Jobs\GetTemplateUsage.cs" />
     <Compile Include="Jobs\TaskResults\TemplateCollection.cs" />
     <Compile Include="Jobs\TaskResults\TemplateUsage.cs" />
     <Compile Include="Jobs\TaskResults\TemplateUsageRow.cs" />
     <Compile Include="PasswordHelper.cs" />
     <Compile Include="ScrollingTextBox.cs" />
+    <Compile Include="Uesp\HoodBotFunctions.cs" />
     <Compile Include="ViewModel\ConstructorParameter.cs" />
     <Compile Include="ViewModel\JobNode.cs" />
     <Compile Include="Jobs\Design\JobParameterAttribute.cs" />

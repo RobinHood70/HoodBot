@@ -1,18 +1,17 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Diagnostics;
+	using System.Threading;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Tasks;
 	using RobinHood70.Robby;
 	using static RobinHood70.WikiCommon.Extensions;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public abstract class WikiJob : WikiRunner
+	public abstract class WikiJob : WikiTask
 	{
 		#region Fields
-		private readonly Progress<double> taskProgressIntercept = new Progress<double>();
+		private int progress = 0;
 		#endregion
 
 		#region Constructors
@@ -21,49 +20,63 @@
 		{
 			ThrowNull(asyncInfo, nameof(asyncInfo));
 			this.AsyncInfo = asyncInfo;
-			this.taskProgressIntercept.ProgressChanged += this.TaskProgressIntercept_ProgressChanged;
 			this.Tasks.AddRange(tasks);
 		}
 		#endregion
 
-		#region Protected Properties
-		protected IList<WikiTask> Tasks { get; } = new List<WikiTask>();
-		#endregion
+		#region Public Properties
+		public AsyncInfo AsyncInfo { get; }
 
-		#region Protected Override Methods
-		protected override void Main()
+		public int Progress
 		{
-			this.ProgressMaximum = this.Tasks.Count + 1;
-			this.MainJob();
-			this.Progress++;
-			this.RunTasks();
-		}
-		#endregion
-
-		#region Protected Virtual Methods
-		protected virtual void RunTasks()
-		{
-			foreach (var task in this.Tasks)
+			get => this.progress;
+			protected set
 			{
-				var sw = new Stopwatch();
-				sw.Start();
-
-				task.SetAsyncInfoWithIntercept(this.taskProgressIntercept);
-				task.Execute();
-				this.Progress++;
-
-				sw.Stop();
-				Debug.WriteLine($"{task.GetType().Name}: {sw.ElapsedMilliseconds}");
+				this.progress = value;
+				this.UpdateProgress();
 			}
 		}
 		#endregion
 
-		#region Public Abstract Methods
-		protected abstract void MainJob();
-		#endregion
+		#region Protected Virtual Methods
+		protected virtual void FlowControlAsync()
+		{
+			var pause = this.AsyncInfo.PauseToken;
+			if (pause.IsPaused)
+			{
+				pause.WaitWhilePausedAsync().Wait();
+			}
 
-		#region Event Handlers
-		private void TaskProgressIntercept_ProgressChanged(object sender, double e) => this.AsyncInfo.ProgressMonitor.Report((this.Progress + e) / this.ProgressMaximum);
+			var cancel = this.AsyncInfo.CancellationToken;
+			if (cancel != CancellationToken.None && cancel.IsCancellationRequested)
+			{
+				cancel.ThrowIfCancellationRequested();
+			}
+		}
+
+		protected virtual void StatusWrite(string status)
+		{
+			this.AsyncInfo.StatusMonitor.Report(status);
+			this.FlowControlAsync();
+		}
+
+		protected virtual void StatusWriteLine(string status) => this.StatusWrite(status + Environment.NewLine);
+
+		protected virtual void UpdateProgress()
+		{
+			this.AsyncInfo.ProgressMonitor.Report((double)this.Progress / this.ProgressMaximum);
+			this.FlowControlAsync();
+		}
+
+		// Same as UpdateProgress/UpdateStatus but with only one pause/cancel check.
+		protected virtual void UpdateProgressWrite(string status)
+		{
+			this.AsyncInfo.ProgressMonitor.Report((double)this.Progress / this.ProgressMaximum);
+			this.AsyncInfo.StatusMonitor.Report(status);
+			this.FlowControlAsync();
+		}
+
+		protected virtual void UpdateProgressWriteLine(string status) => this.UpdateProgressWrite(status + Environment.NewLine);
 		#endregion
 	}
 }

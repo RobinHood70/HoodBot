@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System.Collections.Generic;
+	using System.Threading;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.TaskResults;
-	using RobinHood70.HoodBot.Jobs.Tasks;
 	using RobinHood70.Robby;
 	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
@@ -12,7 +12,7 @@
 	public class GetTemplateUsage : WikiJob
 	{
 		#region Fields
-		private readonly string location;
+		private readonly string saveLocation;
 		private readonly IReadOnlyList<string> originalTemplateNames;
 		private readonly bool respectRedirects;
 		#endregion
@@ -28,6 +28,7 @@
 			: base(site, asyncInfo)
 		{
 			ThrowNull(templateNames, nameof(templateNames));
+			ThrowNull(location, nameof(location));
 			this.respectRedirects = respectRedirects;
 			var allTemplateNames = new List<string>();
 			foreach (var templateName in templateNames)
@@ -35,15 +36,14 @@
 				allTemplateNames.AddRange(templateName.Split('|'));
 			}
 
-			this.location = location.Replace("%templateName%", allTemplateNames[0]);
+			this.saveLocation = location.Replace("%templateName%", allTemplateNames[0]);
 			this.originalTemplateNames = allTemplateNames;
 		}
 		#endregion
 
 		#region Protected Override Methods
-		protected override void MainJob()
+		protected override void Main()
 		{
-			this.ProgressMaximum = 3;
 			var templates = new TitleCollection(this.Site.Namespaces[MediaWikiNamespaces.Template], this.originalTemplateNames);
 			TitleCollection allTemplateNames;
 			if (this.respectRedirects)
@@ -53,6 +53,8 @@
 				allTemplateNames = BuildRedirectList(templates);
 				this.ProgressMaximum++;
 				this.Progress++;
+				Thread.Yield();
+				Thread.Sleep(1000);
 			}
 			else
 			{
@@ -63,10 +65,13 @@
 			var results = PageCollection.Unlimited(this.Site);
 			results.AddPageTranscludedIn(templates);
 			this.Progress++;
+			Thread.Yield();
+			Thread.Sleep(1000);
 			this.StatusWriteLine("Exporting");
-			this.ExportResults(allTemplateNames, results, this.location);
+			this.ExportResults(allTemplateNames, results, this.saveLocation);
 			this.Progress++;
-			// this.Tasks.Add(new LocalExportTask(this, allNames, pageList, this.location));
+			Thread.Yield();
+			Thread.Sleep(1000);
 		}
 		#endregion
 
@@ -79,7 +84,7 @@
 			{
 				this.StatusWriteLine("No template calls found!");
 			}
-			else if (!string.IsNullOrWhiteSpace(this.location))
+			else if (!string.IsNullOrWhiteSpace(this.saveLocation))
 			{
 				try
 				{
@@ -118,7 +123,7 @@
 				}
 			}
 
-			csvFile.WriteFile(this.location);
+			csvFile.WriteFile(this.saveLocation);
 		}
 		#endregion
 	}

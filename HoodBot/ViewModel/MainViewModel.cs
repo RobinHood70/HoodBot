@@ -12,6 +12,7 @@
 	using System.Windows.Media;
 	using RobinHood70.HoodBot.Jobs;
 	using RobinHood70.HoodBot.Jobs.Design;
+	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
@@ -64,6 +65,7 @@
 			this.CurrentItem = this.BotSettings.LastSelectedWiki;
 			this.progressMonitor = new Progress<double>(this.ProgressChanged);
 			this.statusMonitor = new Progress<string>(this.StatusWrite);
+			Site.RegisterUserFunctionsClass(new[] { "en.uesp.net" }, new[] { "HoodBot" }, HoodBotFunctions.CreateInstance);
 		}
 		#endregion
 
@@ -337,7 +339,7 @@
 				this.previousItem = wikiInfo;
 				var wal = new WikiAbstractionLayer(this.client, wikiInfo.Api)
 				{
-					// Assert = "bot",
+					Assert = "user",
 					MaxLag = wikiInfo.MaxLag,
 					StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery
 				};
