@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.WallE.Clients
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Globalization;
 	using System.IO;
 	using System.IO.Compression;
@@ -95,6 +96,17 @@
 		/// <summary>Gets or sets the default location to store cookies. As a static variable, this will apply across all new instances of the client. Existing clients will continue to use the whatever was provided or was the default at their instantiation.</summary>
 		/// <value>The default cookies location.</value>
 		public static string DefaultCookiesLocation { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "cookies.dat");
+
+		/// <summary>Gets the amount of time (in seconds) to add to retries if they occur in succession.</summary>
+		/// <value>The retry delay bonuses.</value>
+		/// <remarks>Although default values are provided, these are user-settable. In the event that more retries are allowed than there are entries in this list, the last retry delay bonus will be used.</remarks>
+		public static IList<int> RetryDelayBonuses { get; } = new List<int>()
+		{
+			0, 0, 0, 0, 0,
+			5, 10, 15, 20, 25,
+			30, 30, 30, 60, 60,
+			120, 120, 300, 1800, 3600
+		};
 		#endregion
 
 		#region Public Properties
@@ -105,7 +117,7 @@
 
 		/// <summary>Gets or sets the number of times to retry an operation in the event of a temporary failure such as a connection loss.</summary>
 		/// <value>The number of retries.</value>
-		public int Retries { get; set; } = 3;
+		public int Retries { get; set; } = 20;
 
 		/// <summary>Gets or sets the amount of time to wait between retries of an operation in the event of a temporary failure such as a connection loss.</summary>
 		/// <value>The retry delay.</value>
@@ -357,8 +369,7 @@
 		private HttpWebResponse SendRequest(Uri uri, string method, string contentType, byte[] postData, bool checkMaxLag)
 		{
 			HttpWebResponse response = null;
-			int retriesRemaining;
-			for (retriesRemaining = this.Retries; retriesRemaining >= 0; retriesRemaining--)
+			for (var attempts = 0; attempts < this.Retries; attempts++)
 			{
 				// Do not try to optimize this out of the loop. A new request must be created every time or else the response returned will be the same response as the previous loop.
 				var request = this.CreateRequest(uri, method);
@@ -375,7 +386,7 @@
 				try
 				{
 					response = request.GetResponse() as HttpWebResponse;
-					if (!checkMaxLag || !this.CheckDelay(response))
+					if (!checkMaxLag || !this.CheckDelay(response, attempts))
 					{
 						if (response.Cookies != null)
 						{
@@ -405,7 +416,7 @@
 					{
 						using (ex.Response)
 						{
-							if (!this.CheckDelay(errorResponse))
+							if (!this.CheckDelay(errorResponse, attempts))
 							{
 								// If we didn't get a retry header or a retriable error, then throw the error.
 								throw;
@@ -413,7 +424,7 @@
 						}
 					}
 
-					if (retriesRemaining == 0)
+					if (attempts == this.Retries - 1)
 					{
 						throw;
 					}
@@ -423,7 +434,7 @@
 			throw new WikiException("Excessive lag!");
 		}
 
-		private bool CheckDelay(HttpWebResponse response)
+		private bool CheckDelay(HttpWebResponse response, int attemptNumber)
 		{
 			var retryAfter = TimeSpan.Zero;
 			var retryHeader = response?.Headers[HttpResponseHeader.RetryAfter];
@@ -451,6 +462,12 @@
 
 			if (retryAfter != TimeSpan.Zero)
 			{
+				if (attemptNumber >= RetryDelayBonuses.Count)
+				{
+					attemptNumber = RetryDelayBonuses.Count - 1;
+				}
+
+				retryAfter += TimeSpan.FromSeconds(RetryDelayBonuses[attemptNumber]);
 				var maxlag = response?.Headers["X-Database-Lag"];
 				if (maxlag == null)
 				{
