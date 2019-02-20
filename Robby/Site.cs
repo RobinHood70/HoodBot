@@ -55,7 +55,7 @@
 
 		private string articlePath;
 		private CultureInfo culture = CultureInfo.CurrentCulture;
-		private HashSet<Title> disambiguationTemplates = null;
+		private HashSet<Title> disambiguationTemplates;
 		private Regex redirectTargetFinder;
 		#endregion
 
@@ -97,6 +97,13 @@
 
 		/// <summary>Occurs when a warning should be sent to the user.</summary>
 		public event StrongEventHandler<Site, WarningEventArgs> WarningOccurred;
+		#endregion
+
+		#region Public Static Properties
+
+		/// <summary>Gets a static dictionary associating sites and users with the UserFunctions class that best fits them.</summary>
+		/// <value>The user functions classes.</value>
+		public static IDictionary<string, UserFunctionsFactory> UserFunctionsClasses { get; } = new Dictionary<string, UserFunctionsFactory>() { };
 		#endregion
 
 		#region Public Properties
@@ -156,7 +163,7 @@
 
 		/// <summary>Gets the main page of the site.</summary>
 		/// <value>The main page.</value>
-		public string MainPage { get; private set; }
+		public Page MainPage { get; private set; }
 
 		/// <summary>Gets the wiki name.</summary>
 		/// <value>The name of the wiki.</value>
@@ -177,11 +184,43 @@
 
 		/// <summary>Gets the bot's user name.</summary>
 		/// <value>The bot's user name.</value>
-		public string UserName { get; private set; }
+		public User User { get; private set; }
+
+		/// <summary>Gets the UserFunctions object that handles site- and/or user-specific functions.</summary>
+		/// <value>A UserFunctions class or derivative that handles site- and/or user-specific functions.</value>
+		public UserFunctions UserFunctions { get; private set; }
 
 		/// <summary>Gets the MediaWiki version of the wiki.</summary>
 		/// <value>The MediaWiki version of the wiki.</value>
 		public string Version { get; private set; }
+		#endregion
+
+		#region Public Static Methods
+
+		/// <summary>Registers a user functions class under all site and username combinations.</summary>
+		/// <param name="sites">The sites to add. If using the same UserFunctions class across all sites the user is operating on, this should be set to null or an empty list.</param>
+		/// <param name="users">The users to add. If using the same UserFunctions class for all users on all sites specifed in &lt;paramref name="sites"/&gt;, this should be set to null or an empty list.</param>
+		/// <param name="factoryMethod">The factory method that creates the correct UserFunctions class for the combination of site(s) and user(s).</param>
+		public static void RegisterUserFunctionsClass(IReadOnlyCollection<string> sites, IReadOnlyCollection<string> users, UserFunctionsFactory factoryMethod)
+		{
+			if (sites == null || sites.Count == 0)
+			{
+				sites = new List<string>() { string.Empty };
+			}
+
+			if (users == null || users.Count == 0)
+			{
+				users = new List<string>() { string.Empty };
+			}
+
+			foreach (var site in sites)
+			{
+				foreach (var user in users)
+				{
+					UserFunctionsClasses[string.Concat(site, '/', user)] = factoryMethod;
+				}
+			}
+		}
 		#endregion
 
 		#region Public Methods
@@ -827,7 +866,8 @@
 				throw new UnauthorizedAccessException(CurrentCulture(LoginFailed, result.Reason));
 			}
 
-			this.UserName = result.User;
+			this.User = new User(this, result.User);
+			this.UserFunctions = this.FindBestUserFunctions();
 
 			// This should never happen with co-initialization, but just in case there's a massive change to the abstraction layer, make sure we have all the info we need.
 			if (this.Version == null)
@@ -847,7 +887,6 @@
 			// General
 			this.CaseSensitive = siteInfo.Flags.HasFlag(SiteInfoFlags.CaseSensitive);
 			this.Culture = GetCulture(siteInfo.Language);
-			this.MainPage = siteInfo.MainPage;
 			this.Name = siteInfo.SiteName;
 			this.ServerName = siteInfo.ServerName;
 			this.Version = siteInfo.Generator;
@@ -889,6 +928,7 @@
 			}
 
 			this.Namespaces = new NamespaceCollection(namespaces, this.EqualityComparerInsensitive);
+			this.MainPage = new Page(this, siteInfo.MainPage); // Now that we understand namespaces, we can create a Page.
 
 			// MagicWords
 			foreach (var word in siteInfo.MagicWords)
@@ -969,8 +1009,20 @@
 			this.Name = null;
 			this.Namespaces = null;
 			this.ServerName = null;
-			this.UserName = null;
 			this.Version = null;
+			this.UserFunctions = new UserFunctions(this);
+		}
+
+		private UserFunctions FindBestUserFunctions()
+		{
+			if (!UserFunctionsClasses.TryGetValue(string.Concat(this.ServerName, '/', this.User.Name), out var factory) &&
+				!UserFunctionsClasses.TryGetValue(string.Concat(this.ServerName, '/'), out factory) &&
+				!UserFunctionsClasses.TryGetValue(string.Concat('/', this.User.Name), out factory))
+			{
+				factory = UserFunctions.CreateInstance;
+			}
+
+			return factory(this);
 		}
 		#endregion
 	}

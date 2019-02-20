@@ -137,7 +137,7 @@
 		/// <remarks>The subject of the e-mail will be the wiki default.</remarks>
 		public ChangeResults Email(string body, bool ccMe, out string emailResult)
 		{
-			defaultSubject = defaultSubject ?? this.Site.LoadParsedMessage("defemailsubject").Replace("$1", this.Site.UserName);
+			defaultSubject = defaultSubject ?? this.Site.LoadParsedMessage("defemailsubject").Replace("$1", this.Site.User.Name);
 			return this.Email(defaultSubject, body, ccMe, out emailResult);
 		}
 

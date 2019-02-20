@@ -59,6 +59,7 @@
     <Compile Include="BacklinkTitle.cs" />
     <Compile Include="Block.cs" />
     <Compile Include="ChangeArgs.cs" />
+    <Compile Include="Design\UserFunctions.cs" />
     <Compile Include="Design\DefaultPageCreator.cs" />
     <Compile Include="Design\Extensions.cs" />
     <Compile Include="Design\IFullTitle.cs" />

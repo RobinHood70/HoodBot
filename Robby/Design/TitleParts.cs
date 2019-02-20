@@ -49,12 +49,12 @@
 						nameRemaining = split[2].TrimStart();
 						if (nameRemaining.Length == 0)
 						{
-							var mainPageName = site.MainPage ?? "Main Page";
+							var mainPageName = site.MainPage.PageName ?? "Main Page";
 
 							// Make sure we're not recursing with a horribly unlikely Main Page.
 							if (mainPageName != fullPageName)
 							{
-								var mainPage = new TitleParts(site, site.MainPage ?? "Main Page");
+								var mainPage = new TitleParts(site, site.MainPage.PageName ?? "Main Page");
 								this.Interwiki = mainPage.Interwiki;
 								this.Namespace = mainPage.Namespace;
 								this.PageName = mainPage.PageName;
