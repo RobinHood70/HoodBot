@@ -382,6 +382,23 @@
 			return p;
 		}
 
+		/// <summary>Adds a set of anonymous parameters with the specified values to the template.</summary>
+		/// <param name="values">The parameter values.</param>
+		public void AddAnonymous(params string[] values) => this.AddAnonymous(values as IEnumerable<string>);
+
+		/// <summary>Adds a set of anonymous parameters with the specified values to the template.</summary>
+		/// <param name="values">The parameter values.</param>
+		public void AddAnonymous(IEnumerable<string> values)
+		{
+			if (values != null)
+			{
+				foreach (var value in values)
+				{
+					this.Add(new Parameter(value));
+				}
+			}
+		}
+
 		/// <summary>Adds a <see cref="Parameter"/> to the <see cref="Template"/> before the given name, or at the beginning if the name was not found.</summary>
 		/// <param name="beforeName">The parameter name to search for.</param>
 		/// <param name="item">The <see cref="Parameter"/> to add to the <see cref="Template"/>.</param>
