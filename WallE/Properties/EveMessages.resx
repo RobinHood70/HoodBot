@@ -186,4 +186,7 @@
   <data name="NotAGenerator" xml:space="preserve">
     <value>An attempt was made to call SetAsGenerator() on a module that cannot be a generator. Please do not call this method yourself; let the framework do it when approprirate.</value>
   </data>
+  <data name="InvalidApi" xml:space="preserve">
+    <value>The URI passed to the constructor did not end in "api.php".</value>
+  </data>
 </root>

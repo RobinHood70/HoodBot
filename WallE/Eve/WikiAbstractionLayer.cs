@@ -45,6 +45,13 @@
 		[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "As above.")]
 		public WikiAbstractionLayer(IMediaWikiClient client, Uri uri)
 		{
+			ThrowNull(client, nameof(client));
+			ThrowNull(uri, nameof(uri));
+			if (!uri.AbsolutePath.EndsWith("api.php", StringComparison.OrdinalIgnoreCase))
+			{
+				throw new InvalidOperationException(CurrentCulture(InvalidApi));
+			}
+
 			this.Client = client;
 			this.Uri = uri;
 			this.ModuleFactory = new ModuleFactory(this)

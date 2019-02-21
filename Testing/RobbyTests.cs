@@ -6,7 +6,6 @@
 	using System.IO;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Testing.MetaTemplate;
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.Testing.TestingCommon;
@@ -57,7 +56,6 @@
 				this.DeleteTests();
 				this.DuplicateFilesTests();
 				this.FileUsagesTests();
-				this.MetaTemplateTests();
 				this.MoveTests();
 				this.NamespaceTests();
 				this.PageCollectionFromCategoriesTest();
@@ -90,13 +88,6 @@
 		public override void Setup()
 		{
 			this.normalWiki = GetSite(this.WikiInfo, false);
-			var wal = this.normalWiki.AbstractionLayer as WikiAbstractionLayer;
-			if (wal.Uri.Host.Contains("uesp.net"))
-			{
-				wal.ModuleFactory.RegisterProperty<VariablesInput>(PropVariables.CreateInstance);
-				wal.ModuleFactory.RegisterGenerator<VariablesInput>(PropVariables.CreateInstance);
-			}
-
 			if (this.WikiInfo.AdminUserName != null)
 			{
 				this.adminWiki = GetSite(this.WikiInfo, true);
@@ -202,26 +193,6 @@
 			var result = filePage.FileUsage();
 			var files = TitleCollection.CopyFrom(result);
 			DumpTitles(files);
-		}
-
-		internal void MetaTemplateTests()
-		{
-			this.normalWiki.DefaultLoadOptions = new PageLoadOptions(PageModules.Info | PageModules.Revisions | PageModules.Custom);
-			var titles = new TitleCollection(this.normalWiki, "Legends:Adoring Fan");
-			var pages = titles.Load();
-			foreach (var page in pages)
-			{
-				var metaPage = page as VariablesPage;
-				Debug.WriteLine(metaPage.PageName);
-				foreach (var metavarSet in metaPage.VariableSets)
-				{
-					Debug.WriteLine("Subset: " + metavarSet.Key ?? "<none>");
-					foreach (var metavar in metavarSet.Value)
-					{
-						Debug.WriteLine($"  {metavar.Key} = {metavar.Value}");
-					}
-				}
-			}
 		}
 
 		internal void MoveTests()

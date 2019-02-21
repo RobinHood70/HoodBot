@@ -77,6 +77,7 @@
 			return originalsFollowed;
 		}
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Method performs a time-consuming operation (at least relative to a property).")]
 		public int GetProgressEstimate()
 		{
 			if (this.Tasks == null)

@@ -124,6 +124,15 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The URI passed to the constructor did not end in &quot;api.php&quot;..
+        /// </summary>
+        internal static string InvalidApi {
+            get {
+                return ResourceManager.GetString("InvalidApi", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to For MediaWiki version 1.23 only, you must specify a user name rather than a user ID for the UserRights function, or provide your own token. The API for that version allowed user IDs to be used, but provided no way to get a token by user ID, nor to get a user name from the user ID..
         /// </summary>
         internal static string InvalidUserRightsRequest {

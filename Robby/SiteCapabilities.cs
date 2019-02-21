@@ -103,7 +103,7 @@
 			{
 				var urib = new UriBuilder(fullHost)
 				{
-					Path = tryPath.Replace("index.php", "api.php")
+					Path = tryPath.Replace("index.php", "api.php").Substring(0, offset + 8)
 				};
 				tryLoc = urib.Uri;
 				tryPath = tryPath.Substring(0, offset + 1);
@@ -196,7 +196,7 @@
 						return true;
 					}
 				}
-				catch (WebException)
+				catch (InvalidOperationException)
 				{
 				}
 			}

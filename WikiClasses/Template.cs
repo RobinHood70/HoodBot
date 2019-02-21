@@ -31,10 +31,10 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Template"/> class. The name and parameters will be parsed from the provided text.</summary>
-		/// <param name="text">The full text of the template.</param>
+		/// <param name="templateText">The full text of the template.</param>
 		/// <remarks>The text can optionally include opening and closing braces, but these are not required except in the rare case where the template has two or more braces at both the start and the end which are not the enclosing braces (e.g., <c>{{{{Template to provide name}}|param={{{param|}}}}}</c>). In any other case, no braces are required, meaning that a new template can be created by specifying only the template name, if required.</remarks>
-		public Template(string text)
-			: this(text, StringComparer.Ordinal, false)
+		public Template(string templateText)
+			: this(templateText, StringComparer.Ordinal, false)
 		{
 		}
 

@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.Testing.MetaTemplate
+﻿namespace RobinHood70.HoodBot.Uesp
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;

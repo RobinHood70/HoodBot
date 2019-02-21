@@ -129,6 +129,9 @@
   <data name="AvailableJobs" xml:space="preserve">
     <value>Tâches disponibles</value>
   </data>
+  <data name="BadLogPage" xml:space="preserve">
+    <value>La page de journal n'est pas au format attendu.</value>
+  </data>
   <data name="BotDataFolder" xml:space="preserve">
     <value>Dossier de données :</value>
   </data>
@@ -182,6 +185,9 @@
   </data>
   <data name="Undo" xml:space="preserve">
     <value>Annuler</value>
+  </data>
+  <data name="UnhandledConstructorParameter" xml:space="preserve">
+    <value>Le paramètre constructeur de type {0} n'est pas géré!</value>
   </data>
   <data name="UserName" xml:space="preserve">
     <value>Nom de l'utilisateur  :</value>

@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.Reflection;
 	using RobinHood70.HoodBot.Jobs;
 	using RobinHood70.HoodBot.Jobs.Design;
@@ -35,7 +34,6 @@
 		{
 			ThrowNull(parent, nameof(parent));
 			ThrowNull(groupName, nameof(groupName));
-			Debug.WriteLine($"Adding Group {groupName} to {parent.Name ?? "<ROOT>"}, Children Count: {parent.Children?.Count}");
 			this.Children = new SortedSet<JobNode>();
 			this.Name = groupName;
 			this.Parent = parent;

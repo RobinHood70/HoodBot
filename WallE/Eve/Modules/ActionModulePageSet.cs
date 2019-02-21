@@ -215,24 +215,27 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			this.BuildRequestPageSet(request, input);
 			request.Prefix = string.Empty;
-			this.ContinueModule.BuildRequest(request);
+			this.ContinueModule?.BuildRequest(request);
 		}
 
 		protected override void DeserializeParent(JToken parent)
 		{
 			ThrowNull(parent, nameof(parent));
 			base.DeserializeParent(parent);
-			var newVersion = this.ContinueModule.Deserialize(parent);
-			if (newVersion != 0)
+			if (this.ContinueModule != null)
 			{
-				this.Wal.ContinueVersion = newVersion;
-				this.ContinueModule = this.Wal.ModuleFactory.CreateContinue();
-				this.ContinueModule.Deserialize(parent);
-			}
+				var newVersion = this.ContinueModule.Deserialize(parent);
+				if (newVersion != 0)
+				{
+					this.Wal.ContinueVersion = newVersion;
+					this.ContinueModule = this.Wal.ModuleFactory.CreateContinue();
+					this.ContinueModule.Deserialize(parent);
+				}
 
-			if (!this.done && this.ContinueModule.BatchComplete && !this.ContinueModule.Continues)
-			{
-				this.offset += this.CurrentListSize;
+				if (!this.done && this.ContinueModule.BatchComplete && !this.ContinueModule.Continues)
+				{
+					this.offset += this.CurrentListSize;
+				}
 			}
 
 			// This is a fugly workaround for the fact that modules other than queries will have the pageset data at the parent level, while query has it at the child level. I couldn't figure out a better way to do it (other than to simply ignore it and check for results that will never be there).

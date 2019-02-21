@@ -27,6 +27,9 @@
 		#region Public Properties
 		public AsyncInfo AsyncInfo { get; }
 
+		// While this could literally be (this is EditJob), I've used a property specifically in case there's need for other edit jobs in the future that don't derive from that class.
+		public bool ReadOnly { get; protected set; } = true;
+
 		public int Progress
 		{
 			get => this.progress;

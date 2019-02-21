@@ -11,7 +11,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		Robby\CheckList.txt = Robby\CheckList.txt
 		GlobalAssemblyInfo.cs = GlobalAssemblyInfo.cs
-		HoodBot\HoodBot.ruleset = HoodBot\HoodBot.ruleset
 		LICENSE = LICENSE
 		SavedSearches.txt = SavedSearches.txt
 		SharedKey.pfx = SharedKey.pfx

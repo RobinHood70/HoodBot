@@ -97,6 +97,15 @@ namespace RobinHood70.HoodBot.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Log page not in expected format..
+        /// </summary>
+        public static string BadLogPage {
+            get {
+                return ResourceManager.GetString("BadLogPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Data Folder:.
         /// </summary>
         public static string BotDataFolder {

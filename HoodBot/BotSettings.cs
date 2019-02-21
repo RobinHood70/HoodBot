@@ -98,7 +98,7 @@
 		{
 			try
 			{
-				_ = new FileInfo(filename);
+				Path.GetFullPath(filename);
 				return true;
 			}
 			catch (ArgumentException)

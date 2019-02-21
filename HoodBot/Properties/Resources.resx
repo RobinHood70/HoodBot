@@ -129,6 +129,9 @@
   <data name="AvailableJobs" xml:space="preserve">
     <value>Available Jobs</value>
   </data>
+  <data name="BadLogPage" xml:space="preserve">
+    <value>Log page not in expected format.</value>
+  </data>
   <data name="BotDataFolder" xml:space="preserve">
     <value>Data Folder:</value>
   </data>
