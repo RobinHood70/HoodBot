@@ -39,12 +39,12 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Template"/> class. The name and parameters will be parsed from the provided text.</summary>
-		/// <param name="text">The full text of the template.</param>
+		/// <param name="templateText">The full text of the template.</param>
 		/// <param name="caseInsensitive">Whether parameter names should be treated case-insensitively.</param>
 		/// <param name="ignoreWhiteSpaceRules">Whether MediaWiki whitespace rules should be ignored. If true, all surrounding whitespace will be included in the parameter names and values.</param>
 		/// <remarks>The text can optionally include opening and closing braces, but these are not required except in the rare case where the template has two or more braces at both the start and the end which are not the enclosing braces (e.g., <c>{{{{Template to provide name}}|param={{{param|}}}}}</c>). In any other case, no braces are required, meaning that a new template can be created by specifying only the template name, if required.</remarks>
-		public Template(string text, bool caseInsensitive, bool ignoreWhiteSpaceRules)
-			: this(text, caseInsensitive ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal, ignoreWhiteSpaceRules)
+		public Template(string templateText, bool caseInsensitive, bool ignoreWhiteSpaceRules)
+			: this(templateText, caseInsensitive ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal, ignoreWhiteSpaceRules)
 		{
 		}
 
@@ -57,24 +57,24 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Template"/> class. The name and parameters will be parsed from the provided text.</summary>
-		/// <param name="text">The full text of the template.</param>
+		/// <param name="templateText">The full text of the template.</param>
 		/// <param name="comparer">The <see cref="StringComparer"/> to use for parameter names.</param>
 		/// <param name="ignoreWhiteSpaceRules">Whether MediaWiki whitespace rules should be ignored when parsing the template text. If true, all surrounding whitespace will be included in the parameter names and values.</param>
 		/// <remarks>The text can optionally include opening and closing braces, but these are not required except in the rare case where the template has two or more braces at both the start and the end which are not the enclosing braces (e.g., <c>{{{{Template to provide name}}|param={{{param|}}}}}</c>). In any other case, no braces are required, meaning that a new template can be created by specifying only the template name, if required.</remarks>
-		public Template(string text, StringComparer comparer, bool ignoreWhiteSpaceRules)
+		public Template(string templateText, StringComparer comparer, bool ignoreWhiteSpaceRules)
 		{
-			ThrowNull(text, nameof(text));
+			ThrowNull(templateText, nameof(templateText));
 			ThrowNull(comparer, nameof(comparer));
 			this.Comparer = comparer;
-			text = text.Trim();
-			if (text.StartsWith("{{", StringComparison.Ordinal) && text.EndsWith("}}", StringComparison.Ordinal))
+			templateText = templateText.Trim();
+			if (templateText.StartsWith("{{", StringComparison.Ordinal) && templateText.EndsWith("}}", StringComparison.Ordinal))
 			{
-				text = text.Substring(2, text.Length - 4);
+				templateText = templateText.Substring(2, templateText.Length - 4);
 			}
 
-			if (text.Length != 0)
+			if (templateText.Length != 0)
 			{
-				var parser = new TemplateParser(text);
+				var parser = new TemplateParser(templateText);
 				parser.ParseIntoTemplate(this, ignoreWhiteSpaceRules);
 			}
 			else
