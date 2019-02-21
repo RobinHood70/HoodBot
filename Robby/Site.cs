@@ -17,7 +17,7 @@
 	/// <summary>Describes the result of an attempted change to the site.</summary>
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1008:EnumsShouldHaveZeroValue", Justification = "Successful is more meaningful in this context.")]
 	[Flags]
-	public enum ChangeResults
+	public enum ChangeStatus
 	{
 		/// <summary>The change to the wiki was successful.</summary>
 		Successful = 0,
@@ -546,19 +546,19 @@
 		/// <summary>Patrols the specified Recent Changes ID.</summary>
 		/// <param name="rcid">The Recent Change ID.</param>
 		/// <returns>A value indicating the change status of the patrol.</returns>
-		public ChangeResults Patrol(long rcid)
+		public ChangeStatus Patrol(long rcid)
 		{
 			var retval = this.PublishChange(this, new Dictionary<string, object>
 			{
 				[nameof(rcid)] = rcid,
 			});
 
-			if (retval == ChangeResults.Successful)
+			if (retval == ChangeStatus.Successful)
 			{
 				var result = this.Patrol(new PatrolInput(rcid));
 				if (result.Title == null)
 				{
-					retval |= ChangeResults.Failed;
+					retval |= ChangeStatus.Failed;
 				}
 			}
 
@@ -568,19 +568,19 @@
 		/// <summary>Patrols the specified revision ID.</summary>
 		/// <param name="revid">The revision ID.</param>
 		/// <returns>A value indicating the change status of the patrol.</returns>
-		public ChangeResults PatrolRevision(long revid)
+		public ChangeStatus PatrolRevision(long revid)
 		{
 			var retval = this.PublishChange(this, new Dictionary<string, object>
 			{
 				[nameof(revid)] = revid,
 			});
 
-			if (retval == ChangeResults.Successful)
+			if (retval == ChangeStatus.Successful)
 			{
 				var result = this.Patrol(PatrolInput.FromRevisionId(revid));
 				if (result.Title == null)
 				{
-					retval |= ChangeResults.Failed;
+					retval |= ChangeStatus.Failed;
 				}
 			}
 
@@ -593,7 +593,7 @@
 		/// <remarks>The destination filename will be the same as the local filename.</remarks>
 		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
 		/// <returns>A value indicating the change status of the upload.</returns>
-		public ChangeResults Upload(string fileName, string editSummary) => this.Upload(fileName, null, editSummary, null);
+		public ChangeStatus Upload(string fileName, string editSummary) => this.Upload(fileName, null, editSummary, null);
 
 		/// <summary>Upload a file to the wiki.</summary>
 		/// <param name="fileName">The full path and filename of the file to upload.</param>
@@ -602,7 +602,7 @@
 		/// <remarks>The destination filename will be the same as the local filename.</remarks>
 		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
 		/// <returns>A value indicating the change status of the upload.</returns>
-		public ChangeResults Upload(string fileName, string destinationName, string editSummary) => this.Upload(fileName, destinationName, editSummary, null);
+		public ChangeStatus Upload(string fileName, string destinationName, string editSummary) => this.Upload(fileName, destinationName, editSummary, null);
 
 		/// <summary>Upload a file to the wiki.</summary>
 		/// <param name="fileName">The full path and filename of the file to upload.</param>
@@ -611,7 +611,7 @@
 		/// <param name="pageText">Full page text for the File page. This should include the license, categories, and anything else required. Set to null to allow the wiki to generate the page text (normally just the <paramref name="editSummary" />).</param>
 		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
 		/// <returns>A value indicating the change status of the upload.</returns>
-		public ChangeResults Upload(string fileName, string destinationName, string editSummary, string pageText)
+		public ChangeStatus Upload(string fileName, string destinationName, string editSummary, string pageText)
 		{
 			var retval = this.PublishChange(this, new Dictionary<string, object>
 			{
@@ -621,7 +621,7 @@
 				[nameof(pageText)] = pageText,
 			});
 
-			if (retval == ChangeResults.Successful)
+			if (retval == ChangeStatus.Successful)
 			{
 				var checkedName = Path.GetFileName(fileName); // Always access this, even if we don't need it, as a means of checking validity.
 				if (string.IsNullOrWhiteSpace(destinationName))
@@ -654,12 +654,12 @@
 
 		/// <summary>Clears the bot's "has message" flag.</summary>
 		/// <returns><c>true</c> if the flag was successfully cleared; otherwise, <c>false</c>.</returns>
-		public virtual ChangeResults ClearMessage()
+		public virtual ChangeStatus ClearMessage()
 		{
 			var retval = this.PublishChange(this, null);
-			if (retval == ChangeResults.Successful && !this.AbstractionLayer.ClearHasMessage())
+			if (retval == ChangeStatus.Successful && !this.AbstractionLayer.ClearHasMessage())
 			{
-				retval |= ChangeResults.Failed;
+				retval |= ChangeStatus.Failed;
 			}
 
 			return retval;
@@ -706,14 +706,14 @@
 		/// <param name="caller">The calling method (populated automatically with caller name).</param>
 		/// <returns>A value indicating the actions that should take place.</returns>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
-		public virtual ChangeResults PublishChange(object sender, IReadOnlyDictionary<string, object> parameters, [CallerMemberName] string caller = null)
+		public virtual ChangeStatus PublishChange(object sender, IReadOnlyDictionary<string, object> parameters, [CallerMemberName] string caller = null)
 		{
 			var changeArgs = new ChangeArgs(sender, caller, parameters);
 			this.Changing.Invoke(this, changeArgs);
-			var retval = this.AllowEditing ? ChangeResults.Successful : ChangeResults.Ignored;
+			var retval = this.AllowEditing ? ChangeStatus.Successful : ChangeStatus.Ignored;
 			if (changeArgs.CancelChange)
 			{
-				retval |= ChangeResults.Cancelled;
+				retval |= ChangeStatus.Cancelled;
 			}
 
 			return retval;
@@ -723,14 +723,14 @@
 		/// <param name="changeArgs">The arguments involved in changing the page. The caller is responsible for creating the object so that it can get the various return values out of it when after the event.</param>
 		/// <returns>A value indicating the actions that should take place.</returns>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
-		public virtual ChangeResults PublishPageTextChange(PageTextChangeArgs changeArgs)
+		public virtual ChangeStatus PublishPageTextChange(PageTextChangeArgs changeArgs)
 		{
 			ThrowNull(changeArgs, nameof(changeArgs));
 			this.PageTextChanging?.Invoke(this, changeArgs);
-			var retval = this.AllowEditing ? ChangeResults.Successful : ChangeResults.Ignored;
+			var retval = this.AllowEditing ? ChangeStatus.Successful : ChangeStatus.Ignored;
 			if (changeArgs.CancelChange)
 			{
-				retval |= ChangeResults.Cancelled;
+				retval |= ChangeStatus.Cancelled;
 			}
 			else
 			{

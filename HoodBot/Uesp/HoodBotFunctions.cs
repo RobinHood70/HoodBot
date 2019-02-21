@@ -35,7 +35,7 @@
 		public override void AddLogEntry(LogInfo info)
 		{
 			ThrowNull(info, nameof(info));
-			var result = ChangeResults.Failed;
+			var result = ChangeStatus.Failed;
 			do
 			{
 				this.LogPage.Load();
@@ -68,7 +68,7 @@
 				{
 				}
 			}
-			while (result.HasFlag(ChangeResults.Failed));
+			while (result.HasFlag(ChangeStatus.Failed));
 		}
 
 		public override void DoSiteCustomizations()

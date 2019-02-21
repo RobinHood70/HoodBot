@@ -203,8 +203,9 @@
 			};
 			page.Save("Create test page", false);
 
-			Debug.WriteLine(page.Move("Move Test", "Move test page", true, out var moveResults));
-			foreach (var move in moveResults)
+			var result = page.Move("Move Test", "Move test page", true);
+			Debug.WriteLine(result.Status);
+			foreach (var move in result.Value)
 			{
 				Debug.WriteLine(move.Key, move.Value);
 			}
@@ -308,9 +309,9 @@
 		internal void PurgeTests()
 		{
 			var titles = new TitleCollection(this.normalWiki, "User:RobinHood70");
-			var result = titles.Purge(PurgeMethod.Normal, out var purgeResults);
-			Debug.WriteLine(result);
-			DumpTitles(purgeResults);
+			var result = titles.Purge(PurgeMethod.Normal);
+			Debug.WriteLine(result.Status);
+			DumpTitles(result.Value);
 		}
 
 		internal void RecentChangesTests()
@@ -406,9 +407,9 @@
 		internal void UnwatchTests()
 		{
 			var titles = new TitleCollection(this.normalWiki, "User:RobinHood70");
-			var result = titles.Unwatch(out var unwatchResult);
-			Debug.WriteLine(result);
-			DumpTitles(unwatchResult);
+			var result = titles.Unwatch();
+			Debug.WriteLine(result.Status);
+			DumpTitles(result.Value);
 		}
 
 		internal void UploadRandomImageTest()
@@ -442,9 +443,9 @@
 		internal void UserEmailTests()
 		{
 			var user = new User(this.normalWiki, "RobinHood70");
-			var result = user.Email("This is a test e-mail.", true, out var message);
-			Debug.WriteLine(result);
-			Debug.WriteLine(message);
+			var result = user.Email("This is a test e-mail.", true);
+			Debug.WriteLine(result.Status);
+			Debug.WriteLine(result.Value);
 		}
 
 		internal void UserFullInfoTests()
@@ -489,9 +490,9 @@
 		internal void WatchTests()
 		{
 			var titles = new TitleCollection(this.normalWiki, "User:RobinHood70");
-			var result = titles.Watch(out var watchResult);
-			Debug.WriteLine(result);
-			DumpTitles(watchResult);
+			var result = titles.Watch();
+			Debug.WriteLine(result.Status);
+			DumpTitles(result.Value);
 		}
 		#endregion
 

@@ -99,7 +99,7 @@
 		/// <param name="expiry">The date and time the block should expire.</param>
 		/// <param name="reblock">if set to <c>true</c>, reblocks the user with the new block settings.</param>
 		/// <returns>A value indicating the change status of the block.</returns>
-		public ChangeResults Block(string reason, BlockFlags flags, DateTime expiry, bool reblock)
+		public ChangeStatus Block(string reason, BlockFlags flags, DateTime expiry, bool reblock)
 		{
 			var input = new BlockInput(this.Name)
 			{
@@ -117,7 +117,7 @@
 		/// <param name="duration">The duration of the block (e.g., "2 weeks").</param>
 		/// <param name="reblock">if set to <c>true</c>, reblocks the user with the new block settings.</param>
 		/// <returns>A value indicating the change status of the block.</returns>
-		public ChangeResults Block(string reason, BlockFlags flags, string duration, bool reblock)
+		public ChangeStatus Block(string reason, BlockFlags flags, string duration, bool reblock)
 		{
 			var input = new BlockInput(this.Name)
 			{
@@ -131,39 +131,37 @@
 
 		/// <summary>Emails the user.</summary>
 		/// <param name="body">The e-mail body.</param>
-		/// <param name="ccMe">if set to <c>true</c>, sends a copy of the e-mail to the bot's e-mail account.</param>
-		/// <param name="emailResult">The result of the e-mail. If successful, this will be the e-mail in its entirety; if not, this will be the result code.</param>
-		/// <returns>A value indicating the change status of the e-mail.</returns>
+		/// <param name="ccMe">if set to <c>true</c>, sends a copy of the e-mail to the user's e-mail account.</param>
+		/// <returns>A value indicating the change status of the e-mail along with a copy of the e-mail that was sent.</returns>
 		/// <remarks>The subject of the e-mail will be the wiki default.</remarks>
-		public ChangeResults Email(string body, bool ccMe, out string emailResult)
+		public ChangeValue<string> Email(string body, bool ccMe)
 		{
 			defaultSubject = defaultSubject ?? this.Site.LoadParsedMessage("defemailsubject").Replace("$1", this.Site.User.Name);
-			return this.Email(defaultSubject, body, ccMe, out emailResult);
+			return this.Email(defaultSubject, body, ccMe);
 		}
 
 		/// <summary>Emails the user.</summary>
 		/// <param name="subject">The subject line for the e-mail if not the wiki default.</param>
 		/// <param name="body">The e-mail body.</param>
-		/// <param name="ccMe">if set to <c>true</c>, sends a copy of the e-mail to the bot's e-mail account.</param>
-		/// <param name="emailResult">The result of the e-mail. If successful, this will be the e-mail in its entirety; if not, this will be the result code.</param>
-		/// <returns>A value indicating the change status of the e-mail.</returns>
-		public ChangeResults Email(string subject, string body, bool ccMe, out string emailResult)
+		/// <param name="ccMe">if set to <c>true</c>, sends a copy of the e-mail to the user's e-mail account.</param>
+		/// <returns>A value indicating the change status of the e-mail along with a copy of the e-mail that was sent.</returns>
+		public ChangeValue<string> Email(string subject, string body, bool ccMe)
 		{
 			if (this.loaded && !this.Emailable)
 			{
 				// Don't ask the wiki what the result will be if we already know we can't e-mail them. Load the e-mail disabled message if we don't already have it and just return that.
 				emailDisabled = emailDisabled ?? this.Site.LoadParsedMessage("usermaildisabled");
-				emailResult = emailDisabled;
-				return ChangeResults.Failed;
+				return new ChangeValue<string>(ChangeStatus.Failed, emailDisabled);
 			}
 
-			var retval = this.Site.PublishChange(this, new Dictionary<string, object>
+			string emailResult;
+			var status = this.Site.PublishChange(this, new Dictionary<string, object>
 			{
 				[nameof(subject)] = subject,
 				[nameof(body)] = body,
 				[nameof(ccMe)] = ccMe,
 			});
-			if (retval == ChangeResults.Successful)
+			if (status == ChangeStatus.Successful)
 			{
 				var input = new EmailUserInput(this.Name, body)
 				{
@@ -173,7 +171,7 @@
 				var result = this.Site.AbstractionLayer.EmailUser(input);
 				if (result.Result != "Success")
 				{
-					retval |= ChangeResults.Failed;
+					status |= ChangeStatus.Failed;
 				}
 
 				emailResult = result.Message ?? result.Result;
@@ -183,7 +181,7 @@
 				emailResult = null;
 			}
 
-			return retval;
+			return new ChangeValue<string>(status, emailResult);
 		}
 
 		// CONSIDER: Adding more GetContributions() and GetWatchlist() options.
@@ -266,7 +264,7 @@
 		/// <param name="msg">The message.</param>
 		/// <param name="editSummary">The edit summary.</param>
 		/// <returns>A value indicating the change status of posting the new talk page message.</returns>
-		public ChangeResults NewTalkPageMessage(string header, string msg, string editSummary)
+		public ChangeStatus NewTalkPageMessage(string header, string msg, string editSummary)
 		{
 			ThrowNull(msg, nameof(msg));
 			msg = msg.Trim();
@@ -283,7 +281,7 @@
 				[nameof(editSummary)] = editSummary,
 			});
 
-			if (retval == ChangeResults.Successful)
+			if (retval == ChangeStatus.Successful)
 			{
 				var input = new EditInput(this.TalkPage.FullPageName, msg)
 				{
@@ -297,7 +295,7 @@
 				var result = this.Site.AbstractionLayer.Edit(input);
 				if (result.Result != "Success")
 				{
-					retval |= ChangeResults.Failed;
+					retval |= ChangeStatus.Failed;
 				}
 			}
 
@@ -307,14 +305,14 @@
 		/// <summary>Unblocks the user for the specified reason.</summary>
 		/// <param name="reason">The unblock reason.</param>
 		/// <returns>A value indicating the change status of the unblock.</returns>
-		public ChangeResults Unblock(string reason)
+		public ChangeStatus Unblock(string reason)
 		{
 			var retval = this.Site.PublishChange(this, new Dictionary<string, object>
 			{
 				[nameof(reason)] = reason,
 			});
 
-			if (retval == ChangeResults.Successful)
+			if (retval == ChangeStatus.Successful)
 			{
 				var input = new UnblockInput(this.Name)
 				{
@@ -324,7 +322,7 @@
 
 				if (result.Id == 0)
 				{
-					retval |= ChangeResults.Failed;
+					retval |= ChangeStatus.Failed;
 				}
 			}
 
@@ -333,7 +331,7 @@
 		#endregion
 
 		#region Private Methods
-		private ChangeResults Block(BlockInput input)
+		private ChangeStatus Block(BlockInput input)
 		{
 			var retval = this.Site.PublishChange(this, new Dictionary<string, object>
 			{
@@ -344,12 +342,12 @@
 				[nameof(input.Flags)] = input.Flags,
 				[nameof(input.Reblock)] = input.Reblock,
 			});
-			if (retval == ChangeResults.Successful)
+			if (retval == ChangeStatus.Successful)
 			{
 				var result = this.Site.AbstractionLayer.Block(input);
 				if (result.Id == 0)
 				{
-					retval |= ChangeResults.Failed;
+					retval |= ChangeStatus.Failed;
 				}
 			}
 

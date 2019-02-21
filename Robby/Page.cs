@@ -314,7 +314,7 @@
 		/// <param name="editSummary">The edit summary.</param>
 		/// <param name="isMinor">Whether the edit should be marked as minor.</param>
 		/// <returns>A value indicating the change status of the edit.</returns>
-		public ChangeResults Save(string editSummary, bool isMinor) => this.Save(editSummary, isMinor, true, false);
+		public ChangeStatus Save(string editSummary, bool isMinor) => this.Save(editSummary, isMinor, true, false);
 
 		/// <summary>Saves the page with full options.</summary>
 		/// <param name="editSummary">The edit summary.</param>
@@ -322,16 +322,16 @@
 		/// <param name="isBotEdit">Whether the edit should be marked as a bot edit.</param>
 		/// <param name="recreateIfJustDeleted">Whether to recreate the page if it was deleted since being loaded.</param>
 		/// <returns>A value indicating the change status of the edit.</returns>
-		public ChangeResults Save(string editSummary, bool isMinor, bool isBotEdit, bool recreateIfJustDeleted)
+		public ChangeStatus Save(string editSummary, bool isMinor, bool isBotEdit, bool recreateIfJustDeleted)
 		{
 			if (!this.TextModified)
 			{
-				return ChangeResults.Ignored;
+				return ChangeStatus.Ignored;
 			}
 
 			var changeArgs = new PageTextChangeArgs(this, nameof(this.Save), editSummary, isMinor, isBotEdit, recreateIfJustDeleted);
 			var retval = this.Site.PublishPageTextChange(changeArgs);
-			if (retval == ChangeResults.Successful && this.TextModified)
+			if (retval == ChangeStatus.Successful && this.TextModified)
 			{
 				var input = new EditInput(this.FullPageName, this.Text)
 				{
@@ -345,7 +345,7 @@
 				var result = this.Site.AbstractionLayer.Edit(input);
 				if (result.Result != "Success")
 				{
-					retval |= ChangeResults.Failed;
+					retval |= ChangeStatus.Failed;
 				}
 			}
 
