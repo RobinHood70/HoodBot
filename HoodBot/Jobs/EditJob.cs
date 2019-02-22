@@ -4,17 +4,18 @@
 	using RobinHood70.HoodBot.Jobs.Tasks;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WikiCommon;
 
 	public abstract class EditJob : WikiJob
 	{
 		protected EditJob(Site site, AsyncInfo asyncInfo, params WikiTask[] tasks)
 			: base(site, asyncInfo, tasks) => this.ReadOnly = false;
 
+		/* In retrospect, these may never be used.
+
 		public event StrongEventHandler<EditJob, Page> Saving;
 
 		public event StrongEventHandler<EditJob, Page> Saved;
-
+		*/
 		#region Public Virtual Properties
 		public virtual string LogDetails { get; protected set; }
 		#endregion
