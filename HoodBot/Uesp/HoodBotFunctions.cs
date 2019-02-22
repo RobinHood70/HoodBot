@@ -6,17 +6,15 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiClasses;
-	using static RobinHood70.WikiCommon.Globals;
 	using static Properties.Resources;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public class HoodBotFunctions : UserFunctions
 	{
-		#region Private Constants
-		private const string Timestamp = "{{subst:#time:Y-m-d H:i:s|{{subst:CURRENTTIMESTAMP}}}}";
-		#endregion
-
 		#region Static Fields
 		private static readonly Regex CurrentTaskFinder = SectionFinder("Current Task");
+		private static readonly Regex EntryFinder = Template.Find(null, "/Entry", "\n");
+		private static readonly Regex EntryTableFinder = new Regex(@"(?<=id=""EntryTable"".*?)\|\}", RegexOptions.Singleline);
 		private static readonly Regex TaskLogFinder = SectionFinder("Task Log");
 		#endregion
 
@@ -39,32 +37,43 @@
 			do
 			{
 				this.LogPage.Load();
-				this.UpdateCurrentStatus(this.LogPage, info.Title);
-
-				var section = new Regex(@"(?<=id=""EntryTable"".*)({{/Entry|\|})", RegexOptions.Singleline);
-				var sectionTitle = section.Match(this.LogPage.Text);
-				if (!sectionTitle.Success)
+				this.UpdateCurrentStatus(this.LogPage, info.Title + '.');
+				var entry = EntryFinder.Match(this.LogPage.Text);
+				if (!entry.Success)
 				{
-					throw new FormatException(BadLogPage);
+					entry = EntryTableFinder.Match(this.LogPage.Text);
+					if (!entry.Success)
+					{
+						throw new FormatException(BadLogPage);
+					}
+				}
+				else
+				{
+					var testTemplate = new Template(entry.Value);
+					if (
+						Parameter.IsNullOrEmpty(testTemplate["3"]) &&
+						testTemplate["1"]?.Value == info.Title &&
+						(testTemplate["info"]?.Value ?? string.Empty) == (info.Details ?? string.Empty))
+					{
+						// If the last job was the same as this one, and is unfinished, then assume we're resuming the job and don't update.
+						return;
+					}
 				}
 
-				var insertPos = sectionTitle.Index;
-				var template = new Template("/Entry")
+				var entryTemplate = new Template("/Entry");
+				entryTemplate.AddAnonymous(info.Title);
+				if (!string.IsNullOrEmpty(info.Details))
 				{
-					{ "task", info.Title },
-					{ "start", Timestamp }
-				};
-				if (!string.IsNullOrWhiteSpace(info.Details))
-				{
-					template.Add("info", info.Details);
+					entryTemplate.Add("info", info.Details);
 				}
 
-				this.LogPage.Text = this.LogPage.Text.Insert(insertPos, template.ToString() + "\n");
+				entryTemplate.AddAnonymous(UniversalNow());
+				this.LogPage.Text = this.LogPage.Text.Insert(entry.Index, entryTemplate.ToString() + "\n");
 				try
 				{
-					result = this.LogPage.Save("Task Started", false);
+					result = this.LogPage.Save("Job Started", false);
 				}
-				catch (StopException)
+				catch (EditConflictException)
 				{
 				}
 			}
@@ -80,6 +89,35 @@
 
 		public override void EndLogEntry()
 		{
+			// Assumes that its current LogPage.Text is still valid and tries to save that directly. Loads only if it gets an edit conflict.
+			var result = ChangeStatus.Failed;
+			do
+			{
+				this.UpdateCurrentStatus(this.LogPage, "None.");
+				var entry = EntryFinder.Match(this.LogPage.Text);
+				if (!entry.Success)
+				{
+					throw new FormatException(BadLogPage);
+				}
+
+				var entryTemplate = new Template(entry.Value);
+				entryTemplate.AddAnonymous(UniversalNow());
+				entryTemplate.Sort("1", "info", "2", "3", "notes");
+
+				this.LogPage.Text = this.LogPage.Text.Remove(entry.Index, entry.Length).Insert(entry.Index, entryTemplate.ToString() + "\n");
+				try
+				{
+					result = this.LogPage.Save("Job Finished", true);
+				}
+				catch (EditConflictException)
+				{
+					this.LogPage.Load();
+				}
+				catch (StopException)
+				{
+				}
+			}
+			while (result.HasFlag(ChangeStatus.Failed));
 		}
 
 		public override void UpdateCurrentStatus(Page page, string title)
@@ -102,7 +140,9 @@
 		#endregion
 
 		#region Private Static Methods
-		private static Regex SectionFinder(string sectionName) => new Regex(@"^==\s*" + Regex.Escape(sectionName) + @"\s*==\s*$", RegexOptions.Multiline);
+		private static Regex SectionFinder(string sectionName) => new Regex(@"^==\s*" + Regex.Escape(sectionName) + @"\s*==\s*?\n", RegexOptions.Multiline);
+
+		private static string UniversalNow() => DateTime.UtcNow.ToString("u").TrimEnd('Z');
 		#endregion
 	}
 }
