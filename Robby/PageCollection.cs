@@ -296,6 +296,17 @@
 		/// <param name="site">The site.</param>
 		/// <returns>A new PageCollection with no namespace limitations, load options set to none, and creating only default pages rather than user-specified.</returns>
 		internal static PageCollection UnlimitedDefault(Site site) => new PageCollection(site, PageLoadOptions.None, PageCreator.Default) { LimitationType = LimitationType.None };
+
+		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="other">The collection to initialize this instance from.</param>
+		/// <returns>A new PageCollection with no namespace limitations, load options set to none, and creating only default pages rather than user-specified.</returns>
+		internal static PageCollection UnlimitedDefault(Site site, IEnumerable<ISimpleTitle> other)
+		{
+			var retval = UnlimitedDefault(site);
+			retval.AddFrom(other);
+			return retval;
+		}
 		#endregion
 
 		#region Internal Methods

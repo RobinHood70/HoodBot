@@ -229,7 +229,7 @@
 		{
 			if (createProtection == null)
 			{
-				return ChangeStatus.Ignored;
+				return ChangeStatus.NoEffect;
 			}
 
 			var protection = new ProtectInputItem("create", createProtection) { Expiry = expiry };
@@ -253,7 +253,7 @@
 		{
 			if (createProtection == null)
 			{
-				return ChangeStatus.Ignored;
+				return ChangeStatus.NoEffect;
 			}
 
 			var protection = new ProtectInputItem("create", createProtection) { ExpiryRelative = duration };
@@ -275,25 +275,17 @@
 		public ChangeStatus Delete(string reason)
 		{
 			ThrowNull(reason, nameof(reason));
-			var retval = this.Site.PublishChange(this, new Dictionary<string, object>
-			{
-				[nameof(reason)] = reason,
-			});
-			if (retval == ChangeStatus.Successful)
-			{
-				var input = new DeleteInput(this.FullPageName)
+			return this.Site.PublishChange(
+				this,
+				new Dictionary<string, object>
 				{
-					Reason = reason
-				};
-
-				var result = this.Site.AbstractionLayer.Delete(input);
-				if (result.LogId == 0)
+					[nameof(reason)] = reason,
+				},
+				() =>
 				{
-					retval |= ChangeStatus.Failed;
-				}
-			}
-
-			return retval;
+					var input = new DeleteInput(this.FullPageName) { Reason = reason };
+					return this.Site.AbstractionLayer.Delete(input).LogId == 0 ? ChangeStatus.Failure : ChangeStatus.Success;
+				});
 		}
 
 		/// <summary>Indicates whether the current title is equal to another title based on Namespace, PageName, and Key.</summary>
@@ -340,23 +332,17 @@
 		{
 			ThrowNull(to, nameof(to));
 			ThrowNull(reason, nameof(reason));
-			var dict = new Dictionary<string, string>();
-			var status = this.Site.PublishChange(this, new Dictionary<string, object>
-			{
-				[nameof(to)] = to,
-				[nameof(reason)] = reason,
-				[nameof(moveTalk)] = moveTalk,
-				[nameof(moveSubpages)] = moveSubpages,
-				[nameof(suppressRedirect)] = suppressRedirect,
-			});
-
-			if (status.HasFlag(ChangeStatus.Ignored))
-			{
-				dict.Add(this.FullPageName, to);
-			}
-			else
-			{
-				if (status != ChangeStatus.Successful)
+			return this.Site.PublishChange(
+				this,
+				new Dictionary<string, object>
+				{
+					[nameof(to)] = to,
+					[nameof(reason)] = reason,
+					[nameof(moveTalk)] = moveTalk,
+					[nameof(moveSubpages)] = moveSubpages,
+					[nameof(suppressRedirect)] = suppressRedirect,
+				},
+				() =>
 				{
 					var input = new MoveInput(this.FullPageName, to)
 					{
@@ -367,10 +353,11 @@
 						Reason = reason
 					};
 
-					MoveResult result;
+					var status = ChangeStatus.Success;
+					var dict = new Dictionary<string, string>();
 					try
 					{
-						result = this.Site.AbstractionLayer.Move(input);
+						var result = this.Site.AbstractionLayer.Move(input);
 						foreach (var item in result)
 						{
 							if (item.Error != null)
@@ -390,12 +377,12 @@
 					catch (WikiException e)
 					{
 						this.Site.PublishWarning(this, e.Info);
-						status |= ChangeStatus.Failed;
+						status = ChangeStatus.Failure;
 					}
-				}
-			}
 
-			return new ChangeValue<IDictionary<string, string>>(status, dict);
+					return new ChangeValue<IDictionary<string, string>>(status, dict);
+				},
+				new Dictionary<string, string>() { [this.FullPageName] = to });
 		}
 
 		/// <summary>Moves the title to the name specified.</summary>
@@ -521,34 +508,25 @@
 		#endregion
 
 		#region Private Methods
-		private ChangeStatus Protect(string reason, ICollection<ProtectInputItem> protections)
-		{
-			if (protections.Count == 0)
-			{
-				return ChangeStatus.Ignored;
-			}
-
-			var retval = this.Site.PublishChange(this, new Dictionary<string, object>
-			{
-				[nameof(reason)] = reason,
-				[nameof(protections)] = protections,
-			});
-			if (retval == ChangeStatus.Successful)
-			{
-				var input = new ProtectInput(this.FullPageName)
+		private ChangeStatus Protect(string reason, ICollection<ProtectInputItem> protections) =>
+			protections.Count == 0 ? ChangeStatus.NoEffect :
+			this.Site.PublishChange(
+				this,
+				new Dictionary<string, object>
 				{
-					Protections = protections,
-					Reason = reason
-				};
-
-				if (!this.Protect(input))
+					[nameof(reason)] = reason,
+					[nameof(protections)] = protections,
+				},
+				() =>
 				{
-					retval |= ChangeStatus.Failed;
-				}
-			}
+					var input = new ProtectInput(this.FullPageName)
+					{
+						Protections = protections,
+						Reason = reason
+					};
 
-			return retval;
-		}
-		#endregion
+					return this.Protect(input) ? ChangeStatus.Success : ChangeStatus.Failure;
+				});
 	}
+	#endregion
 }

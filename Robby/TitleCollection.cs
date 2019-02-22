@@ -177,29 +177,15 @@
 		/// <summary>Purges all pages in the collection.</summary>
 		/// <param name="method">The method.</param>
 		/// <returns>A value indicating the change status of the purge along with a page collection with the purge results.</returns>
-		public ChangeValue<PageCollection> Purge(PurgeMethod method)
-		{
-			var status = this.Site.PublishChange(this, new Dictionary<string, object>
+		public ChangeValue<PageCollection> Purge(PurgeMethod method) => this.Site.PublishChange(
+			this,
+			new Dictionary<string, object> { [nameof(method)] = method },
+			() =>
 			{
-				[nameof(method)] = method,
-			});
-
-			PageCollection purgeResults;
-			if (status == ChangeStatus.Successful)
-			{
-				purgeResults = this.Purge(new PurgeInput(this.ToFullPageNames()) { Method = method });
-				if (purgeResults.Count < this.Count)
-				{
-					status |= ChangeStatus.Failed;
-				}
-			}
-			else
-			{
-				purgeResults = PageCollection.UnlimitedDefault(this.Site);
-			}
-
-			return new ChangeValue<PageCollection>(status, purgeResults);
-		}
+				var pages = this.Purge(new PurgeInput(this.ToFullPageNames()) { Method = method });
+				return new ChangeValue<PageCollection>((pages.Count < this.Count) ? ChangeStatus.Failure : ChangeStatus.Success, pages);
+			},
+			PageCollection.UnlimitedDefault(this.Site));
 
 		/// <summary>Sets namespace limitations for the Load() methods.</summary>
 		/// <param name="namespaceLimitations">The namespace limitations to apply to the PageCollection returned.</param>
@@ -213,49 +199,27 @@
 
 		/// <summary>Watches all pages in the collection.</summary>
 		/// <returns>A value indicating the change status of the watch along with a page collection with the watch results.</returns>
-		public ChangeValue<PageCollection> Watch()
-		{
-			PageCollection pages;
-			var status = this.Site.PublishChange(this, new Dictionary<string, object>());
-			if (status.HasFlag(ChangeStatus.Ignored))
+		public ChangeValue<PageCollection> Watch() => this.Site.PublishChange(
+			this,
+			new Dictionary<string, object>(),
+			() =>
 			{
-				pages = PageCollection.UnlimitedDefault(this.Site);
-				pages.AddFrom(this);
-			}
-			else
-			{
-				pages = this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = false });
-				if (pages.Count < this.Count)
-				{
-					status |= ChangeStatus.Failed;
-				}
-			}
-
-			return new ChangeValue<PageCollection>(status, pages);
-		}
+				var pages = this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = false });
+				return new ChangeValue<PageCollection>((pages.Count < this.Count) ? ChangeStatus.Failure : ChangeStatus.Success, pages);
+			},
+			PageCollection.UnlimitedDefault(this.Site, this));
 
 		/// <summary>Unwatches all pages in the collection.</summary>
 		/// <returns>A value indicating the change status of the unwatch along with a page collection with the unwatch results.</returns>
-		public ChangeValue<PageCollection> Unwatch()
-		{
-			PageCollection pages;
-			var status = this.Site.PublishChange(this, new Dictionary<string, object>());
-			if (status.HasFlag(ChangeStatus.Ignored))
+		public ChangeValue<PageCollection> Unwatch() => this.Site.PublishChange(
+			this,
+			new Dictionary<string, object>(),
+			() =>
 			{
-				pages = PageCollection.UnlimitedDefault(this.Site);
-				pages.AddFrom(this);
-			}
-			else
-			{
-				pages = this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = true });
-				if (pages.Count < this.Count)
-				{
-					status |= ChangeStatus.Failed;
-				}
-			}
-
-			return new ChangeValue<PageCollection>(status, pages);
-		}
+				var pages = this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = true });
+				return new ChangeValue<PageCollection>((pages.Count < this.Count) ? ChangeStatus.Failure : ChangeStatus.Success, pages);
+			},
+			PageCollection.UnlimitedDefault(this.Site, this));
 		#endregion
 
 		#region Public Override Methods

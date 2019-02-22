@@ -151,37 +151,24 @@
 			{
 				// Don't ask the wiki what the result will be if we already know we can't e-mail them. Load the e-mail disabled message if we don't already have it and just return that.
 				emailDisabled = emailDisabled ?? this.Site.LoadParsedMessage("usermaildisabled");
-				return new ChangeValue<string>(ChangeStatus.Failed, emailDisabled);
+				return new ChangeValue<string>(ChangeStatus.Failure, emailDisabled);
 			}
 
-			string emailResult;
-			var status = this.Site.PublishChange(this, new Dictionary<string, object>
-			{
-				[nameof(subject)] = subject,
-				[nameof(body)] = body,
-				[nameof(ccMe)] = ccMe,
-			});
-			if (status == ChangeStatus.Successful)
-			{
-				var input = new EmailUserInput(this.Name, body)
+			return this.Site.PublishChange(
+				this,
+				new Dictionary<string, object>
 				{
-					CCMe = ccMe,
-					Subject = subject
-				};
-				var result = this.Site.AbstractionLayer.EmailUser(input);
-				if (result.Result != "Success")
+					[nameof(subject)] = subject,
+					[nameof(body)] = body,
+					[nameof(ccMe)] = ccMe,
+				},
+				() =>
 				{
-					status |= ChangeStatus.Failed;
-				}
-
-				emailResult = result.Message ?? result.Result;
-			}
-			else
-			{
-				emailResult = null;
-			}
-
-			return new ChangeValue<string>(status, emailResult);
+					var input = new EmailUserInput(this.Name, body) { CCMe = ccMe, Subject = subject };
+					var result = this.Site.AbstractionLayer.EmailUser(input);
+					return new ChangeValue<string>(result.Result == "Success" ? ChangeStatus.Success : ChangeStatus.Failure, result.Message ?? result.Result);
+				},
+				null);
 		}
 
 		// CONSIDER: Adding more GetContributions() and GetWatchlist() options.
@@ -274,66 +261,46 @@
 				msg += " ~~~~";
 			}
 
-			var retval = this.Site.PublishChange(this, new Dictionary<string, object>
-			{
-				[nameof(header)] = header,
-				[nameof(msg)] = msg,
-				[nameof(editSummary)] = editSummary,
-			});
-
-			if (retval == ChangeStatus.Successful)
-			{
-				var input = new EditInput(this.TalkPage.FullPageName, msg)
+			return this.Site.PublishChange(
+				this,
+				new Dictionary<string, object>
 				{
-					Bot = true,
-					Minor = Tristate.False,
-					Recreate = true,
-					Section = -1,
-					SectionTitle = header,
-					Summary = editSummary,
-				};
-				var result = this.Site.AbstractionLayer.Edit(input);
-				if (result.Result != "Success")
+					[nameof(header)] = header,
+					[nameof(msg)] = msg,
+					[nameof(editSummary)] = editSummary,
+				},
+				() =>
 				{
-					retval |= ChangeStatus.Failed;
-				}
-			}
-
-			return retval;
+					var input = new EditInput(this.TalkPage.FullPageName, msg)
+					{
+						Bot = true,
+						Minor = Tristate.False,
+						Recreate = true,
+						Section = -1,
+						SectionTitle = header,
+						Summary = editSummary,
+					};
+					return this.Site.AbstractionLayer.Edit(input).Result == "Success" ? ChangeStatus.Success : ChangeStatus.Failure;
+				});
 		}
 
 		/// <summary>Unblocks the user for the specified reason.</summary>
 		/// <param name="reason">The unblock reason.</param>
 		/// <returns>A value indicating the change status of the unblock.</returns>
-		public ChangeStatus Unblock(string reason)
-		{
-			var retval = this.Site.PublishChange(this, new Dictionary<string, object>
+		public ChangeStatus Unblock(string reason) => this.Site.PublishChange(
+			this,
+			new Dictionary<string, object> { [nameof(reason)] = reason, },
+			() =>
 			{
-				[nameof(reason)] = reason,
+				var input = new UnblockInput(this.Name) { Reason = reason };
+				return this.Site.AbstractionLayer.Unblock(input).Id == 0 ? ChangeStatus.Failure : ChangeStatus.Success;
 			});
-
-			if (retval == ChangeStatus.Successful)
-			{
-				var input = new UnblockInput(this.Name)
-				{
-					Reason = reason
-				};
-				var result = this.Site.AbstractionLayer.Unblock(input);
-
-				if (result.Id == 0)
-				{
-					retval |= ChangeStatus.Failed;
-				}
-			}
-
-			return retval;
-		}
 		#endregion
 
 		#region Private Methods
-		private ChangeStatus Block(BlockInput input)
-		{
-			var retval = this.Site.PublishChange(this, new Dictionary<string, object>
+		private ChangeStatus Block(BlockInput input) => this.Site.PublishChange(
+			this,
+			new Dictionary<string, object>
 			{
 				[nameof(input.User)] = input.User,
 				[nameof(input.Reason)] = input.Reason,
@@ -341,18 +308,8 @@
 				[nameof(input.ExpiryRelative)] = input.ExpiryRelative,
 				[nameof(input.Flags)] = input.Flags,
 				[nameof(input.Reblock)] = input.Reblock,
-			});
-			if (retval == ChangeStatus.Successful)
-			{
-				var result = this.Site.AbstractionLayer.Block(input);
-				if (result.Id == 0)
-				{
-					retval |= ChangeStatus.Failed;
-				}
-			}
-
-			return retval;
-		}
+			},
+			() => this.Site.AbstractionLayer.Block(input).Id == 0 ? ChangeStatus.Failure : ChangeStatus.Success);
 
 		private void Populate(UsersItem user)
 		{

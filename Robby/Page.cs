@@ -326,30 +326,27 @@
 		{
 			if (!this.TextModified)
 			{
-				return ChangeStatus.Ignored;
+				return ChangeStatus.NoEffect;
 			}
 
 			var changeArgs = new PageTextChangeArgs(this, nameof(this.Save), editSummary, isMinor, isBotEdit, recreateIfJustDeleted);
-			var retval = this.Site.PublishPageTextChange(changeArgs);
-			if (retval == ChangeStatus.Successful && this.TextModified)
-			{
-				var input = new EditInput(this.FullPageName, this.Text)
+			return this.Site.PublishPageTextChange(
+				changeArgs,
+				() =>
 				{
-					BaseTimestamp = this.Revisions?.Current?.Timestamp,
-					StartTimestamp = this.StartTimestamp,
-					Bot = changeArgs.BotEdit,
-					Minor = changeArgs.Minor ? Tristate.True : Tristate.False,
-					Recreate = changeArgs.RecreateIfJustDeleted,
-					Summary = changeArgs.EditSummary,
-				};
-				var result = this.Site.AbstractionLayer.Edit(input);
-				if (result.Result != "Success")
-				{
-					retval |= ChangeStatus.Failed;
-				}
-			}
-
-			return retval;
+					// Modification status re-checked here because a subscriber may have reverted the page.
+					return
+						!this.TextModified ? ChangeStatus.NoEffect :
+						this.Site.AbstractionLayer.Edit(new EditInput(this.FullPageName, this.Text)
+						{
+							BaseTimestamp = this.Revisions?.Current?.Timestamp,
+							StartTimestamp = this.StartTimestamp,
+							Bot = changeArgs.BotEdit,
+							Minor = changeArgs.Minor ? Tristate.True : Tristate.False,
+							Recreate = changeArgs.RecreateIfJustDeleted,
+							Summary = changeArgs.EditSummary,
+						}).Result == "Success" ? ChangeStatus.Success : ChangeStatus.Failure;
+				});
 		}
 		#endregion
 

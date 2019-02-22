@@ -15,23 +15,25 @@
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Describes the result of an attempted change to the site.</summary>
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1008:EnumsShouldHaveZeroValue", Justification = "Successful is more meaningful in this context.")]
-	[Flags]
-#pragma warning disable CA1714 // Flags enums should have plural names
 	public enum ChangeStatus
-#pragma warning restore CA1714 // Flags enums should have plural names
 	{
+		/// <summary>No change operation has been attempted.</summary>
+		Unknown,
+
 		/// <summary>The change to the wiki was successful.</summary>
-		Successful = 0,
-
-		/// <summary>The change to the wiki was ignored due to AllowEditing being set to false.</summary>
-		Ignored = 1,
-
-		/// <summary>During the appropriate event, a subscriber requested that the attempted change be cancelled.</summary>
-		Cancelled = 1 << 1,
+		Success,
 
 		/// <summary>The wiki reported that the method failed, either partly or completely, depending on the method.</summary>
-		Failed = 1 << 2,
+		Failure,
+
+		/// <summary>The change to the wiki was ignored due to AllowEditing being set to false.</summary>
+		EditingDisabled,
+
+		/// <summary>The change to the wiki was ignored because it would have no effect.</summary>
+		NoEffect,
+
+		/// <summary>During the appropriate event, a subscriber requested that the attempted change be cancelled.</summary>
+		Cancelled,
 	}
 
 	/// <summary>Represents a single wiki site.</summary>
@@ -548,46 +550,24 @@
 		/// <summary>Patrols the specified Recent Changes ID.</summary>
 		/// <param name="rcid">The Recent Change ID.</param>
 		/// <returns>A value indicating the change status of the patrol.</returns>
-		public ChangeStatus Patrol(long rcid)
-		{
-			var retval = this.PublishChange(this, new Dictionary<string, object>
+		public ChangeStatus Patrol(long rcid) => this.PublishChange(
+			this,
+			new Dictionary<string, object>
 			{
 				[nameof(rcid)] = rcid,
-			});
-
-			if (retval == ChangeStatus.Successful)
-			{
-				var result = this.Patrol(new PatrolInput(rcid));
-				if (result.Title == null)
-				{
-					retval |= ChangeStatus.Failed;
-				}
-			}
-
-			return retval;
-		}
+			},
+			() => this.Patrol(new PatrolInput(rcid)).Title == null ? ChangeStatus.Failure : ChangeStatus.Success);
 
 		/// <summary>Patrols the specified revision ID.</summary>
 		/// <param name="revid">The revision ID.</param>
 		/// <returns>A value indicating the change status of the patrol.</returns>
-		public ChangeStatus PatrolRevision(long revid)
-		{
-			var retval = this.PublishChange(this, new Dictionary<string, object>
+		public ChangeStatus PatrolRevision(long revid) => this.PublishChange(
+			this,
+			new Dictionary<string, object>
 			{
 				[nameof(revid)] = revid,
-			});
-
-			if (retval == ChangeStatus.Successful)
-			{
-				var result = this.Patrol(PatrolInput.FromRevisionId(revid));
-				if (result.Title == null)
-				{
-					retval |= ChangeStatus.Failed;
-				}
-			}
-
-			return retval;
-		}
+			},
+			() => this.Patrol(new PatrolInput(revid)).Title == null ? ChangeStatus.Failure : ChangeStatus.Success);
 
 		/// <summary>Upload a file to the wiki.</summary>
 		/// <param name="fileName">The full path and filename of the file to upload.</param>
@@ -613,17 +593,16 @@
 		/// <param name="pageText">Full page text for the File page. This should include the license, categories, and anything else required. Set to null to allow the wiki to generate the page text (normally just the <paramref name="editSummary" />).</param>
 		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
 		/// <returns>A value indicating the change status of the upload.</returns>
-		public ChangeStatus Upload(string fileName, string destinationName, string editSummary, string pageText)
-		{
-			var retval = this.PublishChange(this, new Dictionary<string, object>
+		public ChangeStatus Upload(string fileName, string destinationName, string editSummary, string pageText) => this.PublishChange(
+			this,
+			new Dictionary<string, object>
 			{
 				[nameof(fileName)] = fileName,
 				[nameof(destinationName)] = destinationName,
 				[nameof(editSummary)] = editSummary,
 				[nameof(pageText)] = pageText,
-			});
-
-			if (retval == ChangeStatus.Successful)
+			},
+			() =>
 			{
 				var checkedName = Path.GetFileName(fileName); // Always access this, even if we don't need it, as a means of checking validity.
 				if (string.IsNullOrWhiteSpace(destinationName))
@@ -644,28 +623,16 @@
 						uploadInput.Text = pageText;
 					}
 
-					this.Upload(uploadInput);
+					return this.Upload(uploadInput) ? ChangeStatus.Success : ChangeStatus.Failure;
 				}
-			}
-
-			return retval;
-		}
+			});
 		#endregion
 
 		#region Public Virtual Methods
 
 		/// <summary>Clears the bot's "has message" flag.</summary>
 		/// <returns><c>true</c> if the flag was successfully cleared; otherwise, <c>false</c>.</returns>
-		public virtual ChangeStatus ClearMessage()
-		{
-			var retval = this.PublishChange(this, null);
-			if (retval == ChangeStatus.Successful && !this.AbstractionLayer.ClearHasMessage())
-			{
-				retval |= ChangeStatus.Failed;
-			}
-
-			return retval;
-		}
+		public virtual ChangeStatus ClearMessage() => this.PublishChange(this, null, () => this.AbstractionLayer.ClearHasMessage() ? ChangeStatus.Success : ChangeStatus.Failure);
 
 		/// <summary>Gets the article path.</summary>
 		/// <param name="unparsedPath">The unparsed path. This can be a local article path or an interwiki path.</param>
@@ -705,36 +672,52 @@
 		/// <summary>Raises the Changing event with the supplied arguments and indicates what actions should be taken.</summary>
 		/// <param name="sender">The sending object.</param>
 		/// <param name="parameters">A dictionary of parameters that were sent to the calling method.</param>
+		/// <param name="changeFunction">The function to execute. It should return a ChangeResult indicating whether the call was successful, failed, or ignored.</param>
 		/// <param name="caller">The calling method (populated automatically with caller name).</param>
 		/// <returns>A value indicating the actions that should take place.</returns>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
-		public virtual ChangeStatus PublishChange(object sender, IReadOnlyDictionary<string, object> parameters, [CallerMemberName] string caller = null)
+		public virtual ChangeStatus PublishChange(object sender, IReadOnlyDictionary<string, object> parameters, Func<ChangeStatus> changeFunction, [CallerMemberName] string caller = null)
 		{
 			var changeArgs = new ChangeArgs(sender, caller, parameters);
-			this.Changing.Invoke(this, changeArgs);
-			var retval = this.AllowEditing ? ChangeStatus.Successful : ChangeStatus.Ignored;
-			if (changeArgs.CancelChange)
-			{
-				retval |= ChangeStatus.Cancelled;
-			}
+			this.Changing?.Invoke(this, changeArgs);
+			return
+				changeArgs.CancelChange ? ChangeStatus.Cancelled :
+				this.AllowEditing ? changeFunction() :
+				ChangeStatus.EditingDisabled;
+		}
 
-			return retval;
+		/// <summary>Raises the Changing event with the supplied arguments and indicates what actions should be taken.</summary>
+		/// <param name="sender">The sending object.</param>
+		/// <param name="parameters">A dictionary of parameters that were sent to the calling method.</param>
+		/// <param name="changeFunction">The function to execute. It should return a ChangeResult indicating whether the call was successful, failed, or ignored.</param>
+		/// <param name="disabledResult">The value to use if the return status is <see cref="ChangeStatus.EditingDisabled"/>.</param>
+		/// <param name="caller">The calling method (populated automatically with caller name).</param>
+		/// <returns>A value indicating the actions that should take place.</returns>
+		/// <remarks>In the event of a <see cref="ChangeStatus.Cancelled"/> result, the corresponding value will be <see langword="default"/>.</remarks>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
+		public virtual ChangeValue<T> PublishChange<T>(object sender, IReadOnlyDictionary<string, object> parameters, Func<ChangeValue<T>> changeFunction, T disabledResult, [CallerMemberName] string caller = null)
+		{
+			var changeArgs = new ChangeArgs(sender, caller, parameters);
+			this.Changing?.Invoke(this, changeArgs);
+			return
+				changeArgs.CancelChange ? new ChangeValue<T>(ChangeStatus.Cancelled, default) :
+				this.AllowEditing ? changeFunction() :
+				new ChangeValue<T>(ChangeStatus.EditingDisabled, disabledResult);
 		}
 
 		/// <summary>Raises the PageTextChanging event with the supplied arguments and indicates what actions should be taken.</summary>
 		/// <param name="changeArgs">The arguments involved in changing the page. The caller is responsible for creating the object so that it can get the various return values out of it when after the event.</param>
 		/// <returns>A value indicating the actions that should take place.</returns>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
-		public virtual ChangeStatus PublishPageTextChange(PageTextChangeArgs changeArgs)
+		public virtual ChangeStatus PublishPageTextChange(PageTextChangeArgs changeArgs, Func<ChangeStatus> changeFunction)
 		{
 			ThrowNull(changeArgs, nameof(changeArgs));
 			this.PageTextChanging?.Invoke(this, changeArgs);
-			var retval = this.AllowEditing ? ChangeStatus.Successful : ChangeStatus.Ignored;
-			if (changeArgs.CancelChange)
-			{
-				retval |= ChangeStatus.Cancelled;
-			}
-			else
+			var retval =
+				changeArgs.CancelChange ? ChangeStatus.Cancelled :
+				this.AllowEditing ? changeFunction() :
+				ChangeStatus.EditingDisabled;
+			if (!this.AllowEditing)
 			{
 				this.PagePreview?.Invoke(this, new PagePreviewArgs(changeArgs));
 			}
