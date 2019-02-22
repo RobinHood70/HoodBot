@@ -91,7 +91,7 @@
 		/// <param name="string1">The first string.</param>
 		/// <param name="string2">The second string.</param>
 		/// <returns>The result of the operator.</returns>
-		public static bool operator ==(TemplateString string1, TemplateString string2) => (string1 ?? string2) == null || string1.Equals(string2);
+		public static bool operator ==(TemplateString string1, TemplateString string2) => string1 == null ? string2 == null : string1.Equals(string2);
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="string1">The first string.</param>
