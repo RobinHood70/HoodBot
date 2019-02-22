@@ -157,6 +157,7 @@
     <Compile Include="Clients\ClientShared.cs" />
     <Compile Include="Design\ChecksumException.cs" />
     <Compile Include="Base\ImageLimitsItem.cs" />
+    <Compile Include="Design\EditConflictException.cs" />
     <Compile Include="Design\FlagFilter.cs" />
     <Compile Include="Design\StopException.cs" />
     <Compile Include="Base\ErrorItem.cs" />

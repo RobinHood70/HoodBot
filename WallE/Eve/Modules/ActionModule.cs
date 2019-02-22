@@ -227,12 +227,17 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				var code = (string)error["code"];
 				var info = (string)error["info"];
-				if (code == "assertbotfailed" || code == "assertuserfailed" || code == "assertnameduserfailed")
+				switch (code)
 				{
-					throw new StopException(info);
+					case "assertbotfailed":
+					case "assertuserfailed":
+					case "assertnameduserfailed":
+						throw new StopException(info);
+					case "editconflict":
+						throw new EditConflictException();
+					default:
+						throw WikiException.General(code, info);
 				}
-
-				throw WikiException.General(code, info);
 			}
 
 			var warnings = parent["warnings"];
