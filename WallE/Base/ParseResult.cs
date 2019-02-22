@@ -31,7 +31,6 @@ namespace RobinHood70.WallE.Base
 
 		public IReadOnlyList<LanguageLinksItem> LanguageLinks { get; set; }
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reasonably straight-forward as is, if not entirely desirable.")]
 		public IReadOnlyDictionary<string, IReadOnlyList<decimal>> LimitReportData { get; set; }
 
 		public string LimitReportHtml { get; set; }

@@ -309,7 +309,6 @@
 		/// <param name="reason">The reason for the move.</param>
 		/// <param name="suppressRedirect">if set to <c>true</c>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Return type - no complex instantiation required.")]
 		public ChangeValue<IDictionary<string, string>> Move(string to, string reason, bool suppressRedirect) => this.Move(to, reason, false, false, suppressRedirect);
 
 		/// <summary>Moves the title to the name specified.</summary>
@@ -317,7 +316,6 @@
 		/// <param name="reason">The reason for the move.</param>
 		/// <param name="suppressRedirect">if set to <c>true</c>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Return type - no complex instantiation required.")]
 		public ChangeValue<IDictionary<string, string>> Move(Title to, string reason, bool suppressRedirect) => this.Move(to?.FullPageName, reason, false, false, suppressRedirect);
 
 		/// <summary>Moves the title to the name specified.</summary>
@@ -327,7 +325,6 @@
 		/// <param name="moveSubpages">if set to <c>true</c>, moves all sub-pages of the original page.</param>
 		/// <param name="suppressRedirect">if set to <c>true</c>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Return type - no complex instantiation required.")]
 		public ChangeValue<IDictionary<string, string>> Move(string to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
 		{
 			ThrowNull(to, nameof(to));
@@ -392,7 +389,6 @@
 		/// <param name="moveSubpages">if set to <c>true</c>, moves all sub-pages of the original page.</param>
 		/// <param name="suppressRedirect">if set to <c>true</c>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Return type - no complex instantiation required.")]
 		public ChangeValue<IDictionary<string, string>> Move(Title to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect) => this.Move(to?.FullPageName, reason, moveTalk, moveSubpages, suppressRedirect);
 
 		/// <summary>Protects the title.</summary>
