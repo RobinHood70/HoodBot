@@ -9,7 +9,7 @@
 		/// <summary>Initializes a new instance of the <see cref="ChangeValue{T}"/> class.</summary>
 		/// <param name="result">The change status.</param>
 		/// <param name="data">The data returned by the function.</param>
-		public ChangeValue(ChangeStatus result, T data)
+		internal ChangeValue(ChangeStatus result, T data)
 		{
 			this.Status = result;
 			this.Value = data;
