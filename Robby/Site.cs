@@ -116,11 +116,6 @@
 		/// <value>The wiki abstraction layer.</value>
 		public IWikiAbstractionLayer AbstractionLayer { get; }
 
-		/// <summary>Gets or sets a value indicating whether methods that would alter the wiki should be allowed.</summary>
-		/// <value><c>true</c> if editing should be allowed; otherwise, <c>false</c>.</value>
-		/// <remarks>If set to false, most methods will silently fail, indicating success whenever possible. This is mostly intended for testing new bot jobs without risking any unintended edits.</remarks>
-		public bool AllowEditing { get; set; } = true;
-
 		/// <summary>Gets a value indicating whether the first letter of titles is case-sensitive.</summary>
 		/// <value><c>true</c> if the first letter of titles is case-sensitive; otherwise, <c>false</c>.</value>
 		public bool CaseSensitive { get; private set; }
@@ -151,6 +146,11 @@
 		/// <summary>Gets a value indicating whether the Disambiguator extension is available.</summary>
 		/// <value><c>true</c> if the Disambiguator extension is available; otherwise, <c>false</c>.</value>
 		public bool DisambiguatorAvailable { get; private set; }
+
+		/// <summary>Gets or sets a value indicating whether methods that would alter the wiki should be disabled.</summary>
+		/// <value><c>true</c> if editing should be disabled; otherwise, <c>false</c>.</value>
+		/// <remarks>If set to true, most methods will silently fail, and their return <see cref="ChangeStatus.EditingDisabled"/>. This is primarily intended for testing new bot jobs without risking any unintended edits.</remarks>
+		public bool EditingDisabled { get; set; } = false;
 
 		/// <summary>Gets or sets the EqualityComparer for case-insensitive comparison.</summary>
 		/// <value>The case-insensitive EqualityComparer.</value>
@@ -682,8 +682,8 @@
 			this.Changing?.Invoke(this, changeArgs);
 			return
 				changeArgs.CancelChange ? ChangeStatus.Cancelled :
-				this.AllowEditing ? changeFunction() :
-				ChangeStatus.EditingDisabled;
+				this.EditingDisabled ? ChangeStatus.EditingDisabled :
+				changeFunction();
 		}
 
 		/// <summary>Raises the Changing event with the supplied arguments and indicates what actions should be taken.</summary>
@@ -701,8 +701,8 @@
 			this.Changing?.Invoke(this, changeArgs);
 			return
 				changeArgs.CancelChange ? new ChangeValue<T>(ChangeStatus.Cancelled, default) :
-				this.AllowEditing ? changeFunction() :
-				new ChangeValue<T>(ChangeStatus.EditingDisabled, disabledResult);
+				this.EditingDisabled ? new ChangeValue<T>(ChangeStatus.EditingDisabled, disabledResult) :
+				changeFunction();
 		}
 
 		/// <summary>Raises the PageTextChanging event with the supplied arguments and indicates what actions should be taken.</summary>
@@ -715,9 +715,9 @@
 			this.PageTextChanging?.Invoke(this, changeArgs);
 			var retval =
 				changeArgs.CancelChange ? ChangeStatus.Cancelled :
-				this.AllowEditing ? changeFunction() :
-				ChangeStatus.EditingDisabled;
-			if (!this.AllowEditing)
+				this.EditingDisabled ? ChangeStatus.EditingDisabled :
+				changeFunction();
+			if (this.EditingDisabled)
 			{
 				this.PagePreview?.Invoke(this, new PagePreviewArgs(changeArgs));
 			}
