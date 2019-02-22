@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WikiClasses
 {
+	using System;
 	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Text;
@@ -8,7 +9,7 @@
 
 	/// <summary>Represents a template parameter.</summary>
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
-	public class Parameter
+	public sealed class Parameter
 	{
 		#region Static Fields
 		private static Regex equalsFinder = new Regex(@"(&#(x3b|61);|\{\{=}}|<nowiki>=</nowiki>)", RegexOptions.IgnoreCase);
@@ -62,7 +63,7 @@
 		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class from an existing one.</summary>
 		/// <param name="copy">The instance to copy.</param>
 		/// <remarks>This is a deep copy.</remarks>
-		protected Parameter(Parameter copy)
+		private Parameter(Parameter copy)
 		{
 			ThrowNull(copy, nameof(copy));
 			this.FullName = copy.FullName.Clone();

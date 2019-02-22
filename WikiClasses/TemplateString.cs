@@ -1,12 +1,20 @@
 ﻿namespace RobinHood70.WikiClasses
 {
+	using System;
+	using System.Collections.Generic;
 	using System.Text;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Represents a string with optional whitespace before and after it, such as a parameter name or value, handling each element separately.</summary>
 	/// <remarks>There are no limitations on what is considered to be whitespace. This allows HTML comments and other unvalued text to be stored as needed.</remarks>
-	public class TemplateString
+	public sealed class TemplateString : IEquatable<TemplateString>
 	{
+		#region Fields
+		private string leadingWhiteSpace;
+		private string trailingWhiteSpace;
+		private string valueText;
+		#endregion
+
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="TemplateString"/> class.</summary>
@@ -45,7 +53,7 @@
 		/// <summary>Initializes a new instance of the <see cref="TemplateString"/> class from an existing one.</summary>
 		/// <param name="copy">The instance to copy.</param>
 		/// <remarks>Since all values are strings, deep/shallow does not apply.</remarks>
-		protected TemplateString(TemplateString copy)
+		private TemplateString(TemplateString copy)
 		{
 			ThrowNull(copy, nameof(copy));
 			this.LeadingWhiteSpace = copy.LeadingWhiteSpace;
@@ -57,13 +65,39 @@
 		#region Public Properties
 
 		/// <summary>Gets or sets the leading whitespace surrounding the string.</summary>
-		public string LeadingWhiteSpace { get; set; }
+		public string LeadingWhiteSpace
+		{
+			get => this.leadingWhiteSpace;
+			set => this.leadingWhiteSpace = value ?? string.Empty;
+		}
 
 		/// <summary>Gets or sets the trailing white space.</summary>
-		public string TrailingWhiteSpace { get; set; }
+		public string TrailingWhiteSpace
+		{
+			get => this.trailingWhiteSpace;
+			set => this.trailingWhiteSpace = value ?? string.Empty;
+		}
 
 		/// <summary>Gets or sets the value.</summary>
-		public string Value { get; set; }
+		public string Value
+		{
+			get => this.valueText;
+			set => this.valueText = value ?? string.Empty;
+		}
+		#endregion
+
+		#region Public Operators
+		/// <summary>Implements the operator ==.</summary>
+		/// <param name="string1">The first string.</param>
+		/// <param name="string2">The second string.</param>
+		/// <returns>The result of the operator.</returns>
+		public static bool operator ==(TemplateString string1, TemplateString string2) => string1.Equals(string2);
+
+		/// <summary>Implements the operator !=.</summary>
+		/// <param name="string1">The first string.</param>
+		/// <param name="string2">The second string.</param>
+		/// <returns>The result of the operator.</returns>
+		public static bool operator !=(TemplateString string1, TemplateString string2) => !string1.Equals(string2);
 		#endregion
 
 		#region Public Methods
@@ -108,10 +142,36 @@
 
 		#region Public Override Methods
 
+		/// <summary>Indicates whether the current object is equal to another object of the same type.</summary>
+		/// <param name="other">An object to compare with this object.</param>
+		/// <returns>
+		///   <span class="keyword">
+		///     <span class="languageSpecificText">
+		///       <span class="cs">true</span>
+		///       <span class="vb">True</span>
+		///       <span class="cpp">true</span>
+		///     </span>
+		///   </span>
+		///   <span class="nu">
+		///     <span class="keyword">true</span> (<span class="keyword">True</span> in Visual Basic)</span> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <span class="keyword"><span class="languageSpecificText"><span class="cs">false</span><span class="vb">False</span><span class="cpp">false</span></span></span><span class="nu"><span class="keyword">false</span> (<span class="keyword">False</span> in Visual Basic)</span>.</returns>
+		public bool Equals(TemplateString other) =>
+			other != null &&
+			this.leadingWhiteSpace == other.leadingWhiteSpace &&
+			this.trailingWhiteSpace == other.trailingWhiteSpace &&
+			this.valueText == other.valueText;
+
 		/// <summary>Returns a string that represents this instance.</summary>
 		/// <returns>A <see cref="string"/> that represents this instance.</returns>
 		/// <remarks>This is always the same as the <see cref="Value"/> property.</remarks>
 		public override string ToString() => this.Value;
+
+		/// <summary>Determines whether the specified <see cref="System.Object"/>, is equal to this instance.</summary>
+		/// <param name="obj">The <see cref="System.Object"/> to compare with this instance.</param>
+		/// <returns>
+		///   <c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.</returns>
+		public override bool Equals(object obj) => Equals(obj as TemplateString);
+
+		public override int GetHashCode() => CompositeHashCode(this.leadingWhiteSpace, this.trailingWhiteSpace, this.valueText);
 		#endregion
 	}
 }
