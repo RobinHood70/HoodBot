@@ -18,11 +18,21 @@
 		private static readonly Regex TaskLogFinder = SectionFinder("Task Log");
 		#endregion
 
+		#region Fields
+		private LogInfo lastLogInfo;
+		#endregion
+
 		#region Constructors
 		public HoodBotFunctions(Site site)
 			: base(site)
 		{
+			this.LogPage = new Page(this.Site, this.Site.User.Page.FullPageName + "/Log");
+			this.StatusPage = this.LogPage;
 		}
+		#endregion
+
+		#region Public Override Properties
+		public override LogJobTypes LogJobTypes => LogJobTypes.Write;
 		#endregion
 
 		#region Public Static Methods
@@ -30,54 +40,40 @@
 		#endregion
 
 		#region Public Override Methods
-		public override void AddLogEntry(LogInfo info)
+		public override ChangeStatus AddLogEntry(LogInfo info)
 		{
 			ThrowNull(info, nameof(info));
-			var result = ChangeStatus.Failed;
-			do
+			var result = ChangeStatus.NoEffect;
+			if (this.ShouldLog(info))
 			{
-				this.LogPage.Load();
-				this.UpdateCurrentStatus(this.LogPage, info.Title + '.');
-				var entry = EntryFinder.Match(this.LogPage.Text);
-				if (!entry.Success)
+				this.lastLogInfo = info;
+				this.LogPage.PageLoaded += this.LogPage_AddEntry;
+				result = ChangeStatus.Unknown; // Change to Unknown so we know if we've ever successfully saved.
+				do
 				{
-					entry = EntryTableFinder.Match(this.LogPage.Text);
-					if (!entry.Success)
+					this.LogPage.Load();
+					try
 					{
-						throw new FormatException(BadLogPage);
+						result = this.LogPage.Save("Job Started", false);
+					}
+					catch (EditConflictException)
+					{
+					}
+					catch (StopException)
+					{
+						result = ChangeStatus.Cancelled;
 					}
 				}
-				else
-				{
-					var testTemplate = new Template(entry.Value);
-					if (
-						Parameter.IsNullOrEmpty(testTemplate["3"]) &&
-						testTemplate["1"]?.Value == info.Title &&
-						(testTemplate["info"]?.Value ?? string.Empty) == (info.Details ?? string.Empty))
-					{
-						// If the last job was the same as this one, and is unfinished, then assume we're resuming the job and don't update.
-						return;
-					}
-				}
+				while (result == ChangeStatus.Unknown);
 
-				var entryTemplate = new Template("/Entry");
-				entryTemplate.AddAnonymous(info.Title);
-				if (!string.IsNullOrEmpty(info.Details))
-				{
-					entryTemplate.Add("info", info.Details);
-				}
-
-				entryTemplate.AddAnonymous(UniversalNow());
-				this.LogPage.Text = this.LogPage.Text.Insert(entry.Index, entryTemplate.ToString() + "\n");
-				try
-				{
-					result = this.LogPage.Save("Job Started", false);
-				}
-				catch (EditConflictException)
-				{
-				}
+				this.LogPage.PageLoaded -= this.LogPage_AddEntry;
 			}
-			while (result.HasFlag(ChangeStatus.Failed));
+			else
+			{
+				this.lastLogInfo = null;
+			}
+
+			return result;
 		}
 
 		public override void DoSiteCustomizations()
@@ -87,62 +83,124 @@
 			wal.ModuleFactory.RegisterGenerator<VariablesInput>(PropVariables.CreateInstance);
 		}
 
-		public override void EndLogEntry()
+		public override ChangeStatus EndLogEntry()
 		{
-			// Assumes that its current LogPage.Text is still valid and tries to save that directly. Loads only if it gets an edit conflict.
-			var result = ChangeStatus.Failed;
-			do
+			var result = ChangeStatus.NoEffect;
+			if (this.ShouldLog(this.lastLogInfo))
 			{
-				this.UpdateCurrentStatus(this.LogPage, "None.");
-				var entry = EntryFinder.Match(this.LogPage.Text);
-				if (!entry.Success)
+				this.LogPage.PageLoaded += this.LogPage_EndEntry;
+				do
 				{
-					throw new FormatException(BadLogPage);
+					// Assumes that its current LogPage.Text is still valid and tries to update, then save that directly. Loads only if it gets an edit conflict.
+					this.LogPage_EndEntry(this.LogPage, EventArgs.Empty);
+					try
+					{
+						result = this.LogPage.Save("Job Finished", true);
+					}
+					catch (EditConflictException)
+					{
+						this.LogPage.Load();
+					}
+					catch (StopException)
+					{
+						result = ChangeStatus.Cancelled;
+					}
 				}
+				while (result == ChangeStatus.Unknown);
 
-				var entryTemplate = new Template(entry.Value);
-				entryTemplate.AddAnonymous(UniversalNow());
-				entryTemplate.Sort("1", "info", "2", "3", "notes");
-
-				this.LogPage.Text = this.LogPage.Text.Remove(entry.Index, entry.Length).Insert(entry.Index, entryTemplate.ToString() + "\n");
-				try
-				{
-					result = this.LogPage.Save("Job Finished", true);
-				}
-				catch (EditConflictException)
-				{
-					this.LogPage.Load();
-				}
-				catch (StopException)
-				{
-				}
+				this.LogPage.PageLoaded -= this.LogPage_EndEntry;
 			}
-			while (result.HasFlag(ChangeStatus.Failed));
+
+			return result;
 		}
 
-		public override void UpdateCurrentStatus(Page page, string title)
+		public override ChangeStatus UpdateCurrentStatus(string status)
 		{
 			// In theory, this could make use of a SectionedPage, but that seems a bit overkill for a simple log page.
-			ThrowNull(page, nameof(page));
-			ThrowNull(title, nameof(title));
-			var sectionTitle = CurrentTaskFinder.Match(page.Text);
-			if (!sectionTitle.Success)
+			ThrowNull(status, nameof(status));
+			var taskSection = CurrentTaskFinder.Match(this.StatusPage.Text);
+			if (!taskSection.Success)
 			{
-				throw new FormatException(BadLogPage);
+				throw BadLogPageException();
 			}
 
-			var insertPos = sectionTitle.Index + sectionTitle.Length;
-			sectionTitle = TaskLogFinder.Match(page.Text);
-			page.Text = page.Text
-				.Remove(insertPos, sectionTitle.Index - insertPos)
-				.Insert(insertPos, title + "\n\n");
+			var insertPos = taskSection.Index + taskSection.Length;
+			taskSection = TaskLogFinder.Match(this.StatusPage.Text, insertPos);
+			var currentTask = status + "\n\n";
+			this.StatusPage.Text = this.StatusPage.Text
+				.Remove(insertPos, taskSection.Index - insertPos)
+				.Insert(insertPos, currentTask);
+			return taskSection.Value == currentTask ? ChangeStatus.NoEffect : ChangeStatus.Success;
 		}
 		#endregion
 
 		#region Private Static Methods
-		private static Regex SectionFinder(string sectionName) => new Regex(@"^==\s*" + Regex.Escape(sectionName) + @"\s*==\s*?\n", RegexOptions.Multiline);
+		private static Exception BadLogPageException() => new FormatException(BadLogPage);
+
+		private static Regex SectionFinder(string sectionName) => new Regex(@"^==\s*" + Regex.Escape(sectionName) + @"\s*==\s*?\n+", RegexOptions.Multiline);
 
 		private static string UniversalNow() => DateTime.UtcNow.ToString("u").TrimEnd('Z');
+		#endregion
+
+		#region Private Methods
+		private void LogPage_AddEntry(Page sender, EventArgs eventArgs)
+		{
+			var result = this.UpdateCurrentStatus(this.lastLogInfo.Title + '.');
+			var entry = EntryFinder.Match(sender.Text);
+			if (!entry.Success)
+			{
+				entry = EntryTableFinder.Match(sender.Text);
+				if (!entry.Success)
+				{
+					throw new FormatException(BadLogPage);
+				}
+			}
+			else
+			{
+				var testTemplate = new Template(entry.Value);
+				if (result == ChangeStatus.NoEffect &&
+					Parameter.IsNullOrEmpty(testTemplate["3"]) &&
+					testTemplate["1"]?.Value == this.lastLogInfo.Title &&
+					(testTemplate["info"]?.Value ?? string.Empty) == (this.lastLogInfo.Details ?? string.Empty))
+				{
+					// If the last job was the same as this one, and is unfinished, then assume we're resuming the job and don't update.
+					return;
+				}
+			}
+
+			var entryTemplate = new Template("/Entry");
+			entryTemplate.AddAnonymous(this.lastLogInfo.Title);
+			if (!string.IsNullOrEmpty(this.lastLogInfo.Details))
+			{
+				entryTemplate.Add("info", this.lastLogInfo.Details);
+			}
+
+			entryTemplate.AddAnonymous(UniversalNow());
+			this.LogPage.Text = this.LogPage.Text.Insert(entry.Index, entryTemplate.ToString() + "\n");
+		}
+
+		private void LogPage_EndEntry(Page sender, EventArgs eventArgs)
+		{
+			this.UpdateCurrentStatus("None.");
+			var entry = EntryFinder.Match(sender.Text);
+			if (!entry.Success)
+			{
+				throw BadLogPageException();
+			}
+
+			var entryTemplate = new Template(entry.Value);
+			if (entryTemplate["2"] == null || entryTemplate["3"] != null)
+			{
+				throw BadLogPageException();
+			}
+
+			entryTemplate.AddAnonymous(UniversalNow());
+			entryTemplate.Sort("1", "info", "2", "3", "notes");
+
+			sender.Text = sender.Text
+				.Remove(entry.Index, entry.Length)
+				.Insert(entry.Index, entryTemplate.ToString() + "\n");
+		}
 		#endregion
 	}
 }

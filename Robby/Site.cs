@@ -669,10 +669,10 @@
 			this.AbstractionLayer.Logout();
 		}
 
-		/// <summary>Raises the Changing event with the supplied arguments and indicates what actions should be taken.</summary>
+		/// <summary>Raises the <see cref="Changing"/> event with the supplied arguments and indicates what actions should be taken.</summary>
 		/// <param name="sender">The sending object.</param>
 		/// <param name="parameters">A dictionary of parameters that were sent to the calling method.</param>
-		/// <param name="changeFunction">The function to execute. It should return a ChangeResult indicating whether the call was successful, failed, or ignored.</param>
+		/// <param name="changeFunction">The function to execute. It should return a <see cref="ChangeStatus"/> indicating whether the call was successful, failed, or ignored.</param>
 		/// <param name="caller">The calling method (populated automatically with caller name).</param>
 		/// <returns>A value indicating the actions that should take place.</returns>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
@@ -687,13 +687,14 @@
 		}
 
 		/// <summary>Raises the Changing event with the supplied arguments and indicates what actions should be taken.</summary>
+		/// <typeparam name="T">The return type for the ChangeValue object.</typeparam>
 		/// <param name="sender">The sending object.</param>
 		/// <param name="parameters">A dictionary of parameters that were sent to the calling method.</param>
-		/// <param name="changeFunction">The function to execute. It should return a ChangeResult indicating whether the call was successful, failed, or ignored.</param>
+		/// <param name="changeFunction">The function to execute. It should return a <see cref="ChangeValue{T}"/> object indicating whether the call was successful, failed, or ignored.</param>
 		/// <param name="disabledResult">The value to use if the return status is <see cref="ChangeStatus.EditingDisabled"/>.</param>
 		/// <param name="caller">The calling method (populated automatically with caller name).</param>
 		/// <returns>A value indicating the actions that should take place.</returns>
-		/// <remarks>In the event of a <see cref="ChangeStatus.Cancelled"/> result, the corresponding value will be <see langword="default"/>.</remarks>
+		/// <remarks>In the event of a <see cref="ChangeStatus.Cancelled"/> result, the corresponding value will be <span class="keyword">default</span>.</remarks>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
 		public virtual ChangeValue<T> PublishChange<T>(object sender, IReadOnlyDictionary<string, object> parameters, Func<ChangeValue<T>> changeFunction, T disabledResult, [CallerMemberName] string caller = null)
 		{
@@ -705,8 +706,9 @@
 				changeFunction();
 		}
 
-		/// <summary>Raises the PageTextChanging event with the supplied arguments and indicates what actions should be taken.</summary>
+		/// <summary>Raises the <see cref="PageTextChanging"/> event with the supplied arguments and indicates what actions should be taken.</summary>
 		/// <param name="changeArgs">The arguments involved in changing the page. The caller is responsible for creating the object so that it can get the various return values out of it when after the event.</param>
+		/// <param name="changeFunction">The function to execute. It should return a <see cref="ChangeStatus"/> indicating whether the call was successful, failed, or ignored.</param>
 		/// <returns>A value indicating the actions that should take place.</returns>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
 		public virtual ChangeStatus PublishPageTextChange(PageTextChangeArgs changeArgs, Func<ChangeStatus> changeFunction)
@@ -995,7 +997,10 @@
 			this.Namespaces = null;
 			this.ServerName = null;
 			this.Version = null;
-			this.UserFunctions = new UserFunctions(this);
+			if (!(this.UserFunctions is DefaultUserFunctions))
+			{
+				this.UserFunctions = DefaultUserFunctions.CreateInstance(this);
+			}
 		}
 
 		private UserFunctions FindBestUserFunctions()
@@ -1004,7 +1009,7 @@
 				!UserFunctionsClasses.TryGetValue(string.Concat(this.ServerName, '/'), out factory) &&
 				!UserFunctionsClasses.TryGetValue(string.Concat('/', this.User.Name), out factory))
 			{
-				factory = UserFunctions.CreateDefaultInstance;
+				factory = DefaultUserFunctions.CreateInstance;
 			}
 
 			return factory(this);
