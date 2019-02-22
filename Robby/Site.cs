@@ -678,6 +678,7 @@
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
 		public virtual ChangeStatus PublishChange(object sender, IReadOnlyDictionary<string, object> parameters, Func<ChangeStatus> changeFunction, [CallerMemberName] string caller = null)
 		{
+			ThrowNull(changeFunction, nameof(changeFunction));
 			var changeArgs = new ChangeArgs(sender, caller, parameters);
 			this.Changing?.Invoke(this, changeArgs);
 			return
@@ -698,6 +699,7 @@
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
 		public virtual ChangeValue<T> PublishChange<T>(object sender, IReadOnlyDictionary<string, object> parameters, Func<ChangeValue<T>> changeFunction, T disabledResult, [CallerMemberName] string caller = null)
 		{
+			ThrowNull(changeFunction, nameof(changeFunction));
 			var changeArgs = new ChangeArgs(sender, caller, parameters);
 			this.Changing?.Invoke(this, changeArgs);
 			return
@@ -714,6 +716,7 @@
 		public virtual ChangeStatus PublishPageTextChange(PageTextChangeArgs changeArgs, Func<ChangeStatus> changeFunction)
 		{
 			ThrowNull(changeArgs, nameof(changeArgs));
+			ThrowNull(changeFunction, nameof(changeFunction));
 			this.PageTextChanging?.Invoke(this, changeArgs);
 			var retval =
 				changeArgs.CancelChange ? ChangeStatus.Cancelled :
