@@ -17,7 +17,9 @@
 	/// <summary>Describes the result of an attempted change to the site.</summary>
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1008:EnumsShouldHaveZeroValue", Justification = "Successful is more meaningful in this context.")]
 	[Flags]
+#pragma warning disable CA1714 // Flags enums should have plural names
 	public enum ChangeStatus
+#pragma warning restore CA1714 // Flags enums should have plural names
 	{
 		/// <summary>The change to the wiki was successful.</summary>
 		Successful = 0,

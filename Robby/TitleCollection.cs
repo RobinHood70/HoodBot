@@ -283,7 +283,7 @@
 			}
 		}
 
-		/// <summary>Adds new objects to the collection based on an existing <see cref="T:RobinHood70.Robby.Design.ISimpleTitle"/> collection.</summary>
+		/// <summary>Adds new objects to the collection based on an existing <see cref="ISimpleTitle"/> collection.</summary>
 		/// <param name="titles">The titles to be added.</param>
 		/// <remarks>All items added are newly created, even if the type of the titles provided matches those in the collection.</remarks>
 		public override void AddFrom(IEnumerable<ISimpleTitle> titles)

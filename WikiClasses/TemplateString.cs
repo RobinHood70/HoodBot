@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.WikiClasses
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Text;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -87,17 +86,18 @@
 		#endregion
 
 		#region Public Operators
+
 		/// <summary>Implements the operator ==.</summary>
 		/// <param name="string1">The first string.</param>
 		/// <param name="string2">The second string.</param>
 		/// <returns>The result of the operator.</returns>
-		public static bool operator ==(TemplateString string1, TemplateString string2) => string1.Equals(string2);
+		public static bool operator ==(TemplateString string1, TemplateString string2) => (string1 ?? string2) == null || string1.Equals(string2);
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="string1">The first string.</param>
 		/// <param name="string2">The second string.</param>
 		/// <returns>The result of the operator.</returns>
-		public static bool operator !=(TemplateString string1, TemplateString string2) => !string1.Equals(string2);
+		public static bool operator !=(TemplateString string1, TemplateString string2) => !(string1 == string2);
 		#endregion
 
 		#region Public Methods
@@ -165,12 +165,14 @@
 		/// <remarks>This is always the same as the <see cref="Value"/> property.</remarks>
 		public override string ToString() => this.Value;
 
-		/// <summary>Determines whether the specified <see cref="System.Object"/>, is equal to this instance.</summary>
-		/// <param name="obj">The <see cref="System.Object"/> to compare with this instance.</param>
+		/// <summary>Determines whether the specified <see cref="object"/>, is equal to this instance.</summary>
+		/// <param name="obj">The <see cref="object"/> to compare with this instance.</param>
 		/// <returns>
-		///   <c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.</returns>
-		public override bool Equals(object obj) => Equals(obj as TemplateString);
+		///   <c>true</c> if the specified <see cref="object"/> is equal to this instance; otherwise, <c>false</c>.</returns>
+		public override bool Equals(object obj) => this.Equals(obj as TemplateString);
 
+		/// <summary>Returns a hash code for this instance.</summary>
+		/// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
 		public override int GetHashCode() => CompositeHashCode(this.leadingWhiteSpace, this.trailingWhiteSpace, this.valueText);
 		#endregion
 	}

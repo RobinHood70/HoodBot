@@ -180,8 +180,8 @@
 			this.ResetHeader();
 		}
 
-		/// <summary>Copies the rows of the file to an <see cref="T:System.Array"/>, starting at a particular <see cref="T:System.Array"/> index.</summary>
-		/// <param name="array">The one-dimensional <see cref="T:System.Array"/> that is the destination of the elements copied from <see cref="T:System.Collections.Generic.ICollection`1"/>. The <see cref="T:System.Array"/> must have zero-based indexing.</param>
+		/// <summary>Copies the rows of the file to an array, starting at a particular array index.</summary>
+		/// <param name="array">The one-dimensional array that is the destination of the elements copied from collection. The array must have zero-based indexing.</param>
 		/// <param name="arrayIndex">The zero-based index in <paramref name="array" /> at which copying begins.</param>
 		public void CopyTo(CsvRow[] array, int arrayIndex) => this.rows.CopyTo(array, arrayIndex);
 

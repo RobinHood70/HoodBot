@@ -96,21 +96,38 @@ namespace RobinHood70.WallE.Eve.Modules
 			output.Redirects = redirects.AsReadOnly();
 			output.Text = (string)result["text"];
 			output.ParsedSummary = (string)result["parsedsummary"].AsBCSubContent();
+			output.LanguageLinks = DeserializeLanguageLinks(result["langlinks"]);
+			output.Categories = DeserializeCategories(result["categories"]);
+			output.CategoriesHtml = (string)result["categorieshtml"];
+			output.Links = DeserializeLinks(result["links"]).AsReadOnly();
+			output.Templates = DeserializeLinks(result["templates"]).AsReadOnly();
+			output.Images = result["images"].AsReadOnlyList<string>();
+			output.ExternalLinks = result["externallinks"].AsReadOnlyList<string>();
+			output.Sections = DeserializeSections(result["sections"]);
+			output.DisplayTitle = (string)result["displaytitle"];
+			output.HeadHtml = (string)result["headhtml"].AsBCSubContent();
+			output.Modules = result["modules"].AsReadOnlyList<string>();
+			output.ModuleScripts = result["modulescripts"].AsReadOnlyList<string>();
+			output.ModuleStyles = result["modulestyles"].AsReadOnlyList<string>();
+			output.JavaScriptConfigurationVariables = result["jsconfigvars"].AsReadOnlyDictionary<string, string>();
+			output.Indicators = result["indicators"].AsBCDictionary();
+			output.InterwikiLinks = result["iwlinks"].GetInterwikiLinks().AsReadOnly();
+			output.WikiText = (string)result["wikitext"].AsBCSubContent();
+			output.PreSaveTransformText = (string)result["psttext"].AsBCSubContent();
+			output.Properties = result["properties"].AsBCDictionary();
+			output.LimitReportData = DeserializeLimitReportData(result["limitreportdata"]);
+			output.LimitReportHtml = (string)result["limitreporthtml"];
+			output.ParseTree = (string)result["parsetree"];
 
-			var langLinks = new List<LanguageLinksItem>();
-			var subResult = result["langlinks"];
-			if (subResult != null)
-			{
-				foreach (var link in subResult)
-				{
-					langLinks.Add(link.GetLanguageLink());
-				}
-			}
+			return output;
+		}
+		#endregion
 
-			output.LanguageLinks = langLinks.AsReadOnly();
+		#region Private Static Methods
 
+		private static IReadOnlyList<ParseCategoriesItem> DeserializeCategories(JToken subResult)
+		{
 			var categories = new List<ParseCategoriesItem>();
-			subResult = result["categories"];
 			if (subResult != null)
 			{
 				foreach (var catResult in subResult)
@@ -128,49 +145,26 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 			}
 
-			output.Categories = categories.AsReadOnly();
-			output.CategoriesHtml = (string)result["categorieshtml"];
-			output.Links = GetLinks(result["links"]).AsReadOnly();
-			output.Templates = GetLinks(result["templates"]).AsReadOnly();
-			output.Images = result["images"].AsReadOnlyList<string>();
-			output.ExternalLinks = result["externallinks"].AsReadOnlyList<string>();
+			return categories.AsReadOnly();
+		}
 
-			var sections = new List<SectionsItem>();
-			subResult = result["sections"];
+		private static IReadOnlyList<LanguageLinksItem> DeserializeLanguageLinks(JToken subResult)
+		{
+			var langLinks = new List<LanguageLinksItem>();
 			if (subResult != null)
 			{
-				foreach (var secResult in subResult)
+				foreach (var link in subResult)
 				{
-					var section = new SectionsItem()
-					{
-						TocLevel = (int)secResult["toclevel"],
-						Level = (int)secResult["level"],
-						Line = (string)secResult["line"],
-						Number = (string)secResult["number"],
-						Index = (string)secResult["index"],
-						FromTitle = (string)secResult["fromtitle"],
-						ByteOffset = (int)secResult["byteoffset"],
-						Anchor = (string)secResult["anchor"],
-					};
-					sections.Add(section);
+					langLinks.Add(link.GetLanguageLink());
 				}
 			}
 
-			output.Sections = sections.AsReadOnly();
-			output.DisplayTitle = (string)result["displaytitle"];
-			output.HeadHtml = (string)result["headhtml"].AsBCSubContent();
-			output.Modules = result["modules"].AsReadOnlyList<string>();
-			output.ModuleScripts = result["modulescripts"].AsReadOnlyList<string>();
-			output.ModuleStyles = result["modulestyles"].AsReadOnlyList<string>();
-			output.JavaScriptConfigurationVariables = result["jsconfigvars"].AsReadOnlyDictionary<string, string>();
-			output.Indicators = result["indicators"].AsBCDictionary();
-			output.InterwikiLinks = result["iwlinks"].GetInterwikiLinks().AsReadOnly();
-			output.WikiText = (string)result["wikitext"].AsBCSubContent();
-			output.PreSaveTransformText = (string)result["psttext"].AsBCSubContent();
-			output.Properties = result["properties"].AsBCDictionary();
+			return langLinks.AsReadOnly();
+		}
 
+		private static IReadOnlyDictionary<string, IReadOnlyList<decimal>> DeserializeLimitReportData(JToken subResult)
+		{
 			var limitData = new Dictionary<string, IReadOnlyList<decimal>>();
-			subResult = result["limitreportdata"];
 			if (subResult != null)
 			{
 				foreach (var entry in subResult)
@@ -193,16 +187,10 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 			}
 
-			output.LimitReportData = limitData.AsReadOnly();
-			output.LimitReportHtml = (string)result["limitreporthtml"];
-			output.ParseTree = (string)result["parsetree"];
-
-			return output;
+			return limitData.AsReadOnly();
 		}
-		#endregion
 
-		#region Private Static Methods
-		private static List<ParseLinksItem> GetLinks(JToken subResult)
+		private static List<ParseLinksItem> DeserializeLinks(JToken subResult)
 		{
 			var links = new List<ParseLinksItem>();
 			if (subResult != null)
@@ -220,6 +208,31 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			return links;
+		}
+
+		private static IReadOnlyList<SectionsItem> DeserializeSections(JToken subResult)
+		{
+			var sections = new List<SectionsItem>();
+			if (subResult != null)
+			{
+				foreach (var secResult in subResult)
+				{
+					var section = new SectionsItem()
+					{
+						TocLevel = (int)secResult["toclevel"],
+						Level = (int)secResult["level"],
+						Line = (string)secResult["line"],
+						Number = (string)secResult["number"],
+						Index = (string)secResult["index"],
+						FromTitle = (string)secResult["fromtitle"],
+						ByteOffset = (int)secResult["byteoffset"],
+						Anchor = (string)secResult["anchor"],
+					};
+					sections.Add(section);
+				}
+			}
+
+			return sections.AsReadOnly();
 		}
 		#endregion
 	}

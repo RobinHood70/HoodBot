@@ -144,7 +144,7 @@
 		/// <value>The full name.</value>
 		public TemplateString FullName { get; set; } = new TemplateString();
 
-		/// <summary>Gets a value indicating whether the <see cref="T:System.Collections.Generic.ICollection`1"/> is read-only.</summary>
+		/// <summary>Gets a value indicating whether the collection is read-only.</summary>
 		public bool IsReadOnly { get; } = false;
 
 		/// <summary>Gets or sets the name.</summary>
@@ -569,8 +569,8 @@
 		///     <span class="keyword">true</span> (<span class="keyword">True</span> in Visual Basic)</span> if <paramref name="name" /> is found in the <see cref="Template"/>; otherwise, <span class="keyword"><span class="languageSpecificText"><span class="cs">false</span><span class="vb">False</span><span class="cpp">false</span></span></span><span class="nu"><span class="keyword">false</span> (<span class="keyword">False</span> in Visual Basic)</span>.</returns>
 		public bool Contains(string name) => this[name] != null;
 
-		/// <summary>Copies the elements of the <see cref="Template"/> to an <see cref="T:System.Array"/>, starting at a particular <see cref="T:System.Array"/> index.</summary>
-		/// <param name="array">The one-dimensional <see cref="T:System.Array"/> that is the destination of the elements copied from <see cref="Template"/>. The <see cref="T:System.Array"/> must have zero-based indexing.</param>
+		/// <summary>Copies the elements of the <see cref="Template"/> to an array, starting at a particular array index.</summary>
+		/// <param name="array">The one-dimensional array that is the destination of the elements copied from <see cref="Template"/>. The array must have zero-based indexing.</param>
 		/// <param name="arrayIndex">The zero-based index in <paramref name="array" /> at which copying begins.</param>
 		public void CopyTo(Parameter[] array, int arrayIndex) => this.parameters.CopyTo(array, arrayIndex);
 
@@ -707,8 +707,8 @@
 			return false;
 		}
 
-		/// <summary>Determines the index of a specific item in the <see cref="T:System.Collections.Generic.IList`1"/>.</summary>
-		/// <param name="item">The object to locate in the <see cref="T:System.Collections.Generic.IList`1"/>.</param>
+		/// <summary>Determines the index of a specific item in the list.</summary>
+		/// <param name="item">The object to locate in the list.</param>
 		/// <returns>The index of <paramref name="item" /> if found in the list; otherwise, -1.</returns>
 		/// <seealso cref="GetAnonymousPosition(Parameter)"/>
 		public int IndexOf(Parameter item) => this.parameters.IndexOf(item);

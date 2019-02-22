@@ -15,7 +15,9 @@
 	/// <param name="eventArgs">The event data.</param>
 	// From: http://stackoverflow.com/questions/1046016/event-signature-in-net-using-a-strong-typed-sender and http://msdn.microsoft.com/en-us/library/sx2bwtw7.aspx. Originally had a TEventArgs : EventArgs constraint, but mirroring EventHandler<TEventArgs>, I removed it.
 	[Serializable]
+#pragma warning disable CA1711 // Identifiers should not have incorrect suffix
 	public delegate void StrongEventHandler<TSender, TEventArgs>(TSender sender, TEventArgs eventArgs);
+#pragma warning restore CA1711 // Identifiers should not have incorrect suffix
 	#endregion
 
 	/// <summary>Global helper methods that are useful in a variety of scenarios.</summary>

@@ -338,7 +338,7 @@
 				[nameof(input.User)] = input.User,
 				[nameof(input.Reason)] = input.Reason,
 				[nameof(input.Expiry)] = input.Expiry,
-				[nameof(input.Expiry)] = input.ExpiryRelative,
+				[nameof(input.ExpiryRelative)] = input.ExpiryRelative,
 				[nameof(input.Flags)] = input.Flags,
 				[nameof(input.Reblock)] = input.Reblock,
 			});
