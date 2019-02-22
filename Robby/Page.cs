@@ -111,7 +111,7 @@
 		/// <summary>Gets a value indicating whether the <see cref="Text" /> property has been modified.</summary>
 		/// <value><see langword="true" /> if the text no longer matches the first revision; otherwise, <see langword="false" />.</value>
 		/// <remarks>This is currently simply a shortcut property to compare the Text with Revisions[0]. This may not be an accurate reflection of modification status when loading a specific revision range or in other unusual circumstances.</remarks>
-		public bool TextModified => this.Revisions.Count > 0 ? this.Text != this.Revisions[0].Text : !string.IsNullOrWhiteSpace(this.Text);
+		public bool TextModified => this.Revisions.Count > 0 ? this.Text != this.Revisions.Current.Text : !string.IsNullOrWhiteSpace(this.Text);
 
 		/// <summary>Gets the links on the page, if they were requested in the last load operation.</summary>
 		/// <value>The links used on the page.</value>
