@@ -111,6 +111,9 @@
     <Rule Id="IDE0033" Action="Info" />
     <Rule Id="IDE0033WithoutSuggestion" Action="Info" />
   </Rules>
+  <Rules AnalyzerId="Microsoft.NetCore.CSharp.Analyzers" RuleNamespace="Microsoft.NetCore.CSharp.Analyzers">
+    <Rule Id="CA5350" Action="None" />
+  </Rules>
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
     <Rule Id="SA0001" Action="None" />
     <Rule Id="SA1124" Action="None" />
