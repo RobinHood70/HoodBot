@@ -7,10 +7,7 @@
 	{
 		[JobInfo("Test Job")]
 		public ChangeTest(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
-		{
-			site.EditingDisabled = true;
-		}
+			: base(site, asyncInfo) => site.EditingDisabled = true;
 
 		public override string LogName { get; } = "Test Job";
 

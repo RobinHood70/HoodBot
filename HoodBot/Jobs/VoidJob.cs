@@ -10,8 +10,6 @@
 		public VoidJob(Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo) => this.ProgressMaximum = 5;
 
-		// public override string LogName => "Empty Job";
-
 		protected override void Main()
 		{
 			for (var i = 1; i <= this.ProgressMaximum; i++)
