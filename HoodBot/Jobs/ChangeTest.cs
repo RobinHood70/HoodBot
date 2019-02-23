@@ -1,16 +1,18 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using RobinHood70.HoodBot.DiffViewers;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 
-	public class ChangeTest : WikiJob
+	public class ChangeTest : EditJob
 	{
 		[JobInfo("Test Job")]
 		public ChangeTest(Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
 		{
+			site.EditingDisabled = true;
 		}
+
+		public override string LogName { get; } = "Test Job";
 
 		protected override void Main()
 		{
@@ -20,9 +22,7 @@
 			foreach (var page in pages)
 			{
 				page.Text += "\nHello World!";
-				var diffViewer = new VsDiff(page);
-				diffViewer.Compare();
-				diffViewer.Wait();
+				page.Save("Test", true);
 			}
 
 			this.Progress++;

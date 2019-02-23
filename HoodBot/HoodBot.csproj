@@ -102,6 +102,8 @@
     </Compile>
     <Compile Include="BotSettings.cs" />
     <Compile Include="DiffViewers\IDiffViewer.cs" />
+    <Compile Include="DiffViewers\IOleMessageFilter.cs" />
+    <Compile Include="DiffViewers\MessageFilter.cs" />
     <Compile Include="DiffViewers\VsDiff.cs" />
     <Compile Include="EncryptingJsonConverter.cs" />
     <Compile Include="IParameterFetcher.cs" />

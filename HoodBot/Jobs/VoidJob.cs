@@ -4,13 +4,13 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 
-	public class VoidJob : EditJob
+	public class VoidJob : WikiJob
 	{
 		[JobInfo("Do Nothing")]
 		public VoidJob(Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo) => this.ProgressMaximum = 5;
 
-		public override string LogName => "Empty Job";
+		// public override string LogName => "Empty Job";
 
 		protected override void Main()
 		{

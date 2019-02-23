@@ -4,14 +4,8 @@
 
 	public interface IDiffViewer
 	{
-		#region Properties
-		string Name { get; }
-
-		Page Page { get; }
-		#endregion
-
 		#region Methods
-		void Compare();
+		void Compare(Page page);
 
 		void Wait();
 		#endregion

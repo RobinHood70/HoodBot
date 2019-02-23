@@ -10,6 +10,7 @@
 	using System.Threading.Tasks;
 	using System.Windows;
 	using System.Windows.Media;
+	using RobinHood70.HoodBot.DiffViewers;
 	using RobinHood70.HoodBot.Jobs;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Uesp;
@@ -350,7 +351,15 @@
 				this.site = new Site(wal);
 				this.site.Login(wikiInfo.UserName, this.Password ?? wikiInfo.Password);
 				this.site.UserFunctions.DoSiteCustomizations();
+				this.site.PagePreview += this.Site_PagePreview;
 			}
+		}
+
+		private void Site_PagePreview(Site sender, PagePreviewArgs eventArgs)
+		{
+			var diffViewer = VsDiff.Instance;
+			diffViewer.Compare(eventArgs.Page);
+			//// diffViewer.Wait();
 		}
 
 		private void OpenEditWindow()
@@ -405,6 +414,7 @@
 			{
 				(this.site.AbstractionLayer as WikiAbstractionLayer).SendingRequest -= WalSendingRequest;
 				(this.site.AbstractionLayer as WikiAbstractionLayer).WarningOccurred -= WalWarningOccurred;
+				this.site.PagePreview -= this.Site_PagePreview;
 				this.site = null;
 			}
 		}
