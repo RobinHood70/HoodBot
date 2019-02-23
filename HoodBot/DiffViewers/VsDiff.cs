@@ -54,7 +54,7 @@
 			ThrowNull(page, nameof(page));
 			var oldFile = Path.GetTempFileName();
 			var newFile = Path.GetTempFileName();
-			File.WriteAllText(oldFile, page.Revisions?.Current.Text ?? string.Empty);
+			File.WriteAllText(oldFile, page.Revisions.Current?.Text ?? string.Empty);
 			File.WriteAllText(newFile, page.Text);
 
 			this.lastDteDocument = null;
@@ -62,7 +62,7 @@
 			{
 				try
 				{
-					dte.ExecuteCommand("Tools.DiffFiles", $"\"{oldFile}\" \"{newFile}\" \"Revision as of {page.Revisions?.Current.Timestamp ?? DateTime.UtcNow}\" \"Latest revision\"");
+					dte.ExecuteCommand("Tools.DiffFiles", $"\"{oldFile}\" \"{newFile}\" \"Revision as of {page.Revisions.Current?.Timestamp ?? DateTime.UtcNow}\" \"Latest revision\"");
 					this.lastDteDocument = dte.ActiveDocument;
 					dte.MainWindow.Visible = true;
 				}

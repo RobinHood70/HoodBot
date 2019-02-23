@@ -64,7 +64,7 @@
 		internal void Add(Revision revision)
 		{
 			this.revisions[revision.Id] = revision;
-			if (this.Current == null || revision.Id > this.Current.Id)
+			if (revision.Id > (this.Current?.Id ?? 0))
 			{
 				this.Current = revision;
 			}

@@ -111,7 +111,7 @@
 		/// <summary>Gets a value indicating whether the <see cref="Text" /> property has been modified.</summary>
 		/// <value><see langword="true" /> if the text no longer matches the first revision; otherwise, <see langword="false" />.</value>
 		/// <remarks>This is currently simply a shortcut property to compare the Text with Revisions[0]. This may not be an accurate reflection of modification status when loading a specific revision range or in other unusual circumstances.</remarks>
-		public bool TextModified => this.Revisions.Count > 0 ? this.Text != this.Revisions.Current.Text : !string.IsNullOrWhiteSpace(this.Text);
+		public bool TextModified => this.Revisions.Current == null ? !string.IsNullOrWhiteSpace(this.Text) : this.Text != this.Revisions.Current.Text;
 
 		/// <summary>Gets the links on the page, if they were requested in the last load operation.</summary>
 		/// <value>The links used on the page.</value>
@@ -233,8 +233,8 @@
 			{
 				if (revs.TryGetValue(info.LastRevisionId, out var revision))
 				{
-					revs.Current = revs[info.LastRevisionId];
-					this.Text = revs.Current.Text;
+					revs.Current = revision;
+					this.Text = revision.Text;
 				}
 				else
 				{
@@ -339,7 +339,7 @@
 						!this.TextModified ? ChangeStatus.NoEffect :
 						this.Site.AbstractionLayer.Edit(new EditInput(this.FullPageName, this.Text)
 						{
-							BaseTimestamp = this.Revisions?.Current?.Timestamp,
+							BaseTimestamp = this.Revisions.Current?.Timestamp,
 							StartTimestamp = this.StartTimestamp,
 							Bot = changeArgs.BotEdit,
 							Minor = changeArgs.Minor ? Tristate.True : Tristate.False,
