@@ -50,7 +50,12 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override WikiTitleItem GetItem(JToken result) => result.GetWikiTitle();
+		protected override WikiTitleItem GetItem(JToken result)
+		{
+			var title = result.GetWikiTitle();
+			title.PageId = (long?)result["id"] ?? 0;
+			return title;
+		}
 
 		protected override int GetNumericLimit()
 		{
