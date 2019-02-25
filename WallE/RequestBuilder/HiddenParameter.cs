@@ -19,7 +19,7 @@
 
 		/// <summary>Accepts the specified visitor.</summary>
 		/// <param name="visitor">The visitor.</param>
-		/// <remarks>See Wikipedia's <a href="https://en.wikipedia.org/wiki/Visitor_pattern">Visitor pattern</a> article if you are not familiar with this pattern.</remarks>
+		/// <remarks>See Wikipedia's <see href="https://en.wikipedia.org/wiki/Visitor_pattern">Visitor pattern</see> article if you are not familiar with this pattern.</remarks>
 		public override void Accept(IParameterVisitor visitor) => visitor?.Visit(this);
 		#endregion
 	}
