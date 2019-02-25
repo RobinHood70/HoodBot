@@ -6,6 +6,7 @@
 	xmlns:local="clr-namespace:RobinHood70.HoodBot"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:properties="clr-namespace:RobinHood70.HoodBot.Properties"
+	xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
 	xmlns:vm="clr-namespace:RobinHood70.HoodBot.ViewModel"
 	x:Name="mainWindow"
 	Title="{x:Static properties:Resources.HoodBotMainWindow}"
@@ -36,6 +37,11 @@
 			<Setter Property="FontFamily" Value="WebDings" />
 			<Setter Property="HorizontalAlignment" Value="Center" />
 		</Style>
+		<CollectionViewSource x:Key="wikiList" Source="{Binding Path='BotSettings.Wikis'}">
+			<CollectionViewSource.SortDescriptions>
+				<scm:SortDescription PropertyName="DisplayName" />
+			</CollectionViewSource.SortDescriptions>
+		</CollectionViewSource>
 	</Window.Resources>
 	<Window.DataContext>
 		<vm:MainViewModel />
@@ -76,7 +82,7 @@
 				Grid.Column="2"
 				VerticalAlignment="Center"
 				DisplayMemberPath="DisplayName"
-				ItemsSource="{Binding BotSettings.Wikis}"
+				ItemsSource="{Binding Source={StaticResource wikiList}}"
 				SelectedItem="{Binding CurrentItem}" />
 			<Button
 				Grid.Column="4"

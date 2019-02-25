@@ -7,6 +7,7 @@
 	xmlns:local="clr-namespace:RobinHood70.HoodBot"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:properties="clr-namespace:RobinHood70.HoodBot.Properties"
+	xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
 	Title="{x:Static properties:Resources.EditSettings}"
 	Style="{StaticResource GlobalWindowStyle}"
 	mc:Ignorable="d">
@@ -14,6 +15,11 @@
 		<Style TargetType="{x:Type Button}">
 			<Setter Property="Padding" Value="20,8" />
 		</Style>
+		<CollectionViewSource x:Key="wikiList" Source="{Binding Path='BotSettings.Wikis'}">
+			<CollectionViewSource.SortDescriptions>
+				<scm:SortDescription PropertyName="DisplayName" />
+			</CollectionViewSource.SortDescriptions>
+		</CollectionViewSource>
 	</Window.Resources>
 	<Window.DataContext>
 		<ViewModel:SettingsViewModel />
@@ -53,7 +59,7 @@
 			Grid.Row="2"
 			Grid.Column="0"
 			DisplayMemberPath="DisplayName"
-			ItemsSource="{Binding BotSettings.Wikis}"
+				ItemsSource="{Binding Source={StaticResource wikiList}}"
 			SelectedItem="{Binding CurrentItem, Mode=TwoWay}" />
 		<Grid Grid.Row="2" Grid.Column="2">
 			<Grid.Resources>
