@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System.Collections.Generic;
-	using System.Threading;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.TaskResults;
 	using RobinHood70.Robby;
@@ -38,6 +37,7 @@
 
 			this.saveLocation = location.Replace("%templateName%", allTemplateNames[0]);
 			this.originalTemplateNames = allTemplateNames;
+			this.ProgressMaximum = 2;
 		}
 		#endregion
 
@@ -53,8 +53,6 @@
 				allTemplateNames = BuildRedirectList(templates);
 				this.ProgressMaximum++;
 				this.Progress++;
-				Thread.Yield();
-				Thread.Sleep(1000);
 			}
 			else
 			{
@@ -65,13 +63,9 @@
 			var results = PageCollection.Unlimited(this.Site);
 			results.GetPageTranscludedIn(templates);
 			this.Progress++;
-			Thread.Yield();
-			Thread.Sleep(1000);
 			this.StatusWriteLine("Exporting");
 			this.ExportResults(allTemplateNames, results, this.saveLocation);
 			this.Progress++;
-			Thread.Yield();
-			Thread.Sleep(1000);
 		}
 		#endregion
 
