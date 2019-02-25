@@ -5,6 +5,7 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Tasks;
 	using RobinHood70.Robby;
+	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Extensions;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -15,7 +16,7 @@
 		#endregion
 
 		#region Constructors
-		protected WikiJob(Site site, AsyncInfo asyncInfo, params WikiTask[] tasks)
+		protected WikiJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo, params WikiTask[] tasks)
 			: base(site)
 		{
 			ThrowNull(asyncInfo, nameof(asyncInfo));

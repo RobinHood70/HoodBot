@@ -8,6 +8,7 @@
 	using RobinHood70.HoodBot.Jobs.Tasks;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.WikiCommon;
 
 	public abstract class EditJob : WikiJob
 	{
@@ -15,7 +16,7 @@
 		private static readonly Type[] MyStackCrawlMarkRefType = new[] { typeof(MyStackCrawlMark).MakeByRefType() };
 		private static MyGetCurrentMethodDelegate dynamicMethod = null;
 
-		protected EditJob(Site site, AsyncInfo asyncInfo, params WikiTask[] tasks)
+		protected EditJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo, params WikiTask[] tasks)
 				: base(site, asyncInfo, tasks)
 		{
 			this.ReadOnly = false;

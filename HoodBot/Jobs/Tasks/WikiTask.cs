@@ -19,7 +19,11 @@
 			this.Job = parent.Job ?? (parent as WikiJob);
 		}
 
-		protected WikiTask(Site site) => this.Site = site;
+		protected WikiTask([ValidatedNotNull] Site site)
+		{
+			ThrowNull(site, nameof(site));
+			this.Site = site;
+		}
 		#endregion
 
 		#region Public Events
