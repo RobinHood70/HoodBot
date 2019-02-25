@@ -52,6 +52,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override WikiTitleItem GetItem(JToken result)
 		{
+			ThrowNull(result, nameof(result));
 			var title = result.GetWikiTitle();
 			title.PageId = (long?)result["id"] ?? 0;
 			return title;
