@@ -101,11 +101,9 @@
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="BotSettings.cs" />
-    <Compile Include="DiffViewers\IDiffViewer.cs" />
-    <Compile Include="DiffViewers\IOleMessageFilter.cs" />
-    <Compile Include="DiffViewers\MessageFilter.cs" />
-    <Compile Include="DiffViewers\VsDiff.cs" />
+    <Compile Include="DiffViewManager.cs" />
     <Compile Include="EncryptingJsonConverter.cs" />
+    <Compile Include="IDiffViewer.cs" />
     <Compile Include="IParameterFetcher.cs" />
     <Compile Include="IWikiInfo.cs" />
     <Compile Include="Jobs\BlockChanger.cs" />

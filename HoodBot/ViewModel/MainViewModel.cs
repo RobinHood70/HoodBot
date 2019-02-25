@@ -357,9 +357,10 @@
 
 		private void Site_PagePreview(Site sender, PagePreviewArgs eventArgs)
 		{
-			var diffViewer = VsDiff.Instance;
-			diffViewer.Compare(eventArgs.Page);
-			//// diffViewer.Wait();
+			var diffViewer = DiffViewManager.CurrentViewer;
+			var current = eventArgs.Page.Revisions.Current;
+			diffViewer.Compare(current?.Text, eventArgs.Page.Text, $"Revision as of {current?.Timestamp ?? DateTime.UtcNow}", "Latest revision");
+			diffViewer.Wait();
 		}
 
 		private void OpenEditWindow()
