@@ -6,11 +6,11 @@
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.IO;
+	using System.Reflection;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows;
 	using System.Windows.Media;
-	using RobinHood70.HoodBot.DiffViewers;
 	using RobinHood70.HoodBot.Jobs;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Uesp;
@@ -38,6 +38,7 @@
 		private readonly string appDataFolder;
 		private readonly IProgress<double> progressMonitor;
 		private readonly IProgress<string> statusMonitor;
+		private readonly List<IDiffViewer> viewers = new List<IDiffViewer>();
 
 		private CancellationTokenSource canceller;
 		private double completedJobs;
@@ -67,6 +68,7 @@
 			this.progressMonitor = new Progress<double>(this.ProgressChanged);
 			this.statusMonitor = new Progress<string>(this.StatusWrite);
 			Site.RegisterUserFunctionsClass(new[] { "en.uesp.net", "rob-centos" }, new[] { "HoodBot" }, HoodBotFunctions.CreateInstance);
+			this.FindDiffViewers();
 		}
 		#endregion
 
@@ -303,6 +305,51 @@
 			this.executing = false;
 		}
 
+		private void FindDiffViewers()
+		{
+			this.viewers.Clear();
+			var exePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+			var dllNames = Directory.GetFiles(exePath, "*.dll", SearchOption.TopDirectoryOnly);
+			foreach (var dllName in dllNames)
+			{
+				if (!dllName.Contains("Diff"))
+				{
+					continue;
+				}
+
+				Assembly dll = null;
+				try
+				{
+					dll = Assembly.LoadFile(dllName);
+				}
+				catch
+				{
+					continue;
+				}
+
+				foreach (var type in dll.ExportedTypes)
+				{
+					if (type.Name != nameof(IDiffViewer) && typeof(IDiffViewer).IsAssignableFrom(type))
+					{
+						IDiffViewer viewer = null;
+						try
+						{
+							viewer = Activator.CreateInstance(type) as IDiffViewer;
+						}
+						catch
+						{
+							continue;
+						}
+
+						if (viewer.Validate())
+						{
+							this.viewers.Add(viewer);
+						}
+					}
+				}
+			}
+		}
+
 		private List<JobNode> GetJobList()
 		{
 			var jobList = new List<JobNode>(this.JobTree.GetCheckedJobs());
@@ -338,29 +385,8 @@
 			{
 				this.ResetSite();
 				this.previousItem = wikiInfo;
-				var wal = new WikiAbstractionLayer(this.client, wikiInfo.Api)
-				{
-					Assert = "user",
-					MaxLag = wikiInfo.MaxLag,
-					StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery
-				};
-
-				// wal.SendingRequest += WalSendingRequest;
-				// wal.ResponseReceived += WalResponseRecieved;
-				wal.WarningOccurred += WalWarningOccurred;
-				this.site = new Site(wal);
-				this.site.Login(wikiInfo.UserName, this.Password ?? wikiInfo.Password);
-				this.site.UserFunctions.DoSiteCustomizations();
-				this.site.PagePreview += this.Site_PagePreview;
+				this.SetSite(wikiInfo);
 			}
-		}
-
-		private void Site_PagePreview(Site sender, PagePreviewArgs eventArgs)
-		{
-			var diffViewer = DiffViewManager.CurrentViewer;
-			var current = eventArgs.Page.Revisions.Current;
-			diffViewer.Compare(current?.Text, eventArgs.Page.Text, $"Revision as of {current?.Timestamp ?? DateTime.UtcNow}", "Latest revision");
-			diffViewer.Wait();
 		}
 
 		private void OpenEditWindow()
@@ -417,6 +443,36 @@
 				(this.site.AbstractionLayer as WikiAbstractionLayer).WarningOccurred -= WalWarningOccurred;
 				this.site.PagePreview -= this.Site_PagePreview;
 				this.site = null;
+			}
+		}
+
+		private void SetSite(WikiInfo wikiInfo)
+		{
+			var wal = new WikiAbstractionLayer(this.client, wikiInfo.Api)
+			{
+				Assert = "user",
+				MaxLag = wikiInfo.MaxLag,
+				StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery
+			};
+
+			// wal.SendingRequest += WalSendingRequest;
+			// wal.ResponseReceived += WalResponseRecieved;
+			wal.WarningOccurred += WalWarningOccurred;
+			this.site = new Site(wal);
+			this.site.Login(wikiInfo.UserName, this.Password ?? wikiInfo.Password);
+			this.site.UserFunctions.DoSiteCustomizations();
+			this.site.PagePreview += this.Site_PagePreview;
+		}
+
+		private void Site_PagePreview(Site sender, PagePreviewArgs eventArgs)
+		{
+			if (this.viewers.Count > 0)
+			{
+				// Until we get a menu going, just grab the first thing we found.
+				var diffViewer = this.viewers[0];
+				var current = eventArgs.Page.Revisions.Current;
+				diffViewer.Compare(current?.Text, eventArgs.Page.Text, $"Revision as of {current?.Timestamp ?? DateTime.UtcNow}", "Latest revision");
+				diffViewer.Wait();
 			}
 		}
 

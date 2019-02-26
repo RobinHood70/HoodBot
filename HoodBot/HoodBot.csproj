@@ -74,9 +74,6 @@
     <StartupObject>RobinHood70.HoodBot.App</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="envdte, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -101,7 +98,6 @@
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="BotSettings.cs" />
-    <Compile Include="DiffViewManager.cs" />
     <Compile Include="EncryptingJsonConverter.cs" />
     <Compile Include="IDiffViewer.cs" />
     <Compile Include="IParameterFetcher.cs" />
