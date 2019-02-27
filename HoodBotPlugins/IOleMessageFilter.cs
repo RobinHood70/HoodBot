@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WikiCommon.DiffViewers
+﻿namespace RobinHood70.HoodBotPlugins
 {
 	using System;
 	using System.Runtime.InteropServices;

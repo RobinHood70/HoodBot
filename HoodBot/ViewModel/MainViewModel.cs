@@ -14,6 +14,7 @@
 	using RobinHood70.HoodBot.Jobs;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Uesp;
+	using RobinHood70.HoodBotPlugins;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
@@ -22,6 +23,7 @@
 	using static RobinHood70.HoodBot.Properties.Resources;
 	using static RobinHood70.WikiCommon.Globals;
 
+	// TODO: Reduce/eliminate dependence on WallE if possible. Ideally, this should all be available directly through Robby or via a communal class.
 	public class MainViewModel : Notifier
 	{
 		#region Private Constants
@@ -38,6 +40,7 @@
 		private readonly string appDataFolder;
 		private readonly IProgress<double> progressMonitor;
 		private readonly IProgress<string> statusMonitor;
+		private readonly List<Type> pluginTypes = new List<Type>();
 		private readonly List<IDiffViewer> viewers = new List<IDiffViewer>();
 
 		private CancellationTokenSource canceller;
@@ -68,7 +71,8 @@
 			this.progressMonitor = new Progress<double>(this.ProgressChanged);
 			this.statusMonitor = new Progress<string>(this.StatusWrite);
 			Site.RegisterUserFunctionsClass(new[] { "en.uesp.net", "rob-centos" }, new[] { "HoodBot" }, HoodBotFunctions.CreateInstance);
-			this.FindDiffViewers();
+			this.pluginTypes = new List<Type>(GetPlugins());
+			this.viewers = new List<IDiffViewer>(this.FindPlugins<IDiffViewer>());
 		}
 		#endregion
 
@@ -212,6 +216,36 @@
 			.Replace(".0", string.Empty)
 			.Replace(" 0s", string.Empty)
 			.Trim();
+
+		private static IEnumerable<Type> GetPlugins()
+		{
+			var exePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+			var dllNames = Directory.GetFiles(Path.Combine(exePath, "Plugins"), "*.dll", SearchOption.TopDirectoryOnly);
+			foreach (var dllName in dllNames)
+			{
+				Assembly dll;
+				try
+				{
+					// Works around the fact that .NET will hold a reference to any loaded assembly.
+					dll = Assembly.Load(File.ReadAllBytes(dllName));
+				}
+				catch
+				{
+					dll = null;
+				}
+
+				if (dll != null)
+				{
+					foreach (var type in dll.ExportedTypes)
+					{
+						if (!type.IsInterface && !type.IsAbstract)
+						{
+							yield return type;
+						}
+					}
+				}
+			}
+		}
 		#endregion
 
 		#region Private Methods
@@ -305,46 +339,27 @@
 			this.executing = false;
 		}
 
-		private void FindDiffViewers()
+		private IEnumerable<T> FindPlugins<T>()
+			where T : class, IPlugin
 		{
-			this.viewers.Clear();
-			var exePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-			var dllNames = Directory.GetFiles(exePath, "*.dll", SearchOption.TopDirectoryOnly);
-			foreach (var dllName in dllNames)
+			foreach (var type in this.pluginTypes)
 			{
-				if (!dllName.Contains("Diff"))
+				if (typeof(T).IsAssignableFrom(type))
 				{
-					continue;
-				}
-
-				Assembly dll = null;
-				try
-				{
-					dll = Assembly.LoadFile(dllName);
-				}
-				catch
-				{
-					continue;
-				}
-
-				foreach (var type in dll.ExportedTypes)
-				{
-					if (type.Name != nameof(IDiffViewer) && typeof(IDiffViewer).IsAssignableFrom(type))
+					T plugin = null;
+					try
 					{
-						IDiffViewer viewer = null;
-						try
-						{
-							viewer = Activator.CreateInstance(type) as IDiffViewer;
-						}
-						catch
-						{
-							continue;
-						}
+						plugin = Activator.CreateInstance(type) as T;
+					}
+					catch
+					{
+						continue;
+					}
 
-						if (viewer.Validate())
-						{
-							this.viewers.Add(viewer);
-						}
+					// Can't yield return in a try/catch block, so we do it here.
+					if (plugin != null && plugin.ValidatePlugin())
+					{
+						yield return plugin;
 					}
 				}
 			}

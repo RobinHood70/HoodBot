@@ -1,8 +1,7 @@
-﻿namespace RobinHood70.WikiCommon
+﻿namespace RobinHood70.HoodBotPlugins
 {
 	using System.Runtime.InteropServices;
 	using System.Security;
-	using RobinHood70.WikiCommon.DiffViewers;
 
 	[SuppressUnmanagedCodeSecurity]
 	internal static class UnsafeNativeMethods

@@ -99,7 +99,6 @@
     </Compile>
     <Compile Include="BotSettings.cs" />
     <Compile Include="EncryptingJsonConverter.cs" />
-    <Compile Include="IDiffViewer.cs" />
     <Compile Include="IParameterFetcher.cs" />
     <Compile Include="IWikiInfo.cs" />
     <Compile Include="Jobs\BlockChanger.cs" />
@@ -212,6 +211,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj">
+      <Project>{eb7d2b63-3bc4-4df2-9c4c-b3cc2f524aa7}</Project>
+      <Name>HoodBotPlugins</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Robby\Robby.csproj">
       <Project>{16A4F00F-11B3-4049-89D2-09C9B6B53C83}</Project>
       <Name>Robby</Name>

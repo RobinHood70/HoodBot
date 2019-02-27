@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\HoodBot\bin\Debug\</OutputPath>
+    <OutputPath>..\HoodBot\bin\Debug\Plugins\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -27,7 +27,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\HoodBot\bin\Debug\Plugins\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -52,16 +52,6 @@
     <Compile Include="VsDiff.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\HoodBot\HoodBot.csproj">
-      <Project>{67bf70df-f8d7-49f0-a6a2-dffc7c8ff55e}</Project>
-      <Name>HoodBot</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WikiCommon\WikiCommon.csproj">
-      <Project>{64878636-cb8c-434e-a03d-b3946216fc7f}</Project>
-      <Name>WikiCommon</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -83,6 +73,13 @@
     <AdditionalFiles Include="..\stylecop.json">
       <Link>stylecop.json</Link>
     </AdditionalFiles>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj">
+      <Project>{eb7d2b63-3bc4-4df2-9c4c-b3cc2f524aa7}</Project>
+      <Name>HoodBotPlugins</Name>
+      <Private>False</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

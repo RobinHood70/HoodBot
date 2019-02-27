@@ -3,12 +3,10 @@
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
-	using System.Diagnostics;
 	using System.IO;
 	using System.Runtime.InteropServices;
 	using EnvDTE;
-	using RobinHood70.HoodBot;
-	using RobinHood70.WikiCommon.DiffViewers;
+	using RobinHood70.HoodBotPlugins;
 
 	[Description("Visual Studio")]
 	public class VsDiff : IDiffViewer, IDisposable
@@ -24,14 +22,8 @@
 
 		#region Fields
 		private readonly List<Document> ourDocuments = new List<Document>();
-		private bool disposedValue = false; // To detect redundant calls
+		private bool disposed = false; // To detect redundant calls
 		private Document lastDteDocument = null;
-		#endregion
-
-		#region Constructors
-		public VsDiff()
-		{
-		}
 		#endregion
 
 		#region Finalizers
@@ -42,10 +34,30 @@
 		public string Name => Properties.Resources.Name;
 		#endregion
 
+		#region Private Properties
+		private DTE Dte
+		{
+			get
+			{
+				// Check if dte is initialized so we're not locking unnecessarily.
+				if (dte == null && !this.disposed)
+				{
+					lock (LockObject)
+					{
+						MessageFilter.Register();
+						dte = dte ?? GetDte(); // Check dte again in case of race condition while entering the lock, and the other guy won.
+						dte.Events.DocumentEvents.DocumentClosing += this.DteDocumentClosing;
+					}
+				}
+
+				return dte;
+			}
+		}
+		#endregion
+
 		#region Public Methods
 		public void Compare(string oldText, string newText, string oldTitle, string newTitle)
 		{
-			this.Initialize();
 			var oldFile = Path.GetTempFileName();
 			var newFile = Path.GetTempFileName();
 			File.WriteAllText(oldFile, oldText ?? string.Empty);
@@ -56,9 +68,9 @@
 			{
 				try
 				{
-					dte.ExecuteCommand("Tools.DiffFiles", $"\"{oldFile}\" \"{newFile}\" \"{oldTitle}\" \"{newTitle}\"");
-					this.lastDteDocument = dte.ActiveDocument;
-					dte.MainWindow.Visible = true;
+					this.Dte.ExecuteCommand("Tools.DiffFiles", $"\"{oldFile}\" \"{newFile}\" \"{oldTitle}\" \"{newTitle}\"");
+					this.lastDteDocument = this.Dte.ActiveDocument;
+					this.Dte.MainWindow.Visible = true;
 				}
 				catch (COMException)
 				{
@@ -78,21 +90,7 @@
 			GC.SuppressFinalize(this);
 		}
 
-		public void Initialize()
-		{
-			// Check if dte is initialized so we're not locking unnecessarily.
-			if (dte == null)
-			{
-				lock (LockObject)
-				{
-					MessageFilter.Register();
-					dte = dte ?? GetDte(); // Check dte again in case of race condition while entering the lock, and the other guy won.
-					dte.Events.DocumentEvents.DocumentClosing += this.DteDocumentClosing;
-				}
-			}
-		}
-
-		public bool Validate() => Type.GetTypeFromProgID(VisualStudioProgID, false) != null;
+		public bool ValidatePlugin() => Type.GetTypeFromProgID(VisualStudioProgID, false) != null;
 
 		public void Wait()
 		{
@@ -102,7 +100,7 @@
 				try
 				{
 					System.Threading.Thread.Sleep(500);
-					waiting = (dte.MainWindow?.Visible ?? false) && this.lastDteDocument != null;
+					waiting = (this.Dte.MainWindow?.Visible ?? false) && this.lastDteDocument != null;
 				}
 				catch (COMException)
 				{
@@ -120,11 +118,11 @@
 		#region Protected Virtual Methods
 		protected virtual void Dispose(bool disposing)
 		{
-			if (!this.disposedValue)
+			if (!this.disposed)
 			{
 				lock (LockObject)
 				{
-					this.disposedValue = true;
+					this.disposed = true;
 					if (dte != null && dte.Documents.Count == 0)
 					{
 						dte.Quit();
@@ -156,7 +154,6 @@
 		#region Private Methods
 		private void DteDocumentClosing(Document document)
 		{
-			Debug.WriteLine("Closing " + document.Name);
 			if (document == this.lastDteDocument)
 			{
 				this.lastDteDocument = null;

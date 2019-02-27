@@ -1,6 +1,6 @@
-﻿namespace RobinHood70.HoodBot
+﻿namespace RobinHood70.HoodBotPlugins
 {
-	public interface IDiffViewer
+	public interface IDiffViewer : IPlugin
 	{
 		#region Properties
 		string Name { get; }
@@ -8,10 +8,6 @@
 
 		#region Methods
 		void Compare(string oldText, string newText, string oldTitle, string newTitle);
-
-		void Initialize();
-
-		bool Validate();
 
 		void Wait();
 		#endregion
