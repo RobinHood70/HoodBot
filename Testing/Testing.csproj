@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>$(SolutionDir)bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;CODE_ANALYSIS;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -31,7 +31,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>$(SolutionDir)\\Debug\</OutputPath>
     <DefineConstants>DEBUG;CODE_ANALYSIS;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -95,22 +95,27 @@
     <ProjectReference Include="..\HoodBot\HoodBot.csproj">
       <Project>{67bf70df-f8d7-49f0-a6a2-dffc7c8ff55e}</Project>
       <Name>HoodBot</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Robby\Robby.csproj">
       <Project>{16a4f00f-11b3-4049-89d2-09c9b6b53c83}</Project>
       <Name>Robby</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\WallE\WallE.csproj">
       <Project>{f338af86-4502-4121-b032-092ca727d51b}</Project>
       <Name>WallE</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\WikiClasses\WikiClasses.csproj">
       <Project>{AD688255-64E2-451C-A32F-85877B7BDEF0}</Project>
       <Name>WikiClasses</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\WikiCommon\WikiCommon.csproj">
       <Project>{64878636-cb8c-434e-a03d-b3946216fc7f}</Project>
       <Name>WikiCommon</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
