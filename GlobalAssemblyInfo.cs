@@ -4,7 +4,7 @@ using System.Resources;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyCopyright("Copyright © Robert Morley 2018")]
+[assembly: AssemblyCopyright("Copyright © Robert Morley 2019")]
 [assembly: AssemblyProduct("HoodBot")]
 [assembly: AssemblyTrademark("")]
 [assembly: CLSCompliant(true)]
