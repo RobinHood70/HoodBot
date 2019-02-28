@@ -7,6 +7,7 @@
 	using System.Runtime.InteropServices;
 	using EnvDTE;
 	using RobinHood70.HoodBotPlugins;
+	using RobinHood70.Robby;
 
 	[Description("Visual Studio")]
 	public class VsDiff : IDiffViewer, IDisposable
@@ -21,9 +22,9 @@
 		#endregion
 
 		#region Fields
-		private readonly List<Document> ourDocuments = new List<Document>();
+		private readonly List<Window> ourWindows = new List<Window>();
 		private bool disposed = false; // To detect redundant calls
-		private Document lastDteDocument = null;
+		private Window lastDteWindow = null;
 		#endregion
 
 		#region Finalizers
@@ -44,9 +45,10 @@
 				{
 					lock (LockObject)
 					{
-						MessageFilter.Register();
 						dte = dte ?? GetDte(); // Check dte again in case of race condition while entering the lock, and the other guy won.
-						dte.Events.DocumentEvents.DocumentClosing += this.DteDocumentClosing;
+
+						// We have to watch windows rather than documents because diff documents are a weird hybrid that emits closing events for each separate document, neither of which corresponds to the ActiveDocument that we would've grabbed.
+						dte.Events.WindowEvents.WindowClosing += this.DteWindowClosing;
 					}
 				}
 
@@ -56,20 +58,21 @@
 		#endregion
 
 		#region Public Methods
-		public void Compare(string oldText, string newText, string oldTitle, string newTitle)
+		public void Compare(Page page, string editSummary, bool isMinor, string editToken)
 		{
+			var current = page.Revisions.Current;
 			var oldFile = Path.GetTempFileName();
 			var newFile = Path.GetTempFileName();
-			File.WriteAllText(oldFile, oldText ?? string.Empty);
-			File.WriteAllText(newFile, newText);
+			File.WriteAllText(oldFile, current?.Text ?? " ");
+			File.WriteAllText(newFile, page.Text ?? " ");
 
-			this.lastDteDocument = null;
+			this.lastDteWindow = null;
 			do
 			{
 				try
 				{
-					this.Dte.ExecuteCommand("Tools.DiffFiles", $"\"{oldFile}\" \"{newFile}\" \"{oldTitle}\" \"{newTitle}\"");
-					this.lastDteDocument = this.Dte.ActiveDocument;
+					this.Dte.ExecuteCommand("Tools.DiffFiles", $"\"{oldFile}\" \"{newFile}\" \"Revision as of {current?.Timestamp ?? DateTime.UtcNow}\" \"{editSummary}\"");
+					this.lastDteWindow = this.Dte.ActiveWindow;
 					this.Dte.MainWindow.Visible = true;
 				}
 				catch (COMException)
@@ -77,9 +80,9 @@
 					System.Threading.Thread.Sleep(500);
 				}
 			}
-			while (this.lastDteDocument == null);
+			while (this.lastDteWindow == null);
 
-			this.ourDocuments.Add(this.lastDteDocument);
+			this.ourWindows.Add(this.lastDteWindow);
 			File.Delete(oldFile);
 			File.Delete(newFile);
 		}
@@ -100,7 +103,7 @@
 				try
 				{
 					System.Threading.Thread.Sleep(500);
-					waiting = (this.Dte.MainWindow?.Visible ?? false) && this.lastDteDocument != null;
+					waiting = (this.Dte.MainWindow?.Visible ?? false) && this.lastDteWindow != null;
 				}
 				catch (COMException)
 				{
@@ -108,9 +111,10 @@
 			}
 			while (waiting);
 
-			if (this.lastDteDocument != null)
+			if (this.lastDteWindow != null)
 			{
-				this.lastDteDocument.Close(vsSaveChanges.vsSaveChangesNo);
+				// If the app was closed rather than the document, close the document. The app doesn't actually close either way, but simply becomes invisible.
+				this.lastDteWindow.Close(vsSaveChanges.vsSaveChangesNo);
 			}
 		}
 		#endregion
@@ -122,14 +126,13 @@
 			{
 				lock (LockObject)
 				{
-					this.disposed = true;
 					if (dte != null && dte.Documents.Count == 0)
 					{
 						dte.Quit();
 					}
 
 					dte = null;
-					MessageFilter.Revoke();
+					this.disposed = true;
 				}
 			}
 		}
@@ -152,14 +155,14 @@
 		#endregion
 
 		#region Private Methods
-		private void DteDocumentClosing(Document document)
+		private void DteWindowClosing(Window window)
 		{
-			if (document == this.lastDteDocument)
+			if (window == this.lastDteWindow)
 			{
-				this.lastDteDocument = null;
+				this.lastDteWindow = null;
 			}
 
-			this.ourDocuments.Remove(document);
+			this.ourWindows.Remove(window);
 		}
 		#endregion
 	}

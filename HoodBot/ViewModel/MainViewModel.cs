@@ -41,7 +41,6 @@
 		private readonly IProgress<double> progressMonitor;
 		private readonly IProgress<string> statusMonitor;
 		private readonly List<Type> pluginTypes = new List<Type>();
-		private readonly List<IDiffViewer> viewers = new List<IDiffViewer>();
 
 		private CancellationTokenSource canceller;
 		private double completedJobs;
@@ -72,7 +71,6 @@
 			this.statusMonitor = new Progress<string>(this.StatusWrite);
 			Site.RegisterUserFunctionsClass(new[] { "en.uesp.net", "rob-centos" }, new[] { "HoodBot" }, HoodBotFunctions.CreateInstance);
 			this.pluginTypes = new List<Type>(GetPlugins());
-			this.viewers = new List<IDiffViewer>(this.FindPlugins<IDiffViewer>());
 		}
 		#endregion
 
@@ -339,28 +337,14 @@
 			this.executing = false;
 		}
 
-		private IEnumerable<T> FindPlugins<T>()
+		private IEnumerable<Type> FindPlugins<T>()
 			where T : class, IPlugin
 		{
 			foreach (var type in this.pluginTypes)
 			{
 				if (typeof(T).IsAssignableFrom(type))
 				{
-					T plugin = null;
-					try
-					{
-						plugin = Activator.CreateInstance(type) as T;
-					}
-					catch
-					{
-						continue;
-					}
-
-					// Can't yield return in a try/catch block, so we do it here.
-					if (plugin != null && plugin.ValidatePlugin())
-					{
-						yield return plugin;
-					}
+					yield return type;
 				}
 			}
 		}
@@ -481,14 +465,41 @@
 
 		private void Site_PagePreview(Site sender, PagePreviewArgs eventArgs)
 		{
-			if (this.viewers.Count > 0)
+			// Until we get a menu going, just grab the first thing we found.
+			var wal = this.site.AbstractionLayer as WikiAbstractionLayer;
+			var token = wal?.TokenManager.SessionToken("csrf"); // HACK: This is only necessary for browser-based diffs. Not sure how to handle it better.
+			var plugin = this.FindPlugin<IDiffViewer>("IeDiff");
+			if (plugin != null)
 			{
-				// Until we get a menu going, just grab the first thing we found.
-				var diffViewer = this.viewers[0];
-				var current = eventArgs.Page.Revisions.Current;
-				diffViewer.Compare(current?.Text, eventArgs.Page.Text, $"Revision as of {current?.Timestamp ?? DateTime.UtcNow}", "Latest revision");
-				diffViewer.Wait();
+				plugin.Compare(eventArgs.Page, eventArgs.EditSummary, eventArgs.Minor, token);
+				plugin.Wait();
 			}
+		}
+
+		private T FindPlugin<T>(string name)
+			where T : class, IPlugin
+		{
+			foreach (var viewer in this.FindPlugins<T>())
+			{
+				if (viewer.Name == name)
+				{
+					try
+					{
+						if (Activator.CreateInstance(viewer) is T instance && instance.ValidatePlugin())
+						{
+							return instance;
+						}
+					}
+					catch (NotSupportedException)
+					{
+					}
+					catch (TargetInvocationException)
+					{
+					}
+				}
+			}
+
+			return null;
 		}
 
 		private void StatusWrite(string text) => this.Status += this.Status.Length == 0 ? text.TrimStart() : text;

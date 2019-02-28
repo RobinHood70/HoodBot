@@ -81,6 +81,10 @@
       <Private>False</Private>
       <Private>False</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Robby\Robby.csproj">
+      <Project>{16a4f00f-11b3-4049-89d2-09c9b6b53c83}</Project>
+      <Name>Robby</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
