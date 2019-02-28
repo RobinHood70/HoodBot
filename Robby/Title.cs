@@ -288,6 +288,10 @@
 				});
 		}
 
+		/// <summary>Gets the article path for the current page.</summary>
+		/// <returns>A Uri to the index.php page.</returns>
+		public Uri GetArticlePath() => this.Site.GetArticlePath(this.FullPageName);
+
 		/// <summary>Indicates whether the current title is equal to another title based on Namespace, PageName, and Key.</summary>
 		/// <param name="other">A title to compare with this one.</param>
 		/// <returns><c>true</c> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <c>false</c>.</returns>
