@@ -147,7 +147,12 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			info.TestActions = testActions;
 			output.Info = info;
-			this.Wal.CurrentTimestamp = info.StartTimestamp;
+
+			// If we got a starttimestamp, and it's greater than the current timestamp, update the current timestamp. This is mostly for MW <= 1.23, but could conceivably also happen if base query and info query occur right as the seconds value updates.
+			if (info.StartTimestamp > this.Wal.CurrentTimestamp)
+			{
+				this.Wal.CurrentTimestamp = info.StartTimestamp;
+			}
 		}
 
 		protected override void DeserializeResult(JToken result, PageItem output)
