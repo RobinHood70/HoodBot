@@ -4,11 +4,15 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 
-	public class VoidJob : WikiJob
+	public class VoidJob : EditJob
 	{
 		[JobInfo("Do Nothing")]
 		public VoidJob(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo) => this.ProgressMaximum = 5;
+			: base(site, asyncInfo)
+		{
+			this.ProgressMaximum = 5;
+			site.EditingDisabled = true;
+		}
 
 		protected override void Main()
 		{

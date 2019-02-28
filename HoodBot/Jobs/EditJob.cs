@@ -50,6 +50,7 @@
 		#region Protected Override Methods
 		protected override void OnCompleted()
 		{
+			this.StatusWriteLine("Ending Log Entry");
 			this.Site.UserFunctions.EndLogEntry();
 			base.OnCompleted();
 		}
