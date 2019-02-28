@@ -56,8 +56,6 @@
 
 		#region Fields
 		private readonly Dictionary<string, MagicWord> magicWords = new Dictionary<string, MagicWord>();
-
-		private string articlePath;
 		private CultureInfo culture = CultureInfo.CurrentCulture;
 		private HashSet<Title> disambiguationTemplates;
 		private Regex redirectTargetFinder;
@@ -115,6 +113,10 @@
 		/// <summary>Gets the wiki abstraction layer.</summary>
 		/// <value>The wiki abstraction layer.</value>
 		public IWikiAbstractionLayer AbstractionLayer { get; }
+
+		/// <summary>Gets the article path.</summary>
+		/// <value>The article path, where <c>$1</c> should be replaced with the URL-encoded article title. </value>
+		public string ArticlePath { get; private set; }
 
 		/// <summary>Gets a value indicating whether the first letter of titles is case-sensitive.</summary>
 		/// <value><c>true</c> if the first letter of titles is case-sensitive; otherwise, <c>false</c>.</value>
@@ -257,7 +259,7 @@
 		/// <param name="articleName">Name of the article.</param>
 		/// <param name="fragment">The fragment to jump to. May be null.</param>
 		/// <returns>A full Uri to the article.</returns>
-		public virtual Uri GetArticlePath(string articleName, string fragment) => this.GetArticlePath(this.articlePath, articleName, fragment);
+		public virtual Uri GetArticlePath(string articleName, string fragment) => this.GetArticlePath(this.ArticlePath, articleName, fragment);
 
 		/// <summary>Gets the redirect target from the page text.</summary>
 		/// <param name="text">The text to parse.</param>
@@ -650,7 +652,7 @@
 
 			if (string.IsNullOrEmpty(unparsedPath))
 			{
-				unparsedPath = this.articlePath;
+				unparsedPath = this.ArticlePath;
 			}
 
 			var fullPath = unparsedPath.Replace("$1", articleName.Replace(' ', '_')).TrimEnd('/');
@@ -659,7 +661,7 @@
 				fullPath += '#' + fragment;
 			}
 
-			return new Uri(articleName);
+			return new Uri(fullPath);
 		}
 
 		/// <summary>Logs the user out.</summary>
@@ -894,7 +896,7 @@
 				path = siteInfo.BasePage.Substring(0, articleBaseIndex) + path;
 			}
 
-			this.articlePath = path;
+			this.ArticlePath = path;
 
 			// NamespaceAliases
 			var allAliases = new Dictionary<int, List<string>>();
@@ -989,7 +991,7 @@
 
 		private void Clear()
 		{
-			this.articlePath = null;
+			this.ArticlePath = null;
 			this.magicWords.Clear();
 
 			this.CaseSensitive = false;
