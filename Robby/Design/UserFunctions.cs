@@ -16,13 +16,13 @@
 	[Flags]
 	public enum LogJobTypes
 	{
-		/// <summary>  Don't log anything.</summary>
+		/// <summary>Don't log anything.</summary>
 		None = 0,
 
-		/// <summary>  Log read-only jobs.</summary>
+		/// <summary>Log read-only jobs.</summary>
 		Read = 1,
 
-		/// <summary>  Log jobs that change the wiki in any way.</summary>
+		/// <summary>Log jobs that change the wiki in any way.</summary>
 		Write = 1 << 1,
 	}
 	#endregion
@@ -77,7 +77,7 @@
 		/// <returns>A <see cref="ChangeStatus"/> value indicating whether the log page was changed.</returns>
 		public abstract ChangeStatus AddLogEntry(LogInfo info);
 
-		/// <summary>  Performs any site-specific customizations.</summary>
+		/// <summary>Performs any site-specific customizations.</summary>
 		public abstract void DoSiteCustomizations();
 
 		/// <summary>Ends the log entry.</summary>
