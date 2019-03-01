@@ -207,6 +207,27 @@
 		/// <summary>Converts the first character of a string to upper-case.</summary>
 		/// <param name="text">The string to alter.</param>
 		/// <returns>A copy of the original string, with the first charcter converted to upper-case.</returns>
+		public static string LowerFirst(this string text) => LowerFirst(text, CultureInfo.InvariantCulture);
+
+		/// <summary>Converts the first character of a string to upper-case.</summary>
+		/// <param name="text">The string to alter.</param>
+		/// <param name="culture">The culture to use for converting the first character to upper-case.</param>
+		/// <returns>A copy of the original string, with the first charcter converted to upper-case.</returns>
+		public static string LowerFirst(this string text, CultureInfo culture)
+		{
+			ThrowNull(culture, nameof(culture));
+			if (string.IsNullOrEmpty(text))
+			{
+				return text;
+			}
+
+			var retval = text.Substring(0, 1).ToLower(culture);
+			return text.Length == 1 ? retval : retval + text.Substring(1);
+		}
+
+		/// <summary>Converts the first character of a string to upper-case.</summary>
+		/// <param name="text">The string to alter.</param>
+		/// <returns>A copy of the original string, with the first charcter converted to upper-case.</returns>
 		public static string UpperFirst(this string text) => UpperFirst(text, CultureInfo.InvariantCulture);
 
 		/// <summary>Converts the first character of a string to upper-case.</summary>
@@ -222,12 +243,7 @@
 			}
 
 			var retval = text.Substring(0, 1).ToUpper(culture);
-			if (text.Length > 1)
-			{
-				retval += text.Substring(1);
-			}
-
-			return retval;
+			return text.Length == 1 ? retval : retval + text.Substring(1);
 		}
 		#endregion
 	}
