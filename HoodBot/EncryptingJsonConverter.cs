@@ -22,7 +22,6 @@
 			}
 		}
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "False positive.")]
 		public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
 		{
 			ThrowNull(writer, nameof(writer));
@@ -33,20 +32,17 @@
 				return;
 			}
 
-			var buffer = Encoding.UTF8.GetBytes(stringValue);
-
-			using (var inputStream = new MemoryStream(buffer, false))
 			using (var outputStream = new MemoryStream())
-			using (var aes = new AesManaged
+			using (var aes = new AesManaged())
 			{
-				Key = this.encryptionKeyBytes
-			})
-			{
+				aes.Key = this.encryptionKeyBytes;
 				var iv = aes.IV; // first access generates a new IV
 				outputStream.Write(iv, 0, iv.Length);
 				outputStream.Flush();
 
-				var encryptor = aes.CreateEncryptor(this.encryptionKeyBytes, iv);
+				var buffer = Encoding.UTF8.GetBytes(stringValue);
+				using (var inputStream = new MemoryStream(buffer, false))
+				using (var encryptor = aes.CreateEncryptor(this.encryptionKeyBytes, iv))
 				using (var cryptoStream = new CryptoStream(outputStream, encryptor, CryptoStreamMode.Write))
 				{
 					inputStream.CopyTo(cryptoStream);
@@ -57,7 +53,6 @@
 		}
 
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Too many possible errors and handling is the same for all. Also, not my code.")]
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "False positive.")]
 		public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
 		{
 			ThrowNull(reader, nameof(reader));
@@ -67,16 +62,11 @@
 				return reader.Value;
 			}
 
+			var decryptedValue = string.Empty;
 			try
 			{
 				var buffer = Convert.FromBase64String(value);
-
 				using (var inputStream = new MemoryStream(buffer, false))
-				using (var outputStream = new MemoryStream())
-				using (var aes = new AesManaged
-				{
-					Key = this.encryptionKeyBytes
-				})
 				{
 					var iv = new byte[16];
 					var bytesRead = inputStream.Read(iv, 0, 16);
@@ -85,20 +75,25 @@
 						throw new CryptographicException("IV is missing or invalid.");
 					}
 
-					var decryptor = aes.CreateDecryptor(this.encryptionKeyBytes, iv);
-					using (var cryptoStream = new CryptoStream(inputStream, decryptor, CryptoStreamMode.Read))
+					using (var outputStream = new MemoryStream())
+					using (var aes = new AesManaged())
 					{
-						cryptoStream.CopyTo(outputStream);
-					}
+						aes.Key = this.encryptionKeyBytes;
+						using (var decryptor = aes.CreateDecryptor(this.encryptionKeyBytes, iv))
+						using (var cryptoStream = new CryptoStream(inputStream, decryptor, CryptoStreamMode.Read))
+						{
+							cryptoStream.CopyTo(outputStream);
+						}
 
-					var decryptedValue = Encoding.UTF8.GetString(outputStream.ToArray());
-					return decryptedValue;
+						decryptedValue = Encoding.UTF8.GetString(outputStream.ToArray());
+					}
 				}
 			}
 			catch
 			{
-				return string.Empty;
 			}
+
+			return decryptedValue;
 		}
 
 		/// <inheritdoc />
