@@ -6,7 +6,7 @@
 
 	/// <summary>Stores a MediaWiki page along with associated data.</summary>
 	/// <seealso cref="Page" />
-	public class Message : Page
+	public class MessagePage : Page
 	{
 		// TODO: Message has different data loaded depending whether it's a faked page or a genuine message. Is this a good idea? Loading all data would require calls to both Load and AllMessages, which could be a undesirable in the PageCreator. Might be a better idea to split this into Message and MessagePage objects depending on behaviour desired, with Message being custom and light-weight.
 		#region Constructors
@@ -14,21 +14,21 @@
 		/// <summary>Initializes a new instance of the <see cref="Message"/> class.</summary>
 		/// <param name="site">The site the page is from.</param>
 		/// <param name="pageName">The page name (<em>without</em> the leading namespace).</param>
-		protected internal Message(Site site, string pageName)
+		protected internal MessagePage(Site site, string pageName)
 			: base(site?.Namespaces[MediaWikiNamespaces.MediaWiki], pageName)
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="Message"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="MessagePage"/> class.</summary>
 		/// <param name="site">The site the page is from.</param>
 		/// <param name="item">The AllMessagesItem to populate this instance from.</param>
-		protected internal Message(Site site, AllMessagesItem item)
+		protected internal MessagePage(Site site, AllMessagesItem item)
 			: base(site?.Namespaces[MediaWikiNamespaces.MediaWiki], item?.Name) => this.PopulateFrom(item);
 		#endregion
 
 		#region Public Properties
 
-		/// <summary>Gets a value indicating whether this <see cref="Message"/> has been customized.</summary>
+		/// <summary>Gets a value indicating whether this <see cref="MessagePage"/> has been customized.</summary>
 		/// <value><see langref="true" /> if customized; otherwise, <see langref="false" />.</value>
 		public bool Customized { get; private set; }
 

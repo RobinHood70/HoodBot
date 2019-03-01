@@ -8,7 +8,7 @@
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Represents a user on the wiki. This can include IP users.</summary>
-	public class User
+	public class User : Title
 	{
 		#region Static Fields
 		private static string defaultSubject = null;
@@ -25,12 +25,8 @@
 		/// <param name="site">The site the user is from.</param>
 		/// <param name="name">The name of the user.</param>
 		public User(Site site, string name)
+			: base(site?.Namespaces[MediaWikiNamespaces.User], TitleParts.DecodeAndNormalize(name))
 		{
-			ThrowNull(site, nameof(site));
-			ThrowNull(name, nameof(name));
-			this.Site = site;
-			this.Name = TitleParts.DecodeAndNormalize(name);
-			this.Page = new Title(site.Namespaces[MediaWikiNamespaces.User], name);
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="User"/> class.</summary>
@@ -70,10 +66,6 @@
 		/// <value>The name.</value>
 		public string Name { get; }
 
-		/// <summary>Gets a <see cref="Title"/> representing the the user page.</summary>
-		/// <value>The user page.</value>
-		public Title Page { get; }
-
 		/// <summary>Gets the date and time the user account was created.</summary>
 		/// <value>The user's registration date.</value>
 		public DateTime Registration { get; private set; }
@@ -81,14 +73,6 @@
 		/// <summary>Gets the user's rights.</summary>
 		/// <value>The user's rights.</value>
 		public IReadOnlyList<string> Rights { get; private set; }
-
-		/// <summary>Gets the site the user is from.</summary>
-		/// <value>The site the user is from.</value>
-		public Site Site { get; }
-
-		/// <summary>Gets the user's talk page.</summary>
-		/// <value>The user's talk page.</value>
-		public Title TalkPage => this.Page.TalkPage;
 		#endregion
 
 		#region Public Methods

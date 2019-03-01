@@ -345,13 +345,13 @@
 		/// <param name="messages">The messages.</param>
 		/// <param name="arguments">Optional arguments to substitute into the messages.</param>
 		/// <returns>A read-only dictionary of the specified arguments with their associated Message objects.</returns>
-		public IReadOnlyDictionary<string, Message> LoadMessages(IEnumerable<string> messages, params string[] arguments) => this.LoadMessages(messages, arguments as IEnumerable<string>);
+		public IReadOnlyDictionary<string, MessagePage> LoadMessages(IEnumerable<string> messages, params string[] arguments) => this.LoadMessages(messages, arguments as IEnumerable<string>);
 
 		/// <summary>Gets multiple messages from MediaWiki space.</summary>
 		/// <param name="messages">The messages.</param>
 		/// <param name="arguments">Optional arguments to substitute into the messages.</param>
 		/// <returns>A read-only dictionary of the specified arguments with their associated Message objects.</returns>
-		public IReadOnlyDictionary<string, Message> LoadMessages(IEnumerable<string> messages, IEnumerable<string> arguments) => this.LoadMessages(new AllMessagesInput
+		public IReadOnlyDictionary<string, MessagePage> LoadMessages(IEnumerable<string> messages, IEnumerable<string> arguments) => this.LoadMessages(new AllMessagesInput
 		{
 			Messages = messages,
 			Arguments = arguments,
@@ -397,14 +397,14 @@
 		/// <param name="messages">The messages.</param>
 		/// <param name="arguments">Optional arguments to substitute into the message.</param>
 		/// <returns>A read-only dictionary of the specified arguments with their associated Message objects.</returns>
-		public IReadOnlyDictionary<string, Message> LoadParsedMessages(IEnumerable<string> messages, IEnumerable<string> arguments) => this.LoadParsedMessages(messages, arguments, null);
+		public IReadOnlyDictionary<string, MessagePage> LoadParsedMessages(IEnumerable<string> messages, IEnumerable<string> arguments) => this.LoadParsedMessages(messages, arguments, null);
 
 		/// <summary>Gets multiple messages from MediaWiki space with any magic words and the like parsed into text.</summary>
 		/// <param name="messages">The messages.</param>
 		/// <param name="arguments">Optional arguments to substitute into the message.</param>
 		/// <param name="title">The title to use for parsing.</param>
 		/// <returns>A read-only dictionary of the specified arguments with their associated Message objects.</returns>
-		public IReadOnlyDictionary<string, Message> LoadParsedMessages(IEnumerable<string> messages, IEnumerable<string> arguments, Title title) => this.LoadMessages(new AllMessagesInput
+		public IReadOnlyDictionary<string, MessagePage> LoadParsedMessages(IEnumerable<string> messages, IEnumerable<string> arguments, Title title) => this.LoadMessages(new AllMessagesInput
 		{
 			Messages = messages,
 			Arguments = arguments,
@@ -785,14 +785,14 @@
 
 		/// <summary>Gets one or more messages from MediaWiki space.</summary>
 		/// <param name="input">The input parameters.</param>
-		/// <returns>A read-only dictionary of message names and their associated <see cref="Message"/> objects, as specified by the input parameters.</returns>
-		protected virtual IReadOnlyDictionary<string, Message> LoadMessages(AllMessagesInput input)
+		/// <returns>A read-only dictionary of message names and their associated <see cref="MessagePage"/> objects, as specified by the input parameters.</returns>
+		protected virtual IReadOnlyDictionary<string, MessagePage> LoadMessages(AllMessagesInput input)
 		{
 			var result = this.AbstractionLayer.AllMessages(input);
-			var retval = new Dictionary<string, Message>(result.Count);
+			var retval = new Dictionary<string, MessagePage>(result.Count);
 			foreach (var item in result)
 			{
-				retval.Add(item.Name, new Message(this, item));
+				retval.Add(item.Name, new MessagePage(this, item));
 			}
 
 			return retval.AsReadOnly();

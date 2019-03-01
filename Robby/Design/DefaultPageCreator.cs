@@ -20,11 +20,11 @@
 			switch (simpleTitle.Namespace.Id)
 			{
 				case MediaWikiNamespaces.MediaWiki:
-					return new Message(simpleTitle.Namespace.Site, simpleTitle.PageName);
+					return new MessagePage(simpleTitle.Namespace.Site, simpleTitle.PageName);
 				case MediaWikiNamespaces.File:
 					return new FilePage(simpleTitle.Namespace.Site, simpleTitle.PageName);
 				case MediaWikiNamespaces.Category:
-					return new Category(simpleTitle.Namespace.Site, simpleTitle.PageName);
+					return new CategoryPage(simpleTitle.Namespace.Site, simpleTitle.PageName);
 				default:
 					return new Page(simpleTitle);
 			}

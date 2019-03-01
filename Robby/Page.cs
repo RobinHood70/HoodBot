@@ -49,7 +49,7 @@
 
 		/// <summary>Gets the page categories, if they were requested in the last load operation.</summary>
 		/// <value>The categories the page is listed in.</value>
-		public IReadOnlyList<CategoryTitle> Categories { get; } = new List<CategoryTitle>();
+		public IReadOnlyList<Category> Categories { get; } = new List<Category>();
 
 		/// <summary>Gets a value indicating whether this <see cref="Page" /> exists.</summary>
 		/// <value><see langword="true" /> if the page exists; otherwise, <see langword="false" />.</value>
@@ -290,11 +290,11 @@
 			}
 
 			// Categories
-			var categories = this.Categories as List<CategoryTitle>;
+			var categories = this.Categories as List<Category>;
 			categories.Clear();
 			foreach (var category in pageItem.Categories)
 			{
-				categories.Add(new CategoryTitle(new TitleParts(this.Site, category.Title), category.SortKey, category.Hidden));
+				categories.Add(new Category(new TitleParts(this.Site, category.Title), category.SortKey, category.Hidden));
 			}
 
 			// Custom

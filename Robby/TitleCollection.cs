@@ -281,7 +281,7 @@
 				{
 					foreach (var redirectedItem in item.Redirects)
 					{
-						this.Add(new BacklinkTitle(this.Site, redirectedItem.Title, mainTitle));
+						this.Add(new Backlink(this.Site, redirectedItem.Title, mainTitle));
 					}
 				}
 			}

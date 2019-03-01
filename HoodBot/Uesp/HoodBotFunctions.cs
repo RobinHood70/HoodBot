@@ -26,7 +26,7 @@
 		public HoodBotFunctions(Site site)
 			: base(site)
 		{
-			this.LogPage = new Page(this.Site, this.Site.User.Page.FullPageName + "/Log");
+			this.LogPage = new Page(this.Site, this.Site.User.FullPageName + "/Log");
 			this.StatusPage = this.LogPage;
 		}
 		#endregion

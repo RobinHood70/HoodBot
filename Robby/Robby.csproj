@@ -56,7 +56,7 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="BacklinkTitle.cs" />
+    <Compile Include="Backlink.cs" />
     <Compile Include="Block.cs" />
     <Compile Include="ChangeArgs.cs" />
     <Compile Include="ChangeValue{T}.cs" />
@@ -70,20 +70,20 @@
     <Compile Include="Design\TitleParts.cs" />
     <Compile Include="InterwikiEntry.cs" />
     <Compile Include="InterwikiMap.cs" />
-    <Compile Include="Category.cs" />
+    <Compile Include="CategoryPage.cs" />
     <Compile Include="Design\PageLoadOptions.cs" />
     <Compile Include="Contribution.cs" />
     <Compile Include="FileRevision.cs" />
     <Compile Include="Design\ISimpleTitle.cs" />
     <Compile Include="Design\PageCreator.cs" />
-    <Compile Include="CategoryTitle.cs" />
+    <Compile Include="Category.cs" />
     <Compile Include="Design\FullPageNameComparer.cs" />
     <Compile Include="Design\IMessageSource.cs" />
     <Compile Include="Design\IKeyedTitle.cs" />
     <Compile Include="MagicWord.cs" />
     <Compile Include="Namespace.cs" />
     <Compile Include="NamespaceCollection.cs" />
-    <Compile Include="Message.cs" />
+    <Compile Include="MessagePage.cs" />
     <Compile Include="Page.cs" />
     <Compile Include="PageCollection.cs" />
     <Compile Include="Design\TitleCollection{TTitle}.cs" />
