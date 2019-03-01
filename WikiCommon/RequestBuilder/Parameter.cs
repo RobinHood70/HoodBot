@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WallE.RequestBuilder
+﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
 	/// <summary>Base class which represents a parameter with a generic value.</summary>
 	/// <typeparam name="T">The type of the parameter the class will represent.</typeparam>

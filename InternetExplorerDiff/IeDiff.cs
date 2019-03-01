@@ -9,7 +9,7 @@
 	using System.Threading;
 	using RobinHood70.HoodBotPlugins;
 	using RobinHood70.Robby;
-	using RobinHood70.WallE.RequestBuilder;
+	using RobinHood70.WikiCommon.RequestBuilder;
 	using SHDocVw;
 
 	[Description("Visual Studio")]

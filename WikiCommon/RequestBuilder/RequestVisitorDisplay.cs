@@ -1,12 +1,13 @@
-﻿namespace RobinHood70.WallE.RequestBuilder
+﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Text;
-	using static RobinHood70.WallE.ProjectGlobals;
 	using static RobinHood70.WikiCommon.Globals;
 
 	// Escaping in this class is only at the Uri level rather than the Data level because it produces much cleaner output which any browser will fix up, if needed, when the request is put through.
+
+	/// <summary>Formats a Request object for display purposes, hiding parameters that should not be revealed.</summary>
 	internal class RequestVisitorDisplay : IParameterVisitor
 	{
 		#region Fields
@@ -20,7 +21,11 @@
 		#endregion
 
 		#region IParameterVisitor Methods
-		public static string Build(ParameterCollection parameters)
+
+		/// <summary>Builds the specified request.</summary>
+		/// <param name="parameters">A <see cref="Parameter{T}"/> to be formatted.</param>
+		/// <returns>A string representing the parameters, formatted for display purposes.</returns>
+		public static string BuildParameters(ParameterCollection parameters)
 		{
 			var sb = new StringBuilder();
 			var visitor = new RequestVisitorDisplay() { builder = sb };
@@ -43,9 +48,12 @@
 			return query.Replace("%20", "+");
 		}
 
+		/// <summary>Builds the specified request.</summary>
+		/// <param name="request">The request.</param>
+		/// <returns>A string representing the parameters, formatted for display purposes.</returns>
 		public static string Build(Request request)
 		{
-			var query = Build(request as ParameterCollection);
+			var query = BuildParameters(request);
 			var methodText =
 				request.Type == RequestType.Get ? "GET" :
 				request.Type == RequestType.Post ? "POST" :
@@ -63,7 +71,7 @@
 		public void Visit<T>(Parameter<T> parameter)
 			where T : IEnumerable<string>
 		{
-			var value = BuildPipedValue(parameter, false);
+			var value = parameter.BuildPipedValue(false);
 			this.builder.Append(Uri.EscapeDataString(value).Replace("%7C", "|"));
 		}
 

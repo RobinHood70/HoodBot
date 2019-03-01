@@ -5,7 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System.Text;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
-	using RobinHood70.WallE.RequestBuilder;
+	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class ActionImport : ActionModule<ImportInput, IReadOnlyList<ImportItem>>

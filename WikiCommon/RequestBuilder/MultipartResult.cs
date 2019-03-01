@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WallE.RequestBuilder
+﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
 	/// <summary>A simple type for multipart data, which must return both the content type as well as the data to send.</summary>
 	public class MultipartResult

@@ -1,0 +1,92 @@
+﻿namespace RobinHood70.WikiCommon.RequestBuilder
+{
+	using System.Collections.Generic;
+	using System.Net.Http;
+	using static RobinHood70.WikiCommon.Globals;
+
+	/// <summary>Formats a Request object as <see cref="MultipartFormDataContent"/>.</summary>
+	public class RequestVisitorHttpContentMultipart : IParameterVisitor
+	{
+		#region Fields
+		private readonly MultipartFormDataContent multipartData;
+		private readonly bool supportsUnitSeparator;
+		#endregion
+
+		#region Constructors
+		private RequestVisitorHttpContentMultipart(MultipartFormDataContent multipartData, bool supportsUnitSeparator)
+		{
+			this.multipartData = multipartData;
+			this.supportsUnitSeparator = supportsUnitSeparator;
+		}
+		#endregion
+
+		#region Public Methods
+
+		/// <summary>Builds the specified request.</summary>
+		/// <param name="request">The request.</param>
+		/// <returns>A <see cref="MultipartFormDataContent"/> object representing the parameters.</returns>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "This is the return value - caller is responsible for disposing.")]
+		public static MultipartFormDataContent Build(Request request)
+		{
+			ThrowNull(request, nameof(request));
+			var visitor = new RequestVisitorHttpContentMultipart(new MultipartFormDataContent(), request.SupportsUnitSeparator);
+			foreach (var param in request)
+			{
+				param.Accept(visitor);
+			}
+
+			return visitor.multipartData;
+		}
+		#endregion
+
+		#region IParameterVisitor Methods
+
+		/// <summary>Visits the specified FileParameter object.</summary>
+		/// <param name="parameter">The FileParameter object.</param>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "False positive.")]
+		public void Visit(FileParameter parameter)
+		{
+			ThrowNull(parameter, nameof(parameter));
+			this.multipartData.Add(new ByteArrayContent(parameter.Value), parameter.Name, parameter.FileName);
+		}
+
+		/// <summary>Visits the specified FormatParameter object.</summary>
+		/// <param name="parameter">The FormatParameter object.</param>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "False positive.")]
+		public void Visit(FormatParameter parameter)
+		{
+			ThrowNull(parameter, nameof(parameter));
+			this.multipartData.Add(new StringContent(parameter.Value), parameter.Name);
+		}
+
+		/// <summary>Visits the specified HiddenParameter object.</summary>
+		/// <param name="parameter">The HiddenParameter object.</param>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "False positive.")]
+		public void Visit(HiddenParameter parameter)
+		{
+			ThrowNull(parameter, nameof(parameter));
+			this.multipartData.Add(new StringContent(parameter.Value), parameter.Name);
+		}
+
+		/// <summary>Visits the specified PipedParameter or PipedListParameter object.</summary>
+		/// <typeparam name="T">An enumerable string collection.</typeparam>
+		/// <param name="parameter">The PipedParameter or PipedListParameter object.</param>
+		/// <remarks>In all cases, the PipedParameter and PipedListParameter objects are treated identically, however the value collections they're associated with differ, so the Visit method is made generic to handle both.</remarks>
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "False positive.")]
+		public void Visit<T>(Parameter<T> parameter)
+			where T : IEnumerable<string>
+		{
+			var value = parameter.BuildPipedValue(this.supportsUnitSeparator);
+			this.multipartData.Add(new StringContent(value), parameter.Name);
+		}
+
+		/// <summary>Visits the specified StringParameter object.</summary>
+		/// <param name="parameter">The StringParameter object.</param>
+		public void Visit(StringParameter parameter)
+		{
+			ThrowNull(parameter, nameof(parameter));
+			this.multipartData.Add(new StringContent(parameter.Value), parameter.Name);
+		}
+		#endregion
+	}
+}

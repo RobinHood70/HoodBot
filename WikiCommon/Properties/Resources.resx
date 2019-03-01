@@ -117,42 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ColonText" xml:space="preserve">
-    <value>{0}: {1}</value>
-  </data>
-  <data name="CommaText" xml:space="preserve">
-    <value>{0}, {1}</value>
-  </data>
-  <data name="PerText" xml:space="preserve">
-    <value>{0} / {1}</value>
-  </data>
-  <data name="StopRequested" xml:space="preserve">
-    <value>A stop was requested because {0}.</value>
-  </data>
-  <data name="WikiExceptionGeneral" xml:space="preserve">
-    <value>The site returned an error.
-Code: {0}
-Info: {1}</value>
-  </data>
-  <data name="WikiWarning" xml:space="preserve">
-    <value>(Warning) {0}: {1}</value>
-  </data>
-  <data name="UploadUnwatchInvalid" xml:space="preserve">
-    <value>You cannot set the Watchlist parameter for uploads to "Unwatch".</value>
-  </data>
-  <data name="InvalidSearchString" xml:space="preserve">
-    <value>You cannot search for an empty string.</value>
-  </data>
-  <data name="MonoCreateZStreamBug" xml:space="preserve">
-    <value>You appear to have the mono CreateZStream bug. Please see http://stackoverflow.com/a/32958861/502255 to fix the issue before using this library. Alternatively, you can set the static DefaultAcceptEncoding to null or an empty string before creating an instance of this client.</value>
-  </data>
-  <data name="IncorrectModuleType" xml:space="preserve">
-    <value>The requested item ({0}) was found, but is not of the expected module type ({1} instead of {2}).</value>
-  </data>
-  <data name="NotSettable" xml:space="preserve">
-    <value>This property is settable only for Interface compatibility; it is never intended to be set.</value>
-  </data>
-  <data name="SiteInfoLanguageConflict" xml:space="preserve">
-    <value>The interwiki language can only have a single value. Once it is set to a non-null value, it cannot be changed. Issue a separate SiteInfo request if different parts of your application require different languages.</value>
+  <data name="NotAPipedParameter" xml:space="preserve">
+    <value>There was an attempt to add a piped parameter value, but an existing value with the same name ({0}) exists and is not a piped parameter.</value>
   </data>
 </root>

@@ -3,7 +3,7 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.WallE.RequestBuilder;
+	using RobinHood70.WikiCommon.RequestBuilder;
 
 	public abstract class ContinueModule
 	{

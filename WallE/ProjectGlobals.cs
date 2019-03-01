@@ -5,54 +5,21 @@
 	using System.Globalization;
 	using System.Security.Cryptography;
 	using System.Text;
-	using RobinHood70.WallE.RequestBuilder;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
+	#region Internal Enumerations
+	internal enum HashType
+	{
+		Md5,
+		Sha1
+	}
+	#endregion
+
 	internal static class ProjectGlobals
 	{
 		#region Public Methods
-		public static string BuildPipedValue<T>(Parameter<T> parameter, bool supportsUnitSeparator)
-			where T : IEnumerable<string>
-		{
-			ThrowNull(parameter, nameof(parameter));
-			string value = null;
-			if (supportsUnitSeparator)
-			{
-				// Although this could be done with the existing builder, it gets a bit messy with Uri encoding then checking for the pipe afterwards, so use a separate builder like other similar classes.
-				var sb = new StringBuilder();
-				foreach (var item in parameter.Value)
-				{
-					sb.Append(item.Contains("|") ? '\x1f' + item + '\x1f' : '|' + item);
-				}
-
-				if (sb.Length > 0 && sb[0] == '|')
-				{
-					sb.Remove(0, 1);
-				}
-
-				value = sb.ToString();
-			}
-			else
-			{
-				value = string.Join("|", parameter.Value);
-			}
-
-			if (value.Length == 0)
-			{
-				return "|";
-			}
-
-			var last = value[value.Length - 1];
-			if (last == '|' || last == '=' || last == '\x1f')
-			{
-				value += '|';
-			}
-
-			return value;
-		}
-
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "I am!")]
 		public static string GetHash(byte[] data, HashType hashType)
 		{

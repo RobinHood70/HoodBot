@@ -10,8 +10,8 @@ namespace RobinHood70.WallE.Clients.Async
 	using System.Runtime.Serialization.Formatters.Binary;
 	using System.Security;
 	using System.Threading.Tasks;
-	using RobinHood70.WallE.RequestBuilder;
 	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
 	// TODO: Synchronize with changes to SimpleClient

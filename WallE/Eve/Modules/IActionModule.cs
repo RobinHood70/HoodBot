@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.WallE.RequestBuilder;
+	using RobinHood70.WikiCommon.RequestBuilder;
 
 	/// <summary>Specifies the set of properties and methods required by all action module implementations.</summary>
 	/// <typeparam name="TInput">The type of the input.</typeparam>

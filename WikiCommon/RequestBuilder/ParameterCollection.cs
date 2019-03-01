@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WallE.RequestBuilder
+﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
 	// Note: Throughout this class, conditions are specified as booleans. While these could certainly be changed to Predicates to delay evaluation until execution time rather than at call time, there is no advantage to doing so here—it would only add overhead (from creating the closure), rather than reducing it.
 	using System;
@@ -7,7 +7,7 @@
 	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WallE.Properties.Messages;
+	using RobinHood70.WikiCommon.Properties;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Provides an easy-to-use parameter dictionary which maintains insertion order.</summary>
@@ -261,7 +261,7 @@
 			{
 				if (!(param is PipedParameter piped))
 				{
-					throw new InvalidOperationException(CurrentCulture(NotAPipedParameter, name));
+					throw new InvalidOperationException(CurrentCulture(Resources.NotAPipedParameter, name));
 				}
 
 				piped.Value.UnionWith(values);
@@ -504,7 +504,7 @@
 
 		/// <summary>Returns a <see cref="string" /> that represents this instance.</summary>
 		/// <returns>A <see cref="string" /> that represents this instance.</returns>
-		public override string ToString() => RequestVisitorDisplay.Build(this);
+		public override string ToString() => RequestVisitorDisplay.BuildParameters(this);
 		#endregion
 
 		#region Protected Override Methods

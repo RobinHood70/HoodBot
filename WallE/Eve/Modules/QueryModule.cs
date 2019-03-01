@@ -5,8 +5,8 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System.Text.RegularExpressions;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
-	using RobinHood70.WallE.RequestBuilder;
 	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
 	// TODO: Consider allowing modules to remove inappropriate inputs/outputs from modules when in generator mode. Easiest implementation is probably to allow normal Build, then implement a RemoveForGenerator virtual method that will come along behind after the build and remove inappropriate parameters from the request.

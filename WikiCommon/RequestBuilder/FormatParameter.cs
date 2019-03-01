@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WallE.RequestBuilder
+﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
 	/// <summary>Represents the format parameter.</summary>
 	/// <seealso cref="StringParameter" />

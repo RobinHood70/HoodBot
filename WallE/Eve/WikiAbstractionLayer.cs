@@ -10,8 +10,8 @@
 	using RobinHood70.WallE.Clients;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Eve.Modules;
-	using RobinHood70.WallE.RequestBuilder;
 	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 

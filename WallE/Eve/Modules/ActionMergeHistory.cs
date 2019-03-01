@@ -3,7 +3,7 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
-	using RobinHood70.WallE.RequestBuilder;
+	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class ActionMergeHistory : ActionModule<MergeHistoryInput, MergeHistoryResult>

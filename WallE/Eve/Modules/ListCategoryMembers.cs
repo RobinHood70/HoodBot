@@ -3,10 +3,11 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Text;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
-	using RobinHood70.WallE.RequestBuilder;
 	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class ListCategoryMembers : ListModule<CategoryMembersInput, CategoryMembersItem>, IGeneratorModule
@@ -61,8 +62,8 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIf("dir", "descending", input.SortDescending)
 				.Add("start", input.Start)
 				.Add("end", input.End)
-				.AddIf("startsortkey", input.StartHexSortKey.PackHex(), input.StartHexSortKey != null && this.SiteVersion < 124)
-				.AddIf("endsortkey", input.EndHexSortKey.PackHex(), input.EndHexSortKey != null && this.SiteVersion < 124)
+				.AddIf("startsortkey", PackHex(input.StartHexSortKey), input.StartHexSortKey != null && this.SiteVersion < 124)
+				.AddIf("endsortkey", PackHex(input.EndHexSortKey), input.EndHexSortKey != null && this.SiteVersion < 124)
 				.AddIfNotNullIf("starthexsortkey", input.StartHexSortKey, this.SiteVersion >= 124)
 				.AddIfNotNullIf("endhexsortkey", input.EndHexSortKey, this.SiteVersion >= 124)
 				.AddIfNotNull("startsortkeyprefix", input.StartSortKeyPrefix)
@@ -91,6 +92,30 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			return item;
+		}
+		#endregion
+
+		#region Private Static Methods
+		private static string PackHex(string hexValue)
+		{
+			if (hexValue == null)
+			{
+				return null;
+			}
+
+			if ((hexValue.Length & 1) == 1)
+			{
+				hexValue = "0" + hexValue;
+			}
+
+			var hexLength2 = hexValue.Length >> 1;
+			var retval = new byte[hexLength2];
+			for (var i = 0; i < hexLength2; i++)
+			{
+				retval[i] = Convert.ToByte(hexValue.Substring(i << 1, 2), 16);
+			}
+
+			return Encoding.UTF8.GetString(retval);
 		}
 		#endregion
 	}

@@ -3,7 +3,7 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
-	using RobinHood70.WallE.RequestBuilder;
+	using RobinHood70.WikiCommon.RequestBuilder;
 
 	internal class ActionLogout : ActionModule<NullObject, NullObject> // Both values are dummy types here, since Logout is the exception to the rule, taking no input and providing no result.
 	{

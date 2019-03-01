@@ -293,7 +293,6 @@
     <Compile Include="Eve\TokenManagerOriginal.cs" />
     <Compile Include="Eve\TokensInput.cs" />
     <Compile Include="Eve\WikiAbstractionLayer.cs" />
-    <Compile Include="Extensions.cs" />
     <Compile Include="Base\Interfaces and Abstract Classes\IGeneratorInput.cs" />
     <Compile Include="Base\PurgeInput.cs" />
     <Compile Include="Base\PurgeResult.cs" />
@@ -391,23 +390,6 @@
     <Compile Include="Base\MoveItem.cs" />
     <Compile Include="Base\RandomInput.cs" />
     <Compile Include="Base\RevisionsItem.cs" />
-    <Compile Include="RequestBuilder\FileParameter.cs" />
-    <Compile Include="RequestBuilder\FormatParameter.cs" />
-    <Compile Include="RequestBuilder\HiddenParameter.cs" />
-    <Compile Include="RequestBuilder\IParameter.cs" />
-    <Compile Include="RequestBuilder\IParameterVisitor.cs" />
-    <Compile Include="RequestBuilder\MultipartResult.cs" />
-    <Compile Include="RequestBuilder\Parameter.cs" />
-    <Compile Include="RequestBuilder\ParameterCollection.cs" />
-    <Compile Include="RequestBuilder\PipedListParameter.cs" />
-    <Compile Include="RequestBuilder\PipedParameter.cs" />
-    <Compile Include="RequestBuilder\Request.cs" />
-    <Compile Include="RequestBuilder\RequestVisitorDisplay.cs" />
-    <Compile Include="RequestBuilder\RequestVisitorHttpContentMultipart.cs" />
-    <Compile Include="RequestBuilder\RequestVisitorHttpContentUrl.cs" />
-    <Compile Include="RequestBuilder\RequestVisitorMultipart.cs" />
-    <Compile Include="RequestBuilder\RequestVisitorUrl.cs" />
-    <Compile Include="RequestBuilder\StringParameter.cs" />
     <Compile Include="Properties\Messages.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

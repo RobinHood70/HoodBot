@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WallE.RequestBuilder
+﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
 	/// <summary>Specifies the properties and methods required by all parameter implementations.</summary>
 	public interface IParameter

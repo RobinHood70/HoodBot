@@ -1,22 +1,22 @@
-﻿namespace RobinHood70.WallE.RequestBuilder
+﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
 	using System.Collections.Generic;
 	using static RobinHood70.WikiCommon.Globals;
 
-	/// <summary>Represents a parameter with collection of unique values, normally separated by pipe characters.</summary>
+	/// <summary>Represents a parameter with collection of values, normally separated by pipe characters. All values added to the parameter will be emitted, regardless of any duplication.</summary>
 	/// <seealso cref="Parameter{T}" />
-	public class PipedParameter : Parameter<HashSet<string>>
+	public class PipedListParameter : Parameter<List<string>>
 	{
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="PipedParameter" /> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="PipedListParameter" /> class.</summary>
 		/// <param name="name">The parameter name.</param>
-		/// <param name="values">The parameter values. Any duplicates in the input will be ignored.</param>
-		public PipedParameter(string name, IEnumerable<string> values)
-			: base(name)
+		/// <param name="values">The parameter values.</param>
+		public PipedListParameter(string name, IEnumerable<string> values)
+				: base(name)
 		{
 			ThrowNull(values, nameof(values));
-			this.Value = new HashSet<string>(values);
+			this.Value = new List<string>(values);
 		}
 		#endregion
 

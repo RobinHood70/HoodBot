@@ -1,13 +1,13 @@
-﻿namespace RobinHood70.WallE.RequestBuilder
+﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Text;
-	using static RobinHood70.WallE.ProjectGlobals;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class RequestVisitorMultipart : IParameterVisitor
+	/// <summary>Formats a Request object as multipart (<see cref="MultipartResult"/>) data.</summary>
+	public class RequestVisitorMultipart : IParameterVisitor
 	{
 		#region Constants
 		private const int RandomBoundaryStartLength = 4;
@@ -33,8 +33,13 @@
 		#endregion
 
 		#region Public Static Methods
+
+		/// <summary>Builds the specified request.</summary>
+		/// <param name="request">The request.</param>
+		/// <returns>A string representing the parameters, as they would be used in a URL or POST data.</returns>
 		public static MultipartResult Build(Request request)
 		{
+			ThrowNull(request, nameof(request));
 			var visitor = new RequestVisitorMultipart
 			{
 				supportsUnitSeparator = request.SupportsUnitSeparator,
@@ -91,6 +96,8 @@
 			return new MultipartResult(contentType, formData);
 		}
 
+		/// <summary>Visits the specified FileParameter object.</summary>
+		/// <param name="parameter">The FileParameter object.</param>
 		public void Visit(FileParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
@@ -105,25 +112,35 @@
 			this.stream.Write(parameter.Value, 0, parameter.Value.Length);
 		}
 
+		/// <summary>Visits the specified FormatParameter object.</summary>
+		/// <param name="parameter">The FormatParameter object.</param>
 		public void Visit(FormatParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
 			this.TextMultipart(parameter.Name, parameter.Value);
 		}
 
+		/// <summary>Visits the specified HiddenParameter object.</summary>
+		/// <param name="parameter">The HiddenParameter object.</param>
 		public void Visit(HiddenParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
 			this.TextMultipart(parameter.Name, parameter.Value);
 		}
 
+		/// <summary>Visits the specified PipedParameter or PipedListParameter object.</summary>
+		/// <typeparam name="T">An enumerable string collection.</typeparam>
+		/// <param name="parameter">The PipedParameter or PipedListParameter object.</param>
+		/// <remarks>In all cases, the PipedParameter and PipedListParameter objects are treated identically, however the value collections they're associated with differ, so the Visit method is made generic to handle both.</remarks>
 		public void Visit<T>(Parameter<T> parameter)
 			where T : IEnumerable<string>
 		{
-			var value = BuildPipedValue(parameter, this.supportsUnitSeparator);
+			var value = parameter.BuildPipedValue(this.supportsUnitSeparator);
 			this.TextMultipart(parameter.Name, value);
 		}
 
+		/// <summary>Visits the specified StringParameter object.</summary>
+		/// <param name="parameter">The StringParameter object.</param>
 		public void Visit(StringParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
