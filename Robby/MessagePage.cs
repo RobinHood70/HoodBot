@@ -8,10 +8,10 @@
 	/// <seealso cref="Page" />
 	public class MessagePage : Page
 	{
-		// TODO: Message has different data loaded depending whether it's a faked page or a genuine message. Is this a good idea? Loading all data would require calls to both Load and AllMessages, which could be a undesirable in the PageCreator. Might be a better idea to split this into Message and MessagePage objects depending on behaviour desired, with Message being custom and light-weight.
+		// TODO: MessagePage has different data loaded depending whether it's a faked page or a genuine message. Is this a good idea? Loading all data would require calls to both Load and AllMessages, which could be undesirable in the PageCreator. Might be a better idea to split this into Message and MessagePage objects depending on behaviour desired, with Message being custom and light-weight.
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="Message"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="MessagePage"/> class.</summary>
 		/// <param name="site">The site the page is from.</param>
 		/// <param name="pageName">The page name (<em>without</em> the leading namespace).</param>
 		protected internal MessagePage(Site site, string pageName)
