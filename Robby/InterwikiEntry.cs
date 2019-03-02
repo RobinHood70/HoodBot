@@ -9,10 +9,12 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="InterwikiEntry"/> class.</summary>
+		/// <param name="site">The site the interwiki entry is from.</param>
 		/// <param name="item">The <see cref="InterwikiMapItem"/> item to initialize from.</param>
-		protected internal InterwikiEntry(InterwikiMapItem item)
+		protected internal InterwikiEntry(Site site, InterwikiMapItem item)
 		{
 			ThrowNull(item, nameof(item));
+			this.Site = site;
 			this.Language = item.Language;
 			this.LocalFarm = item.Flags.HasFlag(InterwikiMapFlags.Local);
 			this.LocalWiki = item.Flags.HasFlag(InterwikiMapFlags.LocalInterwiki);
@@ -44,6 +46,10 @@
 		/// <summary>Gets the interwiki prefix.</summary>
 		/// <value>The interwiki prefix.</value>
 		public string Prefix { get; }
+
+		/// <summary>Gets the site object the interwiki entry is from.</summary>
+		/// <value>The site.</value>
+		public Site Site { get; }
 		#endregion
 
 		#region Public Methods

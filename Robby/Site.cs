@@ -945,7 +945,7 @@
 			var interwikiList = new List<InterwikiEntry>();
 			foreach (var item in siteInfo.InterwikiMap)
 			{
-				var entry = new InterwikiEntry(item);
+				var entry = new InterwikiEntry(this, item);
 				if (doGuess)
 				{
 					entry.GuessLocalWikiFromServer(server);
