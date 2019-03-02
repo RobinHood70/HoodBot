@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System;
-	using System.Diagnostics;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.Robby.Properties.Resources;
 	using static RobinHood70.WikiCommon.Globals;
@@ -38,67 +37,50 @@
 				if (site.Namespaces.TryGetValue(key, out var ns))
 				{
 					this.Namespace = ns;
+					this.OriginalNamespaceText = key;
 					nameRemaining = split[1].TrimStart() + (split.Length == 3 ? ':' + split[2] : string.Empty);
 				}
 				else if (site.InterwikiMap.TryGetValue(key, out var iw))
 				{
 					this.Interwiki = iw;
-					if (iw.LocalWiki && site.Namespaces.TryGetValue(split[1].Trim(), out ns))
+					this.OriginalInterwikiText = key;
+					key = split[1].Trim();
+					if (iw.LocalWiki && site.Namespaces.TryGetValue(key, out ns))
 					{
 						this.Namespace = ns;
+						this.OriginalNamespaceText = key;
 						nameRemaining = split[2].TrimStart();
 						if (nameRemaining.Length == 0)
 						{
-							var mainPageName = site.MainPage.PageName ?? "Main Page";
-
-							// Make sure we're not recursing with a horribly unlikely Main Page.
-							if (mainPageName != fullPageName)
-							{
-								var mainPage = new TitleParts(site, site.MainPage.PageName ?? "Main Page");
-								this.Interwiki = mainPage.Interwiki;
-								this.Namespace = mainPage.Namespace;
-								this.PageName = mainPage.PageName;
-								this.Fragment = mainPage.Fragment;
-
-								return;
-							}
+							this.OriginalPageNameText = string.Empty;
+							this.PageName = site.MainPage?.PageName ?? "Main Page";
+							return;
 						}
 					}
 					else
 					{
-						this.Namespace = site.Namespaces[MediaWikiNamespaces.Main];
 						nameRemaining = split[1].TrimStart() + ':' + split[2];
 					}
 				}
-				else
-				{
-					this.Namespace = site.Namespaces[MediaWikiNamespaces.Main];
-				}
-			}
-			else
-			{
-				this.Namespace = site.Namespaces[MediaWikiNamespaces.Main];
 			}
 
-			if (this.Namespace == MediaWikiNamespaces.Talk)
+			if (this.Namespace == null)
 			{
-				split = nameRemaining.TrimStart().Split(TextArrays.Colon, 2);
-				var nsTest = split[0].TrimEnd();
-				if (split.Length == 2 && (site.Namespaces.Contains(nsTest) || site.InterwikiMap.Contains(nsTest)))
-				{
-					throw new ArgumentException(CurrentCulture(TitleDoubleNamespace));
-				}
+				this.Namespace = site.Namespaces[MediaWikiNamespaces.Main];
+				this.OriginalNamespaceText = string.Empty;
 			}
 
 			split = nameRemaining.Split(TextArrays.Octothorp, 2);
 			if (split.Length == 2)
 			{
 				this.PageName = split[0];
+				this.OriginalPageNameText = split[0];
 				this.Fragment = split[1];
 			}
 			else
 			{
 				this.PageName = nameRemaining;
+				this.OriginalPageNameText = nameRemaining;
 			}
 
 			// Do not change page name if Namespace is null (meaning it's a non-local interwiki or there was a parsing failure).
@@ -106,8 +88,6 @@
 			{
 				this.PageName = this.PageName.UpperFirst(site.Culture);
 			}
-
-			Debug.Assert(this.Interwiki != null || this.Namespace != null, "Neither Interwiki nor Namespace were assigned.");
 		}
 
 		// Designed for data coming directly from MediaWiki. Assumes all values are appropriate and pre-trimmed - only does namespace parsing. interWiki and fragment may be null; fullPageName may not.
@@ -117,17 +97,20 @@
 			if (interWiki != null)
 			{
 				this.Interwiki = site.InterwikiMap[interWiki];
+				this.OriginalInterwikiText = interWiki;
 			}
 
 			var split = fullPageName.Split(TextArrays.Colon, 2);
 			if (site.Namespaces.TryGetValue(split[0], out var ns))
 			{
 				this.Namespace = ns;
+				this.OriginalNamespaceText = split[0];
 				this.PageName = split[1];
 			}
 			else
 			{
 				this.Namespace = site.Namespaces[MediaWikiNamespaces.Main];
+				this.OriginalNamespaceText = string.Empty;
 				this.PageName = fullPageName;
 			}
 
@@ -160,6 +143,21 @@
 		/// <summary>Gets or sets the namespace the page is in.</summary>
 		/// <value>The namespace.</value>
 		public Namespace Namespace { get; set; }
+
+		/// <summary>Gets the interwiki text passed to the constructor, after parsing.</summary>
+		/// <value>The interwiki text.</value>
+		/// <remarks>This value can be used to bypass any automatic formatting or name changes caused by using the default Interwiki values, such as case changes. Parsing removes hidden characters and changes unusual spaces to normal spaces. The value will also have been trimmed.</remarks>
+		public string OriginalInterwikiText { get; }
+
+		/// <summary>Gets the namespace text passed to the constructor, after parsing.</summary>
+		/// <value>The namespace text.</value>
+		/// <remarks>This value can be used to bypass any text changes caused by relying on the Namespace values, such as an alias having been used. Parsing removes hidden characters and changes unusual spaces to normal spaces. The value will also have been trimmed. This value will not change, even if the <see cref="Namespace"/> changes.</remarks>
+		public string OriginalNamespaceText { get; }
+
+		/// <summary>Gets the page name text passed to the constructor, after parsing.</summary>
+		/// <value>The page name text.</value>
+		/// <remarks>This value can be used to bypass any text changes caused by using the PageName value, such as first-letter casing. Parsing removes hidden characters and changes unusual spaces to normal spaces. The value will also have been trimmed.</remarks>
+		public string OriginalPageNameText { get; }
 
 		/// <summary>Gets or sets the name of the page without the namespace.</summary>
 		/// <value>The name of the page without the namespace.</value>
