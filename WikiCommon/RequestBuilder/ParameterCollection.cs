@@ -479,20 +479,18 @@
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
 		public bool TryGetValue(string key, out IParameter value)
 		{
-			if (this.Dictionary == null)
-			{
-				foreach (var testItem in this)
-				{
-					if (this.GetKeyForItem(testItem) == key)
-					{
-						value = testItem;
-						return true;
-					}
-				}
-			}
-			else
+			if (this.Dictionary != null)
 			{
 				return this.Dictionary.TryGetValue(key, out value);
+			}
+
+			foreach (var testItem in this)
+			{
+				if (this.GetKeyForItem(testItem) == key)
+				{
+					value = testItem;
+					return true;
+				}
 			}
 
 			value = null;

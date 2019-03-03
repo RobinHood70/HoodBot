@@ -12,20 +12,18 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Public Methods
 		public bool TryGetValue(string name, out TModule item)
 		{
-			if (this.Dictionary == null)
-			{
-				foreach (var testItem in this)
-				{
-					if (this.GetKeyForItem(testItem) == name)
-					{
-						item = testItem;
-						return true;
-					}
-				}
-			}
-			else
+			if (this.Dictionary != null)
 			{
 				return this.Dictionary.TryGetValue(name, out item);
+			}
+
+			foreach (var testItem in this)
+			{
+				if (this.GetKeyForItem(testItem) == name)
+				{
+					item = testItem;
+					return true;
+				}
 			}
 
 			item = null;
@@ -35,7 +33,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		public bool TryGetValue<TOutput>(string name, out TOutput item)
 			where TOutput : class, TModule
 		{
-			if (this.TryGetValue(name, out TModule foundItem))
+			if (this.TryGetValue(name, out var foundItem))
 			{
 				item = foundItem as TOutput;
 				return item == null ? throw new InvalidOperationException(CurrentCulture(IncorrectModuleType, name, typeof(TOutput).Name, foundItem.GetType().Name)) : true;

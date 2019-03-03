@@ -84,9 +84,9 @@
 			}
 
 			// Do not change page name if Namespace is null (meaning it's a non-local interwiki or there was a parsing failure).
-			if (!this.Namespace?.CaseSensitive ?? false)
+			if (this.Namespace != null)
 			{
-				this.PageName = this.PageName.UpperFirst(site.Culture);
+				this.PageName = this.Namespace.CapitalizePageName(this.PageName);
 			}
 		}
 
@@ -138,7 +138,7 @@
 
 		/// <summary>Gets a value indicating whether this instance is identical to the local wiki.</summary>
 		/// <value><c>true</c> if this instance is local wiki; otherwise, <c>false</c>.</value>
-		public bool IsLocalWiki => this.Interwiki == null || this.Interwiki.LocalWiki;
+		public bool IsLocal => this.Interwiki == null || this.Interwiki.LocalWiki;
 
 		/// <summary>Gets or sets the namespace the page is in.</summary>
 		/// <value>The namespace.</value>
@@ -191,7 +191,6 @@
 		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
 		public bool SimpleEquals(ISimpleTitle other) =>
 			other != null &&
-			this.IsLocalWiki &&
 			this.Namespace == other.Namespace &&
 			this.Namespace.PageNameEquals(this.PageName, other.PageName);
 		#endregion

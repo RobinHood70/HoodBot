@@ -71,7 +71,7 @@
 			ThrowNull(pageName, nameof(pageName));
 			pageName = pageName.Normalize();
 			this.Namespace = ns;
-			this.PageName = ns.CaseSensitive ? pageName : pageName.UpperFirst(ns.Site.Culture);
+			this.PageName = ns.CapitalizePageName(pageName);
 			this.Key = this.FullPageName;
 		}
 
