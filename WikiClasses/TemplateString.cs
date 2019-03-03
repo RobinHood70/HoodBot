@@ -91,7 +91,7 @@
 		/// <param name="string1">The first string.</param>
 		/// <param name="string2">The second string.</param>
 		/// <returns>The result of the operator.</returns>
-		public static bool operator ==(TemplateString string1, TemplateString string2) => string1 == null ? string2 == null : string1.Equals(string2);
+		public static bool operator ==(TemplateString string1, TemplateString string2) => string1?.Equals(string2) ?? string2 is null;
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="string1">The first string.</param>
@@ -116,6 +116,14 @@
 		/// <returns>A copy of this instance.</returns>
 		/// <remarks>Since all values are strings, deep/shallow does not apply.</remarks>
 		public TemplateString Clone() => new TemplateString(this);
+
+		/// <summary>Merges leading and trailing space into the value and clears the space properties.</summary>
+		public void Merge()
+		{
+			this.valueText = this.leadingWhiteSpace + this.valueText + this.trailingWhiteSpace;
+			this.leadingWhiteSpace = string.Empty;
+			this.trailingWhiteSpace = string.Empty;
+		}
 
 		/// <summary>Builds the full text of the value, including surrounding whitespace.</summary>
 		/// <param name="includeWhiteSpace">Whether to include <see cref="LeadingWhiteSpace"/> and <see cref="TrailingWhiteSpace"/> in the return value.</param>
