@@ -201,29 +201,16 @@
 				regexBefore = @"(?<before>" + regexBefore + ")";
 			}
 
-			if (regexNamespaces == null)
-			{
-				regexNamespaces = regexWildNamespace;
-			}
-
-			if (regexPageNames == null)
-			{
-				regexPageNames = regexWild;
-			}
-
-			if (regexDisplayTexts == null)
-			{
-				regexDisplayTexts = regexWild;
-			}
+			var nsOptional = regexNamespaces == null ? "?" : string.Empty;
+			var displayOptional = regexDisplayTexts == null ? "?" : string.Empty;
+			regexNamespaces = regexNamespaces ?? regexWildNamespace;
+			regexPageNames = regexPageNames ?? regexWild;
+			regexDisplayTexts = regexDisplayTexts ?? regexWild;
 
 			if (regexAfter != null)
 			{
 				regexAfter = @"(?<after>" + regexAfter + ")";
 			}
-
-			// Use string check in case .*? was passed as a parameter instead of null.
-			var nsOptional = regexNamespaces == regexWild ? "?" : string.Empty;
-			var displayOptional = regexDisplayTexts == regexWild ? "?" : string.Empty;
 
 			return new Regex(regexBefore + @"\[\[(?<pre>:)?\s*((?<namespace>" + regexNamespaces + "):)" + nsOptional + @"(?<pagename>" + regexPageNames + @")?(\#(?<fragment>.*?))?(\s*\|\s*(?<displaytext>" + regexDisplayTexts + @"))" + displayOptional + @"\s*]]" + regexAfter);
 		}
@@ -324,16 +311,19 @@
 					sb.Append('|');
 					if (name.Length > 0)
 					{
-						sb.Append("(?i:" + Regex.Escape(name.Substring(0, 1)) + ")");
-						if (name.Length > 1)
+						if (ignoreInitialCaps)
 						{
-							var nameRemainder = Regex.Escape(name.Substring(1));
-							if (ignoreInitialCaps)
+							sb.Append("(?i:" + Regex.Escape(name.Substring(0, 1)) + ")");
+							if (name.Length > 1)
 							{
+								var nameRemainder = Regex.Escape(name.Substring(1));
 								nameRemainder = nameRemainder.Replace(@"\ ", @"[_\ ]+");
+								sb.Append(nameRemainder);
 							}
-
-							sb.Append(nameRemainder);
+						}
+						else
+						{
+							sb.Append(Regex.Escape(name));
 						}
 					}
 				}
