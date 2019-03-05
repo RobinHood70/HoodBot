@@ -124,6 +124,11 @@
 		/// <param name="names">The page names, with or without the leading namespace text.</param>
 		public void Add(int defaultNamespace, params string[] names) => this.Add(defaultNamespace, names as IEnumerable<string>);
 
+		/// <summary>Adds multiple titles to the <see cref="TitleCollection">collection</see> at once.</summary>
+		/// <param name="titles">The titles to add.</param>
+		/// <remarks>This method is for convenience only. Unlike the equivalent <see cref="List{T}" /> function, it simply calls <see cref="Add(TTitle)" /> repeatedly and provides no performance benefit.</remarks>
+		public void AddRange(IEnumerable<TTitle> titles) => WikiCommon.Extensions.AddRange(this, titles);
+
 		/// <summary>Determines whether the <see cref="TitleCollection">collection</see> contains a specific value.</summary>
 		/// <param name="item">The object to locate in the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns><see langword="true" /> if <paramref name="item" /> is found in the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />.</returns>
@@ -417,10 +422,14 @@
 		/// <remarks>Query pages are a subset of Special pages that conform to a specific standard. You can find a list by using the Help feature of the API (<c>/api.php?action=help&amp;modules=query+querypage</c>). Note that a few of these (e.g., ListDuplicatedFiles) have API equivalents that are more functional and produce the same or more detailed results.</remarks>
 		public void GetQueryPage(string page, IReadOnlyDictionary<string, string> parameters) => this.GetQueryPage(new QueryPageInput(page) { Parameters = parameters });
 
-		/// <summary>Adds multiple titles to the <see cref="TitleCollection">collection</see> at once.</summary>
-		/// <param name="titles">The titles to add.</param>
-		/// <remarks>This method is for convenience only. Unlike the equivalent <see cref="List{T}" /> function, it simply calls <see cref="Add(TTitle)" /> repeatedly and provides no performance benefit.</remarks>
-		public void AddRange(IEnumerable<TTitle> titles) => WikiCommon.Extensions.AddRange(this, titles);
+		/// <summary>Adds a random set of pages to the collection.</summary>
+		/// <param name="numPages">The number pages.</param>
+		public void GetRandom(int numPages) => this.GetRandomPages(new RandomInput() { MaxItems = numPages });
+
+		/// <summary>Adds a random set of pages from the specified namespaces to the collection.</summary>
+		/// <param name="numPages">The number pages.</param>
+		/// <param name="namespaces">The namespaces.</param>
+		public void GetRandom(int numPages, IEnumerable<int> namespaces) => this.GetRandomPages(new RandomInput() { MaxItems = numPages, Namespaces = namespaces });
 
 		/// <summary>Adds all available recent changes pages to the collection.</summary>
 		public void GetRecentChanges() => this.GetRecentChanges(new RecentChangesInput());
@@ -841,6 +850,10 @@
 		/// <param name="input">The input parameters.</param>
 		/// <remarks>Query pages are a subset of Special pages that conform to a specific standard. You can find a list by using the Help feature of the API (<c>/api.php?action=help&amp;modules=query+querypage</c>). Note that a few of these (e.g., ListDuplicatedFiles) have API equivalents that are more functional and produce the same or more detailed results.</remarks>
 		protected abstract void GetQueryPage(QueryPageInput input);
+
+		/// <summary>Gets a random set of pages from the wiki.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected abstract void GetRandomPages(RandomInput input);
 
 		/// <summary>Adds recent changes pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>

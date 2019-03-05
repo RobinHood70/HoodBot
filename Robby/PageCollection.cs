@@ -440,6 +440,10 @@
 		/// <remarks>Query pages are a subset of Special pages that conform to a specific standard. You can find a list by using the Help feature of the API (<c>/api.php?action=help&amp;modules=query+querypage</c>). Note that a few of these (e.g., ListDuplicatedFiles) have API equivalents that are more functional and produce the same or more detailed results.</remarks>
 		protected override void GetQueryPage(QueryPageInput input) => this.LoadPages(input);
 
+		/// <summary>Gets a random set of pages from the wiki.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected override void GetRandomPages(RandomInput input) => this.LoadPages(input);
+
 		/// <summary>Adds recent changes pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		protected override void GetRecentChanges(RecentChangesInput input) => this.LoadPages(input);

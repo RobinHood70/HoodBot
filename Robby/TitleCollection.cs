@@ -403,6 +403,14 @@
 			this.FillFromTitleItems(result);
 		}
 
+		/// <summary>Gets a random set of pages from the wiki.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected override void GetRandomPages(RandomInput input)
+		{
+			var result = this.Site.AbstractionLayer.Random(input);
+			this.FillFromTitleItems(result);
+		}
+
 		/// <summary>Adds recent changes pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		protected override void GetRecentChanges(RecentChangesInput input)
