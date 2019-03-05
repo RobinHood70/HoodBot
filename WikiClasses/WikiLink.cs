@@ -6,6 +6,7 @@
 	using System.Text;
 	using System.Text.RegularExpressions;
 	using RobinHood70.WikiCommon;
+	using static RobinHood70.WikiClasses.Searches;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Represents a wiki link.</summary>
@@ -180,9 +181,9 @@
 		public static Regex LinkFinder(string regexBefore, IEnumerable<string> namespaces, IEnumerable<string> pageNames, IEnumerable<string> displayTexts, string regexAfter) =>
 			LinkFinderRaw(
 				regexBefore,
-				EnumerableRegex(namespaces, true),
-				EnumerableRegex(pageNames, true),
-				EnumerableRegex(displayTexts, false),
+				EnumerableRegex(namespaces, SearchCasing.IgnoreInitialCaps),
+				EnumerableRegex(pageNames, SearchCasing.IgnoreInitialCaps),
+				EnumerableRegex(displayTexts, SearchCasing.Exact),
 				regexAfter);
 
 		/// <summary>Creates a <see cref="Regex"/> to find all links matching the values provided which also have the specified surrounding text.</summary>
@@ -298,44 +299,6 @@
 		/// <returns>A <see cref="string"/> that represents this instance.</returns>
 		/// <remarks>This is a simple wrapper around the <see cref="Build(StringBuilder)"/> method.</remarks>
 		public override string ToString() => this.Build(new StringBuilder()).ToString();
-		#endregion
-
-		#region Private Methods
-		private static string EnumerableRegex(IEnumerable<string> input, bool ignoreInitialCaps)
-		{
-			if (input != null)
-			{
-				var sb = new StringBuilder();
-				foreach (var name in input)
-				{
-					sb.Append('|');
-					if (name.Length > 0)
-					{
-						if (ignoreInitialCaps)
-						{
-							sb.Append("(?i:" + Regex.Escape(name.Substring(0, 1)) + ")");
-							if (name.Length > 1)
-							{
-								var nameRemainder = Regex.Escape(name.Substring(1));
-								nameRemainder = nameRemainder.Replace(@"\ ", @"[_\ ]+");
-								sb.Append(nameRemainder);
-							}
-						}
-						else
-						{
-							sb.Append(Regex.Escape(name));
-						}
-					}
-				}
-
-				if (sb.Length > 0)
-				{
-					return sb.ToString(1, sb.Length - 1);
-				}
-			}
-
-			return null;
-		}
 		#endregion
 	}
 }
