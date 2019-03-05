@@ -21,7 +21,7 @@
 			var nameRemaining = DecodeAndNormalize(fullPageName);
 			if (nameRemaining.Length > 0 && nameRemaining[0] == ':')
 			{
-				// this.Namespace = site.Namespaces[MediaWikiNamespaces.Main];
+				this.LeadingColon = true;
 				nameRemaining = nameRemaining.Substring(1).TrimStart();
 			}
 
@@ -140,6 +140,10 @@
 		/// <value><c>true</c> if this instance is local wiki; otherwise, <c>false</c>.</value>
 		public bool IsLocal => this.Interwiki == null || this.Interwiki.LocalWiki;
 
+		/// <summary>Gets a value indicating whether the title had a leading colon.</summary>
+		/// <value><see langword="true"/> if there was a leading colon; otherwise, <see langword="false"/>.</value>
+		public bool LeadingColon { get; }
+
 		/// <summary>Gets or sets the namespace the page is in.</summary>
 		/// <value>The namespace.</value>
 		public Namespace Namespace { get; set; }
@@ -201,7 +205,7 @@
 		/// <returns>A <see cref="string" /> that represents this instance.</returns>
 		public override string ToString()
 		{
-			var retval = string.Empty;
+			var retval = this.LeadingColon ? ":" : string.Empty;
 			if (this.Interwiki != null)
 			{
 				retval += this.Interwiki.Prefix + ':';
