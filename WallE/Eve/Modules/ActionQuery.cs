@@ -161,19 +161,20 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(input, nameof(input));
 			base.BeforeSubmit(input);
+			var limiter = input.GeneratorInput as ILimitableInput ?? input;
 			if (input.PropertyModules.TryGetValue("revisions", out PropRevisions revModule) && revModule.IsRevisionRange)
 			{
 				this.MaximumListSize = 1;
 			}
 			else
 			{
-				if (input.Limit > 0 && input.Limit < this.MaximumListSize)
+				if (limiter.Limit > 0 && limiter.Limit < this.MaximumListSize)
 				{
-					this.MaximumListSize = input.Limit;
+					this.MaximumListSize = limiter.Limit;
 				}
 			}
 
-			this.ItemsRemaining = input.MaxItems == 0 ? int.MaxValue : input.MaxItems;
+			this.ItemsRemaining = limiter.MaxItems == 0 ? int.MaxValue : limiter.MaxItems;
 
 			this.CheckActiveModules(input);
 			var newInput = new QueryInput(input) { GetInterwikiUrls = input.GetInterwikiUrls }; // Make a copy so we can modify it.

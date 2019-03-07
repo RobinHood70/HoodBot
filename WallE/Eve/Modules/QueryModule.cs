@@ -33,12 +33,11 @@ namespace RobinHood70.WallE.Eve.Modules
 			this.Wal = wal;
 			this.SiteVersion = wal.SiteVersion;
 			this.Input = input;
-			this.SetItemsRemaining(0);
 			this.Output = output;
 			if (input is ILimitableInput limitable)
 			{
 				this.maxItems = limitable.MaxItems;
-				this.requestedLimit = (limitable.Limit == 0 || limitable.MaxItems < limitable.Limit) ? this.maxItems : limitable.Limit;
+				this.requestedLimit = limitable.Limit; // (limitable.Limit == 0 || limitable.MaxItems < limitable.Limit) ? this.maxItems : limitable.Limit;
 			}
 			else
 			{
@@ -46,6 +45,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				this.requestedLimit = 0;
 			}
 
+			this.SetItemsRemaining(0);
 			this.pageSetGenerator = pageSetGenerator;
 		}
 		#endregion

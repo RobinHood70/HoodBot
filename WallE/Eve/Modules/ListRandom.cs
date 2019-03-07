@@ -58,11 +58,12 @@ namespace RobinHood70.WallE.Eve.Modules
 			return title;
 		}
 
+		/* This was a nice idea, but later versions remove the former 10/20 limit, which means we're now inadvertently requesting hundreds or thousands. Better to let the warning come through on older versions, so the user knows.
 		protected override int GetNumericLimit()
 		{
 			var limit = base.GetNumericLimit();
 			return limit > 10 ? -1 : limit;
-		}
+		} */
 		#endregion
 	}
 }
