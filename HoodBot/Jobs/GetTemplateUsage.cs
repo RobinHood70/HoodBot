@@ -113,7 +113,7 @@
 				foreach (var param in template.Template)
 				{
 					// For now, we're assuming that trimming trailing lines from anon parameters is desirable, but could be made optional if needed.
-					row[param.Name] = param.Anonymous ? param.Value.TrimEnd(new[] { '\r', '\n' }) : param.Value;
+					row[param.Name] = param.Anonymous ? param.Value.TrimEnd(TextArrays.NewLineChars) : param.Value;
 				}
 			}
 
