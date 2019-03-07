@@ -180,7 +180,7 @@
 		/// <param name="pageName">Name of the page.</param>
 		/// <returns>A page name in the given namespace, if it wasn't already.</returns>
 		/// <remarks>This is a convenience function that wraps around <see cref="ForcedNamespace(Namespace, string)"/>.</remarks>
-		public static string CoercePageName(Site site, int ns, string pageName) => CoercePageName(site.Namespaces[ns], pageName);
+		public static string CoercePageName(Site site, int ns, string pageName) => CoercePageName(site?.Namespaces[ns], pageName);
 
 		/// <summary>Returns a <see cref="Title"/> for the given namespace and page name, allowing for the possibility that the page may already have the namespace prepended to it.</summary>
 		/// <param name="ns">The namespace the page should belong to.</param>
@@ -211,7 +211,7 @@
 		/// <param name="ns">The namespace ID the page should belong to.</param>
 		/// <param name="pageName">The name of the page, with or without the corresponding namespace prefix.</param>
 		/// <returns>A Title object with the given name in the given namespace.</returns>
-		public static Title ForcedNamespace(Site site, int ns, string pageName) => ForcedNamespace(site.Namespaces[ns], pageName);
+		public static Title ForcedNamespace(Site site, int ns, string pageName) => ForcedNamespace(site?.Namespaces[ns], pageName);
 
 		/// <summary>Builds the full name of the page from the namespace and page name, accounting for Main space.</summary>
 		/// <param name="ns">The namespace of the page.</param>
