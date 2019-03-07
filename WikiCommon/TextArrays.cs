@@ -29,6 +29,12 @@
 		public static readonly char[] LineFeed = { '\n' };
 
 		[SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly", Justification = "As above.")]
+		public static readonly string[] LinkTerminator = { "[[" };
+
+		[SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly", Justification = "As above.")]
+		public static readonly string[] LinkMarker = { "[[" };
+
+		[SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly", Justification = "As above.")]
 		public static readonly char[] NewLineChars = { '\n', '\r' };
 
 		[SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly", Justification = "As above.")]
@@ -51,6 +57,12 @@
 
 		[SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly", Justification = "As above.")]
 		public static readonly char[] Tab = { '\t' };
+
+		[SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly", Justification = "As above.")]
+		public static readonly string[] TemplateTerminator = { "{{" };
+
+		[SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly", Justification = "As above.")]
+		public static readonly string[] TemplateMarker = { "{{" };
 #pragma warning restore CS1591
 	}
 }
