@@ -6,7 +6,7 @@
 
 	/// <summary>Represents a string with optional whitespace before and after it, such as a parameter name or value, handling each element separately.</summary>
 	/// <remarks>There are no limitations on what is considered to be whitespace. This allows HTML comments and other unvalued text to be stored as needed.</remarks>
-	public sealed class TemplateString : IEquatable<TemplateString>
+	public sealed class ParameterString : IEquatable<ParameterString>
 	{
 		#region Fields
 		private string leadingWhiteSpace;
@@ -16,52 +16,54 @@
 
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="TemplateString"/> class.</summary>
-		public TemplateString()
+		/// <summary>Initializes a new instance of the <see cref="ParameterString"/> class.</summary>
+		public ParameterString()
 			: this(string.Empty, string.Empty, string.Empty)
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="TemplateString"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="ParameterString"/> class.</summary>
 		/// <param name="value">The value of the string.</param>
-		public TemplateString(string value)
+		public ParameterString(string value)
 			: this(string.Empty, value, string.Empty)
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="TemplateString"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="ParameterString"/> class.</summary>
 		/// <param name="leadingWhiteSpace">The leading whitespace.</param>
 		/// <param name="trailingWhiteSpace">The trailing whitespace.</param>
-		/// <remarks>This constructor is primarily intended for use with the <see cref="Template.DefaultNameFormat"/> and <see cref="Template.DefaultValueFormat"/> properties.</remarks>
-		public TemplateString(string leadingWhiteSpace, string trailingWhiteSpace)
+		/// <remarks>This constructor is primarily intended for use with the <see cref="ParameterCollection.DefaultNameFormat"/> and <see cref="ParameterCollection.DefaultValueFormat"/> properties. It initializes only the space properties with no value.</remarks>
+		public ParameterString(string leadingWhiteSpace, string trailingWhiteSpace)
 			: this(leadingWhiteSpace, null, trailingWhiteSpace)
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="TemplateString"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="ParameterString"/> class.</summary>
 		/// <param name="leadingWhiteSpace">The leading whitespace.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="trailingWhiteSpace">The trailing whitespace.</param>
-		public TemplateString(string leadingWhiteSpace, string value, string trailingWhiteSpace)
+		public ParameterString(string leadingWhiteSpace, string value, string trailingWhiteSpace)
 		{
 			this.LeadingWhiteSpace = leadingWhiteSpace;
 			this.Value = value;
 			this.TrailingWhiteSpace = trailingWhiteSpace;
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="TemplateString"/> class from an existing one.</summary>
+		/// <summary>Initializes a new instance of the <see cref="ParameterString"/> class from an existing one.</summary>
 		/// <param name="copy">The instance to copy.</param>
 		/// <remarks>Since all values are strings, deep/shallow does not apply.</remarks>
-		private TemplateString(TemplateString copy)
+		private ParameterString(ParameterString copy)
 		{
 			ThrowNull(copy, nameof(copy));
-			this.LeadingWhiteSpace = copy.LeadingWhiteSpace;
-			this.Value = copy.Value;
-			this.TrailingWhiteSpace = copy.TrailingWhiteSpace;
+			this.CopyFrom(copy);
 		}
 		#endregion
 
 		#region Public Properties
+
+		/// <summary>Gets the length of the string, including surrounding whitespace.</summary>
+		/// <value>The length of the string, including surrounding whitespace.</value>
+		public int Length => this.LeadingWhiteSpace.Length + this.Value.Length + this.TrailingWhiteSpace.Length;
 
 		/// <summary>Gets or sets the leading whitespace surrounding the string.</summary>
 		public string LeadingWhiteSpace
@@ -85,37 +87,72 @@
 		}
 		#endregion
 
+		#region Implicit Conversion Operators
+
+		/// <summary>Performs an implicit conversion from <see cref="ParameterString"/> to <see cref="string"/>.</summary>
+		/// <param name="parameter">The parameter.</param>
+		/// <returns>The result of the conversion.</returns>
+		public static implicit operator string(ParameterString parameter) => parameter?.Value;
+
+		/// <summary>Performs an implicit conversion from <see cref="string"/> to <see cref="ParameterString"/>.</summary>
+		/// <param name="parameter">The parameter.</param>
+		/// <returns>The result of the conversion.</returns>
+		/// <remarks>While going to a string is an implicit operation, going from one is an explicit operation, since any prior format will be lost.</remarks>
+		public static explicit operator ParameterString(string parameter) => new ParameterString(parameter);
+		#endregion
+
 		#region Public Operators
 
 		/// <summary>Implements the operator ==.</summary>
 		/// <param name="string1">The first string.</param>
 		/// <param name="string2">The second string.</param>
 		/// <returns>The result of the operator.</returns>
-		public static bool operator ==(TemplateString string1, TemplateString string2) => string1?.Equals(string2) ?? string2 is null;
+		public static bool operator ==(ParameterString string1, ParameterString string2) => string1?.Equals(string2) ?? string2 is null;
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="string1">The first string.</param>
 		/// <param name="string2">The second string.</param>
 		/// <returns>The result of the operator.</returns>
-		public static bool operator !=(TemplateString string1, TemplateString string2) => !(string1 == string2);
+		public static bool operator !=(ParameterString string1, ParameterString string2) => !(string1 == string2);
 		#endregion
 
 		#region Public Methods
 
 		/// <summary>Builds the full text of the value, including surrounding whitespace, into the provided StringBuilder.</summary>
 		/// <param name="builder">The StringBuilder to append to.</param>
-		public void Build(StringBuilder builder)
+		/// <returns>The original StringBuilder.</returns>
+		public StringBuilder Build(StringBuilder builder)
 		{
 			ThrowNull(builder, nameof(builder));
 			builder.Append(this.LeadingWhiteSpace);
 			builder.Append(this.Value);
 			builder.Append(this.TrailingWhiteSpace);
+
+			return builder;
 		}
 
 		/// <summary>Clones this instance.</summary>
 		/// <returns>A copy of this instance.</returns>
 		/// <remarks>Since all values are strings, deep/shallow does not apply.</remarks>
-		public TemplateString Clone() => new TemplateString(this);
+		public ParameterString Clone() => new ParameterString(this);
+
+		/// <summary>Copies the format from the source ParameterString.</summary>
+		/// <param name="source">The source.</param>
+		public void CopyFormatFrom(ParameterString source)
+		{
+			ThrowNull(source, nameof(source));
+			this.leadingWhiteSpace = source.leadingWhiteSpace;
+			this.trailingWhiteSpace = source.trailingWhiteSpace;
+		}
+
+		/// <summary>Copies the entire contents from the source ParameterString.</summary>
+		/// <param name="source">The source.</param>
+		public void CopyFrom(ParameterString source)
+		{
+			ThrowNull(source, nameof(source));
+			this.CopyFormatFrom(source);
+			this.Value = source.Value;
+		}
 
 		/// <summary>Merges leading and trailing space into the value and clears the space properties.</summary>
 		public void Merge()
@@ -162,7 +199,7 @@
 		///   </span>
 		///   <span class="nu">
 		///     <span class="keyword">true</span> (<span class="keyword">True</span> in Visual Basic)</span> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <span class="keyword"><span class="languageSpecificText"><span class="cs">false</span><span class="vb">False</span><span class="cpp">false</span></span></span><span class="nu"><span class="keyword">false</span> (<span class="keyword">False</span> in Visual Basic)</span>.</returns>
-		public bool Equals(TemplateString other) =>
+		public bool Equals(ParameterString other) =>
 			other != null &&
 			this.leadingWhiteSpace == other.leadingWhiteSpace &&
 			this.trailingWhiteSpace == other.trailingWhiteSpace &&
@@ -177,7 +214,7 @@
 		/// <param name="obj">The <see cref="object"/> to compare with this instance.</param>
 		/// <returns>
 		///   <c>true</c> if the specified <see cref="object"/> is equal to this instance; otherwise, <c>false</c>.</returns>
-		public override bool Equals(object obj) => this.Equals(obj as TemplateString);
+		public override bool Equals(object obj) => this.Equals(obj as ParameterString);
 
 		/// <summary>Returns a hash code for this instance.</summary>
 		/// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>

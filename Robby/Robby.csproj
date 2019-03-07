@@ -68,6 +68,7 @@
     <Compile Include="Design\IFullTitle.cs" />
     <Compile Include="Design\TitleComparer{T}.cs" />
     <Compile Include="Design\TitleParts.cs" />
+    <Compile Include="ImageLink.cs" />
     <Compile Include="InterwikiEntry.cs" />
     <Compile Include="InterwikiMap.cs" />
     <Compile Include="CategoryPage.cs" />
@@ -91,6 +92,7 @@
     <Compile Include="PageTextChangeArgs.cs" />
     <Compile Include="RecentChange.cs" />
     <Compile Include="RecentChangesOptions.cs" />
+    <Compile Include="SiteLink.cs" />
     <Compile Include="TitleCollection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -129,6 +131,10 @@
       <Project>{f338af86-4502-4121-b032-092ca727d51b}</Project>
       <Name>WallE</Name>
       <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\WikiClasses\WikiClasses.csproj">
+      <Project>{AD688255-64E2-451C-A32F-85877B7BDEF0}</Project>
+      <Name>WikiClasses</Name>
     </ProjectReference>
     <ProjectReference Include="..\WikiCommon\WikiCommon.csproj">
       <Project>{64878636-CB8C-434E-A03D-B3946216FC7F}</Project>

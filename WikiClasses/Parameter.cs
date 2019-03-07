@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.WikiClasses
 {
-	using System;
 	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Text;
@@ -15,19 +14,23 @@
 		private static Regex equalsFinder = new Regex(@"(&#(x3b|61);|\{\{=}}|<nowiki>=</nowiki>)", RegexOptions.IgnoreCase);
 		#endregion
 
+		#region Private Fields
+		private bool anonymous;
+		#endregion
+
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
 		/// <param name="value">The parameter value.</param>
 		public Parameter(string value)
-			: this(new TemplateString(), new TemplateString(value), true)
+			: this(null, new ParameterString(value), true)
 		{
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
 		/// <param name="value">The full parameter value, including any leading and trailing whitespace.</param>
-		public Parameter(TemplateString value)
-			: this(new TemplateString(), value, true)
+		public Parameter(ParameterString value)
+			: this(null, value, true)
 		{
 		}
 
@@ -35,29 +38,38 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		public Parameter(string name, string value)
-			: this(new TemplateString(name), new TemplateString(value), name.Length == 0)
+			: this(name == null ? null : new ParameterString(name), new ParameterString(value), name == null)
+		{
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
+		/// <param name="name">The full parameter name, including any leading and trailing whitespace. May be null.</param>
+		/// <param name="value">The full parameter value, including any leading and trailing whitespace. May not be null.</param>
+		/// <param name="anonymous">Whether the parameter should be treated as anonymous. The <paramref name="name"/> parameter must be non-null for this to take effect.</param>
+		public Parameter(string name, string value, bool anonymous)
+			: this(name == null ? null : new ParameterString(name), new ParameterString(value), anonymous)
 		{
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
 		/// <param name="name">The full parameter name, including any leading and trailing whitespace.</param>
 		/// <param name="value">The full parameter value, including any leading and trailing whitespace.</param>
-		public Parameter(TemplateString name, TemplateString value)
-			: this(name, value, (name?.Value.Length ?? 0) == 0)
+		public Parameter(ParameterString name, ParameterString value)
+			: this(name, value, name == null)
 		{
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
-		/// <param name="name">The full parameter name, including any leading and trailing whitespace.</param>
-		/// <param name="value">The full parameter value, including any leading and trailing whitespace.</param>
-		/// <param name="anonymous">Whether the parameter should be treated as anonymous. This overrides automatic detection based on name.</param>
-		public Parameter(TemplateString name, TemplateString value, bool anonymous)
+		/// <param name="name">The full parameter name, including any leading and trailing whitespace. May be null.</param>
+		/// <param name="value">The full parameter value, including any leading and trailing whitespace. May not be null.</param>
+		/// <param name="anonymous">Whether the parameter should be treated as anonymous. The <paramref name="name"/> parameter must be non-null for this to take effect.</param>
+		public Parameter(ParameterString name, ParameterString value, bool anonymous)
 		{
-			ThrowNull(name, nameof(name));
+			// name can be null; value cannot.
 			ThrowNull(value, nameof(value));
 			this.FullName = name;
 			this.FullValue = value;
-			this.Anonymous = anonymous;
+			this.anonymous = anonymous;
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class from an existing one.</summary>
@@ -66,35 +78,54 @@
 		private Parameter(Parameter copy)
 		{
 			ThrowNull(copy, nameof(copy));
-			this.FullName = copy.FullName.Clone();
+			this.FullName = copy.FullName?.Clone();
 			this.FullValue = copy.FullValue.Clone();
-			this.Anonymous = copy.Anonymous;
+			this.anonymous = copy.anonymous;
 		}
 
 		#endregion
 
 		#region Public Properties
 
-		/// <summary>Gets a value indicating whether this <see cref="Parameter"/> is anonymous.</summary>
-		/// <value>
-		///   <c>true</c> if anonymous; otherwise, <c>false</c>.</value>
-		public bool Anonymous { get; private set; }
+		/// <summary>Gets or sets a value indicating whether this <see cref="Parameter"/> is anonymous. A parameter with <c><see cref="FullName"/> == <see langword="null"/></c> will always return <see langword="true"/>.</summary>
+		/// <value><see langword="true"/> if the parameter is anonymous; otherwise, <see langword="false"/>.</value>
+		/// <remarks>
+		/// <para>Setting this property directly performs no checks on the data, which may result in unintended consequences. For example, a template parameter of <c>formula=a² + b² = c²</c> which is made anonymous would effectively result in a new parameter named <c>a² + b²</c> with a value of <c>c²</c>. To provide some degree of safety, use the <see cref="Anonymize(string)"/> method instead.</para>
+		/// <para>Also note that setting the value to <see langword="false"/> when no name exists will still result in a <see langword="true"/> value being returned until such time as a name is set.</para>
+		/// <para>If a name is set and a parameter is anonymous, the parameter continues to be addressable by name. This allows the user to create aliases to specific anonymous parameters for their own internal use.</para>
+		/// </remarks>
+		public bool Anonymous
+		{
+			get => this.anonymous || this.FullName == null;
+			set => this.anonymous = value;
+		}
 
-		/// <summary>Gets the full name.</summary>
+		/// <summary>Gets or sets the full name.</summary>
 		/// <value>The full parameter name, including any leading or trailing whitespace.</value>
-		public TemplateString FullName { get; internal set; }
+		public ParameterString FullName { get; set; }
 
 		/// <summary>Gets the full value.</summary>
 		/// <value>The full parameter value, including any leading or trailing whitespace.</value>
-		public TemplateString FullValue { get; internal set; }
+		public ParameterString FullValue { get; }
 
 		/// <summary>Gets or sets the name.</summary>
 		/// <value>The parameter name.</value>
 		/// <remarks>This is a convenience property, equivalent to <c>FullName.Value</c>.</remarks>
 		public string Name
 		{
-			get => this.FullName.Value;
-			set => this.FullName.Value = value;
+			get => this.FullName?.Value;
+			set
+			{
+				if (value == null)
+				{
+					this.FullName = null;
+				}
+				else
+				{
+					this.FullName = this.FullName ?? new ParameterString();
+					this.FullName.Value = value;
+				}
+			}
 		}
 
 		/// <summary>Gets or sets the value.</summary>
@@ -156,33 +187,32 @@
 		/// <remarks>The name provided will override the current name, if one exists, for consistency of results. For example, if you are anonymizing the "image" parameter to be the first unnamed parameter, but it contains an unescaped equals sign, you can provide "1" as the parameter to ensure that the name "image" is changed, even if a name is still required.</remarks>
 		public bool Anonymize(string nameIfNeeded)
 		{
+			var retval = false;
 			if (equalsFinder.Replace(this.Value, string.Empty).Contains("="))
 			{
 				// Can't anonymize because it contains an equals sign, so use provided label instead.
 				if (this.Name != nameIfNeeded || this.Anonymous)
 				{
 					this.Rename(nameIfNeeded);
-					this.Anonymous = false;
-					return true;
+					this.anonymous = false;
+					retval = true;
 				}
 			}
 			else
 			{
-				if (!this.Anonymous || (this.FullValue.LeadingWhiteSpace?.Length + this.FullValue.TrailingWhiteSpace?.Length) > 0)
-				{
-					this.Anonymous = true;
-					this.FullValue.LeadingWhiteSpace = string.Empty;
-					this.FullValue.TrailingWhiteSpace = string.Empty;
-					return true;
-				}
+				retval = !this.anonymous || (this.FullValue.LeadingWhiteSpace?.Length + this.FullValue.TrailingWhiteSpace?.Length) > 0;
+				this.anonymous = true;
+				this.FullValue.LeadingWhiteSpace = string.Empty;
+				this.FullValue.TrailingWhiteSpace = string.Empty;
 			}
 
-			return false;
+			return retval;
 		}
 
 		/// <summary>Builds the parameter text using the specified builder.</summary>
 		/// <param name="builder">The builder.</param>
-		public void Build(StringBuilder builder)
+		/// <returns>A copy of the <see cref="StringBuilder"/> passed into the method.</returns>
+		public StringBuilder Build(StringBuilder builder)
 		{
 			if (!this.Anonymous)
 			{
@@ -191,6 +221,8 @@
 			}
 
 			this.FullValue.Build(builder);
+
+			return builder;
 		}
 
 		/// <summary>Clones this instance.</summary>
@@ -208,8 +240,8 @@
 		{
 			if (this.Name != newName)
 			{
-				this.Anonymous = false;
-				this.FullName.Value = newName;
+				this.anonymous = false;
+				this.Name = newName;
 
 				return true;
 			}
@@ -224,7 +256,7 @@
 		/// <param name="trimText">Whether to trim the text of the name and value or just clear the whitespace properties of each.</param>
 		public void Trim(bool trimText)
 		{
-			this.FullName.Trim(trimText);
+			this.FullName?.Trim(trimText);
 			this.FullValue.Trim(trimText);
 		}
 
@@ -236,7 +268,7 @@
 
 		/// <summary>Converts the parameter to its equivalent wiki text.</summary>
 		/// <returns>A <see cref="string"/> that represents this instance.</returns>
-		public override string ToString() => this.Anonymous ? this.FullValue.ToString(true) : this.FullName.ToString(true) + "=" + this.FullValue.ToString(true);
+		public override string ToString() => this.Build(new StringBuilder()).ToString();
 		#endregion
 	}
 }

@@ -24,7 +24,7 @@
 				foreach (var match in matches.Cast<Match>())
 				{
 					var template = new Template(match.Value);
-					template.ForceNames();
+					template.ForcePositionalNames();
 					allTemplates.Add(page.FullPageName, template);
 					foreach (var param in template)
 					{
