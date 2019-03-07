@@ -4,7 +4,6 @@ namespace RobinHood70.WallE.Base
 	using System.Collections.Generic;
 	using RobinHood70.WallE.Eve.Modules;
 
-	// [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "All inputs have Input suffix, even when collections.")]
 	public class QueryInput : QueryPageSetInput
 	{
 		#region Constructors
