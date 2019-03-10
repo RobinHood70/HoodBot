@@ -308,13 +308,9 @@
 		/// <returns>The parameter with the name provided.</returns>
 		public Parameter AddOrChange(string name, string value, bool onlyChangeIfBlank)
 		{
-			var parameter = this.AddIfNotPresent(name, value);
-			if (!onlyChangeIfBlank || string.IsNullOrWhiteSpace(parameter.Value))
-			{
-				parameter.Value = value;
-			}
-
-			return parameter;
+			var param = this[name];
+			this.AddOrChangeInternal(param, name, value, onlyChangeIfBlank);
+			return param;
 		}
 
 		/// <summary>Removes the parameter name, making it into an anonymous parameter, or a numbered parameter if anonymization is not possible.</summary>
@@ -700,7 +696,12 @@
 		public bool RemoveOrChange(string name, string value, bool removeCondition)
 		{
 			ThrowNull(name, nameof(name));
-			return this.RemoveOrChange(this[name], name, value, removeCondition);
+			if (removeCondition)
+			{
+				return this.Remove(name);
+			}
+
+			return this.AddOrChangeInternal(this[name], name, value, false);
 		}
 
 		/// <summary>Removes the named parameter if the predicate evaluates to true; otherwise, changes it to the provided value.</summary>
@@ -712,7 +713,12 @@
 		{
 			ThrowNull(removeCondition, nameof(removeCondition));
 			var param = this[name];
-			return this.RemoveOrChange(param, name, value, removeCondition(param));
+			if (removeCondition(param))
+			{
+				return this.Remove(name);
+			}
+
+			return this.AddOrChangeInternal(param, name, value, false);
 		}
 
 		/// <summary>Renames the specified parameter.</summary>
@@ -780,6 +786,29 @@
 		#endregion
 
 		#region Private Methods
+		private bool AddOrChangeInternal(Parameter param, string name, string value, bool onlyChangeIfBlank)
+		{
+			// Private method is because indexing is expensive here, and Predicate version would need to call it twice if it just sent the result of the predicate to the bool version.
+			if (param == null)
+			{
+				this.Add(name, value);
+				return true;
+			}
+
+			if (param.Value == value)
+			{
+				return false;
+			}
+
+			if (!onlyChangeIfBlank || string.IsNullOrWhiteSpace(param.Value))
+			{
+				param.Value = value;
+				return true;
+			}
+
+			return false;
+		}
+
 		private Parameter CreateFormattedParameter(string name, string value)
 		{
 			var lastParam = (this.CopyLast && this.Count > 0) ? this[this.Count - 1] : null;
@@ -803,28 +832,6 @@
 
 		// We don't need to handle the case where IndexOf returns -1 because all paramter names are added to the list by the Sort function.
 		private int IndexedComparer(Parameter param1, Parameter param2) => this.order.IndexOf(param1.Name).CompareTo(this.order.IndexOf(param2.Name));
-
-		private bool RemoveOrChange(Parameter param, string name, string value, bool removeCondition)
-		{
-			// Private method is because indexing is expensive here, and Predicate version would need to call it twice if it just sent the result of the predicate to the bool version.
-			if (param == null)
-			{
-				this.Add(name, value);
-				return true;
-			}
-			else if (param != null && removeCondition)
-			{
-				return this.Remove(name);
-			}
-
-			if (param.Value == value)
-			{
-				return false;
-			}
-
-			param.Value = value;
-			return true;
-		}
 		#endregion
 	}
 }
