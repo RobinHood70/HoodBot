@@ -11,10 +11,15 @@
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using SHDocVw;
+	using static RobinHood70.WikiCommon.Globals;
 
 	[Description("Visual Studio")]
 	public class IeDiff : IDiffViewer
 	{
+		#region Private Constants
+		private const int ComSleep = 1000;
+		#endregion
+
 		#region Fields
 		private Process ieProcess;
 		#endregion
@@ -27,6 +32,7 @@
 		[STAThread]
 		public void Compare(Page page, string editSummary, bool isMinor, string editToken)
 		{
+			ThrowNull(page, nameof(page));
 			InternetExplorer ie = null;
 			for (var i = 0; i < 10; i++)
 			{
@@ -37,7 +43,7 @@
 				}
 				catch (COMException)
 				{
-					Thread.Sleep(500);
+					Thread.Sleep(ComSleep);
 					if (i == 9)
 					{
 						throw;
@@ -45,7 +51,9 @@
 				}
 			}
 
-			var result = SafeNativeMethods.GetWindowThreadProcessId(new IntPtr(ie.HWND), out var processId);
+			var disposable = new object();
+			var hwnd = new HandleRef(disposable, (IntPtr)ie.HWND);
+			SafeNativeMethods.GetWindowThreadProcessId(hwnd, out var processId);
 			this.ieProcess = Process.GetProcessById(Convert.ToInt32(processId));
 
 			var urib = new UriBuilder(page.Site.ArticlePath.Replace("/$1", string.Empty))
@@ -76,12 +84,12 @@
 				}
 				catch (COMException)
 				{
-					Thread.Sleep(500);
+					Thread.Sleep(ComSleep);
 				}
 			}
 			while (error);
 
-			ie.Visible = true;
+			SafeNativeMethods.ShowWindow(hwnd, 3);
 		}
 
 		public bool ValidatePlugin() => Type.GetTypeFromProgID("InternetExplorer.Application", false) != null;
