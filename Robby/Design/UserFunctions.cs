@@ -25,6 +25,28 @@
 		/// <summary>Log jobs that change the wiki in any way.</summary>
 		Write = 1 << 1,
 	}
+
+	/// <summary>Where to save any results sent to the <see cref="UserFunctions.AddResult(ResultDestination, string)"/> methods.</summary>
+	public enum ResultDestination
+	{
+		/// <summary>Do nothing with any results.</summary>
+		None,
+
+		/// <summary>Add results to the results page.</summary>
+		ResultsPage,
+
+		/// <summary>Add results to a user's talk page.</summary>
+		UserTalkPage,
+
+		/// <summary>Add results to the requests page.</summary>
+		RequestPage,
+
+		/// <summary>Add results to an e-mail to be sent to the user.</summary>
+		Email,
+
+		/// <summary>Add results to a local file.</summary>
+		LocalFile,
+	}
 	#endregion
 
 	/// <summary>Provides user/bot-specific functionality for a given site or sites.</summary>
@@ -38,6 +60,10 @@
 		#endregion
 
 		#region Public Properties
+
+		/// <summary>Gets or sets the default result destination when no destination is specified.</summary>
+		/// <value>The default result destination.</value>
+		public ResultDestination DefaultResultDestination { get; set; } = ResultDestination.None;
 
 		/// <summary>Gets or sets the user's log page.</summary>
 		/// <value>The log page.</value>
@@ -60,6 +86,38 @@
 		#endregion
 
 		#region Public Virtual Methods
+
+		/// <summary>Adds the result to the default destination.</summary>
+		/// <param name="text">The text.</param>
+		public void AddResult(string text) => this.AddResult(this.DefaultResultDestination, text);
+
+		/// <summary>Adds the result to the specified destination.</summary>
+		/// <param name="destination">The destination.</param>
+		/// <param name="text">The text.</param>
+		public virtual void AddResult(ResultDestination destination, string text)
+		{
+		}
+
+		/// <summary>Initializes any data required to publish results to the specified destination.</summary>
+		/// <param name="destination">The destination.</param>
+		/// <param name="user">The user.</param>
+		/// <param name="title">The title.</param>
+		public virtual void InitializeResult(ResultDestination destination, string user, string title)
+		{
+		}
+
+		/// <summary>Called when completing a job run.</summary>
+		/// <remarks>This allows for custom actions to occur after a job run. It is left to the client to decide when that has occured and call the method.</remarks>
+		public virtual void OnAllJobsComplete()
+		{
+		}
+
+		/// <summary>Called when starting a job run.</summary>
+		/// <param name="jobCount">The number of jobs being run.</param>
+		/// <remarks>This allows for custom actions to occur before a job run. It is left to the client to decide when that should occur and call the method.</remarks>
+		public virtual void OnAllJobsStarting(int jobCount)
+		{
+		}
 
 		/// <summary>Returns a value indicating whether the log entry represented in the <paramref name="info"/> parameter should be logged.</summary>
 		/// <param name="info">The log information to be checked.</param>
