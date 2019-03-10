@@ -64,7 +64,8 @@
 
 		/// <summary>Gets the user's name.</summary>
 		/// <value>The name.</value>
-		public string Name { get; }
+		/// <remarks>This is an alias to PageName for ease-of-use.</remarks>
+		public string Name => this.PageName;
 
 		/// <summary>Gets the date and time the user account was created.</summary>
 		/// <value>The user's registration date.</value>
