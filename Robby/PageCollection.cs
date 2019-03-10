@@ -80,6 +80,13 @@
 		}
 		#endregion
 
+		#region Public Events
+
+		/// <summary>Occurs for each page when any method in the class causes pages to be loaded.</summary>
+		/// <remarks>This event does not fire if a page is merely added to the collection, or a new blank page is created with the <see cref="AddNewPage"/> method.</remarks>
+		public event StrongEventHandler<PageCollection, Page> PageLoaded;
+		#endregion
+
 		#region Public Static Properties
 
 		/// <summary>Gets the default namespace limitations.</summary>
@@ -182,22 +189,22 @@
 			return page;
 		}
 
-		/// <summary>Adds pages to the collection from a series of titles.</summary>
-		/// <param name="titles">The titles.</param>
-		public void AddTitles(params string[] titles) => this.AddTitles(new TitleCollection(this.Site, titles));
-
-		/// <summary>Adds pages to the collection from a series of titles.</summary>
-		/// <param name="titles">The titles.</param>
-		public void AddTitles(IEnumerable<string> titles) => this.AddTitles(new TitleCollection(this.Site, titles));
-
-		/// <summary>Adds pages to the collection from a series of titles.</summary>
-		/// <param name="titles">The titles.</param>
-		public void AddTitles(IEnumerable<ISimpleTitle> titles) => this.AddTitles(this.LoadOptions, titles);
-
 		/// <summary>Creates a new page using the collection's <see cref="PageCreator"/>.</summary>
 		/// <param name="title">The title of the page to create.</param>
 		/// <returns>The page that was created.</returns>
 		public Page CreatePage(string title) => this.PageCreator.CreatePage(new TitleParts(this.Site, title));
+
+		/// <summary>Loads pages into the collection from a series of titles.</summary>
+		/// <param name="titles">The titles.</param>
+		public void GetTitles(params string[] titles) => this.GetTitles(new TitleCollection(this.Site, titles));
+
+		/// <summary>Loads pages into the collection from a series of titles.</summary>
+		/// <param name="titles">The titles.</param>
+		public void GetTitles(IEnumerable<string> titles) => this.GetTitles(new TitleCollection(this.Site, titles));
+
+		/// <summary>Loads pages into the collection from a series of titles.</summary>
+		/// <param name="titles">The titles.</param>
+		public void GetTitles(IEnumerable<ISimpleTitle> titles) => this.GetTitles(this.LoadOptions, titles);
 
 		/// <summary>Reapplies the namespace limitations in <see cref="NamespaceLimitations"/> to the existing collection.</summary>
 		public void ReapplyLimitations()
@@ -219,7 +226,7 @@
 		public void SetLimitations(IEnumerable<int> namespaceLimitations, LimitationType limitationType)
 		{
 			this.LimitationType = limitationType;
-			if (namespaceLimitations != null)
+			if (limitationType != LimitationType.None && namespaceLimitations != null)
 			{
 				this.NamespaceLimitations.Clear();
 				this.NamespaceLimitations.AddRange(namespaceLimitations);
@@ -231,7 +238,7 @@
 
 		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
 		/// <param name="titles">The titles to add.</param>
-		/// <remarks>Unlike <see cref="AddTitles(IEnumerable{string})"/> and related methods, which all load data from the wiki, this will simply add blank pages to the result set.</remarks>
+		/// <remarks>Unlike <see cref="GetTitles(IEnumerable{string})"/> and related methods, which all load data from the wiki, this will simply add blank pages to the result set.</remarks>
 		public override void Add(IEnumerable<string> titles)
 		{
 			ThrowNull(titles, nameof(titles));
@@ -494,7 +501,7 @@
 		/// <summary>Adds pages to the collection from a series of titles.</summary>
 		/// <param name="options">The page load options.</param>
 		/// <param name="titles">The titles.</param>
-		protected virtual void AddTitles(PageLoadOptions options, IEnumerable<ISimpleTitle> titles) => this.LoadPages(options, new QueryPageSetInput(titles.ToFullPageNames()));
+		protected virtual void GetTitles(PageLoadOptions options, IEnumerable<ISimpleTitle> titles) => this.LoadPages(options, new QueryPageSetInput(titles.ToFullPageNames()));
 
 		/// <summary>Loads pages from the wiki based on a page set specifier.</summary>
 		/// <param name="options">The page load options.</param>
@@ -515,6 +522,11 @@
 
 			this.ReapplyLimitations(); // Not the ideal way of doing this, but probably the most straight-forward. Other option would be to filter for duplicates first via a HashSet or similar, then add to the collection.
 			this.PopulateMapCollections(result);
+
+			foreach (var page in this)
+			{
+				this.PageLoaded?.Invoke(this, page);
+			}
 		}
 
 		/// <summary>Loads category pages recursively.</summary>
@@ -544,6 +556,8 @@
 				{
 					this[page.Key] = page;
 				}
+
+				this.PageLoaded?.Invoke(this, page);
 
 				if (page.Namespace.Id == MediaWikiNamespaces.Category)
 				{

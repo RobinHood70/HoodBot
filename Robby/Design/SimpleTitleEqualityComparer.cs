@@ -7,6 +7,21 @@
 	/// <seealso cref="System.Collections.Generic.EqualityComparer{T}" />
 	public class SimpleTitleEqualityComparer : EqualityComparer<ISimpleTitle>
 	{
+		#region Constructors
+		private SimpleTitleEqualityComparer()
+		{
+		}
+		#endregion
+
+		#region Public Static Properties
+
+		/// <summary>Gets the singleton instance.</summary>
+		/// <value>The instance.</value>
+		public static SimpleTitleEqualityComparer Instance { get; } = new SimpleTitleEqualityComparer();
+		#endregion
+
+		#region Public Override Methods
+
 		/// <summary>Determines whether the specified objects are equal.</summary>
 		/// <param name="x">The first object of type <see cref="ISimpleTitle" /> to compare.</param>
 		/// <param name="y">The second object of type <see cref="ISimpleTitle" /> to compare.</param>
@@ -20,5 +35,6 @@
 		/// <param name="obj">The object.</param>
 		/// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
 		public override int GetHashCode(ISimpleTitle obj) => obj == null ? 0 : CompositeHashCode(obj.Namespace, obj.PageName);
+		#endregion
 	}
 }

@@ -42,6 +42,8 @@
 		#region Public Events
 
 		/// <summary>Occurs when the page is loaded.</summary>
+		/// <remarks>Note that this event is only raised when the page is loaded individually.</remarks>
+		/// <seealso cref="PageCollection.PageLoaded"/>
 		public event StrongEventHandler<Page, EventArgs> PageLoaded;
 		#endregion
 

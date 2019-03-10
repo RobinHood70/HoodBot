@@ -118,7 +118,7 @@
 		}
 
 		/// <summary>Gets or sets the display text. For images, this is an alias for the caption property.</summary>
-		public override ParameterString DisplayText
+		public override ParameterString DisplayParameter
 		{
 			get => this.parameters[Site.ImageCaptionName]?.FullValue;
 			set

@@ -33,6 +33,7 @@
 		#region Static Fields
 		private static readonly Brush ProgressBarGreen = new SolidColorBrush(Color.FromArgb(255, 6, 176, 37));
 		private static readonly Brush ProgressBarYellow = new SolidColorBrush(Color.FromArgb(255, 255, 240, 0));
+		private static IDiffViewer currentViewer = null;
 		#endregion
 
 		#region Fields
@@ -163,16 +164,6 @@
 		internal IParameterFetcher ParameterFetcher { get; set; }
 		#endregion
 
-		#region Public Static Methods (DEBUG only)
-#if DEBUG
-		public static void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine(string.Concat(sender?.SiteName, " Response: ", eventArgs?.Response));
-
-		public static void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine(string.Concat(sender?.SiteName, " Request: ", eventArgs?.Request));
-
-		public static void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine(string.Concat(sender?.SiteName, " Warning: (", eventArgs?.Warning.Code, ") ", eventArgs?.Warning.Info));
-#endif
-		#endregion
-
 		#region Internal Methods
 		internal void GetParameters(JobNode jobNode)
 		{
@@ -244,6 +235,16 @@
 				}
 			}
 		}
+
+		private static void SiteWarningOccurred(Site sender, WarningEventArgs eventArgs) => Debug.WriteLine(eventArgs.Warning);
+
+#if DEBUG
+		private static void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName} Response: {eventArgs.Response}");
+
+		private static void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName} Request: {eventArgs.Request}");
+
+		private static void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName} Warning: ({eventArgs?.Warning.Code}) {eventArgs?.Warning.Info}");
+#endif
 		#endregion
 
 		#region Private Methods
@@ -304,6 +305,8 @@
 				this.canceller = cancelSource;
 				this.pauser = new PauseTokenSource();
 
+				var success = true;
+				this.site.UserFunctions.OnAllJobsStarting(jobList.Count);
 				foreach (var jobNode in jobList)
 				{
 					var job = this.ConstructJob(jobNode);
@@ -317,15 +320,22 @@
 					}
 					catch (OperationCanceledException)
 					{
+						success = false;
 						MessageBox.Show(JobCancelled, nameof(HoodBot), MessageBoxButton.OK, MessageBoxImage.Information);
 						break;
 					}
 					catch (Exception e)
 					{
+						success = false;
 						MessageBox.Show(e.GetType().Name + ": " + e.Message, e.Source, MessageBoxButton.OK, MessageBoxImage.Error);
 						Debug.WriteLine(e.StackTrace);
 						break;
 					}
+				}
+
+				if (success)
+				{
+					this.site.UserFunctions.OnAllJobsComplete();
 				}
 
 				this.pauser = null;
@@ -335,6 +345,32 @@
 			this.Reset();
 			this.StatusWriteLine("Total time for last run: " + FormatTimeSpan(allJobsTimer.Elapsed));
 			this.executing = false;
+		}
+
+		private T FindPlugin<T>(string name)
+			where T : class, IPlugin
+		{
+			foreach (var viewer in this.FindPlugins<T>())
+			{
+				if (viewer.Name == name)
+				{
+					try
+					{
+						if (Activator.CreateInstance(viewer) is T instance && instance.ValidatePlugin())
+						{
+							return instance;
+						}
+					}
+					catch (NotSupportedException)
+					{
+					}
+					catch (TargetInvocationException)
+					{
+					}
+				}
+			}
+
+			return null;
 		}
 
 		private IEnumerable<Type> FindPlugins<T>()
@@ -351,7 +387,7 @@
 
 		private List<JobNode> GetJobList()
 		{
-			var jobList = new List<JobNode>(this.JobTree.GetCheckedJobs());
+			var jobList = new List<JobNode>(JobNode.GetCheckedJobs(this.JobTree.Children));
 			if (jobList.Count > 1)
 			{
 				var equalityComparer = new JobConstructorEqualityComparer();
@@ -385,6 +421,7 @@
 				this.ResetSite();
 				this.previousItem = wikiInfo;
 				this.SetSite(wikiInfo);
+				this.site.Login(wikiInfo.UserName, this.Password ?? wikiInfo.Password);
 			}
 		}
 
@@ -440,7 +477,8 @@
 			{
 				(this.site.AbstractionLayer as WikiAbstractionLayer).SendingRequest -= WalSendingRequest;
 				(this.site.AbstractionLayer as WikiAbstractionLayer).WarningOccurred -= WalWarningOccurred;
-				this.site.PagePreview -= this.Site_PagePreview;
+				this.site.PagePreview -= this.SitePagePreview;
+				this.site.WarningOccurred -= SiteWarningOccurred;
 				this.site = null;
 			}
 		}
@@ -458,48 +496,21 @@
 			// wal.ResponseReceived += WalResponseRecieved;
 			wal.WarningOccurred += WalWarningOccurred;
 			this.site = new Site(wal);
-			this.site.Login(wikiInfo.UserName, this.Password ?? wikiInfo.Password);
-			this.site.UserFunctions.DoSiteCustomizations();
-			this.site.PagePreview += this.Site_PagePreview;
+			this.site.WarningOccurred += SiteWarningOccurred;
+			this.site.PagePreview += this.SitePagePreview;
 		}
 
-		private void Site_PagePreview(Site sender, PagePreviewArgs eventArgs)
+		private void SitePagePreview(Site sender, PagePreviewArgs eventArgs)
 		{
-			// Until we get a menu going, just grab the first thing we found.
-			var wal = this.site.AbstractionLayer as WikiAbstractionLayer;
-			var token = wal?.TokenManager.SessionToken("csrf"); // HACK: This is only necessary for browser-based diffs. Not sure how to handle it better.
-			var plugin = this.FindPlugin<IDiffViewer>("IeDiff");
-			if (plugin != null)
+			// Until we get a menu going, specify manually.
+			currentViewer = currentViewer ?? this.FindPlugin<IDiffViewer>("IeDiff");
+			if (currentViewer != null)
 			{
-				plugin.Compare(eventArgs.Page, eventArgs.EditSummary, eventArgs.Minor, token);
-				plugin.Wait();
+				var wal = this.site.AbstractionLayer as WikiAbstractionLayer;
+				var token = wal?.TokenManager.SessionToken("csrf"); // HACK: This is only necessary for browser-based diffs. Not sure how to handle it better.
+				currentViewer.Compare(eventArgs.Page, eventArgs.EditSummary, eventArgs.Minor, token);
+				currentViewer.Wait();
 			}
-		}
-
-		private T FindPlugin<T>(string name)
-			where T : class, IPlugin
-		{
-			foreach (var viewer in this.FindPlugins<T>())
-			{
-				if (viewer.Name == name)
-				{
-					try
-					{
-						if (Activator.CreateInstance(viewer) is T instance && instance.ValidatePlugin())
-						{
-							return instance;
-						}
-					}
-					catch (NotSupportedException)
-					{
-					}
-					catch (TargetInvocationException)
-					{
-					}
-				}
-			}
-
-			return null;
 		}
 
 		private void StatusWrite(string text) => this.Status += this.Status.Length == 0 ? text.TrimStart() : text;

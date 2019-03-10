@@ -1,6 +1,9 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
 	using System;
+	using System.Collections.Generic;
+	using System.IO;
+	using System.Text;
 	using System.Text.RegularExpressions;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -19,6 +22,8 @@
 		#endregion
 
 		#region Fields
+		private readonly Dictionary<ResultDestination, (string UserOrPageName, string Title)> resultInfo = new Dictionary<ResultDestination, (string, string)>();
+		private readonly Dictionary<ResultDestination, StringBuilder> stringBuilders = new Dictionary<ResultDestination, StringBuilder>();
 		private LogInfo lastLogInfo;
 		#endregion
 
@@ -28,6 +33,7 @@
 		{
 			this.LogPage = new Page(this.Site, this.Site.User.FullPageName + "/Log");
 			this.StatusPage = this.LogPage;
+			this.DefaultResultDestination = ResultDestination.ResultsPage;
 		}
 		#endregion
 
@@ -76,11 +82,62 @@
 			return result;
 		}
 
+		public override void AddResult(ResultDestination destination, string text)
+		{
+			if (!this.stringBuilders.TryGetValue(destination, out var sb))
+			{
+				throw new InvalidOperationException($"Results for {destination} have not been initialized.");
+			}
+
+			sb.Append(text);
+		}
+
+		public override void InitializeResult(ResultDestination destination, string userOrPageName, string title)
+		{
+			this.resultInfo[destination] = (userOrPageName, title);
+			this.stringBuilders[destination] = new StringBuilder();
+		}
+
+		public override void OnAllJobsComplete()
+		{
+			foreach (var sb in this.stringBuilders)
+			{
+				if (sb.Value.Length > 0)
+				{
+					if (!this.resultInfo.TryGetValue(sb.Key, out var info))
+					{
+						throw new InvalidOperationException($"Result destination {sb.Key} was not properly initialized.");
+					}
+
+					info.Title = info.Title ?? "Job Results";
+					var result = sb.Value.ToString().Trim();
+					switch (sb.Key)
+					{
+						case ResultDestination.Email:
+							this.EmailResultsToUser(info.UserOrPageName, info.Title, result);
+							break;
+						case ResultDestination.LocalFile:
+							File.WriteAllText(info.Title, result);
+							break;
+						case ResultDestination.ResultsPage:
+							this.PostResultsToResultsPage(info.UserOrPageName, info.Title, result);
+							break;
+						case ResultDestination.UserTalkPage:
+							this.PostResultsToUserTalkPage(info.UserOrPageName, info.Title, result);
+							break;
+						case ResultDestination.RequestPage:
+							throw new NotSupportedException("This one is more difficult, so is not supported at this time, as I have other things that require my attention more urgently.");
+					}
+				}
+			}
+		}
+
 		public override void DoSiteCustomizations()
 		{
 			var wal = this.Site.AbstractionLayer as WallE.Eve.WikiAbstractionLayer;
 			wal.ModuleFactory.RegisterProperty<VariablesInput>(PropVariables.CreateInstance);
 			wal.ModuleFactory.RegisterGenerator<VariablesInput>(PropVariables.CreateInstance);
+			//// this.Site.PageCreator = new MetaTemplateCreator();
 		}
 
 		public override ChangeStatus EndLogEntry()
@@ -114,6 +171,8 @@
 			return result;
 		}
 
+		public override void OnAllJobsStarting(int jobCount) => this.InitializeResult(ResultDestination.ResultsPage, this.Site.User.Name + "/Results", "Job Results");
+
 		public override ChangeStatus UpdateCurrentStatus(string status)
 		{
 			// In theory, this could make use of a SectionedPage, but that seems a bit overkill for a simple log page.
@@ -143,6 +202,12 @@
 		#endregion
 
 		#region Private Methods
+		private void EmailResultsToUser(string userName, string title, string result)
+		{
+			var user = new User(this.Site, userName);
+			user.Email(title, result, false);
+		}
+
 		private void LogPage_AddEntry(Page sender, EventArgs eventArgs)
 		{
 			var result = this.UpdateCurrentStatus(this.lastLogInfo.Title + '.');
@@ -201,6 +266,22 @@
 				.Remove(entry.Index, entry.Length)
 				.Insert(entry.Index, entryTemplate.ToString() + "\n");
 		}
+
+		private void PostResultsToResultsPage(string pageName, string title, string result)
+		{
+			var page = new Page(this.Site, pageName)
+			{
+				Text = result
+			};
+			page.Save(title, false);
+		}
+
+		private void PostResultsToUserTalkPage(string userName, string title, string result)
+		{
+			var user = new User(this.Site, userName);
+			user.NewTalkPageMessage(title, result, "New Message from " + this.Site.User.Name);
+		}
+
 		#endregion
 	}
 }

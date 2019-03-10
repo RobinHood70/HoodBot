@@ -17,6 +17,7 @@
 		public JobNode()
 		{
 			var wikiJobType = typeof(WikiJob);
+			this.Name = "<Root>";
 			this.Children = new SortedSet<JobNode>();
 			foreach (var type in Assembly.GetCallingAssembly().GetTypes())
 			{
@@ -149,6 +150,26 @@
 			left.CompareTo(right) != -1;
 		#endregion
 
+		#region Public Static Methods
+		public static IEnumerable<JobNode> GetCheckedJobs(IEnumerable<JobNode> children)
+		{
+			foreach (var job in children)
+			{
+				if (job.Children != null)
+				{
+					foreach (var nestedJob in GetCheckedJobs(job.Children))
+					{
+						yield return nestedJob;
+					}
+				}
+				else if (job.IsChecked == true)
+				{
+					yield return job;
+				}
+			}
+		}
+		#endregion
+
 		#region Public Methods
 		public int CompareTo(JobNode other) =>
 			other is null || (this.Children == null && other.Children?.Count > 0) ? 1 :
@@ -174,25 +195,6 @@
 
 			var childSet = new HashSet<JobNode>(this.Children);
 			return childSet.SetEquals(new HashSet<JobNode>(other.Children));
-		}
-
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Longer operation than a simple fetch.")]
-		public IEnumerable<JobNode> GetCheckedJobs()
-		{
-			if (this.Children != null)
-			{
-				foreach (var job in this.Children)
-				{
-					if (job.Constructor == null)
-					{
-						job.GetCheckedJobs();
-					}
-					else if (job.IsChecked == true)
-					{
-						yield return job;
-					}
-				}
-			}
 		}
 
 		public void InitializeParameters()

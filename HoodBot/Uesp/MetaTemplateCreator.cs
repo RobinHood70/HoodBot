@@ -6,7 +6,7 @@
 	using RobinHood70.WallE.Base;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class MetaTemplateBuilder : PageCreator
+	public class MetaTemplateCreator : PageCreator
 	{
 		#region Public Override Methods
 		public override Page CreatePage(ISimpleTitle simpleTitle) => new VariablesPage(simpleTitle);

@@ -54,8 +54,8 @@
 			var retval = TitleCollection.CopyFrom(titles);
 
 			// Loop until nothing new is added.
-			var pagesToCheck = new HashSet<Title>(retval, new SimpleTitleEqualityComparer());
-			var alreadyChecked = new HashSet<Title>(new SimpleTitleEqualityComparer());
+			var pagesToCheck = new HashSet<Title>(retval, SimpleTitleEqualityComparer.Instance);
+			var alreadyChecked = new HashSet<Title>(SimpleTitleEqualityComparer.Instance);
 			do
 			{
 				foreach (var page in pagesToCheck)
@@ -76,7 +76,7 @@
 		public PageCollection FollowRedirects(IEnumerable<Title> titles)
 		{
 			var originalsFollowed = PageCollection.Unlimited(this.Site, new PageLoadOptions(PageModules.None) { FollowRedirects = true });
-			originalsFollowed.AddTitles(titles);
+			originalsFollowed.GetTitles(titles);
 
 			return originalsFollowed;
 		}

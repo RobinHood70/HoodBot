@@ -5,11 +5,12 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Tasks;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Extensions;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public abstract class WikiJob : WikiTask
+	public abstract class WikiJob : WikiTask, IMessageSource
 	{
 		#region Fields
 		private int progress = 0;
@@ -28,9 +29,6 @@
 		#region Public Properties
 		public AsyncInfo AsyncInfo { get; }
 
-		// While this could literally be (this is EditJob), I've used a property specifically in case there's need for other edit jobs in the future that don't derive from that class.
-		public bool ReadOnly { get; protected set; } = true;
-
 		public int Progress
 		{
 			get => this.progress;
@@ -40,6 +38,34 @@
 				this.UpdateProgress();
 			}
 		}
+		#endregion
+
+		#region Public Virtual Methods
+		public virtual bool ReadOnly => true;
+		#endregion
+
+		#region Public Methods
+		public void StatusWrite(string status)
+		{
+			this.AsyncInfo.StatusMonitor.Report(status);
+			this.FlowControlAsync();
+		}
+
+		public void StatusWriteLine(string status) => this.StatusWrite(status + Environment.NewLine);
+
+		public void Warn(string warning) => this.Site.PublishWarning(this, warning);
+
+		public void Write(string text) => this.Site.UserFunctions.AddResult(text);
+
+		public void Write(ResultDestination destination, string text) => this.Site.UserFunctions.AddResult(destination, text);
+
+		public void WriteLine() => this.WriteLine(string.Empty);
+
+		public void WriteLine(string text) => this.Site.UserFunctions.AddResult(text + '\n');
+
+		public void WriteLine(ResultDestination destination) => this.WriteLine(destination, string.Empty);
+
+		public void WriteLine(ResultDestination destination, string text) => this.Site.UserFunctions.AddResult(destination, text + '\n');
 		#endregion
 
 		#region Protected Virtual Methods
@@ -57,14 +83,6 @@
 				cancel.ThrowIfCancellationRequested();
 			}
 		}
-
-		protected virtual void StatusWrite(string status)
-		{
-			this.AsyncInfo.StatusMonitor.Report(status);
-			this.FlowControlAsync();
-		}
-
-		protected virtual void StatusWriteLine(string status) => this.StatusWrite(status + Environment.NewLine);
 
 		protected virtual void UpdateProgress()
 		{

@@ -42,7 +42,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>HoodBot.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
+    <Prefer32Bit>false</Prefer32Bit>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <LangVersion>latest</LangVersion>
     <DocumentationFile>
@@ -109,6 +109,24 @@
     <Compile Include="Jobs\Design\PauseToken.cs" />
     <Compile Include="Jobs\Design\PauseTokenSource.cs" />
     <Compile Include="Jobs\EditJob.cs" />
+    <Compile Include="Jobs\EsoActiveSkillSummaries.cs" />
+    <Compile Include="Jobs\EsoPassiveSkillSummaries.cs" />
+    <Compile Include="Jobs\EsoSkillSummaries\Ability.cs" />
+    <Compile Include="Jobs\EsoSkillSummaries\ActiveSkill.cs" />
+    <Compile Include="Jobs\EsoSkillSummaries\Coefficient.cs" />
+    <Compile Include="Jobs\EsoSkillSummaries\EsoReplacement.cs" />
+    <Compile Include="Jobs\EsoSkillSummaries\EsoReplacer.cs" />
+    <Compile Include="Jobs\EsoSkillSummaries\EsoSkillJob.cs" />
+    <Compile Include="Jobs\EsoSkillSummaries\EsoGeneral.cs" />
+    <Compile Include="Jobs\EsoSkillSummaries\EsoSkillSummaryBase.cs" />
+    <Compile Include="Jobs\EsoSkillSummaries\Morph.cs" />
+    <Compile Include="Jobs\EsoSkillSummaries\PassiveRank.cs" />
+    <Compile Include="Jobs\EsoSkillSummaries\PassiveSkill.cs" />
+    <Compile Include="Jobs\EsoSkillSummaries\ReplacementData.cs" />
+    <Compile Include="Jobs\EsoSkillSummaries\Skill.cs" />
+    <Compile Include="Jobs\EsoSkillSummaries\Synergy.cs" />
+    <Compile Include="Jobs\EsoSkillSummaries\VariableData.cs" />
+    <Compile Include="Jobs\TestJob.cs" />
     <Compile Include="Jobs\VoidJob.cs" />
     <Compile Include="Jobs\GetTemplateUsage.cs" />
     <Compile Include="Jobs\TaskResults\TemplateCollection.cs" />
@@ -117,7 +135,7 @@
     <Compile Include="PasswordHelper.cs" />
     <Compile Include="ScrollingTextBox.cs" />
     <Compile Include="Uesp\HoodBotFunctions.cs" />
-    <Compile Include="Uesp\MetaTemplateBuilder.cs" />
+    <Compile Include="Uesp\MetaTemplateCreator.cs" />
     <Compile Include="Uesp\PropVariables.cs" />
     <Compile Include="Uesp\VariablesInput.cs" />
     <Compile Include="Uesp\VariablesPage.cs" />
@@ -146,7 +164,7 @@
     <Compile Include="ViewModel\RelayCommand{T}.cs" />
     <Compile Include="ViewModel\SettingsViewModel.cs" />
     <Compile Include="WikiInfo.cs" />
-    <Page Include="Settings.xaml">
+    <Page Include="EditSettings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -158,8 +176,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Settings.xaml.cs">
-      <DependentUpon>Settings.xaml</DependentUpon>
+    <Compile Include="EditSettings.xaml.cs">
+      <DependentUpon>EditSettings.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -173,11 +191,16 @@
     <AdditionalFiles Include="..\stylecop.json">
       <Link>stylecop.json</Link>
     </AdditionalFiles>
+    <None Include="connections.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="HoodBot.ruleset" />
     <None Include="SharedKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="HoodBot.png" />
@@ -236,6 +259,9 @@
       <Version>2.6.3</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="MySql.Data">
+      <Version>8.0.15</Version>
     </PackageReference>
     <PackageReference Include="StyleCop.Analyzers">
       <Version>1.1.1-rc.108</Version>

@@ -160,12 +160,8 @@
 		public PageCollection Load(PageLoadOptions options, PageCreator pageCreator)
 		{
 			var retval = new PageCollection(this.Site, options, pageCreator);
-			if (this.loadPageLimitations != null)
-			{
-				retval.SetLimitations(this.loadPageLimitations, this.loadPageLimitationType);
-			}
-
-			retval.AddTitles(this);
+			retval.SetLimitations(this.loadPageLimitations, this.loadPageLimitationType);
+			retval.GetTitles(this);
 
 			return retval;
 		}

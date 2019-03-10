@@ -5,17 +5,30 @@
 
 	/// <summary>An ISimpleTitle comparer which sorts by namespace and page name.</summary>
 	/// <typeparam name="T">The item types to compare. Must implement ISimpleTitle.</typeparam>
-	/// <seealso cref="System.Collections.Generic.IComparer{T}" />
-	public class TitleComparer<T> : IComparer<T>
+	/// <seealso cref="System.Collections.Generic.Comparer{T}" />
+	public class TitleComparer<T> : Comparer<T>
 		where T : ISimpleTitle
 	{
+		#region Constructors
+		private TitleComparer()
+		{
+		}
+		#endregion
+
+		#region Public Static Properties
+
+		/// <summary>Gets the singleton instance.</summary>
+		/// <value>The instance.</value>
+		public static TitleComparer<T> Instance { get; } = new TitleComparer<T>();
+		#endregion
+
 		#region Public Methods
 
 		/// <summary>Compares two objects and returns a value indicating whether one is less than, equal to, or greater than the other.</summary>
 		/// <param name="x">The first object to compare.</param>
 		/// <param name="y">The second object to compare.</param>
 		/// <returns>A signed integer that indicates the relative values of <paramref name="x" /> and <paramref name="y" />.</returns>
-		public int Compare(T x, T y)
+		public override int Compare(T x, T y)
 		{
 			if (x == null)
 			{

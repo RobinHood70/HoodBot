@@ -12,13 +12,16 @@
 	/// <summary>Interaction logic for MainWindow.xaml.</summary>
 	public partial class MainWindow : Window, IParameterFetcher
 	{
+		#region Constructors
 		public MainWindow()
 		{
 			this.InitializeComponent();
 			var vm = this.DataContext as MainViewModel;
 			vm.ParameterFetcher = this;
 		}
+		#endregion
 
+		#region Public Methods
 		public void GetParameter(ConstructorParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
@@ -114,7 +117,37 @@
 				}
 			}
 		}
+		#endregion
 
+		#region Private Static Methods
+
+		// These next two methods adapted from https://social.msdn.microsoft.com/Forums/silverlight/en-US/84cd3a27-6b17-48e6-8f8a-e5737601fdac/treeviewitemcontainergeneratorcontainerfromitem-returns-null?forum=silverlightnet
+		private static TreeViewItem ContainerFromItem(TreeView treeView, object item) =>
+			(treeView.ItemContainerGenerator.ContainerFromItem(item) as TreeViewItem)
+			?? ContainerFromItem(treeView.ItemContainerGenerator, treeView.Items, item);
+
+		private static TreeViewItem ContainerFromItem(ItemContainerGenerator generator, ItemCollection itemCollection, object item)
+		{
+			foreach (var curChildItem in itemCollection)
+			{
+				var parentContainer = generator.ContainerFromItem(curChildItem) as TreeViewItem;
+				if (parentContainer.ItemContainerGenerator.ContainerFromItem(item) is TreeViewItem retval)
+				{
+					return retval;
+				}
+
+				retval = ContainerFromItem(parentContainer.ItemContainerGenerator, parentContainer.Items, item);
+				if (retval != null)
+				{
+					return retval;
+				}
+			}
+
+			return null;
+		}
+		#endregion
+
+		#region Private Methods
 		private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
 		{
 			// TODO: Consider changing to attached property to be fully MVVM compliant.
@@ -127,21 +160,34 @@
 			if (oldNode != null)
 			{
 				vm.SetParameters(oldNode);
-				foreach (var param in oldNode.Parameters)
+				if (oldNode.Parameters != null)
 				{
-					this.UnregisterName(param.Name);
+					foreach (var param in oldNode.Parameters)
+					{
+						this.UnregisterName(param.Name);
+					}
 				}
 			}
 
-			vm.GetParameters(e.NewValue as JobNode);
+			var newNode = e.NewValue as JobNode;
+			if (newNode.Constructor != null)
+			{
+				vm.GetParameters(newNode);
+			}
+			else if (newNode.Children != null)
+			{
+				foreach (var childNode in newNode.Children)
+				{
+					vm.GetParameters(childNode);
+				}
+			}
 		}
 
 		private void TreeView_Checked(object sender, RoutedEventArgs e)
 		{
 			// TODO: Consider changing to attached property to be fully MVVM compliant.
-			var tv = sender as TreeView;
-			var item = (e.OriginalSource as FrameworkElement).DataContext as JobNode;
-			if (tv.ItemContainerGenerator.ContainerFromItem(item) is TreeViewItem tvItem)
+			var jobNode = (e.OriginalSource as FrameworkElement).DataContext as JobNode;
+			if (ContainerFromItem(sender as TreeView, jobNode) is TreeViewItem tvItem)
 			{
 				tvItem.IsSelected = true;
 			}
@@ -154,5 +200,6 @@
 			var jobNode = this.SelectedJobs.SelectedItem as JobNode;
 			vm.SetParameters(jobNode);
 		}
+		#endregion
 	}
 }

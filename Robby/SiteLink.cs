@@ -40,7 +40,7 @@
 			this.Site = title.Namespace.Site;
 			this.namespaceObject = title.Namespace;
 			this.PageName = title.PageName;
-			this.DisplayText.Value = this.PipeTrick();
+			this.DisplayText = this.PipeTrick();
 			this.Normalize();
 		}
 
@@ -54,7 +54,7 @@
 			this.namespaceObject = title.Namespace;
 			this.PageName = title.PageName;
 			this.Fragment = title.Fragment;
-			this.DisplayText.Value = this.PipeTrick();
+			this.DisplayText = this.PipeTrick();
 			this.Normalize();
 		}
 
@@ -65,7 +65,7 @@
 			: this(site)
 		{
 			var parser = this.InitializeFromParser(link);
-			this.DisplayText = parser.SingleParameter;
+			this.DisplayParameter = parser.SingleParameter;
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class using the specified values.</summary>
@@ -87,14 +87,36 @@
 			ThrowNull(pageName, nameof(pageName));
 			this.Namespace = ns;
 			this.PageName = pageName;
-			this.DisplayText = displayText == null ? null : new ParameterString(displayText);
+			this.DisplayParameter = displayText == null ? null : new ParameterString(displayText);
 		}
 		#endregion
 
 		#region Public Properties
 
-		/// <summary>Gets or sets the display text (i.e., the value to the right of the pipe). For images, this is the caption; for categories, it's the sortkey.</summary>
-		public virtual ParameterString DisplayText { get; set; }
+		/// <summary>Gets or sets the display text (i.e., the value to the right of the pipe). For categories, this is the sortkey.</summary>
+		public string DisplayText
+		{
+			get => this.DisplayParameter?.Value;
+			set
+			{
+				if (value == null)
+				{
+					this.DisplayParameter = null;
+				}
+				else
+				{
+					if (this.DisplayParameter == null)
+					{
+						this.DisplayParameter = new ParameterString();
+					}
+
+					this.DisplayParameter.Value = value;
+				}
+			}
+		}
+
+		/// <summary>Gets or sets the display text parameter (i.e., the value to the right of the pipe). For images, this is the caption; for categories, it's the sortkey.</summary>
+		public virtual ParameterString DisplayParameter { get; set; }
 
 		/// <summary>Gets or sets the full name of the page.</summary>
 		public string FullPageName
@@ -393,27 +415,27 @@
 			if (this.Namespace != null)
 			{
 				this.NamespaceText = this.Namespace.Name;
-				if (this.DisplayText != null)
+				if (this.DisplayParameter != null)
 				{
 					this.PageName = this.Namespace.CapitalizePageName(this.PageName);
 				}
 			}
 
-			if (this.DisplayText.Value == this.FullPageName)
+			if (this.DisplayParameter.Value == this.FullPageName)
 			{
-				this.DisplayText = null;
+				this.DisplayParameter = null;
 			}
 		}
 
-		/// <summary>Returns a suggested <see cref="DisplayText"/> value based on the link parts, just like the "pipe trick" on a wiki.</summary>
-		/// <returns>A suggested <see cref="DisplayText"/> value based on the link parts.</returns>
-		/// <remarks>This method does not modify the <see cref="DisplayText"/> in any way.</remarks>
+		/// <summary>Returns a suggested <see cref="DisplayParameter"/> value based on the link parts, just like the "pipe trick" on a wiki.</summary>
+		/// <returns>A suggested <see cref="DisplayParameter"/> value based on the link parts.</returns>
+		/// <remarks>This method does not modify the <see cref="DisplayParameter"/> in any way.</remarks>
 		public string PipeTrick() => this.PipeTrick(false);
 
-		/// <summary>Returns a suggested <see cref="DisplayText"/> value based on the link parts, much like the "pipe trick" on a wiki.</summary>
+		/// <summary>Returns a suggested <see cref="DisplayParameter"/> value based on the link parts, much like the "pipe trick" on a wiki.</summary>
 		/// <param name="useFragmentIfPresent">if set to <c>true</c>, and a fragment exists, uses the fragment to generate the name, rather than the pagename.</param>
-		/// <returns>A suggested <see cref="DisplayText"/> value based on the link parts.</returns>
-		/// <remarks>This method does not modify the <see cref="DisplayText"/> in any way.</remarks>
+		/// <returns>A suggested <see cref="DisplayParameter"/> value based on the link parts.</returns>
+		/// <remarks>This method does not modify the <see cref="DisplayParameter"/> in any way.</remarks>
 		public string PipeTrick(bool useFragmentIfPresent)
 		{
 			string retval;
@@ -456,7 +478,7 @@
 
 		/// <summary>Reformats the link using the specified formats.</summary>
 		/// <param name="nameFormat">Whitespace to add before and after the page name. The <see cref="ParameterString.Value"/> property is ignored.</param>
-		/// <param name="valueFormat">Whitespace to add before and after the <see cref="DisplayText"/>. The <see cref="ParameterString.Value"/> property is ignored.</param>
+		/// <param name="valueFormat">Whitespace to add before and after the <see cref="DisplayParameter"/>. The <see cref="ParameterString.Value"/> property is ignored.</param>
 		public virtual void Reformat(ParameterString nameFormat, ParameterString valueFormat)
 		{
 			if (nameFormat != null)
@@ -468,8 +490,8 @@
 
 			if (valueFormat != null)
 			{
-				this.DisplayText.LeadingWhiteSpace = valueFormat.LeadingWhiteSpace;
-				this.DisplayText.TrailingWhiteSpace = valueFormat.TrailingWhiteSpace;
+				this.DisplayParameter.LeadingWhiteSpace = valueFormat.LeadingWhiteSpace;
+				this.DisplayParameter.TrailingWhiteSpace = valueFormat.TrailingWhiteSpace;
 			}
 		}
 
@@ -500,14 +522,14 @@
 		/// <summary>Builds the parameter text, if needed.</summary>
 		/// <param name="builder">The builder to build into.</param>
 		/// <returns>A copy of the <see cref="StringBuilder"/> passed to the method.</returns>
-		/// <remarks>This is a virtual method, to be overridden by any types that inherit <see cref="SiteLink"/>. The default behaviour is to render only the <see cref="DisplayText"/> property if it's non-<see langword="null"/>.</remarks>
+		/// <remarks>This is a virtual method, to be overridden by any types that inherit <see cref="SiteLink"/>. The default behaviour is to render only the <see cref="DisplayParameter"/> property if it's non-<see langword="null"/>.</remarks>
 		protected virtual StringBuilder BuildParameters(StringBuilder builder)
 		{
 			ThrowNull(builder, nameof(builder));
-			if (this.DisplayText != null)
+			if (this.DisplayParameter != null)
 			{
 				builder.Append('|');
-				this.DisplayText.Build(builder);
+				this.DisplayParameter.Build(builder);
 			}
 
 			return builder;
