@@ -1,7 +1,7 @@
-﻿using RobinHood70.Robby;
-
-namespace RobinHood70.HoodBotPlugins
+﻿namespace RobinHood70.HoodBotPlugins
 {
+	using RobinHood70.Robby;
+
 	/// <summary>An interface for diff viewer plugins to be used with HoodBot.</summary>
 	public interface IDiffViewer : IPlugin
 	{
