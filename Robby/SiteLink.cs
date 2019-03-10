@@ -32,6 +32,32 @@
 			this.Site = site;
 		}
 
+		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
+		/// <param name="title">The title to initialize from.</param>
+		public SiteLink(ISimpleTitle title)
+		{
+			ThrowNull(title, nameof(title));
+			this.Site = title.Namespace.Site;
+			this.namespaceObject = title.Namespace;
+			this.PageName = title.PageName;
+			this.DisplayText.Value = this.PipeTrick();
+			this.Normalize();
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
+		/// <param name="title">The title to initialize from.</param>
+		public SiteLink(IFullTitle title)
+		{
+			ThrowNull(title, nameof(title));
+			this.Site = title.Namespace.Site;
+			this.interwikiObject = title.Interwiki;
+			this.namespaceObject = title.Namespace;
+			this.PageName = title.PageName;
+			this.Fragment = title.Fragment;
+			this.DisplayText.Value = this.PipeTrick();
+			this.Normalize();
+		}
+
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class and attempts to parse the text provided.</summary>
 		/// <param name="site">The Site the link is from.</param>
 		/// <param name="link">The link text to parse.</param>
@@ -373,7 +399,7 @@
 				}
 			}
 
-			if (this.DisplayText.Value == this.PageName)
+			if (this.DisplayText.Value == this.FullPageName)
 			{
 				this.DisplayText = null;
 			}
