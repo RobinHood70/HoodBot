@@ -27,7 +27,24 @@
 		[STAThread]
 		public void Compare(Page page, string editSummary, bool isMinor, string editToken)
 		{
-			var ie = new InternetExplorer();
+			InternetExplorer ie = null;
+			for (var i = 0; i < 10; i++)
+			{
+				try
+				{
+					ie = new InternetExplorer();
+					break;
+				}
+				catch (COMException)
+				{
+					Thread.Sleep(500);
+					if (i == 9)
+					{
+						throw;
+					}
+				}
+			}
+
 			var result = SafeNativeMethods.GetWindowThreadProcessId(new IntPtr(ie.HWND), out var processId);
 			this.ieProcess = Process.GetProcessById(Convert.ToInt32(processId));
 
