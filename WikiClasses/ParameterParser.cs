@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using RobinHood70.WikiCommon;
 
 	/// <summary>This is a helper class to parse parameter text into either a single parameter or a collection of <see cref="Parameter"/>s.</summary>
@@ -24,29 +25,30 @@
 		private readonly int paramStartToken;
 		private readonly string text;
 		private readonly List<Token> tokens = new List<Token>();
-
+		private readonly Stack<FoundDelimiter> delimiterStack = new Stack<FoundDelimiter>();
 		private int tokenIndex;
 		#endregion
 
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="ParameterParser"/> class.</summary>
-		/// <param name="text">The text to parse.</param>
+		/// <param name="textToParse">The text to parse.</param>
 		/// <param name="isLink">Whether to parse the text as a link (<see langword="true"/>) or a template (<see langword="false"/>).</param>
 		/// <param name="parseAllAsValues">if set to <c>true</c> [parse all as values].</param>
 		/// <param name="ignoreWhiteSpaceRules">if set to <c>true</c> [ignore white space rules].</param>
-		public ParameterParser(string text, bool isLink, bool parseAllAsValues, bool ignoreWhiteSpaceRules)
+		public ParameterParser(string textToParse, bool isLink, bool parseAllAsValues, bool ignoreWhiteSpaceRules)
 		{
-			this.text = text ?? string.Empty;
+			this.text = textToParse ?? string.Empty;
 			this.Tokenize(isLink ? "[[" : "{{");
 			if (this.tokens.Count == 0)
 			{
+				this.Name = new ParameterString();
 				return;
 			}
 
 			this.tokenIndex = 0;
 			var name = this.GetParameter(true, false);
-			if (name.Value[0] == ':')
+			if (name.Value.Length > 0 && name.Value[0] == ':')
 			{
 				this.LeadingColon = true;
 				name.Value = name.Value.Substring(1);
@@ -140,16 +142,20 @@
 		#region Private Methods
 		private (Delimiter Delimiter, bool IsTerminator) CheckForDelimiter(int index)
 		{
+			if (this.delimiterStack.Count > 0)
+			{
+				var sought = this.delimiterStack.Peek();
+				if (string.Compare(sought.Delimiter.Terminator, 0, this.text, index, sought.Delimiter.Terminator.Length, StringComparison.Ordinal) == 0)
+				{
+					return (sought.Delimiter, true);
+				}
+			}
+
 			foreach (var delimiter in AllDelimiters)
 			{
 				if (string.Compare(delimiter.Marker, 0, this.text, index, delimiter.Marker.Length, StringComparison.Ordinal) == 0)
 				{
 					return (delimiter, false);
-				}
-
-				if (string.Compare(delimiter.Terminator, 0, this.text, index, delimiter.Terminator.Length, StringComparison.Ordinal) == 0)
-				{
-					return (delimiter, true);
 				}
 			}
 
@@ -272,6 +278,7 @@
 
 					if (isTerminator)
 					{
+						this.delimiterStack.Pop();
 						tokenType = TokenType.DelimiterTerminator;
 						index += delimiter.Terminator.Length;
 					}
@@ -289,8 +296,20 @@
 						}
 						else
 						{
+							this.delimiterStack.Push(new FoundDelimiter(delimiter, index));
 							var delimiterToken = FindMatchingDelimiter(delimiter);
-							if (delimiterToken != null)
+							if (delimiterToken == null)
+							{
+								if (this.delimiterStack.Count > 0)
+								{
+									index = this.delimiterStack.Pop().Index + 1;
+								}
+								else
+								{
+									Debug.WriteLine("I don't think this can ever happen. Prove me wrong!");
+								}
+							}
+							else
 							{
 								return delimiterToken;
 							}
@@ -342,7 +361,7 @@
 					nextToken = this.GetToken(terminatorIndex);
 					terminatorIndex += nextToken?.Length ?? 0;
 				}
-				while (nextToken != null && nextToken.Type != TokenType.DelimiterTerminator || this.TokenText(nextToken) != delimiter.Terminator);
+				while (nextToken != null && (nextToken.Type != TokenType.DelimiterTerminator || this.TokenText(nextToken) != delimiter.Terminator));
 
 				if (nextToken != null)
 				{
@@ -355,20 +374,29 @@
 
 		private void Tokenize(string marker)
 		{
-			var (delimiter, isTerminator) = this.CheckForDelimiter(0);
-			if (isTerminator || delimiter == null || delimiter.Marker != marker)
+			if (this.text.Length > 0)
 			{
-				throw new InvalidOperationException("Text does not start with correct opening characters.");
-			}
+				var (delimiter, isTerminator) = this.CheckForDelimiter(0);
+				if (isTerminator || delimiter == null || delimiter.Marker != marker)
+				{
+					throw new InvalidOperationException("Text does not start with correct opening characters.");
+				}
 
-			var terminator = delimiter.Terminator;
-			var index = delimiter.Marker.Length;
-			var token = this.GetToken(index);
-			while (token != null && token.Type != TokenType.DelimiterTerminator || this.TokenText(token) != terminator)
-			{
-				this.tokens.Add(token);
-				index += token.Length;
-				token = this.GetToken(index);
+				this.delimiterStack.Push(new FoundDelimiter(delimiter, 0));
+				var terminator = delimiter.Terminator;
+				var index = delimiter.Marker.Length;
+				var token = this.GetToken(index);
+				while (token != null && (token.Type != TokenType.DelimiterTerminator || this.TokenText(token) != terminator))
+				{
+					this.tokens.Add(token);
+					index += token.Length;
+					token = this.GetToken(index);
+				}
+
+				if (this.delimiterStack.Count > 0)
+				{
+					Debug.WriteLine("Uh oh!");
+				}
 			}
 		}
 
@@ -376,6 +404,21 @@
 		#endregion
 
 		#region Private Structs
+		private struct FoundDelimiter
+		{
+			public FoundDelimiter(Delimiter delimiter, int index)
+			{
+				this.Delimiter = delimiter;
+				this.Index = index;
+			}
+
+			public Delimiter Delimiter { get; }
+
+			public int Index { get; }
+		}
+		#endregion
+
+		#region Private Classes
 		private class Delimiter
 		{
 			public Delimiter(string marker, string terminator, TokenType tokenType, bool noparse)
@@ -386,9 +429,9 @@
 				this.NoParse = noparse;
 			}
 
-			public bool NoParse { get; }
-
 			public string Marker { get; }
+
+			public bool NoParse { get; }
 
 			public string Terminator { get; }
 

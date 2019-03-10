@@ -692,6 +692,29 @@
 			return false;
 		}
 
+		/// <summary>Removes the named parameter if the predicate evaluates to true; otherwise, changes it to the provided value.</summary>
+		/// <param name="name">The name.</param>
+		/// <param name="value">The value.</param>
+		/// <param name="removeCondition">The condition under which the value should be removed (typically, when it's the default value for the parameter or should not be displayed at all).</param>
+		/// <returns><see langword="true"/> if the template was changed in any way; <see langword="false"/> only if the predicate evaluates to false and the value was already set to the provided value.</returns>
+		public bool RemoveOrChange(string name, string value, bool removeCondition)
+		{
+			ThrowNull(name, nameof(name));
+			return this.RemoveOrChange(this[name], name, value, removeCondition);
+		}
+
+		/// <summary>Removes the named parameter if the predicate evaluates to true; otherwise, changes it to the provided value.</summary>
+		/// <param name="name">The name.</param>
+		/// <param name="value">The value.</param>
+		/// <param name="removeCondition">The predicate.</param>
+		/// <returns><see langword="true"/> if the template was changed in any way; <see langword="false"/> only if the predicate evaluates to false and the value was already set to the provided value.</returns>
+		public bool RemoveOrChange(string name, string value, Predicate<Parameter> removeCondition)
+		{
+			ThrowNull(removeCondition, nameof(removeCondition));
+			var param = this[name];
+			return this.RemoveOrChange(param, name, value, removeCondition(param));
+		}
+
 		/// <summary>Renames the specified parameter.</summary>
 		/// <param name="from">What to rename the parameter from.</param>
 		/// <param name="to">What to rename the parameter to.</param>
@@ -757,19 +780,22 @@
 		#endregion
 
 		#region Private Methods
-		private Parameter CreateFormattedParameter(string name, string value) => new Parameter(name == null ? null : this.CreateParameterString(name, true), this.CreateParameterString(value, false));
+		private Parameter CreateFormattedParameter(string name, string value)
+		{
+			var lastParam = (this.CopyLast && this.Count > 0) ? this[this.Count - 1] : null;
+			return new Parameter(name == null ? null : this.CreateParameterString(lastParam, name, true), this.CreateParameterString(lastParam, value, false));
+		}
 
-		private ParameterString CreateParameterString(string value, bool fromName)
+		private ParameterString CreateParameterString(Parameter lastParam, string value, bool fromName)
 		{
 			ParameterString copyString;
-			if (this.CopyLast && this.Count > 0)
+			if (lastParam == null)
 			{
-				var lastParam = this[this.Count - 1];
-				copyString = fromName ? lastParam.FullName : lastParam.FullValue;
+				copyString = fromName ? this.DefaultNameFormat : this.DefaultValueFormat;
 			}
 			else
 			{
-				copyString = fromName ? this.DefaultNameFormat : this.DefaultValueFormat;
+				copyString = fromName ? lastParam.FullName : lastParam.FullValue;
 			}
 
 			return copyString == null ? null : new ParameterString(copyString.LeadingWhiteSpace, value, copyString.TrailingWhiteSpace);
@@ -777,6 +803,28 @@
 
 		// We don't need to handle the case where IndexOf returns -1 because all paramter names are added to the list by the Sort function.
 		private int IndexedComparer(Parameter param1, Parameter param2) => this.order.IndexOf(param1.Name).CompareTo(this.order.IndexOf(param2.Name));
+
+		private bool RemoveOrChange(Parameter param, string name, string value, bool removeCondition)
+		{
+			// Private method is because indexing is expensive here, and Predicate version would need to call it twice if it just sent the result of the predicate to the bool version.
+			if (param == null)
+			{
+				this.Add(name, value);
+				return true;
+			}
+			else if (param != null && removeCondition)
+			{
+				return this.Remove(name);
+			}
+
+			if (param.Value == value)
+			{
+				return false;
+			}
+
+			param.Value = value;
+			return true;
+		}
 		#endregion
 	}
 }

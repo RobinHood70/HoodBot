@@ -33,7 +33,7 @@
 
 		#region Public Methods
 
-		/// <summary>  Creates a Regex based on a collection of strings.</summary>
+		/// <summary>Creates a Regex based on a collection of strings.</summary>
 		/// <param name="input">The input.</param>
 		/// <param name="casing">The casing to allow for each entry.</param>
 		/// <returns>A Regex fragment containing a pipe-separated list of the collection items, with appropriate case modifiers.</returns>

@@ -2,14 +2,13 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Text;
 	using System.Text.RegularExpressions;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Represents a template as a name and collection of <see cref="Parameter"/>s.</summary>
-	[DebuggerDisplay("{DebuggerDisplay,nq}")]
+	// [DebuggerDisplay("{DebuggerDisplay,nq}")]
 	[SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Template is a more meaningful name.")]
 	public class Template : ParameterCollection
 	{
@@ -56,6 +55,12 @@
 			: base(comparer)
 		{
 			templateText = templateText?.Trim() ?? string.Empty;
+			if (templateText.Length > 0 && !templateText.StartsWith("{{", StringComparison.Ordinal) || !templateText.EndsWith("}}", StringComparison.Ordinal))
+			{
+				// Old template class always allowed text without braces, but new parser expects them, so fudge it.
+				templateText = "{{" + templateText + "}}";
+			}
+
 			var parser = new ParameterParser(templateText, false, false, ignoreWhiteSpaceRules);
 			this.DefaultNameFormat = parser.DefaultFormat(true);
 			this.DefaultValueFormat = parser.DefaultFormat(false);
