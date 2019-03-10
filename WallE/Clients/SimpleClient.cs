@@ -359,7 +359,6 @@
 			request.Method = method;
 			request.ProtocolVersion = this.useV10 ? HttpVersion.Version10 : HttpVersion.Version11;
 			request.Proxy.Credentials = CredentialCache.DefaultCredentials;
-			request.Timeout = 10000;
 			request.UseDefaultCredentials = true;
 			request.UserAgent = this.UserAgent;
 
