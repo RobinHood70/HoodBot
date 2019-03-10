@@ -401,7 +401,9 @@
 		/// <returns>The text of the page.</returns>
 		public string LoadPageText(string pageName)
 		{
-			var result = new TitleCollection(this, pageName).Load();
+			var titles = new TitleCollection(this, pageName);
+			titles.SetNamespaceLimitations(null, LimitationType.None);
+			var result = titles.Load();
 			return result.Count == 1 ? result[0].Text : null;
 		}
 
@@ -917,6 +919,7 @@
 
 			this.User = new User(this, result.User);
 			this.UserFunctions = this.FindBestUserFunctions();
+			this.UserFunctions.DoSiteCustomizations();
 
 			// This should never happen with co-initialization, but just in case there's a massive change to the abstraction layer, make sure we have all the info we need.
 			if (this.Version == null)
