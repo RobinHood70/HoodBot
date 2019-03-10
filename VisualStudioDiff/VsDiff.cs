@@ -8,17 +8,19 @@
 	using EnvDTE;
 	using RobinHood70.HoodBotPlugins;
 	using RobinHood70.Robby;
+	using static RobinHood70.WikiCommon.Globals;
 
 	[Description("Visual Studio")]
 	public class VsDiff : IDiffViewer, IDisposable
 	{
 		#region Private Constants
+		private const int ComSleep = 1000;
 		private const string VisualStudioProgID = "VisualStudio.DTE";
 		#endregion
 
 		#region Static Fields
 		private static readonly object LockObject = new object();
-		private static DTE dte;
+		private static volatile DTE dte;
 		#endregion
 
 		#region Fields
@@ -60,29 +62,31 @@
 		#region Public Methods
 		public void Compare(Page page, string editSummary, bool isMinor, string editToken)
 		{
+			ThrowNull(page, nameof(page));
 			var current = page.Revisions.Current;
 			var oldFile = Path.GetTempFileName();
 			var newFile = Path.GetTempFileName();
 			File.WriteAllText(oldFile, current?.Text ?? " ");
 			File.WriteAllText(newFile, page.Text ?? " ");
 
+			var localDte = this.Dte;
 			this.lastDteWindow = null;
 			do
 			{
 				try
 				{
-					this.Dte.ExecuteCommand("Tools.DiffFiles", $"\"{oldFile}\" \"{newFile}\" \"Revision as of {current?.Timestamp ?? DateTime.UtcNow}\" \"{editSummary}\"");
-					this.lastDteWindow = this.Dte.ActiveWindow;
-					this.Dte.MainWindow.Visible = true;
+					localDte.ExecuteCommand("Tools.DiffFiles", $"\"{oldFile}\" \"{newFile}\" \"Revision as of {current?.Timestamp ?? DateTime.UtcNow}\" \"{editSummary}\"");
+					this.lastDteWindow = localDte.ActiveWindow;
+					this.ourWindows.Add(this.lastDteWindow);
+					localDte.MainWindow.Visible = true;
 				}
 				catch (COMException)
 				{
-					System.Threading.Thread.Sleep(500);
+					System.Threading.Thread.Sleep(ComSleep);
 				}
 			}
 			while (this.lastDteWindow == null);
 
-			this.ourWindows.Add(this.lastDteWindow);
 			File.Delete(oldFile);
 			File.Delete(newFile);
 		}
@@ -102,7 +106,7 @@
 			{
 				try
 				{
-					System.Threading.Thread.Sleep(500);
+					System.Threading.Thread.Sleep(ComSleep);
 					waiting = (this.Dte.MainWindow?.Visible ?? false) && this.lastDteWindow != null;
 				}
 				catch (COMException)
@@ -126,9 +130,22 @@
 			{
 				lock (LockObject)
 				{
-					if (dte != null && dte.Documents.Count == 0)
+					var failed = true;
+					while (failed)
 					{
-						dte.Quit();
+						try
+						{
+							if (dte != null && dte.Documents.Count == 0)
+							{
+								dte.Quit();
+							}
+
+							failed = false;
+						}
+						catch (COMException)
+						{
+							System.Threading.Thread.Sleep(ComSleep);
+						}
 					}
 
 					dte = null;
@@ -142,6 +159,7 @@
 		private static DTE GetDte()
 		{
 			var visualStudioType = Type.GetTypeFromProgID(VisualStudioProgID, true);
+			/* Code below gets the active instance rather than creating a new one. Much faster for initial launch, but window close detection was occasionally unreliable. Testing with new project only to see if it's reliable that way. (And even if it's not, at least we can close the project.)
 			try
 			{
 				return Marshal.GetActiveObject(VisualStudioProgID) as DTE;
@@ -149,6 +167,7 @@
 			catch (COMException)
 			{
 			}
+			*/
 
 			return Activator.CreateInstance(visualStudioType, true) as DTE;
 		}
