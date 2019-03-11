@@ -105,7 +105,7 @@
 					"Template Name"
 				};
 			output.AddRange(allTemplates.HeaderOrder.Keys);
-			csvFile.AddHeader(output);
+			csvFile.Header = output;
 
 			foreach (var template in allTemplates)
 			{
