@@ -7,7 +7,9 @@
 	using System.Text.RegularExpressions;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.WallE.Clients;
 	using RobinHood70.WallE.Design;
+	using RobinHood70.WallE.Eve;
 	using RobinHood70.WikiClasses;
 	using static Properties.Resources;
 	using static RobinHood70.WikiCommon.Globals;
@@ -31,6 +33,8 @@
 		public HoodBotFunctions(Site site)
 			: base(site)
 		{
+			this.NativeAbstractionLayer = this.Site.AbstractionLayer as WikiAbstractionLayer;
+			this.NativeClient = this.NativeAbstractionLayer.Client;
 			this.LogPage = new Page(this.Site, this.Site.User.FullPageName + "/Log");
 			this.StatusPage = this.LogPage;
 			this.DefaultResultDestination = ResultDestination.ResultsPage;
@@ -39,6 +43,12 @@
 
 		#region Public Override Properties
 		public override LogJobTypes LogJobTypes => LogJobTypes.Write;
+		#endregion
+
+		#region Internal Properties
+		internal WikiAbstractionLayer NativeAbstractionLayer { get; }
+
+		internal IMediaWikiClient NativeClient { get; }
 		#endregion
 
 		#region Public Static Methods
@@ -134,9 +144,9 @@
 
 		public override void DoSiteCustomizations()
 		{
-			var wal = this.Site.AbstractionLayer as WallE.Eve.WikiAbstractionLayer;
-			wal.ModuleFactory.RegisterProperty<VariablesInput>(PropVariables.CreateInstance);
-			wal.ModuleFactory.RegisterGenerator<VariablesInput>(PropVariables.CreateInstance);
+			var moduleFactory = this.NativeAbstractionLayer.ModuleFactory;
+			moduleFactory.RegisterProperty<VariablesInput>(PropVariables.CreateInstance);
+			moduleFactory.RegisterGenerator<VariablesInput>(PropVariables.CreateInstance);
 			//// this.Site.PageCreator = new MetaTemplateCreator();
 		}
 

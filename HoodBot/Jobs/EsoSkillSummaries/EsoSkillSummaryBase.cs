@@ -20,7 +20,6 @@
 
 		#region Static Fields
 		private static readonly string[] DestructionTypes = new string[] { "Frost", "Shock", "Fire" };
-		private static readonly Regex TemplateStripper = new Regex(@"{{\s*(ESO Quality Color|Nowrap|ESO (Health|Magicka|MagStam|Physical Penetration|Resistance|Spell Critical|Spell Damage|Spell Penetration|Stamina|Synergy|Ultimate|Weapon Critical|Weapon Damage) Link).*?}}");
 		private static readonly HashSet<string> UpdatedParameters = new HashSet<string> { "area", "casttime", "channelTime", "cost", "desc", "desc1", "desc2", "duration", "icon", "icon2", "icon3", "id", "line", "linerank", "morph1name", "morph1id", "morph1icon", "morph1desc", "morph2name", "morph2id", "morph2icon", "morph2desc", "radius", "range", "target", "type" };
 
 		private static SortedList<string, string> iconNameCache = new SortedList<string, string>();
@@ -43,7 +42,7 @@
 		#endregion
 
 		#region Public Override Properties
-		public override string LogName => "Update ESO " + this.TypeText + " skills";
+		public override string LogName => "Update ESO " + this.TypeText + " Skills";
 		#endregion
 
 		#region Protected Properties
@@ -97,11 +96,11 @@
 			base.OnCompleted();
 		}
 
-		protected override void OnStarted()
+		protected override void PrepareJob()
 		{
 			this.PatchVersion = EsoGeneral.GetPatchVersion(this);
 			this.StatusWriteLine("Fetching data");
-			EsoReplacer.Initialize(this.Site);
+			EsoReplacer.Initialize(this);
 			this.GetSkillList();
 			this.ProgressMaximum = this.skills.Count + 4;
 			this.Progress = 3;
@@ -117,8 +116,8 @@
 			this.skillPages.PageLoaded += this.SkillPageLoaded;
 			this.skillPages.GetTitles(titles);
 			this.skillPages.PageLoaded -= this.SkillPageLoaded;
+			this.StatusWriteLine($"Page count: {this.skillPages.Count}/{this.skills.Count}");
 			this.GenerateReport();
-			base.OnStarted();
 		}
 		#endregion
 
@@ -131,28 +130,11 @@
 		#endregion
 
 		#region Private Methods
-		private bool CompareReplacementText(string oldText, string newText, string pageName)
-		{
-			oldText = EsoReplacer.ToPlainText(oldText);
-			var replacedText = TemplateStripper.Replace(oldText, string.Empty);
-			if (replacedText.Contains("[["))
-			{
-				this.Warn($"\nWatch for links: {pageName}\n{replacedText}");
-			}
-
-			if (replacedText.Contains("{{"))
-			{
-				this.Warn($"\nWatch for templates: {pageName}\n{replacedText}");
-			}
-
-			return oldText != EsoReplacer.ToPlainText(newText);
-		}
-
 		private void GenerateReport()
 		{
 			if (this.trivialChanges.Count > 0)
 			{
-				this.WriteLine($"== {this.TypeText.UpperFirst(this.Site.Culture)} Skills With Trivial Updates ==");
+				this.WriteLine($"== {this.TypeText} Skills With Trivial Updates ==");
 				var newList = new List<string>();
 				foreach (var page in this.trivialChanges)
 				{
@@ -165,7 +147,7 @@
 
 			if (this.nonTrivialChanges.Count > 0)
 			{
-				this.WriteLine($"== {this.TypeText.UpperFirst(this.Site.Culture)} Skills With Non-Trivial Updates ==");
+				this.WriteLine($"== {this.TypeText} Skills With Non-Trivial Updates ==");
 				foreach (var page in this.nonTrivialChanges)
 				{
 					this.WriteLine($"* {{{{Pl|{page.FullPageName}|{page.LabelName}|diff=cur}}}}");
@@ -196,7 +178,6 @@
 				this.WriteLine("|}");
 			}
 
-			this.WriteLine();
 			this.WriteLine();
 		}
 
@@ -337,7 +318,7 @@
 					if (oldParameter != null)
 					{
 						// Not optimized to return true immediately because Compare shows useful info in Debug mode.
-						bigChange |= this.CompareReplacementText(oldParameter.Value, parameter.Value, skill.PageName);
+						bigChange |= EsoReplacer.CompareReplacementText(this, oldParameter.Value, parameter.Value, skill.PageName);
 					}
 					else
 					{

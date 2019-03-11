@@ -110,13 +110,13 @@
     <Compile Include="Jobs\Design\PauseTokenSource.cs" />
     <Compile Include="Jobs\EditJob.cs" />
     <Compile Include="Jobs\EsoActiveSkillSummaries.cs" />
+    <Compile Include="Jobs\EsoItemSets.cs" />
     <Compile Include="Jobs\EsoPassiveSkillSummaries.cs" />
     <Compile Include="Jobs\EsoSkillSummaries\Ability.cs" />
     <Compile Include="Jobs\EsoSkillSummaries\ActiveSkill.cs" />
     <Compile Include="Jobs\EsoSkillSummaries\Coefficient.cs" />
     <Compile Include="Jobs\EsoSkillSummaries\EsoReplacement.cs" />
     <Compile Include="Jobs\EsoSkillSummaries\EsoReplacer.cs" />
-    <Compile Include="Jobs\EsoSkillSummaries\EsoSkillJob.cs" />
     <Compile Include="Jobs\EsoSkillSummaries\EsoGeneral.cs" />
     <Compile Include="Jobs\EsoSkillSummaries\EsoSkillSummaryBase.cs" />
     <Compile Include="Jobs\EsoSkillSummaries\Morph.cs" />

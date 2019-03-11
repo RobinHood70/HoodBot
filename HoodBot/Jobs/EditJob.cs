@@ -105,9 +105,16 @@
 
 		protected override void OnStarted()
 		{
+			this.PrepareJob();
 			base.OnStarted();
 			this.StatusWriteLine("Adding Log Entry");
 			this.Site.UserFunctions.AddLogEntry(new LogInfo(this.LogName ?? this.GetType().Name, this.LogDetails, this.ReadOnly));
+		}
+		#endregion
+
+		#region Protected Virtual Methods
+		protected virtual void PrepareJob()
+		{
 		}
 		#endregion
 

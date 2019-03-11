@@ -16,6 +16,7 @@
 		#region Fields
 		private static readonly Regex EsoLinks = new Regex(@"((?<before>(((''')?[0-9]+(-[0-9]+)?(''')?%?)(\smore|\smax(imum)?|\sof missing|\{\{huh}}|<br>)?|(''')?\{\{Nowrap[^}]*?}}(''')?|max(imum)?|ESO)+)\s)?(?<type>(?-i:Health|Magicka|Physical Penetration|Physical Resistance|Spell Critical|Spell Damage|Spell Penetration|Spell Resistance|Stamina|Ultimate|Weapon Critical|Weapon Damage))(\s(?<after>(Recovery|Regeneration|[0-9]+%)+))?\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 		private static readonly Regex ReplacementFinder = new Regex(@"^\|\ *(<nowiki/>)?(?<from>.*?)(<nowiki/>)?\ *\|\|\ *(<nowiki/>)?(?<to>.*?)(<nowiki/>)?\ *$", RegexOptions.Multiline);
+		private static readonly Regex TemplateStripper = new Regex(@"{{\s*(ESO Quality Color|Nowrap|ESO (Health|Magicka|MagStam|Physical Penetration|Resistance|Spell Critical|Spell Damage|Spell Penetration|Stamina|Synergy|Ultimate|Weapon Critical|Weapon Damage) Link).*?}}");
 		private static readonly Regex TextStripper = new Regex(@"({{huh}}|[0-9]+(-[0-9]+)?%?)");
 
 		private static readonly List<EsoReplacement> ReplaceAllList = new List<EsoReplacement>();
@@ -29,6 +30,23 @@
 		#endregion
 
 		#region Public Methods
+		public static bool CompareReplacementText(WikiJob job, string oldText, string newText, string pageName)
+		{
+			oldText = ToPlainText(oldText);
+			var replacedText = TemplateStripper.Replace(oldText, string.Empty);
+			if (replacedText.Contains("[["))
+			{
+				job.Warn($"\nWatch for links: {pageName}\n{replacedText}");
+			}
+
+			if (replacedText.Contains("{{"))
+			{
+				job.Warn($"\nWatch for templates: {pageName}\n{replacedText}");
+			}
+
+			return oldText != ToPlainText(newText);
+		}
+
 		public static string FirstLinksOnly(Site site, string text)
 		{
 			var uniqueLinks = new HashSet<string>();
@@ -36,12 +54,12 @@
 			return linkFinder.Replace(text, (match) => LinkReplacer(match, site, uniqueLinks));
 		}
 
-		public static void Initialize(Site site)
+		public static void Initialize(WikiJob job)
 		{
 			if (!initialized)
 			{
-				initialized = true;
-				var replacements = site.LoadPageText(site.User.FullPageName + "/ESO Replacements");
+				job.StatusWriteLine("Parsing replacements");
+				var replacements = job.Site.LoadPageText(job.Site.User.FullPageName + "/ESO Replacements");
 				if (string.IsNullOrEmpty(replacements))
 				{
 					throw new InvalidOperationException("Replacements page not found or empty!");
@@ -57,6 +75,7 @@
 
 				GetMatches(replaceFirst.Value, ReplaceFirstList);
 				GetMatches(replaceAll.Value, ReplaceAllList);
+				initialized = true;
 			}
 		}
 

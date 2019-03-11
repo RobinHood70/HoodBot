@@ -9,15 +9,22 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiClasses;
+	using static RobinHood70.WikiCommon.Globals;
 
 	internal static class EsoGeneral
 	{
+		#region Private Constants
+		private const string PatchPageName = "Online:Patch";
+		#endregion
+
+		#region Static Fields
+		private static readonly Regex BonusFinder = new Regex(@"\s*Current [Bb]onus:.*?\.");
+		private static readonly Regex SpaceFixer = new Regex(@"[\n\ ]+");
 		private static readonly string EsoLogConnectionString = ConfigurationManager.ConnectionStrings["EsoLog"].ConnectionString;
 		private static string patchVersion = null;
+		#endregion
 
 		#region Public Properties
-		public static Regex BonusFinder { get; } = new Regex(@"\s*Current [Bb]onus:.*?\.");
-
 		public static Dictionary<int, string> MechanicNames { get; } = new Dictionary<int, string>
 		{
 			[-2] = "Health",
@@ -45,10 +52,6 @@
 			[-68] = "Magicka with Health Cap",
 			[-69] = "Magicka with Health Cap",
 		};
-
-		public static string PatchPageName => "Online:Patch";
-
-		public static Regex SpaceFixer { get; } = new Regex(@"[\n\ ]+");
 		#endregion
 
 		#region Public Methods
@@ -86,22 +89,23 @@
 
 		public static void SetBotUpdateVersion(WikiJob job, string pageType)
 		{
-			// Assumes EsoPatchVersion has already been filled.
-			job.StatusWriteLine("Update ESO patch number");
-			var patchTitle = new TitleCollection(job.Site, PatchPageName);
-			var patchPage = patchTitle.Load()[0];
+			// Assumes EsoPatchVersion has already been updated.
+			ThrowNull(pageType, nameof(pageType));
+			job.StatusWriteLine("Update patch bot parameters");
+			var paramName = "bot" + pageType;
+			var patchPage = new TitleCollection(job.Site, PatchPageName).Load()[0];
 			var match = Template.Find("Online Patch").Match(patchPage.Text);
 			var patchTemplate = new Template(match.Value);
-			var oldValue = patchTemplate["bot" + pageType]?.Value;
+			var oldValue = patchTemplate[paramName]?.Value;
 			var patchVersion = GetPatchVersion(job);
 			if (oldValue != patchVersion)
 			{
-				patchTemplate.AddOrChange("bot" + pageType, patchVersion);
+				patchTemplate.AddOrChange(paramName, patchVersion);
 				patchPage.Text = patchPage.Text
 					.Remove(match.Index, match.Length)
 					.Insert(match.Index, patchTemplate.ToString());
 
-				patchPage.Save("Update bot" + pageType, true);
+				patchPage.Save("Update " + paramName, true);
 			}
 		}
 
