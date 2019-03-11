@@ -52,7 +52,7 @@
 					AND skillTree.skillIndex > 0
 			ORDER BY baseName, minedSkills.morph, minedSkills.rank;";
 
-		protected override string TypeText => "active";
+		protected override string TypeText => "Active";
 		#endregion
 
 		#region Protected Override Methods

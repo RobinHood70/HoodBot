@@ -38,7 +38,7 @@
 					AND skillLine != 'Emperor'
 			ORDER BY skillTree.basename, skillTree.skillTypeName, minedSkills.rank";
 
-		protected override string TypeText => "passive";
+		protected override string TypeText => "Passive";
 		#endregion
 
 		#region Protected Override Methods
