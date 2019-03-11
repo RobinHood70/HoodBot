@@ -5,7 +5,7 @@
 	using System.Text;
 	using System.Text.RegularExpressions;
 	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.HoodBot.Jobs.EsoSkillSummaries;
+	using RobinHood70.HoodBot.Jobs.Eso;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.WikiClasses;

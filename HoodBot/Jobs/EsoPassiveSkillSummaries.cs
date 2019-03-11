@@ -2,13 +2,13 @@
 {
 	using System.Collections.Generic;
 	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.HoodBot.Jobs.EsoSkillSummaries;
+	using RobinHood70.HoodBot.Jobs.Eso;
 	using RobinHood70.Robby;
 	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class EsoPassiveSkillSummaries : EsoSkillSummaryBase<PassiveSkill>
+	internal class EsoPassiveSkillSummaries : EsoSkillJob<PassiveSkill>
 	{
 		#region Constructors
 		[JobInfo("Update Passive Skills", "ESO")]

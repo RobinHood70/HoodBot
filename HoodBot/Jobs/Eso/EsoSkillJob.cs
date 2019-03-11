@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.HoodBot.Jobs.EsoSkillSummaries
+﻿namespace RobinHood70.HoodBot.Jobs.Eso
 {
 	using System;
 	using System.Collections.Generic;
@@ -9,7 +9,7 @@
 	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
 
-	internal abstract class EsoSkillSummaryBase<T> : EditJob
+	internal abstract class EsoSkillJob<T> : EditJob
 		where T : Skill, new()
 	{
 		#region Constants
@@ -35,7 +35,7 @@
 		#endregion
 
 		#region Constructors
-		public EsoSkillSummaryBase(Site site, AsyncInfo asyncInfo)
+		public EsoSkillJob(Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
 		{
 		}

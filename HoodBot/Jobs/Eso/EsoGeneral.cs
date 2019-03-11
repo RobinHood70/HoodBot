@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.HoodBot.Jobs.EsoSkillSummaries
+﻿namespace RobinHood70.HoodBot.Jobs.Eso
 {
 	using System.Collections.Generic;
 	using System.Configuration;
