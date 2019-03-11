@@ -6,6 +6,7 @@
 
 	public class VoidJob : EditJob
 	{
+		#region Constructors
 		[JobInfo("Do Nothing")]
 		public VoidJob(Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
@@ -13,6 +14,11 @@
 			this.ProgressMaximum = 5;
 			site.EditingDisabled = true;
 		}
+		#endregion
+
+		#region Public Override Properties
+		public override string LogName => "Do Nothing";
+		#endregion
 
 		protected override void Main()
 		{

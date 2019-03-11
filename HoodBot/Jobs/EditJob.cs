@@ -1,9 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System;
-	using System.Reflection;
-	using System.Reflection.Emit;
-	using System.Threading;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Tasks;
 	using RobinHood70.Robby;
@@ -14,37 +11,9 @@
 
 	public abstract class EditJob : WikiJob
 	{
-		#region Static Fields
-		private static readonly MethodInfo InternalGetCurrentMethod = Type.GetType("System.Reflection.RuntimeMethodInfo", true).GetMethod("InternalGetCurrentMethod", BindingFlags.Static | BindingFlags.NonPublic);
-		private static readonly Type[] MyStackCrawlMarkRefType = new[] { typeof(MyStackCrawlMark).MakeByRefType() };
-		private static MyGetCurrentMethodDelegate dynamicMethod = null;
-		#endregion
-
 		#region Constructors
 		protected EditJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo, params WikiTask[] tasks)
-				: base(site, asyncInfo, tasks)
-		{
-			var find = MyStackCrawlMark.LookForMyCallersCaller;
-			var constructor = MyGetCurrentMethod(ref find) as ConstructorInfo;
-			if (constructor != null)
-			{
-				this.LogName = constructor.GetCustomAttribute<JobInfoAttribute>()?.Name;
-			}
-		}
-		#endregion
-
-		#region Private Delegates
-		private delegate MethodBase MyGetCurrentMethodDelegate(ref MyStackCrawlMark mark);
-		#endregion
-
-		#region Private Enumerations
-		private enum MyStackCrawlMark
-		{
-			LookForMe,
-			LookForMyCaller,
-			LookForMyCallersCaller,
-			LookForThread
-		}
+				: base(site, asyncInfo, tasks) => site.EditingDisabled = true;
 		#endregion
 
 		#region Public Override Properties
@@ -56,7 +25,7 @@
 		#endregion
 
 		#region Public Abstract Properties
-		public virtual string LogName { get; }
+		public abstract string LogName { get; }
 		#endregion
 
 		#region Protected Properties
@@ -115,25 +84,6 @@
 		#region Protected Virtual Methods
 		protected virtual void PrepareJob()
 		{
-		}
-		#endregion
-
-		#region Private Static Methods
-		private static MethodBase MyGetCurrentMethod(ref MyStackCrawlMark mark)
-		{
-			// This code taken from https://stackoverflow.com/questions/5143068/call-private-method-retaining-call-stack.
-			// It's used in the constructor to find the specific calling constructor instantiating the class.
-			if (dynamicMethod == null)
-			{
-				var m = new DynamicMethod("GetCurrentMethod", typeof(MethodBase), MyStackCrawlMarkRefType, true); // Ignore all privilege checks :D
-				var gen = m.GetILGenerator();
-				gen.Emit(OpCodes.Ldarg_0); // NO type checking here!
-				gen.Emit(OpCodes.Call, InternalGetCurrentMethod);
-				gen.Emit(OpCodes.Ret);
-				Interlocked.CompareExchange(ref dynamicMethod, (MyGetCurrentMethodDelegate)m.CreateDelegate(typeof(MyGetCurrentMethodDelegate)), null);
-			}
-
-			return dynamicMethod(ref mark);
 		}
 		#endregion
 	}
