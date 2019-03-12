@@ -38,6 +38,7 @@
 			["Slimecraw"] = "Slimecraw (set)",
 			["Spawn of Mephala"] = "Spawn of Mephala (set)",
 			["Stormfist"] = "Stormfist (set)",
+			["Symphony of Blades"] = "Symphony of Blades (set)",
 			["Swarm Mother"] = "Swarm Mother (set)",
 			["The Troll King"] = "The Troll King (set)",
 			["Thurvokun"] = "Thurvokun (set)",

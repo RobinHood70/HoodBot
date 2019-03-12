@@ -28,7 +28,11 @@
 		#region Constructors
 		[JobInfo("Item Sets", "ESO")]
 		public EsoItemSets(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo) => this.botFunctions = site.UserFunctions as HoodBotFunctions;
+			: base(site, asyncInfo)
+		{
+			this.botFunctions = site.UserFunctions as HoodBotFunctions;
+			site.EditingDisabled = false;
+		}
 		#endregion
 
 		#region Public Override Properties
@@ -166,20 +170,12 @@
 			if (start < 0 || end < 0)
 			{
 				this.Warn($"Delimiters not found on page {page.FullPageName}");
+				return;
 			}
 
 			start += marker.Length;
-			while (start < end && page.Text[start] == '\n')
-			{
-				start++;
-			}
-
-			while (end > start && page.Text[end - 1] == '\n')
-			{
-				end--;
-			}
-
 			var sb = new StringBuilder();
+			sb.Append('\n');
 			var items = SetBonusRegex.Matches(pageData.BonusDescription);
 			foreach (Match item in items)
 			{
@@ -205,7 +201,7 @@
 				}
 			}
 
-			sb.Remove(sb.Length - 5, 5);
+			sb.Remove(sb.Length - 5, 4);
 
 			var text = sb.ToString();
 			pageData.IsNonTrivial = EsoReplacer.CompareReplacementText(this, page.Text.Substring(start, end - start), text, page.FullPageName);
