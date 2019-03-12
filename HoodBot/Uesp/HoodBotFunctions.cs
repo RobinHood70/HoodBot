@@ -181,7 +181,7 @@
 			return result;
 		}
 
-		public override void OnAllJobsStarting(int jobCount) => this.InitializeResult(ResultDestination.ResultsPage, this.Site.User.Name + "/Results", "Job Results");
+		public override void OnAllJobsStarting(int jobCount) => this.InitializeResult(ResultDestination.ResultsPage, this.Site.User.FullPageName + "/Results", "Job Results");
 
 		public override ChangeStatus UpdateCurrentStatus(string status)
 		{
