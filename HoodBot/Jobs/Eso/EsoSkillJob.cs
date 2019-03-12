@@ -116,7 +116,6 @@
 			this.skillPages.PageLoaded += this.SkillPageLoaded;
 			this.skillPages.GetTitles(titles);
 			this.skillPages.PageLoaded -= this.SkillPageLoaded;
-			this.StatusWriteLine($"Page count: {this.skillPages.Count}/{this.skills.Count}");
 			this.GenerateReport();
 		}
 		#endregion

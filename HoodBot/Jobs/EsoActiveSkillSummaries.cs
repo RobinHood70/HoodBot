@@ -13,7 +13,7 @@
 		#region Constructors
 		[JobInfo("Update Active Skills", "ESO")]
 		public EsoActiveSkillSummaries(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo) => this.Site.EditingDisabled = true;
+			: base(site, asyncInfo) => this.Site.EditingDisabled = false;
 		#endregion
 
 		#region Protected Override Properties

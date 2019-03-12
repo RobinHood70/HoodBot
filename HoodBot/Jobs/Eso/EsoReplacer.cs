@@ -36,12 +36,12 @@
 			var replacedText = TemplateStripper.Replace(oldText, string.Empty);
 			if (replacedText.Contains("[["))
 			{
-				job.Warn($"\nWatch for links: {pageName}\n{replacedText}");
+				job.Warn($"\nWatch for links: {pageName}\nCurrent Text: {replacedText}\nNew Text: {newText}");
 			}
 
 			if (replacedText.Contains("{{"))
 			{
-				job.Warn($"\nWatch for templates: {pageName}\n{replacedText}");
+				job.Warn($"\nWatch for templates: {pageName}\nCurrent Text: {replacedText}\nNew Text: {newText}");
 			}
 
 			return oldText != ToPlainText(newText);
