@@ -55,11 +55,57 @@
 
 		/// <summary>Gets a value indicating whether this <see cref="Page" /> exists.</summary>
 		/// <value><see langword="true" /> if the page exists; otherwise, <see langword="false" />.</value>
-		public bool Exists => !this.Missing && !this.Invalid;
+		public bool Exists => !this.IsMissing && !this.IsInvalid;
+
+		/// <summary>Gets a value indicating whether the page represents a disambiguation page.</summary>
+		/// <returns><see langword="true" /> if this instance is disambiguation; otherwise, <see langword="false" />.</returns>
+		/// <exception cref="InvalidOperationException">Thrown if the page properties (MW 1.21+) or templates (MW 1.20-) weren't loaded prior to checking.</exception>
+		public bool IsDisambiguation
+		{
+			get
+			{
+				if (this.Site.DisambiguatorAvailable)
+				{
+					// Disambiguator is 1.21+, so we don't need to worry about the fact that page properties are 1.17+.
+					if (!this.LoadOptions.Modules.HasFlag(PageModules.Properties))
+					{
+						throw new InvalidOperationException(CurrentCulture(ModuleNotLoaded, nameof(PageModules.Properties), nameof(this.IsDisambiguation)));
+					}
+
+					return this.Properties.ContainsKey("disambiguation");
+				}
+
+				if (!this.LoadOptions.Modules.HasFlag(PageModules.Templates))
+				{
+					throw new InvalidOperationException(CurrentCulture(ModuleNotLoaded, nameof(PageModules.Templates), nameof(this.IsDisambiguation)));
+				}
+
+				var templates = new HashSet<Title>(this.Templates);
+				templates.IntersectWith(this.Site.DisambiguationTemplates);
+
+				return templates.Count > 0;
+			}
+		}
 
 		/// <summary>Gets or sets a value indicating whether this <see cref="Page" /> is invalid.</summary>
 		/// <value><see langword="true" /> if invalid; otherwise, <see langword="false" />.</value>
-		public bool Invalid { get; protected set; }
+		public bool IsInvalid { get; protected set; }
+
+		/// <summary>Gets a value indicating whether this <see cref="Page" /> has been loaded.</summary>
+		/// <value><see langword="true" /> if loaded; otherwise, <see langword="false" />.</value>
+		public bool IsLoaded { get; private set; }
+
+		/// <summary>Gets or sets a value indicating whether this <see cref="Page" /> is missing.</summary>
+		/// <value><see langword="true" /> if the page is missing; otherwise, <see langword="false" />.</value>
+		public bool IsMissing { get; protected set; } = true;
+
+		/// <summary>Gets or sets a value indicating whether this <see cref="Page" /> is new.</summary>
+		/// <value><see langword="true" /> if the page is new; otherwise, <see langword="false" />.</value>
+		public bool IsNew { get; protected set; }
+
+		/// <summary>Gets or sets a value indicating whether this <see cref="Page" /> is a redirect.</summary>
+		/// <value><see langword="true" /> if the page is a redirect; otherwise, <see langword="false" />.</value>
+		public bool IsRedirect { get; protected set; }
 
 		/// <summary>Gets the links on the page, if they were requested in the last load operation.</summary>
 		/// <value>The links used on the page.</value>
@@ -69,30 +115,14 @@
 		/// <value>The links used on the page.</value>
 		public IReadOnlyList<Title> LinksHere { get; } = new List<Title>();
 
-		/// <summary>Gets a value indicating whether this <see cref="Page" /> has been loaded.</summary>
-		/// <value><see langword="true" /> if loaded; otherwise, <see langword="false" />.</value>
-		public bool Loaded { get; private set; }
-
 		/// <summary>Gets or sets the load options.</summary>
 		/// <value>The load options.</value>
 		/// <remarks>If you need to detect disambiguations, you should include Properties for wikis using Disambiguator or Templates for those that aren't. These are not loaded by default.</remarks>
 		public PageLoadOptions LoadOptions { get; set; }
 
-		/// <summary>Gets or sets a value indicating whether this <see cref="Page" /> is missing.</summary>
-		/// <value><see langword="true" /> if the page is missing; otherwise, <see langword="false" />.</value>
-		public bool Missing { get; protected set; } = true;
-
-		/// <summary>Gets or sets a value indicating whether this <see cref="Page" /> is new.</summary>
-		/// <value><see langword="true" /> if the page is new; otherwise, <see langword="false" />.</value>
-		public bool New { get; protected set; }
-
 		/// <summary>Gets the page properties, if they were requested in the last load operation.</summary>
 		/// <value>The list of page properties.</value>
 		public IReadOnlyDictionary<string, string> Properties { get; } = new Dictionary<string, string>();
-
-		/// <summary>Gets or sets a value indicating whether this <see cref="Page" /> is a redirect.</summary>
-		/// <value><see langword="true" /> if the page is a redirect; otherwise, <see langword="false" />.</value>
-		public bool Redirect { get; protected set; }
 
 		/// <summary>Gets the page revisions, if they were requested in the last load operation.</summary>
 		/// <value>The revisions list.</value>
@@ -135,39 +165,12 @@
 		/// <returns><see langword="true" /> if the page exists; otherwise <see langword="false" />.</returns>
 		public bool CheckExistence()
 		{
-			if (!this.Loaded)
+			if (!this.IsLoaded)
 			{
 				this.Load(PageModules.None);
 			}
 
 			return this.Exists;
-		}
-
-		/// <summary>Determines whether the page represents a disambiguation page.</summary>
-		/// <returns><see langword="true" /> if this instance is disambiguation; otherwise, <see langword="false" />.</returns>
-		/// <exception cref="InvalidOperationException">Thrown if the page properties (MW 1.21+) or templates (MW 1.20-) weren't loaded prior to checking.</exception>
-		public bool IsDisambiguation()
-		{
-			if (this.Site.DisambiguatorAvailable)
-			{
-				// Disambiguator is 1.21+, so we don't need to worry about the fact that page properties are 1.17+.
-				if (!this.LoadOptions.Modules.HasFlag(PageModules.Properties))
-				{
-					throw new InvalidOperationException(CurrentCulture(ModuleNotLoaded, nameof(PageModules.Properties), nameof(this.IsDisambiguation)));
-				}
-
-				return this.Properties.ContainsKey("disambiguation");
-			}
-
-			if (!this.LoadOptions.Modules.HasFlag(PageModules.Templates))
-			{
-				throw new InvalidOperationException(CurrentCulture(ModuleNotLoaded, nameof(PageModules.Templates), nameof(this.IsDisambiguation)));
-			}
-
-			var templates = new HashSet<Title>(this.Templates);
-			templates.IntersectWith(this.Site.DisambiguationTemplates);
-
-			return templates.Count > 0;
 		}
 
 		/// <summary>Loads or reloads the page.</summary>
@@ -189,10 +192,52 @@
 			this.Reload();
 		}
 
+		/// <summary>Saves the page.</summary>
+		/// <param name="editSummary">The edit summary.</param>
+		/// <param name="isMinor">Whether the edit should be marked as minor.</param>
+		/// <returns>A value indicating the change status of the edit.</returns>
+		public ChangeStatus Save(string editSummary, bool isMinor) => this.Save(editSummary, isMinor, true, false);
+
+		/// <summary>Saves the page with full options.</summary>
+		/// <param name="editSummary">The edit summary.</param>
+		/// <param name="isMinor">Whether the edit should be marked as minor.</param>
+		/// <param name="isBotEdit">Whether the edit should be marked as a bot edit.</param>
+		/// <param name="recreateIfJustDeleted">Whether to recreate the page if it was deleted since being loaded.</param>
+		/// <returns>A value indicating the change status of the edit.</returns>
+		public ChangeStatus Save(string editSummary, bool isMinor, bool isBotEdit, bool recreateIfJustDeleted)
+		{
+			if (!this.TextModified)
+			{
+				return ChangeStatus.NoEffect;
+			}
+
+			var changeArgs = new PageTextChangeArgs(this, nameof(this.Save), editSummary, isMinor, isBotEdit, recreateIfJustDeleted);
+			return this.Site.PublishPageTextChange(
+				changeArgs,
+				() =>
+				{
+					// Modification status re-checked here because a subscriber may have reverted the page.
+					return
+						!this.TextModified ? ChangeStatus.NoEffect :
+						this.Site.AbstractionLayer.Edit(new EditInput(this.FullPageName, this.Text)
+						{
+							BaseTimestamp = this.Revisions.Current?.Timestamp,
+							StartTimestamp = this.StartTimestamp,
+							Bot = changeArgs.BotEdit,
+							Minor = changeArgs.Minor ? Tristate.True : Tristate.False,
+							Recreate = changeArgs.RecreateIfJustDeleted,
+							Summary = changeArgs.EditSummary,
+						}).Result == "Success" ? ChangeStatus.Success : ChangeStatus.Failure;
+				});
+		}
+		#endregion
+
+		#region Internal Methods
+
 		/// <summary>Populates page data from the specified WallE PageItem.</summary>
 		/// <param name="pageItem">The page item.</param>
 		/// <remarks>This item is publicly available so it can be called from other load-like routines if necessary, such as from a PageCollection's LoadPages routine.</remarks>
-		public void Populate(PageItem pageItem)
+		internal void Populate(PageItem pageItem)
 		{
 			// Assumes title-related properties have already been provided in the constructor.
 			ThrowNull(pageItem, nameof(pageItem));
@@ -204,14 +249,14 @@
 			var info = pageItem.Info;
 			if (info == null)
 			{
-				this.New = false;
-				this.Redirect = false;
+				this.IsNew = false;
+				this.IsRedirect = false;
 				this.StartTimestamp = this.Site.AbstractionLayer.CurrentTimestamp;
 			}
 			else
 			{
-				this.New = info.Flags.HasFlag(PageInfoFlags.New);
-				this.Redirect = info.Flags.HasFlag(PageInfoFlags.Redirect);
+				this.IsNew = info.Flags.HasFlag(PageInfoFlags.New);
+				this.IsRedirect = info.Flags.HasFlag(PageInfoFlags.Redirect);
 				this.StartTimestamp = pageItem.Info.StartTimestamp;
 			}
 
@@ -301,54 +346,16 @@
 
 			// Custom
 			this.PopulateCustomResults(pageItem);
+			this.IsLoaded = true;
 		}
 
 		/// <summary>Populates only flag data. This is useful for results that return more than straight titles, but less than full page data (e.g., Purge, Watch).</summary>
 		/// <param name="invalid">Whether the page is invalid.</param>
 		/// <param name="missing">Whether the page is missing.</param>
-		public void PopulateFlags(bool invalid, bool missing)
+		internal void PopulateFlags(bool invalid, bool missing)
 		{
-			this.Invalid = invalid;
-			this.Missing = missing;
-		}
-
-		/// <summary>Saves the page.</summary>
-		/// <param name="editSummary">The edit summary.</param>
-		/// <param name="isMinor">Whether the edit should be marked as minor.</param>
-		/// <returns>A value indicating the change status of the edit.</returns>
-		public ChangeStatus Save(string editSummary, bool isMinor) => this.Save(editSummary, isMinor, true, false);
-
-		/// <summary>Saves the page with full options.</summary>
-		/// <param name="editSummary">The edit summary.</param>
-		/// <param name="isMinor">Whether the edit should be marked as minor.</param>
-		/// <param name="isBotEdit">Whether the edit should be marked as a bot edit.</param>
-		/// <param name="recreateIfJustDeleted">Whether to recreate the page if it was deleted since being loaded.</param>
-		/// <returns>A value indicating the change status of the edit.</returns>
-		public ChangeStatus Save(string editSummary, bool isMinor, bool isBotEdit, bool recreateIfJustDeleted)
-		{
-			if (!this.TextModified)
-			{
-				return ChangeStatus.NoEffect;
-			}
-
-			var changeArgs = new PageTextChangeArgs(this, nameof(this.Save), editSummary, isMinor, isBotEdit, recreateIfJustDeleted);
-			return this.Site.PublishPageTextChange(
-				changeArgs,
-				() =>
-				{
-					// Modification status re-checked here because a subscriber may have reverted the page.
-					return
-						!this.TextModified ? ChangeStatus.NoEffect :
-						this.Site.AbstractionLayer.Edit(new EditInput(this.FullPageName, this.Text)
-						{
-							BaseTimestamp = this.Revisions.Current?.Timestamp,
-							StartTimestamp = this.StartTimestamp,
-							Bot = changeArgs.BotEdit,
-							Minor = changeArgs.Minor ? Tristate.True : Tristate.False,
-							Recreate = changeArgs.RecreateIfJustDeleted,
-							Summary = changeArgs.EditSummary,
-						}).Result == "Success" ? ChangeStatus.Success : ChangeStatus.Failure;
-				});
+			this.IsInvalid = invalid;
+			this.IsMissing = missing;
 		}
 		#endregion
 
@@ -376,7 +383,6 @@
 			var pageSetInput = new QueryPageSetInput(new[] { this.FullPageName }) { ConvertTitles = this.LoadOptions.ConvertTitles, Redirects = this.LoadOptions.FollowRedirects };
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, propertyInputs, creator.CreatePageItem);
 			this.Populate(result.First());
-			this.Loaded = true;
 			this.PageLoaded?.Invoke(this, EventArgs.Empty);
 		}
 		#endregion

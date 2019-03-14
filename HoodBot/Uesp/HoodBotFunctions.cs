@@ -35,7 +35,8 @@
 		{
 			this.NativeAbstractionLayer = this.Site.AbstractionLayer as WikiAbstractionLayer;
 			this.NativeClient = this.NativeAbstractionLayer.Client;
-			this.LogPage = new Page(this.Site, this.Site.User.FullPageName + "/Log");
+			this.LogPage = new Page(site, this.Site.User.FullPageName + "/Log");
+			this.ResultsPage = new Page(site, this.Site.User.FullPageName + "/Results");
 			this.StatusPage = this.LogPage;
 			this.DefaultResultDestination = ResultDestination.ResultsPage;
 		}
@@ -104,7 +105,8 @@
 
 		public override void InitializeResult(ResultDestination destination, string userOrPageName, string title)
 		{
-			this.resultInfo[destination] = (userOrPageName, title);
+			var currentResult = this.resultInfo[destination];
+			this.resultInfo[destination] = (userOrPageName ?? currentResult.UserOrPageName, title ?? currentResult.Title);
 			this.stringBuilders[destination] = new StringBuilder();
 		}
 
@@ -130,7 +132,7 @@
 							File.WriteAllText(info.Title, result);
 							break;
 						case ResultDestination.ResultsPage:
-							this.PostResultsToResultsPage(info.UserOrPageName, info.Title, result);
+							this.PostResultsToResultsPage(info.Title, result);
 							break;
 						case ResultDestination.UserTalkPage:
 							this.PostResultsToUserTalkPage(info.UserOrPageName, info.Title, result);
@@ -181,7 +183,7 @@
 			return result;
 		}
 
-		public override void OnAllJobsStarting(int jobCount) => this.InitializeResult(ResultDestination.ResultsPage, this.Site.User.FullPageName + "/Results", "Job Results");
+		public override void OnAllJobsStarting(int jobCount) => this.InitializeResult(ResultDestination.ResultsPage, null, "Job Results");
 
 		public override ChangeStatus UpdateCurrentStatus(string status)
 		{
@@ -232,7 +234,7 @@
 			}
 			else
 			{
-				var testTemplate = new Template(entry.Value);
+				var testTemplate = Template.Parse(entry.Value);
 				if (result == ChangeStatus.NoEffect &&
 					Parameter.IsNullOrEmpty(testTemplate["3"]) &&
 					testTemplate["1"]?.Value == this.lastLogInfo.Title &&
@@ -263,7 +265,7 @@
 				throw BadLogPageException();
 			}
 
-			var entryTemplate = new Template(entry.Value);
+			var entryTemplate = Template.Parse(entry.Value);
 			if (entryTemplate["2"] == null || entryTemplate["3"] != null)
 			{
 				throw BadLogPageException();
@@ -277,13 +279,10 @@
 				.Insert(entry.Index, entryTemplate.ToString() + "\n");
 		}
 
-		private void PostResultsToResultsPage(string pageName, string title, string result)
+		private void PostResultsToResultsPage(string title, string result)
 		{
-			var page = new Page(this.Site, pageName)
-			{
-				Text = result
-			};
-			page.Save(title, false);
+			this.ResultsPage.Text = result;
+			this.ResultsPage.Save(title, false);
 		}
 
 		private void PostResultsToUserTalkPage(string userName, string title, string result)

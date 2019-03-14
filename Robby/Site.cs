@@ -827,7 +827,7 @@
 			this.disambiguationTemplates = new HashSet<Title>();
 			var page = new Page(this.Namespaces[MediaWikiNamespaces.MediaWiki], "Disambiguationspage");
 			page.Load(PageModules.Default | PageModules.Links);
-			if (!page.Missing)
+			if (page.Exists)
 			{
 				if (page.Links.Count == 0)
 				{

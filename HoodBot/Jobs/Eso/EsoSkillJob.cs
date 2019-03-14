@@ -79,10 +79,10 @@
 		{
 			this.StatusWriteLine("Saving pages");
 			this.EditConflictAction = this.SkillPageLoaded;
-			foreach (var skill in this.skills)
+			this.skillPages.Sort();
+			foreach (var skillPage in this.skillPages)
 			{
-				var page = this.skillPages[skill.Key];
-				this.SavePage(page, this.LogName, false);
+				this.SavePage(skillPage, this.LogName, false);
 				this.Progress++;
 			}
 
@@ -252,14 +252,11 @@
 
 			var match = skillSummaryFinder.Match(page.Text);
 			var replacements = new HashSet<string>();
-			var template = new Template(match.Value)
-			{
-				// CopyLast = false,
-			};
+			var template = Template.Parse(match.Value);
 
 			template.RemoveDuplicates();
 			template.Remove("update");
-			template.NameTrailingWhiteSpace = "\n";
+			template.NameParameter.TrailingWhiteSpace = "\n";
 			template.DefaultValueFormat.TrailingWhiteSpace = "\n";
 
 			var oldParameters = new ParameterCollection();
@@ -307,7 +304,7 @@
 			newText = EsoReplacer.FirstLinksOnly(this.Site, newText);
 			page.Text = page.Text.Remove(match.Index, match.Length).Insert(match.Index, newText);
 
-			template = new Template(newText);
+			template = Template.Parse(newText);
 			var bigChange = false;
 			foreach (var parameter in template)
 			{

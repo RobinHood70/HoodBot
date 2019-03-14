@@ -23,7 +23,7 @@
 				var matches = find.Matches(page.Text);
 				foreach (var match in matches.Cast<Match>())
 				{
-					var template = new Template(match.Value);
+					var template = Template.Parse(match.Value);
 					template.ForcePositionalNames();
 					allTemplates.Add(page.FullPageName, template);
 					foreach (var param in template)

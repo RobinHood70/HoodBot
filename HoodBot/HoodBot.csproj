@@ -111,6 +111,7 @@
     <Compile Include="Jobs\EditJob.cs" />
     <Compile Include="Jobs\EsoActiveSkillSummaries.cs" />
     <Compile Include="Jobs\EsoItemSets.cs" />
+    <Compile Include="Jobs\EsoNpcs.cs" />
     <Compile Include="Jobs\EsoPassiveSkillSummaries.cs" />
     <Compile Include="Jobs\Eso\Ability.cs" />
     <Compile Include="Jobs\Eso\ActiveSkill.cs" />
@@ -137,6 +138,7 @@
     <Compile Include="Uesp\HoodBotFunctions.cs" />
     <Compile Include="Uesp\MetaTemplateCreator.cs" />
     <Compile Include="Uesp\PropVariables.cs" />
+    <Compile Include="Uesp\UespNamespaces.cs" />
     <Compile Include="Uesp\VariablesInput.cs" />
     <Compile Include="Uesp\VariablesPage.cs" />
     <Compile Include="Uesp\VariablesPageItem.cs" />

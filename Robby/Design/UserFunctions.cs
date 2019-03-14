@@ -69,6 +69,10 @@
 		/// <value>The log page.</value>
 		public Page LogPage { get; protected set; }
 
+		/// <summary>Gets or sets the results page.</summary>
+		/// <value>The results page.</value>
+		public Page ResultsPage { get; protected set; }
+
 		/// <summary>Gets the site associated with this instance.</summary>
 		/// <value>The site associated with this instance.</value>
 		public Site Site { get; }

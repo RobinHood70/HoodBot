@@ -95,7 +95,7 @@
 			var paramName = "bot" + pageType;
 			var patchPage = new TitleCollection(job.Site, PatchPageName).Load()[0];
 			var match = Template.Find("Online Patch").Match(patchPage.Text);
-			var patchTemplate = new Template(match.Value);
+			var patchTemplate = Template.Parse(match.Value);
 			var oldValue = patchTemplate[paramName]?.Value;
 			var patchVersion = GetPatchVersion(job);
 			if (oldValue != patchVersion)

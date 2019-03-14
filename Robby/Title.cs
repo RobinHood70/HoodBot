@@ -216,9 +216,15 @@
 		/// <summary>Builds the full name of the page from the namespace and page name, accounting for Main space.</summary>
 		/// <param name="ns">The namespace of the page.</param>
 		/// <param name="pageName">The page name.</param>
+		/// <returns>The full name of the page from the namespace and page name, accounting for Main space.</returns>
+		public static string NameFromParts(Namespace ns, string pageName) => ns?.DecoratedName + pageName;
+
+		/// <summary>Builds the full name of the page from the namespace, page name, and fragment, accounting for Main space.</summary>
+		/// <param name="ns">The namespace of the page.</param>
+		/// <param name="pageName">The page name.</param>
 		/// <param name="fragment">The fragment (section title/anchor) to include.</param>
 		/// <returns>The full name of the page from the namespace and page name, accounting for Main space.</returns>
-		public static string NameFromParts(Namespace ns, string pageName, string fragment) => ns?.DecoratedName + pageName + (fragment == null ? string.Empty : "#" + fragment);
+		public static string NameFromParts(Namespace ns, string pageName, string fragment) => NameFromParts(ns, pageName) + "#" + fragment;
 
 		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		/// <param name="pageName">The name of the page, without namespace or fragment text.</param>

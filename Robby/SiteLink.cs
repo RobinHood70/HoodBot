@@ -474,7 +474,7 @@
 			this.Namespace.PageNameEquals(this.PageName, other.PageName);
 		#endregion
 
-		#region Public Override Methods
+		#region Public Virtual Methods
 
 		/// <summary>Reformats the link using the specified formats.</summary>
 		/// <param name="nameFormat">Whitespace to add before and after the page name. The <see cref="ParameterString.Value"/> property is ignored.</param>
@@ -494,6 +494,9 @@
 				this.DisplayParameter.TrailingWhiteSpace = valueFormat.TrailingWhiteSpace;
 			}
 		}
+		#endregion
+
+		#region Public Override Methods
 
 		/// <summary>Converts the <see cref="SiteLink"/> to its full wiki text.</summary>
 		/// <returns>A <see cref="string"/> that represents this instance.</returns>

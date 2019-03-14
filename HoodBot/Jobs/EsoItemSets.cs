@@ -44,6 +44,7 @@
 		{
 			this.StatusWriteLine("Saving pages");
 			this.EditConflictAction = this.SetLoaded;
+			this.pages.Sort();
 			foreach (var page in this.pages)
 			{
 				this.SavePage(page, this.LogName, false);
@@ -140,7 +141,7 @@
 
 		private string PatchNumberReplacer(Match match)
 		{
-			var template = new Template(match.Value);
+			var template = Template.Parse(match.Value);
 			template.RemoveDuplicates();
 			template.Remove("update");
 			template.Remove("1");

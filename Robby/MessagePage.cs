@@ -54,10 +54,9 @@
 		protected internal void PopulateFrom(AllMessagesItem item)
 		{
 			ThrowNull(item, nameof(item));
-			this.Invalid = false;
+			this.PopulateFlags(false, item.Flags.HasFlag(MessageFlags.Missing));
 			this.Customized = item.Flags.HasFlag(MessageFlags.Customized);
 			this.DefaultMissing = item.Flags.HasFlag(MessageFlags.DefaultMissing);
-			this.Missing = item.Flags.HasFlag(MessageFlags.Missing);
 			this.DefaultMessage = item.Default;
 			this.NormalizedName = item.NormalizedName;
 			this.Text = item.Content ?? item.Default;
@@ -81,7 +80,7 @@
 				}
 				else
 				{
-					this.Invalid = true;
+					this.PopulateFlags(true, true);
 				}
 			}
 		}
