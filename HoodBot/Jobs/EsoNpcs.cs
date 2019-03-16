@@ -56,7 +56,7 @@
 
 		protected override void PrepareJob()
 		{
-			this.Site.UserFunctions.InitializeResult(ResultDestination.ResultsPage, null, "Existing ESO NPC pages");
+			this.Site.UserFunctions.SetResultTitle(ResultDestination.ResultsPage, "Existing ESO NPC pages");
 			this.StatusWriteLine("Getting wiki data");
 			var newNpcs = new TitleCollection(this.Site);
 			newNpcs.GetCategoryMembers("Online-NPCs", false);
