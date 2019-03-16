@@ -300,9 +300,10 @@
 			where TInput : class
 			where TOutput : class
 		{
+			ThrowNull(module, nameof(module));
 			var input = new QueryInput(module);
 			var query = new ActionQuery(this);
-			if (module is IContinuableQueryModule continuable)
+			if (module is IContinuableQueryModule)
 			{
 				query.SubmitContinued(input);
 			}
