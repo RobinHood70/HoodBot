@@ -59,7 +59,7 @@
 					}
 					else
 					{
-						nameRemaining = split[1].TrimStart() + ':' + split[2];
+						nameRemaining = split[1].TrimStart() + (split.Length == 3 ? ':' + split[2] : string.Empty);
 					}
 				}
 			}
