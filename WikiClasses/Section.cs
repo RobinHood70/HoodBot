@@ -104,7 +104,7 @@
 		internal static Section Parse(MatchCollection matches, string text, ref int offset)
 		{
 			var retval = new Section();
-			Match match = matches[offset];
+			var match = matches[offset];
 			var groups = match.Groups;
 			var level = groups["levelopen"].Value.Length;
 			if (level != groups["levelclose"].Value.Length)
