@@ -56,7 +56,10 @@ namespace RobinHood70.WallE.Eve.Modules
 					// Little point in short-circuiting this beyond the initial check since module count will be small, so just run through all of them.
 					foreach (var module in this.Input.AllModules)
 					{
-						continueParsing &= module.ContinueParsing;
+						if (module is IContinuableQueryModule continuableModule)
+						{
+							continueParsing &= continuableModule.ContinueParsing;
+						}
 					}
 				}
 
@@ -262,7 +265,10 @@ namespace RobinHood70.WallE.Eve.Modules
 					// Should not be an "else if" because generator could be the same type as another module.
 					if (modules.TryGetValue(limit.Name, out var module))
 					{
-						module.ModuleLimit = value;
+						if (module is IContinuableQueryModule continuableModule)
+						{
+							continuableModule.ModuleLimit = value;
+						}
 					}
 					else if (propModules.TryGetValue(limit.Name, out var propModule))
 					{
