@@ -285,15 +285,34 @@
 			this.Uri = urib.Uri;
 		}
 
-		/// <summary>Runs the query specified by the input.</summary>
-		/// <param name="input">The input.</param>
-		/// <remarks>This function is used internally, but also made available externally for special situations.</remarks>
-		public void RunQuery(QueryInput input) => new ActionQuery(this).Submit(input);
-
 		/// <summary>Runs the continuable query specified by the input.</summary>
 		/// <param name="input">The input.</param>
-		/// <remarks>This function is used internally, but also made available externally for special situations.</remarks>
+		/// <remarks>This function is used internally, but also made available externally for special situations. The caller is responsible for deciding whether any given query is continuable.</remarks>
 		public void RunContinuableQuery(QueryInput input) => new ActionQuery(this).SubmitContinued(input);
+
+		/// <summary>Runs the query specified based directly on the input module.</summary>
+		/// <typeparam name="TInput">The input type for the module.</typeparam>
+		/// <typeparam name="TOutput">The output type for the module.</typeparam>
+		/// <param name="module">The input module.</param>
+		/// <returns>The module output.</returns>
+		/// <remarks>This function is used internally, but also made available externally for special situations.</remarks>
+		public TOutput RunModuleQuery<TInput, TOutput>(QueryModule<TInput, TOutput> module)
+			where TInput : class
+			where TOutput : class
+		{
+			var input = new QueryInput(module);
+			var query = new ActionQuery(this);
+			if (module is IContinuableQueryModule continuable)
+			{
+				query.SubmitContinued(input);
+			}
+			else
+			{
+				query.Submit(input);
+			}
+
+			return module.Output;
+		}
 
 		/// <summary>Runs the pageset query specified by the input.</summary>
 		/// <param name="input">The input.</param>
@@ -456,7 +475,7 @@
 			try
 			{
 				this.StopCheckMethods = StopCheckMethods.None;
-				this.RunQuery(new QueryInput());
+				new ActionQuery(this).Submit(new QueryInput());
 
 				return true;
 			}
@@ -1154,7 +1173,7 @@
 		/// <summary>Returns information about <see href="https://www.mediawiki.org/wiki/Manual:UploadStash">stashed</see> files using the <see href="https://www.mediawiki.org/wiki/API:Stashimageinfo">Stashimageinfo</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>A list of image information for each image or chunk.</returns>
-		public IReadOnlyList<ImageInfoItem> StashImageInfo(StashImageInfoInput input) => this.RunListQuery(new PropStashImageInfo(this, input));
+		public IReadOnlyList<ImageInfoItem> StashImageInfo(StashImageInfoInput input) => this.RunModuleQuery(new PropStashImageInfo(this, input)).AsReadOnlyList();
 
 		/// <summary>Adds or removes tags based on revision IDs, log IDs, or Recent Changes IDs using the <see href="https://www.mediawiki.org/wiki/API:Tag">Tag</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -1313,14 +1332,6 @@
 		private IReadOnlyList<TOutput> RunListQuery<TInput, TOutput>(ListModule<TInput, TOutput> module)
 			where TInput : class
 			where TOutput : class => this.RunModuleQuery(module).AsReadOnlyList();
-
-		private TOutput RunModuleQuery<TInput, TOutput>(QueryModule<TInput, TOutput> module)
-			where TInput : class
-			where TOutput : class
-		{
-			this.RunContinuableQuery(new QueryInput(module));
-			return module.Output;
-		}
 
 		private UploadResult UploadFileChunked(UploadInput input, int chunkSize)
 		{

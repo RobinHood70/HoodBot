@@ -7,21 +7,6 @@
 	/// <seealso cref="IModule" />
 	public interface IQueryModule : IModule
 	{
-		#region Properties
-
-		/// <summary>Gets the name of the continue parameter for the module.</summary>
-		/// <value>The name of the continue parameter for the module.</value>
-		string ContinueName { get; }
-
-		/// <summary>Gets a value indicating whether the module is allowed to continue parsing results.</summary>
-		/// <value><see langword="true" /> if parsing should continue; otherwise, <see langword="false" />.</value>
-		bool ContinueParsing { get; }
-
-		/// <summary>Gets or sets the upper limit of items this module can request.</summary>
-		/// <value>The limit of items this module can request.</value>
-		int ModuleLimit { get; set; }
-		#endregion
-
 		#region Methods
 
 		/// <summary>Builds this module's portion of the request.</summary>

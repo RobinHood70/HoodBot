@@ -5,7 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public abstract class ListModule<TInput, TItem> : QueryModule<TInput, IList<TItem>>
+	public abstract class ListModule<TInput, TItem> : QueryModule<TInput, IList<TItem>>, IContinuableQueryModule
 		where TInput : class
 		where TItem : class
 	{

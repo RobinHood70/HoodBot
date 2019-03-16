@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
@@ -8,12 +9,13 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WikiCommon.Globals;
 
 	// TODO: Monitor the links below and see if this is ultimately implemented as a list or with Special:UploadStash/$key as a valid page title, then adapt code as needed.
-	// This behaves more like a List module, and is therefore internally treated as such. It is not (and should not be made into) a property module internally. The entire PHP version of the module will likely be re-written in the future. See https://phabricator.wikimedia.org/T38220 and https://phabricator.wikimedia.org/T89971.
-	internal class PropStashImageInfo : ListModule<StashImageInfoInput, ImageInfoItem>
+	// This behaves more like a List module, but does not support limits or continuation, and is therefore internally treated as just a normal query module. It is not (and should not be made into) a property module internally. The entire PHP version of the module will likely be re-written in the future.
+	// See https://phabricator.wikimedia.org/T38220 and https://phabricator.wikimedia.org/T89971.
+	internal class PropStashImageInfo : QueryModule<StashImageInfoInput, IList<ImageInfoItem>>
 	{
 		#region Constructors
 		public PropStashImageInfo(WikiAbstractionLayer wal, StashImageInfoInput input)
-		: base(wal, input, null)
+			: base(wal, input, new List<ImageInfoItem>(), null)
 		{
 		}
 		#endregion
@@ -47,7 +49,16 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIfNotNullIf("urlparam", input.UrlParameter, this.SiteVersion >= 118);
 		}
 
-		protected override ImageInfoItem GetItem(JToken result) => result.ParseImageInfo();
+		protected override void DeserializeResult(JToken result, IList<ImageInfoItem> output)
+		{
+			ThrowNull(result, nameof(result));
+			ThrowNull(output, nameof(output));
+			foreach (var item in result)
+			{
+				var imageInfo = item.ParseImageInfo();
+				output.Add(imageInfo);
+			}
+		}
 		#endregion
 	}
 }
