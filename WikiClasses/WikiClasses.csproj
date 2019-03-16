@@ -72,6 +72,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Searches.cs" />
+    <Compile Include="Section.cs" />
+    <Compile Include="SectionedPage.cs" />
     <Compile Include="Template.cs" />
     <Compile Include="ParameterString.cs" />
     <Compile Include="WikiLink.cs" />
