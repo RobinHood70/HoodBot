@@ -11,7 +11,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class MetaSiteInfo : QueryModule<SiteInfoInput, SiteInfoResult>
+	internal class MetaSiteInfo : QueryModule<SiteInfoInput, SiteInfoResult>, IContinuableQueryModule
 	{
 		#region Constructors
 		public MetaSiteInfo(WikiAbstractionLayer wal, SiteInfoInput input)

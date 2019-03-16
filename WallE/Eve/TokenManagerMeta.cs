@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.WallE.Eve
 {
 	using System.Collections.Generic;
-	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Eve.Modules;
 	using static RobinHood70.WallE.Eve.TokensInput;
 
@@ -60,10 +59,7 @@
 			{
 				// Ask for all session tokens unless a login token has been requested.
 				var tokensInput = type == Login ? new TokensInput(new string[] { type }) : new TokensInput(this.validTypes);
-				var tokensModule = new MetaTokens(this.wal, tokensInput);
-				this.wal.RunQuery(new QueryInput(tokensModule));
-
-				var tokens = tokensModule.Output;
+				var tokens = this.wal.RunModuleQuery(new MetaTokens(this.wal, tokensInput));
 				foreach (var token in tokens)
 				{
 					this.sessionTokens[TokenManagerFunctions.TrimToken(token.Key)] = token.Value;

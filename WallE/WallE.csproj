@@ -212,6 +212,7 @@
     <Compile Include="Eve\Modules\ContinueModule.cs" />
     <Compile Include="Eve\Modules\ContinueModuleUnknown.cs" />
     <Compile Include="Eve\Modules\IActionModule.cs" />
+    <Compile Include="Eve\Modules\IContinuableQueryModule.cs" />
     <Compile Include="Eve\Modules\IGeneratorModule.cs" />
     <Compile Include="Eve\Modules\IModule.cs" />
     <Compile Include="Eve\Modules\IModuleFactory.cs" />

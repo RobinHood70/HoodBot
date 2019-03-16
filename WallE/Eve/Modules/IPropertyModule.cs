@@ -3,7 +3,7 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using RobinHood70.WallE.Base;
 
-	public interface IPropertyModule : IQueryModule
+	public interface IPropertyModule : IContinuableQueryModule
 	{
 		#region Methods
 		void SetPageOutput(PageItem page);
