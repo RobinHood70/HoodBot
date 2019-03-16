@@ -123,6 +123,21 @@
 		{
 		}
 
+		/// <summary>Sets the result information for the specified destination.</summary>
+		/// <param name="destination">The destination.</param>
+		/// <param name="user">The user.</param>
+		/// <param name="title">The title.</param>
+		public virtual void SetResultInfo(ResultDestination destination, string user, string title)
+		{
+		}
+
+		/// <summary>Sets the result title only, without affecting the user (if any).</summary>
+		/// <param name="destination">The destination.</param>
+		/// <param name="title">The title.</param>
+		public virtual void SetResultTitle(ResultDestination destination, string title)
+		{
+		}
+
 		/// <summary>Returns a value indicating whether the log entry represented in the <paramref name="info"/> parameter should be logged.</summary>
 		/// <param name="info">The log information to be checked.</param>
 		/// <returns>A value indicating whether the log entry represented in the <paramref name="info"/> parameter should be logged.</returns>

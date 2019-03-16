@@ -24,7 +24,7 @@
 		#endregion
 
 		#region Fields
-		private readonly Dictionary<ResultDestination, (string UserOrPageName, string Title)> resultInfo = new Dictionary<ResultDestination, (string, string)>();
+		private readonly Dictionary<ResultDestination, ResultInfo> resultInfo = new Dictionary<ResultDestination, ResultInfo>();
 		private readonly Dictionary<ResultDestination, StringBuilder> stringBuilders = new Dictionary<ResultDestination, StringBuilder>();
 		private LogInfo lastLogInfo;
 		#endregion
@@ -103,47 +103,6 @@
 			sb.Append(text);
 		}
 
-		public override void InitializeResult(ResultDestination destination, string userOrPageName, string title)
-		{
-			var currentResult = this.resultInfo[destination];
-			this.resultInfo[destination] = (userOrPageName ?? currentResult.UserOrPageName, title ?? currentResult.Title);
-			this.stringBuilders[destination] = new StringBuilder();
-		}
-
-		public override void OnAllJobsComplete()
-		{
-			foreach (var sb in this.stringBuilders)
-			{
-				if (sb.Value.Length > 0)
-				{
-					if (!this.resultInfo.TryGetValue(sb.Key, out var info))
-					{
-						throw new InvalidOperationException($"Result destination {sb.Key} was not properly initialized.");
-					}
-
-					info.Title = info.Title ?? "Job Results";
-					var result = sb.Value.ToString().Trim();
-					switch (sb.Key)
-					{
-						case ResultDestination.Email:
-							this.EmailResultsToUser(info.UserOrPageName, info.Title, result);
-							break;
-						case ResultDestination.LocalFile:
-							File.WriteAllText(info.Title, result);
-							break;
-						case ResultDestination.ResultsPage:
-							this.PostResultsToResultsPage(info.Title, result);
-							break;
-						case ResultDestination.UserTalkPage:
-							this.PostResultsToUserTalkPage(info.UserOrPageName, info.Title, result);
-							break;
-						case ResultDestination.RequestPage:
-							throw new NotSupportedException("This one is more difficult, so is not supported at this time, as I have other things that require my attention more urgently.");
-					}
-				}
-			}
-		}
-
 		public override void DoSiteCustomizations()
 		{
 			var moduleFactory = this.NativeAbstractionLayer.ModuleFactory;
@@ -183,7 +142,64 @@
 			return result;
 		}
 
+		public override void InitializeResult(ResultDestination destination, string user, string title)
+		{
+			this.SetResultInfo(destination, user, title);
+			this.stringBuilders[destination] = new StringBuilder();
+		}
+
+		public override void OnAllJobsComplete()
+		{
+			foreach (var sb in this.stringBuilders)
+			{
+				if (sb.Value.Length > 0)
+				{
+					if (!this.resultInfo.TryGetValue(sb.Key, out var info))
+					{
+						throw new InvalidOperationException($"Result destination {sb.Key} was not properly initialized.");
+					}
+
+					info.Title = info.Title ?? "Job Results";
+					var result = sb.Value.ToString().Trim();
+					switch (sb.Key)
+					{
+						case ResultDestination.Email:
+							this.EmailResultsToUser(info.User, info.Title, result);
+							break;
+						case ResultDestination.LocalFile:
+							File.WriteAllText(info.Title, result);
+							break;
+						case ResultDestination.ResultsPage:
+							this.PostResultsToResultsPage(info.Title, result);
+							break;
+						case ResultDestination.UserTalkPage:
+							this.PostResultsToUserTalkPage(info.User, info.Title, result);
+							break;
+						case ResultDestination.RequestPage:
+							this.PostResultsToRequestPage(info.Title, result);
+							break;
+					}
+				}
+			}
+		}
+
 		public override void OnAllJobsStarting(int jobCount) => this.InitializeResult(ResultDestination.ResultsPage, null, "Job Results");
+
+		public override void SetResultInfo(ResultDestination destination, string user, string title) => this.resultInfo[destination] = new ResultInfo(user, title);
+
+		public override void SetResultTitle(ResultDestination destination, string title)
+		{
+			if (this.resultInfo.TryGetValue(destination, out var resultInfo))
+			{
+				resultInfo.Title = title;
+			}
+			else
+			{
+				resultInfo = new ResultInfo(null, title);
+			}
+
+			this.resultInfo[destination] = resultInfo;
+		}
 
 		public override ChangeStatus UpdateCurrentStatus(string status)
 		{
@@ -214,10 +230,10 @@
 		#endregion
 
 		#region Private Methods
-		private void EmailResultsToUser(string userName, string title, string result)
+		private void EmailResultsToUser(string userName, string subject, string text)
 		{
 			var user = new User(this.Site, userName);
-			user.Email(title, result, false);
+			user.Email(subject, text, false);
 		}
 
 		private void LogPage_AddEntry(Page sender, EventArgs eventArgs)
@@ -279,18 +295,59 @@
 				.Insert(entry.Index, entryTemplate.ToString() + "\n");
 		}
 
+		private void PostResultsToRequestPage(string title, string result)
+		{
+			var requestPages = new Page(this.Site, "Project:Bot Requests");
+			requestPages.Load();
+			var sectionedPage = new SectionedPage(requestPages.Text);
+			var section = sectionedPage.FindLastSection(title);
+			var lastLine = Regex.Match(section.Text, "^(?<colons>:*).", RegexOptions.Multiline | RegexOptions.RightToLeft);
+			var colons = lastLine.Success ? lastLine.Groups["colons"].Value : string.Empty;
+			colons += ':';
+			if (colons.Length > 6)
+			{
+				colons = "{{od}} ";
+			}
+
+			section.Text = section.Text.TrimEnd() + '\n' + colons + result;
+			if (!result.Contains("~~~"))
+			{
+				section.Text += " ~~~~";
+			}
+
+			section.Text += "\n\n";
+
+			requestPages.Text = sectionedPage.Build();
+			requestPages.Save("Update status", false);
+		}
+
 		private void PostResultsToResultsPage(string title, string result)
 		{
 			this.ResultsPage.Text = result;
 			this.ResultsPage.Save(title, false);
 		}
 
-		private void PostResultsToUserTalkPage(string userName, string title, string result)
+		private void PostResultsToUserTalkPage(string userName, string sectionTitle, string text)
 		{
 			var user = new User(this.Site, userName);
-			user.NewTalkPageMessage(title, result, "New Message from " + this.Site.User.Name);
+			user.NewTalkPageMessage(sectionTitle, text, "New Message from " + this.Site.User.Name);
 		}
 
+		#endregion
+
+		#region Private Classes
+		private class ResultInfo
+		{
+			public ResultInfo(string user, string title)
+			{
+				this.Title = title;
+				this.User = user;
+			}
+
+			public string Title { get; set; }
+
+			public string User { get; set; }
+		}
 		#endregion
 	}
 }
