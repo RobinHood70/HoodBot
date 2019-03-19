@@ -12,6 +12,10 @@
 
 	internal class EsoNpcs : EditJob
 	{
+		#region Constants
+		private const string Query = "SELECT id, name, gender, ppClass FROM uesp_esolog.npc WHERE level != -1";
+		#endregion
+
 		#region Fields
 		private PageCollection pages;
 		#endregion
@@ -175,7 +179,7 @@
 			this.StatusWriteLine("Getting NPC data");
 			var limit = new SortedSet<long>();
 			var tempNpcData = new Dictionary<long, NPCData>();
-			foreach (var row in Eso.EsoGeneral.RunEsoQuery("SELECT id, name, gender, ppClass FROM uesp_esolog.npc WHERE level != -1"))
+			foreach (var row in Eso.EsoGeneral.RunEsoQuery(Query))
 			{
 				var name = ((string)row["name"]).TrimEnd(); // Corrects a single record where the field has a tab at the end of it - seems to be an ESO problem
 				var removed = allNPCs.Remove("Online:" + name);
