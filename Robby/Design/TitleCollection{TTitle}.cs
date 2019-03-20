@@ -249,14 +249,21 @@
 		public void GetCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, string from, string to, bool recurse)
 		{
 			var cat = Title.ForcedNamespace(this.Site.Namespaces[MediaWikiNamespaces.Category], category);
-			this.GetCategoryMembers(
-				new CategoryMembersInput(cat.FullPageName)
-				{
-					Type = categoryMemberTypes,
-					StartSortKeyPrefix = from,
-					EndSortKeyPrefix = to,
-				},
-				recurse);
+			var input = new CategoryMembersInput(cat.FullPageName)
+			{
+				Properties = CategoryMembersProperties.Title,
+				Type = categoryMemberTypes,
+				StartSortKeyPrefix = from,
+				EndSortKeyPrefix = to,
+			};
+
+			if (recurse)
+			{
+				input.Properties |= CategoryMembersProperties.Type;
+				input.Type |= CategoryMemberTypes.Subcat;
+			}
+
+			this.GetCategoryMembers(input, recurse);
 		}
 
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>

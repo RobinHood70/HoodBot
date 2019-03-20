@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.Robby
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using RobinHood70.Robby.Design;
@@ -30,6 +31,7 @@
 	{
 		#region Fields
 		private readonly Dictionary<string, TitleParts> titleMap = new Dictionary<string, TitleParts>();
+		private readonly List<string> recurseCategories = new List<string>();
 		#endregion
 
 		#region Constructors
@@ -345,6 +347,17 @@
 		}
 		#endregion
 
+		#region Protected Methods
+
+		/// <summary>Gets a value indicating whether the page title is within the collection's limitations.</summary>
+		/// <param name="page">The page.</param>
+		/// <returns><see langword="true"/> if the page is within the collection's limitations and can be added to it; otherwise, <see langword="false"/>.</returns>
+		protected bool IsPageInLimits(Page page) =>
+			this.LimitationType == LimitationType.None ||
+			(this.LimitationType == LimitationType.Remove && !this.NamespaceLimitations.Contains(page.Namespace.Id)) ||
+			(this.LimitationType == LimitationType.FilterTo && this.NamespaceLimitations.Contains(page.Namespace.Id));
+		#endregion
+
 		#region Protected Override Methods
 
 		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
@@ -375,7 +388,7 @@
 			ThrowNull(input, nameof(input));
 			if (recurse)
 			{
-				this.LoadPages(input, new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance));
+				this.RecurseCategoryPages(input, new HashSet<string>());
 			}
 			else
 			{
@@ -506,67 +519,25 @@
 		/// <summary>Loads pages from the wiki based on a page set specifier.</summary>
 		/// <param name="options">The page load options.</param>
 		/// <param name="pageSetInput">The page set input.</param>
-		protected virtual void LoadPages(PageLoadOptions options, QueryPageSetInput pageSetInput)
+		/// <param name="pageValidator">A function which validates whether a page can be added to the collection.</param>
+		protected virtual void LoadPages(PageLoadOptions options, QueryPageSetInput pageSetInput, Func<Page, bool> pageValidator)
 		{
 			ThrowNull(options, nameof(options));
 			ThrowNull(pageSetInput, nameof(pageSetInput));
+			ThrowNull(pageValidator, nameof(pageValidator));
 			pageSetInput.ConvertTitles = options.ConvertTitles;
 			pageSetInput.Redirects = options.FollowRedirects;
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, this.PageCreator.GetPropertyInputs(options), this.PageCreator.CreatePageItem);
-			foreach (var item in result)
-			{
-				var page = this.AddNewPage(item.Value.Title);
-				page.Populate(item.Value);
-				page.LoadOptions = options;
-			}
-
-			this.ReapplyLimitations(); // Not the ideal way of doing this, but probably the most straight-forward. Other option would be to filter for duplicates first via a HashSet or similar, then add to the collection.
-			this.PopulateMapCollections(result);
-
-			foreach (var page in this)
-			{
-				this.PageLoaded?.Invoke(this, page);
-			}
-		}
-
-		/// <summary>Loads category pages recursively.</summary>
-		/// <param name="input">The input.</param>
-		/// <param name="categoryTree">A hashet used to track which categories have already been loaded. This avoids loading the same category if it appears in the tree more than once, and breaks possible recursion loops.</param>
-		protected virtual void LoadPages(CategoryMembersInput input, HashSet<ISimpleTitle> categoryTree)
-		{
-			ThrowNull(input, nameof(input));
-			ThrowNull(categoryTree, nameof(categoryTree));
-			if (!categoryTree.Add(new TitleParts(this.Site, input.Title)))
-			{
-				return;
-			}
-
-			var newInput = new CategoryMembersInput(input);
-			newInput.Properties |= CategoryMembersProperties.Title | CategoryMembersProperties.Type;
-			newInput.Type = newInput.Type | CategoryMemberTypes.Subcat;
-
-			var result = this.Site.AbstractionLayer.LoadPages(new QueryPageSetInput(newInput), this.PageCreator.GetPropertyInputs(this.LoadOptions), this.PageCreator.CreatePageItem);
 			this.PopulateMapCollections(result);
 			foreach (var item in result)
 			{
 				var page = this.CreatePage(item.Value.Title);
 				page.Populate(item.Value);
-				page.LoadOptions = this.LoadOptions;
-				if (input.Type.HasFlag(CategoryMemberTypes.Subcat) || page.Namespace.Id != MediaWikiNamespaces.Category)
+				page.LoadOptions = options;
+				if (pageValidator != null && pageValidator(page))
 				{
 					this[page.Key] = page;
-				}
-
-				this.PageLoaded?.Invoke(this, page);
-
-				if (page.Namespace.Id == MediaWikiNamespaces.Category)
-				{
-					var recurseInput = new CategoryMembersInput(page.FullPageName)
-					{
-						Properties = newInput.Properties,
-						Type = newInput.Type,
-					};
-					this.LoadPages(recurseInput, categoryTree);
+					this.PageLoaded?.Invoke(this, page);
 				}
 			}
 		}
@@ -576,6 +547,39 @@
 		private void LoadPages(IGeneratorInput generator) => this.LoadPages(this.LoadOptions, new QueryPageSetInput(generator));
 
 		private void LoadPages(IGeneratorInput generator, IEnumerable<ISimpleTitle> titles) => this.LoadPages(this.LoadOptions, new QueryPageSetInput(generator, titles.ToFullPageNames()));
+
+		private void LoadPages(PageLoadOptions options, QueryPageSetInput pageSetInput) => this.LoadPages(options, pageSetInput, this.IsPageInLimits);
+
+		private bool RecurseCategoryHandler(Page page)
+		{
+			if (page.Namespace.Id == MediaWikiNamespaces.Category)
+			{
+				this.recurseCategories.Add(page.FullPageName);
+			}
+
+			return this.IsPageInLimits(page);
+		}
+
+		/// <summary>Loads category pages recursively.</summary>
+		/// <param name="input">The input.</param>
+		/// <param name="categoryTree">A hashet used to track which categories have already been loaded. This avoids loading the same category if it appears in the tree more than once, and breaks possible recursion loops.</param>
+		private void RecurseCategoryPages(CategoryMembersInput input, HashSet<string> categoryTree)
+		{
+			if (!categoryTree.Add(input.Title))
+			{
+				return;
+			}
+
+			this.recurseCategories.Clear();
+			this.LoadPages(this.LoadOptions, new QueryPageSetInput(input), this.RecurseCategoryHandler);
+			var copy = new List<string>(this.recurseCategories);
+			this.recurseCategories.Clear();
+			foreach (var category in copy)
+			{
+				input.ChangeTitle(category);
+				this.RecurseCategoryPages(input, categoryTree);
+			}
+		}
 		#endregion
 	}
 }

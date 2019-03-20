@@ -30,29 +30,13 @@ namespace RobinHood70.WallE.Base
 	public class CategoryMembersInput : ILimitableInput, IGeneratorInput
 	{
 		#region Constructors
-		public CategoryMembersInput(string title) => this.Title = title;
+		public CategoryMembersInput(string title)
+		{
+			ThrowNull(title, nameof(title));
+			this.Title = title;
+		}
 
 		public CategoryMembersInput(long pageId) => this.PageId = pageId;
-
-		public CategoryMembersInput(CategoryMembersInput copy)
-		{
-			ThrowNull(copy, nameof(copy));
-			this.End = copy.End;
-			this.EndHexSortKey = copy.EndHexSortKey;
-			this.EndSortKeyPrefix = copy.EndSortKeyPrefix;
-			this.Limit = copy.Limit;
-			this.MaxItems = copy.MaxItems;
-			this.Namespaces = copy.Namespaces;
-			this.PageId = copy.PageId;
-			this.Properties = copy.Properties;
-			this.Sort = copy.Sort;
-			this.SortDescending = copy.SortDescending;
-			this.Start = copy.Start;
-			this.StartHexSortKey = copy.StartHexSortKey;
-			this.StartSortKeyPrefix = copy.StartSortKeyPrefix;
-			this.Title = copy.Title;
-			this.Type = copy.Type;
-		}
 		#endregion
 
 		#region Public Properties
@@ -82,9 +66,17 @@ namespace RobinHood70.WallE.Base
 
 		public string StartSortKeyPrefix { get; set; }
 
-		public string Title { get; }
+		public string Title { get; private set; }
 
 		public CategoryMemberTypes Type { get; set; }
+		#endregion
+
+		#region Public Methods
+		public void ChangeTitle(string newTitle)
+		{
+			ThrowNull(newTitle, nameof(newTitle));
+			this.Title = newTitle;
+		}
 		#endregion
 	}
 }

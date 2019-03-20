@@ -299,7 +299,7 @@
 			ThrowNull(input, nameof(input));
 			if (recurse)
 			{
-				this.FillFromTitleItems(input, new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance));
+				this.RecurseCategoryPages(input, new HashSet<string>());
 			}
 			else
 			{
@@ -548,17 +548,14 @@
 			}
 		}
 
-		private void FillFromTitleItems(CategoryMembersInput input, HashSet<ISimpleTitle> categoryTree)
+		private void RecurseCategoryPages(CategoryMembersInput input, HashSet<string> categoryTree)
 		{
-			if (!categoryTree.Add(new Title(this.Site, input.Title)))
+			if (!categoryTree.Add(input.Title))
 			{
 				return;
 			}
 
-			var newInput = new CategoryMembersInput(input);
-			newInput.Properties |= CategoryMembersProperties.Title | CategoryMembersProperties.Type;
-			newInput.Type = newInput.Type | CategoryMemberTypes.Subcat;
-			var result = this.Site.AbstractionLayer.CategoryMembers(newInput);
+			var result = this.Site.AbstractionLayer.CategoryMembers(input);
 			foreach (var item in result)
 			{
 				var title = new Title(this.Site, item.Title);
@@ -569,12 +566,8 @@
 
 				if (item.Type == CategoryMemberTypes.Subcat)
 				{
-					var recurseInput = new CategoryMembersInput(item.Title)
-					{
-						Properties = newInput.Properties,
-						Type = newInput.Type,
-					};
-					this.FillFromTitleItems(recurseInput, categoryTree);
+					input.ChangeTitle(item.Title);
+					this.RecurseCategoryPages(input, categoryTree);
 				}
 			}
 		}
