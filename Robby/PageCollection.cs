@@ -375,11 +375,11 @@
 			ThrowNull(input, nameof(input));
 			if (recurse)
 			{
-				this.LoadPages(input);
+				this.LoadPages(input, new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance));
 			}
 			else
 			{
-				this.LoadPages(input, new HashSet<ISimpleTitle>());
+				this.LoadPages(input);
 			}
 		}
 

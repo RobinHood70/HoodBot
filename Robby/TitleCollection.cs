@@ -299,11 +299,11 @@
 			ThrowNull(input, nameof(input));
 			if (recurse)
 			{
-				this.FillFromTitleItems(this.Site.AbstractionLayer.CategoryMembers(input));
+				this.FillFromTitleItems(input, new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance));
 			}
 			else
 			{
-				this.FillFromTitleItems(input, new HashSet<ISimpleTitle>());
+				this.FillFromTitleItems(this.Site.AbstractionLayer.CategoryMembers(input));
 			}
 		}
 

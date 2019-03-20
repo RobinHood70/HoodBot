@@ -244,9 +244,9 @@
 		/// <param name="categoryMemberTypes">The category member types to load.</param>
 		/// <param name="from">The category member to start at (inclusive). The member specified does not have to exist.</param>
 		/// <param name="to">The category member to stop at (inclusive). The member specified does not have to exist.</param>
-		/// <param name="loadSubcategories">if set to <c>true</c> recurses through subcategories.</param>
+		/// <param name="recurse">if set to <c>true</c> recurses through subcategories.</param>
 		/// <remarks>If subcategories are loaded, they will be limited to the <paramref name="categoryMemberTypes"/> requested. However, they will <em>not</em> be limited by the <paramref name="from"/> and <paramref name="to"/> parameters.</remarks>
-		public void GetCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, string from, string to, bool loadSubcategories)
+		public void GetCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, string from, string to, bool recurse)
 		{
 			var cat = Title.ForcedNamespace(this.Site.Namespaces[MediaWikiNamespaces.Category], category);
 			this.GetCategoryMembers(
@@ -256,7 +256,7 @@
 					StartSortKeyPrefix = from,
 					EndSortKeyPrefix = to,
 				},
-				loadSubcategories);
+				recurse);
 		}
 
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
