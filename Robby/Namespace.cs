@@ -1,12 +1,15 @@
 ﻿namespace RobinHood70.Robby
 {
+	using System;
 	using System.Collections.Generic;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
+	// Class is sealed since it can be extended through extension methods if needed, and any derivation that would require value equality to change is both unlikely and inadvisable.
+
 	/// <summary>Represents a MediaWiki namespace for a specific site.</summary>
-	public class Namespace
+	public sealed class Namespace : IEquatable<Namespace>
 	{
 		#region Fields
 		private readonly HashSet<string> allNames;
@@ -115,7 +118,19 @@
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
 		/// <returns><c>true</c> if string is equal to any of the names representing the namespace.</returns>
-		public static bool operator ==(Namespace left, Namespace right) => left?.Site == right?.Site && left?.Id == right?.Id;
+		public static bool operator ==(Namespace left, Namespace right) => left == null ? left == right : left.Equals(right);
+
+		/// <summary>Implements the operator !=.</summary>
+		/// <param name="left">The left-hand side of the comparison.</param>
+		/// <param name="right">The right-hand side of the comparison.</param>
+		/// <returns><c>true</c> if the integer provided equals the namespace ID.</returns>
+		public static bool operator ==(Namespace left, int right) => left != null && left.Id == right;
+
+		/// <summary>Implements the operator !=.</summary>
+		/// <param name="left">The left-hand side of the comparison.</param>
+		/// <param name="right">The right-hand side of the comparison.</param>
+		/// <returns><c>true</c> if the integer provided equals the namespace ID.</returns>
+		public static bool operator ==(int left, Namespace right) => right != null && left == right.Id;
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
@@ -126,26 +141,14 @@
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
-		/// <returns><c>true</c> if the integer provided equals the namespace ID.</returns>
-		public static bool operator ==(Namespace left, int right) => left?.Id == right;
-
-		/// <summary>Implements the operator !=.</summary>
-		/// <param name="left">The left-hand side of the comparison.</param>
-		/// <param name="right">The right-hand side of the comparison.</param>
-		/// <returns><c>true</c> if the integer provided equals the namespace ID.</returns>
-		public static bool operator ==(int left, Namespace right) => left == right?.Id;
+		/// <returns><c>true</c> if the integer provided does not equal the namespace ID.</returns>
+		public static bool operator !=(Namespace left, int right) => !(left == right);
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
 		/// <returns><c>true</c> if the integer provided does not equal the namespace ID.</returns>
-		public static bool operator !=(Namespace left, int right) => left?.Id != right;
-
-		/// <summary>Implements the operator !=.</summary>
-		/// <param name="left">The left-hand side of the comparison.</param>
-		/// <param name="right">The right-hand side of the comparison.</param>
-		/// <returns><c>true</c> if the integer provided does not equal the namespace ID.</returns>
-		public static bool operator !=(int left, Namespace right) => left != right?.Id;
+		public static bool operator !=(int left, Namespace right) => !(left == right);
 		#endregion
 
 		#region Public Methods
@@ -185,6 +188,20 @@
 		/// <returns><c>true</c> if the name list for the namespace contains the specified name; otherwise, <c>false</c>.</returns>
 		public bool Contains(string name) => this.allNames.Contains(name);
 
+		/// <summary>Indicates whether the current object is equal to another object of the same type.</summary>
+		/// <param name="other">An object to compare with this object.</param>
+		/// <returns>
+		///   <span class="keyword">
+		///     <span class="languageSpecificText">
+		///       <span class="cs">true</span>
+		///       <span class="vb">True</span>
+		///       <span class="cpp">true</span>
+		///     </span>
+		///   </span>
+		///   <span class="nu">
+		///     <span class="keyword">true</span> (<span class="keyword">True</span> in Visual Basic)</span> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <span class="keyword"><span class="languageSpecificText"><span class="cs">false</span><span class="vb">False</span><span class="cpp">false</span></span></span><span class="nu"><span class="keyword">false</span> (<span class="keyword">False</span> in Visual Basic)</span>.</returns>
+		public bool Equals(Namespace other) => other == null ? false : this.Site == other.Site && this.Id == other.Id;
+
 		/// <summary>Checks if two page names are the same, based on the case-sensitivity for the namespace.</summary>
 		/// <param name="pageName1">The page name to check.</param>
 		/// <param name="pageName2">The page name to compare to.</param>
@@ -222,11 +239,7 @@
 		/// <summary>Determines whether the specified <see cref="object" />, is equal to this instance.</summary>
 		/// <param name="obj">The <see cref="object" /> to compare with this instance.</param>
 		/// <returns><c>true</c> if the specified <see cref="object" /> is equal to this instance; otherwise, <c>false</c>.</returns>
-		public override bool Equals(object obj)
-		{
-			var other = obj as Namespace;
-			return other == null ? false : this.Site == other.Site && this.Id == other.Id;
-		}
+		public override bool Equals(object obj) => this.Equals(obj as Namespace);
 
 		/// <summary>Returns a hash code for this instance.</summary>
 		/// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. </returns>
