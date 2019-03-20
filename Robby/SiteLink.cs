@@ -268,7 +268,6 @@
 			var matches = LinkFinder().Matches(text);
 			foreach (Match match in matches)
 			{
-				Debug.WriteLine(match.Value);
 				var paramGroup = match.Groups["parameter"];
 				var pagename = match.Value.Substring(0, paramGroup.Success ? paramGroup.Captures[0].Index - match.Index : match.Length).Trim(new[] { '[', ']', '|', ' ' });
 				var title = new TitleParts(site, pagename);
