@@ -364,6 +364,43 @@
 
 			return new Regex(regexText, RegexOptions.None, TimeSpan.FromSeconds(10));
 		}
+
+		/// <summary>Links the text from parts.</summary>
+		/// <param name="ns">The namespace.</param>
+		/// <param name="pageName">The name of the page.</param>
+		/// <returns>The text of the link to build.</returns>
+		public static string LinkTextFromParts(Namespace ns, string pageName) => LinkTextFromParts(ns, pageName, null, null);
+
+		/// <summary>Links the text from parts.</summary>
+		/// <param name="ns">The namespace.</param>
+		/// <param name="pageName">The name of the page.</param>
+		/// <param name="displayText">The display text. If null, the default "pipe trick" text will be used.</param>
+		/// <returns>The text of the link to build.</returns>
+		public static string LinkTextFromParts(Namespace ns, string pageName, string displayText) => LinkTextFromParts(ns, pageName, null, displayText);
+
+		/// <summary>Links the text from parts.</summary>
+		/// <param name="ns">The namespace.</param>
+		/// <param name="pageName">The name of the page.</param>
+		/// <param name="fragment">The fragment, if any. May be null.</param>
+		/// <param name="displayText">The display text. If null, the default "pipe trick" text will be used.</param>
+		/// <returns>The text of the link to build.</returns>
+		public static string LinkTextFromParts(Namespace ns, string pageName, string fragment, string displayText)
+		{
+			var link = new SiteLink(ns, pageName, displayText);
+			link.NormalizePageName();
+			if (displayText == null)
+			{
+				link.DisplayText = link.PipeTrick();
+			}
+
+			link.NormalizeDisplayText();
+			if (fragment != null)
+			{
+				link.Fragment = fragment;
+			}
+
+			return link.ToString();
+		}
 		#endregion
 
 		#region Public Methods
@@ -399,6 +436,24 @@
 		/// <remarks>This method causes the <see cref="InterwikiEntry"/>, <see cref="Namespace"/>, and <see cref="PageName"/> to be reformatted. Interwiki prefixes take on standard casing. Namespace aliases or shortcuts become the full name of the namespace (e.g., <c>Image:</c> becomes <c>File:</c>, <c>WP:</c> becomes <c>Wikipedia:</c>). The <see cref="PageName"/> will also be capitalized according to the rules for the namespace if there's already display text overriding the name. Lastly, the display text will be removed if it matches the value the MediaWiki would display.</remarks>
 		public void Normalize()
 		{
+			this.NormalizeInterwikiText();
+			this.NormalizeNamespaceText();
+			this.NormalizePageName();
+			this.NormalizeDisplayText();
+		}
+
+		/// <summary>Normalizes the display text by removing it if it matches the <see cref="FullPageName"/>.</summary>
+		public void NormalizeDisplayText()
+		{
+			if (this.DisplayParameter.Value == this.FullPageName)
+			{
+				this.DisplayParameter = null;
+			}
+		}
+
+		/// <summary>Normalizes the interwiki text to its default capitalization.</summary>
+		public void NormalizeInterwikiText()
+		{
 			if (this.Interwiki != null)
 			{
 				if (this.Interwiki.LocalWiki)
@@ -411,19 +466,29 @@
 					this.interwikiText = this.Interwiki?.Prefix;
 				}
 			}
+		}
 
+		/// <summary>Normalizes the namespace text to its primary name.</summary>
+		public void NormalizeNamespaceText()
+		{
 			if (this.Namespace != null)
 			{
 				this.NamespaceText = this.Namespace.Name;
-				if (this.DisplayParameter != null)
-				{
-					this.PageName = this.Namespace.CapitalizePageName(this.PageName);
-				}
 			}
+		}
 
-			if (this.DisplayParameter.Value == this.FullPageName)
+		/// <summary>Normalizes the name of the page by capitalizing it if the namespace rules allow.</summary>
+		/// <remarks>Capitalization will be skipped if the link is an interwiki link or if there is no display text, since changing the name would also change the text.</remarks>
+		public void NormalizePageName() => this.NormalizePageName(false);
+
+		/// <summary>Normalizes the name of the page by capitalizing it if the namespace rules allow.</summary>
+		/// <param name="ignoreDisplay">If set to true, the page name will be capitalize if possible, even if that would change the resulting text.</param>
+		/// <remarks>Capitalization will be skipped if the link is an interwiki link or if there is no display text, since changing the name would also change the text.</remarks>
+		public void NormalizePageName(bool ignoreDisplay)
+		{
+			if (this.Namespace != null && (ignoreDisplay || this.DisplayParameter != null))
 			{
-				this.DisplayParameter = null;
+				this.PageName = this.Namespace.CapitalizePageName(this.PageName);
 			}
 		}
 
