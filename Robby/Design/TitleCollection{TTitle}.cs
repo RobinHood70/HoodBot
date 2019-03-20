@@ -15,7 +15,7 @@
 	/// <seealso cref="System.Collections.Generic.IReadOnlyCollection{TTitle}" />
 	/// <remarks>This collection class functions similarly to a KeyedCollection, but automatically overwrites existing items with new ones. Unlike a KeyedCollection, however, it does not support changing an item's key, since <see cref="IKeyedTitle"/> does not allow this.</remarks>
 	public abstract class TitleCollection<TTitle> : IList<TTitle>, IReadOnlyCollection<TTitle>
-		where TTitle : IKeyedTitle
+		where TTitle : class, IKeyedTitle
 	{
 		#region Fields
 		private readonly Dictionary<string, TTitle> dictionary = new Dictionary<string, TTitle>();
@@ -132,12 +132,17 @@
 		/// <summary>Determines whether the <see cref="TitleCollection">collection</see> contains a specific value.</summary>
 		/// <param name="item">The object to locate in the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns><see langword="true" /> if <paramref name="item" /> is found in the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />.</returns>
+		public bool Contains(ISimpleTitle item) => this.FindTitle(item) != null;
+
+		/// <summary>Determines whether the <see cref="TitleCollection">collection</see> contains a specific value.</summary>
+		/// <param name="item">The object to locate in the <see cref="TitleCollection">collection</see>.</param>
+		/// <returns><see langword="true" /> if <paramref name="item" /> is found in the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />.</returns>
 		public bool Contains(TTitle item) => this.dictionary.ContainsKey(item?.Key);
 
 		/// <summary>Determines whether the collection contains an item with the specified key.</summary>
 		/// <param name="key">The key to search for.</param>
 		/// <returns><see langword="true" /> if the collection contains an item with the specified key; otherwise, <see langword="true" />.</returns>
-		public bool Contains(string key) => this.dictionary.ContainsKey(key);
+		public bool Contains(string key) => this.dictionary.ContainsKey(key) || this.FindTitle(key) != null;
 
 		/// <summary>Copies the elements of the <see cref="TitleCollection">collection</see> to an <see cref="Array" />, starting at a particular <see cref="Array" /> index.</summary>
 		/// <param name="array">The one-dimensional <see cref="Array" /> that is the destination of the elements copied from <see cref="TitleCollection">collection</see>. The <see cref="Array" /> must have zero-based indexing.</param>
@@ -179,6 +184,29 @@
 		/// <summary>Filters the collection to one or more namespaces.</summary>
 		/// <param name="namespaces">The namespaces to filter to.</param>
 		public void FilterToNamespaces(params int[] namespaces) => this.FilterToNamespaces(namespaces as IEnumerable<int>);
+
+		/// <summary>Finds any ISimpleTitle within the collection.</summary>
+		/// <param name="fullPageName">The full page name of the item to find.</param>
+		/// <returns>The item from the collection, if found; otherwise, null.</returns>
+		/// <remarks>This is an O(n) operation.</remarks>
+		public TTitle FindTitle(string fullPageName) => this.FindTitle(new TitleParts(this.Site, fullPageName));
+
+		/// <summary>Finds any ISimpleTitle within the collection.</summary>
+		/// <param name="item">The item to find.</param>
+		/// <returns>The item from the collection, if found; otherwise, null.</returns>
+		/// <remarks>This is an O(n) operation.</remarks>
+		public TTitle FindTitle(ISimpleTitle item)
+		{
+			foreach (var title in this)
+			{
+				if (title.SimpleEquals(item))
+				{
+					return title;
+				}
+			}
+
+			return null;
+		}
 
 		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
 		/// <param name="title">The title.</param>
