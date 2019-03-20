@@ -22,12 +22,37 @@
 		{
 		}
 
+		/// <summary>Initializes a new instance of the <see cref="Template"/> class with the name provided.</summary>
+		/// <param name="name">The name of the template.</param>
+		/// <param name="onePerLine">If set to true, adds default formatting to the template so that parameters appear one per line; otherwise, parameters appear with no whitespace by default.</param>
+		/// <remarks>The text can optionally include opening and closing braces, but these are not required except in the rare case where the template has two or more braces at both the start and the end which are not the enclosing braces (e.g., <c>{{{{Template to provide name}}|param={{{param|}}}}}</c>). In any other case, no braces are required, meaning that a new template can be created by specifying only the template name, if required.</remarks>
+		public Template(string name, bool onePerLine)
+			: this(name, onePerLine, StringComparer.Ordinal)
+		{
+		}
+
 		/// <summary>Initializes a new instance of the <see cref="Template"/> class. The name and parameters will be parsed from the provided text.</summary>
 		/// <param name="name">The name of the template.</param>
 		/// <param name="comparer">The <see cref="StringComparer"/> to use for parameter names.</param>
 		/// <remarks>The text can optionally include opening and closing braces, but these are not required except in the rare case where the template has two or more braces at both the start and the end which are not the enclosing braces (e.g., <c>{{{{Template to provide name}}|param={{{param|}}}}}</c>). In any other case, no braces are required, meaning that a new template can be created by specifying only the template name, if required.</remarks>
 		public Template(string name, StringComparer comparer)
 			: base(comparer) => this.Name = name;
+
+		/// <summary>Initializes a new instance of the <see cref="Template"/> class. The name and parameters will be parsed from the provided text.</summary>
+		/// <param name="name">The name of the template.</param>
+		/// <param name="onePerLine">If set to true, adds default formatting to the template so that parameters appear one per line; otherwise, parameters appear with no whitespace by default.</param>
+		/// <param name="comparer">The <see cref="StringComparer"/> to use for parameter names.</param>
+		/// <remarks>The text can optionally include opening and closing braces, but these are not required except in the rare case where the template has two or more braces at both the start and the end which are not the enclosing braces (e.g., <c>{{{{Template to provide name}}|param={{{param|}}}}}</c>). In any other case, no braces are required, meaning that a new template can be created by specifying only the template name, if required.</remarks>
+		public Template(string name, bool onePerLine, StringComparer comparer)
+			: base(comparer)
+		{
+			this.Name = name;
+			if (onePerLine)
+			{
+				this.NameParameter.TrailingWhiteSpace = "\n";
+				this.DefaultValueFormat.TrailingWhiteSpace = "\n";
+			}
+		}
 		#endregion
 
 		#region Public Properties
