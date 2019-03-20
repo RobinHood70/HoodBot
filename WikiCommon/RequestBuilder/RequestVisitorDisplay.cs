@@ -72,10 +72,10 @@
 			where T : IEnumerable<string>
 		{
 			var value = parameter.BuildPipedValue(false);
-			this.builder.Append(Uri.EscapeDataString(value).Replace("%7C", "|"));
+			this.builder.Append(EscapeDataString(value).Replace("%7C", "|").Replace("%20", "+"));
 		}
 
-		public void Visit(StringParameter parameter) => this.builder.Append(Uri.EscapeDataString(parameter?.Value ?? string.Empty));
+		public void Visit(StringParameter parameter) => this.builder.Append(EscapeDataString(parameter?.Value ?? string.Empty));
 		#endregion
 	}
 }

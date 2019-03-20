@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using System.Globalization;
+	using System.Text;
 	using System.Text.RegularExpressions;
 
 	#region Public Delegates
@@ -41,6 +42,34 @@
 		#endregion
 
 		#region Public Methods
+
+		/// <summary>Works around Uri.EscapeDataString's length limits.</summary>
+		/// <param name="dataString">The string to escape.</param>
+		/// <returns>The escaped string.</returns>
+		public static string EscapeDataString(string dataString)
+		{
+			if (string.IsNullOrEmpty(dataString))
+			{
+				return dataString;
+			}
+
+			var sb = new StringBuilder(dataString.Length * 2);
+			var offset = 0;
+			while (offset < dataString.Length)
+			{
+				var length = 65000;
+				if ((offset + length) > dataString.Length)
+				{
+					length = dataString.Length - offset;
+				}
+
+				var chunk = dataString.Substring(offset, length);
+				sb.Append(Uri.EscapeDataString(chunk));
+				offset += length;
+			}
+
+			return sb.ToString();
+		}
 
 		/// <summary>Generates a generic hash code based on multiple input hash codes.</summary>
 		/// <param name="hashCodes">Hash codes from constitutent types.</param>

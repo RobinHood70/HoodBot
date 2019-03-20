@@ -45,7 +45,7 @@
 				builder.Remove(0, 1);
 			}
 
-			return builder.ToString().Replace("%20", "+");
+			return builder.ToString();
 		}
 
 		/// <summary>Visits the specified FileParameter object.</summary>
@@ -66,7 +66,7 @@
 		public void Visit(HiddenParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
-			this.builder.Append(Uri.EscapeDataString(parameter.Value));
+			this.builder.Append(EscapeDataString(parameter.Value));
 		}
 
 		/// <summary>Visits the specified PipedParameter or PipedListParameter object.</summary>
@@ -78,7 +78,7 @@
 		{
 			ThrowNull(parameter, nameof(parameter));
 			var value = parameter.BuildPipedValue(this.supportsUnitSeparator);
-			this.builder.Append(Uri.EscapeDataString(value));
+			this.builder.Append(EscapeDataString(value));
 		}
 
 		/// <summary>Visits the specified StringParameter object.</summary>
@@ -86,7 +86,7 @@
 		public void Visit(StringParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
-			this.builder.Append(Uri.EscapeDataString(parameter.Value ?? string.Empty));
+			this.builder.Append(EscapeDataString(parameter.Value ?? string.Empty));
 		}
 		#endregion
 	}
