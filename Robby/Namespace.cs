@@ -118,19 +118,19 @@
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
 		/// <returns><c>true</c> if string is equal to any of the names representing the namespace.</returns>
-		public static bool operator ==(Namespace left, Namespace right) => left == null ? left == right : left.Equals(right);
+		public static bool operator ==(Namespace left, Namespace right) => left is null ? right is null : left.Equals(right);
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
 		/// <returns><c>true</c> if the integer provided equals the namespace ID.</returns>
-		public static bool operator ==(Namespace left, int right) => left != null && left.Id == right;
+		public static bool operator ==(Namespace left, int right) => !(left is null) && left.Id == right;
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
 		/// <returns><c>true</c> if the integer provided equals the namespace ID.</returns>
-		public static bool operator ==(int left, Namespace right) => right != null && left == right.Id;
+		public static bool operator ==(int left, Namespace right) => !(right is null) && left == right.Id;
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
