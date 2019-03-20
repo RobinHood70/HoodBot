@@ -24,7 +24,7 @@
 		#endregion
 
 		#region Fields
-		private readonly Dictionary<ResultDestination, ResultInfo> resultInfo = new Dictionary<ResultDestination, ResultInfo>();
+		private readonly Dictionary<ResultDestination, ResultInfo> results = new Dictionary<ResultDestination, ResultInfo>();
 		private readonly Dictionary<ResultDestination, StringBuilder> stringBuilders = new Dictionary<ResultDestination, StringBuilder>();
 		private LogInfo lastLogInfo;
 		#endregion
@@ -154,7 +154,7 @@
 			{
 				if (sb.Value.Length > 0)
 				{
-					if (!this.resultInfo.TryGetValue(sb.Key, out var info))
+					if (!this.results.TryGetValue(sb.Key, out var info))
 					{
 						throw new InvalidOperationException($"Result destination {sb.Key} was not properly initialized.");
 					}
@@ -185,11 +185,11 @@
 
 		public override void OnAllJobsStarting(int jobCount) => this.InitializeResult(ResultDestination.ResultsPage, null, "Job Results");
 
-		public override void SetResultInfo(ResultDestination destination, string user, string title) => this.resultInfo[destination] = new ResultInfo(user, title);
+		public override void SetResultInfo(ResultDestination destination, string user, string title) => this.results[destination] = new ResultInfo(user, title);
 
 		public override void SetResultTitle(ResultDestination destination, string title)
 		{
-			if (this.resultInfo.TryGetValue(destination, out var resultInfo))
+			if (this.results.TryGetValue(destination, out var resultInfo))
 			{
 				resultInfo.Title = title;
 			}
@@ -198,7 +198,7 @@
 				resultInfo = new ResultInfo(null, title);
 			}
 
-			this.resultInfo[destination] = resultInfo;
+			this.results[destination] = resultInfo;
 		}
 
 		public override ChangeStatus UpdateCurrentStatus(string status)
