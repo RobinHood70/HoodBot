@@ -23,7 +23,7 @@
 		#region Constructors
 		[JobInfo("Create missing NPCs", "ESO")]
 		public EsoNpcs(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo) => site.EditingDisabled = true;
+			: base(site, asyncInfo) => site.EditingDisabled = false;
 		#endregion
 
 		#region Private Enumerations
@@ -61,10 +61,10 @@
 		protected override void PrepareJob()
 		{
 			this.Site.UserFunctions.SetResultTitle(ResultDestination.ResultsPage, "Existing ESO NPC pages");
-			this.StatusWriteLine("Getting wiki data");
+			this.StatusWriteLine("Getting NPC data from wiki");
 			var newNpcs = new TitleCollection(this.Site);
-			newNpcs.GetCategoryMembers("Online-NPCs", false);
-			newNpcs.GetCategoryMembers("Online-Creatures-All", false);
+			newNpcs.GetCategoryMembers("Online-NPCs", CategoryMemberTypes.Page, false);
+			newNpcs.GetCategoryMembers("Online-Creatures-All", CategoryMemberTypes.Page, false);
 			var newNpcData = this.FilterNewNpcs(newNpcs);
 
 			this.StatusWriteLine("Checking for existing pages");
@@ -106,9 +106,8 @@
 		#endregion
 
 		#region Private Static Method
-		private static string GetNPCHeader(NPCData npc)
-		{
-			var npcSummary = new Template("Online NPC Summary")
+		private static string GetNPCHeader(NPCData npc) =>
+			new Template("Online NPC Summary", true)
 			{
 				{ "image", string.Empty },
 				{ "imgdesc", string.Empty },
@@ -117,13 +116,7 @@
 				{ "loc", string.Join(", ", npc.Locations) },
 				{ "faction", string.Empty },
 				{ "class", npc.Class }
-			};
-
-			npcSummary.NameParameter.TrailingWhiteSpace = "\n";
-			npcSummary.DefaultValueFormat.TrailingWhiteSpace = "\n";
-
-			return npcSummary.ToString();
-		}
+			}.ToString();
 		#endregion
 
 		#region Private Methods
@@ -148,7 +141,7 @@
 
 		private Dictionary<string, NPCData> FilterNewNpcs(TitleCollection allNPCs)
 		{
-			var tempNpcData = this.MergeNpcData(allNPCs);
+			var tempNpcData = this.GetNpcsFromDatabase(allNPCs);
 			var newNpcData = new Dictionary<string, NPCData>();
 			foreach (var entry in tempNpcData)
 			{
@@ -172,11 +165,9 @@
 			return list;
 		}
 
-		private Dictionary<long, NPCData> MergeNpcData(TitleCollection allNPCs)
+		private Dictionary<long, NPCData> GetNpcsFromDatabase(TitleCollection allNPCs)
 		{
-			var places = this.GetPlaces();
-
-			this.StatusWriteLine("Getting NPC data");
+			this.StatusWriteLine("Getting NPC data from database");
 			var limit = new SortedSet<long>();
 			var tempNpcData = new Dictionary<long, NPCData>();
 			foreach (var row in Eso.EsoGeneral.RunEsoQuery(Query))
@@ -201,7 +192,7 @@
 
 			this.StatusWriteLine("Getting location data");
 
-			// MySQL doesn't always play nice with the combination of DISTINCT and ORDER BY, so we use DISTINCT only, then sort the results ourselves.
+			// MySQL doesn't always play nice with the combination of DISTINCT and ORDER BY, so we use DISTINCT only, then sort the results ourselves later on.
 			foreach (var row in Eso.EsoGeneral.RunEsoQuery($"SELECT DISTINCT npcId, zone FROM location WHERE npcId IN ({string.Join(",", limit)})"))
 			{
 				var loc = (string)row["zone"];
@@ -209,21 +200,18 @@
 				npc.Locations.Add(loc);
 			}
 
+			var places = this.GetPlaces();
 			foreach (var npcEntry in tempNpcData)
 			{
-				var oldLocs = npcEntry.Value.Locations;
-				var newLocs = new List<string>(oldLocs);
-				newLocs.Sort();
-				for (var i = 0; i < newLocs.Count; i++)
+				var locs = npcEntry.Value.Locations;
+				locs.Sort();
+				for (var i = 0; i < locs.Count; i++)
 				{
-					if (places.Contains(newLocs[i]))
+					if (places.Contains(locs[i]))
 					{
-						newLocs[i] = Title.NameFromParts(this.Site.Namespaces[UespNamespaces.Online], newLocs[i]);
+						locs[i] = SiteLink.LinkTextFromParts(this.Site.Namespaces[UespNamespaces.Online], locs[i]);
 					}
 				}
-
-				oldLocs.Clear();
-				oldLocs.AddRange(newLocs);
 			}
 
 			return tempNpcData;
