@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Text;
 	using RobinHood70.HoodBot.Jobs.Design;
@@ -17,13 +18,14 @@
 		#endregion
 
 		#region Fields
+		private readonly HashSet<string> places = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 		private PageCollection pages;
 		#endregion
 
 		#region Constructors
 		[JobInfo("Create missing NPCs", "ESO")]
 		public EsoNpcs(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo) => site.EditingDisabled = false;
+			: base(site, asyncInfo) => site.EditingDisabled = true;
 		#endregion
 
 		#region Private Enumerations
@@ -62,43 +64,11 @@
 		{
 			this.Site.UserFunctions.SetResultTitle(ResultDestination.ResultsPage, "Existing ESO NPC pages");
 			this.StatusWriteLine("Getting NPC data from wiki");
-			var newNpcs = new TitleCollection(this.Site);
-			newNpcs.GetCategoryMembers("Online-NPCs", CategoryMemberTypes.Page, false);
-			newNpcs.GetCategoryMembers("Online-Creatures-All", CategoryMemberTypes.Page, false);
-			var newNpcData = this.FilterNewNpcs(newNpcs);
+			var allNpcs = new TitleCollection(this.Site);
+			allNpcs.GetCategoryMembers("Online-NPCs", CategoryMemberTypes.Page, false);
+			allNpcs.GetCategoryMembers("Online-Creatures-All", CategoryMemberTypes.Page, false);
 
-			this.StatusWriteLine("Checking for existing pages");
-			var checkPages = new PageCollection(this.Site, PageModules.Info | PageModules.Properties);
-			checkPages.GetTitles(newNpcData.Keys);
-			this.pages = new PageCollection(this.Site);
-			foreach (var npc in newNpcData)
-			{
-				var page = checkPages[npc.Key];
-				if (page.Exists)
-				{
-					newNpcs.Remove(page);
-					this.Write($"* [[{page.FullPageName}|{page.LabelName}]] is ");
-					if (page.IsRedirect)
-					{
-						this.WriteLine("a redirect.");
-					}
-					else if (page.IsDisambiguation)
-					{
-						this.WriteLine("a disambiguation page.");
-					}
-					else
-					{
-						this.WriteLine("already a content page.");
-					}
-
-					var npcData = newNpcData[page.FullPageName];
-					this.WriteLine($"<br>Please use the following data to create a page manually - Name: {npcData.Name}, Gender: {npcData.Gender}, Class: {npcData.Class}, Locations: {npcData.Locations}");
-				}
-				else
-				{
-					this.pages.Add(this.CreatePage(npc.Key, npc.Value));
-				}
-			}
+			this.CreatePages(allNpcs);
 
 			this.ProgressMaximum = this.pages.Count + 1;
 			this.Progress = 1;
@@ -139,10 +109,70 @@
 			return new Page(this.Site, name) { Text = sb.ToString() };
 		}
 
-		private Dictionary<string, NPCData> FilterNewNpcs(TitleCollection allNPCs)
+		private void CreatePages(TitleCollection allNpcs)
 		{
-			var tempNpcData = this.GetNpcsFromDatabase(allNPCs);
-			var newNpcData = new Dictionary<string, NPCData>();
+			var filteredNpcList = this.GetNpcsFromDatabase(allNpcs);
+			var newNpcData = this.FilterNewNpcs(filteredNpcList);
+
+			this.StatusWriteLine("Checking for existing pages");
+			var checkPages = new PageCollection(this.Site, PageModules.Info | PageModules.Revisions | PageModules.Properties);
+			checkPages.GetTitles(newNpcData.Keys);
+			this.pages = new PageCollection(this.Site);
+			foreach (var npc in newNpcData)
+			{
+				var page = checkPages[npc.Key];
+				if (page.Exists)
+				{
+					var npcData = newNpcData[page.FullPageName];
+					string issue = null;
+					if (page.IsRedirect)
+					{
+						issue = "a redirect to a page without an Online NPC Summary";
+						var redirectFinder = SiteLink.LinkFinder().Match(page.Text);
+						SiteLink redirectTarget = null;
+						if (redirectFinder.Success)
+						{
+							redirectTarget = new SiteLink(this.Site, redirectFinder.Value);
+							if (allNpcs.Contains(redirectTarget))
+							{
+								issue = null;
+							}
+						}
+					}
+					else if (page.IsDisambiguation)
+					{
+						issue = "a disambiguation with no clear NPC link";
+						var disambiguations = SiteLink.FindAllLinks(this.Site, page.Text, false);
+						foreach (var disambig in disambiguations)
+						{
+							if (allNpcs.Contains(disambig))
+							{
+								issue = null;
+								break;
+							}
+						}
+					}
+					else
+					{
+						issue = "already a content page without an Online NPC Summary";
+					}
+
+					if (issue != null)
+					{
+						var locations = npcData.Locations.Count >= 20 ? "suppressed due to excessive number" : string.Join(", ", npcData.Locations);
+						this.WriteLine($"* [[{page.FullPageName}|{page.LabelName}]] is {issue}. Please use the following data to create a page manually, if needed.<br>Name: {npcData.Name}, Gender: {npcData.Gender}, Class: {npcData.Class}, Locations: {locations}");
+					}
+				}
+				else
+				{
+					this.pages.Add(this.CreatePage(npc.Key, npc.Value));
+				}
+			}
+		}
+
+		private IReadOnlyDictionary<string, NPCData> FilterNewNpcs(Dictionary<long, NPCData> tempNpcData)
+		{
+			var newNpcData = new SortedDictionary<string, NPCData>();
 			foreach (var entry in tempNpcData)
 			{
 				newNpcData.Add(this.Site.Namespaces[UespNamespaces.Online].DecoratedName + entry.Value.Name, entry.Value);
@@ -151,18 +181,15 @@
 			return newNpcData;
 		}
 
-		private HashSet<string> GetPlaces()
+		private void GetPlaces()
 		{
 			this.StatusWriteLine("Getting place data");
-			var places = new TitleCollection(this.Site);
-			places.GetCategoryMembers("Online-Places", false);
-			var list = new HashSet<string>();
-			foreach (var place in places)
+			var placeTitles = new TitleCollection(this.Site);
+			placeTitles.GetCategoryMembers("Online-Places", false);
+			foreach (var title in placeTitles)
 			{
-				list.Add(place.PageName);
+				this.places.Add(title.PageName);
 			}
-
-			return list;
 		}
 
 		private Dictionary<long, NPCData> GetNpcsFromDatabase(TitleCollection allNPCs)
@@ -173,8 +200,8 @@
 			foreach (var row in Eso.EsoGeneral.RunEsoQuery(Query))
 			{
 				var name = ((string)row["name"]).TrimEnd(); // Corrects a single record where the field has a tab at the end of it - seems to be an ESO problem
-				var removed = allNPCs.Remove("Online:" + name);
-				if (!removed)
+				var found = allNPCs.Contains("Online:" + name);
+				if (!found)
 				{
 					var id = (long)row["id"];
 					var npcData = new NPCData(name, (sbyte)row["gender"], (string)row["ppClass"]);
@@ -200,14 +227,14 @@
 				npc.Locations.Add(loc);
 			}
 
-			var places = this.GetPlaces();
+			this.GetPlaces();
 			foreach (var npcEntry in tempNpcData)
 			{
 				var locs = npcEntry.Value.Locations;
 				locs.Sort();
 				for (var i = 0; i < locs.Count; i++)
 				{
-					if (places.Contains(locs[i]))
+					if (this.places.Contains(locs[i]))
 					{
 						locs[i] = SiteLink.LinkTextFromParts(this.Site.Namespaces[UespNamespaces.Online], locs[i]);
 					}
