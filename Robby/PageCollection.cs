@@ -352,10 +352,11 @@
 		/// <summary>Gets a value indicating whether the page title is within the collection's limitations.</summary>
 		/// <param name="page">The page.</param>
 		/// <returns><see langword="true"/> if the page is within the collection's limitations and can be added to it; otherwise, <see langword="false"/>.</returns>
-		protected bool IsPageInLimits(Page page) =>
-			this.LimitationType == LimitationType.None ||
+		protected bool IsTitleInLimits(ISimpleTitle page) =>
+			page != null &&
+			(this.LimitationType == LimitationType.None ||
 			(this.LimitationType == LimitationType.Remove && !this.NamespaceLimitations.Contains(page.Namespace.Id)) ||
-			(this.LimitationType == LimitationType.FilterTo && this.NamespaceLimitations.Contains(page.Namespace.Id));
+			(this.LimitationType == LimitationType.FilterTo && this.NamespaceLimitations.Contains(page.Namespace.Id)));
 		#endregion
 
 		#region Protected Override Methods
@@ -499,10 +500,7 @@
 		protected override void InsertItem(int index, Page item)
 		{
 			ThrowNull(item, nameof(item));
-			if (
-				this.LimitationType == LimitationType.None ||
-				(this.LimitationType == LimitationType.Remove && !this.NamespaceLimitations.Contains(item.Namespace.Id)) ||
-				(this.LimitationType == LimitationType.FilterTo && this.NamespaceLimitations.Contains(item.Namespace.Id)))
+			if (this.IsTitleInLimits(item))
 			{
 				base.InsertItem(index, item);
 			}
@@ -548,7 +546,7 @@
 
 		private void LoadPages(IGeneratorInput generator, IEnumerable<ISimpleTitle> titles) => this.LoadPages(this.LoadOptions, new QueryPageSetInput(generator, titles.ToFullPageNames()));
 
-		private void LoadPages(PageLoadOptions options, QueryPageSetInput pageSetInput) => this.LoadPages(options, pageSetInput, this.IsPageInLimits);
+		private void LoadPages(PageLoadOptions options, QueryPageSetInput pageSetInput) => this.LoadPages(options, pageSetInput, this.IsTitleInLimits);
 
 		private bool RecurseCategoryHandler(Page page)
 		{
@@ -557,7 +555,7 @@
 				this.recurseCategories.Add(page.FullPageName);
 			}
 
-			return this.IsPageInLimits(page);
+			return this.IsTitleInLimits(page);
 		}
 
 		/// <summary>Loads category pages recursively.</summary>
