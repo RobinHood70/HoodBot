@@ -54,8 +54,8 @@
 			var retval = TitleCollection.CopyFrom(titles);
 
 			// Loop until nothing new is added.
-			var pagesToCheck = new HashSet<Title>(retval, SimpleTitleEqualityComparer.Instance);
-			var alreadyChecked = new HashSet<Title>(SimpleTitleEqualityComparer.Instance);
+			var pagesToCheck = new HashSet<Title>(retval, Title.SimpleEqualityComparer);
+			var alreadyChecked = new HashSet<Title>(Title.SimpleEqualityComparer);
 			do
 			{
 				foreach (var page in pagesToCheck)

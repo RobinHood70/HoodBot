@@ -87,6 +87,17 @@
 		}
 		#endregion
 
+		#region Public Static Properties
+
+		/// <summary>Gets a default equality comparer for Title objects.</summary>
+		/// <remarks>This will usually be the desire equality comparer for external usage, where the calling application could change the page name.</remarks>
+		public static IEqualityComparer<Title> DefaultEqualityComparer => KeyedTitleEqualityComparer.Instance;
+
+		/// <summary>Gets a default equality comparer for Title objects.</summary>
+		/// <remarks>This will usually be the desired equality comparer for internal usage, where the calling application cannot change the page name.</remarks>
+		public static IEqualityComparer<Title> SimpleEqualityComparer => SimpleTitleEqualityComparer.Instance;
+		#endregion
+
 		#region Public Properties
 
 		/// <summary>Gets the value corresponding to {{BASEPAGENAME}}.</summary>
@@ -112,7 +123,7 @@
 		/// <value>The full name of the page.</value>
 		public string FullPageName => this.Namespace.DecoratedName + this.PageName;
 
-		/// <summary>Gets the key to use in dictionary lookups. This is identical to FullPageName (after any decoding and normalization), but unlike FullPagename, cannot be modified after being set.</summary>
+		/// <summary>Gets the key to use in dictionary lookups. This is identical to FullPageName (after any decoding and normalization), but unlike FullPagename, cannot be modified (via PageName) after being set.</summary>
 		/// <value>The key.</value>
 		public string Key { get; }
 

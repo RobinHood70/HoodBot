@@ -62,6 +62,7 @@
     <Compile Include="ChangeValue{T}.cs" />
     <Compile Include="Design\DefaultUserFunctions.cs" />
     <Compile Include="Design\LogInfo.cs" />
+    <Compile Include="Design\KeyedTitleEqualityComparer.cs" />
     <Compile Include="Design\UserFunctions.cs" />
     <Compile Include="Design\DefaultPageCreator.cs" />
     <Compile Include="Design\Extensions.cs" />
