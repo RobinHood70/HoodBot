@@ -86,7 +86,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			this.cachedTimestamp = (DateTime?)result["cachedtimestamp"];
 			this.maxResults = (int?)result["maxresults"] ?? 0;
 
-			base.DeserializeResult(result, output);
+			base.DeserializeResult(result["results"], output);
 		}
 
 		protected override QueryPageItem GetItem(JToken result) => result == null
