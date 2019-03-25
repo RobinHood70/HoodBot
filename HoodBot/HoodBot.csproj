@@ -102,6 +102,7 @@
     <Compile Include="IParameterFetcher.cs" />
     <Compile Include="IWikiInfo.cs" />
     <Compile Include="Jobs\BlockChanger.cs" />
+    <Compile Include="Jobs\BulkDeleteUnused.cs" />
     <Compile Include="Jobs\Design\AsyncInfo.cs" />
     <Compile Include="Jobs\Design\JobConstructorEqualityComparer.cs" />
     <Compile Include="Jobs\Design\JobInfoAttribute.cs" />
