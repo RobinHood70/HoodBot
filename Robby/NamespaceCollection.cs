@@ -57,6 +57,22 @@
 				}
 			}
 		}
+
+		/// <summary>Gets the talk namespaces in the collection as a collection of their IDs, excluding the special namespaces.</summary>
+		/// <value>The talk namespaces in the collection as a collection of their IDs, excluding the special namespaces.</value>
+		public IEnumerable<int> TalkIds
+		{
+			get
+			{
+				foreach (var id in this.IdsDictionary.Keys)
+				{
+					if (id >= 0 && (id & 1) == 1)
+					{
+						yield return id;
+					}
+				}
+			}
+		}
 		#endregion
 
 		#region Protected Properties
