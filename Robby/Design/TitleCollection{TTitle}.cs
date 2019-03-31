@@ -667,14 +667,36 @@
 			return true;
 		}
 
+		/// <summary>Removes the <see cref="TitleCollection">collection</see> item at the specified index.</summary>
+		/// <param name="index">The zero-based index of the item to remove.</param>
+		public void RemoveAt(int index) => this.RemoveItem(index);
+
 		/// <summary>Removes one or more namespaces from the collection.</summary>
 		/// <param name="namespaces">The namespaces to remove.</param>
-		public void RemoveNamespaces(IEnumerable<Namespace> namespaces)
+		public void RemoveNamespaces(IEnumerable<Namespace> namespaces) => this.RemoveNamespaces(false, namespaces);
+
+		/// <summary>Removes one or more namespaces from the collection.</summary>
+		/// <param name="namespaces">The namespaces to remove.</param>
+		public void RemoveNamespaces(params Namespace[] namespaces) => this.RemoveNamespaces(false, namespaces as IEnumerable<Namespace>);
+
+		/// <summary>Removes one or more namespaces from the collection.</summary>
+		/// <param name="namespaces">The namespaces to remove.</param>
+		public void RemoveNamespaces(IEnumerable<int> namespaces) => this.RemoveNamespaces(false, namespaces);
+
+		/// <summary>Removes one or more namespaces from the collection.</summary>
+		/// <param name="namespaces">The namespaces to remove.</param>
+		public void RemoveNamespaces(params int[] namespaces) => this.RemoveNamespaces(false, namespaces as IEnumerable<int>);
+
+		/// <summary>Removes one or more namespaces from the collection.</summary>
+		/// <param name="removeTalk">Whether to remove talk spaces along with <paramref name="namespaces"/>.</param>
+		/// <param name="namespaces">The namespaces to remove.</param>
+		public void RemoveNamespaces(bool removeTalk, IEnumerable<Namespace> namespaces)
 		{
 			var hash = new HashSet<Namespace>(namespaces);
 			for (var i = this.Count - 1; i >= 0; i--)
 			{
-				if (hash.Contains(this[i].Namespace))
+				var ns = this[i].Namespace;
+				if (hash.Contains(ns) || (removeTalk && ns.IsTalkSpace))
 				{
 					this.RemoveAt(i);
 				}
@@ -682,17 +704,20 @@
 		}
 
 		/// <summary>Removes one or more namespaces from the collection.</summary>
+		/// <param name="removeTalk">Whether to remove talk spaces along with <paramref name="namespaces"/>.</param>
 		/// <param name="namespaces">The namespaces to remove.</param>
-		public void RemoveNamespaces(params Namespace[] namespaces) => this.RemoveNamespaces(namespaces as IEnumerable<Namespace>);
+		public void RemoveNamespaces(bool removeTalk, params Namespace[] namespaces) => this.RemoveNamespaces(namespaces as IEnumerable<Namespace>);
 
 		/// <summary>Removes one or more namespaces from the collection.</summary>
+		/// <param name="removeTalk">Whether to remove talk spaces along with <paramref name="namespaces"/>.</param>
 		/// <param name="namespaces">The namespaces to remove.</param>
-		public void RemoveNamespaces(IEnumerable<int> namespaces)
+		public void RemoveNamespaces(bool removeTalk, IEnumerable<int> namespaces)
 		{
 			var hash = new HashSet<int>(namespaces);
 			for (var i = this.Count - 1; i >= 0; i--)
 			{
-				if (hash.Contains(this[i].Namespace.Id))
+				var ns = this[i].Namespace;
+				if (hash.Contains(ns.Id) || (removeTalk && ns.IsTalkSpace))
 				{
 					this.RemoveAt(i);
 				}
@@ -700,12 +725,9 @@
 		}
 
 		/// <summary>Removes one or more namespaces from the collection.</summary>
+		/// <param name="removeTalk">Whether to remove talk spaces along with <paramref name="namespaces"/>.</param>
 		/// <param name="namespaces">The namespaces to remove.</param>
-		public void RemoveNamespaces(params int[] namespaces) => this.RemoveNamespaces(namespaces as IEnumerable<int>);
-
-		/// <summary>Removes the <see cref="TitleCollection">collection</see> item at the specified index.</summary>
-		/// <param name="index">The zero-based index of the item to remove.</param>
-		public void RemoveAt(int index) => this.RemoveItem(index);
+		public void RemoveNamespaces(bool removeTalk, params int[] namespaces) => this.RemoveNamespaces(removeTalk, namespaces as IEnumerable<int>);
 
 		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> by namespace, then pagename.</summary>
 		public void Sort() => this.Sort(TitleComparer<TTitle>.Instance);
