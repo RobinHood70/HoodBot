@@ -46,6 +46,7 @@
 		private CancellationTokenSource canceller;
 		private double completedJobs;
 		private WikiInfo currentItem;
+		private bool editingEnabled;
 		private DateTime? eta;
 		private bool executing;
 		private Visibility jobParameterVisibility = Visibility.Hidden;
@@ -95,6 +96,12 @@
 					this.BotSettings.UpdateLastSelected(value);
 				}
 			}
+		}
+
+		public bool EditingEnabled
+		{
+			get => this.editingEnabled;
+			set => this.Set(ref this.editingEnabled, value, nameof(this.EditingEnabled));
 		}
 
 		public RelayCommand EditSettings => new RelayCommand(this.OpenEditWindow);
@@ -315,6 +322,7 @@
 					this.StatusWriteLine("Starting " + jobNode.Name);
 					try
 					{
+						this.site.EditingEnabled = this.editingEnabled; // Reset every time, in case a job has manually set the site's value.
 						await Task.Run(job.Execute).ConfigureAwait(false);
 						this.completedJobs++;
 					}

@@ -227,6 +227,9 @@
 				<ColumnDefinition Width="*" />
 				<ColumnDefinition Width="10" />
 				<ColumnDefinition Width="auto" />
+				<ColumnDefinition Width="auto" />
+				<ColumnDefinition Width="10" />
+				<ColumnDefinition Width="auto" />
 				<ColumnDefinition Width="10" />
 				<ColumnDefinition Width="auto" />
 				<ColumnDefinition Width="10" />
@@ -254,10 +257,25 @@
 				Grid.Row="1"
 				Grid.Column="2"
 				Text="{Binding UtcEta, Mode=OneWay, StringFormat=T}" />
-			<Button
+			<CheckBox
 				Grid.Row="0"
 				Grid.RowSpan="2"
 				Grid.Column="4"
+				Margin="0,0,5,0"
+				HorizontalAlignment="Center"
+				VerticalAlignment="Center"
+				IsChecked="{Binding EditingEnabled}" />
+			<TextBlock
+				Grid.Row="0"
+				Grid.RowSpan="2"
+				Grid.Column="5"
+				VerticalAlignment="Center"
+				Text="Editing&#x0A;Enabled"
+				TextAlignment="Left" />
+			<Button
+				Grid.Row="0"
+				Grid.RowSpan="2"
+				Grid.Column="7"
 				Command="{Binding Play}">
 				<Viewbox>
 					<TextBlock Style="{StaticResource SpeedText}" Text="4" />
@@ -266,7 +284,7 @@
 			<Button
 				Grid.Row="0"
 				Grid.RowSpan="2"
-				Grid.Column="6"
+				Grid.Column="9"
 				Command="{Binding Pause}">
 				<Viewbox>
 					<TextBlock Style="{StaticResource SpeedText}" Text=";" />
@@ -275,7 +293,7 @@
 			<Button
 				Grid.Row="0"
 				Grid.RowSpan="2"
-				Grid.Column="8"
+				Grid.Column="11"
 				Command="{Binding Stop}">
 				<Viewbox>
 					<TextBlock Style="{StaticResource SpeedText}" Text="&lt;" />
