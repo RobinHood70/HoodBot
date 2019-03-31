@@ -13,7 +13,7 @@
 		private Uri api;
 		private string botDataFolder;
 		private BotSettings botSettings;
-		private WikiInfo currentItem;
+		private IWikiInfo currentItem;
 		private string displayName;
 		private string password;
 		private int readThrottling;
@@ -46,7 +46,7 @@
 
 		public IMediaWikiClient Client { get; set; }
 
-		public WikiInfo CurrentItem
+		public IWikiInfo CurrentItem
 		{
 			get => this.currentItem;
 			set
@@ -98,7 +98,7 @@
 		{
 		}
 
-		public void CancelEdit() => this.UpdateSelection(this.BotSettings.LastSelectedWiki);
+		public void CancelEdit() => this.UpdateSelection(this.BotSettings.GetCurrentItem());
 
 		public void EndEdit()
 		{
@@ -122,7 +122,7 @@
 		#endregion
 
 		#region Internal Methods
-		internal void UpdateSelection(WikiInfo wikiInfo)
+		internal void UpdateSelection(IWikiInfo wikiInfo)
 		{
 			if (wikiInfo == null)
 			{
@@ -138,7 +138,7 @@
 				CopyWikiInfo(wikiInfo, this);
 			}
 
-			this.BotSettings.UpdateLastSelected(wikiInfo);
+			this.BotSettings.UpdateCurrentWiki(wikiInfo);
 		}
 		#endregion
 

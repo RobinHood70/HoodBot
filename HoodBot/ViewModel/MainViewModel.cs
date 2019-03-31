@@ -45,7 +45,7 @@
 
 		private CancellationTokenSource canceller;
 		private double completedJobs;
-		private WikiInfo currentItem;
+		private IWikiInfo currentItem;
 		private bool editingEnabled;
 		private DateTime? eta;
 		private bool executing;
@@ -55,7 +55,7 @@
 		private double overallProgressMax = 1;
 		private string password;
 		private PauseTokenSource pauser;
-		private WikiInfo previousItem;
+		private IWikiInfo previousItem;
 		private Brush progressBarColor = ProgressBarGreen;
 		private Site site;
 		private string status;
@@ -68,7 +68,7 @@
 			this.client = new SimpleClient(ContactInfo, Path.Combine(this.appDataFolder, "Cookies.dat"));
 			this.client.RequestingDelay += this.Client_RequestingDelay;
 			this.BotSettings = BotSettings.Load(Path.Combine(this.appDataFolder, "Settings.json"));
-			this.CurrentItem = this.BotSettings.LastSelectedWiki;
+			this.CurrentItem = this.BotSettings.GetCurrentItem();
 			this.progressMonitor = new Progress<double>(this.ProgressChanged);
 			this.statusMonitor = new Progress<string>(this.StatusWrite);
 			Site.RegisterUserFunctionsClass(new[] { "en.uesp.net", "rob-centos" }, new[] { "HoodBot" }, HoodBotFunctions.CreateInstance);
@@ -86,15 +86,18 @@
 		#endregion
 
 		#region Public Properties
-		public WikiInfo CurrentItem
+		public IWikiInfo CurrentItem
 		{
 			get => this.currentItem;
 			set
 			{
-				if (this.Set(ref this.currentItem, value, nameof(this.CurrentItem)))
+				if (this.currentItem != null)
 				{
-					this.BotSettings.UpdateLastSelected(value);
+					this.BotSettings.UpdateCurrentWiki(value);
+					this.BotSettings.Save();
 				}
+
+				this.Set(ref this.currentItem, value, nameof(this.CurrentItem));
 			}
 		}
 
@@ -439,10 +442,9 @@
 			var view = editWindow.DataContext as SettingsViewModel;
 			view.Client = this.client;
 			view.BotSettings = this.BotSettings;
-			view.CurrentItem = this.BotSettings.LastSelectedWiki;
+			view.CurrentItem = this.CurrentItem;
 			editWindow.ShowDialog();
-
-			this.CurrentItem = this.BotSettings.LastSelectedWiki;
+			this.CurrentItem = this.BotSettings.GetCurrentItem();
 		}
 
 		private void PauseJobs() => this.PauseJobs(!this.pauser.IsPaused);
@@ -491,14 +493,18 @@
 			}
 		}
 
-		private void SetSite(WikiInfo wikiInfo)
+		private void SetSite(IWikiInfo wikiInfo)
 		{
 			var wal = new WikiAbstractionLayer(this.client, wikiInfo.Api)
 			{
 				Assert = "user",
-				MaxLag = wikiInfo.MaxLag,
 				StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery
 			};
+
+			if (wikiInfo is WikiInfo maxlaggable)
+			{
+				wal.MaxLag = maxlaggable.MaxLag;
+			}
 
 			// wal.SendingRequest += WalSendingRequest;
 			// wal.ResponseReceived += WalResponseRecieved;

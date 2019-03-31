@@ -4,6 +4,7 @@
 	using System.Collections.ObjectModel;
 	using System.IO;
 	using Newtonsoft.Json;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public class BotSettings
 	{
@@ -29,14 +30,11 @@
 			}
 		}
 
-		public int LastSelectedOffset { get; set; }
-
-		[JsonIgnore]
-		public WikiInfo LastSelectedWiki => this.LastSelectedOffset >= 0 && this.Wikis.Count > this.LastSelectedOffset ? this.Wikis[this.LastSelectedOffset] : null;
+		public string CurrentName { get; set; }
 
 		public string Location { get; set; }
 
-		public ObservableCollection<WikiInfo> Wikis { get; } = new ObservableCollection<WikiInfo>();
+		public ObservableCollection<IWikiInfo> Wikis { get; } = new ObservableCollection<IWikiInfo>();
 		#endregion
 
 		#region Public Static Methods
@@ -69,17 +67,37 @@
 		#endregion
 
 		#region Public Methods
-		public void RemoveWiki(WikiInfo item)
+		public IWikiInfo GetCurrentItem()
 		{
+			if (this.CurrentName == null)
+			{
+				return null;
+			}
+
+			// It is assumed the list will be relatively small and therefore relatively trivial to iterate through, but this is a function to indicate that it's not completely trivial.
+			foreach (var wiki in this.Wikis)
+			{
+				if (wiki.DisplayName == this.CurrentName)
+				{
+					return wiki;
+				}
+			}
+
+			return null;
+		}
+
+		public void RemoveWiki(IWikiInfo item)
+		{
+			ThrowNull(item, nameof(item));
 			var index = this.Wikis.IndexOf(item);
 			if (index >= 0)
 			{
-				this.Wikis.RemoveAt(index);
-				if (index == this.LastSelectedOffset)
+				if (this.CurrentName == item.DisplayName)
 				{
-					this.LastSelectedOffset = -1;
+					this.CurrentName = null;
 				}
 
+				this.Wikis.RemoveAt(index);
 				this.Save();
 			}
 		}
@@ -90,7 +108,7 @@
 			File.WriteAllText(this.Location, output);
 		}
 
-		public void UpdateLastSelected(WikiInfo item) => this.LastSelectedOffset = this.Wikis.IndexOf(item);
+		public void UpdateCurrentWiki(IWikiInfo wiki) => this.CurrentName = wiki.DisplayName;
 		#endregion
 
 		#region Private Static Methods
