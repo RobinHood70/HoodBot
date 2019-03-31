@@ -59,7 +59,7 @@
 			Grid.Row="2"
 			Grid.Column="0"
 			DisplayMemberPath="DisplayName"
-				ItemsSource="{Binding Source={StaticResource wikiList}}"
+			ItemsSource="{Binding Source={StaticResource wikiList}}"
 			SelectedItem="{Binding CurrentItem, Mode=TwoWay}" />
 		<Grid Grid.Row="2" Grid.Column="2">
 			<Grid.Resources>
