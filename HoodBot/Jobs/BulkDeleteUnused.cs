@@ -14,10 +14,7 @@
 		#region Constructors
 		[JobInfo("Bulk Delete Unused")]
 		public BulkDeleteUnused(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
-		{
-			site.EditingDisabled = true;
-		}
+			: base(site, asyncInfo) => site.EditingEnabled = true;
 		#endregion
 
 		#region Public Override Properties

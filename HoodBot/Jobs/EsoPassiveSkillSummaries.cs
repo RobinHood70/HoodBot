@@ -13,7 +13,9 @@
 		#region Constructors
 		[JobInfo("Update Passive Skills", "ESO")]
 		public EsoPassiveSkillSummaries(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo) => this.Site.EditingDisabled = false;
+			: base(site, asyncInfo)
+		{
+		}
 		#endregion
 
 		#region Protected Override Propertes

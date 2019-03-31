@@ -28,11 +28,7 @@
 		#region Constructors
 		[JobInfo("Item Sets", "ESO")]
 		public EsoItemSets(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
-		{
-			this.botFunctions = site.UserFunctions as HoodBotFunctions;
-			site.EditingDisabled = false;
-		}
+			: base(site, asyncInfo) => this.botFunctions = site.UserFunctions as HoodBotFunctions;
 		#endregion
 
 		#region Public Override Properties

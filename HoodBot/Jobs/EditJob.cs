@@ -13,7 +13,9 @@
 	{
 		#region Constructors
 		protected EditJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo, params WikiTask[] tasks)
-				: base(site, asyncInfo, tasks) => site.EditingDisabled = true;
+				: base(site, asyncInfo, tasks)
+		{
+		}
 		#endregion
 
 		#region Public Override Properties

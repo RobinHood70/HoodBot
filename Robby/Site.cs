@@ -183,7 +183,7 @@
 		/// <summary>Gets or sets a value indicating whether methods that would alter the wiki should be disabled.</summary>
 		/// <value><c>true</c> if editing should be disabled; otherwise, <c>false</c>.</value>
 		/// <remarks>If set to true, most methods will silently fail, and their return <see cref="ChangeStatus.EditingDisabled"/>. This is primarily intended for testing new bot jobs without risking any unintended edits.</remarks>
-		public bool EditingDisabled { get; set; } = false;
+		public bool EditingEnabled { get; set; } = false;
 
 		/// <summary>Gets or sets the EqualityComparer for case-insensitive comparison.</summary>
 		/// <value>The case-insensitive EqualityComparer.</value>
@@ -722,8 +722,8 @@
 			this.Changing?.Invoke(this, changeArgs);
 			return
 				changeArgs.CancelChange ? ChangeStatus.Cancelled :
-				this.EditingDisabled ? ChangeStatus.EditingDisabled :
-				changeFunction();
+				this.EditingEnabled ? changeFunction() :
+				ChangeStatus.EditingDisabled;
 		}
 
 		/// <summary>Raises the Changing event with the supplied arguments and indicates what actions should be taken.</summary>
@@ -743,8 +743,8 @@
 			this.Changing?.Invoke(this, changeArgs);
 			return
 				changeArgs.CancelChange ? new ChangeValue<T>(ChangeStatus.Cancelled, default) :
-				this.EditingDisabled ? new ChangeValue<T>(ChangeStatus.EditingDisabled, disabledResult) :
-				changeFunction();
+				this.EditingEnabled ? changeFunction() :
+				new ChangeValue<T>(ChangeStatus.EditingDisabled, disabledResult);
 		}
 
 		/// <summary>Raises the <see cref="PageTextChanging"/> event with the supplied arguments and indicates what actions should be taken.</summary>
@@ -759,9 +759,9 @@
 			this.PageTextChanging?.Invoke(this, changeArgs);
 			var retval =
 				changeArgs.CancelChange ? ChangeStatus.Cancelled :
-				this.EditingDisabled ? ChangeStatus.EditingDisabled :
-				changeFunction();
-			if (this.EditingDisabled)
+				this.EditingEnabled ? changeFunction() :
+				ChangeStatus.EditingDisabled;
+			if (!this.EditingEnabled)
 			{
 				this.PagePreview?.Invoke(this, new PagePreviewArgs(changeArgs));
 			}

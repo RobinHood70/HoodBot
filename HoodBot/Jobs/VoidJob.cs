@@ -9,11 +9,7 @@
 		#region Constructors
 		[JobInfo("Do Nothing")]
 		public VoidJob(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
-		{
-			this.ProgressMaximum = 5;
-			site.EditingDisabled = true;
-		}
+			: base(site, asyncInfo) => this.ProgressMaximum = 5;
 		#endregion
 
 		#region Public Override Properties

@@ -25,7 +25,9 @@
 		#region Constructors
 		[JobInfo("Create missing NPCs", "ESO")]
 		public EsoNpcs(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo) => site.EditingDisabled = true;
+			: base(site, asyncInfo)
+		{
+		}
 		#endregion
 
 		#region Private Enumerations
