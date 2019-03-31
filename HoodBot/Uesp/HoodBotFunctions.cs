@@ -11,6 +11,7 @@
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WikiClasses;
+	using RobinHood70.WikiCommon;
 	using static Properties.Resources;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -36,6 +37,7 @@
 			this.NativeAbstractionLayer = this.Site.AbstractionLayer as WikiAbstractionLayer;
 			this.NativeClient = this.NativeAbstractionLayer.Client;
 			this.LogPage = new Page(site, this.Site.User.FullPageName + "/Log");
+			this.RequestsPage = new Page(site.Namespaces[MediaWikiNamespaces.Project], "Bot Requests");
 			this.ResultsPage = new Page(site, this.Site.User.FullPageName + "/Results");
 			this.StatusPage = this.LogPage;
 			this.DefaultResultDestination = ResultDestination.ResultsPage;
@@ -50,6 +52,8 @@
 		internal WikiAbstractionLayer NativeAbstractionLayer { get; }
 
 		internal IMediaWikiClient NativeClient { get; }
+
+		internal Page RequestsPage { get; }
 		#endregion
 
 		#region Public Static Methods
@@ -297,9 +301,8 @@
 
 		private void PostResultsToRequestPage(string title, string result)
 		{
-			var requestPages = new Page(this.Site, "Project:Bot Requests");
-			requestPages.Load();
-			var sectionedPage = new SectionedPage(requestPages.Text);
+			this.RequestsPage.Load();
+			var sectionedPage = new SectionedPage(this.RequestsPage.Text);
 			var section = sectionedPage.FindLastSection(title);
 			var lastLine = Regex.Match(section.Text, "^(?<colons>:*).", RegexOptions.Multiline | RegexOptions.RightToLeft);
 			var colons = lastLine.Success ? lastLine.Groups["colons"].Value : string.Empty;
@@ -317,8 +320,8 @@
 
 			section.Text += "\n\n";
 
-			requestPages.Text = sectionedPage.Build();
-			requestPages.Save("Update status", false);
+			this.RequestsPage.Text = sectionedPage.Build();
+			this.RequestsPage.Save("Update status", false);
 		}
 
 		private void PostResultsToResultsPage(string title, string result)
