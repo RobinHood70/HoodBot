@@ -27,15 +27,17 @@
 		/// <summary>Initializes a new instance of the <see cref="ImageLink"/> class.</summary>
 		/// <param name="site">The Site the link is from.</param>
 		public ImageLink(Site site)
-			: this(site, string.Empty)
+			: base(site)
 		{
+			this.borderWord = site.GetPreferredImageMagicWord(Site.ImageBorderName);
+			this.uprightWord = site.GetPreferredImageMagicWord(Site.ImageUprightName);
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="ImageLink"/> class.</summary>
 		/// <param name="site">The Site the link is from.</param>
 		/// <param name="link">The link text to parse.</param>
 		public ImageLink(Site site, string link)
-			: base(site)
+			: this(site)
 		{
 			var parser = this.InitializeFromParser(link);
 			foreach (var parameter in parser.Parameters)
@@ -59,9 +61,6 @@
 				parameter.Name = parameter.Name ?? Site.ImageCaptionName;
 				this.parameters.Add(parameter);
 			}
-
-			this.borderWord = site.GetPreferredImageMagicWord(Site.ImageBorderName);
-			this.uprightWord = site.GetPreferredImageMagicWord(Site.ImageUprightName);
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="ImageLink"/> class.</summary>
@@ -69,8 +68,11 @@
 		/// <param name="pageName">The name of the image page.</param>
 		/// <param name="caption">The caption.</param>
 		public ImageLink(Site site, string pageName, string caption)
-			: this(site, "[[" + Title.CoercePageName(site, MediaWikiNamespaces.File, pageName) + "|" + caption + "]]")
+			: this(site)
 		{
+			this.Namespace = site.Namespaces[MediaWikiNamespaces.File];
+			this.PageName = Title.CoercePageName(site, MediaWikiNamespaces.File, pageName);
+			this.DisplayText = caption;
 		}
 		#endregion
 
