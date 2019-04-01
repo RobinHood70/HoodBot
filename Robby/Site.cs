@@ -1050,37 +1050,6 @@
 			this.PublishWarning(this, "(" + warning.Code + ") " + warning.Info);
 		}
 
-		private void Clear()
-		{
-			this.ArticlePath = null;
-			this.magicWords.Clear();
-
-			this.CaseSensitive = false;
-			this.Culture = CultureInfo.CurrentCulture;
-			this.DisambiguatorAvailable = false;
-			this.MainPage = null;
-			this.Name = null;
-			this.Namespaces = null;
-			this.ServerName = null;
-			this.Version = null;
-			if (!(this.UserFunctions is DefaultUserFunctions))
-			{
-				this.UserFunctions = DefaultUserFunctions.CreateInstance(this);
-			}
-		}
-
-		private UserFunctions FindBestUserFunctions()
-		{
-			if (!UserFunctionsClasses.TryGetValue(string.Concat(this.ServerName, '/', this.User.Name), out var factory) &&
-				!UserFunctionsClasses.TryGetValue(string.Concat(this.ServerName, '/'), out factory) &&
-				!UserFunctionsClasses.TryGetValue(string.Concat('/', this.User.Name), out factory))
-			{
-				factory = DefaultUserFunctions.CreateInstance;
-			}
-
-			return factory(this);
-		}
-
 		private void AddImageRegexes()
 		{
 			if (this.ImageParameterRegexes.Count > 0)
@@ -1136,6 +1105,37 @@
 				var regex = new Regex(sb.ToString(), RegexOptions.IgnoreCase);
 				this.ImageParameterRegexes.Add(entry.Key, regex);
 			}
+		}
+
+		private void Clear()
+		{
+			this.ArticlePath = null;
+			this.magicWords.Clear();
+
+			this.CaseSensitive = false;
+			this.Culture = CultureInfo.CurrentCulture;
+			this.DisambiguatorAvailable = false;
+			this.MainPage = null;
+			this.Name = null;
+			this.Namespaces = null;
+			this.ServerName = null;
+			this.Version = null;
+			if (!(this.UserFunctions is DefaultUserFunctions))
+			{
+				this.UserFunctions = DefaultUserFunctions.CreateInstance(this);
+			}
+		}
+
+		private UserFunctions FindBestUserFunctions()
+		{
+			if (!UserFunctionsClasses.TryGetValue(string.Concat(this.ServerName, '/', this.User.Name), out var factory) &&
+				!UserFunctionsClasses.TryGetValue(string.Concat(this.ServerName, '/'), out factory) &&
+				!UserFunctionsClasses.TryGetValue(string.Concat('/', this.User.Name), out factory))
+			{
+				factory = DefaultUserFunctions.CreateInstance;
+			}
+
+			return factory(this);
 		}
 		#endregion
 	}
