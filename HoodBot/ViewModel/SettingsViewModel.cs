@@ -7,13 +7,14 @@
 	using RobinHood70.WallE.Clients;
 	using static RobinHood70.HoodBot.Properties.Resources;
 
-	public class SettingsViewModel : Notifier, IWikiInfo, IEditableObject
+	// TODO: Re-examine WikiInfo vs MaxLaggableWikiInfo. Need to handle it better.
+	public class SettingsViewModel : Notifier, IEditableObject
 	{
 		#region Fields
 		private Uri api;
 		private string botDataFolder;
 		private BotSettings botSettings;
-		private IWikiInfo currentItem;
+		private WikiInfo currentItem;
 		private string displayName;
 		private string password;
 		private int readThrottling;
@@ -46,7 +47,7 @@
 
 		public IMediaWikiClient Client { get; set; }
 
-		public IWikiInfo CurrentItem
+		public WikiInfo CurrentItem
 		{
 			get => this.currentItem;
 			set
@@ -111,18 +112,23 @@
 			var wikiInfo = this.CurrentItem;
 			if (wikiInfo == null)
 			{
-				wikiInfo = new WikiInfo();
+				wikiInfo = new MaxLaggableWikiInfo();
 				this.BotSettings.Wikis.Add(wikiInfo);
 			}
 
-			CopyWikiInfo(this, wikiInfo);
+			wikiInfo.Api = this.Api;
+			wikiInfo.DisplayName = this.DisplayName;
+			wikiInfo.Password = this.Password;
+			wikiInfo.ReadThrottling = this.ReadThrottling;
+			wikiInfo.WriteThrottling = this.WriteThrottling;
+			wikiInfo.UserName = this.UserName;
 			this.currentItem = wikiInfo;
 			this.BotSettings.Save();
 		}
 		#endregion
 
 		#region Internal Methods
-		internal void UpdateSelection(IWikiInfo wikiInfo)
+		internal void UpdateSelection(WikiInfo wikiInfo)
 		{
 			if (wikiInfo == null)
 			{
@@ -135,7 +141,12 @@
 			}
 			else
 			{
-				CopyWikiInfo(wikiInfo, this);
+				this.Api = wikiInfo.Api;
+				this.DisplayName = wikiInfo.DisplayName;
+				this.Password = wikiInfo.Password;
+				this.ReadThrottling = wikiInfo.ReadThrottling;
+				this.WriteThrottling = wikiInfo.WriteThrottling;
+				this.UserName = wikiInfo.UserName;
 			}
 
 			this.BotSettings.UpdateCurrentWiki(wikiInfo);
@@ -143,16 +154,6 @@
 		#endregion
 
 		#region Private Methods
-		private static void CopyWikiInfo(IWikiInfo from, IWikiInfo to)
-		{
-			to.Api = from.Api;
-			to.DisplayName = from.DisplayName;
-			to.Password = from.Password;
-			to.ReadThrottling = from.ReadThrottling;
-			to.WriteThrottling = from.WriteThrottling;
-			to.UserName = from.UserName;
-		}
-
 		private void Fill(string page)
 		{
 			if (string.IsNullOrWhiteSpace(page) && this.Api != null && this.Api.IsWellFormedOriginalString())

@@ -45,7 +45,7 @@
 
 		private CancellationTokenSource canceller;
 		private double completedJobs;
-		private IWikiInfo currentItem;
+		private WikiInfo currentItem;
 		private bool editingEnabled;
 		private DateTime? eta;
 		private bool executing;
@@ -55,7 +55,7 @@
 		private double overallProgressMax = 1;
 		private string password;
 		private PauseTokenSource pauser;
-		private IWikiInfo previousItem;
+		private WikiInfo previousItem;
 		private Brush progressBarColor = ProgressBarGreen;
 		private Site site;
 		private string status;
@@ -86,7 +86,7 @@
 		#endregion
 
 		#region Public Properties
-		public IWikiInfo CurrentItem
+		public WikiInfo CurrentItem
 		{
 			get => this.currentItem;
 			set
@@ -493,7 +493,7 @@
 			}
 		}
 
-		private void SetSite(IWikiInfo wikiInfo)
+		private void SetSite(WikiInfo wikiInfo)
 		{
 			var wal = new WikiAbstractionLayer(this.client, wikiInfo.Api)
 			{
@@ -501,7 +501,7 @@
 				StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery
 			};
 
-			if (wikiInfo is WikiInfo maxlaggable)
+			if (wikiInfo is MaxLaggableWikiInfo maxlaggable)
 			{
 				wal.MaxLag = maxlaggable.MaxLag;
 			}

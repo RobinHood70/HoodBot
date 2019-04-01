@@ -34,7 +34,7 @@
 
 		public string Location { get; set; }
 
-		public ObservableCollection<IWikiInfo> Wikis { get; } = new ObservableCollection<IWikiInfo>();
+		public ObservableCollection<WikiInfo> Wikis { get; } = new ObservableCollection<WikiInfo>();
 		#endregion
 
 		#region Public Static Methods
@@ -67,7 +67,7 @@
 		#endregion
 
 		#region Public Methods
-		public IWikiInfo GetCurrentItem()
+		public WikiInfo GetCurrentItem()
 		{
 			if (this.CurrentName == null)
 			{
@@ -86,7 +86,7 @@
 			return null;
 		}
 
-		public void RemoveWiki(IWikiInfo item)
+		public void RemoveWiki(WikiInfo item)
 		{
 			ThrowNull(item, nameof(item));
 			var index = this.Wikis.IndexOf(item);
@@ -108,7 +108,7 @@
 			File.WriteAllText(this.Location, output);
 		}
 
-		public void UpdateCurrentWiki(IWikiInfo wiki) => this.CurrentName = wiki.DisplayName;
+		public void UpdateCurrentWiki(WikiInfo wiki) => this.CurrentName = wiki.DisplayName;
 		#endregion
 
 		#region Private Static Methods

@@ -2,15 +2,12 @@
 {
 	using System;
 
-	public class WikiInfo : IWikiInfo
+	public class WikiInfo
 	{
 		#region Public Properties
 		public Uri Api { get; set; }
 
 		public string DisplayName { get; set; }
-
-		// TODO: Add this to forms and saved data. Hard-coded for now.
-		public int MaxLag { get; set; } = 5;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 		[Newtonsoft.Json.JsonConverter(typeof(EncryptingJsonConverter), "¡ʇᴉ ǝʇɐɔsnɟqO")]

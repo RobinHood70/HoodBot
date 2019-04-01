@@ -100,7 +100,6 @@
     <Compile Include="BotSettings.cs" />
     <Compile Include="EncryptingJsonConverter.cs" />
     <Compile Include="IParameterFetcher.cs" />
-    <Compile Include="IWikiInfo.cs" />
     <Compile Include="Jobs\BlockChanger.cs" />
     <Compile Include="Jobs\BulkDeleteUnused.cs" />
     <Compile Include="Jobs\Design\AsyncInfo.cs" />
@@ -128,12 +127,14 @@
     <Compile Include="Jobs\Eso\Skill.cs" />
     <Compile Include="Jobs\Eso\Synergy.cs" />
     <Compile Include="Jobs\Eso\VariableData.cs" />
+    <Compile Include="WikiInfo.cs" />
     <Compile Include="Jobs\TestJob.cs" />
     <Compile Include="Jobs\VoidJob.cs" />
     <Compile Include="Jobs\GetTemplateUsage.cs" />
     <Compile Include="Jobs\TaskResults\TemplateCollection.cs" />
     <Compile Include="Jobs\TaskResults\TemplateUsage.cs" />
     <Compile Include="Jobs\TaskResults\TemplateUsageRow.cs" />
+    <Compile Include="MaxLaggableWikiInfo.cs" />
     <Compile Include="PasswordHelper.cs" />
     <Compile Include="ScrollingTextBox.cs" />
     <Compile Include="Uesp\HoodBotFunctions.cs" />
@@ -166,7 +167,6 @@
     <Compile Include="ViewModel\RelayCommand.cs" />
     <Compile Include="ViewModel\RelayCommand{T}.cs" />
     <Compile Include="ViewModel\SettingsViewModel.cs" />
-    <Compile Include="WikiInfo.cs" />
     <Page Include="EditSettings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
