@@ -1,5 +1,8 @@
 ﻿namespace RobinHood70.Robby.Design
 {
+	using System;
+	using System.Collections.Generic;
+
 	/// <summary>Represents a default derivative of <see cref="UserFunctions"/> which does nothing.</summary>
 	public sealed class DefaultUserFunctions : UserFunctions
 	{
@@ -17,6 +20,14 @@
 		#endregion
 
 		#region Public Properties
+
+		/// <summary>Gets a list of templates indicating a page is flagged for deletion.</summary>
+		/// <value>A list of templates indicating a page is flagged for deletion.</value>
+		public override IReadOnlyList<string> DeleteTemplates => Array.Empty<string>();
+
+		/// <summary>Gets a list of templates indicating a page should never be flagged for deletion.</summary>
+		/// <value>A list of templates indicating a page should never be flagged for deletion.</value>
+		public override IReadOnlyList<string> DoNotDeleteTemplates => Array.Empty<string>();
 
 		/// <summary>Gets the job types that should be logged.</summary>
 		/// <value>The job types to be logged.</value>
