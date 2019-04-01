@@ -400,6 +400,16 @@
 
 			return link.ToString();
 		}
+
+		/// <summary>Gets the title formatted as a link.</summary>
+		/// <param name="title">The title.</param>
+		/// <returns>The title formatted as a link.</returns>
+		public static string LinkTextFromTitle(ISimpleTitle title) => new SiteLink(title.Namespace, title.PageName).ToString();
+
+		/// <summary>Gets the title formatted as a link.</summary>
+		/// <param name="title">The title.</param>
+		/// <returns>The title formatted as a link.</returns>
+		public static string LinkTextFromTitle(Title title) => new SiteLink(title.Namespace, title.PageName, title.LabelName).ToString();
 		#endregion
 
 		#region Public Methods
