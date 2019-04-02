@@ -174,6 +174,37 @@
 		/// <param name="text">The text to decode and normalize.</param>
 		/// <returns>The original text with bidirectional text markers removed and space-like characters converted to spaces.</returns>
 		public static string DecodeAndNormalize(string text) => Globals.DecodeAndNormalize(text);
+
+		/// <summary>Returns a <see cref="TitleParts"/> for the given namespace and page name, allowing for the possibility that the page may already have the namespace prepended to it.</summary>
+		/// <param name="ns">The namespace the page should belong to.</param>
+		/// <param name="pageName">The name of the page, with or without the corresponding namespace prefix.</param>
+		/// <returns>A TitleParts object with the given name in the given namespace.</returns>
+		public static TitleParts ForcedNamespace(Namespace ns, string pageName)
+		{
+			ThrowNull(ns, nameof(ns));
+			ThrowNull(pageName, nameof(pageName));
+			var titleParts = new TitleParts(ns.Site, pageName);
+			if (titleParts.Namespace != ns)
+			{
+				if (titleParts.Namespace == MediaWikiNamespaces.Main)
+				{
+					titleParts.Namespace = ns;
+				}
+				else
+				{
+					titleParts = new TitleParts(ns.Site, ns.DecoratedName + pageName);
+				}
+			}
+
+			return titleParts;
+		}
+
+		/// <summary>Returns a <see cref="TitleParts"/> for the given namespace and page name, allowing for the possibility that the page may already have the namespace prepended to it.</summary>
+		/// <param name="site">The Site the Title is from.</param>
+		/// <param name="ns">The namespace ID the page should belong to.</param>
+		/// <param name="pageName">The name of the page, with or without the corresponding namespace prefix.</param>
+		/// <returns>A <see cref="TitleParts"/> object with the given name in the given namespace.</returns>
+		public static TitleParts ForcedNamespace(Site site, int ns, string pageName) => ForcedNamespace(site?.Namespaces[ns], pageName);
 		#endregion
 
 		#region Public Methods
