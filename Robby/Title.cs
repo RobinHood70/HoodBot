@@ -6,7 +6,6 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
-	using RobinHood70.WikiCommon;
 	using static RobinHood70.Robby.Properties.Resources;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -197,25 +196,7 @@
 		/// <param name="ns">The namespace the page should belong to.</param>
 		/// <param name="pageName">The name of the page, with or without the corresponding namespace prefix.</param>
 		/// <returns>A Title object with the given name in the given namespace.</returns>
-		public static Title ForcedNamespace(Namespace ns, string pageName)
-		{
-			ThrowNull(ns, nameof(ns));
-			ThrowNull(pageName, nameof(pageName));
-			var titleParts = new TitleParts(ns.Site, pageName);
-			if (titleParts.Namespace != ns)
-			{
-				if (titleParts.Namespace == MediaWikiNamespaces.Main)
-				{
-					titleParts.Namespace = ns;
-				}
-				else
-				{
-					titleParts = new TitleParts(ns.Site, ns.DecoratedName + pageName);
-				}
-			}
-
-			return new Title(titleParts);
-		}
+		public static Title ForcedNamespace(Namespace ns, string pageName) => new Title(TitleParts.ForcedNamespace(ns, pageName));
 
 		/// <summary>Returns a <see cref="Title"/> for the given namespace and page name, allowing for the possibility that the page may already have the namespace prepended to it.</summary>
 		/// <param name="site">The Site the Title is from.</param>
@@ -337,15 +318,6 @@
 		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "IsSameTitle will return false if this is null, which will then short-circuit the remainder of the comparison.")]
 		public bool KeyedEquals(IKeyedTitle other) => this.SimpleEquals(other) && this.Key == other.Key;
-
-		/// <summary>Indicates whether the current title is equal to another title based on Namespace and PageName only.</summary>
-		/// <param name="other">A title to compare with this one.</param>
-		/// <returns><c>true</c> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <c>false</c>.</returns>
-		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
-		public bool SimpleEquals(ISimpleTitle other) =>
-			other != null &&
-			this.Namespace == other.Namespace &&
-			this.Namespace.PageNameEquals(this.PageName, other.PageName);
 
 		/// <summary>Moves the title to the name specified.</summary>
 		/// <param name="to">The location to move the title to.</param>
@@ -499,6 +471,29 @@
 			}
 
 			return this.Protect(reason, protections);
+		}
+
+		/// <summary>Indicates whether the current title is equal to another title based on Namespace and PageName only.</summary>
+		/// <param name="other">A title to compare with this one.</param>
+		/// <returns><c>true</c> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <c>false</c>.</returns>
+		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
+		public bool SimpleEquals(ISimpleTitle other) =>
+			other != null &&
+			this.Namespace == other.Namespace &&
+			this.Namespace.PageNameEquals(this.PageName, other.PageName);
+
+		/// <summary>Indicates whether the current title is equivalent to the page name provided.</summary>
+		/// <param name="fullPageName">A page name to compare with this title.</param>
+		/// <returns><see langword="true"/> if the current object is equal to the <paramref name="fullPageName" /> parameter; otherwise, <see langword="false"/>.</returns>
+		public bool TextEquals(string fullPageName)
+		{
+			if (fullPageName is null)
+			{
+				return false;
+			}
+
+			var title = new TitleParts(this.Site, fullPageName);
+			return this.SimpleEquals(title);
 		}
 
 		/// <summary>Unprotects the title for the specified reason.</summary>
