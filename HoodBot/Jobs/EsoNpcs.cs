@@ -130,7 +130,7 @@
 					if (page.IsRedirect)
 					{
 						issue = "a redirect to a page without an Online NPC Summary";
-						var redirectFinder = SiteLink.LinkFinder().Match(page.Text);
+						var redirectFinder = SiteLink.Find().Match(page.Text);
 						SiteLink redirectTarget = null;
 						if (redirectFinder.Success)
 						{
@@ -144,7 +144,7 @@
 					else if (page.IsDisambiguation)
 					{
 						issue = "a disambiguation with no clear NPC link";
-						var disambiguations = SiteLink.FindAllLinks(this.Site, page.Text, false);
+						var disambiguations = SiteLink.FindLinks(this.Site, page.Text, false);
 						foreach (var disambig in disambiguations)
 						{
 							if (allNpcs.Contains(disambig))

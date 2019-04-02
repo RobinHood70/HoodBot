@@ -50,7 +50,7 @@
 		public static string FirstLinksOnly(Site site, string text)
 		{
 			var uniqueLinks = new HashSet<string>();
-			var linkFinder = SiteLink.LinkFinder();
+			var linkFinder = SiteLink.Find();
 			return linkFinder.Replace(text, (match) => LinkReplacer(match, site, uniqueLinks));
 		}
 

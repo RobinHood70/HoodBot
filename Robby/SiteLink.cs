@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.Text;
 	using System.Text.RegularExpressions;
 	using RobinHood70.Robby.Design;
@@ -263,9 +262,9 @@
 		/// <param name="convertFileLinks">Whether to return purely <see cref="SiteLink"/>s, or include <see cref="ImageLink"/>s where appropriate.</param>
 		/// <returns>An enumeration of all links within the text.</returns>
 		/// <remarks>No location information is included, so this is most useful when you simply need to scan links rather than alter them.</remarks>
-		public static IEnumerable<SiteLink> FindAllLinks(Site site, string text, bool convertFileLinks)
+		public static IEnumerable<SiteLink> FindLinks(Site site, string text, bool convertFileLinks)
 		{
-			var matches = LinkFinder().Matches(text);
+			var matches = Find().Matches(text);
 			foreach (Match match in matches)
 			{
 				var paramGroup = match.Groups["parameter"];
@@ -301,13 +300,13 @@
 
 		/// <summary>Creates a <see cref="Regex"/> to find all links.</summary>
 		/// <returns>A <see cref="Regex"/> that finds all links.</returns>
-		public static Regex LinkFinder() => LinkFinder(null, null);
+		public static Regex Find() => Find(null, null);
 
 		/// <summary>Creates a <see cref="Regex"/> to find all links matching the values provided.</summary>
 		/// <param name="namespaces">The namespaces to search for. Use <c>null</c> to match all namespaces.</param>
 		/// <param name="pageNames">The pagenames to search for. Use <c>null</c> to match all pagenames.</param>
 		/// <returns>A <see cref="Regex"/> that finds all links matching the values provided. Note that this will match, for example, any of the pagenames given in any of the namespaces given.</returns>
-		public static Regex LinkFinder(IEnumerable<string> namespaces, IEnumerable<string> pageNames) => LinkFinder(null, null, namespaces, pageNames, null);
+		public static Regex Find(IEnumerable<string> namespaces, IEnumerable<string> pageNames) => Find(null, null, namespaces, pageNames, null);
 
 		/// <summary>Creates a <see cref="Regex"/> to find all links matching the values provided which also have the specified surrounding text.</summary>
 		/// <param name="regexBefore">A <see cref="Regex"/> fragment specifying the text to search for before the link. Use <c>null</c> to ignore the text before the link.</param>
@@ -316,8 +315,8 @@
 		/// <param name="pageNames">The pagenames to search for. Use <c>null</c> to match all pagenames.</param>
 		/// <param name="regexAfter">A <see cref="Regex"/> fragment specifying the text to search for after the link. Use <c>null</c> to ignore the text after the link.</param>
 		/// <returns>A <see cref="Regex"/> that finds all links matching the values provided. Note that this will match, for example, any of the pagenames given in any of the namespaces given.</returns>
-		public static Regex LinkFinder(string regexBefore, IEnumerable<string> interwikis, IEnumerable<string> namespaces, IEnumerable<string> pageNames, string regexAfter) =>
-			LinkFinderRaw(
+		public static Regex Find(string regexBefore, IEnumerable<string> interwikis, IEnumerable<string> namespaces, IEnumerable<string> pageNames, string regexAfter) =>
+			FindRaw(
 				regexBefore,
 				EnumerableRegex(interwikis, SearchCasing.IgnoreCase),
 				EnumerableRegex(namespaces, SearchCasing.IgnoreInitialCaps),
@@ -331,7 +330,7 @@
 		/// <param name="regexPageNames">A <see cref="Regex"/> fragment specifying the pagenames to search for. Use <c>null</c> to match all pagenames.</param>
 		/// <param name="regexAfter">A <see cref="Regex"/> fragment specifying the text to search for after the link. Use <c>null</c> to ignore the text after the link.</param>
 		/// <returns>A <see cref="Regex"/> that finds all links matching the values provided. Note that this will match, for example, any of the pagenames given in any of the namespaces given.</returns>
-		public static Regex LinkFinderRaw(string regexBefore, string regexInterwikis, string regexNamespaces, string regexPageNames, string regexAfter)
+		public static Regex FindRaw(string regexBefore, string regexInterwikis, string regexNamespaces, string regexPageNames, string regexAfter)
 		{
 			// TODO: This probably handles nested links reliably, but is a frightful mess and no longer handles searches in parameter text. Tweak internal parser to handle start and end markers, then abort when it finds the matched end marker, whether or not it's the end of the text. After that, searching becomes just a matter of parsing as per normal, and write a Link/Template equivalent to Regex.Replace to go along with that.
 			const string regexWildNamespace = @"[^:#\|\]]*?";

@@ -12,6 +12,10 @@
 	[SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Template is a more meaningful name.")]
 	public class Template : ParameterCollection
 	{
+		#region Static Fields
+		private static readonly string WildcardName = @"[^#\|}]+?";
+		#endregion
+
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="Template"/> class with the name provided.</summary>
@@ -126,6 +130,10 @@
 		/// <param name="findTimeout">The timeout to be applied to the Regex.</param>
 		/// <returns>A Regex that searches for all template calls with the specified names.</returns>
 		public static Regex Find(string regexBefore, IEnumerable<string> names, string regexAfter, RegexOptions options, int findTimeout) => FindRaw(regexBefore, RegexName(names), regexAfter, options, findTimeout);
+
+		/// <summary>Returns a Regex that searches for all templates.</summary>
+		/// <returns>A Regex that searches for all templates.</returns>
+		public static Regex Find() => Find(null as string);
 
 		/// <summary>Returns a Regex that searches for all template calls with the specified Regex-based names, optionally including text before and after the template call.</summary>
 		/// <param name="regexBefore">A Regex fragment to search for before the template call.</param>
@@ -368,26 +376,28 @@
 
 		private static string RegexName(string name)
 		{
-			var retval = string.Empty;
-			if (name.Length > 0)
+			if (string.IsNullOrEmpty(name))
 			{
-				if (name[0] == '#')
-				{
-					// Caller is searching for a parser function, so handle that.
-					if (name[name.Length - 1] != ':')
-					{
-						name += ':';
-					}
+				return WildcardName;
+			}
 
-					retval = Regex.Escape(name) + ".+?";
-				}
-				else
+			var retval = string.Empty;
+			if (name[0] == '#')
+			{
+				// Caller is searching for a parser function, so handle that.
+				if (name[name.Length - 1] != ':')
 				{
-					retval += "(?i:" + Regex.Escape(name.Substring(0, 1)) + ")";
-					if (name.Length > 1)
-					{
-						retval += Regex.Escape(name.Substring(1)).Replace(@"\ ", @"[_\ ]+");
-					}
+					name += ':';
+				}
+
+				retval = Regex.Escape(name) + ".+?";
+			}
+			else
+			{
+				retval += "(?i:" + Regex.Escape(name.Substring(0, 1)) + ")";
+				if (name.Length > 1)
+				{
+					retval += Regex.Escape(name.Substring(1)).Replace(@"\ ", @"[_\ ]+");
 				}
 			}
 
@@ -400,7 +410,7 @@
 			{
 				if (!namesEnumerator.MoveNext())
 				{
-					return @"[^#\|}]+?";
+					return WildcardName;
 				}
 			}
 

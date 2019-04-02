@@ -17,7 +17,7 @@
 
 		protected override void Main()
 		{
-			var links = SiteLink.FindAllLinks(this.Site, "Some text[[Category:Test]] [[ Image:Example.jpg | x60px | Some text <!-- and a comment {{Template}}--> [[Oblivion:Oblivion]] link ]] More Text", true);
+			var links = SiteLink.FindLinks(this.Site, "Some text[[Category:Test]] [[ Image:Example.jpg | x60px | Some text <!-- and a comment {{Template}}--> [[Oblivion:Oblivion]] link ]] More Text", true);
 			foreach (var link in links)
 			{
 				Debug.WriteLine(link.ToString());
@@ -34,7 +34,7 @@
 			foreach (var page in pages)
 			{
 				Debug.WriteLine("\nPage: " + page.FullPageName);
-				links = SiteLink.FindAllLinks(this.Site, page.Text, true);
+				links = SiteLink.FindLinks(this.Site, page.Text, true);
 				foreach (var link in links)
 				{
 					Debug.WriteLine(link.ToString());
