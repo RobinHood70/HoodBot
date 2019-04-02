@@ -15,6 +15,16 @@
 		/// <param name="fullPageName">Full name of the page.</param>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
 		public TitleParts(Site site, string fullPageName)
+			: this(site, fullPageName, MediaWikiNamespaces.Main)
+		{
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="TitleParts"/> class.</summary>
+		/// <param name="site">The site the title is from.</param>
+		/// <param name="fullPageName">Full name of the page.</param>
+		/// <param name="defaultNamespace">The default namespace if no namespace is specified in the page name.</param>
+		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
+		public TitleParts(Site site, string fullPageName, int defaultNamespace)
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(fullPageName, nameof(fullPageName));
@@ -66,7 +76,7 @@
 
 			if (this.Namespace == null)
 			{
-				this.Namespace = site.Namespaces[MediaWikiNamespaces.Main];
+				this.Namespace = site.Namespaces[defaultNamespace];
 				this.OriginalNamespaceText = string.Empty;
 			}
 
