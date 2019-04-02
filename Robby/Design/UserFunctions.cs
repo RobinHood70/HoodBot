@@ -2,8 +2,11 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.WikiClasses;
 
 	#region Public Delegates
+
+	public delegate void TemplateReplacement(Page currentPage, Template template, Title from, Title to);
 
 	/// <summary>Represents a method which creates a <see cref="UserFunctions"/> derivative.</summary>
 	/// <param name="site">The site the <see cref="UserFunctions"/> object is being created by.</param>
@@ -81,6 +84,11 @@
 		/// <summary>Gets or sets the user's status page.</summary>
 		/// <value>The status page.</value>
 		public Page StatusPage { get; protected set; }
+
+		/// <summary>Gets custom template replacement methods.</summary>
+		/// <value>The custom template replacements.</value>
+		/// <remarks>These can be called on a per-wiki basis any time a page is being moved. This allows for customized parameter replacements for parameters where only part of the page name makes up the parameter (e.g., File:A1.png is being moved to File:B2.png, but the parameter value is only A1).</remarks>
+		public Dictionary<TitleParts, TemplateReplacement> TemplateReplacements { get; }
 		#endregion
 
 		#region Public Abstract Properties

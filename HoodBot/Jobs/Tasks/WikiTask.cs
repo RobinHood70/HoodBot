@@ -3,13 +3,31 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.Text.RegularExpressions;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
+	#region Internal Enumerations
+	public enum ProposedDeletionResult
+	{
+		Add,
+		AlreadyProposed,
+		FoundNoDeleteRequest,
+		NonExistent,
+		PageLoadError
+	}
+	#endregion
+
 	public abstract class WikiTask
 	{
+		#region Fields
+		private readonly Regex alreadyProposed;
+		private readonly Regex neverPropose;
+		#endregion
+
 		#region Constructors
 		protected WikiTask(WikiTask parent)
 		{
@@ -17,6 +35,8 @@
 			this.Site = parent.Site;
 			this.Parent = parent;
 			this.Job = parent.Job ?? (parent as WikiJob);
+			this.alreadyProposed = Template.Find(this.Site.UserFunctions.DeleteTemplates);
+			this.neverPropose = Template.Find(this.Site.UserFunctions.DoNotDeleteTemplates);
 		}
 
 		protected WikiTask([ValidatedNotNull] Site site)
@@ -96,6 +116,57 @@
 			}
 
 			return total;
+		}
+
+		public ProposedDeletionResult CanDelete(Page page)
+		{
+			try
+			{
+				if (!page.IsLoaded)
+				{
+					page.Load();
+				}
+
+				if (!page.Exists)
+				{
+					return ProposedDeletionResult.NonExistent;
+				}
+				else if (this.neverPropose.IsMatch(page.Text))
+				{
+					return ProposedDeletionResult.FoundNoDeleteRequest;
+				}
+				else if (this.alreadyProposed.IsMatch(page.Text))
+				{
+					return ProposedDeletionResult.AlreadyProposed;
+				}
+				else
+				{
+					return ProposedDeletionResult.Add;
+				}
+			}
+			catch
+			{
+				return ProposedDeletionResult.PageLoadError;
+			}
+		}
+
+		public ProposedDeletionResult ProposeForDeletion(Page page, string deletionText)
+		{
+			var retval = this.CanDelete(page);
+			if (retval == ProposedDeletionResult.Add)
+			{
+				try
+				{
+					page.Text = deletionText + page.Text;
+					page.Save("Propose for deletion", false);
+				}
+				catch
+				{
+					return ProposedDeletionResult.PageLoadError;
+				}
+			}
+
+			return retval;
 		}
 		#endregion
 
