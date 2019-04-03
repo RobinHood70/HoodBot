@@ -1,77 +1,122 @@
 ﻿namespace RobinHood70.WikiClasses
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Text;
-	using System.Text.RegularExpressions;
 
+	/// <summary>Represents a section on a wiki page.</summary>
+	/// <remarks>Note that this class is fairly simplistic and geared primarily to representation and manipulation of existing wikitext. It does not attempt to deal with unexpected usage such as adding sections via the <see cref="Text"/> property or commenting out a section header.</remarks>
 	public class Section
 	{
 		#region Constructors
+
+		/// <summary>Initializes a new instance of the <see cref="Section"/> class.</summary>
 		public Section()
 			: this(null, 0, null)
 		{
 		}
 
+		/// <summary>Initializes a new instance of the <see cref="Section"/> class.</summary>
+		/// <param name="title">The title.</param>
+		/// <param name="level">The level (number of equals signs in the title).</param>
 		public Section(string title, int level)
 			: this(title, level, null)
 		{
 		}
 
+		/// <summary>Initializes a new instance of the <see cref="Section"/> class.</summary>
+		/// <param name="title">The title.</param>
+		/// <param name="level">The level.</param>
+		/// <param name="text">The text.</param>
 		public Section(string title, int level, string text)
 		{
-			this.Title = title;
+			this.Title = new PaddedString(title);
 			this.Level = level;
 			this.Text = text;
 		}
 		#endregion
 
-		#region Public Static Properties
-		public static Regex SectionFinder { get; } = new Regex(@"^(?<addbefore>\<!--\ *)?(?<levelopen>={1,6})(?<wslead>\ *)(?<title>.*?)(?<wstrail>\s*)(?<levelclose>={1,6})(?<addafter>\ *--\>)?\ *\r?\n", RegexOptions.Multiline | RegexOptions.Compiled);
-		#endregion
-
 		#region Public Properties
+
+		/// <summary>Gets or sets the text to add after the section title.</summary>
+		/// <value>The text to add after the title.</value>
+		/// <remarks>While normally blank, this property allows insertion of text after the section title. This may include an HTML comment, a noinclude tag, or similar text that should be inserted after any <c>==</c>-type title text. All whitespace is the responsibility of the caller.</remarks>
 		public string AddAfterTitle { get; set; }
 
+		/// <summary>Gets or sets the text to add before the section title.</summary>
+		/// <value>The text to add before the title.</value>
+		/// <remarks>While normally blank, this property allows insertion of text before the section title. This may include prepended text, a noinclude tag, or similar text that should be inserted before any <c>==</c>-type title text. All whitespace is the responsibility of the caller.</remarks>
 		public string AddBeforeTitle { get; set; }
 
-		public string FormattedTitle
-		{
-			get
-			{
-				if (string.IsNullOrWhiteSpace(this.Title))
-				{
-					return null;
-				}
-
-				var equals = "======".Substring(0, this.Level);
-				return string.Concat(
-					this.AddBeforeTitle,
-					equals,
-					this.TitleLeadingWhiteSpace,
-					this.Title,
-					this.TitleTrailingWhiteSpace,
-					equals,
-					this.AddAfterTitle);
-			}
-		}
-
+		/// <summary>Gets or sets the section level.</summary>
+		/// <value>The section level.</value>
 		public int Level { get; set; }
 
+		/// <summary>Gets or sets the title, including surrounding whitespace.</summary>
+		/// <value>The padded title.</value>
+		public PaddedString PaddedTitle { get; set; }
+
+		/// <summary>Gets the subsections of the current section.</summary>
+		/// <value>The subsections.</value>
 		public IList<Section> Subsections { get; } = new List<Section>();
 
+		/// <summary>Gets or sets the section text.</summary>
+		/// <value>The text.</value>
+		/// <remarks>Section text will always start on a new line and have a trailing NewLine. Any other whitespace is the responsibility of the caller. Updates to the text that include new sections will <i>not</i> be reflected in the class.</remarks>
 		public string Text { get; set; }
 
-		public string Title { get; set; }
-
-		public string TitleLeadingWhiteSpace { get; set; }
-
-		public string TitleTrailingWhiteSpace { get; set; }
+		/// <summary>Gets or sets the section title, ignoring surrounding whitespace.</summary>
+		/// <value>The title.</value>
+		public string Title
+		{
+			get => this.PaddedTitle?.Value;
+			set
+			{
+				if (value == null)
+				{
+					this.PaddedTitle = null;
+				}
+				else
+				{
+					this.PaddedTitle = this.PaddedTitle ?? new PaddedString();
+					this.PaddedTitle.Value = value;
+				}
+			}
+		}
 		#endregion
 
 		#region Public Methods
-		public string Build() => this.Build(new StringBuilder()).ToString();
 
+		/// <summary>Builds the section into the specified StringBuilder.</summary>
+		/// <param name="sb">  The StringBuilder to build into.</param>
+		/// <returns>The StringBuilder that was passed, to allow method chaining.</returns>
+		public StringBuilder Build(StringBuilder sb)
+		{
+			if (this.PaddedTitle != null)
+			{
+				var equals = "======".Substring(0, this.Level);
+				sb
+					.Append(this.AddBeforeTitle)
+					.Append(equals);
+				this.PaddedTitle.Build(sb)
+					.Append(this.Title)
+					.Append(equals)
+					.Append(this.AddAfterTitle)
+					.Append('\n');
+			}
+
+			sb.Append(this.Text);
+			foreach (var section in this.Subsections)
+			{
+				sb.Append('\n');
+				section.Build(sb);
+			}
+
+			return sb;
+		}
+
+		/// <summary>Finds the subsection with the specified title.</summary>
+		/// <param name="title">The title.</param>
+		/// <returns>The subsection with the specified title, or null if no section with the title was found.</returns>
 		public Section Find(string title)
 		{
 			foreach (var section in this.Subsections)
@@ -97,61 +142,10 @@
 		#endregion
 
 		#region Public Override Methods
+
+		/// <summary>Returns a string that represents the section.</summary>
+		/// <returns>A <see cref="string"/> that represents the section.</returns>
 		public override string ToString() => this.Title;
-		#endregion
-
-		#region Internal Static Methods
-		internal static Section Parse(MatchCollection matches, string text, ref int offset)
-		{
-			var retval = new Section();
-			var match = matches[offset];
-			var groups = match.Groups;
-			var level = groups["levelopen"].Value.Length;
-			if (level != groups["levelclose"].Value.Length)
-			{
-				throw new InvalidOperationException("Different numbers of '=' in Section header.");
-			}
-
-			var textStart = match.Index + match.Length;
-			retval.AddAfterTitle = groups["addafter"].Value;
-			retval.AddBeforeTitle = groups["addbefore"].Value;
-			retval.Level = level;
-			retval.Text = (offset == matches.Count - 1) ? text.Substring(textStart) : text.Substring(textStart, matches[offset + 1].Index - textStart);
-			retval.Title = groups["title"].Value;
-			retval.TitleLeadingWhiteSpace = groups["wslead"].Value;
-			retval.TitleTrailingWhiteSpace = groups["wstrail"].Value;
-			offset++;
-
-			while (offset < matches.Count && matches[offset].Groups["levelopen"].Value.Length > level)
-			{
-				retval.Subsections.Add(Parse(matches, text, ref offset));
-			}
-
-			return retval;
-		}
-		#endregion
-
-		#region Internal Methods
-		internal StringBuilder Build(StringBuilder sb)
-		{
-			if (this.Title != null)
-			{
-				sb.Append(this.FormattedTitle + '\n');
-			}
-
-			sb.Append(this.Text);
-			foreach (var section in this.Subsections)
-			{
-				if (sb[sb.Length - 1] != '\n')
-				{
-					sb.Append('\n');
-				}
-
-				sb.Append(section.Build());
-			}
-
-			return sb;
-		}
 		#endregion
 	}
 }
