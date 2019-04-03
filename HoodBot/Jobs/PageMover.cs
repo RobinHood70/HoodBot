@@ -37,8 +37,11 @@
 	public abstract class PageMover : EditJob
 	{
 		#region Static Fields
-		private readonly PageCollection backlinks;
 		private static Regex galleryFinder = new Regex(@"(?<open><gallery(\ [^>]*?)?>\s*\n)(?<content>.*?)(?<close>\s*\n</gallery>)", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+		#endregion
+
+		#region Fields
+		private readonly PageCollection backlinks;
 		private bool hasMoves;
 		#endregion
 
