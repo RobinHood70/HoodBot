@@ -73,9 +73,9 @@
 			set => this.NameParameter.Value = value ?? string.Empty;
 		}
 
-		/// <summary>Gets the name as a <see cref="ParameterString"/>.</summary>
+		/// <summary>Gets the name as a <see cref="PaddedString"/>.</summary>
 		/// <value>The name parameter.</value>
-		public ParameterString NameParameter { get; } = new ParameterString();
+		public PaddedString NameParameter { get; } = new PaddedString();
 		#endregion
 
 		#region Private Properties
@@ -217,26 +217,26 @@
 
 		#region Public Methods
 
-		/// <summary>Reformats all parameters to use the <see cref="ParameterCollection.DefaultNameFormat"/> and <see cref="ParameterCollection.DefaultValueFormat"/>. See <see cref="Reformat(ParameterString, ParameterString)"/> for further details.</summary>
+		/// <summary>Reformats all parameters to use the <see cref="ParameterCollection.DefaultNameFormat"/> and <see cref="ParameterCollection.DefaultValueFormat"/>. See <see cref="Reformat(PaddedString, PaddedString)"/> for further details.</summary>
 		public void Reformat() => this.Reformat(this.DefaultNameFormat, this.DefaultValueFormat);
 
-		/// <summary>Reformats anonymous parameters so that the specified number of parameters appear on each physical line. Optionally, remaining parameters will be formatting to use the <see cref="ParameterCollection.DefaultNameFormat"/> and <see cref="ParameterCollection.DefaultValueFormat"/>. See <see cref="Reformat(ParameterString, ParameterString, int)"/> for further details.</summary>
+		/// <summary>Reformats anonymous parameters so that the specified number of parameters appear on each physical line. Optionally, remaining parameters will be formatting to use the <see cref="ParameterCollection.DefaultNameFormat"/> and <see cref="ParameterCollection.DefaultValueFormat"/>. See <see cref="Reformat(PaddedString, PaddedString, int)"/> for further details.</summary>
 		/// <param name="anonsPerLine">If greater than zero, the number of anonymous parameters to group on the same line.</param>
 		/// <param name="anonsOnly">Whether to reformat only anonymous parameters or all parameters.</param>
 		/// <remarks>This method is intended to format anonymous parameters into groupings of related data. For example, a series of pogs might have anonymous parameters equivalent to X, Y, and Name. These could be formatted with each grouping of three on separate lines.</remarks>
 		public void Reformat(int anonsPerLine, bool anonsOnly) => this.Reformat(anonsOnly ? null : this.DefaultNameFormat, anonsOnly ? null : this.DefaultValueFormat, anonsPerLine);
 
-		/// <summary>Reformats all parameters using the specified formats. See <see cref="Reformat(ParameterString, ParameterString, int)"/> for further details.</summary>
+		/// <summary>Reformats all parameters using the specified formats. See <see cref="Reformat(PaddedString, PaddedString, int)"/> for further details.</summary>
 		/// <param name="nameFormat">Whitespace to add before and after every parameter's name.</param>
 		/// <param name="valueFormat">Whitespace to add before and after every parameter's value.</param>
-		public void Reformat(ParameterString nameFormat, ParameterString valueFormat) => this.Reformat(nameFormat, valueFormat, 0);
+		public void Reformat(PaddedString nameFormat, PaddedString valueFormat) => this.Reformat(nameFormat, valueFormat, 0);
 
 		/// <summary>Reformats all parameters using the specified formats. If a template has no parameters, trailing space will always be removed, regardless of the format specified. Otherwise, the template name is given the valueFormat's TrailingWhiteSpace value. The template name's leading space is always left untouched.</summary>
-		/// <param name="nameFormat">Whitespace to add before and after every parameter's name. The <see cref="ParameterString.Value"/> property is ignored.</param>
-		/// <param name="valueFormat">Whitespace to add before and after every parameter's value. The <see cref="ParameterString.Value"/> property is ignored.</param>
+		/// <param name="nameFormat">Whitespace to add before and after every parameter's name. The <see cref="PaddedString.Value"/> property is ignored.</param>
+		/// <param name="valueFormat">Whitespace to add before and after every parameter's value. The <see cref="PaddedString.Value"/> property is ignored.</param>
 		/// <param name="anonsPerLine">If greater than zero, the number of anonymous parameters to group on the same line.</param>
 		/// <remarks>When formatting anonymous parameters in groups, valueFormat is ignored and all space surrounding an anonymous parameter will be removed in favour of having the specified number of parameters per line. Note that, because of the way anonymous parameters work, the two WhiteSpace properties will be set to string.Empty and the Value parameter will be altered as needed to achieve the appropriate formatting. This ensures that the value formats reported by this class match how MediaWiki itself would interpret them.</remarks>
-		public void Reformat(ParameterString nameFormat, ParameterString valueFormat, int anonsPerLine)
+		public void Reformat(PaddedString nameFormat, PaddedString valueFormat, int anonsPerLine)
 		{
 			if (this.Count == 0)
 			{
@@ -250,7 +250,7 @@
 			}
 
 			var anons = 0;
-			ParameterString lastNamed = null;
+			PaddedString lastNamed = null;
 			Parameter lastAnon = null;
 			var doName = false;
 			foreach (var param in this)

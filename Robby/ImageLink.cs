@@ -80,7 +80,7 @@
 
 		/// <summary>Gets or sets the alt text for the image.</summary>
 		/// <value>The alt text.</value>
-		public ParameterString AltText
+		public PaddedString AltText
 		{
 			get => this.GetValue(Site.ImageAltName);
 			set => this.SetParameter(Site.ImageAltName, value);
@@ -88,7 +88,7 @@
 
 		/// <summary>Gets or sets the border text. Use <see cref="BorderValue"/> to use the standardized word for your wiki's language.</summary>
 		/// <value>The border text.</value>
-		public ParameterString Border
+		public PaddedString Border
 		{
 			get => this.GetValue(Site.ImageBorderName);
 			set => this.SetParameter(Site.ImageBorderName, value);
@@ -105,7 +105,7 @@
 
 		/// <summary>Gets or sets the class for the image.</summary>
 		/// <value>The class for the image.</value>
-		public ParameterString Class
+		public PaddedString Class
 		{
 			get => this.GetValue(Site.ImageClassName);
 			set => this.SetParameter(Site.ImageClassName, value);
@@ -113,14 +113,14 @@
 
 		/// <summary>Gets or sets the caption for the image.</summary>
 		/// <value>The caption for the image.</value>
-		public ParameterString Caption
+		public PaddedString Caption
 		{
 			get => this.GetValue(Site.ImageCaptionName);
 			set => this.SetParameter(Site.ImageCaptionName, value);
 		}
 
 		/// <summary>Gets or sets the display text. For images, this is an alias for the caption property.</summary>
-		public override ParameterString DisplayParameter
+		public override PaddedString DisplayParameter
 		{
 			get => this.parameters[Site.ImageCaptionName]?.FullValue;
 			set
@@ -134,7 +134,7 @@
 				var param = this.parameters[Site.ImageCaptionName];
 				if (param == null)
 				{
-					this.parameters.Add(new Parameter(new ParameterString(Site.ImageCaptionName), value.Clone()));
+					this.parameters.Add(new Parameter(new PaddedString(Site.ImageCaptionName), value.Clone()));
 				}
 				else
 				{
@@ -145,7 +145,7 @@
 
 		/// <summary>Gets or sets the format (i.e., thumbnail, frame, frameless).</summary>
 		/// <value>The format.</value>
-		public ParameterString Format
+		public PaddedString Format
 		{
 			get => this.GetValue(Site.ImageFormatName);
 			set => this.SetParameter(Site.ImageFormatName, value);
@@ -162,7 +162,7 @@
 
 		/// <summary>Gets or sets the image's horizontal alignment.</summary>
 		/// <value>The image's horizontal alignment.</value>
-		public ParameterString HorizontalAlignment
+		public PaddedString HorizontalAlignment
 		{
 			get => this.GetValue(Site.ImageHAlignName);
 			set => this.SetParameter(Site.ImageHAlignName, value);
@@ -170,7 +170,7 @@
 
 		/// <summary>Gets or sets the image's language, for image formats that are language-aware (e.g., SVG).</summary>
 		/// <value>The image language.</value>
-		public ParameterString Language
+		public PaddedString Language
 		{
 			get => this.GetValue(Site.ImageLanguageName);
 			set => this.SetParameter(Site.ImageLanguageName, value);
@@ -178,7 +178,7 @@
 
 		/// <summary>Gets or sets the link for the image.</summary>
 		/// <value>The link for the image.</value>
-		public ParameterString Link
+		public PaddedString Link
 		{
 			get => this.GetValue(Site.ImageLinkName);
 			set => this.SetParameter(Site.ImageLinkName, value);
@@ -186,7 +186,7 @@
 
 		/// <summary>Gets or sets the page for the document, for formats like PDF and DJVU.</summary>
 		/// <value>The page for the document.</value>
-		public ParameterString Page
+		public PaddedString Page
 		{
 			get => this.GetValue(Site.ImagePageName);
 			set => this.SetParameter(Site.ImagePageName, value);
@@ -203,7 +203,7 @@
 		/// <summary>Gets or sets the image size directly.</summary>
 		/// <value>The image size.</value>
 		/// <remarks>Setting this option will remove any <see cref="Upright"/> parameter, and vice versa, since they are mutually exclusive. Both may be set simultaneously, however, if the link is parsed from existing text. In that case, if either is altered, the other will be removed.</remarks>
-		public ParameterString Size
+		public PaddedString Size
 		{
 			get => this.GetValue(Site.ImageSizeName);
 			set
@@ -216,7 +216,7 @@
 		/// <summary>Gets or sets the upright scaling factor.</summary>
 		/// <value>The upright factor.</value>
 		/// <remarks>Setting this option will remove any <see cref="Size"/> parameter, and vice versa, since they are mutually exclusive. Both may be set simultaneously, however, if the link is parsed from existing text. In that case, if either is altered, the other will be removed.</remarks>
-		public ParameterString Upright
+		public PaddedString Upright
 		{
 			get => this.GetValue(Site.ImageUprightName);
 			set
@@ -257,7 +257,7 @@
 
 		/// <summary>Gets or sets the image's vertical alignment.</summary>
 		/// <value>The vertical alignment.</value>
-		public ParameterString VerticalAlignment
+		public PaddedString VerticalAlignment
 		{
 			get => this.GetValue(Site.ImageVAlignName);
 			set => this.SetParameter(Site.ImageVAlignName, value);
@@ -279,10 +279,10 @@
 		}
 
 		/// <summary>Reformats all parameters using the specified formats and sorts them in a standardized order.</summary>
-		/// <param name="nameFormat">Whitespace to add before and after the link name. The <see cref="ParameterString.Value"/> property is ignored.</param>
-		/// <param name="valueFormat">Whitespace to add before and after every parameter's value. The <see cref="ParameterString.Value"/> property is ignored.</param>
+		/// <param name="nameFormat">Whitespace to add before and after the link name. The <see cref="PaddedString.Value"/> property is ignored.</param>
+		/// <param name="valueFormat">Whitespace to add before and after every parameter's value. The <see cref="PaddedString.Value"/> property is ignored.</param>
 		/// <remarks>Note that this method differs somewhat from the template method of the same name, since all parameters in a link are treated as anonymous due to the flexibility of parameter formats, such as <c>upright</c>/<c>upright 1.0</c>/<c>upright=1.0</c>.</remarks>
-		public override void Reformat(ParameterString nameFormat, ParameterString valueFormat)
+		public override void Reformat(PaddedString nameFormat, PaddedString valueFormat)
 		{
 			if (nameFormat != null)
 			{
@@ -316,13 +316,13 @@
 				}
 				else
 				{
-					this.Size = new ParameterString(width.ToStringInvariant());
+					this.Size = new PaddedString(width.ToStringInvariant());
 				}
 			}
 			else
 			{
 				var textHeight = height.ToStringInvariant();
-				this.Size = new ParameterString((width != 0 ? width.ToStringInvariant() : string.Empty) + "x" + textHeight);
+				this.Size = new PaddedString((width != 0 ? width.ToStringInvariant() : string.Empty) + "x" + textHeight);
 			}
 		}
 
@@ -345,7 +345,7 @@
 		#endregion
 
 		#region Private Methods
-		private void ExtractActualValue(ParameterString value, int index, int length)
+		private void ExtractActualValue(PaddedString value, int index, int length)
 		{
 			// We're somewhat abusing whitespace values here, but whitespace was intended to hold anything not directly part of a value, which is basically what we have happening here.
 			value.LeadingWhiteSpace += value.Value.Substring(0, index);
@@ -369,9 +369,9 @@
 			return regex.Match(param.Value).Groups["value"]?.Value ?? param.Value;
 		}
 
-		private ParameterString GetValue(string paramName) => this.parameters[paramName]?.FullValue;
+		private PaddedString GetValue(string paramName) => this.parameters[paramName]?.FullValue;
 
-		private void SetParameter(string paramName, ParameterString value)
+		private void SetParameter(string paramName, PaddedString value)
 		{
 			if (value == null)
 			{
@@ -382,7 +382,7 @@
 				var param = this.parameters[paramName];
 				if (param == null)
 				{
-					this.parameters.Add(new Parameter(new ParameterString(paramName), value, true));
+					this.parameters.Add(new Parameter(new PaddedString(paramName), value, true));
 				}
 				else
 				{

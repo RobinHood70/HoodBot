@@ -62,6 +62,7 @@
     <Compile Include="CsvFile.cs" />
     <Compile Include="CsvRow.cs" />
     <Compile Include="NaturalSort.cs" />
+    <Compile Include="PaddedString.cs" />
     <Compile Include="Parameter.cs" />
     <Compile Include="ParameterCollection.cs" />
     <Compile Include="ParameterParser.cs" />
@@ -75,7 +76,6 @@
     <Compile Include="Section.cs" />
     <Compile Include="SectionedPage.cs" />
     <Compile Include="Template.cs" />
-    <Compile Include="ParameterString.cs" />
     <Compile Include="WikiLink.cs" />
   </ItemGroup>
   <ItemGroup>

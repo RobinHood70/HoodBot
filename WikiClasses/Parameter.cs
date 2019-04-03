@@ -23,13 +23,13 @@
 		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
 		/// <param name="value">The parameter value.</param>
 		public Parameter(string value)
-			: this(null, new ParameterString(value), true)
+			: this(null, new PaddedString(value), true)
 		{
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
 		/// <param name="value">The full parameter value, including any leading and trailing whitespace.</param>
-		public Parameter(ParameterString value)
+		public Parameter(PaddedString value)
 			: this(null, value, true)
 		{
 		}
@@ -38,7 +38,7 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		public Parameter(string name, string value)
-			: this(name == null ? null : new ParameterString(name), new ParameterString(value), name == null)
+			: this(name == null ? null : new PaddedString(name), new PaddedString(value), name == null)
 		{
 		}
 
@@ -47,14 +47,14 @@
 		/// <param name="value">The full parameter value, including any leading and trailing whitespace. May not be null.</param>
 		/// <param name="anonymous">Whether the parameter should be treated as anonymous. The <paramref name="name"/> parameter must be non-null for this to take effect.</param>
 		public Parameter(string name, string value, bool anonymous)
-			: this(name == null ? null : new ParameterString(name), new ParameterString(value), anonymous)
+			: this(name == null ? null : new PaddedString(name), new PaddedString(value), anonymous)
 		{
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
 		/// <param name="name">The full parameter name, including any leading and trailing whitespace.</param>
 		/// <param name="value">The full parameter value, including any leading and trailing whitespace.</param>
-		public Parameter(ParameterString name, ParameterString value)
+		public Parameter(PaddedString name, PaddedString value)
 			: this(name, value, name == null)
 		{
 		}
@@ -63,7 +63,7 @@
 		/// <param name="name">The full parameter name, including any leading and trailing whitespace. May be null.</param>
 		/// <param name="value">The full parameter value, including any leading and trailing whitespace. May not be null.</param>
 		/// <param name="anonymous">Whether the parameter should be treated as anonymous. The <paramref name="name"/> parameter must be non-null for this to take effect.</param>
-		public Parameter(ParameterString name, ParameterString value, bool anonymous)
+		public Parameter(PaddedString name, PaddedString value, bool anonymous)
 		{
 			// name can be null; value cannot.
 			ThrowNull(value, nameof(value));
@@ -102,11 +102,11 @@
 
 		/// <summary>Gets or sets the full name.</summary>
 		/// <value>The full parameter name, including any leading or trailing whitespace.</value>
-		public ParameterString FullName { get; set; }
+		public PaddedString FullName { get; set; }
 
 		/// <summary>Gets the full value.</summary>
 		/// <value>The full parameter value, including any leading or trailing whitespace.</value>
-		public ParameterString FullValue { get; }
+		public PaddedString FullValue { get; }
 
 		/// <summary>Gets or sets the name.</summary>
 		/// <value>The parameter name.</value>
@@ -122,7 +122,7 @@
 				}
 				else
 				{
-					this.FullName = this.FullName ?? new ParameterString();
+					this.FullName = this.FullName ?? new PaddedString();
 					this.FullName.Value = value;
 				}
 			}

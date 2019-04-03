@@ -65,12 +65,12 @@
 		/// <summary>Gets or sets the default format to use for the whitespace surrounding the Name property of any new parameters.</summary>
 		/// <remarks>Only the whitespace properties are used for formatting; the Value property is ignored.</remarks>
 		/// <seealso cref="CopyLast"/>
-		public ParameterString DefaultNameFormat { get; set; } = new ParameterString();
+		public PaddedString DefaultNameFormat { get; set; } = new PaddedString();
 
 		/// <summary>Gets or sets the default format to use for the whitespace surrounding the Value property of any new parameters.</summary>
 		/// <remarks>Only the whitespace properties are used for formatting; the Value property is ignored.</remarks>
 		/// <seealso cref="CopyLast"/>
-		public ParameterString DefaultValueFormat { get; set; } = new ParameterString();
+		public PaddedString DefaultValueFormat { get; set; } = new PaddedString();
 
 		/// <summary>Gets a value indicating whether the collection is read-only.</summary>
 		bool ICollection<Parameter>.IsReadOnly { get; } = false;
@@ -815,9 +815,9 @@
 			return new Parameter(name == null ? null : this.CreateParameterString(lastParam, name, true), this.CreateParameterString(lastParam, value, false));
 		}
 
-		private ParameterString CreateParameterString(Parameter lastParam, string value, bool fromName)
+		private PaddedString CreateParameterString(Parameter lastParam, string value, bool fromName)
 		{
-			ParameterString copyString;
+			PaddedString copyString;
 			if (lastParam == null)
 			{
 				copyString = fromName ? this.DefaultNameFormat : this.DefaultValueFormat;
@@ -827,7 +827,7 @@
 				copyString = fromName ? lastParam.FullName : lastParam.FullValue;
 			}
 
-			return copyString == null ? null : new ParameterString(copyString.LeadingWhiteSpace, value, copyString.TrailingWhiteSpace);
+			return copyString == null ? null : new PaddedString(copyString.LeadingWhiteSpace, value, copyString.TrailingWhiteSpace);
 		}
 
 		// We don't need to handle the case where IndexOf returns -1 because all paramter names are added to the list by the Sort function.

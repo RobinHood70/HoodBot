@@ -6,7 +6,7 @@
 
 	/// <summary>Represents a string with optional whitespace before and after it, such as a parameter name or value, handling each element separately.</summary>
 	/// <remarks>There are no limitations on what is considered to be whitespace. This allows HTML comments and other unvalued text to be stored as needed.</remarks>
-	public sealed class ParameterString : IEquatable<ParameterString>
+	public sealed class PaddedString : IEquatable<PaddedString>
 	{
 		#region Fields
 		private string leadingWhiteSpace;
@@ -16,43 +16,43 @@
 
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="ParameterString"/> class.</summary>
-		public ParameterString()
+		/// <summary>Initializes a new instance of the <see cref="PaddedString"/> class.</summary>
+		public PaddedString()
 			: this(string.Empty, string.Empty, string.Empty)
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="ParameterString"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="PaddedString"/> class.</summary>
 		/// <param name="value">The value of the string.</param>
-		public ParameterString(string value)
+		public PaddedString(string value)
 			: this(string.Empty, value, string.Empty)
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="ParameterString"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="PaddedString"/> class.</summary>
 		/// <param name="leadingWhiteSpace">The leading whitespace.</param>
 		/// <param name="trailingWhiteSpace">The trailing whitespace.</param>
 		/// <remarks>This constructor is primarily intended for use with the <see cref="ParameterCollection.DefaultNameFormat"/> and <see cref="ParameterCollection.DefaultValueFormat"/> properties. It initializes only the space properties with no value.</remarks>
-		public ParameterString(string leadingWhiteSpace, string trailingWhiteSpace)
+		public PaddedString(string leadingWhiteSpace, string trailingWhiteSpace)
 			: this(leadingWhiteSpace, null, trailingWhiteSpace)
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="ParameterString"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="PaddedString"/> class.</summary>
 		/// <param name="leadingWhiteSpace">The leading whitespace.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="trailingWhiteSpace">The trailing whitespace.</param>
-		public ParameterString(string leadingWhiteSpace, string value, string trailingWhiteSpace)
+		public PaddedString(string leadingWhiteSpace, string value, string trailingWhiteSpace)
 		{
 			this.LeadingWhiteSpace = leadingWhiteSpace;
 			this.Value = value;
 			this.TrailingWhiteSpace = trailingWhiteSpace;
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="ParameterString"/> class from an existing one.</summary>
+		/// <summary>Initializes a new instance of the <see cref="PaddedString"/> class from an existing one.</summary>
 		/// <param name="copy">The instance to copy.</param>
 		/// <remarks>Since all values are strings, deep/shallow does not apply.</remarks>
-		private ParameterString(ParameterString copy)
+		private PaddedString(PaddedString copy)
 		{
 			ThrowNull(copy, nameof(copy));
 			this.CopyFrom(copy);
@@ -89,16 +89,16 @@
 
 		#region Implicit Conversion Operators
 
-		/// <summary>Performs an implicit conversion from <see cref="ParameterString"/> to <see cref="string"/>.</summary>
+		/// <summary>Performs an implicit conversion from <see cref="PaddedString"/> to <see cref="string"/>.</summary>
 		/// <param name="parameter">The parameter.</param>
 		/// <returns>The result of the conversion.</returns>
-		public static implicit operator string(ParameterString parameter) => parameter?.Value;
+		public static implicit operator string(PaddedString parameter) => parameter?.Value;
 
-		/// <summary>Performs an implicit conversion from <see cref="string"/> to <see cref="ParameterString"/>.</summary>
+		/// <summary>Performs an implicit conversion from <see cref="string"/> to <see cref="PaddedString"/>.</summary>
 		/// <param name="parameter">The parameter.</param>
 		/// <returns>The result of the conversion.</returns>
 		/// <remarks>While going to a string is an implicit operation, going from one is an explicit operation, since any prior format will be lost.</remarks>
-		public static explicit operator ParameterString(string parameter) => new ParameterString(parameter);
+		public static explicit operator PaddedString(string parameter) => new PaddedString(parameter);
 		#endregion
 
 		#region Public Operators
@@ -107,13 +107,13 @@
 		/// <param name="string1">The first string.</param>
 		/// <param name="string2">The second string.</param>
 		/// <returns>The result of the operator.</returns>
-		public static bool operator ==(ParameterString string1, ParameterString string2) => string1?.Equals(string2) ?? string2 is null;
+		public static bool operator ==(PaddedString string1, PaddedString string2) => string1?.Equals(string2) ?? string2 is null;
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="string1">The first string.</param>
 		/// <param name="string2">The second string.</param>
 		/// <returns>The result of the operator.</returns>
-		public static bool operator !=(ParameterString string1, ParameterString string2) => !(string1 == string2);
+		public static bool operator !=(PaddedString string1, PaddedString string2) => !(string1 == string2);
 		#endregion
 
 		#region Public Methods
@@ -134,11 +134,11 @@
 		/// <summary>Clones this instance.</summary>
 		/// <returns>A copy of this instance.</returns>
 		/// <remarks>Since all values are strings, deep/shallow does not apply.</remarks>
-		public ParameterString Clone() => new ParameterString(this);
+		public PaddedString Clone() => new PaddedString(this);
 
 		/// <summary>Copies the format from the source ParameterString.</summary>
 		/// <param name="source">The source.</param>
-		public void CopyFormatFrom(ParameterString source)
+		public void CopyFormatFrom(PaddedString source)
 		{
 			ThrowNull(source, nameof(source));
 			this.leadingWhiteSpace = source.leadingWhiteSpace;
@@ -147,7 +147,7 @@
 
 		/// <summary>Copies the entire contents from the source ParameterString.</summary>
 		/// <param name="source">The source.</param>
-		public void CopyFrom(ParameterString source)
+		public void CopyFrom(PaddedString source)
 		{
 			ThrowNull(source, nameof(source));
 			this.CopyFormatFrom(source);
@@ -199,7 +199,7 @@
 		///   </span>
 		///   <span class="nu">
 		///     <span class="keyword">true</span> (<span class="keyword">True</span> in Visual Basic)</span> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <span class="keyword"><span class="languageSpecificText"><span class="cs">false</span><span class="vb">False</span><span class="cpp">false</span></span></span><span class="nu"><span class="keyword">false</span> (<span class="keyword">False</span> in Visual Basic)</span>.</returns>
-		public bool Equals(ParameterString other) =>
+		public bool Equals(PaddedString other) =>
 			other != null &&
 			this.leadingWhiteSpace == other.leadingWhiteSpace &&
 			this.trailingWhiteSpace == other.trailingWhiteSpace &&
@@ -214,7 +214,7 @@
 		/// <param name="obj">The <see cref="object"/> to compare with this instance.</param>
 		/// <returns>
 		///   <c>true</c> if the specified <see cref="object"/> is equal to this instance; otherwise, <c>false</c>.</returns>
-		public override bool Equals(object obj) => this.Equals(obj as ParameterString);
+		public override bool Equals(object obj) => this.Equals(obj as PaddedString);
 
 		/// <summary>Returns a hash code for this instance.</summary>
 		/// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>

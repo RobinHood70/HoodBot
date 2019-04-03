@@ -86,7 +86,7 @@
 			ThrowNull(pageName, nameof(pageName));
 			this.Namespace = ns;
 			this.PageName = pageName;
-			this.DisplayParameter = displayText == null ? null : new ParameterString(displayText);
+			this.DisplayParameter = displayText == null ? null : new PaddedString(displayText);
 		}
 		#endregion
 
@@ -106,7 +106,7 @@
 				{
 					if (this.DisplayParameter == null)
 					{
-						this.DisplayParameter = new ParameterString();
+						this.DisplayParameter = new PaddedString();
 					}
 
 					this.DisplayParameter.Value = value;
@@ -115,7 +115,7 @@
 		}
 
 		/// <summary>Gets or sets the display text parameter (i.e., the value to the right of the pipe). For images, this is the caption; for categories, it's the sortkey.</summary>
-		public virtual ParameterString DisplayParameter { get; set; }
+		public virtual PaddedString DisplayParameter { get; set; }
 
 		/// <summary>Gets or sets the full name of the page.</summary>
 		public string FullPageName
@@ -550,9 +550,9 @@
 		#region Public Virtual Methods
 
 		/// <summary>Reformats the link using the specified formats.</summary>
-		/// <param name="nameFormat">Whitespace to add before and after the page name. The <see cref="ParameterString.Value"/> property is ignored.</param>
-		/// <param name="valueFormat">Whitespace to add before and after the <see cref="DisplayParameter"/>. The <see cref="ParameterString.Value"/> property is ignored.</param>
-		public virtual void Reformat(ParameterString nameFormat, ParameterString valueFormat)
+		/// <param name="nameFormat">Whitespace to add before and after the page name. The <see cref="PaddedString.Value"/> property is ignored.</param>
+		/// <param name="valueFormat">Whitespace to add before and after the <see cref="DisplayParameter"/>. The <see cref="PaddedString.Value"/> property is ignored.</param>
+		public virtual void Reformat(PaddedString nameFormat, PaddedString valueFormat)
 		{
 			if (nameFormat != null)
 			{

@@ -42,7 +42,7 @@
 			this.Tokenize(isLink ? "[[" : "{{");
 			if (this.tokens.Count == 0)
 			{
-				this.Name = new ParameterString();
+				this.Name = new PaddedString();
 				return;
 			}
 
@@ -89,7 +89,7 @@
 
 		/// <summary>Gets the link or template page name.</summary>
 		/// <value>The name.</value>
-		public ParameterString Name { get; private set; }
+		public PaddedString Name { get; private set; }
 
 		/// <summary>Gets the parameters parsed from the text provided in the constructor.</summary>
 		/// <value>The parameters.</value>
@@ -97,7 +97,7 @@
 
 		/// <summary>Gets the parsed text from the constructor as a single parameter, as would be used in a normal link.</summary>
 		/// <value>The parameter as a single value (everything from the first pipe to the closing delimiter).</value>
-		public ParameterString SingleParameter => this.paramEndToken == 0 ? null : this.GetParameterString(this.paramStartToken, this.paramEndToken, true);
+		public PaddedString SingleParameter => this.paramEndToken == 0 ? null : this.GetParameterString(this.paramStartToken, this.paramEndToken, true);
 		#endregion
 
 		#region Public Methods
@@ -105,7 +105,7 @@
 		/// <summary>Guesses the default format from the existing parameters.</summary>
 		/// <param name="names">if <c>true,</c> returns a format based on the parameter names; otherwise, the format is based on the parameter values.</param>
 		/// <returns>A ParameterString with the most common formatting in use, based on the existing named parameters. If there are no named parameters, returns an empty ParameterString.</returns>
-		public ParameterString DefaultFormat(bool names)
+		public PaddedString DefaultFormat(bool names)
 		{
 			var counts = new Dictionary<string, int>();
 			var highest = 0;
@@ -127,7 +127,7 @@
 				}
 			}
 
-			var retval = new ParameterString();
+			var retval = new PaddedString();
 			if (highest > 0)
 			{
 				var whiteSpace = highestKey.Split(TextArrays.Pipe);
@@ -179,7 +179,7 @@
 				this.tokenIndex++;
 			}
 
-			ParameterString name = null;
+			PaddedString name = null;
 			var start = this.tokenIndex;
 			while (this.tokenIndex < this.tokens.Count)
 			{
@@ -202,9 +202,9 @@
 			return new Parameter(name, value);
 		}
 
-		private ParameterString GetParameterString(int start, int end, bool parseWhiteSpace)
+		private PaddedString GetParameterString(int start, int end, bool parseWhiteSpace)
 		{
-			var retval = new ParameterString();
+			var retval = new PaddedString();
 			var textStart = start;
 			var textEnd = end;
 			if (parseWhiteSpace)
