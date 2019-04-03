@@ -6,6 +6,11 @@
 
 	#region Public Delegates
 
+	/// <summary>A delegate for functions which handle page name replacements within specific templates.</summary>
+	/// <param name="currentPage">The current page.</param>
+	/// <param name="template">The template.</param>
+	/// <param name="from">From.</param>
+	/// <param name="to">To.</param>
 	public delegate void TemplateReplacement(Page currentPage, Template template, Title from, Title to);
 
 	/// <summary>Represents a method which creates a <see cref="UserFunctions"/> derivative.</summary>
