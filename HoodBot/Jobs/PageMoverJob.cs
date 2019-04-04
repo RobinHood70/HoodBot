@@ -14,6 +14,7 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
+	using static RobinHood70.WikiCommon.Globals;
 
 	#region Internal Enums
 	[Flags]
@@ -34,23 +35,23 @@
 	}
 	#endregion
 
-	public abstract class PageMover : EditJob
+	public abstract class PageMoverJob : EditJob
 	{
 		#region Static Fields
-		private static Regex galleryFinder = new Regex(@"(?<open><gallery(\ [^>]*?)?>\s*\n)(?<content>.*?)(?<close>\s*\n</gallery>)", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+		private static readonly Regex GalleryFinder = new Regex(@"(?<open><gallery(\ [^>]*?)?>\s*\n)(?<content>.*?)(?<close>\s*\n</gallery>)", RegexOptions.IgnoreCase | RegexOptions.Singleline);
 		#endregion
 
 		#region Fields
-		private readonly PageCollection backlinks;
-		private bool hasMoves;
+		private bool moveOrPropose = false;
 		#endregion
 
 		#region Constructors
-		protected PageMover(Site site, AsyncInfo asyncInfo, TaskActions taskActions)
+		protected PageMoverJob(Site site, AsyncInfo asyncInfo, TaskActions taskActions)
 			: base(site, asyncInfo)
 		{
 			this.TaskActions = taskActions;
 			this.TalkLikePages = new TitleCollection(site);
+			this.Backlinks = PageCollection.Unlimited(site);
 
 			var actions = new List<string>();
 			if (taskActions.HasFlag(TaskActions.Move))
@@ -88,11 +89,44 @@
 		}
 		#endregion
 
+		#region Public Override Properties
+		public override string LogName
+		{
+			get
+			{
+				if (this.TaskActions.HasFlag(TaskActions.FixLinks) && !this.TaskActions.HasFlag(TaskActions.Move))
+				{
+					return "Link Replacer";
+				}
+
+				var retval = "Page Mover";
+				if (this.TaskActions.HasFlag(TaskActions.ProposeRedirects) || this.TaskActions.HasFlag(TaskActions.ProposeUnused))
+				{
+					return retval + " (Propose Deletion Mode)";
+				}
+
+				if (this.TaskActions.HasFlag(TaskActions.SaveResults))
+				{
+					return retval + " (Report Only)";
+				}
+
+				if (!this.TaskActions.HasFlag(TaskActions.Move))
+				{
+					retval += " (Unknown Configuration)";
+				}
+
+				return retval;
+			}
+		}
+		#endregion
+
 		#region Protected Static Properties
 		protected static string ReplacementStatusFile => @"%BotData%\Replacements.json";
 		#endregion
 
 		#region Protected Properties
+		protected PageCollection Backlinks { get; }
+
 		protected bool DoReport { get; set; } = true;
 
 		protected string EditSummaryEditAfterMove { get; set; } = "Update text after page move";
@@ -124,17 +158,14 @@
 		#region Protected Override Methods
 		protected override void Main()
 		{
-			if (this.hasMoves)
+			if (this.moveOrPropose && (this.TaskActions.HasFlag(TaskActions.Move) || this.TaskActions.HasFlag(TaskActions.ProposeUnused)))
 			{
-				if (this.TaskActions.HasFlag(TaskActions.Move) || this.TaskActions.HasFlag(TaskActions.ProposeUnused))
-				{
-					this.DoMoves();
-				}
+				this.DoMoves();
+			}
 
-				if (this.TaskActions.HasFlag(TaskActions.FixLinks))
-				{
-					this.DoFixLinks(this.backlinks);
-				}
+			if (this.TaskActions.HasFlag(TaskActions.FixLinks) && this.Backlinks.Count > 0)
+			{
+				this.DoFixLinks(this.Backlinks);
 			}
 
 			if (this.Site.EditingEnabled && this.TaskActions.HasFlag(TaskActions.CheckLinksRemaining))
@@ -172,6 +203,7 @@
 
 		protected virtual void DoFixLinks(PageCollection backlinks)
 		{
+			ThrowNull(backlinks, nameof(backlinks));
 			this.StatusWriteLine("Replacing links");
 			this.ProgressMaximum = backlinks.Count + 1;
 			foreach (var page in backlinks)
@@ -262,17 +294,17 @@
 			this.StatusWriteLine("Checking remaining pages");
 			this.ProgressMaximum = this.Replacements.Count;
 			var leftovers = new List<Title>();
-			foreach (var rep in this.Replacements)
+			foreach (var replacement in this.Replacements)
 			{
-				if (rep.Action == ReplacementAction.Move)
+				if (replacement.Action == ReplacementAction.Move)
 				{
 					var backlinks = new TitleCollection(this.Site);
-					backlinks.GetBacklinks(rep.To.FullPageName, BacklinksTypes.All, true);
-					backlinks.Remove(rep.To);
+					backlinks.GetBacklinks(replacement.To.FullPageName, BacklinksTypes.All, true);
+					backlinks.Remove(replacement.To);
 					this.FilterSitePages(backlinks);
 					if (backlinks.Count > 0)
 					{
-						leftovers.Add(rep.To);
+						leftovers.Add(replacement.To);
 					}
 
 					this.Progress++;
@@ -303,7 +335,7 @@
 			foreach (var rep in this.Replacements)
 			{
 				this.WriteLine("|-");
-				this.Write(Globals.Invariant($"| {rep.From} ([[Special:WhatLinksHere/{rep.From}|links]]) || "));
+				this.Write(Invariant($"| {rep.From} ([[Special:WhatLinksHere/{rep.From}|links]]) || "));
 
 				switch (rep.Action)
 				{
@@ -367,7 +399,7 @@
 					backlinkTitles.GetBacklinks(replacement.From.FullPageName, BacklinksTypes.All);
 					if (this.TaskActions.HasFlag(TaskActions.ProposeUnused) && backlinkTitles.Count == count)
 					{
-						var prodResult = fromPages.TryGetValue(replacement.From.FullPageName, out var fromPage) ? this.CanDelete(fromPage) : ProposedDeletionResult.PageLoadError;
+						var prodResult = fromPages.TryGetValue(replacement.From.FullPageName, out var fromPage) ? this.CanDelete(fromPage) : ProposedDeletionResult.NonExistent;
 						switch (prodResult)
 						{
 							case ProposedDeletionResult.AlreadyProposed:
@@ -379,8 +411,7 @@
 								replacement.ActionReason = "No links, but {{tl|Linked image}} present - move instead of proposing for deletion";
 								break;
 							case ProposedDeletionResult.NonExistent:
-							case ProposedDeletionResult.PageLoadError:
-								throw new ArgumentNullException($"Page doesn't exist or failed to load: {replacement.From}");
+								throw new ArgumentNullException($"Page doesn't exist: {replacement.From}");
 							case ProposedDeletionResult.Add:
 								replacement.Action = ReplacementAction.ProposeForDeletion;
 								replacement.ActionReason = "no links";
@@ -389,7 +420,7 @@
 					}
 				}
 
-				if (replacement.Action == ReplacementAction.Unknown)
+				if (replacement.Action == ReplacementAction.Unknown && this.TaskActions.HasFlag(TaskActions.Move))
 				{
 					if (this.TaskActions.HasFlag(TaskActions.CheckToExists) && toPages.Contains(replacement.To))
 					{
@@ -402,26 +433,31 @@
 					}
 				}
 
-				this.hasMoves |= replacement.Action == ReplacementAction.Move;
+				this.moveOrPropose |= replacement.Action > ReplacementAction.Skip;
 				this.Progress++;
 			}
 
 			this.FilterBacklinks(backlinkTitles);
 			this.FilterSitePages(backlinkTitles);
-			this.backlinks.GetTitles(backlinkTitles);
-			this.backlinks.Sort();
+			this.Backlinks.GetTitles(backlinkTitles);
+			this.Backlinks.Sort();
 		}
 
-		protected virtual void FilterBacklinks(TitleCollection backlinkTitles) => backlinkTitles.RemoveNamespaces(
+		protected virtual void FilterBacklinks(TitleCollection backlinkTitles)
+		{
+			ThrowNull(backlinkTitles, nameof(backlinkTitles));
+			backlinkTitles.RemoveNamespaces(
 				MediaWikiNamespaces.Main,
 				MediaWikiNamespaces.Media,
 				MediaWikiNamespaces.MediaWiki,
 				MediaWikiNamespaces.Project,
 				MediaWikiNamespaces.Special,
 				MediaWikiNamespaces.Template);
+		}
 
 		protected virtual void FilterSitePages(TitleCollection backlinkTitles)
 		{
+			ThrowNull(backlinkTitles, nameof(backlinkTitles));
 			var userFunctions = this.Site.UserFunctions;
 			backlinkTitles.Remove(userFunctions.ResultsPage);
 			backlinkTitles.Remove(userFunctions.LogPage);
@@ -434,6 +470,7 @@
 
 		protected virtual void FilterTalkLikePages(TitleCollection backlinkTitles)
 		{
+			ThrowNull(backlinkTitles, nameof(backlinkTitles));
 			foreach (var catPage in this.TalkLikePages)
 			{
 				backlinkTitles.Remove(catPage);
@@ -470,7 +507,7 @@
 				}
 			}
 
-			return replacementsMade ? match.Groups["pre"].Value.Trim() + "\n" + sb.ToString() + match.Groups["post"].Value.Trim() : match.Value;
+			return replacementsMade ? match.Groups["open"].Value.Trim() + "\n" + sb.ToString() + match.Groups["close"].Value.Trim() : match.Value;
 		}
 
 		private static string ReplaceLink(Match match, Title from, Title to)
@@ -541,7 +578,7 @@
 			// Galleries
 			if (replacement.From.Namespace == MediaWikiNamespaces.File)
 			{
-				currentPage.Text = galleryFinder.Replace(currentPage.Text, (match) => ReplaceGalleryLinks(match, replacement.From, replacement.To));
+				currentPage.Text = GalleryFinder.Replace(currentPage.Text, (match) => ReplaceGalleryLinks(match, replacement.From, replacement.To));
 			}
 		}
 		#endregion
