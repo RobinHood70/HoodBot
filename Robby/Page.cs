@@ -236,6 +236,7 @@
 							Minor = changeArgs.Minor ? Tristate.True : Tristate.False,
 							Recreate = changeArgs.RecreateIfJustDeleted,
 							Summary = changeArgs.EditSummary,
+							RequireNewPage = createOnly,
 						}).Result == "Success" ? ChangeStatus.Success : ChangeStatus.Failure;
 				});
 		}

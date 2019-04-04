@@ -13,7 +13,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	internal class ListCategoryMembers : ListModule<CategoryMembersInput, CategoryMembersItem>, IGeneratorModule
 	{
 		#region Static Fields
-		private static Dictionary<string, CategoryMemberTypes> typeLookup = new Dictionary<string, CategoryMemberTypes>
+		private static readonly Dictionary<string, CategoryMemberTypes> TypeLookup = new Dictionary<string, CategoryMemberTypes>
 		{
 			["file"] = CategoryMemberTypes.File,
 			["page"] = CategoryMemberTypes.Page,
@@ -86,7 +86,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			}.GetWikiTitle(result);
 
 			var typeText = (string)result["type"];
-			if (typeText != null && typeLookup.TryGetValue(typeText, out var itemType))
+			if (typeText != null && TypeLookup.TryGetValue(typeText, out var itemType))
 			{
 				item.Type = itemType;
 			}

@@ -15,8 +15,8 @@
 		#endregion
 
 		#region Static Fields
-		private static Encoding encoding = Encoding.UTF8;
-		private static char[] boundaryChars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'()+_,-./:=? ".ToCharArray();
+		private static readonly Encoding CurrentEncoding = Encoding.UTF8;
+		private static readonly char[] BoundaryChars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'()+_,-./:=? ".ToCharArray();
 		#endregion
 
 		#region Fields
@@ -63,7 +63,7 @@
 					{
 						if (first)
 						{
-							memoryStream.Write(encoding.GetBytes("\r\n"), 0, encoding.GetByteCount("\r\n"));
+							memoryStream.Write(CurrentEncoding.GetBytes("\r\n"), 0, CurrentEncoding.GetByteCount("\r\n"));
 						}
 
 						first = true;
@@ -77,7 +77,7 @@
 					if (!visitor.badBoundary)
 					{
 						var footer = "\r\n--" + visitor.boundary + "--\r\n";
-						memoryStream.Write(encoding.GetBytes(footer), 0, encoding.GetByteCount(footer));
+						memoryStream.Write(CurrentEncoding.GetBytes(footer), 0, CurrentEncoding.GetByteCount(footer));
 						formData = new byte[memoryStream.Length];
 						memoryStream.Position = 0;
 						memoryStream.Read(formData, 0, formData.Length);
@@ -101,14 +101,14 @@
 		public void Visit(FileParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
-			if (ScanBoundaryConflicts && parameter.Value.LongLength > 0 && encoding.GetString(parameter.Value).Contains(this.boundary))
+			if (ScanBoundaryConflicts && parameter.Value.LongLength > 0 && CurrentEncoding.GetString(parameter.Value).Contains(this.boundary))
 			{
 				this.badBoundary = true;
 				return;
 			}
 
 			var data = Invariant($"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{parameter.Name}\"; filename=\"{parameter.FileName}\";\r\nContent-Type: application/octet-stream\r\n\r\n");
-			this.stream.Write(encoding.GetBytes(data), 0, encoding.GetByteCount(data));
+			this.stream.Write(CurrentEncoding.GetBytes(data), 0, CurrentEncoding.GetByteCount(data));
 			this.stream.Write(parameter.Value, 0, parameter.Value.Length);
 		}
 
@@ -162,8 +162,8 @@
 
 			for (var i = 0; i < boundaryLength; i++)
 			{
-				var scanLength = i == 69 ? boundaryChars.Length - 1 : boundaryChars.Length;
-				builder.Append(boundaryChars[rand.Next(scanLength)]);
+				var scanLength = i == 69 ? BoundaryChars.Length - 1 : BoundaryChars.Length;
+				builder.Append(BoundaryChars[rand.Next(scanLength)]);
 			}
 
 			return builder.ToString();
@@ -178,7 +178,7 @@
 			}
 
 			var postData = Invariant($"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{name}\"\r\n\r\n{value}");
-			this.stream.Write(encoding.GetBytes(postData), 0, encoding.GetByteCount(postData));
+			this.stream.Write(CurrentEncoding.GetBytes(postData), 0, CurrentEncoding.GetByteCount(postData));
 		}
 		#endregion
 	}

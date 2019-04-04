@@ -10,7 +10,7 @@
 	public class SectionedPage
 	{
 		#region Static Fields
-		private static Regex sectionFinder = new Regex(@"^(?<addbefore>\<!--\ *)?(?<levelopen>={1,6})(?<wslead>\ *)(?<title>.*?)(?<wstrail>\s*)(?<levelclose>={1,6})(?<addafter>\ *--\>)?\ *\r?\n", RegexOptions.Multiline | RegexOptions.Compiled);
+		private static readonly Regex SectionFinder = new Regex(@"^(?<addbefore>\<!--\ *)?(?<levelopen>={1,6})(?<wslead>\ *)(?<title>.*?)(?<wstrail>\s*)(?<levelclose>={1,6})(?<addafter>\ *--\>)?\ *\r?\n", RegexOptions.Multiline | RegexOptions.Compiled);
 		#endregion
 
 		#region Constructors
@@ -20,7 +20,7 @@
 		public SectionedPage(string pageText)
 		{
 			ThrowNull(pageText, nameof(pageText));
-			var titles = sectionFinder.Matches(pageText);
+			var titles = SectionFinder.Matches(pageText);
 			this.Lead = titles.Count == 0 ? pageText : pageText.Substring(0, titles[0].Index);
 
 			var offset = 0;

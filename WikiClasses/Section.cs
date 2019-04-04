@@ -2,6 +2,7 @@
 {
 	using System.Collections.Generic;
 	using System.Text;
+	using static WikiCommon.Globals;
 
 	/// <summary>Represents a section on a wiki page.</summary>
 	/// <remarks>Note that this class is fairly simplistic and geared primarily to representation and manipulation of existing wikitext. It does not attempt to deal with unexpected usage such as adding sections via the <see cref="Text"/> property or commenting out a section header.</remarks>
@@ -91,6 +92,7 @@
 		/// <returns>The StringBuilder that was passed, to allow method chaining.</returns>
 		public StringBuilder Build(StringBuilder sb)
 		{
+			ThrowNull(sb, nameof(sb));
 			if (this.PaddedTitle != null)
 			{
 				var equals = "======".Substring(0, this.Level);

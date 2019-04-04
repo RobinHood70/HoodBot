@@ -18,7 +18,7 @@ namespace RobinHood70.WallE.Base
 	public abstract class PageSetInput
 	{
 		#region Fields
-		private static Dictionary<ListType, string> listNames = new Dictionary<ListType, string>()
+		private static readonly Dictionary<ListType, string> ListNames = new Dictionary<ListType, string>()
 		{
 			[ListType.PageIds] = "pageids",
 			[ListType.RevisionIds] = "revids",
@@ -80,7 +80,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Static Properties
-		public static HashSet<string> AllTypes { get; } = new HashSet<string>(listNames.Values);
+		public static HashSet<string> AllTypes { get; } = new HashSet<string>(ListNames.Values);
 		#endregion
 
 		#region Public Properties
@@ -92,7 +92,7 @@ namespace RobinHood70.WallE.Base
 
 		public bool Redirects { get; set; }
 
-		public string TypeName => listNames[this.ListType];
+		public string TypeName => ListNames[this.ListType];
 
 		public IReadOnlyList<string> Values { get; }
 		#endregion

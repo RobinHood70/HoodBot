@@ -13,7 +13,7 @@
 	public class NaturalSort : IComparer<string>
 	{
 		#region Fields
-		private static readonly Regex NumberRegex = new Regex(@"(\d+([\.,]\d+)");
+		private static readonly Regex NumberRegex = new Regex(@"\d+([\.,]\d+)?");
 		#endregion
 
 		#region Public Methods

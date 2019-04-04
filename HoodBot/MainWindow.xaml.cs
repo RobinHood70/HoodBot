@@ -39,8 +39,7 @@
 			Grid.SetColumn(labelControl, 0);
 			Grid.SetRow(labelControl, lastRow);
 			grid.Children.Add(labelControl);
-
-			Control controlToAdd = null;
+			Control controlToAdd;
 			if (valueType == typeof(bool))
 			{
 				controlToAdd = new CheckBox() { IsChecked = (bool)parameter.Value };

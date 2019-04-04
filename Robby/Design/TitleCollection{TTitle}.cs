@@ -706,7 +706,7 @@
 		/// <summary>Removes one or more namespaces from the collection.</summary>
 		/// <param name="removeTalk">Whether to remove talk spaces along with <paramref name="namespaces"/>.</param>
 		/// <param name="namespaces">The namespaces to remove.</param>
-		public void RemoveNamespaces(bool removeTalk, params Namespace[] namespaces) => this.RemoveNamespaces(namespaces as IEnumerable<Namespace>);
+		public void RemoveNamespaces(bool removeTalk, params Namespace[] namespaces) => this.RemoveNamespaces(removeTalk, namespaces as IEnumerable<Namespace>);
 
 		/// <summary>Removes one or more namespaces from the collection.</summary>
 		/// <param name="removeTalk">Whether to remove talk spaces along with <paramref name="namespaces"/>.</param>

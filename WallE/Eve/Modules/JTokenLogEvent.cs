@@ -12,7 +12,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	internal static class JTokenLogEvent
 	{
 		#region Fields
-		private static Regex protectionFinder = new Regex(@"\[(?<action>[^=]*?)=(?<restrictions>[^\]]*?)\] \((?<indef>indefinite|infinit[ey]|never)?(expires (?<expiry>.*?) \(UTC\))?\)", RegexOptions.Compiled);
+		private static readonly Regex ProtectionFinder = new Regex(@"\[(?<action>[^=]*?)=(?<restrictions>[^\]]*?)\] \((?<indef>indefinite|infinit[ey]|never)?(expires (?<expiry>.*?) \(UTC\))?\)", RegexOptions.Compiled);
 		#endregion
 
 		#region Internal Extension Methods
@@ -47,8 +47,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			var dict = GetExtraData(logType, logAction, values);
-			var logEventsOutput = le as LogEventsItem;
-			if (doBugFix && logEventsOutput != null && logEventsOutput.LogType == "newusers")
+			if (doBugFix && le is LogEventsItem logEventsOutput && logEventsOutput.LogType == "newusers")
 			{
 				// Per https://phabricator.wikimedia.org/T73020
 				switch (logEventsOutput.LogAction)
@@ -227,7 +226,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					break;
 				default:
 					var protections = new List<ProtectionsItem>();
-					foreach (var match in protectionFinder.Matches((string)values["0"]) as IReadOnlyList<Match>)
+					foreach (var match in ProtectionFinder.Matches((string)values["0"]) as IReadOnlyList<Match>)
 					{
 						var groups = match.Groups;
 						var protData = new ProtectionsItem()

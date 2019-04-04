@@ -16,7 +16,7 @@
 			where T : IEnumerable<string>
 		{
 			ThrowNull(parameter, nameof(parameter));
-			string value = null;
+			string value;
 			if (supportsUnitSeparator)
 			{
 				// Although this could be done with the existing builder, it gets a bit messy with Uri encoding then checking for the pipe afterwards, so use a separate builder like other similar classes.

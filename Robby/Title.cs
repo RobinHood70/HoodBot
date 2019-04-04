@@ -37,8 +37,8 @@
 		#endregion
 
 		#region Fields
-		private static Regex labelCommaRemover = new Regex(@"\ *([,，]" + TitleChars + @"*?)\Z", RegexOptions.Compiled);
-		private static Regex labelParenthesesRemover = new Regex(@"\ *(\(" + TitleChars + @"*?\)|（" + TitleChars + @"*?）)\Z", RegexOptions.Compiled);
+		private static readonly Regex LabelCommaRemover = new Regex(@"\ *([,，]" + TitleChars + @"*?)\Z", RegexOptions.Compiled);
+		private static readonly Regex LabelParenthesesRemover = new Regex(@"\ *(\(" + TitleChars + @"*?\)|（" + TitleChars + @"*?）)\Z", RegexOptions.Compiled);
 		#endregion
 
 		#region Constructors
@@ -224,8 +224,8 @@
 		/// <returns>The text with the final paranthetical and/or comma-delimited text removed. Note: like the MediaWiki equivalent, when both are present, this will remove text of the form "(text), text", but text of the form ", text (text)" will become ", text". The text should already have been cleaned using Fixup().</returns>
 		public static string PipeTrick(string pageName)
 		{
-			pageName = labelCommaRemover.Replace(pageName, string.Empty, 1, 1);
-			pageName = labelParenthesesRemover.Replace(pageName, string.Empty, 1, 1);
+			pageName = LabelCommaRemover.Replace(pageName, string.Empty, 1, 1);
+			pageName = LabelParenthesesRemover.Replace(pageName, string.Empty, 1, 1);
 			return pageName;
 		}
 		#endregion

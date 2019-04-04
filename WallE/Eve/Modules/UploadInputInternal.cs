@@ -93,7 +93,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		public void NextChunk(Stream input, int chunkSize)
 		{
 			ThrowNull(input, nameof(input));
-			var readBytes = 0;
 			var copySize = this.FileSize - this.Offset;
 			if (copySize > chunkSize)
 			{
@@ -101,7 +100,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			var fileData = new byte[copySize];
-			readBytes = input.Read(fileData, 0, (int)copySize); // Safe to cast, since it can't be larger than chunkSize, which is an integer
+			var readBytes = input.Read(fileData, 0, (int)copySize); // Safe to cast, since it can't be larger than chunkSize, which is an integer
 			if (readBytes != copySize)
 			{
 				Array.Resize(ref fileData, readBytes);

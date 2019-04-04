@@ -15,7 +15,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		where TOutput : class
 	{
 		#region Static Fields
-		private static Regex limitFinder = new Regex(@"\A(?<module>.*?)limit may not be over (?<limit>[0-9]+)", RegexOptions.Compiled);
+		private static readonly Regex LimitFinder = new Regex(@"\A(?<module>.*?)limit may not be over (?<limit>[0-9]+)", RegexOptions.Compiled);
 		#endregion
 
 		#region Fields
@@ -137,7 +137,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			if (from == this.Name)
 			{
-				var match = limitFinder.Match(text);
+				var match = LimitFinder.Match(text);
 				if (match != null && match.Groups["module"].Value == this.FullPrefix)
 				{
 					this.ModuleLimit = int.Parse(match.Groups["limit"].Value, CultureInfo.InvariantCulture);

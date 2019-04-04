@@ -11,7 +11,7 @@
 	public sealed class Parameter
 	{
 		#region Static Fields
-		private static Regex equalsFinder = new Regex(@"(&#(x3b|61);|\{\{=}}|<nowiki>=</nowiki>)", RegexOptions.IgnoreCase);
+		private static readonly Regex EqualsFinder = new Regex(@"(&#(x3b|61);|\{\{=}}|<nowiki>=</nowiki>)", RegexOptions.IgnoreCase);
 		#endregion
 
 		#region Private Fields
@@ -176,7 +176,7 @@
 		/// <summary>Unescapes the specified text, converting common equivalents of equals signs to an actual equals sign.</summary>
 		/// <param name="text">The text to unescape.</param>
 		/// <returns>The same as the input value, with any of the following converted back to an equals sign: <c>&#x3b;</c>, <c>&#61;</c>, <c>{{=}}</c>, <c>&lt;nowiki>=&lt;/nowiki></c>.</returns>
-		public static string Unescape(string text) => equalsFinder.Replace(text, "=");
+		public static string Unescape(string text) => EqualsFinder.Replace(text, "=");
 		#endregion
 
 		#region Public Methods
@@ -188,7 +188,7 @@
 		public bool Anonymize(string nameIfNeeded)
 		{
 			var retval = false;
-			if (equalsFinder.Replace(this.Value, string.Empty).Contains("="))
+			if (EqualsFinder.Replace(this.Value, string.Empty).Contains("="))
 			{
 				// Can't anonymize because it contains an equals sign, so use provided label instead.
 				if (this.Name != nameIfNeeded || this.Anonymous)

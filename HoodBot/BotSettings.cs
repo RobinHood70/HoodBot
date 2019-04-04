@@ -108,7 +108,11 @@
 			File.WriteAllText(this.Location, output);
 		}
 
-		public void UpdateCurrentWiki(WikiInfo wiki) => this.CurrentName = wiki.DisplayName;
+		public void UpdateCurrentWiki(WikiInfo wiki)
+		{
+			ThrowNull(wiki, nameof(wiki));
+			this.CurrentName = wiki.DisplayName;
+		}
 		#endregion
 
 		#region Private Static Methods

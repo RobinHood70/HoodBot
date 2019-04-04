@@ -22,9 +22,9 @@
 		private static readonly string[] DestructionTypes = new string[] { "Frost", "Shock", "Fire" };
 		private static readonly HashSet<string> UpdatedParameters = new HashSet<string> { "area", "casttime", "channelTime", "cost", "desc", "desc1", "desc2", "duration", "icon", "icon2", "icon3", "id", "line", "linerank", "morph1name", "morph1id", "morph1icon", "morph1desc", "morph2name", "morph2id", "morph2icon", "morph2desc", "radius", "range", "target", "type" };
 
-		private static SortedList<string, string> iconNameCache = new SortedList<string, string>();
-		private static HashSet<string> destructionExceptions = new HashSet<string> { "Destructive Touch", "Impulse", "Wall of Elements" };
-		private static Regex skillSummaryFinder = Template.Find(TemplateName);
+		private static readonly SortedList<string, string> IconNameCache = new SortedList<string, string>();
+		private static readonly HashSet<string> DestructionExceptions = new HashSet<string> { "Destructive Touch", "Impulse", "Wall of Elements" };
+		private static readonly Regex SkillSummaryFinder = Template.Find(TemplateName);
 		#endregion
 
 		#region Fields
@@ -60,12 +60,12 @@
 		{
 			if (currentValue != null)
 			{
-				if (iconNameCache.TryGetValue(currentValue, out var oldValue))
+				if (IconNameCache.TryGetValue(currentValue, out var oldValue))
 				{
 					return oldValue;
 				}
 
-				iconNameCache.Add(currentValue, newValue);
+				IconNameCache.Add(currentValue, newValue);
 			}
 
 			return newValue;
@@ -155,8 +155,8 @@
 				this.WriteLine();
 			}
 
-			var iconChanges = new SortedList<string, string>(iconNameCache.Count);
-			foreach (var kvp in iconNameCache)
+			var iconChanges = new SortedList<string, string>(IconNameCache.Count);
+			foreach (var kvp in IconNameCache)
 			{
 				if (kvp.Key != kvp.Value)
 				{
@@ -245,12 +245,12 @@
 			}
 
 			// EsoReplacer.ClearReplacementStatus();
-			if (skillSummaryFinder.Matches(page.Text).Count != 1)
+			if (SkillSummaryFinder.Matches(page.Text).Count != 1)
 			{
 				this.Warn("Incorrect number of {{" + TemplateName + "}} matches on " + skill.PageName);
 			}
 
-			var match = skillSummaryFinder.Match(page.Text);
+			var match = SkillSummaryFinder.Match(page.Text);
 			var replacements = new HashSet<string>();
 			var template = Template.Parse(match.Value);
 
@@ -283,17 +283,11 @@
 				iconValue = iconValue.Split(':')[0];
 			}
 
-			var loopCount = destructionExceptions.Contains(skill.Name) ? 2 : 0;
+			var loopCount = DestructionExceptions.Contains(skill.Name) ? 2 : 0;
 			for (var i = 0; i <= loopCount; i++)
 			{
 				var iconName = "icon" + (i > 0 ? (i + 1).ToStringInvariant() : string.Empty);
-				var newValue = iconValue;
-				if (loopCount > 0)
-				{
-					newValue += FormattableString.Invariant($" ({DestructionTypes[i]})");
-				}
-
-				newValue = IconValueFixup(template[iconName]?.Value, newValue);
+				var newValue = IconValueFixup(template[iconName]?.Value, iconValue + (loopCount > 0 ? FormattableString.Invariant($" ({DestructionTypes[i]})") : string.Empty));
 				template.AddOrChange(iconName, newValue);
 			}
 

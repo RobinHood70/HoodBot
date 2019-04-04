@@ -10,7 +10,7 @@
 	internal class Morph
 	{
 		#region Fields
-		private static Regex highlight = new Regex(@"\|c[0-9a-fA-F]{6}|\|r");
+		private static readonly Regex Highlight = new Regex(@"\|c[0-9a-fA-F]{6}|\|r");
 		#endregion
 
 		#region Constructors
@@ -97,7 +97,7 @@
 			var isBad = false;
 			foreach (var ability in this.Abilities)
 			{
-				var split = highlight.Split(ability.Description);
+				var split = Highlight.Split(ability.Description);
 				if (split.Length != splitLength)
 				{
 					if (splitLength == 0)

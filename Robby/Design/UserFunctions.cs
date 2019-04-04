@@ -3,6 +3,8 @@
 	using System;
 	using System.Collections.Generic;
 	using RobinHood70.WikiClasses;
+	using RobinHood70.WikiCommon;
+	using static RobinHood70.WikiCommon.Globals;
 
 	#region Public Delegates
 
@@ -65,7 +67,11 @@
 
 		/// <summary>Initializes a new instance of the <see cref="UserFunctions"/> class.</summary>
 		/// <param name="site">The site object associated with this instance.</param>
-		protected UserFunctions(Site site) => this.Site = site;
+		protected UserFunctions([ValidatedNotNull] Site site)
+		{
+			ThrowNull(site, nameof(site));
+			this.Site = site;
+		}
 		#endregion
 
 		#region Public Properties

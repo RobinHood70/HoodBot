@@ -27,9 +27,9 @@
 	public class SiteCapabilities
 	{
 		#region Static Fields
-		private static Regex findRsdLink = new Regex(@"<link rel=""EditURI"" .*?href=""(?<rsdlink>.*?)""", RegexOptions.Compiled);
-		private static Regex findScript = new Regex(@"<script>.*?(wgScriptPath=""(?<scriptpath>.*?)"".*?|wgServer=""(?<serverpath>.*?)"".*?)+</script>", RegexOptions.Singleline | RegexOptions.Compiled);
-		private static Regex findPhpLink = new Regex(@"href=""(?<scriptpath>/([!#$&-;=?-\[\]_a-z~]|%[0-9a-fA-F]{2})+?)?/(api|index).php");
+		private static readonly Regex FindRsdLink = new Regex(@"<link rel=""EditURI"" .*?href=""(?<rsdlink>.*?)""", RegexOptions.Compiled);
+		private static readonly Regex FindScript = new Regex(@"<script>.*?(wgScriptPath=""(?<scriptpath>.*?)"".*?|wgServer=""(?<serverpath>.*?)"".*?)+</script>", RegexOptions.Singleline | RegexOptions.Compiled);
+		private static readonly Regex FindPhpLink = new Regex(@"href=""(?<scriptpath>/([!#$&-;=?-\[\]_a-z~]|%[0-9a-fA-F]{2})+?)?/(api|index).php");
 		#endregion
 
 		#region Fields
@@ -119,7 +119,7 @@
 					return false;
 				}
 
-				var rsdLink = findRsdLink.Match(pageData);
+				var rsdLink = FindRsdLink.Match(pageData);
 				if (rsdLink.Success)
 				{
 					var rsdLinkFixed = rsdLink.Groups["rsdlink"].Value;
@@ -144,7 +144,7 @@
 				}
 				else
 				{
-					var foundScript = findScript.Match(pageData);
+					var foundScript = FindScript.Match(pageData);
 					if (foundScript.Success)
 					{
 						// Should occur only in 1.16
@@ -153,7 +153,7 @@
 					}
 					else
 					{
-						var foundPhpLink = findPhpLink.Match(pageData);
+						var foundPhpLink = FindPhpLink.Match(pageData);
 						if (foundPhpLink.Success)
 						{
 							tryPath = fullHost + foundPhpLink.Groups["scriptpath"].Value + '/';

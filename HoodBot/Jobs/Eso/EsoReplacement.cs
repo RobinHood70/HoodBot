@@ -32,10 +32,9 @@
 
 			// Do not replace if already inside a link or template
 			var indexLinkStart = text.Substring(0, index).LastIndexOf("[[", StringComparison.Ordinal);
-			var indexLinkEnd = -1;
 			if (indexLinkStart >= 0)
 			{
-				indexLinkEnd = text.IndexOf("]]", indexLinkStart, StringComparison.Ordinal);
+				var indexLinkEnd = text.IndexOf("]]", indexLinkStart, StringComparison.Ordinal);
 				if (indexLinkStart < index && indexLinkEnd > index)
 				{
 					return text;
@@ -43,10 +42,9 @@
 			}
 
 			var indexTemplateStart = text.Substring(0, index).LastIndexOf("{{", StringComparison.Ordinal);
-			var indexTemplateEnd = -1;
 			if (indexTemplateStart >= 0)
 			{
-				indexTemplateEnd = text.IndexOf("}}", indexTemplateStart, StringComparison.Ordinal);
+				var indexTemplateEnd = text.IndexOf("}}", indexTemplateStart, StringComparison.Ordinal);
 				if (indexTemplateStart < index && indexTemplateEnd > index)
 				{
 					return text;

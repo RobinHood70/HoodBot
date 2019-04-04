@@ -6,6 +6,7 @@
 	using System.Text.RegularExpressions;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
@@ -17,7 +18,6 @@
 		AlreadyProposed,
 		FoundNoDeleteRequest,
 		NonExistent,
-		PageLoadError
 	}
 	#endregion
 
@@ -120,53 +120,50 @@
 
 		public ProposedDeletionResult CanDelete(Page page)
 		{
-			try
+			ThrowNull(page, nameof(page));
+			if (!page.IsLoaded)
 			{
-				if (!page.IsLoaded)
-				{
-					page.Load();
-				}
-
-				if (!page.Exists)
-				{
-					return ProposedDeletionResult.NonExistent;
-				}
-				else if (this.neverPropose.IsMatch(page.Text))
-				{
-					return ProposedDeletionResult.FoundNoDeleteRequest;
-				}
-				else if (this.alreadyProposed.IsMatch(page.Text))
-				{
-					return ProposedDeletionResult.AlreadyProposed;
-				}
-				else
-				{
-					return ProposedDeletionResult.Add;
-				}
+				page.Load();
 			}
-			catch
+
+			if (!page.Exists)
 			{
-				return ProposedDeletionResult.PageLoadError;
+				return ProposedDeletionResult.NonExistent;
+			}
+			else if (this.neverPropose.IsMatch(page.Text))
+			{
+				return ProposedDeletionResult.FoundNoDeleteRequest;
+			}
+			else if (this.alreadyProposed.IsMatch(page.Text))
+			{
+				return ProposedDeletionResult.AlreadyProposed;
+			}
+			else
+			{
+				return ProposedDeletionResult.Add;
 			}
 		}
 
 		public ProposedDeletionResult ProposeForDeletion(Page page, string deletionText)
 		{
-			var retval = this.CanDelete(page);
-			if (retval == ProposedDeletionResult.Add)
+			ThrowNull(page, nameof(page));
+			while (true)
 			{
 				try
 				{
-					page.Text = deletionText + page.Text;
-					page.Save("Propose for deletion", false);
+					var retval = this.CanDelete(page);
+					if (retval == ProposedDeletionResult.Add)
+					{
+						page.Text = deletionText + page.Text;
+						page.Save("Propose for deletion", false);
+					}
+
+					return retval;
 				}
-				catch
+				catch (EditConflictException)
 				{
-					return ProposedDeletionResult.PageLoadError;
 				}
 			}
-
-			return retval;
 		}
 		#endregion
 

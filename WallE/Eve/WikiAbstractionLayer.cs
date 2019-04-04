@@ -1338,7 +1338,7 @@
 		{
 			var uploadInput = new UploadInputInternal();
 			uploadInput.InitialChunk(input);
-			UploadResult result = null;
+			UploadResult result;
 			var readBytes = 0;
 			do
 			{
