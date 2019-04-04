@@ -6,8 +6,8 @@
 	public enum ReplacementAction
 	{
 		Unknown,
-		Move,
 		Skip,
+		Move,
 		ProposeForDeletion,
 	}
 
