@@ -241,7 +241,7 @@
 					// Works around the fact that .NET will hold a reference to any loaded assembly.
 					dll = Assembly.Load(File.ReadAllBytes(dllName));
 				}
-				catch
+				catch (BadImageFormatException)
 				{
 					dll = null;
 				}
@@ -338,6 +338,7 @@
 						MessageBox.Show(JobCancelled, nameof(HoodBot), MessageBoxButton.OK, MessageBoxImage.Information);
 						break;
 					}
+#pragma warning disable CA1031 // Do not catch general exception types
 					catch (Exception e)
 					{
 						success = false;
@@ -345,6 +346,7 @@
 						Debug.WriteLine(e.StackTrace);
 						break;
 					}
+#pragma warning restore CA1031 // Do not catch general exception types
 				}
 
 				if (success)
