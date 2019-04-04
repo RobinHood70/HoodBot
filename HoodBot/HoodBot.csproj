@@ -128,6 +128,7 @@
     <Compile Include="Jobs\Eso\Skill.cs" />
     <Compile Include="Jobs\Eso\Synergy.cs" />
     <Compile Include="Jobs\Eso\VariableData.cs" />
+    <Compile Include="Jobs\PageMover.cs" />
     <Compile Include="Jobs\PageMoverJob.cs" />
     <Compile Include="WikiInfo.cs" />
     <Compile Include="Jobs\TestJob.cs" />
