@@ -19,7 +19,7 @@ namespace RobinHood70.WallE.Base
 			this.PageId = pageId;
 		}
 
-		protected internal BacklinksInput(BacklinksInput input, BacklinksTypes linkType)
+		public BacklinksInput(BacklinksInput input, BacklinksTypes linkType)
 		{
 			ThrowNull(input, nameof(input));
 			this.FilterRedirects = input.FilterRedirects;
