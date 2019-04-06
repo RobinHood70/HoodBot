@@ -817,17 +817,16 @@
 
 		private PaddedString CreateParameterString(Parameter lastParam, string value, bool fromName)
 		{
-			PaddedString copyString;
-			if (lastParam == null)
+			// Need to check FullName beforehand, since it could be null if last parameter is anonymous.
+			var copyString =
+				lastParam == null ? null :
+				fromName ? lastParam.FullName : lastParam.FullValue;
+			if (copyString == null)
 			{
 				copyString = fromName ? this.DefaultNameFormat : this.DefaultValueFormat;
 			}
-			else
-			{
-				copyString = fromName ? lastParam.FullName : lastParam.FullValue;
-			}
 
-			return copyString == null ? null : new PaddedString(copyString.LeadingWhiteSpace, value, copyString.TrailingWhiteSpace);
+			return new PaddedString(copyString?.LeadingWhiteSpace, value, copyString?.TrailingWhiteSpace);
 		}
 
 		// We don't need to handle the case where IndexOf returns -1 because all paramter names are added to the list by the Sort function.
