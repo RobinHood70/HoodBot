@@ -37,7 +37,7 @@
 			this.Name = ns.Name;
 			this.CanonicalName = ns.CanonicalName;
 			this.DecoratedName = this.Id == MediaWikiNamespaces.Main ? string.Empty : this.Name + ':';
-			this.LinkName = (this.Id == MediaWikiNamespaces.File || this.Id == MediaWikiNamespaces.Category ? ":" : string.Empty) + this.DecoratedName;
+			this.LinkName = (this.IsForcedLinkSpace ? ":" : string.Empty) + this.DecoratedName;
 			this.Aliases = aliases == null ? new List<string>() : new List<string>(aliases);
 
 			this.addedNames = new HashSet<string>(site.EqualityComparerInsensitive);
@@ -81,6 +81,9 @@
 		/// <summary>Gets a value indicating whether this namespace is counted as content space.</summary>
 		/// <value><c>true</c> if this namespace is counted as content space; otherwise, <c>false</c>.</value>
 		public bool IsContentSpace { get; }
+
+		/// <summary>Gets a value indicating whether this namespace requires a colon to be prepended in order to create a link.</summary>
+		public bool IsForcedLinkSpace => this.Id == MediaWikiNamespaces.Category || this.Id == MediaWikiNamespaces.File;
 
 		/// <summary>Gets a value indicating whether this instance is subject space.</summary>
 		/// <value><c>true</c> if this instance is a subject namespace; otherwise, <c>false</c>.</value>
