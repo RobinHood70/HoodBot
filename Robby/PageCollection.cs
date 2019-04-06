@@ -221,6 +221,18 @@
 			}
 		}
 
+		/// <summary>Removes all pages from the collection where the page's <see cref="Page.Exists"/> property is false.</summary>
+		public void RemoveNonExistent()
+		{
+			for (var i = this.Count - 1; i >= 0; i--)
+			{
+				if (!this[i].Exists)
+				{
+					this.RemoveAt(i);
+				}
+			}
+		}
+
 		/// <summary>Sets the namespace limitations to new values, clearing out any previous limitations.</summary>
 		/// <param name="namespaceLimitations">The namespace limitations. If null, only the limitation type is applied; the namespace set will remain unchanged.</param>
 		/// <param name="limitationType">The type of namespace limitations to apply.</param>
@@ -366,6 +378,12 @@
 		protected override void GetBacklinks(BacklinksInput input)
 		{
 			ThrowNull(input, nameof(input));
+			var inputTitle = new TitleParts(this.Site, input.Title);
+			if (inputTitle.Namespace != MediaWikiNamespaces.File && input.LinkTypes.HasFlag(BacklinksTypes.ImageUsage))
+			{
+				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
+			}
+
 			foreach (var type in input.LinkTypes.GetUniqueFlags())
 			{
 				this.LoadPages(new BacklinksInput(input.Title, type)
