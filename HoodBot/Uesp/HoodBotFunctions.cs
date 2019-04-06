@@ -45,9 +45,9 @@
 		#endregion
 
 		#region Public Override Properties
-		public override IReadOnlyList<string> DeleteTemplates { get; } = new[] { "Proposeddeletion", "Prod", "Proposeddeletion-bot", "Speed", "Speedydeletion" };
+		public override IReadOnlyList<string> DeleteTemplates { get; } = new[] { "Proposeddeletion", "Prod", "Speed", "Speedydeletion" };
 
-		public override IReadOnlyList<string> DoNotDeleteTemplates { get; } = new[] { "Empty category", "Linked images" };
+		public override IReadOnlyList<string> DoNotDeleteTemplates { get; } = new[] { "Empty category", "Linked image" };
 
 		public override LogJobTypes LogJobTypes => LogJobTypes.Write;
 		#endregion
