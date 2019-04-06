@@ -38,6 +38,7 @@
 			ThrowNull(title, nameof(title));
 			this.Site = title.Namespace.Site;
 			this.namespaceObject = title.Namespace;
+			this.LeadingColon = title.Namespace.IsForcedLinkSpace;
 			this.PageName = title.PageName;
 			this.DisplayText = this.PipeTrick();
 			this.Normalize();
@@ -51,6 +52,7 @@
 			this.Site = title.Namespace.Site;
 			this.interwikiObject = title.Interwiki;
 			this.namespaceObject = title.Namespace;
+			this.LeadingColon = title.Namespace.IsForcedLinkSpace;
 			this.PageName = title.PageName;
 			this.Fragment = title.Fragment;
 			this.DisplayText = this.PipeTrick();
@@ -85,6 +87,7 @@
 			ThrowNull(ns, nameof(ns));
 			ThrowNull(pageName, nameof(pageName));
 			this.Namespace = ns;
+			this.LeadingColon = ns.IsForcedLinkSpace;
 			this.PageName = pageName;
 			this.DisplayParameter = displayText == null ? null : new PaddedString(displayText);
 		}
@@ -126,6 +129,7 @@
 				var title = new TitleParts(this.Site, value);
 				this.InterwikiText = title.OriginalInterwikiText;  // We're using original text here to retain casing, if desired.
 				this.NamespaceText = title.OriginalNamespaceText;
+				this.LeadingColon = title.LeadingColon;
 				this.PageName = title.OriginalPageNameText;
 				this.Fragment = title.Fragment;
 			}
@@ -188,6 +192,10 @@
 		/// <summary>Gets a value indicating whether this instance is local, either by having no interwiki value or one that represents the local wiki (e.g., :en:SomeArticle, on English Wikipedia).</summary>
 		/// <value><c>true</c> if this instance is local; otherwise, <c>false</c>.</value>
 		public bool IsLocal => this.interwikiObject?.LocalWiki ?? true;
+
+		/// <summary>Gets or sets a value indicating whether a colon should be prepended to the link for spaces like Category and File.</summary>
+		/// <value><see langword="true"/> if a colon should be prepended; otherwise, <see langword="false"/>.</value>
+		public bool LeadingColon { get; set; }
 
 		/// <summary>Gets or sets the white space displayed before the link title.</summary>
 		/// <value>The leading white space.</value>
@@ -461,7 +469,7 @@
 		/// <summary>Normalizes the display text by removing it if it matches the <see cref="FullPageName"/>.</summary>
 		public void NormalizeDisplayText()
 		{
-			if (this.DisplayParameter.Value == this.FullPageName)
+			if (this.DisplayParameter?.Value == this.FullPageName)
 			{
 				this.DisplayParameter = null;
 			}
@@ -623,6 +631,11 @@
 		#region Private Methods
 		private StringBuilder BuildFullTitle(StringBuilder builder)
 		{
+			if (this.LeadingColon)
+			{
+				builder.Append(':');
+			}
+
 			if (!string.IsNullOrEmpty(this.InterwikiText))
 			{
 				builder
