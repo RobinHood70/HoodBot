@@ -109,6 +109,7 @@
     <Compile Include="Jobs\Design\PauseToken.cs" />
     <Compile Include="Jobs\Design\PauseTokenSource.cs" />
     <Compile Include="Jobs\Design\Replacement.cs" />
+    <Compile Include="Jobs\Design\TitleJsonConverter.cs" />
     <Compile Include="Jobs\EditJob.cs" />
     <Compile Include="Jobs\EsoActiveSkillSummaries.cs" />
     <Compile Include="Jobs\EsoItemSets.cs" />

@@ -6,7 +6,6 @@
 	using System.Text.RegularExpressions;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
@@ -144,26 +143,25 @@
 			}
 		}
 
-		public ProposedDeletionResult ProposeForDeletion(Page page, string deletionText)
+		public ProposedDeletionResult ProposeForDeletion(Page page, Template deletionTemplate)
 		{
 			ThrowNull(page, nameof(page));
-			while (true)
+			var retval = this.CanDelete(page);
+			if (retval == ProposedDeletionResult.Add)
 			{
-				try
+				var deletionText = deletionTemplate.ToString();
+				var status = ChangeStatus.Unknown;
+				while (status != ChangeStatus.Success && status != ChangeStatus.EditingDisabled)
 				{
-					var retval = this.CanDelete(page);
-					if (retval == ProposedDeletionResult.Add)
-					{
-						page.Text = deletionText + page.Text;
-						page.Save("Propose for deletion", false);
-					}
-
-					return retval;
-				}
-				catch (EditConflictException)
-				{
+					page.Text =
+						page.Namespace == MediaWikiNamespaces.Template ? "<noinclude>" + deletionText + "</noinclude>" :
+						page.IsRedirect ? page.Text + '\n' + deletionText :
+						deletionText + '\n' + page.Text;
+					status = page.Save("Propose for deletion", false);
 				}
 			}
+
+			return retval;
 		}
 		#endregion
 
