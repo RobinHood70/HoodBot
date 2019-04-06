@@ -268,6 +268,12 @@
 		/// <param name="input">The input parameters.</param>
 		protected override void GetBacklinks(BacklinksInput input)
 		{
+			var inputTitle = new TitleParts(this.Site, input.Title);
+			if (inputTitle.Namespace != MediaWikiNamespaces.File && input.LinkTypes.HasFlag(BacklinksTypes.ImageUsage))
+			{
+				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
+			}
+
 			var result = this.Site.AbstractionLayer.Backlinks(input);
 			foreach (var item in result)
 			{
