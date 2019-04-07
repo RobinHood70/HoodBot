@@ -181,13 +181,15 @@
 
 			PaddedString name = null;
 			var start = this.tokenIndex;
+			var firstEquals = true;
 			while (this.tokenIndex < this.tokens.Count)
 			{
 				var token = this.tokens[this.tokenIndex];
-				if (token.Type == TokenType.Equals && !forceValue)
+				if (token.Type == TokenType.Equals && firstEquals && !forceValue)
 				{
 					name = this.GetParameterString(start, this.tokenIndex - 1, true);
 					start = this.tokenIndex + 1;
+					firstEquals = false;
 				}
 				else if (token.Type == TokenType.Pipe)
 				{

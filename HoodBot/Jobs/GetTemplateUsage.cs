@@ -100,10 +100,10 @@
 				EmptyFieldText = " "
 			};
 			var output = new List<string>(allTemplates.HeaderOrder.Count + 2)
-				{
-					"Page",
-					"Template Name"
-				};
+			{
+				"Page",
+				"Template Name"
+			};
 			output.AddRange(allTemplates.HeaderOrder.Keys);
 			csvFile.Header = output;
 
