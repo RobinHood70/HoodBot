@@ -130,15 +130,18 @@
 			foreach (var curChildItem in itemCollection)
 			{
 				var parentContainer = generator.ContainerFromItem(curChildItem) as TreeViewItem;
-				if (parentContainer.ItemContainerGenerator.ContainerFromItem(item) is TreeViewItem retval)
+				var newGenerator = parentContainer?.ItemContainerGenerator;
+				if (newGenerator != null)
 				{
-					return retval;
-				}
+					if (newGenerator.ContainerFromItem(item) is TreeViewItem retval)
+					{
+						return retval;
+					}
 
-				retval = ContainerFromItem(parentContainer.ItemContainerGenerator, parentContainer.Items, item);
-				if (retval != null)
-				{
-					return retval;
+					if (ContainerFromItem(newGenerator, parentContainer.Items, item) is TreeViewItem retval2)
+					{
+						return retval2;
+					}
 				}
 			}
 
