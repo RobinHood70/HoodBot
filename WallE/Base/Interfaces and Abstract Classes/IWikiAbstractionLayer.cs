@@ -62,9 +62,9 @@
 
 		#region Properties
 
-		/// <summary>Gets the assert string.</summary>
+		/// <summary>Gets or sets the assert string.</summary>
 		/// <value>The assert string to be used, such as "bot" or "user" for <c>assert=bot</c> or <c>assert=user</c>.</value>
-		string Assert { get; }
+		string Assert { get; set; }
 
 		/// <summary>Gets the most recent timestamp from the wiki, which can be used to indicate when an edit was started.</summary>
 		/// <value>The current timestamp.</value>
@@ -91,9 +91,9 @@
 		/// <remarks>This should not normally need to be set, but is left as settable by derived classes, should customization be needed.</remarks>
 		int SiteVersion { get; }
 
-		/// <summary>Gets the various methods to check to see if a stop has been requested.</summary>
+		/// <summary>Gets or sets the various methods to check to see if a stop has been requested.</summary>
 		/// <value>The stop methods.</value>
-		StopCheckMethods StopCheckMethods { get; }
+		StopCheckMethods StopCheckMethods { get; set; }
 
 		/// <summary>Gets a value indicating whether the site supports <see href="https://www.mediawiki.org/wiki/Manual:Maxlag_parameter">maxlag checking</see>.</summary>
 		/// <value><see langword="true" /> if the site supports <c>maxlag</c> checking; otherwise, <see langword="false" />.</value>
