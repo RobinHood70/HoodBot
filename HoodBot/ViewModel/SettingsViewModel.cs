@@ -109,20 +109,14 @@
 				return;
 			}
 
-			var wikiInfo = this.CurrentItem;
-			if (wikiInfo == null)
-			{
-				wikiInfo = new MaxLaggableWikiInfo();
-				this.BotSettings.Wikis.Add(wikiInfo);
-			}
-
+			var wikiInfo = this.CurrentItem ?? this.NewWiki();
 			wikiInfo.Api = this.Api;
 			wikiInfo.DisplayName = this.DisplayName;
 			wikiInfo.Password = this.Password;
 			wikiInfo.ReadThrottling = this.ReadThrottling;
 			wikiInfo.WriteThrottling = this.WriteThrottling;
 			wikiInfo.UserName = this.UserName;
-			this.currentItem = wikiInfo;
+
 			this.BotSettings.Save();
 		}
 		#endregion
@@ -196,6 +190,15 @@
 					this.WriteThrottling = capabilities.SupportsMaxLag ? 0 : 5000;
 				}
 			}
+		}
+
+		private WikiInfo NewWiki()
+		{
+			var retval = new MaxLaggableWikiInfo();
+			this.BotSettings.Wikis.Add(retval);
+			this.currentItem = retval;
+
+			return retval;
 		}
 
 		private void RemoveCurrent()

@@ -1,6 +1,9 @@
 ﻿namespace RobinHood70.HoodBot
 {
 	using System;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Clients;
+	using RobinHood70.WallE.Eve;
 
 	public class WikiInfo
 	{
@@ -23,6 +26,10 @@
 
 		#region Public Override Methods
 		public override string ToString() => this.DisplayName;
+		#endregion
+
+		#region Public Virtual Methods
+		public virtual IWikiAbstractionLayer GetAbstractionLayer(IMediaWikiClient client) => new WikiAbstractionLayer(client, this.Api);
 		#endregion
 	}
 }

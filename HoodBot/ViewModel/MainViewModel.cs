@@ -490,8 +490,12 @@
 			// https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/events/how-to-subscribe-to-and-unsubscribe-from-events#unsubscribing
 			if (this.site != null)
 			{
-				(this.site.AbstractionLayer as WikiAbstractionLayer).SendingRequest -= WalSendingRequest;
-				(this.site.AbstractionLayer as WikiAbstractionLayer).WarningOccurred -= WalWarningOccurred;
+				if (this.site.AbstractionLayer is WikiAbstractionLayer wal)
+				{
+					wal.SendingRequest -= WalSendingRequest;
+				}
+
+				this.site.AbstractionLayer.WarningOccurred -= WalWarningOccurred;
 				this.site.PagePreview -= this.SitePagePreview;
 				this.site.WarningOccurred -= SiteWarningOccurred;
 				this.site = null;
@@ -500,21 +504,18 @@
 
 		private void SetSite(WikiInfo wikiInfo)
 		{
-			var wal = new WikiAbstractionLayer(this.client, wikiInfo.Api)
+			var al = wikiInfo.GetAbstractionLayer(this.client);
+			al.Assert = "user";
+			al.StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery;
+			if (al is WikiAbstractionLayer wal)
 			{
-				Assert = "user",
-				StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery
-			};
-
-			if (wikiInfo is MaxLaggableWikiInfo maxlaggable)
-			{
-				wal.MaxLag = maxlaggable.MaxLag;
+				// wal.SendingRequest += WalSendingRequest;
+				// wal.ResponseReceived += WalResponseRecieved;
 			}
 
-			// wal.SendingRequest += WalSendingRequest;
-			// wal.ResponseReceived += WalResponseRecieved;
-			wal.WarningOccurred += WalWarningOccurred;
-			this.site = new Site(wal);
+			al.WarningOccurred += WalWarningOccurred;
+
+			this.site = new Site(al);
 			this.site.WarningOccurred += SiteWarningOccurred;
 			this.site.PagePreview += this.SitePagePreview;
 		}
@@ -523,10 +524,9 @@
 		{
 			// Until we get a menu going, specify manually.
 			currentViewer = currentViewer ?? this.FindPlugin<IDiffViewer>("IeDiff");
-			if (currentViewer != null)
+			if (currentViewer != null && this.site.AbstractionLayer is WikiAbstractionLayer wal)
 			{
-				var wal = this.site.AbstractionLayer as WikiAbstractionLayer;
-				var token = wal?.TokenManager.SessionToken("csrf"); // HACK: This is only necessary for browser-based diffs. Not sure how to handle it better.
+				var token = wal.TokenManager.SessionToken("csrf"); // HACK: This is only necessary for browser-based diffs. Not sure how to handle it better.
 				currentViewer.Compare(eventArgs.Page, eventArgs.EditSummary, eventArgs.Minor, token);
 				currentViewer.Wait();
 			}
