@@ -12,6 +12,11 @@
 	public abstract class EditJob : WikiJob
 	{
 		#region Constructors
+		protected EditJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
+				: base(site, asyncInfo)
+		{
+		}
+
 		protected EditJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo, params WikiTask[] tasks)
 				: base(site, asyncInfo, tasks)
 		{
