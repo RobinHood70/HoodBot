@@ -1,76 +1,76 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	public class BlockChanger
+	using System;
+	using System.Collections.Generic;
+	using System.Globalization;
+	using System.Windows;
+	using RobinHood70.HoodBot.Jobs.Design;
+	using RobinHood70.Robby;
+	using RobinHood70.WallE.Design;
+	using RobinHood70.WikiCommon;
+
+	public class BlockChanger : EditJob
 	{
-		// TODO: Rewrite this as a job.
+		#region Private Constants
+		private const int NumYears = 1;
+		#endregion
 
-		/*
-		private void BlockChanger(object sender, EventArgs e)
+		#region Fields
+		private readonly List<Block> reblocks = new List<Block>();
+		#endregion
+
+		#region Constructors
+		[JobInfo("Fix Infinite IP Blocks", "Maintenance")]
+		public BlockChanger([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
+			: base(site, asyncInfo)
 		{
-		const int NumYears = 1;
+		}
+		#endregion
 
-		this.ButtonQuick.Enabled = false;
-		var wiki = wikiInfo;
-		this.DoGlobalSetup(wiki.Uri, wiki.UserName, wiki.Password, true);
-		Global.wiki.ClearHasMessage();
+		#region Public Override Properties
+		public override string LogName => "Fix Infinite IP Blocks";
+		#endregion
 
-		try
+		#region Protected Override Methods
+		protected override void Main()
 		{
-		var blocksInput = new BlocksInput();
-		blocksInput.Properties = BlocksProperties.Expiry | BlocksProperties.Flags | BlocksProperties.Reason | BlocksProperties.Timestamp | BlocksProperties.User;
-		blocksInput.ShowAccount = false;
-		blocksInput.ShowIP = true;
-		blocksInput.ShowRange = false;
-		blocksInput.ShowTemp = false;
+			foreach (var block in this.reblocks)
+			{
+				try
+				{
+					var user = new User(this.Site, block.User);
+					if (block.StartTime <= DateTime.Now.AddYears(-NumYears))
+					{
+						user.Unblock("Remove infinite IP block");
+					}
+					else
+					{
+						user.Block("Re-block with finite block length", block.Flags, block.StartTime.AddYears(NumYears), true);
+					}
+				}
+				catch (WikiException ex)
+				{
+					MessageBox.Show(ex.Info, ex.Code);
+				}
 
-		var comparer = CultureInfo.InvariantCulture.CompareInfo;
-
-		var blocks = Global.wiki.BlocksLoad(blocksInput);
-		foreach (var block in blocks)
-		{
-		if (comparer.IndexOf(block.Reason, "proxy", CompareOptions.IgnoreCase) >= 0 && comparer.IndexOf(block.Reason, "tor", CompareOptions.IgnoreCase) == -1)
-		{
-		continue;
+				this.Progress++;
+			}
 		}
 
-		if (block.Timestamp.Value <= DateTime.Now.AddYears(-NumYears))
+		protected override void PrepareJob()
 		{
-		var unblock = new UserUnblockInput(block.User);
-		unblock.Reason = "Remove infinite IP block";
-		Global.wiki.UserUnblock(unblock);
-		}
-		else
-		{
-		var newBlock = new UserBlockInput(block.User);
-		newBlock.AllowUserTalk = block.AllowUserTalk;
-		newBlock.AnonymousOnly = block.AnonymousOnly;
-		newBlock.AutoBlock = block.AutoBlock;
-		newBlock.Expiry = block.Timestamp.Value.AddYears(NumYears);
-		newBlock.NoCreate = block.NoCreate;
-		newBlock.NoEmail = false;
-		newBlock.Reason = "Re-block with finite block length";
-		newBlock.Reblock = true;
-		newBlock.User = block.User;
+			var comparer = this.Site.Culture.CompareInfo;
+			var blocks = this.Site.LoadBlocks(Filter.Exclude, Filter.Any, Filter.Exclude, Filter.Exclude);
+			foreach (var block in blocks)
+			{
+				if (comparer.IndexOf(block.Reason, "proxy", CompareOptions.IgnoreCase) == -1 && comparer.IndexOf(block.Reason, "tor", CompareOptions.IgnoreCase) == -1)
+				{
+					this.reblocks.Add(block);
+				}
+			}
 
-		Global.wiki.UserBlock(newBlock);
+			this.ProgressMaximum = this.reblocks.Count;
 		}
-
-		FormTestBed.CheckTalkPage();
-		}
-		}
-		catch (WikiException ex)
-		{
-		MessageBox.Show(ex.ErrorInfo, ex.ErrorCode);
-		}
-
-		Global.wiki.SiteLogout();
-		this.ButtonQuick.Enabled = true;
-		}
-
-		private static void CheckTalkPage()
-		{
-		var userInfo = Global.wiki.UserGetInfo(new UserInfoInput(UserInfoProperties.HasMsg));
-		}
-		*/
+		#endregion
 	}
 }
