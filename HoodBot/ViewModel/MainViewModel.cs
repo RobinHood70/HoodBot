@@ -19,6 +19,7 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
 	using RobinHood70.WallE.Eve;
+	using RobinHood70.WikiClasses.Parser;
 	using static System.Environment;
 	using static RobinHood70.HoodBot.Properties.Resources;
 	using static RobinHood70.WikiCommon.Globals;
@@ -156,6 +157,8 @@
 		}
 
 		public RelayCommand Stop => new RelayCommand(this.CancelJobs);
+
+		public RelayCommand Test => new RelayCommand(this.RunTest);
 
 		public DateTime? UtcEta
 		{
@@ -499,6 +502,26 @@
 				this.site.PagePreview -= this.SitePagePreview;
 				this.site.WarningOccurred -= SiteWarningOccurred;
 				this.site = null;
+			}
+		}
+
+		private void RunTest()
+		{
+			// var testString = "Some Text {{Trail|Here}} [[Oblivion:Quests|Simple Link]]";
+			var testString = "Some Text {{Trail|Here}}{{Trail|named=There}} [[Oblivion:Quests|Simple Link]] {{Trail|[[Skyrim:Places|Embedded Link]]}} [[Image:Example.png|60px|Text with a [[Link]]]] More Text <nowiki>[[Not a link]]</nowiki><!--[[Also not a link]]--><includeonly>[[Is a link if told we're transcluding|link=Daggerfall:Daggerfall]]</includeonly> Are we done yet?";
+			var nodes = WikiTextParser.Parse(testString, true);
+			var xml = new XmlVisitor(nodes, true);
+			Debug.WriteLine("Original text: " + testString);
+			Debug.WriteLine(xml.Build());
+			var returnText = new WikiTextVisitor(false).Build(nodes);
+			if (testString == returnText)
+			{
+				Debug.WriteLine("Full match!");
+			}
+			else
+			{
+				Debug.WriteLine(testString);
+				Debug.WriteLine(returnText);
 			}
 		}
 

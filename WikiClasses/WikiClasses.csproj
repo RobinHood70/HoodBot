@@ -47,6 +47,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -66,6 +67,11 @@
     <Compile Include="Parameter.cs" />
     <Compile Include="ParameterCollection.cs" />
     <Compile Include="ParameterParser.cs" />
+    <Compile Include="Parser\NameValuePiece.cs" />
+    <Compile Include="Parser\NodeCollection.cs" />
+    <Compile Include="Parser\Nodes\LinkNode.cs" />
+    <Compile Include="Parser\WikiTextVisitor.cs" />
+    <Compile Include="Parser\WikiTextParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -77,13 +83,27 @@
     <Compile Include="SectionedPage.cs" />
     <Compile Include="Template.cs" />
     <Compile Include="WikiLink.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\WikiCommon\WikiCommon.csproj">
-      <Project>{64878636-cb8c-434e-a03d-b3946216fc7f}</Project>
-      <Name>WikiCommon</Name>
-      <Private>False</Private>
-    </ProjectReference>
+    <Compile Include="Parser\Extensions.cs" />
+    <Compile Include="Parser\Nodes\CommentNode.cs" />
+    <Compile Include="Parser\Nodes\EqualsNode.cs" />
+    <Compile Include="Parser\Nodes\TagNode.cs" />
+    <Compile Include="Parser\Nodes\HeaderNode.cs" />
+    <Compile Include="Parser\Nodes\IgnoreNode.cs" />
+    <Compile Include="Parser\Nodes\INodeBase.cs" />
+    <Compile Include="Parser\IVisitor.cs" />
+    <Compile Include="Parser\Nodes\ParameterNode.cs" />
+    <Compile Include="Parser\Nodes\TemplateNode.cs" />
+    <Compile Include="Parser\Nodes\TextNode.cs" />
+    <Compile Include="Parser\ParserValue.cs" />
+    <Compile Include="Parser\Piece.cs" />
+    <Compile Include="Parser\StackElements\HeaderElement.cs" />
+    <Compile Include="Parser\StackElements\LinkElement.cs" />
+    <Compile Include="Parser\StackElements\PairedElement.cs" />
+    <Compile Include="Parser\StackElements\RootElement.cs" />
+    <Compile Include="Parser\StackElements\StackElement.cs" />
+    <Compile Include="Parser\StackElements\TemplateElement.cs" />
+    <Compile Include="Parser\WikiStack.cs" />
+    <Compile Include="Parser\XmlVisitor.cs" />
   </ItemGroup>
   <ItemGroup>
     <AdditionalFiles Include="..\stylecop.json">
@@ -106,6 +126,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WikiCommon\WikiCommon.csproj">
+      <Project>{64878636-cb8c-434e-a03d-b3946216fc7f}</Project>
+      <Name>WikiCommon</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
