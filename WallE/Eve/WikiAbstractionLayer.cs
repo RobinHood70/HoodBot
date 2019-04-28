@@ -932,7 +932,13 @@
 		/// <summary>Logs the user out using the <see href="https://www.mediawiki.org/wiki/API:Logout">Logout</see> API module.</summary>
 		public void Logout()
 		{
-			new ActionLogout(this).Submit(NullObject.Null);
+			var input = new LogoutInput();
+			if (this.SiteVersion >= 134)
+			{
+				input.Token = this.TokenManager.SessionToken(TokensInput.Csrf);
+			}
+
+			new ActionLogout(this).Submit(input);
 			this.Client.SaveCookies();
 			this.UserId = 0;
 			this.UserName = null;

@@ -81,6 +81,7 @@
     <Compile Include="Base\InterwikiBacklinksItem.cs" />
     <Compile Include="Base\LanguageBacklinksItem.cs" />
     <Compile Include="Base\LogEventsItem.cs" />
+    <Compile Include="Base\LogoutInput.cs" />
     <Compile Include="Base\ManageTagsInput.cs" />
     <Compile Include="Base\ManageTagsResult.cs" />
     <Compile Include="Base\MergeHistoryInput.cs" />
