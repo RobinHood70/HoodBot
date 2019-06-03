@@ -292,7 +292,7 @@
 				{
 					var last = piece[piece.Count - 1] as TextNode;
 					var lastValue = last.Text;
-					if (lastValue.SpanReverse(CommentWhiteSpace) == wsLength)
+					if (lastValue.SpanReverse(CommentWhiteSpace, lastValue.Length) == wsLength)
 					{
 						last.Text = lastValue.Substring(0, lastValue.Length - wsLength);
 					}
@@ -413,14 +413,14 @@
 
 		private void ParseLineStart()
 		{
-			var count = this.Text.Span('=', this.Index, 6);
+			var equalsCount = this.Text.Span('=', this.Index, 6);
 
 			// DWIM (for count==1 check): This looks kind of like a name/value separator. Let's let the equals handler have it and break the potential heading. This is heuristic, but AFAICT the methodsfor completely correct disambiguation are very complex.
 			// Using LastIndexOf as a very minor optimization, since we know the = is added last for a PairedElement, but won't break if this is not the case in the future.
-			if (count > 1 || (count == 1 && this.Top.SearchString.LastIndexOf('=') == -1))
+			if (equalsCount > 1 || (equalsCount == 1 && this.Top.SearchString.LastIndexOf('=') == -1))
 			{
-				this.Push(new HeaderElement(this, count));
-				this.Index += count;
+				this.Push(new HeaderElement(this, equalsCount));
+				this.Index += equalsCount;
 			}
 		}
 		#endregion
