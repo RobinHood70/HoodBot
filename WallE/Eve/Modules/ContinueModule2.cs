@@ -67,10 +67,10 @@ namespace RobinHood70.WallE.Eve.Modules
 			if (!this.supportsBatch)
 			{
 				// For pre-MW 1.26, figure out whether or not the batch is complete manually. We don't need to worry about the case of no continue entries here, since we should never be executing this code in that event.
-				this.BatchComplete = this.ContinueEntries.Count <= 2 && this.ContinueEntries.ContainsKey(this.GeneratorContinue);
+				this.BatchComplete = (this.ContinueEntries.Count <= 2) && this.ContinueEntries.ContainsKey(this.GeneratorContinue);
 			}
 #if DEBUG
-			else if (this.BatchComplete != this.ContinueEntries.Count <= 2 && this.ContinueEntries.ContainsKey(this.GeneratorContinue))
+			else if (this.BatchComplete != (this.ContinueEntries.Count <= 2) && this.ContinueEntries.ContainsKey(this.GeneratorContinue))
 			{
 				// This is a temporary check against the method we're using in the Else block for MW 1.21-1.25.
 				Debug.WriteLine($"Calculated BatchComplete does not match returned batch complete:");

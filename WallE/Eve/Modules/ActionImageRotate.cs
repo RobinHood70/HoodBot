@@ -31,7 +31,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(request, nameof(request));
 			ThrowNull(input, nameof(input));
 			request
-				.Add("rotation", ((input.Rotation % 360) + 360) % 360) // Automatically adjusts negative and out-of-range values
+				.Add("rotation", (input.Rotation % 360 + 360) % 360) // Automatically adjusts negative and out-of-range values
 				.AddHidden("token", input.Token);
 		}
 
