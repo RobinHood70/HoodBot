@@ -221,11 +221,12 @@
 
 			var insertPos = taskSection.Index + taskSection.Length;
 			taskSection = TaskLogFinder.Match(this.StatusPage.Text, insertPos);
+			var previousTask = this.StatusPage.Text.Substring(insertPos, taskSection.Index - insertPos);
 			var currentTask = status + "\n\n";
 			this.StatusPage.Text = this.StatusPage.Text
 				.Remove(insertPos, taskSection.Index - insertPos)
 				.Insert(insertPos, currentTask);
-			return taskSection.Value == currentTask ? ChangeStatus.NoEffect : ChangeStatus.Success;
+			return previousTask == currentTask ? ChangeStatus.NoEffect : ChangeStatus.Success;
 		}
 		#endregion
 
@@ -262,7 +263,7 @@
 				if (result == ChangeStatus.NoEffect &&
 					Parameter.IsNullOrEmpty(testTemplate["3"]) &&
 					testTemplate["1"]?.Value == this.lastLogInfo.Title &&
-					(testTemplate["info"]?.Value ?? string.Empty) == (this.lastLogInfo.Details ?? string.Empty))
+					((testTemplate["info"]?.Value ?? string.Empty) == (this.lastLogInfo.Details ?? string.Empty)))
 				{
 					// If the last job was the same as this one, and is unfinished, then assume we're resuming the job and don't update.
 					return;
