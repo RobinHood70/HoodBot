@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<RuleSet Name="HoodBot Custom Rules" Description="Code analysis rules for projects which have been released or are about to be." ToolsVersion="15.0">
+<RuleSet Name="HoodBot Custom Rules" Description="Code analysis rules for projects which have been released or are about to be." ToolsVersion="16.0">
   <IncludeAll Action="Warning" />
   <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
     <Rule Id="CA1009" Action="None" />
@@ -94,6 +94,7 @@
     <Rule Id="IDE0043" Action="Info" />
     <Rule Id="IDE0044" Action="Info" />
     <Rule Id="IDE0044WithoutSuggestion" Action="Info" />
+    <Rule Id="IDE0058" Action="None" />
     <Rule Id="IDE1005" Action="Info" />
     <Rule Id="IDE1005WithoutSuggestion" Action="Info" />
     <Rule Id="IDE1006" Action="Info" />
