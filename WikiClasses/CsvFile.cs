@@ -349,7 +349,7 @@
 		/// <param name="encoding">The encoding.</param>
 		public void WriteFile(string fileName, Encoding encoding)
 		{
-			using (var fileStream = File.OpenWrite(fileName))
+			using (var fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None))
 			using (var writeStream = new StreamWriter(fileStream, encoding))
 			{
 				this.WriteText(writeStream);
@@ -438,7 +438,8 @@
 				}
 			}
 
-			textWriter.WriteLine(string.Join(this.FieldSeparator.ToString(CultureInfo.InvariantCulture), rewriteFields));
+			var line = string.Join(this.FieldSeparator.ToString(CultureInfo.InvariantCulture), rewriteFields);
+			textWriter.WriteLine(line);
 		}
 
 		private void ResetHeader()
