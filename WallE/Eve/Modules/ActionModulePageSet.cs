@@ -232,7 +232,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					this.ContinueModule.Deserialize(parent);
 				}
 
-				if (!this.done && this.ContinueModule.BatchComplete && !this.ContinueModule.Continues)
+				if (!this.done && !this.ContinueModule.BatchComplete && !this.ContinueModule.Continues)
 				{
 					this.offset += this.CurrentListSize;
 				}
