@@ -2,8 +2,10 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Text;
 	using RobinHood70.HoodBot.Jobs.Design;
+	using RobinHood70.HoodBot.Jobs.Eso;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -13,10 +15,6 @@
 
 	internal class EsoNpcs : EditJob
 	{
-		#region Constants
-		private const string Query = "SELECT id, name, gender, ppClass FROM uesp_esolog.npc WHERE level != -1";
-		#endregion
-
 		#region Fields
 		private readonly HashSet<string> places = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 		private PageCollection pages;
@@ -27,15 +25,6 @@
 		public EsoNpcs(Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
 		{
-		}
-		#endregion
-
-		#region Private Enumerations
-		private enum Gender
-		{
-			Unknown = 0,
-			Female = 1,
-			Male = 2
 		}
 		#endregion
 
@@ -52,7 +41,15 @@
 			{
 				foreach (var page in this.pages)
 				{
-					page.Save("Create NPC page", true, Tristate.True, true);
+					try
+					{
+						page.Save("Create NPC page", true, Tristate.True, false);
+					}
+					catch (WikiException e) when (e.Code == "pagedeleted")
+					{
+						this.WriteLine($"* [[{page.FullPageName}|{page.LabelName}]] is blank, but has previously been deleted, so was not created again.");
+					}
+
 					this.Progress++;
 				}
 			}
@@ -108,12 +105,21 @@
 			sb.AppendLine("==Bugs==\n{{Bug|Bug description}}\n** Workaround\n-->");
 			sb.AppendLine("\n{{Stub|NPC}}");
 
-			return new Page(this.Site, name) { Text = sb.ToString() };
+			var retval = new Page(this.Site, name) { Text = sb.ToString() };
+			retval.SetMinimalStartTimestamp();
+
+			return retval;
 		}
 
 		private void CreatePages(TitleCollection allNpcs)
 		{
-			var filteredNpcList = this.GetNpcsFromDatabase(allNpcs);
+			this.StatusWriteLine("Getting NPC data from database");
+			var unfilteredNpcList = EsoGeneral.GetNpcsFromDatabase();
+			var filteredNpcList = this.FilterNpcList(allNpcs, unfilteredNpcList);
+			var locQuery = $"SELECT DISTINCT npcId, zone FROM location USE INDEX (find_npcloc) WHERE npcId IN ({string.Join(",", filteredNpcList)})";
+			this.GetLocationData(locQuery, filteredNpcList);
+			this.GetPlacesData(filteredNpcList);
+
 			var newNpcData = this.FilterNewNpcs(filteredNpcList);
 
 			this.StatusWriteLine("Checking for existing pages");
@@ -172,6 +178,27 @@
 			}
 		}
 
+		private Dictionary<long, NPCData> FilterNpcList(TitleCollection allNpcs, Dictionary<long, NPCData> unfilteredNpcList)
+		{
+			var filteredNpcList = new Dictionary<long, NPCData>();
+			foreach (var npc in unfilteredNpcList)
+			{
+				if (!allNpcs.Contains("Online:" + npc.Value.Name))
+				{
+					if (filteredNpcList.ContainsKey(npc.Key))
+					{
+						this.Warn($"Duplicate entry: {npc.Value.Name}");
+					}
+					else
+					{
+						filteredNpcList.Add(npc.Key, npc.Value);
+					}
+				}
+			}
+
+			return filteredNpcList;
+		}
+
 		private IReadOnlyDictionary<string, NPCData> FilterNewNpcs(Dictionary<long, NPCData> tempNpcData)
 		{
 			var newNpcData = new SortedDictionary<string, NPCData>();
@@ -194,41 +221,8 @@
 			}
 		}
 
-		private Dictionary<long, NPCData> GetNpcsFromDatabase(TitleCollection allNPCs)
+		private void GetPlacesData(Dictionary<long, NPCData> tempNpcData)
 		{
-			this.StatusWriteLine("Getting NPC data from database");
-			var limit = new SortedSet<long>();
-			var tempNpcData = new Dictionary<long, NPCData>();
-			foreach (var row in Eso.EsoGeneral.RunEsoQuery(Query))
-			{
-				var name = ((string)row["name"]).TrimEnd(); // Corrects a single record where the field has a tab at the end of it - seems to be an ESO problem
-				var found = allNPCs.Contains("Online:" + name);
-				if (!found)
-				{
-					var id = (long)row["id"];
-					var npcData = new NPCData(name, (sbyte)row["gender"], (string)row["ppClass"]);
-					if (limit.Contains(id))
-					{
-						this.Warn($"Duplicate entry: {npcData.Name}");
-					}
-					else
-					{
-						tempNpcData.Add(id, npcData);
-						limit.Add(id);
-					}
-				}
-			}
-
-			this.StatusWriteLine("Getting location data");
-
-			// MySQL doesn't always play nice with the combination of DISTINCT and ORDER BY, so we use DISTINCT only, then sort the results ourselves later on.
-			foreach (var row in Eso.EsoGeneral.RunEsoQuery($"SELECT DISTINCT npcId, zone FROM location WHERE npcId IN ({string.Join(",", limit)})"))
-			{
-				var loc = (string)row["zone"];
-				var npc = tempNpcData[(long)row["npcId"]];
-				npc.Locations.Add(loc);
-			}
-
 			this.GetPlaces();
 			foreach (var npcEntry in tempNpcData)
 			{
@@ -242,36 +236,34 @@
 					}
 				}
 			}
-
-			return tempNpcData;
 		}
-		#endregion
 
-		#region Private Classes
-		private class NPCData
+		private void GetLocationData(string query, Dictionary<long, NPCData> tempNpcData)
 		{
-			#region Constructors
-			public NPCData(string name, sbyte gender, string npcClass)
+			this.StatusWriteLine("Getting location data");
+
+			for (var retries = 0; retries < 3; retries++)
 			{
-				this.Name = name;
-				this.Gender = (Gender)gender;
-				this.Class = npcClass;
+				try
+				{
+					//// MySQL doesn't always play nice with the combination of DISTINCT and ORDER BY, so we use no sorting/uniqueness checks at all, then deal with both ourselves.
+					foreach (var row in EsoGeneral.RunQuery(query))
+					{
+						var loc = (string)row["zone"];
+						var npc = tempNpcData[(long)row["npcId"]];
+						if (!npc.Locations.Contains(loc))
+						{
+							npc.Locations.Add(loc);
+						}
+					}
+
+					break;
+				}
+				catch (Exception e)
+				{
+					Debug.WriteLine(e.GetType().FullName);
+				}
 			}
-			#endregion
-
-			#region Public Properties
-			public string Class { get; }
-
-			public Gender Gender { get; }
-
-			public List<string> Locations { get; } = new List<string>();
-
-			public string Name { get; }
-			#endregion
-
-			#region Public Override Methods
-			public override string ToString() => this.Name;
-			#endregion
 		}
 		#endregion
 	}

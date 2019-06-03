@@ -7,10 +7,15 @@
 		// This is a fugly way to fix up the descriptions, but it simplifies things enormously.
 		public static Dictionary<int, string> IdReplacements { get; } = new Dictionary<int, string>
 		{
+			[23234] = "Transform yourself into pure energy and flash forward, stunning enemies near origin location for |cffffff1|r seconds. Casting again within |cffffff4|r seconds costs |cffffff50|r% more Magicka.",
 			[24574] = "Place a rune of protection on yourself for |cffffff1|r minutes. While active, the next enemy to attack you is imprisoned in a constricting sphere of dark magic, stunning them after a short delay for |cffffff3.5|r seconds. This stun cannot be blocked.",
 			[28304] = "Surprise an enemy with a deep lunge, dealing |cffffff$1|r Physical Damage and reducing their Movement Speed by |cffffff60|r% for |cffffff1|r seconds. Also afflicts the enemy with Minor Maim, reducing their damage done by |cffffff15|r% for |cffffff9|r seconds.",
-			[38096] = "Conceal two sinister traps, one at the targeted location and another next to you, which take |cffffff2|r seconds to arm and last for |cffffff60|r seconds. When each trap is triggered, a dark spirit is summoned to terrify up to |cffffff6|r enemies, causing them to flee in fear for |cffffff4|r seconds. After the fear ends, their Movement Speed is reduced by |cffffff50|r% for |cffffff4|r seconds.",
+			/* [37475] = "Conceal two sinister traps, one at the targeted location and another next to you, which take |cffffff2|r seconds to arm and last for |cffffff30|r seconds. When each trap is triggered, a dark spirit is summoned to terrify up to |cffffff6|r enemies, causing them to cower in fear for |cffffff4|r seconds. After the fear ends, their Movement Speed is reduced by |cffffff0|r% for |cffffff0|r seconds.",
+			[38080] = "Conceal two sinister traps, one at the targeted location and another next to you, which take |cffffff2|r seconds to arm and last for |cffffff40|r seconds. When each trap is triggered, a dark spirit is summoned to terrify up to |cffffff6|r enemies, causing them to cower in fear for |cffffff4|r seconds. After the fear ends, their Movement Speed is reduced by |cffffff0|r% for |cffffff0|r seconds.",
+			[38088] = "Conceal two sinister traps, one at the targeted location and another next to you, which take |cffffff2|r seconds to arm and last for |cffffff50|r seconds. When each trap is triggered, a dark spirit is summoned to terrify up to |cffffff6|r enemies, causing them to cower in fear for |cffffff4|r seconds. After the fear ends, their Movement Speed is reduced by |cffffff0|r% for |cffffff0|r seconds.", */
+			[38096] = "Conceal two sinister traps, one at the targeted location and another next to you, which take |cffffff2|r seconds to arm and last for |cffffff60|r seconds. When each trap is triggered, a dark spirit is summoned to terrify up to |cffffff6|r enemies, causing them to cower in fear for |cffffff4|r seconds.",
 			[39104] = "Pounce on an enemy with primal fury, dealing |cffffff$1|r Physical Damage. Pouncing from at least |cffffff10|r meters away adds |cffffff1|r seconds to the duration of your Werewolf Transformation.",
+			[103710] = "Bend time and space around you to gain Major Expedition for |cffffff4|r seconds and Minor Force for |cffffff12|r seconds, increasing your Movement Speed by |cffffff30|r% and Critical Damage by |cffffff10|r%. Activating this ability removes all snares and immobilizations from you and grants immunity to them for |cffffff1|r seconds.",
 		};
 
 		// Although these could be private to specific classes, they're put here in order to have a centralized location where they can easily be found.
@@ -59,7 +64,9 @@
 			["Hireling - Enchanting"] = "Hireling (Enchanting)",
 			["Hireling - Provisioning"] = "Hireling (Provisioning)",
 			["Ruination"] = "Ruination (skill)",
+			["Skeletal Mage"] = "Skeletal Mage (skill)",
 			["Spectral Assassin"] = "Spectral Assassin (skill)",
+			["Spirit Mender"] = "Spirit Mender (skill)",
 			["Woodworking"] = "Woodworking (skill)",
 		};
 
@@ -95,6 +102,7 @@
 		{
 			["% ."] = "%.",
 			["minute When triggered"] = "minute. When triggered",
+			["|cffffff|ce60000CRIMINAL ACT|r|r"] = "{{FC|#E60000|'''CRIMINAL ACT'''}}.",
 		};
 
 		public static IList<string> TextReplacementsUsed { get; } = new List<string>();

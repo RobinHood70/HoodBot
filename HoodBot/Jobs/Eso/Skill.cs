@@ -22,7 +22,7 @@
 		#endregion
 
 		#region Internal Static Properties
-		internal static Regex Highlight { get; } = new Regex(@"\|c[0-9a-f]{6}|\|r");
+		internal static Regex Highlight => new Regex(@"\|c[0-9a-fA-F]{6}|\|r");
 		#endregion
 
 		#region Public Override Methods

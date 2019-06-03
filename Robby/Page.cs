@@ -223,11 +223,8 @@
 			var changeArgs = new PageTextChangeArgs(this, nameof(this.Save), editSummary, isMinor, isBotEdit, recreateIfJustDeleted);
 			return this.Site.PublishPageTextChange(
 				changeArgs,
-				() =>
-				{
-					// Modification status re-checked here because a subscriber may have reverted the page.
-					return
-						!this.TextModified ? ChangeStatus.NoEffect :
+				() => // Modification status re-checked here because a subscriber may have reverted the page.
+					!this.TextModified ? ChangeStatus.NoEffect :
 						this.Site.AbstractionLayer.Edit(new EditInput(this.FullPageName, this.Text)
 						{
 							BaseTimestamp = this.Revisions.Current?.Timestamp,
@@ -237,9 +234,11 @@
 							Recreate = changeArgs.RecreateIfJustDeleted,
 							Summary = changeArgs.EditSummary,
 							RequireNewPage = createOnly,
-						}).Result == "Success" ? ChangeStatus.Success : ChangeStatus.Failure;
-				});
+						}).Result == "Success" ? ChangeStatus.Success : ChangeStatus.Failure);
 		}
+
+		/// <summary>Sets <see cref="StartTimestamp"/> to 2000-01-01. This allows the Save function to detect if a page has ever been deleted.</summary>
+		public void SetMinimalStartTimestamp() => this.StartTimestamp = new DateTime(2000, 1, 1);
 		#endregion
 
 		#region Internal Methods

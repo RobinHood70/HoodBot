@@ -5,14 +5,9 @@
 	using System.Data;
 	using System.Diagnostics;
 	using System.Globalization;
-	using System.Text.RegularExpressions;
 
 	internal class Morph
 	{
-		#region Fields
-		private static readonly Regex Highlight = new Regex(@"\|c[0-9a-fA-F]{6}|\|r");
-		#endregion
-
 		#region Constructors
 		public Morph(IDataRecord data)
 		{
@@ -97,7 +92,7 @@
 			var isBad = false;
 			foreach (var ability in this.Abilities)
 			{
-				var split = Highlight.Split(ability.Description);
+				var split = Skill.Highlight.Split(ability.Description);
 				if (split.Length != splitLength)
 				{
 					if (splitLength == 0)

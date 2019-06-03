@@ -11,6 +11,15 @@
 	using RobinHood70.WikiClasses;
 	using static RobinHood70.WikiCommon.Globals;
 
+	#region Public Enumerations
+	public enum Gender
+	{
+		Unknown = 0,
+		Female = 1,
+		Male = 2
+	}
+	#endregion
+
 	internal static class EsoGeneral
 	{
 		#region Private Constants
@@ -55,6 +64,20 @@
 		#endregion
 
 		#region Public Methods
+		public static Dictionary<long, NPCData> GetNpcsFromDatabase()
+		{
+			var tempNpcData = new Dictionary<long, NPCData>();
+			foreach (var row in RunQuery("SELECT id, name, gender, ppClass FROM uesp_esolog.npc WHERE level != -1"))
+			{
+				var name = ((string)row["name"]).TrimEnd(); // TrimEnd() corrects a single record where the field has a tab at the end of it - seems to be an ESO problem
+				var id = (long)row["id"];
+				var npcData = new NPCData(name, (sbyte)row["gender"], (string)row["ppClass"]);
+				tempNpcData.Add(id, npcData);
+			}
+
+			return tempNpcData;
+		}
+
 		public static string GetPatchVersion(WikiJob job)
 		{
 			if (patchVersion == null)
@@ -71,7 +94,7 @@
 		public static string HarmonizeDescription(string desc) => SpaceFixer.Replace(BonusFinder.Replace(desc, string.Empty), " ");
 
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "No user input.")]
-		public static IEnumerable<IDataRecord> RunEsoQuery(string query)
+		public static IEnumerable<IDataRecord> RunQuery(string query)
 		{
 			using (var connection = new MySqlConnection(EsoLogConnectionString))
 			{

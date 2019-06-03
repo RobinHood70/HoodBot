@@ -186,7 +186,7 @@
 			var errors = false;
 			T skill = null;
 			string lastSkill = null; // We use a string for comparison because the skill itself will sometimes massage the data.
-			foreach (var row in EsoGeneral.RunEsoQuery(this.Query))
+			foreach (var row in EsoGeneral.RunQuery(this.Query))
 			{
 				var uniqueName = (string)row["baseName"] + "::" + (string)row["skillTypeName"];
 				if (lastSkill != uniqueName)
