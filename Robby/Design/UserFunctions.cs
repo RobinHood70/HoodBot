@@ -133,8 +133,8 @@
 		/// <summary>Initializes any data required to publish results to the specified destination.</summary>
 		/// <param name="destination">The destination.</param>
 		/// <param name="user">The user.</param>
-		/// <param name="title">The title.</param>
-		public virtual void InitializeResult(ResultDestination destination, string user, string title)
+		/// <param name="subject">The title.</param>
+		public virtual void InitializeResult(ResultDestination destination, string user, string subject)
 		{
 		}
 

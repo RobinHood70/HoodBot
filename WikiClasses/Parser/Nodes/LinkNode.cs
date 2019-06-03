@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace RobinHood70.WikiClasses.Parser.Nodes
+﻿namespace RobinHood70.WikiClasses.Parser.Nodes
 {
+	using System.Collections.Generic;
+
 	public class LinkNode : INodeBase
 	{
 		#region Constructors

@@ -48,7 +48,6 @@
 			if (!this.valuesOnly)
 			{
 				this.builder.Append(node.Value);
-
 			}
 		}
 
