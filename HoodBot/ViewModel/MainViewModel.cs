@@ -510,9 +510,9 @@
 			// var testString = "Some Text {{Trail|Here}} [[Oblivion:Quests|Simple Link]]";
 			var testString = "Some Text {{Trail|Here}}{{Trail|named=There}} [[Oblivion:Quests|Simple Link]] {{Trail|[[Skyrim:Places|Embedded Link]]}} [[Image:Example.png|60px|Text with a [[Link]]]] More Text <nowiki>[[Not a link]]</nowiki><!--[[Also not a link]]--><includeonly>[[Is a link if told we're transcluding|link=Daggerfall:Daggerfall]]</includeonly> Are we done yet?";
 			var nodes = WikiTextParser.Parse(testString, true);
-			var xml = new XmlVisitor(nodes, true);
+			var xml = new XmlVisitor(true);
 			Debug.WriteLine("Original text: " + testString);
-			Debug.WriteLine(xml.Build());
+			Debug.WriteLine(xml.Build(nodes));
 			var returnText = new WikiTextVisitor(false).Build(nodes);
 			if (testString == returnText)
 			{
@@ -532,8 +532,8 @@
 			al.StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery;
 			if (al is WikiAbstractionLayer wal)
 			{
-				// wal.SendingRequest += WalSendingRequest;
-				// wal.ResponseReceived += WalResponseRecieved;
+				wal.SendingRequest += WalSendingRequest;
+				//// wal.ResponseReceived += WalResponseRecieved;
 			}
 
 			al.WarningOccurred += WalWarningOccurred;

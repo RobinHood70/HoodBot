@@ -11,17 +11,12 @@
 	{
 		#region Fields
 		private readonly StringBuilder builder = new StringBuilder();
-		private readonly NodeCollection nodes;
 		private readonly bool prettyPrint;
 		private int indent;
 		#endregion
 
 		#region Constructors
-		public XmlVisitor(NodeCollection nodes, bool prettyPrint)
-		{
-			this.nodes = nodes;
-			this.prettyPrint = prettyPrint;
-		}
+		public XmlVisitor(bool prettyPrint) => this.prettyPrint = prettyPrint;
 		#endregion
 
 		#region IVisitor Methods
@@ -132,10 +127,10 @@
 		#endregion
 
 		#region Public Methods
-		public string Build()
+		public string Build(NodeCollection nodes)
 		{
 			this.BuildTagOpen("root", null, false);
-			this.nodes.Accept(this);
+			nodes.Accept(this);
 			this.BuildTagClose("root");
 
 			return this.builder.ToString();
