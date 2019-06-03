@@ -211,16 +211,7 @@
 			var textEnd = end;
 			if (parseWhiteSpace)
 			{
-				while (textStart <= end && this.tokens[textStart].Type == TokenType.WhiteSpace)
-				{
-					textStart++;
-				}
-
-				if (textStart > start)
-				{
-					retval.LeadingWhiteSpace = this.GetString(start, textStart - 1);
-				}
-
+				// Do end before start so that if all we have is whitespace, it's assumed to be trailing (e.g., a blank line) rather than leading.
 				while (textEnd >= textStart && this.tokens[textEnd].Type == TokenType.WhiteSpace)
 				{
 					textEnd--;
@@ -229,6 +220,16 @@
 				if (textEnd < end)
 				{
 					retval.TrailingWhiteSpace = this.GetString(textEnd + 1, end);
+				}
+
+				while (textStart <= textEnd && this.tokens[textStart].Type == TokenType.WhiteSpace)
+				{
+					textStart++;
+				}
+
+				if (textStart > start)
+				{
+					retval.LeadingWhiteSpace = this.GetString(start, textStart - 1);
 				}
 			}
 
