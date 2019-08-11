@@ -132,6 +132,7 @@
     <Compile Include="Jobs\Eso\Synergy.cs" />
     <Compile Include="Jobs\Eso\VariableData.cs" />
     <Compile Include="Jobs\ManipulateImageCategory.cs" />
+    <Compile Include="Jobs\AddDeckCodes.cs" />
     <Compile Include="Jobs\OneOffJob.cs" />
     <Compile Include="Jobs\PageMover.cs" />
     <Compile Include="Jobs\PageMoverJob.cs" />
