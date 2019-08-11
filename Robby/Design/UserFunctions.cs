@@ -88,10 +88,6 @@
 		/// <value>The results page.</value>
 		public Page ResultsPage { get; protected set; }
 
-		/// <summary>Gets the site associated with this instance.</summary>
-		/// <value>The site associated with this instance.</value>
-		public Site Site { get; }
-
 		/// <summary>Gets or sets the user's status page.</summary>
 		/// <value>The status page.</value>
 		public Page StatusPage { get; protected set; }
@@ -115,6 +111,16 @@
 		/// <summary>Gets the job types that should be logged.</summary>
 		/// <value>The job types to be logged.</value>
 		public abstract LogJobTypes LogJobTypes { get; }
+
+		/// <summary>Gets a list of pages that function as talk pages, but are located outside of traditional Talk spaces.</summary>
+		public abstract TitleCollection TalkLikePages { get; }
+		#endregion
+
+		#region Protected Properties
+
+		/// <summary>Gets the site associated with this instance.</summary>
+		/// <value>The site associated with this instance.</value>
+		protected Site Site { get; }
 		#endregion
 
 		#region Public Virtual Methods

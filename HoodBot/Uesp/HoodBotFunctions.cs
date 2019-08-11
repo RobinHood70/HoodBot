@@ -28,17 +28,19 @@
 		private readonly Dictionary<ResultDestination, ResultInfo> results = new Dictionary<ResultDestination, ResultInfo>();
 		private readonly Dictionary<ResultDestination, StringBuilder> stringBuilders = new Dictionary<ResultDestination, StringBuilder>();
 		private LogInfo lastLogInfo;
+		private TitleCollection talkLikePages = null;
 		#endregion
 
 		#region Constructors
 		public HoodBotFunctions(Site site)
 			: base(site)
 		{
-			this.NativeAbstractionLayer = this.Site.AbstractionLayer as WikiAbstractionLayer;
+			this.NativeAbstractionLayer = site.AbstractionLayer as WikiAbstractionLayer;
 			this.NativeClient = this.NativeAbstractionLayer.Client;
-			this.LogPage = new Page(site, this.Site.User.FullPageName + "/Log");
+			var pageName = site.User.FullPageName;
+			this.LogPage = new Page(site, pageName + "/Log");
 			this.RequestsPage = new Page(site.Namespaces[MediaWikiNamespaces.Project], "Bot Requests");
-			this.ResultsPage = new Page(site, this.Site.User.FullPageName + "/Results");
+			this.ResultsPage = new Page(site, pageName + "/Results");
 			this.StatusPage = this.LogPage;
 			this.DefaultResultDestination = ResultDestination.ResultsPage;
 		}
@@ -50,6 +52,21 @@
 		public override IReadOnlyList<string> DoNotDeleteTemplates { get; } = new[] { "Empty category", "Linked image" };
 
 		public override LogJobTypes LogJobTypes => LogJobTypes.Write;
+
+		public override TitleCollection TalkLikePages
+		{
+			get
+			{
+				if (this.talkLikePages == null)
+				{
+					var titles = new TitleCollection(this.Site);
+					titles.GetCategoryMembers("Message Boards", false);
+					this.talkLikePages = titles;
+				}
+
+				return this.talkLikePages;
+			}
+		}
 		#endregion
 
 		#region Internal Properties

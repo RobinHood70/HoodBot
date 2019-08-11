@@ -16,6 +16,7 @@
 		{
 			this.LogPage = null;
 			this.StatusPage = null;
+			this.TalkLikePages = new TitleCollection(site);
 		}
 		#endregion
 
@@ -33,6 +34,9 @@
 		/// <value>The job types to be logged.</value>
 		/// <remarks><see cref="DefaultUserFunctions"/> always returns <see cref="LogJobTypes.None"/>.</remarks>
 		public override LogJobTypes LogJobTypes => LogJobTypes.None;
+
+		/// <inheritdoc/>
+		public override TitleCollection TalkLikePages { get; }
 		#endregion
 
 		#region Public Static Methods
