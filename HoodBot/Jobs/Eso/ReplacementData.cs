@@ -25,6 +25,7 @@
 			["Alessian Order"] = "Alessian Order (set)",
 			["Balorgh"] = "Balorgh (set)",
 			["Blood Spawn"] = "Blood Spawn (set)",
+			["Bloodspawn"] = "Blood Spawn (set)",
 			["Chokethorn"] = "Chokethorn (set)",
 			["Giant Spider"] = "Giant Spider (set)",
 			["Grothdarr"] = "Grothdarr (set)",
@@ -36,6 +37,7 @@
 			["Nerien'eth"] = "Nerien'eth (set)",
 			["Night Terror"] = "Night Terror (set)",
 			["Selene"] = "Selene (set)",
+			["Senche-Raht's Grit"] = "Senche-raht's Grit",
 			["Sentinel of Rkugamz"] = "Sentinel of Rkugamz (set)",
 			["Sentry"] = "Sentry (set)",
 			["Shadow Walker"] = "Shadow Walker (set)",
@@ -50,7 +52,6 @@
 			["Tremorscale"] = "Tremorscale (set)",
 			["Valkyn Skoria"] = "Valkyn Skoria (set)",
 			["Velidreth"] = "Velidreth (set)",
-			["Vykosa"] = "Vykosa (set)",
 			["Winterborn"] = "Winterborn (set)",
 		};
 
