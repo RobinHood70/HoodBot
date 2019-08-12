@@ -20,24 +20,26 @@
 	internal static class ProjectGlobals
 	{
 		#region Public Methods
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "I am!")]
 		public static string GetHash(byte[] data, HashType hashType)
 		{
-			string retval = null;
-			HashAlgorithm hash = null;
+			HashAlgorithm hash;
 
-			try
+			// At one point, this was a try/finally block because mono wasn't quite implementing IDisposable properly. This doesn't appear to be the case anymore, so doing it the traditional method. It looks like a using block would probably have worked in any event, since that would presumably coerce hash to IDisposable.
+			// See https://xamarin.github.io/bugzilla-archives/33/3375/bug.html
+			switch (hashType)
 			{
-				switch (hashType)
-				{
-					case HashType.Md5:
-						hash = MD5.Create();
-						break;
-					case HashType.Sha1:
-						hash = SHA1.Create();
-						break;
-				}
+				case HashType.Md5:
+					hash = MD5.Create();
+					break;
+				case HashType.Sha1:
+					hash = SHA1.Create();
+					break;
+				default:
+					return null;
+			}
 
+			using (hash)
+			{
 				var sb = new StringBuilder(40);
 				var hashBytes = hash.ComputeHash(data);
 				foreach (var b in hashBytes)
@@ -45,17 +47,8 @@
 					sb.AppendFormat(CultureInfo.InvariantCulture, "{0:x2}", b);
 				}
 
-				retval = sb.ToString();
+				return sb.ToString();
 			}
-			finally
-			{
-				if (!HasMono)
-				{
-					hash?.Dispose();
-				}
-			}
-
-			return retval;
 		}
 
 		public static string GetHash(this string data, HashType hashType) => GetHash(Encoding.UTF8.GetBytes(data ?? string.Empty), hashType);
