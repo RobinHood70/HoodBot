@@ -365,15 +365,18 @@
 			int attrEnd;
 			string tagClose;
 			string inner;
+			bool selfClosed;
 			if (this.Text[tagEndPos - 1] == '/')
 			{
 				inner = null;
 				tagClose = null;
 				attrEnd = tagEndPos - 1;
+				selfClosed = true;
 				this.Index = tagEndPos + 1;
 			}
 			else
 			{
+				selfClosed = false;
 				attrEnd = tagEndPos;
 				var findClosing = new Regex(@"</" + tagNameLower + @"\s*>", RegexOptions.IgnoreCase);
 				Match match;
@@ -405,7 +408,7 @@
 			else
 			{
 				var attr = attrEnd > attrStart ? this.Text.Substring(attrStart, attrEnd - attrStart) : null;
-				piece.Add(new TagNode(tagOpen, attr, inner, tagClose));
+				piece.Add(new TagNode(tagOpen, attr, inner, tagClose, selfClosed));
 			}
 
 			return true;

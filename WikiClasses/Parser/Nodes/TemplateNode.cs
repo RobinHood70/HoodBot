@@ -8,7 +8,7 @@
 		Argument
 	}
 
-	public class TemplateNode : INodeBase
+	public class TemplateNode : IBacklinkNode
 	{
 		#region Constructors
 		public TemplateNode(TemplateNodeType type, bool atLineStart, NodeCollection title, IList<ParameterNode> parameters)

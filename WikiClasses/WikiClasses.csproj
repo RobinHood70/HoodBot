@@ -69,6 +69,8 @@
     <Compile Include="ParameterParser.cs" />
     <Compile Include="Parser\NameValuePiece.cs" />
     <Compile Include="Parser\NodeCollection.cs" />
+    <Compile Include="Parser\NodeCollectionVisitor.cs" />
+    <Compile Include="Parser\Nodes\IBacklinkNode.cs" />
     <Compile Include="Parser\Nodes\LinkNode.cs" />
     <Compile Include="Parser\WikiTextVisitor.cs" />
     <Compile Include="Parser\WikiTextParser.cs" />
@@ -94,7 +96,6 @@
     <Compile Include="Parser\Nodes\ParameterNode.cs" />
     <Compile Include="Parser\Nodes\TemplateNode.cs" />
     <Compile Include="Parser\Nodes\TextNode.cs" />
-    <Compile Include="Parser\ParserValue.cs" />
     <Compile Include="Parser\Piece.cs" />
     <Compile Include="Parser\StackElements\HeaderElement.cs" />
     <Compile Include="Parser\StackElements\LinkElement.cs" />

@@ -37,10 +37,7 @@
 
 		public void Visit(HeaderNode node)
 		{
-			ThrowNull(node, nameof(node));
-			this.builder.Append(node.EqualsSigns);
-			node.Title.Accept(this);
-			this.builder.Append(node.EqualsSigns);
+			node?.Title.Accept(this);
 		}
 
 		public virtual void Visit(IgnoreNode node)
@@ -90,10 +87,19 @@
 				this.builder
 					.Append('<')
 					.Append(node.Name)
-					.Append(node.Attributes)
-					.Append('>')
-					.Append(node.InnerText)
-					.Append(node.Close);
+					.Append(node.Attributes);
+				if (node.SelfClosed)
+				{
+					this.builder.Append("/>");
+				}
+				else
+				{
+					// TODO: Check what happens with <br> vs. <br/> vs. <br></br>. Do they all work properly?
+					this.builder
+						.Append('>')
+						.Append(node.InnerText)
+						.Append(node.Close);
+				}
 			}
 		}
 

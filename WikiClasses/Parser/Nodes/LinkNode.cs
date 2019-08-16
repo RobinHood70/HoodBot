@@ -2,7 +2,7 @@
 {
 	using System.Collections.Generic;
 
-	public class LinkNode : INodeBase
+	public class LinkNode : IBacklinkNode
 	{
 		#region Constructors
 		public LinkNode(NodeCollection title, IList<ParameterNode> parameters)

@@ -2,6 +2,7 @@
 {
 	using System.Collections;
 	using System.Collections.Generic;
+	using System.Text;
 	using RobinHood70.WikiClasses.Parser.Nodes;
 
 	public class NodeCollection : IList<INodeBase>, INodeBase
@@ -45,6 +46,20 @@
 
 		public NodeCollection GetRange(int index, int count) => new NodeCollection(this.nodes.GetRange(index, count));
 
+		public string GetText()
+		{
+			var sb = new StringBuilder();
+			foreach (var node in this.nodes)
+			{
+				if (node is TextNode n)
+				{
+					sb.Append(n.Text);
+				}
+			}
+
+			return sb.ToString();
+		}
+
 		public int IndexOf(INodeBase item) => this.nodes.IndexOf(item);
 
 		public void Insert(int index, INodeBase item) => this.nodes.Insert(index, item);
@@ -52,6 +67,37 @@
 		public bool Remove(INodeBase item) => this.nodes.Remove(item);
 
 		public void RemoveAt(int index) => this.nodes.RemoveAt(index);
+
+		public void ReplaceTextWith(string newText)
+		{
+			var offset = -1;
+			for (var i = 0; i < this.nodes.Count; i++)
+			{
+				if (this.nodes[i] is TextNode)
+				{
+					offset = i;
+					break;
+				}
+			}
+
+			if (offset == -1)
+			{
+				this.nodes.Insert(0, new TextNode(newText));
+			}
+			else
+			{
+				for (var i = this.nodes.Count - 1; i > offset; i--)
+				{
+					if (this.nodes[i] is TextNode)
+					{
+						this.nodes.RemoveAt(i);
+					}
+				}
+
+				var textNode = this.nodes[offset] as TextNode;
+				textNode.Text = newText;
+			}
+		}
 		#endregion
 
 		#region Internal Methods
