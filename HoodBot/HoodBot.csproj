@@ -100,6 +100,7 @@
     <Compile Include="BotSettings.cs" />
     <Compile Include="EncryptingJsonConverter.cs" />
     <Compile Include="IParameterFetcher.cs" />
+    <Compile Include="Jobs\BacklinkReplaceVisitor.cs" />
     <Compile Include="Jobs\BlockChanger.cs" />
     <Compile Include="Jobs\BulkDeleteUnused.cs" />
     <Compile Include="Jobs\Design\AsyncInfo.cs" />
