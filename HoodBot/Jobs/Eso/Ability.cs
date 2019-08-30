@@ -23,18 +23,10 @@
 				{
 					desc = (string)data["description"];
 				}
-
-				desc = EsoGeneral.HarmonizeDescription(desc);
-				foreach (var replacement in ReplacementData.TextReplacements)
-				{
-					if (desc.Contains(replacement.Key))
-					{
-						ReplacementData.TextReplacementsUsed.Add(replacement.Key);
-						desc = desc.Replace(replacement.Key, replacement.Value);
-					}
-				}
 			}
 
+			desc = EsoGeneral.HarmonizeDescription(desc);
+			desc = EsoReplacer.ReplaceGlobal(desc, null);
 			this.Description = desc;
 
 			var coefficients = new List<Coefficient>();

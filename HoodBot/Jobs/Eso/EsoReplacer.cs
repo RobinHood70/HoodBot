@@ -15,7 +15,7 @@
 	{
 		#region Fields
 		private static readonly Regex EsoLinks = new Regex(@"((?<before>(((''')?[0-9]+(-[0-9]+)?(''')?%?)(\smore|\smax(imum)?|\sof missing|\{\{huh}}|<br>)?|(''')?\{\{Nowrap[^}]*?}}(''')?|max(imum)?|ESO)+)\s)?(?<type>(?-i:Health|Magicka|Physical Penetration|Physical Resistance|Spell Critical|Spell Damage|Spell Penetration|Spell Resistance|Stamina|Ultimate|Weapon Critical|Weapon Damage))(\s(?<after>(Recovery|Regeneration|[0-9]+%)+))?\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-		private static readonly Regex ReplacementFinder = new Regex(@"^\|\ *(<nowiki/>)?(?<from>.*?)(<nowiki/>)?\ *\|\|\ *(<nowiki/>)?(?<to>.*?)(<nowiki/>)?\ *$", RegexOptions.Multiline);
+		private static readonly Regex ReplacementFinder = new Regex(@"^\|\ *(<nowiki/?>)?(?<from>.*?)(</?nowiki/?>)?\ *\|\|\ *(<nowiki/?>)?(?<to>.*?)(</?nowiki/?>)?\ *$", RegexOptions.Multiline);
 		private static readonly Regex TemplateStripper = new Regex(@"{{\s*(ESO Quality Color|Nowrap|ESO (Health|Magicka|MagStam|Physical Penetration|Resistance|Spell Critical|Spell Damage|Spell Penetration|Stamina|Synergy|Ultimate|Weapon Critical|Weapon Damage) Link).*?}}");
 		private static readonly Regex TextStripper = new Regex(@"({{huh}}|[0-9]+(-[0-9]+)?%?)");
 
