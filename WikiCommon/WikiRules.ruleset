@@ -26,6 +26,7 @@
     <Rule Id="CA1027" Action="None" />
     <Rule Id="CA1028" Action="None" />
     <Rule Id="CA1030" Action="None" />
+    <Rule Id="CA1031" Action="None" />
     <Rule Id="CA1033" Action="None" />
     <Rule Id="CA1034" Action="None" />
     <Rule Id="CA1036" Action="None" />
@@ -84,7 +85,6 @@
     <Rule Id="CA1065" Action="None" />
     <Rule Id="CA1821" Action="None" />
     <Rule Id="CA2200" Action="None" />
-    <Rule Id="CA2234" Action="None" />
   </Rules>
   <Rules AnalyzerId="Microsoft.NetCore.Analyzers" RuleNamespace="Microsoft.NetCore.Analyzers">
     <Rule Id="CA1304" Action="None" />
@@ -110,7 +110,6 @@
     <Rule Id="CA5351" Action="None" />
   </Rules>
   <Rules AnalyzerId="Microsoft.NetFramework.Analyzers" RuleNamespace="Microsoft.NetFramework.Analyzers">
-    <Rule Id="CA1058" Action="None" />
     <Rule Id="CA2229" Action="None" />
     <Rule Id="CA2235" Action="None" />
     <Rule Id="CA2237" Action="None" />

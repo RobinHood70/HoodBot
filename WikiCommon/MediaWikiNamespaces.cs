@@ -1,9 +1,9 @@
-﻿namespace RobinHood70.WikiCommon
+﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member - self-documenting
+namespace RobinHood70.WikiCommon
 {
 	/// <summary>This class acts as an Enum, but with no need for casting to and from ints for Namespace IDs. Similar classes can be created for specific wikis, if desired.</summary>
 	public static class MediaWikiNamespaces
 	{
-		#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member - self-documenting
 		public const int Category = 14;
 		public const int CategoryTalk = 15;
 		public const int File = 6;

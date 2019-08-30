@@ -1,7 +1,5 @@
 ﻿namespace RobinHood70.WikiClasses.Parser.StackElements
 {
-	using RobinHood70.WikiClasses.Parser.Nodes;
-
 	internal abstract class StackElement
 	{
 		#region Protected Constants

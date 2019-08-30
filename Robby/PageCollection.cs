@@ -26,7 +26,7 @@
 
 	/// <summary>Represents a collection of pages, with methods to request additional pages from the site.</summary>
 	/// <remarks>Generally speaking, a PageCollection represents data that's returned from the site, although there's nothing preventing you from creating a PageCollection to store your own newly created pages, either. In most such cases, however, it's better to create and save one page at a time than to store the entire set in memory.</remarks>
-	/// <seealso cref="Robby.TitleCollection{TTitle}" />
+	/// <seealso cref="TitleCollection{TTitle}" />
 	public class PageCollection : TitleCollection<Page>
 	{
 		#region Fields
@@ -145,7 +145,7 @@
 		/// <param name="key">The key.</param>
 		/// <returns>The requested <see cref="Page"/>.</returns>
 		/// <exception cref="KeyNotFoundException">Thrown if the page cannot be found either by the name requested or via the substitute name in the <see cref="TitleMap"/>.</exception>
-		/// <remarks>Like a <see cref="System.Collections.Generic.Dictionary{TKey, TValue}"/>, this indexer will add a new entry if the requested entry isn't found.</remarks>
+		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry if the requested entry isn't found.</remarks>
 		public override Page this[string key]
 		{
 			get

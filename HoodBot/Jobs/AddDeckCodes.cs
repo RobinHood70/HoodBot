@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Text.RegularExpressions;
-	using System.Windows.Documents;
 	using Newtonsoft.Json;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Uesp;

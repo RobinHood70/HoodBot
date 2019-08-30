@@ -159,7 +159,7 @@
 			sb.AppendLine("\n{{Stub|NPC}}");
 
 			var retval = new Page(this.Site, npc.PageName) { Text = sb.ToString() };
-			// retval.SetMinimalStartTimestamp();
+			//// retval.SetMinimalStartTimestamp();
 
 			return retval;
 		}
