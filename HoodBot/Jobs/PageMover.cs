@@ -9,10 +9,7 @@
 		#region Constructors
 		[JobInfo("Page Mover")]
 		public PageMover(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
-		{
-			this.MoveOptions = MoveOptions.MoveSubPages | MoveOptions.MoveTalkPage;
-		}
+			: base(site, asyncInfo) => this.MoveOptions = MoveOptions.MoveSubPages | MoveOptions.MoveTalkPage;
 		#endregion
 
 		#region Protected Override Methods

@@ -2,7 +2,6 @@
 {
 	using System.Text;
 	using RobinHood70.WikiClasses.Parser.Nodes;
-	using static RobinHood70.WikiCommon.Globals;
 
 	public class WikiTextVisitor : IVisitor
 	{
@@ -35,10 +34,7 @@
 
 		public void Visit(EqualsNode node) => this.builder.Append('=');
 
-		public void Visit(HeaderNode node)
-		{
-			node?.Title.Accept(this);
-		}
+		public void Visit(HeaderNode node) => node?.Title.Accept(this);
 
 		public virtual void Visit(IgnoreNode node)
 		{

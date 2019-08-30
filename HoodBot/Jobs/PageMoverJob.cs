@@ -59,7 +59,7 @@
 		#endregion
 
 		#region Fields
-		private Dictionary<Title, Title> movedPages = new Dictionary<Title, Title>();
+		private readonly Dictionary<Title, Title> movedPages = new Dictionary<Title, Title>();
 		private string logDetails = null;
 		#endregion
 
