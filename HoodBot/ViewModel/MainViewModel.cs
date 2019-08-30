@@ -246,17 +246,14 @@
 				}
 				catch (BadImageFormatException)
 				{
-					dll = null;
+					continue;
 				}
 
-				if (dll != null)
+				foreach (var type in dll.ExportedTypes)
 				{
-					foreach (var type in dll.ExportedTypes)
+					if (!type.IsInterface && !type.IsAbstract)
 					{
-						if (!type.IsInterface && !type.IsAbstract)
-						{
-							yield return type;
-						}
+						yield return type;
 					}
 				}
 			}
