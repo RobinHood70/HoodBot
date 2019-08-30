@@ -3,8 +3,10 @@
 	using System.Collections.Generic;
 	using System.Configuration;
 	using System.Data;
+	using System.Diagnostics;
 	using System.Text.RegularExpressions;
 	using MySql.Data.MySqlClient;
+	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -64,18 +66,31 @@
 		#endregion
 
 		#region Public Methods
-		public static Dictionary<long, NPCData> GetNpcsFromDatabase()
+		public static EsoNpcList GetNpcsFromDatabase(Namespace online)
 		{
-			var tempNpcData = new Dictionary<long, NPCData>();
+			var retval = new EsoNpcList();
+			var nameClash = new HashSet<string>();
 			foreach (var row in RunQuery("SELECT id, name, gender, ppClass FROM uesp_esolog.npc WHERE level != -1"))
 			{
-				var name = ((string)row["name"]).TrimEnd(); // TrimEnd() corrects a single record where the field has a tab at the end of it - seems to be an ESO problem
-				var id = (long)row["id"];
-				var npcData = new NPCData(name, (sbyte)row["gender"], (string)row["ppClass"]);
-				tempNpcData.Add(id, npcData);
+				var name = (string)row["name"]; // TrimEnd() corrects a single record where the field has a tab at the end of it - seems to be an ESO problem
+				if (ReplacementData.NpcNameFixes.TryGetValue(name, out var newName))
+				{
+					name = newName;
+				}
+
+				if (!ReplacementData.NpcNameSkips.Contains(name))
+				{
+					if (!nameClash.Add(name))
+					{
+						Debug.WriteLine("Warning: an NPC with the name \"" + name + "\" exists more than once in the database!");
+					}
+
+					var npcData = new NPCData((long)row["id"], name, (sbyte)row["gender"], (string)row["ppClass"], online.DecoratedName + name);
+					retval.Add(npcData);
+				}
 			}
 
-			return tempNpcData;
+			return retval;
 		}
 
 		public static string GetPatchVersion(WikiJob job)

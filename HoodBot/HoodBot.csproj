@@ -120,6 +120,7 @@
     <Compile Include="Jobs\Eso\Ability.cs" />
     <Compile Include="Jobs\Eso\ActiveSkill.cs" />
     <Compile Include="Jobs\Eso\Coefficient.cs" />
+    <Compile Include="Jobs\Eso\EsoNpcList.cs" />
     <Compile Include="Jobs\Eso\EsoReplacement.cs" />
     <Compile Include="Jobs\Eso\EsoReplacer.cs" />
     <Compile Include="Jobs\Eso\EsoGeneral.cs" />

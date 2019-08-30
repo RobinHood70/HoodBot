@@ -2,8 +2,8 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.Text;
+	using MySql.Data.MySqlClient;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Eso;
 	using RobinHood70.HoodBot.Uesp;
@@ -16,6 +16,45 @@
 	internal class EsoNpcs : EditJob
 	{
 		#region Fields
+		private readonly HashSet<string> overrides = new HashSet<string>()
+		{
+			"Online:Veeskhleel Shadecaller",
+			"Online:Veeskhleel Predator",
+			"Online:Vadeshta",
+			"Online:Udazada",
+			"Online:Tormented Vestige",
+			"Online:Sliding Stone",
+			"Online:Sharzahir",
+			"Online:Shagrath's Host",
+			"Online:Severine Leonciele",
+			"Online:Sargent Themond",
+			"Online:Sargent Lort",
+			"Online:Sangiin's Thirst",
+			"Online:Sacrificial Helot",
+			"Online:Runs-In-Wild",
+			"Online:Nebzezir",
+			"Online:Moon-Priest Haduras",
+			"Online:Moongrave Sentinel",
+			"Online:Luahna",
+			"Online:Kujo Kethba",
+			"Online:Keshazh",
+			"Online:Hollowfang Skullguard",
+			"Online:Hollowfang Dire-Maw",
+			"Online:Hollowfang Bloodpanther",
+			"Online:Hemo Helot",
+			"Online:Grapple Point",
+			"Online:Fledgeling Gryphon",
+			"Online:Firhesan",
+			"Online:Eternal Servant",
+			"Online:Enzamir",
+			"Online:Dro'zakar",
+			"Online:Dhulavir",
+			"Online:Danouida",
+			"Online:Colby Rangouze",
+			"Online:Coagulant",
+			"Online:Azureblight Seed",
+		};
+
 		private readonly HashSet<string> places = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 		private PageCollection pages;
 		#endregion
@@ -23,7 +62,7 @@
 		#region Constructors
 		[JobInfo("Create missing NPCs", "ESO")]
 		public EsoNpcs(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+				: base(site, asyncInfo)
 		{
 		}
 		#endregion
@@ -43,7 +82,7 @@
 				{
 					try
 					{
-						page.Save("Create NPC page", true, Tristate.True, false);
+						page.Save("Update missing location(s)", true, Tristate.Unknown, false);
 					}
 					catch (WikiException e) when (e.Code == "pagedeleted")
 					{
@@ -75,6 +114,20 @@
 		#endregion
 
 		#region Private Static Method
+		private static EsoNpcList FilterNpcList(TitleCollection allNpcs, EsoNpcList npcList)
+		{
+			var retval = new EsoNpcList();
+			foreach (var npc in npcList)
+			{
+				if (!allNpcs.Contains("Online:" + npc.Name))
+				{
+					retval.Add(npc);
+				}
+			}
+
+			return retval;
+		}
+
 		private static string GetNPCHeader(NPCData npc) =>
 			new Template("Online NPC Summary", true)
 			{
@@ -90,11 +143,11 @@
 
 		#region Private Methods
 
-		private Page CreatePage(string name, NPCData npcData)
+		private Page CreatePage(NPCData npc)
 		{
 			var sb = new StringBuilder();
 			sb.Append("{{Minimal|NPC}}");
-			sb.AppendLine(GetNPCHeader(npcData));
+			sb.AppendLine(GetNPCHeader(npc));
 			sb.AppendLine("\n<!-- Instructions: Provide an initial sentence summarizing the NPC (race, job, where they live).  Subsequent paragraphs provide additional information about the NPC, such as related NPCs, schedule, equipment, etc.  Note that quest-specific information DOES NOT belong on this page, but instead goes on the appropriate quest page.  Spoilers should be avoided.-->");
 			sb.AppendLine("{{NewLeft}}");
 			sb.AppendLine("\n<!--Instructions: If this NPC is related to any quests, replace \"Quest Name\" with the quest's name.--><!--");
@@ -105,33 +158,44 @@
 			sb.AppendLine("==Bugs==\n{{Bug|Bug description}}\n** Workaround\n-->");
 			sb.AppendLine("\n{{Stub|NPC}}");
 
-			var retval = new Page(this.Site, name) { Text = sb.ToString() };
-			retval.SetMinimalStartTimestamp();
+			var retval = new Page(this.Site, npc.PageName) { Text = sb.ToString() };
+			// retval.SetMinimalStartTimestamp();
 
 			return retval;
 		}
 
 		private void CreatePages(TitleCollection allNpcs)
 		{
-			this.StatusWriteLine("Getting NPC data from database");
-			var unfilteredNpcList = EsoGeneral.GetNpcsFromDatabase();
-			var filteredNpcList = this.FilterNpcList(allNpcs, unfilteredNpcList);
-			var locQuery = $"SELECT DISTINCT npcId, zone FROM location USE INDEX (find_npcloc) WHERE npcId IN ({string.Join(",", filteredNpcList)})";
-			this.GetLocationData(locQuery, filteredNpcList);
-			this.GetPlacesData(filteredNpcList);
+			this.pages = new PageCollection(this.Site);
+			foreach (var page in this.overrides)
+			{
+				allNpcs.Remove(page);
+			}
 
-			var newNpcData = this.FilterNewNpcs(filteredNpcList);
+			this.StatusWriteLine("Getting NPC data from database");
+			var npcList = EsoGeneral.GetNpcsFromDatabase(this.Site.Namespaces[UespNamespaces.Online]);
+			npcList = FilterNpcList(allNpcs, npcList);
+			if (npcList.Count == 0)
+			{
+				return;
+			}
+
+			npcList.SortByPageName();
 
 			this.StatusWriteLine("Checking for existing pages");
-			var checkPages = new PageCollection(this.Site, PageModules.Info | PageModules.Revisions | PageModules.Properties);
-			checkPages.GetTitles(newNpcData.Keys);
-			this.pages = new PageCollection(this.Site);
-			foreach (var npc in newNpcData)
+			var titlesOnly = new TitleCollection(this.Site);
+			foreach (var npc in npcList)
 			{
-				var page = checkPages[npc.Key];
-				if (page.Exists)
+				titlesOnly.Add(npc.PageName);
+			}
+
+			var checkPages = titlesOnly.Load(PageModules.Info | PageModules.Revisions | PageModules.Properties);
+			var pagesToSave = new EsoNpcList();
+			foreach (var npc in npcList)
+			{
+				var page = checkPages[npc.PageName];
+				if (page.Exists && !this.overrides.Contains(page.FullPageName))
 				{
-					var npcData = newNpcData[page.FullPageName];
 					string issue = null;
 					if (page.IsRedirect)
 					{
@@ -167,47 +231,22 @@
 
 					if (issue != null)
 					{
-						var locations = npcData.Locations.Count >= 20 ? "suppressed due to excessive number" : string.Join(", ", npcData.Locations);
-						this.WriteLine($"* [[{page.FullPageName}|{page.LabelName}]] is {issue}. Please use the following data to create a page manually, if needed.<br>Name: {npcData.Name}, Gender: {npcData.Gender}, Class: {npcData.Class}, Locations: {locations}");
+						var locations = npc.Locations.Count >= 20 ? "suppressed due to excessive number" : string.Join(", ", npc.Locations);
+						this.WriteLine($"* [[{page.FullPageName}|{page.LabelName}]] is {issue}. Please use the following data to create a page manually, if needed.<br>Name: {npc.Name}, Gender: {npc.Gender}, Class: {npc.Class}, Locations: {locations}");
 					}
 				}
 				else
 				{
-					this.pages.Add(this.CreatePage(npc.Key, npc.Value));
-				}
-			}
-		}
-
-		private Dictionary<long, NPCData> FilterNpcList(TitleCollection allNpcs, Dictionary<long, NPCData> unfilteredNpcList)
-		{
-			var filteredNpcList = new Dictionary<long, NPCData>();
-			foreach (var npc in unfilteredNpcList)
-			{
-				if (!allNpcs.Contains("Online:" + npc.Value.Name))
-				{
-					if (filteredNpcList.ContainsKey(npc.Key))
-					{
-						this.Warn($"Duplicate entry: {npc.Value.Name}");
-					}
-					else
-					{
-						filteredNpcList.Add(npc.Key, npc.Value);
-					}
+					pagesToSave.Add(npc);
 				}
 			}
 
-			return filteredNpcList;
-		}
-
-		private IReadOnlyDictionary<string, NPCData> FilterNewNpcs(Dictionary<long, NPCData> tempNpcData)
-		{
-			var newNpcData = new SortedDictionary<string, NPCData>();
-			foreach (var entry in tempNpcData)
+			this.GetLocationData(pagesToSave);
+			this.GetPlacesData(pagesToSave);
+			foreach (var npc in pagesToSave)
 			{
-				newNpcData.Add(this.Site.Namespaces[UespNamespaces.Online].DecoratedName + entry.Value.Name, entry.Value);
+				this.pages.Add(this.CreatePage(npc));
 			}
-
-			return newNpcData;
 		}
 
 		private void GetPlaces()
@@ -221,12 +260,12 @@
 			}
 		}
 
-		private void GetPlacesData(Dictionary<long, NPCData> tempNpcData)
+		private void GetPlacesData(EsoNpcList npcList)
 		{
 			this.GetPlaces();
-			foreach (var npcEntry in tempNpcData)
+			foreach (var npcEntry in npcList)
 			{
-				var locs = npcEntry.Value.Locations;
+				var locs = npcEntry.Locations;
 				locs.Sort();
 				for (var i = 0; i < locs.Count; i++)
 				{
@@ -238,19 +277,27 @@
 			}
 		}
 
-		private void GetLocationData(string query, Dictionary<long, NPCData> tempNpcData)
+		private void GetLocationData(EsoNpcList npcList)
 		{
 			this.StatusWriteLine("Getting location data");
 
-			for (var retries = 0; retries < 3; retries++)
+			//// MySQL doesn't do well with an IN() clause and we don't have CREATE TEMPORARY TABLE permissions, so work around these two issues.
+			var filter = new StringBuilder();
+			foreach (var npc in npcList)
+			{
+				filter.Append(" OR npcId=" + npc.Id.ToStringInvariant());
+			}
+
+			filter = filter.Remove(0, 4);
+			var query = $"SELECT DISTINCT npcId, zone FROM location USE INDEX (find_npcloc) WHERE " + filter.ToString();
+			for (var retries = 0; retries < 4; retries++)
 			{
 				try
 				{
-					//// MySQL doesn't always play nice with the combination of DISTINCT and ORDER BY, so we use no sorting/uniqueness checks at all, then deal with both ourselves.
 					foreach (var row in EsoGeneral.RunQuery(query))
 					{
 						var loc = (string)row["zone"];
-						var npc = tempNpcData[(long)row["npcId"]];
+						var npc = npcList[(long)row["npcId"]];
 						if (!npc.Locations.Contains(loc))
 						{
 							npc.Locations.Add(loc);
@@ -259,9 +306,12 @@
 
 					break;
 				}
-				catch (Exception e)
+				catch (MySqlException)
 				{
-					Debug.WriteLine(e.GetType().FullName);
+					if (retries == 3)
+					{
+						throw;
+					}
 				}
 			}
 		}

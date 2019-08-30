@@ -5,11 +5,13 @@
 	internal class NPCData
 	{
 		#region Constructors
-		public NPCData(string name, sbyte gender, string npcClass)
+		public NPCData(long id, string name, sbyte gender, string npcClass, string pageName)
 		{
+			this.Id = id;
 			this.Name = name;
 			this.Gender = (Gender)gender;
 			this.Class = npcClass;
+			this.PageName = pageName;
 		}
 		#endregion
 
@@ -18,9 +20,13 @@
 
 		public Gender Gender { get; }
 
+		public long Id { get; }
+
 		public List<string> Locations { get; } = new List<string>();
 
 		public string Name { get; }
+
+		public string PageName { get; }
 		#endregion
 
 		#region Public Override Methods

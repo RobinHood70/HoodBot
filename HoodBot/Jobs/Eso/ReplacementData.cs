@@ -18,6 +18,19 @@
 			[103710] = "Bend time and space around you to gain Major Expedition for |cffffff4|r seconds and Minor Force for |cffffff12|r seconds, increasing your Movement Speed by |cffffff30|r% and Critical Damage by |cffffff10|r%. Activating this ability removes all snares and immobilizations from you and grants immunity to them for |cffffff1|r seconds.",
 		};
 
+		public static Dictionary<string, string> NpcNameFixes { get; } = new Dictionary<string, string>
+		{
+			["Ahmuna-La"] = "Ahmuna-la",
+			["Haina-Daro"] = "Haina-daro",
+			["Samati-Ko"] = "Samati-ko",
+			["Sayya-Daro"] = "Sayya-daro",
+		};
+
+		public static HashSet<string> NpcNameSkips { get; } = new HashSet<string>
+		{
+			"Adventurer", "Alarm", "Alchemy", "Argonian", "Ashlander", "Auroran", "Barracks Door", "Blastbones", "Blighted Blastbones", "Bloodspawn", "Bone Armor", "Bosmer", "Brackenleaf", "Brawler", "Burn Buildings", "Butcher", "Capacitor", "Central Welkynd Stone", "Charged Atronach", "Crystal Prism", "Crystal Receiver", "Crystal Reciever", "Dark Anchor", "Dark Elf", "Dark Seducer", "Dremora Kynlurker\t", "Dremora", "Dro-m'Athra", "Eluza", "Empower Totem", "Enkindling Appendage", "Falinesti Faithful", "Feral Guardian", "Forgotten Tome", "Fractured Energy", "Goblin", "Golden Saint", "Guild Member", "Guise of the Cadaverous Assassin", "Healer", "Hei-Halai", "Herne", "Imperial", "Intensive Mender", "Invis Theatre", "InvisiDirector", "King's Guard", "Knight", "Lion Guard", "Mages Guild", "Malachite", "Manifestation of Terror", "Marona Girith", "Meteor", "Monastic Earrel", "Moonstone", "Mummy", "Nascent Indrik", "Necromancer", "Netch", "New Life Celebrant", "Nix-Ox Fabricant Steed", "Noordigloop the Clog", "Oleena", "Orc", "Poison Gas", "Portal", "Projection", "Pull Totem", "Q3381 Lizard02 PC Child", "Q5872 - Music Control", "Questionable Meat", "Ranger", "Razak's Opus", "Restoring Twilight", "Reveler", "Roneril", "Ruby", "Sand Storm", "Savage Book", "Senche-raht", "Sentry", "Shadow", "Silver", "Siphoning Totem", "Sithis", "Skeletal Mage", "Skeleton", "Slaughterer", "Sorcerer", "Spirit Guardian", "Spirit Mender", "Stalking Blastbones", "Storm", "Strange Cloud", "Strangler\t", "Summoned Flames", "Summoned Storm Atronach", "Sunna'rah", "The Insatiable", "The Ritual", "The Scarlet Judge", "Thief Statue", "Thorn Geko", "Treasure Hunter", "Twilight Matriarch", "Vampiric Totem", "Vulkhel Guard", "Warden", "Welkynd Stone", "Werewolf Berserker", "Werewolf", "Wrath of Sithis", "Wrest Totem", "Yargob gro-Shelob"
+		};
+
 		// Although these could be private to specific classes, they're put here in order to have a centralized location where they can easily be found.
 		public static Dictionary<string, string> SetNameFixes { get; } = new Dictionary<string, string>
 		{
@@ -29,8 +42,10 @@
 			["Chokethorn"] = "Chokethorn (set)",
 			["Giant Spider"] = "Giant Spider (set)",
 			["Grothdarr"] = "Grothdarr (set)",
+			["Grundwulf"] = "Grundwulf (set)",
 			["Iceheart"] = "Iceheart (set)",
 			["Infernal Guardian"] = "Infernal Guardian (set)",
+			["Maarselok"] = "Maarselok (set)",
 			["Maw of the Infernal"] = "Maw of the Infernal (set)",
 			["Mighty Chudan"] = "Mighty Chudan (set)",
 			["Molag Kena"] = "Molag Kena (set)",
