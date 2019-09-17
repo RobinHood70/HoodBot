@@ -68,7 +68,7 @@
 		#endregion
 
 		#region Protected Override Properties
-		public override string LogName => "Create missing ESO NPC Pages";
+		public override string LogName => "Create Missing ESO NPC Pages";
 		#endregion
 
 		#region Protected Override Methods
