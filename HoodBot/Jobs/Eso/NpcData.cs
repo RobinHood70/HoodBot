@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Eso
 {
 	using System.Collections.Generic;
+	using RobinHood70.Robby;
 
 	internal class NPCData
 	{
@@ -25,6 +26,8 @@
 		public List<string> Locations { get; } = new List<string>();
 
 		public string Name { get; }
+
+		public Page Page { get; set; }
 
 		public string PageName { get; }
 		#endregion
