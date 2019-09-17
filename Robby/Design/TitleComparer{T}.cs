@@ -5,7 +5,7 @@
 
 	/// <summary>An ISimpleTitle comparer which sorts by namespace and page name.</summary>
 	/// <typeparam name="T">The item types to compare. Must implement ISimpleTitle.</typeparam>
-	/// <seealso cref="System.Collections.Generic.Comparer{T}" />
+	/// <seealso cref="Comparer{T}" />
 	public class TitleComparer<T> : Comparer<T>
 		where T : ISimpleTitle
 	{

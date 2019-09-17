@@ -60,6 +60,7 @@
 
 		public void Visit(NodeCollection nodes)
 		{
+			ThrowNull(nodes, nameof(nodes));
 			foreach (var node in nodes)
 			{
 				node.Accept(this);
@@ -129,6 +130,7 @@
 		#region Public Methods
 		public string Build(NodeCollection nodes)
 		{
+			ThrowNull(nodes, nameof(nodes));
 			this.BuildTagOpen("root", null, false);
 			nodes.Accept(this);
 			this.BuildTagClose("root");

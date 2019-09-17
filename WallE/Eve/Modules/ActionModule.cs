@@ -7,9 +7,9 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
+	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
 	public abstract class ActionModule<TInput, TOutput> : IActionModule<TInput, TOutput>
@@ -89,12 +89,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(parent, nameof(parent));
 			this.DeserializeParent(parent);
 			var result = parent[this.ResultName];
-			if (result != null && result.Type != JTokenType.Null)
-			{
-				return this.DeserializeResult(result);
-			}
-
-			return null;
+			return result != null && result.Type != JTokenType.Null ? this.DeserializeResult(result) : null;
 		}
 
 		public TOutput Submit(TInput input)
@@ -184,7 +179,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			if (this.StopMethods.HasFlag(StopCheckMethods.Custom) && (this.Wal.CustomStopCheck?.Invoke() == true))
 			{
 				this.Wal.BreakRecursionAfterSubmit = false;
-				throw new StopException(CustomStopCheckFailed);
+				throw new StopException(EveMessages.CustomStopCheckFailed);
 			}
 
 			if (this.StopMethods.HasFlag(StopCheckMethods.TalkCheckNonQuery))
@@ -200,7 +195,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			if (this.SiteVersion != 0 && this.MinimumVersion > this.SiteVersion)
 			{
-				throw new InvalidOperationException(CurrentCulture(ActionNotSupported, this.GetType().Name));
+				throw new InvalidOperationException(CurrentCulture(EveMessages.ActionNotSupported, this.GetType().Name));
 			}
 		}
 
@@ -208,16 +203,16 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			if (result != null && result.Contains("$wgEnableAPI"))
 			{
-				throw WikiException.General(WikiAbstractionLayer.ApiDisabledCode, CurrentCulture(ApiDisabled));
+				throw WikiException.General(WikiAbstractionLayer.ApiDisabledCode, CurrentCulture(EveMessages.ApiDisabled));
 			}
 			else
 			{
-				throw new WikiException(CurrentCulture(ResultInvalid));
+				throw new WikiException(CurrentCulture(EveMessages.ResultInvalid));
 			}
 		}
 
 		// This version is for responses like OpenSearch where the Json should be valid, but is an array rather than an object.
-		protected virtual TOutput DeserializeCustom(JToken result) => throw new WikiException(CurrentCulture(ResultInvalid));
+		protected virtual TOutput DeserializeCustom(JToken result) => throw new WikiException(CurrentCulture(EveMessages.ResultInvalid));
 
 		protected virtual void DeserializeParent(JToken parent)
 		{

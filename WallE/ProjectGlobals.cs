@@ -5,8 +5,8 @@
 	using System.Globalization;
 	using System.Security.Cryptography;
 	using System.Text;
+	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
 	#region Internal Enumerations
@@ -57,7 +57,7 @@
 		{
 			if (!collection.HasItems())
 			{
-				throw new ArgumentException(CurrentCulture(CollectionInvalid, paramName));
+				throw new ArgumentException(CurrentCulture(EveMessages.CollectionInvalid, paramName));
 			}
 		}
 
@@ -86,7 +86,7 @@
 			{
 				if (string.IsNullOrWhiteSpace(item))
 				{
-					throw new ArgumentException(CurrentCulture(CollectionInvalid, paramName));
+					throw new ArgumentException(CurrentCulture(EveMessages.CollectionInvalid, paramName));
 				}
 			}
 		}
@@ -95,7 +95,7 @@
 		{
 			if (string.IsNullOrWhiteSpace(text))
 			{
-				throw new ArgumentException(CurrentCulture(StringInvalid, paramName));
+				throw new ArgumentException(CurrentCulture(EveMessages.StringInvalid, paramName));
 			}
 		}
 		#endregion

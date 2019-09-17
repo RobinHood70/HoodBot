@@ -155,4 +155,7 @@ Info: {1}</value>
   <data name="SiteInfoLanguageConflict" xml:space="preserve">
     <value>The interwiki language can only have a single value. Once it is set to a non-null value, it cannot be changed. Issue a separate SiteInfo request if different parts of your application require different languages.</value>
   </data>
+  <data name="ExcessiveLag" xml:space="preserve">
+    <value>Excessive lag!</value>
+  </data>
 </root>

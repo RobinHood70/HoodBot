@@ -179,6 +179,7 @@
 		public static IEnumerable<T> Cast<T>(this IEnumerable collection)
 			where T : class
 		{
+			ThrowNull(collection, nameof(collection));
 			foreach (var item in collection)
 			{
 				yield return item as T;

@@ -10,9 +10,9 @@
 	using System.Text;
 	using System.Text.RegularExpressions;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.Robby.Properties.Resources;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Describes the result of an attempted change to the site.</summary>
@@ -684,7 +684,7 @@
 			// Used to use WebUtility.UrlEncode, but Uri seems to auto-encode, so removed for now. Discussion in some places of different parts of .NET encoding differently, so may need to re-instate later. See https://stackoverflow.com/a/47877559/502255 for example.
 			if (string.IsNullOrWhiteSpace(articleName))
 			{
-				throw new ArgumentException(CurrentCulture(TitleInvalid));
+				throw new ArgumentException(CurrentCulture(Resources.TitleInvalid));
 			}
 
 			if (string.IsNullOrEmpty(unparsedPath))
@@ -914,7 +914,7 @@
 			if (result.Result != "Success")
 			{
 				this.Clear();
-				throw new UnauthorizedAccessException(CurrentCulture(LoginFailed, result.Reason));
+				throw new UnauthorizedAccessException(CurrentCulture(Resources.LoginFailed, result.Reason));
 			}
 
 			this.User = new User(this, result.User);

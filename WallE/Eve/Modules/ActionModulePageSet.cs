@@ -67,6 +67,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		public PageSetResult<TOutput> SubmitPageSet(TInput input)
 		{
+			ThrowNull(input, nameof(input));
 			this.MaximumListSize = this.Wal.MaximumPageSetSize;
 			this.values = new List<string>(input.Values ?? Array.Empty<string>());
 			if (input.GeneratorInput != null)

@@ -5,8 +5,8 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class ListQueryPage : ListModule<QueryPageInput, QueryPageItem>, IGeneratorModule
@@ -78,7 +78,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(output, nameof(output));
 			if (result["disabled"] != null)
 			{
-				this.Wal.AddWarning("querypage-disabled", CurrentCulture(QueryPageDisabled, this.queryPage));
+				this.Wal.AddWarning("querypage-disabled", CurrentCulture(EveMessages.QueryPageDisabled, this.queryPage));
 				return;
 			}
 

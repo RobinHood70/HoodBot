@@ -4,9 +4,9 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class ActionUpload : ActionModule<UploadInputInternal, UploadResult>
@@ -89,7 +89,7 @@ namespace RobinHood70.WallE.Eve.Modules
 						default:
 							if (value.Type == JTokenType.Object || value.Type == JTokenType.Array)
 							{
-								this.AddWarning("ActionUpload.DeserializeResult", CurrentCulture(NotAString, name));
+								this.AddWarning("ActionUpload.DeserializeResult", CurrentCulture(EveMessages.NotAString, name));
 							}
 							else
 							{

@@ -125,27 +125,17 @@
 				page.Load();
 			}
 
-			if (!page.Exists)
-			{
-				return ProposedDeletionResult.NonExistent;
-			}
-			else if (this.neverPropose.IsMatch(page.Text))
-			{
-				return ProposedDeletionResult.FoundNoDeleteRequest;
-			}
-			else if (this.alreadyProposed.IsMatch(page.Text))
-			{
-				return ProposedDeletionResult.AlreadyProposed;
-			}
-			else
-			{
-				return ProposedDeletionResult.Add;
-			}
+			return
+				!page.Exists ? ProposedDeletionResult.NonExistent :
+				this.neverPropose.IsMatch(page.Text) ? ProposedDeletionResult.FoundNoDeleteRequest :
+				this.alreadyProposed.IsMatch(page.Text) ? ProposedDeletionResult.AlreadyProposed :
+				ProposedDeletionResult.Add;
 		}
 
 		public ProposedDeletionResult ProposeForDeletion(Page page, Template deletionTemplate)
 		{
 			ThrowNull(page, nameof(page));
+			ThrowNull(deletionTemplate, nameof(deletionTemplate));
 			var retval = this.CanDelete(page);
 			if (retval == ProposedDeletionResult.Add)
 			{

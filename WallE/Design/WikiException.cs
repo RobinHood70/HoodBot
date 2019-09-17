@@ -3,7 +3,7 @@
 	using System;
 	using System.Runtime.Serialization;
 	using System.Security.Permissions;
-	using static RobinHood70.WallE.Properties.Messages;
+	using RobinHood70.WallE.Properties;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>The exception thrown when the wiki returns an error instead of the expected result.</summary>
@@ -77,7 +77,7 @@
 		/// <param name="code">The error's <c>code</c> value.</param>
 		/// <param name="info">The error's <c>info</c> value.</param>
 		/// <returns>A new WikiException instance with a general error message.</returns>
-		public static WikiException General(string code, string info) => new WikiException(CurrentCulture(WikiExceptionGeneral, code, info), code, info);
+		public static WikiException General(string code, string info) => new WikiException(CurrentCulture(Messages.WikiExceptionGeneral, code, info), code, info);
 		#endregion
 
 		#region Public Override Methods

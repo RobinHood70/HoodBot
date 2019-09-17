@@ -4,9 +4,9 @@
 	using System.Collections.Generic;
 	using System.Text.RegularExpressions;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
-	using static RobinHood70.Robby.Properties.Resources;
 	using static RobinHood70.WikiCommon.Globals;
 
 	#region Public Enumerations
@@ -53,7 +53,7 @@
 			var titleParts = new TitleParts(site, fullPageName);
 			if (titleParts.Interwiki != null && !titleParts.Interwiki.LocalWiki)
 			{
-				throw new ArgumentException(CurrentCulture(PageNameInterwiki));
+				throw new ArgumentException(CurrentCulture(Resources.PageNameInterwiki));
 			}
 
 			this.Namespace = titleParts.Namespace;
@@ -374,7 +374,7 @@
 						{
 							if (item.Error != null)
 							{
-								this.Site.PublishWarning(this, CurrentCulture(MovePageWarning, this.FullPageName, to, item.Error.Info));
+								this.Site.PublishWarning(this, CurrentCulture(Resources.MovePageWarning, this.FullPageName, to, item.Error.Info));
 							}
 							else
 							{

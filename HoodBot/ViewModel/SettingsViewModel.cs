@@ -3,9 +3,9 @@
 	using System;
 	using System.ComponentModel;
 	using System.Windows;
+	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Clients;
-	using static RobinHood70.HoodBot.Properties.Resources;
 
 	// TODO: Re-examine WikiInfo vs MaxLaggableWikiInfo. Need to handle it better.
 	public class SettingsViewModel : Notifier, IEditableObject
@@ -105,7 +105,7 @@
 		{
 			if (string.IsNullOrWhiteSpace(this.DisplayName) || !(this.Api?.IsWellFormedOriginalString() ?? false))
 			{
-				MessageBox.Show(InvalidWikiInfo, Error, MessageBoxButton.OK, MessageBoxImage.Error);
+				MessageBox.Show(Resources.InvalidWikiInfo, Resources.Error, MessageBoxButton.OK, MessageBoxImage.Error);
 				return;
 			}
 

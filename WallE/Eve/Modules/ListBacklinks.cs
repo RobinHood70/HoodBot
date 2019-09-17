@@ -5,9 +5,9 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class ListBacklinks : ListModule<BacklinksInput, BacklinksItem>, IGeneratorModule
@@ -23,7 +23,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 
 		public ListBacklinks(WikiAbstractionLayer wal, BacklinksInput input, IPageSetGenerator pageSetGenerator)
-			: base(wal, input, pageSetGenerator) => this.linkType = input.LinkTypes.IsUniqueFlag() ? input.LinkTypes : throw new ArgumentException(InputNonUnique);
+			: base(wal, input, pageSetGenerator) => this.linkType = input.LinkTypes.IsUniqueFlag() ? input.LinkTypes : throw new ArgumentException(EveMessages.InputNonUnique);
 		#endregion
 
 		#region Public Override Properties

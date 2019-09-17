@@ -7,8 +7,8 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
+	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class ActionQuery : ActionModulePageSet<QueryInput, PageItem>, IQueryPageSet
@@ -136,7 +136,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			if (this.StopMethods.HasFlag(StopCheckMethods.Custom) && (this.Wal.CustomStopCheck?.Invoke() == true))
 			{
 				this.Wal.BreakRecursionAfterSubmit = false;
-				throw new StopException(CustomStopCheckFailed);
+				throw new StopException(EveMessages.CustomStopCheckFailed);
 			}
 
 			var userOutput = this.userModule?.Output;
@@ -147,13 +147,13 @@ namespace RobinHood70.WallE.Eve.Modules
 					this.Wal.BreakRecursionAfterSubmit = false;
 
 					// Used to check if username has unexpectedly changed, indicating that the bot has been logged out (or conceivably logged in) unexpectedly.
-					throw new StopException(UserNameChanged);
+					throw new StopException(EveMessages.UserNameChanged);
 				}
 
 				if (this.StopMethods.HasFlag(StopCheckMethods.TalkCheckQuery) && userOutput.Flags.HasFlag(UserInfoFlags.HasMessage))
 				{
 					this.Wal.BreakRecursionAfterSubmit = false;
-					throw new StopException(TalkPageChanged);
+					throw new StopException(EveMessages.TalkPageChanged);
 				}
 			}
 
@@ -331,7 +331,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 				if (!hasActiveModule)
 				{
-					throw new InvalidOperationException(NoSupportedModules);
+					throw new InvalidOperationException(EveMessages.NoSupportedModules);
 				}
 			}
 		}

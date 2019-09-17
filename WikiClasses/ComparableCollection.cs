@@ -5,7 +5,7 @@
 
 	/// <summary>A list collection that provides a Comparer.</summary>
 	/// <typeparam name="T">The type of list.</typeparam>
-	/// <seealso cref="System.Collections.Generic.IList{T}" />
+	/// <seealso cref="IList{T}" />
 	public class ComparableCollection<T> : IList<T>
 	{
 		#region Fields

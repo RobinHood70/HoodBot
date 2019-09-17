@@ -4,8 +4,8 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
+	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class PropRevisions : PropListModule<RevisionsInput, RevisionsItem>, IGeneratorModule
@@ -49,7 +49,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			if (this.IsGenerator && this.SiteVersion < 125)
 			{
-				throw new WikiException(RevisionsGeneratorVersionInvalid);
+				throw new WikiException(EveMessages.RevisionsGeneratorVersionInvalid);
 			}
 
 			ThrowNull(request, nameof(request));

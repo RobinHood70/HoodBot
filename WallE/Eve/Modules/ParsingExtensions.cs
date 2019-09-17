@@ -8,9 +8,9 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
+	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Any other API-related items that didn't warrant creation of their own static class.</summary>
@@ -185,7 +185,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			else if (revision.Sha1 != null && revision.Content != null && revision.Content.GetHash(HashType.Sha1) != revision.Sha1)
 			{
 				// CONSIDER: This was changed from a warning to an exception. Should it be handled in Eve or allowed to fall through to the caller?
-				throw new ChecksumException(CurrentCulture(RevisionSha1Failed, revision.RevisionId, pageTitle));
+				throw new ChecksumException(CurrentCulture(EveMessages.RevisionSha1Failed, revision.RevisionId, pageTitle));
 			}
 
 			return revision;

@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
 	public abstract class ListModule<TInput, TItem> : QueryModule<TInput, IList<TItem>>, IContinuableQueryModule
@@ -10,7 +11,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		where TItem : class
 	{
 		#region Constructors
-		protected ListModule(WikiAbstractionLayer wal, TInput input, IPageSetGenerator pageSetGenerator)
+		protected ListModule([ValidatedNotNull] WikiAbstractionLayer wal, [ValidatedNotNull] TInput input, IPageSetGenerator pageSetGenerator)
 			: base(wal, input, new List<TItem>(), pageSetGenerator)
 		{
 		}

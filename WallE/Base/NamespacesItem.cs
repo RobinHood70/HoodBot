@@ -2,7 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
-	using static RobinHood70.WallE.Properties.Messages;
+	using RobinHood70.WallE.Properties;
 	using static RobinHood70.WikiCommon.Globals;
 
 	#region Public Enumerations
@@ -32,7 +32,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => CurrentCulture(ColonText, this.Id, this.Name);
+		public override string ToString() => CurrentCulture(Messages.ColonText, this.Id, this.Name);
 		#endregion
 	}
 }

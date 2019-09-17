@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
+	using static RobinHood70.WikiCommon.Globals;
 
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Project naming convention takes precedence.")]
 	public class PageSetResult<T> : ReadOnlyDictionary<string, T>, IPageSetResult
@@ -30,6 +31,7 @@ namespace RobinHood70.WallE.Base
 		#region Private Static Functions
 		private static IDictionary<string, T> ToDictionary(IEnumerable<T> titles)
 		{
+			ThrowNull(titles, nameof(titles));
 			var output = new Dictionary<string, T>();
 			foreach (var title in titles)
 			{

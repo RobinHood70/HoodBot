@@ -419,6 +419,8 @@
 
 		private void InternalWriteRow(TextWriter textWriter, IEnumerable<string> row, int columnCount, char[] specialChars)
 		{
+			ThrowNull(textWriter, nameof(textWriter));
+			ThrowNull(row, nameof(row));
 			var rewriteFields = new List<string>(columnCount);
 			if (columnCount == 0)
 			{

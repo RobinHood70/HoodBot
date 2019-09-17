@@ -10,9 +10,9 @@
 	using RobinHood70.WallE.Clients;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Eve.Modules;
+	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>An API-based implementation of the <see cref="IWikiAbstractionLayer" /> interface.</summary>
@@ -49,7 +49,7 @@
 			ThrowNull(uri, nameof(uri));
 			if (!uri.AbsolutePath.EndsWith("api.php", StringComparison.OrdinalIgnoreCase))
 			{
-				throw new InvalidOperationException(CurrentCulture(InvalidApi));
+				throw new InvalidOperationException(CurrentCulture(EveMessages.InvalidApi));
 			}
 
 			this.Client = client;
@@ -333,6 +333,7 @@
 		/// <returns>The site's response to the request.</returns>
 		public string SendRequest(Request request)
 		{
+			ThrowNull(request, nameof(request));
 			this.OnSendingRequest(new RequestEventArgs(request));
 			string response;
 			switch (request.Type)
@@ -1255,7 +1256,7 @@
 			ThrowNull(input, nameof(input));
 			if (input.User == null && input.UserId > 0 && this.SiteVersion == 123 && input.Token == null)
 			{
-				throw new InvalidOperationException(InvalidUserRightsRequest);
+				throw new InvalidOperationException(EveMessages.InvalidUserRightsRequest);
 			}
 
 			input.Token = input.Token ?? this.TokenManager.UserRightsToken(input.User);
@@ -1283,7 +1284,7 @@
 
 			if (input.ListType != ListType.Titles || input.GeneratorInput != null)
 			{
-				throw new InvalidOperationException(WatchNotSupported);
+				throw new InvalidOperationException(EveMessages.WatchNotSupported);
 			}
 
 			var list = new List<WatchItem>();

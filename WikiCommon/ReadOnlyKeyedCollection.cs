@@ -7,9 +7,9 @@
 	/// <summary>A read-only version of the KeyedCollection class.</summary>
 	/// <typeparam name="TKey">The type of the key.</typeparam>
 	/// <typeparam name="TItem">The type of the item.</typeparam>
-	/// <seealso cref="System.Collections.Generic.IEnumerable{TItem}" />
-	/// <seealso cref="System.Collections.Generic.IReadOnlyList{TItem}" />
-	/// <seealso cref="System.Collections.Generic.IReadOnlyCollection{TItem}" />
+	/// <seealso cref="IEnumerable{TItem}" />
+	/// <seealso cref="IReadOnlyList{TItem}" />
+	/// <seealso cref="IReadOnlyCollection{TItem}" />
 	public abstract class ReadOnlyKeyedCollection<TKey, TItem> : IEnumerable<TItem>, IReadOnlyList<TItem>, IReadOnlyCollection<TItem>
 	{
 		#region Fields

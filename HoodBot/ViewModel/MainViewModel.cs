@@ -13,6 +13,7 @@
 	using System.Windows.Media;
 	using RobinHood70.HoodBot.Jobs;
 	using RobinHood70.HoodBot.Jobs.Design;
+	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.HoodBotPlugins;
 	using RobinHood70.Robby;
@@ -21,7 +22,6 @@
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WikiClasses.Parser;
 	using static System.Environment;
-	using static RobinHood70.HoodBot.Properties.Resources;
 	using static RobinHood70.WikiCommon.Globals;
 
 	// TODO: Reduce/eliminate dependence on WallE if possible. Ideally, this should all be available directly through Robby or via a communal class.
@@ -177,16 +177,16 @@
 		internal IParameterFetcher ParameterFetcher { get; set; }
 		#endregion
 
-		#region Public Static Methods
+		#region Internal Static Methods
 
-		public static void SiteWarningOccurred(Site sender, WarningEventArgs eventArgs) => Debug.WriteLine(eventArgs.Warning);
+		internal static void SiteWarningOccurred(Site sender, WarningEventArgs eventArgs) => Debug.WriteLine(eventArgs?.Warning);
 
 #if DEBUG
-		public static void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName} Response: {eventArgs.Response}");
+		internal static void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName} Response: {eventArgs.Response}");
 
-		public static void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName} Request: {eventArgs.Request}");
+		internal static void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName} Request: {eventArgs.Request}");
 
-		public static void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName} Warning: ({eventArgs?.Warning.Code}) {eventArgs?.Warning.Info}");
+		internal static void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName} Warning: ({eventArgs?.Warning.Code}) {eventArgs?.Warning.Info}");
 #endif
 		#endregion
 
@@ -272,7 +272,7 @@
 
 		private void Client_RequestingDelay(IMediaWikiClient sender, DelayEventArgs eventArgs)
 		{
-			this.StatusWriteLine(CurrentCulture(DelayRequested, eventArgs.Reason, eventArgs.DelayTime.TotalSeconds + "s", eventArgs.Description));
+			this.StatusWriteLine(CurrentCulture(Resources.DelayRequested, eventArgs.Reason, eventArgs.DelayTime.TotalSeconds + "s", eventArgs.Description));
 			App.WpfYield();
 		}
 
@@ -335,7 +335,7 @@
 					catch (OperationCanceledException)
 					{
 						success = false;
-						MessageBox.Show(JobCancelled, nameof(HoodBot), MessageBoxButton.OK, MessageBoxImage.Information);
+						MessageBox.Show(Resources.JobCancelled, nameof(HoodBot), MessageBoxButton.OK, MessageBoxImage.Information);
 						break;
 					}
 #pragma warning disable CA1031 // Do not catch general exception types

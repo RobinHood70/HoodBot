@@ -19,7 +19,7 @@ namespace RobinHood70.WikiClasses.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -70,11 +70,38 @@ namespace RobinHood70.WikiClasses.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} should never be called on the Root Stack Element..
+        /// </summary>
+        internal static string CalledOnRoot {
+            get {
+                return ResourceManager.GetString("CalledOnRoot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Parameter \&quot;{0}\&quot; already exists..
         /// </summary>
         internal static string ParameterExists {
             get {
                 return ResourceManager.GetString("ParameterExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stack is empty or you attempted to pop the root node..
+        /// </summary>
+        internal static string PoppedRoot {
+            get {
+                return ResourceManager.GetString("PoppedRoot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Different numbers of &apos;=&apos; in Section title..
+        /// </summary>
+        internal static string SectionLevelMismatch {
+            get {
+                return ResourceManager.GetString("SectionLevelMismatch", resourceCulture);
             }
         }
     }

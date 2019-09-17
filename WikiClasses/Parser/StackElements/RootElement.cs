@@ -1,6 +1,8 @@
 ﻿namespace RobinHood70.WikiClasses.Parser.StackElements
 {
 	using System;
+	using RobinHood70.WikiClasses.Properties;
+	using static WikiCommon.Globals;
 
 	internal class RootElement : StackElement
 	{
@@ -22,7 +24,7 @@
 		#endregion
 
 		#region Internal Override Methods
-		internal override NodeCollection BreakSyntax() => throw new InvalidOperationException("BreakSyntax should never be called on the Root Stack Element.");
+		internal override NodeCollection BreakSyntax() => throw new InvalidOperationException(CurrentCulture(Resources.CalledOnRoot, nameof(this.BreakSyntax)));
 
 		internal override void Parse(char found) => this.Stack.Parse(found);
 		#endregion

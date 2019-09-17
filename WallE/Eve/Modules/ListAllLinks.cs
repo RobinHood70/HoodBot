@@ -4,9 +4,9 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class ListAllLinks : ListModule<IAllLinksInput, AllLinksItem>, IGeneratorModule
@@ -36,7 +36,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					(this.Prefix, this.Name) = ("at", "alltransclusions");
 					break;
 				default:
-					throw new ArgumentException(CurrentCulture(linkType.IsUniqueFlag() ? ParameterInvalid : InputNonUnique, nameof(ListAllLinks), linkType));
+					throw new ArgumentException(CurrentCulture(linkType.IsUniqueFlag() ? EveMessages.ParameterInvalid : EveMessages.InputNonUnique, nameof(ListAllLinks), linkType));
 			}
 		}
 		#endregion

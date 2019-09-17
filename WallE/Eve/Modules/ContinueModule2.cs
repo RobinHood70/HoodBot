@@ -3,8 +3,8 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System.Diagnostics;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class ContinueModule2 : ContinueModule
@@ -80,7 +80,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				Debug.Indent();
 				foreach (var entry in this.ContinueEntries)
 				{
-					Debug.WriteLine(CurrentCulture(ColonText, entry.Key, entry.Value));
+					Debug.WriteLine(CurrentCulture(EveMessages.ColonText, entry.Key, entry.Value));
 				}
 
 				Debug.Unindent();

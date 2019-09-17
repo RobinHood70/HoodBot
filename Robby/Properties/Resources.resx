@@ -132,6 +132,12 @@
   <data name="PageNameInterwiki" xml:space="preserve">
     <value>Invalid page name: [[{0}]]. Page is an interwiki link that doesn't resolve to the local wiki.</value>
   </data>
+  <data name="SizeInvalid" xml:space="preserve">
+    <value>Size value invalid.</value>
+  </data>
+  <data name="SourceCollectionEmpty" xml:space="preserve">
+    <value>Source collection is empty - TitleCollection could not be initialized.</value>
+  </data>
   <data name="TitleDoubleNamespace" xml:space="preserve">
     <value>The title cannot be in Talk namespace and followed immediately by another namespace or interwiki prefix.</value>
   </data>

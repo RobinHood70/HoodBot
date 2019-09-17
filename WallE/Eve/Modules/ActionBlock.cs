@@ -4,9 +4,9 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
+	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class ActionBlock : ActionModule<BlockInput, BlockResult>
@@ -79,7 +79,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			// Throw a custom error, since MW 1.25 and under handle this incorrectly.
 			if (result != null && result.Contains("must be an instance of Block"))
 			{
-				throw WikiException.General("reblock-failed", ReblockFailed);
+				throw WikiException.General("reblock-failed", EveMessages.ReblockFailed);
 			}
 
 			return base.DeserializeCustom(result);

@@ -4,7 +4,7 @@
 	using System.Collections.Generic;
 
 	/// <summary>An ISimpleTitle comparer to sort by full page name.</summary>
-	/// <seealso cref="System.Collections.Generic.IComparer{T}" />
+	/// <seealso cref="IComparer{T}" />
 	public class FullPageNameComparer : IComparer<ISimpleTitle>
 	{
 		#region Public Methods

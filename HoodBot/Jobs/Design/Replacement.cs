@@ -69,7 +69,11 @@
 		#endregion
 
 		#region Public Methods
-		public int CompareTo(Replacement other) => TitleComparer<Title>.Instance.Compare(this.From, other.From);
+		public int CompareTo(Replacement other)
+		{
+			ThrowNull(other, nameof(other));
+			return TitleComparer<Title>.Instance.Compare(this.From, other.From);
+		}
 
 		public bool Equals(Replacement other) => !(other is null) && this.From == other.From; // Nothing else is checked for equality, as multiple values for the same From are invalid.
 		#endregion

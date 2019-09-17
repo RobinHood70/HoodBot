@@ -5,6 +5,7 @@
 	using System.Text.RegularExpressions;
 	using RobinHood70.WikiClasses.Parser.Nodes;
 	using RobinHood70.WikiClasses.Parser.StackElements;
+	using RobinHood70.WikiClasses.Properties;
 	using static System.FormattableString;
 
 	// Not a .NET Stack<T> mostly for closer parity with the original PHP version, plus it significantly outperforms the built-in one. Top, being a property, also provides a significant debugging advantage over Peek().
@@ -183,7 +184,7 @@
 		{
 			if (this.count-- < 2)
 			{
-				throw new InvalidOperationException("Stack is empty or you attempted to pop the root node.");
+				throw new InvalidOperationException(Resources.PoppedRoot);
 			}
 
 			this.array[this.count] = null;

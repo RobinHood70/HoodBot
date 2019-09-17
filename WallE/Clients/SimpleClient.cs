@@ -13,9 +13,9 @@
 	using System.Text;
 	using System.Threading;
 	using RobinHood70.WallE.Design;
+	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WallE.Clients.ClientShared;
-	using static RobinHood70.WallE.Properties.Messages;
 	using static RobinHood70.WikiCommon.Globals;
 
 	// TODO: Add cancellation token possibilities so requests can be cancelled if they're failing without waiting for all retries.
@@ -66,11 +66,11 @@
 				}
 				catch (EntryPointNotFoundException)
 				{
-					throw new InvalidOperationException(MonoCreateZStreamBug);
+					throw new InvalidOperationException(Messages.MonoCreateZStreamBug);
 				}
 				catch (DllNotFoundException)
 				{
-					throw new InvalidOperationException(MonoCreateZStreamBug);
+					throw new InvalidOperationException(Messages.MonoCreateZStreamBug);
 				}
 			}
 
@@ -430,7 +430,7 @@
 				}
 			}
 
-			throw new WikiException("Excessive lag!");
+			throw new WikiException(CurrentCulture(Messages.ExcessiveLag));
 		}
 
 		private bool CheckDelay(HttpWebResponse response, int attemptNumber)

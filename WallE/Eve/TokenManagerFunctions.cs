@@ -2,7 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using static RobinHood70.WallE.Properties.EveMessages;
+	using RobinHood70.WallE.Properties;
 
 	internal static class TokenManagerFunctions
 	{
@@ -18,7 +18,7 @@
 
 			if (!validTypes.Contains(type))
 			{
-				throw new ArgumentException(BadTokenRequest, nameof(type));
+				throw new ArgumentException(EveMessages.BadTokenRequest, nameof(type));
 			}
 
 			return type;

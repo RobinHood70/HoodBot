@@ -6,9 +6,9 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
+	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class MetaSiteInfo : QueryModule<SiteInfoInput, SiteInfoResult>, IContinuableQueryModule
@@ -160,7 +160,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					}
 					catch (InvalidCastException)
 					{
-						wal.AddWarning("siteinfo-unhandledparams", CurrentCulture(UnhandledParams, item.Name));
+						wal.AddWarning("siteinfo-unhandledparams", CurrentCulture(EveMessages.UnhandledParams, item.Name));
 					}
 
 					item.Author = (string)result["author"];

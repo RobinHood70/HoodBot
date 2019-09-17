@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Text;
+	using RobinHood70.Robby.Properties;
 	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
 
@@ -156,7 +157,7 @@
 		/// <remarks>Setting this option will remove any <see cref="Upright"/> parameter, and vice versa, since they are mutually exclusive. Both may be set simultaneously, however, if the link is parsed from existing text. In that case, if either is altered, the other will be removed.</remarks>
 		public int Height
 		{
-			get => this.GetSize().Height;
+			get => this.GetSize().height;
 			set => this.SetSize(value, this.Width);
 		}
 
@@ -251,7 +252,7 @@
 		/// <remarks>Setting this option will remove any <see cref="Upright"/> parameter, and vice versa, since they are mutually exclusive. Both may be set simultaneously, however, if the link is parsed from existing text. In that case, if either is altered, the other will be removed.</remarks>
 		public int Width
 		{
-			get => this.GetSize().Width;
+			get => this.GetSize().width;
 			set => this.SetSize(value, this.Height);
 		}
 
@@ -269,13 +270,13 @@
 		/// <summary>Gets the image size.</summary>
 		/// <returns>The image height and width. If either value is missing, a zero will be returned for that value.</returns>
 		/// <exception cref="InvalidOperationException">The size text is invalid, and could not be parsed.</exception>
-		public (int Height, int Width) GetSize()
+		public (int height, int width) GetSize()
 		{
 			var split = this.Size.Value.Split('x');
 			return
 				split.Length == 1 ? (0, int.TryParse(split[0], out var result) ? result : throw NonNumeric) :
 				split.Length == 2 ? (int.TryParse("0" + split[0], out var width) ? width : throw NonNumeric, int.TryParse("0" + split[1], out var height) ? height : throw NonNumeric) :
-				throw new InvalidOperationException("Size value invalid.");
+				throw new InvalidOperationException(Resources.SizeInvalid);
 		}
 
 		/// <summary>Reformats all parameters using the specified formats and sorts them in a standardized order.</summary>
@@ -361,12 +362,16 @@
 				return null;
 			}
 
-			if (!this.Site.ImageParameterRegexes.TryGetValue(paramName, out var regex))
+			if (this.Site.ImageParameterRegexes.TryGetValue(paramName, out var regex))
 			{
-				return param.Value;
+				var value = regex.Match(param.Value).Groups["value"];
+				if (value.Success)
+				{
+					return value.Value;
+				}
 			}
 
-			return regex.Match(param.Value).Groups["value"]?.Value ?? param.Value;
+			return param.Value;
 		}
 
 		private PaddedString GetValue(string paramName) => this.parameters[paramName]?.FullValue;

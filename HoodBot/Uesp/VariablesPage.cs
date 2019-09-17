@@ -5,6 +5,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public class VariablesPage : Page
 	{
@@ -21,6 +22,7 @@
 
 		protected override void PopulateCustomResults(PageItem pageItem)
 		{
+			ThrowNull(pageItem, nameof(pageItem));
 			var varPageItem = pageItem as VariablesPageItem;
 			var dictionary = new Dictionary<string, VariablesResult>();
 			foreach (var item in varPageItem.Variables)

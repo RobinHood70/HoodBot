@@ -2,8 +2,8 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
+	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WallE.Properties.Messages;
 	using static RobinHood70.WikiCommon.Globals;
 
 	public class AllCategoriesItem : ITitle
@@ -16,7 +16,7 @@ namespace RobinHood70.WallE.Base
 		public int? Namespace
 		{
 			get => MediaWikiNamespaces.Category;
-			set => throw new InvalidOperationException(CurrentCulture(NotSettable));
+			set => throw new InvalidOperationException(CurrentCulture(Messages.NotSettable));
 		}
 
 		public long PageId { get; set; }

@@ -2,6 +2,7 @@
 {
 	using System.Text;
 	using RobinHood70.WikiClasses.Parser.Nodes;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public class WikiTextVisitor : IVisitor
 	{
@@ -17,6 +18,7 @@
 		#region Public Methods
 		public string Build(INodeBase node)
 		{
+			ThrowNull(node, nameof(node));
 			this.builder.Clear();
 			node.Accept(this);
 			return this.builder.ToString();
@@ -26,9 +28,10 @@
 		#region IVisitor Methods
 		public virtual void Visit(CommentNode node)
 		{
+			ThrowNull(node, nameof(node));
 			if (!this.valuesOnly)
 			{
-				this.builder.Append(node?.Comment);
+				this.builder.Append(node.Comment);
 			}
 		}
 
@@ -38,6 +41,7 @@
 
 		public virtual void Visit(IgnoreNode node)
 		{
+			ThrowNull(node, nameof(node));
 			if (!this.valuesOnly)
 			{
 				this.builder.Append(node.Value);
@@ -46,6 +50,7 @@
 
 		public void Visit(LinkNode node)
 		{
+			ThrowNull(node, nameof(node));
 			this.builder.Append("[[");
 			node.Title.Accept(this);
 			foreach (var param in node.Parameters)
@@ -58,6 +63,7 @@
 
 		public void Visit(NodeCollection nodes)
 		{
+			ThrowNull(nodes, nameof(nodes));
 			foreach (var node in nodes)
 			{
 				node.Accept(this);
@@ -66,6 +72,7 @@
 
 		public void Visit(ParameterNode node)
 		{
+			ThrowNull(node, nameof(node));
 			this.builder.Append('|');
 			if (node.Name != null)
 			{
@@ -78,6 +85,7 @@
 
 		public virtual void Visit(TagNode node)
 		{
+			ThrowNull(node, nameof(node));
 			if (!this.valuesOnly)
 			{
 				this.builder
@@ -101,6 +109,7 @@
 
 		public void Visit(TemplateNode node)
 		{
+			ThrowNull(node, nameof(node));
 			this.builder.Append("{{");
 			node.Title.Accept(this);
 			foreach (var param in node.Parameters)
@@ -111,7 +120,11 @@
 			this.builder.Append("}}");
 		}
 
-		public void Visit(TextNode node) => this.builder.Append(node?.Text);
+		public void Visit(TextNode node)
+		{
+			ThrowNull(node, nameof(node));
+			this.builder.Append(node.Text);
+		}
 		#endregion
 	}
 }

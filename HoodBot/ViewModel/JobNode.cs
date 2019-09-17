@@ -153,6 +153,7 @@
 		#region Public Static Methods
 		public static IEnumerable<JobNode> GetCheckedJobs(IEnumerable<JobNode> children)
 		{
+			ThrowNull(children, nameof(children));
 			foreach (var job in children)
 			{
 				if (job.Children != null)

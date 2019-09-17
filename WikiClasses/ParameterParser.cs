@@ -140,7 +140,7 @@
 		#endregion
 
 		#region Private Methods
-		private (Delimiter Delimiter, bool IsTerminator) CheckForDelimiter(int index)
+		private (Delimiter delimiter, bool isTerminator) CheckForDelimiter(int index)
 		{
 			if (this.delimiterStack.Count > 0)
 			{
@@ -366,12 +366,7 @@
 				}
 				while (nextToken != null && (nextToken.Type != TokenType.DelimiterTerminator || this.TokenText(nextToken) != delimiter.Terminator));
 
-				if (nextToken != null)
-				{
-					return new Token(markerIndex, terminatorIndex - markerIndex, delimiter.TokenType);
-				}
-
-				return null;
+				return nextToken != null ? new Token(markerIndex, terminatorIndex - markerIndex, delimiter.TokenType) : null;
 			}
 		}
 

@@ -5,7 +5,7 @@
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>An IKeyedTitle equality comparer to determine equality based on the Namespace and PageName only.</summary>
-	/// <seealso cref="System.Collections.Generic.EqualityComparer{T}" />
+	/// <seealso cref="EqualityComparer{T}" />
 	public class KeyedTitleEqualityComparer : IEqualityComparer<IKeyedTitle>, IEqualityComparer
 	{
 		#region Constructors

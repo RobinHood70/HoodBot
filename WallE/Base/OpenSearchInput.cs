@@ -3,8 +3,9 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
-	using static RobinHood70.WallE.Properties.Messages;
+	using RobinHood70.WallE.Properties;
 
+	#region Public Enumerations
 	public enum SearchProfile
 	{
 		Fuzzy,
@@ -18,6 +19,7 @@ namespace RobinHood70.WallE.Base
 		Return,
 		Resolve
 	}
+	#endregion
 
 	public class OpenSearchInput
 	{
@@ -26,7 +28,7 @@ namespace RobinHood70.WallE.Base
 		{
 			if (string.IsNullOrWhiteSpace(search))
 			{
-				throw new ArgumentException(InvalidSearchString, search);
+				throw new ArgumentException(Messages.InvalidSearchString, search);
 			}
 
 			this.Search = search;

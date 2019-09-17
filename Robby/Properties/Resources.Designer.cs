@@ -19,7 +19,7 @@ namespace RobinHood70.Robby.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -102,6 +102,24 @@ namespace RobinHood70.Robby.Properties {
         internal static string PageNameInterwiki {
             get {
                 return ResourceManager.GetString("PageNameInterwiki", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Size value invalid..
+        /// </summary>
+        internal static string SizeInvalid {
+            get {
+                return ResourceManager.GetString("SizeInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Source collection is empty - TitleCollection could not be initialized..
+        /// </summary>
+        internal static string SourceCollectionEmpty {
+            get {
+                return ResourceManager.GetString("SourceCollectionEmpty", resourceCulture);
             }
         }
         

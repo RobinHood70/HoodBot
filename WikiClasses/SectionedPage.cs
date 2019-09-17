@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Text;
 	using System.Text.RegularExpressions;
+	using RobinHood70.WikiClasses.Properties;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>A simple class to allow parsing and manipulation of wikitext as lead text with a collection of page sections.</summary>
@@ -183,7 +184,7 @@
 			var level = groups["levelopen"].Value.Length;
 			if (level != groups["levelclose"].Value.Length)
 			{
-				throw new InvalidOperationException("Different numbers of '=' in Section title.");
+				throw new InvalidOperationException(Resources.SectionLevelMismatch);
 			}
 
 			var textStart = match.Index + match.Length;

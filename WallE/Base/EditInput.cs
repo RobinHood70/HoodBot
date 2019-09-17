@@ -3,9 +3,9 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WallE.ProjectGlobals;
-	using static RobinHood70.WallE.Properties.EveMessages;
 	using static RobinHood70.WikiCommon.Globals;
 
 	public class EditInput
@@ -31,7 +31,7 @@ namespace RobinHood70.WallE.Base
 			ThrowNullOrWhiteSpace(title, nameof(title));
 			if (string.IsNullOrEmpty(prependText ?? appendText))
 			{
-				throw new ArgumentException(CurrentCulture(PrependAppend));
+				throw new ArgumentException(CurrentCulture(EveMessages.PrependAppend));
 			}
 
 			this.Title = title;
@@ -43,7 +43,7 @@ namespace RobinHood70.WallE.Base
 		{
 			if (string.IsNullOrEmpty(prependText ?? appendText))
 			{
-				throw new ArgumentException(CurrentCulture(PrependAppend));
+				throw new ArgumentException(CurrentCulture(EveMessages.PrependAppend));
 			}
 
 			this.PageId = pageId;

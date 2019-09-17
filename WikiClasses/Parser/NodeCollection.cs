@@ -101,22 +101,22 @@
 		#endregion
 
 		#region Internal Methods
-		internal void AddLiteral(string text)
+		internal void AddLiteral(string literal)
 		{
 			var last = this.nodes.Count - 1;
 			if (last == -1)
 			{
-				this.Add(new TextNode(text));
+				this.Add(new TextNode(literal));
 			}
 			else
 			{
 				if (!(this.nodes[last] is TextNode node))
 				{
-					this.Add(new TextNode(text));
+					this.Add(new TextNode(literal));
 				}
 				else
 				{
-					node.Text += text;
+					node.Text += literal;
 				}
 			}
 		}

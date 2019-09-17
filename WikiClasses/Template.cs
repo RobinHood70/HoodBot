@@ -152,12 +152,7 @@
 		public static Template FindTemplate(string name, string text)
 		{
 			var finder = Find(name).Match(text);
-			if (finder.Success)
-			{
-				return new Template(finder.Value);
-			}
-
-			return null;
+			return finder.Success ? new Template(finder.Value) : null;
 		}
 
 		/// <summary>Finds the first template that matches the provided Regex, within the specified text, and returns it as a <see cref="Template"/> object.</summary>
@@ -168,12 +163,7 @@
 		{
 			ThrowNull(finder, nameof(finder));
 			var match = finder.Match(text);
-			if (match.Success)
-			{
-				return new Template(match.Value);
-			}
-
-			return null;
+			return match.Success ? new Template(match.Value) : null;
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Template"/> class. The name and parameters will be parsed from the provided text.</summary>
@@ -407,6 +397,7 @@
 
 		private static string RegexName(IEnumerable<string> names)
 		{
+			ThrowNull(names, nameof(names));
 			using (var namesEnumerator = names.GetEnumerator())
 			{
 				if (!namesEnumerator.MoveNext())

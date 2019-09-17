@@ -1,19 +1,21 @@
 ﻿namespace RobinHood70.WallE.Base
 {
 	using System;
+	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WallE.Properties.Messages;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Stores the inputs and the responses for any requests made to the wiki during the initialization routine. This potentially allows requests to be combined between layers.</summary>
 	/// <seealso cref="EventArgs" />
 	public class InitializationEventArgs : EventArgs
 	{
+		#region Fields
 		private Filter filterLocalInterwiki;
 		private string interwikiLanguageCode;
 		private SiteInfoProperties properties;
 		private bool showAllDatabases;
 		private bool showNumberInGroup;
+		#endregion
 
 		/// <summary>Initializes a new instance of the <see cref="InitializationEventArgs"/> class.</summary>
 		/// <param name="input">The SiteInfo input.</param>
@@ -43,7 +45,7 @@
 		public string InterwikiLanguageCode
 		{
 			get => this.interwikiLanguageCode;
-			set => this.interwikiLanguageCode = string.IsNullOrEmpty(this.interwikiLanguageCode) || this.interwikiLanguageCode == value ? value : throw new InvalidOperationException(CurrentCulture(SiteInfoLanguageConflict));
+			set => this.interwikiLanguageCode = string.IsNullOrEmpty(this.interwikiLanguageCode) || this.interwikiLanguageCode == value ? value : throw new InvalidOperationException(CurrentCulture(Messages.SiteInfoLanguageConflict));
 		}
 
 		/// <summary>Gets or sets the properties specify the data to retrieve.</summary>

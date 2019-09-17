@@ -3,7 +3,7 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.Collections.ObjectModel;
-	using static RobinHood70.WallE.Properties.Messages;
+	using RobinHood70.WallE.Properties;
 	using static RobinHood70.WikiCommon.Globals;
 
 	public class ModuleCollection<TModule> : KeyedCollection<string, TModule>
@@ -36,7 +36,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			if (this.TryGetValue(name, out var foundItem))
 			{
 				item = foundItem as TOutput;
-				return item == null ? throw new InvalidOperationException(CurrentCulture(IncorrectModuleType, name, typeof(TOutput).Name, foundItem.GetType().Name)) : true;
+				return item == null ? throw new InvalidOperationException(CurrentCulture(Messages.IncorrectModuleType, name, typeof(TOutput).Name, foundItem.GetType().Name)) : true;
 			}
 
 			item = null;
