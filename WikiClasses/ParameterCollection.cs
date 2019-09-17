@@ -5,8 +5,8 @@
 	using System.Collections.Generic;
 	using System.Globalization;
 	using System.Text;
+	using RobinHood70.WikiClasses.Properties;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiClasses.Properties.Resources;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>A class for templates and file links which provides Parameter collection-related functionality.</summary>
@@ -96,7 +96,7 @@
 
 		/// <summary>Gets an enumeration of the name or position of each parameter, along with the parameter itself.</summary>
 		/// <value>The parameter names and values.</value>
-		public IEnumerable<(string PositionalName, Parameter Parameter)> PositionalParameters
+		public IEnumerable<(string positionalName, Parameter parameter)> PositionalParameters
 		{
 			get
 			{
@@ -135,11 +135,11 @@
 			{
 				// We have to search the entire collection, rather than bailing out at the first match, because parameters could be duplicated or have anonymous vs. numbered conflicts.
 				Parameter match = null;
-				foreach (var param in this.PositionalParameters)
+				foreach (var (positionalName, parameter) in this.PositionalParameters)
 				{
-					if (this.Comparer.Compare(key, param.PositionalName) == 0)
+					if (this.Comparer.Compare(key, positionalName) == 0)
 					{
-						match = param.Parameter;
+						match = parameter;
 					}
 				}
 
@@ -267,20 +267,21 @@
 		/// <summary>Adds a parameter to the collection if a parameter with that name is blank or does not exist.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
-		/// <returns>The parameter with the name provided.</returns>
+		/// <returns>The new parameter, or null if the parameter already had a non-blank value.</returns>
 		public Parameter AddIfBlank(string name, string value)
 		{
 			var param = this[name];
 			if (param == null)
 			{
-				param = this.Add(name, value);
+				return this.Add(name, value);
 			}
-			else if (param.Value.Length == 0)
+			else if (param.Value.Length == 0 && !string.IsNullOrEmpty(value))
 			{
 				param.Value = value;
+				return param;
 			}
 
-			return param;
+			return null;
 		}
 
 		/// <summary>Adds a parameter to the collection if a parameter with that name does not already exist.</summary>
@@ -338,7 +339,7 @@
 					var newPos = this.GetAnonymousPosition(param);
 					if (newPos != position)
 					{
-						throw new InvalidOperationException(CurrentCulture(AnonymizeBad, param.Name, newPos, position));
+						throw new InvalidOperationException(CurrentCulture(Resources.AnonymizeBad, param.Name, newPos, position));
 					}
 				}
 			}
@@ -592,15 +593,15 @@
 		{
 			var keyOrder = new List<string>();
 			var parameterCopy = new Dictionary<string, Parameter>();
-			foreach (var param in this.PositionalParameters)
+			foreach (var (positionalName, parameter) in this.PositionalParameters)
 			{
-				if (parameterCopy.TryGetValue(param.PositionalName, out var item))
+				if (parameterCopy.TryGetValue(positionalName, out var item))
 				{
-					keyOrder.Remove(param.PositionalName);
+					keyOrder.Remove(positionalName);
 				}
 
-				keyOrder.Add(param.PositionalName);
-				parameterCopy[param.PositionalName] = param.Parameter;
+				keyOrder.Add(positionalName);
+				parameterCopy[positionalName] = parameter;
 			}
 
 			var retval = keyOrder.Count != this.Count;
@@ -696,12 +697,7 @@
 		public bool RemoveOrChange(string name, string value, bool removeCondition)
 		{
 			ThrowNull(name, nameof(name));
-			if (removeCondition)
-			{
-				return this.Remove(name);
-			}
-
-			return this.AddOrChangeInternal(this[name], name, value, false);
+			return removeCondition ? this.Remove(name) : this.AddOrChangeInternal(this[name], name, value, false);
 		}
 
 		/// <summary>Removes the named parameter if the predicate evaluates to true; otherwise, changes it to the provided value.</summary>
@@ -713,12 +709,7 @@
 		{
 			ThrowNull(removeCondition, nameof(removeCondition));
 			var param = this[name];
-			if (removeCondition(param))
-			{
-				return this.Remove(name);
-			}
-
-			return this.AddOrChangeInternal(param, name, value, false);
+			return removeCondition(param) ? this.Remove(name) : this.AddOrChangeInternal(param, name, value, false);
 		}
 
 		/// <summary>Renames the specified parameter.</summary>
@@ -737,7 +728,7 @@
 		/// <remarks>To bypass the parameter name checks, use <see cref="Parameter.Rename(string)"/> instead.</remarks>
 		public bool RenameParameter(Parameter from, string to) =>
 			(from == null || from.Name == to) ? false :
-			this.Contains(to) ? throw new InvalidOperationException(CurrentCulture(ParameterExists, to)) :
+			this.Contains(to) ? throw new InvalidOperationException(CurrentCulture(Resources.ParameterExists, to)) :
 			from.Rename(to);
 
 		/// <summary>Sorts parameters in the order specified.</summary>
