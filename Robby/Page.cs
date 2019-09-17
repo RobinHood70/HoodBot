@@ -3,9 +3,9 @@
 	using System;
 	using System.Collections.Generic;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.Robby.Properties.Resources;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Represents a wiki page.</summary>
@@ -69,7 +69,7 @@
 					// Disambiguator is 1.21+, so we don't need to worry about the fact that page properties are 1.17+.
 					if (!this.LoadOptions.Modules.HasFlag(PageModules.Properties))
 					{
-						throw new InvalidOperationException(CurrentCulture(ModuleNotLoaded, nameof(PageModules.Properties), nameof(this.IsDisambiguation)));
+						throw new InvalidOperationException(CurrentCulture(Resources.ModuleNotLoaded, nameof(PageModules.Properties), nameof(this.IsDisambiguation)));
 					}
 
 					return this.Properties.ContainsKey("disambiguation");
@@ -77,7 +77,7 @@
 
 				if (!this.LoadOptions.Modules.HasFlag(PageModules.Templates))
 				{
-					throw new InvalidOperationException(CurrentCulture(ModuleNotLoaded, nameof(PageModules.Templates), nameof(this.IsDisambiguation)));
+					throw new InvalidOperationException(CurrentCulture(Resources.ModuleNotLoaded, nameof(PageModules.Templates), nameof(this.IsDisambiguation)));
 				}
 
 				var templates = new HashSet<Title>(this.Templates);

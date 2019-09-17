@@ -66,7 +66,7 @@
 				return 1;
 			}
 
-			var siteCulture = x.Namespace.Site.Culture;
+			var siteCulture = x.Site.Culture;
 			return x.Namespace.CaseSensitive
 				? string.Compare(x.PageName, y.PageName, true, siteCulture)
 				: string.Compare(x.PageName.UpperFirst(siteCulture), y.PageName.UpperFirst(siteCulture), true, siteCulture);

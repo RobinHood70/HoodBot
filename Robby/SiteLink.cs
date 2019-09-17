@@ -36,7 +36,7 @@
 		public SiteLink(ISimpleTitle title)
 		{
 			ThrowNull(title, nameof(title));
-			this.Site = title.Namespace.Site;
+			this.Site = title.Site;
 			this.namespaceObject = title.Namespace;
 			this.LeadingColon = title.Namespace.IsForcedLinkSpace;
 			this.PageName = title.PageName;
@@ -49,7 +49,7 @@
 		public SiteLink(IFullTitle title)
 		{
 			ThrowNull(title, nameof(title));
-			this.Site = title.Namespace.Site;
+			this.Site = title.Site;
 			this.interwikiObject = title.Interwiki;
 			this.namespaceObject = title.Namespace;
 			this.LeadingColon = title.Namespace.IsForcedLinkSpace;

@@ -20,7 +20,7 @@
 	}
 	#endregion
 
-	public abstract class WikiTask
+	public abstract class WikiTask : ISiteSpecific
 	{
 		#region Fields
 		private readonly Regex alreadyProposed;

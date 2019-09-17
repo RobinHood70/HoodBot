@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	/// <summary>Interface for Title-like objects.</summary>
-	public interface ISimpleTitle
+	public interface ISimpleTitle : ISiteSpecific
 	{
 		#region Properties
 

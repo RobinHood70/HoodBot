@@ -1,10 +1,11 @@
 ﻿namespace RobinHood70.Robby
 {
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Represents information about an interwiki entry.</summary>
-	public class InterwikiEntry
+	public class InterwikiEntry : ISiteSpecific
 	{
 		#region Constructors
 

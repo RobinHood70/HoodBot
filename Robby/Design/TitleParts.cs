@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System;
+	using RobinHood70.Robby.Properties;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.Robby.Properties.Resources;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Splits a page name into its constituent parts.</summary>
@@ -37,7 +37,7 @@
 
 			if (nameRemaining.Length == 0)
 			{
-				throw new ArgumentException(CurrentCulture(TitleInvalid));
+				throw new ArgumentException(CurrentCulture(Resources.TitleInvalid));
 			}
 
 			var split = nameRemaining.Split(TextArrays.Colon, 3);
@@ -176,6 +176,10 @@
 		/// <summary>Gets or sets the name of the page without the namespace.</summary>
 		/// <value>The name of the page without the namespace.</value>
 		public string PageName { get; set; }
+
+		/// <summary>Gets the site the title belongs to.</summary>
+		/// <value>The site.</value>
+		public Site Site => this.Namespace.Site;
 		#endregion
 
 		#region Public Static Methods

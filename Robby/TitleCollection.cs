@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
@@ -83,13 +84,22 @@
 		public static TitleCollection CopyFrom(IEnumerable<Title> titles)
 		{
 			ThrowNull(titles, nameof(titles));
-			var first = titles.FirstOrDefault();
-			if (first == null)
+			Site site;
+			if (titles is ISiteSpecific siteTitles)
 			{
-				throw new InvalidOperationException("Source collection is empty - TitleCollection could not be initialized.");
+				site = siteTitles.Site;
+			}
+			else
+			{
+				var first = titles.FirstOrDefault();
+				if (first == null)
+				{
+					throw new InvalidOperationException(Resources.SourceCollectionEmpty);
+				}
+
+				site = first.Site;
 			}
 
-			var site = first.Site;
 			var output = new TitleCollection(site);
 			foreach (var title in titles)
 			{
@@ -268,6 +278,7 @@
 		/// <param name="input">The input parameters.</param>
 		protected override void GetBacklinks(BacklinksInput input)
 		{
+			ThrowNull(input, nameof(input));
 			var inputTitle = new TitleParts(this.Site, input.Title);
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && input.LinkTypes.HasFlag(BacklinksTypes.ImageUsage))
 			{

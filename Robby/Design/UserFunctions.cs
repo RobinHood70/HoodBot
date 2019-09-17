@@ -61,7 +61,7 @@
 	#endregion
 
 	/// <summary>Provides user/bot-specific functionality for a given site or sites.</summary>
-	public abstract class UserFunctions
+	public abstract class UserFunctions : ISiteSpecific
 	{
 		#region Constructors
 
@@ -87,6 +87,10 @@
 		/// <summary>Gets or sets the results page.</summary>
 		/// <value>The results page.</value>
 		public Page ResultsPage { get; protected set; }
+
+		/// <summary>Gets the site associated with this instance.</summary>
+		/// <value>The site associated with this instance.</value>
+		public Site Site { get; }
 
 		/// <summary>Gets or sets the user's status page.</summary>
 		/// <value>The status page.</value>
@@ -114,13 +118,6 @@
 
 		/// <summary>Gets a list of pages that function as talk pages, but are located outside of traditional Talk spaces.</summary>
 		public abstract TitleCollection TalkLikePages { get; }
-		#endregion
-
-		#region Protected Properties
-
-		/// <summary>Gets the site associated with this instance.</summary>
-		/// <value>The site associated with this instance.</value>
-		protected Site Site { get; }
 		#endregion
 
 		#region Public Virtual Methods

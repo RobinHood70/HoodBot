@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
@@ -9,7 +10,7 @@
 	// Class is sealed since it can be extended through extension methods if needed, and any derivation that would require value equality to change is both unlikely and inadvisable.
 
 	/// <summary>Represents a MediaWiki namespace for a specific site.</summary>
-	public sealed class Namespace : IEquatable<Namespace>
+	public sealed class Namespace : IEquatable<Namespace>, ISiteSpecific
 	{
 		#region Fields
 		private readonly HashSet<string> allNames;

@@ -4,17 +4,17 @@
 	using System.Collections;
 	using System.Collections.Generic;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.Robby.Properties.Resources;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Provides a base class to manipulate a collection of titles.</summary>
 	/// <typeparam name="TTitle">The type of the title.</typeparam>
-	/// <seealso cref="System.Collections.Generic.IList{TTitle}" />
-	/// <seealso cref="System.Collections.Generic.IReadOnlyCollection{TTitle}" />
+	/// <seealso cref="IList{TTitle}" />
+	/// <seealso cref="IReadOnlyCollection{TTitle}" />
 	/// <remarks>This collection class functions similarly to a KeyedCollection, but automatically overwrites existing items with new ones. Unlike a KeyedCollection, however, it does not support changing an item's key, since <see cref="IKeyedTitle"/> does not allow this.</remarks>
-	public abstract class TitleCollection<TTitle> : IList<TTitle>, IReadOnlyCollection<TTitle>
+	public abstract class TitleCollection<TTitle> : IList<TTitle>, IReadOnlyCollection<TTitle>, ISiteSpecific
 		where TTitle : class, IKeyedTitle
 	{
 		#region Fields
@@ -804,9 +804,9 @@
 		protected virtual void InsertItem(int index, TTitle item)
 		{
 			ThrowNull(item, nameof(item));
-			if (item.Namespace.Site != this.Site)
+			if (item.Site != this.Site)
 			{
-				throw new InvalidOperationException(CurrentCulture(InvalidSite));
+				throw new InvalidOperationException(CurrentCulture(Resources.InvalidSite));
 			}
 
 			this.dictionary[item.Key] = item;
