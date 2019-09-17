@@ -29,13 +29,11 @@
 		public static MultipartFormDataContent Build(Request request)
 		{
 			ThrowNull(request, nameof(request));
-			var visitor = new RequestVisitorHttpContentMultipart(new MultipartFormDataContent(), request.SupportsUnitSeparator);
-			foreach (var param in request)
-			{
-				param.Accept(visitor);
-			}
+			var multipartData = new MultipartFormDataContent();
+			var visitor = new RequestVisitorHttpContentMultipart(multipartData, request.SupportsUnitSeparator);
+			request.Build(visitor);
 
-			return visitor.multipartData;
+			return multipartData;
 		}
 		#endregion
 
@@ -80,13 +78,17 @@
 			this.multipartData.Add(new StringContent(value), parameter.Name);
 		}
 
+#pragma warning disable CA2000 // Dispose objects before losing scope
 		/// <summary>Visits the specified StringParameter object.</summary>
 		/// <param name="parameter">The StringParameter object.</param>
 		public void Visit(StringParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
+
+			// StringContent wants to be disposed, but can't be at this stage. It's only relevant to async methods anyway. Container manages disposal in any event - a very bizarre "convenience feature" that a lot of people have complained about. This whole thing seems very strangely designed - might warrant using/creating something else at some point in the future.
 			this.multipartData.Add(new StringContent(parameter.Value), parameter.Name);
 		}
+#pragma warning restore CA2000 // Dispose objects before losing scope
 		#endregion
 	}
 }

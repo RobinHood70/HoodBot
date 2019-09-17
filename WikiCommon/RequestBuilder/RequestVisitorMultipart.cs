@@ -39,6 +39,7 @@
 		/// <returns>A string representing the parameters, as they would be used in a URL or POST data.</returns>
 		public static MultipartResult Build(Request request)
 		{
+			// TODO: Rewrite tu use request.Build().
 			ThrowNull(request, nameof(request));
 			var visitor = new RequestVisitorMultipart
 			{
@@ -58,15 +59,15 @@
 				using (var memoryStream = new MemoryStream())
 				{
 					visitor.stream = memoryStream;
-					var first = false;
+					var first = true;
 					foreach (var parameter in request)
 					{
-						if (first)
+						if (!first)
 						{
 							memoryStream.Write(CurrentEncoding.GetBytes("\r\n"), 0, CurrentEncoding.GetByteCount("\r\n"));
 						}
 
-						first = true;
+						first = false;
 						parameter.Accept(visitor);
 						if (visitor.badBoundary)
 						{

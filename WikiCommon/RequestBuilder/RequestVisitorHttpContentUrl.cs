@@ -33,10 +33,7 @@
 				parameters = new Dictionary<string, string>(),
 			};
 
-			foreach (var parameter in request)
-			{
-				parameter.Accept(visitor);
-			}
+			request.Build(visitor);
 
 			return new FormUrlEncodedContent(visitor.parameters);
 		}

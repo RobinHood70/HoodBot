@@ -54,6 +54,19 @@
 		public Uri Uri { get; }
 		#endregion
 
+		#region Public Methods
+
+		/// <summary>Builds the request using the specified IParameterVisitor.</summary>
+		/// <param name="visitor">The visitor.</param>
+		public void Build(IParameterVisitor visitor)
+		{
+			foreach (var param in this)
+			{
+				param.Accept(visitor);
+			}
+		}
+		#endregion
+
 		#region Public Override Methods
 
 		/// <summary>Returns a displayable value for the request.</summary>

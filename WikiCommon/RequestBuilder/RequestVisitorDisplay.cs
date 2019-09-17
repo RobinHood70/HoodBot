@@ -10,71 +10,78 @@
 	internal class RequestVisitorDisplay : IParameterVisitor
 	{
 		#region Fields
-		private StringBuilder builder;
+		private readonly StringBuilder builder;
 		#endregion
 
 		#region Constructors
-		private RequestVisitorDisplay()
-		{
-		}
+		private RequestVisitorDisplay(StringBuilder builder) => this.builder = builder;
 		#endregion
 
 		#region IParameterVisitor Methods
-
-		/// <summary>Builds the specified request.</summary>
-		/// <param name="parameters">A <see cref="Parameter{T}"/> to be formatted.</param>
-		/// <returns>A string representing the parameters, formatted for display purposes.</returns>
-		public static string BuildParameters(ParameterCollection parameters)
-		{
-			var sb = new StringBuilder();
-			var visitor = new RequestVisitorDisplay() { builder = sb };
-			foreach (var parameter in parameters)
-			{
-				sb
-					.Append('&')
-					.Append(parameter.Name)
-					.Append('=');
-				parameter.Accept(visitor);
-			}
-
-			if (sb.Length > 0)
-			{
-				sb.Remove(0, 1);
-			}
-
-			var query = sb.ToString();
-
-			return query.Replace("%20", "+");
-		}
 
 		/// <summary>Builds the specified request.</summary>
 		/// <param name="request">The request.</param>
 		/// <returns>A string representing the parameters, formatted for display purposes.</returns>
 		public static string Build(Request request)
 		{
-			var query = BuildParameters(request);
+			var builder = new StringBuilder();
+			var visitor = new RequestVisitorDisplay(builder);
+			request.Build(visitor);
+			builder.Replace("%20", "+");
+
 			var methodText =
 				request.Type == RequestType.Get ? "GET" :
 				request.Type == RequestType.Post ? "POST" :
 				"POST (multipart)";
 
-			return Invariant($"{methodText}: {request.Uri}?{query}");
+			return Invariant($"{methodText}: {request.Uri}?{builder}");
 		}
 
-		public void Visit(FileParameter parameter) => this.builder.Append("<filedata>");
+		public void Visit(FileParameter parameter)
+		{
+			this.BuildParameterName(parameter);
+			this.builder.Append("<filedata>");
+		}
 
-		public void Visit(FormatParameter parameter) => this.builder.Append(parameter?.Value).Append("fm");
+		public void Visit(FormatParameter parameter)
+		{
+			this.BuildParameterName(parameter);
+			this.builder.Append(parameter?.Value).Append("fm");
+		}
 
-		public void Visit(HiddenParameter parameter) => this.builder.Append("<hidden>");
+		public void Visit(HiddenParameter parameter)
+		{
+			this.BuildParameterName(parameter);
+			this.builder.Append("<hidden>");
+		}
 
 		public void Visit<T>(Parameter<T> parameter)
 			where T : IEnumerable<string>
 		{
+			this.BuildParameterName(parameter);
 			var value = parameter.BuildPipedValue(false);
 			this.builder.Append(EscapeDataString(value).Replace("%7C", "|").Replace("%20", "+"));
 		}
 
-		public void Visit(StringParameter parameter) => this.builder.Append(EscapeDataString(parameter?.Value ?? string.Empty));
+		public void Visit(StringParameter parameter)
+		{
+			this.BuildParameterName(parameter);
+			this.builder.Append(EscapeDataString(parameter?.Value ?? string.Empty));
+		}
+		#endregion
+
+		#region Private Methods
+		private void BuildParameterName(IParameter parameter)
+		{
+			if (this.builder.Length > 0)
+			{
+				this.builder.Append('&');
+			}
+
+			this.builder
+				.Append(parameter.Name)
+				.Append('=');
+		}
 		#endregion
 	}
 }

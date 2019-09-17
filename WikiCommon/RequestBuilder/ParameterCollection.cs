@@ -498,13 +498,6 @@
 		}
 		#endregion
 
-		#region Public Override Methods
-
-		/// <summary>Returns a <see cref="string" /> that represents this instance.</summary>
-		/// <returns>A <see cref="string" /> that represents this instance.</returns>
-		public override string ToString() => RequestVisitorDisplay.BuildParameters(this);
-		#endregion
-
 		#region Protected Override Methods
 
 		/// <summary>Gets the key for item.</summary>

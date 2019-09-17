@@ -9,17 +9,19 @@
 	public class RequestVisitorUrl : IParameterVisitor
 	{
 		#region Fields
-		private StringBuilder builder;
-		private bool supportsUnitSeparator;
+		private readonly StringBuilder builder;
+		private readonly bool supportsUnitSeparator;
 		#endregion
 
 		#region Constructors
-		private RequestVisitorUrl()
+		private RequestVisitorUrl(StringBuilder builder, bool supportsUnitSeparator)
 		{
+			this.builder = builder;
+			this.supportsUnitSeparator = supportsUnitSeparator;
 		}
 		#endregion
 
-		#region IParameterVisitor Methods
+		#region Public Static Methods
 
 		/// <summary>Builds the specified request.</summary>
 		/// <param name="request">The request.</param>
@@ -27,26 +29,14 @@
 		public static string Build(Request request)
 		{
 			ThrowNull(request, nameof(request));
-			var visitor = new RequestVisitorUrl();
 			var builder = new StringBuilder();
-			visitor.supportsUnitSeparator = request.SupportsUnitSeparator;
-			visitor.builder = builder;
-			foreach (var parameter in request)
-			{
-				builder
-					.Append('&')
-					.Append(parameter.Name)
-					.Append('=');
-				parameter.Accept(visitor);
-			}
-
-			if (builder.Length > 0)
-			{
-				builder.Remove(0, 1);
-			}
-
+			var visitor = new RequestVisitorUrl(builder, request.SupportsUnitSeparator);
+			request.Build(visitor);
 			return builder.ToString();
 		}
+		#endregion
+
+		#region IParameterVisitor Methods
 
 		/// <summary>Visits the specified FileParameter object.</summary>
 		/// <param name="parameter">The FileParameter object.</param>
@@ -58,6 +48,7 @@
 		public void Visit(FormatParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
+			this.BuildParameterName(parameter);
 			this.builder.Append(parameter.Value);
 		}
 
@@ -66,6 +57,7 @@
 		public void Visit(HiddenParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
+			this.BuildParameterName(parameter);
 			this.builder.Append(EscapeDataString(parameter.Value));
 		}
 
@@ -77,6 +69,7 @@
 			where T : IEnumerable<string>
 		{
 			ThrowNull(parameter, nameof(parameter));
+			this.BuildParameterName(parameter);
 			var value = parameter.BuildPipedValue(this.supportsUnitSeparator);
 			this.builder.Append(EscapeDataString(value));
 		}
@@ -86,7 +79,22 @@
 		public void Visit(StringParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
+			this.BuildParameterName(parameter);
 			this.builder.Append(EscapeDataString(parameter.Value ?? string.Empty));
+		}
+		#endregion
+
+		#region Private Methods
+		private void BuildParameterName(IParameter parameter)
+		{
+			if (this.builder.Length > 0)
+			{
+				this.builder.Append('&');
+			}
+
+			this.builder
+				.Append(parameter.Name)
+				.Append('=');
 		}
 		#endregion
 	}
