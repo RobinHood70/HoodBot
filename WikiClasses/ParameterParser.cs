@@ -305,7 +305,7 @@
 							{
 								if (this.delimiterStack.Count > 0)
 								{
-									index = this.delimiterStack.Pop().Index + 1;
+									index = this.delimiterStack.Pop().Index;
 								}
 								else
 								{

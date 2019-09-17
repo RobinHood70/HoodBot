@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WikiClasses.Parser.Nodes
 {
+	/// <summary>Represents a wikitext (HTML) comment.</summary>
 	public class CommentNode : INodeBase
 	{
 		#region Constructors
