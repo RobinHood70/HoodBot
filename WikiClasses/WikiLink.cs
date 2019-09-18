@@ -45,14 +45,7 @@
 			}
 
 			split = page.Split(TextArrays.Colon, 2);
-			if (split.Length == 1)
-			{
-				this.Namespace = string.Empty;
-			}
-			else
-			{
-				this.Namespace = split[0];
-			}
+			this.Namespace = split.Length == 1 ? string.Empty : split[0];
 
 			var pageName = split[split.Length - 1].Trim();
 			if (pageName.Length == 0)

@@ -179,12 +179,7 @@
 		public string CapitalizePageName(string pageName)
 		{
 			ThrowNull(pageName, nameof(pageName));
-			if (this.CaseSensitive || pageName.Length == 0)
-			{
-				return pageName;
-			}
-
-			return pageName.UpperFirst(this.Site.Culture);
+			return this.CaseSensitive || pageName.Length == 0 ? pageName : pageName.UpperFirst(this.Site.Culture);
 		}
 
 		/// <summary>Determines whether the name specified is in the list of names for this namespace.</summary>

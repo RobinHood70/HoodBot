@@ -234,14 +234,9 @@ namespace RobinHood70.WallE.Eve.Modules
 							Type = groups["action"].Value,
 							Level = groups["restrictions"].Value,
 						};
-						if (groups["indef"].Success)
-						{
-							protData.Expiry = null;
-						}
-						else
-						{
-							protData.Expiry = DateTime.Parse(groups["expiry"].Value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
-						}
+						protData.Expiry = groups["indef"].Success
+							? null
+							: (DateTime?)DateTime.Parse(groups["expiry"].Value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
 
 						protData.Cascading = !string.IsNullOrEmpty((string)values["1"]);
 						protections.Add(protData);

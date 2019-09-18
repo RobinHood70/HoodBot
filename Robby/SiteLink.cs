@@ -278,14 +278,9 @@
 				var paramGroup = match.Groups["parameter"];
 				var pagename = match.Value.Substring(0, paramGroup.Success ? paramGroup.Captures[0].Index - match.Index : match.Length).Trim(new[] { '[', ']', '|', ' ' });
 				var title = new TitleParts(site, pagename);
-				if (convertFileLinks && !title.LeadingColon && title.Namespace == MediaWikiNamespaces.File)
-				{
-					yield return new ImageLink(site, match.Value);
-				}
-				else
-				{
-					yield return new SiteLink(site, match.Value);
-				}
+				yield return convertFileLinks && !title.LeadingColon && title.Namespace == MediaWikiNamespaces.File
+					? new ImageLink(site, match.Value)
+					: new SiteLink(site, match.Value);
 			}
 		}
 
