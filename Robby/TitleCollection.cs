@@ -170,7 +170,7 @@
 		public PageCollection Load(PageLoadOptions options, PageCreator pageCreator)
 		{
 			var retval = new PageCollection(this.Site, options, pageCreator);
-			retval.SetLimitations(this.loadPageLimitations, this.loadPageLimitationType);
+			retval.SetLimitations(this.loadPageLimitationType, this.loadPageLimitations);
 			retval.GetTitles(this);
 
 			return retval;
@@ -194,10 +194,16 @@
 			PageCollection.UnlimitedDefault(this.Site));
 
 		/// <summary>Sets namespace limitations for the Load() methods.</summary>
-		/// <param name="namespaceLimitations">The namespace limitations to apply to the PageCollection returned.</param>
 		/// <param name="limitationType">Type of the limitation.</param>
+		/// <param name="namespaceLimitations">The namespace limitations to apply to the PageCollection returned.</param>
 		/// <remarks>Currently, this applies only to the <see cref="PageCollection"/> returned by the various <see cref="Load()"/> methods. The <see cref="Purge()"/>, <see cref="Watch()"/>, and <see cref="Unwatch()"/> methods always return unfiltered results.</remarks>
-		public void SetNamespaceLimitations(IEnumerable<int> namespaceLimitations, LimitationType limitationType)
+		public void SetLimitations(LimitationType limitationType, params int[] namespaceLimitations) => this.SetLimitations(limitationType, namespaceLimitations as IEnumerable<int>);
+
+		/// <summary>Sets namespace limitations for the Load() methods.</summary>
+		/// <param name="limitationType">Type of the limitation.</param>
+		/// <param name="namespaceLimitations">The namespace limitations to apply to the PageCollection returned.</param>
+		/// <remarks>Currently, this applies only to the <see cref="PageCollection"/> returned by the various <see cref="Load()"/> methods. The <see cref="Purge()"/>, <see cref="Watch()"/>, and <see cref="Unwatch()"/> methods always return unfiltered results.</remarks>
+		public void SetLimitations(LimitationType limitationType, IEnumerable<int> namespaceLimitations)
 		{
 			this.loadPageLimitations = namespaceLimitations;
 			this.loadPageLimitationType = limitationType;

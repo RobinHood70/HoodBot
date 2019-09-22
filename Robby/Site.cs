@@ -402,7 +402,7 @@
 		public string LoadPageText(string pageName)
 		{
 			var titles = new TitleCollection(this, pageName);
-			titles.SetNamespaceLimitations(null, LimitationType.None);
+			titles.SetLimitations(LimitationType.None);
 			var result = titles.Load();
 			return result.Count == 1 ? result[0].Text : null;
 		}

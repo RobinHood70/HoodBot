@@ -239,15 +239,21 @@
 		}
 
 		/// <summary>Sets the namespace limitations to new values, clearing out any previous limitations.</summary>
-		/// <param name="namespaceLimitations">The namespace limitations. If null, only the limitation type is applied; the namespace set will remain unchanged.</param>
 		/// <param name="limitationType">The type of namespace limitations to apply.</param>
+		/// <param name="namespaceLimitations">The namespace limitations. If null, only the limitation type is applied; the namespace set will remain unchanged.</param>
 		/// <remarks>If the <paramref name="namespaceLimitations"/> parameter is null, no changes will be made to either of the limitation properties. This allows current/default limitations to remain in place if needed.</remarks>
-		public void SetLimitations(IEnumerable<int> namespaceLimitations, LimitationType limitationType)
+		public void SetLimitations(LimitationType limitationType, params int[] namespaceLimitations) => this.SetLimitations(limitationType, namespaceLimitations as IEnumerable<int>);
+
+		/// <summary>Sets the namespace limitations to new values, clearing out any previous limitations.</summary>
+		/// <param name="limitationType">The type of namespace limitations to apply.</param>
+		/// <param name="namespaceLimitations">The namespace limitations. If null, only the limitation type is applied; the namespace set will remain unchanged.</param>
+		/// <remarks>If the <paramref name="namespaceLimitations"/> parameter is null, no changes will be made to either of the limitation properties. This allows current/default limitations to remain in place if needed.</remarks>
+		public void SetLimitations(LimitationType limitationType, IEnumerable<int> namespaceLimitations)
 		{
 			this.LimitationType = limitationType;
+			this.NamespaceLimitations.Clear();
 			if (limitationType != LimitationType.None && namespaceLimitations != null)
 			{
-				this.NamespaceLimitations.Clear();
 				this.NamespaceLimitations.AddRange(namespaceLimitations);
 			}
 		}
