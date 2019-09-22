@@ -150,6 +150,8 @@
 			set => this.Set(ref this.progressBarColor, value, nameof(this.ProgressBarColor));
 		}
 
+		public bool ShowDiffs { get; private set; } = true; // Simple hard-coded setting for now.
+
 		public string Status
 		{
 			get => this.status;
@@ -544,7 +546,7 @@
 		{
 			// Until we get a menu going, specify manually.
 			currentViewer = currentViewer ?? this.FindPlugin<IDiffViewer>("IeDiff");
-			if (currentViewer != null && this.site.AbstractionLayer is WikiAbstractionLayer wal)
+			if (currentViewer != null && this.ShowDiffs && this.site.AbstractionLayer is WikiAbstractionLayer wal)
 			{
 				var token = wal.TokenManager.SessionToken("csrf"); // HACK: This is only necessary for browser-based diffs. Not sure how to handle it better.
 				currentViewer.Compare(eventArgs.Page, eventArgs.EditSummary, eventArgs.Minor, token);
