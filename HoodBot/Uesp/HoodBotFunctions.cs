@@ -208,7 +208,11 @@
 			}
 		}
 
-		public override void OnAllJobsStarting(int jobCount) => this.InitializeResult(ResultDestination.ResultsPage, null, "Job Results");
+		public override void OnAllJobsStarting(int jobCount)
+		{
+			this.Site.ClearMessage(true);
+			this.InitializeResult(ResultDestination.ResultsPage, null, "Job Results");
+		}
 
 		public override void SetResultInfo(ResultDestination destination, string user, string title) => this.results[destination] = new ResultInfo(user, title);
 
