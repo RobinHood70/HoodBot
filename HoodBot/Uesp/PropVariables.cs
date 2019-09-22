@@ -54,7 +54,7 @@
 			ThrowNull(result, nameof(result));
 			var vars = result["vars"].ToObject<Dictionary<string, string>>();
 			var subset = (string)result["subset"];
-			return new VariablesResult(vars) { Subset = subset };
+			return new VariablesResult(vars, subset);
 		}
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems((this.Output as VariablesPageItem).Variables);

@@ -138,6 +138,7 @@
     <Compile Include="Jobs\OneOffJob.cs" />
     <Compile Include="Jobs\PageMover.cs" />
     <Compile Include="Jobs\PageMoverJob.cs" />
+    <Compile Include="Uesp\VariableDictionary.cs" />
     <Compile Include="WikiInfo.cs" />
     <Compile Include="Jobs\TestJob.cs" />
     <Compile Include="Jobs\VoidJob.cs" />

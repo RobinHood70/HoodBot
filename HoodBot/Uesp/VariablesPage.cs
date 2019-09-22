@@ -17,20 +17,57 @@
 		#endregion
 
 		#region Public Properties
-		public IReadOnlyDictionary<string, VariablesResult> VariableSets { get; private set; }
+		public VariableDictionary MainSet { get; private set; }
+
+		public IReadOnlyDictionary<string, VariableDictionary> VariableSets { get; private set; }
 		#endregion
 
+		#region Public Methods
+		public string GetVariable(string name)
+		{
+			this.MainSet.TryGetValue(name, out var retval);
+			return retval;
+		}
+
+		public string GetVariable(string setName, string name)
+		{
+			if (string.IsNullOrEmpty(setName))
+			{
+				return this.GetVariable(name);
+			}
+			else
+			{
+				if (this.VariableSets.TryGetValue(setName, out var set))
+				{
+					set.TryGetValue(name, out var retval);
+					return retval;
+				}
+
+				return default;
+			}
+		}
+		#endregion
+
+		#region Protected Override Methods
 		protected override void PopulateCustomResults(PageItem pageItem)
 		{
 			ThrowNull(pageItem, nameof(pageItem));
 			var varPageItem = pageItem as VariablesPageItem;
-			var dictionary = new Dictionary<string, VariablesResult>();
+			var dictionary = new Dictionary<string, VariableDictionary>();
 			foreach (var item in varPageItem.Variables)
 			{
-				dictionary[item.Subset ?? string.Empty] = item;
+				if (item.Subset == null)
+				{
+					this.MainSet = item.Dictionary;
+				}
+				else
+				{
+					dictionary[item.Subset] = item.Dictionary;
+				}
 			}
 
-			this.VariableSets = new ReadOnlyDictionary<string, VariablesResult>(dictionary);
+			this.VariableSets = new ReadOnlyDictionary<string, VariableDictionary>(dictionary);
 		}
+		#endregion
 	}
 }

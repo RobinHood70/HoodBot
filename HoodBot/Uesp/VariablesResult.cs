@@ -1,20 +1,22 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
 	using System.Collections.Generic;
-	using System.Collections.ObjectModel;
 
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Same naming convention as WallE.")]
-	public class VariablesResult : ReadOnlyDictionary<string, string>
+	public class VariablesResult
 	{
 		#region Constructors
-		public VariablesResult(IDictionary<string, string> dictionary)
-			: base(dictionary)
+		public VariablesResult(IDictionary<string, string> dictionary, string subset)
 		{
+			this.Dictionary = new VariableDictionary(dictionary);
+			this.Subset = subset;
 		}
 		#endregion
 
 		#region Public Properties
-		public string Subset { get; set; }
+		public VariableDictionary Dictionary { get; }
+
+		public string Subset { get; }
 		#endregion
 	}
 }
