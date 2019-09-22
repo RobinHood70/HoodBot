@@ -670,8 +670,13 @@
 		#region Public Virtual Methods
 
 		/// <summary>Clears the bot's "has message" flag.</summary>
+		/// <param name="force">Clears the message, even if the site is in read-only mode.</param>
 		/// <returns><c>true</c> if the flag was successfully cleared; otherwise, <c>false</c>.</returns>
-		public virtual ChangeStatus ClearMessage() => this.PublishChange(this, null, () => this.AbstractionLayer.ClearHasMessage() ? ChangeStatus.Success : ChangeStatus.Failure);
+		public virtual ChangeStatus ClearMessage(bool force)
+		{
+			var func = new Func<ChangeStatus>(() => this.AbstractionLayer.ClearHasMessage() ? ChangeStatus.Success : ChangeStatus.Failure);
+			return force ? func() : this.PublishChange(this, null, func);
+		}
 
 		/// <summary>Gets the article path.</summary>
 		/// <param name="unparsedPath">The unparsed path. This can be a local article path or an interwiki path.</param>
