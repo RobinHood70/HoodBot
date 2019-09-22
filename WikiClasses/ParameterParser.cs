@@ -1,4 +1,6 @@
-﻿namespace RobinHood70.WikiClasses
+﻿#pragma warning disable CA1303 // Do not pass literals as localized parameters
+// Class will soon be deprecated, so ignore the warnings.
+namespace RobinHood70.WikiClasses
 {
 	using System;
 	using System.Collections.Generic;
@@ -458,3 +460,4 @@
 		#endregion
 	}
 }
+#pragma warning restore CA1303 // Do not pass literals as localized parameters
