@@ -15,6 +15,8 @@
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
+	#region Public Enumerations
+
 	/// <summary>Describes the result of an attempted change to the site.</summary>
 	public enum ChangeStatus
 	{
@@ -36,6 +38,7 @@
 		/// <summary>During the appropriate event, a subscriber requested that the attempted change be cancelled.</summary>
 		Cancelled,
 	}
+	#endregion
 
 	/// <summary>Represents a single wiki site.</summary>
 	/// <seealso cref="IMessageSource" />
