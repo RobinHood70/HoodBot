@@ -75,6 +75,12 @@
 			}
 		}
 
+		/// <summary>Gets the <see cref="ISimpleTitle">Title</see> with the specified key.</summary>
+		/// <param name="key">The key.</param>
+		/// <returns>The <see cref="ISimpleTitle">Title</see>.</returns>
+		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry if the requested entry isn't found.</remarks>
+		public TTitle this[Title key] => this.dictionary[key?.FullPageName];
+
 		/// <summary>Gets or sets the <see cref="ISimpleTitle">Title</see> with the specified key.</summary>
 		/// <param name="key">The key.</param>
 		/// <returns>The <see cref="ISimpleTitle">Title</see>.</returns>
@@ -754,6 +760,13 @@
 				yield return title.Namespace.AssumedName(ns) + title.PageName;
 			}
 		}
+
+		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
+		/// <param name="key">The key of the value to get.</param>
+		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
+		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
+		public bool TryGetValue(ISimpleTitle key, out TTitle value) => this.dictionary.TryGetValue(key?.FullPageName, out value);
 
 		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
 		/// <param name="key">The key of the value to get.</param>
