@@ -63,6 +63,12 @@
 		/// <summary>Adds one collection of items to another.</summary>
 		/// <typeparam name="T">The type of items.</typeparam>
 		/// <param name="original">The original collection.</param>
+		/// <param name="collection">The values to be added.</param>
+		public static void AddRange<T>(this ICollection<T> original, params T[] collection) => AddRange(original, collection as IEnumerable<T>);
+
+		/// <summary>Adds one collection of items to another.</summary>
+		/// <typeparam name="T">The type of items.</typeparam>
+		/// <param name="original">The original collection.</param>
 		/// <param name="collection">The collection to be added.</param>
 		public static void AddRange<T>(this ICollection<T> original, IEnumerable<T> collection)
 		{
