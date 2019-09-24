@@ -23,8 +23,8 @@
 		private static readonly List<EsoReplacement> ReplaceFirstList = new List<EsoReplacement>();
 		private static readonly ICollection<string> UnreplacedList = new SortedSet<string>();
 
-		private static readonly string[] OnlineSplit = new string[] { "Online:" };
-		private static readonly string[] ResistanceSplit = new string[] { " Resistance" };
+		private static readonly string[] OnlineSplit = new[] { "Online:" };
+		private static readonly string[] ResistanceSplit = new[] { " Resistance" };
 
 		private static bool initialized = false;
 		#endregion

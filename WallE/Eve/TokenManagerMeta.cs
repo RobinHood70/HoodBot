@@ -58,7 +58,7 @@
 			if (!this.sessionTokens.TryGetValue(type, out var retval))
 			{
 				// Ask for all session tokens unless a login token has been requested.
-				var tokensInput = type == Login ? new TokensInput(new string[] { type }) : new TokensInput(this.validTypes);
+				var tokensInput = type == Login ? new TokensInput(new[] { type }) : new TokensInput(this.validTypes);
 				var tokens = this.wal.RunModuleQuery(new MetaTokens(this.wal, tokensInput));
 				foreach (var token in tokens)
 				{

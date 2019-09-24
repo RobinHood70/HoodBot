@@ -19,7 +19,7 @@
 		#endregion
 
 		#region Static Fields
-		private static readonly string[] DestructionTypes = new string[] { "Frost", "Shock", "Fire" };
+		private static readonly string[] DestructionTypes = new[] { "Frost", "Shock", "Fire" };
 		private static readonly HashSet<string> UpdatedParameters = new HashSet<string> { "area", "casttime", "channelTime", "cost", "desc", "desc1", "desc2", "duration", "icon", "icon2", "icon3", "id", "line", "linerank", "morph1name", "morph1id", "morph1icon", "morph1desc", "morph2name", "morph2id", "morph2icon", "morph2desc", "radius", "range", "target", "type" };
 
 		private static readonly SortedList<string, string> IconNameCache = new SortedList<string, string>();

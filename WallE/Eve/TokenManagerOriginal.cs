@@ -34,9 +34,9 @@
 		#region Public Methods
 		public void Clear() => this.SessionTokens.Clear();
 
-		public string RollbackToken(long pageId) => this.GetRollbackToken(QueryPageSetInput.FromPageIds(new long[] { pageId }));
+		public string RollbackToken(long pageId) => this.GetRollbackToken(QueryPageSetInput.FromPageIds(new[] { pageId }));
 
-		public string RollbackToken(string title) => this.GetRollbackToken(new QueryPageSetInput(new string[] { title }));
+		public string RollbackToken(string title) => this.GetRollbackToken(new QueryPageSetInput(new[] { title }));
 
 		public virtual string SessionToken(string type)
 		{
@@ -75,7 +75,7 @@
 
 		public string UserRightsToken(string user)
 		{
-			var usersInput = new UsersInput(new string[] { user })
+			var usersInput = new UsersInput(new[] { user })
 			{
 				GetRightsToken = true,
 			};

@@ -185,9 +185,9 @@
 			switch (filter)
 			{
 				case Filter.Only:
-					return this.Add(name, new string[] { trueValue });
+					return this.Add(name, new[] { trueValue });
 				case Filter.Exclude:
-					return this.Add(name, new string[] { '!' + trueValue });
+					return this.Add(name, new[] { '!' + trueValue });
 				default:
 					return this;
 			}

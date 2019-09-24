@@ -8,7 +8,7 @@
 	internal abstract class Skill
 	{
 		#region Static Fields
-		private static readonly string[] DoubleColonSplit = new string[] { "::" };
+		private static readonly string[] DoubleColonSplit = new[] { "::" };
 		#endregion
 
 		#region Public Properties
