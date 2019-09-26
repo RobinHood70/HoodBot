@@ -8,6 +8,10 @@
 
 	public class MetaTemplateCreator : PageCreator
 	{
+		#region Public Properties
+		public IList<string> VariableNames { get; } = new List<string>();
+		#endregion
+
 		#region Public Override Methods
 		public override Page CreatePage(ISimpleTitle simpleTitle) => new VariablesPage(simpleTitle);
 
@@ -18,7 +22,8 @@
 		protected override void AddCustomPropertyInputs(IList<IPropertyInput> propertyInputs)
 		{
 			ThrowNull(propertyInputs, nameof(propertyInputs));
-			propertyInputs.Add(new VariablesInput());
+			var variablesInput = new VariablesInput() { Variables = this.VariableNames };
+			propertyInputs.Add(variablesInput);
 		}
 		#endregion
 	}
