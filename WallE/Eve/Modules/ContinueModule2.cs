@@ -19,11 +19,17 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Fields
+		private readonly bool addContinue;
 		private readonly bool supportsBatch;
 		#endregion
 
 		#region Constructors
-		public ContinueModule2(int siteVersion100) => this.supportsBatch = siteVersion100 >= BatchVersion;
+		public ContinueModule2(int siteVersion100)
+		{
+			// Version 1.26 emits a warning when not emitting continue=, and lower versions require it, so we track it separately from supportsBatch.
+			this.addContinue = siteVersion100 <= BatchVersion;
+			this.supportsBatch = siteVersion100 >= BatchVersion;
+		}
 		#endregion
 
 		#region Protected Override Methods
@@ -39,7 +45,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 				this.Continues = false;
 			}
-			else if (!this.supportsBatch)
+			else if (this.addContinue)
 			{
 				request.Add(Name);
 			}
