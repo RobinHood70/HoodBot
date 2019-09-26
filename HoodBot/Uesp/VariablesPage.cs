@@ -25,6 +25,11 @@
 		#region Public Methods
 		public string GetVariable(string name)
 		{
+			if (this.MainSet == null)
+			{
+				return default;
+			}
+
 			this.MainSet.TryGetValue(name, out var retval);
 			return retval;
 		}
