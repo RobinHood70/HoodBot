@@ -59,25 +59,31 @@
 	{
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="PageLoadOptions"/> class with default options.</summary>
-		public PageLoadOptions()
-			: this(PageModules.Default)
+		/// <summary>Initializes a new instance of the <see cref="PageLoadOptions"/> class with a custom set of modules.</summary>
+		/// <param name="modules">The modules to load.</param>
+		public PageLoadOptions(PageModules modules)
+			: this(modules, false)
 		{
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="PageLoadOptions"/> class with a custom set of modules.</summary>
+		/// <param name="followRedirects">Indicates whether redirects should be followed when loading.</param>
 		/// <param name="modules">The modules to load.</param>
-		public PageLoadOptions(PageModules modules) => this.Modules = modules;
+		public PageLoadOptions(PageModules modules, bool followRedirects)
+		{
+			this.FollowRedirects = followRedirects;
+			this.Modules = modules;
+		}
 
 		/// <summary>Initializes a new instance of the <see cref="PageLoadOptions"/> class. This is a <em>partial</em> copy constructor which only copies the non-module-related options.</summary>
 		/// <param name="copy">The load options to copy from.</param>
-		/// <param name="newModules">The new set of modules.</param>
-		public PageLoadOptions(PageLoadOptions copy, PageModules newModules)
-			: this(newModules)
+		/// <param name="modules">The set of modules to be loaded.</param>
+		public PageLoadOptions(PageLoadOptions copy, PageModules modules)
 		{
 			ThrowNull(copy, nameof(copy));
 			this.ConvertTitles = copy.ConvertTitles;
 			this.FollowRedirects = copy.FollowRedirects;
+			this.Modules = modules;
 		}
 		#endregion
 
