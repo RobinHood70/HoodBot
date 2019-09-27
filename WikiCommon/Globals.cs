@@ -187,14 +187,20 @@
 		public static string ReplaceSpaces(string text, bool includeHtmlEntities) => (includeHtmlEntities ? SpaceTextHtml : SpaceText).Replace(text, " ");
 
 		/// <summary>Throws an exception if the input value is null.</summary>
+		/// <param name="name">The name of the parameter in the original method.</param>
+		/// <exception cref="ArgumentNullException">Always thrown.</exception>
+		/// <returns>An ArgumentNullException for the specified parameter name.</returns>
+		public static ArgumentNullException ArgumentNull(string name) => new ArgumentNullException(name);
+
+		/// <summary>Throws an exception if the input value is null.</summary>
 		/// <param name="nullable">The value that may be null.</param>
 		/// <param name="name">The name of the parameter in the original method.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="nullable" /> is null.</exception>
 		public static void ThrowNull([ValidatedNotNull] object nullable, string name)
 		{
-			if (nullable is null)
+			if (nullable == null)
 			{
-				throw new ArgumentNullException(name);
+				throw ArgumentNull(name);
 			}
 		}
 
