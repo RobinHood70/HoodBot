@@ -94,7 +94,7 @@
 
 		public PageCollection FollowRedirects(IEnumerable<Title> titles)
 		{
-			var originalsFollowed = PageCollection.Unlimited(this.Site, new PageLoadOptions(PageModules.None) { FollowRedirects = true });
+			var originalsFollowed = PageCollection.Unlimited(this.Site, new PageLoadOptions(PageModules.None, true));
 			originalsFollowed.GetTitles(titles);
 
 			return originalsFollowed;

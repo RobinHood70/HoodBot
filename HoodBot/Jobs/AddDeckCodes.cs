@@ -67,7 +67,7 @@
 				this.WriteLine($"* {item.Name} ignored because name doesn't match type {item.TypeName} (deckcode={item.DeckCode})");
 			}
 
-			this.pages = titles.Load(new PageLoadOptions(PageModules.Default) { FollowRedirects = true });
+			this.pages = titles.Load(new PageLoadOptions(PageModules.Default, true));
 			foreach (var title in titles)
 			{
 				var item = lookup[title];
