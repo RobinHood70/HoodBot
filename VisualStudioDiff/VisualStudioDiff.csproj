@@ -28,7 +28,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\HoodBot\bin\Debug\Plugins\</OutputPath>
+    <OutputPath>$(SolutionDir)bin\Debug\Plugins\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -85,8 +85,6 @@
     <ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj">
       <Project>{eb7d2b63-3bc4-4df2-9c4c-b3cc2f524aa7}</Project>
       <Name>HoodBotPlugins</Name>
-      <Private>False</Private>
-      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Robby\Robby.csproj">
       <Project>{16a4f00f-11b3-4049-89d2-09c9b6b53c83}</Project>
