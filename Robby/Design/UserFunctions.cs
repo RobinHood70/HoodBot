@@ -105,11 +105,11 @@
 		#region Public Abstract Properties
 
 		/// <summary>Gets a list of templates indicating a page is flagged for deletion.</summary>
-		/// <value>  A list of templates indicating a page is flagged for deletion.</value>
+		/// <value>A list of templates indicating a page is flagged for deletion.</value>
 		public abstract IReadOnlyList<string> DeleteTemplates { get; }
 
 		/// <summary>Gets a list of templates indicating a page should never be flagged for deletion.</summary>
-		/// <value>  A list of templates indicating a page should never be flagged for deletion.</value>
+		/// <value>A list of templates indicating a page should never be flagged for deletion.</value>
 		public abstract IReadOnlyList<string> DoNotDeleteTemplates { get; }
 
 		/// <summary>Gets the job types that should be logged.</summary>

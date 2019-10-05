@@ -19,7 +19,7 @@
 		}
 		#endregion
 
-		#region Public  Properties
+		#region Public Properties
 		public IList<Ability> Abilities { get; } = new List<Ability>(4);
 
 		//// public string BaseCost => this.FullName(this.Costs.ToString());

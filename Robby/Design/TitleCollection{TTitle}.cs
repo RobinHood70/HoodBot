@@ -576,7 +576,7 @@
 		/// <remarks>Note that the templates do not have to exist; only the transclusion itself needs to exist. Similarly, a template that has no transclusions at all would not appear in the results.</remarks>
 		public void GetTransclusions() => this.GetTransclusions(new AllTransclusionsInput());
 
-		/// <summary>Adds all pages with  transclusions in the given namespace to the collection.</summary>
+		/// <summary>Adds all pages with transclusions in the given namespace to the collection.</summary>
 		/// <param name="ns">The namespace.</param>
 		/// <remarks>Unlike other namespace-specific methods, the namespace for this method applies to the transclusions to search for, <em>not</em> the pages to return. For example, a namespace value of 0 would find all transclusions of main-space pages, even if the transclusion itself is in Help space, for instance. Note that the transcluded pages do not have to exist; only the transclusion itself needs to exist. Similarly, a page that has no transclusions at all would not appear in the results.</remarks>
 		public void GetTransclusions(int ns) => this.GetTransclusions(new AllTransclusionsInput { Namespace = ns });

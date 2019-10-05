@@ -15,14 +15,14 @@
 		/// <param name="contribution">The contribution.</param>
 		protected internal Contribution(Site site, UserContributionsItem contribution)
 			: base(
-				  contribution?.UserId == 0,
-				  contribution?.Comment,
-				  contribution?.RevisionId ?? 0,
-				  contribution?.Flags.HasFlag(UserContributionFlags.Minor) ?? false,
-				  0,
-				  null,
-				  contribution?.Timestamp,
-				  contribution?.User)
+				contribution?.UserId == 0,
+				contribution?.Comment,
+				contribution?.RevisionId ?? 0,
+				contribution?.Flags.HasFlag(UserContributionFlags.Minor) ?? false,
+				0,
+				null,
+				contribution?.Timestamp,
+				contribution?.User)
 		{
 			ThrowNull(contribution, nameof(contribution));
 			this.Title = new Title(site, contribution.Title);

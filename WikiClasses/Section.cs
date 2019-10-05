@@ -88,7 +88,7 @@
 		#region Public Methods
 
 		/// <summary>Builds the section into the specified StringBuilder.</summary>
-		/// <param name="sb">  The StringBuilder to build into.</param>
+		/// <param name="sb">The StringBuilder to build into.</param>
 		/// <returns>The StringBuilder that was passed, to allow method chaining.</returns>
 		public StringBuilder Build(StringBuilder sb)
 		{

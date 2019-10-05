@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Dictionary>
-  <Words>
-    <Recognized>
-      <Word>Api</Word>
-      <Word>Captcha</Word>
-      <Word>Disambiguator</Word>
-      <Word>Globals</Word>
-      <Word>Transclusions</Word>
-      <Word>wal</Word>
-    </Recognized>
-  </Words>
+	<Words>
+		<Recognized>
+			<Word>Api</Word>
+			<Word>Captcha</Word>
+			<Word>Disambiguator</Word>
+			<Word>Globals</Word>
+			<Word>Transclusions</Word>
+			<Word>wal</Word>
+		</Recognized>
+	</Words>
 </Dictionary>

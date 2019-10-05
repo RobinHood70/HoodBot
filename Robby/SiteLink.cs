@@ -127,7 +127,7 @@
 			set
 			{
 				var title = new TitleParts(this.Site, value);
-				this.InterwikiText = title.OriginalInterwikiText;  // We're using original text here to retain casing, if desired.
+				this.InterwikiText = title.OriginalInterwikiText; // We're using original text here to retain casing, if desired.
 				this.NamespaceText = title.OriginalNamespaceText;
 				this.LeadingColon = title.LeadingColon;
 				this.PageName = title.OriginalPageNameText;

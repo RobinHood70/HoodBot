@@ -1,162 +1,162 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RuleSet Name="Rules for Test Projects" Description="Simple code analysis rules intended only for personal projects. Many proper-design guidelines are disabled." ToolsVersion="15.0">
-  <IncludeAll Action="Warning" />
-  <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
-    <Rule Id="CA1009" Action="None" />
-    <Rule Id="CA1014" Action="None" />
-    <Rule Id="CA1020" Action="None" />
-    <Rule Id="CA1056" Action="None" />
-    <Rule Id="CA1057" Action="None" />
-    <Rule Id="CA1062" Action="None" />
-    <Rule Id="CA1300" Action="None" />
-    <Rule Id="CA1302" Action="None" />
-    <Rule Id="CA1303" Action="None" />
-    <Rule Id="CA1304" Action="Warning" />
-    <Rule Id="CA1305" Action="None" />
-    <Rule Id="CA1306" Action="Warning" />
-    <Rule Id="CA1307" Action="Warning" />
-    <Rule Id="CA1308" Action="None" />
-    <Rule Id="CA1701" Action="None" />
-    <Rule Id="CA1702" Action="None" />
-    <Rule Id="CA1703" Action="None" />
-    <Rule Id="CA1704" Action="None" />
-    <Rule Id="CA1716" Action="None" />
-    <Rule Id="CA1721" Action="None" />
-    <Rule Id="CA1726" Action="None" />
-    <Rule Id="CA2202" Action="None" />
-    <Rule Id="CA2204" Action="None" />
-    <Rule Id="CA2210" Action="None" />
-  </Rules>
-  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
-    <Rule Id="CS1591" Action="None" />
-    <Rule Id="CS8020" Action="Info" />
-  </Rules>
-  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp.EditorFeatures" RuleNamespace="Microsoft.CodeAnalysis.CSharp.EditorFeatures">
-    <Rule Id="IDE0032" Action="Info" />
-  </Rules>
-  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp.Features" RuleNamespace="Microsoft.CodeAnalysis.CSharp.Features">
-    <Rule Id="IDE0001" Action="Info" />
-    <Rule Id="IDE0002" Action="Info" />
-    <Rule Id="IDE0003" Action="Info" />
-    <Rule Id="IDE0004" Action="Info" />
-    <Rule Id="IDE0005" Action="Info" />
-    <Rule Id="IDE0007" Action="Info" />
-    <Rule Id="IDE0007WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0008" Action="Info" />
-    <Rule Id="IDE0008WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0009" Action="Info" />
-    <Rule Id="IDE0009WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0011" Action="Info" />
-    <Rule Id="IDE0011WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0012" Action="Info" />
-    <Rule Id="IDE0013" Action="Info" />
-    <Rule Id="IDE0014" Action="Info" />
-    <Rule Id="IDE0015" Action="Info" />
-    <Rule Id="IDE0016" Action="Info" />
-    <Rule Id="IDE0016WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0017" Action="Info" />
-    <Rule Id="IDE0017WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0018" Action="Info" />
-    <Rule Id="IDE0018WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0019" Action="Info" />
-    <Rule Id="IDE0019WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0020" Action="Info" />
-    <Rule Id="IDE0020WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0021" Action="Info" />
-    <Rule Id="IDE0021WithoutSuggestion" Action="None" />
-    <Rule Id="IDE0022" Action="Info" />
-    <Rule Id="IDE0022WithoutSuggestion" Action="None" />
-    <Rule Id="IDE0023" Action="Info" />
-    <Rule Id="IDE0023WithoutSuggestion" Action="None" />
-    <Rule Id="IDE0024" Action="Info" />
-    <Rule Id="IDE0024WithoutSuggestion" Action="None" />
-    <Rule Id="IDE0025" Action="Info" />
-    <Rule Id="IDE0025WithoutSuggestion" Action="None" />
-    <Rule Id="IDE0026" Action="Info" />
-    <Rule Id="IDE0026WithoutSuggestion" Action="None" />
-    <Rule Id="IDE0027" Action="Info" />
-    <Rule Id="IDE0027WithoutSuggestion" Action="None" />
-    <Rule Id="IDE0028" Action="Info" />
-    <Rule Id="IDE0028WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0029" Action="Info" />
-    <Rule Id="IDE0029WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0030" Action="Info" />
-    <Rule Id="IDE0030WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0031" Action="Info" />
-    <Rule Id="IDE0031WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0034" Action="Info" />
-    <Rule Id="IDE0034WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0036" Action="Info" />
-    <Rule Id="IDE0036WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0037" Action="Info" />
-    <Rule Id="IDE0037WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0039" Action="Info" />
-    <Rule Id="IDE0039WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0040" Action="Info" />
-    <Rule Id="IDE0040WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0041" Action="Info" />
-    <Rule Id="IDE0041WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0042" Action="Info" />
-    <Rule Id="IDE0042WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0043" Action="Info" />
-    <Rule Id="IDE0044" Action="Info" />
-    <Rule Id="IDE0044WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE1005" Action="Info" />
-    <Rule Id="IDE1005WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE1006" Action="Info" />
-    <Rule Id="IDE1006WithoutSuggestion" Action="Info" />
-  </Rules>
-  <Rules AnalyzerId="Microsoft.CodeAnalysis.Features" RuleNamespace="Microsoft.CodeAnalysis.Features">
-    <Rule Id="IDE0010WithoutSuggestion" Action="Info" />
-    <Rule Id="IDE0033" Action="Info" />
-    <Rule Id="IDE0033WithoutSuggestion" Action="Info" />
-  </Rules>
-  <Rules AnalyzerId="Microsoft.NetCore.CSharp.Analyzers" RuleNamespace="Microsoft.NetCore.CSharp.Analyzers">
-    <Rule Id="CA5350" Action="None" />
-  </Rules>
-  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
-    <Rule Id="SA0001" Action="None" />
-    <Rule Id="SA1124" Action="None" />
-    <Rule Id="SA1217" Action="None" />
-    <Rule Id="SA1407" Action="None" />
-    <Rule Id="SA1412" Action="Warning" />
-    <Rule Id="SA1413" Action="None" />
-    <Rule Id="SA1515" Action="None" />
-    <Rule Id="SA1600" Action="None" />
-    <Rule Id="SA1601" Action="None" />
-    <Rule Id="SA1602" Action="None" />
-    <Rule Id="SA1604" Action="None" />
-    <Rule Id="SA1605" Action="None" />
-    <Rule Id="SA1606" Action="None" />
-    <Rule Id="SA1607" Action="None" />
-    <Rule Id="SA1608" Action="None" />
-    <Rule Id="SA1609" Action="Warning" />
-    <Rule Id="SA1610" Action="None" />
-    <Rule Id="SA1611" Action="None" />
-    <Rule Id="SA1612" Action="None" />
-    <Rule Id="SA1613" Action="None" />
-    <Rule Id="SA1614" Action="None" />
-    <Rule Id="SA1615" Action="None" />
-    <Rule Id="SA1616" Action="None" />
-    <Rule Id="SA1617" Action="None" />
-    <Rule Id="SA1618" Action="None" />
-    <Rule Id="SA1619" Action="None" />
-    <Rule Id="SA1620" Action="None" />
-    <Rule Id="SA1621" Action="None" />
-    <Rule Id="SA1622" Action="None" />
-    <Rule Id="SA1623" Action="None" />
-    <Rule Id="SA1624" Action="None" />
-    <Rule Id="SA1625" Action="None" />
-    <Rule Id="SA1626" Action="None" />
-    <Rule Id="SA1627" Action="None" />
-    <Rule Id="SA1633" Action="None" />
-    <Rule Id="SA1634" Action="None" />
-    <Rule Id="SA1635" Action="None" />
-    <Rule Id="SA1636" Action="None" />
-    <Rule Id="SA1637" Action="None" />
-    <Rule Id="SA1638" Action="None" />
-    <Rule Id="SA1640" Action="None" />
-    <Rule Id="SA1641" Action="None" />
-    <Rule Id="SA1652" Action="None" />
-  </Rules>
+	<IncludeAll Action="Warning" />
+	<Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
+		<Rule Id="CA1009" Action="None" />
+		<Rule Id="CA1014" Action="None" />
+		<Rule Id="CA1020" Action="None" />
+		<Rule Id="CA1056" Action="None" />
+		<Rule Id="CA1057" Action="None" />
+		<Rule Id="CA1062" Action="None" />
+		<Rule Id="CA1300" Action="None" />
+		<Rule Id="CA1302" Action="None" />
+		<Rule Id="CA1303" Action="None" />
+		<Rule Id="CA1304" Action="Warning" />
+		<Rule Id="CA1305" Action="None" />
+		<Rule Id="CA1306" Action="Warning" />
+		<Rule Id="CA1307" Action="Warning" />
+		<Rule Id="CA1308" Action="None" />
+		<Rule Id="CA1701" Action="None" />
+		<Rule Id="CA1702" Action="None" />
+		<Rule Id="CA1703" Action="None" />
+		<Rule Id="CA1704" Action="None" />
+		<Rule Id="CA1716" Action="None" />
+		<Rule Id="CA1721" Action="None" />
+		<Rule Id="CA1726" Action="None" />
+		<Rule Id="CA2202" Action="None" />
+		<Rule Id="CA2204" Action="None" />
+		<Rule Id="CA2210" Action="None" />
+	</Rules>
+	<Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp" RuleNamespace="Microsoft.CodeAnalysis.CSharp">
+		<Rule Id="CS1591" Action="None" />
+		<Rule Id="CS8020" Action="Info" />
+	</Rules>
+	<Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp.EditorFeatures" RuleNamespace="Microsoft.CodeAnalysis.CSharp.EditorFeatures">
+		<Rule Id="IDE0032" Action="Info" />
+	</Rules>
+	<Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp.Features" RuleNamespace="Microsoft.CodeAnalysis.CSharp.Features">
+		<Rule Id="IDE0001" Action="Info" />
+		<Rule Id="IDE0002" Action="Info" />
+		<Rule Id="IDE0003" Action="Info" />
+		<Rule Id="IDE0004" Action="Info" />
+		<Rule Id="IDE0005" Action="Info" />
+		<Rule Id="IDE0007" Action="Info" />
+		<Rule Id="IDE0007WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0008" Action="Info" />
+		<Rule Id="IDE0008WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0009" Action="Info" />
+		<Rule Id="IDE0009WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0011" Action="Info" />
+		<Rule Id="IDE0011WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0012" Action="Info" />
+		<Rule Id="IDE0013" Action="Info" />
+		<Rule Id="IDE0014" Action="Info" />
+		<Rule Id="IDE0015" Action="Info" />
+		<Rule Id="IDE0016" Action="Info" />
+		<Rule Id="IDE0016WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0017" Action="Info" />
+		<Rule Id="IDE0017WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0018" Action="Info" />
+		<Rule Id="IDE0018WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0019" Action="Info" />
+		<Rule Id="IDE0019WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0020" Action="Info" />
+		<Rule Id="IDE0020WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0021" Action="Info" />
+		<Rule Id="IDE0021WithoutSuggestion" Action="None" />
+		<Rule Id="IDE0022" Action="Info" />
+		<Rule Id="IDE0022WithoutSuggestion" Action="None" />
+		<Rule Id="IDE0023" Action="Info" />
+		<Rule Id="IDE0023WithoutSuggestion" Action="None" />
+		<Rule Id="IDE0024" Action="Info" />
+		<Rule Id="IDE0024WithoutSuggestion" Action="None" />
+		<Rule Id="IDE0025" Action="Info" />
+		<Rule Id="IDE0025WithoutSuggestion" Action="None" />
+		<Rule Id="IDE0026" Action="Info" />
+		<Rule Id="IDE0026WithoutSuggestion" Action="None" />
+		<Rule Id="IDE0027" Action="Info" />
+		<Rule Id="IDE0027WithoutSuggestion" Action="None" />
+		<Rule Id="IDE0028" Action="Info" />
+		<Rule Id="IDE0028WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0029" Action="Info" />
+		<Rule Id="IDE0029WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0030" Action="Info" />
+		<Rule Id="IDE0030WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0031" Action="Info" />
+		<Rule Id="IDE0031WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0034" Action="Info" />
+		<Rule Id="IDE0034WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0036" Action="Info" />
+		<Rule Id="IDE0036WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0037" Action="Info" />
+		<Rule Id="IDE0037WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0039" Action="Info" />
+		<Rule Id="IDE0039WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0040" Action="Info" />
+		<Rule Id="IDE0040WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0041" Action="Info" />
+		<Rule Id="IDE0041WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0042" Action="Info" />
+		<Rule Id="IDE0042WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0043" Action="Info" />
+		<Rule Id="IDE0044" Action="Info" />
+		<Rule Id="IDE0044WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE1005" Action="Info" />
+		<Rule Id="IDE1005WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE1006" Action="Info" />
+		<Rule Id="IDE1006WithoutSuggestion" Action="Info" />
+	</Rules>
+	<Rules AnalyzerId="Microsoft.CodeAnalysis.Features" RuleNamespace="Microsoft.CodeAnalysis.Features">
+		<Rule Id="IDE0010WithoutSuggestion" Action="Info" />
+		<Rule Id="IDE0033" Action="Info" />
+		<Rule Id="IDE0033WithoutSuggestion" Action="Info" />
+	</Rules>
+	<Rules AnalyzerId="Microsoft.NetCore.CSharp.Analyzers" RuleNamespace="Microsoft.NetCore.CSharp.Analyzers">
+		<Rule Id="CA5350" Action="None" />
+	</Rules>
+	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+		<Rule Id="SA0001" Action="None" />
+		<Rule Id="SA1124" Action="None" />
+		<Rule Id="SA1217" Action="None" />
+		<Rule Id="SA1407" Action="None" />
+		<Rule Id="SA1412" Action="Warning" />
+		<Rule Id="SA1413" Action="None" />
+		<Rule Id="SA1515" Action="None" />
+		<Rule Id="SA1600" Action="None" />
+		<Rule Id="SA1601" Action="None" />
+		<Rule Id="SA1602" Action="None" />
+		<Rule Id="SA1604" Action="None" />
+		<Rule Id="SA1605" Action="None" />
+		<Rule Id="SA1606" Action="None" />
+		<Rule Id="SA1607" Action="None" />
+		<Rule Id="SA1608" Action="None" />
+		<Rule Id="SA1609" Action="Warning" />
+		<Rule Id="SA1610" Action="None" />
+		<Rule Id="SA1611" Action="None" />
+		<Rule Id="SA1612" Action="None" />
+		<Rule Id="SA1613" Action="None" />
+		<Rule Id="SA1614" Action="None" />
+		<Rule Id="SA1615" Action="None" />
+		<Rule Id="SA1616" Action="None" />
+		<Rule Id="SA1617" Action="None" />
+		<Rule Id="SA1618" Action="None" />
+		<Rule Id="SA1619" Action="None" />
+		<Rule Id="SA1620" Action="None" />
+		<Rule Id="SA1621" Action="None" />
+		<Rule Id="SA1622" Action="None" />
+		<Rule Id="SA1623" Action="None" />
+		<Rule Id="SA1624" Action="None" />
+		<Rule Id="SA1625" Action="None" />
+		<Rule Id="SA1626" Action="None" />
+		<Rule Id="SA1627" Action="None" />
+		<Rule Id="SA1633" Action="None" />
+		<Rule Id="SA1634" Action="None" />
+		<Rule Id="SA1635" Action="None" />
+		<Rule Id="SA1636" Action="None" />
+		<Rule Id="SA1637" Action="None" />
+		<Rule Id="SA1638" Action="None" />
+		<Rule Id="SA1640" Action="None" />
+		<Rule Id="SA1641" Action="None" />
+		<Rule Id="SA1652" Action="None" />
+	</Rules>
 </RuleSet>
