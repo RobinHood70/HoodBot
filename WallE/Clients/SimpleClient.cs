@@ -97,6 +97,14 @@
 		/// <value>The default cookies location.</value>
 		public static string DefaultCookiesLocation { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "cookies.dat");
 
+		/// <summary>Gets a value indicating whether the current project is using <see href="http://www.mono-project.com/">Mono</see>.</summary>
+		/// <value><c>true</c> if this instance is running on Mono; otherwise, <c>false</c>.</value>
+		public static bool HasMono { get; } = Type.GetType("Mono.Runtime") != null;
+
+		/// <summary>Gets a value indicating whether the current project is running on Windows.</summary>
+		/// <value><c>true</c> if running on Windows; otherwise, <c>false</c>.</value>
+		public static bool OnWindows { get; } = Environment.OSVersion.Platform < PlatformID.Unix;
+
 		/// <summary>Gets the amount of time (in seconds) to add to retries if they occur in succession.</summary>
 		/// <value>The retry delay bonuses.</value>
 		/// <remarks>Although default values are provided, these are user-settable. In the event that more retries are allowed than there are entries in this list, the last retry delay bonus will be used.</remarks>

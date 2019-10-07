@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
@@ -25,7 +24,7 @@
 		/// <param name="site">The site the user is from.</param>
 		/// <param name="name">The name of the user.</param>
 		public User(Site site, string name)
-			: base(site?.Namespaces[MediaWikiNamespaces.User], TitleParts.DecodeAndNormalize(name))
+			: base(site?.Namespaces[MediaWikiNamespaces.User], name)
 		{
 		}
 

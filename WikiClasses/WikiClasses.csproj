@@ -62,6 +62,7 @@
     <Compile Include="ComparableCollection.cs" />
     <Compile Include="CsvFile.cs" />
     <Compile Include="CsvRow.cs" />
+    <Compile Include="HtmlUtilities.cs" />
     <Compile Include="NaturalSort.cs" />
     <Compile Include="PaddedString.cs" />
     <Compile Include="Parameter.cs" />
@@ -80,6 +81,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ReadOnlyKeyedCollection.cs" />
     <Compile Include="Searches.cs" />
     <Compile Include="Section.cs" />
     <Compile Include="SectionedPage.cs" />

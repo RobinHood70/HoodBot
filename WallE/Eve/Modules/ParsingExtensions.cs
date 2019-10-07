@@ -11,6 +11,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
+	using static RobinHood70.WallE.ProjectGlobals;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Any other API-related items that didn't warrant creation of their own static class.</summary>

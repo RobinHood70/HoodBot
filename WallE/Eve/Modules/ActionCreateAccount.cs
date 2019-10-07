@@ -5,6 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
+	using static RobinHood70.WallE.ProjectGlobals;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class ActionCreateAccount : ActionModule<CreateAccountInput, CreateAccountResult>

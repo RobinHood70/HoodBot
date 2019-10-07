@@ -76,7 +76,14 @@ namespace RobinHood70.WallE.Eve.Modules
 			if (item.NormalizedName == null)
 			{
 				var ci = GetCulture(this.languageCode ?? this.Wal.LanguageCode) ?? CultureInfo.CurrentCulture;
-				item.NormalizedName = NormalizeMessageName(item.Name, ci);
+				if (!string.IsNullOrEmpty(item.Name))
+				{
+					item.NormalizedName = item.NormalizedName.Replace(' ', '_');
+					if (char.IsUpper(item.Name[0]))
+					{
+						item.NormalizedName = item.NormalizedName.Substring(0, 1).ToLower(ci) + (item.Name.Length > 1 ? item.Name.Substring(1) : string.Empty);
+					}
+				}
 			}
 
 			return item;

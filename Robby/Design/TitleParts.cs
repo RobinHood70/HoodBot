@@ -2,6 +2,7 @@
 {
 	using System;
 	using RobinHood70.Robby.Properties;
+	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -28,7 +29,7 @@
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(fullPageName, nameof(fullPageName));
-			var nameRemaining = DecodeAndNormalize(fullPageName);
+			var nameRemaining = HtmlUtilities.DecodeAndNormalize(fullPageName);
 			if (nameRemaining.Length > 0 && nameRemaining[0] == ':')
 			{
 				this.LeadingColon = true;
@@ -183,11 +184,6 @@
 		#endregion
 
 		#region Public Static Methods
-
-		/// <summary>HTML-decodes the specified text, removes bidirectional text markers, and replaces space-like characters with spaces.</summary>
-		/// <param name="text">The text to decode and normalize.</param>
-		/// <returns>The original text with bidirectional text markers removed and space-like characters converted to spaces.</returns>
-		public static string DecodeAndNormalize(string text) => Globals.DecodeAndNormalize(text);
 
 		/// <summary>Returns a <see cref="TitleParts"/> for the given namespace and page name, allowing for the possibility that the page may already have the namespace prepended to it.</summary>
 		/// <param name="ns">The namespace the page should belong to.</param>

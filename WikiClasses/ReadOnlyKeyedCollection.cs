@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WikiCommon
+﻿namespace RobinHood70.WikiClasses
 {
 	using System;
 	using System.Collections;

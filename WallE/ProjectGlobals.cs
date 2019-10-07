@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Collections.ObjectModel;
 	using System.Globalization;
 	using System.Security.Cryptography;
 	using System.Text;
@@ -20,6 +21,13 @@
 	internal static class ProjectGlobals
 	{
 		#region Public Methods
+
+		/// <summary>Creates an empty read-only dictionary of the specified type.</summary>
+		/// <typeparam name="TKey">The key type.</typeparam>
+		/// <typeparam name="TValue">The value type.</typeparam>
+		/// <returns>An empty read-only dictionary.</returns>
+		public static IReadOnlyDictionary<TKey, TValue> EmptyReadOnlyDictionary<TKey, TValue>() => new ReadOnlyDictionary<TKey, TValue>(new Dictionary<TKey, TValue>());
+
 		public static string GetHash(byte[] data, HashType hashType)
 		{
 			HashAlgorithm hash;

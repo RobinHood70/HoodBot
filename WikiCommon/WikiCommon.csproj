@@ -60,7 +60,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="ReadOnlyKeyedCollection.cs" />
     <Compile Include="RequestBuilder\FileParameter.cs" />
     <Compile Include="RequestBuilder\FormatParameter.cs" />
     <Compile Include="RequestBuilder\HiddenParameter.cs" />
