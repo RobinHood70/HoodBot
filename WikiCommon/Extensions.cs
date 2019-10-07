@@ -177,21 +177,6 @@
 
 		#region IEnumerable Extensions
 
-		/// <summary>Nearly identical to Linq's Cast method, but limited to classes for better performance.</summary>
-		/// <typeparam name="T">The type to convert to.</typeparam>
-		/// <param name="collection">The collection to cast.</param>
-		/// <returns>An enumeration with all items cast to the specified type.</returns>
-		/// <remarks>This version of Cast requires that all return types be classes. It's most useful for collections like CookieCollection or MatchCollection, where the <see cref="IReadOnlyList{T}"/> interface was never implemented.</remarks>
-		public static IEnumerable<T> Cast<T>(this IEnumerable collection)
-			where T : class
-		{
-			ThrowNull(collection, nameof(collection));
-			foreach (var item in collection)
-			{
-				yield return item as T;
-			}
-		}
-
 		/// <summary>Determines whether an IEnumerable has items.</summary>
 		/// <param name="list">The enumerable to check.</param>
 		/// <returns><c>true</c> if the list is non-null and has at least one item; otherwise, <c>false</c>.</returns>

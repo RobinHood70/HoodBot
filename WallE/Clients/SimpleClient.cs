@@ -389,7 +389,7 @@
 					{
 						if (response.Cookies != null)
 						{
-							foreach (var cookie in response.Cookies.Cast<Cookie>())
+							foreach (Cookie cookie in response.Cookies)
 							{
 								this.cookieContainer.Add(cookie);
 							}
