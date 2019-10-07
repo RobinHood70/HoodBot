@@ -719,7 +719,10 @@
 		/// <param name="namespaces">The namespaces to remove.</param>
 		public void RemoveNamespaces(bool removeTalk, IEnumerable<int> namespaces)
 		{
-			var hash = new HashSet<int>(namespaces);
+			var hash =
+				namespaces == null ? new HashSet<int>() :
+				namespaces is HashSet<int> isHashSet ? isHashSet :
+				new HashSet<int>(namespaces);
 			for (var i = this.Count - 1; i >= 0; i--)
 			{
 				var ns = this[i].Namespace;
@@ -734,6 +737,9 @@
 		/// <param name="removeTalk">Whether to remove talk spaces along with <paramref name="namespaces"/>.</param>
 		/// <param name="namespaces">The namespaces to remove.</param>
 		public void RemoveNamespaces(bool removeTalk, params int[] namespaces) => this.RemoveNamespaces(removeTalk, namespaces as IEnumerable<int>);
+
+		/// <summary>Removes all talk spaces from the collection.</summary>
+		public void RemoveTalkNamespaces() => this.RemoveNamespaces(true, null as IEnumerable<int>);
 
 		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> by namespace, then pagename.</summary>
 		public void Sort() => this.Sort(TitleComparer<TTitle>.Instance);
