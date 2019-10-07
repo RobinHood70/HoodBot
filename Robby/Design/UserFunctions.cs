@@ -86,7 +86,7 @@
 
 		/// <summary>Gets or sets the results page.</summary>
 		/// <value>The results page.</value>
-		public Page ResultsPage { get; protected set; }
+		public Page ResultsPage { get; set; }
 
 		/// <summary>Gets the site associated with this instance.</summary>
 		/// <value>The site associated with this instance.</value>
@@ -151,6 +151,11 @@
 		/// <param name="jobCount">The number of jobs being run.</param>
 		/// <remarks>This allows for custom actions to occur before a job run. It is left to the client to decide when that should occur and call the method.</remarks>
 		public virtual void OnAllJobsStarting(int jobCount)
+		{
+		}
+
+		/// <summary>Resets the results page to its default value.</summary>
+		public virtual void ResetResultsPage()
 		{
 		}
 

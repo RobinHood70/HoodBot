@@ -353,8 +353,15 @@
 		{
 			ThrowNull(backlinkTitles, nameof(backlinkTitles));
 			var userFunctions = this.Site.UserFunctions;
-			backlinkTitles.Remove(userFunctions.ResultsPage);
-			backlinkTitles.Remove(userFunctions.LogPage);
+			if (userFunctions.ResultsPage != null)
+			{
+				backlinkTitles.Remove(userFunctions.ResultsPage);
+			}
+
+			if (userFunctions.LogPage != null)
+			{
+				backlinkTitles.Remove(userFunctions.LogPage);
+			}
 
 			if (userFunctions is HoodBotFunctions hoodBotUserFunctions)
 			{

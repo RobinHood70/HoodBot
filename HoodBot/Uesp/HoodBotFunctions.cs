@@ -40,7 +40,7 @@
 			var pageName = site.User.FullPageName;
 			this.LogPage = new Page(site, pageName + "/Log");
 			this.RequestsPage = new Page(site.Namespaces[MediaWikiNamespaces.Project], "Bot Requests");
-			this.ResultsPage = new Page(site, pageName + "/Results");
+			this.PrivateResetResultsPage();
 			this.StatusPage = this.LogPage;
 			this.DefaultResultDestination = ResultDestination.ResultsPage;
 		}
@@ -214,6 +214,8 @@
 			this.InitializeResult(ResultDestination.ResultsPage, null, "Job Results");
 		}
 
+		public override void ResetResultsPage() => this.PrivateResetResultsPage();
+
 		public override void SetResultInfo(ResultDestination destination, string user, string title) => this.results[destination] = new ResultInfo(user, title);
 
 		public override void SetResultTitle(ResultDestination destination, string title)
@@ -352,8 +354,11 @@
 
 		private void PostResultsToResultsPage(string title, string result)
 		{
-			this.ResultsPage.Text = result;
-			this.ResultsPage.Save(title, false);
+			if (this.ResultsPage != null)
+			{
+				this.ResultsPage.Text = result;
+				this.ResultsPage.Save(title, false);
+			}
 		}
 
 		private void PostResultsToUserTalkPage(string userName, string sectionTitle, string text)
@@ -362,6 +367,7 @@
 			user.NewTalkPageMessage(sectionTitle, text, "New Message from " + this.Site.User.Name);
 		}
 
+		private void PrivateResetResultsPage() => this.ResultsPage = new Page(this.Site, this.Site.User.FullPageName + "/Results");
 		#endregion
 
 		#region Private Classes
