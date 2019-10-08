@@ -3,7 +3,6 @@
 	using System;
 	using System.Net;
 	using System.Text.RegularExpressions;
-	using System.Web;
 	using System.Xml.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
@@ -135,7 +134,7 @@
 					{
 						if ((bool)descendant.Attribute("preferred"))
 						{
-							var apiLink = HttpUtility.HtmlDecode((string)descendant.Attribute("apiLink"));
+							var apiLink = WebUtility.HtmlDecode((string)descendant.Attribute("apiLink"));
 							tryLoc = new Uri(apiLink);
 							tryPath = apiLink.Substring(0, apiLink.LastIndexOf('/') + 1);
 							break;
