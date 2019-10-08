@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WikiClasses.Parser.Nodes
+﻿namespace RobinHood70.WikiClasses.Parser
 {
 	// Since we've eliminated TreeNode, we need something that'll break up Name and Value during AddLiteral, so this is it. It is, in essence, a null node, since it stores no data.
 	public class EqualsNode : INodeBase

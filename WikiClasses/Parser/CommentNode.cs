@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WikiClasses.Parser.Nodes
+﻿namespace RobinHood70.WikiClasses.Parser
 {
 	/// <summary>Represents a wikitext (HTML) comment.</summary>
 	public class CommentNode : INodeBase

@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
-	using RobinHood70.WikiClasses.Parser.Nodes;
 	using static RobinHood70.WikiCommon.Globals;
 
 	public class NodeCollectionVisitor : IVisitor

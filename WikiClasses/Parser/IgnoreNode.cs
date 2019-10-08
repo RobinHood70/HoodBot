@@ -1,13 +1,13 @@
-﻿namespace RobinHood70.WikiClasses.Parser.Nodes
+﻿namespace RobinHood70.WikiClasses.Parser
 {
-	public class TextNode : INodeBase
+	public class IgnoreNode : INodeBase
 	{
 		#region Constructors
-		public TextNode(string text) => this.Text = text;
+		public IgnoreNode(string value) => this.Value = value;
 		#endregion
 
 		#region Public Properties
-		public string Text { get; set; }
+		public string Value { get; }
 		#endregion
 
 		#region Public Methods
@@ -15,7 +15,7 @@
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Text;
+		public override string ToString() => this.Value;
 		#endregion
 	}
 }

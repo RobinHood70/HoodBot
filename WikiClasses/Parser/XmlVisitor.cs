@@ -4,7 +4,6 @@
 	using System.Globalization;
 	using System.Text;
 	using System.Web.Security.AntiXss;
-	using RobinHood70.WikiClasses.Parser.Nodes;
 	using static WikiCommon.Globals;
 
 	public class XmlVisitor : IVisitor

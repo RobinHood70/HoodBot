@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.WikiClasses.Parser.StackElements
 {
 	using System;
-	using RobinHood70.WikiClasses.Parser.Nodes;
 
 	internal class HeaderElement : StackElement
 	{

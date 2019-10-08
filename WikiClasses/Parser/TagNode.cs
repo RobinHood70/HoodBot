@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WikiClasses.Parser.Nodes
+﻿namespace RobinHood70.WikiClasses.Parser
 {
 	public class TagNode : INodeBase
 	{

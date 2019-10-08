@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Text.RegularExpressions;
-	using RobinHood70.WikiClasses.Parser.Nodes;
 	using RobinHood70.WikiClasses.Parser.StackElements;
 	using RobinHood70.WikiClasses.Properties;
 	using static System.FormattableString;
@@ -41,6 +40,11 @@
 		#endregion
 
 		#region Constructors
+
+		/// <summary>Initializes a new instance of the <see cref="WikiStack"/> class.</summary>
+		/// <param name="text">The text to work with.</param>
+		/// <param name="tagList">A list of tags whose contents should not be parsed.</param>
+		/// <param name="include">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
 		public WikiStack(string text, ICollection<string> tagList, bool? include)
 		{
 			this.array = new StackElement[StartSize];

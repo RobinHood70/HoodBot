@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WikiClasses.Parser.Nodes
+﻿namespace RobinHood70.WikiClasses.Parser
 {
 	/// <summary>Represents common functions to all nodes in the wikitext parser.</summary>
 	public interface INodeBase

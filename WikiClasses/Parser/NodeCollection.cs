@@ -3,7 +3,6 @@
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Text;
-	using RobinHood70.WikiClasses.Parser.Nodes;
 
 	public class NodeCollection : IList<INodeBase>, INodeBase
 	{

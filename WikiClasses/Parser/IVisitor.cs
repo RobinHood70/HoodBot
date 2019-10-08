@@ -1,7 +1,5 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
-	using RobinHood70.WikiClasses.Parser.Nodes;
-
 	public interface IVisitor
 	{
 		void Visit(CommentNode node);
