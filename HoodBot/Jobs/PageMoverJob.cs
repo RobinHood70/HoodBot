@@ -559,7 +559,7 @@
 			{
 				var parser = WikiTextParser.Parse(text);
 				new BacklinkReplaceVisitor(this.Site, parser, this.movedPages).Visit();
-				text = new WikiTextVisitor(false).Build(parser);
+				text = WikiTextVisitor.Raw(parser);
 
 				// Galleries - handled here for now, but might be able to move it into ReplaceVisitor if parsed into a TagNode or custom GalleryNode.
 				foreach (var replacement in this.Replacements)

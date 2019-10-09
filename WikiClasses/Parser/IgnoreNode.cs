@@ -1,6 +1,6 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
-	public class IgnoreNode : INodeBase
+	public class IgnoreNode : WikiNode
 	{
 		#region Constructors
 		public IgnoreNode(string value) => this.Value = value;
@@ -11,7 +11,7 @@
 		#endregion
 
 		#region Public Methods
-		public void Accept(IVisitor visitor) => visitor?.Visit(this);
+		public override void Accept(INodeVisitor visitor) => visitor?.Visit(this);
 		#endregion
 
 		#region Public Override Methods

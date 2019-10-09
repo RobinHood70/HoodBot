@@ -3,8 +3,13 @@
 	using System.Text;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class WikiTextVisitor : IVisitor
+	public class WikiTextVisitor : INodeVisitor
 	{
+		#region Static Fields
+		private static readonly WikiTextVisitor RawVisitor = new WikiTextVisitor(false);
+		private static readonly WikiTextVisitor ValueVisitor = new WikiTextVisitor(true);
+		#endregion
+
 		#region Fields
 		private readonly StringBuilder builder = new StringBuilder();
 		private readonly bool valuesOnly;
@@ -14,8 +19,14 @@
 		public WikiTextVisitor(bool valuesOnly) => this.valuesOnly = valuesOnly;
 		#endregion
 
+		#region Public Static Methods
+		public static string Raw(WikiNode node) => RawVisitor.Build(node);
+
+		public static string Value(WikiNode node) => ValueVisitor.Build(node);
+		#endregion
+
 		#region Public Methods
-		public string Build(INodeBase node)
+		public string Build(WikiNode node)
 		{
 			ThrowNull(node, nameof(node));
 			this.builder.Clear();

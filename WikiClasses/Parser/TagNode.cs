@@ -1,6 +1,6 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
-	public class TagNode : INodeBase
+	public class TagNode : WikiNode
 	{
 		#region Constructors
 		// TODO: Self-closed option was a quick addition to fix the immediate problem. Is this the best approach? Close = { null, empty, content } seems like a better approach and I think what I was doing before, but it wasn't quite working right.
@@ -27,7 +27,7 @@
 		#endregion
 
 		#region Public Methods
-		public void Accept(IVisitor visitor) => visitor?.Visit(this);
+		public override void Accept(INodeVisitor visitor) => visitor?.Visit(this);
 		#endregion
 
 		#region Public Override Methods

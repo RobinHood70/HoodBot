@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
 	/// <summary>Represents a wikitext (HTML) comment.</summary>
-	public class CommentNode : INodeBase
+	public class CommentNode : WikiNode
 	{
 		#region Constructors
 		public CommentNode(string comment) => this.Comment = comment;
@@ -12,7 +12,7 @@
 		#endregion
 
 		#region Public Methods
-		public void Accept(IVisitor visitor) => visitor?.Visit(this);
+		public override void Accept(INodeVisitor visitor) => visitor?.Visit(this);
 		#endregion
 
 		#region Public Override Methods

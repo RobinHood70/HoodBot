@@ -42,7 +42,7 @@
 		private readonly string appDataFolder;
 		private readonly IProgress<double> progressMonitor;
 		private readonly IProgress<string> statusMonitor;
-		private readonly List<Type> pluginTypes = new List<Type>();
+		private readonly List<Type> pluginTypes;
 
 		private CancellationTokenSource canceller;
 		private double completedJobs;
@@ -236,8 +236,10 @@
 
 		private static IEnumerable<Type> GetPlugins()
 		{
-			var exePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-			var dllNames = Directory.GetFiles(Path.Combine(exePath, "Plugins"), "*.dll", SearchOption.TopDirectoryOnly);
+			var assemblyLocation = Assembly.GetEntryAssembly().Location;
+			var exePath = Path.GetDirectoryName(assemblyLocation);
+			var folder = Path.Combine(exePath, "Plugins");
+			var dllNames = Directory.GetFiles(folder, "*.dll", SearchOption.TopDirectoryOnly);
 			foreach (var dllName in dllNames)
 			{
 				Assembly dll;
@@ -508,11 +510,11 @@
 		{
 			// var testString = "Some Text {{Trail|Here}} [[Oblivion:Quests|Simple Link]]";
 			var testString = "Some Text {{Trail|Here}}{{Trail|named=There}} [[Oblivion:Quests|Simple Link]] {{Trail|[[Skyrim:Places|Embedded Link]]}} [[Image:Example.png|60px|Text with a [[Link]]]] More Text <nowiki>[[Not a link]]</nowiki><!--[[Also not a link]]--><includeonly>[[Is a link if told we're transcluding|link=Daggerfall:Daggerfall]]</includeonly> Are we done yet?";
-			var nodes = WikiTextParser.Parse(testString, true);
+			var nodes = WikiTextParser.Parse(testString, true, false);
 			var xml = new XmlVisitor(true);
 			Debug.WriteLine("Original text: " + testString);
 			Debug.WriteLine(xml.Build(nodes));
-			var returnText = new WikiTextVisitor(false).Build(nodes);
+			var returnText = WikiTextVisitor.Raw(nodes);
 			if (testString == returnText)
 			{
 				Debug.WriteLine("Full match!");

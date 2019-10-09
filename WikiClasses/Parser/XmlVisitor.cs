@@ -6,7 +6,7 @@
 	using System.Web.Security.AntiXss;
 	using static WikiCommon.Globals;
 
-	public class XmlVisitor : IVisitor
+	public class XmlVisitor : INodeVisitor
 	{
 		#region Fields
 		private readonly StringBuilder builder = new StringBuilder();

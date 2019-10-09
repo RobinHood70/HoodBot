@@ -1,10 +1,16 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
-	public class HeaderNode : INodeBase
+	using System.Collections;
+	using System.Collections.Generic;
+	using static WikiCommon.Globals;
+
+	public class HeaderNode : WikiNode, IEnumerable<NodeCollection>
 	{
 		#region Constructors
 		public HeaderNode(int index, int level, NodeCollection title)
 		{
+			ThrowNull(title, nameof(title));
+			title.SetParent(this);
 			this.Index = index;
 			this.Level = level;
 			this.Title = title;
@@ -22,7 +28,14 @@
 		#endregion
 
 		#region Public Methods
-		public void Accept(IVisitor visitor) => visitor?.Visit(this);
+		public override void Accept(INodeVisitor visitor) => visitor?.Visit(this);
+
+		public IEnumerator<NodeCollection> GetEnumerator()
+		{
+			yield return this.Title;
+		}
+
+		IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 		#endregion
 
 		#region Public Override Methods

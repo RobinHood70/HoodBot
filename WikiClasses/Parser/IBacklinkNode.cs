@@ -2,7 +2,7 @@
 {
 	using System.Collections.Generic;
 
-	public interface IBacklinkNode : INodeBase
+	public interface IBacklinkNode : IEnumerable<NodeCollection>
 	{
 		#region Properties
 		IList<ParameterNode> Parameters { get; }

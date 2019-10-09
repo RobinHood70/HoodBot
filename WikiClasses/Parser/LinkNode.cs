@@ -1,8 +1,9 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
+	using System.Collections;
 	using System.Collections.Generic;
 
-	public class LinkNode : IBacklinkNode
+	public class LinkNode : WikiNode, IBacklinkNode
 	{
 		#region Constructors
 		public LinkNode(NodeCollection title, IList<ParameterNode> parameters)
@@ -19,7 +20,25 @@
 		#endregion
 
 		#region Public Methods
-		public void Accept(IVisitor visitor) => visitor?.Visit(this);
+		public override void Accept(INodeVisitor visitor) => visitor?.Visit(this);
+
+		public IEnumerator<NodeCollection> GetEnumerator()
+		{
+			if (this.Title != null)
+			{
+				yield return this.Title;
+			}
+
+			foreach (var param in this.Parameters)
+			{
+				foreach (var paramNode in param)
+				{
+					yield return paramNode;
+				}
+			}
+		}
+
+		IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 		#endregion
 
 		#region Public Override Methods

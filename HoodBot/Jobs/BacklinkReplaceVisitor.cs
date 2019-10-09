@@ -4,7 +4,6 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiClasses.Parser;
-	using RobinHood70.WikiClasses.Parser.Nodes;
 	using RobinHood70.WikiCommon;
 
 	internal class BacklinkReplaceVisitor : NodeCollectionVisitor
@@ -41,26 +40,22 @@
 		private void VisitBacklink(IBacklinkNode parent, bool isTemplate)
 		{
 			// TODO: Fix this to only add text to the link if on a non-redirect talk page.
-			var titleText = parent.Title.GetText();
+			var titleText = WikiTextVisitor.Value(parent.Title);
 			var title = new Title(this.site, titleText);
 			if (this.textReplacements.TryGetValue(title, out var replacement))
 			{
-				if (isTemplate)
+				var newName = (isTemplate && title.Namespace == MediaWikiNamespaces.Template && replacement.Namespace == MediaWikiNamespaces.Template)
+					? replacement.PageName
+					: replacement.FullPageName;
+				var newNode = new TextNode(newName);
+				parent.Title.ReplaceAll<TextNode>(newNode);
+
+				if (!isTemplate)
 				{
-					parent.Title.ReplaceTextWith(
-						(title.Namespace == MediaWikiNamespaces.Template && replacement.Namespace == MediaWikiNamespaces.Template)
-						? replacement.PageName
-						: replacement.FullPageName);
-				}
-				else
-				{
-					parent.Title.ReplaceTextWith(replacement.FullPageName);
 					if (parent.Parameters.Count == 0)
 					{
-						parent.Parameters.Add(new ParameterNode(1, new NodeCollection
-						{
-							new TextNode(title.PageName)
-						}));
+						var paramNode = new ParameterNode(1, new NodeCollection(new TextNode(title.PageName)));
+						parent.Parameters.Add(paramNode);
 					}
 				}
 			}

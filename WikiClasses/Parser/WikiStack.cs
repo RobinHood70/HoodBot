@@ -31,6 +31,7 @@
 		private readonly bool enableOnlyInclude;
 		private readonly HashSet<string> ignoredElements = new HashSet<string>();
 		private readonly HashSet<string> ignoredTags = new HashSet<string>();
+		private readonly bool includeIgnores;
 		private readonly HashSet<string> noMoreClosingTag = new HashSet<string>();
 		private readonly int textLength;
 		private readonly Regex tagsRegex;
@@ -45,7 +46,8 @@
 		/// <param name="text">The text to work with.</param>
 		/// <param name="tagList">A list of tags whose contents should not be parsed.</param>
 		/// <param name="include">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
-		public WikiStack(string text, ICollection<string> tagList, bool? include)
+		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
+		public WikiStack(string text, ICollection<string> tagList, bool? include, bool strictInclusion)
 		{
 			this.array = new StackElement[StartSize];
 			this.count = 0;
@@ -55,6 +57,8 @@
 			this.textLength = text.Length;
 			this.enableOnlyInclude = text.Contains(OnlyIncludeTagOpen);
 			this.findOnlyinclude = this.enableOnlyInclude;
+			this.includeIgnores = !strictInclusion;
+
 			var allTags = new HashSet<string>(tagList);
 			switch (include)
 			{
@@ -83,44 +87,32 @@
 
 			regexTags.Sort();
 			this.tagsRegex = new Regex(@"\G(" + string.Join("|", regexTags) + @")", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+			this.Preprocess();
+			this.Merge();
 		}
 		#endregion
 
 		#region Public Properties
-		public int HeadingIndex { get; set; } = 1;
+		public NodeCollection Nodes { get; private set; }
+		#endregion
 
-		public int Index { get; set; }
+		#region Internal Properties
+		internal int HeadingIndex { get; set; } = 1;
 
-		public string Text { get; }
+		internal int Index { get; set; }
 
-		public StackElement Top { get; private set; }
+		internal string Text { get; }
+
+		internal StackElement Top { get; private set; }
 		#endregion
 
 		#region Private Properties
 		private char CurrentCharacter => this.Text[this.Index];
 		#endregion
 
-		#region Public Methods
-		public NodeCollection Merge()
-		{
-			var root = this.array[0].CurrentPiece;
-			for (var i = 1; i < this.count; i++)
-			{
-				root.Merge(this.array[i].BreakSyntax());
-			}
-
-			for (var i = 0; i < root.Count; i++)
-			{
-				if (root[i] is HeaderNode hNode && !hNode.Confirmed)
-				{
-					hNode.Confirmed = true;
-				}
-			}
-
-			return root;
-		}
-
-		public void Parse(char found)
+		#region Internal Methods
+		internal void Parse(char found)
 		{
 			switch (found)
 			{
@@ -184,7 +176,7 @@
 			}
 		}
 
-		public void Pop()
+		internal void Pop()
 		{
 			if (this.count-- < 2)
 			{
@@ -195,56 +187,7 @@
 			this.Top = this.array[this.count - 1];
 		}
 
-		public void Preprocess()
-		{
-			if (this.textLength > 0 && this.Text[0] == '=')
-			{
-				this.ParseLineStart();
-			}
-
-			do
-			{
-				if (this.findOnlyinclude)
-				{
-					var startPos = this.Text.IndexOf(OnlyIncludeTagOpen, this.Index, StringComparison.OrdinalIgnoreCase);
-					if (startPos == -1)
-					{
-						this.Top.CurrentPiece.Add(new IgnoreNode(this.Text.Substring(this.Index)));
-						break;
-					}
-
-					var tagEndPos = startPos + OnlyIncludeTagOpen.Length; // past-the-end
-					this.Top.CurrentPiece.Add(new IgnoreNode(this.Text.Substring(this.Index, tagEndPos - this.Index)));
-					this.Index = tagEndPos;
-					this.findOnlyinclude = false;
-				}
-
-				var search = this.Top.SearchString;
-				var literalOffset = this.Text.IndexOfAny(search.ToCharArray(), this.Index);
-				if (literalOffset == -1)
-				{
-					literalOffset = this.textLength;
-				}
-
-				if (literalOffset != this.Index)
-				{
-					this.Top.CurrentPiece.AddLiteral(this.Text.Substring(this.Index, literalOffset - this.Index));
-					this.Index = literalOffset;
-					if (this.Index >= this.textLength)
-					{
-						break;
-					}
-				}
-
-				this.Top.Parse(this.CurrentCharacter);
-			}
-			while (this.Index < this.textLength);
-
-			var lastHeader = this.Top as HeaderElement;
-			lastHeader?.Parse('\n');
-		}
-
-		public void Push(StackElement item)
+		internal void Push(StackElement item)
 		{
 			if (this.count == this.array.Length)
 			{
@@ -253,7 +196,8 @@
 				this.array = newArray;
 			}
 
-			this.array[this.count++] = item;
+			this.array[this.count] = item;
+			this.count++;
 			this.Top = item;
 		}
 		#endregion
@@ -361,7 +305,11 @@
 
 			if (this.ignoredTags.Contains(tagNameLower))
 			{
-				piece.Add(new IgnoreNode(this.Text.Substring(this.Index, tagEndPos - this.Index + 1)));
+				if (this.includeIgnores)
+				{
+					piece.Add(new IgnoreNode(this.Text.Substring(this.Index, tagEndPos - this.Index + 1)));
+				}
+
 				this.Index = tagEndPos + 1;
 				return true;
 			}
@@ -408,7 +356,10 @@
 
 			if (this.ignoredElements.Contains(tagNameLower))
 			{
-				piece.Add(new IgnoreNode(this.Text.Substring(tagStartPos, this.Index - tagStartPos)));
+				if (this.includeIgnores)
+				{
+					piece.Add(new IgnoreNode(this.Text.Substring(tagStartPos, this.Index - tagStartPos)));
+				}
 			}
 			else
 			{
@@ -417,6 +368,23 @@
 			}
 
 			return true;
+		}
+
+		private void Merge()
+		{
+			this.Nodes = this.array[0].CurrentPiece;
+			for (var i = 1; i < this.count; i++)
+			{
+				this.Nodes.Merge(this.array[i].BreakSyntax());
+			}
+
+			for (var i = 0; i < this.Nodes.Count; i++)
+			{
+				if (this.Nodes[i] is HeaderNode hNode && !hNode.Confirmed)
+				{
+					hNode.Confirmed = true;
+				}
+			}
 		}
 
 		private void ParseLineStart()
@@ -430,6 +398,63 @@
 				this.Push(new HeaderElement(this, equalsCount));
 				this.Index += equalsCount;
 			}
+		}
+
+		private void Preprocess()
+		{
+			if (this.textLength > 0 && this.Text[0] == '=')
+			{
+				this.ParseLineStart();
+			}
+
+			do
+			{
+				if (this.findOnlyinclude)
+				{
+					var startPos = this.Text.IndexOf(OnlyIncludeTagOpen, this.Index, StringComparison.OrdinalIgnoreCase);
+					if (startPos == -1)
+					{
+						if (this.includeIgnores)
+						{
+							this.Top.CurrentPiece.Add(new IgnoreNode(this.Text.Substring(this.Index)));
+						}
+
+						break;
+					}
+
+					var tagEndPos = startPos + OnlyIncludeTagOpen.Length; // past-the-end
+					if (this.includeIgnores)
+					{
+						this.Top.CurrentPiece.Add(new IgnoreNode(this.Text.Substring(this.Index, tagEndPos - this.Index)));
+					}
+
+					this.Index = tagEndPos;
+					this.findOnlyinclude = false;
+				}
+
+				var search = this.Top.SearchString;
+				var literalOffset = this.Text.IndexOfAny(search.ToCharArray(), this.Index);
+				if (literalOffset == -1)
+				{
+					literalOffset = this.textLength;
+				}
+
+				if (literalOffset != this.Index)
+				{
+					this.Top.CurrentPiece.AddLiteral(this.Text.Substring(this.Index, literalOffset - this.Index));
+					this.Index = literalOffset;
+					if (this.Index >= this.textLength)
+					{
+						break;
+					}
+				}
+
+				this.Top.Parse(this.CurrentCharacter);
+			}
+			while (this.Index < this.textLength);
+
+			var lastHeader = this.Top as HeaderElement;
+			lastHeader?.Parse('\n');
 		}
 		#endregion
 
