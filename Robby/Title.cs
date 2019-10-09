@@ -7,7 +7,8 @@
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
-	using static RobinHood70.WikiCommon.Globals;
+    using RobinHood70.WikiClasses;
+    using static RobinHood70.WikiCommon.Globals;
 
 	#region Public Enumerations
 
@@ -68,7 +69,7 @@
 		{
 			ThrowNull(ns, nameof(ns));
 			ThrowNull(pageName, nameof(pageName));
-			pageName = pageName.Normalize();
+			pageName = WikiTextUtilities.DecodeAndNormalize(pageName);
 			this.Namespace = ns;
 			this.PageName = ns.CapitalizePageName(pageName);
 			this.Key = this.FullPageName;
