@@ -4,7 +4,6 @@
 	using System.Diagnostics;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Eso;
-	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
@@ -25,7 +24,7 @@
 			this.Site.UserFunctions.SetResultTitle(ResultDestination.ResultsPage, "ESO NPC pages with no matching database entry");
 
 			this.StatusWriteLine("Getting NPC data from database");
-			var unfilteredNpcList = EsoGeneral.GetNpcsFromDatabase(this.Site.Namespaces[UespNamespaces.Online]);
+			var unfilteredNpcList = EsoGeneral.GetNpcsFromDatabase();
 			var allNames = new List<string>();
 			foreach (var npc in unfilteredNpcList)
 			{

@@ -4,16 +4,16 @@
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 
-	internal class EsoNpcList : KeyedCollection<long, NPCData>
+	internal class NpcCollection : KeyedCollection<long, NpcData>
 	{
 		#region Public Methods
-		public void SortByPageName()
+		public void Sort()
 		{
-			var list = this.Items as List<NPCData>;
+			var list = this.Items as List<NpcData>;
 			list.Sort((x, y) => string.Compare(x.PageName, y.PageName, StringComparison.Ordinal));
 		}
 
-		public bool TryGetValue(long key, out NPCData item)
+		public bool TryGetValue(long key, out NpcData item)
 		{
 			if (this.Dictionary != null)
 			{
@@ -35,7 +35,7 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override long GetKeyForItem(NPCData item) => item?.Id ?? -1;
+		protected override long GetKeyForItem(NpcData item) => item?.Id ?? -1;
 		#endregion
 	}
 }

@@ -16,6 +16,7 @@
 		private static readonly Regex OnlineUpdateRegex = Template.Find("Online Update");
 		private static readonly Regex SetBonusRegex = new Regex(@"\([1-6] items?\)[^(]*(\s|\n)*");
 		private static readonly Uri SetSummaryPage = new Uri("http://esolog.uesp.net/viewlog.php?record=setSummary&format=csv");
+		private static readonly string[] ItemSeparator = new[] { "(", ") ", "\n" };
 		#endregion
 
 		#region Fields
@@ -178,7 +179,7 @@
 			{
 				if (item.Length > 0)
 				{
-					var split = item.Value.Split(new string[] { "(", ") ", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+					var split = item.Value.Split(ItemSeparator, StringSplitOptions.RemoveEmptyEntries);
 					sb.Append($"'''{split[0]}''': ");
 					split[1] = EsoReplacer.ReplaceGlobal(split[1], null);
 					split[1] = EsoReplacer.ReplaceLink(split[1]);
