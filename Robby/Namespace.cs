@@ -46,6 +46,8 @@
 				ns.CanonicalName
 			};
 			this.defaultNames.TrimExcess();
+
+			this.allNames = new HashSet<string>(site.EqualityComparerInsensitive);
 			this.ResetAllNames();
 		}
 		#endregion
