@@ -98,11 +98,11 @@
 		public static string DefaultCookiesLocation { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "cookies.dat");
 
 		/// <summary>Gets a value indicating whether the current project is using <see href="http://www.mono-project.com/">Mono</see>.</summary>
-		/// <value><c>true</c> if this instance is running on Mono; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if this instance is running on Mono; otherwise, <see langword="false"/>.</value>
 		public static bool HasMono { get; } = Type.GetType("Mono.Runtime") != null;
 
 		/// <summary>Gets a value indicating whether the current project is running on Windows.</summary>
-		/// <value><c>true</c> if running on Windows; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if running on Windows; otherwise, <see langword="false"/>.</value>
 		public static bool OnWindows { get; } = Environment.OSVersion.Platform < PlatformID.Unix;
 
 		/// <summary>Gets the amount of time (in seconds) to add to retries if they occur in succession.</summary>
@@ -158,7 +158,7 @@
 		/// <summary>Downloads a file directly to disk instead of returning it as a string.</summary>
 		/// <param name="uri">The URI to download from.</param>
 		/// <param name="fileName">The filename to save to.</param>
-		/// <returns><c>true</c> if the download succeeded; otherwise <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the download succeeded; otherwise <see langword="false"/>.</returns>
 		/// <exception cref="WikiException">HTTP request failed.</exception>
 		public bool DownloadFile(Uri uri, string fileName)
 		{

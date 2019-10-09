@@ -50,7 +50,7 @@
 		public long EditCount { get; private set; }
 
 		/// <summary>Gets a value indicating whether this <see cref="User"/> can be e-mailed.</summary>
-		/// <value><c>true</c> if the user is emailable; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if the user is emailable; otherwise, <see langword="false"/>.</value>
 		public bool Emailable { get; private set; }
 
 		/// <summary>Gets the user's gender.</summary>
@@ -81,7 +81,7 @@
 		/// <param name="reason">The reason for the block.</param>
 		/// <param name="flags">The block flags.</param>
 		/// <param name="expiry">The date and time the block should expire.</param>
-		/// <param name="reblock">if set to <c>true</c>, reblocks the user with the new block settings.</param>
+		/// <param name="reblock">if set to <see langword="true"/>, reblocks the user with the new block settings.</param>
 		/// <returns>A value indicating the change status of the block.</returns>
 		public ChangeStatus Block(string reason, BlockFlags flags, DateTime expiry, bool reblock)
 		{
@@ -99,7 +99,7 @@
 		/// <param name="reason">The reason for the block.</param>
 		/// <param name="flags">The block flags.</param>
 		/// <param name="duration">The duration of the block (e.g., "2 weeks").</param>
-		/// <param name="reblock">if set to <c>true</c>, reblocks the user with the new block settings.</param>
+		/// <param name="reblock">if set to <see langword="true"/>, reblocks the user with the new block settings.</param>
 		/// <returns>A value indicating the change status of the block.</returns>
 		public ChangeStatus Block(string reason, BlockFlags flags, string duration, bool reblock)
 		{
@@ -115,7 +115,7 @@
 
 		/// <summary>Emails the user.</summary>
 		/// <param name="body">The e-mail body.</param>
-		/// <param name="ccMe">if set to <c>true</c>, sends a copy of the e-mail to the user's e-mail account.</param>
+		/// <param name="ccMe">if set to <see langword="true"/>, sends a copy of the e-mail to the user's e-mail account.</param>
 		/// <returns>A value indicating the change status of the e-mail along with a copy of the e-mail that was sent.</returns>
 		/// <remarks>The subject of the e-mail will be the wiki default.</remarks>
 		public ChangeValue<string> Email(string body, bool ccMe)
@@ -127,7 +127,7 @@
 		/// <summary>Emails the user.</summary>
 		/// <param name="subject">The subject line for the e-mail if not the wiki default.</param>
 		/// <param name="body">The e-mail body.</param>
-		/// <param name="ccMe">if set to <c>true</c>, sends a copy of the e-mail to the user's e-mail account.</param>
+		/// <param name="ccMe">if set to <see langword="true"/>, sends a copy of the e-mail to the user's e-mail account.</param>
 		/// <returns>A value indicating the change status of the e-mail along with a copy of the e-mail that was sent.</returns>
 		public ChangeValue<string> Email(string subject, string body, bool ccMe)
 		{

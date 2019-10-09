@@ -105,7 +105,7 @@
 		public string DisplayText { get; set; }
 
 		/// <summary>Gets or sets a value indicating whether to force a File or Category to be a link to the page.</summary>
-		/// <value><c>true</c> if the wiki link should be forced to be a link; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if the wiki link should be forced to be a link; otherwise, <see langword="false"/>.</value>
 		public bool ForceLink { get; set; }
 
 		/// <summary>Gets the full name of the page.</summary>
@@ -142,7 +142,7 @@
 
 		/// <summary>Determines whether the specified value is a valid link.</summary>
 		/// <param name="value">The value to check.</param>
-		/// <returns><c>true</c> if the specified value appears to be a link; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the specified value appears to be a link; otherwise, <see langword="false"/>.</returns>
 		/// <remarks>This is a primitive check for surrounding brackets and may report incorrect values in complex situations.</remarks>
 		public static bool IsLink(string value) =>
 			value != null &&
@@ -158,18 +158,18 @@
 		public static Regex LinkFinder() => LinkFinder(null, null, null, null, null);
 
 		/// <summary>Creates a <see cref="Regex"/> to find all links matching the values provided.</summary>
-		/// <param name="namespaces">The namespaces to search for. Use <c>null</c> to match all namespaces.</param>
-		/// <param name="pageNames">The pagenames to search for. Use <c>null</c> to match all pagenames.</param>
-		/// <param name="displayTexts">The display texts to search for. Use <c>null</c> to match all display texts.</param>
+		/// <param name="namespaces">The namespaces to search for. Use <see langword="null"/> to match all namespaces.</param>
+		/// <param name="pageNames">The pagenames to search for. Use <see langword="null"/> to match all pagenames.</param>
+		/// <param name="displayTexts">The display texts to search for. Use <see langword="null"/> to match all display texts.</param>
 		/// <returns>A <see cref="Regex"/> that finds all links matching the values provided. Note that this will match, for example, any of the pagenames given in any of the namespaces given.</returns>
 		public static Regex LinkFinder(IEnumerable<string> namespaces, IEnumerable<string> pageNames, IEnumerable<string> displayTexts) => LinkFinder(null, namespaces, pageNames, displayTexts, null);
 
 		/// <summary>Creates a <see cref="Regex"/> to find all links matching the values provided which also have the specified surrounding text.</summary>
-		/// <param name="regexBefore">A <see cref="Regex"/> fragment specifying the text to search for before the link. Use <c>null</c> to ignore the text before the link.</param>
-		/// <param name="namespaces">The namespaces to search for. Use <c>null</c> to match all namespaces.</param>
-		/// <param name="pageNames">The pagenames to search for. Use <c>null</c> to match all pagenames.</param>
-		/// <param name="displayTexts">The display texts to search for. Use <c>null</c> to match all display texts.</param>
-		/// <param name="regexAfter">A <see cref="Regex"/> fragment specifying the text to search for after the link. Use <c>null</c> to ignore the text after the link.</param>
+		/// <param name="regexBefore">A <see cref="Regex"/> fragment specifying the text to search for before the link. Use <see langword="null"/> to ignore the text before the link.</param>
+		/// <param name="namespaces">The namespaces to search for. Use <see langword="null"/> to match all namespaces.</param>
+		/// <param name="pageNames">The pagenames to search for. Use <see langword="null"/> to match all pagenames.</param>
+		/// <param name="displayTexts">The display texts to search for. Use <see langword="null"/> to match all display texts.</param>
+		/// <param name="regexAfter">A <see cref="Regex"/> fragment specifying the text to search for after the link. Use <see langword="null"/> to ignore the text after the link.</param>
 		/// <returns>A <see cref="Regex"/> that finds all links matching the values provided. Note that this will match, for example, any of the pagenames given in any of the namespaces given.</returns>
 		public static Regex LinkFinder(string regexBefore, IEnumerable<string> namespaces, IEnumerable<string> pageNames, IEnumerable<string> displayTexts, string regexAfter) =>
 			LinkFinderRaw(
@@ -180,11 +180,11 @@
 				regexAfter);
 
 		/// <summary>Creates a <see cref="Regex"/> to find all links matching the values provided which also have the specified surrounding text.</summary>
-		/// <param name="regexBefore">A <see cref="Regex"/> fragment specifying the text to search for before the link. Use <c>null</c> to ignore the text before the link.</param>
-		/// <param name="regexNamespaces">A <see cref="Regex"/> fragment specifying the namespaces to search for. Use <c>null</c> to match all namespaces.</param>
-		/// <param name="regexPageNames">A <see cref="Regex"/> fragment specifying the pagenames to search for. Use <c>null</c> to match all pagenames.</param>
-		/// <param name="regexDisplayTexts">A <see cref="Regex"/> fragment specifying the display texts to search for. Use <c>null</c> to match all display texts.</param>
-		/// <param name="regexAfter">A <see cref="Regex"/> fragment specifying the text to search for after the link. Use <c>null</c> to ignore the text after the link.</param>
+		/// <param name="regexBefore">A <see cref="Regex"/> fragment specifying the text to search for before the link. Use <see langword="null"/> to ignore the text before the link.</param>
+		/// <param name="regexNamespaces">A <see cref="Regex"/> fragment specifying the namespaces to search for. Use <see langword="null"/> to match all namespaces.</param>
+		/// <param name="regexPageNames">A <see cref="Regex"/> fragment specifying the pagenames to search for. Use <see langword="null"/> to match all pagenames.</param>
+		/// <param name="regexDisplayTexts">A <see cref="Regex"/> fragment specifying the display texts to search for. Use <see langword="null"/> to match all display texts.</param>
+		/// <param name="regexAfter">A <see cref="Regex"/> fragment specifying the text to search for after the link. Use <see langword="null"/> to ignore the text after the link.</param>
 		/// <returns>A <see cref="Regex"/> that finds all links matching the values provided. Note that this will match, for example, any of the pagenames given in any of the namespaces given.</returns>
 		public static Regex LinkFinderRaw(string regexBefore, string regexNamespaces, string regexPageNames, string regexDisplayTexts, string regexAfter)
 		{
@@ -254,7 +254,7 @@
 		public string PipeTrick() => this.PipeTrick(false);
 
 		/// <summary>Returns a suggested DisplayText value based on the link parts, much like the "pipe trick" on a wiki.</summary>
-		/// <param name="useFragmentIfPresent">if set to <c>true</c>, and a fragment exists, uses the fragment to generate the name, rather than the pagename.</param>
+		/// <param name="useFragmentIfPresent">if set to <see langword="true"/>, and a fragment exists, uses the fragment to generate the name, rather than the pagename.</param>
 		/// <returns>A suggested DisplayText value based on the link parts.</returns>
 		/// <remarks>This method does not modify the DisplayText in any way.</remarks>
 		public string PipeTrick(bool useFragmentIfPresent)

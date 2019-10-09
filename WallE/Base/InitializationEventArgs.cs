@@ -57,7 +57,7 @@
 		}
 
 		/// <summary>Gets or sets a value indicating whether to return information about all databases in a <see cref="SiteInfoProperties.DbReplLag"/> request.</summary>
-		/// <value><c>true</c> if all databases should be returned; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if all databases should be returned; otherwise, <see langword="false"/>.</value>
 		public bool ShowAllDatabases
 		{
 			get => this.showAllDatabases;
@@ -65,7 +65,7 @@
 		}
 
 		/// <summary>Gets or sets a value indicating whether to show the number of users in each group, and the groups that can be added or removed in a <see cref="SiteInfoProperties.UserGroups"/> request.</summary>
-		/// <value><c>true</c> if the number of users in each group and group add/remove rights should be returned; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if the number of users in each group and group add/remove rights should be returned; otherwise, <see langword="false"/>.</value>
 		public bool ShowNumberInGroup
 		{
 			get => this.showNumberInGroup;

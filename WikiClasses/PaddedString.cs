@@ -189,16 +189,7 @@
 
 		/// <summary>Indicates whether the current object is equal to another object of the same type.</summary>
 		/// <param name="other">An object to compare with this object.</param>
-		/// <returns>
-		///   <span class="keyword">
-		///     <span class="languageSpecificText">
-		///       <span class="cs">true</span>
-		///       <span class="vb">True</span>
-		///       <span class="cpp">true</span>
-		///     </span>
-		///   </span>
-		///   <span class="nu">
-		///     <span class="keyword">true</span> (<span class="keyword">True</span> in Visual Basic)</span> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <span class="keyword"><span class="languageSpecificText"><span class="cs">false</span><span class="vb">False</span><span class="cpp">false</span></span></span><span class="nu"><span class="keyword">false</span> (<span class="keyword">False</span> in Visual Basic)</span>.</returns>
+		/// <returns><see langword="true"/> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false"/>.</returns>
 		public bool Equals(PaddedString other) =>
 			other != null &&
 			this.leadingWhiteSpace == other.leadingWhiteSpace &&
@@ -213,7 +204,7 @@
 		/// <summary>Determines whether the specified <see cref="object"/>, is equal to this instance.</summary>
 		/// <param name="obj">The <see cref="object"/> to compare with this instance.</param>
 		/// <returns>
-		///   <c>true</c> if the specified <see cref="object"/> is equal to this instance; otherwise, <c>false</c>.</returns>
+		///   <see langword="true"/> if the specified <see cref="object"/> is equal to this instance; otherwise, <see langword="false"/>.</returns>
 		public override bool Equals(object obj) => this.Equals(obj as PaddedString);
 
 		/// <summary>Returns a hash code for this instance.</summary>

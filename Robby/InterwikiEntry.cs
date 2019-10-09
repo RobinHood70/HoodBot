@@ -31,12 +31,12 @@
 		public string Language { get; }
 
 		/// <summary>Gets a value indicating whether this interwiki is located on the same wiki farm as the local wiki.</summary>
-		/// <value><c>true</c> if this interwiki is located on the local wiki farm; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if this interwiki is located on the local wiki farm; otherwise, <see langword="false"/>.</value>
 		/// <remarks>This flags other wikis that are located on the same wiki farm as the current wiki. While this is usually the case for language links, it can also apply in other cases (e.g., the Wikimedia Commons wiki is on the same farm as the MediaWiki wiki).</remarks>
 		public bool LocalFarm { get; }
 
 		/// <summary>Gets a value indicating whether this interwiki link is the current wiki.</summary>
-		/// <value><c>true</c> if the interwiki points to the current wiki; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if the interwiki points to the current wiki; otherwise, <see langword="false"/>.</value>
 		public bool LocalWiki { get; private set; }
 
 		/// <summary>Gets the path of the interwiki.</summary>

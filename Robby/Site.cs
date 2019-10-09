@@ -153,7 +153,7 @@
 		public string ArticlePath { get; private set; }
 
 		/// <summary>Gets a value indicating whether the first letter of titles is case-sensitive.</summary>
-		/// <value><c>true</c> if the first letter of titles is case-sensitive; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if the first letter of titles is case-sensitive; otherwise, <see langword="false"/>.</value>
 		public bool CaseSensitive { get; private set; }
 
 		/// <summary>Gets or sets a CultureInfo object base the wiki's language and variant.</summary>
@@ -180,11 +180,11 @@
 		public IEnumerable<Title> DisambiguationTemplates => this.disambiguationTemplates ?? this.LoadDisambiguationTemplates();
 
 		/// <summary>Gets a value indicating whether the Disambiguator extension is available.</summary>
-		/// <value><c>true</c> if the Disambiguator extension is available; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if the Disambiguator extension is available; otherwise, <see langword="false"/>.</value>
 		public bool DisambiguatorAvailable { get; private set; }
 
 		/// <summary>Gets or sets a value indicating whether methods that would alter the wiki should be disabled.</summary>
-		/// <value><c>true</c> if editing should be disabled; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if editing should be disabled; otherwise, <see langword="false"/>.</value>
 		/// <remarks>If set to true, most methods will silently fail, and their return <see cref="ChangeStatus.EditingDisabled"/>. This is primarily intended for testing new bot jobs without risking any unintended edits.</remarks>
 		public bool EditingEnabled { get; set; } = false;
 
@@ -489,20 +489,20 @@
 
 		/// <summary>Gets recent changes before or after the specified date.</summary>
 		/// <param name="start">The start date.</param>
-		/// <param name="newer">if set to <c>true</c>, returns changes from the specified date and newer; otherwise, it returns changes from the specified date and older.</param>
+		/// <param name="newer">if set to <see langword="true"/>, returns changes from the specified date and newer; otherwise, it returns changes from the specified date and older.</param>
 		/// <returns>A read-only list of recent changes before or after the specified date.</returns>
 		public IReadOnlyList<RecentChange> LoadRecentChanges(DateTime start, bool newer) => this.LoadRecentChanges(start, newer, 0);
 
 		/// <summary>Gets the specified number of recent changes before or after the specified date.</summary>
 		/// <param name="start">The start date.</param>
-		/// <param name="newer">if set to <c>true</c>, returns changes from the specified date and newer; otherwise, it returns changes from the specified date and older.</param>
+		/// <param name="newer">if set to <see langword="true"/>, returns changes from the specified date and newer; otherwise, it returns changes from the specified date and older.</param>
 		/// <param name="count">The number of recent changes to get.</param>
 		/// <returns>A read-only list of recent changes before or after the specified date.</returns>
 		public IReadOnlyList<RecentChange> LoadRecentChanges(DateTime start, bool newer, int count) => this.LoadRecentChanges(new RecentChangesOptions() { Start = start, Newer = newer, Count = count });
 
 		/// <summary>Gets recent changes from or excluding the specified user.</summary>
 		/// <param name="user">The user.</param>
-		/// <param name="exclude">if set to <c>true</c>, get all recent changes <em>except</em> those from the specified user.</param>
+		/// <param name="exclude">if set to <see langword="true"/>, get all recent changes <em>except</em> those from the specified user.</param>
 		/// <returns>A read-only list of recent changes from or excluding the specified user.</returns>
 		public IReadOnlyList<RecentChange> LoadRecentChanges(string user, bool exclude) => this.LoadRecentChanges(new RecentChangesOptions() { User = user, ExcludeUser = exclude });
 
@@ -526,50 +526,50 @@
 		public IReadOnlyList<User> LoadUserInformation(IEnumerable<string> users) => this.LoadUserInformation(new UsersInput(users) { Properties = UsersProperties.All });
 
 		/// <summary>Gets all users on the wiki.</summary>
-		/// <param name="onlyActiveUsers">if set to <c>true</c>, only active users will be returned.</param>
-		/// <param name="onlyUsersWithEdits">if set to <c>true</c>, only users with edits will be returned.</param>
+		/// <param name="onlyActiveUsers">if set to <see langword="true"/>, only active users will be returned.</param>
+		/// <param name="onlyUsersWithEdits">if set to <see langword="true"/>, only users with edits will be returned.</param>
 		/// <returns>A list of users based on the specified criteria.</returns>
 		public IReadOnlyList<User> LoadUsers(bool onlyActiveUsers, bool onlyUsersWithEdits) => this.LoadUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits });
 
 		/// <summary>Gets users whose names start with the specified prefix.</summary>
-		/// <param name="onlyActiveUsers">if set to <c>true</c>, only active users will be returned.</param>
-		/// <param name="onlyUsersWithEdits">if set to <c>true</c>, only users with edits will be returned.</param>
+		/// <param name="onlyActiveUsers">if set to <see langword="true"/>, only active users will be returned.</param>
+		/// <param name="onlyUsersWithEdits">if set to <see langword="true"/>, only users with edits will be returned.</param>
 		/// <param name="prefix">The prefix.</param>
 		/// <returns>A list of users based on the specified criteria.</returns>
 		public IReadOnlyList<User> LoadUsers(bool onlyActiveUsers, bool onlyUsersWithEdits, string prefix) => this.LoadUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Prefix = prefix });
 
 		/// <summary>Gets users whose names fall within the specified range.</summary>
-		/// <param name="onlyActiveUsers">if set to <c>true</c>, only active users will be returned.</param>
-		/// <param name="onlyUsersWithEdits">if set to <c>true</c>, only users with edits will be returned.</param>
+		/// <param name="onlyActiveUsers">if set to <see langword="true"/>, only active users will be returned.</param>
+		/// <param name="onlyUsersWithEdits">if set to <see langword="true"/>, only users with edits will be returned.</param>
 		/// <param name="from">The name to start at (inclusive). The name specified does not have to exist.</param>
 		/// <param name="to">The name to stop at (inclusive). The name specified does not have to exist.</param>
 		/// <returns>A list of users based on the specified criteria.</returns>
 		public IReadOnlyList<User> LoadUsers(bool onlyActiveUsers, bool onlyUsersWithEdits, string from, string to) => this.LoadUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, From = from, To = to });
 
 		/// <summary>Gets the users that belong to the specified groups.</summary>
-		/// <param name="onlyActiveUsers">if set to <c>true</c>, only active users will be retrieved.</param>
-		/// <param name="onlyUsersWithEdits">if set to <c>true</c>, only users with edits will be retrieved.</param>
+		/// <param name="onlyActiveUsers">if set to <see langword="true"/>, only active users will be retrieved.</param>
+		/// <param name="onlyUsersWithEdits">if set to <see langword="true"/>, only users with edits will be retrieved.</param>
 		/// <param name="groups">The groups.</param>
 		/// <returns>A list of <see cref="User"/> objects for users in the specified groups.</returns>
 		public IReadOnlyList<User> LoadUsersInGroups(bool onlyActiveUsers, bool onlyUsersWithEdits, params string[] groups) => this.LoadUsersInGroups(onlyActiveUsers, onlyUsersWithEdits, groups as IEnumerable<string>);
 
 		/// <summary>Gets users that belong to the specified groups.</summary>
-		/// <param name="onlyActiveUsers">if set to <c>true</c>, only active users will be retrieved.</param>
-		/// <param name="onlyUsersWithEdits">if set to <c>true</c>, only users with edits will be retrieved.</param>
+		/// <param name="onlyActiveUsers">if set to <see langword="true"/>, only active users will be retrieved.</param>
+		/// <param name="onlyUsersWithEdits">if set to <see langword="true"/>, only users with edits will be retrieved.</param>
 		/// <param name="groups">The groups.</param>
 		/// <returns>A list of <see cref="User"/> objects for users in the specified groups.</returns>
 		public IReadOnlyList<User> LoadUsersInGroups(bool onlyActiveUsers, bool onlyUsersWithEdits, IEnumerable<string> groups) => this.LoadUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Groups = groups });
 
 		/// <summary>Gets users that have the specified rights.</summary>
-		/// <param name="onlyActiveUsers">if set to <c>true</c>, only active users will be retrieved.</param>
-		/// <param name="onlyUsersWithEdits">if set to <c>true</c>, only users with edits will be retrieved.</param>
+		/// <param name="onlyActiveUsers">if set to <see langword="true"/>, only active users will be retrieved.</param>
+		/// <param name="onlyUsersWithEdits">if set to <see langword="true"/>, only users with edits will be retrieved.</param>
 		/// <param name="rights">The rights.</param>
 		/// <returns>A list of <see cref="User"/> objects for users with the specified rights.</returns>
 		public IReadOnlyList<User> LoadUsersWithRights(bool onlyActiveUsers, bool onlyUsersWithEdits, params string[] rights) => this.LoadUsersWithRights(onlyActiveUsers, onlyUsersWithEdits, rights as IEnumerable<string>);
 
 		/// <summary>Gets users that have the specified rights.</summary>
-		/// <param name="onlyActiveUsers">if set to <c>true</c>, only active users will be retrieved.</param>
-		/// <param name="onlyUsersWithEdits">if set to <c>true</c>, only users with edits will be retrieved.</param>
+		/// <param name="onlyActiveUsers">if set to <see langword="true"/>, only active users will be retrieved.</param>
+		/// <param name="onlyUsersWithEdits">if set to <see langword="true"/>, only users with edits will be retrieved.</param>
 		/// <param name="rights">The rights.</param>
 		/// <returns>A list of <see cref="User"/> objects for users with the specified rights.</returns>
 		public IReadOnlyList<User> LoadUsersWithRights(bool onlyActiveUsers, bool onlyUsersWithEdits, IEnumerable<string> rights) => this.LoadUsers(new AllUsersInput { ActiveUsersOnly = onlyActiveUsers, WithEditsOnly = onlyUsersWithEdits, Rights = rights });
@@ -674,7 +674,7 @@
 
 		/// <summary>Clears the bot's "has message" flag.</summary>
 		/// <param name="force">Clears the message, even if the site is in read-only mode.</param>
-		/// <returns><c>true</c> if the flag was successfully cleared; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the flag was successfully cleared; otherwise, <see langword="false"/>.</returns>
 		public virtual ChangeStatus ClearMessage(bool force)
 		{
 			var func = new Func<ChangeStatus>(() => this.AbstractionLayer.ClearHasMessage() ? ChangeStatus.Success : ChangeStatus.Failure);
@@ -1028,12 +1028,12 @@
 
 		/// <summary>Patrols the specified Recent Changes ID.</summary>
 		/// <param name="input">The input parameters.</param>
-		/// <returns><c>true</c> if the edit was successfully patrolled; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the edit was successfully patrolled; otherwise, <see langword="false"/>.</returns>
 		protected virtual PatrolResult Patrol(PatrolInput input) => this.AbstractionLayer.Patrol(input);
 
 		/// <summary>Uploads a file.</summary>
 		/// <param name="input">The input parameters.</param>
-		/// <returns><c>true</c> if the file was successfully uploaded.</returns>
+		/// <returns><see langword="true"/> if the file was successfully uploaded.</returns>
 		protected virtual bool Upload(UploadInput input) => this.AbstractionLayer.Upload(input).Result == "Success";
 		#endregion
 

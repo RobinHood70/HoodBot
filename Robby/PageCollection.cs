@@ -412,7 +412,7 @@
 
 		/// <summary>Adds category members to the collection, potentially including subcategories and their members.</summary>
 		/// <param name="input">The input parameters.</param>
-		/// <param name="recurse">if set to <c>true</c> load the entire category tree recursively.</param>
+		/// <param name="recurse">if set to <see langword="true"/> load the entire category tree recursively.</param>
 		protected override void GetCategoryMembers(CategoryMembersInput input, bool recurse)
 		{
 			ThrowNull(input, nameof(input));

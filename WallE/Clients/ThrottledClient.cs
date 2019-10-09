@@ -68,7 +68,7 @@
 		/// <summary>Downloads a file directly to disk instead of returning it as a string.</summary>
 		/// <param name="uri">The URI to download from.</param>
 		/// <param name="fileName">The filename to save to.</param>
-		/// <returns><c>true</c> if the download succeeded; otherwise <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the download succeeded; otherwise <see langword="false"/>.</returns>
 		public bool DownloadFile(Uri uri, string fileName)
 		{
 			this.Throttle();

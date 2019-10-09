@@ -314,7 +314,7 @@
 
 		/// <summary>Indicates whether the current title is equal to another title based on Namespace, PageName, and Key.</summary>
 		/// <param name="other">A title to compare with this one.</param>
-		/// <returns><c>true</c> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false"/>.</returns>
 		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "IsSameTitle will return false if this is null, which will then short-circuit the remainder of the comparison.")]
 		public bool KeyedEquals(IKeyedTitle other) => this.SimpleEquals(other) && this.Key == other.Key;
@@ -322,23 +322,23 @@
 		/// <summary>Moves the title to the name specified.</summary>
 		/// <param name="to">The location to move the title to.</param>
 		/// <param name="reason">The reason for the move.</param>
-		/// <param name="suppressRedirect">if set to <c>true</c>, suppress the redirect that would normally be created.</param>
+		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
 		public ChangeValue<IDictionary<string, string>> Move(string to, string reason, bool suppressRedirect) => this.Move(to, reason, false, false, suppressRedirect);
 
 		/// <summary>Moves the title to the name specified.</summary>
 		/// <param name="to">The location to move the title to.</param>
 		/// <param name="reason">The reason for the move.</param>
-		/// <param name="suppressRedirect">if set to <c>true</c>, suppress the redirect that would normally be created.</param>
+		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
 		public ChangeValue<IDictionary<string, string>> Move(Title to, string reason, bool suppressRedirect) => this.Move(to?.FullPageName, reason, false, false, suppressRedirect);
 
 		/// <summary>Moves the title to the name specified.</summary>
 		/// <param name="to">The location to move the title to.</param>
 		/// <param name="reason">The reason for the move.</param>
-		/// <param name="moveTalk">if set to <c>true</c>, moves the talk page as well as the original page.</param>
-		/// <param name="moveSubpages">if set to <c>true</c>, moves all sub-pages of the original page.</param>
-		/// <param name="suppressRedirect">if set to <c>true</c>, suppress the redirect that would normally be created.</param>
+		/// <param name="moveTalk">if set to <see langword="true"/>, moves the talk page as well as the original page.</param>
+		/// <param name="moveSubpages">if set to <see langword="true"/>, moves all sub-pages of the original page.</param>
+		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
 		public ChangeValue<IDictionary<string, string>> Move(string to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
 		{
@@ -400,9 +400,9 @@
 		/// <summary>Moves the title to the name specified.</summary>
 		/// <param name="to">The location to move the title to.</param>
 		/// <param name="reason">The reason for the move.</param>
-		/// <param name="moveTalk">if set to <c>true</c>, moves the talk page as well as the original page.</param>
-		/// <param name="moveSubpages">if set to <c>true</c>, moves all sub-pages of the original page.</param>
-		/// <param name="suppressRedirect">if set to <c>true</c>, suppress the redirect that would normally be created.</param>
+		/// <param name="moveTalk">if set to <see langword="true"/>, moves the talk page as well as the original page.</param>
+		/// <param name="moveSubpages">if set to <see langword="true"/>, moves all sub-pages of the original page.</param>
+		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
 		public ChangeValue<IDictionary<string, string>> Move(Title to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect) => this.Move(to?.FullPageName, reason, moveTalk, moveSubpages, suppressRedirect);
 
@@ -475,7 +475,7 @@
 
 		/// <summary>Indicates whether the current title is equal to another title based on Namespace and PageName only.</summary>
 		/// <param name="other">A title to compare with this one.</param>
-		/// <returns><c>true</c> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false"/>.</returns>
 		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
 		public bool SimpleEquals(ISimpleTitle other) =>
 			other != null &&
@@ -498,8 +498,8 @@
 
 		/// <summary>Unprotects the title for the specified reason.</summary>
 		/// <param name="reason">The reason.</param>
-		/// <param name="editUnprotect">if set to <c>true</c>, removes edit protection.</param>
-		/// <param name="moveUnprotect">if set to <c>true</c>, removes move protection.</param>
+		/// <param name="editUnprotect">if set to <see langword="true"/>, removes edit protection.</param>
+		/// <param name="moveUnprotect">if set to <see langword="true"/>, removes move protection.</param>
 		/// <returns>A value indicating the change status of the unprotection.</returns>
 		public ChangeStatus Unprotect(string reason, bool editUnprotect, bool moveUnprotect) => this.Protect(
 			reason,
@@ -519,7 +519,7 @@
 
 		/// <summary>Protects the title based on the specified input.</summary>
 		/// <param name="input">The input.</param>
-		/// <returns><c>true</c> if all protections were set to the specified values.</returns>
+		/// <returns><see langword="true"/> if all protections were set to the specified values.</returns>
 		protected virtual bool Protect(ProtectInput input)
 		{
 			ThrowNull(input, nameof(input));

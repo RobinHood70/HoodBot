@@ -15,7 +15,7 @@
 		/// <param name="startTime">The start time of the block.</param>
 		/// <param name="expiry">When the block expires.</param>
 		/// <param name="flags">The block flags.</param>
-		/// <param name="automatic">if set to <c>true</c>, indicates that this was an auto-block by the wiki itself.</param>
+		/// <param name="automatic">if set to <see langword="true"/>, indicates that this was an auto-block by the wiki itself.</param>
 		protected internal Block(string user, string by, string reason, DateTime startTime, DateTime expiry, BlockFlags flags, bool automatic)
 		{
 			this.Automatic = automatic;
@@ -29,7 +29,7 @@
 		#endregion
 
 		/// <summary>Gets a value indicating whether whether the block was made automatically by the wiki software.</summary>
-		/// <value><c>true</c> if it was an automatic block; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if it was an automatic block; otherwise, <see langword="false"/>.</value>
 		public bool Automatic { get; }
 
 		/// <summary>Gets the blocking user.</summary>

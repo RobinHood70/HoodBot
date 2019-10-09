@@ -10,7 +10,7 @@
 		/// <summary>Builds a pipe-separated string from an enumerable parameter.</summary>
 		/// <typeparam name="T">Any <see cref="IEnumerable{T}"/> of type <see cref="string"/>, such as from <see cref="PipedListParameter"/> or <see cref="PipedParameter"/>.</typeparam>
 		/// <param name="parameter">The parameter.</param>
-		/// <param name="supportsUnitSeparator">if set to <c>true</c>, 0x1F is supported as an alternative to pipes, when needed.</param>
+		/// <param name="supportsUnitSeparator">if set to <see langword="true"/>, 0x1F is supported as an alternative to pipes, when needed.</param>
 		/// <returns>A pipe-separated string with all the values from the enumeration.</returns>
 		public static string BuildPipedValue<T>(this Parameter<T> parameter, bool supportsUnitSeparator)
 			where T : IEnumerable<string>

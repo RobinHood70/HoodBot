@@ -69,7 +69,7 @@
 		public string SiteName { get; private set; }
 
 		/// <summary>Gets a value indicating whether the site supports the <c>maxlag</c> parameter for speed throttling.</summary>
-		/// <value><c>true</c> if the site supports <c>maxlag</c>; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if the site supports <c>maxlag</c>; otherwise, <see langword="false"/>.</value>
 		public bool SupportsMaxLag { get; private set; }
 
 		/// <summary>Gets the entry points for write access.</summary>
@@ -81,7 +81,7 @@
 
 		/// <summary>Gets all relevant information from the site.</summary>
 		/// <param name="anyPage">Any page on the wiki.</param>
-		/// <returns><c>true</c> if the wiki capabailities were successfully loaded; otherwise <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the wiki capabailities were successfully loaded; otherwise <see langword="false"/>.</returns>
 		/// <remarks>This can be called multiple times with different URIs to get information for different wikis. Previous information will be cleared with each new call.</remarks>
 		public bool Get(Uri anyPage)
 		{

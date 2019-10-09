@@ -34,7 +34,7 @@
 		#region Public Properties
 
 		/// <summary>Gets a value indicating whether the change was performed by an IP editor.</summary>
-		/// <value><c>true</c> if the change was performed by an IP editor; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if the change was performed by an IP editor; otherwise, <see langword="false"/>.</value>
 		public bool Anonymous { get; }
 
 		/// <summary>Gets the edit summary/change comment.</summary>

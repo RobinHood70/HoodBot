@@ -63,7 +63,7 @@
 		#region Public Properties
 
 		/// <summary>Gets or sets a value indicating whether to force a colon to be prepended to the name. For templates, this is usually for Main space; for links, it's used to force a File or Category to be a link to the page instead of its normal functionality.</summary>
-		/// <value><c>true</c> if the wiki link should be forced to be a link; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if the wiki link should be forced to be a link; otherwise, <see langword="false"/>.</value>
 		public bool LeadingColon { get; set; }
 
 		/// <summary>Gets or sets the template name.</summary>

@@ -59,7 +59,7 @@
 		public IReadOnlyList<string> Aliases { get; }
 
 		/// <summary>Gets a value indicating whether the namespace allows subpages.</summary>
-		/// <value><c>true</c> if the namespace allows subpages; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if the namespace allows subpages; otherwise, <see langword="false"/>.</value>
 		public bool AllowsSubpages { get; }
 
 		/// <summary>Gets the canonical name of the namespace.</summary>
@@ -67,7 +67,7 @@
 		public string CanonicalName { get; }
 
 		/// <summary>Gets a value indicating whether the first letter of the namespace name is case-sensitive.</summary>
-		/// <value><c>true</c> if the first letter of the namespace name is case-sensitive; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if the first letter of the namespace name is case-sensitive; otherwise, <see langword="false"/>.</value>
 		public bool CaseSensitive { get; }
 
 		/// <summary>Gets or sets the decorated name of the namespace.</summary>
@@ -80,18 +80,18 @@
 		public int Id { get; }
 
 		/// <summary>Gets a value indicating whether this namespace is counted as content space.</summary>
-		/// <value><c>true</c> if this namespace is counted as content space; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if this namespace is counted as content space; otherwise, <see langword="false"/>.</value>
 		public bool IsContentSpace { get; }
 
 		/// <summary>Gets a value indicating whether this namespace requires a colon to be prepended in order to create a link.</summary>
 		public bool IsForcedLinkSpace => this.Id == MediaWikiNamespaces.Category || this.Id == MediaWikiNamespaces.File;
 
 		/// <summary>Gets a value indicating whether this instance is subject space.</summary>
-		/// <value><c>true</c> if this instance is a subject namespace; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if this instance is a subject namespace; otherwise, <see langword="false"/>.</value>
 		public bool IsSubjectSpace => this.Id == this.subjectSpaceId;
 
 		/// <summary>Gets a value indicating whether this instance is talk space.</summary>
-		/// <value><c>true</c> if this instance is talk namespace; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if this instance is talk namespace; otherwise, <see langword="false"/>.</value>
 		public bool IsTalkSpace => this.Id == this.talkSpaceId;
 
 		/// <summary>Gets or sets the name to be used in links.</summary>
@@ -112,7 +112,7 @@
 		public Namespace SubjectSpace => this.Site.Namespaces[this.subjectSpaceId];
 
 		/// <summary>Gets the MediaWiki ID for the talk space, if applicable.</summary>
-		/// <value>The MediaWiki ID for the talk space, if applicable; otherwise, <c>null</c>.</value>
+		/// <value>The MediaWiki ID for the talk space, if applicable; otherwise, <see langword="null"/>.</value>
 		public Namespace TalkSpace => this.talkSpaceId == null ? null : this.Site.Namespaces[this.talkSpaceId.Value];
 		#endregion
 
@@ -121,37 +121,37 @@
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
-		/// <returns><c>true</c> if string is equal to any of the names representing the namespace.</returns>
+		/// <returns><see langword="true"/> if string is equal to any of the names representing the namespace.</returns>
 		public static bool operator ==(Namespace left, Namespace right) => left is null ? right is null : left.Equals(right);
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
-		/// <returns><c>true</c> if the integer provided equals the namespace ID.</returns>
+		/// <returns><see langword="true"/> if the integer provided equals the namespace ID.</returns>
 		public static bool operator ==(Namespace left, int right) => !(left is null) && left.Id == right;
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
-		/// <returns><c>true</c> if the integer provided equals the namespace ID.</returns>
+		/// <returns><see langword="true"/> if the integer provided equals the namespace ID.</returns>
 		public static bool operator ==(int left, Namespace right) => !(right is null) && left == right.Id;
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
-		/// <returns><c>true</c> if the namespace Site or Id are not equal.</returns>
+		/// <returns><see langword="true"/> if the namespace Site or Id are not equal.</returns>
 		public static bool operator !=(Namespace left, Namespace right) => !(left == right);
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
-		/// <returns><c>true</c> if the integer provided does not equal the namespace ID.</returns>
+		/// <returns><see langword="true"/> if the integer provided does not equal the namespace ID.</returns>
 		public static bool operator !=(Namespace left, int right) => !(left == right);
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
-		/// <returns><c>true</c> if the integer provided does not equal the namespace ID.</returns>
+		/// <returns><see langword="true"/> if the integer provided does not equal the namespace ID.</returns>
 		public static bool operator !=(int left, Namespace right) => !(left == right);
 		#endregion
 
@@ -184,21 +184,12 @@
 
 		/// <summary>Determines whether the name specified is in the list of names for this namespace.</summary>
 		/// <param name="name">The name to locate.</param>
-		/// <returns><c>true</c> if the name list for the namespace contains the specified name; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the name list for the namespace contains the specified name; otherwise, <see langword="false"/>.</returns>
 		public bool Contains(string name) => this.allNames.Contains(name);
 
 		/// <summary>Indicates whether the current object is equal to another object of the same type.</summary>
 		/// <param name="other">An object to compare with this object.</param>
-		/// <returns>
-		///   <span class="keyword">
-		///     <span class="languageSpecificText">
-		///       <span class="cs">true</span>
-		///       <span class="vb">True</span>
-		///       <span class="cpp">true</span>
-		///     </span>
-		///   </span>
-		///   <span class="nu">
-		///     <span class="keyword">true</span> (<span class="keyword">True</span> in Visual Basic)</span> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <span class="keyword"><span class="languageSpecificText"><span class="cs">false</span><span class="vb">False</span><span class="cpp">false</span></span></span><span class="nu"><span class="keyword">false</span> (<span class="keyword">False</span> in Visual Basic)</span>.</returns>
+		/// <returns><see langword="true"/> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false"/>.</returns>
 		public bool Equals(Namespace other) => other == null ? false : this.Site == other.Site && this.Id == other.Id;
 
 		/// <summary>Checks if two page names are the same, based on the case-sensitivity for the namespace.</summary>
@@ -237,7 +228,7 @@
 
 		/// <summary>Determines whether the specified <see cref="object" />, is equal to this instance.</summary>
 		/// <param name="obj">The <see cref="object" /> to compare with this instance.</param>
-		/// <returns><c>true</c> if the specified <see cref="object" /> is equal to this instance; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the specified <see cref="object" /> is equal to this instance; otherwise, <see langword="false"/>.</returns>
 		public override bool Equals(object obj) => this.Equals(obj as Namespace);
 
 		/// <summary>Returns a hash code for this instance.</summary>

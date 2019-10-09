@@ -4,7 +4,7 @@
 	public interface IPlugin
 	{
 		/// <summary>Validates the plugin.</summary>
-		/// <returns><c>true</c> if the plugin can be used in the current configuration; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the plugin can be used in the current configuration; otherwise, <see langword="false"/>.</returns>
 		bool ValidatePlugin();
 	}
 }

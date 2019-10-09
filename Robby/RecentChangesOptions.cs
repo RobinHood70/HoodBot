@@ -27,7 +27,7 @@
 		public DateTime? End { get; set; }
 
 		/// <summary>Gets or sets a value indicating whether to exclude the user specified in <see cref="User"/> or include them.</summary>
-		/// <value><c>true</c> if the user specified in <see cref="User"/> should be excluded; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if the user specified in <see cref="User"/> should be excluded; otherwise, <see langword="false"/>.</value>
 		public bool ExcludeUser { get; set; }
 
 		/// <summary>Gets or sets a value indicating whether to filter edits based on whether they're minor.</summary>
@@ -39,7 +39,7 @@
 		public IEnumerable<int> Namespaces { get; set; }
 
 		/// <summary>Gets or sets a value indicating whether direction changes should be sorted from older to newer (true) or newer to older (false).</summary>
-		/// <value><c>true</c> if changes should be sorted older to newer; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if changes should be sorted older to newer; otherwise, <see langword="false"/>.</value>
 		/// <remarks>If only a Start date is provided but no End date, "older to newer" (true) means changes will be returned from the Start date to the current date; "newer to older" (false) means changes will be returned from the Start Date to the earliest Recent Change. Similarly, if only an End date is provided but no Start date, "older to newer" (true) means changes returned will be from the earliest Recent Change up to the End date; "newer to older" (false) means changes will be returned from the latest Recent Change back to the End date. If dates are provided for both Start and End, the API abstraction layer will ignore this value in favour of the direction indicated by the dates (behaviour from any other abstraction layer is not guaranteed). If no dates are provided, all Recent Changes will be retrieved, sorted according to this setting.</remarks>
 		public bool Newer { get; set; }
 

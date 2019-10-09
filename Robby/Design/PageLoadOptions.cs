@@ -105,7 +105,7 @@
 		#region Public Properties
 
 		/// <summary>Gets or sets a value indicating whether to convert titles to other language variants when necessary.</summary>
-		/// <value><c>true</c> to convert titles; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> to convert titles; otherwise, <see langword="false"/>.</value>
 		public bool ConvertTitles { get; set; }
 
 		/// <summary>Gets or sets the number of File revisions to retrieve.</summary>
@@ -113,7 +113,7 @@
 		public int FileRevisionCount { get; set; }
 
 		/// <summary>Gets or sets a value indicating whether to follow redirects.</summary>
-		/// <value><c>true</c> if redirects should be followed; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if redirects should be followed; otherwise, <see langword="false"/>.</value>
 		public bool FollowRedirects { get; set; }
 
 		/// <summary>Gets the modules to load.</summary>
@@ -133,7 +133,7 @@
 		public long RevisionFromId { get; set; }
 
 		/// <summary>Gets or sets a value indicating whether to retrieve revisions in ascending order if only a From or To option is provided.</summary>
-		/// <value><c>true</c> if revisions should be loaded <em>from</em> the specified date forward or up <em>to</em> the specified date; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if revisions should be loaded <em>from</em> the specified date forward or up <em>to</em> the specified date; otherwise, <see langword="false"/>.</value>
 		public bool RevisionNewer { get; set; }
 
 		/// <summary>Gets or sets the date to retrieve revisions to.</summary>

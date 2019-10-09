@@ -78,16 +78,7 @@
 
 		/// <summary>Determines whether this instance contains the object.</summary>
 		/// <param name="item">The object to locate in the collection.</param>
-		/// <returns>
-		///   <span class="keyword">
-		///     <span class="languageSpecificText">
-		///       <span class="cs">true</span>
-		///       <span class="vb">True</span>
-		///       <span class="cpp">true</span>
-		///     </span>
-		///   </span>
-		///   <span class="nu">
-		///     <span class="keyword">true</span> (<span class="keyword">True</span> in Visual Basic)</span> if <paramref name="item" /> is found in the collection; otherwise, <span class="keyword"><span class="languageSpecificText"><span class="cs">false</span><span class="vb">False</span><span class="cpp">false</span></span></span><span class="nu"><span class="keyword">false</span> (<span class="keyword">False</span> in Visual Basic)</span>.</returns>
+		/// <returns><see langword="true"/> if <paramref name="item" /> is found in the collection; otherwise, <see langword="false"/>.</returns>
 		public bool Contains(T item) => this.IndexOf(item) >= 0;
 
 		/// <summary>Copies the elements of the collection to an array, starting at a particular array index.</summary>
@@ -127,17 +118,7 @@
 
 		/// <summary>Removes the first occurrence of a specific object from the collection.</summary>
 		/// <param name="item">The object to remove from the collection.</param>
-		/// <returns>
-		///   <span class="keyword">
-		///     <span class="languageSpecificText">
-		///       <span class="cs">true</span>
-		///       <span class="vb">True</span>
-		///       <span class="cpp">true</span>
-		///     </span>
-		///   </span>
-		///   <span class="nu">
-		///     <span class="keyword">true</span> (<span class="keyword">True</span> in Visual Basic)</span> if <paramref name="item" /> was successfully removed from the collection; otherwise, <span class="keyword"><span class="languageSpecificText"><span class="cs">false</span><span class="vb">False</span><span class="cpp">false</span></span></span><span class="nu"><span class="keyword">false</span> (<span class="keyword">False</span> in Visual Basic)</span>. This method also returns <span class="keyword"><span class="languageSpecificText"><span class="cs">false</span><span class="vb">False</span><span class="cpp">false</span></span></span><span class="nu"><span class="keyword">false</span> (<span class="keyword">False</span> in Visual Basic)</span> if <paramref name="item" /> is not found in the original collection.
-		/// </returns>
+		/// <returns><see langword="true"/> if <paramref name="item" /> was successfully removed from the collection; otherwise, <see langword="false"/>. This method also returns <see langword="false"/> if <paramref name="item" /> is not found in the original collection.</returns>
 		public bool Remove(T item)
 		{
 			// Behaviour here mirrors that of List<T>, which only removes the first instance of item, not all instances.

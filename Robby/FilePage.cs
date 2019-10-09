@@ -84,7 +84,7 @@
 		public TitleCollection FindDuplicateFiles() => this.FindDuplicateFiles(true);
 
 		/// <summary>Finds any files on the wiki that are duplicates of this one.</summary>
-		/// <param name="localOnly">if set to <c>true</c>, only searches on the local wiki, ignoring shared repositories like Wikimedia Commons.</param>
+		/// <param name="localOnly">if set to <see langword="true"/>, only searches on the local wiki, ignoring shared repositories like Wikimedia Commons.</param>
 		/// <returns>A collection of duplicate file titles.</returns>
 		public TitleCollection FindDuplicateFiles(bool localOnly)
 		{

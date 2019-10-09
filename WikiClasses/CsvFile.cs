@@ -25,7 +25,7 @@
 
 		/// <summary>Gets or sets a value indicating whether to double up the <see cref="FieldDelimiter"/> character if emitted as part of the field value or use the <see cref="EscapeCharacter"/>.</summary>
 		/// <value>
-		///   <c>true</c> if a delimiter character should be emitted twice; <c>false</c> if it should be escaped instead.</value>
+		///   <see langword="true"/> if a delimiter character should be emitted twice; <see langword="false"/> if it should be escaped instead.</value>
 		public bool DoubleUpDelimiters { get; set; } = true;
 
 		/// <summary>Gets or sets the text to emit if a field is present but is an empty string.</summary>
@@ -46,7 +46,7 @@
 		public char FieldSeparator { get; set; } = ',';
 
 		/// <summary>Gets or sets the header row.</summary>
-		/// <value>The header row. <c>null</c> if there is no header row (<c>HasHeader = false</c> or there are no rows in the file).</value>
+		/// <value>The header row. <see langword="null"/> if there is no header row (<c>HasHeader = false</c> or there are no rows in the file).</value>
 		public IEnumerable<string> Header
 		{
 			get => this.headerRow;
@@ -58,8 +58,8 @@
 		}
 
 		/// <summary>Gets or sets a value indicating whether to ignore surrounding white space.</summary>
-		/// <value><c>true</c> if leading or trailing whitespace in a field should be ignored when no delimiter is present; otherwise, <c>false</c>.</value>
-		/// <remarks>When this is set to <c>true</c>, a row of <c>ABC, DEF</c> is treated the same as <c>ABC,DEF</c>; when false, the second value would be " DEF" rather than "DEF".</remarks>
+		/// <value><see langword="true"/> if leading or trailing whitespace in a field should be ignored when no delimiter is present; otherwise, <see langword="false"/>.</value>
+		/// <remarks>When this is set to <see langword="true"/>, a row of <c>ABC, DEF</c> is treated the same as <c>ABC,DEF</c>; when false, the second value would be " DEF" rather than "DEF".</remarks>
 		public bool IgnoreSurroundingWhiteSpace { get; set; } = true;
 		#endregion
 
@@ -281,17 +281,7 @@
 
 		/// <summary>Removes the first occurrence of a specific row from the file.</summary>
 		/// <param name="item">The row to remove from the file.</param>
-		/// <returns>
-		///   <span class="keyword">
-		///     <span class="languageSpecificText">
-		///       <span class="cs">true</span>
-		///       <span class="vb">True</span>
-		///       <span class="cpp">true</span>
-		///     </span>
-		///   </span>
-		///   <span class="nu">
-		///     <span class="keyword">true</span> (<span class="keyword">True</span> in Visual Basic)</span> if <paramref name="item" /> was successfully removed from the file; otherwise, <span class="keyword"><span class="languageSpecificText"><span class="cs">false</span><span class="vb">False</span><span class="cpp">false</span></span></span><span class="nu"><span class="keyword">false</span> (<span class="keyword">False</span> in Visual Basic)</span>. This method also returns <span class="keyword"><span class="languageSpecificText"><span class="cs">false</span><span class="vb">False</span><span class="cpp">false</span></span></span><span class="nu"><span class="keyword">false</span> (<span class="keyword">False</span> in Visual Basic)</span> if <paramref name="item" /> is not found in the original file.
-		/// </returns>
+		/// <returns><see langword="true"/> if <paramref name="item" /> was successfully removed from the file; otherwise, <see langword="false"/>. This method also returns <see langword="false"/> if <paramref name="item" /> is not found in the original file.</returns>
 		public bool Remove(CsvRow item) => this.rows.Remove(item);
 
 		/// <summary>Removes a row based on an exact value match.</summary>

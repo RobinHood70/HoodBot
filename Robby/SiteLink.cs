@@ -190,7 +190,7 @@
 		}
 
 		/// <summary>Gets a value indicating whether this instance is local, either by having no interwiki value or one that represents the local wiki (e.g., :en:SomeArticle, on English Wikipedia).</summary>
-		/// <value><c>true</c> if this instance is local; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if this instance is local; otherwise, <see langword="false"/>.</value>
 		public bool IsLocal => this.interwikiObject?.LocalWiki ?? true;
 
 		/// <summary>Gets or sets a value indicating whether a colon should be prepended to the link for spaces like Category and File.</summary>
@@ -288,7 +288,7 @@
 
 		/// <summary>Determines whether the specified value is a valid link.</summary>
 		/// <param name="value">The value to check.</param>
-		/// <returns><c>true</c> if the specified value appears to be a link; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the specified value appears to be a link; otherwise, <see langword="false"/>.</returns>
 		/// <remarks>This is a primitive check for surrounding brackets and may report incorrect values in complex situations.</remarks>
 		public static bool IsLink(string value) =>
 			value != null &&
@@ -306,17 +306,17 @@
 		public static Regex Find() => Find(null, null);
 
 		/// <summary>Creates a <see cref="Regex"/> to find all links matching the values provided.</summary>
-		/// <param name="namespaces">The namespaces to search for. Use <c>null</c> to match all namespaces.</param>
-		/// <param name="pageNames">The pagenames to search for. Use <c>null</c> to match all pagenames.</param>
+		/// <param name="namespaces">The namespaces to search for. Use <see langword="null"/> to match all namespaces.</param>
+		/// <param name="pageNames">The pagenames to search for. Use <see langword="null"/> to match all pagenames.</param>
 		/// <returns>A <see cref="Regex"/> that finds all links matching the values provided. Note that this will match, for example, any of the pagenames given in any of the namespaces given.</returns>
 		public static Regex Find(IEnumerable<string> namespaces, IEnumerable<string> pageNames) => Find(null, null, namespaces, pageNames, null);
 
 		/// <summary>Creates a <see cref="Regex"/> to find all links matching the values provided which also have the specified surrounding text.</summary>
-		/// <param name="regexBefore">A <see cref="Regex"/> fragment specifying the text to search for before the link. Use <c>null</c> to ignore the text before the link.</param>
-		/// <param name="interwikis">The interwiki prefixes to search for. Use <c>null</c> to match all interwiki prefixes.</param>
-		/// <param name="namespaces">The namespaces to search for. Use <c>null</c> to match all namespaces.</param>
-		/// <param name="pageNames">The pagenames to search for. Use <c>null</c> to match all pagenames.</param>
-		/// <param name="regexAfter">A <see cref="Regex"/> fragment specifying the text to search for after the link. Use <c>null</c> to ignore the text after the link.</param>
+		/// <param name="regexBefore">A <see cref="Regex"/> fragment specifying the text to search for before the link. Use <see langword="null"/> to ignore the text before the link.</param>
+		/// <param name="interwikis">The interwiki prefixes to search for. Use <see langword="null"/> to match all interwiki prefixes.</param>
+		/// <param name="namespaces">The namespaces to search for. Use <see langword="null"/> to match all namespaces.</param>
+		/// <param name="pageNames">The pagenames to search for. Use <see langword="null"/> to match all pagenames.</param>
+		/// <param name="regexAfter">A <see cref="Regex"/> fragment specifying the text to search for after the link. Use <see langword="null"/> to ignore the text after the link.</param>
 		/// <returns>A <see cref="Regex"/> that finds all links matching the values provided. Note that this will match, for example, any of the pagenames given in any of the namespaces given.</returns>
 		public static Regex Find(string regexBefore, IEnumerable<string> interwikis, IEnumerable<string> namespaces, IEnumerable<string> pageNames, string regexAfter) =>
 			FindRaw(
@@ -327,11 +327,11 @@
 				regexAfter);
 
 		/// <summary>Creates a <see cref="Regex"/> to find all links matching the values provided which also have the specified surrounding text.</summary>
-		/// <param name="regexBefore">A <see cref="Regex"/> fragment specifying the text to search for before the link. Use <c>null</c> to ignore the text before the link.</param>
-		/// <param name="regexInterwikis">A <see cref="Regex"/> fragment specifying the interwikis to search for. Use <c>null</c> to match all interwikis.</param>
-		/// <param name="regexNamespaces">A <see cref="Regex"/> fragment specifying the namespaces to search for. Use <c>null</c> to match all namespaces.</param>
-		/// <param name="regexPageNames">A <see cref="Regex"/> fragment specifying the pagenames to search for. Use <c>null</c> to match all pagenames.</param>
-		/// <param name="regexAfter">A <see cref="Regex"/> fragment specifying the text to search for after the link. Use <c>null</c> to ignore the text after the link.</param>
+		/// <param name="regexBefore">A <see cref="Regex"/> fragment specifying the text to search for before the link. Use <see langword="null"/> to ignore the text before the link.</param>
+		/// <param name="regexInterwikis">A <see cref="Regex"/> fragment specifying the interwikis to search for. Use <see langword="null"/> to match all interwikis.</param>
+		/// <param name="regexNamespaces">A <see cref="Regex"/> fragment specifying the namespaces to search for. Use <see langword="null"/> to match all namespaces.</param>
+		/// <param name="regexPageNames">A <see cref="Regex"/> fragment specifying the pagenames to search for. Use <see langword="null"/> to match all pagenames.</param>
+		/// <param name="regexAfter">A <see cref="Regex"/> fragment specifying the text to search for after the link. Use <see langword="null"/> to ignore the text after the link.</param>
 		/// <returns>A <see cref="Regex"/> that finds all links matching the values provided. Note that this will match, for example, any of the pagenames given in any of the namespaces given.</returns>
 		public static Regex FindRaw(string regexBefore, string regexInterwikis, string regexNamespaces, string regexPageNames, string regexAfter)
 		{
@@ -442,7 +442,7 @@
 
 		/// <summary>Indicates whether the current title is equal to another title based on Interwiki, Namespace, PageName, and Fragment.</summary>
 		/// <param name="other">A title to compare with this one.</param>
-		/// <returns><see langword="true"/> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false"/>.</returns>
 		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
 		public bool FullEquals(IFullTitle other) =>
 			other != null &&
@@ -517,7 +517,7 @@
 		public string PipeTrick() => this.PipeTrick(false);
 
 		/// <summary>Returns a suggested <see cref="DisplayParameter"/> value based on the link parts, much like the "pipe trick" on a wiki.</summary>
-		/// <param name="useFragmentIfPresent">if set to <c>true</c>, and a fragment exists, uses the fragment to generate the name, rather than the pagename.</param>
+		/// <param name="useFragmentIfPresent">if set to <see langword="true"/>, and a fragment exists, uses the fragment to generate the name, rather than the pagename.</param>
 		/// <returns>A suggested <see cref="DisplayParameter"/> value based on the link parts.</returns>
 		/// <remarks>This method does not modify the <see cref="DisplayParameter"/> in any way.</remarks>
 		public string PipeTrick(bool useFragmentIfPresent)

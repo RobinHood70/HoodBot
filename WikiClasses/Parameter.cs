@@ -170,7 +170,7 @@
 
 		/// <summary>Determines whether the provided parameter is null or has an empty value.</summary>
 		/// <param name="item">The item to check.</param>
-		/// <returns><c>true</c> if the parameter is null or its value is an empty string; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the parameter is null or its value is an empty string; otherwise, <see langword="false"/>.</returns>
 		public static bool IsNullOrEmpty(Parameter item) => item == null || item.Value.Length == 0;
 
 		/// <summary>Unescapes the specified text, converting common equivalents of equals signs to an actual equals sign.</summary>
@@ -183,7 +183,7 @@
 
 		/// <summary>Anonymizes the specified parameter.</summary>
 		/// <param name="nameIfNeeded">The name for the parameter if anonymization is not possible.</param>
-		/// <returns><c>true</c> if any changes were made to the parameter (whether anonymization or renaming); otherwise <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if any changes were made to the parameter (whether anonymization or renaming); otherwise <see langword="false"/>.</returns>
 		/// <remarks>The name provided will override the current name, if one exists, for consistency of results. For example, if you are anonymizing the "image" parameter to be the first unnamed parameter, but it contains an unescaped equals sign, you can provide "1" as the parameter to ensure that the name "image" is changed, even if a name is still required.</remarks>
 		public bool Anonymize(string nameIfNeeded)
 		{
@@ -234,7 +234,7 @@
 
 		/// <summary>Renames the parameter to the specified name.</summary>
 		/// <param name="newName">The new name.</param>
-		/// <returns><c>true</c> if the parameter name changed; otherwise <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the parameter name changed; otherwise <see langword="false"/>.</returns>
 		/// <remarks>Renaming a parameter sets <see cref="Anonymous"/> to false unless the new name is identical to the old one.</remarks>
 		public bool Rename(string newName)
 		{

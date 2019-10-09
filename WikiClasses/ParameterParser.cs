@@ -36,8 +36,8 @@ namespace RobinHood70.WikiClasses
 		/// <summary>Initializes a new instance of the <see cref="ParameterParser"/> class.</summary>
 		/// <param name="textToParse">The text to parse.</param>
 		/// <param name="isLink">Whether to parse the text as a link (<see langword="true"/>) or a template (<see langword="false"/>).</param>
-		/// <param name="parseAllAsValues">if set to <c>true</c> [parse all as values].</param>
-		/// <param name="ignoreWhiteSpaceRules">if set to <c>true</c> [ignore white space rules].</param>
+		/// <param name="parseAllAsValues">if set to <see langword="true"/> [parse all as values].</param>
+		/// <param name="ignoreWhiteSpaceRules">if set to <see langword="true"/> [ignore white space rules].</param>
 		public ParameterParser(string textToParse, bool isLink, bool parseAllAsValues, bool ignoreWhiteSpaceRules)
 		{
 			this.text = textToParse ?? string.Empty;
@@ -86,7 +86,7 @@ namespace RobinHood70.WikiClasses
 		#region Properties
 
 		/// <summary>Gets a value indicating whether the link or template name started with a colon.</summary>
-		/// <value><c>true</c> if there was a leading colon; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if there was a leading colon; otherwise, <see langword="false"/>.</value>
 		public bool LeadingColon { get; private set; }
 
 		/// <summary>Gets the link or template page name.</summary>
@@ -105,7 +105,7 @@ namespace RobinHood70.WikiClasses
 		#region Public Methods
 
 		/// <summary>Guesses the default format from the existing parameters.</summary>
-		/// <param name="names">if <c>true,</c> returns a format based on the parameter names; otherwise, the format is based on the parameter values.</param>
+		/// <param name="names">if <see langword="true"/>, returns a format based on the parameter names; otherwise, the format is based on the parameter values.</param>
 		/// <returns>A ParameterString with the most common formatting in use, based on the existing named parameters. If there are no named parameters, returns an empty ParameterString.</returns>
 		public PaddedString DefaultFormat(bool names)
 		{

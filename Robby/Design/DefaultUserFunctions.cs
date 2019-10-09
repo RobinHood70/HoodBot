@@ -70,7 +70,7 @@
 		/// <summary>Returns a value indicating whether the log entry represented in the <paramref name="info" /> parameter should be logged.</summary>
 		/// <param name="info">The log information to be checked.</param>
 		/// <returns>A value indicating whether the log entry represented in the <paramref name="info" /> parameter should be logged.</returns>
-		/// <remarks><see cref="DefaultUserFunctions"/> always returns <c>false</c>.</remarks>
+		/// <remarks><see cref="DefaultUserFunctions"/> always returns <see langword="false"/>.</remarks>
 		public override bool ShouldLog(LogInfo info) => false;
 
 		/// <summary>Updates the current status on the page found in <see cref="UserFunctions.StatusPage"/>.</summary>

@@ -11,7 +11,7 @@
 		/// <summary>Initializes a new instance of the <see cref="LogInfo"/> class.</summary>
 		/// <param name="title">The title for the log entry.</param>
 		/// <param name="details">The details for the log entry (typically, job parameters or notes).</param>
-		/// <param name="readOnly">If set to <c>true</c>, indicates that the job is read-only.</param>
+		/// <param name="readOnly">If set to <see langword="true"/>, indicates that the job is read-only.</param>
 		public LogInfo(string title, string details, bool readOnly)
 		{
 			this.Title = title;
@@ -24,7 +24,7 @@
 		public string Details { get; set; }
 
 		/// <summary>Gets or sets a value indicating whether the log entry represents a read-only operation.</summary>
-		/// <value><c>true</c> if [read only]; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if [read only]; otherwise, <see langword="false"/>.</value>
 		public bool ReadOnly { get; set; }
 
 		/// <summary>Gets or sets the log title.</summary>

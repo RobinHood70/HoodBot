@@ -55,8 +55,8 @@
 		public StringComparer Comparer { get; }
 
 		/// <summary>Gets or sets a value indicating whether to copy the format of the final parameter when adding new ones.</summary>
-		/// <value><c>true</c> if the last parameter's format should be copied; <c>false</c> to use <see cref="DefaultNameFormat"/> and <see cref="DefaultValueFormat"/>.</value>
-		/// <remarks>If set to <c>true</c> and there are no parameters in the collection, the default formats will be used.</remarks>
+		/// <value><see langword="true"/> if the last parameter's format should be copied; <see langword="false"/> to use <see cref="DefaultNameFormat"/> and <see cref="DefaultValueFormat"/>.</value>
+		/// <remarks>If set to <see langword="true"/> and there are no parameters in the collection, the default formats will be used.</remarks>
 		public bool CopyLast { get; set; } = true;
 
 		/// <summary>Gets the number of parameters in this collection.</summary>
@@ -127,7 +127,7 @@
 
 		/// <summary>Gets the <see cref="Parameter"/> with the specified key.</summary>
 		/// <param name="key">The key.</param>
-		/// <returns>The specified <see cref="Parameter"/> or <c>null</c> if the key was not found.</returns>
+		/// <returns>The specified <see cref="Parameter"/> or <see langword="null"/> if the key was not found.</returns>
 		/// <remarks>Keys that evaluate to an integer will match either a named parameter or an anonymous parameter in the specified position (compared with other anonymous parameters, not the collection itself). Conflicts will be resolved following the same rules that MediaWiki templates and links use (i.e., last match wins). The collection's <see cref="Comparer"/> property will be used to determine if parameter names are a match.</remarks>
 		public Parameter this[string key]
 		{
@@ -317,7 +317,7 @@
 		/// <summary>Removes the parameter name, making it into an anonymous parameter, or a numbered parameter if anonymization is not possible.</summary>
 		/// <param name="name">The current parameter name.</param>
 		/// <param name="position">The anonymous position the parameter should end up in.</param>
-		/// <returns><c>true</c> if the parameter was successfully anonymized; otherwise <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the parameter was successfully anonymized; otherwise <see langword="false"/>.</returns>
 		/// <remarks>If the parameter cannot be anonymized due to an equals sign in the current value, the parameter name will be changed to the position number if it's not already.</remarks>
 		public bool Anonymize(string name, int position) => this.Anonymize(name, position, position.ToStringInvariant());
 
@@ -325,7 +325,7 @@
 		/// <param name="name">The current parameter name.</param>
 		/// <param name="position">The anonymous position the parameter should end up in.</param>
 		/// <param name="label">The name to change the parameter to if anonymization is not possible.</param>
-		/// <returns><c>true</c> if the parameter was successfully anonymized; otherwise <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the parameter was successfully anonymized; otherwise <see langword="false"/>.</returns>
 		/// <remarks>If the parameter cannot be anonymized due to an equals sign in the current value, the parameter name will be changed to the position number if it's not already.</remarks>
 		public bool Anonymize(string name, int position, string label)
 		{
@@ -370,30 +370,12 @@
 
 		/// <summary>Determines whether this collection contains the specified parameter.</summary>
 		/// <param name="item">The parameter to locate in the collection.</param>
-		/// <returns>
-		///   <span class="keyword">
-		///     <span class="languageSpecificText">
-		///       <span class="cs">true</span>
-		///       <span class="vb">True</span>
-		///       <span class="cpp">true</span>
-		///     </span>
-		///   </span>
-		///   <span class="nu">
-		///     <span class="keyword">true</span> (<span class="keyword">True</span> in Visual Basic)</span> if <paramref name="item" /> is found in the collection; otherwise, <span class="keyword"><span class="languageSpecificText"><span class="cs">false</span><span class="vb">False</span><span class="cpp">false</span></span></span><span class="nu"><span class="keyword">false</span> (<span class="keyword">False</span> in Visual Basic)</span>.</returns>
+		/// <returns><see langword="true"/> if <paramref name="item" /> is found in the collection; otherwise, <see langword="false"/>.</returns>
 		public bool Contains(Parameter item) => this.parameters.Contains(item);
 
 		/// <summary>Determines whether this collection contains a parameter with the specified name.</summary>
 		/// <param name="name">The parameter name to locate in the collection.</param>
-		/// <returns>
-		///   <span class="keyword">
-		///     <span class="languageSpecificText">
-		///       <span class="cs">true</span>
-		///       <span class="vb">True</span>
-		///       <span class="cpp">true</span>
-		///     </span>
-		///   </span>
-		///   <span class="nu">
-		///     <span class="keyword">true</span> (<span class="keyword">True</span> in Visual Basic)</span> if <paramref name="name" /> is found in the collection; otherwise, <span class="keyword"><span class="languageSpecificText"><span class="cs">false</span><span class="vb">False</span><span class="cpp">false</span></span></span><span class="nu"><span class="keyword">false</span> (<span class="keyword">False</span> in Visual Basic)</span>.</returns>
+		/// <returns><see langword="true"/> if <paramref name="name" /> is found in the collection; otherwise, <see langword="false"/>.</returns>
 		public bool Contains(string name) => this[name] != null;
 
 		/// <summary>Copies the elements of the collection to an array, starting at a particular array index.</summary>
@@ -439,7 +421,7 @@
 
 		/// <summary>Finds a parameter whose name is in the parameter list, preferring names that come first in parameter order.</summary>
 		/// <param name="names">The parameter names to check for.</param>
-		/// <returns>The best match among the <see cref="Parameter"/>s or <c>null</c> if no match was found.</returns>
+		/// <returns>The best match among the <see cref="Parameter"/>s or <see langword="null"/> if no match was found.</returns>
 		/// <remarks>This function is primarily intended to reflect MediaWiki's template search. If a template parameter were specified as <c>{{{name|{{{1|}}}}}}</c>, you would call this methods as <c>FindFirst("name", "1");</c> in order to find the "name" parameter if it exists, or the "1" parameter (either specifically named or anonymous) if "name" was not found.</remarks>
 		public Parameter FindFirst(params string[] names)
 		{
@@ -498,7 +480,7 @@
 		IEnumerator IEnumerable.GetEnumerator() => this.parameters.GetEnumerator();
 
 		/// <summary>Determines whether this instance has anonymous parameters.</summary>
-		/// <returns><c>true</c> if this instance has anonymous parameters; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if this instance has anonymous parameters; otherwise, <see langword="false"/>.</returns>
 		public bool HasAnonymous()
 		{
 			foreach (var param in this)
@@ -513,7 +495,7 @@
 		}
 
 		/// <summary>Determines whether this collection has multiple identically named or numbered parameters.</summary>
-		/// <returns><c>true</c> if this instance has duplicates; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if this instance has duplicates; otherwise, <see langword="false"/>.</returns>
 		/// <remarks>This method uses short-circuit logic and is therefore usually faster than <see cref="DuplicateNames"/> if knowing whether duplicates exist is all that's required.</remarks>
 		public bool HasDuplicates()
 		{
@@ -544,23 +526,13 @@
 
 		/// <summary>Removes the first occurrence of the specified <see cref="Parameter"/> from the collection.</summary>
 		/// <param name="item">The <see cref="Parameter"/> to remove from the collection.</param>
-		/// <returns>
-		///   <span class="keyword">
-		///     <span class="languageSpecificText">
-		///       <span class="cs">true</span>
-		///       <span class="vb">True</span>
-		///       <span class="cpp">true</span>
-		///     </span>
-		///   </span>
-		///   <span class="nu">
-		///     <span class="keyword">true</span> (<span class="keyword">True</span> in Visual Basic)</span> if <paramref name="item" /> was successfully removed from the collection; otherwise, <span class="keyword"><span class="languageSpecificText"><span class="cs">false</span><span class="vb">False</span><span class="cpp">false</span></span></span><span class="nu"><span class="keyword">false</span> (<span class="keyword">False</span> in Visual Basic)</span>. This method also returns <span class="keyword"><span class="languageSpecificText"><span class="cs">false</span><span class="vb">False</span><span class="cpp">false</span></span></span><span class="nu"><span class="keyword">false</span> (<span class="keyword">False</span> in Visual Basic)</span> if <paramref name="item" /> is not found in the original collection.
-		/// </returns>
+		/// <returns><see langword="true"/> if <paramref name="item" /> was successfully removed from the collection; otherwise, <see langword="false"/>. This method also returns <see langword="false"/> if <paramref name="item" /> is not found in the original collection.</returns>
 		public bool Remove(Parameter item) => this.parameters.Remove(item);
 
 		/// <summary>Removes all parameters with the specified names from the collection.</summary>
 		/// <param name="names">The parameter names to remove.</param>
 		/// <remarks>This function will remove all copies of any parameters with the given names, including numeric names, alias names and anonymous parameters by position.</remarks>
-		/// <returns><c>true</c> if any parameters were removed; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if any parameters were removed; otherwise, <see langword="false"/>.</returns>
 		public bool Remove(params string[] names)
 		{
 			ThrowNull(names, nameof(names));
@@ -615,7 +587,7 @@
 		}
 
 		/// <summary>Removes all parameters that have no value, except anonymous parameters (which may be important for ordering).</summary>
-		/// <returns><c>true</c> if any values were removed; otherwise <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if any values were removed; otherwise <see langword="false"/>.</returns>
 		public bool RemoveEmpty()
 		{
 			var retval = false;
@@ -634,7 +606,7 @@
 
 		/// <summary>Removes all parameters specified if they're named or numbered parameters and have no value.</summary>
 		/// <param name="names">The parameter names to check. Numbered names will only be applied to explicitly numbered parameters.</param>
-		/// <returns><c>true</c> if any values were removed; otherwise <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if any values were removed; otherwise <see langword="false"/>.</returns>
 		public bool RemoveEmpty(params string[] names)
 		{
 			var retval = false;
@@ -657,7 +629,7 @@
 		/// <summary>Removes a parameter if its value matches the value specified.</summary>
 		/// <param name="name">The name of the parameter to check.</param>
 		/// <param name="value">The value to check for.</param>
-		/// <returns><c>true</c> if the parameter was removed; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the parameter was removed; otherwise, <see langword="false"/>.</returns>
 		public bool RemoveIfEquals(string name, string value)
 		{
 			ThrowNull(name, nameof(name));
@@ -674,7 +646,7 @@
 		/// <summary>Removes the specified parameter if it matches the provided predicate.</summary>
 		/// <param name="name">The name of the parameter to check.</param>
 		/// <param name="predicate">The predicate to check against.</param>
-		/// <returns><c>true</c> if the parameter was removed; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the parameter was removed; otherwise, <see langword="false"/>.</returns>
 		public bool RemoveIf(string name, Predicate<string> predicate)
 		{
 			ThrowNull(name, nameof(name));
@@ -715,7 +687,7 @@
 		/// <summary>Renames the specified parameter.</summary>
 		/// <param name="from">What to rename the parameter from.</param>
 		/// <param name="to">What to rename the parameter to.</param>
-		/// <returns><c>true</c> if the parameter was renamed; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the parameter was renamed; otherwise, <see langword="false"/>.</returns>
 		/// <exception cref="InvalidOperationException">The <paramref name="to" /> name already exists in the collection (except if it matches the <paramref name="from"/> name, which will be ignored).</exception>
 		/// <remarks>To bypass the parameter name checks, use <see cref="Parameter.Rename(string)"/> instead.</remarks>
 		public bool RenameParameter(string from, string to) => this.RenameParameter(this[from], to);
@@ -723,7 +695,7 @@
 		/// <summary>Renames the specified parameter.</summary>
 		/// <param name="from">The <see cref="Parameter"/> to rename.</param>
 		/// <param name="to">What to rename the parameter to.</param>
-		/// <returns><c>true</c> if the parameter was renamed; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the parameter was renamed; otherwise, <see langword="false"/>.</returns>
 		/// <exception cref="InvalidOperationException">The <paramref name="to" /> name already exists in the collection (except if it matches the <paramref name="from" /> name, which will be ignored).</exception>
 		/// <remarks>To bypass the parameter name checks, use <see cref="Parameter.Rename(string)"/> instead.</remarks>
 		public bool RenameParameter(Parameter from, string to) =>

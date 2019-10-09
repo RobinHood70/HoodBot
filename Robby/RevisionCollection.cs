@@ -43,7 +43,7 @@
 
 		/// <summary>Determines whether the collection contains the specified revision ID.</summary>
 		/// <param name="id">The revision ID.</param>
-		/// <returns><c>true</c> if the collection contains the specified revision ID; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the collection contains the specified revision ID; otherwise, <see langword="false"/>.</returns>
 		public bool Contains(long id) => this.revisions.ContainsKey(id);
 
 		/// <summary>Returns an enumerator that iterates through the collection.</summary>

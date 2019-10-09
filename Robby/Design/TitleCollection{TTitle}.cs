@@ -40,7 +40,7 @@
 		public int Count => this.items.Count;
 
 		/// <summary>Gets a value indicating whether the <see cref="TitleCollection">collection</see> is read-only.</summary>
-		/// <value><c>true</c> if the collection is read-only.</value>
+		/// <value><see langword="true"/> if the collection is read-only.</value>
 		public bool IsReadOnly { get; } = false;
 
 		/// <summary>Gets the site for the collection.</summary>
@@ -226,7 +226,7 @@
 		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
 		/// <param name="title">The title.</param>
 		/// <param name="linkTypes">The link types of the pages to retrieve.</param>
-		/// <param name="includeRedirectedTitles">if set to <c>true</c>, pages linking to <paramref name="title"/> via a redirect will be included.</param>
+		/// <param name="includeRedirectedTitles">if set to <see langword="true"/>, pages linking to <paramref name="title"/> via a redirect will be included.</param>
 		public void GetBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles) => this.GetBacklinks(title, linkTypes, includeRedirectedTitles, Filter.Any);
 
 		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
@@ -238,14 +238,14 @@
 		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
 		/// <param name="title">The title.</param>
 		/// <param name="linkTypes">The link types of the pages to retrieve.</param>
-		/// <param name="includeRedirectedTitles">if set to <c>true</c>, pages linking to <paramref name="title"/> via a redirect will be included.</param>
+		/// <param name="includeRedirectedTitles">if set to <see langword="true"/>, pages linking to <paramref name="title"/> via a redirect will be included.</param>
 		/// <param name="redirects">Whether or not to include redirects in the results.</param>
 		public void GetBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles, Filter redirects) => this.GetBacklinks(new BacklinksInput(title, linkTypes) { FilterRedirects = redirects, Redirect = includeRedirectedTitles });
 
 		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
 		/// <param name="title">The title.</param>
 		/// <param name="linkTypes">The link types of the pages to retrieve.</param>
-		/// <param name="includeRedirectedTitles">if set to <c>true</c>, pages linking to <paramref name="title"/> via a redirect will be included.</param>
+		/// <param name="includeRedirectedTitles">if set to <see langword="true"/>, pages linking to <paramref name="title"/> via a redirect will be included.</param>
 		/// <param name="redirects">Whether or not to include redirects in the results.</param>
 		/// <param name="ns">The namespace to limit the results to.</param>
 		public void GetBacklinks(string title, BacklinksTypes linkTypes, bool includeRedirectedTitles, Filter redirects, int ns) => this.GetBacklinks(new BacklinksInput(title, linkTypes) { FilterRedirects = redirects, Namespace = ns, Redirect = includeRedirectedTitles });
@@ -264,13 +264,13 @@
 
 		/// <summary>Adds category members to the collection, potentially including subcategories and their members.</summary>
 		/// <param name="category">The category.</param>
-		/// <param name="recurse">if set to <c>true</c> recurses through subcategories.</param>
+		/// <param name="recurse">if set to <see langword="true"/> recurses through subcategories.</param>
 		public void GetCategoryMembers(string category, bool recurse) => this.GetCategoryMembers(category, CategoryMemberTypes.All, null, null, recurse);
 
 		/// <summary>Adds category members of the specified type to the collection, potentially including subcategories and their members.</summary>
 		/// <param name="category">The category.</param>
 		/// <param name="categoryMemberTypes">The category member types to load.</param>
-		/// <param name="recurse">if set to <c>true</c> recurses through subcategories.</param>
+		/// <param name="recurse">if set to <see langword="true"/> recurses through subcategories.</param>
 		public void GetCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, bool recurse) => this.GetCategoryMembers(category, categoryMemberTypes, null, null, recurse);
 
 		/// <summary>Adds category members of the specified type and within the specified range to the collection, potentially including subcategories and their members.</summary>
@@ -278,7 +278,7 @@
 		/// <param name="categoryMemberTypes">The category member types to load.</param>
 		/// <param name="from">The category member to start at (inclusive). The member specified does not have to exist.</param>
 		/// <param name="to">The category member to stop at (inclusive). The member specified does not have to exist.</param>
-		/// <param name="recurse">if set to <c>true</c> recurses through subcategories.</param>
+		/// <param name="recurse">if set to <see langword="true"/> recurses through subcategories.</param>
 		/// <remarks>If subcategories are loaded, they will be limited to the <paramref name="categoryMemberTypes"/> requested. However, they will <em>not</em> be limited by the <paramref name="from"/> and <paramref name="to"/> parameters.</remarks>
 		public void GetCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, string from, string to, bool recurse)
 		{
@@ -306,7 +306,7 @@
 
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
 		/// <param name="titles">The titles to find duplicates of.</param>
-		/// <param name="localOnly">if set to <c>true</c> [local only].</param>
+		/// <param name="localOnly">if set to <see langword="true"/> [local only].</param>
 		public void GetDuplicateFiles(IEnumerable<ISimpleTitle> titles, bool localOnly) => this.GetDuplicateFiles(new DuplicateFilesInput() { LocalOnly = localOnly }, titles);
 
 		/// <summary>Returns an enumerator that iterates through the collection.</summary>
@@ -502,18 +502,18 @@
 
 		/// <summary>Adds recent changes pages to the collection starting at a given date and time and moving forward or backward from there.</summary>
 		/// <param name="start">The date to start at (inclusive).</param>
-		/// <param name="newer">if set to <c>true</c>, changes from the start date to the most recent will be returned; otherwise, changes from the start date to the oldest will be returned.</param>
+		/// <param name="newer">if set to <see langword="true"/>, changes from the start date to the most recent will be returned; otherwise, changes from the start date to the oldest will be returned.</param>
 		public void GetRecentChanges(DateTime start, bool newer) => this.GetRecentChanges(start, newer, 0);
 
 		/// <summary>Adds a specified number of recent changes pages to the collection starting at a given date and time and moving forward or backward from there.</summary>
 		/// <param name="start">The date to start at (inclusive).</param>
-		/// <param name="newer">if set to <c>true</c>, changes from the start date to the most recent will be returned; otherwise, changes from the start date to the oldest will be returned.</param>
+		/// <param name="newer">if set to <see langword="true"/>, changes from the start date to the most recent will be returned; otherwise, changes from the start date to the oldest will be returned.</param>
 		/// <param name="count">The number of changes to return.</param>
 		public void GetRecentChanges(DateTime start, bool newer, int count) => this.GetRecentChanges(new RecentChangesInput { Start = start, SortAscending = newer, MaxItems = count });
 
 		/// <summary>Adds recent changes pages from a specific user, or excluding that user, to the collection.</summary>
 		/// <param name="user">The user.</param>
-		/// <param name="exclude">if set to <c>true</c> returns changes by everyone other than the user.</param>
+		/// <param name="exclude">if set to <see langword="true"/> returns changes by everyone other than the user.</param>
 		public void GetRecentChanges(string user, bool exclude) => this.GetRecentChanges(new RecentChangesInput { User = user, ExcludeUser = exclude });
 
 		/// <summary>Adds recent changes pages to the collection based on complex criteria.</summary>
@@ -541,12 +541,12 @@
 
 		/// <summary>Adds pages from a range of revisions to the collection.</summary>
 		/// <param name="start">The date to start at (inclusive).</param>
-		/// <param name="newer">if set to <c>true</c>, revisions from the start date to the most recent will be returned; otherwise, changes from the start date to the oldest will be returned.</param>
+		/// <param name="newer">if set to <see langword="true"/>, revisions from the start date to the most recent will be returned; otherwise, changes from the start date to the oldest will be returned.</param>
 		public void GetRevisions(DateTime start, bool newer) => this.GetRevisions(start, newer, 0);
 
 		/// <summary>Adds pages from a range of revisions to the collection.</summary>
 		/// <param name="start">The date to start at (inclusive).</param>
-		/// <param name="newer">if set to <c>true</c>, revisions from the start date to the most recent will be returned; otherwise, changes from the start date to the oldest will be returned.</param>
+		/// <param name="newer">if set to <see langword="true"/>, revisions from the start date to the most recent will be returned; otherwise, changes from the start date to the oldest will be returned.</param>
 		/// <param name="count">The number of revisions to return.</param>
 		public void GetRevisions(DateTime start, bool newer, int count) => this.GetRevisions(new AllRevisionsInput { Start = start, SortAscending = newer, MaxItems = count });
 
@@ -860,7 +860,7 @@
 
 		/// <summary>Adds category members to the collection, potentially including subcategories and their members.</summary>
 		/// <param name="input">The input parameters.</param>
-		/// <param name="recurse">if set to <c>true</c> load the entire category tree recursively.</param>
+		/// <param name="recurse">if set to <see langword="true"/> load the entire category tree recursively.</param>
 		protected abstract void GetCategoryMembers(CategoryMembersInput input, bool recurse);
 
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>

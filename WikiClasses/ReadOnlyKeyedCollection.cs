@@ -88,7 +88,7 @@
 
 		/// <summary>Determines whether the collection contains an element with the specified key.</summary>
 		/// <param name="key">The key to locate in the <see cref="ReadOnlyKeyedCollection{TKey, TItem}"/>.</param>
-		/// <returns><c>true</c> if the <see cref="ReadOnlyKeyedCollection{TKey, TItem}"/> contains an element with the specified key; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the <see cref="ReadOnlyKeyedCollection{TKey, TItem}"/> contains an element with the specified key; otherwise, <see langword="false"/>.</returns>
 		/// <exception cref="ArgumentNullException">key is null.</exception>
 		public bool Contains(TKey key) => this.Dictionary.ContainsKey(key);
 

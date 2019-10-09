@@ -33,8 +33,8 @@
 		public bool BotEdit { get; set; }
 
 		/// <summary>Gets or sets a value indicating whether the desired edit should be cancelled.</summary>
-		/// <value><c>true</c> if the change should be cancelled; otherwise, <c>false</c>.</value>
-		/// <remarks>Once this property is set to <c>true</c>, it cannot be changed.</remarks>
+		/// <value><see langword="true"/> if the change should be cancelled; otherwise, <see langword="false"/>.</value>
+		/// <remarks>Once this property is set to <see langword="true"/>, it cannot be changed.</remarks>
 		public bool CancelChange
 		{
 			get => this.cancelChange;

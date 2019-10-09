@@ -179,7 +179,7 @@
 
 		/// <summary>Determines whether an IEnumerable has items.</summary>
 		/// <param name="list">The enumerable to check.</param>
-		/// <returns><c>true</c> if the list is non-null and has at least one item; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the list is non-null and has at least one item; otherwise, <see langword="false"/>.</returns>
 		/// <exception cref="KeyNotFoundException">The list was empty.</exception>
 		public static bool HasItems(this IEnumerable list) => list?.GetEnumerator().MoveNext() ?? false;
 		#endregion
