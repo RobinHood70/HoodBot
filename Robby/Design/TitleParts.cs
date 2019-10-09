@@ -64,7 +64,7 @@
 						if (nameRemaining.Length == 0)
 						{
 							this.OriginalPageNameText = string.Empty;
-							this.PageName = site.MainPage?.PageName ?? "Main Page";
+							this.PageName = site.MainPageName ?? "Main Page";
 							return;
 						}
 					}

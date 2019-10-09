@@ -201,9 +201,14 @@
 		/// <value>The magic words.</value>
 		public IReadOnlyDictionary<string, MagicWord> MagicWords => this.magicWords;
 
-		/// <summary>Gets the main page of the site.</summary>
+		/// <summary>Gets the <see cref="Title"/> for the main page of the site.</summary>
 		/// <value>The main page.</value>
-		public Page MainPage { get; private set; }
+		public Title MainPage { get; private set; }
+
+		/// <summary>Gets the name of the main page, as returned by the site.</summary>
+		/// <value>The name of the main page.</value>
+		/// <remarks>This will normally be the same as <c><see cref="MainPage"/>.FullPageName</c>, but is provided so that the original name is available, if needed.</remarks>
+		public string MainPageName { get; private set; }
 
 		/// <summary>Gets the wiki name.</summary>
 		/// <value>The name of the wiki.</value>
@@ -988,7 +993,8 @@
 			}
 
 			this.Namespaces = new NamespaceCollection(namespaces, this.EqualityComparerInsensitive);
-			this.MainPage = new Page(this, siteInfo.MainPage); // Now that we understand namespaces, we can create a Page.
+			this.MainPageName = siteInfo.MainPage;
+			this.MainPage = new Title(this, siteInfo.MainPage); // Now that we understand namespaces, we can create a Title.
 
 			// MagicWords
 			foreach (var word in siteInfo.MagicWords)
