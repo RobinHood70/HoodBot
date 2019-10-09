@@ -14,8 +14,7 @@
 	{
 		#region Fields
 		private readonly HashSet<string> allNames;
-		private readonly HashSet<string> addedNames;
-		private readonly HashSet<string> baseNames;
+		private readonly HashSet<string> defaultNames;
 		private readonly int subjectSpaceId;
 		private readonly int? talkSpaceId;
 		#endregion
@@ -41,14 +40,13 @@
 			this.LinkName = (this.IsForcedLinkSpace ? ":" : string.Empty) + this.DecoratedName;
 			this.Aliases = aliases == null ? new List<string>() : new List<string>(aliases);
 
-			this.addedNames = new HashSet<string>(site.EqualityComparerInsensitive);
-			this.baseNames = new HashSet<string>(this.Aliases, site.EqualityComparerInsensitive)
+			this.defaultNames = new HashSet<string>(this.Aliases, site.EqualityComparerInsensitive)
 			{
 				ns.Name,
 				ns.CanonicalName
 			};
-			this.baseNames.TrimExcess();
-			this.allNames = new HashSet<string>(this.baseNames, site.EqualityComparerInsensitive);
+			this.defaultNames.TrimExcess();
+			this.ResetAllNames();
 		}
 		#endregion
 
@@ -159,14 +157,7 @@
 
 		/// <summary>Adds a name to the lookup list.</summary>
 		/// <param name="name">The name.</param>
-		public void AddName(string name)
-		{
-			if (!this.allNames.Contains(name))
-			{
-				this.addedNames.Add(name);
-				this.allNames.Add(name);
-			}
-		}
+		public void AddName(string name) => this.allNames.Add(name);
 
 		/// <summary>Gets a name that's suitable for cases when a namespace is assumed, such as template calls.</summary>
 		/// <param name="ns">The namespace ID.</param>
@@ -213,14 +204,15 @@
 				: pageName1.UpperFirst(siteCulture) == pageName2.UpperFirst(siteCulture);
 		}
 
-		/// <summary>Removes a name from the lookup list. Only names that have been previously added can be removed.</summary>
+		/// <summary>Removes a name from the lookup list.</summary>
 		/// <param name="name">The name.</param>
-		public void RemoveName(string name)
+		public void RemoveName(string name) => this.allNames.Remove(name);
+
+		/// <summary>Resets the internal name list to the default one provided by the wiki, in the event that the name list has been altered by <see cref="AddName(string)"/> or <see cref="RemoveName(string)"/>.</summary>
+		public void ResetAllNames()
 		{
-			if (this.addedNames.Remove(name))
-			{
-				this.allNames.Remove(name);
-			}
+			this.allNames.Clear();
+			this.allNames.UnionWith(this.defaultNames);
 		}
 		#endregion
 
