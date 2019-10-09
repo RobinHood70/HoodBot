@@ -14,8 +14,10 @@
 		}
 		#endregion
 
+		#region Protected Override Methods
 		protected override void Main()
 		{
 		}
+		#endregion
 	}
 }
