@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WikiClasses.Parser
+﻿namespace RobinHood70.WikiClasses.Parser.StackElements
 {
 	internal class NameValuePiece : Piece
 	{

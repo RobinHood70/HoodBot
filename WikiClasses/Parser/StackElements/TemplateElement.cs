@@ -6,7 +6,7 @@
 	{
 		#region Fields
 		private readonly bool atLineStart;
-		private TemplateNodeType type;
+		private int braceLength;
 		#endregion
 
 		#region Constructors
@@ -14,7 +14,7 @@
 			: base(stack, '{', length)
 		{
 			this.atLineStart = atLineStart;
-			this.type = length == 2 ? TemplateNodeType.Template : TemplateNodeType.Argument; // This is a guess for debugging purposes until } is found, at which point this will be updated to an accurate value.
+			this.braceLength = length;
 		}
 		#endregion
 
@@ -25,7 +25,7 @@
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.type.ToString();
+		public override string ToString() => this.braceLength == 2 ? "template" : "argument";
 		#endregion
 
 		#region Internal Override Methods
@@ -53,22 +53,28 @@
 						return;
 					}
 
-					this.type = count == 2 ? TemplateNodeType.Template : TemplateNodeType.Argument;
+					this.braceLength = count;
 					var matchingCount = count == 2 ? 2 : 3;
 					var parameters = new List<ParameterNode>();
 					var argIndex = 1;
-					var partCount = this.NameValuePieces.Count;
-					for (var i = 1; i < partCount; i++)
+					for (var i = 1; i < this.NameValuePieces.Count; i++)
 					{
 						var nvPiece = this.NameValuePieces[i];
 						parameters.Add(nvPiece.SplitPos == -1
-							? new ParameterNode(argIndex++, nvPiece)
-							: new ParameterNode(nvPiece.GetRange(0, nvPiece.SplitPos), nvPiece.GetRange(nvPiece.SplitPos + 1, nvPiece.Count - nvPiece.SplitPos - 1)));
+							? new ParameterNode(argIndex++, nvPiece.ToNodeCollection())
+							: new ParameterNode(nvPiece.ToNodeCollection(0, nvPiece.SplitPos), nvPiece.ToNodeCollection(nvPiece.SplitPos + 1, nvPiece.Count - nvPiece.SplitPos - 1)));
 					}
 
 					this.ParseClose(matchingCount);
-					var template = new TemplateNode(this.type, this.Length == matchingCount && this.atLineStart, this.NameValuePieces[0], parameters);
-					stack.Top.CurrentPiece.Add(template);
+					if (matchingCount == 2)
+					{
+						stack.Top.CurrentPiece.Add(new TemplateNode(this.Length == matchingCount && this.atLineStart, this.NameValuePieces[0].ToNodeCollection(), parameters));
+					}
+					else
+					{
+						stack.Top.CurrentPiece.Add(new ArgumentNode(this.Length == matchingCount && this.atLineStart, this.NameValuePieces[0].ToNodeCollection(), parameters));
+					}
+
 					break;
 				default:
 					stack.Parse(found);

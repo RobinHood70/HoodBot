@@ -29,13 +29,13 @@
 		#endregion
 
 		#region Public Override Methods
-		internal override NodeCollection BreakSyntax() => this.BreakSyntax(this.Length);
+		internal override ElementNodeCollection BreakSyntax() => this.BreakSyntax(this.Length);
 		#endregion
 
 		#region Protected Methods
-		protected NodeCollection BreakSyntax(int matchingCount)
+		protected ElementNodeCollection BreakSyntax(int matchingCount)
 		{
-			var nodes = new NodeCollection(new TextNode(new string(this.open, matchingCount)));
+			var nodes = new ElementNodeCollection(new TextNode(new string(this.open, matchingCount)));
 			var piece = this.NameValuePieces[0];
 			nodes.Merge(piece);
 			var pieceCount = this.NameValuePieces.Count;

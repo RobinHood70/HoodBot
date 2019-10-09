@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
-	using System;
 	using System.Collections;
 	using System.Collections.Generic;
 	using static WikiCommon.Globals;
@@ -12,15 +11,15 @@
 		{
 			this.Index = index;
 			this.Value = value ?? throw ArgumentNull(nameof(value));
-			value.SetParent(this);
+			value.Parent = this;
 		}
 
 		public ParameterNode(NodeCollection name, NodeCollection value)
 		{
 			this.Name = name ?? throw ArgumentNull(nameof(name));
 			this.Value = value ?? throw ArgumentNull(nameof(value));
-			name.SetParent(this);
-			value.SetParent(this);
+			name.Parent = this;
+			value.Parent = this;
 		}
 		#endregion
 

@@ -79,6 +79,15 @@ namespace RobinHood70.WikiClasses.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} called multiple times. It should only ever be called once on a given object..
+        /// </summary>
+        internal static string MultipleCalls {
+            get {
+                return ResourceManager.GetString("MultipleCalls", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Parameter \&quot;{0}\&quot; already exists..
         /// </summary>
         internal static string ParameterExists {

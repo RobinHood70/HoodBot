@@ -12,6 +12,10 @@
 		#endregion
 
 		#region Constructors
+		public NodeCollection()
+		{
+		}
+
 		public NodeCollection(IEnumerable<WikiNode> nodes) => this.nodes.AddRange(nodes);
 
 		public NodeCollection(params WikiNode[] nodes)
@@ -32,7 +36,8 @@
 			get => this.nodes[index];
 			set
 			{
-				value?.SetParent(this);
+				ThrowNull(value, nameof(value));
+				value.Parent = this;
 				this.nodes[index] = value;
 			}
 		}
@@ -44,16 +49,17 @@
 		public void Add(WikiNode item)
 		{
 			ThrowNull(item, nameof(item));
-			item.SetParent(this);
+			item.Parent = this;
 			this.nodes.Add(item);
 		}
 
 		public void AddRange(IEnumerable<WikiNode> collection)
 		{
 			ThrowNull(collection, nameof(collection));
-			foreach (var node in collection)
+			var newCollection = new List<WikiNode>(collection);
+			foreach (var node in newCollection)
 			{
-				node.SetParent(this);
+				node.Parent = this;
 			}
 
 			this.nodes.AddRange(collection);
@@ -76,7 +82,7 @@
 		public void Insert(int index, WikiNode item)
 		{
 			ThrowNull(item, nameof(item));
-			item.SetParent(this);
+			item.Parent = this;
 			this.nodes.Insert(index, item);
 		}
 
@@ -167,49 +173,6 @@
 					}
 				}
 			}
-		}
-		#endregion
-
-		#region Internal Methods
-		internal void AddLiteral(string literal)
-		{
-			var last = this.nodes.Count - 1;
-			if (last == -1)
-			{
-				this.Add(new TextNode(literal));
-			}
-			else
-			{
-				if (!(this.nodes[last] is TextNode node))
-				{
-					this.Add(new TextNode(literal));
-				}
-				else
-				{
-					node.Text += literal;
-				}
-			}
-		}
-
-		internal void Merge(NodeCollection newList)
-		{
-			if (newList == null || newList.Count == 0)
-			{
-				return;
-			}
-
-			var startAt = 0;
-			var last = this.nodes.Count - 1;
-			if (last > -1)
-			{
-				if (this.nodes[last] is TextNode lastNode && newList[0] is TextNode first)
-				{
-					lastNode.Text += first.Text;
-					startAt = 1;
-				}
-			}
-
-			this.nodes.AddRange(startAt == 0 ? newList : newList.GetRange(startAt, newList.Count - startAt));
 		}
 		#endregion
 	}

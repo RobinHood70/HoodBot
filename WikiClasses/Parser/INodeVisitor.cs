@@ -2,6 +2,8 @@
 {
 	public interface INodeVisitor
 	{
+		void Visit(ArgumentNode node);
+
 		void Visit(CommentNode node);
 
 		void Visit(EqualsNode node);

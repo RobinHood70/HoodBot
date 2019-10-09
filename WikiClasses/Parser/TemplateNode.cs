@@ -3,18 +3,11 @@
 	using System.Collections;
 	using System.Collections.Generic;
 
-	public enum TemplateNodeType
-	{
-		Template,
-		Argument
-	}
-
 	public class TemplateNode : WikiNode, IBacklinkNode
 	{
 		#region Constructors
-		public TemplateNode(TemplateNodeType type, bool atLineStart, NodeCollection title, IList<ParameterNode> parameters)
+		public TemplateNode(bool atLineStart, NodeCollection title, IList<ParameterNode> parameters)
 		{
-			this.NodeType = type;
 			this.AtLineStart = atLineStart;
 			this.Title = title;
 			this.Parameters = parameters;
@@ -23,8 +16,6 @@
 
 		#region Public Properties
 		public bool AtLineStart { get; }
-
-		public TemplateNodeType NodeType { get; }
 
 		public IList<ParameterNode> Parameters { get; }
 
@@ -51,6 +42,18 @@
 		}
 
 		IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+
+		public Dictionary<string, NodeCollection> ParameterDictionary()
+		{
+			// TODO: Parameter-based methods are very primitive for now, just to get the basics working. Needs more work.
+			var retval = new Dictionary<string, NodeCollection>();
+			foreach (var parameter in this.Parameters)
+			{
+				retval.Add(parameter.Index > 0 ? parameter.Index.ToString() : WikiTextVisitor.Value(parameter.Name), parameter.Value);
+			}
+
+			return retval;
+		}
 		#endregion
 
 		#region Public Override Methods

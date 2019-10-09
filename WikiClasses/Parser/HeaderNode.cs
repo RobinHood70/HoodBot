@@ -10,7 +10,7 @@
 		public HeaderNode(int index, int level, NodeCollection title)
 		{
 			ThrowNull(title, nameof(title));
-			title.SetParent(this);
+			title.Parent = this;
 			this.Index = index;
 			this.Level = level;
 			this.Title = title;

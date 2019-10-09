@@ -24,7 +24,7 @@
 		#endregion
 
 		#region Internal Override Methods
-		internal override NodeCollection BreakSyntax() => throw new InvalidOperationException(CurrentCulture(Resources.CalledOnRoot, nameof(this.BreakSyntax)));
+		internal override ElementNodeCollection BreakSyntax() => throw new InvalidOperationException(CurrentCulture(Resources.CalledOnRoot, nameof(this.BreakSyntax)));
 
 		internal override void Parse(char found) => this.Stack.Parse(found);
 		#endregion

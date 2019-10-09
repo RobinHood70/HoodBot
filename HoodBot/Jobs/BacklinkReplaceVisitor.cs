@@ -29,11 +29,7 @@
 
 		public override void Visit(TemplateNode node)
 		{
-			if (node.NodeType == TemplateNodeType.Template)
-			{
-				this.VisitBacklink(node, true);
-			}
-
+			this.VisitBacklink(node, true);
 			base.Visit(node);
 		}
 

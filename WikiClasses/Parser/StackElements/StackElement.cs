@@ -25,7 +25,7 @@
 		#endregion
 
 		#region Internal Abstract Methods
-		internal abstract NodeCollection BreakSyntax();
+		internal abstract ElementNodeCollection BreakSyntax();
 
 		internal abstract void Parse(char found);
 		#endregion

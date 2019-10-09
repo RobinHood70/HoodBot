@@ -123,6 +123,9 @@
   <data name="CalledOnRoot" xml:space="preserve">
     <value>{0} should never be called on the Root Stack Element.</value>
   </data>
+  <data name="MultipleCalls" xml:space="preserve">
+    <value>{0} called multiple times. It should only ever be called once on a given object.</value>
+  </data>
   <data name="ParameterExists" xml:space="preserve">
     <value>Parameter \"{0}\" already exists.</value>
   </data>

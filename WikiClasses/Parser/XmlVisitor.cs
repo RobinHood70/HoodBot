@@ -47,8 +47,9 @@
 		public void Visit(LinkNode node)
 		{
 			ThrowNull(node, nameof(node));
-			this.BuildTagOpen("link", null, false);
-			this.BuildTag("title", null, node.Title); // Title is always emitted, even if empty.
+			this
+				.BuildTagOpen("link", null, false)
+				.BuildTag("title", null, node.Title); // Title is always emitted, even if empty.
 			foreach (var part in node.Parameters)
 			{
 				part.Accept(this);
@@ -72,8 +73,9 @@
 			this.BuildTagOpen("part", null, false);
 			if (node.Index == 0)
 			{
-				this.BuildTag("name", null, node.Name);
-				this.Indent();
+				this
+					.BuildTag("name", null, node.Name)
+					.Indent();
 				this.builder.Append('=');
 			}
 			else
@@ -81,16 +83,18 @@
 				this.BuildTag("name", new Dictionary<string, int> { ["index"] = node.Index }, null);
 			}
 
-			this.BuildTag("value", null, node.Value);
-			this.BuildTagClose("part");
+			this
+				.BuildTag("value", null, node.Value)
+				.BuildTagClose("part");
 		}
 
 		public void Visit(TagNode node)
 		{
 			ThrowNull(node, nameof(node));
-			this.BuildTagOpen("ext", null, false);
-			this.BuildValueNode("name", node.Name);
-			this.BuildValueNode("attr", node.Attributes);
+			this
+				.BuildTagOpen("ext", null, false)
+				.BuildValueNode("name", node.Name)
+				.BuildValueNode("attr", node.Attributes);
 			if (node.InnerText != null)
 			{
 				this.BuildValueNode("inner", node.InnerText);
@@ -104,18 +108,28 @@
 			this.BuildTagClose("ext");
 		}
 
+		public void Visit(ArgumentNode node)
+		{
+			ThrowNull(node, nameof(node));
+			this
+				.BuildTagOpen("tplarg", node.AtLineStart ? new Dictionary<string, int> { ["lineStart"] = 1 } : null, false)
+				.BuildTag("title", null, node.Name)
+				.BuildTag("default", null, node.DefaultValue)
+				.BuildTagClose("tplarg");
+		}
+
 		public void Visit(TemplateNode node)
 		{
 			ThrowNull(node, nameof(node));
-			var name = node.NodeType == TemplateNodeType.Template ? "template" : "tplarg";
-			this.BuildTagOpen(name, node.AtLineStart ? new Dictionary<string, int> { ["lineStart"] = 1 } : null, false);
-			this.BuildTag("title", null, node.Title); // Title is always emitted, even if empty.
+			this
+				.BuildTagOpen("template", node.AtLineStart ? new Dictionary<string, int> { ["lineStart"] = 1 } : null, false)
+				.BuildTag("title", null, node.Title); // Title is always emitted, even if empty.
 			foreach (var part in node.Parameters)
 			{
 				part.Accept(this);
 			}
 
-			this.BuildTagClose(name);
+			this.BuildTagClose("template");
 		}
 
 		public void Visit(TextNode node)
@@ -139,7 +153,7 @@
 		#endregion
 
 		#region Private Methods
-		private void BuildTag(string name, Dictionary<string, int> attributes, NodeCollection inner)
+		private XmlVisitor BuildTag(string name, Dictionary<string, int> attributes, NodeCollection inner)
 		{
 			var selfClosed = inner == null || inner.Count == 0;
 			this.BuildTagOpen(name, attributes, selfClosed);
@@ -152,16 +166,20 @@
 
 				this.BuildTagClose(name);
 			}
+
+			return this;
 		}
 
-		private void BuildTagClose(string name)
+		private XmlVisitor BuildTagClose(string name)
 		{
 			this.indent--;
 			this.Indent();
 			this.builder.Append("</").Append(name).Append(">\n");
+
+			return this;
 		}
 
-		private void BuildTagOpen(string name, Dictionary<string, int> attributes, bool selfClosed)
+		private XmlVisitor BuildTagOpen(string name, Dictionary<string, int> attributes, bool selfClosed)
 		{
 			this.Indent();
 			this.builder.Append('<').Append(name);
@@ -182,12 +200,16 @@
 				this.builder.Append(">\n");
 				this.indent++;
 			}
+
+			return this;
 		}
 
-		private void BuildValueNode(string name, string value)
+		private XmlVisitor BuildValueNode(string name, string value)
 		{
 			this.Indent();
 			this.builder.Append('<').Append(name).Append('>').Append(AntiXssEncoder.HtmlEncode(value, true)).Append("</").Append(name).Append('>');
+
+			return this;
 		}
 
 		private void Indent()

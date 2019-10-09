@@ -62,13 +62,15 @@
     <Compile Include="ComparableCollection.cs" />
     <Compile Include="CsvFile.cs" />
     <Compile Include="CsvRow.cs" />
+    <Compile Include="Parser\ArgumentNode.cs" />
+    <Compile Include="Parser\StackElements\ElementNodeCollection.cs" />
     <Compile Include="WikiTextUtilities.cs" />
     <Compile Include="NaturalSort.cs" />
     <Compile Include="PaddedString.cs" />
     <Compile Include="Parameter.cs" />
     <Compile Include="ParameterCollection.cs" />
     <Compile Include="ParameterParser.cs" />
-    <Compile Include="Parser\NameValuePiece.cs" />
+    <Compile Include="Parser\StackElements\NameValuePiece.cs" />
     <Compile Include="Parser\NodeCollection.cs" />
     <Compile Include="Parser\NodeCollectionVisitor.cs" />
     <Compile Include="Parser\IBacklinkNode.cs" />
@@ -98,7 +100,7 @@
     <Compile Include="Parser\ParameterNode.cs" />
     <Compile Include="Parser\TemplateNode.cs" />
     <Compile Include="Parser\TextNode.cs" />
-    <Compile Include="Parser\Piece.cs" />
+    <Compile Include="Parser\StackElements\Piece.cs" />
     <Compile Include="Parser\StackElements\HeaderElement.cs" />
     <Compile Include="Parser\StackElements\LinkElement.cs" />
     <Compile Include="Parser\StackElements\PairedElement.cs" />

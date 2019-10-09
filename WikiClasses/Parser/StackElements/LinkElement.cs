@@ -45,12 +45,12 @@
 					{
 						var nvPiece = this.NameValuePieces[i];
 						parameters.Add(nvPiece.SplitPos == -1
-							? new ParameterNode(argIndex++, nvPiece)
-							: new ParameterNode(nvPiece.GetRange(0, nvPiece.SplitPos), nvPiece.GetRange(nvPiece.SplitPos + 1, nvPiece.Count - nvPiece.SplitPos - 1)));
+							? new ParameterNode(argIndex++, nvPiece.ToNodeCollection())
+							: new ParameterNode(nvPiece.ToNodeCollection(0, nvPiece.SplitPos), nvPiece.ToNodeCollection(nvPiece.SplitPos + 1, nvPiece.Count - nvPiece.SplitPos - 1)));
 					}
 
 					this.ParseClose(2);
-					var link = new LinkNode(this.NameValuePieces[0], parameters);
+					var link = new LinkNode(this.NameValuePieces[0].ToNodeCollection(), parameters);
 					stack.Top.CurrentPiece.Add(link);
 					break;
 				default:

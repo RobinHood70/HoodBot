@@ -1,6 +1,6 @@
-﻿namespace RobinHood70.WikiClasses.Parser
+﻿namespace RobinHood70.WikiClasses.Parser.StackElements
 {
-	public class Piece : NodeCollection
+	internal class Piece : ElementNodeCollection
 	{
 		#region Public Properties
 		public int CommentEnd { get; set; } = -1;

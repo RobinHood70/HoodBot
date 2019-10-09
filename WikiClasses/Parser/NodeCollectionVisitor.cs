@@ -10,6 +10,16 @@
 
 		public virtual void Visit() => this.Visit(this.Nodes);
 
+		public virtual void Visit(ArgumentNode node)
+		{
+			ThrowNull(node, nameof(node));
+			node.Name.Accept(this);
+			foreach (var value in node.AllValues)
+			{
+				value.Accept(this);
+			}
+		}
+
 		public virtual void Visit(CommentNode node)
 		{
 		}

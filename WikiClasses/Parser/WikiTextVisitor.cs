@@ -36,6 +36,26 @@
 		#endregion
 
 		#region IVisitor Methods
+		public void Visit(ArgumentNode node)
+		{
+			ThrowNull(node, nameof(node));
+			this.builder.Append("{{{");
+			node.Name.Accept(this);
+			if (this.valuesOnly)
+			{
+				node.DefaultValue.Accept(this);
+			}
+			else
+			{
+				foreach (var value in node.AllValues)
+				{
+					value.Accept(this);
+				}
+			}
+
+			this.builder.Append("}}}");
+		}
+
 		public virtual void Visit(CommentNode node)
 		{
 			ThrowNull(node, nameof(node));

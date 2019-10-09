@@ -94,7 +94,7 @@
 		#endregion
 
 		#region Public Properties
-		public NodeCollection Nodes { get; private set; }
+		public ElementNodeCollection Nodes { get; private set; }
 		#endregion
 
 		#region Internal Properties

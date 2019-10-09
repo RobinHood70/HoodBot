@@ -34,7 +34,7 @@
 		#endregion
 
 		#region Internal Override Methods
-		internal override NodeCollection BreakSyntax() => this.CurrentPiece;
+		internal override ElementNodeCollection BreakSyntax() => this.CurrentPiece;
 
 		internal override void Parse(char found)
 		{
@@ -55,7 +55,7 @@
 					var count = (searchStart - equalsLength == this.startPos) ? (equalsLength < 3 ? 0 : Math.Min(6, (equalsLength - 1) / 2)) : Math.Min(equalsLength, this.length);
 					if (count > 0)
 					{
-						var headerNode = new HeaderNode(stack.HeadingIndex++, count, this.CurrentPiece);
+						var headerNode = new HeaderNode(stack.HeadingIndex++, count, this.CurrentPiece.ToNodeCollection());
 						stack.Pop();
 						stack.Top.CurrentPiece.Add(headerNode);
 						return;
