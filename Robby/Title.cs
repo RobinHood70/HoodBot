@@ -7,8 +7,8 @@
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
-    using RobinHood70.WikiClasses;
-    using static RobinHood70.WikiCommon.Globals;
+	using RobinHood70.WikiClasses;
+	using static RobinHood70.WikiCommon.Globals;
 
 	#region Public Enumerations
 
