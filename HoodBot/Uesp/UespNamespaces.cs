@@ -2,148 +2,77 @@
 {
 	public static class UespNamespaces
 	{
-		public static int Media { get; } = -2;
-
-		public static int Special { get; } = -1;
-
-		public static int Main { get; } = 0;
-
-		public static int Talk { get; } = 1;
-
-		public static int User { get; } = 2;
-
-		public static int UserTalk { get; } = 3;
-
-		public static int Project { get; } = 4;
-
-		public static int ProjectTalk { get; } = 5;
-
-		public static int File { get; } = 6;
-
-		public static int FileTalk { get; } = 7;
-
-		public static int MediaWiki { get; } = 8;
-
-		public static int MediaWikiTalk { get; } = 9;
-
-		public static int Template { get; } = 10;
-
-		public static int TemplateTalk { get; } = 11;
-
-		public static int Help { get; } = 12;
-
-		public static int HelpTalk { get; } = 13;
-
-		public static int Category { get; } = 14;
-
-		public static int CategoryTalk { get; } = 15;
-
-		public static int Tamold { get; } = 100;
-
-		public static int TamoldTalk { get; } = 101;
-
-		public static int Arena { get; } = 102;
-
-		public static int ArenaTalk { get; } = 103;
-
-		public static int Daggerfall { get; } = 104;
-
-		public static int DaggerfallTalk { get; } = 105;
-
-		public static int Battlespire { get; } = 106;
-
-		public static int BattlespireTalk { get; } = 107;
-
-		public static int Redguard { get; } = 108;
-
-		public static int RedguardTalk { get; } = 109;
-
-		public static int Morrowind { get; } = 110;
-
-		public static int MorrowindTalk { get; } = 111;
-
-		public static int Tribunal { get; } = 112;
-
-		public static int TribunalTalk { get; } = 113;
-
-		public static int Bloodmoon { get; } = 114;
-
-		public static int BloodmoonTalk { get; } = 115;
-
-		public static int Oblivion { get; } = 116;
-
-		public static int OblivionTalk { get; } = 117;
-
-		public static int General { get; } = 118;
-
-		public static int GeneralTalk { get; } = 119;
-
-		public static int Review { get; } = 120;
-
-		public static int ReviewTalk { get; } = 121;
-
-		public static int Tes3Mod { get; } = 122;
-
-		public static int Tes3ModTalk { get; } = 123;
-
-		public static int Tes4Mod { get; } = 124;
-
-		public static int Tes4ModTalk { get; } = 125;
-
-		public static int Shivering { get; } = 126;
-
-		public static int ShiveringTalk { get; } = 127;
-
-		public static int Shadowkey { get; } = 128;
-
-		public static int ShadowkeyTalk { get; } = 129;
-
-		public static int Lore { get; } = 130;
-
-		public static int LoreTalk { get; } = 131;
-
-		public static int Dawnstar { get; } = 132;
-
-		public static int DawnstarTalk { get; } = 133;
-
-		public static int Skyrim { get; } = 134;
-
-		public static int SkyrimTalk { get; } = 135;
-
-		public static int OBMobile { get; } = 136;
-
-		public static int OBMobileTalk { get; } = 137;
-
-		public static int Stormhold { get; } = 138;
-
-		public static int StormholdTalk { get; } = 139;
-
-		public static int Books { get; } = 140;
-
-		public static int BooksTalk { get; } = 141;
-
-		public static int Tes5Mod { get; } = 142;
-
-		public static int Tes5ModTalk { get; } = 143;
-
-		public static int Online { get; } = 144;
-
-		public static int OnlineTalk { get; } = 145;
-
-		public static int Dragonborn { get; } = 146;
-
-		public static int DragonbornTalk { get; } = 147;
-
-		public static int EsoMod { get; } = 148;
-
-		public static int EsoModTalk { get; } = 149;
-
-		public static int Legends { get; } = 150;
-
-		public static int LegendsTalk { get; } = 151;
-
-		public static int Dapel { get; } = 200;
-
-		public static int DapelTalk { get; } = 201;
+		public const int Media = -2;
+		public const int Special = -1;
+		public const int Main = 0;
+		public const int Talk = 1;
+		public const int User = 2;
+		public const int UserTalk = 3;
+		public const int Project = 4;
+		public const int ProjectTalk = 5;
+		public const int File = 6;
+		public const int FileTalk = 7;
+		public const int MediaWiki = 8;
+		public const int MediaWikiTalk = 9;
+		public const int Template = 10;
+		public const int TemplateTalk = 11;
+		public const int Help = 12;
+		public const int HelpTalk = 13;
+		public const int Category = 14;
+		public const int CategoryTalk = 15;
+		public const int Tamold = 100;
+		public const int TamoldTalk = 101;
+		public const int Arena = 102;
+		public const int ArenaTalk = 103;
+		public const int Daggerfall = 104;
+		public const int DaggerfallTalk = 105;
+		public const int Battlespire = 106;
+		public const int BattlespireTalk = 107;
+		public const int Redguard = 108;
+		public const int RedguardTalk = 109;
+		public const int Morrowind = 110;
+		public const int MorrowindTalk = 111;
+		public const int Tribunal = 112;
+		public const int TribunalTalk = 113;
+		public const int Bloodmoon = 114;
+		public const int BloodmoonTalk = 115;
+		public const int Oblivion = 116;
+		public const int OblivionTalk = 117;
+		public const int General = 118;
+		public const int GeneralTalk = 119;
+		public const int Review = 120;
+		public const int ReviewTalk = 121;
+		public const int Tes3Mod = 122;
+		public const int Tes3ModTalk = 123;
+		public const int Tes4Mod = 124;
+		public const int Tes4ModTalk = 125;
+		public const int Shivering = 126;
+		public const int ShiveringTalk = 127;
+		public const int Shadowkey = 128;
+		public const int ShadowkeyTalk = 129;
+		public const int Lore = 130;
+		public const int LoreTalk = 131;
+		public const int Dawnstar = 132;
+		public const int DawnstarTalk = 133;
+		public const int Skyrim = 134;
+		public const int SkyrimTalk = 135;
+		public const int OBMobile = 136;
+		public const int OBMobileTalk = 137;
+		public const int Stormhold = 138;
+		public const int StormholdTalk = 139;
+		public const int Books = 140;
+		public const int BooksTalk = 141;
+		public const int Tes5Mod = 142;
+		public const int Tes5ModTalk = 143;
+		public const int Online = 144;
+		public const int OnlineTalk = 145;
+		public const int Dragonborn = 146;
+		public const int DragonbornTalk = 147;
+		public const int EsoMod = 148;
+		public const int EsoModTalk = 149;
+		public const int Legends = 150;
+		public const int LegendsTalk = 151;
+		public const int Dapel = 200;
+		public const int DapelTalk = 201;
 	}
 }
