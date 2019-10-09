@@ -144,6 +144,7 @@
     <Compile Include="Jobs\PageMover.cs" />
     <Compile Include="Jobs\PageMoverJob.cs" />
     <Compile Include="Jobs\UntranscludeLore.cs" />
+    <Compile Include="Uesp\MetaNamespace.cs" />
     <Compile Include="Uesp\VariableDictionary.cs" />
     <Compile Include="WikiInfo.cs" />
     <Compile Include="Jobs\TestJob.cs" />

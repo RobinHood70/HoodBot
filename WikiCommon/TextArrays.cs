@@ -50,6 +50,9 @@
 		public static readonly char[] Plus = { '+' };
 
 		[SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly", Justification = "As above.")]
+		public static readonly char[] Semicolon = { ';' };
+
+		[SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly", Justification = "As above.")]
 		public static readonly char[] Slash = { '/' };
 
 		[SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly", Justification = "As above.")]
