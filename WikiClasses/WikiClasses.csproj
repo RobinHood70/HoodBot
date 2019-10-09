@@ -62,7 +62,7 @@
     <Compile Include="ComparableCollection.cs" />
     <Compile Include="CsvFile.cs" />
     <Compile Include="CsvRow.cs" />
-    <Compile Include="HtmlUtilities.cs" />
+    <Compile Include="WikiTextUtilities.cs" />
     <Compile Include="NaturalSort.cs" />
     <Compile Include="PaddedString.cs" />
     <Compile Include="Parameter.cs" />

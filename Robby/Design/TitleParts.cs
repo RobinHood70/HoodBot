@@ -29,7 +29,7 @@
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(fullPageName, nameof(fullPageName));
-			var nameRemaining = HtmlUtilities.DecodeAndNormalize(fullPageName);
+			var nameRemaining = WikiTextUtilities.DecodeAndNormalize(fullPageName);
 			if (nameRemaining.Length > 0 && nameRemaining[0] == ':')
 			{
 				this.LeadingColon = true;
@@ -148,7 +148,7 @@
 		public InterwikiEntry Interwiki { get; set; }
 
 		/// <summary>Gets a value indicating whether this instance is identical to the local wiki.</summary>
-		/// <value><c>true</c> if this instance is local wiki; otherwise, <c>false</c>.</value>
+		/// <value><see langword="true"/> if this instance is local wiki; otherwise, <see langword="false"/>.</value>
 		public bool IsLocal => this.Interwiki == null || this.Interwiki.LocalWiki;
 
 		/// <summary>Gets a value indicating whether the title had a leading colon.</summary>
@@ -221,7 +221,7 @@
 
 		/// <summary>Indicates whether the current title is equal to another title based on Interwiki, Namespace, PageName, and Fragment.</summary>
 		/// <param name="other">A title to compare with this one.</param>
-		/// <returns><c>true</c> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false"/>.</returns>
 		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
 		public bool FullEquals(IFullTitle other) =>
 			other != null &&
@@ -232,7 +232,7 @@
 
 		/// <summary>Indicates whether the current title is equal to another title based on Namespace and PageName only.</summary>
 		/// <param name="other">A title to compare with this one.</param>
-		/// <returns><c>true</c> if the current title is equivalent to the local wiki and the title is equal to the <paramref name="other" /> parameter, ignoring the Fragment property; otherwise, <c>false</c>.</returns>
+		/// <returns><see langword="true"/> if the current title is equivalent to the local wiki and the title is equal to the <paramref name="other" /> parameter, ignoring the Fragment property; otherwise, <see langword="false"/>.</returns>
 		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
 		public bool SimpleEquals(ISimpleTitle other) =>
 			other != null &&
