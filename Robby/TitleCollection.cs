@@ -58,7 +58,7 @@
 			ThrowNull(titles, nameof(titles));
 			foreach (var item in titles)
 			{
-				this.Add(Title.ForcedNamespace(ns, item));
+				this.Add(Title.DefaultToNamespace(ns, item));
 			}
 		}
 

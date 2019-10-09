@@ -181,29 +181,49 @@
 		/// <param name="ns">The namespace to coerce to.</param>
 		/// <param name="pageName">Name of the page.</param>
 		/// <returns>A page name in the given namespace, if it wasn't already.</returns>
-		/// <remarks>This is a convenience function that wraps around <see cref="ForcedNamespace(Namespace, string)"/>.</remarks>
-		public static string CoercePageName(Namespace ns, string pageName) => ForcedNamespace(ns, pageName).FullPageName;
+		/// <remarks>This is a convenience function that wraps around <see cref="DefaultToNamespace(Namespace, string)"/>.</remarks>
+		public static string CoercePageName(Namespace ns, string pageName) => DefaultToNamespace(ns, pageName).FullPageName;
 
 		/// <summary>Coerces the name of the page to the provided namespace.</summary>
 		/// <param name="site">The Site the Title is from.</param>
 		/// <param name="ns">The namespace ID to coerce to.</param>
 		/// <param name="pageName">Name of the page.</param>
 		/// <returns>A page name in the given namespace, if it wasn't already.</returns>
-		/// <remarks>This is a convenience function that wraps around <see cref="ForcedNamespace(Namespace, string)"/>.</remarks>
+		/// <remarks>This is a convenience function that wraps around <see cref="DefaultToNamespace(Namespace, string)"/>.</remarks>
 		public static string CoercePageName(Site site, int ns, string pageName) => CoercePageName(site?.Namespaces[ns], pageName);
 
-		/// <summary>Returns a <see cref="Title"/> for the given namespace and page name, allowing for the possibility that the page may already have the namespace prepended to it.</summary>
+		/// <summary>Returns a <see cref="Title"/> for the given namespace and page name, allowing for the possibility that the page may already have the namespace prepended to it or may be overridden to another namespace.</summary>
 		/// <param name="ns">The namespace the page should belong to.</param>
 		/// <param name="pageName">The name of the page, with or without the corresponding namespace prefix.</param>
-		/// <returns>A Title object with the given name in the given namespace.</returns>
-		public static Title ForcedNamespace(Namespace ns, string pageName) => new Title(TitleParts.ForcedNamespace(ns, pageName));
+		/// <returns>A Title object with the given name in the given namespace, by default, unless overridden.</returns>
+		/// <example><list type="bullet">
+		///     <item><c>DefaultToNamespace(MediaWikiNamespaces.Template, "Unsigned")</c> would return a <see cref="Title"/> corresponding to <c>[[Template:Unsigned]]</c>.</item>
+		///     <item><c>DefaultToNamespace(MediaWikiNamespaces.Template, "Help:Unsigned")</c> would return a <see cref="Title"/> corresponding to <c>[[Help:Unsigned]]</c>.</item>
+		///     <item><c>DefaultToNamespace(MediaWikiNamespaces.Template, ":Unsigned")</c> would return a <see cref="Title"/> corresponding to <c>[[Unsigned]]</c>.</item>
+		/// </list></example>
+		public static Title DefaultToNamespace(Namespace ns, string pageName)
+		{
+			ThrowNull(ns, nameof(ns));
+			ThrowNull(pageName, nameof(pageName));
+			return new Title(new TitleParts(ns.Site, ns.Id, pageName));
+		}
 
-		/// <summary>Returns a <see cref="Title"/> for the given namespace and page name, allowing for the possibility that the page may already have the namespace prepended to it.</summary>
+		/// <summary>Returns a <see cref="Title"/> for the given namespace and page name, allowing for the possibility that the page may already have the namespace prepended to it or may be overridden to another namespace.</summary>
 		/// <param name="site">The Site the Title is from.</param>
 		/// <param name="ns">The namespace ID the page should belong to.</param>
 		/// <param name="pageName">The name of the page, with or without the corresponding namespace prefix.</param>
-		/// <returns>A Title object with the given name in the given namespace.</returns>
-		public static Title ForcedNamespace(Site site, int ns, string pageName) => ForcedNamespace(site?.Namespaces[ns], pageName);
+		/// <returns>A Title object with the given name in the given namespace, by default, unless overridden.</returns>
+		/// <example><list type="bullet">
+		///     <item><c>DefaultToNamespace(MediaWikiNamespaces.Template, "Unsigned")</c> would return a <see cref="Title"/> corresponding to <c>[[Template:Unsigned]]</c>.</item>
+		///     <item><c>DefaultToNamespace(MediaWikiNamespaces.Template, "Help:Unsigned")</c> would return a <see cref="Title"/> corresponding to <c>[[Help:Unsigned]]</c>.</item>
+		///     <item><c>DefaultToNamespace(MediaWikiNamespaces.Template, ":Unsigned")</c> would return a <see cref="Title"/> corresponding to <c>[[Unsigned]]</c>.</item>
+		/// </list></example>
+		public static Title DefaultToNamespace(Site site, int ns, string pageName)
+		{
+			ThrowNull(site, nameof(site));
+			ThrowNull(pageName, nameof(pageName));
+			return new Title(new TitleParts(site, ns, pageName));
+		}
 
 		/// <summary>Builds the full name of the page from the namespace and page name, accounting for Main space.</summary>
 		/// <param name="ns">The namespace of the page.</param>

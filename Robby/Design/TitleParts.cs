@@ -16,16 +16,16 @@
 		/// <param name="fullPageName">Full name of the page.</param>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
 		public TitleParts(Site site, string fullPageName)
-			: this(site, fullPageName, MediaWikiNamespaces.Main)
+			: this(site, MediaWikiNamespaces.Main, fullPageName)
 		{
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="TitleParts"/> class.</summary>
 		/// <param name="site">The site the title is from.</param>
-		/// <param name="fullPageName">Full name of the page.</param>
 		/// <param name="defaultNamespace">The default namespace if no namespace is specified in the page name.</param>
+		/// <param name="fullPageName">Full name of the page.</param>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		public TitleParts(Site site, string fullPageName, int defaultNamespace)
+		public TitleParts(Site site, int defaultNamespace, string fullPageName)
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(fullPageName, nameof(fullPageName));
@@ -77,7 +77,8 @@
 
 			if (this.Namespace == null)
 			{
-				this.Namespace = site.Namespaces[defaultNamespace];
+				// If we have a leading colon, but no namespace, then this was meant to override any default namespace and force it to Main space.
+				this.Namespace = this.LeadingColon ? site.Namespaces[MediaWikiNamespaces.Main] : site.Namespaces[defaultNamespace];
 				this.OriginalNamespaceText = string.Empty;
 			}
 
@@ -181,40 +182,6 @@
 		/// <summary>Gets the site the title belongs to.</summary>
 		/// <value>The site.</value>
 		public Site Site => this.Namespace.Site;
-		#endregion
-
-		#region Public Static Methods
-
-		/// <summary>Returns a <see cref="TitleParts"/> for the given namespace and page name, allowing for the possibility that the page may already have the namespace prepended to it.</summary>
-		/// <param name="ns">The namespace the page should belong to.</param>
-		/// <param name="pageName">The name of the page, with or without the corresponding namespace prefix.</param>
-		/// <returns>A TitleParts object with the given name in the given namespace.</returns>
-		public static TitleParts ForcedNamespace(Namespace ns, string pageName)
-		{
-			ThrowNull(ns, nameof(ns));
-			ThrowNull(pageName, nameof(pageName));
-			var titleParts = new TitleParts(ns.Site, pageName);
-			if (titleParts.Namespace != ns)
-			{
-				if (titleParts.Namespace == MediaWikiNamespaces.Main)
-				{
-					titleParts.Namespace = ns;
-				}
-				else
-				{
-					titleParts = new TitleParts(ns.Site, ns.DecoratedName + pageName);
-				}
-			}
-
-			return titleParts;
-		}
-
-		/// <summary>Returns a <see cref="TitleParts"/> for the given namespace and page name, allowing for the possibility that the page may already have the namespace prepended to it.</summary>
-		/// <param name="site">The Site the Title is from.</param>
-		/// <param name="ns">The namespace ID the page should belong to.</param>
-		/// <param name="pageName">The name of the page, with or without the corresponding namespace prefix.</param>
-		/// <returns>A <see cref="TitleParts"/> object with the given name in the given namespace.</returns>
-		public static TitleParts ForcedNamespace(Site site, int ns, string pageName) => ForcedNamespace(site?.Namespaces[ns], pageName);
 		#endregion
 
 		#region Public Methods
