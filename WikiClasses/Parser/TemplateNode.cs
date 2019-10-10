@@ -10,7 +10,7 @@
 		{
 			this.AtLineStart = atLineStart;
 			this.Title = title;
-			this.Parameters = parameters;
+			this.Parameters = parameters ?? new List<ParameterNode>();
 		}
 		#endregion
 

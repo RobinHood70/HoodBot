@@ -73,7 +73,7 @@
 					allTags.Add(IncludeOnlyTag);
 					break;
 				default:
-					// TODO: Figure out what's correct here. This is only a preliminary guess. Intended for parsing raw pages where inclusion is irrelevant.
+					this.ignoredTags.UnionWith(new[] { NoIncludeTag, "/" + NoIncludeTag, OnlyIncludeTag, "/" + OnlyIncludeTag, IncludeOnlyTag, "/" + IncludeOnlyTag });
 					allTags.UnionWith(AllowMissingEndTag);
 					break;
 			}

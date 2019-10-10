@@ -1,9 +1,9 @@
-﻿using System;
-using RobinHood70.WikiClasses.Properties;
-using static RobinHood70.WikiCommon.Globals;
-
-namespace RobinHood70.WikiClasses.Parser
+﻿namespace RobinHood70.WikiClasses.Parser
 {
+	using System;
+	using RobinHood70.WikiClasses.Properties;
+	using static RobinHood70.WikiCommon.Globals;
+
 	/// <summary>Represents common functions to all nodes in the wikitext parser.</summary>
 	public abstract class WikiNode
 	{
@@ -23,7 +23,7 @@ namespace RobinHood70.WikiClasses.Parser
 			get => this.parent;
 			set
 			{
-				if (this.parent == null)
+				if (value == null || this.parent == null)
 				{
 					this.parent = value;
 				}
