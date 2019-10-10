@@ -16,8 +16,12 @@
 		{
 		}
 
+		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
+		/// <param name="nodes">The nodes to initialize the collection with.</param>
 		public NodeCollection(IEnumerable<WikiNode> nodes) => this.nodes.AddRange(nodes);
 
+		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
+		/// <param name="nodes">The nodes to initialize the collection with.</param>
 		public NodeCollection(params WikiNode[] nodes)
 			: this(nodes as IEnumerable<WikiNode>)
 		{
@@ -107,7 +111,8 @@
 			ThrowNull(replaceMethod, nameof(replaceMethod));
 
 			// Slower as a forward loop, but proceeds in the order a user would likely expect, and allows user to have matches fail after first/X replacement(s). Could be implimented as reverse or bidirectional, if needed.
-			for (var i = 0; i < this.nodes.Count; i++)
+			var i = 0;
+			while (i < this.nodes.Count)
 			{
 				var node = this.nodes[i];
 				if (node is IEnumerable<NodeCollection> tree)
@@ -119,22 +124,27 @@
 				}
 
 				var newNode = replaceMethod(node);
+				var iMove = 1;
 				if (!ReferenceEquals(node, newNode))
 				{
 					if (newNode == null)
 					{
 						this.nodes.RemoveAt(i);
+						iMove = 0;
 					}
 					else if (newNode is NodeCollection newNodes)
 					{
 						this.nodes.RemoveAt(i);
 						this.nodes.InsertRange(i, newNodes);
+						iMove = newNodes.Count;
 					}
 					else
 					{
 						this.nodes[i] = newNode;
 					}
 				}
+
+				i += iMove;
 			}
 		}
 
