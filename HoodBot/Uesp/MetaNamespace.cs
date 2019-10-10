@@ -35,7 +35,7 @@
 		}
 		#endregion
 
-		#region Public Properties
+		#region Public Static Properties
 		public static Dictionary<string, MetaNamespace> Namespaces { get; private set; }
 		#endregion
 
@@ -61,10 +61,6 @@
 		public Site Site { get; }
 
 		public string Trail { get; }
-		#endregion
-
-		#region Public Override Properties
-		public override string ToString() => this.Base;
 		#endregion
 
 		#region Public Static Methods
@@ -105,6 +101,10 @@
 				}
 			}
 		}
+		#endregion
+
+		#region Public Override Methods
+		public override string ToString() => this.Base;
 		#endregion
 	}
 }
