@@ -57,7 +57,7 @@
 			this.textLength = text.Length;
 			this.enableOnlyInclude = text.Contains(OnlyIncludeTagOpen);
 			this.findOnlyinclude = this.enableOnlyInclude;
-			this.includeIgnores = !strictInclusion;
+			this.includeIgnores = include == null || !strictInclusion;
 
 			var allTags = new HashSet<string>(tagList);
 			switch (include)
