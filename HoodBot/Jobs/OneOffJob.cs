@@ -11,6 +11,10 @@
 
 	public class OneOffJob : EditJob
 	{
+		#region Static Fields
+		public static readonly bool UseFastMethod = true;
+		#endregion
+
 		#region Constructors
 		[JobInfo("One-Off Job")]
 		public OneOffJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
@@ -31,7 +35,7 @@
 			Namespace lastNamespace = null;
 			foreach (var page in allTransclusions)
 			{
-				var links = FindLoreTransclusions(page.Text);
+				var links = UseFastMethod ? FilterTemplates(page) : FindLoreTransclusions(page);
 				if (links.Count > 0)
 				{
 					if (page.Namespace != lastNamespace)
@@ -52,11 +56,30 @@
 		#endregion
 
 		#region Private Static Methods
-		private static List<string> FindLoreTransclusions(string text)
+		private static ICollection<string> FilterTemplates(Page page)
 		{
-			var search = Template.FindRaw(null, @"(?i:l)ore:[^#\|}]+?", null, RegexOptions.None, 10);
-			var matches = search.Matches(text);
-			var links = new List<string>(matches.Count);
+			var retval = new SortedSet<string>();
+			foreach (var template in page.Templates)
+			{
+				if (template.FullPageName == "Template:Game Book")
+				{
+					return retval;
+				}
+
+				if (template.Namespace == UespNamespaces.Lore)
+				{
+					retval.Add($"[[{template.FullPageName}|]]");
+				}
+			}
+
+			return retval;
+		}
+
+		private static ICollection<string> FindLoreTransclusions(Page page)
+		{
+			var search = Template.FindRaw(null, @"\s*:?\s*(?i:l)ore:[^#\|}]+?", null, RegexOptions.None, 10);
+			var matches = search.Matches(page.Text);
+			var links = new SortedSet<string>();
 			foreach (Match match in matches)
 			{
 				var template = Template.Parse(match.Value);
@@ -68,7 +91,8 @@
 
 		private static PageCollection GetLoreTransclusions(Site site)
 		{
-			var allTransclusions = PageCollection.Unlimited(site, new PageLoadOptions(PageModules.Info | PageModules.Revisions));
+			var modules = PageModules.Info | (UseFastMethod ? PageModules.Templates : PageModules.Revisions);
+			var allTransclusions = PageCollection.Unlimited(site, new PageLoadOptions(modules));
 			allTransclusions.GetTransclusions(UespNamespaces.Lore);
 			//// allTransclusions.GetTitles("Arena:Ria Silmane");
 			allTransclusions.RemoveNamespaces(true, UespNamespaces.User, UespNamespaces.Lore);

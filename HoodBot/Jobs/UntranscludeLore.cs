@@ -90,6 +90,30 @@
 		#endregion
 
 		#region Private Methods
+		private void ConfirmOldTransclusion(NodeCollection parsedText)
+		{
+			if (!this.templateHappened)
+			{
+				var maxTags = parsedText.Count < 3 ? parsedText.Count : 3;
+				for (var loc = 0; loc < maxTags; loc++)
+				{
+					if (parsedText[loc] is IgnoreNode tag && tag.Value == "<noinclude>")
+					{
+						parsedText.Insert(loc + 1, OldTransclusionNode);
+						this.templateHappened = true;
+						break;
+					}
+				}
+
+				if (!this.templateHappened)
+				{
+					parsedText.Insert(0, OldTransclusionNode);
+				}
+			}
+
+			OldTransclusionNode.Parent = null;
+		}
+
 		private WikiNode FmiReplacer(TemplateNode node)
 		{
 			if (this.currentPage.Namespace == UespNamespaces.Lore)
@@ -259,6 +283,25 @@
 			return node;
 		}
 
+		private void SetPageInfo(Page page)
+		{
+			this.currentPage = page; // Easier than passing through multiple levels of replacement.
+			this.linkedNamespaces = new HashSet<Namespace>();
+			foreach (var linkedPage in page.TranscludedIn)
+			{
+				if (!linkedPage.SimpleEquals(page))
+				{
+					if (this.currentPage.Namespace != UespNamespaces.Lore || !this.gamePages.Contains(linkedPage))
+					{
+						this.linkedNamespaces.Add(linkedPage.Namespace);
+					}
+				}
+			}
+
+			this.linkedNamespaces.Remove(this.Site.Namespaces[UespNamespaces.User]);
+			this.noTransclusions = this.linkedNamespaces.Count == 0;
+		}
+
 		private WikiNode TemplateReplacer(WikiNode node)
 		{
 			if (this.transclusionParameters != null && node is ArgumentNode arg)
@@ -348,6 +391,7 @@
 
 		private void UpdateLorePages()
 		{
+			// var page = this.lorePages["Lore:Castle Llugwych"];
 			foreach (var page in this.lorePages)
 			{
 				this.SetPageInfo(page);
@@ -360,53 +404,6 @@
 
 				// page.Text = page.Text.Replace("\xA0", "&nbsp;");
 				// page.Text = Regex.Replace(page.Text, @"[ \t\r\v\u0085\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]+\n", "\n")
-			}
-		}
-
-		private void ConfirmOldTransclusion(NodeCollection parsedText)
-		{
-			if (!this.templateHappened)
-			{
-				var maxTags = parsedText.Count < 3 ? parsedText.Count : 3;
-				for (var loc = 0; loc < maxTags; loc++)
-				{
-					if (parsedText[loc] is IgnoreNode tag && tag.Value == "<noinclude>")
-					{
-						parsedText.Insert(loc + 1, OldTransclusionNode);
-						this.templateHappened = true;
-						break;
-					}
-				}
-
-				if (!this.templateHappened)
-				{
-					parsedText.Insert(0, OldTransclusionNode);
-				}
-			}
-
-			OldTransclusionNode.Parent = null;
-		}
-
-		private void SetPageInfo(Page page)
-		{
-			this.currentPage = page; // Easier than passing through multiple levels of replacement.
-			this.linkedNamespaces = new HashSet<Namespace>();
-			foreach (var linkedPage in page.TranscludedIn)
-			{
-				if (!linkedPage.SimpleEquals(page))
-				{
-					if (this.currentPage.Namespace != UespNamespaces.Lore || !this.gamePages.Contains(linkedPage))
-					{
-						this.linkedNamespaces.Add(linkedPage.Namespace);
-					}
-				}
-			}
-
-			this.linkedNamespaces.Remove(this.Site.Namespaces[UespNamespaces.User]);
-			this.noTransclusions = this.linkedNamespaces.Count == 0;
-			if (this.noTransclusions)
-			{
-				Debug.WriteLine($"{page.FullPageName} has no tranclusions.");
 			}
 		}
 		#endregion
