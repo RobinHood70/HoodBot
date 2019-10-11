@@ -39,7 +39,8 @@
 		public static NodeCollection Parse(string text, bool? include, bool strictInclusion)
 		{
 			ThrowNull(text, nameof(text));
-			return new WikiStack(text, UnparsedTags, include, strictInclusion).Nodes.ToNodeCollection();
+			var stack = new WikiStack(text, UnparsedTags, include, strictInclusion);
+			return new NodeCollection(null, stack.Nodes);
 		}
 		#endregion
 	}

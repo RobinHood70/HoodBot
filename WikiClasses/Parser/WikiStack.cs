@@ -148,7 +148,7 @@
 					var countCurly = this.Text.Span('{', this.Index);
 					if (countCurly >= 2)
 					{
-						this.Push(new TemplateElement(this, countCurly, this.Index > 0 && this.Text[this.Index - 1] == '\n'));
+						this.Push(new TemplateElement(this, countCurly/*, this.Index > 0 && this.Text[this.Index - 1] == '\n'*/));
 					}
 					else
 					{

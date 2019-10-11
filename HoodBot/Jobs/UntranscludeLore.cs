@@ -14,7 +14,7 @@
 	public class UntranscludeLore : EditJob
 	{
 		#region Static Fields
-		private static readonly TemplateNode OldTransclusionNode = new TemplateNode(false, new NodeCollection(new TextNode("Old Lore Transclusion")), null);
+		private static readonly TemplateNode OldTransclusionNode = new TemplateNode(new[] { new TextNode("Old Lore Transclusion") }, null);
 		#endregion
 
 		#region Fields
@@ -126,7 +126,7 @@
 				node.Parameters.Clear();
 				if (this.currentPage.PageName != this.currentLorePage.PageName)
 				{
-					node.Parameters.Add(new ParameterNode(1, new NodeCollection(new TextNode(this.currentLorePage.PageName))));
+					node.Parameters.Add(new ParameterNode(1, new[] { new TextNode(this.currentLorePage.PageName) }));
 				}
 
 				return node;
@@ -136,7 +136,8 @@
 		private void GetPages()
 		{
 			var allPages = new PageCollection(this.Site, new PageLoadOptions(PageModules.Default | PageModules.TranscludedIn, true));
-			allPages.GetPageLinks(new[] { new Title(this.Site, this.Site.User.FullPageName + "/Lore Transclusions") });
+			//// allPages.GetPageLinks(new[] { new Title(this.Site, this.Site.User.FullPageName + "/Lore Transclusions") });
+			allPages.GetTitles("General:The Elder Scrolls", "Lore:Elder Scrolls");
 			allPages.Sort();
 
 			var namespaces = new HashSet<Namespace>();
@@ -201,8 +202,8 @@
 				return new TextNode($"'''{display}'''");
 			}
 
-			var titleNodes = new NodeCollection(new TextNode(linkPage.FullPageName));
-			var displayNode = new ParameterNode(1, new NodeCollection(new TextNode(display)));
+			var titleNodes = new[] { new TextNode(linkPage.FullPageName) };
+			var displayNode = new ParameterNode(1, new[] { new TextNode(display) });
 			return new LinkNode(titleNodes, new[] { displayNode });
 		}
 
@@ -232,7 +233,7 @@
 					}
 
 					var loreText = WikiTextParser.Parse(fixedUpLoreText, true, true);
-					if (templateNode.AtLineStart && loreText.First.Value is TextNode textNode)
+					if (/* templateNode.AtLineStart && */loreText.First.Value is TextNode textNode)
 					{
 						textNode.Text = textNode.Text.TrimStart();
 						if (textNode.Text.Length == 0)
@@ -274,7 +275,7 @@
 					if (!this.templateHappened)
 					{
 						this.templateHappened = true;
-						return new NodeCollection(templateNode, OldTransclusionNode);
+						return new NodeCollection(null, new[] { templateNode, OldTransclusionNode });
 					}
 				}
 			}
@@ -390,7 +391,6 @@
 
 		private void UpdateLorePages()
 		{
-			// var page = this.lorePages["Lore:Castle Llugwych"];
 			foreach (var page in this.lorePages)
 			{
 				this.SetPageInfo(page);

@@ -7,12 +7,11 @@
 	public class HeaderNode : IWikiNode, IEnumerable<NodeCollection>
 	{
 		#region Constructors
-		public HeaderNode(int index, int level, NodeCollection title)
+		public HeaderNode(int index, int level, IEnumerable<IWikiNode> title)
 		{
-			ThrowNull(title, nameof(title));
 			this.Index = index;
 			this.Level = level;
-			this.Title = title;
+			this.Title = new NodeCollection(this, title ?? throw ArgumentNull(nameof(title)));
 		}
 		#endregion
 

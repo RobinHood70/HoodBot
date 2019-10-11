@@ -41,13 +41,11 @@
 			ThrowNull(node, nameof(node));
 			this.builder.Append("{{{");
 			node.Name.Accept(this);
-			if (this.valuesOnly)
+			node.DefaultValue?.Accept(this);
+
+			if (!this.valuesOnly)
 			{
-				node.DefaultValue.Accept(this);
-			}
-			else
-			{
-				foreach (var value in node.AllValues)
+				foreach (var value in node.ExtraValues)
 				{
 					value.Accept(this);
 				}

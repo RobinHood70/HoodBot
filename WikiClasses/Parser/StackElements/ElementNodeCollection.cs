@@ -52,10 +52,6 @@
 
 			this.AddRange(startAt == 0 ? newList : newList.GetRange(startAt, newList.Count - startAt));
 		}
-
-		public NodeCollection ToNodeCollection() => new NodeCollection(this);
-
-		public NodeCollection ToNodeCollection(int index, int count) => new NodeCollection(this.GetRange(index, count));
 		#endregion
 	}
 }

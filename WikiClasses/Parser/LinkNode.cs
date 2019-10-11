@@ -2,14 +2,15 @@
 {
 	using System.Collections;
 	using System.Collections.Generic;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public class LinkNode : IWikiNode, IBacklinkNode
 	{
 		#region Constructors
-		public LinkNode(NodeCollection title, IList<ParameterNode> parameters)
+		public LinkNode(IEnumerable<IWikiNode> title, IList<ParameterNode> parameters)
 		{
-			this.Title = title;
-			this.Parameters = parameters;
+			this.Title = new NodeCollection(this, title ?? throw ArgumentNull(nameof(title)));
+			this.Parameters = parameters ?? new List<ParameterNode>();
 		}
 		#endregion
 

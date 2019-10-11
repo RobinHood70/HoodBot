@@ -1,20 +1,23 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
+	using System.Collections.Generic;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class NodeCollectionVisitor : IWikiNodeVisitor
+	public class NodeVisitor : IWikiNodeVisitor
 	{
-		public NodeCollectionVisitor(NodeCollection nodes) => this.Nodes = nodes;
-
-		public NodeCollection Nodes { get; }
-
-		public virtual void Visit() => this.Visit(this.Nodes);
+		#region Public Methods
+		public virtual void Build(IEnumerable<IWikiNode> nodes)
+		{
+			foreach (var node in nodes ?? throw ArgumentNull(nameof(nodes)))
+			{
+				node.Accept(this);
+			}
+		}
 
 		public virtual void Visit(ArgumentNode node)
 		{
 			ThrowNull(node, nameof(node));
-			node.Name.Accept(this);
-			foreach (var value in node.AllValues)
+			foreach (var value in node)
 			{
 				value.Accept(this);
 			}
@@ -81,5 +84,6 @@
 		public virtual void Visit(TextNode node)
 		{
 		}
+		#endregion
 	}
 }

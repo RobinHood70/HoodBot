@@ -558,7 +558,7 @@
 			if (text != null)
 			{
 				var parser = WikiTextParser.Parse(text);
-				new BacklinkReplaceVisitor(this.Site, parser, this.movedPages).Visit();
+				new BacklinkReplaceVisitor(this.Site, this.movedPages).Build(parser);
 				text = WikiTextVisitor.Raw(parser);
 
 				// Galleries - handled here for now, but might be able to move it into ReplaceVisitor if parsed into a TagNode or custom GalleryNode.

@@ -7,30 +7,19 @@
 	public class NodeCollection : LinkedList<IWikiNode>, IWikiNode
 	{
 		#region Constructors
+		public NodeCollection(IWikiNode parent)
+			: base() => this.Parent = parent;
 
-		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
-		public NodeCollection()
-			: base()
-		{
-		}
+		public NodeCollection(IWikiNode parent, IEnumerable<IWikiNode> nodes)
+			: base(nodes) => this.Parent = parent;
+		#endregion
 
-		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
-		/// <param name="nodes">The nodes to initialize the collection with.</param>
-		public NodeCollection(IEnumerable<IWikiNode> nodes)
-			: base(nodes)
-		{
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
-		/// <param name="nodes">The nodes to initialize the collection with.</param>
-		public NodeCollection(params IWikiNode[] nodes)
-			: base(nodes)
-		{
-		}
+		#region Public Properties
+		public IWikiNode Parent { get; }
 		#endregion
 
 		#region Public Methods
-		public void Accept(INodeVisitor visitor) => visitor?.Visit(this);
+		public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
 
 		public void AddRange(IEnumerable<IWikiNode> collection)
 		{
@@ -91,6 +80,7 @@
 					}
 
 					this.Remove(currentNode);
+					currentNode = nextNode;
 				}
 			}
 		}

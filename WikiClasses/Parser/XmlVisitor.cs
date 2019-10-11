@@ -19,6 +19,21 @@
 		#endregion
 
 		#region IVisitor Methods
+		public void Visit(ArgumentNode node)
+		{
+			ThrowNull(node, nameof(node));
+			this
+				.BuildTagOpen("tplarg", null, false)
+				.BuildTag("title", null, node.Name)
+				.BuildTag("default", null, node.DefaultValue);
+			foreach (var value in node.ExtraValues)
+			{
+				this.BuildTag("extra", null, node.DefaultValue);
+			}
+
+			this.BuildTagClose("tplarg");
+		}
+
 		public void Visit(CommentNode node)
 		{
 			ThrowNull(node, nameof(node));
@@ -108,21 +123,11 @@
 			this.BuildTagClose("ext");
 		}
 
-		public void Visit(ArgumentNode node)
-		{
-			ThrowNull(node, nameof(node));
-			this
-				.BuildTagOpen("tplarg", node.AtLineStart ? new Dictionary<string, int> { ["lineStart"] = 1 } : null, false)
-				.BuildTag("title", null, node.Name)
-				.BuildTag("default", null, node.DefaultValue)
-				.BuildTagClose("tplarg");
-		}
-
 		public void Visit(TemplateNode node)
 		{
 			ThrowNull(node, nameof(node));
 			this
-				.BuildTagOpen("template", node.AtLineStart ? new Dictionary<string, int> { ["lineStart"] = 1 } : null, false)
+				.BuildTagOpen("template", null, false)
 				.BuildTag("title", null, node.Title); // Title is always emitted, even if empty.
 			foreach (var part in node.Parameters)
 			{

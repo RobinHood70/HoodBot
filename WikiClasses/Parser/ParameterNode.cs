@@ -7,16 +7,16 @@
 	public class ParameterNode : IWikiNode, IEnumerable<NodeCollection>
 	{
 		#region Constructors
-		public ParameterNode(int index, NodeCollection value)
+		public ParameterNode(int index, IEnumerable<IWikiNode> value)
 		{
 			this.Index = index;
-			this.Value = value ?? throw ArgumentNull(nameof(value));
+			this.Value = new NodeCollection(this, value ?? throw ArgumentNull(nameof(value)));
 		}
 
-		public ParameterNode(NodeCollection name, NodeCollection value)
+		public ParameterNode(IEnumerable<IWikiNode> name, IEnumerable<IWikiNode> value)
 		{
-			this.Name = name ?? throw ArgumentNull(nameof(name));
-			this.Value = value ?? throw ArgumentNull(nameof(value));
+			this.Name = new NodeCollection(this, name ?? throw ArgumentNull(nameof(name)));
+			this.Value = new NodeCollection(this, value ?? throw ArgumentNull(nameof(value)));
 		}
 		#endregion
 

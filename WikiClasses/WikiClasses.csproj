@@ -70,9 +70,8 @@
     <Compile Include="Parameter.cs" />
     <Compile Include="ParameterCollection.cs" />
     <Compile Include="ParameterParser.cs" />
-    <Compile Include="Parser\StackElements\NameValuePiece.cs" />
     <Compile Include="Parser\NodeCollection.cs" />
-    <Compile Include="Parser\NodeCollectionVisitor.cs" />
+    <Compile Include="Parser\NodeVisitor.cs" />
     <Compile Include="Parser\IBacklinkNode.cs" />
     <Compile Include="Parser\LinkNode.cs" />
     <Compile Include="Parser\WikiTextVisitor.cs" />

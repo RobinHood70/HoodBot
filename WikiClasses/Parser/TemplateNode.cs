@@ -2,21 +2,19 @@
 {
 	using System.Collections;
 	using System.Collections.Generic;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public class TemplateNode : IWikiNode, IBacklinkNode
 	{
 		#region Constructors
-		public TemplateNode(bool atLineStart, NodeCollection title, IList<ParameterNode> parameters)
+		public TemplateNode(IEnumerable<IWikiNode> title, IList<ParameterNode> parameters)
 		{
-			this.AtLineStart = atLineStart;
-			this.Title = title;
+			this.Title = new NodeCollection(this, title ?? throw ArgumentNull(nameof(title)));
 			this.Parameters = parameters ?? new List<ParameterNode>();
 		}
 		#endregion
 
 		#region Public Properties
-		public bool AtLineStart { get; }
-
 		public IList<ParameterNode> Parameters { get; }
 
 		public NodeCollection Title { get; }
