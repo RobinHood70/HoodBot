@@ -1,0 +1,14 @@
+<Project>
+	<PropertyGroup>
+		<Authors>Robert Morley</Authors>
+		<Copyright>Copyright © Robert Morley 2019</Copyright>
+		<Product>HoodBot</Product>
+		<LangVersion>latest</LangVersion>
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>..\SharedKey.pfx</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.6" />
+		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.66" />
+	</ItemGroup>
+</Project>

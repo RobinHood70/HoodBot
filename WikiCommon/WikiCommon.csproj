@@ -1,114 +1,18 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{64878636-CB8C-434E-A03D-B3946216FC7F}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RobinHood70.WikiCommon</RootNamespace>
-    <AssemblyName>WikiCommon</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;CODE_ANALYSIS;DEBUG</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>WikiRules.ruleset</CodeAnalysisRuleSet>
-    <RunCodeAnalysis>false</RunCodeAnalysis>
-    <DocumentationFile>bin\Debug\WikiCommon.xml</DocumentationFile>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>WikiRules.ruleset</CodeAnalysisRuleSet>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-    <LangVersion>latest</LangVersion>
-    <DocumentationFile>bin\Release\WikiCommon.xml</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>SharedKey.pfx</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="..\GlobalAssemblyInfo.cs">
-      <Link>GlobalAssemblyInfo.cs</Link>
-    </Compile>
-    <Compile Include="Enumerations.cs" />
-    <Compile Include="Extensions.cs" />
-    <Compile Include="Globals.cs" />
-    <Compile Include="MediaWikiNamespaces.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="RequestBuilder\FileParameter.cs" />
-    <Compile Include="RequestBuilder\FormatParameter.cs" />
-    <Compile Include="RequestBuilder\HiddenParameter.cs" />
-    <Compile Include="RequestBuilder\IParameter.cs" />
-    <Compile Include="RequestBuilder\IParameterVisitor.cs" />
-    <Compile Include="RequestBuilder\MultipartResult.cs" />
-    <Compile Include="RequestBuilder\Parameter.cs" />
-    <Compile Include="RequestBuilder\ParameterCollection.cs" />
-    <Compile Include="RequestBuilder\ParameterExtensions.cs" />
-    <Compile Include="RequestBuilder\PipedListParameter.cs" />
-    <Compile Include="RequestBuilder\PipedParameter.cs" />
-    <Compile Include="RequestBuilder\Request.cs" />
-    <Compile Include="RequestBuilder\RequestVisitorDisplay.cs" />
-    <Compile Include="RequestBuilder\RequestVisitorHttpContentMultipart.cs" />
-    <Compile Include="RequestBuilder\RequestVisitorHttpContentUrl.cs" />
-    <Compile Include="RequestBuilder\RequestVisitorMultipart.cs" />
-    <Compile Include="RequestBuilder\RequestVisitorUrl.cs" />
-    <Compile Include="RequestBuilder\StringParameter.cs" />
-    <Compile Include="TextArrays.cs" />
-    <Compile Include="ValidatedNotNullAttribute.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <AdditionalFiles Include="..\stylecop.json">
-      <Link>stylecop.json</Link>
-    </AdditionalFiles>
-    <None Include="SharedKey.pfx" />
-    <None Include="WikiRules.ruleset" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Net.Http" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers">
-      <Version>2.9.4</Version>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="StyleCop.Analyzers">
-      <Version>1.2.0-beta.66</Version>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net48</TargetFramework>
+		<Nullable>enable</Nullable>
+		<CodeAnalysisRuleSet>..\WikiRules.ruleset</CodeAnalysisRuleSet>
+		<DocumentationFile>bin\WikiCommon.xml</DocumentationFile>
+		<Description>Common elements for the entire project</Description>
+	</PropertyGroup>
+	<Import Project="..\GlobalInfo.csproj" />
+	<ItemGroup>
+		<AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
+		<AdditionalFiles Include="..\WikiRules.ruleset" Link="WikiRules.ruleset" />
+	</ItemGroup>
+	<ItemGroup>
+		<Reference Include="System" />
+		<Reference Include="System.Net.Http" />
+	</ItemGroup>
 </Project>
