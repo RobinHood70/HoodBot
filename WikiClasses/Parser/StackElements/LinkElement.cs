@@ -26,7 +26,7 @@
 			switch (found)
 			{
 				case '|':
-					this.NameValuePieces.Add(new NameValuePiece());
+					this.NameValuePieces.Add(new Piece());
 					stack.Index++;
 					break;
 				case ']':

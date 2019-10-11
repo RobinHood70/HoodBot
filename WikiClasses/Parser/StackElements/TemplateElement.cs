@@ -5,17 +5,13 @@
 	internal class TemplateElement : PairedElement
 	{
 		#region Fields
-		private readonly bool atLineStart;
+		// private readonly bool atLineStart;
 		private int braceLength;
 		#endregion
 
 		#region Constructors
-		public TemplateElement(WikiStack stack, int length, bool atLineStart)
-			: base(stack, '{', length)
-		{
-			this.atLineStart = atLineStart;
-			this.braceLength = length;
-		}
+		public TemplateElement(WikiStack stack, int length)
+			: base(stack, '{', length) => this.braceLength = length; // this.atLineStart = atLineStart;
 		#endregion
 
 		#region Internal Override Properties
@@ -35,7 +31,7 @@
 			switch (found)
 			{
 				case '|':
-					this.NameValuePieces.Add(new NameValuePiece());
+					this.NameValuePieces.Add(new Piece());
 					stack.Index++;
 					break;
 				case '=':
@@ -74,7 +70,6 @@
 					{
 						stack.Top.CurrentPiece.Add(new ArgumentNode(this.Length == matchingCount && this.atLineStart, this.NameValuePieces[0].ToNodeCollection(), parameters));
 					}
-
 					break;
 				default:
 					stack.Parse(found);

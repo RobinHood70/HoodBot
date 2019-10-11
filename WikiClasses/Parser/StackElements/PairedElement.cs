@@ -14,7 +14,7 @@
 		{
 			this.open = open;
 			this.Length = length;
-			this.NameValuePieces.Add(new NameValuePiece());
+			this.NameValuePieces.Add(new Piece());
 		}
 		#endregion
 
@@ -25,7 +25,7 @@
 		#region Protected Properties
 		protected int Length { get; set; }
 
-		protected List<NameValuePiece> NameValuePieces { get; } = new List<NameValuePiece>();
+		protected List<Piece> NameValuePieces { get; } = new List<Piece>();
 		#endregion
 
 		#region Public Override Methods
@@ -57,7 +57,7 @@
 			if (matchingCount < this.Length)
 			{
 				this.NameValuePieces.Clear();
-				this.NameValuePieces.Add(new NameValuePiece());
+				this.NameValuePieces.Add(new Piece());
 				this.Length -= matchingCount;
 				if (this.Length >= 2)
 				{
