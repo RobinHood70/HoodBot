@@ -23,13 +23,11 @@
 		private bool badBoundary;
 		private string boundary;
 		private bool supportsUnitSeparator;
-		private MemoryStream stream;
+		private MemoryStream? stream;
 		#endregion
 
 		#region Constructors
-		private RequestVisitorMultipart()
-		{
-		}
+		private RequestVisitorMultipart() => this.boundary = RandomBoundary(RandomBoundaryStartLength);
 		#endregion
 
 		#region Public Static Methods
@@ -53,7 +51,6 @@
 			do
 			{
 				visitor.badBoundary = false;
-				visitor.boundary = RandomBoundary(boundaryLength);
 				contentType = "multipart/form-data; boundary=\"" + visitor.boundary + "\"";
 
 				using var memoryStream = new MemoryStream();
@@ -88,6 +85,8 @@
 					{
 						boundaryLength++;
 					}
+
+					visitor.SetRandomBoundary(boundaryLength);
 				}
 			}
 			while (visitor.badBoundary);
@@ -100,15 +99,16 @@
 		public void Visit(FileParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
-			if (ScanBoundaryConflicts && parameter.Value.LongLength > 0 && CurrentEncoding.GetString(parameter.Value).Contains(this.boundary))
+			if (ScanBoundaryConflicts && parameter.Value.data.LongLength > 0 && CurrentEncoding.GetString(parameter.Value.data).Contains(this.boundary))
 			{
 				this.badBoundary = true;
 				return;
 			}
 
-			var data = Invariant($"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{parameter.Name}\"; filename=\"{parameter.FileName}\";\r\nContent-Type: application/octet-stream\r\n\r\n");
-			this.stream.Write(CurrentEncoding.GetBytes(data), 0, CurrentEncoding.GetByteCount(data));
-			this.stream.Write(parameter.Value, 0, parameter.Value.Length);
+			ThrowNull(this.stream, nameof(this.stream));
+			var data = Invariant($"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{parameter.Name}\"; filename=\"{parameter.Value.fileName}\";\r\nContent-Type: application/octet-stream\r\n\r\n");
+			this.stream!.Write(CurrentEncoding.GetBytes(data), 0, CurrentEncoding.GetByteCount(data));
+			this.stream.Write(parameter.Value.data, 0, parameter.Value.data.Length);
 		}
 
 		/// <summary>Visits the specified FormatParameter object.</summary>
@@ -147,6 +147,13 @@
 		}
 		#endregion
 
+		#region Public Methods
+
+		/// <summary>Sets the boundary to a random string of characters of the given length.</summary>
+		/// <param name="boundaryLength">Length of the boundary.</param>
+		public void SetRandomBoundary(int boundaryLength) => this.boundary = RandomBoundary(boundaryLength);
+		#endregion
+
 		#region Private Methods
 		private static string RandomBoundary(int boundaryLength)
 		{
@@ -176,8 +183,9 @@
 				return;
 			}
 
+			ThrowNull(this.stream, nameof(this.stream));
 			var postData = Invariant($"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{name}\"\r\n\r\n{value}");
-			this.stream.Write(CurrentEncoding.GetBytes(postData), 0, CurrentEncoding.GetByteCount(postData));
+			this.stream!.Write(CurrentEncoding.GetBytes(postData), 0, CurrentEncoding.GetByteCount(postData));
 		}
 		#endregion
 	}

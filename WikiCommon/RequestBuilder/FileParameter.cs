@@ -1,10 +1,8 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
-	using static RobinHood70.WikiCommon.Globals;
-
 	/// <summary>Represents a parameter with file information.</summary>
 	/// <seealso cref="Parameter{T}" />
-	public class FileParameter : Parameter<byte[]>
+	public class FileParameter : Parameter<(string fileName, byte[] data)>
 	{
 		#region Constructors
 
@@ -13,19 +11,9 @@
 		/// <param name="fileName">Name of the file.</param>
 		/// <param name="fileData">The file data.</param>
 		public FileParameter(string name, string fileName, byte[] fileData)
-			: base(name)
+			: base(name, (fileName, fileData))
 		{
-			ThrowNull(fileData, nameof(fileData));
-			this.FileName = fileName;
-			this.Value = fileData;
 		}
-		#endregion
-
-		#region Public Properties
-
-		/// <summary>Gets the name of the file.</summary>
-		/// <value>The name of the file.</value>
-		public string FileName { get; }
 		#endregion
 
 		#region Public Override Methods

@@ -11,7 +11,9 @@
 		/// <param name="value">The parameter value.</param>
 		/// <remarks><see langword="null"/> is a valid value for this parameter type, so no input validation is performed.</remarks>
 		public StringParameter(string name, string value)
-			: base(name) => this.Value = value;
+			: base(name, value)
+		{
+		}
 		#endregion
 
 		#region Public Override Methods

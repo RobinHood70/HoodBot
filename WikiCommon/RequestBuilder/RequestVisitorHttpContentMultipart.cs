@@ -45,7 +45,7 @@
 		public void Visit(FileParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
-			this.multipartData.Add(new ByteArrayContent(parameter.Value), parameter.Name, parameter.FileName);
+			this.multipartData.Add(new ByteArrayContent(parameter.Value.data), parameter.Name, parameter.Value.fileName);
 		}
 
 		/// <summary>Visits the specified FormatParameter object.</summary>
@@ -79,6 +79,7 @@
 		}
 
 #pragma warning disable CA2000 // Dispose objects before losing scope
+
 		/// <summary>Visits the specified StringParameter object.</summary>
 		/// <param name="parameter">The StringParameter object.</param>
 		public void Visit(StringParameter parameter)

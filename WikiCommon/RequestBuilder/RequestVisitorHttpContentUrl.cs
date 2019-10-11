@@ -9,7 +9,7 @@
 	public class RequestVisitorHttpContentUrl : IParameterVisitor
 	{
 		#region Fields
-		private Dictionary<string, string> parameters;
+		private readonly Dictionary<string, string> parameters = new Dictionary<string, string>();
 		private bool supportsUnitSeparator;
 		#endregion
 
@@ -30,9 +30,9 @@
 			var visitor = new RequestVisitorHttpContentUrl
 			{
 				supportsUnitSeparator = request.SupportsUnitSeparator,
-				parameters = new Dictionary<string, string>(),
 			};
 
+			visitor.parameters.Clear();
 			request.Build(visitor);
 
 			return new FormUrlEncodedContent(visitor.parameters);

@@ -16,11 +16,6 @@
 		/// <param name="timestamp">The timestamp to format.</param>
 		/// <returns>A string with the date in the standard MediaWiki format.</returns>
 		public static string ToMediaWiki(this DateTime timestamp) => timestamp.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ssK", CultureInfo.InvariantCulture);
-
-		/// <summary>Formats a <see cref="DateTime"/>? in the standard MediaWiki format.</summary>
-		/// <param name="timestamp">The timestamp to format.</param>
-		/// <returns>A string with the date in the standard MediaWiki format or <see langword="null"/> if the input value was null.</returns>
-		public static string ToMediaWiki(this DateTime? timestamp) => timestamp == null ? null : ToMediaWiki(timestamp.Value);
 		#endregion
 
 		#region Enum Extensions
@@ -141,18 +136,47 @@
 			return enumerator.MoveNext() ? enumerator.Current : throw new KeyNotFoundException();
 		}
 
-		/// <summary>Gets the first item of the collection, or the default value for the type.</summary>
+		/// <summary>Gets the first item of the collection, or the specified default value.</summary>
 		/// <typeparam name="T">The collection type.</typeparam>
 		/// <param name="collection">The collection to enumerate.</param>
-		/// <returns>The first item in the collection or <see langword="default"/>.</returns>
-		public static T FirstOrDefault<T>(this IEnumerable<T> collection) => FirstOrDefault(collection, default);
+		/// <returns>The first item in the collection or the specified default value.</returns>
+		public static T? FirstOrDefault<T>(this IEnumerable<T> collection)
+			where T : class => FirstOrDefault(collection, default);
 
 		/// <summary>Gets the first item of the collection, or the specified default value.</summary>
 		/// <typeparam name="T">The collection type.</typeparam>
 		/// <param name="collection">The collection to enumerate.</param>
 		/// <param name="defaultValue">The default value to use if the collection is empty.</param>
 		/// <returns>The first item in the collection or the specified default value.</returns>
-		public static T FirstOrDefault<T>(this IEnumerable<T> collection, T defaultValue)
+		public static T? FirstOrDefault<T>(this IEnumerable<T> collection, T? defaultValue)
+			where T : class
+		{
+			if (collection != null)
+			{
+				using var enumerator = collection.GetEnumerator();
+				if (enumerator.MoveNext())
+				{
+					return enumerator.Current;
+				}
+			}
+
+			return defaultValue;
+		}
+
+		/// <summary>Gets the first item of the collection, or the specified default value.</summary>
+		/// <typeparam name="T">The collection type.</typeparam>
+		/// <param name="collection">The collection to enumerate.</param>
+		/// <returns>The first item in the collection or the specified default value.</returns>
+		public static T FirstOrDefaultValue<T>(this IEnumerable<T> collection)
+			where T : struct => FirstOrDefaultValue(collection, default);
+
+		/// <summary>Gets the first item of the collection, or the specified default value.</summary>
+		/// <typeparam name="T">The collection type.</typeparam>
+		/// <param name="collection">The collection to enumerate.</param>
+		/// <param name="defaultValue">The default value to use if the collection is empty.</param>
+		/// <returns>The first item in the collection or the specified default value.</returns>
+		public static T FirstOrDefaultValue<T>(this IEnumerable<T> collection, T defaultValue)
+			where T : struct
 		{
 			if (collection != null)
 			{

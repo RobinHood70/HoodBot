@@ -32,7 +32,7 @@
 		/// <summary>Generates a generic hash code based on multiple input hash codes.</summary>
 		/// <param name="hashCodes">Hash codes from constitutent types.</param>
 		/// <returns>An integer that is likely to be a good hash code for the combined values.</returns>
-		public static int CompositeHashCode(params object[] hashCodes)
+		public static int CompositeHashCode(params object?[] hashCodes)
 		{
 			ThrowNull(hashCodes, nameof(hashCodes));
 			unchecked
@@ -51,7 +51,7 @@
 		/// <param name="text">The text to format.</param>
 		/// <param name="values">The values of any parameters in the <paramref name="text" /> parameter.</param>
 		/// <returns>The formatted text.</returns>
-		public static string CurrentCulture(string text, params object[] values) => string.Format(CultureInfo.CurrentCulture, text, values);
+		public static string CurrentCulture(string text, params object?[] values) => string.Format(CultureInfo.CurrentCulture, text, values);
 
 		/// <summary>Works around Uri.EscapeDataString's length limits.</summary>
 		/// <param name="dataString">The string to escape.</param>
@@ -84,7 +84,7 @@
 		/// <summary>Attempts to figure out the culture associated with the language code, falling back progressively through parent languages.</summary>
 		/// <param name="languageCode">The language code to try.</param>
 		/// <returns>The nearest CultureInfo possible to the given <paramref name="languageCode"/> or null if nothing is found.</returns>
-		public static CultureInfo GetCulture(string languageCode)
+		public static CultureInfo? GetCulture(string languageCode)
 		{
 			// Try to figure out wiki culture; otherwise revert to CurrentCulture.
 			if (!string.IsNullOrWhiteSpace(languageCode))
@@ -114,15 +114,15 @@
 		/// <param name="formattable">A formattable string.</param>
 		/// <returns>The formatted text.</returns>
 		// Copy of the same-named method from the FormattableString code so that all culture methods are in the same library.
-		public static string Invariant(FormattableString formattable) => formattable?.ToString(CultureInfo.InvariantCulture);
+		public static string Invariant(FormattableString formattable) => (formattable ?? throw ArgumentNull(nameof(formattable))).ToString(CultureInfo.InvariantCulture);
 
 		/// <summary>Throws an exception if the input value is null.</summary>
 		/// <param name="nullable">The value that may be null.</param>
 		/// <param name="name">The name of the parameter in the original method.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="nullable" /> is null.</exception>
-		public static void ThrowNull([ValidatedNotNull] object nullable, string name)
+		public static void ThrowNull([ValidatedNotNull] object? nullable, string name)
 		{
-			if (nullable == null)
+			if (nullable is null)
 			{
 				throw ArgumentNull(name);
 			}

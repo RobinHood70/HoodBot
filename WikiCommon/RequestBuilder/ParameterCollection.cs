@@ -26,7 +26,7 @@
 
 		/// <summary>Gets or sets the prefix to prepend to each parameter name.</summary>
 		/// <value>The prefix. This can be null or empty if no prefix is required.</value>
-		public string Prefix { get; set; }
+		public string Prefix { get; set; } = string.Empty;
 		#endregion
 
 		#region Public Methods
@@ -462,7 +462,7 @@
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
 		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
-		public bool TryGetValue(string key, out IParameter value)
+		public bool TryGetValue(string key, out IParameter? value)
 		{
 			if (this.Dictionary != null)
 			{
@@ -488,7 +488,7 @@
 		/// <summary>Gets the key for item.</summary>
 		/// <param name="item">The item.</param>
 		/// <returns>The key corresponding to the item.</returns>
-		protected override string GetKeyForItem(IParameter item) => item?.Name;
+		protected override string GetKeyForItem(IParameter item) => (item ?? throw ArgumentNull(nameof(item))).Name;
 		#endregion
 	}
 }

@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
 	using System.Collections.Generic;
-	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Represents a parameter with collection of values, normally separated by pipe characters. All values added to the parameter will be emitted, regardless of any duplication.</summary>
 	/// <seealso cref="Parameter{T}" />
@@ -13,10 +12,8 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="values">The parameter values.</param>
 		public PipedListParameter(string name, IEnumerable<string> values)
-				: base(name)
+				: base(name, new List<string>(values))
 		{
-			ThrowNull(values, nameof(values));
-			this.Value = new List<string>(values);
 		}
 		#endregion
 
