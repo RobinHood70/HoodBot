@@ -27,7 +27,7 @@
 		#endregion
 
 		#region Public Methods
-		public void Accept(INodeVisitor visitor) => visitor?.Visit(this);
+		public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
 
 		public IEnumerator<NodeCollection> GetEnumerator()
 		{
@@ -38,7 +38,11 @@
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => "h" + this.Level.ToStringInvariant();
+		public override string ToString()
+		{
+			var equals = new string('=', this.Level);
+			return equals + "Header" + equals;
+		}
 		#endregion
 	}
 }

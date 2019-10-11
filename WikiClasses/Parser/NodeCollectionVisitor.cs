@@ -2,7 +2,7 @@
 {
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class NodeCollectionVisitor : INodeVisitor
+	public class NodeCollectionVisitor : IWikiNodeVisitor
 	{
 		public NodeCollectionVisitor(NodeCollection nodes) => this.Nodes = nodes;
 

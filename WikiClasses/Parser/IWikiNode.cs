@@ -7,7 +7,7 @@
 
 		/// <summary>Accepts a visitor to process the node.</summary>
 		/// <param name="visitor">The visiting class.</param>
-		void Accept(INodeVisitor visitor);
+		void Accept(IWikiNodeVisitor visitor);
 		#endregion
 	}
 }

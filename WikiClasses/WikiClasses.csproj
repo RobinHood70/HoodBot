@@ -96,7 +96,7 @@
     <Compile Include="Parser\HeaderNode.cs" />
     <Compile Include="Parser\IgnoreNode.cs" />
     <Compile Include="Parser\IWikiNode.cs" />
-    <Compile Include="Parser\INodeVisitor.cs" />
+    <Compile Include="Parser\IWikiNodeVisitor.cs" />
     <Compile Include="Parser\ParameterNode.cs" />
     <Compile Include="Parser\TemplateNode.cs" />
     <Compile Include="Parser\TextNode.cs" />

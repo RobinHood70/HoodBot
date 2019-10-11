@@ -4,7 +4,7 @@
 	public class EqualsNode : IWikiNode
 	{
 		#region Public Methods
-		public void Accept(INodeVisitor visitor) => visitor?.Visit(this);
+		public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
 		#endregion
 
 		#region Public Override Methods

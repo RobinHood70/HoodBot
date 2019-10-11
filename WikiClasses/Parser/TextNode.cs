@@ -11,11 +11,11 @@
 		#endregion
 
 		#region Public Methods
-		public void Accept(INodeVisitor visitor) => visitor?.Visit(this);
+		public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Text;
+		public override string ToString() => this.Text.Ellipsis(20);
 		#endregion
 	}
 }

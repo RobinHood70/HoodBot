@@ -29,7 +29,7 @@
 		#endregion
 
 		#region Public Methods
-		public void Accept(INodeVisitor visitor) => visitor?.Visit(this);
+		public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
 
 		public IEnumerator<NodeCollection> GetEnumerator()
 		{
@@ -45,7 +45,7 @@
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => "<part>";
+		public override string ToString() => "|" + (this.Index == 0 ? "name=" : string.Empty) + "value";
 		#endregion
 	}
 }

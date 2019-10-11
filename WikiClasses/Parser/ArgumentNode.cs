@@ -20,13 +20,13 @@
 
 		public bool AtLineStart { get; }
 
-		public NodeCollection DefaultValue => this.AllValues[0].Value;
+		public NodeCollection DefaultValue => this.AllValues?[0].Value;
 
 		public NodeCollection Name { get; }
 		#endregion
 
 		#region Public Methods
-		public void Accept(INodeVisitor visitor) => visitor?.Visit(this);
+		public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
 
 		public IEnumerator<NodeCollection> GetEnumerator()
 		{
@@ -48,7 +48,21 @@
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => "<tplarg>";
+		public override string ToString()
+		{
+			var retval = "{{{arg";
+			var def = this.DefaultValue;
+			if (def != null)
+			{
+				retval += '|';
+				if (def.Count > 0)
+				{
+					retval += "default";
+				}
+			}
+
+			return retval + "}}}";
+		}
 		#endregion
 	}
 }

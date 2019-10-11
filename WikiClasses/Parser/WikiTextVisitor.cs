@@ -3,7 +3,7 @@
 	using System.Text;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class WikiTextVisitor : INodeVisitor
+	public class WikiTextVisitor : IWikiNodeVisitor
 	{
 		#region Static Fields
 		private static readonly WikiTextVisitor RawVisitor = new WikiTextVisitor(false);

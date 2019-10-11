@@ -1,6 +1,6 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
-	public interface INodeVisitor
+	public interface IWikiNodeVisitor
 	{
 		void Visit(ArgumentNode node);
 

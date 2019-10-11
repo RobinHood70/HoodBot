@@ -20,7 +20,7 @@
 		#endregion
 
 		#region Public Methods
-		public void Accept(INodeVisitor visitor) => visitor?.Visit(this);
+		public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
 
 		public IEnumerator<NodeCollection> GetEnumerator()
 		{
@@ -42,7 +42,7 @@
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => "<link>";
+		public override string ToString() => this.Parameters.Count == 0 ? "[[Link]]" : $"[[Link|Count = {this.Parameters.Count}]]";
 		#endregion
 	}
 }
