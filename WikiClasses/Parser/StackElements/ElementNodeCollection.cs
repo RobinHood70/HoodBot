@@ -6,7 +6,7 @@
 	{
 		#region Constructors
 		public ElementNodeCollection(params IWikiNode[] nodes)
-			: base(nodes as IEnumerable<IWikiNode>)
+			: base(nodes)
 		{
 		}
 		#endregion
