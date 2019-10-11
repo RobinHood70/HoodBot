@@ -60,8 +60,8 @@
 		#region Protected Override Methods
 		protected override void UpdateSkillTemplate(ActiveSkill skillBase, Template template, HashSet<string> replacements)
 		{
-			string FormatMeters(string value) => $"{value} meter{(value == "1" ? string.Empty : "s")}";
-			string FormatSeconds(string value) => value == "0" ? "Instant" : $"{value} second{(value == "1" ? string.Empty : "s")}";
+			static string FormatMeters(string value) => $"{value} meter{(value == "1" ? string.Empty : "s")}";
+			static string FormatSeconds(string value) => value == "0" ? "Instant" : $"{value} second{(value == "1" ? string.Empty : "s")}";
 
 			ThrowNull(skillBase, nameof(skillBase));
 			ThrowNull(template, nameof(template));

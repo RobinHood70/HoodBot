@@ -47,7 +47,7 @@
 				{
 					lock (LockObject)
 					{
-						dte = dte ?? GetDte(); // Check dte again in case of race condition while entering the lock, and the other guy won.
+						dte ??= GetDte(); // Check dte again in case of race condition while entering the lock, and the other guy won.
 
 						// We have to watch windows rather than documents because diff documents are a weird hybrid that emits closing events for each separate document, neither of which corresponds to the ActiveDocument that we would've grabbed.
 						dte.Events.WindowEvents.WindowClosing += this.DteWindowClosing;

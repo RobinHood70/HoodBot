@@ -56,13 +56,11 @@
 				try
 				{
 					var bytes = new byte[] { 0x1f, 0x8b, 0x08, 0, 0, 0, 0, 0, 4, 0, 0x63, 0, 0, 0x8d, 0xef, 2, 0xd2, 1, 0, 0, 0 };
-					using (var compressedStream = new MemoryStream(bytes))
-					using (var zipStream = new GZipStream(compressedStream, CompressionMode.Decompress))
-					using (var resultStream = new MemoryStream())
-					{
-						zipStream.CopyTo(resultStream);
-						resultStream.ToArray(); // We don't actually need the result, we just want to be sure the stream has been checked.
-					}
+					using var compressedStream = new MemoryStream(bytes);
+					using var zipStream = new GZipStream(compressedStream, CompressionMode.Decompress);
+					using var resultStream = new MemoryStream();
+					zipStream.CopyTo(resultStream);
+					resultStream.ToArray(); // We don't actually need the result, we just want to be sure the stream has been checked.
 				}
 				catch (EntryPointNotFoundException)
 				{
@@ -197,10 +195,8 @@
 		/// <returns>The text of the result.</returns>
 		public string Get(Uri uri)
 		{
-			using (var response = this.SendRequest(uri, "GET", null, null, true))
-			{
-				return GetResponseText(response);
-			}
+			using var response = this.SendRequest(uri, "GET", null, null, true);
+			return GetResponseText(response);
 		}
 
 		/// <summary>Retrieves cookies from persistent storage.</summary>
@@ -211,11 +207,9 @@
 			{
 				try
 				{
-					using (var stream = File.Open(this.cookiesLocation, FileMode.Open))
-					{
-						this.cookieContainer = new BinaryFormatter().Deserialize(stream) as CookieContainer;
-						return;
-					}
+					using var stream = File.Open(this.cookiesLocation, FileMode.Open);
+					this.cookieContainer = new BinaryFormatter().Deserialize(stream) as CookieContainer;
+					return;
 				}
 				catch (DirectoryNotFoundException)
 				{
@@ -234,10 +228,8 @@
 		/// <returns>The text of the result.</returns>
 		public string Post(Uri uri, string postData)
 		{
-			using (var response = this.SendRequest(uri, "POST", FormUrlEncoded, Encoding.UTF8.GetBytes(postData), true))
-			{
-				return GetResponseText(response);
-			}
+			using var response = this.SendRequest(uri, "POST", FormUrlEncoded, Encoding.UTF8.GetBytes(postData), true);
+			return GetResponseText(response);
 		}
 
 		/// <summary>POSTs text data and retrieves the result.</summary>
@@ -247,10 +239,8 @@
 		/// <returns>The text of the result.</returns>
 		public string Post(Uri uri, string contentType, byte[] postData)
 		{
-			using (var response = this.SendRequest(uri, "POST", contentType, postData, true))
-			{
-				return GetResponseText(response);
-			}
+			using var response = this.SendRequest(uri, "POST", contentType, postData, true);
+			return GetResponseText(response);
 		}
 
 		/// <summary>This method is used both to throttle clients as well as to forward any wiki-requested delays, such as from maxlag. Clients should respect any delays requested by the wiki unless they expect to abort the procedure, or for testing.</summary>
@@ -281,10 +271,8 @@
 		{
 			if (this.cookiesLocation != null)
 			{
-				using (var stream = File.Create(this.cookiesLocation))
-				{
-					new BinaryFormatter().Serialize(stream, this.cookieContainer);
-				}
+				using var stream = File.Create(this.cookiesLocation);
+				new BinaryFormatter().Serialize(stream, this.cookieContainer);
 			}
 		}
 		#endregion
@@ -308,12 +296,10 @@
 		{
 			if (response != null)
 			{
-				using (var respStream = response.GetResponseStream())
-				using (var mem = new MemoryStream())
-				{
-					respStream.CopyTo(mem);
-					return mem.ToArray();
-				}
+				using var respStream = response.GetResponseStream();
+				using var mem = new MemoryStream();
+				respStream.CopyTo(mem);
+				return mem.ToArray();
 			}
 
 			return null;
@@ -326,11 +312,9 @@
 				return null;
 			}
 
-			using (var respStream = response.GetResponseStream())
-			using (var reader = new StreamReader(respStream))
-			{
-				return reader.ReadToEnd();
-			}
+			using var respStream = response.GetResponseStream();
+			using var reader = new StreamReader(respStream);
+			return reader.ReadToEnd();
 		}
 
 		private static bool PerSessionUnsafeHeaderParsing(Exception ex)
@@ -384,10 +368,8 @@
 				{
 					request.ContentType = contentType;
 					request.ContentLength = postData.Length;
-					using (var stream = request.GetRequestStream())
-					{
-						stream.Write(postData, 0, postData.Length);
-					}
+					using var stream = request.GetRequestStream();
+					stream.Write(postData, 0, postData.Length);
 				}
 
 				try

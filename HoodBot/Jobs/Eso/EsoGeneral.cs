@@ -245,17 +245,13 @@
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "No user input.")]
 		public static IEnumerable<IDataRecord> RunQuery(string query)
 		{
-			using (var connection = new MySqlConnection(EsoLogConnectionString))
+			using var connection = new MySqlConnection(EsoLogConnectionString);
+			connection.Open();
+			using var command = new MySqlCommand(query, connection);
+			using var reader = command.ExecuteReader();
+			while (reader.Read())
 			{
-				connection.Open();
-				using (var command = new MySqlCommand(query, connection))
-				using (var reader = command.ExecuteReader())
-				{
-					while (reader.Read())
-					{
-						yield return reader;
-					}
-				}
+				yield return reader;
 			}
 		}
 

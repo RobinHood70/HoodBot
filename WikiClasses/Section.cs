@@ -78,7 +78,7 @@
 				}
 				else
 				{
-					this.PaddedTitle = this.PaddedTitle ?? new PaddedString();
+					this.PaddedTitle ??= new PaddedString();
 					this.PaddedTitle.Value = value;
 				}
 			}

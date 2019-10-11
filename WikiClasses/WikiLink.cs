@@ -197,9 +197,9 @@
 
 			var nsOptional = regexNamespaces == null ? "?" : string.Empty;
 			var displayOptional = regexDisplayTexts == null ? "?" : string.Empty;
-			regexNamespaces = regexNamespaces ?? regexWildNamespace;
-			regexPageNames = regexPageNames ?? regexWild;
-			regexDisplayTexts = regexDisplayTexts ?? regexWild;
+			regexNamespaces ??= regexWildNamespace;
+			regexPageNames ??= regexWild;
+			regexDisplayTexts ??= regexWild;
 
 			if (regexAfter != null)
 			{

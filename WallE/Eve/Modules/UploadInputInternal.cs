@@ -20,18 +20,16 @@ namespace RobinHood70.WallE.Eve.Modules
 			this.Token = input.Token;
 
 			var buffer = new byte[32768];
-			using (var retval = new MemoryStream())
+			using var retval = new MemoryStream();
+			var readBytes = 0;
+			do
 			{
-				var readBytes = 0;
-				do
-				{
-					readBytes = input.FileData.Read(buffer, 0, buffer.Length);
-					retval.Write(buffer, 0, readBytes);
-				}
-				while (readBytes > 0);
-
-				this.FileData = retval.ToArray();
+				readBytes = input.FileData.Read(buffer, 0, buffer.Length);
+				retval.Write(buffer, 0, readBytes);
 			}
+			while (readBytes > 0);
+
+			this.FileData = retval.ToArray();
 		}
 
 		public UploadInputInternal()

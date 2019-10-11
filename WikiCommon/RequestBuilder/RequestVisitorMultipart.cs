@@ -56,39 +56,37 @@
 				visitor.boundary = RandomBoundary(boundaryLength);
 				contentType = "multipart/form-data; boundary=\"" + visitor.boundary + "\"";
 
-				using (var memoryStream = new MemoryStream())
+				using var memoryStream = new MemoryStream();
+				visitor.stream = memoryStream;
+				var first = true;
+				foreach (var parameter in request)
 				{
-					visitor.stream = memoryStream;
-					var first = true;
-					foreach (var parameter in request)
+					if (!first)
 					{
-						if (!first)
-						{
-							memoryStream.Write(CurrentEncoding.GetBytes("\r\n"), 0, CurrentEncoding.GetByteCount("\r\n"));
-						}
-
-						first = false;
-						parameter.Accept(visitor);
-						if (visitor.badBoundary)
-						{
-							break;
-						}
+						memoryStream.Write(CurrentEncoding.GetBytes("\r\n"), 0, CurrentEncoding.GetByteCount("\r\n"));
 					}
 
-					if (!visitor.badBoundary)
+					first = false;
+					parameter.Accept(visitor);
+					if (visitor.badBoundary)
 					{
-						var footer = "\r\n--" + visitor.boundary + "--\r\n";
-						memoryStream.Write(CurrentEncoding.GetBytes(footer), 0, CurrentEncoding.GetByteCount(footer));
-						formData = new byte[memoryStream.Length];
-						memoryStream.Position = 0;
-						memoryStream.Read(formData, 0, formData.Length);
+						break;
 					}
-					else
+				}
+
+				if (!visitor.badBoundary)
+				{
+					var footer = "\r\n--" + visitor.boundary + "--\r\n";
+					memoryStream.Write(CurrentEncoding.GetBytes(footer), 0, CurrentEncoding.GetByteCount(footer));
+					formData = new byte[memoryStream.Length];
+					memoryStream.Position = 0;
+					memoryStream.Read(formData, 0, formData.Length);
+				}
+				else
+				{
+					if (boundaryLength < 70)
 					{
-						if (boundaryLength < 70)
-						{
-							boundaryLength++;
-						}
+						boundaryLength++;
 					}
 				}
 			}

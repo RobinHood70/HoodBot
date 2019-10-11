@@ -21,23 +21,14 @@ namespace RobinHood70.WallE.Eve.Modules
 			: base(wal, input, pageSetGenerator)
 		{
 			var linkType = input.LinkType;
-			switch (linkType)
+			(this.Prefix, this.Name) = linkType switch
 			{
-				case AllLinksTypes.Links:
-					(this.Prefix, this.Name) = ("al", "alllinks");
-					break;
-				case AllLinksTypes.FileUsages:
-					(this.Prefix, this.Name) = ("af", "allfileusages");
-					break;
-				case AllLinksTypes.Redirects:
-					(this.Prefix, this.Name) = ("ar", "allredirects");
-					break;
-				case AllLinksTypes.Transclusions:
-					(this.Prefix, this.Name) = ("at", "alltransclusions");
-					break;
-				default:
-					throw new ArgumentException(CurrentCulture(linkType.IsUniqueFlag() ? EveMessages.ParameterInvalid : EveMessages.InputNonUnique, nameof(ListAllLinks), linkType));
-			}
+				AllLinksTypes.Links => ("al", "alllinks"),
+				AllLinksTypes.FileUsages => ("af", "allfileusages"),
+				AllLinksTypes.Redirects => ("ar", "allredirects"),
+				AllLinksTypes.Transclusions => ("at", "alltransclusions"),
+				_ => throw new ArgumentException(CurrentCulture(linkType.IsUniqueFlag() ? EveMessages.ParameterInvalid : EveMessages.InputNonUnique, nameof(ListAllLinks), linkType)),
+			};
 		}
 		#endregion
 

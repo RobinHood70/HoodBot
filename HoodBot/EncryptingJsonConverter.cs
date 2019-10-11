@@ -16,10 +16,8 @@
 		{
 			// Hash the key to ensure it is exactly 256 bits long, as required by AES-256
 			ThrowNull(encryptionKey, nameof(encryptionKey));
-			using (var sha = new SHA256Managed())
-			{
-				this.encryptionKeyBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(encryptionKey));
-			}
+			using var sha = new SHA256Managed();
+			this.encryptionKeyBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(encryptionKey));
 		}
 
 		public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -32,24 +30,24 @@
 				return;
 			}
 
-			using (var outputStream = new MemoryStream())
-			using (var aes = new AesManaged())
+			using var outputStream = new MemoryStream();
+			using var aes = new AesManaged
 			{
-				aes.Key = this.encryptionKeyBytes;
-				var iv = aes.IV; // first access generates a new IV
-				outputStream.Write(iv, 0, iv.Length);
-				outputStream.Flush();
+				Key = this.encryptionKeyBytes
+			};
+			var iv = aes.IV; // first access generates a new IV
+			outputStream.Write(iv, 0, iv.Length);
+			outputStream.Flush();
 
-				var buffer = Encoding.UTF8.GetBytes(stringValue);
-				using (var inputStream = new MemoryStream(buffer, false))
-				using (var encryptor = aes.CreateEncryptor(this.encryptionKeyBytes, iv))
-				using (var cryptoStream = new CryptoStream(outputStream, encryptor, CryptoStreamMode.Write))
-				{
-					inputStream.CopyTo(cryptoStream);
-				}
-
-				writer.WriteValue(Convert.ToBase64String(outputStream.ToArray()));
+			var buffer = Encoding.UTF8.GetBytes(stringValue);
+			using (var inputStream = new MemoryStream(buffer, false))
+			using (var encryptor = aes.CreateEncryptor(this.encryptionKeyBytes, iv))
+			using (var cryptoStream = new CryptoStream(outputStream, encryptor, CryptoStreamMode.Write))
+			{
+				inputStream.CopyTo(cryptoStream);
 			}
+
+			writer.WriteValue(Convert.ToBase64String(outputStream.ToArray()));
 		}
 
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Too many possible errors and handling is the same for all. Also, not my code.")]
@@ -66,28 +64,26 @@
 			try
 			{
 				var buffer = Convert.FromBase64String(value);
-				using (var inputStream = new MemoryStream(buffer, false))
+				using var inputStream = new MemoryStream(buffer, false);
+				var iv = new byte[16];
+				var bytesRead = inputStream.Read(iv, 0, 16);
+				if (bytesRead < 16)
 				{
-					var iv = new byte[16];
-					var bytesRead = inputStream.Read(iv, 0, 16);
-					if (bytesRead < 16)
-					{
-						throw new CryptographicException("IV is missing or invalid.");
-					}
-
-					using (var outputStream = new MemoryStream())
-					using (var aes = new AesManaged())
-					{
-						aes.Key = this.encryptionKeyBytes;
-						using (var decryptor = aes.CreateDecryptor(this.encryptionKeyBytes, iv))
-						using (var cryptoStream = new CryptoStream(inputStream, decryptor, CryptoStreamMode.Read))
-						{
-							cryptoStream.CopyTo(outputStream);
-						}
-
-						decryptedValue = Encoding.UTF8.GetString(outputStream.ToArray());
-					}
+					throw new CryptographicException("IV is missing or invalid.");
 				}
+
+				using var outputStream = new MemoryStream();
+				using var aes = new AesManaged
+				{
+					Key = this.encryptionKeyBytes
+				};
+				using (var decryptor = aes.CreateDecryptor(this.encryptionKeyBytes, iv))
+				using (var cryptoStream = new CryptoStream(inputStream, decryptor, CryptoStreamMode.Read))
+				{
+					cryptoStream.CopyTo(outputStream);
+				}
+
+				decryptedValue = Encoding.UTF8.GetString(outputStream.ToArray());
 			}
 			catch
 			{

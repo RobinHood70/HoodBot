@@ -59,7 +59,7 @@
 					}
 				}
 
-				parameter.Name = parameter.Name ?? Site.ImageCaptionName;
+				parameter.Name ??= Site.ImageCaptionName;
 				this.parameters.Add(parameter);
 			}
 		}

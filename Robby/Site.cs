@@ -657,21 +657,19 @@
 					destinationName = checkedName;
 				}
 
-				using (var upload = new FileStream(checkedName, FileMode.Open))
+				using var upload = new FileStream(checkedName, FileMode.Open);
+				var uploadInput = new UploadInput(destinationName, upload)
 				{
-					var uploadInput = new UploadInput(destinationName, upload)
-					{
-						IgnoreWarnings = true,
-						Comment = editSummary,
-					};
+					IgnoreWarnings = true,
+					Comment = editSummary,
+				};
 
-					if (pageText != null)
-					{
-						uploadInput.Text = pageText;
-					}
-
-					return this.Upload(uploadInput) ? ChangeStatus.Success : ChangeStatus.Failure;
+				if (pageText != null)
+				{
+					uploadInput.Text = pageText;
 				}
+
+				return this.Upload(uploadInput) ? ChangeStatus.Success : ChangeStatus.Failure;
 			});
 		#endregion
 

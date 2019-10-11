@@ -184,7 +184,7 @@
 						throw new InvalidOperationException($"Result destination {sb.Key} was not properly initialized.");
 					}
 
-					info.Title = info.Title ?? "Job Results";
+					info.Title ??= "Job Results";
 					var result = sb.Value.ToString().Trim();
 					switch (sb.Key)
 					{

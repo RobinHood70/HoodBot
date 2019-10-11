@@ -79,11 +79,9 @@ namespace RobinHood70.WallE.Clients.Async
 
 		public async Task<string> GetAsync(Uri uri)
 		{
-			using (var response = await this.httpClient.GetAsync(uri).ConfigureAwait(false))
-			{
-				var retval = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-				return retval;
-			}
+			using var response = await this.httpClient.GetAsync(uri).ConfigureAwait(false);
+			var retval = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+			return retval;
 		}
 
 		public CookieContainer LoadCookies()
@@ -96,10 +94,8 @@ namespace RobinHood70.WallE.Clients.Async
 
 			try
 			{
-				using (var stream = File.Open(this.cookiesLocation, FileMode.Open))
-				{
-					return new BinaryFormatter().Deserialize(stream) as CookieContainer;
-				}
+				using var stream = File.Open(this.cookiesLocation, FileMode.Open);
+				return new BinaryFormatter().Deserialize(stream) as CookieContainer;
 			}
 			catch (FileNotFoundException)
 			{
@@ -148,11 +144,8 @@ namespace RobinHood70.WallE.Clients.Async
 
 		public async Task<string> PostAsync(Uri uri, HttpContent content)
 		{
-			using (var response = await this.httpClient.PostAsync(uri, content).ConfigureAwait(false))
-			{
-				var retval = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-				return retval;
-			}
+			using var response = await this.httpClient.PostAsync(uri, content).ConfigureAwait(false);
+			return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 		}
 
 		/// <summary>This method is used both to throttle clients as well as to respect any wiki-requested delays, such as from maxlag. Clients should respect any delays requested unless they expect to abort the procedure or for testing.</summary>

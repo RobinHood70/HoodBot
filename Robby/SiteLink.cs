@@ -232,7 +232,7 @@
 				{
 					if (this.IsLocal)
 					{
-						value = value ?? string.Empty;
+						value ??= string.Empty;
 						var ns = this.Site.Namespaces[value];
 						this.namespaceObject = ns;
 					}
@@ -344,9 +344,9 @@
 
 			var iwOptional = regexInterwikis == null ? "?" : string.Empty;
 			var nsOptional = regexNamespaces == null ? "?" : string.Empty;
-			regexInterwikis = regexInterwikis ?? regexWildNamespace;
-			regexNamespaces = regexNamespaces ?? regexWildNamespace;
-			regexPageNames = regexPageNames ?? @"[^#\|\]]*?";
+			regexInterwikis ??= regexWildNamespace;
+			regexNamespaces ??= regexWildNamespace;
+			regexPageNames ??= @"[^#\|\]]*?";
 			if (regexAfter != null)
 			{
 				regexAfter = @"(?<after>" + regexAfter + ")";

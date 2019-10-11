@@ -152,10 +152,8 @@
 		/// <param name="encoding">The encoding.</param>
 		public void ReadFile(string fileName, bool hasHeader, Encoding encoding)
 		{
-			using (var reader = new StreamReader(fileName, encoding))
-			{
-				this.ReadText(reader, hasHeader);
-			}
+			using var reader = new StreamReader(fileName, encoding);
+			this.ReadText(reader, hasHeader);
 		}
 
 		/// <summary>Reads a single row from a <see cref="TextReader"/>.</summary>
@@ -250,10 +248,8 @@
 		/// <param name="hasHeader">Whether or not the data has a header.</param>
 		public void ReadText(string text, bool hasHeader)
 		{
-			using (var textReader = new StringReader(text))
-			{
-				this.ReadText(textReader, hasHeader);
-			}
+			using var textReader = new StringReader(text);
+			this.ReadText(textReader, hasHeader);
 		}
 
 		/// <summary>Reads an entire file from a <see cref="TextReader"/> derivative.</summary>
@@ -339,11 +335,9 @@
 		/// <param name="encoding">The encoding.</param>
 		public void WriteFile(string fileName, Encoding encoding)
 		{
-			using (var fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None))
-			using (var writeStream = new StreamWriter(fileStream, encoding))
-			{
-				this.WriteText(writeStream);
-			}
+			using var fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None);
+			using var writeStream = new StreamWriter(fileStream, encoding);
+			this.WriteText(writeStream);
 		}
 
 		/// <summary>Writes a row to the specified <see cref="TextWriter"/> derivative.</summary>

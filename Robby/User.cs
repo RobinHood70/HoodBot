@@ -120,7 +120,7 @@
 		/// <remarks>The subject of the e-mail will be the wiki default.</remarks>
 		public ChangeValue<string> Email(string body, bool ccMe)
 		{
-			defaultSubject = defaultSubject ?? this.Site.LoadParsedMessage("defemailsubject").Replace("$1", this.Site.User.Name);
+			defaultSubject ??= this.Site.LoadParsedMessage("defemailsubject").Replace("$1", this.Site.User.Name);
 			return this.Email(defaultSubject, body, ccMe);
 		}
 
@@ -134,7 +134,7 @@
 			if (this.loaded && !this.Emailable)
 			{
 				// Don't ask the wiki what the result will be if we already know we can't e-mail them. Load the e-mail disabled message if we don't already have it and just return that.
-				emailDisabled = emailDisabled ?? this.Site.LoadParsedMessage("usermaildisabled");
+				emailDisabled ??= this.Site.LoadParsedMessage("usermaildisabled");
 				return new ChangeValue<string>(ChangeStatus.Failure, emailDisabled);
 			}
 

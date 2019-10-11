@@ -81,12 +81,10 @@
 				}
 				else
 				{
-					using (var enumerator = collection.GetEnumerator())
+					using var enumerator = collection.GetEnumerator();
+					while (enumerator.MoveNext())
 					{
-						while (enumerator.MoveNext())
-						{
-							original.Add(enumerator.Current);
-						}
+						original.Add(enumerator.Current);
 					}
 				}
 			}
@@ -112,10 +110,8 @@
 		public static TValue First<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
 		{
 			ThrowNull(dictionary, nameof(dictionary));
-			using (var enumerator = dictionary.GetEnumerator())
-			{
-				return enumerator.MoveNext() ? enumerator.Current.Value : throw new InvalidOperationException();
-			}
+			using var enumerator = dictionary.GetEnumerator();
+			return enumerator.MoveNext() ? enumerator.Current.Value : throw new InvalidOperationException();
 		}
 		#endregion
 
@@ -141,10 +137,8 @@
 		public static T First<T>(this IEnumerable<T> collection)
 		{
 			ThrowNull(collection, nameof(collection));
-			using (var enumerator = collection.GetEnumerator())
-			{
-				return enumerator.MoveNext() ? enumerator.Current : throw new KeyNotFoundException();
-			}
+			using var enumerator = collection.GetEnumerator();
+			return enumerator.MoveNext() ? enumerator.Current : throw new KeyNotFoundException();
 		}
 
 		/// <summary>Gets the first item of the collection, or the default value for the type.</summary>
@@ -162,12 +156,10 @@
 		{
 			if (collection != null)
 			{
-				using (var enumerator = collection.GetEnumerator())
+				using var enumerator = collection.GetEnumerator();
+				if (enumerator.MoveNext())
 				{
-					if (enumerator.MoveNext())
-					{
-						return enumerator.Current;
-					}
+					return enumerator.Current;
 				}
 			}
 

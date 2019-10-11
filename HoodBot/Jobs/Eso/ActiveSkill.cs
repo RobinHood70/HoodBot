@@ -26,7 +26,7 @@
 
 		public override void GetRankData(IDataRecord data)
 		{
-			string FormatRange(int num) => ((double)num / 100).ToString("0.##");
+			static string FormatRange(int num) => ((double)num / 100).ToString("0.##");
 
 			Morph morph;
 			var morphNum = (sbyte)data["morph"];

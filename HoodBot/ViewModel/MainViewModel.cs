@@ -547,7 +547,7 @@
 		private void SitePagePreview(Site sender, PagePreviewArgs eventArgs)
 		{
 			// Until we get a menu going, specify manually.
-			currentViewer = currentViewer ?? this.FindPlugin<IDiffViewer>("IeDiff");
+			currentViewer ??= this.FindPlugin<IDiffViewer>("IeDiff");
 			if (currentViewer != null && this.ShowDiffs && this.site.AbstractionLayer is WikiAbstractionLayer wal)
 			{
 				var token = wal.TokenManager.SessionToken("csrf"); // HACK: This is only necessary for browser-based diffs. Not sure how to handle it better.

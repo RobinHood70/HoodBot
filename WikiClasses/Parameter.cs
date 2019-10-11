@@ -122,7 +122,7 @@
 				}
 				else
 				{
-					this.FullName = this.FullName ?? new PaddedString();
+					this.FullName ??= new PaddedString();
 					this.FullName.Value = value;
 				}
 			}
@@ -150,12 +150,7 @@
 					retval = retval.Substring(0, 17) + "...";
 				}
 
-				if (!this.Anonymous)
-				{
-					return this.Name + "=" + retval;
-				}
-
-				return retval;
+				return !this.Anonymous ? this.Name + "=" + retval : retval;
 			}
 		}
 		#endregion

@@ -67,23 +67,21 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(result, nameof(result));
 			ThrowNull(output, nameof(output));
-			using (var enumeration = (result as IEnumerable<JToken>).GetEnumerator())
+			using var enumeration = (result as IEnumerable<JToken>).GetEnumerator();
+			while (this.ItemsRemaining > 0 && enumeration.MoveNext())
 			{
-				while (this.ItemsRemaining > 0 && enumeration.MoveNext())
+				var item = this.GetItem(enumeration.Current);
+				if (item != null)
 				{
-					var item = this.GetItem(enumeration.Current);
-					if (item != null)
+					this.myList.Add(item);
+					if (this.ItemsRemaining != int.MaxValue)
 					{
-						this.myList.Add(item);
-						if (this.ItemsRemaining != int.MaxValue)
-						{
-							this.ItemsRemaining--;
-						}
+						this.ItemsRemaining--;
 					}
 				}
-
-				this.SetResultsOnCurrentPage();
 			}
+
+			this.SetResultsOnCurrentPage();
 		}
 		#endregion
 	}

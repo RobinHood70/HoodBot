@@ -176,7 +176,7 @@
 		/// <summary>Loads or reloads the page.</summary>
 		public void Load()
 		{
-			this.LoadOptions = this.LoadOptions ?? this.Site.DefaultLoadOptions;
+			this.LoadOptions ??= this.Site.DefaultLoadOptions;
 			this.Reload();
 		}
 

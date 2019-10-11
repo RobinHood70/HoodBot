@@ -62,22 +62,14 @@ namespace RobinHood70.WallE.Base
 
 		#region Public Methods
 
-		public static string GetDiffToValue(int? revision)
+		public static string GetDiffToValue(int? revision) => revision switch
 		{
-			switch (revision)
-			{
-				case null:
-					return null;
-				case DiffToNext:
-					return "next";
-				case DiffToPrevious:
-					return "prev";
-				case DiffToCurrent:
-					return "cur";
-				default:
-					return revision.Value.ToString(CultureInfo.InvariantCulture);
-			}
-		}
+			null => null,
+			DiffToNext => "next",
+			DiffToPrevious => "prev",
+			DiffToCurrent => "cur",
+			_ => revision.Value.ToString(CultureInfo.InvariantCulture),
+		};
 		#endregion
 	}
 }

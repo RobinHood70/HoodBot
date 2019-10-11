@@ -594,7 +594,7 @@
 		public BlockResult Block(BlockInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Csrf);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Csrf);
 			return new ActionBlock(this).Submit(input);
 		}
 
@@ -670,7 +670,7 @@
 		public DeleteResult Delete(DeleteInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Csrf);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Csrf);
 			return new ActionDelete(this).Submit(input);
 		}
 
@@ -695,7 +695,7 @@
 		public EditResult Edit(EditInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Csrf);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Csrf);
 			var edit = new ActionEdit(this);
 			EditResult retval;
 			bool doCaptcha;
@@ -726,7 +726,7 @@
 		public EmailUserResult EmailUser(EmailUserInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Csrf);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Csrf);
 			return new ActionEmailUser(this).Submit(input);
 		}
 
@@ -771,7 +771,7 @@
 		public FileRevertResult FileRevert(FileRevertInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Csrf);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Csrf);
 			return new ActionFileRevert(this).Submit(input);
 		}
 
@@ -786,7 +786,7 @@
 		public PageSetResult<ImageRotateItem> ImageRotate(ImageRotateInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Csrf);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Csrf);
 			return new ActionImageRotate(this).SubmitPageSet(input);
 		}
 
@@ -796,7 +796,7 @@
 		public IReadOnlyList<ImportItem> Import(ImportInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Csrf);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Csrf);
 			return new ActionImport(this).Submit(input);
 		}
 
@@ -883,7 +883,7 @@
 			this.Assert = null;
 			if (this.SiteVersion >= 127)
 			{
-				input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Login);
+				input.Token ??= this.TokenManager.SessionToken(TokensInput.Login);
 				this.TokenManager.Clear();
 			}
 
@@ -952,7 +952,7 @@
 		public ManageTagsResult ManageTags(ManageTagsInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Csrf);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Csrf);
 			return new ActionManageTags(this).Submit(input);
 		}
 
@@ -962,7 +962,7 @@
 		public MergeHistoryResult MergeHistory(MergeHistoryInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Csrf);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Csrf);
 			return new ActionMergeHistory(this).Submit(input);
 		}
 
@@ -973,7 +973,7 @@
 		public MoveResult Move(MoveInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Csrf);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Csrf);
 			return new ActionMove(this).Submit(input);
 		}
 
@@ -996,7 +996,7 @@
 			ThrowNull(input, nameof(input));
 
 			// Set input Token, even though it's not used directly, so this behaves like other routines.
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Csrf);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Csrf);
 			var internalInput = new OptionsInputInternal() { Reset = input.Reset, ResetKinds = input.ResetKinds, Token = input.Token };
 			var change = new List<string>();
 			if (input.Change != null)
@@ -1060,7 +1060,7 @@
 		public PatrolResult Patrol(PatrolInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Patrol);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Patrol);
 			return new ActionPatrol(this).Submit(input);
 		}
 
@@ -1077,7 +1077,7 @@
 		public ProtectResult Protect(ProtectInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Csrf);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Csrf);
 			return new ActionProtect(this).Submit(input);
 		}
 
@@ -1118,7 +1118,7 @@
 		public ResetPasswordResult ResetPassword(ResetPasswordInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Csrf);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Csrf);
 			return new ActionResetPassword(this).Submit(input);
 		}
 
@@ -1128,7 +1128,7 @@
 		public RevisionDeleteResult RevisionDelete(RevisionDeleteInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Csrf);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Csrf);
 			return new ActionRevisionDelete(this).Submit(input);
 		}
 
@@ -1169,7 +1169,7 @@
 		public PageSetResult<SetNotificationTimestampItem> SetNotificationTimestamp(SetNotificationTimestampInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Csrf);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Csrf);
 			return new ActionSetNotificationTimestamp(this).SubmitPageSet(input);
 		}
 
@@ -1189,7 +1189,7 @@
 		public IReadOnlyList<TagItem> Tag(TagInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Csrf);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Csrf);
 			return new ActionTag(this).Submit(input);
 		}
 
@@ -1204,7 +1204,7 @@
 		public UnblockResult Unblock(UnblockInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Csrf);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Csrf);
 			return new ActionUnblock(this).Submit(input);
 		}
 
@@ -1214,7 +1214,7 @@
 		public UndeleteResult Undelete(UndeleteInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Csrf);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Csrf);
 			return new ActionUndelete(this).Submit(input);
 		}
 
@@ -1224,7 +1224,7 @@
 		public UploadResult Upload(UploadInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Csrf);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Csrf);
 			if (
 				input.ChunkSize > 0
 				&& (this.SiteVersion >= 126
@@ -1259,7 +1259,7 @@
 				throw new InvalidOperationException(EveMessages.InvalidUserRightsRequest);
 			}
 
-			input.Token = input.Token ?? this.TokenManager.UserRightsToken(input.User);
+			input.Token ??= this.TokenManager.UserRightsToken(input.User);
 			return new ActionUserRights(this).Submit(input);
 		}
 
@@ -1275,7 +1275,7 @@
 		public PageSetResult<WatchItem> Watch(WatchInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token = input.Token ?? this.TokenManager.SessionToken(TokensInput.Watch);
+			input.Token ??= this.TokenManager.SessionToken(TokensInput.Watch);
 
 			if (this.SiteVersion >= 123)
 			{

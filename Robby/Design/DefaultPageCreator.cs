@@ -17,17 +17,13 @@
 		public override Page CreatePage(ISimpleTitle simpleTitle)
 		{
 			ThrowNull(simpleTitle, nameof(simpleTitle));
-			switch (simpleTitle.Namespace.Id)
+			return simpleTitle.Namespace.Id switch
 			{
-				case MediaWikiNamespaces.MediaWiki:
-					return new MessagePage(simpleTitle.Site, simpleTitle.PageName);
-				case MediaWikiNamespaces.File:
-					return new FilePage(simpleTitle.Site, simpleTitle.PageName);
-				case MediaWikiNamespaces.Category:
-					return new CategoryPage(simpleTitle.Site, simpleTitle.PageName);
-				default:
-					return new Page(simpleTitle);
-			}
+				MediaWikiNamespaces.MediaWiki => new MessagePage(simpleTitle.Site, simpleTitle.PageName),
+				MediaWikiNamespaces.File => new FilePage(simpleTitle.Site, simpleTitle.PageName),
+				MediaWikiNamespaces.Category => new CategoryPage(simpleTitle.Site, simpleTitle.PageName),
+				_ => new Page(simpleTitle),
+			};
 		}
 
 		/// <summary>Creates a page item.</summary>

@@ -47,18 +47,12 @@
 
 		/// <summary>Creates a new continuation module.</summary>
 		/// <returns>A continuation module appropriate to the version of the wiki in use.</returns>
-		public ContinueModule CreateContinue()
+		public ContinueModule CreateContinue() => this.wal.ContinueVersion switch
 		{
-			switch (this.wal.ContinueVersion)
-			{
-				case 1:
-					return new ContinueModule1();
-				case 2:
-					return new ContinueModule2(this.wal.SiteVersion);
-				default:
-					return new ContinueModuleUnknown();
-			}
-		}
+			1 => new ContinueModule1(),
+			2 => new ContinueModule2(this.wal.SiteVersion),
+			_ => new ContinueModuleUnknown(),
+		};
 
 		/// <summary>Creates a generator module from the relevant input.</summary>
 		/// <typeparam name="TInput">The type of the input.</typeparam>

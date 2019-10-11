@@ -182,15 +182,12 @@
 		public ParameterCollection AddFilterPiped(string name, string trueValue, Filter filter)
 		{
 			ThrowNull(trueValue, nameof(trueValue));
-			switch (filter)
+			return filter switch
 			{
-				case Filter.Only:
-					return this.Add(name, new[] { trueValue });
-				case Filter.Exclude:
-					return this.Add(name, new[] { '!' + trueValue });
-				default:
-					return this;
-			}
+				Filter.Only => this.Add(name, new[] { trueValue }),
+				Filter.Exclude => this.Add(name, new[] { '!' + trueValue }),
+				_ => this,
+			};
 		}
 
 		/// <summary>Adds a toggled Filter parameter if the value is not All and the condition is true. The name of the parameter is fixed, and the value emitted is either <c>trueValue</c> or <c>!trueValue</c>, depending on the value of the filter.</summary>
@@ -207,18 +204,12 @@
 		/// <param name="filterName">The text to emit when the filter is set to Filter.</param>
 		/// <param name="filter">The filter variable.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public ParameterCollection AddFilterText(string name, string onlyName, string filterName, Filter filter)
+		public ParameterCollection AddFilterText(string name, string onlyName, string filterName, Filter filter) => filter switch
 		{
-			switch (filter)
-			{
-				case Filter.Only:
-					return this.Add(name, onlyName);
-				case Filter.Exclude:
-					return this.Add(name, filterName);
-				default:
-					return this;
-			}
-		}
+			Filter.Only => this.Add(name, onlyName),
+			Filter.Exclude => this.Add(name, filterName),
+			_ => this,
+		};
 
 		// TODO: Add AddFlags that distinguishes between None and Default and sends empty parameter for None instead of nothing. Update all relevant calls and flag values as appropriate.
 
@@ -459,18 +450,12 @@
 		/// <param name="falseName">Parameter name to use when the value is false.</param>
 		/// <param name="tristateVar">The tristate parameter value.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public ParameterCollection AddTristate(string trueName, string falseName, Tristate tristateVar)
+		public ParameterCollection AddTristate(string trueName, string falseName, Tristate tristateVar) => tristateVar switch
 		{
-			switch (tristateVar)
-			{
-				case Tristate.True:
-					return this.Add(trueName);
-				case Tristate.False:
-					return this.Add(falseName);
-				default:
-					return this;
-			}
-		}
+			Tristate.True => this.Add(trueName),
+			Tristate.False => this.Add(falseName),
+			_ => this,
+		};
 
 		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
 		/// <param name="key">The key of the value to get.</param>
