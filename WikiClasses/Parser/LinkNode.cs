@@ -3,7 +3,7 @@
 	using System.Collections;
 	using System.Collections.Generic;
 
-	public class LinkNode : WikiNode, IBacklinkNode
+	public class LinkNode : IWikiNode, IBacklinkNode
 	{
 		#region Constructors
 		public LinkNode(NodeCollection title, IList<ParameterNode> parameters)
@@ -20,7 +20,7 @@
 		#endregion
 
 		#region Public Methods
-		public override void Accept(INodeVisitor visitor) => visitor?.Visit(this);
+		public void Accept(INodeVisitor visitor) => visitor?.Visit(this);
 
 		public IEnumerator<NodeCollection> GetEnumerator()
 		{

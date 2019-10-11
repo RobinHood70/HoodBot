@@ -44,7 +44,7 @@
 					? replacement.PageName
 					: replacement.FullPageName;
 				var newNode = new TextNode(newName);
-				parent.Title.ReplaceAll<TextNode>(newNode);
+				parent.Title.ReplaceAllWithOne<TextNode>(newNode);
 
 				if (!isTemplate)
 				{

@@ -95,7 +95,7 @@
     <Compile Include="Parser\TagNode.cs" />
     <Compile Include="Parser\HeaderNode.cs" />
     <Compile Include="Parser\IgnoreNode.cs" />
-    <Compile Include="Parser\WikiNode.cs" />
+    <Compile Include="Parser\IWikiNode.cs" />
     <Compile Include="Parser\INodeVisitor.cs" />
     <Compile Include="Parser\ParameterNode.cs" />
     <Compile Include="Parser\TemplateNode.cs" />

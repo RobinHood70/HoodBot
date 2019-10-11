@@ -2,11 +2,11 @@
 {
 	using System.Collections.Generic;
 
-	internal class ElementNodeCollection : List<WikiNode>
+	internal class ElementNodeCollection : List<IWikiNode>
 	{
 		#region Constructors
-		public ElementNodeCollection(params WikiNode[] nodes)
-			: base(nodes as IEnumerable<WikiNode>)
+		public ElementNodeCollection(params IWikiNode[] nodes)
+			: base(nodes as IEnumerable<IWikiNode>)
 		{
 		}
 		#endregion

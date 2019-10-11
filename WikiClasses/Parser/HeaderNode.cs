@@ -4,13 +4,12 @@
 	using System.Collections.Generic;
 	using static WikiCommon.Globals;
 
-	public class HeaderNode : WikiNode, IEnumerable<NodeCollection>
+	public class HeaderNode : IWikiNode, IEnumerable<NodeCollection>
 	{
 		#region Constructors
 		public HeaderNode(int index, int level, NodeCollection title)
 		{
 			ThrowNull(title, nameof(title));
-			title.Parent = this;
 			this.Index = index;
 			this.Level = level;
 			this.Title = title;
@@ -28,7 +27,7 @@
 		#endregion
 
 		#region Public Methods
-		public override void Accept(INodeVisitor visitor) => visitor?.Visit(this);
+		public void Accept(INodeVisitor visitor) => visitor?.Visit(this);
 
 		public IEnumerator<NodeCollection> GetEnumerator()
 		{

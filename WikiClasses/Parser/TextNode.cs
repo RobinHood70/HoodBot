@@ -1,6 +1,6 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
-	public class TextNode : WikiNode
+	public class TextNode : IWikiNode
 	{
 		#region Constructors
 		public TextNode(string text) => this.Text = text;
@@ -11,7 +11,7 @@
 		#endregion
 
 		#region Public Methods
-		public override void Accept(INodeVisitor visitor) => visitor?.Visit(this);
+		public void Accept(INodeVisitor visitor) => visitor?.Visit(this);
 		#endregion
 
 		#region Public Override Methods

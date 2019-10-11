@@ -78,7 +78,7 @@
 		#endregion
 
 		#region Private Static Methods
-		private static WikiNode IfEqualsReplacer(TemplateNode node, string templateName)
+		private static IWikiNode IfEqualsReplacer(TemplateNode node, string templateName)
 		{
 			var parameters = node.ParameterDictionary();
 			var testValue = templateName.Split(TextArrays.Colon, 2)[1].Trim();
@@ -95,26 +95,27 @@
 			if (!this.templateHappened)
 			{
 				var maxTags = parsedText.Count < 3 ? parsedText.Count : 3;
-				for (var loc = 0; loc < maxTags; loc++)
+				var currentNode = parsedText.First;
+				while (currentNode != null && maxTags > 0)
 				{
-					if (parsedText[loc] is IgnoreNode tag && tag.Value == "<noinclude>")
+					if (currentNode.Value is IgnoreNode tag && tag.Value == "<noinclude>")
 					{
-						parsedText.Insert(loc + 1, OldTransclusionNode);
+						parsedText.AddAfter(currentNode, OldTransclusionNode);
 						this.templateHappened = true;
 						break;
 					}
+
+					maxTags--;
 				}
 
 				if (!this.templateHappened)
 				{
-					parsedText.Insert(0, OldTransclusionNode);
+					parsedText.AddFirst(OldTransclusionNode);
 				}
 			}
-
-			OldTransclusionNode.Parent = null;
 		}
 
-		private WikiNode FmiReplacer(TemplateNode node)
+		private IWikiNode FmiReplacer(TemplateNode node)
 		{
 			if (this.currentPage.Namespace == UespNamespaces.Lore)
 			{
@@ -159,7 +160,7 @@
 			}
 		}
 
-		private WikiNode LoreLinkReplacer(TemplateNode node)
+		private IWikiNode LoreLinkReplacer(TemplateNode node)
 		{
 			var parameters = node.ParameterDictionary();
 			var metaNamespace = MetaNamespace.FromTitle(this.currentPage);
@@ -183,13 +184,11 @@
 				!this.allPageNames.TryGetValue(new Title(metaNamespace.Parent, linkTitle.PageName), out linkPage))
 			{
 				node.Title.Clear();
-				node.Title.Add(new TextNode("Future Link"));
-				linkParam.Parent = null;
+				node.Title.AddFirst(new TextNode("Future Link"));
 				node.Parameters.Clear();
 				node.Parameters.Add(new ParameterNode(1, linkParam));
 				if (displayParam != null)
 				{
-					displayParam.Parent = null;
 					node.Parameters.Add(new ParameterNode(2, displayParam));
 				}
 
@@ -202,12 +201,12 @@
 				return new TextNode($"'''{display}'''");
 			}
 
-			var titleNodes = new NodeCollection { new TextNode(linkPage.FullPageName) };
-			var displayNode = new ParameterNode(1, new NodeCollection { new TextNode(display) });
+			var titleNodes = new NodeCollection(new TextNode(linkPage.FullPageName));
+			var displayNode = new ParameterNode(1, new NodeCollection(new TextNode(display)));
 			return new LinkNode(titleNodes, new[] { displayNode });
 		}
 
-		private WikiNode LoreTransclusionReplacer(WikiNode node)
+		private IWikiNode LoreTransclusionReplacer(IWikiNode node)
 		{
 			if (node is TemplateNode templateNode)
 			{
@@ -233,12 +232,12 @@
 					}
 
 					var loreText = WikiTextParser.Parse(fixedUpLoreText, true, true);
-					if (templateNode.AtLineStart && loreText[0] is TextNode textNode)
+					if (templateNode.AtLineStart && loreText.First.Value is TextNode textNode)
 					{
 						textNode.Text = textNode.Text.TrimStart();
 						if (textNode.Text.Length == 0)
 						{
-							loreText.RemoveAt(0);
+							loreText.RemoveFirst();
 						}
 					}
 
@@ -252,7 +251,7 @@
 			return node;
 		}
 
-		private WikiNode NstReplacer(TemplateNode node)
+		private IWikiNode NstReplacer(TemplateNode node)
 		{
 			var parameters = node.ParameterDictionary();
 			var nsId = MetaNamespace.FromTitle(this.currentPage).Id;
@@ -264,7 +263,7 @@
 			return retval;
 		}
 
-		private WikiNode OldLoreInserter(WikiNode node)
+		private IWikiNode OldLoreInserter(IWikiNode node)
 		{
 			if (node is TemplateNode templateNode)
 			{
@@ -302,7 +301,7 @@
 			this.noTransclusions = this.linkedNamespaces.Count == 0;
 		}
 
-		private WikiNode TemplateReplacer(WikiNode node)
+		private IWikiNode TemplateReplacer(IWikiNode node)
 		{
 			if (this.transclusionParameters != null && node is ArgumentNode arg)
 			{
@@ -330,7 +329,7 @@
 							break;
 						case "Cite book":
 							templateNode.Title.Clear();
-							templateNode.Title.Add(new TextNode("Cite Book"));
+							templateNode.Title.AddFirst(new TextNode("Cite Book"));
 							return node;
 						case "FMI":
 							return this.FmiReplacer(templateNode);
@@ -347,7 +346,7 @@
 						case "Ref":
 							return this.currentPage.Namespace == UespNamespaces.Lore ? node : null;
 						default:
-							if (templateNode.Title[0] is TextNode textNode && textNode.Text.Trim() == "#ifeq:")
+							if (templateNode.Title.First.Value is TextNode textNode && textNode.Text.Trim() == "#ifeq:")
 							{
 								return IfEqualsReplacer(templateNode, templateName);
 							}
@@ -365,7 +364,7 @@
 			return node;
 		}
 
-		private WikiNode TenseReplacer(TemplateNode node)
+		private IWikiNode TenseReplacer(TemplateNode node)
 		{
 			var parameters = node.ParameterDictionary();
 			var parentNamespace = MetaNamespace.ParentFromTitle(this.currentPage);

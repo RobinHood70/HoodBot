@@ -3,7 +3,7 @@
 	using System.Collections;
 	using System.Collections.Generic;
 
-	public class TemplateNode : WikiNode, IBacklinkNode
+	public class TemplateNode : IWikiNode, IBacklinkNode
 	{
 		#region Constructors
 		public TemplateNode(bool atLineStart, NodeCollection title, IList<ParameterNode> parameters)
@@ -23,7 +23,7 @@
 		#endregion
 
 		#region Public Methods
-		public override void Accept(INodeVisitor visitor) => visitor?.Visit(this);
+		public void Accept(INodeVisitor visitor) => visitor?.Visit(this);
 
 		public IEnumerator<NodeCollection> GetEnumerator()
 		{

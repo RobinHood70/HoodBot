@@ -4,7 +4,7 @@
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 
-	public class ArgumentNode : WikiNode, IEnumerable<NodeCollection>
+	public class ArgumentNode : IWikiNode, IEnumerable<NodeCollection>
 	{
 		#region Constructors
 		public ArgumentNode(bool atLineStart, NodeCollection title, IList<ParameterNode> allValues)
@@ -26,7 +26,7 @@
 		#endregion
 
 		#region Public Methods
-		public override void Accept(INodeVisitor visitor) => visitor?.Visit(this);
+		public void Accept(INodeVisitor visitor) => visitor?.Visit(this);
 
 		public IEnumerator<NodeCollection> GetEnumerator()
 		{

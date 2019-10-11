@@ -20,13 +20,13 @@
 		#endregion
 
 		#region Public Static Methods
-		public static string Raw(WikiNode node) => RawVisitor.Build(node);
+		public static string Raw(IWikiNode node) => RawVisitor.Build(node);
 
-		public static string Value(WikiNode node) => ValueVisitor.Build(node);
+		public static string Value(IWikiNode node) => ValueVisitor.Build(node);
 		#endregion
 
 		#region Public Methods
-		public string Build(WikiNode node)
+		public string Build(IWikiNode node)
 		{
 			ThrowNull(node, nameof(node));
 			this.builder.Clear();

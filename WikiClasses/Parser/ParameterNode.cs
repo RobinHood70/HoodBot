@@ -4,22 +4,19 @@
 	using System.Collections.Generic;
 	using static WikiCommon.Globals;
 
-	public class ParameterNode : WikiNode, IEnumerable<NodeCollection>
+	public class ParameterNode : IWikiNode, IEnumerable<NodeCollection>
 	{
 		#region Constructors
 		public ParameterNode(int index, NodeCollection value)
 		{
 			this.Index = index;
 			this.Value = value ?? throw ArgumentNull(nameof(value));
-			value.Parent = this;
 		}
 
 		public ParameterNode(NodeCollection name, NodeCollection value)
 		{
 			this.Name = name ?? throw ArgumentNull(nameof(name));
 			this.Value = value ?? throw ArgumentNull(nameof(value));
-			name.Parent = this;
-			value.Parent = this;
 		}
 		#endregion
 
@@ -32,7 +29,7 @@
 		#endregion
 
 		#region Public Methods
-		public override void Accept(INodeVisitor visitor) => visitor?.Visit(this);
+		public void Accept(INodeVisitor visitor) => visitor?.Visit(this);
 
 		public IEnumerator<NodeCollection> GetEnumerator()
 		{
