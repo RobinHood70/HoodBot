@@ -109,12 +109,14 @@
 
 			foreach (var template in allTemplates)
 			{
-				var row = csvFile.Add(template.Page, template.Template.Name);
+				var fields = new List<string> { template.Page, template.Template.Name };
 				foreach (var param in template.Template)
 				{
 					// For now, we're assuming that trimming trailing lines from anon parameters is desirable, but could be made optional if needed.
-					row[param.Name] = param.Anonymous ? param.Value.TrimEnd(TextArrays.NewLineChars) : param.Value;
+					fields.Add(param.Anonymous ? param.Value.TrimEnd(TextArrays.NewLineChars) : param.Value);
 				}
+
+				csvFile.Add(fields);
 			}
 
 			csvFile.WriteFile(this.saveLocation);

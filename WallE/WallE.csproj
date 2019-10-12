@@ -5,14 +5,9 @@
 		<CodeAnalysisRuleSet>..\WikiRules.ruleset</CodeAnalysisRuleSet>
 		<DocumentationFile>bin\WallE.XML</DocumentationFile>
 		<Description>Wiki Abstraction Layer - handles all low-level communications with a wiki.</Description>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
-	<ItemGroup>
-	  <Compile Remove="Eve\PageSet.cs" />
-	</ItemGroup>
-	<ItemGroup>
-	  <None Remove="CustomDictionary.xml" />
-	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="System.Net.Http" />
 		<Reference Include="System.Net.Http.WebRequest" />
@@ -21,10 +16,19 @@
 		<ProjectReference Include="..\WikiCommon\WikiCommon.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-		<Content Include="..\CustomDictionary.xml" Link="CustomDictionary.xml" />
+		<CodeAnalysisDictionary Include="..\CustomDictionary.xml" Link="CustomDictionary.xml" />
 		<Content Include="Design Notes.txt" />
 	</ItemGroup>
 	<ItemGroup>
+		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.9.6">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.6">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.66" />
 		<PackageReference Include="Newtonsoft.Json" Version="12.0.3-beta2" />
 	</ItemGroup>
 </Project>

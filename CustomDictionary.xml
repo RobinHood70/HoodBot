@@ -2,6 +2,7 @@
 <Dictionary>
 	<Words>
 		<Recognized>
+			<Word>wal</Word>
 			<Word>api</Word>
 			<Word>avg</Word>
 			<Word>bot</Word>
@@ -10,6 +11,7 @@
 			<Word>contribs</Word>
 			<Word>csrf</Word>
 			<Word>deserializer</Word>
+			<Word>disambiguator</Word>
 			<Word>emailable</Word>
 			<Word>globals</Word>
 			<Word>hhvm</Word>

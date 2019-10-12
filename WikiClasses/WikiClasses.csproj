@@ -9,9 +9,20 @@
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>
-		<Reference Include="System.Web" />
+		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.9.6">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.6">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.66" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\WikiCommon\WikiCommon.csproj" />
+	  <ProjectReference Include="..\WikiCommon\WikiCommon.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<Reference Include="System.Web" />
 	</ItemGroup>
 </Project>

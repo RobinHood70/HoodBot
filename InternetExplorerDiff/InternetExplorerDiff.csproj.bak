@@ -3,11 +3,28 @@
 		<TargetFramework>net48</TargetFramework>
 		<LangVersion>latest</LangVersion>
 		<CodeAnalysisRuleSet>..\WikiRules.ruleset</CodeAnalysisRuleSet>
-		<DocumentationFile>bin\WallE.XML</DocumentationFile>
+		<Description>Automates Internet Explorer for on-site diffs.</Description>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+		<OutputPath>..\HoodBot\bin\Debug\Plugins\</OutputPath>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+		<OutputPath>..\HoodBot\bin\Release\Plugins\</OutputPath>
+	</PropertyGroup>
 	<ItemGroup>
-	  <Folder Include="Properties\" />
+		<ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<COMReference Include="SHDocVw">
+			<Guid>{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}</Guid>
+			<VersionMajor>1</VersionMajor>
+			<VersionMinor>1</VersionMinor>
+			<Lcid>0</Lcid>
+			<WrapperTool>tlbimp</WrapperTool>
+			<Isolated>False</Isolated>
+			<EmbedInteropTypes>True</EmbedInteropTypes>
+		</COMReference>
 	</ItemGroup>
 	<ItemGroup>
 	  <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.6">
@@ -18,8 +35,5 @@
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	</ItemGroup>
-	<ItemGroup>
-	  <ProjectReference Include="..\Robby\Robby.csproj" />
 	</ItemGroup>
 </Project>

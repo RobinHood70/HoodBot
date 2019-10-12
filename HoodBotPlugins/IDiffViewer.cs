@@ -6,6 +6,7 @@
 	public interface IDiffViewer : IPlugin
 	{
 		#region Properties
+
 		/// <summary>Gets the human-readable name of this diff viewer.</summary>
 		/// <value>The name.</value>
 		/// <remarks>If appropriate, this name should be internationalized.</remarks>
@@ -13,6 +14,7 @@
 		#endregion
 
 		#region Methods
+
 		/// <summary>Compares the specified texts.</summary>
 		/// <param name="page">The page whose text and most-recent revision should be compared.</param>
 		/// <param name="editSummary">The edit summary for the edit (for browser-based diff viewers where a save may be desirable).</param>
