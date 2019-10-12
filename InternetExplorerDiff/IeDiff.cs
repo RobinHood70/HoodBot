@@ -8,6 +8,7 @@
 	using System.Text;
 	using System.Threading;
 	using RobinHood70.HoodBotPlugins;
+	using RobinHood70.InternetExplorerDiff.Properties;
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using SHDocVw;
@@ -25,7 +26,7 @@
 		#endregion
 
 		#region Public Properties
-		public string Name => Properties.Resources.Name;
+		public string Name => Resources.Name;
 		#endregion
 
 		#region Public Methods

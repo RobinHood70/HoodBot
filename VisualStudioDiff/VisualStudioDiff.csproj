@@ -4,6 +4,7 @@
 		<LangVersion>latest</LangVersion>
 		<CodeAnalysisRuleSet>..\WikiRules.ruleset</CodeAnalysisRuleSet>
 		<Description>Automates Visual Studio's diff viewer.</Description>
+		<RootNamespace>RobinHood70.VisualStudioDiff</RootNamespace>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -25,5 +26,18 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<Compile Update="Properties\Resources.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Resources.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Update="Properties\Resources.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
 	</ItemGroup>
 </Project>

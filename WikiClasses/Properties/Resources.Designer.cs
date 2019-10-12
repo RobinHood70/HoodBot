@@ -79,6 +79,15 @@ namespace RobinHood70.WikiClasses.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The provided link text was malformed..
+        /// </summary>
+        internal static string MalformedLink {
+            get {
+                return ResourceManager.GetString("MalformedLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} called multiple times. It should only ever be called once on a given object..
         /// </summary>
         internal static string MultipleCalls {

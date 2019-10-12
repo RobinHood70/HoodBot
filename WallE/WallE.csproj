@@ -6,6 +6,7 @@
 		<DocumentationFile>bin\WallE.XML</DocumentationFile>
 		<Description>Wiki Abstraction Layer - handles all low-level communications with a wiki.</Description>
 		<Nullable>enable</Nullable>
+		<RootNamespace>RobinHood70.WallE</RootNamespace>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>
@@ -30,5 +31,31 @@
 		</PackageReference>
 		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.66" />
 		<PackageReference Include="Newtonsoft.Json" Version="12.0.3-beta2" />
+	</ItemGroup>
+	<ItemGroup>
+		<Compile Update="Properties\EveMessages.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>EveMessages.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Update="Properties\EveMessages.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>EveMessages.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+	</ItemGroup>
+	<ItemGroup>
+		<Compile Update="Properties\Messages.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Messages.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Update="Properties\Messages.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>Messages.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
 	</ItemGroup>
 </Project>
