@@ -75,7 +75,6 @@
 					break;
 				default:
 					this.ignoredTags.UnionWith(new[] { NoIncludeTag, "/" + NoIncludeTag, OnlyIncludeTag, "/" + OnlyIncludeTag, IncludeOnlyTag, "/" + IncludeOnlyTag });
-					allTags.UnionWith(AllowMissingEndTag);
 					break;
 			}
 
