@@ -5,7 +5,6 @@ namespace RobinHood70.WallE.Design
 	using System.Globalization;
 
 	/// <summary>A static class whose only purpose is to create a FlagFilter using type inference.</summary>
-	[CLSCompliant(false)]
 	public static class FlagFilter
 	{
 		#region Public Methods
@@ -22,7 +21,6 @@ namespace RobinHood70.WallE.Design
 
 	/// <summary>A class for filtering flags enumerations based on the MediaWiki site version.</summary>
 	/// <typeparam name="T">The type of the flags filter to be checked.</typeparam>
-	[CLSCompliant(false)]
 	public sealed class FlagFilter<T>
 		where T : Enum, IConvertible // IConvertible is apparently not implied by Enum unless declared explicity; add it so we don't have to do "as IConvertible" everywhere.
 	{

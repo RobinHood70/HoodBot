@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D5465F73-3B89-4FC9-8AF5-81B2EC6771E1}"
 	ProjectSection(SolutionItems) = preProject
 		Robby\CheckList.txt = Robby\CheckList.txt
+		CustomDictionary.xml = CustomDictionary.xml
 		GlobalAssemblyInfo.cs = GlobalAssemblyInfo.cs
 		GlobalInfo.csproj = GlobalInfo.csproj
 		LICENSE = LICENSE
