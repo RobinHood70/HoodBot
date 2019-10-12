@@ -3,7 +3,6 @@
 		<Authors>Robert Morley</Authors>
 		<Copyright>Copyright © Robert Morley 2019</Copyright>
 		<Product>HoodBot</Product>
-		<LangVersion>latest</LangVersion>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>..\SharedKey.pfx</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
