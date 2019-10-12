@@ -10,7 +10,7 @@
 	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
 
-	public class OneOffJob2 : EditJob
+	public class EsoNpcLocFix : EditJob
 	{
 		#region Fields
 		private readonly PageCollection pages;
@@ -18,7 +18,7 @@
 
 		#region Constructors
 		[JobInfo("One-Off Job - Fix ESO NPC Locations")]
-		public OneOffJob2([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
+		public EsoNpcLocFix([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo) => this.pages = new PageCollection(site);
 		#endregion
 
