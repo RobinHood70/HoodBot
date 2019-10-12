@@ -7,15 +7,15 @@
 	public class NodeCollection : LinkedList<IWikiNode>, IWikiNode
 	{
 		#region Constructors
-		public NodeCollection(IWikiNode parent)
+		public NodeCollection(IWikiNode? parent)
 			: base() => this.Parent = parent;
 
-		public NodeCollection(IWikiNode parent, IEnumerable<IWikiNode> nodes)
+		public NodeCollection(IWikiNode? parent, IEnumerable<IWikiNode> nodes)
 			: base(nodes) => this.Parent = parent;
 		#endregion
 
 		#region Public Properties
-		public IWikiNode Parent { get; }
+		public IWikiNode? Parent { get; }
 		#endregion
 
 		#region Public Methods
@@ -44,7 +44,7 @@
 		///     <item><see langword="null"/> if the node should be removed.</item>
 		/// </list>
 		/// </remarks>
-		public void Replace(Func<IWikiNode, IWikiNode> replaceMethod)
+		public void Replace(Func<IWikiNode, IWikiNode?> replaceMethod)
 		{
 			ThrowNull(replaceMethod, nameof(replaceMethod));
 

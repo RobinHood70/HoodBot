@@ -15,7 +15,7 @@
 		#region Fields
 		private readonly List<CsvRow> rows = new List<CsvRow>();
 		private readonly Dictionary<string, int> nameMap = new Dictionary<string, int>();
-		private IEnumerable<string> headerRow;
+		private IEnumerable<string>? headerRow;
 		#endregion
 
 		#region Public Properties
@@ -47,7 +47,7 @@
 
 		/// <summary>Gets or sets the header row.</summary>
 		/// <value>The header row. <see langword="null"/> if there is no header row (<c>HasHeader = false</c> or there are no rows in the file).</value>
-		public IEnumerable<string> Header
+		public IEnumerable<string>? Header
 		{
 			get => this.headerRow;
 			set
@@ -84,8 +84,7 @@
 
 		/// <summary>Adds the specified field values.</summary>
 		/// <param name="fields">The field values, converted to strings using the default ToString() method for the object.</param>
-		/// <returns>The specified values as a <see cref="CsvRow"/>.</returns>
-		public CsvRow Add(IEnumerable<object> fields)
+		public void Add(IEnumerable<object> fields)
 		{
 			ThrowNull(fields, nameof(fields));
 			var list = new List<string>();
@@ -93,23 +92,20 @@
 			{
 				list.Add(item.ToString());
 			}
-
-			return this.Add(list);
 		}
 
 		/// <summary>Adds the specified field values.</summary>
 		/// <param name="fields">The field values.</param>
-		/// <returns>The specified values as a <see cref="CsvRow"/>.</returns>
-		public CsvRow Add(params string[] fields) => this.Add(fields as IEnumerable<string>);
+		public void Add(params string[] fields) => this.Add(fields as IEnumerable<string>);
 
 		/// <summary>Adds the specified field values.</summary>
 		/// <param name="fields">The field values.</param>
-		/// <returns>The specified values as a <see cref="CsvRow"/>.</returns>
-		public CsvRow Add(IEnumerable<string> fields)
+		public void Add(IEnumerable<string> fields)
 		{
-			var row = new CsvRow(fields, this.nameMap);
-			this.Add(row);
-			return row;
+			if (fields != null)
+			{
+				this.Add(new CsvRow(fields, this.nameMap));
+			}
 		}
 
 		/// <summary>Adds a <see cref="CsvRow"/> directly to the file.</summary>
@@ -159,7 +155,7 @@
 		/// <summary>Reads a single row from a <see cref="TextReader"/>.</summary>
 		/// <param name="reader">The <see cref="TextReader"/> to read from.</param>
 		/// <returns>A <see cref="CsvRow"/> with the field values. If names are provided and not enough fields are present to match the name count, the row will be padded with empty strings.</returns>
-		public IEnumerable<string> ReadRow(TextReader reader)
+		public IEnumerable<string>? ReadRow(TextReader reader)
 		{
 			ThrowNull(reader, nameof(reader));
 			var fields = new List<string>(this.nameMap.Count);
@@ -261,9 +257,13 @@
 			if (hasHeader)
 			{
 				this.Header = this.ReadRow(reader);
+				if (this.Header == null)
+				{
+					return;
+				}
 			}
 
-			IEnumerable<string> row;
+			IEnumerable<string>? row;
 			do
 			{
 				row = this.ReadRow(reader);

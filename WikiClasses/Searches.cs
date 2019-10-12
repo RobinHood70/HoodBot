@@ -37,7 +37,7 @@
 		/// <param name="input">The input.</param>
 		/// <param name="casing">The casing to allow for each entry.</param>
 		/// <returns>A Regex fragment containing a pipe-separated list of the collection items, with appropriate case modifiers.</returns>
-		public static string EnumerableRegex(IEnumerable<string> input, SearchCasing casing)
+		public static string? EnumerableRegex(IEnumerable<string>? input, SearchCasing casing)
 		{
 			if (input == null)
 			{

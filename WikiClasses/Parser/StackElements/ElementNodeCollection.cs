@@ -34,7 +34,7 @@
 
 		public void Merge(ElementNodeCollection newList)
 		{
-			if (newList == null || newList.Count == 0)
+			if (newList.Count == 0)
 			{
 				return;
 			}

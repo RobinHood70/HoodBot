@@ -5,6 +5,7 @@
 	using System.Text;
 	using System.Text.RegularExpressions;
 	using RobinHood70.WikiClasses.Properties;
+	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>A simple class to allow parsing and manipulation of wikitext as lead text with a collection of page sections.</summary>
@@ -85,6 +86,11 @@
 			// Any text coming after the earliest of the lastTexts will be split off from the last section and put into the Footer property.
 			ThrowNull(lastTexts, nameof(lastTexts));
 			var lastSection = this.GetLastSection();
+			if (lastSection == null)
+			{
+				return;
+			}
+
 			var pos = int.MaxValue;
 			foreach (var text in lastTexts)
 			{
@@ -109,33 +115,28 @@
 			// Any text that matches lastRegex will be split off from the last section and put into the Footer property.
 			ThrowNull(lastRegex, nameof(lastRegex));
 			var lastSection = this.GetLastSection();
-			var lastMatch = lastRegex.Match(lastSection.Text);
-			if (lastMatch.Success)
+			if (lastSection != null)
 			{
-				this.Footer = lastSection.Text.Substring(lastMatch.Index);
-				lastSection.Text = lastSection.Text.Substring(0, lastMatch.Index);
+				var lastMatch = lastRegex.Match(lastSection.Text);
+				if (lastMatch.Success)
+				{
+					this.Footer = lastSection.Text.Substring(lastMatch.Index);
+					lastSection.Text = lastSection.Text.Substring(0, lastMatch.Index);
+				}
 			}
 		}
 
 		/// <summary>Finds the first section on the page with the given title, regardless of level.</summary>
 		/// <param name="title">The title.</param>
 		/// <returns>The first section on the page with the specified title, or null if no section with that title was found.</returns>
-		public Section FindFirstSection(string title)
-		{
-			foreach (var section in this.FindSection(title))
-			{
-				return section;
-			}
-
-			return null;
-		}
+		public Section? FindFirstSection(string title) => this.FindSection(title).FirstOrDefault(null);
 
 		/// <summary>Finds the last section with the specified title, regardless of level.</summary>
 		/// <param name="title">The title to search for.</param>
 		/// <returns>The last section on the with the specified title, or null if no section with that title was found.</returns>
-		public Section FindLastSection(string title)
+		public Section? FindLastSection(string title)
 		{
-			Section foundSection = null;
+			Section? foundSection = null;
 			foreach (var section in this.FindSection(title))
 			{
 				foundSection = section;
@@ -208,7 +209,7 @@
 
 		/// <summary>Gets the last section or subsection on the page.</summary>
 		/// <returns>The last section or subsection on the page.</returns>
-		private Section GetLastSection()
+		private Section? GetLastSection()
 		{
 			if (this.Sections.Count == 0)
 			{

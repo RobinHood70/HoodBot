@@ -158,13 +158,13 @@
 		#endregion
 
 		#region Private Methods
-		private XmlVisitor BuildTag(string name, Dictionary<string, int> attributes, NodeCollection inner)
+		private XmlVisitor BuildTag(string name, Dictionary<string, int>? attributes, NodeCollection? inner)
 		{
-			var selfClosed = inner == null || inner.Count == 0;
+			var selfClosed = inner?.Count == 0;
 			this.BuildTagOpen(name, attributes, selfClosed);
 			if (!selfClosed)
 			{
-				foreach (var node in inner)
+				foreach (var node in inner!)
 				{
 					node.Accept(this);
 				}
@@ -184,7 +184,7 @@
 			return this;
 		}
 
-		private XmlVisitor BuildTagOpen(string name, Dictionary<string, int> attributes, bool selfClosed)
+		private XmlVisitor BuildTagOpen(string name, Dictionary<string, int>? attributes, bool selfClosed)
 		{
 			this.Indent();
 			this.builder.Append('<').Append(name);
@@ -209,10 +209,18 @@
 			return this;
 		}
 
-		private XmlVisitor BuildValueNode(string name, string value)
+		private XmlVisitor BuildValueNode(string name, string? value)
 		{
+			var encodedValue = AntiXssEncoder.HtmlEncode(value, true) ?? string.Empty;
 			this.Indent();
-			this.builder.Append('<').Append(name).Append('>').Append(AntiXssEncoder.HtmlEncode(value, true)).Append("</").Append(name).Append('>');
+			this.builder
+				.Append('<')
+				.Append(name)
+				.Append('>')
+				.Append(encodedValue)
+				.Append("</")
+				.Append(name)
+				.Append('>');
 
 			return this;
 		}

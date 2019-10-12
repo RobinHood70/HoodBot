@@ -37,7 +37,7 @@
 		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
-		public Parameter(string name, string value)
+		public Parameter(string? name, string value)
 			: this(name == null ? null : new PaddedString(name), new PaddedString(value), name == null)
 		{
 		}
@@ -46,7 +46,7 @@
 		/// <param name="name">The full parameter name, including any leading and trailing whitespace. May be null.</param>
 		/// <param name="value">The full parameter value, including any leading and trailing whitespace. May not be null.</param>
 		/// <param name="anonymous">Whether the parameter should be treated as anonymous. The <paramref name="name"/> parameter must be non-null for this to take effect.</param>
-		public Parameter(string name, string value, bool anonymous)
+		public Parameter(string? name, string value, bool anonymous)
 			: this(name == null ? null : new PaddedString(name), new PaddedString(value), anonymous)
 		{
 		}
@@ -54,7 +54,7 @@
 		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
 		/// <param name="name">The full parameter name, including any leading and trailing whitespace.</param>
 		/// <param name="value">The full parameter value, including any leading and trailing whitespace.</param>
-		public Parameter(PaddedString name, PaddedString value)
+		public Parameter(PaddedString? name, PaddedString value)
 			: this(name, value, name == null)
 		{
 		}
@@ -63,7 +63,7 @@
 		/// <param name="name">The full parameter name, including any leading and trailing whitespace. May be null.</param>
 		/// <param name="value">The full parameter value, including any leading and trailing whitespace. May not be null.</param>
 		/// <param name="anonymous">Whether the parameter should be treated as anonymous. The <paramref name="name"/> parameter must be non-null for this to take effect.</param>
-		public Parameter(PaddedString name, PaddedString value, bool anonymous)
+		public Parameter(PaddedString? name, PaddedString value, bool anonymous)
 		{
 			// name can be null; value cannot.
 			ThrowNull(value, nameof(value));
@@ -102,7 +102,7 @@
 
 		/// <summary>Gets or sets the full name.</summary>
 		/// <value>The full parameter name, including any leading or trailing whitespace.</value>
-		public PaddedString FullName { get; set; }
+		public PaddedString? FullName { get; set; }
 
 		/// <summary>Gets the full value.</summary>
 		/// <value>The full parameter value, including any leading or trailing whitespace.</value>
@@ -111,7 +111,7 @@
 		/// <summary>Gets or sets the name.</summary>
 		/// <value>The parameter name.</value>
 		/// <remarks>This is a convenience property, equivalent to <c>FullName.Value</c>.</remarks>
-		public string Name
+		public string? Name
 		{
 			get => this.FullName?.Value;
 			set
@@ -161,12 +161,12 @@
 		/// <param name="text">The text to escape.</param>
 		/// <returns>The same as the input value, with <i>all</i> equals signs replaced by the HTML entity <c>&#61;</c>.</returns>
 		/// <remarks>This is currently a dumb replace. If you need something more intelligent, for example something that handles equals signs in embedded templates and image links, you will have to implement it yourself.</remarks>
-		public static string Escape(string text) => text?.Replace("=", "&#61;");
+		public static string Escape(string? text) => text?.Replace("=", "&#61;") ?? string.Empty;
 
 		/// <summary>Determines whether the provided parameter is null or has an empty value.</summary>
 		/// <param name="item">The item to check.</param>
 		/// <returns><see langword="true"/> if the parameter is null or its value is an empty string; otherwise, <see langword="false"/>.</returns>
-		public static bool IsNullOrEmpty(Parameter item) => item == null || item.Value.Length == 0;
+		public static bool IsNullOrEmpty(Parameter? item) => item == null || item.Value.Length == 0;
 
 		/// <summary>Unescapes the specified text, converting common equivalents of equals signs to an actual equals sign.</summary>
 		/// <param name="text">The text to unescape.</param>
@@ -209,7 +209,8 @@
 		/// <returns>A copy of the <see cref="StringBuilder"/> passed into the method.</returns>
 		public StringBuilder Build(StringBuilder builder)
 		{
-			if (!this.Anonymous)
+			ThrowNull(builder, nameof(builder));
+			if (!this.Anonymous && this.FullName != null)
 			{
 				this.FullName.Build(builder);
 				builder.Append('=');

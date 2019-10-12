@@ -13,7 +13,7 @@
 		/// <param name="maxLength">The maximum length.</param>
 		/// <returns>System.String.</returns>
 		/// <remarks>This limits only the initial string length, not the total, so the return value can have a maximum length of maxLength + 3.</remarks>
-		public static string Ellipsis(this string text, int maxLength) =>
+		public static string? Ellipsis(this string? text, int maxLength) =>
 			text == null ? null :
 			text.Length > maxLength ? text.Substring(0, maxLength) + "..." :
 			text;

@@ -12,7 +12,7 @@
 
 		/// <summary>Initializes a new instance of the <see cref="Section"/> class.</summary>
 		public Section()
-			: this(null, 0, null)
+			: this(string.Empty, 0, string.Empty)
 		{
 		}
 
@@ -20,7 +20,7 @@
 		/// <param name="title">The title.</param>
 		/// <param name="level">The level (number of equals signs in the title).</param>
 		public Section(string title, int level)
-			: this(title, level, null)
+			: this(title, level, string.Empty)
 		{
 		}
 
@@ -41,12 +41,12 @@
 		/// <summary>Gets or sets the text to add after the section title.</summary>
 		/// <value>The text to add after the title.</value>
 		/// <remarks>While normally blank, this property allows insertion of text after the section title. This may include an HTML comment, a noinclude tag, or similar text that should be inserted after any <c>==</c>-type title text. All whitespace is the responsibility of the caller.</remarks>
-		public string AddAfterTitle { get; set; }
+		public string? AddAfterTitle { get; set; }
 
 		/// <summary>Gets or sets the text to add before the section title.</summary>
 		/// <value>The text to add before the title.</value>
 		/// <remarks>While normally blank, this property allows insertion of text before the section title. This may include prepended text, a noinclude tag, or similar text that should be inserted before any <c>==</c>-type title text. All whitespace is the responsibility of the caller.</remarks>
-		public string AddBeforeTitle { get; set; }
+		public string? AddBeforeTitle { get; set; }
 
 		/// <summary>Gets or sets the section level.</summary>
 		/// <value>The section level.</value>
@@ -54,7 +54,7 @@
 
 		/// <summary>Gets or sets the title, including surrounding whitespace.</summary>
 		/// <value>The padded title.</value>
-		public PaddedString PaddedTitle { get; set; }
+		public PaddedString? PaddedTitle { get; set; }
 
 		/// <summary>Gets the subsections of the current section.</summary>
 		/// <value>The subsections.</value>
@@ -67,7 +67,7 @@
 
 		/// <summary>Gets or sets the section title, ignoring surrounding whitespace.</summary>
 		/// <value>The title.</value>
-		public string Title
+		public string? Title
 		{
 			get => this.PaddedTitle?.Value;
 			set
@@ -119,7 +119,7 @@
 		/// <summary>Finds the subsection with the specified title.</summary>
 		/// <param name="title">The title.</param>
 		/// <returns>The subsection with the specified title, or null if no section with the title was found.</returns>
-		public Section Find(string title)
+		public Section? Find(string title)
 		{
 			foreach (var section in this.Subsections)
 			{
@@ -147,7 +147,7 @@
 
 		/// <summary>Returns a string that represents the section.</summary>
 		/// <returns>A <see cref="string"/> that represents the section.</returns>
-		public override string ToString() => this.Title;
+		public override string ToString() => this.Title ?? "<Empty>";
 		#endregion
 	}
 }

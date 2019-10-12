@@ -99,7 +99,7 @@ namespace RobinHood70.WikiClasses
 
 		/// <summary>Gets the parsed text from the constructor as a single parameter, as would be used in a normal link.</summary>
 		/// <value>The parameter as a single value (everything from the first pipe to the closing delimiter).</value>
-		public PaddedString SingleParameter => this.paramEndToken == 0 ? null : this.GetParameterString(this.paramStartToken, this.paramEndToken, true);
+		public PaddedString? SingleParameter => this.paramEndToken == 0 ? null : this.GetParameterString(this.paramStartToken, this.paramEndToken, true);
 		#endregion
 
 		#region Public Methods
@@ -117,7 +117,7 @@ namespace RobinHood70.WikiClasses
 				if (!parameter.Anonymous)
 				{
 					var key = names
-						? parameter.FullName.LeadingWhiteSpace + '|' + parameter.FullName.TrailingWhiteSpace
+						? parameter.FullName?.LeadingWhiteSpace + '|' + parameter.FullName?.TrailingWhiteSpace
 						: parameter.FullValue.LeadingWhiteSpace + '|' + parameter.FullValue.TrailingWhiteSpace;
 					counts.TryGetValue(key, out var lastCount);
 					counts[key] = ++lastCount;
@@ -142,7 +142,7 @@ namespace RobinHood70.WikiClasses
 		#endregion
 
 		#region Private Methods
-		private (Delimiter delimiter, bool isTerminator) CheckForDelimiter(int index)
+		private (Delimiter? delimiter, bool isTerminator) CheckForDelimiter(int index)
 		{
 			if (this.delimiterStack.Count > 0)
 			{
@@ -181,7 +181,7 @@ namespace RobinHood70.WikiClasses
 				this.tokenIndex++;
 			}
 
-			PaddedString name = null;
+			PaddedString? name = null;
 			var start = this.tokenIndex;
 			var firstEquals = true;
 			while (this.tokenIndex < this.tokens.Count)
@@ -245,7 +245,7 @@ namespace RobinHood70.WikiClasses
 
 		private string GetString(int start, int end) => start == end ? this.text.Substring(this.tokens[start].Start, this.tokens[start].Length) : this.text.Substring(this.tokens[start].Start, this.tokens[end].Start + this.tokens[end].Length - this.tokens[start].Start);
 
-		private Token GetToken(int index)
+		private Token? GetToken(int index)
 		{
 			var start = index;
 			var tokenType = TokenType.Unknown;
@@ -356,11 +356,11 @@ namespace RobinHood70.WikiClasses
 
 			return tokenType == TokenType.Unknown ? null : new Token(start, index - start, tokenType);
 
-			Token FindMatchingDelimiter(Delimiter delimiter)
+			Token? FindMatchingDelimiter(Delimiter delimiter)
 			{
 				var markerIndex = index;
 				var terminatorIndex = index + delimiter.Marker.Length;
-				Token nextToken;
+				Token? nextToken;
 				do
 				{
 					nextToken = this.GetToken(terminatorIndex);

@@ -49,9 +49,10 @@
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
 		public WikiStack(string text, ICollection<string> tagList, bool? include, bool strictInclusion)
 		{
+			// Not using Push both so that nullable reference check succeeds on .Top and for a micro-optimization.
 			this.array = new StackElement[StartSize];
-			this.count = 0;
-			this.Push(new RootElement(this));
+			this.Top = new RootElement(this);
+			this.count = 1;
 
 			this.Text = text;
 			this.textLength = text.Length;
@@ -89,12 +90,7 @@
 			this.tagsRegex = new Regex(@"\G(" + string.Join("|", regexTags) + @")", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
 			this.Preprocess();
-			this.Merge();
 		}
-		#endregion
-
-		#region Public Properties
-		public ElementNodeCollection Nodes { get; private set; }
 		#endregion
 
 		#region Internal Properties
@@ -109,6 +105,28 @@
 
 		#region Private Properties
 		private char CurrentCharacter => this.Text[this.Index];
+		#endregion
+
+		#region Public Methods
+		public ElementNodeCollection GetElements()
+		{
+			// We don't need to check that array.Length > 0 because the root node cannot be popped without throwing an error.
+			var nodes = this.array[0].CurrentPiece;
+			for (var i = 1; i < this.count; i++)
+			{
+				nodes.Merge(this.array[i].BreakSyntax());
+			}
+
+			for (var i = 0; i < nodes.Count; i++)
+			{
+				if (nodes[i] is HeaderNode hNode && !hNode.Confirmed)
+				{
+					hNode.Confirmed = true;
+				}
+			}
+
+			return nodes;
+		}
 		#endregion
 
 		#region Internal Methods
@@ -178,12 +196,13 @@
 
 		internal void Pop()
 		{
-			if (this.count-- < 2)
+			this.count--;
+			if (this.count == 0)
 			{
 				throw new InvalidOperationException(Resources.PoppedRoot);
 			}
 
-			this.array[this.count] = null;
+			// this.array[this.count] = null;
 			this.Top = this.array[this.count - 1];
 		}
 
@@ -239,11 +258,13 @@
 				var wsLength = this.Index - wsStart;
 				if (wsLength > 0)
 				{
-					var last = piece[piece.Count - 1] as TextNode;
-					var lastValue = last.Text;
-					if (lastValue.SpanReverse(CommentWhiteSpace, lastValue.Length) == wsLength)
+					if (piece[piece.Count - 1] is TextNode last)
 					{
-						last.Text = lastValue.Substring(0, lastValue.Length - wsLength);
+						var lastValue = last.Text;
+						if (lastValue.SpanReverse(CommentWhiteSpace, lastValue.Length) == wsLength)
+						{
+							last.Text = lastValue.Substring(0, lastValue.Length - wsLength);
+						}
 					}
 				}
 
@@ -316,8 +337,8 @@
 
 			var tagStartPos = this.Index;
 			int attrEnd;
-			string tagClose;
-			string inner;
+			string? tagClose;
+			string? inner;
 			bool selfClosed;
 			if (this.Text[tagEndPos - 1] == '/')
 			{
@@ -368,23 +389,6 @@
 			}
 
 			return true;
-		}
-
-		private void Merge()
-		{
-			this.Nodes = this.array[0].CurrentPiece;
-			for (var i = 1; i < this.count; i++)
-			{
-				this.Nodes.Merge(this.array[i].BreakSyntax());
-			}
-
-			for (var i = 0; i < this.Nodes.Count; i++)
-			{
-				if (this.Nodes[i] is HeaderNode hNode && !hNode.Confirmed)
-				{
-					hNode.Confirmed = true;
-				}
-			}
 		}
 
 		private void ParseLineStart()

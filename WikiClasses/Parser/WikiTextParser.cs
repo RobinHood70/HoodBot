@@ -40,7 +40,8 @@
 		{
 			ThrowNull(text, nameof(text));
 			var stack = new WikiStack(text, UnparsedTags, include, strictInclusion);
-			return new NodeCollection(null, stack.Nodes);
+			var nodes = stack.GetElements();
+			return new NodeCollection(null, nodes);
 		}
 		#endregion
 	}

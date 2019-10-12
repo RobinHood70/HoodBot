@@ -47,7 +47,7 @@
 			var retval = new Dictionary<string, NodeCollection>();
 			foreach (var parameter in this.Parameters)
 			{
-				retval.Add(parameter.Index > 0 ? parameter.Index.ToString() : WikiTextVisitor.Value(parameter.Name), parameter.Value);
+				retval.Add(parameter.Name == null ? parameter.Index.ToString() : WikiTextVisitor.Value(parameter.Name), parameter.Value);
 			}
 
 			return retval;

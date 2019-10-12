@@ -14,7 +14,6 @@
 	{
 		#region Fields
 		private readonly List<Parameter> parameters = new List<Parameter>();
-		private ComparableCollection<string> order;
 		#endregion
 
 		#region Constructors
@@ -129,12 +128,12 @@
 		/// <param name="key">The key.</param>
 		/// <returns>The specified <see cref="Parameter"/> or <see langword="null"/> if the key was not found.</returns>
 		/// <remarks>Keys that evaluate to an integer will match either a named parameter or an anonymous parameter in the specified position (compared with other anonymous parameters, not the collection itself). Conflicts will be resolved following the same rules that MediaWiki templates and links use (i.e., last match wins). The collection's <see cref="Comparer"/> property will be used to determine if parameter names are a match.</remarks>
-		public Parameter this[string key]
+		public Parameter? this[string key]
 		{
 			get
 			{
 				// We have to search the entire collection, rather than bailing out at the first match, because parameters could be duplicated or have anonymous vs. numbered conflicts.
-				Parameter match = null;
+				Parameter? match = null;
 				foreach (var (positionalName, parameter) in this.PositionalParameters)
 				{
 					if (this.Comparer.Compare(key, positionalName) == 0)
@@ -268,7 +267,7 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <returns>The new parameter, or null if the parameter already had a non-blank value.</returns>
-		public Parameter AddIfBlank(string name, string value)
+		public Parameter? AddIfBlank(string name, string value)
 		{
 			var param = this[name];
 			if (param == null)
@@ -294,20 +293,20 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <returns>The parameter with the name provided.</returns>
-		public Parameter AddOrChange(string name, string value) => this.AddOrChange(name, value, false);
+		public Parameter? AddOrChange(string name, string value) => this.AddOrChange(name, value, false);
 
 		/// <summary>Adds a parameter with the specified name and value, or changes the value if the parameter already exists.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <returns>The parameter with the name provided.</returns>
-		public Parameter AddOrChange(string name, int value) => this.AddOrChange(name, value.ToString(CultureInfo.InvariantCulture));
+		public Parameter? AddOrChange(string name, int value) => this.AddOrChange(name, value.ToString(CultureInfo.InvariantCulture), false);
 
 		/// <summary>Adds a parameter with the specified name and value, or changes the value if the parameter already exists.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <param name="onlyChangeIfBlank">Whether to change the parameter value only if the current value is blank or does not exist.</param>
 		/// <returns>The parameter with the name provided.</returns>
-		public Parameter AddOrChange(string name, string value, bool onlyChangeIfBlank)
+		public Parameter? AddOrChange(string name, string value, bool onlyChangeIfBlank)
 		{
 			var param = this[name];
 			this.AddOrChangeInternal(param, name, value, onlyChangeIfBlank);
@@ -398,7 +397,7 @@
 		}
 
 		/// <summary>Returns a <see cref="HashSet{T}"/> of duplicate parameter names within the collection.</summary>
-		/// <returns>A <see cref="HashSet{T}"/> of duplicate parameter names within the collection.</returns>
+		/// <returns>A <see cref="HashSet{T}"/> of duplicate parameter names within the collection (ignoring null values).</returns>
 		public HashSet<string> DuplicateNames()
 		{
 			var names = new HashSet<string>();
@@ -406,13 +405,16 @@
 			foreach (var param in this)
 			{
 				var name = param.Name;
-				if (names.Contains(name))
+				if (name != null)
 				{
-					duplicates.Add(name);
-				}
-				else
-				{
-					names.Add(name);
+					if (names.Contains(name))
+					{
+						duplicates.Add(name);
+					}
+					else
+					{
+						names.Add(name);
+					}
 				}
 			}
 
@@ -423,7 +425,7 @@
 		/// <param name="names">The parameter names to check for.</param>
 		/// <returns>The best match among the <see cref="Parameter"/>s or <see langword="null"/> if no match was found.</returns>
 		/// <remarks>This function is primarily intended to reflect MediaWiki's template search. If a template parameter were specified as <c>{{{name|{{{1|}}}}}}</c>, you would call this methods as <c>FindFirst("name", "1");</c> in order to find the "name" parameter if it exists, or the "1" parameter (either specifically named or anonymous) if "name" was not found.</remarks>
-		public Parameter FindFirst(params string[] names)
+		public Parameter? FindFirst(params string[] names)
 		{
 			ThrowNull(names, nameof(names));
 			foreach (var name in names)
@@ -517,7 +519,7 @@
 		/// <param name="item">The object to locate in the list.</param>
 		/// <returns>The index of <paramref name="item" /> if found in the list; otherwise, -1.</returns>
 		/// <seealso cref="GetAnonymousPosition(Parameter)"/>
-		public int IndexOf(Parameter item) => this.parameters.IndexOf(item);
+		public int IndexOf(Parameter? item) => item == null ? -1 : this.parameters.IndexOf(item);
 
 		/// <summary>Inserts a <see cref="Parameter"/> into the collection at the specified index (not to be confused with the anonymous position).</summary>
 		/// <param name="index">The zero-based index at which <paramref name="item" /> should be inserted.</param>
@@ -545,7 +547,8 @@
 			var retval = false;
 			for (var i = this.parameters.Count - 1; i >= 0; i--)
 			{
-				if (uniqueNames.Contains(allNames[i]) || uniqueNames.Contains(this.parameters[i].Name))
+				var paramName = this.parameters[i].Name;
+				if (uniqueNames.Contains(allNames[i]) || (paramName != null && uniqueNames.Contains(paramName)))
 				{
 					this.parameters.RemoveAt(i);
 					retval = true;
@@ -616,7 +619,7 @@
 				for (var i = this.parameters.Count - 1; i >= 0; i--)
 				{
 					var param = this[i];
-					if (!param.Anonymous && param.Value.Length == 0 && uniqueNames.Contains(param.Name))
+					if (!param.Anonymous && param.Value.Length == 0 && param.Name != null && uniqueNames.Contains(param.Name))
 					{
 						this.parameters.RemoveAt(i);
 					}
@@ -677,7 +680,7 @@
 		/// <param name="value">The value.</param>
 		/// <param name="removeCondition">The predicate.</param>
 		/// <returns><see langword="true"/> if the template was changed in any way; <see langword="false"/> only if the predicate evaluates to false and the value was already set to the provided value.</returns>
-		public bool RemoveOrChange(string name, string value, Predicate<Parameter> removeCondition)
+		public bool RemoveOrChange(string name, string value, Predicate<Parameter?> removeCondition)
 		{
 			ThrowNull(removeCondition, nameof(removeCondition));
 			var param = this[name];
@@ -690,7 +693,11 @@
 		/// <returns><see langword="true"/> if the parameter was renamed; otherwise, <see langword="false"/>.</returns>
 		/// <exception cref="InvalidOperationException">The <paramref name="to" /> name already exists in the collection (except if it matches the <paramref name="from"/> name, which will be ignored).</exception>
 		/// <remarks>To bypass the parameter name checks, use <see cref="Parameter.Rename(string)"/> instead.</remarks>
-		public bool RenameParameter(string from, string to) => this.RenameParameter(this[from], to);
+		public bool RenameParameter(string from, string to)
+		{
+			var fromParam = this[from];
+			return fromParam == null ? false : this.RenameParameter(fromParam, to);
+		}
 
 		/// <summary>Renames the specified parameter.</summary>
 		/// <param name="from">The <see cref="Parameter"/> to rename.</param>
@@ -714,18 +721,25 @@
 		public void Sort(IEnumerable<string> sortOrder)
 		{
 			ThrowNull(sortOrder, nameof(sortOrder));
-			this.order = new ComparableCollection<string>(sortOrder, this.Comparer as IEqualityComparer<string>);
+			var order = new ComparableCollection<string>(sortOrder, this.Comparer as IEqualityComparer<string>);
 
 			/* Ensures that any parameters not specified in the order will retain their original sorting. */
 			foreach (var name in this.PositionalNames)
 			{
-				if (!this.order.Contains(name))
+				if (!order.Contains(name))
 				{
-					this.order.Add(name);
+					order.Add(name);
 				}
 			}
 
-			this.parameters.Sort(this.IndexedComparer);
+			this.parameters.Sort(IndexedComparer);
+
+			int IndexedComparer(Parameter param1, Parameter param2)
+			{
+				var index1 = param1.Name == null ? -1 : order.IndexOf(param1.Name);
+				var index2 = param2.Name == null ? -1 : order.IndexOf(param2.Name);
+				return index1.CompareTo(index2);
+			}
 		}
 
 		/// <summary>Returns the value of the parameter if it exists; otherwise, <see cref="string.Empty"/>.</summary>
@@ -749,7 +763,7 @@
 		#endregion
 
 		#region Private Methods
-		private bool AddOrChangeInternal(Parameter param, string name, string value, bool onlyChangeIfBlank)
+		private bool AddOrChangeInternal(Parameter? param, string name, string value, bool onlyChangeIfBlank)
 		{
 			// Private method is because indexing is expensive here, and Predicate version would need to call it twice if it just sent the result of the predicate to the bool version.
 			if (param == null)
@@ -778,7 +792,7 @@
 			return new Parameter(name == null ? null : this.CreateParameterString(lastParam, name, true), this.CreateParameterString(lastParam, value, false));
 		}
 
-		private PaddedString CreateParameterString(Parameter lastParam, string value, bool fromName)
+		private PaddedString CreateParameterString(Parameter? lastParam, string value, bool fromName)
 		{
 			// Need to check FullName beforehand, since it could be null if last parameter is anonymous.
 			var copyString =
@@ -789,11 +803,8 @@
 				copyString = fromName ? this.DefaultNameFormat : this.DefaultValueFormat;
 			}
 
-			return new PaddedString(copyString?.LeadingWhiteSpace, value, copyString?.TrailingWhiteSpace);
+			return new PaddedString(copyString?.LeadingWhiteSpace ?? string.Empty, value, copyString?.TrailingWhiteSpace ?? string.Empty);
 		}
-
-		// We don't need to handle the case where IndexOf returns -1 because all paramter names are added to the list by the Sort function.
-		private int IndexedComparer(Parameter param1, Parameter param2) => this.order.IndexOf(param1.Name).CompareTo(this.order.IndexOf(param2.Name));
 		#endregion
 	}
 }

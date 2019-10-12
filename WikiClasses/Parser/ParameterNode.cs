@@ -23,7 +23,7 @@
 		#region Public Properties
 		public int Index { get; set; }
 
-		public NodeCollection Name { get; }
+		public NodeCollection? Name { get; }
 
 		public NodeCollection Value { get; }
 		#endregion

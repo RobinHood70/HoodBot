@@ -39,7 +39,7 @@
 		/// <summary>Gets the default value.</summary>
 		/// <value>The default value. This will be <see langword="null"/> if there is no default value.</value>
 		/// <remarks>In order to prevent the possibility of DefaultValue being set to a NodeCollection from another object, it cannot be set directly. Use the provided methods to add or remove default values. You may also trim extraneous values from the object (only available by iterating the ArgumentNode itself).</remarks>
-		public NodeCollection DefaultValue { get; private set; }
+		public NodeCollection? DefaultValue { get; private set; }
 
 		/// <summary>Gets any additional values after the default value (e.g., the b in {{{1|a|b}}}).</summary>
 		/// <value>The extra values.</value>

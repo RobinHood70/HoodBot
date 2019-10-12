@@ -90,7 +90,7 @@
 		/// <param name="name">The name to search for.</param>
 		/// <returns>A Regex that searches for all template calls with the specified name.</returns>
 		/// <remarks>The Regex will be set to timeout after 10 seconds. This ensures that malformed templates will not lock the process.</remarks>
-		public static Regex Find(string name) => Find(null, name, null);
+		public static Regex Find(string? name) => Find(null, name, null);
 
 		/// <summary>Returns a Regex that searches for all template calls with the specified names.</summary>
 		/// <param name="names">The names to search for.</param>
@@ -104,7 +104,7 @@
 		/// <param name="regexAfter">A Regex fragment to search for after the template call.</param>
 		/// <returns>A Regex that searches for all template calls with the specified name.</returns>
 		/// <remarks>The Regex will be set to timeout after 10 seconds. This ensures that malformed templates will not lock the process.</remarks>
-		public static Regex Find(string regexBefore, string name, string regexAfter) => Find(regexBefore, name, regexAfter, RegexOptions.None, 10);
+		public static Regex Find(string? regexBefore, string? name, string? regexAfter) => Find(regexBefore, name, regexAfter, RegexOptions.None, 10);
 
 		/// <summary>Returns a Regex that searches for all template calls with the specified name, optionally including text before and after the template call.</summary>
 		/// <param name="regexBefore">A Regex fragment to search for before the template call.</param>
@@ -113,7 +113,7 @@
 		/// <param name="options">The <see cref="RegexOptions"/> to create the Regex with.</param>
 		/// <param name="findTimeout">The timeout to be applied to the Regex.</param>
 		/// <returns>A Regex that searches for all template calls with the specified name.</returns>
-		public static Regex Find(string regexBefore, string name, string regexAfter, RegexOptions options, int findTimeout) => FindRaw(regexBefore, RegexName(name), regexAfter, options, findTimeout);
+		public static Regex Find(string? regexBefore, string? name, string? regexAfter, RegexOptions options, int findTimeout) => FindRaw(regexBefore, RegexName(name), regexAfter, options, findTimeout);
 
 		/// <summary>Returns a Regex that searches for all template calls with the specified names, optionally including text before and after the template call.</summary>
 		/// <param name="regexBefore">A Regex fragment to search for before the template call.</param>
@@ -143,13 +143,13 @@
 		/// <param name="options">The <see cref="RegexOptions"/> to create the Regex with.</param>
 		/// <param name="findTimeout">The timeout to be applied to the Regex.</param>
 		/// <returns>A Regex that searches for all template calls with the specified names.</returns>
-		public static Regex FindRaw(string regexBefore, string regexNames, string regexAfter, RegexOptions options, int findTimeout) => new Regex(InternalRegexText(regexBefore, regexNames, regexAfter), options, TimeSpan.FromSeconds(findTimeout));
+		public static Regex FindRaw(string? regexBefore, string regexNames, string? regexAfter, RegexOptions options, int findTimeout) => new Regex(InternalRegexText(regexBefore, regexNames, regexAfter), options, TimeSpan.FromSeconds(findTimeout));
 
 		/// <summary>Finds the first template with the specified name, within the specified text, and returns it as a <see cref="Template"/> object.</summary>
 		/// <param name="name">The name to search for.</param>
 		/// <param name="text">The text to search in.</param>
 		/// <returns>A <see cref="Template"/> object populated with the first template found, or null if no matching template was found.</returns>
-		public static Template FindTemplate(string name, string text)
+		public static Template? FindTemplate(string name, string text)
 		{
 			var finder = Find(name).Match(text);
 			return finder.Success ? new Template(finder.Value) : null;
@@ -159,7 +159,7 @@
 		/// <param name="finder">The Regex pattern to find the template.</param>
 		/// <param name="text">The text to search in.</param>
 		/// <returns>A <see cref="Template"/> object populated with the first template found, or null if no matching template was found.</returns>
-		public static Template FindTemplate(Regex finder, string text)
+		public static Template? FindTemplate(Regex finder, string text)
 		{
 			ThrowNull(finder, nameof(finder));
 			var match = finder.Match(text);
@@ -227,7 +227,7 @@
 		/// <param name="valueFormat">Whitespace to add before and after every parameter's value. The <see cref="PaddedString.Value"/> property is ignored.</param>
 		/// <param name="anonsPerLine">If greater than zero, the number of anonymous parameters to group on the same line.</param>
 		/// <remarks>When formatting anonymous parameters in groups, valueFormat is ignored and all space surrounding an anonymous parameter will be removed in favour of having the specified number of parameters per line. Note that, because of the way anonymous parameters work, the two WhiteSpace properties will be set to string.Empty and the Value parameter will be altered as needed to achieve the appropriate formatting. This ensures that the value formats reported by this class match how MediaWiki itself would interpret them.</remarks>
-		public void Reformat(PaddedString nameFormat, PaddedString valueFormat, int anonsPerLine)
+		public void Reformat(PaddedString? nameFormat, PaddedString? valueFormat, int anonsPerLine)
 		{
 			if (this.Count == 0)
 			{
@@ -241,8 +241,8 @@
 			}
 
 			var anons = 0;
-			PaddedString lastNamed = null;
-			Parameter lastAnon = null;
+			PaddedString? lastNamed = null;
+			Parameter? lastAnon = null;
 			var doName = false;
 			foreach (var param in this)
 			{
@@ -332,7 +332,7 @@
 		#endregion
 
 		#region Private Static Methods
-		private static string InternalRegexText(string regexBefore, string escapedName, string regexAfter)
+		private static string InternalRegexText(string? regexBefore, string escapedName, string? regexAfter)
 		{
 			var retval = string.Concat(
 				@"(?<!{)",
@@ -365,7 +365,7 @@
 			return retval;
 		}
 
-		private static string RegexName(string name)
+		private static string RegexName(string? name)
 		{
 			if (string.IsNullOrEmpty(name))
 			{
@@ -373,7 +373,7 @@
 			}
 
 			var retval = string.Empty;
-			if (name[0] == '#')
+			if (name![0] == '#')
 			{
 				// Caller is searching for a parser function, so handle that.
 				if (name[name.Length - 1] != ':')

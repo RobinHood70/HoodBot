@@ -15,7 +15,7 @@
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Text.Ellipsis(20);
+		public override string ToString() => this.Text.Ellipsis(20) ?? "<Empty>";
 		#endregion
 	}
 }

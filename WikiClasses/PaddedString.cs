@@ -8,12 +8,6 @@
 	/// <remarks>There are no limitations on what is considered to be whitespace. This allows HTML comments and other unvalued text to be stored as needed.</remarks>
 	public sealed class PaddedString : IEquatable<PaddedString>
 	{
-		#region Fields
-		private string leadingWhiteSpace;
-		private string trailingWhiteSpace;
-		private string valueText;
-		#endregion
-
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="PaddedString"/> class.</summary>
@@ -34,7 +28,7 @@
 		/// <param name="trailingWhiteSpace">The trailing whitespace.</param>
 		/// <remarks>This constructor is primarily intended for use with the <see cref="ParameterCollection.DefaultNameFormat"/> and <see cref="ParameterCollection.DefaultValueFormat"/> properties. It initializes only the space properties with no value.</remarks>
 		public PaddedString(string leadingWhiteSpace, string trailingWhiteSpace)
-			: this(leadingWhiteSpace, null, trailingWhiteSpace)
+			: this(leadingWhiteSpace, string.Empty, trailingWhiteSpace)
 		{
 		}
 
@@ -55,7 +49,9 @@
 		private PaddedString(PaddedString copy)
 		{
 			ThrowNull(copy, nameof(copy));
-			this.CopyFrom(copy);
+			this.LeadingWhiteSpace = copy.LeadingWhiteSpace;
+			this.TrailingWhiteSpace = copy.TrailingWhiteSpace;
+			this.Value = copy.Value;
 		}
 		#endregion
 
@@ -66,25 +62,13 @@
 		public int Length => this.LeadingWhiteSpace.Length + this.Value.Length + this.TrailingWhiteSpace.Length;
 
 		/// <summary>Gets or sets the leading whitespace surrounding the string.</summary>
-		public string LeadingWhiteSpace
-		{
-			get => this.leadingWhiteSpace;
-			set => this.leadingWhiteSpace = value ?? string.Empty;
-		}
+		public string LeadingWhiteSpace { get; set; }
 
 		/// <summary>Gets or sets the trailing white space.</summary>
-		public string TrailingWhiteSpace
-		{
-			get => this.trailingWhiteSpace;
-			set => this.trailingWhiteSpace = value ?? string.Empty;
-		}
+		public string TrailingWhiteSpace { get; set; }
 
 		/// <summary>Gets or sets the value.</summary>
-		public string Value
-		{
-			get => this.valueText;
-			set => this.valueText = value ?? string.Empty;
-		}
+		public string Value { get; set; }
 		#endregion
 
 		#region Implicit Conversion Operators
@@ -92,7 +76,7 @@
 		/// <summary>Performs an implicit conversion from <see cref="PaddedString"/> to <see cref="string"/>.</summary>
 		/// <param name="parameter">The parameter.</param>
 		/// <returns>The result of the conversion.</returns>
-		public static implicit operator string(PaddedString parameter) => parameter?.Value;
+		public static implicit operator string(PaddedString parameter) => parameter?.Value ?? string.Empty;
 
 		/// <summary>Performs an implicit conversion from <see cref="string"/> to <see cref="PaddedString"/>.</summary>
 		/// <param name="parameter">The parameter.</param>
@@ -107,13 +91,13 @@
 		/// <param name="string1">The first string.</param>
 		/// <param name="string2">The second string.</param>
 		/// <returns>The result of the operator.</returns>
-		public static bool operator ==(PaddedString string1, PaddedString string2) => string1?.Equals(string2) ?? string2 is null;
+		public static bool operator ==(PaddedString? string1, PaddedString? string2) => string1?.Equals(string2) ?? string2 is null;
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="string1">The first string.</param>
 		/// <param name="string2">The second string.</param>
 		/// <returns>The result of the operator.</returns>
-		public static bool operator !=(PaddedString string1, PaddedString string2) => !(string1 == string2);
+		public static bool operator !=(PaddedString? string1, PaddedString? string2) => !(string1 == string2);
 		#endregion
 
 		#region Public Methods
@@ -141,8 +125,8 @@
 		public void CopyFormatFrom(PaddedString source)
 		{
 			ThrowNull(source, nameof(source));
-			this.leadingWhiteSpace = source.leadingWhiteSpace;
-			this.trailingWhiteSpace = source.trailingWhiteSpace;
+			this.LeadingWhiteSpace = source.LeadingWhiteSpace;
+			this.TrailingWhiteSpace = source.TrailingWhiteSpace;
 		}
 
 		/// <summary>Copies the entire contents from the source ParameterString.</summary>
@@ -157,9 +141,9 @@
 		/// <summary>Merges leading and trailing space into the value and clears the space properties.</summary>
 		public void Merge()
 		{
-			this.valueText = this.leadingWhiteSpace + this.valueText + this.trailingWhiteSpace;
-			this.leadingWhiteSpace = string.Empty;
-			this.trailingWhiteSpace = string.Empty;
+			this.Value = this.LeadingWhiteSpace + this.Value + this.TrailingWhiteSpace;
+			this.LeadingWhiteSpace = string.Empty;
+			this.TrailingWhiteSpace = string.Empty;
 		}
 
 		/// <summary>Builds the full text of the value, including surrounding whitespace.</summary>
@@ -190,11 +174,11 @@
 		/// <summary>Indicates whether the current object is equal to another object of the same type.</summary>
 		/// <param name="other">An object to compare with this object.</param>
 		/// <returns><see langword="true"/> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false"/>.</returns>
-		public bool Equals(PaddedString other) =>
+		public bool Equals(PaddedString? other) =>
 			other != null &&
-			this.leadingWhiteSpace == other.leadingWhiteSpace &&
-			this.trailingWhiteSpace == other.trailingWhiteSpace &&
-			this.valueText == other.valueText;
+			this.LeadingWhiteSpace == other.LeadingWhiteSpace &&
+			this.TrailingWhiteSpace == other.TrailingWhiteSpace &&
+			this.Value == other.Value;
 
 		/// <summary>Returns a string that represents this instance.</summary>
 		/// <returns>A <see cref="string"/> that represents this instance.</returns>
@@ -203,13 +187,12 @@
 
 		/// <summary>Determines whether the specified <see cref="object"/>, is equal to this instance.</summary>
 		/// <param name="obj">The <see cref="object"/> to compare with this instance.</param>
-		/// <returns>
-		///   <see langword="true"/> if the specified <see cref="object"/> is equal to this instance; otherwise, <see langword="false"/>.</returns>
+		/// <returns><see langword="true"/> if the specified <see cref="object"/> is equal to this instance; otherwise, <see langword="false"/>.</returns>
 		public override bool Equals(object obj) => this.Equals(obj as PaddedString);
 
 		/// <summary>Returns a hash code for this instance.</summary>
 		/// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
-		public override int GetHashCode() => CompositeHashCode(this.leadingWhiteSpace, this.trailingWhiteSpace, this.valueText);
+		public override int GetHashCode() => CompositeHashCode(this.LeadingWhiteSpace, this.TrailingWhiteSpace, this.Value);
 		#endregion
 	}
 }

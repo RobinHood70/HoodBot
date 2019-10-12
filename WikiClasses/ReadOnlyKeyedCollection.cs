@@ -14,7 +14,7 @@
 	{
 		#region Fields
 		private readonly List<TItem> items;
-		private Dictionary<TKey, TItem> dictionary;
+		private Dictionary<TKey, TItem>? dictionary;
 		#endregion
 
 		#region Constructors
@@ -22,7 +22,7 @@
 		/// <summary>Initializes a new instance of the <see cref="ReadOnlyKeyedCollection{TKey, TItem}" /> class that uses the default equality comparer.</summary>
 		/// <param name="items">The items.</param>
 		protected ReadOnlyKeyedCollection(IEnumerable<TItem> items)
-			: this(items, null)
+			: this(items, EqualityComparer<TKey>.Default)
 		{
 		}
 
@@ -49,10 +49,9 @@
 
 		#region Private Properties
 
-		// This method is required, since the call to GetKeyForItem would result in a virtual call from the constructor if it were placed there, which is bad.
-		// The dictionary is private rather than protected, since a caller could conceivably modify it and have items and dictionary out of sync.
 		private Dictionary<TKey, TItem> Dictionary
 		{
+			// A manual getter is required, since the call to GetKeyForItem would result in a virtual call from the constructor if it were placed there, which is bad.
 			get
 			{
 				if (this.dictionary == null)
