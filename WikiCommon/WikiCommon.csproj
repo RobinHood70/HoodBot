@@ -9,11 +9,6 @@
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>
-		<AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
-		<AdditionalFiles Include="..\WikiRules.ruleset" Link="WikiRules.ruleset" />
-	</ItemGroup>
-	<ItemGroup>
-		<Reference Include="System" />
 		<Reference Include="System.Net.Http" />
 	</ItemGroup>
 </Project>
