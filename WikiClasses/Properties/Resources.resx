@@ -126,6 +126,9 @@
   <data name="MalformedLink" xml:space="preserve">
     <value>The provided link text was malformed.</value>
   </data>
+  <data name="MalformedParameter" xml:space="preserve">
+    <value>The provided parameter text was malformed.</value>
+  </data>
   <data name="MultipleCalls" xml:space="preserve">
     <value>{0} called multiple times. It should only ever be called once on a given object.</value>
   </data>

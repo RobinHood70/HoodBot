@@ -86,7 +86,7 @@
 		{
 			ThrowNull(node, nameof(node));
 			this.BuildTagOpen("part", null, false);
-			if (node.Index == 0)
+			if (!node.Anonymous)
 			{
 				this
 					.BuildTag("name", null, node.Name)

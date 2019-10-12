@@ -338,18 +338,15 @@
 			int attrEnd;
 			string? tagClose;
 			string? inner;
-			bool selfClosed;
 			if (this.Text[tagEndPos - 1] == '/')
 			{
 				inner = null;
 				tagClose = null;
 				attrEnd = tagEndPos - 1;
-				selfClosed = true;
 				this.Index = tagEndPos + 1;
 			}
 			else
 			{
-				selfClosed = false;
 				attrEnd = tagEndPos;
 				var findClosing = new Regex(@"</" + tagNameLower + @"\s*>", RegexOptions.IgnoreCase);
 				Match match;
@@ -362,7 +359,7 @@
 				else if (AllowMissingEndTag.Contains(tagNameLower))
 				{
 					inner = this.Text.Substring(tagEndPos + 1);
-					tagClose = null;
+					tagClose = string.Empty;
 					this.Index = this.textLength;
 				}
 				else
@@ -384,7 +381,7 @@
 			else
 			{
 				var attr = attrEnd > attrStart ? this.Text.Substring(attrStart, attrEnd - attrStart) : null;
-				piece.Add(new TagNode(tagOpen, attr, inner, tagClose, selfClosed));
+				piece.Add(new TagNode(tagOpen, attr, inner, tagClose));
 			}
 
 			return true;
