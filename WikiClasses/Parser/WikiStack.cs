@@ -162,31 +162,21 @@
 
 					break;
 				case '{':
-					var countCurly = this.Text.Span('{', this.Index);
-					if (countCurly >= 2)
-					{
-						this.Push(new TemplateElement(this, countCurly/*, this.Index > 0 && this.Text[this.Index - 1] == '\n'*/));
-					}
-					else
-					{
-						this.Top.CurrentPiece.AddLiteral(new string('{', countCurly));
-					}
-
-					this.Index += countCurly;
-					break;
 				case '[':
-					// Repetitive with above, but slightly faster than combining, on average.
-					var countSquare = this.Text.Span('[', this.Index);
-					if (countSquare >= 2)
+					var countFound = this.Text.Span(found, this.Index);
+					if (countFound >= 2)
 					{
-						this.Push(new LinkElement(this, countSquare));
+						var element = found == '['
+							? new LinkElement(this, countFound)
+							: new TemplateElement(this, countFound/*, this.Index > 0 && this.Text[this.Index - 1] == '\n'*/) as StackElement;
+						this.Push(element);
 					}
 					else
 					{
-						this.Top.CurrentPiece.AddLiteral(new string('[', countSquare));
+						this.Top.CurrentPiece.AddLiteral(new string('{', countFound));
 					}
 
-					this.Index += countSquare;
+					this.Index += countFound;
 					break;
 				default:
 					throw new InvalidOperationException(Invariant($"Found unexpected character '{this.CurrentCharacter}' at position {this.Index}."));

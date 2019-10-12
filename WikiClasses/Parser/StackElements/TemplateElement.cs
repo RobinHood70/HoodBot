@@ -1,7 +1,5 @@
 ﻿namespace RobinHood70.WikiClasses.Parser.StackElements
 {
-	using System.Collections.Generic;
-
 	internal class TemplateElement : PairedElement
 	{
 		#region Fields
@@ -27,53 +25,28 @@
 		#region Internal Override Methods
 		internal override void Parse(char found)
 		{
-			var stack = this.Stack;
 			switch (found)
 			{
 				case '|':
 					this.NameValuePieces.Add(new Piece());
-					stack.Index++;
+					this.Stack.Index++;
 					break;
 				case '=':
 					var lastPiece = this.NameValuePieces[this.NameValuePieces.Count - 1];
 					lastPiece.SplitPos = lastPiece.Count;
 					lastPiece.Add(new EqualsNode());
-					stack.Index++;
+					this.Stack.Index++;
 					break;
 				case '}':
-					var count = stack.Text.Span('}', stack.Index, this.Length);
-					if (count < 2)
+					var foundCount = this.ParseClose(found);
+					if (foundCount > 1)
 					{
-						this.CurrentPiece.AddLiteral(new string('}', count));
-						stack.Index += count;
-						return;
-					}
-
-					this.braceLength = count;
-					var matchingCount = count == 2 ? 2 : 3;
-					var parameters = new List<ParameterNode>();
-					var argIndex = 1;
-					for (var i = 1; i < this.NameValuePieces.Count; i++)
-					{
-						var nvPiece = this.NameValuePieces[i];
-						parameters.Add(nvPiece.SplitPos == -1 || matchingCount == 3
-							? new ParameterNode(argIndex++, nvPiece)
-							: new ParameterNode(nvPiece.GetRange(0, nvPiece.SplitPos), nvPiece.GetRange(nvPiece.SplitPos + 1, nvPiece.Count - nvPiece.SplitPos - 1)));
-					}
-
-					this.ParseClose(matchingCount);
-					if (matchingCount == 2)
-					{
-						stack.Top.CurrentPiece.Add(new TemplateNode(/* this.Length == matchingCount && this.atLineStart,*/ this.NameValuePieces[0], parameters));
-					}
-					else
-					{
-						stack.Top.CurrentPiece.Add(new ArgumentNode(/* this.Length == matchingCount && this.atLineStart,*/ this.NameValuePieces[0], parameters));
+						this.braceLength = foundCount;
 					}
 
 					break;
 				default:
-					stack.Parse(found);
+					this.Stack.Parse(found);
 					break;
 			}
 		}

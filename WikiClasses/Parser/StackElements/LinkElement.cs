@@ -22,39 +22,17 @@
 		#region Internal Override Methods
 		internal override void Parse(char found)
 		{
-			var stack = this.Stack;
 			switch (found)
 			{
 				case '|':
 					this.NameValuePieces.Add(new Piece());
-					stack.Index++;
+					this.Stack.Index++;
 					break;
 				case ']':
-					var count = stack.Text.Span(']', stack.Index, this.Length);
-					if (count < 2)
-					{
-						this.CurrentPiece.AddLiteral(new string(']', count));
-						stack.Index += count;
-						return;
-					}
-
-					var parameters = new List<ParameterNode>();
-					var argIndex = 1;
-					var pieceCount = this.NameValuePieces.Count;
-					for (var i = 1; i < pieceCount; i++)
-					{
-						var nvPiece = this.NameValuePieces[i];
-						parameters.Add(nvPiece.SplitPos == -1
-							? new ParameterNode(argIndex++, nvPiece)
-							: new ParameterNode(nvPiece.GetRange(0, nvPiece.SplitPos), nvPiece.GetRange(nvPiece.SplitPos + 1, nvPiece.Count - nvPiece.SplitPos - 1)));
-					}
-
-					this.ParseClose(2);
-					var link = new LinkNode(this.NameValuePieces[0], parameters);
-					stack.Top.CurrentPiece.Add(link);
+					this.ParseClose(found);
 					break;
 				default:
-					stack.Parse(found);
+					this.Stack.Parse(found);
 					break;
 			}
 		}
