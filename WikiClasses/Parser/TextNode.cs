@@ -7,7 +7,7 @@
 
 		/// <summary>Initializes a new instance of the <see cref="TextNode"/> class.</summary>
 		/// <param name="txt">The text.</param>
-		public TextNode(string text) => this.Text = text;
+		public TextNode(string txt) => this.Text = txt;
 		#endregion
 
 		#region Public Properties

@@ -57,10 +57,10 @@
 		#region Public Static Methods
 
 		/// <summary>Creates a new ArgumentNode from the provided text.</summary>
-		/// <param name="text">The text of the argument.</param>
+		/// <param name="txt">The text of the argument.</param>
 		/// <returns>A new ArgumentNode.</returns>
 		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single argument (<c>{{{abc|123}}}</c>).</exception>
-		public static ArgumentNode FromText(string text) => WikiTextParser.SingleNode<ArgumentNode>(text);
+		public static ArgumentNode FromText(string txt) => WikiTextParser.SingleNode<ArgumentNode>(txt);
 
 		/// <summary>Creates a new ArgumentNode from its parts.</summary>
 		/// <param name="name">The name.</param>

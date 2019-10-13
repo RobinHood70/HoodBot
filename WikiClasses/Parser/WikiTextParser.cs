@@ -24,10 +24,10 @@
 		#region Public Methods
 
 		/// <summary>Normalizes the specified text.</summary>
-		/// <param name="text">The text to normalize.</param>
+		/// <param name="txt">The text to normalize.</param>
 		/// <remarks>Numerous parts of the parser rely on linebreaks being <c>\n</c>. This method provides offers a way to ensure that line endings conform to that expectation. This also removes null characters because while the parser can handle them fine, C# doesn't do so well with them in terms of displaying strings and such, and there really is no reason you should have null characters in wikitext anyway.</remarks>
 		/// <returns>The normalized text.</returns>
-		public static string Normalize(string text) => EolNormalizer.Replace(text, "\n").Replace("\0", string.Empty);
+		public static string Normalize(string txt) => EolNormalizer.Replace(txt, "\n").Replace("\0", string.Empty);
 
 		/// <summary>Parses the specified text.</summary>
 		/// <param name="text">The text to parse.</param>
@@ -49,14 +49,14 @@
 
 		/// <summary>If the text provided represents a single node of the specified type, returns that node. Otherwise, throws an error.</summary>
 		/// <typeparam name="T">The type of node desired.</typeparam>
-		/// <param name="text">The text to parse.</param>
+		/// <param name="txt">The text to parse.</param>
 		/// <param name="callerName">  The caller member name.</param>
 		/// <returns>The single node of the specified type.</returns>
 		/// <exception cref="ArgumentException">Thrown if there is more than one node in the collection, or the node is not of the specified type.</exception>
-		public static T SingleNode<T>(string text, [CallerMemberName] string callerName = "<Unknown>")
+		public static T SingleNode<T>(string txt, [CallerMemberName] string callerName = "<Unknown>")
 			where T : IWikiNode
 		{
-			var parser = Parse(text);
+			var parser = Parse(txt);
 			return (parser.Count == 1 && parser.First.Value is T node)
 				? node
 				: throw new ArgumentException(CurrentCulture(Resources.MalformedNodeText, typeof(T).Name, callerName));

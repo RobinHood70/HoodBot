@@ -43,20 +43,20 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="WikiStack"/> class.</summary>
-		/// <param name="text">The text to work with.</param>
+		/// <param name="txt">The text to work with.</param>
 		/// <param name="tagList">A list of tags whose contents should not be parsed.</param>
 		/// <param name="include">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
-		public WikiStack(string text, ICollection<string> tagList, bool? include, bool strictInclusion)
+		public WikiStack(string txt, ICollection<string> tagList, bool? include, bool strictInclusion)
 		{
 			// Not using Push both so that nullable reference check succeeds on .Top and for a micro-optimization.
 			this.array = new StackElement[StartSize];
 			this.Top = new RootElement(this);
 			this.count = 1;
 
-			this.Text = text;
-			this.textLength = text.Length;
-			this.enableOnlyInclude = text.Contains(OnlyIncludeTagOpen);
+			this.Text = txt;
+			this.textLength = txt.Length;
+			this.enableOnlyInclude = txt.Contains(OnlyIncludeTagOpen);
 			this.findOnlyinclude = this.enableOnlyInclude;
 			this.includeIgnores = include == null || !strictInclusion;
 

@@ -27,12 +27,12 @@
 		/// <summary>Initializes a new instance of the <see cref="Section"/> class.</summary>
 		/// <param name="title">The title.</param>
 		/// <param name="level">The level.</param>
-		/// <param name="text">The text.</param>
-		public Section(string title, int level, string text)
+		/// <param name="txt">The text.</param>
+		public Section(string title, int level, string txt)
 		{
 			this.Title = new PaddedString(title);
 			this.Level = level;
-			this.Text = text;
+			this.Text = txt;
 		}
 		#endregion
 

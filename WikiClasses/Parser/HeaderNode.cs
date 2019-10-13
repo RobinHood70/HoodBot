@@ -12,11 +12,11 @@
 
 		/// <summary>Initializes a new instance of the <see cref="HeaderNode"/> class.</summary>
 		/// <param name="level">The level.</param>
-		/// <param name="text">The text.</param>
-		public HeaderNode(int level, string text)
+		/// <param name="txt">The text.</param>
+		public HeaderNode(int level, string txt)
 		{
 			this.Level = level;
-			this.Title = WikiTextParser.Parse(text);
+			this.Title = WikiTextParser.Parse(txt);
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="HeaderNode"/> class.</summary>
@@ -53,10 +53,10 @@
 		#region Public Static Methods
 
 		/// <summary>Creates a new ArgumentNode from the provided text.</summary>
-		/// <param name="text">The text of the argument.</param>
+		/// <param name="txt">The text of the argument.</param>
 		/// <returns>A new ArgumentNode.</returns>
 		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single argument (<c>{{{abc|123}}}</c>).</exception>
-		public static HeaderNode FromText(string text) => WikiTextParser.SingleNode<HeaderNode>(text);
+		public static HeaderNode FromText(string txt) => WikiTextParser.SingleNode<HeaderNode>(txt);
 		#endregion
 
 		#region Public Methods

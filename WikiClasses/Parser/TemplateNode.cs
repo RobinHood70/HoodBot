@@ -34,10 +34,10 @@
 		#region Public Static Methods
 
 		/// <summary>Creates a new TemplateNode from the provided text.</summary>
-		/// <param name="text">The text of the template, including surrounding braces (<c>{{...}}</c>).</param>
+		/// <param name="txt">The text of the template, including surrounding braces (<c>{{...}}</c>).</param>
 		/// <returns>A new TemplateNode.</returns>
 		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single link (e.g., <c>[[Link]]</c>, or any variant thereof).</exception>
-		public static TemplateNode FromText(string text) => WikiTextParser.SingleNode<TemplateNode>(text);
+		public static TemplateNode FromText(string txt) => WikiTextParser.SingleNode<TemplateNode>(txt);
 
 		/// <summary>Creates a new TemplateNode from its parts.</summary>
 		/// <param name="title">The link destination.</param>

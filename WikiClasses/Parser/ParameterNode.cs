@@ -68,13 +68,13 @@
 		#region Public Static Methods
 
 		/// <summary>Creates a new ParameterNode from the provided text.</summary>
-		/// <param name="text">The text of the parameter (without a pipe (<c>|</c>).</param>
+		/// <param name="txt">The text of the parameter (without a pipe (<c>|</c>).</param>
 		/// <returns>A new ParameterNode.</returns>
 		/// <remarks>Due to the way the parser works, this method internally creates a template in order to parse the parameter. If you are calling this method as part of constructing a link or template, it is faster to use their methods and construct the entire object at once.</remarks>
-		public static ParameterNode FromText(string text)
+		public static ParameterNode FromText(string txt)
 		{
-			ThrowNull(text, nameof(text));
-			var template = TemplateNode.FromParts(string.Empty, new[] { text });
+			ThrowNull(txt, nameof(txt));
+			var template = TemplateNode.FromParts(string.Empty, new[] { txt });
 			return (template.Parameters.Count == 1)
 				? template.Parameters[0]
 				: throw new InvalidOperationException(CurrentCulture(Resources.MalformedNodeText, nameof(ParameterNode), nameof(FromText)));

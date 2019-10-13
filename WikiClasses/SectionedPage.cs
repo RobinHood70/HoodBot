@@ -173,11 +173,11 @@
 
 		/// <summary>Parses the specified MatchCollection into a section.</summary>
 		/// <param name="matches">The matches.</param>
-		/// <param name="text">The text.</param>
+		/// <param name="txt">The text.</param>
 		/// <param name="offset">The offset.</param>
 		/// <returns>A section with subsections based on the matches found.</returns>
 		/// <exception cref="InvalidOperationException">Different numbers of '=' in Section title.</exception>
-		private static Section ParseSection(MatchCollection matches, string text, ref int offset)
+		private static Section ParseSection(MatchCollection matches, string txt, ref int offset)
 		{
 			var retval = new Section();
 			var match = matches[offset];
@@ -192,13 +192,13 @@
 			retval.AddAfterTitle = groups["addafter"].Value;
 			retval.AddBeforeTitle = groups["addbefore"].Value;
 			retval.Level = level;
-			retval.Text = (offset == matches.Count - 1) ? text.Substring(textStart) : text.Substring(textStart, matches[offset + 1].Index - textStart);
+			retval.Text = (offset == matches.Count - 1) ? txt.Substring(textStart) : txt.Substring(textStart, matches[offset + 1].Index - textStart);
 			retval.Title = new PaddedString(groups["wslead"].Value, groups["title"].Value, groups["wstrail"].Value);
 			offset++;
 
 			while (offset < matches.Count && matches[offset].Groups["levelopen"].Value.Length > level)
 			{
-				retval.Subsections.Add(ParseSection(matches, text, ref offset));
+				retval.Subsections.Add(ParseSection(matches, txt, ref offset));
 			}
 
 			return retval;

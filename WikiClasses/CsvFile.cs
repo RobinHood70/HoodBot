@@ -240,11 +240,11 @@
 		}
 
 		/// <summary>Reads CSV text from a string.</summary>
-		/// <param name="text">The CSV text.</param>
+		/// <param name="txt">The CSV text.</param>
 		/// <param name="hasHeader">Whether or not the data has a header.</param>
-		public void ReadText(string text, bool hasHeader)
+		public void ReadText(string txt, bool hasHeader)
 		{
-			using var textReader = new StringReader(text);
+			using var textReader = new StringReader(txt);
 			this.ReadText(textReader, hasHeader);
 		}
 

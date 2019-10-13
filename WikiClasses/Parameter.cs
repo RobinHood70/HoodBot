@@ -169,9 +169,9 @@
 		public static bool IsNullOrEmpty(Parameter? item) => item == null || item.Value.Length == 0;
 
 		/// <summary>Unescapes the specified text, converting common equivalents of equals signs to an actual equals sign.</summary>
-		/// <param name="text">The text to unescape.</param>
+		/// <param name="txt">The text to unescape.</param>
 		/// <returns>The same as the input value, with any of the following converted back to an equals sign: <c>&#x3b;</c>, <c>&#61;</c>, <c>{{=}}</c>, <c>&lt;nowiki>=&lt;/nowiki></c>.</returns>
-		public static string Unescape(string text) => EqualsFinder.Replace(text, "=");
+		public static string Unescape(string txt) => EqualsFinder.Replace(txt, "=");
 		#endregion
 
 		#region Public Methods

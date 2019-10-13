@@ -25,7 +25,7 @@ namespace RobinHood70.WikiClasses
 		#region Fields
 		private readonly int paramEndToken;
 		private readonly int paramStartToken;
-		private readonly string text;
+		private readonly string txt;
 		private readonly List<Token> tokens = new List<Token>();
 		private readonly Stack<FoundDelimiter> delimiterStack = new Stack<FoundDelimiter>();
 		private int tokenIndex;
@@ -34,13 +34,13 @@ namespace RobinHood70.WikiClasses
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="ParameterParser"/> class.</summary>
-		/// <param name="textToParse">The text to parse.</param>
+		/// <param name="txtToParse">The text to parse.</param>
 		/// <param name="isLink">Whether to parse the text as a link (<see langword="true"/>) or a template (<see langword="false"/>).</param>
 		/// <param name="parseAllAsValues">if set to <see langword="true"/> [parse all as values].</param>
 		/// <param name="ignoreWhiteSpaceRules">if set to <see langword="true"/> [ignore white space rules].</param>
-		public ParameterParser(string textToParse, bool isLink, bool parseAllAsValues, bool ignoreWhiteSpaceRules)
+		public ParameterParser(string txtToParse, bool isLink, bool parseAllAsValues, bool ignoreWhiteSpaceRules)
 		{
-			this.text = textToParse ?? string.Empty;
+			this.txt = txtToParse ?? string.Empty;
 			this.Tokenize(isLink ? "[[" : "{{");
 			if (this.tokens.Count == 0)
 			{
@@ -147,7 +147,7 @@ namespace RobinHood70.WikiClasses
 			if (this.delimiterStack.Count > 0)
 			{
 				var sought = this.delimiterStack.Peek();
-				if (string.Compare(sought.Delimiter.Terminator, 0, this.text, index, sought.Delimiter.Terminator.Length, StringComparison.Ordinal) == 0)
+				if (string.Compare(sought.Delimiter.Terminator, 0, this.txt, index, sought.Delimiter.Terminator.Length, StringComparison.Ordinal) == 0)
 				{
 					return (sought.Delimiter, true);
 				}
@@ -155,7 +155,7 @@ namespace RobinHood70.WikiClasses
 
 			foreach (var delimiter in AllDelimiters)
 			{
-				if (string.Compare(delimiter.Marker, 0, this.text, index, delimiter.Marker.Length, StringComparison.Ordinal) == 0)
+				if (string.Compare(delimiter.Marker, 0, this.txt, index, delimiter.Marker.Length, StringComparison.Ordinal) == 0)
 				{
 					return (delimiter, false);
 				}
@@ -243,15 +243,15 @@ namespace RobinHood70.WikiClasses
 			return retval;
 		}
 
-		private string GetString(int start, int end) => start == end ? this.text.Substring(this.tokens[start].Start, this.tokens[start].Length) : this.text.Substring(this.tokens[start].Start, this.tokens[end].Start + this.tokens[end].Length - this.tokens[start].Start);
+		private string GetString(int start, int end) => start == end ? this.txt.Substring(this.tokens[start].Start, this.tokens[start].Length) : this.txt.Substring(this.tokens[start].Start, this.tokens[end].Start + this.tokens[end].Length - this.tokens[start].Start);
 
 		private Token? GetToken(int index)
 		{
 			var start = index;
 			var tokenType = TokenType.Unknown;
-			while (index < this.text.Length)
+			while (index < this.txt.Length)
 			{
-				if (this.text[index] == '=')
+				if (this.txt[index] == '=')
 				{
 					if (tokenType == TokenType.Unknown)
 					{
@@ -262,7 +262,7 @@ namespace RobinHood70.WikiClasses
 					break;
 				}
 
-				if (this.text[index] == '|')
+				if (this.txt[index] == '|')
 				{
 					if (tokenType == TokenType.Unknown)
 					{
@@ -292,7 +292,7 @@ namespace RobinHood70.WikiClasses
 						if (delimiter.NoParse)
 						{
 							// Special cases - no other delimiters count until we find a terminator.
-							var end = this.text.IndexOf(delimiter.Terminator, index + delimiter.Marker.Length, StringComparison.Ordinal);
+							var end = this.txt.IndexOf(delimiter.Terminator, index + delimiter.Marker.Length, StringComparison.Ordinal);
 							if (end != -1)
 							{
 								index = end + delimiter.Terminator.Length;
@@ -328,7 +328,7 @@ namespace RobinHood70.WikiClasses
 					}
 				}
 
-				if (char.IsWhiteSpace(this.text[index]))
+				if (char.IsWhiteSpace(this.txt[index]))
 				{
 					if (tokenType == TokenType.Unknown)
 					{
@@ -374,7 +374,7 @@ namespace RobinHood70.WikiClasses
 
 		private void Tokenize(string marker)
 		{
-			if (this.text.Length > 0)
+			if (this.txt.Length > 0)
 			{
 				var (delimiter, isTerminator) = this.CheckForDelimiter(0);
 				if (isTerminator || delimiter == null || delimiter.Marker != marker)
@@ -400,7 +400,7 @@ namespace RobinHood70.WikiClasses
 			}
 		}
 
-		private string TokenText(Token token) => this.text.Substring(token.Start, token.Length);
+		private string TokenText(Token token) => this.txt.Substring(token.Start, token.Length);
 		#endregion
 
 		#region Private Structs

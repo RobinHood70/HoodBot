@@ -15,20 +15,20 @@
 		#region Public Methods
 
 		/// <summary>HTML-decodes the specified text, removes bidirectional text markers, and replaces space-like characters with spaces.</summary>
-		/// <param name="text">The text to decode and normalize.</param>
+		/// <param name="txt">The text to decode and normalize.</param>
 		/// <returns>The original text with bidirectional text markers removed and space-like characters converted to spaces.</returns>
-		public static string DecodeAndNormalize(string text) => ReplaceTitleSpaces(RemoveInivisibleCharacters(WebUtility.HtmlDecode(text)), false).Trim();
+		public static string DecodeAndNormalize(string txt) => ReplaceTitleSpaces(RemoveInivisibleCharacters(WebUtility.HtmlDecode(txt)), false).Trim();
 
 		/// <summary>Removes invisible characters from the text.</summary>
-		/// <param name="text">The text.</param>
+		/// <param name="txt">The text.</param>
 		/// <returns>The provided text with any invisible characters removed.</returns>
-		public static string RemoveInivisibleCharacters(string text) => BidiText.Replace(text, string.Empty);
+		public static string RemoveInivisibleCharacters(string txt) => BidiText.Replace(txt, string.Empty);
 
 		/// <summary>Replaces any space-like characters with spaces, optionally including basic HTML entities without fully decoding the text.</summary>
-		/// <param name="text">The text.</param>
+		/// <param name="txt">The text.</param>
 		/// <param name="includeHtmlEntities">if set to <see langword="true"/> also replaces <c>&amp;#32;</c>, <c>&amp;#x20;</c> and <c>&amp;nbsp;</c>.</param>
 		/// <returns>The provided text with anything resembling a space converted to a normal space.</returns>
-		public static string ReplaceTitleSpaces(string text, bool includeHtmlEntities) => (includeHtmlEntities ? SpaceTextHtml : TitleSpaceText).Replace(text, " ");
+		public static string ReplaceTitleSpaces(string txt, bool includeHtmlEntities) => (includeHtmlEntities ? SpaceTextHtml : TitleSpaceText).Replace(txt, " ");
 		#endregion
 	}
 }
