@@ -34,7 +34,7 @@
 				case '=':
 					var lastPiece = this.NameValuePieces[this.NameValuePieces.Count - 1];
 					lastPiece.SplitPos = lastPiece.Count;
-					lastPiece.Add(new EqualsNode());
+					lastPiece.Add(EqualsNode.Instance);
 					this.Stack.Index++;
 					break;
 				case '}':

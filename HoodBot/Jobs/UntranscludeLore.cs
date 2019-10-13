@@ -14,7 +14,7 @@
 	public class UntranscludeLore : EditJob
 	{
 		#region Static Fields
-		private static readonly TemplateNode OldTransclusionNode = new TemplateNode(new[] { new TextNode("Old Lore Transclusion") }, null);
+		private static readonly TemplateNode OldTransclusionNode = TemplateNode.FromParts("Old Lore Transclusion");
 		#endregion
 
 		#region Fields
@@ -126,7 +126,7 @@
 				node.Parameters.Clear();
 				if (this.currentPage.PageName != this.currentLorePage.PageName)
 				{
-					node.Parameters.Add(new ParameterNode(1, new[] { new TextNode(this.currentLorePage.PageName) }));
+					node.Parameters.Add(ParameterNode.FromParts(1, this.currentLorePage.PageName));
 				}
 
 				return node;
@@ -197,14 +197,9 @@
 				return node;
 			}
 
-			if (this.noTransclusions && linkTitle.SimpleEquals(this.currentPage))
-			{
-				return new TextNode($"'''{display}'''");
-			}
-
-			var titleNodes = new[] { new TextNode(linkPage.FullPageName) };
-			var displayNode = new ParameterNode(1, new[] { new TextNode(display) });
-			return new LinkNode(titleNodes, new[] { displayNode });
+			return this.noTransclusions && linkTitle.SimpleEquals(this.currentPage)
+				? new TextNode($"'''{display}'''")
+				: LinkNode.FromParts(linkPage.FullPageName, display) as IWikiNode;
 		}
 
 		private IWikiNode LoreTransclusionReplacer(IWikiNode node)

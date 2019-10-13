@@ -1,7 +1,10 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
+	using System;
 	using System.Collections.Generic;
+	using System.Runtime.CompilerServices;
 	using System.Text.RegularExpressions;
+	using RobinHood70.WikiClasses.Properties;
 	using static WikiCommon.Globals;
 
 	/// <summary>A <see langword="static" /> class which encompasses all common methods for converting a block of text into parsed wikitext nodes.</summary>
@@ -29,19 +32,34 @@
 		/// <summary>Parses the specified text.</summary>
 		/// <param name="text">The text to parse.</param>
 		/// <returns>A <see cref="NodeCollection"/> with the parsed text.</returns>
-		public static NodeCollection Parse(string text) => Parse(text, null, false);
+		public static NodeCollection Parse(string? text) => Parse(text, null, false);
 
 		/// <summary>Parses the specified text.</summary>
 		/// <param name="text">The text to parse.</param>
 		/// <param name="include">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
 		/// <returns>A <see cref="NodeCollection"/> with the parsed text.</returns>
-		public static NodeCollection Parse(string text, bool? include, bool strictInclusion)
+		public static NodeCollection Parse(string? text, bool? include, bool strictInclusion)
 		{
 			ThrowNull(text, nameof(text));
-			var stack = new WikiStack(text, UnparsedTags, include, strictInclusion);
+			var stack = new WikiStack(text ?? string.Empty, UnparsedTags, include, strictInclusion);
 			var nodes = stack.GetElements();
 			return new NodeCollection(null, nodes);
+		}
+
+		/// <summary>If the text provided represents a single node of the specified type, returns that node. Otherwise, throws an error.</summary>
+		/// <typeparam name="T">The type of node desired.</typeparam>
+		/// <param name="text">The text to parse.</param>
+		/// <param name="callerName">  The caller member name.</param>
+		/// <returns>The single node of the specified type.</returns>
+		/// <exception cref="ArgumentException">Thrown if there is more than one node in the collection, or the node is not of the specified type.</exception>
+		public static T SingleNode<T>(string text, [CallerMemberName] string callerName = "<Unknown>")
+			where T : IWikiNode
+		{
+			var parser = Parse(text);
+			return (parser.Count == 1 && parser.First.Value is T node)
+				? node
+				: throw new ArgumentException(CurrentCulture(Resources.MalformedNodeText, typeof(T).Name, callerName));
 		}
 		#endregion
 	}

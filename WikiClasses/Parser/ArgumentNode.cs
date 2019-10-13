@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
+	using System;
 	using System.Collections;
 	using System.Collections.Generic;
 	using static RobinHood70.WikiCommon.Globals;
@@ -13,24 +14,27 @@
 
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="ArgumentNode"/> class and parses the values provided.</summary>
-		/// <param name="name">The name.</param>
-		/// <param name="defaultValue">The default value.</param>
-		public ArgumentNode(string name, string defaultValue)
-		{
-			var parsedName = WikiTextParser.Parse(name ?? throw ArgumentNull(nameof(name)));
-			var parsedValue = WikiTextParser.Parse(defaultValue ?? throw ArgumentNull(nameof(defaultValue)));
-			this.Name = new NodeCollection(this, parsedName);
-			this.HandleDefaultValue(parsedValue);
-		}
-
 		/// <summary>Initializes a new instance of the <see cref="ArgumentNode"/> class.</summary>
 		/// <param name="title">The title.</param>
 		/// <param name="defaultValue">The default value. May be null or an empty collection. If populated, this should preferentially be either a single ParameterNode or a collection of IWikiNodes representing the default value itself. For compatibility with MediaWiki, it can also be a list of parameter nodes, in which case, these will be added as individual entries to the AllValues collection.</param>
 		public ArgumentNode(IEnumerable<IWikiNode> title, IEnumerable<IWikiNode> defaultValue)
 		{
 			this.Name = new NodeCollection(this, title ?? throw ArgumentNull(nameof(title)));
-			this.HandleDefaultValue(defaultValue);
+			if (defaultValue is IEnumerable<ParameterNode> parameters)
+			{
+				foreach (var value in parameters)
+				{
+					this.AddParameterNode(value);
+				}
+			}
+			else if (defaultValue is ParameterNode parameter)
+			{
+				this.AddParameterNode(parameter);
+			}
+			else if (defaultValue != null)
+			{
+				this.extraValues.Add(new NodeCollection(this, defaultValue));
+			}
 		}
 		#endregion
 
@@ -48,6 +52,26 @@
 		/// <summary>Gets the name of the argument.</summary>
 		/// <value>The argument name.</value>
 		public NodeCollection Name { get; }
+		#endregion
+
+		#region Public Static Methods
+
+		/// <summary>Creates a new ArgumentNode from the provided text.</summary>
+		/// <param name="text">The text of the argument.</param>
+		/// <returns>A new ArgumentNode.</returns>
+		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single argument (<c>{{{abc|123}}}</c>).</exception>
+		public static ArgumentNode FromText(string text) => WikiTextParser.SingleNode<ArgumentNode>(text);
+
+		/// <summary>Creates a new ArgumentNode from its parts.</summary>
+		/// <param name="name">The name.</param>
+		/// <param name="defaultValue">The default value.</param>
+		/// <returns>A new ArgumentNode.</returns>
+		public static ArgumentNode FromParts(string name, string defaultValue)
+		{
+			var parsedName = WikiTextParser.Parse(name ?? throw ArgumentNull(nameof(name)));
+			var parsedValue = WikiTextParser.Parse(defaultValue ?? throw ArgumentNull(nameof(defaultValue)));
+			return new ArgumentNode(parsedName, parsedValue);
+		}
 		#endregion
 
 		#region Public Methods
@@ -125,7 +149,7 @@
 					collection.AddLast(node);
 				}
 
-				collection.AddLast(new EqualsNode());
+				collection.AddLast(EqualsNode.Instance);
 			}
 
 			foreach (var node in parameter.Value)
@@ -140,25 +164,6 @@
 			else
 			{
 				this.extraValues.Add(collection);
-			}
-		}
-
-		private void HandleDefaultValue(IEnumerable<IWikiNode> defaultValue)
-		{
-			if (defaultValue is IEnumerable<ParameterNode> parameters)
-			{
-				foreach (var value in parameters)
-				{
-					this.AddParameterNode(value);
-				}
-			}
-			else if (defaultValue is ParameterNode parameter)
-			{
-				this.AddParameterNode(parameter);
-			}
-			else if (defaultValue != null)
-			{
-				this.extraValues.Add(new NodeCollection(this, defaultValue));
 			}
 		}
 		#endregion

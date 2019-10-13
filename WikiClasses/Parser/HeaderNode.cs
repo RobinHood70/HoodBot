@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
+	using System;
 	using System.Collections;
 	using System.Collections.Generic;
 	using static WikiCommon.Globals;
@@ -47,6 +48,15 @@
 		/// <summary>Gets the title.</summary>
 		/// <value>The title.</value>
 		public NodeCollection Title { get; }
+		#endregion
+
+		#region Public Static Methods
+
+		/// <summary>Creates a new ArgumentNode from the provided text.</summary>
+		/// <param name="text">The text of the argument.</param>
+		/// <returns>A new ArgumentNode.</returns>
+		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single argument (<c>{{{abc|123}}}</c>).</exception>
+		public static HeaderNode FromText(string text) => WikiTextParser.SingleNode<HeaderNode>(text);
 		#endregion
 
 		#region Public Methods

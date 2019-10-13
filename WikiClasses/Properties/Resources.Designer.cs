@@ -79,20 +79,11 @@ namespace RobinHood70.WikiClasses.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The provided link text was malformed..
+        ///   Looks up a localized string similar to The text provided to {0}.{1} was malformed..
         /// </summary>
-        internal static string MalformedLink {
+        internal static string MalformedNodeText {
             get {
-                return ResourceManager.GetString("MalformedLink", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The provided parameter text was malformed..
-        /// </summary>
-        internal static string MalformedParameter {
-            get {
-                return ResourceManager.GetString("MalformedParameter", resourceCulture);
+                return ResourceManager.GetString("MalformedNodeText", resourceCulture);
             }
         }
         

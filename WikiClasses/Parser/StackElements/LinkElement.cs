@@ -1,7 +1,5 @@
 ﻿namespace RobinHood70.WikiClasses.Parser.StackElements
 {
-	using System.Collections.Generic;
-
 	internal class LinkElement : PairedElement
 	{
 		#region Constructors

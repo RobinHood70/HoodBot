@@ -3,54 +3,12 @@
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
-	using RobinHood70.WikiClasses.Properties;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Represents a link, including embedded images.</summary>
 	public class LinkNode : IWikiNode, IBacklinkNode
 	{
 		#region Constructors
-
-		/// <summary>Initializes a new instance of the <see cref="LinkNode"/> class.</summary>
-		/// <param name="fullLink">The full link.</param>
-		public LinkNode(string fullLink)
-		{
-			var newLink = ParseFullLink(fullLink);
-			this.Title = new NodeCollection(this, newLink.Title);
-			this.Parameters = new List<ParameterNode>();
-			foreach (var param in newLink.Parameters)
-			{
-				this.Parameters.Add(new ParameterNode(param));
-			}
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="LinkNode"/> class.</summary>
-		/// <param name="title">The title.</param>
-		/// <param name="displayText">The display text.</param>
-		public LinkNode(string title, string displayText)
-			: this(title, new[] { displayText })
-		{
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="LinkNode"/> class.</summary>
-		/// <param name="title">The title.</param>
-		/// <param name="parameters">The parameters.</param>
-		public LinkNode(string title, IEnumerable<string> parameters)
-		{
-			ThrowNull(title, nameof(title));
-			ThrowNull(parameters, nameof(parameters));
-			var linkText = "[[" + title;
-			var paramText = string.Join("|", parameters);
-			if (paramText.Length > 0)
-			{
-				linkText += "|" + paramText;
-			}
-
-			linkText += "]]";
-			var newLink = ParseFullLink(linkText);
-			this.Title = newLink.Title;
-			this.Parameters = newLink.Parameters;
-		}
 
 		/// <summary>Initializes a new instance of the <see cref="LinkNode"/> class.</summary>
 		/// <param name="title">The title.</param>
@@ -71,6 +29,49 @@
 		/// <summary>Gets the title.</summary>
 		/// <value>The title.</value>
 		public NodeCollection Title { get; }
+		#endregion
+
+		#region Public Static Methods
+
+		/// <summary>Creates a new LinkNode from the provided text.</summary>
+		/// <param name="text">The text of the link, including surrounding brackets (<c>[[...]]</c>).</param>
+		/// <returns>A new LinkNode.</returns>
+		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single link (e.g., <c>[[Link]]</c>, or any variant thereof).</exception>
+		public static LinkNode FromText(string text) => WikiTextParser.SingleNode<LinkNode>(text);
+
+		/// <summary>Creates a new LinkNode from its parts.</summary>
+		/// <param name="title">The link destination.</param>
+		/// <returns>A new ArgumentNode.</returns>
+		public static LinkNode FromParts(string title) => FromParts(title);
+
+		/// <summary>Creates a new LinkNode from its parts.</summary>
+		/// <param name="title">The link destination.</param>
+		/// <param name="displayText">The display text for the link.</param>
+		/// <returns>A new ArgumentNode.</returns>
+		public static LinkNode FromParts(string title, string displayText) => FromParts(title, new[] { displayText });
+
+		/// <summary>Creates a new LinkNode from its parts.</summary>
+		/// <param name="title">The link destination.</param>
+		/// <param name="parameters">The default value.</param>
+		/// <returns>A new ArgumentNode.</returns>
+		public static LinkNode FromParts(string title, IEnumerable<string> parameters)
+		{
+			ThrowNull(title, nameof(title));
+			ThrowNull(parameters, nameof(parameters));
+			var linkText = "[[" + title;
+			if (parameters != null)
+			{
+				var paramText = string.Join("|", parameters);
+				if (paramText.Length > 0)
+				{
+					linkText += "|" + paramText;
+				}
+			}
+
+			linkText += "]]";
+
+			return FromText(linkText);
+		}
 		#endregion
 
 		#region Public Methods
@@ -105,19 +106,6 @@
 		/// <summary>Returns a <see cref="string"/> that represents this instance.</summary>
 		/// <returns>A <see cref="string"/> that represents this instance.</returns>
 		public override string ToString() => this.Parameters.Count == 0 ? "[[Link]]" : $"[[Link|Count = {this.Parameters.Count}]]";
-		#endregion
-
-		#region Private Methods
-		private static LinkNode ParseFullLink(string linkText)
-		{
-			var allNodes = WikiTextParser.Parse(linkText);
-			if (allNodes.Count == 1 && allNodes.First?.Value is LinkNode retval)
-			{
-				return retval;
-			}
-
-			throw new InvalidOperationException(CurrentCulture(Resources.MalformedLink));
-		}
 		#endregion
 	}
 }

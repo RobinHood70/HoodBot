@@ -3,6 +3,19 @@
 	/// <summary>Represents the separator between name and value.</summary>
 	public class EqualsNode : IWikiNode
 	{
+		#region Constructors
+		private EqualsNode()
+		{
+		}
+		#endregion
+
+		#region Public Properties
+
+		/// <summary>Gets an instance of the equals node.</summary>
+		/// <value>The instance.</value>
+		public static EqualsNode Instance { get; } = new EqualsNode();
+		#endregion
+
 		#region Public Methods
 
 		/// <summary>Accepts a visitor to process the node.</summary>

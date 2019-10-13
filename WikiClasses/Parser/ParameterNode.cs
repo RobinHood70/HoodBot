@@ -16,67 +16,6 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="ParameterNode"/> class.</summary>
-		/// <param name="fullParameter">The full parameter.</param>
-		/// <exception cref="InvalidOperationException">Thrown if the parameter is not in a recognizable format.</exception>
-		/// <remarks>This is the slowest of the constructors; one of the others should be used whenever possible.</remarks>
-		public ParameterNode(string fullParameter)
-		{
-			ThrowNull(fullParameter, nameof(fullParameter));
-			if (fullParameter.Length > 0 && fullParameter[0] != '|')
-			{
-				fullParameter = '|' + fullParameter;
-			}
-
-			var param = WikiTextParser.Parse("{{" + fullParameter + "}}");
-			if (param.Count == 1 && param.First.Value is TemplateNode template && template.Parameters.Count == 1)
-			{
-				var newParameter = template.Parameters[0];
-				this.Index = newParameter.Index;
-				if (newParameter.Name != null)
-				{
-					this.Name = new NodeCollection(this, newParameter.Name);
-				}
-
-				this.Value = new NodeCollection(this, newParameter.Value);
-			}
-			else
-			{
-				throw new InvalidOperationException(CurrentCulture(Resources.MalformedParameter));
-			}
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="ParameterNode"/> class.</summary>
-		/// <param name="copy">The copy.</param>
-		public ParameterNode(ParameterNode copy)
-		{
-			ThrowNull(copy, nameof(copy));
-			if (copy.Name != null)
-			{
-				this.Name = new NodeCollection(this, copy.Name);
-			}
-
-			this.Value = new NodeCollection(this, copy.Value);
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="ParameterNode"/> class.</summary>
-		/// <param name="index">The index.</param>
-		/// <param name="value">The value.</param>
-		public ParameterNode(int index, string value)
-		{
-			this.index = index;
-			this.Value = WikiTextParser.Parse(value);
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="ParameterNode"/> class.</summary>
-		/// <param name="name">The name.</param>
-		/// <param name="value">The value.</param>
-		public ParameterNode(string name, string value)
-		{
-			this.Name = WikiTextParser.Parse(name);
-			this.Value = WikiTextParser.Parse(value);
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="ParameterNode"/> class.</summary>
 		/// <param name="index">The index.</param>
 		/// <param name="value">The value.</param>
 		public ParameterNode(int index, IEnumerable<IWikiNode> value)
@@ -124,6 +63,34 @@
 		/// <summary>Gets the parameter value.</summary>
 		/// <value>The value.</value>
 		public NodeCollection Value { get; }
+		#endregion
+
+		#region Public Static Methods
+
+		/// <summary>Creates a new ParameterNode from the provided text.</summary>
+		/// <param name="text">The text of the parameter (without a pipe (<c>|</c>).</param>
+		/// <returns>A new ParameterNode.</returns>
+		/// <remarks>Due to the way the parser works, this method internally creates a template in order to parse the parameter. If you are calling this method as part of constructing a link or template, it is faster to use their methods and construct the entire object at once.</remarks>
+		public static ParameterNode FromText(string text)
+		{
+			ThrowNull(text, nameof(text));
+			var template = TemplateNode.FromParts(string.Empty, new[] { text });
+			return (template.Parameters.Count == 1)
+				? template.Parameters[0]
+				: throw new InvalidOperationException(CurrentCulture(Resources.MalformedNodeText, nameof(ParameterNode), nameof(FromText)));
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="ParameterNode"/> class.</summary>
+		/// <param name="index">The index.</param>
+		/// <param name="value">The value.</param>
+		/// <returns>A new ParameterNode.</returns>
+		public static ParameterNode FromParts(int index, string value) => new ParameterNode(index, WikiTextParser.Parse(value));
+
+		/// <summary>Initializes a new instance of the <see cref="ParameterNode"/> class.</summary>
+		/// <param name="name">The name.</param>
+		/// <param name="value">The value.</param>
+		/// <returns>A new ParameterNode.</returns>
+		public static ParameterNode FromParts(string name, string value) => new ParameterNode(WikiTextParser.Parse(name), WikiTextParser.Parse(value));
 		#endregion
 
 		#region Public Methods
