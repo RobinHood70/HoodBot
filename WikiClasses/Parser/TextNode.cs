@@ -6,7 +6,7 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="TextNode"/> class.</summary>
-		/// <param name="text">The text.</param>
+		/// <param name="txt">The text.</param>
 		public TextNode(string text) => this.Text = text;
 		#endregion
 

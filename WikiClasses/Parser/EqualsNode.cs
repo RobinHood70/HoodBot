@@ -9,7 +9,7 @@
 		}
 		#endregion
 
-		#region Public Properties
+		#region Public Static Properties
 
 		/// <summary>Gets an instance of the equals node.</summary>
 		/// <value>The instance.</value>

@@ -202,9 +202,9 @@
 				: LinkNode.FromParts(linkPage.FullPageName, display) as IWikiNode;
 		}
 
-		private IWikiNode LoreTransclusionReplacer(IWikiNode node)
+		private IWikiNode LoreTransclusionReplacer(LinkedListNode<IWikiNode> node)
 		{
-			if (node is TemplateNode templateNode)
+			if (node.Value is TemplateNode templateNode)
 			{
 				var templateName = WikiTextVisitor.Value(templateNode.Title).Trim();
 				var templateTitle = Title.DefaultToNamespace(this.Site, MediaWikiNamespaces.Template, templateName);
@@ -244,7 +244,7 @@
 				}
 			}
 
-			return node;
+			return node.Value;
 		}
 
 		private IWikiNode NstReplacer(TemplateNode node)
@@ -259,9 +259,9 @@
 			return retval;
 		}
 
-		private IWikiNode OldLoreInserter(IWikiNode node)
+		private IWikiNode OldLoreInserter(LinkedListNode<IWikiNode> node)
 		{
-			if (node is TemplateNode templateNode)
+			if (node.Value is TemplateNode templateNode)
 			{
 				var templateName = WikiTextVisitor.Value(templateNode.Title).Trim();
 				var templateTitle = Title.DefaultToNamespace(this.Site, MediaWikiNamespaces.Template, templateName);
@@ -275,7 +275,7 @@
 				}
 			}
 
-			return node;
+			return node.Value;
 		}
 
 		private void SetPageInfo(Page page)
@@ -297,9 +297,9 @@
 			this.noTransclusions = this.linkedNamespaces.Count == 0;
 		}
 
-		private IWikiNode TemplateReplacer(IWikiNode node)
+		private IWikiNode TemplateReplacer(LinkedListNode<IWikiNode> node)
 		{
-			if (this.transclusionParameters != null && node is ArgumentNode arg)
+			if (this.transclusionParameters != null && node.Value is ArgumentNode arg)
 			{
 				var argName = WikiTextVisitor.Value(arg.Name);
 				this.transclusionParameters.TryGetValue(argName, out var retval);
@@ -307,7 +307,7 @@
 				return retval ?? arg.DefaultValue;
 			}
 
-			if (node is TemplateNode templateNode)
+			if (node.Value is TemplateNode templateNode)
 			{
 				var templateName = WikiTextVisitor.Value(templateNode.Title).Trim();
 				var templateTitle = Title.DefaultToNamespace(this.Site, MediaWikiNamespaces.Template, templateName);
@@ -326,7 +326,7 @@
 						case "Cite book":
 							templateNode.Title.Clear();
 							templateNode.Title.AddFirst(new TextNode("Cite Book"));
-							return node;
+							return node.Value;
 						case "FMI":
 							return this.FmiReplacer(templateNode);
 						case "Lore Link":
@@ -340,7 +340,7 @@
 						case "PAGENAME":
 							return new TextNode(this.currentPage.PageName);
 						case "Ref":
-							return this.currentPage.Namespace == UespNamespaces.Lore ? node : null;
+							return this.currentPage.Namespace == UespNamespaces.Lore ? node.Value : null;
 						default:
 							if (templateNode.Title.First.Value is TextNode textNode && textNode.Text.Trim() == "#ifeq:")
 							{
@@ -352,12 +352,12 @@
 								Debug.WriteLine($"{WikiTextVisitor.Raw(templateNode)} transcluding onto [[{this.currentPage.FullPageName}]]");
 							}
 
-							return node;
+							return node.Value;
 					}
 				}
 			}
 
-			return node;
+			return node.Value;
 		}
 
 		private IWikiNode TenseReplacer(TemplateNode node)

@@ -1,26 +1,45 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
-	using System;
 	using System.Collections.Generic;
 	using static WikiCommon.Globals;
 
+	/// <summary>  A delegate for the method required by the Replace method.</summary>
+	/// <param name="node">The node.</param>
+	/// <returns>A LinkedListNode&lt;IWikiNode>.</returns>
+	public delegate IWikiNode? NodeReplacer(LinkedListNode<IWikiNode> node);
+
+	/// <summary>Represents a collection of <see cref="IWikiNode"/> nodes.</summary>
 	public class NodeCollection : LinkedList<IWikiNode>, IWikiNode
 	{
 		#region Constructors
+
+		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
+		/// <param name="parent">The parent.</param>
 		public NodeCollection(IWikiNode? parent)
 			: base() => this.Parent = parent;
 
+		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
+		/// <param name="parent">The parent.</param>
+		/// <param name="nodes">The nodes.</param>
 		public NodeCollection(IWikiNode? parent, IEnumerable<IWikiNode> nodes)
 			: base(nodes) => this.Parent = parent;
 		#endregion
 
 		#region Public Properties
+
+		/// <summary>Gets the parent node for the collection.</summary>
+		/// <value>The node's parent, or <see langword="null"/> if this is the root node.</value>
 		public IWikiNode? Parent { get; }
 		#endregion
 
 		#region Public Methods
+
+		/// <summary>Accepts a visitor to process the node.</summary>
+		/// <param name="visitor">The visiting class.</param>
 		public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
 
+		/// <summary>Adds all nodes in the provided collection to the end of the current collection.</summary>
+		/// <param name="collection">The collection to be added.</param>
 		public void AddRange(IEnumerable<IWikiNode> collection)
 		{
 			ThrowNull(collection, nameof(collection));
@@ -33,22 +52,21 @@
 		/// <summary>Removes all nodes of the given type.</summary>
 		/// <typeparam name="T">The type of node to remove.</typeparam>
 		public void RemoveAll<T>()
-			where T : IWikiNode => this.Replace((node) => node is T ? null : node);
+			where T : IWikiNode => this.Replace((node) => node.Value is T ? null : node.Value);
 
 		/// <summary>Replaces the specified node with a new node.</summary>
 		/// <param name="replaceMethod">A function to replace the value with a new one.</param>
 		/// <remarks>The replacement function should determine whether or not the current node is the desired one, and then return one of the following:
 		/// <list type="bullet">
-		///     <item>The original node if it is not the desired node or the node is modified in-place.</item>
-		///     <item>A single <see cref="IWikiNode"/> to replace the original node with. If this is a <see cref="NodeCollection"/>, the individual items of the collection will be inserted rather than the collection itself.</item>
+		///     <item>The current <see cref="LinkedListNode{T}.Value">Value</see> of the <see cref="LinkedListNode{T}"/> if it is not the desired node or the node has already been modified by the replacer method.</item>
+		///     <item>A single <see cref="IWikiNode"/> to replace the value of the original node with. If this is a <see cref="NodeCollection"/>, the original node will be removed, and the items of the collection inserted in its place.</item>
 		///     <item><see langword="null"/> if the node should be removed.</item>
 		/// </list>
+		/// Any new nodes that are added will not be searched by the replacer.
 		/// </remarks>
-		public void Replace(Func<IWikiNode, IWikiNode?> replaceMethod)
+		public void Replace(NodeReplacer replaceMethod)
 		{
 			ThrowNull(replaceMethod, nameof(replaceMethod));
-
-			// Slower as a forward loop, but proceeds in the order a user would likely expect, and allows user to have matches fail after first/X replacement(s). Could be implimented as reverse or bidirectional, if needed.
 			var currentNode = this.First;
 			while (currentNode != null)
 			{
@@ -60,26 +78,28 @@
 					}
 				}
 
-				var newNode = replaceMethod(currentNode.Value);
+				var newNode = replaceMethod(currentNode);
 				var nextNode = currentNode.Next;
-				if (!ReferenceEquals(currentNode, newNode))
+				if (!ReferenceEquals(currentNode.Value, newNode))
 				{
-					if (newNode != null)
+					if (newNode == null)
 					{
-						if (newNode is NodeCollection newNodes)
+						this.Remove(currentNode);
+					}
+					else if (newNode is NodeCollection newNodes)
+					{
+						foreach (var colNode in newNodes)
 						{
-							foreach (var colNode in newNodes)
-							{
-								this.AddBefore(currentNode, colNode);
-							}
+							this.AddBefore(currentNode, colNode);
 						}
-						else
-						{
-							this.AddBefore(currentNode, newNode);
-						}
+
+						this.Remove(currentNode);
+					}
+					else
+					{
+						currentNode.Value = newNode;
 					}
 
-					this.Remove(currentNode);
 					currentNode = nextNode;
 				}
 			}
