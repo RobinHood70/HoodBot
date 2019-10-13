@@ -75,7 +75,6 @@
 				matchingCount == 3 ? new ArgumentNode(this.NameValuePieces[0], parameters) :
 				found == ']' ? new LinkNode(this.NameValuePieces[0], parameters) :
 				new TemplateNode(this.NameValuePieces[0], parameters) as IWikiNode;
-			this.Stack.Top.CurrentPiece.Add(node);
 			this.Stack.Index += matchingCount;
 			this.Stack.Pop();
 			if (matchingCount < this.Length)
@@ -93,6 +92,7 @@
 				}
 			}
 
+			this.Stack.Top.CurrentPiece.Add(node);
 			return matchingCount;
 		}
 		#endregion

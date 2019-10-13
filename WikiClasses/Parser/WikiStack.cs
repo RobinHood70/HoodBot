@@ -52,6 +52,7 @@
 			// Not using Push both so that nullable reference check succeeds on .Top and for a micro-optimization.
 			this.array = new StackElement[StartSize];
 			this.Top = new RootElement(this);
+			this.array[0] = this.Top;
 			this.count = 1;
 
 			this.Text = txt;

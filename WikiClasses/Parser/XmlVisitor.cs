@@ -197,11 +197,11 @@
 		#region Private Methods
 		private XmlVisitor BuildTag(string name, Dictionary<string, int>? attributes, NodeCollection? inner)
 		{
-			var selfClosed = inner?.Count == 0;
+			var selfClosed = inner == null || inner.Count == 0;
 			this.BuildTagOpen(name, attributes, selfClosed);
 			if (!selfClosed)
 			{
-				foreach (var node in inner!)
+				foreach (var node in inner)
 				{
 					node.Accept(this);
 				}
