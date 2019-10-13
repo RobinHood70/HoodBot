@@ -11,10 +11,6 @@
 		/// <param name="node">The node.</param>
 		void Visit(CommentNode node);
 
-		/// <summary>Visits the specified <see cref="EqualsNode"/>.</summary>
-		/// <param name="node">The node.</param>
-		void Visit(EqualsNode node);
-
 		/// <summary>Visits the specified <see cref="HeaderNode"/>.</summary>
 		/// <param name="node">The node.</param>
 		void Visit(HeaderNode node);

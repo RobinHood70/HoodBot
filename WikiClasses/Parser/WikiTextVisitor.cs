@@ -21,7 +21,7 @@
 
 		/// <summary>Initializes a new instance of the <see cref="WikiTextVisitor"/> class.</summary>
 		/// <param name="valuesOnly"><list type="bullet">
-		/// <item>If set to <see langword="true"/> , returns only the value of each node, ignoring comments and the like. This is most useful for finding named items.</item>
+		/// <item>If set to <see langword="true"/>, returns only the value of each node, ignoring comments and the like. This is most useful for finding named items.</item>
 		/// <item>If set to false, returns all nodes in the collection. This is most useful for editing the collection.</item>
 		/// </list></param>
 		public WikiTextVisitor(bool valuesOnly) => this.valuesOnly = valuesOnly;
@@ -92,10 +92,6 @@
 				this.builder.Append(node.Comment);
 			}
 		}
-
-		/// <summary>Visits the specified <see cref="EqualsNode"/>.</summary>
-		/// <param name="node">The node.</param>
-		public void Visit(EqualsNode node) => this.builder.Append('=');
 
 		/// <summary>Visits the specified <see cref="HeaderNode"/>.</summary>
 		/// <param name="node">The node.</param>

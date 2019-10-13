@@ -36,12 +36,6 @@
 		{
 		}
 
-		/// <summary>Visits the specified <see cref="EqualsNode"/>.</summary>
-		/// <param name="node">The node.</param>
-		public virtual void Visit(EqualsNode node)
-		{
-		}
-
 		/// <summary>Visits the specified <see cref="HeaderNode"/>.</summary>
 		/// <param name="node">The node.</param>
 		public virtual void Visit(HeaderNode node)

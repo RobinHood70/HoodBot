@@ -21,13 +21,13 @@
 			}
 			else
 			{
-				if (!(this[last] is TextNode node))
+				if (this[last] is TextNode node)
 				{
-					this.Add(new TextNode(literal));
+					node.Text += literal;
 				}
 				else
 				{
-					node.Text += literal;
+					this.Add(new TextNode(literal));
 				}
 			}
 		}
@@ -39,18 +39,18 @@
 				return;
 			}
 
-			var startAt = 0;
+			var merged = false;
 			var last = this.Count - 1;
 			if (last > -1)
 			{
 				if (this[last] is TextNode lastNode && newList[0] is TextNode first)
 				{
 					lastNode.Text += first.Text;
-					startAt = 1;
+					merged = true;
 				}
 			}
 
-			this.AddRange(startAt == 0 ? newList : newList.GetRange(startAt, newList.Count - startAt));
+			this.AddRange(merged ? newList.GetRange(1, newList.Count - 1) : newList);
 		}
 		#endregion
 	}

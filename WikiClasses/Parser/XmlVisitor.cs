@@ -71,15 +71,6 @@
 			this.BuildValueNode("comment", node.Comment);
 		}
 
-		/// <summary>Visits the specified <see cref="EqualsNode"/>.</summary>
-		/// <param name="node">The node.</param>
-		public void Visit(EqualsNode node)
-		{
-			ThrowNull(node, nameof(node));
-			this.Indent();
-			this.builder.Append('=');
-		}
-
 		/// <summary>Visits the specified <see cref="HeaderNode"/>.</summary>
 		/// <param name="node">The node.</param>
 		public void Visit(HeaderNode node)
@@ -201,7 +192,7 @@
 			this.BuildTagOpen(name, attributes, selfClosed);
 			if (!selfClosed)
 			{
-				foreach (var node in inner)
+				foreach (var node in inner!)
 				{
 					node.Accept(this);
 				}

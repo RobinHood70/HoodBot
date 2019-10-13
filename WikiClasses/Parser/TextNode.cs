@@ -1,13 +1,15 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
+	using System.ComponentModel;
+
 	/// <summary>Represents a block of text.</summary>
 	public class TextNode : IWikiNode
 	{
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="TextNode"/> class.</summary>
-		/// <param name="txt">The text.</param>
-		public TextNode(string txt) => this.Text = txt;
+		/// <param name="text">The text.</param>
+		public TextNode([Localizable(false)]string text) => this.Text = text;
 		#endregion
 
 		#region Public Properties

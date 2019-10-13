@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
 	using System.Collections.Generic;
+	using System.ComponentModel;
 	using static WikiCommon.Globals;
 
 	/// <summary>  A delegate for the method required by the Replace method.</summary>
@@ -46,6 +47,48 @@
 			foreach (var item in collection)
 			{
 				this.AddLast(item);
+			}
+		}
+
+		/// <summary>Adds text to the end of the collection.</summary>
+		/// <param name="text">The text.</param>
+		/// <remarks>Adds text to the existing node, if the last node in the collection is a TextNode; otherwise, creates a new TextNode with the specified text and adds it to the collection.</remarks>
+		public void AddText([Localizable(false)] string text)
+		{
+			if (this.Last.Value is TextNode node)
+			{
+				node.Text += text;
+			}
+			else
+			{
+				node = new TextNode(text);
+				this.AddLast(node);
+			}
+		}
+
+		/// <summary>Merges any adjacent TextNodes in the collection.</summary>
+		/// <param name="recursive">if set to <see langword="true"/>, merges the entire tree.</param>
+		/// <remarks>While the parser does this while parsing wiki text, user manipulation can lead to multiple adjacent TextNodes. Use this function if you require your tree to be well formed, or before intensive operations if you believe it could be heavily fragmented.</remarks>
+		public void MergeText(bool recursive)
+		{
+			var current = this.First;
+			while (current != null)
+			{
+				var next = current.Next;
+				if (current.Value is TextNode currentText && next.Value is TextNode nextText)
+				{
+					nextText.Text = currentText.Text + nextText.Text;
+					this.Remove(current);
+				}
+				else if (recursive && current.Value is IEnumerable<NodeCollection> subNodes)
+				{
+					foreach (var node in subNodes)
+					{
+						node.MergeText(recursive);
+					}
+				}
+
+				current = next;
 			}
 		}
 

@@ -149,7 +149,7 @@
 					collection.AddLast(node);
 				}
 
-				collection.AddLast(new TextNode("="));
+				collection.AddText("=");
 			}
 
 			foreach (var node in parameter.Value)
