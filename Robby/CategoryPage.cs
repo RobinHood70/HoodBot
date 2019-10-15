@@ -14,7 +14,7 @@
 		/// <param name="site">The site the category is from.</param>
 		/// <param name="pageName">The page name (<em>without</em> the leading namespace).</param>
 		public CategoryPage(Site site, string pageName)
-			: base(site?.Namespaces[MediaWikiNamespaces.Category], pageName)
+			: base(site, MediaWikiNamespaces.Category, pageName)
 		{
 		}
 		#endregion

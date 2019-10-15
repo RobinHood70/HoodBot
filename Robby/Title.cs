@@ -63,7 +63,7 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the namespace and page name.</summary>
-		/// <param name="ns">The namespace to which the page belongs.</param>
+		/// <param name="ns">The namespace the title is in.</param>
 		/// <param name="pageName">The name of the page without the namespace.</param>
 		public Title(Namespace ns, string pageName)
 		{
@@ -73,6 +73,15 @@
 			this.Namespace = ns;
 			this.PageName = ns.CapitalizePageName(pageName);
 			this.Key = this.FullPageName;
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the namespace and page name.</summary>
+		/// <param name="site">The site this title is from.</param>
+		/// <param name="ns">The namespace ID the title is in.</param>
+		/// <param name="pageName">The name of the page without the namespace.</param>
+		public Title(Site site, int ns, string pageName)
+			: this(site?.Namespaces[ns], pageName)
+		{
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class, copying the information from another <see cref="ISimpleTitle"/> object.</summary>

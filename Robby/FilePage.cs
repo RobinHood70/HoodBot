@@ -21,7 +21,7 @@
 		/// <param name="site">The site the file is from.</param>
 		/// <param name="pageName">The page name (<em>without</em> the leading namespace).</param>
 		public FilePage(Site site, string pageName)
-			: base(site?.Namespaces[MediaWikiNamespaces.File], pageName)
+			: base(site, MediaWikiNamespaces.File, pageName)
 		{
 		}
 		#endregion

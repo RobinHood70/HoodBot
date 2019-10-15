@@ -160,7 +160,7 @@
 		{
 			var retval = new PageCollection(site);
 			retval.SetLimitations(LimitationType.FilterTo, UespNamespaces.Online);
-			retval.GetPageTranscludedIn(new[] { new Title(site.Namespaces[UespNamespaces.Template], "Online NPC Summary") });
+			retval.GetPageTranscludedIn(new[] { new Title(site, UespNamespaces.Template, "Online NPC Summary") });
 			retval.Sort();
 
 			return retval;

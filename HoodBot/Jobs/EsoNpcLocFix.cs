@@ -133,7 +133,7 @@
 		{
 			var allTitles = new TitleCollection(this.Site);
 			allTitles.SetLimitations(LimitationType.FilterTo, UespNamespaces.Online);
-			allTitles.GetPageTranscludedIn(new[] { new Title(this.Site.Namespaces[UespNamespaces.Template], "Online NPC Summary") });
+			allTitles.GetPageTranscludedIn(new[] { new Title(this.Site, UespNamespaces.Template, "Online NPC Summary") });
 			allTitles.Sort();
 			var i = allTitles.Count - 1;
 			while (allTitles[i].PageName[0] != 'A')

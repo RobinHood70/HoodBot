@@ -39,7 +39,7 @@
 			this.NativeClient = this.NativeAbstractionLayer.Client;
 			var pageName = site.User.FullPageName;
 			this.LogPage = new Page(site, pageName + "/Log");
-			this.RequestsPage = new Page(site.Namespaces[MediaWikiNamespaces.Project], "Bot Requests");
+			this.RequestsPage = new Page(site, MediaWikiNamespaces.Project, "Bot Requests");
 			this.PrivateResetResultsPage();
 			this.StatusPage = this.LogPage;
 			this.DefaultResultDestination = ResultDestination.ResultsPage;

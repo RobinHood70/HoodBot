@@ -31,6 +31,15 @@
 		{
 		}
 
+		/// <summary>Initializes a new instance of the <see cref="Page" /> class using the namespace and page name.</summary>
+		/// <param name="site">The site this page is from.</param>
+		/// <param name="ns">The namespace ID the page is in.</param>
+		/// <param name="pageName">The name of the page without the namespace.</param>
+		public Page(Site site, int ns, string pageName)
+			: base(site, ns, pageName)
+		{
+		}
+
 		/// <summary>Initializes a new instance of the <see cref="Page" /> class from another ISimpleTitle-based object.</summary>
 		/// <param name="title">The Title object to copy from.</param>
 		public Page(ISimpleTitle title)
