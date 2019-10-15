@@ -52,8 +52,8 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(result, nameof(result));
 			var output = new ExpandTemplatesResult()
 			{
-				ParseTree = (string)result["parsetree"],
-				WikiText = (string)result["wikitext"],
+				ParseTree = (string?)result["parsetree"],
+				WikiText = (string?)result["wikitext"],
 				Categories = result["categories"].AsReadOnlyList<string>(),
 				Properties = result["properties"].AsBCDictionary(),
 				Volatile = result["volatile"].AsBCBool(),

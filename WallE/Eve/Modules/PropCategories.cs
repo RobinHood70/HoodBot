@@ -50,17 +50,15 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override CategoriesItem GetItem(JToken result) => result == null
+		protected override CategoriesItem? GetItem(JToken result) => result == null
 			? null
-			: new CategoriesItem()
-			{
-				Namespace = (int?)result["ns"], // Should always be 14, but theoretically, an extension might cause other results to be possible, so read it in just in case.
-				Title = (string)result["title"],
-				SortKey = (string)result["sortkey"],
-				SortKeyPrefix = (string)result["sortkeyprefix"],
-				Timestamp = (DateTime?)result["timestamp"],
-				Hidden = result["hidden"].AsBCBool(),
-			};
+			: new CategoriesItem(
+				ns: (int)result.NotNull("ns"),
+				title: result.StringNotNull("title"),
+				hidden: result["hidden"].AsBCBool(),
+				sortkey: (string?)result["sortkey"],
+				sortkeyPrefix: (string?)result["sortkeyprefix"],
+				timestamp: (DateTime?)result["timestamp"]);
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Categories);
 

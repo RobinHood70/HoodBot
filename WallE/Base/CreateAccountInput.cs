@@ -11,21 +11,21 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public string Domain { get; set; }
+		public string? Domain { get; set; }
 
-		public string Email { get; set; }
+		public string? Email { get; set; }
 
-		public string Language { get; set; }
+		public string? Language { get; set; }
 
 		public bool MailPassword => this.Password == null && this.Email != null;
 
 		public string Name { get; }
 
-		public string Password { get; private set; }
+		public string? Password { get; private set; }
 
-		public string RealName { get; set; }
+		public string? RealName { get; set; }
 
-		public string Reason { get; set; }
+		public string? Reason { get; set; }
 		#endregion
 
 		#region Public Static Methods

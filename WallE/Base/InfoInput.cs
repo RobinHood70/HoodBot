@@ -28,9 +28,9 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public InfoProperties Properties { get; set; }
 
-		public IEnumerable<string> TestActions { get; set; }
+		public IEnumerable<string>? TestActions { get; set; }
 
-		public IEnumerable<string> Tokens { get; set; }
+		public IEnumerable<string>? Tokens { get; set; }
 		#endregion
 	}
 }

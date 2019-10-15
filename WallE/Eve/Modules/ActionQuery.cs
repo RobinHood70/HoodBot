@@ -14,19 +14,19 @@ namespace RobinHood70.WallE.Eve.Modules
 	internal class ActionQuery : ActionModulePageSet<QueryInput, PageItem>, IQueryPageSet
 	{
 		#region Fields
-		private readonly Func<PageItem> pageItemFactory;
-
 		private MetaUserInfo userModule;
 		#endregion
 
 		#region Constructors
 		public ActionQuery(WikiAbstractionLayer wal)
-			: base(wal)
+			: base(wal, null)
 		{
 		}
 
-		public ActionQuery(WikiAbstractionLayer wal, Func<PageItem> pageFactory)
-			: this(wal) => this.pageItemFactory = pageFactory;
+		public ActionQuery(WikiAbstractionLayer wal, TitleCreator<PageItem> pageFactory)
+			: base(wal, pageFactory)
+		{
+		}
 		#endregion
 
 		#region Public Properties
@@ -270,7 +270,7 @@ namespace RobinHood70.WallE.Eve.Modules
 							continuableModule.ModuleLimit = value;
 						}
 					}
-					else if (propModules.TryGetValue(limit.Name, out var propModule))
+					else if (propModules.TryGetValue(limit.Name, out var propModule) && propModule != null)
 					{
 						propModule.ModuleLimit = value;
 					}
@@ -279,12 +279,9 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			// Kludgey workaround for https://phabricator.wikimedia.org/T36356. If there had been more than just this one module, some sort of "Needs deserializing during parent's DeserializeParent" feature could have been added, but that seemed just as kludgey as this for a single faulty module.
 			var watchlistRaw = parent[ListWatchlistRaw.ModuleName];
-			if (watchlistRaw != null)
+			if (watchlistRaw != null && modules.TryGetValue(ListWatchlistRaw.ModuleName, out var watchListModule) && watchListModule != null)
 			{
-				if (modules.TryGetValue(ListWatchlistRaw.ModuleName, out ListWatchlistRaw watchlistModule))
-				{
-					watchlistModule.Deserialize(parent);
-				}
+				watchListModule.Deserialize(parent);
 			}
 		}
 
@@ -339,6 +336,11 @@ namespace RobinHood70.WallE.Eve.Modules
 		private void DeserializePages(JToken result)
 		{
 			ThrowNull(result, nameof(result));
+			if (this.ItemCreator == null)
+			{
+				throw new InvalidOperationException("Trying to create pages with no page creator!");
+			}
+
 			var pages = this.Pages as KeyedPages;
 			foreach (var page in result)
 			{
@@ -362,8 +364,9 @@ namespace RobinHood70.WallE.Eve.Modules
 						continue;
 					}
 
-					item = this.pageItemFactory();
-					this.DeserializeTitle(innerResult, item);
+					var wikiTitle = this.DeserializeTitle(innerResult);
+					item = this.ItemCreator(wikiTitle.Namespace, wikiTitle.Title, wikiTitle.PageId);
+					this.DeserializePage(innerResult, item);
 					pages.Add(item);
 					if (this.ItemsRemaining != int.MaxValue)
 					{

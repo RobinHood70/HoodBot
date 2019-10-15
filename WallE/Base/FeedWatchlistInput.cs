@@ -10,9 +10,9 @@ namespace RobinHood70.WallE.Base
 
 		public bool LinkToDiffs { get; set; }
 
-		public string ExcludeUser { get; set; }
+		public string? ExcludeUser { get; set; }
 
-		public string FeedFormat { get; set; }
+		public string? FeedFormat { get; set; }
 
 		public Filter FilterAnonymous { get; set; }
 
@@ -28,9 +28,9 @@ namespace RobinHood70.WallE.Base
 
 		public bool LinkToSections { get; set; }
 
-		public string Owner { get; set; }
+		public string? Owner { get; set; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 
 		public WatchlistTypes Types { get; set; }
 		#endregion

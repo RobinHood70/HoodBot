@@ -122,8 +122,11 @@
 		public abstract Page CreatePage(ISimpleTitle simpleTitle);
 
 		/// <summary>Creates a page item.</summary>
+		/// <param name="ns">The namespace.</param>
+		/// <param name="title">The title.</param>
+		/// <param name="pageId">The page identifier.</param>
 		/// <returns>A new PageItem for use by WallE.</returns>
-		public abstract PageItem CreatePageItem();
+		public abstract PageItem CreatePageItem(int ns, string title, long pageId);
 		#endregion
 
 		#region Protected Abstract Methods

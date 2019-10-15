@@ -119,7 +119,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					var item = new LagItem()
 					{
-						Host = (string)result["host"],
+						Host = (string?)result["host"],
 						Lag = (int)result["lag"],
 					};
 					outputList.Add(item);
@@ -148,11 +148,11 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					var item = new ExtensionItem()
 					{
-						Type = (string)result["type"],
-						Name = (string)result["name"],
-						NameMessage = (string)result["namemsg"],
-						Description = (string)result["description"],
-						DescriptionMessage = (string)result["descriptionmsg"],
+						Type = (string?)result["type"],
+						Name = (string?)result["name"],
+						NameMessage = (string?)result["namemsg"],
+						Description = (string?)result["description"],
+						DescriptionMessage = (string?)result["descriptionmsg"],
 					};
 					try
 					{
@@ -163,16 +163,16 @@ namespace RobinHood70.WallE.Eve.Modules
 						wal.AddWarning("siteinfo-unhandledparams", CurrentCulture(EveMessages.UnhandledParams, item.Name));
 					}
 
-					item.Author = (string)result["author"];
-					item.Url = (string)result["url"];
-					item.Version = (string)result["version"];
-					item.VersionControlSystem = (string)result["vcs-system"];
-					item.VersionControlSystemVersion = (string)result["vcs-version"];
-					item.VersionControlSystemUrl = (string)result["vcs-url"];
+					item.Author = (string?)result["author"];
+					item.Url = (string?)result["url"];
+					item.Version = (string?)result["version"];
+					item.VersionControlSystem = (string?)result["vcs-system"];
+					item.VersionControlSystemVersion = (string?)result["vcs-version"];
+					item.VersionControlSystemUrl = (string?)result["vcs-url"];
 					item.VersionControlSystemDate = (DateTime?)result["vcs-date"];
-					item.LicenseName = (string)result["license-name"];
-					item.License = (string)result["license"];
-					item.Credits = (string)result["credits"];
+					item.LicenseName = (string?)result["license-name"];
+					item.License = (string?)result["license"];
+					item.Credits = (string?)result["credits"];
 
 					outputList.Add(item);
 				}
@@ -198,7 +198,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				var outputList = new List<string>();
 				foreach (var result in node)
 				{
-					outputList.Add((string)result["ext"]);
+					outputList.Add((string?)result["ext"]);
 				}
 
 				output.FileExtensions = outputList;
@@ -219,12 +219,12 @@ namespace RobinHood70.WallE.Eve.Modules
 			var result = parent["general"];
 			if (result != null)
 			{
-				output.ArticlePath = (string)result["articlepath"];
-				output.BasePage = (string)result["base"];
-				output.DbType = (string)result["dbtype"];
-				output.DbVersion = (string)result["dbversion"];
+				output.ArticlePath = (string?)result["articlepath"];
+				output.BasePage = (string?)result["base"];
+				output.DbType = (string?)result["dbtype"];
+				output.DbVersion = (string?)result["dbversion"];
 				output.ExternalImages = result["externalimages"].AsReadOnlyList<string>();
-				output.Fallback8BitEncoding = (string)result["fallback8bitEncoding"];
+				output.Fallback8BitEncoding = (string?)result["fallback8bitEncoding"];
 
 				var fallback = new List<string>();
 				if (result["fallback"] != null)
@@ -236,9 +236,9 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 
 				output.FallbackLanguages = fallback;
-				output.Favicon = (string)result["favicon"];
+				output.Favicon = (string?)result["favicon"];
 				output.Flags =
-					((string)result["case"] == "case-sensitive" ? SiteInfoFlags.CaseSensitive : SiteInfoFlags.None) |
+					((string?)result["case"] == "case-sensitive" ? SiteInfoFlags.CaseSensitive : SiteInfoFlags.None) |
 					result.GetFlag("imagewhitelistenabled", SiteInfoFlags.ImageWhitelistEnabled) |
 					result.GetFlag("langconversion", SiteInfoFlags.LanguageConversion) |
 					result.GetFlag("misermode", SiteInfoFlags.MiserMode) |
@@ -246,10 +246,10 @@ namespace RobinHood70.WallE.Eve.Modules
 					result.GetFlag("righttoleft", SiteInfoFlags.RightToLeft) |
 					result.GetFlag("titleconversion", SiteInfoFlags.TitleConversion) |
 					result.GetFlag("writeapi", SiteInfoFlags.WriteApi);
-				output.Generator = (string)result["generator"];
-				output.GitBranch = (string)result["git-branch"];
-				output.GitHash = (string)result["git-hash"];
-				output.HhvmVersion = (string)result["hhvmversion"];
+				output.Generator = (string?)result["generator"];
+				output.GitBranch = (string?)result["git-branch"];
+				output.GitHash = (string?)result["git-hash"];
+				output.HhvmVersion = (string?)result["hhvmversion"];
 
 				var imageLimits = new Dictionary<string, ImageLimitsItem>();
 				if (result["imagelimits"] != null)
@@ -279,23 +279,23 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 
 				output.ImageLimits = imageLimits;
-				output.Language = (string)result["lang"];
-				output.LegalTitleChars = (string)result["legaltitlechars"];
-				output.LinkPrefix = (string)result["linkprefix"];
-				output.LinkPrefixCharset = (string)result["linkprefixcharset"];
-				output.LinkTrail = (string)result["linktrail"];
-				output.Logo = (string)result["logo"];
-				output.MainPage = (string)result["mainpage"];
+				output.Language = (string?)result["lang"];
+				output.LegalTitleChars = (string?)result["legaltitlechars"];
+				output.LinkPrefix = (string?)result["linkprefix"];
+				output.LinkPrefixCharset = (string?)result["linkprefixcharset"];
+				output.LinkTrail = (string?)result["linktrail"];
+				output.Logo = (string?)result["logo"];
+				output.MainPage = (string?)result["mainpage"];
 				output.MaxUploadSize = (long?)result["maxuploadsize"] ?? 0;
-				output.PhpSapi = (string)result["phpsapi"];
-				output.PhpVersion = (string)result["phpversion"];
-				output.ReadOnlyReason = (string)result["readonlyreason"];
+				output.PhpSapi = (string?)result["phpsapi"];
+				output.PhpVersion = (string?)result["phpversion"];
+				output.ReadOnlyReason = (string?)result["readonlyreason"];
 				output.Revision = (long?)result["revision"] ?? 0;
-				output.RightsText = (string)result["rightstext"];
-				output.Script = (string)result["script"];
-				output.ScriptPath = (string)result["scriptpath"];
-				output.Server = (string)result["server"];
-				output.ServerName = (string)result["servername"];
+				output.RightsText = (string?)result["rightstext"];
+				output.Script = (string?)result["script"];
+				output.ScriptPath = (string?)result["scriptpath"];
+				output.Server = (string?)result["server"];
+				output.ServerName = (string?)result["servername"];
 				if (output.ServerName == null)
 				{
 					// Same basic approach as MediaWiki uses
@@ -304,7 +304,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					output.ServerName = uri.Host;
 				}
 
-				output.SiteName = (string)result["sitename"];
+				output.SiteName = (string?)result["sitename"];
 
 				var thumbLimits = result["thumblimits"];
 				if (thumbLimits != null)
@@ -331,7 +331,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 				var timeOffset = (int?)result["timeoffset"];
 				output.TimeOffset = timeOffset == null ? (TimeSpan?)null : TimeSpan.FromMinutes(timeOffset.Value);
-				output.TimeZone = (string)result["timezone"];
+				output.TimeZone = (string?)result["timezone"];
 
 				// Default value is "false", which gets emitted in JSON, so check for that.
 				var variantArticlePath = result["variantarticlepath"];
@@ -350,7 +350,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 
 				output.Variants = variants;
-				output.WikiId = (string)result["wikiid"];
+				output.WikiId = (string?)result["wikiid"];
 			}
 		}
 
@@ -364,19 +364,19 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					var item = new InterwikiMapItem()
 					{
-						Prefix = (string)result["prefix"],
+						Prefix = (string?)result["prefix"],
 						Flags =
 						result.GetFlag("extralanguagelink", InterwikiMapFlags.ExtraLanguageLink) |
 						result.GetFlag("local", InterwikiMapFlags.Local) |
 						result.GetFlag("localinterwiki", InterwikiMapFlags.LocalInterwiki) |
 						result.GetFlag("protorel", InterwikiMapFlags.ProtocolRelative) |
 						result.GetFlag("trans", InterwikiMapFlags.TransclusionAllowed),
-						Language = (string)result["language"],
-						LinkText = (string)result["linktext"],
-						SiteName = (string)result["sitename"],
-						Url = (string)result["url"],
-						WikiId = (string)result["wikiid"],
-						ApiUrl = (string)result["api"],
+						Language = (string?)result["language"],
+						LinkText = (string?)result["linktext"],
+						SiteName = (string?)result["sitename"],
+						Url = (string?)result["url"],
+						WikiId = (string?)result["wikiid"],
+						ApiUrl = (string?)result["api"],
 					};
 					outputList.Add(item);
 				}
@@ -395,8 +395,8 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					var item = new LanguageItem()
 					{
-						Code = (string)result["code"],
-						Name = (string)result.AsBCContent("name"),
+						Code = (string?)result["code"],
+						Name = result.AsBCStringOptional("name"),
 					};
 					outputList.Add(item);
 				}
@@ -415,8 +415,8 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					var item = new LibrariesItem()
 					{
-						Name = (string)result["name"],
-						Version = (string)result["version"],
+						Name = (string?)result["name"],
+						Version = (string?)result["version"],
 					};
 					outputList.Add(item);
 				}
@@ -435,7 +435,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					var item = new MagicWordsItem()
 					{
-						Name = (string)result["name"],
+						Name = (string?)result["name"],
 						Aliases = result["aliases"].AsReadOnlyList<string>(),
 						CaseSensitive = result["case-sensitive"].AsBCBool(),
 					};
@@ -457,7 +457,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					var item = new NamespaceAliasesItem()
 					{
 						Id = (int)result["id"],
-						Alias = (string)result.AsBCContent("alias"),
+						Alias = result.AsBCStringOptional("alias"),
 					};
 					outputList.Add(item);
 				}
@@ -477,15 +477,15 @@ namespace RobinHood70.WallE.Eve.Modules
 					var result = resultNode.First;
 					var item = new NamespacesItem()
 					{
-						CanonicalName = (string)result["canonical"] ?? string.Empty,
-						DefaultContentModel = (string)result["defaultcontentmodel"],
+						CanonicalName = (string?)result["canonical"] ?? string.Empty,
+						DefaultContentModel = (string?)result["defaultcontentmodel"],
 						Flags =
-						((string)result["case"] == "case-sensitive" ? NamespaceFlags.CaseSensitive : NamespaceFlags.None) |
+						((string?)result["case"] == "case-sensitive" ? NamespaceFlags.CaseSensitive : NamespaceFlags.None) |
 						result.GetFlag("content", NamespaceFlags.ContentSpace) |
 						result.GetFlag("nonincludable", NamespaceFlags.NonIncludable) |
 						result.GetFlag("subpages", NamespaceFlags.Subpages),
 						Id = (int)result["id"],
-						Name = (string)result.AsBCContent("name"),
+						Name = result.AsBCStringOptional("name"),
 					};
 					outputList.Add(item);
 				}
@@ -524,8 +524,8 @@ namespace RobinHood70.WallE.Eve.Modules
 			var result = parent["rightsinfo"];
 			if (result != null)
 			{
-				output.RightsText = (string)result["text"]; // Overwrites the version coming from the General branch if both are present. This is probably preferred, since this one gets $wgRightsPage if $wgRightsText isn't present.
-				output.RightsUrl = (string)result["url"];
+				output.RightsText = (string?)result["text"]; // Overwrites the version coming from the General branch if both are present. This is probably preferred, since this one gets $wgRightsPage if $wgRightsText isn't present.
+				output.RightsUrl = (string?)result["url"];
 			}
 		}
 
@@ -539,7 +539,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					var item = new SubscribedHooksItem()
 					{
-						Name = (string)result["name"],
+						Name = (string?)result["name"],
 					};
 					var subscribers = result["subscribers"];
 					if (subscribers.Type == JTokenType.Array)
@@ -573,8 +573,8 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					var item = new SkinsItem()
 					{
-						Code = (string)result["code"],
-						Name = (string)result.AsBCContent("name"),
+						Code = (string?)result["code"],
+						Name = result.AsBCStringOptional("name"),
 						Unusable = result["unusable"].AsBCBool(),
 					};
 					if (result["default"].AsBCBool())
@@ -599,7 +599,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					var item = new SpecialPageAliasesItem()
 					{
-						RealName = (string)result["realname"],
+						RealName = (string?)result["realname"],
 						Aliases = result["aliases"].AsReadOnlyList<string>(),
 					};
 					outputList.Add(item);
@@ -640,7 +640,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					var item = new UserGroupsItem()
 					{
-						Name = (string)result["name"],
+						Name = (string?)result["name"],
 						Number = (long?)result["number"] ?? -1,
 						Rights = result["rights"].AsReadOnlyList<string>(),
 						Add = result["add"].AsReadOnlyList<string>(),

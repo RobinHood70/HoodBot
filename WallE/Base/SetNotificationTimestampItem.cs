@@ -17,18 +17,27 @@ namespace RobinHood70.WallE.Base
 
 	public class SetNotificationTimestampItem : ITitle
 	{
+		#region Constructors
+		public SetNotificationTimestampItem(int ns, string title, long pageId)
+		{
+			this.Namespace = ns;
+			this.Title = title;
+			this.PageId = pageId;
+		}
+		#endregion
+
 		#region Public Properties
 		public SetNotificationTimestampFlags Flags { get; set; }
 
-		public int? Namespace { get; set; }
+		public int Namespace { get; }
 
 		public DateTime? NotificationTimestamp { get; set; }
 
-		public long PageId { get; set; }
+		public long PageId { get; }
 
 		public long RevisionId { get; set; }
 
-		public string Title { get; set; }
+		public string Title { get; }
 		#endregion
 
 		#region Public Override Methods

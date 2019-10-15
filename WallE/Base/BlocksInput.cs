@@ -48,9 +48,9 @@ namespace RobinHood70.WallE.Base
 
 		public Filter FilterTemporary { get; set; }
 
-		public IEnumerable<long> Ids { get; set; }
+		public IEnumerable<long>? Ids { get; set; }
 
-		public IPAddress IP { get; }
+		public IPAddress? IP { get; }
 
 		public int Limit { get; set; }
 
@@ -62,7 +62,7 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Start { get; set; }
 
-		public IEnumerable<string> Users { get; }
+		public IEnumerable<string>? Users { get; }
 		#endregion
 	}
 }

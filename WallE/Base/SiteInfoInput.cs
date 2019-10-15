@@ -40,7 +40,7 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public Filter FilterLocalInterwiki { get; set; }
 
-		public string InterwikiLanguageCode { get; set; }
+		public string? InterwikiLanguageCode { get; set; }
 
 		public SiteInfoProperties Properties { get; set; }
 

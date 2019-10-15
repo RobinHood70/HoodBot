@@ -15,7 +15,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Constructors
 		public MetaAllMessages(WikiAbstractionLayer wal, AllMessagesInput input)
-			: base(wal, input, null)
+			: base(wal, input)
 		{
 		}
 		#endregion
@@ -63,16 +63,16 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			var item = new AllMessagesItem()
 			{
-				Content = (string)result.AsBCContent("content"),
-				Default = (string)result["default"],
+				Content = result.AsBCStringOptional("content"),
+				Default = (string?)result["default"],
 				Flags =
 					result.GetFlag("customised", MessageFlags.Customized) |
 					result.GetFlag("defaultmissing", MessageFlags.DefaultMissing) |
 					result.GetFlag("missing", MessageFlags.Missing),
-				Name = (string)result["name"],
+				Name = (string?)result["name"],
 			};
 
-			item.NormalizedName = (string)result["normalizedname"];
+			item.NormalizedName = (string?)result["normalizedname"];
 			if (item.NormalizedName == null)
 			{
 				var ci = GetCulture(this.languageCode ?? this.Wal.LanguageCode) ?? CultureInfo.CurrentCulture;

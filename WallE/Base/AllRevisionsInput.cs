@@ -7,11 +7,11 @@ namespace RobinHood70.WallE.Base
 	public class AllRevisionsInput : IRevisionsInput, IGeneratorInput
 	{
 		#region Public Properties
-		public string ContentFormat { get; set; }
+		public string? ContentFormat { get; set; }
 
 		public int? DiffTo { get; set; }
 
-		public string DiffToText { get; set; }
+		public string? DiffToText { get; set; }
 
 		public bool DiffToTextPreSaveTransform { get; set; }
 
@@ -29,7 +29,7 @@ namespace RobinHood70.WallE.Base
 
 		public int MaxItems { get; set; }
 
-		public IEnumerable<int> Namespaces { get; set; }
+		public IEnumerable<int>? Namespaces { get; set; }
 
 		public bool Parse { get; set; }
 
@@ -41,7 +41,7 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Start { get; set; }
 
-		public string User { get; set; }
+		public string? User { get; set; }
 		#endregion
 	}
 }

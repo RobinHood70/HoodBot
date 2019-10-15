@@ -139,16 +139,7 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="values">The parameter values.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public ParameterCollection Add(string name, IEnumerable<string> values)
-		{
-			// Do not add if values is empty.
-			if (values.HasItems())
-			{
-				this.AddForced(name, values);
-			}
-
-			return this;
-		}
+		public ParameterCollection Add(string name, IEnumerable<string>? values) => values == null || values.IsEmpty() ? this : this.AddForced(name, values);
 
 		/// <summary>Adds an enumerable IFormattable parameter if the value is non-null.</summary>
 		/// <typeparam name="T">Any type that implements IFormattable.</typeparam>
@@ -156,7 +147,7 @@
 		/// <param name="values">The parameter values.</param>
 		/// <returns>The current collection (fluent interface).</returns>
 		/// <remarks>A sorted copy of the values is added, not the original list.</remarks>
-		public ParameterCollection Add<T>(string name, IEnumerable<T> values)
+		public ParameterCollection Add<T>(string name, IEnumerable<T>? values)
 			where T : IFormattable
 		{
 			if (values != null)
@@ -164,7 +155,7 @@
 				var newList = new List<string>();
 				foreach (var value in values)
 				{
-					newList.Add(value.ToStringInvariant());
+					newList.Add(value.ToStringInvariant() ?? string.Empty);
 				}
 
 				newList.Sort();
@@ -279,11 +270,11 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public ParameterCollection AddHidden(string name, string value)
+		public ParameterCollection AddHidden(string name, string? value)
 		{
 			ThrowNull(name, nameof(name));
 			ThrowNull(value, nameof(value)); // Unlike regular Add, there is no condition in which this should be null.
-			this.Add(new HiddenParameter(this.Prefix + name, value));
+			this.Add(new HiddenParameter(this.Prefix + name, value!));
 			return this;
 		}
 
@@ -354,7 +345,7 @@
 		/// <param name="values">The parameter values.</param>
 		/// <param name="condition">The condition to check.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public ParameterCollection AddIf(string name, IEnumerable<string> values, bool condition) => condition ? this.Add(name, values) : this;
+		public ParameterCollection AddIf(string name, IEnumerable<string>? values, bool condition) => condition ? this.Add(name, values) : this;
 
 		/// <summary>Adds an enumerable IFormattable parameter if the value is non-null and the condition is true.</summary>
 		/// <typeparam name="T">Any IFormattable type.</typeparam>
@@ -369,7 +360,7 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public ParameterCollection AddIfNotNull(string name, string value) => value != null ? this.Add(name, value) : this;
+		public ParameterCollection AddIfNotNull(string name, string? value) => value != null ? this.Add(name, value) : this;
 
 		/// <summary>Adds a string parameter if the value is non-null and the condition is true.</summary>
 		/// <param name="name">The parameter name.</param>
@@ -433,7 +424,7 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public ParameterCollection AddOrChangeIfNotNull(string name, string value)
+		public ParameterCollection AddOrChangeIfNotNull(string name, string? value)
 		{
 			// Removes any existing key and replaces it with the new key/value, not preserving order. We must remove and re-add, since the only way to set a value is to construct a new Parameter object.
 			if (value != null)

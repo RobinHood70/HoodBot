@@ -16,37 +16,60 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Internal Extension Methods
-		internal static void ParseLogEvent(this JToken result, ILogEvents le, string logType, string logAction, HashSet<string> knownProps, bool hasUserIdFlag)
+		internal static void ParseLogEvent(this JToken result, ILogEvents le, string logType, string logAction, ICollection<string> knownProps, bool hasUserIdFlag)
 		{
 			// hasUserIdFlag only necessary for list=logevents bug fix, can presumably be removed when we get to Json2 format.
-			Dictionary<string, object> values;
-			var doBugFix = true;
-			if (result["params"] != null)
+			le.ExtraData = GetDictionary(result, le, logType, logAction, knownProps, hasUserIdFlag);
+			le.LogType = logType;
+			le.LogAction = logAction;
+			le.LogEventFlags =
+				result.GetFlag("actionhidden", LogEventFlags.ActionHidden) |
+				result.GetFlag("commenthidden", LogEventFlags.CommentHidden) |
+				result.GetFlag("suppressed", LogEventFlags.Suppressed) |
+				result.GetFlag("anon", LogEventFlags.UserAnonymous) |
+				result.GetFlag("userhidden", LogEventFlags.UserHidden);
+			le.UserId = (long?)result["userid"] ?? -1;
+			le.User = (string?)result["user"];
+			le.Timestamp = (DateTime?)result["timestamp"];
+			le.Comment = (string?)result["comment"];
+			le.ParsedComment = (string?)result["parsedcomment"];
+			le.LogId = (long?)result["logid"] ?? 0;
+		}
+
+		private static Dictionary<string, object?> GetDictionary(JToken result, ILogEvents le, string logType, string logAction, ICollection<string> knownProps, bool hasUserIdFlag)
+		{
+			// TODO: Look at this code again later and rewrite, especially if updated for a later version of MW. Bug fix code is for MW 1.24 and before. I think all the ExtraData stuff is too, or much of it, anyway. For 1.25+, everything goes to result["params"]. Just convert that to a dictionary and parse it.
+			var parms = result["params"];
+			var doBugFix = parms == null;
+			var baseNode = parms ?? (logType == null ? result : result[logType]);
+			var values = baseNode?.ToObject<Dictionary<string, object?>>() ?? new Dictionary<string, object?>();
+			if (doBugFix && logType != null && baseNode != null)
 			{
-				doBugFix = false;
-				values = result["params"].ToObject<Dictionary<string, object>>();
-			}
-			else if (logType == null)
-			{
-				values = result.ToObject<Dictionary<string, object>>();
-			}
-			else
-			{
-				values = result[logType].ToObject<Dictionary<string, object>>();
-				if (values == null)
+				foreach (var prop in result.Children<JProperty>())
 				{
-					values = new Dictionary<string, object>();
-					foreach (var prop in result.Children<JProperty>())
+					if (!knownProps.Contains(prop.Name))
 					{
-						if (!knownProps.Contains(prop.Name))
-						{
-							values.Add(prop.Name, prop.Value);
-						}
+						values.Add(prop.Name, prop.Value);
 					}
 				}
 			}
 
-			var dict = GetExtraData(logType, logAction, values);
+			var dict = logType switch
+			{
+				"block" => ExtraDataBlock(values, logAction),
+				"delete" => ExtraDataDelete(values, logAction),
+				"suppress" => ExtraDataDelete(values, logAction),
+				"merge" => ExtraDataMerge(values),
+				"move" => ExtraDataMove(values),
+				"newusers" => ExtraDataNewUsers(values),
+				"pagelang" => ExtraDataPageLanguage(values),
+				"patrol" => ExtraDataPatrol(values),
+				"protect" => ExtraDataProtect(values, logAction),
+				"rights" => ExtraDataRights(values),
+				"upload" => ExtraDataUpload(values),
+				_ => values,
+			};
+
 			if (doBugFix && le is LogEventsItem logEventsOutput && logEventsOutput.LogType == "newusers")
 			{
 				// Per https://phabricator.wikimedia.org/T73020
@@ -72,88 +95,28 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 			}
 
-			le.GetWikiTitle(result);
-			le.ExtraData = dict;
-			le.LogType = logType;
-			le.LogAction = logAction;
-			le.LogEventFlags =
-				result.GetFlag("actionhidden", LogEventFlags.ActionHidden) |
-				result.GetFlag("commenthidden", LogEventFlags.CommentHidden) |
-				result.GetFlag("suppressed", LogEventFlags.Suppressed) |
-				result.GetFlag("anon", LogEventFlags.UserAnonymous) |
-				result.GetFlag("userhidden", LogEventFlags.UserHidden);
-			le.UserId = (long?)result["userid"] ?? -1;
-			le.User = (string)result["user"];
-			le.Timestamp = (DateTime?)result["timestamp"];
-			le.Comment = (string)result["comment"];
-			le.ParsedComment = (string)result["parsedcomment"];
-			le.LogId = (long?)result["logid"] ?? 0;
+			return dict;
 		}
 		#endregion
 
 		#region Private Methods
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "Complexity warning is a lie. To be fixed in an upcoming Roslyn update.")]
-		private static Dictionary<string, object> GetExtraData(string type, string action, Dictionary<string, object> values)
-		{
-			// Used to be a switch, but converted to if/else if block because that's what happens internally anyway, and CA1502 was falsely triggering with bizarrely high complexities on the string switch.
-			var dict = new Dictionary<string, object>();
-			switch (type)
+		private static Dictionary<string, object?> ExtraDataBlock(Dictionary<string, object?> values, string action) => action != "unblock" && values["duration"] != null
+			? new Dictionary<string, object?>
 			{
-				case "block":
-					ExtraDataBlock(dict, values, action);
-					break;
-				case "delete":
-				case "suppress":
-					ExtraDataDelete(dict, values, action);
-					break;
-				case "merge":
-					ExtraDataMerge(dict, values);
-					break;
-				case "move":
-					ExtraDataMove(dict, values);
-					break;
-				case "newusers":
-					ExtraDataNewUsers(dict, values);
-					break;
-				case "pagelang":
-					ExtraDataPageLanguage(dict, values);
-					break;
-				case "patrol":
-					ExtraDataPatrol(dict, values);
-					break;
-				case "protect":
-					ExtraDataProtect(dict, values, action);
-					break;
-				case "rights":
-					ExtraDataRights(dict, values);
-					break;
-				case "upload":
-					ExtraDataUpload(dict, values);
-					break;
-				default:
-					dict = values;
-					break;
+				{ "duration", (string?)values["duration"] },
+				{ "flags", (string?)values["flags"] },
+				{ "expiry", (DateTime?)values["expiry"] }
 			}
+			: new Dictionary<string, object?>();
 
-			return dict;
-		}
-
-		private static void ExtraDataBlock(Dictionary<string, object> dict, Dictionary<string, object> values, string action)
+		private static Dictionary<string, object?> ExtraDataDelete(Dictionary<string, object?> values, string action)
 		{
-			if (action != "unblock" && values["duration"] != null)
-			{
-				dict.Add("duration", (string)values["duration"]);
-				dict.Add("flags", (string)values["flags"]);
-				dict.Add("expiry", (DateTime?)values["expiry"]);
-			}
-		}
-
-		private static void ExtraDataDelete(Dictionary<string, object> dict, Dictionary<string, object> values, string action)
-		{
-			var valOffset = 0;
+			// TODO: This code *only* seems to support 1.24 and below. Is that right? That doesn't seem like what I would've wanted, but maybe I just forgot to come back to this.
+			var dict = new Dictionary<string, object?>();
+			var valOffset = '0';
 			if (action == "event" || action == "revision")
 			{
-				var revisionType = (string)values[valOffset.ToStringInvariant()];
+				var revisionType = (string?)values[valOffset.ToString()];
 				switch (revisionType)
 				{
 					case "archive":
@@ -165,68 +128,87 @@ namespace RobinHood70.WallE.Eve.Modules
 						break;
 				}
 
-				var ids = (string)values[valOffset.ToStringInvariant()];
-				var logIds = new List<long>();
-				foreach (var value in ids.Split(TextArrays.Comma))
+				var value = values[valOffset.ToString()];
+				if (value != null)
 				{
-					logIds.Add(long.Parse(value, CultureInfo.InvariantCulture));
+					var ids = (string)value;
+					var logIds = new List<long>();
+					foreach (var commaSplit in ids.Split(TextArrays.Comma))
+					{
+						logIds.Add(long.Parse(commaSplit, CultureInfo.InvariantCulture));
+					}
+
+					dict.Add("logids", logIds);
 				}
 
-				dict.Add("logids", logIds);
+				value = values[valOffset++.ToString()];
+				if (value != null)
+				{
+					dict.Add("old", LogEventGetRDType((string)value));
+				}
 
-				valOffset++;
-				dict.Add("old", LogEventGetRDType((string)values[valOffset.ToStringInvariant()]));
-				valOffset++;
-				dict.Add("new", LogEventGetRDType((string)values[valOffset.ToStringInvariant()]));
+				value = values[valOffset++.ToString()];
+				if (value != null)
+				{
+					dict.Add("new", LogEventGetRDType((string)value));
+				}
 			}
+
+			return dict;
 		}
 
-		private static void ExtraDataMerge(Dictionary<string, object> dict, Dictionary<string, object> values)
+		private static Dictionary<string, object?> ExtraDataMerge(Dictionary<string, object?> values) => new Dictionary<string, object?>
 		{
-			dict.Add("mergetitle", (string)values["0"]);
-			dict.Add("mergetimestamp", ((string)values["1"]).AsDate());
-		}
+			{ "mergetitle", (string?)values["0"] },
+			{ "mergetimestamp", ((string?)values["1"]).AsDate() }
+		};
 
-		private static void ExtraDataMove(Dictionary<string, object> dict, Dictionary<string, object> values)
+		private static Dictionary<string, object?> ExtraDataMove(Dictionary<string, object?> values) => new Dictionary<string, object?>
 		{
-			dict.Add("suppressredirect", values["suppressredirect"] != null);
-			dict.Add("Newtonsoft", (int)values["new_ns"]);
-			dict.Add("title", (string)values["new_title"]);
-		}
+			{ "suppressredirect", values["suppressredirect"] != null },
+			{ "ns", (int?)values["new_ns"] },
+			{ "title", (string?)values["new_title"] }
+		};
 
-		private static void ExtraDataNewUsers(Dictionary<string, object> dict, Dictionary<string, object> values)
+		private static Dictionary<string, object?> ExtraDataNewUsers(Dictionary<string, object?> values)
 		{
-			if (values["userid"] != null)
+			var dict = new Dictionary<string, object?>();
+			var value = values["userid"];
+			if (value != null)
 			{
-				dict.Add("createuserid", (int)values["userid"]);
+				dict.Add("createuserid", (int)value);
 			}
+
+			return dict;
 		}
 
-		private static void ExtraDataPageLanguage(Dictionary<string, object> dict, Dictionary<string, object> values)
+		private static Dictionary<string, object?> ExtraDataPageLanguage(Dictionary<string, object?> values) => new Dictionary<string, object?>
 		{
-			dict.Add("newlanguage", (string)values["newlanguage"]);
-			dict.Add("oldlanguage", (string)values["oldlanguage"]);
-		}
+			{ "newlanguage", (string?)values["newlanguage"] },
+			{ "oldlanguage", (string?)values["oldlanguage"] }
+		};
 
-		private static void ExtraDataPatrol(Dictionary<string, object> dict, Dictionary<string, object> values)
+		private static Dictionary<string, object?> ExtraDataPatrol(Dictionary<string, object?> values) => new Dictionary<string, object?>
 		{
-			dict.Add("currentid", (long?)values["curid"] ?? 0);
-			dict.Add("previousid", (long?)values["previd"] ?? 0);
-			dict.Add("autopatrolled", (string)values["auto"] == "1");
-		}
+			{ "currentid", (long?)values["curid"] ?? 0 },
+			{ "previousid", (long?)values["previd"] ?? 0 },
+			{ "autopatrolled", (string?)values["auto"] == "1" }
+		};
 
-		private static void ExtraDataProtect(Dictionary<string, object> dict, Dictionary<string, object> values, string action)
+		private static Dictionary<string, object?> ExtraDataProtect(Dictionary<string, object?> values, string action)
 		{
+			var dict = new Dictionary<string, object?>();
 			switch (action)
 			{
 				case "move_prot":
-					dict.Add("movedpage", (string)values["0"]);
-					break;
+					dict.Add("movedpage", (string?)values["0"]);
+					return dict;
 				case "unprotect":
-					break;
+					return dict;
 				default:
 					var protections = new List<ProtectionsItem>();
-					foreach (var match in ProtectionFinder.Matches((string)values["0"]) as IReadOnlyList<Match>)
+					var matches = ProtectionFinder.Matches((string?)values["0"]);
+					foreach (Match match in matches)
 					{
 						var groups = match.Groups;
 						var protData = new ProtectionsItem()
@@ -238,27 +220,26 @@ namespace RobinHood70.WallE.Eve.Modules
 							? null
 							: (DateTime?)DateTime.Parse(groups["expiry"].Value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
 
-						protData.Cascading = !string.IsNullOrEmpty((string)values["1"]);
+						protData.Cascading = !string.IsNullOrEmpty((string?)values["1"]);
 						protections.Add(protData);
 					}
 
 					dict.Add("protections", protections);
-
-					break;
+					return dict;
 			}
 		}
 
-		private static void ExtraDataRights(Dictionary<string, object> dict, Dictionary<string, object> values)
+		private static Dictionary<string, object?> ExtraDataRights(Dictionary<string, object?> values) => new Dictionary<string, object?>
 		{
-			dict.Add("new", ParseRights((string)values["new"]));
-			dict.Add("old", ParseRights((string)values["old"]));
-		}
+			{ "new", ParseRights((string?)values["new"]) },
+			{ "old", ParseRights((string?)values["old"]) }
+		};
 
-		private static void ExtraDataUpload(Dictionary<string, object> dict, Dictionary<string, object> values)
+		private static Dictionary<string, object?> ExtraDataUpload(Dictionary<string, object?> values) => new Dictionary<string, object?>
 		{
-			dict.Add("sha1", (string)values["img_sha1"]);
-			dict.Add("uploadtimestamp", (DateTime?)values["img_timestamp"]);
-		}
+			{ "sha1", (string?)values["img_sha1"] },
+			{ "uploadtimestamp", (DateTime?)values["img_timestamp"] }
+		};
 
 		private static RevisionDeleteTypes LogEventGetRDType(string param)
 		{
@@ -267,7 +248,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			return (RevisionDeleteTypes)int.Parse(type, CultureInfo.InvariantCulture);
 		}
 
-		private static IReadOnlyList<string> ParseRights(string value) => value.Split(TextArrays.CommaSpace, StringSplitOptions.RemoveEmptyEntries);
+		private static IReadOnlyList<string> ParseRights(string? value) => value?.Split(TextArrays.CommaSpace, StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
 		#endregion
 	}
 }

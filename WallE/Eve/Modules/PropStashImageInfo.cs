@@ -55,7 +55,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(output, nameof(output));
 			foreach (var item in result)
 			{
-				var imageInfo = item.ParseImageInfo();
+				var imageInfo = JTokenImageInfo.ParseImageInfo(item, new ImageInfoItem());
 				output.Add(imageInfo);
 			}
 		}

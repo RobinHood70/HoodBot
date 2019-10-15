@@ -44,7 +44,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(result, nameof(result));
 			var output = new UserRightsResult()
 			{
-				User = (string)result["user"],
+				User = (string?)result["user"],
 				UserId = (long)result["userid"],
 				Added = result["added"].AsReadOnlyList<string>(),
 				Removed = result["removed"].AsReadOnlyList<string>(),

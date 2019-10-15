@@ -12,7 +12,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ActionWatch(WikiAbstractionLayer wal)
-			: base(wal)
+			: base(wal, WatchItemCreator)
 		{
 		}
 		#endregion
@@ -54,13 +54,24 @@ namespace RobinHood70.WallE.Eve.Modules
 				result.GetFlag("missing", WatchFlags.Missing) |
 				result.GetFlag("unwatched", WatchFlags.Unwatched) |
 				result.GetFlag("watched", WatchFlags.Watched);
-			page.Namespace = this.FindNamespace(page.Title);
 			this.Pages.Add(page);
+		}
+
+		protected override WikiTitleItem DeserializeTitle(JToken result)
+		{
+			ThrowNull(result, nameof(result));
+			var title = result.StringNotNull("title");
+			var ns = (int?)result["ns"] ?? this.FindNamespace(title);
+			return new WikiTitleItem(ns, title, 0);
 		}
 		#endregion
 
+		#region Private Static Classes
+		private static WatchItem WatchItemCreator(int ns, string title, long pageId) => new WatchItem(ns, title, pageId);
+		#endregion
+
 		#region Private Methods
-		private int? FindNamespace(string title)
+		private int FindNamespace(string title)
 		{
 			var nsSplit = title.Split(TextArrays.Colon, 2);
 			if (nsSplit.Length == 2)

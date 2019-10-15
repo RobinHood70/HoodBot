@@ -3,11 +3,15 @@
 	using System;
 	using System.Collections.Generic;
 	using RobinHood70.WallE.Properties;
+	using static RobinHood70.WikiCommon.Globals;
 
 	internal static class TokenManagerFunctions
 	{
 		#region Public Static Methods
-		public static string TrimToken(string token) => (token?.EndsWith("token", StringComparison.Ordinal) ?? false) ? token.Substring(0, token.Length - 5) : token;
+		public static string TrimTokenKey(string key) =>
+			key == null ? throw ArgumentNull(nameof(key)) :
+			key.EndsWith("token", StringComparison.Ordinal) ? key.Substring(0, key.Length - 5) :
+			key;
 
 		public static string ValidateTokenType(HashSet<string> validTypes, string type, string replace, string replaceWith)
 		{

@@ -7,11 +7,11 @@ namespace RobinHood70.WallE.Base
 	public class AllDeletedRevisionsInput : IRevisionsInput, IGeneratorInput
 	{
 		#region Public Properties
-		public string ContentFormat { get; set; }
+		public string? ContentFormat { get; set; }
 
 		public int? DiffTo { get; set; }
 
-		public string DiffToText { get; set; }
+		public string? DiffToText { get; set; }
 
 		public bool DiffToTextPreSaveTransform { get; set; }
 
@@ -21,7 +21,7 @@ namespace RobinHood70.WallE.Base
 
 		public bool ExpandTemplates { get; set; }
 
-		public string From { get; set; }
+		public string? From { get; set; }
 
 		public bool GenerateTitles { get; set; }
 
@@ -31,11 +31,11 @@ namespace RobinHood70.WallE.Base
 
 		public int MaxItems { get; set; }
 
-		public IEnumerable<int> Namespaces { get; set; }
+		public IEnumerable<int>? Namespaces { get; set; }
 
 		public bool Parse { get; set; }
 
-		public string Prefix { get; set; }
+		public string? Prefix { get; set; }
 
 		public RevisionsProperties Properties { get; set; }
 
@@ -45,11 +45,11 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Start { get; set; }
 
-		public string Tag { get; set; }
+		public string? Tag { get; set; }
 
-		public string To { get; set; }
+		public string? To { get; set; }
 
-		public string User { get; set; }
+		public string? User { get; set; }
 		#endregion
 	}
 }

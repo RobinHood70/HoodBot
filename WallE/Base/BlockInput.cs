@@ -15,17 +15,17 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public DateTime? Expiry { get; set; }
 
-		public string ExpiryRelative { get; set; }
+		public string? ExpiryRelative { get; set; }
 
 		public BlockFlags Flags { get; set; }
 
-		public string Reason { get; set; }
+		public string? Reason { get; set; }
 
 		public bool Reblock { get; set; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 
-		public string User { get; }
+		public string? User { get; }
 
 		public long UserId { get; }
 

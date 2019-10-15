@@ -20,40 +20,60 @@ namespace RobinHood70.WallE.Base
 	}
 	#endregion
 
-	public class UserContributionsItem : ITitle
+	public class UserContributionsItem
 	{
+		#region Constructors
+		internal UserContributionsItem(string user, long userId, int? ns, string? title, long pageId, string? comment, UserContributionFlags flags, long parentId, string? parsedComment, long revId, int size, int sizeDiff, IReadOnlyList<string> tags, DateTime? timestamp)
+		{
+			this.User = user;
+			this.UserId = userId;
+			this.Namespace = ns;
+			this.Title = title;
+			this.PageId = pageId;
+			this.Comment = comment;
+			this.Flags = flags;
+			this.ParentId = parentId;
+			this.ParsedComment = parsedComment;
+			this.RevisionId = revId;
+			this.Size = size;
+			this.SizeDifference = sizeDiff;
+			this.Tags = tags;
+			this.Timestamp = timestamp;
+		}
+		#endregion
+
 		#region Public Properties
-		public string Comment { get; set; }
+		public string? Comment { get; }
 
-		public UserContributionFlags Flags { get; set; }
+		public UserContributionFlags Flags { get; }
 
-		public int? Namespace { get; set; }
+		public int? Namespace { get; }
 
-		public long PageId { get; set; }
+		public long PageId { get; }
 
-		public long ParentId { get; set; }
+		public long ParentId { get; }
 
-		public string ParsedComment { get; set; }
+		public string? ParsedComment { get; }
 
-		public long RevisionId { get; set; }
+		public long RevisionId { get; }
 
-		public int Size { get; set; }
+		public int Size { get; }
 
-		public int SizeDifference { get; set; }
+		public int SizeDifference { get; }
 
-		public IReadOnlyList<string> Tags { get; set; }
+		public IReadOnlyList<string> Tags { get; }
 
-		public DateTime? Timestamp { get; set; }
+		public DateTime? Timestamp { get; }
 
-		public string Title { get; set; }
+		public string? Title { get; }
 
-		public string User { get; set; }
+		public string User { get; }
 
-		public long UserId { get; set; }
+		public long UserId { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title;
+		public override string ToString() => this.Title ?? this.User ?? ProjectGlobals.NoTitle;
 		#endregion
 	}
 }

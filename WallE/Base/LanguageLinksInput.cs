@@ -18,9 +18,9 @@ namespace RobinHood70.WallE.Base
 	public class LanguageLinksInput : IPropertyInput, ILimitableInput
 	{
 		#region Public Properties
-		public string InLanguageCode { get; set; }
+		public string? InLanguageCode { get; set; }
 
-		public string Language { get; set; }
+		public string? Language { get; set; }
 
 		public int Limit { get; set; }
 
@@ -30,7 +30,7 @@ namespace RobinHood70.WallE.Base
 
 		public bool SortDescending { get; set; }
 
-		public string Title { get; set; }
+		public string? Title { get; set; }
 		#endregion
 	}
 }

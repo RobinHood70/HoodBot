@@ -8,16 +8,18 @@ namespace RobinHood70.WallE.Base
 	public class SearchResult : ReadOnlyCollection<SearchResultItem>
 	{
 		#region Constructors
-		public SearchResult(IList<SearchResultItem> list)
+		internal SearchResult(IList<SearchResultItem> list, string? suggestion, int totalHits)
 			: base(list)
 		{
+			this.Suggestion = suggestion;
+			this.TotalHits = totalHits;
 		}
 		#endregion
 
 		#region Public Properties
-		public string Suggestion { get; set; }
+		public string? Suggestion { get; }
 
-		public int TotalHits { get; set; }
+		public int TotalHits { get; }
 		#endregion
 	}
 }

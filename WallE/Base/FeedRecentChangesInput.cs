@@ -9,13 +9,13 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public bool Associated { get; set; }
 
-		public IEnumerable<string> Categories { get; set; }
+		public IEnumerable<string>? Categories { get; set; }
 
 		public bool CategoriesAny { get; set; }
 
 		public int Days { get; set; }
 
-		public string FeedFormat { get; set; }
+		public string? FeedFormat { get; set; }
 
 		public DateTime? From { get; set; }
 
@@ -37,11 +37,11 @@ namespace RobinHood70.WallE.Base
 
 		public int Limit { get; set; }
 
-		public int? Namespace { get; set; }
+		public int Namespace { get; }
 
 		public bool ShowLinkedTo { get; set; }
 
-		public IEnumerable<string> TagFilter { get; set; }
+		public IEnumerable<string>? TagFilter { get; set; }
 
 		public bool Target { get; set; }
 		#endregion

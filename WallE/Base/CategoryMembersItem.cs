@@ -6,20 +6,33 @@ namespace RobinHood70.WallE.Base
 
 	public class CategoryMembersItem : ITitle
 	{
+		#region Constructors
+		internal CategoryMembersItem(int ns, string title, long pageId, string? sortKey, string? sortKeyPrfix, DateTime? timestamp, CategoryMemberTypes type)
+		{
+			this.Namespace = ns;
+			this.Title = title;
+			this.PageId = pageId;
+			this.SortKey = sortKey;
+			this.SortKeyPrefix = sortKeyPrfix;
+			this.Timestamp = timestamp;
+			this.Type = type;
+		}
+		#endregion
+
 		#region Public Properties
-		public int? Namespace { get; set; }
+		public int Namespace { get; }
 
-		public long PageId { get; set; }
+		public long PageId { get; }
 
-		public string SortKey { get; set; }
+		public string? SortKey { get; }
 
-		public string SortKeyPrefix { get; set; }
+		public string? SortKeyPrefix { get; }
 
-		public DateTime? Timestamp { get; set; }
+		public DateTime? Timestamp { get; }
 
-		public string Title { get; set; }
+		public string Title { get; }
 
-		public CategoryMemberTypes Type { get; set; }
+		public CategoryMemberTypes Type { get; }
 		#endregion
 
 		#region Public Override Methods

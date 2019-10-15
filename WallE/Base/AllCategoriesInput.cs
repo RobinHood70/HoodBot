@@ -17,7 +17,7 @@ namespace RobinHood70.WallE.Base
 	public class AllCategoriesInput : ILimitableInput, IGeneratorInput
 	{
 		#region Public Properties
-		public string From { get; set; }
+		public string? From { get; set; }
 
 		public int Limit { get; set; }
 
@@ -27,13 +27,13 @@ namespace RobinHood70.WallE.Base
 
 		public int MinCount { get; set; } = -1;
 
-		public string Prefix { get; set; }
+		public string? Prefix { get; set; }
 
 		public AllCategoriesProperties Properties { get; set; }
 
 		public bool SortDescending { get; set; }
 
-		public string To { get; set; }
+		public string? To { get; set; }
 		#endregion
 	}
 }

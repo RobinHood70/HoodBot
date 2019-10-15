@@ -15,8 +15,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Fields
 		private readonly HashSet<string> modules = new HashSet<string>();
 
-		private string currentGeneratorValue;
-		private string savedGeneratorValue;
+		private string? currentGeneratorValue;
+		private string? savedGeneratorValue;
 		#endregion
 
 		#region Public Override Methods
@@ -57,7 +57,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					if (param.Name == this.GeneratorContinue)
 					{
-						this.savedGeneratorValue = (string)param.Value;
+						this.savedGeneratorValue = (string?)param.Value;
 					}
 					else
 					{
@@ -67,7 +67,7 @@ namespace RobinHood70.WallE.Eve.Modules
 						}
 
 						this.modules.Add(module.Name);
-						this.ContinueEntries[param.Name] = (string)param.Value;
+						this.ContinueEntries[param.Name] = (string?)param.Value;
 					}
 				}
 			}

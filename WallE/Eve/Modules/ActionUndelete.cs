@@ -45,10 +45,10 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(result, nameof(result));
 			var output = new UndeleteResult()
 			{
-				Title = (string)result["title"],
+				Title = (string?)result["title"],
 				Revisions = (int)result["revisions"],
 				FileVersions = (int)result["fileversions"],
-				Reason = (string)result["reason"],
+				Reason = (string?)result["reason"],
 			};
 			return output;
 		}

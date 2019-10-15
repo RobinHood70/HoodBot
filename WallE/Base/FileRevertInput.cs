@@ -18,11 +18,11 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public string ArchiveName { get; }
 
-		public string Comment { get; set; }
+		public string? Comment { get; set; }
 
 		public string FileName { get; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 		#endregion
 	}
 }

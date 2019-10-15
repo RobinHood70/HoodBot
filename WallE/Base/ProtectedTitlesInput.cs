@@ -25,13 +25,13 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public DateTime? End { get; set; }
 
-		public IEnumerable<string> Levels { get; set; }
+		public IEnumerable<string>? Levels { get; set; }
 
 		public int Limit { get; set; }
 
 		public int MaxItems { get; set; }
 
-		public IEnumerable<int> Namespaces { get; set; }
+		public IEnumerable<int>? Namespaces { get; set; }
 
 		public ProtectedTitlesProperties Properties { get; set; }
 

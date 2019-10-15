@@ -3,20 +3,32 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 
-	public class CategoriesItem : ITitleOnly
+	public class CategoriesItem : ITitle
 	{
+		#region Constructors
+		public CategoriesItem(int ns, string title, bool hidden, string? sortkey, string? sortkeyPrefix, DateTime? timestamp)
+		{
+			this.Namespace = ns;
+			this.Title = title;
+			this.Hidden = hidden;
+			this.SortKey = sortkey;
+			this.SortKeyPrefix = sortkeyPrefix;
+			this.Timestamp = timestamp;
+		}
+		#endregion
+
 		#region Public Properties
-		public bool Hidden { get; set; }
+		public bool Hidden { get; }
 
-		public int? Namespace { get; set; }
+		public int Namespace { get; }
 
-		public string SortKey { get; set; }
+		public string? SortKey { get; }
 
-		public string SortKeyPrefix { get; set; }
+		public string? SortKeyPrefix { get; }
 
-		public DateTime? Timestamp { get; set; }
+		public DateTime? Timestamp { get; }
 
-		public string Title { get; set; }
+		public string Title { get; }
 		#endregion
 
 		#region Public Override Methods

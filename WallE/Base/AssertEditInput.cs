@@ -4,9 +4,9 @@ namespace RobinHood70.WallE.Base
 	public class AssertEditInput
 	{
 		#region Public Properties
-		public string Assert { get; set; }
+		public string? Assert { get; set; }
 
-		public string NAssert { get; set; }
+		public string? NAssert { get; set; }
 		#endregion
 	}
 }

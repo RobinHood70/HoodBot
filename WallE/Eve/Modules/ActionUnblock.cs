@@ -49,16 +49,16 @@ namespace RobinHood70.WallE.Eve.Modules
 			};
 			if (result["user"].Type == JTokenType.Object)
 			{
-				output.User = (string)result["user"]["mName"];
+				output.User = (string?)result["user"]["mName"];
 				output.UserId = (long?)result["user"]["mId"] ?? -1;
 			}
 			else
 			{
-				output.User = (string)result["user"];
+				output.User = (string?)result["user"];
 				output.UserId = (long)result["userid"];
 			}
 
-			output.Reason = (string)result["reason"];
+			output.Reason = (string?)result["reason"];
 
 			return output;
 		}

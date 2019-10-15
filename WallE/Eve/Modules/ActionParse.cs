@@ -87,37 +87,37 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(result, nameof(result));
 			var output = new ParseResult()
 			{
-				Title = (string)result["title"],
+				Title = (string?)result["title"],
 				PageId = (long?)result["pageid"] ?? 0,
 				RevisionId = (long?)result["revid"] ?? 0,
 			};
 			var redirects = new Dictionary<string, PageSetRedirectItem>();
 			result["redirects"].GetRedirects(redirects, this.Wal);
 			output.Redirects = redirects.AsReadOnly();
-			output.Text = (string)result["text"];
-			output.ParsedSummary = (string)result["parsedsummary"].AsBCSubContent();
+			output.Text = (string?)result["text"];
+			output.ParsedSummary = (string?)result["parsedsummary"].AsBCSubContent();
 			output.LanguageLinks = DeserializeLanguageLinks(result["langlinks"]);
 			output.Categories = DeserializeCategories(result["categories"]);
-			output.CategoriesHtml = (string)result["categorieshtml"];
+			output.CategoriesHtml = (string?)result["categorieshtml"];
 			output.Links = DeserializeLinks(result["links"]).AsReadOnly();
 			output.Templates = DeserializeLinks(result["templates"]).AsReadOnly();
 			output.Images = result["images"].AsReadOnlyList<string>();
 			output.ExternalLinks = result["externallinks"].AsReadOnlyList<string>();
 			output.Sections = DeserializeSections(result["sections"]);
-			output.DisplayTitle = (string)result["displaytitle"];
-			output.HeadHtml = (string)result["headhtml"].AsBCSubContent();
+			output.DisplayTitle = (string?)result["displaytitle"];
+			output.HeadHtml = (string?)result["headhtml"].AsBCSubContent();
 			output.Modules = result["modules"].AsReadOnlyList<string>();
 			output.ModuleScripts = result["modulescripts"].AsReadOnlyList<string>();
 			output.ModuleStyles = result["modulestyles"].AsReadOnlyList<string>();
 			output.JavaScriptConfigurationVariables = result["jsconfigvars"].AsReadOnlyDictionary<string, string>();
 			output.Indicators = result["indicators"].AsBCDictionary();
 			output.InterwikiLinks = result["iwlinks"].GetInterwikiLinks().AsReadOnly();
-			output.WikiText = (string)result["wikitext"].AsBCSubContent();
-			output.PreSaveTransformText = (string)result["psttext"].AsBCSubContent();
+			output.WikiText = (string?)result["wikitext"].AsBCSubContent();
+			output.PreSaveTransformText = (string?)result["psttext"].AsBCSubContent();
 			output.Properties = result["properties"].AsBCDictionary();
 			output.LimitReportData = DeserializeLimitReportData(result["limitreportdata"]);
-			output.LimitReportHtml = (string)result["limitreporthtml"];
-			output.ParseTree = (string)result["parsetree"];
+			output.LimitReportHtml = (string?)result["limitreporthtml"];
+			output.ParseTree = (string?)result["parsetree"];
 
 			return output;
 		}
@@ -134,7 +134,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					var category = new ParseCategoriesItem()
 					{
-						Category = (string)catResult.AsBCContent("category"),
+						Category = catResult.AsBCString("category"),
 						SortKey = (string)catResult["sortkey"],
 						Flags =
 							catResult.GetFlag("hidden", ParseCategoryFlags.Hidden) |
@@ -190,20 +190,14 @@ namespace RobinHood70.WallE.Eve.Modules
 			return limitData.AsReadOnly();
 		}
 
-		private static List<ParseLinksItem> DeserializeLinks(JToken subResult)
+		private static List<ParseLinksItem> DeserializeLinks(JToken linkResults)
 		{
 			var links = new List<ParseLinksItem>();
-			if (subResult != null)
+			if (links != null)
 			{
-				foreach (var linkResult in subResult)
+				foreach (var result in linkResults)
 				{
-					var link = new ParseLinksItem()
-					{
-						Namespace = (int?)linkResult["ns"],
-						Title = (string)linkResult.AsBCContent("title"),
-						Exists = linkResult["exists"].AsBCBool(),
-					};
-					links.Add(link);
+					links.Add(new ParseLinksItem((int)result.NotNull("ns"), result.StringNotNull("title"), result["exists"].AsBCBool()));
 				}
 			}
 

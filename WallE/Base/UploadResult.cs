@@ -6,18 +6,22 @@ namespace RobinHood70.WallE.Base
 
 	public class UploadResult
 	{
+		#region Constructors
+		public UploadResult(string result) => this.Result = result;
+		#endregion
+
 		#region Public Properties
 		public IReadOnlyList<string> Duplicates { get; set; } = Array.Empty<string>();
 
-		public string FileKey { get; set; }
+		public string? FileKey { get; set; }
 
-		public string FileName { get; set; }
+		public string? FileName { get; set; }
 
-		public ImageInfoItem ImageInfo { get; set; }
+		public ImageInfoItem? ImageInfo { get; set; }
 
 		public string Result { get; set; }
 
-		public IReadOnlyDictionary<string, string> Warnings { get; set; }
+		public IReadOnlyDictionary<string, string>? Warnings { get; set; }
 		#endregion
 	}
 }

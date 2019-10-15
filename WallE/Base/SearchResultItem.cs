@@ -3,33 +3,50 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 
-	public class SearchResultItem : ITitleOnly
+	public class SearchResultItem : ITitle
 	{
+		#region Constructors
+		public SearchResultItem(int ns, string title, string? redirSnippet, string? redirTitle, string? sectionSnippet, string? sectionTitle, int size, string? snippet, DateTime? timestamp, string? titleSnippet, int wordCount)
+		{
+			this.Namespace = ns;
+			this.Title = title;
+			this.RedirectSnippet = redirSnippet;
+			this.RedirectTitle = redirTitle;
+			this.SectionSnippet = sectionSnippet;
+			this.SectionTitle = sectionTitle;
+			this.Size = size;
+			this.Snippet = snippet;
+			this.Timestamp = timestamp;
+			this.TitleSnippet = titleSnippet;
+			this.WordCount = wordCount;
+		}
+		#endregion
+
 		#region Public Properties
-		public int? Namespace { get; set; }
+		public int Namespace { get; }
 
-		public string RedirectSnippet { get; set; }
+		public string? RedirectSnippet { get; }
 
-		public string RedirectTitle { get; set; }
+		public string? RedirectTitle { get; }
 
 		// Excluded because no common search engines ever used it and it's now deprecated.
 		//// public float Score { get; set; }
 
-		public string SectionSnippet { get; set; }
+		public string? SectionSnippet { get; }
 
-		public string SectionTitle { get; set; }
+		public string? SectionTitle { get; }
 
-		public int Size { get; set; }
+		public int Size { get; }
 
-		public string Snippet { get; set; }
+		public string? Snippet { get; }
 
-		public DateTime? Timestamp { get; set; }
+		public DateTime? Timestamp { get; }
 
-		public string Title { get; set; }
+		public string Title { get; }
 
-		public string TitleSnippet { get; set; }
+		public string? TitleSnippet { get; }
 
-		public int WordCount { get; set; }
+		public int WordCount { get; }
 		#endregion
 
 		#region Public Override Methods

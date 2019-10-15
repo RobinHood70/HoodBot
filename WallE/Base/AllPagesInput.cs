@@ -14,7 +14,7 @@ namespace RobinHood70.WallE.Base
 
 		public Filter FilterRedirects { get; set; }
 
-		public string From { get; set; }
+		public string? From { get; set; }
 
 		public int Limit { get; set; }
 
@@ -26,15 +26,15 @@ namespace RobinHood70.WallE.Base
 
 		public int? Namespace { get; set; }
 
-		public string Prefix { get; set; }
+		public string? Prefix { get; set; }
 
-		public string ProtectionLevel { get; set; }
+		public string? ProtectionLevel { get; set; }
 
-		public string ProtectionType { get; set; }
+		public string? ProtectionType { get; set; }
 
 		public bool SortDescending { get; set; }
 
-		public string To { get; set; }
+		public string? To { get; set; }
 		#endregion
 	}
 }

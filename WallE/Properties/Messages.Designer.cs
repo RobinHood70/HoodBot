@@ -142,6 +142,15 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An attempt was made to access the site before properly initializing it. Please call the {0}() or {1}() functions before using site-specific methods..
+        /// </summary>
+        internal static string SiteNotInitialized {
+            get {
+                return ResourceManager.GetString("SiteNotInitialized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A stop was requested because {0}..
         /// </summary>
         internal static string StopRequested {

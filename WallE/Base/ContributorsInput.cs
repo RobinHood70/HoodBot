@@ -19,7 +19,7 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public ContributorsFilterType FilterType { get; set; }
 
-		public IEnumerable<string> FilterValues { get; set; }
+		public IEnumerable<string>? FilterValues { get; set; }
 
 		public int Limit { get; set; }
 

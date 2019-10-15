@@ -48,12 +48,13 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override LinksHereItem GetItem(JToken result) => result == null
+		protected override LinksHereItem? GetItem(JToken result) => result == null
 			? null
-			: new LinksHereItem
-			{
-				Redirect = result["redirect"].AsBCBool()
-			}.GetWikiTitle(result);
+			: new LinksHereItem(
+				ns: (int?)result["ns"],
+				title: (string?)result["title"],
+				pageId: (long?)result["pageid"] ?? 0,
+				redirect: result["redirect"].AsBCBool());
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.LinksHere);
 

@@ -15,7 +15,7 @@
 		#region Public Override Methods
 		public override Page CreatePage(ISimpleTitle simpleTitle) => new VariablesPage(simpleTitle);
 
-		public override PageItem CreatePageItem() => new VariablesPageItem();
+		public override PageItem CreatePageItem(int ns, string title, long pageId) => new VariablesPageItem(ns, title, pageId);
 		#endregion
 
 		#region Protected Override Methods

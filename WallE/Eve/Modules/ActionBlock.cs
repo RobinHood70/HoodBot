@@ -55,13 +55,13 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(result, nameof(result));
 			var output = new BlockResult()
 			{
-				User = (string)result["user"],
+				User = (string?)result["user"],
 				UserId = (long)result["userID"],
 				Expiry = result["expiry"].AsDate(),
 			};
-			var id = (string)result["id"];
+			var id = (string?)result["id"];
 			output.Id = string.IsNullOrEmpty(id) ? 0 : (long)result["id"];
-			output.Reason = (string)result["reason"];
+			output.Reason = (string?)result["reason"];
 			output.WatchUser = result["watchuser"].AsBCBool();
 			output.Flags =
 				result.GetFlag("allowusertalk", BlockFlags.AllowUserTalk) |

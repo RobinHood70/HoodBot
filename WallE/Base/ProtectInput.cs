@@ -21,15 +21,15 @@ namespace RobinHood70.WallE.Base
 
 		public long PageId { get; }
 
-		public IEnumerable<ProtectInputItem> Protections { get; set; }
+		public IEnumerable<ProtectInputItem>? Protections { get; set; }
 
-		public string Reason { get; set; }
+		public string? Reason { get; set; }
 
-		public IEnumerable<string> Tags { get; set; }
+		public IEnumerable<string>? Tags { get; set; }
 
-		public string Title { get; }
+		public string? Title { get; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 
 		public bool Watch { get; set; }
 

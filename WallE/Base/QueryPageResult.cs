@@ -9,18 +9,21 @@ namespace RobinHood70.WallE.Base
 	public class QueryPageResult : ReadOnlyCollection<QueryPageItem>
 	{
 		#region Constructors
-		public QueryPageResult(IList<QueryPageItem> list)
+		internal QueryPageResult(IList<QueryPageItem> list, bool cached, DateTime? cachedTimestamp, int maxResults)
 			: base(list)
 		{
+			this.Cached = cached;
+			this.CachedTimestamp = cachedTimestamp;
+			this.MaxResults = maxResults;
 		}
 		#endregion
 
 		#region Public Properties
-		public bool Cached { get; set; }
+		public bool Cached { get; }
 
-		public DateTime? CachedTimestamp { get; set; }
+		public DateTime? CachedTimestamp { get; }
 
-		public int MaxResults { get; set; }
+		public int MaxResults { get; }
 		#endregion
 	}
 }

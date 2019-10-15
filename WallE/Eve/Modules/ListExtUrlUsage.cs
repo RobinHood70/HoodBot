@@ -14,7 +14,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public ListExtUrlUsage(WikiAbstractionLayer wal, ExternalUrlUsageInput input, IPageSetGenerator pageSetGenerator)
+		public ListExtUrlUsage(WikiAbstractionLayer wal, ExternalUrlUsageInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 		}
@@ -48,12 +48,9 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override ExternalUrlUsageItem GetItem(JToken result) => result == null
+		protected override ExternalUrlUsageItem? GetItem(JToken result) => result == null
 			? null
-			: new ExternalUrlUsageItem
-			{
-				Url = (string)result["url"]
-			}.GetWikiTitle(result);
+			: new ExternalUrlUsageItem((int?)result["ns"], (string?)result["title"], (long?)result["pageid"] ?? 0, (string?)result["url"]);
 		#endregion
 	}
 }

@@ -39,7 +39,7 @@ namespace RobinHood70.WallE.Base
 
 		public string Text { get; }
 
-		public string Title { get; set; }
+		public string? Title { get; set; }
 		#endregion
 	}
 }

@@ -86,7 +86,7 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public bool ConvertTitles { get; set; }
 
-		public IGeneratorInput GeneratorInput { get; }
+		public IGeneratorInput? GeneratorInput { get; }
 
 		public ListType ListType { get; }
 
@@ -94,7 +94,7 @@ namespace RobinHood70.WallE.Base
 
 		public string TypeName => ListNames[this.ListType];
 
-		public IReadOnlyList<string> Values { get; }
+		public IReadOnlyList<string>? Values { get; }
 		#endregion
 	}
 }

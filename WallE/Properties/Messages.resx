@@ -158,4 +158,7 @@ Info: {1}</value>
   <data name="ExcessiveLag" xml:space="preserve">
     <value>Excessive lag!</value>
   </data>
+  <data name="SiteNotInitialized" xml:space="preserve">
+    <value>An attempt was made to access the site before properly initializing it. Please call the {0}() or {1}() functions before using site-specific methods.</value>
+  </data>
 </root>

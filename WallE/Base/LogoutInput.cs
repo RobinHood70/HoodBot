@@ -4,7 +4,7 @@ namespace RobinHood70.WallE.Base
 	public class LogoutInput
 	{
 		#region Public Properties
-		public string Token { get; set; }
+		public string? Token { get; set; }
 		#endregion
 	}
 }

@@ -18,9 +18,9 @@ namespace RobinHood70.WallE.Base
 
 		public long RevisionId { get; private set; }
 
-		public IEnumerable<string> Tags { get; set; }
+		public IEnumerable<string>? Tags { get; set; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 		#endregion
 
 		#region Public Static Methods

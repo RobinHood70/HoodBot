@@ -6,18 +6,29 @@ namespace RobinHood70.WallE.Base
 
 	public class BacklinksItem : ITitle
 	{
+		#region Constructors
+		internal BacklinksItem(int ns, string title, long pageId, bool isRedirect, BacklinksTypes type)
+		{
+			this.Namespace = ns;
+			this.Title = title;
+			this.PageId = pageId;
+			this.IsRedirect = isRedirect;
+			this.Type = type;
+		}
+		#endregion
+
 		#region Public Properties
-		public bool IsRedirect { get; set; }
+		public bool IsRedirect { get; }
 
-		public int? Namespace { get; set; }
+		public int Namespace { get; }
 
-		public long PageId { get; set; }
+		public long PageId { get; }
 
 		public IReadOnlyList<ITitle> Redirects { get; } = new List<ITitle>();
 
-		public string Title { get; set; }
+		public string Title { get; }
 
-		public BacklinksTypes Type { get; set; }
+		public BacklinksTypes Type { get; }
 		#endregion
 
 		#region Public Override Methods

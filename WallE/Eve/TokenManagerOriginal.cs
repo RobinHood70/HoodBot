@@ -2,9 +2,11 @@
 {
 	using System.Collections.Generic;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Eve.Modules;
+	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WallE.Eve.TokensInput;
+	using static RobinHood70.WikiCommon.Globals;
 
 	internal class TokenManagerOriginal : ITokenManager
 	{
@@ -19,9 +21,9 @@
 		#region Protected Static Properties
 		protected static HashSet<string> ValidTypes { get; } = new HashSet<string>
 		{
-			Edit,
-			Patrol,
-			Watch,
+			TokensInput.Edit,
+			TokensInput.Patrol,
+			TokensInput.Watch,
 		};
 		#endregion
 
@@ -40,11 +42,11 @@
 
 		public virtual string SessionToken(string type)
 		{
-			type = TokenManagerFunctions.ValidateTokenType(ValidTypes, type, Csrf, Edit);
+			type = TokenManagerFunctions.ValidateTokenType(ValidTypes, type, TokensInput.Csrf, TokensInput.Edit);
 			if (!this.SessionTokens.TryGetValue(type, out var retval))
 			{
 				var pageSetInput = new QueryPageSetInput(DummyPage);
-				var propInfoInput = new InfoInput { Tokens = new[] { Edit, Watch } };
+				var propInfoInput = new InfoInput { Tokens = new[] { TokensInput.Edit, TokensInput.Watch } };
 				var input = new RecentChangesInput { GetPatrolToken = true, MaxItems = 1 };
 				var recentChanges = new ListRecentChanges(this.Wal, input);
 				var propertyModules = this.Wal.ModuleFactory.CreateModules(new[] { propInfoInput });
@@ -56,7 +58,7 @@
 				{
 					foreach (var token in page.Value.Info.Tokens)
 					{
-						this.SessionTokens[TokenManagerFunctions.TrimToken(token.Key)] = token.Value;
+						this.SessionTokens[TokenManagerFunctions.TrimTokenKey(token.Key)] = token.Value;
 					}
 
 					break;
@@ -64,7 +66,7 @@
 
 				if (rc.Count > 0)
 				{
-					this.SessionTokens[Patrol] = rc[0].PatrolToken;
+					this.SessionTokens[TokensInput.Patrol] = rc[0].PatrolToken;
 				}
 
 				this.SessionTokens.TryGetValue(type, out retval);
@@ -80,12 +82,7 @@
 				GetRightsToken = true,
 			};
 			var users = this.Wal.Users(usersInput);
-			if (users.Count == 1)
-			{
-				return users[0].Token;
-			}
-
-			return null;
+			return (users.Count == 1 ? users[0].Token : null) ?? throw new WikiException(CurrentCulture(EveMessages.InvalidToken, TokensInput.UserRights));
 		}
 		#endregion
 
@@ -94,7 +91,7 @@
 		{
 			var revisions = new RevisionsInput() { GetRollbackToken = true };
 			var pages = this.Wal.LoadPages(pageSetInput, new[] { revisions });
-			return pages.First()?.Revisions.First()?.RollbackToken;
+			return pages.First()?.Revisions.First()?.RollbackToken ?? throw new WikiException(CurrentCulture(EveMessages.InvalidToken, TokensInput.Rollback));
 		}
 		#endregion
 	}

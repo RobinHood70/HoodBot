@@ -59,23 +59,9 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override AllImagesItem GetItem(JToken result)
-		{
-			if (result == null)
-			{
-				return null;
-			}
-
-			var item = new AllImagesItem()
-			{
-				Name = (string)result["name"],
-				Namespace = (int?)result["ns"],
-				Title = (string)result["title"],
-			};
-			result.ParseImageInfo(item);
-
-			return item;
-		}
+		protected override AllImagesItem? GetItem(JToken result) => result == null
+			? null
+			: JTokenImageInfo.ParseImageInfo(result, new AllImagesItem((int)result.NotNull("ns"), result.StringNotNull("title"), result.StringNotNull("name")));
 		#endregion
 	}
 }

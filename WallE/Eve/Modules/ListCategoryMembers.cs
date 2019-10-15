@@ -55,7 +55,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			request
 				.AddIfNotNull("title", input.Title)
 				.AddIf("pageid", input.PageId, input.Title == null)
-				.AddFlags("prop", input.Properties)
+				.AddFlags("prop", input.Properties | CategoryMembersProperties.Title)
 				.Add("namespace", input.Namespaces)
 				.AddFlags("type", input.Type)
 				.AddIfPositive("sort", input.Sort)
@@ -78,18 +78,21 @@ namespace RobinHood70.WallE.Eve.Modules
 				return null;
 			}
 
-			var item = new CategoryMembersItem
+			var typeText = (string?)result["type"];
+			if (typeText == null || !TypeLookup.TryGetValue(typeText, out var itemType))
 			{
-				SortKey = (string)result["sortkey"],
-				SortKeyPrefix = (string)result["sortkeyprefix"],
-				Timestamp = (DateTime?)result["timestamp"]
-			}.GetWikiTitle(result);
-
-			var typeText = (string)result["type"];
-			if (typeText != null && TypeLookup.TryGetValue(typeText, out var itemType))
-			{
-				item.Type = itemType;
+				itemType = CategoryMemberTypes.None;
 			}
+
+			var item = new CategoryMembersItem(
+				(int)result.NotNull("ns"),
+				result.StringNotNull("title"),
+				(long?)result["pageid"] ?? 0,
+				(string?)result["sortkey"],
+				(string?)result["sortkeyprefix"],
+				(DateTime?)result["timestamp"],
+				itemType
+				);
 
 			return item;
 		}

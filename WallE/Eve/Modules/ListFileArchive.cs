@@ -11,7 +11,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ListFileArchive(WikiAbstractionLayer wal, FileArchiveInput input)
-			: base(wal, input, null)
+			: base(wal, input)
 		{
 		}
 		#endregion
@@ -46,25 +46,9 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override FileArchiveItem GetItem(JToken result)
-		{
-			if (result == null)
-			{
-				return null;
-			}
-
-			// Not using GetWikiTitle because PageId uses non-standard name.
-			var item = new FileArchiveItem
-			{
-				Name = (string)result["name"],
-				Namespace = (int?)result["ns"],
-				PageId = (long?)result["id"] ?? 0,
-				Title = (string)result["title"]
-			};
-			result.ParseImageInfo(item);
-
-			return item;
-		}
+		protected override FileArchiveItem? GetItem(JToken result) => result == null
+			? null
+			: JTokenImageInfo.ParseImageInfo(result, new FileArchiveItem(result.StringNotNull("name"), (long?)result["id"] ?? 0, (int?)result["ns"], (string?)result["title"]));
 		#endregion
 	}
 }

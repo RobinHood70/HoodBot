@@ -16,11 +16,11 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public string Domain { get; set; }
+		public string? Domain { get; set; }
 
 		public string Password { get; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 
 		public string UserName { get; }
 		#endregion

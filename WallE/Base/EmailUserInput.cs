@@ -18,13 +18,13 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public bool CCMe { get; set; }
 
-		public string Subject { get; set; }
+		public string? Subject { get; set; }
 
 		public string Target { get; }
 
 		public string Text { get; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 		#endregion
 	}
 }

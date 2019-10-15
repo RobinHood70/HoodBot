@@ -38,7 +38,7 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public int Limit { get; set; }
 
-		public IEnumerable<int> Namespaces { get; set; }
+		public IEnumerable<int>? Namespaces { get; set; }
 
 		public SearchProfile Profile { get; set; }
 

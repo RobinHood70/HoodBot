@@ -23,7 +23,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public string From { get; }
+		public string? From { get; }
 
 		public long FromId { get; }
 
@@ -35,11 +35,11 @@ namespace RobinHood70.WallE.Base
 
 		public bool NoRedirect { get; set; }
 
-		public string Reason { get; set; }
+		public string? Reason { get; set; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 
-		public string To { get; }
+		public string? To { get; }
 
 		public WatchlistOption Watchlist { get; set; }
 		#endregion

@@ -47,14 +47,15 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override LanguageBacklinksItem GetItem(JToken result) => result == null
+		protected override LanguageBacklinksItem? GetItem(JToken result) => result == null
 			? null
-			: new LanguageBacklinksItem
-			{
-				IsRedirect = result["redirect"].AsBCBool(),
-				LanguageCode = (string)result["lllang"],
-				LanguageTitle = (string)result["lltitle"]
-			}.GetWikiTitle(result);
+			: new LanguageBacklinksItem(
+				ns: (int)result.NotNull("ns"),
+				title: result.StringNotNull("title"),
+				pageId: (long)result.NotNull("pageid"),
+				isRedirect: result["redirect"].AsBCBool(),
+				langCode: (string?)result["lllang"],
+				langTitle: (string?)result["lltitle"]);
 		#endregion
 	}
 }

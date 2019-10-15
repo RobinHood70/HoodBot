@@ -15,7 +15,7 @@
 		/// <summary>Builds a user agent value the conforms to MediaWiki's recommended spec: https://meta.wikimedia.org/wiki/User-Agent_policy.</summary>
 		/// <param name="contactInfo">E-mail address or username on the wiki you will be editing on.</param>
 		/// <returns>The user agent string.</returns>
-		public static string BuildUserAgent(string contactInfo)
+		public static string BuildUserAgent(string? contactInfo)
 		{
 			// This routine is deliberately not localized.
 			string botInfo;
@@ -36,7 +36,7 @@
 				contactInfo = "none";
 			}
 
-			return Invariant($"Bot: {botInfo} ({libraryName.Name} v{libraryName.Version}); Contact: {contactInfo.Trim()}");
+			return Invariant($"Bot: {botInfo} ({libraryName.Name} v{libraryName.Version}); Contact: {contactInfo!.Trim()}");
 		}
 	}
 }

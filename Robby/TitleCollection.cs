@@ -255,7 +255,7 @@
 			ThrowNull(titles, nameof(titles));
 			foreach (var title in titles)
 			{
-				this.Add(new Title(this.Site.Namespaces[defaultNamespace], title));
+				this.Add(new Title(this.Site, defaultNamespace, title));
 			}
 		}
 
@@ -311,7 +311,10 @@
 		protected override void GetCategories(AllCategoriesInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllCategories(input);
-			this.FillFromTitleItems(result);
+			foreach (var item in result)
+			{
+				this.Add(new Title(this.Site, MediaWikiNamespaces.Category, item.Category));
+			}
 		}
 
 		/// <summary>Adds category members to the collection, potentially including subcategories and their members.</summary>
@@ -348,7 +351,10 @@
 		protected override void GetFileUsage(AllFileUsagesInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllFileUsages(input);
-			this.FillFromTitleItems(result);
+			foreach (var item in result)
+			{
+				this.Add(new Title(this.Site, item.Title));
+			}
 		}
 
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
@@ -361,7 +367,10 @@
 		protected override void GetLinksToNamespace(AllLinksInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllLinks(input);
-			this.FillFromTitleItems(result);
+			foreach (var item in result)
+			{
+				this.Add(new Title(this.Site, item.Title));
+			}
 		}
 
 		/// <summary>Adds pages from a given namespace to the collection. Parameters allow filtering to a specific range of pages.</summary>
@@ -392,7 +401,10 @@
 		protected override void GetPagesWithProperty(PagesWithPropertyInput input)
 		{
 			var result = this.Site.AbstractionLayer.PagesWithProperty(input);
-			this.FillFromTitleItems(result);
+			foreach (var item in result)
+			{
+				this.Add(new Title(this.Site, item.Title));
+			}
 		}
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
@@ -435,7 +447,10 @@
 		protected override void GetRecentChanges(RecentChangesInput input)
 		{
 			var result = this.Site.AbstractionLayer.RecentChanges(input);
-			this.FillFromTitleItems(result);
+			foreach (var item in result)
+			{
+				this.Add(new Title(this.Site, item.Title));
+			}
 		}
 
 		/// <summary>Adds redirects to a namespace to the collection.</summary>
@@ -443,7 +458,10 @@
 		protected override void GetRedirectsToNamespace(AllRedirectsInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllRedirects(input);
-			this.FillFromTitleItems(result);
+			foreach (var item in result)
+			{
+				this.Add(new Title(this.Site, item.Title));
+			}
 		}
 
 		/// <summary>Adds pages from a range of revisions to the collection.</summary>
@@ -467,7 +485,10 @@
 		protected override void GetTransclusions(AllTransclusionsInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllTransclusions(input);
-			this.FillFromTitleItems(result);
+			foreach (var item in result)
+			{
+				this.Add(new Title(this.Site, item.Title));
+			}
 		}
 
 		/// <summary>Adds changed watchlist pages to the collection.</summary>
@@ -498,7 +519,7 @@
 			{
 				var name = item.Name.Replace('_', ' ');
 				name = this.Site.Namespaces[MediaWikiNamespaces.MediaWiki].CapitalizePageName(name);
-				this.Add(new Title(this.Site.Namespaces[MediaWikiNamespaces.MediaWiki], name));
+				this.Add(new Title(this.Site, MediaWikiNamespaces.MediaWiki, name));
 			}
 		}
 
@@ -563,7 +584,7 @@
 		#endregion
 
 		#region Private Methods
-		private void FillFromTitleItems(IEnumerable<ITitleOnly> result)
+		private void FillFromTitleItems(IEnumerable<ITitle> result)
 		{
 			foreach (var item in result)
 			{

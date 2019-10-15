@@ -2,18 +2,27 @@
 namespace RobinHood70.WallE.Base
 {
 	// Note that FromId refers to a different page than Namespace and Title.
-	public class AllLinksItem : ITitleOnly
+	public class AllLinksItem
 	{
+		#region Public Constructors
+		public AllLinksItem(int? ns, string? title, long fromId)
+		{
+			this.Namespace = ns;
+			this.Title = title;
+			this.FromId = fromId;
+		}
+		#endregion
+
 		#region Public Properties
-		public long FromId { get; set; }
+		public long FromId { get; }
 
-		public int? Namespace { get; set; }
+		public int? Namespace { get; }
 
-		public string Title { get; set; }
+		public string? Title { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title;
+		public override string ToString() => this.Title ?? ProjectGlobals.NoTitle;
 		#endregion
 	}
 }

@@ -22,37 +22,37 @@ namespace RobinHood70.WallE.Base
 	public class RevisionsItem
 	{
 		#region Public Properties
-		public string Comment { get; set; }
+		public string? Comment { get; set; }
 
-		public string ContentFormat { get; set; }
+		public string? ContentFormat { get; set; }
 
-		public string ContentModel { get; set; }
+		public string? ContentModel { get; set; }
 
 		public RevisionFlags Flags { get; set; }
 
-		public string ParsedComment { get; set; }
+		public string? ParsedComment { get; set; }
 
-		public string ParseTree { get; set; }
+		public string? ParseTree { get; set; }
 
 		public long ParentId { get; set; }
 
 		public long RevisionId { get; set; }
 
-		public string RollbackToken { get; set; }
+		public string? RollbackToken { get; set; }
 
-		public string Sha1 { get; set; }
+		public string? Sha1 { get; set; }
 
 		public long Size { get; set; }
 
-		public IReadOnlyList<string> Tags { get; set; }
+		public IReadOnlyList<string>? Tags { get; set; }
 
-		public string Content { get; set; }
+		public string? Content { get; set; }
 
 		public DateTime? Timestamp { get; set; }
 
 		public long UserId { get; set; }
 
-		public string User { get; set; }
+		public string? User { get; set; }
 		#endregion
 	}
 }

@@ -8,9 +8,6 @@ namespace RobinHood70.WallE.Base
 	public class SetNotificationTimestampInput : PageSetInput
 	{
 		#region Constructors
-		public SetNotificationTimestampInput()
-			: base() => this.EntireWatchlist = true;
-
 		public SetNotificationTimestampInput(IEnumerable<string> titles)
 			: base(titles)
 		{
@@ -38,13 +35,13 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public bool EntireWatchlist { get; set; }
+		public bool EntireWatchlist { get; set; } = true;
 
 		public long NewerThanRevisionId { get; set; }
 
 		public DateTime? Timestamp { get; set; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 
 		public long ToRevisionId { get; set; }
 		#endregion

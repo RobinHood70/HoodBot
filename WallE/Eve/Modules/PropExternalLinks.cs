@@ -41,7 +41,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override string GetItem(JToken result) => (string)result.AsBCContent("url");
+		protected override string GetItem(JToken result) => result.AsBCStringOptional("url");
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.ExternalLinks);
 

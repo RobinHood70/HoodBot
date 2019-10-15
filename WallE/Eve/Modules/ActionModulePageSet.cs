@@ -13,7 +13,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 	public abstract class ActionModulePageSet<TInput, TOutput> : ActionModule<TInput, IReadOnlyList<TOutput>>, IPageSetGenerator
 		where TInput : PageSetInput
-		where TOutput : ITitle, new()
+		where TOutput : ITitle
 	{
 		#region Static Fields
 		private static readonly Regex TooManyFinder = new Regex(@"Too many values .*?'(?<parameter>.*?)'.*?limit is (?<sizelimit>[0-9]+)", RegexOptions.Compiled);
@@ -32,10 +32,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Constructors
-		protected ActionModulePageSet(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
+		protected ActionModulePageSet(WikiAbstractionLayer wal, TitleCreator<TOutput>? itemCreator)
+			: base(wal) => this.ItemCreator = itemCreator;
 		#endregion
 
 		#region Public Properties
@@ -46,6 +44,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected ContinueModule ContinueModule { get; set; }
 
 		protected int MaximumListSize { get; set; }
+
+		protected TitleCreator<TOutput>? ItemCreator { get; }
 		#endregion
 
 		#region Protected Virtual Properties
@@ -124,23 +124,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Methods
-		protected void DeserializeTitle(JToken result, TOutput page)
-		{
-			ThrowNull(result, nameof(result));
-			ThrowNull(page, nameof(page));
-			page.Namespace = (int?)result["ns"];
-			var pageId = (long?)result["pageid"]; // We want to keep the nullable version for Title checking
-			page.PageId = pageId ?? 0;
-			page.Title = (string)result["title"] ?? FakeTitleFromId(pageId);
-			if (page.Title == null)
-			{
-				// In older versions of MediaWiki, some generators could return missing pages with no title or ID, most commonly when links tables were out of date and needed refreshLinks.php run on them. If we get one of these, skip to the next page, there's nothing else we can do.
-				return;
-			}
-
-			this.DeserializePage(result, page);
-		}
-
 		protected void GetExceptions(JToken result)
 		{
 			ThrowNull(result, nameof(result));
@@ -162,6 +145,18 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			AddToDictionary(result["normalized"], this.normalized);
 			result["redirects"].GetRedirects(this.redirects, this.Wal);
+		}
+		#endregion
+
+		#region Protected Virtual Methods
+		protected virtual WikiTitleItem DeserializeTitle(JToken result)
+		{
+			// TODO: I think DeserializeTitle can be merged into DeserializePage and just have that create and return the whole thing.
+			ThrowNull(result, nameof(result));
+			var ns = (int)result.NotNull("ns");
+			var title = result.StringNotNull("title");
+			var id = (int)result.NotNull("pageid");
+			return new WikiTitleItem(ns, title, id);
 		}
 		#endregion
 
@@ -246,15 +241,23 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 		}
 
-		protected override IReadOnlyList<TOutput> DeserializeResult(JToken result)
+		protected override IReadOnlyList<TOutput>? DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
+			if (this.ItemCreator == null)
+			{
+				throw new InvalidOperationException("Trying to create pages with no page creator!");
+			}
+
 			foreach (var item in result)
 			{
-				this.DeserializeTitle(item, new TOutput());
+				var wikiTitle = this.DeserializeTitle(result);
+				var output = this.ItemCreator(wikiTitle.Namespace, wikiTitle.Title, wikiTitle.PageId);
+				this.DeserializePage(item, output);
 			}
 
 			// PageSets don't actually return a value here, instead returning it in Pages, so return null instead.
+			// TODO: Could this be used as a better way to return the pageset information like redirects and invalid titles?
 			return null;
 		}
 		#endregion

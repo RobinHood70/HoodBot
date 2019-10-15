@@ -93,7 +93,7 @@
 			SafeNativeMethods.ShowWindow(hwnd, 3);
 		}
 
-		public bool ValidatePlugin() => Type.GetTypeFromProgID("InternetExplorer.Application", false) != null;
+		public bool ValidatePlugin() => Type.GetTypeFromProgID("InternetExplorer.Application") != null;
 
 		public void Wait() => this.ieProcess.WaitForExit();
 		#endregion

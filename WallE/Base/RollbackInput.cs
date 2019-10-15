@@ -28,13 +28,13 @@ namespace RobinHood70.WallE.Base
 
 		public long PageId { get; }
 
-		public string Summary { get; set; }
+		public string? Summary { get; set; }
 
-		public IEnumerable<string> Tags { get; set; }
+		public IEnumerable<string>? Tags { get; set; }
 
-		public string Title { get; }
+		public string? Title { get; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 
 		public string User { get; }
 

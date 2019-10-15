@@ -3,14 +3,21 @@ namespace RobinHood70.WallE.Base
 {
 	public class PatrolResult : ITitle
 	{
+		#region Constructors
+		internal PatrolResult(int ns, string title, long rcId)
+		{
+			this.Namespace = ns;
+			this.Title = title;
+			this.RecentChangesId = rcId;
+		}
+		#endregion
+
 		#region Public Properties
-		public int? Namespace { get; set; }
+		public int Namespace { get; }
 
-		public long PageId { get; set; }
+		public long RecentChangesId { get; }
 
-		public long RecentChangesId { get; set; }
-
-		public string Title { get; set; }
+		public string Title { get; }
 		#endregion
 
 		#region Public Override Methods

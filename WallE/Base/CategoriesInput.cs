@@ -20,7 +20,7 @@ namespace RobinHood70.WallE.Base
 	public class CategoriesInput : IPropertyInput, ILimitableInput, IGeneratorInput
 	{
 		#region Public Properties
-		public IEnumerable<string> Categories { get; set; }
+		public IEnumerable<string>? Categories { get; set; }
 
 		public Filter FilterHidden { get; set; }
 

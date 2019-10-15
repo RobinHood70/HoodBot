@@ -30,15 +30,15 @@ namespace RobinHood70.WallE.Base
 
 		public bool ExcludeUser { get; set; }
 
-		public string From { get; set; }
+		public string? From { get; set; }
 
 		public int Limit { get; set; }
 
 		public int MaxItems { get; set; }
 
-		public int? Namespace { get; set; }
+		public int Namespace { get; }
 
-		public string Prefix { get; set; }
+		public string? Prefix { get; set; }
 
 		public DeletedRevisionsProperties Properties { get; set; }
 
@@ -46,13 +46,13 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Start { get; set; }
 
-		public string Tag { get; set; }
+		public string? Tag { get; set; }
 
-		public string To { get; set; }
+		public string? To { get; set; }
 
 		public bool Unique { get; set; }
 
-		public string User { get; set; }
+		public string? User { get; set; }
 		#endregion
 	}
 }

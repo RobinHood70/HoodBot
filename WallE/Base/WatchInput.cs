@@ -34,7 +34,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public string Token { get; set; }
+		public string? Token { get; set; }
 
 		public bool Unwatch { get; set; }
 		#endregion

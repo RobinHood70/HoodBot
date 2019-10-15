@@ -142,9 +142,9 @@
 					{
 						currentNode.Value = newNode;
 					}
-
-					currentNode = nextNode;
 				}
+
+				currentNode = nextNode;
 			}
 		}
 

@@ -60,14 +60,11 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override UploadResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new UploadResult()
-			{
-				Result = (string)result["result"],
-			};
+			var output = new UploadResult((string?)result["result"] ?? string.Empty);
 
 			// Disallow stop checks while upload is in progress.
 			this.continued = output.Result == "Continued";
-			output.FileName = (string)result["filename"];
+			output.FileName = (string?)result["filename"];
 
 			var outputWarnings = new Dictionary<string, string>();
 			var warnings = result["warnings"];
@@ -77,37 +74,48 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					var name = prop.Name;
 					var value = prop.Value;
-					switch (name)
+					if (value != null)
 					{
-						case "duplicate":
-							output.Duplicates = value.AsReadOnlyList<string>();
-							break;
-						case "nochange":
-							var ts = (string)value["timestamp"];
-							outputWarnings.Add(name, ts);
-							break;
-						default:
-							if (value.Type == JTokenType.Object || value.Type == JTokenType.Array)
-							{
-								this.AddWarning("ActionUpload.DeserializeResult", CurrentCulture(EveMessages.NotAString, name));
-							}
-							else
-							{
-								outputWarnings.Add(name, (string)value);
-							}
+						switch (name)
+						{
+							case "duplicate":
+								output.Duplicates = value.AsReadOnlyList<string>();
+								break;
+							case "nochange":
+								var ts = (string?)value["timestamp"];
+								if (ts != null)
+								{
+									outputWarnings.Add(name, ts);
+								}
 
-							break;
+								break;
+							default:
+								if (value.Type == JTokenType.Object || value.Type == JTokenType.Array)
+								{
+									this.AddWarning("ActionUpload.DeserializeResult", CurrentCulture(EveMessages.NotAString, name));
+								}
+								else
+								{
+									var valueString = (string?)value;
+									if (valueString != null)
+									{
+										outputWarnings.Add(name, valueString);
+									}
+								}
+
+								break;
+						}
 					}
 				}
 			}
 
 			output.Warnings = outputWarnings.AsReadOnly();
-			output.FileKey = (string)result["filekey"];
+			output.FileKey = (string?)result["filekey"];
 
 			var imageInfo = result["imageinfo"];
 			if (imageInfo != null)
 			{
-				output.ImageInfo = result["imageinfo"].ParseImageInfo();
+				output.ImageInfo = JTokenImageInfo.ParseImageInfo(imageInfo, new ImageInfoItem());
 			}
 
 			return output;

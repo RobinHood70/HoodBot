@@ -8,13 +8,13 @@ namespace RobinHood70.WallE.Base
 
 		public long FromRevision { get; set; }
 
-		public string FromTitle { get; set; }
+		public string? FromTitle { get; set; }
 
 		public long ToId { get; set; }
 
 		public long ToRevision { get; set; }
 
-		public string ToTitle { get; set; }
+		public string? ToTitle { get; set; }
 		#endregion
 	}
 }

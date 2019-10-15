@@ -22,7 +22,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 
 		public ListUserContribs(WikiAbstractionLayer wal, UserContributionsInput input, IPageSetGenerator pageSetGenerator)
-			: base(wal, input, pageSetGenerator) => this.continueName = this.SiteVersion < 114 || (input.UserPrefix == null && input.Users.HasItems() && this.SiteVersion < 123) ? "start" : "continue";
+			: base(wal, input, pageSetGenerator) => this.continueName = this.SiteVersion < 114 || (this.SiteVersion < 123 && input.UserPrefix == null && input.Users != null && !input.Users.IsEmpty())
+			? "start"
+			: "continue";
 		#endregion
 
 		#region Public Override Properties
@@ -63,11 +65,16 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override UserContributionsItem GetItem(JToken result) => result == null
+		protected override UserContributionsItem? GetItem(JToken result) => result == null
 			? null
-			: new UserContributionsItem
-			{
-				Flags =
+			: new UserContributionsItem(
+				user: result.StringNotNull("user"),
+				userId: (long?)result["userid"] ?? 0,
+				ns: (int?)result["ns"],
+				title: (string?)result["title"],
+				pageId: (long?)result.NotNull("pageid") ?? 0,
+				comment: (string?)result["comment"],
+				flags:
 					result.GetFlag("commenthidden", UserContributionFlags.CommentHidden) |
 					result.GetFlag("minor", UserContributionFlags.Minor) |
 					result.GetFlag("new", UserContributionFlags.New) |
@@ -76,17 +83,13 @@ namespace RobinHood70.WallE.Eve.Modules
 					result.GetFlag("texthidden", UserContributionFlags.TextHidden) |
 					result.GetFlag("top", UserContributionFlags.Top) |
 					result.GetFlag("userhidden", UserContributionFlags.UserHidden),
-				UserId = (long)result["userid"],
-				User = (string)result["user"],
-				RevisionId = (long?)result["revid"] ?? 0,
-				ParentId = (long?)result["parentid"] ?? 0,
-				Timestamp = (DateTime?)result["timestamp"],
-				Comment = (string)result["comment"],
-				ParsedComment = (string)result["parsedcomment"],
-				Size = (int?)result["size"] ?? 0,
-				SizeDifference = (int?)result["sizediff"] ?? 0,
-				Tags = result["tags"].AsReadOnlyList<string>()
-			}.GetWikiTitle(result);
+				parentId: (long?)result["parentid"] ?? 0,
+				parsedComment: (string?)result["parsedcomment"],
+				revId: (long?)result["revid"] ?? 0,
+				size: (int?)result["size"] ?? 0,
+				sizeDiff: (int?)result["sizediff"] ?? 0,
+				tags: result["tags"].AsReadOnlyList<string>(),
+				timestamp: (DateTime?)result["timestamp"]);
 		#endregion
 	}
 }

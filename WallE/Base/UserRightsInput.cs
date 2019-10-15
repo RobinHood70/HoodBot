@@ -12,15 +12,15 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public IEnumerable<string> Add { get; set; }
+		public IEnumerable<string>? Add { get; set; }
 
-		public string Reason { get; set; }
+		public string? Reason { get; set; }
 
-		public IEnumerable<string> Remove { get; set; }
+		public IEnumerable<string>? Remove { get; set; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 
-		public string User { get; }
+		public string? User { get; }
 
 		public long UserId { get; }
 		#endregion

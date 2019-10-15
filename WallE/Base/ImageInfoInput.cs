@@ -9,9 +9,9 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public DateTime? End { get; set; }
 
-		public IEnumerable<string> ExtendedMetadataFilter { get; set; }
+		public IEnumerable<string>? ExtendedMetadataFilter { get; set; }
 
-		public string ExtendedMetadataLanguage { get; set; }
+		public string? ExtendedMetadataLanguage { get; set; }
 
 		public bool ExtendedMetadataMultilanguage { get; set; }
 
@@ -31,7 +31,7 @@ namespace RobinHood70.WallE.Base
 
 		public int UrlHeight { get; set; }
 
-		public string UrlParameter { get; set; }
+		public string? UrlParameter { get; set; }
 
 		public int UrlWidth { get; set; }
 		#endregion

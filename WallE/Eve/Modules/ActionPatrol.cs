@@ -40,10 +40,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override PatrolResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			return new PatrolResult
-			{
-				RecentChangesId = (int?)result["rcid"] ?? 0
-			}.GetWikiTitle(result);
+			return new PatrolResult(
+				ns: (int)result.NotNull("ns"), 
+				title: result.StringNotNull("title"),
+				rcId: (long)result.NotNull("rcid"));
 		}
 		#endregion
 	}

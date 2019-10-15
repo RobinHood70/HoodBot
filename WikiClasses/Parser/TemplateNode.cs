@@ -42,29 +42,28 @@
 		/// <summary>Creates a new TemplateNode from its parts.</summary>
 		/// <param name="title">The link destination.</param>
 		/// <returns>A new ArgumentNode.</returns>
-		public static TemplateNode FromParts(string title) => FromParts(title);
+		public static TemplateNode FromParts(string title) => FromParts(title, null);
 
 		/// <summary>Creates a new TemplateNode from its parts.</summary>
 		/// <param name="title">The link destination.</param>
 		/// <param name="parameters">The default value.</param>
 		/// <returns>A new ArgumentNode.</returns>
-		public static TemplateNode FromParts(string title, IEnumerable<string> parameters)
+		public static TemplateNode FromParts(string title, IEnumerable<string>? parameters)
 		{
 			ThrowNull(title, nameof(title));
-			ThrowNull(parameters, nameof(parameters));
-			var linkText = "[[" + title;
+			var templateText = "{{" + title;
 			if (parameters != null)
 			{
 				var paramText = string.Join("|", parameters);
 				if (paramText.Length > 0)
 				{
-					linkText += "|" + paramText;
+					templateText += "|" + paramText;
 				}
 			}
 
-			linkText += "]]";
+			templateText += "}}";
 
-			return FromText(linkText);
+			return FromText(templateText);
 		}
 		#endregion
 

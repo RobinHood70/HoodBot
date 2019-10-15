@@ -40,7 +40,7 @@ namespace RobinHood70.WallE.Base
 
 		public int UrlHeight { get; set; }
 
-		public string UrlParameter { get; set; }
+		public string? UrlParameter { get; set; }
 
 		public int UrlWidth { get; set; }
 		#endregion

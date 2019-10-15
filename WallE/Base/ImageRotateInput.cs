@@ -25,7 +25,7 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public int Rotation { get; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 		#endregion
 
 		#region Public Static Methods

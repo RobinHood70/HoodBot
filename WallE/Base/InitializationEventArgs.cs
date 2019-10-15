@@ -11,7 +11,7 @@
 	{
 		#region Fields
 		private Filter filterLocalInterwiki;
-		private string interwikiLanguageCode;
+		private string? interwikiLanguageCode;
 		private SiteInfoProperties properties;
 		private bool showAllDatabases;
 		private bool showNumberInGroup;
@@ -20,7 +20,7 @@
 		/// <summary>Initializes a new instance of the <see cref="InitializationEventArgs"/> class.</summary>
 		/// <param name="input">The SiteInfo input.</param>
 		/// <param name="result">The SiteInfo result.</param>
-		public InitializationEventArgs(SiteInfoInput input, SiteInfoResult result)
+		public InitializationEventArgs(SiteInfoInput input, SiteInfoResult? result)
 		{
 			ThrowNull(input, nameof(input));
 			this.filterLocalInterwiki = input.FilterLocalInterwiki;

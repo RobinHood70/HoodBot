@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	// MW: 1.27
+	// MWVERSION: 1.27
 	internal class ActionFileRevert : ActionModule<FileRevertInput, FileRevertResult>
 	{
 		#region Constructors
@@ -45,12 +45,12 @@ namespace RobinHood70.WallE.Eve.Modules
 			var error = result["error"];
 			if (error != null)
 			{
-				throw WikiException.General((string)result["code"], (string)result["info"]);
+				throw WikiException.General((string?)result["code"], (string?)result["info"]);
 			}
 
 			var output = new FileRevertResult()
 			{
-				Result = (string)result["result"],
+				Result = (string?)result["result"],
 			};
 			return output;
 		}

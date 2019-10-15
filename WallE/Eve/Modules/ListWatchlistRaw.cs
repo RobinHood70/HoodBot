@@ -55,14 +55,12 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override WatchlistRawItem GetItem(JToken result) => result == null
+		protected override WatchlistRawItem? GetItem(JToken result) => result == null
 			? null
-			: new WatchlistRawItem()
-			{
-				Namespace = (int?)result["ns"],
-				Title = (string)result["title"],
-				Changed = result["changed"].AsBCBool(),
-			};
+			: new WatchlistRawItem(
+				ns: (int)result.NotNull("ns"),
+				title: result.StringNotNull("title"),
+				changed: result["changed"].AsBCBool());
 		#endregion
 	}
 }

@@ -27,7 +27,7 @@
 				var tokens = action.Submit(tokensInput);
 				foreach (var token in tokens)
 				{
-					this.SessionTokens[TokenManagerFunctions.TrimToken(token.Key)] = token.Value;
+					this.SessionTokens[TokenManagerFunctions.TrimTokenKey(token.Key)] = token.Value;
 				}
 
 				this.SessionTokens.TryGetValue(type, out retval);

@@ -46,12 +46,13 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override PagesWithPropertyItem GetItem(JToken result) => result == null
+		protected override PagesWithPropertyItem? GetItem(JToken result) => result == null
 			? null
-			: new PagesWithPropertyItem
-			{
-				Value = (string)result["value"]
-			}.GetWikiTitle(result);
+			: new PagesWithPropertyItem(
+				ns: (int?)result["ns"],
+				title: (string?)result["title"],
+				pageId: (long?)result["pageid"] ?? 0,
+				value: (string?)result["value"]);
 		#endregion
 	}
 }

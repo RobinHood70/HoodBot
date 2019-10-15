@@ -40,7 +40,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public string Action { get; set; }
+		public string? Action { get; set; }
 
 		public DateTime? End { get; set; }
 
@@ -50,7 +50,7 @@ namespace RobinHood70.WallE.Base
 
 		public int? Namespace { get; }
 
-		public string Prefix { get; private set; }
+		public string? Prefix { get; private set; }
 
 		public LogEventsProperties Properties { get; set; }
 
@@ -58,13 +58,13 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Start { get; set; }
 
-		public string Tag { get; set; }
+		public string? Tag { get; set; }
 
-		public string Title { get; }
+		public string? Title { get; }
 
-		public string Type { get; set; }
+		public string? Type { get; set; }
 
-		public string User { get; set; }
+		public string? User { get; set; }
 		#endregion
 
 		#region Public Static Methods

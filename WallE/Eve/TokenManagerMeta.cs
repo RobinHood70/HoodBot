@@ -62,7 +62,7 @@
 				var tokens = this.wal.RunModuleQuery(new MetaTokens(this.wal, tokensInput));
 				foreach (var token in tokens)
 				{
-					this.sessionTokens[TokenManagerFunctions.TrimToken(token.Key)] = token.Value;
+					this.sessionTokens[TokenManagerFunctions.TrimTokenKey(token.Key)] = token.Value;
 				}
 
 				this.sessionTokens.TryGetValue(type, out retval);

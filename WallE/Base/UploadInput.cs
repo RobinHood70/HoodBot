@@ -24,7 +24,7 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public int ChunkSize { get; set; }
 
-		public string Comment { get; set; }
+		public string? Comment { get; set; }
 
 		public Stream FileData { get; }
 
@@ -33,9 +33,9 @@ namespace RobinHood70.WallE.Base
 		public string RemoteFileName { get; }
 
 		[Localizable(false)]
-		public string Text { get; set; }
+		public string? Text { get; set; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 
 		public WatchlistOption Watchlist
 		{

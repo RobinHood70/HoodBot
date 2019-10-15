@@ -12,7 +12,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ListBlocks(WikiAbstractionLayer wal, BlocksInput input)
-			: base(wal, input, null)
+			: base(wal, input)
 		{
 		}
 		#endregion
@@ -52,13 +52,13 @@ namespace RobinHood70.WallE.Eve.Modules
 			: new BlocksResult()
 			{
 				Id = (long?)result["id"] ?? 0,
-				User = (string)result["user"],
+				User = (string?)result["user"],
 				UserId = (long?)result["userid"] ?? 0,
-				By = (string)result["by"],
+				By = (string?)result["by"],
 				ById = (long?)result["byid"] ?? 0,
 				Timestamp = (DateTime?)result["timestamp"],
 				Expiry = result["expiry"].AsDate(),
-				Reason = (string)result["reason"],
+				Reason = (string?)result["reason"],
 				Automatic = result["automatic"].AsBCBool(),
 				Flags =
 					result.GetFlag("allowusertalk", BlockFlags.AllowUserTalk) |
@@ -67,8 +67,8 @@ namespace RobinHood70.WallE.Eve.Modules
 					result.GetFlag("hidden", BlockFlags.Hidden) |
 					result.GetFlag("nocreate", BlockFlags.NoCreate) |
 					result.GetFlag("noemail", BlockFlags.NoEmail),
-				RangeStart = (string)result["rangestart"],
-				RangeEnd = (string)result["rangeend"],
+				RangeStart = (string?)result["rangestart"],
+				RangeEnd = (string?)result["rangeend"],
 			};
 		#endregion
 	}

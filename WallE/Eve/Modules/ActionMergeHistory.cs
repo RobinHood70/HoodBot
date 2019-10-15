@@ -45,9 +45,9 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(result, nameof(result));
 			var output = new MergeHistoryResult()
 			{
-				From = (string)result["from"],
-				To = (string)result["to"],
-				Reason = (string)result["reason"],
+				From = (string?)result["from"],
+				To = (string?)result["to"],
+				Reason = (string?)result["reason"],
 				Timestamp = result["timestamp"].AsDate(),
 			};
 			return output;

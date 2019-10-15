@@ -174,7 +174,7 @@
 					}
 					else
 					{
-						this.Top.CurrentPiece.AddLiteral(new string('{', countFound));
+						this.Top.CurrentPiece.AddLiteral(new string(found, countFound));
 					}
 
 					this.Index += countFound;

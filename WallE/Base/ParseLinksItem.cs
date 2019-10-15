@@ -1,14 +1,23 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
-	public class ParseLinksItem : ITitleOnly
+	public class ParseLinksItem : ITitle
 	{
+		#region Constructors
+		public ParseLinksItem(int ns, string title, bool exists)
+		{
+			this.Namespace = ns;
+			this.Title = title;
+			this.Exists = exists;
+		}
+		#endregion
+
 		#region Public Properties
-		public bool Exists { get; set; }
+		public bool Exists { get; }
 
-		public int? Namespace { get; set; }
+		public int Namespace { get; }
 
-		public string Title { get; set; }
+		public string Title { get; }
 		#endregion
 
 		#region Public Override Methods

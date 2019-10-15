@@ -64,16 +64,16 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(result, nameof(result));
 			var output = new CreateAccountResult()
 			{
-				UserName = (string)result["username"],
+				UserName = (string?)result["username"],
 				UserId = (long?)result["userid"] ?? 0,
-				Result = (string)result["result"],
+				Result = (string?)result["result"],
 				Warnings = result["warnings"].GetWarnings(),
 			};
 
 			// Only replace it if non-null, as we seem to be gettina NeedToken/NeedCaptcha loop otherwise.
 			if (result["token"] != null)
 			{
-				this.token = (string)result["token"];
+				this.token = (string?)result["token"];
 			}
 
 			this.CaptchaData = result["captcha"].AsReadOnlyDictionary<string, string>();

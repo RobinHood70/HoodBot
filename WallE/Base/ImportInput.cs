@@ -22,21 +22,21 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public bool FullHistory { get; set; }
 
-		public string InterwikiPage { get; set; }
+		public string? InterwikiPage { get; set; }
 
-		public string InterwikiSource { get; set; }
+		public string? InterwikiSource { get; set; }
 
 		public int? Namespace { get; }
 
-		public string RootPage { get; }
+		public string? RootPage { get; }
 
-		public string Summary { get; set; }
+		public string? Summary { get; set; }
 
 		public bool Templates { get; set; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 
-		public string Xml { get; set; }
+		public string? Xml { get; set; }
 		#endregion
 	}
 }

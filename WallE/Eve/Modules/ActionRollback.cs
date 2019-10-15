@@ -46,9 +46,9 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(result, nameof(result));
 			var output = new RollbackResult()
 			{
-				Title = (string)result["title"],
+				Title = (string?)result["title"],
 				PageId = (long)result["pageid"],
-				Summary = (string)result["summary"],
+				Summary = (string?)result["summary"],
 				RevisionId = (long)result["revid"],
 				OldRevisionId = (long)result["old_revid"],
 				LastRevisionId = (long)result["last_revid"],

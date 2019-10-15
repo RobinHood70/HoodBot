@@ -1,33 +1,36 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
-	using System;
-	using RobinHood70.WallE.Properties;
-	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiCommon.Globals;
-
-	public class AllCategoriesItem : ITitle
+	public class AllCategoriesItem
 	{
-		#region Public Properties
-		public int Files { get; set; }
-
-		public bool Hidden { get; set; }
-
-		public int? Namespace
+		#region Constructors
+		internal AllCategoriesItem(string category, int files, bool hidden, int pages, int size, int subcats)
 		{
-			get => MediaWikiNamespaces.Category;
-			set => throw new InvalidOperationException(CurrentCulture(Messages.NotSettable));
+			this.Category = category;
+			this.Files = files;
+			this.Hidden = hidden;
+			this.Pages = pages;
+			this.Size = size;
+			this.Subcategories = subcats;
 		}
+		#endregion
 
-		public long PageId { get; set; }
+		#region Public Properties
+		public string Category { get; }
 
-		public int Pages { get; set; }
+		public int Files { get; }
 
-		public int Size { get; set; }
+		public bool Hidden { get; }
 
-		public int Subcategories { get; set; }
+		public int Pages { get; }
 
-		public string Title { get; set; }
+		public int Size { get; }
+
+		public int Subcategories { get; }
+		#endregion
+
+		#region Public Override Methods
+		public override string ToString() => this.Category;
 		#endregion
 	}
 }

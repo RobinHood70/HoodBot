@@ -12,17 +12,17 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public string OldImage { get; set; }
+		public string? OldImage { get; set; }
 
 		public long PageId { get; }
 
-		public string Reason { get; set; }
+		public string? Reason { get; set; }
 
-		public IEnumerable<string> Tags { get; set; }
+		public IEnumerable<string>? Tags { get; set; }
 
-		public string Title { get; }
+		public string? Title { get; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 
 		public WatchlistOption Watchlist { get; set; }
 		#endregion

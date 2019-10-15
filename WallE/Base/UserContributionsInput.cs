@@ -47,7 +47,7 @@ namespace RobinHood70.WallE.Base
 
 		public int MaxItems { get; set; }
 
-		public IEnumerable<int> Namespaces { get; set; }
+		public IEnumerable<int>? Namespaces { get; set; }
 
 		public UserContribsProperties Properties { get; set; }
 
@@ -55,11 +55,11 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Start { get; set; }
 
-		public string Tag { get; set; }
+		public string? Tag { get; set; }
 
-		public string UserPrefix { get; }
+		public string? UserPrefix { get; }
 
-		public IEnumerable<string> Users { get; }
+		public IEnumerable<string>? Users { get; }
 		#endregion
 	}
 }

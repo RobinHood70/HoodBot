@@ -48,7 +48,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public string BackEnd { get; set; }
+		public string? BackEnd { get; set; }
 
 		public SearchInfo Info { get; set; }
 
@@ -59,7 +59,7 @@ namespace RobinHood70.WallE.Base
 
 		public int MaxItems { get; set; }
 
-		public IEnumerable<int> Namespaces { get; set; }
+		public IEnumerable<int>? Namespaces { get; set; }
 
 		public SearchProperties Properties { get; set; }
 

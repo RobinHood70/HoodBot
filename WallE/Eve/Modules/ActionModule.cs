@@ -84,7 +84,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			return request;
 		}
 
-		public TOutput Deserialize(JToken parent)
+		public TOutput? Deserialize(JToken parent)
 		{
 			ThrowNull(parent, nameof(parent));
 			this.DeserializeParent(parent);
@@ -160,7 +160,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Abstract Methods
 		protected abstract void BuildRequestLocal(Request request, TInput input);
 
-		protected abstract TOutput DeserializeResult(JToken result);
+		protected abstract TOutput? DeserializeResult(JToken result);
 		#endregion
 
 		#region Protected Virtual Methods
@@ -240,7 +240,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				foreach (var warning in warnings.Children<JProperty>())
 				{
-					var description = (string)warning.First.AsBCContent("warnings");
+					var description = warning.First.AsBCString("warnings");
 
 					foreach (var line in description.Split(TextArrays.LineFeed))
 					{

@@ -25,7 +25,7 @@ namespace RobinHood70.WallE.Base
 
 		public int MaxItems { get; set; }
 
-		public IEnumerable<int> Namespaces { get; set; }
+		public IEnumerable<int>? Namespaces { get; set; }
 
 		public RedirectsProperties Properties { get; set; }
 		#endregion

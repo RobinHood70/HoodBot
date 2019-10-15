@@ -6,11 +6,11 @@ namespace RobinHood70.WallE.Base
 	public class DeletedRevisionsInput : IRevisionsInput, IPropertyInput, IGeneratorInput
 	{
 		#region Public Properties
-		public string ContentFormat { get; set; }
+		public string? ContentFormat { get; set; }
 
 		public int? DiffTo { get; set; }
 
-		public string DiffToText { get; set; }
+		public string? DiffToText { get; set; }
 
 		public bool DiffToTextPreSaveTransform { get; set; }
 
@@ -36,9 +36,9 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Start { get; set; }
 
-		public string Tag { get; set; }
+		public string? Tag { get; set; }
 
-		public string User { get; set; }
+		public string? User { get; set; }
 		#endregion
 	}
 }

@@ -6,8 +6,17 @@ namespace RobinHood70.WallE.Base
 	// This is mostly internal to MediaWiki, but CreateAccount returns it as part of its warnings.
 	public class WarningsItem
 	{
+		#region Constructors
+		public WarningsItem(string type, string? message, IReadOnlyList<object> parameters)
+		{
+			this.Type = type;
+			this.Message = message;
+			this.Parameters = parameters;
+		}
+		#endregion
+
 		#region Public Properties
-		public string Message { get; set; }
+		public string? Message { get; set; }
 
 		public IReadOnlyList<object> Parameters { get; set; }
 

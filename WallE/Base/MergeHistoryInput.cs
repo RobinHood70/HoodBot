@@ -37,19 +37,19 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public string From { get; }
+		public string? From { get; }
 
 		public long FromId { get; }
 
-		public string Reason { get; set; }
+		public string? Reason { get; set; }
 
 		public DateTime? Timestamp { get; set; }
 
-		public string To { get; }
+		public string? To { get; }
 
 		public long ToId { get; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 		#endregion
 	}
 }

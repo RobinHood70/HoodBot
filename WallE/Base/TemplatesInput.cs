@@ -10,11 +10,11 @@ namespace RobinHood70.WallE.Base
 
 		public int MaxItems { get; set; }
 
-		public IEnumerable<int> Namespaces { get; set; }
+		public IEnumerable<int>? Namespaces { get; set; }
 
 		public bool SortDescending { get; set; }
 
-		public IEnumerable<string> Templates { get; set; }
+		public IEnumerable<string>? Templates { get; set; }
 		#endregion
 	}
 }

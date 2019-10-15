@@ -21,7 +21,7 @@ namespace RobinHood70.WallE.Base
 
 		public string Page { get; }
 
-		public IReadOnlyDictionary<string, string> Parameters { get; set; }
+		public IReadOnlyDictionary<string, string>? Parameters { get; set; }
 		#endregion
 	}
 }

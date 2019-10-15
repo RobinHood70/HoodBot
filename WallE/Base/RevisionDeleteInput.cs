@@ -49,15 +49,15 @@ namespace RobinHood70.WallE.Base
 
 		public IEnumerable<long> Ids { get; }
 
-		public string Reason { get; set; }
+		public string? Reason { get; set; }
 
 		public RevisionDeleteProperties Show { get; set; }
 
 		public RevisionDeleteSuppression Suppress { get; set; }
 
-		public string Target { get; set; }
+		public string? Target { get; set; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 
 		public RevisionDeleteType Type { get; }
 		#endregion

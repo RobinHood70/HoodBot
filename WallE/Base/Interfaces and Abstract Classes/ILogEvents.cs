@@ -30,12 +30,12 @@ namespace RobinHood70.WallE.Base
 	}
 	#endregion
 
-	public interface ILogEvents : ITitle
+	public interface ILogEvents
 	{
 		#region Public Properties
-		string Comment { get; set; }
+		string? Comment { get; set; }
 
-		IReadOnlyDictionary<string, object> ExtraData { get; set; }
+		IReadOnlyDictionary<string, object?> ExtraData { get; set; }
 
 		LogEventFlags LogEventFlags { get; set; }
 
@@ -45,11 +45,11 @@ namespace RobinHood70.WallE.Base
 
 		string LogType { get; set; }
 
-		string ParsedComment { get; set; }
+		string? ParsedComment { get; set; }
 
 		DateTime? Timestamp { get; set; }
 
-		string User { get; set; }
+		string? User { get; set; }
 
 		long UserId { get; set; }
 		#endregion

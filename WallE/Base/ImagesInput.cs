@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Base
 	public class ImagesInput : IPropertyInput, ILimitableInput, IGeneratorInput
 	{
 		#region Public Properties
-		public IEnumerable<string> Images { get; set; }
+		public IEnumerable<string>? Images { get; set; }
 
 		public int Limit { get; set; }
 

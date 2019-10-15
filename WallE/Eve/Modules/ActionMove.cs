@@ -59,7 +59,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			var output = new MoveResult(list)
 			{
-				Reason = (string)result["reason"],
+				Reason = (string?)result["reason"],
 				RedirectCreated = result["redirectcreated"].AsBCBool(),
 			};
 			return output;
@@ -74,8 +74,8 @@ namespace RobinHood70.WallE.Eve.Modules
 				var item = new MoveItem()
 				{
 					Error = result["error"].GetError() ?? result.GetError("talkmove-error-code", "talkmove-error-info"),
-					From = (string)result[prefix + "from"],
-					To = (string)result[prefix + "to"],
+					From = (string?)result[prefix + "from"],
+					To = (string?)result[prefix + "to"],
 					MovedOverRedirect = result[prefix + "moveoverredirect"].AsBCBool(),
 				};
 				output.Add(item);

@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	// MWVERSION 1.29
+	// MWVERSION: 1.29
 	internal class ListRandom : ListModule<RandomInput, WikiTitleItem>, IGeneratorModule
 	{
 		#region Constructors
@@ -49,13 +49,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override WikiTitleItem GetItem(JToken result)
-		{
-			ThrowNull(result, nameof(result));
-			var title = result.GetWikiTitle();
-			title.PageId = (long?)result["id"] ?? 0;
-			return title;
-		}
+		protected override WikiTitleItem GetItem(JToken result) => result.GetWikiTitle();
 
 		/* This was a nice idea, but later versions remove the former 10/20 limit, which means we're now inadvertently requesting hundreds or thousands. Better to let the warning come through on older versions, so the user knows.
 		protected override int GetNumericLimit()

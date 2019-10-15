@@ -63,8 +63,8 @@ namespace RobinHood70.WallE.Eve.Modules
 			var output = new ProtectResult()
 			{
 				Cascade = result["cascade"].AsBCBool(),
-				Reason = (string)result["reason"],
-				Title = (string)result["title"],
+				Reason = (string?)result["reason"],
+				Title = (string?)result["title"],
 			};
 			var protections = result["protections"];
 			if (protections != null)

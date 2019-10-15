@@ -62,29 +62,29 @@
 
 		/// <summary>Adds one collection of items to another.</summary>
 		/// <typeparam name="T">The type of items.</typeparam>
-		/// <param name="original">The original collection.</param>
-		/// <param name="collection">The values to be added.</param>
-		public static void AddRange<T>(this ICollection<T> original, params T[] collection) => AddRange(original, collection as IEnumerable<T>);
+		/// <param name="collection">The original collection.</param>
+		/// <param name="values">The values to be added.</param>
+		public static void AddRange<T>(this ICollection<T> collection, params T[] values) => AddRange(collection, values as IEnumerable<T>);
 
 		/// <summary>Adds one collection of items to another.</summary>
 		/// <typeparam name="T">The type of items.</typeparam>
-		/// <param name="original">The original collection.</param>
-		/// <param name="collection">The collection to be added.</param>
-		public static void AddRange<T>(this ICollection<T> original, IEnumerable<T> collection)
+		/// <param name="collection">The original collection.</param>
+		/// <param name="values">The collection to be added.</param>
+		public static void AddRange<T>(this ICollection<T> collection, IEnumerable<T> values)
 		{
-			ThrowNull(original, nameof(original));
-			if (collection != null)
+			ThrowNull(collection, nameof(collection));
+			if (values != null)
 			{
-				if (original is List<T> list)
+				if (collection is List<T> list)
 				{
-					list.AddRange(collection);
+					list.AddRange(values);
 				}
 				else
 				{
-					using var enumerator = collection.GetEnumerator();
+					using var enumerator = values.GetEnumerator();
 					while (enumerator.MoveNext())
 					{
-						original.Add(enumerator.Current);
+						collection.Add(enumerator.Current);
 					}
 				}
 			}
@@ -98,7 +98,7 @@
 		/// <typeparam name="TValue">The value-type of the <paramref name="dictionary" /> (inferred).</typeparam>
 		/// <param name="dictionary">The dictionary to convert.</param>
 		/// <returns>A read-only dictionary based on the provided dictionary. If the input was null, an empty read-only dictionary is returned.</returns>
-		public static ReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue> dictionary) => new ReadOnlyDictionary<TKey, TValue>(dictionary ?? new Dictionary<TKey, TValue>());
+		public static ReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue>? dictionary) => new ReadOnlyDictionary<TKey, TValue>(dictionary ?? new Dictionary<TKey, TValue>());
 
 		/// <summary>Gets the value of the "first" item in a dictionary.</summary>
 		/// <typeparam name="TKey">The key type of the dictionary.</typeparam>
@@ -117,48 +117,71 @@
 
 		#region IEnumerable<T> Extensions
 
-		/// <summary>Casts the enumerable to an IReadOnlyCollection if possible, or creates a new one if needed.</summary>
-		/// <typeparam name="T">The type of the original enumerable.</typeparam>
-		/// <param name="collection">The enumerable to convert.</param>
-		/// <returns>The existing enumerable as an IReadOnlyCollection or a new list.</returns>
-		public static IReadOnlyCollection<T> AsReadOnlyCollection<T>(this IEnumerable<T> collection) => collection.HasItems() ? collection as IReadOnlyCollection<T> ?? new List<T>(collection) : Array.Empty<T>();
-
 		/// <summary>Casts the enumerable to an IReadOnlyList if possible, or creates a new one if needed.</summary>
 		/// <typeparam name="T">The type of the original enumerable.</typeparam>
-		/// <param name="collection">The enumerable to convert.</param>
+		/// <param name="enumerable">The enumerable to convert.</param>
 		/// <returns>The existing enumerable as an IReadOnlyList or a new list.</returns>
-		public static IReadOnlyList<T> AsReadOnlyList<T>(this IEnumerable<T> collection) => collection.HasItems() ? collection as IReadOnlyList<T> ?? new List<T>(collection) : Array.Empty<T>();
+		public static IReadOnlyList<T> AsReadOnlyList<T>(this IEnumerable<T>? enumerable) => enumerable == null || IsEmpty(enumerable) ? Array.Empty<T>() : enumerable as IReadOnlyList<T> ?? new List<T>(enumerable);
+
+		/// <summary>Determines whether an IEnumerable<typeparamref name="T"/> contains the specified value.</summary>
+		/// <typeparam name="T">The type of the original enumerable.</typeparam>
+		/// <param name="enumerable">The enumerable to convert.</param>
+		/// <param name="value">The value to find.</param>
+		/// <returns><see langword="true"/> if the collection contains the specified value; otherwise, <see langword="false"/>.</returns>
+		public static bool Contains<T>(this IEnumerable<T> enumerable, T value) => (enumerable as ICollection<T>)?.Contains(value) ?? Contains(enumerable, value, null);
+
+		/// <summary>Determines whether an IEnumerable<typeparamref name="T"/> contains the specified value.</summary>
+		/// <typeparam name="T">The type of the original enumerable.</typeparam>
+		/// <param name="enumerable">The enumerable to convert.</param>
+		/// <param name="value">The value to find.</param>
+		/// <param name="comparer">The equality comparer to use to make the comparison.</param>
+		/// <returns><see langword="true"/> if the collection contains the specified value; otherwise, <see langword="false"/>.</returns>
+		public static bool Contains<T>(this IEnumerable<T> enumerable, T value, IEqualityComparer<T>? comparer)
+		{
+			// It's understandable why this wasn't in IEnumerable<T>, since enumerating can potentially be a slow-running operation, but it's beyond me why this wasn't put into IReadOnlyCollection<T>. MS covered it with Linq, using a virtually identical implementation to this, but that's still only a workaround (as is this).
+			ThrowNull(enumerable, nameof(enumerable));
+			comparer ??= EqualityComparer<T>.Default;
+			foreach (var item in enumerable)
+			{
+				if (comparer.Equals(item, value))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
 
 		/// <summary>Gets the first item of the collection.</summary>
 		/// <typeparam name="T">The collection type.</typeparam>
-		/// <param name="collection">The collection to enumerate.</param>
+		/// <param name="enumerable">The collection to enumerate.</param>
 		/// <returns>The first value in the enumerable, or throws an error.</returns>
 		/// <exception cref="KeyNotFoundException">The list was empty.</exception>
-		public static T First<T>(this IEnumerable<T> collection)
+		public static T First<T>(this IEnumerable<T> enumerable)
 		{
-			ThrowNull(collection, nameof(collection));
-			using var enumerator = collection.GetEnumerator();
+			ThrowNull(enumerable, nameof(enumerable));
+			using var enumerator = enumerable.GetEnumerator();
 			return enumerator.MoveNext() ? enumerator.Current : throw new KeyNotFoundException();
 		}
 
 		/// <summary>Gets the first item of the collection, or the specified default value.</summary>
 		/// <typeparam name="T">The collection type.</typeparam>
-		/// <param name="collection">The collection to enumerate.</param>
+		/// <param name="enumerable">The collection to enumerate.</param>
 		/// <returns>The first item in the collection or the specified default value.</returns>
-		public static T? FirstOrDefault<T>(this IEnumerable<T> collection)
-			where T : class => FirstOrDefault(collection, default);
+		public static T? FirstOrDefault<T>(this IEnumerable<T> enumerable)
+			where T : class => FirstOrDefault(enumerable, default);
 
 		/// <summary>Gets the first item of the collection, or the specified default value.</summary>
 		/// <typeparam name="T">The collection type.</typeparam>
-		/// <param name="collection">The collection to enumerate.</param>
+		/// <param name="enumerable">The collection to enumerate.</param>
 		/// <param name="defaultValue">The default value to use if the collection is empty.</param>
 		/// <returns>The first item in the collection or the specified default value.</returns>
-		public static T? FirstOrDefault<T>(this IEnumerable<T> collection, T? defaultValue)
+		public static T? FirstOrDefault<T>(this IEnumerable<T> enumerable, T? defaultValue)
 			where T : class
 		{
-			if (collection != null)
+			if (enumerable != null)
 			{
-				using var enumerator = collection.GetEnumerator();
+				using var enumerator = enumerable.GetEnumerator();
 				if (enumerator.MoveNext())
 				{
 					return enumerator.Current;
@@ -170,22 +193,22 @@
 
 		/// <summary>Gets the first item of the collection, or the specified default value.</summary>
 		/// <typeparam name="T">The collection type.</typeparam>
-		/// <param name="collection">The collection to enumerate.</param>
+		/// <param name="enumerable">The collection to enumerate.</param>
 		/// <returns>The first item in the collection or the specified default value.</returns>
-		public static T FirstOrDefaultValue<T>(this IEnumerable<T> collection)
-			where T : struct => FirstOrDefaultValue(collection, default);
+		public static T FirstOrDefaultValue<T>(this IEnumerable<T> enumerable)
+			where T : struct => FirstOrDefaultValue(enumerable, default);
 
 		/// <summary>Gets the first item of the collection, or the specified default value.</summary>
 		/// <typeparam name="T">The collection type.</typeparam>
-		/// <param name="collection">The collection to enumerate.</param>
+		/// <param name="enumerable">The collection to enumerate.</param>
 		/// <param name="defaultValue">The default value to use if the collection is empty.</param>
 		/// <returns>The first item in the collection or the specified default value.</returns>
-		public static T FirstOrDefaultValue<T>(this IEnumerable<T> collection, T defaultValue)
+		public static T FirstOrDefaultValue<T>(this IEnumerable<T> enumerable, T defaultValue)
 			where T : struct
 		{
-			if (collection != null)
+			if (enumerable != null)
 			{
-				using var enumerator = collection.GetEnumerator();
+				using var enumerator = enumerable.GetEnumerator();
 				if (enumerator.MoveNext())
 				{
 					return enumerator.Current;
@@ -199,20 +222,27 @@
 		#region IEnumerable Extensions
 
 		/// <summary>Determines whether an IEnumerable has items.</summary>
-		/// <param name="list">The enumerable to check.</param>
+		/// <param name="enumerable">The enumerable to check.</param>
 		/// <returns><see langword="true"/> if the list is non-null and has at least one item; otherwise, <see langword="false"/>.</returns>
 		/// <exception cref="KeyNotFoundException">The list was empty.</exception>
-		public static bool HasItems(this IEnumerable list) => list?.GetEnumerator().MoveNext() ?? false;
+		public static bool IsEmpty(this IEnumerable enumerable) => enumerable == null ? true : !enumerable.GetEnumerator().MoveNext();
 		#endregion
 
 		#region IFormattable Extensions
 
+		// This was originally implemented as a generic. Why? I have a feeling it might've been something to do with unexpected name resolution at the time, but results seem consistent at this point.
+
 		/// <summary>Convenience method to format any IFormattable value as an invariant value.</summary>
-		/// <typeparam name="T">Any IFormattable.</typeparam>
+		/// <param name="value">The value to format.</param>
+		/// <returns>The value as an invariant string.</returns>
+		public static string? ToStringInvariant(this IFormattable value) => value?.ToString(null, CultureInfo.InvariantCulture);
+
+		/// <summary>Convenience method to format any IFormattable value as an invariant value.</summary>
+		/// <typeparam name="T">The type of the parameter passed.</typeparam>
 		/// <param name="value">The value to format.</param>
 		/// <returns>The value as an invariant string.</returns>
 		public static string ToStringInvariant<T>(this T value)
-			where T : IFormattable => value.ToString(null, CultureInfo.InvariantCulture);
+			where T : struct, IFormattable => value.ToString(null, CultureInfo.InvariantCulture);
 		#endregion
 
 		#region String Extensions

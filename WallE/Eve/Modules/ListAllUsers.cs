@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ListAllUsers(WikiAbstractionLayer wal, AllUsersInput input)
-			: base(wal, input, null)
+			: base(wal, input)
 		{
 		}
 		#endregion
@@ -43,21 +43,13 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override AllUsersItem GetItem(JToken result)
-		{
-			if (result == null)
-			{
-				return null;
-			}
-
-			var item = new AllUsersItem
+		protected override AllUsersItem? GetItem(JToken result) => result == null
+			? null
+			: new AllUsersItem((long?)result["userid"] ?? 0, (string?)result["name"])
 			{
 				RecentActions = (int?)result["recentactions"] ?? (int?)result["recenteditcount"] ?? 0
-			};
-			result.GetUser(item);
-
-			return item;
-		}
+			}
+			.GetUserFrom(result);
 		#endregion
 	}
 }

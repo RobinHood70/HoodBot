@@ -1,7 +1,6 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
-	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
@@ -12,7 +11,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ListDeletedRevs(WikiAbstractionLayer wal, ListDeletedRevisionsInput input)
-			: base(wal, input, null)
+			: base(wal, input)
 		{
 		}
 		#endregion
@@ -55,28 +54,21 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override DeletedRevisionsItem GetItem(JToken result)
+		protected override DeletedRevisionsItem? GetItem(JToken result)
 		{
 			if (result == null)
 			{
 				return null;
 			}
 
-			var item = new DeletedRevisionsItem
-			{
-				DeletedRevisionsToken = (string)result["token"]
-			}.GetWikiTitle(result);
-
-			var revisions = new List<RevisionsItem>();
-			foreach (var revisionNode in result["revisions"])
-			{
-				var revision = revisionNode.GetRevision(item.Title);
-				revisions.Add(revision);
-			}
-
-			item.Revisions = revisions;
-
-			return item;
+			var title = result.StringNotNull("title");
+			var revisions = result.GetRevisions(title);
+			return new DeletedRevisionsItem(
+				ns: (int)result.NotNull("ns"),
+				title: title,
+				pageId: (long)result.NotNull("pageid"),
+				revisions: revisions,
+				token: (string?)result["token"]);
 		}
 		#endregion
 	}

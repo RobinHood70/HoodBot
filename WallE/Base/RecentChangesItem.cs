@@ -19,6 +19,15 @@ namespace RobinHood70.WallE.Base
 	/// <summary>Holds all data for an entry from Special:RecentChanges. Note that a Recent Change is, in essence, a log entry with a few extra properties and is therefore modeled that way. Since log entries can be derived types, themselves, the LogEvent property holds the specific LogEvent derivative, when appropriate, or a base LogEvent object for normal edits.</summary>
 	public class RecentChangesItem : ILogEvents
 	{
+		#region Constructors
+		public RecentChangesItem(int ns, string title, long pageId)
+		{
+			this.Namespace = ns;
+			this.Title = title;
+			this.PageId = pageId;
+		}
+		#endregion
+
 		#region Public Properties
 		public string Comment { get; set; }
 
@@ -36,7 +45,7 @@ namespace RobinHood70.WallE.Base
 
 		public string LogType { get; set; }
 
-		public int? Namespace { get; set; }
+		public int? Namespace { get; }
 
 		public int NewLength { get; set; }
 
@@ -44,11 +53,13 @@ namespace RobinHood70.WallE.Base
 
 		public long OldRevisionId { get; set; }
 
-		public long PageId { get; set; }
+		public long PageId { get; }
 
 		public string ParsedComment { get; set; }
 
 		public string PatrolToken { get; set; }
+
+		public string RecentChangeType { get; set; }
 
 		public long RevisionId { get; set; }
 
@@ -56,9 +67,7 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Timestamp { get; set; }
 
-		public string Title { get; set; }
-
-		public string RecentChangeType { get; set; }
+		public string? Title { get; }
 
 		public string User { get; set; }
 

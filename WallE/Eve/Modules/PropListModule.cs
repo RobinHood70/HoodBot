@@ -55,7 +55,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Abstract Methods
-		protected abstract TItem GetItem(JToken result);
+		protected abstract TItem? GetItem(JToken result);
 
 		protected abstract void GetResultsFromCurrentPage();
 

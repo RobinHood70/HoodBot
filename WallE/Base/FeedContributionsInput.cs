@@ -17,17 +17,17 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public bool DeletedOnly { get; set; }
 
-		public string FeedFormat { get; set; }
+		public string? FeedFormat { get; set; }
 
 		public int Month { get; set; }
 
-		public int? Namespace { get; set; }
+		public int Namespace { get; }
 
 		public bool NewOnly { get; set; }
 
 		public bool ShowSizeDifference { get; set; }
 
-		public IEnumerable<string> TagFilter { get; set; }
+		public IEnumerable<string>? TagFilter { get; set; }
 
 		public bool TopOnly { get; set; }
 

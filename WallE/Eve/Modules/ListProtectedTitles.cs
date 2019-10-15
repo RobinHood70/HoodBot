@@ -56,20 +56,18 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override ProtectedTitlesItem GetItem(JToken result) => result == null
+		protected override ProtectedTitlesItem? GetItem(JToken result) => result == null
 			? null
-			: new ProtectedTitlesItem()
-			{
-				Namespace = (int?)result["ns"],
-				Title = (string)result["title"],
-				Timestamp = (DateTime?)result["timestamp"],
-				User = (string)result["user"],
-				UserId = (long?)result["userid"] ?? 0,
-				Comment = (string)result["comment"],
-				ParsedComment = (string)result["parsedcomment"],
-				Expiry = result["expiry"].AsDate(),
-				Level = (string)result["level"],
-			};
+			: new ProtectedTitlesItem(
+				ns: (int)result.NotNull("ns"),
+				title: result.StringNotNull("title"),
+				comment: (string?)result["comment"],
+				expiry: result["expiry"].AsDate(),
+				level: (string?)result["level"],
+				parsedComment: (string?)result["parsedcomment"],
+				timestamp: (DateTime?)result["timestamp"],
+				user: (string?)result["user"],
+				userId: (long?)result["userid"] ?? 0);
 		#endregion
 	}
 }

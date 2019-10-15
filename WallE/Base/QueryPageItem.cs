@@ -4,18 +4,29 @@ namespace RobinHood70.WallE.Base
 	using System;
 	using System.Collections.Generic;
 
-	public class QueryPageItem : ITitleOnly
+	public class QueryPageItem : ITitle
 	{
+		#region Constructors
+		internal QueryPageItem(int ns, string title, long value, IReadOnlyDictionary<string, object?>? databaseResult, DateTime? timestamp)
+		{
+			this.Namespace = ns;
+			this.Title = title;
+			this.Value = value;
+			this.DatabaseResult = databaseResult;
+			this.Timestamp = timestamp;
+		}
+		#endregion
+
 		#region Public Properties
-		public IReadOnlyDictionary<string, string> DatabaseResults { get; set; }
+		public IReadOnlyDictionary<string, object?>? DatabaseResult { get; }
 
-		public int? Namespace { get; set; }
+		public int Namespace { get; }
 
-		public DateTime? Timestamp { get; set; }
+		public DateTime? Timestamp { get; }
 
-		public string Title { get; set; }
+		public string Title { get; }
 
-		public string Value { get; set; }
+		public long Value { get; }
 		#endregion
 
 		#region Public Override Methods

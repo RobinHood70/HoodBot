@@ -53,6 +53,9 @@ namespace RobinHood70.WikiCommon
 	[Flags]
 	public enum CategoryMemberTypes
 	{
+		/// <summary>No value has been set or type was not recognized.</summary>
+		None = 0,
+
 		/// <summary>Regular pages</summary>
 		Page = 1,
 

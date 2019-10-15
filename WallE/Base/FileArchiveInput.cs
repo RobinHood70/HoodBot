@@ -27,21 +27,21 @@ namespace RobinHood70.WallE.Base
 	public class FileArchiveInput : ILimitableInput
 	{
 		#region Public Properties
-		public string From { get; set; }
+		public string? From { get; set; }
 
 		public int Limit { get; set; }
 
 		public int MaxItems { get; set; }
 
-		public string Prefix { get; set; }
+		public string? Prefix { get; set; }
 
 		public FileArchiveProperties Properties { get; set; }
 
-		public string Sha1 { get; set; }
+		public string? Sha1 { get; set; }
 
 		public bool SortDescending { get; set; }
 
-		public string To { get; set; }
+		public string? To { get; set; }
 		#endregion
 	}
 }

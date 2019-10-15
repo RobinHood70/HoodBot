@@ -14,11 +14,11 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public bool Capture { get; set; }
 
-		public string Email { get; private set; }
+		public string? Email { get; private set; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 
-		public string User { get; }
+		public string? User { get; }
 		#endregion
 
 		#region Public Static Methods

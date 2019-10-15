@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Base
 	public class PagePropertiesInput : IPropertyInput
 	{
 		#region Public Properties
-		public IEnumerable<string> Properties { get; set; }
+		public IEnumerable<string>? Properties { get; set; }
 		#endregion
 	}
 }

@@ -20,7 +20,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Properties
-		protected Dictionary<string, string> ContinueEntries { get; } = new Dictionary<string, string>();
+		protected Dictionary<string, string?> ContinueEntries { get; } = new Dictionary<string, string?>();
 
 		protected string GeneratorContinue { get; set; } = string.Empty;
 		#endregion

@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
@@ -11,7 +12,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ActionSetNotificationTimestamp(WikiAbstractionLayer wal)
-			: base(wal)
+			: base(wal, SetNotificationTimestampItemCreator)
 		{
 		}
 		#endregion
@@ -56,22 +57,27 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override IReadOnlyList<SetNotificationTimestampItem> DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
+			if (this.ItemCreator == null)
+			{
+				throw new InvalidOperationException("Trying to create pages with no page creator!");
+			}
 
 			// If using entirewatchlist, return a single page with the notification timestamp and faked page data.
 			if (result.Type == JTokenType.Object && result["notificationtimestamp"] != null)
 			{
-				var newPage = new SetNotificationTimestampItem()
-				{
-					Namespace = 0,
-					NotificationTimestamp = result["notificationtimestamp"].AsDate(),
-					Title = "::Entire Watchlist::",
-				};
+				var newPage = this.ItemCreator(0, "::Entire Watchlist::", 0);
+				newPage.NotificationTimestamp = result["notificationtimestamp"].AsDate();
 				this.Pages.Add(newPage);
+
 				return null;
 			}
 
 			return base.DeserializeResult(result);
 		}
+		#endregion
+
+		#region Private Static Classes
+		private static SetNotificationTimestampItem SetNotificationTimestampItemCreator(int ns, string title, long pageId) => new SetNotificationTimestampItem(ns, title, pageId);
 		#endregion
 	}
 }

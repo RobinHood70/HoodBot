@@ -24,15 +24,15 @@ namespace RobinHood70.WallE.Base
 
 		public int MaxItems { get; set; }
 
-		public IEnumerable<int> Namespaces { get; set; }
+		public IEnumerable<int>? Namespaces { get; set; }
 
-		public string Owner { get; set; }
+		public string? Owner { get; set; }
 
 		public WatchlistRawProperties Properties { get; set; }
 
 		public bool SortDescending { get; set; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 		#endregion
 	}
 }

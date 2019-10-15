@@ -39,9 +39,9 @@ namespace RobinHood70.WallE.Base
 
 		public UsersProperties Properties { get; set; }
 
-		public IEnumerable<long> UserIds { get; }
+		public IEnumerable<long>? UserIds { get; }
 
-		public IEnumerable<string> Users { get; }
+		public IEnumerable<string>? Users { get; }
 		#endregion
 	}
 }

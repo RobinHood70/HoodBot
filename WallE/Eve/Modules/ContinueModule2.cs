@@ -1,9 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
-	using System.Diagnostics;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -75,25 +73,6 @@ namespace RobinHood70.WallE.Eve.Modules
 				// For pre-MW 1.26, figure out whether or not the batch is complete manually. We don't need to worry about the case of no continue entries here, since we should never be executing this code in that event.
 				this.BatchComplete = (this.ContinueEntries.Count <= 2) && this.ContinueEntries.ContainsKey(this.GeneratorContinue);
 			}
-#if DEBUG
-			else if (this.BatchComplete != (this.ContinueEntries.Count <= 2) && this.ContinueEntries.ContainsKey(this.GeneratorContinue))
-			{
-				// This is a temporary check against the method we're using in the Else block for MW 1.21-1.25.
-				Debug.WriteLine($"Calculated BatchComplete does not match returned batch complete:");
-				Debug.Indent();
-				Debug.WriteLine("Returned: " + this.BatchComplete);
-				Debug.WriteLine("Continue Entries:");
-				Debug.Indent();
-				foreach (var entry in this.ContinueEntries)
-				{
-					Debug.WriteLine(CurrentCulture(EveMessages.ColonText, entry.Key, entry.Value));
-				}
-
-				Debug.Unindent();
-				Debug.Unindent();
-				Debug.Fail("Please fix!");
-			}
-#endif
 
 			return 0;
 		}

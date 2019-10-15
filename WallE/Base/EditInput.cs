@@ -66,23 +66,23 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public string AppendText { get; }
+		public string? AppendText { get; }
 
 		public DateTime? BaseTimestamp { get; set; }
 
 		public bool Bot { get; set; }
 
-		public string ContentFormat { get; set; }
+		public string? ContentFormat { get; set; }
 
-		public string ContentModel { get; set; }
+		public string? ContentModel { get; set; }
 
-		public string Md5 { get; set; }
+		public string? Md5 { get; set; }
 
 		public Tristate Minor { get; set; }
 
 		public long PageId { get; set; }
 
-		public string PrependText { get; }
+		public string? PrependText { get; }
 
 		public bool Recreate { get; set; }
 
@@ -90,19 +90,19 @@ namespace RobinHood70.WallE.Base
 
 		public int? Section { get; set; }
 
-		public string SectionTitle { get; set; }
+		public string? SectionTitle { get; set; }
 
 		public DateTime? StartTimestamp { get; set; }
 
-		public string Summary { get; set; }
+		public string? Summary { get; set; }
 
-		public IEnumerable<string> Tags { get; set; }
+		public IEnumerable<string>? Tags { get; set; }
 
-		public string Text { get; }
+		public string? Text { get; }
 
-		public string Title { get; }
+		public string? Title { get; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 
 		/// <summary>Gets or sets whether the existence of a page should be considered in making an edit.</summary>
 		/// <value>Set to true to only allow creating new pages, never overwriting existing ones; set to false to only allow editing pages, never creating them; leave as null to edit or create pages as necessary.</value>

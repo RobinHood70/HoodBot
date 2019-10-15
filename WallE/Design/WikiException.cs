@@ -64,11 +64,11 @@
 
 		/// <summary>Gets the error code.</summary>
 		/// <value>The error code.</value>
-		public string Code { get; }
+		public string? Code { get; }
 
 		/// <summary>Gets the descriptive error information.</summary>
 		/// <value>The descriptive error information.</value>
-		public string Info { get; }
+		public string? Info { get; }
 		#endregion
 
 		#region Public Static Method

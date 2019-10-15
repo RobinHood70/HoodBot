@@ -34,7 +34,7 @@
 
 		/// <summary>Initializes a new instance of the <see cref="SimpleClient" /> class.</summary>
 		public SimpleClient()
-			: this(null)
+			: this(null, null)
 		{
 		}
 
@@ -48,7 +48,7 @@
 		/// <summary>Initializes a new instance of the <see cref="SimpleClient" /> class with contact information for the User-Agent string.</summary>
 		/// <param name="contactInfo">The contact info to be displayed - typically, an e-mail address or user name on the target wiki.</param>
 		/// <param name="cookiesLocation">The location and file name to store cookies in across sessions. If null, the default location specified in <see cref="DefaultCookiesLocation" /> will be used.</param>
-		public SimpleClient(string contactInfo, string cookiesLocation)
+		public SimpleClient(string? contactInfo, string? cookiesLocation)
 		{
 			// Test for the Mono Z-Stream bug on Windows: http://stackoverflow.com/a/32958861/502255
 			if (HasMono && OnWindows && (DefaultAcceptEncoding.Contains("gzip") || DefaultAcceptEncoding.Contains("deflate")))
@@ -75,14 +75,14 @@
 			ServicePointManager.Expect100Continue = false;
 			this.UserAgent = BuildUserAgent(contactInfo);
 			this.cookiesLocation = cookiesLocation ?? DefaultCookiesLocation;
-			this.LoadCookies();
+			this.cookieContainer = this.GetCookieContainer();
 		}
 		#endregion
 
 		#region Events
 
 		/// <summary>The event raised when either the site or the client is requesting a delay.</summary>
-		public event StrongEventHandler<IMediaWikiClient, DelayEventArgs> RequestingDelay;
+		public event StrongEventHandler<IMediaWikiClient, DelayEventArgs>? RequestingDelay;
 		#endregion
 
 		#region Public Static Properties
@@ -193,40 +193,20 @@
 		/// <summary>Gets the text of the result returned by the given URI.</summary>
 		/// <param name="uri">The URI to get.</param>
 		/// <returns>The text of the result.</returns>
-		public string Get(Uri uri)
+		public string? Get(Uri uri)
 		{
 			using var response = this.SendRequest(uri, "GET", null, null, true);
 			return GetResponseText(response);
 		}
 
 		/// <summary>Retrieves cookies from persistent storage.</summary>
-		public void LoadCookies()
-		{
-			// CookieContainer does not play well with serializers other than the BinaryFormatter (and reportedly SoapFormatter). Do not convert this to anything else without testing.
-			if (this.cookiesLocation != null)
-			{
-				try
-				{
-					using var stream = File.Open(this.cookiesLocation, FileMode.Open);
-					this.cookieContainer = new BinaryFormatter().Deserialize(stream) as CookieContainer;
-					return;
-				}
-				catch (DirectoryNotFoundException)
-				{
-				}
-				catch (FileNotFoundException)
-				{
-				}
-			}
-
-			this.cookieContainer = new CookieContainer();
-		}
+		public void LoadCookies() => this.cookieContainer = this.GetCookieContainer();
 
 		/// <summary>POSTs text data and retrieves the result.</summary>
 		/// <param name="uri">The URI to POST data to.</param>
 		/// <param name="postData">The text to POST.</param>
 		/// <returns>The text of the result.</returns>
-		public string Post(Uri uri, string postData)
+		public string? Post(Uri uri, string postData)
 		{
 			using var response = this.SendRequest(uri, "POST", FormUrlEncoded, Encoding.UTF8.GetBytes(postData), true);
 			return GetResponseText(response);
@@ -237,7 +217,7 @@
 		/// <param name="contentType">The text of the content type. Typicially <c>x-www-form-urlencoded</c> or <c>multipart/form-data (...)</c>, but there is no restriction on values.</param>
 		/// <param name="postData">The text to POST.</param>
 		/// <returns>The text of the result.</returns>
-		public string Post(Uri uri, string contentType, byte[] postData)
+		public string? Post(Uri uri, string contentType, byte[] postData)
 		{
 			using var response = this.SendRequest(uri, "POST", contentType, postData, true);
 			return GetResponseText(response);
@@ -292,7 +272,7 @@
 		#endregion
 
 		#region Private Static Methods
-		private static byte[] GetResponseData(HttpWebResponse response)
+		private static byte[]? GetResponseData(HttpWebResponse response)
 		{
 			if (response != null)
 			{
@@ -305,7 +285,7 @@
 			return null;
 		}
 
-		private static string GetResponseText(HttpWebResponse response)
+		private static string? GetResponseText(HttpWebResponse response)
 		{
 			if (response == null)
 			{
@@ -340,9 +320,64 @@
 		#endregion
 
 		#region Private Methods
+		private bool CheckDelay(HttpWebResponse response, int attemptNumber)
+		{
+			if (response == null)
+			{
+				return false;
+			}
+
+			var retryAfter = TimeSpan.Zero;
+			var retryHeader = response.Headers[HttpResponseHeader.RetryAfter];
+			if (retryHeader == null)
+			{
+				// If we didn't get a retry header, check if the response status code indicates a retriable error. If so, use the client's RetryDelay value.
+				switch (response.StatusCode)
+				{
+					case HttpStatusCode.RequestTimeout:
+					case HttpStatusCode.BadGateway:
+					case HttpStatusCode.GatewayTimeout:
+					case (HttpStatusCode)509:
+					case HttpStatusCode.ServiceUnavailable:
+						retryAfter = this.RetryDelay;
+						break;
+					default:
+						break;
+				}
+			}
+			else
+			{
+				// Regardless of status code, if we got a retry header, retry after that amount of time.
+				retryAfter = int.TryParse(retryHeader, out var retrySeconds) ? TimeSpan.FromSeconds(retrySeconds) : this.RetryDelay;
+			}
+
+			if (retryAfter != TimeSpan.Zero)
+			{
+				if (attemptNumber >= RetryDelayBonuses.Count)
+				{
+					attemptNumber = RetryDelayBonuses.Count - 1;
+				}
+
+				retryAfter += TimeSpan.FromSeconds(RetryDelayBonuses[attemptNumber]);
+				var maxlag = response.Headers["X-Database-Lag"];
+				if (maxlag == null)
+				{
+					this.RequestDelay(retryAfter, DelayReason.Error, response.StatusDescription);
+				}
+				else
+				{
+					this.RequestDelay(retryAfter, DelayReason.MaxLag, "Database lag: " + maxlag + " seconds.");
+				}
+
+				return true;
+			}
+
+			return false;
+		}
+
 		private HttpWebRequest CreateRequest(Uri uri, string method)
 		{
-			var request = WebRequest.Create(uri) as HttpWebRequest;
+			var request = (HttpWebRequest)WebRequest.Create(uri);
 			request.AllowAutoRedirect = true;
 			request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
 			request.CookieContainer = this.cookieContainer;
@@ -357,9 +392,30 @@
 			return request;
 		}
 
-		private HttpWebResponse SendRequest(Uri uri, string method, string contentType, byte[] postData, bool checkMaxLag)
+		private CookieContainer GetCookieContainer()
 		{
-			HttpWebResponse response = null;
+			// CookieContainer does not play well with serializers other than the BinaryFormatter (and reportedly SoapFormatter). Do not convert this to anything else without testing.
+			if (this.cookiesLocation != null)
+			{
+				try
+				{
+					using var stream = File.Open(this.cookiesLocation, FileMode.Open);
+					return new BinaryFormatter().Deserialize(stream) as CookieContainer ?? new CookieContainer();
+				}
+				catch (DirectoryNotFoundException)
+				{
+				}
+				catch (FileNotFoundException)
+				{
+				}
+			}
+
+			return new CookieContainer();
+		}
+
+		private HttpWebResponse SendRequest(Uri uri, string method, string? contentType, byte[]? postData, bool checkMaxLag)
+		{
+			HttpWebResponse? response = null;
 			for (var attempts = 0; attempts < this.Retries; attempts++)
 			{
 				// Do not try to optimize this out of the loop. A new request must be created every time or else the response returned will be the same response as the previous loop.
@@ -374,7 +430,7 @@
 
 				try
 				{
-					response = request.GetResponse() as HttpWebResponse;
+					response = (HttpWebResponse)request.GetResponse();
 					if (!checkMaxLag || !this.CheckDelay(response, attempts))
 					{
 						if (response.Cookies != null)
@@ -388,7 +444,7 @@
 						return response;
 					}
 
-					response?.Dispose();
+					response.Dispose();
 					response = null;
 				}
 				catch (WebException ex)
@@ -421,56 +477,6 @@
 			}
 
 			throw new WikiException(CurrentCulture(Messages.ExcessiveLag));
-		}
-
-		private bool CheckDelay(HttpWebResponse response, int attemptNumber)
-		{
-			var retryAfter = TimeSpan.Zero;
-			var retryHeader = response?.Headers[HttpResponseHeader.RetryAfter];
-			if (retryHeader == null)
-			{
-				// If we didn't get a retry header, check if the response status code indicates a retriable error. If so, use the client's RetryDelay value.
-				switch (response.StatusCode)
-				{
-					case HttpStatusCode.RequestTimeout:
-					case HttpStatusCode.BadGateway:
-					case HttpStatusCode.GatewayTimeout:
-					case (HttpStatusCode)509:
-					case HttpStatusCode.ServiceUnavailable:
-						retryAfter = this.RetryDelay;
-						break;
-					default:
-						break;
-				}
-			}
-			else
-			{
-				// Regardless of status code, if we got a retry header, retry after that amount of time.
-				retryAfter = int.TryParse(retryHeader, out var retrySeconds) ? TimeSpan.FromSeconds(retrySeconds) : this.RetryDelay;
-			}
-
-			if (retryAfter != TimeSpan.Zero)
-			{
-				if (attemptNumber >= RetryDelayBonuses.Count)
-				{
-					attemptNumber = RetryDelayBonuses.Count - 1;
-				}
-
-				retryAfter += TimeSpan.FromSeconds(RetryDelayBonuses[attemptNumber]);
-				var maxlag = response?.Headers["X-Database-Lag"];
-				if (maxlag == null)
-				{
-					this.RequestDelay(retryAfter, DelayReason.Error, response.StatusDescription);
-				}
-				else
-				{
-					this.RequestDelay(retryAfter, DelayReason.MaxLag, "Database lag: " + maxlag + " seconds.");
-				}
-
-				return true;
-			}
-
-			return false;
 		}
 		#endregion
 	}

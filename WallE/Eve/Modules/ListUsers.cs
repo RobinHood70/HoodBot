@@ -11,7 +11,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ListUsers(WikiAbstractionLayer wal, UsersInput input)
-			: base(wal, input, null)
+			: base(wal, input)
 		{
 		}
 		#endregion
@@ -42,27 +42,19 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddFlags("prop", prop);
 		}
 
-		protected override UsersItem GetItem(JToken result)
-		{
-			if (result == null)
-			{
-				return null;
-			}
-
-			var item = new UsersItem
+		protected override UsersItem? GetItem(JToken result) => result == null
+			? null
+			: new UsersItem((long?)result["userid"] ?? 0, (string?)result["name"])
 			{
 				Flags =
-				result.GetFlag("emailable", UserFlags.Emailable) |
-				result.GetFlag("interwiki", UserFlags.Interwiki) |
-				result.GetFlag("invalid", UserFlags.Invalid) |
-				result.GetFlag("missing", UserFlags.Missing),
-				Gender = (string)result["gender"],
-				Token = (string)result["userrightstoken"]
-			};
-			result.GetUser(item);
-
-			return item;
-		}
+					result.GetFlag("emailable", UserFlags.Emailable) |
+					result.GetFlag("interwiki", UserFlags.Interwiki) |
+					result.GetFlag("invalid", UserFlags.Invalid) |
+					result.GetFlag("missing", UserFlags.Missing),
+				Gender = (string?)result["gender"],
+				Token = (string?)result["userrightstoken"]
+			}
+			.GetUserFrom(result);
 		#endregion
 	}
 }

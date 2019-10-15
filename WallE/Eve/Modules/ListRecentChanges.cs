@@ -74,12 +74,12 @@ namespace RobinHood70.WallE.Eve.Modules
 				return null;
 			}
 
-			var item = new RecentChangesItem();
-			var logType = (string)result["logtype"];
-			var logAction = (string)result["logaction"];
+			var item = new RecentChangesItem((int)result.NotNull("ns"), result.StringNotNull("title"), (long)result.NotNull("pageid"));
+			var logType = (string?)result["logtype"];
+			var logAction = (string?)result["logaction"];
 			result.ParseLogEvent(item, logType, logAction, KnownProps, false);
 			item.Tags = result["tags"].AsReadOnlyList<string>();
-			item.RecentChangeType = (string)result["type"];
+			item.RecentChangeType = (string?)result["type"];
 			item.Id = (long?)result["rcid"] ?? 0;
 			item.Flags =
 				result.GetFlag("bot", RecentChangesFlags.Bot) |
@@ -88,7 +88,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				result.GetFlag("redirect", RecentChangesFlags.Redirect);
 			item.OldLength = (int?)result["oldlen"] ?? 0;
 			item.NewLength = (int?)result["newlen"] ?? 0;
-			item.PatrolToken = (string)result["patroltoken"];
+			item.PatrolToken = (string?)result["patroltoken"];
 			item.RevisionId = (long?)result["revid"] ?? 0;
 			item.OldRevisionId = (long?)result["old_revid"] ?? 0;
 

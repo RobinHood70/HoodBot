@@ -17,8 +17,17 @@ namespace RobinHood70.WallE.Base
 	}
 	#endregion
 
-	public class WatchlistItem : ILogEvents
+	public class WatchlistItem : ILogEvents, ITitle
 	{
+		#region Constructors
+		public WatchlistItem(int ns, string title, long pageId)
+		{
+			this.Namespace = ns;
+			this.Title = title;
+			this.PageId = pageId;
+		}
+		#endregion
+
 		#region Public Properties
 		public string Comment { get; set; }
 
@@ -34,7 +43,7 @@ namespace RobinHood70.WallE.Base
 
 		public string LogType { get; set; }
 
-		public int? Namespace { get; set; }
+		public int Namespace { get; }
 
 		public int NewLength { get; set; }
 
@@ -44,7 +53,7 @@ namespace RobinHood70.WallE.Base
 
 		public long OldRevisionId { get; set; }
 
-		public long PageId { get; set; }
+		public long PageId { get; }
 
 		public string ParsedComment { get; set; }
 
@@ -52,7 +61,7 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Timestamp { get; set; }
 
-		public string Title { get; set; }
+		public string Title { get; }
 
 		public string User { get; set; }
 

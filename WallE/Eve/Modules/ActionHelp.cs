@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	// MW: 1.27
+	// MWVERSION: 1.27
 	internal class ActionHelp : ActionModule<HelpInput, HelpResult>
 	{
 		#region Constructors
@@ -99,8 +99,8 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 			else
 			{
-				output.Help = new List<string> { (string)result["help"] };
-				output.Mime = (string)result["mime"];
+				output.Help = new List<string> { (string?)result["help"] };
+				output.Mime = (string?)result["mime"];
 			}
 
 			return output;

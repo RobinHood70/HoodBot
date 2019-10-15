@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Base
 	public interface ILinksInput : IPropertyInput, ILimitableInput, IGeneratorInput
 	{
 		#region Properties
-		IEnumerable<int> Namespaces { get; set; }
+		IEnumerable<int>? Namespaces { get; set; }
 
 		bool SortDescending { get; set; }
 		#endregion

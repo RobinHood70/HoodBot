@@ -133,11 +133,29 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to For MediaWiki version 1.23 only, you must specify a user name rather than a user ID for the UserRights function, or provide your own token. The API for that version allowed user IDs to be used, but provided no way to get a token by user ID, nor to get a user name from the user ID..
+        ///   Looks up a localized string similar to The wiki did not return the requested {0} token..
+        /// </summary>
+        internal static string InvalidToken {
+            get {
+                return ResourceManager.GetString("InvalidToken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Prior to MediaWiki version 1.24, you must specify a user name rather than a user ID for the UserRights function, or provide your own token. The API for MW 1.23 allowed user IDs to be used, but provided no way to get a token by user ID, nor to get a user name from the user ID. Versions prior to that do not support user IDs at all..
         /// </summary>
         internal static string InvalidUserRightsRequest {
             get {
                 return ResourceManager.GetString("InvalidUserRightsRequest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The data returned by the wiki is missing the expected element {0}, a child of {1}, in {2}..
+        /// </summary>
+        internal static string MalformedData {
+            get {
+                return ResourceManager.GetString("MalformedData", resourceCulture);
             }
         }
         

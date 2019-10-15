@@ -84,10 +84,10 @@ namespace RobinHood70.WallE.Eve.Modules
 				Flags =
 				result.GetFlag("new", EditFlags.New) |
 				result.GetFlag("nochange", EditFlags.NoChange),
-				Result = (string)result["result"],
+				Result = (string?)result["result"],
 				PageId = (long?)result["pageid"] ?? 0,
-				Title = (string)result["title"],
-				ContentModel = (string)result["contentmodel"],
+				Title = (string?)result["title"],
+				ContentModel = (string?)result["contentmodel"],
 				OldRevisionId = (long?)result["oldrevid"] ?? 0,
 				NewRevisionId = (long?)result["newrevid"] ?? 0,
 				NewTimestamp = (DateTime?)result["newtimestamp"],

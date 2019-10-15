@@ -57,17 +57,17 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(result, nameof(result));
 			var output = new LoginResult()
 			{
-				Result = (string)result["result"],
-				Reason = (string)result["reason"],
+				Result = (string?)result["result"],
+				Reason = (string?)result["reason"],
 			};
 			switch (output.Result)
 			{
 				case "NeedToken":
-					output.Token = (string)result["token"];
+					output.Token = (string?)result["token"];
 					break;
 				case "Success":
 					output.UserId = (long?)result["lguserid"] ?? -1;
-					output.User = (string)result["lgusername"];
+					output.User = (string?)result["lgusername"];
 					break;
 				case "Throttled":
 					output.WaitTime = TimeSpan.FromSeconds((int?)result["wait"] ?? 0);

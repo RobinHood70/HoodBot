@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ActionImageRotate(WikiAbstractionLayer wal)
-			: base(wal)
+			: base(wal, ImageRotateItemCreator)
 		{
 		}
 		#endregion
@@ -40,12 +40,16 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(result, nameof(result));
 			ThrowNull(page, nameof(page));
 			page.ErrorMessage = result["errormessage"].GetWarnings();
-			page.Result = (string)result["result"];
+			page.Result = (string?)result["result"];
 			page.Flags =
 				result.GetFlag("invalid", ImageRotateFlags.Invalid) |
 				result.GetFlag("missing", ImageRotateFlags.Missing);
 			this.Pages.Add(page);
 		}
+		#endregion
+
+		#region Private Methods
+		public static ImageRotateItem ImageRotateItemCreator(int ns, string title, long pageId) => new ImageRotateItem(ns, title, pageId);
 		#endregion
 	}
 }

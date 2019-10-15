@@ -65,21 +65,9 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override AllLinksItem GetItem(JToken result)
-		{
-			if (result == null || !result.HasValues)
-			{
-				return null;
-			}
-
-			var item = new AllLinksItem()
-			{
-				FromId = (long?)result["fromid"] ?? 0,
-				Namespace = (int?)result["ns"],
-				Title = (string)result["title"],
-			};
-			return item;
-		}
+		protected override AllLinksItem? GetItem(JToken result) => result == null || !result.HasValues
+			? null
+			: new AllLinksItem((int?)result["ns"], (string?)result["title"], (long?)result["fromid"] ?? 0);
 		#endregion
 	}
 }

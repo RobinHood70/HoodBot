@@ -44,13 +44,13 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(result, nameof(result));
 			var output = new CompareResult()
 			{
-				Body = (string)result["body"],
+				Body = (string?)result["body"],
 				FromId = (int?)result["fromid"] ?? 0,
 				FromRevision = (int?)result["fromrev"] ?? 0,
-				FromTitle = (string)result["fromtitle"],
+				FromTitle = (string?)result["fromtitle"],
 				ToId = (int?)result["toid"] ?? 0,
 				ToRevision = (int?)result["torev"] ?? 0,
-				ToTitle = (string)result["totitle"],
+				ToTitle = (string?)result["totitle"],
 			};
 			return output;
 		}

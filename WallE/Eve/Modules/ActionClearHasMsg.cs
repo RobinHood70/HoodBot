@@ -33,7 +33,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override CustomResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			return new CustomResult((string)result);
+			return new CustomResult((string?)result);
 		}
 		#endregion
 	}

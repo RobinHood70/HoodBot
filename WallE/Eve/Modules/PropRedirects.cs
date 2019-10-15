@@ -50,10 +50,11 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override RedirectsItem GetItem(JToken result) => result == null
 			? null
-			: new RedirectsItem
-			{
-				Fragment = (string)result["fragment"]
-			}.GetWikiTitle(result);
+			: new RedirectsItem(
+				ns: (int?)result["ns"],
+				title: (string?)result["title"],
+				pageId: (long?)result["pageid"] ?? 0,
+				fragment: (string?)result["fragment"]);
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Redirects);
 

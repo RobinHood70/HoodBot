@@ -11,7 +11,12 @@ namespace RobinHood70.WallE.Eve.Modules
 		where TItem : class
 	{
 		#region Constructors
-		protected ListModule([ValidatedNotNull] WikiAbstractionLayer wal, [ValidatedNotNull] TInput input, IPageSetGenerator pageSetGenerator)
+		protected ListModule([ValidatedNotNull] WikiAbstractionLayer wal, [ValidatedNotNull] TInput input)
+			: this(wal, input, null)
+		{
+		}
+
+		protected ListModule([ValidatedNotNull] WikiAbstractionLayer wal, [ValidatedNotNull] TInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, new List<TItem>(), pageSetGenerator)
 		{
 		}
@@ -22,7 +27,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Methods
-		protected abstract TItem GetItem(JToken result);
+		protected abstract TItem? GetItem(JToken result);
 		#endregion
 
 		#region Protected Override Methods
@@ -33,6 +38,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			using var enumeration = (result as IEnumerable<JToken>).GetEnumerator();
 			while (this.ItemsRemaining > 0 && enumeration.MoveNext())
 			{
+				// While this could be set up to ehck enumeration.Current and simply not call if it's null, because of the accessibility of GetItem, we have to check the result in GetItem anyway, and it could well return a null value, so it makes more sense to check for null afterwards rather than before.
 				var item = this.GetItem(enumeration.Current);
 				if (item != null)
 				{

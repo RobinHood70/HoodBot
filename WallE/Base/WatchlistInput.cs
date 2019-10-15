@@ -50,9 +50,9 @@ namespace RobinHood70.WallE.Base
 
 		public int MaxItems { get; set; }
 
-		public IEnumerable<int> Namespaces { get; set; }
+		public IEnumerable<int>? Namespaces { get; set; }
 
-		public string Owner { get; set; }
+		public string? Owner { get; set; }
 
 		public WatchlistProperties Properties { get; set; }
 
@@ -60,11 +60,11 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Start { get; set; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 
 		public WatchlistTypes Type { get; set; }
 
-		public string User { get; set; }
+		public string? User { get; set; }
 		#endregion
 	}
 }

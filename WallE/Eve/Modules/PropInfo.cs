@@ -60,7 +60,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddFlags("prop", prop)
 				.AddIf("testactions", input.TestActions, this.SiteVersion >= 125)
 				.Add("token", input.Tokens)
-				.Add("token", !input.Tokens.HasItems() && this.SiteVersion < 124); // Since enumerable version of add will filter out null values, ensure timestamp is requested if tokens are null/empty.
+				.Add("token", input.Tokens.IsEmpty() && this.SiteVersion < 124); // Since enumerable version of add will filter out null values, ensure timestamp is requested if tokens are null/empty.
 		}
 
 		protected override void DeserializeParent(JToken parent, PageItem output)
@@ -73,7 +73,6 @@ namespace RobinHood70.WallE.Eve.Modules
 				return;
 			}
 
-			output.GetWikiTitle(parent);
 			var info = new PageInfo()
 			{
 				ContentModel = (string)parent["contentmodel"],
@@ -122,11 +121,11 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					var prot = new ProtectionsItem()
 					{
-						Type = (string)result["type"],
-						Level = (string)result["level"],
+						Type = (string?)result["type"],
+						Level = (string?)result["level"],
 						Expiry = result["expiry"].AsDate(),
 						Cascading = result["cascade"].AsBCBool(),
-						Source = (string)result["source"],
+						Source = (string?)result["source"],
 					};
 					protections.Add(prot);
 				}

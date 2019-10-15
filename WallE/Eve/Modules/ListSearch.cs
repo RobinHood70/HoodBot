@@ -9,10 +9,11 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
+	// MWVERSION: 1.25
 	internal class ListSearch : ListModule<SearchInput, SearchResultItem>, IGeneratorModule
 	{
 		#region Fields
-		private string suggestion;
+		private string? suggestion;
 		private int totalHits;
 		#endregion
 
@@ -45,12 +46,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Methods
-		public SearchResult AsSearchResult() =>
-			new SearchResult(this.Output)
-			{
-				Suggestion = this.suggestion,
-				TotalHits = this.totalHits,
-			};
+		public SearchResult AsSearchResult() => new SearchResult(
+			list: this.Output,
+			suggestion: this.suggestion,
+			totalHits: this.totalHits);
 		#endregion
 
 		#region Public Override Methods
@@ -79,53 +78,52 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(parent, nameof(parent));
 			ThrowNull(output, nameof(output));
 			var infoNode = parent["searchinfo"];
-			this.suggestion = (string)infoNode["suggestion"];
-			this.totalHits = (int?)infoNode["totalhits"] ?? 0;
+			if (infoNode != null)
+			{
+				this.suggestion = (string?)infoNode["suggestion"];
+				this.totalHits = (int?)infoNode["totalhits"] ?? 0;
+			}
 		}
 
-		protected override SearchResultItem GetItem(JToken result)
+		protected override SearchResultItem? GetItem(JToken result)
 		{
 			if (result == null)
 			{
 				return null;
 			}
 
-			var item = new SearchResultItem()
-			{
-				Namespace = (int?)result["ns"],
-				Title = (string)result["title"],
-				Snippet = (string)result["snippet"],
-				Size = (int?)result["size"] ?? 0,
-				WordCount = (int?)result["wordcount"] ?? 0,
-				Timestamp = (DateTime?)result["timestamp"],
-				TitleSnippet = (string)result["title"],
-				RedirectSnippet = (string)result["redirectsnippet"],
-				SectionTitle = (string)result["sectiontitle"],
-				SectionSnippet = (string)result["sectionsnippet"],
-			};
+			string? redir;
 			var redirectTitle = result["redirecttitle"];
-			if (redirectTitle != null)
+			if (redirectTitle != null && this.SiteVersion < 126 && redirectTitle.Type == JTokenType.Object)
 			{
-				if (redirectTitle.Type == JTokenType.Object)
+				// FIX: Fix for https://phabricator.wikimedia.org/T88397 - follows same logic as Title::getPrefixedText()
+				var ns = (int?)redirectTitle["mNamespace"] ?? 0;
+				redir = (string?)redirectTitle["mDbkeyform"];
+				if (ns != 0)
 				{
-					// FIX: Fix for https://phabricator.wikimedia.org/T88397 - follows same logic as Title::getPrefixedText()
-					var ns = (int?)redirectTitle["mNamespace"] ?? 0;
-					item.RedirectTitle = (string)redirectTitle["mDbkeyform"];
-					if (ns != 0)
-					{
-						var siteInfoNamespace = this.Wal.Namespaces[ns];
-						item.RedirectTitle = string.Concat(siteInfoNamespace.Name, ":", item.RedirectTitle);
-					}
+					var siteInfoNamespace = this.Wal.Namespaces[ns];
+					redir = string.Concat(siteInfoNamespace.Name, ":", redir);
+				}
 
-					item.RedirectTitle = item.RedirectTitle.Replace('_', ' ');
-				}
-				else
-				{
-					item.RedirectTitle = (string)redirectTitle;
-				}
+				redir = redir?.Replace('_', ' ');
+			}
+			else
+			{
+				redir = (string?)redirectTitle;
 			}
 
-			return item;
+			return new SearchResultItem(
+				ns: (int)result.NotNull("ns"),
+				title: result.StringNotNull("title"),
+				redirSnippet: (string?)result["redirectsnippet"],
+				redirTitle: redir,
+				sectionSnippet: (string?)result["sectionsnippet"],
+				sectionTitle: (string?)result["sectiontitle"],
+				snippet: (string?)result["snippet"],
+				size: (int?)result["size"] ?? 0,
+				timestamp: (DateTime?)result["timestamp"],
+				titleSnippet: (string?)result["title"],
+				wordCount: (int?)result["wordcount"] ?? 0);
 		}
 		#endregion
 	}

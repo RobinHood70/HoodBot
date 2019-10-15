@@ -44,14 +44,9 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override InterwikiTitleItem GetItem(JToken result) => result == null
+		protected override InterwikiTitleItem? GetItem(JToken result) => result == null
 			? null
-			: new InterwikiTitleItem()
-			{
-				InterwikiPrefix = (string)result["prefix"],
-				Title = (string)result.AsBCContent("title"),
-				Url = (Uri)result["url"],
-			};
+			: new InterwikiTitleItem((string)result["prefix"]!, result.AsBCStringOptional("title")!, (Uri?)result["url"]);
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.InterwikiLinks);
 

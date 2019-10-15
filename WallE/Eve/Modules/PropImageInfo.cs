@@ -66,7 +66,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 		}
 
-		protected override ImageInfoItem GetItem(JToken result) => result.ParseImageInfo();
+		protected override ImageInfoItem GetItem(JToken result) => JTokenImageInfo.ParseImageInfo(result, new ImageInfoItem());
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.ImageInfoEntries);
 

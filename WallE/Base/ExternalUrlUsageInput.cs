@@ -25,13 +25,13 @@ namespace RobinHood70.WallE.Base
 
 		public int MaxItems { get; set; }
 
-		public IEnumerable<int> Namespaces { get; set; }
+		public IEnumerable<int>? Namespaces { get; set; }
 
 		public ExtUrlUsageProperties Properties { get; set; }
 
-		public string Protocol { get; set; }
+		public string? Protocol { get; set; }
 
-		public string Query { get; set; }
+		public string? Query { get; set; }
 		#endregion
 	}
 }

@@ -20,6 +20,10 @@
 
 	internal static class ProjectGlobals
 	{
+		#region Public Constants
+		public const string NoTitle = "<No Title>";
+		#endregion
+
 		#region Public Methods
 
 		/// <summary>Creates an empty read-only dictionary of the specified type.</summary>
@@ -30,40 +34,30 @@
 
 		public static string GetHash(byte[] data, HashType hashType)
 		{
-			HashAlgorithm hash;
-
 			// At one point, this was a try/finally block because mono wasn't quite implementing IDisposable properly. This doesn't appear to be the case anymore, so doing it the traditional method. It looks like a using block would probably have worked in any event, since that would presumably coerce hash to IDisposable.
 			// See https://xamarin.github.io/bugzilla-archives/33/3375/bug.html
-			switch (hashType)
+			using var hash = hashType switch
 			{
-				case HashType.Md5:
-					hash = MD5.Create();
-					break;
-				case HashType.Sha1:
-					hash = SHA1.Create();
-					break;
-				default:
-					return null;
+				HashType.Md5 => MD5.Create(),
+				HashType.Sha1 => SHA1.Create() as HashAlgorithm,
+				_ => throw new InvalidOperationException(),
+			};
+
+			var sb = new StringBuilder(40);
+			var hashBytes = hash.ComputeHash(data);
+			foreach (var b in hashBytes)
+			{
+				sb.AppendFormat(CultureInfo.InvariantCulture, "{0:x2}", b);
 			}
 
-			using (hash)
-			{
-				var sb = new StringBuilder(40);
-				var hashBytes = hash.ComputeHash(data);
-				foreach (var b in hashBytes)
-				{
-					sb.AppendFormat(CultureInfo.InvariantCulture, "{0:x2}", b);
-				}
-
-				return sb.ToString();
-			}
+			return sb.ToString();
 		}
 
 		public static string GetHash(this string data, HashType hashType) => GetHash(Encoding.UTF8.GetBytes(data ?? string.Empty), hashType);
 
 		public static void ThrowCollectionEmpty<T>(IEnumerable<T> collection, string paramName)
 		{
-			if (!collection.HasItems())
+			if (collection.IsEmpty())
 			{
 				throw new ArgumentException(CurrentCulture(EveMessages.CollectionInvalid, paramName));
 			}

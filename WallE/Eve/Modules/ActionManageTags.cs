@@ -43,8 +43,8 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(result, nameof(result));
 			var output = new ManageTagsResult()
 			{
-				Operation = (string)result["operation"],
-				Tag = (string)result["tag"],
+				Operation = (string?)result["operation"],
+				Tag = (string?)result["tag"],
 				Warnings = result["warnings"].AsReadOnlyList<string>(),
 				Success = result["success"].AsBCBool(),
 				LogId = (long?)result["logid"] ?? 0,

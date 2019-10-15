@@ -85,23 +85,18 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override BacklinksItem GetItem(JToken result)
+		protected override BacklinksItem? GetItem(JToken result)
 		{
 			if (result == null)
 			{
 				return null;
 			}
 
-			var item = new BacklinksItem
-			{
-				IsRedirect = result["redirect"].AsBCBool(),
-				Type = this.Input.LinkTypes
-			}.GetWikiTitle(result);
+			var item = new BacklinksItem((int)result.NotNull("ns"), result.StringNotNull("title"), (long)result.NotNull("pageid"), result["redirect"].AsBCBool(), this.Input.LinkTypes);
 
 			var redirLinks = result["redirlinks"];
-			if (redirLinks != null)
+			if (redirLinks != null && item.Redirects is List<ITitle> redirects)
 			{
-				var redirects = item.Redirects as List<ITitle>;
 				if (redirLinks.Type == JTokenType.Array)
 				{
 					foreach (var entry in redirLinks)
@@ -114,7 +109,11 @@ namespace RobinHood70.WallE.Eve.Modules
 					// See https://phabricator.wikimedia.org/T73907
 					foreach (var entry in redirLinks)
 					{
-						redirects.Add(entry.First.GetWikiTitle());
+						var first = entry.First;
+						if (first != null)
+						{
+							redirects.Add(first.GetWikiTitle());
+						}
 					}
 				}
 			}

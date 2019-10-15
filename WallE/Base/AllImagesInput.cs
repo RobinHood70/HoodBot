@@ -20,7 +20,7 @@ namespace RobinHood70.WallE.Base
 
 		public Filter FilterBots { get; set; }
 
-		public string From { get; set; }
+		public string? From { get; set; }
 
 		public int Limit { get; set; }
 
@@ -28,15 +28,15 @@ namespace RobinHood70.WallE.Base
 
 		public int MaximumSize { get; set; } = -1;
 
-		public string MimeType { get; set; }
+		public string? MimeType { get; set; }
 
 		public int MinimumSize { get; set; } = -1;
 
-		public string Prefix { get; set; }
+		public string? Prefix { get; set; }
 
 		public ImageProperties Properties { get; set; }
 
-		public string Sha1 { get; set; }
+		public string? Sha1 { get; set; }
 
 		public AllImagesSort SortBy { get; set; }
 
@@ -44,9 +44,9 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Start { get; set; }
 
-		public string To { get; set; }
+		public string? To { get; set; }
 
-		public string User { get; set; }
+		public string? User { get; set; }
 		#endregion
 	}
 }

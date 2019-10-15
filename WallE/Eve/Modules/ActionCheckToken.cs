@@ -41,7 +41,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(result, nameof(result));
 			var output = new CheckTokenResult()
 			{
-				Result = (string)result["result"],
+				Result = (string?)result["result"],
 				Generated = result["generated"].AsDate(),
 			};
 			return output;

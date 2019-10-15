@@ -17,6 +17,15 @@ namespace RobinHood70.WallE.Base
 
 	public class PageItem : ITitle
 	{
+		#region Constructors
+		public PageItem(int ns, string title, long pageId)
+		{
+			this.Namespace = ns;
+			this.Title = title;
+			this.PageId = pageId;
+		}
+		#endregion
+
 		#region Public Properties
 		public long AnonContributors { get; set; }
 
@@ -57,11 +66,11 @@ namespace RobinHood70.WallE.Base
 
 		public IReadOnlyList<LinksHereItem> LinksHere { get; set; } = Array.Empty<LinksHereItem>();
 
-		public int? Namespace { get; set; }
+		public int Namespace { get; }
 
 		public IReadOnlyDictionary<string, string> Properties { get; set; } = EmptyReadOnlyDictionary<string, string>();
 
-		public long PageId { get; set; }
+		public long PageId { get; }
 
 		public IReadOnlyList<RedirectsItem> Redirects { get; set; } = Array.Empty<RedirectsItem>();
 
@@ -69,7 +78,7 @@ namespace RobinHood70.WallE.Base
 
 		public IReadOnlyList<ITitle> Templates { get; set; } = Array.Empty<ITitle>();
 
-		public string Title { get; set; }
+		public string Title { get; }
 
 		public IReadOnlyList<TranscludedInItem> TranscludedIn { get; set; } = Array.Empty<TranscludedInItem>();
 		#endregion

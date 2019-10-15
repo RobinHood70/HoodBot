@@ -26,23 +26,23 @@ namespace RobinHood70.WallE.Base
 
 		public bool ExcludeGroups { get; set; }
 
-		public string From { get; set; }
+		public string? From { get; set; }
 
-		public IEnumerable<string> Groups { get; set; }
+		public IEnumerable<string>? Groups { get; set; }
 
 		public int Limit { get; set; }
 
 		public int MaxItems { get; set; }
 
-		public string Prefix { get; set; }
+		public string? Prefix { get; set; }
 
 		public AllUsersProperties Properties { get; set; }
 
-		public IEnumerable<string> Rights { get; set; }
+		public IEnumerable<string>? Rights { get; set; }
 
 		public bool SortDescending { get; set; }
 
-		public string To { get; set; }
+		public string? To { get; set; }
 
 		public bool WithEditsOnly { get; set; }
 		#endregion

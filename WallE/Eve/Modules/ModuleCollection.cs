@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		where TModule : class, IModule
 	{
 		#region Public Methods
-		public bool TryGetValue(string name, out TModule item)
+		public bool TryGetValue(string name, out TModule? item)
 		{
 			if (this.Dictionary != null)
 			{
@@ -26,26 +26,26 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 			}
 
-			item = null;
+			item = default;
 			return false;
 		}
 
-		public bool TryGetValue<TOutput>(string name, out TOutput item)
+		public bool TryGetValue<TOutput>(string name, out TOutput? item)
 			where TOutput : class, TModule
 		{
 			if (this.TryGetValue(name, out var foundItem))
 			{
 				item = foundItem as TOutput;
-				return item == null ? throw new InvalidOperationException(CurrentCulture(Messages.IncorrectModuleType, name, typeof(TOutput).Name, foundItem.GetType().Name)) : true;
+				return item == null ? throw new InvalidOperationException(CurrentCulture(Messages.IncorrectModuleType, name, typeof(TOutput).Name, foundItem?.GetType().Name)) : true;
 			}
 
-			item = null;
+			item = default;
 			return false;
 		}
 		#endregion
 
 		#region Protected Override Methods
-		protected override string GetKeyForItem(TModule item) => item?.Name;
+		protected override string GetKeyForItem(TModule item) => (item ?? throw ArgumentNull(nameof(item))).Name;
 		#endregion
 	}
 }

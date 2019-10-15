@@ -27,8 +27,11 @@
 		}
 
 		/// <summary>Creates a page item.</summary>
+		/// <param name="ns">The namespace.</param>
+		/// <param name="title">The title.</param>
+		/// <param name="pageId">The page identifier.</param>
 		/// <returns>A new PageItem for use by WallE.</returns>
-		public override PageItem CreatePageItem() => new PageItem();
+		public override PageItem CreatePageItem(int ns, string title, long pageId) => new PageItem(ns, title, pageId);
 		#endregion
 
 		#region Protected Override Methods

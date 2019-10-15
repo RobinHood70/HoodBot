@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ListTags(WikiAbstractionLayer wal, TagsInput input)
-			: base(wal, input, null)
+			: base(wal, input)
 		{
 		}
 		#endregion
@@ -42,9 +42,9 @@ namespace RobinHood70.WallE.Eve.Modules
 			? null
 			: new TagsItem()
 			{
-				Name = (string)result["name"],
-				DisplayName = (string)result["displayname"],
-				Description = (string)result["description"],
+				Name = (string?)result["name"],
+				DisplayName = (string?)result["displayname"],
+				Description = (string?)result["description"],
 				HitCount = (int?)result["hitcount"] ?? 0,
 			};
 		#endregion

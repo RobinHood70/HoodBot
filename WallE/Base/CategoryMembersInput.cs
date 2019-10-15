@@ -42,15 +42,15 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public DateTime? End { get; set; }
 
-		public string EndHexSortKey { get; set; }
+		public string? EndHexSortKey { get; set; }
 
-		public string EndSortKeyPrefix { get; set; }
+		public string? EndSortKeyPrefix { get; set; }
 
 		public int Limit { get; set; }
 
 		public int MaxItems { get; set; }
 
-		public IEnumerable<int> Namespaces { get; set; }
+		public IEnumerable<int>? Namespaces { get; set; }
 
 		public long PageId { get; }
 
@@ -62,11 +62,11 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Start { get; set; }
 
-		public string StartHexSortKey { get; set; }
+		public string? StartHexSortKey { get; set; }
 
-		public string StartSortKeyPrefix { get; set; }
+		public string? StartSortKeyPrefix { get; set; }
 
-		public string Title { get; private set; }
+		public string? Title { get; private set; }
 
 		public CategoryMemberTypes Type { get; set; }
 		#endregion

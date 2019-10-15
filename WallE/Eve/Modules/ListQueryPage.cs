@@ -45,13 +45,11 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Methods
-		public QueryPageResult AsQueryPageResult() =>
-			new QueryPageResult(this.Output)
-			{
-				Cached = this.cached,
-				CachedTimestamp = this.cachedTimestamp,
-				MaxResults = this.maxResults,
-			};
+		public QueryPageResult AsQueryPageResult() => new QueryPageResult(
+			list: this.Output,
+			cached: this.cached,
+			cachedTimestamp: this.cachedTimestamp,
+			maxResults: this.maxResults);
 		#endregion
 
 		#region Protected Override Methods
@@ -89,16 +87,14 @@ namespace RobinHood70.WallE.Eve.Modules
 			base.DeserializeResult(result["results"], output);
 		}
 
-		protected override QueryPageItem GetItem(JToken result) => result == null
+		protected override QueryPageItem? GetItem(JToken result) => result == null
 			? null
-			: new QueryPageItem()
-			{
-				Namespace = (int?)result["ns"],
-				Title = (string)result["title"],
-				Timestamp = (DateTime?)result["timestamp"],
-				Value = (string)result["value"],
-				DatabaseResults = result["databaseResults"].AsReadOnlyDictionary<string, string>()
-			};
+			: new QueryPageItem(
+				ns: (int)result.NotNull("ns"),
+				title: result.StringNotNull("title"),
+				value: (long)result.NotNull("value"),
+				databaseResult: result["databaseResult"]?.AsReadOnlyDictionary<string, object?>(),
+				timestamp: (DateTime?)result["timestamp"]);
 		#endregion
 	}
 }

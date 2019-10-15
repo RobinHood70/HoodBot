@@ -52,9 +52,9 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			output.BlockExpiry = result["blockexpiry"].AsDate();
 			output.BlockId = (long?)result["blockid"] ?? 0;
-			output.BlockReason = (string)result["blockreason"];
+			output.BlockReason = (string?)result["blockreason"];
 			output.BlockTimestamp = (DateTime?)result["blockedtimestamp"];
-			output.BlockedBy = (string)result["blockedby"];
+			output.BlockedBy = (string?)result["blockedby"];
 			output.BlockedById = (long?)result["blockedbyid"] ?? 0;
 
 			var token = result["changeablegroups"];
@@ -67,7 +67,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			};
 			output.ChangeableGroups = changeableGroups;
 			output.EditCount = (long?)result["editcount"] ?? -1;
-			output.Email = (string)result["email"];
+			output.Email = (string?)result["email"];
 			output.EmailAuthenticated = result["emailauthenticated"].AsDate();
 			output.Flags =
 				result.GetFlag("anon", UserInfoFlags.Anonymous) |
@@ -75,11 +75,11 @@ namespace RobinHood70.WallE.Eve.Modules
 			output.Groups = result["groups"].AsReadOnlyList<string>();
 			output.Id = (long?)result["id"] ?? -1;
 			output.ImplicitGroups = result["implicitgroups"].AsReadOnlyList<string>();
-			output.Name = (string)result["name"];
+			output.Name = (string?)result["name"];
 
 			var options = result["options"];
 			output.Options = options.AsReadOnlyDictionary<string, object>();
-			output.PreferencesToken = (string)result["preferencestoken"];
+			output.PreferencesToken = (string?)result["preferencestoken"];
 
 			var rateLimits = new Dictionary<string, RateLimitsItem>();
 			token = result["ratelimits"];
@@ -92,10 +92,10 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			output.RateLimits = rateLimits;
-			output.RealName = (string)result["realname"];
+			output.RealName = (string?)result["realname"];
 			output.RegistrationDate = result["registrationdate"].AsDate();
 			output.Rights = result["rights"].AsReadOnlyList<string>();
-			var unreadCount = (string)result["unreadcount"] ?? "-1";
+			var unreadCount = (string?)result["unreadcount"] ?? "-1";
 			if (unreadCount.EndsWith("+", StringComparison.Ordinal))
 			{
 				unreadCount = unreadCount.Substring(0, unreadCount.Length - 1);

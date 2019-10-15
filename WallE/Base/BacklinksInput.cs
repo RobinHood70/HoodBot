@@ -43,15 +43,15 @@ namespace RobinHood70.WallE.Base
 
 		public int MaxItems { get; set; }
 
-		public int? Namespace { get; set; }
+		public int Namespace { get; set; }
 
-		public long PageId { get; }
+		public long PageId { get; set; }
 
 		public bool Redirect { get; set; }
 
 		public bool SortDescending { get; set; }
 
-		public string Title { get; }
+		public string? Title { get; set; }
 		#endregion
 	}
 }

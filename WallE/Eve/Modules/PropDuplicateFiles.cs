@@ -51,10 +51,10 @@ namespace RobinHood70.WallE.Eve.Modules
 			? null
 			: new DuplicateFileItem()
 			{
-				Name = (string)result["name"],
+				Name = (string?)result["name"],
 				Shared = result["shared"].AsBCBool(),
 				Timestamp = result["timestamp"].AsDate(),
-				User = (string)result["user"],
+				User = (string?)result["user"],
 			};
 
 		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.DuplicateFiles);

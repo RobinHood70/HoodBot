@@ -53,9 +53,9 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public string ContentFormat { get; set; }
+		public string? ContentFormat { get; set; }
 
-		public string ContentModel { get; set; }
+		public string? ContentModel { get; set; }
 
 		public bool DisableEditSection { get; set; }
 
@@ -69,7 +69,7 @@ namespace RobinHood70.WallE.Base
 
 		public long OldId { get; private set; }
 
-		public string Page { get; private set; }
+		public string? Page { get; private set; }
 
 		public long PageId { get; private set; }
 
@@ -81,17 +81,17 @@ namespace RobinHood70.WallE.Base
 
 		public bool Redirects { get; set; }
 
-		public string Section { get; set; }
+		public string? Section { get; set; }
 
 		public bool SectionPreview { get; set; }
 
-		public string SectionTitle { get; set; }
+		public string? SectionTitle { get; set; }
 
-		public string Summary { get; set; }
+		public string? Summary { get; set; }
 
-		public string Text { get; private set; }
+		public string? Text { get; private set; }
 
-		public string Title { get; private set; }
+		public string? Title { get; private set; }
 		#endregion
 
 		#region Public Static Methods
@@ -107,7 +107,7 @@ namespace RobinHood70.WallE.Base
 
 		public static ParseInput FromText(string text) => FromText(text, null);
 
-		public static ParseInput FromText(string text, string title)
+		public static ParseInput FromText(string text, string? title)
 		{
 			ThrowNull(text, nameof(text)); // Odd that someone would pass whitespace here, but not inconceivable, so only check for null. Title can be null, so no check.
 			return new ParseInput() { Text = text, Title = title };

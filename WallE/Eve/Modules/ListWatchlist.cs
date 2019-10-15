@@ -85,12 +85,12 @@ namespace RobinHood70.WallE.Eve.Modules
 				return null;
 			}
 
-			var item = new WatchlistItem()
+			var item = new WatchlistItem((int)result.NotNull("ns"), result.StringNotNull("title"), (long?)result["pageid"] ?? 0)
 			{
-				WatchlistType = (string)result["type"],
+				WatchlistType = (string?)result["type"],
 			};
-			var logType = (string)result["logtype"];
-			var logAction = (string)result["logaction"];
+			var logType = (string?)result["logtype"];
+			var logAction = (string?)result["logaction"];
 			result.ParseLogEvent(item, logType, logAction, KnownProps, false);
 			item.RevisionId = (long?)result["revid"] ?? 0;
 			item.OldRevisionId = (long?)result["old_revid"] ?? 0;

@@ -10,9 +10,9 @@ namespace RobinHood70.WallE.Base
 
 		public int MaxItems { get; set; }
 
-		public string Protocol { get; set; }
+		public string? Protocol { get; set; }
 
-		public string Query { get; set; }
+		public string? Query { get; set; }
 		#endregion
 	}
 }

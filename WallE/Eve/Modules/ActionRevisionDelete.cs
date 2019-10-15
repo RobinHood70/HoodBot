@@ -64,8 +64,8 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			var output = new RevisionDeleteResult(list)
 			{
-				Status = (string)result["status"],
-				Target = (string)result["target"],
+				Status = (string?)result["status"],
+				Target = (string?)result["target"],
 				Errors = GetRenderedMessages(result["errors"]),
 				Warnings = GetRenderedMessages(result["warnings"]),
 			};

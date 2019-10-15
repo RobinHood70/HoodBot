@@ -18,61 +18,61 @@ namespace RobinHood70.WallE.Base
 	public class ImageInfoItem
 	{
 		#region Public Properties
-		public string ArchiveName { get; set; }
+		public string? ArchiveName { get; internal set; }
 
-		public int BitDepth { get; set; }
+		public int BitDepth { get; internal set; }
 
-		public string CanonicalTitle { get; set; }
+		public string? CanonicalTitle { get; internal set; }
 
-		public string Comment { get; set; }
+		public string? Comment { get; internal set; }
 
-		public IReadOnlyDictionary<string, object> CommonMetadata { get; set; }
+		public IReadOnlyDictionary<string, object> CommonMetadata { get; } = new Dictionary<string, object>();
 
-		public string DescriptionUri { get; set; }
+		public string? DescriptionUri { get; internal set; }
 
-		public float Duration { get; set; }
+		public float Duration { get; internal set; }
 
-		public IReadOnlyDictionary<string, ExtendedMetadataItem> ExtendedMetadata { get; set; }
+		public IReadOnlyDictionary<string, ExtendedMetadataItem> ExtendedMetadata { get; } = new Dictionary<string, ExtendedMetadataItem>();
 
-		public ImageInfoFlags Flags { get; set; }
+		public ImageInfoFlags Flags { get; internal set; }
 
-		public int Height { get; set; }
+		public int Height { get; internal set; }
 
-		public string MediaType { get; set; }
+		public string? MediaType { get; internal set; }
 
-		public IReadOnlyDictionary<string, object> Metadata { get; set; }
+		public IReadOnlyDictionary<string, object> Metadata { get; } = new Dictionary<string, object>();
 
-		public string MimeType { get; set; }
+		public string? MimeType { get; internal set; }
 
-		public long PageCount { get; set; }
+		public long PageCount { get; internal set; }
 
-		public string ParsedComment { get; set; }
+		public string? ParsedComment { get; internal set; }
 
-		public string Sha1 { get; set; }
+		public string? Sha1 { get; internal set; }
 
-		public int Size { get; set; }
+		public int Size { get; internal set; }
 
-		public string ThumbError { get; set; }
+		public string? ThumbError { get; internal set; }
 
-		public int ThumbHeight { get; set; }
+		public int ThumbHeight { get; internal set; }
 
-		public string ThumbMime { get; set; }
+		public string? ThumbMime { get; internal set; }
 
-		public string ThumbUri { get; set; }
+		public string? ThumbUri { get; internal set; }
 
-		public int ThumbWidth { get; set; }
+		public int ThumbWidth { get; internal set; }
 
-		public DateTime? Timestamp { get; set; }
+		public DateTime? Timestamp { get; internal set; }
 
-		public string UploadWarningHtml { get; set; }
+		public string? UploadWarningHtml { get; internal set; }
 
-		public string Uri { get; set; }
+		public string? Uri { get; internal set; }
 
-		public long UserId { get; set; }
+		public long UserId { get; internal set; }
 
-		public string User { get; set; }
+		public string? User { get; internal set; }
 
-		public int Width { get; set; }
+		public int Width { get; internal set; }
 		#endregion
 	}
 }

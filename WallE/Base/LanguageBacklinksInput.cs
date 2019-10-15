@@ -31,7 +31,7 @@ namespace RobinHood70.WallE.Base
 
 		public bool SortDescending { get; set; }
 
-		public string Title { get; set; }
+		public string? Title { get; set; }
 		#endregion
 	}
 }

@@ -21,12 +21,11 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Fields
 		private readonly int maxItems;
 		private readonly int requestedLimit;
-
-		private readonly IPageSetGenerator pageSetGenerator;
+		private readonly IPageSetGenerator? pageSetGenerator;
 		#endregion
 
 		#region Constructors
-		protected QueryModule([ValidatedNotNull] WikiAbstractionLayer wal, [ValidatedNotNull] TInput input, TOutput output, IPageSetGenerator pageSetGenerator)
+		protected QueryModule([ValidatedNotNull] WikiAbstractionLayer wal, [ValidatedNotNull] TInput input, TOutput? output, IPageSetGenerator pageSetGenerator)
 		{
 			ThrowNull(wal, nameof(wal));
 			ThrowNull(input, nameof(input));
@@ -58,7 +57,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		public int ModuleLimit { get; set; } = int.MaxValue;
 
 		// Unlike Action modules, Query modules cannot return results directly during their Submit phase, so we store them here until the client requests them. Setter is protected so that Prop modules can set current page as needed.
-		public TOutput Output { get; protected set; }
+		public TOutput? Output { get; protected set; }
 
 		public WikiAbstractionLayer Wal { get; }
 		#endregion

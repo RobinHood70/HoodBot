@@ -28,14 +28,14 @@ namespace RobinHood70.WallE.Base
 	public interface IRevisionsInput : ILimitableInput
 	{
 		#region Public Properties
-		string ContentFormat { get; set; }
+		string? ContentFormat { get; set; }
 
 		/// <summary>Gets or sets the revision ID to compare a diff to.</summary>
 		/// <value>The ID to compare to.</value>
 		/// <remarks>This can be an integer or any of the <see cref="MediaWikiGlobal" /> DiffTo constants.</remarks>
 		int? DiffTo { get; set; }
 
-		string DiffToText { get; set; }
+		string? DiffToText { get; set; }
 
 		bool DiffToTextPreSaveTransform { get; set; }
 
@@ -57,7 +57,7 @@ namespace RobinHood70.WallE.Base
 
 		DateTime? Start { get; }
 
-		string User { get; set; }
+		string? User { get; set; }
 		#endregion
 	}
 }

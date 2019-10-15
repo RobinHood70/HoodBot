@@ -17,13 +17,13 @@ namespace RobinHood70.WallE.Base
 
 		public int MaxItems { get; set; }
 
-		public string Prefix { get; set; }
+		public string? Prefix { get; set; }
 
 		public InterwikiLinksProperties Properties { get; set; }
 
 		public bool SortDescending { get; set; }
 
-		public string Title { get; set; }
+		public string? Title { get; set; }
 		#endregion
 	}
 }

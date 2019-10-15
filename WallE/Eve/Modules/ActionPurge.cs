@@ -7,11 +7,11 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionPurge : ActionModulePageSet<PurgeInput, PurgeResult>
+	internal class ActionPurge : ActionModulePageSet<PurgeInput, PurgeItem>
 	{
 		#region Constructors
 		public ActionPurge(WikiAbstractionLayer wal)
-			: base(wal)
+			: base(wal, PurgeItemCreator)
 		{
 		}
 		#endregion
@@ -36,7 +36,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIf("forcerecursivelinkupdate", input.Method == PurgeMethod.RecursiveLinkUpdate, this.SiteVersion >= 122);
 		}
 
-		protected override void DeserializePage(JToken result, PurgeResult page)
+		protected override void DeserializePage(JToken result, PurgeItem page)
 		{
 			ThrowNull(result, nameof(result));
 			ThrowNull(page, nameof(page));
@@ -47,6 +47,10 @@ namespace RobinHood70.WallE.Eve.Modules
 				result.GetFlag("purged", PurgeFlags.Purged);
 			this.Pages.Add(page);
 		}
+		#endregion
+
+		#region Private Methods
+		private static PurgeItem PurgeItemCreator(int ns, string title, long pageId) => new PurgeItem(ns, title, pageId);
 		#endregion
 	}
 }

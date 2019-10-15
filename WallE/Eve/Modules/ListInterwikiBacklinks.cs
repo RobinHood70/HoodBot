@@ -47,14 +47,13 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override InterwikiBacklinksItem GetItem(JToken result) => result == null
-			? null
-			: new InterwikiBacklinksItem
-			{
-				IsRedirect = result["redirect"].AsBCBool(),
-				InterwikiPrefix = (string)result["iwprefix"],
-				InterwikiTitle = (string)result["iwtitle"]
-			}.GetWikiTitle(result);
+		protected override InterwikiBacklinksItem GetItem(JToken result) => new InterwikiBacklinksItem(
+			ns: (int)result.NotNull("ns"),
+			title: result.StringNotNull("title"),
+			pageId: (long)result.NotNull("pageid"),
+			isRedirect: result["redirect"].AsBCBool(),
+			iwPrefix: (string?)result["iwprefix"],
+			iwTitle: (string?)result["iwtitle"]);
 		#endregion
 	}
 }

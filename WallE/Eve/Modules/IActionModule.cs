@@ -7,6 +7,9 @@
 	/// <typeparam name="TInput">The type of the input.</typeparam>
 	/// <typeparam name="TOutput">The type of the output.</typeparam>
 	public interface IActionModule<TInput, TOutput> : IModule
+		where TInput : class
+		where TOutput : class
+
 	{
 		#region Methods
 
@@ -18,7 +21,7 @@
 		/// <summary>Deserializes the specified JSON into an object.</summary>
 		/// <param name="parent">The parent.</param>
 		/// <returns>The output object.</returns>
-		TOutput Deserialize(JToken parent);
+		TOutput? Deserialize(JToken parent);
 		#endregion
 	}
 }

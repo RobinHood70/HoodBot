@@ -29,11 +29,11 @@ namespace RobinHood70.WallE.Base
 
 		public TagOperation Operation { get; }
 
-		public string Reason { get; set; }
+		public string? Reason { get; set; }
 
 		public string Tag { get; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 		#endregion
 	}
 }

@@ -42,7 +42,7 @@
 		private readonly string appDataFolder;
 		private readonly IProgress<double> progressMonitor;
 		private readonly IProgress<string> statusMonitor;
-		private readonly List<Type> pluginTypes;
+		private readonly Dictionary<string, Type> pluginTypes = new Dictionary<string, Type>();
 
 		private CancellationTokenSource canceller;
 		private double completedJobs;
@@ -73,7 +73,29 @@
 			this.progressMonitor = new Progress<double>(this.ProgressChanged);
 			this.statusMonitor = new Progress<string>(this.StatusWrite);
 			Site.RegisterUserFunctionsClass(new[] { "en.uesp.net", "rob-centos" }, new[] { "HoodBot" }, HoodBotFunctions.CreateInstance);
-			this.pluginTypes = new List<Type>(GetPlugins());
+			foreach (var type in GetPlugins())
+			{
+				this.pluginTypes.Add(type.Name, type);
+			}
+
+			if (this.pluginTypes.TryGetValue("IeDiff", out var diffViewer))
+			{
+				try
+				{
+					var instance = Activator.CreateInstance(diffViewer);
+					var viewer = instance as IDiffViewer;
+					if (viewer.ValidatePlugin())
+					{
+						currentViewer = viewer;
+					}
+				}
+				catch (NotSupportedException)
+				{
+				}
+				catch (TargetInvocationException)
+				{
+				}
+			}
 		}
 		#endregion
 
@@ -239,9 +261,10 @@
 			var assemblyLocation = Assembly.GetEntryAssembly().Location;
 			var exePath = Path.GetDirectoryName(assemblyLocation);
 			var folder = Path.Combine(exePath, "Plugins");
-			var dllNames = Directory.GetFiles(folder, "*.dll", SearchOption.TopDirectoryOnly);
+			var dllNames = Directory.GetFiles(folder, "InternetExplorerDiff*.dll", SearchOption.AllDirectories);
 			foreach (var dllName in dllNames)
 			{
+				Debug.Write(dllName+": ");
 				Assembly dll;
 				try
 				{
@@ -253,13 +276,17 @@
 					continue;
 				}
 
-				foreach (var type in dll.ExportedTypes)
+				Debug.WriteLine("Enumerating");
+				foreach (var type in dll.GetExportedTypes())
 				{
-					if (!type.IsInterface && !type.IsAbstract)
+					// Debug.WriteLine($"{type.Name}: Interface = {type.IsInterface}, Abstract = {type.IsAbstract}, Assignable = {typeof(IPlugin).IsAssignableFrom(type)}");
+					if (!type.IsInterface && !type.IsAbstract && typeof(IPlugin).IsAssignableFrom(type))
 					{
 						yield return type;
 					}
 				}
+
+				dll = null;
 			}
 		}
 		#endregion
@@ -370,39 +397,24 @@
 		private T FindPlugin<T>(string name)
 			where T : class, IPlugin
 		{
-			foreach (var viewer in this.FindPlugins<T>())
+			if (this.pluginTypes.TryGetValue(name, out var viewer))
 			{
-				if (viewer.Name == name)
+				try
 				{
-					try
+					if (Activator.CreateInstance(viewer) is T instance && instance.ValidatePlugin())
 					{
-						if (Activator.CreateInstance(viewer) is T instance && instance.ValidatePlugin())
-						{
-							return instance;
-						}
+						return instance;
 					}
-					catch (NotSupportedException)
-					{
-					}
-					catch (TargetInvocationException)
-					{
-					}
+				}
+				catch (NotSupportedException)
+				{
+				}
+				catch (TargetInvocationException)
+				{
 				}
 			}
 
 			return null;
-		}
-
-		private IEnumerable<Type> FindPlugins<T>()
-			where T : class, IPlugin
-		{
-			foreach (var type in this.pluginTypes)
-			{
-				if (typeof(T).IsAssignableFrom(type))
-				{
-					yield return type;
-				}
-			}
 		}
 
 		private List<JobNode> GetJobList()
@@ -494,12 +506,14 @@
 			// https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/events/how-to-subscribe-to-and-unsubscribe-from-events#unsubscribing
 			if (this.site != null)
 			{
+#if DEBUG
 				if (this.site.AbstractionLayer is WikiAbstractionLayer wal)
 				{
 					wal.SendingRequest -= WalSendingRequest;
 				}
 
 				this.site.AbstractionLayer.WarningOccurred -= WalWarningOccurred;
+#endif
 				this.site.PagePreview -= this.SitePagePreview;
 				this.site.WarningOccurred -= SiteWarningOccurred;
 				this.site = null;
@@ -531,6 +545,7 @@
 			var al = wikiInfo.GetAbstractionLayer(this.client);
 			al.Assert = "user";
 			al.StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery;
+#if DEBUG
 			if (al is WikiAbstractionLayer wal)
 			{
 				wal.SendingRequest += WalSendingRequest;
@@ -538,7 +553,7 @@
 			}
 
 			al.WarningOccurred += WalWarningOccurred;
-
+#endif
 			this.site = new Site(al);
 			this.site.WarningOccurred += SiteWarningOccurred;
 			this.site.PagePreview += this.SitePagePreview;
@@ -547,7 +562,7 @@
 		private void SitePagePreview(Site sender, PagePreviewArgs eventArgs)
 		{
 			// Until we get a menu going, specify manually.
-			currentViewer ??= this.FindPlugin<IDiffViewer>("IeDiff");
+			// currentViewer ??= this.FindPlugin<IDiffViewer>("IeDiff");
 			if (currentViewer != null && this.ShowDiffs && this.site.AbstractionLayer is WikiAbstractionLayer wal)
 			{
 				var token = wal.TokenManager.SessionToken("csrf"); // HACK: This is only necessary for browser-based diffs. Not sure how to handle it better.

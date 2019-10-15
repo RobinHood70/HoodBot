@@ -50,7 +50,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			? null
 			: new ContributorItem()
 			{
-				Name = (string)result["name"],
+				Name = (string?)result["name"],
 				UserId = (long)result["userid"],
 			};
 

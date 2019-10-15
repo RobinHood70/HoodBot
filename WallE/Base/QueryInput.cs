@@ -23,7 +23,7 @@ namespace RobinHood70.WallE.Base
 		/// <param name="pageSetInput">Page set information.</param>
 		/// <param name="propertyModules">Property modules to use.</param>
 		/// <param name="queryModules">Non-pageset query modules to use.</param>
-		public QueryInput(QueryPageSetInput pageSetInput, IEnumerable<IPropertyModule> propertyModules, IEnumerable<IQueryModule> queryModules)
+		public QueryInput(QueryPageSetInput pageSetInput, IEnumerable<IPropertyModule> propertyModules, IEnumerable<IQueryModule>? queryModules)
 			: base(pageSetInput)
 		{
 			this.PageSetQuery = true;
@@ -68,7 +68,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Private Methods
-		private void PopulateModules(IEnumerable<IPropertyModule> propertyModules, IEnumerable<IQueryModule> queryModules)
+		private void PopulateModules(IEnumerable<IPropertyModule>? propertyModules, IEnumerable<IQueryModule>? queryModules)
 		{
 			if (propertyModules != null)
 			{

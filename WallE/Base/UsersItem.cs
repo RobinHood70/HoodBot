@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
+	using static RobinHood70.WikiCommon.Globals;
 
 	#region Public Enumerations
 	[Flags]
@@ -18,8 +19,16 @@ namespace RobinHood70.WallE.Base
 
 	public class UsersItem : IUser
 	{
+		#region Constructors
+		public UsersItem(long userId, string? name)
+		{
+			this.Name = name ?? throw ArgumentNull(nameof(name));
+			this.UserId = userId;
+		}
+		#endregion
+
 		#region Public Properties
-		public string BlockedBy { get; set; }
+		public string? BlockedBy { get; set; }
 
 		public long BlockedById { get; set; }
 
@@ -29,7 +38,7 @@ namespace RobinHood70.WallE.Base
 
 		public long BlockId { get; set; }
 
-		public string BlockReason { get; set; }
+		public string? BlockReason { get; set; }
 
 		public DateTime? BlockTimestamp { get; set; }
 
@@ -37,21 +46,21 @@ namespace RobinHood70.WallE.Base
 
 		public UserFlags Flags { get; set; }
 
-		public string Gender { get; set; }
+		public string? Gender { get; set; }
 
-		public IReadOnlyList<string> Groups { get; set; }
+		public IReadOnlyList<string>? Groups { get; set; }
 
-		public IReadOnlyList<string> ImplicitGroups { get; set; }
+		public IReadOnlyList<string>? ImplicitGroups { get; set; }
 
-		public string Name { get; set; }
+		public string Name { get; }
 
 		public DateTime? Registration { get; set; }
 
-		public IReadOnlyList<string> Rights { get; set; }
+		public IReadOnlyList<string>? Rights { get; set; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 
-		public long UserId { get; set; }
+		public long UserId { get; }
 		#endregion
 	}
 }

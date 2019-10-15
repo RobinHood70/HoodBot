@@ -12,7 +12,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public MetaFileRepoInfo(WikiAbstractionLayer wal, FileRepositoryInfoInput input)
-			: base(wal, input, null)
+			: base(wal, input)
 		{
 		}
 		#endregion
@@ -48,22 +48,22 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			var item = new FileRepositoryInfoItem()
 			{
-				ApiUrl = (string)result["apiurl"],
-				ArticleUrl = (string)result["articleurl"],
-				DescriptionBaseUrl = (string)result["descBaseUrl"],
+				ApiUrl = (string?)result["apiurl"],
+				ArticleUrl = (string?)result["articleurl"],
+				DescriptionBaseUrl = (string?)result["descBaseUrl"],
 				DescriptionCacheExpiry = TimeSpan.FromSeconds((int?)result["descriptionCacheExpiry"] ?? 0),
-				DisplayName = (string)result["displayname"],
-				Favicon = (string)result["favicon"],
+				DisplayName = (string?)result["displayname"],
+				Favicon = (string?)result["favicon"],
 				Flags =
 				result.GetFlag("fetchDescription", FileRepositoryFlags.FetchDescription) |
 				result.GetFlag("initialCapital", FileRepositoryFlags.InitialCapital) |
 				result.GetFlag("local", FileRepositoryFlags.Local),
-				Name = (string)result["name"],
-				RootUrl = (string)result["rootUrl"],
-				ScriptDirectoryUrl = (string)result["scriptDirUrl"],
-				ScriptExtension = (string)result["scriptExtension"],
-				ThumbUrl = (string)result["thumbUrl"],
-				Url = (string)result["url"],
+				Name = (string?)result["name"],
+				RootUrl = (string?)result["rootUrl"],
+				ScriptDirectoryUrl = (string?)result["scriptDirUrl"],
+				ScriptExtension = (string?)result["scriptExtension"],
+				ThumbUrl = (string?)result["thumbUrl"],
+				Url = (string?)result["url"],
 			};
 
 			var otherInfo = new Dictionary<string, string>();

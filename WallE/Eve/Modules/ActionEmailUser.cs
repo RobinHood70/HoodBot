@@ -43,8 +43,8 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(result, nameof(result));
 			var output = new EmailUserResult()
 			{
-				Result = (string)result["result"],
-				Message = (string)result["message"],
+				Result = (string?)result["result"],
+				Message = (string?)result["message"],
 			};
 			return output;
 		}

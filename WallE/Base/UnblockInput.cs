@@ -18,13 +18,13 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public long Id { get; }
 
-		public string Reason { get; set; }
+		public string? Reason { get; set; }
 
-		public IEnumerable<string> Tags { get; set; }
+		public IEnumerable<string>? Tags { get; set; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 
-		public string User { get; }
+		public string? User { get; }
 
 		public long UserId { get; private set; }
 		#endregion

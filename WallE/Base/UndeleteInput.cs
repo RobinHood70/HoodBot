@@ -16,17 +16,17 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public IEnumerable<int> FileIds { get; set; }
+		public IEnumerable<int>? FileIds { get; set; }
 
-		public string Reason { get; set; }
+		public string? Reason { get; set; }
 
-		public IEnumerable<string> Tags { get; set; }
+		public IEnumerable<string>? Tags { get; set; }
 
-		public IEnumerable<DateTime> Timestamps { get; set; }
+		public IEnumerable<DateTime>? Timestamps { get; set; }
 
 		public string Title { get; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 
 		public WatchlistOption Watchlist { get; set; }
 		#endregion

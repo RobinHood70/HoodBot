@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Base
 		/// <summary>Gets or sets a string-based list of properties to retrieve.</summary>
 		/// <value>The properties.</value>
 		/// <remarks>Unlike the Properties value on other inputs, this one is left as a collection of strings due to the flexible nature of the module.</remarks>
-		public IEnumerable<string> Properties { get; set; }
+		public IEnumerable<string>? Properties { get; set; }
 		#endregion
 	}
 }

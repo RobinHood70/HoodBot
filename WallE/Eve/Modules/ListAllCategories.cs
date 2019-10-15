@@ -53,16 +53,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override AllCategoriesItem GetItem(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var item = new AllCategoriesItem()
-			{
-				Title = (string)result.AsBCContent("category"),
-				Hidden = result["hidden"].AsBCBool(),
-				Size = (int?)result["size"] ?? 0,
-				Pages = (int?)result["pages"] ?? 0,
-				Files = (int?)result["files"] ?? 0,
-				Subcategories = (int?)result["subcats"] ?? 0,
-			};
-			return item;
+			return new AllCategoriesItem(
+				category: result.AsBCString("category"),
+				files: (int?)result["files"] ?? 0,
+				hidden: result["hidden"].AsBCBool(),
+				pages: (int?)result["pages"] ?? 0,
+				size: (int?)result["size"] ?? 0,
+				subcats: (int?)result["subcats"] ?? 0);
 		}
 		#endregion
 	}

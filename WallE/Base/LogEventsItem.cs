@@ -4,8 +4,17 @@ namespace RobinHood70.WallE.Base
 	using System;
 	using System.Collections.Generic;
 
-	public class LogEventsItem : ILogEvents
+	public class LogEventsItem : ILogEvents, ITitle
 	{
+		#region Constructors
+		public LogEventsItem(int ns, string title, long pageId)
+		{
+			this.Namespace = ns;
+			this.Title = title;
+			this.PageId = pageId;
+		}
+		#endregion
+
 		#region Public Properties
 		public string Comment { get; set; }
 
@@ -21,17 +30,17 @@ namespace RobinHood70.WallE.Base
 
 		public string LogType { get; set; }
 
-		public long PageId { get; set; }
+		public long PageId { get; }
 
 		public string ParsedComment { get; set; }
 
-		public int? Namespace { get; set; }
+		public int Namespace { get; }
 
 		public IReadOnlyList<string> Tags { get; set; }
 
 		public DateTime? Timestamp { get; set; }
 
-		public string Title { get; set; }
+		public string Title { get; }
 
 		public string User { get; set; }
 
