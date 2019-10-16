@@ -5,6 +5,6 @@
 	{
 		/// <summary>Validates the plugin.</summary>
 		/// <returns><see langword="true"/> if the plugin can be used in the current configuration; otherwise, <see langword="false"/>.</returns>
-		bool ValidatePlugin();
+		bool Validate();
 	}
 }

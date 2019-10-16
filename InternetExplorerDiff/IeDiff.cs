@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.InternetExplorerDiff
 {
 	using System;
-	using System.ComponentModel;
+	using System.ComponentModel.Composition;
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.Runtime.InteropServices;
@@ -14,7 +14,8 @@
 	using SHDocVw;
 	using static RobinHood70.WikiCommon.Globals;
 
-	[Description("Visual Studio")]
+	[Export(typeof(IPlugin))]
+	[ExportMetadata("DisplayName", "Internet Explorer")]
 	public class IeDiff : IDiffViewer
 	{
 		#region Private Constants
@@ -93,7 +94,7 @@
 			SafeNativeMethods.ShowWindow(hwnd, 3);
 		}
 
-		public bool ValidatePlugin() => Type.GetTypeFromProgID("InternetExplorer.Application") != null;
+		public bool Validate() => Type.GetTypeFromProgID("InternetExplorer.Application") != null;
 
 		public void Wait() => this.ieProcess.WaitForExit();
 		#endregion

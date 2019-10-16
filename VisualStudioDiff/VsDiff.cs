@@ -2,7 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.ComponentModel;
+	using System.ComponentModel.Composition;
 	using System.IO;
 	using System.Runtime.InteropServices;
 	using EnvDTE;
@@ -10,7 +10,8 @@
 	using RobinHood70.Robby;
 	using static RobinHood70.WikiCommon.Globals;
 
-	[Description("Visual Studio")]
+	[Export(typeof(IPlugin))]
+	[ExportMetadata("DisplayName", "Visual Studio")]
 	public class VsDiff : IDiffViewer, IDisposable
 	{
 		#region Private Constants
@@ -62,6 +63,11 @@
 		#region Public Methods
 		public void Compare(Page page, string editSummary, bool isMinor, string editToken)
 		{
+			if (this.disposed)
+			{
+				throw new ObjectDisposedException(this.GetType().FullName);
+			}
+
 			ThrowNull(page, nameof(page));
 			var current = page.Revisions.Current;
 			var oldFile = Path.GetTempFileName();
@@ -97,7 +103,7 @@
 			GC.SuppressFinalize(this);
 		}
 
-		public bool ValidatePlugin() => Type.GetTypeFromProgID(VisualStudioProgID, false) != null;
+		public bool Validate() => Type.GetTypeFromProgID(VisualStudioProgID, false) != null;
 
 		public void Wait()
 		{

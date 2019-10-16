@@ -6,7 +6,6 @@
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.IO;
-	using System.Reflection;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows;
@@ -34,7 +33,6 @@
 		#region Static Fields
 		private static readonly Brush ProgressBarGreen = new SolidColorBrush(Color.FromArgb(255, 6, 176, 37));
 		private static readonly Brush ProgressBarYellow = new SolidColorBrush(Color.FromArgb(255, 255, 240, 0));
-		private static IDiffViewer currentViewer = null;
 		#endregion
 
 		#region Fields
@@ -42,7 +40,6 @@
 		private readonly string appDataFolder;
 		private readonly IProgress<double> progressMonitor;
 		private readonly IProgress<string> statusMonitor;
-		private readonly Dictionary<string, Type> pluginTypes = new Dictionary<string, Type>();
 
 		private CancellationTokenSource canceller;
 		private double completedJobs;
@@ -73,29 +70,8 @@
 			this.progressMonitor = new Progress<double>(this.ProgressChanged);
 			this.statusMonitor = new Progress<string>(this.StatusWrite);
 			Site.RegisterUserFunctionsClass(new[] { "en.uesp.net", "rob-centos" }, new[] { "HoodBot" }, HoodBotFunctions.CreateInstance);
-			foreach (var type in GetPlugins())
-			{
-				this.pluginTypes.Add(type.Name, type);
-			}
-
-			if (this.pluginTypes.TryGetValue("IeDiff", out var diffViewer))
-			{
-				try
-				{
-					var instance = Activator.CreateInstance(diffViewer);
-					var viewer = instance as IDiffViewer;
-					if (viewer.ValidatePlugin())
-					{
-						currentViewer = viewer;
-					}
-				}
-				catch (NotSupportedException)
-				{
-				}
-				catch (TargetInvocationException)
-				{
-				}
-			}
+			var plugins = Plugins.Instance;
+			this.DiffViewer = plugins.DiffViewers["Visual Studio"];
 		}
 		#endregion
 
@@ -123,6 +99,8 @@
 				this.Set(ref this.currentItem, value, nameof(this.CurrentItem));
 			}
 		}
+
+		public IDiffViewer DiffViewer { get; set; }
 
 		public bool EditingEnabled
 		{
@@ -255,40 +233,6 @@
 			.Replace(".0", string.Empty)
 			.Replace(" 0s", string.Empty)
 			.Trim();
-
-		private static IEnumerable<Type> GetPlugins()
-		{
-			var assemblyLocation = Assembly.GetEntryAssembly().Location;
-			var exePath = Path.GetDirectoryName(assemblyLocation);
-			var folder = Path.Combine(exePath, "Plugins");
-			var dllNames = Directory.GetFiles(folder, "InternetExplorerDiff*.dll", SearchOption.AllDirectories);
-			foreach (var dllName in dllNames)
-			{
-				Debug.Write(dllName+": ");
-				Assembly dll;
-				try
-				{
-					// Works around the fact that .NET will hold a reference to any loaded assembly.
-					dll = Assembly.Load(File.ReadAllBytes(dllName));
-				}
-				catch (BadImageFormatException)
-				{
-					continue;
-				}
-
-				Debug.WriteLine("Enumerating");
-				foreach (var type in dll.GetExportedTypes())
-				{
-					// Debug.WriteLine($"{type.Name}: Interface = {type.IsInterface}, Abstract = {type.IsAbstract}, Assignable = {typeof(IPlugin).IsAssignableFrom(type)}");
-					if (!type.IsInterface && !type.IsAbstract && typeof(IPlugin).IsAssignableFrom(type))
-					{
-						yield return type;
-					}
-				}
-
-				dll = null;
-			}
-		}
 		#endregion
 
 		#region Private Methods
@@ -392,29 +336,6 @@
 			this.Reset();
 			this.StatusWriteLine("Total time for last run: " + FormatTimeSpan(allJobsTimer.Elapsed));
 			this.executing = false;
-		}
-
-		private T FindPlugin<T>(string name)
-			where T : class, IPlugin
-		{
-			if (this.pluginTypes.TryGetValue(name, out var viewer))
-			{
-				try
-				{
-					if (Activator.CreateInstance(viewer) is T instance && instance.ValidatePlugin())
-					{
-						return instance;
-					}
-				}
-				catch (NotSupportedException)
-				{
-				}
-				catch (TargetInvocationException)
-				{
-				}
-			}
-
-			return null;
 		}
 
 		private List<JobNode> GetJobList()
@@ -563,11 +484,11 @@
 		{
 			// Until we get a menu going, specify manually.
 			// currentViewer ??= this.FindPlugin<IDiffViewer>("IeDiff");
-			if (currentViewer != null && this.ShowDiffs && this.site.AbstractionLayer is WikiAbstractionLayer wal)
+			if (this.DiffViewer != null && this.ShowDiffs && this.site.AbstractionLayer is WikiAbstractionLayer wal)
 			{
 				var token = wal.TokenManager.SessionToken("csrf"); // HACK: This is only necessary for browser-based diffs. Not sure how to handle it better.
-				currentViewer.Compare(eventArgs.Page, eventArgs.EditSummary, eventArgs.Minor, token);
-				currentViewer.Wait();
+				this.DiffViewer.Compare(eventArgs.Page, eventArgs.EditSummary, eventArgs.Minor, token);
+				this.DiffViewer.Wait();
 			}
 		}
 
