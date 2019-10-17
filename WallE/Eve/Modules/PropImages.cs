@@ -49,9 +49,9 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override ITitle GetItem(JToken result) => result.GetWikiTitle();
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Images);
+		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.Images);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.Images = this.CopyList();
+		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.Images);
 		#endregion
 	}
 }

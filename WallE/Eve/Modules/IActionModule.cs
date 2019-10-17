@@ -9,7 +9,6 @@
 	public interface IActionModule<TInput, TOutput> : IModule
 		where TInput : class
 		where TOutput : class
-
 	{
 		#region Methods
 

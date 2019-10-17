@@ -3,7 +3,8 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.Collections.Generic;
-	using Newtonsoft.Json.Linq;
+    using System.Collections.Immutable;
+    using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.ProjectGlobals;
@@ -25,7 +26,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Internal Properties
-		internal IReadOnlyDictionary<string, string> CaptchaData { get; private set; } = EmptyReadOnlyDictionary<string, string>();
+		internal IReadOnlyDictionary<string, string> CaptchaData { get; private set; } = ImmutableDictionary<string, string>.Empty;
 
 		internal Dictionary<string, string> CaptchaSolution { get; } = new Dictionary<string, string>();
 		#endregion
@@ -92,7 +93,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				NewRevisionId = (long?)result["newrevid"] ?? 0,
 				NewTimestamp = (DateTime?)result["newtimestamp"],
 			};
-			this.CaptchaData = result["captcha"].AsReadOnlyDictionary<string, string>();
+			this.CaptchaData = result["captcha"].AsReadOnlyDictionary<string>();
 
 			return output;
 		}

@@ -20,7 +20,7 @@ namespace RobinHood70.WallE.Base
 	}
 	#endregion
 
-	public class UserContributionsItem
+	public class UserContributionsItem : ITitleOptional
 	{
 		#region Constructors
 		internal UserContributionsItem(string user, long userId, int? ns, string? title, long pageId, string? comment, UserContributionFlags flags, long parentId, string? parsedComment, long revId, int size, int sizeDiff, IReadOnlyList<string> tags, DateTime? timestamp)

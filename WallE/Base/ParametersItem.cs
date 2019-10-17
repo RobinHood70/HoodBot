@@ -18,7 +18,7 @@ namespace RobinHood70.WallE.Base
 	public class ParametersItem
 	{
 		#region Public Properties
-		public object Default { get; set; }
+		public object? Default { get; set; }
 
 		public RawMessageInfo Description { get; set; }
 
@@ -44,11 +44,11 @@ namespace RobinHood70.WallE.Base
 
 		public IReadOnlyDictionary<string, string> Submodules { get; set; }
 
-		public string SubmoduleParameterPrefix { get; set; }
+		public string? SubmoduleParameterPrefix { get; set; }
 
-		public string TokenType { get; set; }
+		public string? TokenType { get; set; }
 
-		public string Type { get; set; }
+		public string? Type { get; set; }
 
 		public IReadOnlyList<string> TypeValues { get; set; }
 		#endregion

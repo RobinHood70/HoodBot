@@ -51,7 +51,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			? null
 			: new LanguageBacklinksItem(
 				ns: (int)result.NotNull("ns"),
-				title: result.StringNotNull("title"),
+				title: result.SafeString("title"),
 				pageId: (long)result.NotNull("pageid"),
 				isRedirect: result["redirect"].AsBCBool(),
 				langCode: (string?)result["lllang"],

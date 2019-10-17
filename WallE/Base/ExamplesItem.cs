@@ -3,10 +3,22 @@ namespace RobinHood70.WallE.Base
 {
 	public class ExamplesItem
 	{
-		#region Public Properties
-		public MessageItem Description { get; set; }
+		#region Constructors
+		internal ExamplesItem(string query, MessageItem description)
+		{
+			this.Query = query;
+			this.Description = description;
+		}
+		#endregion
 
-		public string Query { get; set; }
+		#region Public Properties
+		public MessageItem Description { get; }
+
+		public string Query { get; }
+		#endregion
+
+		#region Public Override Methods
+		public override string ToString() => this.Query;
 		#endregion
 	}
 }

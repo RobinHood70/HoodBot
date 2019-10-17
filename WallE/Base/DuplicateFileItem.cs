@@ -5,14 +5,28 @@ namespace RobinHood70.WallE.Base
 
 	public class DuplicateFileItem
 	{
+		#region Constructors
+		internal DuplicateFileItem(string name, bool? shared, DateTime timestamp, string user)
+		{
+			this.Name = name;
+			this.Shared = shared;
+			this.Timestamp = timestamp;
+			this.User = user;
+		}
+		#endregion
+
 		#region Public Properties
-		public string Name { get; set; }
+		public string Name { get; }
 
-		public bool Shared { get; set; }
+		public bool? Shared { get; }
 
-		public DateTime? Timestamp { get; set; }
+		public DateTime Timestamp { get; }
 
-		public string User { get; set; }
+		public string User { get; }
+		#endregion
+
+		#region Public Override Methods
+		public override string ToString() => this.Name;
 		#endregion
 	}
 }

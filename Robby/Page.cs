@@ -400,8 +400,11 @@
 			var propertyInputs = creator.GetPropertyInputs(this.LoadOptions);
 			var pageSetInput = new QueryPageSetInput(new[] { this.FullPageName }) { ConvertTitles = this.LoadOptions.ConvertTitles, Redirects = this.LoadOptions.FollowRedirects };
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, propertyInputs, creator.CreatePageItem);
-			this.Populate(result.First());
-			this.PageLoaded?.Invoke(this, EventArgs.Empty);
+			if (result.Count == 1)
+			{
+				this.Populate(result[0]);
+				this.PageLoaded?.Invoke(this, EventArgs.Empty);
+			}
 		}
 		#endregion
 	}

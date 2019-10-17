@@ -49,7 +49,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override InterwikiBacklinksItem GetItem(JToken result) => new InterwikiBacklinksItem(
 			ns: (int)result.NotNull("ns"),
-			title: result.StringNotNull("title"),
+			title: result.SafeString("title"),
 			pageId: (long)result.NotNull("pageid"),
 			isRedirect: result["redirect"].AsBCBool(),
 			iwPrefix: (string?)result["iwprefix"],

@@ -3,7 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
-	using static RobinHood70.WallE.ProjectGlobals;
+	using System.Collections.Immutable;
 
 	#region Public Enumerations
 	[Flags]
@@ -54,9 +54,9 @@ namespace RobinHood70.WallE.Base
 
 		public long TalkId { get; set; }
 
-		public IReadOnlyDictionary<string, bool> TestActions { get; set; } = EmptyReadOnlyDictionary<string, bool>();
+		public IReadOnlyDictionary<string, bool> TestActions { get; set; } = ImmutableDictionary<string, bool>.Empty;
 
-		public IReadOnlyDictionary<string, string> Tokens { get; set; } = EmptyReadOnlyDictionary<string, string>();
+		public IReadOnlyDictionary<string, string> Tokens { get; set; } = ImmutableDictionary<string, string>.Empty;
 
 		public DateTime? Touched { get; set; }
 

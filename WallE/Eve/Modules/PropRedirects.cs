@@ -48,7 +48,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override RedirectsItem GetItem(JToken result) => result == null
+		protected override RedirectsItem? GetItem(JToken result) => result == null
 			? null
 			: new RedirectsItem(
 				ns: (int?)result["ns"],
@@ -56,9 +56,9 @@ namespace RobinHood70.WallE.Eve.Modules
 				pageId: (long?)result["pageid"] ?? 0,
 				fragment: (string?)result["fragment"]);
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Redirects);
+		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.Redirects);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.Redirects = this.CopyList();
+		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.Redirects);
 		#endregion
 	}
 }

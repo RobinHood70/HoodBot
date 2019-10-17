@@ -6,12 +6,16 @@ namespace RobinHood70.WallE.Base
 	public class DeletedRevisionsItem : AllRevisionsItem
 	{
 		#region Constructors
-		public DeletedRevisionsItem(int ns, string title, long pageId, IReadOnlyList<RevisionsItem> revisions, string? token)
+		internal DeletedRevisionsItem(int ns, string title, long pageId, IReadOnlyList<RevisionsItem> revisions, string? token)
 			: base(ns, title, pageId, revisions) => this.DeletedRevisionsToken = token;
 		#endregion
 
 		#region Public Properties
-		public string? DeletedRevisionsToken { get; set; }
+		public string? DeletedRevisionsToken { get; }
+		#endregion
+
+		#region Public Override Methods
+		public override string ToString() => this.Title;
 		#endregion
 	}
 }

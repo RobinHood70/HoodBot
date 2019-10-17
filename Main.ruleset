@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<RuleSet Name="Rules for Main Projects" Description="Code analysis rules for projects which have been released or are about to be." ToolsVersion="15.0">
+<RuleSet Name="Rules for Main Projects" Description="Code analysis rules for projects which have been released or are about to be." ToolsVersion="16.0">
   <IncludeAll Action="Warning" />
   <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
     <Rule Id="CA1003" Action="None" />
@@ -143,6 +143,7 @@
     <Rule Id="CA2109" Action="Warning" />
   </Rules>
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <Rule Id="SA1118" Action="None" />
     <Rule Id="SA1124" Action="None" />
     <Rule Id="SA1217" Action="None" />
     <Rule Id="SA1407" Action="None" />

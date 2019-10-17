@@ -44,7 +44,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			var output = new ResetPasswordResult()
 			{
 				Status = (string?)result["status"],
-				Passwords = result["passwords"].AsReadOnlyDictionary<string, string>(),
+				Passwords = result["passwords"].AsReadOnlyDictionary<string>(),
 			};
 			return output;
 		}

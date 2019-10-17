@@ -1,8 +1,10 @@
-﻿namespace RobinHood70.WikiClasses
+﻿namespace RobinHood70.WikiCommon
 {
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
+	using RobinHood70.WikiCommon.Properties;
+	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>A read-only version of the KeyedCollection class.</summary>
 	/// <typeparam name="TKey">The type of the key.</typeparam>
@@ -10,29 +12,49 @@
 	/// <seealso cref="IEnumerable{TItem}" />
 	/// <seealso cref="IReadOnlyList{TItem}" />
 	/// <seealso cref="IReadOnlyCollection{TItem}" />
-	public abstract class ReadOnlyKeyedCollection<TKey, TItem> : IEnumerable<TItem>, IReadOnlyList<TItem>, IReadOnlyCollection<TItem>
+	public class ReadOnlyKeyedCollection<TKey, TItem> : IReadOnlyDictionary<TKey, TItem>, IReadOnlyList<TItem>
 	{
 		#region Fields
 		private readonly List<TItem> items;
+		private readonly Func<TItem, TKey>? keyFunc;
 		private Dictionary<TKey, TItem>? dictionary;
 		#endregion
 
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="ReadOnlyKeyedCollection{TKey, TItem}" /> class that uses the default equality comparer.</summary>
+		/// <param name="keyFunc">The function that provides the key for the collection.</param>
 		/// <param name="items">The items.</param>
-		protected ReadOnlyKeyedCollection(IEnumerable<TItem> items)
-			: this(items, EqualityComparer<TKey>.Default)
+		public ReadOnlyKeyedCollection(Func<TItem, TKey> keyFunc, IEnumerable<TItem> items)
+			: this(keyFunc, items, null)
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="ReadOnlyKeyedCollection{TKey, TItem}" /> class that uses the specified equality comparer.</summary>
+		/// <summary>Initializes a new instance of the <see cref="ReadOnlyKeyedCollection{TKey, TItem}"/> class that uses the specified equality comparer.</summary>
+		/// <param name="keyFunc">The function that provides the key for the collection.</param>
 		/// <param name="items">The items.</param>
-		/// <param name="comparer">The implementation of the <see cref="IEqualityComparer{TKey}" /> generic interface to use when comparing keys, or null to use the default equality comparer for the type of the key, obtained from <see cref="EqualityComparer{TKey}.Default" />.</param>
-		protected ReadOnlyKeyedCollection(IEnumerable<TItem> items, IEqualityComparer<TKey> comparer)
+		/// <param name="comparer">The implementation of the <see cref="IEqualityComparer{TKey}"/> generic interface to use when comparing keys, or null to use the default equality comparer for the type of the key, obtained from <see cref="EqualityComparer{TKey}.Default"/>.</param>
+		public ReadOnlyKeyedCollection(Func<TItem, TKey> keyFunc, IEnumerable<TItem> items, IEqualityComparer<TKey>? comparer)
+			: this(items, comparer)
 		{
-			this.Comparer = comparer;
-			this.items = new List<TItem>(items);
+			ThrowNull(keyFunc, nameof(keyFunc));
+			this.keyFunc = keyFunc;
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="ReadOnlyKeyedCollection{TKey, TItem}" /> class that uses the default equality comparer.</summary>
+		/// <param name="items">The items.</param>
+		protected ReadOnlyKeyedCollection(IEnumerable<TItem> items)
+			: this(items, null)
+		{
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="ReadOnlyKeyedCollection{TKey, TItem}"/> class that uses the specified equality comparer.</summary>
+		/// <param name="items">The items.</param>
+		/// <param name="comparer">The implementation of the <see cref="IEqualityComparer{TKey}"/> generic interface to use when comparing keys, or null to use the default equality comparer for the type of the key, obtained from <see cref="EqualityComparer{TKey}.Default"/>.</param>
+		protected ReadOnlyKeyedCollection(IEnumerable<TItem> items, IEqualityComparer<TKey>? comparer)
+		{
+			this.Comparer = comparer ?? EqualityComparer<TKey>.Default;
+			this.items = new List<TItem>(items ?? Array.Empty<TItem>());
 		}
 		#endregion
 
@@ -45,6 +67,14 @@
 		/// <summary>Gets the generic equality comparer that is used to determine equality of keys in the collection.</summary>
 		/// <value>The implementation of the <see cref="IEqualityComparer{TItem}"/> generic interface that is used to determine equality of keys in the collection.</value>
 		public IEqualityComparer<TKey> Comparer { get; }
+
+		/// <summary>Gets an enumerable collection that contains the keys in the collection.</summary>
+		/// <value>The keys.</value>
+		public IEnumerable<TKey> Keys => this.Dictionary.Keys;
+
+		/// <summary>Gets an enumerable collection that contains the values in the collection.</summary>
+		/// <value>The values.</value>
+		public IEnumerable<TItem> Values => this.Dictionary.Values;
 		#endregion
 
 		#region Private Properties
@@ -91,9 +121,13 @@
 		/// <exception cref="ArgumentNullException">key is null.</exception>
 		public bool Contains(TKey key) => this.Dictionary.ContainsKey(key);
 
+		bool IReadOnlyDictionary<TKey, TItem>.ContainsKey(TKey key) => this.Dictionary.ContainsKey(key);
+
 		/// <summary>Returns an enumerator that iterates through the collection.</summary>
 		/// <returns>An enumerator that can be used to iterate through the collection.</returns>
 		public IEnumerator<TItem> GetEnumerator() => this.items.GetEnumerator();
+
+		IEnumerator<KeyValuePair<TKey, TItem>> IEnumerable<KeyValuePair<TKey, TItem>>.GetEnumerator() => this.Dictionary.GetEnumerator();
 
 		/// <summary>Returns an enumerator that iterates through a collection.</summary>
 		/// <returns>An <see cref="IEnumerator" /> object that can be used to iterate through the collection.</returns>
@@ -107,12 +141,12 @@
 		public bool TryGetValue(TKey key, out TItem value) => this.Dictionary.TryGetValue(key, out value);
 		#endregion
 
-		#region Protected Abstract Methods
+		#region Protected Virtual Methods
 
-		/// <summary>When implemented in a derived class, extracts the key from the specified element.</summary>
+		/// <summary>When specified in the constructor or implemented in a derived class, extracts the key from the specified element.</summary>
 		/// <param name="item">The element from which to extract the key.</param>
 		/// <returns>The key for the specified element.</returns>
-		protected abstract TKey GetKeyForItem(TItem item);
+		protected virtual TKey GetKeyForItem(TItem item) => this.keyFunc != null ? this.keyFunc(item) : throw new InvalidOperationException(Resources.NoKeyFunction);
 		#endregion
 	}
 }

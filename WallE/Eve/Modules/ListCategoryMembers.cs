@@ -55,7 +55,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			request
 				.AddIfNotNull("title", input.Title)
 				.AddIf("pageid", input.PageId, input.Title == null)
-				.AddFlags("prop", input.Properties | CategoryMembersProperties.Title)
+				.AddFlags("prop", input.Properties)
 				.Add("namespace", input.Namespaces)
 				.AddFlags("type", input.Type)
 				.AddIfPositive("sort", input.Sort)
@@ -86,13 +86,12 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			var item = new CategoryMembersItem(
 				(int)result.NotNull("ns"),
-				result.StringNotNull("title"),
+				result.SafeString("title"),
 				(long?)result["pageid"] ?? 0,
 				(string?)result["sortkey"],
 				(string?)result["sortkeyprefix"],
 				(DateTime?)result["timestamp"],
-				itemType
-				);
+				itemType);
 
 			return item;
 		}

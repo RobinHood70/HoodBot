@@ -4,10 +4,10 @@ namespace RobinHood70.WallE.Base
 	using System;
 	using RobinHood70.WikiCommon;
 
-	public class CategoryMembersItem : ITitle
+	public class CategoryMembersItem : ITitleOptional
 	{
 		#region Constructors
-		internal CategoryMembersItem(int ns, string title, long pageId, string? sortKey, string? sortKeyPrfix, DateTime? timestamp, CategoryMemberTypes type)
+		internal CategoryMembersItem(int? ns, string? title, long pageId, string? sortKey, string? sortKeyPrfix, DateTime? timestamp, CategoryMemberTypes type)
 		{
 			this.Namespace = ns;
 			this.Title = title;
@@ -20,7 +20,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public int Namespace { get; }
+		public int? Namespace { get; }
 
 		public long PageId { get; }
 
@@ -30,13 +30,13 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Timestamp { get; }
 
-		public string Title { get; }
+		public string? Title { get; }
 
 		public CategoryMemberTypes Type { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title;
+		public override string ToString() => this.Title ?? ProjectGlobals.NoTitle;
 		#endregion
 	}
 }

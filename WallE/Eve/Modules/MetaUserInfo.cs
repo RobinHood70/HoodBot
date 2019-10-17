@@ -78,7 +78,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			output.Name = (string?)result["name"];
 
 			var options = result["options"];
-			output.Options = options.AsReadOnlyDictionary<string, object>();
+			output.Options = options.AsReadOnlyDictionary<object>();
 			output.PreferencesToken = (string?)result["preferencestoken"];
 
 			var rateLimits = new Dictionary<string, RateLimitsItem>();

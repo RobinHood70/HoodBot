@@ -62,7 +62,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			output.Modules = result["modules"].AsReadOnlyList<string>();
 			output.ModuleScripts = result["modulescripts"].AsReadOnlyList<string>();
 			output.ModuleStyles = result["modulestyles"].AsReadOnlyList<string>();
-			output.JavaScriptConfigVariables = result["jsconfigvars"].AsReadOnlyDictionary<string, string>();
+			output.JavaScriptConfigVariables = result["jsconfigvars"].AsReadOnlyDictionary<string>();
 
 			return output;
 		}

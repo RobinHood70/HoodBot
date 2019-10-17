@@ -323,14 +323,19 @@
 		protected override void GetCategoryMembers(CategoryMembersInput input, bool recurse)
 		{
 			ThrowNull(input, nameof(input));
+			var originalProps = input.Properties;
+			input.Properties |= CategoryMembersProperties.Title;
 			if (recurse)
 			{
 				this.RecurseCategoryPages(input, new HashSet<string>());
 			}
 			else
 			{
-				this.FillFromTitleItems(this.Site.AbstractionLayer.CategoryMembers(input));
+				var result = this.Site.AbstractionLayer.CategoryMembers(input);
+				this.FillFromTitleItems(result);
 			}
+
+			input.Properties = originalProps;
 		}
 
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
@@ -351,10 +356,7 @@
 		protected override void GetFileUsage(AllFileUsagesInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllFileUsages(input);
-			foreach (var item in result)
-			{
-				this.Add(new Title(this.Site, item.Title));
-			}
+			this.FillFromTitleItems(result);
 		}
 
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
@@ -367,10 +369,7 @@
 		protected override void GetLinksToNamespace(AllLinksInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllLinks(input);
-			foreach (var item in result)
-			{
-				this.Add(new Title(this.Site, item.Title));
-			}
+			this.FillFromTitleItems(result);
 		}
 
 		/// <summary>Adds pages from a given namespace to the collection. Parameters allow filtering to a specific range of pages.</summary>
@@ -401,10 +400,7 @@
 		protected override void GetPagesWithProperty(PagesWithPropertyInput input)
 		{
 			var result = this.Site.AbstractionLayer.PagesWithProperty(input);
-			foreach (var item in result)
-			{
-				this.Add(new Title(this.Site, item.Title));
-			}
+			this.FillFromTitleItems(result);
 		}
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
@@ -447,10 +443,7 @@
 		protected override void GetRecentChanges(RecentChangesInput input)
 		{
 			var result = this.Site.AbstractionLayer.RecentChanges(input);
-			foreach (var item in result)
-			{
-				this.Add(new Title(this.Site, item.Title));
-			}
+			this.FillFromTitleItems(result);
 		}
 
 		/// <summary>Adds redirects to a namespace to the collection.</summary>
@@ -458,10 +451,7 @@
 		protected override void GetRedirectsToNamespace(AllRedirectsInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllRedirects(input);
-			foreach (var item in result)
-			{
-				this.Add(new Title(this.Site, item.Title));
-			}
+			this.FillFromTitleItems(result);
 		}
 
 		/// <summary>Adds pages from a range of revisions to the collection.</summary>
@@ -485,10 +475,7 @@
 		protected override void GetTransclusions(AllTransclusionsInput input)
 		{
 			var result = this.Site.AbstractionLayer.AllTransclusions(input);
-			foreach (var item in result)
-			{
-				this.Add(new Title(this.Site, item.Title));
-			}
+			this.FillFromTitleItems(result);
 		}
 
 		/// <summary>Adds changed watchlist pages to the collection.</summary>
@@ -517,9 +504,7 @@
 			var result = this.Site.AbstractionLayer.AllMessages(input);
 			foreach (var item in result)
 			{
-				var name = item.Name.Replace('_', ' ');
-				name = this.Site.Namespaces[MediaWikiNamespaces.MediaWiki].CapitalizePageName(name);
-				this.Add(new Title(this.Site, MediaWikiNamespaces.MediaWiki, name));
+				this.Add(new Title(this.Site, MediaWikiNamespaces.MediaWiki, item.Name));
 			}
 		}
 
@@ -538,10 +523,7 @@
 			ThrowNull(pageSetInput, nameof(pageSetInput));
 			var loadOptions = new PageLoadOptions(this.Site.DefaultLoadOptions, PageModules.Info);
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, PageCreator.Default.GetPropertyInputs(loadOptions), PageCreator.Default.CreatePageItem);
-			foreach (var item in result)
-			{
-				this.Add(new Title(this.Site, item.Value.Title));
-			}
+			this.FillFromTitleItems(result);
 		}
 
 		/// <summary>Purges all pages in the collection.</summary>
@@ -554,9 +536,8 @@
 			retval.PopulateMapCollections(result);
 			foreach (var item in result)
 			{
-				var purgePage = item.Value;
-				var flags = purgePage.Flags;
-				var page = retval.AddNewPage(purgePage.Title);
+				var flags = item.Flags;
+				var page = retval.AddNewPage(item.Title);
 				page.PopulateFlags(flags.HasFlag(PurgeFlags.Invalid), flags.HasFlag(PurgeFlags.Missing));
 			}
 
@@ -573,9 +554,8 @@
 			pages.PopulateMapCollections(result);
 			foreach (var item in result)
 			{
-				var watchPage = item.Value;
-				var flags = watchPage.Flags;
-				var page = pages.AddNewPage(watchPage.Title);
+				var flags = item.Flags;
+				var page = pages.AddNewPage(item.Title);
 				page.PopulateFlags(false, flags.HasFlag(WatchFlags.Missing));
 			}
 
@@ -589,6 +569,14 @@
 			foreach (var item in result)
 			{
 				this.Add(new Title(this.Site, item.Title));
+			}
+		}
+
+		private void FillFromTitleItems(IEnumerable<ITitleOptional> result)
+		{
+			foreach (var item in result)
+			{
+				this.Add(new Title(this.Site, item.Title ?? throw new InvalidOperationException(Resources.TitleInvalid)));
 			}
 		}
 
@@ -610,8 +598,10 @@
 
 				if (item.Type == CategoryMemberTypes.Subcat)
 				{
+					var originalTitle = input.Title;
 					input.ChangeTitle(item.Title);
 					this.RecurseCategoryPages(input, categoryTree);
+					input.ChangeTitle(originalTitle);
 				}
 			}
 		}

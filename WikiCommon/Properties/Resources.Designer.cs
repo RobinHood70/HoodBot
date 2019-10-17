@@ -61,6 +61,15 @@ namespace RobinHood70.WikiCommon.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No key function was provided in the constructor and the base function GetKeyForItem() was not overridden..
+        /// </summary>
+        internal static string NoKeyFunction {
+            get {
+                return ResourceManager.GetString("NoKeyFunction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to There was an attempt to add a piped parameter value, but an existing value with the same name ({0}) exists and is not a piped parameter..
         /// </summary>
         internal static string NotAPipedParameter {

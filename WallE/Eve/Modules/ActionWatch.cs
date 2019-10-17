@@ -60,7 +60,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override WikiTitleItem DeserializeTitle(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var title = result.StringNotNull("title");
+			var title = result.SafeString("title");
 			var ns = (int?)result["ns"] ?? this.FindNamespace(title);
 			return new WikiTitleItem(ns, title, 0);
 		}

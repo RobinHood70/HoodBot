@@ -226,8 +226,11 @@
 				Properties = UsersProperties.All
 			};
 			var result = this.Site.AbstractionLayer.Users(input);
-			var user = result.First();
-			this.Populate(user);
+			if (result.Count == 1)
+			{
+				var user = result[0];
+				this.Populate(user);
+			}
 		}
 
 		/// <summary>Creates a new message on the user's talk page.</summary>
@@ -239,7 +242,7 @@
 		{
 			ThrowNull(msg, nameof(msg));
 			msg = msg.Trim();
-			if (!msg.Contains("~~~"))
+			if (!msg.Contains("~~~") && !msg.Contains(":" + this.Name))
 			{
 				// If at least the name wasn't found in the message, then add a normal signature.
 				msg += " ~~~~";

@@ -39,46 +39,41 @@ namespace RobinHood70.WallE.Eve.Modules
 			request.Add("prop", input.Properties);
 		}
 
-		protected override FileRepositoryInfoItem GetItem(JToken result)
+		protected override FileRepositoryInfoItem? GetItem(JToken result)
 		{
 			if (result == null)
 			{
 				return null;
 			}
 
-			var item = new FileRepositoryInfoItem()
-			{
-				ApiUrl = (string?)result["apiurl"],
-				ArticleUrl = (string?)result["articleurl"],
-				DescriptionBaseUrl = (string?)result["descBaseUrl"],
-				DescriptionCacheExpiry = TimeSpan.FromSeconds((int?)result["descriptionCacheExpiry"] ?? 0),
-				DisplayName = (string?)result["displayname"],
-				Favicon = (string?)result["favicon"],
-				Flags =
-				result.GetFlag("fetchDescription", FileRepositoryFlags.FetchDescription) |
-				result.GetFlag("initialCapital", FileRepositoryFlags.InitialCapital) |
-				result.GetFlag("local", FileRepositoryFlags.Local),
-				Name = (string?)result["name"],
-				RootUrl = (string?)result["rootUrl"],
-				ScriptDirectoryUrl = (string?)result["scriptDirUrl"],
-				ScriptExtension = (string?)result["scriptExtension"],
-				ThumbUrl = (string?)result["thumbUrl"],
-				Url = (string?)result["url"],
-			};
-
-			var otherInfo = new Dictionary<string, string>();
+			var otherInfo = new Dictionary<string, string?>();
 			foreach (var otherNode in result.Children<JProperty>())
 			{
 				var ignoreWords = new SortedSet<string>() { "apiurl", "articleurl", "descBaseUrl", "descriptionCacheExpiry", "displayname", "favicon", "fetchDescription", "initialCapital", "local", "name", "rootUrl", "scriptDirUrl", "scriptExtension", "thumbUrl", "url" };
 				if (!ignoreWords.Contains(otherNode.Name))
 				{
-					otherInfo.Add(otherNode.Name, (string)otherNode.Value);
+					otherInfo.Add(otherNode.Name, (string?)otherNode.Value);
 				}
 			}
 
-			item.OtherInfo = otherInfo;
-
-			return item;
+			return new FileRepositoryInfoItem(
+				name: result.SafeString("name"),
+				displayName: result.SafeString("displayname"),
+				rootUrl: result.SafeString("rootUrl"),
+				apiUrl: result.SafeString("apiurl"),
+				articleUrl: (string?)result["articleurl"],
+				descBaseUrl: (string?)result["descBaseUrl"],
+				descCacheExpiry: TimeSpan.FromSeconds((int?)result["descriptionCacheExpiry"] ?? 0),
+				favicon: (string?)result["favicon"],
+				flags:
+					result.GetFlag("fetchDescription", FileRepositoryFlags.FetchDescription) |
+					result.GetFlag("initialCapital", FileRepositoryFlags.InitialCapital) |
+					result.GetFlag("local", FileRepositoryFlags.Local),
+				otherInfo: otherInfo,
+				scriptDirUrl: (string?)result["scriptDirUrl"],
+				scriptExt: (string?)result["scriptExtension"],
+				thumbUrl: (string?)result["thumbUrl"],
+				url: (string?)result["url"]);
 		}
 		#endregion
 	}

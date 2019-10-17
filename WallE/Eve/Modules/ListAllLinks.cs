@@ -67,7 +67,10 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override AllLinksItem? GetItem(JToken result) => result == null || !result.HasValues
 			? null
-			: new AllLinksItem((int?)result["ns"], (string?)result["title"], (long?)result["fromid"] ?? 0);
+			: new AllLinksItem(
+				ns: (int?)result["ns"],
+				title: (string?)result["title"],
+				fromId: (long?)result["fromid"] ?? 0);
 		#endregion
 	}
 }

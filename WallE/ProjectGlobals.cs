@@ -30,7 +30,7 @@
 		/// <typeparam name="TKey">The key type.</typeparam>
 		/// <typeparam name="TValue">The value type.</typeparam>
 		/// <returns>An empty read-only dictionary.</returns>
-		public static IReadOnlyDictionary<TKey, TValue> EmptyReadOnlyDictionary<TKey, TValue>() => new ReadOnlyDictionary<TKey, TValue>(new Dictionary<TKey, TValue>());
+		public static IReadOnlyDictionary<TKey, TValue> ReadOnlyDictionary<TKey, TValue>() => new ReadOnlyDictionary<TKey, TValue>(new Dictionary<TKey, TValue>());
 
 		public static string GetHash(byte[] data, HashType hashType)
 		{

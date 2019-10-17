@@ -32,7 +32,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override ITitle GetItem(JToken result) => result.GetWikiTitle();
+		protected override ITitle? GetItem(JToken result) => result?.GetWikiTitle();
 		#endregion
 	}
 }

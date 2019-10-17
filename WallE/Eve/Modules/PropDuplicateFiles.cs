@@ -47,19 +47,17 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override DuplicateFileItem GetItem(JToken result) => result == null
+		protected override DuplicateFileItem? GetItem(JToken result) => result == null
 			? null
-			: new DuplicateFileItem()
-			{
-				Name = (string?)result["name"],
-				Shared = result["shared"].AsBCBool(),
-				Timestamp = result["timestamp"].AsDate(),
-				User = (string?)result["user"],
-			};
+			: new DuplicateFileItem(
+				name: result.SafeString("name"),
+				shared: result["shared"].AsBCBool(),
+				timestamp: result.AsDateNotNull("timestamp"),
+				user: result.SafeString("user"));
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.DuplicateFiles);
+		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.DuplicateFiles);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.DuplicateFiles = this.CopyList();
+		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.DuplicateFiles);
 		#endregion
 	}
 }

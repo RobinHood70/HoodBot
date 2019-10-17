@@ -56,9 +56,9 @@ namespace RobinHood70.WallE.Eve.Modules
 				pageId: (long?)result["pageid"] ?? 0,
 				redirect: result["redirect"].AsBCBool());
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.TranscludedIn);
+		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.TranscludedIn);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.TranscludedIn = this.CopyList();
+		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.TranscludedIn);
 		#endregion
 	}
 }

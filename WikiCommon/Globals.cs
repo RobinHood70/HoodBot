@@ -83,8 +83,8 @@
 
 		/// <summary>Attempts to figure out the culture associated with the language code, falling back progressively through parent languages.</summary>
 		/// <param name="languageCode">The language code to try.</param>
-		/// <returns>The nearest CultureInfo possible to the given <paramref name="languageCode"/> or null if nothing is found.</returns>
-		public static CultureInfo? GetCulture(string languageCode)
+		/// <returns>The nearest CultureInfo possible to the given <paramref name="languageCode"/> or CurrentCulture if nothing is found.</returns>
+		public static CultureInfo GetCulture(string? languageCode)
 		{
 			// Try to figure out wiki culture; otherwise revert to CurrentCulture.
 			if (!string.IsNullOrWhiteSpace(languageCode))
@@ -97,7 +97,7 @@
 					}
 					catch (CultureNotFoundException)
 					{
-						var lastDash = languageCode.LastIndexOf('-');
+						var lastDash = languageCode!.LastIndexOf('-');
 						if (lastDash > -1)
 						{
 							languageCode = languageCode.Substring(0, lastDash);
@@ -107,7 +107,7 @@
 				while (languageCode.Length > 0);
 			}
 
-			return null;
+			return CultureInfo.CurrentCulture;
 		}
 
 		/// <summary>Convenience method so that CurrentCulture and Invariant are all in the same class for both traditional and formattable strings, and are used the same way.</summary>

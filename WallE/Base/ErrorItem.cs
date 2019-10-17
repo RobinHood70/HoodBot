@@ -4,7 +4,7 @@ namespace RobinHood70.WallE.Base
 	public class ErrorItem
 	{
 		#region Constructors
-		public ErrorItem(string code, string info)
+		internal ErrorItem(string code, string info)
 		{
 			this.Code = code;
 			this.Info = info;
@@ -15,6 +15,10 @@ namespace RobinHood70.WallE.Base
 		public string Code { get; }
 
 		public string Info { get; }
+		#endregion
+
+		#region Public Override Methods
+		public override string ToString() => this.Code;
 		#endregion
 	}
 }

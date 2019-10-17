@@ -1,7 +1,6 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
-	using System.Globalization;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -10,7 +9,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	internal class MetaAllMessages : ListModule<AllMessagesInput, AllMessagesItem>
 	{
 		#region Fields
-		private string languageCode;
+		private string? languageCode;
 		#endregion
 
 		#region Constructors
@@ -54,39 +53,34 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIfNotNull("prefix", input.Prefix);
 		}
 
-		protected override AllMessagesItem GetItem(JToken result)
+		protected override AllMessagesItem? GetItem(JToken result)
 		{
 			if (result == null)
 			{
 				return null;
 			}
 
-			var item = new AllMessagesItem()
+			var name = result.SafeString("name");
+			var normalizedName = (string?)result["normalizedname"];
+			if (normalizedName == null)
 			{
-				Content = result.AsBCStringOptional("content"),
-				Default = (string?)result["default"],
-				Flags =
-					result.GetFlag("customised", MessageFlags.Customized) |
-					result.GetFlag("defaultmissing", MessageFlags.DefaultMissing) |
-					result.GetFlag("missing", MessageFlags.Missing),
-				Name = (string?)result["name"],
-			};
-
-			item.NormalizedName = (string?)result["normalizedname"];
-			if (item.NormalizedName == null)
-			{
-				var ci = GetCulture(this.languageCode ?? this.Wal.LanguageCode) ?? CultureInfo.CurrentCulture;
-				if (!string.IsNullOrEmpty(item.Name))
+				var ci = GetCulture(this.languageCode ?? this.Wal.LanguageCode);
+				normalizedName = name.Replace(' ', '_');
+				if (char.IsUpper(normalizedName[0]))
 				{
-					item.NormalizedName = item.NormalizedName.Replace(' ', '_');
-					if (char.IsUpper(item.Name[0]))
-					{
-						item.NormalizedName = item.NormalizedName.Substring(0, 1).ToLower(ci) + (item.Name.Length > 1 ? item.Name.Substring(1) : string.Empty);
-					}
+					normalizedName = normalizedName.Substring(0, 1).ToLower(ci) + (name.Length > 1 ? name.Substring(1) : string.Empty);
 				}
 			}
 
-			return item;
+			return new AllMessagesItem(
+				content: result.AsBCStringOptional("content"),
+				def: (string?)result["default"],
+				flags:
+					result.GetFlag("customised", MessageFlags.Customized) |
+					result.GetFlag("defaultmissing", MessageFlags.DefaultMissing) |
+					result.GetFlag("missing", MessageFlags.Missing),
+				name: name,
+				normalizedName: normalizedName);
 		}
 		#endregion
 	}

@@ -17,7 +17,7 @@ namespace RobinHood70.WallE.Base
 	public class WatchItem : ITitle
 	{
 		#region Constructors
-		public WatchItem(int ns, string title, long pageId)
+		internal WatchItem(int ns, string title, long pageId)
 		{
 			this.Namespace = ns;
 			this.Title = title;
@@ -26,7 +26,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public WatchFlags Flags { get; set; }
+		public WatchFlags Flags { get; internal set; }
 
 		public int Namespace { get; }
 

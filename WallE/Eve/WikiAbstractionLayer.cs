@@ -1331,7 +1331,10 @@
 				{
 					var newInput = new WatchInput(new[] { title }) { Token = input.Token, Unwatch = input.Unwatch };
 					var result = new ActionWatch(this).SubmitPageSet(newInput);
-					list.Add(result.First());
+					foreach (var item in result)
+					{
+						list.Add(item);
+					}
 				}
 			}
 
@@ -1441,4 +1444,3 @@
 		#endregion
 	}
 }
- 

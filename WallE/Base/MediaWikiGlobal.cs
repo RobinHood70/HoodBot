@@ -62,7 +62,7 @@ namespace RobinHood70.WallE.Base
 
 		#region Public Methods
 
-		public static string GetDiffToValue(int? revision) => revision switch
+		public static string? GetDiffToValue(int? revision) => revision switch
 		{
 			null => null,
 			DiffToNext => "next",

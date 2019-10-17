@@ -48,8 +48,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Private Methods
-		public static ImageRotateItem ImageRotateItemCreator(int ns, string title, long pageId) => new ImageRotateItem(ns, title, pageId);
+		#region Private Static Methods
+		private static ImageRotateItem ImageRotateItemCreator(int ns, string title, long pageId) => new ImageRotateItem(ns, title, pageId);
 		#endregion
 	}
 }

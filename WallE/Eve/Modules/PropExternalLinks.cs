@@ -41,11 +41,11 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override string GetItem(JToken result) => result.AsBCStringOptional("url");
+		protected override string? GetItem(JToken result) => result.AsBCStringOptional("url");
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.ExternalLinks);
+		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.ExternalLinks);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.ExternalLinks = this.CopyList();
+		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.ExternalLinks);
 		#endregion
 	}
 }

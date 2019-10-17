@@ -63,11 +63,11 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIf("limit", this.Limit, input.Limit > 0 || input.MaxItems > 1 || this.IsRevisionRange); // TODO: Needs testing when limits/maxitems are actually set to positive values. Limits are weird in this module, but since they're per-query, I believe this should work as written.
 		}
 
-		protected override RevisionsItem GetItem(JToken result) => result.GetRevision(this.Output.Title);
+		protected override RevisionsItem GetItem(JToken result) => result.GetRevision(this.Output?.Title ?? string.Empty);
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Revisions);
+		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.Revisions);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.Revisions = this.CopyList();
+		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.Revisions);
 		#endregion
 	}
 }

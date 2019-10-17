@@ -3,7 +3,8 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Collections.ObjectModel;
+    using System.Collections.Immutable;
+    using System.Collections.ObjectModel;
 	using System.Globalization;
 	using System.Runtime.CompilerServices;
 	using Newtonsoft.Json.Linq;
@@ -16,7 +17,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Any other API-related items that didn't warrant creation of their own static class.</summary>
-	internal static class ParsingExtensions
+	public static class ParsingExtensions
 	{
 		#region Private Constants
 		private const string Unknown = "<Unknown>";
@@ -40,8 +41,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		public static string AsBCString(this JToken token, string name, [CallerMemberName]string caller = Unknown)
 		{
 			ThrowNull(token, nameof(token));
-			var node = token[name] ?? token["*"] ?? throw new WikiException(CurrentCulture(EveMessages.MalformedData, name, token.Path, caller));
-			return (string?)node ?? throw new WikiException(CurrentCulture(EveMessages.MalformedData, name, token.Path, caller));
+			var node = token[name] ?? token["*"] ?? throw MalformedException(token, name, caller);
+			return (string?)node ?? throw MalformedException(token, name, caller);
 		}
 
 		public static string? AsBCStringOptional(this JToken token, string name)
@@ -76,36 +77,56 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		public static JToken? AsBCSubContent(this JToken token) => token?.Type == JTokenType.Object ? token?["*"] : token;
 
+		public static DateTime AsDateNotNull(this JToken token, string name, [CallerMemberName] string caller = Unknown)
+		{
+			ThrowNull(token, nameof(token));
+			var node = token[name] ?? throw MalformedException(token, name, caller);
+			return AsDate((string?)node) ?? throw MalformedException(token, name, caller);
+		}
+
 		public static DateTime? AsDate(this JToken? date) => date == null ? null : AsDate((string?)date);
 
 		public static IReadOnlyList<T> AsReadOnlyList<T>(this JToken? token) => token?.Values<T>().AsReadOnlyList() ?? Array.Empty<T>();
 
-		public static IReadOnlyDictionary<TKey, TValue> AsReadOnlyDictionary<TKey, TValue>(this JToken token) => token == null
-			? EmptyReadOnlyDictionary<TKey, TValue>()
-			: token.ToObject<Dictionary<TKey, TValue>>().AsReadOnly();
+		public static IReadOnlyDictionary<string, TValue> AsReadOnlyDictionary<TValue>(this JToken? token)
+		{
+			if (token == null)
+			{
+				return ImmutableDictionary<string, TValue>.Empty;
+			}
+
+			// Internally, ToObject gets rather convoluted when dealing with complex types. Since we're always dealing with strings at the first type anyway, I've changed token.ToObject<Dictionary<TKey, TValue>>() to only call ToObject() on the value, which should normally be a simple type.
+			var dict = new Dictionary<string, TValue>();
+			foreach (var item in token.Children<JProperty>())
+			{
+				dict.Add(item.Name, item.Value.ToObject<TValue>());
+			}
+
+			return new ReadOnlyDictionary<string, TValue>(dict);
+		}
 
 		public static ErrorItem GetError(this JToken result) => GetError(result, "code", "info");
 
 		public static ErrorItem GetError(this JToken result, string codeName, string infoName) =>
-			new ErrorItem(result.StringNotNull(codeName), result.StringNotNull(infoName));
+			new ErrorItem(result.SafeString(codeName), result.SafeString(infoName));
 
 		public static T GetFlag<T>(this JToken result, string nodeName, T value) => result[nodeName].AsBCBool() ? value : default;
 
-		public static List<InterwikiTitleItem> GetInterwikiLinks(this JToken result)
+		public static List<InterwikiTitleItem> GetInterwikiLinks(this JToken? result)
 		{
 			var output = new List<InterwikiTitleItem>();
 			if (result != null)
 			{
 				foreach (var item in result)
 				{
-					output.Add(new InterwikiTitleItem(item.StringNotNull("iw"), item.StringNotNull("title"), (Uri?)item["url"]));
+					output.Add(new InterwikiTitleItem(item.SafeString("iw"), item.SafeString("title"), (Uri?)item["url"]));
 				}
 			}
 
 			return output;
 		}
 
-		public static LanguageLinksItem GetLanguageLink(this JToken result) => result == null
+		public static LanguageLinksItem? GetLanguageLink(this JToken? result) => result == null
 			? null
 			: new LanguageLinksItem()
 			{
@@ -116,7 +137,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				Title = (string?)result["title"],
 			};
 
-		public static void GetRedirects(this JToken result, Dictionary<string, PageSetRedirectItem> redirects, WikiAbstractionLayer wal)
+		public static void GetRedirects(this JToken? result, Dictionary<string, PageSetRedirectItem> redirects, WikiAbstractionLayer wal)
 		{
 			const string fromName = "from";
 			const string toName = "to";
@@ -127,7 +148,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				foreach (var item in result)
 				{
-					var to = item.StringNotNull(toName);
+					var to = item.SafeString(toName);
 					var interwiki = (string?)item[toInterwikiName];
 					if (interwiki == null && wal.SiteVersion < 125)
 					{
@@ -151,13 +172,14 @@ namespace RobinHood70.WallE.Eve.Modules
 						fragment: (string?)item[toFragmentName],
 						interwiki: interwiki,
 						generatorInfo: gi);
-					redirects[item.StringNotNull(fromName)] = toPage;
+					redirects[item.SafeString(fromName)] = toPage;
 				}
 			}
 		}
 
 		public static RevisionsItem GetRevision(this JToken result, string pageTitle)
 		{
+			ThrowNull(result, nameof(result));
 			var revision = new RevisionsItem()
 			{
 				Comment = (string?)result["comment"],
@@ -217,23 +239,11 @@ namespace RobinHood70.WallE.Eve.Modules
 			return revisions;
 		}
 
-		public static T GetUserFrom<T>(this T user, JToken result)
-			where T : IUser
+		public static T GetUserData<T>(this T user, JToken result)
+			where T : InternalUserItem
 		{
-			user.EditCount = (long?)result["editcount"] ?? 0;
-			user.BlockId = (long?)result["blockid"] ?? 0;
-			user.BlockedBy = (string?)result["blockedby"];
-			user.BlockedById = (long?)result["blockedbyid"] ?? 0;
-			user.BlockTimestamp = (DateTime?)result["blockedtimestamp"];
-			user.BlockReason = (string?)result["blockreason"];
-			user.BlockExpiry = result["blockexpiry"].AsDate();
-			user.BlockHidden = result["hidden"].AsBCBool();
-
 			// ListAllUsers returns an empty string, ListUsers returns null, so check for both.
 			var regDate = (string?)result["registration"];
-			user.Registration = string.IsNullOrEmpty(regDate) ? null : (DateTime?)result["registration"];
-			user.Groups = result["groups"].AsReadOnlyList<string>();
-			user.ImplicitGroups = result["implicitgroups"].AsReadOnlyList<string>();
 			var rights = result["rights"];
 			if (rights != null)
 			{
@@ -251,6 +261,18 @@ namespace RobinHood70.WallE.Eve.Modules
 					}
 				}
 			}
+
+			user.BlockId = (long?)result["blockid"] ?? 0;
+			user.BlockedBy = (string?)result["blockedby"];
+			user.BlockedById = (long?)result["blockedbyid"] ?? 0;
+			user.BlockTimestamp = (DateTime?)result["blockedtimestamp"];
+			user.BlockReason = (string?)result["blockreason"];
+			user.BlockExpiry = result["blockexpiry"].AsDate();
+			user.BlockHidden = result["hidden"].AsBCBool();
+			user.EditCount = (long?)result["editcount"] ?? 0;
+			user.Groups = result["groups"].AsReadOnlyList<string>();
+			user.ImplicitGroups = result["implicitgroups"].AsReadOnlyList<string>();
+			user.Registration = string.IsNullOrEmpty(regDate) ? null : (DateTime?)result["registration"];
 
 			return user;
 		}
@@ -270,15 +292,15 @@ namespace RobinHood70.WallE.Eve.Modules
 			return list.AsReadOnly();
 		}
 
-		public static WikiTitleItem GetWikiTitle(this JToken result) => new WikiTitleItem((int)result.NotNull("ns"), result.StringNotNull("title"), (long?)result["pageid"] ?? 0);
+		public static WikiTitleItem GetWikiTitle(this JToken result) => new WikiTitleItem((int)result.NotNull("ns"), result.SafeString("title"), (long?)result["pageid"] ?? 0);
 
-		public static JToken NotNull(this JToken token, string name, [CallerMemberName] string caller = Unknown) => token[name] ?? throw new WikiException(CurrentCulture(EveMessages.MalformedData, name, token.Path, caller));
+		public static JToken NotNull(this JToken token, string name, [CallerMemberName] string caller = Unknown) => token[name] ?? throw MalformedException(token, name, caller);
 
-		public static string StringNotNull(this JToken token, string name, [CallerMemberName] string caller = Unknown)
+		public static string SafeString(this JToken token, string name, [CallerMemberName] string caller = Unknown)
 		{
 			ThrowNull(token, nameof(token));
-			var node = token[name] ?? throw new WikiException(CurrentCulture(EveMessages.MalformedData, name, token.Path, caller));
-			return (string?)node ?? throw new WikiException(CurrentCulture(EveMessages.MalformedData, name, token.Path, caller));
+			var node = token[name] ?? throw MalformedException(token, name, caller);
+			return (string?)node ?? throw MalformedException(token, name, caller);
 		}
 		#endregion
 
@@ -328,6 +350,10 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			return request;
 		}
+		#endregion
+
+		#region Private Methods
+		private static WikiException MalformedException(JToken token, string name, string caller) => new WikiException(CurrentCulture(EveMessages.MalformedData, name, token.Path, caller));
 		#endregion
 	}
 }

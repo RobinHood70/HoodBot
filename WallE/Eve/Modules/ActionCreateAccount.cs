@@ -2,10 +2,10 @@
 namespace RobinHood70.WallE.Eve.Modules
 {
 	using System.Collections.Generic;
+	using System.Collections.Immutable;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WallE.ProjectGlobals;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class ActionCreateAccount : ActionModule<CreateAccountInput, CreateAccountResult>
@@ -28,7 +28,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Internal Properties
-		internal IReadOnlyDictionary<string, string> CaptchaData { get; private set; } = EmptyReadOnlyDictionary<string, string>();
+		internal IReadOnlyDictionary<string, string> CaptchaData { get; private set; } = ImmutableDictionary<string, string>.Empty;
 
 		internal Dictionary<string, string> CaptchaSolution { get; } = new Dictionary<string, string>();
 		#endregion
@@ -76,7 +76,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				this.token = (string?)result["token"];
 			}
 
-			this.CaptchaData = result["captcha"].AsReadOnlyDictionary<string, string>();
+			this.CaptchaData = result["captcha"].AsReadOnlyDictionary<string>();
 			return output;
 		}
 		#endregion

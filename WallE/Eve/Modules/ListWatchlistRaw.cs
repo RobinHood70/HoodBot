@@ -59,7 +59,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			? null
 			: new WatchlistRawItem(
 				ns: (int)result.NotNull("ns"),
-				title: result.StringNotNull("title"),
+				title: result.SafeString("title"),
 				changed: result["changed"].AsBCBool());
 		#endregion
 	}

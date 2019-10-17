@@ -85,7 +85,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				return null;
 			}
 
-			var item = new WatchlistItem((int)result.NotNull("ns"), result.StringNotNull("title"), (long?)result["pageid"] ?? 0)
+			var item = new WatchlistItem((int)result.NotNull("ns"), result.SafeString("title"), (long?)result["pageid"] ?? 0)
 			{
 				WatchlistType = (string?)result["type"],
 			};

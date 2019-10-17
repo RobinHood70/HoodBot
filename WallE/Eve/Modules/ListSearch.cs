@@ -114,7 +114,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			return new SearchResultItem(
 				ns: (int)result.NotNull("ns"),
-				title: result.StringNotNull("title"),
+				title: result.SafeString("title"),
 				redirSnippet: (string?)result["redirectsnippet"],
 				redirTitle: redir,
 				sectionSnippet: (string?)result["sectionsnippet"],

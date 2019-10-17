@@ -41,8 +41,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(result, nameof(result));
 			return new PatrolResult(
-				ns: (int)result.NotNull("ns"), 
-				title: result.StringNotNull("title"),
+				ns: (int)result.NotNull("ns"),
+				title: result.SafeString("title"),
 				rcId: (long)result.NotNull("rcid"));
 		}
 		#endregion

@@ -92,7 +92,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				return null;
 			}
 
-			var item = new BacklinksItem((int)result.NotNull("ns"), result.StringNotNull("title"), (long)result.NotNull("pageid"), result["redirect"].AsBCBool(), this.Input.LinkTypes);
+			var item = new BacklinksItem((int)result.NotNull("ns"), result.SafeString("title"), (long)result.NotNull("pageid"), result["redirect"].AsBCBool(), this.Input.LinkTypes);
 
 			var redirLinks = result["redirlinks"];
 			if (redirLinks != null && item.Redirects is List<ITitle> redirects)

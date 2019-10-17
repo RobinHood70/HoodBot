@@ -6,20 +6,24 @@ namespace RobinHood70.WallE.Base
 	public class InterwikiTitleItem
 	{
 		#region Constructors
-		public InterwikiTitleItem(string interwikiPrefix, string title, Uri? uri)
+		internal InterwikiTitleItem(string prefix, string title, Uri? url)
 		{
-			this.InterwikiPrefix = interwikiPrefix;
+			this.Prefix = prefix;
 			this.Title = title;
-			this.Url = uri;
+			this.Url = url;
 		}
 		#endregion
 
 		#region Public Properties
-		public string InterwikiPrefix { get; }
+		public string Prefix { get; }
 
 		public string Title { get; }
 
-		public Uri Url { get; }
+		public Uri? Url { get; }
+		#endregion
+
+		#region Public Override Methods
+		public override string ToString() => this.Prefix;
 		#endregion
 	}
 }

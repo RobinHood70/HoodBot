@@ -3,10 +3,18 @@ namespace RobinHood70.WallE.Base
 {
 	public class ContributorItem
 	{
-		#region Public Properties
-		public string Name { get; set; }
+		#region Constructors
+		internal ContributorItem(string name, long userId)
+		{
+			this.Name = name;
+			this.UserId = userId;
+		}
+		#endregion
 
-		public long UserId { get; set; }
+		#region Public Properties
+		public string Name { get; }
+
+		public long UserId { get; }
 		#endregion
 
 		#region Public Override Methods

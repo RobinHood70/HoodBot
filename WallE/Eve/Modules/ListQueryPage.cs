@@ -91,9 +91,9 @@ namespace RobinHood70.WallE.Eve.Modules
 			? null
 			: new QueryPageItem(
 				ns: (int)result.NotNull("ns"),
-				title: result.StringNotNull("title"),
+				title: result.SafeString("title"),
 				value: (long)result.NotNull("value"),
-				databaseResult: result["databaseResult"]?.AsReadOnlyDictionary<string, object?>(),
+				databaseResult: result["databaseResult"]?.AsReadOnlyDictionary<object?>(),
 				timestamp: (DateTime?)result["timestamp"]);
 		#endregion
 	}

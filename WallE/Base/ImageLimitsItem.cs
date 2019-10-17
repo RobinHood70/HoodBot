@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Base
 	public class ImageLimitsItem
 	{
 		#region Constructors
-		public ImageLimitsItem(int width, int height)
+		internal ImageLimitsItem(int width, int height)
 		{
 			this.Width = width;
 			this.Height = height;
@@ -18,7 +18,9 @@ namespace RobinHood70.WallE.Base
 		public int Height { get; }
 
 		public int Width { get; }
+		#endregion
 
+		#region Public Override Methods
 		public override string ToString() => CurrentCulture(Messages.CommaText, this.Width, this.Height);
 		#endregion
 	}

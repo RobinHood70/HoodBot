@@ -45,11 +45,11 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override AllUsersItem? GetItem(JToken result) => result == null
 			? null
-			: new AllUsersItem((long?)result["userid"] ?? 0, (string?)result["name"])
-			{
-				RecentActions = (int?)result["recentactions"] ?? (int?)result["recenteditcount"] ?? 0
-			}
-			.GetUserFrom(result);
+			: new AllUsersItem(
+				userId: (long?)result["userid"] ?? 0,
+				name: result.SafeString("name"),
+				recentActions: (int?)result["recentactions"] ?? (int?)result["recenteditcount"] ?? 0)
+			.GetUserData(result);
 		#endregion
 	}
 }

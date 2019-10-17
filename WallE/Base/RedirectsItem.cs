@@ -1,10 +1,10 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
-	public class RedirectsItem
+	public class RedirectsItem : ITitleOptional
 	{
 		#region Constructors
-		public RedirectsItem(int? ns, string? title, long pageId, string? fragment)
+		internal RedirectsItem(int? ns, string? title, long pageId, string? fragment)
 		{
 			this.Namespace = ns;
 			this.Title = title;
@@ -12,7 +12,6 @@ namespace RobinHood70.WallE.Base
 			this.Fragment = fragment;
 		}
 		#endregion
-
 
 		#region Public Properties
 		public string? Fragment { get; }
@@ -25,7 +24,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title;
+		public override string ToString() => this.Title ?? ProjectGlobals.NoTitle;
 		#endregion
 	}
 }

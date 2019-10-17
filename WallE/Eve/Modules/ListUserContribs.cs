@@ -68,7 +68,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override UserContributionsItem? GetItem(JToken result) => result == null
 			? null
 			: new UserContributionsItem(
-				user: result.StringNotNull("user"),
+				user: result.SafeString("user"),
 				userId: (long?)result["userid"] ?? 0,
 				ns: (int?)result["ns"],
 				title: (string?)result["title"],

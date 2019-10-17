@@ -14,18 +14,34 @@ namespace RobinHood70.WallE.Base
 	}
 	#endregion
 
+	// Args is not implemented here because it just echoes back the input.
 	public class AllMessagesItem
 	{
+		#region Constructors
+		internal AllMessagesItem(string? content, string? def, MessageFlags flags, string name, string normalizedName)
+		{
+			this.Content = content;
+			this.Default = def;
+			this.Flags = flags;
+			this.Name = name;
+			this.NormalizedName = normalizedName;
+		}
+		#endregion
+
 		#region Public Properties
-		public string Content { get; set; }
+		public string? Content { get; }
 
-		public string Default { get; set; }
+		public string? Default { get; }
 
-		public MessageFlags Flags { get; set; }
+		public MessageFlags Flags { get; }
 
-		public string Name { get; set; }
+		public string Name { get; }
 
-		public string NormalizedName { get; set; }
+		public string NormalizedName { get; }
+		#endregion
+
+		#region Public Override Methods
+		public override string ToString() => this.Name;
 		#endregion
 	}
 }

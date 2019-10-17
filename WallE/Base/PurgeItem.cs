@@ -16,7 +16,7 @@ namespace RobinHood70.WallE.Base
 	public class PurgeItem : ITitle
 	{
 		#region Constructors
-		public PurgeItem(int ns, string title, long pageId)
+		internal PurgeItem(int ns, string title, long pageId)
 		{
 			this.Namespace = ns;
 			this.Title = title;
@@ -25,7 +25,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public PurgeFlags Flags { get; set; }
+		public PurgeFlags Flags { get; internal set; }
 
 		public int Namespace { get; }
 

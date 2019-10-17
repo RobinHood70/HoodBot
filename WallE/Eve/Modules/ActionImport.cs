@@ -55,13 +55,11 @@ namespace RobinHood70.WallE.Eve.Modules
 			var output = new List<ImportItem>();
 			foreach (var item in result)
 			{
-				var import = new ImportItem((int)result.NotNull("ns"), result.StringNotNull("title"))
-				{
-					Invalid = item["invalid"].AsBCBool(),
-					Revisions = (int?)item["revisions"] ?? 0,
-				};
-
-				output.Add(import);
+				output.Add(new ImportItem(
+					ns: (int)result.NotNull("ns"),
+					title: result.SafeString("title"),
+					revisions: (int?)item["revisions"] ?? 0,
+					invalid: item["invalid"].AsBCBool()));
 			}
 
 			return output;

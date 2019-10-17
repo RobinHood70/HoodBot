@@ -367,7 +367,7 @@
 		/// <param name="value">The parameter value.</param>
 		/// <param name="condition">The condition to check.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public ParameterCollection AddIfNotNullIf(string name, string value, bool condition) => (condition && value != null) ? this.Add(name, value) : this;
+		public ParameterCollection AddIfNotNullIf(string name, string? value, bool condition) => (condition && value != null) ? this.Add(name, value) : this;
 
 		/// <summary>Adds an enumeration parameter if its integer value is greater than zero.</summary>
 		/// <param name="name">The parameter name.</param>

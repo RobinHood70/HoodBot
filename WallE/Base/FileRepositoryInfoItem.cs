@@ -17,34 +17,58 @@ namespace RobinHood70.WallE.Base
 
 	public class FileRepositoryInfoItem
 	{
+		#region Constructors
+		internal FileRepositoryInfoItem(string name, string displayName, string rootUrl, string apiUrl, string? articleUrl, string? descBaseUrl, TimeSpan descCacheExpiry, string? favicon, FileRepositoryFlags flags, IReadOnlyDictionary<string, string?> otherInfo, string? scriptDirUrl, string? scriptExt, string? thumbUrl, string? url )
+		{
+			this.Name = name;
+			this.DisplayName = displayName;
+			this.RootUrl = rootUrl;
+			this.ApiUrl = apiUrl;
+			this.ArticleUrl = articleUrl;
+			this.DescriptionBaseUrl = descBaseUrl;
+			this.DescriptionCacheExpiry = descCacheExpiry;
+			this.Favicon = favicon;
+			this.Flags = flags;
+			this.OtherInfo = otherInfo;
+			this.ScriptDirectoryUrl = scriptDirUrl;
+			this.ScriptExtension = scriptExt;
+			this.ThumbUrl = thumbUrl;
+			this.Url = url;
+		}
+		#endregion
+
 		#region Public Properties
-		public string ApiUrl { get; set; }
+		public string ApiUrl { get; }
 
-		public string ArticleUrl { get; set; }
+		public string? ArticleUrl { get; }
 
-		public string DescriptionBaseUrl { get; set; }
+		public string? DescriptionBaseUrl { get; }
 
-		public TimeSpan DescriptionCacheExpiry { get; set; }
+		public TimeSpan DescriptionCacheExpiry { get; }
 
-		public string DisplayName { get; set; }
+		public string DisplayName { get; }
 
-		public string Favicon { get; set; }
+		public string? Favicon { get; }
 
-		public FileRepositoryFlags Flags { get; set; }
+		public FileRepositoryFlags Flags { get; }
 
-		public string Name { get; set; }
+		public string Name { get; }
 
-		public IReadOnlyDictionary<string, string> OtherInfo { get; set; }
+		public IReadOnlyDictionary<string, string?> OtherInfo { get; }
 
-		public string RootUrl { get; set; }
+		public string RootUrl { get; }
 
-		public string ScriptDirectoryUrl { get; set; }
+		public string? ScriptDirectoryUrl { get; }
 
-		public string ScriptExtension { get; set; }
+		public string? ScriptExtension { get; }
 
-		public string ThumbUrl { get; set; }
+		public string? ThumbUrl { get; }
 
-		public string Url { get; set; }
+		public string? Url { get; }
+		#endregion
+
+		#region Public Override Methods
+		public override string ToString() => this.DisplayName;
 		#endregion
 	}
 }

@@ -5,10 +5,28 @@ namespace RobinHood70.WallE.Base
 
 	public class RawMessageInfo
 	{
+		#region Constructors
+		internal RawMessageInfo(string? text)
+		{
+			this.RawMessages = new List<MessageItem>();
+			this.Text = text;
+		}
+
+		internal RawMessageInfo(IReadOnlyList<MessageItem> rawMessages)
+		{
+			this.RawMessages = rawMessages;
+			this.Text = null;
+		}
+		#endregion
+
 		#region Public Properties
-		public string Text { get; set; }
+		public string? Text { get; }
 
 		public IReadOnlyList<MessageItem> RawMessages { get; set; }
+		#endregion
+
+		#region Public Override Methods
+		public override string ToString() => this.Text ?? "<Raw Messages>";
 		#endregion
 	}
 }

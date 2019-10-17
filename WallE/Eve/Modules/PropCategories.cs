@@ -54,15 +54,15 @@ namespace RobinHood70.WallE.Eve.Modules
 			? null
 			: new CategoriesItem(
 				ns: (int)result.NotNull("ns"),
-				title: result.StringNotNull("title"),
+				title: result.SafeString("title"),
 				hidden: result["hidden"].AsBCBool(),
 				sortkey: (string?)result["sortkey"],
 				sortkeyPrefix: (string?)result["sortkeyprefix"],
 				timestamp: (DateTime?)result["timestamp"]);
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Categories);
+		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.Categories);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.Categories = this.CopyList();
+		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.Categories);
 		#endregion
 	}
 }

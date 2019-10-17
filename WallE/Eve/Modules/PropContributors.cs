@@ -46,17 +46,13 @@ namespace RobinHood70.WallE.Eve.Modules
 			output.AnonContributors = (int?)parent["anoncontributors"] ?? 0;
 		}
 
-		protected override ContributorItem GetItem(JToken result) => result == null
+		protected override ContributorItem? GetItem(JToken result) => result == null
 			? null
-			: new ContributorItem()
-			{
-				Name = (string?)result["name"],
-				UserId = (long)result["userid"],
-			};
+			: new ContributorItem(result.SafeString("name"), (long)result.NotNull("userid"));
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.Contributors);
+		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.Contributors);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.Contributors = this.CopyList();
+		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.Contributors);
 		#endregion
 	}
 }

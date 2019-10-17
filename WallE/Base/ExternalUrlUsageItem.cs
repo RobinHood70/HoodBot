@@ -2,7 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	// Despite looking like an ITitle, we cannot guarantee that it will behave like once since, at least as of MW 1.33, no part of the result is required to be emitted by the API.
-	public class ExternalUrlUsageItem
+	public class ExternalUrlUsageItem : ITitleOptional
 	{
 		#region Constructors
 		internal ExternalUrlUsageItem(int? ns, string? title, long pageId, string? url)

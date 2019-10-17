@@ -5,7 +5,6 @@
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Eve.Modules;
 	using RobinHood70.WallE.Properties;
-	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
 	internal class TokenManagerOriginal : ITokenManager
@@ -56,7 +55,7 @@
 
 				foreach (var page in pageSet)
 				{
-					foreach (var token in page.Value.Info.Tokens)
+					foreach (var token in page.Info.Tokens)
 					{
 						this.SessionTokens[TokenManagerFunctions.TrimTokenKey(token.Key)] = token.Value;
 					}
@@ -91,7 +90,20 @@
 		{
 			var revisions = new RevisionsInput() { GetRollbackToken = true };
 			var pages = this.Wal.LoadPages(pageSetInput, new[] { revisions });
-			return pages.First()?.Revisions.First()?.RollbackToken ?? throw new WikiException(CurrentCulture(EveMessages.InvalidToken, TokensInput.Rollback));
+
+			// By all rights, there should only be one page and one revision in the collection, but we don't really care if something very weird happens here, just as long as at least ONE of them has a rollback token, so just iterate the entire set if somehow there are multiple results.
+			foreach (var page in pages)
+			{
+				foreach (var rev in page.Revisions)
+				{
+					if (rev.RollbackToken != null)
+					{
+						return rev.RollbackToken;
+					}
+				}
+			}
+
+			throw new WikiException(CurrentCulture(EveMessages.InvalidToken, TokensInput.Rollback));
 		}
 		#endregion
 	}

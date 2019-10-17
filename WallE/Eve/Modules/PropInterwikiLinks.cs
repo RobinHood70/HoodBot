@@ -46,11 +46,11 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override InterwikiTitleItem? GetItem(JToken result) => result == null
 			? null
-			: new InterwikiTitleItem((string)result["prefix"]!, result.AsBCStringOptional("title")!, (Uri?)result["url"]);
+			: new InterwikiTitleItem(result.SafeString("prefix"), result.AsBCStringOptional("title")!, (Uri?)result["url"]);
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.InterwikiLinks);
+		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.InterwikiLinks);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.InterwikiLinks = this.CopyList();
+		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.InterwikiLinks);
 		#endregion
 	}
 }

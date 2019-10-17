@@ -17,7 +17,7 @@ namespace RobinHood70.WallE.Base
 	#endregion
 
 	/// <summary>Holds all data for an entry from Special:RecentChanges. Note that a Recent Change is, in essence, a log entry with a few extra properties and is therefore modeled that way. Since log entries can be derived types, themselves, the LogEvent property holds the specific LogEvent derivative, when appropriate, or a base LogEvent object for normal edits.</summary>
-	public class RecentChangesItem : ILogEvents
+	public class RecentChangesItem : ILogEvents, ITitleOptional
 	{
 		#region Constructors
 		public RecentChangesItem(int ns, string title, long pageId)

@@ -60,7 +60,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			? null
 			: new ProtectedTitlesItem(
 				ns: (int)result.NotNull("ns"),
-				title: result.StringNotNull("title"),
+				title: result.SafeString("title"),
 				comment: (string?)result["comment"],
 				expiry: result["expiry"].AsDate(),
 				level: (string?)result["level"],

@@ -3,15 +3,27 @@ namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
 
-	// Hey, don't blame me for this naming! This is what you get when you create a paraminfo module for documenting info about parameters in modules! :)
 	public class InformationItem
 	{
+		#region Constructors
+		internal InformationItem(string name, RawMessageInfo text, IReadOnlyList<int> values)
+		{
+			this.Name = name;
+			this.Text = text;
+			this.Values = values;
+		}
+		#endregion
+
 		#region Public Properties
-		public string Name { get; set; }
+		public string Name { get; }
 
-		public RawMessageInfo Text { get; set; }
+		public RawMessageInfo Text { get; }
 
-		public IReadOnlyList<int> Values { get; set; }
+		public IReadOnlyList<int> Values { get; }
+		#endregion
+
+		#region Public Override Methods
+		public override string ToString() => this.Name;
 		#endregion
 	}
 }

@@ -72,24 +72,21 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					var name = item.Name;
 					var itemValue = item.Value;
-					var value = itemValue["value"];
-					var source = (string?)itemValue["source"];
+					var value = itemValue.NotNull("value");
+					var source = itemValue.SafeString("source");
 					var hidden = itemValue["hidden"].AsBCBool();
-					if (value != null)
+					if (value.Type == JTokenType.Object)
 					{
-						if (value.Type == JTokenType.Object)
+						var newItem = new ExtendedMetadataItem(value.AsReadOnlyDictionary<string>(), source, hidden);
+						dict.Add(name, newItem);
+					}
+					else
+					{
+						var stringValue = (string?)value;
+						if (stringValue != null)
 						{
-							var newItem = new ExtendedMetadataItem(value.AsReadOnlyDictionary<string, string>(), source, hidden);
-							dict.Add(name, newItem);
-						}
-						else
-						{
-							var stringValue = (string?)value;
-							if (stringValue != null)
-							{
-								var newDict = new Dictionary<string, string> { [string.Empty] = stringValue };
-								dict.Add(name, new ExtendedMetadataItem(newDict, source, hidden));
-							}
+							var newDict = new Dictionary<string, string> { [string.Empty] = stringValue };
+							dict.Add(name, new ExtendedMetadataItem(newDict, source, hidden));
 						}
 					}
 				}

@@ -3,7 +3,6 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
-	using static RobinHood70.WallE.ProjectGlobals;
 
 	#region Public Enumerations
 	[Flags]
@@ -29,58 +28,58 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public long AnonContributors { get; set; }
 
-		public IReadOnlyList<CategoriesItem> Categories { get; set; } = Array.Empty<CategoriesItem>();
+		public IReadOnlyList<CategoriesItem> Categories { get; } = new List<CategoriesItem>();
 
 		public CategoryInfoResult CategoryInfo { get; set; }
 
-		public IReadOnlyList<ContributorItem> Contributors { get; set; } = Array.Empty<ContributorItem>();
+		public IReadOnlyList<ContributorItem> Contributors { get; } = new List<ContributorItem>();
 
 		/// <summary>Gets custom module results. This collection is unused by the framework and exists for any custom property modules the user might implement.</summary>
 		/// <value>The custom page information.</value>
 		/// <remarks>Module results can be added here as needed, then unboxed again when they reach the caller. Pages can, of course, also be inherited with custom property module results added, but this will likely be a far easier method in the long run.</remarks>
 		public IList<object> CustomPageInfo { get; } = new List<object>();
 
-		public IReadOnlyList<RevisionsItem> DeletedRevisions { get; set; } = Array.Empty<RevisionsItem>();
+		public IReadOnlyList<RevisionsItem> DeletedRevisions { get; } = new List<RevisionsItem>();
 
-		public IReadOnlyList<DuplicateFileItem> DuplicateFiles { get; set; } = Array.Empty<DuplicateFileItem>();
+		public IReadOnlyList<DuplicateFileItem> DuplicateFiles { get; } = new List<DuplicateFileItem>();
 
-		public IReadOnlyList<string> ExternalLinks { get; set; } = Array.Empty<string>();
+		public IReadOnlyList<string> ExternalLinks { get; } = new List<string>();
 
-		public IReadOnlyList<FileUsageItem> FileUsages { get; set; } = Array.Empty<FileUsageItem>();
+		public IReadOnlyList<FileUsageItem> FileUsages { get; } = new List<FileUsageItem>();
 
 		public PageFlags Flags { get; set; }
 
-		public IReadOnlyList<ImageInfoItem> ImageInfoEntries { get; set; } = Array.Empty<ImageInfoItem>();
+		public IReadOnlyList<ImageInfoItem> ImageInfoEntries { get; } = new List<ImageInfoItem>();
 
-		public IReadOnlyList<ITitle> Images { get; set; } = Array.Empty<ITitle>();
+		public IReadOnlyList<ITitle> Images { get; } = new List<ITitle>();
 
 		public string ImageRepository { get; set; }
 
 		public PageInfo Info { get; set; }
 
-		public IReadOnlyList<InterwikiTitleItem> InterwikiLinks { get; set; } = Array.Empty<InterwikiTitleItem>();
+		public IReadOnlyList<InterwikiTitleItem> InterwikiLinks { get; } = new List<InterwikiTitleItem>();
 
-		public IReadOnlyList<LanguageLinksItem> LanguageLinks { get; set; } = Array.Empty<LanguageLinksItem>();
+		public IReadOnlyList<LanguageLinksItem> LanguageLinks { get; } = new List<LanguageLinksItem>();
 
-		public IReadOnlyList<ITitle> Links { get; set; } = Array.Empty<ITitle>();
+		public IReadOnlyList<ITitle> Links { get; } = new List<ITitle>();
 
-		public IReadOnlyList<LinksHereItem> LinksHere { get; set; } = Array.Empty<LinksHereItem>();
+		public IReadOnlyList<LinksHereItem> LinksHere { get; } = new List<LinksHereItem>();
 
 		public int Namespace { get; }
 
-		public IReadOnlyDictionary<string, string> Properties { get; set; } = EmptyReadOnlyDictionary<string, string>();
+		public IReadOnlyDictionary<string, string> Properties { get; } = new Dictionary<string, string>();
 
 		public long PageId { get; }
 
-		public IReadOnlyList<RedirectsItem> Redirects { get; set; } = Array.Empty<RedirectsItem>();
+		public IReadOnlyList<RedirectsItem> Redirects { get; } = new List<RedirectsItem>();
 
-		public IReadOnlyList<RevisionsItem> Revisions { get; set; } = Array.Empty<RevisionsItem>();
+		public IReadOnlyList<RevisionsItem> Revisions { get; } = new List<RevisionsItem>();
 
-		public IReadOnlyList<ITitle> Templates { get; set; } = Array.Empty<ITitle>();
+		public IReadOnlyList<ITitle> Templates { get; } = new List<ITitle>();
 
 		public string Title { get; }
 
-		public IReadOnlyList<TranscludedInItem> TranscludedIn { get; set; } = Array.Empty<TranscludedInItem>();
+		public IReadOnlyList<TranscludedInItem> TranscludedIn { get; } = new List<TranscludedInItem>();
 		#endregion
 
 		#region Public Override Methods

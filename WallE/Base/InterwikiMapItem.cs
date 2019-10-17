@@ -18,22 +18,40 @@ namespace RobinHood70.WallE.Base
 
 	public class InterwikiMapItem
 	{
+		#region Constructors
+		internal InterwikiMapItem(string prefix, string url, string? apiUrl, InterwikiMapFlags flags, string? language, string? linkText, string? siteName, string? wikiId)
+		{
+			this.Prefix = prefix;
+			this.Url = url;
+			this.ApiUrl = apiUrl;
+			this.Flags = flags;
+			this.Language = language;
+			this.LinkText = linkText;
+			this.SiteName = siteName;
+			this.WikiId = wikiId;
+		}
+		#endregion
+
 		#region Public Properties
-		public string ApiUrl { get; set; }
+		public string? ApiUrl { get; set; }
 
-		public string Language { get; set; }
+		public string? Language { get; set; }
 
-		public string LinkText { get; set; }
+		public string? LinkText { get; set; }
 
 		public InterwikiMapFlags Flags { get; set; }
 
 		public string Prefix { get; set; }
 
-		public string SiteName { get; set; }
+		public string? SiteName { get; set; }
 
 		public string Url { get; set; }
 
-		public string WikiId { get; set; }
+		public string? WikiId { get; set; }
+		#endregion
+
+		#region Public Override Methods
+		public override string ToString() => this.Prefix;
 		#endregion
 	}
 }

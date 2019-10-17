@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
@@ -45,7 +46,22 @@ namespace RobinHood70.WallE.Eve.Modules
 		// Makes a copy of the list or else we just end up handing out the same collection to everything.
 		protected IReadOnlyList<TItem> CopyList() => new List<TItem>(this.myList).AsReadOnly();
 
-		protected void ResetItems(IEnumerable<TItem> add)
+		// Makes a copy of the list or else we just end up handing out the same collection to everything.
+		protected void CopyList(IReadOnlyList<TItem>? input)
+		{
+			ThrowNull(input, nameof(input));
+			if (input is List<TItem> list)
+			{
+				list.Clear();
+				list.AddRange(this.myList);
+			}
+			else
+			{
+				throw new InvalidOperationException();
+			}
+		}
+
+		protected void ResetItems(IEnumerable<TItem>? add)
 		{
 			ThrowNull(add, nameof(add));
 			this.myList.Clear();

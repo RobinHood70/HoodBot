@@ -195,7 +195,7 @@
 
 		/// <summary>Gets the interwiki map.</summary>
 		/// <value>The interwiki map.</value>
-		public InterwikiMap InterwikiMap { get; private set; }
+		public ReadOnlyKeyedCollection<string, InterwikiEntry> InterwikiMap { get; private set; }
 
 		/// <summary>Gets a list of current magic words on the wiki.</summary>
 		/// <value>The magic words.</value>
@@ -1027,7 +1027,7 @@
 				interwikiList.Add(entry);
 			}
 
-			this.InterwikiMap = new InterwikiMap(interwikiList);
+			this.InterwikiMap = new ReadOnlyKeyedCollection<string, InterwikiEntry>(item => item?.Prefix, interwikiList);
 		}
 
 		/// <summary>Patrols the specified Recent Changes ID.</summary>

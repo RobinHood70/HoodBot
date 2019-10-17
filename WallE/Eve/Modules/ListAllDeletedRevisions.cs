@@ -56,7 +56,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				return null;
 			}
 
-			var title = result.StringNotNull("title");
+			var title = result.SafeString("title");
 			var revisions = result.GetRevisions(title);
 			return new AllRevisionsItem(
 				ns: (int)result.NotNull("ns"),

@@ -13,15 +13,15 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public string? DescriptionUrl { get; set; }
+		public string? DescriptionUrl { get; internal set; }
 
-		public string Name { get; set; }
+		public string Name { get; internal set; }
 
 		public int Namespace { get; }
 
 		public string Title { get; }
 
-		public string? Url { get; set; }
+		public string? Url { get; internal set; }
 		#endregion
 
 		#region Public Override Methods

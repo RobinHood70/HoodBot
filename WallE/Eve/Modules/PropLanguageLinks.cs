@@ -46,9 +46,9 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override LanguageLinksItem GetItem(JToken result) => result.GetLanguageLink();
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output.LanguageLinks);
+		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.LanguageLinks);
 
-		protected override void SetResultsOnCurrentPage() => this.Output.LanguageLinks = this.CopyList();
+		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.LanguageLinks);
 		#endregion
 	}
 }

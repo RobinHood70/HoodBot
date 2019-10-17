@@ -2,10 +2,10 @@
 namespace RobinHood70.WallE.Base
 {
 	// Note that FromId refers to a different page than Namespace and Title.
-	public class AllLinksItem
+	public class AllLinksItem : ITitleOptional
 	{
 		#region Public Constructors
-		public AllLinksItem(int? ns, string? title, long fromId)
+		internal AllLinksItem(int? ns, string? title, long fromId)
 		{
 			this.Namespace = ns;
 			this.Title = title;

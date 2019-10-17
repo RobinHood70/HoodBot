@@ -2,7 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	// This class is not an ITitle because none of the properties are guaranteed to be emitted as of MW 1.33.
-	public class PagesWithPropertyItem
+	public class PagesWithPropertyItem : ITitleOptional
 	{
 		#region Constructors
 		public PagesWithPropertyItem(int? ns, string? title, long pageId, string? value)

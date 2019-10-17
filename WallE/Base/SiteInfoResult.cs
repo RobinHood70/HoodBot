@@ -3,7 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
-	using static RobinHood70.WallE.ProjectGlobals;
+	using System.Collections.Immutable;
 
 	#region Public Enumerations
 	[Flags]
@@ -32,7 +32,7 @@ namespace RobinHood70.WallE.Base
 
 		public string DbVersion { get; set; }
 
-		public IReadOnlyDictionary<string, object> DefaultOptions { get; set; } = EmptyReadOnlyDictionary<string, object>();
+		public IReadOnlyDictionary<string, object> DefaultOptions { get; set; } = ImmutableDictionary<string, object>.Empty;
 
 		public SkinsItem DefaultSkin { get; set; } = new SkinsItem();
 
@@ -62,7 +62,7 @@ namespace RobinHood70.WallE.Base
 
 		public string HhvmVersion { get; set; }
 
-		public IReadOnlyDictionary<string, ImageLimitsItem> ImageLimits { get; set; } = EmptyReadOnlyDictionary<string, ImageLimitsItem>();
+		public IReadOnlyDictionary<string, ImageLimitsItem> ImageLimits { get; set; } = ImmutableDictionary<string, ImageLimitsItem>.Empty;
 
 		public IReadOnlyList<InterwikiMapItem> InterwikiMap { get; set; } = Array.Empty<InterwikiMapItem>();
 
@@ -132,7 +132,7 @@ namespace RobinHood70.WallE.Base
 
 		public StatisticsInfo Statistics { get; set; } = new StatisticsInfo();
 
-		public IReadOnlyDictionary<string, int> ThumbLimits { get; set; } = EmptyReadOnlyDictionary<string, int>();
+		public IReadOnlyDictionary<string, int> ThumbLimits { get; set; } = ImmutableDictionary<string, int>.Empty;
 
 		public DateTime? Time { get; set; }
 

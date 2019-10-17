@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Base
 	public class ExtendedMetadataItem
 	{
 		#region Constructors
-		public ExtendedMetadataItem(IReadOnlyDictionary<string, string> values, string? source, bool hidden)
+		internal ExtendedMetadataItem(IReadOnlyDictionary<string, string> values, string source, bool hidden)
 		{
 			this.MultilanguageValues = values;
 			this.Source = source;
@@ -19,7 +19,11 @@ namespace RobinHood70.WallE.Base
 
 		public IReadOnlyDictionary<string, string> MultilanguageValues { get; }
 
-		public string? Source { get; }
+		public string Source { get; }
+		#endregion
+
+		#region Public Override Methods
+		public override string ToString() => this.Source;
 		#endregion
 	}
 }

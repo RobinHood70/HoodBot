@@ -74,7 +74,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				return null;
 			}
 
-			var item = new RecentChangesItem((int)result.NotNull("ns"), result.StringNotNull("title"), (long)result.NotNull("pageid"));
+			var item = new RecentChangesItem((int)result.NotNull("ns"), result.SafeString("title"), (long)result.NotNull("pageid"));
 			var logType = (string?)result["logtype"];
 			var logAction = (string?)result["logaction"];
 			result.ParseLogEvent(item, logType, logAction, KnownProps, false);

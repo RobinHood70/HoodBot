@@ -347,7 +347,7 @@
 			foreach (var item in result.Interwiki)
 			{
 				var titleParts = new TitleParts(this.Site, item.Value.Title);
-				Debug.Assert(titleParts.Interwiki.Prefix != item.Value.InterwikiPrefix, "Interwiki prefixes didn't match.", titleParts.Interwiki.Prefix + " != " + item.Value.InterwikiPrefix);
+				Debug.Assert(titleParts.Interwiki.Prefix != item.Value.Prefix, "Interwiki prefixes didn't match.", titleParts.Interwiki.Prefix + " != " + item.Value.Prefix);
 				this.titleMap[item.Key] = titleParts;
 			}
 
@@ -558,8 +558,8 @@
 			this.PopulateMapCollections(result);
 			foreach (var item in result)
 			{
-				var page = this.CreatePage(item.Value.Title);
-				page.Populate(item.Value);
+				var page = this.CreatePage(item.Title);
+				page.Populate(item);
 				page.LoadOptions = options;
 				if (pageValidator != null && pageValidator(page))
 				{
@@ -601,11 +601,14 @@
 			this.LoadPages(this.LoadOptions, new QueryPageSetInput(input), this.RecurseCategoryHandler);
 			var copy = new List<string>(this.recurseCategories);
 			this.recurseCategories.Clear();
+			var originalTitle = input.Title;
 			foreach (var category in copy)
 			{
 				input.ChangeTitle(category);
 				this.RecurseCategoryPages(input, categoryTree);
 			}
+
+			input.ChangeTitle(originalTitle);
 		}
 		#endregion
 	}

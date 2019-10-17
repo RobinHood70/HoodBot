@@ -109,7 +109,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			output.Modules = result["modules"].AsReadOnlyList<string>();
 			output.ModuleScripts = result["modulescripts"].AsReadOnlyList<string>();
 			output.ModuleStyles = result["modulestyles"].AsReadOnlyList<string>();
-			output.JavaScriptConfigurationVariables = result["jsconfigvars"].AsReadOnlyDictionary<string, string>();
+			output.JavaScriptConfigurationVariables = result["jsconfigvars"].AsReadOnlyDictionary<string>();
 			output.Indicators = result["indicators"].AsBCDictionary();
 			output.InterwikiLinks = result["iwlinks"].GetInterwikiLinks().AsReadOnly();
 			output.WikiText = (string?)result["wikitext"].AsBCSubContent();
@@ -197,7 +197,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				foreach (var result in linkResults)
 				{
-					links.Add(new ParseLinksItem((int)result.NotNull("ns"), result.StringNotNull("title"), result["exists"].AsBCBool()));
+					links.Add(new ParseLinksItem((int)result.NotNull("ns"), result.SafeString("title"), result["exists"].AsBCBool()));
 				}
 			}
 

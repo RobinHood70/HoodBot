@@ -56,14 +56,13 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Public Methods
 		public PageSetResult<TOutput> CreatePageSet() =>
-			new PageSetResult<TOutput>(this.Pages)
-			{
-				BadRevisionIds = new List<long>(this.badRevisionIds),
-				Converted = this.converted.AsReadOnly(),
-				Interwiki = this.interwiki.AsReadOnly(),
-				Normalized = this.normalized.AsReadOnly(),
-				Redirects = this.redirects.AsReadOnly(),
-			};
+			new PageSetResult<TOutput>(
+				titles: this.Pages,
+				badRevisionIds: new List<long>(this.badRevisionIds),
+				converted: this.converted,
+				interwiki: this.interwiki,
+				normalized: this.normalized,
+				redirects: this.redirects);
 
 		public PageSetResult<TOutput> SubmitPageSet(TInput input)
 		{
@@ -154,7 +153,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			// TODO: I think DeserializeTitle can be merged into DeserializePage and just have that create and return the whole thing.
 			ThrowNull(result, nameof(result));
 			var ns = (int)result.NotNull("ns");
-			var title = result.StringNotNull("title");
+			var title = result.SafeString("title");
 			var id = (int)result.NotNull("pageid");
 			return new WikiTitleItem(ns, title, id);
 		}

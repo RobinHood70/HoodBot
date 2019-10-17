@@ -134,7 +134,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			var node = parent["defaultoptions"];
 			if (node != null)
 			{
-				output.DefaultOptions = node.AsReadOnlyDictionary<string, object>();
+				output.DefaultOptions = node.AsReadOnlyDictionary<object>();
 			}
 		}
 
@@ -146,35 +146,34 @@ namespace RobinHood70.WallE.Eve.Modules
 				var outputList = new List<ExtensionItem>();
 				foreach (var result in node)
 				{
-					var item = new ExtensionItem()
-					{
-						Type = (string?)result["type"],
-						Name = (string?)result["name"],
-						NameMessage = (string?)result["namemsg"],
-						Description = (string?)result["description"],
-						DescriptionMessage = (string?)result["descriptionmsg"],
-					};
+					var name = (string?)result["name"];
+					IReadOnlyList<string>? descMsgParams = null;
 					try
 					{
-						item.DescriptionMessageParameters = result["descriptionmsgparams"].AsReadOnlyList<string>();
+						descMsgParams = result["descriptionmsgparams"].AsReadOnlyList<string>();
 					}
 					catch (InvalidCastException)
 					{
-						wal.AddWarning("siteinfo-unhandledparams", CurrentCulture(EveMessages.UnhandledParams, item.Name));
+						wal.AddWarning("siteinfo-unhandledparams", CurrentCulture(EveMessages.UnhandledParams, name));
 					}
 
-					item.Author = (string?)result["author"];
-					item.Url = (string?)result["url"];
-					item.Version = (string?)result["version"];
-					item.VersionControlSystem = (string?)result["vcs-system"];
-					item.VersionControlSystemVersion = (string?)result["vcs-version"];
-					item.VersionControlSystemUrl = (string?)result["vcs-url"];
-					item.VersionControlSystemDate = (DateTime?)result["vcs-date"];
-					item.LicenseName = (string?)result["license-name"];
-					item.License = (string?)result["license"];
-					item.Credits = (string?)result["credits"];
-
-					outputList.Add(item);
+					outputList.Add(new ExtensionItem(
+						type: result.SafeString("type"),
+						author: (string?)result["author"],
+						credits: (string?)result["credits"],
+						description: (string?)result["description"],
+						descriptionMessage: (string?)result["descriptionmsg"],
+						descriptionMessageParameters: descMsgParams,
+						license: (string?)result["license"],
+						licenseName: (string?)result["license-name"],
+						name: name,
+						nameMessage: (string?)result["namemsg"],
+						url: (string?)result["url"],
+						version: (string?)result["version"],
+						versionControlSystem: (string?)result["vcs-system"],
+						versionControlSystemDate: (DateTime?)result["vcs-date"],
+						versionControlSystemUrl: (string?)result["vcs-url"],
+						versionControlSystemVersion: (string?)result["vcs-version"]));
 				}
 
 				output.Extensions = outputList;
@@ -311,7 +310,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					if (wal.DetectedFormatVersion == 2)
 					{
-						output.ThumbLimits = thumbLimits.AsReadOnlyDictionary<string, int>();
+						output.ThumbLimits = thumbLimits.AsReadOnlyDictionary<int>();
 					}
 					else
 					{
@@ -362,23 +361,20 @@ namespace RobinHood70.WallE.Eve.Modules
 				var outputList = new List<InterwikiMapItem>();
 				foreach (var result in node)
 				{
-					var item = new InterwikiMapItem()
-					{
-						Prefix = (string?)result["prefix"],
-						Flags =
-						result.GetFlag("extralanguagelink", InterwikiMapFlags.ExtraLanguageLink) |
-						result.GetFlag("local", InterwikiMapFlags.Local) |
-						result.GetFlag("localinterwiki", InterwikiMapFlags.LocalInterwiki) |
-						result.GetFlag("protorel", InterwikiMapFlags.ProtocolRelative) |
-						result.GetFlag("trans", InterwikiMapFlags.TransclusionAllowed),
-						Language = (string?)result["language"],
-						LinkText = (string?)result["linktext"],
-						SiteName = (string?)result["sitename"],
-						Url = (string?)result["url"],
-						WikiId = (string?)result["wikiid"],
-						ApiUrl = (string?)result["api"],
-					};
-					outputList.Add(item);
+					outputList.Add(new InterwikiMapItem(
+						prefix: result.SafeString("prefix"),
+						url: result.SafeString("url"),
+						flags:
+							result.GetFlag("extralanguagelink", InterwikiMapFlags.ExtraLanguageLink) |
+							result.GetFlag("local", InterwikiMapFlags.Local) |
+							result.GetFlag("localinterwiki", InterwikiMapFlags.LocalInterwiki) |
+							result.GetFlag("protorel", InterwikiMapFlags.ProtocolRelative) |
+							result.GetFlag("trans", InterwikiMapFlags.TransclusionAllowed),
+						language: (string?)result["language"],
+						linkText: (string?)result["linktext"],
+						siteName: (string?)result["sitename"],
+						wikiId: (string?)result["wikiid"],
+						apiUrl: (string?)result["api"]));
 				}
 
 				output.InterwikiMap = outputList;

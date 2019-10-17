@@ -9,11 +9,12 @@
 
 	#region Public Delegates
 
-	/// <summary>Delegate for page creation.</summary>
+	/// <summary>Delegate for title object creation.</summary>
+	/// <typeparam name="T">The type of title object to create.</typeparam>
 	/// <param name="ns">The namespace.</param>
-	/// <param name="title">The title.</param>
+	/// <param name="title">The page title.</param>
 	/// <param name="pageId">The page identifier.</param>
-	/// <returns>  A <see cref="PageItem"/> or derivative.</returns>
+	/// <returns>An <see cref="ITitle"/> object. In external use, this will normally be a <see cref="PageItem"/> or derivative.</returns>
 	public delegate T TitleCreator<T>(int ns, string title, long pageId)
 		where T : ITitle;
 	#endregion

@@ -61,7 +61,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override AllImagesItem? GetItem(JToken result) => result == null
 			? null
-			: JTokenImageInfo.ParseImageInfo(result, new AllImagesItem((int)result.NotNull("ns"), result.StringNotNull("title"), result.StringNotNull("name")));
+			: JTokenImageInfo.ParseImageInfo(result, new AllImagesItem((int)result.NotNull("ns"), result.SafeString("title"), result.SafeString("name")));
 		#endregion
 	}
 }
