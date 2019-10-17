@@ -289,5 +289,83 @@
 			return text.Length == 1 ? retval : retval + text.Substring(1);
 		}
 		#endregion
+
+#if DEBUG
+		// Any calls to any of these methods should be replaced by native methods/properties.
+		#region Honeypot Methods
+		internal static void AddRange<T>(this List<T> list, params T[] values)
+		{
+			ThrowNull(list, nameof(list));
+			ThrowNull(values, nameof(values));
+			list.AddRange(values);
+		}
+
+		internal static IReadOnlyList<T> AsReadOnlyList<T>(this List<T>? list) => list?.AsReadOnly() ?? Array.Empty<T>() as IReadOnlyList<T>;
+
+		internal static T First<T>(this IReadOnlyList<T> list) => list[0];
+
+		internal static T? FirstOrDefault<T>(this IReadOnlyList<T> list)
+			where T : class
+		{
+			if (list != null)
+			{
+				using var enumerator = list.GetEnumerator();
+				if (enumerator.MoveNext())
+				{
+					return enumerator.Current;
+				}
+			}
+
+			return default;
+		}
+
+		internal static T? FirstOrDefault<T>(this IReadOnlyList<T> list, T? defaultValue)
+			where T : class
+		{
+			if (list != null)
+			{
+				using var enumerator = list.GetEnumerator();
+				if (enumerator.MoveNext())
+				{
+					return enumerator.Current;
+				}
+			}
+
+			return defaultValue;
+		}
+
+		internal static T FirstOrDefaultValue<T>(this IReadOnlyList<T> list)
+			where T : struct
+		{
+			if (list != null)
+			{
+				using var enumerator = list.GetEnumerator();
+				if (enumerator.MoveNext())
+				{
+					return enumerator.Current;
+				}
+			}
+
+			return default;
+		}
+
+		internal static T FirstOrDefaultValue<T>(this IReadOnlyList<T> enumerable, T defaultValue)
+			where T : struct
+		{
+			if (enumerable != null)
+			{
+				using var enumerator = enumerable.GetEnumerator();
+				if (enumerator.MoveNext())
+				{
+					return enumerator.Current;
+				}
+			}
+
+			return defaultValue;
+		}
+
+		internal static bool IsEmpty(this ICollection collection) => (collection?.Count ?? 0) == 0;
+		#endregion
+#endif
 	}
 }
