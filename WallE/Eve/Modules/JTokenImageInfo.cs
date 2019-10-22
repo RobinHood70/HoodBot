@@ -15,12 +15,12 @@ namespace RobinHood70.WallE.Eve.Modules
 			item.Timestamp = (DateTime?)result["timestamp"];
 			item.User = (string?)result["user"];
 			item.UserId = (long?)result["userid"] ?? -1;
-			item.Flags =
-				result.GetFlag("anon", ImageInfoFlags.Anonymous) |
-				result.GetFlag("commenthidden", ImageInfoFlags.CommentHidden) |
-				result.GetFlag("filehidden", ImageInfoFlags.FileHidden) |
-				result.GetFlag("suppressed", ImageInfoFlags.Suppressed) |
-				result.GetFlag("userhidden", ImageInfoFlags.UserHidden);
+			item.Flags = result.GetFlags(
+				("anon", ImageInfoFlags.Anonymous),
+				("commenthidden", ImageInfoFlags.CommentHidden),
+				("filehidden", ImageInfoFlags.FileHidden),
+				("suppressed", ImageInfoFlags.Suppressed),
+				("userhidden", ImageInfoFlags.UserHidden));
 			item.Size = (int?)result["size"] ?? 0;
 			item.Width = (short?)result["width"] ?? 0;
 			item.Height = (short?)result["height"] ?? 0;
@@ -72,12 +72,12 @@ namespace RobinHood70.WallE.Eve.Modules
 				{
 					var name = item.Name;
 					var itemValue = item.Value;
-					var value = itemValue.NotNull("value");
-					var source = itemValue.SafeString("source");
-					var hidden = itemValue["hidden"].AsBCBool();
+					var value = itemValue.MustHave("value");
+					var source = itemValue.MustHaveString("source");
+					var hidden = itemValue["hidden"].ToBCBool();
 					if (value.Type == JTokenType.Object)
 					{
-						var newItem = new ExtendedMetadataItem(value.AsReadOnlyDictionary<string>(), source, hidden);
+						var newItem = new ExtendedMetadataItem(value.ToStringDictionary<string>(), source, hidden);
 						dict.Add(name, newItem);
 					}
 					else

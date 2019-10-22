@@ -68,27 +68,27 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override UserContributionsItem? GetItem(JToken result) => result == null
 			? null
 			: new UserContributionsItem(
-				user: result.SafeString("user"),
+				user: result.MustHaveString("user"),
 				userId: (long?)result["userid"] ?? 0,
 				ns: (int?)result["ns"],
 				title: (string?)result["title"],
-				pageId: (long?)result.NotNull("pageid") ?? 0,
+				pageId: (long?)result.MustHave("pageid") ?? 0,
 				comment: (string?)result["comment"],
-				flags:
-					result.GetFlag("commenthidden", UserContributionFlags.CommentHidden) |
-					result.GetFlag("minor", UserContributionFlags.Minor) |
-					result.GetFlag("new", UserContributionFlags.New) |
-					result.GetFlag("patrolled", UserContributionFlags.Patrolled) |
-					result.GetFlag("suppressed", UserContributionFlags.Suppressed) |
-					result.GetFlag("texthidden", UserContributionFlags.TextHidden) |
-					result.GetFlag("top", UserContributionFlags.Top) |
-					result.GetFlag("userhidden", UserContributionFlags.UserHidden),
+				flags: result.GetFlags(
+					("commenthidden", UserContributionFlags.CommentHidden),
+					("minor", UserContributionFlags.Minor),
+					("new", UserContributionFlags.New),
+					("patrolled", UserContributionFlags.Patrolled),
+					("suppressed", UserContributionFlags.Suppressed),
+					("texthidden", UserContributionFlags.TextHidden),
+					("top", UserContributionFlags.Top),
+					("userhidden", UserContributionFlags.UserHidden)),
 				parentId: (long?)result["parentid"] ?? 0,
 				parsedComment: (string?)result["parsedcomment"],
 				revId: (long?)result["revid"] ?? 0,
 				size: (int?)result["size"] ?? 0,
 				sizeDiff: (int?)result["sizediff"] ?? 0,
-				tags: result["tags"].AsReadOnlyList<string>(),
+				tags: result["tags"].ToReadOnlyList<string>(),
 				timestamp: (DateTime?)result["timestamp"]);
 		#endregion
 	}

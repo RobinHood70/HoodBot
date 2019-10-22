@@ -40,11 +40,11 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(result, nameof(result));
 			ThrowNull(page, nameof(page));
-			page.Flags =
-				result.GetFlag("invalid", PurgeFlags.Invalid) |
-				result.GetFlag("missing", PurgeFlags.Missing) |
-				result.GetFlag("linkupdate", PurgeFlags.LinkUpdate) |
-				result.GetFlag("purged", PurgeFlags.Purged);
+			page.Flags = result.GetFlags(
+				("invalid", PurgeFlags.Invalid),
+				("missing", PurgeFlags.Missing),
+				("linkupdate", PurgeFlags.LinkUpdate),
+				("purged", PurgeFlags.Purged));
 			this.Pages.Add(page);
 		}
 		#endregion

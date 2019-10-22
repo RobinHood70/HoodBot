@@ -1,5 +1,7 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
+	using RobinHood70.WikiCommon;
+
 	/// <summary>Represents a wikitext (HTML) comment.</summary>
 	public class CommentNode : IWikiNode
 	{

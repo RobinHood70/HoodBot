@@ -2,7 +2,6 @@
 namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
-	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Properties;
@@ -70,30 +69,28 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 		}
 
-		protected override void DeserializeResult(JToken result, IList<QueryPageItem> output)
+		protected override void DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			ThrowNull(output, nameof(output));
 			if (result["disabled"] != null)
 			{
 				this.Wal.AddWarning("querypage-disabled", CurrentCulture(EveMessages.QueryPageDisabled, this.queryPage));
 				return;
 			}
 
-			this.cached = result["cached"].AsBCBool();
+			this.cached = result["cached"].ToBCBool();
 			this.cachedTimestamp = (DateTime?)result["cachedtimestamp"];
 			this.maxResults = (int?)result["maxresults"] ?? 0;
-
-			base.DeserializeResult(result["results"], output);
+			base.DeserializeResult(result.MustHave("results"));
 		}
 
 		protected override QueryPageItem? GetItem(JToken result) => result == null
 			? null
 			: new QueryPageItem(
-				ns: (int)result.NotNull("ns"),
-				title: result.SafeString("title"),
-				value: (long)result.NotNull("value"),
-				databaseResult: result["databaseResult"]?.AsReadOnlyDictionary<object?>(),
+				ns: (int)result.MustHave("ns"),
+				title: result.MustHaveString("title"),
+				value: (long)result.MustHave("value"),
+				databaseResult: result["databaseResult"]?.ToStringDictionary<object?>(),
 				timestamp: (DateTime?)result["timestamp"]);
 		#endregion
 	}

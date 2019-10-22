@@ -20,7 +20,7 @@
 		#endregion
 
 		#region Constructors
-		internal Namespace(Site site, NamespacesItem ns, IEnumerable<string> aliases)
+		internal Namespace(Site site, SiteInfoNamespace ns, IEnumerable<string> aliases)
 		{
 			ThrowNull(site, nameof(site));
 			this.Site = site;

@@ -1,12 +1,13 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class PropRedirects : PropListModule<RedirectsInput, RedirectsItem>, IGeneratorModule
+	internal class PropRedirects : PropListModule<RedirectsInput, RedirectItem>, IGeneratorModule
 	{
 		#region Constructors
 		public PropRedirects(WikiAbstractionLayer wal, RedirectsInput input)
@@ -48,17 +49,15 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override RedirectsItem? GetItem(JToken result) => result == null
+		protected override RedirectItem? GetItem(JToken result, PageItem page) => result == null
 			? null
-			: new RedirectsItem(
+			: new RedirectItem(
 				ns: (int?)result["ns"],
 				title: (string?)result["title"],
 				pageId: (long?)result["pageid"] ?? 0,
 				fragment: (string?)result["fragment"]);
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.Redirects);
-
-		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.Redirects);
+		protected override ICollection<RedirectItem> GetMutableList(PageItem page) => (ICollection<RedirectItem>)page.Redirects;
 		#endregion
 	}
 }

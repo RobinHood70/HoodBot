@@ -143,6 +143,7 @@
     <Compile Include="Jobs\UntranscludeLore.cs" />
     <Compile Include="Uesp\MetaNamespace.cs" />
     <Compile Include="Uesp\VariableDictionary.cs" />
+    <Compile Include="Uesp\VariableItem.cs" />
     <Compile Include="WikiInfo.cs" />
     <Compile Include="Jobs\TestJob.cs" />
     <Compile Include="Jobs\VoidJob.cs" />
@@ -160,7 +161,6 @@
     <Compile Include="Uesp\VariablesInput.cs" />
     <Compile Include="Uesp\VariablesPage.cs" />
     <Compile Include="Uesp\VariablesPageItem.cs" />
-    <Compile Include="Uesp\VariablesResult.cs" />
     <Compile Include="ViewModel\ConstructorParameter.cs" />
     <Compile Include="ViewModel\JobNode.cs" />
     <Compile Include="Jobs\Design\JobParameterAttribute.cs" />

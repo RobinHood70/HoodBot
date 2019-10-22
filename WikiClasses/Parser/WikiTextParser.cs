@@ -53,7 +53,7 @@
 		/// <param name="callerName">  The caller member name.</param>
 		/// <returns>The single node of the specified type.</returns>
 		/// <exception cref="ArgumentException">Thrown if there is more than one node in the collection, or the node is not of the specified type.</exception>
-		public static T SingleNode<T>(string txt, [CallerMemberName] string callerName = "<Unknown>")
+		public static T SingleNode<T>(string txt, [CallerMemberName] string callerName = Unknown)
 			where T : IWikiNode
 		{
 			var parser = Parse(txt);

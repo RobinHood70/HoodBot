@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
+	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
@@ -8,7 +9,7 @@
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public class PropVariables : PropListModule<VariablesInput, VariablesResult>, IGeneratorModule
+	public class PropVariables : PropListModule<VariablesInput, VariableItem>, IGeneratorModule
 	{
 		#region Constructors
 		public PropVariables(WikiAbstractionLayer wal, VariablesInput input)
@@ -49,17 +50,19 @@
 				.Add("limit", this.Limit);
 		}
 
-		protected override VariablesResult GetItem(JToken result)
+		protected override VariableItem GetItem(JToken result, PageItem page)
 		{
 			ThrowNull(result, nameof(result));
 			var vars = result["vars"].ToObject<Dictionary<string, string>>();
 			var subset = (string)result["subset"];
-			return new VariablesResult(vars, subset);
+			return new VariableItem(vars, subset);
 		}
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems((this.Output as VariablesPageItem).Variables);
-
-		protected override void SetResultsOnCurrentPage() => (this.Output as VariablesPageItem).Variables = this.CopyList();
+		protected override ICollection<VariableItem> GetMutableList(PageItem page)
+		{
+			var varPage = page as VariablesPageItem ?? throw new InvalidOperationException();
+			return varPage.Variables as ICollection<VariableItem>;
+		}
 		#endregion
 	}
 }

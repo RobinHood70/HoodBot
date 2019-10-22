@@ -11,8 +11,8 @@
 
 		/// <summary>Initializes a new instance of the <see cref="InterwikiEntry"/> class.</summary>
 		/// <param name="site">The site the interwiki entry is from.</param>
-		/// <param name="item">The <see cref="InterwikiMapItem"/> item to initialize from.</param>
-		protected internal InterwikiEntry(Site site, InterwikiMapItem item)
+		/// <param name="item">The <see cref="SiteInfoInterwikiMap"/> item to initialize from.</param>
+		protected internal InterwikiEntry(Site site, SiteInfoInterwikiMap item)
 		{
 			ThrowNull(item, nameof(item));
 			this.Site = site;

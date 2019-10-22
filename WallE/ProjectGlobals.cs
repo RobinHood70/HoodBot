@@ -20,10 +20,6 @@
 
 	internal static class ProjectGlobals
 	{
-		#region Public Constants
-		public const string NoTitle = "<No Title>";
-		#endregion
-
 		#region Public Methods
 
 		/// <summary>Creates an empty read-only dictionary of the specified type.</summary>

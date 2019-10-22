@@ -42,14 +42,11 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override UserRightsResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new UserRightsResult()
-			{
-				User = (string?)result["user"],
-				UserId = (long)result["userid"],
-				Added = result["added"].AsReadOnlyList<string>(),
-				Removed = result["removed"].AsReadOnlyList<string>(),
-			};
-			return output;
+			return new UserRightsResult(
+				user: result.MustHaveString("user"),
+				userId: (long?)result["userid"] ?? 0,
+				added: result["added"].ToReadOnlyList<string>(),
+				removed: result["removed"].ToReadOnlyList<string>());
 		}
 		#endregion
 	}

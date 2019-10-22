@@ -60,31 +60,26 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override ProtectResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new ProtectResult()
+			var protections = new List<ProtectResultItem>();
+			if (result["protections"] is JToken protectionsNode)
 			{
-				Cascade = result["cascade"].AsBCBool(),
-				Reason = (string?)result["reason"],
-				Title = (string?)result["title"],
-			};
-			var protections = result["protections"];
-			if (protections != null)
-			{
-				var list = new List<ProtectResultItem>();
-				foreach (var protection in protections)
+				foreach (var protection in protectionsNode)
 				{
-					var item = new ProtectResultItem();
-					var kvp = protection.First as JProperty;
-					item.Type = kvp.Name;
-					item.Level = (string)kvp.Value;
-					item.Expiry = protection["expiry"].AsDate();
-
-					list.Add(item);
+					if (protection.First is JProperty kvp)
+					{
+						protections.Add(new ProtectResultItem(
+							type: kvp.Name,
+							level: (string?)kvp.Value ?? string.Empty,
+							expiry: protection["expiry"].ToNullableDate()));
+					}
 				}
-
-				output.Protections = list.AsReadOnly();
 			}
 
-			return output;
+			return new ProtectResult(
+				title: result.MustHaveString("title"),
+				reason: result.MustHaveString("reason"),
+				cascade: result["cascade"].ToBCBool(),
+				protections: protections);
 		}
 		#endregion
 	}

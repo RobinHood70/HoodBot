@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Eve;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -49,21 +50,13 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("generatetitles", input.GenerateTitles);
 		}
 
-		protected override AllRevisionsItem? GetItem(JToken result)
-		{
-			if (result == null)
-			{
-				return null;
-			}
-
-			var title = result.SafeString("title");
-			var revisions = result.GetRevisions(title);
-			return new AllRevisionsItem(
-				ns: (int)result.NotNull("ns"),
-				title: title,
-				pageId: (long)result.NotNull("pageid"),
-				revisions: revisions);
-		}
+		protected override AllRevisionsItem? GetItem(JToken result) => result == null
+			? null
+			: new AllRevisionsItem(
+			ns: (int)result.MustHave("ns"),
+			title: result.MustHaveString("title"),
+			pageId: (long)result.MustHave("pageid"),
+			revisions: result.GetRevisions());
 		#endregion
 	}
 }

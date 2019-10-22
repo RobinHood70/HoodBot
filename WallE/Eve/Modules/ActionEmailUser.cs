@@ -41,12 +41,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override EmailUserResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new EmailUserResult()
-			{
-				Result = (string?)result["result"],
-				Message = (string?)result["message"],
-			};
-			return output;
+			return new EmailUserResult(
+				result: result.MustHaveString("result"),
+				message: (string?)result["message"]);
 		}
 		#endregion
 	}

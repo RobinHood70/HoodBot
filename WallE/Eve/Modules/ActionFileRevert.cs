@@ -3,7 +3,6 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
-	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -42,17 +41,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override FileRevertResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var error = result["error"];
-			if (error != null)
-			{
-				throw WikiException.General((string?)result["code"], (string?)result["info"]);
-			}
-
-			var output = new FileRevertResult()
-			{
-				Result = (string?)result["result"],
-			};
-			return output;
+			return new FileRevertResult(result.MustHaveString("result"));
 		}
 		#endregion
 	}

@@ -58,9 +58,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override WatchlistRawItem? GetItem(JToken result) => result == null
 			? null
 			: new WatchlistRawItem(
-				ns: (int)result.NotNull("ns"),
-				title: result.SafeString("title"),
-				changed: result["changed"].AsBCBool());
+				ns: (int)result.MustHave("ns"),
+				title: result.MustHaveString("title"),
+				changed: result["changed"].ToBCBool());
 		#endregion
 	}
 }

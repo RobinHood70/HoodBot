@@ -38,15 +38,13 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override TagsItem GetItem(JToken result) => result == null
+		protected override TagsItem? GetItem(JToken result) => result == null
 			? null
-			: new TagsItem()
-			{
-				Name = (string?)result["name"],
-				DisplayName = (string?)result["displayname"],
-				Description = (string?)result["description"],
-				HitCount = (int?)result["hitcount"] ?? 0,
-			};
+			: new TagsItem(
+				name: result.MustHaveString("name"),
+				description: (string?)result["description"],
+				displayName: (string?)result["displayname"],
+				hitCount: (int?)result["hitcount"] ?? 0);
 		#endregion
 	}
 }

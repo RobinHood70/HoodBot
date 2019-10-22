@@ -45,13 +45,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override DeleteResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new DeleteResult()
-			{
-				LogId = (long?)result["logid"] ?? 0,
-				Reason = (string?)result["reason"],
-				Title = (string?)result["title"],
-			};
-			return output;
+			return new DeleteResult(
+				title: result.MustHaveString("title"),
+				reason: result.MustHaveString("reason"),
+				logId: (long?)result["logid"] ?? 0);
 		}
 		#endregion
 	}

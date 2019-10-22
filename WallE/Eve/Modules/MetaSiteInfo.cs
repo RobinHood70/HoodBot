@@ -7,7 +7,6 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Properties;
-	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -15,7 +14,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public MetaSiteInfo(WikiAbstractionLayer wal, SiteInfoInput input)
-			: base(wal, input, new SiteInfoResult(), null)
+			: base(wal, input, null)
 		{
 		}
 		#endregion
@@ -38,6 +37,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Methods
+		protected override void DeserializeResult(JToken result) => throw new InvalidOperationException(EveMessages.CannotDeserialize);
+
 		public override bool HandleWarning(string from, string text)
 		{
 			if (this.SiteVersion == 0 && from == "main" && text?.Contains("formatversion") == true)
@@ -76,589 +77,478 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIfNotNullIf("inlanguagecode", input.InterwikiLanguageCode, prop.HasFlag(SiteInfoProperties.InterwikiMap));
 		}
 
-		protected override void DeserializeResult(JToken result, SiteInfoResult output)
+		protected override void DeserializeParent(JToken parent)
 		{
-		}
+			ThrowNull(parent, nameof(parent));
 
-		protected override void DeserializeParent(JToken parent, SiteInfoResult output)
-		{
 			// Because this module can continue in non-standard fashion (each module will either appear in whole or not at all), we need to ensure that outputs are only written to if necessary.
-			GetGeneral(parent, output, this.Wal);
-			GetNamespaces(parent, output);
-			GetNamespaceAliases(parent, output);
-			GetSpecialPageAliases(parent, output);
-			GetMagicWords(parent, output);
-			GetInterwikiMap(parent, output);
-			GetDbReplLag(parent, output);
-			GetStatistics(parent, output);
-			GetUserGroups(parent, output);
-			GetFileExtensions(parent, output);
-			GetLibraries(parent, output);
-			GetExtensions(parent, output, this.Wal);
-			GetRightsInfo(parent, output);
-			GetRestrictions(parent, output);
-			GetLanguages(parent, output);
-			GetSkins(parent, output);
-			GetExtensionTags(parent, output);
-			GetFunctionHooks(parent, output);
-			GetVariables(parent, output);
-			GetProtocols(parent, output);
-			GetDefaultOptions(parent, output);
-			GetSubscribedHooks(parent, output);
+			var (defaultSkin, skins) = GetSkins(parent);
+			this.Output ??= new SiteInfoResult();
+			var output = this.Output; // Mostly done to reduce hits on this.Output in reference search, since we're trying to limit using it whenever possible.
+			output.DefaultOptions ??= GetDefaultOptions(parent);
+			output.DefaultSkin ??= defaultSkin;
+			output.Extensions ??= this.GetExtensions(parent);
+			output.ExtensionTags ??= GetExtensionTags(parent);
+			output.FileExtensions ??= GetFileExtensions(parent);
+			output.FunctionHooks ??= GetFunctionHooks(parent);
+			output.General ??= this.GetGeneral(parent);
+			output.InterwikiMap ??= GetInterwikiMap(parent);
+			output.LagInfo ??= GetDbReplLag(parent);
+			output.Languages ??= GetLanguages(parent);
+			output.Libraries ??= GetLibraries(parent);
+			output.MagicWords ??= GetMagicWords(parent);
+			output.Namespaces ??= GetNamespaces(parent);
+			output.NamespaceAliases ??= GetNamespaceAliases(parent);
+			output.Protocols ??= GetProtocols(parent);
+			output.Restrictions ??= GetRestrictions(parent);
+			output.Rights ??= this.GetRightsInfo(parent);
+			output.Skins ??= skins;
+			output.SpecialPageAliases ??= GetSpecialPageAliases(parent);
+			output.Statistics ??= GetStatistics(parent);
+			output.SubscribedHooks ??= GetSubscribedHooks(parent);
+			output.UserGroups ??= GetUserGroups(parent);
+			output.Variables ??= GetVariables(parent);
 		}
 		#endregion
 
 		#region Private Static Methods
-		private static void GetDbReplLag(JToken parent, SiteInfoResult output)
+		private static List<SiteInfoLag>? GetDbReplLag(JToken parent)
 		{
-			var node = parent["dbrepllag"];
-			if (node != null)
+			if (!(parent["dbrepllag"] is JToken node))
 			{
-				var outputList = new List<LagItem>();
-				foreach (var result in node)
+				return null;
+			}
+
+			var retval = new List<SiteInfoLag>();
+			foreach (var result in node)
+			{
+				retval.Add(new SiteInfoLag(result.MustHaveString("host"), (int)result.MustHave("lag")));
+			}
+
+			return retval;
+		}
+
+		private static Dictionary<string, object>? GetDefaultOptions(JToken parent) => parent["defaultoptions"] is JToken node ? node.ToStringDictionary<object>() : null;
+
+		private static List<string>? GetExtensionTags(JToken parent) => parent["extensiontags"] is JToken node ? node.ToList<string>() : null;
+
+		private static List<string>? GetFileExtensions(JToken parent)
+		{
+			if (!(parent["fileextensions"] is JToken node))
+			{
+				return null;
+			}
+
+			var retval = new List<string>();
+			foreach (var result in node)
+			{
+				retval.Add(result.MustHaveString("ext"));
+			}
+
+			return retval;
+		}
+
+		private static List<string>? GetFunctionHooks(JToken parent) => parent["functionhooks"] is JToken node ? node.ToList<string>() : null;
+
+		private static List<SiteInfoInterwikiMap>? GetInterwikiMap(JToken parent)
+		{
+			if (!(parent["interwikimap"] is JToken node))
+			{
+				return null;
+			}
+
+			var retval = new List<SiteInfoInterwikiMap>();
+			foreach (var result in node)
+			{
+				retval.Add(new SiteInfoInterwikiMap(
+					prefix: result.MustHaveString("prefix"),
+					url: result.MustHaveString("url"),
+					flags: result.GetFlags(
+						("extralanguagelink", InterwikiMapFlags.ExtraLanguageLink),
+						("local", InterwikiMapFlags.Local),
+						("localinterwiki", InterwikiMapFlags.LocalInterwiki),
+						("protorel", InterwikiMapFlags.ProtocolRelative),
+						("trans", InterwikiMapFlags.TransclusionAllowed)),
+					language: (string?)result["language"],
+					linkText: (string?)result["linktext"],
+					siteName: (string?)result["sitename"],
+					wikiId: (string?)result["wikiid"],
+					apiUrl: (string?)result["api"]));
+			}
+
+			return retval;
+		}
+
+		private static List<SiteInfoLanguage>? GetLanguages(JToken parent)
+		{
+			if (!(parent["languages"] is JToken node))
+			{
+				return null;
+			}
+
+			var retval = new List<SiteInfoLanguage>();
+			foreach (var result in node)
+			{
+				retval.Add(new SiteInfoLanguage(result.MustHaveString("code"), result.MustHaveBCString("name")));
+			}
+
+			return retval;
+		}
+
+		private static List<SiteInfoLibrary>? GetLibraries(JToken parent)
+		{
+			if (!(parent["libraries"] is JToken node))
+			{
+				return null;
+			}
+
+			var retval = new List<SiteInfoLibrary>();
+			foreach (var result in node)
+			{
+				retval.Add(new SiteInfoLibrary(
+					name: result.MustHaveString("name"),
+					version: result.MustHaveString("version")));
+			}
+
+			return retval;
+		}
+
+		private static List<SiteInfoMagicWord>? GetMagicWords(JToken parent)
+		{
+			if (!(parent["magicwords"] is JToken node))
+			{
+				return null;
+			}
+
+			var retval = new List<SiteInfoMagicWord>();
+			foreach (var result in node)
+			{
+				retval.Add(new SiteInfoMagicWord(
+					name: result.MustHaveString("name"),
+					aliases: result.MustHaveList<string>("aliases"),
+					caseSensitive: result["case-sensitive"].ToBCBool()));
+			}
+
+			return retval;
+		}
+
+		private static List<SiteInfoNamespaceAlias>? GetNamespaceAliases(JToken parent)
+		{
+			if (!(parent["namespacealiases"] is JToken node))
+			{
+				return null;
+			}
+
+			var retval = new List<SiteInfoNamespaceAlias>();
+			foreach (var result in node)
+			{
+				retval.Add(new SiteInfoNamespaceAlias(
+					id: (int)result.MustHave("id"),
+					alias: result.MustHaveBCString("alias")));
+			}
+
+			return retval;
+		}
+
+		private static List<SiteInfoNamespace>? GetNamespaces(JToken parent)
+		{
+			if (!(parent["namespaces"] is JToken node))
+			{
+				return null;
+			}
+
+			var retval = new List<SiteInfoNamespace>();
+			foreach (var resultNode in node)
+			{
+				if (resultNode.First is JToken result)
 				{
-					var item = new LagItem()
-					{
-						Host = (string?)result["host"],
-						Lag = (int)result["lag"],
-					};
-					outputList.Add(item);
+					retval.Add(new SiteInfoNamespace(
+						id: (int)result.MustHave("id"),
+						canonicalName: (string?)result["canonical"] ?? string.Empty,
+						defaultContentModel: (string?)result["defaultcontentmodel"],
+						flags: ((string?)result["case"] == "case-sensitive" ? NamespaceFlags.CaseSensitive : NamespaceFlags.None) | result.GetFlags(
+							("content", NamespaceFlags.ContentSpace),
+							("nonincludable", NamespaceFlags.NonIncludable),
+							("subpages", NamespaceFlags.Subpages)),
+						name: result.MustHaveBCString("name")));
+				}
+			}
+
+			return retval;
+		}
+
+		private static List<string>? GetProtocols(JToken parent) => parent["protocols"] is JToken node ? node.ToList<string>() : null;
+
+		private static SiteInfoRestriction? GetRestrictions(JToken parent) => parent["restrictions"] is JToken node
+			? new SiteInfoRestriction(
+				cascadingLevels: node["cascadinglevels"].ToReadOnlyList<string>(),
+				levels: node["levels"].ToReadOnlyList<string>(),
+				semiProtectedLevels: node["semiprotectedlevels"].ToReadOnlyList<string>(),
+				types: node["types"].ToReadOnlyList<string>())
+			: null;
+
+		private static (SiteInfoSkin? defaultSkin, List<SiteInfoSkin>? skins) GetSkins(JToken parent)
+		{
+			if (!(parent["skins"] is JToken node))
+			{
+				return (null, null);
+			}
+
+			SiteInfoSkin? defaultSkin = null;
+			var retval = new List<SiteInfoSkin>();
+			foreach (var result in node)
+			{
+				var item = new SiteInfoSkin(
+					code: result.MustHaveString("code"),
+					name: result.MustHaveBCString("name"),
+					unusable: result["unusable"].ToBCBool());
+				if (result["default"].ToBCBool())
+				{
+					defaultSkin = item;
 				}
 
-				output.LagInfo = outputList;
+				retval.Add(item);
 			}
+
+			return (defaultSkin, retval);
 		}
 
-		private static void GetDefaultOptions(JToken parent, SiteInfoResult output)
+		private static List<SiteInfoSpecialPageAlias>? GetSpecialPageAliases(JToken parent)
 		{
-			var node = parent["defaultoptions"];
-			if (node != null)
+			if (!(parent["specialpagealiases"] is JToken node))
 			{
-				output.DefaultOptions = node.AsReadOnlyDictionary<object>();
+				return null;
 			}
+
+			var retval = new List<SiteInfoSpecialPageAlias>();
+			foreach (var result in node)
+			{
+				retval.Add(new SiteInfoSpecialPageAlias(
+					realName: result.MustHaveString("realname"),
+					aliases: result.MustHaveList<string>("aliases")));
+			}
+
+			return retval;
 		}
 
-		private static void GetExtensions(JToken parent, SiteInfoResult output, WikiAbstractionLayer wal)
+		private static SiteInfoStatistics? GetStatistics(JToken parent) => parent["statistics"] is JToken node
+			? new SiteInfoStatistics(
+				activeUsers: (long)node.MustHave("activeusers"),
+				admins: (long)node.MustHave("admins"),
+				articles: (long)node.MustHave("articles"),
+				edits: (long)node.MustHave("edits"),
+				images: (long)node.MustHave("images"),
+				jobs: (long)node.MustHave("jobs"),
+				pages: (long)node.MustHave("pages"),
+				users: (long)node.MustHave("users"),
+				views: (long?)node["views"] ?? -1)
+			: null;
+
+		private static List<SiteInfoSubscribedHook>? GetSubscribedHooks(JToken parent)
 		{
-			var node = parent["extensions"];
-			if (node != null)
+			if (!(parent["showhooks"] is JToken node))
 			{
-				var outputList = new List<ExtensionItem>();
-				foreach (var result in node)
+				return null;
+			}
+
+			var retval = new List<SiteInfoSubscribedHook>();
+			foreach (var result in node)
+			{
+				// See https://phabricator.wikimedia.org/T117022 for details on the Scribunto check.
+				var subscribersNode = result.MustHave("subscribers");
+				var subscribers = subscribersNode.Type == JTokenType.Object && subscribersNode["scribunto"] is JToken scribuntoNode
+					? new List<string> { (string?)scribuntoNode ?? string.Empty }
+					: subscribersNode.ToList<string>();
+
+				retval.Add(new SiteInfoSubscribedHook(
+					name: result.MustHaveString("name"),
+					subscribers: subscribers));
+			}
+
+			return retval;
+		}
+
+		private static List<SiteInfoUserGroup>? GetUserGroups(JToken parent)
+		{
+			if (!(parent["usergroups"] is JToken node))
+			{
+				return null;
+			}
+
+			var retval = new List<SiteInfoUserGroup>();
+			foreach (var result in node)
+			{
+				retval.Add(new SiteInfoUserGroup(
+					name: result.MustHaveString("name"),
+					rights: result.MustHaveList<string>("rights"),
+					number: (long?)result["number"] ?? -1,
+					add: result["add"].ToReadOnlyList<string>(),
+					addSelf: result["add-self"].ToReadOnlyList<string>(),
+					remove: result["remove"].ToReadOnlyList<string>(),
+					removeSelf: result["remove-self"].ToReadOnlyList<string>()));
+			}
+
+			return retval;
+		}
+
+		private static List<string>? GetVariables(JToken parent) => parent["variables"] is JToken node ? node.ToList<string>() : null;
+		#endregion
+
+		#region Private Methods
+		private List<SiteInfoExtensions>? GetExtensions(JToken parent)
+		{
+			if (!(parent["extensions"] is JToken node))
+			{
+				return null;
+			}
+
+			var retval = new List<SiteInfoExtensions>();
+			foreach (var result in node)
+			{
+				var name = (string?)result["name"];
+				IReadOnlyList<string>? descMsgParams = null;
+				try
 				{
-					var name = (string?)result["name"];
-					IReadOnlyList<string>? descMsgParams = null;
-					try
-					{
-						descMsgParams = result["descriptionmsgparams"].AsReadOnlyList<string>();
-					}
-					catch (InvalidCastException)
-					{
-						wal.AddWarning("siteinfo-unhandledparams", CurrentCulture(EveMessages.UnhandledParams, name));
-					}
-
-					outputList.Add(new ExtensionItem(
-						type: result.SafeString("type"),
-						author: (string?)result["author"],
-						credits: (string?)result["credits"],
-						description: (string?)result["description"],
-						descriptionMessage: (string?)result["descriptionmsg"],
-						descriptionMessageParameters: descMsgParams,
-						license: (string?)result["license"],
-						licenseName: (string?)result["license-name"],
-						name: name,
-						nameMessage: (string?)result["namemsg"],
-						url: (string?)result["url"],
-						version: (string?)result["version"],
-						versionControlSystem: (string?)result["vcs-system"],
-						versionControlSystemDate: (DateTime?)result["vcs-date"],
-						versionControlSystemUrl: (string?)result["vcs-url"],
-						versionControlSystemVersion: (string?)result["vcs-version"]));
+					descMsgParams = result["descriptionmsgparams"].ToReadOnlyList<string>();
+				}
+				catch (InvalidCastException)
+				{
+					this.Wal.AddWarning("siteinfo-unhandledparams", CurrentCulture(EveMessages.UnhandledParams, name));
 				}
 
-				output.Extensions = outputList;
+				retval.Add(new SiteInfoExtensions(
+					type: result.MustHaveString("type"),
+					author: (string?)result["author"],
+					credits: (string?)result["credits"],
+					description: (string?)result["description"],
+					descriptionMessage: (string?)result["descriptionmsg"],
+					descriptionMessageParameters: descMsgParams,
+					license: (string?)result["license"],
+					licenseName: (string?)result["license-name"],
+					name: name,
+					nameMessage: (string?)result["namemsg"],
+					url: (string?)result["url"],
+					version: (string?)result["version"],
+					versionControlSystem: (string?)result["vcs-system"],
+					versionControlSystemDate: (DateTime?)result["vcs-date"],
+					versionControlSystemUrl: (string?)result["vcs-url"],
+					versionControlSystemVersion: (string?)result["vcs-version"]));
 			}
+
+			return retval;
 		}
 
-		private static void GetExtensionTags(JToken parent, SiteInfoResult output)
+		private SiteInfoGeneral? GetGeneral(JToken parent)
 		{
-			var node = parent["extensiontags"];
-			if (node != null)
+			if (!(parent["general"] is JToken node))
 			{
-				output.ExtensionTags = node.AsReadOnlyList<string>();
+				return null;
 			}
-		}
 
-		private static void GetFileExtensions(JToken parent, SiteInfoResult output)
-		{
-			var node = parent["fileextensions"];
-			if (node != null)
+			var fallback = new List<string>();
+			var fallbacksNode = node["fallback"];
+			if (fallbacksNode != null)
 			{
-				var outputList = new List<string>();
-				foreach (var result in node)
+				foreach (var token in fallbacksNode)
 				{
-					outputList.Add((string?)result["ext"]);
+					fallback.Add(token.MustHaveString("code"));
 				}
-
-				output.FileExtensions = outputList;
 			}
-		}
 
-		private static void GetFunctionHooks(JToken parent, SiteInfoResult output)
-		{
-			var node = parent["functionhooks"];
-			if (node != null)
+			var imageLimits = new Dictionary<string, ImageLimitsItem>();
+			if (node["imagelimits"] is JToken imageLimitsNode)
 			{
-				output.FunctionHooks = node.AsReadOnlyList<string>();
-			}
-		}
-
-		private static void GetGeneral(JToken parent, SiteInfoResult output, WikiAbstractionLayer wal)
-		{
-			var result = parent["general"];
-			if (result != null)
-			{
-				output.ArticlePath = (string?)result["articlepath"];
-				output.BasePage = (string?)result["base"];
-				output.DbType = (string?)result["dbtype"];
-				output.DbVersion = (string?)result["dbversion"];
-				output.ExternalImages = result["externalimages"].AsReadOnlyList<string>();
-				output.Fallback8BitEncoding = (string?)result["fallback8bitEncoding"];
-
-				var fallback = new List<string>();
-				if (result["fallback"] != null)
+				foreach (var token in imageLimitsNode.ToBCIndexedList(this.Wal.DetectedFormatVersion))
 				{
-					foreach (var token in result["fallback"])
-					{
-						fallback.Add((string)token["code"]);
-					}
+					var value = token.value;
+					imageLimits.Add(token.key, new ImageLimitsItem((int)value.MustHave("width"), (int)value.MustHave("height")));
 				}
-
-				output.FallbackLanguages = fallback;
-				output.Favicon = (string?)result["favicon"];
-				output.Flags =
-					((string?)result["case"] == "case-sensitive" ? SiteInfoFlags.CaseSensitive : SiteInfoFlags.None) |
-					result.GetFlag("imagewhitelistenabled", SiteInfoFlags.ImageWhitelistEnabled) |
-					result.GetFlag("langconversion", SiteInfoFlags.LanguageConversion) |
-					result.GetFlag("misermode", SiteInfoFlags.MiserMode) |
-					result.GetFlag("readonly", SiteInfoFlags.ReadOnly) |
-					result.GetFlag("righttoleft", SiteInfoFlags.RightToLeft) |
-					result.GetFlag("titleconversion", SiteInfoFlags.TitleConversion) |
-					result.GetFlag("writeapi", SiteInfoFlags.WriteApi);
-				output.Generator = (string?)result["generator"];
-				output.GitBranch = (string?)result["git-branch"];
-				output.GitHash = (string?)result["git-hash"];
-				output.HhvmVersion = (string?)result["hhvmversion"];
-
-				var imageLimits = new Dictionary<string, ImageLimitsItem>();
-				if (result["imagelimits"] != null)
-				{
-					var counter = 0;
-					foreach (var token in result["imagelimits"])
-					{
-						JToken actualToken;
-						string key;
-						if (wal.DetectedFormatVersion == 2)
-						{
-							var prop = token as JProperty;
-							key = prop.Name;
-							actualToken = prop.Value;
-						}
-						else
-						{
-							key = counter.ToStringInvariant();
-							counter++;
-							actualToken = token;
-						}
-
-						var width = (int)actualToken["width"];
-						var height = (int)actualToken["height"];
-						imageLimits.Add(key, new ImageLimitsItem(width, height));
-					}
-				}
-
-				output.ImageLimits = imageLimits;
-				output.Language = (string?)result["lang"];
-				output.LegalTitleChars = (string?)result["legaltitlechars"];
-				output.LinkPrefix = (string?)result["linkprefix"];
-				output.LinkPrefixCharset = (string?)result["linkprefixcharset"];
-				output.LinkTrail = (string?)result["linktrail"];
-				output.Logo = (string?)result["logo"];
-				output.MainPage = (string?)result["mainpage"];
-				output.MaxUploadSize = (long?)result["maxuploadsize"] ?? 0;
-				output.PhpSapi = (string?)result["phpsapi"];
-				output.PhpVersion = (string?)result["phpversion"];
-				output.ReadOnlyReason = (string?)result["readonlyreason"];
-				output.Revision = (long?)result["revision"] ?? 0;
-				output.RightsText = (string?)result["rightstext"];
-				output.Script = (string?)result["script"];
-				output.ScriptPath = (string?)result["scriptpath"];
-				output.Server = (string?)result["server"];
-				output.ServerName = (string?)result["servername"];
-				if (output.ServerName == null)
-				{
-					// Same basic approach as MediaWiki uses
-					var canonical = output.Server.StartsWith("//", StringComparison.Ordinal) ? "http:" + output.Server : output.Server;
-					var uri = new Uri(canonical);
-					output.ServerName = uri.Host;
-				}
-
-				output.SiteName = (string?)result["sitename"];
-
-				var thumbLimits = result["thumblimits"];
-				if (thumbLimits != null)
-				{
-					if (wal.DetectedFormatVersion == 2)
-					{
-						output.ThumbLimits = thumbLimits.AsReadOnlyDictionary<int>();
-					}
-					else
-					{
-						var dict = new Dictionary<string, int>();
-						var counter = 0;
-						foreach (var limit in thumbLimits)
-						{
-							dict.Add(counter.ToStringInvariant(), (int)limit);
-							counter++;
-						}
-
-						output.ThumbLimits = dict;
-					}
-				}
-
-				output.Time = (DateTime?)result["time"];
-
-				var timeOffset = (int?)result["timeoffset"];
-				output.TimeOffset = timeOffset == null ? (TimeSpan?)null : TimeSpan.FromMinutes(timeOffset.Value);
-				output.TimeZone = (string?)result["timezone"];
-
-				// Default value is "false", which gets emitted in JSON, so check for that.
-				var variantArticlePath = result["variantarticlepath"];
-				if (variantArticlePath.Type != JTokenType.Boolean)
-				{
-					output.VariantArticlePath = (string)variantArticlePath;
-				}
-
-				var variants = new List<string>();
-				if (result["variants"] != null)
-				{
-					foreach (var token in result["variants"])
-					{
-						variants.Add((string)token["code"]);
-					}
-				}
-
-				output.Variants = variants;
-				output.WikiId = (string?)result["wikiid"];
 			}
-		}
 
-		private static void GetInterwikiMap(JToken parent, SiteInfoResult output)
-		{
-			var node = parent["interwikimap"];
-			if (node != null)
+			var server = node.MustHaveString("server");
+			var serverName = (string?)node["servername"];
+			if (serverName == null)
 			{
-				var outputList = new List<InterwikiMapItem>();
-				foreach (var result in node)
+				// Same approach as MediaWiki uses in Setup.php
+				var canonical = server.StartsWith("//", StringComparison.Ordinal) ? "http:" + server : server;
+				var uri = new Uri(canonical);
+				serverName = uri.Host;
+			}
+
+			var thumbLimits = new Dictionary<string, int>();
+			if (node["thumblimits"] is JToken thumbLimitsNode)
+			{
+				foreach (var (key, value) in thumbLimitsNode.ToBCIndexedList(this.Wal.DetectedFormatVersion))
 				{
-					outputList.Add(new InterwikiMapItem(
-						prefix: result.SafeString("prefix"),
-						url: result.SafeString("url"),
-						flags:
-							result.GetFlag("extralanguagelink", InterwikiMapFlags.ExtraLanguageLink) |
-							result.GetFlag("local", InterwikiMapFlags.Local) |
-							result.GetFlag("localinterwiki", InterwikiMapFlags.LocalInterwiki) |
-							result.GetFlag("protorel", InterwikiMapFlags.ProtocolRelative) |
-							result.GetFlag("trans", InterwikiMapFlags.TransclusionAllowed),
-						language: (string?)result["language"],
-						linkText: (string?)result["linktext"],
-						siteName: (string?)result["sitename"],
-						wikiId: (string?)result["wikiid"],
-						apiUrl: (string?)result["api"]));
+					thumbLimits.Add(key, (int)value);
 				}
-
-				output.InterwikiMap = outputList;
 			}
-		}
 
-		private static void GetLanguages(JToken parent, SiteInfoResult output)
-		{
-			var node = parent["languages"];
-			if (node != null)
+			var timeOffsetNode = (double)node.MustHave("timeoffset");
+			var timeOffset = TimeSpan.FromMinutes(timeOffsetNode);
+
+			// Default value is "false", which gets emitted in JSON, so check for that.
+			var variantArticlePathNode = node.MustHave("variantarticlepath");
+			var variantArticlePath = variantArticlePathNode?.Type == JTokenType.Boolean ? null : (string?)variantArticlePathNode;
+
+			var variants = new List<string>();
+			if (node["variants"] is JToken variantsNode)
 			{
-				var outputList = new List<LanguageItem>();
-				foreach (var result in node)
+				foreach (var token in variantsNode)
 				{
-					var item = new LanguageItem()
-					{
-						Code = (string?)result["code"],
-						Name = result.AsBCStringOptional("name"),
-					};
-					outputList.Add(item);
+					variants.Add(token.MustHaveString("code"));
 				}
-
-				output.Languages = outputList;
 			}
+
+			return new SiteInfoGeneral(
+				articlePath: node.MustHaveString("articlepath"),
+				basePage: node.MustHaveString("base"),
+				dbType: node.MustHaveString("dbtype"),
+				dbVersion: node.MustHaveString("dbversion"),
+				externalImages: node["externalimages"].ToReadOnlyList<string>(),
+				fallback8BitEncoding: node.MustHaveString("fallback8bitEncoding"),
+				fallbackLanguages: fallback,
+				favicon: (string?)node["favicon"],
+				flags: ((string?)node["case"] == "case-sensitive" ? SiteInfoFlags.CaseSensitive : SiteInfoFlags.None) | node.GetFlags(
+					("imagewhitelistenabled", SiteInfoFlags.ImageWhitelistEnabled),
+					("langconversion", SiteInfoFlags.LanguageConversion),
+					("misermode", SiteInfoFlags.MiserMode),
+					("readonly", SiteInfoFlags.ReadOnly),
+					("righttoleft", SiteInfoFlags.RightToLeft),
+					("titleconversion", SiteInfoFlags.TitleConversion),
+					("writeapi", SiteInfoFlags.WriteApi)),
+				generator: node.MustHaveString("generator"),
+				gitBranch: (string?)node["git-branch"],
+				gitHash: (string?)node["git-hash"],
+				hhvmVersion: (string?)node["hhvmversion"],
+				imageLimits: imageLimits,
+				language: node.MustHaveString("lang"),
+				legalTitleChars: (string?)node["legaltitlechars"],
+				linkPrefix: (string?)node["linkprefix"],
+				linkPrefixCharset: (string?)node["linkprefixcharset"],
+				linkTrail: (string?)node["linktrail"],
+				logo: (string?)node["logo"],
+				mainPage: node.MustHaveString("mainpage"),
+				maxUploadSize: (long?)node["maxuploadsize"] ?? 0,
+				phpSapi: node.MustHaveString("phpsapi"),
+				phpVersion: node.MustHaveString("phpversion"),
+				readOnlyReason: (string?)node["readonlyreason"],
+				revision: (long?)node["revision"] ?? 0,
+				script: node.MustHaveString("script"),
+				scriptPath: node.MustHaveString("scriptpath"),
+				server: server,
+				serverName: serverName,
+				siteName: node.MustHaveString("sitename"),
+				thumbLimits: thumbLimits,
+				time: node.MustHaveDate("time"),
+				timeOffset: timeOffset,
+				timeZone: node.MustHaveString("timezone"),
+				variantArticlePath: variantArticlePath,
+				variants: variants,
+				wikiId: node.MustHaveString("wikiid"));
 		}
 
-		private static void GetLibraries(JToken parent, SiteInfoResult output)
-		{
-			var node = parent["libraries"];
-			if (node != null)
-			{
-				var outputList = new List<LibrariesItem>();
-				foreach (var result in node)
-				{
-					var item = new LibrariesItem()
-					{
-						Name = (string?)result["name"],
-						Version = (string?)result["version"],
-					};
-					outputList.Add(item);
-				}
-
-				output.Libraries = outputList;
-			}
-		}
-
-		private static void GetMagicWords(JToken parent, SiteInfoResult output)
-		{
-			var node = parent["magicwords"];
-			if (node != null)
-			{
-				var outputList = new List<MagicWordsItem>();
-				foreach (var result in node)
-				{
-					var item = new MagicWordsItem()
-					{
-						Name = (string?)result["name"],
-						Aliases = result["aliases"].AsReadOnlyList<string>(),
-						CaseSensitive = result["case-sensitive"].AsBCBool(),
-					};
-					outputList.Add(item);
-				}
-
-				output.MagicWords = outputList;
-			}
-		}
-
-		private static void GetNamespaceAliases(JToken parent, SiteInfoResult output)
-		{
-			var node = parent["namespacealiases"];
-			if (node != null)
-			{
-				var outputList = new List<NamespaceAliasesItem>();
-				foreach (var result in node)
-				{
-					var item = new NamespaceAliasesItem()
-					{
-						Id = (int)result["id"],
-						Alias = result.AsBCStringOptional("alias"),
-					};
-					outputList.Add(item);
-				}
-
-				output.NamespaceAliases = outputList;
-			}
-		}
-
-		private static void GetNamespaces(JToken parent, SiteInfoResult output)
-		{
-			var node = parent["namespaces"];
-			if (node != null)
-			{
-				var outputList = new List<NamespacesItem>();
-				foreach (var resultNode in node)
-				{
-					var result = resultNode.First;
-					var item = new NamespacesItem()
-					{
-						CanonicalName = (string?)result["canonical"] ?? string.Empty,
-						DefaultContentModel = (string?)result["defaultcontentmodel"],
-						Flags =
-						((string?)result["case"] == "case-sensitive" ? NamespaceFlags.CaseSensitive : NamespaceFlags.None) |
-						result.GetFlag("content", NamespaceFlags.ContentSpace) |
-						result.GetFlag("nonincludable", NamespaceFlags.NonIncludable) |
-						result.GetFlag("subpages", NamespaceFlags.Subpages),
-						Id = (int)result["id"],
-						Name = result.AsBCStringOptional("name"),
-					};
-					outputList.Add(item);
-				}
-
-				output.Namespaces = outputList;
-			}
-		}
-
-		private static void GetProtocols(JToken parent, SiteInfoResult output)
-		{
-			var node = parent["protocols"];
-			if (node != null)
-			{
-				output.Protocols = node.AsReadOnlyList<string>();
-			}
-		}
-
-		private static void GetRestrictions(JToken parent, SiteInfoResult output)
-		{
-			var node = parent["restrictions"];
-			if (node != null)
-			{
-				var item = new RestrictionsItem()
-				{
-					CascadingLevels = node["cascadinglevels"].AsReadOnlyList<string>(),
-					Levels = node["levels"].AsReadOnlyList<string>(),
-					SemiProtectedLevels = node["semiprotectedlevels"].AsReadOnlyList<string>(),
-					Types = node["types"].AsReadOnlyList<string>(),
-				};
-				output.Restrictions = item;
-			}
-		}
-
-		private static void GetRightsInfo(JToken parent, SiteInfoResult output)
-		{
-			var result = parent["rightsinfo"];
-			if (result != null)
-			{
-				output.RightsText = (string?)result["text"]; // Overwrites the version coming from the General branch if both are present. This is probably preferred, since this one gets $wgRightsPage if $wgRightsText isn't present.
-				output.RightsUrl = (string?)result["url"];
-			}
-		}
-
-		private static void GetSubscribedHooks(JToken parent, SiteInfoResult output)
-		{
-			var node = parent["showhooks"];
-			if (node != null)
-			{
-				var outputList = new List<SubscribedHooksItem>();
-				foreach (var result in node)
-				{
-					var item = new SubscribedHooksItem()
-					{
-						Name = (string?)result["name"],
-					};
-					var subscribers = result["subscribers"];
-					if (subscribers.Type == JTokenType.Array)
-					{
-						item.Subscribers = result["subscribers"].AsReadOnlyList<string>();
-					}
-					else if (subscribers.Type == JTokenType.Object && subscribers["scribunto"] != null)
-					{
-						// Compensates for Scribunto oddness noted at https://phabricator.wikimedia.org/T117022
-						var list = new List<string>
-						{
-							(string)subscribers["scribunto"],
-						};
-						item.Subscribers = list;
-					}
-
-					outputList.Add(item);
-				}
-
-				output.SubscribedHooks = outputList;
-			}
-		}
-
-		private static void GetSkins(JToken parent, SiteInfoResult output)
-		{
-			var node = parent["skins"];
-			if (node != null)
-			{
-				var outputList = new List<SkinsItem>();
-				foreach (var result in node)
-				{
-					var item = new SkinsItem()
-					{
-						Code = (string?)result["code"],
-						Name = result.AsBCStringOptional("name"),
-						Unusable = result["unusable"].AsBCBool(),
-					};
-					if (result["default"].AsBCBool())
-					{
-						output.DefaultSkin = item;
-					}
-
-					outputList.Add(item);
-				}
-
-				output.Skins = outputList;
-			}
-		}
-
-		private static void GetSpecialPageAliases(JToken parent, SiteInfoResult output)
-		{
-			var node = parent["specialpagealiases"];
-			if (node != null)
-			{
-				var outputList = new List<SpecialPageAliasesItem>();
-				foreach (var result in node)
-				{
-					var item = new SpecialPageAliasesItem()
-					{
-						RealName = (string?)result["realname"],
-						Aliases = result["aliases"].AsReadOnlyList<string>(),
-					};
-					outputList.Add(item);
-				}
-
-				output.SpecialPageAliases = outputList;
-			}
-		}
-
-		private static void GetStatistics(JToken parent, SiteInfoResult output)
-		{
-			var result = parent["statistics"];
-			if (result != null)
-			{
-				var item = new StatisticsInfo()
-				{
-					ActiveUsers = (long?)result["activeusers"] ?? 0,
-					Admins = (long?)result["admins"] ?? 0,
-					Articles = (long?)result["articles"] ?? 0,
-					Edits = (long?)result["edits"] ?? 0,
-					Images = (long?)result["images"] ?? 0,
-					Jobs = (long?)result["jobs"] ?? 0,
-					Pages = (long?)result["pages"] ?? 0,
-					Users = (long?)result["users"] ?? 0,
-					Views = (long?)result["views"] ?? 0,
-				};
-				output.Statistics = item;
-			}
-		}
-
-		private static void GetUserGroups(JToken parent, SiteInfoResult output)
-		{
-			var node = parent["usergroups"];
-			if (node != null)
-			{
-				var outputList = new List<UserGroupsItem>();
-				foreach (var result in node)
-				{
-					var item = new UserGroupsItem()
-					{
-						Name = (string?)result["name"],
-						Number = (long?)result["number"] ?? -1,
-						Rights = result["rights"].AsReadOnlyList<string>(),
-						Add = result["add"].AsReadOnlyList<string>(),
-						AddSelf = result["add-self"].AsReadOnlyList<string>(),
-						Remove = result["remove"].AsReadOnlyList<string>(),
-						RemoveSelf = result["remove-self"].AsReadOnlyList<string>(),
-					};
-					outputList.Add(item);
-				}
-
-				output.UserGroups = outputList;
-			}
-		}
-
-		private static void GetVariables(JToken parent, SiteInfoResult output)
-		{
-			var node = parent["variables"];
-			if (node != null)
-			{
-				output.Variables = node.AsReadOnlyList<string>();
-			}
-		}
+		private SiteInfoRights? GetRightsInfo(JToken parent) => parent["rightsinfo"] is JToken node ? new SiteInfoRights((string?)node["text"], (string?)node["url"]) : null;
 		#endregion
 	}
 }

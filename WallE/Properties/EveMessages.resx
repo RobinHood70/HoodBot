@@ -157,7 +157,7 @@
     <value>MediaWiki versions prior to 1.25 do not support the revisions property modules as generators.</value>
   </data>
   <data name="RevisionSha1Failed" xml:space="preserve">
-    <value>SHA1 check for revision {0} on page "{1}" failed.</value>
+    <value>SHA1 check for revision {0} failed.</value>
   </data>
   <data name="TalkPageChanged" xml:space="preserve">
     <value>the bot's talk page changed</value>
@@ -194,5 +194,14 @@
   </data>
   <data name="MalformedData" xml:space="preserve">
     <value>The data returned by the wiki is missing the expected element {0}, a child of {1}, in {2}.</value>
+  </data>
+  <data name="MalformedDataType" xml:space="preserve">
+    <value>The data returned by the wiki is not of the expected type. {0}, a child of {1}, is not a {2}.</value>
+  </data>
+  <data name="CannotDeserializeWithoutPage" xml:space="preserve">
+    <value>You cannot deserialize a property module without specifying the page to deserialize to.</value>
+  </data>
+  <data name="CannotDeserialize" xml:space="preserve">
+    <value>This {0} module cannot be deseralized in the normal manner.</value>
   </data>
 </root>

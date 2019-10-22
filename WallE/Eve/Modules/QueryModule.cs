@@ -5,6 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System.Text.RegularExpressions;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Eve;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
@@ -25,14 +26,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Constructors
-		protected QueryModule([ValidatedNotNull] WikiAbstractionLayer wal, [ValidatedNotNull] TInput input, TOutput? output, IPageSetGenerator pageSetGenerator)
+		protected QueryModule([ValidatedNotNull] WikiAbstractionLayer wal, [ValidatedNotNull] TInput input, IPageSetGenerator? pageSetGenerator)
 		{
 			ThrowNull(wal, nameof(wal));
 			ThrowNull(input, nameof(input));
 			this.Wal = wal;
 			this.SiteVersion = wal.SiteVersion;
 			this.Input = input;
-			this.Output = output;
 			if (input is ILimitableInput limitable)
 			{
 				this.maxItems = limitable.MaxItems;
@@ -121,14 +121,19 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		public virtual void Deserialize(JToken parent)
 		{
-			if (parent != null)
+			if (parent == null)
 			{
-				this.DeserializeParent(parent, this.Output);
-				var result = parent[this.ResultName];
-				if (result != null && result.Type != JTokenType.Null)
-				{
-					this.DeserializeResult(result, this.Output);
-				}
+				throw ParsingExtensions.MalformedException("<Deserialize>", parent);
+			}
+
+			this.DeserializeParent(parent);
+			if (parent[this.ResultName] is JToken result && result.Type != JTokenType.Null)
+			{
+				this.DeserializeResult(result);
+			}
+			else if (this.Output == null)
+			{
+				throw ParsingExtensions.MalformedException(this.ResultName, parent);
 			}
 		}
 
@@ -155,11 +160,11 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Abstract Methods
 		protected abstract void BuildRequestLocal(Request request, TInput input);
 
-		protected abstract void DeserializeResult(JToken result, TOutput output);
+		protected abstract void DeserializeResult(JToken result);
 		#endregion
 
 		#region Protected Virtual Methods
-		protected virtual void DeserializeParent(JToken parent, TOutput output)
+		protected virtual void DeserializeParent(JToken parent)
 		{
 		}
 

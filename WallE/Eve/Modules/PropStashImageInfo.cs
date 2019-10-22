@@ -15,7 +15,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public PropStashImageInfo(WikiAbstractionLayer wal, StashImageInfoInput input)
-			: base(wal, input, new List<ImageInfoItem>(), null)
+			: base(wal, input, null)
 		{
 		}
 		#endregion
@@ -49,14 +49,14 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIfNotNullIf("urlparam", input.UrlParameter, this.SiteVersion >= 118);
 		}
 
-		protected override void DeserializeResult(JToken result, IList<ImageInfoItem> output)
+		protected override void DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			ThrowNull(output, nameof(output));
+			this.Output = new List<ImageInfoItem>();
 			foreach (var item in result)
 			{
 				var imageInfo = JTokenImageInfo.ParseImageInfo(item, new ImageInfoItem());
-				output.Add(imageInfo);
+				this.Output.Add(imageInfo);
 			}
 		}
 		#endregion

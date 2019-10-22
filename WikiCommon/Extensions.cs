@@ -247,6 +247,16 @@
 
 		#region String Extensions
 
+		/// <summary>Limits text to the specified maximum length.</summary>
+		/// <param name="text">The text.</param>
+		/// <param name="maxLength">The maximum length.</param>
+		/// <returns>System.String.</returns>
+		/// <remarks>This limits only the initial string length, not the total, so the return value can have a maximum length of maxLength + 3.</remarks>
+		public static string? Ellipsis(this string? text, int maxLength) =>
+			text == null ? null :
+			text.Length > maxLength ? text.Substring(0, maxLength) + "..." :
+			text;
+
 		/// <summary>Converts the first character of a string to upper-case.</summary>
 		/// <param name="text">The string to alter.</param>
 		/// <returns>A copy of the original string, with the first charcter converted to upper-case.</returns>

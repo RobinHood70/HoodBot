@@ -8,6 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
+	using static RobinHood70.WikiCommon.Globals;
 
 	internal static class JTokenLogEvent
 	{
@@ -16,18 +17,18 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Internal Extension Methods
-		internal static void ParseLogEvent(this JToken result, ILogEvents le, string logType, string logAction, ICollection<string> knownProps, bool hasUserIdFlag)
+		internal static void ParseLogEvent(this JToken result, LogEvent le, string prefix, ICollection<string> knownProps, bool hasUserIdFlag)
 		{
-			// hasUserIdFlag only necessary for list=logevents bug fix, can presumably be removed when we get to Json2 format.
-			le.ExtraData = GetDictionary(result, le, logType, logAction, knownProps, hasUserIdFlag);
-			le.LogType = logType;
-			le.LogAction = logAction;
-			le.LogEventFlags =
-				result.GetFlag("actionhidden", LogEventFlags.ActionHidden) |
-				result.GetFlag("commenthidden", LogEventFlags.CommentHidden) |
-				result.GetFlag("suppressed", LogEventFlags.Suppressed) |
-				result.GetFlag("anon", LogEventFlags.UserAnonymous) |
-				result.GetFlag("userhidden", LogEventFlags.UserHidden);
+			le.PageId = (long?)result["pageid"] ?? 0;
+			le.LogType = (string?)result[prefix + "type"];
+			le.LogAction = (string?)result[prefix + "action"];
+			le.ExtraData = new ExtraDataParser(result, le, le.LogType, le.LogAction, knownProps, hasUserIdFlag).Result;
+			le.LogEventFlags = result.GetFlags(
+				("actionhidden", LogEventFlags.ActionHidden),
+				("commenthidden", LogEventFlags.CommentHidden),
+				("suppressed", LogEventFlags.Suppressed),
+				("anon", LogEventFlags.UserAnonymous),
+				("userhidden", LogEventFlags.UserHidden));
 			le.UserId = (long?)result["userid"] ?? -1;
 			le.User = (string?)result["user"];
 			le.Timestamp = (DateTime?)result["timestamp"];
@@ -35,220 +36,265 @@ namespace RobinHood70.WallE.Eve.Modules
 			le.ParsedComment = (string?)result["parsedcomment"];
 			le.LogId = (long?)result["logid"] ?? 0;
 		}
+		#endregion
 
-		private static Dictionary<string, object?> GetDictionary(JToken result, ILogEvents le, string logType, string logAction, ICollection<string> knownProps, bool hasUserIdFlag)
+		#region Private Classes
+
+		private class ExtraDataParser
 		{
 			// TODO: Look at this code again later and rewrite, especially if updated for a later version of MW. Bug fix code is for MW 1.24 and before. I think all the ExtraData stuff is too, or much of it, anyway. For 1.25+, everything goes to result["params"]. Just convert that to a dictionary and parse it.
-			var parms = result["params"];
-			var doBugFix = parms == null;
-			var baseNode = parms ?? (logType == null ? result : result[logType]);
-			var values = baseNode?.ToObject<Dictionary<string, object?>>() ?? new Dictionary<string, object?>();
-			if (doBugFix && logType != null && baseNode != null)
+			#region Fields
+			private readonly JToken parms;
+			private readonly string? logAction;
+			#endregion
+
+			#region Constructors
+
+			// hasUserIdFlag only necessary for list=logevents bug fix, can presumably be removed when we get to Json2 format.
+			public ExtraDataParser(JToken result, LogEvent le, string? logType, string? logAction, ICollection<string> knownProps, bool hasUserIdFlag)
 			{
-				foreach (var prop in result.Children<JProperty>())
+				ThrowNull(result, nameof(result));
+				this.logAction = logAction;
+
+				var doBugFix = false;
+				if (result["params"] is JToken parms)
+				{
+					this.parms = parms;
+					doBugFix = true;
+				}
+
+				if (logType != null && result[logType] is JToken logParms)
+				{
+					this.parms = logParms;
+				}
+
+				this.parms = result;
+				switch (logType)
+				{
+					case "block":
+						this.ExtraDataBlock();
+						break;
+					case "delete":
+						this.ExtraDataDelete();
+						break;
+					case "suppress":
+						this.ExtraDataDelete();
+						break;
+					case "merge":
+						this.ExtraDataMerge();
+						break;
+					case "move":
+						this.ExtraDataMove();
+						break;
+					case "newusers":
+						this.ExtraDataNewUsers();
+						break;
+					case "pagelang":
+						this.ExtraDataPageLanguage();
+						break;
+					case "patrol":
+						this.ExtraDataPatrol();
+						break;
+					case "protect":
+						this.ExtraDataProtect();
+						break;
+					case "rights":
+						this.ExtraDataRights();
+						break;
+					case "upload":
+						this.ExtraDataUpload();
+						break;
+					default:
+						if (logType != null)
+						{
+							this.ExtraDataGeneric(knownProps);
+						}
+
+						break;
+				}
+
+				if (doBugFix && le is LogEventsItem logEventsOutput && logEventsOutput.LogType == "newusers")
+				{
+					// Per https://phabricator.wikimedia.org/T73020
+					switch (logEventsOutput.LogAction)
+					{
+						case "create":
+							this.Result["createuserid"] = logEventsOutput.UserId;
+							break;
+						case "create2":
+							if (hasUserIdFlag)
+							{
+								this.Result.Remove("createuserid");
+							}
+							else
+							{
+								this.Result["createuserid"] = logEventsOutput.UserId;
+								logEventsOutput.UserId = -1;
+							}
+
+							break;
+						default:
+							break;
+					}
+				}
+			}
+			#endregion
+
+			#region Public Properties
+			public Dictionary<string, object?> Result { get; } = new Dictionary<string, object?>();
+			#endregion
+
+			#region Private Methods
+			private void ExtraDataGeneric(ICollection<string> knownProps)
+			{
+				foreach (var prop in this.parms.Children<JProperty>())
 				{
 					if (!knownProps.Contains(prop.Name))
 					{
-						values.Add(prop.Name, prop.Value);
+						this.Result.Add(prop.Name, prop.Value.ToObject<object>());
 					}
 				}
 			}
 
-			var dict = logType switch
+			private void ExtraDataBlock()
 			{
-				"block" => ExtraDataBlock(values, logAction),
-				"delete" => ExtraDataDelete(values, logAction),
-				"suppress" => ExtraDataDelete(values, logAction),
-				"merge" => ExtraDataMerge(values),
-				"move" => ExtraDataMove(values),
-				"newusers" => ExtraDataNewUsers(values),
-				"pagelang" => ExtraDataPageLanguage(values),
-				"patrol" => ExtraDataPatrol(values),
-				"protect" => ExtraDataProtect(values, logAction),
-				"rights" => ExtraDataRights(values),
-				"upload" => ExtraDataUpload(values),
-				_ => values,
-			};
-
-			if (doBugFix && le is LogEventsItem logEventsOutput && logEventsOutput.LogType == "newusers")
-			{
-				// Per https://phabricator.wikimedia.org/T73020
-				switch (logEventsOutput.LogAction)
+				if (this.logAction != "unblock" && this.parms["duration"] != null)
 				{
-					case "create":
-						dict["createuserid"] = logEventsOutput.UserId;
-						break;
-					case "create2":
-						if (hasUserIdFlag)
-						{
-							dict.Remove("createuserid");
-						}
-						else
-						{
-							dict["createuserid"] = logEventsOutput.UserId;
-							logEventsOutput.UserId = -1;
-						}
-
-						break;
-					default:
-						break;
+					this.Result.Add("duration", (string?)this.parms["duration"]);
+					this.Result.Add("flags", (string?)this.parms["flags"]);
+					this.Result.Add("expiry", (DateTime?)this.parms["expiry"]);
 				}
 			}
 
-			return dict;
-		}
-		#endregion
-
-		#region Private Methods
-		private static Dictionary<string, object?> ExtraDataBlock(Dictionary<string, object?> values, string action) => action != "unblock" && values["duration"] != null
-			? new Dictionary<string, object?>
+			private void ExtraDataDelete()
 			{
-				{ "duration", (string?)values["duration"] },
-				{ "flags", (string?)values["flags"] },
-				{ "expiry", (DateTime?)values["expiry"] }
-			}
-			: new Dictionary<string, object?>();
-
-		private static Dictionary<string, object?> ExtraDataDelete(Dictionary<string, object?> values, string action)
-		{
-			// TODO: This code *only* seems to support 1.24 and below. Is that right? That doesn't seem like what I would've wanted, but maybe I just forgot to come back to this.
-			var dict = new Dictionary<string, object?>();
-			var valOffset = '0';
-			if (action == "event" || action == "revision")
-			{
-				var revisionType = (string?)values[valOffset.ToString()];
-				switch (revisionType)
+				// TODO: This code *only* seems to support 1.24 and below. Is that right? That doesn't seem like what I would've wanted, but maybe I just forgot to come back to this.
+				var valOffset = '0';
+				if (this.logAction == "event" || this.logAction == "revision")
 				{
-					case "archive":
-					case "filearchive":
-					case "oldimage":
-					case "revision":
-						dict.Add("revisiontype", revisionType);
-						valOffset++;
-						break;
-				}
-
-				var value = values[valOffset.ToString()];
-				if (value != null)
-				{
-					var ids = (string)value;
-					var logIds = new List<long>();
-					foreach (var commaSplit in ids.Split(TextArrays.Comma))
+					var revisionType = (string?)this.parms[valOffset.ToString()];
+					switch (revisionType)
 					{
-						logIds.Add(long.Parse(commaSplit, CultureInfo.InvariantCulture));
+						case "archive":
+						case "filearchive":
+						case "oldimage":
+						case "revision":
+							this.Result.Add("revisiontype", revisionType);
+							valOffset++;
+							break;
 					}
 
-					dict.Add("logids", logIds);
-				}
+					if (this.parms[valOffset.ToString()] is JToken logIdsNode && (string?)logIdsNode is string ids)
+					{
+						var logIds = new List<long>();
+						foreach (var commaSplit in ids.Split(TextArrays.Comma))
+						{
+							logIds.Add(long.Parse(commaSplit, CultureInfo.InvariantCulture));
+						}
 
-				value = values[valOffset++.ToString()];
-				if (value != null)
-				{
-					dict.Add("old", LogEventGetRDType((string)value));
-				}
+						this.Result.Add("logids", logIds);
+					}
 
-				value = values[valOffset++.ToString()];
-				if (value != null)
-				{
-					dict.Add("new", LogEventGetRDType((string)value));
+					if (this.parms[valOffset++.ToString()] is JToken oldNode)
+					{
+						this.Result.Add("old", this.LogEventGetRDType((string?)oldNode));
+					}
+
+					if (this.parms[valOffset++.ToString()] is JToken newNode)
+					{
+						this.Result.Add("new", this.LogEventGetRDType((string?)newNode));
+					}
 				}
 			}
 
-			return dict;
-		}
-
-		private static Dictionary<string, object?> ExtraDataMerge(Dictionary<string, object?> values) => new Dictionary<string, object?>
-		{
-			{ "mergetitle", (string?)values["0"] },
-			{ "mergetimestamp", ((string?)values["1"]).AsDate() }
-		};
-
-		private static Dictionary<string, object?> ExtraDataMove(Dictionary<string, object?> values) => new Dictionary<string, object?>
-		{
-			{ "suppressredirect", values["suppressredirect"] != null },
-			{ "ns", (int?)values["new_ns"] },
-			{ "title", (string?)values["new_title"] }
-		};
-
-		private static Dictionary<string, object?> ExtraDataNewUsers(Dictionary<string, object?> values)
-		{
-			var dict = new Dictionary<string, object?>();
-			var value = values["userid"];
-			if (value != null)
+			private void ExtraDataMerge()
 			{
-				dict.Add("createuserid", (int)value);
+				this.Result.Add("mergetitle", (string?)this.parms["0"]);
+				this.Result.Add("mergetimestamp", ((string?)this.parms["1"]).ToNullableDate());
 			}
 
-			return dict;
-		}
-
-		private static Dictionary<string, object?> ExtraDataPageLanguage(Dictionary<string, object?> values) => new Dictionary<string, object?>
-		{
-			{ "newlanguage", (string?)values["newlanguage"] },
-			{ "oldlanguage", (string?)values["oldlanguage"] }
-		};
-
-		private static Dictionary<string, object?> ExtraDataPatrol(Dictionary<string, object?> values) => new Dictionary<string, object?>
-		{
-			{ "currentid", (long?)values["curid"] ?? 0 },
-			{ "previousid", (long?)values["previd"] ?? 0 },
-			{ "autopatrolled", (string?)values["auto"] == "1" }
-		};
-
-		private static Dictionary<string, object?> ExtraDataProtect(Dictionary<string, object?> values, string action)
-		{
-			var dict = new Dictionary<string, object?>();
-			switch (action)
+			private void ExtraDataMove()
 			{
-				case "move_prot":
-					dict.Add("movedpage", (string?)values["0"]);
-					return dict;
-				case "unprotect":
-					return dict;
-				default:
+				this.Result.Add("suppressredirect", this.parms["suppressredirect"] != null);
+				this.Result.Add("ns", (int?)this.parms["new_ns"]);
+				this.Result.Add("title", (string?)this.parms["new_title"]);
+			}
+
+			private void ExtraDataNewUsers()
+			{
+				var value = this.parms["userid"];
+				if (value != null)
+				{
+					this.Result.Add("createuserid", (int)value);
+				}
+			}
+
+			private void ExtraDataPageLanguage()
+			{
+				this.Result.Add("newlanguage", (string?)this.parms["newlanguage"]);
+				this.Result.Add("oldlanguage", (string?)this.parms["oldlanguage"]);
+			}
+
+			private void ExtraDataPatrol()
+			{
+				this.Result.Add("currentid", (long?)this.parms["curid"] ?? 0);
+				this.Result.Add("previousid", (long?)this.parms["previd"] ?? 0);
+				this.Result.Add("autopatrolled", (string?)this.parms["auto"] == "1");
+			}
+
+			private void ExtraDataProtect()
+			{
+				if (this.logAction == "move_prot")
+				{
+					this.Result.Add("movedpage", (string?)this.parms["0"]);
+				}
+				else if (this.logAction != "unprotect")
+				{
 					var protections = new List<ProtectionsItem>();
-					var matches = ProtectionFinder.Matches((string?)values["0"]);
+					var matches = ProtectionFinder.Matches((string?)this.parms["0"]);
 					foreach (Match match in matches)
 					{
 						var groups = match.Groups;
-						var protData = new ProtectionsItem()
-						{
-							Type = groups["action"].Value,
-							Level = groups["restrictions"].Value,
-						};
-						protData.Expiry = groups["indef"].Success
+						var expiry = groups["indef"].Success
 							? null
-							: (DateTime?)DateTime.Parse(groups["expiry"].Value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
+							: groups["expiry"].Value.ToNullableDate();
+						var cascading = !string.IsNullOrEmpty((string?)this.parms["1"]);
 
-						protData.Cascading = !string.IsNullOrEmpty((string?)values["1"]);
-						protections.Add(protData);
+						protections.Add(new ProtectionsItem(
+							type: groups["action"].Value,
+							level: groups["restrictions"].Value,
+							expiry: expiry,
+							cascading: cascading,
+							source: null));
 					}
 
-					dict.Add("protections", protections);
-					return dict;
+					this.Result.Add("protections", protections);
+				}
 			}
+
+			private void ExtraDataRights()
+			{
+				this.Result.Add("new", this.ParseRights((string?)this.parms["new"]));
+				this.Result.Add("old", this.ParseRights((string?)this.parms["old"]));
+			}
+
+			private void ExtraDataUpload()
+			{
+				this.Result.Add("sha1", (string?)this.parms["img_sha1"]);
+				this.Result.Add("uploadtimestamp", (DateTime?)this.parms["img_timestamp"]);
+			}
+
+			private RevisionDeleteTypes LogEventGetRDType(string param)
+			{
+				ThrowNull(param, nameof(param));
+				var info = param.Split(TextArrays.EqualsSign);
+				var type = info[info.Length - 1];
+				return (RevisionDeleteTypes)int.Parse(type, CultureInfo.InvariantCulture);
+			}
+
+			private IReadOnlyList<string> ParseRights(string? value) => value?.Split(TextArrays.CommaSpace, StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
+			#endregion
 		}
-
-		private static Dictionary<string, object?> ExtraDataRights(Dictionary<string, object?> values) => new Dictionary<string, object?>
-		{
-			{ "new", ParseRights((string?)values["new"]) },
-			{ "old", ParseRights((string?)values["old"]) }
-		};
-
-		private static Dictionary<string, object?> ExtraDataUpload(Dictionary<string, object?> values) => new Dictionary<string, object?>
-		{
-			{ "sha1", (string?)values["img_sha1"] },
-			{ "uploadtimestamp", (DateTime?)values["img_timestamp"] }
-		};
-
-		private static RevisionDeleteTypes LogEventGetRDType(string param)
-		{
-			var info = param.Split(TextArrays.EqualsSign);
-			var type = info[info.Length - 1];
-			return (RevisionDeleteTypes)int.Parse(type, CultureInfo.InvariantCulture);
-		}
-
-		private static IReadOnlyList<string> ParseRights(string? value) => value?.Split(TextArrays.CommaSpace, StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
 		#endregion
 	}
 }

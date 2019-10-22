@@ -66,7 +66,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override RecentChangesItem GetItem(JToken result)
+		protected override RecentChangesItem? GetItem(JToken result)
 		{
 			// Same bug as ListLogEvents
 			if (result == null || result["type"] == null)
@@ -74,23 +74,23 @@ namespace RobinHood70.WallE.Eve.Modules
 				return null;
 			}
 
-			var item = new RecentChangesItem((int)result.NotNull("ns"), result.SafeString("title"), (long)result.NotNull("pageid"));
-			var logType = (string?)result["logtype"];
-			var logAction = (string?)result["logaction"];
-			result.ParseLogEvent(item, logType, logAction, KnownProps, false);
-			item.Tags = result["tags"].AsReadOnlyList<string>();
-			item.RecentChangeType = (string?)result["type"];
-			item.Id = (long?)result["rcid"] ?? 0;
-			item.Flags =
-				result.GetFlag("bot", RecentChangesFlags.Bot) |
-				result.GetFlag("minor", RecentChangesFlags.Minor) |
-				result.GetFlag("new", RecentChangesFlags.New) |
-				result.GetFlag("redirect", RecentChangesFlags.Redirect);
-			item.OldLength = (int?)result["oldlen"] ?? 0;
-			item.NewLength = (int?)result["newlen"] ?? 0;
-			item.PatrolToken = (string?)result["patroltoken"];
-			item.RevisionId = (long?)result["revid"] ?? 0;
-			item.OldRevisionId = (long?)result["old_revid"] ?? 0;
+			var item = new RecentChangesItem(
+				ns: (int)result.MustHave("ns"),
+				title: result.MustHaveString("title"),
+				flags: result.GetFlags(
+					("bot", RecentChangesFlags.Bot),
+					("minor", RecentChangesFlags.Minor),
+					("new", RecentChangesFlags.New),
+					("redirect", RecentChangesFlags.Redirect)),
+				id: (long?)result["rcid"] ?? 0,
+				newLength: (int?)result["newlen"] ?? 0,
+				oldLength: (int?)result["oldlen"] ?? 0,
+				oldRevisionId: (long?)result["old_revid"] ?? 0,
+				patrolToken: (string?)result["patroltoken"],
+				recentChangeType: (string?)result["type"],
+				revisionId: (long?)result["revid"] ?? 0,
+				tags: result["tags"].ToReadOnlyList<string>());
+			result.ParseLogEvent(item, "log", KnownProps, false);
 
 			return item;
 		}

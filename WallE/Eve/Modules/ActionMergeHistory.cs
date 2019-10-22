@@ -43,14 +43,11 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override MergeHistoryResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new MergeHistoryResult()
-			{
-				From = (string?)result["from"],
-				To = (string?)result["to"],
-				Reason = (string?)result["reason"],
-				Timestamp = result["timestamp"].AsDate(),
-			};
-			return output;
+			return new MergeHistoryResult(
+				from: result.MustHaveString("from"),
+				reason: result.MustHaveString("reason"),
+				timestamp: result.MustHaveDate("timestamp"),
+				to: result.MustHaveString("to"));
 		}
 		#endregion
 	}

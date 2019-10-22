@@ -12,12 +12,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		protected ListModule([ValidatedNotNull] WikiAbstractionLayer wal, [ValidatedNotNull] TInput input)
-			: this(wal, input, null)
+			: base(wal, input, null)
 		{
 		}
 
 		protected ListModule([ValidatedNotNull] WikiAbstractionLayer wal, [ValidatedNotNull] TInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, new List<TItem>(), pageSetGenerator)
+			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
@@ -31,18 +31,18 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Override Methods
-		protected override void DeserializeResult(JToken result, IList<TItem> output)
+		protected override void DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			ThrowNull(output, nameof(output));
-			using var enumeration = (result as IEnumerable<JToken>).GetEnumerator();
-			while (this.ItemsRemaining > 0 && enumeration.MoveNext())
+			this.Output ??= new List<TItem>();
+			using var enumerator = result.Children().GetEnumerator();
+			while (this.ItemsRemaining > 0 && enumerator.MoveNext())
 			{
 				// While this could be set up to ehck enumeration.Current and simply not call if it's null, because of the accessibility of GetItem, we have to check the result in GetItem anyway, and it could well return a null value, so it makes more sense to check for null afterwards rather than before.
-				var item = this.GetItem(enumeration.Current);
+				var item = this.GetItem(enumerator.Current);
 				if (item != null)
 				{
-					output.Add(item);
+					this.Output.Add(item);
 					if (this.ItemsRemaining != int.MaxValue)
 					{
 						this.ItemsRemaining--;

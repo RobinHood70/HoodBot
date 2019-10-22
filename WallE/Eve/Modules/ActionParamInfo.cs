@@ -3,7 +3,8 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.Collections.Generic;
-	using Newtonsoft.Json.Linq;
+    using System.Collections.Immutable;
+    using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -110,84 +111,64 @@ namespace RobinHood70.WallE.Eve.Modules
 					var description = GetMessages(module["description"]);
 					var dynamicParameters = GetMessages(module["dynamicparameters"]);
 					var examples = GetExamples(this.SiteVersion < 125 ? module["allexamples"] : module["examples"]);
-					var parameters = GetParameters(module);
-					var className = module.SafeString("classname");
+					var parameters = GetParameters(module["parameters"]);
+					var templatedParameters = GetParameters(module["templatedparameters"]);
+					var className = module.MustHaveString("classname");
 					output.Add(className, new ParameterInfoItem(
 						className: className,
-						helpUrls: module["helpurls"].AsReadOnlyList<string>(),
+						helpUrls: module["helpurls"].ToReadOnlyList<string>(),
 						parameters: parameters,
-						path: module.SafeString("path"),
-						prefix: module.SafeString("prefix"),
+						path: module.MustHaveString("path"),
+						prefix: module.MustHaveString("prefix"),
 						name: (string?)module["name"],
 						description: description,
 						dynamicParameters: dynamicParameters,
 						examples: examples,
-						flags:
-							module.GetFlag("deprecated", ModuleFlags.Deprecated) |
-							module.GetFlag("generator", ModuleFlags.Generator) |
-							module.GetFlag("internal", ModuleFlags.Internal) |
-							module.GetFlag("mustbeposted", ModuleFlags.MustBePosted) |
-							module.GetFlag("readrights", ModuleFlags.ReadRights) |
-							module.GetFlag("writerights", ModuleFlags.WriteRights),
+						flags: module.GetFlags(
+							("deprecated", ModuleFlags.Deprecated),
+							("generator", ModuleFlags.Generator),
+							("internal", ModuleFlags.Internal),
+							("mustbeposted", ModuleFlags.MustBePosted),
+							("readrights", ModuleFlags.ReadRights),
+							("writerights", ModuleFlags.WriteRights)),
 						group: (string?)module["group"],
 						licenseLink: (string?)module["licenselink"],
 						licenseTag: (string?)module["licensetag"],
 						source: (string?)module["source"],
-						sourceName: (string?)module["sourcename"]
-						));
+						sourceName: (string?)module["sourcename"],
+						templatedParameters: templatedParameters));
 				}
 			}
 
 			return output;
 		}
 
-		private static Dictionary<string, ParametersItem> GetParameters(JToken module)
+		private static IReadOnlyDictionary<string, ParametersItem> GetParameters(JToken? token)
 		{
-			var parametersList = new Dictionary<string, ParametersItem>();
-			var parameters = module["parameters"];
-			if (parameters != null)
+			var parametersList = new List<ParametersItem>();
+			if (token != null)
 			{
-				foreach (var parameterNode in parameters)
+				foreach (var parameterNode in token)
 				{
-					var parameter = new ParametersItem();
-					var parameterName = parameterNode.SafeString("name");
-					parameter.Description = GetMessages(parameterNode["description"]);
-					parameter.Flags =
-						parameterNode.GetFlag("allowsduplicates", ParameterFlags.AllowsDuplicates) |
-						parameterNode.GetFlag("deprecated", ParameterFlags.Deprecated) |
-						parameterNode.GetFlag("enforcerange", ParameterFlags.EnforceRange) |
-						parameterNode.GetFlag("multi", ParameterFlags.Multivalued) |
-						parameterNode.GetFlag("required", ParameterFlags.Required);
-					parameter.TokenType = (string?)parameterNode["tokentype"];
-					if (parameterNode["default"] is JValue defaultNode)
-					{
-						parameter.Default = defaultNode.Value;
-					}
-
-					parameter.Limit = (int?)parameterNode["limit"] ?? 0;
-					parameter.HighLimit = (int?)parameterNode["highlimit"] ?? 0;
-					parameter.LowLimit = (int?)parameterNode["lowlimit"] ?? 0;
-
-					var typeValue = parameterNode["type"];
-					if (typeValue != null)
+					var dflt = parameterNode["default"] is JValue defaultNode ? defaultNode.Value : null;
+					IReadOnlyList<string> typeValues = ImmutableList<string>.Empty;
+					string? type = null;
+					IReadOnlyDictionary<string, string> subModules = new Dictionary<string, string>();
+					string? subModuleParamPrefix = null;
+					if (parameterNode["type"] is JToken typeValue)
 					{
 						if (typeValue.Type == JTokenType.Array)
 						{
-							parameter.TypeValues = typeValue.AsReadOnlyList<string>();
-							parameter.Type = "valuelist";
-							parameter.Submodules = parameterNode["submodules"].AsReadOnlyDictionary<string>();
-							parameter.SubmoduleParameterPrefix = (string?)parameterNode["submoduleparamprefix"];
+							typeValues = typeValue.ToReadOnlyList<string>();
+							type = "valuelist";
+							subModules = parameterNode["submodules"].ToStringDictionary<string>();
+							subModuleParamPrefix = (string?)parameterNode["submoduleparamprefix"];
 						}
 						else
 						{
-							parameter.TypeValues = Array.Empty<string>();
-							parameter.Type = (string?)typeValue;
+							type = (string?)typeValue;
 						}
 					}
-
-					parameter.Maximum = (int?)parameterNode["max"] ?? 0;
-					parameter.HighMaximum = (int?)parameterNode["highmax"] ?? 0;
-					parameter.Minimum = (int?)parameterNode["min"] ?? 0;
 
 					var newInfoList = new List<InformationItem>();
 					var infoArrayNode = parameterNode["info"];
@@ -196,18 +177,38 @@ namespace RobinHood70.WallE.Eve.Modules
 						foreach (var infoNode in infoArrayNode)
 						{
 							newInfoList.Add(new InformationItem(
-								name: infoNode.SafeString("name"),
-								text: GetMessages(infoNode.NotNull("text")),
-								values: infoNode["values"].AsReadOnlyList<int>()));
+								name: infoNode.MustHaveString("name"),
+								text: GetMessages(infoNode.MustHave("text")),
+								values: infoNode["values"].ToReadOnlyList<int>()));
 						}
 					}
 
-					parameter.Information = newInfoList;
-					parametersList.Add(parameterName, parameter);
+					parametersList.Add(new ParametersItem(
+						name: parameterNode.MustHaveString("name"),
+						dflt: dflt,
+						description: GetMessages(parameterNode["description"]),
+						flags: parameterNode.GetFlags(
+							("allowsduplicates", ParameterFlags.AllowsDuplicates),
+							("deprecated", ParameterFlags.Deprecated),
+							("enforcerange", ParameterFlags.EnforceRange),
+							("multi", ParameterFlags.Multivalued),
+							("required", ParameterFlags.Required)),
+						highLimit: (int?)parameterNode["highlimit"] ?? 0,
+						highMaximum: (int?)parameterNode["highmax"] ?? 0,
+						information: newInfoList,
+						limit: (int?)parameterNode["limit"] ?? 0,
+						lowLimit: (int?)parameterNode["lowlimit"] ?? 0,
+						maximum: (int?)parameterNode["max"] ?? 0,
+						minimum: (int?)parameterNode["min"] ?? 0,
+						subModuleParameterPrefix: subModuleParamPrefix,
+						subModules: subModules,
+						tokenType: (string?)parameterNode["tokentype"],
+						type: type,
+						typeValues: typeValues));
 				}
 			}
 
-			return parametersList;
+			return new ReadOnlyKeyedCollection<string, ParametersItem>(item => item.Name, parametersList);
 		}
 
 		private static List<ExamplesItem> GetExamples(JToken? module)
@@ -217,7 +218,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				foreach (var example in module)
 				{
-					var newExample = new ExamplesItem(example.SafeString("query"), GetMessage(example.NotNull("description")));
+					var newExample = new ExamplesItem(example.MustHaveString("query"), GetMessage(example.MustHave("description")));
 					examplesList.Add(newExample);
 				}
 			}
@@ -287,7 +288,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			return new MessageItem(
-				key: message.SafeString("key"),
+				key: message.MustHaveString("key"),
 				parameters: parameterList,
 				forValue: (string?)message["forvalue"]);
 		}

@@ -50,21 +50,17 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override ExpandTemplatesResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new ExpandTemplatesResult()
-			{
-				ParseTree = (string?)result["parsetree"],
-				WikiText = (string?)result["wikitext"],
-				Categories = result["categories"].AsReadOnlyList<string>(),
-				Properties = result["properties"].AsBCDictionary(),
-				Volatile = result["volatile"].AsBCBool(),
-			};
-			output.TimeToLive = TimeSpan.FromSeconds((int?)result["ttl"] ?? 0);
-			output.Modules = result["modules"].AsReadOnlyList<string>();
-			output.ModuleScripts = result["modulescripts"].AsReadOnlyList<string>();
-			output.ModuleStyles = result["modulestyles"].AsReadOnlyList<string>();
-			output.JavaScriptConfigVariables = result["jsconfigvars"].AsReadOnlyDictionary<string>();
-
-			return output;
+			return new ExpandTemplatesResult(
+				categories: result["categories"].ToReadOnlyList<string>(),
+				javaScriptConfigVars: result["jsconfigvars"].ToStringDictionary<string>(),
+				moduleScripts: result["modulescripts"].ToReadOnlyList<string>(),
+				moduleStyles: result["modulestyles"].ToReadOnlyList<string>(),
+				modules: result["modules"].ToReadOnlyList<string>(),
+				parseTree: (string?)result["parsetree"],
+				properties: result["properties"].ToBCDictionary(),
+				timeToLive: TimeSpan.FromSeconds((int?)result["ttl"] ?? 0),
+				vol: result["volatile"].ToBCBool(),
+				wikiText: (string?)result["wikitext"]);
 		}
 		#endregion
 	}

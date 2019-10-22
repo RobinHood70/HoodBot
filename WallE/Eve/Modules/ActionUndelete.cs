@@ -43,14 +43,11 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override UndeleteResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new UndeleteResult()
-			{
-				Title = (string?)result["title"],
-				Revisions = (int)result["revisions"],
-				FileVersions = (int)result["fileversions"],
-				Reason = (string?)result["reason"],
-			};
-			return output;
+			return new UndeleteResult(
+				title: result.MustHaveString("title"),
+				revisions: (int)result.MustHave("revisions"),
+				fileVersions: (int)result.MustHave("fileversions"),
+				reason: result.MustHaveString("reason"));
 		}
 		#endregion
 	}

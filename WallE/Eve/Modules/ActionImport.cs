@@ -56,10 +56,10 @@ namespace RobinHood70.WallE.Eve.Modules
 			foreach (var item in result)
 			{
 				output.Add(new ImportItem(
-					ns: (int)result.NotNull("ns"),
-					title: result.SafeString("title"),
+					ns: (int)result.MustHave("ns"),
+					title: result.MustHaveString("title"),
 					revisions: (int?)item["revisions"] ?? 0,
-					invalid: item["invalid"].AsBCBool()));
+					invalid: item["invalid"].ToBCBool()));
 			}
 
 			return output;

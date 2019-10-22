@@ -42,17 +42,14 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override CompareResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new CompareResult()
-			{
-				Body = (string?)result["body"],
-				FromId = (int?)result["fromid"] ?? 0,
-				FromRevision = (int?)result["fromrev"] ?? 0,
-				FromTitle = (string?)result["fromtitle"],
-				ToId = (int?)result["toid"] ?? 0,
-				ToRevision = (int?)result["torev"] ?? 0,
-				ToTitle = (string?)result["totitle"],
-			};
-			return output;
+			return new CompareResult(
+				body: (string?)result["body"],
+				fromId: (int?)result["fromid"] ?? 0,
+				fromRevision: (int?)result["fromrevid"] ?? 0,
+				fromTitle: (string?)result["fromtitle"],
+				toId: (int?)result["toid"] ?? 0,
+				toRevision: (int?)result["torevid"] ?? 0,
+				toTitle: (string?)result["totitle"]);
 		}
 		#endregion
 	}

@@ -21,6 +21,15 @@
 	/// <summary>Global helper methods that are useful in a variety of scenarios.</summary>
 	public static class Globals
 	{
+		#region Public Constants
+
+		/// <summary>The text displayed when the title is missing.</summary>
+		public const string NoTitle = "<No Title>";
+
+		/// <summary>The text displayed for unknown values.</summary>
+		public const string Unknown = "<Unknown>";
+		#endregion
+
 		#region Public Methods
 
 		/// <summary>Throws an exception if the input value is null.</summary>

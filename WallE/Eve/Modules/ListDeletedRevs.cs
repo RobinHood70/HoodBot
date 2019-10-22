@@ -54,22 +54,14 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override DeletedRevisionsItem? GetItem(JToken result)
-		{
-			if (result == null)
-			{
-				return null;
-			}
-
-			var title = result.SafeString("title");
-			var revisions = result.GetRevisions(title);
-			return new DeletedRevisionsItem(
-				ns: (int)result.NotNull("ns"),
-				title: title,
-				pageId: (long)result.NotNull("pageid"),
-				revisions: revisions,
-				token: (string?)result["token"]);
-		}
+		protected override DeletedRevisionsItem? GetItem(JToken result) => result == null
+			? null
+			: new DeletedRevisionsItem(
+			ns: (int)result.MustHave("ns"),
+			title: result.MustHaveString("title"),
+			pageId: (long)result.MustHave("pageid"),
+			revisions: result.GetRevisions(),
+			token: (string?)result["token"]);
 		#endregion
 	}
 }

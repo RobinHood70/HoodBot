@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -47,17 +48,15 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override DuplicateFileItem? GetItem(JToken result) => result == null
+		protected override DuplicateFileItem? GetItem(JToken result, PageItem page) => result == null
 			? null
 			: new DuplicateFileItem(
-				name: result.SafeString("name"),
-				shared: result["shared"].AsBCBool(),
-				timestamp: result.AsDateNotNull("timestamp"),
-				user: result.SafeString("user"));
+				name: result.MustHaveString("name"),
+				shared: result["shared"].ToBCBool(),
+				timestamp: result.MustHaveDate("timestamp"),
+				user: result.MustHaveString("user"));
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.DuplicateFiles);
-
-		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.DuplicateFiles);
+		protected override ICollection<DuplicateFileItem> GetMutableList(PageItem page) => (ICollection<DuplicateFileItem>)page.DuplicateFiles;
 		#endregion
 	}
 }

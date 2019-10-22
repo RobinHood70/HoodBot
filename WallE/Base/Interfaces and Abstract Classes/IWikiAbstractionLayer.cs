@@ -370,7 +370,7 @@
 		/// <param name="input">The input parameters.</param>
 		/// <returns>A list of results for each page, subpage, or talk page moved, including errors that may indicate only partial success.</returns>
 		/// <remarks>Due to the fact that this method can generate multiple errors, any errors returned here will not be raised as exceptions. Results should instead be scanned for errors, and acted upon accordingly.</remarks>
-		MoveResult Move(MoveInput input);
+		IReadOnlyList<MoveItem> Move(MoveInput input);
 
 		/// <summary>Returns data corresponding to the <see href="https://www.mediawiki.org/wiki/API:Opensearch">Opensearch</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>

@@ -13,91 +13,38 @@ namespace RobinHood70.WallE.Eve.Modules
 		where TInput : class, IPropertyInput
 		where TItem : class
 	{
-		#region Fields
-		private readonly List<TItem> myList = new List<TItem>();
-		#endregion
-
 		#region Constructors
-		protected PropListModule(WikiAbstractionLayer wal, TInput input)
-			: this(wal, input, null)
-		{
-		}
-
-		protected PropListModule(WikiAbstractionLayer wal, TInput input, IPageSetGenerator pageSetGenerator)
+		protected PropListModule(WikiAbstractionLayer wal, TInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 		}
 		#endregion
 
-		#region Public Override Methods
-		public override void Deserialize(JToken parent)
-		{
-			if (this.Output != null)
-			{
-				this.GetResultsFromCurrentPage();
-			}
-
-			base.Deserialize(parent);
-		}
-		#endregion
-
-		#region Protected Methods
-
-		// Makes a copy of the list or else we just end up handing out the same collection to everything.
-		protected IReadOnlyList<TItem> CopyList() => new List<TItem>(this.myList).AsReadOnly();
-
-		// Makes a copy of the list or else we just end up handing out the same collection to everything.
-		protected void CopyList(IReadOnlyList<TItem>? input)
-		{
-			ThrowNull(input, nameof(input));
-			if (input is List<TItem> list)
-			{
-				list.Clear();
-				list.AddRange(this.myList);
-			}
-			else
-			{
-				throw new InvalidOperationException();
-			}
-		}
-
-		protected void ResetItems(IEnumerable<TItem>? add)
-		{
-			ThrowNull(add, nameof(add));
-			this.myList.Clear();
-			this.myList.AddRange(add);
-			this.SetItemsRemaining(this.myList.Count);
-		}
-		#endregion
-
 		#region Protected Abstract Methods
-		protected abstract TItem? GetItem(JToken result);
+		protected abstract TItem? GetItem(JToken result, PageItem page);
 
-		protected abstract void GetResultsFromCurrentPage();
-
-		protected abstract void SetResultsOnCurrentPage();
+		protected abstract ICollection<TItem> GetMutableList(PageItem page);
 		#endregion
 
 		#region Protected Override Methods
-		protected override void DeserializeResult(JToken result, PageItem output)
+		protected override void DeserializeToPage(JToken result, PageItem page)
 		{
 			ThrowNull(result, nameof(result));
-			ThrowNull(output, nameof(output));
+			ThrowNull(page, nameof(page));
 			using var enumeration = (result as IEnumerable<JToken>).GetEnumerator();
+			var list = this.GetMutableList(page) ?? throw new InvalidOperationException();
 			while (this.ItemsRemaining > 0 && enumeration.MoveNext())
 			{
-				var item = this.GetItem(enumeration.Current);
+				var item = this.GetItem(enumeration.Current, page);
 				if (item != null)
 				{
-					this.myList.Add(item);
+					list.Add(item);
 					if (this.ItemsRemaining != int.MaxValue)
 					{
 						this.ItemsRemaining--;
 					}
 				}
 			}
-
-			this.SetResultsOnCurrentPage();
 		}
 		#endregion
 	}

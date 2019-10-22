@@ -2,7 +2,6 @@
 namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
-	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
@@ -19,7 +18,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Constructors
 		public ListSearch(WikiAbstractionLayer wal, SearchInput input)
-			: this(wal, input, null)
+			: base(wal, input, null)
 		{
 		}
 
@@ -73,12 +72,10 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override void DeserializeParent(JToken parent, IList<SearchResultItem> output)
+		protected override void DeserializeParent(JToken parent)
 		{
 			ThrowNull(parent, nameof(parent));
-			ThrowNull(output, nameof(output));
-			var infoNode = parent["searchinfo"];
-			if (infoNode != null)
+			if (parent["searchinfo"] is JToken infoNode)
 			{
 				this.suggestion = (string?)infoNode["suggestion"];
 				this.totalHits = (int?)infoNode["totalhits"] ?? 0;
@@ -113,8 +110,8 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			return new SearchResultItem(
-				ns: (int)result.NotNull("ns"),
-				title: result.SafeString("title"),
+				ns: (int)result.MustHave("ns"),
+				title: result.MustHaveString("title"),
 				redirSnippet: (string?)result["redirectsnippet"],
 				redirTitle: redir,
 				sectionSnippet: (string?)result["sectionsnippet"],

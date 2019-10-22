@@ -48,10 +48,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 
 		protected override InterwikiBacklinksItem GetItem(JToken result) => new InterwikiBacklinksItem(
-			ns: (int)result.NotNull("ns"),
-			title: result.SafeString("title"),
-			pageId: (long)result.NotNull("pageid"),
-			isRedirect: result["redirect"].AsBCBool(),
+			ns: (int)result.MustHave("ns"),
+			title: result.MustHaveString("title"),
+			pageId: (long)result.MustHave("pageid"),
+			isRedirect: result["redirect"].ToBCBool(),
 			iwPrefix: (string?)result["iwprefix"],
 			iwTitle: (string?)result["iwtitle"]);
 		#endregion

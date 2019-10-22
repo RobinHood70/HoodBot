@@ -44,29 +44,25 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override IReadOnlyList<OpenSearchItem> DeserializeCustom(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var api = result.First;
-			if ((string)api != "api")
-			{
-				base.DeserializeCustom(result);
-			}
 
-			var titles = (JArray)api.Next;
-			var descriptions = (JArray)titles.Next;
-			var urls = (JArray)descriptions.Next;
-
-			var output = new List<OpenSearchItem>(titles.Count);
-			for (var i = 0; i < titles.Count; i++)
+			// 0th term is the search term, so we ignore that.
+			if (result is JArray array && array.Count == 4 && array[1] is JArray titles && array[2] is JArray descriptions && array[3] is JArray urls)
 			{
-				var search = new OpenSearchItem()
+				var output = new List<OpenSearchItem>(titles.Count);
+				for (var i = 0; i < titles.Count; i++)
 				{
-					Title = (string)titles[i],
-					Description = (string)descriptions[i],
-					Uri = (Uri)urls[i],
-				};
-				output.Add(search);
-			}
+					output.Add(new OpenSearchItem(
+						title: (string?)titles[i],
+						description: (string?)descriptions[i],
+						uri: (Uri?)urls[i]));
+				}
 
-			return output;
+				return output;
+			}
+			else
+			{
+				return base.DeserializeCustom(result);
+			}
 		}
 
 		protected override IReadOnlyList<OpenSearchItem> DeserializeResult(JToken result) => throw new NotSupportedException();

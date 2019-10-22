@@ -57,18 +57,18 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			return new FileRepositoryInfoItem(
-				name: result.SafeString("name"),
-				displayName: result.SafeString("displayname"),
-				rootUrl: result.SafeString("rootUrl"),
-				apiUrl: result.SafeString("apiurl"),
+				name: result.MustHaveString("name"),
+				displayName: result.MustHaveString("displayname"),
+				rootUrl: result.MustHaveString("rootUrl"),
+				apiUrl: result.MustHaveString("apiurl"),
 				articleUrl: (string?)result["articleurl"],
 				descBaseUrl: (string?)result["descBaseUrl"],
 				descCacheExpiry: TimeSpan.FromSeconds((int?)result["descriptionCacheExpiry"] ?? 0),
 				favicon: (string?)result["favicon"],
-				flags:
-					result.GetFlag("fetchDescription", FileRepositoryFlags.FetchDescription) |
-					result.GetFlag("initialCapital", FileRepositoryFlags.InitialCapital) |
-					result.GetFlag("local", FileRepositoryFlags.Local),
+				flags: result.GetFlags(
+					("fetchDescription", FileRepositoryFlags.FetchDescription),
+					("initialCapital", FileRepositoryFlags.InitialCapital),
+					("local", FileRepositoryFlags.Local)),
 				otherInfo: otherInfo,
 				scriptDirUrl: (string?)result["scriptDirUrl"],
 				scriptExt: (string?)result["scriptExtension"],

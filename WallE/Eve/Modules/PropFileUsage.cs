@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -49,17 +50,15 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override FileUsageItem? GetItem(JToken result) => result == null
+		protected override FileUsageItem? GetItem(JToken result, PageItem page) => result == null
 			? null
 			: new FileUsageItem(
 				ns: (int?)result["ns"],
 				title: (string?)result["title"],
 				pageId: (long?)result["pageid"] ?? 0,
-				redirect: result["redirect"].AsBCBool());
+				redirect: result["redirect"].ToBCBool());
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.FileUsages);
-
-		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.FileUsages);
+		protected override ICollection<FileUsageItem> GetMutableList(PageItem page) => (ICollection<FileUsageItem>)page.FileUsages;
 		#endregion
 	}
 }

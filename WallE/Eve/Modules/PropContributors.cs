@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -10,7 +11,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public PropContributors(WikiAbstractionLayer wal, ContributorsInput input)
-			: base(wal, input)
+			: base(wal, input, null)
 		{
 		}
 		#endregion
@@ -39,20 +40,18 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override void DeserializeParent(JToken parent, PageItem output)
+		protected override void DeserializeParentToPage(JToken parent, PageItem page)
 		{
 			ThrowNull(parent, nameof(parent));
-			ThrowNull(output, nameof(output));
-			output.AnonContributors = (int?)parent["anoncontributors"] ?? 0;
+			ThrowNull(page, nameof(page));
+			page.AnonContributors = (int?)parent["anoncontributors"] ?? 0;
 		}
 
-		protected override ContributorItem? GetItem(JToken result) => result == null
+		protected override ContributorItem? GetItem(JToken result, PageItem page) => result == null
 			? null
-			: new ContributorItem(result.SafeString("name"), (long)result.NotNull("userid"));
+			: new ContributorItem(result.MustHaveString("name"), (long)result.MustHave("userid"));
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.Contributors);
-
-		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.Contributors);
+		protected override ICollection<ContributorItem> GetMutableList(PageItem page) => (ICollection<ContributorItem>)page.Contributors;
 		#endregion
 	}
 }

@@ -59,10 +59,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override ProtectedTitlesItem? GetItem(JToken result) => result == null
 			? null
 			: new ProtectedTitlesItem(
-				ns: (int)result.NotNull("ns"),
-				title: result.SafeString("title"),
+				ns: (int)result.MustHave("ns"),
+				title: result.MustHaveString("title"),
 				comment: (string?)result["comment"],
-				expiry: result["expiry"].AsDate(),
+				expiry: result["expiry"].ToNullableDate(),
 				level: (string?)result["level"],
 				parsedComment: (string?)result["parsedcomment"],
 				timestamp: (DateTime?)result["timestamp"],

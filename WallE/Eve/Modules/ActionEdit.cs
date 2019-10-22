@@ -2,9 +2,7 @@
 namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
-	using System.Collections.Generic;
-    using System.Collections.Immutable;
-    using Newtonsoft.Json.Linq;
+	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.ProjectGlobals;
@@ -25,12 +23,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		public override string Name { get; } = "edit";
 		#endregion
 
-		#region Internal Properties
-		internal IReadOnlyDictionary<string, string> CaptchaData { get; private set; } = ImmutableDictionary<string, string>.Empty;
-
-		internal Dictionary<string, string> CaptchaSolution { get; } = new Dictionary<string, string>();
-		#endregion
-
 		#region Protected Override Properties
 		protected override RequestType RequestType { get; } = RequestType.Post;
 		#endregion
@@ -40,16 +32,12 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(request, nameof(request));
 			ThrowNull(input, nameof(input));
-			if (input.Text.Length > 8000)
+			if (input.Text?.Length > 8000)
 			{
 				request.Type = RequestType.PostMultipart;
 			}
 
-			foreach (var kvp in this.CaptchaData)
-			{
-				request.AddHidden(kvp.Key, kvp.Value);
-			}
-
+			var md5Text = (input.Text ?? (input.PrependText + input.AppendText)).GetHash(HashType.Md5);
 			request
 				.AddIfNotNull("title", input.Title)
 				.AddIf("pageid", input.PageId, input.Title == null)
@@ -73,29 +61,27 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("redirect", input.Redirect)
 				.AddIfNotNull("contentformat", input.ContentFormat)
 				.AddIfNotNull("contentmodel", input.ContentModel)
-				.AddIf("md5", input.Text.GetHash(HashType.Md5), (input.Text ?? (input.PrependText + input.AppendText)) != null)
+				.AddIfNotNull("md5", md5Text)
+				.AddHidden(input.CaptchaSolution)
 				.AddHidden("token", input.Token);
 		}
 
 		protected override EditResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new EditResult()
-			{
-				Flags =
-				result.GetFlag("new", EditFlags.New) |
-				result.GetFlag("nochange", EditFlags.NoChange),
-				Result = (string?)result["result"],
-				PageId = (long?)result["pageid"] ?? 0,
-				Title = (string?)result["title"],
-				ContentModel = (string?)result["contentmodel"],
-				OldRevisionId = (long?)result["oldrevid"] ?? 0,
-				NewRevisionId = (long?)result["newrevid"] ?? 0,
-				NewTimestamp = (DateTime?)result["newtimestamp"],
-			};
-			this.CaptchaData = result["captcha"].AsReadOnlyDictionary<string>();
-
-			return output;
+			return new EditResult(
+				result: result.MustHaveString("result"),
+				pageId: (long?)result.MustHave("pageid") ?? 0,
+				title: result.MustHaveString("title"),
+				flags: result.GetFlags(
+					("new", EditFlags.New),
+					("nochange", EditFlags.NoChange)),
+				contentModel: (string?)result["contentmodel"],
+				oldRevisionId: (long?)result["oldrevid"] ?? 0,
+				newRevisionId: (long?)result["newrevid"] ?? 0,
+				newTimestamp: (DateTime?)result["newtimestamp"],
+				captchaData: result["captcha"].ToStringDictionary<string>()
+			);
 		}
 		#endregion
 	}

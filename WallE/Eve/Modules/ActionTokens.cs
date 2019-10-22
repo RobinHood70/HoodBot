@@ -36,10 +36,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override IReadOnlyDictionary<string, string> DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new Dictionary<string, string>();
-			result.AddPropertiesToDictionary(output);
-
-			return output;
+			return result.ToStringDictionary<string>();
 		}
 		#endregion
 	}

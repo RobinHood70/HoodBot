@@ -6,11 +6,11 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class MetaTokens : QueryModule<TokensInput, IDictionary<string, string>>
+	internal class MetaTokens : QueryModule<TokensInput, IReadOnlyDictionary<string, string>>
 	{
 		#region Constructors
 		public MetaTokens(WikiAbstractionLayer wal, TokensInput input)
-			: base(wal, input, new Dictionary<string, string>(), null)
+			: base(wal, input, null)
 		{
 		}
 		#endregion
@@ -35,11 +35,10 @@ namespace RobinHood70.WallE.Eve.Modules
 			request.Add("type", input.Types);
 		}
 
-		protected override void DeserializeResult(JToken result, IDictionary<string, string> output)
+		protected override void DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			ThrowNull(output, nameof(output));
-			result.AddPropertiesToDictionary(output);
+			this.Output = result.ToStringDictionary<string>();
 		}
 		#endregion
 	}

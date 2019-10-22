@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System.Collections.Generic;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
@@ -44,9 +45,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			base.BuildRequestLocal(request, input);
 		}
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.Templates);
-
-		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.Templates);
+		protected override ICollection<ITitle> GetMutableList(PageItem page) => (ICollection<ITitle>)page.Templates;
 		#endregion
 	}
 }

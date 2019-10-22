@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -10,7 +11,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public PropExternalLinks(WikiAbstractionLayer wal, ExternalLinksInput input)
-			: base(wal, input)
+			: base(wal, input, null)
 		{
 		}
 		#endregion
@@ -41,11 +42,9 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override string? GetItem(JToken result) => result.AsBCStringOptional("url");
+		protected override string? GetItem(JToken result, PageItem page) => result.MustHaveBCString("url");
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.ExternalLinks);
-
-		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.ExternalLinks);
+		protected override ICollection<string> GetMutableList(PageItem page) => (ICollection<string>)page.ExternalLinks;
 		#endregion
 	}
 }

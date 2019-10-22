@@ -53,25 +53,20 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override BlockResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new BlockResult()
-			{
-				User = (string?)result["user"],
-				UserId = (long)result["userID"],
-				Expiry = result["expiry"].AsDate(),
-			};
-			var id = (string?)result["id"];
-			output.Id = string.IsNullOrEmpty(id) ? 0 : (long)result["id"];
-			output.Reason = (string?)result["reason"];
-			output.WatchUser = result["watchuser"].AsBCBool();
-			output.Flags =
-				result.GetFlag("allowusertalk", BlockFlags.AllowUserTalk) |
-				result.GetFlag("anononly", BlockFlags.AnonymousOnly) |
-				result.GetFlag("autoblock", BlockFlags.AutoBlock) |
-				result.GetFlag("hidename", BlockFlags.Hidden) |
-				result.GetFlag("nocreate", BlockFlags.NoCreate) |
-				result.GetFlag("noemail", BlockFlags.NoEmail);
-
-			return output;
+			return new BlockResult(
+				user: result.MustHaveString("user"),
+				userId: (long)result.MustHave("userID"),
+				reason: result.MustHaveString("reason"),
+				expiry: result["expiry"].ToNullableDate(),
+				id: string.IsNullOrEmpty((string?)result["id"]) ? 0 : (long?)result["id"] ?? 0,
+				flags: result.GetFlags(
+					("allowusertalk", BlockFlags.AllowUserTalk),
+					("anononly", BlockFlags.AnonymousOnly),
+					("autoblock", BlockFlags.AutoBlock),
+					("hidename", BlockFlags.Hidden),
+					("nocreate", BlockFlags.NoCreate),
+					("noemail", BlockFlags.NoEmail)),
+				watchUser: result["watchuser"].ToBCBool());
 		}
 
 		protected override BlockResult DeserializeCustom(string result)

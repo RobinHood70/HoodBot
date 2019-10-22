@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
@@ -11,7 +12,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public PropImageInfo(WikiAbstractionLayer wal, ImageInfoInput input)
-			: base(wal, input)
+			: base(wal, input, null)
 		{
 		}
 		#endregion
@@ -56,21 +57,19 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIf("limit", this.Limit, input.Limit > 1);
 		}
 
-		protected override void DeserializeParent(JToken parent, PageItem output)
+		protected override void DeserializeParentToPage(JToken parent, PageItem page)
 		{
 			ThrowNull(parent, nameof(parent));
-			ThrowNull(output, nameof(output));
+			ThrowNull(page, nameof(page));
 			if (parent["imagerepository"] != null)
 			{
-				output.ImageRepository = (string)parent["imagerepository"];
+				page.ImageRepository = (string)parent["imagerepository"];
 			}
 		}
 
-		protected override ImageInfoItem GetItem(JToken result) => JTokenImageInfo.ParseImageInfo(result, new ImageInfoItem());
+		protected override ImageInfoItem GetItem(JToken result, PageItem page) => JTokenImageInfo.ParseImageInfo(result, new ImageInfoItem());
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.ImageInfoEntries);
-
-		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.ImageInfoEntries);
+		protected override ICollection<ImageInfoItem> GetMutableList(PageItem page) => (ICollection<ImageInfoItem>)page.ImageInfoEntries;
 		#endregion
 	}
 }

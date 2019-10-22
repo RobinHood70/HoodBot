@@ -49,7 +49,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override FileArchiveItem? GetItem(JToken result) => result == null
 			? null
 			: JTokenImageInfo.ParseImageInfo(result, new FileArchiveItem(
-				name: result.SafeString("name"),
+				name: result.MustHaveString("name"),
 				fileArchiveId: (long?)result["id"] ?? 0,
 				ns: (int?)result["ns"],
 				title: (string?)result["title"]));

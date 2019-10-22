@@ -34,19 +34,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		protected override void DeserializeResult(JToken result, PageItem output)
+		protected override void DeserializeToPage(JToken result, PageItem page)
 		{
 			ThrowNull(result, nameof(result));
-			ThrowNull(output, nameof(output));
-
-			output.CategoryInfo = new CategoryInfoResult()
-			{
-				Files = (int)result["files"],
-				Pages = (int)result["pages"],
-				Size = (int)result["size"],
-				Subcategories = (int)result["subcats"],
-				Hidden = result["hidden"].AsBCBool(),
-			};
+			page.CategoryInfo = new CategoryInfoResult(
+				files: (int)result.MustHave("files"),
+				pages: (int)result.MustHave("pages"),
+				size: (int)result.MustHave("size"),
+				subcategories: (int)result.MustHave("subcats"),
+				hidden: result["hidden"].ToBCBool());
 		}
 		#endregion
 	}

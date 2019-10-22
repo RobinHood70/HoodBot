@@ -1,14 +1,16 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
+	using RobinHood70.WallE.Eve;
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class PropDeletedRevisions : PropListModule<DeletedRevisionsInput, RevisionsItem>, IGeneratorModule
+	internal class PropDeletedRevisions : PropListModule<DeletedRevisionsInput, RevisionItem>, IGeneratorModule
 	{
 		#region Constructors
 		public PropDeletedRevisions(WikiAbstractionLayer wal, DeletedRevisionsInput input)
@@ -54,11 +56,9 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIf("limit", this.Limit, input.Limit > 0 || input.MaxItems > 1); // TODO: Needs testing when limits/maxitems are actually set to positive values. Limits are weird in this module, but since they're per-query, I believe this should work as written.
 		}
 
-		protected override RevisionsItem GetItem(JToken result) => result.GetRevision(this.Output?.Title ?? string.Empty);
+		protected override RevisionItem GetItem(JToken result, PageItem page) => result.GetRevision();
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.DeletedRevisions);
-
-		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.DeletedRevisions);
+		protected override ICollection<RevisionItem> GetMutableList(PageItem page) => (ICollection<RevisionItem>)page.DeletedRevisions;
 		#endregion
 	}
 }

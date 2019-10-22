@@ -1,8 +1,8 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
-    using System.Collections.Generic;
-    using Newtonsoft.Json.Linq;
+	using System.Collections.Generic;
+	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
@@ -38,11 +38,11 @@ namespace RobinHood70.WallE.Eve.Modules
 			request.Add("prop", input.Properties);
 		}
 
-		protected override void DeserializeResult(JToken result, PageItem output)
+		protected override void DeserializeToPage(JToken result, PageItem page)
 		{
 			ThrowNull(result, nameof(result));
-			ThrowNull(output, nameof(output));
-			if (output.Properties is Dictionary<string, string?> dictionary)
+			ThrowNull(page, nameof(page));
+			if (page.Properties is Dictionary<string, string?> dictionary)
 			{
 				dictionary.Clear();
 				foreach (var item in result.Children<JProperty>())

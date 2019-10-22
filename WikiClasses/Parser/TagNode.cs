@@ -1,5 +1,7 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
+	using RobinHood70.WikiCommon;
+
 	/// <summary>  Represents an unparsed tag, such as pre or nowiki.</summary>
 	public class TagNode : IWikiNode
 	{

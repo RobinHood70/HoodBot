@@ -50,10 +50,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override LanguageBacklinksItem? GetItem(JToken result) => result == null
 			? null
 			: new LanguageBacklinksItem(
-				ns: (int)result.NotNull("ns"),
-				title: result.SafeString("title"),
-				pageId: (long)result.NotNull("pageid"),
-				isRedirect: result["redirect"].AsBCBool(),
+				ns: (int)result.MustHave("ns"),
+				title: result.MustHaveString("title"),
+				pageId: (long)result.MustHave("pageid"),
+				isRedirect: result["redirect"].ToBCBool(),
 				langCode: (string?)result["lllang"],
 				langTitle: (string?)result["lltitle"]);
 		#endregion

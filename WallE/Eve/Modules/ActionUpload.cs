@@ -60,15 +60,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override UploadResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new UploadResult((string?)result["result"] ?? string.Empty);
+			var resultText = result.MustHaveString("result");
 
 			// Disallow stop checks while upload is in progress.
-			this.continued = output.Result == "Continued";
-			output.FileName = (string?)result["filename"];
-
+			this.continued = resultText == "Continued";
+			IReadOnlyList<string> duplicates = new List<string>();
 			var outputWarnings = new Dictionary<string, string>();
-			var warnings = result["warnings"];
-			if (warnings != null)
+			if (result["warnings"] is JToken warnings)
 			{
 				foreach (var prop in warnings.Children<JProperty>())
 				{
@@ -79,11 +77,10 @@ namespace RobinHood70.WallE.Eve.Modules
 						switch (name)
 						{
 							case "duplicate":
-								output.Duplicates = value.AsReadOnlyList<string>();
+								duplicates = value.ToReadOnlyList<string>();
 								break;
 							case "nochange":
-								var ts = (string?)value["timestamp"];
-								if (ts != null)
+								if ((string?)value["timestamp"] is string ts)
 								{
 									outputWarnings.Add(name, ts);
 								}
@@ -94,13 +91,9 @@ namespace RobinHood70.WallE.Eve.Modules
 								{
 									this.AddWarning("ActionUpload.DeserializeResult", CurrentCulture(EveMessages.NotAString, name));
 								}
-								else
+								else if ((string?)value is string valueString)
 								{
-									var valueString = (string?)value;
-									if (valueString != null)
-									{
-										outputWarnings.Add(name, valueString);
-									}
+									outputWarnings.Add(name, valueString);
 								}
 
 								break;
@@ -109,16 +102,13 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 			}
 
-			output.Warnings = outputWarnings.AsReadOnly();
-			output.FileKey = (string?)result["filekey"];
-
-			var imageInfo = result["imageinfo"];
-			if (imageInfo != null)
-			{
-				output.ImageInfo = JTokenImageInfo.ParseImageInfo(imageInfo, new ImageInfoItem());
-			}
-
-			return output;
+			return new UploadResult(
+				result: resultText,
+				duplicates: duplicates,
+				fileKey: (string?)result["filekey"],
+				fileName: (string?)result["filename"],
+				imageInfo: result["imageinfo"] is JToken imageInfoNode ? JTokenImageInfo.ParseImageInfo(imageInfoNode, new ImageInfoItem()) : null,
+				warnings: outputWarnings.AsReadOnly());
 		}
 		#endregion
 	}

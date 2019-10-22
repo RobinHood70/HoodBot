@@ -44,12 +44,12 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(result, nameof(result));
 			ThrowNull(page, nameof(page));
-			page.Flags =
-				result.GetFlag("invalid", SetNotificationTimestampFlags.Invalid) |
-				result.GetFlag("missing", SetNotificationTimestampFlags.Missing) |
-				result.GetFlag("known", SetNotificationTimestampFlags.Known) |
-				result.GetFlag("notwatched", SetNotificationTimestampFlags.NotWatched);
-			page.NotificationTimestamp = result["notificationtimestamp"].AsDate();
+			page.Flags = result.GetFlags(
+				("invalid", SetNotificationTimestampFlags.Invalid),
+				("missing", SetNotificationTimestampFlags.Missing),
+				("known", SetNotificationTimestampFlags.Known),
+				("notwatched", SetNotificationTimestampFlags.NotWatched));
+			page.NotificationTimestamp = result["notificationtimestamp"].ToNullableDate();
 			page.RevisionId = (long?)result["revid"] ?? 0;
 			this.Pages.Add(page);
 		}
@@ -66,7 +66,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			if (result.Type == JTokenType.Object && result["notificationtimestamp"] != null)
 			{
 				var newPage = this.ItemCreator(0, "::Entire Watchlist::", 0);
-				newPage.NotificationTimestamp = result["notificationtimestamp"].AsDate();
+				newPage.NotificationTimestamp = result["notificationtimestamp"].ToNullableDate();
 				this.Pages.Add(newPage);
 
 				return null;

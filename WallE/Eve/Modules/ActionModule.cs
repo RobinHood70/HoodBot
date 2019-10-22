@@ -217,39 +217,39 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected virtual void DeserializeParent(JToken parent)
 		{
 			ThrowNull(parent, nameof(parent));
-			var error = parent["error"];
-			if (error != null)
+
+			// TODO: Add multiple-error support here (errorformat=raw) using new GetErrors() function.
+			if (parent["error"].GetError() is ErrorItem error)
 			{
-				var code = (string)error["code"];
-				var info = (string)error["info"];
-				switch (code)
+				switch (error.Code)
 				{
 					case "assertbotfailed":
 					case "assertuserfailed":
 					case "assertnameduserfailed":
-						throw new StopException(info);
+						throw new StopException(error.Info);
 					case "editconflict":
 						throw new EditConflictException();
 					default:
-						throw WikiException.General(code, info);
+						throw WikiException.General(error.Code, error.Info);
 				}
 			}
 
-			var warnings = parent["warnings"];
-			if (warnings != null)
+			if (parent["warnings"] is JToken warnings)
 			{
 				foreach (var warning in warnings.Children<JProperty>())
 				{
-					var description = warning.First.AsBCString("warnings");
-
-					foreach (var line in description.Split(TextArrays.LineFeed))
+					if (warning.First is JToken descNode)
 					{
-						this.AddWarning(warning.Name, line);
+						var description = descNode.MustHaveBCString("warnings");
+						foreach (var line in description.Split(TextArrays.LineFeed))
+						{
+							this.AddWarning(warning.Name, line);
+						}
 					}
 				}
 			}
 
-			this.Wal.CurrentTimestamp = (DateTime?)parent["curtimestamp"];
+			this.Wal.CurrentTimestamp = parent["curtimestamp"].ToNullableDate();
 		}
 		#endregion
 	}

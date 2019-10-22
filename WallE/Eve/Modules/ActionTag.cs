@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionTag : ActionModule<TagInput, IReadOnlyList<TagItem>>
+	internal class ActionTag : ActionModule<TagInput, List<TagItem>>
 	{
 		#region Constructors
 		public ActionTag(WikiAbstractionLayer wal)
@@ -41,7 +41,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddHidden("token", input.Token);
 		}
 
-		protected override IReadOnlyList<TagItem> DeserializeResult(JToken result)
+		protected override List<TagItem> DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
 			var tags = new List<TagItem>();
@@ -49,23 +49,20 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				foreach (var item in result)
 				{
-					var tag = new TagItem()
-					{
-						RevisionId = (long?)item["revid"] ?? 0,
-						RecentChangesId = (long?)item["rcid"] ?? 0,
-						LogId = (long?)item["logid"] ?? 0,
-						Status = (string)item["status"],
-						Error = item.GetError(),
-						NoOperation = item["noop"].AsBCBool(),
-						ActionLogId = (long?)item["actionlogid"] ?? 0,
-						Added = item["added"].AsReadOnlyList<string>(),
-						Removed = item["removed"].AsReadOnlyList<string>(),
-					};
-					tags.Add(tag);
+					tags.Add(new TagItem(
+						status: item.MustHaveString("status"),
+						actionLogId: (long?)item["actionlogid"] ?? 0,
+						added: item["added"].ToReadOnlyList<string>(),
+						error: item.GetError(),
+						logId: (long?)item["logid"] ?? 0,
+						noOperation: item["noop"].ToBCBool(),
+						recentChangesId: (long?)item["rcid"] ?? 0,
+						removed: item["removed"].ToReadOnlyList<string>(),
+						revisionId: (long?)item["revid"] ?? 0));
 				}
 			}
 
-			return tags.AsReadOnly();
+			return tags;
 		}
 		#endregion
 	}

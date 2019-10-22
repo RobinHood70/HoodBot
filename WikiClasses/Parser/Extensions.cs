@@ -8,16 +8,6 @@
 	{
 		#region String Extensions
 
-		/// <summary>Limits text to the specified maximum length.</summary>
-		/// <param name="text">The text.</param>
-		/// <param name="maxLength">The maximum length.</param>
-		/// <returns>System.String.</returns>
-		/// <remarks>This limits only the initial string length, not the total, so the return value can have a maximum length of maxLength + 3.</remarks>
-		public static string? Ellipsis(this string? text, int maxLength) =>
-			text == null ? null :
-			text.Length > maxLength ? text.Substring(0, maxLength) + "..." :
-			text;
-
 		/// <summary>Counts the number of consecutive characters that match the mask character.</summary>
 		/// <param name="txt">The text to scan.</param>
 		/// <param name="mask">The matching character to count.</param>

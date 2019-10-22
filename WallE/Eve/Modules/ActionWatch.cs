@@ -50,17 +50,17 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(result, nameof(result));
 			ThrowNull(page, nameof(page));
-			page.Flags =
-				result.GetFlag("missing", WatchFlags.Missing) |
-				result.GetFlag("unwatched", WatchFlags.Unwatched) |
-				result.GetFlag("watched", WatchFlags.Watched);
+			page.Flags = result.GetFlags(
+				("missing", WatchFlags.Missing),
+				("unwatched", WatchFlags.Unwatched),
+				("watched", WatchFlags.Watched));
 			this.Pages.Add(page);
 		}
 
 		protected override WikiTitleItem DeserializeTitle(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var title = result.SafeString("title");
+			var title = result.MustHaveString("title");
 			var ns = (int?)result["ns"] ?? this.FindNamespace(title);
 			return new WikiTitleItem(ns, title, 0);
 		}

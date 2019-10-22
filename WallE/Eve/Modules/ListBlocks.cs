@@ -1,7 +1,6 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
-	using System;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
@@ -47,29 +46,27 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override BlocksResult GetItem(JToken result) => result == null
+		protected override BlocksResult? GetItem(JToken result) => result == null
 			? null
-			: new BlocksResult()
-			{
-				Id = (long?)result["id"] ?? 0,
-				User = (string?)result["user"],
-				UserId = (long?)result["userid"] ?? 0,
-				By = (string?)result["by"],
-				ById = (long?)result["byid"] ?? 0,
-				Timestamp = (DateTime?)result["timestamp"],
-				Expiry = result["expiry"].AsDate(),
-				Reason = (string?)result["reason"],
-				Automatic = result["automatic"].AsBCBool(),
-				Flags =
-					result.GetFlag("allowusertalk", BlockFlags.AllowUserTalk) |
-					result.GetFlag("anononly", BlockFlags.AnonymousOnly) |
-					result.GetFlag("autoblock", BlockFlags.AutoBlock) |
-					result.GetFlag("hidden", BlockFlags.Hidden) |
-					result.GetFlag("nocreate", BlockFlags.NoCreate) |
-					result.GetFlag("noemail", BlockFlags.NoEmail),
-				RangeStart = (string?)result["rangestart"],
-				RangeEnd = (string?)result["rangeend"],
-			};
+			: new BlocksResult(
+				automatic: result["automatic"].ToBCBool(),
+				by: (string?)result["by"],
+				byId: (long?)result["byid"] ?? 0,
+				expiry: result["expiry"].ToNullableDate(),
+				flags: result.GetFlags(
+					("allowusertalk", BlockFlags.AllowUserTalk),
+					("anononly", BlockFlags.AnonymousOnly),
+					("autoblock", BlockFlags.AutoBlock),
+					("hidden", BlockFlags.Hidden),
+					("nocreate", BlockFlags.NoCreate),
+					("noemail", BlockFlags.NoEmail)),
+				id: (long?)result["id"] ?? 0,
+				rangeStart: (string?)result["rangestart"],
+				rangeEnd: (string?)result["rangeend"],
+				reason: (string?)result["reason"],
+				timestamp: result["timestamp"].ToNullableDate(),
+				user: (string?)result["user"],
+				userId: (long?)result["userid"] ?? 0);
 		#endregion
 	}
 }

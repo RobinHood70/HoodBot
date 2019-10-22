@@ -63,98 +63,92 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("token", input.Tokens.IsEmpty() && this.SiteVersion < 124); // Since enumerable version of add will filter out null values, ensure timestamp is requested if tokens are null/empty.
 		}
 
-		protected override void DeserializeParent(JToken parent, PageItem output)
+		protected override void DeserializeParentToPage(JToken parent, PageItem page)
 		{
 			ThrowNull(parent, nameof(parent));
-			ThrowNull(output, nameof(output));
-			if (output.Info != null)
+			ThrowNull(page, nameof(page));
+			if (page.Info != null)
 			{
 				// We already have an Info from a previous query - do not overwrite it, as the results would be empty and produce invalid information. If needed, this could also be converted to check presense of each response field individually.
 				return;
 			}
 
-			var info = new PageInfo()
+			var counter = -1L;
+			if (parent["counter"] is JToken counterNode && counterNode.Type == JTokenType.Integer)
 			{
-				ContentModel = (string)parent["contentmodel"],
-				Language = (string)parent["pagelanguage"],
-				Touched = parent["touched"].AsDate(),
-				LastRevisionId = (long?)parent["lastrevid"] ?? 0,
-				Flags =
-					parent.GetFlag("new", PageInfoFlags.New) |
-					parent.GetFlag("readable", PageInfoFlags.Readable) |
-					parent.GetFlag("redirect", PageInfoFlags.Redirect) |
-					parent.GetFlag("watched", PageInfoFlags.Watched),
-				Length = (int?)parent["length"] ?? 0,
-				StartTimestamp = parent["starttimestamp"].AsDate(),
-				RestrictionTypes = parent["restrictiontypes"].AsReadOnlyList<string>(),
-				Watchers = (long?)parent["watchers"] ?? 0,
-				NotificationTimestamp = parent["notificationtimestamp"].AsDate(),
-				TalkId = (long?)parent["talkid"] ?? 0,
-				SubjectId = (long?)parent["subjectid"] ?? 0,
-				FullUrl = (Uri)parent["fullurl"],
-				EditUrl = (Uri)parent["editurl"],
-				CanonicalUrl = (Uri)parent["canonicalurl"],
-				Preload = (string)parent["preload"],
-				DisplayTitle = (string)parent["displaytitle"],
-			};
-
-			var counter = parent["counter"];
-			info.Counter = counter?.Type == JTokenType.Integer ? (long?)parent["counter"] ?? -1 : -1;
+				counter = (long)counterNode;
+			}
 
 			var tokens = new Dictionary<string, string>();
 			foreach (var token in parent.Children<JProperty>())
 			{
 				if (token.Name.EndsWith("token", StringComparison.Ordinal))
 				{
-					tokens.Add(token.Name, (string)token.Value);
+					tokens.Add(token.Name, (string?)token.Value ?? string.Empty);
 				}
 			}
 
-			info.Tokens = tokens;
-
 			// Protection can apply even when there's no page
-			var protectionNode = parent["protection"];
 			var protections = new List<ProtectionsItem>();
-			if (protectionNode != null)
+			if (parent["protection"] is JToken protectionNode)
 			{
 				foreach (var result in protectionNode)
 				{
-					var prot = new ProtectionsItem()
-					{
-						Type = (string?)result["type"],
-						Level = (string?)result["level"],
-						Expiry = result["expiry"].AsDate(),
-						Cascading = result["cascade"].AsBCBool(),
-						Source = (string?)result["source"],
-					};
-					protections.Add(prot);
+					protections.Add(new ProtectionsItem(
+						type: result.MustHaveString("type"),
+						level: result.MustHaveString("level"),
+						expiry: result.MustHaveDate("expiry"),
+						cascading: result["cascade"].ToBCBool(),
+						source: (string?)result["source"]));
 				}
 			}
-
-			info.Protections = protections;
 
 			// Ensure that all inputs have an output so we get consistent results between JSON1 and JSON2. To cover the corner case where some extension gives unexpected outputs that don't match the input actions, or multiple outputs for a single input, I've initialized the dictionary from the input actions, then updated from there. It is assumed that the programmer will be aware of what they're looking for should these cases ever occur, and will not be bothered by extraneous false values beyond the original input actions.
 			var testActions = new Dictionary<string, bool>(this.baseActions);
-			var testActionsNode = parent["actions"];
-			if (testActionsNode != null)
+			if (parent["actions"] is JToken testActionsNode)
 			{
 				foreach (var prop in testActionsNode.Children<JProperty>())
 				{
-					testActions[prop.Name] = prop.Value.AsBCBool();
+					testActions[prop.Name] = prop.Value.ToBCBool();
 				}
 			}
 
-			info.TestActions = testActions;
-			output.Info = info;
-
 			// If we got a starttimestamp, and it's greater than the current timestamp, update the current timestamp. This is mostly for MW <= 1.23, but could conceivably also happen if base query and info query occur right as the seconds value updates.
-			if (info.StartTimestamp > this.Wal.CurrentTimestamp)
+			var startTimestamp = parent["starttimestamp"].ToNullableDate();
+			if (startTimestamp > this.Wal.CurrentTimestamp)
 			{
-				this.Wal.CurrentTimestamp = info.StartTimestamp;
+				this.Wal.CurrentTimestamp = startTimestamp;
 			}
+
+			page.Info = new PageInfo(
+				canonicalUrl: (Uri?)parent["canonicalurl"],
+				contentModel: (string?)parent["contentmodel"],
+				counter: counter,
+				displayTitle: (string?)parent["displaytitle"],
+				editUrl: (Uri?)parent["editurl"],
+				flags: parent.GetFlags(
+					("new", PageInfoFlags.New),
+					("readable", PageInfoFlags.Readable),
+					("redirect", PageInfoFlags.Redirect),
+					("watched", PageInfoFlags.Watched)),
+				fullUrl: (Uri?)parent["fullurl"],
+				language: (string?)parent["pagelanguage"],
+				lastRevisionId: (long?)parent["lastrevid"] ?? 0,
+				length: (int?)parent["length"] ?? 0,
+				notificationTimestamp: parent["notificationtimestamp"].ToNullableDate(),
+				preload: (string?)parent["preload"],
+				protections: protections,
+				restrictionTypes: parent["restrictiontypes"].ToReadOnlyList<string>(),
+				startTimestamp: startTimestamp,
+				subjectId: (long?)parent["subjectid"] ?? 0,
+				talkId: (long?)parent["talkid"] ?? 0,
+				testActions: testActions,
+				tokens: tokens,
+				touched: parent["touched"].ToNullableDate(),
+				watchers: (long?)parent["watchers"] ?? 0);
 		}
 
-		protected override void DeserializeResult(JToken result, PageItem output)
+		protected override void DeserializeToPage(JToken result, PageItem page)
 		{
 		}
 		#endregion

@@ -40,27 +40,30 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddHidden("token", input.Token);
 		}
 
-		protected override UnblockResult DeserializeResult(JToken result)
+		protected override UnblockResult? DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new UnblockResult()
+			var userNode = result.MustHave("user");
+
+			string user;
+			long userId;
+			if (userNode.Type == JTokenType.Object)
 			{
-				Id = (long)result["id"],
-			};
-			if (result["user"].Type == JTokenType.Object)
-			{
-				output.User = (string?)result["user"]["mName"];
-				output.UserId = (long?)result["user"]["mId"] ?? -1;
+				// Deals with https://phabricator.wikimedia.org/T45518 in MW 1.18 and early versions of 1.19/1.20
+				user = userNode.MustHaveString("mName");
+				userId = (long?)userNode["mId"] ?? 0;
 			}
 			else
 			{
-				output.User = (string?)result["user"];
-				output.UserId = (long)result["userid"];
+				user = (string?)userNode ?? string.Empty; // Should never actually be null, but don't have MustBeString and didn't think it was worth doing more than this.
+				userId = (long?)result["userid"] ?? 0;
 			}
 
-			output.Reason = (string?)result["reason"];
-
-			return output;
+			return new UnblockResult(
+				id: (long)result.MustHave("id"),
+				user: user,
+				userId: userId,
+				reason: (string?)result["reason"]);
 		}
 		#endregion
 	}

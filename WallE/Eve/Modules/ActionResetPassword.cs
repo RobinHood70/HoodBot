@@ -41,12 +41,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override ResetPasswordResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new ResetPasswordResult()
-			{
-				Status = (string?)result["status"],
-				Passwords = result["passwords"].AsReadOnlyDictionary<string>(),
-			};
-			return output;
+			return new ResetPasswordResult(
+				status: result.MustHaveString("status"),
+				passwords: result["passwords"].ToStringDictionary<string>());
 		}
 		#endregion
 	}

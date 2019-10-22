@@ -46,42 +46,36 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(result, nameof(result));
 			var list = new List<RevisionDeleteItem>();
-			var items = result["items"];
-			if (items != null)
+			foreach (var item in result.MustHave("items"))
 			{
-				foreach (var item in items)
-				{
-					var rdi = new RevisionDeleteItem()
-					{
-						Status = (string)item["status"],
-						Id = (long)item["id"],
-						Errors = GetRenderedMessages(item["errors"]),
-						Warnings = GetRenderedMessages(item["warnings"]),
-					};
-					list.Add(rdi);
-				}
+				var revision = item.GetRevision();
+				list.Add(new RevisionDeleteItem(
+					id: (long)item.MustHave("id"),
+					status: item.MustHaveString("status"),
+					errors: GetRenderedMessages(item["errors"]),
+					warnings: GetRenderedMessages(item["warnings"]),
+					revision: revision));
 			}
 
-			var output = new RevisionDeleteResult(list)
-			{
-				Status = (string?)result["status"],
-				Target = (string?)result["target"],
-				Errors = GetRenderedMessages(result["errors"]),
-				Warnings = GetRenderedMessages(result["warnings"]),
-			};
-			return output;
+			return new RevisionDeleteResult(
+				list: list,
+				status: result.MustHaveString("status"),
+				target: result.MustHaveString("target"),
+				errors: GetRenderedMessages(result["errors"]),
+				warnings: GetRenderedMessages(result["warnings"]));
 		}
 		#endregion
 
 		#region Private Static Methods
-		private static IReadOnlyList<string> GetRenderedMessages(JToken messages)
+		private static IReadOnlyList<string> GetRenderedMessages(JToken? messages)
 		{
 			var output = new List<string>();
 			if (messages != null)
 			{
 				foreach (var msg in messages)
 				{
-					output.Add((string)msg["rendered"]);
+					// CONSIDER: Expand to include non-rendered message? Always emitted.
+					output.Add(msg.MustHaveString("rendered"));
 				}
 			}
 

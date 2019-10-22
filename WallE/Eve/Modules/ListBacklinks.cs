@@ -92,10 +92,8 @@ namespace RobinHood70.WallE.Eve.Modules
 				return null;
 			}
 
-			var item = new BacklinksItem((int)result.NotNull("ns"), result.SafeString("title"), (long)result.NotNull("pageid"), result["redirect"].AsBCBool(), this.Input.LinkTypes);
-
-			var redirLinks = result["redirlinks"];
-			if (redirLinks != null && item.Redirects is List<ITitle> redirects)
+			var redirects = new List<ITitle>();
+			if (result["redirlinks"] is JToken redirLinks)
 			{
 				if (redirLinks.Type == JTokenType.Array)
 				{
@@ -118,7 +116,13 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 			}
 
-			return item;
+			return new BacklinksItem(
+				ns: (int)result.MustHave("ns"),
+				title: result.MustHaveString("title"),
+				isRedirect: result["redirect"].ToBCBool(),
+				pageId: (long)result.MustHave("pageid"),
+				redirects: redirects,
+				type: this.Input.LinkTypes);
 		}
 
 		// This module does some really funky things with the limits in redirect mode that don't interact well with how I'm dealing with limits. So, if a specific limit isn't set, always return "max" (-1) rather than the actual limit number, because otherwise the limit will actually take effect in an undesired way.

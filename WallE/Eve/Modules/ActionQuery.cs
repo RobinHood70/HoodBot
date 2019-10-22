@@ -164,20 +164,19 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(input, nameof(input));
 			base.BeforeSubmit(input);
-			var limiter = input.GeneratorInput as ILimitableInput ?? input;
-			if (input.PropertyModules.TryGetValue("revisions", out PropRevisions revModule) && revModule.IsRevisionRange)
+			if (input.PropertyModules.Find(module => module.Name == "revisions") is PropRevisions revModule && revModule.IsRevisionRange)
 			{
 				this.MaximumListSize = 1;
 			}
 			else
 			{
-				if (limiter.Limit > 0 && limiter.Limit < this.MaximumListSize)
+				if (input.Limit > 0 && input.Limit < this.MaximumListSize)
 				{
-					this.MaximumListSize = limiter.Limit;
+					this.MaximumListSize = input.Limit;
 				}
 			}
 
-			this.ItemsRemaining = limiter.MaxItems == 0 ? int.MaxValue : limiter.MaxItems;
+			this.ItemsRemaining = input.MaxItems == 0 ? int.MaxValue : input.MaxItems;
 
 			this.CheckActiveModules(input);
 			var newInput = new QueryInput(input) { GetInterwikiUrls = input.GetInterwikiUrls }; // Make a copy so we can modify it.
@@ -187,7 +186,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				bool useExisting;
 
 				// If a MetaUserInfo module already exists, remove it (so as not to corrupt its input data) and replace it with a merged copy of ours and the original.
-				if (newInput.QueryModules.TryGetValue("userinfo", out MetaUserInfo userInfo))
+				if (newInput.QueryModules.Find(module => module.Name == "userinfo") is MetaUserInfo userInfo)
 				{
 					userInfoInput = userInfo.Input;
 					useExisting = true;
@@ -240,9 +239,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(result, nameof(result));
 			ThrowNull(page, nameof(page));
-			page.Flags =
-				result.GetFlag("invalid", PageFlags.Invalid) |
-				result.GetFlag("missing", PageFlags.Missing);
+			page.Flags = result.GetFlags(
+				("invalid", PageFlags.Invalid),
+				("missing", PageFlags.Missing));
 		}
 
 		protected override void DeserializeParent(JToken parent)
@@ -251,8 +250,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			base.DeserializeParent(parent);
 			var modules = this.Input.QueryModules;
 			var propModules = this.Input.PropertyModules;
-			var limits = parent["limits"];
-			if (limits != null)
+			if (parent["limits"] is JToken limits)
 			{
 				foreach (var limit in limits.Children<JProperty>())
 				{
@@ -262,15 +260,14 @@ namespace RobinHood70.WallE.Eve.Modules
 						this.Generator.ModuleLimit = value;
 					}
 
-					// Should not be an "else if" because generator could be the same type as another module.
-					if (modules.TryGetValue(limit.Name, out var module))
+					if (modules.Find(module => module.Name == limit.Name) is IQueryModule module)
 					{
 						if (module is IContinuableQueryModule continuableModule)
 						{
 							continuableModule.ModuleLimit = value;
 						}
 					}
-					else if (propModules.TryGetValue(limit.Name, out var propModule) && propModule != null)
+					else if (propModules.Find(module => module.Name == limit.Name) is IPropertyModule propModule)
 					{
 						propModule.ModuleLimit = value;
 					}
@@ -278,14 +275,13 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			// Kludgey workaround for https://phabricator.wikimedia.org/T36356. If there had been more than just this one module, some sort of "Needs deserializing during parent's DeserializeParent" feature could have been added, but that seemed just as kludgey as this for a single faulty module.
-			var watchlistRaw = parent[ListWatchlistRaw.ModuleName];
-			if (watchlistRaw != null && modules.TryGetValue(ListWatchlistRaw.ModuleName, out var watchListModule) && watchListModule != null)
+			if (parent[ListWatchlistRaw.ModuleName] != null && modules.Find(module => module.Name == ListWatchlistRaw.ModuleName) is ListWatchlistRaw watchListModule)
 			{
 				watchListModule.Deserialize(parent);
 			}
 		}
 
-		protected override IReadOnlyList<PageItem> DeserializeResult(JToken result)
+		protected override IReadOnlyList<PageItem>? DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
 			if (this.Input.PageSetQuery)
@@ -376,8 +372,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 				foreach (var module in this.Input.PropertyModules)
 				{
-					module.SetPageOutput(item);
-					module.Deserialize(innerResult);
+					module.Deserialize(innerResult, item);
 				}
 			}
 		}

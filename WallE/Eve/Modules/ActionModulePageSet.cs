@@ -24,7 +24,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		private readonly Dictionary<string, string> converted = new Dictionary<string, string>();
 		private readonly Dictionary<string, InterwikiTitleItem> interwiki = new Dictionary<string, InterwikiTitleItem>();
 		private readonly Dictionary<string, string> normalized = new Dictionary<string, string>();
-		private readonly Dictionary<string, PageSetRedirectItem> redirects = new Dictionary<string, PageSetRedirectItem>();
+		private Dictionary<string, PageSetRedirectItem> redirects;
 
 		private bool done;
 		private int offset;
@@ -143,7 +143,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			AddToDictionary(result["normalized"], this.normalized);
-			result["redirects"].GetRedirects(this.redirects, this.Wal);
+			this.redirects = result["redirects"].GetRedirects(this.Wal.InterwikiPrefixes, this.SiteVersion);
 		}
 		#endregion
 
@@ -152,9 +152,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			// TODO: I think DeserializeTitle can be merged into DeserializePage and just have that create and return the whole thing.
 			ThrowNull(result, nameof(result));
-			var ns = (int)result.NotNull("ns");
-			var title = result.SafeString("title");
-			var id = (int)result.NotNull("pageid");
+			var ns = (int)result.MustHave("ns");
+			var title = result.MustHaveString("title");
+			var id = (int)result.MustHave("pageid");
 			return new WikiTitleItem(ns, title, id);
 		}
 		#endregion

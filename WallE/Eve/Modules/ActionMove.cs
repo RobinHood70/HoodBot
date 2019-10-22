@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WikiCommon.Globals;
 
 	// IMPNOTE: Result is slightly reformatted from the API to provide a straight-forward collection of pages that were moved.
-	internal class ActionMove : ActionModule<MoveInput, MoveResult>
+	internal class ActionMove : ActionModule<MoveInput, IReadOnlyList<MoveItem>>
 	{
 		#region Constructors
 		public ActionMove(WikiAbstractionLayer wal)
@@ -47,7 +47,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddHidden("token", input.Token);
 		}
 
-		protected override MoveResult DeserializeResult(JToken result)
+		protected override IReadOnlyList<MoveItem> DeserializeResult(JToken result)
 		{
 			// Errors occur at multiple levels during a move operation and can represent partial success, so instead of throwing them, we gather them into the result and let the user figure out what to do.
 			ThrowNull(result, nameof(result));
@@ -57,12 +57,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			DeserializeSubpages(result["subpages"], list);
 			DeserializeSubpages(result["subpages-talk"], list);
 
-			var output = new MoveResult(list)
-			{
-				Reason = (string?)result["reason"],
-				RedirectCreated = result["redirectcreated"].AsBCBool(),
-			};
-			return output;
+			return list;
 		}
 		#endregion
 
@@ -71,18 +66,16 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			if (result[prefix + "from"] != null)
 			{
-				var item = new MoveItem()
-				{
-					Error = result["error"].GetError() ?? result.GetError("talkmove-error-code", "talkmove-error-info"),
-					From = (string?)result[prefix + "from"],
-					To = (string?)result[prefix + "to"],
-					MovedOverRedirect = result[prefix + "moveoverredirect"].AsBCBool(),
-				};
-				output.Add(item);
+				output.Add(new MoveItem(
+					error: result["error"].GetError() ?? result.GetError("talkmove-error-code", "talkmove-error-info"),
+					from: (string?)result[prefix + "from"],
+					movedOverRedirect: result[prefix + "moveoverredirect"].ToBCBool(),
+					redirectCreated: result["redirectcreated"].ToBCBool(),
+					to: (string?)result[prefix + "to"]));
 			}
 		}
 
-		private static void DeserializeSubpages(JToken node, IList<MoveItem> output)
+		private static void DeserializeSubpages(JToken? node, IList<MoveItem> output)
 		{
 			if (node != null)
 			{

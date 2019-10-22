@@ -1,7 +1,6 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
-	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
@@ -77,7 +76,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override WatchlistItem GetItem(JToken result)
+		protected override WatchlistItem? GetItem(JToken result)
 		{
 			// Same bug as in ListLogEvents.cs but a slightly different manifestation. It appears only when LogInfo is requested and since there are no tags here, the result node will be a null-valued node.
 			if (result == null || result.Type == JTokenType.Null)
@@ -85,28 +84,21 @@ namespace RobinHood70.WallE.Eve.Modules
 				return null;
 			}
 
-			var item = new WatchlistItem((int)result.NotNull("ns"), result.SafeString("title"), (long?)result["pageid"] ?? 0)
-			{
-				WatchlistType = (string?)result["type"],
-			};
-			var logType = (string?)result["logtype"];
-			var logAction = (string?)result["logaction"];
-			result.ParseLogEvent(item, logType, logAction, KnownProps, false);
-			item.RevisionId = (long?)result["revid"] ?? 0;
-			item.OldRevisionId = (long?)result["old_revid"] ?? 0;
-			item.Flags =
-				result.GetFlag("bot", WatchlistFlags.Bot) |
-				result.GetFlag("minor", WatchlistFlags.Minor) |
-				result.GetFlag("new", WatchlistFlags.New) |
-				result.GetFlag("patrolled", WatchlistFlags.Patrolled) |
-				result.GetFlag("unpatrolled", WatchlistFlags.Unpatrolled);
-			item.OldLength = (int?)result["oldlen"] ?? -1;
-			item.NewLength = (int?)result["newlen"] ?? -1;
-			var notification = result["notificationtimestamp"];
-			if (!string.IsNullOrEmpty((string)notification))
-			{
-				item.NotificationTimestamp = (DateTime)notification;
-			}
+			var item = new WatchlistItem(
+				watchlistType: result.MustHaveString("type"),
+				ns: (int?)result["ns"],
+				title: (string?)result["title"],
+				flags: result.GetFlags(
+					("bot", WatchlistFlags.Bot),
+					("minor", WatchlistFlags.Minor),
+					("new", WatchlistFlags.New),
+					("patrolled", WatchlistFlags.Patrolled),
+					("unpatrolled", WatchlistFlags.Unpatrolled)),
+				newLength: (int?)result["newlen"] ?? -1,
+				oldLength: (int?)result["oldlen"] ?? -1,
+				oldRevisionId: (long?)result["old_revid"] ?? 0,
+				revisionId: (long?)result["revid"] ?? 0);
+			result.ParseLogEvent(item, "log", KnownProps, false);
 
 			return item;
 		}

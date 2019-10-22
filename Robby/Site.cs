@@ -677,12 +677,32 @@
 
 		/// <summary>Clears the bot's "has message" flag.</summary>
 		/// <param name="force">Clears the message, even if the site is in read-only mode.</param>
-		/// <returns><see langword="true"/> if the flag was successfully cleared; otherwise, <see langword="false"/>.</returns>
+		/// <returns><see cref="ChangeStatus.Success"/> if the flag was successfully cleared; otherwise, <see cref="ChangeStatus.Failure"/>.</returns>
 		public virtual ChangeStatus ClearMessage(bool force)
 		{
 			var func = new Func<ChangeStatus>(() => this.AbstractionLayer.ClearHasMessage() ? ChangeStatus.Success : ChangeStatus.Failure);
 			return force ? func() : this.PublishChange(this, null, func);
 		}
+
+		/// <summary>Creates a new account on the server.</summary>
+		/// <param name="name">The account name.</param>
+		/// <param name="password">The account password.</param>
+		/// <param name="email">The account email. May be null.</param>
+		/// <returns><see cref="ChangeStatus.Success"/> if the account was successfully created; otherwise, <see cref="ChangeStatus.Failure"/>.</returns>
+		public virtual ChangeStatus CreateAccount(string name, string password, string email) => this.PublishChange(
+			this,
+			new Dictionary<string, object>
+			{
+				[nameof(name)] = name,
+				[nameof(password)] = password,
+				[nameof(email)] = email,
+			},
+			() =>
+			{
+				var input = new CreateAccountInput(name, password) { Email = email };
+				var result = this.AbstractionLayer.CreateAccount(input);
+				return result.Result == "Success" ? ChangeStatus.Success : ChangeStatus.Failure;
+			});
 
 		/// <summary>Gets the article path.</summary>
 		/// <param name="unparsedPath">The unparsed path. This can be a local article path or an interwiki path.</param>
@@ -935,7 +955,7 @@
 			// This should never happen with co-initialization, but just in case there's a massive change to the abstraction layer, make sure we have all the info we need.
 			if (this.Version == null)
 			{
-				var siteInfo = this.AbstractionLayer.SiteInfo(new SiteInfoInput() { Properties = NeededSiteInfo });
+				var siteInfo = this.AbstractionLayer.SiteInfo(new SiteInfoInput(NeededSiteInfo));
 				this.ParseInternalSiteInfo(siteInfo);
 			}
 		}
@@ -948,26 +968,28 @@
 			ThrowNull(siteInfo, nameof(siteInfo));
 
 			// General
-			this.CaseSensitive = siteInfo.Flags.HasFlag(SiteInfoFlags.CaseSensitive);
-			this.Culture = GetCulture(siteInfo.Language);
-			this.Name = siteInfo.SiteName;
-			this.ServerName = siteInfo.ServerName;
-			this.Version = siteInfo.Generator;
-			var path = siteInfo.ArticlePath;
+			var general = siteInfo.General;
+			this.CaseSensitive = general.Flags.HasFlag(SiteInfoFlags.CaseSensitive);
+			this.Culture = GetCulture(general.Language);
+			this.Name = general.SiteName;
+			this.ServerName = general.ServerName;
+			this.Version = general.Generator;
+			var path = general.ArticlePath;
 			if (path.StartsWith("/", StringComparison.Ordinal))
 			{
 				// If article path is relative, figure out the absolute address.
 				var repl = path.Substring(0, path.IndexOf("$1", StringComparison.Ordinal));
-				var articleBaseIndex = siteInfo.BasePage.IndexOf(repl, StringComparison.Ordinal);
+				var articleBaseIndex = general.BasePage.IndexOf(repl, StringComparison.Ordinal);
 				if (articleBaseIndex < 0)
 				{
-					articleBaseIndex = siteInfo.BasePage.IndexOf("/", siteInfo.BasePage.IndexOf("//", StringComparison.Ordinal) + 2, StringComparison.Ordinal);
+					articleBaseIndex = general.BasePage.IndexOf("/", general.BasePage.IndexOf("//", StringComparison.Ordinal) + 2, StringComparison.Ordinal);
 				}
 
-				path = siteInfo.BasePage.Substring(0, articleBaseIndex) + path;
+				path = general.BasePage.Substring(0, articleBaseIndex) + path;
 			}
 
 			this.ArticlePath = path;
+			this.MainPageName = general.MainPage;
 
 			// NamespaceAliases
 			var allAliases = new Dictionary<int, List<string>>();
@@ -991,8 +1013,7 @@
 			}
 
 			this.Namespaces = new NamespaceCollection(namespaces, this.EqualityComparerInsensitive);
-			this.MainPageName = siteInfo.MainPage;
-			this.MainPage = new Title(this, siteInfo.MainPage); // Now that we understand namespaces, we can create a Title.
+			this.MainPage = new Title(this, general.MainPage); // Now that we understand namespaces, we can create a Title.
 
 			// MagicWords
 			foreach (var word in siteInfo.MagicWords)
@@ -1014,7 +1035,7 @@
 				}
 			}
 
-			var server = siteInfo.Server; // Used to help determine if interwiki is local
+			var server = general.Server; // Used to help determine if interwiki is local
 			var interwikiList = new List<InterwikiEntry>();
 			foreach (var item in siteInfo.InterwikiMap)
 			{

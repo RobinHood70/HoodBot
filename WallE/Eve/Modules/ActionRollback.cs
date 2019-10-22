@@ -44,16 +44,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override RollbackResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new RollbackResult()
-			{
-				Title = (string?)result["title"],
-				PageId = (long)result["pageid"],
-				Summary = (string?)result["summary"],
-				RevisionId = (long)result["revid"],
-				OldRevisionId = (long)result["old_revid"],
-				LastRevisionId = (long)result["last_revid"],
-			};
-			return output;
+			return new RollbackResult(
+				title: result.MustHaveString("title"),
+				pageId: (long)result.MustHave("pageid"),
+				summary: result.MustHaveString("summary"),
+				revisionId: (long)result.MustHave("revid"),
+				oldRevisionId: (long)result.MustHave("old_revid"),
+				lastRevisionId: (long)result.MustHave("last_revid"));
 		}
 		#endregion
 	}

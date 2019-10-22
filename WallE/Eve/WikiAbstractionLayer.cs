@@ -17,9 +17,8 @@
 
 	/// <summary>An API-based implementation of the <see cref="IWikiAbstractionLayer" /> interface.</summary>
 	/// <seealso cref="IWikiAbstractionLayer" />
-	/// <seealso cref="IMaxLaggable" />
 	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Not much to be done while maintaining the ease of abstraction (e.g., using index.php or a database layer). If anyone has a better design, I'm all ears!")]
-	public class WikiAbstractionLayer : IWikiAbstractionLayer, IMaxLaggable
+	public class WikiAbstractionLayer : IWikiAbstractionLayer
 	{
 		#region Internal Constants
 		internal const int LimitSmall1 = 50;
@@ -34,9 +33,10 @@
 
 		#region Fields
 		private readonly HashSet<string> interwikiPrefixes = new HashSet<string>(StringComparer.Create(CultureInfo.InvariantCulture, true));
-		private readonly Dictionary<int, NamespacesItem> namespaces = new Dictionary<int, NamespacesItem>();
+		private readonly Dictionary<int, SiteInfoNamespace> namespaces = new Dictionary<int, SiteInfoNamespace>();
 		private readonly List<ErrorItem> warnings = new List<ErrorItem>();
 		private readonly WikiException notInitialized = new WikiException(string.Format(Messages.SiteNotInitialized, nameof(Login), nameof(Initialize)));
+		private ITokenManager tokenManager = null;
 		#endregion
 
 		#region Constructors
@@ -201,7 +201,7 @@
 
 		/// <summary>Gets the namespace collection for the site.</summary>
 		/// <value>The site's namespaces.</value>
-		public IReadOnlyDictionary<int, NamespacesItem> Namespaces => this.namespaces;
+		public IReadOnlyDictionary<int, SiteInfoNamespace> Namespaces => this.namespaces;
 
 		/// <summary>Gets or sets the path of index.php relative to the document root.</summary>
 		/// <value>The path of index.php relative to the document root.</value>
@@ -227,7 +227,15 @@
 
 		/// <summary>Gets or sets the class to use as a token manager.</summary>
 		/// <value>The token manager.</value>
-		public ITokenManager? TokenManager { get; set; }
+		public ITokenManager TokenManager
+		{
+			get => this.tokenManager ??=
+					this.SiteVersion == 0 ? throw new InvalidOperationException(string.Format(Messages.SiteNotInitialized, nameof(this.Initialize), nameof(this.Login))) :
+					this.SiteVersion >= TokenManagerMeta.MinimumVersion ? new TokenManagerMeta(this) :
+					this.SiteVersion >= TokenManagerAction.MinimumVersion ? new TokenManagerAction(this) :
+					new TokenManagerOriginal(this) as ITokenManager;
+			set => this.tokenManager = value ?? throw ArgumentNull(nameof(this.TokenManager));
+		}
 
 		/// <summary>Gets or sets the base URI used for all requests. This should be the full URI to api.php (e.g., <c>https://en.wikipedia.org/w/api.php</c>).</summary>
 		/// <value>The URI to use as a base.</value>
@@ -262,10 +270,6 @@
 		/// <value><see langword="true" /> to skip the AfterSubmit cycle, thus breaking recursion; otherwise, <see langword="false" />.</value>
 		/// <remarks>Custom stop checks might rely on calls to additional modules in order to determine whether the bot should stop. Since these each have their own AfterSubmit process, the entire check would become recursive. The AfterSubmit routine manages this variable to ensure that stop checks are only performed at the top-most level. When set to true, the routine returns immediately without performing any additional stop checks.</remarks>
 		protected internal bool BreakRecursionAfterSubmit { get; set; }
-		#endregion
-
-		#region Private Properties
-		private ITokenManager CheckedTokenManager => this.TokenManager ?? throw this.notInitialized;
 		#endregion
 
 		#region Public Static Methods
@@ -403,15 +407,14 @@
 				* converting WatchItem's Title to a traditional ITitle value.
 			InterwikiMap is only required to emulate PageSet redirects' tointerwiki property for < 1.25.
 			*/
-			var eventArgs = new InitializationEventArgs(new SiteInfoInput() { Properties = NeededSiteInfo }, null);
+			var eventArgs = new InitializationEventArgs(new SiteInfoInput(NeededSiteInfo), null);
 			this.OnInitializing(eventArgs);
 
 			// Create input from return values in eventArgs
-			var siteInfoInput = new SiteInfoInput()
+			var siteInfoInput = new SiteInfoInput(eventArgs.Properties)
 			{
 				FilterLocalInterwiki = eventArgs.FilterLocalInterwiki,
 				InterwikiLanguageCode = eventArgs.InterwikiLanguageCode,
-				Properties = eventArgs.Properties,
 				ShowAllDatabases = eventArgs.ShowAllDatabases,
 				ShowNumberInGroup = eventArgs.ShowNumberInGroup
 			};
@@ -426,25 +429,26 @@
 			var siteInfo = infoModule.Output;
 
 			// General
-			this.Flags = siteInfo.Flags;
-			this.LanguageCode = siteInfo.Language;
-			this.SiteName = siteInfo.SiteName;
-			this.Script = siteInfo.Script;
-			var path = siteInfo.ArticlePath;
+			var general = siteInfo.General;
+			this.Flags = general.Flags;
+			this.LanguageCode = general.Language;
+			this.SiteName = general.SiteName;
+			this.Script = general.Script;
+			var path = general.ArticlePath;
 			if (path.StartsWith("/", StringComparison.Ordinal))
 			{
 				var repl = path.Substring(0, path.IndexOf("$1", StringComparison.Ordinal));
-				var articleBaseIndex = siteInfo.BasePage.IndexOf(repl, StringComparison.Ordinal);
+				var articleBaseIndex = general.BasePage.IndexOf(repl, StringComparison.Ordinal);
 				if (articleBaseIndex < 0)
 				{
-					articleBaseIndex = siteInfo.BasePage.IndexOf("/", siteInfo.BasePage.IndexOf("//", StringComparison.Ordinal) + 2, StringComparison.Ordinal);
+					articleBaseIndex = general.BasePage.IndexOf("/", general.BasePage.IndexOf("//", StringComparison.Ordinal) + 2, StringComparison.Ordinal);
 				}
 
-				path = siteInfo.BasePage.Substring(0, articleBaseIndex) + path;
+				path = general.BasePage.Substring(0, articleBaseIndex) + path;
 			}
 
 			this.ArticlePath = path;
-			var versionFudged = Regex.Replace(siteInfo.Generator, @"[^0-9\.]", ".").TrimStart(TextArrays.Period);
+			var versionFudged = Regex.Replace(general.Generator, @"[^0-9\.]", ".").TrimStart(TextArrays.Period);
 			var versionSplit = versionFudged.Split(TextArrays.Period);
 			var siteVersion = int.Parse(versionSplit[0], CultureInfo.InvariantCulture) * 100 + int.Parse(versionSplit[1], CultureInfo.InvariantCulture);
 			this.SiteVersion = siteVersion;
@@ -467,18 +471,7 @@
 			this.SupportsMaxLag = siteInfo.LagInfo?.Count > 0 && siteInfo.LagInfo[0].Lag != -1;
 
 			// Other (not SiteInfo-related)
-			if (this.TokenManager == null)
-			{
-				this.TokenManager =
-					siteVersion >= TokenManagerMeta.MinimumVersion ? new TokenManagerMeta(this) :
-					siteVersion >= TokenManagerAction.MinimumVersion ? new TokenManagerAction(this) :
-					new TokenManagerOriginal(this) as ITokenManager;
-			}
-			else
-			{
-				// Token Manager can be non-null if we're using the site after logging out (possibly to log in again as someone else). It's pointless to reinitialize it in that case.
-				this.TokenManager.Clear();
-			}
+			this.TokenManager.Clear();
 
 			if (this.ContinueVersion == 0)
 			{
@@ -665,26 +658,24 @@
 		/// <returns>Information about the account created.</returns>
 		public CreateAccountResult CreateAccount(CreateAccountInput input)
 		{
+			ThrowNull(input, nameof(input));
 			var create = new ActionCreateAccount(this);
-			CreateAccountResult retval;
-			var retries = 3; // We potentially need to get the token, submit the token, and respond to a Captcha just for a single request.
-			bool doCaptcha;
-			do
+			var retval = create.Submit(input);
+			if (input.Token == null)
 			{
-				retries--;
+				input.Token = retval.Token;
 				retval = create.Submit(input);
-				doCaptcha = false;
-				if (create.CaptchaData.Count > 0)
+			}
+
+			if (retval.CaptchaData.Count > 0)
+			{
+				var eventArgs = new CaptchaEventArgs(retval.CaptchaData, input.CaptchaSolution);
+				this.OnCaptchaChallenge(eventArgs);
+				if (eventArgs.CaptchaSolution.Count > 0)
 				{
-					var eventArgs = new CaptchaEventArgs(create.CaptchaData, create.CaptchaSolution);
-					this.OnCaptchaChallenge(eventArgs);
-					if (eventArgs.CaptchaSolution.Count > 0)
-					{
-						doCaptcha = true;
-					}
+					retval = create.Submit(input);
 				}
 			}
-			while (retries > 0 && (doCaptcha || retval.Result == "NeedToken"));
 
 			// Unlike Login, it is not necessarily a critical event if user creation fails, so just return the result regardless of success.
 			return retval;
@@ -723,25 +714,16 @@
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
 			var edit = new ActionEdit(this);
-			EditResult retval;
-			bool doCaptcha;
-			var retry = false; // Only one edit and one captcha check so we're not looping in case of captcha failure.
-			do
+			var retval = edit.Submit(input);
+			if (retval.CaptchaData.Count > 0)
 			{
-				doCaptcha = false;
-				retval = edit.Submit(input);
-				if (edit.CaptchaData.Count > 0)
+				var eventArgs = new CaptchaEventArgs(retval.CaptchaData, input.CaptchaSolution);
+				this.OnCaptchaChallenge(eventArgs);
+				if (eventArgs.CaptchaSolution.Count > 0)
 				{
-					var eventArgs = new CaptchaEventArgs(edit.CaptchaData, edit.CaptchaSolution);
-					this.OnCaptchaChallenge(eventArgs);
-					if (eventArgs.CaptchaSolution.Count > 0)
-					{
-						retry = !retry;
-						doCaptcha = true;
-					}
+					retval = edit.Submit(input);
 				}
 			}
-			while (doCaptcha && retry);
 
 			return retval;
 		}
@@ -882,8 +864,8 @@
 
 			if (string.IsNullOrEmpty(input.UserName))
 			{
-				this.CheckedTokenManager.Clear();
-				return LoginResult.EditingAnonymously;
+				this.TokenManager.Clear();
+				return LoginResult.EditingAnonymously(this.UserName);
 			}
 
 			var userNameSplit = input.UserName.Split(TextArrays.At);
@@ -1007,7 +989,7 @@
 		/// <param name="input">The input parameters.</param>
 		/// <returns>A list of results for each page, subpage, or talk page moved, including errors that may indicate only partial success.</returns>
 		/// <remarks>Due to the fact that this method can generate multiple errors, any errors returned here will not be raised as exceptions. Results should instead be scanned for errors, and acted upon accordingly.</remarks>
-		public MoveResult Move(MoveInput input)
+		public IReadOnlyList<MoveItem> Move(MoveInput input)
 		{
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
@@ -1176,8 +1158,8 @@
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.CheckToken(
 					input.Title == null
-					? this.CheckedTokenManager.RollbackToken(input.PageId)
-					: this.CheckedTokenManager.RollbackToken(input.Title));
+					? this.TokenManager.RollbackToken(input.PageId)
+					: this.TokenManager.RollbackToken(input.Title));
 			return new ActionRollback(this).Submit(input);
 		}
 
@@ -1294,7 +1276,7 @@
 				var tokenUser = input.User ?? (this.SiteVersion >= 124
 					? string.Empty // Name is unnecessary for 1.24+
 					: throw new InvalidOperationException(EveMessages.InvalidUserRightsRequest));
-				input.Token = this.CheckToken(this.CheckedTokenManager.UserRightsToken(tokenUser));
+				input.Token = this.CheckToken(this.TokenManager.UserRightsToken(tokenUser));
 			}
 
 			return new ActionUserRights(this).Submit(input);
@@ -1394,13 +1376,13 @@
 			this.SiteName = null;
 			this.SiteVersion = 0;
 			this.SupportsMaxLag = false;
-			this.TokenManager = null;
 			this.UseLanguage = null;
 			this.interwikiPrefixes.Clear();
 			this.namespaces.Clear();
+			this.tokenManager?.Clear();
 		}
 
-		private string GetSessionToken(string type) => this.CheckToken(this.CheckedTokenManager.SessionToken(type));
+		private string GetSessionToken(string type) => this.CheckToken(this.TokenManager.SessionToken(type));
 
 		private IReadOnlyList<TOutput> RunListQuery<TInput, TOutput>(ListModule<TInput, TOutput> module)
 			where TInput : class

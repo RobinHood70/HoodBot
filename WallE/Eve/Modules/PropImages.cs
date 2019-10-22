@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -47,11 +48,9 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override ITitle GetItem(JToken result) => result.GetWikiTitle();
+		protected override ITitle GetItem(JToken result, PageItem page) => result.GetWikiTitle();
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.Images);
-
-		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.Images);
+		protected override ICollection<ITitle> GetMutableList(PageItem page) => (ICollection<ITitle>)page.Images;
 		#endregion
 	}
 }

@@ -41,9 +41,9 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(page, nameof(page));
 			page.ErrorMessage = result["errormessage"].GetWarnings();
 			page.Result = (string?)result["result"];
-			page.Flags =
-				result.GetFlag("invalid", ImageRotateFlags.Invalid) |
-				result.GetFlag("missing", ImageRotateFlags.Missing);
+			page.Flags = result.GetFlags(
+				("invalid", ImageRotateFlags.Invalid),
+				("missing", ImageRotateFlags.Missing));
 			this.Pages.Add(page);
 		}
 		#endregion

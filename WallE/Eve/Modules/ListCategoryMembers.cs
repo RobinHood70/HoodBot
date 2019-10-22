@@ -85,8 +85,8 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			var item = new CategoryMembersItem(
-				(int)result.NotNull("ns"),
-				result.SafeString("title"),
+				(int)result.MustHave("ns"),
+				result.MustHaveString("title"),
 				(long?)result["pageid"] ?? 0,
 				(string?)result["sortkey"],
 				(string?)result["sortkeyprefix"],

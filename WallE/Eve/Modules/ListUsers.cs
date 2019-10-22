@@ -46,12 +46,12 @@ namespace RobinHood70.WallE.Eve.Modules
 			? null
 			: new UsersItem(
 				userId: (long?)result["userid"] ?? 0,
-				name: result.SafeString("name"),
-				flags:
-					result.GetFlag("emailable", UserFlags.Emailable) |
-					result.GetFlag("interwiki", UserFlags.Interwiki) |
-					result.GetFlag("invalid", UserFlags.Invalid) |
-					result.GetFlag("missing", UserFlags.Missing),
+				name: result.MustHaveString("name"),
+				flags: result.GetFlags(
+					("emailable", UserFlags.Emailable),
+					("interwiki", UserFlags.Interwiki),
+					("invalid", UserFlags.Invalid),
+					("missing", UserFlags.Missing)),
 				gender: (string?)result["gender"],
 				token: (string?)result["userrightstoken"])
 			.GetUserData(result);

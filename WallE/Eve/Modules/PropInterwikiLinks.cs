@@ -2,6 +2,7 @@
 namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
+	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -11,7 +12,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public PropInterwikiLinks(WikiAbstractionLayer wal, InterwikiLinksInput input)
-			: base(wal, input)
+			: base(wal, input, null)
 		{
 		}
 		#endregion
@@ -44,13 +45,11 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override InterwikiTitleItem? GetItem(JToken result) => result == null
+		protected override InterwikiTitleItem? GetItem(JToken result, PageItem page) => result == null
 			? null
-			: new InterwikiTitleItem(result.SafeString("prefix"), result.AsBCStringOptional("title")!, (Uri?)result["url"]);
+			: new InterwikiTitleItem(result.MustHaveString("prefix"), result.MustHaveBCString("title")!, (Uri?)result["url"]);
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.InterwikiLinks);
-
-		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.InterwikiLinks);
+		protected override ICollection<InterwikiTitleItem> GetMutableList(PageItem page) => (ICollection<InterwikiTitleItem>)page.InterwikiLinks;
 		#endregion
 	}
 }

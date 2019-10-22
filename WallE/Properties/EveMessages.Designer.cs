@@ -88,6 +88,24 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This {0} module cannot be deseralized in the normal manner..
+        /// </summary>
+        internal static string CannotDeserialize {
+            get {
+                return ResourceManager.GetString("CannotDeserialize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You cannot deserialize a property module without specifying the page to deserialize to..
+        /// </summary>
+        internal static string CannotDeserializeWithoutPage {
+            get {
+                return ResourceManager.GetString("CannotDeserializeWithoutPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An item in the collection {0} was null (or whitespace only for strings), or there were no items in the collection..
         /// </summary>
         internal static string CollectionInvalid {
@@ -156,6 +174,15 @@ namespace RobinHood70.WallE.Properties {
         internal static string MalformedData {
             get {
                 return ResourceManager.GetString("MalformedData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The data returned by the wiki is not of the expected type. {0}, a child of {1}, is not a {2}..
+        /// </summary>
+        internal static string MalformedDataType {
+            get {
+                return ResourceManager.GetString("MalformedDataType", resourceCulture);
             }
         }
         
@@ -241,7 +268,7 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to SHA1 check for revision {0} on page &quot;{1}&quot; failed..
+        ///   Looks up a localized string similar to SHA1 check for revision {0} failed..
         /// </summary>
         internal static string RevisionSha1Failed {
             get {

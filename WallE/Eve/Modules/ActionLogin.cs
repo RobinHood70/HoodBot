@@ -55,26 +55,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override LoginResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new LoginResult()
-			{
-				Result = (string?)result["result"],
-				Reason = (string?)result["reason"],
-			};
-			switch (output.Result)
-			{
-				case "NeedToken":
-					output.Token = (string?)result["token"];
-					break;
-				case "Success":
-					output.UserId = (long?)result["lguserid"] ?? -1;
-					output.User = (string?)result["lgusername"];
-					break;
-				case "Throttled":
-					output.WaitTime = TimeSpan.FromSeconds((int?)result["wait"] ?? 0);
-					break;
-			}
-
-			return output;
+			return new LoginResult(
+				result: result.MustHaveString("result"),
+				reason: (string?)result["reason"],
+				user: (string?)result["lgusername"],
+				userId: (long?)result["lguserid"] ?? -1,
+				token: (string?)result["token"],
+				waitTime: TimeSpan.FromSeconds((int?)result["wait"] ?? 0));
 		}
 		#endregion
 	}

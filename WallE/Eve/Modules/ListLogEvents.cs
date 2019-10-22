@@ -55,19 +55,25 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override LogEventsItem? GetItem(JToken result)
 		{
-			// https://github.com/wikimedia/mediawiki-core/commit/bf1e9d76ad4776ad5d9f6f5b662b418bbf4b1acd
-			// Versions of MediaWiki prior to 1.24 have a bug where not all log entries are shown. This usually (always?) occurs when an item has dropped off RC or is deleted. When rcprop=tags is specified, however, empty tags entries with no other info may be emitted, so skip to next iteration if that appears to be the case. Uses "type" for validity-checking, since that should always be emitted, no matter what.
-			if (result == null || result["type"] == null)
+			if (result == null)
 			{
 				return null;
 			}
 
-			var item = new LogEventsItem((int)result.NotNull("ns"), result.SafeString("title"), (long?)result["pageid"] ?? 0);
-			var logType = (string?)result["type"];
-			var logAction = (string?)result["action"];
-			result.ParseLogEvent(item, logType, logAction, KnownProps, this.getUserId);
-			item.LogPageId = (long?)result["logpage"] ?? 0;
-			item.Tags = result["tags"].AsReadOnlyList<string>();
+			// https://phabricator.wikimedia.org/rSVN112546 / https://github.com/wikimedia/mediawiki-core/commit/bf1e9d76ad4776ad5d9f6f5b662b418bbf4b1acd
+			// Versions of MediaWiki prior to 1.24 have a bug where not all log entries are shown. This usually (always?) occurs when an item has dropped off RC or is deleted. When rcprop=tags is specified, however, empty tags entries with no other info may be emitted, so skip to next iteration if that appears to be the case.
+			var tags = result["tags"];
+			if (tags != null && new List<JToken>(result.Children()).Count == 1 && new List<JToken>(tags.Children()).Count == 0)
+			{
+				return null;
+			}
+
+			var item = new LogEventsItem(
+				ns: (int?)result["ns"],
+				title: (string?)result["title"],
+				logPageId: (long?)result["logpage"] ?? 0,
+				tags: tags.ToReadOnlyList<string>());
+			result.ParseLogEvent(item, string.Empty, KnownProps, this.getUserId);
 
 			return item;
 		}

@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
 	using System.ComponentModel;
+	using RobinHood70.WikiCommon;
 
 	/// <summary>Represents a block of text.</summary>
 	public class TextNode : IWikiNode

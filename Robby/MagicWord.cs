@@ -8,8 +8,8 @@
 	public class MagicWord
 	{
 		/// <summary>Initializes a new instance of the <see cref="MagicWord"/> class.</summary>
-		/// <param name="word">The <see cref="MagicWordsItem"/> to initialize from.</param>
-		protected internal MagicWord(MagicWordsItem word)
+		/// <param name="word">The <see cref="SiteInfoMagicWord"/> to initialize from.</param>
+		protected internal MagicWord(SiteInfoMagicWord word)
 		{
 			// Assumes dictionary will hold Id.
 			ThrowNull(word, nameof(word));

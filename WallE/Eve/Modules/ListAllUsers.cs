@@ -47,7 +47,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			? null
 			: new AllUsersItem(
 				userId: (long?)result["userid"] ?? 0,
-				name: result.SafeString("name"),
+				name: result.MustHaveString("name"),
 				recentActions: (int?)result["recentactions"] ?? (int?)result["recenteditcount"] ?? 0)
 			.GetUserData(result);
 		#endregion

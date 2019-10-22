@@ -41,15 +41,12 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override ManageTagsResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new ManageTagsResult()
-			{
-				Operation = (string?)result["operation"],
-				Tag = (string?)result["tag"],
-				Warnings = result["warnings"].AsReadOnlyList<string>(),
-				Success = result["success"].AsBCBool(),
-				LogId = (long?)result["logid"] ?? 0,
-			};
-			return output;
+			return new ManageTagsResult(
+				operation: result.MustHaveString("operation"),
+				tag: result.MustHaveString("tag"),
+				success: result.MustHave("success").ToBCBool(),
+				warnings: result["warnings"].ToReadOnlyList<string>(),
+				logId: (long?)result["logid"] ?? 0);
 		}
 		#endregion
 	}

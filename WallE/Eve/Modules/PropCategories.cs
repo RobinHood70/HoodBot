@@ -2,6 +2,7 @@
 namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
+	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -50,19 +51,17 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override CategoriesItem? GetItem(JToken result) => result == null
+		protected override CategoriesItem? GetItem(JToken result, PageItem page) => result == null
 			? null
 			: new CategoriesItem(
-				ns: (int)result.NotNull("ns"),
-				title: result.SafeString("title"),
-				hidden: result["hidden"].AsBCBool(),
+				ns: (int)result.MustHave("ns"),
+				title: result.MustHaveString("title"),
+				hidden: result["hidden"].ToBCBool(),
 				sortkey: (string?)result["sortkey"],
 				sortkeyPrefix: (string?)result["sortkeyprefix"],
 				timestamp: (DateTime?)result["timestamp"]);
 
-		protected override void GetResultsFromCurrentPage() => this.ResetItems(this.Output?.Categories);
-
-		protected override void SetResultsOnCurrentPage() => this.CopyList(this.Output?.Categories);
+		protected override ICollection<CategoriesItem> GetMutableList(PageItem page) => (ICollection<CategoriesItem>)page.Categories;
 		#endregion
 	}
 }

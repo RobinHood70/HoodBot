@@ -39,12 +39,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override CheckTokenResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new CheckTokenResult()
-			{
-				Result = (string?)result["result"],
-				Generated = result["generated"].AsDate(),
-			};
-			return output;
+			return new CheckTokenResult(
+				result: result.MustHaveString("result"),
+				generated: result["generated"].ToNullableDate());
 		}
 		#endregion
 	}

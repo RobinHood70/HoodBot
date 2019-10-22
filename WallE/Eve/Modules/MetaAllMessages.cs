@@ -60,7 +60,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				return null;
 			}
 
-			var name = result.SafeString("name");
+			var name = result.MustHaveString("name");
 			var normalizedName = (string?)result["normalizedname"];
 			if (normalizedName == null)
 			{
@@ -73,12 +73,12 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			return new AllMessagesItem(
-				content: result.AsBCStringOptional("content"),
+				content: result.ToNullableBCString("content"),
 				def: (string?)result["default"],
-				flags:
-					result.GetFlag("customised", MessageFlags.Customized) |
-					result.GetFlag("defaultmissing", MessageFlags.DefaultMissing) |
-					result.GetFlag("missing", MessageFlags.Missing),
+				flags: result.GetFlags(
+					("customised", MessageFlags.Customized),
+					("defaultmissing", MessageFlags.DefaultMissing),
+					("missing", MessageFlags.Missing)),
 				name: name,
 				normalizedName: normalizedName);
 		}

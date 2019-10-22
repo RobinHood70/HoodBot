@@ -441,7 +441,7 @@
 			}
 		}
 
-		private async void RunTest()
+		private void RunTest()
 		{
 			// var testString = "Some Text {{Trail|Here}} [[Oblivion:Quests|Simple Link]]";
 			var testString = "Some Text {{Trail|Here}}{{Trail|named=<includeonly>t</includeonly>here}} [[Oblivion:Quests|Simple Link]] {{Trail|[[Skyrim:Places|Embedded Link]]}} [[Image:Example.png|60px|Text with a [[Link]]]] More Text <nowiki>[[Not a link]]</nowiki><!--[[Also not a link]]--><includeonly>[[Is a link if told we're transcluding|link=Daggerfall:Daggerfall]]</includeonly> Are we done yet?";

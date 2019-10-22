@@ -3,7 +3,6 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Globalization;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
@@ -14,7 +13,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public MetaUserInfo(WikiAbstractionLayer wal, UserInfoInput input)
-			: base(wal, input, new UserInfoResult(), null)
+			: base(wal, input, null)
 		{
 		}
 		#endregion
@@ -45,87 +44,68 @@ namespace RobinHood70.WallE.Eve.Modules
 			request.AddFlags("prop", prop);
 		}
 
-		protected override void DeserializeResult(JToken result, UserInfoResult output)
+		protected override void DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			ThrowNull(output, nameof(output));
-
-			output.BlockExpiry = result["blockexpiry"].AsDate();
-			output.BlockId = (long?)result["blockid"] ?? 0;
-			output.BlockReason = (string?)result["blockreason"];
-			output.BlockTimestamp = (DateTime?)result["blockedtimestamp"];
-			output.BlockedBy = (string?)result["blockedby"];
-			output.BlockedById = (long?)result["blockedbyid"] ?? 0;
-
 			var token = result["changeablegroups"];
-			var changeableGroups = new ChangeableGroupsInfo()
-			{
-				Add = token?["add"].AsReadOnlyList<string>(),
-				AddSelf = token?["add-self"].AsReadOnlyList<string>(),
-				Remove = token?["remove"].AsReadOnlyList<string>(),
-				RemoveSelf = token?["remove-self"].AsReadOnlyList<string>(),
-			};
-			output.ChangeableGroups = changeableGroups;
-			output.EditCount = (long?)result["editcount"] ?? -1;
-			output.Email = (string?)result["email"];
-			output.EmailAuthenticated = result["emailauthenticated"].AsDate();
-			output.Flags =
-				result.GetFlag("anon", UserInfoFlags.Anonymous) |
-				result.GetFlag("messages", UserInfoFlags.HasMessage);
-			output.Groups = result["groups"].AsReadOnlyList<string>();
-			output.Id = (long?)result["id"] ?? -1;
-			output.ImplicitGroups = result["implicitgroups"].AsReadOnlyList<string>();
-			output.Name = (string?)result["name"];
+			var changeableGroups = token == null ? null : new ChangeableGroupsInfo(
+				add: token.MustHave("add").ToList<string>(),
+				addSelf: token.MustHave("add-self").ToList<string>(),
+				remove: token.MustHave("remove").ToList<string>(),
+				removeSelf: token.MustHave("remove-self").ToList<string>());
 
-			var options = result["options"];
-			output.Options = options.AsReadOnlyDictionary<object>();
-			output.PreferencesToken = (string?)result["preferencestoken"];
-
-			var rateLimits = new Dictionary<string, RateLimitsItem>();
-			token = result["ratelimits"];
-			if (token != null)
+			var rateLimits = new Dictionary<string, RateLimitsItem?>();
+			if (result["ratelimits"] is JToken rateLimitsNode)
 			{
-				foreach (var entry in token.Children<JProperty>())
+				foreach (var entry in rateLimitsNode.Children<JProperty>())
 				{
 					rateLimits.Add(entry.Name, GetRateLimits(entry.Value));
 				}
 			}
 
-			output.RateLimits = rateLimits;
-			output.RealName = (string?)result["realname"];
-			output.RegistrationDate = result["registrationdate"].AsDate();
-			output.Rights = result["rights"].AsReadOnlyList<string>();
-			var unreadCount = (string?)result["unreadcount"] ?? "-1";
-			if (unreadCount.EndsWith("+", StringComparison.Ordinal))
-			{
-				unreadCount = unreadCount.Substring(0, unreadCount.Length - 1);
-			}
-
-			output.UnreadCount = int.Parse(unreadCount, CultureInfo.InvariantCulture);
+			this.Output = new UserInfoResult(
+				id: (long)result.MustHave("id"),
+				name: result.MustHaveString("name"),
+				blockExpiry: result["blockexpiry"].ToNullableDate(),
+				blockId: (long?)result["blockid"] ?? 0,
+				blockReason: (string?)result["blockreason"],
+				blockTimestamp: (DateTime?)result["blockedtimestamp"],
+				blockedBy: (string?)result["blockedby"],
+				blockedById: (long?)result["blockedbyid"] ?? 0,
+				changeableGroups: changeableGroups,
+				editCount: (long?)result["editcount"] ?? -1,
+				email: (string?)result["email"],
+				emailAuthenticated: result["emailauthenticated"].ToNullableDate(),
+				flags: result.GetFlags(
+					("anon", UserInfoFlags.Anonymous),
+					("messages", UserInfoFlags.HasMessage)),
+				groups: result["groups"].ToReadOnlyList<string>(),
+				implicitGroups: result["implicitgroups"].ToReadOnlyList<string>(),
+				options: result["options"].ToStringDictionary<object>(),
+				preferencesToken: (string?)result["preferencestoken"],
+				rateLimits: rateLimits,
+				realName: (string?)result["realname"],
+				registrationDate: result["registrationdate"].ToNullableDate(),
+				rights: result["rights"].ToReadOnlyList<string>(),
+				unreadText: (string?)result["unreadcount"]);
 		}
 		#endregion
 
 		#region Private Methods
-		private static RateLimitsItem GetRateLimits(JToken value)
-		{
-			var rateLimits = new RateLimitsItem()
-			{
-				Anonymous = GetRateLimit(value["anon"]),
-				IP = GetRateLimit(value["ip"]),
-				Newbie = GetRateLimit(value["newbie"]),
-				Subnet = GetRateLimit(value["subnet"]),
-				User = GetRateLimit(value["user"]),
-			};
-			return rateLimits;
-		}
-
-		private static RateLimitInfo GetRateLimit(JToken value) => value == null
+		private static RateLimitsItem? GetRateLimits(JToken value) => value == null
 			? null
-			: new RateLimitInfo()
-			{
-				Hits = (int)value["hits"],
-				Seconds = (int)value["seconds"],
-			};
+			: new RateLimitsItem(
+				anonymous: GetRateLimit(value["anon"]),
+				ip: GetRateLimit(value["ip"]),
+				newbie: GetRateLimit(value["newbie"]),
+				subnet: GetRateLimit(value["subnet"]),
+				user: GetRateLimit(value["user"]));
+
+		private static RateLimitInfo? GetRateLimit(JToken? value) => value == null
+			? null
+			: new RateLimitInfo(
+				hits: (int)value.MustHave("hits"),
+				seconds: (int)value.MustHave("seconds"));
 		#endregion
 	}
 }

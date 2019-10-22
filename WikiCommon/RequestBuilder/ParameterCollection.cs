@@ -274,7 +274,23 @@
 		{
 			ThrowNull(name, nameof(name));
 			ThrowNull(value, nameof(value)); // Unlike regular Add, there is no condition in which this should be null.
-			this.Add(new HiddenParameter(this.Prefix + name, value!));
+			this.Add(new HiddenParameter(this.Prefix + name, value));
+			return this;
+		}
+
+		/// <summary>Adds a set of string parameters whose values should be hidden for debugging (e.g., captcha data).</summary>
+		/// <param name="values">The parameter values.</param>
+		/// <returns>The current collection (fluent interface).</returns>
+		public ParameterCollection AddHidden(IEnumerable<KeyValuePair<string, string>>? values)
+		{
+			if (values != null)
+			{
+				foreach (var kvp in values)
+				{
+					this.AddHidden(kvp.Key, kvp.Value);
+				}
+			}
+
 			return this;
 		}
 
@@ -289,7 +305,7 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public ParameterCollection AddHiddenIfNotNull(string name, string value) => value != null ? this.AddHidden(name, value) : this;
+		public ParameterCollection AddHiddenIfNotNull(string name, string? value) => value != null ? this.AddHidden(name, value) : this;
 
 		/// <summary>Adds a boolean parameter if both it and the specified conidition are true.</summary>
 		/// <param name="name">The parameter name.</param>

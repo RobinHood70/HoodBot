@@ -110,8 +110,8 @@
 
 		public void UpdateCurrentWiki(WikiInfo wiki)
 		{
-			ThrowNull(wiki, nameof(wiki));
-			this.CurrentName = wiki.DisplayName;
+			// ThrowNull(wiki, nameof(wiki));
+			this.CurrentName = wiki?.DisplayName;
 		}
 		#endregion
 
