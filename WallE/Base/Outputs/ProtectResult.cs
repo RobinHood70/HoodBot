@@ -3,11 +3,12 @@ namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
 
-	public class ProtectResult : ITitleOptional
+	public class ProtectResult : ITitle
 	{
 		#region Constructors
-		internal ProtectResult(string title, string reason, bool cascade, IReadOnlyList<ProtectResultItem> protections)
+		internal ProtectResult(int ns, string title, string reason, bool cascade, IReadOnlyList<ProtectResultItem> protections)
 		{
+			this.Namespace = ns;
 			this.Title = title;
 			this.Reason = reason;
 			this.Cascade = cascade;
@@ -17,6 +18,8 @@ namespace RobinHood70.WallE.Base
 
 		#region Public Properties
 		public bool Cascade { get; }
+
+		public int Namespace { get; }
 
 		public IReadOnlyList<ProtectResultItem> Protections { get; }
 

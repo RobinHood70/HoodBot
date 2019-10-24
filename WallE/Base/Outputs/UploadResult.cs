@@ -4,7 +4,7 @@ namespace RobinHood70.WallE.Base
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
-	using static RobinHood70.WikiCommon.Globals;
+	using RobinHood70.WikiCommon;
 
 	public class UploadResult
 	{
@@ -35,7 +35,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.FileName ?? Unknown;
+		public override string ToString() => this.FileName ?? Globals.Unknown;
 		#endregion
 	}
 }

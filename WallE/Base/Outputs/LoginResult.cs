@@ -2,13 +2,13 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
-	using static RobinHood70.WikiCommon.Globals;
+	using RobinHood70.WikiCommon;
 
 	public class LoginResult
 	{
 		#region Constructors
 		internal LoginResult(string result, string? reason, string? user, long userId)
-			: this(result, user, reason, userId, null, TimeSpan.Zero)
+			: this(result, reason, user, userId, null, TimeSpan.Zero)
 		{
 		}
 
@@ -52,7 +52,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.User ?? Unknown;
+		public override string ToString() => this.User ?? Globals.Unknown;
 		#endregion
 	}
 }

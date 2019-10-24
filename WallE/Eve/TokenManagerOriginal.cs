@@ -2,10 +2,7 @@
 {
 	using System.Collections.Generic;
 	using RobinHood70.WallE.Base;
-	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Eve.Modules;
-	using RobinHood70.WallE.Properties;
-	using static RobinHood70.WikiCommon.Globals;
 
 	internal class TokenManagerOriginal : ITokenManager
 	{
@@ -35,14 +32,16 @@
 		#region Public Methods
 		public void Clear() => this.SessionTokens.Clear();
 
-		public string RollbackToken(long pageId) => this.GetRollbackToken(QueryPageSetInput.FromPageIds(new[] { pageId }));
+		public string? LoginToken() => null;
 
-		public string RollbackToken(string title) => this.GetRollbackToken(new QueryPageSetInput(new[] { title }));
+		public string? RollbackToken(long pageId) => this.GetRollbackToken(QueryPageSetInput.FromPageIds(new[] { pageId }));
 
-		public virtual string SessionToken(string type)
+		public string? RollbackToken(string title) => this.GetRollbackToken(new QueryPageSetInput(new[] { title }));
+
+		public virtual string? SessionToken(string type)
 		{
 			type = TokenManagerFunctions.ValidateTokenType(ValidTypes, type, TokensInput.Csrf, TokensInput.Edit);
-			if (!this.SessionTokens.TryGetValue(type, out var retval))
+			if (this.SessionTokens.Count == 0)
 			{
 				var pageSetInput = new QueryPageSetInput(DummyPage);
 				var propInfoInput = new InfoInput { Tokens = new[] { TokensInput.Edit, TokensInput.Watch } };
@@ -51,42 +50,37 @@
 				var propertyModules = this.Wal.ModuleFactory.CreateModules(new[] { propInfoInput });
 				var queryInput = new QueryInput(pageSetInput, propertyModules, new[] { recentChanges });
 				var pageSet = this.Wal.RunPageSetQuery(queryInput);
-				var rc = recentChanges.Output;
-
-				foreach (var page in pageSet)
+				if (pageSet.Count == 1 && pageSet[0].Info is PageInfo info)
 				{
-					foreach (var token in page.Info.Tokens)
+					foreach (var token in info.Tokens)
 					{
 						this.SessionTokens[TokenManagerFunctions.TrimTokenKey(token.Key)] = token.Value;
 					}
-
-					break;
 				}
 
-				if (rc.Count > 0)
+				if (recentChanges.Output is IList<RecentChangesItem> rc && rc.Count > 0 && rc[0].PatrolToken is string patrolToken)
 				{
-					this.SessionTokens[TokensInput.Patrol] = rc[0].PatrolToken;
+					this.SessionTokens[TokensInput.Patrol] = patrolToken;
 				}
-
-				this.SessionTokens.TryGetValue(type, out retval);
 			}
 
+			this.SessionTokens.TryGetValue(type, out var retval);
 			return retval;
 		}
 
-		public string UserRightsToken(string user)
+		public string? UserRightsToken(string user)
 		{
 			var usersInput = new UsersInput(new[] { user })
 			{
 				GetRightsToken = true,
 			};
 			var users = this.Wal.Users(usersInput);
-			return (users.Count == 1 ? users[0].Token : null) ?? throw new WikiException(CurrentCulture(EveMessages.InvalidToken, TokensInput.UserRights));
+			return users.Count == 1 ? users[0].Token : null;
 		}
 		#endregion
 
 		#region Private Methods
-		private string GetRollbackToken(QueryPageSetInput pageSetInput)
+		private string? GetRollbackToken(QueryPageSetInput pageSetInput)
 		{
 			var revisions = new RevisionsInput() { GetRollbackToken = true };
 			var pages = this.Wal.LoadPages(pageSetInput, new[] { revisions });
@@ -103,7 +97,7 @@
 				}
 			}
 
-			throw new WikiException(CurrentCulture(EveMessages.InvalidToken, TokensInput.Rollback));
+			return null;
 		}
 		#endregion
 	}

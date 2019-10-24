@@ -1,11 +1,12 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
-	public class RollbackResult : ITitleOptional
+	public class RollbackResult : ITitle
 	{
 		#region Constructors
-		internal RollbackResult(string title, long pageId, string summary, long revisionId, long oldRevisionId, long lastRevisionId)
+		internal RollbackResult(int ns, string title, long pageId, string summary, long revisionId, long oldRevisionId, long lastRevisionId)
 		{
+			this.Namespace = ns;
 			this.Title = title;
 			this.PageId = pageId;
 			this.Summary = summary;
@@ -17,6 +18,8 @@ namespace RobinHood70.WallE.Base
 
 		#region Public Properties
 		public long LastRevisionId { get; }
+
+		public int Namespace { get; }
 
 		public long OldRevisionId { get; }
 

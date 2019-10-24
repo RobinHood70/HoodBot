@@ -5,24 +5,25 @@
 	internal class PlaceCollection : KeyedCollection<string, Place>
 	{
 		#region Public Methods
-		public bool TryGetValue(string key, out Place item)
+		public Place ValueOrDefault(string key)
 		{
-			if (this.Dictionary != null)
+			if (key != null)
 			{
-				return this.Dictionary.TryGetValue(key, out item);
-			}
-
-			foreach (var testItem in this)
-			{
-				if (this.GetKeyForItem(testItem) == key)
+				if (this.Dictionary != null)
 				{
-					item = testItem;
-					return true;
+					return this.Dictionary.TryGetValue(key, out var item) ? item : default;
+				}
+
+				foreach (var testItem in this)
+				{
+					if (this.GetKeyForItem(testItem) == key)
+					{
+						return testItem;
+					}
 				}
 			}
 
-			item = null;
-			return false;
+			return default;
 		}
 		#endregion
 

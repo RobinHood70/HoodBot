@@ -5,8 +5,10 @@
 	using System.Collections.Generic;
 	using static RobinHood70.WikiCommon.Globals;
 
+#pragma warning disable CA1710 // Identifiers should have correct suffix
 	/// <summary>This class acts as a mutable-once dictionary. It is initialized as an empty dictionary, which you can update once via the <see cref="CopyFrom(IReadOnlyDictionary{string, string})"/> method. After that, it becomes immutable.</summary>
 	public class VariableDictionary : IReadOnlyDictionary<string, string>
+#pragma warning restore CA1710 // Identifiers should have correct suffix
 	{
 		#region Fields
 		private readonly Dictionary<string, string> variables = new Dictionary<string, string>();
@@ -22,9 +24,9 @@
 		#endregion
 
 		#region Public Properties
-		public IEnumerable<string> Keys => ((IReadOnlyDictionary<string, string>)this.variables).Keys;
+		public IEnumerable<string> Keys => this.variables.Keys;
 
-		public IEnumerable<string> Values => ((IReadOnlyDictionary<string, string>)this.variables).Values;
+		public IEnumerable<string> Values => this.variables.Values;
 
 		public int Count => this.variables.Count;
 		#endregion
@@ -36,7 +38,7 @@
 		#region Public Methods
 		public bool ContainsKey(string key) => this.variables.ContainsKey(key);
 
-		public void CopyFrom(IEnumerable<KeyValuePair<string, string>> other)
+		public void CopyFrom(IReadOnlyDictionary<string, string> other)
 		{
 			if (this.initialized)
 			{
@@ -54,6 +56,8 @@
 		public IEnumerator<KeyValuePair<string, string>> GetEnumerator() => ((IReadOnlyDictionary<string, string>)this.variables).GetEnumerator();
 
 		public bool TryGetValue(string key, out string value) => this.variables.TryGetValue(key, out value);
+
+		public string ValueOrDefault(string key) => key != null && this.variables.TryGetValue(key, out var item) ? item : default;
 
 		IEnumerator IEnumerable.GetEnumerator() => ((IReadOnlyDictionary<string, string>)this.variables).GetEnumerator();
 		#endregion

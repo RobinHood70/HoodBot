@@ -12,35 +12,44 @@ namespace RobinHood70.WallE.Eve.Modules
 		public UploadInputInternal(UploadInput input)
 		{
 			ThrowNull(input, nameof(input));
-			this.Comment = input.Comment;
-			this.FileName = input.RemoteFileName;
 			this.IgnoreWarnings = input.IgnoreWarnings;
-			this.Text = input.Text;
-			this.Watchlist = input.Watchlist;
+			this.Offset = 0;
+			this.FileName = input.RemoteFileName;
 			this.Token = input.Token;
-
-			var buffer = new byte[32768];
-			using var retval = new MemoryStream();
-			var readBytes = 0;
-			do
+			if (input.ChunkSize > 0)
 			{
-				readBytes = input.FileData.Read(buffer, 0, buffer.Length);
-				retval.Write(buffer, 0, readBytes);
+				this.Stash = true;
+				this.FileSize = input.FileData.Length;
+				this.FileData = Array.Empty<byte>(); // TODO: This is just to satisfy the null-checking, which doesn't flow into methods called from constructors. Remove if they implement that.
+				this.NextChunk(input.FileData, input.ChunkSize);
 			}
-			while (readBytes > 0);
+			else
+			{
+				this.Stash = false;
+				this.FileSize = 0;
+				this.Comment = input.Comment;
+				this.Text = input.Text;
+				this.Watchlist = input.Watchlist;
 
-			this.FileData = retval.ToArray();
-		}
+				var buffer = new byte[32768];
+				using var retval = new MemoryStream();
+				var readBytes = 0;
+				do
+				{
+					readBytes = input.FileData.Read(buffer, 0, buffer.Length);
+					retval.Write(buffer, 0, readBytes);
+				}
+				while (readBytes > 0);
 
-		public UploadInputInternal()
-		{
+				this.FileData = retval.ToArray();
+			}
 		}
 		#endregion
 
 		#region Public Properties
-		public string Comment { get; set; }
+		public string? Comment { get; set; }
 
-		public string FileKey { get; set; }
+		public string? FileKey { get; set; }
 
 		public string FileName { get; set; }
 
@@ -52,9 +61,9 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		public bool Stash { get; set; }
 
-		public string Text { get; set; }
+		public string? Text { get; set; }
 
-		public string Token { get; set; }
+		public string? Token { get; set; }
 
 		public WatchlistOption Watchlist { get; set; }
 		#endregion
@@ -68,24 +77,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(input, nameof(input));
 			this.Comment = input.Comment;
-			this.FileData = null;
+			this.FileData = Array.Empty<byte>();
 			this.FileSize = 0;
 			this.IgnoreWarnings = input.IgnoreWarnings;
 			this.Offset = 0;
 			this.Stash = false;
 			this.Text = input.Text;
 			this.Watchlist = input.Watchlist;
-		}
-
-		public void InitialChunk(UploadInput input)
-		{
-			ThrowNull(input, nameof(input));
-			this.IgnoreWarnings = input.IgnoreWarnings;
-			this.Offset = 0;
-			this.Stash = true;
-			this.FileName = input.RemoteFileName;
-			this.FileSize = input.FileData.Length;
-			this.Token = input.Token;
 		}
 
 		public void NextChunk(Stream input, int chunkSize)

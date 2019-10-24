@@ -1,17 +1,18 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Globalization;
+	using System.IO;
 	using System.Text.RegularExpressions;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public abstract class ActionModulePageSet<TInput, TOutput> : ActionModule<TInput, IReadOnlyList<TOutput>>, IPageSetGenerator
+	public abstract class ActionModulePageSet<TInput, TOutput> : ActionModule, IPageSetGenerator
 		where TInput : PageSetInput
 		where TOutput : ITitle
 	{
@@ -24,157 +25,74 @@ namespace RobinHood70.WallE.Eve.Modules
 		private readonly Dictionary<string, string> converted = new Dictionary<string, string>();
 		private readonly Dictionary<string, InterwikiTitleItem> interwiki = new Dictionary<string, InterwikiTitleItem>();
 		private readonly Dictionary<string, string> normalized = new Dictionary<string, string>();
-		private Dictionary<string, PageSetRedirectItem> redirects;
-
-		private bool done;
+		private readonly Dictionary<string, PageSetRedirectItem> redirects = new Dictionary<string, PageSetRedirectItem>();
 		private int offset;
-		private List<string> values;
 		#endregion
 
 		#region Constructors
-		protected ActionModulePageSet(WikiAbstractionLayer wal, TitleCreator<TOutput>? itemCreator)
-			: base(wal) => this.ItemCreator = itemCreator;
+		protected ActionModulePageSet(WikiAbstractionLayer wal)
+			: base(wal)
+		{
+		}
 		#endregion
 
 		#region Public Properties
-		public IGeneratorModule Generator { get; set; }
+		public IGeneratorModule? Generator { get; protected set; }
 		#endregion
 
 		#region Protected Properties
-		protected ContinueModule ContinueModule { get; set; }
+		protected ContinueModule? ContinueModule { get; set; }
 
 		protected int MaximumListSize { get; set; }
 
-		protected TitleCreator<TOutput>? ItemCreator { get; }
+		protected bool PageSetDone { get; set; }
 		#endregion
 
 		#region Protected Virtual Properties
 		protected virtual int CurrentListSize => this.MaximumListSize;
-
-		protected virtual IList<TOutput> Pages { get; } = new List<TOutput>();
 		#endregion
 
 		#region Public Methods
-		public PageSetResult<TOutput> CreatePageSet() =>
-			new PageSetResult<TOutput>(
-				titles: this.Pages,
-				badRevisionIds: new List<long>(this.badRevisionIds),
-				converted: this.converted,
-				interwiki: this.interwiki,
-				normalized: this.normalized,
-				redirects: this.redirects);
-
-		public PageSetResult<TOutput> SubmitPageSet(TInput input)
+		public virtual PageSetResult<TOutput> Submit(TInput input)
 		{
 			ThrowNull(input, nameof(input));
 			this.MaximumListSize = this.Wal.MaximumPageSetSize;
-			this.values = new List<string>(input.Values ?? Array.Empty<string>());
 			if (input.GeneratorInput != null)
 			{
 				this.Generator = this.Wal.ModuleFactory.CreateGenerator(input.GeneratorInput, this);
 			}
 
 			this.Wal.ClearWarnings();
-			this.BeforeSubmit(input);
+			this.BeforeSubmit();
 			this.ContinueModule = this.Wal.ModuleFactory.CreateContinue();
 			this.ContinueModule.BeforePageSetSubmit(this);
 			this.offset = 0;
 
+			var pages = new List<TOutput>();
 			do
 			{
-				this.SubmitInternal(input);
-				while (this.ContinueModule.Continues && this.Continues)
+				var request = this.CreateRequest(input);
+				var response = this.Wal.SendRequest(request);
+				this.ParseResponse(response, pages);
+				while (this.ContinueModule.Continues)
 				{
-					this.SubmitInternal(input);
+					request = this.CreateRequest(input);
+					response = this.Wal.SendRequest(request);
+					this.ParseResponse(response, pages);
 				}
 			}
-			while (!this.done);
+			while (!this.PageSetDone);
 
-			this.AfterSubmit();
-			return this.CreatePageSet();
-		}
-		#endregion
-
-		#region Public Virtual Methods
-		public virtual bool HandleWarning(string from, string text)
-		{
-			if (from == this.Name)
-			{
-				var match = TooManyFinder.Match(text);
-				if (match.Success)
-				{
-					var parameter = match.Groups["parameter"].Value;
-					if (PageSetInput.AllTypes.Contains(parameter))
-					{
-						this.done = false;
-						this.MaximumListSize = int.Parse(match.Groups["sizelimit"].Value, CultureInfo.InvariantCulture);
-						this.offset = this.MaximumListSize;
-						return true;
-					}
-				}
-			}
-
-			return false;
+			return this.CreatePageSet(pages);
 		}
 		#endregion
 
 		#region Protected Static Methods
-		protected static string FakeTitleFromId(long? pageId) => pageId.HasValue ? '#' + pageId.Value.ToStringInvariant() : null;
+		protected static string? FakeTitleFromId(long? pageId) => pageId == null ? null : '#' + pageId.Value.ToStringInvariant();
 		#endregion
 
 		#region Protected Methods
-		protected void GetExceptions(JToken result)
-		{
-			ThrowNull(result, nameof(result));
-			var node = result["badrevids"];
-			if (node != null)
-			{
-				foreach (var item in node)
-				{
-					this.badRevisionIds.Add((long)item.First["revid"]);
-				}
-			}
-
-			AddToDictionary(result["converted"], this.converted);
-			var links = result["interwiki"].GetInterwikiLinks();
-			foreach (var link in links)
-			{
-				this.interwiki.Add(link.Title, link);
-			}
-
-			AddToDictionary(result["normalized"], this.normalized);
-			this.redirects = result["redirects"].GetRedirects(this.Wal.InterwikiPrefixes, this.SiteVersion);
-		}
-		#endregion
-
-		#region Protected Virtual Methods
-		protected virtual WikiTitleItem DeserializeTitle(JToken result)
-		{
-			// TODO: I think DeserializeTitle can be merged into DeserializePage and just have that create and return the whole thing.
-			ThrowNull(result, nameof(result));
-			var ns = (int)result.MustHave("ns");
-			var title = result.MustHaveString("title");
-			var id = (int)result.MustHave("pageid");
-			return new WikiTitleItem(ns, title, id);
-		}
-		#endregion
-
-		#region Protected Abstract Methods
-		protected abstract void BuildRequestPageSet(Request request, TInput input);
-
-		protected abstract void DeserializePage(JToken result, TOutput page);
-		#endregion
-
-		#region Protected Override Methods
-		protected override void AddWarning(string from, string text)
-		{
-			if (!this.HandleWarning(from, text))
-			{
-				base.AddWarning(from, text);
-			}
-		}
-
-		protected override void BuildRequestLocal(Request request, TInput input)
+		protected void BuildRequest(Request request, TInput input)
 		{
 			ThrowNull(request, nameof(request));
 			ThrowNull(input, nameof(input));
@@ -185,23 +103,26 @@ namespace RobinHood70.WallE.Eve.Modules
 				this.Generator.BuildRequest(request);
 			}
 
-			if (this.values?.Count > 0)
+			if (input.Values?.Count > this.offset)
 			{
-				var listSize = this.values.Count - this.offset;
-				this.done = listSize <= this.CurrentListSize;
-				if (!this.done)
+				var listSize = input.Values.Count - this.offset;
+				this.PageSetDone = listSize <= this.CurrentListSize;
+				if (!this.PageSetDone)
 				{
 					listSize = this.CurrentListSize;
 				}
 
-				var currentGroup = this.values.GetRange(this.offset, listSize);
+				var currentGroup = new List<string>(listSize);
+				for (var i = 0; i < listSize; i++)
+				{
+					currentGroup.Add(input.Values[this.offset + i]);
+				}
 
-				// Several generators also use titles/pageids/revids, so emit them if present, whether or not there's a generator.
 				request.Add(input.TypeName, currentGroup);
 			}
 			else
 			{
-				this.done = true;
+				this.PageSetDone = true;
 			}
 
 			request
@@ -213,71 +134,153 @@ namespace RobinHood70.WallE.Eve.Modules
 			this.ContinueModule?.BuildRequest(request);
 		}
 
+		protected PageSetResult<TOutput> CreatePageSet(IReadOnlyList<TOutput> pages) => new PageSetResult<TOutput>(
+			titles: pages,
+			badRevisionIds: new List<long>(this.badRevisionIds),
+			converted: this.converted,
+			interwiki: this.interwiki,
+			normalized: this.normalized,
+			redirects: this.redirects);
+
+		protected void GetPageSetNodes(JToken result)
+		{
+			ThrowNull(result, nameof(result));
+			if (result["badrevids"] is JToken node)
+			{
+				foreach (var item in node)
+				{
+					if (item.First?["revid"] is JToken revid)
+					{
+						this.badRevisionIds.Add((long?)revid ?? 0);
+					}
+				}
+			}
+
+			AddToDictionary(result["converted"], this.converted);
+			var links = result["interwiki"].GetInterwikiLinks();
+			foreach (var link in links)
+			{
+				this.interwiki.Add(link.Title, link);
+			}
+
+			AddToDictionary(result["normalized"], this.normalized);
+			var redirects = result["redirects"].GetRedirects(this.Wal.InterwikiPrefixes, this.SiteVersion);
+			foreach (var item in redirects)
+			{
+				this.redirects.Add(item.Key, item.Value);
+			}
+		}
+
+		protected void ParseResponse(string? response, IList<TOutput> pages)
+		{
+			var jsonResponse = ToJson(response);
+			if (jsonResponse.Type == JTokenType.Object)
+			{
+				this.Deserialize(jsonResponse, pages);
+			}
+			else if (!(jsonResponse is JArray array && array.Count == 0))
+			{
+				throw new InvalidDataException();
+			}
+		}
+		#endregion
+
+		#region Protected Abstract Methods
+		protected abstract void BuildRequestPageSet(Request request, TInput input);
+
+		protected abstract TOutput GetItem(JToken result);
+		#endregion
+
+		#region Protected Override Methods
 		protected override void DeserializeParent(JToken parent)
 		{
 			ThrowNull(parent, nameof(parent));
 			base.DeserializeParent(parent);
 			if (this.ContinueModule != null)
 			{
-				var newVersion = this.ContinueModule.Deserialize(parent);
-				if (newVersion != 0)
-				{
-					this.Wal.ContinueVersion = newVersion;
-					this.ContinueModule = this.Wal.ModuleFactory.CreateContinue();
-					this.ContinueModule.Deserialize(parent);
-				}
+				this.ContinueModule = this.ContinueModule.Deserialize(this.Wal, parent);
 
-				if (!this.done && !this.ContinueModule.BatchComplete && !this.ContinueModule.Continues)
+				// Was: !this.PageSetDone && !this.ContinueModule.BatchComplete && !this.ContinueModule.Continues, but that seems wrong. Maybe have been the result of the faulty BatchComplete in ContinueModule2.
+				if (!this.PageSetDone && this.ContinueModule.BatchComplete)
 				{
 					this.offset += this.CurrentListSize;
 				}
 			}
 
-			// This is a fugly workaround for the fact that modules other than queries will have the pageset data at the parent level, while query has it at the child level. I couldn't figure out a better way to do it (other than to simply ignore it and check for results that will never be there).
-			if (!(this is ActionQuery))
-			{
-				this.GetExceptions(parent);
-			}
+			this.GetPageSetNodes(parent);
 		}
 
-		protected override IReadOnlyList<TOutput>? DeserializeResult(JToken result)
+		protected override bool HandleWarning(string from, string text)
+		{
+			if (from == this.Name)
+			{
+				var match = TooManyFinder.Match(text);
+				if (match.Success)
+				{
+					var parameter = match.Groups["parameter"].Value;
+					if (PageSetInput.AllTypes.Contains(parameter))
+					{
+						this.PageSetDone = false;
+						this.MaximumListSize = int.Parse(match.Groups["sizelimit"].Value, CultureInfo.InvariantCulture);
+						this.offset = this.MaximumListSize;
+						return true;
+					}
+				}
+			}
+
+			return base.HandleWarning(from, text);
+		}
+		#endregion
+
+		#region Protected Virtual Methods
+		protected virtual void DeserializeResult(JToken result, IList<TOutput> pages)
 		{
 			ThrowNull(result, nameof(result));
-			if (this.ItemCreator == null)
-			{
-				throw new InvalidOperationException("Trying to create pages with no page creator!");
-			}
-
+			ThrowNull(pages, nameof(pages));
 			foreach (var item in result)
 			{
-				var wikiTitle = this.DeserializeTitle(result);
-				var output = this.ItemCreator(wikiTitle.Namespace, wikiTitle.Title, wikiTitle.PageId);
-				this.DeserializePage(item, output);
+				pages.Add(this.GetItem(item));
 			}
-
-			// PageSets don't actually return a value here, instead returning it in Pages, so return null instead.
-			// TODO: Could this be used as a better way to return the pageset information like redirects and invalid titles?
-			return null;
 		}
 		#endregion
 
 		#region Private Static Methods
-		private static void AddToDictionary<TKey, TValue>(JToken token, IDictionary<TKey, TValue> dict)
+		private static void AddToDictionary(JToken? token, IDictionary<string, string> dict)
 		{
 			if (token != null)
 			{
 				foreach (var item in token)
 				{
-					if (item["from"] != null)
-					{
-						var key = item["from"].Value<TKey>();
-						var value = item["to"].Value<TValue>();
-						dict.Add(key, value);
-					}
+					dict.Add(item.MustHaveString("from"), item.MustHaveString("to"));
 				}
 			}
 		}
 		#endregion
 
+		#region Private Methods
+		private Request CreateRequest(TInput input)
+		{
+			ThrowNull(input, nameof(input));
+			var request = this.CreateBaseRequest();
+			request.Prefix = this.FullPrefix;
+			this.BuildRequest(request, input);
+			request.Prefix = string.Empty;
+
+			return request;
+		}
+
+		private void Deserialize(JToken parent, IList<TOutput> pages)
+		{
+			this.DeserializeParent(parent);
+			if (parent[this.Name] is JToken result && result.Type != JTokenType.Null)
+			{
+				this.DeserializeResult(result, pages);
+			}
+			else
+			{
+				throw WikiException.General("no-result", "The expected result node, " + this.Name + ", was not found.");
+			}
+		}
+		#endregion
 	}
 }

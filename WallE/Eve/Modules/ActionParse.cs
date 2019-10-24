@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WikiCommon.Globals;
 
 	// MWVERSION: 1.28
-	internal class ActionParse : ActionModule<ParseInput, ParseResult>
+	internal class ActionParse : ActionModuleValued<ParseInput, ParseResult>
 	{
 		#region Constructors
 		public ActionParse(WikiAbstractionLayer wal)
@@ -30,17 +30,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Override Methods
-		protected override void AddWarning(string from, string text)
-		{
-			ThrowNull(text, nameof(text));
-
-			// 1.26 and 1.27 always emit a warning when the Modules property is specified, even though only one section of it is deprecated, so swallow that.
-			if (!text.StartsWith("modulemessages", StringComparison.Ordinal))
-			{
-				base.AddWarning(from, text);
-			}
-		}
-
 		protected override void BuildRequestLocal(Request request, ParseInput input)
 		{
 			ThrowNull(request, nameof(request));
@@ -114,6 +103,9 @@ namespace RobinHood70.WallE.Eve.Modules
 				title: (string?)result["title"],
 				wikiText: (string?)result["wikitext"].FromBCSubElements());
 		}
+
+		// 1.26 and 1.27 always emit a warning when the Modules property is specified, even though only one section of it is deprecated, so swallow that.
+		protected override bool HandleWarning(string from, string text) => text.StartsWith("modulemessages", StringComparison.Ordinal) ? true : base.HandleWarning(from, text);
 		#endregion
 
 		#region Private Static Methods

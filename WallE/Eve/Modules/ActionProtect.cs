@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionProtect : ActionModule<ProtectInput, ProtectResult>
+	internal class ActionProtect : ActionModuleValued<ProtectInput, ProtectResult>
 	{
 		#region Constructors
 		public ActionProtect(WikiAbstractionLayer wal)
@@ -75,8 +75,10 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 			}
 
+			var title = result.MustHaveString("title");
 			return new ProtectResult(
-				title: result.MustHaveString("title"),
+				ns: this.FindRequiredNamespace(title),
+				title: title,
 				reason: result.MustHaveString("reason"),
 				cascade: result["cascade"].ToBCBool(),
 				protections: protections);

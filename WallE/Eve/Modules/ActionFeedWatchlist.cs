@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionFeedWatchlist : ActionModule<FeedWatchlistInput, CustomResult>
+	internal class ActionFeedWatchlist : ActionModuleValued<FeedWatchlistInput, CustomResult>
 	{
 		#region Constructors
 		public ActionFeedWatchlist(WikiAbstractionLayer wal)

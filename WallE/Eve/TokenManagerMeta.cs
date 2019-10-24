@@ -8,15 +8,14 @@
 	{
 		#region Public Constants
 		public const int MinimumVersion = 124;
+		public const int MinimumVersionLogin = 127;
 		#endregion
 
 		#region Fields
 
-		// Can't be static in this version, since Login will be removed for MW 1.24-1.27
-		private readonly HashSet<string> validTypes = new HashSet<string>
+		private static readonly HashSet<string> ValidTypes = new HashSet<string>
 		{
 			Csrf,
-			Login,
 			Patrol,
 			Rollback,
 			UserRights,
@@ -28,24 +27,31 @@
 		#endregion
 
 		#region Constructors
-		public TokenManagerMeta(WikiAbstractionLayer wal)
-		{
-			this.wal = wal;
-			if (wal.SiteVersion < 128)
-			{
-				this.validTypes.Remove(Login);
-			}
-		}
+		public TokenManagerMeta(WikiAbstractionLayer wal) => this.wal = wal;
 		#endregion
 
 		#region Public Override Methods
-		public string RollbackToken(long pageId) => this.AnyToken(Rollback);
+		public string? LoginToken()
+		{
+			if (this.wal.SiteVersion >= MinimumVersionLogin)
+			{
+				var tokens = this.wal.RunModuleQuery(new MetaTokens(this.wal, new TokensInput(Login)));
+				foreach (var token in tokens)
+				{
+					return token.Value;
+				}
+			}
 
-		public string RollbackToken(string title) => this.AnyToken(Rollback);
+			return null;
+		}
 
-		public string SessionToken(string type) => this.AnyToken(TokenManagerFunctions.ValidateTokenType(this.validTypes, type, Edit, Csrf));
+		public string? RollbackToken(long pageId) => this.AnyToken(Rollback);
 
-		public string UserRightsToken(string user) => this.AnyToken(UserRights);
+		public string? RollbackToken(string title) => this.AnyToken(Rollback);
+
+		public string? SessionToken(string type) => this.AnyToken(TokenManagerFunctions.ValidateTokenType(ValidTypes, type, Edit, Csrf));
+
+		public string? UserRightsToken(string user) => this.AnyToken(UserRights);
 		#endregion
 
 		#region Public Methods
@@ -53,21 +59,18 @@
 		#endregion
 
 		#region Private Methods
-		private string AnyToken(string type)
+		private string? AnyToken(string type)
 		{
-			if (!this.sessionTokens.TryGetValue(type, out var retval))
+			if (this.sessionTokens.Count == 0)
 			{
-				// Ask for all session tokens unless a login token has been requested.
-				var tokensInput = type == Login ? new TokensInput(new[] { type }) : new TokensInput(this.validTypes);
-				var tokens = this.wal.RunModuleQuery(new MetaTokens(this.wal, tokensInput));
+				var tokens = this.wal.RunModuleQuery(new MetaTokens(this.wal, new TokensInput(ValidTypes)));
 				foreach (var token in tokens)
 				{
 					this.sessionTokens[TokenManagerFunctions.TrimTokenKey(token.Key)] = token.Value;
 				}
-
-				this.sessionTokens.TryGetValue(type, out retval);
 			}
 
+			this.sessionTokens.TryGetValue(type, out var retval);
 			return retval;
 		}
 		#endregion

@@ -1,7 +1,6 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
-	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
@@ -12,7 +11,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ActionSetNotificationTimestamp(WikiAbstractionLayer wal)
-			: base(wal, SetNotificationTimestampItemCreator)
+			: base(wal)
 		{
 		}
 		#endregion
@@ -40,44 +39,42 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddHidden("token", input.Token);
 		}
 
-		protected override void DeserializePage(JToken result, SetNotificationTimestampItem page)
+		protected override SetNotificationTimestampItem GetItem(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			ThrowNull(page, nameof(page));
-			page.Flags = result.GetFlags(
-				("invalid", SetNotificationTimestampFlags.Invalid),
-				("missing", SetNotificationTimestampFlags.Missing),
-				("known", SetNotificationTimestampFlags.Known),
-				("notwatched", SetNotificationTimestampFlags.NotWatched));
-			page.NotificationTimestamp = result["notificationtimestamp"].ToNullableDate();
-			page.RevisionId = (long?)result["revid"] ?? 0;
-			this.Pages.Add(page);
+			return new SetNotificationTimestampItem(
+				ns: (int)result.MustHave("ns"),
+				title: result.MustHaveString("title"),
+				pageId: (long?)result["pageid"] ?? 0,
+				flags: result.GetFlags(
+					("invalid", SetNotificationTimestampFlags.Invalid),
+					("missing", SetNotificationTimestampFlags.Missing),
+					("known", SetNotificationTimestampFlags.Known),
+					("notwatched", SetNotificationTimestampFlags.NotWatched)),
+				notificationTimestamp: result["notificationtimestamp"].ToNullableDate(),
+				revId: (long?)result["revid"] ?? 0);
 		}
 
-		protected override IReadOnlyList<SetNotificationTimestampItem> DeserializeResult(JToken result)
+		protected override void DeserializeResult(JToken result, IList<SetNotificationTimestampItem> pages)
 		{
 			ThrowNull(result, nameof(result));
-			if (this.ItemCreator == null)
-			{
-				throw new InvalidOperationException("Trying to create pages with no page creator!");
-			}
 
 			// If using entirewatchlist, return a single page with the notification timestamp and faked page data.
 			if (result.Type == JTokenType.Object && result["notificationtimestamp"] != null)
 			{
-				var newPage = this.ItemCreator(0, "::Entire Watchlist::", 0);
-				newPage.NotificationTimestamp = result["notificationtimestamp"].ToNullableDate();
-				this.Pages.Add(newPage);
-
-				return null;
+				pages.Add(new SetNotificationTimestampItem(
+					ns: 0,
+					title: "::Entire Watchlist::",
+					pageId: 0,
+					flags: SetNotificationTimestampFlags.None,
+					notificationTimestamp: result["notificationtimestamp"].ToNullableDate(),
+					revId: 0));
 			}
-
-			return base.DeserializeResult(result);
+			else
+			{
+				base.DeserializeResult(result, pages);
+			}
 		}
-		#endregion
-
-		#region Private Static Classes
-		private static SetNotificationTimestampItem SetNotificationTimestampItemCreator(int ns, string title, long pageId) => new SetNotificationTimestampItem(ns, title, pageId);
 		#endregion
 	}
 }

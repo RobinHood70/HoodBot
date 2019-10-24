@@ -27,10 +27,6 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Constructors
-		protected PageSetInput()
-		{
-		}
-
 		protected PageSetInput(PageSetInput input)
 		{
 			ThrowNull(input, nameof(input));
@@ -94,7 +90,7 @@ namespace RobinHood70.WallE.Base
 
 		public string TypeName => ListNames[this.ListType];
 
-		public IReadOnlyList<string>? Values { get; }
+		public IReadOnlyList<string> Values { get; }
 		#endregion
 	}
 }

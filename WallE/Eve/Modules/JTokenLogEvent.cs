@@ -284,7 +284,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				this.Result.Add("uploadtimestamp", (DateTime?)this.parms["img_timestamp"]);
 			}
 
-			private RevisionDeleteTypes LogEventGetRDType(string param)
+			private RevisionDeleteTypes LogEventGetRDType(string? param)
 			{
 				ThrowNull(param, nameof(param));
 				var info = param.Split(TextArrays.EqualsSign);

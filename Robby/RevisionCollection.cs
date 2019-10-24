@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.Robby
 {
-	using System;
 	using System.Collections;
 	using System.Collections.Generic;
 
@@ -56,8 +55,12 @@
 		/// <param name="id">The ID of the revision to get.</param>
 		/// <param name="value">When this method returns, contains the revision with the specified ID, if found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
 		/// <returns><see langword="true" /> if the collection contains a revision with the specified ID; otherwise, <see langword="false" />.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="id" /> is <see langword="null" />.</exception>
 		public bool TryGetValue(long id, out Revision value) => this.revisions.TryGetValue(id, out value);
+
+		/// <summary>Returns the revision associated with the specified ID, or null if not found.</summary>
+		/// <param name="id">The ID of the revision to get.</param>
+		/// <returns>The revision associated with the specified ID.</returns>
+		public Revision ValueOrDefault(long id) => this.revisions.TryGetValue(id, out var value) ? value : default;
 		#endregion
 
 		#region Internal Methods

@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionClearHasMsg : ActionModule<NullObject, CustomResult>
+	internal class ActionClearHasMsg : ActionModuleValued<NullObject, CustomResult>
 	{
 		#region Constructors
 		public ActionClearHasMsg(WikiAbstractionLayer wal)
@@ -33,7 +33,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override CustomResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			return new CustomResult((string?)result);
+			return new CustomResult((string?)result ?? string.Empty);
 		}
 		#endregion
 	}

@@ -204,4 +204,19 @@
   <data name="CannotDeserialize" xml:space="preserve">
     <value>This {0} module cannot be deseralized in the normal manner.</value>
   </data>
+  <data name="NoPageCreator" xml:space="preserve">
+    <value>Trying to create pages with no page creator!</value>
+  </data>
+  <data name="InitializationFailed" xml:space="preserve">
+    <value>Site initialization failed because required user or site information could not be found.</value>
+  </data>
+  <data name="PageFactoryNotSet" xml:space="preserve">
+    <value>The page factory for the query has not been set.</value>
+  </data>
+  <data name="UseSubmit" xml:space="preserve">
+    <value>Because of its complexity, ApiQueryPageSet does not use the normal {0}(...) mechanism. Pass all inputs in the constructor, then call Submit() instead.</value>
+  </data>
+  <data name="NullResponse" xml:space="preserve">
+    <value>The return value of the request was null.</value>
+  </data>
 </root>

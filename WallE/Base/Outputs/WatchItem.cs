@@ -17,11 +17,12 @@ namespace RobinHood70.WallE.Base
 	public class WatchItem : ITitle
 	{
 		#region Constructors
-		internal WatchItem(int ns, string title, long pageId)
+		internal WatchItem(int ns, string title, long pageId, WatchFlags flags)
 		{
 			this.Namespace = ns;
 			this.Title = title;
 			this.PageId = pageId;
+			this.Flags = flags;
 		}
 		#endregion
 

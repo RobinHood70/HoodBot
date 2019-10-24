@@ -30,7 +30,7 @@ namespace RobinHood70.WallE.Base
 
 		public IReadOnlyList<CategoriesItem> Categories { get; } = new List<CategoriesItem>();
 
-		public CategoryInfoResult CategoryInfo { get; internal set; }
+		public CategoryInfoResult? CategoryInfo { get; internal set; }
 
 		public IReadOnlyList<ContributorItem> Contributors { get; } = new List<ContributorItem>();
 
@@ -53,9 +53,9 @@ namespace RobinHood70.WallE.Base
 
 		public IReadOnlyList<ITitle> Images { get; } = new List<ITitle>();
 
-		public string ImageRepository { get; internal set; }
+		public string? ImageRepository { get; internal set; }
 
-		public PageInfo Info { get; internal set; }
+		public PageInfo? Info { get; internal set; }
 
 		public IReadOnlyList<InterwikiTitleItem> InterwikiLinks { get; } = new List<InterwikiTitleItem>();
 

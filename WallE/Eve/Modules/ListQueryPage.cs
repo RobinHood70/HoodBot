@@ -45,7 +45,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Public Methods
 		public QueryPageResult AsQueryPageResult() => new QueryPageResult(
-			list: this.Output,
+			list: this.Output ?? Array.Empty<QueryPageItem>(),
 			cached: this.cached,
 			cachedTimestamp: this.cachedTimestamp,
 			maxResults: this.maxResults);

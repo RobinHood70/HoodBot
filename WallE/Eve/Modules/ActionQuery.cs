@@ -3,314 +3,144 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Collections.ObjectModel;
+	using System.IO;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
-	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionQuery : ActionModulePageSet<QueryInput, PageItem>, IQueryPageSet
+	internal class ActionQuery : ActionModule
 	{
 		#region Fields
-		private MetaUserInfo userModule;
+		private readonly List<IQueryModule> queryModules;
+		private readonly MetaUserInfo? userModule;
+		private ContinueModule? continueModule;
 		#endregion
 
 		#region Constructors
-		public ActionQuery(WikiAbstractionLayer wal)
-			: base(wal, null)
+		public ActionQuery(WikiAbstractionLayer wal, IEnumerable<IQueryModule> queryModules)
+			: base(wal)
 		{
-		}
+			this.queryModules = new List<IQueryModule>(queryModules ?? Array.Empty<IQueryModule>());
+			var props =
+				((wal.ValidStopCheckMethods.HasFlag(StopCheckMethods.UserNameCheck) && wal.SiteVersion < 128) ? UserInfoProperties.BlockInfo : UserInfoProperties.None)
+				| (wal.ValidStopCheckMethods.HasFlag(StopCheckMethods.TalkCheckQuery) ? UserInfoProperties.HasMsg : UserInfoProperties.None);
+			if (props != UserInfoProperties.None)
+			{
+				var userInfoInput = new UserInfoInput() { Properties = props };
+				this.userModule = new MetaUserInfo(wal, userInfoInput);
+				this.queryModules.Add(this.userModule);
+			}
 
-		public ActionQuery(WikiAbstractionLayer wal, TitleCreator<PageItem> pageFactory)
-			: base(wal, pageFactory)
-		{
+			foreach (var module in this.queryModules)
+			{
+				if (module is IContinuableQueryModule)
+				{
+					this.continueModule = wal.ModuleFactory.CreateContinue();
+				}
+			}
 		}
 		#endregion
 
 		#region Public Properties
-		public HashSet<string> InactiveModules { get; } = new HashSet<string>();
+		public UserInfoResult? UserInfo { get; protected set; }
 		#endregion
 
 		#region Public Override Properties
-		public override int MinimumVersion { get; } = 0;
+		public override int MinimumVersion => 0;
 
-		public override string Name { get; } = "query";
-		#endregion
-
-		#region Protected Properties
-		protected int ItemsRemaining { get; private set; }
-
-		protected QueryInput Input { get; private set; }
+		public override string Name => "query";
 		#endregion
 
 		#region Protected Override Properties
-		protected override bool Continues
-		{
-			get
-			{
-				var continueParsing = this.ItemsRemaining > 0 || !this.ContinueModule.BatchComplete;
-				if (continueParsing)
-				{
-					// Little point in short-circuiting this beyond the initial check since module count will be small, so just run through all of them.
-					foreach (var module in this.Input.AllModules)
-					{
-						if (module is IContinuableQueryModule continuableModule)
-						{
-							continueParsing &= continuableModule.ContinueParsing;
-						}
-					}
-				}
-
-				return continueParsing;
-			}
-		}
-
-		protected override int CurrentListSize =>
-			(this.ItemsRemaining == int.MaxValue || this.ItemsRemaining + 10 > this.MaximumListSize)
-			? this.MaximumListSize
-			: (this.ItemsRemaining <= 5 ? 10 : this.ItemsRemaining + 10);
-
-		protected override IList<PageItem> Pages { get; } = new KeyedPages();
-
-		protected override RequestType RequestType { get; } = RequestType.Get;
-
-		protected override StopCheckMethods StopMethods => this.Wal.UserId == 0 ? this.Wal.StopCheckMethods & (StopCheckMethods.Custom | StopCheckMethods.TalkCheckQuery) : this.Wal.StopCheckMethods;
+		protected override RequestType RequestType => RequestType.Get;
 		#endregion
 
 		#region Public Methods
-		public void SubmitContinued(QueryInput input)
+		public void Submit()
 		{
 			this.Wal.ClearWarnings();
-			this.ContinueModule = this.Wal.ModuleFactory.CreateContinue();
-			this.BeforeSubmit(input);
-			this.SubmitInternal(input);
-			while (this.ContinueModule.Continues && this.Continues)
+			this.BeforeSubmit();
+			var request = this.CreateRequest();
+			var response = this.Wal.SendRequest(request);
+			this.ParseResponse(response);
+			while (this.continueModule?.Continues ?? false)
 			{
-				this.SubmitInternal(input);
+				request = this.CreateRequest();
+				response = this.Wal.SendRequest(request);
+				this.ParseResponse(response);
 			}
-
-			this.AfterSubmit();
 		}
 		#endregion
 
 		#region Protected Override Methods
-		protected override void AddWarning(string from, string text)
+		protected override void BeforeSubmit()
 		{
-			if (text != null)
-			{
-				if (text.StartsWith("Action '", StringComparison.Ordinal) && text.EndsWith("' is not allowed for the current user", StringComparison.Ordinal))
-				{
-					// Swallow all token warnings
-					return;
-				}
-
-				// Originally, this only handled module-specific warnings, but it was changed to have all modules check all warnings to account for cases like MetaSiteInfo, which can generate a formatversion warning during its first call that originates from "main".
-				if (this.HandleWarning(from, text))
-				{
-					return;
-				}
-
-				foreach (var module in this.Input.QueryModules)
-				{
-					if (module.HandleWarning(from, text))
-					{
-						return;
-					}
-				}
-			}
-
-			base.AddWarning(from, text);
-		}
-
-		protected override void AfterSubmit()
-		{
-			if (this.Wal.BreakRecursionAfterSubmit)
-			{
-				// Necessary because the custom stop check would become recursive if it called on any other modules.
-				return;
-			}
-
-			this.Wal.BreakRecursionAfterSubmit = true;
-			if (this.StopMethods.HasFlag(StopCheckMethods.Custom) && (this.Wal.CustomStopCheck?.Invoke() == true))
-			{
-				this.Wal.BreakRecursionAfterSubmit = false;
-				throw new StopException(EveMessages.CustomStopCheckFailed);
-			}
-
-			var userOutput = this.userModule?.Output;
-			if (userOutput != null)
-			{
-				if (this.StopMethods.HasFlag(StopCheckMethods.UserNameCheck) && this.SiteVersion < 128 && this.Wal.UserName != userOutput.Name)
-				{
-					this.Wal.BreakRecursionAfterSubmit = false;
-
-					// Used to check if username has unexpectedly changed, indicating that the bot has been logged out (or conceivably logged in) unexpectedly.
-					throw new StopException(EveMessages.UserNameChanged);
-				}
-
-				if (this.StopMethods.HasFlag(StopCheckMethods.TalkCheckQuery) && userOutput.Flags.HasFlag(UserInfoFlags.HasMessage))
-				{
-					this.Wal.BreakRecursionAfterSubmit = false;
-					throw new StopException(EveMessages.TalkPageChanged);
-				}
-			}
-
-			this.Wal.BreakRecursionAfterSubmit = false;
-		}
-
-		protected override void BeforeSubmit(QueryInput input)
-		{
-			ThrowNull(input, nameof(input));
-			base.BeforeSubmit(input);
-			if (input.PropertyModules.Find(module => module.Name == "revisions") is PropRevisions revModule && revModule.IsRevisionRange)
-			{
-				this.MaximumListSize = 1;
-			}
-			else
-			{
-				if (input.Limit > 0 && input.Limit < this.MaximumListSize)
-				{
-					this.MaximumListSize = input.Limit;
-				}
-			}
-
-			this.ItemsRemaining = input.MaxItems == 0 ? int.MaxValue : input.MaxItems;
-
-			this.CheckActiveModules(input);
-			var newInput = new QueryInput(input) { GetInterwikiUrls = input.GetInterwikiUrls }; // Make a copy so we can modify it.
-			if ((this.StopMethods.HasFlag(StopCheckMethods.UserNameCheck) && this.SiteVersion < 128) || this.StopMethods.HasFlag(StopCheckMethods.TalkCheckQuery))
-			{
-				UserInfoInput userInfoInput;
-				bool useExisting;
-
-				// If a MetaUserInfo module already exists, remove it (so as not to corrupt its input data) and replace it with a merged copy of ours and the original.
-				if (newInput.QueryModules.Find(module => module.Name == "userinfo") is MetaUserInfo userInfo)
-				{
-					userInfoInput = userInfo.Input;
-					useExisting = true;
-				}
-				else
-				{
-					userInfoInput = new UserInfoInput();
-					useExisting = false;
-				}
-
-				userInfoInput.Properties |= UserInfoProperties.BlockInfo;
-				if (this.StopMethods.HasFlag(StopCheckMethods.TalkCheckQuery))
-				{
-					userInfoInput.Properties |= UserInfoProperties.HasMsg;
-				}
-
-				userInfo = new MetaUserInfo(this.Wal, userInfoInput);
-				this.userModule = userInfo;
-
-				if (!useExisting)
-				{
-					newInput.QueryModules.Add(userInfo);
-				}
-			}
-
-			this.Input = newInput;
-		}
-
-		protected override void BuildRequestPageSet(Request request, QueryInput input)
-		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
-			foreach (var module in this.Input.PropertyModules)
-			{
-				if (!this.InactiveModules.Contains(module.Name))
-				{
-					module.BuildRequest(request);
-				}
-			}
-
-			foreach (var module in this.Input.QueryModules)
-			{
-				module.BuildRequest(request);
-			}
-
-			request.Add("iwurl", input.GetInterwikiUrls);
-		}
-
-		protected override void DeserializePage(JToken result, PageItem page)
-		{
-			ThrowNull(result, nameof(result));
-			ThrowNull(page, nameof(page));
-			page.Flags = result.GetFlags(
-				("invalid", PageFlags.Invalid),
-				("missing", PageFlags.Missing));
+			base.BeforeSubmit();
+			this.CheckActiveModules();
 		}
 
 		protected override void DeserializeParent(JToken parent)
 		{
 			ThrowNull(parent, nameof(parent));
 			base.DeserializeParent(parent);
-			var modules = this.Input.QueryModules;
-			var propModules = this.Input.PropertyModules;
+			if (this.continueModule != null)
+			{
+				this.continueModule = this.continueModule.Deserialize(this.Wal, parent);
+			}
+
 			if (parent["limits"] is JToken limits)
 			{
 				foreach (var limit in limits.Children<JProperty>())
 				{
 					var value = (int)limit.Value;
-					if (this.Generator?.Name == limit.Name)
+					foreach (var queryModule in this.queryModules)
 					{
-						this.Generator.ModuleLimit = value;
-					}
-
-					if (modules.Find(module => module.Name == limit.Name) is IQueryModule module)
-					{
-						if (module is IContinuableQueryModule continuableModule)
+						if (queryModule.Name == limit.Name && queryModule is IContinuableQueryModule continuableModule)
 						{
 							continuableModule.ModuleLimit = value;
+							break;
 						}
-					}
-					else if (propModules.Find(module => module.Name == limit.Name) is IPropertyModule propModule)
-					{
-						propModule.ModuleLimit = value;
 					}
 				}
 			}
 
 			// Kludgey workaround for https://phabricator.wikimedia.org/T36356. If there had been more than just this one module, some sort of "Needs deserializing during parent's DeserializeParent" feature could have been added, but that seemed just as kludgey as this for a single faulty module.
-			if (parent[ListWatchlistRaw.ModuleName] != null && modules.Find(module => module.Name == ListWatchlistRaw.ModuleName) is ListWatchlistRaw watchListModule)
+			if (parent[ListWatchlistRaw.ModuleName] != null && this.queryModules.Find(module => module.Name == ListWatchlistRaw.ModuleName) is ListWatchlistRaw watchListModule)
 			{
 				watchListModule.Deserialize(parent);
 			}
 		}
 
-		protected override IReadOnlyList<PageItem>? DeserializeResult(JToken result)
+		protected override bool HandleWarning(string from, string text)
 		{
-			ThrowNull(result, nameof(result));
-			if (this.Input.PageSetQuery)
+			if (text.StartsWith("Action '", StringComparison.Ordinal) && text.EndsWith("' is not allowed for the current user", StringComparison.Ordinal))
 			{
-				this.GetExceptions(result);
-				var pages = result["pages"];
-				if (pages != null)
+				// Swallow all token warnings
+				return true;
+			}
+
+			foreach (var module in this.queryModules)
+			{
+				if (module.HandleWarning(from, text))
 				{
-					this.DeserializePages(pages);
+					return true;
 				}
 			}
 
-			foreach (var module in this.Input.QueryModules)
-			{
-				module.Deserialize(result);
-			}
-
-			return null;
+			return base.HandleWarning(from, text);
 		}
 		#endregion
 
 		#region Private Methods
-		private void CheckActiveModules(QueryInput input)
+		private void CheckActiveModules()
 		{
-			if (input.QueryModules.Count > 0 || input.PropertyModules.Count > 0)
+			if (this.queryModules.Count > 0)
 			{
 				// Check if any modules are active. This is done before adding/merging the UserModule, since that would always make it appear that there's an active module.
 				var hasActiveModule = false;
-				foreach (var module in input.AllModules)
+				foreach (var module in this.queryModules)
 				{
 					if (module.MinimumVersion == 0 || this.SiteVersion == 0 || this.SiteVersion >= module.MinimumVersion)
 					{
@@ -329,83 +159,50 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 		}
 
-		private void DeserializePages(JToken result)
+		private Request CreateRequest()
 		{
-			ThrowNull(result, nameof(result));
-			if (this.ItemCreator == null)
+			var request = this.CreateBaseRequest();
+			foreach (var module in this.queryModules)
 			{
-				throw new InvalidOperationException("Trying to create pages with no page creator!");
+				module.BuildRequest(request);
 			}
 
-			var pages = this.Pages as KeyedPages;
-			foreach (var page in result)
+			this.userModule?.BuildRequest(request);
+			this.continueModule?.BuildRequest(request);
+
+			return request;
+		}
+
+		private void Deserialize(JToken parent)
+		{
+			ThrowNull(parent, nameof(parent));
+			this.DeserializeParent(parent);
+			if (parent[this.Name] is JToken result && result.Type != JTokenType.Null)
 			{
-				var innerResult = this.Wal.DetectedFormatVersion == 2 ? page : page?.First;
-				var pageId = (long?)innerResult["pageid"];
-				var search = (string)innerResult["title"] ?? FakeTitleFromId(pageId);
-				if (search == null)
+				foreach (var module in this.queryModules)
 				{
-					// Some generators can return missing pages with no title (or ID?), most commonly when links tables are out of date and need refreshLinks.php run on them. If we get one of these, skip to the next page.
-					// Unsure if page ID is also not returned, so switching to a throw for now rather than skipping.
-					throw new FormatException();
-
-					// return;
+					module.Deserialize(result);
 				}
 
-				if (!pages.TryGetValue(search, out var item))
+				if (this.userModule != null)
 				{
-					if (this.ItemsRemaining <= 0)
-					{
-						// If we've hit our limit, stop creating new pages, but we still need to check existing ones in case they're continued pages from previous results.
-						continue;
-					}
-
-					var wikiTitle = this.DeserializeTitle(innerResult);
-					item = this.ItemCreator(wikiTitle.Namespace, wikiTitle.Title, wikiTitle.PageId);
-					this.DeserializePage(innerResult, item);
-					pages.Add(item);
-					if (this.ItemsRemaining != int.MaxValue)
-					{
-						this.ItemsRemaining--;
-					}
-				}
-
-				foreach (var module in this.Input.PropertyModules)
-				{
-					module.Deserialize(innerResult, item);
+					this.userModule.Deserialize(result);
+					this.UserInfo = this.userModule.Output;
 				}
 			}
 		}
-		#endregion
 
-		#region Private Classes
-		private class KeyedPages : KeyedCollection<string, PageItem>
+		private void ParseResponse(string? response)
 		{
-			#region Public Methods
-			public bool TryGetValue(string key, out PageItem item)
+			var jsonResponse = ToJson(response);
+			if (jsonResponse.Type == JTokenType.Object)
 			{
-				if (this.Dictionary != null)
-				{
-					return this.Dictionary.TryGetValue(key, out item);
-				}
-
-				foreach (var testItem in this)
-				{
-					if (this.GetKeyForItem(testItem) == key)
-					{
-						item = testItem;
-						return true;
-					}
-				}
-
-				item = null;
-				return false;
+				this.Deserialize(jsonResponse);
 			}
-			#endregion
-
-			#region Protected Override Methods
-			protected override string GetKeyForItem(PageItem item) => item?.Title;
-			#endregion
+			else if (!(jsonResponse is JArray array && array.Count == 0))
+			{
+				throw new InvalidDataException();
+			}
 		}
 		#endregion
 	}

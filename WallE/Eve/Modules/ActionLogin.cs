@@ -5,10 +5,9 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WallE.ProjectGlobals;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionLogin : ActionModule<LoginInput, LoginResult>
+	internal class ActionLogin : ActionModuleValued<LoginInput, LoginResult>
 	{
 		#region Constructors
 		public ActionLogin(WikiAbstractionLayer wal)
@@ -26,21 +25,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Override Properties
-		protected override RequestType RequestType { get; } = RequestType.Post;
-
-		protected override StopCheckMethods StopMethods { get; } = StopCheckMethods.None;
+		protected override RequestType RequestType => RequestType.Post;
 		#endregion
 
 		#region Protected Override Methods
-		protected override void AddWarning(string from, string text)
-		{
-			ThrowNullOrWhiteSpace(text, nameof(text));
-			if (!text.StartsWith("Main-account login", StringComparison.Ordinal))
-			{
-				base.AddWarning(from, text);
-			}
-		}
-
 		protected override void BuildRequestLocal(Request request, LoginInput input)
 		{
 			ThrowNull(request, nameof(request));
@@ -63,6 +51,8 @@ namespace RobinHood70.WallE.Eve.Modules
 				token: (string?)result["token"],
 				waitTime: TimeSpan.FromSeconds((int?)result["wait"] ?? 0));
 		}
+
+		protected override bool HandleWarning(string from, string text) => text.StartsWith("Main-account login", StringComparison.Ordinal) ? true : base.HandleWarning(from, text);
 		#endregion
 	}
 }

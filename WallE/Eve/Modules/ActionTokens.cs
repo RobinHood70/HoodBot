@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionTokens : ActionModule<TokensInput, IReadOnlyDictionary<string, string>>
+	internal class ActionTokens : ActionModuleValued<TokensInput, IReadOnlyDictionary<string, string>>
 	{
 		#region Constructors
 		public ActionTokens(WikiAbstractionLayer wal)

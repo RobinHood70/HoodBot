@@ -72,7 +72,7 @@
 
 				foreach (var item in matchAgainst)
 				{
-					if (places.TryGetValue(item.PageName, out var place) && place.Zone == null)
+					if (places.ValueOrDefault(item.PageName) is Place place && place.Zone == null)
 					{
 						this.WriteLine($"* [[{page.FullPageName}|]]: no zone information. Check <code>loc</code> to see if zone for [[{item.FullPageName}|{item.LabelName}]] needs to be removed.");
 					}
@@ -80,7 +80,7 @@
 
 				for (var matchNum = 0; matchNum < matchAgainst.Count; matchNum++)
 				{
-					if (places.TryGetValue(matchAgainst[matchNum].PageName, out var place) && place.Zone == null)
+					if (places.ValueOrDefault(matchAgainst[matchNum].PageName) is Place place && place.Zone == null)
 					{
 						matchAgainst.Add(UespNamespaces.Online, place.Zone);
 					}

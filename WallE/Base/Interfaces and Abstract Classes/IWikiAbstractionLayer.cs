@@ -45,8 +45,14 @@
 		/// <summary>Allows the user to stop the bot based on a custom check. See <see cref="IWikiAbstractionLayer.CustomStopCheck" /> for more information.</summary>
 		Custom = 1 << 4,
 
+		/// <summary>All talk-check flags.</summary>
+		TalkChecks = TalkCheckNonQuery | TalkCheckQuery,
+
+		/// <summary>Valid flags when logged out.</summary>
+		LoggedOut = TalkChecks | Custom,
+
 		/// <summary>Use all available stop check methods.</summary>
-		All = Assert | UserNameCheck | TalkCheckNonQuery | TalkCheckNonQuery | Custom
+		All = Assert | UserNameCheck | TalkCheckNonQuery | TalkCheckNonQuery | Custom,
 	}
 	#endregion
 
@@ -62,11 +68,11 @@
 
 		/// <summary>Occurs after initialization data has been loaded and processed.</summary>
 		/// <remarks>Subscribers to this event should assume that they may get more information back than what they requested (e.g., all interwiki info instead of local only), and filter out any data that they do not require.</remarks>
-		event StrongEventHandler<IWikiAbstractionLayer, InitializationEventArgs>? Initialized;
+		event StrongEventHandler<IWikiAbstractionLayer, InitializedEventArgs>? Initialized;
 
 		/// <summary>Occurs when the wiki is about to load initialization data.</summary>
 		/// <remarks>Subscribers to this event have the opportunity to request additional SiteInfo data over what the base abstraction layer and any other layers require. It is the subscriber's responsibility to ensure that they're always requesting a superset of the information required and do not inadvertently prevent another subscriber from getting the information it requires. Most settings should be OR'd together with previous values and Filter settings should be set to Any in the event of a conflict. If there's a conflict in the interwiki language code, you will not be able to use co-initialization and should issue a separate SiteInfo request.</remarks>
-		event StrongEventHandler<IWikiAbstractionLayer, InitializationEventArgs>? Initializing;
+		event StrongEventHandler<IWikiAbstractionLayer, InitializingEventArgs>? Initializing;
 
 		/// <summary>Occurs when a warning is issued by the wiki.</summary>
 		event StrongEventHandler<IWikiAbstractionLayer, WarningEventArgs>? WarningOccurred;
@@ -115,6 +121,10 @@
 		/// <value>The name of the current user.</value>
 		/// <remarks>It's conceivable that not every possible implementor would need a UserName, and it may be null if the user doesn't log in, but it's reasonable to assume that neither of these will be the norm, and UserName is handy to have easily accessible without having to cast to a specific implementor.</remarks>
 		string? UserName { get; }
+
+		/// <summary>Gets the stop check methods that are valid for current state.</summary>
+		/// <value>The stop methods.</value>
+		StopCheckMethods ValidStopCheckMethods { get; }
 
 		/// <summary>Gets a list of all warnings.</summary>
 		/// <value>The warnings.</value>

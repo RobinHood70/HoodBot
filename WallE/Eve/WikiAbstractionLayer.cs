@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.Net;
@@ -36,7 +37,7 @@
 		private readonly Dictionary<int, SiteInfoNamespace> namespaces = new Dictionary<int, SiteInfoNamespace>();
 		private readonly List<ErrorItem> warnings = new List<ErrorItem>();
 		private readonly WikiException notInitialized = new WikiException(string.Format(Messages.SiteNotInitialized, nameof(Login), nameof(Initialize)));
-		private ITokenManager tokenManager = null;
+		private ITokenManager? tokenManager = null;
 		#endregion
 
 		#region Constructors
@@ -119,10 +120,10 @@
 		public event StrongEventHandler<IWikiAbstractionLayer, CaptchaEventArgs>? CaptchaChallenge;
 
 		/// <summary>Occurs after initialization data has been loaded and processed.</summary>
-		public event StrongEventHandler<IWikiAbstractionLayer, InitializationEventArgs>? Initialized;
+		public event StrongEventHandler<IWikiAbstractionLayer, InitializedEventArgs>? Initialized;
 
 		/// <summary>Occurs when the wiki is about to load initialization data.</summary>
-		public event StrongEventHandler<IWikiAbstractionLayer, InitializationEventArgs>? Initializing;
+		public event StrongEventHandler<IWikiAbstractionLayer, InitializingEventArgs>? Initializing;
 
 		/// <summary>Raised when an HTTP response is received from the client.</summary>
 		public event StrongEventHandler<IWikiAbstractionLayer, ResponseEventArgs>? ResponseReceived;
@@ -218,7 +219,7 @@
 
 		/// <summary>Gets or sets the various methods to check to see if a stop has been requested.</summary>
 		/// <value>The stop methods.</value>
-		public StopCheckMethods StopCheckMethods { get; set; } = StopCheckMethods.UserNameCheck | StopCheckMethods.TalkCheckQuery | StopCheckMethods.TalkCheckNonQuery;
+		public StopCheckMethods StopCheckMethods { get; set; }
 
 		/// <summary>Gets or sets a value indicating whether the site supports <see href="https://www.mediawiki.org/wiki/Manual:Maxlag_parameter">maxlag checking</see>.</summary>
 		/// <value><see langword="true" /> if the site supports <c>maxlag</c> checking; otherwise, <see langword="false" />.</value>
@@ -259,17 +260,13 @@
 		/// <value><see langword="true" /> to use UTF-8; otherwise, <see langword="false" />. Defaults to <see langword="true" />.</value>
 		public bool Utf8 { get; set; } = true;
 
+		/// <summary>Gets the stop check methods that are valid for current state.</summary>
+		/// <value>The stop methods.</value>
+		public StopCheckMethods ValidStopCheckMethods => this.UserId == 0 ? this.StopCheckMethods & StopCheckMethods.LoggedOut : this.StopCheckMethods;
+
 		/// <summary>Gets a list of all warnings.</summary>
 		/// <value>The warnings.</value>
 		public IReadOnlyList<ErrorItem> Warnings => this.warnings;
-		#endregion
-
-		#region Protected Internal Properties
-
-		/// <summary>Gets or sets a value indicating whether to break recursion during the AfterSubmit cycle.</summary>
-		/// <value><see langword="true" /> to skip the AfterSubmit cycle, thus breaking recursion; otherwise, <see langword="false" />.</value>
-		/// <remarks>Custom stop checks might rely on calls to additional modules in order to determine whether the bot should stop. Since these each have their own AfterSubmit process, the entire check would become recursive. The AfterSubmit routine manages this variable to ensure that stop checks are only performed at the top-most level. When set to true, the routine returns immediately without performing any additional stop checks.</remarks>
-		protected internal bool BreakRecursionAfterSubmit { get; set; }
 		#endregion
 
 		#region Public Static Methods
@@ -309,7 +306,17 @@
 		/// <summary>Runs the continuable query specified by the input.</summary>
 		/// <param name="input">The input.</param>
 		/// <remarks>This function is used internally, but also made available externally for special situations. The caller is responsible for deciding whether any given query is continuable.</remarks>
-		public void RunContinuableQuery(QueryInput input) => new ActionQuery(this).SubmitContinued(input);
+		public void RunQuery(IEnumerable<IQueryModule> input)
+		{
+			var query = new ActionQuery(this, input);
+			query.Submit();
+			this.DoStopCheck(query.UserInfo);
+		}
+
+		/// <summary>Runs the continuable query specified by the input.</summary>
+		/// <param name="input">The input.</param>
+		/// <remarks>This function is used internally, but also made available externally for special situations. The caller is responsible for deciding whether any given query is continuable.</remarks>
+		public void RunQuery(params IQueryModule[] input) => this.RunQuery(input as IEnumerable<IQueryModule>);
 
 		/// <summary>Runs the query specified based directly on the input module.</summary>
 		/// <typeparam name="TInput">The input type for the module.</typeparam>
@@ -322,18 +329,8 @@
 			where TOutput : class
 		{
 			ThrowNull(module, nameof(module));
-			var input = new QueryInput(module);
-			var query = new ActionQuery(this);
-			if (module is IContinuableQueryModule)
-			{
-				query.SubmitContinued(input);
-			}
-			else
-			{
-				query.Submit(input);
-			}
-
-			return module.Output;
+			this.RunQuery(module);
+			return module.Output ?? throw WikiException.General("null-result", module.Name + " was found in the results, but the deserializer returned null.");
 		}
 
 		/// <summary>Runs the pageset query specified by the input.</summary>
@@ -347,7 +344,13 @@
 		/// <param name="pageFactory">The factory method to use to generate PageItem derivatives.</param>
 		/// <remarks>This function is used internally, but also made available externally for special situations.</remarks>
 		/// <returns>A list of <see cref="PageItem"/>s of the specified underlying type.</returns>
-		public PageSetResult<PageItem> RunPageSetQuery(QueryInput input, TitleCreator<PageItem> pageFactory) => new ActionQuery(this, pageFactory).SubmitPageSet(input);
+		public PageSetResult<PageItem> RunPageSetQuery(QueryInput input, TitleCreator<PageItem> pageFactory)
+		{
+			var query = new ActionQueryPageSet(this, input, pageFactory);
+			var retval = query.Submit();
+			this.DoStopCheck(query.UserInfo);
+			return retval;
+		}
 
 		/// <summary>Converts the given request into an HTML request and submits it to the site.</summary>
 		/// <param name="request">The request.</param>
@@ -407,7 +410,7 @@
 				* converting WatchItem's Title to a traditional ITitle value.
 			InterwikiMap is only required to emulate PageSet redirects' tointerwiki property for < 1.25.
 			*/
-			var eventArgs = new InitializationEventArgs(new SiteInfoInput(NeededSiteInfo), null);
+			var eventArgs = new InitializingEventArgs(new SiteInfoInput(NeededSiteInfo));
 			this.OnInitializing(eventArgs);
 
 			// Create input from return values in eventArgs
@@ -416,17 +419,20 @@
 				FilterLocalInterwiki = eventArgs.FilterLocalInterwiki,
 				InterwikiLanguageCode = eventArgs.InterwikiLanguageCode,
 				ShowAllDatabases = eventArgs.ShowAllDatabases,
-				ShowNumberInGroup = eventArgs.ShowNumberInGroup
+				ShowNumberInGroup = eventArgs.ShowNumberInGroup,
 			};
 
 			var infoModule = new MetaSiteInfo(this, siteInfoInput);
 			var userModule = new MetaUserInfo(this, new UserInfoInput());
-			this.RunContinuableQuery(new QueryInput(infoModule, userModule));
+			this.RunQuery(infoModule, userModule);
 
-			this.UserId = userModule.Output.Id;
-			this.UserName = userModule.Output.Name;
+			if (!(userModule.Output is UserInfoResult userInfo) || !(infoModule.Output is SiteInfoResult siteInfo) || siteInfo.General == null || siteInfo.Namespaces == null)
+			{
+				throw new WikiException(EveMessages.InitializationFailed);
+			}
 
-			var siteInfo = infoModule.Output;
+			this.UserId = userInfo.Id;
+			this.UserName = userInfo.Name;
 
 			// General
 			var general = siteInfo.General;
@@ -462,9 +468,13 @@
 
 			// Interwiki
 			this.interwikiPrefixes.Clear();
-			foreach (var interwiki in siteInfo.InterwikiMap)
+			if (siteInfo.InterwikiMap != null)
 			{
-				this.interwikiPrefixes.Add(interwiki.Prefix);
+				// Should never actually be null, but not critical if it is.
+				foreach (var interwiki in siteInfo.InterwikiMap)
+				{
+					this.interwikiPrefixes.Add(interwiki.Prefix);
+				}
 			}
 
 			// DbReplLag
@@ -478,7 +488,7 @@
 				this.ContinueVersion = siteVersion >= ContinueModule2.MinimumVersion ? 2 : 1;
 			}
 
-			this.OnInitialized(new InitializationEventArgs(siteInfoInput, siteInfo));
+			this.OnInitialized(new InitializedEventArgs(siteInfoInput, siteInfo));
 		}
 
 		/// <summary>Determines whether the API is enabled (even if read-only) on the current wiki.</summary>
@@ -496,7 +506,7 @@
 			try
 			{
 				this.StopCheckMethods = StopCheckMethods.None;
-				new ActionQuery(this).Submit(new QueryInput());
+				new ActionQuery(this, Array.Empty<IQueryModule>()).Submit();
 
 				return true;
 			}
@@ -597,7 +607,7 @@
 				modules.Add(new ListBacklinks(this, new BacklinksInput(input, type)));
 			}
 
-			this.RunContinuableQuery(new QueryInput(modules));
+			this.RunQuery(modules);
 			var output = new HashSet<BacklinksItem>(new BacklinksOutputComparer());
 			foreach (var module in modules)
 			{
@@ -614,7 +624,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
-			return new ActionBlock(this).Submit(input);
+			return this.SubmitValueAction(new ActionBlock(this), input);
 		}
 
 		/// <summary>Returns data from the <see href="https://www.mediawiki.org/wiki/API:Blocks">Blocks</see> API module.</summary>
@@ -630,28 +640,33 @@
 		/// <summary>Checks a token using the <see href="https://www.mediawiki.org/wiki/API:Checktoken">Checktoken</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>Information about the checked token.</returns>
-		public CheckTokenResult CheckToken(CheckTokenInput input) => new ActionCheckToken(this).Submit(input);
+		public CheckTokenResult CheckToken(CheckTokenInput input) => this.SubmitValueAction(new ActionCheckToken(this), input);
 
 		/// <summary>Clears the user's "has message" flag using the <see href="https://www.mediawiki.org/wiki/API:Clearhasmsg">Clearhasmsg</see> API module or by visiting the user's talk page on wikis below version 1.24.</summary>
 		/// <returns>Whether the attempt was successful.</returns>
 		public bool ClearHasMessage()
 		{
+			bool retval;
+			var stopCheck = this.StopCheckMethods;
+			this.StopCheckMethods &= ~(StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery);
 			try
 			{
-				return new ActionClearHasMsg(this).Submit(NullObject.Null).Result == "success";
+				retval = this.SubmitValueAction(new ActionClearHasMsg(this), NullObject.Null).Result == "success";
 			}
 			catch (NotSupportedException)
 			{
+				var index = this.GetArticlePath(this.Namespaces[MediaWikiNamespaces.UserTalk].Name + ":" + this.UserName);
+				retval = !string.IsNullOrEmpty(this.Client.Get(index));
 			}
 
-			var index = this.GetArticlePath(this.Namespaces[MediaWikiNamespaces.UserTalk].Name + ":" + this.UserName);
-			return !string.IsNullOrEmpty(this.Client.Get(index));
+			this.StopCheckMethods = stopCheck;
+			return retval;
 		}
 
 		/// <summary>Compares two revisions or pages using the <see href="https://www.mediawiki.org/wiki/API:Compare">Compare</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>Information about the comparison.</returns>
-		public CompareResult Compare(CompareInput input) => new ActionCompare(this).Submit(input);
+		public CompareResult Compare(CompareInput input) => this.SubmitValueAction(new ActionCompare(this), input);
 
 		/// <summary>Creates an account using the <see href="https://www.mediawiki.org/wiki/API:Createaccount">Createaccount</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -688,7 +703,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
-			return new ActionDelete(this).Submit(input);
+			return this.SubmitValueAction(new ActionDelete(this), input);
 		}
 
 		/// <summary>Returns data from the <see href="https://www.mediawiki.org/wiki/API:Deletedrevisions">Deletedrevisions</see> API module.</summary>
@@ -735,13 +750,13 @@
 		{
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
-			return new ActionEmailUser(this).Submit(input);
+			return this.SubmitValueAction(new ActionEmailUser(this), input);
 		}
 
 		/// <summary>Returns data from the <see href="https://www.mediawiki.org/wiki/API:Expandtemplates">Expandtemplates</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>Information about the expanded templates.</returns>
-		public ExpandTemplatesResult ExpandTemplates(ExpandTemplatesInput input) => new ActionExpandTemplates(this).Submit(input);
+		public ExpandTemplatesResult ExpandTemplates(ExpandTemplatesInput input) => this.SubmitValueAction(new ActionExpandTemplates(this), input);
 
 		/// <summary>Returns data from the <see href="https://www.mediawiki.org/wiki/API:Externalurlusage">Externalurlusage</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -751,17 +766,17 @@
 		/// <summary>Returns data from the <see href="https://www.mediawiki.org/wiki/API:Feedcontributions">Feedcontributions</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>The raw XML of the Contributions RSS feed.</returns>
-		public string FeedContributions(FeedContributionsInput input) => new ActionFeedContributions(this).Submit(input).Result;
+		public string FeedContributions(FeedContributionsInput input) => this.SubmitValueAction(new ActionFeedContributions(this), input).Result;
 
 		/// <summary>Returns data from the <see href="https://www.mediawiki.org/wiki/API:Feedrecentchanges">Feedrecentchanges</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>The raw XML of the Recent Changes RSS feed.</returns>
-		public string FeedRecentChanges(FeedRecentChangesInput input) => new ActionFeedRecentChanges(this).Submit(input).Result;
+		public string FeedRecentChanges(FeedRecentChangesInput input) => this.SubmitValueAction(new ActionFeedRecentChanges(this), input).Result;
 
 		/// <summary>Returns data from the <see href="https://www.mediawiki.org/wiki/API:Feedwatchlist">Feedwatchlist</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>The raw XML of the Watchlist RSS feed.</returns>
-		public string FeedWatchlist(FeedWatchlistInput input) => new ActionFeedWatchlist(this).Submit(input).Result;
+		public string FeedWatchlist(FeedWatchlistInput input) => this.SubmitValueAction(new ActionFeedWatchlist(this), input).Result;
 
 		/// <summary>Returns data from the <see href="https://www.mediawiki.org/wiki/API:Filearchive">Filearchive</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -780,13 +795,13 @@
 		{
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
-			return new ActionFileRevert(this).Submit(input);
+			return this.SubmitValueAction(new ActionFileRevert(this), input);
 		}
 
 		/// <summary>Gets help information using the <see href="https://www.mediawiki.org/wiki/API:Help">Help</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>The API help for the module(s) requested.</returns>
-		public HelpResult Help(HelpInput input) => new ActionHelp(this).Submit(input);
+		public HelpResult Help(HelpInput input) => this.SubmitValueAction(new ActionHelp(this), input);
 
 		/// <summary>Returns data from the <see href="https://www.mediawiki.org/wiki/API:Imagerotate">Imagerotate</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -795,7 +810,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
-			return new ActionImageRotate(this).SubmitPageSet(input);
+			return this.SubmitPageSet(new ActionImageRotate(this), input);
 		}
 
 		/// <summary>Imports pages into a wiki. Correspondes to the <see href="https://www.mediawiki.org/wiki/API:Import">Import</see> API module.</summary>
@@ -805,7 +820,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
-			return new ActionImport(this).Submit(input);
+			return this.SubmitValueAction(new ActionImport(this), input);
 		}
 
 		/// <summary>Returns data from the <see href="https://www.mediawiki.org/wiki/API:Iwbacklinks">Iwbacklinks</see> API module.</summary>
@@ -880,20 +895,14 @@
 			// Second logins are not allowed without first logging out in later versions of the API.
 			this.Logout(false); // Explicitly call non-clearing logout or the rest of the method will fail.
 
-			if (this.SiteVersion >= 127)
-			{
-				input.Token ??= this.GetSessionToken(TokensInput.Login);
-				this.TokenManager!.Clear();
-			}
-
+			input.Token ??= this.TokenManager.LoginToken();
 			var assert = this.Assert;
 			this.Assert = null;
 			var retries = 4; // Allow up to four retries in case of throttling, plus the NeedToken portion of the request.
 			LoginResult output;
 			do
 			{
-				var login = new ActionLogin(this);
-				output = login.Submit(input);
+				output = new ActionLogin(this).Submit(input); // Do NOT change this to use the normal StopCheck routines, as there shouldn't be any stop checks when logging in.
 				switch (output.Result)
 				{
 					case "NeedToken":
@@ -947,7 +956,7 @@
 					input.Token = this.GetSessionToken(TokensInput.Csrf);
 				}
 
-				new ActionLogout(this).Submit(input);
+				new ActionLogout(this).Submit(input);  // Do NOT change this to use the normal StopCheck routines, as there shouldn't be any stop checks when logging out.
 				this.Client.SaveCookies();
 
 				// These are the only things that we absolutely must clear when logging out, since the site could conceivably still be used afterwards, even though it probably shouldn't be.
@@ -961,7 +970,7 @@
 			}
 			else
 			{
-				this.TokenManager?.Clear();
+				this.TokenManager.Clear();
 			}
 		}
 
@@ -972,7 +981,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
-			return new ActionManageTags(this).Submit(input);
+			return this.SubmitValueAction(new ActionManageTags(this), input);
 		}
 
 		/// <summary>Merges the history of two pages using the <see href="https://www.mediawiki.org/wiki/API:Mergehistory">Mergehistory</see> API module.</summary>
@@ -982,7 +991,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
-			return new ActionMergeHistory(this).Submit(input);
+			return this.SubmitValueAction(new ActionMergeHistory(this), input);
 		}
 
 		/// <summary>Moves a page, and optionally, it's talk/sub-pages using the <see href="https://www.mediawiki.org/wiki/API:Move">Move</see> API module.</summary>
@@ -993,7 +1002,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
-			return new ActionMove(this).Submit(input);
+			return this.SubmitValueAction(new ActionMove(this), input);
 		}
 
 		/// <summary>Returns data from the <see href="https://www.mediawiki.org/wiki/API:Opensearch">Opensearch</see> API module.</summary>
@@ -1004,7 +1013,7 @@
 		public IReadOnlyList<OpenSearchItem> OpenSearch(OpenSearchInput input)
 		{
 			ThrowNull(input, nameof(input));
-			return new ActionOpenSearch(this).Submit(input);
+			return this.SubmitValueAction(new ActionOpenSearch(this), input);
 		}
 
 		/// <summary>Sets one or more options using the <see href="https://www.mediawiki.org/wiki/API:Options">Options</see> API module.</summary>
@@ -1044,12 +1053,12 @@
 					foreach (var value in singleItems)
 					{
 						var singleInput = new OptionsInputInternal(input.Token, value.Key, value.Value);
-						new ActionOptions(this).Submit(singleInput);
+						this.SubmitValueAction(new ActionOptions(this), singleInput);
 					}
 				}
 			}
 
-			new ActionOptions(this).Submit(internalInput);
+			this.SubmitValueAction(new ActionOptions(this), internalInput);
 		}
 
 		/// <summary>Returns data from the <see href="https://www.mediawiki.org/wiki/API:Pagepropnames">Pagepropnames</see> API module.</summary>
@@ -1065,12 +1074,12 @@
 		/// <summary>Returns data from the <see href="https://www.mediawiki.org/wiki/API:Paraminfo">Paraminfo</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>A dictionary of parameter information with the module name as the key.</returns>
-		public IReadOnlyDictionary<string, ParameterInfoItem> ParameterInfo(ParameterInfoInput input) => new ActionParamInfo(this).Submit(input);
+		public IReadOnlyDictionary<string, ParameterInfoItem> ParameterInfo(ParameterInfoInput input) => this.SubmitValueAction(new ActionParamInfo(this), input);
 
 		/// <summary>Parses custom text, a page, or a revision using the <see href="https://www.mediawiki.org/wiki/API:Parse">Parse</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>The result of the parse.</returns>
-		public ParseResult Parse(ParseInput input) => new ActionParse(this).Submit(input);
+		public ParseResult Parse(ParseInput input) => this.SubmitValueAction(new ActionParse(this), input);
 
 		/// <summary>Patrols a recent change or revision using the <see href="https://www.mediawiki.org/wiki/API:Patrol">Patrol</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -1079,7 +1088,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Patrol);
-			return new ActionPatrol(this).Submit(input);
+			return this.SubmitValueAction(new ActionPatrol(this), input);
 		}
 
 		/// <summary>Searches one or more namespaces for page titles prefixed by the given characters. Unlike AllPages, the search pattern is not considered rigid, and may include parsing out definite articles or similar modifications using the <see href="https://www.mediawiki.org/wiki/API:Prefixsearch">Prefixsearch</see> API module.</summary>
@@ -1096,7 +1105,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
-			return new ActionProtect(this).Submit(input);
+			return this.SubmitValueAction(new ActionProtect(this), input);
 		}
 
 		/// <summary>Retrieves page titles that are creation-protected using the <see href="https://www.mediawiki.org/wiki/API:Protectedtitles">Protectedtitles</see> API module.</summary>
@@ -1107,7 +1116,7 @@
 		/// <summary>Returns data from the <see href="https://www.mediawiki.org/wiki/API:Purge">Purge</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>A list of pages that were purged, along with information about the purge for each page.</returns>
-		public PageSetResult<PurgeItem> Purge(PurgeInput input) => new ActionPurge(this).SubmitPageSet(input);
+		public PageSetResult<PurgeItem> Purge(PurgeInput input) => this.SubmitPageSet(new ActionPurge(this), input);
 
 		/// <summary>Returns data from the <see href="https://www.mediawiki.org/wiki/API:Querypage">Querypage</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -1115,7 +1124,7 @@
 		public QueryPageResult QueryPage(QueryPageInput input)
 		{
 			var module = new ListQueryPage(this, input);
-			this.RunContinuableQuery(new QueryInput(module));
+			this.RunQuery(module);
 
 			return module.AsQueryPageResult();
 		}
@@ -1137,7 +1146,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
-			return new ActionResetPassword(this).Submit(input);
+			return this.SubmitValueAction(new ActionResetPassword(this), input);
 		}
 
 		/// <summary>Hides one or more revisions from those without permission to view them using the <see href="https://www.mediawiki.org/wiki/API:Revisiondelete"></see> API module.</summary>
@@ -1147,7 +1156,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
-			return new ActionRevisionDelete(this).Submit(input);
+			return this.SubmitValueAction(new ActionRevisionDelete(this), input);
 		}
 
 		/// <summary>Rolls back all of the last user's edits to a page using the <see href="https://www.mediawiki.org/wiki/API:Rollback">Rollback</see> API module.</summary>
@@ -1159,8 +1168,9 @@
 			input.Token ??= this.CheckToken(
 					input.Title == null
 					? this.TokenManager.RollbackToken(input.PageId)
-					: this.TokenManager.RollbackToken(input.Title));
-			return new ActionRollback(this).Submit(input);
+					: this.TokenManager.RollbackToken(input.Title),
+					TokensInput.Rollback);
+			return this.SubmitValueAction(new ActionRollback(this), input);
 		}
 
 		/// <summary>Returns Really Simple Discovery information using the <see href="https://www.mediawiki.org/wiki/API:Rsd">Rsd</see> API module.</summary>
@@ -1175,7 +1185,7 @@
 		public SearchResult Search(SearchInput input)
 		{
 			var module = new ListSearch(this, input);
-			this.RunContinuableQuery(new QueryInput(module));
+			this.RunQuery(module);
 
 			return module.AsSearchResult();
 		}
@@ -1187,7 +1197,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
-			return new ActionSetNotificationTimestamp(this).SubmitPageSet(input);
+			return this.SubmitPageSet(new ActionSetNotificationTimestamp(this), input);
 		}
 
 		/// <summary>Returns information about the site using the <see href="https://www.mediawiki.org/wiki/API:Siteinfo">Siteinfo</see> API module.</summary>
@@ -1207,7 +1217,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
-			return new ActionTag(this).Submit(input);
+			return this.SubmitValueAction(new ActionTag(this), input);
 		}
 
 		/// <summary>Displays information about all tags available on the wiki using the <see href="https://www.mediawiki.org/wiki/API:Tags">Tags</see> API module.</summary>
@@ -1222,7 +1232,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
-			return new ActionUnblock(this).Submit(input);
+			return this.SubmitValueAction(new ActionUnblock(this), input);
 		}
 
 		/// <summary>Undeletes a page or specific revisions thereof (by file ID or date/time) using the <see href="https://www.mediawiki.org/wiki/API:Undelete">Undelete</see> API module.</summary>
@@ -1232,7 +1242,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
-			return new ActionUndelete(this).Submit(input);
+			return this.SubmitValueAction(new ActionUndelete(this), input);
 		}
 
 		/// <summary>Uploads a file to the wiki using the <see href="https://www.mediawiki.org/wiki/API:Upload">Upload</see> API module.</summary>
@@ -1242,16 +1252,15 @@
 		{
 			ThrowNull(input, nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
-			if (
-				input.ChunkSize > 0
+			if (input.ChunkSize > 0
 				&& (this.SiteVersion >= 126
-					|| (this.SiteVersion >= 120 && !input.RemoteFileName.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))))
+				|| (this.SiteVersion >= 120 && !input.RemoteFileName.EndsWith(".svg", StringComparison.OrdinalIgnoreCase))))
 			{
-				return this.UploadFileChunked(input, input.ChunkSize);
+				return this.UploadFileChunked(input);
 			}
 
 			var uploadInput = new UploadInputInternal(input);
-			return new ActionUpload(this).Submit(uploadInput);
+			return this.SubmitValueAction(new ActionUpload(this), uploadInput);
 		}
 
 		/// <summary>Retrieves a user's contributions using the <see href="https://www.mediawiki.org/wiki/API:Usercontribs">Usercontribs</see> API module.</summary>
@@ -1261,7 +1270,7 @@
 
 		/// <summary>Returns information about the current user using the <see href="https://www.mediawiki.org/wiki/API:Userinfo">Userinfo</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
-		/// <returns>Information about the current user.</returns>
+		/// <returns>Information about the current user. Note that due to WallE's stop-checking, you may get additional information you didn't request—specifically: block information and the HasMessage flag.</returns>
 		public UserInfoResult UserInfo(UserInfoInput input) => this.RunModuleQuery(new MetaUserInfo(this, input));
 
 		/// <summary>Adds or removes user rights (based on rights groups) using the <see href="https://www.mediawiki.org/wiki/API:Userrights">Userrights</see> API module.</summary>
@@ -1276,10 +1285,10 @@
 				var tokenUser = input.User ?? (this.SiteVersion >= 124
 					? string.Empty // Name is unnecessary for 1.24+
 					: throw new InvalidOperationException(EveMessages.InvalidUserRightsRequest));
-				input.Token = this.CheckToken(this.TokenManager.UserRightsToken(tokenUser));
+				input.Token = this.CheckToken(this.TokenManager.UserRightsToken(tokenUser), TokensInput.UserRights);
 			}
 
-			return new ActionUserRights(this).Submit(input);
+			return this.SubmitValueAction(new ActionUserRights(this), input);
 		}
 
 		/// <summary>Retrieves information about specific users on the wiki using the <see href="https://www.mediawiki.org/wiki/API:Users">Users</see> API module.</summary>
@@ -1298,7 +1307,7 @@
 
 			if (this.SiteVersion >= 123)
 			{
-				return new ActionWatch(this).SubmitPageSet(input);
+				return this.SubmitPageSet(new ActionWatch(this), input);
 			}
 
 			if (input.ListType != ListType.Titles || input.GeneratorInput != null)
@@ -1306,13 +1315,14 @@
 				throw new InvalidOperationException(EveMessages.WatchNotSupported);
 			}
 
+			// Watch each page individually, then merge the individual result into a constructed PageSetResult.
 			var list = new List<WatchItem>();
 			if (input.Values != null)
 			{
 				foreach (var title in input.Values)
 				{
 					var newInput = new WatchInput(new[] { title }) { Token = input.Token, Unwatch = input.Unwatch };
-					var result = new ActionWatch(this).SubmitPageSet(newInput);
+					var result = this.SubmitPageSet(new ActionWatch(this), newInput);
 					foreach (var item in result)
 					{
 						list.Add(item);
@@ -1334,19 +1344,63 @@
 		public IReadOnlyList<WatchlistRawItem> WatchlistRaw(WatchlistRawInput input) => this.RunListQuery(new ListWatchlistRaw(this, input));
 		#endregion
 
+		#region Protected Methods
+
+		/// <summary>Performs any stop checks flagged in <see cref="ValidStopCheckMethods"/> (derived from <see cref="StopCheckMethods"/>).</summary>
+		/// <remarks>This version is used for actions other than queries.</remarks>
+		protected void DoStopCheck() => this.DoStopCheck(null);
+		#endregion
+
 		#region Protected Virtual Methods
+
+		/// <summary>Performs any stop checks flagged in <see cref="ValidStopCheckMethods"/> (derived from <see cref="StopCheckMethods"/>).</summary>
+		/// <param name="userInfoResult">The user information returned by the query. Set to <see langword="null"/> if not a query or integrated check is disabled.</param>
+		/// <remarks>This version uses the integrated query results, if available.</remarks>
+		protected virtual void DoStopCheck(UserInfoResult? userInfoResult)
+		{
+			if (this.ValidStopCheckMethods.HasFlag(StopCheckMethods.Custom) && (this.CustomStopCheck?.Invoke() == true))
+			{
+				throw new StopException(EveMessages.CustomStopCheckFailed);
+			}
+
+			if ((this.ValidStopCheckMethods & (StopCheckMethods.TalkChecks | StopCheckMethods.UserNameCheck)) != StopCheckMethods.None)
+			{
+				if (userInfoResult == null)
+				{
+					if (this.ValidStopCheckMethods.HasFlag(StopCheckMethods.TalkCheckQuery))
+					{
+						Debug.WriteLine("Something's not right here, this should've been an integrated check!");
+					}
+
+					var input = new UserInfoInput() { Properties = UserInfoProperties.HasMsg };
+					userInfoResult = this.UserInfo(input);
+				}
+
+				if (this.ValidStopCheckMethods.HasFlag(StopCheckMethods.UserNameCheck) && this.SiteVersion < 128 && this.UserName != userInfoResult.Name)
+				{
+					// Used to check if username has unexpectedly changed, indicating that the bot has been logged out (or conceivably logged in) unexpectedly.
+					throw new StopException(EveMessages.UserNameChanged);
+				}
+
+				if (userInfoResult.Flags.HasFlag(UserInfoFlags.HasMessage)
+					&& ((this.ValidStopCheckMethods & StopCheckMethods.TalkChecks) != StopCheckMethods.None))
+				{
+					throw new StopException(EveMessages.TalkPageChanged);
+				}
+			}
+		}
 
 		/// <summary>Raises the <see cref="CaptchaChallenge" /> event.</summary>
 		/// <param name="e">The <see cref="CaptchaEventArgs" /> instance containing the event data.</param>
 		protected virtual void OnCaptchaChallenge(CaptchaEventArgs e) => this.CaptchaChallenge?.Invoke(this, e);
 
 		/// <summary>Raises the <see cref="Initialized" /> event.</summary>
-		/// <param name="e">The <see cref="InitializationEventArgs"/> instance containing the event data.</param>
-		protected virtual void OnInitialized(InitializationEventArgs e) => this.Initialized?.Invoke(this, e);
+		/// <param name="e">The <see cref="InitializedEventArgs"/> instance containing the event data.</param>
+		protected virtual void OnInitialized(InitializedEventArgs e) => this.Initialized?.Invoke(this, e);
 
 		/// <summary>Raises the <see cref="Initializing" /> event.</summary>
-		/// <param name="e">The <see cref="InitializationEventArgs"/> instance containing the event data.</param>
-		protected virtual void OnInitializing(InitializationEventArgs e) => this.Initializing?.Invoke(this, e);
+		/// <param name="e">The <see cref="InitializedEventArgs"/> instance containing the event data.</param>
+		protected virtual void OnInitializing(InitializingEventArgs e) => this.Initializing?.Invoke(this, e);
 
 		/// <summary>Raises the <see cref="ResponseReceived" /> event.</summary>
 		/// <param name="e">The <see cref="ResponseEventArgs" /> instance containing the event data.</param>
@@ -1362,7 +1416,7 @@
 		#endregion
 
 		#region Private Methods
-		private string CheckToken(string? token) => token ?? throw new WikiException(EveMessages.InvalidToken);
+		private string CheckToken(string? token, string type) => token ?? throw new WikiException(CurrentCulture(EveMessages.InvalidToken, type));
 
 		private void Clear()
 		{
@@ -1379,35 +1433,52 @@
 			this.UseLanguage = null;
 			this.interwikiPrefixes.Clear();
 			this.namespaces.Clear();
-			this.tokenManager?.Clear();
+			this.tokenManager?.Clear(); // Deliberately clearing underlying property so we're not initializing it only to clear it.
 		}
 
-		private string GetSessionToken(string type) => this.CheckToken(this.TokenManager.SessionToken(type));
+		private string GetSessionToken(string type) => this.CheckToken(this.TokenManager.SessionToken(type), type);
 
 		private IReadOnlyList<TOutput> RunListQuery<TInput, TOutput>(ListModule<TInput, TOutput> module)
 			where TInput : class
 			where TOutput : class => this.RunModuleQuery(module).AsReadOnlyList();
 
-		private UploadResult UploadFileChunked(UploadInput input, int chunkSize)
+		private PageSetResult<TOutput> SubmitPageSet<TInput, TOutput>(ActionModulePageSet<TInput, TOutput> action, TInput input)
+			where TInput : PageSetInput
+			where TOutput : ITitle
 		{
-			var uploadInput = new UploadInputInternal();
-			uploadInput.InitialChunk(input);
+			var retval = action.Submit(input);
+			this.DoStopCheck();
+			return retval;
+		}
+
+		private TOutput SubmitValueAction<TInput, TOutput>(ActionModuleValued<TInput, TOutput> action, TInput input)
+			where TInput : class
+			where TOutput : class
+		{
+			var retval = action.Submit(input);
+			this.DoStopCheck();
+			return retval;
+		}
+
+		private UploadResult UploadFileChunked(UploadInput input)
+		{
+			var uploadInput = new UploadInputInternal(input);
 			UploadResult result;
 			var readBytes = 0;
 			do
 			{
-				uploadInput.NextChunk(input.FileData, chunkSize);
-				result = new ActionUpload(this).Submit(uploadInput);
-				uploadInput.Offset += chunkSize;
+				uploadInput.NextChunk(input.FileData, input.ChunkSize);
+				result = this.SubmitValueAction(new ActionUpload(this), uploadInput);
+				uploadInput.Offset += input.ChunkSize;
 				uploadInput.FileKey = result.FileKey;
 			}
-			while (result?.Result == "Continue" && readBytes > 0);
+			while (result.Result == "Continue" && readBytes > 0);
 
 			if (result.Result == "Success")
 			{
 				uploadInput.FinalChunk(input);
 				uploadInput.FileKey = result.FileKey;
-				result = new ActionUpload(this).Submit(uploadInput);
+				result = this.SubmitValueAction(new ActionUpload(this), uploadInput);
 			}
 
 			return result;

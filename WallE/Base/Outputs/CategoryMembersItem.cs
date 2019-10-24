@@ -3,7 +3,6 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiCommon.Globals;
 
 	public class CategoryMembersItem : ITitleOptional
 	{
@@ -37,7 +36,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title ?? NoTitle;
+		public override string ToString() => this.Title ?? Globals.NoTitle;
 		#endregion
 	}
 }

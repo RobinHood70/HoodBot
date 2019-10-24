@@ -20,7 +20,7 @@
 		public override string SessionToken(string type)
 		{
 			type = TokenManagerFunctions.ValidateTokenType(ValidTypes, type, Csrf, Edit);
-			if (!this.SessionTokens.TryGetValue(type, out var retval))
+			if (this.SessionTokens.Count == 0)
 			{
 				var action = new ActionTokens(this.Wal);
 				var tokensInput = new TokensInput(ValidTypes);
@@ -29,10 +29,9 @@
 				{
 					this.SessionTokens[TokenManagerFunctions.TrimTokenKey(token.Key)] = token.Value;
 				}
-
-				this.SessionTokens.TryGetValue(type, out retval);
 			}
 
+			this.SessionTokens.TryGetValue(type, out var retval);
 			return retval;
 		}
 		#endregion

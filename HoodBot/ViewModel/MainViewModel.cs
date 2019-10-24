@@ -71,7 +71,7 @@
 			this.statusMonitor = new Progress<string>(this.StatusWrite);
 			Site.RegisterUserFunctionsClass(new[] { "en.uesp.net", "rob-centos" }, new[] { "HoodBot" }, HoodBotFunctions.CreateInstance);
 			var plugins = Plugins.Instance;
-			this.DiffViewer = plugins.DiffViewers["Visual Studio"];
+			this.DiffViewer = plugins.DiffViewers["Internet Explorer"];
 		}
 		#endregion
 

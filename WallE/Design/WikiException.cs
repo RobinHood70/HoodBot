@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.WallE.Design
 {
 	using System;
+	using System.ComponentModel;
 	using System.Runtime.Serialization;
 	using System.Security.Permissions;
 	using RobinHood70.WallE.Properties;
@@ -77,7 +78,7 @@
 		/// <param name="code">The error's <c>code</c> value.</param>
 		/// <param name="info">The error's <c>info</c> value.</param>
 		/// <returns>A new WikiException instance with a general error message.</returns>
-		public static WikiException General(string code, string info) => new WikiException(CurrentCulture(Messages.WikiExceptionGeneral, code, info), code, info);
+		public static WikiException General(string code, [Localizable(true)] string info) => new WikiException(CurrentCulture(Messages.WikiExceptionGeneral, code, info), code, info);
 		#endregion
 
 		#region Public Override Methods

@@ -296,7 +296,7 @@
 
 			if (info != null)
 			{
-				if (revs.TryGetValue(info.LastRevisionId, out var revision))
+				if (revs.ValueOrDefault(info.LastRevisionId) is Revision revision)
 				{
 					revs.Current = revision;
 					this.Text = revision.Text;

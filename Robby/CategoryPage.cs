@@ -49,8 +49,7 @@
 		protected override void PopulateCustomResults(PageItem pageItem)
 		{
 			ThrowNull(pageItem, nameof(pageItem));
-			var catInfo = pageItem.CategoryInfo;
-			if (catInfo != null)
+			if (pageItem.CategoryInfo is CategoryInfoResult catInfo)
 			{
 				this.FileCount = catInfo.Files;
 				this.FullCount = catInfo.Size;

@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WikiCommon.Globals;
 
 	// MWVERSION: 1.27
-	internal class ActionHelp : ActionModule<HelpInput, HelpResult>
+	internal class ActionHelp : ActionModuleValued<HelpInput, HelpResult>
 	{
 		#region Constructors
 		public ActionHelp(WikiAbstractionLayer wal)

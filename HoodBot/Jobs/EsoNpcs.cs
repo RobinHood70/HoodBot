@@ -37,7 +37,7 @@
 				{
 					try
 					{
-						page.Save("Update missing location(s)", true, Tristate.Unknown, false);
+						page.Save(this.LogName, false, Tristate.True, false);
 					}
 					catch (WikiException e) when (e.Code == "pagedeleted")
 					{
@@ -72,8 +72,8 @@
 			this.saveList = new PageCollection(this.Site);
 			foreach (var npc in npcData)
 			{
-				npc.TrimPlaces(places);
-				this.saveList.Add(this.CreatePage(npc));
+					npc.TrimPlaces(places);
+					this.saveList.Add(this.CreatePage(npc));
 			}
 
 			this.ProgressMaximum = this.saveList.Count + 4;
@@ -128,7 +128,9 @@
 				.AppendLine("{{Stub|NPC}}")
 				.ToString();
 
-			return new Page(this.eso, npc.PageName) { Text = text };
+			var page = new Page(this.eso, npc.PageName) { Text = text };
+			page.SetMinimalStartTimestamp();
+			return page;
 		}
 		#endregion
 
@@ -141,15 +143,16 @@
 			foreach (var npc in npcData)
 			{
 				var title = new NpcTitle(this.eso, npc);
-				if (!allNpcs.TryGetValue(title, out var page))
+				if (allNpcs.ValueOrDefault(title) is null)
 				{
 					titlesOnly.Add(title);
 				}
 			}
 
+			titlesOnly.Sort();
+
 			var pageLoadOptions = new PageLoadOptions(PageModules.Default | PageModules.Properties, true);
 			var checkPages = titlesOnly.Load(pageLoadOptions);
-			titlesOnly.Sort();
 			//// checkPages.Sort();
 			foreach (var title in titlesOnly)
 			{

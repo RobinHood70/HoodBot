@@ -7,7 +7,7 @@
 
 	/// <summary>Stores the inputs and the responses for any requests made to the wiki during the initialization routine. This potentially allows requests to be combined between layers.</summary>
 	/// <seealso cref="EventArgs" />
-	public class InitializationEventArgs : EventArgs
+	public class InitializingEventArgs : EventArgs
 	{
 		#region Fields
 		private Filter filterLocalInterwiki;
@@ -17,10 +17,9 @@
 		private bool showNumberInGroup;
 		#endregion
 
-		/// <summary>Initializes a new instance of the <see cref="InitializationEventArgs"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="InitializingEventArgs"/> class.</summary>
 		/// <param name="input">The SiteInfo input.</param>
-		/// <param name="result">The SiteInfo result.</param>
-		public InitializationEventArgs(SiteInfoInput input, SiteInfoResult? result)
+		public InitializingEventArgs(SiteInfoInput input)
 		{
 			ThrowNull(input, nameof(input));
 			this.filterLocalInterwiki = input.FilterLocalInterwiki;
@@ -28,7 +27,6 @@
 			this.properties = input.Properties;
 			this.showAllDatabases = input.ShowAllDatabases;
 			this.showNumberInGroup = input.ShowNumberInGroup;
-			this.Result = result;
 		}
 
 		/// <summary>Gets or sets the filter for local interwikis.</summary>
@@ -42,10 +40,20 @@
 		/// <summary>Gets or sets the interwiki language code.</summary>
 		/// <value>The interwiki language code.</value>
 		/// <exception cref="InvalidOperationException">Thrown if a value is specified for the interwiki language code, and another part of the application has already set a different value.</exception>
-		public string InterwikiLanguageCode
+		public string? InterwikiLanguageCode
 		{
 			get => this.interwikiLanguageCode;
-			set => this.interwikiLanguageCode = string.IsNullOrEmpty(this.interwikiLanguageCode) || this.interwikiLanguageCode == value ? value : throw new InvalidOperationException(CurrentCulture(Messages.SiteInfoLanguageConflict));
+			set
+			{
+				if (string.IsNullOrEmpty(this.interwikiLanguageCode))
+				{
+					this.interwikiLanguageCode = value;
+				}
+				else if (this.interwikiLanguageCode != value)
+				{
+					throw new InvalidOperationException(CurrentCulture(Messages.SiteInfoLanguageConflict));
+				}
+			}
 		}
 
 		/// <summary>Gets or sets the properties specify the data to retrieve.</summary>
@@ -71,9 +79,5 @@
 			get => this.showNumberInGroup;
 			set => this.showNumberInGroup |= value;
 		}
-
-		/// <summary>Gets the SiteInfo result.</summary>
-		/// <value>The SiteInfo result.</value>
-		public SiteInfoResult Result { get; }
 	}
 }

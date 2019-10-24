@@ -3,15 +3,15 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.Collections.Generic;
-    using System.Collections.Immutable;
-    using Newtonsoft.Json.Linq;
+	using System.Collections.Immutable;
+	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
 	// MWVERSION: 1.28
-	internal class ActionParamInfo : ActionModule<ParameterInfoInput, IReadOnlyDictionary<string, ParameterInfoItem>>
+	internal class ActionParamInfo : ActionModuleValued<ParameterInfoInput, IReadOnlyDictionary<string, ParameterInfoItem>>
 	{
 		#region Static Fields
 		private static readonly HashSet<string> FormatModuleValues = new HashSet<string> { "json", "jsonfm", "php", "phpfm", "wddx", "wddxfm", "xml", "xmlfm", "yaml", "yamlfm", "rawfm", "txt", "txtfm", "dbg", "dbgfm", "dump", "dumpfm", "none" };

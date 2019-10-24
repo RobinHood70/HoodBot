@@ -444,7 +444,7 @@
 					backlinkTitles.AddRange(tempTitles);
 					if (this.FollowUpActions.HasFlag(FollowUpActions.ProposeUnused) && tempTitles.Count > 0)
 					{
-						var prodResult = fromPages.TryGetValue(replacement.From.FullPageName, out var fromPage) ? this.CanDelete(fromPage) : ProposedDeletionResult.NonExistent;
+						var prodResult = fromPages.ValueOrDefault(replacement.From.FullPageName) is Page fromPage ? this.CanDelete(fromPage) : ProposedDeletionResult.NonExistent;
 						switch (prodResult)
 						{
 							case ProposedDeletionResult.AlreadyProposed:

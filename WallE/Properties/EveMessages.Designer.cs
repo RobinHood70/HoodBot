@@ -133,6 +133,15 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Site initialization failed because required user or site information could not be found..
+        /// </summary>
+        internal static string InitializationFailed {
+            get {
+                return ResourceManager.GetString("InitializationFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The flags input must contain only a single flag..
         /// </summary>
         internal static string InputNonUnique {
@@ -187,6 +196,15 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Trying to create pages with no page creator!.
+        /// </summary>
+        internal static string NoPageCreator {
+            get {
+                return ResourceManager.GetString("NoPageCreator", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The query you attempted is invalid on this wiki..
         /// </summary>
         internal static string NoSupportedModules {
@@ -210,6 +228,24 @@ namespace RobinHood70.WallE.Properties {
         internal static string NotAString {
             get {
                 return ResourceManager.GetString("NotAString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The return value of the request was null..
+        /// </summary>
+        internal static string NullResponse {
+            get {
+                return ResourceManager.GetString("NullResponse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The page factory for the query has not been set..
+        /// </summary>
+        internal static string PageFactoryNotSet {
+            get {
+                return ResourceManager.GetString("PageFactoryNotSet", resourceCulture);
             }
         }
         
@@ -309,6 +345,15 @@ namespace RobinHood70.WallE.Properties {
         internal static string UserNameChanged {
             get {
                 return ResourceManager.GetString("UserNameChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Because of its complexity, ApiQueryPageSet does not use the normal {0}(...) mechanism. Pass all inputs in the constructor, then call Submit() instead..
+        /// </summary>
+        internal static string UseSubmit {
+            get {
+                return ResourceManager.GetString("UseSubmit", resourceCulture);
             }
         }
         

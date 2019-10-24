@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.WikiClasses.Parser.StackElements
 {
 	using System;
+	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.WikiClasses.Properties;
 	using static WikiCommon.Globals;
 
@@ -24,6 +25,7 @@
 		#endregion
 
 		#region Internal Override Methods
+		[DoesNotReturn]
 		internal override ElementNodeCollection BreakSyntax() => throw new InvalidOperationException(CurrentCulture(Resources.CalledOnRoot, nameof(this.BreakSyntax)));
 
 		internal override void Parse(char found) => this.Stack.Parse(found);

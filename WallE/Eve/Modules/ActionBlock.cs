@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System.Diagnostics.CodeAnalysis;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
@@ -9,7 +10,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionBlock : ActionModule<BlockInput, BlockResult>
+	internal class ActionBlock : ActionModuleValued<BlockInput, BlockResult>
 	{
 		#region Constructors
 		public ActionBlock(WikiAbstractionLayer wal)
@@ -69,10 +70,11 @@ namespace RobinHood70.WallE.Eve.Modules
 				watchUser: result["watchuser"].ToBCBool());
 		}
 
+		[DoesNotReturn]
 		protected override BlockResult DeserializeCustom(string result)
 		{
 			// Throw a custom error, since MW 1.25 and under handle this incorrectly.
-			if (result != null && result.Contains("must be an instance of Block"))
+			if (result.Contains("must be an instance of Block"))
 			{
 				throw WikiException.General("reblock-failed", EveMessages.ReblockFailed);
 			}

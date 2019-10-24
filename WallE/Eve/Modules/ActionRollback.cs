@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionRollback : ActionModule<RollbackInput, RollbackResult>
+	internal class ActionRollback : ActionModuleValued<RollbackInput, RollbackResult>
 	{
 		#region Constructors
 		public ActionRollback(WikiAbstractionLayer wal)
@@ -44,8 +44,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override RollbackResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
+			var title = result.MustHaveString("title");
 			return new RollbackResult(
-				title: result.MustHaveString("title"),
+				ns: this.FindRequiredNamespace(title),
+				title: title,
 				pageId: (long)result.MustHave("pageid"),
 				summary: result.MustHaveString("summary"),
 				revisionId: (long)result.MustHave("revid"),

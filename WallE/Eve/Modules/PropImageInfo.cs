@@ -61,10 +61,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(parent, nameof(parent));
 			ThrowNull(page, nameof(page));
-			if (parent["imagerepository"] != null)
-			{
-				page.ImageRepository = (string)parent["imagerepository"];
-			}
+			page.ImageRepository = (string?)parent["imagerepository"];
 		}
 
 		protected override ImageInfoItem GetItem(JToken result, PageItem page) => JTokenImageInfo.ParseImageInfo(result, new ImageInfoItem());

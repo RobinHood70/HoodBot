@@ -27,8 +27,10 @@ namespace RobinHood70.WallE.Eve.Modules
 			// Check if query continue type has been set manually or a previous result did not emit a query-continue.
 			if (this.Continues)
 			{
+				ThrowNull(this.GeneratorContinue, nameof(this.GeneratorContinue));
+
 				// We must allow for changing, since some query-continues re-use parameters that may have already been added by the module.
-				request.AddOrChangeIfNotNull(this.GeneratorContinue, this.currentGeneratorValue);
+				request.AddOrChangeIfNotNull(this.GeneratorContinue!, this.currentGeneratorValue);
 				foreach (var entry in this.ContinueEntries)
 				{
 					request.AddOrChangeIfNotNull(entry.Key, entry.Value);
@@ -38,12 +40,12 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 		}
 
-		public override int Deserialize(JToken parent)
+		public override ContinueModule Deserialize(WikiAbstractionLayer wal, JToken parent)
 		{
 			var result = parent?[Name];
 			if (result == null || result.Type == JTokenType.Null)
 			{
-				return 0;
+				return this;
 			}
 
 			// True by default for cases when there's no query-continue in the result and therefore DeserializeMain() isn't called.
@@ -61,7 +63,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					}
 					else
 					{
-						if (this.GeneratorContinue.Length > 0)
+						if (this.GeneratorContinue?.Length > 0)
 						{
 							this.BatchComplete = false;
 						}
@@ -77,7 +79,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				this.currentGeneratorValue = this.savedGeneratorValue;
 			}
 
-			return 0;
+			return this;
 		}
 		#endregion
 
@@ -85,10 +87,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		public override void BeforePageSetSubmit(IPageSetGenerator pageSet)
 		{
 			base.BeforePageSetSubmit(pageSet);
-			if (pageSet is IQueryPageSet queryPageSet)
+			if (pageSet is ActionQueryPageSet query)
 			{
-				queryPageSet.InactiveModules.Clear();
-				queryPageSet.InactiveModules.UnionWith(this.modules);
+				query.InactiveModules.Clear();
+				query.InactiveModules.UnionWith(this.modules);
 			}
 		}
 		#endregion

@@ -11,7 +11,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ActionPurge(WikiAbstractionLayer wal)
-			: base(wal, PurgeItemCreator)
+			: base(wal)
 		{
 		}
 		#endregion
@@ -36,21 +36,19 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIf("forcerecursivelinkupdate", input.Method == PurgeMethod.RecursiveLinkUpdate, this.SiteVersion >= 122);
 		}
 
-		protected override void DeserializePage(JToken result, PurgeItem page)
+		protected override PurgeItem GetItem(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			ThrowNull(page, nameof(page));
-			page.Flags = result.GetFlags(
-				("invalid", PurgeFlags.Invalid),
-				("missing", PurgeFlags.Missing),
-				("linkupdate", PurgeFlags.LinkUpdate),
-				("purged", PurgeFlags.Purged));
-			this.Pages.Add(page);
+			return new PurgeItem(
+				ns: (int)result.MustHave("ns"),
+				title: result.MustHaveString("title"),
+				pageId: (long?)result["pageid"] ?? 0,
+				flags: result.GetFlags(
+					("invalid", PurgeFlags.Invalid),
+					("missing", PurgeFlags.Missing),
+					("linkupdate", PurgeFlags.LinkUpdate),
+					("purged", PurgeFlags.Purged)));
 		}
-		#endregion
-
-		#region Private Methods
-		private static PurgeItem PurgeItemCreator(int ns, string title, long pageId) => new PurgeItem(ns, title, pageId);
 		#endregion
 	}
 }

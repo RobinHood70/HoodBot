@@ -46,7 +46,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Public Methods
 		public SearchResult AsSearchResult() => new SearchResult(
-			list: this.Output,
+			list: this.Output ?? Array.Empty<SearchResultItem>(),
 			suggestion: this.suggestion,
 			totalHits: this.totalHits);
 		#endregion

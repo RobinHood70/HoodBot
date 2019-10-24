@@ -780,6 +780,16 @@
 		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
 		public bool TryGetValue(string key, out TTitle value) => this.dictionary.TryGetValue(key, out value);
+
+		/// <summary>Returns the requested value, or null if not found.</summary>
+		/// <param name="key">The key.</param>
+		/// <returns>The requested value, or null if not found.</returns>
+		public TTitle ValueOrDefault(ISimpleTitle key) => this.ValueOrDefault(key?.FullPageName);
+
+		/// <summary>Returns the requested value, or null if not found.</summary>
+		/// <param name="key">The key.</param>
+		/// <returns>The requested value, or null if not found.</returns>
+		public TTitle ValueOrDefault(string key) => key != null && this.dictionary.TryGetValue(key, out var item) ? item : default;
 		#endregion
 
 		#region Public Abstract Methods

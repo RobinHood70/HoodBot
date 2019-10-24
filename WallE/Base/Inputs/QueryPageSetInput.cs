@@ -18,10 +18,6 @@ namespace RobinHood70.WallE.Base
 		public QueryPageSetInput(IGeneratorInput generatorInput, IEnumerable<string> titles)
 			: base(generatorInput, titles) => this.CopyGeneratorLimits(generatorInput);
 
-		protected QueryPageSetInput()
-		{
-		}
-
 		protected QueryPageSetInput(IEnumerable<long> ids, ListType listType)
 			: base(ids, listType)
 		{

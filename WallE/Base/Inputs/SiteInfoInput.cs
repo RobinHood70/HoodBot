@@ -46,7 +46,7 @@ namespace RobinHood70.WallE.Base
 
 		public string? InterwikiLanguageCode { get; set; }
 
-		public SiteInfoProperties Properties { get; set; }
+		public SiteInfoProperties Properties { get; }
 
 		public bool ShowAllDatabases { get; set; }
 

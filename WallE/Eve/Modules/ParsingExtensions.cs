@@ -24,7 +24,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		public static WikiException MalformedException(string name, JToken? token, [CallerMemberName]string caller = Unknown) => new WikiException(CurrentCulture(EveMessages.MalformedData, name, token?.Path, caller));
 
 		// These methods are not extensions, but are placed in this class as useful but not warranting a class of their own yet.
-		public static WikiException MalformedTypeException(string typeName, JToken? token, [CallerMemberName]string caller = Unknown) => new WikiException(CurrentCulture(EveMessages.MalformedDataType, typeName, token?.Path, caller));
+		public static WikiException MalformedTypeException(string typeName, JToken? token, [CallerMemberName]string caller = Unknown) => new WikiException(CurrentCulture(EveMessages.MalformedDataType, typeName, token?.Path ?? Globals.Unknown, caller));
 		#endregion
 
 		#region JToken Methods
@@ -214,6 +214,8 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		public static WikiTitleItem GetWikiTitle(this JToken? result) => result == null ? throw new InvalidOperationException() : new WikiTitleItem((int)result.MustHave("ns"), result.MustHaveString("title"), (long?)result["pageid"] ?? 0);
 
+		public static string MustBeString(this JToken token, [CallerMemberName] string caller = Unknown) => (string?)token ?? throw MalformedTypeException(nameof(String), token, caller);
+
 		public static JToken MustHave(this JToken token, string name, [CallerMemberName] string caller = Unknown) => token[name] ?? throw MalformedException(name, token, caller);
 
 		public static string MustHaveBCString(this JToken token, string name, [CallerMemberName]string caller = Unknown)
@@ -244,7 +246,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			token == null ? false :
 			token.Type == JTokenType.Boolean ? (bool)token :
 			token.Type == JTokenType.String ? true :
-			throw MalformedException((token as JProperty)?.Name ?? Unknown, token);
+			throw MalformedException((token as JProperty)?.Name ?? Globals.Unknown, token);
 
 		public static IReadOnlyDictionary<string, string?> ToBCDictionary(this JToken? token)
 		{

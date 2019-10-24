@@ -17,24 +17,27 @@ namespace RobinHood70.WallE.Base
 	public class ImageRotateItem : ITitle
 	{
 		#region Constructors
-		internal ImageRotateItem(int ns, string title, long pageId)
+		internal ImageRotateItem(int ns, string title, long pageId, IReadOnlyList<WarningsItem> errorMessage, string? result, ImageRotateFlags flags)
 		{
 			this.Namespace = ns;
 			this.Title = title;
 			this.PageId = pageId;
+			this.ErrorMessage = errorMessage;
+			this.Result = result;
+			this.Flags = flags;
 		}
 		#endregion
 
 		#region Public Properties
-		public IReadOnlyList<WarningsItem>? ErrorMessage { get; internal set; }
+		public IReadOnlyList<WarningsItem>? ErrorMessage { get; }
 
 		public int Namespace { get; }
 
 		public long PageId { get; }
 
-		public ImageRotateFlags Flags { get; internal set; }
+		public ImageRotateFlags Flags { get; }
 
-		public string? Result { get; internal set; }
+		public string? Result { get; }
 
 		public string Title { get; }
 		#endregion

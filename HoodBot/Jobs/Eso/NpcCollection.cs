@@ -13,25 +13,24 @@
 			list.Sort((x, y) => string.Compare(x.PageName, y.PageName, StringComparison.Ordinal));
 		}
 
-		public bool TryGetValue(long key, out NpcData item)
+		public NpcData ValueOrDefault(long key)
 		{
 			if (this.Dictionary != null)
 			{
-				return this.Dictionary.TryGetValue(key, out item);
+				return this.Dictionary.TryGetValue(key, out var item) ? item : default;
 			}
 
 			foreach (var testItem in this)
 			{
 				if (this.GetKeyForItem(testItem) == key)
 				{
-					item = testItem;
-					return true;
+					return testItem;
 				}
 			}
 
-			item = null;
-			return false;
+			return default;
 		}
+
 		#endregion
 
 		#region Protected Override Methods

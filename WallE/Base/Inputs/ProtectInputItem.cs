@@ -16,7 +16,7 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public DateTime? Expiry { get; set; }
 
-		public string ExpiryRelative { get; set; }
+		public string? ExpiryRelative { get; set; }
 
 		public string Level { get; set; }
 

@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WallE.ProjectGlobals;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionEdit : ActionModule<EditInput, EditResult>
+	internal class ActionEdit : ActionModuleValued<EditInput, EditResult>
 	{
 		#region Constructors
 		public ActionEdit(WikiAbstractionLayer wal)
@@ -80,8 +80,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				oldRevisionId: (long?)result["oldrevid"] ?? 0,
 				newRevisionId: (long?)result["newrevid"] ?? 0,
 				newTimestamp: (DateTime?)result["newtimestamp"],
-				captchaData: result["captcha"].ToStringDictionary<string>()
-			);
+				captchaData: result["captcha"].ToStringDictionary<string>());
 		}
 		#endregion
 	}

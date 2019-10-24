@@ -1065,10 +1065,10 @@
 		#region Private Methods
 
 		// Parse co-initialization results.
-		private void AbstractionLayer_Initialized(IWikiAbstractionLayer sender, InitializationEventArgs eventArgs) => this.ParseInternalSiteInfo(eventArgs.Result);
+		private void AbstractionLayer_Initialized(IWikiAbstractionLayer sender, InitializedEventArgs eventArgs) => this.ParseInternalSiteInfo(eventArgs.Result);
 
 		// Setup co-initialization to avoid near-duplicate requests with AbstractionLayer.
-		private void AbstractionLayer_Initializing(IWikiAbstractionLayer sender, InitializationEventArgs eventArgs)
+		private void AbstractionLayer_Initializing(IWikiAbstractionLayer sender, InitializingEventArgs eventArgs)
 		{
 			eventArgs.Properties = NeededSiteInfo;
 			eventArgs.FilterLocalInterwiki = Filter.Any;

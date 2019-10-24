@@ -15,15 +15,15 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public ErrorItem Error { get; }
+		public ErrorItem? Error { get; }
 
-		public string From { get; }
+		public string? From { get; }
 
 		public bool MovedOverRedirect { get; }
 
 		public bool RedirectCreated { get; }
 
-		public string To { get; }
+		public string? To { get; }
 		#endregion
 
 		#region Public Override Methods

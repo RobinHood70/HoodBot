@@ -200,7 +200,7 @@
 
 			foreach (var mappedName in places.TitleMap)
 			{
-				if (retval.TryGetValue(mappedName.Value.PageName, out var place))
+				if (retval.ValueOrDefault(mappedName.Value.PageName) is Place place)
 				{
 					// In an ideal world, this would be a direct reference to the same place, rather than a copy, but that ends up being a lot of work for very little gain.
 					var key = new Title(site, mappedName.Key).PageName;
@@ -229,7 +229,7 @@
 				foreach (var kvp in locCopy)
 				{
 					var key = kvp.Key;
-					if (places.TryGetValue(key, out var place))
+					if (places.ValueOrDefault(key) is Place place)
 					{
 						npc.AllPlaces.Add(place, kvp.Value);
 						npc.AllLocations.Remove(key);
@@ -289,7 +289,7 @@
 			{
 				if (member.Namespace == UespNamespaces.Online)
 				{
-					if (places.TryGetValue(member.PageName, out var place))
+					if (places.ValueOrDefault(member.PageName) is Place place)
 					{
 						if (place.Type == PlaceType.Unknown)
 						{

@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.WikiCommon
 {
 	using System;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.Text;
 
@@ -129,11 +130,11 @@
 		/// <param name="nullable">The value that may be null.</param>
 		/// <param name="name">The name of the parameter in the original method.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="nullable" /> is null.</exception>
-		public static void ThrowNull([ValidatedNotNull] object? nullable, string name)
+		public static void ThrowNull([ValidatedNotNull][NotNull] object? nullable, string name)
 		{
 			if (nullable is null)
 			{
-				throw ArgumentNull(name);
+				throw new ArgumentNullException(name);
 			}
 		}
 		#endregion

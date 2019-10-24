@@ -40,25 +40,29 @@
 		/// <summary>Clears all tokens.</summary>
 		void Clear();
 
+		/// <summary>Gets a login token for MediaWiki versions 1.27 and above.</summary>
+		/// <returns>A login token.</returns>
+		string? LoginToken();
+
 		/// <summary>Gets a rollback token based on the page ID.</summary>
 		/// <param name="pageId">The page ID.</param>
 		/// <returns>A rollback token.</returns>
-		string RollbackToken(long pageId);
+		string? RollbackToken(long pageId);
 
 		/// <summary>Gets a rollback token based on the page title.</summary>
 		/// <param name="title">The page title.</param>
 		/// <returns>A rollback token.</returns>
-		string RollbackToken(string title);
+		string? RollbackToken(string title);
 
 		/// <summary>Gets a session token.</summary>
 		/// <param name="type">The type of token to get.</param>
 		/// <returns>A session token of the type requested.</returns>
-		string SessionToken(string type);
+		string? SessionToken(string type);
 
 		/// <summary>Gets a user rights token.</summary>
 		/// <param name="userName">The user name.</param>
 		/// <returns>A user rights token.</returns>
-		string UserRightsToken(string userName);
+		string? UserRightsToken(string userName);
 		#endregion
 	}
 }

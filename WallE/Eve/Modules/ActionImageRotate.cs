@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ActionImageRotate(WikiAbstractionLayer wal)
-			: base(wal, ImageRotateItemCreator)
+			: base(wal)
 		{
 		}
 		#endregion
@@ -35,21 +35,19 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddHidden("token", input.Token);
 		}
 
-		protected override void DeserializePage(JToken result, ImageRotateItem page)
+		protected override ImageRotateItem GetItem(JToken result)
 		{
 			ThrowNull(result, nameof(result));
-			ThrowNull(page, nameof(page));
-			page.ErrorMessage = result["errormessage"].GetWarnings();
-			page.Result = (string?)result["result"];
-			page.Flags = result.GetFlags(
-				("invalid", ImageRotateFlags.Invalid),
-				("missing", ImageRotateFlags.Missing));
-			this.Pages.Add(page);
+			return new ImageRotateItem(
+				ns: (int)result.MustHave("ns"),
+				title: result.MustHaveString("title"),
+				pageId: (long?)result["pageid"] ?? 0,
+				errorMessage: result["errormessage"].GetWarnings(),
+				result: (string?)result["result"],
+				flags: result.GetFlags(
+					("invalid", ImageRotateFlags.Invalid),
+					("missing", ImageRotateFlags.Missing)));
 		}
-		#endregion
-
-		#region Private Static Methods
-		private static ImageRotateItem ImageRotateItemCreator(int ns, string title, long pageId) => new ImageRotateItem(ns, title, pageId);
 		#endregion
 	}
 }

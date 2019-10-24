@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.Text.RegularExpressions;
 	using Newtonsoft.Json.Linq;
@@ -57,6 +58,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		public int ModuleLimit { get; set; } = int.MaxValue;
 
 		// Unlike Action modules, Query modules cannot return results directly during their Submit phase, so we store them here until the client requests them. Setter is protected so that Prop modules can set current page as needed.
+		[DisallowNull]
 		public TOutput? Output { get; protected set; }
 
 		public WikiAbstractionLayer Wal { get; }
@@ -131,8 +133,10 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				this.DeserializeResult(result);
 			}
-			else if (this.Output == null)
+
+			if (this.Output == null)
 			{
+				// If we didn't find the node, or deserialization failed silently for some reason, throw an error.
 				throw ParsingExtensions.MalformedException(this.ResultName, parent);
 			}
 		}
@@ -171,7 +175,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		/// <summary>Gets the appropriate limit to send, attempting to reduce the amount of data returned, if desired and possible.</summary>
 		/// <remarks>This only applies to ILimitableModules, but is convenient to have here.</remarks>
 		/// <returns>The calculated limit value (or -1 for "max"), taking into account the reported limit from the wiki (if any), the number of items remaining, and a fudge-factor for generators.</returns>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Performs a complex calculation that will often need to rely on a base/derived call chain.")]
+		[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Performs a complex calculation that will often need to rely on a base/derived call chain.")]
 		protected virtual int GetNumericLimit()
 		{
 			var limit = this.ItemsRemaining;

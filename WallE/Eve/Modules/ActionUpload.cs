@@ -9,12 +9,8 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionUpload : ActionModule<UploadInputInternal, UploadResult>
+	internal class ActionUpload : ActionModuleValued<UploadInputInternal, UploadResult>
 	{
-		#region Fields
-		private bool continued = false;
-		#endregion
-
 		#region Constructors
 		public ActionUpload(WikiAbstractionLayer wal)
 			: base(wal)
@@ -30,8 +26,6 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Protected Override Properties
 		protected override RequestType RequestType { get; } = RequestType.PostMultipart;
-
-		protected override StopCheckMethods StopMethods => this.continued ? StopCheckMethods.None : this.Wal.StopCheckMethods;
 		#endregion
 
 		#region Protected Override Methods
@@ -61,9 +55,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(result, nameof(result));
 			var resultText = result.MustHaveString("result");
-
-			// Disallow stop checks while upload is in progress.
-			this.continued = resultText == "Continued";
 			IReadOnlyList<string> duplicates = new List<string>();
 			var outputWarnings = new Dictionary<string, string>();
 			if (result["warnings"] is JToken warnings)

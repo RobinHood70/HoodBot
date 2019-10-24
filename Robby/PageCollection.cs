@@ -148,21 +148,10 @@
 		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry if the requested entry isn't found.</remarks>
 		public override Page this[string key]
 		{
-			get
-			{
-				if (this.TryGetValue(key, out var retval))
-				{
-					return retval;
-				}
-
-				if (this.titleMap.TryGetValue(key, out var altKey) && this.TryGetValue(altKey.FullPageName, out retval))
-				{
-					return retval;
-				}
-
-				throw new KeyNotFoundException();
-			}
-
+			get => this.TryGetValue(key, out var retval)
+				|| (this.titleMap.TryGetValue(key, out var altKey) && this.TryGetValue(altKey.FullPageName, out retval))
+				? retval
+				: throw new KeyNotFoundException();
 			set => base[key] = value;
 		}
 		#endregion

@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.WikiCommon.Properties;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -78,7 +79,6 @@
 		#endregion
 
 		#region Private Properties
-
 		private Dictionary<TKey, TItem> Dictionary
 		{
 			// A manual getter is required, since the call to GetKeyForItem would result in a virtual call from the constructor if it were placed there, which is bad.
@@ -133,12 +133,18 @@
 		/// <returns>An <see cref="IEnumerator" /> object that can be used to iterate through the collection.</returns>
 		IEnumerator IEnumerable.GetEnumerator() => this.items.GetEnumerator();
 
-		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key..</summary>
+		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
 		/// <param name="key">The key of the value to get.</param>
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
 		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
 		public bool TryGetValue(TKey key, out TItem value) => this.Dictionary.TryGetValue(key, out value);
+
+		/// <summary>Returns the value associated with the specified key.</summary>
+		/// <param name="key">The key of the value to get.</param>
+		/// <returns>The value associated with the specified key, or <see langword="default"/> if not found.</returns>
+		[return: MaybeNull]
+		public TItem ValueOrDefault(TKey key) => key != null && this.Dictionary.TryGetValue(key, out var value) ? value : default;
 		#endregion
 
 		#region Protected Virtual Methods

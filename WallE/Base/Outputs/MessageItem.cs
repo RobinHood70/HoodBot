@@ -15,7 +15,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public string ForValue { get; }
+		public string? ForValue { get; }
 
 		public string Key { get; }
 

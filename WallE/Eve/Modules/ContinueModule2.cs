@@ -49,11 +49,11 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 		}
 
-		public override int Deserialize(JToken parent)
+		public override ContinueModule Deserialize(WikiAbstractionLayer wal, JToken parent)
 		{
 			if (parent == null)
 			{
-				return 0;
+				return this;
 			}
 
 			this.BatchComplete = this.supportsBatch ? parent["batchcomplete"].ToBCBool() : true;
@@ -70,11 +70,11 @@ namespace RobinHood70.WallE.Eve.Modules
 				if (!this.supportsBatch)
 				{
 					// For pre-MW 1.26, figure out whether or not the batch is complete manually. We don't need to worry about the case of no continue entries here, since we should never be executing this code in that event.
-					this.BatchComplete = (this.ContinueEntries.Count <= 2) && this.ContinueEntries.ContainsKey(this.GeneratorContinue);
+					this.BatchComplete = this.ContinueEntries.Count <= 2 && (this.GeneratorContinue == null ? true : this.ContinueEntries.ContainsKey(this.GeneratorContinue));
 				}
 			}
 
-			return 0;
+			return this;
 		}
 		#endregion
 	}

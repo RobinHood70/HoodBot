@@ -5,7 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
-	internal class ActionLogout : ActionModule<LogoutInput, NullObject> // Both values are dummy types here, since Logout is the exception to the rule, taking no input and providing no result.
+	internal class ActionLogout : ActionModuleValued<LogoutInput, NullObject> // Both values are dummy types here, since Logout is the exception to the rule, taking no input and providing no result.
 	{
 		#region Constructors
 		public ActionLogout(WikiAbstractionLayer wal)
@@ -22,10 +22,6 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Protected Override Properties
 		protected override RequestType RequestType { get; } = RequestType.Get;
-		#endregion
-
-		#region Protected Override Properties
-		protected override StopCheckMethods StopMethods { get; } = StopCheckMethods.None;
 		#endregion
 
 		#region Protected Override Methods

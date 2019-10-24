@@ -108,11 +108,9 @@
 			File.WriteAllText(this.Location, output);
 		}
 
-		public void UpdateCurrentWiki(WikiInfo wiki)
-		{
-			// ThrowNull(wiki, nameof(wiki));
-			this.CurrentName = wiki?.DisplayName;
-		}
+		// No null-checking here or Add button breaks.
+		// TODO: See if there's more that needs to be done for Add. If nothing else, it doesn't sort after adding. Was that intentional?
+		public void UpdateCurrentWiki(WikiInfo wiki) => this.CurrentName = wiki?.DisplayName;
 		#endregion
 
 		#region Private Static Methods

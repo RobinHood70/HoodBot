@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WikiCommon.Globals;
 
 	// MWVERSION: 1.29
-	internal class ActionUnblock : ActionModule<UnblockInput, UnblockResult>
+	internal class ActionUnblock : ActionModuleValued<UnblockInput, UnblockResult>
 	{
 		#region Constructors
 		public ActionUnblock(WikiAbstractionLayer wal)
@@ -55,7 +55,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 			else
 			{
-				user = (string?)userNode ?? string.Empty; // Should never actually be null, but don't have MustBeString and didn't think it was worth doing more than this.
+				user = (string?)userNode ?? string.Empty;
 				userId = (long?)result["userid"] ?? 0;
 			}
 

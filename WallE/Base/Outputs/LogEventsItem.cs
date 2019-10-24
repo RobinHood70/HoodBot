@@ -2,7 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
-	using static RobinHood70.WikiCommon.Globals;
+	using RobinHood70.WikiCommon;
 
 	public class LogEventsItem : LogEvent, ITitleOptional
 	{
@@ -27,7 +27,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title ?? NoTitle;
+		public override string ToString() => this.Title ?? Globals.NoTitle;
 		#endregion
 	}
 }

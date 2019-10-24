@@ -9,6 +9,10 @@
 
 		/// <summary>Initializes a new instance of the <see cref="TokensInput" /> class.</summary>
 		/// <param name="tokenTypes">The token types.</param>
+		public TokensInput(params string[] tokenTypes) => this.Types = tokenTypes;
+
+		/// <summary>Initializes a new instance of the <see cref="TokensInput" /> class.</summary>
+		/// <param name="tokenTypes">The token types.</param>
 		public TokensInput(IEnumerable<string> tokenTypes) => this.Types = tokenTypes;
 		#endregion
 

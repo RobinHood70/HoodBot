@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionOpenSearch : ActionModule<OpenSearchInput, IReadOnlyList<OpenSearchItem>>
+	internal class ActionOpenSearch : ActionModuleValued<OpenSearchInput, IReadOnlyList<OpenSearchItem>>
 	{
 		#region Constructors
 		public ActionOpenSearch(WikiAbstractionLayer wal)
@@ -46,23 +46,29 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(result, nameof(result));
 
 			// 0th term is the search term, so we ignore that.
-			if (result is JArray array && array.Count == 4 && array[1] is JArray titles && array[2] is JArray descriptions && array[3] is JArray urls)
+			if (result is JArray array)
 			{
-				var output = new List<OpenSearchItem>(titles.Count);
-				for (var i = 0; i < titles.Count; i++)
+				if (array.Count == 0)
 				{
-					output.Add(new OpenSearchItem(
-						title: (string?)titles[i],
-						description: (string?)descriptions[i],
-						uri: (Uri?)urls[i]));
+					return Array.Empty<OpenSearchItem>();
 				}
 
-				return output;
+				if (array.Count == 4 && array[1] is JArray titles && array[2] is JArray descriptions && array[3] is JArray urls)
+				{
+					var output = new List<OpenSearchItem>(titles.Count);
+					for (var i = 0; i < titles.Count; i++)
+					{
+						output.Add(new OpenSearchItem(
+							title: (string?)titles[i],
+							description: (string?)descriptions[i],
+							uri: (Uri?)urls[i]));
+					}
+
+					return output;
+				}
 			}
-			else
-			{
-				return base.DeserializeCustom(result);
-			}
+
+			return base.DeserializeCustom(result);
 		}
 
 		protected override IReadOnlyList<OpenSearchItem> DeserializeResult(JToken result) => throw new NotSupportedException();

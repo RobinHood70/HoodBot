@@ -140,18 +140,28 @@
 		/// <returns>An enumerator that can be used to iterate through the collection.</returns>
 		IEnumerator IEnumerable.GetEnumerator() => this.IdsDictionary.Values.GetEnumerator();
 
-		/// <summary>Gets the namespace associated with the specified ID.</summary>
-		/// <param name="id">The namespace ID to try to get.</param>
+		/// <summary>Returns the namespace associated with the specified ID.</summary>
+		/// <param name="id">The namespace ID to search for.</param>
 		/// <param name="value">The namespace object, if found; otherwise, null.</param>
 		/// <returns>True if the collection contains the desired namespace.</returns>
 		public bool TryGetValue(int id, out Namespace value) => this.IdsDictionary.TryGetValue(id, out value);
 
-		/// <summary>Gets the namespace associated with the specified ID.</summary>
-		/// <param name="name">Any of the names or aliases of the namespace to try to get.</param>
+		/// <summary>Returns the namespace associated with the specified name.</summary>
+		/// <param name="name">Any of the names or aliases of the namespace to search for.</param>
 		/// <param name="value">The namespace object, if found; otherwise, null.</param>
 		/// <returns>True if the collection contains the desired namespace.</returns>
 		/// <exception cref="ArgumentNullException">The name is null.</exception>
 		public bool TryGetValue(string name, out Namespace value) => this.NamesDictionary.TryGetValue(name, out value);
+
+		/// <summary>Returns the namespace associated with the specified ID.</summary>
+		/// <param name="id">The namespace ID to search for.</param>
+		/// <returns>The requested value, or null if not found.</returns>
+		public Namespace ValueOrDefault(int id) => this.IdsDictionary.TryGetValue(id, out var value) ? value : default;
+
+		/// <summary>Returns the namespace associated with the specified name.</summary>
+		/// <param name="name">Any of the names or aliases of the namespace to search for.</param>
+		/// <returns>The requested value, or null if not found.</returns>
+		public Namespace ValueOrDefault(string name) => name != null && this.NamesDictionary.TryGetValue(name, out var value) ? value : default;
 		#endregion
 	}
 }

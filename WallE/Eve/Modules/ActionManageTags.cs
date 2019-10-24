@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionManageTags : ActionModule<ManageTagsInput, ManageTagsResult>
+	internal class ActionManageTags : ActionModuleValued<ManageTagsInput, ManageTagsResult>
 	{
 		#region Constructors
 		public ActionManageTags(WikiAbstractionLayer wal)

@@ -1,5 +1,7 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
+	using static RobinHood70.WikiCommon.Globals;
+
 	/// <summary>Represents a string parameter whose results should not be displayed to the user during debugging sessions and the like (e.g., passwords or tokens).</summary>
 	/// <seealso cref="StringParameter" />
 	public class HiddenParameter : StringParameter
@@ -20,7 +22,11 @@
 		/// <summary>Accepts the specified visitor.</summary>
 		/// <param name="visitor">The visitor.</param>
 		/// <remarks>See Wikipedia's <see href="https://en.wikipedia.org/wiki/Visitor_pattern">Visitor pattern</see> article if you are not familiar with this pattern.</remarks>
-		public override void Accept(IParameterVisitor visitor) => visitor?.Visit(this);
+		public override void Accept(IParameterVisitor visitor)
+		{
+			ThrowNull(visitor, nameof(visitor));
+			visitor.Visit(this);
+		}
 		#endregion
 	}
 }

@@ -4,7 +4,6 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System.Diagnostics;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
-	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -12,7 +11,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Constructors
 		public ActionWatch(WikiAbstractionLayer wal)
-			: base(wal, WatchItemCreator)
+			: base(wal)
 		{
 		}
 		#endregion
@@ -32,7 +31,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(request, nameof(request));
 			ThrowNull(input, nameof(input));
-			if (this.SiteVersion < 123)
+			if (this.SiteVersion < 123 && input.Values != null)
 			{
 				Debug.Assert(input.ListType == ListType.Titles && input.Values.Count == 1 && this.Generator == null, "Incorrect values sent to < MW 1.23 Watch");
 				request.Remove("titles");
@@ -46,48 +45,18 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddHidden("token", input.Token);
 		}
 
-		protected override void DeserializePage(JToken result, WatchItem page)
-		{
-			ThrowNull(result, nameof(result));
-			ThrowNull(page, nameof(page));
-			page.Flags = result.GetFlags(
-				("missing", WatchFlags.Missing),
-				("unwatched", WatchFlags.Unwatched),
-				("watched", WatchFlags.Watched));
-			this.Pages.Add(page);
-		}
-
-		protected override WikiTitleItem DeserializeTitle(JToken result)
+		protected override WatchItem GetItem(JToken result)
 		{
 			ThrowNull(result, nameof(result));
 			var title = result.MustHaveString("title");
-			var ns = (int?)result["ns"] ?? this.FindNamespace(title);
-			return new WikiTitleItem(ns, title, 0);
-		}
-		#endregion
-
-		#region Private Static Classes
-		private static WatchItem WatchItemCreator(int ns, string title, long pageId) => new WatchItem(ns, title, pageId);
-		#endregion
-
-		#region Private Methods
-		private int FindNamespace(string title)
-		{
-			var nsSplit = title.Split(TextArrays.Colon, 2);
-			if (nsSplit.Length == 2)
-			{
-				var nsText = nsSplit[0];
-				foreach (var ns in this.Wal.Namespaces)
-				{
-					if (nsText == ns.Value.Name)
-					{
-						return ns.Key;
-					}
-				}
-			}
-
-			// No namespaces matched, or title didn't have a colon, so it must be in Main space.
-			return 0;
+			return new WatchItem(
+				ns: (int?)result["ns"] ?? this.FindRequiredNamespace(title),
+				title: title,
+				pageId: (long?)result["pageid"] ?? 0,
+				flags: result.GetFlags(
+					("missing", WatchFlags.Missing),
+					("unwatched", WatchFlags.Unwatched),
+					("watched", WatchFlags.Watched)));
 		}
 		#endregion
 	}

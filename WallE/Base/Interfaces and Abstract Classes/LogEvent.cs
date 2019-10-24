@@ -41,7 +41,7 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public string? Comment { get; internal set; }
 
-		public IReadOnlyDictionary<string, object?> ExtraData { get; internal set; }
+		public IReadOnlyDictionary<string, object?>? ExtraData { get; internal set; }
 
 		public string? LogAction { get; internal set; }
 

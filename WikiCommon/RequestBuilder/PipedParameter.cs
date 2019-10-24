@@ -1,6 +1,8 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
+	using System;
 	using System.Collections.Generic;
+	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Represents a parameter with collection of unique values, normally separated by pipe characters.</summary>
 	/// <seealso cref="Parameter{T}" />
@@ -12,7 +14,7 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="values">The parameter values. Any duplicates in the input will be ignored.</param>
 		public PipedParameter(string name, IEnumerable<string> values)
-			: base(name, new HashSet<string>(values))
+			: base(name, new HashSet<string>(values ?? Array.Empty<string>()))
 		{
 		}
 		#endregion
@@ -21,7 +23,11 @@
 
 		/// <summary>Accepts the specified visitor.</summary>
 		/// <param name="visitor">The visitor.</param>
-		public override void Accept(IParameterVisitor visitor) => visitor?.Visit(this);
+		public override void Accept(IParameterVisitor visitor)
+		{
+			ThrowNull(visitor, nameof(visitor));
+			visitor.Visit(this);
+		}
 
 		/// <summary>Returns a <see cref="string" /> that represents this instance.</summary>
 		/// <returns>A <see cref="string" /> that represents this instance.</returns>

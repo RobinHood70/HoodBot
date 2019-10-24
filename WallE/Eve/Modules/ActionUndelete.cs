@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionUndelete : ActionModule<UndeleteInput, UndeleteResult>
+	internal class ActionUndelete : ActionModuleValued<UndeleteInput, UndeleteResult>
 	{
 		#region Constructors
 		public ActionUndelete(WikiAbstractionLayer wal)
@@ -43,8 +43,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override UndeleteResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
+			var title = result.MustHaveString("title");
 			return new UndeleteResult(
-				title: result.MustHaveString("title"),
+				ns: this.FindRequiredNamespace(title),
+				title: title,
 				revisions: (int)result.MustHave("revisions"),
 				fileVersions: (int)result.MustHave("fileversions"),
 				reason: result.MustHaveString("reason"));

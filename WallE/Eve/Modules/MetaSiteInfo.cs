@@ -37,11 +37,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Methods
-		protected override void DeserializeResult(JToken result) => throw new InvalidOperationException(EveMessages.CannotDeserialize);
-
 		public override bool HandleWarning(string from, string text)
 		{
-			if (this.SiteVersion == 0 && from == "main" && text?.Contains("formatversion") == true)
+			if (this.SiteVersion == 0 && from == "main" && text.Contains("formatversion") == true)
 			{
 				this.Wal.DetectedFormatVersion = 1;
 				return true;
@@ -85,7 +83,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			var (defaultSkin, skins) = GetSkins(parent);
 			this.Output ??= new SiteInfoResult();
 			var output = this.Output; // Mostly done to reduce hits on this.Output in reference search, since we're trying to limit using it whenever possible.
-			output.DefaultOptions ??= GetDefaultOptions(parent);
+			output!.DefaultOptions ??= GetDefaultOptions(parent);
 			output.DefaultSkin ??= defaultSkin;
 			output.Extensions ??= this.GetExtensions(parent);
 			output.ExtensionTags ??= GetExtensionTags(parent);
@@ -109,6 +107,8 @@ namespace RobinHood70.WallE.Eve.Modules
 			output.UserGroups ??= GetUserGroups(parent);
 			output.Variables ??= GetVariables(parent);
 		}
+
+		protected override void DeserializeResult(JToken result) => throw new InvalidOperationException(EveMessages.CannotDeserialize);
 		#endregion
 
 		#region Private Static Methods

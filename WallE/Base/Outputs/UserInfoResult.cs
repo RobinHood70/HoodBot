@@ -92,7 +92,7 @@ namespace RobinHood70.WallE.Base
 
 		public string? PreferencesToken { get; }
 
-		public IReadOnlyDictionary<string, RateLimitsItem> RateLimits { get; }
+		public IReadOnlyDictionary<string, RateLimitsItem?> RateLimits { get; }
 
 		public string? RealName { get; }
 

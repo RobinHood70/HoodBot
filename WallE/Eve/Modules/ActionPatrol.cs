@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionPatrol : ActionModule<PatrolInput, PatrolResult>
+	internal class ActionPatrol : ActionModuleValued<PatrolInput, PatrolResult>
 	{
 		#region Constructors
 		public ActionPatrol(WikiAbstractionLayer wal)

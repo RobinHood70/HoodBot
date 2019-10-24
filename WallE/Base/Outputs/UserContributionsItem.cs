@@ -3,7 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
-	using static RobinHood70.WikiCommon.Globals;
+	using RobinHood70.WikiCommon;
 
 	#region Public Enumerations
 	[Flags]
@@ -74,7 +74,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title ?? this.User ?? NoTitle;
+		public override string ToString() => this.Title ?? this.User ?? Globals.NoTitle;
 		#endregion
 	}
 }

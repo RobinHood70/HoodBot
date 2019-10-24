@@ -18,11 +18,14 @@ namespace RobinHood70.WallE.Base
 	public class SetNotificationTimestampItem : ITitle
 	{
 		#region Constructors
-		internal SetNotificationTimestampItem(int ns, string title, long pageId)
+		internal SetNotificationTimestampItem(int ns, string title, long pageId, SetNotificationTimestampFlags flags, DateTime? notificationTimestamp, long revId)
 		{
 			this.Namespace = ns;
 			this.Title = title;
 			this.PageId = pageId;
+			this.Flags = flags;
+			this.NotificationTimestamp = notificationTimestamp;
+			this.RevisionId = revId;
 		}
 		#endregion
 

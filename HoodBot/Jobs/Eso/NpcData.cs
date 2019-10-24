@@ -89,7 +89,7 @@
 				var place = kvp.Key;
 				if (place.Zone != null)
 				{
-					if (places.TryGetValue(place.Zone, out var zonePlace))
+					if (places.ValueOrDefault(place.Zone) is Place zonePlace)
 					{
 						if (zonePlace.Type == PlaceType.Unknown)
 						{

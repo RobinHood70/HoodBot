@@ -3,7 +3,6 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiCommon.Globals;
 
 	public class BlocksResult
 	{
@@ -52,7 +51,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.User ?? Unknown;
+		public override string ToString() => this.User ?? Globals.Unknown;
 		#endregion
 	}
 }

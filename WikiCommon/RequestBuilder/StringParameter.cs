@@ -1,5 +1,7 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
+	using static RobinHood70.WikiCommon.Globals;
+
 	/// <summary>Represents a string parameter.</summary>
 	/// <seealso cref="Parameter{T}" />
 	public class StringParameter : Parameter<string>
@@ -21,7 +23,11 @@
 		/// <summary>Accepts the specified visitor.</summary>
 		/// <param name="visitor">The visitor.</param>
 		/// <remarks>See Wikipedia's <see href="https://en.wikipedia.org/wiki/Visitor_pattern">Visitor pattern</see> article if you are not familiar with this pattern.</remarks>
-		public override void Accept(IParameterVisitor visitor) => visitor?.Visit(this);
+		public override void Accept(IParameterVisitor visitor)
+		{
+			ThrowNull(visitor, nameof(visitor));
+			visitor.Visit(this);
+		}
 
 		/// <summary>Returns a <see cref="string" /> that represents this instance.</summary>
 		/// <returns>A <see cref="string" /> that represents this instance.</returns>

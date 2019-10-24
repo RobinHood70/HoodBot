@@ -16,11 +16,12 @@ namespace RobinHood70.WallE.Base
 	public class PurgeItem : ITitle
 	{
 		#region Constructors
-		internal PurgeItem(int ns, string title, long pageId)
+		internal PurgeItem(int ns, string title, long pageId, PurgeFlags flags)
 		{
 			this.Namespace = ns;
 			this.Title = title;
 			this.PageId = pageId;
+			this.Flags = flags;
 		}
 		#endregion
 

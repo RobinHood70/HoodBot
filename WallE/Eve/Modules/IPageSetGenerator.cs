@@ -4,7 +4,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	public interface IPageSetGenerator
 	{
 		#region Properties
-		IGeneratorModule Generator { get; }
+		IGeneratorModule? Generator { get; }
 		#endregion
 	}
 }

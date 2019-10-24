@@ -1,5 +1,7 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
+	using static RobinHood70.WikiCommon.Globals;
+
 	/// <summary>Base class which represents a parameter with a generic value.</summary>
 	/// <typeparam name="T">The type of the parameter the class will represent.</typeparam>
 	/// <seealso cref="IParameter" />
@@ -10,8 +12,10 @@
 		/// <summary>Initializes a new instance of the <see cref="Parameter{T}" /> class.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
+		/// <remarks>The <paramref name="name"/> cannot be null, but the <paramref name="value"/> is left to the derived class to validate.</remarks>
 		protected Parameter(string name, T value)
 		{
+			ThrowNull(name, nameof(name));
 			this.Name = name;
 			this.Value = value;
 		}
