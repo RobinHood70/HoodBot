@@ -14,7 +14,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public ListLanguageBacklinks(WikiAbstractionLayer wal, LanguageBacklinksInput input, IPageSetGenerator pageSetGenerator)
+		public ListLanguageBacklinks(WikiAbstractionLayer wal, LanguageBacklinksInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 		}
@@ -31,7 +31,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListLanguageBacklinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListLanguageBacklinks(wal, input as LanguageBacklinksInput, pageSetGenerator);
+		public static ListLanguageBacklinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is LanguageBacklinksInput listInput
+				? new ListLanguageBacklinks(wal, listInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(LanguageBacklinksInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

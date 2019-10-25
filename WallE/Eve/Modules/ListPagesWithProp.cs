@@ -14,7 +14,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public ListPagesWithProp(WikiAbstractionLayer wal, PagesWithPropertyInput input, IPageSetGenerator pageSetGenerator)
+		public ListPagesWithProp(WikiAbstractionLayer wal, PagesWithPropertyInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 		}
@@ -31,7 +31,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListPagesWithProp CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListPagesWithProp(wal, input as PagesWithPropertyInput, pageSetGenerator);
+		public static ListPagesWithProp CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is PagesWithPropertyInput listInput
+				? new ListPagesWithProp(wal, listInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(PagesWithPropertyInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

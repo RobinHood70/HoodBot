@@ -31,7 +31,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListExtUrlUsage CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListExtUrlUsage(wal, input as ExternalUrlUsageInput, pageSetGenerator);
+		public static ListExtUrlUsage CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is ExternalUrlUsageInput listInput
+				? new ListExtUrlUsage(wal, listInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(ExternalUrlUsageInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

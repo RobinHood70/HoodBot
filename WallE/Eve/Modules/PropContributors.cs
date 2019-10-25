@@ -27,7 +27,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropContributors CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropContributors(wal, input as ContributorsInput);
+		public static PropContributors CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
+			input is ContributorsInput propInput
+				? new PropContributors(wal, propInput)
+				: throw InvalidParameterType(nameof(input), nameof(ContributorsInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

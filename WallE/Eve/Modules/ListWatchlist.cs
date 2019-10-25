@@ -27,7 +27,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public ListWatchlist(WikiAbstractionLayer wal, WatchlistInput input, IPageSetGenerator pageSetGenerator)
+		public ListWatchlist(WikiAbstractionLayer wal, WatchlistInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator) => this.continueName = this.SiteVersion < 123 ? "start" : "continue";
 		#endregion
 
@@ -44,7 +44,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListWatchlist CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListWatchlist(wal, input as WatchlistInput, pageSetGenerator);
+		public static ListWatchlist CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is WatchlistInput listInput
+				? new ListWatchlist(wal, listInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(WatchlistInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

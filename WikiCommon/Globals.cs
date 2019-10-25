@@ -3,7 +3,9 @@
 	using System;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
+	using System.Runtime.CompilerServices;
 	using System.Text;
+	using RobinHood70.WikiCommon.Properties;
 
 	#region Public Delegates
 
@@ -119,6 +121,14 @@
 
 			return CultureInfo.CurrentCulture;
 		}
+
+		/// <summary>The error thrown when a parameter could not be cast to the expected type.</summary>
+		/// <param name="parameterName">Name of the parameter.</param>
+		/// <param name="wantedType">The type that was wanted.</param>
+		/// <param name="actualType">The actual type of the parameter passed.</param>
+		/// <param name="caller">The caller.</param>
+		/// <returns>System.InvalidCastException.</returns>
+		public static InvalidCastException InvalidParameterType(string parameterName, string wantedType, string actualType, [CallerMemberName] string caller = Unknown) => new InvalidCastException(CurrentCulture(Resources.ParameterInvalidCast, parameterName, caller, actualType, wantedType));
 
 		/// <summary>Convenience method so that CurrentCulture and Invariant are all in the same class for both traditional and formattable strings, and are used the same way.</summary>
 		/// <param name="formattable">A formattable string.</param>

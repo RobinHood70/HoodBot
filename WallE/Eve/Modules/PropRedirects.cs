@@ -15,7 +15,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public PropRedirects(WikiAbstractionLayer wal, RedirectsInput input, IPageSetGenerator pageSetGenerator)
+		public PropRedirects(WikiAbstractionLayer wal, RedirectsInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 		}
@@ -32,9 +32,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropRedirects CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropRedirects(wal, input as RedirectsInput, pageSetGenerator);
+		public static PropRedirects CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is RedirectsInput propInput
+				? new PropRedirects(wal, propInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(RedirectsInput), input.GetType().Name);
 
-		public static PropRedirects CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropRedirects(wal, input as RedirectsInput);
+		public static PropRedirects CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
+			input is RedirectsInput propInput
+				? new PropRedirects(wal, propInput)
+				: throw InvalidParameterType(nameof(input), nameof(RedirectsInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

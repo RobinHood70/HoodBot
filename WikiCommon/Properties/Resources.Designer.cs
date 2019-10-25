@@ -86,5 +86,14 @@ namespace RobinHood70.WikiCommon.Properties {
                 return ResourceManager.GetString("NotAPipedParameter", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The {0} parameter passed to {1} could not be cast to {2}, as it&apos;s type was {3}..
+        /// </summary>
+        internal static string ParameterInvalidCast {
+            get {
+                return ResourceManager.GetString("ParameterInvalidCast", resourceCulture);
+            }
+        }
     }
 }

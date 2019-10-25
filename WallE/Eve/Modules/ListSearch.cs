@@ -41,7 +41,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListSearch CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListSearch(wal, input as SearchInput, pageSetGenerator);
+		public static ListSearch CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is SearchInput listInput
+				? new ListSearch(wal, listInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(SearchInput), input.GetType().Name);
 		#endregion
 
 		#region Public Methods

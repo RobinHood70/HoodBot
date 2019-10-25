@@ -55,7 +55,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("categories_any", input.CategoriesAny);
 		}
 
-		protected override CustomResult DeserializeCustom(string result) => new CustomResult(result);
+		protected override CustomResult DeserializeCustom(string? result) => new CustomResult(result);
 
 		protected override CustomResult DeserializeResult(JToken result) => throw new NotSupportedException();
 		#endregion

@@ -71,9 +71,13 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 		}
 
-		protected override HelpResult DeserializeCustom(string result) => new HelpResult(
-			help: new List<string> { result },
-			mime: "text/html");
+		protected override HelpResult DeserializeCustom(string? result)
+		{
+			ThrowNull(result, nameof(result));
+			return new HelpResult(
+				help: new List<string> { result },
+				mime: "text/html");
+		}
 
 		protected override HelpResult DeserializeResult(JToken result)
 		{

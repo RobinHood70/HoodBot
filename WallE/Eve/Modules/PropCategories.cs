@@ -16,7 +16,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public PropCategories(WikiAbstractionLayer wal, CategoriesInput input, IPageSetGenerator pageSetGenerator)
+		public PropCategories(WikiAbstractionLayer wal, CategoriesInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 		}
@@ -33,9 +33,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropCategories CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropCategories(wal, input as CategoriesInput, pageSetGenerator);
+		public static PropCategories CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is CategoriesInput propInput
+				? new PropCategories(wal, propInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(CategoriesInput), input.GetType().Name);
 
-		public static PropCategories CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropCategories(wal, input as CategoriesInput);
+		public static PropCategories CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
+			input is CategoriesInput propInput
+				? new PropCategories(wal, propInput)
+				: throw InvalidParameterType(nameof(input), nameof(CategoriesInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

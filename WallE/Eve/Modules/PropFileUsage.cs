@@ -16,7 +16,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public PropFileUsage(WikiAbstractionLayer wal, FileUsageInput input, IPageSetGenerator pageSetGenerator)
+		public PropFileUsage(WikiAbstractionLayer wal, FileUsageInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 		}
@@ -33,9 +33,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropFileUsage CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropFileUsage(wal, input as FileUsageInput, pageSetGenerator);
+		public static PropFileUsage CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is FileUsageInput propInput
+				? new PropFileUsage(wal, propInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(FileUsageInput), input.GetType().Name);
 
-		public static PropFileUsage CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropFileUsage(wal, input as FileUsageInput);
+		public static PropFileUsage CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
+			input is FileUsageInput propInput
+				? new PropFileUsage(wal, propInput)
+				: throw InvalidParameterType(nameof(input), nameof(FileUsageInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

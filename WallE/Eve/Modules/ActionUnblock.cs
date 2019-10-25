@@ -40,7 +40,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddHidden("token", input.Token);
 		}
 
-		protected override UnblockResult? DeserializeResult(JToken result)
+		protected override UnblockResult DeserializeResult(JToken result)
 		{
 			ThrowNull(result, nameof(result));
 			var userNode = result.MustHave("user");

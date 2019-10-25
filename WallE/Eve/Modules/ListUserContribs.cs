@@ -21,7 +21,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public ListUserContribs(WikiAbstractionLayer wal, UserContributionsInput input, IPageSetGenerator pageSetGenerator)
+		public ListUserContribs(WikiAbstractionLayer wal, UserContributionsInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator) => this.continueName = this.SiteVersion < 114 || (this.SiteVersion < 123 && input.UserPrefix == null && input.Users != null && !input.Users.IsEmpty())
 			? "start"
 			: "continue";

@@ -370,7 +370,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			#endregion
 
 			#region Protected Override Methods
-			protected override string GetKeyForItem(PageItem item) => item?.Title;
+			protected override string GetKeyForItem(PageItem item) => item?.Title ?? Unknown;
 			#endregion
 		}
 		#endregion

@@ -17,7 +17,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public ListAllLinks(WikiAbstractionLayer wal, IAllLinksInput input, IPageSetGenerator pageSetGenerator)
+		public ListAllLinks(WikiAbstractionLayer wal, IAllLinksInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 			var linkType = input.LinkType;
@@ -43,7 +43,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListAllLinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListAllLinks(wal, input as IAllLinksInput, pageSetGenerator);
+		public static ListAllLinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is IAllLinksInput listInput
+				? new ListAllLinks(wal, listInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(IAllLinksInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

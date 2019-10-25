@@ -14,7 +14,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public PropLinks(WikiAbstractionLayer wal, LinksInput input, IPageSetGenerator pageSetGenerator)
+		public PropLinks(WikiAbstractionLayer wal, LinksInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 		}
@@ -31,9 +31,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropLinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropLinks(wal, input as LinksInput, pageSetGenerator);
+		public static PropLinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is LinksInput propInput
+				? new PropLinks(wal, propInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(LinksInput), input.GetType().Name);
 
-		public static PropLinks CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropLinks(wal, input as LinksInput);
+		public static PropLinks CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
+			input is LinksInput propInput
+				? new PropLinks(wal, propInput)
+				: throw InvalidParameterType(nameof(input), nameof(LinksInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

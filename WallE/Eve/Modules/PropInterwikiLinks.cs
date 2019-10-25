@@ -28,7 +28,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropInterwikiLinks CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropInterwikiLinks(wal, input as InterwikiLinksInput);
+		public static PropInterwikiLinks CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
+			input is InterwikiLinksInput propInput
+				? new PropInterwikiLinks(wal, propInput)
+				: throw InvalidParameterType(nameof(input), nameof(InterwikiLinksInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

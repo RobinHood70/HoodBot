@@ -27,7 +27,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropExternalLinks CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropExternalLinks(wal, input as ExternalLinksInput);
+		public static PropExternalLinks CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
+			input is ExternalLinksInput propInput
+				? new PropExternalLinks(wal, propInput)
+				: throw InvalidParameterType(nameof(input), nameof(ExternalLinksInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

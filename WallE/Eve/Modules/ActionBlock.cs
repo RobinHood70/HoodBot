@@ -71,10 +71,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 
 		[DoesNotReturn]
-		protected override BlockResult DeserializeCustom(string result)
+		protected override BlockResult DeserializeCustom(string? result)
 		{
 			// Throw a custom error, since MW 1.25 and under handle this incorrectly.
-			if (result.Contains("must be an instance of Block"))
+			if (result != null && result.Contains("must be an instance of Block"))
 			{
 				throw WikiException.General("reblock-failed", EveMessages.ReblockFailed);
 			}

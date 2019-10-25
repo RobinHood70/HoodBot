@@ -46,7 +46,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIf("showsizediff", input.ShowSizeDifference, !this.Wal.Flags.HasFlag(SiteInfoFlags.MiserMode));
 		}
 
-		protected override CustomResult DeserializeCustom(string result) => new CustomResult(result);
+		protected override CustomResult DeserializeCustom(string? result) => new CustomResult(result);
 
 		protected override CustomResult DeserializeResult(JToken result) => throw new NotSupportedException();
 		#endregion

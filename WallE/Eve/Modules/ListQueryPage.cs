@@ -23,7 +23,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public ListQueryPage(WikiAbstractionLayer wal, QueryPageInput input, IPageSetGenerator pageSetGenerator)
+		public ListQueryPage(WikiAbstractionLayer wal, QueryPageInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator) => this.queryPage = input.Page;
 		#endregion
 
@@ -40,7 +40,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListQueryPage CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListQueryPage(wal, input as QueryPageInput, pageSetGenerator);
+		public static ListQueryPage CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is QueryPageInput listInput
+				? new ListQueryPage(wal, listInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(QueryPageInput), input.GetType().Name);
 		#endregion
 
 		#region Public Methods

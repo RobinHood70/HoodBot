@@ -18,7 +18,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public PropDeletedRevisions(WikiAbstractionLayer wal, DeletedRevisionsInput input, IPageSetGenerator pageSetGenerator)
+		public PropDeletedRevisions(WikiAbstractionLayer wal, DeletedRevisionsInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 		}
@@ -35,9 +35,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropDeletedRevisions CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropDeletedRevisions(wal, input as DeletedRevisionsInput, pageSetGenerator);
+		public static PropDeletedRevisions CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is DeletedRevisionsInput propInput
+				? new PropDeletedRevisions(wal, propInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(DeletedRevisionsInput), input.GetType().Name);
 
-		public static PropDeletedRevisions CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropDeletedRevisions(wal, input as DeletedRevisionsInput);
+		public static PropDeletedRevisions CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
+			input is DeletedRevisionsInput propInput
+				? new PropDeletedRevisions(wal, propInput)
+				: throw InvalidParameterType(nameof(input), nameof(DeletedRevisionsInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

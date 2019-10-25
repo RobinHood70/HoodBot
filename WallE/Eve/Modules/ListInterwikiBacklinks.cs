@@ -14,7 +14,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public ListInterwikiBacklinks(WikiAbstractionLayer wal, InterwikiBacklinksInput input, IPageSetGenerator pageSetGenerator)
+		public ListInterwikiBacklinks(WikiAbstractionLayer wal, InterwikiBacklinksInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 		}
@@ -31,7 +31,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListInterwikiBacklinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListInterwikiBacklinks(wal, input as InterwikiBacklinksInput, pageSetGenerator);
+		public static ListInterwikiBacklinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is InterwikiBacklinksInput listInput
+				? new ListInterwikiBacklinks(wal, listInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(InterwikiBacklinksInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

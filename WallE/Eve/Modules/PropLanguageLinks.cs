@@ -27,7 +27,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropLanguageLinks CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropLanguageLinks(wal, input as LanguageLinksInput);
+		public static PropLanguageLinks CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
+			input is LanguageLinksInput propInput
+				? new PropLanguageLinks(wal, propInput)
+				: throw InvalidParameterType(nameof(input), nameof(LanguageLinksInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

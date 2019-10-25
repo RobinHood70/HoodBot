@@ -27,7 +27,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public ListCategoryMembers(WikiAbstractionLayer wal, CategoryMembersInput input, IPageSetGenerator pageSetGenerator)
+		public ListCategoryMembers(WikiAbstractionLayer wal, CategoryMembersInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 		}
@@ -44,7 +44,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListCategoryMembers CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListCategoryMembers(wal, input as CategoryMembersInput, pageSetGenerator);
+		public static ListCategoryMembers CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is CategoryMembersInput listInput
+				? new ListCategoryMembers(wal, listInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(CategoryMembersInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods
@@ -62,8 +65,8 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIf("dir", "descending", input.SortDescending)
 				.Add("start", input.Start)
 				.Add("end", input.End)
-				.AddIf("startsortkey", PackHex(input.StartHexSortKey), input.StartHexSortKey != null && this.SiteVersion < 124)
-				.AddIf("endsortkey", PackHex(input.EndHexSortKey), input.EndHexSortKey != null && this.SiteVersion < 124)
+				.AddIfNotNullIf("startsortkey", PackHex(input.StartHexSortKey), this.SiteVersion < 124)
+				.AddIfNotNullIf("endsortkey", PackHex(input.EndHexSortKey), this.SiteVersion < 124)
 				.AddIfNotNullIf("starthexsortkey", input.StartHexSortKey, this.SiteVersion >= 124)
 				.AddIfNotNullIf("endhexsortkey", input.EndHexSortKey, this.SiteVersion >= 124)
 				.AddIfNotNull("startsortkeyprefix", input.StartSortKeyPrefix)
@@ -73,11 +76,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override CategoryMembersItem GetItem(JToken result)
 		{
-			if (result == null)
-			{
-				return null;
-			}
-
+			ThrowNull(result, nameof(result));
 			var typeText = (string?)result["type"];
 			if (typeText == null || !TypeLookup.TryGetValue(typeText, out var itemType))
 			{
@@ -98,7 +97,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Private Static Methods
-		private static string PackHex(string hexValue)
+		private static string? PackHex(string? hexValue)
 		{
 			if (hexValue == null)
 			{

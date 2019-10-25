@@ -47,7 +47,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIfNotNullIf("to", input.To, this.SiteVersion >= 118)
 				.AddIfNotNullIf("prefix", input.Prefix, this.SiteVersion >= 118)
 				.Add("unique", input.Unique)
-				.AddIf("tag", input.Tag, input.Tag != null && this.SiteVersion >= 118)
+				.AddIfNotNullIf("tag", input.Tag, this.SiteVersion >= 118)
 				.AddIfNotNull(input.ExcludeUser ? "excludeuser" : "user", input.User)
 				.Add("namespace", input.Namespace)
 				.AddFlags("prop", prop)

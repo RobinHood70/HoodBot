@@ -22,7 +22,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public ListRecentChanges(WikiAbstractionLayer wal, RecentChangesInput input, IPageSetGenerator pageSetGenerator)
+		public ListRecentChanges(WikiAbstractionLayer wal, RecentChangesInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 		}
@@ -39,7 +39,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListRecentChanges CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListRecentChanges(wal, input as RecentChangesInput, pageSetGenerator);
+		public static ListRecentChanges CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is RecentChangesInput listInput
+				? new ListRecentChanges(wal, listInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(RecentChangesInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

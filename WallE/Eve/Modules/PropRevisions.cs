@@ -18,7 +18,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public PropRevisions(WikiAbstractionLayer wal, RevisionsInput input, IPageSetGenerator pageSetGenerator)
+		public PropRevisions(WikiAbstractionLayer wal, RevisionsInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator) => this.IsRevisionRange =
 				input.Start != null ||
 				input.End != null ||
@@ -41,9 +41,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropRevisions CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropRevisions(wal, input as RevisionsInput, pageSetGenerator);
+		public static PropRevisions CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is RevisionsInput propInput
+				? new PropRevisions(wal, propInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(RevisionsInput), input.GetType().Name);
 
-		public static PropRevisions CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropRevisions(wal, input as RevisionsInput);
+		public static PropRevisions CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
+			input is RevisionsInput propInput
+				? new PropRevisions(wal, propInput)
+				: throw InvalidParameterType(nameof(input), nameof(RevisionsInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

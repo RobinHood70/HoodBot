@@ -22,7 +22,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public ListBacklinks(WikiAbstractionLayer wal, BacklinksInput input, IPageSetGenerator pageSetGenerator)
+		public ListBacklinks(WikiAbstractionLayer wal, BacklinksInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator) => this.linkType = input.LinkTypes.IsUniqueFlag() ? input.LinkTypes : throw new ArgumentException(EveMessages.InputNonUnique);
 		#endregion
 
@@ -67,7 +67,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListBacklinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListBacklinks(wal, input as BacklinksInput, pageSetGenerator);
+		public static ListBacklinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is BacklinksInput listInput
+				? new ListBacklinks(wal, listInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(BacklinksInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

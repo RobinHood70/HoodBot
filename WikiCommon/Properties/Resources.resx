@@ -126,4 +126,7 @@
   <data name="NotAPipedParameter" xml:space="preserve">
     <value>There was an attempt to add a piped parameter value, but an existing value with the same name ({0}) exists and is not a piped parameter.</value>
   </data>
+  <data name="ParameterInvalidCast" xml:space="preserve">
+    <value>The {0} parameter passed to {1} could not be cast to {2}, as it's type was {3}.</value>
+  </data>
 </root>

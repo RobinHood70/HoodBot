@@ -50,7 +50,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIf("linktodiffs", input.LinkToDiffs, this.SiteVersion >= 117 && this.SiteVersion < 124);
 		}
 
-		protected override CustomResult DeserializeCustom(string result) => new CustomResult(result);
+		protected override CustomResult DeserializeCustom(string? result) => new CustomResult(result);
 
 		protected override CustomResult DeserializeResult(JToken result) => throw new NotSupportedException();
 		#endregion

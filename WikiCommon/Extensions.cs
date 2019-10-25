@@ -225,7 +225,7 @@
 		/// <param name="enumerable">The enumerable to check.</param>
 		/// <returns><see langword="true"/> if the list is non-null and has at least one item; otherwise, <see langword="false"/>.</returns>
 		/// <exception cref="KeyNotFoundException">The list was empty.</exception>
-		public static bool IsEmpty(this IEnumerable enumerable) => enumerable == null ? true : !enumerable.GetEnumerator().MoveNext();
+		public static bool IsEmpty(this IEnumerable? enumerable) => enumerable == null ? true : !enumerable.GetEnumerator().MoveNext();
 		#endregion
 
 		#region IFormattable Extensions

@@ -15,7 +15,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public PropTranscludedIn(WikiAbstractionLayer wal, TranscludedInInput input, IPageSetGenerator pageSetGenerator)
+		public PropTranscludedIn(WikiAbstractionLayer wal, TranscludedInInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 		}
@@ -32,9 +32,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropTranscludedIn CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropTranscludedIn(wal, input as TranscludedInInput, pageSetGenerator);
+		public static PropTranscludedIn CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is TranscludedInInput propInput
+				? new PropTranscludedIn(wal, propInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(TranscludedInInput), input.GetType().Name);
 
-		public static PropTranscludedIn CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropTranscludedIn(wal, input as TranscludedInInput);
+		public static PropTranscludedIn CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
+			input is TranscludedInInput propInput
+				? new PropTranscludedIn(wal, propInput)
+				: throw InvalidParameterType(nameof(input), nameof(TranscludedInInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

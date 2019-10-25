@@ -26,7 +26,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropCategoryInfo CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropCategoryInfo(wal, input as CategoryInfoInput);
+		public static PropCategoryInfo CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
+			input is CategoryInfoInput propInput
+				? new PropCategoryInfo(wal, propInput)
+				: throw InvalidParameterType(nameof(input), nameof(CategoryInfoInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

@@ -156,7 +156,7 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="values">The parameter values.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public Request Add(string name, IEnumerable<DateTime> values)
+		public Request Add(string name, IEnumerable<DateTime>? values)
 		{
 			if (values != null)
 			{
@@ -338,7 +338,7 @@
 		/// <param name="value">The parameter value.</param>
 		/// <param name="condition">The condition to check.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public Request AddHiddenIf(string name, string value, bool condition) => condition ? this.AddHidden(name, value) : this;
+		public Request AddHiddenIf(string name, string? value, bool condition) => condition ? this.AddHidden(name, value) : this;
 
 		/// <summary>Adds a string parameter whose value should be hidden for debugging (e.g., passwords or tokens)if the value is not null.</summary>
 		/// <param name="name">The parameter name.</param>
@@ -408,7 +408,7 @@
 		/// <param name="values">The values.</param>
 		/// <param name="condition">The condition to check.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public Request AddIf<T>(string name, IEnumerable<T> values, bool condition)
+		public Request AddIf<T>(string name, IEnumerable<T>? values, bool condition)
 			where T : IFormattable => condition ? this.Add(name, values) : this;
 
 		/// <summary>Adds a string parameter if the value is non-null.</summary>

@@ -14,7 +14,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public ListWatchlistRaw(WikiAbstractionLayer wal, WatchlistRawInput input, IPageSetGenerator pageSetGenerator)
+		public ListWatchlistRaw(WikiAbstractionLayer wal, WatchlistRawInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 		}
@@ -37,7 +37,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListWatchlistRaw CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListWatchlistRaw(wal, input as WatchlistRawInput, pageSetGenerator);
+		public static ListWatchlistRaw CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is WatchlistRawInput listInput
+				? new ListWatchlistRaw(wal, listInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(WatchlistRawInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

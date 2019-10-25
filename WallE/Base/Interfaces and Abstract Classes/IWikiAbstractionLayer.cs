@@ -284,17 +284,17 @@
 		/// <summary>Returns data corresponding to the <see href="https://www.mediawiki.org/wiki/API:Feedcontributions">Feedcontributions</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>The raw XML of the Contributions RSS feed.</returns>
-		string FeedContributions(FeedContributionsInput input);
+		string? FeedContributions(FeedContributionsInput input);
 
 		/// <summary>Returns data corresponding to the <see href="https://www.mediawiki.org/wiki/API:Feedrecentchanges">Feedrecentchanges</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>The raw XML of the Recent Changes RSS feed.</returns>
-		string FeedRecentChanges(FeedRecentChangesInput input);
+		string? FeedRecentChanges(FeedRecentChangesInput input);
 
 		/// <summary>Returns data corresponding to the <see href="https://www.mediawiki.org/wiki/API:Feedwatchlist">Feedwatchlist</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>The raw XML of the Watchlist RSS feed.</returns>
-		string FeedWatchlist(FeedWatchlistInput input);
+		string? FeedWatchlist(FeedWatchlistInput input);
 
 		/// <summary>Returns data corresponding to the <see href="https://www.mediawiki.org/wiki/API:Filearchive">Filearchive</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -473,7 +473,7 @@
 
 		/// <summary>Returns Really Simple Discovery information. Corresponds to the <see href="https://www.mediawiki.org/wiki/API:Rsd">Rsd</see> API module.</summary>
 		/// <returns>The raw XML of the RSD schema.</returns>
-		string Rsd();
+		string? Rsd();
 
 		/// <summary>Searches for wiki pages that fulfil given criteria. Corresponds to the <see href="https://www.mediawiki.org/wiki/API:Search">Search</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>

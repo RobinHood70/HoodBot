@@ -766,17 +766,17 @@
 		/// <summary>Returns data from the <see href="https://www.mediawiki.org/wiki/API:Feedcontributions">Feedcontributions</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>The raw XML of the Contributions RSS feed.</returns>
-		public string FeedContributions(FeedContributionsInput input) => this.SubmitValueAction(new ActionFeedContributions(this), input).Result;
+		public string? FeedContributions(FeedContributionsInput input) => this.SubmitValueAction(new ActionFeedContributions(this), input).Result;
 
 		/// <summary>Returns data from the <see href="https://www.mediawiki.org/wiki/API:Feedrecentchanges">Feedrecentchanges</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>The raw XML of the Recent Changes RSS feed.</returns>
-		public string FeedRecentChanges(FeedRecentChangesInput input) => this.SubmitValueAction(new ActionFeedRecentChanges(this), input).Result;
+		public string? FeedRecentChanges(FeedRecentChangesInput input) => this.SubmitValueAction(new ActionFeedRecentChanges(this), input).Result;
 
 		/// <summary>Returns data from the <see href="https://www.mediawiki.org/wiki/API:Feedwatchlist">Feedwatchlist</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>The raw XML of the Watchlist RSS feed.</returns>
-		public string FeedWatchlist(FeedWatchlistInput input) => this.SubmitValueAction(new ActionFeedWatchlist(this), input).Result;
+		public string? FeedWatchlist(FeedWatchlistInput input) => this.SubmitValueAction(new ActionFeedWatchlist(this), input).Result;
 
 		/// <summary>Returns data from the <see href="https://www.mediawiki.org/wiki/API:Filearchive">Filearchive</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -1175,7 +1175,7 @@
 
 		/// <summary>Returns Really Simple Discovery information using the <see href="https://www.mediawiki.org/wiki/API:Rsd">Rsd</see> API module.</summary>
 		/// <returns>The raw XML of the RSD schema.</returns>
-		public string Rsd() => new ActionRsd(this).Submit(NullObject.Null).Result;
+		public string? Rsd() => new ActionRsd(this).Submit(NullObject.Null).Result;
 
 		/// <summary>Searches for wiki pages that fulfil given criteria using the <see href="https://www.mediawiki.org/wiki/API:Search">Search</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>

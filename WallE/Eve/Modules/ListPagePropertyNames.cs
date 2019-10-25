@@ -33,7 +33,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			request.Add("limit", this.Limit);
 		}
 
-		protected override string GetItem(JToken result) => (string?)result?["propname"];
+		protected override string? GetItem(JToken result) => (string?)result?["propname"];
 		#endregion
 	}
 }

@@ -15,7 +15,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public PropImages(WikiAbstractionLayer wal, ImagesInput input, IPageSetGenerator pageSetGenerator)
+		public PropImages(WikiAbstractionLayer wal, ImagesInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 		}
@@ -32,9 +32,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropImages CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropImages(wal, input as ImagesInput, pageSetGenerator);
+		public static PropImages CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is ImagesInput propInput
+				? new PropImages(wal, propInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(ImagesInput), input.GetType().Name);
 
-		public static PropImages CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropImages(wal, input as ImagesInput);
+		public static PropImages CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
+			input is ImagesInput propInput
+				? new PropImages(wal, propInput)
+				: throw InvalidParameterType(nameof(input), nameof(ImagesInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

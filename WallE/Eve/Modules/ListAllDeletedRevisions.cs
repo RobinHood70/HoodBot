@@ -15,7 +15,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public ListAllDeletedRevisions(WikiAbstractionLayer wal, AllDeletedRevisionsInput input, IPageSetGenerator pageSetGenerator)
+		public ListAllDeletedRevisions(WikiAbstractionLayer wal, AllDeletedRevisionsInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 		}
@@ -32,7 +32,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static ListAllDeletedRevisions CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new ListAllDeletedRevisions(wal, input as AllDeletedRevisionsInput, pageSetGenerator);
+		public static ListAllDeletedRevisions CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is AllDeletedRevisionsInput listInput
+				? new ListAllDeletedRevisions(wal, listInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(AllDeletedRevisionsInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

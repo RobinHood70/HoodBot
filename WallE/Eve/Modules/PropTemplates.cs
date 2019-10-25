@@ -14,7 +14,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public PropTemplates(WikiAbstractionLayer wal, TemplatesInput input, IPageSetGenerator pageSetGenerator)
+		public PropTemplates(WikiAbstractionLayer wal, TemplatesInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 		}
@@ -31,9 +31,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropTemplates CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropTemplates(wal, input as TemplatesInput, pageSetGenerator);
+		public static PropTemplates CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is TemplatesInput propInput
+				? new PropTemplates(wal, propInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(TemplatesInput), input.GetType().Name);
 
-		public static PropTemplates CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropTemplates(wal, input as TemplatesInput);
+		public static PropTemplates CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
+			input is TemplatesInput propInput
+				? new PropTemplates(wal, propInput)
+				: throw InvalidParameterType(nameof(input), nameof(TemplatesInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods

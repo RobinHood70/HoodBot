@@ -15,7 +15,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		public PropDuplicateFiles(WikiAbstractionLayer wal, DuplicateFilesInput input, IPageSetGenerator pageSetGenerator)
+		public PropDuplicateFiles(WikiAbstractionLayer wal, DuplicateFilesInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 		}
@@ -32,9 +32,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Static Methods
-		public static PropDuplicateFiles CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropDuplicateFiles(wal, input as DuplicateFilesInput, pageSetGenerator);
+		public static PropDuplicateFiles CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			input is DuplicateFilesInput propInput
+				? new PropDuplicateFiles(wal, propInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(DuplicateFilesInput), input.GetType().Name);
 
-		public static PropDuplicateFiles CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropDuplicateFiles(wal, input as DuplicateFilesInput);
+		public static PropDuplicateFiles CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
+			input is DuplicateFilesInput propInput
+				? new PropDuplicateFiles(wal, propInput)
+				: throw InvalidParameterType(nameof(input), nameof(DuplicateFilesInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods
