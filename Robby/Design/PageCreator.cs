@@ -58,7 +58,7 @@
 
 			if (whatToLoad.HasFlag(PageModules.Info))
 			{
-				propertyInputs.Add(new InfoInput());
+				propertyInputs.Add(new InfoInput() { Properties = InfoProperties.Url });
 			}
 
 			if (whatToLoad.HasFlag(PageModules.Links))

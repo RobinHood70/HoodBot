@@ -4,6 +4,7 @@
 		<LangVersion>latest</LangVersion>
 		<CodeAnalysisRuleSet>..\WikiRules.ruleset</CodeAnalysisRuleSet>
 		<Description>Automates Visual Studio's diff viewer.</Description>
+		<Nullable>enable</Nullable>
 		<RootNamespace>RobinHood70.VisualStudioDiff</RootNamespace>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
@@ -30,6 +31,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj" />
+		<ProjectReference Include="..\WikiCommon\WikiCommon.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 	  <Reference Include="System.ComponentModel.Composition" />

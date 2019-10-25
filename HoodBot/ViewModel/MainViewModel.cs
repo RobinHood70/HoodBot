@@ -487,7 +487,16 @@
 			if (this.DiffViewer != null && this.ShowDiffs && this.site.AbstractionLayer is WikiAbstractionLayer wal)
 			{
 				var token = wal.TokenManager.SessionToken("csrf"); // HACK: This is only necessary for browser-based diffs. Not sure how to handle it better.
-				this.DiffViewer.Compare(eventArgs.Page, eventArgs.EditSummary, eventArgs.Minor, token);
+				var page = eventArgs.Page;
+				var diffContent = new DiffContent(page.FullPageName, page.Text, eventArgs.EditSummary, eventArgs.Minor)
+				{
+					EditPath = page.EditPath,
+					EditToken = token,
+					LastRevisionText = page.Revisions?.Current?.Text,
+					LastRevisionTimestamp = page.Revisions?.Current?.Timestamp,
+					StartTimestamp = page.StartTimestamp,
+				};
+				this.DiffViewer.Compare(diffContent);
 				this.DiffViewer.Wait();
 			}
 		}

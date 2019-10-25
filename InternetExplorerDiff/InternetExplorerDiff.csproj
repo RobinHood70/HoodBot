@@ -4,6 +4,7 @@
 		<LangVersion>latest</LangVersion>
 		<CodeAnalysisRuleSet>..\WikiRules.ruleset</CodeAnalysisRuleSet>
 		<Description>Automates Internet Explorer for on-site diffs.</Description>
+		<Nullable>enable</Nullable>
 		<RootNamespace>RobinHood70.InternetExplorerDiff</RootNamespace>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
@@ -25,6 +26,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj" />
+		<ProjectReference Include="..\WikiCommon\WikiCommon.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 	  <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.6">

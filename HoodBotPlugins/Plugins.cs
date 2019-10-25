@@ -6,6 +6,7 @@
 	using System.ComponentModel.Composition.Hosting;
 	using System.ComponentModel.Composition.Primitives;
 	using System.Diagnostics;
+	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
 	using System.Reflection;
 
@@ -13,9 +14,9 @@
 	public class Plugins : IDisposable
 	{
 		#region Fields
-		private static Plugins instance;
-		private static ComposablePartCatalog catalog;
-		private static CompositionContainer container;
+		private static Plugins? instance;
+		private static ComposablePartCatalog? catalog;
+		private static CompositionContainer? container;
 		#endregion
 
 		#region Constructors
@@ -55,9 +56,10 @@
 
 		#region Public Properties
 
-		/// <summary>Gets all plugins available.</summary>
+		/// <summary>Gets all plugins available. Initialized to non-null via <see cref="ImportManyAttribute"/> in <see cref="System.ComponentModel.Composition"/>.</summary>
 		[ImportMany(typeof(IPlugin))]
-		public IEnumerable<Lazy<IPlugin, IPluginMetadata>> All { get; private set; }
+		[NotNull]
+		public IEnumerable<Lazy<IPlugin, IPluginMetadata>>? All { get; private set; }
 
 		/// <summary>Gets all difference viewers available.</summary>
 		public IReadOnlyDictionary<string, IDiffViewer> DiffViewers { get; }
@@ -68,8 +70,8 @@
 		/// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
 		public void Dispose()
 		{
-			container.Dispose();
-			catalog.Dispose();
+			container?.Dispose();
+			catalog?.Dispose();
 		}
 		#endregion
 	}

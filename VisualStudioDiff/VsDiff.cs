@@ -7,7 +7,6 @@
 	using System.Runtime.InteropServices;
 	using EnvDTE;
 	using RobinHood70.HoodBotPlugins;
-	using RobinHood70.Robby;
 	using static RobinHood70.WikiCommon.Globals;
 
 	[Export(typeof(IPlugin))]
@@ -21,13 +20,13 @@
 
 		#region Static Fields
 		private static readonly object LockObject = new object();
-		private static volatile DTE dte;
+		private static volatile DTE? dte;
 		#endregion
 
 		#region Fields
 		private readonly List<Window> ourWindows = new List<Window>();
 		private bool disposed = false; // To detect redundant calls
-		private Window lastDteWindow = null;
+		private Window? lastDteWindow = null;
 		#endregion
 
 		#region Finalizers
@@ -55,25 +54,24 @@
 					}
 				}
 
-				return dte;
+				return dte ?? throw new NullReferenceException();
 			}
 		}
 		#endregion
 
 		#region Public Methods
-		public void Compare(Page page, string editSummary, bool isMinor, string editToken)
+		public void Compare(DiffContent diff)
 		{
 			if (this.disposed)
 			{
 				throw new ObjectDisposedException(this.GetType().FullName);
 			}
 
-			ThrowNull(page, nameof(page));
-			var current = page.Revisions.Current;
+			ThrowNull(diff, nameof(diff));
 			var oldFile = Path.GetTempFileName();
 			var newFile = Path.GetTempFileName();
-			File.WriteAllText(oldFile, current?.Text ?? " ");
-			File.WriteAllText(newFile, page.Text ?? " ");
+			File.WriteAllText(oldFile, diff.LastRevisionText ?? " ");
+			File.WriteAllText(newFile, diff.Text ?? " ");
 
 			var localDte = this.Dte;
 			this.lastDteWindow = null;
@@ -81,7 +79,8 @@
 			{
 				try
 				{
-					localDte.ExecuteCommand("Tools.DiffFiles", $"\"{oldFile}\" \"{newFile}\" \"Revision as of {current?.Timestamp ?? DateTime.UtcNow}\" \"{editSummary}\"");
+					var minorText = diff.IsMinor ? " (m)" : string.Empty;
+					localDte.ExecuteCommand("Tools.DiffFiles", $"\"{oldFile}\" \"{newFile}\" \"[[{diff.FullPageName}]] as of {diff.LastRevisionTimestamp ?? DateTime.UtcNow}\" \"{diff.EditSummary}{minorText}\"");
 					this.lastDteWindow = localDte.ActiveWindow;
 					this.ourWindows.Add(this.lastDteWindow);
 					localDte.MainWindow.Visible = true;
@@ -175,7 +174,7 @@
 			}
 			*/
 
-			return Activator.CreateInstance(visualStudioType, true) as DTE;
+			return Activator.CreateInstance(visualStudioType, true) as DTE ?? throw new NullReferenceException();
 		}
 		#endregion
 

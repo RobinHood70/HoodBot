@@ -4,6 +4,7 @@
 		<LangVersion>latest</LangVersion>
 		<CodeAnalysisRuleSet>..\WikiRules.ruleset</CodeAnalysisRuleSet>
 		<DocumentationFile>bin\WallE.XML</DocumentationFile>
+		<Nullable>enable</Nullable>
 		<RootNamespace>RobinHood70.HoodBotPlugins</RootNamespace>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
@@ -23,9 +24,6 @@
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	</ItemGroup>
-	<ItemGroup>
-	  <ProjectReference Include="..\Robby\Robby.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 	  <Reference Include="System.ComponentModel.Composition" />

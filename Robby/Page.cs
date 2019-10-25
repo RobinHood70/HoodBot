@@ -58,9 +58,17 @@
 
 		#region Public Properties
 
+		/// <summary>Gets or sets the canonical article path.</summary>
+		/// <value>The canonical article path.</value>
+		public Uri CanonicalPath { get; protected set; }
+
 		/// <summary>Gets the page categories, if they were requested in the last load operation.</summary>
 		/// <value>The categories the page is listed in.</value>
 		public IReadOnlyList<Category> Categories { get; } = new List<Category>();
+
+		/// <summary>Gets or sets the URI to edit the article in a browser.</summary>
+		/// <value>The edit path.</value>
+		public Uri EditPath { get; protected set; }
 
 		/// <summary>Gets a value indicating whether this <see cref="Page" /> exists.</summary>
 		/// <value><see langword="true" /> if the page exists; otherwise, <see langword="false" />.</value>
@@ -273,6 +281,8 @@
 			}
 			else
 			{
+				this.CanonicalPath = info.CanonicalUrl;
+				this.EditPath = info.EditUrl;
 				this.IsNew = info.Flags.HasFlag(PageInfoFlags.New);
 				this.IsRedirect = info.Flags.HasFlag(PageInfoFlags.Redirect);
 				this.StartTimestamp = pageItem.Info.StartTimestamp;
