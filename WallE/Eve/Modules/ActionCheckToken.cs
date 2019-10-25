@@ -16,13 +16,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Properties
-		public override int MinimumVersion { get; } = 125;
+		public override int MinimumVersion => 125;
 
-		public override string Name { get; } = "checktoken";
+		public override string Name => "checktoken";
 		#endregion
 
 		#region Protected Override Properties
-		protected override RequestType RequestType { get; } = RequestType.Get;
+		protected override RequestType RequestType => RequestType.Get;
 		#endregion
 
 		#region Protected Override Methods

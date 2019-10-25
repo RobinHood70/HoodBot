@@ -23,17 +23,17 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Public Static Properties
 
 		// Create a static copy of the module name because it's referred to elsewhere in the code due to an anomaly in the results.
-		public static string ModuleName { get; } = "watchlistraw";
+		public static string ModuleName => "watchlistraw";
 		#endregion
 
 		#region Public Override Properties
-		public override int MinimumVersion { get; } = 114;
+		public override int MinimumVersion => 114;
 
-		public override string Name { get; } = ModuleName;
+		public override string Name => ModuleName;
 		#endregion
 
 		#region Protected Override Properties
-		protected override string Prefix { get; } = "wr";
+		protected override string Prefix => "wr";
 		#endregion
 
 		#region Public Static Methods

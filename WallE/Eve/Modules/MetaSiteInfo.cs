@@ -20,20 +20,20 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Properties
-		public override string ContinueName { get; } = "prop";
+		public override string ContinueName => "prop";
 
 		// This module can continue, but does not support limits in any way, so override normal handling and always continue if asked to.
 		public override bool ContinueParsing => true;
 
-		public override int MinimumVersion { get; } = 0;
+		public override int MinimumVersion => 0;
 
-		public override string Name { get; } = "siteinfo";
+		public override string Name => "siteinfo";
 		#endregion
 
 		#region Protected Override Properties
-		protected override string ModuleType { get; } = "meta";
+		protected override string ModuleType => "meta";
 
-		protected override string Prefix { get; } = "si";
+		protected override string Prefix => "si";
 		#endregion
 
 		#region Public Override Methods

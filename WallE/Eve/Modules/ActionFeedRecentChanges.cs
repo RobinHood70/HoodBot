@@ -17,15 +17,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Properties
-		public override int MinimumVersion { get; } = 123;
+		public override int MinimumVersion => 123;
 
-		public override string Name { get; } = "feedrecentchanges";
+		public override string Name => "feedrecentchanges";
 		#endregion
 
 		#region Protected Override Properties
-		protected override bool ForceCustomDeserialization { get; } = true;
+		protected override bool ForceCustomDeserialization => true;
 
-		protected override RequestType RequestType { get; } = RequestType.Get;
+		protected override RequestType RequestType => RequestType.Get;
 		#endregion
 
 		#region Protected Override Methods

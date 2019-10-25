@@ -19,7 +19,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Override Properties
-		protected override string ModuleType { get; } = "prop";
+		protected override string ModuleType => "prop";
 		#endregion
 
 		#region PUblic Virtual Methods

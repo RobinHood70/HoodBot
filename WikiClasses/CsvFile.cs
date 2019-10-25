@@ -64,7 +64,7 @@
 		#endregion
 
 		#region Interface Properties
-		bool ICollection<CsvRow>.IsReadOnly { get; } = false;
+		bool ICollection<CsvRow>.IsReadOnly => false;
 		#endregion
 
 		#region Public Indexers

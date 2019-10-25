@@ -30,13 +30,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Public Override Properties
 		public override string ContinueName => this.continueName;
 
-		public override int MinimumVersion { get; } = 109;
+		public override int MinimumVersion => 109;
 
-		public override string Name { get; } = "usercontribs";
+		public override string Name => "usercontribs";
 		#endregion
 
 		#region Protected Override Properties
-		protected override string Prefix { get; } = "uc";
+		protected override string Prefix => "uc";
 		#endregion
 
 		#region Protected Override Methods

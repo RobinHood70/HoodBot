@@ -17,13 +17,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Properties
-		public override int MinimumVersion { get; } = 123;
+		public override int MinimumVersion => 123;
 
-		public override string Name { get; } = "revisiondelete";
+		public override string Name => "revisiondelete";
 		#endregion
 
 		#region Protected Override Properties
-		protected override RequestType RequestType { get; } = RequestType.Post;
+		protected override RequestType RequestType => RequestType.Post;
 		#endregion
 
 		#region Protected Override Methods

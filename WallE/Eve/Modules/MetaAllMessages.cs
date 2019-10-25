@@ -20,15 +20,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Properties
-		public override int MinimumVersion { get; } = 112;
+		public override int MinimumVersion => 112;
 
-		public override string Name { get; } = "allmessages";
+		public override string Name => "allmessages";
 		#endregion
 
 		#region Protected Override Properties
-		protected override string ModuleType { get; } = "meta";
+		protected override string ModuleType => "meta";
 
-		protected override string Prefix { get; } = "am";
+		protected override string Prefix => "am";
 		#endregion
 
 		#region Protected Override Methods

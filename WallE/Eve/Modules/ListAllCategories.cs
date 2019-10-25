@@ -21,13 +21,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Properties
-		public override int MinimumVersion { get; } = 112;
+		public override int MinimumVersion => 112;
 
-		public override string Name { get; } = "allcategories";
+		public override string Name => "allcategories";
 		#endregion
 
 		#region Protected Override Properties
-		protected override string Prefix { get; } = "ac";
+		protected override string Prefix => "ac";
 		#endregion
 
 		#region Public Static Methods

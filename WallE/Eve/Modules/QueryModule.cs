@@ -71,7 +71,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Virtual Properties
-		public virtual string ContinueName { get; } = "continue";
+		public virtual string ContinueName => "continue";
 
 		public virtual bool ContinueParsing => this.ItemsRemaining > 0;
 

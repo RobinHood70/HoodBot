@@ -56,7 +56,7 @@
 
 		/// <summary>Gets a value indicating whether the wiki supports \x1F unit separators.</summary>
 		/// <value><see langword="true" /> if the wiki supports \x1F unit separators; otherwise, <see langword="false" />.</value>
-		public bool SupportsUnitSeparator { get; } = false;
+		public bool SupportsUnitSeparator { get; }
 
 		/// <summary>Gets or sets the request type. Defaults to <see cref="RequestType.Get" />.</summary>
 		/// <value>The requesty type.</value>

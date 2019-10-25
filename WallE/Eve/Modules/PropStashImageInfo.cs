@@ -21,15 +21,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Properties
-		public override int MinimumVersion { get; } = 117;
+		public override int MinimumVersion => 117;
 
-		public override string Name { get; } = "stashimageinfo";
+		public override string Name => "stashimageinfo";
 		#endregion
 
 		#region Protected Override Properties
-		protected override string ModuleType { get; } = "prop";
+		protected override string ModuleType => "prop";
 
-		protected override string Prefix { get; } = "sii";
+		protected override string Prefix => "sii";
 		#endregion
 
 		#region Protected Override Methods

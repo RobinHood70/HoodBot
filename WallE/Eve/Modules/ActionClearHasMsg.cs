@@ -16,13 +16,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Parameters
-		public override int MinimumVersion { get; } = 124;
+		public override int MinimumVersion => 124;
 
-		public override string Name { get; } = "clearhasmsg";
+		public override string Name => "clearhasmsg";
 		#endregion
 
 		#region Protected Override Properties
-		protected override RequestType RequestType { get; } = RequestType.Get;
+		protected override RequestType RequestType => RequestType.Get;
 		#endregion
 
 		#region Protected Override Methods

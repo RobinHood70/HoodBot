@@ -19,13 +19,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Properties
-		public override int MinimumVersion { get; } = 116;
+		public override int MinimumVersion => 116;
 
-		public override string Name { get; } = "upload";
+		public override string Name => "upload";
 		#endregion
 
 		#region Protected Override Properties
-		protected override RequestType RequestType { get; } = RequestType.PostMultipart;
+		protected override RequestType RequestType => RequestType.PostMultipart;
 		#endregion
 
 		#region Protected Override Methods

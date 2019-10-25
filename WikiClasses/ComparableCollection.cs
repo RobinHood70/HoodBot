@@ -50,7 +50,7 @@
 		public int Count => this.list.Count;
 
 		/// <summary>Gets a value indicating whether the collection is read-only.</summary>
-		public bool IsReadOnly { get; } = false;
+		public bool IsReadOnly => false;
 		#endregion
 
 		#region Indexers

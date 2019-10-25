@@ -24,13 +24,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Properties
-		public override int MinimumVersion { get; } = 109;
+		public override int MinimumVersion => 109;
 
-		public override string Name { get; } = "logevents";
+		public override string Name => "logevents";
 		#endregion
 
 		#region Protected Override Properties
-		protected override string Prefix { get; } = "le";
+		protected override string Prefix => "le";
 		#endregion
 
 		#region Protected Override Methods

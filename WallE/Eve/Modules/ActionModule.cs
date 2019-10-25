@@ -15,12 +15,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	public abstract class ActionModule
 	{
 		#region Constructors
-		protected ActionModule(WikiAbstractionLayer wal)
-		{
-			ThrowNull(wal, nameof(wal));
-			this.Wal = wal;
-			this.SiteVersion = wal.SiteVersion;
-		}
+		protected ActionModule(WikiAbstractionLayer wal) => this.Wal = wal ?? throw ArgumentNull(nameof(wal));
 		#endregion
 
 		#region Public Abstract Properties
@@ -30,11 +25,11 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Virtual Properties
-		public virtual string FullPrefix => string.Empty;
+		public virtual string Prefix => string.Empty;
 		#endregion
 
 		#region Protected Properties
-		protected int SiteVersion { get; }
+		protected int SiteVersion => this.Wal.SiteVersion;
 
 		protected WikiAbstractionLayer Wal { get; }
 		#endregion

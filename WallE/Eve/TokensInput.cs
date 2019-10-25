@@ -20,31 +20,31 @@
 
 		/// <summary>Gets the name of the cross-site request forgery token.</summary>
 		/// <value>The name of the CSRF token.</value>
-		public static string Csrf { get; } = "csrf";
+		public static string Csrf => "csrf";
 
 		/// <summary>Gets the name of the edit token.</summary>
 		/// <value>The name of the edit token.</value>
-		public static string Edit { get; } = "edit";
+		public static string Edit => "edit";
 
 		/// <summary>Gets the name of the login token.</summary>
 		/// <value>The name of the login.</value>
-		public static string Login { get; } = "login";
+		public static string Login => "login";
 
 		/// <summary>Gets the name of the patrol token.</summary>
 		/// <value>The name of the patrol token.</value>
-		public static string Patrol { get; } = "patrol";
+		public static string Patrol => "patrol";
 
 		/// <summary>Gets the name of the rollback token.</summary>
 		/// <value>The name of the rollback token.</value>
-		public static string Rollback { get; } = "rollback";
+		public static string Rollback => "rollback";
 
 		/// <summary>Gets the name of the user rights token.</summary>
 		/// <value>The name of the user rights token.</value>
-		public static string UserRights { get; } = "userrights";
+		public static string UserRights => "userrights";
 
 		/// <summary>Gets the name of the watch token.</summary>
 		/// <value>The name of the watch token.</value>
-		public static string Watch { get; } = "watch";
+		public static string Watch => "watch";
 		#endregion
 
 		#region Public Properties

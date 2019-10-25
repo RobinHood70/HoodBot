@@ -17,11 +17,11 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Properties
-		public override int MinimumVersion { get; } = 0;
+		public override int MinimumVersion => 0;
 
-		public override string Name { get; } = "login";
+		public override string Name => "login";
 
-		public override string FullPrefix { get; } = "lg";
+		public override string Prefix => "lg";
 		#endregion
 
 		#region Protected Override Properties

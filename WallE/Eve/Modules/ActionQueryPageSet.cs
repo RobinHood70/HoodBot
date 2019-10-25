@@ -46,9 +46,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Properties
-		public override int MinimumVersion { get; } = 0;
+		public override int MinimumVersion => 0;
 
-		public override string Name { get; } = "query";
+		public override string Name => "query";
 		#endregion
 
 		#region Protected Override Properties
@@ -80,7 +80,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			? this.MaximumListSize
 			: (this.itemsRemaining <= 5 ? 10 : this.itemsRemaining + 10);
 
-		protected override RequestType RequestType { get; } = RequestType.Get;
+		protected override RequestType RequestType => RequestType.Get;
 		#endregion
 
 		#region Private Properties
@@ -301,7 +301,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		private Request CreateRequest()
 		{
 			var request = this.CreateBaseRequest();
-			request.Prefix = this.FullPrefix;
+			request.Prefix = this.Prefix;
 			this.BuildRequest(request, this.input);
 			request.Prefix = string.Empty;
 

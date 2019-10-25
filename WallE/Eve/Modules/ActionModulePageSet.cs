@@ -262,7 +262,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(input, nameof(input));
 			var request = this.CreateBaseRequest();
-			request.Prefix = this.FullPrefix;
+			request.Prefix = this.Prefix;
 			this.BuildRequest(request, input);
 			request.Prefix = string.Empty;
 

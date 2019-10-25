@@ -18,22 +18,18 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 
 		public ListAllLinks(WikiAbstractionLayer wal, IAllLinksInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator)
-		{
-			var linkType = input.LinkType;
-			(this.Prefix, this.Name) = linkType switch
+			: base(wal, input, pageSetGenerator) => (this.Prefix, this.Name) = input.LinkType switch
 			{
 				AllLinksTypes.Links => ("al", "alllinks"),
 				AllLinksTypes.FileUsages => ("af", "allfileusages"),
 				AllLinksTypes.Redirects => ("ar", "allredirects"),
 				AllLinksTypes.Transclusions => ("at", "alltransclusions"),
-				_ => throw new ArgumentException(CurrentCulture(linkType.IsUniqueFlag() ? EveMessages.ParameterInvalid : EveMessages.InputNonUnique, nameof(ListAllLinks), linkType)),
+				_ => throw new ArgumentException(CurrentCulture(input.LinkType.IsUniqueFlag() ? EveMessages.ParameterInvalid : EveMessages.InputNonUnique, nameof(ListAllLinks), input.LinkType)),
 			};
-		}
 		#endregion
 
 		#region Public Override Properties
-		public override int MinimumVersion { get; } = 111;
+		public override int MinimumVersion => 111;
 
 		public override string Name { get; }
 		#endregion

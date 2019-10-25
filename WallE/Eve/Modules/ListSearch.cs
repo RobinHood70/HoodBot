@@ -29,15 +29,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Properties
-		public override string ContinueName { get; } = "offset";
+		public override string ContinueName => "offset";
 
-		public override int MinimumVersion { get; } = 111;
+		public override int MinimumVersion => 111;
 
-		public override string Name { get; } = "search";
+		public override string Name => "search";
 		#endregion
 
 		#region Protected Override Properties
-		protected override string Prefix { get; } = "sr";
+		protected override string Prefix => "sr";
 		#endregion
 
 		#region Public Static Methods

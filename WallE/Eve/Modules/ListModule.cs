@@ -23,7 +23,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Override Properties
-		protected override string ModuleType { get; } = "list";
+		protected override string ModuleType => "list";
 		#endregion
 
 		#region Protected Methods

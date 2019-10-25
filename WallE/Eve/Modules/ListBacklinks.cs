@@ -12,10 +12,6 @@ namespace RobinHood70.WallE.Eve.Modules
 
 	internal class ListBacklinks : ListModule<BacklinksInput, BacklinksItem>, IGeneratorModule
 	{
-		#region Fields
-		private readonly BacklinksTypes linkType;
-		#endregion
-
 		#region Contructors
 		public ListBacklinks(WikiAbstractionLayer wal, BacklinksInput input)
 			: this(wal, input, null)
@@ -23,47 +19,23 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 
 		public ListBacklinks(WikiAbstractionLayer wal, BacklinksInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator) => this.linkType = input.LinkTypes.IsUniqueFlag() ? input.LinkTypes : throw new ArgumentException(EveMessages.InputNonUnique);
+			: base(wal, input, pageSetGenerator) => (this.Prefix, this.Name) = input.LinkTypes switch
+			{
+				BacklinksTypes.Backlinks => ("bl", "backlinks"),
+				BacklinksTypes.EmbeddedIn => ("ei", "embeddedin"),
+				BacklinksTypes.ImageUsage => ("iu", "imageusage"),
+				_ => throw new ArgumentException(CurrentCulture(input.LinkTypes.IsUniqueFlag() ? EveMessages.ParameterInvalid : EveMessages.InputNonUnique, nameof(ListAllLinks), input.LinkTypes))
+			};
 		#endregion
 
 		#region Public Override Properties
-		public override int MinimumVersion { get; } = 109;
+		public override int MinimumVersion => 109;
 
-		public override string Name
-		{
-			get
-			{
-				switch (this.linkType)
-				{
-					default:
-					case BacklinksTypes.Backlinks:
-						return "backlinks";
-					case BacklinksTypes.EmbeddedIn:
-						return "embeddedin";
-					case BacklinksTypes.ImageUsage:
-						return "imageusage";
-				}
-			}
-		}
+		public override string Name { get; }
 		#endregion
 
 		#region Protected Override Properties
-		protected override string Prefix
-		{
-			get
-			{
-				switch (this.linkType)
-				{
-					default:
-					case BacklinksTypes.Backlinks:
-						return "bl";
-					case BacklinksTypes.EmbeddedIn:
-						return "ei";
-					case BacklinksTypes.ImageUsage:
-						return "iu";
-				}
-			}
-		}
+		protected override string Prefix { get; }
 		#endregion
 
 		#region Public Static Methods
@@ -83,7 +55,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIf("pageid", input.PageId, input.Title == null)
 				.Add("namespace", input.Namespace)
 				.AddIf("dir", "descending", input.SortDescending)
-				.AddIf("redirect", input.Redirect, this.linkType != BacklinksTypes.EmbeddedIn)
+				.AddIf("redirect", input.Redirect, input.LinkTypes != BacklinksTypes.EmbeddedIn)
 				.AddFilterText("filterredir", "redirects", "nonredirects", input.FilterRedirects)
 				.Add("limit", this.Limit);
 		}
@@ -110,8 +82,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					// See https://phabricator.wikimedia.org/T73907
 					foreach (var entry in redirLinks)
 					{
-						var first = entry.First;
-						if (first != null)
+						if (entry.First is JToken first)
 						{
 							redirects.Add(first.GetWikiTitle());
 						}

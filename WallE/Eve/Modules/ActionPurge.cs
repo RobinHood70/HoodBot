@@ -17,9 +17,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Properties
-		public override int MinimumVersion { get; } = 114;
+		public override int MinimumVersion => 114;
 
-		public override string Name { get; } = "purge";
+		public override string Name => "purge";
 		#endregion
 
 		#region Protected Override Properties
