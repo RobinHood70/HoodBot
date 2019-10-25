@@ -53,7 +53,7 @@
 		/// <summary>Occurs when the page is loaded.</summary>
 		/// <remarks>Note that this event is only raised when the page is loaded individually.</remarks>
 		/// <seealso cref="PageCollection.PageLoaded"/>
-		public event StrongEventHandler<Page, EventArgs> PageLoaded;
+		public event StrongEventHandler<Page, EventArgs>? PageLoaded;
 		#endregion
 
 		#region Public Properties
@@ -155,7 +155,7 @@
 
 		/// <summary>Gets or sets the text, if revisions were requested in the last load operation.</summary>
 		/// <value>The page text.</value>
-		public string Text { get; set; }
+		public string? Text { get; set; }
 
 		/// <summary>Gets a value indicating whether the <see cref="Text" /> property has been modified.</summary>
 		/// <value><see langword="true" /> if the text no longer matches the first revision; otherwise, <see langword="false" />.</value>
@@ -293,15 +293,7 @@
 			revs.Clear();
 			foreach (var rev in pageItem.Revisions)
 			{
-				revs.Add(new Revision(
-					rev.Flags.HasFlag(RevisionFlags.Anonymous),
-					rev.Comment,
-					rev.RevisionId,
-					rev.Flags.HasFlag(RevisionFlags.Minor),
-					rev.ParentId,
-					rev.Content,
-					rev.Timestamp,
-					rev.User));
+				revs.Add(new Revision(rev));
 			}
 
 			if (info != null)

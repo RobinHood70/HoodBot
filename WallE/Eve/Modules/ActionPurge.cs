@@ -22,10 +22,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		public override string Name => "purge";
 		#endregion
 
-		#region Protected Override Properties
-		protected override RequestType RequestType => RequestType.Post;
-		#endregion
-
 		#region Protected Override Methods
 		protected override void BuildRequestPageSet(Request request, PurgeInput input)
 		{

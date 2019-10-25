@@ -82,11 +82,11 @@
 
 		/// <summary>Gets or sets the user's log page.</summary>
 		/// <value>The log page.</value>
-		public Page LogPage { get; protected set; }
+		public Page? LogPage { get; protected set; }
 
 		/// <summary>Gets or sets the results page.</summary>
 		/// <value>The results page.</value>
-		public Page ResultsPage { get; set; }
+		public Page? ResultsPage { get; set; }
 
 		/// <summary>Gets the site associated with this instance.</summary>
 		/// <value>The site associated with this instance.</value>
@@ -94,12 +94,7 @@
 
 		/// <summary>Gets or sets the user's status page.</summary>
 		/// <value>The status page.</value>
-		public Page StatusPage { get; protected set; }
-
-		/// <summary>Gets custom template replacement methods.</summary>
-		/// <value>The custom template replacements.</value>
-		/// <remarks>These can be called on a per-wiki basis any time a page is being moved. This allows for customized parameter replacements for parameters where only part of the page name makes up the parameter (e.g., File:A1.png is being moved to File:B2.png, but the parameter value is only A1).</remarks>
-		public Dictionary<TitleParts, TemplateReplacement> TemplateReplacements { get; }
+		public Page? StatusPage { get; protected set; }
 		#endregion
 
 		#region Public Abstract Properties

@@ -41,7 +41,7 @@
 
 		/// <summary>Gets a value indicating whether the <see cref="TitleCollection">collection</see> is read-only.</summary>
 		/// <value><see langword="true"/> if the collection is read-only.</value>
-		public bool IsReadOnly { get; } = false;
+		public bool IsReadOnly => false;
 
 		/// <summary>Gets the site for the collection.</summary>
 		/// <value>The site.</value>

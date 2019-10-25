@@ -141,7 +141,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 		}
 
-		public virtual bool HandleWarning(string from, string text)
+		public virtual bool HandleWarning(string? from, string? text)
 		{
 			if (from == this.Name)
 			{

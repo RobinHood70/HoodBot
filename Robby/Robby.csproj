@@ -4,6 +4,7 @@
 		<LangVersion>latest</LangVersion>
 		<CodeAnalysisRuleSet>..\WikiRules.ruleset</CodeAnalysisRuleSet>
 		<DocumentationFile>bin\Robby.xml</DocumentationFile>
+		<Nullable>enable</Nullable>
 		<RootNamespace>RobinHood70.Robby</RootNamespace>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />

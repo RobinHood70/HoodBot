@@ -37,9 +37,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Methods
-		public override bool HandleWarning(string from, string text)
+		public override bool HandleWarning(string? from, string? text)
 		{
-			if (this.SiteVersion == 0 && from == "main" && text.Contains("formatversion") == true)
+			if (this.SiteVersion == 0 && from == "main" && text?.Contains("formatversion") == true)
 			{
 				this.Wal.DetectedFormatVersion = 1;
 				return true;

@@ -2,6 +2,7 @@
 namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
+	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
@@ -140,7 +141,14 @@ namespace RobinHood70.WallE.Eve.Modules
 			this.Wal.CurrentTimestamp = parent["curtimestamp"].ToNullableDate();
 		}
 
-		protected virtual bool HandleWarning(string from, string text) => false;
+		protected virtual bool HandleWarning([NotNull] string? from, [NotNull] string? text)
+		{
+			ThrowNull(from, nameof(from));
+			ThrowNull(text, nameof(text));
+
+			// Swallow all token warnings. Currently emitted primarily by queries, but also by ApiTokens.
+			return text.StartsWith("Action '", StringComparison.Ordinal) && text.EndsWith("' is not allowed for the current user", StringComparison.Ordinal);
+		}
 
 		protected virtual bool ModuleStopCheck() => false;
 		#endregion

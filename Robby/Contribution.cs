@@ -14,15 +14,7 @@
 		/// <param name="site">The site the contribution is from.</param>
 		/// <param name="contribution">The contribution.</param>
 		protected internal Contribution(Site site, UserContributionsItem contribution)
-			: base(
-				contribution?.UserId == 0,
-				contribution?.Comment,
-				contribution?.RevisionId ?? 0,
-				contribution?.Flags.HasFlag(UserContributionFlags.Minor) ?? false,
-				0,
-				null,
-				contribution?.Timestamp,
-				contribution?.User)
+			: base(contribution)
 		{
 			ThrowNull(contribution, nameof(contribution));
 			this.Title = new Title(site, contribution.Title);
@@ -35,10 +27,6 @@
 		#endregion
 
 		#region Public Properties
-
-		/// <summary>Gets the namespaceof the contribution.</summary>
-		/// <value>The namespace.</value>
-		public Namespace Namespace { get; }
 
 		/// <summary>Gets a value indicating whether this <see cref="Contribution" /> is new.</summary>
 		/// <value><see langword="true" /> if it's new; otherwise, <see langword="false" />.</value>

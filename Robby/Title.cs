@@ -2,7 +2,8 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Text.RegularExpressions;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Text.RegularExpressions;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
@@ -47,7 +48,7 @@
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the site and full page name.</summary>
 		/// <param name="site">The site this title is from.</param>
 		/// <param name="fullPageName">The full name of the page.</param>
-		public Title(Site site, string fullPageName)
+		public Title([NotNull] Site site, [NotNull] string? fullPageName)
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(fullPageName, nameof(fullPageName));
@@ -65,7 +66,7 @@
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the namespace and page name.</summary>
 		/// <param name="ns">The namespace the title is in.</param>
 		/// <param name="pageName">The name of the page without the namespace.</param>
-		public Title(Namespace ns, string pageName)
+		public Title([NotNull] Namespace? ns, [NotNull] string? pageName)
 		{
 			ThrowNull(ns, nameof(ns));
 			ThrowNull(pageName, nameof(pageName));
@@ -87,7 +88,7 @@
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class, copying the information from another <see cref="ISimpleTitle"/> object.</summary>
 		/// <param name="title">The Title object to copy from.</param>
 		/// <remarks>Note that the Key property will be set to the new full page name, regardless of the original item's key.</remarks>
-		public Title(ISimpleTitle title)
+		public Title([NotNull] ISimpleTitle title)
 		{
 			ThrowNull(title, nameof(title));
 			this.Namespace = title.Namespace;

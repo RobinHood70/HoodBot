@@ -30,7 +30,6 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				var userInfoInput = new UserInfoInput() { Properties = props };
 				this.userModule = new MetaUserInfo(wal, userInfoInput);
-				this.queryModules.Add(this.userModule);
 			}
 
 			foreach (var module in this.queryModules)
@@ -38,6 +37,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				if (module is IContinuableQueryModule)
 				{
 					this.continueModule = wal.ModuleFactory.CreateContinue();
+					break;
 				}
 			}
 		}
@@ -57,20 +57,94 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override RequestType RequestType => RequestType.Get;
 		#endregion
 
+		#region Public Static Methods
+		public static void CheckActiveModules(WikiAbstractionLayer wal, IEnumerable<IQueryModule> modules)
+		{
+			using var enumerator = modules.GetEnumerator();
+			if (!enumerator.MoveNext())
+			{
+				// This is a deliberately empty query, so return immediately with no further checking.
+				return;
+			}
+
+			var hasActiveModule = false;
+			do
+			{
+				var module = enumerator.Current;
+				if (module.MinimumVersion == 0 || wal.SiteVersion == 0 || wal.SiteVersion >= module.MinimumVersion)
+				{
+					hasActiveModule = true;
+				}
+				else
+				{
+					wal.AddWarning("query-modulenotsupported", module.GetType().Name);
+				}
+			}
+			while (enumerator.MoveNext());
+
+			if (!hasActiveModule)
+			{
+				throw new InvalidOperationException(EveMessages.NoSupportedModules);
+			}
+		}
+
+		public static void CheckParent(JToken parent, IEnumerable<IQueryModule> modules)
+		{
+			if (parent["limits"] is JToken limits)
+			{
+				foreach (var limit in limits.Children<JProperty>())
+				{
+					var value = (int)limit.Value;
+					foreach (var module in modules)
+					{
+						if (module.Name == limit.Name && module is IContinuableQueryModule continuableModule)
+						{
+							continuableModule.ModuleLimit = value;
+							break;
+						}
+					}
+				}
+			}
+
+			// Kludgey workaround for https://phabricator.wikimedia.org/T36356. If there had been more than just this one module, some sort of "Needs deserializing during parent's DeserializeParent" feature could have been added, but that seemed just as kludgey as this for a single faulty module.
+			if (parent[ListWatchlistRaw.ModuleName] != null)
+			{
+				foreach (var module in modules)
+				{
+					 if (module is ListWatchlistRaw watchListModule)
+					{
+						watchListModule.Deserialize(parent);
+					}
+				}
+			}
+		}
+
+		public static bool HandleWarning(string? from, string? text, IEnumerable<IQueryModule> queryModules, MetaUserInfo? userModule)
+		{
+			foreach (var module in queryModules)
+			{
+				if (module.HandleWarning(from, text))
+				{
+					return true;
+				}
+			}
+
+			return userModule?.HandleWarning(from, text) ?? false;
+		}
+		#endregion
+
 		#region Public Methods
 		public void Submit()
 		{
 			this.Wal.ClearWarnings();
 			this.BeforeSubmit();
-			var request = this.CreateRequest();
-			var response = this.Wal.SendRequest(request);
-			this.ParseResponse(response);
-			while (this.continueModule?.Continues ?? false)
+			do
 			{
-				request = this.CreateRequest();
-				response = this.Wal.SendRequest(request);
+				var request = this.CreateRequest();
+				var response = this.Wal.SendRequest(request);
 				this.ParseResponse(response);
 			}
+			while (this.continueModule?.Continues ?? false);
 		}
 		#endregion
 
@@ -78,7 +152,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override void BeforeSubmit()
 		{
 			base.BeforeSubmit();
-			this.CheckActiveModules();
+			CheckActiveModules(this.Wal, this.queryModules);
 		}
 
 		protected override void DeserializeParent(JToken parent)
@@ -90,75 +164,13 @@ namespace RobinHood70.WallE.Eve.Modules
 				this.continueModule = this.continueModule.Deserialize(this.Wal, parent);
 			}
 
-			if (parent["limits"] is JToken limits)
-			{
-				foreach (var limit in limits.Children<JProperty>())
-				{
-					var value = (int)limit.Value;
-					foreach (var queryModule in this.queryModules)
-					{
-						if (queryModule.Name == limit.Name && queryModule is IContinuableQueryModule continuableModule)
-						{
-							continuableModule.ModuleLimit = value;
-							break;
-						}
-					}
-				}
-			}
-
-			// Kludgey workaround for https://phabricator.wikimedia.org/T36356. If there had been more than just this one module, some sort of "Needs deserializing during parent's DeserializeParent" feature could have been added, but that seemed just as kludgey as this for a single faulty module.
-			if (parent[ListWatchlistRaw.ModuleName] != null && this.queryModules.Find(module => module.Name == ListWatchlistRaw.ModuleName) is ListWatchlistRaw watchListModule)
-			{
-				watchListModule.Deserialize(parent);
-			}
+			CheckParent(parent, this.queryModules);
 		}
 
-		protected override bool HandleWarning(string from, string text)
-		{
-			if (text.StartsWith("Action '", StringComparison.Ordinal) && text.EndsWith("' is not allowed for the current user", StringComparison.Ordinal))
-			{
-				// Swallow all token warnings
-				return true;
-			}
-
-			foreach (var module in this.queryModules)
-			{
-				if (module.HandleWarning(from, text))
-				{
-					return true;
-				}
-			}
-
-			return base.HandleWarning(from, text);
-		}
+		protected override bool HandleWarning(string? from, string? text) => HandleWarning(from, text, this.queryModules, this.userModule) ? true : base.HandleWarning(from, text);
 		#endregion
 
 		#region Private Methods
-		private void CheckActiveModules()
-		{
-			if (this.queryModules.Count > 0)
-			{
-				// Check if any modules are active. This is done before adding/merging the UserModule, since that would always make it appear that there's an active module.
-				var hasActiveModule = false;
-				foreach (var module in this.queryModules)
-				{
-					if (module.MinimumVersion == 0 || this.SiteVersion == 0 || this.SiteVersion >= module.MinimumVersion)
-					{
-						hasActiveModule = true;
-					}
-					else
-					{
-						this.Wal.AddWarning("query-modulenotsupported", module.GetType().Name);
-					}
-				}
-
-				if (!hasActiveModule)
-				{
-					throw new InvalidOperationException(EveMessages.NoSupportedModules);
-				}
-			}
-		}
-
 		private Request CreateRequest()
 		{
 			var request = this.CreateBaseRequest();

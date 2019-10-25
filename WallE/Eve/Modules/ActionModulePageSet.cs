@@ -31,9 +31,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Constructors
 		protected ActionModulePageSet(WikiAbstractionLayer wal)
-			: base(wal)
-		{
-		}
+			: base(wal) => this.ContinueModule = wal.ModuleFactory.CreateContinue();
 		#endregion
 
 		#region Public Properties
@@ -41,14 +39,20 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Properties
-		protected ContinueModule? ContinueModule { get; set; }
+		protected ContinueModule ContinueModule { get; set; }
 
 		protected int MaximumListSize { get; set; }
 
 		protected bool PageSetDone { get; set; }
 		#endregion
 
+		#region Protected Override Properties
+		protected override RequestType RequestType => RequestType.Post;
+		#endregion
+
 		#region Protected Virtual Properties
+		protected virtual bool Continues => true;
+
 		protected virtual int CurrentListSize => this.MaximumListSize;
 		#endregion
 
@@ -56,16 +60,16 @@ namespace RobinHood70.WallE.Eve.Modules
 		public virtual PageSetResult<TOutput> Submit(TInput input)
 		{
 			ThrowNull(input, nameof(input));
-			this.MaximumListSize = this.Wal.MaximumPageSetSize;
+			this.Wal.ClearWarnings();
 			if (input.GeneratorInput != null)
 			{
 				this.Generator = this.Wal.ModuleFactory.CreateGenerator(input.GeneratorInput, this);
 			}
 
-			this.Wal.ClearWarnings();
+			this.MaximumListSize = this.GetMaximumListSize(input);
 			this.BeforeSubmit();
-			this.ContinueModule = this.Wal.ModuleFactory.CreateContinue();
 			this.ContinueModule.BeforePageSetSubmit(this);
+			this.PageSetDone = false;
 			this.offset = 0;
 
 			var pages = new List<TOutput>();
@@ -74,14 +78,8 @@ namespace RobinHood70.WallE.Eve.Modules
 				var request = this.CreateRequest(input);
 				var response = this.Wal.SendRequest(request);
 				this.ParseResponse(response, pages);
-				while (this.ContinueModule.Continues)
-				{
-					request = this.CreateRequest(input);
-					response = this.Wal.SendRequest(request);
-					this.ParseResponse(response, pages);
-				}
 			}
-			while (!this.PageSetDone);
+			while (this.ContinueModule.Continues && this.Continues && !this.PageSetDone);
 
 			return this.CreatePageSet(pages);
 		}
@@ -92,48 +90,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Methods
-		protected void BuildRequest(Request request, TInput input)
-		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
-			request.Prefix = string.Empty;
-			if (this.Generator != null)
-			{
-				request.Add("generator", this.Generator.Name);
-				this.Generator.BuildRequest(request);
-			}
-
-			if (input.Values?.Count > this.offset)
-			{
-				var listSize = input.Values.Count - this.offset;
-				this.PageSetDone = listSize <= this.CurrentListSize;
-				if (!this.PageSetDone)
-				{
-					listSize = this.CurrentListSize;
-				}
-
-				var currentGroup = new List<string>(listSize);
-				for (var i = 0; i < listSize; i++)
-				{
-					currentGroup.Add(input.Values[this.offset + i]);
-				}
-
-				request.Add(input.TypeName, currentGroup);
-			}
-			else
-			{
-				this.PageSetDone = true;
-			}
-
-			request
-				.AddIf("converttitles", input.ConvertTitles, input.GeneratorInput != null || input.ListType == ListType.Titles)
-				.AddIf("redirects", input.Redirects, input.ListType != ListType.RevisionIds);
-
-			this.BuildRequestPageSet(request, input);
-			request.Prefix = string.Empty;
-			this.ContinueModule?.BuildRequest(request);
-		}
-
 		protected PageSetResult<TOutput> CreatePageSet(IReadOnlyList<TOutput> pages) => new PageSetResult<TOutput>(
 			titles: pages,
 			badRevisionIds: new List<long>(this.badRevisionIds),
@@ -210,7 +166,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			this.GetPageSetNodes(parent);
 		}
 
-		protected override bool HandleWarning(string from, string text)
+		protected override bool HandleWarning(string? from, string? text)
 		{
 			if (from == this.Name)
 			{
@@ -242,6 +198,8 @@ namespace RobinHood70.WallE.Eve.Modules
 				pages.Add(this.GetItem(item));
 			}
 		}
+
+		protected virtual int GetMaximumListSize(TInput input) => this.Wal.MaximumPageSetSize;
 		#endregion
 
 		#region Private Static Methods
@@ -263,8 +221,42 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(input, nameof(input));
 			var request = this.CreateBaseRequest();
 			request.Prefix = this.Prefix;
-			this.BuildRequest(request, input);
+			if (this.Generator != null)
+			{
+				request.Add("generator", this.Generator.Name);
+				this.Generator.BuildRequest(request);
+			}
+
+			if (input.Values?.Count > this.offset)
+			{
+				var listSize = input.Values.Count - this.offset;
+				this.PageSetDone = listSize <= this.CurrentListSize;
+				if (!this.PageSetDone)
+				{
+					listSize = this.CurrentListSize;
+				}
+
+				var currentGroup = new List<string>(listSize);
+				for (var i = 0; i < listSize; i++)
+				{
+					currentGroup.Add(input.Values[this.offset + i]);
+				}
+
+				request.Add(input.TypeName, currentGroup);
+			}
+			else
+			{
+				this.PageSetDone = true;
+			}
+
+			request
+				.AddIf("converttitles", input.ConvertTitles, input.GeneratorInput != null || input.ListType == ListType.Titles)
+				.AddIf("redirects", input.Redirects, input.ListType != ListType.RevisionIds);
+
+			this.BuildRequestPageSet(request, input);
+
 			request.Prefix = string.Empty;
+			this.ContinueModule?.BuildRequest(request);
 
 			return request;
 		}

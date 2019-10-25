@@ -335,12 +335,6 @@
 
 		/// <summary>Runs the pageset query specified by the input.</summary>
 		/// <param name="input">The input.</param>
-		/// <remarks>This function is used internally, but also made available externally for special situations.</remarks>
-		/// <returns>A list of <see cref="PageItem"/>s.</returns>
-		public PageSetResult<PageItem> RunPageSetQuery(QueryInput input) => this.RunPageSetQuery(input, DefaultPageFactory);
-
-		/// <summary>Runs the pageset query specified by the input.</summary>
-		/// <param name="input">The input.</param>
 		/// <param name="pageFactory">The factory method to use to generate PageItem derivatives.</param>
 		/// <remarks>This function is used internally, but also made available externally for special situations.</remarks>
 		/// <returns>A list of <see cref="PageItem"/>s of the specified underlying type.</returns>
@@ -838,13 +832,7 @@
 		/// <param name="propertyInputs"><para>A collection of any combination of property inputs. Built-in property inputs include: <see cref="CategoriesInput" />, <see cref="CategoryInfoInput" />, <see cref="ContributorsInput" />, <see cref="DeletedRevisionsInput" />, <see cref="DuplicateFilesInput" />, <see cref="ExternalLinksInput" />, <see cref="FileUsageInput" />, <see cref="ImageInfoInput" />, <see cref="ImagesInput" />, <see cref="InfoInput" />, <see cref="InterwikiLinksInput" />, <see cref="LanguageLinksInput" />, <see cref="LinksHereInput" />, <see cref="PagePropertiesInput" />, <see cref="RedirectsInput" />, <see cref="RevisionsInput" />, <see cref="StashImageInfoInput" />, and <see cref="TranscludedInInput" />.</para>
 		/// <para>A typical, simple collection would include an InfoInput and a RevisionsInput, which would fetch basic information about the page, along with the latest revision.</para></param>
 		/// <returns>A list of pages based on the pageSetInput parameter with the information for each of the property inputs.</returns>
-		public PageSetResult<PageItem> LoadPages(QueryPageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs)
-		{
-			ThrowNull(pageSetInput, nameof(pageSetInput));
-			ThrowNull(propertyInputs, nameof(propertyInputs));
-			var propertyModules = this.ModuleFactory.CreateModules(propertyInputs);
-			return this.RunPageSetQuery(new QueryInput(pageSetInput, propertyModules));
-		}
+		public PageSetResult<PageItem> LoadPages(QueryPageSetInput pageSetInput, IEnumerable<IPropertyInput> propertyInputs) => this.LoadPages(pageSetInput, propertyInputs, DefaultPageFactory);
 
 		/// <summary>Loads page information. Incorporates the various API <see href="https://www.mediawiki.org/wiki/API:Properties">property</see> modules.</summary>
 		/// <param name="pageSetInput">A pageset input which specifies a list of page titles, page IDs, revision IDs, or a generator.</param>

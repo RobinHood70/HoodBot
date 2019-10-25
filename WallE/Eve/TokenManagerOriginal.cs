@@ -49,7 +49,7 @@
 				var recentChanges = new ListRecentChanges(this.Wal, input);
 				var propertyModules = this.Wal.ModuleFactory.CreateModules(new[] { propInfoInput });
 				var queryInput = new QueryInput(pageSetInput, propertyModules, new[] { recentChanges });
-				var pageSet = this.Wal.RunPageSetQuery(queryInput);
+				var pageSet = this.Wal.RunPageSetQuery(queryInput, WikiAbstractionLayer.DefaultPageFactory);
 				if (pageSet.Count == 1 && pageSet[0].Info is PageInfo info)
 				{
 					foreach (var token in info.Tokens)

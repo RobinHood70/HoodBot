@@ -4,7 +4,6 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
-	using System.Diagnostics.CodeAnalysis;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Properties;
@@ -52,7 +51,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Override Properties
-		protected bool Continues
+		protected override bool Continues
 		{
 			get
 			{
@@ -76,6 +75,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 		}
 
+		// The idea behind this is that some results may be disqualified or not returned (e.g., pages not found) when trying to reach a specific number of pages, so we always ask for a little extra in order to reduce the number of small queries.
 		protected override int CurrentListSize => (this.itemsRemaining == int.MaxValue || this.itemsRemaining + 10 > this.MaximumListSize)
 			? this.MaximumListSize
 			: (this.itemsRemaining <= 5 ? 10 : this.itemsRemaining + 10);
@@ -102,59 +102,27 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Methods
-		public PageSetResult<PageItem> Submit()
-		{
-			this.MaximumListSize = this.Wal.MaximumPageSetSize;
-			if (this.input.GeneratorInput != null)
-			{
-				this.Generator = this.Wal.ModuleFactory.CreateGenerator(this.input.GeneratorInput, this);
-			}
-
-			this.Wal.ClearWarnings();
-			this.BeforeSubmit();
-			this.ContinueModule = this.Wal.ModuleFactory.CreateContinue();
-			this.ContinueModule.BeforePageSetSubmit(this);
-			this.PageSetDone = false;
-
-			var pages = new KeyedPages();
-			do
-			{
-				var request = this.CreateRequest();
-				var response = this.Wal.SendRequest(request);
-				this.ParseResponse(response, pages);
-				while (this.ContinueModule.Continues && this.Continues)
-				{
-					request = this.CreateRequest();
-					response = this.Wal.SendRequest(request);
-					this.ParseResponse(response, pages);
-				}
-			}
-			while (!this.PageSetDone);
-
-			return this.CreatePageSet(pages);
-		}
+		public PageSetResult<PageItem> Submit() => this.Submit(this.input);
 		#endregion
 
 		#region Public Override Methods
-		[DoesNotReturn]
-		public override PageSetResult<PageItem> Submit(QueryInput input) => throw new InvalidOperationException(CurrentCulture(EveMessages.UseSubmit, nameof(this.Submit)));
+		public override PageSetResult<PageItem> Submit(QueryInput input)
+		{
+			if (input != this.input)
+			{
+				throw new InvalidOperationException(CurrentCulture(EveMessages.UseSubmit, nameof(this.Submit)));
+			}
+
+			return base.Submit(input);
+		}
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BeforeSubmit()
 		{
 			base.BeforeSubmit();
-			if (this.input.PropertyModules != null && this.input.PropertyModules.Find(module => module.Name == "revisions") is PropRevisions revModule && revModule.IsRevisionRange)
-			{
-				this.MaximumListSize = 1;
-			}
-			else if (this.input.Limit > 0 && this.input.Limit < this.MaximumListSize)
-			{
-				this.MaximumListSize = this.input.Limit;
-			}
-
 			this.itemsRemaining = this.input.MaxItems == 0 ? int.MaxValue : this.input.MaxItems;
-			this.CheckActiveModules();
+			ActionQuery.CheckActiveModules(this.Wal, this.AllModules);
 		}
 
 		// Written this way just to make it obvious that in this case, the input is not being used, since this.input is the correct "parameter".
@@ -164,32 +132,13 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(parent, nameof(parent));
 			base.DeserializeParent(parent);
-			if (parent["limits"] is JToken limits)
+			var list = new List<IQueryModule>(this.AllModules);
+			if (this.Generator != null)
 			{
-				foreach (var limit in limits.Children<JProperty>())
-				{
-					var value = (int)limit.Value;
-					if (this.Generator?.Name == limit.Name)
-					{
-						this.Generator.ModuleLimit = value;
-					}
-
-					foreach (var allModule in this.AllModules)
-					{
-						if (allModule.Name == limit.Name && allModule is IContinuableQueryModule module)
-						{
-							module.ModuleLimit = value;
-							break;
-						}
-					}
-				}
+				list.Add(this.Generator);
 			}
 
-			// Kludgey workaround for https://phabricator.wikimedia.org/T36356. If there had been more than just this one module, some sort of "Needs deserializing during parent's DeserializeParent" feature could have been added, but that seemed just as kludgey as this for a single faulty module.
-			if (parent[ListWatchlistRaw.ModuleName] != null && this.input.QueryModules.Find(module => module.Name == ListWatchlistRaw.ModuleName) is ListWatchlistRaw watchListModule)
-			{
-				watchListModule.Deserialize(parent);
-			}
+			ActionQuery.CheckParent(parent, list);
 		}
 
 		protected override void DeserializeResult(JToken result, IList<PageItem> pages)
@@ -232,24 +181,14 @@ namespace RobinHood70.WallE.Eve.Modules
 			return page;
 		}
 
-		protected override bool HandleWarning(string from, string text)
-		{
-			if (text.StartsWith("Action '", StringComparison.Ordinal) && text.EndsWith("' is not allowed for the current user", StringComparison.Ordinal))
-			{
-				// Swallow all token warnings
-				return true;
-			}
+		protected override bool HandleWarning(string? from, string? text) => ActionQuery.HandleWarning(from, text, this.input.QueryModules, this.userModule) ? true : base.HandleWarning(from, text);
 
-			foreach (var module in this.input.QueryModules)
-			{
-				if (module.HandleWarning(from, text))
-				{
-					return true;
-				}
-			}
-
-			return base.HandleWarning(from, text);
-		}
+		protected override int GetMaximumListSize(QueryInput input) =>
+			this.input.PropertyModules != null && this.input.PropertyModules.Find(module => module.Name == "revisions") is PropRevisions revModule && revModule.IsRevisionRange
+				? 1 :
+			this.input.Limit > 0 && this.input.Limit < this.MaximumListSize
+				? this.input.Limit
+				: this.Wal.MaximumPageSetSize;
 		#endregion
 
 		#region Private Methods
@@ -271,41 +210,6 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			this.userModule?.BuildRequest(request);
 			request.Add("iwurl", this.input.GetInterwikiUrls);
-		}
-
-		private void CheckActiveModules()
-		{
-			if (this.input.QueryModules.Count > 0 || this.input.PropertyModules.Count > 0)
-			{
-				// Check if any modules are active. This is done before adding/merging the UserModule, since that would always make it appear that there's an active module.
-				var hasActiveModule = false;
-				foreach (var module in this.AllModules)
-				{
-					if (module.MinimumVersion == 0 || this.SiteVersion == 0 || this.SiteVersion >= module.MinimumVersion)
-					{
-						hasActiveModule = true;
-					}
-					else
-					{
-						this.Wal.AddWarning("query-modulenotsupported", module.GetType().Name);
-					}
-				}
-
-				if (!hasActiveModule)
-				{
-					throw new InvalidOperationException(EveMessages.NoSupportedModules);
-				}
-			}
-		}
-
-		private Request CreateRequest()
-		{
-			var request = this.CreateBaseRequest();
-			request.Prefix = this.Prefix;
-			this.BuildRequest(request, this.input);
-			request.Prefix = string.Empty;
-
-			return request;
 		}
 
 		private void DeserializePages(JToken result, IList<PageItem> pagesIn)

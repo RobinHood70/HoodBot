@@ -105,7 +105,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 
 		// 1.26 and 1.27 always emit a warning when the Modules property is specified, even though only one section of it is deprecated, so swallow that.
-		protected override bool HandleWarning(string from, string text) => text.StartsWith("modulemessages", StringComparison.Ordinal) ? true : base.HandleWarning(from, text);
+		protected override bool HandleWarning(string? from, string? text) => text?.StartsWith("modulemessages", StringComparison.Ordinal) == true ? true : base.HandleWarning(from, text);
 		#endregion
 
 		#region Private Static Methods

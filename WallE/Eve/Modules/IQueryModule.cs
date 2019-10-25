@@ -24,7 +24,7 @@
 		/// <param name="from">Where the warning originated.</param>
 		/// <param name="text">The text of the warning.</param>
 		/// <returns><see langword="true" /> if the warning was handled and does not need to be dealt with in any other way; <see langword="false" /> if it remains unhandled.</returns>
-		bool HandleWarning(string from, string text);
+		bool HandleWarning(string? from, string? text);
 		#endregion
 	}
 }
