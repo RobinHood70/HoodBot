@@ -9,11 +9,13 @@
 	public class MetaTemplateCreator : PageCreator
 	{
 		#region Public Properties
+		public bool GameSpaceOnly { get; set; } = true;
+
 		public IList<string> VariableNames { get; } = new List<string>();
 		#endregion
 
 		#region Public Override Methods
-		public override Page CreatePage(ISimpleTitle simpleTitle) => new VariablesPage(simpleTitle);
+		public override Page CreatePage(ISimpleTitle simpleTitle) => (this.GameSpaceOnly && simpleTitle?.Namespace.Id < 100) ? Default.CreatePage(simpleTitle) : new VariablesPage(simpleTitle);
 
 		public override PageItem CreatePageItem(int ns, string title, long pageId) => new VariablesPageItem(ns, title, pageId);
 		#endregion

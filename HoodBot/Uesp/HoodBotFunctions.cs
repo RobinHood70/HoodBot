@@ -133,7 +133,6 @@
 			var moduleFactory = this.NativeAbstractionLayer.ModuleFactory;
 			moduleFactory.RegisterProperty<VariablesInput>(PropVariables.CreateInstance);
 			moduleFactory.RegisterGenerator<VariablesInput>(PropVariables.CreateInstance);
-			this.Site.PageCreator = new MetaTemplateCreator();
 		}
 
 		public override ChangeStatus EndLogEntry()
