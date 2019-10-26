@@ -4,6 +4,7 @@
 	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.Runtime.CompilerServices;
+	using System.Security.Cryptography;
 	using System.Text;
 	using RobinHood70.WikiCommon.Properties;
 
@@ -19,6 +20,19 @@
 #pragma warning disable CA1711 // Identifiers should not have incorrect suffix
 	public delegate void StrongEventHandler<TSender, TEventArgs>(TSender sender, TEventArgs eventArgs);
 #pragma warning restore CA1711 // Identifiers should not have incorrect suffix
+	#endregion
+
+	#region Internal Enumerations
+
+	/// <summary>The hash type to return from the GetHash() functions.</summary>
+	public enum HashType
+	{
+		/// <summary>Message Digest 5 (MD5) hash.</summary>
+		Md5,
+
+		/// <summary>Secure Hash Algorithm 1 (SHA1) hash.</summary>
+		Sha1
+	}
 	#endregion
 
 	/// <summary>Global helper methods that are useful in a variety of scenarios.</summary>
@@ -121,6 +135,37 @@
 
 			return CultureInfo.CurrentCulture;
 		}
+
+		/// <summary>Gets the requested type of hash for the byte data provided.</summary>
+		/// <param name="data">The byte data.</param>
+		/// <param name="hashType">The type of the hash.</param>
+		/// <returns>The hash, represented as a <see cref="string"/>.</returns>
+		public static string GetHash(byte[] data, HashType hashType)
+		{
+			// At one point, this was a try/finally block because mono wasn't quite implementing IDisposable properly. This doesn't appear to be the case anymore, so doing it the traditional method. It looks like a using block would probably have worked in any event, since that would presumably coerce hash to IDisposable.
+			// See https://xamarin.github.io/bugzilla-archives/33/3375/bug.html
+			using var hash = hashType switch
+			{
+				HashType.Md5 => MD5.Create(),
+				HashType.Sha1 => SHA1.Create() as HashAlgorithm,
+				_ => throw new InvalidOperationException(),
+			};
+
+			var sb = new StringBuilder(40);
+			var hashBytes = hash.ComputeHash(data);
+			foreach (var b in hashBytes)
+			{
+				sb.AppendFormat(CultureInfo.InvariantCulture, "{0:x2}", b);
+			}
+
+			return sb.ToString();
+		}
+
+		/// <summary>Gets the requested type of hash for the byte data provided.</summary>
+		/// <param name="data">The byte data.</param>
+		/// <param name="hashType">The type of the hash.</param>
+		/// <returns>The hash, represented as a <see cref="string"/>.</returns>
+		public static string GetHash(this string data, HashType hashType) => GetHash(Encoding.UTF8.GetBytes(data ?? string.Empty), hashType);
 
 		/// <summary>The error thrown when a parameter could not be cast to the expected type.</summary>
 		/// <param name="parameterName">Name of the parameter.</param>

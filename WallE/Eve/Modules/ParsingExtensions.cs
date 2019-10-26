@@ -12,7 +12,6 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WallE.ProjectGlobals;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Any other API-related items that didn't warrant creation of their own static class.</summary>
@@ -24,7 +23,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		public static WikiException MalformedException(string name, JToken? token, [CallerMemberName]string caller = Unknown) => new WikiException(CurrentCulture(EveMessages.MalformedData, name, token?.Path, caller));
 
 		// These methods are not extensions, but are placed in this class as useful but not warranting a class of their own yet.
-		public static WikiException MalformedTypeException(string typeName, JToken? token, [CallerMemberName]string caller = Unknown) => new WikiException(CurrentCulture(EveMessages.MalformedDataType, typeName, token?.Path ?? Globals.Unknown, caller));
+		public static WikiException MalformedTypeException(string typeName, JToken? token, [CallerMemberName]string caller = Unknown) => new WikiException(CurrentCulture(EveMessages.MalformedDataType, typeName, token?.Path ?? Unknown, caller));
 		#endregion
 
 		#region JToken Methods
@@ -246,7 +245,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			token == null ? false :
 			token.Type == JTokenType.Boolean ? (bool)token :
 			token.Type == JTokenType.String ? true :
-			throw MalformedException((token as JProperty)?.Name ?? Globals.Unknown, token);
+			throw MalformedException((token as JProperty)?.Name ?? Unknown, token);
 
 		public static IReadOnlyDictionary<string, string?> ToBCDictionary(this JToken? token)
 		{
