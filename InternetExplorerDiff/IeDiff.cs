@@ -34,6 +34,7 @@
 		public void Compare(DiffContent diff)
 		{
 			ThrowNull(diff, nameof(diff));
+			ThrowNull(diff.EditPath, nameof(diff.EditPath));
 			InternetExplorer? ie = null;
 			for (var i = 0; i < 10; i++)
 			{
@@ -62,9 +63,8 @@
 			SafeNativeMethods.GetWindowThreadProcessId(hwnd, out var processId);
 			this.ieProcess = Process.GetProcessById(Convert.ToInt32(processId));
 
-			var urib = new UriBuilder(diff.EditPath);
-			urib.Query += "&action=submit";
-			var request = new Request(urib.Uri, RequestType.Post, false);
+			var uri = new Uri(diff.EditPath.ToString().Replace("action=edit", "action=submit"));
+			var request = new Request(uri, RequestType.Post, false);
 			request
 				.Add("wpDiff", "Show changes")
 				.Add("wpTextbox1", diff.Text)
