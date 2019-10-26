@@ -2,6 +2,7 @@
 namespace RobinHood70.WallE.Eve.Modules
 {
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Globalization;
 	using System.IO;
 	using System.Text.RegularExpressions;
@@ -69,10 +70,9 @@ namespace RobinHood70.WallE.Eve.Modules
 			this.MaximumListSize = this.GetMaximumListSize(input);
 			this.BeforeSubmit();
 			this.ContinueModule.BeforePageSetSubmit(this);
-			this.PageSetDone = false;
 			this.offset = 0;
+			var pages = this.CreatePageList();
 
-			var pages = new List<TOutput>();
 			do
 			{
 				var request = this.CreateRequest(input);
@@ -90,7 +90,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Methods
-		protected PageSetResult<TOutput> CreatePageSet(IReadOnlyList<TOutput> pages) => new PageSetResult<TOutput>(
+		protected PageSetResult<TOutput> CreatePageSet(IList<TOutput> pages) => new PageSetResult<TOutput>(
 			titles: pages,
 			badRevisionIds: new List<long>(this.badRevisionIds),
 			converted: this.converted,
@@ -189,6 +189,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Virtual Methods
+		protected virtual IList<TOutput> CreatePageList() => new List<TOutput>();
+
 		protected virtual void DeserializeResult(JToken result, IList<TOutput> pages)
 		{
 			ThrowNull(result, nameof(result));
@@ -227,15 +229,17 @@ namespace RobinHood70.WallE.Eve.Modules
 				this.Generator.BuildRequest(request);
 			}
 
-			if (input.Values?.Count > this.offset)
+			if (input.Values == null)
 			{
-				var listSize = input.Values.Count - this.offset;
-				this.PageSetDone = listSize <= this.CurrentListSize;
-				if (!this.PageSetDone)
-				{
-					listSize = this.CurrentListSize;
-				}
-
+				this.PageSetDone = this.Generator == null;
+			}
+			else
+			{
+				this.PageSetDone = (input.Values.Count - this.offset) <= this.CurrentListSize;
+				var listSize = this.PageSetDone
+					? input.Values.Count - this.offset
+					: this.CurrentListSize;
+				Debug.Assert(listSize > 0, "listSize was 0 or negative!");
 				var currentGroup = new List<string>(listSize);
 				for (var i = 0; i < listSize; i++)
 				{
@@ -243,10 +247,6 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 
 				request.Add(input.TypeName, currentGroup);
-			}
-			else
-			{
-				this.PageSetDone = true;
 			}
 
 			request

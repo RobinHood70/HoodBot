@@ -128,6 +128,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		// Written this way just to make it obvious that in this case, the input is not being used, since this.input is the correct "parameter".
 		protected override void BuildRequestPageSet(Request request, QueryInput input) => this.BuildRequestPageSet(request);
 
+		protected override IList<PageItem> CreatePageList() => new KeyedPages();
+
 		protected override void DeserializeParent(JToken parent)
 		{
 			ThrowNull(parent, nameof(parent));
