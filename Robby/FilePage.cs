@@ -115,6 +115,7 @@
 						width: imageInfoEntry.Width,
 						comment: imageInfoEntry.Comment,
 						mimeType: imageInfoEntry.MimeType,
+						sha1: imageInfoEntry.Sha1,
 						user: imageInfoEntry.User,
 						timestamp: imageInfoEntry.Timestamp,
 						uri: new Uri(imageInfoEntry.Uri));

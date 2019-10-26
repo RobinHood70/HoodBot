@@ -49,6 +49,7 @@
 						ImageProperties.BitDepth |
 						ImageProperties.Comment |
 						ImageProperties.Mime |
+						ImageProperties.Sha1 |
 						ImageProperties.Size |
 						ImageProperties.Timestamp |
 						ImageProperties.Url |
