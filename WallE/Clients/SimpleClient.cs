@@ -164,8 +164,7 @@
 			ThrowNull(fileName, nameof(fileName));
 			using (var response = this.SendRequest(uri, "GET", null, null, false))
 			{
-				var retval = GetResponseData(response);
-				if (retval != null)
+				if (GetResponseData(response) is byte[] retval)
 				{
 					try
 					{
