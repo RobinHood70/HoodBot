@@ -87,6 +87,12 @@
 				if (this.dictionary == null)
 				{
 					this.dictionary = new Dictionary<TKey, TItem>(this.items.Count, this.Comparer);
+				}
+
+				// This seems to happen during debugging, perhaps when the initial list is not yet fully initialized? Not quite sure.
+				if (this.dictionary.Count != this.items.Count)
+				{
+					this.dictionary.Clear();
 					foreach (var item in this.items)
 					{
 						this.dictionary.Add(this.GetKeyForItem(item), item);
