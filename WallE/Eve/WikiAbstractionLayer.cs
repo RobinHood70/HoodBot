@@ -38,6 +38,7 @@
 		private readonly List<ErrorItem> warnings = new List<ErrorItem>();
 		private readonly WikiException notInitialized = new WikiException(string.Format(Messages.SiteNotInitialized, nameof(Login), nameof(Initialize)));
 		private ITokenManager? tokenManager = null;
+		private int userTalkChecksIgnored = 0;
 		#endregion
 
 		#region Constructors
@@ -256,6 +257,10 @@
 		/// <value>The name of the current user.</value>
 		public string? UserName { get; protected set; }
 
+		/// <summary>Gets or sets how often the user talk page should be checked for non-queries.</summary>
+		/// <value>The frequency to check user name and talk page. A value of 1 or less will check with every non-query request; higher values will only check every n times.</value>
+		public int UserCheckFrequency { get; set; }
+
 		/// <summary>Gets or sets a value indicating whether to use UTF-8 encoding for responses.</summary>
 		/// <value><see langword="true" /> to use UTF-8; otherwise, <see langword="false" />. Defaults to <see langword="true" />.</value>
 		public bool Utf8 { get; set; } = true;
@@ -285,7 +290,7 @@
 		/// <param name="pageName">The name of the page.</param>
 		/// <returns>An string representing either an absolute or relative URI to the article.</returns>
 		/// <remarks>This does not return a Uri object because the article path may be relative, which is not supported by the C# Uri class. Although this function could certainly be made to provide a fixed Uri, that might not be what the caller wants, so the caller is left to interpret the result value as they wish.</remarks>
-		public Uri GetArticlePath(string pageName)
+		public Uri GetFullArticlePath(string pageName)
 		{
 			ThrowNull(pageName, nameof(pageName));
 			var articlePath = this.ArticlePath ?? throw this.notInitialized;
@@ -496,10 +501,8 @@
 				return true;
 			}
 
-			var stopCheck = this.StopCheckMethods;
 			try
 			{
-				this.StopCheckMethods = StopCheckMethods.None;
 				new ActionQuery(this, Array.Empty<IQueryModule>()).Submit();
 
 				return true;
@@ -519,11 +522,6 @@
 				{
 					throw;
 				}
-			}
-			finally
-			{
-				// Unlikely to come into play if the check fails, but just to be safe, restore it either way.
-				this.StopCheckMethods = stopCheck;
 			}
 
 			return false;
@@ -640,21 +638,16 @@
 		/// <returns>Whether the attempt was successful.</returns>
 		public bool ClearHasMessage()
 		{
-			bool retval;
-			var stopCheck = this.StopCheckMethods;
-			this.StopCheckMethods &= ~(StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery);
 			try
 			{
-				retval = this.SubmitValueAction(new ActionClearHasMsg(this), NullObject.Null).Result == "success";
+				// We don't go through the standard SubmitValueAction here, since that would perform an inappropriate stop check.
+				return new ActionClearHasMsg(this).Submit(NullObject.Null).Result == "success";
 			}
 			catch (NotSupportedException)
 			{
-				var index = this.GetArticlePath(this.Namespaces[MediaWikiNamespaces.UserTalk].Name + ":" + this.UserName);
-				retval = !string.IsNullOrEmpty(this.Client.Get(index));
+				var index = this.GetFullArticlePath(this.Namespaces[MediaWikiNamespaces.UserTalk].Name + ":" + this.UserName);
+				return !string.IsNullOrEmpty(this.Client.Get(index));
 			}
-
-			this.StopCheckMethods = stopCheck;
-			return retval;
 		}
 
 		/// <summary>Compares two revisions or pages using the <see href="https://www.mediawiki.org/wiki/API:Compare">Compare</see> API module.</summary>
@@ -686,6 +679,8 @@
 				}
 			}
 
+			this.DoStopCheck();
+
 			// Unlike Login, it is not necessarily a critical event if user creation fails, so just return the result regardless of success.
 			return retval;
 		}
@@ -707,7 +702,7 @@
 
 		/// <summary>Downloads the specified resource (typically, a Uri) to a file.</summary>
 		/// <param name="input">The input parameters.</param>
-		/// <remarks>This is not part of the API, but since Upload is, it makes sense to provide its counterpart so the end-user is not left accessing Client directly.</remarks>
+		/// <remarks>This is not part of the API, but since Upload is, it makes sense to provide its counterpart so the end-user is not left accessing Client directly. No stop checks are performed when using this method, since this could be downloading from anywhere.</remarks>
 		public void Download(DownloadInput input)
 		{
 			ThrowNull(input, nameof(input));
@@ -734,6 +729,7 @@
 				}
 			}
 
+			this.DoStopCheck();
 			return retval;
 		}
 
@@ -857,6 +853,7 @@
 		/// <summary>Logs the user in using the <see href="https://www.mediawiki.org/wiki/API:Login">Login</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>Information about the login.</returns>
+		/// <remarks>No stop checking is performed when logging in.</remarks>
 		public LoginResult Login(LoginInput input)
 		{
 			ThrowNull(input, nameof(input));
@@ -929,11 +926,14 @@
 		}
 
 		/// <summary>Logs the user out using the <see href="https://www.mediawiki.org/wiki/API:Logout">Logout</see> API module.</summary>
-		/// <remarks>This call does not clear site data, since the user will most likely stop using the Site object after logging out anyway. This could also be a logout due to detecting that the wrong user is currently logged in, in which case most of the site information is still valid, and the user may even be intentionally access the site anonymously. Since the user's intent is unknown, it is safer not to assume it.</remarks>
+		/// <remarks>This call does not clear site data, since the user will most likely stop using the Site object after logging out anyway. This could also be a logout due to detecting that the wrong user is currently logged in, in which case most of the site information is still valid, and the user may even be intentionally access the site anonymously. Since the user's intent is unknown, it is safer not to assume it.
+		///
+		/// No stop checking is performed on logging out.</remarks>
 		public void Logout() => this.Logout(false);
 
 		/// <summary>Logs the user out using the <see href="https://www.mediawiki.org/wiki/API:Logout">Logout</see> API module.</summary>
 		/// <param name="clear">Whether to clear all site data or not. If you intend to keep using the site even after logging out, set this to <see langword="false"/>; use <see langword="true"/> to clear all site-specific data, such as namespaces and site name.</param>
+		/// <remarks>No stop checking is performed on logging out.</remarks>
 		public void Logout(bool clear)
 		{
 			if (this.UserId != 0)
@@ -1153,7 +1153,7 @@
 		public RollbackResult Rollback(RollbackInput input)
 		{
 			ThrowNull(input, nameof(input));
-			input.Token ??= this.CheckToken(
+			input.Token ??= CheckToken(
 					input.Title == null
 					? this.TokenManager.RollbackToken(input.PageId)
 					: this.TokenManager.RollbackToken(input.Title),
@@ -1163,6 +1163,7 @@
 
 		/// <summary>Returns Really Simple Discovery information using the <see href="https://www.mediawiki.org/wiki/API:Rsd">Rsd</see> API module.</summary>
 		/// <returns>The raw XML of the RSD schema.</returns>
+		/// <remarks>No stop checking is performed when using this method.</remarks>
 		public string? Rsd() => new ActionRsd(this).Submit(NullObject.Null).Result;
 
 		/// <summary>Searches for wiki pages that fulfil given criteria using the <see href="https://www.mediawiki.org/wiki/API:Search">Search</see> API module.</summary>
@@ -1236,6 +1237,7 @@
 		/// <summary>Uploads a file to the wiki using the <see href="https://www.mediawiki.org/wiki/API:Upload">Upload</see> API module.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns>Information about the uploaded file.</returns>
+		/// <remarks>Unlike the <see cref="Download(DownloadInput)"/> method, this method performs stop checking after every upload, since it can only upload to the current wiki.</remarks>
 		public UploadResult Upload(UploadInput input)
 		{
 			ThrowNull(input, nameof(input));
@@ -1273,7 +1275,7 @@
 				var tokenUser = input.User ?? (this.SiteVersion >= 124
 					? string.Empty // Name is unnecessary for 1.24+
 					: throw new InvalidOperationException(EveMessages.InvalidUserRightsRequest));
-				input.Token = this.CheckToken(this.TokenManager.UserRightsToken(tokenUser), TokensInput.UserRights);
+				input.Token = CheckToken(this.TokenManager.UserRightsToken(tokenUser), TokensInput.UserRights);
 			}
 
 			return this.SubmitValueAction(new ActionUserRights(this), input);
@@ -1355,25 +1357,37 @@
 			{
 				if (userInfoResult == null)
 				{
-					if (this.ValidStopCheckMethods.HasFlag(StopCheckMethods.TalkCheckQuery))
+					Debug.Assert(this.ValidStopCheckMethods.HasFlag(StopCheckMethods.TalkCheckQuery), "Something's not right here, this should've been an integrated check!");
+					if (this.userTalkChecksIgnored >= this.UserCheckFrequency)
 					{
-						Debug.WriteLine("Something's not right here, this should've been an integrated check!");
+						var input = new UserInfoInput() { Properties = UserInfoProperties.HasMsg };
+						userInfoResult = this.UserInfo(input);
+						if (userInfoResult == null)
+						{
+							throw WikiException.General("userinfo-failed", "UserInfo check failed!");
+						}
+
+						this.userTalkChecksIgnored = 0;
+					}
+					else
+					{
+						this.userTalkChecksIgnored++;
+					}
+				}
+
+				if (userInfoResult != null)
+				{
+					if (this.ValidStopCheckMethods.HasFlag(StopCheckMethods.UserNameCheck) && this.SiteVersion < 128 && this.UserName != userInfoResult.Name)
+					{
+						// Used to check if username has unexpectedly changed, indicating that the bot has been logged out (or conceivably logged in) unexpectedly.
+						throw new StopException(EveMessages.UserNameChanged);
 					}
 
-					var input = new UserInfoInput() { Properties = UserInfoProperties.HasMsg };
-					userInfoResult = this.UserInfo(input);
-				}
-
-				if (this.ValidStopCheckMethods.HasFlag(StopCheckMethods.UserNameCheck) && this.SiteVersion < 128 && this.UserName != userInfoResult.Name)
-				{
-					// Used to check if username has unexpectedly changed, indicating that the bot has been logged out (or conceivably logged in) unexpectedly.
-					throw new StopException(EveMessages.UserNameChanged);
-				}
-
-				if (userInfoResult.Flags.HasFlag(UserInfoFlags.HasMessage)
-					&& ((this.ValidStopCheckMethods & StopCheckMethods.TalkChecks) != StopCheckMethods.None))
-				{
-					throw new StopException(EveMessages.TalkPageChanged);
+					if (userInfoResult.Flags.HasFlag(UserInfoFlags.HasMessage)
+						&& ((this.ValidStopCheckMethods & StopCheckMethods.TalkChecks) != StopCheckMethods.None))
+					{
+						throw new StopException(EveMessages.TalkPageChanged);
+					}
 				}
 			}
 		}
@@ -1404,7 +1418,7 @@
 		#endregion
 
 		#region Private Methods
-		private string CheckToken(string? token, string type) => token ?? throw new WikiException(CurrentCulture(EveMessages.InvalidToken, type));
+		private static string CheckToken(string? token, string type) => token ?? throw new WikiException(CurrentCulture(EveMessages.InvalidToken, type));
 
 		private void Clear()
 		{
@@ -1424,7 +1438,7 @@
 			this.tokenManager?.Clear(); // Deliberately clearing underlying property so we're not initializing it only to clear it.
 		}
 
-		private string GetSessionToken(string type) => this.CheckToken(this.TokenManager.SessionToken(type), type);
+		private string GetSessionToken(string type) => CheckToken(this.TokenManager.SessionToken(type), type);
 
 		private IReadOnlyList<TOutput> RunListQuery<TInput, TOutput>(ListModule<TInput, TOutput> module)
 			where TInput : class

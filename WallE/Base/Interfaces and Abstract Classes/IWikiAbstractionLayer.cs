@@ -117,6 +117,10 @@
 		/// <value><see langword="true" /> if the site supports <c>maxlag</c> checking; otherwise, <see langword="false" />.</value>
 		bool SupportsMaxLag { get; }
 
+		/// <summary>Gets or sets how often the user talk page should be checked for non-queries.</summary>
+		/// <value>The frequency to check user name and talk page. A value of 1 or less will check with every non-query request; higher values will only check every n times.</value>
+		int UserCheckFrequency { get; set; }
+
 		/// <summary>Gets the name of the current user.</summary>
 		/// <value>The name of the current user.</value>
 		/// <remarks>It's conceivable that not every possible implementor would need a UserName, and it may be null if the user doesn't log in, but it's reasonable to assume that neither of these will be the norm, and UserName is handy to have easily accessible without having to cast to a specific implementor.</remarks>

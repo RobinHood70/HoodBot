@@ -464,8 +464,10 @@
 		private void SetSite(WikiInfo wikiInfo)
 		{
 			var al = wikiInfo.GetAbstractionLayer(this.client);
-			al.Assert = "user";
+			// TODO: Move this into site-specific code - not urgent, wait until Site-derivative rewrites.
+			al.Assert = "bot";
 			al.StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery;
+			al.UserCheckFrequency = 10;
 #if DEBUG
 			if (al is WikiAbstractionLayer wal)
 			{
