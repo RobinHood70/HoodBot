@@ -23,15 +23,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region PUblic Virtual Methods
-		public virtual void Deserialize(JToken parent, PageItem page)
+		public virtual void Deserialize(JToken result, PageItem page)
 		{
 			ThrowNull(page, nameof(page));
-			if (parent != null)
+			if (result != null)
 			{
-				this.DeserializeParentToPage(parent, page);
-				if (parent[this.ResultName] is JToken result && result.Type != JTokenType.Null)
+				this.DeserializeParentToPage(result, page);
+				if (result[this.ResultName] is JToken node && node.Type != JTokenType.Null)
 				{
-					this.DeserializeToPage(result, page);
+					this.DeserializeToPage(node, page);
 				}
 			}
 		}
