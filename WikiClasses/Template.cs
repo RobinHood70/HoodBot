@@ -14,7 +14,7 @@
 	public class Template : ParameterCollection
 	{
 		#region Static Fields
-		private static readonly string WildcardName = @"[^#\|}]+?";
+		private const string WildcardName = @"[^#\|}]+?";
 		#endregion
 
 		#region Constructors
