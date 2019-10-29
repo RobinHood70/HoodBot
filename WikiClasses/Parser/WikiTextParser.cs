@@ -43,7 +43,7 @@
 		{
 			ThrowNull(text, nameof(text));
 			var stack = new WikiStack(text ?? string.Empty, UnparsedTags, include, strictInclusion);
-			var nodes = stack.GetElements();
+			var nodes = stack.GetFinalNodes();
 			return new NodeCollection(null, nodes);
 		}
 

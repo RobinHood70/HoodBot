@@ -1,9 +1,18 @@
-﻿namespace RobinHood70.WikiClasses.Parser
+﻿using System.Collections.Generic;
+
+namespace RobinHood70.WikiClasses.Parser
 {
 	/// <summary>Represents common functions to all nodes in the wikitext parser.</summary>
 	public interface IWikiNode
 	{
-		#region Public Methods
+		#region Properties
+
+		/// <summary>Gets an enumerator that iterates through any NodeCollections this node contains.</summary>
+		/// <returns>An enumerator that can be used to iterate through additional NodeCollections.</returns>
+		IEnumerable<NodeCollection> NodeCollections { get; }
+		#endregion
+
+		#region Methods
 
 		/// <summary>Accepts a visitor to process the node.</summary>
 		/// <param name="visitor">The visiting class.</param>

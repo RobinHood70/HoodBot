@@ -1,5 +1,7 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
+	using System.Collections.Generic;
+	using System.Linq;
 	using RobinHood70.WikiCommon;
 
 	/// <summary>Represents a wikitext (HTML) comment.</summary>
@@ -17,6 +19,10 @@
 		/// <summary>Gets or sets the comment text.</summary>
 		/// <value>The comment text.</value>
 		public string Comment { get; set; }
+
+		/// <summary>Gets an enumerator that iterates through any NodeCollections this node contains.</summary>
+		/// <returns>An enumerator that can be used to iterate through additional NodeCollections.</returns>
+		public IEnumerable<NodeCollection> NodeCollections => Enumerable.Empty<NodeCollection>();
 		#endregion
 
 		#region Public Methods

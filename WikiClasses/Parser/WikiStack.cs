@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.ComponentModel;
 	using System.Text.RegularExpressions;
 	using RobinHood70.WikiClasses.Parser.StackElements;
 	using RobinHood70.WikiClasses.Properties;
@@ -43,11 +44,11 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="WikiStack"/> class.</summary>
-		/// <param name="txt">The text to work with.</param>
+		/// <param name="text">The text to work with.</param>
 		/// <param name="tagList">A list of tags whose contents should not be parsed.</param>
 		/// <param name="include">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
-		public WikiStack(string txt, ICollection<string> tagList, bool? include, bool strictInclusion)
+		public WikiStack([Localizable(false)] string text, ICollection<string> tagList, bool? include, bool strictInclusion)
 		{
 			// Not using Push both so that nullable reference check succeeds on .Top and for a micro-optimization.
 			this.array = new StackElement[StartSize];
@@ -55,9 +56,9 @@
 			this.array[0] = this.Top;
 			this.count = 1;
 
-			this.Text = txt;
-			this.textLength = txt.Length;
-			this.enableOnlyInclude = txt.Contains(OnlyIncludeTagOpen);
+			this.Text = text;
+			this.textLength = text.Length;
+			this.enableOnlyInclude = text.Contains(OnlyIncludeTagOpen);
 			this.findOnlyinclude = this.enableOnlyInclude;
 			this.includeIgnores = include == null || !strictInclusion;
 
@@ -108,7 +109,7 @@
 		#endregion
 
 		#region Public Methods
-		public ElementNodeCollection GetElements()
+		public ElementNodeCollection GetFinalNodes()
 		{
 			// We don't need to check that array.Length > 0 because the root node cannot be popped without throwing an error.
 			var nodes = this.array[0].CurrentPiece;
@@ -382,8 +383,7 @@
 		{
 			var equalsCount = this.Text.Span('=', this.Index, 6);
 
-			// DWIM (for count==1 check): This looks kind of like a name/value separator. Let's let the equals handler have it and break the potential heading. This is heuristic, but AFAICT the methodsfor completely correct disambiguation are very complex.
-			// Using LastIndexOf as a very minor optimization, since we know the = is added last for a PairedElement, but won't break if this is not the case in the future.
+			// Using LastIndexOf instead of Contains as a very minor optimization, since we know the = is added to the SearchString last for a PairedElement. Even if that changes in the future, this won't break, it just won't be quite as optimal.
 			if (equalsCount > 1 || (equalsCount == 1 && this.Top.SearchString.LastIndexOf('=') == -1))
 			{
 				this.Push(new HeaderElement(this, equalsCount));

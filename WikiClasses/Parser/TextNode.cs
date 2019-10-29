@@ -1,6 +1,8 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
+	using System.Collections.Generic;
 	using System.ComponentModel;
+	using System.Linq;
 	using RobinHood70.WikiCommon;
 
 	/// <summary>Represents a block of text.</summary>
@@ -14,6 +16,10 @@
 		#endregion
 
 		#region Public Properties
+
+		/// <summary>Gets an enumerator that iterates through any NodeCollections this node contains.</summary>
+		/// <returns>An enumerator that can be used to iterate through additional NodeCollections.</returns>
+		public IEnumerable<NodeCollection> NodeCollections => Enumerable.Empty<NodeCollection>();
 
 		/// <summary>Gets or sets the text.</summary>
 		/// <value>The text.</value>

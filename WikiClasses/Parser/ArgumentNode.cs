@@ -1,12 +1,11 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
 	using System;
-	using System.Collections;
 	using System.Collections.Generic;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Represents a template argument, such as <c>{{{1|}}}</c>.</summary>
-	public class ArgumentNode : IWikiNode, IEnumerable<NodeCollection>
+	public class ArgumentNode : IWikiNode
 	{
 		#region Fields
 		private readonly List<NodeCollection> extraValues = new List<NodeCollection>();
@@ -52,6 +51,24 @@
 		/// <summary>Gets the name of the argument.</summary>
 		/// <value>The argument name.</value>
 		public NodeCollection Name { get; }
+
+		/// <summary>Gets an enumerator that iterates through any NodeCollections this node contains.</summary>
+		/// <returns>An enumerator that can be used to iterate through additional NodeCollections.</returns>
+		public IEnumerable<NodeCollection> NodeCollections
+		{
+			get
+			{
+				if (this.Name != null)
+				{
+					yield return this.Name;
+				}
+
+				foreach (var value in this.extraValues)
+				{
+					yield return value;
+				}
+			}
+		}
 		#endregion
 
 		#region Public Static Methods
@@ -87,23 +104,6 @@
 		/// <summary>Adds a default value. If one exists, this will overwrite it.</summary>
 		/// <param name="value">The value to add.</param>
 		public void AddDefaultValue(IEnumerable<IWikiNode> value) => this.DefaultValue = new NodeCollection(this, value);
-
-		/// <summary>Returns an enumerator that iterates through the collection.</summary>
-		/// <returns>An enumerator that can be used to iterate through the collection.</returns>
-		public IEnumerator<NodeCollection> GetEnumerator()
-		{
-			if (this.Name != null)
-			{
-				yield return this.Name;
-			}
-
-			foreach (var value in this.extraValues)
-			{
-				yield return value;
-			}
-		}
-
-		IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
 		/// <summary>Removes the default value.</summary>
 		public void RemoveDefaultValue() => this.DefaultValue = null;

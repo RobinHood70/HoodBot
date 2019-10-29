@@ -24,7 +24,7 @@
 		public virtual void Visit(ArgumentNode node)
 		{
 			ThrowNull(node, nameof(node));
-			foreach (var value in node)
+			foreach (var value in node.NodeCollections)
 			{
 				value.Accept(this);
 			}

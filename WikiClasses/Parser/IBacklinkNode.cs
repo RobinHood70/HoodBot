@@ -3,7 +3,7 @@
 	using System.Collections.Generic;
 
 	/// <summary>Interface for links and transclusions.</summary>
-	public interface IBacklinkNode : IEnumerable<NodeCollection>
+	public interface IBacklinkNode : IWikiNode
 	{
 		#region Properties
 

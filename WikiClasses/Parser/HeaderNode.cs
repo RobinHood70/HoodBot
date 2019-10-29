@@ -1,33 +1,24 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
 	using System;
-	using System.Collections;
 	using System.Collections.Generic;
+	using System.ComponentModel;
 	using static WikiCommon.Globals;
 
 	/// <summary>Represents a header.</summary>
-	public class HeaderNode : IWikiNode, IEnumerable<NodeCollection>
+	public class HeaderNode : IWikiNode
 	{
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="HeaderNode"/> class.</summary>
-		/// <param name="level">The level.</param>
-		/// <param name="txt">The text.</param>
-		public HeaderNode(int level, string txt)
-		{
-			this.Level = level;
-			this.Title = WikiTextParser.Parse(txt);
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="HeaderNode"/> class.</summary>
 		/// <param name="index">The index.</param>
 		/// <param name="level">The level.</param>
-		/// <param name="title">The title.</param>
-		public HeaderNode(int index, int level, IEnumerable<IWikiNode> title)
+		/// <param name="text">The text of the header.</param>
+		public HeaderNode(int index, int level, [Localizable(false)] IEnumerable<IWikiNode> text)
 		{
 			this.Index = index;
 			this.Level = level;
-			this.Title = new NodeCollection(this, title ?? throw ArgumentNull(nameof(title)));
+			this.Title = new NodeCollection(this, text ?? throw ArgumentNull(nameof(text)));
 		}
 		#endregion
 
@@ -37,6 +28,11 @@
 		/// <value><see langword="true"/> if confirmed; otherwise, <see langword="false"/>.</value>
 		public bool Confirmed { get; set; }
 
+		/// <summary>Gets the equals signs surrounding the title.</summary>
+		/// <value>The equals signs which surround the title.</value>
+		/// <remarks>This is a convenience method to produce the appropriate amount of equals signs instead of having to repeat the same code in numerous places.</remarks>
+		public string EqualsSigns => new string('=', this.Level);
+
 		/// <summary>Gets or sets the index.</summary>
 		/// <value>The index (count of headers to this point in the text).</value>
 		public int Index { get; set; }
@@ -45,6 +41,16 @@
 		/// <value>The level. This is equal to the number of visible equals signs.</value>
 		public int Level { get; set; }
 
+		/// <summary>Gets an enumerator that iterates through any NodeCollections this node contains.</summary>
+		/// <returns>An enumerator that can be used to iterate through additional NodeCollections.</returns>
+		public IEnumerable<NodeCollection> NodeCollections
+		{
+			get
+			{
+				yield return this.Title;
+			}
+		}
+
 		/// <summary>Gets the title.</summary>
 		/// <value>The title.</value>
 		public NodeCollection Title { get; }
@@ -52,11 +58,18 @@
 
 		#region Public Static Methods
 
-		/// <summary>Creates a new ArgumentNode from the provided text.</summary>
-		/// <param name="txt">The text of the argument.</param>
-		/// <returns>A new ArgumentNode.</returns>
+		/// <summary>Creates a new HeaderNode from the provided text.</summary>
+		/// <param name="level">The header level (number of equals signs).</param>
+		/// <param name="text">The text of the argument.</param>
+		/// <returns>A new HeaderNode.</returns>
 		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single argument (<c>{{{abc|123}}}</c>).</exception>
-		public static HeaderNode FromText(string txt) => WikiTextParser.SingleNode<HeaderNode>(txt);
+		public static HeaderNode FromParts(int level, [Localizable(false)] string text) => new HeaderNode(0, level, WikiTextParser.Parse(text));
+
+		/// <summary>Creates a new HeaderNode from the provided text.</summary>
+		/// <param name="text">The text of the argument.</param>
+		/// <returns>A new HeaderNode.</returns>
+		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single argument (<c>{{{abc|123}}}</c>).</exception>
+		public static HeaderNode FromText([Localizable(false)] string text) => WikiTextParser.SingleNode<HeaderNode>(text);
 		#endregion
 
 		#region Public Methods
@@ -65,25 +78,19 @@
 		/// <param name="visitor">The visiting class.</param>
 		public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
 
-		/// <summary>Returns an enumerator that iterates through the collection.</summary>
-		/// <returns>An enumerator that can be used to iterate through the collection.</returns>
-		public IEnumerator<NodeCollection> GetEnumerator()
+		public string GetInnerText(bool innerTrim)
 		{
-			yield return this.Title;
+			var text = WikiTextVisitor.Value(this).TrimEnd();
+			text = text.Substring(this.Level, text.Length - this.Level * 2);
+			return innerTrim ? text.Trim() : text;
 		}
-
-		IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 		#endregion
 
 		#region Public Override Methods
 
 		/// <summary>Returns a <see cref="string"/> that represents this instance.</summary>
 		/// <returns>A <see cref="string"/> that represents this instance.</returns>
-		public override string ToString()
-		{
-			var equals = new string('=', this.Level);
-			return equals + "Header" + equals;
-		}
+		public override string ToString() => this.EqualsSigns + "Header" + this.EqualsSigns;
 		#endregion
 	}
 }

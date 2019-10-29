@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
 	using System;
-	using System.Collections;
 	using System.Collections.Generic;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -21,6 +20,27 @@
 		#endregion
 
 		#region Public Properties
+
+		/// <summary>Gets an enumerator that iterates through any NodeCollections this node contains.</summary>
+		/// <returns>An enumerator that can be used to iterate through additional NodeCollections.</returns>
+		public IEnumerable<NodeCollection> NodeCollections
+		{
+			get
+			{
+				if (this.Title != null)
+				{
+					yield return this.Title;
+				}
+
+				foreach (var param in this.Parameters)
+				{
+					foreach (var paramNode in param.NodeCollections)
+					{
+						yield return paramNode;
+					}
+				}
+			}
+		}
 
 		/// <summary>Gets the parameters.</summary>
 		/// <value>The parameters.</value>
@@ -73,24 +93,6 @@
 		/// <param name="visitor">The visiting class.</param>
 		public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
 
-		/// <summary>Returns an enumerator that iterates through the collection.</summary>
-		/// <returns>An enumerator that can be used to iterate through the collection.</returns>
-		public IEnumerator<NodeCollection> GetEnumerator()
-		{
-			if (this.Title != null)
-			{
-				yield return this.Title;
-			}
-
-			foreach (var param in this.Parameters)
-			{
-				foreach (var paramNode in param)
-				{
-					yield return paramNode;
-				}
-			}
-		}
-
 		/// <summary>Converts all parameter names to their corresponding text with values remaining as <see cref="NodeCollection"/>s.</summary>
 		/// <returns>A dictionary of names and values.</returns>
 		public Dictionary<string, NodeCollection> ParameterDictionary()
@@ -112,7 +114,5 @@
 		/// <returns>A <see cref="string"/> that represents this instance.</returns>
 		public override string ToString() => this.Parameters.Count == 0 ? "{{Template}}" : $"{{Template|Count = {this.Parameters.Count}}}";
 		#endregion
-
-		IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 	}
 }

@@ -7,7 +7,7 @@
 	using static WikiCommon.Globals;
 
 	/// <summary>Represents a parameter to a template or link.</summary>
-	public class ParameterNode : IWikiNode, IEnumerable<NodeCollection>
+	public class ParameterNode : IWikiNode
 	{
 		#region Fields
 		private int index;
@@ -36,6 +36,10 @@
 
 		#region Public Properties
 
+		/// <summary>Gets a value indicating whether this <see cref="ParameterNode">parameter</see> is anonymous.</summary>
+		/// <value><c>true</c> if anonymous; otherwise, <c>false</c>.</value>
+		public bool Anonymous => this.Name == null;
+
 		/// <summary>Gets or sets the index for anonymous parameters.</summary>
 		/// <value>The index.</value>
 		/// <remarks>If this value is set to a value greater than zero, <see cref="Name"/> is automatically set to <see langword="null"/>.</remarks>
@@ -52,13 +56,24 @@
 			}
 		}
 
-		/// <summary>Gets a value indicating whether this <see cref="ParameterNode">parameter</see> is anonymous.</summary>
-		/// <value><c>true</c> if anonymous; otherwise, <c>false</c>.</value>
-		public bool Anonymous => this.Name == null;
-
 		/// <summary>Gets the name of the parameter, if not anonymous.</summary>
 		/// <value>The name.</value>
 		public NodeCollection? Name { get; private set; }
+
+		/// <summary>Gets an enumerator that iterates through any NodeCollections this node contains.</summary>
+		/// <returns>An enumerator that can be used to iterate through additional NodeCollections.</returns>
+		public IEnumerable<NodeCollection> NodeCollections
+		{
+			get
+			{
+				if (this.Name != null)
+				{
+					yield return this.Name;
+				}
+
+				yield return this.Value;
+			}
+		}
 
 		/// <summary>Gets the parameter value.</summary>
 		/// <value>The value.</value>
@@ -98,20 +113,6 @@
 		/// <summary>Accepts a visitor to process the node.</summary>
 		/// <param name="visitor">The visiting class.</param>
 		public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
-
-		/// <summary>Returns an enumerator that iterates through the collection.</summary>
-		/// <returns>An enumerator that can be used to iterate through the collection.</returns>
-		public IEnumerator<NodeCollection> GetEnumerator()
-		{
-			if (this.Name != null)
-			{
-				yield return this.Name;
-			}
-
-			yield return this.Value;
-		}
-
-		IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
 		/// <summary>Sets the name from a list of nodes.</summary>
 		/// <param name="name">The name. If non-null, <see cref="Index"/> will be set to zero.</param>
