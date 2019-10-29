@@ -75,12 +75,6 @@
 			}
 		}
 
-		/// <summary>Gets the <see cref="ISimpleTitle">Title</see> with the specified key.</summary>
-		/// <param name="key">The key.</param>
-		/// <returns>The <see cref="ISimpleTitle">Title</see>.</returns>
-		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry if the requested entry isn't found.</remarks>
-		public TTitle this[Title key] => this[key?.FullPageName];
-
 		/// <summary>Gets or sets the <see cref="ISimpleTitle">Title</see> with the specified key.</summary>
 		/// <param name="key">The key.</param>
 		/// <returns>The <see cref="ISimpleTitle">Title</see>.</returns>

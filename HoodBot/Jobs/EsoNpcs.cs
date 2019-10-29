@@ -72,8 +72,8 @@
 			this.saveList = new PageCollection(this.Site);
 			foreach (var npc in npcData)
 			{
-					npc.TrimPlaces(places);
-					this.saveList.Add(this.CreatePage(npc));
+				npc.TrimPlaces(places);
+				this.saveList.Add(this.CreatePage(npc));
 			}
 
 			this.ProgressMaximum = this.saveList.Count + 4;
@@ -157,7 +157,7 @@
 			foreach (var title in titlesOnly)
 			{
 				var npc = (title as NpcTitle).Npc;
-				var page = checkPages[title];
+				var page = checkPages[title.FullPageName];
 				if (page.Exists)
 				{
 					string issue;

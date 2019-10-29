@@ -288,13 +288,13 @@
 							{ "bot", "1" }
 						};
 					deleteTemplate.AddAnonymous(replacement.DeleteReason);
-					this.ProposeForDeletion(pages[replacement.From], deleteTemplate);
+					this.ProposeForDeletion(pages[replacement.From.FullPageName], deleteTemplate);
 				}
 
 				if (replacement.Action != ReplacementAction.Skip && this.EditPageMethod != null)
 				{
 					var title = this.Site.EditingEnabled ? replacement.To : replacement.From;
-					var page = pages[title];
+					var page = pages[title.FullPageName];
 					this.EditConflictAction = this.EditPageMethod;
 					this.SavePage(page, this.EditSummaryEditAfterMove, true);
 				}
