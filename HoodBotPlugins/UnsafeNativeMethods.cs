@@ -8,6 +8,7 @@
 	{
 		// Implement the IOleMessageFilter interface.
 		[DllImport("ole32.dll", ExactSpelling = true)]
+		[DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
 		public static extern int CoRegisterMessageFilter(IOleMessageFilter newFilter, out IOleMessageFilter oldMsgFilter);
 	}
 }
