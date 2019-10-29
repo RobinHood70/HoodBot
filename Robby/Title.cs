@@ -2,8 +2,8 @@
 {
 	using System;
 	using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Text.RegularExpressions;
+	using System.Diagnostics.CodeAnalysis;
+	using System.Text.RegularExpressions;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
@@ -347,7 +347,7 @@
 		/// <param name="other">A title to compare with this one.</param>
 		/// <returns><see langword="true"/> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false"/>.</returns>
 		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "IsSameTitle will return false if this is null, which will then short-circuit the remainder of the comparison.")]
+		[SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "IsSameTitle will return false if this is null, which will then short-circuit the remainder of the comparison.")]
 		public bool KeyedEquals(IKeyedTitle other) => this.SimpleEquals(other) && this.Key == other.Key;
 
 		/// <summary>Moves the title to the name specified.</summary>
