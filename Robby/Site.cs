@@ -767,7 +767,7 @@
 		/// <returns>A value indicating the actions that should take place.</returns>
 		/// <remarks>In the event of a <see cref="ChangeStatus.Cancelled"/> result, the corresponding value will be <span class="keyword">default</span>.</remarks>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
-		public virtual ChangeValue<T> PublishChange<T>(object sender, IReadOnlyDictionary<string, object> parameters, Func<ChangeValue<T>> changeFunction, T disabledResult, [CallerMemberName] string caller = null)
+		public virtual ChangeValue<T> PublishChange<T>(object sender, IReadOnlyDictionary<string, object> parameters, Func<ChangeValue<T>> changeFunction, T disabledResult, [CallerMemberName] string caller = "")
 		{
 			ThrowNull(changeFunction, nameof(changeFunction));
 			var changeArgs = new ChangeArgs(sender, caller, parameters);
