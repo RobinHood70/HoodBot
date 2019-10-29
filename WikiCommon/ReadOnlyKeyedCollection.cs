@@ -127,7 +127,10 @@
 		/// <exception cref="ArgumentNullException">key is null.</exception>
 		public bool Contains(TKey key) => this.Dictionary.ContainsKey(key);
 
-		bool IReadOnlyDictionary<TKey, TItem>.ContainsKey(TKey key) => this.Dictionary.ContainsKey(key);
+		/// <summary>Determines whether the read-only dictionary contains an element that has the specified key.</summary>
+		/// <param name="key">The key to locate.</param>
+		/// <returns><see langword="true"/> if the read-only dictionary contains an element that has the specified key; otherwise, <see langword="false"/>.</returns>
+		public bool ContainsKey(TKey key) => this.Dictionary.ContainsKey(key);
 
 		/// <summary>Returns an enumerator that iterates through the collection.</summary>
 		/// <returns>An enumerator that can be used to iterate through the collection.</returns>

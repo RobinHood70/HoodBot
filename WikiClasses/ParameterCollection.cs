@@ -72,7 +72,7 @@
 		public PaddedString DefaultValueFormat { get; set; } = new PaddedString();
 
 		/// <summary>Gets a value indicating whether the collection is read-only.</summary>
-		bool ICollection<Parameter>.IsReadOnly => false;
+		public bool IsReadOnly => false;
 
 		/// <summary>Gets an enumeration of the name or position of each parameter.</summary>
 		/// <value>The parameter names and values.</value>
