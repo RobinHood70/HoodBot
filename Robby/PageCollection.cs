@@ -227,6 +227,18 @@
 			}
 		}
 
+		/// <summary>Removes all pages from the collection where the page's <see cref="Page.Exists"/> property is false.</summary>
+		public void RemoveUnchanged()
+		{
+			for (var i = this.Count - 1; i >= 0; i--)
+			{
+				if (!this[i].TextModified)
+				{
+					this.RemoveAt(i);
+				}
+			}
+		}
+
 		/// <summary>Sets the namespace limitations to new values, clearing out any previous limitations.</summary>
 		/// <param name="limitationType">The type of namespace limitations to apply.</param>
 		/// <param name="namespaceLimitations">The namespace limitations. If null, only the limitation type is applied; the namespace set will remain unchanged.</param>
