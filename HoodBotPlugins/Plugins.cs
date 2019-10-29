@@ -13,21 +13,25 @@
 	/// <summary>A singleton class to handle all plugin functionality.</summary>
 	public class Plugins : IDisposable
 	{
-		#region Fields
+		#region Static Fields
 		private static Plugins? instance;
-		private static ComposablePartCatalog? catalog;
-		private static CompositionContainer? container;
+		#endregion
+
+		#region Fields
+		private readonly ComposablePartCatalog? catalog;
+		private readonly CompositionContainer? container;
+		private bool disposedValue = false; // To detect redundant calls
 		#endregion
 
 		#region Constructors
 		private Plugins()
 		{
 			var folder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-			catalog = new DirectoryCatalog(folder + @"\Plugins\net48", "*Diff*.dll");
-			container = new CompositionContainer(catalog);
+			this.catalog = new DirectoryCatalog(folder + @"\Plugins\net48", "*Diff*.dll");
+			this.container = new CompositionContainer(this.catalog);
 			try
 			{
-				container.ComposeParts(this);
+				this.container.ComposeParts(this);
 			}
 			catch (CompositionException ce)
 			{
@@ -70,8 +74,27 @@
 		/// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
 		public void Dispose()
 		{
-			container?.Dispose();
-			catalog?.Dispose();
+			this.Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+		#endregion
+
+		#region Protected Methods
+
+		/// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+		/// <param name="disposing"><see langword="true"/> if the object is being disposed; <see langword="false"/> if it's finalizing.</param>
+		protected virtual void Dispose(bool disposing)
+		{
+			if (!this.disposedValue)
+			{
+				if (disposing)
+				{
+					this.catalog?.Dispose();
+					this.container?.Dispose();
+				}
+
+				this.disposedValue = true;
+			}
 		}
 		#endregion
 	}
