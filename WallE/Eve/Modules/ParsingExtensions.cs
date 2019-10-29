@@ -203,7 +203,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				foreach (var item in result)
 				{
-					var warning = new WarningsItem((string)item["type"]!, (string?)item["message"], (item["params"]?.ToObject<IEnumerable<object>>()).AsReadOnlyList());
+					var warning = new WarningsItem((string?)item["type"] ?? string.Empty, (string?)item["message"], (item["params"]?.ToObject<IEnumerable<object>>()).AsReadOnlyList());
 					list.Add(warning);
 				}
 			}
@@ -259,7 +259,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				var dict = new Dictionary<string, string?>();
 				foreach (var entry in token)
 				{
-					var key = (string)entry["name"]!;
+					var key = (string?)entry["name"] ?? string.Empty;
 					var value = (string?)entry["*"];
 
 					dict.Add(key, value);
