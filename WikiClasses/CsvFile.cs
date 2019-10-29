@@ -92,6 +92,8 @@
 			{
 				list.Add(item.ToString());
 			}
+
+			this.Add(list);
 		}
 
 		/// <summary>Adds the specified field values.</summary>
