@@ -38,6 +38,18 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
+		#region Private Static Classes
+		private static RevisionDeleteTypes LogEventGetRDType(string? param)
+		{
+			ThrowNull(param, nameof(param));
+			var info = param.Split(TextArrays.EqualsSign);
+			var type = info[info.Length - 1];
+			return (RevisionDeleteTypes)int.Parse(type, CultureInfo.InvariantCulture);
+		}
+
+		private static IReadOnlyList<string> ParseRights(string? value) => value?.Split(TextArrays.CommaSpace, StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
+		#endregion
+
 		#region Private Classes
 
 		private class ExtraDataParser
@@ -197,12 +209,12 @@ namespace RobinHood70.WallE.Eve.Modules
 
 					if (this.parms[valOffset++.ToString()] is JToken oldNode)
 					{
-						this.Result.Add("old", this.LogEventGetRDType((string?)oldNode));
+						this.Result.Add("old", LogEventGetRDType((string?)oldNode));
 					}
 
 					if (this.parms[valOffset++.ToString()] is JToken newNode)
 					{
-						this.Result.Add("new", this.LogEventGetRDType((string?)newNode));
+						this.Result.Add("new", LogEventGetRDType((string?)newNode));
 					}
 				}
 			}
@@ -274,8 +286,8 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			private void ExtraDataRights()
 			{
-				this.Result.Add("new", this.ParseRights((string?)this.parms["new"]));
-				this.Result.Add("old", this.ParseRights((string?)this.parms["old"]));
+				this.Result.Add("new", ParseRights((string?)this.parms["new"]));
+				this.Result.Add("old", ParseRights((string?)this.parms["old"]));
 			}
 
 			private void ExtraDataUpload()
@@ -283,16 +295,6 @@ namespace RobinHood70.WallE.Eve.Modules
 				this.Result.Add("sha1", (string?)this.parms["img_sha1"]);
 				this.Result.Add("uploadtimestamp", (DateTime?)this.parms["img_timestamp"]);
 			}
-
-			private RevisionDeleteTypes LogEventGetRDType(string? param)
-			{
-				ThrowNull(param, nameof(param));
-				var info = param.Split(TextArrays.EqualsSign);
-				var type = info[info.Length - 1];
-				return (RevisionDeleteTypes)int.Parse(type, CultureInfo.InvariantCulture);
-			}
-
-			private IReadOnlyList<string> ParseRights(string? value) => value?.Split(TextArrays.CommaSpace, StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
 			#endregion
 		}
 		#endregion
