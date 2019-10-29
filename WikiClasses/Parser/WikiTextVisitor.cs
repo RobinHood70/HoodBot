@@ -95,7 +95,11 @@
 
 		/// <summary>Visits the specified <see cref="HeaderNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		public void Visit(HeaderNode node) => node?.Title.Accept(this);
+		public void Visit(HeaderNode node)
+		{
+			ThrowNull(node, nameof(node));
+			node.Title.Accept(this);
+		}
 
 		/// <summary>Visits the specified <see cref="IgnoreNode"/>.</summary>
 		/// <param name="node">The node.</param>
