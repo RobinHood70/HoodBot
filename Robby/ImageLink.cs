@@ -236,7 +236,7 @@
 			set
 			{
 				this.parameters.Remove(Site.ImageSizeName);
-				if (value == 0 || value == double.NaN)
+				if (value == 0 || double.IsNaN(value))
 				{
 					this.parameters.Add(new Parameter(Site.ImageUprightName, this.uprightWord, true));
 				}
