@@ -245,7 +245,9 @@ namespace RobinHood70.WikiClasses
 
 		private string GetString(int start, int end) => start == end ? this.txt.Substring(this.tokens[start].Start, this.tokens[start].Length) : this.txt.Substring(this.tokens[start].Start, this.tokens[end].Start + this.tokens[end].Length - this.tokens[start].Start);
 
+#pragma warning disable CA1502 // Avoid excessive complexity - intend for this to be written out, in time.
 		private Token? GetToken(int index)
+#pragma warning restore CA1502 // Avoid excessive complexity
 		{
 			var start = index;
 			var tokenType = TokenType.Unknown;
