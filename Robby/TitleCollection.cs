@@ -91,7 +91,7 @@
 			}
 			else
 			{
-				var first = titles.FirstOrDefault();
+				var first = titles.First();
 				if (first == null)
 				{
 					throw new InvalidOperationException(Resources.SourceCollectionEmpty);

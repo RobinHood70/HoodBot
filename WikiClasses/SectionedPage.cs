@@ -129,7 +129,7 @@
 		/// <summary>Finds the first section on the page with the given title, regardless of level.</summary>
 		/// <param name="title">The title.</param>
 		/// <returns>The first section on the page with the specified title, or null if no section with that title was found.</returns>
-		public Section? FindFirstSection(string title) => this.FindSection(title).FirstOrDefault(null);
+		public Section? FindFirstSection(string title) => this.FindSection(title).First();
 
 		/// <summary>Finds the last section with the specified title, regardless of level.</summary>
 		/// <param name="title">The title to search for.</param>

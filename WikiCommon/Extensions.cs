@@ -4,6 +4,7 @@
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -152,59 +153,20 @@
 			return false;
 		}
 
-		/// <summary>Gets the first item of the collection.</summary>
-		/// <typeparam name="T">The collection type.</typeparam>
-		/// <param name="enumerable">The collection to enumerate.</param>
-		/// <returns>The first value in the enumerable, or throws an error.</returns>
-		/// <exception cref="KeyNotFoundException">The list was empty.</exception>
-		public static T First<T>(this IEnumerable<T> enumerable)
-		{
-			ThrowNull(enumerable, nameof(enumerable));
-			using var enumerator = enumerable.GetEnumerator();
-			return enumerator.MoveNext() ? enumerator.Current : throw new KeyNotFoundException();
-		}
-
 		/// <summary>Gets the first item of the collection, or the specified default value.</summary>
 		/// <typeparam name="T">The collection type.</typeparam>
 		/// <param name="enumerable">The collection to enumerate.</param>
 		/// <returns>The first item in the collection or the specified default value.</returns>
-		public static T? FirstOrDefault<T>(this IEnumerable<T> enumerable)
-			where T : class => FirstOrDefault(enumerable, default);
+		[return: MaybeNull]
+		public static T First<T>(this IEnumerable<T>? enumerable) => First(enumerable, default!);
 
 		/// <summary>Gets the first item of the collection, or the specified default value.</summary>
 		/// <typeparam name="T">The collection type.</typeparam>
 		/// <param name="enumerable">The collection to enumerate.</param>
 		/// <param name="defaultValue">The default value to use if the collection is empty.</param>
 		/// <returns>The first item in the collection or the specified default value.</returns>
-		public static T? FirstOrDefault<T>(this IEnumerable<T> enumerable, T? defaultValue)
-			where T : class
-		{
-			if (enumerable != null)
-			{
-				using var enumerator = enumerable.GetEnumerator();
-				if (enumerator.MoveNext())
-				{
-					return enumerator.Current;
-				}
-			}
-
-			return defaultValue;
-		}
-
-		/// <summary>Gets the first item of the collection, or the specified default value.</summary>
-		/// <typeparam name="T">The collection type.</typeparam>
-		/// <param name="enumerable">The collection to enumerate.</param>
-		/// <returns>The first item in the collection or the specified default value.</returns>
-		public static T FirstOrDefaultValue<T>(this IEnumerable<T> enumerable)
-			where T : struct => FirstOrDefaultValue(enumerable, default);
-
-		/// <summary>Gets the first item of the collection, or the specified default value.</summary>
-		/// <typeparam name="T">The collection type.</typeparam>
-		/// <param name="enumerable">The collection to enumerate.</param>
-		/// <param name="defaultValue">The default value to use if the collection is empty.</param>
-		/// <returns>The first item in the collection or the specified default value.</returns>
-		public static T FirstOrDefaultValue<T>(this IEnumerable<T> enumerable, T defaultValue)
-			where T : struct
+		[return: MaybeNull]
+		public static T First<T>(this IEnumerable<T>? enumerable, [MaybeNull] T defaultValue)
 		{
 			if (enumerable != null)
 			{
