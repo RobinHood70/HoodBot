@@ -229,17 +229,18 @@ namespace RobinHood70.WallE.Eve.Modules
 				this.Generator.BuildRequest(request);
 			}
 
-			if (input.Values == null)
+			if (input.Values == null || input.Values.Count == 0)
 			{
 				this.PageSetDone = this.Generator == null;
 			}
 			else
 			{
-				this.PageSetDone = (input.Values.Count - this.offset) <= this.CurrentListSize;
+				var numRemaining = input.Values.Count - this.offset;
+				this.PageSetDone = numRemaining <= this.CurrentListSize;
 				var listSize = this.PageSetDone
-					? input.Values.Count - this.offset
+					? numRemaining
 					: this.CurrentListSize;
-				Debug.Assert(listSize > 0, "listSize was 0 or negative!");
+				Debug.Assert(listSize >= 0, "listSize was 0 or negative!");
 				var currentGroup = new List<string>(listSize);
 				for (var i = 0; i < listSize; i++)
 				{
