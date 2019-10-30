@@ -5,7 +5,6 @@
 
 	/// <summary>Represents a single row in a <see cref="CsvFile"/>.</summary>
 	/// <remarks>Once created, the number of values in a row may not be changed.</remarks>
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Not intuitive to refer to this as a collection.")]
 	public class CsvRow : IReadOnlyList<string>, IReadOnlyCollection<string>, IEnumerable<string>
 	{
 		#region Fields

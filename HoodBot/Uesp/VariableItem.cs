@@ -2,7 +2,6 @@
 {
 	using System.Collections.Generic;
 
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Same naming convention as WallE.")]
 	public class VariableItem
 	{
 		#region Constructors

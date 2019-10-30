@@ -10,7 +10,6 @@
 
 	/// <summary>Represents a template as a name and collection of <see cref="Parameter"/>s.</summary>
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
-	[SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Template is a more meaningful name.")]
 	public class Template : ParameterCollection
 	{
 		#region Static Fields

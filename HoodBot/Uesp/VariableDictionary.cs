@@ -6,9 +6,7 @@
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>This class acts as a mutable-once dictionary. It is initialized as an empty dictionary, which you can update once via the <see cref="CopyFrom(IReadOnlyDictionary{string, string})"/> method. After that, it becomes immutable.</summary>
-#pragma warning disable CA1710 // Identifiers should have correct suffix
 	public class VariableDictionary : IReadOnlyDictionary<string, string>
-#pragma warning restore CA1710 // Identifiers should have correct suffix
 	{
 		#region Fields
 		private readonly Dictionary<string, string> variables = new Dictionary<string, string>();

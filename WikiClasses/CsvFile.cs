@@ -9,7 +9,6 @@
 
 	/// <summary>Reads or writes a CSV file, including tab-separated files and similar formats.</summary>
 	/// <remarks>This class is primarily designed to handle entire files at once. <see cref="TextReader"/>- and <see cref="TextWriter"/>-based methods are also available to support streaming and the like.</remarks>
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Unintuitive to refer to it as a 'CsvRowCollection'.")]
 	public sealed class CsvFile : IList<CsvRow>
 	{
 		#region Fields
