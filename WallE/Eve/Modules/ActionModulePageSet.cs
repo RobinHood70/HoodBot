@@ -32,7 +32,11 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Constructors
 		protected ActionModulePageSet(WikiAbstractionLayer wal)
-			: base(wal) => this.ContinueModule = wal.ModuleFactory.CreateContinue();
+			: base(wal)
+		{
+			this.ContinueModule = wal.ModuleFactory.CreateContinue();
+			this.MaximumListSize = this.Wal.MaximumPageSetSize;
+		}
 		#endregion
 
 		#region Public Properties
@@ -67,7 +71,6 @@ namespace RobinHood70.WallE.Eve.Modules
 				this.Generator = this.Wal.ModuleFactory.CreateGenerator(input.GeneratorInput, this);
 			}
 
-			this.MaximumListSize = this.GetMaximumListSize(input);
 			this.BeforeSubmit();
 			this.ContinueModule.BeforePageSetSubmit(this);
 			this.offset = 0;
@@ -77,6 +80,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				var request = this.CreateRequest(input);
 				var response = this.Wal.SendRequest(request);
+				Debug.WriteLine(response?.Length);
 				this.ParseResponse(response, pages);
 			}
 			while (this.ContinueModule.Continues && this.Continues && !this.PageSetDone);
@@ -129,12 +133,20 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected void ParseResponse(string? response, IList<TOutput> pages)
 		{
-			var jsonResponse = ToJson(response);
-			if (jsonResponse.Type == JTokenType.Object)
+			var result = ToJson(response);
+			if (result.Type == JTokenType.Object)
 			{
-				this.Deserialize(jsonResponse, pages);
+				this.DeserializeAction(result);
+				if (result[this.Name] is JToken node && node.Type != JTokenType.Null)
+				{
+					this.DeserializeResult(node, pages);
+				}
+				else
+				{
+					throw WikiException.General("no-result", "The expected result node, " + this.Name + ", was not found.");
+				}
 			}
-			else if (!(jsonResponse is JArray array && array.Count == 0))
+			else if (!(result is JArray array && array.Count == 0))
 			{
 				throw new InvalidDataException();
 			}
@@ -148,13 +160,12 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Override Methods
-		protected override void DeserializeParent(JToken parent)
+		protected override void DeserializeActionExtra(JToken result)
 		{
-			ThrowNull(parent, nameof(parent));
-			base.DeserializeParent(parent);
+			ThrowNull(result, nameof(result));
 			if (this.ContinueModule != null)
 			{
-				this.ContinueModule = this.ContinueModule.Deserialize(this.Wal, parent);
+				this.ContinueModule = this.ContinueModule.Deserialize(this.Wal, result);
 
 				// Was: !this.PageSetDone && !this.ContinueModule.BatchComplete && !this.ContinueModule.Continues, but that seems wrong. Maybe have been the result of the faulty BatchComplete in ContinueModule2.
 				if (!this.PageSetDone && this.ContinueModule.BatchComplete)
@@ -163,7 +174,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 			}
 
-			this.GetPageSetNodes(parent);
+			this.GetPageSetNodes(result);
 		}
 
 		protected override bool HandleWarning(string? from, string? text)
@@ -171,16 +182,12 @@ namespace RobinHood70.WallE.Eve.Modules
 			if (from == this.Name)
 			{
 				var match = TooManyFinder.Match(text);
-				if (match.Success)
+				if (match.Success && PageSetInput.AllTypes.Contains(match.Groups["parameter"].Value))
 				{
-					var parameter = match.Groups["parameter"].Value;
-					if (PageSetInput.AllTypes.Contains(parameter))
-					{
-						this.PageSetDone = false;
-						this.MaximumListSize = int.Parse(match.Groups["sizelimit"].Value, CultureInfo.InvariantCulture);
-						this.offset = this.MaximumListSize;
-						return true;
-					}
+					this.PageSetDone = false;
+					this.MaximumListSize = int.Parse(match.Groups["sizelimit"].Value, CultureInfo.InvariantCulture);
+					this.offset = this.MaximumListSize;
+					return true;
 				}
 			}
 
@@ -200,8 +207,6 @@ namespace RobinHood70.WallE.Eve.Modules
 				pages.Add(this.GetItem(item));
 			}
 		}
-
-		protected virtual int GetMaximumListSize(TInput input) => this.Wal.MaximumPageSetSize;
 		#endregion
 
 		#region Private Static Methods
@@ -260,19 +265,6 @@ namespace RobinHood70.WallE.Eve.Modules
 			this.ContinueModule?.BuildRequest(request);
 
 			return request;
-		}
-
-		private void Deserialize(JToken parent, IList<TOutput> pages)
-		{
-			this.DeserializeParent(parent);
-			if (parent[this.Name] is JToken result && result.Type != JTokenType.Null)
-			{
-				this.DeserializeResult(result, pages);
-			}
-			else
-			{
-				throw WikiException.General("no-result", "The expected result node, " + this.Name + ", was not found.");
-			}
 		}
 		#endregion
 	}

@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionMergeHistory : ActionModuleValued<MergeHistoryInput, MergeHistoryResult>
+	internal class ActionMergeHistory : ActionModule<MergeHistoryInput, MergeHistoryResult>
 	{
 		#region Constructors
 		public ActionMergeHistory(WikiAbstractionLayer wal)

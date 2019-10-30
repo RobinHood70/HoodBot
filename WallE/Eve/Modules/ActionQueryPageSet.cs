@@ -35,6 +35,19 @@ namespace RobinHood70.WallE.Eve.Modules
 				var userInfoInput = new UserInfoInput() { Properties = props };
 				this.userModule = new MetaUserInfo(wal, userInfoInput);
 			}
+
+			/* Below used to include the following instead of this.Wal.MaximumPageSetSize, but I don't believe it is correct or has any bearing on the results:
+				this.input.GeneratorInput is ILimitableInput limitable &&
+				limitable.Limit > 0 && limitable.Limit < this.Wal.MaximumPageSetSize
+					? limitable.Limit
+					: this.Wal.MaximumPageSetSize;
+			*/
+			this.MaximumListSize =
+				this.input.PropertyModules != null &&
+				this.input.PropertyModules.Find(module => module.Name == "revisions") is PropRevisions revModule &&
+				revModule.IsRevisionRange
+					? 1
+					: this.Wal.MaximumPageSetSize;
 		}
 		#endregion
 
@@ -121,7 +134,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override void BeforeSubmit()
 		{
 			base.BeforeSubmit();
-			this.itemsRemaining = this.input.MaxItems == 0 ? int.MaxValue : this.input.MaxItems;
+			this.itemsRemaining = this.input.GeneratorInput is ILimitableInput limitable && limitable.MaxItems > 0 ? limitable.MaxItems : int.MaxValue;
 			ActionQuery.CheckActiveModules(this.Wal, this.AllModules);
 		}
 
@@ -130,17 +143,17 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override IList<PageItem> CreatePageList() => new KeyedPages();
 
-		protected override void DeserializeParent(JToken parent)
+		protected override void DeserializeActionExtra(JToken result)
 		{
-			ThrowNull(parent, nameof(parent));
-			base.DeserializeParent(parent);
+			ThrowNull(result, nameof(result));
+			base.DeserializeActionExtra(result);
 			var list = new List<IQueryModule>(this.AllModules);
 			if (this.Generator != null)
 			{
 				list.Add(this.Generator);
 			}
 
-			ActionQuery.CheckParent(parent, list);
+			ActionQuery.CheckResult(result, list);
 		}
 
 		protected override void DeserializeResult(JToken result, IList<PageItem> pages)
@@ -183,14 +196,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			return page;
 		}
 
-		protected override bool HandleWarning(string? from, string? text) => ActionQuery.HandleWarning(from, text, this.input.QueryModules, this.userModule) ? true : base.HandleWarning(from, text);
-
-		protected override int GetMaximumListSize(QueryInput input) =>
-			this.input.PropertyModules != null && this.input.PropertyModules.Find(module => module.Name == "revisions") is PropRevisions revModule && revModule.IsRevisionRange
-				? 1 :
-			this.input.Limit > 0 && this.input.Limit < this.MaximumListSize
-				? this.input.Limit
-				: this.Wal.MaximumPageSetSize;
+		protected override bool HandleWarning(string? from, string? text) => ActionQuery.HandleWarning(from, text, this.input.QueryModules, this.userModule) || base.HandleWarning(from, text);
 		#endregion
 
 		#region Private Methods

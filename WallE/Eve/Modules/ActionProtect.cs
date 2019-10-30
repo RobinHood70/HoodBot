@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionProtect : ActionModuleValued<ProtectInput, ProtectResult>
+	internal class ActionProtect : ActionModule<ProtectInput, ProtectResult>
 	{
 		#region Constructors
 		public ActionProtect(WikiAbstractionLayer wal)

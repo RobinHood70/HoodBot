@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionImport : ActionModuleValued<ImportInput, IReadOnlyList<ImportItem>>
+	internal class ActionImport : ActionModule<ImportInput, IReadOnlyList<ImportItem>>
 	{
 		#region Constructors
 		public ActionImport(WikiAbstractionLayer wal)

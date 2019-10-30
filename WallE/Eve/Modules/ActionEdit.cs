@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionEdit : ActionModuleValued<EditInput, EditResult>
+	internal class ActionEdit : ActionModule<EditInput, EditResult>
 	{
 		#region Constructors
 		public ActionEdit(WikiAbstractionLayer wal)

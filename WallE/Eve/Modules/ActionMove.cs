@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WikiCommon.Globals;
 
 	// IMPNOTE: Result is slightly reformatted from the API to provide a straight-forward collection of pages that were moved.
-	internal class ActionMove : ActionModuleValued<MoveInput, IReadOnlyList<MoveItem>>
+	internal class ActionMove : ActionModule<MoveInput, IReadOnlyList<MoveItem>>
 	{
 		#region Constructors
 		public ActionMove(WikiAbstractionLayer wal)

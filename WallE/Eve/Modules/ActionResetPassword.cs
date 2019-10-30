@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WikiCommon.Globals;
 
 	// MWVERSION: 1.28
-	internal class ActionResetPassword : ActionModuleValued<ResetPasswordInput, ResetPasswordResult>
+	internal class ActionResetPassword : ActionModule<ResetPasswordInput, ResetPasswordResult>
 	{
 		#region Constructors
 		public ActionResetPassword(WikiAbstractionLayer wal)

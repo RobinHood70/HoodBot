@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WikiCommon.Globals;
 
 	// MWVERSION: 1.28
-	internal class ActionParse : ActionModuleValued<ParseInput, ParseResult>
+	internal class ActionParse : ActionModule<ParseInput, ParseResult>
 	{
 		#region Constructors
 		public ActionParse(WikiAbstractionLayer wal)

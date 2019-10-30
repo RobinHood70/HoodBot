@@ -5,7 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionOptions : ActionModuleValued<OptionsInputInternal, NullObject>
+	internal class ActionOptions : ActionModule<OptionsInputInternal, NullObject>
 	{
 		#region Constructors
 		public ActionOptions(WikiAbstractionLayer wal)

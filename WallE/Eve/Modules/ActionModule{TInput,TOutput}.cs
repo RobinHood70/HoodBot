@@ -9,12 +9,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public abstract class ActionModuleValued<TInput, TOutput> : ActionModule
+	public abstract class ActionModule<TInput, TOutput> : ActionModule
 		where TInput : class
 		where TOutput : class
 	{
 		#region Constructors
-		protected ActionModuleValued(WikiAbstractionLayer wal)
+		protected ActionModule(WikiAbstractionLayer wal)
 			: base(wal)
 		{
 		}
@@ -71,18 +71,6 @@ namespace RobinHood70.WallE.Eve.Modules
 			return request;
 		}
 
-		private TOutput Deserialize(JToken parent)
-		{
-			ThrowNull(parent, nameof(parent));
-			this.DeserializeParent(parent);
-			if (parent[this.Name] is JToken result && result.Type != JTokenType.Null)
-			{
-				return this.DeserializeResult(result) ?? throw WikiException.General("null-result", this.Name + " was found in the results, but the deserializer returned null.");
-			}
-
-			throw WikiException.General("no-result", "The expected result node, " + this.Name + ", was not found.");
-		}
-
 		private TOutput ParseResponse(string? response)
 		{
 			if (this.ForceCustomDeserialization)
@@ -93,8 +81,19 @@ namespace RobinHood70.WallE.Eve.Modules
 			try
 			{
 				// DeserializeCustom allows modules like OpenSearch to work correctly. If it returns an object with error info, the standard deserialization routine kicks in, while the custom one will kick in if it gets an array.
-				var jsonResponse = ToJson(response);
-				return jsonResponse.Type == JTokenType.Object ? this.Deserialize(jsonResponse) : this.DeserializeCustom(jsonResponse);
+				var result = ToJson(response);
+				if (result.Type == JTokenType.Object)
+				{
+					this.DeserializeAction(result);
+					if (result[this.Name] is JToken node && result.Type != JTokenType.Null)
+					{
+						return this.DeserializeResult(node) ?? throw WikiException.General("null-result", this.Name + " was found in the results, but the deserializer returned null.");
+					}
+
+					throw WikiException.General("no-result", "The expected result node, " + this.Name + ", was not found.");
+				}
+
+				return this.DeserializeCustom(result);
 			}
 			catch (JsonReaderException)
 			{

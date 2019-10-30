@@ -5,13 +5,13 @@
 	{
 		#region Properties
 
-		/// <summary>Gets the number of items to fetch at a time.</summary>
+		/// <summary>Gets or sets the number of items to fetch at a time.</summary>
 		/// <value>The number of items to fetch at a time.</value>
-		int Limit { get; }
+		int Limit { get; set; }
 
-		/// <summary>Gets the number of items to fetch in total.</summary>
+		/// <summary>Gets or sets the number of items to fetch in total.</summary>
 		/// <value>The number of items to fetch in total.</value>
-		int MaxItems { get; }
+		int MaxItems { get; set; }
 		#endregion
 	}
 }

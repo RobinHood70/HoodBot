@@ -88,7 +88,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 		}
 
-		public static void CheckParent(JToken parent, IEnumerable<IQueryModule> modules)
+		public static void CheckResult(JToken parent, IEnumerable<IQueryModule> modules)
 		{
 			if (parent["limits"] is JToken limits)
 			{
@@ -155,16 +155,29 @@ namespace RobinHood70.WallE.Eve.Modules
 			CheckActiveModules(this.Wal, this.queryModules);
 		}
 
-		protected override void DeserializeParent(JToken parent)
+		protected override void DeserializeActionExtra(JToken result)
 		{
-			ThrowNull(parent, nameof(parent));
-			base.DeserializeParent(parent);
-			if (this.continueModule != null)
+			ThrowNull(result, nameof(result));
+			if (result[this.Name] is JToken node && node.Type != JTokenType.Null)
 			{
-				this.continueModule = this.continueModule.Deserialize(this.Wal, parent);
+				foreach (var module in this.queryModules)
+				{
+					module.Deserialize(node);
+				}
+
+				if (this.userModule != null)
+				{
+					this.userModule.Deserialize(node);
+					this.UserInfo = this.userModule.Output;
+				}
 			}
 
-			CheckParent(parent, this.queryModules);
+			if (this.continueModule != null)
+			{
+				this.continueModule = this.continueModule.Deserialize(this.Wal, result);
+			}
+
+			CheckResult(result, this.queryModules);
 		}
 
 		protected override bool HandleWarning(string? from, string? text) => HandleWarning(from, text, this.queryModules, this.userModule) ? true : base.HandleWarning(from, text);
@@ -185,33 +198,14 @@ namespace RobinHood70.WallE.Eve.Modules
 			return request;
 		}
 
-		private void Deserialize(JToken parent)
-		{
-			ThrowNull(parent, nameof(parent));
-			this.DeserializeParent(parent);
-			if (parent[this.Name] is JToken result && result.Type != JTokenType.Null)
-			{
-				foreach (var module in this.queryModules)
-				{
-					module.Deserialize(result);
-				}
-
-				if (this.userModule != null)
-				{
-					this.userModule.Deserialize(result);
-					this.UserInfo = this.userModule.Output;
-				}
-			}
-		}
-
 		private void ParseResponse(string? response)
 		{
-			var jsonResponse = ToJson(response);
-			if (jsonResponse.Type == JTokenType.Object)
+			var result = ToJson(response);
+			if (result.Type == JTokenType.Object)
 			{
-				this.Deserialize(jsonResponse);
+				this.DeserializeAction(result);
 			}
-			else if (!(jsonResponse is JArray array && array.Count == 0))
+			else if (!(result is JArray array && array.Count == 0))
 			{
 				throw new InvalidDataException();
 			}

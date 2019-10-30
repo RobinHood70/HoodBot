@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionUpload : ActionModuleValued<UploadInputInternal, UploadResult>
+	internal class ActionUpload : ActionModule<UploadInputInternal, UploadResult>
 	{
 		#region Constructors
 		public ActionUpload(WikiAbstractionLayer wal)

@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionOpenSearch : ActionModuleValued<OpenSearchInput, IReadOnlyList<OpenSearchItem>>
+	internal class ActionOpenSearch : ActionModule<OpenSearchInput, IReadOnlyList<OpenSearchItem>>
 	{
 		#region Constructors
 		public ActionOpenSearch(WikiAbstractionLayer wal)

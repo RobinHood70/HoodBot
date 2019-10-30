@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WikiCommon.Globals;
 
 	// HACK: Much of this module remains untested, as there is virtually no documentation on it, and example outputs were mostly impossible to find.
-	internal class ActionExpandTemplates : ActionModuleValued<ExpandTemplatesInput, ExpandTemplatesResult>
+	internal class ActionExpandTemplates : ActionModule<ExpandTemplatesInput, ExpandTemplatesResult>
 	{
 		#region Constructors
 		public ActionExpandTemplates(WikiAbstractionLayer wal)

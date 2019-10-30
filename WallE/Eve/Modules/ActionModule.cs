@@ -65,6 +65,45 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("curtimestamp", wal.SiteVersion >= 124);
 		}
 
+		protected void DeserializeAction(JToken result)
+		{
+			ThrowNull(result, nameof(result));
+
+			// TODO: Add multiple-error support here (errorformat=raw) using new GetErrors() function.
+			if (result["error"].GetError() is ErrorItem error)
+			{
+				switch (error.Code)
+				{
+					case "assertbotfailed":
+					case "assertuserfailed":
+					case "assertnameduserfailed":
+						throw new StopException(error.Info);
+					case "editconflict":
+						throw new EditConflictException();
+					default:
+						throw WikiException.General(error.Code, error.Info);
+				}
+			}
+
+			if (result["warnings"] is JToken warnings)
+			{
+				foreach (var warning in warnings.Children<JProperty>())
+				{
+					if (warning.First is JToken descNode)
+					{
+						var description = descNode.MustHaveBCString("warnings");
+						foreach (var line in description.Split(TextArrays.LineFeed))
+						{
+							this.AddWarning(warning.Name, line);
+						}
+					}
+				}
+			}
+
+			this.Wal.CurrentTimestamp = result["curtimestamp"].ToNullableDate();
+			this.DeserializeActionExtra(result);
+		}
+
 		protected int FindRequiredNamespace(string title)
 		{
 			ThrowNull(title, nameof(title));
@@ -103,42 +142,8 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 		}
 
-		protected virtual void DeserializeParent(JToken parent)
+		protected virtual void DeserializeActionExtra(JToken result)
 		{
-			ThrowNull(parent, nameof(parent));
-
-			// TODO: Add multiple-error support here (errorformat=raw) using new GetErrors() function.
-			if (parent["error"].GetError() is ErrorItem error)
-			{
-				switch (error.Code)
-				{
-					case "assertbotfailed":
-					case "assertuserfailed":
-					case "assertnameduserfailed":
-						throw new StopException(error.Info);
-					case "editconflict":
-						throw new EditConflictException();
-					default:
-						throw WikiException.General(error.Code, error.Info);
-				}
-			}
-
-			if (parent["warnings"] is JToken warnings)
-			{
-				foreach (var warning in warnings.Children<JProperty>())
-				{
-					if (warning.First is JToken descNode)
-					{
-						var description = descNode.MustHaveBCString("warnings");
-						foreach (var line in description.Split(TextArrays.LineFeed))
-						{
-							this.AddWarning(warning.Name, line);
-						}
-					}
-				}
-			}
-
-			this.Wal.CurrentTimestamp = parent["curtimestamp"].ToNullableDate();
 		}
 
 		protected virtual bool HandleWarning([NotNull] string? from, [NotNull] string? text)
@@ -149,8 +154,6 @@ namespace RobinHood70.WallE.Eve.Modules
 			// Swallow all token warnings. Currently emitted primarily by queries, but also by ApiTokens.
 			return text.StartsWith("Action '", StringComparison.Ordinal) && text.EndsWith("' is not allowed for the current user", StringComparison.Ordinal);
 		}
-
-		protected virtual bool ModuleStopCheck() => false;
 		#endregion
 	}
 }

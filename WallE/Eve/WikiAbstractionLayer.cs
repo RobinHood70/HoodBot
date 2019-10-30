@@ -1453,7 +1453,7 @@
 			return retval;
 		}
 
-		private TOutput SubmitValueAction<TInput, TOutput>(ActionModuleValued<TInput, TOutput> action, TInput input)
+		private TOutput SubmitValueAction<TInput, TOutput>(ActionModule<TInput, TOutput> action, TInput input)
 			where TInput : class
 			where TOutput : class
 		{

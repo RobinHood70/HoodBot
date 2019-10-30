@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
-	internal class ActionRevisionDelete : ActionModuleValued<RevisionDeleteInput, RevisionDeleteResult>
+	internal class ActionRevisionDelete : ActionModule<RevisionDeleteInput, RevisionDeleteResult>
 	{
 		#region Constructors
 		public ActionRevisionDelete(WikiAbstractionLayer wal)
