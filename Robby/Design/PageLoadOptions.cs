@@ -120,6 +120,11 @@
 		/// <value>The modules to load.</value>
 		public PageModules Modules { get; }
 
+		/// <summary>Gets or sets the maximum number of pages to load in a single batch.</summary>
+		/// <value>The batch page limit.</value>
+		/// <remarks>Use this to set a smaller-than-maximum page limit on wikis that may be running on resource-limited servers. Bots can typically request up to 5000 pages at a time; setting this to 500, for example, will cause queries to take longer to fulfill, but will be easier on the responding server. The same results will be returned regardless of the setting. To avoid flooding a server with requests, values less than 50 will be ignored.</remarks>
+		public int PageLimit { get; set; }
+
 		/// <summary>Gets or sets the number of revisions to retrieve.</summary>
 		/// <value>The number of revisions to retrieve.</value>
 		public int RevisionCount { get; set; }

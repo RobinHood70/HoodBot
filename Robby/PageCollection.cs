@@ -555,6 +555,19 @@
 			ThrowNull(pageValidator, nameof(pageValidator));
 			pageSetInput.ConvertTitles = options.ConvertTitles;
 			pageSetInput.Redirects = options.FollowRedirects;
+			if (pageSetInput.GeneratorInput is ILimitableInput limited)
+			{
+				if (options.PageLimit >= 50)
+				{
+					limited.Limit = options.PageLimit;
+				}
+				else if (options.Modules.HasFlag(PageModules.Revisions))
+				{
+					// API-specific. Because of the way revisions output is handled in a pageset, setting the page limit to be the same as the revisions limit results in a much more optimal result, returning less data in more evenly sized batches. This might apply to other modules as well, but revisions is likely the biggest concern, so we always set 500 here unless a higher limit was specifically requested above.
+					limited.Limit = 500;
+				}
+			}
+
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, this.PageCreator.GetPropertyInputs(options), this.PageCreator.CreatePageItem);
 			this.PopulateMapCollections(result);
 			foreach (var item in result)
@@ -562,7 +575,7 @@
 				var page = this.CreatePage(item.Title);
 				page.Populate(item);
 				page.LoadOptions = options;
-				if (pageValidator != null && pageValidator(page))
+				if (pageValidator(page))
 				{
 					this[page.Key] = page;
 					this.PageLoaded?.Invoke(this, page);
