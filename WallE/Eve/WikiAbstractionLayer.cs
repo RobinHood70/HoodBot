@@ -163,6 +163,13 @@
 		/// <value>A function which returns true if the bot should stop what it's doing.</value>
 		public Func<bool>? CustomStopCheck { get; set; }
 
+		/// <summary>Gets any debug information returned by an action.</summary>
+		/// <value>The debug information.</value>
+		/// <remarks>For future expansion. Not yet implemented.
+		///
+		/// If debugging is enabled, any action can return debugging information along with the normal results. If a server does so, the results will be located here.</remarks>
+		public DebugInfoResult DebugInfo { get; protected internal set; }
+
 		/// <summary>Gets or sets the detected format version.</summary>
 		/// <value>The detected format version.</value>
 		/// <remarks>This should not normally need to be set, but is left as settable by derived classes, should customization be needed. Assumes version 2, then falls back to 1 in the event of an error message.</remarks>
