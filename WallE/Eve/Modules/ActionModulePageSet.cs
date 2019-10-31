@@ -47,8 +47,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected ContinueModule ContinueModule { get; set; }
 
 		protected int MaximumListSize { get; set; }
-
-		protected bool PageSetDone { get; set; }
 		#endregion
 
 		#region Protected Override Properties
@@ -78,12 +76,17 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			do
 			{
-				var request = this.CreateRequest(input);
-				var response = this.Wal.SendRequest(request);
-				Debug.WriteLine(response?.Length);
-				this.ParseResponse(response, pages);
+				do
+				{
+					var request = this.CreateRequest(input);
+					var response = this.Wal.SendRequest(request);
+					this.ParseResponse(response, pages);
+				}
+				while (this.ContinueModule.Continues && this.Continues);
+
+				this.offset += this.CurrentListSize;
 			}
-			while (this.ContinueModule.Continues && this.Continues && !this.PageSetDone);
+			while (this.offset < input.Values.Count);
 
 			return this.CreatePageSet(pages);
 		}
@@ -109,7 +112,8 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				foreach (var item in node)
 				{
-					if (item.First?["revid"] is JToken revid)
+					// TODO: Was item.First?["revid"] - need to figure out if this was a simple error or version difference.
+					if (item["revid"] is JToken revid)
 					{
 						this.badRevisionIds.Add((long?)revid ?? 0);
 					}
@@ -166,12 +170,6 @@ namespace RobinHood70.WallE.Eve.Modules
 			if (this.ContinueModule != null)
 			{
 				this.ContinueModule = this.ContinueModule.Deserialize(this.Wal, result);
-
-				// Was: !this.PageSetDone && !this.ContinueModule.BatchComplete && !this.ContinueModule.Continues, but that seems wrong. Maybe have been the result of the faulty BatchComplete in ContinueModule2.
-				if (!this.PageSetDone && this.ContinueModule.BatchComplete)
-				{
-					this.offset += this.CurrentListSize;
-				}
 			}
 
 			this.GetPageSetNodes(result);
@@ -184,9 +182,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				var match = TooManyFinder.Match(text);
 				if (match.Success && PageSetInput.AllTypes.Contains(match.Groups["parameter"].Value))
 				{
-					this.PageSetDone = false;
 					this.MaximumListSize = int.Parse(match.Groups["sizelimit"].Value, CultureInfo.InvariantCulture);
-					this.offset = this.MaximumListSize;
 					return true;
 				}
 			}
@@ -234,15 +230,10 @@ namespace RobinHood70.WallE.Eve.Modules
 				this.Generator.BuildRequest(request);
 			}
 
-			if (input.Values == null || input.Values.Count == 0)
-			{
-				this.PageSetDone = this.Generator == null;
-			}
-			else
+			if (input.Values != null && input.Values.Count > 0)
 			{
 				var numRemaining = input.Values.Count - this.offset;
-				this.PageSetDone = numRemaining <= this.CurrentListSize;
-				var listSize = this.PageSetDone
+				var listSize = numRemaining < this.CurrentListSize
 					? numRemaining
 					: this.CurrentListSize;
 				Debug.Assert(listSize >= 0, "listSize was 0 or negative!");
