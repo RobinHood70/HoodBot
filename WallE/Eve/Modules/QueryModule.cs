@@ -175,7 +175,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		/// <summary>Gets the appropriate limit to send, attempting to reduce the amount of data returned, if desired and possible.</summary>
 		/// <remarks>This only applies to ILimitableModules, but is convenient to have here.</remarks>
 		/// <returns>The calculated limit value (or -1 for "max"), taking into account the reported limit from the wiki (if any), the number of items remaining, and a fudge-factor for generators.</returns>
-		[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Performs a complex calculation that will often need to rely on a base/derived call chain.")]
 		protected virtual int GetNumericLimit()
 		{
 			var limit = this.ItemsRemaining;

@@ -151,7 +151,6 @@
 		/// <summary>Determines whether the relevant interface for this abstraction layer is enabled on the current wiki.</summary>
 		/// <returns><see langword="true" /> if the interface is enabled; otherwise, <see langword="false" />.</returns>
 		/// <remarks>This function will normally need to communicate with the wiki to determine the return value. Since that consumes significantly more time than a simple property check, it's implemented as a function rather than a property.</remarks>
-		[SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Performs a time-consuming operation.")]
 		bool IsEnabled();
 		#endregion
 
