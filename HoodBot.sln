@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.28809.33
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WallE", "WallE\WallE.csproj", "{F338AF86-4502-4121-B032-092CA727D51B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Robby", "Robby\Robby.csproj", "{16A4F00F-11B3-4049-89D2-09C9B6B53C83}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Robby", "Robby\Robby.csproj", "{16A4F00F-11B3-4049-89D2-09C9B6B53C83}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D5465F73-3B89-4FC9-8AF5-81B2EC6771E1}"
 	ProjectSection(SolutionItems) = preProject
@@ -17,7 +17,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		SavedSearches.txt = SavedSearches.txt
 		SharedKey.pfx = SharedKey.pfx
 		stylecop.json = stylecop.json
-		Testing.ruleset = Testing.ruleset
 		WikiRules.ruleset = WikiRules.ruleset
 	EndProjectSection
 EndProject
@@ -25,11 +24,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoodBot", "HoodBot\HoodBot.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikiClasses", "WikiClasses\WikiClasses.csproj", "{AD688255-64E2-451C-A32F-85877B7BDEF0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudioDiff", "VisualStudioDiff\VisualStudioDiff.csproj", "{7B5541AC-8629-434F-A696-5D1C36F7C8D8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VisualStudioDiff", "VisualStudioDiff\VisualStudioDiff.csproj", "{7B5541AC-8629-434F-A696-5D1C36F7C8D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoodBotPlugins", "HoodBotPlugins\HoodBotPlugins.csproj", "{EB7D2B63-3BC4-4DF2-9C4C-B3CC2F524AA7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HoodBotPlugins", "HoodBotPlugins\HoodBotPlugins.csproj", "{EB7D2B63-3BC4-4DF2-9C4C-B3CC2F524AA7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InternetExplorerDiff", "InternetExplorerDiff\InternetExplorerDiff.csproj", "{61568FBB-7E25-43D5-A221-419EAA7B949A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InternetExplorerDiff", "InternetExplorerDiff\InternetExplorerDiff.csproj", "{61568FBB-7E25-43D5-A221-419EAA7B949A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WikiCommon", "WikiCommon\WikiCommon.csproj", "{64878636-CB8C-434E-A03D-B3946216FC7F}"
 EndProject

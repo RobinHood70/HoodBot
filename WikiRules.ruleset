@@ -1,4 +1,4 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RuleSet Name="Rules for WallE" Description="Custom Rules for Wiki-Related Code" ToolsVersion="16.0">
-  <Include Path="main.ruleset" Action="Default" />
+	<Include Path="main.ruleset" Action="Default" />
 </RuleSet>
