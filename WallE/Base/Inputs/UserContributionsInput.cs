@@ -30,6 +30,8 @@ namespace RobinHood70.WallE.Base
 		public UserContributionsInput(string userPrefix) => this.UserPrefix = userPrefix;
 
 		public UserContributionsInput(IEnumerable<string> users) => this.Users = users;
+
+		public UserContributionsInput(params string[] users) => this.Users = users;
 		#endregion
 
 		#region Public Properties
