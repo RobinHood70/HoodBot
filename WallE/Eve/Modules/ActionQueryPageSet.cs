@@ -17,7 +17,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		private readonly QueryInput input;
 		private readonly TitleCreator<PageItem>? pageFactory;
 		private readonly MetaUserInfo? userModule;
-		private int itemsRemaining;
+		private int pagesRemaining;
 		#endregion
 
 		#region Constructors
@@ -68,20 +68,20 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			get
 			{
-				if (this.itemsRemaining > 0 || (this.ContinueModule != null && !this.ContinueModule.BatchComplete))
+				if (this.pagesRemaining > 0 || (this.ContinueModule != null && !this.ContinueModule.BatchComplete))
 				{
-					// Logic changed, cuz I think there was a bug in here previously. Used to be if any module didn't continue, the whole thing would return false. Pretty sure it should be if anything wants to continue, the whole thing should.
-					var cont = false;
 					var enumerator = this.AllModules.GetEnumerator();
-					while (!cont && enumerator.MoveNext())
+					while (enumerator.MoveNext())
 					{
-						if (enumerator.Current is IContinuableQueryModule continuableModule)
+						// CONSIDER: Does this make sense to check anymore? In most pageset queries, we won't care about number of sub-items. Original idea was for Revisions module, I think, but that can't work because we don't have the required info in the continuation data to forcibly fudge it. Very likely "ContinueParsing" should be removed or maybe only work in non-generator mode, if applicable.
+						// If anything tells us not to continue parsing, bail out. This is most commonly used to abort a query when MaxItems has been reached.
+						if (enumerator.Current is IContinuableQueryModule continuableModule && !continuableModule.ContinueParsing)
 						{
-							cont |= continuableModule.ContinueParsing;
+							return false;
 						}
 					}
 
-					return cont;
+					return true;
 				}
 
 				return false;
@@ -89,9 +89,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 
 		// The idea behind this is that some results may be disqualified or not returned (e.g., pages not found) when trying to reach a specific number of pages, so we always ask for a little extra in order to reduce the number of small queries.
-		protected override int CurrentListSize => (this.itemsRemaining == int.MaxValue || this.itemsRemaining + 10 > this.MaximumListSize)
+		protected override int CurrentListSize => (this.pagesRemaining == int.MaxValue || this.pagesRemaining + 10 > this.MaximumListSize)
 			? this.MaximumListSize
-			: (this.itemsRemaining <= 5 ? 10 : this.itemsRemaining + 10);
+			: (this.pagesRemaining <= 5 ? 10 : this.pagesRemaining + 10);
 
 		protected override RequestType RequestType => RequestType.Get;
 		#endregion
@@ -134,7 +134,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override void BeforeSubmit()
 		{
 			base.BeforeSubmit();
-			this.itemsRemaining = this.input.GeneratorInput is ILimitableInput limitable && limitable.MaxItems > 0 ? limitable.MaxItems : int.MaxValue;
+			this.pagesRemaining = this.input.GeneratorInput is ILimitableInput limitable && limitable.MaxItems > 0 ? limitable.MaxItems : int.MaxValue;
 			ActionQuery.CheckActiveModules(this.Wal, this.AllModules);
 		}
 
@@ -232,14 +232,14 @@ namespace RobinHood70.WallE.Eve.Modules
 					&& ((string?)innerResult["title"] ?? FakeTitleFromId((long?)innerResult["pageid"])) is string search)
 				{
 					var item = pages.ValueOrDefault(search);
-					if (item == null && this.itemsRemaining > 0)
+					if (item == null && this.pagesRemaining > 0)
 					{
 						// If we've hit our limit, stop creating new pages, but we still need to check existing ones in case they're continued pages from previous results.
 						item = this.GetItem(innerResult);
 						pages.Add(item);
-						if (this.itemsRemaining != int.MaxValue)
+						if (this.pagesRemaining != int.MaxValue)
 						{
-							this.itemsRemaining--;
+							this.pagesRemaining--;
 						}
 					}
 
