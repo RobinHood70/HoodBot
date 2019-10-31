@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace RobinHood70.WikiClasses.Parser
+﻿namespace RobinHood70.WikiClasses.Parser
 {
+	using System.Collections.Generic;
+
 	/// <summary>Represents common functions to all nodes in the wikitext parser.</summary>
 	public interface IWikiNode
 	{

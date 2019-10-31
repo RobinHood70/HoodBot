@@ -17,6 +17,12 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
+		public NodeCollection()
+			: this(null)
+		{
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
 		/// <param name="parent">The parent.</param>
 		public NodeCollection(IWikiNode? parent)
 			: base() => this.Parent = parent;
@@ -293,6 +299,15 @@
 
 			return null;
 		}
+
+		#region Public Methods
+
+		/// <summary>Finds any section nodes with the given name, after trimming.</summary>
+		/// <param name="sectionName">Name of the section.</param>
+		/// <returns>IEnumerable&lt;LinkedListNode&lt;IWikiNode&gt;&gt;.</returns>
+		public IEnumerable<LinkedListNode<IWikiNode>> FindSectionNodes(string sectionName) => this.FindAllLinked(item => item.Value is HeaderNode header && header.GetInnerText(true) == sectionName.Trim());
+		#endregion
+
 
 		/// <summary>Merges any adjacent TextNodes in the collection.</summary>
 		/// <param name="recursive">if set to <see langword="true"/>, merges the entire tree.</param>

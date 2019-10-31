@@ -8,6 +8,7 @@
 	/// <summary>Represents a header.</summary>
 	public class HeaderNode : IWikiNode
 	{
+		// TODO: Rejig this so that header node is strictly the header with no trailing space. GetInnerText can then be removed in favour of only storing the text. Will need to look closely at HeaderElement, though, to make sure fallback unwikifying isn't affected.
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="HeaderNode"/> class.</summary>
