@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
 	using System.Text.RegularExpressions;
 	using Newtonsoft.Json;
@@ -97,6 +98,7 @@
 		#endregion
 
 		#region Private Classes
+		[SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Auto-populated by JSON deserializer.")]
 		private class DeckCodeInfo
 		{
 			[JsonProperty("english_name")]
