@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
 	using System;
-	using System.Collections;
 	using System.Collections.Generic;
 	using RobinHood70.WikiClasses.Properties;
 	using static WikiCommon.Globals;

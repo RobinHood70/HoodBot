@@ -308,7 +308,6 @@
 		public IEnumerable<LinkedListNode<IWikiNode>> FindSectionNodes(string sectionName) => this.FindAllLinked(item => item.Value is HeaderNode header && header.GetInnerText(true) == sectionName.Trim());
 		#endregion
 
-
 		/// <summary>Merges any adjacent TextNodes in the collection.</summary>
 		/// <param name="recursive">if set to <see langword="true"/>, merges the entire tree.</param>
 		/// <remarks>While the parser does this while parsing wiki text, user manipulation can lead to multiple adjacent TextNodes. Use this function if you require your tree to be well formed, or before intensive operations if you believe it could be heavily fragmented.</remarks>
