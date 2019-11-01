@@ -198,13 +198,32 @@
 		/// <param name="value">The value to format.</param>
 		/// <returns>The value as an invariant string.</returns>
 		public static string? ToStringInvariant(this IFormattable value) => value?.ToString(null, CultureInfo.InvariantCulture);
+		#endregion
 
-		/// <summary>Convenience method to format any IFormattable value as an invariant value.</summary>
-		/// <typeparam name="T">The type of the parameter passed.</typeparam>
-		/// <param name="value">The value to format.</param>
-		/// <returns>The value as an invariant string.</returns>
-		public static string ToStringInvariant<T>(this T value)
-			where T : struct, IFormattable => value.ToString(null, CultureInfo.InvariantCulture);
+		#region IList<T> Extensions
+
+		/// <summary>Shuffles the specified list into a random order.</summary>
+		/// <typeparam name="T">The list type.</typeparam>
+		/// <param name="list">The list.</param>
+		public static void Shuffle<T>(this IList<T>? list)
+		{
+			ThrowNull(list, nameof(list));
+			var random = new Random();
+			var i = list.Count - 1;
+			if (i == 0)
+			{
+				return;
+			}
+
+			while (i >= 0)
+			{
+				var swapWith = random.Next(list.Count);
+				var value = list[i];
+				list[i] = list[swapWith];
+				list[swapWith] = value;
+				i--;
+			}
+		}
 		#endregion
 
 		#region String Extensions
@@ -274,69 +293,13 @@
 
 		internal static IReadOnlyList<T> AsReadOnlyList<T>(this List<T>? list) => list?.AsReadOnly() ?? Array.Empty<T>() as IReadOnlyList<T>;
 
-		internal static T First<T>(this IReadOnlyList<T> list) => list[0];
+		[return: MaybeNull]
+		internal static T First<T>(this IReadOnlyList<T> list) => list == null ? default : list[0];
 
-		internal static T? FirstOrDefault<T>(this IReadOnlyList<T> list)
-			where T : class
-		{
-			if (list != null)
-			{
-				using var enumerator = list.GetEnumerator();
-				if (enumerator.MoveNext())
-				{
-					return enumerator.Current;
-				}
-			}
+		[return: MaybeNull]
+		internal static T First<T>(this IReadOnlyList<T> list, [AllowNull] T defaultValue) => list == null ? defaultValue : list[0];
 
-			return default;
-		}
-
-		internal static T? FirstOrDefault<T>(this IReadOnlyList<T> list, T? defaultValue)
-			where T : class
-		{
-			if (list != null)
-			{
-				using var enumerator = list.GetEnumerator();
-				if (enumerator.MoveNext())
-				{
-					return enumerator.Current;
-				}
-			}
-
-			return defaultValue;
-		}
-
-		internal static T FirstOrDefaultValue<T>(this IReadOnlyList<T> list)
-			where T : struct
-		{
-			if (list != null)
-			{
-				using var enumerator = list.GetEnumerator();
-				if (enumerator.MoveNext())
-				{
-					return enumerator.Current;
-				}
-			}
-
-			return default;
-		}
-
-		internal static T FirstOrDefaultValue<T>(this IReadOnlyList<T> enumerable, T defaultValue)
-			where T : struct
-		{
-			if (enumerable != null)
-			{
-				using var enumerator = enumerable.GetEnumerator();
-				if (enumerator.MoveNext())
-				{
-					return enumerator.Current;
-				}
-			}
-
-			return defaultValue;
-		}
-
-		internal static bool IsEmpty(this ICollection collection) => (collection?.Count ?? 0) == 0;
+		internal static bool IsEmpty(this ICollection? collection) => collection == null || collection.Count == 0;
 		#endregion
 #endif
 	}
