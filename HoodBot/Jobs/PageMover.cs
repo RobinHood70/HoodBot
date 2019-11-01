@@ -13,7 +13,7 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override ICollection<Replacement> GetReplacements()
+		protected override ICollection<Replacement> PopulateReplacements()
 		{
 			var retval = new List<Replacement>
 			{

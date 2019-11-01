@@ -216,7 +216,7 @@
 			}
 			else
 			{
-				this.Replacements = this.GetReplacements();
+				this.Replacements = this.PopulateReplacements();
 				var backlinks = this.SetupAndGetBacklinks();
 				this.BacklinkTitles.AddRange(backlinks);
 				var newFile = JsonConvert.SerializeObject(this.Replacements, Formatting.Indented, titleConverter);
@@ -233,7 +233,7 @@
 		#endregion
 
 		#region Protected Abstract Methods
-		protected abstract ICollection<Replacement> GetReplacements();
+		protected abstract ICollection<Replacement> PopulateReplacements();
 		#endregion
 
 		#region Protected Virtual Methods
