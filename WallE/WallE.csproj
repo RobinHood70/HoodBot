@@ -26,11 +26,7 @@
 		<Content Include="Design Notes.txt" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="2.9.6">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.6">
+		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.7">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -40,7 +36,7 @@
 		</PackageReference>
 		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.66" />
 		<PackageReference Include="Newtonsoft.Json" Version="12.0.3-beta2" />
-		<PackageReference Include="System.Collections.Immutable" Version="1.7.0-preview1.19504.10" />
+		<PackageReference Include="System.Collections.Immutable" Version="1.7.0-preview2.19523.17" />
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Update="Properties\EveMessages.Designer.cs">
