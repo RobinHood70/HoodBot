@@ -166,9 +166,9 @@
 			return result;
 		}
 
-		public override void InitializeResult(ResultDestination destination, string user, string title)
+		public override void InitializeResult(ResultDestination destination, string user, string subject)
 		{
-			this.SetResultInfo(destination, user, title);
+			this.SetResultInfo(destination, user, subject);
 			this.stringBuilders[destination] = new StringBuilder();
 		}
 
