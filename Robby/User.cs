@@ -159,10 +159,9 @@
 
 		/// <summary>Gets the user's entire contribution history.</summary>
 		/// <returns>A read-only list with the user's entire contribution history.</returns>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Method performs a time-consuming operation.")]
 		public IReadOnlyList<Contribution> GetContributions()
 		{
-			var input = new UserContributionsInput(new[] { this.Name });
+			var input = new UserContributionsInput(this.Name);
 			var result = this.Site.AbstractionLayer.UserContributions(input);
 			var retval = new List<Contribution>();
 			foreach (var item in result)
@@ -176,10 +175,26 @@
 		/// <summary>Gets the user's contribution history in the specified namespaces.</summary>
 		/// <param name="namespaces">The namespaces of the contributions to retrieve.</param>
 		/// <returns>A read-only list with the user's contribution history in the specified namespaces.</returns>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Method performs a time-consuming operation.")]
 		public IReadOnlyList<Contribution> GetContributions(IEnumerable<int> namespaces)
 		{
-			var input = new UserContributionsInput(new[] { this.Name }) { Namespaces = namespaces };
+			var input = new UserContributionsInput(this.Name) { Namespaces = namespaces };
+			var result = this.Site.AbstractionLayer.UserContributions(input);
+			var retval = new List<Contribution>();
+			foreach (var item in result)
+			{
+				retval.Add(new Contribution(this.Site, item));
+			}
+
+			return retval;
+		}
+
+		/// <summary>Gets the user's entire contribution history.</summary>
+		/// <param name="from">The date and time to start listing contributions from.</param>
+		/// <param name="to">The date and time to list contributions to.</param>
+		/// <returns>A read-only list with the user's entire contribution history.</returns>
+		public IReadOnlyList<Contribution> GetContributions(DateTime? from, DateTime? to)
+		{
+			var input = new UserContributionsInput(this.Name) { Start = from, End = to, SortAscending = (from ?? DateTime.MinValue) < (to ?? DateTime.MaxValue) };
 			var result = this.Site.AbstractionLayer.UserContributions(input);
 			var retval = new List<Contribution>();
 			foreach (var item in result)
