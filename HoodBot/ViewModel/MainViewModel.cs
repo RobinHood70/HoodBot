@@ -19,7 +19,6 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
 	using RobinHood70.WallE.Eve;
-	using RobinHood70.WikiClasses.Parser;
 	using static System.Environment;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -443,29 +442,14 @@
 
 		private void RunTest()
 		{
-			// var testString = "Some Text {{Trail|Here}} [[Oblivion:Quests|Simple Link]]";
-			var testString = "Some Text {{Trail|Here}}{{Trail|named=<includeonly>t</includeonly>here}} [[Oblivion:Quests|Simple Link]] {{Trail|[[Skyrim:Places|Embedded Link]]}} [[Image:Example.png|60px|Text with a [[Link]]]] More Text <nowiki>[[Not a link]]</nowiki><!--[[Also not a link]]--><includeonly>[[Is a link if told we're transcluding|link=Daggerfall:Daggerfall]]</includeonly> Are we done yet?";
-			var nodes = WikiTextParser.Parse(testString, true, false);
-			var xml = new XmlVisitor(true);
-			Debug.WriteLine("Original text: " + testString);
-			Debug.WriteLine(xml.Build(nodes));
-			var returnText = WikiTextVisitor.Raw(nodes);
-			if (testString == returnText)
-			{
-				Debug.WriteLine("Full match!");
-			}
-			else
-			{
-				Debug.WriteLine(testString);
-				Debug.WriteLine(returnText);
-			}
 		}
 
 		private void SetSite(WikiInfo wikiInfo)
 		{
 			var al = wikiInfo.GetAbstractionLayer(this.client);
+
 			// TODO: Move this into site-specific code - not urgent, wait until Site-derivative rewrites.
-			al.Assert = "bot";
+			al.Assert = "user";
 			al.StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery;
 			al.UserCheckFrequency = 10;
 #if DEBUG
