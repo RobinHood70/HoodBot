@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System;
-	using System.Collections.Generic;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon;
@@ -23,22 +22,14 @@
 		#region Protected Override Methods
 		protected override void Main()
 		{
-			var titles = new TitleCollection(this.Site);
-			titles.GetQueryPage("Wantedpages");
-			var sorted = new List<string>();
-			foreach (var title in titles)
+			var results = PageCollection.Unlimited(this.Site);
+			results.GetSearchResults("Riddle'thar", this.Site.Namespaces.RegularIds);
+			foreach (var page in results)
 			{
-				if (title.Namespace == MediaWikiNamespaces.Main)
+				if (page.Text.IndexOf("Riddle'thar", StringComparison.CurrentCulture) >= 0)
 				{
-					var uri = Uri.EscapeUriString(title.FullPageName).Replace("?", "%3F");
-					sorted.Add($"* [https://en.uesp.net/wiki/Special:WhatLinksHere/{uri} {title.FullPageName}]");
+					this.StatusWriteLine(page.FullPageName);
 				}
-			}
-
-			sorted.Sort();
-			foreach (var item in sorted)
-			{
-				this.WriteLine(item);
 			}
 		}
 		#endregion
