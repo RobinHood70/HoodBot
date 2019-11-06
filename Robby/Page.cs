@@ -12,6 +12,11 @@
 	/// <seealso cref="Title" />
 	public class Page : Title
 	{
+		#region Fields
+		private Uri? canonicalPath = null;
+		private Uri? editPath = null;
+		#endregion
+
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="Page" /> class based on site and page name.</summary>
@@ -60,7 +65,11 @@
 
 		/// <summary>Gets or sets the canonical article path.</summary>
 		/// <value>The canonical article path.</value>
-		public Uri CanonicalPath { get; protected set; }
+		public Uri CanonicalPath
+		{
+			get => this.canonicalPath ?? this.Site.GetArticlePath(this.FullPageName);
+			set => this.canonicalPath = value;
+		}
 
 		/// <summary>Gets the page categories, if they were requested in the last load operation.</summary>
 		/// <value>The categories the page is listed in.</value>
@@ -68,7 +77,14 @@
 
 		/// <summary>Gets or sets the URI to edit the article in a browser.</summary>
 		/// <value>The edit path.</value>
-		public Uri EditPath { get; protected set; }
+		public Uri EditPath
+		{
+			get => this.editPath ?? new UriBuilder(this.Site.ScriptPath)
+			{
+				Query = "title=" + Uri.EscapeDataString(this.FullPageName) + "&action=edit"
+			}.Uri;
+			set => this.editPath = value;
+		}
 
 		/// <summary>Gets a value indicating whether this <see cref="Page" /> exists.</summary>
 		/// <value><see langword="true" /> if the page exists; otherwise, <see langword="false" />.</value>
@@ -271,23 +287,6 @@
 			// None
 			this.PopulateFlags(pageItem.Flags.HasFlag(PageFlags.Invalid), pageItem.Flags.HasFlag(PageFlags.Missing));
 
-			// Info
-			var info = pageItem.Info;
-			if (info == null)
-			{
-				this.IsNew = false;
-				this.IsRedirect = false;
-				this.StartTimestamp = this.Site.AbstractionLayer.CurrentTimestamp;
-			}
-			else
-			{
-				this.CanonicalPath = info.CanonicalUrl;
-				this.EditPath = info.EditUrl;
-				this.IsNew = info.Flags.HasFlag(PageInfoFlags.New);
-				this.IsRedirect = info.Flags.HasFlag(PageInfoFlags.Redirect);
-				this.StartTimestamp = pageItem.Info.StartTimestamp;
-			}
-
 			// Revisions
 			var revs = this.Revisions;
 			revs.Clear();
@@ -296,8 +295,15 @@
 				revs.Add(new Revision(rev));
 			}
 
-			if (info != null)
+			// Info
+			if (pageItem.Info is PageInfo info)
 			{
+				this.CanonicalPath = info.CanonicalUrl;
+				this.EditPath = info.EditUrl;
+				this.IsNew = info.Flags.HasFlag(PageInfoFlags.New);
+				this.IsRedirect = info.Flags.HasFlag(PageInfoFlags.Redirect);
+				this.StartTimestamp = pageItem.Info.StartTimestamp;
+
 				if (revs.ValueOrDefault(info.LastRevisionId) is Revision revision)
 				{
 					revs.Current = revision;
@@ -310,6 +316,12 @@
 					// Blank the text, since it's not the current page text. We don't set revs.Current here because it will either have been set internally by .Add or set by a successful try.
 					this.Text = null;
 				}
+			}
+			else
+			{
+				this.IsNew = false;
+				this.IsRedirect = false;
+				this.StartTimestamp = this.Site.AbstractionLayer.CurrentTimestamp;
 			}
 
 			// Links
