@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
+	using static RobinHood70.WikiCommon.Globals;
 
 	internal class NpcCollection : KeyedCollection<long, NpcData>
 	{
@@ -34,7 +35,7 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override long GetKeyForItem(NpcData item) => item?.Id ?? -1;
+		protected override long GetKeyForItem(NpcData item) => item == null ? throw ArgumentNull(nameof(item)) : item.Id;
 		#endregion
 	}
 }

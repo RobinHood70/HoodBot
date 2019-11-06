@@ -7,11 +7,12 @@
 		// This is a fugly way to fix up the descriptions, but it simplifies things enormously.
 		public static Dictionary<int, string> IdReplacements { get; } = new Dictionary<int, string>
 		{
-			[23234] = "Transform yourself into pure energy and flash forward, stunning enemies near origin location for |cffffff1|r seconds. This effect cannot be blocked. Casting again within |cffffff4|r seconds costs |cffffff33|r% more Magicka.",
-			[24574] = "Place a rune of protection on yourself for |cffffff1|r minutes. While active, the next enemy to attack you is imprisoned in a constricting sphere of dark magic, stunning them after a short delay for |cffffff3.5|r seconds. This stun cannot be blocked.",
+			[23234] = "Transform yourself into pure energy and flash forward, stunning enemies near your final location for |cffffff1|r seconds. This effect cannot be blocked. Casting again within |cffffff4|r seconds costs |cffffff33|r% more {{ESO Magicka Link}}.",
+			[24574] = "Place a rune of protection on yourself for |cffffff1|r minutes. While active, the next enemy to attack you is imprisoned in a constricting sphere of dark magic, stunning them after a short delay for |cffffff3|r seconds. This stun cannot be blocked.",
 			[38096] = "Conceal two sinister traps, one at the targeted location and another next to you, which take |cffffff2|r seconds to arm and last for |cffffff60|r seconds. When each trap is triggered, a dark spirit is summoned to terrify up to |cffffff6|r enemies, causing them to cower in fear for |cffffff4|r seconds.",
 			[39104] = "Pounce on an enemy with primal fury, dealing |cffffff$1|r Physical Damage. Pouncing from at least |cffffff10|r meters away adds |cffffff1|r seconds to the duration of your Werewolf Transformation.",
-			[40242] = "Hurl a ball of caltrops that scatter over the target area, dealing |cffffff$1|r Physical Damage every |cffffff1|r second to enemies inside, and reducing their Movement Speed by |cffffff50|r%. Enemies who take damage from the caltrops have Major Fracture applied to them, reducing their Physical Resistance by |cffffff5280|r for |cffffff1|r seconds.",
+			[40242] = "Hurl a ball of caltrops that scatter over the target area, dealing |cffffff$1|r Physical Damage every |cffffff1|r second to enemies inside, and reducing their Movement Speed by |cffffff50|r%. Enemies who take damage from the caltrops have Major Fracture applied to them, reducing their {{ESO Resistance Link|Physical}} by |cffffff5280|r for |cffffff1|r seconds.",
+			[62107] = "Focus your senses for |cffffff60|r seconds, reducing your damage taken by |cffffff2|r% with every Light or Heavy Attack, up to 5 times. While active, hitting an enemy with |cffffff5|r Light or Heavy Attacks converts this ability into Assassin's Scourge, allowing you to fire a spectral arrow for half cost that deals |cffffff$1|r Disease Damage, and heals for |cffffff33|r% of the damage dealt if you are within |cffffff7|r meters of the enemy.",
 			[103710] = "Bend time and space around you to gain Major Expedition for |cffffff4|r seconds and Minor Force for |cffffff12|r seconds, increasing your Movement Speed by |cffffff30|r% and Critical Damage by |cffffff10|r%. Activating this ability removes all snares and immobilizations from you and grants immunity to them for |cffffff1|r seconds.",
 		};
 
@@ -26,45 +27,6 @@
 		public static HashSet<string> NpcNameSkips { get; } = new HashSet<string>
 		{
 			"Adventurer", "Alarm", "Alchemy", "Argonian", "Ashlander", "Auroran", "Barracks Door", "Blastbones", "Blighted Blastbones", "Bloodspawn", "Bone Armor", "Bosmer", "Brackenleaf", "Brawler", "Burn Buildings", "Butcher", "Capacitor", "Central Welkynd Stone", "Charged Atronach", "Crystal Prism", "Crystal Receiver", "Crystal Reciever", "Dark Anchor", "Dark Elf", "Dark Seducer", "Dremora Kynlurker\t", "Dremora", "Dro-m'Athra", "Eluza", "Empower Totem", "Enkindling Appendage", "Falinesti Faithful", "Feral Guardian", "Forgotten Tome", "Fractured Energy", "Goblin", "Golden Saint", "Guild Member", "Guise of the Cadaverous Assassin", "Healer", "Hei-Halai", "Herne", "Imperial", "Intensive Mender", "Invis Theatre", "InvisiDirector", "King's Guard", "Knight", "Lion Guard", "Mages Guild", "Malachite", "Manifestation of Terror", "Marona Girith", "Meteor", "Monastic Earrel", "Moonstone", "Mummy", "Nascent Indrik", "Necromancer", "Netch", "New Life Celebrant", "Nix-Ox Fabricant Steed", "Noordigloop the Clog", "Oleena", "Orc", "Poison Gas", "Portal", "Projection", "Pull Totem", "Q3381 Lizard02 PC Child", "Q5872 - Music Control", "Questionable Meat", "Ranger", "Razak's Opus", "Restoring Twilight", "Reveler", "Roneril", "Ruby", "Sand Storm", "Savage Book", "Senche-raht", "Sentry", "Shadow", "Silver", "Siphoning Totem", "Sithis", "Skeletal Mage", "Skeleton", "Slaughterer", "Sorcerer", "Spirit Guardian", "Spirit Mender", "Stalking Blastbones", "Storm", "Strange Cloud", "Strangler\t", "Summoned Flames", "Summoned Storm Atronach", "Sunna'rah", "The Insatiable", "The Ritual", "The Scarlet Judge", "Thief Statue", "Thorn Geko", "Treasure Hunter", "Twilight Matriarch", "Vampiric Totem", "Vulkhel Guard", "Warden", "Welkynd Stone", "Werewolf Berserker", "Werewolf", "Wrath of Sithis", "Wrest Totem", "Yargob gro-Shelob"
-		};
-
-		// Although these could be private to specific classes, they're put here in order to have a centralized location where they can easily be found.
-		public static Dictionary<string, string> SetNameFixes { get; } = new Dictionary<string, string>
-		{
-			["Agility"] = "Agility (set)",
-			["Alessian Order"] = "Alessian Order (set)",
-			["Balorgh"] = "Balorgh (set)",
-			["Blood Spawn"] = "Blood Spawn (set)",
-			["Bloodspawn"] = "Blood Spawn (set)",
-			["Chokethorn"] = "Chokethorn (set)",
-			["Giant Spider"] = "Giant Spider (set)",
-			["Grothdarr"] = "Grothdarr (set)",
-			["Grundwulf"] = "Grundwulf (set)",
-			["Iceheart"] = "Iceheart (set)",
-			["Infernal Guardian"] = "Infernal Guardian (set)",
-			["Maarselok"] = "Maarselok (set)",
-			["Maw of the Infernal"] = "Maw of the Infernal (set)",
-			["Mighty Chudan"] = "Mighty Chudan (set)",
-			["Molag Kena"] = "Molag Kena (set)",
-			["Nerien'eth"] = "Nerien'eth (set)",
-			["Night Terror"] = "Night Terror (set)",
-			["Selene"] = "Selene (set)",
-			["Senche-Raht's Grit"] = "Senche-raht's Grit",
-			["Sentinel of Rkugamz"] = "Sentinel of Rkugamz (set)",
-			["Sentry"] = "Sentry (set)",
-			["Shadow Walker"] = "Shadow Walker (set)",
-			["Shadowrend"] = "Shadowrend (set)",
-			["Slimecraw"] = "Slimecraw (set)",
-			["Spawn of Mephala"] = "Spawn of Mephala (set)",
-			["Stormfist"] = "Stormfist (set)",
-			["Symphony of Blades"] = "Symphony of Blades (set)",
-			["Swarm Mother"] = "Swarm Mother (set)",
-			["The Troll King"] = "The Troll King (set)",
-			["Thurvokun"] = "Thurvokun (set)",
-			["Tremorscale"] = "Tremorscale (set)",
-			["Valkyn Skoria"] = "Valkyn Skoria (set)",
-			["Velidreth"] = "Velidreth (set)",
-			["Winterborn"] = "Winterborn (set)",
 		};
 
 		public static Dictionary<string, string> SkillNameFixes { get; } = new Dictionary<string, string>

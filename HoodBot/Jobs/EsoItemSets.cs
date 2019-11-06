@@ -2,27 +2,29 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Text;
+    using System.Diagnostics;
+    using System.Text;
 	using System.Text.RegularExpressions;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Eso;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiClasses;
+    using RobinHood70.WikiCommon;
 
-	internal class EsoItemSets : EditJob
+    internal class EsoItemSets : EditJob
 	{
 		#region Static Fields
 		private static readonly Regex OnlineUpdateRegex = Template.Find("Online Update");
-		private static readonly Regex SetBonusRegex = new Regex(@"\([1-6] items?\)[^(]*(\s|\n)*");
+		private static readonly Regex SetBonusRegex = new Regex(@"(\([1-6] items?\))");
 		private static readonly Uri SetSummaryPage = new Uri("http://esolog.uesp.net/viewlog.php?record=setSummary&format=csv");
-		private static readonly string[] ItemSeparator = new[] { "(", ") ", "\n" };
 		#endregion
 
 		#region Fields
 		private readonly CsvFile parser = new CsvFile();
 		private readonly HoodBotFunctions botFunctions;
-		private readonly Dictionary<string, PageData> data = new Dictionary<string, PageData>();
+		private readonly Dictionary<string, PageData> sets = new Dictionary<string, PageData>();
 		private PageCollection pages;
 		#endregion
 
@@ -64,30 +66,29 @@
 			this.StatusWriteLine("Fetching data");
 			var csvData = this.botFunctions.NativeClient.Get(SetSummaryPage);
 			this.parser.ReadText(csvData, true);
-			this.ProgressMaximum = this.parser.Count + 5;
-			this.Progress = 3;
+			this.ProgressMaximum = this.parser.Count + 2;
+			this.Progress++;
 
 			this.StatusWriteLine("Updating");
-			var titles = new TitleCollection(this.Site);
+			var sets = new List<PageData>();
 			foreach (var row in this.parser)
 			{
-				var setName = row["setName"].Replace(@"\'", "'");
-				if (ReplacementData.SetNameFixes.TryGetValue(setName, out var pageName))
+				if (row["id"] == "1100")
 				{
-					this.Warn($"Set replacement made: {setName} => {pageName}");
+					continue;
 				}
 
-				pageName = "Online:" + (pageName ?? setName);
-				titles.Add(pageName);
+				var setName = row["setName"].Replace(@"\'", "'");
 				var bonusDescription = row["setBonusDesc"];
 				if (bonusDescription[0] != '(')
 				{
-					this.Warn($"Set bonus for {pageName} doesn't start with a bracket:{Environment.NewLine}{bonusDescription}");
+					this.Warn($"Set bonus for {setName} doesn't start with a bracket:{Environment.NewLine}{bonusDescription}");
 				}
 
-				this.data.Add(pageName, new PageData(setName, bonusDescription));
+				sets.Add(new PageData(setName, bonusDescription));
 			}
 
+			var titles = this.ResolveAndPopulateSets(sets);
 			this.pages = new PageCollection(this.Site);
 			this.pages.PageLoaded += this.SetLoaded;
 			this.pages.GetTitles(titles);
@@ -125,7 +126,7 @@
 		private void GenerateReport()
 		{
 			this.WriteLine("== Item Sets With Non-Trivial Updates ==");
-			foreach (var item in this.data)
+			foreach (var item in this.sets)
 			{
 				if (item.Value.IsNonTrivial)
 				{
@@ -147,9 +148,68 @@
 			return template.ToString();
 		}
 
+		private TitleCollection ResolveAndPopulateSets(List<PageData> dbSets)
+		{
+			var catMembers = new TitleCollection(this.Site);
+			catMembers.GetCategoryMembers("Online-Sets", false);
+
+			var titles = new TitleCollection(this.Site); // These titles are known to exist.
+			var uncheckedSets = new Dictionary<Title, PageData>(); // These titles are not in the category and need to be checked for redirects, etc.
+			foreach (var set in dbSets)
+			{
+				if ((catMembers.FindTitle(UespNamespaces.Online, set.SetName, true) ?? catMembers.FindTitle(UespNamespaces.Online, set.SetName + " (set)", true)) is Title foundPage)
+				{
+					titles.Add(foundPage);
+					this.sets.Add(foundPage.PageName, set);
+				}
+				else
+				{
+					var newTitle = new Title(this.Site, UespNamespaces.Online, set.SetName);
+					uncheckedSets.Add(newTitle, set);
+				}
+			}
+
+			var loadOptions = new PageLoadOptions(PageModules.Links | PageModules.Properties, true);
+			var checkNewPages = new PageCollection(this.Site, loadOptions);
+			checkNewPages.GetTitles(uncheckedSets.Keys);
+			foreach (var title in uncheckedSets)
+			{
+				if (checkNewPages[title.Key.FullPageName] is Page page && page.Exists)
+				{
+					var resolved = false;
+					if (page.IsDisambiguation)
+					{
+						foreach (var link in page.Links)
+						{
+							if (link.PageName.Contains(" (set)"))
+							{
+								titles.Add(link);
+								this.sets.Add(link.PageName, title.Value);
+								resolved = true;
+								break;
+							}
+						}
+					}
+
+					if (!resolved)
+					{
+						this.Warn($"{page.FullPageName} exists but is neither a set not a disambiguation to one. Please check!");
+					}
+				}
+				else
+				{
+					titles.Add(title.Key);
+					this.sets.Add(title.Key.PageName, title.Value);
+					this.Warn($"{title.Value.SetName} does not exist and will be created.");
+				}
+			}
+
+			return titles;
+		}
+
 		private void SetLoaded(object sender, Page page)
 		{
-			var pageData = this.data[page.FullPageName];
+			var pageData = this.sets[page.PageName];
 			if (!page.Exists || string.IsNullOrEmpty(page.Text))
 			{
 				page.Text = BuildNewPage(pageData.SetName);
@@ -174,29 +234,29 @@
 			start += marker.Length;
 			var sb = new StringBuilder();
 			sb.Append('\n');
-			var items = SetBonusRegex.Matches(pageData.BonusDescription);
-			foreach (Match item in items)
+			var items = SetBonusRegex.Split(pageData.BonusDescription);
+			if (items[0].Length > 0)
 			{
-				if (item.Length > 0)
+				Debug.WriteLine("WTF?");
+			}
+
+			for (var itemNum = 1; itemNum < items.Length; itemNum += 2)
+			{
+				var itemName = items[itemNum].Trim(TextArrays.Parentheses);
+				var desc = Regex.Replace(items[itemNum + 1].Trim(), "[\n ]+", " ");
+				if (desc.StartsWith(page.PageName, StringComparison.Ordinal))
 				{
-					var split = item.Value.Split(ItemSeparator, StringSplitOptions.RemoveEmptyEntries);
-					sb.Append($"'''{split[0]}''': ");
-					split[1] = EsoReplacer.ReplaceGlobal(split[1], null);
-					split[1] = EsoReplacer.ReplaceLink(split[1]);
-					sb.Append(split[1]);
-
-					for (var i = 2; i < split.Length; i++)
-					{
-						var splitItem = split[i];
-						sb.Append("; ");
-						splitItem = char.ToLower(splitItem[0], this.Site.Culture) + splitItem.Substring(1);
-						splitItem = EsoReplacer.ReplaceGlobal(splitItem, null);
-						splitItem = EsoReplacer.ReplaceLink(splitItem);
-						sb.Append(splitItem);
-					}
-
-					sb.Append("<br>\n");
+					desc = desc.Substring(page.PageName.Length).TrimStart();
 				}
+
+				desc = EsoReplacer.ReplaceGlobal(desc, null);
+				desc = EsoReplacer.ReplaceLink(desc);
+				sb
+					.Append("'''")
+					.Append(itemName)
+					.Append("''': ")
+					.Append(desc)
+					.Append("<br>\n");
 			}
 
 			sb.Remove(sb.Length - 5, 4);

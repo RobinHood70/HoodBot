@@ -1,15 +1,17 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Eso
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Data;
 	using System.Diagnostics;
-	using RobinHood70.Robby;
+    using System.Diagnostics.CodeAnalysis;
+    using RobinHood70.Robby;
 
 	#region Public Enumerations
 	public enum PickpocketDifficulty
 	{
 		NotApplicable = -1,
-		Unknown = 0,
+		Unknown,
 		Easy,
 		Medium,
 		Hard,
@@ -18,11 +20,8 @@
 
 	internal class NpcData
 	{
-		#region Fields
-		private string reaction;
-		#endregion
-
 		#region Constructors
+		[SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1122:Use string.Empty for empty strings", Justification = "False hit. Cannot use non-constant expression.")]
 		public NpcData(IDataRecord row)
 		{
 			this.Id = (long)row["id"];
@@ -32,33 +31,48 @@
 			this.Difficulty--;
 			this.PickpocketDifficulty = (PickpocketDifficulty)(sbyte)row["ppDifficulty"];
 			this.LootType = (string)row["ppClass"];
+			this.Reaction = (sbyte)row["reaction"] switch
+			{
+				-1 => this.LootType switch
+				{
+					"Bard" => "Friendly",
+					"" => string.Empty,
+					null => string.Empty,
+					_ => "Justice Neutral"
+				},
+				1 => "Hostile",
+				2 => "Neutral",
+				3 => "Friendly",
+				_ => throw new InvalidOperationException("Reaction value is out of range.")
+			};
+
+			if (name.Length > 2 && name[name.Length - 2] == '^' && gender == -1)
+			{
+				var genderChar = char.ToUpperInvariant(name[name.Length - 1]);
+				name = name.Substring(0, name.Length - 2);
+				this.Gender = genderChar switch
+				{
+					'M' => Gender.Male,
+					'F' => Gender.Female,
+					_ => Gender.None
+				};
+			}
+			else
+			{
+				this.Gender = (Gender)gender;
+			}
 
 			if (ReplacementData.NpcNameFixes.TryGetValue(name, out var newName))
 			{
 				name = newName;
 			}
 
-			if (name.Length > 2 && name[name.Length - 2] == '^')
-			{
-				var genderChar = char.ToUpperInvariant(name[name.Length - 1]);
-				name = name.Substring(0, name.Length - 2);
-				if (gender == -1)
-				{
-					gender = genderChar == 'M' ? (sbyte)2 : genderChar == 'F' ? (sbyte)1 : (sbyte)-1;
-				}
-			}
-
 			this.Name = name;
 			this.PageName = name;
-			this.Gender = (Gender)gender;
 		}
 		#endregion
 
 		#region Public Properties
-		public Dictionary<string, int> AllLocations { get; } = new Dictionary<string, int>();
-
-		public IDictionary<Place, int> AllPlaces { get; set; } = new Dictionary<Place, int>();
-
 		public sbyte Difficulty { get; }
 
 		public Gender Gender { get; }
@@ -73,68 +87,74 @@
 
 		public PickpocketDifficulty PickpocketDifficulty { get; }
 
-		public string Reaction
-		{
-			get => this.reaction ?? (this.LootType == "Bard" ? "Friendly" : "Justice Neutral");
-			set => this.reaction = value;
-		}
+		public Dictionary<Place, int> Places { get; } = new Dictionary<Place, int>();
+
+		public string Reaction { get; }
+
+		public Dictionary<string, int> UnknownLocations { get; } = new Dictionary<string, int>();
 		#endregion
 
 		#region Public Methods
-		public void TrimPlaces(PlaceCollection places)
+		public void TrimPlaces()
 		{
-			var remove = new List<Place>();
-			foreach (var kvp in this.AllPlaces)
+			void Remove(Func<Place, int, bool> condition)
 			{
-				var place = kvp.Key;
-				if (place.Zone != null)
+				var remove = new List<Place>();
+				foreach (var kvp in this.Places)
 				{
-					if (places.ValueOrDefault(place.Zone) is Place zonePlace)
+					if (condition(kvp.Key, kvp.Value))
 					{
-						if (zonePlace.Type == PlaceType.Unknown)
+						remove.Add(kvp.Key);
+					}
+				}
+
+				foreach (var item in remove)
+				{
+					this.Places.Remove(item);
+				}
+			}
+
+			var sum = 0;
+			foreach (var kvp in this.Places)
+			{
+				sum += kvp.Value;
+			}
+
+			var quartile = (int)((double)sum / (this.Places.Count * 2));
+			Remove((place, count) => count < quartile);
+			Remove(
+				(place, count) =>
+				{
+					foreach (var subPlace in this.Places)
+					{
+						if (subPlace.Key.Type != PlaceType.Unknown && subPlace.Key.Zone == place.TitleName)
 						{
-							remove.Add(zonePlace);
+							return true;
 						}
 					}
-					else
-					{
-						Debug.WriteLine("Zone not found: " + place.Zone);
-					}
+
+					return false;
+				});
+
+			var showPlaces = new Dictionary<PlaceType, List<Place>>();
+			foreach (var kvp in this.Places)
+			{
+				var place = kvp.Key;
+				if (!showPlaces.TryGetValue(place.Type, out var list))
+				{
+					list = new List<Place>();
+					showPlaces.Add(place.Type, list);
 				}
+
+				list.Add(kvp.Key);
 			}
 
-			foreach (var item in remove)
+			foreach (var placeType in showPlaces)
 			{
-				this.AllPlaces.Remove(item);
-			}
-
-			var hasPlaceType = new List<PlaceType>();
-			var showPlaceTypes = new List<PlaceType>();
-			foreach (var kvp in this.AllPlaces)
-			{
-				var placeType = kvp.Key.Type;
-				if (hasPlaceType.Contains(placeType))
+				if (placeType.Value.Count > 1)
 				{
-					showPlaceTypes.Add(placeType);
+					Debug.Write($"[[Online:{this.PageName}|{this.Name}]] has multiple {placeType.Key} entries: {string.Join(", ", placeType.Value)}.");
 				}
-				else
-				{
-					hasPlaceType.Add(placeType);
-				}
-			}
-
-			foreach (var placeType in showPlaceTypes)
-			{
-				var value = string.Empty;
-				foreach (var kvp in this.AllPlaces)
-				{
-					if (kvp.Key.Type == placeType)
-					{
-						value += ", " + kvp.Key.TitleName;
-					}
-				}
-
-				Debug.Write($"[[Online:{this.PageName}|{this.Name}]] has multiple {placeType} entries: {value.Substring(2)}.");
 			}
 		}
 		#endregion
@@ -176,18 +196,18 @@
 		#endregion
 
 		#region Private Methods
-		private IReadOnlyCollection<Place> Subset(PlaceType placeType)
+		private List<Place> Subset(PlaceType placeType)
 		{
-			var retval = new PlaceCollection();
-			foreach (var place in this.AllPlaces)
+			var list = new List<Place>();
+			foreach (var place in this.Places.Keys)
 			{
-				if (place.Key.Type == placeType)
+				if (place.Type == placeType)
 				{
-					retval.Add(place.Key);
+					list.Add(place);
 				}
 			}
 
-			return retval;
+			return list;
 		}
 		#endregion
 	}

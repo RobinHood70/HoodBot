@@ -17,7 +17,8 @@
 	#region Public Enumerations
 	public enum Gender
 	{
-		Unknown = 0,
+		None = -1,
+		NotApplicable = 0,
 		Female = 1,
 		Male = 2
 	}
@@ -62,17 +63,20 @@
 			[-66] = "Green Balance Skills Slotted",
 			[-67] = "Winter's Embrace Slotted",
 			[-68] = "Magicka with Health Cap",
-			[-69] = "Magicka with Health Cap",
+			[-69] = "Bone Tyrant Slotted",
+			[-70] = "Grave Lord Slotted",
+			[-71] = "Spell Damage Capped",
+			[-72] = "Magicka and Weapon Damage",
 		};
 
 		public static IEnumerable<PlaceInfo> PlaceInfo { get; } = new PlaceInfo[]
 		{
 			new PlaceInfo(PlaceType.City, "city", "Online-Places-Cities", 5),
 			new PlaceInfo(PlaceType.Settlement, "settlement", "Online-Places-Settlements", 5),
-			new PlaceInfo(PlaceType.Unknown, "loc", null, 10),
 			new PlaceInfo(PlaceType.House, "house", "Online-Places-Homes", 1),
 			new PlaceInfo(PlaceType.Ship, "ship", "Online-Places-Ships", 1),
 			new PlaceInfo(PlaceType.Store, "store", "Online-Places-Stores", 1),
+			new PlaceInfo(PlaceType.Unknown, "loc", null, 10),
 		};
 		#endregion
 
@@ -82,7 +86,7 @@
 			var npcIds = new List<long>(npcData.Count);
 			foreach (var npc in npcData)
 			{
-				if (npc.AllLocations.Count == 0)
+				if (npc.UnknownLocations.Count == 0)
 				{
 					npcIds.Add(npc.Id);
 				}
@@ -104,7 +108,7 @@
 						var location = (string)row["zone"];
 						var count = (int)row["locCount"];
 						var npc = npcData[npcId];
-						npc.AllLocations.Add(location, count);
+						npc.UnknownLocations.Add(location, count);
 					}
 
 					break;
@@ -139,7 +143,7 @@
 		{
 			var retval = new NpcCollection();
 			var nameClash = new HashSet<string>();
-			foreach (var row in RunQuery("SELECT id, name, gender, difficulty, ppDifficulty, ppClass FROM uesp_esolog.npc WHERE level != -1"))
+			foreach (var row in RunQuery("SELECT id, name, gender, difficulty, ppDifficulty, ppClass, reaction FROM uesp_esolog.npc WHERE level != -1"))
 			{
 				var npcData = new NpcData(row);
 				if (!ReplacementData.NpcNameSkips.Contains(npcData.Name))
@@ -184,9 +188,9 @@
 		public static PlaceCollection GetPlaces(Site site)
 		{
 			var pageLoadOptions = new PageLoadOptions(PageModules.Custom, true);
-			var pageCreator = new MetaTemplateCreator();
-			pageCreator.VariableNames.AddRange("alliance", "settlement", "titlename", "zone");
+			var pageCreator = new MetaTemplateCreator("alliance", "settlement", "titlename", "zone");
 			var places = new PageCollection(site, pageLoadOptions, pageCreator);
+			places.SetLimitations(LimitationType.FilterTo, UespNamespaces.Online);
 			places.GetCategoryMembers("Online-Places", false);
 
 			var retval = new PlaceCollection();
@@ -200,7 +204,7 @@
 
 			foreach (var mappedName in places.TitleMap)
 			{
-				if (retval.ValueOrDefault(mappedName.Value.PageName) is Place place)
+				if (retval[mappedName.Value.PageName] is Place place)
 				{
 					// In an ideal world, this would be a direct reference to the same place, rather than a copy, but that ends up being a lot of work for very little gain.
 					var key = new Title(site, mappedName.Key).PageName;
@@ -225,14 +229,14 @@
 		{
 			foreach (var npc in npcData)
 			{
-				var locCopy = new Dictionary<string, int>(npc.AllLocations);
+				var locCopy = new Dictionary<string, int>(npc.UnknownLocations);
 				foreach (var kvp in locCopy)
 				{
 					var key = kvp.Key;
-					if (places.ValueOrDefault(key) is Place place)
+					if (places[key] is Place place)
 					{
-						npc.AllPlaces.Add(place, kvp.Value);
-						npc.AllLocations.Remove(key);
+						npc.Places.Add(place, kvp.Value);
+						npc.UnknownLocations.Remove(key);
 					}
 					else
 					{
@@ -289,7 +293,7 @@
 			{
 				if (member.Namespace == UespNamespaces.Online)
 				{
-					if (places.ValueOrDefault(member.PageName) is Place place)
+					if (places[member.PageName] is Place place)
 					{
 						if (place.Type == PlaceType.Unknown)
 						{

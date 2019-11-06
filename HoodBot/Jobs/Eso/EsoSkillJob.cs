@@ -224,7 +224,7 @@
 		private void SkillPageLoaded(object sender, Page page)
 		{
 			var nonTrivial = this.UpdatePageText(page, this.skills[page.FullPageName]);
-			if (sender != this)
+			if (sender != this && page.TextModified)
 			{
 				if (nonTrivial)
 				{

@@ -1,34 +1,53 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Eso
 {
-	using System.Collections.ObjectModel;
+	using System;
+	using System.Collections.Generic;
 
-	internal class PlaceCollection : KeyedCollection<string, Place>
+	internal class PlaceCollection
 	{
-		#region Public Methods
-		public Place ValueOrDefault(string key)
+		#region Fields
+		private readonly HashSet<string> ambiguousNames = new HashSet<string>();
+		private readonly Dictionary<string, Place> primary = new Dictionary<string, Place>();
+		private readonly Dictionary<string, Place> secondary = new Dictionary<string, Place>();
+		#endregion
+
+		#region Public Indexers
+		public Place this[string name]
 		{
-			if (key != null)
+			get
 			{
-				if (this.Dictionary != null)
+				if (this.ambiguousNames.Contains(name))
 				{
-					return this.Dictionary.TryGetValue(key, out var item) ? item : default;
+					throw new InvalidOperationException("Tried to look up amibguous name: " + name);
 				}
 
-				foreach (var testItem in this)
-				{
-					if (this.GetKeyForItem(testItem) == key)
-					{
-						return testItem;
-					}
-				}
+				return
+					this.primary.TryGetValue(name, out var place) ? place :
+					this.secondary.TryGetValue(name, out place) ? place :
+					default;
 			}
-
-			return default;
 		}
 		#endregion
 
-		#region Protected Properties
-		protected override string GetKeyForItem(Place item) => item?.Key;
+		#region Public Methods
+		public void Add(Place place)
+		{
+			var titleName = place.TitleName;
+			if (!this.ambiguousNames.Contains(titleName) && !this.secondary.ContainsKey(titleName))
+			{
+				if (this.secondary.ContainsKey(titleName))
+				{
+					this.ambiguousNames.Add(titleName);
+					this.secondary.Remove(titleName);
+				}
+				else
+				{
+					this.secondary.Add(titleName, place);
+				}
+			}
+
+			this.primary.Add(place.Key, place);
+		}
 		#endregion
 	}
 }

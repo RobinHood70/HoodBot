@@ -64,8 +64,12 @@
 		#region Private Methods
 		private int SkillDamage()
 		{
+			int value;
+			int maxValue;
+
 			// Dave's source code for this is found in ComputeEsoSkillValue() here:
-			// https://bitbucket.org/uesp/esolog/src/3f1e33ac0339b75c788259af35597662c7c6ef80/resources/esoskills.js?at=default
+			// https://bitbucket.org/uesp/esolog/src/default/resources/esoskills.js
+			// Note that Dave's calculations are significantly more complex, as they involve variable amounts. For the bot's purposes, constant amounts are used for key values, which simplifies many of the formulae.
 			switch (this.TypeNumber)
 			{
 				case -2:
@@ -75,14 +79,18 @@
 				case 0:
 				case 6:
 				case 10:
+				case -72:
 					return (int)Math.Round(this.A * Ability.Stat + this.B * Ability.Damage + this.C);
-				case var n when n >= -67 && n <= -51:
-					return (int)this.A;
 				case -68:
-				case -69:
-					var value = (int)Math.Round(this.A * Ability.Stat);
-					var maxValue = (int)Math.Round(this.B * Ability.Health);
+					value = (int)Math.Round(this.A * Ability.Stat);
+					maxValue = (int)Math.Round(this.B * Ability.Health);
 					return value > maxValue ? maxValue : value;
+				case -71:
+					value = (int)Math.Round(this.A * Ability.Damage + this.B);
+					maxValue = (int)this.C;
+					return value > maxValue ? maxValue : value;
+				case var n when n >= -70 && n <= -51:
+					return (int)this.A;
 				default:
 					throw new InvalidOperationException($"Invalid {nameof(this.TypeNumber)} {this.TypeNumber}");
 			}

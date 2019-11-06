@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System.Collections.Generic;
 	using System.Text;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Eso;
@@ -14,7 +15,7 @@
 	{
 		#region Fields
 		private readonly Namespace eso;
-		private PageCollection saveList;
+		private PageCollection pages;
 		#endregion
 
 		#region Constructors
@@ -33,7 +34,7 @@
 			this.StatusWriteLine("Saving");
 			try
 			{
-				foreach (var page in this.saveList)
+				foreach (var page in this.pages)
 				{
 					try
 					{
@@ -69,14 +70,14 @@
 			var places = EsoGeneral.GetPlaces(this.Site);
 			EsoGeneral.ParseNpcLocations(npcData, places);
 
-			this.saveList = new PageCollection(this.Site);
+			this.pages = new PageCollection(this.Site);
 			foreach (var npc in npcData)
 			{
-				npc.TrimPlaces(places);
-				this.saveList.Add(this.CreatePage(npc));
+				npc.TrimPlaces();
+				this.pages.Add(this.CreatePage(npc));
 			}
 
-			this.ProgressMaximum = this.saveList.Count + 4;
+			this.ProgressMaximum = this.pages.Count + 4;
 			this.Progress = 4;
 		}
 		#endregion
@@ -103,6 +104,21 @@
 				if (placeText.Length > 0)
 				{
 					template.AddBefore("race", paramName, placeText);
+				}
+			}
+
+			if (npc.UnknownLocations.Count > 0)
+			{
+				var list = new SortedSet<string>(npc.UnknownLocations.Keys);
+				var locText = string.Join(", ", list);
+				var loc = template["loc"];
+				if (loc != null)
+				{
+					loc.Value += ", " + locText;
+				}
+				else
+				{
+					template.AddBefore("race", "loc", locText);
 				}
 			}
 
@@ -194,7 +210,7 @@
 
 					if (issue != null)
 					{
-						this.WriteLine($"* [[{page.FullPageName}|{page.LabelName}]] is {issue}. Please use the following data to create a page manually, if needed.<br>Name: {npc.Name}, Gender: {npc.Gender}, Class: {npc.LootType}, Locations: {string.Join(", ", npc.AllLocations)}");
+						this.WriteLine($"* [[{page.FullPageName}|{page.LabelName}]] is {issue}. Please use the following data to create a page manually, if needed.\n*:Name: {npc.Name}\n*:Gender: {npc.Gender}\n*:Loot Type: {npc.LootType}\n*:Known Locations: {string.Join(", ", npc.Places)}\n*:Unknown Locations: {string.Join(", ", npc.UnknownLocations)}");
 					}
 				}
 				else
