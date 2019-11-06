@@ -8,10 +8,14 @@
 
 	public class MetaTemplateCreator : PageCreator
 	{
+		#region Constructors
+		public MetaTemplateCreator(params string[] variables) => this.VariableNames = variables == null ? new List<string>() : new List<string>(variables);
+		#endregion
+
 		#region Public Properties
 		public bool GameSpaceOnly { get; set; } = true;
 
-		public IList<string> VariableNames { get; } = new List<string>();
+		public IList<string> VariableNames { get; }
 		#endregion
 
 		#region Public Override Methods
