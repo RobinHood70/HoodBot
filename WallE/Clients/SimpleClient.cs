@@ -12,6 +12,7 @@
 	using System.Security;
 	using System.Text;
 	using System.Threading;
+	using System.Threading.Tasks;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
@@ -241,7 +242,12 @@
 				return false;
 			}
 
-			Thread.Sleep(delayTime);
+			// Thread.Sleep(delayTime);
+
+			// Temporary workaround for Thread.Sleep locking the UI thread.
+			// TODO: Make this work with pause/cancel tokens. Right now, this bypasses that process completely.
+			Task.Run(() => Thread.Sleep(delayTime)).Wait();
+
 			return true;
 		}
 
@@ -359,16 +365,9 @@
 
 				retryAfter += TimeSpan.FromSeconds(RetryDelayBonuses[attemptNumber]);
 				var maxlag = response.Headers["X-Database-Lag"];
-				if (maxlag == null)
-				{
-					this.RequestDelay(retryAfter, DelayReason.Error, response.StatusDescription);
-				}
-				else
-				{
-					this.RequestDelay(retryAfter, DelayReason.MaxLag, "Database lag: " + maxlag + " seconds.");
-				}
-
-				return true;
+				var reason = maxlag == null ? DelayReason.Error : DelayReason.MaxLag;
+				var description = maxlag == null ? response.StatusDescription : "Database lag: " + maxlag + " seconds.";
+				return this.RequestDelay(retryAfter, reason, description);
 			}
 
 			return false;

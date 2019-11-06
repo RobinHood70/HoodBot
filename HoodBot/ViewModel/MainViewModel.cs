@@ -248,6 +248,14 @@
 		{
 			this.StatusWriteLine(CurrentCulture(Resources.DelayRequested, eventArgs.Reason, eventArgs.DelayTime.TotalSeconds + "s", eventArgs.Description));
 			App.WpfYield();
+
+			/*
+			// Half-assed workaround for pausing and cancelling that ultimately just ends in the wiki throwing an error. See TODO in SimpleClient.RequestDelay().
+			if (this.pauser.IsPaused || this.canceller.IsCancellationRequested)
+			{
+				eventArgs.Cancel = true;
+			}
+			*/
 		}
 
 		private WikiJob ConstructJob(JobNode jobNode)
