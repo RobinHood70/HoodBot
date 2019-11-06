@@ -132,17 +132,21 @@
 		/// <summary>Determines whether the <see cref="TitleCollection">collection</see> contains a specific value.</summary>
 		/// <param name="item">The object to locate in the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns><see langword="true" /> if <paramref name="item" /> is found in the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />.</returns>
-		public bool Contains(ISimpleTitle item) => this.FindTitle(item) != null;
+		public bool Contains(ISimpleTitle item) => this.FindTitle(item, false) != null;
 
 		/// <summary>Determines whether the <see cref="TitleCollection">collection</see> contains a specific value.</summary>
 		/// <param name="item">The object to locate in the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns><see langword="true" /> if <paramref name="item" /> is found in the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />.</returns>
-		public bool Contains(TTitle item) => this.dictionary.ContainsKey(item?.Key);
+		public bool Contains(TTitle item)
+		{
+			ThrowNull(item, nameof(item));
+			return this.dictionary.ContainsKey(item.Key);
+		}
 
 		/// <summary>Determines whether the collection contains an item with the specified key.</summary>
 		/// <param name="key">The key to search for.</param>
 		/// <returns><see langword="true" /> if the collection contains an item with the specified key; otherwise, <see langword="true" />.</returns>
-		public bool Contains(string key) => this.dictionary.ContainsKey(key) || this.FindTitle(key) != null;
+		public bool Contains(string key) => this.dictionary.ContainsKey(key) || this.FindTitle(key, false) != null;
 
 		/// <summary>Copies the elements of the <see cref="TitleCollection">collection</see> to an <see cref="Array" />, starting at a particular <see cref="Array" /> index.</summary>
 		/// <param name="array">The one-dimensional <see cref="Array" /> that is the destination of the elements copied from <see cref="TitleCollection">collection</see>. The <see cref="Array" /> must have zero-based indexing.</param>
@@ -187,19 +191,33 @@
 
 		/// <summary>Finds any ISimpleTitle within the collection.</summary>
 		/// <param name="fullPageName">The full page name of the item to find.</param>
+		/// <param name="ignoreCase">If set to <see langword="true"/>, titles will match regardless of the case of the page name. (Note that namespace casing must still follow site capitalization rules.)</param>
 		/// <returns>The item from the collection, if found; otherwise, null.</returns>
 		/// <remarks>This is an O(n) operation.</remarks>
-		public TTitle FindTitle(string fullPageName) => this.FindTitle(new TitleParts(this.Site, fullPageName));
+		public TTitle? FindTitle(string fullPageName, bool ignoreCase) => this.FindTitle(new TitleParts(this.Site, fullPageName), ignoreCase);
+
+		/// <summary>Finds any ISimpleTitle within the collection.</summary>
+		/// <param name="ns">The namespace the title is in.</param>
+		/// <param name="pageName">The full page name of the item to find.</param>
+		/// <param name="ignoreCase">If set to <see langword="true"/>, titles will match regardless of the case of the page name.</param>
+		/// <returns>The item from the collection, if found; otherwise, null.</returns>
+		/// <remarks>This is an O(n) operation.</remarks>
+		public TTitle? FindTitle(int ns, string pageName, bool ignoreCase) => this.FindTitle(new TitleParts(this.Site, ns, pageName), ignoreCase);
 
 		/// <summary>Finds any ISimpleTitle within the collection.</summary>
 		/// <param name="item">The item to find.</param>
+		/// <param name="ignoreCase">If set to <see langword="true"/>, titles will match regardless of the case of the page name.</param>
 		/// <returns>The item from the collection, if found; otherwise, null.</returns>
 		/// <remarks>This is an O(n) operation.</remarks>
-		public TTitle FindTitle(ISimpleTitle item)
+		public TTitle? FindTitle(ISimpleTitle item, bool ignoreCase)
 		{
+			ThrowNull(item, nameof(item));
 			foreach (var title in this)
 			{
-				if (title.SimpleEquals(item))
+				if (title.SimpleEquals(item)
+					|| (ignoreCase
+						&& title.Namespace == item.Namespace
+						&& string.Compare(title.PageName, item.PageName, StringComparison.OrdinalIgnoreCase) == 0))
 				{
 					return title;
 				}
