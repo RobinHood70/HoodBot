@@ -41,6 +41,9 @@
 		public static readonly char[] Octothorp = { '#' };
 
 		[SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly", Justification = "As above.")]
+		public static readonly char[] Parentheses = { '(', ')' };
+
+		[SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly", Justification = "As above.")]
 		public static readonly char[] Period = { '.' };
 
 		[SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly", Justification = "As above.")]

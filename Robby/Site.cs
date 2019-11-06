@@ -150,7 +150,7 @@
 
 		/// <summary>Gets the article path.</summary>
 		/// <value>The article path, where <c>$1</c> should be replaced with the URL-encoded article title. </value>
-		public string ArticlePath { get; private set; }
+		public string? ArticlePath { get; private set; }
 
 		/// <summary>Gets a value indicating whether the first letter of titles is case-sensitive.</summary>
 		/// <value><see langword="true"/> if the first letter of titles is case-sensitive; otherwise, <see langword="false"/>.</value>
@@ -203,16 +203,16 @@
 
 		/// <summary>Gets the <see cref="Title"/> for the main page of the site.</summary>
 		/// <value>The main page.</value>
-		public Title MainPage { get; private set; }
+		public Title? MainPage { get; private set; }
 
 		/// <summary>Gets the name of the main page, as returned by the site.</summary>
 		/// <value>The name of the main page.</value>
 		/// <remarks>This will normally be the same as <c><see cref="MainPage"/>.FullPageName</c>, but is provided so that the original name is available, if needed.</remarks>
-		public string MainPageName { get; private set; }
+		public string? MainPageName { get; private set; }
 
 		/// <summary>Gets the wiki name.</summary>
 		/// <value>The name of the wiki.</value>
-		public string Name { get; private set; }
+		public string? Name { get; private set; }
 
 		/// <summary>Gets the wiki namespaces.</summary>
 		/// <value>the wiki namespaces.</value>
@@ -223,13 +223,18 @@
 		/// <remarks>A PageCreator is an abstract factory which serves as a bridge between customized PageItem types from WallE and the corresponding custom Page type for Robby.</remarks>
 		public PageCreator PageCreator { get; set; } = PageCreator.Default;
 
+		/// <summary>Gets the script path. This is the path preceding api.php, index.php and so forth.</summary>
+		/// <value>The script path.</value>
+		/// <remarks>If not returned by the API, it will be guessed based on the path to api.php itself.</remarks>
+		public string? ScriptPath { get; private set; }
+
 		/// <summary>Gets the name of the server—typically, the base URL.</summary>
 		/// <value>The name of the server.</value>
-		public string ServerName { get; private set; }
+		public string? ServerName { get; private set; }
 
 		/// <summary>Gets the bot's user name.</summary>
 		/// <value>The bot's user name.</value>
-		public User User { get; private set; }
+		public User? User { get; private set; }
 
 		/// <summary>Gets the UserFunctions object that handles site- and/or user-specific functions.</summary>
 		/// <value>A UserFunctions class or derivative that handles site- and/or user-specific functions.</value>
@@ -237,7 +242,7 @@
 
 		/// <summary>Gets the MediaWiki version of the wiki.</summary>
 		/// <value>The MediaWiki version of the wiki.</value>
-		public string Version { get; private set; }
+		public string? Version { get; private set; }
 		#endregion
 
 		#region Internal Properties
@@ -712,7 +717,7 @@
 		/// <exception cref="ArgumentException">Article name is invalid.</exception>
 		public virtual Uri GetArticlePath(string unparsedPath, string articleName, string fragment)
 		{
-			// Used to use WebUtility.UrlEncode, but Uri seems to auto-encode, so removed for now. Discussion in some places of different parts of .NET encoding differently, so may need to re-instate later. See https://stackoverflow.com/a/47877559/502255 for example.
+			// CONSIDER: Used to use WebUtility.UrlEncode, but Uri seems to auto-encode, so removed for now. Discussion in some places of different parts of .NET encoding differently, so may need to re-instate later. See https://stackoverflow.com/a/47877559/502255 for example.
 			if (string.IsNullOrWhiteSpace(articleName))
 			{
 				throw new ArgumentException(CurrentCulture(Resources.TitleInvalid));
@@ -975,21 +980,10 @@
 			this.ServerName = general.ServerName;
 			this.Version = general.Generator;
 			var path = general.ArticlePath;
-			if (path.StartsWith("/", StringComparison.Ordinal))
-			{
-				// If article path is relative, figure out the absolute address.
-				var repl = path.Substring(0, path.IndexOf("$1", StringComparison.Ordinal));
-				var articleBaseIndex = general.BasePage.IndexOf(repl, StringComparison.Ordinal);
-				if (articleBaseIndex < 0)
-				{
-					articleBaseIndex = general.BasePage.IndexOf("/", general.BasePage.IndexOf("//", StringComparison.Ordinal) + 2, StringComparison.Ordinal);
-				}
-
-				path = general.BasePage.Substring(0, articleBaseIndex) + path;
-			}
-
-			this.ArticlePath = path;
+			var basePath = general.BasePage.Substring(0, general.BasePage.IndexOf(general.Server, StringComparison.Ordinal) + general.Server.Length); // Search for server in BasePage and extract everything from the start of BasePage to then. This effectively converts Server to canonical if it was protocol-relative.
+			this.ArticlePath = path.StartsWith("/", StringComparison.Ordinal) ? basePath + path : path;
 			this.MainPageName = general.MainPage;
+			this.ScriptPath = basePath + general.Script;
 
 			// NamespaceAliases
 			var allAliases = new Dictionary<int, List<string>>();
