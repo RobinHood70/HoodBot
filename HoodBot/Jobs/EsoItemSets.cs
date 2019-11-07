@@ -2,8 +2,8 @@
 {
 	using System;
 	using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Text;
+	using System.Diagnostics;
+	using System.Text;
 	using System.Text.RegularExpressions;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Eso;
@@ -11,9 +11,9 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiClasses;
-    using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon;
 
-    internal class EsoItemSets : EditJob
+	internal class EsoItemSets : EditJob
 	{
 		#region Static Fields
 		private static readonly Regex OnlineUpdateRegex = Template.Find("Online Update");
@@ -22,7 +22,6 @@
 		#endregion
 
 		#region Fields
-		private readonly CsvFile parser = new CsvFile();
 		private readonly HoodBotFunctions botFunctions;
 		private readonly Dictionary<string, PageData> sets = new Dictionary<string, PageData>();
 		private PageCollection pages;
@@ -65,13 +64,14 @@
 			EsoReplacer.Initialize(this);
 			this.StatusWriteLine("Fetching data");
 			var csvData = this.botFunctions.NativeClient.Get(SetSummaryPage);
-			this.parser.ReadText(csvData, true);
-			this.ProgressMaximum = this.parser.Count + 2;
+			var parser = new CsvFile();
+			parser.ReadText(csvData, true);
+			this.ProgressMaximum = parser.Count + 2;
 			this.Progress++;
 
 			this.StatusWriteLine("Updating");
 			var sets = new List<PageData>();
-			foreach (var row in this.parser)
+			foreach (var row in parser)
 			{
 				if (row["id"] == "1100")
 				{
