@@ -191,7 +191,7 @@
 			var pageCreator = new MetaTemplateCreator("alliance", "settlement", "titlename", "zone");
 			var places = new PageCollection(site, pageLoadOptions, pageCreator);
 			places.SetLimitations(LimitationType.FilterTo, UespNamespaces.Online);
-			places.GetCategoryMembers("Online-Places", false);
+			places.GetCategoryMembers("Online-Places");
 
 			var retval = new PlaceCollection();
 			foreach (VariablesPage page in places)
@@ -288,7 +288,7 @@
 		private static void GetPlaceCategory(Site site, PlaceCollection places, PlaceInfo placeInfo)
 		{
 			var cat = new PageCollection(site);
-			cat.GetCategoryMembers(placeInfo.CategoryName, false);
+			cat.GetCategoryMembers(placeInfo.CategoryName);
 			foreach (var member in cat)
 			{
 				if (member.Namespace == UespNamespaces.Online)

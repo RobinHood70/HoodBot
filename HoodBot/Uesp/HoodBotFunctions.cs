@@ -60,7 +60,7 @@
 				if (this.talkLikePages == null)
 				{
 					var titles = new TitleCollection(this.Site);
-					titles.GetCategoryMembers("Message Boards", false);
+					titles.GetCategoryMembers("Message Boards");
 					this.talkLikePages = titles;
 				}
 

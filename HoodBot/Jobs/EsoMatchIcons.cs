@@ -189,7 +189,7 @@
 		private void GetLicenseTemplates()
 		{
 			var licenseTemplates = new TitleCollection(this.Site);
-			licenseTemplates.GetCategoryMembers("Image Copyright Templates", false);
+			licenseTemplates.GetCategoryMembers("Image Copyright Templates");
 			licenseTemplates.Remove("Template:Zenimage");
 			foreach (var template in licenseTemplates)
 			{

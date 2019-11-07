@@ -438,7 +438,7 @@
 					tempTitles.GetBacklinks(replacement.From.FullPageName, BacklinksTypes.All);
 					if (replacement.From.Namespace == MediaWikiNamespaces.Category)
 					{
-						tempTitles.GetCategoryMembers(replacement.From.FullPageName, false);
+						tempTitles.GetCategoryMembers(replacement.From.FullPageName);
 					}
 
 					backlinkTitles.AddRange(tempTitles);

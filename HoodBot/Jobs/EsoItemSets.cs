@@ -151,7 +151,7 @@
 		private TitleCollection ResolveAndPopulateSets(List<PageData> dbSets)
 		{
 			var catMembers = new TitleCollection(this.Site);
-			catMembers.GetCategoryMembers("Online-Sets", false);
+			catMembers.GetCategoryMembers("Online-Sets");
 
 			var titles = new TitleCollection(this.Site); // These titles are known to exist.
 			var uncheckedSets = new Dictionary<Title, PageData>(); // These titles are not in the category and need to be checked for redirects, etc.

@@ -274,9 +274,13 @@
 		/// <param name="to">The category to stop at (inclusive). The category specified does not have to exist.</param>
 		public void GetCategories(string from, string to) => this.GetCategories(new AllCategoriesInput { From = from, To = to });
 
+		/// <summary>Adds category members to the collection, not including subcategories.</summary>
+		/// <param name="category">The category.</param>
+		public void GetCategoryMembers(string category) => this.GetCategoryMembers(category, CategoryMemberTypes.All, null, null, false);
+
 		/// <summary>Adds category members to the collection, potentially including subcategories and their members.</summary>
 		/// <param name="category">The category.</param>
-		/// <param name="recurse">if set to <see langword="true"/> recurses through subcategories.</param>
+		/// <param name="recurse">if set to <see langword="true"/> recurses through subcategories; otherwise, subcategories will appear only as titles within the collection.</param>
 		public void GetCategoryMembers(string category, bool recurse) => this.GetCategoryMembers(category, CategoryMemberTypes.All, null, null, recurse);
 
 		/// <summary>Adds category members of the specified type to the collection, potentially including subcategories and their members.</summary>
@@ -292,7 +296,7 @@
 		/// <param name="to">The category member to stop at (inclusive). The member specified does not have to exist.</param>
 		/// <param name="recurse">if set to <see langword="true"/> recurses through subcategories.</param>
 		/// <remarks>If subcategories are loaded, they will be limited to the <paramref name="categoryMemberTypes"/> requested. However, they will <em>not</em> be limited by the <paramref name="from"/> and <paramref name="to"/> parameters.</remarks>
-		public void GetCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, string from, string to, bool recurse)
+		public void GetCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, string? from, string? to, bool recurse)
 		{
 			var cat = Title.DefaultToNamespace(this.Site.Namespaces[MediaWikiNamespaces.Category], category);
 			var input = new CategoryMembersInput(cat.FullPageName)
