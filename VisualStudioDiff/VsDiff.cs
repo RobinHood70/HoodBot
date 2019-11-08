@@ -38,7 +38,7 @@
 		#endregion
 
 		#region Private Properties
-		private DTE Dte
+		private DTE? Dte
 		{
 			get
 			{
@@ -54,7 +54,7 @@
 					}
 				}
 
-				return dte ?? throw new NullReferenceException();
+				return dte;
 			}
 		}
 		#endregion
@@ -73,7 +73,7 @@
 			File.WriteAllText(oldFile, diff.LastRevisionText ?? " ");
 			File.WriteAllText(newFile, diff.Text ?? " ");
 
-			var localDte = this.Dte;
+			var localDte = this.Dte ?? throw new InvalidOperationException();
 			this.lastDteWindow = null;
 			do
 			{
@@ -112,7 +112,7 @@
 				try
 				{
 					System.Threading.Thread.Sleep(ComSleep);
-					waiting = (this.Dte.MainWindow?.Visible ?? false) && this.lastDteWindow != null;
+					waiting = (this.Dte?.MainWindow?.Visible ?? false) && this.lastDteWindow != null;
 				}
 				catch (COMException)
 				{
@@ -174,7 +174,7 @@
 			}
 			*/
 
-			return Activator.CreateInstance(visualStudioType, true) as DTE ?? throw new NullReferenceException();
+			return Activator.CreateInstance(visualStudioType, true) as DTE ?? throw new InvalidOperationException();
 		}
 		#endregion
 

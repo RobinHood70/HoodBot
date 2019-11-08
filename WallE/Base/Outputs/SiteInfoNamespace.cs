@@ -20,7 +20,7 @@ namespace RobinHood70.WallE.Base
 	public class SiteInfoNamespace
 	{
 		#region Constructors
-		internal SiteInfoNamespace(int id, string canonicalName, string? defaultContentModel, NamespaceFlags flags, string? name)
+		internal SiteInfoNamespace(int id, string canonicalName, string? defaultContentModel, NamespaceFlags flags, string name)
 		{
 			this.Id = id;
 			this.CanonicalName = canonicalName;
@@ -39,7 +39,7 @@ namespace RobinHood70.WallE.Base
 
 		public int Id { get; }
 
-		public string? Name { get; }
+		public string Name { get; }
 		#endregion
 
 		#region Public Override Methods

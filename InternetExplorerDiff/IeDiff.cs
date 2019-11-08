@@ -60,8 +60,14 @@
 
 			var disposable = new object();
 			var hwnd = new HandleRef(disposable, (IntPtr)ie.HWND);
-			SafeNativeMethods.GetWindowThreadProcessId(hwnd, out var processId);
-			this.ieProcess = Process.GetProcessById(Convert.ToInt32(processId));
+			_ = SafeNativeMethods.GetWindowThreadProcessId(hwnd, out var processId);
+			var processId32 = Convert.ToInt32(processId);
+			if (processId32 == 0)
+			{
+				throw new InvalidOperationException();
+			}
+
+			this.ieProcess = Process.GetProcessById(processId32);
 
 			var uri = new Uri(diff.EditPath.ToString().Replace("action=edit", "action=submit"));
 			var request = new Request(uri, RequestType.Post, false);

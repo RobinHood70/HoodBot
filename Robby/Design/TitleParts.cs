@@ -45,7 +45,7 @@
 			if (split.Length >= 2)
 			{
 				var key = split[0].TrimEnd();
-				if (site.Namespaces.TryGetValue(key, out var ns))
+				if (site.Namespaces.ValueOrDefault(key) is Namespace ns)
 				{
 					this.Namespace = ns;
 					this.OriginalNamespaceText = key;
@@ -56,9 +56,9 @@
 					this.Interwiki = iw;
 					this.OriginalInterwikiText = key;
 					key = split[1].Trim();
-					if (iw.LocalWiki && site.Namespaces.TryGetValue(key, out ns))
+					if (iw.LocalWiki && site.Namespaces.ValueOrDefault(key) is Namespace nsiw)
 					{
-						this.Namespace = ns;
+						this.Namespace = nsiw;
 						this.OriginalNamespaceText = key;
 						nameRemaining = split[2].TrimStart();
 						if (nameRemaining.Length == 0)
@@ -113,7 +113,7 @@
 			}
 
 			var split = fullPageName.Split(TextArrays.Colon, 2);
-			if (site.Namespaces.TryGetValue(split[0], out var ns))
+			if (site.Namespaces.ValueOrDefault(split[0]) is Namespace ns)
 			{
 				this.Namespace = ns;
 				this.OriginalNamespaceText = split[0];

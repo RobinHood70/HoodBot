@@ -4,11 +4,11 @@
 
 	/// <summary>Stores the result of a change to the wiki, along with any data associated with the change.</summary>
 	/// <typeparam name="T">The type of data being returned from the function.</typeparam>
-	public struct ChangeValue<T>
+	public class ChangeValue<T>
 	{
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="ChangeValue{T}"/> struct.</summary>
+		/// <summary>Initializes a new instance of the <see cref="ChangeValue{T}"/> class.</summary>
 		/// <param name="result">The change status.</param>
 		/// <param name="data">The data returned by the function.</param>
 		internal ChangeValue(ChangeStatus result, [AllowNull] T data)

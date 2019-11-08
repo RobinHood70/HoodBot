@@ -156,12 +156,12 @@
 		/// <summary>Returns the namespace associated with the specified ID.</summary>
 		/// <param name="id">The namespace ID to search for.</param>
 		/// <returns>The requested value, or null if not found.</returns>
-		public Namespace ValueOrDefault(int id) => this.IdsDictionary.TryGetValue(id, out var value) ? value : default;
+		public Namespace? ValueOrDefault(int id) => this.IdsDictionary.TryGetValue(id, out var value) ? value : default;
 
 		/// <summary>Returns the namespace associated with the specified name.</summary>
 		/// <param name="name">Any of the names or aliases of the namespace to search for.</param>
 		/// <returns>The requested value, or null if not found.</returns>
-		public Namespace ValueOrDefault(string name) => name != null && this.NamesDictionary.TryGetValue(name, out var value) ? value : default;
+		public Namespace? ValueOrDefault(string name) => name != null && this.NamesDictionary.TryGetValue(name, out var value) ? value : default;
 		#endregion
 	}
 }
