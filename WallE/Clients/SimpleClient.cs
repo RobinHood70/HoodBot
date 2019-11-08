@@ -8,6 +8,7 @@
 	using System.Net;
 	using System.Net.Configuration;
 	using System.Reflection;
+	using System.Runtime.Serialization;
 	using System.Runtime.Serialization.Formatters.Binary;
 	using System.Security;
 	using System.Text;
@@ -393,12 +394,14 @@
 		private CookieContainer GetCookieContainer()
 		{
 			// CookieContainer does not play well with serializers other than the BinaryFormatter (and reportedly SoapFormatter). Do not convert this to anything else without testing.
+			// CONSIDER: Converting this to JSON serialization (subject to the warning above). Might be doable by simply iterating the cookies in the container rather than trying to de/serialize the entire container.
 			if (this.cookiesLocation != null)
 			{
 				try
 				{
 					using var stream = File.Open(this.cookiesLocation, FileMode.Open);
-					return new BinaryFormatter().Deserialize(stream) as CookieContainer ?? new CookieContainer();
+					var formatter = new BinaryFormatter() { Binder = new CookieBinder() };
+					return formatter.Deserialize(stream) as CookieContainer ?? new CookieContainer();
 				}
 				catch (DirectoryNotFoundException)
 				{
@@ -475,6 +478,34 @@
 			}
 
 			throw new WikiException(CurrentCulture(Messages.ExcessiveLag));
+		}
+		#endregion
+
+		#region Private Classes
+		private class CookieBinder : SerializationBinder
+		{
+			private static readonly HashSet<string> ValidTypes = new HashSet<string>
+			{
+				"System.Collections.ArrayList",
+				"System.Collections.Comparer",
+				"System.Collections.Hashtable",
+				"System.Collections.SortedList",
+				"System.Collections.SortedList+SyncSortedList",
+				"System.Collections.SortedList+ValueList",
+				"System.Globalization.CompareInfo",
+				"System.Net.Cookie",
+				"System.Net.CookieCollection",
+				"System.Net.CookieContainer",
+				"System.Net.CookieVariant",
+				"System.Net.PathList",
+				"System.Net.PathList+PathListComparer",
+				"System.Object",
+			};
+
+			public override Type BindToType(string assemblyName, string typeName) =>
+				ValidTypes.Contains(typeName)
+					? Type.GetType(typeName + ", " + assemblyName)
+					: throw new InvalidDataException();
 		}
 		#endregion
 	}
