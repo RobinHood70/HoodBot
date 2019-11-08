@@ -2,6 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
+	using System.Globalization;
 
 	public class RevisionDeleteItem
 	{
@@ -29,7 +30,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Id.ToString();
+		public override string ToString() => this.Id.ToString(CultureInfo.CurrentCulture);
 		#endregion
 	}
 }

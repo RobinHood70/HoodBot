@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
+	using System.Globalization;
 	using RobinHood70.WikiCommon;
 
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Project naming convention takes precedence.")]
@@ -24,7 +25,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.TotalHits.ToString() + ": " + this.Suggestion.Ellipsis(20);
+		public override string ToString() => this.TotalHits.ToString(CultureInfo.CurrentCulture) + ": " + this.Suggestion.Ellipsis(20);
 		#endregion
 	}
 }
