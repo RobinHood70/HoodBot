@@ -197,7 +197,11 @@
 		/// <summary>Convenience method to format any IFormattable value as an invariant value.</summary>
 		/// <param name="value">The value to format.</param>
 		/// <returns>The value as an invariant string.</returns>
-		public static string? ToStringInvariant(this IFormattable value) => value?.ToString(null, CultureInfo.InvariantCulture);
+		public static string ToStringInvariant(this IFormattable value)
+		{
+			ThrowNull(value, nameof(value));
+			return value.ToString(null, CultureInfo.InvariantCulture);
+		}
 		#endregion
 
 		#region IList<T> Extensions
