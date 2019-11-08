@@ -100,6 +100,12 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 			}
 
+			if (result["debuginfo"] is JToken debugInfo)
+			{
+				// TODO: Implement this!
+				this.Wal.DebugInfo = new DebugInfoResult();
+			}
+
 			this.Wal.CurrentTimestamp = result["curtimestamp"].ToNullableDate();
 			this.DeserializeActionExtra(result);
 		}
