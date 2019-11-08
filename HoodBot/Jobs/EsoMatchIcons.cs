@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.IO;
 	using System.Text;
 	using System.Text.RegularExpressions;
@@ -75,34 +74,6 @@
 
 			this.pages.Sort();
 		}
-
-		private void FixBotError()
-		{
-			var from = new DateTime(2019, 10, 31, 8, 38, 0, DateTimeKind.Utc);
-			var to = null as DateTime?; // new DateTime(2019, 10, 29, 10, 42, 10, DateTimeKind.Utc);
-			var user = this.Site.User;
-			var contributions = user.GetContributions(from, to);
-			var revIds = new SortedSet<long>();
-			foreach (var contribution in contributions)
-			{
-				revIds.Add(contribution.ParentId);
-				revIds.Add(contribution.Id);
-			}
-
-			this.pages.GetRevisionIds(revIds);
-			foreach (var page in this.pages)
-			{
-				var filePage = page as FilePage;
-				var latest = page.Revisions.Current;
-				if (latest.Text.IndexOf("original file:", StringComparison.OrdinalIgnoreCase) != -1 && filePage.LatestFileRevision is FileRevision fr)
-				{
-					if (!this.allIcons.ContainsKey(fr.Sha1))
-					{
-						Debug.WriteLine(page.FullPageName);
-					}
-				}
-			}
-		}
 		#endregion
 
 		#region Private Static Methods
@@ -165,6 +136,36 @@
 		#endregion
 
 		#region Private Methods
+		/*
+		private void FixBotError()
+		{
+			var from = new DateTime(2019, 10, 31, 8, 38, 0, DateTimeKind.Utc);
+			var to = null as DateTime?; // new DateTime(2019, 10, 29, 10, 42, 10, DateTimeKind.Utc);
+			var user = this.Site.User;
+			var contributions = user.GetContributions(from, to);
+			var revIds = new SortedSet<long>();
+			foreach (var contribution in contributions)
+			{
+				revIds.Add(contribution.ParentId);
+				revIds.Add(contribution.Id);
+			}
+
+			this.pages.GetRevisionIds(revIds);
+			foreach (var page in this.pages)
+			{
+				var filePage = page as FilePage;
+				var latest = page.Revisions.Current;
+				if (latest.Text.IndexOf("original file:", StringComparison.OrdinalIgnoreCase) != -1 && filePage.LatestFileRevision is FileRevision fr)
+				{
+					if (!this.allIcons.ContainsKey(fr.Sha1))
+					{
+						Debug.WriteLine(page.FullPageName);
+					}
+				}
+			}
+		}
+		*/
+
 		private IReadOnlyDictionary<string, List<ItemInfo>> GetItems()
 		{
 			var queries = new Dictionary<string, string>
