@@ -2,10 +2,11 @@
 	<PropertyGroup>
 		<TargetFramework>net48</TargetFramework>
 		<LangVersion>latest</LangVersion>
-		<CodeAnalysisRuleSet>..\WikiRules.ruleset</CodeAnalysisRuleSet>
+		<CodeAnalysisRuleSet>..\Main.ruleset</CodeAnalysisRuleSet>
 		<Description>Automates Internet Explorer for on-site diffs.</Description>
 		<Nullable>enable</Nullable>
 		<RootNamespace>RobinHood70.InternetExplorerDiff</RootNamespace>
+		<NeutralLanguage>English (Canada)</NeutralLanguage>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -15,35 +16,35 @@
 		<OutputPath>..\HoodBot\bin\Release\Plugins\</OutputPath>
 	</PropertyGroup>
 	<ItemGroup>
-	  <COMReference Include="SHDocVw.dll">
-	    <Guid>eab22ac0-30c1-11cf-a7eb-0000c05bae0b</Guid>
-	    <VersionMajor>1</VersionMajor>
-	    <VersionMinor>1</VersionMinor>
-	    <WrapperTool>tlbimp</WrapperTool>
-	    <Lcid>0</Lcid>
-	    <Isolated>false</Isolated>
-	  </COMReference>
+		<COMReference Include="SHDocVw.dll">
+			<Guid>eab22ac0-30c1-11cf-a7eb-0000c05bae0b</Guid>
+			<VersionMajor>1</VersionMajor>
+			<VersionMinor>1</VersionMinor>
+			<WrapperTool>tlbimp</WrapperTool>
+			<Lcid>0</Lcid>
+			<Isolated>false</Isolated>
+		</COMReference>
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj" />
 		<ProjectReference Include="..\WikiCommon\WikiCommon.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.7">
-	    <PrivateAssets>all</PrivateAssets>
-	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
-	  <PackageReference Include="Nullable" Version="1.1.1">
-	    <PrivateAssets>all</PrivateAssets>
-	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
-	  <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.66">
-	    <PrivateAssets>all</PrivateAssets>
-	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
+		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.7">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Nullable" Version="1.1.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.66">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 	</ItemGroup>
 	<ItemGroup>
-	  <Reference Include="System.ComponentModel.Composition" />
+		<Reference Include="System.ComponentModel.Composition" />
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Update="Properties\Resources.Designer.cs">

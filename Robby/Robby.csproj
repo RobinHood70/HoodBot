@@ -2,10 +2,11 @@
 	<PropertyGroup>
 		<TargetFramework>net48</TargetFramework>
 		<LangVersion>latest</LangVersion>
-		<CodeAnalysisRuleSet>..\WikiRules.ruleset</CodeAnalysisRuleSet>
+		<CodeAnalysisRuleSet>..\Main.ruleset</CodeAnalysisRuleSet>
 		<DocumentationFile>bin\Robby.xml</DocumentationFile>
 		<Nullable>enable</Nullable>
 		<RootNamespace>RobinHood70.Robby</RootNamespace>
+		<NeutralLanguage>English (Canada)</NeutralLanguage>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>

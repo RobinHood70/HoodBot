@@ -2,10 +2,11 @@
 	<PropertyGroup>
 		<TargetFramework>net48</TargetFramework>
 		<LangVersion>latest</LangVersion>
-		<CodeAnalysisRuleSet>..\WikiRules.ruleset</CodeAnalysisRuleSet>
+		<CodeAnalysisRuleSet>..\Main.ruleset</CodeAnalysisRuleSet>
 		<Description>Automates Visual Studio's diff viewer.</Description>
 		<Nullable>enable</Nullable>
 		<RootNamespace>RobinHood70.VisualStudioDiff</RootNamespace>
+		<NeutralLanguage>English (Canada)</NeutralLanguage>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

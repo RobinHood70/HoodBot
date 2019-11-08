@@ -2,11 +2,12 @@
 	<PropertyGroup>
 		<TargetFramework>net48</TargetFramework>
 		<LangVersion>latest</LangVersion>
-		<CodeAnalysisRuleSet>..\WikiRules.ruleset</CodeAnalysisRuleSet>
+		<CodeAnalysisRuleSet>..\Main.ruleset</CodeAnalysisRuleSet>
 		<DocumentationFile>bin\WikiClasses.xml</DocumentationFile>
 		<Description>Common objects that are MediaWiki-specific.</Description>
 		<Nullable>enable</Nullable>
 		<RootNamespace>RobinHood70.WikiClasses</RootNamespace>
+		<NeutralLanguage>English (Canada)</NeutralLanguage>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>

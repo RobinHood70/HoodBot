@@ -2,11 +2,12 @@
 	<PropertyGroup>
 		<TargetFramework>net48</TargetFramework>
 		<LangVersion>latest</LangVersion>
-		<CodeAnalysisRuleSet>..\WikiRules.ruleset</CodeAnalysisRuleSet>
+		<CodeAnalysisRuleSet>..\Main.ruleset</CodeAnalysisRuleSet>
 		<DocumentationFile>bin\WikiCommon.xml</DocumentationFile>
 		<Description>Common elements for the entire project</Description>
 		<Nullable>enable</Nullable>
 		<RootNamespace>RobinHood70.WikiCommon</RootNamespace>
+		<NeutralLanguage>en-CA</NeutralLanguage>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>

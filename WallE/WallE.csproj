@@ -2,11 +2,12 @@
 	<PropertyGroup>
 		<TargetFramework>net48</TargetFramework>
 		<LangVersion>latest</LangVersion>
-		<CodeAnalysisRuleSet>..\WikiRules.ruleset</CodeAnalysisRuleSet>
+		<CodeAnalysisRuleSet>WallERules.ruleset</CodeAnalysisRuleSet>
 		<DocumentationFile>bin\WallE.XML</DocumentationFile>
 		<Description>Wiki Abstraction Layer - handles all low-level communications with a wiki.</Description>
 		<Nullable>enable</Nullable>
 		<RootNamespace>RobinHood70.WallE</RootNamespace>
+		<NeutralLanguage>en-CA</NeutralLanguage>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>
