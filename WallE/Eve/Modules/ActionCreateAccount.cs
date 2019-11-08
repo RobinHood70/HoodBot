@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System.Globalization;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
@@ -48,7 +49,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(result, nameof(result));
 			var resultText = result.MustHaveString("result");
-			resultText = resultText == "needtoken" ? "NeedToken" : resultText.UpperFirst();
+			resultText = resultText == "needtoken" ? "NeedToken" : resultText.UpperFirst(CultureInfo.InvariantCulture);
 			return new CreateAccountResult(
 				result: resultText,
 				captchaData: result["captcha"].ToStringDictionary<string>(),

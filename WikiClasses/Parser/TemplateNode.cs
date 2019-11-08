@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Represents a template call.</summary>
@@ -101,7 +102,7 @@
 			var retval = new Dictionary<string, NodeCollection>();
 			foreach (var parameter in this.Parameters)
 			{
-				retval.Add(parameter.Anonymous ? parameter.Index.ToString() : WikiTextVisitor.Value(parameter.Name!), parameter.Value);
+				retval.Add(parameter.Anonymous ? parameter.Index.ToString(CultureInfo.InvariantCulture) : WikiTextVisitor.Value(parameter.Name!), parameter.Value);
 			}
 
 			return retval;
