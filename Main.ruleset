@@ -912,11 +912,10 @@
     <Rule Id="CA2216" Action="Warning" />
     <Rule Id="CA2229" Action="Warning" />
     <Rule Id="CA2235" Action="Warning" />
-    <Rule Id="CA2237" Action="Warning" />
+    <Rule Id="CA2237" Action="None" />
     <Rule Id="CA2241" Action="Warning" />
     <Rule Id="CA2242" Action="Warning" />
     <Rule Id="CA2243" Action="Warning" />
-    <Rule Id="CA2300" Action="Warning" />
     <Rule Id="CA2301" Action="Warning" />
     <Rule Id="CA2302" Action="Warning" />
     <Rule Id="CA2305" Action="Warning" />
@@ -944,8 +943,8 @@
     <Rule Id="CA3011" Action="Warning" />
     <Rule Id="CA3012" Action="Warning" />
     <Rule Id="CA3061" Action="Warning" />
-    <Rule Id="CA5350" Action="Warning" />
-    <Rule Id="CA5351" Action="Warning" />
+    <Rule Id="CA5350" Action="None" />
+    <Rule Id="CA5351" Action="None" />
     <Rule Id="CA5358" Action="Warning" />
     <Rule Id="CA5359" Action="Warning" />
     <Rule Id="CA5360" Action="Warning" />
