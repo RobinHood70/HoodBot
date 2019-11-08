@@ -77,12 +77,6 @@
 		/// <param name="parameter">The parameter.</param>
 		/// <returns>The result of the conversion.</returns>
 		public static implicit operator string(PaddedString parameter) => parameter?.Value ?? string.Empty;
-
-		/// <summary>Performs an implicit conversion from <see cref="string"/> to <see cref="PaddedString"/>.</summary>
-		/// <param name="parameter">The parameter.</param>
-		/// <returns>The result of the conversion.</returns>
-		/// <remarks>While going to a string is an implicit operation, going from one is an explicit operation, since any prior format will be lost.</remarks>
-		public static explicit operator PaddedString(string parameter) => new PaddedString(parameter);
 		#endregion
 
 		#region Public Operators
