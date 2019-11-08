@@ -65,7 +65,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				foreach (var (key, value) in nodeNames)
 				{
-					retval |= Convert.ToUInt64(token[key].ToBCBool() ? value : default);
+					retval |= token[key].ToBCBool() ? Convert.ToUInt64(value, CultureInfo.InvariantCulture) : 0;
 				}
 			}
 
