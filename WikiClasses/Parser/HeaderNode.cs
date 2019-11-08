@@ -8,7 +8,7 @@
 	/// <summary>Represents a header.</summary>
 	public class HeaderNode : IWikiNode
 	{
-		// TODO: Rejig this so that header node is strictly the header with no trailing space. GetInnerText can then be removed in favour of only storing the text. Will need to look closely at HeaderElement, though, to make sure fallback unwikifying isn't affected.
+		// TODO: Rejig this so that header node is strictly the header with no trailing space. GetInnerText can then be removed since this will only ever be storing the interior text. Will need to look closely at HeaderElement, though, to make sure fallback unwikifying isn't affected.
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="HeaderNode"/> class.</summary>
@@ -79,6 +79,10 @@
 		/// <param name="visitor">The visiting class.</param>
 		public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
 
+		/// <summary>Gets the text inside the heading delimiters.</summary>
+		/// <param name="innerTrim">if set to <c>true</c> [inner trim].</param>
+		/// <returns>The text inside the heading delimiters.</returns>
+		/// <remarks>This is method is provided as a temporary measure. The intent is to alter the parser itself so as to make this method unnecessary.</remarks>
 		public string GetInnerText(bool innerTrim)
 		{
 			var text = WikiTextVisitor.Value(this).TrimEnd();
