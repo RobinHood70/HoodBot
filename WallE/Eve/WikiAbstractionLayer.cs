@@ -36,7 +36,7 @@
 		private readonly HashSet<string> interwikiPrefixes = new HashSet<string>(StringComparer.Create(CultureInfo.InvariantCulture, true));
 		private readonly Dictionary<int, SiteInfoNamespace> namespaces = new Dictionary<int, SiteInfoNamespace>();
 		private readonly List<ErrorItem> warnings = new List<ErrorItem>();
-		private readonly WikiException notInitialized = new WikiException(string.Format(Messages.SiteNotInitialized, nameof(Login), nameof(Initialize)));
+		private readonly WikiException notInitialized = new WikiException(CurrentCulture(Messages.SiteNotInitialized, nameof(Login), nameof(Initialize)));
 		private ITokenManager? tokenManager = null;
 		private int userTalkChecksIgnored = 0;
 		#endregion
@@ -163,12 +163,12 @@
 		/// <value>A function which returns true if the bot should stop what it's doing.</value>
 		public Func<bool>? CustomStopCheck { get; set; }
 
-		/// <summary>Gets any debug information returned by an action.</summary>
+		/// <summary>Gets or sets any debug information returned by an action.</summary>
 		/// <value>The debug information.</value>
 		/// <remarks>For future expansion. Not yet implemented.
 		///
 		/// If debugging is enabled, any action can return debugging information along with the normal results. If a server does so, the results will be located here.</remarks>
-		public DebugInfoResult DebugInfo { get; protected internal set; }
+		public DebugInfoResult? DebugInfo { get; protected internal set; } = null;
 
 		/// <summary>Gets or sets the detected format version.</summary>
 		/// <value>The detected format version.</value>
@@ -239,7 +239,7 @@
 		public ITokenManager TokenManager
 		{
 			get => this.tokenManager ??=
-					this.SiteVersion == 0 ? throw new InvalidOperationException(string.Format(Messages.SiteNotInitialized, nameof(this.Initialize), nameof(this.Login))) :
+					this.SiteVersion == 0 ? throw new InvalidOperationException(CurrentCulture(Messages.SiteNotInitialized, nameof(this.Initialize), nameof(this.Login))) :
 					this.SiteVersion >= TokenManagerMeta.MinimumVersion ? new TokenManagerMeta(this) :
 					this.SiteVersion >= TokenManagerAction.MinimumVersion ? new TokenManagerAction(this) :
 					new TokenManagerOriginal(this) as ITokenManager;
@@ -342,6 +342,7 @@
 		{
 			ThrowNull(module, nameof(module));
 			this.RunQuery(module);
+
 			return module.Output ?? throw WikiException.General("null-result", module.Name + " was found in the results, but the deserializer returned null.");
 		}
 
@@ -352,9 +353,12 @@
 		/// <returns>A list of <see cref="PageItem"/>s of the specified underlying type.</returns>
 		public PageSetResult<PageItem> RunPageSetQuery(QueryInput input, TitleCreator<PageItem> pageFactory)
 		{
+			ThrowNull(input, nameof(input));
+			ThrowNull(pageFactory, nameof(pageFactory));
 			var query = new ActionQueryPageSet(this, input, pageFactory);
 			var retval = query.Submit();
 			this.DoStopCheck(query.UserInfo);
+
 			return retval;
 		}
 
@@ -1371,7 +1375,7 @@
 						userInfoResult = this.UserInfo(input);
 						if (userInfoResult == null)
 						{
-							throw WikiException.General("userinfo-failed", "UserInfo check failed!");
+							throw WikiException.General("userinfo-failed", EveMessages.UserInfoCheckFailed);
 						}
 
 						this.userTalkChecksIgnored = 0;

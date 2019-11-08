@@ -219,4 +219,7 @@
   <data name="NullResponse" xml:space="preserve">
     <value>The return value of the request was null.</value>
   </data>
+  <data name="UserInfoCheckFailed" xml:space="preserve">
+    <value>UserInfo check failed! User name and ID could not be validated.</value>
+  </data>
 </root>

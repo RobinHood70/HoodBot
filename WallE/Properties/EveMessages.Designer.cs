@@ -340,6 +340,15 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to UserInfo check failed! User name and ID could not be validated..
+        /// </summary>
+        internal static string UserInfoCheckFailed {
+            get {
+                return ResourceManager.GetString("UserInfoCheckFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to the current username changed unexpectedly.
         /// </summary>
         internal static string UserNameChanged {
