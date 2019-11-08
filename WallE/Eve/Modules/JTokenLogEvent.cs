@@ -184,7 +184,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				var valOffset = '0';
 				if (this.logAction == "event" || this.logAction == "revision")
 				{
-					var revisionType = (string?)this.parms[valOffset.ToString()];
+					var revisionType = (string?)this.parms[new string(valOffset, 1)];
 					switch (revisionType)
 					{
 						case "archive":
@@ -196,7 +196,7 @@ namespace RobinHood70.WallE.Eve.Modules
 							break;
 					}
 
-					if (this.parms[valOffset.ToString()] is JToken logIdsNode && (string?)logIdsNode is string ids)
+					if (this.parms[new string(valOffset, 1)] is JToken logIdsNode && (string?)logIdsNode is string ids)
 					{
 						var logIds = new List<long>();
 						foreach (var commaSplit in ids.Split(TextArrays.Comma))
@@ -207,12 +207,14 @@ namespace RobinHood70.WallE.Eve.Modules
 						this.Result.Add("logids", logIds);
 					}
 
-					if (this.parms[valOffset++.ToString()] is JToken oldNode)
+					valOffset++;
+					if (this.parms[new string(valOffset, 1)] is JToken oldNode)
 					{
 						this.Result.Add("old", LogEventGetRDType((string?)oldNode));
 					}
 
-					if (this.parms[valOffset++.ToString()] is JToken newNode)
+					valOffset++;
+					if (this.parms[new string(valOffset, 1)] is JToken newNode)
 					{
 						this.Result.Add("new", LogEventGetRDType((string?)newNode));
 					}

@@ -13,7 +13,7 @@
 		/// <param name="mask">The matching character to count.</param>
 		/// <param name="offset">The zero-based offset into the string to start scanning from.</param>
 		/// <returns>The matching character count.</returns>
-		public static int Span(this string txt, char mask, int offset) => Span(txt, mask.ToString(), offset, txt?.Length ?? 0);
+		public static int Span(this string txt, char mask, int offset) => Span(txt, new string(mask, 1), offset, txt?.Length ?? 0);
 
 		/// <summary>Counts the number of consecutive characters that match the mask character.</summary>
 		/// <param name="txt">The text to scan.</param>
@@ -21,7 +21,7 @@
 		/// <param name="offset">The zero-based offset into the string to start scanning from.</param>
 		/// <param name="limit">The maximum number of matching characters allowed.</param>
 		/// <returns>The matching character count.</returns>
-		public static int Span(this string txt, char mask, int offset, int limit) => Span(txt, mask.ToString(), offset, limit);
+		public static int Span(this string txt, char mask, int offset, int limit) => Span(txt, new string(mask, 1), offset, limit);
 
 		/// <summary>Counts the number of consecutive characters that match the mask character.</summary>
 		/// <param name="txt">The text to scan.</param>
@@ -82,7 +82,7 @@
 		/// <param name="mask">The matching character to count.</param>
 		/// <param name="offset">The zero-based offset into the string to start scanning from.</param>
 		/// <returns>The matching character count.</returns>
-		public static int SpanReverse(this string txt, char mask, int offset) => SpanReverse(txt, mask.ToString(), offset, txt?.Length ?? 0);
+		public static int SpanReverse(this string txt, char mask, int offset) => SpanReverse(txt, new string(mask, 1), offset, txt?.Length ?? 0);
 
 		/// <summary>Counts the number of consecutive characters that match the mask character.</summary>
 		/// <param name="txt">The text to scan.</param>
@@ -90,7 +90,7 @@
 		/// <param name="offset">The zero-based offset into the string to start scanning from.</param>
 		/// <param name="limit">The maximum number of matching characters allowed.</param>
 		/// <returns>The matching character count.</returns>
-		public static int SpanReverse(this string txt, char mask, int offset, int limit) => SpanReverse(txt, mask.ToString(), offset, limit);
+		public static int SpanReverse(this string txt, char mask, int offset, int limit) => SpanReverse(txt, new string(mask, 1), offset, limit);
 
 		/// <summary>Counts the number of consecutive characters that match the mask character.</summary>
 		/// <param name="txt">The text to scan.</param>
