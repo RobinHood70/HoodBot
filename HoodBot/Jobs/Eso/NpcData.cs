@@ -127,7 +127,7 @@
 				{
 					foreach (var subPlace in this.Places)
 					{
-						if (subPlace.Key.Type != PlaceType.Unknown && subPlace.Key.Zone == place.TitleName)
+						if (subPlace.Key.PlaceType != PlaceType.Unknown && subPlace.Key.Zone == place.TitleName)
 						{
 							return true;
 						}
@@ -140,10 +140,10 @@
 			foreach (var kvp in this.Places)
 			{
 				var place = kvp.Key;
-				if (!showPlaces.TryGetValue(place.Type, out var list))
+				if (!showPlaces.TryGetValue(place.PlaceType, out var list))
 				{
 					list = new List<Place>();
-					showPlaces.Add(place.Type, list);
+					showPlaces.Add(place.PlaceType, list);
 				}
 
 				list.Add(kvp.Key);
@@ -201,7 +201,7 @@
 			var list = new List<Place>();
 			foreach (var place in this.Places.Keys)
 			{
-				if (place.Type == placeType)
+				if (place.PlaceType == placeType)
 				{
 					list.Add(place);
 				}

@@ -102,6 +102,7 @@
     <Compile Include="Jobs\EsoMatchIcons.cs" />
     <Compile Include="Jobs\EsoNpcs.cs" />
     <Compile Include="Jobs\EsoPassiveSkillSummaries.cs" />
+    <Compile Include="Jobs\EsoQuests.cs" />
     <Compile Include="Jobs\EsoUpdateNpcs.cs" />
     <Compile Include="Jobs\Eso\Ability.cs" />
     <Compile Include="Jobs\Eso\ActiveSkill.cs" />

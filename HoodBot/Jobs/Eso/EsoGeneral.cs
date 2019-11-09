@@ -188,7 +188,7 @@
 		public static PlaceCollection GetPlaces(Site site)
 		{
 			var pageLoadOptions = new PageLoadOptions(PageModules.Custom, true);
-			var pageCreator = new MetaTemplateCreator("alliance", "settlement", "titlename", "zone");
+			var pageCreator = new MetaTemplateCreator("alliance", "settlement", "titlename", "type", "zone");
 			var places = new PageCollection(site, pageLoadOptions, pageCreator);
 			places.SetLimitations(LimitationType.FilterTo, UespNamespaces.Online);
 			places.GetCategoryMembers("Online-Places");
@@ -295,9 +295,9 @@
 				{
 					if (places[member.PageName] is Place place)
 					{
-						if (place.Type == PlaceType.Unknown)
+						if (place.PlaceType == PlaceType.Unknown)
 						{
-							place.Type = placeInfo.Type;
+							place.PlaceType = placeInfo.Type;
 						}
 						else
 						{

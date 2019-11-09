@@ -29,6 +29,7 @@
 			this.Settlement = page.GetVariable("settlement");
 			this.Title = new Title(page);
 			this.TitleName = page.GetVariable("titlename");
+			this.TypeText = page.GetVariable("type");
 			this.Zone = page.GetVariable("zone");
 		}
 
@@ -45,13 +46,15 @@
 
 		public string Key { get; }
 
+		public PlaceType PlaceType { get; internal set; } // Should be redundant to TypeText, but this is taken from categories as opposed to the MT variables, so could differ.
+
 		public string Settlement { get; private set; }
 
 		public Title Title { get; private set; }
 
 		public string TitleName { get; private set; }
 
-		public PlaceType Type { get; internal set; }
+		public string TypeText { get; private set; }
 
 		public string Zone { get; private set; }
 		#endregion
@@ -72,7 +75,8 @@
 				Alliance = other.Alliance,
 				Settlement = other.Settlement,
 				Title = other.Title,
-				Type = other.Type,
+				PlaceType = other.PlaceType,
+				TypeText = other.TypeText,
 				Zone = other.Zone,
 			};
 
