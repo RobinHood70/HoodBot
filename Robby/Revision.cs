@@ -19,7 +19,7 @@
 			this.Comment = contributionItem.Comment;
 			this.Id = contributionItem.RevisionId;
 			this.Minor = contributionItem.Flags.HasFlag(UserContributionFlags.Minor);
-			this.ParentId = 0;
+			this.ParentId = contributionItem.ParentId;
 			this.Text = null;
 			this.Timestamp = contributionItem.Timestamp;
 			this.User = contributionItem.User;
