@@ -89,8 +89,8 @@
 		{
 			ThrowNull(txt, nameof(txt));
 			var template = TemplateNode.FromParts(string.Empty, new[] { txt });
-			return (template.Parameters.Count == 1)
-				? template.Parameters[0]
+			return template.Parameters.Count == 1 && template.Parameters.First.Value is ParameterNode retval
+				? retval
 				: throw new InvalidOperationException(CurrentCulture(Resources.MalformedNodeText, nameof(ParameterNode), nameof(FromText)));
 		}
 
@@ -157,7 +157,20 @@
 
 		/// <summary>Returns a <see cref="string"/> that represents this instance.</summary>
 		/// <returns>A <see cref="string"/> that represents this instance.</returns>
-		public override string ToString() => "|" + (this.Anonymous ? string.Empty : "name=") + "value";
+		public override string ToString()
+		{
+			// For simple name=value nodes, display the text; otherwise, display "name" and/or "value" as needed so we're not executing time-consuming processing here.
+			var name =
+				this.Anonymous
+					? string.Empty :
+				this.Name?.Count == 1 && this.Name.First.Value is TextNode nameNode
+					? nameNode.Text
+					: "<name>";
+			var value = this.Value.Count == 1 && this.Value.First.Value is TextNode valueNode
+				? valueNode.Text
+				: "<value>";
+			return $"|{name}={value}";
+		}
 		#endregion
 	}
 }
