@@ -20,7 +20,7 @@ namespace RobinHood70.WallE.Base
 	public class RecentChangesItem : LogEvent, ITitle
 	{
 		#region Constructors
-		internal RecentChangesItem(int ns, string title, RecentChangesFlags flags, long id, int newLength, int oldLength, long oldRevisionId, string? patrolToken, string? recentChangeType, long revisionId, IReadOnlyList<string>? tags)
+		internal RecentChangesItem(int ns, string title, RecentChangesFlags flags, long id, int newLength, int oldLength, long oldRevisionId, string? patrolToken, string? recentChangeType, long revisionId, IReadOnlyList<string> tags)
 		{
 			this.Namespace = ns;
 			this.Title = title;
@@ -55,7 +55,7 @@ namespace RobinHood70.WallE.Base
 
 		public long RevisionId { get; }
 
-		public IReadOnlyList<string>? Tags { get; }
+		public IReadOnlyList<string> Tags { get; }
 
 		public string Title { get; }
 		#endregion
