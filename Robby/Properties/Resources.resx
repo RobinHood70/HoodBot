@@ -132,6 +132,9 @@
   <data name="PageNameInterwiki" xml:space="preserve">
     <value>Invalid page name: [[{0}]]. Page is an interwiki link that doesn't resolve to the local wiki.</value>
   </data>
+  <data name="SiteNotInitialized" xml:space="preserve">
+    <value>{0} is invalid until the site has been initialized.</value>
+  </data>
   <data name="SizeInvalid" xml:space="preserve">
     <value>Size value invalid.</value>
   </data>

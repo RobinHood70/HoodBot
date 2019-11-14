@@ -106,6 +106,15 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} is invalid until the site has been initialized..
+        /// </summary>
+        internal static string SiteNotInitialized {
+            get {
+                return ResourceManager.GetString("SiteNotInitialized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Size value invalid..
         /// </summary>
         internal static string SizeInvalid {

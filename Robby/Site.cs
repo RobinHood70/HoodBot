@@ -90,9 +90,17 @@
 
 		#region Fields
 		private readonly Dictionary<string, MagicWord> magicWords = new Dictionary<string, MagicWord>();
+		private string? baseArticlePath;
 		private CultureInfo culture = CultureInfo.CurrentCulture;
 		private HashSet<Title> disambiguationTemplates;
+		private Title? mainPage;
+		private string? mainPageName;
+		private NamespaceCollection? namespaces;
 		private Regex redirectTargetFinder;
+		private string? scriptPath;
+		private string? serverName;
+		private string? siteName;
+		private string? version;
 		#endregion
 
 		#region Constructors
@@ -150,7 +158,7 @@
 
 		/// <summary>Gets the base article path.</summary>
 		/// <value>The base article path, where <c>$1</c> should be replaced with the URL-encoded article title. </value>
-		public string? BaseArticlePath { get; private set; }
+		public string BaseArticlePath => this.baseArticlePath ?? throw NoSite(nameof(this.BaseArticlePath));
 
 		/// <summary>Gets a value indicating whether the first letter of titles is case-sensitive.</summary>
 		/// <value><see langword="true"/> if the first letter of titles is case-sensitive; otherwise, <see langword="false"/>.</value>
@@ -203,20 +211,20 @@
 
 		/// <summary>Gets the <see cref="Title"/> for the main page of the site.</summary>
 		/// <value>The main page.</value>
-		public Title? MainPage { get; private set; }
+		public Title MainPage => this.mainPage ?? throw NoSite(nameof(this.MainPage));
 
 		/// <summary>Gets the name of the main page, as returned by the site.</summary>
 		/// <value>The name of the main page.</value>
 		/// <remarks>This will normally be the same as <c><see cref="MainPage"/>.FullPageName</c>, but is provided so that the original name is available, if needed.</remarks>
-		public string? MainPageName { get; private set; }
+		public string MainPageName => this.mainPageName ?? throw NoSite(nameof(this.MainPageName));
 
 		/// <summary>Gets the wiki name.</summary>
 		/// <value>The name of the wiki.</value>
-		public string? Name { get; private set; }
+		public string Name => this.siteName ?? throw NoSite(nameof(this.Name));
 
 		/// <summary>Gets the wiki namespaces.</summary>
 		/// <value>the wiki namespaces.</value>
-		public NamespaceCollection Namespaces { get; private set; }
+		public NamespaceCollection Namespaces => this.namespaces ?? throw NoSite(nameof(this.Namespaces));
 
 		/// <summary>Gets or sets the page creator.</summary>
 		/// <value>The page creator.</value>
@@ -226,11 +234,11 @@
 		/// <summary>Gets the script path. This is the path preceding api.php, index.php and so forth.</summary>
 		/// <value>The script path.</value>
 		/// <remarks>If not returned by the API, it will be guessed based on the path to api.php itself.</remarks>
-		public string? ScriptPath { get; private set; }
+		public string ScriptPath => this.scriptPath ?? throw NoSite(nameof(this.ScriptPath));
 
 		/// <summary>Gets the name of the server—typically, the base URL.</summary>
 		/// <value>The name of the server.</value>
-		public string? ServerName { get; private set; }
+		public string ServerName => this.serverName ?? throw NoSite(nameof(this.ServerName));
 
 		/// <summary>Gets the bot's user name.</summary>
 		/// <value>The bot's user name.</value>
@@ -242,7 +250,7 @@
 
 		/// <summary>Gets the MediaWiki version of the wiki.</summary>
 		/// <value>The MediaWiki version of the wiki.</value>
-		public string? Version { get; private set; }
+		public string Version => this.version ?? throw NoSite(nameof(this.Version));
 		#endregion
 
 		#region Internal Properties
@@ -976,14 +984,14 @@
 			var general = siteInfo.General;
 			this.CaseSensitive = general.Flags.HasFlag(SiteInfoFlags.CaseSensitive);
 			this.Culture = GetCulture(general.Language);
-			this.Name = general.SiteName;
-			this.ServerName = general.ServerName;
-			this.Version = general.Generator;
+			this.siteName = general.SiteName;
+			this.serverName = general.ServerName;
+			this.version = general.Generator;
 			var path = general.ArticlePath;
 			var basePath = general.BasePage.Substring(0, general.BasePage.IndexOf(general.Server, StringComparison.Ordinal) + general.Server.Length); // Search for server in BasePage and extract everything from the start of BasePage to then. This effectively converts Server to canonical if it was protocol-relative.
-			this.BaseArticlePath = path.StartsWith("/", StringComparison.Ordinal) ? basePath + path : path;
-			this.MainPageName = general.MainPage;
-			this.ScriptPath = basePath + general.Script;
+			this.baseArticlePath = path.StartsWith("/", StringComparison.Ordinal) ? basePath + path : path;
+			this.mainPageName = general.MainPage;
+			this.scriptPath = basePath + general.Script;
 
 			// NamespaceAliases
 			var allAliases = new Dictionary<int, List<string>>();
@@ -1006,8 +1014,8 @@
 				namespaces.Add(new Namespace(this, item, aliases));
 			}
 
-			this.Namespaces = new NamespaceCollection(namespaces, this.EqualityComparerInsensitive);
-			this.MainPage = new Title(this, general.MainPage); // Now that we understand namespaces, we can create a Title.
+			this.namespaces = new NamespaceCollection(namespaces, this.EqualityComparerInsensitive);
+			this.mainPage = new Title(this, general.MainPage); // Now that we understand namespaces, we can create a Title.
 
 			// MagicWords
 			foreach (var word in siteInfo.MagicWords)
@@ -1054,6 +1062,10 @@
 		/// <param name="input">The input parameters.</param>
 		/// <returns><see langword="true"/> if the file was successfully uploaded.</returns>
 		protected virtual bool Upload(UploadInput input) => this.AbstractionLayer.Upload(input).Result == "Success";
+		#endregion
+
+		#region Private Static Methods
+		private static InvalidOperationException NoSite(string name) => throw new InvalidOperationException(CurrentCulture(Resources.SiteNotInitialized, name));
 		#endregion
 
 		#region Private Methods
@@ -1136,17 +1148,16 @@
 
 		private void Clear()
 		{
-			this.BaseArticlePath = null;
-			this.magicWords.Clear();
-
+			this.baseArticlePath = null;
 			this.CaseSensitive = false;
 			this.Culture = CultureInfo.CurrentCulture;
 			this.DisambiguatorAvailable = false;
-			this.MainPage = null;
-			this.Name = null;
-			this.Namespaces = null;
-			this.ServerName = null;
-			this.Version = null;
+			this.magicWords.Clear();
+			this.mainPage = null;
+			this.namespaces = null;
+			this.serverName = null;
+			this.siteName = null;
+			this.version = null;
 			if (!(this.UserFunctions is DefaultUserFunctions))
 			{
 				this.UserFunctions = DefaultUserFunctions.CreateInstance(this);
