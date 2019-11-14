@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.Robby
 {
 	using System;
+	using System.Globalization;
 	using System.Text;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WikiClasses;
@@ -120,6 +121,19 @@
 			set => this.SetParameter(Site.ImageCaptionName, value);
 		}
 
+		/// <summary>Gets or sets the image dimensions directly.</summary>
+		/// <value>The image dimensions.</value>
+		/// <remarks>Setting this option will remove any <see cref="Upright"/> parameter, and vice versa, since they are mutually exclusive. Both may be set simultaneously, however, if the link is parsed from existing text. In that case, if either is altered, the other will be removed.</remarks>
+		public PaddedString Dimensions
+		{
+			get => this.GetValue(Site.ImageSizeName);
+			set
+			{
+				this.parameters.Remove(Site.ImageUprightName);
+				this.SetParameter(Site.ImageSizeName, value);
+			}
+		}
+
 		/// <summary>Gets or sets the display text. For images, this is an alias for the caption property.</summary>
 		public override PaddedString DisplayParameter
 		{
@@ -197,26 +211,13 @@
 		/// <value>The page value.</value>
 		public int PageValue
 		{
-			get => int.Parse(this.GetRegexValue(Site.ImagePageName) ?? "0");
+			get => int.Parse(this.GetRegexValue(Site.ImagePageName) ?? "0", CultureInfo.InvariantCulture);
 			set => this.SetParameterValue(Site.ImagePageName, value.ToStringInvariant());
-		}
-
-		/// <summary>Gets or sets the image size directly.</summary>
-		/// <value>The image size.</value>
-		/// <remarks>Setting this option will remove any <see cref="Upright"/> parameter, and vice versa, since they are mutually exclusive. Both may be set simultaneously, however, if the link is parsed from existing text. In that case, if either is altered, the other will be removed.</remarks>
-		public PaddedString Size
-		{
-			get => this.GetValue(Site.ImageSizeName);
-			set
-			{
-				this.parameters.Remove(Site.ImageUprightName);
-				this.SetParameter(Site.ImageSizeName, value);
-			}
 		}
 
 		/// <summary>Gets or sets the upright scaling factor.</summary>
 		/// <value>The upright factor.</value>
-		/// <remarks>Setting this option will remove any <see cref="Size"/> parameter, and vice versa, since they are mutually exclusive. Both may be set simultaneously, however, if the link is parsed from existing text. In that case, if either is altered, the other will be removed.</remarks>
+		/// <remarks>Setting this option will remove any <see cref="Dimensions"/> parameter, and vice versa, since they are mutually exclusive. Both may be set simultaneously, however, if the link is parsed from existing text. In that case, if either is altered, the other will be removed.</remarks>
 		public PaddedString Upright
 		{
 			get => this.GetValue(Site.ImageUprightName);
@@ -229,7 +230,7 @@
 
 		/// <summary>Gets or sets the upright value as a number.</summary>
 		/// <value>The upright value.</value>
-		/// <remarks>Setting this option will remove any <see cref="Size"/> parameter, and vice versa, since they are mutually exclusive. Both may be set simultaneously, however, if the link is parsed from existing text. In that case, if either is altered, the other will be removed.</remarks>
+		/// <remarks>Setting this option will remove any <see cref="Dimensions"/> parameter, and vice versa, since they are mutually exclusive. Both may be set simultaneously, however, if the link is parsed from existing text. In that case, if either is altered, the other will be removed.</remarks>
 		public double UprightValue
 		{
 			get => double.TryParse(this.GetRegexValue(Site.ImageUprightName), out var retval) ? retval : double.NaN;
@@ -272,7 +273,7 @@
 		/// <exception cref="InvalidOperationException">The size text is invalid, and could not be parsed.</exception>
 		public (int height, int width) GetSize()
 		{
-			var split = this.Size.Value.Split('x');
+			var split = this.Dimensions.Value.Split('x');
 			return
 				split.Length == 1 ? (0, int.TryParse(split[0], out var result) ? result : throw NonNumeric) :
 				split.Length == 2 ? (int.TryParse("0" + split[0], out var width) ? width : throw NonNumeric, int.TryParse("0" + split[1], out var height) ? height : throw NonNumeric) :
@@ -304,7 +305,7 @@
 			this.Sort();
 		}
 
-		/// <summary>Sets the image size, formatting the <see cref="Size"/> paramter appropriately.</summary>
+		/// <summary>Sets the image size, formatting the <see cref="Dimensions"/> paramter appropriately.</summary>
 		/// <param name="height">The height.</param>
 		/// <param name="width">The width.</param>
 		public void SetSize(int height, int width)
@@ -317,13 +318,13 @@
 				}
 				else
 				{
-					this.Size = new PaddedString(width.ToStringInvariant());
+					this.Dimensions = new PaddedString(width.ToStringInvariant());
 				}
 			}
 			else
 			{
 				var textHeight = height.ToStringInvariant();
-				this.Size = new PaddedString((width != 0 ? width.ToStringInvariant() : string.Empty) + "x" + textHeight);
+				this.Dimensions = new PaddedString((width != 0 ? width.ToStringInvariant() : string.Empty) + "x" + textHeight);
 			}
 		}
 
