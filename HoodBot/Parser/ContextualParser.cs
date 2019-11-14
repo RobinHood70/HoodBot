@@ -11,6 +11,7 @@
 	{
 		#region Constructors
 		public ContextualParser()
+			: base(null)
 		{
 		}
 

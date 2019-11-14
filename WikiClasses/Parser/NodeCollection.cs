@@ -6,6 +6,8 @@
 	using System.Linq;
 	using static WikiCommon.Globals;
 
+	// CONSIDER: Implementing a NodeCollection<T> so that properties like Parameters can be more strongly typed as NodeCollection<ParameterNode>.
+
 	/// <summary>  A delegate for the method required by the Replace method.</summary>
 	/// <param name="node">The node.</param>
 	/// <returns>A LinkedListNode&lt;IWikiNode>.</returns>
@@ -15,12 +17,6 @@
 	public class NodeCollection : LinkedList<IWikiNode>, IWikiNode
 	{
 		#region Constructors
-
-		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
-		public NodeCollection()
-			: this(null)
-		{
-		}
 
 		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
 		/// <param name="parent">The parent.</param>
@@ -83,15 +79,13 @@
 		/// <returns>The nodes that satisfy the specified condition.</returns>
 		public IEnumerable<IWikiNode> FindAll(Predicate<IWikiNode> condition)
 		{
-			var node = this.First;
-			while (node != null)
+			ThrowNull(condition, nameof(condition));
+			foreach (var node in this)
 			{
-				if (condition(node.Value))
+				if (condition(node))
 				{
-					yield return node.Value;
+					yield return node;
 				}
-
-				node = node.Next;
 			}
 		}
 
@@ -99,28 +93,36 @@
 		/// <typeparam name="T">The type of node to find.</typeparam>
 		/// <returns>The nodes in the collection that are of the specified type.</returns>
 		public IEnumerable<T> FindAll<T>()
+			where T : IWikiNode => this.FindAll((T item) => true);
+
+		/// <summary>Finds all nodes of the specified type.</summary>
+		/// <typeparam name="T">The type of node to find.</typeparam>
+		/// <param name="condition">The condition a given node must satisfy.</param>
+		/// <returns>The nodes in the collection that are of the specified type.</returns>
+		public IEnumerable<T> FindAll<T>(Predicate<T> condition)
 			where T : IWikiNode
 		{
+			ThrowNull(condition, nameof(condition));
 			foreach (var node in this)
 			{
-				if (node is T castNode)
+				if (node is T castNode && condition(castNode))
 				{
 					yield return castNode;
 				}
 			}
 		}
 
-		/// <summary>Finds all <see cref="LinkedListNode{T}">LinkedListNodes</see> with values of the specified type.</summary>
-		/// <typeparam name="T">The type of node to find.</typeparam>
-		/// <returns>The nodes in the collection that are of the specified type.</returns>
+		/// <summary>Finds all <see cref="LinkedListNode{T}">LinkedListNodes</see> satisfying the specified condition.</summary>
+		/// <param name="condition">The condition a given node must satisfy.</param>
+		/// <returns>The nodes in the collection that satisfy the specified condition.</returns>
 		/// <remarks>This version allows you to traverse and/or modify the list as needed. Unlike the Replace method, however, this method is unaware of any alterations you make to the collection, so will traverse the nodes in the order they're in, regardless of any changes. Anything that modifies the Next property of the current node will inherently also alter the iteration. If you insert nodes after the current node, they will be iterated through.</remarks>
-		public IEnumerable<LinkedListNode<IWikiNode>> FindAllLinked<T>()
-			where T : IWikiNode
+		public IEnumerable<LinkedListNode<IWikiNode>> FindAllLinked(Predicate<IWikiNode> condition)
 		{
+			ThrowNull(condition, nameof(condition));
 			var node = this.First;
 			while (node != null)
 			{
-				if (node.Value is T)
+				if (condition(node.Value))
 				{
 					yield return node;
 				}
@@ -129,16 +131,26 @@
 			}
 		}
 
-		/// <summary>Finds all <see cref="LinkedListNode{T}">LinkedListNodes</see> satisfying the specified condition.</summary>
-		/// <param name="condition">The condition a given node must satisfy.</param>
-		/// <returns>The nodes in the collection that satisfy the specified condition.</returns>
+		/// <summary>Finds all <see cref="LinkedListNode{T}">LinkedListNodes</see> with values of the specified type.</summary>
+		/// <typeparam name="T">The type of node to find.</typeparam>
+		/// <returns>The nodes in the collection that are of the specified type.</returns>
 		/// <remarks>This version allows you to traverse and/or modify the list as needed. Unlike the Replace method, however, this method is unaware of any alterations you make to the collection, so will traverse the nodes in the order they're in, regardless of any changes. Anything that modifies the Next property of the current node will inherently also alter the iteration. If you insert nodes after the current node, they will be iterated through.</remarks>
-		public IEnumerable<LinkedListNode<IWikiNode>> FindAllLinked(Predicate<LinkedListNode<IWikiNode>> condition)
+		public IEnumerable<LinkedListNode<IWikiNode>> FindAllLinked<T>()
+			where T : IWikiNode => this.FindAllLinked((T item) => true);
+
+		/// <summary>Finds all <see cref="LinkedListNode{T}">LinkedListNodes</see> with values of the specified type.</summary>
+		/// <typeparam name="T">The type of node to find.</typeparam>
+		/// <param name="condition">The condition a given node must satisfy.</param>
+		/// <returns>The nodes in the collection that are of the specified type.</returns>
+		/// <remarks>This version allows you to traverse and/or modify the list as needed. Unlike the Replace method, however, this method is unaware of any alterations you make to the collection, so will traverse the nodes in the order they're in, regardless of any changes. Anything that modifies the Next property of the current node will inherently also alter the iteration. If you insert nodes after the current node, they will be iterated through.</remarks>
+		public IEnumerable<LinkedListNode<IWikiNode>> FindAllLinked<T>(Predicate<T> condition)
+			where T : IWikiNode
 		{
+			ThrowNull(condition, nameof(condition));
 			var node = this.First;
 			while (node != null)
 			{
-				if (condition(node))
+				if (node.Value is T castNode && condition(castNode))
 				{
 					yield return node;
 				}
@@ -152,6 +164,7 @@
 		/// <returns>The first node that satisfies the specified condition.</returns>
 		public IWikiNode? FindFirst(Predicate<IWikiNode> condition)
 		{
+			ThrowNull(condition, nameof(condition));
 			var node = this.First;
 			while (node != null)
 			{
@@ -170,11 +183,19 @@
 		/// <typeparam name="T">The type of node to find.</typeparam>
 		/// <returns>The first node node in the collection of the specified type.</returns>
 		public T? FindFirst<T>()
+			where T : class, IWikiNode => this.FindFirst((T item) => true);
+
+		/// <summary>Finds the first node of the specified type that satisfies the specified condition.</summary>
+		/// <typeparam name="T">The type of node to find.</typeparam>
+		/// <param name="condition">The condition a given node must satisfy.</param>
+		/// <returns>The first node node in the collection of the specified type.</returns>
+		public T? FindFirst<T>(Predicate<T> condition)
 			where T : class, IWikiNode
 		{
+			ThrowNull(condition, nameof(condition));
 			foreach (var node in this)
 			{
-				if (node is T castNode)
+				if (node is T castNode && condition(castNode))
 				{
 					return castNode;
 				}
@@ -183,16 +204,15 @@
 			return default;
 		}
 
-		/// <summary>Finds the first <see cref="LinkedListNode{T}">LinkedListNode</see> of the specified type.</summary>
-		/// <typeparam name="T">The type of node to find.</typeparam>
-		/// <returns>The first node in the collection of the specified type.</returns>
-		public LinkedListNode<IWikiNode>? FindFirstLinked<T>()
-			where T : IWikiNode
+		/// <summary>Finds the first <see cref="LinkedListNode{T}">LinkedListNode</see> satisfying the specified condition.</summary>
+		/// <param name="condition">The condition a given node must satisfy.</param>
+		/// <returns>The first node in the collection that satisfies the specified condition.</returns>
+		public LinkedListNode<IWikiNode>? FindFirstLinked(Predicate<IWikiNode> condition)
 		{
 			var node = this.First;
 			while (node != null)
 			{
-				if (node.Value is T)
+				if (condition(node.Value))
 				{
 					return node;
 				}
@@ -203,15 +223,24 @@
 			return null;
 		}
 
-		/// <summary>Finds the first <see cref="LinkedListNode{T}">LinkedListNode</see> satisfying the specified condition.</summary>
+		/// <summary>Finds the first <see cref="LinkedListNode{T}">LinkedListNode</see> of the specified type.</summary>
+		/// <typeparam name="T">The type of node to find.</typeparam>
+		/// <returns>The first node in the collection of the specified type.</returns>
+		public LinkedListNode<IWikiNode>? FindFirstLinked<T>()
+			where T : IWikiNode => this.FindFirstLinked((T item) => true);
+
+		/// <summary>Finds the first <see cref="LinkedListNode{T}">LinkedListNode</see> of the specified type.</summary>
+		/// <typeparam name="T">The type of node to find.</typeparam>
 		/// <param name="condition">The condition a given node must satisfy.</param>
-		/// <returns>The first node in the collection that satisfies the specified condition.</returns>
-		public LinkedListNode<IWikiNode>? FindFirstLinked(Predicate<LinkedListNode<IWikiNode>> condition)
+		/// <returns>The first node in the collection of the specified type.</returns>
+		public LinkedListNode<IWikiNode>? FindFirstLinked<T>(Predicate<T> condition)
+			where T : IWikiNode
 		{
+			ThrowNull(condition, nameof(condition));
 			var node = this.First;
 			while (node != null)
 			{
-				if (condition(node))
+				if (node.Value is T castNode && condition(castNode))
 				{
 					return node;
 				}
@@ -245,12 +274,20 @@
 		/// <typeparam name="T">The type of node to find.</typeparam>
 		/// <returns>The last node node in the collection of the specified type.</returns>
 		public T? FindLast<T>()
+			where T : class, IWikiNode => this.FindLast((T item) => true);
+
+		/// <summary>Finds the last node of the specified type.</summary>
+		/// <typeparam name="T">The type of node to find.</typeparam>
+		/// <param name="condition">The condition a given node must satisfy.</param>
+		/// <returns>The last node node in the collection of the specified type.</returns>
+		public T? FindLast<T>(Predicate<T> condition)
 			where T : class, IWikiNode
 		{
+			ThrowNull(condition, nameof(condition));
 			var node = this.Last;
 			while (node != null)
 			{
-				if (node.Value is T lastNode)
+				if (node.Value is T lastNode && condition(lastNode))
 				{
 					return lastNode;
 				}
@@ -261,16 +298,44 @@
 			return default;
 		}
 
+		/// <summary>Finds the last <see cref="LinkedListNode{T}">LinkedListNode</see> satisfying the specified condition.</summary>
+		/// <param name="condition">The condition a given node must satisfy.</param>
+		/// <returns>The last node in the collection that satisfy the specified condition.</returns>
+		public LinkedListNode<IWikiNode>? FindLastLinked(Predicate<IWikiNode> condition)
+		{
+			ThrowNull(condition, nameof(condition));
+			var node = this.Last;
+			while (node != null)
+			{
+				if (condition(node.Value))
+				{
+					return node;
+				}
+
+				node = node.Previous;
+			}
+
+			return null;
+		}
+
 		/// <summary>Finds the last <see cref="LinkedListNode{T}">LinkedListNode</see> with a value of the specified type.</summary>
 		/// <typeparam name="T">The type of node to find.</typeparam>
 		/// <returns>The last node in the collection of the specified type.</returns>
 		public LinkedListNode<IWikiNode>? FindLastLinked<T>()
+			where T : IWikiNode => this.FindLastLinked((T item) => true);
+
+		/// <summary>Finds the last <see cref="LinkedListNode{T}">LinkedListNode</see> with a value of the specified type.</summary>
+		/// <typeparam name="T">The type of node to find.</typeparam>
+		/// <param name="condition">The condition a given node must satisfy.</param>
+		/// <returns>The last node in the collection of the specified type.</returns>
+		public LinkedListNode<IWikiNode>? FindLastLinked<T>(Predicate<T> condition)
 			where T : IWikiNode
 		{
+			ThrowNull(condition, nameof(condition));
 			var node = this.Last;
 			while (node != null)
 			{
-				if (node.Value is T)
+				if (node.Value is T castNode && condition(castNode))
 				{
 					return node;
 				}
@@ -280,33 +345,6 @@
 
 			return null;
 		}
-
-		/// <summary>Finds the last <see cref="LinkedListNode{T}">LinkedListNode</see> satisfying the specified condition.</summary>
-		/// <param name="condition">The condition a given node must satisfy.</param>
-		/// <returns>The last node in the collection that satisfy the specified condition.</returns>
-		public LinkedListNode<IWikiNode>? FindLastLinked(Predicate<LinkedListNode<IWikiNode>> condition)
-		{
-			var node = this.Last;
-			while (node != null)
-			{
-				if (condition(node))
-				{
-					return node;
-				}
-
-				node = node.Previous;
-			}
-
-			return null;
-		}
-
-		#region Public Methods
-
-		/// <summary>Finds any section nodes with the given name, after trimming.</summary>
-		/// <param name="sectionName">Name of the section.</param>
-		/// <returns>IEnumerable&lt;LinkedListNode&lt;IWikiNode&gt;&gt;.</returns>
-		public IEnumerable<LinkedListNode<IWikiNode>> FindSectionNodes(string sectionName) => this.FindAllLinked(item => item.Value is HeaderNode header && header.GetInnerText(true) == sectionName.Trim());
-		#endregion
 
 		/// <summary>Merges any adjacent TextNodes in the collection.</summary>
 		/// <param name="recursive">if set to <see langword="true"/>, merges the entire tree.</param>
@@ -338,6 +376,16 @@
 		/// <typeparam name="T">The type of node to remove.</typeparam>
 		public void RemoveAll<T>()
 			where T : IWikiNode => this.Replace((node) => node.Value is T ? null : node.Value);
+
+		/// <summary>Removes all nodes of the given type.</summary>
+		/// <typeparam name="T">The type of node to remove.</typeparam>
+		/// <param name="condition">The condition a given node must satisfy.</param>
+		public void RemoveAll<T>(Predicate<T> condition)
+			where T : IWikiNode
+		{
+			ThrowNull(condition, nameof(condition));
+			this.Replace((node) => node.Value is T castNode && condition(castNode) ? null : node.Value);
+		}
 
 		/// <summary>Replaces the specified node with a new node.</summary>
 		/// <param name="replaceMethod">A function to replace the value with a new one.</param>
@@ -395,6 +443,7 @@
 		public void ReplaceAllWithOne<T>(IWikiNode newNode)
 			where T : IWikiNode
 		{
+			ThrowNull(newNode, nameof(newNode));
 			var currentNode = this.First;
 			var first = true;
 			while (currentNode != null)

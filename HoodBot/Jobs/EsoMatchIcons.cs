@@ -353,20 +353,12 @@
 			}
 
 			var site = this.Site;
-			var category = parsedPage.FindLastLinked(item =>
+			var category = parsedPage.FindLastLinked<LinkNode>(item =>
 			{
 				// While this could be done as a one-liner, it would be fragile and not easy to debug.
-				if (item.Value is LinkNode link)
-				{
-					var linkTitle = WikiTextVisitor.Value(link.Title);
-					var title = new Title(site, linkTitle);
-					if (title.Namespace == MediaWikiNamespaces.Category)
-					{
-						return true;
-					}
-				}
-
-				return false;
+				var linkTitle = WikiTextVisitor.Value(item.Title);
+				var title = new Title(site, linkTitle);
+				return title.Namespace == MediaWikiNamespaces.Category;
 			});
 
 			if (category != null && category.Previous?.Value is TextNode textNode && (textNode?.Text?.EndsWith("\n", StringComparison.Ordinal) == true))
@@ -380,7 +372,7 @@
 
 		private void ReplaceNormal(ContextualParser parsedPage, string newText)
 		{
-			var addAfter = parsedPage.FindSectionNodes("Summary").First();
+			var addAfter = parsedPage.FindFirstLinked<HeaderNode>(item => item.GetInnerText(true) == "Summary");
 			if (addAfter == null)
 			{
 				addAfter = parsedPage.AddFirst(HeaderNode.FromText("== Summary =="));
