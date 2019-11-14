@@ -13,10 +13,10 @@
 		/// <summary>Initializes a new instance of the <see cref="LinkNode"/> class.</summary>
 		/// <param name="title">The title.</param>
 		/// <param name="parameters">The parameters.</param>
-		public LinkNode(IEnumerable<IWikiNode> title, IList<ParameterNode> parameters)
+		public LinkNode(IEnumerable<IWikiNode> title, IEnumerable<ParameterNode> parameters)
 		{
 			this.Title = new NodeCollection(this, title ?? throw ArgumentNull(nameof(title)));
-			this.Parameters = parameters ?? new List<ParameterNode>();
+			this.Parameters = new NodeCollection(this, parameters ?? Array.Empty<ParameterNode>());
 		}
 		#endregion
 
@@ -28,24 +28,14 @@
 		{
 			get
 			{
-				if (this.Title != null)
-				{
-					yield return this.Title;
-				}
-
-				foreach (var param in this.Parameters)
-				{
-					foreach (var paramNode in param.NodeCollections)
-					{
-						yield return paramNode;
-					}
-				}
+				yield return this.Title;
+				yield return this.Parameters;
 			}
 		}
 
 		/// <summary>Gets the parameters.</summary>
 		/// <value>The parameters.</value>
-		public IList<ParameterNode> Parameters { get; }
+		public NodeCollection Parameters { get; }
 
 		/// <summary>Gets the title.</summary>
 		/// <value>The title.</value>

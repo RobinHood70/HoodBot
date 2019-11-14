@@ -13,10 +13,10 @@
 		/// <summary>Initializes a new instance of the <see cref="TemplateNode"/> class.</summary>
 		/// <param name="title">The title.</param>
 		/// <param name="parameters">The parameters.</param>
-		public TemplateNode(IEnumerable<IWikiNode> title, IList<ParameterNode> parameters)
+		public TemplateNode(IEnumerable<IWikiNode> title, IEnumerable<ParameterNode> parameters)
 		{
 			this.Title = new NodeCollection(this, title ?? throw ArgumentNull(nameof(title)));
-			this.Parameters = parameters ?? new List<ParameterNode>();
+			this.Parameters = new NodeCollection(this, parameters ?? Array.Empty<ParameterNode>());
 		}
 		#endregion
 
@@ -28,24 +28,14 @@
 		{
 			get
 			{
-				if (this.Title != null)
-				{
-					yield return this.Title;
-				}
-
-				foreach (var param in this.Parameters)
-				{
-					foreach (var paramNode in param.NodeCollections)
-					{
-						yield return paramNode;
-					}
-				}
+				yield return this.Title;
+				yield return this.Parameters;
 			}
 		}
 
 		/// <summary>Gets the parameters.</summary>
 		/// <value>The parameters.</value>
-		public IList<ParameterNode> Parameters { get; }
+		public NodeCollection Parameters { get; }
 
 		/// <summary>Gets the template name.</summary>
 		/// <value>The template name.</value>
@@ -62,13 +52,13 @@
 
 		/// <summary>Creates a new TemplateNode from its parts.</summary>
 		/// <param name="title">The link destination.</param>
-		/// <returns>A new ArgumentNode.</returns>
+		/// <returns>A new TemplateNode.</returns>
 		public static TemplateNode FromParts(string title) => FromParts(title, null);
 
 		/// <summary>Creates a new TemplateNode from its parts.</summary>
 		/// <param name="title">The link destination.</param>
 		/// <param name="parameters">The default value.</param>
-		/// <returns>A new ArgumentNode.</returns>
+		/// <returns>A new TemplateNode.</returns>
 		public static TemplateNode FromParts(string title, IEnumerable<string>? parameters)
 		{
 			ThrowNull(title, nameof(title));
@@ -100,7 +90,7 @@
 		{
 			// TODO: Parameter-based methods are very primitive for now, just to get the basics working. Needs more work.
 			var retval = new Dictionary<string, NodeCollection>();
-			foreach (var parameter in this.Parameters)
+			foreach (ParameterNode parameter in this.Parameters)
 			{
 				retval.Add(parameter.Anonymous ? parameter.Index.ToString(CultureInfo.InvariantCulture) : WikiTextVisitor.Value(parameter.Name!), parameter.Value);
 			}

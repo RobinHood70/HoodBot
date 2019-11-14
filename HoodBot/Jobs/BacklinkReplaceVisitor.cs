@@ -50,7 +50,7 @@
 					if (parent.Parameters.Count == 0)
 					{
 						var paramNode = new ParameterNode(1, new List<IWikiNode>() { new TextNode(title.PageName) });
-						parent.Parameters.Add(paramNode);
+						parent.Parameters.AddLast(paramNode);
 					}
 				}
 			}
