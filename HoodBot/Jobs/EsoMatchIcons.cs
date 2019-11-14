@@ -23,7 +23,6 @@
 		#region Fields
 		private readonly HashSet<ISimpleTitle> licenseTemplates = new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance);
 		private IReadOnlyDictionary<string, List<ItemInfo>> allItems;
-		private PageCollection pages;
 		private IReadOnlyDictionary<string, ICollection<string>> allIcons;
 		#endregion
 
@@ -32,10 +31,12 @@
 		public EsoMatchIcons(Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
 		{
+			this.Pages.LoadOptions = new PageLoadOptions(PageModules.Info | PageModules.Revisions | PageModules.Categories | PageModules.FileInfo);
+			this.Pages.SetLimitations(LimitationType.FilterTo, MediaWikiNamespaces.File);
 		}
 		#endregion
 
-		#region Public Override Properties
+			#region Public Override Properties
 		public override string LogName => "Match ON-icons with log viewer";
 		#endregion
 
@@ -64,11 +65,8 @@
 			this.StatusWriteLine("Getting image info from wiki");
 			this.GetLicenseTemplates();
 
-			this.Pages.SetLimitations(LimitationType.FilterTo, MediaWikiNamespaces.File);
 			this.Pages.PageLoaded += this.Pages_PageLoaded;
 			this.Pages.GetNamespace(MediaWikiNamespaces.File, Filter.Exclude, "ON-icon-");
-			//// this.FixBotError();
-			//// this.pages.GetTitles("File:ON-icon-dye stamp-Blossoming Darkness, Sunlight.png");
 			this.Pages.PageLoaded -= this.Pages_PageLoaded;
 
 			this.Pages.Sort();
@@ -135,36 +133,6 @@
 		#endregion
 
 		#region Private Methods
-		/*
-		private void FixBotError()
-		{
-			var from = new DateTime(2019, 10, 31, 8, 38, 0, DateTimeKind.Utc);
-			var to = null as DateTime?; // new DateTime(2019, 10, 29, 10, 42, 10, DateTimeKind.Utc);
-			var user = this.Site.User;
-			var contributions = user.GetContributions(from, to);
-			var revIds = new SortedSet<long>();
-			foreach (var contribution in contributions)
-			{
-				revIds.Add(contribution.ParentId);
-				revIds.Add(contribution.Id);
-			}
-
-			this.pages.GetRevisionIds(revIds);
-			foreach (var page in this.pages)
-			{
-				var filePage = page as FilePage;
-				var latest = page.Revisions.Current;
-				if (latest.Text.IndexOf("original file:", StringComparison.OrdinalIgnoreCase) != -1 && filePage.LatestFileRevision is FileRevision fr)
-				{
-					if (!this.allIcons.ContainsKey(fr.Sha1))
-					{
-						Debug.WriteLine(page.FullPageName);
-					}
-				}
-			}
-		}
-		*/
-
 		private IReadOnlyDictionary<string, List<ItemInfo>> GetItems()
 		{
 			var queries = new Dictionary<string, string>
