@@ -299,62 +299,66 @@
 
 		private IWikiNode TemplateReplacer(LinkedListNode<IWikiNode> node)
 		{
-			if (this.transclusionParameters != null && node.Value is ArgumentNode arg)
+			switch (node.Value)
 			{
-				var argName = WikiTextVisitor.Value(arg.Name);
-				this.transclusionParameters.TryGetValue(argName, out var retval);
-
-				return retval ?? arg.DefaultValue;
-			}
-
-			if (node.Value is TemplateNode templateNode)
-			{
-				var templateName = WikiTextVisitor.Value(templateNode.Title).Trim();
-				var templateTitle = Title.DefaultToNamespace(this.Site, MediaWikiNamespaces.Template, templateName);
-				if (templateTitle.Namespace == UespNamespaces.Template)
-				{
-					switch (templateTitle.PageName)
+				case ArgumentNode arg:
+					if (this.transclusionParameters != null)
 					{
-						case "Cite Book":
-						case "Disambig":
-						case "NewLeft":
-						case "NewLine":
-						case "Stub":
-						case "TIL":
-						case "Year":
-							break;
-						case "Cite book":
+						var argName = WikiTextVisitor.Value(arg.Name);
+						this.transclusionParameters.TryGetValue(argName, out var retval);
+
+						return retval ?? arg.DefaultValue;
+					}
+
+					break;
+				case TemplateNode templateNode:
+					var templateName = WikiTextVisitor.Value(templateNode.Title).Trim();
+					var templateTitle = Title.DefaultToNamespace(this.Site, MediaWikiNamespaces.Template, templateName);
+					if (templateTitle.Namespace == UespNamespaces.Template)
+					{
+						if (templateTitle.PageName == "Cite book")
+						{
 							templateNode.Title.Clear();
 							templateNode.Title.AddFirst(new TextNode("Cite Book"));
-							return node.Value;
-						case "FMI":
-							return this.FmiReplacer(templateNode);
-						case "Lore Link":
-							return this.LoreLinkReplacer(templateNode);
-						case "Nst":
-							return this.NstReplacer(templateNode);
-						case "Tense":
-							return this.TenseReplacer(templateNode);
-						case "NAMESPACE":
-							return new TextNode(this.currentPage.Namespace.Name);
-						case "PAGENAME":
-							return new TextNode(this.currentPage.PageName);
-						case "Ref":
-							return this.currentPage.Namespace == UespNamespaces.Lore ? node.Value : null;
-						default:
-							if (templateNode.Title.First.Value is TextNode textNode && textNode.Text.Trim() == "#ifeq:")
-							{
-								return IfEqualsReplacer(templateNode, templateName);
-							}
+							break;
+						}
 
-							if (this.currentPage.Namespace != UespNamespaces.Lore)
-							{
-								Debug.WriteLine($"{WikiTextVisitor.Raw(templateNode)} transcluding onto [[{this.currentPage.FullPageName}]]");
-							}
+						if (templateTitle.PageName == "Ref" && this.currentPage.Namespace != UespNamespaces.Lore)
+						{
+							// Has to be outside of switch because we use null for something else there and then change it to node.Value later.
+							return null;
+						}
 
-							return node.Value;
+						var retval = templateTitle.PageName switch
+						{
+							"Cite Book" => node.Value,
+							"Disambig" => node.Value,
+							"FMI" => this.FmiReplacer(templateNode),
+							"Lore Link" => this.LoreLinkReplacer(templateNode),
+							"NAMESPACE" => new TextNode(this.currentPage.Namespace.Name),
+							"NewLeft" => node.Value,
+							"NewLine" => node.Value,
+							"Nst" => this.NstReplacer(templateNode),
+							"PAGENAME" => new TextNode(this.currentPage.PageName),
+							"Ref" => node.Value,
+							"Stub" => node.Value,
+							"Tense" => this.TenseReplacer(templateNode),
+							"TIL" => node.Value,
+							"Year" => node.Value,
+							_ => (templateNode.Title.First.Value is TextNode textNode && textNode.Text.Trim() == "#ifeq:")
+								? IfEqualsReplacer(templateNode, templateName)
+								: null
+						};
+
+						if (retval == null && this.currentPage.Namespace != UespNamespaces.Lore)
+						{
+							Debug.WriteLine($"{WikiTextVisitor.Raw(templateNode)} transcluding onto [[{this.currentPage.FullPageName}]]");
+						}
+
+						return retval ?? node.Value;
 					}
-				}
+
+					break;
 			}
 
 			return node.Value;

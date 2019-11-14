@@ -129,7 +129,8 @@
     <Compile Include="Jobs\OneOffJob.cs" />
     <Compile Include="Jobs\PageMover.cs" />
     <Compile Include="Jobs\PageMoverJob.cs" />
-    <Compile Include="Jobs\UntranscludeLore.cs" />
+    <None Include="Old Jobs\UntranscludeLore.cs" />
+    <Compile Include="Jobs\UndoLocChanges.cs" />
     <Compile Include="Jobs\WantedInMain.cs" />
     <Compile Include="Parser\ContextualParser.cs" />
     <Compile Include="Uesp\MetaNamespace.cs" />
