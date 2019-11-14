@@ -486,8 +486,8 @@
 				{
 					EditPath = page.EditPath,
 					EditToken = token,
-					LastRevisionText = page.Revisions?.Current?.Text,
-					LastRevisionTimestamp = page.Revisions?.Current?.Timestamp,
+					LastRevisionText = page.CurrentRevision?.Text,
+					LastRevisionTimestamp = page.CurrentRevision?.Timestamp,
 					StartTimestamp = page.StartTimestamp,
 				};
 				this.DiffViewer.Compare(diffContent);

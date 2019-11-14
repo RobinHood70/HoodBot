@@ -13,8 +13,9 @@
 	public class Page : Title
 	{
 		#region Fields
-		private Uri? canonicalPath = null;
-		private Uri? editPath = null;
+		private Uri? canonicalPath;
+		private Revision? currentRevision;
+		private Uri? editPath;
 		#endregion
 
 		#region Constructors
@@ -74,6 +75,16 @@
 		/// <summary>Gets the page categories, if they were requested in the last load operation.</summary>
 		/// <value>The categories the page is listed in.</value>
 		public IReadOnlyList<Category> Categories { get; } = new List<Category>();
+
+		/// <summary>Gets the current revision.</summary>
+		/// <value>The current revision.</value>
+		/// <remarks>If revisions are loaded which do not include the current revision, this will be null.</remarks>
+		public Revision? CurrentRevision => this.currentRevision ?? (this.currentRevision = (this.Revisions as List<Revision>)!.Find(item => item.Id == this.CurrentRevisionId));
+
+		/// <summary>Gets the ID of the current revision.</summary>
+		/// <value>The ID of the current revision.</value>
+		/// <remarks>Even if this is populated, the current revision isn't guaranteed to be.</remarks>
+		public long CurrentRevisionId { get; internal set; }
 
 		/// <summary>Gets or sets the URI to edit the article in a browser.</summary>
 		/// <value>The edit path.</value>
@@ -159,7 +170,7 @@
 
 		/// <summary>Gets the page revisions, if they were requested in the last load operation.</summary>
 		/// <value>The revisions list.</value>
-		public RevisionCollection Revisions { get; } = new RevisionCollection();
+		public IReadOnlyList<Revision> Revisions { get; } = new List<Revision>();
 
 		/// <summary>Gets or sets the timestamp when the page was loaded. Used for edit conflict detection.</summary>
 		/// <value>The start timestamp.</value>
@@ -176,7 +187,7 @@
 		/// <summary>Gets a value indicating whether the <see cref="Text" /> property has been modified.</summary>
 		/// <value><see langword="true" /> if the text no longer matches the first revision; otherwise, <see langword="false" />.</value>
 		/// <remarks>This is currently simply a shortcut property to compare the Text with Revisions[0]. This may not be an accurate reflection of modification status when loading a specific revision range or in other unusual circumstances.</remarks>
-		public bool TextModified => this.Revisions.Current == null ? !string.IsNullOrWhiteSpace(this.Text) : this.Text != this.Revisions.Current.Text;
+		public bool TextModified => this.CurrentRevision == null ? !string.IsNullOrWhiteSpace(this.Text) : this.Text != this.CurrentRevision.Text;
 
 		/// <summary>Gets the links on the page, if they were requested in the last load operation.</summary>
 		/// <value>The links used on the page.</value>
@@ -260,7 +271,7 @@
 					!this.TextModified ? ChangeStatus.NoEffect :
 						this.Site.AbstractionLayer.Edit(new EditInput(this.FullPageName, this.Text)
 						{
-							BaseTimestamp = this.Revisions.Current?.Timestamp,
+							BaseTimestamp = this.CurrentRevision?.Timestamp,
 							StartTimestamp = this.StartTimestamp,
 							Bot = changeArgs.BotEdit,
 							Minor = changeArgs.Minor ? Tristate.True : Tristate.False,
@@ -288,7 +299,7 @@
 			this.PopulateFlags(pageItem.Flags.HasFlag(PageFlags.Invalid), pageItem.Flags.HasFlag(PageFlags.Missing));
 
 			// Revisions
-			var revs = this.Revisions;
+			var revs = (List<Revision>)this.Revisions;
 			revs.Clear();
 			foreach (var rev in pageItem.Revisions)
 			{
@@ -298,34 +309,27 @@
 			// Info
 			if (pageItem.Info is PageInfo info)
 			{
-				this.CanonicalPath = info.CanonicalUrl;
-				this.EditPath = info.EditUrl;
+				this.canonicalPath = info.CanonicalUrl;
+				this.CurrentRevisionId = info.LastRevisionId;
+				this.editPath = info.EditUrl;
 				this.IsNew = info.Flags.HasFlag(PageInfoFlags.New);
 				this.IsRedirect = info.Flags.HasFlag(PageInfoFlags.Redirect);
 				this.StartTimestamp = pageItem.Info.StartTimestamp;
-
-				if (revs.ValueOrDefault(info.LastRevisionId) is Revision revision)
-				{
-					revs.Current = revision;
-					this.Text = revision.Text;
-				}
-				else
-				{
-					// Debug.WriteLine($"Revision {info.LastRevisionId} not found on {pageItem.Title}. Should it have been? Current revision for page is {revs.Current?.Id}.");
-
-					// Blank the text, since it's not the current page text. We don't set revs.Current here because it will either have been set internally by .Add or set by a successful try.
-					this.Text = null;
-				}
+				this.Text = this.CurrentRevisionId != 0 ? this.CurrentRevision?.Text : null;
 			}
 			else
 			{
+				this.canonicalPath = null;
+				this.CurrentRevisionId = 0;
+				this.editPath = null;
 				this.IsNew = false;
 				this.IsRedirect = false;
 				this.StartTimestamp = this.Site.AbstractionLayer.CurrentTimestamp;
+				this.Text = null;
 			}
 
 			// Links
-			var links = this.Links as List<Title>;
+			var links = (List<Title>)this.Links;
 			links.Clear();
 			foreach (var link in pageItem.Links)
 			{
@@ -333,7 +337,7 @@
 			}
 
 			// LinksHere
-			var linksHere = this.LinksHere as List<Title>;
+			var linksHere = (List<Title>)this.LinksHere;
 			linksHere.Clear();
 			foreach (var linkHere in pageItem.LinksHere)
 			{
@@ -341,7 +345,7 @@
 			}
 
 			// Properties
-			var properties = this.Properties as Dictionary<string, string>;
+			var properties = (Dictionary<string, string>)this.Properties;
 			properties.Clear();
 			if (pageItem.Properties?.Count > 0)
 			{
@@ -353,7 +357,7 @@
 			}
 
 			// Templates
-			var templates = this.Templates as List<Title>;
+			var templates = (List<Title>)this.Templates;
 			templates.Clear();
 			foreach (var link in pageItem.Templates)
 			{
@@ -361,7 +365,7 @@
 			}
 
 			// TranscludedIn
-			var transcludedIn = this.TranscludedIn as List<Title>;
+			var transcludedIn = (List<Title>)this.TranscludedIn;
 			transcludedIn.Clear();
 			foreach (var transclusionHere in pageItem.TranscludedIn)
 			{
@@ -369,7 +373,7 @@
 			}
 
 			// Categories
-			var categories = this.Categories as List<Category>;
+			var categories = (List<Category>)this.Categories;
 			categories.Clear();
 			foreach (var category in pageItem.Categories)
 			{
