@@ -1,12 +1,13 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.WikiCommon;
 
 	/// <summary>An ISimpleTitle comparer which sorts by namespace and page name.</summary>
 	/// <typeparam name="T">The item types to compare. Must implement ISimpleTitle.</typeparam>
 	/// <seealso cref="Comparer{T}" />
-	public class TitleComparer<T> : Comparer<T>
+	public sealed class TitleComparer<T> : IComparer<T>
 		where T : ISimpleTitle
 	{
 		#region Constructors
@@ -19,6 +20,8 @@
 
 		/// <summary>Gets the singleton instance.</summary>
 		/// <value>The instance.</value>
+		/// <remarks>Note that this is a pseudo-singleton, in that a new instance will be created for each type.</remarks>
+		[SuppressMessage("Design", "CA1000:Do not declare static members on generic types", Justification = "Pseudo-singleton comparable to Comparer<T>.Default.")]
 		public static TitleComparer<T> Instance { get; } = new TitleComparer<T>();
 		#endregion
 
@@ -28,7 +31,7 @@
 		/// <param name="x">The first object to compare.</param>
 		/// <param name="y">The second object to compare.</param>
 		/// <returns>A signed integer that indicates the relative values of <paramref name="x" /> and <paramref name="y" />.</returns>
-		public override int Compare(T x, T y)
+		public int Compare(T x, T y)
 		{
 			if (x == null)
 			{
