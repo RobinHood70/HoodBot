@@ -15,7 +15,6 @@
 	{
 		#region Fields
 		private readonly Namespace eso;
-		private PageCollection pages;
 		#endregion
 
 		#region Constructors
@@ -34,7 +33,7 @@
 			this.StatusWriteLine("Saving");
 			try
 			{
-				foreach (var page in this.pages)
+				foreach (var page in this.Pages)
 				{
 					try
 					{
@@ -70,14 +69,13 @@
 			var places = EsoGeneral.GetPlaces(this.Site);
 			EsoGeneral.ParseNpcLocations(npcData, places);
 
-			this.pages = new PageCollection(this.Site);
 			foreach (var npc in npcData)
 			{
 				npc.TrimPlaces();
-				this.pages.Add(this.CreatePage(npc));
+				this.Pages.Add(this.CreatePage(npc));
 			}
 
-			this.ProgressMaximum = this.pages.Count + 4;
+			this.ProgressMaximum = this.Pages.Count + 4;
 			this.Progress = 4;
 		}
 		#endregion

@@ -30,7 +30,6 @@
 		#region Fields
 		private readonly SortedSet<Page> trivialChanges = new SortedSet<Page>(TitleComparer<Page>.Instance);
 		private readonly SortedSet<Page> nonTrivialChanges = new SortedSet<Page>(TitleComparer<Page>.Instance);
-		private PageCollection skillPages;
 		private IReadOnlyDictionary<string, T> skills;
 		#endregion
 
@@ -79,8 +78,8 @@
 		{
 			this.StatusWriteLine("Saving pages");
 			this.EditConflictAction = this.SkillPageLoaded;
-			this.skillPages.Sort();
-			foreach (var skillPage in this.skillPages)
+			this.Pages.Sort();
+			foreach (var skillPage in this.Pages)
 			{
 				this.SavePage(skillPage, this.LogName, false);
 				this.Progress++;
@@ -112,10 +111,9 @@
 			}
 
 			this.StatusWriteLine("Loading pages");
-			this.skillPages = new PageCollection(this.Site);
-			this.skillPages.PageLoaded += this.SkillPageLoaded;
-			this.skillPages.GetTitles(titles);
-			this.skillPages.PageLoaded -= this.SkillPageLoaded;
+			this.Pages.PageLoaded += this.SkillPageLoaded;
+			this.Pages.GetTitles(titles);
+			this.Pages.PageLoaded -= this.SkillPageLoaded;
 			this.GenerateReport();
 		}
 		#endregion

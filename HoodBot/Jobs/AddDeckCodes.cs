@@ -17,15 +17,12 @@
 	{
 		#region Fields
 		private readonly Regex cardSummaryFinder = Template.Find("Legends Card Summary");
-		private PageCollection pages;
 		#endregion
 
 		#region Constructors
 		[JobInfo("Add Deck Codes", "Legends")]
 		public AddDeckCodes([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
-		{
-		}
+			: base(site, asyncInfo) => this.Pages.LoadOptions = new PageLoadOptions(PageModules.Default, true);
 		#endregion
 
 		#region Public Override Properties
@@ -35,7 +32,7 @@
 		#region Protected Override Methods
 		protected override void Main()
 		{
-			foreach (var page in this.pages)
+			foreach (var page in this.Pages)
 			{
 				this.SavePage(page, "Add deck code", true);
 				this.Progress++;
@@ -68,11 +65,11 @@
 				this.WriteLine($"* {item.Name} ignored because name doesn't match type {item.TypeName} (deckcode={item.DeckCode})");
 			}
 
-			this.pages = titles.Load(new PageLoadOptions(PageModules.Default, true));
+			this.Pages.GetTitles(titles);
 			foreach (var title in titles)
 			{
 				var item = lookup[title];
-				var page = this.pages[title.FullPageName];
+				var page = this.Pages[title.FullPageName];
 				if (page != null && !page.IsMissing)
 				{
 					page.Text = this.cardSummaryFinder.Replace(page.Text, (match) => this.CardSummary_Replacer(match, item.DeckCode), 1);
@@ -83,8 +80,8 @@
 				}
 			}
 
-			this.ProgressMaximum = this.pages.Count;
-			this.pages.Sort();
+			this.ProgressMaximum = this.Pages.Count;
+			this.Pages.Sort();
 		}
 		#endregion
 

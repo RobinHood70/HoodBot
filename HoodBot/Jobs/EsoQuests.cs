@@ -87,10 +87,6 @@
 		};
 		#endregion
 
-		#region Fields
-		private PageCollection pages = null;
-		#endregion
-
 		#region Constructors
 		[JobInfo("Quests", "ESO")]
 		public EsoQuests([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
@@ -117,8 +113,8 @@
 		protected override void Main()
 		{
 			this.StatusWriteLine("Saving pages");
-			this.pages.Sort();
-			foreach (var page in this.pages)
+			this.Pages.Sort();
+			foreach (var page in this.Pages)
 			{
 				this.SavePage(page, this.LogName, true);
 				this.Progress++;
@@ -137,7 +133,6 @@
 			this.StatusWriteLine("Getting quest data");
 			var quests = this.GetQuestData(allTitles, wikiQuests);
 
-			this.pages = new PageCollection(this.Site);
 			var places = EsoGeneral.GetPlaces(this.Site);
 			foreach (var quest in quests)
 			{
@@ -156,10 +151,10 @@
 					quest.Zone = place.TitleName;
 				}
 
-				this.pages.Add(this.NewPage(quest));
+				this.Pages.Add(this.NewPage(quest));
 			}
 
-			this.ProgressMaximum = this.pages.Count + 1;
+			this.ProgressMaximum = this.Pages.Count + 1;
 			this.Progress++;
 		}
 		#endregion

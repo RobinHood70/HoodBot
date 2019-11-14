@@ -24,7 +24,6 @@
 		#region Fields
 		private readonly HoodBotFunctions botFunctions;
 		private readonly Dictionary<string, PageData> sets = new Dictionary<string, PageData>();
-		private PageCollection pages;
 		#endregion
 
 		#region Constructors
@@ -42,8 +41,8 @@
 		{
 			this.StatusWriteLine("Saving pages");
 			this.EditConflictAction = this.SetLoaded;
-			this.pages.Sort();
-			foreach (var page in this.pages)
+			this.Pages.Sort();
+			foreach (var page in this.Pages)
 			{
 				this.SavePage(page, this.LogName, false);
 				this.Progress++;
@@ -89,10 +88,9 @@
 			}
 
 			var titles = this.ResolveAndPopulateSets(sets);
-			this.pages = new PageCollection(this.Site);
-			this.pages.PageLoaded += this.SetLoaded;
-			this.pages.GetTitles(titles);
-			this.pages.PageLoaded -= this.SetLoaded;
+			this.Pages.PageLoaded += this.SetLoaded;
+			this.Pages.GetTitles(titles);
+			this.Pages.PageLoaded -= this.SetLoaded;
 			this.GenerateReport();
 			this.Progress++;
 		}

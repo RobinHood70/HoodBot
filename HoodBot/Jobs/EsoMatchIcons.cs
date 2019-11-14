@@ -43,10 +43,10 @@
 		protected override void Main()
 		{
 			this.StatusWriteLine("Saving pages");
-			this.pages.RemoveUnchanged();
-			this.ProgressMaximum = this.pages.Count;
+			this.Pages.RemoveUnchanged();
+			this.ProgressMaximum = this.Pages.Count;
 			this.EditConflictAction = this.Pages_PageLoaded;
-			foreach (var page in this.pages)
+			foreach (var page in this.Pages)
 			{
 				this.SavePage(page, this.LogName, true);
 				this.Progress++;
@@ -63,16 +63,15 @@
 
 			this.StatusWriteLine("Getting image info from wiki");
 			this.GetLicenseTemplates();
-			this.pages = new PageCollection(this.Site, PageModules.Info | PageModules.Revisions | PageModules.Categories | PageModules.FileInfo);
-			this.pages.SetLimitations(LimitationType.FilterTo, MediaWikiNamespaces.File);
 
-			this.pages.PageLoaded += this.Pages_PageLoaded;
-			this.pages.GetNamespace(MediaWikiNamespaces.File, Filter.Exclude, "ON-icon-");
+			this.Pages.SetLimitations(LimitationType.FilterTo, MediaWikiNamespaces.File);
+			this.Pages.PageLoaded += this.Pages_PageLoaded;
+			this.Pages.GetNamespace(MediaWikiNamespaces.File, Filter.Exclude, "ON-icon-");
 			//// this.FixBotError();
 			//// this.pages.GetTitles("File:ON-icon-dye stamp-Blossoming Darkness, Sunlight.png");
-			this.pages.PageLoaded -= this.Pages_PageLoaded;
+			this.Pages.PageLoaded -= this.Pages_PageLoaded;
 
-			this.pages.Sort();
+			this.Pages.Sort();
 		}
 		#endregion
 

@@ -13,14 +13,18 @@
 	{
 		#region Constructors
 		protected EditJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-				: base(site, asyncInfo)
+				: this(site, asyncInfo, null)
 		{
 		}
 
 		protected EditJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo, params WikiTask[] tasks)
-				: base(site, asyncInfo, tasks)
-		{
-		}
+				: base(site, asyncInfo, tasks) => this.Pages = new PageCollection(site);
+		#endregion
+
+		#region Public Properties
+
+		// Nearly all edit jobs act on a PageCollection, so we provide a preinitialized one here for convenience.
+		public PageCollection Pages { get; }
 		#endregion
 
 		#region Public Override Properties
@@ -88,10 +92,10 @@
 		}
 		#endregion
 
-		#region Protected Virtual Methods
-		protected virtual void PrepareJob()
-		{
-		}
+		#region Protected Abstract Methods
+
+		// While this could be virtual as well, the number of jobs with an empty PrepareJob method will be vanishingly small, so made it abstract instead.
+		protected abstract void PrepareJob();
 		#endregion
 	}
 }
