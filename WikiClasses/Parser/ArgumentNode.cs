@@ -15,7 +15,7 @@
 
 		/// <summary>Initializes a new instance of the <see cref="ArgumentNode"/> class.</summary>
 		/// <param name="title">The title.</param>
-		/// <param name="defaultValue">The default value. May be null or an empty collection. If populated, this should preferentially be either a single ParameterNode or a collection of IWikiNodes representing the default value itself. For compatibility with MediaWiki, it can also be a list of parameter nodes, in which case, these will be added as individual entries to the AllValues collection.</param>
+		/// <param name="defaultValue">The default value. May be null or an empty collection. If populated, this should preferentially be either a single ParameterNode or a collection of IWikiNodes representing the default value itself. For compatibility with MediaWiki, it can also be a list of parameter nodes, in which case, these will be added as individual entries to the <see cref="ExtraValues"/> collection.</param>
 		public ArgumentNode(IEnumerable<IWikiNode> title, IEnumerable<IWikiNode> defaultValue)
 		{
 			this.Name = new NodeCollection(this, title ?? throw ArgumentNull(nameof(title)));
@@ -40,12 +40,13 @@
 		#region Public Properties
 
 		/// <summary>Gets the default value.</summary>
-		/// <value>The default value. This will be <see langword="null"/> if there is no default value.</value>
-		/// <remarks>In order to prevent the possibility of DefaultValue being set to a NodeCollection from another object, it cannot be set directly. Use the provided methods to add or remove default values. You may also trim extraneous values from the object (only available by iterating the ArgumentNode itself).</remarks>
+		/// <value>The default value. This will be <see langword="null"/> if there is no default value (e.g., <c>{{{1}}}</c>) in order to distinguish it from a node with an empty default value (e.g., <c>{{{1|}}}</c>).</value>
+		/// <remarks>To prevent the possibility of DefaultValue being set to a NodeCollection from another object, it cannot be set directly. Use the provided methods to add or remove default values. You may also trim extraneous values from the object (only available by iterating the ArgumentNode itself).</remarks>
 		public NodeCollection? DefaultValue { get; private set; }
 
 		/// <summary>Gets any additional values after the default value (e.g., the b in {{{1|a|b}}}).</summary>
 		/// <value>The extra values.</value>
+		/// <remarks>The MediaWiki software allows constructs such as <c>{{{1|a|b}}}</c> but will only take <c>a</c> as the default value in that instance, ignoring <c>b</c> altogether. This property provides access to values beyond the first so that no information is lost.</remarks>
 		public IReadOnlyList<NodeCollection> ExtraValues => this.extraValues;
 
 		/// <summary>Gets the name of the argument.</summary>
