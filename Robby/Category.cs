@@ -12,7 +12,7 @@
 		/// <param name="simpleTitle">The <see cref="ISimpleTitle"/> that represents the category.</param>
 		/// <param name="sortKey">The sort key.</param>
 		/// <param name="hidden">if set to <see langword="true" /> if the category is hidden.</param>
-		internal Category(ISimpleTitle simpleTitle, string sortKey, bool hidden)
+		internal Category(ISimpleTitle simpleTitle, string? sortKey, bool hidden)
 			: base(simpleTitle)
 		{
 			this.Hidden = hidden;
@@ -28,7 +28,7 @@
 
 		/// <summary>Gets the sort key.</summary>
 		/// <value>The sort key.</value>
-		public string SortKey { get; }
+		public string? SortKey { get; }
 		#endregion
 	}
 }
