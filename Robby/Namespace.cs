@@ -20,7 +20,7 @@
 		#endregion
 
 		#region Constructors
-		internal Namespace(Site site, SiteInfoNamespace ns, IEnumerable<string> aliases)
+		internal Namespace(Site site, StringComparer comparer, SiteInfoNamespace ns, IEnumerable<string> aliases)
 		{
 			ThrowNull(site, nameof(site));
 			this.Site = site;
@@ -40,14 +40,14 @@
 			this.LinkName = (this.IsForcedLinkSpace ? ":" : string.Empty) + this.DecoratedName;
 			this.Aliases = aliases == null ? new List<string>() : new List<string>(aliases);
 
-			this.defaultNames = new HashSet<string>(this.Aliases, site.EqualityComparerInsensitive)
+			this.defaultNames = new HashSet<string>(this.Aliases, comparer)
 			{
 				ns.Name,
 				ns.CanonicalName
 			};
 			this.defaultNames.TrimExcess();
 
-			this.allNames = new HashSet<string>(site.EqualityComparerInsensitive);
+			this.allNames = new HashSet<string>(comparer);
 			this.ResetAllNames();
 		}
 		#endregion
@@ -122,37 +122,37 @@
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
 		/// <returns><see langword="true"/> if string is equal to any of the names representing the namespace.</returns>
-		public static bool operator ==(Namespace left, Namespace right) => left is null ? right is null : left.Equals(right);
+		public static bool operator ==(Namespace? left, Namespace? right) => left is null ? right is null : left.Equals(right);
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
 		/// <returns><see langword="true"/> if the integer provided equals the namespace ID.</returns>
-		public static bool operator ==(Namespace left, int right) => !(left is null) && left.Id == right;
+		public static bool operator ==(Namespace? left, int right) => !(left is null) && left.Id == right;
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
 		/// <returns><see langword="true"/> if the integer provided equals the namespace ID.</returns>
-		public static bool operator ==(int left, Namespace right) => !(right is null) && left == right.Id;
+		public static bool operator ==(int left, Namespace? right) => !(right is null) && left == right.Id;
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
 		/// <returns><see langword="true"/> if the namespace Site or Id are not equal.</returns>
-		public static bool operator !=(Namespace left, Namespace right) => !(left == right);
+		public static bool operator !=(Namespace? left, Namespace? right) => !(left == right);
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
 		/// <returns><see langword="true"/> if the integer provided does not equal the namespace ID.</returns>
-		public static bool operator !=(Namespace left, int right) => !(left == right);
+		public static bool operator !=(Namespace? left, int right) => !(left == right);
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
 		/// <returns><see langword="true"/> if the integer provided does not equal the namespace ID.</returns>
-		public static bool operator !=(int left, Namespace right) => !(left == right);
+		public static bool operator !=(int left, Namespace? right) => !(left == right);
 		#endregion
 
 		#region Public Methods

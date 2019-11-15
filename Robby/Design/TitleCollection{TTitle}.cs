@@ -429,7 +429,7 @@
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
 		/// <param name="namespaces">The namespaces to limit results to.</param>
-		public void GetPageLinks(IEnumerable<ISimpleTitle> titles, IEnumerable<int> namespaces) => this.GetPageLinks(new LinksInput() { Namespaces = namespaces }, titles);
+		public void GetPageLinks(IEnumerable<ISimpleTitle> titles, IEnumerable<int>? namespaces) => this.GetPageLinks(new LinksInput() { Namespaces = namespaces }, titles);
 
 		/// <summary>Adds pages that link to the given titles to the collection.</summary>
 		/// <param name="titles">The titles.</param>
@@ -641,7 +641,7 @@
 		/// <summary>Determines the index of a specific item in the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="item">The item to locate in the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns>The index of <paramref name="item" /> if found in the list; otherwise, -1.</returns>
-		public int IndexOf(TTitle item) => this.IndexOf(item?.Key);
+		public int IndexOf(TTitle item) => this.IndexOf((item ?? throw ArgumentNull(nameof(item))).Key);
 
 		/// <summary>Determines the index of a specific item in the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="key">The key of the item to locate in the <see cref="TitleCollection">collection</see>.</param>
@@ -671,7 +671,7 @@
 		/// <summary>Removes a specific item from the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="item">The item to remove from the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns><see langword="true" /> if <paramref name="item" /> was successfully removed from the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />. This method also returns <see langword="false" /> if <paramref name="item" /> is not found in the original <see cref="TitleCollection">collection</see>.</returns>
-		public bool Remove(TTitle item) => this.Remove(item?.Key);
+		public bool Remove(TTitle item) => this.Remove((item ?? throw ArgumentNull(nameof(item))).Key);
 
 		/// <summary>Removes the item with the specified key from the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="key">The key of the item to remove from the <see cref="TitleCollection">collection</see>.</param>
@@ -733,7 +733,7 @@
 		/// <summary>Removes one or more namespaces from the collection.</summary>
 		/// <param name="removeTalk">Whether to remove talk spaces along with <paramref name="namespaces"/>.</param>
 		/// <param name="namespaces">The namespaces to remove.</param>
-		public void RemoveNamespaces(bool removeTalk, IEnumerable<int> namespaces)
+		public void RemoveNamespaces(bool removeTalk, IEnumerable<int>? namespaces)
 		{
 			var hash =
 				namespaces == null ? new HashSet<int>() :
@@ -788,7 +788,11 @@
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
 		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
-		public bool TryGetValue(ISimpleTitle key, out TTitle value) => this.dictionary.TryGetValue(key?.FullPageName, out value);
+		public bool TryGetValue(ISimpleTitle key, out TTitle value)
+		{
+			ThrowNull(key, nameof(key));
+			return this.dictionary.TryGetValue(key.FullPageName, out value);
+		}
 
 		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
 		/// <param name="key">The key of the value to get.</param>
@@ -800,12 +804,12 @@
 		/// <summary>Returns the requested value, or null if not found.</summary>
 		/// <param name="key">The key.</param>
 		/// <returns>The requested value, or null if not found.</returns>
-		public TTitle ValueOrDefault(ISimpleTitle key) => this.ValueOrDefault(key?.FullPageName);
+		public TTitle? ValueOrDefault(ISimpleTitle key) => this.ValueOrDefault((key ?? throw ArgumentNull(nameof(key))).FullPageName);
 
 		/// <summary>Returns the requested value, or null if not found.</summary>
 		/// <param name="key">The key.</param>
 		/// <returns>The requested value, or null if not found.</returns>
-		public TTitle ValueOrDefault(string key) => key != null && this.dictionary.TryGetValue(key, out var item) ? item : default;
+		public TTitle? ValueOrDefault(string key) => key != null && this.dictionary.TryGetValue(key, out var item) ? item : default;
 		#endregion
 
 		#region Public Abstract Methods

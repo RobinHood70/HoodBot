@@ -16,6 +16,7 @@
 		private Uri? canonicalPath;
 		private Revision? currentRevision;
 		private Uri? editPath;
+		private PageLoadOptions? loadOptionsUsed;
 		#endregion
 
 		#region Constructors
@@ -111,7 +112,7 @@
 				if (this.Site.DisambiguatorAvailable)
 				{
 					// Disambiguator is 1.21+, so we don't need to worry about the fact that page properties are 1.17+.
-					if (!this.LoadOptions.Modules.HasFlag(PageModules.Properties))
+					if (this.loadOptionsUsed == null || !this.loadOptionsUsed.Modules.HasFlag(PageModules.Properties))
 					{
 						throw new InvalidOperationException(CurrentCulture(Resources.ModuleNotLoaded, nameof(PageModules.Properties), nameof(this.IsDisambiguation)));
 					}
@@ -119,7 +120,7 @@
 					return this.Properties.ContainsKey("disambiguation");
 				}
 
-				if (!this.LoadOptions.Modules.HasFlag(PageModules.Templates))
+				if (this.loadOptionsUsed == null || !this.loadOptionsUsed.Modules.HasFlag(PageModules.Templates))
 				{
 					throw new InvalidOperationException(CurrentCulture(Resources.ModuleNotLoaded, nameof(PageModules.Templates), nameof(this.IsDisambiguation)));
 				}
@@ -159,11 +160,6 @@
 		/// <value>The links used on the page.</value>
 		public IReadOnlyList<Title> LinksHere { get; } = new List<Title>();
 
-		/// <summary>Gets or sets the load options.</summary>
-		/// <value>The load options.</value>
-		/// <remarks>If you need to detect disambiguations, you should include Properties for wikis using Disambiguator or Templates for those that aren't. These are not loaded by default.</remarks>
-		public PageLoadOptions LoadOptions { get; set; }
-
 		/// <summary>Gets the page properties, if they were requested in the last load operation.</summary>
 		/// <value>The list of page properties.</value>
 		public IReadOnlyDictionary<string, string> Properties { get; } = new Dictionary<string, string>();
@@ -187,7 +183,7 @@
 		/// <summary>Gets a value indicating whether the <see cref="Text" /> property has been modified.</summary>
 		/// <value><see langword="true" /> if the text no longer matches the first revision; otherwise, <see langword="false" />.</value>
 		/// <remarks>This is currently simply a shortcut property to compare the Text with Revisions[0]. This may not be an accurate reflection of modification status when loading a specific revision range or in other unusual circumstances.</remarks>
-		public bool TextModified => this.CurrentRevision == null ? !string.IsNullOrWhiteSpace(this.Text) : this.Text != this.CurrentRevision.Text;
+		public bool TextModified => this.Text != this.CurrentRevision?.Text;
 
 		/// <summary>Gets the links on the page, if they were requested in the last load operation.</summary>
 		/// <value>The links used on the page.</value>
@@ -218,11 +214,7 @@
 		}
 
 		/// <summary>Loads or reloads the page.</summary>
-		public void Load()
-		{
-			this.LoadOptions ??= this.Site.DefaultLoadOptions;
-			this.Reload();
-		}
+		public void Load() => this.Load(this.Site.DefaultLoadOptions);
 
 		/// <summary>Loads the specified page modules.</summary>
 		/// <param name="pageModules">The page modules.</param>
@@ -232,8 +224,16 @@
 		/// <param name="options">The options.</param>
 		public void Load(PageLoadOptions options)
 		{
-			this.LoadOptions = options;
-			this.Reload();
+			this.loadOptionsUsed = options;
+			var creator = this.Site.PageCreator;
+			var propertyInputs = creator.GetPropertyInputs(options);
+			var pageSetInput = new QueryPageSetInput(new[] { this.FullPageName }) { ConvertTitles = options.ConvertTitles, Redirects = options.FollowRedirects };
+			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, propertyInputs, creator.CreatePageItem);
+			if (result.Count == 1)
+			{
+				this.Populate(result[0]);
+				this.PageLoaded?.Invoke(this, EventArgs.Empty);
+			}
 		}
 
 		/// <summary>Saves the page.</summary>
@@ -259,6 +259,11 @@
 		/// <returns>A value indicating the change status of the edit.</returns>
 		public ChangeStatus Save(string editSummary, bool isMinor, Tristate createOnly, bool recreateIfJustDeleted, bool isBotEdit)
 		{
+			if (this.Text == null)
+			{
+				return this.CurrentRevision?.Text == null ? ChangeStatus.NoEffect : throw new InvalidOperationException(Resources.PageTextNull);
+			}
+
 			if (!this.TextModified)
 			{
 				return ChangeStatus.NoEffect;
@@ -406,23 +411,6 @@
 		/// <param name="pageItem">The page item.</param>
 		protected virtual void PopulateCustomResults(PageItem pageItem)
 		{
-		}
-		#endregion
-
-		#region Private Methods
-
-		/// <summary>Reloads the page with the current load options.</summary>
-		private void Reload()
-		{
-			var creator = this.Site.PageCreator;
-			var propertyInputs = creator.GetPropertyInputs(this.LoadOptions);
-			var pageSetInput = new QueryPageSetInput(new[] { this.FullPageName }) { ConvertTitles = this.LoadOptions.ConvertTitles, Redirects = this.LoadOptions.FollowRedirects };
-			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, propertyInputs, creator.CreatePageItem);
-			if (result.Count == 1)
-			{
-				this.Populate(result[0]);
-				this.PageLoaded?.Invoke(this, EventArgs.Empty);
-			}
 		}
 		#endregion
 	}

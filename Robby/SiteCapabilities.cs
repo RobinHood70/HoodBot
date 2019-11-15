@@ -50,15 +50,15 @@
 
 		/// <summary>Gets the Uri to the API entry point.</summary>
 		/// <value>The API entry point.</value>
-		public Uri Api { get; private set; }
+		public Uri? Api { get; private set; }
 
 		/// <summary>Gets the current user.</summary>
 		/// <value>The current user, if any; otherwise, null.</value>
-		public string CurrentUser { get; private set; }
+		public string? CurrentUser { get; private set; }
 
 		/// <summary>Gets the Uri to the index.php entry point.</summary>
 		/// <value>The index.php entry point.</value>
-		public Uri Index { get; private set; }
+		public Uri? Index { get; private set; }
 
 		/// <summary>Gets the entry points for read access.</summary>
 		/// <value>The entry points for read access.</value>
@@ -66,7 +66,7 @@
 
 		/// <summary>Gets the name of the wiki.</summary>
 		/// <value>The name of the wiki.</value>
-		public string SiteName { get; private set; }
+		public string? SiteName { get; private set; }
 
 		/// <summary>Gets a value indicating whether the site supports the <c>maxlag</c> parameter for speed throttling.</summary>
 		/// <value><see langword="true"/> if the site supports <c>maxlag</c>; otherwise, <see langword="false"/>.</value>
@@ -91,7 +91,7 @@
 			this.Clear();
 			var fullHost = new UriBuilder(anyPage.Scheme, anyPage.Host).Uri;
 			var tryPath = anyPage.AbsolutePath;
-			Uri tryLoc = null;
+			Uri? tryLoc = null;
 			var offset = tryPath.IndexOf("/index.php", StringComparison.Ordinal);
 			if (offset == -1)
 			{
@@ -172,7 +172,7 @@
 					{
 						api.Initialize();
 						this.Api = api.Uri;
-						Uri index = null;
+						Uri? index = null;
 						if (!string.IsNullOrWhiteSpace(api.Script))
 						{
 							index = new UriBuilder(fullHost)
@@ -242,7 +242,7 @@
 			}
 		}
 
-		private string TryGet(Uri uri)
+		private string? TryGet(Uri uri)
 		{
 			try
 			{

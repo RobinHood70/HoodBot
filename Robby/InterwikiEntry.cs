@@ -28,7 +28,7 @@
 
 		/// <summary>Gets the language for language links.</summary>
 		/// <value>The language.</value>
-		public string Language { get; }
+		public string? Language { get; }
 
 		/// <summary>Gets a value indicating whether this interwiki is located on the same wiki farm as the local wiki.</summary>
 		/// <value><see langword="true"/> if this interwiki is located on the local wiki farm; otherwise, <see langword="false"/>.</value>

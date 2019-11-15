@@ -117,11 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="EmailSubjectNull" xml:space="preserve">
+    <value>No e-mail subject was provided and the default subject could not be retrieved from the wiki.</value>
+  </data>
   <data name="InvalidSite" xml:space="preserve">
     <value>You attempted to use an object from one site with an object from another.</value>
   </data>
   <data name="LoginFailed" xml:space="preserve">
     <value>The attempt to log in to the wiki failed: {0}</value>
+  </data>
+  <data name="MissingSiteInfo" xml:space="preserve">
+    <value>The internal site information object is missing required values.</value>
   </data>
   <data name="ModuleNotLoaded" xml:space="preserve">
     <value>You must load {0} when calling the {1} method.</value>
@@ -131,6 +137,9 @@
   </data>
   <data name="PageNameInterwiki" xml:space="preserve">
     <value>Invalid page name: [[{0}]]. Page is an interwiki link that doesn't resolve to the local wiki.</value>
+  </data>
+  <data name="PageTextNull" xml:space="preserve">
+    <value>The page text is currently null, which is normally unintentional. To save an intentionally blank page, set the Text property to string.Empty.</value>
   </data>
   <data name="SiteNotInitialized" xml:space="preserve">
     <value>{0} is invalid until the site has been initialized.</value>

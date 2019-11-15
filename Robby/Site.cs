@@ -3,6 +3,7 @@
 	// TODO: Review access rights project-wide.
 	using System;
 	using System.Collections.Generic;
+	using System.ComponentModel;
 	using System.Globalization;
 	using System.IO;
 	using System.Net;
@@ -12,6 +13,7 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WikiClasses.Parser;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -92,11 +94,11 @@
 		private readonly Dictionary<string, MagicWord> magicWords = new Dictionary<string, MagicWord>();
 		private string? baseArticlePath;
 		private CultureInfo culture = CultureInfo.CurrentCulture;
-		private HashSet<Title> disambiguationTemplates;
+		private HashSet<Title>? disambiguationTemplates;
+		private ReadOnlyKeyedCollection<string, InterwikiEntry>? interwikiMap;
 		private Title? mainPage;
 		private string? mainPageName;
 		private NamespaceCollection? namespaces;
-		private Regex redirectTargetFinder;
 		private string? scriptPath;
 		private string? serverName;
 		private string? siteName;
@@ -114,6 +116,7 @@
 			wiki.Initialized += this.AbstractionLayer_Initialized;
 			wiki.WarningOccurred += this.AbstractionLayer_WarningOccurred;
 			this.AbstractionLayer = wiki;
+			this.UserFunctions = DefaultUserFunctions.CreateInstance(this);
 		}
 		#endregion
 
@@ -131,16 +134,16 @@
 		#region Events
 
 		/// <summary>Occurs when a change is about to be made to the wiki. Subscribers have the option to indicate if they need the change to be cancelled.</summary>
-		public event StrongEventHandler<Site, ChangeArgs> Changing;
+		public event StrongEventHandler<Site, ChangeArgs>? Changing;
 
 		/// <summary>Occurs after the PageTextChanging event when a page is about to be edited on the wiki.</summary>
-		public event StrongEventHandler<Site, PagePreviewArgs> PagePreview;
+		public event StrongEventHandler<Site, PagePreviewArgs>? PagePreview;
 
 		/// <summary>Occurs when a page is about to be edited on the wiki. Subscribers may make additional changes to the page, or indicate if they need the change to be cancelled.</summary>
-		public event StrongEventHandler<Site, PageTextChangeArgs> PageTextChanging;
+		public event StrongEventHandler<Site, PageTextChangeArgs>? PageTextChanging;
 
 		/// <summary>Occurs when a warning should be sent to the user.</summary>
-		public event StrongEventHandler<Site, WarningEventArgs> WarningOccurred;
+		public event StrongEventHandler<Site, WarningEventArgs>? WarningOccurred;
 		#endregion
 
 		#region Public Static Properties
@@ -169,12 +172,8 @@
 		/// <remarks>Not all languages available in MediaWiki have direct equivalents in Windows. The bot will attempt to fall back to the more general language or variant when possible, but this property is left settable in the event that the choice made is unacceptable. If the culture cannot be determined, <see cref="CultureInfo.CurrentCulture"/> is used instead. Attempting to set the Culture to null will also result in CurrentCulture being used.</remarks>
 		public CultureInfo Culture
 		{
-			get => this.culture;
-			set
-			{
-				this.culture = value ?? CultureInfo.CurrentCulture;
-				this.EqualityComparerInsensitive = StringComparer.Create(value, true);
-			}
+			get => this.culture ?? throw NoSite(nameof(this.Culture));
+			set => this.culture = value;
 		}
 
 		/// <summary>Gets or sets the default load options.</summary>
@@ -185,7 +184,7 @@
 		/// <summary>Gets the list of disambiguation templates on wikis that aren't using Disambiguator.</summary>
 		/// <value>The disambiguation templates.</value>
 		/// <remarks>This will be auto-populated on first use if not already set.</remarks>
-		public IEnumerable<Title> DisambiguationTemplates => this.disambiguationTemplates ?? this.LoadDisambiguationTemplates();
+		public IReadOnlyCollection<Title> DisambiguationTemplates => this.disambiguationTemplates ?? this.LoadDisambiguationTemplates();
 
 		/// <summary>Gets a value indicating whether the Disambiguator extension is available.</summary>
 		/// <value><see langword="true"/> if the Disambiguator extension is available; otherwise, <see langword="false"/>.</value>
@@ -196,14 +195,9 @@
 		/// <remarks>If set to true, most methods will silently fail, and their return <see cref="ChangeStatus.EditingDisabled"/>. This is primarily intended for testing new bot jobs without risking any unintended edits.</remarks>
 		public bool EditingEnabled { get; set; } = false;
 
-		/// <summary>Gets or sets the EqualityComparer for case-insensitive comparison.</summary>
-		/// <value>The case-insensitive EqualityComparer.</value>
-		/// <remarks>This provides a central, consistent comparer for anything that is site-aware.</remarks>
-		public IEqualityComparer<string> EqualityComparerInsensitive { get; protected set; }
-
 		/// <summary>Gets the interwiki map.</summary>
 		/// <value>The interwiki map.</value>
-		public ReadOnlyKeyedCollection<string, InterwikiEntry> InterwikiMap { get; private set; }
+		public ReadOnlyKeyedCollection<string, InterwikiEntry> InterwikiMap => this.interwikiMap ?? throw NoSite(nameof(this.InterwikiMap));
 
 		/// <summary>Gets a list of current magic words on the wiki.</summary>
 		/// <value>The magic words.</value>
@@ -315,30 +309,33 @@
 		/// <param name="articleName">Name of the article.</param>
 		/// <param name="fragment">The fragment to jump to. May be null.</param>
 		/// <returns>A full Uri to the article.</returns>
-		public virtual Uri GetArticlePath(string articleName, string fragment) => this.GetArticlePath(this.BaseArticlePath, articleName, fragment);
+		public virtual Uri GetArticlePath(string articleName, string? fragment) => this.GetArticlePath(this.BaseArticlePath, articleName, fragment);
 
 		/// <summary>Gets the redirect target from the page text.</summary>
 		/// <param name="text">The text to parse.</param>
 		/// <returns>A <see cref="TitleParts"/> object with the parsed redirect.</returns>
-		public virtual TitleParts GetRedirectFromText(string text)
+		public virtual TitleParts? GetRedirectFromText(string text)
 		{
 			ThrowNull(text, nameof(text));
-			if (this.redirectTargetFinder == null)
+			var redirects = new HashSet<string>(this.MagicWords.TryGetValue("redirect", out var redirect) ? redirect.Aliases : DefaultRedirect);
+			var parser = WikiTextParser.Parse(text);
+			if (parser.First is LinkedListNode<IWikiNode> first && first.Value is TextNode textNode)
 			{
-				var list = new List<string>();
-				var redirects = new HashSet<string>(this.MagicWords.TryGetValue("redirect", out var redirect) ? redirect.Aliases : DefaultRedirect);
-				foreach (var redirWord in redirects)
+				var searchText = textNode.Text.TrimEnd();
+
+				// In most cases, searchText will now be the full redirect magic word (e.g., "#REDIRECT"), but old versions of MediaWiki used colons, so strip off a single colon (only one is allowed) if needed and re-trim.
+				if (searchText.Length > 0 && searchText[searchText.Length - 1] == ':')
 				{
-					list.Add(Regex.Escape(redirWord));
+					searchText = searchText.Substring(0, searchText.Length - 1).TrimEnd();
 				}
 
-				// Regex originally taken from WikitextContent.php --> '!^\s*:?\s*\[{2}(.*?)(?:\|.*?)?\]{2}\s*!'
-				this.redirectTargetFinder = new Regex("^(" + string.Join("|", list) + @")\s*:?\s*\[\[(?<target>.*?)(\|.*?)?\]\]", redirect.CaseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
+				if (redirects.Contains(searchText) && first.Next.Value is LinkNode linkNode)
+				{
+					return new TitleParts(this, WikiTextVisitor.Raw(linkNode.Title));
+				}
 			}
 
-			var target = this.redirectTargetFinder.Match(text).Groups["target"];
-
-			return target.Success ? new TitleParts(this, target.Value) : null;
+			return null;
 		}
 
 		/// <summary>Gets all active blocks.</summary>
@@ -382,19 +379,21 @@
 		public IReadOnlyList<Block> LoadBlocks(IPAddress ip) => this.LoadBlocks(new BlocksInput(ip));
 
 		/// <summary>Gets a message from MediaWiki space.</summary>
-		/// <param name="msg">The message.</param>
+		/// <param name="message">The message.</param>
 		/// <param name="arguments">Optional arguments to substitute into the message.</param>
 		/// <returns>The text of the message.</returns>
-		public string LoadMessage(string msg, params string[] arguments) => this.LoadMessage(msg, arguments as IEnumerable<string>);
+		public string? LoadMessage([Localizable(false)] string message, params string[] arguments) => this.LoadMessage(message, arguments as IEnumerable<string>);
 
 		/// <summary>Gets a message from MediaWiki space.</summary>
-		/// <param name="msg">The message.</param>
+		/// <param name="message">The message.</param>
 		/// <param name="arguments">Optional arguments to substitute into the message.</param>
 		/// <returns>The text of the message.</returns>
-		public string LoadMessage(string msg, IEnumerable<string> arguments)
+		public string? LoadMessage([Localizable(false)] string message, IEnumerable<string> arguments)
 		{
-			var messages = this.LoadMessages(new[] { msg }, arguments);
-			return messages[msg].Text;
+			ThrowNull(message, nameof(message));
+			ThrowNull(arguments, nameof(arguments));
+			var messages = this.LoadMessages(new[] { message }, arguments);
+			return messages.TryGetValue(message, out var retval) ? retval.Text : null;
 		}
 
 		/// <summary>Gets multiple messages from MediaWiki space.</summary>
@@ -420,35 +419,34 @@
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="pageName">Name of the page.</param>
 		/// <returns>The text of the page.</returns>
-		public string LoadPageText(string pageName)
+		public string? LoadPageText(string pageName)
 		{
-			var titles = new TitleCollection(this, pageName);
-			titles.SetLimitations(LimitationType.None);
-			var result = titles.Load();
-			return result.Count == 1 ? result[0].Text : null;
+			var pages = PageCollection.Unlimited(this);
+			pages.GetTitles(pageName);
+			return pages.Count == 1 ? pages[0].Text : null;
 		}
 
 		/// <summary>Gets a message from MediaWiki space with any magic words and the like parsed into text.</summary>
 		/// <param name="msg">The message.</param>
 		/// <param name="arguments">Optional arguments to substitute into the message.</param>
 		/// <returns>The text of the message.</returns>
-		public string LoadParsedMessage(string msg, params string[] arguments) => this.LoadParsedMessage(msg, arguments as IEnumerable<string>, null);
+		public string? LoadParsedMessage(string msg, params string[] arguments) => this.LoadParsedMessage(msg, arguments as IEnumerable<string>, null);
 
 		/// <summary>Gets a message from MediaWiki space with any magic words and the like parsed into text.</summary>
 		/// <param name="msg">The message.</param>
 		/// <param name="arguments">Optional arguments to substitute into the message.</param>
 		/// <returns>The text of the message.</returns>
-		public string LoadParsedMessage(string msg, IEnumerable<string> arguments) => this.LoadParsedMessage(msg, arguments, null);
+		public string? LoadParsedMessage(string msg, IEnumerable<string> arguments) => this.LoadParsedMessage(msg, arguments, null);
 
 		/// <summary>Gets a message from MediaWiki space with any magic words and the like parsed into text.</summary>
 		/// <param name="msg">The message.</param>
 		/// <param name="arguments">Optional arguments to substitute into the message.</param>
 		/// <param name="title">The title to use for parsing.</param>
 		/// <returns>The text of the message.</returns>
-		public string LoadParsedMessage(string msg, IEnumerable<string> arguments, Title title)
+		public string? LoadParsedMessage(string msg, IEnumerable<string> arguments, Title? title)
 		{
 			var messages = this.LoadParsedMessages(new[] { msg }, arguments, title);
-			return messages[msg].Text;
+			return messages.TryGetValue(msg, out var retval) ? retval.Text : null;
 		}
 
 		/// <summary>Gets multiple messages from MediaWiki space with any magic words and the like parsed into text.</summary>
@@ -462,7 +460,7 @@
 		/// <param name="arguments">Optional arguments to substitute into the message.</param>
 		/// <param name="title">The title to use for parsing.</param>
 		/// <returns>A read-only dictionary of the specified arguments with their associated Message objects.</returns>
-		public IReadOnlyDictionary<string, MessagePage> LoadParsedMessages(IEnumerable<string> messages, IEnumerable<string> arguments, Title title) => this.LoadMessages(new AllMessagesInput
+		public IReadOnlyDictionary<string, MessagePage> LoadParsedMessages(IEnumerable<string> messages, IEnumerable<string> arguments, Title? title) => this.LoadMessages(new AllMessagesInput
 		{
 			Messages = messages,
 			Arguments = arguments,
@@ -612,7 +610,7 @@
 		/// <returns>A value indicating the change status of the patrol.</returns>
 		public ChangeStatus Patrol(long rcid) => this.PublishChange(
 			this,
-			new Dictionary<string, object>
+			new Dictionary<string, object?>
 			{
 				[nameof(rcid)] = rcid,
 			},
@@ -623,7 +621,7 @@
 		/// <returns>A value indicating the change status of the patrol.</returns>
 		public ChangeStatus PatrolRevision(long revid) => this.PublishChange(
 			this,
-			new Dictionary<string, object>
+			new Dictionary<string, object?>
 			{
 				[nameof(revid)] = revid,
 			},
@@ -653,9 +651,9 @@
 		/// <param name="pageText">Full page text for the File page. This should include the license, categories, and anything else required. Set to null to allow the wiki to generate the page text (normally just the <paramref name="editSummary" />).</param>
 		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
 		/// <returns>A value indicating the change status of the upload.</returns>
-		public ChangeStatus Upload(string fileName, string destinationName, string editSummary, string pageText) => this.PublishChange(
+		public ChangeStatus Upload(string fileName, string? destinationName, string editSummary, string? pageText) => this.PublishChange(
 			this,
-			new Dictionary<string, object>
+			new Dictionary<string, object?>
 			{
 				[nameof(fileName)] = fileName,
 				[nameof(destinationName)] = destinationName,
@@ -671,7 +669,7 @@
 				}
 
 				using var upload = new FileStream(checkedName, FileMode.Open);
-				var uploadInput = new UploadInput(destinationName, upload)
+				var uploadInput = new UploadInput(destinationName!, upload)
 				{
 					IgnoreWarnings = true,
 					Comment = editSummary,
@@ -704,7 +702,7 @@
 		/// <returns><see cref="ChangeStatus.Success"/> if the account was successfully created; otherwise, <see cref="ChangeStatus.Failure"/>.</returns>
 		public virtual ChangeStatus CreateAccount(string name, string password, string email) => this.PublishChange(
 			this,
-			new Dictionary<string, object>
+			new Dictionary<string, object?>
 			{
 				[nameof(name)] = name,
 				[nameof(password)] = password,
@@ -723,7 +721,7 @@
 		/// <param name="fragment">The fragment to jump to. May be null.</param>
 		/// <returns>A full Uri to the article.</returns>
 		/// <exception cref="ArgumentException">Article name is invalid.</exception>
-		public virtual Uri GetArticlePath(string unparsedPath, string articleName, string fragment)
+		public virtual Uri GetArticlePath(string unparsedPath, string articleName, string? fragment)
 		{
 			// CONSIDER: Used to use WebUtility.UrlEncode, but Uri seems to auto-encode, so removed for now. Discussion in some places of different parts of .NET encoding differently, so may need to re-instate later. See https://stackoverflow.com/a/47877559/502255 for example.
 			if (string.IsNullOrWhiteSpace(articleName))
@@ -759,7 +757,7 @@
 		/// <param name="caller">The calling method (populated automatically with caller name).</param>
 		/// <returns>A value indicating the actions that should take place.</returns>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
-		public virtual ChangeStatus PublishChange(object sender, IReadOnlyDictionary<string, object> parameters, Func<ChangeStatus> changeFunction, [CallerMemberName] string caller = null)
+		public virtual ChangeStatus PublishChange(object sender, IReadOnlyDictionary<string, object?>? parameters, Func<ChangeStatus> changeFunction, [CallerMemberName] string caller = "")
 		{
 			ThrowNull(changeFunction, nameof(changeFunction));
 			var changeArgs = new ChangeArgs(sender, caller, parameters);
@@ -772,16 +770,18 @@
 
 		/// <summary>Raises the Changing event with the supplied arguments and indicates what actions should be taken.</summary>
 		/// <typeparam name="T">The return type for the ChangeValue object.</typeparam>
+		/// <param name="disabledResult">The value to use if the return status is <see cref="ChangeStatus.EditingDisabled"/>.</param>
 		/// <param name="sender">The sending object.</param>
 		/// <param name="parameters">A dictionary of parameters that were sent to the calling method.</param>
 		/// <param name="changeFunction">The function to execute. It should return a <see cref="ChangeValue{T}"/> object indicating whether the call was successful, failed, or ignored.</param>
-		/// <param name="disabledResult">The value to use if the return status is <see cref="ChangeStatus.EditingDisabled"/>.</param>
 		/// <param name="caller">The calling method (populated automatically with caller name).</param>
 		/// <returns>A value indicating the actions that should take place.</returns>
 		/// <remarks>In the event of a <see cref="ChangeStatus.Cancelled"/> result, the corresponding value will be <span class="keyword">default</span>.</remarks>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
-		public virtual ChangeValue<T> PublishChange<T>(object sender, IReadOnlyDictionary<string, object> parameters, Func<ChangeValue<T>> changeFunction, T disabledResult, [CallerMemberName] string caller = "")
+		public virtual ChangeValue<T> PublishChange<T>(T disabledResult, object sender, IReadOnlyDictionary<string, object?>? parameters, Func<ChangeValue<T>> changeFunction, [CallerMemberName] string caller = "")
+			where T : class
 		{
+			// Note: disabledResult comes first in this call instead of last to prevent ambiguous calls when T is a string (i.e., same type as caller parameter).
 			ThrowNull(changeFunction, nameof(changeFunction));
 			var changeArgs = new ChangeArgs(sender, caller, parameters);
 			this.Changing?.Invoke(this, changeArgs);
@@ -820,10 +820,10 @@
 		#endregion
 
 		#region Internal Methods
-		internal string GetPreferredImageMagicWord(string search)
+		internal string? GetPreferredImageMagicWord(string search)
 		{
 			var entry = ImageMagicWords[search];
-			string retval = null;
+			string? retval = null;
 			foreach (var wordName in entry)
 			{
 				var magicWord = this.MagicWords[wordName];
@@ -866,20 +866,23 @@
 
 		/// <summary>Loads the disambiguation templates for wikis that don't use Disambiguator.</summary>
 		/// <returns>A collection of titles of disambiguation templates.</returns>
-		protected virtual ICollection<Title> LoadDisambiguationTemplates()
+		protected virtual IReadOnlyCollection<Title> LoadDisambiguationTemplates()
 		{
-			this.disambiguationTemplates = new HashSet<Title>();
-			var page = new Page(this.Namespaces[MediaWikiNamespaces.MediaWiki], "Disambiguationspage");
-			page.Load(PageModules.Default | PageModules.Links);
-			if (page.Exists)
+			if (this.disambiguationTemplates == null)
 			{
-				if (page.Links.Count == 0)
+				this.disambiguationTemplates = new HashSet<Title>();
+				var page = new Page(this.Namespaces[MediaWikiNamespaces.MediaWiki], "Disambiguationspage");
+				page.Load(PageModules.Default | PageModules.Links);
+				if (page.Exists && page.Text != null)
 				{
-					this.disambiguationTemplates.Add(new Title(this, page.Text.Trim()));
-				}
-				else
-				{
-					this.disambiguationTemplates.UnionWith(page.Links);
+					if (page.Links.Count == 0)
+					{
+						this.disambiguationTemplates.Add(new Title(this, page.Text.Trim()));
+					}
+					else
+					{
+						this.disambiguationTemplates.UnionWith(page.Links);
+					}
 				}
 			}
 
@@ -961,7 +964,7 @@
 				throw new UnauthorizedAccessException(CurrentCulture(Resources.LoginFailed, result.Reason));
 			}
 
-			this.User = new User(this, result.User);
+			this.User = result.User == null ? null : new User(this, result.User);
 			this.UserFunctions = this.FindBestUserFunctions();
 			this.UserFunctions.DoSiteCustomizations();
 
@@ -978,17 +981,26 @@
 		/// <param name="siteInfo">The site information.</param>
 		protected virtual void ParseInternalSiteInfo(SiteInfoResult siteInfo)
 		{
-			ThrowNull(siteInfo, nameof(siteInfo));
+			if (siteInfo == null
+				|| siteInfo.General == null
+				|| siteInfo.InterwikiMap == null
+				|| siteInfo.NamespaceAliases == null
+				|| siteInfo.Namespaces == null
+				|| siteInfo.MagicWords == null)
+			{
+				throw new InvalidOperationException(Resources.MissingSiteInfo);
+			}
 
 			// General
 			var general = siteInfo.General;
+			var server = general.Server; // Used to help determine if interwiki is local
 			this.CaseSensitive = general.Flags.HasFlag(SiteInfoFlags.CaseSensitive);
-			this.Culture = GetCulture(general.Language);
+			this.culture = GetCulture(general.Language);
 			this.siteName = general.SiteName;
 			this.serverName = general.ServerName;
 			this.version = general.Generator;
 			var path = general.ArticlePath;
-			var basePath = general.BasePage.Substring(0, general.BasePage.IndexOf(general.Server, StringComparison.Ordinal) + general.Server.Length); // Search for server in BasePage and extract everything from the start of BasePage to then. This effectively converts Server to canonical if it was protocol-relative.
+			var basePath = general.BasePage.Substring(0, general.BasePage.IndexOf(server, StringComparison.Ordinal) + server.Length); // Search for server in BasePage and extract everything from the start of BasePage to then. This effectively converts Server to canonical if it was protocol-relative.
 			this.baseArticlePath = path.StartsWith("/", StringComparison.Ordinal) ? basePath + path : path;
 			this.mainPageName = general.MainPage;
 			this.scriptPath = basePath + general.Script;
@@ -1007,15 +1019,19 @@
 			}
 
 			// Namespaces
+			var comparer = StringComparer.Create(this.Culture, true);
 			var namespaces = new List<Namespace>(siteInfo.Namespaces.Count);
 			foreach (var item in siteInfo.Namespaces)
 			{
-				allAliases.TryGetValue(item.Id, out var aliases);
-				namespaces.Add(new Namespace(this, item, aliases));
+				allAliases.TryGetValue(item.Id, out var nsAliases);
+				namespaces.Add(new Namespace(this, comparer, item, nsAliases));
 			}
 
-			this.namespaces = new NamespaceCollection(namespaces, this.EqualityComparerInsensitive);
-			this.mainPage = new Title(this, general.MainPage); // Now that we understand namespaces, we can create a Title.
+			this.namespaces = new NamespaceCollection(namespaces, comparer);
+			if (this.mainPageName != null)
+			{
+				this.mainPage = new Title(this, this.mainPageName); // Now that we understand namespaces, we can create a Title.
+			}
 
 			// MagicWords
 			foreach (var word in siteInfo.MagicWords)
@@ -1037,12 +1053,11 @@
 				}
 			}
 
-			var server = general.Server; // Used to help determine if interwiki is local
 			var interwikiList = new List<InterwikiEntry>();
 			foreach (var item in siteInfo.InterwikiMap)
 			{
 				var entry = new InterwikiEntry(this, item);
-				if (doGuess)
+				if (doGuess && server != null)
 				{
 					entry.GuessLocalWikiFromServer(server);
 				}
@@ -1050,7 +1065,7 @@
 				interwikiList.Add(entry);
 			}
 
-			this.InterwikiMap = new ReadOnlyKeyedCollection<string, InterwikiEntry>(item => item?.Prefix, interwikiList);
+			this.interwikiMap = new ReadOnlyKeyedCollection<string, InterwikiEntry>(item => (item ?? throw ArgumentNull(nameof(item))).Prefix, interwikiList);
 		}
 
 		/// <summary>Patrols the specified Recent Changes ID.</summary>
@@ -1166,9 +1181,10 @@
 
 		private UserFunctions FindBestUserFunctions()
 		{
-			if (!UserFunctionsClasses.TryGetValue(string.Concat(this.ServerName, '/', this.User.Name), out var factory) &&
+			var userName = this.User?.Name ?? string.Empty;
+			if (!UserFunctionsClasses.TryGetValue(string.Concat(this.ServerName, '/', userName), out var factory) &&
 				!UserFunctionsClasses.TryGetValue(string.Concat(this.ServerName, '/'), out factory) &&
-				!UserFunctionsClasses.TryGetValue(string.Concat('/', this.User.Name), out factory))
+				!UserFunctionsClasses.TryGetValue(string.Concat('/', userName), out factory))
 			{
 				factory = DefaultUserFunctions.CreateInstance;
 			}

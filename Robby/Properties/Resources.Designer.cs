@@ -61,6 +61,15 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No e-mail subject was provided and the default subject could not be retrieved from the wiki..
+        /// </summary>
+        internal static string EmailSubjectNull {
+            get {
+                return ResourceManager.GetString("EmailSubjectNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You attempted to use an object from one site with an object from another..
         /// </summary>
         internal static string InvalidSite {
@@ -75,6 +84,15 @@ namespace RobinHood70.Robby.Properties {
         internal static string LoginFailed {
             get {
                 return ResourceManager.GetString("LoginFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The internal site information object is missing required values..
+        /// </summary>
+        internal static string MissingSiteInfo {
+            get {
+                return ResourceManager.GetString("MissingSiteInfo", resourceCulture);
             }
         }
         
@@ -102,6 +120,15 @@ namespace RobinHood70.Robby.Properties {
         internal static string PageNameInterwiki {
             get {
                 return ResourceManager.GetString("PageNameInterwiki", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The page text is currently null, which is normally unintentional. To save an intentionally blank page, set the Text property to string.Empty..
+        /// </summary>
+        internal static string PageTextNull {
+            get {
+                return ResourceManager.GetString("PageTextNull", resourceCulture);
             }
         }
         

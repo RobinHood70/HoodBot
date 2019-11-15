@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
@@ -10,8 +11,8 @@
 	public class User : Title
 	{
 		#region Static Fields
-		private static string defaultSubject = null;
-		private static string emailDisabled = null;
+		private static string? defaultSubject;
+		private static string? emailDisabled;
 		#endregion
 
 		#region Fields
@@ -32,18 +33,14 @@
 		/// <param name="site">The site the user is from.</param>
 		/// <param name="user">The WallE <see cref="UsersInput"/> to populate the data from.</param>
 		protected internal User(Site site, UsersItem user)
-			: this(site, user?.Name)
-		{
-			ThrowNull(user, nameof(user));
-			this.Populate(user);
-		}
+			: this(site, (user ?? throw ArgumentNull(nameof(user))).Name) => this.Populate(user);
 		#endregion
 
 		#region Public Properties
 
 		/// <summary>Gets information about any active blocks on the user.</summary>
 		/// <value>The block information.</value>
-		public Block BlockInfo { get; private set; }
+		public Block? BlockInfo { get; private set; }
 
 		/// <summary>Gets the user's edit count.</summary>
 		/// <value>The user's edit count.</value>
@@ -55,11 +52,11 @@
 
 		/// <summary>Gets the user's gender.</summary>
 		/// <value>The user's gender.</value>
-		public string Gender { get; private set; }
+		public string? Gender { get; private set; }
 
 		/// <summary>Gets the groups the user belongs to.</summary>
 		/// <value>The groups the user belongs to.</value>
-		public IReadOnlyList<string> Groups { get; private set; }
+		public IReadOnlyList<string>? Groups { get; private set; }
 
 		/// <summary>Gets the user's name.</summary>
 		/// <value>The name.</value>
@@ -72,7 +69,7 @@
 
 		/// <summary>Gets the user's rights.</summary>
 		/// <value>The user's rights.</value>
-		public IReadOnlyList<string> Rights { get; private set; }
+		public IReadOnlyList<string>? Rights { get; private set; }
 		#endregion
 
 		#region Public Methods
@@ -120,7 +117,17 @@
 		/// <remarks>The subject of the e-mail will be the wiki default.</remarks>
 		public ChangeValue<string> Email(string body, bool ccMe)
 		{
-			defaultSubject ??= this.Site.LoadParsedMessage("defemailsubject").Replace("$1", this.Site.User.Name);
+			defaultSubject ??= this.Site.LoadParsedMessage("defemailsubject");
+			if (defaultSubject == null)
+			{
+				throw new InvalidOperationException(Resources.EmailSubjectNull);
+			}
+
+			if (this.Site.User != null)
+			{
+				defaultSubject = defaultSubject.Replace("$1", this.Site.User.Name);
+			}
+
 			return this.Email(defaultSubject, body, ccMe);
 		}
 
@@ -139,8 +146,9 @@
 			}
 
 			return this.Site.PublishChange(
+				string.Empty,
 				this,
-				new Dictionary<string, object>
+				new Dictionary<string, object?>
 				{
 					[nameof(subject)] = subject,
 					[nameof(body)] = body,
@@ -151,8 +159,7 @@
 					var input = new EmailUserInput(this.Name, body) { CCMe = ccMe, Subject = subject };
 					var result = this.Site.AbstractionLayer.EmailUser(input);
 					return new ChangeValue<string>(result.Result == "Success" ? ChangeStatus.Success : ChangeStatus.Failure, result.Message ?? result.Result);
-				},
-				null);
+				});
 		}
 
 		// CONSIDER: Adding more GetContributions() and GetWatchlist() options.
@@ -214,7 +221,7 @@
 		/// <param name="token">The user's watchlist token. This must be provided by the user.</param>
 		/// <param name="namespaces">The namespaces of the contributions to retrieve.</param>
 		/// <returns>A read-only list of <see cref="Title"/>s in the user's watchlist.</returns>
-		public IReadOnlyList<Title> GetWatchlist(string token, IEnumerable<int> namespaces)
+		public IReadOnlyList<Title> GetWatchlist(string token, IEnumerable<int>? namespaces)
 		{
 			var input = new WatchlistRawInput
 			{
@@ -265,7 +272,7 @@
 
 			return this.Site.PublishChange(
 				this,
-				new Dictionary<string, object>
+				new Dictionary<string, object?>
 				{
 					[nameof(header)] = header,
 					[nameof(msg)] = msg,
@@ -273,6 +280,7 @@
 				},
 				() =>
 				{
+					ThrowNull(this.TalkPage, nameof(User), nameof(this.TalkPage));
 					var input = new EditInput(this.TalkPage.FullPageName, msg)
 					{
 						Bot = true,
@@ -291,7 +299,7 @@
 		/// <returns>A value indicating the change status of the unblock.</returns>
 		public ChangeStatus Unblock(string reason) => this.Site.PublishChange(
 			this,
-			new Dictionary<string, object> { [nameof(reason)] = reason, },
+			new Dictionary<string, object?> { [nameof(reason)] = reason, },
 			() =>
 			{
 				var input = new UnblockInput(this.Name) { Reason = reason };
@@ -302,7 +310,7 @@
 		#region Private Methods
 		private ChangeStatus Block(BlockInput input) => this.Site.PublishChange(
 			this,
-			new Dictionary<string, object>
+			new Dictionary<string, object?>
 			{
 				[nameof(input.User)] = input.User,
 				[nameof(input.Reason)] = input.Reason,
@@ -319,9 +327,9 @@
 			this.EditCount = user.EditCount;
 			this.Emailable = user.Flags.HasFlag(UserFlags.Emailable);
 			this.Gender = user.Gender;
-			this.Groups = user.Groups;
+			this.Groups = user.Groups ?? Array.Empty<string>();
 			this.Registration = user.Registration ?? DateTime.MinValue;
-			this.Rights = user.Rights;
+			this.Rights = user.Rights ?? Array.Empty<string>();
 			this.loaded = true;
 		}
 		#endregion

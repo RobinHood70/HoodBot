@@ -18,7 +18,7 @@
 
 		/// <summary>Initializes a new instance of the <see cref="PaddedString"/> class.</summary>
 		/// <param name="value">The value of the string.</param>
-		public PaddedString(string value)
+		public PaddedString(string? value)
 			: this(string.Empty, value, string.Empty)
 		{
 		}
@@ -36,10 +36,10 @@
 		/// <param name="leadingWhiteSpace">The leading whitespace.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="trailingWhiteSpace">The trailing whitespace.</param>
-		public PaddedString(string leadingWhiteSpace, string value, string trailingWhiteSpace)
+		public PaddedString(string leadingWhiteSpace, string? value, string trailingWhiteSpace)
 		{
 			this.LeadingWhiteSpace = leadingWhiteSpace;
-			this.Value = value;
+			this.Value = value ?? string.Empty;
 			this.TrailingWhiteSpace = trailingWhiteSpace;
 		}
 

@@ -180,7 +180,7 @@
 		/// <summary>Gets a Title object for this Title's corresponding subject page.</summary>
 		/// <value>The talk page.</value>
 		/// <remarks>If this Title is a talk page, the Title returned will be itself. Returns null for pages which have no associated talk page.</remarks>
-		public Title TalkPage =>
+		public Title? TalkPage =>
 			this.Namespace.TalkSpace == null ? null
 			: this.Namespace.IsTalkSpace ? this
 			: new Title(this.Namespace.TalkSpace, this.PageName);
@@ -201,7 +201,12 @@
 		/// <param name="pageName">Name of the page.</param>
 		/// <returns>A page name in the given namespace, if it wasn't already.</returns>
 		/// <remarks>This is a convenience function that wraps around <see cref="DefaultToNamespace(Namespace, string)"/>.</remarks>
-		public static string CoercePageName(Site site, int ns, string pageName) => CoercePageName(site?.Namespaces[ns], pageName);
+		public static string CoercePageName(Site site, int ns, string pageName)
+		{
+			ThrowNull(site, nameof(site));
+			ThrowNull(pageName, nameof(pageName));
+			return CoercePageName(site.Namespaces[ns], pageName);
+		}
 
 		/// <summary>Returns a <see cref="Title"/> for the given namespace and page name, allowing for the possibility that the page may already have the namespace prepended to it or may be overridden to another namespace.</summary>
 		/// <param name="ns">The namespace the page should belong to.</param>
@@ -276,7 +281,7 @@
 		/// <param name="expiry">The expiry date and time.</param>
 		/// <returns>A value indicating the change status of the protection.</returns>
 		/// <remarks>This version allows custom create-protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="CreateProtect(string, ProtectionLevel, DateTime)"/> version of this call.</remarks>
-		public ChangeStatus CreateProtect(string reason, string createProtection, DateTime expiry)
+		public ChangeStatus CreateProtect(string reason, string? createProtection, DateTime expiry)
 		{
 			if (createProtection == null)
 			{
@@ -302,11 +307,7 @@
 		/// <remarks>This version allows custom create-protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="CreateProtect(string, ProtectionLevel, string)"/> version of this call.</remarks>
 		public ChangeStatus CreateProtect(string reason, string createProtection, string duration)
 		{
-			if (createProtection == null)
-			{
-				return ChangeStatus.NoEffect;
-			}
-
+			ThrowNull(createProtection, nameof(createProtection));
 			var protection = new ProtectInputItem("create", createProtection) { ExpiryRelative = duration };
 			return this.Protect(reason, new[] { protection });
 		}
@@ -316,8 +317,17 @@
 		/// <returns>A value indicating the change status of the unprotection.</returns>
 		public ChangeStatus CreateUnprotect(string reason)
 		{
-			var protection = new ProtectInputItem("create", ProtectionWord(ProtectionLevel.None));
+			var protection = new ProtectInputItem("create", ProtectionWord(ProtectionLevel.None)!);
 			return this.Protect(reason, new[] { protection });
+		}
+
+		/// <summary>Deconstructs this instance into its constituent parts.</summary>
+		/// <param name="ns">The value returned by <see cref="Namespace"/>.</param>
+		/// <param name="pageName">The value returned by <see cref="PageName"/>.</param>
+		public void Deconstruct(out Namespace ns, out string pageName)
+		{
+			ns = this.Namespace;
+			pageName = this.PageName;
 		}
 
 		/// <summary>Deletes the title for the specified reason.</summary>
@@ -328,7 +338,7 @@
 			ThrowNull(reason, nameof(reason));
 			return this.Site.PublishChange(
 				this,
-				new Dictionary<string, object>
+				new Dictionary<string, object?>
 				{
 					[nameof(reason)] = reason,
 				},
@@ -355,14 +365,18 @@
 		/// <param name="reason">The reason for the move.</param>
 		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
-		public ChangeValue<IDictionary<string, string>> Move(string to, string reason, bool suppressRedirect) => this.Move(to, reason, false, false, suppressRedirect);
+		public ChangeValue<IDictionary<string?, string?>> Move(string to, string reason, bool suppressRedirect) => this.Move(to, reason, false, false, suppressRedirect);
 
 		/// <summary>Moves the title to the name specified.</summary>
 		/// <param name="to">The location to move the title to.</param>
 		/// <param name="reason">The reason for the move.</param>
 		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
-		public ChangeValue<IDictionary<string, string>> Move(Title to, string reason, bool suppressRedirect) => this.Move(to?.FullPageName, reason, false, false, suppressRedirect);
+		public ChangeValue<IDictionary<string?, string?>> Move(Title to, string reason, bool suppressRedirect)
+		{
+			ThrowNull(to, nameof(to));
+			return this.Move(to.FullPageName, reason, false, false, suppressRedirect);
+		}
 
 		/// <summary>Moves the title to the name specified.</summary>
 		/// <param name="to">The location to move the title to.</param>
@@ -371,13 +385,14 @@
 		/// <param name="moveSubpages">if set to <see langword="true"/>, moves all sub-pages of the original page.</param>
 		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
-		public ChangeValue<IDictionary<string, string>> Move(string to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
+		public ChangeValue<IDictionary<string?, string?>> Move(string to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
 		{
 			ThrowNull(to, nameof(to));
 			ThrowNull(reason, nameof(reason));
 			return this.Site.PublishChange(
+				new Dictionary<string?, string?>() { [this.FullPageName] = to },
 				this,
-				new Dictionary<string, object>
+				new Dictionary<string, object?>
 				{
 					[nameof(to)] = to,
 					[nameof(reason)] = reason,
@@ -397,7 +412,7 @@
 					};
 
 					var status = ChangeStatus.Success;
-					var dict = new Dictionary<string, string>();
+					var dict = new Dictionary<string?, string?>();
 					try
 					{
 						var result = this.Site.AbstractionLayer.Move(input);
@@ -419,13 +434,12 @@
 					}
 					catch (WikiException e)
 					{
-						this.Site.PublishWarning(this, e.Info);
+						this.Site.PublishWarning(this, e.Info ?? e.Message);
 						status = ChangeStatus.Failure;
 					}
 
-					return new ChangeValue<IDictionary<string, string>>(status, dict);
-				},
-				new Dictionary<string, string>() { [this.FullPageName] = to });
+					return new ChangeValue<IDictionary<string?, string?>>(status, dict);
+				});
 		}
 
 		/// <summary>Moves the title to the name specified.</summary>
@@ -435,7 +449,11 @@
 		/// <param name="moveSubpages">if set to <see langword="true"/>, moves all sub-pages of the original page.</param>
 		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
-		public ChangeValue<IDictionary<string, string>> Move(Title to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect) => this.Move(to?.FullPageName, reason, moveTalk, moveSubpages, suppressRedirect);
+		public ChangeValue<IDictionary<string?, string?>> Move(Title to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
+		{
+			ThrowNull(to, nameof(to));
+			return this.Move(to.FullPageName, reason, moveTalk, moveSubpages, suppressRedirect);
+		}
 
 		/// <summary>Protects the title.</summary>
 		/// <param name="reason">The reason for the protection.</param>
@@ -451,7 +469,7 @@
 		/// <param name="moveProtection">The move-protection level.</param>
 		/// <param name="duration">The duration of the protection (e.g., "2 weeks").</param>
 		/// <returns>A value indicating the change status of the protection.</returns>
-		public ChangeStatus Protect(string reason, ProtectionLevel editProtection, ProtectionLevel moveProtection, string duration) => this.Protect(reason, ProtectionWord(editProtection), ProtectionWord(moveProtection), duration);
+		public ChangeStatus Protect(string reason, ProtectionLevel editProtection, ProtectionLevel moveProtection, string? duration) => this.Protect(reason, ProtectionWord(editProtection), ProtectionWord(moveProtection), duration);
 
 		/// <summary>Protects the title.</summary>
 		/// <param name="reason">The reason for the protection.</param>
@@ -483,7 +501,7 @@
 		/// <param name="duration">The duration of the protection (e.g., "2 weeks").</param>
 		/// <returns>A value indicating the change status of the protection.</returns>
 		/// <remarks>This version allows custom protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="Protect(string, ProtectionLevel, ProtectionLevel, string)"/> version of this call.</remarks>
-		public ChangeStatus Protect(string reason, string editProtection, string moveProtection, string duration)
+		public ChangeStatus Protect(string reason, string? editProtection, string? moveProtection, string? duration)
 		{
 			if (duration == null)
 			{
@@ -569,29 +587,32 @@
 			level == ProtectionLevel.None ? "all" :
 			level == ProtectionLevel.Semi ? "autoconfirmed" :
 			level == ProtectionLevel.Full ? "sysop" :
-			null;
+			throw new ArgumentOutOfRangeException(nameof(level));
 		#endregion
 
 		#region Private Methods
-		private ChangeStatus Protect(string reason, ICollection<ProtectInputItem> protections) =>
-			protections.Count == 0 ? ChangeStatus.NoEffect :
-			this.Site.PublishChange(
-				this,
-				new Dictionary<string, object>
-				{
-					[nameof(reason)] = reason,
-					[nameof(protections)] = protections,
-				},
-				() =>
-				{
-					var input = new ProtectInput(this.FullPageName)
+		private ChangeStatus Protect(string reason, ICollection<ProtectInputItem> protections)
+		{
+			ThrowNull(reason, nameof(reason));
+			return protections.Count == 0 ? ChangeStatus.NoEffect :
+				this.Site.PublishChange(
+					this,
+					new Dictionary<string, object?>
 					{
-						Protections = protections,
-						Reason = reason
-					};
+						[nameof(reason)] = reason,
+						[nameof(protections)] = protections,
+					},
+					() =>
+					{
+						var input = new ProtectInput(this.FullPageName)
+						{
+							Protections = protections,
+							Reason = reason
+						};
 
-					return this.Protect(input) ? ChangeStatus.Success : ChangeStatus.Failure;
-				});
+						return this.Protect(input) ? ChangeStatus.Success : ChangeStatus.Failure;
+					});
+		}
 	}
 	#endregion
 }

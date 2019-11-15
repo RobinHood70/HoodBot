@@ -23,7 +23,7 @@
 		/// <param name="site">The site the page is from.</param>
 		/// <param name="item">The AllMessagesItem to populate this instance from.</param>
 		protected internal MessagePage(Site site, AllMessagesItem item)
-			: base(site, MediaWikiNamespaces.MediaWiki, item?.Name) => this.PopulateFrom(item);
+			: base(site, MediaWikiNamespaces.MediaWiki, (item ?? throw ArgumentNull(nameof(item))).Name) => this.PopulateFrom(item);
 		#endregion
 
 		#region Public Properties
@@ -35,7 +35,7 @@
 		/// <summary>Gets the default message.</summary>
 		/// <value>The default message.</value>
 		/// <remarks>If the message has been loaded via any of the <see cref="Site" /> GetMessage-related methods, this will contain the default version of the message, even if it has since been customized.</remarks>
-		public string DefaultMessage { get; private set; }
+		public string? DefaultMessage { get; private set; }
 
 		/// <summary>Gets a value indicating whether the default value was missing.</summary>
 		/// <value><see langref="true" /> if the default value is missing; otherwise, <see langref="false" />.</value>
@@ -44,7 +44,7 @@
 		/// <summary>Gets the normalized name of the message.</summary>
 		/// <value>The normalized name.</value>
 		/// <remarks>For messages, spaces will be replaced by underscores, and the first letter will be converted to lower-case.</remarks>
-		public string NormalizedName { get; private set; }
+		public string? NormalizedName { get; private set; }
 		#endregion
 
 		#region Protected Internal Methods

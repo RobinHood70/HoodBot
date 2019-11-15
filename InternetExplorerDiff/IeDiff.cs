@@ -34,7 +34,7 @@
 		public void Compare(DiffContent diff)
 		{
 			ThrowNull(diff, nameof(diff));
-			ThrowNull(diff.EditPath, nameof(diff.EditPath));
+			ThrowNull(diff.EditPath, nameof(diff), nameof(diff.EditPath));
 			InternetExplorer? ie = null;
 			for (var i = 0; i < 10; i++)
 			{

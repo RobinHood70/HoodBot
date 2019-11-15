@@ -12,6 +12,29 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="TitleParts"/> class.</summary>
+		/// <param name="title">The ISimpleTitle to copy values from.</param>
+		public TitleParts(ISimpleTitle title)
+		{
+			ThrowNull(title, nameof(title));
+			this.Site = title.Site;
+			this.OriginalNamespaceText = title.Namespace.Name;
+			this.OriginalPageNameText = title.PageName;
+			this.LeadingColon = title.Namespace.IsForcedLinkSpace;
+			this.Namespace = title.Namespace;
+			this.PageName = title.PageName;
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="TitleParts"/> class.</summary>
+		/// <param name="title">The ISimpleTitle to copy values from.</param>
+		public TitleParts(IFullTitle title)
+			: this(title as ISimpleTitle)
+		{
+			ThrowNull(title, nameof(title));
+			this.Interwiki = title.Interwiki;
+			this.Fragment = title.Fragment;
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="TitleParts"/> class.</summary>
 		/// <param name="site">The site the title is from.</param>
 		/// <param name="fullPageName">Full name of the page.</param>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
@@ -29,7 +52,11 @@
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(fullPageName, nameof(fullPageName));
-			var nameRemaining = WikiTextUtilities.DecodeAndNormalize(fullPageName);
+			this.Site = site;
+
+			// Pipes are not allowed in page names, so if we find one, only parse the first part; the remainder is likely cruft from a category or file link.
+			var nameRemaining = fullPageName.Split(TextArrays.Pipe, 2)[0].TrimEnd();
+			nameRemaining = WikiTextUtilities.DecodeAndNormalize(nameRemaining);
 			if (nameRemaining.Length > 0 && nameRemaining[0] == ':')
 			{
 				this.LeadingColon = true;
@@ -41,31 +68,31 @@
 				throw new ArgumentException(CurrentCulture(Resources.TitleInvalid));
 			}
 
+			Namespace? nsFinal = null;
+			string? originalNs = null;
 			var split = nameRemaining.Split(TextArrays.Colon, 3);
 			if (split.Length >= 2)
 			{
 				var key = split[0].TrimEnd();
 				if (site.Namespaces.ValueOrDefault(key) is Namespace ns)
 				{
-					this.Namespace = ns;
-					this.OriginalNamespaceText = key;
+					nsFinal = ns;
+					originalNs = key;
 					nameRemaining = split[1].TrimStart() + (split.Length == 3 ? ':' + split[2] : string.Empty);
 				}
-				else if (site.InterwikiMap.TryGetValue(key, out var iw))
+				else if (site.InterwikiMap != null && site.InterwikiMap.TryGetValue(key, out var iw))
 				{
 					this.Interwiki = iw;
 					this.OriginalInterwikiText = key;
 					key = split[1].Trim();
 					if (iw.LocalWiki && site.Namespaces.ValueOrDefault(key) is Namespace nsiw)
 					{
-						this.Namespace = nsiw;
-						this.OriginalNamespaceText = key;
+						nsFinal = nsiw;
+						originalNs = key;
 						nameRemaining = split[2].TrimStart();
 						if (nameRemaining.Length == 0)
 						{
-							this.OriginalPageNameText = string.Empty;
 							this.PageName = site.MainPageName ?? "Main Page";
-							return;
 						}
 					}
 					else
@@ -75,37 +102,39 @@
 				}
 			}
 
-			if (this.Namespace == null)
-			{
-				// If we have a leading colon, but no namespace, then this was meant to override any default namespace and force it to Main space.
-				this.Namespace = this.LeadingColon ? site.Namespaces[MediaWikiNamespaces.Main] : site.Namespaces[defaultNamespace];
-				this.OriginalNamespaceText = string.Empty;
-			}
+			// If we have a leading colon, but no namespace, then this was meant to override any default namespace and force it to Main space.
+			this.Namespace = nsFinal ?? site.Namespaces[this.LeadingColon ? MediaWikiNamespaces.Main : defaultNamespace];
+			this.OriginalNamespaceText = originalNs ?? string.Empty;
 
-			split = nameRemaining.Split(TextArrays.Octothorp, 2);
-			if (split.Length == 2)
+			if (nameRemaining.Length == 0)
 			{
-				this.PageName = split[0];
-				this.OriginalPageNameText = split[0];
-				this.Fragment = split[1];
+				this.OriginalPageNameText = string.Empty;
 			}
 			else
 			{
-				this.PageName = nameRemaining;
-				this.OriginalPageNameText = nameRemaining;
+				split = nameRemaining.Split(TextArrays.Octothorp, 2);
+				if (split.Length == 2)
+				{
+					this.PageName = split[0];
+					this.OriginalPageNameText = split[0];
+					this.Fragment = split[1];
+				}
+				else
+				{
+					this.PageName = nameRemaining;
+					this.OriginalPageNameText = nameRemaining;
+				}
 			}
 
-			// Do not change page name if Namespace is null (meaning it's a non-local interwiki or there was a parsing failure).
-			if (this.Namespace != null)
-			{
-				this.PageName = this.Namespace.CapitalizePageName(this.PageName);
-			}
+			this.PageName = this.Namespace.CapitalizePageName(this.PageName);
 		}
 
 		// Designed for data coming directly from MediaWiki. Assumes all values are appropriate and pre-trimmed - only does namespace parsing. interWiki and fragment may be null; fullPageName may not.
-		internal TitleParts(Site site, string interWiki, string fullPageName, string fragment)
+		internal TitleParts(Site site, string? interWiki, string fullPageName, string? fragment)
 		{
+			ThrowNull(site, nameof(site));
 			ThrowNull(fullPageName, nameof(fullPageName));
+			this.Site = site;
 			if (interWiki != null)
 			{
 				this.Interwiki = site.InterwikiMap[interWiki];
@@ -126,6 +155,7 @@
 				this.PageName = fullPageName;
 			}
 
+			this.OriginalPageNameText = this.PageName;
 			if (fragment != null)
 			{
 				this.Fragment = fragment;
@@ -137,7 +167,7 @@
 
 		/// <summary>Gets or sets the title's fragment (the section or ID to scroll to).</summary>
 		/// <value>The fragment.</value>
-		public string Fragment { get; set; }
+		public string? Fragment { get; set; }
 
 		/// <summary>Gets the full name of the page.</summary>
 		/// <value>The full name of the page.</value>
@@ -146,24 +176,25 @@
 
 		/// <summary>Gets or sets the interwiki prefix.</summary>
 		/// <value>The interwiki prefix.</value>
-		public InterwikiEntry Interwiki { get; set; }
+		public InterwikiEntry? Interwiki { get; set; }
 
 		/// <summary>Gets a value indicating whether this instance is identical to the local wiki.</summary>
 		/// <value><see langword="true"/> if this instance is local wiki; otherwise, <see langword="false"/>.</value>
 		public bool IsLocal => this.Interwiki == null || this.Interwiki.LocalWiki;
 
-		/// <summary>Gets a value indicating whether the title had a leading colon.</summary>
+		/// <summary>Gets or sets a value indicating whether the title had a leading colon.</summary>
 		/// <value><see langword="true"/> if there was a leading colon; otherwise, <see langword="false"/>.</value>
-		public bool LeadingColon { get; }
+		public bool LeadingColon { get; set; }
 
 		/// <summary>Gets or sets the namespace the page is in.</summary>
 		/// <value>The namespace.</value>
+		/// <remarks>In the event that the title is a non-local interwiki title, this will be populated with the default namespace specified in the constructor (if applicable).</remarks>
 		public Namespace Namespace { get; set; }
 
 		/// <summary>Gets the interwiki text passed to the constructor, after parsing.</summary>
 		/// <value>The interwiki text.</value>
 		/// <remarks>This value can be used to bypass any automatic formatting or name changes caused by using the default Interwiki values, such as case changes. Parsing removes hidden characters and changes unusual spaces to normal spaces. The value will also have been trimmed.</remarks>
-		public string OriginalInterwikiText { get; }
+		public string? OriginalInterwikiText { get; }
 
 		/// <summary>Gets the namespace text passed to the constructor, after parsing.</summary>
 		/// <value>The namespace text.</value>
@@ -181,10 +212,25 @@
 
 		/// <summary>Gets the site the title belongs to.</summary>
 		/// <value>The site.</value>
-		public Site Site => this.Namespace.Site;
+		public Site Site { get; }
 		#endregion
 
 		#region Public Methods
+
+		/// <summary>Deconstructs this instance into its constituent parts.</summary>
+		/// <param name="leadingColon">The value returned by <see cref="LeadingColon"/>.</param>
+		/// <param name="interwiki">The value returned by <see cref="Interwiki"/>.</param>
+		/// <param name="ns">The value returned by <see cref="Namespace"/>.</param>
+		/// <param name="pageName">The value returned by <see cref="PageName"/>.</param>
+		/// <param name="fragment">The value returned by <see cref="Fragment"/>.</param>
+		public void Deconstruct(out bool leadingColon, out InterwikiEntry? interwiki, out Namespace ns, out string pageName, out string? fragment)
+		{
+			leadingColon = this.LeadingColon;
+			interwiki = this.Interwiki;
+			ns = this.Namespace;
+			pageName = this.PageName;
+			fragment = this.Fragment;
+		}
 
 		/// <summary>Indicates whether the current title is equal to another title based on Interwiki, Namespace, PageName, and Fragment.</summary>
 		/// <param name="other">A title to compare with this one.</param>

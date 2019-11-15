@@ -36,7 +36,7 @@
 
 		/// <summary>Gets or sets the namespaces to retrieve.</summary>
 		/// <value>The namespaces to retrieve.</value>
-		public IEnumerable<int> Namespaces { get; set; }
+		public IEnumerable<int>? Namespaces { get; set; }
 
 		/// <summary>Gets or sets a value indicating whether direction changes should be sorted from older to newer (true) or newer to older (false).</summary>
 		/// <value><see langword="true"/> if changes should be sorted older to newer; otherwise, <see langword="false"/>.</value>
@@ -57,7 +57,7 @@
 
 		/// <summary>Gets or sets the tag to limit Recent Changes to.</summary>
 		/// <value>The tag to limit Recent Changes to.</value>
-		public string Tag { get; set; }
+		public string? Tag { get; set; }
 
 		/// <summary>Gets or sets the Recent Change types to load.</summary>
 		/// <value>The Recent Change types to load.</value>
@@ -65,7 +65,7 @@
 
 		/// <summary>Gets or sets the user whose changes should be retrieved (or ignored, if <see cref="ExcludeUser"/> is set).</summary>
 		/// <value>The user whose changes should be loaded or ignored.</value>
-		public string User { get; set; }
+		public string? User { get; set; }
 		#endregion
 
 		#region Internal Methods

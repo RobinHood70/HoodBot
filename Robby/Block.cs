@@ -16,7 +16,7 @@
 		/// <param name="expiry">When the block expires.</param>
 		/// <param name="flags">The block flags.</param>
 		/// <param name="automatic">if set to <see langword="true"/>, indicates that this was an auto-block by the wiki itself.</param>
-		protected internal Block(string user, string by, string reason, DateTime startTime, DateTime expiry, BlockFlags flags, bool automatic)
+		protected internal Block(string? user, string? by, string? reason, DateTime startTime, DateTime expiry, BlockFlags flags, bool automatic)
 		{
 			this.Automatic = automatic;
 			this.BlockedBy = by;
@@ -34,7 +34,7 @@
 
 		/// <summary>Gets the blocking user.</summary>
 		/// <value>The user this user was blocked by.</value>
-		public string BlockedBy { get; }
+		public string? BlockedBy { get; }
 
 		/// <summary>Gets the date and time the block expires. DateTime.Max is used to represent an indefinite block.</summary>
 		/// <value>The date and time the block expires.</value>
@@ -46,7 +46,7 @@
 
 		/// <summary>Gets the reason the user was blocked.</summary>
 		/// <value>The reason the user was blocked.</value>
-		public string Reason { get; }
+		public string? Reason { get; }
 
 		/// <summary>Gets the time when the block was placed. DateTime.Min is used to represent unknown start times (usually only on very old or damaged wikis).</summary>
 		/// <value>The start time of the block.</value>
@@ -54,6 +54,6 @@
 
 		/// <summary>Gets the user who was blocked.</summary>
 		/// <value>The user who was blocked.</value>
-		public string User { get; }
+		public string? User { get; }
 	}
 }

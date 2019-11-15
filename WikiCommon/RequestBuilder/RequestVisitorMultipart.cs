@@ -105,7 +105,7 @@
 				return;
 			}
 
-			ThrowNull(this.stream, nameof(this.stream));
+			ThrowNull(this.stream, nameof(RequestVisitorMultipart), nameof(this.stream));
 			var data = Invariant($"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{parameter.Name}\"; filename=\"{parameter.Value.fileName}\";\r\nContent-Type: application/octet-stream\r\n\r\n");
 			this.stream!.Write(CurrentEncoding.GetBytes(data), 0, CurrentEncoding.GetByteCount(data));
 			this.stream.Write(parameter.Value.data, 0, parameter.Value.data.Length);
@@ -183,7 +183,7 @@
 				return;
 			}
 
-			ThrowNull(this.stream, nameof(this.stream));
+			ThrowNull(this.stream, nameof(RequestVisitorMultipart), nameof(this.stream));
 			var postData = Invariant($"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{name}\"\r\n\r\n{value}");
 			this.stream!.Write(CurrentEncoding.GetBytes(postData), 0, CurrentEncoding.GetByteCount(postData));
 		}

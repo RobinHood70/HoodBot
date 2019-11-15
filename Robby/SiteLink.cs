@@ -5,41 +5,29 @@
 	using System.Text;
 	using System.Text.RegularExpressions;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.Properties;
 	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiClasses.Searches;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Represents a wiki link.</summary>
-	public class SiteLink : IFullTitle
+	public class SiteLink : TitleParts
 	{
 		#region Fields
-		private string interwikiText;
-		private InterwikiEntry interwikiObject;
+		private string? interwikiText;
 		private string namespaceText;
-		private Namespace namespaceObject;
+		private string nameLeadingWhitespace = string.Empty;
+		private string nameTrailingWhitespace = string.Empty;
 		#endregion
 
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
-		/// <param name="site">The Site the link is from.</param>
-		public SiteLink([ValidatedNotNull] Site site)
-		{
-			ThrowNull(site, nameof(site));
-			this.Site = site;
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
 		/// <param name="title">The title to initialize from.</param>
 		public SiteLink(ISimpleTitle title)
+			: base(title)
 		{
-			ThrowNull(title, nameof(title));
-			this.Site = title.Site;
-			this.namespaceObject = title.Namespace;
-			this.LeadingColon = title.Namespace.IsForcedLinkSpace;
-			this.PageName = title.PageName;
+			this.namespaceText = this.OriginalNamespaceText;
 			this.DisplayText = this.PipeTrick();
 			this.Normalize();
 		}
@@ -47,14 +35,10 @@
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
 		/// <param name="title">The title to initialize from.</param>
 		public SiteLink(IFullTitle title)
+			: base(title)
 		{
-			ThrowNull(title, nameof(title));
-			this.Site = title.Site;
-			this.interwikiObject = title.Interwiki;
-			this.namespaceObject = title.Namespace;
-			this.LeadingColon = title.Namespace.IsForcedLinkSpace;
-			this.PageName = title.PageName;
-			this.Fragment = title.Fragment;
+			this.interwikiText = this.OriginalInterwikiText;
+			this.namespaceText = this.OriginalNamespaceText;
 			this.DisplayText = this.PipeTrick();
 			this.Normalize();
 		}
@@ -63,10 +47,14 @@
 		/// <param name="site">The Site the link is from.</param>
 		/// <param name="link">The link text to parse.</param>
 		public SiteLink(Site site, string link)
-			: this(site)
+			: base(site, link)
 		{
-			var parser = this.InitializeFromParser(link);
-			this.DisplayParameter = parser.SingleParameter;
+			this.Parser = new ParameterParser(link, true, true, false);
+			this.interwikiText = this.OriginalInterwikiText; // We're using original text here to retain casing, if desired.
+			this.namespaceText = this.OriginalNamespaceText;
+			this.NameLeadingWhiteSpace = this.Parser.Name.LeadingWhiteSpace;
+			this.NameTrailingWhiteSpace = this.Parser.Name.TrailingWhiteSpace;
+			this.DisplayParameter = this.Parser.SingleParameter;
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class using the specified values.</summary>
@@ -81,14 +69,10 @@
 		/// <param name="ns">The namespace the link is in.</param>
 		/// <param name="pageName">The name of the page.</param>
 		/// <param name="displayText">The display text.</param>
-		public SiteLink(Namespace ns, string pageName, string displayText)
-			: this(ns?.Site)
+		public SiteLink(Namespace ns, string pageName, string? displayText)
+			: base((ns ?? throw ArgumentNull(nameof(ns))).Site, ns.Id, pageName)
 		{
-			ThrowNull(ns, nameof(ns));
-			ThrowNull(pageName, nameof(pageName));
-			this.Namespace = ns;
-			this.LeadingColon = ns.IsForcedLinkSpace;
-			this.PageName = pageName;
+			this.namespaceText = this.OriginalNamespaceText;
 			this.DisplayParameter = displayText == null ? null : new PaddedString(displayText);
 		}
 		#endregion
@@ -96,7 +80,7 @@
 		#region Public Properties
 
 		/// <summary>Gets or sets the display text (i.e., the value to the right of the pipe). For categories, this is the sortkey.</summary>
-		public string DisplayText
+		public string? DisplayText
 		{
 			get => this.DisplayParameter?.Value;
 			set
@@ -118,108 +102,53 @@
 		}
 
 		/// <summary>Gets or sets the display text parameter (i.e., the value to the right of the pipe). For images, this is the caption; for categories, it's the sortkey.</summary>
-		public virtual PaddedString DisplayParameter { get; set; }
+		public virtual PaddedString? DisplayParameter { get; set; }
 
-		/// <summary>Gets or sets the full name of the page.</summary>
-		public string FullPageName
-		{
-			get => this.BuildFullTitle(new StringBuilder()).ToString();
-			set
-			{
-				var title = new TitleParts(this.Site, value);
-				this.InterwikiText = title.OriginalInterwikiText; // We're using original text here to retain casing, if desired.
-				this.NamespaceText = title.OriginalNamespaceText;
-				this.LeadingColon = title.LeadingColon;
-				this.PageName = title.OriginalPageNameText;
-				this.Fragment = title.Fragment;
-			}
-		}
-
-		/// <summary>Gets or sets the fragment for the link (i.e., the section/anchor).</summary>
-		public string Fragment { get; set; }
-
-		/// <summary>Gets or sets the interwiki data for the link.</summary>
-		/// <value>The interwiki data.</value>
-		/// <exception cref="InvalidOperationException">When setting the interwiki value, the Site of the value does not match the Site of the link.</exception>
-		public InterwikiEntry Interwiki
-		{
-			get => this.interwikiObject;
-			set
-			{
-				if (value == null)
-				{
-					this.interwikiObject = null;
-					this.interwikiText = null;
-				}
-				else if (this.Site != value.Site)
-				{
-					throw new InvalidOperationException(Resources.InvalidSite);
-				}
-				else
-				{
-					this.interwikiObject = value;
-					if (!string.Equals(this.interwikiText, value.Prefix, StringComparison.OrdinalIgnoreCase))
-					{
-						this.interwikiText = value.Prefix;
-					}
-				}
-			}
-		}
-
-		/// <summary>Gets or sets the interwiki text. It will be validated against the site's interwiki map, and <see cref="Interwiki"/> will be changed if needed.</summary>
-		public string InterwikiText
+		/// <summary>Gets or sets the interwiki text. It will be validated against the site's interwiki map, and <see cref="TitleParts.Interwiki"/> will be changed if needed.</summary>
+		public string? InterwikiText
 		{
 			get => this.interwikiText;
 			set
 			{
-				try
+				this.interwikiText = value;
+				if (value == null)
 				{
-					var iw = value == null ? null : this.Site.InterwikiMap[value];
-					this.interwikiObject = iw;
-					this.interwikiText = value;
-					if (!this.IsLocal)
-					{
-						this.namespaceObject = null;
-					}
+					this.Interwiki = null;
 				}
-				catch (KeyNotFoundException)
+				else
 				{
-					throw;
+					try
+					{
+						this.Interwiki = this.Site.InterwikiMap[value];
+					}
+					catch (KeyNotFoundException)
+					{
+						throw;
+					}
+
+					if (!this.IsLocal && this.Namespace.Id != 0)
+					{
+						this.PageName = this.Namespace.DecoratedName + this.PageName;
+						this.Namespace = this.Site.Namespaces[MediaWikiNamespaces.Main];
+					}
 				}
 			}
 		}
 
-		/// <summary>Gets a value indicating whether this instance is local, either by having no interwiki value or one that represents the local wiki (e.g., :en:SomeArticle, on English Wikipedia).</summary>
-		/// <value><see langword="true"/> if this instance is local; otherwise, <see langword="false"/>.</value>
-		public bool IsLocal => this.interwikiObject?.LocalWiki ?? true;
-
-		/// <summary>Gets or sets a value indicating whether a colon should be prepended to the link for spaces like Category and File.</summary>
-		/// <value><see langword="true"/> if a colon should be prepended; otherwise, <see langword="false"/>.</value>
-		public bool LeadingColon { get; set; }
+		/// <summary>Gets or sets the white space displayed before the link title.</summary>
+		/// <value>The leading white space.</value>
+		public string NameLeadingWhiteSpace
+		{
+			get => this.nameLeadingWhitespace;
+			set => this.nameLeadingWhitespace = value ?? string.Empty;
+		}
 
 		/// <summary>Gets or sets the white space displayed before the link title.</summary>
 		/// <value>The leading white space.</value>
-		public string NameLeadingWhiteSpace { get; set; }
-
-		/// <summary>Gets or sets the namespace the page is in.</summary>
-		/// <value>The namespace.</value>
-		/// <exception cref="InvalidOperationException">When setting the namespace value, the Site of the value does not match the Site of the link.</exception>
-		public Namespace Namespace
+		public string NameTrailingWhiteSpace
 		{
-			get => this.namespaceObject;
-			set
-			{
-				if (value != null && this.Site != value.Site)
-				{
-					throw new InvalidOperationException(Resources.InvalidSite);
-				}
-
-				this.namespaceObject = value ?? this.Site.Namespaces[MediaWikiNamespaces.Main];
-				if (!this.namespaceObject.Contains(this.namespaceText))
-				{
-					this.namespaceText = this.namespaceObject.Name;
-				}
-			}
+			get => this.nameTrailingWhitespace;
+			set => this.nameTrailingWhitespace = value ?? string.Empty;
 		}
 
 		/// <summary>Gets or sets the namespace text. It will be validated against the site's namespaces, and <see cref="Namespace"/> will be changed if needed.</summary>
@@ -234,7 +163,7 @@
 					{
 						value ??= string.Empty;
 						var ns = this.Site.Namespaces[value];
-						this.namespaceObject = ns;
+						this.Namespace = ns;
 					}
 
 					this.namespaceText = value;
@@ -245,21 +174,12 @@
 				}
 			}
 		}
+		#endregion
 
-		/// <summary>Gets or sets the white space displayed before the link title.</summary>
-		/// <value>The leading white space.</value>
-		public string NameTrailingWhiteSpace { get; set; }
+		#region Protected Properties
 
-		/// <summary>Gets or sets the name of the page without the namespace.</summary>
-		public string PageName { get; set; }
-
-		/// <summary>Gets the root page of a subpage.</summary>
-		/// <remarks>Note that this property returns the pagename up to (but not including) the first slash. This is <em>not necessarily</em> the page directly above, as <c>{{BASEPAGENAME}}</c> would return. For example, <c>Template:Complicated/Subtemplate/Doc</c> would return only <c>Template:Complicated</c>.</remarks>
-		public string RootPageName => this.NamespaceText + ':' + this.PageName.Split(TextArrays.Slash, 2)[0];
-
-		/// <summary>Gets the site the link is on.</summary>
-		/// <value>The site the link is on.</value>
-		public Site Site { get; }
+		/// <summary>Gets the parser in use for the Site/link constructor. This allows inheritors to properly parse parameters.</summary>
+		protected ParameterParser? Parser { get; } // TODO: This is a positively awful way to do this. Class is likely to be deprecated and eventually completely unused; if it isn't, figure out a better way to do this.
 		#endregion
 
 		#region Public Static Methods
@@ -309,7 +229,7 @@
 		/// <param name="namespaces">The namespaces to search for. Use <see langword="null"/> to match all namespaces.</param>
 		/// <param name="pageNames">The pagenames to search for. Use <see langword="null"/> to match all pagenames.</param>
 		/// <returns>A <see cref="Regex"/> that finds all links matching the values provided. Note that this will match, for example, any of the pagenames given in any of the namespaces given.</returns>
-		public static Regex Find(IEnumerable<string> namespaces, IEnumerable<string> pageNames) => Find(null, null, namespaces, pageNames, null);
+		public static Regex Find(IEnumerable<string>? namespaces, IEnumerable<string>? pageNames) => Find(null, null, namespaces, pageNames, null);
 
 		/// <summary>Creates a <see cref="Regex"/> to find all links matching the values provided which also have the specified surrounding text.</summary>
 		/// <param name="regexBefore">A <see cref="Regex"/> fragment specifying the text to search for before the link. Use <see langword="null"/> to ignore the text before the link.</param>
@@ -318,7 +238,7 @@
 		/// <param name="pageNames">The pagenames to search for. Use <see langword="null"/> to match all pagenames.</param>
 		/// <param name="regexAfter">A <see cref="Regex"/> fragment specifying the text to search for after the link. Use <see langword="null"/> to ignore the text after the link.</param>
 		/// <returns>A <see cref="Regex"/> that finds all links matching the values provided. Note that this will match, for example, any of the pagenames given in any of the namespaces given.</returns>
-		public static Regex Find(string regexBefore, IEnumerable<string> interwikis, IEnumerable<string> namespaces, IEnumerable<string> pageNames, string regexAfter) =>
+		public static Regex Find(string? regexBefore, IEnumerable<string>? interwikis, IEnumerable<string>? namespaces, IEnumerable<string>? pageNames, string? regexAfter) =>
 			FindRaw(
 				regexBefore,
 				EnumerableRegex(interwikis, SearchCasing.IgnoreCase),
@@ -333,7 +253,7 @@
 		/// <param name="regexPageNames">A <see cref="Regex"/> fragment specifying the pagenames to search for. Use <see langword="null"/> to match all pagenames.</param>
 		/// <param name="regexAfter">A <see cref="Regex"/> fragment specifying the text to search for after the link. Use <see langword="null"/> to ignore the text after the link.</param>
 		/// <returns>A <see cref="Regex"/> that finds all links matching the values provided. Note that this will match, for example, any of the pagenames given in any of the namespaces given.</returns>
-		public static Regex FindRaw(string regexBefore, string regexInterwikis, string regexNamespaces, string regexPageNames, string regexAfter)
+		public static Regex FindRaw(string? regexBefore, string? regexInterwikis, string? regexNamespaces, string? regexPageNames, string? regexAfter)
 		{
 			// TODO: This probably handles nested links reliably, but is a frightful mess and no longer handles searches in parameter text. Tweak internal parser to handle start and end markers, then abort when it finds the matched end marker, whether or not it's the end of the text. After that, searching becomes just a matter of parsing as per normal, and write a Link/Template equivalent to Regex.Replace to go along with that.
 			const string regexWildNamespace = @"[^:#\|\]]*?";
@@ -385,7 +305,7 @@
 		/// <param name="fragment">The fragment, if any. May be null.</param>
 		/// <param name="displayText">The display text. If null, the default "pipe trick" text will be used.</param>
 		/// <returns>The text of the link to build.</returns>
-		public static string LinkTextFromParts(Namespace ns, string pageName, string fragment, string displayText)
+		public static string LinkTextFromParts(Namespace ns, string pageName, string? fragment, string? displayText)
 		{
 			var link = new SiteLink(ns, pageName, displayText);
 			link.NormalizePageName();
@@ -440,19 +360,8 @@
 				.Append("]]");
 		}
 
-		/// <summary>Indicates whether the current title is equal to another title based on Interwiki, Namespace, PageName, and Fragment.</summary>
-		/// <param name="other">A title to compare with this one.</param>
-		/// <returns><see langword="true"/> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false"/>.</returns>
-		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
-		public bool FullEquals(IFullTitle other) =>
-			other != null &&
-			this.Interwiki == other.Interwiki &&
-			this.Namespace == other.Namespace &&
-			this.Namespace.PageNameEquals(this.PageName, other.PageName) &&
-			this.Fragment == other.Fragment;
-
 		/// <summary>Normalizes all elements of the link.</summary>
-		/// <remarks>This method causes the <see cref="InterwikiEntry"/>, <see cref="Namespace"/>, and <see cref="PageName"/> to be reformatted. Interwiki prefixes take on standard casing. Namespace aliases or shortcuts become the full name of the namespace (e.g., <c>Image:</c> becomes <c>File:</c>, <c>WP:</c> becomes <c>Wikipedia:</c>). The <see cref="PageName"/> will also be capitalized according to the rules for the namespace if there's already display text overriding the name. Lastly, the display text will be removed if it matches the value the MediaWiki would display.</remarks>
+		/// <remarks>This method causes the <see cref="InterwikiEntry"/>, <see cref="Namespace"/>, and <see cref="TitleParts.PageName"/> to be reformatted. Interwiki prefixes take on standard casing. Namespace aliases or shortcuts become the full name of the namespace (e.g., <c>Image:</c> becomes <c>File:</c>, <c>WP:</c> becomes <c>Wikipedia:</c>). The <see cref="TitleParts.PageName"/> will also be capitalized according to the rules for the namespace if there's already display text overriding the name. Lastly, the display text will be removed if it matches the value the MediaWiki would display.</remarks>
 		public void Normalize()
 		{
 			this.NormalizeInterwikiText();
@@ -461,10 +370,11 @@
 			this.NormalizeDisplayText();
 		}
 
-		/// <summary>Normalizes the display text by removing it if it matches the <see cref="FullPageName"/>.</summary>
+		/// <summary>Normalizes the display text by removing it if it matches the full title text.</summary>
 		public void NormalizeDisplayText()
 		{
-			if (this.DisplayParameter?.Value == this.FullPageName)
+			var defaultTitle = this.BuildFullTitle(new StringBuilder()).ToString();
+			if (this.DisplayParameter?.Value == defaultTitle)
 			{
 				this.DisplayParameter = null;
 			}
@@ -477,7 +387,7 @@
 			{
 				if (this.Interwiki.LocalWiki)
 				{
-					this.interwikiObject = null;
+					this.Interwiki = null;
 					this.interwikiText = null;
 				}
 				else
@@ -525,7 +435,7 @@
 			string retval;
 			if (useFragmentIfPresent && !string.IsNullOrWhiteSpace(this.Fragment))
 			{
-				retval = this.Fragment;
+				retval = this.Fragment!;
 			}
 			else
 			{
@@ -547,15 +457,6 @@
 
 			return retval.Replace('_', ' ').Trim();
 		}
-
-		/// <summary>Indicates whether the current title is equal to another title based on Namespace and PageName only.</summary>
-		/// <param name="other">A title to compare with this one.</param>
-		/// <returns><see langword="true"/> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false"/>.</returns>
-		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
-		public bool SimpleEquals(ISimpleTitle other) =>
-			other != null &&
-			this.Namespace == other.Namespace &&
-			this.Namespace.PageNameEquals(this.PageName, other.PageName);
 		#endregion
 
 		#region Public Virtual Methods
@@ -574,6 +475,11 @@
 
 			if (valueFormat != null)
 			{
+				if (this.DisplayParameter == null)
+				{
+					this.DisplayParameter = new PaddedString();
+				}
+
 				this.DisplayParameter.LeadingWhiteSpace = valueFormat.LeadingWhiteSpace;
 				this.DisplayParameter.TrailingWhiteSpace = valueFormat.TrailingWhiteSpace;
 			}
@@ -586,22 +492,6 @@
 		/// <returns>A <see cref="string"/> that represents this instance.</returns>
 		/// <remarks>This is a simple wrapper around the <see cref="Build(StringBuilder)"/> method.</remarks>
 		public override string ToString() => this.Build(new StringBuilder()).ToString();
-		#endregion
-
-		#region Protected Methods
-
-		/// <summary>Parses the provided text and sets the name properties.</summary>
-		/// <param name="textToParse">The text to parse.</param>
-		/// <returns>The parameter parser.</returns>
-		protected ParameterParser InitializeFromParser(string textToParse)
-		{
-			var parser = new ParameterParser(textToParse, true, true, false);
-			this.NameLeadingWhiteSpace = parser.Name.LeadingWhiteSpace;
-			this.NameTrailingWhiteSpace = parser.Name.TrailingWhiteSpace;
-			this.FullPageName = parser.Name;
-
-			return parser;
-		}
 		#endregion
 
 		#region Protected Virtual Methods

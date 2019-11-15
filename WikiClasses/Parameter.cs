@@ -22,7 +22,7 @@
 
 		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
 		/// <param name="value">The parameter value.</param>
-		public Parameter(string value)
+		public Parameter(string? value)
 			: this(null, new PaddedString(value), true)
 		{
 		}
@@ -37,7 +37,7 @@
 		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
-		public Parameter(string? name, string value)
+		public Parameter(string? name, string? value)
 			: this(name == null ? null : new PaddedString(name), new PaddedString(value), name == null)
 		{
 		}
@@ -46,7 +46,7 @@
 		/// <param name="name">The full parameter name, including any leading and trailing whitespace. May be null.</param>
 		/// <param name="value">The full parameter value, including any leading and trailing whitespace. May not be null.</param>
 		/// <param name="anonymous">Whether the parameter should be treated as anonymous. The <paramref name="name"/> parameter must be non-null for this to take effect.</param>
-		public Parameter(string? name, string value, bool anonymous)
+		public Parameter(string? name, string? value, bool anonymous)
 			: this(name == null ? null : new PaddedString(name), new PaddedString(value), anonymous)
 		{
 		}

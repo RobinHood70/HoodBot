@@ -34,7 +34,7 @@
 
 		/// <summary>Gets the latest file revision.</summary>
 		/// <value>The latest file revision.</value>
-		public FileRevision LatestFileRevision { get; private set; }
+		public FileRevision? LatestFileRevision { get; private set; }
 		#endregion
 
 		#region Public Methods

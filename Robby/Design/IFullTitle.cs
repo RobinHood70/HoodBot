@@ -6,11 +6,11 @@
 	{
 		/// <summary>Gets the fragment.</summary>
 		/// <value>The fragment.</value>
-		string Fragment { get; }
+		string? Fragment { get; }
 
 		/// <summary>Gets the interwiki entry.</summary>
 		/// <value>The interwiki entry.</value>
-		InterwikiEntry Interwiki { get; }
+		InterwikiEntry? Interwiki { get; }
 
 		/// <summary>Indicates whether the current title is equal to another title based on Interwiki, Namespace, PageName, and Fragment.</summary>
 		/// <param name="other">A title to compare with this one.</param>

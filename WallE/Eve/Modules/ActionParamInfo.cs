@@ -40,7 +40,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(request, nameof(request));
 			ThrowNull(input, nameof(input));
-			ThrowNull(input.Modules, nameof(input.Modules));
+			ThrowNull(input.Modules, nameof(input), nameof(input.Modules));
 			if (this.SiteVersion >= 125)
 			{
 				request

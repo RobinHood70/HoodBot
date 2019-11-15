@@ -63,7 +63,7 @@
 		/// <param name="site">The site the pages are from. All pages in a collection must belong to the same site.</param>
 		/// <param name="options">A <see cref="PageLoadOptions"/> object initialized with a set of modules. Using this constructor allows you to customize some options.</param>
 		/// <param name="creator">A custom page creator. Use this to create Page items that include page data from custom property modules. On Wikipedia, for example, this might be used to create pages that include geographic coordinates from the GeoData exstension.</param>
-		public PageCollection(Site site, PageLoadOptions options, PageCreator creator)
+		public PageCollection(Site site, PageLoadOptions? options, PageCreator? creator)
 			: base(site)
 		{
 			this.LoadOptions = options ?? site.DefaultLoadOptions;
@@ -86,7 +86,7 @@
 
 		/// <summary>Occurs for each page when any method in the class causes pages to be loaded.</summary>
 		/// <remarks>This event does not fire if a page is merely added to the collection, or a new blank page is created with the <see cref="AddNewPage"/> method.</remarks>
-		public event StrongEventHandler<PageCollection, Page> PageLoaded;
+		public event StrongEventHandler<PageCollection, Page>? PageLoaded;
 		#endregion
 
 		#region Public Static Properties
@@ -249,7 +249,7 @@
 		/// <param name="limitationType">The type of namespace limitations to apply.</param>
 		/// <param name="namespaceLimitations">The namespace limitations. If null, only the limitation type is applied; the namespace set will remain unchanged.</param>
 		/// <remarks>If the <paramref name="namespaceLimitations"/> parameter is null, no changes will be made to either of the limitation properties. This allows current/default limitations to remain in place if needed.</remarks>
-		public void SetLimitations(LimitationType limitationType, IEnumerable<int> namespaceLimitations)
+		public void SetLimitations(LimitationType limitationType, IEnumerable<int>? namespaceLimitations)
 		{
 			this.LimitationType = limitationType;
 			this.NamespaceLimitations.Clear();
@@ -348,7 +348,7 @@
 			foreach (var item in result.Interwiki)
 			{
 				var titleParts = new TitleParts(this.Site, item.Value.Title);
-				Debug.Assert(titleParts.Interwiki.Prefix != item.Value.Prefix, "Interwiki prefixes didn't match.", titleParts.Interwiki.Prefix + " != " + item.Value.Prefix);
+				Debug.Assert(titleParts.Interwiki?.Prefix == item.Value.Prefix, "Interwiki prefixes didn't match.", titleParts.Interwiki?.Prefix + " != " + item.Value.Prefix);
 				this.titleMap[item.Key] = titleParts;
 			}
 
@@ -390,10 +390,12 @@
 		protected override void GetBacklinks(BacklinksInput input)
 		{
 			ThrowNull(input, nameof(input));
+			ThrowNull(input.Title, nameof(input), nameof(input.Title));
 			var inputTitle = new TitleParts(this.Site, input.Title);
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && input.LinkTypes.HasFlag(BacklinksTypes.ImageUsage))
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
+				ThrowNull(input.Title, nameof(input), nameof(input.Title)); // Input changed, so re-check before proceeding.
 			}
 
 			foreach (var type in input.LinkTypes.GetUniqueFlags())
@@ -574,7 +576,6 @@
 			{
 				var page = this.CreatePage(item.Title);
 				page.Populate(item);
-				page.LoadOptions = options;
 				if (pageValidator(page))
 				{
 					this[page.Key] = page;
@@ -606,6 +607,7 @@
 		/// <param name="categoryTree">A hashet used to track which categories have already been loaded. This avoids loading the same category if it appears in the tree more than once, and breaks possible recursion loops.</param>
 		private void RecurseCategoryPages(CategoryMembersInput input, HashSet<string> categoryTree)
 		{
+			ThrowNull(input.Title, nameof(input), nameof(input.Title));
 			if (!categoryTree.Add(input.Title))
 			{
 				return;

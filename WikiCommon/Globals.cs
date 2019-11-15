@@ -192,6 +192,19 @@
 				throw new ArgumentNullException(name);
 			}
 		}
+
+		/// <summary>Throws an exception if the input value is null.</summary>
+		/// <param name="nullable">The value that may be null.</param>
+		/// <param name="objectName">The name of the object in the original method.</param>
+		/// <param name="propertyName">The property of the object which was found to be null.</param>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="nullable" /> is null.</exception>
+		public static void ThrowNull([ValidatedNotNull][NotNull] object? nullable, string objectName, string propertyName)
+		{
+			if (nullable is null)
+			{
+				throw new InvalidOperationException(CurrentCulture(Resources.PropertyNull, objectName, propertyName));
+			}
+		}
 		#endregion
 	}
 }

@@ -28,7 +28,7 @@
 			this.RevisionId = recentChange.RevisionId;
 			this.Tags = recentChange.Tags;
 			this.Timestamp = recentChange.Timestamp ?? DateTime.MinValue;
-			this.User = new User(site, recentChange.User);
+			this.User = recentChange.User == null ? null : new User(site, recentChange.User);
 		}
 
 		#region Public Properties
@@ -39,7 +39,7 @@
 
 		/// <summary>Gets the edit summary/change comment.</summary>
 		/// <value>The edit summary/change comment.</value>
-		public string Comment { get; }
+		public string? Comment { get; }
 
 		/// <summary>Gets the Recent Change flags.</summary>
 		/// <value>The Recent Change flags.</value>
@@ -51,11 +51,11 @@
 
 		/// <summary>Gets the log action.</summary>
 		/// <value>The log action.</value>
-		public string LogAction { get; }
+		public string? LogAction { get; }
 
 		/// <summary>Gets the log entry type.</summary>
 		/// <value>The log entry type.</value>
-		public string LogType { get; }
+		public string? LogType { get; }
 
 		/// <summary>Gets the new size.</summary>
 		/// <value>The new size.</value>
@@ -71,19 +71,15 @@
 
 		/// <summary>Gets the type of the change.</summary>
 		/// <value>The type of the change.</value>
-		public string RecentChangeType { get; }
-
-		/// <summary>Gets the revision tags.</summary>
-		/// <value>The revision tags.</value>
-		public IReadOnlyList<string> Tags { get; }
+		public string? RecentChangeType { get; }
 
 		/// <summary>Gets the revision ID of the change.</summary>
 		/// <value>The revision ID of the change.</value>
 		public long RevisionId { get; }
 
-		/// <summary>Gets the text of the change.</summary>
-		/// <value>The text of the change.</value>
-		public string Text { get; }
+		/// <summary>Gets the revision tags.</summary>
+		/// <value>The revision tags.</value>
+		public IReadOnlyList<string> Tags { get; }
 
 		/// <summary>Gets the date and time of the change.</summary>
 		/// <value>The date and time of the change.</value>
@@ -95,7 +91,7 @@
 
 		/// <summary>Gets the user who made the change.</summary>
 		/// <value>The user who made the change.</value>
-		public User User { get; }
+		public User? User { get; }
 		#endregion
 	}
 }

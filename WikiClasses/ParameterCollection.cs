@@ -745,13 +745,13 @@
 		/// <summary>Returns the value of the parameter if it exists; otherwise, <see cref="string.Empty"/>.</summary>
 		/// <param name="key">The name of the parameter to get.</param>
 		/// <returns>The value of the parameter if it exists; otherwise, <see cref="string.Empty"/>.</returns>
-		public string ValueOrDefault(string key) => this.ValueOrDefault(key, string.Empty);
+		public Parameter ValueOrDefault(string key) => this.ValueOrDefault(key, string.Empty);
 
 		/// <summary>Returns the value of the parameter if it exists; otherwise, <paramref name="defaultValue"/>.</summary>
 		/// <param name="key">The name of the parameter to get.</param>
 		/// <param name="defaultValue">The value to use if the parameter is not found.</param>
 		/// <returns>The value of the parameter if it exists; otherwise, <paramref name="defaultValue"/>.</returns>
-		public string ValueOrDefault(string key, string defaultValue) => this[key]?.Value ?? defaultValue;
+		public Parameter ValueOrDefault(string key, string defaultValue) => this[key] ?? new Parameter(defaultValue);
 		#endregion
 
 		#region Public Override Methods

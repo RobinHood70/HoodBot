@@ -209,9 +209,10 @@
 		private static string LinkReplacer(Match match, Site site, HashSet<string> uniqueLinks)
 		{
 			var link = new SiteLink(site, match.Value);
-			if (!uniqueLinks.Contains(link.FullPageName))
+			var linkTitle = link.ToString();
+			if (!uniqueLinks.Contains(linkTitle))
 			{
-				uniqueLinks.Add(link.FullPageName);
+				uniqueLinks.Add(linkTitle);
 				return match.Value;
 			}
 

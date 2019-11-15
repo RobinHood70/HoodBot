@@ -6,6 +6,7 @@
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
+	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Represents an Image link.</summary>
 	/// <remarks>
@@ -20,29 +21,27 @@
 
 		#region Fields
 		private readonly ParameterCollection parameters = new ParameterCollection();
-		private readonly string borderWord;
-		private readonly string uprightWord;
+		private readonly string? borderWord;
+		private readonly string? uprightWord;
 		#endregion
 
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="ImageLink"/> class.</summary>
 		/// <param name="site">The Site the link is from.</param>
-		public ImageLink(Site site)
-			: base(site)
-		{
-			this.borderWord = site.GetPreferredImageMagicWord(Site.ImageBorderName);
-			this.uprightWord = site.GetPreferredImageMagicWord(Site.ImageUprightName);
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="ImageLink"/> class.</summary>
-		/// <param name="site">The Site the link is from.</param>
 		/// <param name="link">The link text to parse.</param>
 		public ImageLink(Site site, string link)
-			: this(site)
+			: base(site, link)
 		{
-			var parser = this.InitializeFromParser(link);
-			foreach (var parameter in parser.Parameters)
+			ThrowNull(site, nameof(site));
+			this.borderWord = site.GetPreferredImageMagicWord(Site.ImageBorderName);
+			this.uprightWord = site.GetPreferredImageMagicWord(Site.ImageUprightName);
+			if (this.Parser == null)
+			{
+				throw new InvalidOperationException();
+			}
+
+			foreach (var parameter in this.Parser.Parameters)
 			{
 				foreach (var entry in site.ImageParameterRegexes)
 				{
@@ -70,8 +69,10 @@
 		/// <param name="pageName">The name of the image page.</param>
 		/// <param name="caption">The caption.</param>
 		public ImageLink(Site site, string pageName, string caption)
-			: this(site)
+			: base((site ?? throw ArgumentNull(nameof(site))).Namespaces[MediaWikiNamespaces.File], pageName)
 		{
+			this.borderWord = site.GetPreferredImageMagicWord(Site.ImageBorderName);
+			this.uprightWord = site.GetPreferredImageMagicWord(Site.ImageUprightName);
 			this.Namespace = site.Namespaces[MediaWikiNamespaces.File];
 			this.PageName = Title.CoercePageName(site, MediaWikiNamespaces.File, pageName);
 			this.DisplayText = caption;
@@ -82,7 +83,7 @@
 
 		/// <summary>Gets or sets the alt text for the image.</summary>
 		/// <value>The alt text.</value>
-		public PaddedString AltText
+		public PaddedString? AltText
 		{
 			get => this.GetValue(Site.ImageAltName);
 			set => this.SetParameter(Site.ImageAltName, value);
@@ -90,7 +91,7 @@
 
 		/// <summary>Gets or sets the border text. Use <see cref="BorderValue"/> to use the standardized word for your wiki's language.</summary>
 		/// <value>The border text.</value>
-		public PaddedString Border
+		public PaddedString? Border
 		{
 			get => this.GetValue(Site.ImageBorderName);
 			set => this.SetParameter(Site.ImageBorderName, value);
@@ -107,7 +108,7 @@
 
 		/// <summary>Gets or sets the class for the image.</summary>
 		/// <value>The class for the image.</value>
-		public PaddedString Class
+		public PaddedString? Class
 		{
 			get => this.GetValue(Site.ImageClassName);
 			set => this.SetParameter(Site.ImageClassName, value);
@@ -115,7 +116,7 @@
 
 		/// <summary>Gets or sets the caption for the image.</summary>
 		/// <value>The caption for the image.</value>
-		public PaddedString Caption
+		public PaddedString? Caption
 		{
 			get => this.GetValue(Site.ImageCaptionName);
 			set => this.SetParameter(Site.ImageCaptionName, value);
@@ -124,7 +125,7 @@
 		/// <summary>Gets or sets the image dimensions directly.</summary>
 		/// <value>The image dimensions.</value>
 		/// <remarks>Setting this option will remove any <see cref="Upright"/> parameter, and vice versa, since they are mutually exclusive. Both may be set simultaneously, however, if the link is parsed from existing text. In that case, if either is altered, the other will be removed.</remarks>
-		public PaddedString Dimensions
+		public PaddedString? Dimensions
 		{
 			get => this.GetValue(Site.ImageSizeName);
 			set
@@ -135,7 +136,7 @@
 		}
 
 		/// <summary>Gets or sets the display text. For images, this is an alias for the caption property.</summary>
-		public override PaddedString DisplayParameter
+		public override PaddedString? DisplayParameter
 		{
 			get => this.parameters[Site.ImageCaptionName]?.FullValue;
 			set
@@ -160,7 +161,7 @@
 
 		/// <summary>Gets or sets the format (i.e., thumbnail, frame, frameless).</summary>
 		/// <value>The format.</value>
-		public PaddedString Format
+		public PaddedString? Format
 		{
 			get => this.GetValue(Site.ImageFormatName);
 			set => this.SetParameter(Site.ImageFormatName, value);
@@ -177,7 +178,7 @@
 
 		/// <summary>Gets or sets the image's horizontal alignment.</summary>
 		/// <value>The image's horizontal alignment.</value>
-		public PaddedString HorizontalAlignment
+		public PaddedString? HorizontalAlignment
 		{
 			get => this.GetValue(Site.ImageHAlignName);
 			set => this.SetParameter(Site.ImageHAlignName, value);
@@ -185,7 +186,7 @@
 
 		/// <summary>Gets or sets the image's language, for image formats that are language-aware (e.g., SVG).</summary>
 		/// <value>The image language.</value>
-		public PaddedString Language
+		public PaddedString? Language
 		{
 			get => this.GetValue(Site.ImageLanguageName);
 			set => this.SetParameter(Site.ImageLanguageName, value);
@@ -193,7 +194,7 @@
 
 		/// <summary>Gets or sets the link for the image.</summary>
 		/// <value>The link for the image.</value>
-		public PaddedString Link
+		public PaddedString? Link
 		{
 			get => this.GetValue(Site.ImageLinkName);
 			set => this.SetParameter(Site.ImageLinkName, value);
@@ -201,7 +202,7 @@
 
 		/// <summary>Gets or sets the page for the document, for formats like PDF and DJVU.</summary>
 		/// <value>The page for the document.</value>
-		public PaddedString Page
+		public PaddedString? Page
 		{
 			get => this.GetValue(Site.ImagePageName);
 			set => this.SetParameter(Site.ImagePageName, value);
@@ -218,7 +219,7 @@
 		/// <summary>Gets or sets the upright scaling factor.</summary>
 		/// <value>The upright factor.</value>
 		/// <remarks>Setting this option will remove any <see cref="Dimensions"/> parameter, and vice versa, since they are mutually exclusive. Both may be set simultaneously, however, if the link is parsed from existing text. In that case, if either is altered, the other will be removed.</remarks>
-		public PaddedString Upright
+		public PaddedString? Upright
 		{
 			get => this.GetValue(Site.ImageUprightName);
 			set
@@ -259,7 +260,7 @@
 
 		/// <summary>Gets or sets the image's vertical alignment.</summary>
 		/// <value>The vertical alignment.</value>
-		public PaddedString VerticalAlignment
+		public PaddedString? VerticalAlignment
 		{
 			get => this.GetValue(Site.ImageVAlignName);
 			set => this.SetParameter(Site.ImageVAlignName, value);
@@ -273,11 +274,13 @@
 		/// <exception cref="InvalidOperationException">The size text is invalid, and could not be parsed.</exception>
 		public (int height, int width) GetSize()
 		{
-			var split = this.Dimensions.Value.Split('x');
-			return
-				split.Length == 1 ? (0, int.TryParse(split[0], out var result) ? result : throw NonNumeric) :
-				split.Length == 2 ? (int.TryParse("0" + split[0], out var width) ? width : throw NonNumeric, int.TryParse("0" + split[1], out var height) ? height : throw NonNumeric) :
-				throw new InvalidOperationException(Resources.SizeInvalid);
+			var split = this.Dimensions?.Value.Split('x');
+			return split?.Length switch
+			{
+				1 => (0, int.TryParse(split[0], out var result) ? result : throw NonNumeric),
+				2 => (int.TryParse("0" + split[0], out var width) ? width : throw NonNumeric, int.TryParse("0" + split[1], out var height) ? height : throw NonNumeric),
+				_ => throw new InvalidOperationException(Resources.SizeInvalid)
+			};
 		}
 
 		/// <summary>Reformats all parameters using the specified formats and sorts them in a standardized order.</summary>
@@ -355,7 +358,7 @@
 			value.Value = value.Value.Substring(index, length);
 		}
 
-		private string GetRegexValue(string paramName)
+		private string? GetRegexValue(string paramName)
 		{
 			var param = this.parameters[paramName];
 			if (param == null)
@@ -375,9 +378,13 @@
 			return param.Value;
 		}
 
-		private PaddedString GetValue(string paramName) => this.parameters[paramName]?.FullValue;
+		private PaddedString? GetValue(string paramName)
+		{
+			ThrowNull(paramName, nameof(paramName));
+			return this.parameters.ValueOrDefault(paramName)?.FullValue;
+		}
 
-		private void SetParameter(string paramName, PaddedString value)
+		private void SetParameter(string paramName, PaddedString? value)
 		{
 			if (value == null)
 			{
@@ -397,7 +404,7 @@
 			}
 		}
 
-		private void SetParameterValue(string paramName, string value)
+		private void SetParameterValue(string paramName, string? value)
 		{
 			if (value == null)
 			{

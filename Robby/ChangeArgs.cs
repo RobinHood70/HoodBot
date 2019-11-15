@@ -15,11 +15,11 @@
 		/// <param name="realSender">The real sending object.</param>
 		/// <param name="methodName">The method name.</param>
 		/// <param name="parameters">Any parameters to the method. If null, Parameters will be set to an empty dictionary.</param>
-		public ChangeArgs(object realSender, string methodName, IReadOnlyDictionary<string, object> parameters)
+		public ChangeArgs(object realSender, string methodName, IReadOnlyDictionary<string, object?>? parameters)
 		{
 			this.RealSender = realSender;
 			this.MethodName = methodName;
-			this.Parameters = parameters ?? new Dictionary<string, object>();
+			this.Parameters = parameters ?? new Dictionary<string, object?>();
 		}
 		#endregion
 
@@ -40,7 +40,7 @@
 
 		/// <summary>Gets the parameters of the method that published the event.</summary>
 		/// <value>The parameters.</value>
-		public IReadOnlyDictionary<string, object> Parameters { get; }
+		public IReadOnlyDictionary<string, object?> Parameters { get; }
 
 		/// <summary>Gets the actual sending object, since the sender in the event method will always appear to be the Site object.</summary>
 		/// <value>The sender.</value>

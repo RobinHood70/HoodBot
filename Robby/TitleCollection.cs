@@ -13,8 +13,8 @@
 	public class TitleCollection : TitleCollection<Title>, IEnumerable<Title>, IMessageSource
 	{
 		#region Fields
-		private IEnumerable<int> loadPageLimitations = null;
-		private LimitationType loadPageLimitationType = LimitationType.None;
+		private IEnumerable<int>? loadPageLimitations;
+		private LimitationType loadPageLimitationType;
 		#endregion
 
 		#region Constructors
@@ -52,7 +52,7 @@
 		/// <param name="ns">The namespace the titles are in.</param>
 		/// <param name="titles">The titles. Namespace text is optional and will be stripped if provided.</param>
 		public TitleCollection(Namespace ns, IEnumerable<string> titles)
-			: base(ns?.Site)
+			: base((ns ?? throw ArgumentNull(nameof(ns))).Site)
 		{
 			ThrowNull(ns, nameof(ns));
 			ThrowNull(titles, nameof(titles));
@@ -184,14 +184,14 @@
 		/// <param name="method">The method.</param>
 		/// <returns>A value indicating the change status of the purge along with a page collection with the purge results.</returns>
 		public ChangeValue<PageCollection> Purge(PurgeMethod method) => this.Site.PublishChange(
+			PageCollection.UnlimitedDefault(this.Site),
 			this,
-			new Dictionary<string, object> { [nameof(method)] = method },
+			new Dictionary<string, object?> { [nameof(method)] = method },
 			() =>
 			{
 				var pages = this.Purge(new PurgeInput(this.ToFullPageNames()) { Method = method });
 				return new ChangeValue<PageCollection>((pages.Count < this.Count) ? ChangeStatus.Failure : ChangeStatus.Success, pages);
-			},
-			PageCollection.UnlimitedDefault(this.Site));
+			});
 
 		/// <summary>Sets namespace limitations for the Load() methods.</summary>
 		/// <param name="limitationType">Type of the limitation.</param>
@@ -212,26 +212,26 @@
 		/// <summary>Watches all pages in the collection.</summary>
 		/// <returns>A value indicating the change status of the watch along with a page collection with the watch results.</returns>
 		public ChangeValue<PageCollection> Watch() => this.Site.PublishChange(
+			PageCollection.UnlimitedDefault(this.Site, this),
 			this,
-			new Dictionary<string, object>(),
+			new Dictionary<string, object?>(),
 			() =>
 			{
 				var pages = this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = false });
 				return new ChangeValue<PageCollection>((pages.Count < this.Count) ? ChangeStatus.Failure : ChangeStatus.Success, pages);
-			},
-			PageCollection.UnlimitedDefault(this.Site, this));
+			});
 
 		/// <summary>Unwatches all pages in the collection.</summary>
 		/// <returns>A value indicating the change status of the unwatch along with a page collection with the unwatch results.</returns>
 		public ChangeValue<PageCollection> Unwatch() => this.Site.PublishChange(
+			PageCollection.UnlimitedDefault(this.Site, this),
 			this,
-			new Dictionary<string, object>(),
+			new Dictionary<string, object?>(),
 			() =>
 			{
 				var pages = this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = true });
 				return new ChangeValue<PageCollection>((pages.Count < this.Count) ? ChangeStatus.Failure : ChangeStatus.Success, pages);
-			},
-			PageCollection.UnlimitedDefault(this.Site, this));
+			});
 		#endregion
 
 		#region Public Override Methods
@@ -285,6 +285,7 @@
 		protected override void GetBacklinks(BacklinksInput input)
 		{
 			ThrowNull(input, nameof(input));
+			ThrowNull(input.Title, nameof(input), nameof(input.Title));
 			var inputTitle = new TitleParts(this.Site, input.Title);
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && input.LinkTypes.HasFlag(BacklinksTypes.ImageUsage))
 			{
@@ -582,6 +583,8 @@
 
 		private void RecurseCategoryPages(CategoryMembersInput input, HashSet<string> categoryTree)
 		{
+			ThrowNull(input, nameof(input));
+			ThrowNull(input.Title, nameof(input), nameof(input.Title));
 			if (!categoryTree.Add(input.Title))
 			{
 				return;

@@ -95,5 +95,14 @@ namespace RobinHood70.WikiCommon.Properties {
                 return ResourceManager.GetString("ParameterInvalidCast", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The {1} property of {0} was unexpectedly null..
+        /// </summary>
+        internal static string PropertyNull {
+            get {
+                return ResourceManager.GetString("PropertyNull", resourceCulture);
+            }
+        }
     }
 }
