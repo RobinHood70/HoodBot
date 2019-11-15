@@ -6,9 +6,7 @@
 	using System.Windows;
 	using System.Windows.Threading;
 
-	/// <summary>
-	/// Interaction logic for App.xaml.
-	/// </summary>
+	/// <summary>Interaction logic for App.xaml.</summary>
 	public partial class App : Application
 	{
 		// Ensure everything is updated on the UI end before continuing.

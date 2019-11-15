@@ -3,7 +3,7 @@
 	using System.Collections.Generic;
 	using System.Globalization;
 	using System.Text;
-	using System.Web.Security.AntiXss;
+	using System.Text.Encodings.Web;
 	using static WikiCommon.Globals;
 
 	/// <summary>Builds the XML parse tree for the nodes, similar to that of Special:ExpandTemplates.</summary>
@@ -181,7 +181,7 @@
 		{
 			ThrowNull(node, nameof(node));
 			this.Indent();
-			this.builder.Append(AntiXssEncoder.HtmlEncode(node.Text.Replace(' ', '_'), true));
+			this.builder.Append(HtmlEncoder.Default.Encode(node.Text.Replace(' ', '_')));
 		}
 		#endregion
 
@@ -239,7 +239,7 @@
 
 		private XmlVisitor BuildValueNode(string name, string? value)
 		{
-			var encodedValue = AntiXssEncoder.HtmlEncode(value, true) ?? string.Empty;
+			var encodedValue = HtmlEncoder.Default.Encode(value) ?? string.Empty;
 			this.Indent();
 			this.builder
 				.Append('<')

@@ -27,7 +27,7 @@
 		private Plugins()
 		{
 			var folder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-			this.catalog = new DirectoryCatalog(folder + @"\Plugins\net48", "*Diff*.dll");
+			this.catalog = new DirectoryCatalog(folder + @"\Plugins", "*Diff*.dll");
 			this.container = new CompositionContainer(this.catalog);
 			try
 			{

@@ -1,296 +1,84 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{67BF70DF-F8D7-49F0-A6A2-DFFC7C8FF55E}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
-    <RootNamespace>RobinHood70.HoodBot</RootNamespace>
-    <AssemblyName>HoodBot</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <WarningLevel>4</WarningLevel>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-    <TargetFrameworkProfile />
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>HoodBot.ruleset</CodeAnalysisRuleSet>
-    <LangVersion>latest</LangVersion>
-    <ApplicationIcon>HoodBot.ico</ApplicationIcon>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>SharedKey.pfx</AssemblyOriginatorKeyFile>
-    <StartupObject>RobinHood70.HoodBot.App</StartupObject>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <Prefer32Bit>false</Prefer32Bit>
-    <DocumentationFile>
-    </DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Web" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xaml">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="WindowsBase" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-  </ItemGroup>
-  <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </ApplicationDefinition>
-    <Compile Include="BotSettings.cs" />
-    <Compile Include="EncryptingJsonConverter.cs" />
-    <Compile Include="IParameterFetcher.cs" />
-    <Compile Include="Jobs\BacklinkReplaceVisitor.cs" />
-    <Compile Include="Jobs\BlockChanger.cs" />
-    <Compile Include="Jobs\BulkDeleteUnused.cs" />
-    <Compile Include="Jobs\Design\AsyncInfo.cs" />
-    <Compile Include="Jobs\Design\JobConstructorEqualityComparer.cs" />
-    <Compile Include="Jobs\Design\JobInfoAttribute.cs" />
-    <Compile Include="Jobs\Design\JobParameterFileAttribute.cs" />
-    <Compile Include="Jobs\Design\PauseToken.cs" />
-    <Compile Include="Jobs\Design\PauseTokenSource.cs" />
-    <Compile Include="Jobs\Design\Replacement.cs" />
-    <Compile Include="Jobs\Design\TitleJsonConverter.cs" />
-    <Compile Include="Jobs\EditJob.cs" />
-    <Compile Include="Jobs\EsoActiveSkillSummaries.cs" />
-    <Compile Include="Jobs\EsoItemSets.cs" />
-    <Compile Include="Jobs\EsoDeletableNpcs.cs" />
-    <Compile Include="Jobs\EsoMatchIcons.cs" />
-    <Compile Include="Jobs\EsoNpcs.cs" />
-    <Compile Include="Jobs\EsoPassiveSkillSummaries.cs" />
-    <Compile Include="Jobs\EsoQuests.cs" />
-    <Compile Include="Jobs\EsoUpdateNpcs.cs" />
-    <Compile Include="Jobs\Eso\Ability.cs" />
-    <Compile Include="Jobs\Eso\ActiveSkill.cs" />
-    <Compile Include="Jobs\Eso\Coefficient.cs" />
-    <Compile Include="Jobs\Eso\NpcCollection.cs" />
-    <Compile Include="Jobs\Eso\EsoReplacement.cs" />
-    <Compile Include="Jobs\Eso\EsoReplacer.cs" />
-    <Compile Include="Jobs\Eso\EsoGeneral.cs" />
-    <Compile Include="Jobs\Eso\EsoSkillJob.cs" />
-    <Compile Include="Jobs\Eso\Morph.cs" />
-    <Compile Include="Jobs\Eso\NpcData.cs" />
-    <Compile Include="Jobs\Eso\PassiveRank.cs" />
-    <Compile Include="Jobs\Eso\PassiveSkill.cs" />
-    <Compile Include="Jobs\Eso\Place.cs" />
-    <Compile Include="Jobs\Eso\PlaceCollection.cs" />
-    <Compile Include="Jobs\Eso\PlaceInfo.cs" />
-    <Compile Include="Jobs\Eso\ReplacementData.cs" />
-    <Compile Include="Jobs\Eso\Skill.cs" />
-    <Compile Include="Jobs\Eso\Synergy.cs" />
-    <Compile Include="Jobs\Eso\VariableData.cs" />
-    <Compile Include="Jobs\ManipulateImageCategory.cs" />
-    <Compile Include="Jobs\AddDeckCodes.cs" />
-    <Compile Include="Jobs\EsoNpcLocFix.cs" />
-    <Compile Include="Jobs\OneOffJob.cs" />
-    <Compile Include="Jobs\PageMover.cs" />
-    <Compile Include="Jobs\PageMoverJob.cs" />
-    <None Include="Old Jobs\UntranscludeLore.cs" />
-    <Compile Include="Jobs\UndoLocChanges.cs" />
-    <Compile Include="Jobs\WantedInMain.cs" />
-    <Compile Include="Parser\ContextualParser.cs" />
-    <Compile Include="Uesp\MetaNamespace.cs" />
-    <Compile Include="Uesp\VariableDictionary.cs" />
-    <Compile Include="Uesp\VariableItem.cs" />
-    <Compile Include="WikiInfo.cs" />
-    <Compile Include="Jobs\TestJob.cs" />
-    <Compile Include="Jobs\VoidJob.cs" />
-    <Compile Include="Jobs\GetTemplateUsage.cs" />
-    <Compile Include="Jobs\TaskResults\TemplateCollection.cs" />
-    <Compile Include="Jobs\TaskResults\TemplateUsage.cs" />
-    <Compile Include="Jobs\TaskResults\TemplateUsageRow.cs" />
-    <Compile Include="MaxLaggableWikiInfo.cs" />
-    <Compile Include="PasswordHelper.cs" />
-    <Compile Include="ScrollingTextBox.cs" />
-    <Compile Include="Uesp\HoodBotFunctions.cs" />
-    <Compile Include="Uesp\MetaTemplateCreator.cs" />
-    <Compile Include="Uesp\PropVariables.cs" />
-    <Compile Include="Uesp\UespNamespaces.cs" />
-    <Compile Include="Uesp\VariablesInput.cs" />
-    <Compile Include="Uesp\VariablesPage.cs" />
-    <Compile Include="Uesp\VariablesPageItem.cs" />
-    <Compile Include="ViewModel\ConstructorParameter.cs" />
-    <Compile Include="ViewModel\JobNode.cs" />
-    <Compile Include="Jobs\Design\JobParameterAttribute.cs" />
-    <Compile Include="Jobs\Tasks\ProgressEventArgs.cs" />
-    <Compile Include="Jobs\Tasks\TaskEventArgs.cs" />
-    <Compile Include="Jobs\Tasks\WikiTask.cs" />
-    <Compile Include="Jobs\WikiJob.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\Resources.fr.Designer.cs">
-      <DependentUpon>Resources.fr.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="ViewModel\MainViewModel.cs" />
-    <Compile Include="ViewModel\Notifier.cs" />
-    <Compile Include="ViewModel\RelayCommand.cs" />
-    <Compile Include="ViewModel\RelayCommand{T}.cs" />
-    <Compile Include="ViewModel\SettingsViewModel.cs" />
-    <Page Include="EditSettings.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EditSettings.xaml.cs">
-      <DependentUpon>EditSettings.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <AdditionalFiles Include="..\stylecop.json">
-      <Link>stylecop.json</Link>
-    </AdditionalFiles>
-    <None Include="connections.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="HoodBot.ruleset" />
-    <None Include="SharedKey.pfx" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config">
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="HoodBot.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="HoodBot.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.7.1">
-      <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4.7.1 %28x86 and x64%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.fr.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.fr.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj">
-      <Project>{eb7d2b63-3bc4-4df2-9c4c-b3cc2f524aa7}</Project>
-      <Name>HoodBotPlugins</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Robby\Robby.csproj">
-      <Project>{16A4F00F-11B3-4049-89D2-09C9B6B53C83}</Project>
-      <Name>Robby</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WallE\WallE.csproj">
-      <Project>{F338AF86-4502-4121-B032-092CA727D51B}</Project>
-      <Name>WallE</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WikiClasses\WikiClasses.csproj">
-      <Project>{ad688255-64e2-451c-a32f-85877b7bdef0}</Project>
-      <Name>WikiClasses</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WikiCommon\WikiCommon.csproj">
-      <Project>{64878636-cb8c-434e-a03d-b3946216fc7f}</Project>
-      <Name>WikiCommon</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers">
-      <Version>2.9.7</Version>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="MySql.Data">
-      <Version>8.0.18</Version>
-    </PackageReference>
-    <PackageReference Include="Newtonsoft.Json">
-      <Version>12.0.3-beta2</Version>
-    </PackageReference>
-    <PackageReference Include="Nullable">
-      <Version>1.1.1</Version>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="StyleCop.Analyzers">
-      <Version>1.2.0-beta.66</Version>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-  </PropertyGroup>
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<RootNamespace>RobinHood70.HoodBot</RootNamespace>
+		<TargetFramework>netcoreapp3.0</TargetFramework>
+		<UseWPF>true</UseWPF>
+		<LangVersion>latest</LangVersion>
+		<ApplicationIcon>HoodBot.ico</ApplicationIcon>
+		<RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+		<ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+		<CodeAnalysisRuleSet>HoodBot.ruleset</CodeAnalysisRuleSet>
+		<SignAssembly>true</SignAssembly>
+		<AssemblyOriginatorKeyFile>SharedKey.pfx</AssemblyOriginatorKeyFile>
+		<NeutralLanguage>en-CA</NeutralLanguage>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <DefineConstants>DEBUG</DefineConstants>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Old Jobs\UntranscludeLore.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="Old Jobs\UntranscludeLore.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.7">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.0-preview3.19553.2" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.0-preview3.19553.2" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.0-preview3.19553.2" />
+		<PackageReference Include="MySql.Data" Version="8.0.18" />
+		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.113">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj" />
+		<ProjectReference Include="..\Robby\Robby.csproj" />
+		<ProjectReference Include="..\WallE\WallE.csproj" />
+		<ProjectReference Include="..\WikiClasses\WikiClasses.csproj" />
+		<ProjectReference Include="..\WikiCommon\WikiCommon.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Resource Include="HoodBot.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Properties\Resources.Designer.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Resources.resx</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Properties\Resources.resx">
+	    <Generator>PublicResXFileCodeGenerator</Generator>
+	    <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="connectionStrings.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
 </Project>

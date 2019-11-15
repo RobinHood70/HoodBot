@@ -175,7 +175,7 @@
 				BorderThickness="1"
 				LostFocus="JobParametersBorder_LostFocus"
 				Visibility="Visible">
-				<!-- {Binding JobParameterVisibility, Mode=OneWay} -->
+				<!--  {Binding JobParameterVisibility, Mode=OneWay}  -->
 				<Border.Background>
 					<SolidColorBrush Opacity="0.9" Color="#FFFFFFFF" />
 				</Border.Background>
@@ -260,10 +260,10 @@
 				Grid.Column="2"
 				Text="{Binding UtcEta, Mode=OneWay, StringFormat=T}" />
 			<Button
-                Grid.Row="0"
-                Grid.RowSpan="2"
-                Grid.Column="4"
-                Command="{Binding Test}">
+				Grid.Row="0"
+				Grid.RowSpan="2"
+				Grid.Column="4"
+				Command="{Binding Test}">
 				Test
 			</Button>
 			<CheckBox

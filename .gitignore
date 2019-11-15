@@ -260,3 +260,5 @@ paket-files/
 __pycache__/
 *.pyc
 /HoodBot/connections.config
+/HoodBotOld
+/HoodBot/connectionStrings.json

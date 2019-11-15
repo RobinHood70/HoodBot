@@ -1,11 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net48</TargetFramework>
+		<TargetFramework>netcoreapp3.0</TargetFramework>
 		<LangVersion>latest</LangVersion>
 		<CodeAnalysisRuleSet>..\Main.ruleset</CodeAnalysisRuleSet>
 		<DocumentationFile>bin\WallE.XML</DocumentationFile>
 		<Nullable>enable</Nullable>
 		<RootNamespace>RobinHood70.HoodBotPlugins</RootNamespace>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>
@@ -16,14 +18,11 @@
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	  <PackageReference Include="Nullable" Version="1.1.1">
+	  <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.113">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	  <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.66">
-	    <PrivateAssets>all</PrivateAssets>
-	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
+	  <PackageReference Include="System.ComponentModel.Composition" Version="4.7.0-preview3.19551.4" />
 	</ItemGroup>
 	<ItemGroup>
 	  <Reference Include="System.ComponentModel.Composition" />

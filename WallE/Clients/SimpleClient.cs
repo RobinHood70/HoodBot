@@ -2,12 +2,9 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Globalization;
 	using System.IO;
 	using System.IO.Compression;
 	using System.Net;
-	using System.Net.Configuration;
-	using System.Reflection;
 	using System.Runtime.Serialization;
 	using System.Runtime.Serialization.Formatters.Binary;
 	using System.Security;
@@ -305,6 +302,7 @@
 
 		private static bool PerSessionUnsafeHeaderParsing(Exception ex)
 		{
+			/*
 			if (!ex.Message.Contains("Section=ResponseStatusLine"))
 			{
 				return false;
@@ -320,6 +318,7 @@
 				useUnsafeHeaderParsing.SetValue(section, true);
 				return true;
 			}
+			*/
 
 			return false;
 		}

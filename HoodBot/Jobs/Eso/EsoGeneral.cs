@@ -2,11 +2,13 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Configuration;
 	using System.Data;
 	using System.Diagnostics;
-	using System.Text.RegularExpressions;
-	using MySql.Data.MySqlClient;
+    using System.IO;
+    using System.Reflection;
+    using System.Text.RegularExpressions;
+    using Microsoft.Extensions.Configuration;
+    using MySql.Data.MySqlClient;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -30,14 +32,32 @@
 		private const string PatchPageName = "Online:Patch";
 		#endregion
 
-		#region Static Fields
+		#region Fields
 		private static readonly Regex BonusFinder = new Regex(@"\s*Current [Bb]onus:.*?\.");
 		private static readonly Regex SpaceFixer = new Regex(@"[\n\ ]+");
-		private static readonly string EsoLogConnectionString = ConfigurationManager.ConnectionStrings["EsoLog"].ConnectionString;
+		private static string? esoLogConnectionString = null; // = ConfigurationManager.ConnectionStrings["EsoLog"].ConnectionString;
 		private static string patchVersion = null;
 		#endregion
 
 		#region Public Properties
+		public static string EsoLogConnectionString
+		{
+			get
+			{
+				if (esoLogConnectionString == null)
+				{
+					var folder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+					var builder = new ConfigurationBuilder()
+						.SetBasePath(folder)
+						.AddJsonFile("connectionStrings.json", false, false);
+					var config = builder.Build();
+					esoLogConnectionString = config.GetConnectionString("EsoLog");
+				}
+
+				return esoLogConnectionString;
+			}
+		}
+
 		public static Dictionary<int, string> MechanicNames { get; } = new Dictionary<int, string>
 		{
 			[-2] = "Health",
