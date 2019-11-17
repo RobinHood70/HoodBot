@@ -394,6 +394,14 @@
 				title: token.MustHaveString("title"),
 				pageId: (long?)token["pageid"] ?? 0);
 
+		/// <summary>Ignores a token if it is boolean and evaluates to <see langword="false"/>.</summary>
+		/// <param name="token">The token.</param>
+		/// <returns>The original token or null if the token was <see langword="false"/>.</returns>
+		/// <remarks>This is used for rare cases where formatversion=2 returns false when a value should really be <see langword="null"/>.</remarks>
+		public static JToken? IgnoreFalse(this JToken? token) => token == null || (token.Type == JTokenType.Boolean && !(bool)token)
+			? null
+			: token;
+
 		/// <summary>Ensures that the token is non-null and contains a non-null string.</summary>
 		/// <param name="token">The token to examine.</param>
 		/// <param name="caller">The caller name (automatically populated).</param>

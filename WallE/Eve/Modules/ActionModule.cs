@@ -2,12 +2,14 @@
 namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
+	using RobinHood70.WallE.Eve;
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -102,8 +104,54 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			if (result["debuginfo"] is JToken debugInfo)
 			{
-				// TODO: Implement this!
-				this.Wal.DebugInfo = new DebugInfoResult();
+				var includes = new List<DebugInfoInclude>();
+				foreach (var include in debugInfo.MustHave("includes"))
+				{
+					includes.Add(new DebugInfoInclude(
+						name: include.MustHaveString("name"),
+						size: include.MustHaveString("size")));
+				}
+
+				var logs = new List<DebugInfoLog>();
+				foreach (var log in debugInfo.MustHave("log"))
+				{
+					logs.Add(new DebugInfoLog(
+						caller: log.MustHaveString("caller"),
+						logType: log.MustHaveString("type"),
+						message: log.MustHaveString("msg")));
+				}
+
+				var queries = new List<DebugInfoQuery>();
+				foreach (var query in debugInfo.MustHave("queries"))
+				{
+					queries.Add(new DebugInfoQuery(
+						function: query.MustHaveString("function"),
+						isMaster: query["master"].GetBCBool(),
+						runTime: (double?)query["time"] ?? 0,
+						sql: query.MustHaveString("sql")));
+				}
+
+				var requestNode = debugInfo.MustHave("request");
+				var fullHost = this.Wal.Uri.AbsoluteUri.Replace(this.Wal.Uri.AbsolutePath, string.Empty, StringComparison.Ordinal);
+				var request = new DebugInfoRequest(
+						headers: requestNode.MustHave("headers").GetStringDictionary<string>(),
+						method: requestNode.MustHaveString("method"),
+						parameters: requestNode.MustHave("params").GetStringDictionary<string>(),
+						url: new Uri(fullHost + requestNode.MustHaveString("url")));
+
+				this.Wal.DebugInfo = new DebugInfoResult(
+					debugLog: debugInfo.MustHaveList<string>("debugLog"),
+					elapsedTime: (double?)debugInfo["time"] ?? 0,
+					gitBranch: (string?)debugInfo["gitBranch"].IgnoreFalse(),
+					gitRevision: (string?)debugInfo["gitRevision"].IgnoreFalse(),
+					gitViewUrl: (Uri?)debugInfo["gitViewUrl"].IgnoreFalse(),
+					includes: includes,
+					log: logs,
+					mwVersion: debugInfo.MustHaveString("mwVersion"),
+					phpEngine: debugInfo.MustHaveString("phpEngine"),
+					phpVersion: debugInfo.MustHaveString("phpVersion"),
+					queries: queries,
+					request: request);
 			}
 
 			this.Wal.CurrentTimestamp = result["curtimestamp"].GetNullableDate();
