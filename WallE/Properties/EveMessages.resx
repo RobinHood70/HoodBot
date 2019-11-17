@@ -193,10 +193,10 @@
     <value>The wiki did not return the requested {0} token.</value>
   </data>
   <data name="MalformedData" xml:space="preserve">
-    <value>The data returned by the wiki is missing the expected element {0}, a child of {1}, in {2}.</value>
+    <value>The "{0}" node is missing from {1} in {2}.</value>
   </data>
   <data name="MalformedDataType" xml:space="preserve">
-    <value>The data returned by the wiki is not of the expected type. {0}, a child of {1}, is not a {2}.</value>
+    <value>The "{0}" node at {1} is not in the expected format in {2}.</value>
   </data>
   <data name="CannotDeserializeWithoutPage" xml:space="preserve">
     <value>You cannot deserialize a property module without specifying the page to deserialize to.</value>

@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
+	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
@@ -43,9 +44,9 @@
 		/// <param name="fileName">Name of the file to download to. This will be overwritten if it exists. If fileName represents a path, the page name will be used as the file name.</param>
 		public void Download(string fileName)
 		{
-			if (this.fileRevisions.Count == 0)
+			if (this.fileRevisions.Count == 0 || !(this.fileRevisions[0].Uri is Uri uri))
 			{
-				return;
+				throw new InvalidOperationException(Resources.FileRevisionInvalid);
 			}
 
 			try
@@ -60,7 +61,7 @@
 			{
 			}
 
-			this.Site.Download(this.fileRevisions[0].Uri.OriginalString, fileName);
+			this.Site.Download(uri.OriginalString, fileName);
 		}
 
 		/// <summary>Finds all pages the file is used on.</summary>
@@ -118,7 +119,7 @@
 						sha1: imageInfoEntry.Sha1,
 						user: imageInfoEntry.User,
 						timestamp: imageInfoEntry.Timestamp,
-						uri: new Uri(imageInfoEntry.Uri));
+						uri: imageInfoEntry.Uri == null ? null : new Uri(imageInfoEntry.Uri));
 					this.fileRevisions.Add(fileRevision);
 
 					if (fileRevision.Timestamp > latest)

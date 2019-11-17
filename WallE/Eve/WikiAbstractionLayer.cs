@@ -301,7 +301,7 @@
 		{
 			ThrowNull(pageName, nameof(pageName));
 			var articlePath = this.ArticlePath ?? throw this.notInitialized;
-			return new Uri(articlePath.Replace("$1", pageName.Replace(' ', '_')));
+			return new Uri(articlePath.Replace("$1", pageName.Replace(' ', '_'), StringComparison.Ordinal));
 		}
 
 		/// <summary>Makes the URI secure.</summary>
@@ -365,11 +365,11 @@
 		/// <summary>Converts the given request into an HTML request and submits it to the site.</summary>
 		/// <param name="request">The request.</param>
 		/// <returns>The site's response to the request.</returns>
-		public string? SendRequest(Request request)
+		public string SendRequest(Request request)
 		{
 			ThrowNull(request, nameof(request));
 			this.OnSendingRequest(new RequestEventArgs(request));
-			string? response;
+			string response;
 			switch (request.Type)
 			{
 				case RequestType.Post:
@@ -386,11 +386,7 @@
 					break;
 			}
 
-			if (response != null)
-			{
-				this.OnResponseReceived(new ResponseEventArgs(response));
-			}
-
+			this.OnResponseReceived(new ResponseEventArgs(response));
 			return response;
 		}
 		#endregion
@@ -614,7 +610,10 @@
 			var output = new HashSet<BacklinksItem>(new BacklinksOutputComparer());
 			foreach (var module in modules)
 			{
-				output.UnionWith(module.Output);
+				if (module.Output != null)
+				{
+					output.UnionWith(module.Output);
+				}
 			}
 
 			return output.AsReadOnlyList();
@@ -657,7 +656,7 @@
 			catch (NotSupportedException)
 			{
 				var index = this.GetFullArticlePath(this.Namespaces[MediaWikiNamespaces.UserTalk].Name + ":" + this.UserName);
-				return !string.IsNullOrEmpty(this.Client.Get(index));
+				return this.Client.Get(index).Length > 0;
 			}
 		}
 
@@ -880,7 +879,7 @@
 			}
 
 			var userNameSplit = input.UserName.Split(TextArrays.At);
-			var botPasswordName = userNameSplit[userNameSplit.Length - 1];
+			var botPasswordName = userNameSplit[^1];
 
 			// Both checks are necessary because user names can legitimately contain @ signs.
 			if (this.UserName == input.UserName || this.UserName == botPasswordName)
@@ -1032,7 +1031,7 @@
 				string? lastKey = null;
 				foreach (var changeItem in input.Change)
 				{
-					if (this.SiteVersion < 128 && (changeItem.Key.Contains("|") || (changeItem.Value?.Contains("|") ?? false)))
+					if (this.SiteVersion < 128 && (changeItem.Key.Contains('|', StringComparison.Ordinal) || (changeItem.Value?.Contains('|', StringComparison.Ordinal) ?? false)))
 					{
 						singleItems.Add(changeItem.Key, changeItem.Value);
 						lastKey = changeItem.Key;

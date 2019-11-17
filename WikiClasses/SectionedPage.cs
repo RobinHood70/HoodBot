@@ -192,8 +192,8 @@
 			retval.AddAfterTitle = groups["addafter"].Value;
 			retval.AddBeforeTitle = groups["addbefore"].Value;
 			retval.Level = level;
-			retval.Text = (offset == matches.Count - 1) ? txt.Substring(textStart) : txt.Substring(textStart, matches[offset + 1].Index - textStart);
-			retval.Title = new PaddedString(groups["wslead"].Value, groups["title"].Value, groups["wstrail"].Value);
+			retval.Text = (offset == matches.Count - 1) ? txt.Substring(textStart) : txt[textStart..matches[offset + 1].Index];
+			retval.Title = groups["title"].Value;
 			offset++;
 
 			while (offset < matches.Count && matches[offset].Groups["levelopen"].Value.Length > level)

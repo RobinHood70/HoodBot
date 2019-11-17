@@ -41,7 +41,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(result, nameof(result));
 			return new CheckTokenResult(
 				result: result.MustHaveString("result"),
-				generated: result["generated"].ToNullableDate());
+				generated: result["generated"].GetNullableDate());
 		}
 		#endregion
 	}

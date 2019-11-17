@@ -5,7 +5,6 @@
 	using System.Data;
 	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
-	using RobinHood70.Robby;
 
 	#region Public Enumerations
 	public enum PickpocketDifficulty
@@ -46,10 +45,10 @@
 				_ => throw new InvalidOperationException("Reaction value is out of range.")
 			};
 
-			if (name.Length > 2 && name[name.Length - 2] == '^' && gender == -1)
+			if (name.Length > 2 && name[^2] == '^' && gender == -1)
 			{
-				var genderChar = char.ToUpperInvariant(name[name.Length - 1]);
-				name = name.Substring(0, name.Length - 2);
+				var genderChar = char.ToUpperInvariant(name[^1]);
+				name = name[0..^2];
 				this.Gender = genderChar switch
 				{
 					'M' => Gender.Male,
@@ -176,14 +175,21 @@
 				case PlaceType.Store:
 					foreach (var item in subset)
 					{
-						list.Add(item.TitleName);
+						if (item.TitleName != null)
+						{
+							list.Add(item.TitleName);
+						}
 					}
 
 					break;
 				default:
 					foreach (var item in subset)
 					{
-						list.Add(item.Title == null ? item.TitleName : SiteLink.LinkTextFromTitle(item.Title));
+						var title = item.ToString();
+						if (title != null)
+						{
+							list.Add(title);
+						}
 					}
 
 					break;

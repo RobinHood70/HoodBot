@@ -97,7 +97,7 @@ namespace RobinHood70.WikiCommon.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The {1} property of {0} was unexpectedly null..
+        ///   Looks up a localized string similar to {0}.{1} was unexpectedly null..
         /// </summary>
         internal static string PropertyNull {
             get {

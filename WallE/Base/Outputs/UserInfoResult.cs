@@ -17,7 +17,7 @@ namespace RobinHood70.WallE.Base
 	public class UserInfoResult
 	{
 		#region Constructors
-		internal UserInfoResult(long id, string name, DateTime? blockExpiry, long blockId, string? blockReason, DateTime? blockTimestamp, string? blockedBy, long blockedById, ChangeableGroupsInfo? changeableGroups, long editCount, string? email, DateTime? emailAuthenticated, UserInfoFlags flags, IReadOnlyList<string> groups, IReadOnlyList<string> implicitGroups, Dictionary<string, object> options, string? preferencesToken, Dictionary<string, RateLimitsItem?> rateLimits, string? realName, DateTime? registrationDate, IReadOnlyList<string> rights, string? unreadText)
+		internal UserInfoResult(long id, string name, DateTime? blockExpiry, long blockId, string? blockReason, DateTime? blockTimestamp, string? blockedBy, long blockedById, ChangeableGroupsInfo? changeableGroups, long editCount, string? email, DateTime? emailAuthenticated, UserInfoFlags flags, IReadOnlyList<string> groups, IReadOnlyList<string> implicitGroups, IReadOnlyDictionary<string, object> options, string? preferencesToken, IReadOnlyDictionary<string, RateLimitsItem?> rateLimits, string? realName, DateTime? registrationDate, IReadOnlyList<string> rights, string? unreadText)
 		{
 			this.Id = id;
 			this.Name = name;
@@ -46,7 +46,7 @@ namespace RobinHood70.WallE.Base
 			{
 				if (unreadText.EndsWith("+", StringComparison.Ordinal))
 				{
-					unreadText = unreadText.Substring(0, unreadText.Length - 1);
+					unreadText = unreadText[0..^1];
 				}
 
 				if (int.TryParse(unreadText, out var result))

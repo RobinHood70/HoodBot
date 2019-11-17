@@ -92,7 +92,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				patrolToken: (string?)result["patroltoken"],
 				recentChangeType: (string?)result["type"],
 				revisionId: (long?)result["revid"] ?? 0,
-				tags: result["tags"].ToReadOnlyList<string>());
+				tags: result["tags"].GetList<string>());
 			result.ParseLogEvent(item, "log", KnownProps, false);
 
 			return item;

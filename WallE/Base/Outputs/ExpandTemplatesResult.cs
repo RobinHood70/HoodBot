@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Base
 	public class ExpandTemplatesResult
 	{
 		#region Constructors
-		internal ExpandTemplatesResult(IReadOnlyList<string> categories, Dictionary<string, string> javaScriptConfigVars, IReadOnlyList<string> moduleScripts, IReadOnlyList<string> moduleStyles, IReadOnlyList<string> modules, string? parseTree, IReadOnlyDictionary<string, string?> properties, TimeSpan timeToLive, bool vol, string? wikiText)
+		internal ExpandTemplatesResult(IReadOnlyList<string> categories, IReadOnlyDictionary<string, string> javaScriptConfigVars, IReadOnlyList<string> moduleScripts, IReadOnlyList<string> moduleStyles, IReadOnlyList<string> modules, string? parseTree, IReadOnlyDictionary<string, string?> properties, TimeSpan timeToLive, bool vol, string? wikiText)
 		{
 			this.Categories = categories;
 			this.JavaScriptConfigVariables = javaScriptConfigVars;
@@ -46,7 +46,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.WikiText?.Ellipsis(30) ?? this.ParseTree?.Ellipsis(30) ?? base.ToString();
+		public override string ToString() => this.WikiText?.Ellipsis(30) ?? this.ParseTree?.Ellipsis(30) ?? this.GetType().Name;
 		#endregion
 	}
 }

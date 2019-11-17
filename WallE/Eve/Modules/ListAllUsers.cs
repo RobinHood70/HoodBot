@@ -46,10 +46,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override AllUsersItem? GetItem(JToken result) => result == null
 			? null
 			: new AllUsersItem(
-				userId: (long?)result["userid"] ?? 0,
-				name: result.MustHaveString("name"),
-				recentActions: (int?)result["recentactions"] ?? (int?)result["recenteditcount"] ?? 0)
-			.GetUserData(result);
+				baseUser: result.GetUser(),
+				recentActions: (int?)result["recentactions"] ?? (int?)result["recenteditcount"] ?? 0);
 		#endregion
 	}
 }

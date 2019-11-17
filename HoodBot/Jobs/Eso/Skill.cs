@@ -11,29 +11,11 @@
 		private static readonly string[] DoubleColonSplit = new[] { "::" };
 		#endregion
 
-		#region Public Properties
-		public string Class { get; protected set; }
-
-		public string Name { get; private set; }
-
-		public string PageName { get; private set; }
-
-		public string SkillLine { get; protected set; }
-		#endregion
-
-		#region Internal Static Properties
-		internal static Regex Highlight => new Regex(@"\|c[0-9a-fA-F]{6}|\|r");
-		#endregion
-
-		#region Public Override Methods
-		public override string ToString() => $"{this.Name} ({this.SkillLine})";
-		#endregion
-
-		#region Public Virtual Methods
-		public virtual void GetData(IDataRecord data)
+		#region Constructors
+		protected Skill(IDataRecord row)
 		{
-			this.Name = (string)data["baseName"];
-			var classLine = ((string)data["skillTypeName"]).Split(DoubleColonSplit, StringSplitOptions.None);
+			this.Name = (string)row["baseName"];
+			var classLine = ((string)row["skillTypeName"]).Split(DoubleColonSplit, StringSplitOptions.None);
 			this.Class = classLine[0];
 			this.SkillLine = classLine[1];
 			var testName = this.Name;
@@ -52,10 +34,26 @@
 		}
 		#endregion
 
+		#region Public Properties
+		public string Class { get; protected set; }
+
+		public string Name { get; }
+
+		public string PageName { get; }
+
+		public string SkillLine { get; protected set; }
+		#endregion
+
+		#region Internal Static Properties
+		internal static Regex Highlight => new Regex(@"\|c[0-9a-fA-F]{6}|\|r");
+		#endregion
+
+		#region Public Override Methods
+		public override string ToString() => $"{this.Name} ({this.SkillLine})";
+		#endregion
+
 		#region Public Abstract Methods
 		public abstract bool Check();
-
-		public abstract void GetRankData(IDataRecord data);
 		#endregion
 	}
 }

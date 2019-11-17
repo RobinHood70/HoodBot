@@ -88,7 +88,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				revId: (long?)result["revid"] ?? 0,
 				size: (int?)result["size"] ?? 0,
 				sizeDiff: (int?)result["sizediff"] ?? 0,
-				tags: result["tags"].ToReadOnlyList<string>(),
+				tags: result["tags"].GetList<string>(),
 				timestamp: (DateTime?)result["timestamp"]);
 		#endregion
 	}

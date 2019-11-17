@@ -27,15 +27,17 @@
 		#region Fields
 		private readonly Dictionary<ResultDestination, ResultInfo> results = new Dictionary<ResultDestination, ResultInfo>();
 		private readonly Dictionary<ResultDestination, StringBuilder> stringBuilders = new Dictionary<ResultDestination, StringBuilder>();
-		private LogInfo lastLogInfo;
-		private TitleCollection talkLikePages = null;
+		private readonly User user;
+		private LogInfo? lastLogInfo;
+		private TitleCollection? talkLikePages = null;
 		#endregion
 
 		#region Constructors
 		public HoodBotFunctions(Site site)
 			: base(site)
 		{
-			this.NativeAbstractionLayer = site.AbstractionLayer as WikiAbstractionLayer;
+			this.user = site.User ?? throw new InvalidOperationException("Not logged in.");
+			this.NativeAbstractionLayer = (WikiAbstractionLayer)site.AbstractionLayer;
 			this.NativeClient = this.NativeAbstractionLayer.Client;
 			var pageName = site.User.FullPageName;
 			this.LogPage = new Page(site, pageName + "/Log");
@@ -89,26 +91,29 @@
 			if (this.ShouldLog(info))
 			{
 				this.lastLogInfo = info;
-				this.LogPage.PageLoaded += this.LogPage_AddEntry;
-				result = ChangeStatus.Unknown; // Change to Unknown so we know if we've ever successfully saved.
-				do
+				if (this.LogPage != null)
 				{
-					this.LogPage.Load();
-					try
+					this.LogPage.PageLoaded += this.LogPage_AddEntry;
+					result = ChangeStatus.Unknown; // Change to Unknown so we know if we've ever successfully saved.
+					do
 					{
-						result = this.LogPage.Save("Job Started", false);
+						this.LogPage.Load();
+						try
+						{
+							result = this.LogPage.Save("Job Started", false);
+						}
+						catch (EditConflictException)
+						{
+						}
+						catch (StopException)
+						{
+							result = ChangeStatus.Cancelled;
+						}
 					}
-					catch (EditConflictException)
-					{
-					}
-					catch (StopException)
-					{
-						result = ChangeStatus.Cancelled;
-					}
-				}
-				while (result == ChangeStatus.Unknown);
+					while (result == ChangeStatus.Unknown);
 
-				this.LogPage.PageLoaded -= this.LogPage_AddEntry;
+					this.LogPage.PageLoaded -= this.LogPage_AddEntry;
+				}
 			}
 			else
 			{
@@ -138,7 +143,7 @@
 		public override ChangeStatus EndLogEntry()
 		{
 			var result = ChangeStatus.NoEffect;
-			if (this.ShouldLog(this.lastLogInfo))
+			if (this.ShouldLog(this.lastLogInfo) && this.LogPage != null)
 			{
 				this.LogPage.PageLoaded += this.LogPage_EndEntry;
 				do
@@ -166,7 +171,7 @@
 			return result;
 		}
 
-		public override void InitializeResult(ResultDestination destination, string user, string subject)
+		public override void InitializeResult(ResultDestination destination, string? user, string? subject)
 		{
 			this.SetResultInfo(destination, user, subject);
 			this.stringBuilders[destination] = new StringBuilder();
@@ -188,6 +193,7 @@
 					switch (sb.Key)
 					{
 						case ResultDestination.Email:
+							ThrowNull(info.User, nameof(info), nameof(info.User));
 							this.EmailResultsToUser(info.User, info.Title, result);
 							break;
 						case ResultDestination.LocalFile:
@@ -197,6 +203,7 @@
 							this.PostResultsToResultsPage(info.Title, result);
 							break;
 						case ResultDestination.UserTalkPage:
+							ThrowNull(info.User, nameof(info), nameof(info.User));
 							this.PostResultsToUserTalkPage(info.User, info.Title, result);
 							break;
 						case ResultDestination.RequestPage:
@@ -215,7 +222,7 @@
 
 		public override void ResetResultsPage() => this.PrivateResetResultsPage();
 
-		public override void SetResultInfo(ResultDestination destination, string user, string title) => this.results[destination] = new ResultInfo(user, title);
+		public override void SetResultInfo(ResultDestination destination, string? user, string? title) => this.results[destination] = new ResultInfo(user, title);
 
 		public override void SetResultTitle(ResultDestination destination, string title)
 		{
@@ -235,20 +242,25 @@
 		{
 			// In theory, this could make use of a SectionedPage, but that seems a bit overkill for a simple log page.
 			ThrowNull(status, nameof(status));
-			var taskSection = CurrentTaskFinder.Match(this.StatusPage.Text);
-			if (!taskSection.Success)
+			if (this.StatusPage != null)
 			{
-				throw BadLogPageException();
+				var taskSection = CurrentTaskFinder.Match(this.StatusPage.Text);
+				if (!taskSection.Success)
+				{
+					throw BadLogPageException();
+				}
+
+				var insertPos = taskSection.Index + taskSection.Length;
+				taskSection = TaskLogFinder.Match(this.StatusPage.Text, insertPos);
+				var previousTask = this.StatusPage.Text[insertPos..taskSection.Index];
+				var currentTask = status + "\n\n";
+				this.StatusPage.Text = this.StatusPage.Text
+					.Remove(insertPos, taskSection.Index - insertPos)
+					.Insert(insertPos, currentTask);
+				return previousTask == currentTask ? ChangeStatus.NoEffect : ChangeStatus.Success;
 			}
 
-			var insertPos = taskSection.Index + taskSection.Length;
-			taskSection = TaskLogFinder.Match(this.StatusPage.Text, insertPos);
-			var previousTask = this.StatusPage.Text.Substring(insertPos, taskSection.Index - insertPos);
-			var currentTask = status + "\n\n";
-			this.StatusPage.Text = this.StatusPage.Text
-				.Remove(insertPos, taskSection.Index - insertPos)
-				.Insert(insertPos, currentTask);
-			return previousTask == currentTask ? ChangeStatus.NoEffect : ChangeStatus.Success;
+			return ChangeStatus.NoEffect;
 		}
 		#endregion
 
@@ -261,14 +273,16 @@
 		#endregion
 
 		#region Private Methods
-		private void EmailResultsToUser(string userName, string subject, string text)
+		private void EmailResultsToUser(string? userName, string subject, string text)
 		{
+			ThrowNull(userName, nameof(userName));
 			var user = new User(this.Site, userName);
 			user.Email(subject, text, false);
 		}
 
 		private void LogPage_AddEntry(Page sender, EventArgs eventArgs)
 		{
+			ThrowNull(this.lastLogInfo, nameof(HoodBotFunctions), nameof(this.lastLogInfo));
 			var result = this.UpdateCurrentStatus(this.lastLogInfo.Title + '.');
 			var entry = EntryFinder.Match(sender.Text);
 			if (!entry.Success)
@@ -300,7 +314,7 @@
 			}
 
 			entryTemplate.AddAnonymous(UniversalNow());
-			this.LogPage.Text = this.LogPage.Text.Insert(entry.Index, entryTemplate.ToString() + "\n");
+			sender.Text = sender.Text?.Insert(entry.Index, entryTemplate.ToString() + "\n");
 		}
 
 		private void LogPage_EndEntry(Page sender, EventArgs eventArgs)
@@ -321,7 +335,7 @@
 			entryTemplate.AddAnonymous(UniversalNow());
 			entryTemplate.Sort("1", "info", "2", "3", "notes");
 
-			sender.Text = sender.Text
+			sender.Text = sender.Text?
 				.Remove(entry.Index, entry.Length)
 				.Insert(entry.Index, entryTemplate.ToString() + "\n");
 		}
@@ -329,8 +343,18 @@
 		private void PostResultsToRequestPage(string title, string result)
 		{
 			this.RequestsPage.Load();
+			if (this.RequestsPage.IsMissing)
+			{
+				throw new InvalidOperationException("RequestsPage missing.");
+			}
+
 			var sectionedPage = new SectionedPage(this.RequestsPage.Text);
 			var section = sectionedPage.FindLastSection(title);
+			if (section == null)
+			{
+				throw new InvalidOperationException("Section not found!");
+			}
+
 			var lastLine = Regex.Match(section.Text, "^(?<colons>:*).", RegexOptions.Multiline | RegexOptions.RightToLeft);
 			var colons = lastLine.Success ? lastLine.Groups["colons"].Value : string.Empty;
 			colons += ':';
@@ -340,7 +364,7 @@
 			}
 
 			section.Text = section.Text.TrimEnd() + '\n' + colons + result;
-			if (!result.Contains("~~~"))
+			if (!result.Contains("~~~", StringComparison.Ordinal))
 			{
 				section.Text += " ~~~~";
 			}
@@ -363,24 +387,24 @@
 		private void PostResultsToUserTalkPage(string userName, string sectionTitle, string text)
 		{
 			var user = new User(this.Site, userName);
-			user.NewTalkPageMessage(sectionTitle, text, "New Message from " + this.Site.User.Name);
+			user.NewTalkPageMessage(sectionTitle, text, "New Message from " + this.user.Name);
 		}
 
-		private void PrivateResetResultsPage() => this.ResultsPage = new Page(this.Site, this.Site.User.FullPageName + "/Results");
+		private void PrivateResetResultsPage() => this.ResultsPage = new Page(this.Site, this.user.FullPageName + "/Results");
 		#endregion
 
 		#region Private Classes
 		private class ResultInfo
 		{
-			public ResultInfo(string user, string title)
+			public ResultInfo(string? user, string? title)
 			{
 				this.Title = title;
 				this.User = user;
 			}
 
-			public string Title { get; set; }
+			public string? Title { get; set; }
 
-			public string User { get; set; }
+			public string? User { get; set; }
 		}
 		#endregion
 	}

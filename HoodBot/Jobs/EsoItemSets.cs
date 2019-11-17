@@ -29,7 +29,7 @@
 		#region Constructors
 		[JobInfo("Item Sets", "ESO")]
 		public EsoItemSets(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo) => this.botFunctions = site.UserFunctions as HoodBotFunctions;
+			: base(site, asyncInfo) => this.botFunctions = (HoodBotFunctions)site.UserFunctions;
 		#endregion
 
 		#region Public Override Properties
@@ -63,21 +63,21 @@
 			EsoReplacer.Initialize(this);
 			this.StatusWriteLine("Fetching data");
 			var csvData = this.botFunctions.NativeClient.Get(SetSummaryPage);
-			var parser = new CsvFile();
-			parser.ReadText(csvData, true);
-			this.ProgressMaximum = parser.Count + 2;
+			var csvFile = new CsvFile();
+			csvFile.ReadText(csvData, true);
+			this.ProgressMaximum = csvFile.Count + 2;
 			this.Progress++;
 
 			this.StatusWriteLine("Updating");
 			var sets = new List<PageData>();
-			foreach (var row in parser)
+			foreach (var row in csvFile)
 			{
 				if (row["id"] == "1100")
 				{
 					continue;
 				}
 
-				var setName = row["setName"].Replace(@"\'", "'");
+				var setName = row["setName"].Replace(@"\'", "'", StringComparison.Ordinal);
 				var bonusDescription = row["setBonusDesc"];
 				if (bonusDescription[0] != '(')
 				{
@@ -179,7 +179,7 @@
 					{
 						foreach (var link in page.Links)
 						{
-							if (link.PageName.Contains(" (set)"))
+							if (link.PageName.Contains(" (set)", StringComparison.OrdinalIgnoreCase))
 							{
 								titles.Add(link);
 								this.sets.Add(link.PageName, title.Value);
@@ -260,7 +260,7 @@
 			sb.Remove(sb.Length - 5, 4);
 
 			var text = sb.ToString();
-			pageData.IsNonTrivial = EsoReplacer.CompareReplacementText(this, page.Text.Substring(start, end - start), text, page.FullPageName);
+			pageData.IsNonTrivial = EsoReplacer.CompareReplacementText(this, page.Text[start..end], text, page.FullPageName);
 			text = EsoReplacer.FirstLinksOnly(this.Site, text);
 
 			page.Text = OnlineUpdateRegex.Replace(page.Text.Substring(0, start), this.PatchNumberReplacer) + text + page.Text.Substring(end);

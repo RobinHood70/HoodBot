@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Text;
 	using static RobinHood70.WikiCommon.Globals;
@@ -23,7 +24,7 @@
 				var sb = new StringBuilder();
 				foreach (var item in parameter.Value)
 				{
-					sb.Append(item.Contains("|") ? '\x1f' + item + '\x1f' : '|' + item);
+					sb.Append(item.Contains('|', StringComparison.Ordinal) ? '\x1f' + item + '\x1f' : '|' + item);
 				}
 
 				if (sb.Length > 0 && sb[0] == '|')
@@ -43,7 +44,7 @@
 				return "|";
 			}
 
-			var last = value[value.Length - 1];
+			var last = value[^1];
 			if (last == '|' || last == '=' || last == '\x1f')
 			{
 				value += '|';

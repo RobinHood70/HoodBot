@@ -5,17 +5,17 @@
 	public class VariableItem
 	{
 		#region Constructors
-		public VariableItem(IReadOnlyDictionary<string, string> dictionary, string subset)
+		public VariableItem(IReadOnlyDictionary<string, string> dictionary, string? subset)
 		{
-			this.Dictionary = new VariableDictionary(dictionary);
+			this.Dictionary = dictionary;
 			this.Subset = subset;
 		}
 		#endregion
 
 		#region Public Properties
-		public VariableDictionary Dictionary { get; }
+		public IReadOnlyDictionary<string, string> Dictionary { get; }
 
-		public string Subset { get; }
+		public string? Subset { get; }
 		#endregion
 	}
 }

@@ -27,7 +27,7 @@
 			link = link.Trim();
 			if (link.StartsWith("[[", StringComparison.Ordinal) && link.EndsWith("]]", StringComparison.Ordinal))
 			{
-				link = link.Substring(2, link.Length - 4);
+				link = link[2..^2];
 				link = link.Trim();
 			}
 
@@ -47,7 +47,7 @@
 			split = page.Split(TextArrays.Colon, 2);
 			this.Namespace = split.Length == 1 ? string.Empty : split[0];
 
-			var pageName = split[split.Length - 1].Trim();
+			var pageName = split[^1].Trim();
 			if (pageName.Length == 0)
 			{
 				this.PageName = pageName;
@@ -129,8 +129,8 @@
 		/// <remarks>No location information is included, so this is most useful when you simply need to scan links rather than alter them.</remarks>
 		public static IEnumerable<WikiLink> FindAllLinks(string txt)
 		{
-			var matches = LinkFinder().Matches(txt);
-			foreach (Match match in matches)
+			var matches = (IEnumerable<Match>)LinkFinder().Matches(txt);
+			foreach (var match in matches)
 			{
 				yield return new WikiLink(match);
 			}
@@ -145,9 +145,9 @@
 			value.Length > 4 &&
 			value[0] == '[' &&
 			value[1] == '[' &&
-			value[value.Length - 2] == ']' &&
-			value[value.Length - 1] == ']' &&
-			value.Substring(2, value.Length - 4).IndexOfAny(TextArrays.SquareBrackets) == -1;
+			value[^2] == ']' &&
+			value[^1] == ']' &&
+			value[2..^2].IndexOfAny(TextArrays.SquareBrackets) == -1;
 
 		/// <summary>Creates a <see cref="Regex"/> to find all links.</summary>
 		/// <returns>A <see cref="Regex"/> that finds all links.</returns>

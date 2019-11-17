@@ -27,7 +27,7 @@
 		/// <param name="txt">The text to normalize.</param>
 		/// <remarks>Numerous parts of the parser rely on linebreaks being <c>\n</c>. This method provides offers a way to ensure that line endings conform to that expectation. This also removes null characters because while the parser can handle them fine, C# doesn't do so well with them in terms of displaying strings and such, and there really is no reason you should have null characters in wikitext anyway.</remarks>
 		/// <returns>The normalized text.</returns>
-		public static string Normalize(string txt) => EolNormalizer.Replace(txt, "\n").Replace("\0", string.Empty);
+		public static string Normalize(string txt) => EolNormalizer.Replace(txt, "\n").Replace("\0", string.Empty, StringComparison.Ordinal);
 
 		/// <summary>Parses the specified text.</summary>
 		/// <param name="text">The text to parse.</param>
@@ -57,7 +57,7 @@
 			where T : IWikiNode
 		{
 			var parser = Parse(txt);
-			return (parser.Count == 1 && parser.First.Value is T node)
+			return (parser.Count == 1 && parser.First is LinkedListNode<IWikiNode> first && first.Value is T node)
 				? node
 				: throw new ArgumentException(CurrentCulture(Resources.MalformedNodeText, typeof(T).Name, callerName));
 		}

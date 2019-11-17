@@ -77,31 +77,31 @@ namespace RobinHood70.WallE.Eve.Modules
 				categories: DeserializeCategories(result["categories"]),
 				categoriesHtml: (string?)result["categorieshtml"],
 				displayTitle: (string?)result["displaytitle"],
-				externalLinks: result["externallinks"].ToReadOnlyList<string>(),
-				headHtml: (string?)result["headhtml"].FromBCSubElements(),
-				images: result["images"].ToReadOnlyList<string>(),
-				indicators: result["indicators"].ToBCDictionary(),
+				externalLinks: result["externallinks"].GetList<string>(),
+				headHtml: (string?)result["headhtml"].GetBCSubElements(),
+				images: result["images"].GetList<string>(),
+				indicators: result["indicators"].GetBCDictionary(),
 				interwikiLinks: result["iwlinks"].GetInterwikiLinks(),
-				javaScriptConfigurationVariables: result["jsconfigvars"].ToStringDictionary<string>(),
+				javaScriptConfigurationVariables: result["jsconfigvars"].GetStringDictionary<string>(),
 				languageLinks: DeserializeLanguageLinks(result["langlinks"]),
 				limitReportData: DeserializeLimitReportData(result["limitreportdata"]),
 				limitReportHtml: (string?)result["limitreporthtml"],
 				links: DeserializeLinks(result["links"]),
-				moduleScripts: result["modulescripts"].ToReadOnlyList<string>(),
-				moduleStyles: result["modulestyles"].ToReadOnlyList<string>(),
-				modules: result["modules"].ToReadOnlyList<string>(),
+				moduleScripts: result["modulescripts"].GetList<string>(),
+				moduleStyles: result["modulestyles"].GetList<string>(),
+				modules: result["modules"].GetList<string>(),
 				pageId: (long?)result["pageid"] ?? 0,
 				parseTree: (string?)result["parsetree"],
-				parsedSummary: (string?)result["parsedsummary"].FromBCSubElements(),
-				preSaveTransformText: (string?)result["psttext"].FromBCSubElements(),
-				properties: result["properties"].ToBCDictionary(),
+				parsedSummary: (string?)result["parsedsummary"].GetBCSubElements(),
+				preSaveTransformText: (string?)result["psttext"].GetBCSubElements(),
+				properties: result["properties"].GetBCDictionary(),
 				redirects: result["redirects"].GetRedirects(this.Wal.InterwikiPrefixes, this.SiteVersion),
 				revisionId: (long?)result["revid"] ?? 0,
 				sections: DeserializeSections(result["sections"]),
 				templates: DeserializeLinks(result["templates"]),
 				text: (string?)result["text"],
 				title: (string?)result["title"],
-				wikiText: (string?)result["wikitext"].FromBCSubElements());
+				wikiText: (string?)result["wikitext"].GetBCSubElements());
 		}
 
 		// 1.26 and 1.27 always emit a warning when the Modules property is specified, even though only one section of it is deprecated, so swallow that.
@@ -137,7 +137,10 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				foreach (var link in subResult)
 				{
-					langLinks.Add(link.GetLanguageLink());
+					if (link.GetLanguageLink() is LanguageLinksItem item)
+					{
+						langLinks.Add(item);
+					}
 				}
 			}
 
@@ -175,7 +178,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				foreach (var result in linkResults)
 				{
-					links.Add(new ParseLinksItem((int)result.MustHave("ns"), result.MustHaveString("title"), result["exists"].ToBCBool()));
+					links.Add(new ParseLinksItem((int)result.MustHave("ns"), result.MustHaveString("title"), result["exists"].GetBCBool()));
 				}
 			}
 

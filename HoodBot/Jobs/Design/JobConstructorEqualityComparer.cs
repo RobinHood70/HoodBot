@@ -33,6 +33,11 @@
 				return true;
 			}
 
+			if (x.Parameters == null || y.Parameters == null)
+			{
+				return x.Parameters == null && y.Parameters == null;
+			}
+
 			if (x.Parameters.Count != y.Parameters.Count)
 			{
 				return false;

@@ -7,7 +7,7 @@
 	public class PauseTokenSource
 	{
 		internal static readonly Task CompletedTask = Task.FromResult(true);
-		private volatile TaskCompletionSource<bool> paused;
+		private volatile TaskCompletionSource<bool>? paused;
 
 		public bool IsPaused
 		{

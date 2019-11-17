@@ -8,31 +8,19 @@
 	[SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Instantiated by generic new().")]
 	internal class ActiveSkill : Skill
 	{
-		#region Public Properties
-		public int LearnedLevel { get; private set; }
-
-		public IList<Morph> Morphs { get; } = new List<Morph>(3);
-
-		public string SkillType { get; private set; }
-		#endregion
-
-		#region Internal Override Methods
-		public override void GetData(IDataRecord data)
-		{
-			base.GetData(data);
-			this.LearnedLevel = (int)data["learnedLevel"];
-			this.SkillType = (string)data["type"];
-		}
-
-		public override void GetRankData(IDataRecord data)
+		public ActiveSkill(IDataRecord row)
+			: base(row)
 		{
 			static string FormatRange(int num) => ((double)num / 100).ToString("0.##");
 
+			this.LearnedLevel = (int)row["learnedLevel"];
+			this.SkillType = (string)row["type"];
+
 			Morph morph;
-			var morphNum = (sbyte)data["morph"];
+			var morphNum = (sbyte)row["morph"];
 			if (morphNum == this.Morphs.Count)
 			{
-				morph = new Morph(data);
+				morph = new Morph(row);
 				this.Morphs.Add(morph);
 			}
 			else
@@ -40,13 +28,13 @@
 				morph = this.Morphs[this.Morphs.Count - 1];
 			}
 
-			morph.Abilities.Add(new Ability(data));
-			morph.ChannelTimes.Add(EsoGeneral.TimeToText((int)data["channelTime"]));
-			morph.Costs.Add((int)data["cost"]);
-			morph.Durations.Add(EsoGeneral.TimeToText((int)data["duration"]));
-			morph.Radii.Add(FormatRange((int)data["radius"]));
-			var maxRange = FormatRange((int)data["maxRange"]);
-			var minRange = FormatRange((int)data["minRange"]);
+			morph.Abilities.Add(new Ability(row));
+			morph.ChannelTimes.Add(EsoGeneral.TimeToText((int)row["channelTime"]));
+			morph.Costs.Add((int)row["cost"]);
+			morph.Durations.Add(EsoGeneral.TimeToText((int)row["duration"]));
+			morph.Radii.Add(FormatRange((int)row["radius"]));
+			var maxRange = FormatRange((int)row["maxRange"]);
+			var minRange = FormatRange((int)row["minRange"]);
 			var range = minRange == "0" ? maxRange : string.Concat(minRange, "-", maxRange);
 			morph.Ranges.Add(range);
 
@@ -56,6 +44,15 @@
 			}
 		}
 
+		#region Public Properties
+		public int LearnedLevel { get; }
+
+		public IList<Morph> Morphs { get; } = new List<Morph>(3);
+
+		public string SkillType { get; }
+		#endregion
+
+		#region Internal Override Methods
 		public override bool Check()
 		{
 			var retval = false;

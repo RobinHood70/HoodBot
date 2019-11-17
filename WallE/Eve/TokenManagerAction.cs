@@ -17,7 +17,7 @@
 		#endregion
 
 		#region Public Override Methods
-		public override string SessionToken(string type)
+		public override string? SessionToken(string type)
 		{
 			type = TokenManagerFunctions.ValidateTokenType(ValidTypes, type, Csrf, Edit);
 			if (this.SessionTokens.Count == 0)

@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -27,22 +26,19 @@
 			var smallImages = new List<FilePage>();
 			foreach (var result in list)
 			{
-				if (result is FilePage image)
+				if (result is FilePage image && image.LatestFileRevision is FileRevision imageInfo && imageInfo.Height < 64 && imageInfo.Width < 64)
 				{
-					var fileInfo = image.LatestFileRevision;
-					if (fileInfo.Height < 64 && fileInfo.Width < 64)
-					{
-						smallImages.Add(image);
-					}
+					smallImages.Add(image);
 				}
 			}
 
-			Debug.WriteLine(smallImages.Count);
 			smallImages.Sort(TitleComparer<Page>.Instance);
-
 			foreach (var image in smallImages)
 			{
-				this.WriteLine($"* {SiteLink.LinkTextFromTitle(image)} ({image.LatestFileRevision.Width}x{image.LatestFileRevision.Height})");
+				if (image.LatestFileRevision is FileRevision imageInfo)
+				{
+					this.WriteLine($"* {SiteLink.LinkTextFromTitle(image)} ({imageInfo.Width}x{imageInfo.Height})");
+				}
 			}
 		}
 	}

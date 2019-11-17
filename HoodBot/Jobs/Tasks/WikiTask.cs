@@ -3,10 +3,8 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
-	using System.Text.RegularExpressions;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -22,20 +20,13 @@
 
 	public abstract class WikiTask : ISiteSpecific
 	{
-		#region Fields
-		private readonly Regex alreadyProposed;
-		private readonly Regex neverPropose;
-		#endregion
-
 		#region Constructors
 		protected WikiTask(WikiTask parent)
 		{
 			ThrowNull(parent, nameof(parent));
 			this.Site = parent.Site;
 			this.Parent = parent;
-			this.Job = parent.Job ?? (parent as WikiJob);
-			this.alreadyProposed = Template.Find(this.Site.UserFunctions.DeleteTemplates);
-			this.neverPropose = Template.Find(this.Site.UserFunctions.DoNotDeleteTemplates);
+			this.Job = parent.Job ?? (WikiJob)parent;
 		}
 
 		protected WikiTask([ValidatedNotNull] Site site)
@@ -46,17 +37,17 @@
 		#endregion
 
 		#region Public Events
-		public event StrongEventHandler<WikiTask, EventArgs> Completed;
+		public event StrongEventHandler<WikiTask, EventArgs>? Completed;
 
-		public event StrongEventHandler<WikiTask, EventArgs> RunningTasks;
+		public event StrongEventHandler<WikiTask, EventArgs>? RunningTasks;
 
-		public event StrongEventHandler<WikiTask, EventArgs> Started;
+		public event StrongEventHandler<WikiTask, EventArgs>? Started;
 		#endregion
 
 		#region Public Properties
-		public WikiJob Job { get; } // Top-level Job object.
+		public WikiJob? Job { get; } // Top-level Job object.
 
-		public WikiTask Parent { get; } // Immediate parent, in the event of task nesting.
+		public WikiTask? Parent { get; } // Immediate parent, in the event of task nesting.
 
 		public int ProgressMaximum { get; protected set; } = 1;
 
@@ -114,43 +105,6 @@
 			}
 
 			return total;
-		}
-
-		public ProposedDeletionResult CanDelete(Page page)
-		{
-			ThrowNull(page, nameof(page));
-			if (!page.IsLoaded)
-			{
-				page.Load();
-			}
-
-			return
-				!page.Exists ? ProposedDeletionResult.NonExistent :
-				this.neverPropose.IsMatch(page.Text) ? ProposedDeletionResult.FoundNoDeleteRequest :
-				this.alreadyProposed.IsMatch(page.Text) ? ProposedDeletionResult.AlreadyProposed :
-				ProposedDeletionResult.Add;
-		}
-
-		public ProposedDeletionResult ProposeForDeletion(Page page, Template deletionTemplate)
-		{
-			ThrowNull(page, nameof(page));
-			ThrowNull(deletionTemplate, nameof(deletionTemplate));
-			var retval = this.CanDelete(page);
-			if (retval == ProposedDeletionResult.Add)
-			{
-				var deletionText = deletionTemplate.ToString();
-				var status = ChangeStatus.Unknown;
-				while (status != ChangeStatus.Success && status != ChangeStatus.EditingDisabled)
-				{
-					page.Text =
-						page.Namespace == MediaWikiNamespaces.Template ? "<noinclude>" + deletionText + "</noinclude>" :
-						page.IsRedirect ? page.Text + '\n' + deletionText :
-						deletionText + '\n' + page.Text;
-					status = page.Save("Propose for deletion", false);
-				}
-			}
-
-			return retval;
 		}
 		#endregion
 

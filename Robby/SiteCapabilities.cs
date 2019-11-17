@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.Robby
 {
 	using System;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Net;
 	using System.Text.RegularExpressions;
 	using System.Xml.Linq;
@@ -39,7 +40,7 @@
 
 		/// <summary>Initializes a new instance of the <see cref="SiteCapabilities"/> class.</summary>
 		/// <param name="client">The <see cref="IMediaWikiClient"/> client to be used to access the site.</param>
-		public SiteCapabilities(IMediaWikiClient client)
+		public SiteCapabilities([NotNull] IMediaWikiClient? client)
 		{
 			ThrowNull(client, nameof(client));
 			this.client = client;
@@ -102,7 +103,7 @@
 			{
 				var urib = new UriBuilder(fullHost)
 				{
-					Path = tryPath.Replace("index.php", "api.php").Substring(0, offset + 8)
+					Path = tryPath.Replace("index.php", "api.php", StringComparison.Ordinal).Substring(0, offset + 8)
 				};
 				tryLoc = urib.Uri;
 				tryPath = tryPath.Substring(0, offset + 1);

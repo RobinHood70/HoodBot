@@ -12,7 +12,7 @@
 		#endregion
 
 		#region Public Indexers
-		public Place this[string name]
+		public Place? this[string name]
 		{
 			get
 			{
@@ -32,8 +32,7 @@
 		#region Public Methods
 		public void Add(Place place)
 		{
-			var titleName = place.TitleName;
-			if (!this.ambiguousNames.Contains(titleName) && !this.secondary.ContainsKey(titleName))
+			if (place.TitleName is string titleName && !this.ambiguousNames.Contains(titleName) && !this.secondary.ContainsKey(titleName))
 			{
 				if (this.secondary.ContainsKey(titleName))
 				{

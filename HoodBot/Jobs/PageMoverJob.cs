@@ -7,7 +7,6 @@
 	using System.Text.RegularExpressions;
 	using Newtonsoft.Json;
 	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.HoodBot.Jobs.Tasks;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -59,8 +58,10 @@
 		#endregion
 
 		#region Fields
+		private readonly Regex alreadyProposed;
 		private readonly Dictionary<Title, Title> movedPages = new Dictionary<Title, Title>();
-		private string logDetails = null;
+		private readonly Regex doNotDelete;
+		private string? logDetails = null;
 		#endregion
 
 		#region Constructors
@@ -69,6 +70,8 @@
 		{
 			this.BacklinkTitles = new TitleCollection(site);
 			this.EditPages = new TitleCollection(site);
+			this.alreadyProposed = Template.Find(this.Site.UserFunctions.DeleteTemplates);
+			this.doNotDelete = Template.Find(this.Site.UserFunctions.DoNotDeleteTemplates);
 		}
 		#endregion
 
@@ -137,7 +140,7 @@
 
 		protected bool DoReport { get; set; } = true;
 
-		protected Action<EditJob, Page> EditPageMethod { get; } = null;
+		protected Action<EditJob, Page>? EditPageMethod { get; } = null;
 
 		protected TitleCollection EditPages { get; }
 
@@ -157,12 +160,16 @@
 
 		protected RedirectOption RedirectOption { get; set; } = RedirectOption.Suppress;
 
-		protected ICollection<Replacement> Replacements { get; private set; }
+		protected IList<Replacement> Replacements { get; } = new List<Replacement>();
 
 		protected bool SuppressRedirects { get; set; } = true;
 		#endregion
 
 		#region Protected Methods
+
+		protected void AddReplacement(string from, string to) => this.Replacements.Add(new Replacement(this.Site, from, to));
+
+		protected void AddReplacement(Title from, Title to) => this.Replacements.Add(new Replacement(from, to));
 
 		// [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Optiona, to be called only when necessary.")]
 		protected void LoadReplacementsFromFile(string fileName)
@@ -171,7 +178,7 @@
 			foreach (var line in repFile)
 			{
 				var rep = line.Split('\t');
-				this.Replacements.Add(new Replacement(this.Site, rep[0].Trim(), rep[1].Trim()));
+				this.AddReplacement(rep[0].Trim(), rep[1].Trim());
 			}
 		}
 		#endregion
@@ -209,14 +216,20 @@
 			this.StatusWriteLine("Getting Replacement List");
 			if (File.Exists(ReplacementStatusFile) && File.Exists(BacklinksFile))
 			{
+				// TODO: Rewrite to manually create and populate replacements so class can respect properties that should be read-only.
 				var repFile = File.ReadAllText(ReplacementStatusFile);
-				this.Replacements = JsonConvert.DeserializeObject<ICollection<Replacement>>(repFile, titleConverter);
+				if (JsonConvert.DeserializeObject<ICollection<Replacement>>(repFile, titleConverter) is ICollection<Replacement> replacements)
+				{
+					this.Replacements.Clear();
+					this.Replacements.AddRange(replacements);
+				}
+
 				var backlinkLines = File.ReadAllLines(BacklinksFile, Encoding.Unicode);
 				this.BacklinkTitles.Add(backlinkLines);
 			}
 			else
 			{
-				this.Replacements = this.PopulateReplacements();
+				this.PopulateReplacements();
 				var backlinks = this.SetupAndGetBacklinks();
 				this.BacklinkTitles.AddRange(backlinks);
 				var newFile = JsonConvert.SerializeObject(this.Replacements, Formatting.Indented, titleConverter);
@@ -233,7 +246,7 @@
 		#endregion
 
 		#region Protected Abstract Methods
-		protected abstract ICollection<Replacement> PopulateReplacements();
+		protected abstract void PopulateReplacements();
 		#endregion
 
 		#region Protected Virtual Methods
@@ -410,11 +423,14 @@
 						this.MoveOptions.HasFlag(MoveOptions.MoveTalkPage),
 						this.MoveOptions.HasFlag(MoveOptions.MoveSubPages),
 						this.RedirectOption == RedirectOption.Suppress);
-					foreach (var entry in result.Value)
+					if (result.Value is IDictionary<string, string> values)
 					{
-						var from = new Title(this.Site, entry.Key);
-						var to = new Title(this.Site, entry.Value);
-						this.movedPages.Add(from, to);
+						foreach (var entry in values)
+						{
+							var from = new Title(this.Site, entry.Key);
+							var to = new Title(this.Site, entry.Value);
+							this.movedPages.Add(from, to);
+						}
 					}
 				}
 
@@ -444,30 +460,31 @@
 					backlinkTitles.AddRange(tempTitles);
 					if (this.FollowUpActions.HasFlag(FollowUpActions.ProposeUnused) && tempTitles.Count > 0)
 					{
-						var prodResult = fromPages.ValueOrDefault(replacement.From.FullPageName) is Page fromPage ? this.CanDelete(fromPage) : ProposedDeletionResult.NonExistent;
-						switch (prodResult)
+						var fromPage = fromPages.ValueOrDefault(replacement.From.FullPageName);
+						if (fromPage == null || !fromPage.Exists)
 						{
-							case ProposedDeletionResult.AlreadyProposed:
-								replacement.Action = ReplacementAction.Skip;
-								replacement.ActionReason = "Already proposed for deletion";
-								break;
-							case ProposedDeletionResult.FoundNoDeleteRequest:
-								if (this.MoveAction != MoveAction.Skip)
-								{
-									replacement.Action = ReplacementAction.Move;
-									replacement.ActionReason = "No links, but {{tl|Linked image}} present - move instead of proposing for deletion";
-								}
+							throw new ArgumentNullException($"Page doesn't exist: {replacement.From}");
+						}
 
-								break;
-							case ProposedDeletionResult.NonExistent:
-								throw new ArgumentNullException($"Page doesn't exist: {replacement.From}");
-							case ProposedDeletionResult.Add:
-								replacement.Action = ReplacementAction.ProposeForDeletion;
-								replacement.ActionReason = "Unused";
-								replacement.DeleteReason = "Unused";
-								this.EditPages.Add(replacement.From);
-
-								break;
+						if (this.doNotDelete.IsMatch(fromPage.Text))
+						{
+							if (this.MoveAction != MoveAction.Skip)
+							{
+								replacement.Action = ReplacementAction.Move;
+								replacement.ActionReason = "No links, but {{tl|Linked image}} present - move instead of proposing for deletion";
+							}
+						}
+						else if (this.alreadyProposed.IsMatch(fromPage.Text))
+						{
+							replacement.Action = ReplacementAction.Skip;
+							replacement.ActionReason = "Already proposed for deletion";
+						}
+						else
+						{
+							replacement.Action = ReplacementAction.ProposeForDeletion;
+							replacement.ActionReason = "Unused";
+							replacement.DeleteReason = "Unused";
+							this.EditPages.Add(replacement.From);
 						}
 					}
 				}
@@ -522,7 +539,7 @@
 		{
 			var sb = new StringBuilder();
 			var replacementsMade = false;
-			var lines = match.Groups["content"].Value.Replace("\r", string.Empty).Split('\n');
+			var lines = match.Groups["content"].Value.Replace("\r", string.Empty, StringComparison.Ordinal).Split('\n');
 			foreach (var line in lines)
 			{
 				var pageName = line.Split(TextArrays.Pipe, 2)[0];
@@ -587,7 +604,7 @@
 			this.CustomReplaceGeneral(page);
 		}
 
-		private (PageCollection fromPages, PageCollection toPages) GetReplacementPages()
+		private (PageCollection FromTitles, PageCollection ToTitles) GetReplacementPages()
 		{
 			var fromTitles = new TitleCollection(this.Site);
 			var toTitles = new TitleCollection(this.Site);
@@ -597,20 +614,36 @@
 				toTitles.Add(replacement.To);
 			}
 
-			PageCollection fromPages = null;
+			var fromPages = PageCollection.Unlimited(this.Site);
 			if (this.FollowUpActions.HasFlag(FollowUpActions.ProposeUnused))
 			{
-				fromPages = fromTitles.Load(); // Need content to check proposed deletion status.
+				fromPages.GetTitles(fromTitles);
 			}
 
-			PageCollection toPages = null;
+			var toPages = PageCollection.Unlimited(this.Site, new PageLoadOptions(PageModules.None)); // Only worried about existence, so don't load anything other than that.
 			if (!this.MoveOverExisting)
 			{
-				toPages = toTitles.Load(PageModules.None); // Only worried about existence, so don't load anything other than that.
+				toPages.GetTitles(toTitles);
 				toPages.RemoveNonExistent();
 			}
 
 			return (fromPages, toPages);
+		}
+
+		private void ProposeForDeletion(Page page, Template deletionTemplate)
+		{
+			ThrowNull(page, nameof(page));
+			ThrowNull(deletionTemplate, nameof(deletionTemplate));
+			var deletionText = deletionTemplate.ToString();
+			var status = ChangeStatus.Unknown;
+			while (status != ChangeStatus.Success && status != ChangeStatus.EditingDisabled)
+			{
+				page.Text =
+					page.Namespace == MediaWikiNamespaces.Template ? "<noinclude>" + deletionText + "</noinclude>" :
+					page.IsRedirect ? page.Text + '\n' + deletionText :
+					deletionText + '\n' + page.Text;
+				status = page.Save("Propose for deletion", false);
+			}
 		}
 		#endregion
 	}

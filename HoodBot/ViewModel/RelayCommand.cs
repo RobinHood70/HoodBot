@@ -7,7 +7,7 @@
 	{
 		#region Fields
 		private readonly Action action;
-		private readonly Func<bool> canExecute;
+		private readonly Func<bool>? canExecute;
 		#endregion
 
 		#region Constructors

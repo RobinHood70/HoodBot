@@ -365,14 +365,14 @@
 		/// <param name="reason">The reason for the move.</param>
 		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
-		public ChangeValue<IDictionary<string?, string?>> Move(string to, string reason, bool suppressRedirect) => this.Move(to, reason, false, false, suppressRedirect);
+		public ChangeValue<IDictionary<string, string>> Move(string to, string reason, bool suppressRedirect) => this.Move(to, reason, false, false, suppressRedirect);
 
 		/// <summary>Moves the title to the name specified.</summary>
 		/// <param name="to">The location to move the title to.</param>
 		/// <param name="reason">The reason for the move.</param>
 		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
-		public ChangeValue<IDictionary<string?, string?>> Move(Title to, string reason, bool suppressRedirect)
+		public ChangeValue<IDictionary<string, string>> Move(Title to, string reason, bool suppressRedirect)
 		{
 			ThrowNull(to, nameof(to));
 			return this.Move(to.FullPageName, reason, false, false, suppressRedirect);
@@ -385,12 +385,12 @@
 		/// <param name="moveSubpages">if set to <see langword="true"/>, moves all sub-pages of the original page.</param>
 		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
-		public ChangeValue<IDictionary<string?, string?>> Move(string to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
+		public ChangeValue<IDictionary<string, string>> Move(string to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
 		{
 			ThrowNull(to, nameof(to));
 			ThrowNull(reason, nameof(reason));
 			return this.Site.PublishChange(
-				new Dictionary<string?, string?>() { [this.FullPageName] = to },
+				new Dictionary<string, string>() { [this.FullPageName] = to },
 				this,
 				new Dictionary<string, object?>
 				{
@@ -412,7 +412,7 @@
 					};
 
 					var status = ChangeStatus.Success;
-					var dict = new Dictionary<string?, string?>();
+					var dict = new Dictionary<string, string>();
 					try
 					{
 						var result = this.Site.AbstractionLayer.Move(input);
@@ -422,9 +422,13 @@
 							{
 								this.Site.PublishWarning(this, CurrentCulture(Resources.MovePageWarning, this.FullPageName, to, item.Error.Info));
 							}
-							else
+							else if (item.From != null && item.To != null)
 							{
 								dict.Add(item.From, item.To);
+							}
+							else
+							{
+								throw new InvalidOperationException(); // item.From and/or item.To was null.
 							}
 						}
 
@@ -438,7 +442,7 @@
 						status = ChangeStatus.Failure;
 					}
 
-					return new ChangeValue<IDictionary<string?, string?>>(status, dict);
+					return new ChangeValue<IDictionary<string, string>>(status, dict);
 				});
 		}
 
@@ -449,7 +453,7 @@
 		/// <param name="moveSubpages">if set to <see langword="true"/>, moves all sub-pages of the original page.</param>
 		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
-		public ChangeValue<IDictionary<string?, string?>> Move(Title to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
+		public ChangeValue<IDictionary<string, string>> Move(Title to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
 		{
 			ThrowNull(to, nameof(to));
 			return this.Move(to.FullPageName, reason, moveTalk, moveSubpages, suppressRedirect);
@@ -572,6 +576,7 @@
 		protected virtual bool Protect(ProtectInput input)
 		{
 			ThrowNull(input, nameof(input));
+			ThrowNull(input.Protections, nameof(input), nameof(input.Protections));
 			var inputCount = new List<ProtectInputItem>(input.Protections).Count;
 			var result = this.Site.AbstractionLayer.Protect(input);
 

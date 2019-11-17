@@ -7,7 +7,7 @@
 		/// <param name="title">The title for the log entry.</param>
 		/// <param name="details">The details for the log entry (typically, job parameters or notes).</param>
 		/// <param name="readOnly">If set to <see langword="true"/>, indicates that the job is read-only.</param>
-		public LogInfo(string title, string details, bool readOnly)
+		public LogInfo(string title, string? details, bool readOnly)
 		{
 			this.Title = title;
 			this.Details = details;
@@ -16,7 +16,7 @@
 
 		/// <summary>Gets any additional details about the log entry.</summary>
 		/// <value>The additional details.</value>
-		public string Details { get; }
+		public string? Details { get; }
 
 		/// <summary>Gets a value indicating whether the log entry represents a read-only operation.</summary>
 		/// <value><see langword="true"/> if [read only]; otherwise, <see langword="false"/>.</value>

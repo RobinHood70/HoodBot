@@ -15,6 +15,7 @@
 		public override Title ReadJson(JsonReader reader, Type objectType, Title existingValue, bool hasExistingValue, JsonSerializer serializer)
 		{
 			ThrowNull(reader, nameof(reader));
+			ThrowNull(reader.Value, nameof(reader), nameof(reader.Value));
 			return new Title(this.site, (string)reader.Value);
 		}
 

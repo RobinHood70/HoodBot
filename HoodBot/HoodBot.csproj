@@ -15,6 +15,7 @@
 		<NeutralLanguage>en-CA</NeutralLanguage>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -22,6 +23,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Old Jobs\EsoMatchIcons.cs" />
+	  <Compile Remove="Old Jobs\UndoLocChanges.cs" />
 	  <Compile Remove="Old Jobs\UntranscludeLore.cs" />
 	</ItemGroup>
 
@@ -30,6 +33,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Include="Old Jobs\EsoMatchIcons.cs" />
+	  <None Include="Old Jobs\UndoLocChanges.cs" />
 	  <None Include="Old Jobs\UntranscludeLore.cs" />
 	</ItemGroup>
 

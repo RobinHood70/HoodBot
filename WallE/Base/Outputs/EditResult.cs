@@ -15,7 +15,7 @@ namespace RobinHood70.WallE.Base
 	public class EditResult
 	{
 		#region Constructors
-		internal EditResult(string result, long pageId, string title, EditFlags flags, string? contentModel, long oldRevisionId, long newRevisionId, DateTime? newTimestamp, Dictionary<string, string> captchaData)
+		internal EditResult(string result, long pageId, string title, EditFlags flags, string? contentModel, long oldRevisionId, long newRevisionId, DateTime? newTimestamp, IReadOnlyDictionary<string, string> captchaData)
 		{
 			this.Result = result;
 			this.PageId = pageId;
@@ -32,7 +32,7 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public string? ContentModel { get; }
 
-		public Dictionary<string, string> CaptchaData { get; }
+		public IReadOnlyDictionary<string, string> CaptchaData { get; }
 
 		public EditFlags Flags { get; }
 

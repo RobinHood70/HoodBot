@@ -47,15 +47,18 @@
 			var ignored = new List<DeckCodeInfo>();
 			foreach (var item in codeData)
 			{
-				if (item.Name == item.TypeName)
+				if (item.Name != null)
 				{
-					var title = new Title(this.Site, UespNamespaces.Legends, item.Name);
-					titles.Add(title);
-					lookup.Add(title, item);
-				}
-				else
-				{
-					ignored.Add(item);
+					if (item.Name == item.TypeName)
+					{
+						var title = new Title(this.Site, UespNamespaces.Legends, item.Name);
+						titles.Add(title);
+						lookup.Add(title, item);
+					}
+					else
+					{
+						ignored.Add(item);
+					}
 				}
 			}
 
@@ -70,7 +73,7 @@
 			{
 				var item = lookup[title];
 				var page = this.Pages[title.FullPageName];
-				if (page != null && !page.IsMissing)
+				if (page != null && !page.IsMissing && item.DeckCode != null)
 				{
 					page.Text = this.cardSummaryFinder.Replace(page.Text, (match) => this.CardSummary_Replacer(match, item.DeckCode), 1);
 				}
@@ -99,18 +102,18 @@
 		private class DeckCodeInfo
 		{
 			[JsonProperty("english_name")]
-			public string Name { get; set; }
+			public string? Name { get; set; }
 
 			[JsonProperty("collection")]
-			public string Collection { get; set; }
+			public string? Collection { get; set; }
 
 			[JsonProperty("export_code")]
-			public string DeckCode { get; set; }
+			public string? DeckCode { get; set; }
 
 			[JsonProperty("type_name")]
-			public string TypeName { get; set; }
+			public string? TypeName { get; set; }
 
-			public override string ToString() => this.Name;
+			public override string ToString() => this.Name ?? Globals.Unknown;
 		}
 		#endregion
 	}

@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using System.Diagnostics.CodeAnalysis;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
@@ -58,7 +59,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				user: result.MustHaveString("user"),
 				userId: (long)result.MustHave("userID"),
 				reason: result.MustHaveString("reason"),
-				expiry: result["expiry"].ToNullableDate(),
+				expiry: result["expiry"].GetNullableDate(),
 				id: string.IsNullOrEmpty((string?)result["id"]) ? 0 : (long?)result["id"] ?? 0,
 				flags: result.GetFlags(
 					("allowusertalk", BlockFlags.AllowUserTalk),
@@ -67,14 +68,14 @@ namespace RobinHood70.WallE.Eve.Modules
 					("hidename", BlockFlags.Hidden),
 					("nocreate", BlockFlags.NoCreate),
 					("noemail", BlockFlags.NoEmail)),
-				watchUser: result["watchuser"].ToBCBool());
+				watchUser: result["watchuser"].GetBCBool());
 		}
 
 		[DoesNotReturn]
 		protected override BlockResult DeserializeCustom(string? result)
 		{
 			// Throw a custom error, since MW 1.25 and under handle this incorrectly.
-			if (result != null && result.Contains("must be an instance of Block"))
+			if (result != null && result.Contains("must be an instance of Block", StringComparison.OrdinalIgnoreCase))
 			{
 				throw WikiException.General("reblock-failed", EveMessages.ReblockFailed);
 			}

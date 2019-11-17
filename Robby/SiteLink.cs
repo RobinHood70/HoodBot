@@ -192,15 +192,18 @@
 		/// <remarks>No location information is included, so this is most useful when you simply need to scan links rather than alter them.</remarks>
 		public static IEnumerable<SiteLink> FindLinks(Site site, string text, bool convertFileLinks)
 		{
-			var matches = Find().Matches(text);
-			foreach (Match match in matches)
+			var matches = (IEnumerable<Match>)Find().Matches(text);
+			foreach (var match in matches)
 			{
-				var paramGroup = match.Groups["parameter"];
-				var pagename = match.Value.Substring(0, paramGroup.Success ? paramGroup.Captures[0].Index - match.Index : match.Length).Trim(new[] { '[', ']', '|', ' ' });
-				var title = new TitleParts(site, pagename);
-				yield return convertFileLinks && !title.LeadingColon && title.Namespace == MediaWikiNamespaces.File
-					? new ImageLink(site, match.Value)
-					: new SiteLink(site, match.Value);
+				if (match != null)
+				{
+					var paramGroup = match.Groups["parameter"];
+					var pagename = match.Value.Substring(0, paramGroup.Success ? paramGroup.Captures[0].Index - match.Index : match.Length).Trim(new[] { '[', ']', '|', ' ' });
+					var title = new TitleParts(site, pagename);
+					yield return convertFileLinks && !title.LeadingColon && title.Namespace == MediaWikiNamespaces.File
+						? new ImageLink(site, match.Value)
+						: new SiteLink(site, match.Value);
+				}
 			}
 		}
 
@@ -215,9 +218,9 @@
 			value.Length > 4 &&
 			value[0] == '[' &&
 			value[1] == '[' &&
-			value[value.Length - 2] == ']' &&
-			value[value.Length - 1] == ']' &&
-			value.Substring(2, value.Length - 4).IndexOfAny(TextArrays.SquareBrackets) == -1;
+			value[^2] == ']' &&
+			value[^1] == ']' &&
+			value[2..^2].IndexOfAny(TextArrays.SquareBrackets) == -1;
 
 		// TODO: Update to use Interwiki as well.
 

@@ -93,7 +93,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			return new BacklinksItem(
 				ns: (int)result.MustHave("ns"),
 				title: result.MustHaveString("title"),
-				isRedirect: result["redirect"].ToBCBool(),
+				isRedirect: result["redirect"].GetBCBool(),
 				pageId: (long)result.MustHave("pageid"),
 				redirects: redirects,
 				type: this.Input.LinkTypes);

@@ -89,7 +89,7 @@
 		{
 			ThrowNull(txt, nameof(txt));
 			var template = TemplateNode.FromParts(string.Empty, new[] { txt });
-			return template.Parameters.Count == 1 && template.Parameters.First.Value is ParameterNode retval
+			return template.Parameters.Count == 1 && template.Parameters.First is LinkedListNode<IWikiNode> first && first.Value is ParameterNode retval
 				? retval
 				: throw new InvalidOperationException(CurrentCulture(Resources.MalformedNodeText, nameof(ParameterNode), nameof(FromText)));
 		}
@@ -163,10 +163,10 @@
 			var name =
 				this.Anonymous
 					? string.Empty :
-				this.Name?.Count == 1 && this.Name.First.Value is TextNode nameNode
+				this.Name?.Count == 1 && this.Name.First is LinkedListNode<IWikiNode> firstName && firstName.Value is TextNode nameNode
 					? nameNode.Text
 					: "<name>";
-			var value = this.Value.Count == 1 && this.Value.First.Value is TextNode valueNode
+			var value = this.Value.Count == 1 && this.Value.First is LinkedListNode<IWikiNode> firstValue && firstValue.Value is TextNode valueNode
 				? valueNode.Text
 				: "<value>";
 			return $"|{name}={value}";

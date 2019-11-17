@@ -70,6 +70,15 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This file has no revisions or the Uri for the file is null..
+        /// </summary>
+        internal static string FileRevisionInvalid {
+            get {
+                return ResourceManager.GetString("FileRevisionInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You attempted to use an object from one site with an object from another..
         /// </summary>
         internal static string InvalidSite {

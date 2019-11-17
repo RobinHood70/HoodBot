@@ -120,6 +120,9 @@
   <data name="EmailSubjectNull" xml:space="preserve">
     <value>No e-mail subject was provided and the default subject could not be retrieved from the wiki.</value>
   </data>
+  <data name="FileRevisionInvalid" xml:space="preserve">
+    <value>This file has no revisions or the Uri for the file is null.</value>
+  </data>
   <data name="InvalidSite" xml:space="preserve">
     <value>You attempted to use an object from one site with an object from another.</value>
   </data>

@@ -34,7 +34,7 @@
 		#endregion
 
 		#region Public Override Methods
-		public override bool Equals(object obj) => obj is PauseToken ? this.Equals((PauseToken)obj) : false;
+		public override bool Equals(object? obj) => obj is PauseToken ? this.Equals((PauseToken)obj) : false;
 
 		public override int GetHashCode() => this.source?.GetHashCode() ?? 0;
 		#endregion

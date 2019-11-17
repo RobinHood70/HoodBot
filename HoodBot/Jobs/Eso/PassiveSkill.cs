@@ -1,11 +1,30 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Eso
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Data;
 	using System.Diagnostics;
 
 	internal class PassiveSkill : Skill
 	{
+		#region Constructors
+		public PassiveSkill(IDataRecord row)
+			: base(row)
+		{
+			this.SkillLine = this.SkillLine
+				.Replace(" Skills", string.Empty, StringComparison.Ordinal)
+				.Replace("Dark Elf", "Dunmer", StringComparison.Ordinal)
+				.Replace("High Elf", "Altmer", StringComparison.Ordinal)
+				.Replace("Wood Elf", "Bosmer", StringComparison.Ordinal);
+			if (this.Class == "Craft")
+			{
+				this.Class = "Crafting";
+			}
+
+			((List<PassiveRank>)this.Ranks).Add(new PassiveRank(row));
+		}
+		#endregion
+
 		#region Public Properties
 		public int Id => this.Ranks[this.Ranks.Count - 1].Id;
 
@@ -33,22 +52,6 @@
 
 			return retval;
 		}
-
-		public override void GetData(IDataRecord data)
-		{
-			base.GetData(data);
-			this.SkillLine = this.SkillLine
-				.Replace(" Skills", string.Empty)
-				.Replace("Dark Elf", "Dunmer")
-				.Replace("High Elf", "Altmer")
-				.Replace("Wood Elf", "Bosmer");
-			if (this.Class == "Craft")
-			{
-				this.Class = "Crafting";
-			}
-		}
-
-		public override void GetRankData(IDataRecord data) => (this.Ranks as List<PassiveRank>).Add(new PassiveRank(data));
 		#endregion
 	}
 }

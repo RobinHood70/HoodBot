@@ -17,12 +17,15 @@
 		#endregion
 
 		#region Constructors
-		protected WikiJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo, params WikiTask[] tasks)
+		protected WikiJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo, params WikiTask[]? tasks)
 			: base(site)
 		{
 			ThrowNull(asyncInfo, nameof(asyncInfo));
 			this.AsyncInfo = asyncInfo;
-			this.Tasks.AddRange(tasks);
+			if (tasks != null)
+			{
+				this.Tasks.AddRange(tasks);
+			}
 		}
 		#endregion
 
@@ -47,7 +50,7 @@
 		#region Public Methods
 		public void StatusWrite(string status)
 		{
-			this.AsyncInfo.StatusMonitor.Report(status);
+			this.AsyncInfo.StatusMonitor?.Report(status);
 			this.FlowControlAsync();
 		}
 
@@ -71,14 +74,12 @@
 		#region Protected Virtual Methods
 		protected virtual void FlowControlAsync()
 		{
-			var pause = this.AsyncInfo.PauseToken;
-			if (pause.IsPaused)
+			if (this.AsyncInfo.PauseToken is PauseToken pause && pause.IsPaused)
 			{
 				pause.WaitWhilePausedAsync().Wait();
 			}
 
-			var cancel = this.AsyncInfo.CancellationToken;
-			if (cancel != CancellationToken.None && cancel.IsCancellationRequested)
+			if (this.AsyncInfo.CancellationToken is CancellationToken cancel && cancel != CancellationToken.None && cancel.IsCancellationRequested)
 			{
 				cancel.ThrowIfCancellationRequested();
 			}
@@ -86,15 +87,15 @@
 
 		protected virtual void UpdateProgress()
 		{
-			this.AsyncInfo.ProgressMonitor.Report((double)this.Progress / this.ProgressMaximum);
+			this.AsyncInfo.ProgressMonitor?.Report((double)this.Progress / this.ProgressMaximum);
 			this.FlowControlAsync();
 		}
 
 		// Same as UpdateProgress/UpdateStatus but with only one pause/cancel check.
 		protected virtual void UpdateProgressWrite(string status)
 		{
-			this.AsyncInfo.ProgressMonitor.Report((double)this.Progress / this.ProgressMaximum);
-			this.AsyncInfo.StatusMonitor.Report(status);
+			this.AsyncInfo.ProgressMonitor?.Report((double)this.Progress / this.ProgressMaximum);
+			this.AsyncInfo.StatusMonitor?.Report(status);
 			this.FlowControlAsync();
 		}
 

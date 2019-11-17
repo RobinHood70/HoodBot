@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Base
 	public class CreateAccountResult
 	{
 		#region Constructors
-		internal CreateAccountResult(string result, Dictionary<string, string> captchaData, string? token, long userId, string? userName, IReadOnlyList<WarningsItem> warnings)
+		internal CreateAccountResult(string result, IReadOnlyDictionary<string, string> captchaData, string? token, long userId, string? userName, IReadOnlyList<WarningsItem> warnings)
 		{
 			this.CaptchaData = captchaData;
 			this.UserName = userName;

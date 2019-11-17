@@ -214,11 +214,29 @@ namespace RobinHood70.HoodBot.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No wiki has been selected..
+        /// </summary>
+        public static string NoWiki {
+            get {
+                return ResourceManager.GetString("NoWiki", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Password:.
         /// </summary>
         public static string Password {
             get {
                 return ResourceManager.GetString("Password", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You must enter a password, either in the saved wiki information or on th emain form..
+        /// </summary>
+        public static string PasswordNotSet {
+            get {
+                return ResourceManager.GetString("PasswordNotSet", resourceCulture);
             }
         }
         

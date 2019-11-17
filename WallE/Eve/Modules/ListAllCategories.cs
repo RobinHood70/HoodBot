@@ -59,7 +59,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			return new AllCategoriesItem(
 				category: result.MustHaveBCString("category"),
 				files: (int?)result["files"] ?? 0,
-				hidden: result["hidden"].ToBCBool(),
+				hidden: result["hidden"].GetBCBool(),
 				pages: (int?)result["pages"] ?? 0,
 				size: (int?)result["size"] ?? 0,
 				subcats: (int?)result["subcats"] ?? 0);

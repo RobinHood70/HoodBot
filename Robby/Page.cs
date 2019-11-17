@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
@@ -17,6 +18,7 @@
 		private Revision? currentRevision;
 		private Uri? editPath;
 		private PageLoadOptions? loadOptionsUsed;
+		private string text = string.Empty;
 		#endregion
 
 		#region Constructors
@@ -178,7 +180,12 @@
 
 		/// <summary>Gets or sets the text, if revisions were requested in the last load operation.</summary>
 		/// <value>The page text.</value>
-		public string? Text { get; set; }
+		[AllowNull]
+		public string Text
+		{
+			get => this.text;
+			set => this.text = value ?? string.Empty;
+		}
 
 		/// <summary>Gets a value indicating whether the <see cref="Text" /> property has been modified.</summary>
 		/// <value><see langword="true" /> if the text no longer matches the first revision; otherwise, <see langword="false" />.</value>
@@ -259,11 +266,6 @@
 		/// <returns>A value indicating the change status of the edit.</returns>
 		public ChangeStatus Save(string editSummary, bool isMinor, Tristate createOnly, bool recreateIfJustDeleted, bool isBotEdit)
 		{
-			if (this.Text == null)
-			{
-				return this.CurrentRevision?.Text == null ? ChangeStatus.NoEffect : throw new InvalidOperationException(Resources.PageTextNull);
-			}
-
 			if (!this.TextModified)
 			{
 				return ChangeStatus.NoEffect;
@@ -355,10 +357,7 @@
 			if (pageItem.Properties?.Count > 0)
 			{
 				properties.Clear();
-				foreach (var property in pageItem.Properties)
-				{
-					properties.Add(property.Key, property.Value);
-				}
+				properties.AddRange(pageItem.Properties);
 			}
 
 			// Templates

@@ -25,7 +25,7 @@ namespace RobinHood70.WikiClasses
 		#region Fields
 		private readonly int paramEndToken;
 		private readonly int paramStartToken;
-		private readonly string txt;
+		private readonly string text;
 		private readonly List<Token> tokens = new List<Token>();
 		private readonly Stack<FoundDelimiter> delimiterStack = new Stack<FoundDelimiter>();
 		private int tokenIndex;
@@ -40,7 +40,7 @@ namespace RobinHood70.WikiClasses
 		/// <param name="ignoreWhiteSpaceRules">if set to <see langword="true"/> [ignore white space rules].</param>
 		public ParameterParser(string txtToParse, bool isLink, bool parseAllAsValues, bool ignoreWhiteSpaceRules)
 		{
-			this.txt = txtToParse ?? string.Empty;
+			this.text = txtToParse ?? string.Empty;
 			this.Tokenize(isLink ? "[[" : "{{");
 			if (this.tokens.Count == 0)
 			{
@@ -142,12 +142,12 @@ namespace RobinHood70.WikiClasses
 		#endregion
 
 		#region Private Methods
-		private (Delimiter? delimiter, bool isTerminator) CheckForDelimiter(int index)
+		private (Delimiter? Delimiter, bool IsTerminator) CheckForDelimiter(int index)
 		{
 			if (this.delimiterStack.Count > 0)
 			{
 				var sought = this.delimiterStack.Peek();
-				if (string.Compare(sought.Delimiter.Terminator, 0, this.txt, index, sought.Delimiter.Terminator.Length, StringComparison.Ordinal) == 0)
+				if (string.Compare(sought.Delimiter.Terminator, 0, this.text, index, sought.Delimiter.Terminator.Length, StringComparison.Ordinal) == 0)
 				{
 					return (sought.Delimiter, true);
 				}
@@ -155,7 +155,7 @@ namespace RobinHood70.WikiClasses
 
 			foreach (var delimiter in AllDelimiters)
 			{
-				if (string.Compare(delimiter.Marker, 0, this.txt, index, delimiter.Marker.Length, StringComparison.Ordinal) == 0)
+				if (string.Compare(delimiter.Marker, 0, this.text, index, delimiter.Marker.Length, StringComparison.Ordinal) == 0)
 				{
 					return (delimiter, false);
 				}
@@ -243,7 +243,14 @@ namespace RobinHood70.WikiClasses
 			return retval;
 		}
 
-		private string GetString(int start, int end) => start == end ? this.txt.Substring(this.tokens[start].Start, this.tokens[start].Length) : this.txt.Substring(this.tokens[start].Start, this.tokens[end].Start + this.tokens[end].Length - this.tokens[start].Start);
+		private string GetString(int start, int end)
+		{
+			var startToken = this.tokens[start];
+			var endToken = this.tokens[end];
+			return start == end
+				? this.text.Substring(startToken.Start, startToken.Length)
+				: this.text[startToken.Start..(endToken.Start + endToken.Length)];
+		}
 
 #pragma warning disable CA1502 // Avoid excessive complexity - intend for this to be written out, in time.
 		private Token? GetToken(int index)
@@ -251,9 +258,9 @@ namespace RobinHood70.WikiClasses
 		{
 			var start = index;
 			var tokenType = TokenType.Unknown;
-			while (index < this.txt.Length)
+			while (index < this.text.Length)
 			{
-				if (this.txt[index] == '=')
+				if (this.text[index] == '=')
 				{
 					if (tokenType == TokenType.Unknown)
 					{
@@ -264,7 +271,7 @@ namespace RobinHood70.WikiClasses
 					break;
 				}
 
-				if (this.txt[index] == '|')
+				if (this.text[index] == '|')
 				{
 					if (tokenType == TokenType.Unknown)
 					{
@@ -294,7 +301,7 @@ namespace RobinHood70.WikiClasses
 						if (delimiter.NoParse)
 						{
 							// Special cases - no other delimiters count until we find a terminator.
-							var end = this.txt.IndexOf(delimiter.Terminator, index + delimiter.Marker.Length, StringComparison.Ordinal);
+							var end = this.text.IndexOf(delimiter.Terminator, index + delimiter.Marker.Length, StringComparison.Ordinal);
 							if (end != -1)
 							{
 								index = end + delimiter.Terminator.Length;
@@ -330,7 +337,7 @@ namespace RobinHood70.WikiClasses
 					}
 				}
 
-				if (char.IsWhiteSpace(this.txt[index]))
+				if (char.IsWhiteSpace(this.text[index]))
 				{
 					if (tokenType == TokenType.Unknown)
 					{
@@ -376,7 +383,7 @@ namespace RobinHood70.WikiClasses
 
 		private void Tokenize(string marker)
 		{
-			if (this.txt.Length > 0)
+			if (this.text.Length > 0)
 			{
 				var (delimiter, isTerminator) = this.CheckForDelimiter(0);
 				if (isTerminator || delimiter == null || delimiter.Marker != marker)
@@ -402,7 +409,7 @@ namespace RobinHood70.WikiClasses
 			}
 		}
 
-		private string TokenText(Token token) => this.txt.Substring(token.Start, token.Length);
+		private string TokenText(Token token) => this.text.Substring(token.Start, token.Length);
 		#endregion
 
 		#region Private Structs

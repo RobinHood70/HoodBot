@@ -72,7 +72,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				ns: (int?)result["ns"],
 				title: (string?)result["title"],
 				logPageId: (long?)result["logpage"] ?? 0,
-				tags: tags.ToReadOnlyList<string>());
+				tags: tags.GetList<string>());
 			result.ParseLogEvent(item, string.Empty, KnownProps, this.getUserId);
 
 			return item;

@@ -17,7 +17,7 @@
 		{
 		}
 
-		public PropVariables(WikiAbstractionLayer wal, VariablesInput input, IPageSetGenerator pageSetGenerator)
+		public PropVariables(WikiAbstractionLayer wal, VariablesInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 		}
@@ -34,9 +34,15 @@
 		#endregion
 
 		#region Public Static Methods
-		public static PropVariables CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new PropVariables(wal, input as VariablesInput, pageSetGenerator);
+		public static PropVariables CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
+			(input ?? throw ArgumentNull(nameof(input))) is VariablesInput propInput
+				? new PropVariables(wal, propInput, pageSetGenerator)
+				: throw InvalidParameterType(nameof(input), nameof(CategoriesInput), input.GetType().Name);
 
-		public static PropVariables CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new PropVariables(wal, input as VariablesInput);
+		public static PropVariables CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
+			(input ?? throw ArgumentNull(nameof(input))) is VariablesInput propInput
+				? new PropVariables(wal, propInput)
+				: throw InvalidParameterType(nameof(input), nameof(CategoriesInput), input.GetType().Name);
 		#endregion
 
 		#region Protected Override Methods
@@ -53,15 +59,15 @@
 		protected override VariableItem GetItem(JToken result, PageItem page)
 		{
 			ThrowNull(result, nameof(result));
-			var vars = result["vars"].ToObject<Dictionary<string, string>>();
-			var subset = (string)result["subset"];
+			var vars = result["vars"].GetStringDictionary<string>();
+			var subset = (string?)result["subset"];
 			return new VariableItem(vars, subset);
 		}
 
 		protected override ICollection<VariableItem> GetMutableList(PageItem page)
 		{
 			var varPage = page as VariablesPageItem ?? throw new InvalidOperationException();
-			return varPage.Variables as ICollection<VariableItem>;
+			return (ICollection<VariableItem>)varPage.Variables;
 		}
 		#endregion
 	}

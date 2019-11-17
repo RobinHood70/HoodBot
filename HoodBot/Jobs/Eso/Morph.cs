@@ -30,7 +30,7 @@
 
 		public VariableData<int> Costs { get; } = new VariableData<int>();
 
-		public string Description { get; private set; }
+		public string? Description { get; private set; }
 
 		public VariableData<string> Durations { get; } = new VariableData<string>();
 
@@ -76,7 +76,7 @@
 				calcCosts.Add(this.CalculatedCost(cost, patchVersion));
 			}
 
-			return this.FullName(calcCosts.ToString());
+			return this.FullName(calcCosts.ToString() ?? string.Empty);
 		}
 
 		public string FullName(int cost) => this.FullName(cost.ToString(CultureInfo.InvariantCulture));
@@ -174,7 +174,10 @@
 				var descriptions = new List<string>();
 				foreach (var fragment in variableDescriptions)
 				{
-					descriptions.Add(fragment.ToString());
+					if (fragment.ToString() is string fragmentText)
+					{
+						descriptions.Add(fragmentText);
+					}
 				}
 
 				this.Description = string.Join("'''", descriptions);

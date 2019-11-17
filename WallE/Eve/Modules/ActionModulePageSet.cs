@@ -129,10 +129,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			AddToDictionary(result["normalized"], this.normalized);
 			var redirects = result["redirects"].GetRedirects(this.Wal.InterwikiPrefixes, this.SiteVersion);
-			foreach (var item in redirects)
-			{
-				this.redirects.Add(item.Key, item.Value);
-			}
+			this.redirects.AddRange(redirects);
 		}
 
 		protected void ParseResponse(string? response, IList<TOutput> pages)

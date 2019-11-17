@@ -86,7 +86,9 @@
 		// Enum.ToString() has a bug that can cause 0-valued enums to appear in outputs if there's more than one of them (e.g., None = 0, Default = None). Enum.GetName() does not seem to suffer from this, so we use that instead.
 		[SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Not a normalization")]
 		public Request Add(string name, Enum value) =>
-			value != null ? this.Add(name, Enum.GetName(value.GetType(), value).ToLowerInvariant()) : this;
+			value?.GetType().GetEnumName(value) is string enumName
+				? this.Add(name, enumName.ToLowerInvariant())
+				: this;
 
 		/// <summary>Adds a DateTime parameter.</summary>
 		/// <param name="name">The parameter name.</param>
@@ -252,7 +254,10 @@
 			foreach (var prop in values.GetUniqueFlags())
 			{
 				// Enum.ToString() has a bug that can cause 0-valued enums to appear in outputs if there's more than one of them (e.g., None = 0, Default = None). Enum.GetName() does not seem to suffer from this.
-				list.Add(Enum.GetName(values.GetType(), prop).ToLowerInvariant());
+				if (values.GetType().GetEnumName(prop) is string enumName)
+				{
+					list.Add(enumName.ToLowerInvariant());
+				}
 			}
 
 			this.Add(name, list);
@@ -511,31 +516,6 @@
 			{
 				param.Accept(visitor);
 			}
-		}
-
-		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
-		/// <param name="key">The key of the value to get.</param>
-		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
-		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
-		public bool TryGetValue(string key, out IParameter? value)
-		{
-			if (this.Dictionary != null)
-			{
-				return this.Dictionary.TryGetValue(key, out value);
-			}
-
-			foreach (var testItem in this)
-			{
-				if (this.GetKeyForItem(testItem) == key)
-				{
-					value = testItem;
-					return true;
-				}
-			}
-
-			value = null;
-			return false;
 		}
 
 		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>

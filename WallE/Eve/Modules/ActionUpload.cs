@@ -68,7 +68,7 @@ namespace RobinHood70.WallE.Eve.Modules
 						switch (name)
 						{
 							case "duplicate":
-								duplicates = value.ToReadOnlyList<string>();
+								duplicates = value.GetList<string>();
 								break;
 							case "nochange":
 								if ((string?)value["timestamp"] is string ts)

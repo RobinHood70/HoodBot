@@ -4,7 +4,7 @@
 
 	/// <summary>Represents a parameter with file information.</summary>
 	/// <seealso cref="Parameter{T}" />
-	public class FileParameter : Parameter<(string fileName, byte[] data)>
+	public class FileParameter : Parameter<(string FileName, byte[] Data)>
 	{
 		#region Constructors
 

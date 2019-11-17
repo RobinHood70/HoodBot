@@ -6,8 +6,8 @@
 	[AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
 	public class JobParameterAttribute : Attribute
 	{
-		public object DefaultValue { get; set; }
+		public object? DefaultValue { get; set; }
 
-		public string Label { get; set; }
+		public string? Label { get; set; }
 	}
 }

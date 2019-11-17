@@ -2,7 +2,6 @@
 namespace RobinHood70.WallE.Eve.Modules
 {
 	using System.Collections.Generic;
-	using System.Text;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -32,14 +31,14 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(request, nameof(request));
 			ThrowNull(input, nameof(input));
-			if (input.Xml != null)
+			if (input.GetXmlData() is byte[] xmlData)
 			{
 				request.Type = RequestType.PostMultipart;
+				request.Add("xml", "dummyName", xmlData);
 			}
 
 			request
 				.AddIfNotNull("summary", input.Summary)
-				.Add("xml", "dummyName", Encoding.ASCII.GetBytes(input.Xml))
 				.AddIfNotNull("interwikisource", input.InterwikiSource)
 				.AddIfNotNull("interwikipage", input.InterwikiPage)
 				.Add("fullhistory", input.FullHistory)
@@ -59,7 +58,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					ns: (int)result.MustHave("ns"),
 					title: result.MustHaveString("title"),
 					revisions: (int?)item["revisions"] ?? 0,
-					invalid: item["invalid"].ToBCBool()));
+					invalid: item["invalid"].GetBCBool()));
 			}
 
 			return output;

@@ -61,7 +61,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				ns: (int?)result["ns"],
 				title: (string?)result["title"],
 				pageId: (long?)result["pageid"] ?? 0,
-				redirect: result["redirect"].ToBCBool());
+				redirect: result["redirect"].GetBCBool());
 
 		protected override ICollection<TranscludedInItem> GetMutableList(PageItem page) => (ICollection<TranscludedInItem>)page.TranscludedIn;
 		#endregion

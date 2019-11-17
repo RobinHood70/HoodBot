@@ -51,15 +51,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(result, nameof(result));
 			return new ExpandTemplatesResult(
-				categories: result["categories"].ToReadOnlyList<string>(),
-				javaScriptConfigVars: result["jsconfigvars"].ToStringDictionary<string>(),
-				moduleScripts: result["modulescripts"].ToReadOnlyList<string>(),
-				moduleStyles: result["modulestyles"].ToReadOnlyList<string>(),
-				modules: result["modules"].ToReadOnlyList<string>(),
+				categories: result["categories"].GetList<string>(),
+				javaScriptConfigVars: result["jsconfigvars"].GetStringDictionary<string>(),
+				moduleScripts: result["modulescripts"].GetList<string>(),
+				moduleStyles: result["modulestyles"].GetList<string>(),
+				modules: result["modules"].GetList<string>(),
 				parseTree: (string?)result["parsetree"],
-				properties: result["properties"].ToBCDictionary(),
+				properties: result["properties"].GetBCDictionary(),
 				timeToLive: TimeSpan.FromSeconds((int?)result["ttl"] ?? 0),
-				vol: result["volatile"].ToBCBool(),
+				vol: result["volatile"].GetBCBool(),
 				wikiText: (string?)result["wikitext"]);
 		}
 		#endregion

@@ -30,7 +30,7 @@
 		/// <param name="txt">The text.</param>
 		public Section(string title, int level, string txt)
 		{
-			this.Title = new PaddedString(title);
+			this.Title = new PaddedString(title).Value;
 			this.Level = level;
 			this.Text = txt;
 		}

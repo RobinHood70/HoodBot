@@ -132,7 +132,7 @@
 		/// <param name="destination">The destination.</param>
 		/// <param name="user">The user.</param>
 		/// <param name="subject">The title.</param>
-		public virtual void InitializeResult(ResultDestination destination, string user, string subject)
+		public virtual void InitializeResult(ResultDestination destination, string user, string? subject)
 		{
 		}
 
@@ -172,7 +172,7 @@
 		/// <summary>Returns a value indicating whether the log entry represented in the <paramref name="info"/> parameter should be logged.</summary>
 		/// <param name="info">The log information to be checked.</param>
 		/// <returns>A value indicating whether the log entry represented in the <paramref name="info"/> parameter should be logged.</returns>
-		public virtual bool ShouldLog(LogInfo info) =>
+		public virtual bool ShouldLog(LogInfo? info) =>
 			info == null ? false :
 			((info.ReadOnly && this.LogJobTypes.HasFlag(LogJobTypes.Read)) ||
 			(!info.ReadOnly && this.LogJobTypes.HasFlag(LogJobTypes.Write)));

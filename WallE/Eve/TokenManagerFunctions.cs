@@ -10,7 +10,7 @@
 		#region Public Static Methods
 		public static string TrimTokenKey(string key) =>
 			key == null ? throw ArgumentNull(nameof(key)) :
-			key.EndsWith("token", StringComparison.Ordinal) ? key.Substring(0, key.Length - 5) :
+			key.EndsWith("token", StringComparison.Ordinal) ? key[0..^5] :
 			key;
 
 		public static string ValidateTokenType(HashSet<string> validTypes, string type, string replace, string replaceWith)

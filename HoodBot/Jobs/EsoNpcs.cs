@@ -91,7 +91,7 @@
 				{ "gender", npc.Gender.ToString() },
 				{ "difficulty", npc.Difficulty > 0 ? npc.Difficulty.ToString() : string.Empty },
 				{ "reaction", npc.Reaction },
-				{ "pickpocket", npc.PickpocketDifficulty > 0 ? npc.PickpocketDifficulty.ToString() : null },
+				{ "pickpocket", npc.PickpocketDifficulty > 0 ? npc.PickpocketDifficulty.ToString() : string.Empty },
 				{ "loottype", npc.LootType },
 				{ "faction", string.Empty },
 			};
@@ -170,11 +170,11 @@
 			//// checkPages.Sort();
 			foreach (var title in titlesOnly)
 			{
-				var npc = (title as NpcTitle).Npc;
+				var npc = ((NpcTitle)title).Npc;
 				var page = checkPages[title.FullPageName];
 				if (page.Exists)
 				{
-					string issue;
+					string? issue;
 					if (page.IsDisambiguation)
 					{
 						issue = "a disambiguation with no clear NPC link";

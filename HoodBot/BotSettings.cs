@@ -9,11 +9,15 @@
 	public class BotSettings
 	{
 		#region Fields
-		private string botDataFolder;
+		private string botDataFolder = DefaultBotDataFolder;
 		#endregion
 
 		#region Constructors
 		public BotSettings(string location) => this.Location = location;
+		#endregion
+
+		#region Public Static Properties
+		public static string DefaultBotDataFolder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BotData");
 		#endregion
 
 		#region Public Properties
@@ -30,7 +34,7 @@
 			}
 		}
 
-		public string CurrentName { get; set; }
+		public string? CurrentName { get; set; }
 
 		public string Location { get; set; }
 
@@ -53,7 +57,7 @@
 
 				if (!IsPathValid(retval.BotDataFolder))
 				{
-					retval.BotDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BotData");
+					retval.botDataFolder = DefaultBotDataFolder;
 				}
 
 				return retval;
@@ -67,7 +71,7 @@
 		#endregion
 
 		#region Public Methods
-		public WikiInfo GetCurrentItem()
+		public WikiInfo? GetCurrentItem()
 		{
 			if (this.CurrentName == null)
 			{
@@ -108,9 +112,8 @@
 			File.WriteAllText(this.Location, output);
 		}
 
-		// No null-checking here or Add button breaks.
 		// TODO: See if there's more that needs to be done for Add. If nothing else, it doesn't sort after adding. Was that intentional?
-		public void UpdateCurrentWiki(WikiInfo wiki) => this.CurrentName = wiki?.DisplayName;
+		public void UpdateCurrentWiki(WikiInfo? wiki) => this.CurrentName = wiki?.DisplayName;
 		#endregion
 
 		#region Private Static Methods

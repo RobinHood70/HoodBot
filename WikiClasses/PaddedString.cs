@@ -71,14 +71,6 @@
 		public string Value { get; set; }
 		#endregion
 
-		#region Implicit Conversion Operators
-
-		/// <summary>Performs an implicit conversion from <see cref="PaddedString"/> to <see cref="string"/>.</summary>
-		/// <param name="parameter">The parameter.</param>
-		/// <returns>The result of the conversion.</returns>
-		public static implicit operator string(PaddedString parameter) => parameter?.Value ?? string.Empty;
-		#endregion
-
 		#region Public Operators
 
 		/// <summary>Implements the operator ==.</summary>
@@ -177,12 +169,12 @@
 		/// <summary>Returns a string that represents this instance.</summary>
 		/// <returns>A <see cref="string"/> that represents this instance.</returns>
 		/// <remarks>This is always the same as the <see cref="Value"/> property.</remarks>
-		public override string ToString() => this.Value;
+		public override string ToString() => this.LeadingWhiteSpace + this.Value + this.TrailingWhiteSpace;
 
 		/// <summary>Determines whether the specified <see cref="object"/>, is equal to this instance.</summary>
 		/// <param name="obj">The <see cref="object"/> to compare with this instance.</param>
 		/// <returns><see langword="true"/> if the specified <see cref="object"/> is equal to this instance; otherwise, <see langword="false"/>.</returns>
-		public override bool Equals(object obj) => this.Equals(obj as PaddedString);
+		public override bool Equals(object? obj) => this.Equals(obj as PaddedString);
 
 		/// <summary>Returns a hash code for this instance.</summary>
 		/// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>

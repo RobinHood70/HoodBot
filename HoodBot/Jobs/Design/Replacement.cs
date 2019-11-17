@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
 	using System;
+	using System.Diagnostics.CodeAnalysis;
 	using Newtonsoft.Json;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -36,21 +37,25 @@
 			this.To = to;
 		}
 
+#pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
 		[JsonConstructor]
 		private Replacement()
 		{
 		}
+#pragma warning restore CS8618
 		#endregion
 
 		#region Public Properties
 		public ReplacementAction Action { get; set; } = ReplacementAction.Unknown;
 
-		public string ActionReason { get; set; }
+		public string? ActionReason { get; set; }
 
-		public string DeleteReason { get; set; }
+		public string? DeleteReason { get; set; }
 
+		[AllowNull]
 		public Title From { get; set; }
 
+		[AllowNull]
 		public Title To { get; set; }
 		#endregion
 
@@ -75,13 +80,13 @@
 			return TitleComparer<Title>.Instance.Compare(this.From, other.From);
 		}
 
-		public bool Equals(Replacement other) => !(other is null) && this.From == other.From; // Nothing else is checked for equality, as multiple values for the same From are invalid.
+		public bool Equals(Replacement? other) => !(other is null) && this.From == other.From; // Nothing else is checked for equality, as multiple values for the same From are invalid.
 		#endregion
 
 		#region Public Override Methods
-		public override bool Equals(object obj) => this.Equals(obj as Replacement);
+		public override bool Equals(object? obj) => this.Equals(obj as Replacement);
 
-		public override int GetHashCode() => this.From.GetHashCode();
+		public override int GetHashCode() => this.From?.GetHashCode() ?? 0;
 
 		public override string ToString() => $"{this.Action}: {this.From.FullPageName} → {this.To.FullPageName}";
 		#endregion

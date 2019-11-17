@@ -19,15 +19,15 @@
 			foreach (var page in pages)
 			{
 				var find = Template.Find(allNames);
-				var matches = find.Matches(page.Text);
-				foreach (Match match in matches)
+				var matches = (IEnumerable<Match>)find.Matches(page.Text);
+				foreach (var match in matches)
 				{
 					var template = Template.Parse(match.Value);
 					template.ForcePositionalNames();
 					allTemplates.Add(page.FullPageName, template);
 					foreach (var param in template)
 					{
-						if (headersLookup.Add(param.Name))
+						if (param.Name != null && headersLookup.Add(param.Name))
 						{
 							headerNames.Add(param.Name);
 						}

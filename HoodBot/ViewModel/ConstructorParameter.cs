@@ -20,8 +20,9 @@
 			}
 
 			this.Attribute = attributes.Length == 1 ? attributes[0] as JobParameterAttribute : null;
-			this.Label = this.Attribute?.Label ?? UnCamelCase(parameter.Name);
-			this.Name = parameter.Name;
+			var name = parameter.Name ?? throw PropertyNull(nameof(parameter), nameof(parameter.Name));
+			this.Label = this.Attribute?.Label ?? UnCamelCase(name);
+			this.Name = name;
 			this.Type = parameter.ParameterType;
 			if (this.Attribute?.DefaultValue != null)
 			{
@@ -35,7 +36,7 @@
 		#endregion
 
 		#region Public Properties
-		public JobParameterAttribute Attribute { get; }
+		public JobParameterAttribute? Attribute { get; }
 
 		public string Label { get; }
 
@@ -43,17 +44,17 @@
 
 		public Type Type { get; }
 
-		public object Value { get; set; }
+		public object? Value { get; set; }
 		#endregion
 
 		#region Public Methods
-		public bool Equals(ConstructorParameter other) => other == null
+		public bool Equals(ConstructorParameter? other) => other == null
 			? false
 			: this.Label == other.Label && this.Name == other.Name && this.Type == other.Type && this.Value == other.Value;
 		#endregion
 
 		#region Public Override Methods
-		public override bool Equals(object obj) => this.Equals(obj as ConstructorParameter);
+		public override bool Equals(object? obj) => this.Equals(obj as ConstructorParameter);
 
 		public override int GetHashCode() => CompositeHashCode(this.Label, this.Name, this.Type, this.Value);
 
@@ -61,13 +62,17 @@
 		#endregion
 
 		#region Private Static Methods
-		private static string FormatMember(ParameterInfo parameter) => parameter.Member.ToString()
-			.Substring(5)
-			.Replace("System.", string.Empty)
-			.Replace("Collections.Generic.", string.Empty)
-			.Replace("Collections.ObjectModel.", string.Empty)
-			.Replace("RobinHood70.Robby.", string.Empty)
-			.Replace("RobinHood70.HoodBot.Jobs.Design.", string.Empty);
+		private static string FormatMember(ParameterInfo parameter)
+		{
+			var memberName = parameter.Member.ToString() ?? throw new InvalidOperationException();
+			return memberName
+					 .Substring(5)
+					 .Replace("System.", string.Empty, StringComparison.Ordinal)
+					 .Replace("Collections.Generic.", string.Empty, StringComparison.Ordinal)
+					 .Replace("Collections.ObjectModel.", string.Empty, StringComparison.Ordinal)
+					 .Replace("RobinHood70.Robby.", string.Empty, StringComparison.Ordinal)
+					 .Replace("RobinHood70.HoodBot.Jobs.Design.", string.Empty, StringComparison.Ordinal);
+		}
 
 		private static string UnCamelCase(string name)
 		{
@@ -87,7 +92,7 @@
 				}
 				else if (!char.IsUpper(c) && lastWasCapital && !didWordBreak)
 				{
-					words.Add(word.Substring(0, word.Length - 1));
+					words.Add(word[0..^1]);
 					word = word.Substring(word.Length - 1) + c;
 					didWordBreak = true;
 				}

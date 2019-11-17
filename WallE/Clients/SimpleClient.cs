@@ -25,8 +25,8 @@
 	{
 		#region Fields
 		private readonly string cookiesLocation;
+		private readonly bool useV10 = false;
 		private CookieContainer cookieContainer;
-		private bool useV10 = false;
 		#endregion
 
 		#region Constructors
@@ -50,7 +50,7 @@
 		public SimpleClient(string? contactInfo, string? cookiesLocation)
 		{
 			// Test for the Mono Z-Stream bug on Windows: http://stackoverflow.com/a/32958861/502255
-			if (HasMono && OnWindows && (DefaultAcceptEncoding.Contains("gzip") || DefaultAcceptEncoding.Contains("deflate")))
+			if (HasMono && OnWindows && (DefaultAcceptEncoding.Contains("gzip", StringComparison.OrdinalIgnoreCase) || DefaultAcceptEncoding.Contains("deflate", StringComparison.OrdinalIgnoreCase)))
 			{
 				try
 				{
@@ -191,7 +191,7 @@
 		/// <summary>Gets the text of the result returned by the given URI.</summary>
 		/// <param name="uri">The URI to get.</param>
 		/// <returns>The text of the result.</returns>
-		public string? Get(Uri uri)
+		public string Get(Uri uri)
 		{
 			using var response = this.SendRequest(uri, "GET", null, null, true);
 			return GetResponseText(response);
@@ -204,7 +204,7 @@
 		/// <param name="uri">The URI to POST data to.</param>
 		/// <param name="postData">The text to POST.</param>
 		/// <returns>The text of the result.</returns>
-		public string? Post(Uri uri, string postData)
+		public string Post(Uri uri, string postData)
 		{
 			using var response = this.SendRequest(uri, "POST", FormUrlEncoded, Encoding.UTF8.GetBytes(postData), true);
 			return GetResponseText(response);
@@ -215,7 +215,7 @@
 		/// <param name="contentType">The text of the content type. Typicially <c>x-www-form-urlencoded</c> or <c>multipart/form-data (...)</c>, but there is no restriction on values.</param>
 		/// <param name="postData">The text to POST.</param>
 		/// <returns>The text of the result.</returns>
-		public string? Post(Uri uri, string contentType, byte[] postData)
+		public string Post(Uri uri, string contentType, byte[] postData)
 		{
 			using var response = this.SendRequest(uri, "POST", contentType, postData, true);
 			return GetResponseText(response);
@@ -288,21 +288,17 @@
 			return null;
 		}
 
-		private static string? GetResponseText(HttpWebResponse response)
+		private static string GetResponseText(HttpWebResponse response)
 		{
-			if (response == null)
-			{
-				return null;
-			}
-
+			ThrowNull(response, nameof(response));
 			using var respStream = response.GetResponseStream();
 			using var reader = new StreamReader(respStream);
 			return reader.ReadToEnd();
 		}
 
+		/*
 		private static bool PerSessionUnsafeHeaderParsing(Exception ex)
 		{
-			/*
 			if (!ex.Message.Contains("Section=ResponseStatusLine"))
 			{
 				return false;
@@ -318,10 +314,10 @@
 				useUnsafeHeaderParsing.SetValue(section, true);
 				return true;
 			}
-			*/
 
 			return false;
 		}
+		*/
 		#endregion
 
 		#region Private Methods
@@ -433,9 +429,9 @@
 					response = (HttpWebResponse)request.GetResponse();
 					if (!checkMaxLag || !this.CheckDelay(response, attempts))
 					{
-						if (response.Cookies != null)
+						if (response.Cookies is IEnumerable<Cookie> cookies)
 						{
-							foreach (Cookie cookie in response.Cookies)
+							foreach (var cookie in cookies)
 							{
 								this.cookieContainer.Add(cookie);
 							}
@@ -451,11 +447,13 @@
 				{
 					response?.Dispose();
 					response = null;
+					/*
 					if (PerSessionUnsafeHeaderParsing(ex))
 					{
 						this.useV10 = true;
 						continue;
 					}
+					*/
 
 					if (ex.Response is HttpWebResponse errorResponse)
 					{
@@ -501,10 +499,19 @@
 				"System.Object",
 			};
 
-			public override Type BindToType(string assemblyName, string typeName) =>
-				ValidTypes.Contains(typeName)
-					? Type.GetType(typeName + ", " + assemblyName)
-					: throw new InvalidDataException();
+			public override Type BindToType(string assemblyName, string typeName)
+			{
+				if (ValidTypes.Contains(typeName))
+				{
+					var type = Type.GetType(typeName + ", " + assemblyName);
+					if (type != null)
+					{
+						return type;
+					}
+				}
+
+				throw new InvalidDataException();
+			}
 		}
 		#endregion
 	}

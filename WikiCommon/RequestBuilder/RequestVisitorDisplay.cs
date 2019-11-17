@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Text;
 	using static RobinHood70.WikiCommon.Globals;
@@ -60,7 +61,7 @@
 		{
 			this.BuildParameterName(parameter);
 			var value = parameter.BuildPipedValue(false);
-			this.builder.Append(EscapeDataString(value).Replace("%7C", "|").Replace("%20", "+"));
+			this.builder.Append(EscapeDataString(value).Replace("%7C", "|", StringComparison.Ordinal).Replace("%20", "+", StringComparison.Ordinal));
 		}
 
 		public void Visit(StringParameter parameter)

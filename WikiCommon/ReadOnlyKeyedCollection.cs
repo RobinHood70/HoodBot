@@ -14,6 +14,7 @@
 	/// <seealso cref="IReadOnlyList{TItem}" />
 	/// <seealso cref="IReadOnlyCollection{TItem}" />
 	public class ReadOnlyKeyedCollection<TKey, TItem> : IReadOnlyDictionary<TKey, TItem>, IReadOnlyList<TItem>
+		where TKey : notnull
 	{
 		#region Fields
 		private readonly List<TItem> items;

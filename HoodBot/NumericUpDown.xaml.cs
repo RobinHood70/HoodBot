@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot
 {
+	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.Windows;
 	using System.Windows.Controls;
@@ -15,7 +16,7 @@
 		#endregion
 
 		#region Constructors
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Windows.Controls.TextBox.set_Text(System.String)", Justification = "Needs no translation.")]
+		[SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Windows.Controls.TextBox.set_Text(System.String)", Justification = "Needs no translation.")]
 		public NumericUpDown()
 		{
 			this.InitializeComponent();
@@ -42,6 +43,7 @@
 			set => this.SetValue(StepValueProperty, value);
 		}
 
+		[SuppressMessage("Naming", "CA1721:Property names should not match get methods", Justification = "Can't rename methods and property name is the most logical.")]
 		public int Value
 		{
 			get => (int)this.GetValue(ValueProperty);
@@ -53,8 +55,7 @@
 		private static void ValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
 			var num = (int)e.NewValue;
-			var control = d as NumericUpDown;
-			control.Number.Text = num.ToString(CultureInfo.CurrentUICulture);
+			((NumericUpDown)d).Number.Text = num.ToString(CultureInfo.CurrentUICulture);
 		}
 		#endregion
 

@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Data;
 	using System.Text.RegularExpressions;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
@@ -10,7 +11,7 @@
 	using RobinHood70.WikiCommon;
 
 	internal abstract class EsoSkillJob<T> : EditJob
-		where T : Skill, new()
+		where T : Skill
 	{
 		#region Constants
 		protected const string SkillTable = "skillTree";
@@ -28,9 +29,9 @@
 		#endregion
 
 		#region Fields
-		private readonly SortedSet<Page> trivialChanges = new SortedSet<Page>(TitleComparer<Page>.Instance);
 		private readonly SortedSet<Page> nonTrivialChanges = new SortedSet<Page>(TitleComparer<Page>.Instance);
-		private IReadOnlyDictionary<string, T> skills;
+		private readonly Dictionary<string, T> skills = new Dictionary<string, T>();
+		private readonly SortedSet<Page> trivialChanges = new SortedSet<Page>(TitleComparer<Page>.Instance);
 		#endregion
 
 		#region Constructors
@@ -45,7 +46,7 @@
 		#endregion
 
 		#region Protected Properties
-		protected string PatchVersion { get; private set; }
+		protected string? PatchVersion { get; private set; }
 		#endregion
 
 		#region Protected Abstract Properties
@@ -55,7 +56,7 @@
 		#endregion
 
 		#region Protected Static Methods
-		protected static string IconValueFixup(string currentValue, string newValue)
+		protected static string IconValueFixup(string? currentValue, string newValue)
 		{
 			if (currentValue != null)
 			{
@@ -119,6 +120,8 @@
 		#endregion
 
 		#region Protected Abstract Methods
+		protected abstract T GetNewSkill(IDataRecord row);
+
 		protected abstract void UpdateSkillTemplate(T skillBase, Template template, HashSet<string> replacements);
 		#endregion
 
@@ -180,33 +183,28 @@
 
 		private void GetSkillList()
 		{
-			var allSkills = new Dictionary<string, T>();
 			var errors = false;
-			T skill = null;
-			string lastSkill = null; // We use a string for comparison because the skill itself will sometimes massage the data.
+			string? lastSkill = null; // We use a string for comparison because the skill itself will sometimes massage the data.
 			foreach (var row in EsoGeneral.RunQuery(this.Query))
 			{
 				var uniqueName = (string)row["baseName"] + "::" + (string)row["skillTypeName"];
 				if (lastSkill != uniqueName)
 				{
-					lastSkill = uniqueName;
-					skill = new T();
-					skill.GetData(row);
-					allSkills.Add(skill.PageName, skill);
-				}
-
-				try
-				{
-					skill.GetRankData(row);
-				}
-				catch (InvalidOperationException e)
-				{
-					this.Warn(e.Message);
-					errors = true;
+					try
+					{
+						lastSkill = uniqueName;
+						var skill = this.GetNewSkill(row);
+						this.skills.Add(skill.PageName, skill);
+					}
+					catch (InvalidOperationException e)
+					{
+						this.Warn(e.Message);
+						errors = true;
+					}
 				}
 			}
 
-			foreach (var checkSkill in allSkills)
+			foreach (var checkSkill in this.skills)
 			{
 				errors |= checkSkill.Value.Check();
 			}
@@ -215,8 +213,6 @@
 			{
 				throw new InvalidOperationException("Problems found in skill data.");
 			}
-
-			this.skills = allSkills;
 		}
 
 		private void SkillPageLoaded(object sender, Page page)
@@ -300,7 +296,7 @@
 			var bigChange = false;
 			foreach (var parameter in template)
 			{
-				if (UpdatedParameters.Contains(parameter.Name))
+				if (parameter.Name != null && UpdatedParameters.Contains(parameter.Name))
 				{
 					var oldParameter = oldParameters[parameter.Name];
 					if (oldParameter != null)

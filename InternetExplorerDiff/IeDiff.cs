@@ -69,7 +69,7 @@
 
 			this.ieProcess = Process.GetProcessById(processId32);
 
-			var uri = new Uri(diff.EditPath.ToString().Replace("action=edit", "action=submit"));
+			var uri = new Uri(diff.EditPath.ToString().Replace("action=edit", "action=submit", StringComparison.Ordinal));
 			var request = new Request(uri, RequestType.Post, false);
 			request
 				.Add("wpDiff", "Show changes")

@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.Text;
 	using RobinHood70.WikiClasses.Properties;
@@ -95,7 +96,7 @@
 
 		/// <summary>Gets an enumeration of the name or position of each parameter, along with the parameter itself.</summary>
 		/// <value>The parameter names and values.</value>
-		public IEnumerable<(string positionalName, Parameter parameter)> PositionalParameters
+		public IEnumerable<(string PositionalName, Parameter Parameter)> PositionalParameters
 		{
 			get
 			{
@@ -718,6 +719,7 @@
 		/// <summary>Sorts parameters in the order specified.</summary>
 		/// <param name="sortOrder">A list of parameter names in the order to sort them.</param>
 		/// <remarks>Any parameters not specified in <paramref name="sortOrder"/> will be moved after the specified parameters, and will otherwise retain their original order.</remarks>
+		[SuppressMessage("Style", "IDE0009:Member access should be qualified.", Justification = "False hit due to bug in analyzer.")]
 		public void Sort(IEnumerable<string> sortOrder)
 		{
 			ThrowNull(sortOrder, nameof(sortOrder));

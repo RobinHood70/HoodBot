@@ -65,7 +65,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				ns: (int)result.MustHave("ns"),
 				title: result.MustHaveString("title"),
 				comment: (string?)result["comment"],
-				expiry: result["expiry"].ToNullableDate(),
+				expiry: result["expiry"].GetNullableDate(),
 				level: (string?)result["level"],
 				parsedComment: (string?)result["parsedcomment"],
 				timestamp: (DateTime?)result["timestamp"],

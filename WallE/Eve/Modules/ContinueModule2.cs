@@ -56,7 +56,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				return this;
 			}
 
-			this.BatchComplete = this.supportsBatch ? parent["batchcomplete"].ToBCBool() : true;
+			this.BatchComplete = this.supportsBatch ? parent["batchcomplete"].GetBCBool() : true;
 			if (parent[Name] is JToken result && result.Type != JTokenType.Null)
 			{
 				this.Continues = true;

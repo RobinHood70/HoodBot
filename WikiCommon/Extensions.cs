@@ -34,7 +34,8 @@
 			where T : Enum
 		{
 			ulong flag = 1;
-			foreach (T value in Enum.GetValues(flagValue.GetType()))
+			var values = (IEnumerable<T>)flagValue.GetType().GetEnumValues();
+			foreach (var value in values)
 			{
 				var bits = Convert.ToUInt64(value, CultureInfo.InvariantCulture);
 				while (flag < bits)
@@ -94,12 +95,29 @@
 
 		#region IDictionary<TKey, TValue> Extensions
 
+		/// <summary>Adds the items from one dictionary (or other set of key-value pairs) to another.</summary>
+		/// <typeparam name="TKey">The type of the key.</typeparam>
+		/// <typeparam name="TValue">The type of the value.</typeparam>
+		/// <param name="dictionary">The dictionary to add to.</param>
+		/// <param name="items">The items to add.</param>
+		public static void AddRange<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, IEnumerable<KeyValuePair<TKey, TValue>> items)
+			where TKey : notnull
+		{
+			ThrowNull(dictionary, nameof(dictionary));
+			ThrowNull(items, nameof(items));
+			foreach (var item in items)
+			{
+				dictionary.Add(item.Key, item.Value);
+			}
+		}
+
 		/// <summary>Convenience method to convert a dictionary to read-only.</summary>
 		/// <typeparam name="TKey">The key-type of the <paramref name="dictionary" /> (inferred).</typeparam>
 		/// <typeparam name="TValue">The value-type of the <paramref name="dictionary" /> (inferred).</typeparam>
 		/// <param name="dictionary">The dictionary to convert.</param>
 		/// <returns>A read-only dictionary based on the provided dictionary. If the input was null, an empty read-only dictionary is returned.</returns>
-		public static ReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue>? dictionary) => new ReadOnlyDictionary<TKey, TValue>(dictionary ?? new Dictionary<TKey, TValue>());
+		public static ReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue>? dictionary)
+			where TKey : notnull => new ReadOnlyDictionary<TKey, TValue>(dictionary ?? new Dictionary<TKey, TValue>());
 
 		/// <summary>Gets the value of the "first" item in a dictionary.</summary>
 		/// <typeparam name="TKey">The key type of the dictionary.</typeparam>
@@ -109,6 +127,7 @@
 		/// <exception cref="KeyNotFoundException">The list was empty.</exception>
 		/// <remarks>Although the current implementation of dictionaries appears to maintain insertion order, this is not guaranteed. This function should be used only to get the value from a single-entry dictionary, or to get a unspecified value from a multi-entry dictionary.</remarks>
 		public static TValue First<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
+			where TKey : notnull
 		{
 			ThrowNull(dictionary, nameof(dictionary));
 			using var enumerator = dictionary.GetEnumerator();

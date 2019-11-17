@@ -9,7 +9,7 @@
 		{
 		}
 
-		public ProgressEventArgs(int progress, int progressMax, WikiTask task)
+		public ProgressEventArgs(int progress, int progressMax, WikiTask? task)
 		{
 			this.Progress = progress;
 			this.ProgressMaximum = progressMax;
@@ -20,6 +20,6 @@
 
 		public int ProgressMaximum { get; }
 
-		public WikiTask Task { get; }
+		public WikiTask? Task { get; }
 	}
 }

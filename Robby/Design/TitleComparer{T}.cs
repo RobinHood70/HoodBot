@@ -8,7 +8,7 @@
 	/// <typeparam name="T">The item types to compare. Must implement ISimpleTitle.</typeparam>
 	/// <seealso cref="Comparer{T}" />
 	public sealed class TitleComparer<T> : IComparer<T>
-		where T : ISimpleTitle
+		where T : class, ISimpleTitle
 	{
 		#region Constructors
 		private TitleComparer()
@@ -31,7 +31,7 @@
 		/// <param name="x">The first object to compare.</param>
 		/// <param name="y">The second object to compare.</param>
 		/// <returns>A signed integer that indicates the relative values of <paramref name="x" /> and <paramref name="y" />.</returns>
-		public int Compare(T x, T y)
+		public int Compare(T? x, T? y)
 		{
 			if (x == null)
 			{

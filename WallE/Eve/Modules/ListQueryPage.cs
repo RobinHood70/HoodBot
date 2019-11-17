@@ -81,7 +81,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				return;
 			}
 
-			this.cached = result["cached"].ToBCBool();
+			this.cached = result["cached"].GetBCBool();
 			this.cachedTimestamp = (DateTime?)result["cachedtimestamp"];
 			this.maxResults = (int?)result["maxresults"] ?? 0;
 			base.DeserializeResult(result.MustHave("results"));
@@ -93,7 +93,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				ns: (int)result.MustHave("ns"),
 				title: result.MustHaveString("title"),
 				value: (long)result.MustHave("value"),
-				databaseResult: result["databaseResult"]?.ToStringDictionary<object?>(),
+				databaseResult: result["databaseResult"]?.GetStringDictionary<object?>(),
 				timestamp: (DateTime?)result["timestamp"]);
 		#endregion
 	}

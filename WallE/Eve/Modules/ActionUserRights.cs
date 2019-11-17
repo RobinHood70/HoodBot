@@ -45,8 +45,8 @@ namespace RobinHood70.WallE.Eve.Modules
 			return new UserRightsResult(
 				user: result.MustHaveString("user"),
 				userId: (long?)result["userid"] ?? 0,
-				added: result["added"].ToReadOnlyList<string>(),
-				removed: result["removed"].ToReadOnlyList<string>());
+				added: result["added"].GetList<string>(),
+				removed: result["removed"].GetList<string>());
 		}
 		#endregion
 	}

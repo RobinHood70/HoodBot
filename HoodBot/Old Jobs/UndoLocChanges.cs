@@ -64,11 +64,11 @@
 		#endregion
 
 		#region Private Static Methods
-		private static LinkedListNode<IWikiNode> GetLocation(NodeCollection parser)
+		private static LinkedListNode<IWikiNode>? GetLocation(NodeCollection parser)
 		{
 			var templates = parser.FindAll<TemplateNode>(template => WikiTextVisitor.Value(template.Title).Trim() == "Online NPC Summary");
 			var list = new List<TemplateNode>(templates);
-			return list.Count == 1 ? list[0].Parameters.FindLastLinked<ParameterNode>(param => WikiTextVisitor.Value(param.Name).Trim() == "loc") : null;
+			return list.Count == 1 ? list[0].Parameters.FindLastLinked<ParameterNode>(param => param.Name != null && WikiTextVisitor.Value(param.Name).Trim() == "loc") : null;
 		}
 
 		private static List<string> LocSplit(NodeCollection valueNodes)
@@ -121,6 +121,11 @@
 			var from = new DateTime(2019, 9, 19, 1, 0, 23, DateTimeKind.Utc);
 			var to = new DateTime(2019, 9, 19, 11, 58, 41, DateTimeKind.Utc);
 			var user = this.Site.User;
+			if (user == null)
+			{
+				throw new InvalidOperationException();
+			}
+
 			var contributions = user.GetContributions(from, to);
 			var titles = new TitleCollection(this.Site);
 			foreach (var contribution in contributions)
@@ -151,7 +156,7 @@
 		{
 			if (page.Revisions.Count > 1)
 			{
-				var parser = WikiTextParser.Parse(page.CurrentRevision.Text);
+				var parser = WikiTextParser.Parse(page.CurrentRevision!.Text);
 				var newer = GetLocation(WikiTextParser.Parse(page.Revisions[1].Text));
 				var older = GetLocation(WikiTextParser.Parse(page.Revisions[0].Text));
 				var current = GetLocation(parser);

@@ -43,7 +43,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(param, nameof(param));
 			var info = param.Split(TextArrays.EqualsSign);
-			var type = info[info.Length - 1];
+			var type = info[^1];
 			return (RevisionDeleteTypes)int.Parse(type, CultureInfo.InvariantCulture);
 		}
 
@@ -224,7 +224,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			private void ExtraDataMerge()
 			{
 				this.Result.Add("mergetitle", (string?)this.parms["0"]);
-				this.Result.Add("mergetimestamp", ((string?)this.parms["1"]).ToNullableDate());
+				this.Result.Add("mergetimestamp", this.parms["1"].GetNullableDate());
 			}
 
 			private void ExtraDataMove()
@@ -265,13 +265,13 @@ namespace RobinHood70.WallE.Eve.Modules
 				else if (this.logAction != "unprotect")
 				{
 					var protections = new List<ProtectionsItem>();
-					var matches = ProtectionFinder.Matches((string?)this.parms["0"]);
-					foreach (Match match in matches)
+					var matches = (IEnumerable<Match>)ProtectionFinder.Matches((string?)this.parms["0"]);
+					foreach (var match in matches)
 					{
 						var groups = match.Groups;
 						var expiry = groups["indef"].Success
 							? null
-							: groups["expiry"].Value.ToNullableDate();
+							: groups["expiry"].Value.GetNullableDate();
 						var cascading = !string.IsNullOrEmpty((string?)this.parms["1"]);
 
 						protections.Add(new ProtectionsItem(

@@ -73,7 +73,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			return new AllMessagesItem(
-				content: result.ToNullableBCString("content"),
+				content: result.GetNullableBCString("content"),
 				def: (string?)result["default"],
 				flags: result.GetFlags(
 					("customised", MessageFlags.Customized),

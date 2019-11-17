@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Base
 	public class SiteInfoMagicWord
 	{
 		#region Constructors
-		internal SiteInfoMagicWord(string name, List<string> aliases, bool caseSensitive)
+		internal SiteInfoMagicWord(string name, IReadOnlyList<string> aliases, bool caseSensitive)
 		{
 			this.Name = name;
 			this.Aliases = aliases;

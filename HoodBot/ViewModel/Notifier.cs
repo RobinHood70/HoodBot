@@ -6,7 +6,7 @@
 	public abstract class Notifier : INotifyPropertyChanged
 	{
 		#region Public Events
-		public event PropertyChangedEventHandler PropertyChanged;
+		public event PropertyChangedEventHandler? PropertyChanged;
 		#endregion
 
 		#region Protected Virtual Methods

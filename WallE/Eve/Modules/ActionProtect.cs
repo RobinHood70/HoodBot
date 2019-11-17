@@ -70,7 +70,7 @@ namespace RobinHood70.WallE.Eve.Modules
 						protections.Add(new ProtectResultItem(
 							type: kvp.Name,
 							level: (string?)kvp.Value ?? string.Empty,
-							expiry: protection["expiry"].ToNullableDate()));
+							expiry: protection["expiry"].GetNullableDate()));
 					}
 				}
 			}
@@ -80,7 +80,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				ns: this.FindRequiredNamespace(title),
 				title: title,
 				reason: result.MustHaveString("reason"),
-				cascade: result["cascade"].ToBCBool(),
+				cascade: result["cascade"].GetBCBool(),
 				protections: protections);
 		}
 		#endregion

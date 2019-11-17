@@ -44,8 +44,8 @@ namespace RobinHood70.WallE.Eve.Modules
 			return new ManageTagsResult(
 				operation: result.MustHaveString("operation"),
 				tag: result.MustHaveString("tag"),
-				success: result.MustHave("success").ToBCBool(),
-				warnings: result["warnings"].ToReadOnlyList<string>(),
+				success: result.MustHave("success").GetBCBool(),
+				warnings: result["warnings"].GetList<string>(),
 				logId: (long?)result["logid"] ?? 0);
 		}
 		#endregion

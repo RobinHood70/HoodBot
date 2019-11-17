@@ -40,9 +40,9 @@
 		private readonly IProgress<double> progressMonitor;
 		private readonly IProgress<string> statusMonitor;
 
-		private CancellationTokenSource canceller;
+		private CancellationTokenSource? canceller;
 		private double completedJobs;
-		private WikiInfo currentItem;
+		private WikiInfo? currentItem;
 		private bool editingEnabled;
 		private DateTime? eta;
 		private bool executing;
@@ -50,12 +50,10 @@
 		private DateTime jobStarted;
 		private double overallProgress;
 		private double overallProgressMax = 1;
-		private string password;
-		private PauseTokenSource pauser;
-		private WikiInfo previousItem;
+		private string? password;
+		private PauseTokenSource? pauser;
 		private Brush progressBarColor = ProgressBarGreen;
-		private Site site;
-		private string status;
+		private string status = string.Empty;
 		#endregion
 
 		#region Constructors
@@ -78,13 +76,14 @@
 		~MainViewModel()
 		{
 			this.BotSettings.Save();
-			this.ResetSite();
 			this.client.RequestingDelay -= this.Client_RequestingDelay;
 		}
 		#endregion
 
 		#region Public Properties
-		public WikiInfo CurrentItem
+		public BotSettings BotSettings { get; }
+
+		public WikiInfo? CurrentItem
 		{
 			get => this.currentItem;
 			set
@@ -119,8 +118,6 @@
 
 		public JobNode JobTree { get; } = new JobNode();
 
-		public BotSettings BotSettings { get; }
-
 		public double OverallProgress
 		{
 			get => this.overallProgress;
@@ -133,7 +130,7 @@
 			private set => this.Set(ref this.overallProgressMax, value < 1 ? 1 : value, nameof(this.OverallProgressMax));
 		}
 
-		public string Password
+		public string? Password
 		{
 			get => this.password;
 			set => this.Set(ref this.password, value, nameof(this.Password));
@@ -154,7 +151,7 @@
 		public string Status
 		{
 			get => this.status;
-			set => this.Set(ref this.status, value, nameof(this.Status));
+			set => this.Set(ref this.status, value ?? string.Empty, nameof(this.Status));
 		}
 
 		public RelayCommand Stop => new RelayCommand(this.CancelJobs);
@@ -175,7 +172,7 @@
 		#endregion
 
 		#region Internal Properties
-		internal IParameterFetcher ParameterFetcher { get; set; }
+		internal IParameterFetcher? ParameterFetcher { get; set; }
 		#endregion
 
 		#region Internal Static Methods
@@ -194,43 +191,40 @@
 		#region Internal Methods
 		internal void GetParameters(JobNode jobNode)
 		{
-			if (jobNode?.Constructor == null)
+			if (jobNode != null
+				&& jobNode.Constructor != null
+				&& this.ParameterFetcher != null
+				&& (jobNode.Parameters ?? jobNode.InitializeParameters()) is IReadOnlyList<ConstructorParameter> jobParams)
 			{
-				return;
-			}
-
-			if (jobNode.Parameters == null)
-			{
-				jobNode.InitializeParameters();
-			}
-
-			this.JobParameterVisibility = jobNode.Parameters?.Count > 0 ? Visibility.Visible : Visibility.Hidden;
-			foreach (var param in jobNode.Parameters)
-			{
-				this.ParameterFetcher.GetParameter(param);
+				this.JobParameterVisibility = jobParams.Count > 0 ? Visibility.Visible : Visibility.Hidden;
+				foreach (var param in jobParams)
+				{
+					this.ParameterFetcher.GetParameter(param);
+				}
 			}
 		}
 
 		internal void SetParameters(JobNode jobNode)
 		{
-			if (jobNode?.Constructor == null || ((jobNode.Parameters?.Count ?? 0) == 0))
+			if (jobNode != null
+				&& jobNode.Constructor != null
+				&& this.ParameterFetcher != null
+				&& (jobNode.Parameters ?? jobNode.InitializeParameters()) is IReadOnlyList<ConstructorParameter> jobParams)
 			{
-				return;
-			}
-
-			foreach (var param in jobNode.Parameters)
-			{
-				this.ParameterFetcher.SetParameter(param);
+				foreach (var param in jobParams)
+				{
+					this.ParameterFetcher.SetParameter(param);
+				}
 			}
 		}
 		#endregion
 
 		#region Private Static Methods
 		private static string FormatTimeSpan(TimeSpan allJobsTimer) => allJobsTimer.ToString(@"h\h\ m\m\ s\.f\s", CultureInfo.CurrentCulture)
-			.Replace("0h", string.Empty)
-			.Replace(" 0m", string.Empty)
-			.Replace(".0", string.Empty)
-			.Replace(" 0s", string.Empty)
+			.Replace("0h", string.Empty, StringComparison.Ordinal)
+			.Replace(" 0m", string.Empty, StringComparison.Ordinal)
+			.Replace(".0", string.Empty, StringComparison.Ordinal)
+			.Replace(" 0s", string.Empty, StringComparison.Ordinal)
 			.Trim();
 		#endregion
 
@@ -258,20 +252,20 @@
 			*/
 		}
 
-		private WikiJob ConstructJob(JobNode jobNode)
+		private WikiJob ConstructJob(JobNode jobNode, Site site)
 		{
-			var objectList = new List<object>
-			{
-				this.site,
-				new AsyncInfo(this.progressMonitor, this.statusMonitor, this.pauser.Token, this.canceller.Token)
-			};
+			Debug.Assert(jobNode.Constructor != null, "jobNode.Constructor is null.");
+			var objectList = new List<object?> { site, new AsyncInfo(this.progressMonitor, this.statusMonitor, this.pauser?.Token, this.canceller?.Token) };
 
-			foreach (var param in jobNode.Parameters)
+			if (jobNode.Parameters is IReadOnlyList<ConstructorParameter> jobParams)
 			{
-				objectList.Add(param.Attribute is JobParameterFileAttribute && param.Value is string value ? ExpandEnvironmentVariables(value) : param.Value);
+				foreach (var param in jobParams)
+				{
+					objectList.Add(param.Attribute is JobParameterFileAttribute && param.Value is string value ? ExpandEnvironmentVariables(value) : param.Value);
+				}
 			}
 
-			return jobNode.Constructor.Invoke(objectList.ToArray()) as WikiJob;
+			return (WikiJob)jobNode.Constructor.Invoke(objectList.ToArray());
 		}
 
 		private async void ExecuteJobs()
@@ -292,7 +286,6 @@
 			var allJobsTimer = new Stopwatch();
 			allJobsTimer.Start();
 			this.ClearStatus();
-			this.InitializeSite();
 			this.completedJobs = 0;
 			this.OverallProgressMax = jobList.Count;
 			using (var cancelSource = new CancellationTokenSource())
@@ -301,16 +294,17 @@
 				this.pauser = new PauseTokenSource();
 
 				var success = true;
-				this.site.UserFunctions.OnAllJobsStarting(jobList.Count);
+				var site = this.InitializeSite();
+				site.UserFunctions.OnAllJobsStarting(jobList.Count);
 				foreach (var jobNode in jobList)
 				{
-					var job = this.ConstructJob(jobNode);
+					var job = this.ConstructJob(jobNode, site);
 					this.ProgressBarColor = ProgressBarGreen;
 					this.jobStarted = DateTime.UtcNow;
 					this.StatusWriteLine("Starting " + jobNode.Name);
 					try
 					{
-						this.site.EditingEnabled = this.editingEnabled; // Reset every time, in case a job has manually set the site's value.
+						site.EditingEnabled = this.editingEnabled; // Reset every time, in case a job has manually set the site's value.
 						await Task.Run(job.Execute).ConfigureAwait(false);
 						this.completedJobs++;
 					}
@@ -333,9 +327,10 @@
 
 				if (success)
 				{
-					this.site.UserFunctions.OnAllJobsComplete();
+					site.UserFunctions.OnAllJobsComplete();
 				}
 
+				this.ResetSite(site);
 				this.pauser = null;
 				this.canceller = null;
 			}
@@ -368,35 +363,49 @@
 			return jobList;
 		}
 
-		private void InitializeSite()
+		private Site InitializeSite()
 		{
-			var wikiInfo = this.CurrentItem;
-			if (wikiInfo == null)
+			var wikiInfo = this.CurrentItem ?? throw new InvalidOperationException(Resources.NoWiki);
+			var al = wikiInfo.GetAbstractionLayer(this.client);
+
+			// TODO: Move this into site-specific code - not urgent, wait until Site-derivative rewrites.
+			al.Assert = "user";
+			al.StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery;
+			al.UserCheckFrequency = 10;
+#if DEBUG
+			if (al is WikiAbstractionLayer wal)
 			{
-				throw new InvalidOperationException("No wiki has been selected.");
+				wal.SendingRequest += WalSendingRequest;
+				//// wal.ResponseReceived += WalResponseRecieved;
 			}
 
-			if (wikiInfo != this.previousItem)
+			al.WarningOccurred += WalWarningOccurred;
+#endif
+
+			var site = new Site(al);
+			site.WarningOccurred += SiteWarningOccurred;
+			site.PagePreview += this.SitePagePreview;
+			if (wikiInfo.UserName != null)
 			{
-				this.ResetSite();
-				this.previousItem = wikiInfo;
-				this.SetSite(wikiInfo);
-				this.site.Login(wikiInfo.UserName, this.Password ?? wikiInfo.Password);
+				site.Login(wikiInfo.UserName, this.Password ?? wikiInfo.Password ?? throw new InvalidOperationException(Resources.PasswordNotSet));
 			}
+
+			return site;
 		}
 
 		private void OpenEditWindow()
 		{
-			var editWindow = new EditSettings();
-			var view = editWindow.DataContext as SettingsViewModel;
-			view.Client = this.client;
-			view.BotSettings = this.BotSettings;
-			view.CurrentItem = this.CurrentItem;
-			editWindow.ShowDialog();
+			new EditSettings(this.BotSettings, this.client, this.CurrentItem).ShowDialog();
 			this.CurrentItem = this.BotSettings.GetCurrentItem();
 		}
 
-		private void PauseJobs() => this.PauseJobs(!this.pauser.IsPaused);
+		private void PauseJobs()
+		{
+			if (this.pauser != null)
+			{
+				this.PauseJobs(!this.pauser.IsPaused);
+			}
+		}
 
 		private void PauseJobs(bool isPaused)
 		{
@@ -428,61 +437,33 @@
 			this.jobStarted = DateTime.MinValue;
 		}
 
-		private void ResetSite()
+		private void ResetSite(Site site)
 		{
-			// Unsubscribe before resetting site object, per
-			// https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/events/how-to-subscribe-to-and-unsubscribe-from-events#unsubscribing
-			if (this.site != null)
-			{
 #if DEBUG
-				if (this.site.AbstractionLayer is WikiAbstractionLayer wal)
-				{
-					wal.SendingRequest -= WalSendingRequest;
-				}
-
-				this.site.AbstractionLayer.WarningOccurred -= WalWarningOccurred;
-#endif
-				this.site.PagePreview -= this.SitePagePreview;
-				this.site.WarningOccurred -= SiteWarningOccurred;
-				this.site = null;
+			if (site.AbstractionLayer is WikiAbstractionLayer wal)
+			{
+				wal.SendingRequest -= WalSendingRequest;
 			}
+
+			site.AbstractionLayer.WarningOccurred -= WalWarningOccurred;
+#endif
+			site.PagePreview -= this.SitePagePreview;
+			site.WarningOccurred -= SiteWarningOccurred;
 		}
 
 		private void RunTest()
 		{
 		}
 
-		private void SetSite(WikiInfo wikiInfo)
-		{
-			var al = wikiInfo.GetAbstractionLayer(this.client);
-
-			// TODO: Move this into site-specific code - not urgent, wait until Site-derivative rewrites.
-			al.Assert = "user";
-			al.StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery;
-			al.UserCheckFrequency = 10;
-#if DEBUG
-			if (al is WikiAbstractionLayer wal)
-			{
-				wal.SendingRequest += WalSendingRequest;
-				//// wal.ResponseReceived += WalResponseRecieved;
-			}
-
-			al.WarningOccurred += WalWarningOccurred;
-#endif
-			this.site = new Site(al);
-			this.site.WarningOccurred += SiteWarningOccurred;
-			this.site.PagePreview += this.SitePagePreview;
-		}
-
 		private void SitePagePreview(Site sender, PagePreviewArgs eventArgs)
 		{
 			// Until we get a menu going, specify manually.
 			// currentViewer ??= this.FindPlugin<IDiffViewer>("IeDiff");
-			if (this.DiffViewer != null && this.ShowDiffs && this.site.AbstractionLayer is WikiAbstractionLayer wal)
+			if (this.DiffViewer != null && this.ShowDiffs && sender.AbstractionLayer is WikiAbstractionLayer wal)
 			{
 				var token = wal.TokenManager.SessionToken("csrf"); // HACK: This is only necessary for browser-based diffs. Not sure how to handle it better.
 				var page = eventArgs.Page;
-				var diffContent = new DiffContent(page.FullPageName, page.Text, eventArgs.EditSummary, eventArgs.Minor)
+				var diffContent = new DiffContent(page.FullPageName, page.Text ?? string.Empty, eventArgs.EditSummary, eventArgs.Minor)
 				{
 					EditPath = page.EditPath,
 					EditToken = token,

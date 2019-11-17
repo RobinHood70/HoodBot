@@ -106,7 +106,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				this.Wal.DebugInfo = new DebugInfoResult();
 			}
 
-			this.Wal.CurrentTimestamp = result["curtimestamp"].ToNullableDate();
+			this.Wal.CurrentTimestamp = result["curtimestamp"].GetNullableDate();
 			this.DeserializeActionExtra(result);
 		}
 

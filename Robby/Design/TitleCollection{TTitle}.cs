@@ -788,7 +788,7 @@
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
 		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
-		public bool TryGetValue(ISimpleTitle key, out TTitle value)
+		public bool TryGetValue(ISimpleTitle key, out TTitle? value)
 		{
 			ThrowNull(key, nameof(key));
 			return this.dictionary.TryGetValue(key.FullPageName, out value);
@@ -799,7 +799,7 @@
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
 		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
-		public bool TryGetValue(string key, out TTitle value) => this.dictionary.TryGetValue(key, out value);
+		public bool TryGetValue(string key, out TTitle? value) => this.dictionary.TryGetValue(key, out value);
 
 		/// <summary>Returns the requested value, or null if not found.</summary>
 		/// <param name="key">The key.</param>

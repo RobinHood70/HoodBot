@@ -130,6 +130,6 @@
     <value>The {0} parameter passed to {1} could not be cast to {2}, as it's type was {3}.</value>
   </data>
   <data name="PropertyNull" xml:space="preserve">
-    <value>The {1} property of {0} was unexpectedly null.</value>
+    <value>{0}.{1} was unexpectedly null.</value>
   </data>
 </root>

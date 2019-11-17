@@ -8,25 +8,33 @@
 	[AttributeUsage(AttributeTargets.Constructor)]
 	public sealed class JobInfoAttribute : Attribute
 	{
-		public JobInfoAttribute(string name) => this.Name = name;
-
-		public JobInfoAttribute(string name, string groupsText)
-			: this(name)
+		#region Constructors
+		public JobInfoAttribute(string name)
+			: this(name, null)
 		{
+		}
+
+		public JobInfoAttribute(string name, string? groupsText)
+		{
+			this.Name = name;
+			var groups = new List<string>();
 			if (!string.IsNullOrWhiteSpace(groupsText))
 			{
 				var groupSplit = groupsText.Split(TextArrays.Pipe);
-				for (var i = 0; i < groupSplit.Length; i++)
+				foreach (var group in groupSplit)
 				{
-					groupSplit[i] = groupSplit[i].Trim();
+					groups.Add(group.Trim());
 				}
-
-				this.Groups = groupSplit;
 			}
-		}
 
-		public IEnumerable<string> Groups { get; }
+			this.Groups = groups;
+		}
+		#endregion
+
+		#region Public Properties
+		public IReadOnlyList<string> Groups { get; }
 
 		public string Name { get; }
+		#endregion
 	}
 }

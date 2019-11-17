@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
+	using System;
 	using System.Globalization;
 	using static WikiCommon.Globals;
 
@@ -69,7 +70,7 @@
 			}
 
 			var baseOffset = offset;
-			while (offset < limit && mask.IndexOf(txt[offset]) != -1)
+			while (offset < limit && mask.IndexOf(txt[offset], StringComparison.Ordinal) != -1)
 			{
 				offset++;
 			}
@@ -132,7 +133,7 @@
 			// Decrement offset because we're going in the reverse direction, so want to look at the character *before* the current one.
 			offset--;
 			var baseOffset = offset;
-			while (offset >= limit && mask.IndexOf(txt[offset]) != -1)
+			while (offset >= limit && mask.IndexOf(txt[offset], StringComparison.Ordinal) != -1)
 			{
 				offset--;
 			}

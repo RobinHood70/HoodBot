@@ -168,8 +168,14 @@
   <data name="NoAppDataPath" xml:space="preserve">
     <value>L'application n'a pas pu démarrer car la répertoire ApplicationDate n'a pas pu être créé. Voir InnerException pour plus de détails.</value>
   </data>
+  <data name="NoWiki" xml:space="preserve">
+    <value>Il faut sélectionner un wiki.</value>
+  </data>
   <data name="Password" xml:space="preserve">
     <value>Mot de passe :</value>
+  </data>
+  <data name="PasswordNotSet" xml:space="preserve">
+    <value>Il faut entrer un mot de passe, soit dans les informations enregistrées pour le wiki, soit sur le formulaire principal.</value>
   </data>
   <data name="ReadThrottle" xml:space="preserve">
     <value>Limitation à lire :</value>

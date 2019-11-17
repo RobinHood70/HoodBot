@@ -38,14 +38,17 @@
 			{
 				try
 				{
-					var user = new User(this.Site, block.User);
-					if (block.StartTime <= DateTime.Now.AddYears(-NumYears))
+					if (block.User is string userName)
 					{
-						user.Unblock("Remove infinite IP block");
-					}
-					else
-					{
-						user.Block("Re-block with finite block length", block.Flags, block.StartTime.AddYears(NumYears), true);
+						var user = new User(this.Site, block.User);
+						if (block.StartTime <= DateTime.Now.AddYears(-NumYears))
+						{
+							user.Unblock("Remove infinite IP block");
+						}
+						else
+						{
+							user.Block("Re-block with finite block length", block.Flags, block.StartTime.AddYears(NumYears), true);
+						}
 					}
 				}
 				catch (WikiException ex)
@@ -63,7 +66,7 @@
 			var blocks = this.Site.LoadBlocks(Filter.Exclude, Filter.Any, Filter.Exclude, Filter.Exclude);
 			foreach (var block in blocks)
 			{
-				if (comparer.IndexOf(block.Reason, "proxy", CompareOptions.IgnoreCase) == -1 && comparer.IndexOf(block.Reason, "tor", CompareOptions.IgnoreCase) == -1)
+				if (block.Reason == null || (comparer.IndexOf(block.Reason, "proxy", CompareOptions.IgnoreCase) == -1 && comparer.IndexOf(block.Reason, "tor", CompareOptions.IgnoreCase) == -1))
 				{
 					this.reblocks.Add(block);
 				}

@@ -45,7 +45,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				pages: (int)result.MustHave("pages"),
 				size: (int)result.MustHave("size"),
 				subcategories: (int)result.MustHave("subcats"),
-				hidden: result["hidden"].ToBCBool());
+				hidden: result["hidden"].GetBCBool());
 		}
 		#endregion
 	}

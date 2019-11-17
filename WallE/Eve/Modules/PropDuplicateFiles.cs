@@ -58,7 +58,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			? null
 			: new DuplicateFileItem(
 				name: result.MustHaveString("name"),
-				shared: result["shared"].ToBCBool(),
+				shared: result["shared"].GetBCBool(),
 				timestamp: result.MustHaveDate("timestamp"),
 				user: result.MustHaveString("user"));
 

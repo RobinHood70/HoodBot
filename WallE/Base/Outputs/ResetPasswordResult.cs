@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Base
 	public class ResetPasswordResult
 	{
 		#region Constructors
-		internal ResetPasswordResult(string status, Dictionary<string, string> passwords)
+		internal ResetPasswordResult(string status, IReadOnlyDictionary<string, string> passwords)
 		{
 			this.Status = status;
 			this.Passwords = passwords;

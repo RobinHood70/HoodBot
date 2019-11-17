@@ -14,10 +14,7 @@
 		public BacklinkReplaceVisitor(Site site, Dictionary<Title, Title> replacements)
 		{
 			this.site = site;
-			foreach (var replacement in replacements)
-			{
-				this.textReplacements.Add(replacement.Key, replacement.Value);
-			}
+			this.textReplacements.AddRange(replacements);
 		}
 
 		public override void Visit(LinkNode node)

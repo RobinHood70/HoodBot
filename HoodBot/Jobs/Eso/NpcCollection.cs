@@ -10,11 +10,11 @@
 		#region Public Methods
 		public void Sort()
 		{
-			var list = this.Items as List<NpcData>;
+			var list = (List<NpcData>)this.Items;
 			list.Sort((x, y) => string.Compare(x.PageName, y.PageName, StringComparison.Ordinal));
 		}
 
-		public NpcData ValueOrDefault(long key)
+		public NpcData? ValueOrDefault(long key)
 		{
 			if (this.Dictionary != null)
 			{

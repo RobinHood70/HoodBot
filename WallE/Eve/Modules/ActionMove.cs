@@ -69,8 +69,8 @@ namespace RobinHood70.WallE.Eve.Modules
 				output.Add(new MoveItem(
 					error: result["error"].GetError() ?? result.GetError("talkmove-error-code", "talkmove-error-info"),
 					from: (string?)result[prefix + "from"],
-					movedOverRedirect: result[prefix + "moveoverredirect"].ToBCBool(),
-					redirectCreated: result["redirectcreated"].ToBCBool(),
+					movedOverRedirect: result[prefix + "moveoverredirect"].GetBCBool(),
+					redirectCreated: result["redirectcreated"].GetBCBool(),
 					to: (string?)result[prefix + "to"]));
 			}
 		}

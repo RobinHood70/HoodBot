@@ -150,7 +150,7 @@
 		{
 			get => this.TryGetValue(key, out var retval)
 				|| (this.titleMap.TryGetValue(key, out var altKey) && this.TryGetValue(altKey.FullPageName, out retval))
-				? retval
+				? retval!
 				: throw new KeyNotFoundException();
 			set => base[key] = value;
 		}

@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WikiClasses
 {
+	using System;
 	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Text;
@@ -161,7 +162,7 @@
 		/// <param name="text">The text to escape.</param>
 		/// <returns>The same as the input value, with <i>all</i> equals signs replaced by the HTML entity <c>&#61;</c>.</returns>
 		/// <remarks>This is currently a dumb replace. If you need something more intelligent, for example something that handles equals signs in embedded templates and image links, you will have to implement it yourself.</remarks>
-		public static string Escape(string? text) => text?.Replace("=", "&#61;") ?? string.Empty;
+		public static string Escape(string? text) => text?.Replace("=", "&#61;", StringComparison.Ordinal) ?? string.Empty;
 
 		/// <summary>Determines whether the provided parameter is null or has an empty value.</summary>
 		/// <param name="item">The item to check.</param>
@@ -183,7 +184,7 @@
 		public bool Anonymize(string nameIfNeeded)
 		{
 			var retval = false;
-			if (EqualsFinder.Replace(this.Value, string.Empty).Contains("="))
+			if (EqualsFinder.Replace(this.Value, string.Empty).Contains('=', StringComparison.Ordinal))
 			{
 				// Can't anonymize because it contains an equals sign, so use provided label instead.
 				if (this.Name != nameIfNeeded || this.Anonymous)

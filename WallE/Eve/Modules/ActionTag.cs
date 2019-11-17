@@ -52,12 +52,12 @@ namespace RobinHood70.WallE.Eve.Modules
 					tags.Add(new TagItem(
 						status: item.MustHaveString("status"),
 						actionLogId: (long?)item["actionlogid"] ?? 0,
-						added: item["added"].ToReadOnlyList<string>(),
+						added: item["added"].GetList<string>(),
 						error: item.GetError(),
 						logId: (long?)item["logid"] ?? 0,
-						noOperation: item["noop"].ToBCBool(),
+						noOperation: item["noop"].GetBCBool(),
 						recentChangesId: (long?)item["rcid"] ?? 0,
-						removed: item["removed"].ToReadOnlyList<string>(),
+						removed: item["removed"].GetList<string>(),
 						revisionId: (long?)item["revid"] ?? 0));
 				}
 			}

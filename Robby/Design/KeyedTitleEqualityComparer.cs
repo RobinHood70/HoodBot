@@ -37,7 +37,7 @@
 		/// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
 		public int GetHashCode(IKeyedTitle? obj) => obj == null ? 0 : CompositeHashCode(obj.Namespace, obj.Key, obj.PageName);
 
-		bool IEqualityComparer.Equals(object x, object y) => x == y || (x is IKeyedTitle newX && y is IKeyedTitle newY ? this.Equals(newX, newY) : false);
+		bool IEqualityComparer.Equals(object? x, object? y) => x == y || (x is IKeyedTitle newX && y is IKeyedTitle newY ? this.Equals(newX, newY) : false);
 
 		int IEqualityComparer.GetHashCode(object obj) => this.GetHashCode(obj as IKeyedTitle);
 		#endregion

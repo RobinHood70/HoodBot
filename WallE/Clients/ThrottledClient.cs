@@ -82,7 +82,7 @@
 		/// <summary>Gets the text of the result returned by the given URI.</summary>
 		/// <param name="uri">The URI to get.</param>
 		/// <returns>The text of the result.</returns>
-		public string? Get(Uri uri)
+		public string Get(Uri uri)
 		{
 			this.Throttle();
 			var retval = this.baseClient.Get(uri);
@@ -99,7 +99,7 @@
 		/// <param name="uri">The URI to POST data to.</param>
 		/// <param name="postData">The text to POST.</param>
 		/// <returns>The text of the result.</returns>
-		public string? Post(Uri uri, string postData)
+		public string Post(Uri uri, string postData)
 		{
 			this.Throttle();
 			var retval = this.baseClient.Post(uri, postData);
@@ -114,7 +114,7 @@
 		/// <param name="contentType">The text of the content type. Typicially "<c>x-www-form-urlencoded</c>" or "<c>multipart/form-data ...</c>", but there is no restriction on values.</param>
 		/// <param name="postData">The byte array to POST.</param>
 		/// <returns>The text of the result.</returns>
-		public string? Post(Uri uri, string contentType, byte[] postData)
+		public string Post(Uri uri, string contentType, byte[] postData)
 		{
 			this.Throttle();
 			var retval = this.baseClient.Post(uri, contentType, postData);

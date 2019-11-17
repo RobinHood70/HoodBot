@@ -74,10 +74,10 @@ namespace RobinHood70.WallE.Eve.Modules
 					var itemValue = item.Value;
 					var value = itemValue.MustHave("value");
 					var source = itemValue.MustHaveString("source");
-					var hidden = itemValue["hidden"].ToBCBool();
+					var hidden = itemValue["hidden"].GetBCBool();
 					if (value.Type == JTokenType.Object)
 					{
-						var newItem = new ExtendedMetadataItem(value.ToStringDictionary<string>(), source, hidden);
+						var newItem = new ExtendedMetadataItem(value.GetStringDictionary<string>(), source, hidden);
 						dict.Add(name, newItem);
 					}
 					else

@@ -136,19 +136,21 @@
 			var places = EsoGeneral.GetPlaces(this.Site);
 			foreach (var quest in quests)
 			{
-				if (quest.Zone == "Tamriel")
-				{
-					quest.Zone = string.Empty;
-				}
-				else if (quest.Zone.Length != 0)
+				if (quest.Zone != null && quest.Zone.Length != 0)
 				{
 					var place = places[quest.Zone];
-					while (place.TypeText != "Zone" && place.Zone != null && places[place.Zone] is Place newZone)
+					if (place != null)
 					{
-						place = newZone;
-					}
+						while (place.TypeText != "Zone" && place.Zone != null && places[place.Zone] is Place newZone)
+						{
+							place = newZone;
+						}
 
-					quest.Zone = place.TitleName;
+						if (place.TitleName != null)
+						{
+							quest.Zone = place.TitleName;
+						}
+					}
 				}
 
 				this.Pages.Add(this.NewPage(quest));
@@ -160,17 +162,6 @@
 		#endregion
 
 		#region Private Static Methods
-		private static List<QuestData> GetDBQuests()
-		{
-			var quests = new List<QuestData>();
-			foreach (var row in EsoGeneral.RunQuery(QuestQuery))
-			{
-				quests.Add(new QuestData(row));
-			}
-
-			return quests;
-		}
-
 		private static List<string> QuestObjectives(string objectiveType, List<Condition> conditions)
 		{
 			var retval = new List<string>();
@@ -192,15 +183,25 @@
 		#endregion
 
 		#region Private Methods
+		private List<QuestData> GetDBQuests()
+		{
+			var quests = new List<QuestData>();
+			foreach (var row in EsoGeneral.RunQuery(QuestQuery))
+			{
+				quests.Add(new QuestData(row, this.Site));
+			}
+
+			return quests;
+		}
+
 		private List<QuestData> GetFilteredQuests(TitleCollection allTitles, TitleCollection wikiQuests)
 		{
-			var quests = GetDBQuests();
+			var quests = this.GetDBQuests();
 			for (var i = quests.Count - 1; i >= 0; i--)
 			{
 				var quest = quests[i];
 				var titleDisambig = new Title(this.Site, UespNamespaces.Online, quest.Name + " (quest)");
-				var title = new Title(this.Site, UespNamespaces.Online, quest.Name);
-				if (wikiQuests.Contains(title) || wikiQuests.Contains(titleDisambig))
+				if (wikiQuests.Contains(quest.Title) || wikiQuests.Contains(titleDisambig))
 				{
 					quests.RemoveAt(i);
 					continue;
@@ -217,9 +218,10 @@
 					}
 				}
 
-				if (!removed)
+				if (!removed && allTitles.Contains(quest.Title))
 				{
-					quest.Title = allTitles.Contains(title) ? titleDisambig : title;
+					// If title already exists, create quest at titleDisambig instead.
+					quest.Title = titleDisambig;
 				}
 			}
 
@@ -237,7 +239,7 @@
 
 			var whereText = string.Join(",", questDict.Keys);
 			this.StatusWriteLine("Getting stage data");
-			foreach (var row in EsoGeneral.RunQuery(StageQuery.Replace("<questIds>", whereText)))
+			foreach (var row in EsoGeneral.RunQuery(StageQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
 			{
 				var stage = new Stage(row);
 				var questId = (long)row["questId"];
@@ -247,18 +249,20 @@
 			}
 
 			this.StatusWriteLine("Getting condition data");
-			foreach (var row in EsoGeneral.RunQuery(ConditionQuery.Replace("<questIds>", whereText)))
+			foreach (var row in EsoGeneral.RunQuery(ConditionQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
 			{
 				var condition = new Condition(row);
 				var questId = (long)row["questId"];
 				var stageId = (long)row["questStepId"];
 				var stages = questDict[questId].Stages;
-				var stage = stages.Find(item => item.Id == stageId);
-				stage.Conditions.Add(condition);
+				if (stages.Find(item => item.Id == stageId) is Stage stage)
+				{
+					stage.Conditions.Add(condition);
+				}
 			}
 
 			this.StatusWriteLine("Getting rewards data");
-			foreach (var row in EsoGeneral.RunQuery(RewardsQuery.Replace("<questIds>", whereText)))
+			foreach (var row in EsoGeneral.RunQuery(RewardsQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
 			{
 				var reward = new Reward(row);
 				var questId = (long)row["questId"];
@@ -469,22 +473,22 @@
 
 			public string Text { get; }
 
-			public bool Equals(Condition other) => other == null
+			public bool Equals(Condition? other) => other == null
 				? false
 				: this.IsComplete == other.IsComplete && this.IsFail == other.IsFail && this.Text == other.Text;
 			#endregion
 
 			#region Public Override Methods
-			public override bool Equals(object obj) => this.Equals(obj as Condition);
+			public override bool Equals(object? obj) => this.Equals(obj as Condition);
 
-			public override int GetHashCode() => this.Text.GetHashCode() ^ (this.IsFail ? 1 : 0) ^ (this.IsComplete ? 2 : 0);
+			public override int GetHashCode() => this.Text.GetHashCode(StringComparison.Ordinal) ^ (this.IsFail ? 1 : 0) ^ (this.IsComplete ? 2 : 0);
 			#endregion
 		}
 
 		private class QuestData
 		{
 			#region Constructors
-			public QuestData(IDataRecord row)
+			public QuestData(IDataRecord row, Site site)
 			{
 				this.BackgroundText = (string)row["backgroundText"];
 				this.Id = (long)row["id"];
@@ -498,6 +502,13 @@
 				{
 					this.Zone = (string)row["locZone"];
 				}
+
+				if (this.Zone == "Tamriel")
+				{
+					this.Zone = string.Empty;
+				}
+
+				this.Title = new Title(site, UespNamespaces.Online, this.Name);
 			}
 			#endregion
 
@@ -518,7 +529,7 @@
 
 			public List<Stage> Stages { get; } = new List<Stage>();
 
-			public string Mod => this.Zone switch
+			public string? Mod => this.Zone switch
 			{
 				"Southern Elsweyr" => "Dragonhold",
 				_ => null,

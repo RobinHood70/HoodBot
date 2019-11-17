@@ -178,7 +178,7 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The data returned by the wiki is missing the expected element {0}, a child of {1}, in {2}..
+        ///   Looks up a localized string similar to The &quot;{0}&quot; node is missing from {1} in {2}..
         /// </summary>
         internal static string MalformedData {
             get {
@@ -187,7 +187,7 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The data returned by the wiki is not of the expected type. {0}, a child of {1}, is not a {2}..
+        ///   Looks up a localized string similar to The &quot;{0}&quot; node at {1} is not in the expected format in {2}..
         /// </summary>
         internal static string MalformedDataType {
             get {

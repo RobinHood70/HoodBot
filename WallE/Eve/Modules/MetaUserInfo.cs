@@ -49,10 +49,10 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(result, nameof(result));
 			var token = result["changeablegroups"];
 			var changeableGroups = token == null ? null : new ChangeableGroupsInfo(
-				add: token.MustHave("add").ToList<string>(),
-				addSelf: token.MustHave("add-self").ToList<string>(),
-				remove: token.MustHave("remove").ToList<string>(),
-				removeSelf: token.MustHave("remove-self").ToList<string>());
+				add: token.MustHave("add").GetList<string>(),
+				addSelf: token.MustHave("add-self").GetList<string>(),
+				remove: token.MustHave("remove").GetList<string>(),
+				removeSelf: token.MustHave("remove-self").GetList<string>());
 
 			var rateLimits = new Dictionary<string, RateLimitsItem?>();
 			if (result["ratelimits"] is JToken rateLimitsNode)
@@ -66,7 +66,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			this.Output = new UserInfoResult(
 				id: (long)result.MustHave("id"),
 				name: result.MustHaveString("name"),
-				blockExpiry: result["blockexpiry"].ToNullableDate(),
+				blockExpiry: result["blockexpiry"].GetNullableDate(),
 				blockId: (long?)result["blockid"] ?? 0,
 				blockReason: (string?)result["blockreason"],
 				blockTimestamp: (DateTime?)result["blockedtimestamp"],
@@ -75,18 +75,18 @@ namespace RobinHood70.WallE.Eve.Modules
 				changeableGroups: changeableGroups,
 				editCount: (long?)result["editcount"] ?? -1,
 				email: (string?)result["email"],
-				emailAuthenticated: result["emailauthenticated"].ToNullableDate(),
+				emailAuthenticated: result["emailauthenticated"].GetNullableDate(),
 				flags: result.GetFlags(
 					("anon", UserInfoFlags.Anonymous),
 					("messages", UserInfoFlags.HasMessage)),
-				groups: result["groups"].ToReadOnlyList<string>(),
-				implicitGroups: result["implicitgroups"].ToReadOnlyList<string>(),
-				options: result["options"].ToStringDictionary<object>(),
+				groups: result["groups"].GetList<string>(),
+				implicitGroups: result["implicitgroups"].GetList<string>(),
+				options: result["options"].GetStringDictionary<object>(),
 				preferencesToken: (string?)result["preferencestoken"],
 				rateLimits: rateLimits,
 				realName: (string?)result["realname"],
-				registrationDate: result["registrationdate"].ToNullableDate(),
-				rights: result["rights"].ToReadOnlyList<string>(),
+				registrationDate: result["registrationdate"].GetNullableDate(),
+				rights: result["rights"].GetList<string>(),
 				unreadText: (string?)result["unreadcount"]);
 		}
 		#endregion

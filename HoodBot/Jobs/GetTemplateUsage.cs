@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System;
 	using System.Collections.Generic;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.TaskResults;
@@ -35,7 +36,7 @@
 				allTemplateNames.AddRange(templateName.Split('|'));
 			}
 
-			this.saveLocation = location.Replace("%templateName%", allTemplateNames[0]);
+			this.saveLocation = location.Replace("%templateName%", allTemplateNames[0], StringComparison.Ordinal);
 			this.originalTemplateNames = allTemplateNames;
 			this.ProgressMaximum = 2;
 		}

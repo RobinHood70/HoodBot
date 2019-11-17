@@ -101,7 +101,7 @@ namespace RobinHood70.WallE.Eve.Modules
 						type: result.MustHaveString("type"),
 						level: result.MustHaveString("level"),
 						expiry: result.MustHaveDate("expiry"),
-						cascading: result["cascade"].ToBCBool(),
+						cascading: result["cascade"].GetBCBool(),
 						source: (string?)result["source"]));
 				}
 			}
@@ -112,12 +112,12 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				foreach (var prop in testActionsNode.Children<JProperty>())
 				{
-					testActions[prop.Name] = prop.Value.ToBCBool();
+					testActions[prop.Name] = prop.Value.GetBCBool();
 				}
 			}
 
 			// If we got a starttimestamp, and it's greater than the current timestamp, update the current timestamp. This is mostly for MW <= 1.23, but could conceivably also happen if base query and info query occur right as the seconds value updates.
-			var startTimestamp = parent["starttimestamp"].ToNullableDate();
+			var startTimestamp = parent["starttimestamp"].GetNullableDate();
 			if (startTimestamp > this.Wal.CurrentTimestamp)
 			{
 				this.Wal.CurrentTimestamp = startTimestamp;
@@ -138,16 +138,16 @@ namespace RobinHood70.WallE.Eve.Modules
 				language: (string?)parent["pagelanguage"],
 				lastRevisionId: (long?)parent["lastrevid"] ?? 0,
 				length: (int?)parent["length"] ?? 0,
-				notificationTimestamp: parent["notificationtimestamp"].ToNullableDate(),
+				notificationTimestamp: parent["notificationtimestamp"].GetNullableDate(),
 				preload: (string?)parent["preload"],
 				protections: protections,
-				restrictionTypes: parent["restrictiontypes"].ToReadOnlyList<string>(),
+				restrictionTypes: parent["restrictiontypes"].GetList<string>(),
 				startTimestamp: startTimestamp,
 				subjectId: (long?)parent["subjectid"] ?? 0,
 				talkId: (long?)parent["talkid"] ?? 0,
 				testActions: testActions,
 				tokens: tokens,
-				touched: parent["touched"].ToNullableDate(),
+				touched: parent["touched"].GetNullableDate(),
 				watchers: (long?)parent["watchers"] ?? 0);
 		}
 

@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Base
 	public class SiteInfoSpecialPageAlias
 	{
 		#region Constructors
-		internal SiteInfoSpecialPageAlias(string realName, List<string> aliases)
+		internal SiteInfoSpecialPageAlias(string realName, IReadOnlyList<string> aliases)
 		{
 			this.RealName = realName;
 			this.Aliases = aliases;

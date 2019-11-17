@@ -8,6 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Properties;
+	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -41,7 +42,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Public Override Methods
 		public override bool HandleWarning(string? from, string? text)
 		{
-			if (this.SiteVersion == 0 && from == "main" && text?.Contains("formatversion") == true)
+			if (this.SiteVersion == 0 && from == "main" && text?.Contains("formatversion", StringComparison.Ordinal) == true)
 			{
 				this.Wal.DetectedFormatVersion = 1;
 				return true;
@@ -114,6 +115,34 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Private Static Methods
+		private static IEnumerable<(string Key, JToken Value)> GetBCIndexedList(JToken? token, int formatVersion)
+		{
+			if (token == null)
+			{
+				yield break;
+			}
+
+			if (formatVersion == 2)
+			{
+				foreach (var node in token)
+				{
+					if (node is JProperty useNode)
+					{
+						yield return (useNode.Name, useNode.Value);
+					}
+				}
+			}
+			else
+			{
+				var counter = 0;
+				foreach (var node in token)
+				{
+					yield return (counter.ToStringInvariant(), node);
+					counter++;
+				}
+			}
+		}
+
 		private static List<SiteInfoLag>? GetDbReplLag(JToken parent)
 		{
 			if (!(parent["dbrepllag"] is JToken node))
@@ -130,9 +159,9 @@ namespace RobinHood70.WallE.Eve.Modules
 			return retval;
 		}
 
-		private static Dictionary<string, object>? GetDefaultOptions(JToken parent) => parent["defaultoptions"] is JToken node ? node.ToStringDictionary<object>() : null;
+		private static IReadOnlyDictionary<string, object>? GetDefaultOptions(JToken parent) => parent["defaultoptions"] is JToken node ? node.GetStringDictionary<object>() : null;
 
-		private static List<string>? GetExtensionTags(JToken parent) => parent["extensiontags"] is JToken node ? node.ToList<string>() : null;
+		private static IReadOnlyList<string>? GetExtensionTags(JToken parent) => parent["extensiontags"] is JToken node ? node.GetList<string>() : null;
 
 		private static List<string>? GetFileExtensions(JToken parent)
 		{
@@ -150,7 +179,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			return retval;
 		}
 
-		private static List<string>? GetFunctionHooks(JToken parent) => parent["functionhooks"] is JToken node ? node.ToList<string>() : null;
+		private static IReadOnlyList<string>? GetFunctionHooks(JToken parent) => parent["functionhooks"] is JToken node ? node.GetList<string>() : null;
 
 		private static List<SiteInfoInterwikiMap>? GetInterwikiMap(JToken parent)
 		{
@@ -228,7 +257,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				retval.Add(new SiteInfoMagicWord(
 					name: result.MustHaveString("name"),
 					aliases: result.MustHaveList<string>("aliases"),
-					caseSensitive: result["case-sensitive"].ToBCBool()));
+					caseSensitive: result["case-sensitive"].GetBCBool()));
 			}
 
 			return retval;
@@ -279,17 +308,17 @@ namespace RobinHood70.WallE.Eve.Modules
 			return retval;
 		}
 
-		private static List<string>? GetProtocols(JToken parent) => parent["protocols"] is JToken node ? node.ToList<string>() : null;
+		private static IReadOnlyList<string>? GetProtocols(JToken parent) => parent["protocols"] is JToken node ? node.GetList<string>() : null;
 
 		private static SiteInfoRestriction? GetRestrictions(JToken parent) => parent["restrictions"] is JToken node
 			? new SiteInfoRestriction(
-				cascadingLevels: node["cascadinglevels"].ToReadOnlyList<string>(),
-				levels: node["levels"].ToReadOnlyList<string>(),
-				semiProtectedLevels: node["semiprotectedlevels"].ToReadOnlyList<string>(),
-				types: node["types"].ToReadOnlyList<string>())
+				cascadingLevels: node["cascadinglevels"].GetList<string>(),
+				levels: node["levels"].GetList<string>(),
+				semiProtectedLevels: node["semiprotectedlevels"].GetList<string>(),
+				types: node["types"].GetList<string>())
 			: null;
 
-		private static (SiteInfoSkin? defaultSkin, List<SiteInfoSkin>? skins) GetSkins(JToken parent)
+		private static (SiteInfoSkin? DefaultSkin, List<SiteInfoSkin>? Skins) GetSkins(JToken parent)
 		{
 			if (!(parent["skins"] is JToken node))
 			{
@@ -303,8 +332,8 @@ namespace RobinHood70.WallE.Eve.Modules
 				var item = new SiteInfoSkin(
 					code: result.MustHaveString("code"),
 					name: result.MustHaveBCString("name"),
-					unusable: result["unusable"].ToBCBool());
-				if (result["default"].ToBCBool())
+					unusable: result["unusable"].GetBCBool());
+				if (result["default"].GetBCBool())
 				{
 					defaultSkin = item;
 				}
@@ -360,7 +389,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				var subscribersNode = result.MustHave("subscribers");
 				var subscribers = subscribersNode.Type == JTokenType.Object && subscribersNode["scribunto"] is JToken scribuntoNode
 					? new List<string> { (string?)scribuntoNode ?? string.Empty }
-					: subscribersNode.ToList<string>();
+					: subscribersNode.GetList<string>();
 
 				retval.Add(new SiteInfoSubscribedHook(
 					name: result.MustHaveString("name"),
@@ -384,16 +413,16 @@ namespace RobinHood70.WallE.Eve.Modules
 					name: result.MustHaveString("name"),
 					rights: result.MustHaveList<string>("rights"),
 					number: (long?)result["number"] ?? -1,
-					add: result["add"].ToReadOnlyList<string>(),
-					addSelf: result["add-self"].ToReadOnlyList<string>(),
-					remove: result["remove"].ToReadOnlyList<string>(),
-					removeSelf: result["remove-self"].ToReadOnlyList<string>()));
+					add: result["add"].GetList<string>(),
+					addSelf: result["add-self"].GetList<string>(),
+					remove: result["remove"].GetList<string>(),
+					removeSelf: result["remove-self"].GetList<string>()));
 			}
 
 			return retval;
 		}
 
-		private static List<string>? GetVariables(JToken parent) => parent["variables"] is JToken node ? node.ToList<string>() : null;
+		private static IReadOnlyList<string>? GetVariables(JToken parent) => parent["variables"] is JToken node ? node.GetList<string>() : null;
 		#endregion
 
 		#region Private Methods
@@ -411,7 +440,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				IReadOnlyList<string>? descMsgParams = null;
 				try
 				{
-					descMsgParams = result["descriptionmsgparams"].ToReadOnlyList<string>();
+					descMsgParams = result["descriptionmsgparams"].GetList<string>();
 				}
 				catch (InvalidCastException)
 				{
@@ -460,10 +489,9 @@ namespace RobinHood70.WallE.Eve.Modules
 			var imageLimits = new Dictionary<string, ImageLimitsItem>();
 			if (node["imagelimits"] is JToken imageLimitsNode)
 			{
-				foreach (var token in imageLimitsNode.ToBCIndexedList(this.Wal.DetectedFormatVersion))
+				foreach (var (key, value) in GetBCIndexedList(imageLimitsNode, this.Wal.DetectedFormatVersion))
 				{
-					var value = token.value;
-					imageLimits.Add(token.key, new ImageLimitsItem((int)value.MustHave("width"), (int)value.MustHave("height")));
+					imageLimits.Add(key, new ImageLimitsItem((int)value.MustHave("width"), (int)value.MustHave("height")));
 				}
 			}
 
@@ -480,7 +508,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			var thumbLimits = new Dictionary<string, int>();
 			if (node["thumblimits"] is JToken thumbLimitsNode)
 			{
-				foreach (var (key, value) in thumbLimitsNode.ToBCIndexedList(this.Wal.DetectedFormatVersion))
+				foreach (var (key, value) in GetBCIndexedList(thumbLimitsNode, this.Wal.DetectedFormatVersion))
 				{
 					thumbLimits.Add(key, (int)value);
 				}
@@ -507,7 +535,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				basePage: node.MustHaveString("base"),
 				dbType: node.MustHaveString("dbtype"),
 				dbVersion: node.MustHaveString("dbversion"),
-				externalImages: node["externalimages"].ToReadOnlyList<string>(),
+				externalImages: node["externalimages"].GetList<string>(),
 				fallback8BitEncoding: node.MustHaveString("fallback8bitEncoding"),
 				fallbackLanguages: fallback,
 				favicon: (string?)node["favicon"],

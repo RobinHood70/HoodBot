@@ -13,12 +13,12 @@
 	{
 		#region Constructors
 		protected EditJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-				: this(site, asyncInfo, null)
+			: this(site, asyncInfo, null)
 		{
 		}
 
-		protected EditJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo, params WikiTask[] tasks)
-				: base(site, asyncInfo, tasks) => this.Pages = new PageCollection(site);
+		protected EditJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo, params WikiTask[]? tasks)
+			: base(site, asyncInfo, tasks) => this.Pages = new PageCollection(site);
 		#endregion
 
 		#region Public Properties
@@ -32,7 +32,9 @@
 		#endregion
 
 		#region Public Virtual Properties
-		public virtual string LogDetails { get; protected set; }
+		public virtual string? LogDetails { get; protected set; }
+
+		public bool LogJob { get; protected set; } = true;
 		#endregion
 
 		#region Public Abstract Properties
@@ -44,7 +46,7 @@
 		/// <summary>Gets or sets the edit conflict action.</summary>
 		/// <value>The edit conflict action.</value>
 		/// <remarks>During a SavePage, if an edit conflict occurs, the page will automatically be re-loaded and the method specified here will be executed.</remarks>
-		protected Action<EditJob, Page> EditConflictAction { get; set; } = null;
+		protected Action<EditJob, Page>? EditConflictAction { get; set; } = null;
 		#endregion
 
 		#region Protected Methods
@@ -79,7 +81,11 @@
 		protected override void OnCompleted()
 		{
 			this.StatusWriteLine("Ending Log Entry");
-			this.Site.UserFunctions.EndLogEntry();
+			if (this.LogJob)
+			{
+				this.Site.UserFunctions.EndLogEntry();
+			}
+
 			base.OnCompleted();
 		}
 
@@ -88,7 +94,10 @@
 			this.PrepareJob();
 			base.OnStarted();
 			this.StatusWriteLine("Adding Log Entry");
-			this.Site.UserFunctions.AddLogEntry(new LogInfo(this.LogName ?? this.GetType().Name, this.LogDetails, this.ReadOnly));
+			if (this.LogJob)
+			{
+				this.Site.UserFunctions.AddLogEntry(new LogInfo(this.LogName ?? this.GetType().Name, this.LogDetails, this.ReadOnly));
+			}
 		}
 		#endregion
 

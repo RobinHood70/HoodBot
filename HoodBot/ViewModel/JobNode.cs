@@ -18,7 +18,6 @@
 		{
 			var wikiJobType = typeof(WikiJob);
 			this.Name = "<Root>";
-			this.Children = new SortedSet<JobNode>();
 			foreach (var type in Assembly.GetCallingAssembly().GetTypes())
 			{
 				if (type.IsSubclassOf(wikiJobType))
@@ -35,7 +34,6 @@
 		{
 			ThrowNull(parent, nameof(parent));
 			ThrowNull(groupName, nameof(groupName));
-			this.Children = new SortedSet<JobNode>();
 			this.Name = groupName;
 			this.Parent = parent;
 			this.isChecked = false;
@@ -45,17 +43,16 @@
 		{
 			ThrowNull(parent, nameof(parent));
 			ThrowNull(constructor, nameof(constructor));
-			var jobName = constructor.GetCustomAttribute<JobInfoAttribute>().Name;
-
 			this.Constructor = constructor;
-			this.Name = jobName;
+			var customAttrib = constructor.GetCustomAttribute<JobInfoAttribute>() ?? throw new InvalidOperationException();
+			this.Name = customAttrib.Name;
 			this.Parent = parent;
 			this.isChecked = false;
 		}
 		#endregion
 
 		#region Public Properties
-		public ConstructorInfo Constructor { get; }
+		public ConstructorInfo? Constructor { get; }
 
 		public bool? IsChecked
 		{
@@ -65,7 +62,7 @@
 				this.Set(ref this.isChecked, value, nameof(this.IsChecked));
 				if (value == null)
 				{
-					if (this.Children?.Count > 0)
+					if (this.Children.Count > 0)
 					{
 						var falseCount = 0;
 						var trueCount = 0;
@@ -96,7 +93,7 @@
 				}
 				else
 				{
-					if (this.Children?.Count > 0)
+					if (this.Children.Count > 0)
 					{
 						foreach (var child in this.Children)
 						{
@@ -112,39 +109,39 @@
 			}
 		}
 
-		public SortedSet<JobNode> Children { get; }
+		public SortedSet<JobNode> Children { get; } = new SortedSet<JobNode>();
 
 		public string Name { get; }
 
-		public IReadOnlyList<ConstructorParameter> Parameters { get; private set; }
+		public IReadOnlyList<ConstructorParameter>? Parameters { get; private set; }
 
-		public JobNode Parent { get; }
+		public JobNode? Parent { get; }
 		#endregion
 
 		#region Public Operators
-		public static bool operator ==(JobNode left, JobNode right) =>
+		public static bool operator ==(JobNode? left, JobNode? right) =>
 			ReferenceEquals(left, right) ? true :
 			left is null ? false :
 			left.Equals(right);
 
-		public static bool operator !=(JobNode left, JobNode right) => !(left == right);
+		public static bool operator !=(JobNode? left, JobNode? right) => !(left == right);
 
-		public static bool operator <(JobNode left, JobNode right) =>
+		public static bool operator <(JobNode? left, JobNode? right) =>
 			ReferenceEquals(left, right) ? false :
 			left is null ? true :
 			left.CompareTo(right) == -1;
 
-		public static bool operator <=(JobNode left, JobNode right) =>
+		public static bool operator <=(JobNode? left, JobNode? right) =>
 			ReferenceEquals(left, right) ? true :
 			left is null ? true :
 			left.CompareTo(right) != 1;
 
-		public static bool operator >(JobNode left, JobNode right) =>
+		public static bool operator >(JobNode? left, JobNode? right) =>
 			ReferenceEquals(left, right) ? false :
 			left is null ? false :
 			left.CompareTo(right) == 1;
 
-		public static bool operator >=(JobNode left, JobNode right) =>
+		public static bool operator >=(JobNode? left, JobNode? right) =>
 			ReferenceEquals(left, right) ? true :
 			left is null ? false :
 			left.CompareTo(right) != -1;
@@ -156,7 +153,7 @@
 			ThrowNull(children, nameof(children));
 			foreach (var job in children)
 			{
-				if (job.Children != null)
+				if (job.Children.Count > 0)
 				{
 					foreach (var nestedJob in GetCheckedJobs(job.Children))
 					{
@@ -172,12 +169,11 @@
 		#endregion
 
 		#region Public Methods
-		public int CompareTo(JobNode other) =>
-			other is null || (this.Children == null && other.Children?.Count > 0) ? 1 :
-			other.Children is null && this.Children?.Count > 0 ? -1 :
+		public int CompareTo(JobNode? other) =>
+			other is null ? 1 :
 			string.Compare(this.Name, other.Name, StringComparison.Ordinal);
 
-		public bool Equals(JobNode other)
+		public bool Equals(JobNode? other)
 		{
 			if (other is null)
 			{
@@ -189,38 +185,36 @@
 				return false;
 			}
 
-			if (this.Children == null)
-			{
-				return other.Children == null;
-			}
-
 			var childSet = new HashSet<JobNode>(this.Children);
 			return childSet.SetEquals(new HashSet<JobNode>(other.Children));
 		}
 
-		public void InitializeParameters()
+		public IReadOnlyList<ConstructorParameter>? InitializeParameters()
 		{
-			var parameters = new List<ConstructorParameter>();
-			var wantedParameters = this.Constructor.GetParameters();
-			foreach (var parameter in wantedParameters)
+			if (this.Constructor is ConstructorInfo constructorInfo)
 			{
-				switch (parameter.ParameterType.Name)
+				var parameters = new List<ConstructorParameter>();
+				this.Parameters = parameters;
+				foreach (var parameter in constructorInfo.GetParameters())
 				{
-					case "Site":
-					case "AsyncInfo":
-						break;
-					default:
-						parameters.Add(new ConstructorParameter(parameter));
-						break;
+					switch (parameter.ParameterType.Name)
+					{
+						case "Site":
+						case "AsyncInfo":
+							break;
+						default:
+							parameters.Add(new ConstructorParameter(parameter));
+							break;
+					}
 				}
 			}
 
-			this.Parameters = parameters;
+			return this.Parameters;
 		}
 		#endregion
 
 		#region Public Override Methods
-		public override bool Equals(object obj) => ReferenceEquals(this, obj) || this.Equals(obj as JobNode);
+		public override bool Equals(object? obj) => ReferenceEquals(this, obj) || this.Equals(obj as JobNode);
 
 		public override int GetHashCode() => CompositeHashCode(this.Parent, this.Name, this.Children);
 
@@ -239,7 +233,7 @@
 			}
 
 			var groups = jobInfo.Groups;
-			if (groups == null)
+			if (groups.Count == 0)
 			{
 				this.AddConstructor(constructor);
 				return;

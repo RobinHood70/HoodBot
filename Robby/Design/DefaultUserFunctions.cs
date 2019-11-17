@@ -71,7 +71,7 @@
 		/// <param name="info">The log information to be checked.</param>
 		/// <returns>A value indicating whether the log entry represented in the <paramref name="info" /> parameter should be logged.</returns>
 		/// <remarks><see cref="DefaultUserFunctions"/> always returns <see langword="false"/>.</remarks>
-		public override bool ShouldLog(LogInfo info) => false;
+		public override bool ShouldLog(LogInfo? info) => false;
 
 		/// <summary>Updates the current status on the page found in <see cref="UserFunctions.StatusPage"/>.</summary>
 		/// <param name="status">The text to use for the status update.</param>

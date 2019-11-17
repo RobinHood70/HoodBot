@@ -4,11 +4,11 @@
 	using System.Collections.Generic;
 	using System.Data;
 	using System.Diagnostics;
-    using System.IO;
-    using System.Reflection;
-    using System.Text.RegularExpressions;
-    using Microsoft.Extensions.Configuration;
-    using MySql.Data.MySqlClient;
+	using System.IO;
+	using System.Reflection;
+	using System.Text.RegularExpressions;
+	using Microsoft.Extensions.Configuration;
+	using MySql.Data.MySqlClient;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -36,7 +36,7 @@
 		private static readonly Regex BonusFinder = new Regex(@"\s*Current [Bb]onus:.*?\.");
 		private static readonly Regex SpaceFixer = new Regex(@"[\n\ ]+");
 		private static string? esoLogConnectionString = null; // = ConfigurationManager.ConnectionStrings["EsoLog"].ConnectionString;
-		private static string patchVersion = null;
+		private static string? patchVersion = null;
 		#endregion
 
 		#region Public Properties
@@ -198,8 +198,15 @@
 				var patchTitle = new TitleCollection(job.Site, PatchPageName);
 				var pageLoadOptions = new PageLoadOptions(PageModules.Custom);
 				var pageCreator = (job.Site.PageCreator as MetaTemplateCreator) ?? new MetaTemplateCreator();
-				var patchPage = patchTitle.Load(pageLoadOptions, pageCreator)[0] as VariablesPage;
-				patchVersion = patchPage.MainSet["number"];
+				var patchPage = (VariablesPage)patchTitle.Load(pageLoadOptions, pageCreator)[0];
+				if (patchPage.MainSet?["number"] is string version)
+				{
+					patchVersion = version;
+				}
+				else
+				{
+					throw new InvalidOperationException("Could not find patch version on page.");
+				}
 			}
 
 			return patchVersion;
@@ -234,10 +241,7 @@
 
 			foreach (var placeInfo in PlaceInfo)
 			{
-				if (placeInfo.CategoryName != null)
-				{
-					GetPlaceCategory(site, retval, placeInfo);
-				}
+				GetPlaceCategory(site, retval, placeInfo);
 			}
 
 			return retval;
@@ -307,6 +311,11 @@
 		#region Private Methods
 		private static void GetPlaceCategory(Site site, PlaceCollection places, PlaceInfo placeInfo)
 		{
+			if (placeInfo.CategoryName == null)
+			{
+				return;
+			}
+
 			var cat = new PageCollection(site);
 			cat.GetCategoryMembers(placeInfo.CategoryName);
 			foreach (var member in cat)

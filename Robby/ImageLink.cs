@@ -172,7 +172,7 @@
 		/// <remarks>Setting this option will remove any <see cref="Upright"/> parameter, and vice versa, since they are mutually exclusive. Both may be set simultaneously, however, if the link is parsed from existing text. In that case, if either is altered, the other will be removed.</remarks>
 		public int Height
 		{
-			get => this.GetSize().height;
+			get => this.GetSize().Height;
 			set => this.SetSize(value, this.Width);
 		}
 
@@ -254,7 +254,7 @@
 		/// <remarks>Setting this option will remove any <see cref="Upright"/> parameter, and vice versa, since they are mutually exclusive. Both may be set simultaneously, however, if the link is parsed from existing text. In that case, if either is altered, the other will be removed.</remarks>
 		public int Width
 		{
-			get => this.GetSize().width;
+			get => this.GetSize().Width;
 			set => this.SetSize(value, this.Height);
 		}
 
@@ -272,7 +272,7 @@
 		/// <summary>Gets the image size.</summary>
 		/// <returns>The image height and width. If either value is missing, a zero will be returned for that value.</returns>
 		/// <exception cref="InvalidOperationException">The size text is invalid, and could not be parsed.</exception>
-		public (int height, int width) GetSize()
+		public (int Height, int Width) GetSize()
 		{
 			var split = this.Dimensions?.Value.Split('x');
 			return split?.Length switch

@@ -48,7 +48,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override LanguageLinksItem? GetItem(JToken result, PageItem page) => result?.GetLanguageLink();
+		protected override LanguageLinksItem? GetItem(JToken result, PageItem page) => result.GetLanguageLink();
 
 		protected override ICollection<LanguageLinksItem> GetMutableList(PageItem page) => (ICollection<LanguageLinksItem>)page.LanguageLinks;
 		#endregion

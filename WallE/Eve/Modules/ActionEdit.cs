@@ -80,7 +80,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				oldRevisionId: (long?)result["oldrevid"] ?? 0,
 				newRevisionId: (long?)result["newrevid"] ?? 0,
 				newTimestamp: (DateTime?)result["newtimestamp"],
-				captchaData: result["captcha"].ToStringDictionary<string>());
+				captchaData: result["captcha"].GetStringDictionary<string>());
 		}
 		#endregion
 	}

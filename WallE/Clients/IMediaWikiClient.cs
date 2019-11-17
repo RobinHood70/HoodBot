@@ -42,7 +42,7 @@
 		/// <summary>Gets the text of the result returned by the given URI.</summary>
 		/// <param name="uri">The URI to get.</param>
 		/// <returns>The text of the result.</returns>
-		string? Get(Uri uri);
+		string Get(Uri uri);
 
 		/// <summary>Retrieves cookies from persistent storage.</summary>
 		void LoadCookies();
@@ -51,14 +51,14 @@
 		/// <param name="uri">The URI to POST data to.</param>
 		/// <param name="postData">The text to POST.</param>
 		/// <returns>The text of the result.</returns>
-		string? Post(Uri uri, string postData);
+		string Post(Uri uri, string postData);
 
 		/// <summary>POSTs byte data and retrieves the result.</summary>
 		/// <param name="uri">The URI to POST data to.</param>
 		/// <param name="contentType">The text of the content type. Typicially "<c>x-www-form-urlencoded</c>" or "<c>multipart/form-data ...</c>", but there is no restriction on values.</param>
 		/// <param name="postData">The byte array to POST.</param>
 		/// <returns>The text of the result.</returns>
-		string? Post(Uri uri, string contentType, byte[] postData);
+		string Post(Uri uri, string contentType, byte[] postData);
 
 		/// <summary>This method is used both to throttle clients as well as to forward any wiki-requested delays, such as from maxlag. Clients should respect any delays requested by the wiki unless they expect to abort the procedure, or for testing.</summary>
 		/// <param name="delayTime">The amount of time to delay for.</param>

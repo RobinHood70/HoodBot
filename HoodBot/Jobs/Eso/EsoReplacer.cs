@@ -34,12 +34,12 @@
 		{
 			oldText = ToPlainText(oldText);
 			var replacedText = TemplateStripper.Replace(oldText, string.Empty);
-			if (replacedText.Contains("[["))
+			if (replacedText.Contains("[[", StringComparison.Ordinal))
 			{
 				job.Warn($"\nWatch for links: {pageName}\nCurrent Text: {replacedText}\nNew Text: {newText}");
 			}
 
-			if (replacedText.Contains("{{"))
+			if (replacedText.Contains("{{", StringComparison.Ordinal))
 			{
 				job.Warn($"\nWatch for templates: {pageName}\nCurrent Text: {replacedText}\nNew Text: {newText}");
 			}
@@ -59,6 +59,11 @@
 			if (!initialized)
 			{
 				job.StatusWriteLine("Parsing replacements");
+				if (job.Site.User == null)
+				{
+					throw new InvalidOperationException("Not logged in.");
+				}
+
 				var replacements = job.Site.LoadPageText(job.Site.User.FullPageName + "/ESO Replacements");
 				if (string.IsNullOrEmpty(replacements))
 				{
@@ -79,7 +84,7 @@
 			}
 		}
 
-		public static string ReplaceGlobal(string text, string skillName)
+		public static string ReplaceGlobal(string text, string? skillName)
 		{
 			foreach (var replacement in ReplaceAllList)
 			{
@@ -88,7 +93,7 @@
 				var offset = text.IndexOf(replacement.From, StringComparison.Ordinal);
 				while (offset >= 0)
 				{
-					newText.Append(text.Substring(lastOffset, offset - lastOffset));
+					newText.Append(text[lastOffset..offset]);
 					var inLinkLeft = text.LastIndexOf("[[", offset, StringComparison.Ordinal);
 					var inLinkRight = text.LastIndexOf("]]", offset, StringComparison.Ordinal);
 
@@ -120,7 +125,7 @@
 				{
 					if (skillName == synergy.Skill)
 					{
-						text = text.Replace(synergy.Text, synergy.SynergyLink);
+						text = text.Replace(synergy.Text, synergy.SynergyLink, StringComparison.Ordinal);
 					}
 				}
 			}
@@ -132,7 +137,7 @@
 		{
 			foreach (var replacement in ReplaceFirstList)
 			{
-				if (text.Contains(replacement.From))
+				if (text.Contains(replacement.From, StringComparison.Ordinal))
 				{
 					UnreplacedList.Remove(replacement.From);
 					text = replacement.ReplaceFirst(text);
@@ -155,30 +160,30 @@
 
 		public static string ToPlainText(string text)
 		{
-			text = text.Replace("[[ON:", "[[Online:");
+			text = text.Replace("[[ON:", "[[Online:", StringComparison.OrdinalIgnoreCase);
 			foreach (var replacement in ReplaceAllList)
 			{
-				text = text.Replace(replacement.To, replacement.From);
+				text = text.Replace(replacement.To, replacement.From, StringComparison.Ordinal);
 			}
 
 			foreach (var replacement in ReplaceFirstList)
 			{
-				text = text.Replace(replacement.To, replacement.From);
+				text = text.Replace(replacement.To, replacement.From, StringComparison.Ordinal);
 				var lcReplace = replacement.To.Split(OnlineSplit, 2, StringSplitOptions.None);
 				if (lcReplace.Length == 2)
 				{
-					text = text.Replace(lcReplace[0] + "Online:" + lcReplace[1].LowerFirst(CultureInfo.InvariantCulture), replacement.From);
+					text = text.Replace(lcReplace[0] + "Online:" + lcReplace[1].LowerFirst(CultureInfo.InvariantCulture), replacement.From, StringComparison.Ordinal);
 				}
 
 				lcReplace = replacement.To.Split(TextArrays.TemplateTerminator, 2, StringSplitOptions.None);
 				if (lcReplace.Length == 2)
 				{
-					text = text.Replace(lcReplace[0] + "{{" + lcReplace[1].LowerFirst(CultureInfo.InvariantCulture), replacement.From);
+					text = text.Replace(lcReplace[0] + "{{" + lcReplace[1].LowerFirst(CultureInfo.InvariantCulture), replacement.From, StringComparison.Ordinal);
 				}
 			}
 
 			text = TextStripper.Replace(text, string.Empty);
-			text = text.Replace("  ", " ").Trim();
+			text = text.Replace("  ", " ", StringComparison.Ordinal).Trim();
 
 			return text;
 		}
@@ -187,7 +192,8 @@
 		#region Private Methods
 		private static void GetMatches(string tableText, List<EsoReplacement> list)
 		{
-			foreach (Match match in ReplacementFinder.Matches(tableText))
+			var matches = (IEnumerable<Match>)ReplacementFinder.Matches(tableText);
+			foreach (var match in matches)
 			{
 				var from = match.Groups["from"].Value;
 				var to = match.Groups["to"].Value;
@@ -216,7 +222,7 @@
 				return match.Value;
 			}
 
-			return link.DisplayParameter;
+			return link.DisplayParameter?.ToString() ?? string.Empty;
 		}
 
 		private static string ReplaceTemplate(Match match)
@@ -246,11 +252,11 @@
 						return "free";
 					default:
 						// Because these are anonymous parameters, we must always add the before value, even if empty.
-						linkTemplate.AddAnonymous(before.Value.Replace("'''", string.Empty));
+						linkTemplate.AddAnonymous(before.Value.Replace("'''", string.Empty, StringComparison.Ordinal));
 
 						if (after.Success)
 						{
-							linkTemplate.AddAnonymous(after.Value.Replace("'''", string.Empty));
+							linkTemplate.AddAnonymous(after.Value.Replace("'''", string.Empty, StringComparison.Ordinal));
 						}
 
 						break;

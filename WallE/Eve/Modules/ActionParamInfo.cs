@@ -116,7 +116,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					var className = module.MustHaveString("classname");
 					output.Add(className, new ParameterInfoItem(
 						className: className,
-						helpUrls: module["helpurls"].ToReadOnlyList<string>(),
+						helpUrls: module["helpurls"].GetList<string>(),
 						parameters: parameters,
 						path: module.MustHaveString("path"),
 						prefix: module.MustHaveString("prefix"),
@@ -159,9 +159,9 @@ namespace RobinHood70.WallE.Eve.Modules
 					{
 						if (typeValue.Type == JTokenType.Array)
 						{
-							typeValues = typeValue.ToReadOnlyList<string>();
+							typeValues = typeValue.GetList<string>();
 							type = "valuelist";
-							subModules = parameterNode["submodules"].ToStringDictionary<string>();
+							subModules = parameterNode["submodules"].GetStringDictionary<string>();
 							subModuleParamPrefix = (string?)parameterNode["submoduleparamprefix"];
 						}
 						else
@@ -179,7 +179,7 @@ namespace RobinHood70.WallE.Eve.Modules
 							newInfoList.Add(new InformationItem(
 								name: infoNode.MustHaveString("name"),
 								text: GetMessages(infoNode.MustHave("text")),
-								values: infoNode["values"].ToReadOnlyList<int>()));
+								values: infoNode["values"].GetList<int>()));
 						}
 					}
 

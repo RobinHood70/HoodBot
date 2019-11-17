@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Base
 	public class HelpResult
 	{
 		#region Constructors
-		internal HelpResult(List<string> help, string mime)
+		internal HelpResult(IReadOnlyList<string> help, string mime)
 		{
 			this.Help = help;
 			this.Mime = mime;

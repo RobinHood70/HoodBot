@@ -1,10 +1,15 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
+	using System;
 	using static RobinHood70.WallE.ProjectGlobals;
 
 	public class ImportInput
 	{
+		#region Fields
+		private byte[] xmlData = Array.Empty<byte>();
+		#endregion
+
 		#region Constructors
 		public ImportInput()
 		{
@@ -35,8 +40,14 @@ namespace RobinHood70.WallE.Base
 		public bool Templates { get; set; }
 
 		public string? Token { get; set; }
+		#endregion
 
-		public string? Xml { get; set; }
+		#region Public Methods
+
+		// Caller is responsible for proper encoding. Using methods instead of properties to avoid the issues with arrays as properties.
+		public byte[] GetXmlData() => this.xmlData;
+
+		public void SetXmlData(byte[] data) => this.xmlData = data;
 		#endregion
 	}
 }

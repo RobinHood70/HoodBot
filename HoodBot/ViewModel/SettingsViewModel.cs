@@ -6,26 +6,27 @@
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Clients;
+	using static RobinHood70.WikiCommon.Globals;
 
 	// TODO: Re-examine WikiInfo vs MaxLaggableWikiInfo. Need to handle it better.
 	public class SettingsViewModel : Notifier, IEditableObject
 	{
 		#region Fields
-		private Uri api;
-		private string botDataFolder;
-		private BotSettings botSettings;
-		private WikiInfo currentItem;
-		private string displayName;
-		private string password;
+		private Uri? api;
+		private string? botDataFolder;
+		private BotSettings? botSettings;
+		private WikiInfo? currentItem;
+		private string? displayName;
+		private string? password;
 		private int readThrottling;
-		private string userName;
+		private string? userName;
 		private int writeThrottling;
 		#endregion
 
 		#region Public Properties
 		public RelayCommand Add => new RelayCommand(() => this.CurrentItem = null);
 
-		public Uri Api
+		public Uri? Api
 		{
 			get => this.api;
 			set => this.Set(ref this.api, value, nameof(this.Api));
@@ -33,7 +34,7 @@
 
 		public RelayCommand<string> AutoFill => new RelayCommand<string>(this.Fill);
 
-		public string BotDataFolder
+		public string? BotDataFolder
 		{
 			get => this.botDataFolder;
 			set => this.Set(ref this.botDataFolder, value, nameof(this.BotDataFolder));
@@ -41,13 +42,13 @@
 
 		public BotSettings BotSettings
 		{
-			get => this.botSettings;
-			set => this.Set(ref this.botSettings, value, nameof(this.BotSettings));
+			get => this.botSettings ?? throw PropertyNull(nameof(SettingsViewModel), nameof(this.botSettings));
+			set => this.Set(ref this.botSettings, value ?? throw ArgumentNull(nameof(value)), nameof(this.BotSettings));
 		}
 
-		public IMediaWikiClient Client { get; set; }
+		public IMediaWikiClient? Client { get; set; }
 
-		public WikiInfo CurrentItem
+		public WikiInfo? CurrentItem
 		{
 			get => this.currentItem;
 			set
@@ -57,13 +58,13 @@
 			}
 		}
 
-		public string DisplayName
+		public string? DisplayName
 		{
 			get => this.displayName;
 			set => this.Set(ref this.displayName, value, nameof(this.DisplayName));
 		}
 
-		public string Password
+		public string? Password
 		{
 			get => this.password;
 			set => this.Set(ref this.password, value, nameof(this.Password));
@@ -81,7 +82,7 @@
 
 		public RelayCommand Undo => new RelayCommand(() => this.CancelEdit());
 
-		public string UserName
+		public string? UserName
 		{
 			get => this.userName;
 			set => this.Set(ref this.userName, value, nameof(this.UserName));
@@ -122,7 +123,7 @@
 		#endregion
 
 		#region Internal Methods
-		internal void UpdateSelection(WikiInfo wikiInfo)
+		internal void UpdateSelection(WikiInfo? wikiInfo)
 		{
 			if (wikiInfo == null)
 			{

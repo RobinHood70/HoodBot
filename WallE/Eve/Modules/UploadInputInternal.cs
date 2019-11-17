@@ -32,16 +32,16 @@ namespace RobinHood70.WallE.Eve.Modules
 				this.Watchlist = input.Watchlist;
 
 				var buffer = new byte[32768];
-				using var retval = new MemoryStream();
+				using var fileData = new MemoryStream();
 				var readBytes = 0;
 				do
 				{
 					readBytes = input.FileData.Read(buffer, 0, buffer.Length);
-					retval.Write(buffer, 0, readBytes);
+					fileData.Write(buffer, 0, readBytes);
 				}
 				while (readBytes > 0);
 
-				this.FileData = retval.ToArray();
+				this.FileData = fileData.ToArray();
 			}
 		}
 		#endregion

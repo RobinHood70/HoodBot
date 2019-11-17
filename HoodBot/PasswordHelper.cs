@@ -67,7 +67,7 @@
 
 		private static void Password_Changed(DependencyObject sender, DependencyPropertyChangedEventArgs e)
 		{
-			var passwordBox = sender as PasswordBox;
+			var passwordBox = (PasswordBox)sender;
 			passwordBox.PasswordChanged -= PasswordBox_Password_Changed;
 
 			if (!GetIsUpdating(passwordBox))
@@ -80,7 +80,7 @@
 
 		private static void PasswordBox_Password_Changed(object sender, RoutedEventArgs e)
 		{
-			var passwordBox = sender as PasswordBox;
+			var passwordBox = (PasswordBox)sender;
 			SetIsUpdating(passwordBox, true);
 			SetPassword(passwordBox, passwordBox.Password);
 			SetIsUpdating(passwordBox, false);

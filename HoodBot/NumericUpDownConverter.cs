@@ -8,6 +8,6 @@
 	{
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture) => (double)value / 1.5;
 
-		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => null;
+		public object? ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => null;
 	}
 }

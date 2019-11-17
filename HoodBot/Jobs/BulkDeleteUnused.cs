@@ -8,15 +8,13 @@
 	public class BulkDeleteUnused : EditJob
 	{
 		#region Fields
-		private TitleCollection deleteTitles;
+		private readonly TitleCollection deleteTitles;
 		#endregion
 
 		#region Constructors
 		[JobInfo("Bulk Delete Unused")]
 		public BulkDeleteUnused(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
-		{
-		}
+			: base(site, asyncInfo) => this.deleteTitles = new TitleCollection(this.Site);
 		#endregion
 
 		#region Public Override Properties
@@ -38,7 +36,7 @@
 			var unused = new TitleCollection(this.Site);
 			unused.GetQueryPage("Unusedimages");
 
-			this.deleteTitles = new TitleCollection(this.Site);
+			this.deleteTitles.Clear();
 			foreach (var title in unused)
 			{
 				if (title.Namespace == MediaWikiNamespaces.File && title.PageName.StartsWith("LG-audio-", StringComparison.Ordinal))

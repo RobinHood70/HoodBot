@@ -12,6 +12,7 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiClasses.Parser;
 	using RobinHood70.WikiCommon;
+	using static RobinHood70.WikiCommon.Globals;
 
 	public class EsoMatchIcons : EditJob
 	{
@@ -90,7 +91,7 @@
 						allIcons.Add(checksum, list);
 					}
 
-					list.Add(file.Substring(iconFolder.Length).Replace(".png", string.Empty).Replace('\\', '/'));
+					list.Add(file.Substring(iconFolder.Length).Replace(".png", string.Empty, StringComparison.OrdinalIgnoreCase).Replace('\\', '/'));
 				}
 			}
 
@@ -116,7 +117,7 @@
 					throw new InvalidCastException();
 				}
 
-				var iconName = ((string)row["icon"]).Replace("/esoui/art/icons/", string.Empty).Replace(".dds", string.Empty);
+				var iconName = ((string)row["icon"]).Replace("/esoui/art/icons/", string.Empty, StringComparison.OrdinalIgnoreCase).Replace(".dds", string.Empty, StringComparison.OrdinalIgnoreCase);
 				var entry = new ItemInfo(
 					id: id,
 					itemName: (string)row["name"],
@@ -171,7 +172,7 @@
 			foreach (var category in page.Categories)
 			{
 				if (category.PageName == "Online-Icons-Books" ||
-					(category.PageName == "Online-Icons-Quest Items" && page.PageName.Contains("Book")) ||
+					(category.PageName == "Online-Icons-Quest Items" && page.PageName.Contains("Book", StringComparison.Ordinal)) ||
 					page.PageName == "ON-icon-minor adornment-Necklace.png" ||
 					page.PageName == "ON-icon-minor adornment-Ring.png")
 				{
@@ -254,8 +255,7 @@
 			page.Text = oldest.Text; */
 			if (page is FilePage filePage && filePage.LatestFileRevision is FileRevision latestRevision)
 			{
-				page.Text = page.Text.Trim().Replace("Original file: Original file:", "Original file:");
-				this.allIcons.TryGetValue(latestRevision.Sha1, out var foundIcons);
+				this.allIcons.TryGetValue(latestRevision.Sha1 ?? throw PropertyNull(nameof(latestRevision), nameof(latestRevision.Sha1)), out var foundIcons);
 				if (foundIcons == null)
 				{
 					var parsedPage = ContextualParser.FromPage(page);
@@ -272,7 +272,7 @@
 						var split = match.Groups["name"].Value.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
 						for (var i = 0; i < split.Length; i++)
 						{
-							split[i] = split[i].Trim().Replace(".png", string.Empty).Replace(".dds", string.Empty);
+							split[i] = split[i].Trim().Replace(".png", string.Empty, StringComparison.OrdinalIgnoreCase).Replace(".dds", string.Empty, StringComparison.OrdinalIgnoreCase);
 						}
 
 						list.AddRange(split);
@@ -310,21 +310,22 @@
 
 		private void ReplaceNoMatch(ContextualParser parsedPage)
 		{
-			var filePage = parsedPage.Title as Page;
-			foreach (var pageCat in filePage.Categories)
+			if (parsedPage.Title is Page filePage)
 			{
-				if (pageCat.PageName == "Online-Icons-Missing Original File")
+				foreach (var pageCat in filePage.Categories)
 				{
-					return;
+					if (pageCat.PageName == "Online-Icons-Missing Original File")
+					{
+						return;
+					}
 				}
 			}
 
-			var site = this.Site;
 			var category = parsedPage.FindLastLinked<LinkNode>(item =>
 			{
 				// While this could be done as a one-liner, it would be fragile and not easy to debug.
 				var linkTitle = WikiTextVisitor.Value(item.Title);
-				var title = new Title(site, linkTitle);
+				var title = new Title(this.Site, linkTitle);
 				return title.Namespace == MediaWikiNamespaces.Category;
 			});
 
@@ -333,8 +334,10 @@
 				category = parsedPage.AddAfter(category, new TextNode("\n"));
 			}
 
-			var addAfterNode = category ?? parsedPage.Last;
-			parsedPage.AddAfter(addAfterNode, LinkNode.FromParts("Category:Online-Icons-Missing Original File"));
+			if ((category ?? parsedPage.Last) is LinkedListNode<IWikiNode> addAfterNode)
+			{
+				parsedPage.AddAfter(addAfterNode, LinkNode.FromParts("Category:Online-Icons-Missing Original File"));
+			}
 		}
 
 		private void ReplaceNormal(ContextualParser parsedPage, string newText)
@@ -346,13 +349,11 @@
 				parsedPage.AddAfter(addAfter, new TextNode("\n"));
 			}
 
-			do
+			while (addAfter.Next is LinkedListNode<IWikiNode> next && !(next.Value is HeaderNode) && !(next.Value is LinkNode link && new Title(this.Site, WikiTextVisitor.Value(link.Title)).Namespace == MediaWikiNamespaces.Category))
 			{
-				addAfter = addAfter.Next;
+				addAfter = next;
 			}
-			while (addAfter != null && !(addAfter.Value is HeaderNode) && !(addAfter.Value is LinkNode link && new Title(this.Site, WikiTextVisitor.Value(link.Title)).Namespace == MediaWikiNamespaces.Category));
 
-			addAfter = addAfter == null ? parsedPage.Last : addAfter.Previous;
 			if (!(addAfter.Value is TextNode textNode))
 			{
 				textNode = new TextNode(newText);

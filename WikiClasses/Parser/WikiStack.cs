@@ -58,7 +58,7 @@
 
 			this.Text = text;
 			this.textLength = text.Length;
-			this.enableOnlyInclude = text.Contains(OnlyIncludeTagOpen);
+			this.enableOnlyInclude = text.Contains(OnlyIncludeTagOpen, StringComparison.OrdinalIgnoreCase);
 			this.findOnlyinclude = this.enableOnlyInclude;
 			this.includeIgnores = include == null || !strictInclusion;
 
@@ -280,7 +280,7 @@
 				{
 					cmt = comments[j];
 					var start = j == 0 ? this.Index : cmt.Start;
-					piece.Add(new CommentNode(this.Text.Substring(start, cmt.End - start)));
+					piece.Add(new CommentNode(this.Text[start..cmt.End]));
 					piece.Add(new TextNode(this.Text.Substring(cmt.End, cmt.WhiteSpaceLength)));
 				}
 
@@ -295,7 +295,7 @@
 			}
 
 			piece.CommentEnd = endPos - 1;
-			piece.Add(new CommentNode(this.Text.Substring(startPos, endPos - startPos)));
+			piece.Add(new CommentNode(this.Text[startPos..endPos]));
 			this.Index = endPos;
 
 			return retval;
@@ -357,7 +357,7 @@
 				else
 				{
 					this.Index = tagEndPos + 1;
-					piece.AddLiteral(this.Text.Substring(tagStartPos, this.Index - tagStartPos));
+					piece.AddLiteral(this.Text[tagStartPos..this.Index]);
 					this.noMoreClosingTag.Add(tagNameLower);
 					return true;
 				}
@@ -367,12 +367,12 @@
 			{
 				if (this.includeIgnores)
 				{
-					piece.Add(new IgnoreNode(this.Text.Substring(tagStartPos, this.Index - tagStartPos)));
+					piece.Add(new IgnoreNode(this.Text[tagStartPos..this.Index]));
 				}
 			}
 			else
 			{
-				var attr = attrEnd > attrStart ? this.Text.Substring(attrStart, attrEnd - attrStart) : null;
+				var attr = attrEnd > attrStart ? this.Text[attrStart..attrEnd] : null;
 				piece.Add(new TagNode(tagOpen, attr, inner, tagClose));
 			}
 
@@ -416,7 +416,7 @@
 					var tagEndPos = startPos + OnlyIncludeTagOpen.Length; // past-the-end
 					if (this.includeIgnores)
 					{
-						this.Top.CurrentPiece.Add(new IgnoreNode(this.Text.Substring(this.Index, tagEndPos - this.Index)));
+						this.Top.CurrentPiece.Add(new IgnoreNode(this.Text[this.Index..tagEndPos]));
 					}
 
 					this.Index = tagEndPos;
@@ -432,7 +432,7 @@
 
 				if (literalOffset != this.Index)
 				{
-					this.Top.CurrentPiece.AddLiteral(this.Text.Substring(this.Index, literalOffset - this.Index));
+					this.Top.CurrentPiece.AddLiteral(this.Text[this.Index..literalOffset]);
 					this.Index = literalOffset;
 					if (this.Index >= this.textLength)
 					{

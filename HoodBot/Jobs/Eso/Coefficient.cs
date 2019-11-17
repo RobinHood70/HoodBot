@@ -42,7 +42,7 @@
 		#endregion
 
 		#region Public Static Methods
-		public static Coefficient FromCollection(IReadOnlyList<Coefficient> list, string text)
+		public static Coefficient? FromCollection(IReadOnlyList<Coefficient> list, string text)
 		{
 			if (text?.Length > 0 && text[0] == '$')
 			{

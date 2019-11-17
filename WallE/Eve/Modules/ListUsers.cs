@@ -45,16 +45,14 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override UsersItem? GetItem(JToken result) => result == null
 			? null
 			: new UsersItem(
-				userId: (long?)result["userid"] ?? 0,
-				name: result.MustHaveString("name"),
+				baseUser: result.GetUser(),
 				flags: result.GetFlags(
 					("emailable", UserFlags.Emailable),
 					("interwiki", UserFlags.Interwiki),
 					("invalid", UserFlags.Invalid),
 					("missing", UserFlags.Missing)),
 				gender: (string?)result["gender"],
-				token: (string?)result["userrightstoken"])
-			.GetUserData(result);
+				token: (string?)result["userrightstoken"]);
 		#endregion
 	}
 }

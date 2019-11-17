@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using System.Diagnostics.CodeAnalysis;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
@@ -46,7 +47,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected virtual TOutput DeserializeCustom(string? result)
 		{
 			// Note that result will not yet have been checked for null in this version of deserialization.
-			if (result != null && result.Contains("$wgEnableAPI"))
+			if (result != null && result.Contains("$wgEnableAPI", StringComparison.Ordinal))
 			{
 				throw WikiException.General(WikiAbstractionLayer.ApiDisabledCode, CurrentCulture(EveMessages.ApiDisabled));
 			}

@@ -125,7 +125,7 @@
 
 			if (this.Site.User != null)
 			{
-				defaultSubject = defaultSubject.Replace("$1", this.Site.User.Name);
+				defaultSubject = defaultSubject.Replace("$1", this.Site.User.Name, StringComparison.Ordinal);
 			}
 
 			return this.Email(defaultSubject, body, ccMe);
@@ -264,7 +264,7 @@
 		{
 			ThrowNull(msg, nameof(msg));
 			msg = msg.Trim();
-			if (!msg.Contains("~~~") && !msg.Contains(":" + this.Name))
+			if (!msg.Contains("~~~", StringComparison.Ordinal) && !msg.Contains(":" + this.Name, StringComparison.Ordinal))
 			{
 				// If at least the name wasn't found in the message, then add a normal signature.
 				msg += " ~~~~";

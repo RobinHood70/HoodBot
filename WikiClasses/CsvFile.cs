@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WikiClasses
 {
+	using System;
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Globalization;
@@ -89,7 +90,10 @@
 			var list = new List<string>();
 			foreach (var item in fields)
 			{
-				list.Add(item.ToString());
+				if (item.ToString() is string value)
+				{
+					list.Add(value);
+				}
 			}
 
 			this.Add(list);
@@ -171,7 +175,7 @@
 				while (!endOfField)
 				{
 					var character = (char)reader.Read();
-					if ("\n\r\u2028\u2029".IndexOf(character) != -1)
+					if ("\n\r\u2028\u2029".IndexOf(character, StringComparison.Ordinal) != -1)
 					{
 						if (insideQuotes)
 						{
@@ -486,7 +490,7 @@
 				}
 				else
 				{
-					if ("\n\r\u2028\u2029".IndexOf(character) != -1)
+					if ("\n\r\u2028\u2029".IndexOf(character, StringComparison.Ordinal) != -1)
 					{
 						addDelimiter = true;
 					}

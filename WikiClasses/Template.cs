@@ -268,7 +268,7 @@
 						if (anons == anonsPerLine)
 						{
 							anons = 0;
-							if (param.Value.Length == 0 || param.Value[param.Value.Length - 1] != '\n')
+							if (param.Value.Length == 0 || param.Value[^1] != '\n')
 							{
 								param.Value += '\n';
 							}
@@ -302,7 +302,7 @@
 			}
 
 			// If number of anonymous parameters isn't an even multiple of anonsPerLine, format the last parameter properly.
-			if (anons > 0 && lastAnon != null && (lastAnon.Value.Length == 0 || lastAnon.Value[lastAnon.Value.Length - 1] != '\n'))
+			if (anons > 0 && lastAnon != null && (lastAnon.Value.Length == 0 || lastAnon.Value[^1] != '\n'))
 			{
 				lastAnon.Value += '\n';
 			}
@@ -375,7 +375,7 @@
 			if (name![0] == '#')
 			{
 				// Caller is searching for a parser function, so handle that.
-				if (name[name.Length - 1] != ':')
+				if (name[^1] != ':')
 				{
 					name += ':';
 				}
@@ -387,7 +387,7 @@
 				retval += "(?i:" + Regex.Escape(name.Substring(0, 1)) + ")";
 				if (name.Length > 1)
 				{
-					retval += Regex.Escape(name.Substring(1)).Replace(@"\ ", @"[_\ ]+");
+					retval += Regex.Escape(name.Substring(1)).Replace(@"\ ", @"[_\ ]+", StringComparison.Ordinal);
 				}
 			}
 

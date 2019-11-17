@@ -52,7 +52,7 @@
 		/// <summary>Throws an exception if the input value is null.</summary>
 		/// <param name="name">The name of the parameter in the original method.</param>
 		/// <exception cref="ArgumentNullException">Always thrown.</exception>
-		/// <returns>An ArgumentNullException for the specified parameter name.</returns>
+		/// <returns>An <see cref="ArgumentNullException"/> for the specified parameter name.</returns>
 		public static ArgumentNullException ArgumentNull(string name) => new ArgumentNullException(name);
 
 		/// <summary>Generates a generic hash code based on multiple input hash codes.</summary>
@@ -172,7 +172,7 @@
 		/// <param name="wantedType">The type that was wanted.</param>
 		/// <param name="actualType">The actual type of the parameter passed.</param>
 		/// <param name="caller">The caller.</param>
-		/// <returns>System.InvalidCastException.</returns>
+		/// <returns>An <see cref="InvalidCastException"/>.</returns>
 		public static InvalidCastException InvalidParameterType(string parameterName, string wantedType, string actualType, [CallerMemberName] string caller = Unknown) => new InvalidCastException(CurrentCulture(Resources.ParameterInvalidCast, parameterName, caller, actualType, wantedType));
 
 		/// <summary>Convenience method so that CurrentCulture and Invariant are all in the same class for both traditional and formattable strings, and are used the same way.</summary>
@@ -180,6 +180,12 @@
 		/// <returns>The formatted text.</returns>
 		// Copy of the same-named method from the FormattableString code so that all culture methods are in the same library.
 		public static string Invariant(FormattableString formattable) => (formattable ?? throw ArgumentNull(nameof(formattable))).ToString(CultureInfo.InvariantCulture);
+
+		/// <summary>The error thrown when a property of an object was unexpectedly null.</summary>
+		/// <param name="objectName">The name of the object in the original method.</param>
+		/// <param name="propertyName">The property of the object which was found to be null.</param>
+		/// <returns>An <see cref="InvalidOperationException"/> for the specified object and property.</returns>
+		public static InvalidOperationException PropertyNull(string objectName, string propertyName) => new InvalidOperationException(CurrentCulture(Resources.PropertyNull, objectName, propertyName));
 
 		/// <summary>Throws an exception if the input value is null.</summary>
 		/// <param name="nullable">The value that may be null.</param>
@@ -189,11 +195,11 @@
 		{
 			if (nullable is null)
 			{
-				throw new ArgumentNullException(name);
+				throw ArgumentNull(name);
 			}
 		}
 
-		/// <summary>Throws an exception if the input value is null.</summary>
+		/// <summary>Throws an exception if the property value is null.</summary>
 		/// <param name="nullable">The value that may be null.</param>
 		/// <param name="objectName">The name of the object in the original method.</param>
 		/// <param name="propertyName">The property of the object which was found to be null.</param>
@@ -202,7 +208,7 @@
 		{
 			if (nullable is null)
 			{
-				throw new InvalidOperationException(CurrentCulture(Resources.PropertyNull, objectName, propertyName));
+				throw PropertyNull(objectName, propertyName);
 			}
 		}
 		#endregion

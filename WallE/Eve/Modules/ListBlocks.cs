@@ -49,10 +49,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override BlocksResult? GetItem(JToken result) => result == null
 			? null
 			: new BlocksResult(
-				automatic: result["automatic"].ToBCBool(),
+				automatic: result["automatic"].GetBCBool(),
 				by: (string?)result["by"],
 				byId: (long?)result["byid"] ?? 0,
-				expiry: result["expiry"].ToNullableDate(),
+				expiry: result["expiry"].GetNullableDate(),
 				flags: result.GetFlags(
 					("allowusertalk", BlockFlags.AllowUserTalk),
 					("anononly", BlockFlags.AnonymousOnly),
@@ -64,7 +64,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				rangeStart: (string?)result["rangestart"],
 				rangeEnd: (string?)result["rangeend"],
 				reason: (string?)result["reason"],
-				timestamp: result["timestamp"].ToNullableDate(),
+				timestamp: result["timestamp"].GetNullableDate(),
 				user: (string?)result["user"],
 				userId: (long?)result["userid"] ?? 0);
 		#endregion

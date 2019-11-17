@@ -1,14 +1,19 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
 	using System.Collections.Generic;
-	using System.Collections.ObjectModel;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
 	public class VariablesPage : Page
 	{
+		#region Fields
+		private readonly Dictionary<string, string> mainSet = new Dictionary<string, string>();
+		private readonly Dictionary<string, IReadOnlyDictionary<string, string>> subsets = new Dictionary<string, IReadOnlyDictionary<string, string>>();
+		#endregion
+
 		#region Constructors
 		public VariablesPage(ISimpleTitle simpleTitle)
 			: base(simpleTitle)
@@ -17,61 +22,46 @@
 		#endregion
 
 		#region Public Properties
-		public VariableDictionary MainSet { get; private set; }
+		public IReadOnlyDictionary<string, string>? MainSet => this.mainSet;
 
-		public IReadOnlyDictionary<string, VariableDictionary> VariableSets { get; private set; }
+		public IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> VariableSets => this.subsets;
 		#endregion
 
 		#region Public Methods
-		public string GetVariable(string name)
-		{
-			if (this.MainSet == null)
-			{
-				return default;
-			}
+		public string? GetVariable(string name) =>
+			this.MainSet != null && this.MainSet.TryGetValue(name, out var retval)
+				? retval
+				: default;
 
-			this.MainSet.TryGetValue(name, out var retval);
-			return retval;
-		}
-
-		public string GetVariable(string setName, string name)
-		{
-			if (string.IsNullOrEmpty(setName))
-			{
-				return this.GetVariable(name);
-			}
-			else
-			{
-				if (this.VariableSets.TryGetValue(setName, out var set))
-				{
-					set.TryGetValue(name, out var retval);
-					return retval;
-				}
-
-				return default;
-			}
-		}
+		public string? GetVariable(string setName, string name) =>
+			string.IsNullOrEmpty(setName)
+				? this.GetVariable(name) :
+			this.VariableSets.TryGetValue(setName, out var set) && set.TryGetValue(name, out var retval)
+				? retval
+				: default;
 		#endregion
 
 		#region Protected Override Methods
 		protected override void PopulateCustomResults(PageItem pageItem)
 		{
 			ThrowNull(pageItem, nameof(pageItem));
-			var varPageItem = pageItem as VariablesPageItem;
-			var dictionary = new Dictionary<string, VariableDictionary>();
-			foreach (var item in varPageItem.Variables)
+			if (pageItem is VariablesPageItem varPageItem)
 			{
-				if (item.Subset == null)
+				this.mainSet.Clear();
+				this.subsets.Clear();
+				foreach (var item in varPageItem.Variables)
 				{
-					this.MainSet = item.Dictionary;
-				}
-				else
-				{
-					dictionary[item.Subset] = item.Dictionary;
+					if (item.Subset == null)
+					{
+						this.mainSet.Clear();
+						this.mainSet.AddRange(item.Dictionary);
+					}
+					else
+					{
+						this.subsets[item.Subset] = item.Dictionary;
+					}
 				}
 			}
-
-			this.VariableSets = new ReadOnlyDictionary<string, VariableDictionary>(dictionary);
 		}
 		#endregion
 	}

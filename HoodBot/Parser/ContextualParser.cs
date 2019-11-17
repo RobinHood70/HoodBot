@@ -26,11 +26,16 @@
 
 		public Dictionary<string, Func<string>> TemplateResolvers { get; } = new Dictionary<string, Func<string>>();
 
-		public ISimpleTitle Title { get; set; }
+		public ISimpleTitle? Title { get; set; }
 		#endregion
 
 		#region Public Static Methods
-		public static ContextualParser FromPage(Page page) => FromText(page, page?.Text);
+		public static ContextualParser FromPage(Page page)
+		{
+			ThrowNull(page, nameof(page));
+			ThrowNull(page.Text, nameof(page), nameof(page.Text));
+			return FromText(page, page.Text);
+		}
 
 		public static ContextualParser FromText(ISimpleTitle title, string text)
 		{

@@ -34,7 +34,7 @@
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.AllEqual
+		public override string? ToString() => this.AllEqual
 			? this[0].ToString()
 			: this.TextBefore + "{{Nowrap|[" + string.Join(" / ", this) + "]}}" + this.TextAfter;
 		#endregion

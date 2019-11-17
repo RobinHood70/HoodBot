@@ -63,7 +63,7 @@
 		/// <remarks>Adds text to the existing node, if the last node in the collection is a TextNode; otherwise, creates a new TextNode with the specified text and adds it to the collection.</remarks>
 		public void AddText([Localizable(false)] string text)
 		{
-			if (this.Last.Value is TextNode node)
+			if (this.Last is LinkedListNode<IWikiNode> last && last.Value is TextNode node)
 			{
 				node.Text += text;
 			}
@@ -355,7 +355,7 @@
 			while (current != null)
 			{
 				var next = current.Next;
-				if (current.Value is TextNode currentText && next.Value is TextNode nextText)
+				if (current.Value is TextNode currentText && next?.Value is TextNode nextText)
 				{
 					nextText.Text = currentText.Text + nextText.Text;
 					this.Remove(current);

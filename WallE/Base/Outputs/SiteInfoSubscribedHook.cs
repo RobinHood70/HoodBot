@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Base
 	public class SiteInfoSubscribedHook
 	{
 		#region Constructors
-		internal SiteInfoSubscribedHook(string name, List<string> subscribers)
+		internal SiteInfoSubscribedHook(string name, IReadOnlyList<string> subscribers)
 		{
 			this.Name = name;
 			this.Subscribers = subscribers;

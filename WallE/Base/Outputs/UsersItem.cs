@@ -15,11 +15,25 @@ namespace RobinHood70.WallE.Base
 	}
 	#endregion
 
-	public class UsersItem : InternalUserItem
+	public class UsersItem : UserItem
 	{
 		#region Constructors
-		internal UsersItem(long userId, string name, UserFlags flags, string? gender, string? token)
-			: base(userId, name)
+		internal UsersItem(UserItem baseUser, UserFlags flags, string? gender, string? token)
+			: base(
+				  userId: baseUser.UserId,
+				  name: baseUser.Name,
+				  blockedBy: baseUser.BlockedBy,
+				  blockedById: baseUser.BlockedById,
+				  blockExpiry: baseUser.BlockExpiry,
+				  blockHidden: baseUser.BlockHidden,
+				  blockId: baseUser.BlockId,
+				  blockReason: baseUser.BlockReason,
+				  blockTimestamp: baseUser.BlockTimestamp,
+				  editCount: baseUser.EditCount,
+				  groups: baseUser.Groups,
+				  implicitGroups: baseUser.ImplicitGroups,
+				  registration: baseUser.Registration,
+				  rights: baseUser.Rights)
 		{
 			this.Flags = flags;
 			this.Gender = gender;

@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.Robby
 {
+	using System;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using static RobinHood70.WikiCommon.Globals;
@@ -41,7 +42,7 @@
 
 		/// <summary>Gets the path of the interwiki.</summary>
 		/// <value>The path of the interwiki, with <c>$1</c> where the article name should go.</value>
-		/// <remarks>This is not represented as a <see cref="System.Uri"/> since it would virtually always have to be converted back to a string for the <c>$1</c> replacement.</remarks>
+		/// <remarks>This is not represented as a <see cref="Uri"/> since it would virtually always have to be converted back to a string for the <c>$1</c> replacement.</remarks>
 		public string Path { get; }
 
 		/// <summary>Gets the interwiki prefix.</summary>
@@ -59,7 +60,7 @@
 		/// <param name="serverPath">Path to the server.</param>
 		public void GuessLocalWikiFromServer(string serverPath)
 		{
-			if (this.Path.Contains(serverPath))
+			if (this.Path.Contains(serverPath, StringComparison.OrdinalIgnoreCase))
 			{
 				this.LocalWiki = true;
 			}

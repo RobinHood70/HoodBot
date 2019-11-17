@@ -16,7 +16,7 @@
 		/// <param name="user">The user who uploaded the file.</param>
 		/// <param name="timestamp">The timestamp on the upload.</param>
 		/// <param name="uri">The URI to the specific version of the file.</param>
-		protected internal FileRevision(int bitDepth, int size, int height, int width, string? comment, string? mimeType, string? sha1, string? user, DateTime? timestamp, Uri uri)
+		protected internal FileRevision(int bitDepth, int size, int height, int width, string? comment, string? mimeType, string? sha1, string? user, DateTime? timestamp, Uri? uri)
 		{
 			this.BitDepth = bitDepth;
 			this.Comment = comment;
@@ -60,7 +60,7 @@
 
 		/// <summary>Gets the URI to the specific version of the file.</summary>
 		/// <value>The URI.</value>
-		public Uri Uri { get; }
+		public Uri? Uri { get; }
 
 		/// <summary>Gets the user who uploaded the file.</summary>
 		/// <value>The user who uploaded the file.</value>

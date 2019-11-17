@@ -36,7 +36,7 @@
 		#endregion
 
 		#region Public Static Properties
-		public static Dictionary<string, MetaNamespace> Namespaces { get; private set; }
+		public static Dictionary<string, MetaNamespace> Namespaces { get; } = new Dictionary<string, MetaNamespace>();
 		#endregion
 
 		#region Public Properties
@@ -64,7 +64,7 @@
 		#endregion
 
 		#region Public Static Methods
-		public static MetaNamespace FromTitle(Title title)
+		public static MetaNamespace? FromTitle(Title title)
 		{
 			ThrowNull(title, nameof(title));
 			var test = title.Namespace.DecoratedName + title.BasePageName;
@@ -76,24 +76,22 @@
 			return retval;
 		}
 
-		public static MetaNamespace ParentFromTitle(Title title)
+		public static MetaNamespace? ParentFromTitle(Title title)
 		{
 			var retval = FromTitle(title);
-			return retval != null ? Namespaces[retval.Parent.Name] : null;
+			return retval == null ? null : Namespaces[retval.Parent.Name];
 		}
 
 		public static void InitializeNamespaces(Site site)
 		{
 			// CONSIDER: Populating collection with all site namespaces, so it can respond as MetaTemplate would for those.
 			ThrowNull(site, nameof(site));
-			if (Namespaces == null)
+			if (Namespaces.Count == 0 && site.LoadMessage("Uespnamespacelist") is string message)
 			{
-				Namespaces = new Dictionary<string, MetaNamespace>();
-				var message = site.LoadMessage("Uespnamespacelist");
 				var lines = message.Split(TextArrays.LineFeed, StringSplitOptions.RemoveEmptyEntries);
 				foreach (var line in lines)
 				{
-					if ("<#".IndexOf(line[0]) < 0)
+					if (line[0] != '<' && line[0] != '#')
 					{
 						var ns = new MetaNamespace(site, line);
 						Namespaces.Add(ns.Base, ns);

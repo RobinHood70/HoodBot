@@ -47,7 +47,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					("missing", SetNotificationTimestampFlags.Missing),
 					("known", SetNotificationTimestampFlags.Known),
 					("notwatched", SetNotificationTimestampFlags.NotWatched)),
-				notificationTimestamp: result["notificationtimestamp"].ToNullableDate(),
+				notificationTimestamp: result["notificationtimestamp"].GetNullableDate(),
 				revId: (long?)result["revid"] ?? 0);
 		}
 
@@ -63,7 +63,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					title: "::Entire Watchlist::",
 					pageId: 0,
 					flags: SetNotificationTimestampFlags.None,
-					notificationTimestamp: result["notificationtimestamp"].ToNullableDate(),
+					notificationTimestamp: result["notificationtimestamp"].GetNullableDate(),
 					revId: 0));
 			}
 			else

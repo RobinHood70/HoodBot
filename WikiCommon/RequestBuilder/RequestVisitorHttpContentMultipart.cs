@@ -45,7 +45,7 @@
 		public void Visit(FileParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
-			this.multipartData.Add(new ByteArrayContent(parameter.Value.data), parameter.Name, parameter.Value.fileName);
+			this.multipartData.Add(new ByteArrayContent(parameter.Value.Data), parameter.Name, parameter.Value.FileName);
 		}
 
 		/// <summary>Visits the specified FormatParameter object.</summary>

@@ -56,7 +56,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				ns: (int)result.MustHave("ns"),
 				title: result.MustHaveString("title"),
 				pageId: (long)result.MustHave("pageid"),
-				isRedirect: result["redirect"].ToBCBool(),
+				isRedirect: result["redirect"].GetBCBool(),
 				langCode: (string?)result["lllang"],
 				langTitle: (string?)result["lltitle"]);
 		#endregion

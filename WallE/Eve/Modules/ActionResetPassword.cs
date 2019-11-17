@@ -43,7 +43,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			ThrowNull(result, nameof(result));
 			return new ResetPasswordResult(
 				status: result.MustHaveString("status"),
-				passwords: result["passwords"].ToStringDictionary<string>());
+				passwords: result["passwords"].GetStringDictionary<string>());
 		}
 		#endregion
 	}

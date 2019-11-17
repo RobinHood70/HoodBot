@@ -52,7 +52,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			resultText = resultText == "needtoken" ? "NeedToken" : resultText.UpperFirst(CultureInfo.InvariantCulture);
 			return new CreateAccountResult(
 				result: resultText,
-				captchaData: result["captcha"].ToStringDictionary<string>(),
+				captchaData: result["captcha"].GetStringDictionary<string>(),
 				token: (string?)result["token"],
 				userId: (long?)result["userid"] ?? 0,
 				userName: (string?)result["username"],

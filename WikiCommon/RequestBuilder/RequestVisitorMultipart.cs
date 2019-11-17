@@ -99,16 +99,16 @@
 		public void Visit(FileParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
-			if (ScanBoundaryConflicts && parameter.Value.data.LongLength > 0 && CurrentEncoding.GetString(parameter.Value.data).Contains(this.boundary))
+			if (ScanBoundaryConflicts && parameter.Value.Data.LongLength > 0 && CurrentEncoding.GetString(parameter.Value.Data).Contains(this.boundary, StringComparison.Ordinal))
 			{
 				this.badBoundary = true;
 				return;
 			}
 
 			ThrowNull(this.stream, nameof(RequestVisitorMultipart), nameof(this.stream));
-			var data = Invariant($"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{parameter.Name}\"; filename=\"{parameter.Value.fileName}\";\r\nContent-Type: application/octet-stream\r\n\r\n");
+			var data = Invariant($"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{parameter.Name}\"; filename=\"{parameter.Value.FileName}\";\r\nContent-Type: application/octet-stream\r\n\r\n");
 			this.stream!.Write(CurrentEncoding.GetBytes(data), 0, CurrentEncoding.GetByteCount(data));
-			this.stream.Write(parameter.Value.data, 0, parameter.Value.data.Length);
+			this.stream.Write(parameter.Value.Data, 0, parameter.Value.Data.Length);
 		}
 
 		/// <summary>Visits the specified FormatParameter object.</summary>
@@ -177,7 +177,7 @@
 
 		private void TextMultipart(string name, string value)
 		{
-			if (ScanBoundaryConflicts && (value?.Contains(this.boundary) ?? false))
+			if (ScanBoundaryConflicts && (value?.Contains(this.boundary, StringComparison.Ordinal) ?? false))
 			{
 				this.badBoundary = true;
 				return;

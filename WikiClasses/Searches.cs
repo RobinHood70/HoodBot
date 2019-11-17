@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WikiClasses
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Text;
 	using System.Text.RegularExpressions;
@@ -56,7 +57,7 @@
 						if (name.Length > 1)
 						{
 							var nameRemainder = Regex.Escape(name.Substring(1));
-							nameRemainder = nameRemainder.Replace(@"\ ", @"[_\ ]+");
+							nameRemainder = nameRemainder.Replace(@"\ ", @"[_\ ]+", StringComparison.Ordinal);
 
 							sb.Append(nameRemainder);
 						}

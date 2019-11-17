@@ -324,12 +324,12 @@
 				var searchText = textNode.Text.TrimEnd();
 
 				// In most cases, searchText will now be the full redirect magic word (e.g., "#REDIRECT"), but old versions of MediaWiki used colons, so strip off a single colon (only one is allowed) if needed and re-trim.
-				if (searchText.Length > 0 && searchText[searchText.Length - 1] == ':')
+				if (searchText.Length > 0 && searchText[^1] == ':')
 				{
-					searchText = searchText.Substring(0, searchText.Length - 1).TrimEnd();
+					searchText = searchText[0..^1].TrimEnd();
 				}
 
-				if (redirects.Contains(searchText) && first.Next.Value is LinkNode linkNode)
+				if (redirects.Contains(searchText) && first.Next?.Value is LinkNode linkNode)
 				{
 					return new TitleParts(this, WikiTextVisitor.Raw(linkNode.Title));
 				}
@@ -393,7 +393,7 @@
 			ThrowNull(message, nameof(message));
 			ThrowNull(arguments, nameof(arguments));
 			var messages = this.LoadMessages(new[] { message }, arguments);
-			return messages.TryGetValue(message, out var retval) ? retval.Text : null;
+			return messages.TryGetValue(message, out var retval) ? retval.Text : string.Empty;
 		}
 
 		/// <summary>Gets multiple messages from MediaWiki space.</summary>
@@ -734,7 +734,7 @@
 				unparsedPath = this.BaseArticlePath;
 			}
 
-			var fullPath = unparsedPath.Replace("$1", articleName.Replace(' ', '_')).TrimEnd('/');
+			var fullPath = unparsedPath.Replace("$1", articleName.Replace(' ', '_'), StringComparison.Ordinal).TrimEnd('/');
 			if (fragment != null)
 			{
 				fullPath += '#' + fragment;
@@ -829,7 +829,7 @@
 				var magicWord = this.MagicWords[wordName];
 				foreach (var value in magicWord.Aliases)
 				{
-					if (!value.Contains("$1"))
+					if (!value.Contains("$1", StringComparison.Ordinal))
 					{
 						retval = wordName;
 						break;
@@ -873,7 +873,7 @@
 				this.disambiguationTemplates = new HashSet<Title>();
 				var page = new Page(this.Namespaces[MediaWikiNamespaces.MediaWiki], "Disambiguationspage");
 				page.Load(PageModules.Default | PageModules.Links);
-				if (page.Exists && page.Text != null)
+				if (page.Exists)
 				{
 					if (page.Links.Count == 0)
 					{
@@ -1132,7 +1132,7 @@
 
 					foreach (var value in magicWord.Aliases)
 					{
-						var regexValue = value.Replace("$1", "(?<value>.*?)");
+						var regexValue = value.Replace("$1", "(?<value>.*?)", StringComparison.Ordinal);
 						sb
 							.Append(regexValue)
 							.Append('|');

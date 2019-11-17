@@ -62,7 +62,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			: new CategoriesItem(
 				ns: (int)result.MustHave("ns"),
 				title: result.MustHaveString("title"),
-				hidden: result["hidden"].ToBCBool(),
+				hidden: result["hidden"].GetBCBool(),
 				sortkey: (string?)result["sortkey"],
 				sortkeyPrefix: (string?)result["sortkeyprefix"],
 				timestamp: (DateTime?)result["timestamp"]);
