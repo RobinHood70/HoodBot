@@ -40,9 +40,9 @@
 			set => this.Set(ref this.botDataFolder, value, nameof(this.BotDataFolder));
 		}
 
-		public BotSettings BotSettings
+		public BotSettings? BotSettings
 		{
-			get => this.botSettings ?? throw PropertyNull(nameof(SettingsViewModel), nameof(this.botSettings));
+			get => this.botSettings;
 			set => this.Set(ref this.botSettings, value ?? throw ArgumentNull(nameof(value)), nameof(this.BotSettings));
 		}
 
@@ -100,10 +100,15 @@
 		{
 		}
 
-		public void CancelEdit() => this.UpdateSelection(this.BotSettings.GetCurrentItem());
+		public void CancelEdit()
+		{
+			ThrowNull(this.BotSettings, nameof(SettingsViewModel), nameof(this.BotSettings));
+			this.UpdateSelection(this.BotSettings.GetCurrentItem());
+		}
 
 		public void EndEdit()
 		{
+			ThrowNull(this.BotSettings, nameof(SettingsViewModel), nameof(this.BotSettings));
 			if (string.IsNullOrWhiteSpace(this.DisplayName) || !(this.Api?.IsWellFormedOriginalString() ?? false))
 			{
 				MessageBox.Show(Resources.InvalidWikiInfo, Resources.Error, MessageBoxButton.OK, MessageBoxImage.Error);
@@ -125,6 +130,7 @@
 		#region Internal Methods
 		internal void UpdateSelection(WikiInfo? wikiInfo)
 		{
+			ThrowNull(this.BotSettings, nameof(SettingsViewModel), nameof(this.BotSettings));
 			if (wikiInfo == null)
 			{
 				this.Api = null;
@@ -195,6 +201,7 @@
 
 		private WikiInfo NewWiki()
 		{
+			ThrowNull(this.BotSettings, nameof(SettingsViewModel), nameof(this.BotSettings));
 			var retval = new MaxLaggableWikiInfo();
 			this.BotSettings.Wikis.Add(retval);
 			this.currentItem = retval;
@@ -206,6 +213,7 @@
 		{
 			if (this.CurrentItem != null)
 			{
+				ThrowNull(this.BotSettings, nameof(SettingsViewModel), nameof(this.BotSettings));
 				this.BotSettings.RemoveWiki(this.CurrentItem);
 			}
 		}
