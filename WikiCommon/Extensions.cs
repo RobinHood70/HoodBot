@@ -34,18 +34,20 @@
 			where T : Enum
 		{
 			ulong flag = 1;
-			var values = (IEnumerable<T>)flagValue.GetType().GetEnumValues();
-			foreach (var value in values)
+			foreach (var arrayValue in flagValue.GetType().GetEnumValues())
 			{
-				var bits = Convert.ToUInt64(value, CultureInfo.InvariantCulture);
-				while (flag < bits)
+				if (arrayValue is T value)
 				{
-					flag <<= 1;
-				}
+					var bits = Convert.ToUInt64(value, CultureInfo.InvariantCulture);
+					while (flag < bits)
+					{
+						flag <<= 1;
+					}
 
-				if (flag == bits && flagValue.HasFlag(value))
-				{
-					yield return value;
+					if (flag == bits && flagValue.HasFlag(value))
+					{
+						yield return value;
+					}
 				}
 			}
 		}
