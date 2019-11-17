@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
 	using System.Collections.Generic;
-	using RobinHood70.HoodBot.ViewModel;
+	using RobinHood70.HoodBot.ViewModels;
 	using static RobinHood70.WikiCommon.Globals;
 
 	public class JobConstructorEqualityComparer : IEqualityComparer<JobNode>

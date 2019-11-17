@@ -1,5 +1,5 @@
 ﻿<Window
-	x:Class="RobinHood70.HoodBot.MainWindow"
+	x:Class="RobinHood70.HoodBot.Views.MainWindow"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -7,7 +7,7 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:properties="clr-namespace:RobinHood70.HoodBot.Properties"
 	xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
-	xmlns:vm="clr-namespace:RobinHood70.HoodBot.ViewModel"
+	xmlns:vm="clr-namespace:RobinHood70.HoodBot.ViewModels"
 	x:Name="mainWindow"
 	Title="{x:Static properties:Resources.HoodBotMainWindow}"
 	Width="900"
@@ -161,7 +161,7 @@
 			Grid.Column="2"
 			LastChildFill="True">
 			<DockPanel.Background>
-				<ImageBrush ImageSource="HoodBot.png" Stretch="Uniform" />
+				<ImageBrush ImageSource="/Assets/HoodBot.png" Stretch="Uniform" />
 			</DockPanel.Background>
 			<TextBlock
 				HorizontalAlignment="Center"

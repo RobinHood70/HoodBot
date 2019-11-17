@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.HoodBot.ViewModel
+﻿namespace RobinHood70.HoodBot.ViewModels
 {
 	using System;
 	using System.Collections.Generic;
@@ -14,6 +14,7 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.HoodBot.Uesp;
+	using RobinHood70.HoodBot.Views;
 	using RobinHood70.HoodBotPlugins;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Base;

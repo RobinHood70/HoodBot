@@ -6,7 +6,7 @@
 		<TargetFramework>netcoreapp3.0</TargetFramework>
 		<UseWPF>true</UseWPF>
 		<LangVersion>latest</LangVersion>
-		<ApplicationIcon>HoodBot.ico</ApplicationIcon>
+		<ApplicationIcon>Assets/HoodBot.ico</ApplicationIcon>
 		<RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
 		<ApplicationVersion>1.0.0.%2a</ApplicationVersion>
 		<CodeAnalysisRuleSet>HoodBot.ruleset</CodeAnalysisRuleSet>
@@ -62,7 +62,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Resource Include="HoodBot.png" />
+	  <Resource Include="Assets\HoodBot.png" />
 	</ItemGroup>
 
 	<ItemGroup>

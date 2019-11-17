@@ -1,7 +1,7 @@
-﻿namespace RobinHood70.HoodBot
+﻿namespace RobinHood70.HoodBot.Views
 {
 	using System.Windows;
-	using RobinHood70.HoodBot.ViewModel;
+	using RobinHood70.HoodBot.ViewModels;
 	using RobinHood70.WallE.Clients;
 
 	/// <summary>Interaction logic for EditSettings.xaml.</summary>

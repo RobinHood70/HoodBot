@@ -1,10 +1,10 @@
-﻿namespace RobinHood70.HoodBot
+﻿namespace RobinHood70.HoodBot.Views
 {
 	using System;
 	using System.Collections;
 	using System.Windows;
 	using System.Windows.Controls;
-	using RobinHood70.HoodBot.ViewModel;
+	using RobinHood70.HoodBot.ViewModels;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.HoodBot.Properties.Resources; // Allowing "using static" for this one due to naming conflict with framework.
 	using static RobinHood70.WikiCommon.Globals;
