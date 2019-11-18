@@ -64,29 +64,17 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			this.Output = new UserInfoResult(
-				id: (long)result.MustHave("id"),
-				name: result.MustHaveString("name"),
-				blockExpiry: result["blockexpiry"].GetNullableDate(),
-				blockId: (long?)result["blockid"] ?? 0,
-				blockReason: (string?)result["blockreason"],
-				blockTimestamp: (DateTime?)result["blockedtimestamp"],
-				blockedBy: (string?)result["blockedby"],
-				blockedById: (long?)result["blockedbyid"] ?? 0,
+				baseUser: result.GetUser(),
 				changeableGroups: changeableGroups,
-				editCount: (long?)result["editcount"] ?? -1,
 				email: (string?)result["email"],
 				emailAuthenticated: result["emailauthenticated"].GetNullableDate(),
 				flags: result.GetFlags(
 					("anon", UserInfoFlags.Anonymous),
 					("messages", UserInfoFlags.HasMessage)),
-				groups: result["groups"].GetList<string>(),
-				implicitGroups: result["implicitgroups"].GetList<string>(),
 				options: result["options"].GetStringDictionary<object>(),
 				preferencesToken: (string?)result["preferencestoken"],
 				rateLimits: rateLimits,
 				realName: (string?)result["realname"],
-				registrationDate: result["registrationdate"].GetNullableDate(),
-				rights: result["rights"].GetList<string>(),
 				unreadText: (string?)result["unreadcount"]);
 		}
 		#endregion

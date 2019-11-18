@@ -437,7 +437,7 @@
 				throw new WikiException(EveMessages.InitializationFailed);
 			}
 
-			this.UserId = userInfo.Id;
+			this.UserId = userInfo.UserId;
 			this.UserName = userInfo.Name;
 
 			// General

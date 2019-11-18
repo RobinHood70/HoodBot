@@ -349,19 +349,19 @@
 					: throw MalformedTypeException("rights", token);
 
 			return new UserItem(
-				userId: (long?)token["userid"] ?? 0,
+				userId: (long?)(token["userid"] ?? token["id"]) ?? 0,
 				name: token.MustHaveString("name"),
-				blockId: (long?)token["blockid"] ?? 0,
-				blockedBy: (string?)token["blockedby"],
-				blockedById: (long?)token["blockedbyid"] ?? 0,
-				blockTimestamp: (DateTime?)token["blockedtimestamp"],
-				blockReason: (string?)token["blockreason"],
 				blockExpiry: token["blockexpiry"].GetNullableDate(),
 				blockHidden: token["hidden"].GetBCBool(),
+				blockId: (long?)token["blockid"] ?? 0,
+				blockReason: (string?)token["blockreason"],
+				blockTimestamp: (DateTime?)token["blockedtimestamp"],
+				blockedBy: (string?)token["blockedby"],
+				blockedById: (long?)token["blockedbyid"] ?? 0,
 				editCount: (long?)token["editcount"] ?? 0,
 				groups: token["groups"].GetList<string>(),
 				implicitGroups: token["implicitgroups"].GetList<string>(),
-				registration: token["registration"].GetNullableDate(),
+				registration: (token["registration"] ?? token["registrationdate"]).GetNullableDate(),
 				rights: userRights);
 		}
 
