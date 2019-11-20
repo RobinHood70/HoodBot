@@ -1,8 +1,6 @@
-﻿namespace RobinHood70.HoodBot.Jobs
+﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
 	using System;
-	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.HoodBot.Jobs.Tasks;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Design;
@@ -13,10 +11,11 @@
 	{
 		#region Constructors
 		protected EditJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: this(site, asyncInfo, null) => this.JobType = JobTypes.Read | JobTypes.Write;
-
-		protected EditJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo, params WikiTask[]? tasks)
-			: base(site, asyncInfo, tasks) => this.Pages = new PageCollection(site);
+			: base(site, asyncInfo)
+		{
+			this.JobType = JobTypes.Read | JobTypes.Write;
+			this.Pages = new PageCollection(site);
+		}
 		#endregion
 
 		#region Public Properties

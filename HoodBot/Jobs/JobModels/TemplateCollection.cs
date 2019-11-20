@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.HoodBot.Jobs.TaskResults
+﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
 	using System.Collections.Generic;
 	using System.Text.RegularExpressions;

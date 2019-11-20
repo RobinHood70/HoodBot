@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.HoodBot.Jobs.Eso
+﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
 	using System;
 	using System.Collections.Generic;
@@ -6,6 +6,7 @@
 	using System.Globalization;
 	using System.Text;
 	using System.Text.RegularExpressions;
+	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;

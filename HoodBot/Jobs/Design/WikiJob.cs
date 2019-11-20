@@ -1,36 +1,37 @@
-﻿namespace RobinHood70.HoodBot.Jobs
+﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
 	using System;
 	using System.Threading;
-	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.HoodBot.Jobs.Tasks;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Extensions;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public abstract class WikiJob : WikiTask, IMessageSource
+	public abstract class WikiJob : IMessageSource, ISiteSpecific
 	{
 		#region Fields
 		private int progress = 0;
 		#endregion
 
 		#region Constructors
-		protected WikiJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo, params WikiTask[]? tasks)
-			: base(site)
+		protected WikiJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
 		{
+			ThrowNull(site, nameof(site));
 			ThrowNull(asyncInfo, nameof(asyncInfo));
+			this.Site = site;
 			this.AsyncInfo = asyncInfo;
-			if (tasks != null)
-			{
-				this.Tasks.AddRange(tasks);
-			}
-
 			this.LogName = this.GetType().Name.UnCamelCase();
 			this.Logger = (site as IJobLogger)?.JobLogger;
 			this.Results = (site as IResultPageHandler)?.ResultPageHandler;
 		}
+		#endregion
+
+		#region Public Events
+		public event StrongEventHandler<WikiJob, EventArgs>? Completed;
+
+		public event StrongEventHandler<WikiJob, EventArgs>? Started;
 		#endregion
 
 		#region Public Properties
@@ -45,6 +46,10 @@
 				this.UpdateProgress();
 			}
 		}
+
+		public int ProgressMaximum { get; protected set; } = 1;
+
+		public Site Site { get; }
 		#endregion
 
 		#region Public Abstract Properties
@@ -64,6 +69,13 @@
 		#endregion
 
 		#region Public Methods
+		public void Execute()
+		{
+			this.BeforeMain();
+			this.Main();
+			this.JobCompleted();
+		}
+
 		public void StatusWrite(string status)
 		{
 			this.AsyncInfo.StatusMonitor?.Report(status);
@@ -81,31 +93,6 @@
 		public void WriteLine(string text) => this.Write(text + '\n');
 		#endregion
 
-		#region Protected Override Methods
-		protected override void JobCompleted()
-		{
-			this.StatusWriteLine("Ending Log Entry");
-			if (this.Logger != null && this.Logger.ShouldLog(this.JobType))
-			{
-				this.Logger.EndLogEntry();
-			}
-
-			base.JobCompleted();
-		}
-
-		protected override void BeforeMain()
-		{
-			this.BeforeLogging();
-			base.BeforeMain();
-			if (this.Logger != null && this.Logger.ShouldLog(this.JobType) == true)
-			{
-				this.StatusWriteLine("Adding Log Entry");
-				var logInfo = new LogInfo(this.LogName ?? "Unknown Job Type", this.LogDetails, this.JobType);
-				this.Logger.AddLogEntry(logInfo);
-			}
-		}
-		#endregion
-
 		#region Protected Methods
 		protected void SetResultDescription(string title)
 		{
@@ -116,9 +103,25 @@
 		}
 		#endregion
 
+		#region Protected Abstract Methods
+		protected abstract void Main();
+		#endregion
+
 		#region Protected Virtual Methods
 		protected virtual void BeforeLogging()
 		{
+		}
+
+		protected virtual void BeforeMain()
+		{
+			this.Started?.Invoke(this, EventArgs.Empty);
+			this.BeforeLogging();
+			if (this.Logger != null && this.Logger.ShouldLog(this.JobType) == true)
+			{
+				this.StatusWriteLine("Adding Log Entry");
+				var logInfo = new LogInfo(this.LogName ?? "Unknown Job Type", this.LogDetails, this.JobType);
+				this.Logger.AddLogEntry(logInfo);
+			}
 		}
 
 		protected virtual void FlowControlAsync()
@@ -132,6 +135,17 @@
 			{
 				cancel.ThrowIfCancellationRequested();
 			}
+		}
+
+		protected virtual void JobCompleted()
+		{
+			this.StatusWriteLine("Ending Log Entry");
+			if (this.Logger != null && this.Logger.ShouldLog(this.JobType))
+			{
+				this.Logger.EndLogEntry();
+			}
+
+			this.Completed?.Invoke(this, EventArgs.Empty);
 		}
 
 		protected virtual void UpdateProgress()

@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.HoodBot.Jobs.Eso
+﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
 	public class Synergy
 	{

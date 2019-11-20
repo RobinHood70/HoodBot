@@ -3,8 +3,9 @@
 	using System;
 	using System.Collections.Generic;
 	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.HoodBot.Jobs.TaskResults;
+	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
@@ -68,6 +69,41 @@
 			this.ExportResults(allTemplateNames, results, this.saveLocation);
 			this.Progress++;
 		}
+		#endregion
+
+		#region Private Static Methods
+		private static TitleCollection BuildRedirectList(IEnumerable<Title> titles)
+		{
+			var retval = TitleCollection.CopyFrom(titles);
+
+			// Loop until nothing new is added.
+			var pagesToCheck = new HashSet<Title>(retval, Title.SimpleEqualityComparer);
+			var alreadyChecked = new HashSet<Title>(Title.SimpleEqualityComparer);
+			do
+			{
+				foreach (var page in pagesToCheck)
+				{
+					retval.GetBacklinks(page.FullPageName, BacklinksTypes.Backlinks, true, Filter.Only);
+				}
+
+				alreadyChecked.UnionWith(pagesToCheck);
+				pagesToCheck.Clear();
+				pagesToCheck.UnionWith(retval);
+				pagesToCheck.ExceptWith(alreadyChecked);
+			}
+			while (pagesToCheck.Count > 0);
+
+			return retval;
+		}
+
+		private PageCollection FollowRedirects(IEnumerable<Title> titles)
+		{
+			var originalsFollowed = PageCollection.Unlimited(this.Site, new PageLoadOptions(PageModules.None, true));
+			originalsFollowed.GetTitles(titles);
+
+			return originalsFollowed;
+		}
+
 		#endregion
 
 		#region Private Methods

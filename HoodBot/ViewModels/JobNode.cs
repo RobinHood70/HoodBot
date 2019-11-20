@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Reflection;
-	using RobinHood70.HoodBot.Jobs;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using static RobinHood70.WikiCommon.Globals;
 

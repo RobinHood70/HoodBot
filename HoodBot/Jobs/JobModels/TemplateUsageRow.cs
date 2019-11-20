@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.HoodBot.Jobs.TaskResults
+﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
 	using RobinHood70.WikiClasses;
 

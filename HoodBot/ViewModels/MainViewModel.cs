@@ -10,7 +10,6 @@
 	using System.Threading.Tasks;
 	using System.Windows;
 	using System.Windows.Media;
-	using RobinHood70.HoodBot.Jobs;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.HoodBot.Properties;
@@ -22,7 +21,6 @@
 	using static System.Environment;
 	using static RobinHood70.WikiCommon.Globals;
 
-	// TODO: Reduce/eliminate dependence on WallE if possible. Ideally, this should all be available directly through Robby or via a communal class.
 	public class MainViewModel : Notifier
 	{
 		#region Private Constants
@@ -177,9 +175,9 @@
 
 		#region Internal Static Methods
 
+#if DEBUG
 		internal static void SiteWarningOccurred(Site sender, WarningEventArgs eventArgs) => Debug.WriteLine(eventArgs?.Warning);
 
-#if DEBUG
 		internal static void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName} Response: {eventArgs.Response}");
 
 		internal static void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName} Request: {eventArgs.Request}");
@@ -254,7 +252,7 @@
 
 		private WikiJob ConstructJob(JobNode jobNode, Site site)
 		{
-			Debug.Assert(jobNode.Constructor != null, "jobNode.Constructor is null.");
+			ThrowNull(jobNode.Constructor, nameof(jobNode), nameof(jobNode.Constructor));
 			var objectList = new List<object?> { site, new AsyncInfo(this.progressMonitor, this.statusMonitor, this.pauser?.Token, this.canceller?.Token) };
 
 			if (jobNode.Parameters is IReadOnlyList<ConstructorParameter> jobParams)
@@ -378,7 +376,9 @@
 #endif
 			var factoryMethod = Site.GetFactoryMethod(wikiInfo.SiteClassIdentifier);
 			var site = factoryMethod(abstractionLayer);
+#if DEBUG
 			site.WarningOccurred += SiteWarningOccurred;
+#endif
 			site.PagePreview += this.SitePagePreview;
 			if (wikiInfo.UserName != null)
 			{
@@ -441,9 +441,9 @@
 			}
 
 			site.AbstractionLayer.WarningOccurred -= WalWarningOccurred;
+			site.WarningOccurred -= SiteWarningOccurred;
 #endif
 			site.PagePreview -= this.SitePagePreview;
-			site.WarningOccurred -= SiteWarningOccurred;
 		}
 
 		private void RunTest()

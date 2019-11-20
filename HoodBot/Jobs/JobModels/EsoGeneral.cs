@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.HoodBot.Jobs.Eso
+﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
 	using System;
 	using System.Collections.Generic;
@@ -9,6 +9,7 @@
 	using System.Text.RegularExpressions;
 	using Microsoft.Extensions.Configuration;
 	using MySql.Data.MySqlClient;
+	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
