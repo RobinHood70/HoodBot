@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 	using RobinHood70.WikiClasses.Properties;
 	using static WikiCommon.Globals;
 
@@ -31,6 +32,17 @@
 			this.Name = new NodeCollection(this, name ?? throw ArgumentNull(nameof(name)));
 			this.Value = new NodeCollection(this, value ?? throw ArgumentNull(nameof(value)));
 		}
+		#endregion
+
+		#region Public Static Properties
+
+		/// <summary>Gets or sets the text to use when escaping equals signs.</summary>
+		/// <value>The equals sign escape text.</value>
+		public static string EqualsEscape { get; set; } = "&#61;";
+
+		/// <summary>Gets or sets the text to use when escaping pipes.</summary>
+		/// <value>The pipe escape text.</value>
+		public static string PipeEscape { get; set; } = "{{!}}";
 		#endregion
 
 		#region Public Properties
@@ -81,6 +93,56 @@
 
 		#region Public Static Methods
 
+		/// <summary>Escapes any pipes in the value.</summary>
+		/// <param name="nameValue">The text to escape.</param>
+		/// <returns>The escaped text.</returns>
+		public static string EscapeNameValue(string? nameValue)
+		{
+			if (nameValue == null)
+			{
+				return string.Empty;
+			}
+
+			var nodes = WikiTextParser.Parse(nameValue);
+			EscapeValue(nodes, false);
+			return WikiTextVisitor.Raw(nodes);
+		}
+
+		/// <summary>Escapes any pipes and equals signs in the value.</summary>
+		/// <param name="value">The text to escape.</param>
+		/// <returns>The escaped text.</returns>
+		public static string EscapeValue(string? value)
+		{
+			if (value == null)
+			{
+				return string.Empty;
+			}
+
+			var nodes = WikiTextParser.Parse(value);
+			EscapeValue(nodes, true);
+			return WikiTextVisitor.Raw(nodes);
+		}
+
+		/// <summary>Escapes any pipes and, optionally, equals signs in the value.</summary>
+		/// <param name="nodes">The <see cref="NodeCollection"/> whose <see cref="TextNode"/>s should be escaped.</param>
+		/// <param name="escapeEquals">if set to <c>true</c> equals signs are escaped as well as pipes (i.e., with the default settings, <c>key=value|value</c> becomes <c>key&#61;value{{!}}value</c>); otherwise, only pipes will be escaped (i.e., <c>key=value|value</c> becomes <c>key=value{{!}}value</c>).</param>
+		/// <remarks><see cref="TextNode"/>s at the root of the collection will potentially have been modified with the replaced text. For simplicity and speed, template-like replacements (e.g., {{!}} or {{=}}) will <i>not</i> have been inserted as <see cref="TemplateNode"/>s, but only as text replacements within the TextNode itself. If correct parsing is needed, callers should convert the NodeCollection to text and then back again.</remarks>
+		public static void EscapeValue(NodeCollection nodes, bool escapeEquals)
+		{
+			ThrowNull(nodes, nameof(nodes));
+			foreach (var node in nodes)
+			{
+				if (node is TextNode textNode)
+				{
+					textNode.Text = textNode.Text.Replace("|", PipeEscape, StringComparison.Ordinal);
+					if (escapeEquals)
+					{
+						textNode.Text = textNode.Text.Replace("=", EqualsEscape, StringComparison.Ordinal);
+					}
+				}
+			}
+		}
+
 		/// <summary>Creates a new ParameterNode from the provided text.</summary>
 		/// <param name="txt">The text of the parameter (without a pipe (<c>|</c>).</param>
 		/// <returns>A new ParameterNode.</returns>
@@ -88,7 +150,7 @@
 		public static ParameterNode FromText(string txt)
 		{
 			ThrowNull(txt, nameof(txt));
-			var template = TemplateNode.FromParts(string.Empty, new[] { txt });
+			var template = TemplateNode.FromParts(string.Empty, false, new[] { txt });
 			return template.Parameters.Count == 1 && template.Parameters.First is LinkedListNode<IWikiNode> first && first.Value is ParameterNode retval
 				? retval
 				: throw new InvalidOperationException(CurrentCulture(Resources.MalformedNodeText, nameof(ParameterNode), nameof(FromText)));
@@ -112,6 +174,10 @@
 		/// <summary>Accepts a visitor to process the node.</summary>
 		/// <param name="visitor">The visiting class.</param>
 		public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
+
+		/// <summary>Gets the parameter's name, converting anonymous parameters to their numbered value.</summary>
+		/// <returns>The parameter name.</returns>
+		public string NameToText() => this.Name == null ? this.Index.ToString(CultureInfo.InvariantCulture) : WikiTextVisitor.Value(this.Name);
 
 		/// <summary>Sets the name from a list of nodes.</summary>
 		/// <param name="name">The name. If non-null, <see cref="Index"/> will be set to zero.</param>

@@ -12,8 +12,8 @@
 	using System.Windows.Media;
 	using RobinHood70.HoodBot.Jobs;
 	using RobinHood70.HoodBot.Jobs.Design;
+	using RobinHood70.HoodBot.Models;
 	using RobinHood70.HoodBot.Properties;
-	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.HoodBot.Views;
 	using RobinHood70.HoodBotPlugins;
 	using RobinHood70.Robby;
@@ -67,7 +67,7 @@
 			this.CurrentItem = this.BotSettings.GetCurrentItem();
 			this.progressMonitor = new Progress<double>(this.ProgressChanged);
 			this.statusMonitor = new Progress<string>(this.StatusWrite);
-			Site.RegisterUserFunctionsClass(new[] { "en.uesp.net", "rob-centos" }, new[] { "HoodBot" }, HoodBotFunctions.CreateInstance);
+			Site.RegisterSiteClass(Uesp.UespSite.CreateInstance, "UespHoodBot");
 			var plugins = Plugins.Instance;
 			this.DiffViewer = plugins.DiffViewers["Internet Explorer"];
 		}
@@ -296,7 +296,9 @@
 
 				var success = true;
 				var site = this.InitializeSite();
-				site.UserFunctions.OnAllJobsStarting(jobList.Count);
+				var jobRunner = site as IJobAware;
+				jobRunner?.OnJobsStarted();
+
 				foreach (var jobNode in jobList)
 				{
 					var job = this.ConstructJob(jobNode, site);
@@ -326,10 +328,7 @@
 #pragma warning restore CA1031 // Do not catch general exception types
 				}
 
-				if (success)
-				{
-					site.UserFunctions.OnAllJobsComplete();
-				}
+				jobRunner?.OnJobsCompleted(success);
 
 				this.ResetSite(site);
 				this.pauser = null;
@@ -382,8 +381,8 @@
 
 			al.WarningOccurred += WalWarningOccurred;
 #endif
-
-			var site = new Site(al);
+			var factoryMethod = Site.GetFactoryMethod(wikiInfo.SiteClassIdentifier);
+			var site = factoryMethod(al);
 			site.WarningOccurred += SiteWarningOccurred;
 			site.PagePreview += this.SitePagePreview;
 			if (wikiInfo.UserName != null)

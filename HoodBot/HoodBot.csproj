@@ -16,16 +16,17 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 		<Nullable>enable</Nullable>
+		<RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-	  <DefineConstants>DEBUG</DefineConstants>
+		<DefineConstants>DEBUG</DefineConstants>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Old Jobs\EsoMatchIcons.cs" />
-	  <Compile Remove="Old Jobs\UndoLocChanges.cs" />
-	  <Compile Remove="Old Jobs\UntranscludeLore.cs" />
+		<Compile Remove="Old Jobs\EsoMatchIcons.cs" />
+		<Compile Remove="Old Jobs\UndoLocChanges.cs" />
+		<Compile Remove="Old Jobs\UntranscludeLore.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -33,23 +34,23 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Include="Old Jobs\EsoMatchIcons.cs" />
-	  <None Include="Old Jobs\UndoLocChanges.cs" />
-	  <None Include="Old Jobs\UntranscludeLore.cs" />
+		<None Include="Old Jobs\EsoMatchIcons.cs" />
+		<None Include="Old Jobs\UndoLocChanges.cs" />
+		<None Include="Old Jobs\UntranscludeLore.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.7">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.0-preview3.19553.2" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.0-preview3.19553.2" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.0-preview3.19553.2" />
 		<PackageReference Include="MySql.Data" Version="8.0.18" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.113">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 	</ItemGroup>
 
@@ -62,28 +63,28 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Resource Include="Assets\HoodBot.png" />
+		<Resource Include="Assets\HoodBot.png" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Properties\Resources.Designer.cs">
-	    <DesignTime>True</DesignTime>
-	    <AutoGen>True</AutoGen>
-	    <DependentUpon>Resources.resx</DependentUpon>
-	  </Compile>
+		<Compile Update="Properties\Resources.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Resources.resx</DependentUpon>
+		</Compile>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Update="Properties\Resources.resx">
-	    <Generator>PublicResXFileCodeGenerator</Generator>
-	    <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-	  </EmbeddedResource>
+		<EmbeddedResource Update="Properties\Resources.resx">
+			<Generator>PublicResXFileCodeGenerator</Generator>
+			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="connectionStrings.json">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
+		<None Update="connectionStrings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
 
 </Project>

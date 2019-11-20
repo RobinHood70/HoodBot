@@ -97,6 +97,15 @@ namespace RobinHood70.WikiClasses.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Nodes aren&apos;t in the same list!.
+        /// </summary>
+        internal static string NodesInDifferentLists {
+            get {
+                return ResourceManager.GetString("NodesInDifferentLists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Parameter \&quot;{0}\&quot; already exists..
         /// </summary>
         internal static string ParameterExists {

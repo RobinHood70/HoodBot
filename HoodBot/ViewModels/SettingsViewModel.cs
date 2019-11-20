@@ -19,6 +19,7 @@
 		private string? displayName;
 		private string? password;
 		private int readThrottling;
+		private string? siteClassIdentifier;
 		private string? userName;
 		private int writeThrottling;
 		#endregion
@@ -80,6 +81,12 @@
 
 		public RelayCommand Save => new RelayCommand(() => this.EndEdit());
 
+		public string? SiteClassIdentifier
+		{
+			get => this.siteClassIdentifier;
+			set => this.Set(ref this.siteClassIdentifier, value, nameof(this.SiteClassIdentifier));
+		}
+
 		public RelayCommand Undo => new RelayCommand(() => this.CancelEdit());
 
 		public string? UserName
@@ -120,6 +127,7 @@
 			wikiInfo.DisplayName = this.DisplayName;
 			wikiInfo.Password = this.Password;
 			wikiInfo.ReadThrottling = this.ReadThrottling;
+			wikiInfo.SiteClassIdentifier = this.SiteClassIdentifier;
 			wikiInfo.WriteThrottling = this.WriteThrottling;
 			wikiInfo.UserName = this.UserName;
 
@@ -137,6 +145,7 @@
 				this.DisplayName = null;
 				this.Password = null;
 				this.ReadThrottling = 0;
+				this.SiteClassIdentifier = null;
 				this.WriteThrottling = 0;
 				this.UserName = null;
 			}
@@ -146,6 +155,7 @@
 				this.DisplayName = wikiInfo.DisplayName;
 				this.Password = wikiInfo.Password;
 				this.ReadThrottling = wikiInfo.ReadThrottling;
+				this.SiteClassIdentifier = wikiInfo.SiteClassIdentifier;
 				this.WriteThrottling = wikiInfo.WriteThrottling;
 				this.UserName = wikiInfo.UserName;
 			}

@@ -189,11 +189,17 @@
   <data name="Save" xml:space="preserve">
     <value>Sauvegarder</value>
   </data>
+  <data name="SiteClassKey" xml:space="preserve">
+    <value>Clé de la classe Site :</value>
+  </data>
   <data name="Undo" xml:space="preserve">
     <value>Annuler</value>
   </data>
   <data name="UnhandledConstructorParameter" xml:space="preserve">
     <value>Le paramètre constructeur de type {0} n'est pas géré!</value>
+  </data>
+  <data name="UserEmailDisabled" xml:space="preserve">
+    <value>Il n'est pas possible d'envoyer un courriel à cet utilisateur.</value>
   </data>
   <data name="UserName" xml:space="preserve">
     <value>Nom de l'utilisateur  :</value>

@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.IO;
 	using System.Text.RegularExpressions;
@@ -93,6 +94,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Static Methods
+		[return: NotNullIfNotNull("pageId")]
 		protected static string? FakeTitleFromId(long? pageId) => pageId == null ? null : '#' + pageId.Value.ToStringInvariant();
 		#endregion
 

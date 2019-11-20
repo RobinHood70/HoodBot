@@ -18,5 +18,19 @@
 				}
 			}
 		}
+
+		/// <summary>Convert a collection of ISimpleTitles to their page names, ignoring namespace.</summary>
+		/// <param name="titles">The titles to convert.</param>
+		/// <returns>An enumeration of the titles converted to their page names, ignoring namespace.</returns>
+		public static IEnumerable<string> ToPageNames(this IEnumerable<ISimpleTitle> titles)
+		{
+			if (titles != null)
+			{
+				foreach (var title in titles)
+				{
+					yield return title.PageName;
+				}
+			}
+		}
 	}
 }

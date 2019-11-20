@@ -39,7 +39,7 @@
 			}
 		}
 
-		protected override void PrepareJob()
+		protected override void BeforeLogging()
 		{
 			var codeData = JsonConvert.DeserializeObject<List<DeckCodeInfo>>(File.ReadAllText(@"D:\Users\rmorl\Desktop\export_codes.json"));
 			var lookup = new Dictionary<Title, DeckCodeInfo>();

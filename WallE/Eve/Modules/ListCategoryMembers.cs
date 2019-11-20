@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Text;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
@@ -97,6 +98,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Private Static Methods
+		[return: NotNullIfNotNull("hexValue")]
 		private static string? PackHex(string? hexValue)
 		{
 			if (hexValue == null)

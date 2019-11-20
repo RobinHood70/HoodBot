@@ -18,8 +18,8 @@
 
 	/// <summary>An API-based implementation of the <see cref="IWikiAbstractionLayer" /> interface.</summary>
 	/// <seealso cref="IWikiAbstractionLayer" />
-	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Not much to be done while maintaining the ease of abstraction (e.g., using index.php or a database layer). If anyone has a better design, I'm all ears!")]
-	public class WikiAbstractionLayer : IWikiAbstractionLayer
+	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "High class coupling is the result of using classes for inputs, which is a recommended design when dealing with such a high level of input variability.")]
+	public class WikiAbstractionLayer : IWikiAbstractionLayer, IInternetEntryPoint
 	{
 		#region Internal Constants
 		internal const int LimitSmall1 = 50;
@@ -44,20 +44,20 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="WikiAbstractionLayer" /> class.</summary>
-		/// <param name="client">The client.</param>
-		/// <param name="uri">The URI.</param>
+		/// <param name="client">The internet client.</param>
+		/// <param name="apiUri">The URI to api.php.</param>
 		[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "As above.")]
-		public WikiAbstractionLayer(IMediaWikiClient client, Uri uri)
+		public WikiAbstractionLayer(IMediaWikiClient client, Uri apiUri)
 		{
 			ThrowNull(client, nameof(client));
-			ThrowNull(uri, nameof(uri));
-			if (!uri.AbsolutePath.EndsWith("api.php", StringComparison.OrdinalIgnoreCase))
+			ThrowNull(apiUri, nameof(apiUri));
+			if (!apiUri.AbsolutePath.EndsWith("api.php", StringComparison.OrdinalIgnoreCase))
 			{
 				throw new InvalidOperationException(CurrentCulture(EveMessages.InvalidApi));
 			}
 
 			this.Client = client;
-			this.Uri = uri;
+			this.EntryPoint = apiUri;
 			this.ModuleFactory = new ModuleFactory(this)
 				.RegisterGenerator<CategoriesInput>(PropCategories.CreateInstance)
 				.RegisterGenerator<DeletedRevisionsInput>(PropDeletedRevisions.CreateInstance)
@@ -250,7 +250,7 @@
 		/// <value>The URI to use as a base.</value>
 		/// <remarks>This should normally be set only by the constructor and the <see cref="MakeUriSecure(bool)" /> routine, but is left as settable by derived classes, should customization be needed.</remarks>
 		/// <seealso cref="WikiAbstractionLayer(IMediaWikiClient, Uri)" />
-		public Uri Uri { get; protected set; }
+		public Uri EntryPoint { get; protected set; }
 
 		/// <summary>Gets or sets the language to use for responses from the wiki.</summary>
 		/// <value>The use language.</value>
@@ -308,11 +308,11 @@
 		/// <param name="https">If set to <see langword="true" />, forces the URI to be a secure URI (https://); if false, forces it to be insecure (http://).</param>
 		public void MakeUriSecure(bool https)
 		{
-			var urib = new UriBuilder(this.Uri)
+			var urib = new UriBuilder(this.EntryPoint)
 			{
 				Scheme = https ? "https" : "http",
 			};
-			this.Uri = urib.Uri;
+			this.EntryPoint = urib.Uri;
 		}
 
 		/// <summary>Runs the continuable query specified by the input.</summary>

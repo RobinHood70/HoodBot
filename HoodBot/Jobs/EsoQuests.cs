@@ -121,7 +121,7 @@
 			}
 		}
 
-		protected override void PrepareJob()
+		protected override void BeforeLogging()
 		{
 			this.StatusWriteLine("Getting wiki data");
 			var allTitles = new TitleCollection(this.Site);

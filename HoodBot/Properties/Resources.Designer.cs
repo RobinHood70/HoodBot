@@ -277,6 +277,15 @@ namespace RobinHood70.HoodBot.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Site Class Key.
+        /// </summary>
+        public static string SiteClassKey {
+            get {
+                return ResourceManager.GetString("SiteClassKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Undo.
         /// </summary>
         public static string Undo {
@@ -291,6 +300,15 @@ namespace RobinHood70.HoodBot.Properties {
         public static string UnhandledConstructorParameter {
             get {
                 return ResourceManager.GetString("UnhandledConstructorParameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to It is not possible to send an e-mail to this user..
+        /// </summary>
+        public static string UserEmailDisabled {
+            get {
+                return ResourceManager.GetString("UserEmailDisabled", resourceCulture);
             }
         }
         

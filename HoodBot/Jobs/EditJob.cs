@@ -3,8 +3,8 @@
 	using System;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Tasks;
+	using RobinHood70.HoodBot.Models;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
@@ -13,9 +13,7 @@
 	{
 		#region Constructors
 		protected EditJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: this(site, asyncInfo, null)
-		{
-		}
+			: this(site, asyncInfo, null) => this.JobType = JobTypes.Read | JobTypes.Write;
 
 		protected EditJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo, params WikiTask[]? tasks)
 			: base(site, asyncInfo, tasks) => this.Pages = new PageCollection(site);
@@ -25,20 +23,6 @@
 
 		// Nearly all edit jobs act on a PageCollection, so we provide a preinitialized one here for convenience.
 		public PageCollection Pages { get; }
-		#endregion
-
-		#region Public Override Properties
-		public override bool ReadOnly => false;
-		#endregion
-
-		#region Public Virtual Properties
-		public virtual string? LogDetails { get; protected set; }
-
-		public bool LogJob { get; protected set; } = true;
-		#endregion
-
-		#region Public Abstract Properties
-		public abstract string LogName { get; }
 		#endregion
 
 		#region Protected Properties
@@ -75,36 +59,6 @@
 				}
 			}
 		}
-		#endregion
-
-		#region Protected Override Methods
-		protected override void OnCompleted()
-		{
-			this.StatusWriteLine("Ending Log Entry");
-			if (this.LogJob)
-			{
-				this.Site.UserFunctions.EndLogEntry();
-			}
-
-			base.OnCompleted();
-		}
-
-		protected override void OnStarted()
-		{
-			this.PrepareJob();
-			base.OnStarted();
-			this.StatusWriteLine("Adding Log Entry");
-			if (this.LogJob)
-			{
-				this.Site.UserFunctions.AddLogEntry(new LogInfo(this.LogName ?? this.GetType().Name, this.LogDetails, this.ReadOnly));
-			}
-		}
-		#endregion
-
-		#region Protected Abstract Methods
-
-		// While this could be virtual as well, the number of jobs with an empty PrepareJob method will be vanishingly small, so made it abstract instead.
-		protected abstract void PrepareJob();
 		#endregion
 	}
 }

@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.Runtime.CompilerServices;
 	using Newtonsoft.Json.Linq;
@@ -91,6 +92,7 @@
 		/// <summary>Gets a standard code/info-formatted error.</summary>
 		/// <param name="token">The token to examine.</param>
 		/// <returns>An <see cref="ErrorItem"/> with the error details. Can be null only if the error node parameter was null.</returns>
+		[return: NotNullIfNotNull("token")]
 		public static ErrorItem? GetError(this JToken? token) => GetError(token, "code", "info");
 
 		/// <summary>Gets a standard code/info-formatted error with custom names.</summary>
@@ -99,6 +101,7 @@
 		/// <param name="infoName">Name of the information node.</param>
 		/// <returns>An <see cref="ErrorItem"/> with the error details. Can be null only if the error node parameter was null.</returns>
 		/// <remarks>This is used for sub-structures, such as move results, where the code/info nodes have prefixes.</remarks>
+		[return: NotNullIfNotNull("token")]
 		public static ErrorItem? GetError(this JToken? token, string codeName, string infoName) => token == null
 			? null
 			: new ErrorItem(token.MustHaveString(codeName), token.MustHaveString(infoName));
@@ -165,6 +168,7 @@
 		/// <summary>Gets a language link.</summary>
 		/// <param name="token">The token to examine.</param>
 		/// <returns>A <see cref="LanguageLinksItem"/>.</returns>
+		[return: NotNullIfNotNull("token")]
 		public static LanguageLinksItem? GetLanguageLink(this JToken? token) => token == null
 			? null
 			: new LanguageLinksItem(

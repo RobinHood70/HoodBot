@@ -60,7 +60,7 @@
 			}
 		}
 
-		protected override void PrepareJob()
+		protected override void BeforeLogging()
 		{
 			var comparer = this.Site.Culture.CompareInfo;
 			var blocks = this.Site.LoadBlocks(Filter.Exclude, Filter.Any, Filter.Exclude, Filter.Exclude);

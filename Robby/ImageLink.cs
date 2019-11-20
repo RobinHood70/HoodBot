@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.Robby
 {
 	using System;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.Text;
 	using RobinHood70.Robby.Properties;
@@ -358,6 +359,7 @@
 			value.Value = value.Value.Substring(index, length);
 		}
 
+		[return: NotNullIfNotNull("paramName")]
 		private string? GetRegexValue(string paramName)
 		{
 			var param = this.parameters[paramName];

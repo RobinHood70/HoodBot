@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
+	using System.Collections.Generic;
 	using System.Text;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -34,10 +35,20 @@
 		/// <returns>The raw text for a node or node collection.</returns>
 		public static string Raw(IWikiNode node) => RawVisitor.Build(node);
 
+		/// <summary>Returns the raw text for a set of nodes.</summary>
+		/// <param name="nodes">The nodes.</param>
+		/// <returns>The raw text for the specified nodes.</returns>
+		public static string Raw(IEnumerable<IWikiNode> nodes) => RawVisitor.Build(nodes);
+
 		/// <summary>Returns the value text for a node or node collection.</summary>
 		/// <param name="node">The node.</param>
 		/// <returns>The value text for a node or node collection.</returns>
 		public static string Value(IWikiNode node) => ValueVisitor.Build(node);
+
+		/// <summary>Returns the value text for a node or node collection.</summary>
+		/// <param name="nodes">The nodes.</param>
+		/// <returns>The value text for the specified nodes.</returns>
+		public static string Value(IEnumerable<IWikiNode> nodes) => ValueVisitor.Build(nodes);
 		#endregion
 
 		#region Public Methods
@@ -50,6 +61,21 @@
 			ThrowNull(node, nameof(node));
 			this.builder.Clear();
 			node.Accept(this);
+			return this.builder.ToString();
+		}
+
+		/// <summary>Builds the specified node or node collection into wiki text.</summary>
+		/// <param name="nodes">The nodes.</param>
+		/// <returns>The wiki text of the collection.</returns>
+		public string Build(IEnumerable<IWikiNode> nodes)
+		{
+			ThrowNull(nodes, nameof(nodes));
+			this.builder.Clear();
+			foreach (var node in nodes)
+			{
+				node.Accept(this);
+			}
+
 			return this.builder.ToString();
 		}
 		#endregion

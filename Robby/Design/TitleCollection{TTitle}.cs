@@ -689,6 +689,29 @@
 			return true;
 		}
 
+		/// <summary>Removes a specific item from the <see cref="TitleCollection">collection</see>.</summary>
+		/// <param name="item">The item to remove from the <see cref="TitleCollection">collection</see>.</param>
+		/// <returns><see langword="true" /> if <paramref name="item" /> was successfully removed from the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />. This method also returns <see langword="false" /> if <paramref name="item" /> is not found in the original <see cref="TitleCollection">collection</see>.</returns>
+		public bool Remove(ISimpleTitle item)
+		{
+			ThrowNull(item, nameof(item));
+			if (this.Remove(item.FullPageName))
+			{
+				return true;
+			}
+
+			for (var i = this.Count - 1; i >= 0; i--)
+			{
+				if (this[i].SimpleEquals(item))
+				{
+					this.RemoveAt(i);
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 		/// <summary>Removes the <see cref="TitleCollection">collection</see> item at the specified index.</summary>
 		/// <param name="index">The zero-based index of the item to remove.</param>
 		public void RemoveAt(int index) => this.RemoveItem(index);

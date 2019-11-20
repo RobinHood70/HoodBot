@@ -21,6 +21,7 @@
 		/// <summary>Formats a <see cref="DateTime"/>? in the standard MediaWiki format.</summary>
 		/// <param name="timestamp">The timestamp to format.</param>
 		/// <returns>A string with the date in the standard MediaWiki format or <see langword="null"/> if the input value was null.</returns>
+		[return: NotNullIfNotNull("timestamp")]
 		public static string? ToMediaWiki(this DateTime? timestamp) => timestamp == null ? null : ToMediaWiki(timestamp.Value);
 		#endregion
 
@@ -258,6 +259,7 @@
 		/// <param name="maxLength">The maximum length.</param>
 		/// <returns>System.String.</returns>
 		/// <remarks>This limits only the initial string length, not the total, so the return value can have a maximum length of maxLength + 3.</remarks>
+		[return: NotNullIfNotNull("text")]
 		public static string? Ellipsis(this string? text, int maxLength) =>
 			text == null ? null :
 			text.Length > maxLength ? text.Substring(0, maxLength) + "..." :
@@ -282,6 +284,53 @@
 
 			var retval = text.Substring(0, 1).ToLower(culture);
 			return text.Length == 1 ? retval : retval + text.Substring(1);
+		}
+
+		/// <summary>Takes a camel-case text and adds spaces before each block of one or more upper-case letters.</summary>
+		/// <param name="text">The text to convert.</param>
+		/// <returns>The original text with spaces inserted.</returns>
+		[return: NotNullIfNotNull("text")]
+		public static string? UnCamelCase(this string text)
+		{
+			if (text == null)
+			{
+				return null;
+			}
+
+			text = text.UpperFirst(CultureInfo.CurrentUICulture);
+			var words = new List<string>(5);
+			var word = string.Empty;
+			var lastWasCapital = false;
+			var didWordBreak = false;
+			foreach (var c in text)
+			{
+				if (char.IsUpper(c) && !lastWasCapital)
+				{
+					if (word.Length > 0)
+					{
+						words.Add(word);
+					}
+
+					word = c.ToString(CultureInfo.InvariantCulture);
+					lastWasCapital = true;
+					didWordBreak = true;
+				}
+				else if (!char.IsUpper(c) && lastWasCapital && !didWordBreak)
+				{
+					words.Add(word[0..^1]);
+					word = word.Substring(word.Length - 1) + c;
+					didWordBreak = true;
+				}
+				else
+				{
+					word += c;
+					lastWasCapital = char.IsUpper(c);
+					didWordBreak = false;
+				}
+			}
+
+			words.Add(word);
+			return string.Join(" ", words);
 		}
 
 		/// <summary>Converts the first character of a string to upper-case.</summary>

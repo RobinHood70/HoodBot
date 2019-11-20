@@ -111,12 +111,12 @@
 		#region Public Methods
 		public virtual void Execute()
 		{
-			this.OnStarted();
+			this.BeforeMain();
 			this.ProgressMaximum = this.GetProgressEstimate();
 			this.Main();
 			this.OnRunningTasks();
 			this.RunTasks();
-			this.OnCompleted();
+			this.JobCompleted();
 		}
 		#endregion
 
@@ -125,11 +125,11 @@
 		#endregion
 
 		#region Protected Virtual Methods
-		protected virtual void OnCompleted() => this.Completed?.Invoke(this, EventArgs.Empty);
+		protected virtual void JobCompleted() => this.Completed?.Invoke(this, EventArgs.Empty);
 
 		protected virtual void OnRunningTasks() => this.RunningTasks?.Invoke(this, EventArgs.Empty);
 
-		protected virtual void OnStarted() => this.Started?.Invoke(this, EventArgs.Empty);
+		protected virtual void BeforeMain() => this.Started?.Invoke(this, EventArgs.Empty);
 
 		protected virtual void RunTasks()
 		{

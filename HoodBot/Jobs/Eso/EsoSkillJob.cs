@@ -90,13 +90,13 @@
 			this.Progress++;
 		}
 
-		protected override void OnCompleted()
+		protected override void JobCompleted()
 		{
 			EsoReplacer.ShowUnreplaced();
-			base.OnCompleted();
+			base.JobCompleted();
 		}
 
-		protected override void PrepareJob()
+		protected override void BeforeLogging()
 		{
 			this.PatchVersion = EsoGeneral.GetPatchVersion(this);
 			this.StatusWriteLine("Fetching data");

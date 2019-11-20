@@ -5,7 +5,6 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Eso;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 
 	internal class EsoDeletableNpcs : WikiJob
@@ -13,16 +12,12 @@
 		#region Constructors
 		[JobInfo("Find deletable NPCs", "ESO")]
 		public EsoDeletableNpcs(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
-		{
-		}
+			: base(site, asyncInfo) => this.SetResultDescription("ESO NPC pages with no matching database entry");
 		#endregion
 
 		#region Protected Override Methods
 		protected override void Main()
 		{
-			this.Site.UserFunctions.SetResultTitle(ResultDestination.ResultsPage, "ESO NPC pages with no matching database entry");
-
 			this.StatusWriteLine("Getting NPC data from database");
 			var unfilteredNpcList = EsoGeneral.GetNpcsFromDatabase();
 			var allNames = new List<string>();
@@ -54,6 +49,12 @@
 					}
 				}
 			}
+		}
+
+		protected override void JobCompleted()
+		{
+			this.Results?.Save();
+			base.JobCompleted();
 		}
 		#endregion
 	}

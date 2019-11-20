@@ -3,6 +3,7 @@
 	using System;
 	using System.ComponentModel.Composition;
 	using System.Diagnostics;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.Runtime.InteropServices;
 	using System.Text;
@@ -107,6 +108,7 @@
 		#endregion
 
 		#region Private Methods
+		[return: NotNullIfNotNull("dt")]
 		private static string? IndexDateTime(DateTime? dt) => dt?.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
 		#endregion
 	}

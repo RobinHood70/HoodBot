@@ -172,7 +172,7 @@
 					if (api.IsEnabled())
 					{
 						api.Initialize();
-						this.Api = api.Uri;
+						this.Api = api.EntryPoint;
 						Uri? index = null;
 						if (!string.IsNullOrWhiteSpace(api.Script))
 						{

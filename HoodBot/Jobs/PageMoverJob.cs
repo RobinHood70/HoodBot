@@ -7,7 +7,6 @@
 	using System.Text.RegularExpressions;
 	using Newtonsoft.Json;
 	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiClasses;
@@ -70,8 +69,8 @@
 		{
 			this.BacklinkTitles = new TitleCollection(site);
 			this.EditPages = new TitleCollection(site);
-			this.alreadyProposed = Template.Find(this.Site.UserFunctions.DeleteTemplates);
-			this.doNotDelete = Template.Find(this.Site.UserFunctions.DoNotDeleteTemplates);
+			this.alreadyProposed = Template.Find(this.Site.DeletionTemplates.ToPageNames());
+			this.doNotDelete = Template.Find(this.Site.DeletePreventionTemplates.ToPageNames());
 		}
 		#endregion
 
@@ -210,7 +209,7 @@
 			File.Delete(ReplacementStatusFile);
 		}
 
-		protected override void PrepareJob()
+		protected override void BeforeLogging()
 		{
 			var titleConverter = new TitleJsonConverter(this.Site);
 			this.StatusWriteLine("Getting Replacement List");
@@ -365,27 +364,16 @@
 		protected virtual void FilterSitePages(TitleCollection backlinkTitles)
 		{
 			ThrowNull(backlinkTitles, nameof(backlinkTitles));
-			var userFunctions = this.Site.UserFunctions;
-			if (userFunctions.ResultsPage != null)
+			foreach (var title in this.Site.FilterPages)
 			{
-				backlinkTitles.Remove(userFunctions.ResultsPage);
-			}
-
-			if (userFunctions.LogPage != null)
-			{
-				backlinkTitles.Remove(userFunctions.LogPage);
-			}
-
-			if (userFunctions is HoodBotFunctions hoodBotUserFunctions)
-			{
-				backlinkTitles.Remove(hoodBotUserFunctions.RequestsPage);
+				backlinkTitles.Remove(title);
 			}
 		}
 
 		protected virtual void FilterTalkLikePages(TitleCollection backlinkTitles)
 		{
 			ThrowNull(backlinkTitles, nameof(backlinkTitles));
-			foreach (var catPage in this.Site.UserFunctions.TalkLikePages)
+			foreach (var catPage in this.Site.DiscussionPages)
 			{
 				backlinkTitles.Remove(catPage);
 			}

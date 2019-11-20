@@ -1,9 +1,12 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
+	// TODO: Move most of the static functions to extension methods (and throw errors if not in the same list, instead of allowing any list).
+	// TODO: Add recursive options to all Find methods. (See Replace method for the very simple algorithm to do so.)
+	// TODO: Build a custom LinkedList replacement that's observable in some fashion.
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
-	using System.Linq;
+	using RobinHood70.WikiClasses.Properties;
 	using static WikiCommon.Globals;
 
 	// CONSIDER: Implementing a NodeCollection<T> so that properties like Parameters can be more strongly typed as NodeCollection<ParameterNode>.
@@ -14,7 +17,7 @@
 	public delegate IWikiNode? NodeReplacer(LinkedListNode<IWikiNode> node);
 
 	/// <summary>Represents a collection of <see cref="IWikiNode"/> nodes.</summary>
-	public class NodeCollection : LinkedList<IWikiNode>, IWikiNode
+	public class NodeCollection : LinkedList<IWikiNode>
 	{
 		#region Constructors
 
@@ -32,13 +35,205 @@
 
 		#region Public Properties
 
-		/// <summary>Gets an enumerator that iterates through any NodeCollections this node contains.</summary>
-		/// <value>The node collections.</value>
-		public IEnumerable<NodeCollection> NodeCollections => Enumerable.Empty<NodeCollection>();
-
 		/// <summary>Gets the parent node for the collection.</summary>
 		/// <value>The node's parent, or <see langword="null"/> if this is the root node.</value>
 		public IWikiNode? Parent { get; }
+		#endregion
+
+		#region Public Static Methods
+
+		/// <summary>Finds the next <see cref="LinkedListNode{T}">LinkedListNode</see> of the specified type.</summary>
+		/// <typeparam name="T">The type of node to find.</typeparam>
+		/// <param name="startAt">The node to start searching from. This node <i>will</i> be included in the search.</param>
+		/// <returns>The next node in the collection of the specified type.</returns>
+		public static LinkedListNode<IWikiNode>? FindNextLinked<T>(LinkedListNode<IWikiNode>? startAt)
+			where T : IWikiNode => FindNextLinked(startAt, (T item) => true);
+
+		/// <summary>Finds the next <see cref="LinkedListNode{T}">LinkedListNode</see> of the specified type.</summary>
+		/// <typeparam name="T">The type of node to find.</typeparam>
+		/// <param name="startAt">The node to start searching from. This node <i>will</i> be included in the search.</param>
+		/// <param name="condition">The condition a given node must satisfy.</param>
+		/// <returns>The next node in the collection of the specified type.</returns>
+		public static LinkedListNode<IWikiNode>? FindNextLinked<T>(LinkedListNode<IWikiNode>? startAt, Predicate<T> condition)
+			where T : IWikiNode
+		{
+			ThrowNull(condition, nameof(condition));
+			var node = startAt;
+			while (node != null)
+			{
+				if (node.Value is T castNode && condition(castNode))
+				{
+					return node;
+				}
+
+				node = node.Next;
+			}
+
+			return null;
+		}
+
+		/// <summary>Finds the previous <see cref="LinkedListNode{T}">LinkedListNode</see> of the specified type.</summary>
+		/// <typeparam name="T">The type of node to find.</typeparam>
+		/// <param name="startAt">The node to start searching from. This node <i>will</i> be included in the search.</param>
+		/// <returns>The previous node in the collection of the specified type.</returns>
+		public static LinkedListNode<IWikiNode>? FindPreviousLinked<T>(LinkedListNode<IWikiNode>? startAt)
+			where T : IWikiNode => FindPreviousLinked(startAt, (T item) => true);
+
+		/// <summary>Finds the previous <see cref="LinkedListNode{T}">LinkedListNode</see> of the specified type.</summary>
+		/// <typeparam name="T">The type of node to find.</typeparam>
+		/// <param name="startAt">The node to start searching from. This node <i>will</i> be included in the search.</param>
+		/// <param name="condition">The condition a given node must satisfy.</param>
+		/// <returns>The previous node in the collection of the specified type.</returns>
+		public static LinkedListNode<IWikiNode>? FindPreviousLinked<T>(LinkedListNode<IWikiNode>? startAt, Predicate<T> condition)
+			where T : IWikiNode
+		{
+			ThrowNull(condition, nameof(condition));
+			var node = startAt;
+			while (node != null)
+			{
+				if (node.Value is T castNode && condition(castNode))
+				{
+					return node;
+				}
+
+				node = node.Previous;
+			}
+
+			return null;
+		}
+
+		/// <summary>Returns the value of all nodes between the start and end nodes, non-inclusive. The start and end nodes are assumed to be in the correct order.</summary>
+		/// <param name="start">The start node.</param>
+		/// <param name="end">The end node.</param>
+		/// <returns>An <see cref="IEnumerable{T}"/> of the values between the two nodes.</returns>
+		/// <exception cref="InvalidOperationException">The start and end nodes are not part of the same list.</exception>
+		public static IEnumerable<IWikiNode> NodesBetween(LinkedListNode<IWikiNode> start, LinkedListNode<IWikiNode> end) => NodesBetween(start, end, false, false, false);
+
+		/// <summary>Returns the value of all nodes between the start and end nodes, non-inclusive.</summary>
+		/// <param name="start">The start node.</param>
+		/// <param name="end">The end node.</param>
+		/// <param name="checkOrder">if set to <c>true</c> checks the order of the nodes before proceeding.</param>
+		/// <returns>An <see cref="IEnumerable{T}"/> of the values between the two nodes.</returns>
+		/// <exception cref="InvalidOperationException">The start and end nodes are not part of the same list.</exception>
+		public static IEnumerable<IWikiNode> NodesBetween(LinkedListNode<IWikiNode> start, LinkedListNode<IWikiNode> end, bool checkOrder) => NodesBetween(start, end, checkOrder, false, false);
+
+		/// <summary>Returns the value of all nodes between the start and end nodes, non-inclusive.</summary>
+		/// <param name="start">The start node.</param>
+		/// <param name="end">The end node.</param>
+		/// <param name="checkOrder">if set to <c>true</c> checks the order of the nodes before proceeding.</param>
+		/// <param name="includeStart">if set to <c>true</c> [include start].</param>
+		/// <param name="includeEnd">if set to <c>true</c> [include end].</param>
+		/// <returns>An <see cref="IEnumerable{T}"/> of the values between the two nodes.</returns>
+		/// <exception cref="InvalidOperationException">The start and end nodes are not part of the same list.</exception>
+		public static IEnumerable<IWikiNode> NodesBetween(LinkedListNode<IWikiNode> start, LinkedListNode<IWikiNode> end, bool checkOrder, bool includeStart, bool includeEnd)
+		{
+			ThrowNull(start, nameof(start));
+			ThrowNull(end, nameof(end));
+			if (start.List != end.List)
+			{
+				throw new InvalidOperationException(Resources.NodesInDifferentLists);
+			}
+
+			if (checkOrder)
+			{
+				(start, end) = EnsureOrder(start, end);
+			}
+
+			if (includeStart)
+			{
+				yield return start.Value;
+			}
+
+			var current = start.Next;
+			while (current != null && current != end)
+			{
+				yield return current.Value;
+				current = current.Next;
+			}
+
+			if (includeEnd)
+			{
+				yield return end.Value;
+			}
+		}
+
+		/// <summary>Removes all nodes in the list after the given node.</summary>
+		/// <param name="start">The start.</param>
+		public static void RemoveAfter(LinkedListNode<IWikiNode> start) => RemoveAfter(start, false);
+
+		/// <summary>Removes all nodes in the list after the given node, optionally including the start node.</summary>
+		/// <param name="start">The start.</param>
+		/// <param name="inclusive">if set to <see langword="true"/>, the start node will also be removed.</param>
+		public static void RemoveAfter(LinkedListNode<IWikiNode> start, bool inclusive)
+		{
+			ThrowNull(start, nameof(start));
+			ThrowNull(start.List, nameof(start), nameof(start.List));
+			while (start.Next != null)
+			{
+				start.List.Remove(start.Next);
+			}
+
+			if (inclusive)
+			{
+				start.List.Remove(start);
+			}
+		}
+
+		/// <summary>Removes all nodes in the list before the given node.</summary>
+		/// <param name="start">The start.</param>
+		public static void RemoveBefore(LinkedListNode<IWikiNode> start) => RemoveBefore(start, false);
+
+		/// <summary>Removes all nodes in the list before the given node, optionally including the start node.</summary>
+		/// <param name="start">The start.</param>
+		/// <param name="inclusive">if set to <see langword="true"/>, the start node will also be removed.</param>
+		public static void RemoveBefore(LinkedListNode<IWikiNode> start, bool inclusive)
+		{
+			ThrowNull(start, nameof(start));
+			ThrowNull(start.List, nameof(start), nameof(start.List));
+			while (start.Previous != null)
+			{
+				start.List.Remove(start.Previous);
+			}
+
+			if (inclusive)
+			{
+				start.List.Remove(start);
+			}
+		}
+
+		/// <summary>Removes all nodes between the start and end nodes, not including either node.</summary>
+		/// <param name="start">The start node.</param>
+		/// <param name="end">The end node.</param>
+		/// <param name="checkOrder">if set to <see langword="true"/>, the method will verify whether the end node comes before or after the start node, and adjust accordingly; if set to <see langword="false"/>, the check will be skipped. It is safe to set this to <see langword="false"/> if you can be certain that the end node comes after the start node (e.g., it was found by using the <see cref="LinkedListNode{T}.Next">Next</see> property or one of the <c>FindNext</c> methods); otherwise, leave it set to <see langword="true"/> or else all entries from the start node forward will be removed.</param>
+		/// <exception cref="InvalidOperationException">The start and end nodes are not part of the same list.</exception>
+		public static void RemoveBetween(LinkedListNode<IWikiNode> start, LinkedListNode<IWikiNode> end, bool checkOrder)
+		{
+			ThrowNull(start, nameof(start));
+			ThrowNull(end, nameof(end));
+			ThrowNull(start.List, nameof(start), nameof(start.List));
+			if (start.List != end.List)
+			{
+				throw new InvalidOperationException(Resources.NodesInDifferentLists);
+			}
+
+			if (start == end)
+			{
+				return;
+			}
+
+			if (checkOrder)
+			{
+				(start, end) = EnsureOrder(start, end);
+			}
+
+			if (start.List is LinkedList<IWikiNode> list)
+			{
+				while (start.Next != null && start.Next != end)
+				{
+					list.Remove(start.Next);
+				}
+			}
+		}
 		#endregion
 
 		#region Public Methods
@@ -251,6 +446,12 @@
 			return null;
 		}
 
+		/// <summary>Finds the first header with the specified text.</summary>
+		/// <param name="headerText">Name of the header.</param>
+		/// <returns>The first header with the specified text.</returns>
+		/// <remarks>This is a temporary function until HeaderNode can be rewritten to work more like other nodes (i.e., without capturing trailing whitespace).</remarks>
+		public LinkedListNode<IWikiNode>? FindFirstHeaderLinked(string headerText) => this.FindFirstLinked<HeaderNode>(header => header.GetInnerText(true) == headerText);
+
 		/// <summary>Finds the last node in the collection satisfying the specified condition.</summary>
 		/// <param name="condition">The condition a given node must satisfy.</param>
 		/// <returns>The last node that satisfies the specified condition.</returns>
@@ -297,6 +498,12 @@
 
 			return default;
 		}
+
+		/// <summary>Finds the last header with the specified text.</summary>
+		/// <param name="headerText">Name of the header.</param>
+		/// <returns>The first header with the specified text.</returns>
+		/// <remarks>This is a temporary function until HeaderNode can be rewritten to work more like other nodes (i.e., without capturing trailing whitespace).</remarks>
+		public LinkedListNode<IWikiNode>? FindLastHeaderLinked(string headerText) => this.FindLastLinked<HeaderNode>(header => header.GetInnerText(true) == headerText);
 
 		/// <summary>Finds the last <see cref="LinkedListNode{T}">LinkedListNode</see> satisfying the specified condition.</summary>
 		/// <param name="condition">The condition a given node must satisfy.</param>
@@ -462,6 +669,19 @@
 
 				currentNode = nextNode;
 			}
+		}
+		#endregion
+
+		#region Private Static Methods
+		private static (LinkedListNode<IWikiNode> Start, LinkedListNode<IWikiNode> End) EnsureOrder(LinkedListNode<IWikiNode> start, LinkedListNode<IWikiNode> end)
+		{
+			var current = start;
+			while (current.Next != null && current.Next != end)
+			{
+				current = current.Next;
+			}
+
+			return current.Next == null ? (end, start) : (start, end);
 		}
 		#endregion
 	}

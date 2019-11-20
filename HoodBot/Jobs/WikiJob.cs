@@ -4,8 +4,8 @@
 	using System.Threading;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Tasks;
+	using RobinHood70.HoodBot.Models;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Extensions;
 	using static RobinHood70.WikiCommon.Globals;
@@ -26,6 +26,10 @@
 			{
 				this.Tasks.AddRange(tasks);
 			}
+
+			this.LogName = this.GetType().Name.UnCamelCase();
+			this.Logger = (site as IJobLogger)?.JobLogger;
+			this.Results = (site as IResultPageHandler)?.ResultPageHandler;
 		}
 		#endregion
 
@@ -43,8 +47,20 @@
 		}
 		#endregion
 
-		#region Public Virtual Methods
-		public virtual bool ReadOnly => true;
+		#region Public Abstract Properties
+		public virtual string LogName { get; }
+		#endregion
+
+		#region Public Virtual Properties
+		public JobTypes JobType { get; protected set; } = JobTypes.Read;
+
+		public virtual string? LogDetails { get; protected set; }
+
+		public JobLogger? Logger { get; protected set; }
+		#endregion
+
+		#region Protected Properties
+		protected ResultHandler? Results { get; set; }
 		#endregion
 
 		#region Public Methods
@@ -58,20 +74,53 @@
 
 		public void Warn(string warning) => this.Site.PublishWarning(this, warning);
 
-		public void Write(string text) => this.Site.UserFunctions.AddResult(text);
-
-		public void Write(ResultDestination destination, string text) => this.Site.UserFunctions.AddResult(destination, text);
+		public void Write(string text) => this.Results?.Write(text);
 
 		public void WriteLine() => this.WriteLine(string.Empty);
 
-		public void WriteLine(string text) => this.Site.UserFunctions.AddResult(text + '\n');
+		public void WriteLine(string text) => this.Write(text + '\n');
+		#endregion
 
-		public void WriteLine(ResultDestination destination) => this.WriteLine(destination, string.Empty);
+		#region Protected Override Methods
+		protected override void JobCompleted()
+		{
+			this.StatusWriteLine("Ending Log Entry");
+			if (this.Logger != null && this.Logger.ShouldLog(this.JobType))
+			{
+				this.Logger.EndLogEntry();
+			}
 
-		public void WriteLine(ResultDestination destination, string text) => this.Site.UserFunctions.AddResult(destination, text + '\n');
+			base.JobCompleted();
+		}
+
+		protected override void BeforeMain()
+		{
+			this.BeforeLogging();
+			base.BeforeMain();
+			if (this.Logger != null && this.Logger.ShouldLog(this.JobType) == true)
+			{
+				this.StatusWriteLine("Adding Log Entry");
+				var logInfo = new LogInfo(this.LogName ?? "Unknown Job Type", this.LogDetails, this.JobType);
+				this.Logger.AddLogEntry(logInfo);
+			}
+		}
+		#endregion
+
+		#region Protected Methods
+		protected void SetResultDescription(string title)
+		{
+			if (this.Results != null)
+			{
+				this.Results.Description = this.Results.Description == null ? title : this.Results.Description + "; " + title;
+			}
+		}
 		#endregion
 
 		#region Protected Virtual Methods
+		protected virtual void BeforeLogging()
+		{
+		}
+
 		protected virtual void FlowControlAsync()
 		{
 			if (this.AsyncInfo.PauseToken is PauseToken pause && pause.IsPaused)

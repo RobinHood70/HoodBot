@@ -20,7 +20,11 @@
 		#region Constructors
 		[JobInfo("Create missing NPCs", "ESO")]
 		public EsoNpcs(Site site, AsyncInfo asyncInfo)
-				: base(site, asyncInfo) => this.eso = site.Namespaces[UespNamespaces.Online];
+				: base(site, asyncInfo)
+		{
+			this.eso = site.Namespaces[UespNamespaces.Online];
+			this.SetResultDescription("Existing ESO NPC pages");
+		}
 		#endregion
 
 		#region Protected Override Properties
@@ -53,10 +57,8 @@
 			}
 		}
 
-		protected override void PrepareJob()
+		protected override void BeforeLogging()
 		{
-			this.Site.UserFunctions.SetResultTitle(ResultDestination.ResultsPage, "Existing ESO NPC pages");
-
 			this.StatusWriteLine("Getting NPC data from wiki");
 			var allNpcs = EsoGeneral.GetNpcsFromCategories(this.Site);
 

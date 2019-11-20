@@ -20,6 +20,8 @@
 
 		public int ReadThrottling { get; set; }
 
+		public string? SiteClassIdentifier { get; set; }
+
 		public string? UserName { get; set; }
 
 		public int WriteThrottling { get; set; }

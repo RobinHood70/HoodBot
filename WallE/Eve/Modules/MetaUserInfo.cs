@@ -1,8 +1,8 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
-	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
@@ -89,6 +89,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				subnet: GetRateLimit(value["subnet"]),
 				user: GetRateLimit(value["user"]));
 
+		[return: NotNullIfNotNull("value")]
 		private static RateLimitInfo? GetRateLimit(JToken? value) => value == null
 			? null
 			: new RateLimitInfo(

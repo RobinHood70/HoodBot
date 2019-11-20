@@ -2,6 +2,7 @@
 {
 	using System.Collections.Generic;
 	using RobinHood70.HoodBot.Jobs.Design;
+	using RobinHood70.HoodBot.Models;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
@@ -10,7 +11,7 @@
 	{
 		[JobInfo("Manipulate Image Category")]
 		public ManipulateImageCategory([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo) => site.UserFunctions.InitializeResult(ResultDestination.ResultsPage, "User:Jeancey/Kah", null);
+			: base(site, asyncInfo) => this.Results = new PageResultHandler(new Title(site, "User:Jeancey/Kah"));
 
 		protected override void Main()
 		{

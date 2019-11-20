@@ -2,6 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 
 	#region Public Enumerations
@@ -62,6 +63,7 @@ namespace RobinHood70.WallE.Base
 
 		#region Public Methods
 
+		[return: NotNullIfNotNull("revision")]
 		public static string? GetDiffToValue(int? revision) => revision switch
 		{
 			null => null,

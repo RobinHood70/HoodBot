@@ -1,10 +1,9 @@
 ﻿namespace RobinHood70.HoodBot.ViewModels
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Globalization;
 	using System.Reflection;
 	using RobinHood70.HoodBot.Jobs.Design;
+	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
 	public sealed class ConstructorParameter : IEquatable<ConstructorParameter>
@@ -21,7 +20,7 @@
 
 			this.Attribute = attributes.Length == 1 ? attributes[0] as JobParameterAttribute : null;
 			var name = parameter.Name ?? throw PropertyNull(nameof(parameter), nameof(parameter.Name));
-			this.Label = this.Attribute?.Label ?? UnCamelCase(name);
+			this.Label = this.Attribute?.Label ?? name.UnCamelCase();
 			this.Name = name;
 			this.Type = parameter.ParameterType;
 			if (this.Attribute?.DefaultValue != null)
@@ -72,40 +71,6 @@
 					 .Replace("Collections.ObjectModel.", string.Empty, StringComparison.Ordinal)
 					 .Replace("RobinHood70.Robby.", string.Empty, StringComparison.Ordinal)
 					 .Replace("RobinHood70.HoodBot.Jobs.Design.", string.Empty, StringComparison.Ordinal);
-		}
-
-		private static string UnCamelCase(string name)
-		{
-			name = char.ToUpperInvariant(name[0]) + (name.Length > 1 ? name.Substring(1) : string.Empty);
-			var words = new List<string>(5);
-			var word = string.Empty;
-			var lastWasCapital = false;
-			var didWordBreak = false;
-			foreach (var c in name)
-			{
-				if (char.IsUpper(c) && !lastWasCapital)
-				{
-					words.Add(word);
-					word = c.ToString(CultureInfo.InvariantCulture);
-					lastWasCapital = true;
-					didWordBreak = true;
-				}
-				else if (!char.IsUpper(c) && lastWasCapital && !didWordBreak)
-				{
-					words.Add(word[0..^1]);
-					word = word.Substring(word.Length - 1) + c;
-					didWordBreak = true;
-				}
-				else
-				{
-					word += c;
-					lastWasCapital = char.IsUpper(c);
-					didWordBreak = false;
-				}
-			}
-
-			words.Add(word);
-			return string.Join(" ", words);
 		}
 		#endregion
 	}

@@ -10,6 +10,8 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Clients;
 	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
 
@@ -22,14 +24,24 @@
 		#endregion
 
 		#region Fields
-		private readonly HoodBotFunctions botFunctions;
 		private readonly Dictionary<string, PageData> sets = new Dictionary<string, PageData>();
+		private readonly IMediaWikiClient client;
 		#endregion
 
 		#region Constructors
 		[JobInfo("Item Sets", "ESO")]
 		public EsoItemSets(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo) => this.botFunctions = (HoodBotFunctions)site.UserFunctions;
+			: base(site, asyncInfo)
+		{
+			if (site.AbstractionLayer is IInternetEntryPoint entryPoint)
+			{
+				this.client = entryPoint.Client;
+			}
+			else
+			{
+				throw new InvalidCastException();
+			}
+		}
 		#endregion
 
 		#region Public Override Properties
@@ -52,17 +64,17 @@
 			this.Progress++;
 		}
 
-		protected override void OnCompleted()
+		protected override void JobCompleted()
 		{
 			EsoReplacer.ShowUnreplaced();
-			base.OnCompleted();
+			base.JobCompleted();
 		}
 
-		protected override void PrepareJob()
+		protected override void BeforeLogging()
 		{
 			EsoReplacer.Initialize(this);
 			this.StatusWriteLine("Fetching data");
-			var csvData = this.botFunctions.NativeClient.Get(SetSummaryPage);
+			var csvData = this.client.Get(SetSummaryPage);
 			var csvFile = new CsvFile();
 			csvFile.ReadText(csvData, true);
 			this.ProgressMaximum = csvFile.Count + 2;

@@ -55,7 +55,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected Request CreateBaseRequest()
 		{
 			var wal = this.Wal; // Just to make code more readable.
-			return new Request(this.Wal.Uri, this.RequestType, this.SiteVersion >= 128)
+			return new Request(this.Wal.EntryPoint, this.RequestType, this.SiteVersion >= 128)
 				.AddIfNotNull("action", this.Name)
 				.AddIfNotNull("uselang", wal.UseLanguage)
 				.AddFormat("json")
@@ -132,7 +132,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 
 				var requestNode = debugInfo.MustHave("request");
-				var fullHost = this.Wal.Uri.AbsoluteUri.Replace(this.Wal.Uri.AbsolutePath, string.Empty, StringComparison.Ordinal);
+				var fullHost = this.Wal.EntryPoint.AbsoluteUri.Replace(this.Wal.EntryPoint.AbsolutePath, string.Empty, StringComparison.Ordinal);
 				var request = new DebugInfoRequest(
 						headers: requestNode.MustHave("headers").GetStringDictionary<string>(),
 						method: requestNode.MustHaveString("method"),

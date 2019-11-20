@@ -31,7 +31,7 @@
 			}
 		}
 
-		protected override void PrepareJob()
+		protected override void BeforeLogging()
 		{
 			var unused = new TitleCollection(this.Site);
 			unused.GetQueryPage("Unusedimages");

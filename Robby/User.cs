@@ -12,7 +12,6 @@
 	{
 		#region Static Fields
 		private static string? defaultSubject;
-		private static string? emailDisabled;
 		#endregion
 
 		#region Fields
@@ -138,11 +137,12 @@
 		/// <returns>A value indicating the change status of the e-mail along with a copy of the e-mail that was sent.</returns>
 		public ChangeValue<string> Email(string subject, string body, bool ccMe)
 		{
+			ThrowNull(subject, nameof(subject));
+			ThrowNull(body, nameof(body));
 			if (this.loaded && !this.Emailable)
 			{
-				// Don't ask the wiki what the result will be if we already know we can't e-mail them. Load the e-mail disabled message if we don't already have it and just return that.
-				emailDisabled ??= this.Site.LoadParsedMessage("usermaildisabled");
-				return new ChangeValue<string>(ChangeStatus.Failure, emailDisabled);
+				// Don't ask the wiki what the result will be if we already know we can't e-mail them.
+				return new ChangeValue<string>(ChangeStatus.Failure, Resources.UserEmailDisabled);
 			}
 
 			return this.Site.PublishChange(
@@ -243,15 +243,18 @@
 		/// <remarks>The information loaded includes the following properties: BlockInfo, EditCount, Emailable, Gender, Groups, Registration, and Rights.</remarks>
 		public void Load()
 		{
-			var input = new UsersInput(new[] { this.Name })
+			if (!this.loaded)
 			{
-				Properties = UsersProperties.All
-			};
-			var result = this.Site.AbstractionLayer.Users(input);
-			if (result.Count == 1)
-			{
-				var user = result[0];
-				this.Populate(user);
+				var input = new UsersInput(new[] { this.Name })
+				{
+					Properties = UsersProperties.All
+				};
+				var result = this.Site.AbstractionLayer.Users(input);
+				if (result.Count == 1)
+				{
+					var user = result[0];
+					this.Populate(user);
+				}
 			}
 		}
 
@@ -327,7 +330,18 @@
 			this.EditCount = user.EditCount;
 			this.Emailable = user.Flags.HasFlag(UserFlags.Emailable);
 			this.Gender = user.Gender;
-			this.Groups = user.Groups ?? Array.Empty<string>();
+			var groups = new List<string>();
+			if (user.Groups != null)
+			{
+				groups.AddRange(user.Groups);
+			}
+
+			if (user.ImplicitGroups != null)
+			{
+				groups.AddRange(user.ImplicitGroups);
+			}
+
+			this.Groups = groups;
 			this.Registration = user.Registration ?? DateTime.MinValue;
 			this.Rights = user.Rights ?? Array.Empty<string>();
 			this.loaded = true;

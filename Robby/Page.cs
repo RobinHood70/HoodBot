@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.ComponentModel;
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
@@ -247,7 +248,7 @@
 		/// <param name="editSummary">The edit summary.</param>
 		/// <param name="isMinor">Whether the edit should be marked as minor.</param>
 		/// <returns>A value indicating the change status of the edit.</returns>
-		public ChangeStatus Save(string editSummary, bool isMinor) => this.Save(editSummary, isMinor, Tristate.Unknown, false, true);
+		public ChangeStatus Save([Localizable(true)] string editSummary, bool isMinor) => this.Save(editSummary, isMinor, Tristate.Unknown, false, true);
 
 		/// <summary>Saves the page with full options.</summary>
 		/// <param name="editSummary">The edit summary.</param>
@@ -255,7 +256,7 @@
 		/// <param name="createOnly">Whether the edit should only occur if it would create a new page (<see cref="Tristate.True"/>), if it would not create a new page (<see cref="Tristate.False"/>) or it doesn't matter (<see cref="Tristate.Unknown"/>).</param>
 		/// <param name="recreateIfJustDeleted">Whether to recreate the page if it was deleted since being loaded.</param>
 		/// <returns>A value indicating the change status of the edit.</returns>
-		public ChangeStatus Save(string editSummary, bool isMinor, Tristate createOnly, bool recreateIfJustDeleted) => this.Save(editSummary, isMinor, createOnly, recreateIfJustDeleted, true);
+		public ChangeStatus Save([Localizable(true)] string editSummary, bool isMinor, Tristate createOnly, bool recreateIfJustDeleted) => this.Save(editSummary, isMinor, createOnly, recreateIfJustDeleted, true);
 
 		/// <summary>Saves the page with full options.</summary>
 		/// <param name="editSummary">The edit summary.</param>
@@ -264,7 +265,7 @@
 		/// <param name="recreateIfJustDeleted">Whether to recreate the page if it was deleted since being loaded.</param>
 		/// <param name="isBotEdit">Whether the edit should be marked as a bot edit.</param>
 		/// <returns>A value indicating the change status of the edit.</returns>
-		public ChangeStatus Save(string editSummary, bool isMinor, Tristate createOnly, bool recreateIfJustDeleted, bool isBotEdit)
+		public ChangeStatus Save([Localizable(true)] string editSummary, bool isMinor, Tristate createOnly, bool recreateIfJustDeleted, bool isBotEdit)
 		{
 			if (!this.TextModified)
 			{

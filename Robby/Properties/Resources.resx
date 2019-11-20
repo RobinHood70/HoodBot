@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="BotResults" xml:space="preserve">
+    <value>Bot Results</value>
+  </data>
   <data name="EmailSubjectNull" xml:space="preserve">
     <value>No e-mail subject was provided and the default subject could not be retrieved from the wiki.</value>
   </data>
@@ -144,6 +147,9 @@
   <data name="PageTextNull" xml:space="preserve">
     <value>The page text is currently null, which is normally unintentional. To save an intentionally blank page, set the Text property to string.Empty.</value>
   </data>
+  <data name="Results" xml:space="preserve">
+    <value>Results</value>
+  </data>
   <data name="SiteNotInitialized" xml:space="preserve">
     <value>{0} is invalid until the site has been initialized.</value>
   </data>
@@ -158,5 +164,8 @@
   </data>
   <data name="TitleInvalid" xml:space="preserve">
     <value>The title name cannot be blank.</value>
+  </data>
+  <data name="UserEmailDisabled" xml:space="preserve">
+    <value>It is not possible to send an e-mail to this user.</value>
   </data>
 </root>

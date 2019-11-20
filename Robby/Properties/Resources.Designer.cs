@@ -61,6 +61,15 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bot Results.
+        /// </summary>
+        internal static string BotResults {
+            get {
+                return ResourceManager.GetString("BotResults", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No e-mail subject was provided and the default subject could not be retrieved from the wiki..
         /// </summary>
         internal static string EmailSubjectNull {
@@ -142,6 +151,15 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Results.
+        /// </summary>
+        internal static string Results {
+            get {
+                return ResourceManager.GetString("Results", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} is invalid until the site has been initialized..
         /// </summary>
         internal static string SiteNotInitialized {
@@ -183,6 +201,15 @@ namespace RobinHood70.Robby.Properties {
         internal static string TitleInvalid {
             get {
                 return ResourceManager.GetString("TitleInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to It is not possible to send an e-mail to this user..
+        /// </summary>
+        internal static string UserEmailDisabled {
+            get {
+                return ResourceManager.GetString("UserEmailDisabled", resourceCulture);
             }
         }
     }

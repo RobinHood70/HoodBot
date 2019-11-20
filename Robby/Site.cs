@@ -17,6 +17,14 @@
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
+	#region Public Delegates
+
+	/// <summary>Represents a method which creates a <see cref="Site"/> derivative.</summary>
+	/// <param name="abstractionLayer">The <see cref="IWikiAbstractionLayer"/> to initialize the site with.</param>
+	/// <returns>A custom <see cref="Site"/> object.</returns>
+	public delegate Site SiteFactoryMethod(IWikiAbstractionLayer abstractionLayer);
+	#endregion
+
 	#region Public Enumerations
 
 	/// <summary>Describes the result of an attempted change to the site.</summary>
@@ -88,13 +96,18 @@
 			[ImageSizeName] = new[] { "img_width" },
 			[ImageUprightName] = new[] { "img_upright" },
 		};
+
+		private static readonly Dictionary<string, SiteFactoryMethod> SiteClasses = new Dictionary<string, SiteFactoryMethod>();
 		#endregion
 
 		#region Fields
 		private readonly Dictionary<string, MagicWord> magicWords = new Dictionary<string, MagicWord>();
 		private string? baseArticlePath;
 		private CultureInfo culture = CultureInfo.CurrentCulture;
+		private IReadOnlyCollection<Title>? deletePreventionTemplates;
+		private IReadOnlyCollection<Title>? deletionTemplates;
 		private HashSet<Title>? disambiguationTemplates;
+		private IReadOnlyCollection<Title>? discussionPages;
 		private ReadOnlyKeyedCollection<string, InterwikiEntry>? interwikiMap;
 		private Title? mainPage;
 		private string? mainPageName;
@@ -116,7 +129,6 @@
 			wiki.Initialized += this.AbstractionLayer_Initialized;
 			wiki.WarningOccurred += this.AbstractionLayer_WarningOccurred;
 			this.AbstractionLayer = wiki;
-			this.UserFunctions = DefaultUserFunctions.CreateInstance(this);
 		}
 		#endregion
 
@@ -146,13 +158,6 @@
 		public event StrongEventHandler<Site, WarningEventArgs>? WarningOccurred;
 		#endregion
 
-		#region Public Static Properties
-
-		/// <summary>Gets a static dictionary associating sites and users with the UserFunctions class that best fits them.</summary>
-		/// <value>The user functions classes.</value>
-		public static IDictionary<string, UserFunctionsFactory> UserFunctionsClasses { get; } = new Dictionary<string, UserFunctionsFactory>() { };
-		#endregion
-
 		#region Public Properties
 
 		/// <summary>Gets the wiki abstraction layer.</summary>
@@ -161,7 +166,7 @@
 
 		/// <summary>Gets the base article path.</summary>
 		/// <value>The base article path, where <c>$1</c> should be replaced with the URL-encoded article title. </value>
-		public string BaseArticlePath => this.baseArticlePath ?? throw NoSite(nameof(this.BaseArticlePath));
+		public string BaseArticlePath => this.baseArticlePath ?? throw NoSite();
 
 		/// <summary>Gets a value indicating whether the first letter of titles is case-sensitive.</summary>
 		/// <value><see langword="true"/> if the first letter of titles is case-sensitive; otherwise, <see langword="false"/>.</value>
@@ -172,7 +177,7 @@
 		/// <remarks>Not all languages available in MediaWiki have direct equivalents in Windows. The bot will attempt to fall back to the more general language or variant when possible, but this property is left settable in the event that the choice made is unacceptable. If the culture cannot be determined, <see cref="CultureInfo.CurrentCulture"/> is used instead. Attempting to set the Culture to null will also result in CurrentCulture being used.</remarks>
 		public CultureInfo Culture
 		{
-			get => this.culture ?? throw NoSite(nameof(this.Culture));
+			get => this.culture ?? throw NoSite();
 			set => this.culture = value;
 		}
 
@@ -181,10 +186,21 @@
 		/// <remarks>If you need to detect disambiguations, you should consider setting this to include Properties for wikis using Disambiguator or Templates for those that aren't.</remarks>
 		public PageLoadOptions DefaultLoadOptions { get; set; } = PageLoadOptions.Default;
 
+		/// <summary>Gets a list of templates indicating a page should never be flagged for deletion.</summary>
+		/// <value>A list of templates indicating a page should never be flagged for deletion.</value>
+		public IReadOnlyCollection<Title> DeletePreventionTemplates => this.deletePreventionTemplates ?? this.LoadDeletePreventionTemplates();
+
+		/// <summary>Gets a list of templates indicating a page is flagged for deletion.</summary>
+		/// <value>A list of templates indicating a page is flagged for deletion.</value>
+		public IReadOnlyCollection<Title> DeletionTemplates => this.deletionTemplates ?? this.LoadDeletionTemplates();
+
 		/// <summary>Gets the list of disambiguation templates on wikis that aren't using Disambiguator.</summary>
 		/// <value>The disambiguation templates.</value>
 		/// <remarks>This will be auto-populated on first use if not already set.</remarks>
 		public IReadOnlyCollection<Title> DisambiguationTemplates => this.disambiguationTemplates ?? this.LoadDisambiguationTemplates();
+
+		/// <summary>Gets a list of pages that function as talk pages, but are located outside of traditional Talk spaces.</summary>
+		public IReadOnlyCollection<Title> DiscussionPages => this.discussionPages ?? this.LoadDiscussionPages();
 
 		/// <summary>Gets a value indicating whether the Disambiguator extension is available.</summary>
 		/// <value><see langword="true"/> if the Disambiguator extension is available; otherwise, <see langword="false"/>.</value>
@@ -195,9 +211,13 @@
 		/// <remarks>If set to true, most methods will silently fail, and their return <see cref="ChangeStatus.EditingDisabled"/>. This is primarily intended for testing new bot jobs without risking any unintended edits.</remarks>
 		public bool EditingEnabled { get; set; } = false;
 
+		/// <summary>Gets the list of special pages on the site that should normally be filtered out of any results.</summary>
+		/// <value>The filter pages.</value>
+		public HashSet<ISimpleTitle> FilterPages { get; } = new HashSet<ISimpleTitle>();
+
 		/// <summary>Gets the interwiki map.</summary>
 		/// <value>The interwiki map.</value>
-		public ReadOnlyKeyedCollection<string, InterwikiEntry> InterwikiMap => this.interwikiMap ?? throw NoSite(nameof(this.InterwikiMap));
+		public ReadOnlyKeyedCollection<string, InterwikiEntry> InterwikiMap => this.interwikiMap ?? throw NoSite();
 
 		/// <summary>Gets a list of current magic words on the wiki.</summary>
 		/// <value>The magic words.</value>
@@ -205,20 +225,20 @@
 
 		/// <summary>Gets the <see cref="Title"/> for the main page of the site.</summary>
 		/// <value>The main page.</value>
-		public Title MainPage => this.mainPage ?? throw NoSite(nameof(this.MainPage));
+		public Title MainPage => this.mainPage ?? throw NoSite();
 
 		/// <summary>Gets the name of the main page, as returned by the site.</summary>
 		/// <value>The name of the main page.</value>
 		/// <remarks>This will normally be the same as <c><see cref="MainPage"/>.FullPageName</c>, but is provided so that the original name is available, if needed.</remarks>
-		public string MainPageName => this.mainPageName ?? throw NoSite(nameof(this.MainPageName));
+		public string MainPageName => this.mainPageName ?? throw NoSite();
 
 		/// <summary>Gets the wiki name.</summary>
 		/// <value>The name of the wiki.</value>
-		public string Name => this.siteName ?? throw NoSite(nameof(this.Name));
+		public string Name => this.siteName ?? throw NoSite();
 
 		/// <summary>Gets the wiki namespaces.</summary>
 		/// <value>the wiki namespaces.</value>
-		public NamespaceCollection Namespaces => this.namespaces ?? throw NoSite(nameof(this.Namespaces));
+		public NamespaceCollection Namespaces => this.namespaces ?? throw NoSite();
 
 		/// <summary>Gets or sets the page creator.</summary>
 		/// <value>The page creator.</value>
@@ -228,23 +248,19 @@
 		/// <summary>Gets the script path. This is the path preceding api.php, index.php and so forth.</summary>
 		/// <value>The script path.</value>
 		/// <remarks>If not returned by the API, it will be guessed based on the path to api.php itself.</remarks>
-		public string ScriptPath => this.scriptPath ?? throw NoSite(nameof(this.ScriptPath));
+		public string ScriptPath => this.scriptPath ?? throw NoSite();
 
 		/// <summary>Gets the name of the server—typically, the base URL.</summary>
 		/// <value>The name of the server.</value>
-		public string ServerName => this.serverName ?? throw NoSite(nameof(this.ServerName));
+		public string ServerName => this.serverName ?? throw NoSite();
 
 		/// <summary>Gets the bot's user name.</summary>
 		/// <value>The bot's user name.</value>
 		public User? User { get; private set; }
 
-		/// <summary>Gets the UserFunctions object that handles site- and/or user-specific functions.</summary>
-		/// <value>A UserFunctions class or derivative that handles site- and/or user-specific functions.</value>
-		public UserFunctions UserFunctions { get; private set; }
-
 		/// <summary>Gets the MediaWiki version of the wiki.</summary>
 		/// <value>The MediaWiki version of the wiki.</value>
-		public string Version => this.version ?? throw NoSite(nameof(this.Version));
+		public string Version => this.version ?? throw NoSite();
 		#endregion
 
 		#region Internal Properties
@@ -253,28 +269,28 @@
 
 		#region Public Static Methods
 
+		/// <summary>The <see cref="SiteFactoryMethod"/> that creates a default <see cref="Site"/> object.</summary>
+		/// <param name="abstractionLayer">The abstraction layer to use with the site.</param>
+		/// <returns>A <see cref="Site"/> object.</returns>
+		public static Site DefaultSiteFactoryMethod(IWikiAbstractionLayer abstractionLayer) => new Site(abstractionLayer);
+
+		/// <summary>Gets a factory method to create a new <see cref="Site"/> object or derivative thereof.</summary>
+		/// <param name="siteClassIdentifier">The site class identifier.</param>
+		/// <returns>RobinHood70.Robby.SiteFactoryMethod.</returns>
+		/// <remarks>Note that the identifier does <i>not</i> have to be the class name. It can be a user-friendly name, as long as the factory method for the <see cref="Site"/> derivative has been registered with <see cref="RegisterSiteClass(SiteFactoryMethod, string[])"/>. If the requested name is not found, the default <see cref="Site"/> factory method will be returned.</remarks>
+		public static SiteFactoryMethod GetFactoryMethod(string? siteClassIdentifier) =>
+					!string.IsNullOrEmpty(siteClassIdentifier) && SiteClasses.TryGetValue(siteClassIdentifier, out var factoryMethod)
+						? factoryMethod
+						: DefaultSiteFactoryMethod;
+
 		/// <summary>Registers a user functions class under all site and username combinations.</summary>
-		/// <param name="sites">The sites to add. If using the same UserFunctions class across all sites the user is operating on, this should be set to null or an empty list.</param>
-		/// <param name="users">The users to add. If using the same UserFunctions class for all users on all sites specifed in &lt;paramref name="sites"/&gt;, this should be set to null or an empty list.</param>
 		/// <param name="factoryMethod">The factory method that creates the correct UserFunctions class for the combination of site(s) and user(s).</param>
-		public static void RegisterUserFunctionsClass(IReadOnlyCollection<string> sites, IReadOnlyCollection<string> users, UserFunctionsFactory factoryMethod)
+		/// <param name="identifiers">The identifier(s) associated with the class. This can be any value at all except null or <see cref="string.Empty"/> (both of which return the default <see cref="Site"/> object if used). This is done to allow user-friendly naming instead of lengthy type names (or shorter but potentially conflicting ones).</param>
+		public static void RegisterSiteClass(SiteFactoryMethod factoryMethod, params string[] identifiers)
 		{
-			if (sites == null || sites.Count == 0)
+			foreach (var id in identifiers)
 			{
-				sites = new List<string>() { string.Empty };
-			}
-
-			if (users == null || users.Count == 0)
-			{
-				users = new List<string>() { string.Empty };
-			}
-
-			foreach (var site in sites)
-			{
-				foreach (var user in users)
-				{
-					UserFunctionsClasses[string.Concat(site, '/', user)] = factoryMethod;
-				}
+				SiteClasses[id] = factoryMethod;
 			}
 		}
 		#endregion
@@ -841,6 +857,14 @@
 		}
 		#endregion
 
+		#region Protected Static Methods
+
+		/// <summary>Throws an exception indicating that the site has not been initialized.</summary>
+		/// <param name="name">The name.</param>
+		/// <returns>System.InvalidOperationException.</returns>
+		protected static InvalidOperationException NoSite([CallerMemberName] string name = "") => throw new InvalidOperationException(CurrentCulture(Resources.SiteNotInitialized, name));
+		#endregion
+
 		#region Protected Virtual Methods
 
 		/// <summary>Downloads a file.</summary>
@@ -863,6 +887,16 @@
 
 			return retval;
 		}
+
+		/// <summary>When overridden in a derived class, loads the list of templates indicating a page should never be flagged for deletion.</summary>
+		/// <returns>A list of templates indicating a page should never be flagged for deletion.</returns>
+		/// <remarks>If not overridden, this will return an empty collection.</remarks>
+		protected virtual IReadOnlyCollection<Title> LoadDeletePreventionTemplates() => this.deletePreventionTemplates = Array.Empty<Title>();
+
+		/// <summary>When overridden in a derived class, loads the list of templates indicating a page is flagged for deletion.</summary>
+		/// <returns>A list of templates indicating a page is flagged for deletion.</returns>
+		/// <remarks>If not overridden, this will return an empty collection.</remarks>
+		protected virtual IReadOnlyCollection<Title> LoadDeletionTemplates() => this.deletionTemplates = Array.Empty<Title>();
 
 		/// <summary>Loads the disambiguation templates for wikis that don't use Disambiguator.</summary>
 		/// <returns>A collection of titles of disambiguation templates.</returns>
@@ -888,6 +922,11 @@
 
 			return this.disambiguationTemplates;
 		}
+
+		/// <summary>When overridden in a derived class, loads the list of pages that function as talk pages, but are located outside of traditional Talk spaces.</summary>
+		/// <returns>A list of pages that function as talk pages.</returns>
+		/// <remarks>If not overridden, this will return an empty collection.</remarks>
+		protected virtual IReadOnlyCollection<Title> LoadDiscussionPages() => this.discussionPages = Array.Empty<Title>();
 
 		/// <summary>Gets one or more messages from MediaWiki space.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -965,8 +1004,6 @@
 			}
 
 			this.User = result.User == null ? null : new User(this, result.User);
-			this.UserFunctions = this.FindBestUserFunctions();
-			this.UserFunctions.DoSiteCustomizations();
 
 			// This should never happen with co-initialization, but just in case there's a massive change to the abstraction layer, make sure we have all the info we need.
 			if (this.Version == null)
@@ -1079,10 +1116,6 @@
 		protected virtual bool Upload(UploadInput input) => this.AbstractionLayer.Upload(input).Result == "Success";
 		#endregion
 
-		#region Private Static Methods
-		private static InvalidOperationException NoSite(string name) => throw new InvalidOperationException(CurrentCulture(Resources.SiteNotInitialized, name));
-		#endregion
-
 		#region Private Methods
 
 		// Parse co-initialization results.
@@ -1173,23 +1206,6 @@
 			this.serverName = null;
 			this.siteName = null;
 			this.version = null;
-			if (!(this.UserFunctions is DefaultUserFunctions))
-			{
-				this.UserFunctions = DefaultUserFunctions.CreateInstance(this);
-			}
-		}
-
-		private UserFunctions FindBestUserFunctions()
-		{
-			var userName = this.User?.Name ?? string.Empty;
-			if (!UserFunctionsClasses.TryGetValue(string.Concat(this.ServerName, '/', userName), out var factory) &&
-				!UserFunctionsClasses.TryGetValue(string.Concat(this.ServerName, '/'), out factory) &&
-				!UserFunctionsClasses.TryGetValue(string.Concat('/', userName), out factory))
-			{
-				factory = DefaultUserFunctions.CreateInstance;
-			}
-
-			return factory(this);
 		}
 		#endregion
 	}

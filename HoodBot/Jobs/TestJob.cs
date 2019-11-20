@@ -4,7 +4,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon;
 
-	public class TestJob : WikiJob
+	public class TestJob : EditJob
 	{
 		#region Constructors
 		[JobInfo("Test Job")]
