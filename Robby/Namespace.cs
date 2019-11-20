@@ -15,8 +15,6 @@
 		#region Fields
 		private readonly HashSet<string> allNames;
 		private readonly HashSet<string> defaultNames;
-		private readonly int subjectSpaceId;
-		private readonly int? talkSpaceId;
 		#endregion
 
 		#region Constructors
@@ -27,8 +25,8 @@
 			this.Id = ns.Id;
 
 			// We can't actually populate SubjectSpace and TalkSpace here because they may not both be present in Site.Namespaces at this time, so only populate the local variables.
-			this.subjectSpaceId = ns.Id >= MediaWikiNamespaces.Main ? ns.Id & 0x7ffffffe : ns.Id;
-			this.talkSpaceId = ns.Id >= MediaWikiNamespaces.Main ? new int?(ns.Id | 1) : null;
+			this.SubjectSpaceId = ns.Id >= MediaWikiNamespaces.Main ? ns.Id & 0x7ffffffe : ns.Id;
+			this.TalkSpaceId = ns.Id >= MediaWikiNamespaces.Main ? new int?(ns.Id | 1) : null;
 
 			this.AllowsSubpages = ns.Flags.HasFlag(NamespaceFlags.Subpages);
 			this.CaseSensitive = ns.Flags.HasFlag(NamespaceFlags.CaseSensitive);
@@ -88,11 +86,11 @@
 
 		/// <summary>Gets a value indicating whether this instance is subject space.</summary>
 		/// <value><see langword="true"/> if this instance is a subject namespace; otherwise, <see langword="false"/>.</value>
-		public bool IsSubjectSpace => this.Id == this.subjectSpaceId;
+		public bool IsSubjectSpace => this.Id == this.SubjectSpaceId;
 
 		/// <summary>Gets a value indicating whether this instance is talk space.</summary>
 		/// <value><see langword="true"/> if this instance is talk namespace; otherwise, <see langword="false"/>.</value>
-		public bool IsTalkSpace => this.Id == this.talkSpaceId;
+		public bool IsTalkSpace => this.Id == this.TalkSpaceId;
 
 		/// <summary>Gets or sets the name to be used in links.</summary>
 		/// <value>The name of the namespace as used in a link.</value>
@@ -107,13 +105,22 @@
 		/// <value>The site.</value>
 		public Site Site { get; }
 
+		/// <summary>Gets the subject space.</summary>
+		/// <value>The subject space.</value>
+		public Namespace SubjectSpace => this.Site.Namespaces[this.SubjectSpaceId];
+
 		/// <summary>Gets the MediaWiki ID for the subject space.</summary>
 		/// <value>The MediaWiki ID for the subject space.</value>
-		public Namespace SubjectSpace => this.Site.Namespaces[this.subjectSpaceId];
+		public int SubjectSpaceId { get; }
+
+		/// <summary>Gets the talk space, if applicable.</summary>
+		/// <value>The talk space, if applicable; otherwise, <see langword="null"/>.</value>
+		/// <remarks>This will only be <see langword="null"/> for namespaces that don't support talk pages, like Media and Special.</remarks>
+		public Namespace? TalkSpace => this.TalkSpaceId == null ? null : this.Site.Namespaces[this.TalkSpaceId.Value];
 
 		/// <summary>Gets the MediaWiki ID for the talk space, if applicable.</summary>
 		/// <value>The MediaWiki ID for the talk space, if applicable; otherwise, <see langword="null"/>.</value>
-		public Namespace? TalkSpace => this.talkSpaceId == null ? null : this.Site.Namespaces[this.talkSpaceId.Value];
+		public int? TalkSpaceId { get; }
 		#endregion
 
 		#region Public Operators
@@ -127,32 +134,8 @@
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
-		/// <returns><see langword="true"/> if the integer provided equals the namespace ID.</returns>
-		public static bool operator ==(Namespace? left, int right) => !(left is null) && left.Id == right;
-
-		/// <summary>Implements the operator !=.</summary>
-		/// <param name="left">The left-hand side of the comparison.</param>
-		/// <param name="right">The right-hand side of the comparison.</param>
-		/// <returns><see langword="true"/> if the integer provided equals the namespace ID.</returns>
-		public static bool operator ==(int left, Namespace? right) => !(right is null) && left == right.Id;
-
-		/// <summary>Implements the operator !=.</summary>
-		/// <param name="left">The left-hand side of the comparison.</param>
-		/// <param name="right">The right-hand side of the comparison.</param>
 		/// <returns><see langword="true"/> if the namespace Site or Id are not equal.</returns>
 		public static bool operator !=(Namespace? left, Namespace? right) => !(left == right);
-
-		/// <summary>Implements the operator !=.</summary>
-		/// <param name="left">The left-hand side of the comparison.</param>
-		/// <param name="right">The right-hand side of the comparison.</param>
-		/// <returns><see langword="true"/> if the integer provided does not equal the namespace ID.</returns>
-		public static bool operator !=(Namespace? left, int right) => !(left == right);
-
-		/// <summary>Implements the operator !=.</summary>
-		/// <param name="left">The left-hand side of the comparison.</param>
-		/// <param name="right">The right-hand side of the comparison.</param>
-		/// <returns><see langword="true"/> if the integer provided does not equal the namespace ID.</returns>
-		public static bool operator !=(int left, Namespace? right) => !(left == right);
 		#endregion
 
 		#region Public Methods

@@ -30,7 +30,7 @@
 
 			this.StatusWriteLine("Getting NPC data from wiki");
 			var allNpcs = new TitleCollection(this.Site);
-			var templates = new TitleCollection(this.Site.Namespaces[MediaWikiNamespaces.Template], "Online NPC Summary");
+			var templates = new TitleCollection(this.Site, MediaWikiNamespaces.Template, "Online NPC Summary");
 			allNpcs.GetPageTranscludedIn(templates);
 			//// allNpcs.GetCategoryMembers("Online-NPCs", CategoryMemberTypes.Page, false);
 			//// allNpcs.GetCategoryMembers("Online-Creatures-All", CategoryMemberTypes.Page, false);

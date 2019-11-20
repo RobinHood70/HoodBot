@@ -43,17 +43,7 @@
 				return 1;
 			}
 
-			if (x.Namespace == null)
-			{
-				return y.Namespace == null ? 0 : -1;
-			}
-
-			if (y.Namespace == null)
-			{
-				return 1;
-			}
-
-			var nsCompare = x.Namespace.Id.CompareTo(y.Namespace.Id);
+			var nsCompare = x.NamespaceId.CompareTo(y.NamespaceId);
 			if (nsCompare != 0)
 			{
 				return nsCompare;

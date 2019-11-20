@@ -49,24 +49,26 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class with a specific list of titles in a given namespace.</summary>
+		/// <param name="site">The site.</param>
 		/// <param name="ns">The namespace the titles are in.</param>
 		/// <param name="titles">The titles. Namespace text is optional and will be stripped if provided.</param>
-		public TitleCollection(Namespace ns, IEnumerable<string> titles)
-			: base((ns ?? throw ArgumentNull(nameof(ns))).Site)
+		public TitleCollection(Site site, int ns, IEnumerable<string> titles)
+			: base(site)
 		{
-			ThrowNull(ns, nameof(ns));
+			ThrowNull(site, nameof(site));
 			ThrowNull(titles, nameof(titles));
 			foreach (var item in titles)
 			{
-				this.Add(Title.DefaultToNamespace(ns, item));
+				this.Add(Title.DefaultToNamespace(site, ns, item));
 			}
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class with a specific list of titles in a given namespace.</summary>
+		/// <param name="site">The site.</param>
 		/// <param name="ns">The namespace the titles are in.</param>
 		/// <param name="titles">The titles. Namespace text is optional and will be stripped if provided.</param>
-		public TitleCollection(Namespace ns, params string[] titles)
-			: this(ns, titles as IEnumerable<string>)
+		public TitleCollection(Site site, int ns, params string[] titles)
+			: this(site, ns, titles as IEnumerable<string>)
 		{
 		}
 		#endregion
@@ -287,7 +289,7 @@
 			ThrowNull(input, nameof(input));
 			ThrowNull(input.Title, nameof(input), nameof(input.Title));
 			var inputTitle = new TitleParts(this.Site, input.Title);
-			if (inputTitle.Namespace != MediaWikiNamespaces.File && input.LinkTypes.HasFlag(BacklinksTypes.ImageUsage))
+			if (inputTitle.NamespaceId != MediaWikiNamespaces.File && input.LinkTypes.HasFlag(BacklinksTypes.ImageUsage))
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
 			}

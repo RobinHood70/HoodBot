@@ -24,7 +24,7 @@
 		private Page currentPage;
 		private Page currentLorePage;
 		private Dictionary<string, NodeCollection> transclusionParameters;
-		private HashSet<Namespace> linkedNamespaces;
+		private HashSet<int> linkedNamespaces;
 		private bool noTransclusions;
 		private bool templateHappened;
 		#endregion
@@ -147,7 +147,7 @@
 				if (!namespaces.Contains(page.Namespace))
 				{
 					namespaces.Add(page.Namespace);
-					this.allPageNames.GetNamespace(page.Namespace.Id, Filter.Any);
+					this.allPageNames.GetNamespace(page.NamespaceId, Filter.Any);
 				}
 
 				if (page.Namespace == UespNamespaces.Lore)
@@ -165,7 +165,7 @@
 		{
 			var parameters = node.ParameterDictionary();
 			var metaNamespace = MetaNamespace.FromTitle(this.currentPage);
-			if (!parameters.TryGetValue(metaNamespace.Id + "link", out var linkParam))
+			if (!parameters.TryGetValue(metaNamespaceId + "link", out var linkParam))
 			{
 				linkParam = parameters["1"];
 			}
@@ -281,19 +281,19 @@
 		private void SetPageInfo(Page page)
 		{
 			this.currentPage = page; // Easier than passing through multiple levels of replacement.
-			this.linkedNamespaces = new HashSet<Namespace>();
+			this.linkedNamespaces = new HashSet<int>();
 			foreach (var linkedPage in page.TranscludedIn)
 			{
 				if (!linkedPage.SimpleEquals(page))
 				{
-					if (this.currentPage.Namespace != UespNamespaces.Lore || !this.gamePages.Contains(linkedPage))
+					if (this.currentPage.NamespaceId != UespNamespaces.Lore || !this.gamePages.Contains(linkedPage))
 					{
-						this.linkedNamespaces.Add(linkedPage.Namespace);
+						this.linkedNamespaces.Add(linkedPage.NamespaceId);
 					}
 				}
 			}
 
-			this.linkedNamespaces.Remove(this.Site.Namespaces[UespNamespaces.User]);
+			this.linkedNamespaces.Remove(UespNamespaces.User);
 			this.noTransclusions = this.linkedNamespaces.Count == 0;
 		}
 
@@ -368,7 +368,7 @@
 		{
 			var parameters = node.ParameterDictionary();
 			var parentNamespace = MetaNamespace.ParentFromTitle(this.currentPage);
-			var paramToGet = parameters.ContainsKey(parentNamespace.Base) || parameters.ContainsKey(parentNamespace.Id) ? "1" : "2";
+			var paramToGet = parameters.ContainsKey(parentNamespace.Base) || parameters.ContainsKey(parentNamespaceId) ? "1" : "2";
 			parameters.TryGetValue(paramToGet, out var retval);
 			return retval;
 		}

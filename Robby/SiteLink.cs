@@ -58,19 +58,21 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class using the specified values.</summary>
-		/// <param name="ns">The namespace.</param>
+		/// <param name="site">The Site the link is from.</param>
+		/// <param name="ns">The namespace identifier.</param>
 		/// <param name="pageName">The page name.</param>
-		public SiteLink(Namespace ns, string pageName)
-			: this(ns, pageName, null)
+		public SiteLink(Site site, int ns, string pageName)
+			: this(site, ns, pageName, null)
 		{
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
-		/// <param name="ns">The namespace the link is in.</param>
+		/// <param name="site">The Site the link is from.</param>
+		/// <param name="ns">The namespace identifier.</param>
 		/// <param name="pageName">The name of the page.</param>
 		/// <param name="displayText">The display text.</param>
-		public SiteLink(Namespace ns, string pageName, string? displayText)
-			: base((ns ?? throw ArgumentNull(nameof(ns))).Site, ns.Id, pageName)
+		public SiteLink(Site site, int ns, string pageName, string? displayText)
+			: base(site ?? throw ArgumentNull(nameof(site)), ns, pageName)
 		{
 			this.namespaceText = this.OriginalNamespaceText;
 			this.DisplayParameter = displayText == null ? null : new PaddedString(displayText);
@@ -126,10 +128,10 @@
 						throw;
 					}
 
-					if (!this.IsLocal && this.Namespace.Id != 0)
+					if (!this.IsLocal && this.NamespaceId != MediaWikiNamespaces.Main)
 					{
 						this.PageName = this.Namespace.DecoratedName + this.PageName;
-						this.Namespace = this.Site.Namespaces[MediaWikiNamespaces.Main];
+						this.NamespaceId = MediaWikiNamespaces.Main;
 					}
 				}
 			}
@@ -163,7 +165,7 @@
 					{
 						value ??= string.Empty;
 						var ns = this.Site.Namespaces[value];
-						this.Namespace = ns;
+						this.NamespaceId = ns.Id;
 					}
 
 					this.namespaceText = value;
@@ -200,7 +202,7 @@
 					var paramGroup = match.Groups["parameter"];
 					var pagename = match.Value.Substring(0, paramGroup.Success ? paramGroup.Captures[0].Index - match.Index : match.Length).Trim(new[] { '[', ']', '|', ' ' });
 					var title = new TitleParts(site, pagename);
-					yield return convertFileLinks && !title.LeadingColon && title.Namespace == MediaWikiNamespaces.File
+					yield return convertFileLinks && !title.LeadingColon && title.NamespaceId == MediaWikiNamespaces.File
 						? new ImageLink(site, match.Value)
 						: new SiteLink(site, match.Value);
 				}
@@ -290,27 +292,30 @@
 		}
 
 		/// <summary>Links the text from parts.</summary>
+		/// <param name="site">The site.</param>
 		/// <param name="ns">The namespace.</param>
 		/// <param name="pageName">The name of the page.</param>
 		/// <returns>The text of the link to build.</returns>
-		public static string LinkTextFromParts(Namespace ns, string pageName) => LinkTextFromParts(ns, pageName, null, null);
+		public static string LinkTextFromParts(Site site, int ns, string pageName) => LinkTextFromParts(site, ns, pageName, null, null);
 
 		/// <summary>Links the text from parts.</summary>
+		/// <param name="site">The site.</param>
 		/// <param name="ns">The namespace.</param>
 		/// <param name="pageName">The name of the page.</param>
 		/// <param name="displayText">The display text. If null, the default "pipe trick" text will be used.</param>
 		/// <returns>The text of the link to build.</returns>
-		public static string LinkTextFromParts(Namespace ns, string pageName, string displayText) => LinkTextFromParts(ns, pageName, null, displayText);
+		public static string LinkTextFromParts(Site site, int ns, string pageName, string displayText) => LinkTextFromParts(site, ns, pageName, null, displayText);
 
 		/// <summary>Links the text from parts.</summary>
-		/// <param name="ns">The namespace.</param>
+		/// <param name="site">The site.</param>
+		/// <param name="ns">The namespace identifier.</param>
 		/// <param name="pageName">The name of the page.</param>
 		/// <param name="fragment">The fragment, if any. May be null.</param>
 		/// <param name="displayText">The display text. If null, the default "pipe trick" text will be used.</param>
 		/// <returns>The text of the link to build.</returns>
-		public static string LinkTextFromParts(Namespace ns, string pageName, string? fragment, string? displayText)
+		public static string LinkTextFromParts(Site site, int ns, string pageName, string? fragment, string? displayText)
 		{
-			var link = new SiteLink(ns, pageName, displayText);
+			var link = new SiteLink(site, ns, pageName, displayText);
 			link.NormalizePageName();
 			if (displayText == null)
 			{
@@ -332,7 +337,7 @@
 		public static string LinkTextFromTitle(ISimpleTitle title)
 		{
 			ThrowNull(title, nameof(title));
-			return new SiteLink(title.Namespace, title.PageName).ToString();
+			return new SiteLink(title.Site, title.NamespaceId, title.PageName).ToString();
 		}
 
 		/// <summary>Gets the title formatted as a link.</summary>
@@ -341,7 +346,7 @@
 		public static string LinkTextFromTitle(Title title)
 		{
 			ThrowNull(title, nameof(title));
-			return new SiteLink(title.Namespace, title.PageName, title.LabelName).ToString();
+			return new SiteLink(title.Site, title.NamespaceId, title.PageName, title.LabelName).ToString();
 		}
 		#endregion
 

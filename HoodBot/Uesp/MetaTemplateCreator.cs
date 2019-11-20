@@ -22,7 +22,7 @@
 		public override Page CreatePage(ISimpleTitle simpleTitle)
 		{
 			ThrowNull(simpleTitle, nameof(simpleTitle));
-			return this.GameSpaceOnly && simpleTitle.Namespace.Id < 100
+			return this.GameSpaceOnly && simpleTitle.NamespaceId < 100
 				? Default.CreatePage(simpleTitle)
 				: new VariablesPage(simpleTitle);
 		}

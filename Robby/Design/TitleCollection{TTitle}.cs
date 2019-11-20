@@ -155,30 +155,12 @@
 
 		/// <summary>Filters the collection to one or more namespaces.</summary>
 		/// <param name="namespaces">The namespaces to filter to.</param>
-		public void FilterToNamespaces(IEnumerable<Namespace> namespaces)
-		{
-			var hash = new HashSet<Namespace>(namespaces);
-			for (var i = this.Count - 1; i >= 0; i--)
-			{
-				if (!hash.Contains(this[i].Namespace))
-				{
-					this.RemoveAt(i);
-				}
-			}
-		}
-
-		/// <summary>Filters the collection to one or more namespaces.</summary>
-		/// <param name="namespaces">The namespaces to filter to.</param>
-		public void FilterToNamespaces(params Namespace[] namespaces) => this.FilterToNamespaces(namespaces as IEnumerable<Namespace>);
-
-		/// <summary>Filters the collection to one or more namespaces.</summary>
-		/// <param name="namespaces">The namespaces to filter to.</param>
 		public void FilterToNamespaces(IEnumerable<int> namespaces)
 		{
 			var hash = new HashSet<int>(namespaces);
 			for (var i = this.Count - 1; i >= 0; i--)
 			{
-				if (!hash.Contains(this[i].Namespace.Id))
+				if (!hash.Contains(this[i].NamespaceId))
 				{
 					this.RemoveAt(i);
 				}
@@ -216,7 +198,7 @@
 			{
 				if (title.SimpleEquals(item)
 					|| (ignoreCase
-						&& title.Namespace == item.Namespace
+						&& title.NamespaceId == item.NamespaceId
 						&& string.Compare(title.PageName, item.PageName, StringComparison.OrdinalIgnoreCase) == 0))
 				{
 					return title;
@@ -298,7 +280,7 @@
 		/// <remarks>If subcategories are loaded, they will be limited to the <paramref name="categoryMemberTypes"/> requested. However, they will <em>not</em> be limited by the <paramref name="from"/> and <paramref name="to"/> parameters.</remarks>
 		public void GetCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, string? from, string? to, bool recurse)
 		{
-			var cat = Title.DefaultToNamespace(this.Site.Namespaces[MediaWikiNamespaces.Category], category);
+			var cat = Title.DefaultToNamespace(this.Site, MediaWikiNamespaces.Category, category);
 			var input = new CategoryMembersInput(cat.FullPageName)
 			{
 				Properties = CategoryMembersProperties.Title,
@@ -718,14 +700,6 @@
 
 		/// <summary>Removes one or more namespaces from the collection.</summary>
 		/// <param name="namespaces">The namespaces to remove.</param>
-		public void RemoveNamespaces(IEnumerable<Namespace> namespaces) => this.RemoveNamespaces(false, namespaces);
-
-		/// <summary>Removes one or more namespaces from the collection.</summary>
-		/// <param name="namespaces">The namespaces to remove.</param>
-		public void RemoveNamespaces(params Namespace[] namespaces) => this.RemoveNamespaces(false, namespaces as IEnumerable<Namespace>);
-
-		/// <summary>Removes one or more namespaces from the collection.</summary>
-		/// <param name="namespaces">The namespaces to remove.</param>
 		public void RemoveNamespaces(IEnumerable<int> namespaces) => this.RemoveNamespaces(false, namespaces);
 
 		/// <summary>Removes one or more namespaces from the collection.</summary>
@@ -735,32 +709,11 @@
 		/// <summary>Removes one or more namespaces from the collection.</summary>
 		/// <param name="removeTalk">Whether to remove talk spaces along with <paramref name="namespaces"/>.</param>
 		/// <param name="namespaces">The namespaces to remove.</param>
-		public void RemoveNamespaces(bool removeTalk, IEnumerable<Namespace> namespaces)
-		{
-			var hash = new HashSet<Namespace>(namespaces);
-			for (var i = this.Count - 1; i >= 0; i--)
-			{
-				var ns = this[i].Namespace;
-				if (hash.Contains(ns) || (removeTalk && ns.IsTalkSpace))
-				{
-					this.RemoveAt(i);
-				}
-			}
-		}
-
-		/// <summary>Removes one or more namespaces from the collection.</summary>
-		/// <param name="removeTalk">Whether to remove talk spaces along with <paramref name="namespaces"/>.</param>
-		/// <param name="namespaces">The namespaces to remove.</param>
-		public void RemoveNamespaces(bool removeTalk, params Namespace[] namespaces) => this.RemoveNamespaces(removeTalk, namespaces as IEnumerable<Namespace>);
-
-		/// <summary>Removes one or more namespaces from the collection.</summary>
-		/// <param name="removeTalk">Whether to remove talk spaces along with <paramref name="namespaces"/>.</param>
-		/// <param name="namespaces">The namespaces to remove.</param>
 		public void RemoveNamespaces(bool removeTalk, IEnumerable<int>? namespaces)
 		{
 			var hash =
 				namespaces == null ? new HashSet<int>() :
-				namespaces is HashSet<int> isHashSet ? isHashSet :
+				namespaces is HashSet<int> hashSet ? hashSet :
 				new HashSet<int>(namespaces);
 			for (var i = this.Count - 1; i >= 0; i--)
 			{

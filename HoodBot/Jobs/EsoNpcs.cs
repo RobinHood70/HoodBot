@@ -13,18 +13,10 @@
 
 	internal class EsoNpcs : EditJob
 	{
-		#region Fields
-		private readonly Namespace eso;
-		#endregion
-
 		#region Constructors
 		[JobInfo("Create missing NPCs", "ESO")]
 		public EsoNpcs(Site site, AsyncInfo asyncInfo)
-				: base(site, asyncInfo)
-		{
-			this.eso = site.Namespaces[UespNamespaces.Online];
-			this.SetResultDescription("Existing ESO NPC pages");
-		}
+				: base(site, asyncInfo) => this.SetResultDescription("Existing ESO NPC pages");
 		#endregion
 
 		#region Protected Override Properties
@@ -144,7 +136,7 @@
 				.AppendLine("{{Stub|NPC}}")
 				.ToString();
 
-			var page = new Page(this.eso, npc.PageName) { Text = text };
+			var page = new Page(this.Site, UespNamespaces.Online, npc.PageName) { Text = text };
 			page.SetMinimalStartTimestamp();
 			return page;
 		}
@@ -158,7 +150,7 @@
 			var titlesOnly = new TitleCollection(this.Site);
 			foreach (var npc in npcData)
 			{
-				var title = new NpcTitle(this.eso, npc);
+				var title = new NpcTitle(this.Site, npc);
 				if (allNpcs.ValueOrDefault(title) is null)
 				{
 					titlesOnly.Add(title);
@@ -227,8 +219,8 @@
 		#region Private Classes
 		private class NpcTitle : Title
 		{
-			public NpcTitle(Namespace ns, NpcData npc)
-				: base(ns, npc.Name) => this.Npc = npc;
+			public NpcTitle(Site site, NpcData npc)
+				: base(site, UespNamespaces.Online, npc.Name) => this.Npc = npc;
 
 			public NpcData Npc { get; }
 		}

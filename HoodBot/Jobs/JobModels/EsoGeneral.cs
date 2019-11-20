@@ -321,7 +321,7 @@
 			cat.GetCategoryMembers(placeInfo.CategoryName);
 			foreach (var member in cat)
 			{
-				if (member.Namespace == UespNamespaces.Online)
+				if (member.NamespaceId == UespNamespaces.Online)
 				{
 					if (places[member.PageName] is Place place)
 					{
@@ -335,7 +335,7 @@
 						}
 					}
 				}
-				else if (member.Namespace != UespNamespaces.Category)
+				else if (member.NamespaceId != UespNamespaces.Category)
 				{
 					Debug.WriteLine($"Unexpected page [[{member.FullPageName}]] found in [[:Category:{placeInfo.CategoryName}]].");
 				}

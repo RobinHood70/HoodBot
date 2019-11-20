@@ -46,7 +46,7 @@
 		#region Protected Override Methods
 		protected override void Main()
 		{
-			var templates = new TitleCollection(this.Site.Namespaces[MediaWikiNamespaces.Template], this.originalTemplateNames);
+			var templates = new TitleCollection(this.Site, MediaWikiNamespaces.Template, this.originalTemplateNames);
 			TitleCollection allTemplateNames;
 			if (this.respectRedirects)
 			{

@@ -308,7 +308,7 @@
 		/// <param name="fileName">Name of the file.</param>
 		public void DownloadFile(string pageName, string fileName)
 		{
-			var fileTitle = new TitleCollection(this.Namespaces[MediaWikiNamespaces.File], pageName);
+			var fileTitle = new TitleCollection(this, MediaWikiNamespaces.File, pageName);
 			var filePages = fileTitle.Load(PageModules.FileInfo);
 			if (filePages.Count == 1 && filePages[0] is FilePage filePage)
 			{
@@ -905,7 +905,7 @@
 			if (this.disambiguationTemplates == null)
 			{
 				this.disambiguationTemplates = new HashSet<Title>();
-				var page = new Page(this.Namespaces[MediaWikiNamespaces.MediaWiki], "Disambiguationspage");
+				var page = new Page(this, MediaWikiNamespaces.MediaWiki, "Disambiguationspage");
 				page.Load(PageModules.Default | PageModules.Links);
 				if (page.Exists)
 				{

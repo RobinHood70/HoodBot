@@ -92,7 +92,7 @@
 				for (var locIndex = locSplit.Count - 1; locIndex >= 0; locIndex--)
 				{
 					var entry = locSplit[locIndex];
-					var link = SiteLink.IsLink(entry) ? new SiteLink(this.Site, entry) : new SiteLink(this.Site.Namespaces[UespNamespaces.Online], entry);
+					var link = SiteLink.IsLink(entry) ? new SiteLink(this.Site, entry) : new SiteLink(this.Site, UespNamespaces.Online, entry);
 					foreach (ISimpleTitle title in matchAgainst)
 					{
 						if (link == title || link.DisplayText == title.PageName)

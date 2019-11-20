@@ -9,6 +9,10 @@
 		/// <value>The full name of the page.</value>
 		string FullPageName { get; }
 
+		/// <summary>Gets the ID of the namespace the page is in.</summary>
+		/// <value>The namespace ID.</value>
+		int NamespaceId { get; }
+
 		/// <summary>Gets the namespace the page is in.</summary>
 		/// <value>The namespace.</value>
 		Namespace Namespace { get; }

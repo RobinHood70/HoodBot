@@ -17,7 +17,7 @@
 		public override Page CreatePage(ISimpleTitle simpleTitle)
 		{
 			ThrowNull(simpleTitle, nameof(simpleTitle));
-			return simpleTitle.Namespace.Id switch
+			return simpleTitle.NamespaceId switch
 			{
 				MediaWikiNamespaces.MediaWiki => new MessagePage(simpleTitle.Site, simpleTitle.PageName),
 				MediaWikiNamespaces.File => new FilePage(simpleTitle.Site, simpleTitle.PageName),

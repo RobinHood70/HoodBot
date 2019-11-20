@@ -118,7 +118,6 @@
 			ThrowNull(ns, nameof(ns));
 			this.NamesDictionary.Add(name, ns);
 			ns.AddName(name);
-			this.NamesDictionary.Add(name, ns);
 		}
 
 		/// <summary>Determines whether the collection contains an element with the specified key.</summary>

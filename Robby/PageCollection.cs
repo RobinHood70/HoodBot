@@ -283,13 +283,13 @@
 			foreach (var title in titles)
 			{
 				var titleParts = new TitleParts(this.Site, title);
-				if (titleParts.Namespace.Id == MediaWikiNamespaces.Main)
+				if (titleParts.NamespaceId == MediaWikiNamespaces.Main)
 				{
-					titleParts.Namespace = this.Site.Namespaces[defaultNamespace];
+					titleParts.NamespaceId = defaultNamespace;
 				}
-				else if (titleParts.Namespace.Id != defaultNamespace)
+				else if (titleParts.NamespaceId != defaultNamespace)
 				{
-					titleParts.Namespace = this.Site.Namespaces[defaultNamespace];
+					titleParts.NamespaceId = defaultNamespace;
 					titleParts.PageName = title;
 				}
 
@@ -379,8 +379,8 @@
 		protected bool IsTitleInLimits(ISimpleTitle page) =>
 			page != null &&
 			(this.LimitationType == LimitationType.None ||
-			(this.LimitationType == LimitationType.Remove && !this.NamespaceLimitations.Contains(page.Namespace.Id)) ||
-			(this.LimitationType == LimitationType.FilterTo && this.NamespaceLimitations.Contains(page.Namespace.Id)));
+			(this.LimitationType == LimitationType.Remove && !this.NamespaceLimitations.Contains(page.NamespaceId)) ||
+			(this.LimitationType == LimitationType.FilterTo && this.NamespaceLimitations.Contains(page.NamespaceId)));
 		#endregion
 
 		#region Protected Override Methods
@@ -392,7 +392,7 @@
 			ThrowNull(input, nameof(input));
 			ThrowNull(input.Title, nameof(input), nameof(input.Title));
 			var inputTitle = new TitleParts(this.Site, input.Title);
-			if (inputTitle.Namespace != MediaWikiNamespaces.File && input.LinkTypes.HasFlag(BacklinksTypes.ImageUsage))
+			if (inputTitle.NamespaceId != MediaWikiNamespaces.File && input.LinkTypes.HasFlag(BacklinksTypes.ImageUsage))
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
 				ThrowNull(input.Title, nameof(input), nameof(input.Title)); // Input changed, so re-check before proceeding.
@@ -594,7 +594,7 @@
 
 		private bool RecurseCategoryHandler(Page page)
 		{
-			if (page.Namespace.Id == MediaWikiNamespaces.Category)
+			if (page.NamespaceId == MediaWikiNamespaces.Category)
 			{
 				this.recurseCategories.Add(page.FullPageName);
 			}

@@ -36,7 +36,7 @@
 			var title = new Title(this.site, titleText);
 			if (this.textReplacements.TryGetValue(title, out var replacement))
 			{
-				var newName = (isTemplate && title.Namespace == MediaWikiNamespaces.Template && replacement.Namespace == MediaWikiNamespaces.Template)
+				var newName = (isTemplate && title.NamespaceId == MediaWikiNamespaces.Template && replacement.NamespaceId == MediaWikiNamespaces.Template)
 					? replacement.PageName
 					: replacement.FullPageName;
 				var newNode = new TextNode(newName);

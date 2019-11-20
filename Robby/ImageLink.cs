@@ -70,11 +70,11 @@
 		/// <param name="pageName">The name of the image page.</param>
 		/// <param name="caption">The caption.</param>
 		public ImageLink(Site site, string pageName, string caption)
-			: base((site ?? throw ArgumentNull(nameof(site))).Namespaces[MediaWikiNamespaces.File], pageName)
+			: base(site ?? throw ArgumentNull(nameof(site)), MediaWikiNamespaces.File, pageName)
 		{
 			this.borderWord = site.GetPreferredImageMagicWord(Site.ImageBorderName);
 			this.uprightWord = site.GetPreferredImageMagicWord(Site.ImageUprightName);
-			this.Namespace = site.Namespaces[MediaWikiNamespaces.File];
+			this.NamespaceId = MediaWikiNamespaces.File;
 			this.PageName = Title.CoercePageName(site, MediaWikiNamespaces.File, pageName);
 			this.DisplayText = caption;
 		}

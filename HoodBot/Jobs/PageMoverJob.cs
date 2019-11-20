@@ -440,7 +440,7 @@
 				{
 					var tempTitles = new TitleCollection(this.Site);
 					tempTitles.GetBacklinks(replacement.From.FullPageName, BacklinksTypes.All);
-					if (replacement.From.Namespace == MediaWikiNamespaces.Category)
+					if (replacement.From.NamespaceId == MediaWikiNamespaces.Category)
 					{
 						tempTitles.GetCategoryMembers(replacement.From.FullPageName);
 					}
@@ -534,7 +534,7 @@
 				var title = new TitleParts(fromTitle.Site, pageName);
 				if (fromTitle.PageName == title.PageName)
 				{
-					if (fromTitle.Namespace == MediaWikiNamespaces.File)
+					if (fromTitle.NamespaceId == MediaWikiNamespaces.File)
 					{
 						sb.Append(fromTitle.Namespace.DecoratedName);
 					}
@@ -569,7 +569,7 @@
 				// Galleries - handled here for now, but might be able to move it into ReplaceVisitor if parsed into a TagNode or custom GalleryNode.
 				foreach (var replacement in this.Replacements)
 				{
-					if (replacement.From.Namespace == MediaWikiNamespaces.File)
+					if (replacement.From.NamespaceId == MediaWikiNamespaces.File)
 					{
 						text = GalleryFinder.Replace(text, (match) => ReplaceGalleryLinks(match, replacement.From, replacement.To));
 					}
@@ -627,7 +627,7 @@
 			while (status != ChangeStatus.Success && status != ChangeStatus.EditingDisabled)
 			{
 				page.Text =
-					page.Namespace == MediaWikiNamespaces.Template ? "<noinclude>" + deletionText + "</noinclude>" :
+					page.NamespaceId == MediaWikiNamespaces.Template ? "<noinclude>" + deletionText + "</noinclude>" :
 					page.IsRedirect ? page.Text + '\n' + deletionText :
 					deletionText + '\n' + page.Text;
 				status = page.Save("Propose for deletion", false);

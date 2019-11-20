@@ -24,7 +24,7 @@
 			var sorted = new List<string>();
 			foreach (var title in titles)
 			{
-				if (title.Namespace == MediaWikiNamespaces.Main)
+				if (title.NamespaceId == MediaWikiNamespaces.Main)
 				{
 					var uri = Uri.EscapeUriString(title.FullPageName).Replace("?", "%3F", StringComparison.Ordinal);
 					sorted.Add($"* [https://en.uesp.net/wiki/Special:WhatLinksHere/{uri} {title.FullPageName}]");

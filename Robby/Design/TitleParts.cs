@@ -20,7 +20,7 @@
 			this.OriginalNamespaceText = title.Namespace.Name;
 			this.OriginalPageNameText = title.PageName;
 			this.LeadingColon = title.Namespace.IsForcedLinkSpace;
-			this.Namespace = title.Namespace;
+			this.NamespaceId = title.NamespaceId;
 			this.PageName = title.PageName;
 		}
 
@@ -68,7 +68,7 @@
 				throw new ArgumentException(CurrentCulture(Resources.TitleInvalid));
 			}
 
-			Namespace? nsFinal = null;
+			int? nsFinal = null;
 			string? originalNs = null;
 			var split = nameRemaining.Split(TextArrays.Colon, 3);
 			if (split.Length >= 2)
@@ -76,7 +76,7 @@
 				var key = split[0].TrimEnd();
 				if (site.Namespaces.ValueOrDefault(key) is Namespace ns)
 				{
-					nsFinal = ns;
+					nsFinal = ns.Id;
 					originalNs = key;
 					nameRemaining = split[1].TrimStart() + (split.Length == 3 ? ':' + split[2] : string.Empty);
 				}
@@ -87,7 +87,7 @@
 					key = split[1].Trim();
 					if (iw.LocalWiki && site.Namespaces.ValueOrDefault(key) is Namespace nsiw)
 					{
-						nsFinal = nsiw;
+						nsFinal = nsiw.Id;
 						originalNs = key;
 						nameRemaining = split[2].TrimStart();
 						if (nameRemaining.Length == 0)
@@ -103,7 +103,7 @@
 			}
 
 			// If we have a leading colon, but no namespace, then this was meant to override any default namespace and force it to Main space.
-			this.Namespace = nsFinal ?? site.Namespaces[this.LeadingColon ? MediaWikiNamespaces.Main : defaultNamespace];
+			this.NamespaceId = nsFinal ?? (this.LeadingColon ? MediaWikiNamespaces.Main : defaultNamespace);
 			this.OriginalNamespaceText = originalNs ?? string.Empty;
 
 			if (nameRemaining.Length == 0)
@@ -142,15 +142,15 @@
 			}
 
 			var split = fullPageName.Split(TextArrays.Colon, 2);
-			if (site.Namespaces.ValueOrDefault(split[0]) is Namespace ns)
+			if ((this.Interwiki == null || this.Interwiki.LocalWiki) && site.Namespaces.ValueOrDefault(split[0]) is Namespace ns)
 			{
-				this.Namespace = ns;
+				this.NamespaceId = ns.Id;
 				this.OriginalNamespaceText = split[0];
 				this.PageName = split[1];
 			}
 			else
 			{
-				this.Namespace = site.Namespaces[MediaWikiNamespaces.Main];
+				this.NamespaceId = MediaWikiNamespaces.Main;
 				this.OriginalNamespaceText = string.Empty;
 				this.PageName = fullPageName;
 			}
@@ -172,7 +172,7 @@
 		/// <summary>Gets the full name of the page.</summary>
 		/// <value>The full name of the page.</value>
 		/// <remarks>This value is always constructed from the Namespace.DecoratedName property and the PageName property and can only be changed by changing those values.</remarks>
-		public string FullPageName => this.Namespace?.DecoratedName + this.PageName;
+		public string FullPageName => this.Namespace.DecoratedName + this.PageName;
 
 		/// <summary>Gets or sets the interwiki prefix.</summary>
 		/// <value>The interwiki prefix.</value>
@@ -186,10 +186,14 @@
 		/// <value><see langword="true"/> if there was a leading colon; otherwise, <see langword="false"/>.</value>
 		public bool LeadingColon { get; set; }
 
-		/// <summary>Gets or sets the namespace the page is in.</summary>
+		/// <summary>Gets the namespace the page is in.</summary>
 		/// <value>The namespace.</value>
 		/// <remarks>In the event that the title is a non-local interwiki title, this will be populated with the default namespace specified in the constructor (if applicable).</remarks>
-		public Namespace Namespace { get; set; }
+		public Namespace Namespace => this.Site.Namespaces[this.NamespaceId];
+
+		/// <summary>Gets or sets the namespace identifier.</summary>
+		/// <value>The namespace identifier.</value>
+		public int NamespaceId { get; set; }
 
 		/// <summary>Gets the interwiki text passed to the constructor, after parsing.</summary>
 		/// <value>The interwiki text.</value>
@@ -218,16 +222,18 @@
 		#region Public Methods
 
 		/// <summary>Deconstructs this instance into its constituent parts.</summary>
+		/// <param name="site">The value returned by <see cref="Site"/>.</param>
 		/// <param name="leadingColon">The value returned by <see cref="LeadingColon"/>.</param>
 		/// <param name="interwiki">The value returned by <see cref="Interwiki"/>.</param>
-		/// <param name="ns">The value returned by <see cref="Namespace"/>.</param>
+		/// <param name="ns">The value returned by <see cref="NamespaceId"/>.</param>
 		/// <param name="pageName">The value returned by <see cref="PageName"/>.</param>
 		/// <param name="fragment">The value returned by <see cref="Fragment"/>.</param>
-		public void Deconstruct(out bool leadingColon, out InterwikiEntry? interwiki, out Namespace ns, out string pageName, out string? fragment)
+		public void Deconstruct(out Site site, out bool leadingColon, out InterwikiEntry? interwiki, out int ns, out string pageName, out string? fragment)
 		{
+			site = this.Site;
 			leadingColon = this.LeadingColon;
 			interwiki = this.Interwiki;
-			ns = this.Namespace;
+			ns = this.NamespaceId;
 			pageName = this.PageName;
 			fragment = this.Fragment;
 		}
@@ -249,7 +255,8 @@
 		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
 		public bool SimpleEquals(ISimpleTitle other) =>
 			other != null &&
-			this.Namespace == other.Namespace &&
+			this.Site == other.Site &&
+			this.NamespaceId == other.NamespaceId &&
 			this.Namespace.PageNameEquals(this.PageName, other.PageName);
 		#endregion
 
