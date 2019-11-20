@@ -19,7 +19,7 @@
 	/// <summary>An API-based implementation of the <see cref="IWikiAbstractionLayer" /> interface.</summary>
 	/// <seealso cref="IWikiAbstractionLayer" />
 	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "High class coupling is the result of using classes for inputs, which is a recommended design when dealing with such a high level of input variability.")]
-	public class WikiAbstractionLayer : IWikiAbstractionLayer, IInternetEntryPoint
+	public class WikiAbstractionLayer : IWikiAbstractionLayer, IInternetEntryPoint, IMaxLaggable, ITokenGenerator
 	{
 		#region Internal Constants
 		internal const int LimitSmall1 = 50;
@@ -126,10 +126,10 @@
 		/// <summary>Occurs when the wiki is about to load initialization data.</summary>
 		public event StrongEventHandler<IWikiAbstractionLayer, InitializingEventArgs>? Initializing;
 
-		/// <summary>Raised when an HTTP response is received from the client.</summary>
+		/// <inheritdoc/>
 		public event StrongEventHandler<IWikiAbstractionLayer, ResponseEventArgs>? ResponseReceived;
 
-		/// <summary>Raised when sending a request to the client.</summary>
+		/// <inheritdoc/>
 		public event StrongEventHandler<IWikiAbstractionLayer, RequestEventArgs>? SendingRequest;
 
 		/// <summary>Occurs when a warning is issued by the wiki.</summary>
@@ -198,9 +198,7 @@
 		/// <remarks>This should not normally need to be set, as the bot will adjust automatically as needed. However, if you know in advance that you will be logged in as a user with lower limits (typically anyone who isn't a bot or admin), then you can save some overhead by lowering this to 50, rather than the default 500.</remarks>
 		public int MaximumPageSetSize { get; set; } = LimitSmall2;
 
-		/// <summary>Gets or sets the <c>maxlag</c> value to be used with the site. A value of 5 is recommended by MediaWiki, but smaller sites may want to use a different value to be more (or less) responsive to lag conditions. The lower the number, the more often the bot will pause in response to lag.</summary>
-		/// <value>The maximum lag.</value>
-		/// <remarks>This value has no effect on wikis that don't use a replicated database cluster. Once the internal site info has been retrieved, this will stop being emitted in the request if the site doesn't support it. See MediaWiki's <see href="https://www.mediawiki.org/wiki/Manual:Maxlag_parameter">Maxlag parameter</see> for full details.</remarks>
+		/// <inheritdoc/>
 		public int MaxLag { get; set; } = 5;
 
 		/// <summary>Gets or sets the module factory.</summary>
@@ -229,12 +227,10 @@
 		/// <value>The stop methods.</value>
 		public StopCheckMethods StopCheckMethods { get; set; }
 
-		/// <summary>Gets or sets a value indicating whether the site supports <see href="https://www.mediawiki.org/wiki/Manual:Maxlag_parameter">maxlag checking</see>.</summary>
-		/// <value><see langword="true" /> if the site supports <c>maxlag</c> checking; otherwise, <see langword="false" />.</value>
-		/// <remarks>This should not normally need to be set, but is left as settable by derived classes, should customization be needed.</remarks>
+		/// <inheritdoc/>
 		public bool SupportsMaxLag { get; protected set; } = true; // No harm in trying until we know for sure.
 
-		/// <summary>Gets or sets the class to use as a token manager.</summary>
+		/// <summary>Gets or sets the token manager.</summary>
 		/// <value>The token manager.</value>
 		public ITokenManager TokenManager
 		{

@@ -4,6 +4,7 @@
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Eve;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -13,11 +14,14 @@
 		public UespSite(IWikiAbstractionLayer abstractionLayer)
 			: base(abstractionLayer)
 		{
-			if (abstractionLayer is WallE.Eve.WikiAbstractionLayer eve)
+			if (abstractionLayer is WikiAbstractionLayer eve)
 			{
 				var moduleFactory = eve.ModuleFactory;
 				moduleFactory.RegisterProperty<VariablesInput>(PropVariables.CreateInstance);
 				moduleFactory.RegisterGenerator<VariablesInput>(PropVariables.CreateInstance);
+				eve.Assert = "bot";
+				eve.StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery;
+				eve.UserCheckFrequency = 10;
 			}
 		}
 		#endregion

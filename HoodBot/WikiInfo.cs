@@ -32,7 +32,9 @@
 		#endregion
 
 		#region Public Virtual Methods
-		public virtual IWikiAbstractionLayer GetAbstractionLayer(IMediaWikiClient client) => this.Api == null ? throw PropertyNull(nameof(WikiInfo), nameof(this.Api)) : new WikiAbstractionLayer(client, this.Api);
+		public virtual IWikiAbstractionLayer GetAbstractionLayer(IMediaWikiClient client) => this.Api == null
+			? throw PropertyNull(nameof(WikiInfo), nameof(this.Api))
+			: new WikiAbstractionLayer(client, this.Api);
 		#endregion
 	}
 }

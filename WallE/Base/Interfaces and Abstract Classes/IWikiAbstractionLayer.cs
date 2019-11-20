@@ -113,10 +113,6 @@
 		/// <value>The stop methods.</value>
 		StopCheckMethods StopCheckMethods { get; set; }
 
-		/// <summary>Gets a value indicating whether the site supports <see href="https://www.mediawiki.org/wiki/Manual:Maxlag_parameter">maxlag checking</see>.</summary>
-		/// <value><see langword="true" /> if the site supports <c>maxlag</c> checking; otherwise, <see langword="false" />.</value>
-		bool SupportsMaxLag { get; }
-
 		/// <summary>Gets or sets how often the user talk page should be checked for non-queries.</summary>
 		/// <value>The frequency to check user name and talk page. A value of 1 or less will check with every non-query request; higher values will only check every n times.</value>
 		int UserCheckFrequency { get; set; }

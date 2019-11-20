@@ -14,9 +14,9 @@
 		public override IWikiAbstractionLayer GetAbstractionLayer(IMediaWikiClient client)
 		{
 			var retval = base.GetAbstractionLayer(client);
-			if (retval is WallE.Eve.WikiAbstractionLayer wal)
+			if (retval is IMaxLaggable maxLag)
 			{
-				wal.MaxLag = this.MaxLag;
+				maxLag.MaxLag = this.MaxLag;
 			}
 
 			return retval;

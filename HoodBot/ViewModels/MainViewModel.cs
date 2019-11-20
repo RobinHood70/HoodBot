@@ -19,7 +19,6 @@
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
-	using RobinHood70.WallE.Eve;
 	using static System.Environment;
 	using static RobinHood70.WikiCommon.Globals;
 
@@ -366,23 +365,19 @@
 		private Site InitializeSite()
 		{
 			var wikiInfo = this.CurrentItem ?? throw new InvalidOperationException(Resources.NoWiki);
-			var al = wikiInfo.GetAbstractionLayer(this.client);
+			var abstractionLayer = wikiInfo.GetAbstractionLayer(this.client);
 
-			// TODO: Move this into site-specific code - not urgent, wait until Site-derivative rewrites.
-			al.Assert = "user";
-			al.StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery;
-			al.UserCheckFrequency = 10;
 #if DEBUG
-			if (al is WikiAbstractionLayer wal)
+			if (abstractionLayer is IInternetEntryPoint internet)
 			{
-				wal.SendingRequest += WalSendingRequest;
-				//// wal.ResponseReceived += WalResponseRecieved;
+				internet.SendingRequest += WalSendingRequest;
+				//// internet.ResponseReceived += WalResponseRecieved;
 			}
 
-			al.WarningOccurred += WalWarningOccurred;
+			abstractionLayer.WarningOccurred += WalWarningOccurred;
 #endif
 			var factoryMethod = Site.GetFactoryMethod(wikiInfo.SiteClassIdentifier);
-			var site = factoryMethod(al);
+			var site = factoryMethod(abstractionLayer);
 			site.WarningOccurred += SiteWarningOccurred;
 			site.PagePreview += this.SitePagePreview;
 			if (wikiInfo.UserName != null)
@@ -440,9 +435,9 @@
 		private void ResetSite(Site site)
 		{
 #if DEBUG
-			if (site.AbstractionLayer is WikiAbstractionLayer wal)
+			if (site.AbstractionLayer is IInternetEntryPoint internet)
 			{
-				wal.SendingRequest -= WalSendingRequest;
+				internet.SendingRequest -= WalSendingRequest;
 			}
 
 			site.AbstractionLayer.WarningOccurred -= WalWarningOccurred;
@@ -459,9 +454,9 @@
 		{
 			// Until we get a menu going, specify manually.
 			// currentViewer ??= this.FindPlugin<IDiffViewer>("IeDiff");
-			if (this.DiffViewer != null && this.ShowDiffs && sender.AbstractionLayer is WikiAbstractionLayer wal)
+			if (this.DiffViewer != null && this.ShowDiffs && sender.AbstractionLayer is ITokenGenerator tokens)
 			{
-				var token = wal.TokenManager.SessionToken("csrf"); // HACK: This is only necessary for browser-based diffs. Not sure how to handle it better.
+				var token = tokens.TokenManager.SessionToken("csrf");
 				var page = eventArgs.Page;
 				var diffContent = new DiffContent(page.FullPageName, page.Text ?? string.Empty, eventArgs.EditSummary, eventArgs.Minor)
 				{

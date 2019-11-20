@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WallE.Eve
+﻿namespace RobinHood70.WallE
 {
 	/*
 	Pre-1.20:
