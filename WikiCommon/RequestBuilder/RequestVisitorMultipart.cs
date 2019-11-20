@@ -37,7 +37,7 @@
 		/// <returns>A string representing the parameters, as they would be used in a URL or POST data.</returns>
 		public static MultipartResult Build(Request request)
 		{
-			// TODO: Rewrite tu use request.Build().
+			// TODO: Rewrite to use request.Build().
 			ThrowNull(request, nameof(request));
 			var visitor = new RequestVisitorMultipart
 			{
