@@ -172,6 +172,35 @@
 			other is null ? 1 :
 			string.Compare(this.Name, other.Name, StringComparison.Ordinal);
 
+		public bool ConstructorEquals(JobNode? other)
+		{
+			if (other == null)
+			{
+				return false;
+			}
+
+			if (this.Constructor == other.Constructor && this.Parameters == other.Parameters)
+			{
+				return true;
+			}
+
+			if (this.Parameters == null || other.Parameters == null || this.Parameters.Count != other.Parameters.Count)
+			{
+				return false;
+			}
+
+			// If constructors are equal, but Parmeters didn't match by reference, double-check individual parameter equality.
+			for (var i = 0; i < this.Parameters.Count; i++)
+			{
+				if (this.Parameters[i] != other.Parameters[i])
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
 		public bool Equals(JobNode? other)
 		{
 			if (other is null)

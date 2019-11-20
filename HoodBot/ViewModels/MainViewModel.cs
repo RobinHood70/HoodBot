@@ -342,14 +342,12 @@
 			var jobList = new List<JobNode>(JobNode.GetCheckedJobs(this.JobTree.Children));
 			if (jobList.Count > 1)
 			{
-				var equalityComparer = new JobConstructorEqualityComparer();
-
-				// Remove any duplicate jobs based on Constructor equality. Simple bubble-sort style algorithm is sufficient due to small size.
+				// Remove any duplicate jobs based on Constructor equality (i.e., same job checked under multiple branches of tree). Simple nested loop algorithm is sufficient due to small size.
 				for (var outerLoop = 0; outerLoop < jobList.Count - 1; outerLoop++)
 				{
 					for (var innerLoop = jobList.Count - 1; innerLoop > outerLoop; innerLoop--)
 					{
-						if (equalityComparer.Equals(jobList[innerLoop], jobList[outerLoop]))
+						if (jobList[innerLoop].ConstructorEquals(jobList[outerLoop]))
 						{
 							jobList.RemoveAt(innerLoop);
 						}
