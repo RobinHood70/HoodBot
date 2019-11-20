@@ -9,7 +9,11 @@
 	{
 		#region Methods
 
-		// TODO: See if we can turn BuildRequest(Request) into BuildRequest(Request, input), possibly by splitting out QueryModule<TInput, TOutput> into a non-generic base class and a generic one, or something similar. The object is to get rid of the input in the constructor, which would then trickle down into IModuleFactory's GeneratorFactoryMethod and remove that dependence and the type-non-specific dictionary going on there that requires all CreateInstance methods to have IGeneratorInput as a second input instead of the specific type. If that all goes well, see if something similar can be done with PropertyFactoryMethod.
+		/*
+			TODO: See if we can turn BuildRequest(Request) into BuildRequest(Request, input), possibly by splitting out QueryModule<TInput, TOutput> into a non-generic base class and a generic one, or something similar. The object is to get rid of the input in the constructor, which would then trickle down into IModuleFactory's GeneratorFactoryMethod and remove that dependence and the type-non-specific dictionary going on there that requires all CreateInstance methods to have IGeneratorInput as a second input instead of the specific type. If that all goes well, see if something similar can be done with PropertyFactoryMethod.
+
+			Note: Gave this a try on a bad day and it didn't work out well so changes were reverted in their entirety. Going to need to try again on a good day. The main issue is that inputs are not readily available at call sites like ActionQuery.CreateRequest and ActionQueryPageSet.BuildRequestPageSet.
+		*/
 
 		/// <summary>Builds this module's portion of the request.</summary>
 		/// <param name="request">The request.</param>
