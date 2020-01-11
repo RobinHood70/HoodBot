@@ -110,16 +110,7 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void Main()
-		{
-			this.StatusWriteLine("Saving pages");
-			this.Pages.Sort();
-			foreach (var page in this.Pages)
-			{
-				this.SavePage(page, this.LogName, true);
-				this.Progress++;
-			}
-		}
+		protected override void Main() => this.SavePages(this.LogName);
 
 		protected override void BeforeLogging()
 		{

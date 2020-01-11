@@ -58,6 +58,31 @@
 				}
 			}
 		}
+
+		protected void SavePages(string editSummary) => this.SavePages(editSummary, true, null);
+
+		protected void SavePages(string editSummary, bool isMinor) => this.SavePages(editSummary, isMinor, null);
+
+		protected void SavePages(string editSummary, bool isMinor, Action<EditJob, Page>? editConflictAction)
+		{
+			this.Pages.RemoveUnchanged();
+			if (this.Pages.Count == 0)
+			{
+				this.Warn("No pages to save!");
+				return;
+			}
+
+			this.StatusWriteLine("Saving pages");
+			this.EditConflictAction = editConflictAction;
+			this.Pages.Sort();
+			this.ProgressMaximum = this.Pages.Count;
+
+			foreach (var page in this.Pages)
+			{
+				this.SavePage(page, editSummary, isMinor);
+				this.Progress++;
+			}
+		}
 		#endregion
 	}
 }

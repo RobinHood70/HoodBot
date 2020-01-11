@@ -77,15 +77,7 @@
 		#region Protected Override Methods
 		protected override void Main()
 		{
-			this.StatusWriteLine("Saving pages");
-			this.EditConflictAction = this.SkillPageLoaded;
-			this.Pages.Sort();
-			foreach (var skillPage in this.Pages)
-			{
-				this.SavePage(skillPage, this.LogName, false);
-				this.Progress++;
-			}
-
+			this.SavePages(this.LogName, false, this.SkillPageLoaded);
 			EsoGeneral.SetBotUpdateVersion(this, this.TypeText.ToLowerInvariant());
 			this.Progress++;
 		}

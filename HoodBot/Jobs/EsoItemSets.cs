@@ -51,15 +51,7 @@
 		#region Protected Override Methods
 		protected override void Main()
 		{
-			this.StatusWriteLine("Saving pages");
-			this.EditConflictAction = this.SetLoaded;
-			this.Pages.Sort();
-			foreach (var page in this.Pages)
-			{
-				this.SavePage(page, this.LogName, false);
-				this.Progress++;
-			}
-
+			this.SavePages(this.LogName, false);
 			EsoGeneral.SetBotUpdateVersion(this, "itemset");
 			this.Progress++;
 		}

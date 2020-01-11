@@ -30,14 +30,7 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void Main()
-		{
-			foreach (var page in this.Pages)
-			{
-				this.SavePage(page, "Add deck code", true);
-				this.Progress++;
-			}
-		}
+		protected override void Main() => this.SavePages("Add deck code");
 
 		protected override void BeforeLogging()
 		{
@@ -82,9 +75,6 @@
 					this.WriteLine($"* {title.PageName} not found (deckcode={item.DeckCode}).");
 				}
 			}
-
-			this.ProgressMaximum = this.Pages.Count;
-			this.Pages.Sort();
 		}
 		#endregion
 
