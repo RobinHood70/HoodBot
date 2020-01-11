@@ -425,6 +425,14 @@
 		/// <param name="titles">The titles.</param>
 		public void GetPageTranscludedIn(IEnumerable<ISimpleTitle> titles) => this.GetPageTranscludedIn(new TranscludedInInput(), titles);
 
+		/// <summary>Adds pages that transclude the given titles to the collection.</summary>
+		/// <param name="titles">The titles.</param>
+		public void GetPageTranscludedIn(IEnumerable<string> titles) => this.GetPageTranscludedIn(new TitleCollection(this.Site, titles));
+
+		/// <summary>Adds pages that transclude the given titles to the collection.</summary>
+		/// <param name="titles">The titles.</param>
+		public void GetPageTranscludedIn(params string[] titles) => this.GetPageTranscludedIn(titles as IEnumerable<string>);
+
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
 		public void GetPageTransclusions(IEnumerable<ISimpleTitle> titles) => this.GetPageTransclusions(new TemplatesInput(), titles);
