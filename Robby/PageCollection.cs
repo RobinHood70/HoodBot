@@ -121,11 +121,6 @@
 		/// <remarks>Changing the contents of this collection only affects newly added pages and does not affect any existing items in the collection. Use <see cref="ReapplyLimitations"/> to do so, if needed.</remarks>
 		public ICollection<int> NamespaceLimitations { get; } = new HashSet<int>(DefaultNamespaceLimitations);
 
-		/// <summary>Gets or sets a value indicated whether <see cref="NamespaceLimitations"/> specifies namespaces to be removed from the collection or only allowing those namepaces.</summary>
-		/// <value>The type of the namespace limitation.</value>
-		/// <remarks>Changing this property only affects newly added pages and does not affect any existing items in the collection. Use <see cref="ReapplyLimitations"/> to do so, if needed.</remarks>
-		public LimitationType LimitationType { get; set; } = DefaultLimitationType;
-
 		/// <summary>Gets or sets the page creator.</summary>
 		/// <value>The page creator.</value>
 		public PageCreator PageCreator { get; set; }
@@ -137,6 +132,14 @@
 		/// <para>The title map is largely for informational purposes. When accessing items in the collection, it will automatically check the title map and attempt to return the correct result.</para>
 		/// </remarks>
 		public IReadOnlyDictionary<string, TitleParts> TitleMap => this.titleMap;
+		#endregion
+
+		#region Protected Properties
+
+		/// <summary>Gets or sets a value indicated whether <see cref="NamespaceLimitations"/> specifies namespaces to be removed from the collection or only allowing those namepaces.</summary>
+		/// <value>The type of the namespace limitation.</value>
+		/// <remarks>Changing this property only affects newly added pages and does not affect any existing items in the collection. Use <see cref="ReapplyLimitations"/> to do so, if needed.</remarks>
+		protected LimitationType LimitationType { get; set; } = DefaultLimitationType;
 		#endregion
 
 		#region Public Indexers
