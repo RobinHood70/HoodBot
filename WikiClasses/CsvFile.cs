@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.IO;
 	using System.Text;
@@ -19,6 +20,10 @@
 		#endregion
 
 		#region Public Properties
+
+		/// <summary>Gets or sets a value indicating whether fields should always be delimited as text.</summary>
+		/// <value><see langword="true"/> if fields should always be delimited; otherwise, <see langword="false"/> (in which case, delimiting is automatic as needed).</value>
+		public bool AlwaysDelimitFields { get; set; } // CONSIDER: Replacing (or supplementing) this with a column format scheme. Note, however, that Excel doesn't always respect this in any event, so it should not be a priority.
 
 		/// <summary>Gets the number of rows currently in the file.</summary>
 		public int Count => this.rows.Count;
@@ -65,6 +70,8 @@
 
 		#region Interface Properties
 		bool ICollection<CsvRow>.IsReadOnly => false;
+
+		int ICollection<CsvRow>.Count { get; }
 		#endregion
 
 		#region Public Indexers
@@ -84,7 +91,8 @@
 
 		/// <summary>Adds the specified field values.</summary>
 		/// <param name="fields">The field values, converted to strings using the default ToString() method for the object.</param>
-		public void Add(IEnumerable<object> fields)
+		/// <returns>The CsvRow that was added.</returns>
+		public CsvRow Add(IEnumerable<object> fields)
 		{
 			ThrowNull(fields, nameof(fields));
 			var list = new List<string>();
@@ -96,26 +104,32 @@
 				}
 			}
 
-			this.Add(list);
+			return this.Add(list);
 		}
 
 		/// <summary>Adds the specified field values.</summary>
 		/// <param name="fields">The field values.</param>
-		public void Add(params string[] fields) => this.Add(fields as IEnumerable<string>);
+		/// <returns>The CsvRow that was added.</returns>
+		public CsvRow Add(params string[] fields) => this.Add(fields as IEnumerable<string>);
 
 		/// <summary>Adds the specified field values.</summary>
 		/// <param name="fields">The field values.</param>
-		public void Add(IEnumerable<string> fields)
+		/// <returns>The CsvRow that was added.</returns>
+		public CsvRow Add(IEnumerable<string> fields)
 		{
-			if (fields != null)
-			{
-				this.Add(new CsvRow(fields, this.nameMap));
-			}
+			ThrowNull(fields, nameof(fields));
+			return this.Add(new CsvRow(fields, this.nameMap));
 		}
 
 		/// <summary>Adds a <see cref="CsvRow"/> directly to the file.</summary>
 		/// <param name="item">The row to add to the file.</param>
-		public void Add(CsvRow item) => this.rows.Add(item);
+		/// <returns>The original <paramref name="item"/> parameter.</returns>
+		public CsvRow Add([NotNull] CsvRow? item)
+		{
+			ThrowNull(item, nameof(item));
+			this.rows.Add(item);
+			return item;
+		}
 
 		/// <summary>Adds a header with the specified field names.</summary>
 		/// <param name="fieldNames">The field names.</param>
@@ -382,6 +396,8 @@
 		#endregion
 
 		#region Interface Methods
+		void ICollection<CsvRow>.Add(CsvRow item) => this.rows.Add(item);
+
 		bool ICollection<CsvRow>.Contains(CsvRow item) => this.rows.Contains(item);
 
 		int IList<CsvRow>.IndexOf(CsvRow item) => this.rows.IndexOf(item);
@@ -423,7 +439,7 @@
 				{
 					rewriteFields.Add(
 						field == null ? string.Empty :
-						(field.Length > 0 && field.IndexOfAny(specialChars) == -1) ? field :
+						(field.Length > 0 && field.IndexOfAny(specialChars) == -1 && !this.AlwaysDelimitFields) ? field :
 						this.RewriteField(field));
 					columnNumber++;
 				}
@@ -457,7 +473,7 @@
 				}
 			}
 
-			var addDelimiter = field.Length == 0;
+			var addDelimiter = field.Length == 0 || this.AlwaysDelimitFields;
 			foreach (var character in field)
 			{
 				if (character == this.FieldDelimiter)
@@ -478,7 +494,7 @@
 				}
 				else if (character == this.FieldSeparator)
 				{
-					addDelimiter = this.FieldDelimiter.HasValue;
+					addDelimiter |= this.FieldDelimiter.HasValue;
 					if (addDelimiter)
 					{
 						sb.Append(this.FieldSeparator);
