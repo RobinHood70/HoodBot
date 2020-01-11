@@ -571,7 +571,7 @@
 			var parameterCopy = new Dictionary<string, Parameter>();
 			foreach (var (positionalName, parameter) in this.PositionalParameters)
 			{
-				if (parameterCopy.TryGetValue(positionalName, out var item))
+				if (parameterCopy.ContainsKey(positionalName))
 				{
 					keyOrder.Remove(positionalName);
 				}
