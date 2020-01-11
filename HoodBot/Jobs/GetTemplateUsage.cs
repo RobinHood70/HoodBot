@@ -134,7 +134,7 @@
 		{
 			var csvFile = new CsvFile()
 			{
-				EmptyFieldText = " "
+				EmptyFieldText = " ",
 			};
 			var output = new List<string>(allTemplates.HeaderOrder.Count + 2)
 			{
@@ -146,14 +146,13 @@
 
 			foreach (var template in allTemplates)
 			{
-				var fields = new List<string> { template.Page, template.Template.Name };
+				var row = csvFile.Add(template.Page, template.Template.Name);
 				foreach (var param in template.Template)
 				{
 					// For now, we're assuming that trimming trailing lines from anon parameters is desirable, but could be made optional if needed.
-					fields.Add(param.Anonymous ? param.Value.TrimEnd(TextArrays.NewLineChars) : param.Value);
+					ThrowNull(param.Name, nameof(param), nameof(param.Name));
+					row[param.Name] = param.Anonymous ? param.Value.TrimEnd(TextArrays.NewLineChars) : param.Value;
 				}
-
-				csvFile.Add(fields);
 			}
 
 			csvFile.WriteFile(this.saveLocation);
