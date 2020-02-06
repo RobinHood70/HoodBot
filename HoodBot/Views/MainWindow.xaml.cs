@@ -42,24 +42,27 @@
 			Grid.SetRow(labelControl, lastRow);
 			grid.Children.Add(labelControl);
 			Control controlToAdd;
-			if (parameter.Value is bool boolValue/* valueType == typeof(bool)*/)
+			if (valueType == typeof(bool))
 			{
-				controlToAdd = new CheckBox() { IsChecked = boolValue };
+				controlToAdd = new CheckBox() { IsChecked = (bool?)parameter.Value };
 			}
 			//// else if (parameter.Attribute is JobParameterFileAttribute fileAttribute)
 			//// {
 			////	controlToAdd = new FileTextBox();
 			//// }
-			else if (parameter.Value is IFormattable paramValue/* typeof(IFormattable).IsAssignableFrom(valueType)*/)
+			else if (typeof(IFormattable).IsAssignableFrom(valueType))
 			{
-				controlToAdd = new TextBox() { Text = paramValue.ToString(), AcceptsReturn = false };
+				controlToAdd = new TextBox() { Text = (parameter.Value as IFormattable)?.ToString(), AcceptsReturn = false };
 			}
-			else if (parameter.Value is IEnumerable parameterValues/* typeof(IEnumerable).IsAssignableFrom(valueType)*/)
+			else if (typeof(IEnumerable).IsAssignableFrom(valueType))
 			{
 				var textValue = string.Empty;
-				foreach (var value in parameterValues)
+				if (parameter.Value is IEnumerable parameterValues)
 				{
-					textValue += value?.ToString();
+					foreach (var value in parameterValues)
+					{
+						textValue += value?.ToString();
+					}
 				}
 
 				controlToAdd = new TextBox() { Text = textValue, AcceptsReturn = true };
