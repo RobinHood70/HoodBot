@@ -93,6 +93,37 @@
 
 		#region Public Static Methods
 
+		/// <summary>Copies the format (surrounding whitespace) from another parameter into a new anonymous parameter.</summary>
+		/// <param name="other">The other parameter.</param>
+		/// <param name="value">The new parameter value.</param>
+		/// <returns>A new, formatted <see cref="ParameterNode"/> with the specified value.</returns>
+		public static ParameterNode CopyFormatFrom(ParameterNode? other, string value)
+		{
+			if (other != null)
+			{
+				value = AddWhitespace(other.Value, value);
+				return FromParts(other.Index + 1, value);
+			}
+
+			return FromParts(1, value);
+		}
+
+		/// <summary>Copies the format (surrounding whitespace) from another parameter into a new named parameter.</summary>
+		/// <param name="other">The other parameter.</param>
+		/// <param name="name">The new parameter name.</param>
+		/// <param name="value">The new parameter value.</param>
+		/// <returns>A new, formatted <see cref="ParameterNode"/> with the specified value.</returns>
+		public static ParameterNode CopyFormatFrom(ParameterNode? other, string name, string value)
+		{
+			if (other != null)
+			{
+				name = AddWhitespace(other.Name, name);
+				value = AddWhitespace(other.Value, value);
+			}
+
+			return FromParts(name, value);
+		}
+
 		/// <summary>Escapes any pipes in the value.</summary>
 		/// <param name="nameValue">The text to escape.</param>
 		/// <returns>The escaped text.</returns>
@@ -177,7 +208,7 @@
 
 		/// <summary>Gets the parameter's name, converting anonymous parameters to their numbered value.</summary>
 		/// <returns>The parameter name.</returns>
-		public string NameToText() => this.Name == null ? this.Index.ToString(CultureInfo.InvariantCulture) : WikiTextVisitor.Value(this.Name);
+		public string NameToText() => this.Name == null ? this.Index.ToString(CultureInfo.InvariantCulture) : WikiTextVisitor.Value(this.Name).Trim();
 
 		/// <summary>Sets the name from a list of nodes.</summary>
 		/// <param name="name">The name. If non-null, <see cref="Index"/> will be set to zero.</param>
@@ -236,6 +267,43 @@
 				? valueNode.Text
 				: "<value>";
 			return $"|{name}={value}";
+		}
+		#endregion
+
+		#region Private Methods
+		private static string AddWhitespace(NodeCollection? nodes, string value)
+		{
+			if (nodes != null)
+			{
+				var textValue = WikiTextVisitor.Value(nodes);
+				var startLength = 0;
+				while (startLength < textValue.Length && char.IsWhiteSpace(textValue[startLength]))
+				{
+					startLength++;
+				}
+
+				if (startLength > 0)
+				{
+					value = textValue.Substring(0, startLength) + value;
+				}
+
+				if (startLength < textValue.Length)
+				{
+					var endPos = textValue.Length - 1;
+					while (endPos >= 0 && char.IsWhiteSpace(textValue[endPos]))
+					{
+						endPos--;
+					}
+
+					endPos++;
+					if (endPos < textValue.Length)
+					{
+						value += textValue.Substring(endPos);
+					}
+				}
+			}
+
+			return value;
 		}
 		#endregion
 	}

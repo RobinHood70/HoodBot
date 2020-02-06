@@ -34,13 +34,13 @@
 		/// <remarks>This is a convenience method to produce the appropriate amount of equals signs instead of having to repeat the same code in numerous places.</remarks>
 		public string EqualsSigns => new string('=', this.Level);
 
-		/// <summary>Gets or sets the index.</summary>
+		/// <summary>Gets the index.</summary>
 		/// <value>The index (count of headers to this point in the text).</value>
-		public int Index { get; set; }
+		public int Index { get; }
 
-		/// <summary>Gets or sets the level.</summary>
+		/// <summary>Gets the level.</summary>
 		/// <value>The level. This is equal to the number of visible equals signs.</value>
-		public int Level { get; set; }
+		public int Level { get; }
 
 		/// <summary>Gets an enumerator that iterates through any NodeCollections this node contains.</summary>
 		/// <returns>An enumerator that can be used to iterate through additional NodeCollections.</returns>

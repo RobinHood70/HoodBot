@@ -110,7 +110,13 @@
 		public void RemoveDefaultValue() => this.DefaultValue = null;
 
 		/// <summary>Trims all extra values from the argument.</summary>
-		public void TrimExtraValues() => this.extraValues.Clear();
+		public void TrimExtraValues()
+		{
+			if (this.extraValues.Count > 0)
+			{
+				this.extraValues.Clear();
+			}
+		}
 		#endregion
 
 		#region Public Override Methods

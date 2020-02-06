@@ -1,12 +1,17 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
+	using System;
 	using System.Collections.Generic;
-	using System.Linq;
+	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.WikiCommon;
 
 	/// <summary>Represents a wikitext (HTML) comment.</summary>
 	public class CommentNode : IWikiNode
 	{
+		#region Fields
+		private string comment = string.Empty;
+		#endregion
+
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="CommentNode"/> class.</summary>
@@ -18,11 +23,23 @@
 
 		/// <summary>Gets or sets the comment text.</summary>
 		/// <value>The comment text.</value>
-		public string Comment { get; set; }
+		[AllowNull]
+		public string Comment
+		{
+			get => this.comment;
+			set
+			{
+				value ??= string.Empty;
+				if (this.comment != value)
+				{
+					this.comment = value;
+				}
+			}
+		}
 
 		/// <summary>Gets an enumerator that iterates through any NodeCollections this node contains.</summary>
 		/// <returns>An enumerator that can be used to iterate through additional NodeCollections.</returns>
-		public IEnumerable<NodeCollection> NodeCollections => Enumerable.Empty<NodeCollection>();
+		public IEnumerable<NodeCollection> NodeCollections => Array.Empty<NodeCollection>();
 		#endregion
 
 		#region Public Methods

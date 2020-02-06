@@ -8,11 +8,15 @@
 	/// <summary>Represents a block of text.</summary>
 	public class TextNode : IWikiNode
 	{
+		#region Fields
+		private string text;
+		#endregion
+
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="TextNode"/> class.</summary>
 		/// <param name="text">The text.</param>
-		public TextNode([Localizable(false)]string text) => this.Text = text;
+		public TextNode([Localizable(false)]string text) => this.text = text;
 		#endregion
 
 		#region Public Properties
@@ -23,7 +27,17 @@
 
 		/// <summary>Gets or sets the text.</summary>
 		/// <value>The text.</value>
-		public string Text { get; set; }
+		public string Text
+		{
+			get => this.text;
+			set
+			{
+				if (value != this.text)
+				{
+					this.text = value;
+				}
+			}
+		}
 		#endregion
 
 		#region Public Methods

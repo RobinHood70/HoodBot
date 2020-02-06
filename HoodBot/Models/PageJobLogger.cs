@@ -100,7 +100,7 @@
 			Debug.Assert(this.logInfo != null, "LogInfo is null.");
 			var parsedText = WikiTextParser.Parse(sender.Text);
 			var result = this.UpdateCurrentStatus(parsedText);
-			var entryNode = parsedText.FindFirstLinked<TemplateNode>(template => WikiTextVisitor.Value(template.Title).Trim() == "/Entry");
+			var entryNode = parsedText.FindFirstLinked<TemplateNode>(template => template.GetTitleValue() == "/Entry");
 			if (entryNode == null || !(entryNode.Value is TemplateNode entry))
 			{
 				// CONSIDER: This used to insert a /Entry into an empty table, but given that we're not currently parsing tables, that would've required far too much code for a one-off situation, so it's been left out. Could theoretically be reintroduced once table parsing is in place.

@@ -7,6 +7,13 @@
 	/// <summary>  Represents an unparsed tag, such as pre or nowiki.</summary>
 	public class TagNode : IWikiNode
 	{
+		#region Fields
+		private string? attributes;
+		private string? close;
+		private string? innerText;
+		private string name;
+		#endregion
+
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="TagNode"/> class.</summary>
@@ -16,10 +23,10 @@
 		/// <param name="close">The close.</param>
 		public TagNode(string name, string? attributes, string? innerText, string? close)
 		{
-			this.Name = name;
-			this.Attributes = attributes;
-			this.InnerText = innerText;
-			this.Close = close;
+			this.name = name;
+			this.attributes = attributes;
+			this.innerText = innerText;
+			this.close = close;
 		}
 		#endregion
 
@@ -27,19 +34,59 @@
 
 		/// <summary>Gets or sets the tag's attributes.</summary>
 		/// <value>The attributes.</value>
-		public string? Attributes { get; set; }
+		public string? Attributes
+		{
+			get => this.attributes;
+			set
+			{
+				if (value != this.attributes)
+				{
+					this.attributes = value;
+				}
+			}
+		}
 
 		/// <summary>Gets or sets the close tag.</summary>
 		/// <value>The close tag.</value>
-		public string? Close { get; set; } // Note that this is a full close tag, including the surrounding </...>.
+		public string? Close // Note that this is a full close tag, including the surrounding </...>.
+		{
+			get => this.close;
+			set
+			{
+				if (value != this.close)
+				{
+					this.close = value;
+				}
+			}
+		}
 
 		/// <summary>Gets or sets the inner text.</summary>
 		/// <value>The unparsed inner text.</value>
-		public string? InnerText { get; set; }
+		public string? InnerText
+		{
+			get => this.innerText;
+			set
+			{
+				if (value != this.innerText)
+				{
+					this.innerText = value;
+				}
+			}
+		}
 
 		/// <summary>Gets or sets the tag name.</summary>
 		/// <value>The tag name.</value>
-		public string Name { get; set; } // Note that this is NOT a full open tag, it's just the name.
+		public string Name // Note that this is NOT a full open tag, it's just the name.
+		{
+			get => this.name;
+			set
+			{
+				if (value != this.name)
+				{
+					this.name = value;
+				}
+			}
+		}
 
 		/// <summary>Gets an enumerator that iterates through any NodeCollections this node contains.</summary>
 		/// <returns>An enumerator that can be used to iterate through additional NodeCollections.</returns>

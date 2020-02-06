@@ -96,7 +96,12 @@
 
 			this.builder.Append("{{{");
 			node.Name.Accept(this);
-			node.DefaultValue?.Accept(this);
+			if (node.DefaultValue != null)
+			{
+				this.builder.Append('|');
+				node.DefaultValue.Accept(this);
+			}
+
 			if (!this.valuesOnly)
 			{
 				foreach (var value in node.ExtraValues)

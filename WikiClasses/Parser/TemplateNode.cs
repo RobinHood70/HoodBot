@@ -171,6 +171,53 @@
 		/// <param name="visitor">The visiting class.</param>
 		public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
 
+		/// <summary>Adds a new parameter to the template. Copies the format of the previous named parameter, if there is one, then adds the parameter after it.</summary>
+		/// <param name="name">The name of the parameter to add.</param>
+		/// <param name="value">The value of the parameter to add.</param>
+		public void AddParameter(string name, string value) => this.AddParameter(name, value, true);
+
+		/// <summary>Adds a new parameter to the template. Optionally, copies the format of the previous named parameter, if there is one, then adds the parameter after it.</summary>
+		/// <param name="name">The name of the parameter to add.</param>
+		/// <param name="value">The value of the parameter to add.</param>
+		/// <param name="copyFormat">Whether to copy the format of the previous parameter or use the values as provided.</param>
+		public void AddParameter(string name, string value, bool copyFormat)
+		{
+			var previous = copyFormat ? this.Parameters.FindLastLinked<ParameterNode>(item => item.Name != null) : null;
+			if (previous?.Value is ParameterNode prevValue)
+			{
+				if (this.FindParameter(name) != null)
+				{
+					throw new InvalidOperationException("Parameter exists");
+				}
+
+				this.Parameters.AddAfter(previous, ParameterNode.CopyFormatFrom(prevValue, name, value));
+			}
+			else
+			{
+				this.Parameters.AddLast(ParameterNode.FromParts(name, value));
+			}
+		}
+
+		/// <summary>Adds a new anonymous parameter to the template. Copies the format of the last anonymous parameter, if there is one, then adds the parameter after it.</summary>
+		/// <param name="value">The value of the parameter to add.</param>
+		public void AddParameter(string value) => this.AddParameter(value, true);
+
+		/// <summary>Adds a new anonymous parameter to the template. Copies the format of the last anonymous parameter, if there is one, then adds the parameter after it.</summary>
+		/// <param name="value">The value of the parameter to add.</param>
+		/// <param name="copyFormat">Whether to copy the format of the previous parameter or use the values as provided.</param>
+		public void AddParameter(string value, bool copyFormat)
+		{
+			var previous = copyFormat ? this.Parameters.FindLastLinked<ParameterNode>(item => item.Name == null) : null;
+			if (previous?.Value is ParameterNode prevValue)
+			{
+				this.Parameters.AddAfter(previous, ParameterNode.CopyFormatFrom(prevValue, value));
+			}
+			else
+			{
+				this.Parameters.AddLast(ParameterNode.FromParts(1, value));
+			}
+		}
+
 		/// <summary>Finds the last parameter with the given name.</summary>
 		/// <param name="parameterName">The name of the parameter.</param>
 		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
@@ -191,6 +238,10 @@
 
 			return null;
 		}
+
+		/// <summary>Parses the title and returns the trimmed value.</summary>
+		/// <returns>The title.</returns>
+		public string? GetTitleValue() => this.Title == null ? null : WikiTextVisitor.Value(this.Title).Trim();
 
 		/// <summary>Returns the wiki text of the last parameter with the specified name.</summary>
 		/// <param name="parameterName">Name of the parameter.</param>
@@ -218,27 +269,27 @@
 			return i;
 		}
 
+		/// <summary>Finds the parameters with the given name and removes it.</summary>
+		/// <param name="parameterName">The name of the parameter.</param>
+		/// <remarks>In the event of a duplicate parameter, all parameters with the same name will be removed.</remarks>
+		public void RemoveParameter(string parameterName)
+		{
+			for (var node = this.Parameters.Last; node != null; node = node.Previous)
+			{
+				if (node.Value is ParameterNode parameter && parameter.NameToText() == parameterName)
+				{
+					this.Parameters.Remove(node);
+				}
+			}
+		}
+
 		/// <summary>Returns the value of the last parameter with the specified name.</summary>
 		/// <param name="parameterName">Name of the parameter.</param>
 		/// <returns>The value of the last parameter with the specified name.</returns>
 		public string? ValueOf(string parameterName)
 		{
 			var param = this.FindParameter(parameterName);
-			return param == null ? null : WikiTextVisitor.Value(param.Value);
-		}
-
-		/// <summary>Converts all parameter names to their corresponding text with values remaining as <see cref="NodeCollection"/>s.</summary>
-		/// <returns>A dictionary of names and values.</returns>
-		public Dictionary<string, NodeCollection> ParameterDictionary()
-		{
-			// TODO: Parameter-based methods are very primitive for now, just to get the basics working. Needs more work.
-			var retval = new Dictionary<string, NodeCollection>();
-			foreach (ParameterNode parameter in this.Parameters)
-			{
-				retval.Add(parameter.NameToText(), parameter.Value);
-			}
-
-			return retval;
+			return param == null ? null : WikiTextVisitor.Value(param.Value).Trim();
 		}
 		#endregion
 

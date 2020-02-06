@@ -57,7 +57,7 @@
 				.BuildTag("default", null, node.DefaultValue);
 			foreach (var value in node.ExtraValues)
 			{
-				this.BuildTag("extra", null, node.DefaultValue);
+				this.BuildTag("extra", null, value);
 			}
 
 			this.BuildTagClose("tplarg");

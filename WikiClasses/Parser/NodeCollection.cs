@@ -6,6 +6,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
+	using System.Runtime.Serialization;
 	using RobinHood70.WikiClasses.Properties;
 	using static WikiCommon.Globals;
 
@@ -30,7 +31,14 @@
 		/// <param name="parent">The parent.</param>
 		/// <param name="nodes">The nodes.</param>
 		public NodeCollection(IWikiNode? parent, IEnumerable<IWikiNode> nodes)
-			: base(nodes) => this.Parent = parent;
+			: this(parent)
+		{
+			ThrowNull(nodes, nameof(nodes));
+			foreach (var node in nodes)
+			{
+				this.AddLast(node);
+			}
+		}
 		#endregion
 
 		#region Public Properties
@@ -307,6 +315,60 @@
 			}
 		}
 
+		/// <summary>Finds all nodes in the collection satisfying the specified condition.</summary>
+		/// <param name="condition">The condition a given node must satisfy.</param>
+		/// <returns>The nodes that satisfy the specified condition.</returns>
+		public IEnumerable<IWikiNode> FindAllRecursive(Predicate<IWikiNode> condition)
+		{
+			ThrowNull(condition, nameof(condition));
+			foreach (var node in this)
+			{
+				if (condition(node))
+				{
+					yield return node;
+				}
+
+				if (node.NodeCollections != null)
+				{
+					foreach (var subNode in node.NodeCollections)
+					{
+						subNode.FindAllRecursive(condition);
+					}
+				}
+			}
+		}
+
+		/// <summary>Finds all nodes of the specified type.</summary>
+		/// <typeparam name="T">The type of node to find.</typeparam>
+		/// <returns>The nodes in the collection that are of the specified type.</returns>
+		public IEnumerable<T> FindAllRecursive<T>()
+			where T : IWikiNode => this.FindAllRecursive((T item) => true);
+
+		/// <summary>Finds all nodes of the specified type.</summary>
+		/// <typeparam name="T">The type of node to find.</typeparam>
+		/// <param name="condition">The condition a given node must satisfy.</param>
+		/// <returns>The nodes in the collection that are of the specified type.</returns>
+		public IEnumerable<T> FindAllRecursive<T>(Predicate<T> condition)
+			where T : IWikiNode
+		{
+			ThrowNull(condition, nameof(condition));
+			foreach (var node in this)
+			{
+				if (node is T castNode && condition(castNode))
+				{
+					yield return castNode;
+				}
+
+				if (node.NodeCollections != null)
+				{
+					foreach (var subNode in node.NodeCollections)
+					{
+						subNode.FindAllRecursive(condition);
+					}
+				}
+			}
+		}
+
 		/// <summary>Finds all <see cref="LinkedListNode{T}">LinkedListNodes</see> satisfying the specified condition.</summary>
 		/// <param name="condition">The condition a given node must satisfy.</param>
 		/// <returns>The nodes in the collection that satisfy the specified condition.</returns>
@@ -551,6 +613,15 @@
 			}
 
 			return null;
+		}
+
+		/// <summary>Gets the backing LinkedList's version field to provide add/remove tracking.</summary>
+		/// <returns>The version.</returns>
+		public int GetVersion()
+		{
+			var info = new SerializationInfo(typeof(NodeCollection), new FormatterConverter());
+			this.GetObjectData(info, default);
+			return info.GetInt32("Version");
 		}
 
 		/// <summary>Merges any adjacent TextNodes in the collection.</summary>
