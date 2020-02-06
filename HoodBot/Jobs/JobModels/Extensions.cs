@@ -6,7 +6,9 @@
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
+#pragma warning disable CA1724 // Type names should not match namespaces
 	public static class Extensions
+#pragma warning restore CA1724 // Type names should not match namespaces
 	{
 		public static TitleParts BacklinkTitleToParts(this IBacklinkNode node, Site site)
 		{
