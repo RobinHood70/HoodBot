@@ -232,6 +232,10 @@
 		/// <remarks>Parameters can be used to change low-level information, such as spacing around the parameters or choosing an alternate language for language-specific parameters. Note that these are not checked in any way, and incorrect data could cause unexpected behaviour or errors.</remarks>
 		public Dictionary<ParameterType, EmbeddedValue> Parameters { get; } = new Dictionary<ParameterType, EmbeddedValue>();
 
+		/// <summary>Gets a value indicating whether any overlapping parameters were dropped during initial parsing (e.g., left|right, multiple captions).</summary>
+		/// <value><c>true</c> if parameters were dropped; otherwise, <c>false</c>.</value>
+		public bool ParametersDropped { get; private set; } = false;
+
 		/// <summary>Gets or sets the display text (i.e., the value to the right of the pipe). For categories, this is the sortkey; for images, this is the caption.</summary>
 		public string? Text
 		{
@@ -328,7 +332,7 @@
 				if (subNode is ParameterNode parameter)
 				{
 					var valueRaw = WikiTextVisitor.Raw(parameter.Value);
-					retval.AddValueDirect(valueRaw);
+					retval.InitValue(valueRaw);
 				}
 			}
 
@@ -454,7 +458,7 @@
 		#endregion
 
 		#region Private Methods
-		private void AddValueDirect(string value)
+		private void InitValue(string value)
 		{
 			ThrowNull(value, nameof(value));
 			var parameter = SplitWhitespace(value);
@@ -474,7 +478,20 @@
 				}
 			}
 
-			this.Parameters.Add(parameterType, parameter);
+			if (this.Parameters.ContainsKey(parameterType))
+			{
+				this.ParametersDropped = true;
+				if (parameterType == ParameterType.Caption)
+				{
+					// Unlike other parameters, the last caption is always used in the event of a conflict, rather than the first, so compensate for that.
+					this.Parameters.Remove(parameterType);
+					this.Parameters.Add(parameterType, parameter);
+				}
+			}
+			else
+			{
+				this.Parameters.Add(parameterType, parameter);
+			}
 		}
 
 		private string? GetValue(ParameterType name) => this.Parameters.TryGetValue(name, out var value) ? value.Value : null;
@@ -490,7 +507,7 @@
 			{
 				param.Value = value;
 			}
-			else if (DirectValues.TryGetValue(value, out var valueType) && parameterType == valueType)
+			else if (parameterType == ParameterType.Caption || (DirectValues.TryGetValue(value, out var valueType) && parameterType == valueType))
 			{
 				var paramValue = new EmbeddedValue(value);
 				this.Parameters.Add(parameterType, paramValue);

@@ -226,6 +226,19 @@
 		/// <inheritdoc/>
 		public string AsLink() => "[[" + this.ToString() + "]]";
 
+		/// <summary>Coerces the current namespace to another one.</summary>
+		/// <param name="namespaceId">The namespace identifier.</param>
+		/// <remarks>This is primarily intended for known-bare titles (e.g., template calls or gallery links) that may have been misidentified as being in a namespace other than what they actually are. The namespace will be changed to the new one and <see cref="OriginalNamespaceText"/> will be prepended to the page name. Note that OriginalNamespaceText will remain unaltered.</remarks>
+		public void CoerceTo(int namespaceId)
+		{
+			var originalNamespace = this.NamespaceId;
+			this.NamespaceId = namespaceId;
+			if (originalNamespace != MediaWikiNamespaces.Main || this.OriginalNamespaceText.Length > 0)
+			{
+				this.PageName = this.OriginalNamespaceText + ':' + this.PageName;
+			}
+		}
+
 		/// <summary>Deconstructs this instance into its constituent parts.</summary>
 		/// <param name="site">The value returned by <see cref="Site"/>.</param>
 		/// <param name="leadingColon">The value returned by <see cref="LeadingColon"/>.</param>
