@@ -224,7 +224,7 @@
 		#region Public Methods
 
 		/// <inheritdoc/>
-		public string AsLink() => "[[" + this.ToString() + "]]";
+		public string AsLink() => "[[" + this.ToString(true) + "]]";
 
 		/// <summary>Coerces the current namespace to another one.</summary>
 		/// <param name="namespaceId">The namespace identifier.</param>
@@ -282,15 +282,13 @@
 			this.Site == other.Site &&
 			this.NamespaceId == other.NamespaceId &&
 			this.Namespace.PageNameEquals(this.PageName, other.PageName);
-		#endregion
 
-		#region Public Overrides
-
-		/// <summary>Returns a <see cref="string" /> that represents this instance.</summary>
-		/// <returns>A <see cref="string" /> that represents this instance.</returns>
-		public override string ToString()
+		/// <summary>Returns a <see cref="string" /> that represents this title.</summary>
+		/// <param name="forceLink">if set to <c>true</c>, forces link formatting in namespaces that require it (e.g., Category and File), regardless of the value of LeadingColon.</param>
+		/// <returns>A <see cref="string" /> that represents this title.</returns>
+		public string ToString(bool forceLink)
 		{
-			var retval = this.LeadingColon ? ":" : string.Empty;
+			var retval = this.LeadingColon || (forceLink && this.Namespace.IsForcedLinkSpace) ? ":" : string.Empty;
 			if (this.Interwiki != null)
 			{
 				retval += this.Interwiki.Prefix + ':';
@@ -304,6 +302,13 @@
 
 			return retval;
 		}
+		#endregion
+
+		#region Public Overrides
+
+		/// <summary>Returns a <see cref="string" /> that represents this instance.</summary>
+		/// <returns>A <see cref="string" /> that represents this instance.</returns>
+		public override string ToString() => this.ToString(false);
 		#endregion
 	}
 }

@@ -242,7 +242,7 @@
 		#region Public Methods
 
 		/// <inheritdoc/>
-		public string AsLink() => "[[" + this.ToString() + "]]";
+		public string AsLink() => "[[" + this.ToString(true) + "]]";
 
 		/// <summary>Protects a non-existent page from being created.</summary>
 		/// <param name="reason">The reason for the create-protection.</param>
@@ -526,6 +526,11 @@
 			var title = new TitleParts(this.Site, fullPageName);
 			return this.SimpleEquals(title);
 		}
+
+		/// <summary>Returns a <see cref="string" /> that represents this title.</summary>
+		/// <param name="forceLink">if set to <c>true</c>, forces link formatting in namespaces that require it (e.g., Category and File), regardless of the value of LeadingColon.</param>
+		/// <returns>A <see cref="string" /> that represents this title.</returns>
+		public string ToString(bool forceLink) => (forceLink ? ":" : string.Empty) + this.FullPageName;
 
 		/// <summary>Unprotects the title for the specified reason.</summary>
 		/// <param name="reason">The reason.</param>
