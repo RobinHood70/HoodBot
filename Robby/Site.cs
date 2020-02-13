@@ -8,8 +8,6 @@
 	using System.IO;
 	using System.Net;
 	using System.Runtime.CompilerServices;
-	using System.Text;
-	using System.Text.RegularExpressions;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
@@ -55,21 +53,6 @@
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Sufficiently maintainable for now. Could conceivably split off the LoadX() methods if needed, I suppose.")]
 	public class Site : IMessageSource
 	{
-		#region Internal Constants
-		internal const string ImageVAlignName = "alignment";
-		internal const string ImageAltName = "alt";
-		internal const string ImageBorderName = "border";
-		internal const string ImageClassName = "class";
-		internal const string ImageCaptionName = "caption";
-		internal const string ImageFormatName = "format";
-		internal const string ImageLanguageName = "language";
-		internal const string ImageLinkName = "link";
-		internal const string ImageHAlignName = "location";
-		internal const string ImagePageName = "page";
-		internal const string ImageSizeName = "size";
-		internal const string ImageUprightName = "upright";
-		#endregion
-
 		#region Private Constants
 		private const SiteInfoProperties NeededSiteInfo =
 			SiteInfoProperties.General |
@@ -81,21 +64,6 @@
 
 		#region Static Fields
 		private static readonly string[] DefaultRedirect = { "#REDIRECT" };
-
-		private static readonly Dictionary<string, string[]> ImageMagicWords = new Dictionary<string, string[]>()
-		{
-			[ImageVAlignName] = new[] { "img_baseline", "img_sub", "img_super", "img_top", "img_text_top", "img_middle", "img_bottom", "img_text_bottom" },
-			[ImageAltName] = new[] { "img_alt" },
-			[ImageBorderName] = new[] { "img_border" },
-			[ImageClassName] = new[] { "img_class" },
-			[ImageFormatName] = new[] { "img_framed", "img_frameless", "img_thumbnail", "img_manualthumb" },
-			[ImageLanguageName] = new[] { "img_lang" },
-			[ImageLinkName] = new[] { "img_link" },
-			[ImageHAlignName] = new[] { "img_right", "img_left", "img_center", "img_none" },
-			[ImagePageName] = new[] { "img_page" },
-			[ImageSizeName] = new[] { "img_width" },
-			[ImageUprightName] = new[] { "img_upright" },
-		};
 
 		private static readonly Dictionary<string, SiteFactoryMethod> SiteClasses = new Dictionary<string, SiteFactoryMethod>();
 		#endregion
@@ -261,10 +229,6 @@
 		/// <summary>Gets the MediaWiki version of the wiki.</summary>
 		/// <value>The MediaWiki version of the wiki.</value>
 		public string Version => this.version ?? throw NoSite();
-		#endregion
-
-		#region Internal Properties
-		internal Dictionary<string, Regex> ImageParameterRegexes { get; } = new Dictionary<string, Regex>();
 		#endregion
 
 		#region Public Static Methods
@@ -835,28 +799,6 @@
 		public virtual void PublishWarning(IMessageSource sender, string warning) => this.WarningOccurred?.Invoke(this, new WarningEventArgs(sender, warning));
 		#endregion
 
-		#region Internal Methods
-		internal string? GetPreferredImageMagicWord(string search)
-		{
-			var entry = ImageMagicWords[search];
-			string? retval = null;
-			foreach (var wordName in entry)
-			{
-				var magicWord = this.MagicWords[wordName];
-				foreach (var value in magicWord.Aliases)
-				{
-					if (!value.Contains("$1", StringComparison.Ordinal))
-					{
-						retval = wordName;
-						break;
-					}
-				}
-			}
-
-			return retval;
-		}
-		#endregion
-
 		#region Protected Static Methods
 
 		/// <summary>Throws an exception indicating that the site has not been initialized.</summary>
@@ -1077,7 +1019,6 @@
 			}
 
 			this.DisambiguatorAvailable = this.magicWords.ContainsKey("disambiguation");
-			this.AddImageRegexes();
 
 			// InterwikiMap
 			var doGuess = true;
@@ -1135,63 +1076,6 @@
 		{
 			var warning = eventArgs.Warning;
 			this.PublishWarning(this, "(" + warning.Code + ") " + warning.Info);
-		}
-
-		private void AddImageRegexes()
-		{
-			if (this.ImageParameterRegexes.Count > 0)
-			{
-				return;
-			}
-
-			foreach (var entry in ImageMagicWords)
-			{
-				var sb = new StringBuilder();
-				sb.Append(@"\A");
-				var needParentheses = entry.Value.Length != 1 || this.MagicWords[entry.Value[0]].Aliases.Count != 1;
-				if (needParentheses)
-				{
-					sb.Append('(');
-				}
-
-				foreach (var wordName in entry.Value)
-				{
-					// Assumes that there is always at least one alias per word.
-					var magicWord = this.MagicWords[wordName];
-					if (!magicWord.CaseSensitive)
-					{
-						sb.Append("(?i-:");
-					}
-
-					foreach (var value in magicWord.Aliases)
-					{
-						var regexValue = value.Replace("$1", "(?<value>.*?)", StringComparison.Ordinal);
-						sb
-							.Append(regexValue)
-							.Append('|');
-					}
-
-					if (!magicWord.CaseSensitive)
-					{
-						sb.Append(')');
-					}
-
-					sb
-						.Remove(sb.Length - 1, 1)
-						.Append("|");
-				}
-
-				sb.Remove(sb.Length - 1, 1);
-				if (needParentheses)
-				{
-					sb.Append(')');
-				}
-
-				sb.Append(@"\Z");
-
-				var regex = new Regex(sb.ToString(), RegexOptions.IgnoreCase);
-				this.ImageParameterRegexes.Add(entry.Key, regex);
-			}
 		}
 
 		private void Clear()

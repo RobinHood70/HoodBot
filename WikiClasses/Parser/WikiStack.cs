@@ -58,7 +58,7 @@
 
 			this.Text = text;
 			this.textLength = text.Length;
-			this.enableOnlyInclude = text.Contains(OnlyIncludeTagOpen, StringComparison.OrdinalIgnoreCase);
+			this.enableOnlyInclude = (include == true) && text.Contains(OnlyIncludeTagOpen, StringComparison.OrdinalIgnoreCase);
 			this.findOnlyinclude = this.enableOnlyInclude;
 			this.includeIgnores = include == null || !strictInclusion;
 
@@ -181,7 +181,8 @@
 					this.Index += countFound;
 					break;
 				default:
-					throw new InvalidOperationException(Invariant($"Found unexpected character '{this.CurrentCharacter}' at position {this.Index}."));
+					var curChar = this.Index < this.Text.Length ? this.Text[this.Index] : '\uffff';
+					throw new InvalidOperationException(Invariant($"Found unexpected character '{curChar}' at position {this.Index}."));
 			}
 		}
 
@@ -393,6 +394,11 @@
 
 		private void Preprocess()
 		{
+			if (this.textLength == 0)
+			{
+				return;
+			}
+
 			if (this.textLength > 0 && this.Text[0] == '=')
 			{
 				this.ParseLineStart();

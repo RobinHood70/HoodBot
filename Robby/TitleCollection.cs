@@ -238,6 +238,14 @@
 
 		#region Public Override Methods
 
+		/// <summary>Adds a copy of the specified title to the collection.</summary>
+		/// <param name="title">The title to add.</param>
+		public override void Add(ISimpleTitle title)
+		{
+			var realTitle = new Title(title);
+			this.Add(realTitle);
+		}
+
 		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
 		/// <param name="titles">The titles to add.</param>
 		public override void Add(IEnumerable<string> titles)

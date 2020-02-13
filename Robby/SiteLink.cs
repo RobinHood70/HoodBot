@@ -2,556 +2,528 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Text;
-	using System.Text.RegularExpressions;
+	using System.Globalization;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Properties;
 	using RobinHood70.WikiClasses;
+	using RobinHood70.WikiClasses.Parser;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiClasses.Searches;
 	using static RobinHood70.WikiCommon.Globals;
 
-	/// <summary>Represents a wiki link.</summary>
-	public class SiteLink : TitleParts
+	#region Public Enumerations
+
+	/// <summary>The parameter type of a given value.</summary>
+	public enum ParameterType
 	{
-		#region Fields
-		private string? interwikiText;
-		private string namespaceText;
-		private string nameLeadingWhitespace = string.Empty;
-		private string nameTrailingWhitespace = string.Empty;
+		/// <summary>HTML alt text parameter.</summary>
+		Alternate,
+
+		/// <summary>Border parameter.</summary>
+		Border,
+
+		/// <summary>Caption parameter.</summary>
+		Caption,
+
+		/// <summary>Class parameter.</summary>
+		Class,
+
+		/// <summary>Format parameter.</summary>
+		Format,
+
+		/// <summary>Horizontal alignment parameter.</summary>
+		Halign,
+
+		/// <summary>Language parameter.</summary>
+		Language,
+
+		/// <summary>Link parameter.</summary>
+		Link,
+
+		/// <summary>Page parameter.</summary>
+		Page,
+
+		/// <summary>Size parameter.</summary>
+		Size,
+
+		/// <summary>Upright parameter.</summary>
+		Upright,
+
+		/// <summary>Vertical alignment parameter.</summary>
+		Valign,
+	}
+	#endregion
+
+	/// <summary>Represents a link with site-specific Title information and parameters in the site's language.</summary>
+	public class SiteLink
+	{
+		#region Static Fields
+		private static readonly Dictionary<string, ParameterType> DirectValues = new Dictionary<string, ParameterType>();
+
+		private static readonly List<(ParameterType ParameterType, string Before, string After)> ImageParameterInfo = new List<(ParameterType ParameterType, string Before, string After)>();
+
+		private static readonly Dictionary<string, ParameterType> ImageWords = new Dictionary<string, ParameterType>()
+		{
+			["img_baseline"] = ParameterType.Valign, // no params
+			["img_sub"] = ParameterType.Valign, // no params
+			["img_super"] = ParameterType.Valign, // no params
+			["img_top"] = ParameterType.Valign, // no params
+			["img_text_top"] = ParameterType.Valign, // no params
+			["img_middle"] = ParameterType.Valign, // no params
+			["img_bottom"] = ParameterType.Valign, // no params
+			["img_text_bottom"] = ParameterType.Valign, // no params
+			["img_alt"] = ParameterType.Alternate, // has param
+			["img_border"] = ParameterType.Border, // no params
+			["img_class"] = ParameterType.Class, // has param
+			["img_framed"] = ParameterType.Format, // no params
+			["img_frameless"] = ParameterType.Format, // no params
+			["img_thumbnail"] = ParameterType.Format, // no params
+			["img_manualthumb"] = ParameterType.Format, // has param (if no match for set direct value, set thumb=value)
+			["img_lang"] = ParameterType.Language, // has param
+			["img_link"] = ParameterType.Link, // has param
+			["img_right"] = ParameterType.Halign, // no params
+			["img_left"] = ParameterType.Halign, // no params
+			["img_center"] = ParameterType.Halign, // no params
+			["img_none"] = ParameterType.Halign, // no params
+			["img_page"] = ParameterType.Page, // has param
+			["img_width"] = ParameterType.Size, // has param
+			["img_upright"] = ParameterType.Upright, // optional param (use 0 = none)
+		};
+
+		private static readonly InvalidOperationException NonNumeric = new InvalidOperationException(Resources.SizeInvalid);
+
+		private static readonly Dictionary<ParameterType, string> PreferredWords = new Dictionary<ParameterType, string>();
 		#endregion
 
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
-		/// <param name="title">The title to initialize from.</param>
-		public SiteLink(ISimpleTitle title)
-			: base(title)
+		/// <param name="title">The title.</param>
+		public SiteLink(TitleParts title)
 		{
-			this.namespaceText = this.OriginalNamespaceText;
-			this.DisplayText = this.PipeTrick();
-			this.Normalize();
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
-		/// <param name="title">The title to initialize from.</param>
-		public SiteLink(IFullTitle title)
-			: base(title)
-		{
-			this.interwikiText = this.OriginalInterwikiText;
-			this.namespaceText = this.OriginalNamespaceText;
-			this.DisplayText = this.PipeTrick();
-			this.Normalize();
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class and attempts to parse the text provided.</summary>
-		/// <param name="site">The Site the link is from.</param>
-		/// <param name="link">The link text to parse.</param>
-		public SiteLink(Site site, string link)
-			: base(site, link)
-		{
-			this.Parser = new ParameterParser(link, true, true, false);
-			this.interwikiText = this.OriginalInterwikiText; // We're using original text here to retain casing, if desired.
-			this.namespaceText = this.OriginalNamespaceText;
-			this.NameLeadingWhiteSpace = this.Parser.Name.LeadingWhiteSpace;
-			this.NameTrailingWhiteSpace = this.Parser.Name.TrailingWhiteSpace;
-			this.DisplayParameter = this.Parser.SingleParameter;
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class using the specified values.</summary>
-		/// <param name="site">The Site the link is from.</param>
-		/// <param name="ns">The namespace identifier.</param>
-		/// <param name="pageName">The page name.</param>
-		public SiteLink(Site site, int ns, string pageName)
-			: this(site, ns, pageName, null)
-		{
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
-		/// <param name="site">The Site the link is from.</param>
-		/// <param name="ns">The namespace identifier.</param>
-		/// <param name="pageName">The name of the page.</param>
-		/// <param name="displayText">The display text.</param>
-		public SiteLink(Site site, int ns, string pageName, string? displayText)
-			: base(site ?? throw ArgumentNull(nameof(site)), ns, pageName)
-		{
-			this.namespaceText = this.OriginalNamespaceText;
-			this.DisplayParameter = displayText == null ? null : new PaddedString(displayText);
+			ThrowNull(title, nameof(title));
+			var site = title.Site;
+			this.Title = title;
+			this.TitleWhitespaceAfter = string.Empty;
+			this.TitleWhitespaceBefore = string.Empty;
+			if (ImageParameterInfo.Count == 0)
+			{
+				foreach (var word in ImageWords)
+				{
+					var magic = site.MagicWords[word.Key];
+					foreach (var alias in magic.Aliases)
+					{
+						var split = alias.Split("$1", 2);
+						if (split.Length == 1)
+						{
+							DirectValues.Add(alias, word.Value);
+							if ((word.Value == ParameterType.Border || word.Value == ParameterType.Upright) && !PreferredWords.ContainsKey(word.Value))
+							{
+								PreferredWords.Add(word.Value, alias);
+							}
+						}
+						else
+						{
+							ImageParameterInfo.Add((word.Value, split[0], split[1]));
+						}
+					}
+				}
+			}
 		}
 		#endregion
 
 		#region Public Properties
 
-		/// <summary>Gets or sets the display text (i.e., the value to the right of the pipe). For categories, this is the sortkey.</summary>
-		public string? DisplayText
+		/// <summary>Gets or sets the alt text for the image.</summary>
+		/// <value>The alt text.</value>
+		public string? AltText
 		{
-			get => this.DisplayParameter?.Value;
+			get => this.GetValue(ParameterType.Alternate);
+			set => this.SetParameterValue(ParameterType.Alternate, value);
+		}
+
+		/// <summary>Gets or sets a value indicating whether a border should be displayed.</summary>
+		/// <value><see langword="true"/> to display a border; otherwise, <see langword="false"/>.</value>
+		/// <remarks>Use this property to insert the default border text in the wiki's language.</remarks>
+		public bool Border
+		{
+			get => this.GetValue(ParameterType.Border) != null;
+			set => this.SetDirectValue(ParameterType.Border, value ? PreferredWords[ParameterType.Border] : null);
+		}
+
+		/// <summary>Gets or sets the class for the image.</summary>
+		/// <value>The class for the image.</value>
+		public string? Class
+		{
+			get => this.GetValue(ParameterType.Class);
+			set => this.SetParameterValue(ParameterType.Class, value);
+		}
+
+		/// <summary>Gets or sets the image dimensions directly.</summary>
+		/// <value>The image dimensions.</value>
+		/// <remarks>Setting this option will remove any <see cref="Upright"/> parameter, and vice versa, since they are mutually exclusive. Both may be set simultaneously, however, if the link is parsed from existing text. In that case, if either is altered, the other will be removed.</remarks>
+		public string? Dimensions
+		{
+			get => this.GetValue(ParameterType.Size);
+			set
+			{
+				this.Parameters.Remove(ParameterType.Upright);
+				this.SetParameterValue(ParameterType.Size, value);
+			}
+		}
+
+		/// <summary>Gets or sets the format (i.e., thumbnail, frame, frameless).</summary>
+		/// <value>The format.</value>
+		public string? Format
+		{
+			get => this.GetValue(ParameterType.Format);
+			set
+			{
+				if (!this.SetDirectValue(ParameterType.Format, value))
+				{
+					// If the value is recognized via SetDirectValue, use it. Otherwise, this should find the only option with a parameter (manualthumb). If there end up being more options with parameters in the future, something else will need to be done here.
+					this.SetParameterValue(ParameterType.Format, value);
+				}
+			}
+		}
+
+		/// <summary>Gets or sets the image height.</summary>
+		/// <value>The image height.</value>
+		/// <remarks>Setting this option will remove any <see cref="Upright"/> parameter, and vice versa, since they are mutually exclusive. Both may be set simultaneously, however, if the link is parsed from existing text. In that case, if either is altered, the other will be removed.</remarks>
+		public int Height
+		{
+			get => this.GetSize().Height;
+			set => this.SetSize(value, this.Width);
+		}
+
+		/// <summary>Gets or sets the image's horizontal alignment.</summary>
+		/// <value>The image's horizontal alignment.</value>
+		public string? HorizontalAlignment
+		{
+			get => this.GetValue(ParameterType.Halign);
+			set => this.SetDirectValue(ParameterType.Halign, value);
+		}
+
+		/// <summary>Gets or sets the image's language, for image formats that are language-aware (e.g., SVG).</summary>
+		/// <value>The image language.</value>
+		public string? Language
+		{
+			get => this.GetValue(ParameterType.Language);
+			set => this.SetParameterValue(ParameterType.Language, value);
+		}
+
+		/// <summary>Gets or sets the link for the image.</summary>
+		/// <value>The link for the image.</value>
+		public string? Link
+		{
+			get => this.GetValue(ParameterType.Link);
+			set => this.SetParameterValue(ParameterType.Link, value);
+		}
+
+		/// <summary>Gets or sets the <see cref="Robby.Page"/> value as an integer.</summary>
+		/// <value>The page value.</value>
+		public int? Page
+		{
+			get => int.Parse(this.GetValue(ParameterType.Page) ?? "0", CultureInfo.InvariantCulture);
+			set => this.SetParameterValue(ParameterType.Page, value?.ToStringInvariant());
+		}
+
+		/// <summary>Gets the raw parameter information.</summary>
+		/// <value>The parameters.</value>
+		/// <remarks>Parameters can be used to change low-level information, such as spacing around the parameters or choosing an alternate language for language-specific parameters. Note that these are not checked in any way, and incorrect data could cause unexpected behaviour or errors.</remarks>
+		public Dictionary<ParameterType, EmbeddedValue> Parameters { get; } = new Dictionary<ParameterType, EmbeddedValue>();
+
+		/// <summary>Gets or sets the display text (i.e., the value to the right of the pipe). For categories, this is the sortkey; for images, this is the caption.</summary>
+		public string? Text
+		{
+			get => this.GetValue(ParameterType.Caption);
+			set => this.SetDirectValue(ParameterType.Caption, value);
+		}
+
+		/// <summary>Gets or sets the title of the link.</summary>
+		/// <value>The title.</value>
+		public TitleParts Title { get; set; }
+
+		/// <summary>Gets or sets the whitespace after the title.</summary>
+		/// <value>The whitespace after the title.</value>
+		public string TitleWhitespaceAfter { get; set; }
+
+		/// <summary>Gets or sets the whitespace before the title.</summary>
+		/// <value>The whitespace before the title.</value>
+		public string TitleWhitespaceBefore { get; set; }
+
+		/// <summary>Gets or sets the upright value as a number.</summary>
+		/// <value>The upright value.</value>
+		/// <remarks>Setting this option will remove any <see cref="Dimensions"/> parameter, and vice versa, since they are mutually exclusive. Both may be set simultaneously, however, if the link is parsed from existing text. In that case, if either is altered, the other will be removed.</remarks>
+		public double? Upright
+		{
+			get
+			{
+				var textValue = this.GetValue(ParameterType.Upright);
+				return
+					textValue == null ? (double?)null :
+					textValue.TrimEnd().Length == 0 ? 1 :
+					double.TryParse(textValue, out var retval) ? retval :
+					double.NaN;
+			}
+
 			set
 			{
 				if (value == null)
 				{
-					this.DisplayParameter = null;
+					this.Parameters.Remove(ParameterType.Upright);
 				}
-				else
+				else if (!double.IsNegative(value.Value))
 				{
-					if (this.DisplayParameter == null)
+					this.Parameters.Remove(ParameterType.Size);
+					if (value == 0)
 					{
-						this.DisplayParameter = new PaddedString();
+						this.SetDirectValue(ParameterType.Upright, PreferredWords[ParameterType.Upright]);
 					}
-
-					this.DisplayParameter.Value = value;
-				}
-			}
-		}
-
-		/// <summary>Gets or sets the display text parameter (i.e., the value to the right of the pipe). For images, this is the caption; for categories, it's the sortkey.</summary>
-		public virtual PaddedString? DisplayParameter { get; set; }
-
-		/// <summary>Gets or sets the interwiki text. It will be validated against the site's interwiki map, and <see cref="TitleParts.Interwiki"/> will be changed if needed.</summary>
-		public string? InterwikiText
-		{
-			get => this.interwikiText;
-			set
-			{
-				this.interwikiText = value;
-				if (value == null)
-				{
-					this.Interwiki = null;
-				}
-				else
-				{
-					try
+					else
 					{
-						this.Interwiki = this.Site.InterwikiMap[value];
-					}
-					catch (KeyNotFoundException)
-					{
-						throw;
-					}
-
-					if (!this.IsLocal && this.NamespaceId != MediaWikiNamespaces.Main)
-					{
-						this.PageName = this.Namespace.DecoratedName + this.PageName;
-						this.NamespaceId = MediaWikiNamespaces.Main;
+						this.SetParameterValue(ParameterType.Upright, value?.ToStringInvariant());
 					}
 				}
 			}
 		}
 
-		/// <summary>Gets or sets the white space displayed before the link title.</summary>
-		/// <value>The leading white space.</value>
-		public string NameLeadingWhiteSpace
+		/// <summary>Gets or sets the image width.</summary>
+		/// <value>The image width.</value>
+		/// <remarks>Setting this option will remove any <see cref="Upright"/> parameter, and vice versa, since they are mutually exclusive. Both may be set simultaneously, however, if the link is parsed from existing text. In that case, if either is altered, the other will be removed.</remarks>
+		public int Width
 		{
-			get => this.nameLeadingWhitespace;
-			set => this.nameLeadingWhitespace = value ?? string.Empty;
+			get => this.GetSize().Width;
+			set => this.SetSize(value, this.Height);
 		}
 
-		/// <summary>Gets or sets the white space displayed before the link title.</summary>
-		/// <value>The leading white space.</value>
-		public string NameTrailingWhiteSpace
+		/// <summary>Gets or sets the image's vertical alignment.</summary>
+		/// <value>The vertical alignment.</value>
+		public string? VerticalAlignment
 		{
-			get => this.nameTrailingWhitespace;
-			set => this.nameTrailingWhitespace = value ?? string.Empty;
+			get => this.GetValue(ParameterType.Valign);
+			set => this.SetDirectValue(ParameterType.Valign, value);
 		}
-
-		/// <summary>Gets or sets the namespace text. It will be validated against the site's namespaces, and <see cref="Namespace"/> will be changed if needed.</summary>
-		public string NamespaceText
-		{
-			get => this.namespaceText;
-			set
-			{
-				try
-				{
-					if (this.IsLocal)
-					{
-						value ??= string.Empty;
-						var ns = this.Site.Namespaces[value];
-						this.NamespaceId = ns.Id;
-					}
-
-					this.namespaceText = value;
-				}
-				catch (KeyNotFoundException)
-				{
-					throw;
-				}
-			}
-		}
-		#endregion
-
-		#region Protected Properties
-
-		/// <summary>Gets the parser in use for the Site/link constructor. This allows inheritors to properly parse parameters.</summary>
-		protected ParameterParser? Parser { get; } // TODO: This is a positively awful way to do this. Class is likely to be deprecated and eventually completely unused; if it isn't, figure out a better way to do this.
 		#endregion
 
 		#region Public Static Methods
 
-		/// <summary>Finds all links within the given text.</summary>
-		/// <param name="site">The Site the link is from.</param>
-		/// <param name="text">The text to search.</param>
-		/// <param name="convertFileLinks">Whether to return purely <see cref="SiteLink"/>s, or include <see cref="ImageLink"/>s where appropriate.</param>
-		/// <returns>An enumeration of all links within the text.</returns>
-		/// <remarks>No location information is included, so this is most useful when you simply need to scan links rather than alter them.</remarks>
-		public static IEnumerable<SiteLink> FindLinks(Site site, string text, bool convertFileLinks)
+		/// <summary>Creates a new SiteLink instance from a <see cref="LinkNode"/>.</summary>
+		/// <param name="site">The site the link is from.</param>
+		/// <param name="link">The link node.</param>
+		/// <returns>A new SiteLink.</returns>
+		public static SiteLink FromLinkNode(Site site, LinkNode link)
 		{
-			var matches = (IEnumerable<Match>)Find().Matches(text);
-			foreach (var match in matches)
+			ThrowNull(link, nameof(link));
+			var titleText = WikiTextVisitor.Value(link.Title);
+			var valueSplit = SplitWhitespace(titleText);
+			var title = new TitleParts(site, valueSplit.Value);
+			var retval = new SiteLink(title)
 			{
-				if (match != null)
+				TitleWhitespaceBefore = valueSplit.Before,
+				TitleWhitespaceAfter = valueSplit.After
+			};
+
+			foreach (var subNode in link.Parameters)
+			{
+				if (subNode is ParameterNode parameter)
 				{
-					var paramGroup = match.Groups["parameter"];
-					var pagename = match.Value.Substring(0, paramGroup.Success ? paramGroup.Captures[0].Index - match.Index : match.Length).Trim(new[] { '[', ']', '|', ' ' });
-					var title = new TitleParts(site, pagename);
-					yield return convertFileLinks && !title.LeadingColon && title.NamespaceId == MediaWikiNamespaces.File
-						? new ImageLink(site, match.Value)
-						: new SiteLink(site, match.Value);
+					var valueRaw = WikiTextVisitor.Raw(parameter.Value);
+					retval.AddValueDirect(valueRaw);
 				}
 			}
+
+			return retval;
 		}
 
-		// TODO: Update to TryCreate() method after additional parameters (i.e., image link) are handled.
-
-		/// <summary>Determines whether the specified value is a valid link.</summary>
-		/// <param name="value">The value to check.</param>
-		/// <returns><see langword="true"/> if the specified value appears to be a link; otherwise, <see langword="false"/>.</returns>
-		/// <remarks>This is a primitive check for surrounding brackets and may report incorrect values in complex situations.</remarks>
-		public static bool IsLink(string value) =>
-			value != null &&
-			value.Length > 4 &&
-			value[0] == '[' &&
-			value[1] == '[' &&
-			value[^2] == ']' &&
-			value[^1] == ']' &&
-			value[2..^2].IndexOfAny(TextArrays.SquareBrackets) == -1;
-
-		// TODO: Update to use Interwiki as well.
-
-		/// <summary>Creates a <see cref="Regex"/> to find all links.</summary>
-		/// <returns>A <see cref="Regex"/> that finds all links.</returns>
-		public static Regex Find() => Find(null, null);
-
-		/// <summary>Creates a <see cref="Regex"/> to find all links matching the values provided.</summary>
-		/// <param name="namespaces">The namespaces to search for. Use <see langword="null"/> to match all namespaces.</param>
-		/// <param name="pageNames">The pagenames to search for. Use <see langword="null"/> to match all pagenames.</param>
-		/// <returns>A <see cref="Regex"/> that finds all links matching the values provided. Note that this will match, for example, any of the pagenames given in any of the namespaces given.</returns>
-		public static Regex Find(IEnumerable<string>? namespaces, IEnumerable<string>? pageNames) => Find(null, null, namespaces, pageNames, null);
-
-		/// <summary>Creates a <see cref="Regex"/> to find all links matching the values provided which also have the specified surrounding text.</summary>
-		/// <param name="regexBefore">A <see cref="Regex"/> fragment specifying the text to search for before the link. Use <see langword="null"/> to ignore the text before the link.</param>
-		/// <param name="interwikis">The interwiki prefixes to search for. Use <see langword="null"/> to match all interwiki prefixes.</param>
-		/// <param name="namespaces">The namespaces to search for. Use <see langword="null"/> to match all namespaces.</param>
-		/// <param name="pageNames">The pagenames to search for. Use <see langword="null"/> to match all pagenames.</param>
-		/// <param name="regexAfter">A <see cref="Regex"/> fragment specifying the text to search for after the link. Use <see langword="null"/> to ignore the text after the link.</param>
-		/// <returns>A <see cref="Regex"/> that finds all links matching the values provided. Note that this will match, for example, any of the pagenames given in any of the namespaces given.</returns>
-		public static Regex Find(string? regexBefore, IEnumerable<string>? interwikis, IEnumerable<string>? namespaces, IEnumerable<string>? pageNames, string? regexAfter) =>
-			FindRaw(
-				regexBefore,
-				EnumerableRegex(interwikis, SearchCasing.IgnoreCase),
-				EnumerableRegex(namespaces, SearchCasing.IgnoreInitialCaps),
-				EnumerableRegex(pageNames, SearchCasing.IgnoreInitialCaps),
-				regexAfter);
-
-		/// <summary>Creates a <see cref="Regex"/> to find all links matching the values provided which also have the specified surrounding text.</summary>
-		/// <param name="regexBefore">A <see cref="Regex"/> fragment specifying the text to search for before the link. Use <see langword="null"/> to ignore the text before the link.</param>
-		/// <param name="regexInterwikis">A <see cref="Regex"/> fragment specifying the interwikis to search for. Use <see langword="null"/> to match all interwikis.</param>
-		/// <param name="regexNamespaces">A <see cref="Regex"/> fragment specifying the namespaces to search for. Use <see langword="null"/> to match all namespaces.</param>
-		/// <param name="regexPageNames">A <see cref="Regex"/> fragment specifying the pagenames to search for. Use <see langword="null"/> to match all pagenames.</param>
-		/// <param name="regexAfter">A <see cref="Regex"/> fragment specifying the text to search for after the link. Use <see langword="null"/> to ignore the text after the link.</param>
-		/// <returns>A <see cref="Regex"/> that finds all links matching the values provided. Note that this will match, for example, any of the pagenames given in any of the namespaces given.</returns>
-		public static Regex FindRaw(string? regexBefore, string? regexInterwikis, string? regexNamespaces, string? regexPageNames, string? regexAfter)
+		/// <summary>Creates a new SiteLink instance from the provided text.</summary>
+		/// <param name="site">The site the link is from.</param>
+		/// <param name="link">The text of the link.</param>
+		/// <returns>A new SiteLink.</returns>
+		/// <remarks>The text may include or exclude surrounding brackets. Pipes in the text are handled properly either way in order to support gallery links.</remarks>
+		public static SiteLink FromText(Site site, string link)
 		{
-			// TODO: This probably handles nested links reliably, but is a frightful mess and no longer handles searches in parameter text. Tweak internal parser to handle start and end markers, then abort when it finds the matched end marker, whether or not it's the end of the text. After that, searching becomes just a matter of parsing as per normal, and write a Link/Template equivalent to Regex.Replace to go along with that.
-			const string regexWildNamespace = @"[^:#\|\]]*?";
-			if (regexBefore != null)
+			ThrowNull(link, nameof(link));
+			if (!link.StartsWith("[[", StringComparison.Ordinal) || !link.EndsWith("]]", StringComparison.Ordinal))
 			{
-				regexBefore = @"(?<before>" + regexBefore + ")";
+				link = "[[" + link + "]]";
 			}
 
-			var iwOptional = regexInterwikis == null ? "?" : string.Empty;
-			var nsOptional = regexNamespaces == null ? "?" : string.Empty;
-			regexInterwikis ??= regexWildNamespace;
-			regexNamespaces ??= regexWildNamespace;
-			regexPageNames ??= @"[^#\|\]]*?";
-			if (regexAfter != null)
-			{
-				regexAfter = @"(?<after>" + regexAfter + ")";
-			}
-
-			var regexText = regexBefore +
-				@"\[\[" +
-				"(?<pre>:)?" +
-				$"((?<interwiki>{regexInterwikis}):){iwOptional}" +
-				$@"\s*((?<namespace>{regexNamespaces}):){nsOptional}" +
-				$"(?<pagename>{regexPageNames})" +
-				@"(\#(?<fragment>[^\|\]]*?))?" +
-				@"(\s*\|\s*(?<parameter>([^\[\]\|]*?(\[\[[^\]]*?]])?)*?))*?" +
-				@"\s*]]" +
-				regexAfter;
-
-			return new Regex(regexText, RegexOptions.None, TimeSpan.FromSeconds(10));
-		}
-
-		/// <summary>Links the text from parts.</summary>
-		/// <param name="site">The site.</param>
-		/// <param name="ns">The namespace.</param>
-		/// <param name="pageName">The name of the page.</param>
-		/// <returns>The text of the link to build.</returns>
-		public static string LinkTextFromParts(Site site, int ns, string pageName) => LinkTextFromParts(site, ns, pageName, null, null);
-
-		/// <summary>Links the text from parts.</summary>
-		/// <param name="site">The site.</param>
-		/// <param name="ns">The namespace.</param>
-		/// <param name="pageName">The name of the page.</param>
-		/// <param name="displayText">The display text. If null, the default "pipe trick" text will be used.</param>
-		/// <returns>The text of the link to build.</returns>
-		public static string LinkTextFromParts(Site site, int ns, string pageName, string displayText) => LinkTextFromParts(site, ns, pageName, null, displayText);
-
-		/// <summary>Links the text from parts.</summary>
-		/// <param name="site">The site.</param>
-		/// <param name="ns">The namespace identifier.</param>
-		/// <param name="pageName">The name of the page.</param>
-		/// <param name="fragment">The fragment, if any. May be null.</param>
-		/// <param name="displayText">The display text. If null, the default "pipe trick" text will be used.</param>
-		/// <returns>The text of the link to build.</returns>
-		public static string LinkTextFromParts(Site site, int ns, string pageName, string? fragment, string? displayText)
-		{
-			var link = new SiteLink(site, ns, pageName, displayText);
-			link.NormalizePageName();
-			if (displayText == null)
-			{
-				link.DisplayText = link.PipeTrick();
-			}
-
-			link.NormalizeDisplayText();
-			if (fragment != null)
-			{
-				link.Fragment = fragment;
-			}
-
-			return link.ToString();
-		}
-
-		/// <summary>Gets the title formatted as a link.</summary>
-		/// <param name="title">The title.</param>
-		/// <returns>The title formatted as a link.</returns>
-		public static string LinkTextFromTitle(ISimpleTitle title)
-		{
-			ThrowNull(title, nameof(title));
-			return new SiteLink(title.Site, title.NamespaceId, title.PageName).ToString();
-		}
-
-		/// <summary>Gets the title formatted as a link.</summary>
-		/// <param name="title">The title.</param>
-		/// <returns>The title formatted as a link.</returns>
-		public static string LinkTextFromTitle(Title title)
-		{
-			ThrowNull(title, nameof(title));
-			return new SiteLink(title.Site, title.NamespaceId, title.PageName, title.LabelName).ToString();
+			var linkNode = LinkNode.FromText(link);
+			return FromLinkNode(site, linkNode);
 		}
 		#endregion
 
 		#region Public Methods
 
-		/// <summary>Builds the link into the specified StringBuilder.</summary>
-		/// <param name="builder">The StringBuilder to build into.</param>
-		/// <returns>A copy of the <see cref="StringBuilder"/> passed into the method.</returns>
-		public StringBuilder Build(StringBuilder builder)
+		/// <summary>Gets the image size.</summary>
+		/// <returns>The image height and width. If either value is missing, a zero will be returned for that value.</returns>
+		/// <exception cref="InvalidOperationException">The size text is invalid, and could not be parsed.</exception>
+		public (int Height, int Width) GetSize()
 		{
-			ThrowNull(builder, nameof(builder));
-			builder
-				.Append("[[")
-				.Append(this.NameLeadingWhiteSpace);
-			this.BuildFullTitle(builder)
-				.Append(this.NameTrailingWhiteSpace);
-			return
-				this.BuildParameters(builder)
-				.Append("]]");
-		}
-
-		/// <summary>Normalizes all elements of the link.</summary>
-		/// <remarks>This method causes the <see cref="InterwikiEntry"/>, <see cref="Namespace"/>, and <see cref="TitleParts.PageName"/> to be reformatted. Interwiki prefixes take on standard casing. Namespace aliases or shortcuts become the full name of the namespace (e.g., <c>Image:</c> becomes <c>File:</c>, <c>WP:</c> becomes <c>Wikipedia:</c>). The <see cref="TitleParts.PageName"/> will also be capitalized according to the rules for the namespace if there's already display text overriding the name. Lastly, the display text will be removed if it matches the value the MediaWiki would display.</remarks>
-		public void Normalize()
-		{
-			this.NormalizeInterwikiText();
-			this.NormalizeNamespaceText();
-			this.NormalizePageName();
-			this.NormalizeDisplayText();
-		}
-
-		/// <summary>Normalizes the display text by removing it if it matches the full title text.</summary>
-		public void NormalizeDisplayText()
-		{
-			var defaultTitle = this.BuildFullTitle(new StringBuilder()).ToString();
-			if (this.DisplayParameter?.Value == defaultTitle)
+			if (this.Dimensions is string dimensions)
 			{
-				this.DisplayParameter = null;
-			}
-		}
-
-		/// <summary>Normalizes the interwiki text to its default capitalization.</summary>
-		public void NormalizeInterwikiText()
-		{
-			if (this.Interwiki != null)
-			{
-				if (this.Interwiki.LocalWiki)
+				var split = dimensions.Split('x', 2);
+				return split.Length switch
 				{
-					this.Interwiki = null;
-					this.interwikiText = null;
+					1 => (0, int.TryParse(split[0], out var result) ? result : throw NonNumeric),
+					2 => (int.TryParse("0" + split[0], out var width) ? width : throw NonNumeric, int.TryParse("0" + split[1], out var height) ? height : throw NonNumeric),
+					_ => (0, 0)
+				};
+			}
+
+			return (0, 0);
+		}
+
+		/// <summary>Sets the image size, formatting the <see cref="Dimensions"/> paramter appropriately.</summary>
+		/// <param name="height">The height.</param>
+		/// <param name="width">The width.</param>
+		public void SetSize(int height, int width)
+		{
+			if (height == 0)
+			{
+				if (width == 0)
+				{
+					this.Parameters.Remove(ParameterType.Size);
 				}
 				else
 				{
-					this.interwikiText = this.Interwiki?.Prefix;
+					this.Dimensions = width.ToStringInvariant();
 				}
-			}
-		}
-
-		/// <summary>Normalizes the namespace text to its primary name.</summary>
-		public void NormalizeNamespaceText()
-		{
-			if (this.Namespace != null)
-			{
-				this.NamespaceText = this.Namespace.Name;
-			}
-		}
-
-		/// <summary>Normalizes the name of the page by capitalizing it if the namespace rules allow.</summary>
-		/// <remarks>Capitalization will be skipped if the link is an interwiki link or if there is no display text, since changing the name would also change the text.</remarks>
-		public void NormalizePageName() => this.NormalizePageName(false);
-
-		/// <summary>Normalizes the name of the page by capitalizing it if the namespace rules allow.</summary>
-		/// <param name="ignoreDisplay">If set to true, the page name will be capitalize if possible, even if that would change the resulting text.</param>
-		/// <remarks>Capitalization will be skipped if the link is an interwiki link or if there is no display text, since changing the name would also change the text.</remarks>
-		public void NormalizePageName(bool ignoreDisplay)
-		{
-			if (this.Namespace != null && (ignoreDisplay || this.DisplayParameter != null))
-			{
-				this.PageName = this.Namespace.CapitalizePageName(this.PageName);
-			}
-		}
-
-		/// <summary>Returns a suggested <see cref="DisplayParameter"/> value based on the link parts, just like the "pipe trick" on a wiki.</summary>
-		/// <returns>A suggested <see cref="DisplayParameter"/> value based on the link parts.</returns>
-		/// <remarks>This method does not modify the <see cref="DisplayParameter"/> in any way.</remarks>
-		public string PipeTrick() => this.PipeTrick(false);
-
-		/// <summary>Returns a suggested <see cref="DisplayParameter"/> value based on the link parts, much like the "pipe trick" on a wiki.</summary>
-		/// <param name="useFragmentIfPresent">if set to <see langword="true"/>, and a fragment exists, uses the fragment to generate the name, rather than the pagename.</param>
-		/// <returns>A suggested <see cref="DisplayParameter"/> value based on the link parts.</returns>
-		/// <remarks>This method does not modify the <see cref="DisplayParameter"/> in any way.</remarks>
-		public string PipeTrick(bool useFragmentIfPresent)
-		{
-			string retval;
-			if (useFragmentIfPresent && !string.IsNullOrWhiteSpace(this.Fragment))
-			{
-				retval = this.Fragment!;
 			}
 			else
 			{
-				retval = this.PageName ?? string.Empty;
-				var split = retval.Split(TextArrays.Comma, 2);
-				if (split.Length == 1)
-				{
-					var lastIndex = retval.LastIndexOf('(');
-					if (retval.LastIndexOf(')') > lastIndex)
-					{
-						retval = retval.Substring(0, lastIndex);
-					}
-				}
-				else
-				{
-					retval = split[0];
-				}
+				this.Dimensions = (width == 0 ? string.Empty : width.ToStringInvariant()) + "x" + height.ToStringInvariant();
 			}
-
-			return retval.Replace('_', ' ').Trim();
 		}
-		#endregion
 
-		#region Public Virtual Methods
-
-		/// <summary>Reformats the link using the specified formats.</summary>
-		/// <param name="nameFormat">Whitespace to add before and after the page name. The <see cref="PaddedString.Value"/> property is ignored.</param>
-		/// <param name="valueFormat">Whitespace to add before and after the <see cref="DisplayParameter"/>. The <see cref="PaddedString.Value"/> property is ignored.</param>
-		public virtual void Reformat(PaddedString nameFormat, PaddedString valueFormat)
+		/// <summary>Converts to the link to a <see cref="LinkNode"/>.</summary>
+		/// <returns>A <see cref="LinkNode"/> containing the parsed link text.</returns>
+		public LinkNode ToLinkNode()
 		{
-			if (nameFormat != null)
+			var values = new List<string>();
+			foreach (var parameter in this.Parameters)
 			{
-				this.NameLeadingWhiteSpace = nameFormat.LeadingWhiteSpace;
-				this.Normalize();
-				this.NameTrailingWhiteSpace = nameFormat.TrailingWhiteSpace;
+				var text = parameter.Value.ToString();
+				values.Add(text);
 			}
 
-			if (valueFormat != null)
-			{
-				if (this.DisplayParameter == null)
-				{
-					this.DisplayParameter = new PaddedString();
-				}
-
-				this.DisplayParameter.LeadingWhiteSpace = valueFormat.LeadingWhiteSpace;
-				this.DisplayParameter.TrailingWhiteSpace = valueFormat.TrailingWhiteSpace;
-			}
+			return LinkNode.FromParts(this.TitleWhitespaceBefore + this.Title.ToString() + this.TitleWhitespaceAfter, values);
 		}
 		#endregion
 
 		#region Public Override Methods
 
-		/// <summary>Converts the <see cref="SiteLink"/> to its full wiki text.</summary>
-		/// <returns>A <see cref="string"/> that represents this instance.</returns>
-		/// <remarks>This is a simple wrapper around the <see cref="Build(StringBuilder)"/> method.</remarks>
-		public override string ToString() => this.Build(new StringBuilder()).ToString();
+		/// <summary>Returns the full text of the link.</summary>
+		/// <returns>A <see cref="string" /> that represents this instance.</returns>
+		public override string ToString() => WikiTextVisitor.Raw(this.ToLinkNode());
 		#endregion
 
-		#region Protected Virtual Methods
-
-		/// <summary>Builds the parameter text, if needed.</summary>
-		/// <param name="builder">The builder to build into.</param>
-		/// <returns>A copy of the <see cref="StringBuilder"/> passed to the method.</returns>
-		/// <remarks>This is a virtual method, to be overridden by any types that inherit <see cref="SiteLink"/>. The default behaviour is to render only the <see cref="DisplayParameter"/> property if it's non-<see langword="null"/>.</remarks>
-		protected virtual StringBuilder BuildParameters(StringBuilder builder)
+		#region Private Static Methods
+		private static EmbeddedValue SplitWhitespace(string titleText)
 		{
-			ThrowNull(builder, nameof(builder));
-			if (this.DisplayParameter != null)
+			var value = new EmbeddedValue();
+			var index = 0;
+			while (index < titleText.Length && char.IsWhiteSpace(titleText[index]))
 			{
-				builder.Append('|');
-				this.DisplayParameter.Build(builder);
+				index++;
 			}
 
-			return builder;
+			value.Before = string.Empty;
+			if (index > 0)
+			{
+				value.Before = titleText.Substring(0, index);
+				titleText = titleText.Substring(index);
+			}
+
+			index = titleText.Length;
+			while (index > 0 && char.IsWhiteSpace(titleText[index - 1]))
+			{
+				index--;
+			}
+
+			value.After = string.Empty;
+			if (index < titleText.Length)
+			{
+				value.After = titleText.Substring(index);
+				titleText = titleText.Substring(0, index);
+			}
+
+			value.Value = titleText;
+			return value;
 		}
 		#endregion
 
 		#region Private Methods
-		private StringBuilder BuildFullTitle(StringBuilder builder)
+		private void AddValueDirect(string value)
 		{
-			if (this.LeadingColon)
+			ThrowNull(value, nameof(value));
+			var parameter = SplitWhitespace(value);
+			if (!DirectValues.TryGetValue(parameter.Value, out var parameterType))
 			{
-				builder.Append(':');
+				parameterType = ParameterType.Caption;
+				foreach (var paramValue in ImageParameterInfo)
+				{
+					if (parameter.Value.StartsWith(paramValue.Before, StringComparison.Ordinal) && parameter.Value.EndsWith(paramValue.After, StringComparison.Ordinal))
+					{
+						parameterType = paramValue.ParameterType;
+						parameter.Before += paramValue.Before;
+						parameter.Value = parameter.Value.Substring(paramValue.Before.Length, parameter.Value.Length - paramValue.Before.Length - paramValue.After.Length);
+						parameter.After = paramValue.After + parameter.After;
+						break;
+					}
+				}
 			}
 
-			if (!string.IsNullOrEmpty(this.InterwikiText))
+			this.Parameters.Add(parameterType, parameter);
+		}
+
+		private string? GetValue(ParameterType name) => this.Parameters.TryGetValue(name, out var value) ? value.Value : null;
+
+		private bool SetDirectValue(ParameterType parameterType, string? value)
+		{
+			var retval = true;
+			if (value == null)
 			{
-				builder
-					.Append(this.InterwikiText)
-					.Append(':');
+				this.Parameters.Remove(parameterType);
+			}
+			else if (this.Parameters.TryGetValue(parameterType, out var param))
+			{
+				param.Value = value;
+			}
+			else if (DirectValues.TryGetValue(value, out var valueType) && parameterType == valueType)
+			{
+				var paramValue = new EmbeddedValue(value);
+				this.Parameters.Add(parameterType, paramValue);
+			}
+			else
+			{
+				retval = false;
 			}
 
-			if (!string.IsNullOrEmpty(this.NamespaceText))
-			{
-				builder
-					.Append(this.NamespaceText)
-					.Append(':');
-			}
+			return retval;
+		}
 
-			builder.Append(this.PageName);
-			if (!string.IsNullOrEmpty(this.Fragment))
+		private void SetParameterValue(ParameterType parameterType, string? value)
+		{
+			if (value == null)
 			{
-				builder
-					.Append('#')
-					.Append(this.Fragment);
+				this.Parameters.Remove(parameterType);
 			}
-
-			return builder;
+			else if (this.Parameters.TryGetValue(parameterType, out var parameter))
+			{
+				parameter.Value = value;
+			}
+			else
+			{
+				foreach (var info in ImageParameterInfo)
+				{
+					if (info.ParameterType == parameterType)
+					{
+						this.Parameters.Add(parameterType, new EmbeddedValue(info.Before, value, info.After));
+						break;
+					}
+				}
+			}
 		}
 		#endregion
 	}

@@ -44,7 +44,7 @@ namespace RobinHood70.WikiClasses
 			this.Tokenize(isLink ? "[[" : "{{");
 			if (this.tokens.Count == 0)
 			{
-				this.Name = new PaddedString();
+				this.Name = new EmbeddedValue();
 				return;
 			}
 
@@ -91,7 +91,7 @@ namespace RobinHood70.WikiClasses
 
 		/// <summary>Gets the link or template page name.</summary>
 		/// <value>The name.</value>
-		public PaddedString Name { get; private set; }
+		public EmbeddedValue Name { get; private set; }
 
 		/// <summary>Gets the parameters parsed from the text provided in the constructor.</summary>
 		/// <value>The parameters.</value>
@@ -99,15 +99,15 @@ namespace RobinHood70.WikiClasses
 
 		/// <summary>Gets the parsed text from the constructor as a single parameter, as would be used in a normal link.</summary>
 		/// <value>The parameter as a single value (everything from the first pipe to the closing delimiter).</value>
-		public PaddedString? SingleParameter => this.paramEndToken == 0 ? null : this.GetParameterString(this.paramStartToken, this.paramEndToken, true);
+		public EmbeddedValue? SingleParameter => this.paramEndToken == 0 ? null : this.GetParameterString(this.paramStartToken, this.paramEndToken, true);
 		#endregion
 
 		#region Public Methods
 
 		/// <summary>Guesses the default format from the existing parameters.</summary>
 		/// <param name="names">if <see langword="true"/>, returns a format based on the parameter names; otherwise, the format is based on the parameter values.</param>
-		/// <returns>A ParameterString with the most common formatting in use, based on the existing named parameters. If there are no named parameters, returns an empty ParameterString.</returns>
-		public PaddedString DefaultFormat(bool names)
+		/// <returns>A EmbeddedValue with the most common formatting in use, based on the existing named parameters. If there are no named parameters, returns an empty EmbeddedValue.</returns>
+		public EmbeddedValue DefaultFormat(bool names)
 		{
 			var counts = new Dictionary<string, int>();
 			var highest = 0;
@@ -117,8 +117,8 @@ namespace RobinHood70.WikiClasses
 				if (!parameter.Anonymous)
 				{
 					var key = names
-						? parameter.FullName?.LeadingWhiteSpace + '|' + parameter.FullName?.TrailingWhiteSpace
-						: parameter.FullValue.LeadingWhiteSpace + '|' + parameter.FullValue.TrailingWhiteSpace;
+						? parameter.FullName?.Before + '|' + parameter.FullName?.After
+						: parameter.FullValue.Before + '|' + parameter.FullValue.After;
 					counts.TryGetValue(key, out var lastCount);
 					counts[key] = ++lastCount;
 					if (lastCount > highest)
@@ -129,12 +129,12 @@ namespace RobinHood70.WikiClasses
 				}
 			}
 
-			var retval = new PaddedString();
+			var retval = new EmbeddedValue();
 			if (highest > 0)
 			{
 				var whiteSpace = highestKey.Split(TextArrays.Pipe);
-				retval.LeadingWhiteSpace = whiteSpace[0];
-				retval.TrailingWhiteSpace = whiteSpace[1];
+				retval.Before = whiteSpace[0];
+				retval.After = whiteSpace[1];
 			}
 
 			return retval;
@@ -181,7 +181,7 @@ namespace RobinHood70.WikiClasses
 				this.tokenIndex++;
 			}
 
-			PaddedString? name = null;
+			EmbeddedValue? name = null;
 			var start = this.tokenIndex;
 			var firstEquals = true;
 			while (this.tokenIndex < this.tokens.Count)
@@ -206,9 +206,9 @@ namespace RobinHood70.WikiClasses
 			return new Parameter(name, value);
 		}
 
-		private PaddedString GetParameterString(int start, int end, bool parseWhiteSpace)
+		private EmbeddedValue GetParameterString(int start, int end, bool parseWhiteSpace)
 		{
-			var retval = new PaddedString();
+			var retval = new EmbeddedValue();
 			var textStart = start;
 			var textEnd = end;
 			if (parseWhiteSpace)
@@ -221,7 +221,7 @@ namespace RobinHood70.WikiClasses
 
 				if (textEnd < end)
 				{
-					retval.TrailingWhiteSpace = this.GetString(textEnd + 1, end);
+					retval.After = this.GetString(textEnd + 1, end);
 				}
 
 				while (textStart <= textEnd && this.tokens[textStart].Type == TokenType.WhiteSpace)
@@ -231,7 +231,7 @@ namespace RobinHood70.WikiClasses
 
 				if (textStart > start)
 				{
-					retval.LeadingWhiteSpace = this.GetString(start, textStart - 1);
+					retval.Before = this.GetString(start, textStart - 1);
 				}
 			}
 

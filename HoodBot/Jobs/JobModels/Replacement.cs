@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.HoodBot.Jobs.Design
+﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
 	using System;
 	using System.Diagnostics.CodeAnalysis;
@@ -10,9 +10,11 @@
 	public enum ReplacementAction
 	{
 		Unknown,
-		Skip,
+		CustomMove,
+		EditOnly,
 		Move,
 		ProposeForDeletion,
+		Skip,
 	}
 
 	public sealed class Replacement : IComparable<Replacement>, IEquatable<Replacement>
@@ -53,10 +55,10 @@
 		public string? DeleteReason { get; set; }
 
 		[AllowNull]
-		public Title From { get; set; }
+		public ISimpleTitle From { get; set; }
 
 		[AllowNull]
-		public Title To { get; set; }
+		public ISimpleTitle To { get; set; }
 		#endregion
 
 		#region Operators
@@ -77,7 +79,7 @@
 		public int CompareTo(Replacement other)
 		{
 			ThrowNull(other, nameof(other));
-			return TitleComparer<Title>.Instance.Compare(this.From, other.From);
+			return TitleComparer<ISimpleTitle>.Instance.Compare(this.From, other.From);
 		}
 
 		public bool Equals(Replacement? other) => !(other is null) && this.From == other.From; // Nothing else is checked for equality, as multiple values for the same From are invalid.

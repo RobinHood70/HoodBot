@@ -24,6 +24,10 @@
 
 		#region Methods
 
+		/// <summary>Returns the provided title as link text.</summary>
+		/// <returns>The current title, formatted as a link.</returns>
+		string AsLink();
+
 		/// <summary>Indicates whether the current title is equal to another title based on Namespace and PageName only.</summary>
 		/// <param name="other">A title to compare with this one.</param>
 		/// <returns><see langword="true"/> if the current title is equal to the <paramref name="other"/> parameter; otherwise, <see langword="false"/>.</returns>

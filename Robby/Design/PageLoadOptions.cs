@@ -46,11 +46,14 @@
 		/// <summary>Load custom page information. Use this in conjunction with a custom PageCreator to control when your custom information is retrieved.</summary>
 		Custom = 1 << 15,
 
+		/// <summary>On File-space pages, load file backlinks.</summary>
+		FileUsage = 1 << 16,
+
 		/// <summary>Loads default page information, including flags, current timestamp, and current page text.</summary>
 		Default = Info | Revisions,
 
 		/// <summary>Load everything Robby is capable of handling.</summary>
-		All = Categories | CategoryInfo | FileInfo | Info | Links | LinksHere | Properties | Revisions | Templates | TranscludedIn | Custom
+		All = Categories | CategoryInfo | FileInfo | FileUsage | Info | Links | LinksHere | Properties | Revisions | Templates | TranscludedIn | Custom
 	}
 	#endregion
 

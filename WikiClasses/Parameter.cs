@@ -24,13 +24,13 @@
 		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
 		/// <param name="value">The parameter value.</param>
 		public Parameter(string? value)
-			: this(null, new PaddedString(value), true)
+			: this(null, new EmbeddedValue(value), true)
 		{
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
 		/// <param name="value">The full parameter value, including any leading and trailing whitespace.</param>
-		public Parameter(PaddedString value)
+		public Parameter(EmbeddedValue value)
 			: this(null, value, true)
 		{
 		}
@@ -39,7 +39,7 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		public Parameter(string? name, string? value)
-			: this(name == null ? null : new PaddedString(name), new PaddedString(value), name == null)
+			: this(name == null ? null : new EmbeddedValue(name), new EmbeddedValue(value), name == null)
 		{
 		}
 
@@ -48,14 +48,14 @@
 		/// <param name="value">The full parameter value, including any leading and trailing whitespace. May not be null.</param>
 		/// <param name="anonymous">Whether the parameter should be treated as anonymous. The <paramref name="name"/> parameter must be non-null for this to take effect.</param>
 		public Parameter(string? name, string? value, bool anonymous)
-			: this(name == null ? null : new PaddedString(name), new PaddedString(value), anonymous)
+			: this(name == null ? null : new EmbeddedValue(name), new EmbeddedValue(value), anonymous)
 		{
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
 		/// <param name="name">The full parameter name, including any leading and trailing whitespace.</param>
 		/// <param name="value">The full parameter value, including any leading and trailing whitespace.</param>
-		public Parameter(PaddedString? name, PaddedString value)
+		public Parameter(EmbeddedValue? name, EmbeddedValue value)
 			: this(name, value, name == null)
 		{
 		}
@@ -64,7 +64,7 @@
 		/// <param name="name">The full parameter name, including any leading and trailing whitespace. May be null.</param>
 		/// <param name="value">The full parameter value, including any leading and trailing whitespace. May not be null.</param>
 		/// <param name="anonymous">Whether the parameter should be treated as anonymous. The <paramref name="name"/> parameter must be non-null for this to take effect.</param>
-		public Parameter(PaddedString? name, PaddedString value, bool anonymous)
+		public Parameter(EmbeddedValue? name, EmbeddedValue value, bool anonymous)
 		{
 			// name can be null; value cannot.
 			ThrowNull(value, nameof(value));
@@ -103,11 +103,11 @@
 
 		/// <summary>Gets or sets the full name.</summary>
 		/// <value>The full parameter name, including any leading or trailing whitespace.</value>
-		public PaddedString? FullName { get; set; }
+		public EmbeddedValue? FullName { get; set; }
 
 		/// <summary>Gets the full value.</summary>
 		/// <value>The full parameter value, including any leading or trailing whitespace.</value>
-		public PaddedString FullValue { get; }
+		public EmbeddedValue FullValue { get; }
 
 		/// <summary>Gets or sets the name.</summary>
 		/// <value>The parameter name.</value>
@@ -123,7 +123,7 @@
 				}
 				else
 				{
-					this.FullName ??= new PaddedString();
+					this.FullName ??= new EmbeddedValue();
 					this.FullName.Value = value;
 				}
 			}
@@ -196,10 +196,10 @@
 			}
 			else
 			{
-				retval = !this.anonymous || (this.FullValue.LeadingWhiteSpace?.Length + this.FullValue.TrailingWhiteSpace?.Length) > 0;
+				retval = !this.anonymous || (this.FullValue.Before?.Length + this.FullValue.After?.Length) > 0;
 				this.anonymous = true;
-				this.FullValue.LeadingWhiteSpace = string.Empty;
-				this.FullValue.TrailingWhiteSpace = string.Empty;
+				this.FullValue.Before = string.Empty;
+				this.FullValue.After = string.Empty;
 			}
 
 			return retval;

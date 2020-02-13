@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
+	using System;
 	using System.Collections.Generic;
-	using System.Linq;
 	using RobinHood70.WikiCommon;
 
 	/// <summary>  Represents an unparsed tag, such as pre or nowiki.</summary>
@@ -90,7 +90,7 @@
 
 		/// <summary>Gets an enumerator that iterates through any NodeCollections this node contains.</summary>
 		/// <returns>An enumerator that can be used to iterate through additional NodeCollections.</returns>
-		public IEnumerable<NodeCollection> NodeCollections => Enumerable.Empty<NodeCollection>();
+		public IEnumerable<NodeCollection> NodeCollections => Array.Empty<NodeCollection>();
 
 		/// <summary>Gets a value indicating whether the tag is self-closed.</summary>
 		/// <value>

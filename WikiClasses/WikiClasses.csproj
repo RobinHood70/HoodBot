@@ -7,7 +7,7 @@
 		<Description>Common objects that are MediaWiki-specific.</Description>
 		<Nullable>enable</Nullable>
 		<RootNamespace>RobinHood70.WikiClasses</RootNamespace>
-		<NeutralLanguage>English (Canada)</NeutralLanguage>
+		<NeutralLanguage>en-CA</NeutralLanguage>
 		<RestoreProjectStyle>PackageReference</RestoreProjectStyle>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
@@ -15,7 +15,7 @@
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.7">
+		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>

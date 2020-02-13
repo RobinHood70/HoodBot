@@ -55,7 +55,7 @@
 			var titleParts = new TitleParts(site, fullPageName);
 			if (titleParts.Interwiki != null && !titleParts.Interwiki.LocalWiki)
 			{
-				throw new ArgumentException(CurrentCulture(Resources.PageNameInterwiki));
+				throw new ArgumentException(CurrentCulture(Resources.PageNameInterwiki, fullPageName));
 			}
 
 			this.Site = titleParts.Site;
@@ -240,6 +240,9 @@
 		#endregion
 
 		#region Public Methods
+
+		/// <inheritdoc/>
+		public string AsLink() => "[[" + this.ToString() + "]]";
 
 		/// <summary>Protects a non-existent page from being created.</summary>
 		/// <param name="reason">The reason for the create-protection.</param>

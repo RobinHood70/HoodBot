@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.WikiClasses.Parser
 {
+	using System;
 	using System.Collections.Generic;
-	using System.Linq;
 
 	/// <summary>Represents a blob of text that should be ignored. Depending on the parser's configuration, this can be the entire text of an <c>include</c>/<c>noinclude</c> block, the text outside of an <c>onlyinclude</c>, or just the tags themselves.</summary>
 	public class IgnoreNode : IWikiNode
@@ -17,7 +17,7 @@
 
 		/// <summary>Gets an enumerator that iterates through any NodeCollections this node contains.</summary>
 		/// <returns>An enumerator that can be used to iterate through additional NodeCollections.</returns>
-		public IEnumerable<NodeCollection> NodeCollections => Enumerable.Empty<NodeCollection>();
+		public IEnumerable<NodeCollection> NodeCollections => Array.Empty<NodeCollection>();
 
 		/// <summary>Gets the value.</summary>
 		/// <value>The value.</value>

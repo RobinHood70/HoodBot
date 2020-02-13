@@ -189,7 +189,11 @@
 				while (!endOfField)
 				{
 					var character = (char)reader.Read();
-					if ("\n\r\u2028\u2029".IndexOf(character, StringComparison.Ordinal) != -1)
+					if (character == 0xffff)
+					{
+						endOfField = true;
+					}
+					else if ("\n\r\u2028\u2029".IndexOf(character, StringComparison.Ordinal) != -1)
 					{
 						if (insideQuotes)
 						{
@@ -210,6 +214,7 @@
 					{
 						if (!outsideValue && this.DoubleUpDelimiters && reader.Peek() == this.FieldDelimiter)
 						{
+							reader.Read();
 							field.Append('"');
 						}
 						else
@@ -251,10 +256,12 @@
 					}
 				}
 
+				// Debug.Write(field.ToString() + ",");
 				fields.Add(field.ToString());
 				field.Clear();
 			}
 
+			// Debug.WriteLine(string.Empty);
 			return fields.Count == 0 ? null : fields;
 		}
 

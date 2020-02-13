@@ -130,7 +130,7 @@
 				var newList = new List<string>();
 				foreach (var page in this.trivialChanges)
 				{
-					newList.Add(new SiteLink(page).ToString());
+					newList.Add(new SiteLink(new TitleParts(page)).ToString());
 				}
 
 				this.WriteLine(string.Join(", ", newList));
@@ -242,8 +242,8 @@
 
 			template.RemoveDuplicates();
 			template.Remove("update");
-			template.NameParameter.TrailingWhiteSpace = "\n";
-			template.DefaultValueFormat.TrailingWhiteSpace = "\n";
+			template.NameParameter.After = "\n";
+			template.DefaultValueFormat.After = "\n";
 
 			var oldParameters = new ParameterCollection();
 			foreach (var paramName in UpdatedParameters)

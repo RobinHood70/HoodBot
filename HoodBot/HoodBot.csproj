@@ -40,14 +40,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.7">
+		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.0-preview3.19553.2" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.0-preview3.19553.2" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.0-preview3.19553.2" />
-		<PackageReference Include="MySql.Data" Version="8.0.18" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.1" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.1" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.1" />
+		<PackageReference Include="MySql.Data" Version="8.0.19" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.113">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

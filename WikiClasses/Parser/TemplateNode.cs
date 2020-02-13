@@ -187,7 +187,7 @@
 			{
 				if (this.FindParameter(name) != null)
 				{
-					throw new InvalidOperationException("Parameter exists");
+					throw new InvalidOperationException(CurrentCulture(Properties.Resources.ParameterExists, name));
 				}
 
 				this.Parameters.AddAfter(previous, ParameterNode.CopyFormatFrom(prevValue, name, value));

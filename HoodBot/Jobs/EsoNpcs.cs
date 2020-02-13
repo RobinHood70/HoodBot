@@ -9,6 +9,7 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiClasses;
+	using RobinHood70.WikiClasses.Parser;
 	using RobinHood70.WikiCommon;
 
 	internal class EsoNpcs : EditJob
@@ -172,13 +173,14 @@
 					if (page.IsDisambiguation)
 					{
 						issue = "a disambiguation with no clear NPC link";
-						var disambiguations = SiteLink.FindLinks(this.Site, page.Text, false);
-						foreach (var disambig in disambiguations)
+						var parser = WikiTextParser.Parse(page.Text);
+						foreach (var linkNode in parser.FindAllRecursive<LinkNode>())
 						{
-							if (allNpcs.Contains(disambig))
+							var disambig = SiteLink.FromLinkNode(this.Site, linkNode);
+							if (allNpcs.Contains(disambig.Title))
 							{
 								issue = null;
-								npc.PageName = disambig.PageName;
+								npc.PageName = disambig.Title.PageName;
 								break;
 							}
 						}

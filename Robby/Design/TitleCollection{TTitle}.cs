@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
@@ -783,7 +784,7 @@
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
 		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
-		public bool TryGetValue(string key, out TTitle? value) => this.dictionary.TryGetValue(key, out value);
+		public bool TryGetValue(string key, [NotNullWhen(returnValue: true)] out TTitle? value) => this.dictionary.TryGetValue(key, out value);
 
 		/// <summary>Returns the requested value, or null if not found.</summary>
 		/// <param name="key">The key.</param>
@@ -797,6 +798,10 @@
 		#endregion
 
 		#region Public Abstract Methods
+
+		/// <summary>Adds a copy of the specified title to the collection.</summary>
+		/// <param name="title">The title to add.</param>
+		public abstract void Add(ISimpleTitle title);
 
 		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
 		/// <param name="titles">The titles to add.</param>

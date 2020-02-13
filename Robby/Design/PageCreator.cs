@@ -57,6 +57,11 @@
 				});
 			}
 
+			if (whatToLoad.HasFlag(PageModules.FileUsage))
+			{
+				propertyInputs.Add(new FileUsageInput());
+			}
+
 			if (whatToLoad.HasFlag(PageModules.Info))
 			{
 				propertyInputs.Add(new InfoInput() { Properties = InfoProperties.Url });

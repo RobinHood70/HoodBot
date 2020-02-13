@@ -6,7 +6,7 @@
 		<Description>Automates Internet Explorer for on-site diffs.</Description>
 		<Nullable>enable</Nullable>
 		<RootNamespace>RobinHood70.InternetExplorerDiff</RootNamespace>
-		<NeutralLanguage>English (Canada)</NeutralLanguage>
+		<NeutralLanguage>en-CA</NeutralLanguage>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 		<RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
@@ -33,7 +33,7 @@
 		<ProjectReference Include="..\WikiCommon\WikiCommon.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.7">
+		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>

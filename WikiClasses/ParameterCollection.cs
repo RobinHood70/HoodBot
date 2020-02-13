@@ -65,12 +65,12 @@
 		/// <summary>Gets or sets the default format to use for the whitespace surrounding the Name property of any new parameters.</summary>
 		/// <remarks>Only the whitespace properties are used for formatting; the Value property is ignored.</remarks>
 		/// <seealso cref="CopyLast"/>
-		public PaddedString DefaultNameFormat { get; set; } = new PaddedString();
+		public EmbeddedValue DefaultNameFormat { get; set; } = new EmbeddedValue();
 
 		/// <summary>Gets or sets the default format to use for the whitespace surrounding the Value property of any new parameters.</summary>
 		/// <remarks>Only the whitespace properties are used for formatting; the Value property is ignored.</remarks>
 		/// <seealso cref="CopyLast"/>
-		public PaddedString DefaultValueFormat { get; set; } = new PaddedString();
+		public EmbeddedValue DefaultValueFormat { get; set; } = new EmbeddedValue();
 
 		/// <summary>Gets a value indicating whether the collection is read-only.</summary>
 		public bool IsReadOnly => false;
@@ -794,7 +794,7 @@
 			return new Parameter(name == null ? null : this.CreateParameterString(lastParam, name, true), this.CreateParameterString(lastParam, value, false));
 		}
 
-		private PaddedString CreateParameterString(Parameter? lastParam, string value, bool fromName)
+		private EmbeddedValue CreateParameterString(Parameter? lastParam, string value, bool fromName)
 		{
 			// Need to check FullName beforehand, since it could be null if last parameter is anonymous.
 			var copyString =
@@ -805,7 +805,7 @@
 				copyString = fromName ? this.DefaultNameFormat : this.DefaultValueFormat;
 			}
 
-			return new PaddedString(copyString?.LeadingWhiteSpace ?? string.Empty, value, copyString?.TrailingWhiteSpace ?? string.Empty);
+			return new EmbeddedValue(copyString?.Before ?? string.Empty, value, copyString?.After ?? string.Empty);
 		}
 		#endregion
 	}

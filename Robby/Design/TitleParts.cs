@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System;
-	using RobinHood70.Robby.Properties;
 	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
@@ -63,10 +62,12 @@
 				nameRemaining = nameRemaining.Substring(1).TrimStart();
 			}
 
-			if (nameRemaining.Length == 0)
+			// Title can be valid with no length when passed from a null template or link, for example.
+			/* if (nameRemaining.Length == 0)
 			{
 				throw new ArgumentException(CurrentCulture(Resources.TitleInvalid));
 			}
+			*/
 
 			int? nsFinal = null;
 			string? originalNs = null;
@@ -108,6 +109,7 @@
 
 			if (nameRemaining.Length == 0)
 			{
+				this.PageName = string.Empty;
 				this.OriginalPageNameText = string.Empty;
 			}
 			else
@@ -221,6 +223,9 @@
 
 		#region Public Methods
 
+		/// <inheritdoc/>
+		public string AsLink() => "[[" + this.ToString() + "]]";
+
 		/// <summary>Deconstructs this instance into its constituent parts.</summary>
 		/// <param name="site">The value returned by <see cref="Site"/>.</param>
 		/// <param name="leadingColon">The value returned by <see cref="LeadingColon"/>.</param>
@@ -248,6 +253,12 @@
 			this.Namespace == other.Namespace &&
 			this.Namespace.PageNameEquals(this.PageName, other.PageName) &&
 			this.Fragment == other.Fragment;
+
+		/// <summary>Checks if the current page name is the same as the specified page name, based on the case-sensitivity for the namespace.</summary>
+		/// <param name="pageName">The page name to compare to.</param>
+		/// <returns><see langword="true" /> if the two string are considered the same; otherwise <see langword="false" />.</returns>
+		/// <remarks>It is assumed that the namespace for the parameter is equal to the current one, or at least that they have the same case-sensitivy.</remarks>
+		public bool PageNameEquals(string pageName) => this.Namespace.PageNameEquals(this.PageName, pageName);
 
 		/// <summary>Indicates whether the current title is equal to another title based on Namespace and PageName only.</summary>
 		/// <param name="other">A title to compare with this one.</param>

@@ -27,6 +27,20 @@
 
 		#region Public Properties
 
+		/// <summary>Gets the culture passed in the constructor. This controls the language used for the class.</summary>
+		/// <value>The culture.</value>
+		public CultureInfo Culture { get; }
+
+		/// <summary>Gets or sets the default text for the <see cref="Description"/>.</summary>
+		/// <value>The default text for the <see cref="Description"/>.</value>
+		/// <remarks>This property should be set in a derived class to set default text for the description if the caller doesn't customize it. If the derived class fails to set this, it will attempt to return the localized version of "Bot Results" or, failing all else, the English version of it.</remarks>
+		[AllowNull]
+		public string DefaultText
+		{
+			get => this.defaultText;
+			protected set => this.defaultText = value ?? this.ResourceManager.GetString("BotResults", this.Culture) ?? BotResults;
+		}
+
 		/// <summary>Gets or sets the description text.</summary>
 		/// <value>The description.</value>
 		/// <remarks>Use of this property is handler-specific, typically for edit summaries or e-mail subjects. Some handlers may ignore it altogether, so it should not be used to convey essential information. Setting this property to <see langword="null"/> will cause it to return <see cref="DefaultText"/>.</remarks>
@@ -40,23 +54,9 @@
 		/// <summary>Gets the <see cref="StringBuilder"/> that holds the result text.</summary>
 		/// <value>The string builder.</value>
 		public StringBuilder StringBuilder { get; } = new StringBuilder();
-
-		/// <summary>Gets or sets the default text for the <see cref="Description"/>.</summary>
-		/// <value>The default text for the <see cref="Description"/>.</value>
-		/// <remarks>This property should be set in a derived class to set default text for the description if the caller doesn't customize it. If the derived class fails to set this, it will attempt to return the localized version of "Bot Results" or, failing all else, the English version of it.</remarks>
-		[AllowNull]
-		public string DefaultText
-		{
-			get => this.defaultText;
-			protected set => this.defaultText = value ?? this.ResourceManager.GetString("BotResults", this.Culture) ?? BotResults;
-		}
 		#endregion
 
 		#region Protected Properties
-
-		/// <summary>Gets the culture passed in the constructor. This controls the language used for the class.</summary>
-		/// <value>The culture.</value>
-		public CultureInfo Culture { get; }
 
 		/// <summary>Gets the resource manager.</summary>
 		/// <value>The resource manager.</value>

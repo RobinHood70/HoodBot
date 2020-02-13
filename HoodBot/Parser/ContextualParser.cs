@@ -34,14 +34,14 @@
 		{
 			ThrowNull(page, nameof(page));
 			ThrowNull(page.Text, nameof(page), nameof(page.Text));
-			return FromText(page, page.Text);
+			return FromText(page, page.Text, null);
 		}
 
-		public static ContextualParser FromText(ISimpleTitle title, string text)
+		public static ContextualParser FromText(ISimpleTitle title, string text, bool? inclusion)
 		{
 			ThrowNull(title, nameof(title));
 			ThrowNull(text, nameof(text));
-			var nodes = WikiTextParser.Parse(text);
+			var nodes = WikiTextParser.Parse(text, inclusion, false);
 			return new ContextualParser(title, nodes);
 		}
 		#endregion

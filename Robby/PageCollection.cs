@@ -265,6 +265,16 @@
 
 		#region Public Override Methods
 
+		/// <summary>Adds a copy of the specified title to the collection.</summary>
+		/// <param name="title">The title to add.</param>
+		/// <remarks>Unlike <see cref="GetTitles(IEnumerable{string})"/> and related methods, which all load data from the wiki, this will simply add blank pages to the result set.</remarks>
+		public override void Add(ISimpleTitle title)
+		{
+			ThrowNull(title, nameof(title));
+			var page = this.PageCreator.CreatePage(title);
+			this[page.Key] = page;
+		}
+
 		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
 		/// <param name="titles">The titles to add.</param>
 		/// <remarks>Unlike <see cref="GetTitles(IEnumerable{string})"/> and related methods, which all load data from the wiki, this will simply add blank pages to the result set.</remarks>
@@ -578,7 +588,7 @@
 			foreach (var item in result)
 			{
 				var page = this.CreatePage(item.Title);
-				page.Populate(item);
+				page.Populate(item, options);
 				if (pageValidator(page))
 				{
 					this[page.Key] = page;

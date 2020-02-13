@@ -59,6 +59,11 @@
 
 		#region Public Properties
 
+		/// <summary>Gets the backlinks on the page, if they were requested in the last load operation.</summary>
+		/// <value>The links used on the page.</value>
+		/// <remarks>This includes links, transclusions, and file usage.</remarks>
+		public IReadOnlyDictionary<Title, BacklinksTypes> Backlinks { get; } = new Dictionary<Title, BacklinksTypes>(SimpleTitleEqualityComparer.Instance);
+
 		/// <summary>Gets or sets the canonical article path.</summary>
 		/// <value>The canonical article path.</value>
 		public Uri CanonicalPath
@@ -150,10 +155,6 @@
 		/// <value>The links used on the page.</value>
 		public IReadOnlyList<Title> Links { get; } = new List<Title>();
 
-		/// <summary>Gets the links on the page, if they were requested in the last load operation.</summary>
-		/// <value>The links used on the page.</value>
-		public IReadOnlyList<Title> LinksHere { get; } = new List<Title>();
-
 		/// <summary>Gets the page properties, if they were requested in the last load operation.</summary>
 		/// <value>The list of page properties.</value>
 		public IReadOnlyDictionary<string, string> Properties { get; } = new Dictionary<string, string>();
@@ -183,10 +184,6 @@
 		/// <value><see langword="true" /> if the text no longer matches the first revision; otherwise, <see langword="false" />.</value>
 		/// <remarks>This is currently simply a shortcut property to compare the Text with Revisions[0]. This may not be an accurate reflection of modification status when loading a specific revision range or in other unusual circumstances.</remarks>
 		public bool TextModified => this.Text != this.CurrentRevision?.Text;
-
-		/// <summary>Gets the links on the page, if they were requested in the last load operation.</summary>
-		/// <value>The links used on the page.</value>
-		public IReadOnlyList<Title> TranscludedIn { get; } = new List<Title>();
 		#endregion
 
 		#region Public Static Methods
@@ -223,14 +220,13 @@
 		/// <param name="options">The options.</param>
 		public void Load(PageLoadOptions options)
 		{
-			this.loadOptionsUsed = options;
 			var creator = this.Site.PageCreator;
 			var propertyInputs = creator.GetPropertyInputs(options);
 			var pageSetInput = new QueryPageSetInput(new[] { this.FullPageName }) { ConvertTitles = options.ConvertTitles, Redirects = options.FollowRedirects };
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, propertyInputs, creator.CreatePageItem);
 			if (result.Count == 1)
 			{
-				this.Populate(result[0]);
+				this.Populate(result[0], options);
 				this.PageLoaded?.Invoke(this, EventArgs.Empty);
 			}
 		}
@@ -288,95 +284,21 @@
 
 		/// <summary>Populates page data from the specified WallE PageItem.</summary>
 		/// <param name="pageItem">The page item.</param>
+		/// <param name="optionsUsed">The options that were used to load the page. This can be used to reload the page.</param>
 		/// <remarks>This item is publicly available so it can be called from other load-like routines if necessary, such as from a PageCollection's LoadPages routine.</remarks>
-		internal void Populate(PageItem pageItem)
+		internal void Populate(PageItem pageItem, PageLoadOptions optionsUsed)
 		{
 			// Assumes title-related properties have already been provided in the constructor.
 			ThrowNull(pageItem, nameof(pageItem));
-
-			// None
+			this.loadOptionsUsed = optionsUsed;
 			this.PopulateFlags(pageItem.Flags.HasFlag(PageFlags.Invalid), pageItem.Flags.HasFlag(PageFlags.Missing));
-
-			// Revisions
-			var revs = (List<Revision>)this.Revisions;
-			revs.Clear();
-			foreach (var rev in pageItem.Revisions)
-			{
-				revs.Add(new Revision(rev));
-			}
-
-			// Info
-			if (pageItem.Info is PageInfo info)
-			{
-				this.canonicalPath = info.CanonicalUrl;
-				this.CurrentRevisionId = info.LastRevisionId;
-				this.editPath = info.EditUrl;
-				this.IsNew = info.Flags.HasFlag(PageInfoFlags.New);
-				this.IsRedirect = info.Flags.HasFlag(PageInfoFlags.Redirect);
-				this.StartTimestamp = pageItem.Info.StartTimestamp;
-				this.Text = this.CurrentRevisionId != 0 ? this.CurrentRevision?.Text : null;
-			}
-			else
-			{
-				this.canonicalPath = null;
-				this.CurrentRevisionId = 0;
-				this.editPath = null;
-				this.IsNew = false;
-				this.IsRedirect = false;
-				this.StartTimestamp = this.Site.AbstractionLayer.CurrentTimestamp;
-				this.Text = null;
-			}
-
-			// Links
-			var links = (List<Title>)this.Links;
-			links.Clear();
-			foreach (var link in pageItem.Links)
-			{
-				links.Add(new Title(this.Site, link.Title));
-			}
-
-			// LinksHere
-			var linksHere = (List<Title>)this.LinksHere;
-			linksHere.Clear();
-			foreach (var linkHere in pageItem.LinksHere)
-			{
-				linksHere.Add(new Title(this.Site, linkHere.Title));
-			}
-
-			// Properties
-			var properties = (Dictionary<string, string>)this.Properties;
-			properties.Clear();
-			if (pageItem.Properties?.Count > 0)
-			{
-				properties.Clear();
-				properties.AddRange(pageItem.Properties);
-			}
-
-			// Templates
-			var templates = (List<Title>)this.Templates;
-			templates.Clear();
-			foreach (var link in pageItem.Templates)
-			{
-				templates.Add(new Title(this.Site, link.Title));
-			}
-
-			// TranscludedIn
-			var transcludedIn = (List<Title>)this.TranscludedIn;
-			transcludedIn.Clear();
-			foreach (var transclusionHere in pageItem.TranscludedIn)
-			{
-				transcludedIn.Add(new Title(this.Site, transclusionHere.Title));
-			}
-
-			// Categories
-			var categories = (List<Category>)this.Categories;
-			categories.Clear();
-			foreach (var category in pageItem.Categories)
-			{
-				categories.Add(new Category(new TitleParts(this.Site, category.Title), category.SortKey, category.Hidden));
-			}
-
-			// Custom
+			this.PopulateRevisions(pageItem);
+			this.PopulateInfo(pageItem);
+			this.PopulateLinks(pageItem);
+			this.PopulateBacklinks(pageItem);
+			this.PopulateProperties(pageItem);
+			this.PopulateTemplates(pageItem);
+			this.PopulateCategories(pageItem);
 			this.PopulateCustomResults(pageItem);
 			this.IsLoaded = true;
 		}
@@ -402,6 +324,108 @@
 		/// <param name="pageItem">The page item.</param>
 		protected virtual void PopulateCustomResults(PageItem pageItem)
 		{
+		}
+		#endregion
+
+		#region Private Methods
+		private void PopulateBacklinks(PageItem pageItem)
+		{
+			var backlinks = (Dictionary<Title, BacklinksTypes>)this.Backlinks;
+			backlinks.Clear();
+			this.PopulateBacklinksType(backlinks, pageItem.FileUsages, BacklinksTypes.ImageUsage);
+			this.PopulateBacklinksType(backlinks, pageItem.LinksHere, BacklinksTypes.Backlinks);
+			this.PopulateBacklinksType(backlinks, pageItem.TranscludedIn, BacklinksTypes.EmbeddedIn);
+		}
+
+		private void PopulateBacklinksType(Dictionary<Title, BacklinksTypes> backlinks, IReadOnlyList<ITitleOptional> list, BacklinksTypes type)
+		{
+			foreach (var link in list)
+			{
+				var title = new Title(this.Site, link.Title);
+				if (backlinks.ContainsKey(title))
+				{
+					backlinks[title] |= type;
+				}
+				else
+				{
+					backlinks[title] = type;
+				}
+			}
+		}
+
+		private void PopulateCategories(PageItem pageItem)
+		{
+			var categories = (List<Category>)this.Categories;
+			categories.Clear();
+			foreach (var category in pageItem.Categories)
+			{
+				categories.Add(new Category(new TitleParts(this.Site, category.Title), category.SortKey, category.Hidden));
+			}
+		}
+
+		private void PopulateInfo(PageItem pageItem)
+		{
+			if (pageItem.Info is PageInfo info)
+			{
+				this.canonicalPath = info.CanonicalUrl;
+				this.CurrentRevisionId = info.LastRevisionId;
+				this.editPath = info.EditUrl;
+				this.IsNew = info.Flags.HasFlag(PageInfoFlags.New);
+				this.IsRedirect = info.Flags.HasFlag(PageInfoFlags.Redirect);
+				this.StartTimestamp = pageItem.Info.StartTimestamp;
+				this.Text = this.CurrentRevisionId != 0 ? this.CurrentRevision?.Text : null;
+			}
+			else
+			{
+				this.canonicalPath = null;
+				this.CurrentRevisionId = 0;
+				this.editPath = null;
+				this.IsNew = false;
+				this.IsRedirect = false;
+				this.StartTimestamp = this.Site.AbstractionLayer.CurrentTimestamp;
+				this.Text = null;
+			}
+		}
+
+		private void PopulateLinks(PageItem pageItem)
+		{
+			var links = (List<Title>)this.Links;
+			links.Clear();
+			foreach (var link in pageItem.Links)
+			{
+				links.Add(new Title(this.Site, link.Title));
+			}
+		}
+
+		private void PopulateProperties(PageItem pageItem)
+		{
+			var properties = (Dictionary<string, string>)this.Properties;
+			properties.Clear();
+			if (pageItem.Properties?.Count > 0)
+			{
+				properties.Clear();
+				properties.AddRange(pageItem.Properties);
+			}
+		}
+
+		private void PopulateRevisions(PageItem pageItem)
+		{
+			var revs = (List<Revision>)this.Revisions;
+			revs.Clear();
+			foreach (var rev in pageItem.Revisions)
+			{
+				revs.Add(new Revision(rev));
+			}
+		}
+
+		private void PopulateTemplates(PageItem pageItem)
+		{
+			var templates = (List<Title>)this.Templates;
+			templates.Clear();
+			foreach (var link in pageItem.Templates)
+			{
+				templates.Add(new Title(this.Site, link.Title));
+			}
 		}
 		#endregion
 	}

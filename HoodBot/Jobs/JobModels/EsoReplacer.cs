@@ -9,6 +9,7 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.WikiClasses;
+	using RobinHood70.WikiClasses.Parser;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiClasses.Searches;
 
@@ -50,9 +51,27 @@
 
 		public static string FirstLinksOnly(Site site, string text)
 		{
+			// TODO: Needs testing. Was replaced without testing during SiteLink revamp.
 			var uniqueLinks = new HashSet<string>();
-			var linkFinder = SiteLink.Find();
-			return linkFinder.Replace(text, (match) => LinkReplacer(match, site, uniqueLinks));
+			var nodes = WikiTextParser.Parse(text);
+			if (nodes.FindFirstLinked<LinkNode>() is LinkedListNode<IWikiNode> linkedNode)
+			{
+				var link = SiteLink.FromLinkNode(site, (LinkNode)linkedNode.Value);
+				if (!uniqueLinks.Contains(link.Title.FullPageName))
+				{
+					uniqueLinks.Add(link.Title.FullPageName);
+				}
+				else
+				{
+					if (linkedNode.List is NodeCollection list)
+					{
+						list.AddAfter(linkedNode, new TextNode(link.Text ?? string.Empty));
+						list.Remove(linkedNode);
+					}
+				}
+			}
+
+			return WikiTextVisitor.Raw(nodes);
 		}
 
 		public static void Initialize(WikiJob job)
@@ -211,19 +230,6 @@
 				x.From.Length == y.From.Length ? 0 :
 				x.From.Length < y.From.Length ? 1 :
 				-1);
-		}
-
-		private static string LinkReplacer(Match match, Site site, HashSet<string> uniqueLinks)
-		{
-			var link = new SiteLink(site, match.Value);
-			var linkTitle = link.ToString();
-			if (!uniqueLinks.Contains(linkTitle))
-			{
-				uniqueLinks.Add(linkTitle);
-				return match.Value;
-			}
-
-			return link.DisplayParameter?.ToString() ?? string.Empty;
 		}
 
 		private static string ReplaceTemplate(Match match)
