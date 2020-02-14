@@ -41,6 +41,7 @@
 		#region Public Override Methods
 		public void OnJobsCompleted(bool success)
 		{
+			this.FilterPages.Remove("Project:Bot Requests");
 			if (this.ResultPageHandler != null)
 			{
 				this.ResultPageHandler.Save();
@@ -48,11 +49,7 @@
 			}
 		}
 
-		public void OnJobsStarted()
-		{
-			this.FilterPages.Clear();
-			this.FilterPages.Add(new Title(this, MediaWikiNamespaces.Project, "Bot Requests"));
-		}
+		public void OnJobsStarted() => this.FilterPages.Add(new Title(this, MediaWikiNamespaces.Project, "Bot Requests"));
 		#endregion
 
 		#region Protected Override Methods
@@ -82,6 +79,21 @@
 			this.FilterPages.Add(this.LogPage);
 			this.JobLogger = new PageJobLogger(JobTypes.Write, this.LogPage);
 			//// Reinstate if pages become different: this.FilterPages.Add(this.StatusPage);
+		}
+
+		public override void Logout()
+		{
+			if (this.User != null)
+			{
+				this.FilterPages.Remove(this.User.FullPageName + "/Results");
+			}
+
+			if (this.LogPage != null)
+			{
+				this.FilterPages.Remove(this.LogPage);
+			}
+
+			base.Logout();
 		}
 		#endregion
 	}
