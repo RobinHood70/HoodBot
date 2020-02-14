@@ -62,21 +62,21 @@
 		#endregion
 
 		#region Operators
-		public static bool operator ==(Replacement left, Replacement right) => left is null ? right is null : left.Equals(right);
+		public static bool operator ==(Replacement? left, Replacement? right) => left is null ? right is null : left.Equals(right);
 
-		public static bool operator !=(Replacement left, Replacement right) => !(left == right);
+		public static bool operator !=(Replacement? left, Replacement? right) => !(left == right);
 
-		public static bool operator <(Replacement left, Replacement right) => left is null ? !(right is null) : left.CompareTo(right) < 0;
+		public static bool operator <(Replacement? left, Replacement? right) => left is null ? !(right is null) : left.CompareTo(right) < 0;
 
-		public static bool operator <=(Replacement left, Replacement right) => left is null || left.CompareTo(right) <= 0;
+		public static bool operator <=(Replacement? left, Replacement? right) => left is null || left.CompareTo(right) <= 0;
 
-		public static bool operator >(Replacement left, Replacement right) => !(left is null) && left.CompareTo(right) > 0;
+		public static bool operator >(Replacement? left, Replacement? right) => !(left is null) && left.CompareTo(right) > 0;
 
-		public static bool operator >=(Replacement left, Replacement right) => left is null ? right is null : left.CompareTo(right) >= 0;
+		public static bool operator >=(Replacement? left, Replacement? right) => left is null ? right is null : left.CompareTo(right) >= 0;
 		#endregion
 
 		#region Public Methods
-		public int CompareTo(Replacement other)
+		public int CompareTo(Replacement? other)
 		{
 			ThrowNull(other, nameof(other));
 			return TitleComparer<ISimpleTitle>.Instance.Compare(this.From, other.From);
