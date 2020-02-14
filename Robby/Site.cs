@@ -93,6 +93,7 @@
 		public Site(IWikiAbstractionLayer wiki)
 		{
 			ThrowNull(wiki, nameof(wiki));
+			this.FilterPages = new TitleCollection(this);
 			wiki.Initializing += this.AbstractionLayer_Initializing;
 			wiki.Initialized += this.AbstractionLayer_Initialized;
 			wiki.WarningOccurred += this.AbstractionLayer_WarningOccurred;
@@ -181,7 +182,7 @@
 
 		/// <summary>Gets the list of special pages on the site that should normally be filtered out of any results.</summary>
 		/// <value>The filter pages.</value>
-		public HashSet<ISimpleTitle> FilterPages { get; } = new HashSet<ISimpleTitle>();
+		public TitleCollection FilterPages { get; }
 
 		/// <summary>Gets the interwiki map.</summary>
 		/// <value>The interwiki map.</value>
