@@ -102,9 +102,10 @@
 		/// <returns>An <see cref="ErrorItem"/> with the error details. Can be null only if the error node parameter was null.</returns>
 		/// <remarks>This is used for sub-structures, such as move results, where the code/info nodes have prefixes.</remarks>
 		[return: NotNullIfNotNull("token")]
-		public static ErrorItem? GetError(this JToken? token, string codeName, string infoName) => token == null
-			? null
-			: new ErrorItem(token.MustHaveString(codeName), token.MustHaveString(infoName));
+		public static ErrorItem? GetError(this JToken? token, string codeName, string infoName) =>
+			token == null ? null :
+			token[codeName] == null ? null :
+			new ErrorItem(token.MustHaveString(codeName), token.MustHaveString(infoName));
 
 		/// <summary>Gets multiple error item nodes.</summary>
 		/// <param name="token">The token to examine.</param>
