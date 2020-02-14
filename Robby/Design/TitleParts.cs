@@ -231,11 +231,14 @@
 		/// <remarks>This is primarily intended for known-bare titles (e.g., template calls or gallery links) that may have been misidentified as being in a namespace other than what they actually are. The namespace will be changed to the new one and <see cref="OriginalNamespaceText"/> will be prepended to the page name. Note that OriginalNamespaceText will remain unaltered.</remarks>
 		public void CoerceTo(int namespaceId)
 		{
-			var originalNamespace = this.NamespaceId;
-			this.NamespaceId = namespaceId;
-			if (originalNamespace != MediaWikiNamespaces.Main || this.OriginalNamespaceText.Length > 0)
+			if (this.NamespaceId != namespaceId)
 			{
-				this.PageName = this.OriginalNamespaceText + ':' + this.PageName;
+				var originalNamespace = this.NamespaceId;
+				this.NamespaceId = namespaceId;
+				if (originalNamespace != MediaWikiNamespaces.Main || this.OriginalNamespaceText.Length > 0)
+				{
+					this.PageName = this.OriginalNamespaceText + ':' + this.PageName;
+				}
 			}
 		}
 
