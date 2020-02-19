@@ -148,7 +148,7 @@
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
 		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
-		public bool TryGetValue(TKey key, out TItem value) => this.Dictionary.TryGetValue(key, out value);
+		public bool TryGetValue(TKey key, [NotNullWhen(returnValue: true)] out TItem value) => this.Dictionary.TryGetValue(key, out value);
 
 		/// <summary>Returns the value associated with the specified key.</summary>
 		/// <param name="key">The key of the value to get.</param>
