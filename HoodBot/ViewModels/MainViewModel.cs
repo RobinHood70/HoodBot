@@ -291,6 +291,8 @@
 				this.canceller = cancelSource;
 				this.pauser = new PauseTokenSource();
 
+				this.StatusWriteLine("Initializing");
+				App.WpfYield();
 				var success = true;
 				var site = this.InitializeSite();
 				var jobRunner = site as IJobAware;
