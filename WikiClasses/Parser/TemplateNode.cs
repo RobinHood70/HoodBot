@@ -34,6 +34,29 @@
 			}
 		}
 
+		/// <summary>Gets the numbered parameters.</summary>
+		/// <value>The numbered parameters.</value>
+		/// <remarks>Parameters returned by this function include both fully anonymous and number-named parameters. The index returned is not guaranteed to be unique or consecutive. For example, a template like <c>{{Test|anon1a|anon2|1=anon1b|anon3}}</c> would return, in order: 1=anon1a, 2=anon2, 1=anon1b, 3=anon3.</remarks>
+		public IEnumerable<(int Index, ParameterNode Parameter)> NumberedParameters
+		{
+			get
+			{
+				var i = 0;
+				foreach (ParameterNode parameter in this.Parameters)
+				{
+					if (parameter.Name == null)
+					{
+						i++;
+						yield return (i, parameter);
+					}
+					else if (int.TryParse(parameter.NameToText(), out var namedNumber) && namedNumber > 0)
+					{
+						yield return (namedNumber, parameter);
+					}
+				}
+			}
+		}
+
 		/// <summary>Gets the parameters.</summary>
 		/// <value>The parameters.</value>
 		public NodeCollection Parameters { get; }
@@ -214,23 +237,72 @@
 			}
 			else
 			{
-				this.Parameters.AddLast(ParameterNode.FromParts(1, value));
+				this.Parameters.AddLast(ParameterNode.FromParts(value));
 			}
 		}
 
-		/// <summary>Finds the last parameter with the given name.</summary>
-		/// <param name="parameterName">The name of the parameter.</param>
-		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
-		public ParameterNode? FindParameter(string parameterName) => this.FindParameterLinked(parameterName)?.Value as ParameterNode;
+		/// <summary>Finds a numbered parameter, whether it's anonymous or a numerically named parameter.</summary>
+		/// <param name="number">The numbered parameter to search for.</param>
+		/// <returns>The parameter, if found; otherwise, <see langword="null"/>.</returns>
+		public ParameterNode? FindNumberedParameter(int number) => this.FindNumberedParameterLinked(number)?.Value as ParameterNode;
 
-		/// <summary>Finds the last parameter with the given name.</summary>
-		/// <param name="parameterName">The name of the parameter.</param>
-		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
-		public LinkedListNode<IWikiNode>? FindParameterLinked(string parameterName)
+		/// <summary>Finds a numbered parameter, whether it's anonymous or a numerically named parameter.</summary>
+		/// <param name="number">The numbered parameter to search for.</param>
+		/// <returns>The <see cref="LinkedListNode{T}"/> of the parameter, if found; otherwise, <see langword="null"/>.</returns>
+		public LinkedListNode<IWikiNode>? FindNumberedParameterLinked(int number)
 		{
+			LinkedListNode<IWikiNode>? retval = null;
+			var i = 0;
+			for (var node = this.Parameters.First; node != null; node = node.Next)
+			{
+				var parameter = (node.Value as ParameterNode) ?? throw new InvalidOperationException();
+				int foundNumber;
+				if (parameter.Name == null)
+				{
+					i++;
+					foundNumber = i;
+				}
+				else if (!int.TryParse(parameter.NameToText(), out foundNumber))
+				{
+					foundNumber = 0;
+				}
+
+				if (foundNumber == number)
+				{
+					retval = node;
+				}
+			}
+
+			return retval;
+		}
+
+		/// <summary>Finds the last parameter with any of the provided names.</summary>
+		/// <param name="parameterNames">The names of the parameters to search for.</param>
+		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
+		public ParameterNode? FindParameter(params string[] parameterNames) => this.FindParameterLinked(parameterNames)?.Value as ParameterNode;
+
+		/// <summary>Finds the last parameter with any of the provided names.</summary>
+		/// <param name="ignoreCase">Whether to ignore case when checking parameter names.</param>
+		/// <param name="parameterNames">The names of the parameters to search for.</param>
+		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
+		public ParameterNode? FindParameter(bool ignoreCase, params string[] parameterNames) => this.FindParameterLinked(ignoreCase, parameterNames)?.Value as ParameterNode;
+
+		/// <summary>Finds the last parameter with any of the provided names.</summary>
+		/// <param name="parameterNames">The names of the parameters to search for.</param>
+		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
+		public LinkedListNode<IWikiNode>? FindParameterLinked(params string[] parameterNames) => this.FindParameterLinked(false, parameterNames);
+
+		/// <summary>Finds the last parameter with any of the provided names.</summary>
+		/// <param name="ignoreCase">Whether to ignore case when checking parameter names.</param>
+		/// <param name="parameterNames">The names of the parameters to search for.</param>
+		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
+		public LinkedListNode<IWikiNode>? FindParameterLinked(bool ignoreCase, params string[] parameterNames)
+		{
+			ThrowNull(parameterNames, nameof(parameterNames));
+			var nameSet = new HashSet<string>(parameterNames, ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
 			for (var node = this.Parameters.Last; node != null; node = node.Previous)
 			{
-				if (node.Value is ParameterNode parameter && parameter.NameToText() == parameterName)
+				if (node.Value is ParameterNode parameter && parameter.NameToText() is string name && nameSet.Contains(name))
 				{
 					return node;
 				}
@@ -239,9 +311,53 @@
 			return null;
 		}
 
+		/// <summary>Finds the last parameter with any of the provided names.</summary>
+		/// <param name="parameterNames">The names of the parameters to search for.</param>
+		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
+		public IEnumerable<ParameterNode> FindParameters(params string[] parameterNames) => this.FindParameters(true, parameterNames);
+
+		/// <summary>Finds the last parameter with any of the provided names.</summary>
+		/// <param name="ignoreCase">Whether to ignore case when checking parameter names.</param>
+		/// <param name="parameterNames">The names of the parameters to search for.</param>
+		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
+		public IEnumerable<ParameterNode> FindParameters(bool ignoreCase, params string[] parameterNames)
+		{
+			ThrowNull(parameterNames, nameof(parameterNames));
+			var nameSet = new HashSet<string>(parameterNames, ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
+			for (var node = this.Parameters.Last; node != null; node = node.Previous)
+			{
+				if (node.Value is ParameterNode parameter && parameter.NameToText() is string name && nameSet.Contains(name))
+				{
+					yield return parameter;
+				}
+			}
+		}
+
+		/// <summary>Finds the last parameter with any of the provided names.</summary>
+		/// <param name="parameterNames">The names of the parameters to search for.</param>
+		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
+		public IEnumerable<LinkedListNode<IWikiNode>> FindParametersLinked(params string[] parameterNames) => this.FindParametersLinked(false, parameterNames);
+
+		/// <summary>Finds the last parameter with any of the provided names.</summary>
+		/// <param name="ignoreCase">Whether to ignore case when checking parameter names.</param>
+		/// <param name="parameterNames">The names of the parameters to search for.</param>
+		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
+		public IEnumerable<LinkedListNode<IWikiNode>> FindParametersLinked(bool ignoreCase, params string[] parameterNames)
+		{
+			ThrowNull(parameterNames, nameof(parameterNames));
+			var nameSet = new HashSet<string>(parameterNames, ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
+			for (var node = this.Parameters.Last; node != null; node = node.Previous)
+			{
+				if (node.Value is ParameterNode parameter && parameter.NameToText() is string name && nameSet.Contains(name))
+				{
+					yield return node;
+				}
+			}
+		}
+
 		/// <summary>Parses the title and returns the trimmed value.</summary>
 		/// <returns>The title.</returns>
-		public string? GetTitleValue() => this.Title == null ? null : WikiTextVisitor.Value(this.Title).Trim();
+		public string GetTitleValue() => WikiTextVisitor.Value(this.Title).Trim();
 
 		/// <summary>Returns the wiki text of the last parameter with the specified name.</summary>
 		/// <param name="parameterName">Name of the parameter.</param>
@@ -250,23 +366,6 @@
 		{
 			var param = this.FindParameter(parameterName);
 			return param == null ? null : WikiTextVisitor.Raw(param.Value);
-		}
-
-		/// <summary>Reindexes anonymous parameters.</summary>
-		/// <returns>The count of anonymous parameters.</returns>
-		/// <remarks>This method is temporary, until a more robust parameter collection is developed.</remarks>
-		public int Reindex()
-		{
-			var i = 0;
-			for (var current = this.Parameters.First; current != null; current = current.Next)
-			{
-				if (current.Value is ParameterNode param && param.Anonymous)
-				{
-					param.Index = ++i;
-				}
-			}
-
-			return i;
 		}
 
 		/// <summary>Finds the parameters with the given name and removes it.</summary>
@@ -281,6 +380,15 @@
 					this.Parameters.Remove(node);
 				}
 			}
+		}
+
+		/// <summary>Returns the value of the last parameter with the specified name.</summary>
+		/// <param name="parameterNumber">Number of the parameter.</param>
+		/// <returns>The value of the last parameter with the specified name.</returns>
+		public string? ValueOf(int parameterNumber)
+		{
+			var param = this.FindNumberedParameter(parameterNumber);
+			return param == null ? null : WikiTextVisitor.Value(param.Value).Trim();
 		}
 
 		/// <summary>Returns the value of the last parameter with the specified name.</summary>

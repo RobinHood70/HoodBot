@@ -108,16 +108,16 @@
 			}
 
 			// If the last job was the same as this job and has no end time, then it's either the current job or a resumed one.
-			if (string.IsNullOrEmpty(entry.ValueOf("3")) &&
-				entry.ValueOf("1")?.Trim() == this.logInfo.Title &&
+			if (string.IsNullOrEmpty(entry.ValueOf(3)) &&
+				entry.ValueOf(1)?.Trim() == this.logInfo.Title &&
 				(entry.ValueOf("info") ?? string.Empty) == (this.logInfo.Details ?? string.Empty))
 			{
 				// If the end date is not null, then we're at the end of the job, so update the end time.
 				if (this.end != null)
 				{
-					var start = entry.FindParameterLinked("2");
+					var start = entry.FindNumberedParameterLinked(2);
 					Debug.Assert(start != null, "Start parameter not found.");
-					var end = ParameterNode.FromParts(3, FormatDateTime(DateTime.UtcNow));
+					var end = ParameterNode.FromParts(FormatDateTime(DateTime.UtcNow));
 					entry.Parameters.AddAfter(start, end);
 					sender.Text = WikiTextVisitor.Raw(parsedText);
 				}

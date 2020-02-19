@@ -8,7 +8,6 @@
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
-	using RobinHood70.WikiClasses;
 	using static RobinHood70.WikiCommon.Globals;
 
 	#region Public Enumerations
@@ -58,25 +57,30 @@
 				throw new ArgumentException(CurrentCulture(Resources.PageNameInterwiki, fullPageName));
 			}
 
-			this.Site = titleParts.Site;
+			this.Site = site;
 			this.NamespaceId = titleParts.NamespaceId;
 			this.PageName = titleParts.PageName;
 			this.Key = this.FullPageName;
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the namespace and page name.</summary>
-		/// <param name="site">The site this title is from.</param>
-		/// <param name="ns">The namespace ID the title is in.</param>
-		/// <param name="pageName">The name of the page without the namespace.</param>
-		public Title(Site site, int ns, string? pageName)
+		/// <param name="site">The site the title is from.</param>
+		/// <param name="defaultNamespace">The default namespace if no namespace is specified in the page name.</param>
+		/// <param name="pageName">The page name. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
+		public Title(Site site, int defaultNamespace, string? pageName)
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(pageName, nameof(pageName));
-			pageName = WikiTextUtilities.DecodeAndNormalize(pageName);
+			var titleParts = new TitleParts(site, defaultNamespace, pageName);
+			if (titleParts.Interwiki != null && !titleParts.Interwiki.LocalWiki)
+			{
+				throw new ArgumentException(CurrentCulture(Resources.PageNameInterwiki, pageName));
+			}
+
 			this.Site = site;
-			this.NamespaceId = ns;
-			this.PageName = this.Namespace.CapitalizePageName(pageName);
-			this.Key = this.FullPageName;
+			this.NamespaceId = titleParts.NamespaceId;
+			this.PageName = titleParts.PageName;
+			this.Key = titleParts.FullPageName;
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class, copying the information from another <see cref="ISimpleTitle"/> object.</summary>
@@ -155,7 +159,7 @@
 		/// <summary>Gets a Title object for this Title's corresponding subject page.</summary>
 		/// <value>The subject page.</value>
 		/// <remarks>If this Title is a subject page, returns itself.</remarks>
-		public Title SubjectPage => this.Namespace.IsSubjectSpace ? this : new Title(this.Site, this.Namespace.SubjectSpaceId, this.PageName);
+		public ISimpleTitle SubjectPage => this.Namespace.IsSubjectSpace ? this : new Title(this.Site, this.Namespace.SubjectSpaceId, this.PageName);
 
 		/// <summary>Gets the value corresponding to {{SUBPAGENAME}}.</summary>
 		/// <value>The name of the subpage.</value>
@@ -179,7 +183,7 @@
 		/// <summary>Gets a Title object for this Title's corresponding subject page.</summary>
 		/// <value>The talk page.</value>
 		/// <remarks>If this Title is a talk page, the Title returned will be itself. Returns null for pages which have no associated talk page.</remarks>
-		public Title? TalkPage =>
+		public ISimpleTitle? TalkPage =>
 			this.Namespace.TalkSpaceId == null ? null
 			: this.Namespace.IsTalkSpace ? this
 			: new Title(this.Site, this.Namespace.TalkSpaceId.Value, this.PageName);
@@ -365,10 +369,32 @@
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
 		public ChangeValue<IDictionary<string, string>> Move(string to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
 		{
+			const string subPageName = "/SubPage";
+
 			ThrowNull(to, nameof(to));
 			ThrowNull(reason, nameof(reason));
+			var fakeResult = new Dictionary<string, string>();
+			if (!this.Site.EditingEnabled)
+			{
+				fakeResult.Add(this.FullPageName, to);
+				if (moveTalk && this.TalkPage != null)
+				{
+					var toPage = new Title(this.Site, to);
+					if (toPage.TalkPage is Title toTalk)
+					{
+						fakeResult.Add(this.TalkPage.FullPageName, toTalk.FullPageName);
+					}
+				}
+
+				if (moveSubpages && this.Namespace.AllowsSubpages)
+				{
+					var toSubPage = new Title(this.Site, to + subPageName);
+					fakeResult.Add(this.FullPageName + subPageName, toSubPage.FullPageName);
+				}
+			}
+
 			return this.Site.PublishChange(
-				new Dictionary<string, string>() { [this.FullPageName] = to },
+				fakeResult,
 				this,
 				new Dictionary<string, object?>
 				{
@@ -436,6 +462,9 @@
 			ThrowNull(to, nameof(to));
 			return this.Move(to.FullPageName, reason, moveTalk, moveSubpages, suppressRedirect);
 		}
+
+		/// <inheritdoc/>
+		public bool PageNameEquals(string pageName) => this.Namespace.PageNameEquals(this.PageName, pageName);
 
 		/// <summary>Protects the title.</summary>
 		/// <param name="reason">The reason for the protection.</param>
@@ -512,20 +541,6 @@
 			other != null &&
 			this.Namespace == other.Namespace &&
 			this.Namespace.PageNameEquals(this.PageName, other.PageName);
-
-		/// <summary>Indicates whether the current title is equivalent to the page name provided.</summary>
-		/// <param name="fullPageName">A page name to compare with this title.</param>
-		/// <returns><see langword="true"/> if the current object is equal to the <paramref name="fullPageName" /> parameter; otherwise, <see langword="false"/>.</returns>
-		public bool TextEquals(string fullPageName)
-		{
-			if (fullPageName is null)
-			{
-				return false;
-			}
-
-			var title = new TitleParts(this.Site, fullPageName);
-			return this.SimpleEquals(title);
-		}
 
 		/// <summary>Returns a <see cref="string" /> that represents this title.</summary>
 		/// <param name="forceLink">if set to <c>true</c>, forces link formatting in namespaces that require it (e.g., Category and File), regardless of the value of LeadingColon.</param>

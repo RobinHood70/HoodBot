@@ -2,27 +2,17 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Globalization;
 	using RobinHood70.WikiClasses.Properties;
 	using static WikiCommon.Globals;
 
 	/// <summary>Represents a parameter to a template or link.</summary>
 	public class ParameterNode : IWikiNode
 	{
-		#region Fields
-		private int index;
-		#endregion
-
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="ParameterNode"/> class.</summary>
-		/// <param name="index">The index.</param>
 		/// <param name="value">The value.</param>
-		public ParameterNode(int index, IEnumerable<IWikiNode> value)
-		{
-			this.index = index;
-			this.Value = new NodeCollection(this, value ?? throw ArgumentNull(nameof(value)));
-		}
+		public ParameterNode(IEnumerable<IWikiNode> value) => this.Value = new NodeCollection(this, value ?? throw ArgumentNull(nameof(value)));
 
 		/// <summary>Initializes a new instance of the <see cref="ParameterNode"/> class.</summary>
 		/// <param name="name">The name.</param>
@@ -50,22 +40,6 @@
 		/// <summary>Gets a value indicating whether this <see cref="ParameterNode">parameter</see> is anonymous.</summary>
 		/// <value><c>true</c> if anonymous; otherwise, <c>false</c>.</value>
 		public bool Anonymous => this.Name == null;
-
-		/// <summary>Gets or sets the index for anonymous parameters.</summary>
-		/// <value>The index.</value>
-		/// <remarks>If this value is set to a value greater than zero, <see cref="Name"/> is automatically set to <see langword="null"/>.</remarks>
-		public int Index
-		{
-			get => this.index;
-			set
-			{
-				this.index = value;
-				if (value > 0 && this.Name != null)
-				{
-					this.Name = null;
-				}
-			}
-		}
 
 		/// <summary>Gets the name of the parameter, if not anonymous.</summary>
 		/// <value>The name.</value>
@@ -102,10 +76,9 @@
 			if (other != null)
 			{
 				value = AddWhitespace(other.Value, value);
-				return FromParts(other.Index + 1, value);
 			}
 
-			return FromParts(1, value);
+			return FromParts(value);
 		}
 
 		/// <summary>Copies the format (surrounding whitespace) from another parameter into a new named parameter.</summary>
@@ -187,11 +160,10 @@
 				: throw new InvalidOperationException(CurrentCulture(Resources.MalformedNodeText, nameof(ParameterNode), nameof(FromText)));
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="ParameterNode"/> class.</summary>
-		/// <param name="index">The index.</param>
+		/// <summary>Initializes a new instance of the <see cref="ParameterNode"/> class as an anonymous parameter.</summary>
 		/// <param name="value">The value.</param>
 		/// <returns>A new ParameterNode.</returns>
-		public static ParameterNode FromParts(int index, string value) => new ParameterNode(index, WikiTextParser.Parse(value));
+		public static ParameterNode FromParts(string value) => new ParameterNode(WikiTextParser.Parse(value));
 
 		/// <summary>Initializes a new instance of the <see cref="ParameterNode"/> class.</summary>
 		/// <param name="name">The name.</param>
@@ -208,7 +180,7 @@
 
 		/// <summary>Gets the parameter's name, converting anonymous parameters to their numbered value.</summary>
 		/// <returns>The parameter name.</returns>
-		public string NameToText() => this.Name == null ? this.Index.ToString(CultureInfo.InvariantCulture) : WikiTextVisitor.Value(this.Name).Trim();
+		public string? NameToText() => this.Name == null ? null : WikiTextVisitor.Value(this.Name).Trim();
 
 		/// <summary>Sets the name from a list of nodes.</summary>
 		/// <param name="name">The name. If non-null, <see cref="Index"/> will be set to zero.</param>
@@ -236,7 +208,6 @@
 			}
 			else
 			{
-				this.index = 0;
 				if (this.Name == null)
 				{
 					this.Name = new NodeCollection(this, name);

@@ -1,20 +1,19 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
 	using System;
-	using System.Diagnostics.CodeAnalysis;
 	using Newtonsoft.Json;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using static RobinHood70.WikiCommon.Globals;
 
-	public enum ReplacementAction
+	[Flags]
+	public enum ReplacementActions
 	{
-		Unknown,
-		CustomMove,
-		EditOnly,
-		Move,
-		ProposeForDeletion,
-		Skip,
+		None = 0,
+		Move = 1,
+		Edit = 1 << 1,
+		Propose = 1 << 2,
+		Skip = 1 << 3,
 	}
 
 	public sealed class Replacement : IComparable<Replacement>, IEquatable<Replacement>
@@ -25,7 +24,8 @@
 		{
 		}
 
-		public Replacement(Title from, Title to)
+		[JsonConstructor]
+		public Replacement(ISimpleTitle from, ISimpleTitle to)
 		{
 			ThrowNull(from, nameof(from));
 			ThrowNull(to, nameof(to));
@@ -38,27 +38,22 @@
 			this.From = from;
 			this.To = to;
 		}
-
-#pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
-		[JsonConstructor]
-		private Replacement()
-		{
-		}
-#pragma warning restore CS8618
 		#endregion
 
 		#region Public Properties
-		public ReplacementAction Action { get; set; } = ReplacementAction.Unknown;
+		public ReplacementActions Actions { get; set; }
 
-		public string? ActionReason { get; set; }
+		public ISimpleTitle From { get; }
 
-		public string? DeleteReason { get; set; }
+		[JsonIgnore]
+		public Page? FromPage { get; internal set; }
 
-		[AllowNull]
-		public ISimpleTitle From { get; set; }
+		public string? Reason { get; set; }
 
-		[AllowNull]
 		public ISimpleTitle To { get; set; }
+
+		[JsonIgnore]
+		public Page? ToPage { get; set; }
 		#endregion
 
 		#region Operators
@@ -90,7 +85,7 @@
 
 		public override int GetHashCode() => this.From?.GetHashCode() ?? 0;
 
-		public override string ToString() => $"{this.Action}: {this.From.FullPageName} → {this.To.FullPageName}";
+		public override string ToString() => $"{this.Actions}: {this.From.FullPageName} → {this.To.FullPageName}";
 		#endregion
 	}
 }

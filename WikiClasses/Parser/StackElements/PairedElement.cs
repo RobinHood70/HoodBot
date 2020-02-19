@@ -60,14 +60,13 @@
 			}
 
 			var parameters = new List<ParameterNode>();
-			var argIndex = 1;
 			var pieceCount = this.NameValuePieces.Count;
 			var matchingCount = (found == ']' || count == 2) ? 2 : 3;
 			for (var i = 1; i < pieceCount; i++)
 			{
 				var nvPiece = this.NameValuePieces[i];
 				parameters.Add(nvPiece.SplitPos == -1 || matchingCount == 3
-					? new ParameterNode(argIndex++, nvPiece)
+					? new ParameterNode(nvPiece)
 					: new ParameterNode(nvPiece.GetRange(0, nvPiece.SplitPos), nvPiece.GetRange(nvPiece.SplitPos + 1, nvPiece.Count - nvPiece.SplitPos - 1)));
 			}
 

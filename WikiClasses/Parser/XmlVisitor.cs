@@ -129,7 +129,7 @@
 			}
 			else
 			{
-				this.BuildTag("name", new Dictionary<string, int> { ["index"] = node.Index }, null);
+				this.BuildTag("name", null, null);
 			}
 
 			this

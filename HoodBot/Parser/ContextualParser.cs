@@ -5,18 +5,26 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiClasses.Parser;
+	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
 	public class ContextualParser : NodeCollection
 	{
 		#region Constructors
-		public ContextualParser()
+		public ContextualParser(Site site)
 			: base(null)
 		{
+			ThrowNull(site, nameof(site));
+			this.Site = site;
 		}
 
 		public ContextualParser(ISimpleTitle title, NodeCollection nodes)
-			: base(null, nodes) => this.Title = title;
+			: base(null, nodes)
+		{
+			ThrowNull(title, nameof(title));
+			this.Title = title;
+			this.Site = title.Site;
+		}
 		#endregion
 
 		#region Public Properties
@@ -25,6 +33,8 @@
 		public IDictionary<string, string> Parameters { get; } = new Dictionary<string, string>();
 
 		public Dictionary<string, Func<string>> TemplateResolvers { get; } = new Dictionary<string, Func<string>>();
+
+		public Site Site { get; }
 
 		public ISimpleTitle? Title { get; set; }
 		#endregion
@@ -43,6 +53,43 @@
 			ThrowNull(text, nameof(text));
 			var nodes = WikiTextParser.Parse(text, inclusion, false);
 			return new ContextualParser(title, nodes);
+		}
+		#endregion
+
+		#region Public Methods
+		public bool AddCategory(string category)
+		{
+			ThrowNull(category, nameof(category));
+			var catTitle = new TitleParts(this.Site, MediaWikiNamespaces.Category, category);
+			LinkedListNode<IWikiNode>? lastCategory = null;
+			foreach (var link in this.FindAllLinked<LinkNode>())
+			{
+				var linkNode = (LinkNode)link.Value;
+				var titleText = WikiTextVisitor.Value(linkNode.Title);
+				var title = new TitleParts(this.Site, titleText);
+				if (title.NamespaceId == MediaWikiNamespaces.Category)
+				{
+					if (title.PageName == catTitle.PageName)
+					{
+						return false;
+					}
+
+					lastCategory = link;
+				}
+			}
+
+			var newCat = LinkNode.FromParts(catTitle.ToString());
+			if (lastCategory == null)
+			{
+				this.AddLast(new TextNode("\n\n"));
+				this.AddLast(newCat);
+			}
+			else
+			{
+				this.AddAfter(lastCategory, newCat);
+			}
+
+			return true;
 		}
 		#endregion
 	}

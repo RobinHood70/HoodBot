@@ -75,15 +75,13 @@
 				var replacement = new Replacement(dbPage, srPage);
 				if (dbPage.IsRedirect || dbPage.IsDisambiguation)
 				{
-					this.EditPages.Add(dbPage);
-					replacement.Action = ReplacementAction.EditOnly;
-					replacement.ActionReason = "Source is a redirect or disambiguation.";
+					replacement.Actions = ReplacementActions.Skip;
+					replacement.Reason = "Source is a redirect or disambiguation.";
 				}
 				else if (srPage.Exists && (srPage.IsRedirect || srPage.IsDisambiguation))
 				{
-					this.EditPages.Add(srPage);
-					replacement.Action = ReplacementAction.EditOnly;
-					replacement.ActionReason = "Destination is a redirect or disambiguation.";
+					replacement.Actions = ReplacementActions.Skip;
+					replacement.Reason = "Destination is a redirect or disambiguation.";
 				}
 
 				this.Replacements.Add(replacement);

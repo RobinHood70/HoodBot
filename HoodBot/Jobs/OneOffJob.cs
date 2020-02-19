@@ -38,7 +38,7 @@
 			var modHeader = parsedText.FindFirst<TemplateNode>(item => item.BacklinkTitleToParts(this.Site).PageName == "Mod Header");
 			if (modIconData != null && modHeader != null)
 			{
-				var modHeaderNameRaw = modHeader.FindParameter("1");
+				var modHeaderNameRaw = modHeader.FindNumberedParameter(1);
 				var modHeaderName = modHeaderNameRaw == null ? null : WikiTextVisitor.Value(modHeaderNameRaw.Value);
 				if (modIconData.Value is TemplateNode modIconTemplate && modHeaderName == page.PageName)
 				{
@@ -48,14 +48,14 @@
 					}
 
 					parsedText.Remove(modIconData);
-					var icon = modIconTemplate.FindParameter("1");
+					var icon = modIconTemplate.FindNumberedParameter(1);
 					if (icon != null)
 					{
 						icon.SetName("icon");
 						modHeader.Parameters.AddLast(icon);
 					}
 
-					var iconSize = modIconTemplate.FindParameter("2");
+					var iconSize = modIconTemplate.FindNumberedParameter(2);
 					if (iconSize != null)
 					{
 						var sizeValue = WikiTextVisitor.Raw(iconSize.Value);

@@ -45,21 +45,20 @@
 		/// <summary>Initializes a new instance of the <see cref="TitleParts"/> class.</summary>
 		/// <param name="site">The site the title is from.</param>
 		/// <param name="defaultNamespace">The default namespace if no namespace is specified in the page name.</param>
-		/// <param name="fullPageName">Full name of the page.</param>
+		/// <param name="pageName">The page name. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		public TitleParts(Site site, int defaultNamespace, string fullPageName)
+		public TitleParts(Site site, int defaultNamespace, string pageName)
 		{
 			ThrowNull(site, nameof(site));
-			ThrowNull(fullPageName, nameof(fullPageName));
+			ThrowNull(pageName, nameof(pageName));
 			this.Site = site;
 
 			// Pipes are not allowed in page names, so if we find one, only parse the first part; the remainder is likely cruft from a category or file link.
-			var nameRemaining = fullPageName.Split(TextArrays.Pipe, 2)[0].TrimEnd();
-			nameRemaining = WikiTextUtilities.DecodeAndNormalize(nameRemaining);
+			var nameRemaining = pageName.Split(TextArrays.Pipe, 2)[0];
 			if (nameRemaining.Length > 0 && nameRemaining[0] == ':')
 			{
 				this.LeadingColon = true;
-				nameRemaining = nameRemaining.Substring(1).TrimStart();
+				nameRemaining = nameRemaining.Substring(1);
 			}
 
 			// Title can be valid with no length when passed from a null template or link, for example.
@@ -74,23 +73,23 @@
 			var split = nameRemaining.Split(TextArrays.Colon, 3);
 			if (split.Length >= 2)
 			{
-				var key = split[0].TrimEnd();
+				var key = WikiTextUtilities.DecodeAndNormalize(split[0]).Trim();
 				if (site.Namespaces.ValueOrDefault(key) is Namespace ns)
 				{
 					nsFinal = ns.Id;
-					originalNs = key;
-					nameRemaining = split[1].TrimStart() + (split.Length == 3 ? ':' + split[2] : string.Empty);
+					originalNs = split[0];
+					nameRemaining = split[1] + (split.Length == 3 ? ':' + split[2] : string.Empty);
 				}
 				else if (site.InterwikiMap != null && site.InterwikiMap.TryGetValue(key, out var iw))
 				{
 					this.Interwiki = iw;
-					this.OriginalInterwikiText = key;
-					key = split[1].Trim();
+					this.OriginalInterwikiText = split[0];
+					key = WikiTextUtilities.DecodeAndNormalize(split[1]).Trim();
 					if (iw.LocalWiki && site.Namespaces.ValueOrDefault(key) is Namespace nsiw)
 					{
 						nsFinal = nsiw.Id;
-						originalNs = key;
-						nameRemaining = split[2].TrimStart();
+						originalNs = split[1];
+						nameRemaining = split[2];
 						if (nameRemaining.Length == 0)
 						{
 							this.PageName = site.MainPageName ?? "Main Page";
@@ -98,7 +97,7 @@
 					}
 					else
 					{
-						nameRemaining = split[1].TrimStart() + (split.Length == 3 ? ':' + split[2] : string.Empty);
+						nameRemaining = split[1] + (split.Length == 3 ? ':' + split[2] : string.Empty);
 					}
 				}
 			}
@@ -109,22 +108,23 @@
 
 			if (nameRemaining.Length == 0)
 			{
-				this.PageName = string.Empty;
 				this.OriginalPageNameText = string.Empty;
+				this.PageName = string.Empty;
 			}
 			else
 			{
 				split = nameRemaining.Split(TextArrays.Octothorp, 2);
 				if (split.Length == 2)
 				{
-					this.PageName = split[0];
 					this.OriginalPageNameText = split[0];
-					this.Fragment = split[1];
+					this.PageName = WikiTextUtilities.DecodeAndNormalize(split[0]).Trim();
+					this.OriginalFragmentText = split[1];
+					this.Fragment = WikiTextUtilities.DecodeAndNormalize(split[1]).TrimEnd();
 				}
 				else
 				{
-					this.PageName = nameRemaining;
 					this.OriginalPageNameText = nameRemaining;
+					this.PageName = WikiTextUtilities.DecodeAndNormalize(nameRemaining).Trim();
 				}
 			}
 
@@ -167,6 +167,25 @@
 
 		#region Public Properties
 
+		/// <summary>Gets the value corresponding to {{BASEPAGENAME}}.</summary>
+		/// <value>The name of the base page.</value>
+		public string BasePageName
+		{
+			get
+			{
+				if (this.Namespace.AllowsSubpages)
+				{
+					var subpageLoc = this.PageName.LastIndexOf('/');
+					if (subpageLoc >= 0)
+					{
+						return this.PageName.Substring(0, subpageLoc);
+					}
+				}
+
+				return this.PageName;
+			}
+		}
+
 		/// <summary>Gets or sets the title's fragment (the section or ID to scroll to).</summary>
 		/// <value>The fragment.</value>
 		public string? Fragment { get; set; }
@@ -197,19 +216,24 @@
 		/// <value>The namespace identifier.</value>
 		public int NamespaceId { get; set; }
 
+		/// <summary>Gets the fragment text passed to the constructor, after parsing.</summary>
+		/// <value>The fragment text.</value>
+		/// <remarks>This value can be used to bypass any automatic formatting or name changes caused by using the default Interwiki values, such as case changes. Parsing removes hidden characters and changes unusual spaces to normal spaces.</remarks>
+		public string? OriginalFragmentText { get; }
+
 		/// <summary>Gets the interwiki text passed to the constructor, after parsing.</summary>
 		/// <value>The interwiki text.</value>
-		/// <remarks>This value can be used to bypass any automatic formatting or name changes caused by using the default Interwiki values, such as case changes. Parsing removes hidden characters and changes unusual spaces to normal spaces. The value will also have been trimmed.</remarks>
+		/// <remarks>This value can be used to bypass any automatic formatting or name changes caused by using the default Interwiki values, such as case changes. Parsing removes hidden characters and changes unusual spaces to normal spaces.</remarks>
 		public string? OriginalInterwikiText { get; }
 
 		/// <summary>Gets the namespace text passed to the constructor, after parsing.</summary>
 		/// <value>The namespace text.</value>
-		/// <remarks>This value can be used to bypass any text changes caused by relying on the Namespace values, such as an alias having been used. Parsing removes hidden characters and changes unusual spaces to normal spaces. The value will also have been trimmed. This value will not change, even if the <see cref="Namespace"/> changes.</remarks>
+		/// <remarks>This value can be used to bypass any text changes caused by relying on the Namespace values, such as an alias having been used. Parsing removes hidden characters and changes unusual spaces to normal spaces.</remarks>
 		public string OriginalNamespaceText { get; }
 
 		/// <summary>Gets the page name text passed to the constructor, after parsing.</summary>
 		/// <value>The page name text.</value>
-		/// <remarks>This value can be used to bypass any text changes caused by using the PageName value, such as first-letter casing. Parsing removes hidden characters and changes unusual spaces to normal spaces. The value will also have been trimmed.</remarks>
+		/// <remarks>This value can be used to bypass any text changes caused by using the PageName value, such as first-letter casing. Parsing removes hidden characters and changes unusual spaces to normal spaces.</remarks>
 		public string OriginalPageNameText { get; }
 
 		/// <summary>Gets or sets the name of the page without the namespace.</summary>
@@ -219,12 +243,44 @@
 		/// <summary>Gets the site the title belongs to.</summary>
 		/// <value>The site.</value>
 		public Site Site { get; }
+
+		/// <summary>Gets a Title object for this Title's corresponding subject page.</summary>
+		/// <value>The subject page.</value>
+		/// <remarks>If this Title is a subject page, returns itself.</remarks>
+		public ISimpleTitle SubjectPage => this.Namespace.IsSubjectSpace ? this : new TitleParts(this.Site, this.Namespace.SubjectSpaceId, this.PageName);
+
+		/// <summary>Gets the value corresponding to {{SUBPAGENAME}}.</summary>
+		/// <value>The name of the subpage.</value>
+		public string SubpageName
+		{
+			get
+			{
+				if (this.Namespace.AllowsSubpages)
+				{
+					var subpageLoc = this.PageName.LastIndexOf('/');
+					if (subpageLoc >= 0)
+					{
+						return this.PageName.Substring(subpageLoc);
+					}
+				}
+
+				return this.PageName;
+			}
+		}
+
+		/// <summary>Gets a Title object for this Title's corresponding subject page.</summary>
+		/// <value>The talk page.</value>
+		/// <remarks>If this Title is a talk page, the Title returned will be itself. Returns null for pages which have no associated talk page.</remarks>
+		public ISimpleTitle? TalkPage =>
+			this.Namespace.TalkSpaceId == null ? null
+			: this.Namespace.IsTalkSpace ? this
+			: new TitleParts(this.Site, this.Namespace.TalkSpaceId.Value, this.PageName);
 		#endregion
 
 		#region Public Methods
 
 		/// <inheritdoc/>
-		public string AsLink() => "[[" + this.ToString(true) + "]]";
+		public string AsLink() => "[[" + this.ToString(true, false) + "]]";
 
 		/// <summary>Coerces the current namespace to another one.</summary>
 		/// <param name="namespaceId">The namespace identifier.</param>
@@ -240,6 +296,17 @@
 					this.PageName = this.OriginalNamespaceText + ':' + this.PageName;
 				}
 			}
+		}
+
+		/// <summary>Deconstructs this instance into its constituent parts.</summary>
+		/// <param name="site">The site this title is from.</param>
+		/// <param name="ns">The value returned by <see cref="Namespace"/>.</param>
+		/// <param name="pageName">The value returned by <see cref="PageName"/>.</param>
+		public void Deconstruct(out Site site, out int ns, out string pageName)
+		{
+			site = this.Site;
+			ns = this.NamespaceId;
+			pageName = this.PageName;
 		}
 
 		/// <summary>Deconstructs this instance into its constituent parts.</summary>
@@ -288,22 +355,37 @@
 
 		/// <summary>Returns a <see cref="string" /> that represents this title.</summary>
 		/// <param name="forceLink">if set to <c>true</c>, forces link formatting in namespaces that require it (e.g., Category and File), regardless of the value of LeadingColon.</param>
+		/// <param name="useOriginal">if set to <c>true</c>, uses the original text provided for the link rather than the current, formatted text.</param>
 		/// <returns>A <see cref="string" /> that represents this title.</returns>
-		public string ToString(bool forceLink)
+		public string ToString(bool forceLink, bool useOriginal)
 		{
-			var retval = this.LeadingColon || (forceLink && this.Namespace.IsForcedLinkSpace) ? ":" : string.Empty;
-			if (this.Interwiki != null)
+			string interwiki;
+			string ns;
+			string pagename;
+			string? fragment;
+			if (useOriginal)
 			{
-				retval += this.Interwiki.Prefix + ':';
+				interwiki = this.OriginalInterwikiText ?? string.Empty;
+				ns = WikiTextUtilities.DecodeAndNormalize(this.OriginalNamespaceText).Trim();
+				ns = this.OriginalNamespaceText + (ns.Length == 0 ? string.Empty : ":");
+				pagename = this.OriginalPageNameText;
+				fragment = this.OriginalFragmentText;
+			}
+			else
+			{
+				interwiki = this.Interwiki == null ? string.Empty : this.Interwiki.Prefix + ':';
+				ns = this.Namespace.DecoratedName;
+				pagename = this.PageName;
+				fragment = this.Fragment;
 			}
 
-			retval += this.FullPageName;
-			if (this.Fragment != null)
+			if (fragment != null)
 			{
-				retval += '#' + this.Fragment;
+				fragment = '#' + fragment;
 			}
 
-			return retval;
+			var colon = this.LeadingColon || (forceLink && this.Namespace.IsForcedLinkSpace) ? ":" : string.Empty;
+			return colon + interwiki + ns + pagename + fragment;
 		}
 		#endregion
 
@@ -311,7 +393,7 @@
 
 		/// <summary>Returns a <see cref="string" /> that represents this instance.</summary>
 		/// <returns>A <see cref="string" /> that represents this instance.</returns>
-		public override string ToString() => this.ToString(false);
+		public override string ToString() => this.ToString(false, false);
 		#endregion
 	}
 }
