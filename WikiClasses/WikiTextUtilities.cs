@@ -17,7 +17,7 @@
 		/// <summary>HTML-decodes the specified text, removes bidirectional text markers, and replaces space-like characters with spaces.</summary>
 		/// <param name="txt">The text to decode and normalize.</param>
 		/// <returns>The original text with bidirectional text markers removed and space-like characters converted to spaces.</returns>
-		public static string DecodeAndNormalize(string txt) => ReplaceTitleSpaces(RemoveInivisibleCharacters(WebUtility.HtmlDecode(txt)), false).Trim();
+		public static string DecodeAndNormalize(string txt) => ReplaceTitleSpaces(RemoveInivisibleCharacters(WebUtility.HtmlDecode(txt)), false);
 
 		/// <summary>Removes invisible characters from the text.</summary>
 		/// <param name="txt">The text.</param>
