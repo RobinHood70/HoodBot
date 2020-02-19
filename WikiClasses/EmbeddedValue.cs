@@ -56,8 +56,8 @@
 
 		#region Public Properties
 
-		/// <summary>Gets the length of the string, including surrounding whitespace.</summary>
-		/// <value>The length of the string, including surrounding whitespace.</value>
+		/// <summary>Gets the length of the string, including surrounding text.</summary>
+		/// <value>The length of the string, including surrounding text.</value>
 		public int Length => this.Before.Length + this.Value.Length + this.After.Length;
 
 		/// <summary>Gets or sets the text before the value.</summary>
@@ -85,9 +85,46 @@
 		public static bool operator !=(EmbeddedValue? string1, EmbeddedValue? string2) => !(string1 == string2);
 		#endregion
 
+		#region Public Static Methods
+
+		/// <summary>Returns the value provided as an <see cref="EmbeddedValue"/> with leading and trailing whitespace moved into the <see cref="Before"/> and <see cref="After"/> properties.</summary>
+		/// <param name="value">The value to split.</param>
+		/// <returns>An EmbeddedValue with the whitespace extracted.</returns>
+		public static EmbeddedValue FindWhitespace(string? value)
+		{
+			var before = string.Empty;
+			var after = string.Empty;
+			if (value != null)
+			{
+				int index;
+				for (index = 0; index < value.Length && char.IsWhiteSpace(value[index]); index++)
+				{
+				}
+
+				if (index > 0)
+				{
+					before = value.Substring(0, index);
+					value = value.Substring(index);
+				}
+
+				for (index = value.Length; index > 0 && char.IsWhiteSpace(value[index - 1]); index--)
+				{
+				}
+
+				if (index < value.Length)
+				{
+					after = value.Substring(index);
+					value = value.Substring(0, index);
+				}
+			}
+
+			return new EmbeddedValue(before, value, after);
+		}
+		#endregion
+
 		#region Public Methods
 
-		/// <summary>Builds the full text of the value, including surrounding whitespace, into the provided StringBuilder.</summary>
+		/// <summary>Builds the full text of the value, including surrounding text, into the provided StringBuilder.</summary>
 		/// <param name="builder">The StringBuilder to append to.</param>
 		/// <returns>The original StringBuilder.</returns>
 		public StringBuilder Build(StringBuilder builder)
