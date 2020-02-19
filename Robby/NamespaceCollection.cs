@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Read-only Namespace dictionary that can be referenced by ID and all valid names for the namespace.</summary>
@@ -143,14 +144,14 @@
 		/// <param name="id">The namespace ID to search for.</param>
 		/// <param name="value">The namespace object, if found; otherwise, null.</param>
 		/// <returns>True if the collection contains the desired namespace.</returns>
-		public bool TryGetValue(int id, out Namespace? value) => this.IdsDictionary.TryGetValue(id, out value);
+		public bool TryGetValue(int id, [NotNullWhen(returnValue: true)] out Namespace? value) => this.IdsDictionary.TryGetValue(id, out value);
 
 		/// <summary>Returns the namespace associated with the specified name.</summary>
 		/// <param name="name">Any of the names or aliases of the namespace to search for.</param>
 		/// <param name="value">The namespace object, if found; otherwise, null.</param>
 		/// <returns>True if the collection contains the desired namespace.</returns>
 		/// <exception cref="ArgumentNullException">The name is null.</exception>
-		public bool TryGetValue(string name, out Namespace? value) => this.NamesDictionary.TryGetValue(name, out value);
+		public bool TryGetValue(string name, [NotNullWhen(returnValue: true)] out Namespace? value) => this.NamesDictionary.TryGetValue(name, out value);
 
 		/// <summary>Returns the namespace associated with the specified ID.</summary>
 		/// <param name="id">The namespace ID to search for.</param>
