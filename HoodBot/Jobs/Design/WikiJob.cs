@@ -13,6 +13,7 @@
 	{
 		#region Fields
 		private int progress = 0;
+		private int progressMaximum = 1;
 		#endregion
 
 		#region Constructors
@@ -47,7 +48,17 @@
 			}
 		}
 
-		public int ProgressMaximum { get; protected set; } = 1;
+		public int ProgressMaximum
+		{
+			get => this.progressMaximum;
+			protected set
+			{
+				this.progressMaximum = value <= 0 ? 1 : value;
+				this.UpdateProgress();
+			}
+		}
+
+		public double ProgressPercent => (double)this.Progress / this.ProgressMaximum;
 
 		public Site Site { get; }
 		#endregion
@@ -74,6 +85,12 @@
 			this.BeforeMain();
 			this.Main();
 			this.JobCompleted();
+		}
+
+		public void ResetProgress(int progressMax)
+		{
+			this.Progress = 0;
+			this.ProgressMaximum = progressMax;
 		}
 
 		public void StatusWrite(string status)
@@ -150,14 +167,14 @@
 
 		protected virtual void UpdateProgress()
 		{
-			this.AsyncInfo.ProgressMonitor?.Report((double)this.Progress / this.ProgressMaximum);
+			this.AsyncInfo.ProgressMonitor?.Report(this.ProgressPercent);
 			this.FlowControlAsync();
 		}
 
 		// Same as UpdateProgress/UpdateStatus but with only one pause/cancel check.
 		protected virtual void UpdateProgressWrite(string status)
 		{
-			this.AsyncInfo.ProgressMonitor?.Report((double)this.Progress / this.ProgressMaximum);
+			this.AsyncInfo.ProgressMonitor?.Report(this.ProgressPercent);
 			this.AsyncInfo.StatusMonitor?.Report(status);
 			this.FlowControlAsync();
 		}
