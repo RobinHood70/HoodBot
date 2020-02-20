@@ -24,7 +24,7 @@
 		public TitleCollection GetAllTemplateTitles(params string[] templates)
 		{
 			var titles = new TitleCollection(this.Site, MediaWikiNamespaces.Template, templates);
-			var pages = PageCollection.Unlimited(this.Site, new PageLoadOptions(PageModules.None, true));
+			var pages = PageCollection.Unlimited(this.Site, PageModules.None, true);
 			pages.GetTitles(titles);
 			var pagesToCheck = new HashSet<Title>(pages, Title.SimpleEqualityComparer);
 			var alreadyChecked = new HashSet<Title>(Title.SimpleEqualityComparer);

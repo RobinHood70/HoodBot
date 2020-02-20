@@ -177,9 +177,10 @@
 		/// <summary>Initializes a new instance of the PageCollection class with no namespace limitations.</summary>
 		/// <param name="site">The site the pages are from. All pages in a collection must belong to the same site.</param>
 		/// <param name="modules">The module types indicating which data to retrieve from the site. Using this constructor, all modules will be loaded using default parameters.</param>
+		/// <param name="followRedirects">Whether to follow redirects.</param>
 		/// <returns>A new PageCollection with all namespace limitations disabled.</returns>
 		/// <remarks>This is a simple shortcut method to create PageCollections where limitations can safely be ignored.</remarks>
-		public static PageCollection Unlimited(Site site, PageModules modules) => new PageCollection(site, modules) { LimitationType = LimitationType.None };
+		public static PageCollection Unlimited(Site site, PageModules modules, bool followRedirects) => Unlimited(site, new PageLoadOptions(modules, followRedirects));
 		#endregion
 
 		#region Public Methods
