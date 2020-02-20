@@ -182,9 +182,8 @@
 		/// <returns>The parameter name.</returns>
 		public string? NameToText() => this.Name == null ? null : WikiTextVisitor.Value(this.Name).Trim();
 
-		/// <summary>Sets the name from a list of nodes.</summary>
-		/// <param name="name">The name. If non-null, <see cref="Index"/> will be set to zero.</param>
-		/// <remarks>If the name is currently null, a new NodeCollection will be created; otherwise, the existing collection will be cleared and re-populated, so existing references to Name will remain intact.</remarks>
+		/// <summary>Sets the name to the specified text.</summary>
+		/// <param name="name">The name.</param>
 		public void SetName(string name)
 		{
 			if (name == null)
@@ -198,8 +197,7 @@
 		}
 
 		/// <summary>Sets the name from a list of nodes.</summary>
-		/// <param name="name">The name. If non-null, <see cref="Index"/> will be set to zero.</param>
-		/// <remarks>If the name is currently null, a new NodeCollection will be created; otherwise, the existing collection will be cleared and re-populated, so existing references to Name will remain intact.</remarks>
+		/// <param name="name">The name.</param>
 		public void SetName(IEnumerable<IWikiNode>? name)
 		{
 			if (name == null)
@@ -217,6 +215,31 @@
 					this.Name.Clear();
 					this.Name.AddRange(name);
 				}
+			}
+		}
+
+		/// <summary>Sets the value to the specified text.</summary>
+		/// <param name="value">The value.</param>
+		public void SetValue(string value)
+		{
+			if (value == null)
+			{
+				this.Value.Clear();
+			}
+			else
+			{
+				this.SetValue(WikiTextParser.Parse(value));
+			}
+		}
+
+		/// <summary>Sets the value from a list of nodes.</summary>
+		/// <param name="value">The value.</param>
+		public void SetValue(IEnumerable<IWikiNode>? value)
+		{
+			this.Value.Clear();
+			if (value != null)
+			{
+				this.Value.AddRange(value);
 			}
 		}
 		#endregion
