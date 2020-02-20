@@ -347,6 +347,7 @@
 		/// <param name="reason">The reason for the move.</param>
 		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
+		/// <remarks>The original title object will remain unaltered after the move; it will not be updated to reflect the destination.</remarks>
 		public ChangeValue<IDictionary<string, string>> Move(string to, string reason, bool suppressRedirect) => this.Move(to, reason, false, false, suppressRedirect);
 
 		/// <summary>Moves the title to the name specified.</summary>
@@ -354,6 +355,7 @@
 		/// <param name="reason">The reason for the move.</param>
 		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
+		/// <remarks>The original title object will remain unaltered after the move; it will not be updated to reflect the destination.</remarks>
 		public ChangeValue<IDictionary<string, string>> Move(Title to, string reason, bool suppressRedirect)
 		{
 			ThrowNull(to, nameof(to));
@@ -367,6 +369,7 @@
 		/// <param name="moveSubpages">if set to <see langword="true"/>, moves all sub-pages of the original page.</param>
 		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
+		/// <remarks>The original title object will remain unaltered after the move; it will not be updated to reflect the destination.</remarks>
 		public ChangeValue<IDictionary<string, string>> Move(string to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
 		{
 			const string subPageName = "/SubPage";
@@ -435,10 +438,6 @@
 								throw new InvalidOperationException(); // item.From and/or item.To was null.
 							}
 						}
-
-						var titleParts = new TitleParts(this.Site, to);
-						this.NamespaceId = titleParts.NamespaceId;
-						this.PageName = titleParts.PageName;
 					}
 					catch (WikiException e)
 					{
@@ -457,6 +456,7 @@
 		/// <param name="moveSubpages">if set to <see langword="true"/>, moves all sub-pages of the original page.</param>
 		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
+		/// <remarks>The original title object will remain unaltered after the move; it will not be updated to reflect the destination.</remarks>
 		public ChangeValue<IDictionary<string, string>> Move(Title to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
 		{
 			ThrowNull(to, nameof(to));
