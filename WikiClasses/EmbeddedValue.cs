@@ -96,17 +96,8 @@
 			var after = string.Empty;
 			if (value != null)
 			{
+				// We do "after" first so that if the entire string is whitespace and includes a line-terminator, that's seen as the end of the line, not the beginning.
 				int index;
-				for (index = 0; index < value.Length && char.IsWhiteSpace(value[index]); index++)
-				{
-				}
-
-				if (index > 0)
-				{
-					before = value.Substring(0, index);
-					value = value.Substring(index);
-				}
-
 				for (index = value.Length; index > 0 && char.IsWhiteSpace(value[index - 1]); index--)
 				{
 				}
@@ -115,6 +106,16 @@
 				{
 					after = value.Substring(index);
 					value = value.Substring(0, index);
+				}
+
+				for (index = 0; index < value.Length && char.IsWhiteSpace(value[index]); index++)
+				{
+				}
+
+				if (index > 0)
+				{
+					before = value.Substring(0, index);
+					value = value.Substring(index);
 				}
 			}
 
