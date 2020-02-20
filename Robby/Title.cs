@@ -169,8 +169,8 @@
 			{
 				if (this.Namespace.AllowsSubpages)
 				{
-					var subpageLoc = this.PageName.LastIndexOf('/');
-					if (subpageLoc >= 0)
+					var subpageLoc = this.PageName.LastIndexOf('/') + 1;
+					if (subpageLoc > 0)
 					{
 						return this.PageName.Substring(subpageLoc);
 					}
@@ -545,7 +545,7 @@
 		/// <summary>Returns a <see cref="string" /> that represents this title.</summary>
 		/// <param name="forceLink">if set to <c>true</c>, forces link formatting in namespaces that require it (e.g., Category and File), regardless of the value of LeadingColon.</param>
 		/// <returns>A <see cref="string" /> that represents this title.</returns>
-		public string ToString(bool forceLink) => (forceLink ? ":" : string.Empty) + this.FullPageName;
+		public string ToString(bool forceLink) => (forceLink && this.Namespace.IsForcedLinkSpace ? ":" : string.Empty) + this.FullPageName;
 
 		/// <summary>Unprotects the title for the specified reason.</summary>
 		/// <param name="reason">The reason.</param>

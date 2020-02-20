@@ -257,8 +257,8 @@
 			{
 				if (this.Namespace.AllowsSubpages)
 				{
-					var subpageLoc = this.PageName.LastIndexOf('/');
-					if (subpageLoc >= 0)
+					var subpageLoc = this.PageName.LastIndexOf('/') + 1;
+					if (subpageLoc > 0)
 					{
 						return this.PageName.Substring(subpageLoc);
 					}
