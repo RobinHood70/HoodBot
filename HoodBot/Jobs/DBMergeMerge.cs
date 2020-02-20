@@ -70,8 +70,8 @@
 
 		protected override void MovePages()
 		{
-			var fromPages = PageCollection.Unlimited(this.Site);
-			var toPages = PageCollection.Unlimited(this.Site);
+			var fromPages = new PageCollection(this.Site);
+			var toPages = new PageCollection(this.Site);
 			foreach (var replacement in this.Replacements)
 			{
 				if (!replacement.Actions.HasFlag(ReplacementActions.Move))
@@ -95,7 +95,7 @@
 					replacement.ToPage.Text = WikiTextVisitor.Raw(toPageParser);
 				}
 
-				replacement.FromPage.Text = $"#REDIRECT [[{replacement.To}]]\n\n[[Category: Redirects from Moves]]";
+				replacement.FromPage.Text = $"#REDIRECT [[{replacement.To}]]\n\n[[Category:Redirects from Moves]]";
 
 				if (replacement.FromPage.TextModified)
 				{
@@ -196,7 +196,7 @@
 			}
 		}
 
-		private void AddRedirCat(Page page)
+		private void AddRedirCat(Page page, Replacement replacement)
 		{
 			if (page.NamespaceId != UespNamespaces.Dragonborn)
 			{

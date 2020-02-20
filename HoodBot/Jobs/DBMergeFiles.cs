@@ -37,6 +37,7 @@
 			this.TemplateReplacements.Add("NPC Summary", this.DroppedNsHandler);
 			this.TemplateReplacements.Add("NPC Summary Multi", this.DroppedNsHandler);
 			this.TemplateReplacements.Add("Place Summary", this.DroppedNsHandler);
+			this.TemplateReplacements.Add("Quest Fork", this.QuestForkHandler);
 			this.TemplateReplacements.Add("Quest Header", this.DroppedNsHandler);
 			this.TemplateReplacements.Add("Shout Summary", this.DroppedNsHandler);
 			this.TemplateReplacements.Add("Skyrim Settlements", this.DroppedNsHandler);
@@ -138,8 +139,7 @@
 					}
 					else
 					{
-						nsBase.Value.Clear();
-						nsBase.Value.AddText(value.Value == "DB" ? "SR" : "Skyrim");
+						nsBase.SetValue(value.Value == "DB" ? "SR" : "Skyrim");
 					}
 				}
 			}
@@ -176,6 +176,14 @@
 				{
 					DBMergeArticles.UpdateFileParameter(this, MediaWikiNamespaces.File, parameter.Parameter.Value);
 				}
+			}
+		}
+
+		private void QuestForkHandler(Page page, TemplateNode template)
+		{
+			foreach (var parameter in template.FindParameters(true, "imageL", "imageL2", "imageR", "imageR2"))
+			{
+				DBMergeArticles.UpdateFileParameter(this, MediaWikiNamespaces.File, parameter.Value);
 			}
 		}
 		#endregion

@@ -73,7 +73,7 @@
 		private string? baseArticlePath;
 		private CultureInfo culture = CultureInfo.CurrentCulture;
 		private IReadOnlyCollection<Title>? deletePreventionTemplates;
-		private IReadOnlyCollection<Title>? deletionTemplates;
+		private IReadOnlyCollection<Title>? deletionCategories;
 		private HashSet<Title>? disambiguationTemplates;
 		private IReadOnlyCollection<Title>? discussionPages;
 		private ReadOnlyKeyedCollection<string, InterwikiEntry>? interwikiMap;
@@ -161,7 +161,7 @@
 
 		/// <summary>Gets a list of templates indicating a page is flagged for deletion.</summary>
 		/// <value>A list of templates indicating a page is flagged for deletion.</value>
-		public IReadOnlyCollection<Title> DeletionTemplates => this.deletionTemplates ?? this.LoadDeletionTemplates();
+		public IReadOnlyCollection<Title> DeletionCategories => this.deletionCategories ?? this.LoadDeletionCategories();
 
 		/// <summary>Gets the list of disambiguation templates on wikis that aren't using Disambiguator.</summary>
 		/// <value>The disambiguation templates.</value>
@@ -839,7 +839,7 @@
 		/// <summary>When overridden in a derived class, loads the list of templates indicating a page is flagged for deletion.</summary>
 		/// <returns>A list of templates indicating a page is flagged for deletion.</returns>
 		/// <remarks>If not overridden, this will return an empty collection.</remarks>
-		protected virtual IReadOnlyCollection<Title> LoadDeletionTemplates() => this.deletionTemplates = Array.Empty<Title>();
+		protected virtual IReadOnlyCollection<Title> LoadDeletionCategories() => this.deletionCategories = Array.Empty<Title>();
 
 		/// <summary>Loads the disambiguation templates for wikis that don't use Disambiguator.</summary>
 		/// <returns>A collection of titles of disambiguation templates.</returns>

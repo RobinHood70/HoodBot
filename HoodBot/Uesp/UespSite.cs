@@ -70,7 +70,7 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override IReadOnlyCollection<Title> LoadDeletionTemplates() => new TitleCollection(this, MediaWikiNamespaces.Template, "Proposeddeletion", "Prod", "Speed", "Speedydeletion");
+		protected override IReadOnlyCollection<Title> LoadDeletionCategories() => new TitleCollection(this, MediaWikiNamespaces.Category, "Marked for Deletion");
 
 		protected override IReadOnlyCollection<Title> LoadDeletePreventionTemplates() => new TitleCollection(this, MediaWikiNamespaces.Template, "Empty category", "Linked image");
 
