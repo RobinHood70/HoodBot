@@ -34,7 +34,7 @@
 		/// <summary>On File-space pages, load file revision info, which includes information such as dimensions, MIME type, and pixel depth, along with the user and timestamp for the revision.</summary>
 		FileInfo = 1 << 6,
 
-		/// <summary>Load the list of categories in which this page is categorized.</summary>
+		/// <summary>Load information about the members of the category.</summary>
 		CategoryInfo = 1 << 7,
 
 		/// <summary>Load the list of backlinks to the page. When part of a pageset, this allows getting backlinks for multiple pages at once.</summary>
