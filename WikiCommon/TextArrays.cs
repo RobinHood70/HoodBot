@@ -11,6 +11,9 @@
 		public static readonly char[] At = { '@' };
 
 		[SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly", Justification = "As above.")]
+		public static readonly char[] CategorySeparators = { ' ', '-' };
+
+		[SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly", Justification = "As above.")]
 		public static readonly char[] Colon = { ':' };
 
 		[SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly", Justification = "As above.")]

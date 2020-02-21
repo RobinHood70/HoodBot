@@ -203,6 +203,10 @@
 		/// <value><see langword="true"/> if this instance is local wiki; otherwise, <see langword="false"/>.</value>
 		public bool IsLocal => this.Interwiki == null || this.Interwiki.LocalWiki;
 
+		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
+		/// <value>The name of the label.</value>
+		public string LabelName => Title.PipeTrick(this.PageName);
+
 		/// <summary>Gets or sets a value indicating whether the title had a leading colon.</summary>
 		/// <value><see langword="true"/> if there was a leading colon; otherwise, <see langword="false"/>.</value>
 		public bool LeadingColon { get; set; }
