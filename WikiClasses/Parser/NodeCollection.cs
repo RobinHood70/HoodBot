@@ -43,6 +43,32 @@
 
 		#region Public Properties
 
+		/// <summary>Gets the linked list nodes.</summary>
+		/// <value>The linked list nodes.</value>
+		public IEnumerable<LinkedListNode<IWikiNode>> LinkedNodes
+		{
+			get
+			{
+				for (var node = this.First; node != null; node = node.Next)
+				{
+					yield return node;
+				}
+			}
+		}
+
+		/// <summary>Gets the linked list nodesin reverse order.</summary>
+		/// <value>The linked list nodes.</value>
+		public IEnumerable<LinkedListNode<IWikiNode>> LinkedNodesReverse
+		{
+			get
+			{
+				for (var node = this.Last; node != null; node = node.Previous)
+				{
+					yield return node;
+				}
+			}
+		}
+
 		/// <summary>Gets the parent node for the collection.</summary>
 		/// <value>The node's parent, or <see langword="null"/> if this is the root node.</value>
 		public IWikiNode? Parent { get; }
@@ -376,15 +402,12 @@
 		public IEnumerable<LinkedListNode<IWikiNode>> FindAllLinked(Predicate<IWikiNode> condition)
 		{
 			ThrowNull(condition, nameof(condition));
-			var node = this.First;
-			while (node != null)
+			foreach (var node in this.LinkedNodes)
 			{
 				if (condition(node.Value))
 				{
 					yield return node;
 				}
-
-				node = node.Next;
 			}
 		}
 
@@ -404,15 +427,12 @@
 			where T : IWikiNode
 		{
 			ThrowNull(condition, nameof(condition));
-			var node = this.First;
-			while (node != null)
+			foreach (var node in this.LinkedNodes)
 			{
 				if (node.Value is T castNode && condition(castNode))
 				{
 					yield return node;
 				}
-
-				node = node.Next;
 			}
 		}
 
@@ -422,15 +442,12 @@
 		public IWikiNode? FindFirst(Predicate<IWikiNode> condition)
 		{
 			ThrowNull(condition, nameof(condition));
-			var node = this.First;
-			while (node != null)
+			foreach (var node in this.LinkedNodes)
 			{
 				if (condition(node.Value))
 				{
 					return node.Value;
 				}
-
-				node = node.Next;
 			}
 
 			return default;
@@ -466,18 +483,15 @@
 		/// <returns>The first node in the collection that satisfies the specified condition.</returns>
 		public LinkedListNode<IWikiNode>? FindFirstLinked(Predicate<IWikiNode> condition)
 		{
-			var node = this.First;
-			while (node != null)
+			foreach (var node in this.LinkedNodes)
 			{
 				if (condition(node.Value))
 				{
 					return node;
 				}
-
-				node = node.Next;
 			}
 
-			return null;
+			return default;
 		}
 
 		/// <summary>Finds the first <see cref="LinkedListNode{T}">LinkedListNode</see> of the specified type.</summary>
@@ -494,18 +508,15 @@
 			where T : IWikiNode
 		{
 			ThrowNull(condition, nameof(condition));
-			var node = this.First;
-			while (node != null)
+			foreach (var node in this.LinkedNodes)
 			{
 				if (node.Value is T castNode && condition(castNode))
 				{
 					return node;
 				}
-
-				node = node.Next;
 			}
 
-			return null;
+			return default;
 		}
 
 		/// <summary>Finds the first header with the specified text.</summary>
@@ -629,6 +640,7 @@
 		/// <remarks>While the parser does this while parsing wiki text, user manipulation can lead to multiple adjacent TextNodes. Use this function if you require your tree to be well formed, or before intensive operations if you believe it could be heavily fragmented.</remarks>
 		public void MergeText(bool recursive)
 		{
+			// TODO: Re-write as foreach.LinkedNode or similar.
 			var current = this.First;
 			while (current != null)
 			{
