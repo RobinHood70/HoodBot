@@ -47,7 +47,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIfNotNull("to", input.To)
 				.AddFilterText("prfiltercascade", "cascading", "noncascading", input.FilterCascading)
 				.AddFilterText("filterlanglinks", "withlanglinks", "withoutlanglinks", input.FilterLanguageLinks)
-				.AddFilterText("filterredir", "redirect", "nonredirects", input.FilterRedirects)
+				.AddFilterText("filterredir", "redirects", "nonredirects", input.FilterRedirects)
 				.AddIf("maxsize", input.MaximumSize, input.MaximumSize >= 0)
 				.AddIf("minsize", input.MinimumSize, input.MinimumSize >= 0)
 				.Add("namespace", input.Namespace)
