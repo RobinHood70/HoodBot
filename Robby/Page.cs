@@ -412,6 +412,7 @@
 		{
 			var revs = (List<Revision>)this.Revisions;
 			revs.Clear();
+			this.currentRevision = null;
 			foreach (var rev in pageItem.Revisions)
 			{
 				revs.Add(new Revision(rev));
