@@ -32,12 +32,11 @@
 		#region Public Methods
 		public void Add(Place place)
 		{
-			if (place.TitleName is string titleName && !this.ambiguousNames.Contains(titleName) && !this.secondary.ContainsKey(titleName))
+			if (place.TitleName is string titleName && !this.ambiguousNames.Contains(titleName))
 			{
-				if (this.secondary.ContainsKey(titleName))
+				if (this.secondary.Remove(titleName))
 				{
 					this.ambiguousNames.Add(titleName);
-					this.secondary.Remove(titleName);
 				}
 				else
 				{
