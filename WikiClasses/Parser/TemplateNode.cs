@@ -253,21 +253,17 @@
 		{
 			LinkedListNode<IWikiNode>? retval = null;
 			var i = 0;
-			for (var node = this.Parameters.First; node != null; node = node.Next)
+			foreach (var node in this.Parameters.LinkedNodes)
 			{
-				var parameter = (node.Value as ParameterNode) ?? throw new InvalidOperationException();
-				int foundNumber;
+				var parameter = (ParameterNode)node.Value;
 				if (parameter.Name == null)
 				{
-					i++;
-					foundNumber = i;
+					if (++i == number)
+					{
+						retval = node;
+					}
 				}
-				else if (!int.TryParse(parameter.NameToText(), out foundNumber))
-				{
-					foundNumber = 0;
-				}
-
-				if (foundNumber == number)
+				else if (int.TryParse(parameter.NameToText(), out var foundNumber) && foundNumber == number)
 				{
 					retval = node;
 				}
