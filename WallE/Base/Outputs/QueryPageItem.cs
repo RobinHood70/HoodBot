@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Base
 	public class QueryPageItem : ITitle
 	{
 		#region Constructors
-		internal QueryPageItem(int ns, string title, long value, IReadOnlyDictionary<string, object?>? databaseResult, DateTime? timestamp)
+		internal QueryPageItem(int ns, string title, string? value, IReadOnlyDictionary<string, object?>? databaseResult, DateTime? timestamp)
 		{
 			this.Namespace = ns;
 			this.Title = title;
@@ -26,7 +26,7 @@ namespace RobinHood70.WallE.Base
 
 		public string Title { get; }
 
-		public long Value { get; }
+		public string? Value { get; }
 		#endregion
 
 		#region Public Override Methods

@@ -92,7 +92,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			: new QueryPageItem(
 				ns: (int)result.MustHave("ns"),
 				title: result.MustHaveString("title"),
-				value: (long)result.MustHave("value"),
+				value: (string?)result.MustHave("value"),
 				databaseResult: result["databaseResult"]?.GetStringDictionary<object?>(),
 				timestamp: (DateTime?)result["timestamp"]);
 		#endregion
