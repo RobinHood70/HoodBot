@@ -184,6 +184,10 @@
 
 		#region Protected Methods
 
+		protected void AddReplacement(string from, string to) => this.Replacements.Add(new Replacement(this.Site, from, to));
+
+		protected void AddReplacement(Title from, Title to) => this.Replacements.Add(new Replacement(from, to));
+
 		// [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Optiona, to be called only when necessary.")]
 		protected IEnumerable<Replacement> LoadReplacementsFromFile(string fileName)
 		{
