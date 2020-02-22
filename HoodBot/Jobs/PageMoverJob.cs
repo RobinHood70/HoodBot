@@ -257,7 +257,7 @@
 				this.CheckRemaining();
 			}
 
-			// DeleteFiles();
+			DeleteFiles();
 		}
 		#endregion
 

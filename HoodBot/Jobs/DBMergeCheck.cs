@@ -49,12 +49,7 @@
 			}
 
 			var text = string.Join(", ", list);
-			if (text.Length > 0)
-			{
-				return " (" + text + ")";
-			}
-
-			return text;
+			return text.Length > 0 ? " (" + text + ")" : text;
 		}
 		#endregion
 

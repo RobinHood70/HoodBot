@@ -18,14 +18,12 @@
 		public DBMergeFiles(Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
 		{
-			this.MoveOptions = MoveOptions.None;
+			// this.FollowUpActions = FollowUpActions.EmitReport;
 			this.FollowUpActions = FollowUpActions.EmitReport | FollowUpActions.ProposeUnused | FollowUpActions.FixLinks | FollowUpActions.CheckLinksRemaining;
 			this.TemplateReplacements.Add("Gameinfo", this.GameInfoHandler);
 			this.TemplateReplacements.Add("Icon", this.IconHandler);
 			this.TemplateReplacements.Add("Multiple images", this.MultipleImagesHandler);
-			this.TemplateReplacements.Add("Multiple Images", this.MultipleImagesHandler);
 			this.TemplateReplacements.Add("Multiple Images 2", this.MultipleImages2Handler);
-			this.TemplateReplacements.Add("Multiple images 2", this.MultipleImages2Handler);
 			this.TemplateReplacements.Add("Artifact Summary", this.DroppedNsHandler);
 			this.TemplateReplacements.Add("City Summary", this.DroppedNsHandler);
 			this.TemplateReplacements.Add("Creature Summary", this.DroppedNsHandler);
@@ -52,6 +50,7 @@
 			ThrowNull(backlinkTitles, nameof(backlinkTitles));
 			base.FilterBacklinks(backlinkTitles);
 			backlinkTitles.Remove("User:HoodBot/Dragonborn Merge Actions");
+			backlinkTitles.Remove("UESPWiki:Dragonborn Merge Project");
 		}
 
 		protected override void PopulateReplacements()
@@ -74,7 +73,7 @@
 
 			foreach (var dbFile in dbFiles)
 			{
-				var fileName = dbFile.PageName.Substring(3).Replace(" 01.", ".", StringComparison.Ordinal);
+				var fileName = "SR-" + dbFile.PageName.Substring(3).Replace(" 01.", ".", StringComparison.Ordinal);
 				var extension = fileName.Substring(fileName.LastIndexOf('.'));
 				fileName = fileName.Substring(0, fileName.Length - extension.Length);
 				fileName = fileName switch

@@ -20,10 +20,9 @@
 		public DBMergeMerge(Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
 		{
-			DeleteFiles();
 			//// this.MoveAction = MoveAction.None;
 			//// this.FollowUpActions = FollowUpActions.EmitReport;
-			this.RedirectOption = RedirectOption.Create;
+			//// this.RedirectOption = RedirectOption.Create;
 			this.FromPageModules = PageModules.Info | PageModules.Properties | PageModules.Revisions;
 			this.ToPageModules = PageModules.Info | PageModules.Properties | PageModules.Revisions;
 			this.CustomEdit = this.AddRedirCat;
@@ -38,6 +37,7 @@
 			ThrowNull(backlinkTitles, nameof(backlinkTitles));
 			base.FilterBacklinks(backlinkTitles);
 			backlinkTitles.Remove("User:HoodBot/Dragonborn Merge Actions");
+			backlinkTitles.Remove("UESPWiki:Dragonborn Merge Project");
 
 			var alreadyRedirected = new TitleCollection(this.Site);
 			alreadyRedirected.GetCategoryMembers("DBMerge-Redirects");

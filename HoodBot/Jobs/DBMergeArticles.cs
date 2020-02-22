@@ -38,6 +38,7 @@
 
 		#region Fields
 		private readonly Dictionary<string, List<string>> dbArchives = new Dictionary<string, List<string>>();
+		private readonly TitleCollection toPages; // Post-job hack to fix missing SRExtra on Dragonborn Lore Books.
 		#endregion
 
 		#region Constructors
@@ -45,11 +46,11 @@
 		public DBMergeArticles(Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
 		{
-			this.Logger = null;
-			//// DeleteFiles();
-			this.MoveAction = MoveAction.None;
 			this.CustomEdit = this.UpdatePage;
-			this.FollowUpActions = FollowUpActions.EmitReport | FollowUpActions.CheckLinksRemaining | FollowUpActions.FixLinks;
+			this.MoveAction = MoveAction.None;
+			this.FollowUpActions = FollowUpActions.FixLinks;
+			this.toPages = new TitleCollection(site);
+			// this.FollowUpActions = FollowUpActions.EmitReport | FollowUpActions.CheckLinksRemaining | FollowUpActions.FixLinks;
 			this.RedirectOption = RedirectOption.Create;
 			this.ReplaceSingleNode = this.FixNsBase;
 			this.TemplateReplacements.Add("About", this.AboutHandler);
@@ -101,6 +102,11 @@
 		{
 			foreach (var replacement in this.Replacements)
 			{
+				this.toPages.Add(replacement.To);
+			}
+
+			foreach (var replacement in this.Replacements)
+			{
 				if (!replacement.Actions.HasFlag(ReplacementActions.Skip))
 				{
 					this.EditDictionary.Add(replacement.From, replacement);
@@ -134,6 +140,11 @@
 			ThrowNull(backlinkTitles, nameof(backlinkTitles));
 			//// base.FilterBacklinks(backlinkTitles);
 			backlinkTitles.Remove("User:HoodBot/Dragonborn Merge Actions");
+			backlinkTitles.Remove("UESPWiki:Dragonborn Merge Project");
+
+			// Fix Lore Books
+			backlinkTitles.GetBacklinks("Template:Lore Book", BacklinksTypes.EmbeddedIn);
+			backlinkTitles.GetBacklinks("Template:Lore Book Compilation", BacklinksTypes.EmbeddedIn);
 		}
 
 		protected override void PopulateReplacements()
@@ -422,6 +433,16 @@
 				linkedDb.List?.Remove(linkedDb);
 			}
 
+			// Note: this was a post-job fix, so does not account properly for DBName, as it would have had it been done pre-job.
+			if (template.FindParameterLinked("SRName") is LinkedListNode<IWikiNode> dbName && dbName.Value is ParameterNode dbNameParam && dbNameParam.Value.Count > 0)
+			{
+				var srPage = WikiTextVisitor.Value(dbNameParam.Value).Trim();
+				if (this.toPages.Contains(new TitleParts(this.Site, UespNamespaces.Skyrim, srPage)))
+				{
+					template.Parameters.AddAfter(dbName, ParameterNode.FromParts("SRExtra", "([[Skyrim:Dragonborn|Dragonborn]])\n"));
+				}
+			}
+
 			foreach (var parameter in template.Parameters)
 			{
 				if (parameter is ParameterNode node && node.Name != null)
@@ -527,11 +548,11 @@
 				var parser = ContextualParser.FromPage(page);
 				if (!page.Namespace.IsTalkSpace)
 				{
-					AddModHeader(parser);
+					// AddModHeader(parser);
 				}
 				else if (this.dbArchives.TryGetValue(page.BasePageName, out var archiveList))
 				{
-					UpdateArchiveTable(parser, archiveList);
+					// UpdateArchiveTable(parser, archiveList);
 				}
 
 				this.ReplaceNodes(page, parser);
