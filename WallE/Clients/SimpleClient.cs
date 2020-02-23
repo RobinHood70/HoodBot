@@ -472,6 +472,10 @@
 						throw;
 					}
 				}
+				catch (OperationCanceledException)
+				{
+					this.RequestDelay(TimeSpan.FromSeconds(5), DelayReason.Error, "Http timeout.");
+				}
 			}
 
 			throw new WikiException(CurrentCulture(Messages.ExcessiveLag));
