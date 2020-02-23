@@ -206,11 +206,7 @@
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
-			foreach (var category in this.Site.DeletionCategories)
-			{
-				this.ProposedDeletions.GetCategoryMembers(category.PageName, CategoryMemberTypes.Page | CategoryMemberTypes.File, false);
-			}
-
+			this.ProposedDeletions.AddRange(this.GetProposedDeletions());
 			foreach (var template in this.Site.DeletePreventionTemplates)
 			{
 				this.doNotDelete.GetBacklinks(template.FullPageName, BacklinksTypes.EmbeddedIn, true);

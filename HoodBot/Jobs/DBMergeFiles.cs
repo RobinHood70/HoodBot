@@ -55,8 +55,7 @@
 
 		protected override void PopulateReplacements()
 		{
-			var deleted = new TitleCollection(this.Site);
-			deleted.GetCategoryMembers("Marked for Deletion");
+			var deleted = TitleCollection.CopyFrom(this.ProposedDeletions);
 			deleted.FilterToNamespaces(MediaWikiNamespaces.File);
 
 			var dbFiles = new TitleCollection(this.Site);

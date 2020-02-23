@@ -33,6 +33,17 @@
 		#endregion
 
 		#region Protected Methods
+		protected TitleCollection GetProposedDeletions()
+		{
+			var deleted = new TitleCollection(this.Site);
+			foreach (var title in this.Site.DeletionCategories)
+			{
+				deleted.GetCategoryMembers(title.PageName);
+			}
+
+			return deleted;
+		}
+
 		protected void SavePage(Page page, string editSummary, bool isMinor)
 		{
 			ThrowNull(page, nameof(page));

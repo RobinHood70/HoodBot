@@ -139,8 +139,7 @@
 				dbCheckPages.Remove(title);
 			}
 
-			var deleted = new TitleCollection(this.Site);
-			deleted.GetCategoryMembers("Marked for Deletion");
+			var deleted = TitleCollection.CopyFrom(this.ProposedDeletions);
 			foreach (var title in deleted)
 			{
 				dbCheckPages.Remove(title);
