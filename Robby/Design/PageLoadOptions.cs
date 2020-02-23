@@ -52,6 +52,9 @@
 		/// <summary>Loads default page information, including flags, current timestamp, and current page text.</summary>
 		Default = Info | Revisions,
 
+		/// <summary>Load all backlink types.</summary>
+		Backlinks = FileUsage | LinksHere | TranscludedIn,
+
 		/// <summary>Load everything Robby is capable of handling.</summary>
 		All = Categories | CategoryInfo | FileInfo | FileUsage | Info | Links | LinksHere | Properties | Revisions | Templates | TranscludedIn | Custom
 	}

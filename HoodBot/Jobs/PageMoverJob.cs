@@ -155,7 +155,7 @@
 
 		protected PageModules FromPageModules
 		{
-			get => this.fromPageModules | PageModules.Info | PageModules.FileUsage | PageModules.LinksHere | PageModules.TranscludedIn;
+			get => this.fromPageModules | PageModules.Info | PageModules.Backlinks;
 			set => this.fromPageModules = value;
 		}
 
@@ -274,7 +274,7 @@
 		{
 			this.StatusWriteLine("Checking remaining pages");
 			var leftovers = new TitleCollection(this.Site);
-			var allBacklinks = PageCollection.Unlimited(this.Site, PageModules.Info | PageModules.FileUsage | PageModules.LinksHere | PageModules.TranscludedIn, false);
+			var allBacklinks = PageCollection.Unlimited(this.Site, PageModules.Info | PageModules.Backlinks, false);
 			allBacklinks.GetTitles(this.replacements.Keys);
 			foreach (var page in allBacklinks)
 			{
