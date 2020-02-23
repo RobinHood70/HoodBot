@@ -242,6 +242,10 @@
 				this.Value.AddRange(value);
 			}
 		}
+
+		/// <summary>Gets the parameter's trimmed value.</summary>
+		/// <returns>The parameter value.</returns>
+		public string? ValueToText() => this.Value == null ? null : WikiTextVisitor.Value(this.Value).Trim();
 		#endregion
 
 		#region Public Override Methods
