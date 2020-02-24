@@ -24,6 +24,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Remove="Old Jobs\DBMergeArticles.cs" />
+		<Compile Remove="Old Jobs\DBMergeFiles.cs" />
+		<Compile Remove="Old Jobs\DBMergeIdentifyConflicts.cs" />
+		<Compile Remove="Old Jobs\DBMergeMerge.cs" />
+		<Compile Remove="Old Jobs\DBMergePrep.cs" />
 		<Compile Remove="Old Jobs\EsoMatchIcons.cs" />
 		<Compile Remove="Old Jobs\UndoLocChanges.cs" />
 		<Compile Remove="Old Jobs\UntranscludeLore.cs" />
@@ -34,6 +39,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Include="Old Jobs\DBMergeArticles.cs" />
+		<None Include="Old Jobs\DBMergeFiles.cs" />
+		<None Include="Old Jobs\DBMergeIdentifyConflicts.cs" />
+		<None Include="Old Jobs\DBMergeMerge.cs" />
+		<None Include="Old Jobs\DBMergePrep.cs" />
 		<None Include="Old Jobs\EsoMatchIcons.cs" />
 		<None Include="Old Jobs\UndoLocChanges.cs" />
 		<None Include="Old Jobs\UntranscludeLore.cs" />
