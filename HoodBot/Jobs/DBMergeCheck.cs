@@ -15,7 +15,7 @@
 		#endregion
 
 		#region Constructors
-		[JobInfo("Final Check", "Dragonborn Merge")]
+		[JobInfo(/*"Final Check", "Dragonborn Merge"*/ "Dragonborn Final Check")]
 		public DBMergeCheck([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
 		{
@@ -38,8 +38,10 @@
 
 		protected override void Main()
 		{
-			this.MainPages();
-			this.Backlinks();
+			var pages = this.MainPages();
+			this.RemainingNonRedirects(pages);
+			this.RemainingRedirects(pages);
+			this.Backlinks(pages);
 			this.SeeAlso();
 
 			this.Results?.Save();
@@ -47,7 +49,7 @@
 		#endregion
 
 		#region Private Methods
-		private void Backlinks()
+		private void Backlinks(PageCollection ignore)
 		{
 			var pageCollection = new PageCollection(this.Site, PageModules.CategoryInfo | PageModules.Backlinks);
 			pageCollection.GetQueryPage("Wantedcategories");
@@ -66,10 +68,15 @@
 			pageCollection.GetNamespace(MediaWikiNamespaces.File, Filter.Any, "DB-");
 			pageCollection.GetNamespace(MediaWikiNamespaces.Category, Filter.Any, "Dragonborn");
 			this.FilterPages(pageCollection);
+			foreach (var page in ignore)
+			{
+				pageCollection.Remove(page);
+			}
+
 			pageCollection.Sort();
 
 			this.WriteLine("\n== Pages Linked To ==");
-			this.WriteLine("Pages here have incoming links that should be adjusted to point to the correct Skyrim page instead.");
+			this.WriteLine("Pages here have incoming links that should be adjusted to point to the correct Skyrim page instead (excluding those reported in sections above).");
 			foreach (var page in pageCollection)
 			{
 				var text = this.GetTextForPage(page);
@@ -114,7 +121,7 @@
 			}
 		}
 
-		private void MainPages()
+		private PageCollection MainPages()
 		{
 			var pageCollection = new PageCollection(this.Site, PageModules.Categories | PageModules.CategoryInfo | PageModules.Backlinks | PageModules.Info | PageModules.Properties);
 			pageCollection.GetNamespace(UespNamespaces.Dragonborn, Filter.Any);
@@ -122,6 +129,11 @@
 			this.FilterPages(pageCollection);
 			pageCollection.Sort();
 
+			return pageCollection;
+		}
+
+		private void RemainingNonRedirects(PageCollection pageCollection)
+		{
 			this.WriteLine("== Remaining Non-Redirect Pages ==");
 			this.WriteLine("Pages here were tagged as requiring human intervention, either due to complexity of the merge or because the target was a redirect. If desired, the bot can be used to do straight-up moves to a different name, but anything more complex than that should be handled by a human.");
 			foreach (var page in pageCollection)
@@ -131,7 +143,10 @@
 					this.WriteLine("* " + page.AsLink());
 				}
 			}
+		}
 
+		private void RemainingRedirects(PageCollection pageCollection)
+		{
 			this.WriteLine("\n== Remaining Redirect Pages ==");
 			this.WriteLine("Pages here were redirects ''before'' any page moves occurred. They should be checked against the Skyrim page of the same name to figure out what to do with them.");
 			foreach (var page in pageCollection)
