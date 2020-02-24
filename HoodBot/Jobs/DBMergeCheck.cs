@@ -10,17 +10,32 @@
 
 	public class DBMergeCheck : EditJob
 	{
+		#region Fields
+		private TitleCollection filter;
+		#endregion
+
 		#region Constructors
 		[JobInfo("Final Check", "Dragonborn Merge")]
 		public DBMergeCheck([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
 		{
+			var checkPage = new Title(this.Site, "Project:Dragonborn Merge Project/Merge Results");
+
 			this.Logger = null;
-			this.Results = new PageResultHandler(new TitleParts(this.Site, "Project:Dragonborn Merge Project/Merge Results"));
+			this.Results = new PageResultHandler(checkPage);
+
+			this.filter = new TitleCollection(site)
+			{
+				checkPage,
+				"User:HoodBot/Results",
+				"Project:Dragonborn Merge Project",
+			};
 		}
 		#endregion
 
-		#region Portected Override Methods
+		#region Protected Override Methods
+		protected override void BeforeLogging() => this.filter.AddRange(this.GetProposedDeletions());
+
 		protected override void Main()
 		{
 			this.MainPages();
@@ -31,32 +46,10 @@
 		}
 		#endregion
 
-		#region Private Static Methods
-		private static string GetTextForPage(Page page)
-		{
-			var catSize = page is CategoryPage catPage ? catPage.FullCount : 0;
-			var list = new List<string>();
-			if (page.Backlinks.Count > 0)
-			{
-				var links = "link" + (page.Backlinks.Count == 1 ? string.Empty : "s");
-				list.Add($"{page.Backlinks.Count} {links}");
-			}
-
-			if (catSize > 0)
-			{
-				var cats = "category member" + (catSize == 1 ? string.Empty : "s");
-				list.Add($"{catSize} {cats}");
-			}
-
-			var text = string.Join(", ", list);
-			return text.Length > 0 ? " (" + text + ")" : text;
-		}
-		#endregion
-
 		#region Private Methods
 		private void Backlinks()
 		{
-			var pageCollection = new PageCollection(this.Site, PageModules.CategoryInfo | PageModules.FileUsage | PageModules.LinksHere | PageModules.TranscludedIn);
+			var pageCollection = new PageCollection(this.Site, PageModules.CategoryInfo | PageModules.Backlinks);
 			pageCollection.GetQueryPage("Wantedcategories");
 			pageCollection.GetQueryPage("Wantedfiles");
 			for (var i = pageCollection.Count - 1; i >= 0; i--)
@@ -72,13 +65,14 @@
 			pageCollection.GetNamespace(UespNamespaces.DragonbornTalk, Filter.Any);
 			pageCollection.GetNamespace(MediaWikiNamespaces.File, Filter.Any, "DB-");
 			pageCollection.GetNamespace(MediaWikiNamespaces.Category, Filter.Any, "Dragonborn");
+			this.FilterPages(pageCollection);
 			pageCollection.Sort();
 
 			this.WriteLine("\n== Pages Linked To ==");
 			this.WriteLine("Pages here have incoming links that should be adjusted to point to the correct Skyrim page instead.");
 			foreach (var page in pageCollection)
 			{
-				var text = GetTextForPage(page);
+				var text = this.GetTextForPage(page);
 				if (text.Length > 0)
 				{
 					this.WriteLine($"* {page.AsLink()}{text}");
@@ -86,11 +80,46 @@
 			}
 		}
 
+		private string GetTextForPage(Page page)
+		{
+			var catSize = page is CategoryPage catPage ? catPage.FullCount : 0;
+			var list = new List<string>();
+			var backlinks = (Dictionary<Title, BacklinksTypes>)page.Backlinks;
+			foreach (var title in this.filter)
+			{
+				backlinks.Remove(title);
+			}
+
+			if (page.Backlinks.Count > 0)
+			{
+				var links = "link" + (page.Backlinks.Count == 1 ? string.Empty : "s");
+				list.Add($"{page.Backlinks.Count} {links}");
+			}
+
+			if (catSize > 0)
+			{
+				var cats = "category member" + (catSize == 1 ? string.Empty : "s");
+				list.Add($"{catSize} {cats}");
+			}
+
+			var text = string.Join(", ", list);
+			return text.Length > 0 ? " (" + text + ")" : text;
+		}
+
+		private void FilterPages(PageCollection pageCollection)
+		{
+			foreach (var item in this.filter)
+			{
+				pageCollection.Remove(item);
+			}
+		}
+
 		private void MainPages()
 		{
-			var pageCollection = new PageCollection(this.Site, PageModules.Categories | PageModules.CategoryInfo | PageModules.FileUsage | PageModules.Info | PageModules.LinksHere | PageModules.Properties | PageModules.TranscludedIn);
+			var pageCollection = new PageCollection(this.Site, PageModules.Categories | PageModules.CategoryInfo | PageModules.Backlinks | PageModules.Info | PageModules.Properties);
 			pageCollection.GetNamespace(UespNamespaces.Dragonborn, Filter.Any);
 			pageCollection.GetNamespace(UespNamespaces.DragonbornTalk, Filter.Any);
+			this.FilterPages(pageCollection);
 			pageCollection.Sort();
 
 			this.WriteLine("== Remaining Non-Redirect Pages ==");
@@ -115,7 +144,11 @@
 					{
 						NamespaceId = page.NamespaceId == UespNamespaces.Dragonborn ? UespNamespaces.Skyrim : UespNamespaces.SkyrimTalk
 					};
-					this.WriteLine($"* {page.PageName}: {{{{Pl|{page.FullPageName}|{page.Namespace.Name}|3=redirect=no}}}}{GetTextForPage(page)} / {{{{Pl|{newTitle.FullPageName}|{newTitle.Namespace.Name}|3=redirect=no}}}}");
+					var pageInfo = this.GetTextForPage(page);
+					if (pageInfo.Length > 0)
+					{
+						this.WriteLine($"* {page.PageName}: {{{{Pl|{page.FullPageName}|{page.Namespace.Name}|3=redirect=no}}}}{pageInfo} / {{{{Pl|{newTitle.FullPageName}|{newTitle.Namespace.Name}|3=redirect=no}}}}");
+					}
 				}
 			}
 		}
@@ -144,7 +177,7 @@
 					var catPage = (CategoryPage)page;
 					if (catPage.FullCount > 0)
 					{
-						this.WriteLine($"* {page.AsLink()}{GetTextForPage(page)}");
+						this.WriteLine($"* {page.AsLink()}{this.GetTextForPage(page)}");
 					}
 				}
 			}

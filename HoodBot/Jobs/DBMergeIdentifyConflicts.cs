@@ -31,8 +31,7 @@
 			var ignored = new TitleCollection(this.Site);
 			ignored.GetCategoryMembers("DBMerge-No Bot");
 
-			var deleted = new TitleCollection(this.Site);
-			deleted.GetCategoryMembers("Marked for Deletion");
+			var deleted = this.GetProposedDeletions();
 
 			dbPages.Sort();
 			this.WriteLine("Any page not mentioned below will be moved normally.");

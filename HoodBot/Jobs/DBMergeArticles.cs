@@ -38,7 +38,6 @@
 
 		#region Fields
 		private readonly Dictionary<string, List<string>> dbArchives = new Dictionary<string, List<string>>();
-		private readonly TitleCollection toPages; // Post-job hack to fix missing SRExtra on Dragonborn Lore Books.
 		#endregion
 
 		#region Constructors
@@ -48,9 +47,7 @@
 		{
 			this.CustomEdit = this.UpdatePage;
 			this.MoveAction = MoveAction.None;
-			this.FollowUpActions = FollowUpActions.FixLinks;
-			this.toPages = new TitleCollection(site);
-			// this.FollowUpActions = FollowUpActions.EmitReport | FollowUpActions.CheckLinksRemaining | FollowUpActions.FixLinks;
+			this.FollowUpActions = FollowUpActions.CheckLinksRemaining | FollowUpActions.FixLinks;
 			this.RedirectOption = RedirectOption.Create;
 			this.ReplaceSingleNode = this.FixNsBase;
 			this.TemplateReplacements.Add("About", this.AboutHandler);
@@ -102,11 +99,6 @@
 		{
 			foreach (var replacement in this.Replacements)
 			{
-				this.toPages.Add(replacement.To);
-			}
-
-			foreach (var replacement in this.Replacements)
-			{
 				if (!replacement.Actions.HasFlag(ReplacementActions.Skip))
 				{
 					this.EditDictionary.Add(replacement.From, replacement);
@@ -114,12 +106,9 @@
 					{
 						var basePageName = replacement.To.BasePageName;
 						var talkTitle = new TitleParts(this.Site, replacement.To.NamespaceId, basePageName);
-						if (!this.EditDictionary.ContainsKey(talkTitle))
-						{
-							// This is a bit kludgey, and would make more sense outside of the EditDictionary context, but this avoids multiple edits to the same page.
-							this.EditDictionary[talkTitle] = replacement;
-						}
 
+						// This is a bit kludgey, and would make more sense outside of the EditDictionary context, but this avoids multiple edits to the same page.
+						this.EditDictionary.TryAdd(talkTitle, replacement);
 						if (!this.dbArchives.TryGetValue(basePageName, out var list))
 						{
 							list = new List<string>();
@@ -426,33 +415,26 @@
 
 		private void LoreBookHandler(Page page, TemplateNode template)
 		{
-			if (template.FindParameterLinked("DB") is LinkedListNode<IWikiNode> linkedDb && linkedDb.Value is ParameterNode db && db.Value.Count > 0)
+			LinkedListNode<IWikiNode>? addExtra = null;
+			foreach (var node in template.Parameters.LinkedNodes)
 			{
-				template.Parameters.AddAfter(linkedDb, ParameterNode.FromParts("SRExtra", "([[Skyrim:Dragonborn|Dragonborn]])\n"));
-				template.Parameters.AddAfter(linkedDb, ParameterNode.FromParts("SR", "1\n"));
-				linkedDb.List?.Remove(linkedDb);
-			}
-
-			// Note: this was a post-job fix, so does not account properly for DBName, as it would have had it been done pre-job.
-			if (template.FindParameterLinked("SRName") is LinkedListNode<IWikiNode> dbName && dbName.Value is ParameterNode dbNameParam && dbNameParam.Value.Count > 0)
-			{
-				var srPage = WikiTextVisitor.Value(dbNameParam.Value).Trim();
-				if (this.toPages.Contains(new TitleParts(this.Site, UespNamespaces.Skyrim, srPage)))
+				var parameter = (ParameterNode)node.Value;
+				var name = parameter.NameToText();
+				if ((name == "DB" || name == "DBName") && parameter.Value.Count > 0)
 				{
-					template.Parameters.AddAfter(dbName, ParameterNode.FromParts("SRExtra", "([[Skyrim:Dragonborn|Dragonborn]])\n"));
+					parameter.SetName(name == "DB" ? "SR" : "SRName");
+					addExtra = node;
+				}
+
+				if (name == "DBExtra")
+				{
+					parameter.SetName("SRExtra");
 				}
 			}
 
-			foreach (var parameter in template.Parameters)
+			if (addExtra != null)
 			{
-				if (parameter is ParameterNode node && node.Name != null)
-				{
-					var name = WikiTextVisitor.Value(node.Name);
-					if (name.StartsWith("DB", StringComparison.Ordinal))
-					{
-						node.SetName("SR" + name.Substring(2));
-					}
-				}
+				template.Parameters.AddAfter(addExtra, ParameterNode.FromParts("SRExtra", "([[Skyrim:Dragonborn|Dragonborn]])\n"));
 			}
 		}
 
@@ -548,11 +530,11 @@
 				var parser = ContextualParser.FromPage(page);
 				if (!page.Namespace.IsTalkSpace)
 				{
-					// AddModHeader(parser);
+					AddModHeader(parser);
 				}
 				else if (this.dbArchives.TryGetValue(page.BasePageName, out var archiveList))
 				{
-					// UpdateArchiveTable(parser, archiveList);
+					UpdateArchiveTable(parser, archiveList);
 				}
 
 				this.ReplaceNodes(page, parser);
