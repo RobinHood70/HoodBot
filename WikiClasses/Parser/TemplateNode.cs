@@ -353,7 +353,7 @@
 
 		/// <summary>Parses the title and returns the trimmed value.</summary>
 		/// <returns>The title.</returns>
-		public string GetTitleValue() => WikiTextVisitor.Value(this.Title).Trim();
+		public string GetTitleValue() => WikiTextUtilities.DecodeAndNormalize(WikiTextVisitor.Value(this.Title)).Trim();
 
 		/// <summary>Returns the wiki text of the last parameter with the specified name.</summary>
 		/// <param name="parameterName">Name of the parameter.</param>
