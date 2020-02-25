@@ -11,7 +11,7 @@
 	public class DBMergeCheck : EditJob
 	{
 		#region Fields
-		private TitleCollection filter;
+		private readonly TitleCollection filter;
 		#endregion
 
 		#region Constructors
