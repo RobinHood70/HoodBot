@@ -32,7 +32,7 @@
 			var fragments = new HashSet<string>();
 			foreach (var page in this.Pages)
 			{
-				if (this.lookup.TryGetValue(new TitleParts(page), out var originalTarget))
+				if (this.lookup.TryGetValue(new FullTitle(page), out var originalTarget))
 				{
 					loopCheck.Clear();
 					fragments.Clear();
@@ -70,7 +70,7 @@
 						continue;
 					}
 
-					var comboTarget = new TitleParts(target);
+					var comboTarget = new FullTitle(target);
 					if (fragments.Count == 1)
 					{
 						comboTarget.Fragment = fragments.First();
@@ -140,7 +140,7 @@
 						}
 
 						var targetText = WikiTextVisitor.Value(targetNode.Title);
-						var target = new TitleParts(this.Site, targetText);
+						var target = new FullTitle(this.Site, targetText);
 						if (this.lookup.TryAdd(title, target))
 						{
 							this.parsedPages.Add(title, nodes);

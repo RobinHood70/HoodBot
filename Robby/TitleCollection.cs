@@ -51,7 +51,7 @@
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class with a specific list of titles in a given namespace.</summary>
 		/// <param name="site">The site.</param>
 		/// <param name="ns">The namespace the titles are in.</param>
-		/// <param name="titles">The titles. Namespace text is optional and will be stripped if provided.</param>
+		/// <param name="titles">The titles. Namespace text is optional for individual titles and will be used in favour of the ns parameter if provided.</param>
 		public TitleCollection(Site site, int ns, IEnumerable<string> titles)
 			: base(site)
 		{
@@ -59,7 +59,7 @@
 			ThrowNull(titles, nameof(titles));
 			foreach (var item in titles)
 			{
-				this.Add(Title.DefaultToNamespace(site, ns, item));
+				this.Add(new Title(site, ns, item, false));
 			}
 		}
 
@@ -265,7 +265,7 @@
 			ThrowNull(titles, nameof(titles));
 			foreach (var title in titles)
 			{
-				this.Add(new Title(this.Site, defaultNamespace, title));
+				this.Add(new Title(this.Site, defaultNamespace, title, false));
 			}
 		}
 
@@ -296,7 +296,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			ThrowNull(input.Title, nameof(input), nameof(input.Title));
-			var inputTitle = new TitleParts(this.Site, input.Title);
+			var inputTitle = new FullTitle(this.Site, input.Title);
 			if (inputTitle.NamespaceId != MediaWikiNamespaces.File && input.LinkTypes.HasFlag(BacklinksTypes.ImageUsage))
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
@@ -324,7 +324,7 @@
 			var result = this.Site.AbstractionLayer.AllCategories(input);
 			foreach (var item in result)
 			{
-				this.Add(new Title(this.Site, MediaWikiNamespaces.Category, item.Category));
+				this.Add(new Title(this.Site, MediaWikiNamespaces.Category, item.Category, true));
 			}
 		}
 
@@ -515,7 +515,7 @@
 			var result = this.Site.AbstractionLayer.AllMessages(input);
 			foreach (var item in result)
 			{
-				this.Add(new Title(this.Site, MediaWikiNamespaces.MediaWiki, item.Name));
+				this.Add(new Title(this.Site, MediaWikiNamespaces.MediaWiki, item.Name, true));
 			}
 		}
 
@@ -609,10 +609,10 @@
 					this.Add(title);
 				}
 
-				if (item.Type == CategoryMemberTypes.Subcat)
+				if (item.Type == CategoryMemberTypes.Subcat && item.Title is string itemTitle)
 				{
 					var originalTitle = input.Title;
-					input.ChangeTitle(item.Title);
+					input.ChangeTitle(itemTitle);
 					this.RecurseCategoryPages(input, categoryTree);
 					input.ChangeTitle(originalTitle);
 				}

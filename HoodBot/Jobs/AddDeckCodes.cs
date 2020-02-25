@@ -44,7 +44,7 @@
 				{
 					if (item.Name == item.TypeName)
 					{
-						var title = new Title(this.Site, UespNamespaces.Legends, item.Name);
+						var title = new Title(this.Site, UespNamespaces.Legends, item.Name, true);
 						titles.Add(title);
 						lookup.Add(title, item);
 					}

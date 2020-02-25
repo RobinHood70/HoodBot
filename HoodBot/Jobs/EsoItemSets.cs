@@ -166,7 +166,7 @@
 				}
 				else
 				{
-					var newTitle = new Title(this.Site, UespNamespaces.Online, set.SetName);
+					var newTitle = new Title(this.Site, UespNamespaces.Online, set.SetName, true);
 					uncheckedSets.Add(newTitle, set);
 				}
 			}

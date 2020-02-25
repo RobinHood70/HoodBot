@@ -488,10 +488,10 @@
 					{
 						foreach (var item in values)
 						{
-							var from = new TitleParts(this.Site, item.Key);
+							var from = new FullTitle(this.Site, item.Key);
 							if (!from.SimpleEquals(replacement.From))
 							{
-								var to = new TitleParts(this.Site, item.Value);
+								var to = new FullTitle(this.Site, item.Value);
 								var newReplacement = new Replacement(from, to)
 								{
 									Actions = replacement.Actions,
@@ -573,7 +573,7 @@
 					var changed = false;
 
 					// Surround gallery link with actual link braces. Add a space in case line ends in an HTML link (parser cannot currently make sense of "[[File|[http link]]]").
-					var link = SiteLink.FromText(this.Site, line + ' ');
+					var link = SiteLink.FromGalleryText(this.Site, line + ' ');
 					if (link.Text != null)
 					{
 						var captionParser = WikiTextParser.Parse(link.Text);
@@ -586,8 +586,6 @@
 						}
 					}
 
-					var bareLink = link.Title.NamespaceId != MediaWikiNamespaces.File;
-					link.Title.CoerceTo(MediaWikiNamespaces.File);
 					if (this.replacements.TryGetValue(link.Title, out var replacement))
 					{
 						this.UpdateLinkText(page, link, replacement.To);
@@ -607,7 +605,7 @@
 
 					if (changed)
 					{
-						if (bareLink)
+						if (link.Title.Coerced)
 						{
 							link.Title.NamespaceId = MediaWikiNamespaces.Main;
 						}
@@ -635,7 +633,7 @@
 
 			var changed = false;
 			var siteLink = SiteLink.FromLinkNode(this.Site, link);
-			if (siteLink.Link != null && (new TitleParts(this.Site, siteLink.Link) is TitleParts linkLink) && this.replacements.TryGetValue(linkLink, out var linkReplacement))
+			if (siteLink.Link != null && (new FullTitle(this.Site, siteLink.Link) is FullTitle linkLink) && this.replacements.TryGetValue(linkLink, out var linkReplacement))
 			{
 				changed = true;
 				linkLink.NamespaceId = linkReplacement.To.NamespaceId;
@@ -644,7 +642,7 @@
 				{
 					// Interwiki is always replaced; fragment is only replaced if not already specified. Might want to check replacement.From.Fragment if it's a full title as well, but this seems an unlikely scenario. Might even want to leave IFullTitle handling to a custom method when this gets redesigned to a visitor.
 					linkLink.Interwiki = full.Interwiki;
-					linkLink.Fragment ??= (linkReplacement.To as TitleParts)?.Fragment;
+					linkLink.Fragment ??= full.Fragment;
 				}
 
 				siteLink.Link = linkLink.ToString();
@@ -660,7 +658,7 @@
 				{
 					// Interwiki is always replaced; fragment is only replaced if not already specified. Might want to check replacement.From.Fragment if it's a full title as well, but this seems an unlikely scenario. Might even want to leave IFullTitle handling to a custom method when this gets redesigned to a visitor.
 					siteLink.Title.Interwiki = full.Interwiki;
-					siteLink.Title.Fragment ??= (replacement.To as TitleParts)?.Fragment;
+					siteLink.Title.Fragment ??= full.Fragment;
 				}
 			}
 
@@ -698,7 +696,7 @@
 			{
 				if (link.Text != null)
 				{
-					var paramTitle = new TitleParts(this.Site, link.Text);
+					var paramTitle = new FullTitle(this.Site, link.Text);
 					if (paramTitle.SimpleEquals(link.Title))
 					{
 						link.Text = toLink.FullPageName;
@@ -709,9 +707,10 @@
 					}
 				}
 			}
-			else if ((link.Text == null || link.Text.Length == 0) && (link.Title.LeadingColon || (link.Title.NamespaceId != MediaWikiNamespaces.File && link.Title.NamespaceId != MediaWikiNamespaces.Category)))
+			else if (string.IsNullOrEmpty(link.Text) && (link.Title.LeadingColon || (link.Title.NamespaceId != MediaWikiNamespaces.File && link.Title.NamespaceId != MediaWikiNamespaces.Category)))
 			{
-				link.Text = link.Title.ToString(false, true).TrimStart(':');
+				// If no link text exists, create some from the original title.
+				link.Text = link.OriginalLink?.TrimStart(':');
 			}
 		}
 
@@ -723,7 +722,7 @@
 			var templateName = WikiTextVisitor.Value(template.Title);
 			if (templateName.Length > 0)
 			{
-				var templateTitle = new TitleParts(this.Site, MediaWikiNamespaces.Template, templateName);
+				var templateTitle = new FullTitle(this.Site, MediaWikiNamespaces.Template, templateName, false);
 				if (this.replacements.TryGetValue(templateTitle, out var replacement))
 				{
 					var newTemplate = replacement.To;

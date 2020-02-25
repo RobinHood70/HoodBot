@@ -8,6 +8,7 @@
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
+	using RobinHood70.WikiCommon;
 	using static RobinHood70.WikiCommon.Globals;
 
 	#region Public Enumerations
@@ -40,6 +41,7 @@
 		#region Fields
 		private static readonly Regex LabelCommaRemover = new Regex(@"\ *([,，]" + TitleChars + @"*?)\Z", RegexOptions.Compiled);
 		private static readonly Regex LabelParenthesesRemover = new Regex(@"\ *(\(" + TitleChars + @"*?\)|（" + TitleChars + @"*?）)\Z", RegexOptions.Compiled);
+		private int namespaceId;
 		#endregion
 
 		#region Constructors
@@ -47,40 +49,19 @@
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the site and full page name.</summary>
 		/// <param name="site">The site this title is from.</param>
 		/// <param name="fullPageName">The full name of the page.</param>
-		public Title([NotNull] Site site, [NotNull] string? fullPageName)
+		public Title([NotNull] Site site, string? fullPageName)
+			: this(site, MediaWikiNamespaces.Main, fullPageName ?? string.Empty, false)
 		{
-			ThrowNull(site, nameof(site));
-			ThrowNull(fullPageName, nameof(fullPageName));
-			var titleParts = new TitleParts(site, fullPageName);
-			if (titleParts.Interwiki != null && !titleParts.Interwiki.LocalWiki)
-			{
-				throw new ArgumentException(CurrentCulture(Resources.PageNameInterwiki, fullPageName));
-			}
-
-			this.Site = site;
-			this.NamespaceId = titleParts.NamespaceId;
-			this.PageName = titleParts.PageName;
-			this.Key = this.FullPageName;
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the namespace and page name.</summary>
 		/// <param name="site">The site the title is from.</param>
 		/// <param name="defaultNamespace">The default namespace if no namespace is specified in the page name.</param>
 		/// <param name="pageName">The page name. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
-		public Title(Site site, int defaultNamespace, string? pageName)
+		/// <param name="forceNamespace">If <see langword="true"/>, the namespace specified will always be used, even if the pageName begins with what looks like a namespace or interwiki prefix.</param>
+		public Title(Site site, int defaultNamespace, string pageName, bool forceNamespace)
+			: this(new TitleParser(site, defaultNamespace, pageName, forceNamespace))
 		{
-			ThrowNull(site, nameof(site));
-			ThrowNull(pageName, nameof(pageName));
-			var titleParts = new TitleParts(site, defaultNamespace, pageName);
-			if (titleParts.Interwiki != null && !titleParts.Interwiki.LocalWiki)
-			{
-				throw new ArgumentException(CurrentCulture(Resources.PageNameInterwiki, pageName));
-			}
-
-			this.Site = site;
-			this.NamespaceId = titleParts.NamespaceId;
-			this.PageName = titleParts.PageName;
-			this.Key = titleParts.FullPageName;
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class, copying the information from another <see cref="ISimpleTitle"/> object.</summary>
@@ -92,6 +73,17 @@
 			this.Site = title.Site;
 			this.NamespaceId = title.NamespaceId;
 			this.PageName = title.PageName;
+			this.Key = this.FullPageName;
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="Title"/> class.</summary>
+		/// <param name="parser">The <see cref="TitleParser"/> with the desired information.</param>
+		protected Title(TitleParser parser)
+		{
+			ThrowNull(parser, nameof(parser));
+			this.Site = parser.Site;
+			this.NamespaceId = parser.NamespaceId;
+			this.PageName = parser.PageName;
 			this.Key = this.FullPageName;
 		}
 		#endregion
@@ -128,29 +120,41 @@
 			}
 		}
 
+		/// <summary>Gets or sets a value indicating whether the title was coerced into its namespace, or started there to being with.</summary>
+		/// <value><c>true</c> if coerced into the indicated namespace; otherwise, <c>false</c>.</value>
+		public bool Coerced { get; protected set; }
+
 		/// <summary>Gets the value corresponding to {{FULLPAGENAME}}.</summary>
 		/// <value>The full name of the page.</value>
 		public string FullPageName => this.Namespace.DecoratedName + this.PageName;
 
-		/// <summary>Gets the key to use in dictionary lookups. This is identical to FullPageName (after any decoding and normalization), but unlike FullPagename, cannot be modified (via PageName) after being set.</summary>
+		/// <summary>Gets or sets the key to use in dictionary lookups. This is identical to FullPageName (after any decoding and normalization), but unlike FullPagename, cannot be modified (via PageName) after being set.</summary>
 		/// <value>The key.</value>
-		public string Key { get; }
+		public string Key { get; protected set; }
 
 		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		/// <value>The name of the label.</value>
-		public string LabelName => PipeTrick(this.PageName);
+		public virtual string LabelName => PipeTrick(this.PageName);
+
+		/// <summary>Gets or sets a value indicating whether the title had a leading colon.</summary>
+		/// <value><see langword="true"/> if there was a leading colon; otherwise, <see langword="false"/>.</value>
+		public bool LeadingColon { get; set; }
 
 		/// <summary>Gets the namespace object for the title.</summary>
 		/// <value>The namespace.</value>
-		public Namespace Namespace => this.Site.Namespaces[this.NamespaceId];
+		public Namespace Namespace => this.Site.Namespaces[this.namespaceId];
 
 		/// <summary>Gets or sets the namespace identifier.</summary>
 		/// <value>The namespace identifier.</value>
-		public int NamespaceId { get; protected set; }
+		public int NamespaceId
+		{
+			get => this.namespaceId;
+			set => this.namespaceId = this.Site.Namespaces.Contains(value) ? value : throw new ArgumentOutOfRangeException(nameof(value));
+		}
 
 		/// <summary>Gets or sets the value corresponding to {{PAGENAME}}.</summary>
 		/// <value>The name of the page without the namespace.</value>
-		public string PageName { get; protected set; }
+		public string PageName { get; set; }
 
 		/// <summary>Gets the site the Title is from.</summary>
 		/// <value>The site the Title is from.</value>
@@ -159,7 +163,7 @@
 		/// <summary>Gets a Title object for this Title's corresponding subject page.</summary>
 		/// <value>The subject page.</value>
 		/// <remarks>If this Title is a subject page, returns itself.</remarks>
-		public ISimpleTitle SubjectPage => this.Namespace.IsSubjectSpace ? this : new Title(this.Site, this.Namespace.SubjectSpaceId, this.PageName);
+		public ISimpleTitle SubjectPage => this.Namespace.IsSubjectSpace ? this : new Title(this.Site, this.Namespace.SubjectSpaceId, this.PageName, true);
 
 		/// <summary>Gets the value corresponding to {{SUBPAGENAME}}.</summary>
 		/// <value>The name of the subpage.</value>
@@ -186,50 +190,10 @@
 		public ISimpleTitle? TalkPage =>
 			this.Namespace.TalkSpaceId == null ? null
 			: this.Namespace.IsTalkSpace ? this
-			: new Title(this.Site, this.Namespace.TalkSpaceId.Value, this.PageName);
+			: new Title(this.Site, this.Namespace.TalkSpaceId.Value, this.PageName, true);
 		#endregion
 
 		#region Public Static Methods
-
-		/// <summary>Coerces the name of the page to the provided namespace.</summary>
-		/// <param name="site">The Site the Title is from.</param>
-		/// <param name="ns">The namespace to coerce to.</param>
-		/// <param name="pageName">Name of the page.</param>
-		/// <returns>A page name in the given namespace, if it isn't already in a different namespace.</returns>
-		/// <remarks>This is a convenience function that wraps around <see cref="DefaultToNamespace(Site, int, string)"/>.</remarks>
-		public static string CoercePageName(Site site, int ns, string pageName) => DefaultToNamespace(site, ns, pageName).FullPageName;
-
-		/// <summary>Returns a <see cref="Title"/> for the given namespace and page name, allowing for the possibility that the page may already have the namespace prepended to it or may be overridden to another namespace.</summary>
-		/// <param name="site">The Site the Title is from.</param>
-		/// <param name="ns">The namespace ID the page should belong to.</param>
-		/// <param name="pageName">The name of the page, with or without the corresponding namespace prefix.</param>
-		/// <returns>A Title object with the given name in the given namespace, by default, unless overridden.</returns>
-		/// <example><list type="bullet">
-		///     <item><c>DefaultToNamespace(MediaWikiNamespaces.Template, "Unsigned")</c> would return a <see cref="Title"/> corresponding to <c>[[Template:Unsigned]]</c>.</item>
-		///     <item><c>DefaultToNamespace(MediaWikiNamespaces.Template, "Help:Unsigned")</c> would return a <see cref="Title"/> corresponding to <c>[[Help:Unsigned]]</c>.</item>
-		///     <item><c>DefaultToNamespace(MediaWikiNamespaces.Template, ":Unsigned")</c> would return a <see cref="Title"/> corresponding to <c>[[Unsigned]]</c>.</item>
-		/// </list></example>
-		public static Title DefaultToNamespace(Site site, int ns, string pageName)
-		{
-			ThrowNull(site, nameof(site));
-			ThrowNull(pageName, nameof(pageName));
-			return new Title(new TitleParts(site, ns, pageName));
-		}
-
-		/// <summary>Builds the full name of the page from the namespace and page name, accounting for Main space.</summary>
-		/// <param name="site">The Site the Title is from.</param>
-		/// <param name="ns">The namespace identifier of the page.</param>
-		/// <param name="pageName">The page name.</param>
-		/// <returns>The full name of the page from the namespace and page name, accounting for Main space.</returns>
-		public static string NameFromParts(Site site, int ns, string pageName) => (site ?? throw ArgumentNull(nameof(site))).Namespaces[ns].DecoratedName + pageName;
-
-		/// <summary>Builds the full name of the page from the namespace, page name, and fragment, accounting for Main space.</summary>
-		/// <param name="site">The Site the Title is from.</param>
-		/// <param name="ns">The namespace identifier of the page.</param>
-		/// <param name="pageName">The page name.</param>
-		/// <param name="fragment">The fragment (section title/anchor) to include.</param>
-		/// <returns>The full name of the page from the namespace and page name, accounting for Main space.</returns>
-		public static string NameFromParts(Site site, int ns, string pageName, string fragment) => NameFromParts(site, ns, pageName) + "#" + fragment;
 
 		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		/// <param name="pageName">The name of the page, without namespace or fragment text.</param>
@@ -545,7 +509,11 @@
 		/// <summary>Returns a <see cref="string" /> that represents this title.</summary>
 		/// <param name="forceLink">if set to <c>true</c>, forces link formatting in namespaces that require it (e.g., Category and File), regardless of the value of LeadingColon.</param>
 		/// <returns>A <see cref="string" /> that represents this title.</returns>
-		public string ToString(bool forceLink) => (forceLink && this.Namespace.IsForcedLinkSpace ? ":" : string.Empty) + this.FullPageName;
+		public virtual string ToString(bool forceLink)
+		{
+			var colon = this.LeadingColon || (forceLink && this.Namespace.IsForcedLinkSpace) ? ":" : string.Empty;
+			return colon + this.Namespace.DecoratedName + this.PageName;
+		}
 
 		/// <summary>Unprotects the title for the specified reason.</summary>
 		/// <param name="reason">The reason.</param>
@@ -563,7 +531,7 @@
 
 		/// <summary>Returns a string that represents the current Title.</summary>
 		/// <returns>A string that represents the current object.</returns>
-		public override string ToString() => this.FullPageName;
+		public override string ToString() => this.ToString(false);
 		#endregion
 
 		#region Protected Methods

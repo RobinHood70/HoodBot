@@ -126,6 +126,12 @@
   <data name="FileRevisionInvalid" xml:space="preserve">
     <value>This file has no revisions or the Uri for the file is null.</value>
   </data>
+  <data name="InvalidInterwiki" xml:space="preserve">
+    <value>The interwiki specified is not present on this wiki.</value>
+  </data>
+  <data name="InvalidNamespace" xml:space="preserve">
+    <value>The namespace specified is not present on this wiki.</value>
+  </data>
   <data name="InvalidSite" xml:space="preserve">
     <value>You attempted to use an object from one site with an object from another.</value>
   </data>

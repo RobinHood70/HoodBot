@@ -98,36 +98,14 @@
 
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
 		/// <param name="title">The title.</param>
-		public SiteLink(TitleParts title)
+		public SiteLink(ISimpleTitle title)
 		{
 			ThrowNull(title, nameof(title));
 			var site = title.Site;
-			this.Title = title;
+			this.Title = new FullTitle(title);
 			this.TitleWhitespaceAfter = string.Empty;
 			this.TitleWhitespaceBefore = string.Empty;
-			if (ImageParameterInfo.Count == 0)
-			{
-				foreach (var word in ImageWords)
-				{
-					var magic = site.MagicWords[word.Key];
-					foreach (var alias in magic.Aliases)
-					{
-						var split = alias.Split("$1", 2);
-						if (split.Length == 1)
-						{
-							DirectValues.Add(alias, word.Value);
-							if ((word.Value == ParameterType.Border || word.Value == ParameterType.Upright) && !PreferredWords.ContainsKey(word.Value))
-							{
-								PreferredWords.Add(word.Value, alias);
-							}
-						}
-						else
-						{
-							ImageParameterInfo.Add((word.Value, split[0], split[1]));
-						}
-					}
-				}
-			}
+			InitializeImageInfo(site);
 		}
 		#endregion
 
@@ -219,6 +197,11 @@
 			set => this.SetParameterValue(ParameterType.Link, value);
 		}
 
+		/// <summary>Gets the original text of the link, in case we need to make display text out of it.</summary>
+		/// <value>The original link.</value>
+		/// <remarks>This will normally only be null if the title was created from scratch using one of the constructors.</remarks>
+		public string? OriginalLink { get; private set; }
+
 		/// <summary>Gets or sets the <see cref="Robby.Page"/> value as an integer.</summary>
 		/// <value>The page value.</value>
 		public int? Page
@@ -245,7 +228,7 @@
 
 		/// <summary>Gets or sets the title of the link.</summary>
 		/// <value>The title.</value>
-		public TitleParts Title { get; set; }
+		public FullTitle Title { get; set; }
 
 		/// <summary>Gets or sets the whitespace after the title.</summary>
 		/// <value>The whitespace after the title.</value>
@@ -311,18 +294,38 @@
 
 		#region Public Static Methods
 
+		/// <summary>Creates a new SiteLink instance from the provided text.</summary>
+		/// <param name="site">The site the link is from.</param>
+		/// <param name="link">The text of the link.</param>
+		/// <returns>A new SiteLink.</returns>
+		/// <remarks>The text may include or exclude surrounding brackets. Pipes in the text are handled properly either way in order to support gallery links.</remarks>
+		public static SiteLink FromGalleryText(Site site, string link)
+		{
+			ThrowNull(link, nameof(link));
+			var linkNode = CreateLinkNode(link);
+			return FromLinkNode(site, linkNode, true);
+		}
+
 		/// <summary>Creates a new SiteLink instance from a <see cref="LinkNode"/>.</summary>
 		/// <param name="site">The site the link is from.</param>
 		/// <param name="link">The link node.</param>
 		/// <returns>A new SiteLink.</returns>
-		public static SiteLink FromLinkNode(Site site, LinkNode link)
+		public static SiteLink FromLinkNode(Site site, LinkNode link) => FromLinkNode(site, link, false);
+
+		/// <summary>Creates a new SiteLink instance from a <see cref="LinkNode"/>.</summary>
+		/// <param name="site">The site the link is from.</param>
+		/// <param name="link">The link node.</param>
+		/// <param name="coerceToFile">If set to <see langword="true"/>, coerces the link to be in File space (for galleries).</param>
+		/// <returns>A new SiteLink.</returns>
+		public static SiteLink FromLinkNode(Site site, LinkNode link, bool coerceToFile)
 		{
 			ThrowNull(link, nameof(link));
 			var titleText = WikiTextVisitor.Value(link.Title);
 			var valueSplit = SplitWhitespace(titleText);
-			var title = new TitleParts(site, valueSplit.Value);
+			var title = coerceToFile ? new FullTitle(site, MediaWikiNamespaces.File, valueSplit.Value, false) : new FullTitle(site, valueSplit.Value);
 			var retval = new SiteLink(title)
 			{
+				OriginalLink = titleText,
 				TitleWhitespaceBefore = valueSplit.Before,
 				TitleWhitespaceAfter = valueSplit.After
 			};
@@ -347,13 +350,8 @@
 		public static SiteLink FromText(Site site, string link)
 		{
 			ThrowNull(link, nameof(link));
-			if (!link.StartsWith("[[", StringComparison.Ordinal) || !link.EndsWith("]]", StringComparison.Ordinal))
-			{
-				link = "[[" + link + "]]";
-			}
-
-			var linkNode = LinkNode.FromText(link);
-			return FromLinkNode(site, linkNode);
+			var linkNode = CreateLinkNode(link);
+			return FromLinkNode(site, linkNode, false);
 		}
 		#endregion
 
@@ -457,7 +455,62 @@
 		}
 		#endregion
 
+		#region Private Static Methods
+		private static LinkNode CreateLinkNode(string link)
+		{
+			// The extra space at the end, and then its later removal, is a kludgey workaround for the rare case of [[Link|Text [http://external]]], which the parser doesn't handle correctly at this point.
+			if (!link.StartsWith("[[", StringComparison.Ordinal) || !link.EndsWith("]]", StringComparison.Ordinal))
+			{
+				link = "[[" + link + " ]]";
+			}
+
+			var linkNode = LinkNode.FromText(link);
+			var nodes = linkNode.Parameters.Count == 0 ? linkNode.Title : ((ParameterNode)linkNode.Parameters.Last!.Value).Value;
+			var last = (TextNode)nodes.Last!.Value;
+			if (last.Text.Length == 1)
+			{
+				nodes.Remove(nodes.Last);
+			}
+			else
+			{
+				last.Text = last.Text[0..^1];
+			}
+
+			return linkNode;
+		}
+
+		private static void InitializeImageInfo(Site site)
+		{
+			// Initialize internals.
+			if (ImageParameterInfo.Count == 0)
+			{
+				foreach (var word in ImageWords)
+				{
+					var magic = site.MagicWords[word.Key];
+					foreach (var alias in magic.Aliases)
+					{
+						var split = alias.Split("$1", 2);
+						if (split.Length == 1)
+						{
+							DirectValues.Add(alias, word.Value);
+							if ((word.Value == ParameterType.Border || word.Value == ParameterType.Upright) && !PreferredWords.ContainsKey(word.Value))
+							{
+								PreferredWords.Add(word.Value, alias);
+							}
+						}
+						else
+						{
+							ImageParameterInfo.Add((word.Value, split[0], split[1]));
+						}
+					}
+				}
+			}
+		}
+		#endregion
+
 		#region Private Methods
+		private string? GetValue(ParameterType name) => this.Parameters.TryGetValue(name, out var value) ? value.Value : null;
+
 		private void InitValue(string value)
 		{
 			ThrowNull(value, nameof(value));
@@ -493,8 +546,6 @@
 				this.Parameters.Add(parameterType, parameter);
 			}
 		}
-
-		private string? GetValue(ParameterType name) => this.Parameters.TryGetValue(name, out var value) ? value.Value : null;
 
 		private bool SetDirectValue(ParameterType parameterType, string? value)
 		{

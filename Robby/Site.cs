@@ -294,8 +294,8 @@
 
 		/// <summary>Gets the redirect target from the page text.</summary>
 		/// <param name="text">The text to parse.</param>
-		/// <returns>A <see cref="TitleParts"/> object with the parsed redirect.</returns>
-		public virtual TitleParts? GetRedirectFromText(string text)
+		/// <returns>A <see cref="IFullTitle"/> object with the parsed redirect.</returns>
+		public virtual IFullTitle? GetRedirectFromText(string text)
 		{
 			ThrowNull(text, nameof(text));
 			var redirects = new HashSet<string>(this.MagicWords.TryGetValue("redirect", out var redirect) ? redirect.Aliases : DefaultRedirect);
@@ -312,7 +312,7 @@
 
 				if (redirects.Contains(searchText) && first.Next?.Value is LinkNode linkNode)
 				{
-					return new TitleParts(this, WikiTextVisitor.Raw(linkNode.Title));
+					return new FullTitle(this, WikiTextVisitor.Raw(linkNode.Title));
 				}
 			}
 

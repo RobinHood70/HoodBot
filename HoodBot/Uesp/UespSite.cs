@@ -49,7 +49,7 @@
 			}
 		}
 
-		public void OnJobsStarted() => this.FilterPages.Add(new Title(this, MediaWikiNamespaces.Project, "Bot Requests"));
+		public void OnJobsStarted() => this.FilterPages.Add(new Title(this, "Project:Bot Requests"));
 		#endregion
 
 		#region Public Override Methods

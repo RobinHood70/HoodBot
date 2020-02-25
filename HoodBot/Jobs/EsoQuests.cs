@@ -191,7 +191,7 @@
 			for (var i = quests.Count - 1; i >= 0; i--)
 			{
 				var quest = quests[i];
-				var titleDisambig = new Title(this.Site, UespNamespaces.Online, quest.Name + " (quest)");
+				var titleDisambig = new Title(this.Site, UespNamespaces.Online, quest.Name + " (quest)", true);
 				if (wikiQuests.Contains(quest.Title) || wikiQuests.Contains(titleDisambig))
 				{
 					quests.RemoveAt(i);
@@ -420,7 +420,7 @@
 			{
 				if (stage.Zone != "Tamriel" && stage.Zone != quest.Zone)
 				{
-					var title = new Title(this.Site, UespNamespaces.Online, stage.Zone);
+					var title = new Title(this.Site, UespNamespaces.Online, stage.Zone, true);
 					locs.Add(title.AsLink());
 				}
 
@@ -499,7 +499,7 @@
 					this.Zone = string.Empty;
 				}
 
-				this.Title = new Title(site, UespNamespaces.Online, this.Name);
+				this.Title = new Title(site, UespNamespaces.Online, this.Name, true);
 			}
 			#endregion
 

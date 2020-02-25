@@ -17,7 +17,7 @@
 		{
 			ThrowNull(reader, nameof(reader));
 			ThrowNull(reader.Value, nameof(reader), nameof(reader.Value));
-			return new TitleParts(this.site, (string)reader.Value);
+			return new FullTitle(this.site, (string)reader.Value);
 		}
 
 		public override void WriteJson(JsonWriter writer, ISimpleTitle value, JsonSerializer serializer)

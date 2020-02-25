@@ -88,6 +88,24 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The interwiki specified is not present on this wiki..
+        /// </summary>
+        internal static string InvalidInterwiki {
+            get {
+                return ResourceManager.GetString("InvalidInterwiki", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The namespace specified is not present on this wiki..
+        /// </summary>
+        internal static string InvalidNamespace {
+            get {
+                return ResourceManager.GetString("InvalidNamespace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You attempted to use an object from one site with an object from another..
         /// </summary>
         internal static string InvalidSite {

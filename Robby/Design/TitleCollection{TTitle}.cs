@@ -177,7 +177,7 @@
 		/// <param name="ignoreCase">If set to <see langword="true"/>, titles will match regardless of the case of the page name. (Note that namespace casing must still follow site capitalization rules.)</param>
 		/// <returns>The item from the collection, if found; otherwise, null.</returns>
 		/// <remarks>This is an O(n) operation.</remarks>
-		public TTitle? FindTitle(string fullPageName, bool ignoreCase) => this.FindTitle(new TitleParts(this.Site, fullPageName), ignoreCase);
+		public TTitle? FindTitle(string fullPageName, bool ignoreCase) => this.FindTitle(new FullTitle(this.Site, fullPageName), ignoreCase);
 
 		/// <summary>Finds any ISimpleTitle within the collection.</summary>
 		/// <param name="ns">The namespace the title is in.</param>
@@ -185,7 +185,7 @@
 		/// <param name="ignoreCase">If set to <see langword="true"/>, titles will match regardless of the case of the page name.</param>
 		/// <returns>The item from the collection, if found; otherwise, null.</returns>
 		/// <remarks>This is an O(n) operation.</remarks>
-		public TTitle? FindTitle(int ns, string pageName, bool ignoreCase) => this.FindTitle(new TitleParts(this.Site, ns, pageName), ignoreCase);
+		public TTitle? FindTitle(int ns, string pageName, bool ignoreCase) => this.FindTitle(new FullTitle(this.Site, ns, pageName, false), ignoreCase);
 
 		/// <summary>Finds any ISimpleTitle within the collection.</summary>
 		/// <param name="item">The item to find.</param>
@@ -281,7 +281,7 @@
 		/// <remarks>If subcategories are loaded, they will be limited to the <paramref name="categoryMemberTypes"/> requested. However, they will <em>not</em> be limited by the <paramref name="from"/> and <paramref name="to"/> parameters.</remarks>
 		public void GetCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, string? from, string? to, bool recurse)
 		{
-			var cat = Title.DefaultToNamespace(this.Site, MediaWikiNamespaces.Category, category);
+			var cat = new Title(this.Site, MediaWikiNamespaces.Category, category, false);
 			var input = new CategoryMembersInput(cat.FullPageName)
 			{
 				Properties = CategoryMembersProperties.Title,

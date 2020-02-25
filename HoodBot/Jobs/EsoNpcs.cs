@@ -176,7 +176,7 @@
 						var parser = WikiTextParser.Parse(page.Text);
 						foreach (var linkNode in parser.FindAllRecursive<LinkNode>())
 						{
-							var disambig = SiteLink.FromLinkNode(this.Site, linkNode);
+							var disambig = SiteLink.FromLinkNode(this.Site, linkNode, false);
 							if (allNpcs.Contains(disambig.Title))
 							{
 								issue = null;
@@ -222,7 +222,7 @@
 		private class NpcTitle : Title
 		{
 			public NpcTitle(Site site, NpcData npc)
-				: base(site, UespNamespaces.Online, npc.Name) => this.Npc = npc;
+				: base(site, UespNamespaces.Online, npc.Name, true) => this.Npc = npc;
 
 			public NpcData Npc { get; }
 		}

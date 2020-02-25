@@ -36,8 +36,9 @@
 		/// <param name="site">The site this page is from.</param>
 		/// <param name="ns">The namespace ID the page is in.</param>
 		/// <param name="pageName">The name of the page without the namespace.</param>
+		/// <remarks>This constructor will always assume the namespace given is correct, even if the pageName begins with something that looks like a namespace.</remarks>
 		public Page(Site site, int ns, string pageName)
-			: base(site, ns, pageName)
+			: base(site, ns, pageName, true)
 		{
 		}
 
@@ -359,7 +360,7 @@
 			categories.Clear();
 			foreach (var category in pageItem.Categories)
 			{
-				categories.Add(new Category(new TitleParts(this.Site, category.Title), category.SortKey, category.Hidden));
+				categories.Add(new Category(new FullTitle(this.Site, category.Title), category.SortKey, category.Hidden));
 			}
 		}
 

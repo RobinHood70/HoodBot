@@ -30,7 +30,7 @@
 	public class PageCollection : TitleCollection<Page>
 	{
 		#region Fields
-		private readonly Dictionary<string, TitleParts> titleMap = new Dictionary<string, TitleParts>();
+		private readonly Dictionary<string, IFullTitle> titleMap = new Dictionary<string, IFullTitle>();
 		private readonly List<string> recurseCategories = new List<string>();
 		#endregion
 
@@ -131,7 +131,7 @@
 		/// <para>The title map allows mapping from the original name you provided for a page to the actual title that was returned. If, for example, you requested "Main Page" and got redirected to "Main page", there would be an entry in the title map indicating that. Not all titles in the title map will necessarily appear in the result set. For example, if you provided an interwiki title, the result set most likely won't include that, but the title map will still include an InterwikiTitle result for it.</para>
 		/// <para>The title map is largely for informational purposes. When accessing items in the collection, it will automatically check the title map and attempt to return the correct result.</para>
 		/// </remarks>
-		public IReadOnlyDictionary<string, TitleParts> TitleMap => this.titleMap;
+		public IReadOnlyDictionary<string, IFullTitle> TitleMap => this.titleMap;
 		#endregion
 
 		#region Protected Properties
@@ -199,7 +199,7 @@
 		/// <summary>Creates a new page using the collection's <see cref="PageCreator"/>.</summary>
 		/// <param name="title">The title of the page to create.</param>
 		/// <returns>The page that was created.</returns>
-		public Page CreatePage(string title) => this.PageCreator.CreatePage(new TitleParts(this.Site, title));
+		public Page CreatePage(string title) => this.PageCreator.CreatePage(new FullTitle(this.Site, title));
 
 		/// <summary>Loads pages into the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>
@@ -303,7 +303,7 @@
 			ThrowNull(titles, nameof(titles));
 			foreach (var title in titles)
 			{
-				var titleParts = new TitleParts(this.Site, title);
+				var titleParts = new FullTitle(this.Site, title);
 				if (titleParts.NamespaceId == MediaWikiNamespaces.Main)
 				{
 					titleParts.NamespaceId = defaultNamespace;
@@ -368,26 +368,26 @@
 		{
 			foreach (var item in result.Interwiki)
 			{
-				var titleParts = new TitleParts(this.Site, item.Value.Title);
+				var titleParts = new FullTitle(this.Site, item.Value.Title);
 				Debug.Assert(titleParts.Interwiki?.Prefix == item.Value.Prefix, "Interwiki prefixes didn't match.", titleParts.Interwiki?.Prefix + " != " + item.Value.Prefix);
 				this.titleMap[item.Key] = titleParts;
 			}
 
 			foreach (var item in result.Converted)
 			{
-				this.titleMap[item.Key] = new TitleParts(this.Site, item.Value);
+				this.titleMap[item.Key] = new FullTitle(this.Site, item.Value);
 			}
 
 			foreach (var item in result.Normalized)
 			{
-				this.titleMap[item.Key] = new TitleParts(this.Site, item.Value);
+				this.titleMap[item.Key] = new FullTitle(this.Site, item.Value);
 			}
 
 			foreach (var item in result.Redirects)
 			{
 				// Move interwiki redirects to InterwikiTitles collection, since lookups would try to redirect to a local page with the same name.
 				var value = item.Value;
-				this.titleMap[item.Key] = new TitleParts(this.Site, value.Interwiki, value.Title, value.Fragment);
+				this.titleMap[item.Key] = new FullTitle(this.Site, value.Interwiki, value.Title, value.Fragment);
 			}
 		}
 		#endregion
@@ -412,7 +412,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			ThrowNull(input.Title, nameof(input), nameof(input.Title));
-			var inputTitle = new TitleParts(this.Site, input.Title);
+			var inputTitle = new FullTitle(this.Site, input.Title);
 			if (inputTitle.NamespaceId != MediaWikiNamespaces.File && input.LinkTypes.HasFlag(BacklinksTypes.ImageUsage))
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
