@@ -358,7 +358,10 @@
 				{
 					foreach (var subNode in node.NodeCollections)
 					{
-						subNode.FindAllRecursive(condition);
+						foreach (var value in subNode.FindAllRecursive(condition))
+						{
+							yield return value;
+						}
 					}
 				}
 			}
@@ -378,18 +381,21 @@
 			where T : IWikiNode
 		{
 			ThrowNull(condition, nameof(condition));
-			foreach (var node in this)
+			for (var node = this.First; node != null; node = node.Next)
 			{
-				if (node is T castNode && condition(castNode))
+				if (node.Value is T castNode && condition(castNode))
 				{
 					yield return castNode;
 				}
 
-				if (node.NodeCollections != null)
+				if (node.Value.NodeCollections != null)
 				{
-					foreach (var subNode in node.NodeCollections)
+					foreach (var subNode in node.Value.NodeCollections)
 					{
-						subNode.FindAllRecursive(condition);
+						foreach (var value in subNode.FindAllRecursive(condition))
+						{
+							yield return value;
+						}
 					}
 				}
 			}
