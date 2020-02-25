@@ -155,8 +155,8 @@
 		{
 			ThrowNull(txt, nameof(txt));
 			var template = TemplateNode.FromParts(string.Empty, false, new[] { txt });
-			return template.Parameters.Count == 1 && template.Parameters.First is LinkedListNode<IWikiNode> first && first.Value is ParameterNode retval
-				? retval
+			return template.Parameters.Count == 1
+				? template.Parameters[0]
 				: throw new InvalidOperationException(CurrentCulture(Resources.MalformedNodeText, nameof(ParameterNode), nameof(FromText)));
 		}
 

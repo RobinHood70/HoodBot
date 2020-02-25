@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System.Collections.Generic;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Parser;
 	using RobinHood70.Robby;
@@ -35,9 +34,8 @@
 			ThrowNull(parsedPage, nameof(parsedPage));
 			foreach (var node in parsedPage.FindAllRecursive<TemplateNode>(template => template.GetTitleValue() == "Map Link"))
 			{
-				if (node.FindParameterLinked("ns_base") is LinkedListNode<IWikiNode> nsBase)
+				if (node.FindParameter("ns_base") is ParameterNode parameter)
 				{
-					var parameter = (ParameterNode)nsBase.Value;
 					var value = parameter.ValueToText()?.Trim();
 					if (value == "DB" || value == "Dragonborn")
 					{

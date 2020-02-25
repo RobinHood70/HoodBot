@@ -16,7 +16,7 @@
 		public LinkNode(IEnumerable<IWikiNode> title, IEnumerable<ParameterNode> parameters)
 		{
 			this.Title = new NodeCollection(this, title ?? throw ArgumentNull(nameof(title)));
-			this.Parameters = new NodeCollection(this, parameters ?? Array.Empty<ParameterNode>());
+			this.Parameters = new List<ParameterNode>(parameters ?? throw ArgumentNull(nameof(parameters)));
 		}
 		#endregion
 
@@ -29,13 +29,19 @@
 			get
 			{
 				yield return this.Title;
-				yield return this.Parameters;
+				foreach (var parameter in this.Parameters)
+				{
+					foreach (var nodeCollection in parameter.NodeCollections)
+					{
+						yield return nodeCollection;
+					}
+				}
 			}
 		}
 
 		/// <summary>Gets the parameters.</summary>
 		/// <value>The parameters.</value>
-		public NodeCollection Parameters { get; }
+		public IList<ParameterNode> Parameters { get; }
 
 		/// <summary>Gets the title.</summary>
 		/// <value>The title.</value>

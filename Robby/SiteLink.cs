@@ -330,13 +330,10 @@
 				TitleWhitespaceAfter = valueSplit.After
 			};
 
-			foreach (var subNode in link.Parameters)
+			foreach (var parameter in link.Parameters)
 			{
-				if (subNode is ParameterNode parameter)
-				{
-					var valueRaw = WikiTextVisitor.Raw(parameter.Value);
-					retval.InitValue(valueRaw);
-				}
+				var valueRaw = WikiTextVisitor.Raw(parameter.Value);
+				retval.InitValue(valueRaw);
 			}
 
 			return retval;
@@ -465,7 +462,7 @@
 			}
 
 			var linkNode = LinkNode.FromText(link);
-			var nodes = linkNode.Parameters.Count == 0 ? linkNode.Title : ((ParameterNode)linkNode.Parameters.Last!.Value).Value;
+			var nodes = linkNode.Parameters.Count == 0 ? linkNode.Title : linkNode.Parameters[linkNode.Parameters.Count - 1].Value;
 			var last = (TextNode)nodes.Last!.Value;
 			if (last.Text.Length == 1)
 			{

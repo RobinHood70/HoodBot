@@ -115,10 +115,10 @@
 				// If the end date is not null, then we're at the end of the job, so update the end time.
 				if (this.end != null)
 				{
-					var start = entry.FindNumberedParameterLinked(2);
-					Debug.Assert(start != null, "Start parameter not found.");
+					var start = entry.FindNumberedParameterIndex(2);
+					Debug.Assert(start != -1, "Start parameter not found.");
 					var end = ParameterNode.FromParts(FormatDateTime(DateTime.UtcNow));
-					entry.Parameters.AddAfter(start, end);
+					entry.Parameters.Insert(start, end);
 					sender.Text = WikiTextVisitor.Raw(parsedText);
 				}
 

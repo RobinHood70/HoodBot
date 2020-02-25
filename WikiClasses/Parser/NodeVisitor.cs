@@ -78,8 +78,9 @@
 		public virtual void Visit(ParameterNode node)
 		{
 			ThrowNull(node, nameof(node));
+			ThrowNull(node.Value, nameof(node.Value));
 			node.Name?.Accept(this);
-			node.Value?.Accept(this);
+			node.Value.Accept(this);
 		}
 
 		/// <summary>Visits the specified <see cref="TagNode"/>.</summary>
