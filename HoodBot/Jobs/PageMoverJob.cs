@@ -206,7 +206,7 @@
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
-			this.ProposedDeletions.AddRange(this.GetProposedDeletions());
+			this.ProposedDeletions.AddRange(this.LoadProposedDeletions());
 			foreach (var template in this.Site.DeletePreventionTemplates)
 			{
 				this.doNotDelete.GetBacklinks(template.FullPageName, BacklinksTypes.EmbeddedIn, true);

@@ -33,7 +33,7 @@
 		#endregion
 
 		#region Protected Methods
-		protected TitleCollection GetProposedDeletions()
+		protected TitleCollection LoadProposedDeletions()
 		{
 			var deleted = new TitleCollection(this.Site);
 			foreach (var title in this.Site.DeletionCategories)

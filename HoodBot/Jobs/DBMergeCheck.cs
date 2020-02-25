@@ -34,7 +34,7 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void BeforeLogging() => this.filter.AddRange(this.GetProposedDeletions());
+		protected override void BeforeLogging() => this.filter.AddRange(this.LoadProposedDeletions());
 
 		protected override void Main()
 		{
