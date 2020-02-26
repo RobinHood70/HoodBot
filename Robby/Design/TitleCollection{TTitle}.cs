@@ -773,10 +773,10 @@
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
 		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
-		public bool TryGetValue(ISimpleTitle key, [NotNullWhen(returnValue: true)] out TTitle? value)
+		public bool TryGetValue(ISimpleTitle key, [MaybeNullWhen(false)] out TTitle value)
 		{
 			ThrowNull(key, nameof(key));
-			return this.dictionary.TryGetValue(key.FullPageName, out value);
+			return this.dictionary.TryGetValue(key.FullPageName, out value!);
 		}
 
 		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
@@ -784,7 +784,7 @@
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
 		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
-		public bool TryGetValue(string key, [NotNullWhen(returnValue: true)] out TTitle? value) => this.dictionary.TryGetValue(key, out value);
+		public bool TryGetValue(string key, [MaybeNullWhen(false)] out TTitle value) => this.dictionary.TryGetValue(key, out value!);
 
 		/// <summary>Returns the requested value, or null if not found.</summary>
 		/// <param name="key">The key.</param>

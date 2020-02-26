@@ -144,14 +144,14 @@
 		/// <param name="id">The namespace ID to search for.</param>
 		/// <param name="value">The namespace object, if found; otherwise, null.</param>
 		/// <returns>True if the collection contains the desired namespace.</returns>
-		public bool TryGetValue(int id, [NotNullWhen(returnValue: true)] out Namespace? value) => this.IdsDictionary.TryGetValue(id, out value);
+		public bool TryGetValue(int id, [MaybeNullWhen(false)] out Namespace value) => this.IdsDictionary.TryGetValue(id, out value!);
 
 		/// <summary>Returns the namespace associated with the specified name.</summary>
 		/// <param name="name">Any of the names or aliases of the namespace to search for.</param>
 		/// <param name="value">The namespace object, if found; otherwise, null.</param>
 		/// <returns>True if the collection contains the desired namespace.</returns>
 		/// <exception cref="ArgumentNullException">The name is null.</exception>
-		public bool TryGetValue(string name, [NotNullWhen(returnValue: true)] out Namespace? value) => this.NamesDictionary.TryGetValue(name, out value);
+		public bool TryGetValue(string name, [MaybeNullWhen(false)] out Namespace value) => this.NamesDictionary.TryGetValue(name, out value!);
 
 		/// <summary>Returns the namespace associated with the specified ID.</summary>
 		/// <param name="id">The namespace ID to search for.</param>
