@@ -81,11 +81,8 @@
 			: base(parser)
 		{
 			this.Interwiki = parser.Interwiki;
-			this.NamespaceId = parser.NamespaceId;
-			this.PageName = parser.PageName;
 			this.Fragment = parser.Fragment;
 			this.Coerced = parser.Coerced;
-			this.Key = this.FullPageName;
 		}
 		#endregion
 
