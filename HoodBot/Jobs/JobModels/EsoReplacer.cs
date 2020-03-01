@@ -57,9 +57,9 @@
 			if (nodes.FindFirstLinked<LinkNode>() is LinkedListNode<IWikiNode> linkedNode)
 			{
 				var link = SiteLink.FromLinkNode(site, (LinkNode)linkedNode.Value);
-				if (!uniqueLinks.Contains(link.Title.FullPageName))
+				if (!uniqueLinks.Contains(link.FullPageName))
 				{
-					uniqueLinks.Add(link.Title.FullPageName);
+					uniqueLinks.Add(link.FullPageName);
 				}
 				else
 				{

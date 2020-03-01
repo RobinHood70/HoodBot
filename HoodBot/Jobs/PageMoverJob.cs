@@ -586,7 +586,7 @@
 						}
 					}
 
-					if (this.replacements.TryGetValue(link.Title, out var replacement))
+					if (this.replacements.TryGetValue(link, out var replacement))
 					{
 						this.UpdateLinkText(page, link, replacement.To);
 
@@ -598,16 +598,16 @@
 						else
 						{
 							// this.UpdateLinkText(page, link, toTitle);
-							link.Title.PageName = toTitle.PageName;
+							link.PageName = toTitle.PageName;
 							changed = true;
 						}
 					}
 
 					if (changed)
 					{
-						if (link.Title.Coerced)
+						if (link.Coerced)
 						{
-							link.Title.NamespaceId = MediaWikiNamespaces.Main;
+							link.NamespaceId = MediaWikiNamespaces.Main;
 						}
 
 						newLine = link.ToString();
@@ -648,17 +648,17 @@
 				siteLink.Link = linkLink.ToString();
 			}
 
-			if (siteLink.Title != null && this.replacements.TryGetValue(siteLink.Title, out var replacement))
+			if (this.replacements.TryGetValue(siteLink, out var replacement))
 			{
 				changed = true;
 				this.UpdateLinkText(page, siteLink, replacement.To);
-				siteLink.Title.NamespaceId = replacement.To.NamespaceId;
-				siteLink.Title.PageName = replacement.To.PageName;
+				siteLink.NamespaceId = replacement.To.NamespaceId;
+				siteLink.PageName = replacement.To.PageName;
 				if (replacement.To is IFullTitle full)
 				{
 					// Interwiki is always replaced; fragment is only replaced if not already specified. Might want to check replacement.From.Fragment if it's a full title as well, but this seems an unlikely scenario. Might even want to leave IFullTitle handling to a custom method when this gets redesigned to a visitor.
-					siteLink.Title.Interwiki = full.Interwiki;
-					siteLink.Title.Fragment ??= full.Fragment;
+					siteLink.Interwiki = full.Interwiki;
+					siteLink.Fragment ??= full.Fragment;
 				}
 			}
 
@@ -697,17 +697,17 @@
 				if (link.Text != null)
 				{
 					var paramTitle = new FullTitle(this.Site, link.Text);
-					if (paramTitle.SimpleEquals(link.Title))
+					if (paramTitle.SimpleEquals(link))
 					{
 						link.Text = toLink.FullPageName;
 					}
-					else if (link.Title.PageNameEquals(paramTitle.PageName))
+					else if (link.PageNameEquals(paramTitle.PageName))
 					{
 						link.Text = toLink.PageName;
 					}
 				}
 			}
-			else if (string.IsNullOrEmpty(link.Text) && (link.Title.LeadingColon || (link.Title.NamespaceId != MediaWikiNamespaces.File && link.Title.NamespaceId != MediaWikiNamespaces.Category)))
+			else if (string.IsNullOrEmpty(link.Text) && (link.LeadingColon || (link.NamespaceId != MediaWikiNamespaces.File && link.NamespaceId != MediaWikiNamespaces.Category)))
 			{
 				// If no link text exists, create some from the original title.
 				link.Text = link.OriginalLink?.TrimStart(':');

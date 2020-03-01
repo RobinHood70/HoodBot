@@ -177,10 +177,10 @@
 						foreach (var linkNode in parser.FindAllRecursive<LinkNode>())
 						{
 							var disambig = SiteLink.FromLinkNode(this.Site, linkNode, false);
-							if (allNpcs.Contains(disambig.Title))
+							if (allNpcs.Contains(disambig))
 							{
 								issue = null;
-								npc.PageName = disambig.Title.PageName;
+								npc.PageName = disambig.PageName;
 								break;
 							}
 						}

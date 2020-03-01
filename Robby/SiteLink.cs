@@ -54,7 +54,7 @@
 	#endregion
 
 	/// <summary>Represents a link with site-specific Title information and parameters in the site's language.</summary>
-	public class SiteLink
+	public class SiteLink : FullTitle
 	{
 		#region Static Fields
 		private static readonly Dictionary<string, ParameterType> DirectValues = new Dictionary<string, ParameterType>();
@@ -99,14 +99,27 @@
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
 		/// <param name="title">The title.</param>
 		public SiteLink(ISimpleTitle title)
-		{
-			ThrowNull(title, nameof(title));
-			var site = title.Site;
-			this.Title = new FullTitle(title);
-			this.TitleWhitespaceAfter = string.Empty;
-			this.TitleWhitespaceBefore = string.Empty;
-			InitializeImageInfo(site);
-		}
+			: base(title) => InitializeImageInfo(this.Site);
+
+		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
+		/// <param name="title">The title.</param>
+		public SiteLink(IFullTitle title)
+			: base(title) => InitializeImageInfo(this.Site);
+
+		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
+		/// <param name="site">The site the title is from.</param>
+		/// <param name="fullPageName">Full name of the page to link to.</param>
+		public SiteLink(Site site, string fullPageName)
+			: base(site, fullPageName) => InitializeImageInfo(this.Site);
+
+		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
+		/// <param name="site">The site the title is from.</param>
+		/// <param name="defaultNamespace">The default namespace if no namespace is specified in the page name.</param>
+		/// <param name="pageName">The page name to link to. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
+		/// <param name="forceNamespace">If <see langword="true"/>, the namespace specified will always be used, even if the pageName begins with what looks like a namespace or interwiki prefix.</param>
+		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
+		public SiteLink(Site site, int defaultNamespace, string pageName, bool forceNamespace)
+			: base(site, defaultNamespace, pageName, forceNamespace) => InitializeImageInfo(this.Site);
 		#endregion
 
 		#region Public Properties
@@ -226,17 +239,13 @@
 			set => this.SetDirectValue(ParameterType.Caption, value);
 		}
 
-		/// <summary>Gets or sets the title of the link.</summary>
-		/// <value>The title.</value>
-		public FullTitle Title { get; set; }
-
 		/// <summary>Gets or sets the whitespace after the title.</summary>
 		/// <value>The whitespace after the title.</value>
-		public string TitleWhitespaceAfter { get; set; }
+		public string TitleWhitespaceAfter { get; set; } = string.Empty;
 
 		/// <summary>Gets or sets the whitespace before the title.</summary>
 		/// <value>The whitespace before the title.</value>
-		public string TitleWhitespaceBefore { get; set; }
+		public string TitleWhitespaceBefore { get; set; } = string.Empty;
 
 		/// <summary>Gets or sets the upright value as a number.</summary>
 		/// <value>The upright value.</value>
@@ -322,14 +331,10 @@
 			ThrowNull(link, nameof(link));
 			var titleText = WikiTextVisitor.Value(link.Title);
 			var valueSplit = SplitWhitespace(titleText);
-			var title = coerceToFile ? new FullTitle(site, MediaWikiNamespaces.File, valueSplit.Value, false) : new FullTitle(site, valueSplit.Value);
-			var retval = new SiteLink(title)
-			{
-				OriginalLink = titleText,
-				TitleWhitespaceBefore = valueSplit.Before,
-				TitleWhitespaceAfter = valueSplit.After
-			};
-
+			var retval = coerceToFile ? new SiteLink(site, MediaWikiNamespaces.File, valueSplit.Value, false) : new SiteLink(site, valueSplit.Value);
+			retval.OriginalLink = titleText;
+			retval.TitleWhitespaceBefore = valueSplit.Before;
+			retval.TitleWhitespaceAfter = valueSplit.After;
 			foreach (var parameter in link.Parameters)
 			{
 				var valueRaw = WikiTextVisitor.Raw(parameter.Value);
@@ -406,7 +411,7 @@
 				values.Add(text);
 			}
 
-			return LinkNode.FromParts(this.TitleWhitespaceBefore + this.Title.ToString() + this.TitleWhitespaceAfter, values);
+			return LinkNode.FromParts(this.TitleWhitespaceBefore + this.ToString(false) + this.TitleWhitespaceAfter, values);
 		}
 		#endregion
 
@@ -414,7 +419,12 @@
 
 		/// <summary>Returns the full text of the link.</summary>
 		/// <returns>A <see cref="string" /> that represents this instance.</returns>
-		public override string ToString() => WikiTextVisitor.Raw(this.ToLinkNode());
+		public override string ToString()
+		{
+			var linkNode = this.ToLinkNode();
+			var text = WikiTextVisitor.Raw(linkNode);
+			return text;
+		}
 		#endregion
 
 		#region Private Static Methods
