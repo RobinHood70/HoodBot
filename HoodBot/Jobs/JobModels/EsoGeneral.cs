@@ -33,6 +33,11 @@
 		private const string PatchPageName = "Online:Patch";
 		#endregion
 
+		#region Static Fields
+		private static readonly Regex ColourCode = new Regex(@"\A\|c[0-9A-F]{6}(.*?)\|r\Z");
+		private static readonly Regex TrailingDigits = new Regex(@"\s*\d+\Z");
+		#endregion
+
 		#region Fields
 		private static readonly Regex BonusFinder = new Regex(@"\s*Current [Bb]onus:.*?\.");
 		private static readonly Regex SpaceFixer = new Regex(@"[\n\ ]+");
@@ -166,15 +171,19 @@
 			var nameClash = new HashSet<string>();
 			foreach (var row in RunQuery("SELECT id, name, gender, difficulty, ppDifficulty, ppClass, reaction FROM uesp_esolog.npc WHERE level != -1"))
 			{
-				var npcData = new NpcData(row);
-				if (!ReplacementData.NpcNameSkips.Contains(npcData.Name))
+				var name = (string)row["name"];
+				if (!ColourCode.IsMatch(name) && !TrailingDigits.IsMatch(name))
 				{
-					if (!nameClash.Add(npcData.Name))
+					var npcData = new NpcData(row);
+					if (!ReplacementData.NpcNameSkips.Contains(npcData.Name))
 					{
-						throw new InvalidOperationException($"Warning: an NPC with the name \"{npcData.Name}\" exists more than once in the database!");
-					}
+						if (!nameClash.Add(npcData.Name))
+						{
+							throw new InvalidOperationException($"Warning: an NPC with the name \"{npcData.Name}\" exists more than once in the database!");
+						}
 
-					retval.Add(npcData);
+						retval.Add(npcData);
+					}
 				}
 			}
 
@@ -232,11 +241,18 @@
 
 			foreach (var mappedName in places.TitleMap)
 			{
-				if (retval[mappedName.Value.PageName] is Place place)
+				// TODO: Take another look at this later. Error catching added here that triggered on [[Online:Hircine's Hunting Grounds]]. Having a bad day and not sure if this is the right thing to do.
+				try
 				{
-					// In an ideal world, this would be a direct reference to the same place, rather than a copy, but that ends up being a lot of work for very little gain.
-					var key = new Title(site, mappedName.Key).PageName;
-					retval.Add(Place.Copy(key, place));
+					if (retval[mappedName.Value.PageName] is Place place)
+					{
+						// In an ideal world, this would be a direct reference to the same place, rather than a copy, but that ends up being a lot of work for very little gain.
+						var key = new Title(site, mappedName.Key).PageName;
+						retval.Add(Place.Copy(key, place));
+					}
+				}
+				catch (InvalidOperationException)
+				{
 				}
 			}
 
@@ -323,16 +339,23 @@
 			{
 				if (member.NamespaceId == UespNamespaces.Online)
 				{
-					if (places[member.PageName] is Place place)
+					// TODO: Take another look at this later. Error catching added here that triggered on [[Online:Farm House]]. Having a bad day and not sure if this is the right thing to do.
+					try
 					{
-						if (place.PlaceType == PlaceType.Unknown)
+						if (places[member.PageName] is Place place)
 						{
-							place.PlaceType = placeInfo.Type;
+							if (place.PlaceType == PlaceType.Unknown)
+							{
+								place.PlaceType = placeInfo.Type;
+							}
+							else
+							{
+								Debug.WriteLine($"Multiple place types on page: {member.FullPageName}");
+							}
 						}
-						else
-						{
-							Debug.WriteLine($"Multiple place types on page: {member.FullPageName}");
-						}
+					}
+					catch (InvalidOperationException)
+					{
 					}
 				}
 				else if (member.NamespaceId != UespNamespaces.Category)
