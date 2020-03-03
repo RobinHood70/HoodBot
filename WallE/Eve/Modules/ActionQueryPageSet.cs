@@ -185,8 +185,9 @@ namespace RobinHood70.WallE.Eve.Modules
 				throw new InvalidOperationException(EveMessages.PageFactoryNotSet);
 			}
 
+			// Invalid titles can be missing a namespace. Since the page factory requires one, we use 0.
 			var page = this.pageFactory(
-				ns: (int)result.MustHave("ns"),
+				ns: (int?)result["ns"] ?? 0,
 				title: result.MustHaveString("title"),
 				pageId: (long?)result["pageid"] ?? 0);
 			page.Flags = result.GetFlags(
