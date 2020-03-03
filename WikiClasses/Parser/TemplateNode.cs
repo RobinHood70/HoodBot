@@ -222,7 +222,7 @@
 				}
 
 				var previous = this.Parameters[index];
-				this.Parameters.Insert(index, ParameterNode.CopyFormatFrom(previous, name, value));
+				this.Parameters.Insert(index + 1, ParameterNode.CopyFormatFrom(previous, name, value));
 			}
 			else
 			{
@@ -258,18 +258,19 @@
 		{
 			var retval = -1;
 			var i = 0;
-			foreach (var node in this.Parameters)
+			for (var index = 0; index < this.Parameters.Count; index++)
 			{
+				var node = this.Parameters[index];
 				if (node.Name == null)
 				{
 					if (++i == number)
 					{
-						retval = i;
+						retval = index;
 					}
 				}
 				else if (int.TryParse(node.NameToText(), out var foundNumber) && foundNumber == number)
 				{
-					retval = i;
+					retval = index;
 				}
 			}
 
