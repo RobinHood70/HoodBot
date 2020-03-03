@@ -38,7 +38,7 @@
 			{
 				if (image.LatestFileRevision is FileRevision imageInfo)
 				{
-					this.WriteLine($"* {image.AsLink()} ({imageInfo.Width}x{imageInfo.Height})");
+					this.WriteLine($"* {image.AsLink(true)} ({imageInfo.Width}x{imageInfo.Height})");
 				}
 			}
 		}

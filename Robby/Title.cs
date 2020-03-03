@@ -210,7 +210,7 @@
 		#region Public Methods
 
 		/// <inheritdoc/>
-		public string AsLink() => "[[" + this.ToString(true) + "]]";
+		public string AsLink(bool friendly) => "[[" + this.ToString(true) + (friendly ? "|" + this.LabelName : string.Empty) + "]]";
 
 		/// <summary>Protects a non-existent page from being created.</summary>
 		/// <param name="reason">The reason for the create-protection.</param>

@@ -43,8 +43,9 @@
 		#region Methods
 
 		/// <summary>Returns the provided title as link text.</summary>
+		/// <param name="friendly">Whether to format the link as friendly (<c>[[Talk:Page|Page]]</c>) or raw (<c>[[Talk:Page]]</c>).</param>
 		/// <returns>The current title, formatted as a link.</returns>
-		string AsLink();
+		string AsLink(bool friendly);
 
 		/// <summary>Deconstructs this instance into its constituent parts.</summary>
 		/// <param name="site">The site this title is from.</param>

@@ -337,7 +337,7 @@
 				var actions = new List<string>();
 				if (replacement.Actions.HasFlag(ReplacementActions.Move))
 				{
-					actions.Add("move to " + replacement.To.AsLink());
+					actions.Add("move to " + replacement.To.AsLink(false));
 				}
 
 				if (replacement.Actions.HasFlag(ReplacementActions.Edit) && this.CustomEdit != null)
@@ -453,7 +453,7 @@
 		{
 			ThrowNull(replacement, nameof(replacement));
 			replacement.Actions &= ~ReplacementActions.Move;
-			replacement.Reason = $"{replacement.To.AsLink()} exists";
+			replacement.Reason = $"{replacement.To.AsLink(false)} exists";
 		}
 
 		protected virtual void MovePages()
@@ -666,7 +666,7 @@
 			{
 				if (siteLink.ParametersDropped)
 				{
-					Debug.WriteLine($"{page.AsLink()}: Skipped update link because parameters were dropped in " + WikiTextVisitor.Raw(link));
+					Debug.WriteLine($"{page.AsLink(false)}: Skipped update link because parameters were dropped in " + WikiTextVisitor.Raw(link));
 				}
 				else
 				{

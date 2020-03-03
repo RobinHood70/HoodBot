@@ -82,7 +82,7 @@
 				var text = this.GetTextForPage(page);
 				if (text.Length > 0)
 				{
-					this.WriteLine($"* {page.AsLink()}{text}");
+					this.WriteLine($"* {page.AsLink(false)}{text}");
 				}
 			}
 		}
@@ -105,8 +105,16 @@
 
 			if (catSize > 0)
 			{
-				var cats = "category member" + (catSize == 1 ? string.Empty : "s");
-				list.Add($"{catSize} {cats}");
+				var catMembers = new TitleCollection(this.Site);
+				catMembers.GetCategoryMembers(page.FullPageName, CategoryMemberTypes.All, false);
+				catMembers.Remove(page);
+				//// catMembers.Remove("Skyrim:Dragonborn");
+
+				if (catMembers.Count > 0)
+				{
+					var cats = "category member" + (catSize == 1 ? string.Empty : "s");
+					list.Add($"{catSize} {cats}");
+				}
 			}
 
 			var text = string.Join(", ", list);
@@ -140,7 +148,7 @@
 			{
 				if (!page.IsRedirect)
 				{
-					this.WriteLine("* " + page.AsLink());
+					this.WriteLine("* " + page.AsLink(false));
 				}
 			}
 		}
@@ -192,7 +200,7 @@
 					var catPage = (CategoryPage)page;
 					if (catPage.FullCount > 0)
 					{
-						this.WriteLine($"* {page.AsLink()}{this.GetTextForPage(page)}");
+						this.WriteLine($"* {page.AsLink(false)}{this.GetTextForPage(page)}");
 					}
 				}
 			}

@@ -43,7 +43,7 @@
 				this.WriteLine($"Pages linking to <nowiki>[[{this.title}]]</nowiki>:");
 				foreach (var result in this.results)
 				{
-					this.WriteLine($"* {result.AsLink()}");
+					this.WriteLine($"* {result.AsLink(false)}");
 				}
 			}
 		}
