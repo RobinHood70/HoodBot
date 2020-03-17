@@ -93,6 +93,7 @@
 			[-70] = "Grave Lord Slotted",
 			[-71] = "Spell Damage Capped",
 			[-72] = "Magicka and Weapon Damage",
+			[-73] = "Magicka and Spell Damage",
 		};
 
 		public static IEnumerable<PlaceInfo> PlaceInfo { get; } = new PlaceInfo[]

@@ -7,6 +7,10 @@
 
 	internal class PassiveSkill : Skill
 	{
+		#region Fields
+		private readonly List<PassiveRank> ranks = new List<PassiveRank>();
+		#endregion
+
 		#region Constructors
 		public PassiveSkill(IDataRecord row)
 			: base(row)
@@ -20,28 +24,26 @@
 			{
 				this.Class = "Crafting";
 			}
-
-			((List<PassiveRank>)this.Ranks).Add(new PassiveRank(row));
 		}
 		#endregion
 
 		#region Public Properties
-		public int Id => this.Ranks[this.Ranks.Count - 1].Id;
+		public int Id => this.ranks[this.ranks.Count - 1].Id;
 
-		public IReadOnlyList<PassiveRank> Ranks { get; } = new List<PassiveRank>();
+		public IReadOnlyList<PassiveRank> Ranks => this.ranks;
 		#endregion
 
-		#region Internal Override Methods
+		#region Public Override Methods
 		public override bool Check()
 		{
 			var retval = false;
-			if (this.Ranks.Count < 1 || this.Ranks.Count > 10)
+			if (this.ranks.Count < 1 || this.ranks.Count > 10)
 			{
 				retval = true;
 				Debug.WriteLine($"Warning: {this.Name} has an unusual number of ranks ({this.Ranks.Count}).");
 			}
 
-			foreach (var rank in this.Ranks)
+			foreach (var rank in this.ranks)
 			{
 				if (string.IsNullOrWhiteSpace(rank.Description))
 				{
@@ -52,6 +54,8 @@
 
 			return retval;
 		}
+
+		public override void GetData(IDataRecord row) => this.ranks.Add(new PassiveRank(row));
 		#endregion
 	}
 }

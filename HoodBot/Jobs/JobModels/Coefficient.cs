@@ -79,14 +79,31 @@
 				case 0:
 				case 6:
 				case 10:
-				case -72:
-					return (int)Math.Round(this.A * Ability.Stat + this.B * Ability.Damage + this.C);
 				case -68:
 					value = (int)Math.Round(this.A * Ability.Stat);
 					maxValue = (int)Math.Round(this.B * Ability.Health);
 					return value > maxValue ? maxValue : value;
 				case -71:
 					value = (int)Math.Round(this.A * Ability.Damage + this.B);
+					maxValue = (int)this.C;
+					return value > maxValue ? maxValue : value;
+				case -72:
+					return (int)Math.Round(this.A * Ability.Stat + this.B * Ability.Damage + this.C);
+				case -73:
+					var halfMax = this.C / 2;
+					var statDamage = this.A * Ability.Stat;
+					if (statDamage > halfMax)
+					{
+						statDamage = halfMax;
+					}
+
+					var dmgDamage = this.B * Ability.Damage;
+					if (dmgDamage > halfMax)
+					{
+						dmgDamage = halfMax;
+					}
+
+					value = (int)Math.Round(statDamage + dmgDamage);
 					maxValue = (int)this.C;
 					return value > maxValue ? maxValue : value;
 				case var n when n >= -70 && n <= -51:

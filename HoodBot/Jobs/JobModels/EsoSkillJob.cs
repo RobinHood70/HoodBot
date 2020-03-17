@@ -176,17 +176,18 @@
 		private void GetSkillList()
 		{
 			var errors = false;
-			string? lastSkill = null; // We use a string for comparison because the skill itself will sometimes massage the data.
+			T? currentSkill = null;
+			string? lastName = null; // We use a string for comparison because the skill itself will sometimes massage the data.
 			foreach (var row in EsoGeneral.RunQuery(this.Query))
 			{
-				var uniqueName = (string)row["baseName"] + "::" + (string)row["skillTypeName"];
-				if (lastSkill != uniqueName)
+				var currentName = (string)row["skillTypeName"] + "::" + (string)row["baseName"];
+				if (lastName != currentName)
 				{
+					lastName = currentName;
+					currentSkill = this.GetNewSkill(row);
 					try
 					{
-						lastSkill = uniqueName;
-						var skill = this.GetNewSkill(row);
-						this.skills.Add(skill.PageName, skill);
+						this.skills.Add(currentSkill.PageName, currentSkill);
 					}
 					catch (InvalidOperationException e)
 					{
@@ -194,6 +195,8 @@
 						errors = true;
 					}
 				}
+
+				currentSkill!.GetData(row);
 			}
 
 			foreach (var checkSkill in this.skills)
