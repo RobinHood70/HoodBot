@@ -179,7 +179,8 @@
 				return false;
 			}
 
-			if (this.Constructor == other.Constructor && this.Parameters == other.Parameters)
+			var equalConstructors = this.Constructor == other.Constructor;
+			if (equalConstructors && this.Parameters == other.Parameters)
 			{
 				return true;
 			}
@@ -198,7 +199,7 @@
 				}
 			}
 
-			return true;
+			return equalConstructors;
 		}
 
 		public bool Equals(JobNode? other)
