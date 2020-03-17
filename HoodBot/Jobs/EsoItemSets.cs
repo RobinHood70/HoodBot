@@ -21,10 +21,15 @@
 		private static readonly Regex OnlineUpdateRegex = Template.Find("Online Update");
 		private static readonly Regex SetBonusRegex = new Regex(@"(\([1-6] items?\))");
 		private static readonly Uri SetSummaryPage = new Uri("http://esolog.uesp.net/viewlog.php?record=setSummary&format=csv");
+		private static readonly Dictionary<string, string> TitleOverrides = new Dictionary<string, string>
+		{
+			// Title Overrides will likely only be necessary when creating new "(set)" pages that need to be disambiguated upon creation. While this could be done programatically, it's probably best not to, so that a human has verified that the page really should be created and that the existing page isn't malformed or something.
+			["Grave Guardian"] = "Grave Guardian (set)"
+		};
 		#endregion
 
 		#region Fields
-		private readonly Dictionary<string, PageData> sets = new Dictionary<string, PageData>();
+		private readonly IDictionary<string, PageData> sets = new SortedDictionary<string, PageData>();
 		private readonly IMediaWikiClient client;
 		#endregion
 
@@ -159,14 +164,26 @@
 			var uncheckedSets = new Dictionary<Title, PageData>(); // These titles are not in the category and need to be checked for redirects, etc.
 			foreach (var set in dbSets)
 			{
-				if ((catMembers.FindTitle(UespNamespaces.Online, set.SetName, true) ?? catMembers.FindTitle(UespNamespaces.Online, set.SetName + " (set)", true)) is Title foundPage)
+				if (!TitleOverrides.TryGetValue(set.SetName, out var setName))
+				{
+					setName = set.SetName;
+				}
+
+				if ((catMembers.FindTitle(UespNamespaces.Online, setName, true) ?? catMembers.FindTitle(UespNamespaces.Online, setName + " (set)", true)) is Title foundPage)
 				{
 					titles.Add(foundPage);
-					this.sets.Add(foundPage.PageName, set);
+					try
+					{
+						this.sets.Add(foundPage.PageName, set);
+					}
+					catch (ArgumentException)
+					{
+						Debug.WriteLine($"Duplicate entry for {set.SetName} in raw data.");
+					}
 				}
 				else
 				{
-					var newTitle = new Title(this.Site, UespNamespaces.Online, set.SetName, true);
+					var newTitle = new Title(this.Site, UespNamespaces.Online, setName, true);
 					uncheckedSets.Add(newTitle, set);
 				}
 			}
@@ -195,14 +212,14 @@
 
 					if (!resolved)
 					{
-						this.Warn($"{page.FullPageName} exists but is neither a set not a disambiguation to one. Please check!");
+						this.Warn($"{page.FullPageName} exists but is neither a set nor a disambiguation to one. Please check!");
 					}
 				}
 				else
 				{
 					titles.Add(title.Key);
 					this.sets.Add(title.Key.PageName, title.Value);
-					this.Warn($"{title.Value.SetName} does not exist and will be created.");
+					this.Warn($"{title.Key.FullPageName} does not exist and will be created.");
 				}
 			}
 
