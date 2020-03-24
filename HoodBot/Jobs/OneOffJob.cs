@@ -1,11 +1,13 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System;
 	using System.Collections.Generic;
+	using System.IO;
+	using Newtonsoft.Json;
 	using RobinHood70.HoodBot.Jobs.Design;
+	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Parser;
-	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiClasses.Parser;
 	using RobinHood70.WikiCommon;
 	using static WikiCommon.Globals;
@@ -21,19 +23,20 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override string EditSummary => "Add mod parameter";
+		protected override string EditSummary => "Fix header to match link text";
 
 		protected override void LoadPages()
 		{
-			var srGameBooks = new TitleCollection(this.Site);
-			srGameBooks.GetBacklinks("Template:NPC Summary", BacklinksTypes.EmbeddedIn, false, Filter.Exclude, UespNamespaces.Skyrim);
+			var titles = new TitleCollection(this.Site);
+			var titleConverter = new ISimpleTitleJsonConverter(this.Site);
+			var repFile = File.ReadAllText(Environment.ExpandEnvironmentVariables(@"%BotData%\Replacements - Merge.json"));
+			var reps = JsonConvert.DeserializeObject<IEnumerable<Replacement>>(repFile, titleConverter) ?? throw new InvalidOperationException();
+			foreach (var rep in reps)
+			{
+				titles.Add(rep.To);
+			}
 
-			var mhTitles = new TitleCollection(this.Site);
-			mhTitles.GetBacklinks("Template:Mod Header", BacklinksTypes.EmbeddedIn, false, Filter.Exclude, UespNamespaces.Skyrim);
-
-			var combined = new HashSet<Title>(mhTitles, SimpleTitleEqualityComparer.Instance);
-			combined.IntersectWith(srGameBooks);
-			this.Pages.GetTitles(combined);
+			this.Pages.GetTitles(titles);
 		}
 		#endregion
 
@@ -42,26 +45,11 @@
 		{
 			ThrowNull(page, nameof(page));
 			ThrowNull(parsedPage, nameof(parsedPage));
-			if (parsedPage.FindFirst<TemplateNode>(template => template.GetTitleValue() == "Mod Header") is TemplateNode modHeader)
+			var dbHeader = parsedPage.FindFirst<HeaderNode>(header => header.Level == 1 && header.GetInnerText(true) == "Dragonborn {{DB}}");
+			if (dbHeader != null)
 			{
-				foreach (var npcSummary in parsedPage.FindAll<TemplateNode>(template => template.GetTitleValue() == "NPC Summary"))
-				{
-					if (npcSummary.FindParameter("mod") == null)
-					{
-						switch (modHeader.FindNumberedParameter(1)?.ValueToText())
-						{
-							case "Dragonborn":
-								npcSummary.AddParameter("mod", "[[Skyrim:Dragonborn|Dragonborn]]", true);
-								break;
-							case "Dawnguard":
-								npcSummary.AddParameter("mod", "[[Skyrim:Dawnguard|Dawnguard]]", true);
-								break;
-							case "Hearthfire":
-								npcSummary.AddParameter("mod", "[[Skyrim:Hearthfire|Hearthfire]]", true);
-								break;
-						}
-					}
-				}
+				dbHeader.Title.Clear();
+				dbHeader.Title.AddText("= Dragonborn =");
 			}
 		}
 		#endregion
