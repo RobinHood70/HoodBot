@@ -25,6 +25,30 @@
 		#endregion
 
 		#region Protected Override Methods
+		protected override void BeforeLogging()
+		{
+			this.StatusWriteLine("Getting NPC data from wiki");
+			var allNpcs = EsoGeneral.GetNpcsFromCategories(this.Site);
+
+			this.StatusWriteLine("Getting NPC data from database");
+			var npcData = EsoGeneral.GetNpcsFromDatabase();
+			this.FilterNpcs(allNpcs, npcData);
+			EsoGeneral.GetNpcLocations(npcData);
+
+			this.StatusWriteLine("Getting place data from wiki");
+			var places = EsoGeneral.GetPlaces(this.Site);
+			EsoGeneral.ParseNpcLocations(npcData, places);
+
+			foreach (var npc in npcData)
+			{
+				npc.TrimPlaces();
+				this.Pages.Add(this.CreatePage(npc));
+			}
+
+			this.ProgressMaximum = this.Pages.Count + 4;
+			this.Progress = 4;
+		}
+
 		protected override void Main()
 		{
 			this.StatusWriteLine("Saving");
@@ -48,30 +72,6 @@
 			{
 				// Do nothing. If someone created the page in the meantime, it's no longer our problem.
 			}
-		}
-
-		protected override void BeforeLogging()
-		{
-			this.StatusWriteLine("Getting NPC data from wiki");
-			var allNpcs = EsoGeneral.GetNpcsFromCategories(this.Site);
-
-			this.StatusWriteLine("Getting NPC data from database");
-			var npcData = EsoGeneral.GetNpcsFromDatabase();
-			this.FilterNpcs(allNpcs, npcData);
-			EsoGeneral.GetNpcLocations(npcData);
-
-			this.StatusWriteLine("Getting place data from wiki");
-			var places = EsoGeneral.GetPlaces(this.Site);
-			EsoGeneral.ParseNpcLocations(npcData, places);
-
-			foreach (var npc in npcData)
-			{
-				npc.TrimPlaces();
-				this.Pages.Add(this.CreatePage(npc));
-			}
-
-			this.ProgressMaximum = this.Pages.Count + 4;
-			this.Progress = 4;
 		}
 		#endregion
 

@@ -21,6 +21,7 @@
 	using static System.Environment;
 	using static RobinHood70.WikiCommon.Globals;
 
+	// TODO: Decouple this into a job-runner class, or something along those lines, that notifies this one of updates.
 	public class MainViewModel : Notifier
 	{
 		#region Private Constants
@@ -96,7 +97,7 @@
 			}
 		}
 
-		public IDiffViewer DiffViewer { get; set; }
+		public IDiffViewer? DiffViewer { get; set; }
 
 		public bool EditingEnabled
 		{
