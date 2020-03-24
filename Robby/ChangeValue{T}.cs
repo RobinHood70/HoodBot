@@ -11,7 +11,7 @@
 		/// <summary>Initializes a new instance of the <see cref="ChangeValue{T}"/> class.</summary>
 		/// <param name="result">The change status.</param>
 		/// <param name="data">The data returned by the function.</param>
-		internal ChangeValue(ChangeStatus result, [AllowNull] T data)
+		internal ChangeValue(ChangeStatus result, [MaybeNull] T data)
 		{
 			this.Status = result;
 			this.Value = data;
