@@ -243,7 +243,7 @@
 			if (index != -1)
 			{
 				var previous = this.Parameters[index];
-				this.Parameters.Insert(index, ParameterNode.CopyFormatFrom(previous, value));
+				this.Parameters.Insert(index + 1, ParameterNode.CopyFormatFrom(previous, value));
 			}
 			else
 			{
