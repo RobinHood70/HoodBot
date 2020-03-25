@@ -19,7 +19,7 @@
 		#endregion
 
 		#region Internal Override Properties
-		internal override Piece CurrentPiece => this.NameValuePieces[this.NameValuePieces.Count - 1];
+		internal override Piece CurrentPiece => this.NameValuePieces[^1];
 		#endregion
 
 		#region Protected Properties

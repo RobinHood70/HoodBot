@@ -28,7 +28,7 @@
 		#endregion
 
 		#region Public Properties
-		public int Id => this.ranks[this.ranks.Count - 1].Id;
+		public int Id => this.ranks[^1].Id;
 
 		public IReadOnlyList<PassiveRank> Ranks => this.ranks;
 		#endregion
