@@ -328,7 +328,7 @@
 			{
 				foreach (var item in token.Children<JProperty>())
 				{
-					dict.Add(item.Name, item.Value.ToObject<TValue>());
+					dict.Add(item.Name, item.Value.ToObject<TValue>()!);
 				}
 			}
 
