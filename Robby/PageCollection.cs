@@ -337,6 +337,9 @@
 			this.titleMap.Clear();
 		}
 
+		/// <inheritdoc/>
+		public override void GetCustomGenerator(IGeneratorInput generatorInput) => this.LoadPages(this.LoadOptions, new QueryPageSetInput(generatorInput));
+
 		/// <summary>Adds pages with the specified revision IDs to the collection.</summary>
 		/// <param name="revisionIds">The IDs.</param>
 		/// <remarks>General information about the pages for the revision IDs specified will always be loaded, regardless of the LoadOptions setting, though the revisions themselves may not be if the collection's load options would filter them out.</remarks>
@@ -421,7 +424,7 @@
 
 			foreach (var type in input.LinkTypes.GetUniqueFlags())
 			{
-				this.LoadPages(new BacklinksInput(input.Title, type)
+				this.GetCustomGenerator(new BacklinksInput(input.Title, type)
 				{
 					FilterRedirects = input.FilterRedirects,
 					Namespace = input.Namespace,
@@ -432,7 +435,7 @@
 
 		/// <summary>Adds a set of category pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetCategories(AllCategoriesInput input) => this.LoadPages(input);
+		protected override void GetCategories(AllCategoriesInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds category members to the collection, potentially including subcategories and their members.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -446,7 +449,7 @@
 			}
 			else
 			{
-				this.LoadPages(input);
+				this.GetCustomGenerator(input);
 			}
 		}
 
@@ -457,11 +460,11 @@
 
 		/// <summary>Adds files to the collection, based on optionally file-specific parameters.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetFiles(AllImagesInput input) => this.LoadPages(input);
+		protected override void GetFiles(AllImagesInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds files that are in use to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetFileUsage(AllFileUsagesInput input) => this.LoadPages(input);
+		protected override void GetFileUsage(AllFileUsagesInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -470,11 +473,11 @@
 
 		/// <summary>Adds pages that link to a given namespace.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetLinksToNamespace(AllLinksInput input) => this.LoadPages(input);
+		protected override void GetLinksToNamespace(AllLinksInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds pages from a given namespace to the collection. Parameters allow filtering to a specific range of pages.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetNamespace(AllPagesInput input) => this.LoadPages(input);
+		protected override void GetNamespace(AllPagesInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -503,48 +506,48 @@
 
 		/// <summary>Adds pages with a given property to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetPagesWithProperty(PagesWithPropertyInput input) => this.LoadPages(input);
+		protected override void GetPagesWithProperty(PagesWithPropertyInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds prefix-search results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetPrefixSearchResults(PrefixSearchInput input) => this.LoadPages(input);
+		protected override void GetPrefixSearchResults(PrefixSearchInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds query page results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <remarks>Query pages are a subset of Special pages that conform to a specific standard. You can find a list by using the Help feature of the API (<c>/api.php?action=help&amp;modules=query+querypage</c>). Note that a few of these (e.g., ListDuplicatedFiles) have API equivalents that are more functional and produce the same or more detailed results.</remarks>
-		protected override void GetQueryPage(QueryPageInput input) => this.LoadPages(input);
+		protected override void GetQueryPage(QueryPageInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Gets a random set of pages from the wiki.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetRandomPages(RandomInput input) => this.LoadPages(input);
+		protected override void GetRandomPages(RandomInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds recent changes pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetRecentChanges(RecentChangesInput input) => this.LoadPages(input);
+		protected override void GetRecentChanges(RecentChangesInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds redirects to a namespace to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetRedirectsToNamespace(AllRedirectsInput input) => this.LoadPages(input);
+		protected override void GetRedirectsToNamespace(AllRedirectsInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds pages from a range of revisions to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetRevisions(AllRevisionsInput input) => this.LoadPages(input);
+		protected override void GetRevisions(AllRevisionsInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds search results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetSearchResults(SearchInput input) => this.LoadPages(input);
+		protected override void GetSearchResults(SearchInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds pages with template transclusions to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetTransclusions(AllTransclusionsInput input) => this.LoadPages(input);
+		protected override void GetTransclusions(AllTransclusionsInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds changed watchlist pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetWatchlistChanged(WatchlistInput input) => this.LoadPages(input);
+		protected override void GetWatchlistChanged(WatchlistInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds raw watchlist pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected override void GetWatchlistRaw(WatchlistRawInput input) => this.LoadPages(input);
+		protected override void GetWatchlistRaw(WatchlistRawInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Inserts an item into the <see cref="PageCollection">collection</see>.</summary>
 		/// <param name="index">The index to insert at.</param>
@@ -607,8 +610,6 @@
 		#endregion
 
 		#region Private Methods
-		private void LoadPages(IGeneratorInput generator) => this.LoadPages(this.LoadOptions, new QueryPageSetInput(generator));
-
 		private void LoadPages(IGeneratorInput generator, IEnumerable<ISimpleTitle> titles) => this.LoadPages(this.LoadOptions, new QueryPageSetInput(generator, titles.ToFullPageNames()));
 
 		private void LoadPages(PageLoadOptions options, QueryPageSetInput pageSetInput) => this.LoadPages(options, pageSetInput, this.IsTitleInLimits);

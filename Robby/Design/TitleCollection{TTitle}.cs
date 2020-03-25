@@ -817,6 +817,10 @@
 		/// <remarks>All items added are newly created, even if the type of the titles provided matches those in the collection.</remarks>
 		public abstract void AddFrom(IEnumerable<ISimpleTitle> titles);
 
+		/// <summary>Adds pages returned by a custom generator.</summary>
+		/// <param name="generatorInput">The generator input.</param>
+		public abstract void GetCustomGenerator(IGeneratorInput generatorInput);
+
 		/// <summary>Adds pages to the collection from their revision IDs.</summary>
 		/// <param name="revisionIds">The revision IDs.</param>
 		public abstract void GetRevisionIds(IEnumerable<long> revisionIds);
