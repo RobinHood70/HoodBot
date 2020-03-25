@@ -3,7 +3,9 @@
 	using System;
 	using System.Collections.Generic;
 	using RobinHood70.HoodBot.Jobs.Design;
+	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiClasses.Parser;
 	using RobinHood70.WikiCommon;
 
@@ -50,38 +52,22 @@
 				}
 			}
 
-			var goodBooks = new TitleCollection(this.Site);
-			goodBooks.GetBacklinks("Template:Lore Book Compilation", BacklinksTypes.EmbeddedIn);
-
-			var allBooks = new PageCollection(this.Site);
-			allBooks.GetBacklinks("Template:Lore Book", BacklinksTypes.EmbeddedIn);
-			foreach (var book in allBooks)
+			var pageLoadOptions = new PageLoadOptions(PageModules.Info | PageModules.Custom, true);
+			var pageCreator = new MetaTemplateCreator("listbook");
+			var listBooks = new PageCollection(this.Site, pageLoadOptions, pageCreator);
+			listBooks.SetLimitations(LimitationType.FilterTo, UespNamespaces.Lore);
+			listBooks.GetCustomGenerator(new VariablesInput() { Variables = new[] { "listbook" } });
+			for (var i = listBooks.Count - 1; i >= 0; i--)
 			{
-				var parser = WikiTextParser.Parse(book.Text);
-				if (parser.FindFirst<TemplateNode>(item => item.GetTitleValue() == "Lore Book") is TemplateNode template)
+				var varPage = (VariablesPage)listBooks[i];
+				var value = varPage.GetVariable("listbook");
+				if (value != null && !this.ListBookValue(value))
 				{
-					var addIt = true;
-					foreach (var param in template.Parameters)
-					{
-						var paramName = param.NameToText();
-						if (paramName == "up" || paramName == "prev")
-						{
-							if (!string.IsNullOrWhiteSpace(param.ValueToText()))
-							{
-								addIt = false;
-								break;
-							}
-						}
-					}
-
-					if (addIt)
-					{
-						goodBooks.Add(book);
-					}
+					listBooks.RemoveAt(i);
 				}
 			}
 
-			goodBooks.Sort((title1, title2) =>
+			listBooks.Sort((title1, title2) =>
 			{
 				var page1 = title1.PageName;
 				if (this.linkTitles.TryGetValue(page1, out var linkTitle))
@@ -103,7 +89,7 @@
 			});
 
 			var loreBookTitles = new TitleCollection(this.Site);
-			foreach (var book in goodBooks)
+			foreach (var book in listBooks)
 			{
 				var label = TrimArticle(book.PageName);
 				var letter = label.Substring(0, 1).ToUpperInvariant();
@@ -162,6 +148,12 @@
 			parser.Remove(first.Next!);
 			page.Text = WikiTextVisitor.Raw(parser);
 		}
+
+		private bool ListBookValue(string value) =>
+			value == "1" ? true : // Quick check for most common value
+			int.TryParse(value, out var intVal) ? intVal != 0 :
+			bool.TryParse(value, out var boolVal) ? boolVal :
+			value.ToLowerInvariant() == "no";
 		#endregion
 	}
 }
