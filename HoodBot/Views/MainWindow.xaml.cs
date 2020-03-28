@@ -4,10 +4,10 @@
 	using System.Collections;
 	using System.Windows;
 	using System.Windows.Controls;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.ViewModels;
-	using RobinHood70.WikiCommon;
+	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.HoodBot.Properties.Resources; // Allowing "using static" for this one due to naming conflict with framework.
-	using static RobinHood70.WikiCommon.Globals;
 
 	/// <summary>Interaction logic for MainWindow.xaml.</summary>
 	public partial class MainWindow : Window, IParameterFetcher

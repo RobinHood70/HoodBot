@@ -222,4 +222,7 @@
   <data name="UserInfoCheckFailed" xml:space="preserve">
     <value>UserInfo check failed! User name and ID could not be validated.</value>
   </data>
+  <data name="ParameterInvalidCast" xml:space="preserve">
+    <value>The {0} parameter passed to {1} could not be cast to {2}, as it's type was {3}.</value>
+  </data>
 </root>

@@ -4,11 +4,11 @@
 	using System.Collections.Generic;
 	using System.Data;
 	using System.Text;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
-	using RobinHood70.WikiCommon;
 
 	public class EsoQuests : EditJob
 	{

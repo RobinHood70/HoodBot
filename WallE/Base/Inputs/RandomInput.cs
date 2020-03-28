@@ -2,7 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
-	using RobinHood70.WikiCommon;
+	using RobinHood70.CommonCode;
 
 	public class RandomInput : ILimitableInput, IGeneratorInput
 	{

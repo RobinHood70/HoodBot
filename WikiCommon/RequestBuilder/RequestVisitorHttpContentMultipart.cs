@@ -2,8 +2,7 @@
 {
 	using System.Collections.Generic;
 	using System.Net.Http;
-	using static RobinHood70.WikiCommon.Globals;
-
+	using static RobinHood70.CommonCode.Globals;
 	/// <summary>Formats a Request object as <see cref="MultipartFormDataContent"/>.</summary>
 	public class RequestVisitorHttpContentMultipart : IParameterVisitor
 	{

@@ -1,12 +1,13 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Parser;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WikiClasses.Parser;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiCommon.Globals;
+	using RobinHood70.WikiCommon.Parser;
+	using static RobinHood70.CommonCode.Globals;
 
 	public class LinkFinder : ParsedPageJob
 	{

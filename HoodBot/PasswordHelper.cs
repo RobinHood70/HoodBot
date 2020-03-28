@@ -2,7 +2,7 @@
 {
 	using System.Windows;
 	using System.Windows.Controls;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	// Taken from https://www.wpftutorial.net/PasswordBox.html
 	public static class PasswordHelper

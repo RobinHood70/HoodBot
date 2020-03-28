@@ -52,7 +52,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.User ?? Globals.Unknown;
+		public override string ToString() => this.User ?? FallbackText.Unknown;
 		#endregion
 	}
 }

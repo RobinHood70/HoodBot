@@ -2,7 +2,7 @@
 
 namespace RobinHood70.WallE.Base
 {
-	using RobinHood70.WikiCommon;
+	using RobinHood70.CommonCode;
 
 	public class EmailUserResult
 	{

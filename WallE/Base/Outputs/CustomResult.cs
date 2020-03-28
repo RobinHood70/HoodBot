@@ -14,7 +14,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Result ?? Globals.Unknown;
+		public override string ToString() => this.Result ?? FallbackText.Unknown;
 		#endregion
 	}
 }

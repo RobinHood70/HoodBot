@@ -3,9 +3,9 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Properties;
-	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	internal static class ProjectGlobals
 	{

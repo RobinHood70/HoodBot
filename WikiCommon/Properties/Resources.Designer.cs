@@ -61,6 +61,24 @@ namespace RobinHood70.WikiCommon.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Anonymizing parameter {0} put it into position {1} instead of {2}..
+        /// </summary>
+        internal static string AnonymizeBad {
+            get {
+                return ResourceManager.GetString("AnonymizeBad", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} should never be called on the Root Stack Element..
+        /// </summary>
+        internal static string CalledOnRoot {
+            get {
+                return ResourceManager.GetString("CalledOnRoot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The file you are attempting to upload is empty, and would be rejected by the MediaWiki software..
         /// </summary>
         internal static string EmptyFile {
@@ -70,11 +88,20 @@ namespace RobinHood70.WikiCommon.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No key function was provided in the constructor and the base function GetKeyForItem() was not overridden..
+        ///   Looks up a localized string similar to The text provided to {0}.{1} was malformed..
         /// </summary>
-        internal static string NoKeyFunction {
+        internal static string MalformedNodeText {
             get {
-                return ResourceManager.GetString("NoKeyFunction", resourceCulture);
+                return ResourceManager.GetString("MalformedNodeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Nodes aren&apos;t in the same list!.
+        /// </summary>
+        internal static string NodesInDifferentLists {
+            get {
+                return ResourceManager.GetString("NodesInDifferentLists", resourceCulture);
             }
         }
         
@@ -88,20 +115,20 @@ namespace RobinHood70.WikiCommon.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The {0} parameter passed to {1} could not be cast to {2}, as it&apos;s type was {3}..
+        ///   Looks up a localized string similar to Parameter \&quot;{0}\&quot; already exists..
         /// </summary>
-        internal static string ParameterInvalidCast {
+        internal static string ParameterExists {
             get {
-                return ResourceManager.GetString("ParameterInvalidCast", resourceCulture);
+                return ResourceManager.GetString("ParameterExists", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0}.{1} was unexpectedly null..
+        ///   Looks up a localized string similar to Stack is empty or you attempted to pop the root node..
         /// </summary>
-        internal static string PropertyNull {
+        internal static string PoppedRoot {
             get {
-                return ResourceManager.GetString("PropertyNull", resourceCulture);
+                return ResourceManager.GetString("PoppedRoot", resourceCulture);
             }
         }
     }

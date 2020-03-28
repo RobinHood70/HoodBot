@@ -12,7 +12,7 @@
 	using RobinHood70.InternetExplorerDiff.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using SHDocVw;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	[Export(typeof(IPlugin))]
 	[ExportMetadata("DisplayName", "Internet Explorer")]

@@ -5,8 +5,7 @@ namespace RobinHood70.WallE.Base
 	using System.ComponentModel;
 	using System.IO;
 	using RobinHood70.WallE.Properties;
-	using static RobinHood70.WikiCommon.Globals;
-
+	using static RobinHood70.CommonCode.Globals;
 	public class UploadInput
 	{
 		#region Fields

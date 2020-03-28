@@ -8,11 +8,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System.IO;
 	using System.Text.RegularExpressions;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
-	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
+	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	public abstract class ActionModulePageSet<TInput, TOutput> : ActionModule, IPageSetGenerator
 		where TInput : PageSetInput

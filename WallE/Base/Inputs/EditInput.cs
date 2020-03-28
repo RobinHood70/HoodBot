@@ -3,11 +3,10 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Properties;
-	using RobinHood70.WikiCommon;
+	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.ProjectGlobals;
-	using static RobinHood70.WikiCommon.Globals;
-
 	public class EditInput
 	{
 		#region Constructors

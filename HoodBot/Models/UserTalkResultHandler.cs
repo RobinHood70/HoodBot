@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Models
 {
 	using RobinHood70.Robby;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Implements the <see cref="ResultHandler" /> class and saves results to a new section of a user's talk page.</summary>
 	/// <seealso cref="ResultHandler" />

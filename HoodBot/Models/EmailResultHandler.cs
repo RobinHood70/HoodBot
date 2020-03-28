@@ -3,7 +3,7 @@
 	using System;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Implements the <see cref="ResultHandler" /> class and e-mails results to the user if they have e-mail enabled.</summary>
 	/// <seealso cref="ResultHandler" />

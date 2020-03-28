@@ -2,7 +2,7 @@
 {
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Implements the <see cref="ResultHandler" /> class and saves results to a wiki page.</summary>
 	/// <seealso cref="ResultHandler" />

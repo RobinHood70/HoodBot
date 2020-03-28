@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>netcoreapp3.0</TargetFramework>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
 		<LangVersion>latest</LangVersion>
 		<CodeAnalysisRuleSet>WallERules.ruleset</CodeAnalysisRuleSet>
 		<DocumentationFile>bin\WallE.XML</DocumentationFile>
@@ -20,14 +20,11 @@
 		<None Remove="Clients\Async\**" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\WikiCommon\WikiCommon.csproj" />
-	</ItemGroup>
-	<ItemGroup>
 		<CodeAnalysisDictionary Include="..\CustomDictionary.xml" Link="CustomDictionary.xml" />
 		<Content Include="Design Notes.txt" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
+		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0-beta3.final">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -36,7 +33,15 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-		<PackageReference Include="System.Collections.Immutable" Version="1.7.0" />
+		<PackageReference Include="System.Collections.Immutable" Version="5.0.0-preview.1.20120.5" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\WikiCommon\WikiCommon.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Reference Include="CommonCode">
+	    <HintPath>..\CommonCode.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Update="Properties\EveMessages.Designer.cs">

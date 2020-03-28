@@ -4,13 +4,13 @@
 	using System.Collections.Generic;
 	using System.IO;
 	using Newtonsoft.Json;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Parser;
 	using RobinHood70.Robby;
-	using RobinHood70.WikiClasses.Parser;
-	using RobinHood70.WikiCommon;
-	using static WikiCommon.Globals;
+	using RobinHood70.WikiCommon.Parser;
+	using static RobinHood70.CommonCode.Globals;
 
 	public class OneOffJob : ParsedPageJob
 	{

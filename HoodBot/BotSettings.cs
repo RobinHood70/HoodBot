@@ -4,7 +4,7 @@
 	using System.Collections.ObjectModel;
 	using System.IO;
 	using Newtonsoft.Json;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	public class BotSettings
 	{

@@ -8,7 +8,7 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
 	using RobinHood70.WallE.Eve;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Methods by which the wiki can be accessed.</summary>
 	public enum EntryPoint

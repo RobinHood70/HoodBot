@@ -4,10 +4,10 @@
 	using System.Collections.Generic;
 	using System.Data;
 	using System.Text.RegularExpressions;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
 
 	internal abstract class EsoSkillJob<T> : EditJob

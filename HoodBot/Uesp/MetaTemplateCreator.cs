@@ -4,7 +4,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	public class MetaTemplateCreator : PageCreator
 	{

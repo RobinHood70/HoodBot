@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.WallE.Base
 {
 	using System;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Properties;
-	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Stores the inputs and the responses for any requests made to the wiki during the initialization routine. This potentially allows requests to be combined between layers.</summary>
 	/// <seealso cref="EventArgs" />

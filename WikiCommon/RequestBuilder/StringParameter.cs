@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
-	using static RobinHood70.WikiCommon.Globals;
-
+	using static RobinHood70.CommonCode.Globals;
 	/// <summary>Represents a string parameter.</summary>
 	/// <seealso cref="Parameter{T}" />
 	public class StringParameter : Parameter<string>

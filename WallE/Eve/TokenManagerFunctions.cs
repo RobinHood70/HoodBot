@@ -3,8 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using RobinHood70.WallE.Properties;
-	using static RobinHood70.WikiCommon.Globals;
-
+	using static RobinHood70.CommonCode.Globals;
 	internal static class TokenManagerFunctions
 	{
 		#region Public Static Methods

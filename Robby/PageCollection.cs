@@ -3,10 +3,11 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Enumerations
 

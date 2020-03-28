@@ -3,11 +3,11 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WikiClasses.Parser;
-	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon.Parser;
 
 	// TODO: Rewrite this class when more clear-headed...this is beyond fugly!
 	public class FixDoubleRedirects : EditJob

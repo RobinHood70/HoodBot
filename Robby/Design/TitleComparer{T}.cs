@@ -2,7 +2,7 @@
 {
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
-	using RobinHood70.WikiCommon;
+	using RobinHood70.CommonCode;
 
 	/// <summary>An ISimpleTitle comparer which sorts by namespace and page name.</summary>
 	/// <typeparam name="T">The item types to compare. Must implement ISimpleTitle.</typeparam>

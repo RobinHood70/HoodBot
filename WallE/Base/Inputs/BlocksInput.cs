@@ -4,7 +4,7 @@ namespace RobinHood70.WallE.Base
 	using System;
 	using System.Collections.Generic;
 	using System.Net;
-	using RobinHood70.WikiCommon;
+	using RobinHood70.CommonCode;
 
 	#region Public Enumerations
 	[Flags]

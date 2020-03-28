@@ -3,7 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	internal class NpcCollection : KeyedCollection<long, NpcData>
 	{

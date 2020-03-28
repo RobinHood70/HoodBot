@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.WallE.Base
 {
 	using System;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Clients;
-	using RobinHood70.WikiCommon;
 
 	/// <summary>Represents an abstraction layer that uses the Internet (e.g., one based on api.php or index.php).</summary>
 	public interface IInternetEntryPoint

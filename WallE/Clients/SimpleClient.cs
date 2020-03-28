@@ -11,12 +11,11 @@
 	using System.Text;
 	using System.Threading;
 	using System.Threading.Tasks;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Properties;
-	using RobinHood70.WikiCommon;
+	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Clients.ClientShared;
-	using static RobinHood70.WikiCommon.Globals;
-
 	// TODO: Add cancellation token possibilities so requests can be cancelled if they're failing without waiting for all retries.
 
 	/// <summary>This class provides basic HTTP and cookie handling, with MediaWiki maxlag support.</summary>

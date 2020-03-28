@@ -4,7 +4,7 @@
 	using Newtonsoft.Json;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	[Flags]
 	public enum ReplacementActions

@@ -4,7 +4,7 @@ namespace RobinHood70.WallE.Base
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using System.Globalization;
-	using RobinHood70.WikiCommon;
+	using RobinHood70.CommonCode;
 
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Project naming convention takes precedence.")]
 	public class SearchResult : ReadOnlyCollection<SearchResultItem>

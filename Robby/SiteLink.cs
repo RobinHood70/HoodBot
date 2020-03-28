@@ -3,12 +3,12 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Globalization;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
-	using RobinHood70.WikiClasses;
-	using RobinHood70.WikiClasses.Parser;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiCommon.Globals;
+	using RobinHood70.WikiCommon.Parser;
+	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Enumerations
 

@@ -2,7 +2,7 @@
 {
 	using System.Collections;
 	using System.Collections.Generic;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>An ISimpleTitle equality comparer to determine equality based on the Namespace and PageName only.</summary>
 	/// <seealso cref="EqualityComparer{T}" />

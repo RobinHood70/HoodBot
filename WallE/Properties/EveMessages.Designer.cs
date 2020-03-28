@@ -259,6 +259,15 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The {0} parameter passed to {1} could not be cast to {2}, as it&apos;s type was {3}..
+        /// </summary>
+        internal static string ParameterInvalidCast {
+            get {
+                return ResourceManager.GetString("ParameterInvalidCast", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to At least one of prependText or appendText must be a string of one or more characters..
         /// </summary>
         internal static string PrependAppend {

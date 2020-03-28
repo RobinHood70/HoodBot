@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
-	using static RobinHood70.WikiCommon.Globals;
-
+	using static RobinHood70.CommonCode.Globals;
 	/// <summary>Base class which represents a parameter with a generic value.</summary>
 	/// <typeparam name="T">The type of the parameter the class will represent.</typeparam>
 	/// <seealso cref="IParameter" />

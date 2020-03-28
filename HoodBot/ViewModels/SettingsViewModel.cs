@@ -6,7 +6,7 @@
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Clients;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	// TODO: Re-examine WikiInfo vs MaxLaggableWikiInfo. Need to handle it better.
 	public class SettingsViewModel : Notifier, IEditableObject

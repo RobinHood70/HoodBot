@@ -4,7 +4,6 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon;
-
 	public class BulkDeleteUnused : EditJob
 	{
 		#region Fields

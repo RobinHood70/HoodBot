@@ -13,9 +13,8 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Enumerations
 	public enum Gender

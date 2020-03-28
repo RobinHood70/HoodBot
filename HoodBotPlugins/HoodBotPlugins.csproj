@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>netcoreapp3.0</TargetFramework>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
 		<LangVersion>latest</LangVersion>
 		<CodeAnalysisRuleSet>..\Main.ruleset</CodeAnalysisRuleSet>
 		<DocumentationFile>bin\WallE.XML</DocumentationFile>
@@ -12,10 +12,7 @@
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>
-		<Folder Include="Properties\" />
-	</ItemGroup>
-	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
+		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0-beta3.final">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -23,7 +20,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="System.ComponentModel.Composition" Version="4.7.0" />
+		<PackageReference Include="System.ComponentModel.Composition" Version="5.0.0-preview.1.20120.5" />
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="System.ComponentModel.Composition" />

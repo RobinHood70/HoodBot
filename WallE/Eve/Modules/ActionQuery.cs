@@ -8,8 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WikiCommon.Globals;
-
+	using static RobinHood70.CommonCode.Globals;
 	internal class ActionQuery : ActionModule
 	{
 		#region Fields
@@ -111,7 +110,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				foreach (var module in modules)
 				{
-					 if (module is ListWatchlistRaw watchListModule)
+					if (module is ListWatchlistRaw watchListModule)
 					{
 						watchListModule.Deserialize(parent);
 					}

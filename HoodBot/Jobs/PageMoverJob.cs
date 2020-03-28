@@ -8,14 +8,15 @@
 	using System.IO;
 	using System.Text;
 	using Newtonsoft.Json;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Parser;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WikiClasses.Parser;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiCommon.Globals;
+	using RobinHood70.WikiCommon.Parser;
+	using static RobinHood70.CommonCode.Globals;
 
 	#region Internal Enums
 	[Flags]

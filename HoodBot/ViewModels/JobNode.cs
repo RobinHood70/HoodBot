@@ -4,7 +4,7 @@
 	using System.Collections.Generic;
 	using System.Reflection;
 	using RobinHood70.HoodBot.Jobs.Design;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	public sealed class JobNode : Notifier, IComparable<JobNode>, IEquatable<JobNode>
 	{

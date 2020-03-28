@@ -2,9 +2,9 @@
 {
 	using System;
 	using System.Reflection;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	public sealed class ConstructorParameter : IEquatable<ConstructorParameter>
 	{

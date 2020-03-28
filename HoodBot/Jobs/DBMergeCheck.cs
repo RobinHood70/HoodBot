@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.HoodBot.Uesp;

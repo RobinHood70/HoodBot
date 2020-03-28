@@ -3,8 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using RobinHood70.WallE.Base;
-	using static RobinHood70.WikiCommon.Globals;
-
+	using static RobinHood70.CommonCode.Globals;
 	/// <summary>Concrete implementation of <see cref="IModuleFactory" />.</summary>
 	/// <seealso cref="IModuleFactory" />
 	internal class ModuleFactory : IModuleFactory

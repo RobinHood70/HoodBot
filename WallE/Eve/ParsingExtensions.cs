@@ -7,12 +7,13 @@
 	using System.Globalization;
 	using System.Runtime.CompilerServices;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Extensions that help with parsing JSON data returned by WallE.Eve.</summary>
 	/// <remarks>These extensions are made public to allow external classes to use the same methods as are used internally. Note that some of these methods are highly specific, but are nevertheless available here for the sake of simplicity, since multiple modules use them. Most methods will gracefully handle <see langword="null"/> tokens, typically by returning a null result. The parameter nullability indicates which is expected; those methods which expect a non-null token will also note that in the remarks.</remarks>
@@ -28,7 +29,7 @@
 					token == null ? false :
 					token.Type == JTokenType.Boolean ? (bool)token :
 					token.Type == JTokenType.String ? true :
-					throw MalformedException((token as JProperty)?.Name ?? Unknown, token);
+					throw MalformedException((token as JProperty)?.Name ?? FallbackText.Unknown, token);
 
 		/// <summary>Gets a dictionary of string keys and values from the current token, regardless of format version.</summary>
 		/// <param name="token">The token to examine.</param>
@@ -67,7 +68,7 @@
 		/// <param name="token">The token to examine.</param>
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>System.DateTime.</returns>
-		public static DateTime GetDate(this JToken? token, [CallerMemberName] string caller = Unknown)
+		public static DateTime GetDate(this JToken? token, [CallerMemberName] string caller = FallbackText.Unknown)
 		{
 			var date = (string?)token;
 			switch (date)
@@ -412,21 +413,21 @@
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>A <see cref="string"/> representing the value in the node.</returns>
 		/// <remarks>The token provided must not be <see langword="null"/> (either the token itself or the string value).</remarks>
-		public static string MustBeString(this JToken token, [CallerMemberName] string caller = Unknown) => (string?)token ?? throw MalformedTypeException(nameof(String), token, caller);
+		public static string MustBeString(this JToken token, [CallerMemberName] string caller = FallbackText.Unknown) => (string?)token ?? throw MalformedTypeException(nameof(String), token, caller);
 
 		/// <summary>Ensures that the token has a subnode with the given name and returns it.</summary>
 		/// <param name="token">The token to examine.</param>
 		/// <param name="name">The name to check.</param>
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>The named subnode.</returns>
-		public static JToken MustHave(this JToken token, string name, [CallerMemberName] string caller = Unknown) => token?[name] ?? throw MalformedException(name, token, caller);
+		public static JToken MustHave(this JToken token, string name, [CallerMemberName] string caller = FallbackText.Unknown) => token?[name] ?? throw MalformedException(name, token, caller);
 
 		/// <summary>Ensures that the token has a non-null string node with either the given name or "*", and returns the value of that node.</summary>
 		/// <param name="token">The token to examine.</param>
 		/// <param name="name">The name.</param>
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>The value <see cref="string"/>.</returns>
-		public static string MustHaveBCString(this JToken token, string name, [CallerMemberName]string caller = Unknown)
+		public static string MustHaveBCString(this JToken token, string name, [CallerMemberName]string caller = FallbackText.Unknown)
 		{
 			ThrowNull(token, nameof(token));
 			var node = token[name] ?? token["*"] ?? throw MalformedException(name, token, caller);
@@ -438,7 +439,7 @@
 		/// <param name="name">The name.</param>
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>System.DateTime.</returns>
-		public static DateTime MustHaveDate(this JToken token, string name, [CallerMemberName] string caller = Unknown)
+		public static DateTime MustHaveDate(this JToken token, string name, [CallerMemberName] string caller = FallbackText.Unknown)
 		{
 			ThrowNull(token, nameof(token));
 			var node = token[name] ?? throw MalformedException(name, token, caller);
@@ -451,14 +452,14 @@
 		/// <param name="name">The name.</param>
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>A list of the specified type.</returns>
-		public static IReadOnlyList<T> MustHaveList<T>(this JToken token, string name, [CallerMemberName] string caller = Unknown) => token.MustHave(name, caller).GetList<T>();
+		public static IReadOnlyList<T> MustHaveList<T>(this JToken token, string name, [CallerMemberName] string caller = FallbackText.Unknown) => token.MustHave(name, caller).GetList<T>();
 
 		/// <summary>Ensures that the token has a non-null string node with the given name and returns the value of that node.</summary>
 		/// <param name="token">The token to examine.</param>
 		/// <param name="name">The name.</param>
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>A <see cref="string"/> with the value of the node.</returns>
-		public static string MustHaveString(this JToken token, string name, [CallerMemberName] string caller = Unknown)
+		public static string MustHaveString(this JToken token, string name, [CallerMemberName] string caller = FallbackText.Unknown)
 		{
 			ThrowNull(token, nameof(token));
 			var node = token[name] ?? throw MalformedException(name, token, caller);
@@ -533,7 +534,7 @@
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>RobinHood70.WallE.Design.WikiException.</returns>
 		// These methods are not extensions, but are placed in this class as useful but not warranting a class of their own yet.
-		public static WikiException MalformedException(string name, JToken? token, [CallerMemberName]string caller = Unknown) => new WikiException(CurrentCulture(EveMessages.MalformedData, name, token?.Path ?? Unknown, caller));
+		public static WikiException MalformedException(string name, JToken? token, [CallerMemberName]string caller = FallbackText.Unknown) => new WikiException(CurrentCulture(EveMessages.MalformedData, name, token?.Path ?? FallbackText.Unknown, caller));
 
 		/// <summary>
 		/// Malformeds the type exception.
@@ -542,7 +543,15 @@
 		/// <param name="token">The token.</param>
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>RobinHood70.WallE.Design.WikiException.</returns>
-		public static WikiException MalformedTypeException(string typeName, JToken? token, [CallerMemberName]string caller = Unknown) => new WikiException(CurrentCulture(EveMessages.MalformedDataType, typeName, token?.Path ?? Unknown, caller));
+		public static WikiException MalformedTypeException(string typeName, JToken? token, [CallerMemberName]string caller = FallbackText.Unknown) => new WikiException(CurrentCulture(EveMessages.MalformedDataType, typeName, token?.Path ?? FallbackText.Unknown, caller));
+
+		/// <summary>The error thrown when a parameter could not be cast to the expected type.</summary>
+		/// <param name="parameterName">Name of the parameter.</param>
+		/// <param name="wantedType">The type that was wanted.</param>
+		/// <param name="actualType">The actual type of the parameter passed.</param>
+		/// <param name="caller">The caller.</param>
+		/// <returns>An <see cref="InvalidCastException"/>.</returns>
+		public static InvalidCastException InvalidParameterType(string parameterName, string wantedType, string actualType, [CallerMemberName] string caller = FallbackText.Unknown) => new InvalidCastException(CurrentCulture(EveMessages.ParameterInvalidCast, parameterName, caller, actualType, wantedType));
 		#endregion
 	}
 }

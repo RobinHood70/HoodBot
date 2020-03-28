@@ -8,12 +8,13 @@
 	using System.IO;
 	using System.Net;
 	using System.Runtime.CompilerServices;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
-	using RobinHood70.WikiClasses.Parser;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiCommon.Globals;
+	using RobinHood70.WikiCommon.Parser;
+	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Delegates
 

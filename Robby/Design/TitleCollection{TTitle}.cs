@@ -4,11 +4,12 @@
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Provides a base class to manipulate a collection of titles.</summary>
 	/// <typeparam name="TTitle">The type of the title.</typeparam>
@@ -128,7 +129,7 @@
 		/// <summary>Adds multiple titles to the <see cref="TitleCollection">collection</see> at once.</summary>
 		/// <param name="titles">The titles to add.</param>
 		/// <remarks>This method is for convenience only. Unlike the equivalent <see cref="List{T}" /> function, it simply calls <see cref="Add(TTitle)" /> repeatedly and provides no performance benefit.</remarks>
-		public void AddRange(IEnumerable<TTitle> titles) => WikiCommon.Extensions.AddRange(this, titles);
+		public void AddRange(IEnumerable<TTitle> titles) => CommonCode.Extensions.AddRange(this, titles);
 
 		/// <summary>Determines whether the <see cref="TitleCollection">collection</see> contains a specific value.</summary>
 		/// <param name="item">The object to locate in the <see cref="TitleCollection">collection</see>.</param>

@@ -7,6 +7,7 @@
 	using System.Globalization;
 	using System.Net;
 	using System.Text.RegularExpressions;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
 	using RobinHood70.WallE.Design;
@@ -14,8 +15,7 @@
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WikiCommon.Globals;
-
+	using static RobinHood70.CommonCode.Globals;
 	/// <summary>An API-based implementation of the <see cref="IWikiAbstractionLayer" /> interface.</summary>
 	/// <seealso cref="IWikiAbstractionLayer" />
 	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "High class coupling is the result of using classes for inputs, which is a recommended design when dealing with such a high level of input variability.")]

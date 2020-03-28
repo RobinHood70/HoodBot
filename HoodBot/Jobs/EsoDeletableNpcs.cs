@@ -6,7 +6,6 @@
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon;
-
 	internal class EsoDeletableNpcs : WikiJob
 	{
 		#region Constructors

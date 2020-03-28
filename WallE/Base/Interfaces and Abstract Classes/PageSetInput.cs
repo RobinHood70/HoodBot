@@ -4,10 +4,9 @@ namespace RobinHood70.WallE.Base
 	using System;
 	using System.Collections.Generic;
 	using System.Globalization;
-	using RobinHood70.WikiCommon;
+	using RobinHood70.CommonCode;
+	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.ProjectGlobals;
-	using static RobinHood70.WikiCommon.Globals;
-
 	public enum ListType
 	{
 		Titles,

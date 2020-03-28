@@ -8,8 +8,8 @@
 	using RobinHood70.HoodBot.Jobs.Eso;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
-	using RobinHood70.WikiClasses;
-	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon; using RobinHood70.CommonCode;
+	using RobinHood70.WikiCommon; using RobinHood70.CommonCode;
 
 	internal class EsoUpdateNpcs : EditJob
 	{

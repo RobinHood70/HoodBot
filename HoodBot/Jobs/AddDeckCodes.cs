@@ -6,11 +6,11 @@
 	using System.IO;
 	using System.Text.RegularExpressions;
 	using Newtonsoft.Json;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
 
 	public class AddDeckCodes : EditJob
@@ -103,7 +103,7 @@
 			[JsonProperty("type_name")]
 			public string? TypeName { get; set; }
 
-			public override string ToString() => this.Name ?? Globals.Unknown;
+			public override string ToString() => this.Name ?? FallbackText.Unknown;
 		}
 		#endregion
 	}

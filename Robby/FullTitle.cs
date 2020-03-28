@@ -1,8 +1,9 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Splits a page name into its constituent parts.</summary>
 	public class FullTitle : Title, IFullTitle, ISimpleTitle

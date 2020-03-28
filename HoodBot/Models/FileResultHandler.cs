@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Models
 {
 	using System.IO;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Implements the <see cref="ResultHandler" /> class and stores results in a local file.</summary>
 	/// <seealso cref="ResultHandler" />

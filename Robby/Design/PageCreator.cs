@@ -2,7 +2,7 @@
 {
 	using System.Collections.Generic;
 	using RobinHood70.WallE.Base;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Provides a base class for creating Page objects. This serves as a go-between for customized page extensions in WallE and Robby.</summary>
 	public abstract class PageCreator

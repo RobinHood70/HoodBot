@@ -8,7 +8,8 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
+	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal class PropDeletedRevisions : PropListModule<DeletedRevisionsInput, RevisionItem>, IGeneratorModule
 	{

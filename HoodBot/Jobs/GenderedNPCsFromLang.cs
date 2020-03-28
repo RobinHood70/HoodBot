@@ -3,10 +3,9 @@
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
-	using RobinHood70.WikiClasses;
-	using RobinHood70.WikiCommon;
 
 	public class GenderedNPCsFromLang : WikiJob
 	{

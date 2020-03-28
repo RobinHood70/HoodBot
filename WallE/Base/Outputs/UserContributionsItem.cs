@@ -74,7 +74,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title ?? this.User ?? Globals.NoTitle;
+		public override string ToString() => this.Title ?? this.User ?? FallbackText.NoTitle;
 		#endregion
 	}
 }

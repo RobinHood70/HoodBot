@@ -2,8 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using RobinHood70.WallE.Properties;
-	using static RobinHood70.WikiCommon.Globals;
-
+	using static RobinHood70.CommonCode.Globals;
 	public class ImageLimitsItem
 	{
 		#region Constructors

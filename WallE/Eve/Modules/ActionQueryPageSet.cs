@@ -7,8 +7,10 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Properties;
+	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
+	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// While there's some code overlap between this and ActionQuery, having the two as separate entities significantly reduces the code complexity in ActionQuery, and in this as well, to a lesser extent.
 	internal class ActionQueryPageSet : ActionModulePageSet<QueryInput, PageItem>, IPageSetGenerator
@@ -283,7 +285,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			#endregion
 
 			#region Protected Override Methods
-			protected override string GetKeyForItem(PageItem item) => item?.Title ?? Unknown;
+			protected override string GetKeyForItem(PageItem item) => item?.Title ?? FallbackText.Unknown;
 			#endregion
 		}
 		#endregion

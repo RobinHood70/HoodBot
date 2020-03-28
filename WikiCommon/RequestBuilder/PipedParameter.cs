@@ -2,8 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using static RobinHood70.WikiCommon.Globals;
-
+	using static RobinHood70.CommonCode.Globals;
 	/// <summary>Represents a parameter with collection of unique values, normally separated by pipe characters.</summary>
 	/// <seealso cref="Parameter{T}" />
 	public class PipedParameter : Parameter<HashSet<string>>

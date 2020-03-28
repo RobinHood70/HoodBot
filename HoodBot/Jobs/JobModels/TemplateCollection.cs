@@ -3,8 +3,7 @@
 	using System.Collections.Generic;
 	using System.Text.RegularExpressions;
 	using RobinHood70.Robby;
-	using RobinHood70.WikiClasses;
-
+	using RobinHood70.WikiCommon;
 	public class TemplateCollection : List<TemplateUsageRow>
 	{
 		public Dictionary<string, int> HeaderOrder { get; } = new Dictionary<string, int>();

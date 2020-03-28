@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Enumerations
 

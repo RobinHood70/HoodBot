@@ -5,10 +5,10 @@
 	using System.Collections.ObjectModel;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Properties;
-	using static RobinHood70.WikiCommon.Globals;
-
+	using static RobinHood70.CommonCode.Globals;
 	#region Public Enumerations
 
 	/// <summary>A combination of the HTTP method and the content type.</summary>

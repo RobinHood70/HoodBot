@@ -2,7 +2,7 @@
 {
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>In addition to regular page data, stores information about a category.</summary>
 	/// <seealso cref="Page" />

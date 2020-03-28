@@ -6,7 +6,8 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
+	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// HACK: Much of this module remains untested, as there is virtually no documentation on it, and example outputs were mostly impossible to find.
 	internal class ActionExpandTemplates : ActionModule<ExpandTemplatesInput, ExpandTemplatesResult>

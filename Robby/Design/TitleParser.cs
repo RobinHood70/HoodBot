@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.Robby.Design
 {
-	using RobinHood70.WikiClasses;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>This class serves as a light-weight parser to split a wiki title into its constituent parts.</summary>
 	public class TitleParser

@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<RootNamespace>RobinHood70.HoodBot</RootNamespace>
-		<TargetFramework>netcoreapp3.0</TargetFramework>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
 		<UseWPF>true</UseWPF>
 		<LangVersion>latest</LangVersion>
 		<ApplicationIcon>Assets/HoodBot.ico</ApplicationIcon>
@@ -50,15 +50,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
+		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0-beta3.final">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.1" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.1" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.1" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0-preview.1.20120.4" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="5.0.0-preview.1.20120.4" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0-preview.1.20120.4" />
 		<PackageReference Include="MySql.Data" Version="8.0.19" />
-		<PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.164">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -68,8 +68,13 @@
 		<ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj" />
 		<ProjectReference Include="..\Robby\Robby.csproj" />
 		<ProjectReference Include="..\WallE\WallE.csproj" />
-		<ProjectReference Include="..\WikiClasses\WikiClasses.csproj" />
 		<ProjectReference Include="..\WikiCommon\WikiCommon.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="CommonCode">
+	    <HintPath>..\CommonCode.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 	<ItemGroup>

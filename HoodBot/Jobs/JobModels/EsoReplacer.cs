@@ -6,12 +6,12 @@
 	using System.Globalization;
 	using System.Text;
 	using System.Text.RegularExpressions;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
-	using RobinHood70.WikiClasses;
-	using RobinHood70.WikiClasses.Parser;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiClasses.Searches;
+	using RobinHood70.WikiCommon.Parser;
+	using static RobinHood70.WikiCommon.Searches;
 
 	internal static class EsoReplacer
 	{

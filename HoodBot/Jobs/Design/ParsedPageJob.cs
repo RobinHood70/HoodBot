@@ -1,11 +1,12 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
 	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Parser;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WikiClasses.Parser;
 	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon.Parser;
 
 	public abstract class ParsedPageJob : EditJob
 	{

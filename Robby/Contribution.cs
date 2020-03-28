@@ -2,7 +2,7 @@
 {
 	using System.Collections.Generic;
 	using RobinHood70.WallE.Base;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Stores information about a single user contribution.</summary>
 	/// <seealso cref="Revision" />

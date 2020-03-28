@@ -6,7 +6,7 @@
 	using System.Security.Cryptography;
 	using System.Text;
 	using Newtonsoft.Json;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	public class EncryptingJsonConverter : JsonConverter
 	{

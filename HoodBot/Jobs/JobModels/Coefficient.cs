@@ -3,7 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Data;
-	using RobinHood70.WikiCommon;
+	using RobinHood70.CommonCode;
 
 	internal class Coefficient
 	{

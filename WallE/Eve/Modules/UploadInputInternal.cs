@@ -4,8 +4,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System;
 	using System.IO;
 	using RobinHood70.WallE.Base;
-	using static RobinHood70.WikiCommon.Globals;
-
+	using static RobinHood70.CommonCode.Globals;
 	internal class UploadInputInternal
 	{
 		#region Constructors

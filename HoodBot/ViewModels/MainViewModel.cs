@@ -19,7 +19,7 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
 	using static System.Environment;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	// TODO: Decouple this into a job-runner class, or something along those lines, that notifies this one of updates.
 	public class MainViewModel : Notifier

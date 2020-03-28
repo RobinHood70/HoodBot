@@ -3,8 +3,8 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
-	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiCommon.Globals;
+	using RobinHood70.CommonCode;
+	using static RobinHood70.CommonCode.Globals;
 
 	public abstract class ListModule<TInput, TItem> : QueryModule<TInput, IList<TItem>>, IContinuableQueryModule
 		where TInput : class

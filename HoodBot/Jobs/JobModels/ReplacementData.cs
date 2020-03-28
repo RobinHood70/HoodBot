@@ -41,7 +41,6 @@
 			["Ruination"] = "Ruination (skill)",
 			["Skeletal Mage"] = "Skeletal Mage (skill)",
 			["Spectral Assassin"] = "Spectral Assassin (skill)",
-			["Spirit Mender"] = "Spirit Mender (skill)",
 			["Unstoppable"] = "Unstoppable (skill)",
 			["Woodworking"] = "Woodworking (skill)",
 		};

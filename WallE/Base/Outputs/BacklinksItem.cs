@@ -3,7 +3,6 @@ namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
 	using RobinHood70.WikiCommon;
-
 	public class BacklinksItem : ITitle
 	{
 		#region Constructors

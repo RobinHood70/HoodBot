@@ -5,6 +5,7 @@
 	using System.Diagnostics;
 	using System.Text;
 	using System.Text.RegularExpressions;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
@@ -12,7 +13,6 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
-	using RobinHood70.WikiClasses;
 	using RobinHood70.WikiCommon;
 
 	internal class EsoItemSets : EditJob

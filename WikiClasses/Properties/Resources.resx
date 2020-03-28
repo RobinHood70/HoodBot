@@ -117,28 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AnonymizeBad" xml:space="preserve">
-    <value>Anonymizing parameter {0} put it into position {1} instead of {2}.</value>
-  </data>
-  <data name="CalledOnRoot" xml:space="preserve">
-    <value>{0} should never be called on the Root Stack Element.</value>
-  </data>
-  <data name="MalformedNodeText" xml:space="preserve">
-    <value>The text provided to {0}.{1} was malformed.</value>
-  </data>
-  <data name="MultipleCalls" xml:space="preserve">
-    <value>{0} called multiple times. It should only ever be called once on a given object.</value>
-  </data>
-  <data name="NodesInDifferentLists" xml:space="preserve">
-    <value>Nodes aren't in the same list!</value>
-  </data>
-  <data name="ParameterExists" xml:space="preserve">
-    <value>Parameter \"{0}\" already exists.</value>
-  </data>
-  <data name="PoppedRoot" xml:space="preserve">
-    <value>Stack is empty or you attempted to pop the root node.</value>
-  </data>
-  <data name="SectionLevelMismatch" xml:space="preserve">
-    <value>Different numbers of '=' in Section title.</value>
-  </data>
 </root>

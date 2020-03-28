@@ -5,7 +5,8 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
+	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// IMPNOTE: Result is slightly reformatted from the API to provide a straight-forward collection of pages that were moved.
 	internal class ActionMove : ActionModule<MoveInput, IReadOnlyList<MoveItem>>

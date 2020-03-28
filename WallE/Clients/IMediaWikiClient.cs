@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.WallE.Clients
 {
 	using System;
-	using RobinHood70.WikiCommon;
+	using RobinHood70.CommonCode;
 
 	/// <summary>The reason for requested delay.</summary>
 	public enum DelayReason

@@ -5,7 +5,7 @@
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	public class ISimpleTitleJsonConverter : JsonConverter<ISimpleTitle>
 	{

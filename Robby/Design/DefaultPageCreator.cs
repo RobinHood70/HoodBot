@@ -3,7 +3,7 @@
 	using System.Collections.Generic;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>The default page creation mechanism.</summary>
 	/// <seealso cref="PageCreator" />

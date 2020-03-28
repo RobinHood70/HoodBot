@@ -2,8 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
-	using static RobinHood70.WikiCommon.Globals;
-
+	using static RobinHood70.CommonCode.Globals;
 	#region Public Enumerations
 	[Flags]
 	public enum ParseProperties

@@ -4,7 +4,7 @@
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Enumerations
 	public enum PlaceType

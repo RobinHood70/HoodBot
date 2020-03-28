@@ -2,12 +2,11 @@
 {
 	using System;
 	using System.Threading;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiCommon.Extensions;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	public abstract class WikiJob : IMessageSource, ISiteSpecific
 	{

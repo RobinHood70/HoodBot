@@ -3,10 +3,11 @@
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Represents a file on the wiki. Includes all page data as well as file revisions and file-specific methods.</summary>
 	/// <seealso cref="Page" />

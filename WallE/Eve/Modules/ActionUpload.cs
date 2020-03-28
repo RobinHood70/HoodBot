@@ -3,11 +3,12 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Properties;
-	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.WikiCommon.Globals;
+	using static RobinHood70.CommonCode.Globals;
+	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal class ActionUpload : ActionModule<UploadInputInternal, UploadResult>
 	{
