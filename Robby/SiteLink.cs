@@ -58,9 +58,7 @@
 	{
 		#region Static Fields
 		private static readonly Dictionary<string, ParameterType> DirectValues = new Dictionary<string, ParameterType>();
-
 		private static readonly List<(ParameterType ParameterType, string Before, string After)> ImageParameterInfo = new List<(ParameterType ParameterType, string Before, string After)>();
-
 		private static readonly Dictionary<string, ParameterType> ImageWords = new Dictionary<string, ParameterType>()
 		{
 			["img_baseline"] = ParameterType.Valign, // no params
@@ -90,8 +88,8 @@
 		};
 
 		private static readonly InvalidOperationException NonNumeric = new InvalidOperationException(Resources.SizeInvalid);
-
 		private static readonly Dictionary<ParameterType, string> PreferredWords = new Dictionary<ParameterType, string>();
+		private static readonly char[] SplitX = new[] { 'x' };
 		#endregion
 
 		#region Constructors
@@ -366,7 +364,7 @@
 		{
 			if (this.Dimensions is string dimensions)
 			{
-				var split = dimensions.Split('x', 2);
+				var split = dimensions.Split(SplitX, 2);
 				return split.Length switch
 				{
 					1 => (0, int.TryParse(split[0], out var result) ? result : throw NonNumeric),
