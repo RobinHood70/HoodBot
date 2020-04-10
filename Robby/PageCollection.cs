@@ -638,16 +638,19 @@
 
 			this.recurseCategories.Clear();
 			this.LoadPages(this.LoadOptions, new QueryPageSetInput(input), this.RecurseCategoryHandler);
-			var copy = new List<string>(this.recurseCategories);
-			this.recurseCategories.Clear();
-			var originalTitle = input.Title;
-			foreach (var category in copy)
+			if (this.recurseCategories.Count > 0)
 			{
-				input.ChangeTitle(category);
-				this.RecurseCategoryPages(input, categoryTree);
-			}
+				var copy = new List<string>(this.recurseCategories);
+				this.recurseCategories.Clear();
+				var originalTitle = input.Title;
+				foreach (var category in copy)
+				{
+					input.ChangeTitle(category);
+					this.RecurseCategoryPages(input, categoryTree);
+				}
 
-			input.ChangeTitle(originalTitle);
+				input.ChangeTitle(originalTitle);
+			}
 		}
 		#endregion
 	}
