@@ -269,7 +269,7 @@
 
 			if (skill.Name.StartsWith("Keen Eye: ", StringComparison.Ordinal))
 			{
-				iconValue = iconValue.Split(':')[0];
+				iconValue = iconValue.Split(TextArrays.Colon)[0];
 			}
 
 			var loopCount = DestructionExceptions.Contains(skill.Name) ? 2 : 0;

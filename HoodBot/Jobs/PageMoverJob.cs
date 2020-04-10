@@ -196,7 +196,7 @@
 			var replacements = new List<Replacement>();
 			foreach (var line in repFile)
 			{
-				var rep = line.Split('\t');
+				var rep = line.Split(TextArrays.Tab);
 				replacements.Add(new Replacement(this.Site, rep[0].Trim(), rep[1].Trim()));
 			}
 

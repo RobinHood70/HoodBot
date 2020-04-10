@@ -32,7 +32,7 @@
 			{
 				// For now, simply trimming the article so that cases like "Alik'r, The" don't sort after "Alik'r Survival". This may miss a few edge cases, though.
 				title = title.Replace("\"", string.Empty, StringComparison.Ordinal);
-				var split = title.Split(' ', 2, StringSplitOptions.None);
+				var split = title.Split(TextArrays.Space, 2, StringSplitOptions.None);
 				return split.Length > 1 && split[0] is string article && (article == "A" || article == "An" || article == "The")
 					? split[1]
 					: title;

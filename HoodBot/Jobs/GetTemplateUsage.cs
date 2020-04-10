@@ -34,7 +34,7 @@
 			var allTemplateNames = new List<string>();
 			foreach (var templateName in templateNames)
 			{
-				allTemplateNames.AddRange(templateName.Split('|'));
+				allTemplateNames.AddRange(templateName.Split(TextArrays.Pipe));
 			}
 
 			this.saveLocation = location.Replace("%templateName%", allTemplateNames[0], StringComparison.Ordinal);
