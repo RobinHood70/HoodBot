@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
 	using System;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Threading;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Models;
@@ -16,7 +17,7 @@
 		#endregion
 
 		#region Constructors
-		protected WikiJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
+		protected WikiJob([NotNull, ValidatedNotNull]Site site, [NotNull, ValidatedNotNull]AsyncInfo asyncInfo)
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(asyncInfo, nameof(asyncInfo));
