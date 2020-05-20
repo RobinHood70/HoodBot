@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Parser;
 	using RobinHood70.Robby;
@@ -11,7 +12,7 @@
 	public abstract class ParsedPageJob : EditJob
 	{
 		#region Constructors
-		protected ParsedPageJob([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
+		protected ParsedPageJob([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
 		{
 		}

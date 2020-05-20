@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using RobinHood70.WikiCommon;
+
 	public class BlockResult
 	{
 		#region Constructors

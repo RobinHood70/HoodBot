@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using static RobinHood70.CommonCode.Globals;
+
 	/// <summary>Represents a template argument, such as <c>{{{1|}}}</c>.</summary>
 	public class ArgumentNode : IWikiNode
 	{

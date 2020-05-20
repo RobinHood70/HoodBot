@@ -5,6 +5,7 @@
 	using System.IO;
 	using System.Text;
 	using static RobinHood70.CommonCode.Globals;
+
 	/// <summary>Formats a Request object as multipart (<see cref="MultipartResult"/>) data.</summary>
 	public class RequestVisitorMultipart : IParameterVisitor
 	{

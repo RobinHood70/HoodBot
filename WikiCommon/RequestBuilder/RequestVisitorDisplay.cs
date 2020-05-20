@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Text;
 	using static RobinHood70.CommonCode.Globals;
+
 	// Escaping in this class is only at the Uri level rather than the Data level because it produces much cleaner output which any browser will fix up, if needed, when the request is put through.
 
 	/// <summary>Formats a Request object for display purposes, hiding parameters that should not be revealed.</summary>

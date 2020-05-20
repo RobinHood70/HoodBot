@@ -3,6 +3,7 @@
 	using System.Collections.Generic;
 	using System.Text;
 	using static RobinHood70.CommonCode.Globals;
+
 	/// <summary>Visitor to build wiki text, optionally ignoring text that has no value to the parser, such as comments or nowiki text.</summary>
 	/// <seealso cref="IWikiNodeVisitor" />
 	public class WikiTextVisitor : IWikiNodeVisitor

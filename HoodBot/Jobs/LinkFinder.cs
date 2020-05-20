@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Parser;
@@ -19,7 +20,7 @@
 		#region Constructors
 
 		[JobInfo("Link Finder")]
-		public LinkFinder([ValidatedNotNull] Site site, AsyncInfo asyncInfo, string search)
+		public LinkFinder([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo, string search)
 			: base(site, asyncInfo)
 		{
 			ThrowNull(search, nameof(search));

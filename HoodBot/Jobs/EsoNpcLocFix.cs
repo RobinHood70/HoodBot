@@ -19,7 +19,7 @@
 
 		#region Constructors
 		[JobInfo("One-Off Job - Fix ESO NPC Locations")]
-		public EsoNpcLocFix([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
+		public EsoNpcLocFix([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo) => this.pages = new PageCollection(site);
 		#endregion
 

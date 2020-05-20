@@ -5,6 +5,7 @@ namespace RobinHood70.WallE.Base
 	using System.Collections.Generic;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.CommonCode.Globals;
+
 	#region Public Enumerations
 	[Flags]
 	public enum CategoryMembersProperties

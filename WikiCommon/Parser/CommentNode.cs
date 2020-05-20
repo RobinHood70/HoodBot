@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
+
 	/// <summary>Represents a wikitext (HTML) comment.</summary>
 	public class CommentNode : IWikiNode
 	{

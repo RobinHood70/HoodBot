@@ -9,6 +9,7 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.Properties;
 	using static RobinHood70.CommonCode.Globals;
+
 	/// <summary>A class for templates and file links which provides Parameter collection-related functionality.</summary>
 	public class ParameterCollection : IList<Parameter>
 	{

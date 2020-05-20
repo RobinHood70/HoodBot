@@ -10,7 +10,7 @@
 	public class DBMergeIdentifyConflicts : EditJob
 	{
 		[JobInfo("Identify Conflicts", "Dragonborn Merge")]
-		public DBMergeIdentifyConflicts([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
+		public DBMergeIdentifyConflicts([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
 		{
 			this.Logger = null;

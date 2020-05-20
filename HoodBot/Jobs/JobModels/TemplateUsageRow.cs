@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
 	using RobinHood70.WikiCommon;
+
 	public class TemplateUsageRow
 	{
 		public TemplateUsageRow(string page, Template template)

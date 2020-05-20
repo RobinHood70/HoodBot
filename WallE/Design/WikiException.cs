@@ -6,6 +6,7 @@
 	using System.Security.Permissions;
 	using RobinHood70.WallE.Properties;
 	using static RobinHood70.CommonCode.Globals;
+
 	/// <summary>The exception thrown when the wiki returns an error instead of the expected result.</summary>
 	/// <seealso cref="Exception" />
 	/// <seealso cref="ISerializable" />

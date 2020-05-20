@@ -21,7 +21,7 @@
 
 		#region Constructors
 		[JobInfo("Add Deck Codes", "Legends")]
-		public AddDeckCodes([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
+		public AddDeckCodes([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo) => this.Pages.LoadOptions = new PageLoadOptions(PageModules.Default, true);
 		#endregion
 
@@ -68,7 +68,7 @@
 				var page = this.Pages[title.FullPageName];
 				if (page != null && !page.IsMissing && item.DeckCode != null)
 				{
-					page.Text = this.cardSummaryFinder.Replace(page.Text, (match) => this.CardSummary_Replacer(match, item.DeckCode), 1);
+					page.Text = this.cardSummaryFinder.Replace(page.Text, (match) => CardSummary_Replacer(match, item.DeckCode), 1);
 				}
 				else
 				{
@@ -78,8 +78,8 @@
 		}
 		#endregion
 
-		#region Private Methods
-		private string CardSummary_Replacer(Match match, string deckCode)
+		#region Private Static Methods
+		private static string CardSummary_Replacer(Match match, string deckCode)
 		{
 			var template = Template.Parse(match.Value);
 			template.AddOrChange("deckcode", deckCode);

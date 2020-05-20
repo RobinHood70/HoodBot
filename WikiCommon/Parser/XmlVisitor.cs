@@ -257,7 +257,7 @@
 		{
 			if (this.prettyPrint)
 			{
-				if (this.builder.Length > 0 && this.builder[this.builder.Length - 1] != '\n')
+				if (this.builder.Length > 0 && this.builder[^1] != '\n')
 				{
 					this.builder.Append('\n');
 				}

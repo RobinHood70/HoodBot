@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using static RobinHood70.CommonCode.Globals;
+
 	/// <summary>Represents a parameter with collection of values, normally separated by pipe characters. All values added to the parameter will be emitted, regardless of any duplication.</summary>
 	/// <seealso cref="Parameter{T}" />
 	public class PipedListParameter : Parameter<List<string>>

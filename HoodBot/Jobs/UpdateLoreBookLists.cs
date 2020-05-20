@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Uesp;
@@ -19,7 +20,7 @@
 
 		#region Constructors
 		[JobInfo("Update Lore Book Entries", "Maintenance")]
-		public UpdateLoreBookLists([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
+		public UpdateLoreBookLists([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
 		{
 		}
@@ -62,7 +63,7 @@
 			{
 				var varPage = (VariablesPage)listBooks[i];
 				var value = varPage.GetVariable("listbook");
-				if (value != null && !this.ListBookValue(value))
+				if (value != null && !ListBookValue(value))
 				{
 					listBooks.RemoveAt(i);
 				}
@@ -118,6 +119,14 @@
 		protected override void Main() => this.SavePages("Update list", true, this.LoreBookEntries_PageLoaded);
 		#endregion
 
+		#region Private Static Methods
+		private static bool ListBookValue(string value) =>
+			value == "1" ? true : // Quick check for most common value
+			int.TryParse(value, out var intVal) ? intVal != 0 :
+			bool.TryParse(value, out var boolVal) ? boolVal :
+			value.ToLowerInvariant() == "no";
+		#endregion
+
 		#region Private Methods
 		private void LoreBookEntries_PageLoaded(object sender, Page page)
 		{
@@ -149,12 +158,6 @@
 			parser.Remove(first.Next!);
 			page.Text = WikiTextVisitor.Raw(parser);
 		}
-
-		private bool ListBookValue(string value) =>
-			value == "1" ? true : // Quick check for most common value
-			int.TryParse(value, out var intVal) ? intVal != 0 :
-			bool.TryParse(value, out var boolVal) ? boolVal :
-			value.ToLowerInvariant() == "no";
 		#endregion
 	}
 }

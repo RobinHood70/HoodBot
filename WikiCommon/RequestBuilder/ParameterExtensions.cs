@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Text;
 	using static RobinHood70.CommonCode.Globals;
+
 	/// <summary>Extensions to the parameter classes.</summary>
 	public static class ParameterExtensions
 	{

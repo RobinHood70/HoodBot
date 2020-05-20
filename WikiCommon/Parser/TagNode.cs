@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
+
 	/// <summary>  Represents an unparsed tag, such as pre or nowiki.</summary>
 	public class TagNode : IWikiNode
 	{

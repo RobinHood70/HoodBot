@@ -16,6 +16,7 @@
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
+
 	/// <summary>An API-based implementation of the <see cref="IWikiAbstractionLayer" /> interface.</summary>
 	/// <seealso cref="IWikiAbstractionLayer" />
 	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "High class coupling is the result of using classes for inputs, which is a recommended design when dealing with such a high level of input variability.")]

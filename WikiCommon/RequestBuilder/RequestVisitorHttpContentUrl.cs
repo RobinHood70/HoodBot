@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Net.Http;
 	using static RobinHood70.CommonCode.Globals;
+
 	/// <summary>Formats a Request object as <see cref="FormUrlEncodedContent"/>.</summary>
 	public class RequestVisitorHttpContentUrl : IParameterVisitor
 	{

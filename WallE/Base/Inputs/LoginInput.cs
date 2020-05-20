@@ -2,6 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using static RobinHood70.CommonCode.Globals;
+
 	public class LoginInput
 	{
 		#region Constructors

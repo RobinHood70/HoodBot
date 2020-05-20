@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Data;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
@@ -89,7 +90,7 @@
 
 		#region Constructors
 		[JobInfo("Quests", "ESO")]
-		public EsoQuests([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
+		public EsoQuests([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
 		{
 		}

@@ -6,6 +6,7 @@ namespace RobinHood70.WikiCommon
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using RobinHood70.CommonCode;
+
 	/// <summary>This is a helper class to parse parameter text into either a single parameter or a collection of <see cref="Parameter"/>s.</summary>
 	/// <remarks>Both the single parameter and collection will be populated after Parse is called, regardless of the number of parameters. If multiple parameters are present, the value in <see cref="SingleParameter"/> will treat everything after the name as a single value, regardless of the presence of pipes or equals signs (as is done in MediaWiki for links outside File space).</remarks>
 	public class ParameterParser

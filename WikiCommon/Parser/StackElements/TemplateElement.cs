@@ -13,7 +13,7 @@
 		#endregion
 
 		#region Internal Override Properties
-		internal override string SearchString => this.NameValuePieces[this.NameValuePieces.Count - 1].SplitPos == -1
+		internal override string SearchString => this.NameValuePieces[^1].SplitPos == -1
 			? SearchBase + "|}="
 			: SearchBase + "|}";
 		#endregion
@@ -32,7 +32,7 @@
 					this.Stack.Index++;
 					break;
 				case '=':
-					var lastPiece = this.NameValuePieces[this.NameValuePieces.Count - 1];
+					var lastPiece = this.NameValuePieces[^1];
 					lastPiece.SplitPos = lastPiece.Count;
 
 					// Node type isn't really relevant here, as long as it's not a TextNode. IgnoreNode made the most sense. This is an interim value that won't ever make it to the final output. Could probably be done with SplitPos alone, but adding this makes the TextNode checks in AddLiteral and Merge fail in their own right, without having to check SplitPos.

@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Models;
@@ -10,7 +11,7 @@
 	public class ManipulateImageCategory : WikiJob
 	{
 		[JobInfo("Manipulate Image Category")]
-		public ManipulateImageCategory([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
+		public ManipulateImageCategory([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo) => this.Results = new PageResultHandler(new Title(site, "User:Jeancey/Kah"));
 
 		protected override void Main()

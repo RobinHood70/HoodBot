@@ -6,6 +6,7 @@ namespace RobinHood70.WallE.Base
 	using System.Collections.Immutable;
 	using RobinHood70.CommonCode;
 	using static RobinHood70.CommonCode.Globals;
+
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Project naming convention takes precedence.")]
 	public class PageSetResult<T> : ReadOnlyKeyedCollection<string, T>, IPageSetResult
 		where T : ITitle

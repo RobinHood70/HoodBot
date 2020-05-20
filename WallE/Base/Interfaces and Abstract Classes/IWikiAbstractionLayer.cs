@@ -52,7 +52,7 @@
 		LoggedOut = TalkChecks | Custom,
 
 		/// <summary>Use all available stop check methods.</summary>
-		All = Assert | UserNameCheck | TalkCheckNonQuery | TalkCheckNonQuery | Custom,
+		All = Assert | UserNameCheck | TalkCheckNonQuery | TalkCheckQuery | Custom,
 	}
 	#endregion
 

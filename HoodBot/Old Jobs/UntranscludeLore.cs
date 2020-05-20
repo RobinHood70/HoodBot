@@ -31,7 +31,7 @@
 
 		#region Constructors
 		[JobInfo("Untransclude Lore")]
-		public UntranscludeLore([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
+		public UntranscludeLore([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
 		{
 			this.allPageNames = new TitleCollection(site);

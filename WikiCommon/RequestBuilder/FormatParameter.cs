@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
 	using static RobinHood70.CommonCode.Globals;
+
 	/// <summary>Represents the format parameter.</summary>
 	/// <seealso cref="StringParameter" />
 	/// <remarks>The only effect of this class is to change displayed links to use the pretty-print version of the format parameter, while leaving the actual requests sent to the server unaltered.</remarks>

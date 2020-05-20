@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Models;
@@ -17,7 +18,7 @@
 
 		#region Constructors
 		[JobInfo(/*"Final Check", "Dragonborn Merge"*/ "Dragonborn Final Check")]
-		public DBMergeCheck([ValidatedNotNull] Site site, AsyncInfo asyncInfo)
+		public DBMergeCheck([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
 		{
 			var checkPage = new Title(this.Site, "Project:Dragonborn Merge Project/Merge Results");

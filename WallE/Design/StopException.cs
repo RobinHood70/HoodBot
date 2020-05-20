@@ -4,6 +4,7 @@
 	using System.Runtime.Serialization;
 	using RobinHood70.WallE.Properties;
 	using static RobinHood70.CommonCode.Globals;
+
 	/// <summary>The exception that is thrown when a stop has been requested via the wiki.</summary>
 	/// <remarks>Typical sources of this exception are a change to the logged-in user's talk page, the user changing or being logged out unexpectedly, or via a custom stop check method.</remarks>
 	/// <seealso cref="Exception" />

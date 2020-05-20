@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
 	using static RobinHood70.CommonCode.Globals;
+
 	/// <summary>Represents a string parameter whose results should not be displayed to the user during debugging sessions and the like (e.g., passwords or tokens).</summary>
 	/// <seealso cref="StringParameter" />
 	public class HiddenParameter : StringParameter

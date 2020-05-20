@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using RobinHood70.CommonCode;
+
 	/// <summary>Represents a block of text.</summary>
 	public class TextNode : IWikiNode
 	{

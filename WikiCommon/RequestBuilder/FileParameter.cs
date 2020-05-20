@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
 	using static RobinHood70.CommonCode.Globals;
+
 	/// <summary>Represents a parameter with file information.</summary>
 	/// <seealso cref="Parameter{T}" />
 	public class FileParameter : Parameter<(string FileName, byte[] Data)>

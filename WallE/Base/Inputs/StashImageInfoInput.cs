@@ -23,7 +23,7 @@ namespace RobinHood70.WallE.Base
 		CommonMetadata = 1 << 14,
 		ExtMetadata = 1 << 15,
 		BitDepth = 1 << 17,
-		All = Timestamp | CanonicalTitle | Url | Size | Sha1 | Dimensions | Sha1 | Mime | ThumbMime | Metadata | CommonMetadata | ExtMetadata | BitDepth
+		All = Timestamp | CanonicalTitle | Url | Size | Dimensions | Sha1 | Mime | ThumbMime | Metadata | CommonMetadata | ExtMetadata | BitDepth
 	}
 	#endregion
 

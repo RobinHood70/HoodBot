@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using static RobinHood70.CommonCode.Globals;
+
 	/// <summary>Represents a link, including embedded images.</summary>
 	public class LinkNode : IWikiNode, IBacklinkNode
 	{

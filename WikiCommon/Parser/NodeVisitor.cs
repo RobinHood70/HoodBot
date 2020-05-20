@@ -2,6 +2,7 @@
 {
 	using System.Collections.Generic;
 	using static RobinHood70.CommonCode.Globals;
+
 	/// <summary>Represents a generalized node visitor, which can be used as a base class for other visitors.</summary>
 	/// <seealso cref="IWikiNodeVisitor" />
 	public class NodeVisitor : IWikiNodeVisitor

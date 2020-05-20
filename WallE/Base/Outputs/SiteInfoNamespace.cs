@@ -4,6 +4,7 @@ namespace RobinHood70.WallE.Base
 	using System;
 	using RobinHood70.WallE.Properties;
 	using static RobinHood70.CommonCode.Globals;
+
 	#region Public Enumerations
 	[Flags]
 	public enum NamespaceFlags

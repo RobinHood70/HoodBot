@@ -27,7 +27,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Constructors
-		protected QueryModule([ValidatedNotNull] WikiAbstractionLayer wal, [ValidatedNotNull] TInput input, IPageSetGenerator? pageSetGenerator)
+		protected QueryModule([NotNull, ValidatedNotNull] WikiAbstractionLayer wal, [NotNull, ValidatedNotNull] TInput input, IPageSetGenerator? pageSetGenerator)
 		{
 			ThrowNull(wal, nameof(wal));
 			ThrowNull(input, nameof(input));

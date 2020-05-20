@@ -2,6 +2,7 @@
 namespace RobinHood70.WallE.Eve.Modules
 {
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using static RobinHood70.CommonCode.Globals;
@@ -11,12 +12,12 @@ namespace RobinHood70.WallE.Eve.Modules
 		where TItem : class
 	{
 		#region Constructors
-		protected ListModule([ValidatedNotNull] WikiAbstractionLayer wal, [ValidatedNotNull] TInput input)
+		protected ListModule([NotNull, ValidatedNotNull] WikiAbstractionLayer wal, [NotNull, ValidatedNotNull] TInput input)
 			: this(wal, input, null)
 		{
 		}
 
-		protected ListModule([ValidatedNotNull] WikiAbstractionLayer wal, [ValidatedNotNull] TInput input, IPageSetGenerator? pageSetGenerator)
+		protected ListModule([NotNull, ValidatedNotNull] WikiAbstractionLayer wal, [NotNull, ValidatedNotNull] TInput input, IPageSetGenerator? pageSetGenerator)
 			: base(wal, input, pageSetGenerator)
 		{
 		}

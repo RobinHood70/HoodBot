@@ -6,6 +6,7 @@
 	using System.Text;
 	using System.Text.RegularExpressions;
 	using static RobinHood70.CommonCode.Globals;
+
 	/// <summary>Represents a template parameter.</summary>
 	[DebuggerDisplay("{DebuggerDisplay,nq}")]
 	public sealed class Parameter
