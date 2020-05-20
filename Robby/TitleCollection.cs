@@ -212,18 +212,6 @@
 			this.loadPageLimitationType = limitationType;
 		}
 
-		/// <summary>Watches all pages in the collection.</summary>
-		/// <returns>A value indicating the change status of the watch along with a page collection with the watch results.</returns>
-		public ChangeValue<PageCollection> Watch() => this.Site.PublishChange(
-			PageCollection.UnlimitedDefault(this.Site, this),
-			this,
-			new Dictionary<string, object?>(),
-			() =>
-			{
-				var pages = this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = false });
-				return new ChangeValue<PageCollection>((pages.Count < this.Count) ? ChangeStatus.Failure : ChangeStatus.Success, pages);
-			});
-
 		/// <summary>Unwatches all pages in the collection.</summary>
 		/// <returns>A value indicating the change status of the unwatch along with a page collection with the unwatch results.</returns>
 		public ChangeValue<PageCollection> Unwatch() => this.Site.PublishChange(
@@ -233,6 +221,18 @@
 			() =>
 			{
 				var pages = this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = true });
+				return new ChangeValue<PageCollection>((pages.Count < this.Count) ? ChangeStatus.Failure : ChangeStatus.Success, pages);
+			});
+
+		/// <summary>Watches all pages in the collection.</summary>
+		/// <returns>A value indicating the change status of the watch along with a page collection with the watch results.</returns>
+		public ChangeValue<PageCollection> Watch() => this.Site.PublishChange(
+			PageCollection.UnlimitedDefault(this.Site, this),
+			this,
+			new Dictionary<string, object?>(),
+			() =>
+			{
+				var pages = this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = false });
 				return new ChangeValue<PageCollection>((pages.Count < this.Count) ? ChangeStatus.Failure : ChangeStatus.Success, pages);
 			});
 		#endregion
