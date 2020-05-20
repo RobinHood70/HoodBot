@@ -609,6 +609,11 @@
 			},
 			() => this.Patrol(new PatrolInput(revid)).Title == null ? ChangeStatus.Failure : ChangeStatus.Success);
 
+		/// <summary>Unwatches all pages in the specified namespace.</summary>
+		/// <param name="ns">The namespace to unwatch.</param>
+		/// <returns>A collection of pages that were unwatched.</returns>
+		public ChangeValue<PageCollection> Unwatch(int ns) => this.Watch(ns, true);
+
 		/// <summary>Upload a file to the wiki.</summary>
 		/// <param name="fileName">The full path and filename of the file to upload.</param>
 		/// <param name="editSummary">The edit summary for the upload.</param>
@@ -663,6 +668,29 @@
 				}
 
 				return this.Upload(uploadInput) ? ChangeStatus.Success : ChangeStatus.Failure;
+			});
+
+		/// <summary>Watches all pages in the specified namespace.</summary>
+		/// <param name="ns">The namespace to watch.</param>
+		/// <returns>A collection of pages that were watched.</returns>
+		public ChangeValue<PageCollection> Watch(int ns) => this.Watch(ns, false);
+
+		/// <summary>Watches or unwatches all pages in the specified namespace.</summary>
+		/// <param name="ns">The namespace to watch or (un)watch.</param>
+		/// <param name="unwatch">If set to <see langword="true"/>, pages will be unwatched; otherwise, pages will be watched.</param>
+		/// <returns>A collection of pages that were (un)watched.</returns>
+		public ChangeValue<PageCollection> Watch(int ns, bool unwatch) => this.PublishChange(
+			PageCollection.UnlimitedDefault(this),
+			this,
+			new Dictionary<string, object?>
+			{
+				[nameof(ns)] = ns,
+			},
+			() =>
+			{
+				var input = new WatchInput(new AllPagesInput() { Namespace = ns }) { Unwatch = unwatch };
+				var pages = this.Watch(input);
+				return new ChangeValue<PageCollection>(pages.Count == 0 ? ChangeStatus.NoEffect : ChangeStatus.Success, pages);
 			});
 		#endregion
 
@@ -1052,6 +1080,15 @@
 		/// <param name="input">The input parameters.</param>
 		/// <returns><see langword="true"/> if the edit was successfully patrolled; otherwise, <see langword="false"/>.</returns>
 		protected virtual PatrolResult Patrol(PatrolInput input) => this.AbstractionLayer.Patrol(input);
+
+		/// <summary>Watches or unwatches pages as specified by the input parameters.</summary>
+		/// <param name="input">The input parameters.</param>
+		/// <returns>A collection of the pages that were watched or unwatched.</returns>
+		protected virtual PageCollection Watch(WatchInput input)
+		{
+			var result = this.AbstractionLayer.Watch(input);
+			return new PageCollection(this, result);
+		}
 
 		/// <summary>Uploads a file.</summary>
 		/// <param name="input">The input parameters.</param>
