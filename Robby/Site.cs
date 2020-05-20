@@ -4,6 +4,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.IO;
 	using System.Net;
@@ -51,7 +52,7 @@
 
 	/// <summary>Represents a single wiki site.</summary>
 	/// <seealso cref="IMessageSource" />
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Sufficiently maintainable for now. Could conceivably split off the LoadX() methods if needed, I suppose.")]
+	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Sufficiently maintainable for now. Could conceivably split off the LoadX() methods if needed, I suppose.")]
 	public class Site : IMessageSource
 	{
 		#region Private Constants
@@ -754,10 +755,15 @@
 		}
 
 		/// <summary>Logs the user out.</summary>
+		/// <remarks>Like all write operations, the actual logout request will NOT be sent to the wiki unless editing is enabled.</remarks>
 		public virtual void Logout()
 		{
 			this.Clear();
-			this.AbstractionLayer.Logout();
+
+			if (this.EditingEnabled)
+			{
+				this.AbstractionLayer.Logout();
+			}
 		}
 
 		/// <summary>Raises the <see cref="Changing"/> event with the supplied arguments and indicates what actions should be taken.</summary>
@@ -766,7 +772,7 @@
 		/// <param name="changeFunction">The function to execute. It should return a <see cref="ChangeStatus"/> indicating whether the call was successful, failed, or ignored.</param>
 		/// <param name="caller">The calling method (populated automatically with caller name).</param>
 		/// <returns>A value indicating the actions that should take place.</returns>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
+		[SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
 		public virtual ChangeStatus PublishChange(object sender, IReadOnlyDictionary<string, object?>? parameters, Func<ChangeStatus> changeFunction, [CallerMemberName] string caller = "")
 		{
 			ThrowNull(changeFunction, nameof(changeFunction));
@@ -787,7 +793,7 @@
 		/// <param name="caller">The calling method (populated automatically with caller name).</param>
 		/// <returns>A value indicating the actions that should take place.</returns>
 		/// <remarks>In the event of a <see cref="ChangeStatus.Cancelled"/> result, the corresponding value will be <span class="keyword">default</span>.</remarks>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
+		[SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
 		public virtual ChangeValue<T> PublishChange<T>(T disabledResult, object sender, IReadOnlyDictionary<string, object?>? parameters, Func<ChangeValue<T>> changeFunction, [CallerMemberName] string caller = "")
 			where T : class
 		{
@@ -805,7 +811,7 @@
 		/// <param name="changeArgs">The arguments involved in changing the page. The caller is responsible for creating the object so that it can get the various return values out of it when after the event.</param>
 		/// <param name="changeFunction">The function to execute. It should return a <see cref="ChangeStatus"/> indicating whether the call was successful, failed, or ignored.</param>
 		/// <returns>A value indicating the actions that should take place.</returns>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
+		[SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
 		public virtual ChangeStatus PublishPageTextChange(PageTextChangeArgs changeArgs, Func<ChangeStatus> changeFunction)
 		{
 			ThrowNull(changeArgs, nameof(changeArgs));
@@ -963,26 +969,37 @@
 		}
 
 		/// <summary>Logs the specified user into the wiki and loads necessary information for proper functioning of the class.</summary>
-		/// <param name="input">The input parameters. May be null.</param>
+		/// <param name="input">The input parameters.</param>
 		/// <exception cref="UnauthorizedAccessException">Thrown if there was an error logging into the wiki (which typically denotes that the user had the wrong password or does not have permission to log in).</exception>
 		/// <remarks>Even if you wish to edit anonymously, you <em>must</em> still log in by passing <see langword="null" /> for the input.</remarks>
-		protected virtual void Login(LoginInput input)
+		protected virtual void Login([NotNull, ValidatedNotNull] LoginInput input)
 		{
-			var result = this.AbstractionLayer.Login(input);
-			if (result.Result != "Success")
+			ThrowNull(input, nameof(input));
+			string? name;
+			if (this.EditingEnabled)
 			{
-				this.Clear();
-				throw new UnauthorizedAccessException(CurrentCulture(Resources.LoginFailed, result.Reason));
+				var result = this.AbstractionLayer.Login(input);
+				if (result.Result != "Success")
+				{
+					this.Clear();
+					throw new UnauthorizedAccessException(CurrentCulture(Resources.LoginFailed, result.Reason));
+				}
+
+				name = result.User;
+			}
+			else
+			{
+				name = input.UserName;
 			}
 
-			this.User = result.User == null ? null : new User(this, result.User);
-
-			// This should never happen with co-initialization, but just in case there's a massive change to the abstraction layer, make sure we have all the info we need.
-			if (this.Version == null)
+			// Check if internal version has been initialized. If not, we're probably faking a login and co-initialization hasn't occurred. Either way, make sure we have all the info we need before creating the User object.
+			if (this.version == null)
 			{
 				var siteInfo = this.AbstractionLayer.SiteInfo(new SiteInfoInput(NeededSiteInfo));
 				this.ParseInternalSiteInfo(siteInfo);
 			}
+
+			this.User = name == null ? null : new User(this, name);
 		}
 
 		/// <summary>Gets all site information required for proper functioning of the framework.</summary>
