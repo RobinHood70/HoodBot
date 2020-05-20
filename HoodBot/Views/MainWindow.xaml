@@ -114,7 +114,7 @@
 				HorizontalAlignment="Right"
 				DockPanel.Dock="Left"
 				Text="{x:Static properties:Resources.UserName}" />
-			<TextBox Grid.Row="0" Grid.Column="2" />
+			<TextBox Grid.Row="0" Grid.Column="2" Text="{Binding UserName}" />
 			<TextBlock
 				Grid.Row="2"
 				Grid.Column="0"

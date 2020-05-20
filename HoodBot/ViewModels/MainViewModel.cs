@@ -53,6 +53,7 @@
 		private PauseTokenSource? pauser;
 		private Brush progressBarColor = ProgressBarGreen;
 		private string status = string.Empty;
+		private string? userName;
 		#endregion
 
 		#region Constructors
@@ -156,6 +157,12 @@
 		public RelayCommand Stop => new RelayCommand(this.CancelJobs);
 
 		public RelayCommand Test => new RelayCommand(this.RunTest);
+
+		public string? UserName
+		{
+			get => this.userName;
+			set => this.Set(ref this.userName, value, nameof(this.UserName));
+		}
 
 		public DateTime? UtcEta
 		{
@@ -381,9 +388,12 @@
 			site.WarningOccurred += SiteWarningOccurred;
 #endif
 			site.PagePreview += this.SitePagePreview;
-			if (wikiInfo.UserName != null)
+			site.EditingEnabled = this.EditingEnabled;
+			var user = this.UserName ?? wikiInfo.UserName;
+			var password = this.Password ?? wikiInfo.Password ?? throw new InvalidOperationException(Resources.PasswordNotSet);
+			if (user != null)
 			{
-				site.Login(wikiInfo.UserName, this.Password ?? wikiInfo.Password ?? throw new InvalidOperationException(Resources.PasswordNotSet));
+				site.Login(user, password);
 			}
 
 			return site;
