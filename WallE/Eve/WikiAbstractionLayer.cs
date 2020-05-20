@@ -950,7 +950,10 @@
 					input.Token = this.GetSessionToken(TokensInput.Csrf);
 				}
 
+				var assert = this.Assert;
+				this.Assert = null;
 				new ActionLogout(this).Submit(input);  // Do NOT change this to use the normal StopCheck routines, as there shouldn't be any stop checks when logging out.
+				this.Assert = assert;
 				this.Client.SaveCookies();
 
 				// These are the only things that we absolutely must clear when logging out, since the site could conceivably still be used afterwards, even though it probably shouldn't be.
