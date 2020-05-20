@@ -31,7 +31,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Override Methods
-		protected override void DeserializeResult(JToken result)
+		protected override void DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			this.Output ??= new List<TItem>();

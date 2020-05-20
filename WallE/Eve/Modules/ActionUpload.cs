@@ -52,7 +52,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddHidden("token", input.Token);
 		}
 
-		protected override UploadResult DeserializeResult(JToken result)
+		protected override UploadResult DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			var resultText = result.MustHaveString("result");

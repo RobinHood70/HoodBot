@@ -10,6 +10,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
+
 	// TODO: Consider allowing modules to remove inappropriate inputs/outputs from modules when in generator mode. Easiest implementation is probably to allow normal Build, then implement a RemoveForGenerator virtual method that will come along behind after the build and remove inappropriate parameters from the request.
 	public abstract class QueryModule<TInput, TOutput> : IQueryModule
 		where TInput : class
@@ -163,7 +164,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Abstract Methods
 		protected abstract void BuildRequestLocal(Request request, TInput input);
 
-		protected abstract void DeserializeResult(JToken result);
+		protected abstract void DeserializeResult(JToken? result);
 		#endregion
 
 		#region Protected Virtual Methods

@@ -48,7 +48,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddHidden("token", input.Token);
 		}
 
-		protected override IReadOnlyList<MoveItem> DeserializeResult(JToken result)
+		protected override IReadOnlyList<MoveItem> DeserializeResult(JToken? result)
 		{
 			// Errors occur at multiple levels during a move operation and can represent partial success, so instead of throwing them, we gather them into the result and let the user figure out what to do.
 			ThrowNull(result, nameof(result));

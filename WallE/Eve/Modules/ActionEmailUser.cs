@@ -39,7 +39,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddHidden("token", input.Token);
 		}
 
-		protected override EmailUserResult DeserializeResult(JToken result)
+		protected override EmailUserResult DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			return new EmailUserResult(

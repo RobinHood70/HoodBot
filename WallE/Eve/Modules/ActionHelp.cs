@@ -80,7 +80,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				mime: "text/html");
 		}
 
-		protected override HelpResult DeserializeResult(JToken result)
+		protected override HelpResult DeserializeResult(JToken? result)
 		{
 			// Conceivably, results could be parsed more here (e.g., format 1.21-1.24 the same as 1.25+, and to get specific modules for MW 1.16-) but this has not been implemented due to the extreme unlikelihood of this module ever being used outside of very specific circumstances where the user is probably doing their own parsing anyway.
 			ThrowNull(result, nameof(result));

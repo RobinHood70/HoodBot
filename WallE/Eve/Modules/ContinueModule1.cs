@@ -5,6 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
+
 	internal class ContinueModule1 : ContinueModule
 	{
 		#region Public Constants

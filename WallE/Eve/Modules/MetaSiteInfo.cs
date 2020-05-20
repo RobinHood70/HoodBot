@@ -103,7 +103,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			output.NamespaceAliases ??= GetNamespaceAliases(parent);
 			output.Protocols ??= GetProtocols(parent);
 			output.Restrictions ??= GetRestrictions(parent);
-			output.Rights ??= this.GetRightsInfo(parent);
+			output.Rights ??= GetRightsInfo(parent);
 			output.Skins ??= skins;
 			output.SpecialPageAliases ??= GetSpecialPageAliases(parent);
 			output.Statistics ??= GetStatistics(parent);
@@ -112,7 +112,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			output.Variables ??= GetVariables(parent);
 		}
 
-		protected override void DeserializeResult(JToken result) => throw new InvalidOperationException(EveMessages.CannotDeserialize);
+		protected override void DeserializeResult(JToken? result) => throw new InvalidOperationException(EveMessages.CannotDeserialize);
 		#endregion
 
 		#region Private Static Methods
@@ -318,6 +318,8 @@ namespace RobinHood70.WallE.Eve.Modules
 				semiProtectedLevels: node["semiprotectedlevels"].GetList<string>(),
 				types: node["types"].GetList<string>())
 			: null;
+
+		private static SiteInfoRights? GetRightsInfo(JToken parent) => parent["rightsinfo"] is JToken node ? new SiteInfoRights((string?)node["text"], (string?)node["url"]) : null;
 
 		private static (SiteInfoSkin? DefaultSkin, List<SiteInfoSkin>? Skins) GetSkins(JToken parent)
 		{
@@ -578,8 +580,6 @@ namespace RobinHood70.WallE.Eve.Modules
 				variants: variants,
 				wikiId: node.MustHaveString("wikiid"));
 		}
-
-		private SiteInfoRights? GetRightsInfo(JToken parent) => parent["rightsinfo"] is JToken node ? new SiteInfoRights((string?)node["text"], (string?)node["url"]) : null;
 		#endregion
 	}
 }

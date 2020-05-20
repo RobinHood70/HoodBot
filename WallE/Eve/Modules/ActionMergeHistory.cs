@@ -41,7 +41,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddHidden("token", input.Token);
 		}
 
-		protected override MergeHistoryResult DeserializeResult(JToken result)
+		protected override MergeHistoryResult DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			return new MergeHistoryResult(

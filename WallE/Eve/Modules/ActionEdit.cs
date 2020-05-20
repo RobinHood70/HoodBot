@@ -67,7 +67,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddHidden("token", input.Token);
 		}
 
-		protected override EditResult DeserializeResult(JToken result)
+		protected override EditResult DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			return new EditResult(

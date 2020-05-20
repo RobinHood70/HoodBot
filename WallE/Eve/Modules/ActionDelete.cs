@@ -43,7 +43,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddHidden("token", input.Token);
 		}
 
-		protected override DeleteResult DeserializeResult(JToken result)
+		protected override DeleteResult DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			return new DeleteResult(

@@ -42,6 +42,10 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected abstract RequestType RequestType { get; }
 		#endregion
 
+		#region Protected Virtual Properties
+		protected virtual bool GetTimeStamp => true;
+		#endregion
+
 		#region Protected Static Methods
 		protected static JToken ToJson(string? response)
 		{
@@ -65,7 +69,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIf("assert", wal.Assert!, wal.ValidStopCheckMethods.HasFlag(StopCheckMethods.Assert) && !string.IsNullOrEmpty(wal.Assert))
 				.AddIfNotNullIf("assertuser", wal.UserName, wal.ValidStopCheckMethods.HasFlag(StopCheckMethods.UserNameCheck) && wal.SiteVersion >= 128)
 				.AddIf("maxlag", wal.MaxLag, wal.SupportsMaxLag && wal.MaxLag != 0) // Can be -1 for testing, so check != 0 rather than > 0
-				.Add("curtimestamp", wal.SiteVersion >= 124);
+				.Add("curtimestamp", this.GetTimeStamp && wal.SiteVersion >= 124);
 		}
 
 		protected void DeserializeAction(JToken result)
@@ -155,7 +159,11 @@ namespace RobinHood70.WallE.Eve.Modules
 					request: request);
 			}
 
-			this.Wal.CurrentTimestamp = result["curtimestamp"].GetNullableDate();
+			if (result["curtimestamp"] is JToken timestamp)
+			{
+				this.Wal.CurrentTimestamp = timestamp.GetNullableDate();
+			}
+
 			this.DeserializeActionExtra(result);
 		}
 

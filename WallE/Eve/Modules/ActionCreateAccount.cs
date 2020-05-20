@@ -46,7 +46,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddHidden(input.CaptchaSolution);
 		}
 
-		protected override CreateAccountResult DeserializeResult(JToken result)
+		protected override CreateAccountResult DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			var resultText = result.MustHaveString("result");

@@ -42,7 +42,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddHidden("token", input.Token);
 		}
 
-		protected override List<TagItem> DeserializeResult(JToken result)
+		protected override List<TagItem> DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			var tags = new List<TagItem>();

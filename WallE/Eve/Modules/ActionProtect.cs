@@ -58,7 +58,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddHidden("token", input.Token);
 		}
 
-		protected override ProtectResult DeserializeResult(JToken result)
+		protected override ProtectResult DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			var protections = new List<ProtectResultItem>();

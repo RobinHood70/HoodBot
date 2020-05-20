@@ -4,6 +4,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
+
 	internal class ActionOptions : ActionModule<OptionsInputInternal, NullObject>
 	{
 		#region Constructors
@@ -37,7 +38,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddHidden("token", input.Token);
 		}
 
-		protected override NullObject DeserializeResult(JToken result) => NullObject.Null;
+		protected override NullObject DeserializeResult(JToken? result) => NullObject.Null;
 		#endregion
 	}
 }

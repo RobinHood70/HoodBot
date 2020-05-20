@@ -48,7 +48,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIf("generatexml", input.Properties.HasFlag(ExpandTemplatesProperties.ParseTree), this.SiteVersion < 124);
 		}
 
-		protected override ExpandTemplatesResult DeserializeResult(JToken result)
+		protected override ExpandTemplatesResult DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			return new ExpandTemplatesResult(

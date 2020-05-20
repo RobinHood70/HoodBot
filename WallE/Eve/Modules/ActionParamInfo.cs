@@ -89,7 +89,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("pagesetmodule", pagesetModule);
 		}
 
-		protected override IReadOnlyDictionary<string, ParameterInfoItem> DeserializeResult(JToken result)
+		protected override IReadOnlyDictionary<string, ParameterInfoItem> DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			var output = new Dictionary<string, ParameterInfoItem>();

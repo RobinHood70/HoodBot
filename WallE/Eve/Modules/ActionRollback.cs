@@ -42,7 +42,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddHidden("token", input.Token);
 		}
 
-		protected override RollbackResult DeserializeResult(JToken result)
+		protected override RollbackResult DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			var title = result.MustHaveString("title");

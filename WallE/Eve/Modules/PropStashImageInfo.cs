@@ -7,6 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
+
 	// TODO: Monitor the links below and see if this is ultimately implemented as a list or with Special:UploadStash/$key as a valid page title, then adapt code as needed.
 	// This behaves more like a List module, but does not support limits or continuation, and is therefore internally treated as just a normal query module. It is not (and should not be made into) a property module internally. The entire PHP version of the module will likely be re-written in the future.
 	// See https://phabricator.wikimedia.org/T38220 and https://phabricator.wikimedia.org/T89971.
@@ -48,7 +49,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIfNotNullIf("urlparam", input.UrlParameter, this.SiteVersion >= 118);
 		}
 
-		protected override void DeserializeResult(JToken result)
+		protected override void DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			this.Output = new List<ImageInfoItem>();

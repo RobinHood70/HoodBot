@@ -21,13 +21,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Override Properties
+		protected override bool GetTimeStamp => false;
+
 		protected override RequestType RequestType => RequestType.Get;
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, LogoutInput input) => request.AddHiddenIfNotNull("token", input.Token);
 
-		protected override NullObject DeserializeResult(JToken result) => NullObject.Null;
+		protected override NullObject DeserializeResult(JToken? result) => NullObject.Null;
 		#endregion
 	}
 }

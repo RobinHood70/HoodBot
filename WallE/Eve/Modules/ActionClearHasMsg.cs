@@ -5,6 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
+
 	internal class ActionClearHasMsg : ActionModule<NullObject, CustomResult>
 	{
 		#region Constructors
@@ -29,7 +30,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		protected override CustomResult DeserializeResult(JToken result)
+		protected override CustomResult DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			return new CustomResult((string?)result ?? string.Empty);

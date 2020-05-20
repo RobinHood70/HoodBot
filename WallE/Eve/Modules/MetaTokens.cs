@@ -36,7 +36,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			request.Add("type", input.Types);
 		}
 
-		protected override void DeserializeResult(JToken result)
+		protected override void DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			this.Output = result.GetStringDictionary<string>();

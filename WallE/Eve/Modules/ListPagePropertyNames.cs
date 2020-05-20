@@ -5,6 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
+
 	internal class ListPagePropertyNames : ListModule<PagePropertyNamesInput, string>
 	{
 		#region Constructors

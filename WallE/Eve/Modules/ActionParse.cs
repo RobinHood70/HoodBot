@@ -71,7 +71,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIfNotNullIf("contentmodel", input.ContentModel, this.SiteVersion >= 121);
 		}
 
-		protected override ParseResult DeserializeResult(JToken result)
+		protected override ParseResult DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			return new ParseResult(

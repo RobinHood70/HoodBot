@@ -5,6 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
+
 	internal class ActionCompare : ActionModule<CompareInput, CompareResult>
 	{
 		#region Constructors
@@ -38,7 +39,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIfNotNull("totitle", input.ToTitle);
 		}
 
-		protected override CompareResult DeserializeResult(JToken result)
+		protected override CompareResult DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			return new CompareResult(

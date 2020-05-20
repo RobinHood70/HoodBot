@@ -39,7 +39,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddHidden("token", input.Token);
 		}
 
-		protected override FileRevertResult DeserializeResult(JToken result)
+		protected override FileRevertResult DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			return new FileRevertResult(result.MustHaveString("result"));

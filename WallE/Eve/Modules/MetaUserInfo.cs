@@ -45,7 +45,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			request.AddFlags("prop", prop);
 		}
 
-		protected override void DeserializeResult(JToken result)
+		protected override void DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			var token = result["changeablegroups"];

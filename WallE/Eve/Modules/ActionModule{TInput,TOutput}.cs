@@ -9,6 +9,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
+
 	public abstract class ActionModule<TInput, TOutput> : ActionModule
 		where TInput : class
 		where TOutput : class
@@ -38,7 +39,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Abstract Methods
 		protected abstract void BuildRequestLocal(Request request, TInput input);
 
-		protected abstract TOutput DeserializeResult(JToken result);
+		protected abstract TOutput DeserializeResult(JToken? result);
 		#endregion
 
 		#region Protected Virtual Methods
@@ -80,20 +81,17 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			try
 			{
-				// DeserializeCustom allows modules like OpenSearch to work correctly. If it returns an object with error info, the standard deserialization routine kicks in, while the custom one will kick in if it gets an array.
 				var result = ToJson(response);
-				if (result.Type == JTokenType.Object)
+				if (result.Type != JTokenType.Object)
 				{
-					this.DeserializeAction(result);
-					if (result[this.Name] is JToken node && result.Type != JTokenType.Null)
-					{
-						return this.DeserializeResult(node) ?? throw WikiException.General("null-result", this.Name + " was found in the results, but the deserializer returned null.");
-					}
-
-					throw WikiException.General("no-result", "The expected result node, " + this.Name + ", was not found.");
+					// Because this is customized, none of the standard checks are applied. A null result could well be valid here.
+					return this.DeserializeCustom(result);
 				}
 
-				return this.DeserializeCustom(result);
+				this.DeserializeAction(result);
+
+				// What happens if result[this.Name] is null is left up to the individual module. In most cases, this will throw an error, but it is valid for modules like Logout to return an empty JSON object.
+				return this.DeserializeResult(result[this.Name]) ?? throw WikiException.General("null-result", this.Name + " was found in the results, but the deserializer returned null.");
 			}
 			catch (JsonReaderException)
 			{

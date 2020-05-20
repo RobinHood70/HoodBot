@@ -49,7 +49,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddHidden("token", input.Token);
 		}
 
-		protected override IReadOnlyList<ImportItem> DeserializeResult(JToken result)
+		protected override IReadOnlyList<ImportItem> DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			var output = new List<ImportItem>();

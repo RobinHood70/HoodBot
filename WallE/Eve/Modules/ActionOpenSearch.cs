@@ -7,6 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
+
 	internal class ActionOpenSearch : ActionModule<OpenSearchInput, IReadOnlyList<OpenSearchItem>>
 	{
 		#region Constructors
@@ -70,7 +71,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			return base.DeserializeCustom(result);
 		}
 
-		protected override IReadOnlyList<OpenSearchItem> DeserializeResult(JToken result) => throw new NotSupportedException();
+		protected override IReadOnlyList<OpenSearchItem> DeserializeResult(JToken? result) => throw new NotSupportedException();
 		#endregion
 	}
 }

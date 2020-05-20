@@ -73,7 +73,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 		}
 
-		protected override void DeserializeResult(JToken result)
+		protected override void DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
 			if (result["disabled"] != null)

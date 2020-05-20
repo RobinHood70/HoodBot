@@ -6,6 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
+
 	internal class ActionFeedWatchlist : ActionModule<FeedWatchlistInput, CustomResult>
 	{
 		#region Constructors
@@ -51,7 +52,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override CustomResult DeserializeCustom(string? result) => new CustomResult(result);
 
-		protected override CustomResult DeserializeResult(JToken result) => throw new NotSupportedException();
+		protected override CustomResult DeserializeResult(JToken? result) => throw new NotSupportedException();
 		#endregion
 	}
 }
