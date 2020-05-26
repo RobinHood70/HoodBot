@@ -22,9 +22,8 @@
 
 		protected override void LoadPages() => this.Pages.GetBacklinks("Template:BG", BacklinksTypes.EmbeddedIn);
 
-		protected override void ParseText(object sender, Page page, ContextualParser parsedPage)
+		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
-			ThrowNull(page, nameof(page));
 			ThrowNull(parsedPage, nameof(parsedPage));
 			var templates = parsedPage.FindAllRecursive<TemplateNode>();
 			foreach (var template in templates)

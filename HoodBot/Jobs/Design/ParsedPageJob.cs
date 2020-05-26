@@ -70,14 +70,14 @@
 		#region Protected Abstract Methods
 		protected abstract void LoadPages();
 
-		protected abstract void ParseText(object sender, Page page, ContextualParser parsedPage);
+		protected abstract void ParseText(object sender, ContextualParser parsedPage);
 		#endregion
 
 		#region Private Methods
 		private void Results_PageLoaded(object sender, Page eventArgs)
 		{
 			var parsedPage = ContextualParser.FromPage(eventArgs);
-			this.ParseText(sender, eventArgs, parsedPage);
+			this.ParseText(sender, parsedPage);
 			eventArgs.Text = WikiTextVisitor.Raw(parsedPage);
 		}
 		#endregion

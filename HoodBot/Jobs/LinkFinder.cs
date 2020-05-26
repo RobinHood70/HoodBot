@@ -52,17 +52,17 @@
 
 		protected override void LoadPages() => this.Pages.GetBacklinks(this.title.FullPageName, BacklinksTypes.Backlinks | BacklinksTypes.ImageUsage, false, Filter.Any);
 
-		protected override void ParseText(object sender, Page page, ContextualParser parsedPage)
+		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
-			ThrowNull(page, nameof(page));
 			ThrowNull(parsedPage, nameof(parsedPage));
+			ThrowNull(parsedPage.Title, nameof(parsedPage), nameof(parsedPage.Title));
 			var links = parsedPage.FindAllRecursive<LinkNode>();
 			foreach (var link in links)
 			{
 				var siteLink = SiteLink.FromLinkNode(this.Site, link);
 				if (siteLink.FullEquals(this.title))
 				{
-					this.results.Add(page);
+					this.results.Add(parsedPage.Title);
 				}
 			}
 		}
