@@ -236,10 +236,10 @@
 		public ITokenManager TokenManager
 		{
 			get => this.tokenManager ??=
-					this.SiteVersion == 0 ? throw new InvalidOperationException(CurrentCulture(Messages.SiteNotInitialized, nameof(this.Initialize), nameof(this.Login))) :
-					this.SiteVersion >= TokenManagerMeta.MinimumVersion ? new TokenManagerMeta(this) :
-					this.SiteVersion >= TokenManagerAction.MinimumVersion ? new TokenManagerAction(this) :
-					new TokenManagerOriginal(this) as ITokenManager;
+				this.SiteVersion == 0 ? throw new InvalidOperationException(CurrentCulture(Messages.SiteNotInitialized, nameof(this.Initialize), nameof(this.Login))) :
+				this.SiteVersion >= TokenManagerMeta.MinimumVersion ? new TokenManagerMeta(this) :
+				this.SiteVersion >= TokenManagerAction.MinimumVersion ? new TokenManagerAction(this) :
+				new TokenManagerOriginal(this) as ITokenManager;
 			set => this.tokenManager = value ?? throw ArgumentNull(nameof(this.TokenManager));
 		}
 
@@ -484,8 +484,7 @@
 			this.SupportsMaxLag = siteInfo.LagInfo?.Count > 0 && siteInfo.LagInfo[0].Lag != -1;
 
 			// Other (not SiteInfo-related)
-			this.TokenManager.Clear();
-
+			this.tokenManager?.Clear();
 			if (this.ContinueVersion == 0)
 			{
 				this.ContinueVersion = siteVersion >= ContinueModule2.MinimumVersion ? 2 : 1;
@@ -871,7 +870,7 @@
 
 			if (string.IsNullOrEmpty(input.UserName))
 			{
-				this.TokenManager.Clear();
+				this.tokenManager?.Clear();
 				return LoginResult.EditingAnonymously(this.UserName);
 			}
 
@@ -968,7 +967,7 @@
 			}
 			else
 			{
-				this.TokenManager.Clear();
+				this.tokenManager?.Clear();
 			}
 		}
 

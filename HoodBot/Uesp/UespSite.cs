@@ -86,8 +86,11 @@
 
 			ThrowNull(this.User, nameof(UespSite), nameof(this.User));
 
-			// Assumes we'll never be editing UESP anonymously.
-			this.AbstractionLayer.Assert = (this.User.Name == "HotnBOThered" || this.User.Name == "HoodBot") ? "bot" : "user";
+			if (this.EditingEnabled)
+			{
+				// Assumes we'll never be editing UESP anonymously.
+				this.AbstractionLayer.Assert = (this.User.Name == "HotnBOThered" || this.User.Name == "HoodBot") ? "bot" : "user";
+			}
 
 			// Messages have to be cleared in order to get pages from the wiki properly, so force that to happen, even if editing is disabled.
 			this.ClearMessage(true);

@@ -989,14 +989,8 @@
 			}
 			else
 			{
+				this.AbstractionLayer.Initialize();
 				name = input.UserName;
-			}
-
-			// Check if internal version has been initialized. If not, we're probably faking a login and co-initialization hasn't occurred. Either way, make sure we have all the info we need before creating the User object.
-			if (this.version == null)
-			{
-				var siteInfo = this.AbstractionLayer.SiteInfo(new SiteInfoInput(NeededSiteInfo));
-				this.ParseInternalSiteInfo(siteInfo);
 			}
 
 			this.User = name == null ? null : new User(this, name);
