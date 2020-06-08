@@ -8,21 +8,21 @@
 	/// <seealso cref="ResultHandler" />
 	public class PageResultHandler : ResultHandler
 	{
-		#region Fields
-		private readonly ISimpleTitle title;
-		#endregion
-
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="PageResultHandler"/> class.</summary>
-		/// <param name="title">A <see cref="Title"/> that points to the results page.</param>
+		/// <param name="title">A <see cref="Robby.Title"/> that points to the results page.</param>
 		public PageResultHandler(ISimpleTitle title)
 			: base(title?.Site.Culture)
 		{
 			ThrowNull(title, nameof(title));
-			this.title = title;
+			this.Title = title;
 			this.DefaultText = this.ResourceManager.GetString("Results", title.Site.Culture);
 		}
+		#endregion
+
+		#region Public Properties
+		public ISimpleTitle Title { get; set; }
 		#endregion
 
 		#region Public Methods
@@ -32,7 +32,7 @@
 		{
 			if (this.StringBuilder.Length > 0)
 			{
-				var page = new Page(this.title) { Text = this.StringBuilder.ToString() };
+				var page = new Page(this.Title) { Text = this.StringBuilder.ToString() };
 				page.Save(this.Description, false);
 			}
 		}
