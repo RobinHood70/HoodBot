@@ -61,11 +61,10 @@
 		#region Protected Override Methods
 		protected override ActiveSkill GetNewSkill(IDataRecord row) => new ActiveSkill(row);
 
-		protected override void UpdateSkillTemplate(ActiveSkill skillBase, Template template, HashSet<string> replacements)
+		protected override void UpdateSkillTemplate(ActiveSkill skillBase, Template template)
 		{
 			ThrowNull(skillBase, nameof(skillBase));
 			ThrowNull(template, nameof(template));
-			ThrowNull(replacements, nameof(replacements));
 			ThrowNull(this.PatchVersion, nameof(EsoActiveSkillSummaries), nameof(this.PatchVersion));
 			var baseMorph = skillBase.Morphs[0];
 			template.AddOrChange("id", baseMorph.Abilities[3].Id);

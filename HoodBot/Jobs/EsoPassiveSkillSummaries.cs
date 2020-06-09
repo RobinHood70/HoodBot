@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System.Collections.Generic;
 	using System.Data;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
@@ -47,11 +46,10 @@
 		#region Protected Override Methods
 		protected override PassiveSkill GetNewSkill(IDataRecord row) => new PassiveSkill(row);
 
-		protected override void UpdateSkillTemplate(PassiveSkill skillBase, Template template, HashSet<string> replacements)
+		protected override void UpdateSkillTemplate(PassiveSkill skillBase, Template template)
 		{
 			ThrowNull(skillBase, nameof(skillBase));
 			ThrowNull(template, nameof(template));
-			ThrowNull(replacements, nameof(replacements));
 			template.AddOrChange("type", "Passive");
 			template.AddOrChange("id", skillBase.Id.ToStringInvariant());
 			foreach (var rank in skillBase.Ranks)
