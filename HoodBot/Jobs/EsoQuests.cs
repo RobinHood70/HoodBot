@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Data;
+	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Text;
 	using RobinHood70.CommonCode;
@@ -10,6 +11,7 @@
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 
 	public class EsoQuests : EditJob
 	{
@@ -116,19 +118,33 @@
 		protected override void BeforeLogging()
 		{
 			this.StatusWriteLine("Getting wiki data");
-			var allTitles = new TitleCollection(this.Site);
-			allTitles.GetNamespace(UespNamespaces.Online, Filter.Any);
+			// var allTitles = new TitleCollection(this.Site);
+			// allTitles.GetNamespace(UespNamespaces.Online, Filter.Any);
 
 			var wikiQuests = new TitleCollection(this.Site);
 			wikiQuests.GetCategoryMembers("Online-Quests");
 
-			this.StatusWriteLine("Getting quest data");
-			var quests = this.GetQuestData(allTitles, wikiQuests);
+			Debug.WriteLine(wikiQuests.Contains("Online:Capture Farm"));
 
+			this.StatusWriteLine("Getting quest data");
+			var quests = new List<QuestData>(this.GetQuestData(wikiQuests));
+			var allTitles = new TitleCollection(this.Site);
+			foreach (var quest in quests)
+			{
+				allTitles.Add(quest.FullPageName);
+			}
+
+			var allPages = allTitles.Load(PageModules.Info);
+			allPages.RemoveExists(false);
 			var places = EsoGeneral.GetPlaces(this.Site);
 			foreach (var quest in quests)
 			{
-				if (quest.Zone != null && quest.Zone.Length != 0)
+				if (allPages.Contains(quest.FullPageName))
+				{
+					quest.FullPageName += " (quest)";
+				}
+
+				if (!string.IsNullOrEmpty(quest.Zone))
 				{
 					var place = places[quest.Zone];
 					if (place != null)
@@ -175,67 +191,61 @@
 		#endregion
 
 		#region Private Methods
-		private List<QuestData> GetDBQuests()
+		private IEnumerable<QuestData> GetDBQuests()
 		{
-			var quests = new List<QuestData>();
 			foreach (var row in EsoGeneral.RunQuery(QuestQuery))
 			{
-				quests.Add(new QuestData(row, this.Site));
+				yield return new QuestData(row);
 			}
-
-			return quests;
 		}
 
-		private List<QuestData> GetFilteredQuests(TitleCollection allTitles, TitleCollection wikiQuests)
+		private IEnumerable<QuestData> GetFilteredQuests(TitleCollection wikiQuests)
 		{
-			var quests = this.GetDBQuests();
-			for (var i = quests.Count - 1; i >= 0; i--)
+			foreach (var quest in this.GetDBQuests())
 			{
-				var quest = quests[i];
-				var titleDisambig = new Title(this.Site, UespNamespaces.Online, quest.Name + " (quest)", true);
-				if (wikiQuests.Contains(quest.Title) || wikiQuests.Contains(titleDisambig))
+				var title = new Title(this.Site, quest.FullPageName);
+				var titleDisambig = new Title(title);
+				titleDisambig.PageName += " (quest)";
+				if (!wikiQuests.Contains(title) && !wikiQuests.Contains(titleDisambig))
 				{
-					quests.RemoveAt(i);
-					continue;
-				}
-
-				var removed = false;
-				foreach (var wikiQuest in wikiQuests)
-				{
-					if (wikiQuest.PageName.StartsWith(quest.Name, StringComparison.OrdinalIgnoreCase))
+					var missing = true;
+					foreach (var wikiQuest in wikiQuests)
 					{
-						quests.RemoveAt(i);
-						removed = true;
-						break;
+						var splitName = wikiQuest.PageName.Split(" (", StringSplitOptions.None);
+						if (string.Compare(splitName[0], quest.Name, StringComparison.OrdinalIgnoreCase) == 0)
+						{
+							missing = false;
+							break;
+						}
+					}
+
+					if (missing)
+					{
+						yield return quest;
 					}
 				}
-
-				if (!removed && allTitles.Contains(quest.Title))
-				{
-					// If title already exists, create quest at titleDisambig instead.
-					quest.Title = titleDisambig;
-				}
 			}
-
-			return quests;
 		}
 
-		private List<QuestData> GetQuestData(TitleCollection allTitles, TitleCollection wikiQuests)
+		private IEnumerable<QuestData> GetQuestData(TitleCollection wikiQuests)
 		{
-			var quests = this.GetFilteredQuests(allTitles, wikiQuests);
-			var questDict = new Dictionary<long, QuestData>();
+			var quests = this.GetFilteredQuests(wikiQuests);
+			var questDict = new Dictionary<string, QuestData>();
+			var questNames = new Dictionary<long, string>();
 			foreach (var quest in quests)
 			{
-				questDict.Add(quest.Id, quest);
+				questDict.TryAdd(quest.Name, quest);
+				questNames.Add(quest.Id, quest.Name);
 			}
 
-			var whereText = string.Join(",", questDict.Keys);
+			var whereText = string.Join(",", questNames.Keys);
 			this.StatusWriteLine("Getting stage data");
 			foreach (var row in EsoGeneral.RunQuery(StageQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
 			{
 				var stage = new Stage(row);
 				var questId = (long)row["questId"];
-				var stages = questDict[questId].Stages;
+				var questName = questNames[questId];
+				var stages = questDict[questName].Stages;
 
 				stages.Add(stage);
 			}
@@ -246,7 +256,8 @@
 				var condition = new Condition(row);
 				var questId = (long)row["questId"];
 				var stageId = (long)row["questStepId"];
-				var stages = questDict[questId].Stages;
+				var questName = questNames[questId];
+				var stages = questDict[questName].Stages;
 				if (stages.Find(item => item.Id == stageId) is Stage stage)
 				{
 					stage.Conditions.Add(condition);
@@ -258,12 +269,15 @@
 			{
 				var reward = new Reward(row);
 				var questId = (long)row["questId"];
-				var rewards = questDict[questId].Rewards;
-
-				rewards.Add(reward);
+				var questName = questNames[questId];
+				var rewards = questDict[questName].Rewards;
+				if (rewards.Find(item => item.ItemId == reward.ItemId) == null)
+				{
+					rewards.Add(reward);
+				}
 			}
 
-			return quests;
+			return questDict.Values;
 		}
 
 		private Page NewPage(QuestData quest)
@@ -411,7 +425,7 @@
 				.AppendLine()
 				.AppendLine("{{Stub|Quest}}");
 
-			return new Page(quest.Title) { Text = sb.ToString() };
+			return new Page(this.Site, quest.FullPageName ?? throw new InvalidOperationException()) { Text = sb.ToString() };
 		}
 
 		private Dictionary<string, List<Condition>> MergeStages(QuestData quest, SortedSet<string> locs)
@@ -480,36 +494,48 @@
 		private class QuestData
 		{
 			#region Constructors
-			public QuestData(IDataRecord row, Site site)
+			public QuestData(IDataRecord row)
 			{
-				this.BackgroundText = (string)row["backgroundText"];
+				var fromEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252) ?? throw new InvalidOperationException();
+				var toEncoding = Encoding.UTF8;
+				var bgText = (string)row["backgroundText"];
+				var bgBytes = fromEncoding.GetBytes(bgText);
+				this.BackgroundText = toEncoding.GetString(bgBytes); // Fix UTF8 stored as CP-1252
 				this.Id = (long)row["id"];
 				this.InternalId = (int)row["internalId"];
-				this.Name = (string)row["name"];
+				this.Name = ((string)row["name"]).Replace("  ", " ", StringComparison.Ordinal); // Handles "Capture  Farm" with two spaces.
+				this.FullPageName = "Online:" + this.Name;
 				this.Objective = (string)row["objective"];
 				this.RepeatType = (short)row["repeatType"];
 				this.Type = (short)row["type"];
-				this.Zone = (string)row["zone"];
-				if (this.Zone.Length == 0)
+				var zone = (string)row["zone"];
+				if (zone.Length == 0 || zone == "Tamriel")
 				{
-					this.Zone = (string)row["locZone"];
+					zone = (string)row["locZone"];
+					if (zone == "Tamriel")
+					{
+						zone = string.Empty;
+					}
 				}
 
-				if (this.Zone == "Tamriel")
-				{
-					this.Zone = string.Empty;
-				}
-
-				this.Title = new Title(site, UespNamespaces.Online, this.Name, true);
+				this.Zone = zone;
 			}
 			#endregion
 
 			#region Public Properties
 			public string BackgroundText { get; }
 
+			public string FullPageName { get; set; }
+
 			public long Id { get; }
 
 			public int InternalId { get; }
+
+			public string? Mod => this.Zone switch
+			{
+				"Southern Elsweyr" => "Dragonhold",
+				_ => null,
+			};
 
 			public string Name { get; }
 
@@ -520,14 +546,6 @@
 			public List<Reward> Rewards { get; } = new List<Reward>();
 
 			public List<Stage> Stages { get; } = new List<Stage>();
-
-			public string? Mod => this.Zone switch
-			{
-				"Southern Elsweyr" => "Dragonhold",
-				_ => null,
-			};
-
-			public Title Title { get; set; }
 
 			public int Type { get; }
 

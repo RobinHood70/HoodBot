@@ -9,6 +9,7 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.WikiCommon.Searches;
@@ -51,15 +52,20 @@
 
 		public static string FirstLinksOnly(Site site, string text)
 		{
-			// TODO: Needs testing. Was replaced without testing during SiteLink revamp.
-			var uniqueLinks = new HashSet<string>();
 			var nodes = WikiTextParser.Parse(text);
+			FirstLinksOnly(site, nodes);
+			return WikiTextVisitor.Raw(nodes);
+		}
+
+		public static void FirstLinksOnly(Site site, NodeCollection nodes)
+		{
+			var uniqueLinks = new HashSet<Title>(SimpleTitleEqualityComparer.Instance);
 			if (nodes.FindFirstLinked<LinkNode>() is LinkedListNode<IWikiNode> linkedNode)
 			{
 				var link = SiteLink.FromLinkNode(site, (LinkNode)linkedNode.Value);
-				if (!uniqueLinks.Contains(link.FullPageName))
+				if (!uniqueLinks.Contains(link))
 				{
-					uniqueLinks.Add(link.FullPageName);
+					uniqueLinks.Add(link);
 				}
 				else
 				{
@@ -70,8 +76,6 @@
 					}
 				}
 			}
-
-			return WikiTextVisitor.Raw(nodes);
 		}
 
 		public static void Initialize(WikiJob job)
@@ -155,16 +159,53 @@
 
 		public static string ReplaceLink(string text)
 		{
-			foreach (var replacement in ReplaceFirstList)
+			if (string.IsNullOrEmpty(text))
 			{
-				if (text.Contains(replacement.From, StringComparison.Ordinal))
-				{
-					UnreplacedList.Remove(replacement.From);
-					text = replacement.ReplaceFirst(text);
-				}
+				return text;
 			}
 
-			return text;
+			var parsedText = WikiTextParser.Parse(text);
+			ReplaceLink(parsedText);
+			return WikiTextVisitor.Raw(parsedText);
+		}
+
+		public static void ReplaceLink(NodeCollection parsedText)
+		{
+			// TODO: This will do for now, but is not ideal in the long run since it's inserting links into the node collection without treating them as links. Replacements should be converted to NodeCollections, then inserted correctly into the existing collection.
+			var foundReplacements = new HashSet<string>();
+			foreach (var textNode in parsedText.FindAll<TextNode>())
+			{
+				var newValue = new StringBuilder();
+				var newText = textNode.Text;
+				var i = 0;
+				do
+				{
+					var foundReplacement = false;
+					foreach (var replacement in ReplaceFirstList)
+					{
+						if (!foundReplacements.Contains(replacement.From) && newText.StartsWith(replacement.From, StringComparison.Ordinal))
+						{
+							foundReplacement = true;
+							foundReplacements.Add(replacement.From);
+							UnreplacedList.Remove(replacement.From);
+							newValue.Append(replacement.To);
+							i += replacement.From.Length;
+							break;
+						}
+					}
+
+					if (!foundReplacement)
+					{
+						newValue.Append(newText[0]);
+						i++;
+					}
+
+					newText = textNode.Text.Substring(i);
+				}
+				while (i < textNode.Text.Length);
+
+				textNode.Text = newValue.ToString();
+			}
 		}
 
 		public static void ShowUnreplaced()

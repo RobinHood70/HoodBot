@@ -19,6 +19,17 @@
 
 	internal class NpcData
 	{
+		#region Static Fields
+		private static readonly Dictionary<sbyte, string> Reactions = new Dictionary<sbyte, string>
+		{
+			[1] = "Hostile",
+			[2] = "Neutral",
+			[3] = "Friendly",
+			[4] = "Player Ally",
+			[5] = "NPC Ally",
+		};
+		#endregion
+
 		#region Constructors
 		[SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1122:Use string.Empty for empty strings", Justification = "False hit. Cannot use non-constant expression.")]
 		public NpcData(IDataRecord row)
@@ -30,20 +41,16 @@
 			this.Difficulty--;
 			this.PickpocketDifficulty = (PickpocketDifficulty)(sbyte)row["ppDifficulty"];
 			this.LootType = (string)row["ppClass"];
-			this.Reaction = (sbyte)row["reaction"] switch
-			{
-				-1 => this.LootType switch
+			var reaction = (sbyte)row["reaction"];
+			this.Reaction = reaction == -1
+				? this.LootType switch
 				{
 					"Bard" => "Friendly",
 					"" => string.Empty,
 					null => string.Empty,
 					_ => "Justice Neutral"
-				},
-				1 => "Hostile",
-				2 => "Neutral",
-				3 => "Friendly",
-				_ => throw new InvalidOperationException("Reaction value is out of range.")
-			};
+				}
+				: Reactions[reaction];
 
 			if (name.Length > 2 && name[^2] == '^' && gender == -1)
 			{
@@ -138,22 +145,32 @@
 			var showPlaces = new Dictionary<PlaceType, List<Place>>();
 			foreach (var kvp in this.Places)
 			{
-				var place = kvp.Key;
-				if (!showPlaces.TryGetValue(place.PlaceType, out var list))
+				var placeType = kvp.Key.PlaceType;
+				if (placeType != PlaceType.Unknown)
 				{
-					list = new List<Place>();
-					showPlaces.Add(place.PlaceType, list);
-				}
+					if (!showPlaces.TryGetValue(placeType, out var list))
+					{
+						list = new List<Place>();
+						showPlaces.Add(placeType, list);
+					}
 
-				list.Add(kvp.Key);
+					list.Add(kvp.Key);
+				}
 			}
 
+			var wroteSomething = false;
 			foreach (var placeType in showPlaces)
 			{
 				if (placeType.Value.Count > 1)
 				{
+					wroteSomething = true;
 					Debug.Write($"[[Online:{this.PageName}|{this.Name}]] has multiple {placeType.Key} entries: {string.Join(", ", placeType.Value)}.");
 				}
+			}
+
+			if (wroteSomething)
+			{
+				Debug.WriteLine(string.Empty);
 			}
 		}
 		#endregion
