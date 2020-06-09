@@ -67,8 +67,8 @@
 			int value;
 			int maxValue;
 
-			// Dave's source code for this is found in ComputeEsoSkillValue() here:
-			// https://bitbucket.org/uesp/esolog/src/default/resources/esoskills.js
+			// Dave's source code for this is found in ComputeEsoSkillValue() in the (already cloned) esolog repository at:
+			// https://github.com/uesp/uesp-esolog
 			// Note that Dave's calculations are significantly more complex, as they involve variable amounts. For the bot's purposes, constant amounts are used for key values, which simplifies many of the formulae.
 			switch (this.TypeNumber)
 			{
