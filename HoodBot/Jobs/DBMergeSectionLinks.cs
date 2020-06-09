@@ -6,6 +6,7 @@
 	using Newtonsoft.Json;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
+	using RobinHood70.HoodBot.Models;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon.Parser;
@@ -16,6 +17,12 @@
 		public DBMergeSectionLinks(Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
 		{
+			if (this.Results is PageResultHandler results)
+			{
+				results.Title = new Page(this.Site, "User:Kiz/Sandbox1");
+				this.WriteLine("{{#addtotrail:[[User:Kiz|Kiz]]: [[User:Kiz/Subpages|Subpages]]}}{{Notice|<onlyinclude>DBMerge - Outstanding Links</onlyinclude>}}");
+				this.WriteLine("----");
+			}
 		}
 
 		protected override void Main()
@@ -29,6 +36,8 @@
 				titles.Add(rep.To);
 			}
 
+			titles.Remove("Skyrim:Miscellaneous Items"); // This one is legitimately #Dragonborn
+
 			var pages = new PageCollection(this.Site, PageModules.LinksHere);
 			pages.GetTitles(titles);
 
@@ -41,11 +50,11 @@
 				}
 			}
 
-			backlinks.Sort();
 			backlinks.Remove("User:HoodBot/Results");
+			backlinks.Remove("User:Kiz/Sandbox1");
+			//// backlinks.Sort(); // Only useful for debugging
 
 			pages = PageCollection.Unlimited(this.Site);
-			//// pages.GetTitles("Category:Dragonborn-Factions-DLC2AshSpawnFaction");
 			pages.GetTitles(backlinks);
 			pages.Sort();
 			foreach (var page in pages)
