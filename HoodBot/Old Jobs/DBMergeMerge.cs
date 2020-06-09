@@ -158,7 +158,7 @@
 
 			var srPages = new PageCollection(this.Site, PageModules.Info | PageModules.Properties | PageModules.Revisions);
 			srPages.GetTitles(srTitles);
-			srPages.RemoveNonExistent();
+			srPages.RemoveExists(false);
 			srPages.Sort();
 			foreach (var srPage in srPages)
 			{

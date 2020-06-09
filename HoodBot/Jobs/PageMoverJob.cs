@@ -857,13 +857,13 @@
 
 			// TODO: Used to only load if proposing unused or fixing links. Removed since FromPage could be useful for custom moves. May want to reinstate with additional check for custom edit. Also check all code for where FromPage and ToPage are actually used.
 			fromPages.GetTitles(fromTitles);
-			fromPages.RemoveNonExistent();
+			fromPages.RemoveExists(false);
 
 			var toPages = PageCollection.Unlimited(this.Site, this.ToPageModules, false); // Only worried about existence, so don't load anything other than that unless told to.
 			if (!this.MoveOverExisting)
 			{
 				toPages.GetTitles(toTitles);
-				toPages.RemoveNonExistent();
+				toPages.RemoveExists(false);
 			}
 
 			foreach (var replacement in this.replacements)

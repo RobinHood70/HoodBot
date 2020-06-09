@@ -227,12 +227,13 @@
 			}
 		}
 
-		/// <summary>Removes all pages from the collection where the page's <see cref="Page.Exists"/> property is false.</summary>
-		public void RemoveNonExistent()
+		/// <summary>Removes all pages from the collection where the page's <see cref="Page.Exists"/> property equals the value provided.</summary>
+		/// <param name="exists">If <see langword="true"/>, pages that exist will be removed from the collection; if <see langword="false"/>, non-existent pages will be removed fromt he collection.</param>
+		public void RemoveExists(bool exists)
 		{
 			for (var i = this.Count - 1; i >= 0; i--)
 			{
-				if (!this[i].Exists)
+				if (this[i].Exists == exists)
 				{
 					this.RemoveAt(i);
 				}
