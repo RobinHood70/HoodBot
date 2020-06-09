@@ -18,6 +18,7 @@
 	internal class EsoItemSets : EditJob
 	{
 		#region Static Fields
+		private static readonly HashSet<int> BadRows = new HashSet<int> { 1226, 1240 };
 		private static readonly Regex OnlineUpdateRegex = Template.Find("Online Update");
 		private static readonly Regex SetBonusRegex = new Regex(@"(\([1-6] items?\))");
 		private static readonly Uri SetSummaryPage = new Uri("http://esolog.uesp.net/viewlog.php?record=setSummary&format=csv");
@@ -81,19 +82,17 @@
 			var sets = new List<PageData>();
 			foreach (var row in csvFile)
 			{
-				if (row["id"] == "1100")
+				if (!BadRows.Contains(int.Parse(row["id"])))
 				{
-					continue;
-				}
+					var setName = row["setName"].Replace(@"\'", "'", StringComparison.Ordinal);
+					var bonusDescription = row["setBonusDesc"];
+					if (bonusDescription[0] != '(')
+					{
+						this.Warn($"Set bonus for {setName} doesn't start with a bracket:{Environment.NewLine}{bonusDescription}");
+					}
 
-				var setName = row["setName"].Replace(@"\'", "'", StringComparison.Ordinal);
-				var bonusDescription = row["setBonusDesc"];
-				if (bonusDescription[0] != '(')
-				{
-					this.Warn($"Set bonus for {setName} doesn't start with a bracket:{Environment.NewLine}{bonusDescription}");
+					sets.Add(new PageData(setName, bonusDescription));
 				}
-
-				sets.Add(new PageData(setName, bonusDescription));
 			}
 
 			var titles = this.ResolveAndPopulateSets(sets);
@@ -137,7 +136,7 @@
 			{
 				if (item.Value.IsNonTrivial)
 				{
-					this.WriteLine($"* {{{{Pl|{item.Key}|{item.Value.SetName}|diff=cur}}}}");
+					this.WriteLine($"* {{{{Pl|Online:{item.Key}|{item.Value.SetName}|diff=cur}}}}");
 				}
 			}
 
