@@ -47,9 +47,12 @@
 		#endregion
 
 		#region Public Methods
-		public bool Equals(ConstructorParameter? other) => other == null
-			? false
-			: this.Label == other.Label && this.Name == other.Name && this.Type == other.Type && this.Value == other.Value;
+		public bool Equals(ConstructorParameter? other) =>
+			other != null &&
+			this.Label == other.Label &&
+			this.Name == other.Name &&
+			this.Type == other.Type &&
+			this.Value == other.Value;
 		#endregion
 
 		#region Public Override Methods

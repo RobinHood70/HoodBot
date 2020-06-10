@@ -13,14 +13,14 @@
 
 		public ISimpleTitleJsonConverter(Site site) => this.site = site;
 
-		public override ISimpleTitle ReadJson(JsonReader reader, Type objectType, ISimpleTitle existingValue, bool hasExistingValue, JsonSerializer serializer)
+		public override ISimpleTitle ReadJson(JsonReader reader, Type objectType, ISimpleTitle? existingValue, bool hasExistingValue, JsonSerializer serializer)
 		{
 			ThrowNull(reader, nameof(reader));
 			ThrowNull(reader.Value, nameof(reader), nameof(reader.Value));
 			return new FullTitle(this.site, (string)reader.Value);
 		}
 
-		public override void WriteJson(JsonWriter writer, ISimpleTitle value, JsonSerializer serializer)
+		public override void WriteJson(JsonWriter writer, ISimpleTitle? value, JsonSerializer serializer)
 		{
 			ThrowNull(writer, nameof(writer));
 			ThrowNull(value, nameof(value));

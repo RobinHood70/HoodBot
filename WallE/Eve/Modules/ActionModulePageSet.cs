@@ -175,16 +175,16 @@ namespace RobinHood70.WallE.Eve.Modules
 			this.GetPageSetNodes(result);
 		}
 
-		protected override bool HandleWarning(string? from, string? text)
+		protected override bool HandleWarning(string from, string text)
 		{
-			if (from == this.Name)
+			if (
+				from == this.Name &&
+				TooManyFinder.Match(text) is var match &&
+				match.Success &&
+				PageSetInput.AllTypes.Contains(match.Groups["parameter"].Value))
 			{
-				var match = TooManyFinder.Match(text);
-				if (match.Success && PageSetInput.AllTypes.Contains(match.Groups["parameter"].Value))
-				{
-					this.MaximumListSize = int.Parse(match.Groups["sizelimit"].Value, CultureInfo.InvariantCulture);
-					return true;
-				}
+				this.MaximumListSize = int.Parse(match.Groups["sizelimit"].Value, CultureInfo.InvariantCulture);
+				return true;
 			}
 
 			return base.HandleWarning(from, text);

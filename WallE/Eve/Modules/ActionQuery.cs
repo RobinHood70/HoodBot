@@ -180,7 +180,12 @@ namespace RobinHood70.WallE.Eve.Modules
 			CheckResult(result, this.queryModules);
 		}
 
-		protected override bool HandleWarning(string? from, string? text) => HandleWarning(from, text, this.queryModules, this.userModule) ? true : base.HandleWarning(from, text);
+		protected override bool HandleWarning(string from, string text)
+		{
+			ThrowNull(from, nameof(from));
+			ThrowNull(text, nameof(text));
+			return HandleWarning(from, text, this.queryModules, this.userModule) || base.HandleWarning(from, text);
+		}
 		#endregion
 
 		#region Private Methods

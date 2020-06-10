@@ -1,6 +1,8 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Base;
@@ -80,7 +82,7 @@
 			return titles;
 		}
 
-		protected override void Login(LoginInput input)
+		protected override void Login([NotNull, ValidatedNotNull] LoginInput input)
 		{
 			base.Login(input);
 

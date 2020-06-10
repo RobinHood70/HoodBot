@@ -53,7 +53,11 @@ namespace RobinHood70.WallE.Eve.Modules
 				waitTime: TimeSpan.FromSeconds((int?)result["wait"] ?? 0));
 		}
 
-		protected override bool HandleWarning(string? from, string? text) => text?.StartsWith("Main-account login", StringComparison.Ordinal) == true ? true : base.HandleWarning(from, text);
+		protected override bool HandleWarning(string from, string text)
+		{
+			ThrowNull(text, nameof(text));
+			return text.StartsWith("Main-account login", StringComparison.Ordinal) || base.HandleWarning(from, text);
+		}
 		#endregion
 	}
 }

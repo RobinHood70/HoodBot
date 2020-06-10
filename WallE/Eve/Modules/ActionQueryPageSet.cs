@@ -199,7 +199,12 @@ namespace RobinHood70.WallE.Eve.Modules
 			return page;
 		}
 
-		protected override bool HandleWarning(string? from, string? text) => ActionQuery.HandleWarning(from, text, this.input.QueryModules, this.userModule) || base.HandleWarning(from, text);
+		protected override bool HandleWarning(string from, string text)
+		{
+			ThrowNull(from, nameof(from));
+			ThrowNull(text, nameof(text));
+			return ActionQuery.HandleWarning(from, text, this.input.QueryModules, this.userModule) || base.HandleWarning(from, text);
+		}
 		#endregion
 
 		#region Private Methods

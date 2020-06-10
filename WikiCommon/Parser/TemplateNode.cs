@@ -140,7 +140,7 @@
 		/// <param name="parameters">The parameter collection, with equals signs (if appropriate), but without pipes.</param>
 		/// <returns>A new TemplateNode.</returns>
 		/// <remarks>Parameters added through this method will not be evaluated for equals signs in the value.</remarks>
-		public static TemplateNode FromParts(string title, IEnumerable<(string? Name, string Value)> parameters) => FromParts(title, false, parameters as IEnumerable<(string?, string)>);
+		public static TemplateNode FromParts(string title, IEnumerable<(string? Name, string Value)> parameters) => FromParts(title, false, parameters);
 
 		/// <summary>Creates a new TemplateNode from its parts.</summary>
 		/// <param name="title">The link destination.</param>

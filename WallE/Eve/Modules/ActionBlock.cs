@@ -2,7 +2,6 @@
 namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
-	using System.Diagnostics.CodeAnalysis;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
@@ -72,7 +71,6 @@ namespace RobinHood70.WallE.Eve.Modules
 				watchUser: result["watchuser"].GetBCBool());
 		}
 
-		[DoesNotReturn]
 		protected override BlockResult DeserializeCustom(string? result)
 		{
 			// Throw a custom error, since MW 1.25 and under handle this incorrectly.

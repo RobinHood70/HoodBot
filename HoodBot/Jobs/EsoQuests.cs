@@ -118,9 +118,6 @@
 		protected override void BeforeLogging()
 		{
 			this.StatusWriteLine("Getting wiki data");
-			// var allTitles = new TitleCollection(this.Site);
-			// allTitles.GetNamespace(UespNamespaces.Online, Filter.Any);
-
 			var wikiQuests = new TitleCollection(this.Site);
 			wikiQuests.GetCategoryMembers("Online-Quests");
 
@@ -170,6 +167,14 @@
 		#endregion
 
 		#region Private Static Methods
+		private static IEnumerable<QuestData> GetDBQuests()
+		{
+			foreach (var row in EsoGeneral.RunQuery(QuestQuery))
+			{
+				yield return new QuestData(row);
+			}
+		}
+
 		private static List<string> QuestObjectives(string objectiveType, List<Condition> conditions)
 		{
 			var retval = new List<string>();
@@ -191,17 +196,9 @@
 		#endregion
 
 		#region Private Methods
-		private IEnumerable<QuestData> GetDBQuests()
-		{
-			foreach (var row in EsoGeneral.RunQuery(QuestQuery))
-			{
-				yield return new QuestData(row);
-			}
-		}
-
 		private IEnumerable<QuestData> GetFilteredQuests(TitleCollection wikiQuests)
 		{
-			foreach (var quest in this.GetDBQuests())
+			foreach (var quest in GetDBQuests())
 			{
 				var title = new Title(this.Site, quest.FullPageName);
 				var titleDisambig = new Title(title);
@@ -479,9 +476,11 @@
 
 			public string Text { get; }
 
-			public bool Equals(Condition? other) => other == null
-				? false
-				: this.IsComplete == other.IsComplete && this.IsFail == other.IsFail && this.Text == other.Text;
+			public bool Equals(Condition? other) =>
+				other != null &&
+				this.IsComplete == other.IsComplete &&
+				this.IsFail == other.IsFail &&
+				this.Text == other.Text;
 			#endregion
 
 			#region Public Override Methods

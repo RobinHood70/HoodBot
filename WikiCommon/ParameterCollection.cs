@@ -697,7 +697,7 @@
 		public bool RenameParameter(string from, string to)
 		{
 			var fromParam = this[from];
-			return fromParam == null ? false : this.RenameParameter(fromParam, to);
+			return fromParam != null && this.RenameParameter(fromParam, to);
 		}
 
 		/// <summary>Renames the specified parameter.</summary>
@@ -707,9 +707,10 @@
 		/// <exception cref="InvalidOperationException">The <paramref name="to" /> name already exists in the collection (except if it matches the <paramref name="from" /> name, which will be ignored).</exception>
 		/// <remarks>To bypass the parameter name checks, use <see cref="Parameter.Rename(string)"/> instead.</remarks>
 		public bool RenameParameter(Parameter from, string to) =>
-			(from == null || from.Name == to) ? false :
-			this.Contains(to) ? throw new InvalidOperationException(CurrentCulture(Resources.ParameterExists, to)) :
-			from.Rename(to);
+			from != null &&
+			from.Name != to &&
+			(this.Contains(to) ? throw new InvalidOperationException(CurrentCulture(Resources.ParameterExists, to)) :
+			from.Rename(to));
 
 		/// <summary>Sorts parameters in the order specified.</summary>
 		/// <param name="sortOrder">A list of parameter names in the order to sort them.</param>
@@ -723,7 +724,7 @@
 		public void Sort(IEnumerable<string> sortOrder)
 		{
 			ThrowNull(sortOrder, nameof(sortOrder));
-			var order = new ComparableCollection<string>(sortOrder, this.Comparer as IEqualityComparer<string>);
+			var order = new ComparableCollection<string>(sortOrder, this.Comparer);
 
 			/* Ensures that any parameters not specified in the order will retain their original sorting. */
 			foreach (var name in this.PositionalNames)

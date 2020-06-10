@@ -26,10 +26,9 @@
 		/// <returns><see langword="true"/> if the token provided is <c>true</c> or an empty string; <see langword="false"/> if the token is <c>false</c> or null.</returns>
 		/// <exception cref="WikiException">The node data was not convertible to a boolean value.</exception>
 		public static bool GetBCBool(this JToken? token) =>
-					token == null ? false :
-					token.Type == JTokenType.Boolean ? (bool)token :
+					token != null && (token.Type == JTokenType.Boolean ? (bool)token :
 					token.Type == JTokenType.String ? true :
-					throw MalformedException((token as JProperty)?.Name ?? FallbackText.Unknown, token);
+					throw MalformedException((token as JProperty)?.Name ?? FallbackText.Unknown, token));
 
 		/// <summary>Gets a dictionary of string keys and values from the current token, regardless of format version.</summary>
 		/// <param name="token">The token to examine.</param>

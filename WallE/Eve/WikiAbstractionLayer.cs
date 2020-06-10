@@ -1500,7 +1500,7 @@
 		private class BacklinksOutputComparer : EqualityComparer<BacklinksItem>
 		{
 			#region Public Override Methods
-			public override bool Equals(BacklinksItem x, BacklinksItem y) => x?.PageId == y?.PageId;
+			public override bool Equals(BacklinksItem? x, BacklinksItem? y) => x?.PageId == y?.PageId;
 
 			public override int GetHashCode(BacklinksItem obj) => obj?.PageId.GetHashCode() ?? 0;
 			#endregion

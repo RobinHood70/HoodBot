@@ -119,31 +119,21 @@
 
 		#region Public Operators
 		public static bool operator ==(JobNode? left, JobNode? right) =>
-			ReferenceEquals(left, right) ? true :
-			left is null ? false :
-			left.Equals(right);
+			ReferenceEquals(left, right) || (!(left is null) && left.Equals(right));
 
 		public static bool operator !=(JobNode? left, JobNode? right) => !(left == right);
 
 		public static bool operator <(JobNode? left, JobNode? right) =>
-			ReferenceEquals(left, right) ? false :
-			left is null ? true :
-			left.CompareTo(right) == -1;
+			!ReferenceEquals(left, right) && (left is null || left.CompareTo(right) == -1);
 
 		public static bool operator <=(JobNode? left, JobNode? right) =>
-			ReferenceEquals(left, right) ? true :
-			left is null ? true :
-			left.CompareTo(right) != 1;
+			ReferenceEquals(left, right) || left is null || left.CompareTo(right) != 1;
 
 		public static bool operator >(JobNode? left, JobNode? right) =>
-			ReferenceEquals(left, right) ? false :
-			left is null ? false :
-			left.CompareTo(right) == 1;
+			!ReferenceEquals(left, right) && !(left is null) && left.CompareTo(right) == 1;
 
 		public static bool operator >=(JobNode? left, JobNode? right) =>
-			ReferenceEquals(left, right) ? true :
-			left is null ? false :
-			left.CompareTo(right) != -1;
+			ReferenceEquals(left, right) || (!(left is null) && left.CompareTo(right) != -1);
 		#endregion
 
 		#region Public Static Methods

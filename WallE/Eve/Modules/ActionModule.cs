@@ -3,7 +3,6 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
@@ -209,7 +208,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		protected virtual bool HandleWarning([NotNull] string? from, [NotNull] string? text)
+		protected virtual bool HandleWarning(string from, string text)
 		{
 			ThrowNull(from, nameof(from));
 			ThrowNull(text, nameof(text));

@@ -148,7 +148,7 @@
 			var delayTime =
 				this.LastWasPost == null ? TimeSpan.Zero :
 				(this.LastWasPost.Value ? this.WriteInterval : this.ReadInterval) - this.stopwatch.Elapsed;
-			return delayTime > TimeSpan.Zero ? this.RequestDelay(delayTime, DelayReason.ClientThrottled, "Throttled") : true;
+			return delayTime <= TimeSpan.Zero || this.RequestDelay(delayTime, DelayReason.ClientThrottled, "Throttled");
 		}
 		#endregion
 	}

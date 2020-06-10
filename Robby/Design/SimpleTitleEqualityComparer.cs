@@ -27,17 +27,16 @@
 		/// <param name="x">The first object of type <see cref="ISimpleTitle" /> to compare.</param>
 		/// <param name="y">The second object of type <see cref="ISimpleTitle" /> to compare.</param>
 		/// <returns><see langword="true" /> if the specified objects are equal; otherwise, <see langword="false" />.</returns>
-		public bool Equals(ISimpleTitle x, ISimpleTitle y) =>
+		public bool Equals(ISimpleTitle? x, ISimpleTitle? y) =>
 			x == null ? y == null :
-			y == null ? false :
-			x.NamespaceId == y.NamespaceId && x.Namespace.PageNameEquals(x.PageName, y.PageName);
+			y != null && x.NamespaceId == y.NamespaceId && x.Namespace.PageNameEquals(x.PageName, y.PageName);
 
 		/// <summary>Returns a hash code for this instance.</summary>
 		/// <param name="obj">The object.</param>
 		/// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
 		public int GetHashCode(ISimpleTitle? obj) => obj == null ? 0 : CompositeHashCode(obj.NamespaceId, obj.PageName);
 
-		bool IEqualityComparer.Equals(object? x, object? y) => x == y || (x is ISimpleTitle newX && y is ISimpleTitle newY ? this.Equals(newX, newY) : false);
+		bool IEqualityComparer.Equals(object? x, object? y) => x == y || (x is ISimpleTitle newX && y is ISimpleTitle newY && this.Equals(newX, newY));
 
 		int IEqualityComparer.GetHashCode(object obj) => this.GetHashCode(obj as ISimpleTitle);
 		#endregion

@@ -167,7 +167,7 @@
 		/// <summary>Indicates whether the current object is equal to another object of the same type.</summary>
 		/// <param name="other">An object to compare with this object.</param>
 		/// <returns><see langword="true"/> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false"/>.</returns>
-		public bool Equals(Namespace? other) => other is null ? false : this.Site == other.Site && this.Id == other.Id;
+		public bool Equals(Namespace? other) => !(other is null) && this.Site == other.Site && this.Id == other.Id;
 
 		/// <summary>Checks if two page names are the same, based on the case-sensitivity for the namespace.</summary>
 		/// <param name="pageName1">The page name to check.</param>

@@ -57,21 +57,21 @@ namespace RobinHood70.WallE.Eve.Modules
 				return this;
 			}
 
-			this.BatchComplete = this.supportsBatch ? parent["batchcomplete"].GetBCBool() : true;
+			this.BatchComplete = !this.supportsBatch || parent["batchcomplete"].GetBCBool();
 			if (parent[Name] is JToken result && result.Type != JTokenType.Null)
 			{
 				this.Continues = true;
 				this.ContinueEntries.Clear();
 				foreach (var node in result.Children<JProperty>())
 				{
-					this.ContinueEntries.Add(node.Name, (string?)node.Value ?? throw ParsingExtensions.MalformedTypeException(nameof(System.String), node));
+					this.ContinueEntries.Add(node.Name, (string?)node.Value ?? throw MalformedTypeException(nameof(System.String), node));
 				}
 
 				// Figure out whether or not the batch is complete manually. We don't need to worry about the case of no continue entries here, since we should never be executing this code in that event.
 				if (!this.supportsBatch)
 				{
 					// For pre-MW 1.26, figure out whether or not the batch is complete manually. We don't need to worry about the case of no continue entries here, since we should never be executing this code in that event.
-					this.BatchComplete = this.ContinueEntries.Count <= 2 && (this.GeneratorContinue == null ? true : this.ContinueEntries.ContainsKey(this.GeneratorContinue));
+					this.BatchComplete = this.ContinueEntries.Count <= 2 && (this.GeneratorContinue == null || this.ContinueEntries.ContainsKey(this.GeneratorContinue));
 				}
 			}
 

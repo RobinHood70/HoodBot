@@ -81,7 +81,7 @@
 		/// <summary>Gets the current revision.</summary>
 		/// <value>The current revision.</value>
 		/// <remarks>If revisions are loaded which do not include the current revision, this will be null.</remarks>
-		public Revision? CurrentRevision => this.currentRevision ?? (this.currentRevision = (this.Revisions as List<Revision>)!.Find(item => item.Id == this.CurrentRevisionId));
+		public Revision? CurrentRevision => this.currentRevision ??= (this.Revisions as List<Revision>)!.Find(item => item.Id == this.CurrentRevisionId);
 
 		/// <summary>Gets the ID of the current revision.</summary>
 		/// <value>The ID of the current revision.</value>

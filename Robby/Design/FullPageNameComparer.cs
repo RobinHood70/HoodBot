@@ -13,7 +13,7 @@
 		/// <param name="x">The first object to compare.</param>
 		/// <param name="y">The second object to compare.</param>
 		/// <returns>A signed integer that indicates the relative values of <paramref name="x" /> and <paramref name="y" />.</returns>
-		public int Compare(ISimpleTitle x, ISimpleTitle y) =>
+		public int Compare(ISimpleTitle? x, ISimpleTitle? y) =>
 			x == null
 			? y == null ? 0 : -1
 			: y == null ? 1 : string.Compare(x.FullPageName, y.FullPageName, StringComparison.Ordinal);

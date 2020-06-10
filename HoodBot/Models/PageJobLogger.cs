@@ -59,26 +59,6 @@
 		#endregion
 
 		#region Private Methods
-		private void AddTemplateToPage(LinkedListNode<IWikiNode> node)
-		{
-			var parms = new List<(string?, string)>
-				{
-					(null, this.logInfo.Title)
-				};
-
-			if (!string.IsNullOrEmpty(this.logInfo.Details))
-			{
-				parms.Add(("info", this.logInfo.Details));
-			}
-
-			AddDateTime(parms, this.start);
-			AddDateTime(parms, this.end);
-
-			var list = node.List!;
-			list.AddBefore(node, TemplateNode.FromParts("/Entry", false, parms));
-			list.AddBefore(node, new TextNode("\n"));
-		}
-
 		private bool UpdateCurrentStatus(NodeCollection nodes)
 		{
 			ThrowNull(this.status, nameof(PageJobLogger), nameof(this.status));
@@ -100,33 +80,50 @@
 			Debug.Assert(this.logInfo != null, "LogInfo is null.");
 			var parsedText = WikiTextParser.Parse(sender.Text);
 			var result = this.UpdateCurrentStatus(parsedText);
-			var entryNode = parsedText.FindFirstLinked<TemplateNode>(template => template.GetTitleValue() == "/Entry");
-			if (entryNode == null || !(entryNode.Value is TemplateNode entry))
+			if (
+				parsedText.FindFirstLinked<TemplateNode>(template => template.GetTitleValue() == "/Entry") is LinkedListNode<IWikiNode> entryNode &&
+				entryNode.Value is TemplateNode entry)
+			{
+				// If the last job was the same as this job and has no end time, then it's either the current job or a resumed one.
+				if (string.IsNullOrEmpty(entry.ValueOf(3)) &&
+					entry.ValueOf(1)?.Trim() == this.logInfo.Title &&
+					(entry.ValueOf("info") ?? string.Empty) == (this.logInfo.Details ?? string.Empty))
+				{
+					// If the end date is not null, then we're at the end of the job, so update the end time.
+					if (this.end != null)
+					{
+						var start = entry.FindNumberedParameterIndex(2);
+						Debug.Assert(start != -1, "Start parameter not found.");
+						var end = ParameterNode.FromParts(FormatDateTime(DateTime.UtcNow));
+						entry.Parameters.Insert(start, end);
+						sender.Text = WikiTextVisitor.Raw(parsedText);
+					}
+
+					return;
+				}
+
+				var parms = new List<(string?, string)> { (null, this.logInfo.Title) };
+				if (!string.IsNullOrEmpty(this.logInfo.Details))
+				{
+					parms.Add(("info", this.logInfo.Details));
+				}
+
+				AddDateTime(parms, this.start);
+				AddDateTime(parms, this.end);
+
+				if (entryNode.List is LinkedList<IWikiNode> list)
+				{
+					list.AddBefore(entryNode, TemplateNode.FromParts("/Entry", false, parms));
+					list.AddBefore(entryNode, new TextNode("\n"));
+				}
+
+				sender.Text = WikiTextVisitor.Raw(parsedText);
+			}
+			else
 			{
 				// CONSIDER: This used to insert a /Entry into an empty table, but given that we're not currently parsing tables, that would've required far too much code for a one-off situation, so it's been left out. Could theoretically be reintroduced once table parsing is in place.
 				throw BadLogPage;
 			}
-
-			// If the last job was the same as this job and has no end time, then it's either the current job or a resumed one.
-			if (string.IsNullOrEmpty(entry.ValueOf(3)) &&
-				entry.ValueOf(1)?.Trim() == this.logInfo.Title &&
-				(entry.ValueOf("info") ?? string.Empty) == (this.logInfo.Details ?? string.Empty))
-			{
-				// If the end date is not null, then we're at the end of the job, so update the end time.
-				if (this.end != null)
-				{
-					var start = entry.FindNumberedParameterIndex(2);
-					Debug.Assert(start != -1, "Start parameter not found.");
-					var end = ParameterNode.FromParts(FormatDateTime(DateTime.UtcNow));
-					entry.Parameters.Insert(start, end);
-					sender.Text = WikiTextVisitor.Raw(parsedText);
-				}
-
-				return;
-			}
-
-			this.AddTemplateToPage(entryNode);
-			sender.Text = WikiTextVisitor.Raw(parsedText);
 		}
 
 		private void UpdateLogPage(string editSummary, string status)

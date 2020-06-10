@@ -27,7 +27,7 @@
 
 		#region Public Methods
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "0#", Justification = "Renamed to indicate that parameter is ignored.")]
-		public bool CanExecute(object ignored) => this.canExecute == null ? true : this.canExecute();
+		public bool CanExecute(object ignored) => this.canExecute == null || this.canExecute();
 
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1725:ParameterNamesShouldMatchBaseDeclaration", MessageId = "0#", Justification = "Renamed to indicate that parameter is ignored.")]
 		public void Execute(object ignored) => this.action();

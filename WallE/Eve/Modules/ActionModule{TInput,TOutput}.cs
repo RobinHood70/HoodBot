@@ -2,7 +2,6 @@
 namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
-	using System.Diagnostics.CodeAnalysis;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Design;
@@ -43,7 +42,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Virtual Methods
-		[DoesNotReturn]
 		protected virtual TOutput DeserializeCustom(string? result)
 		{
 			// Note that result will not yet have been checked for null in this version of deserialization.
@@ -56,7 +54,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 
 		// This version is for responses like OpenSearch where the Json should be valid, but is an array rather than an object.
-		[DoesNotReturn]
 		protected virtual TOutput DeserializeCustom(JToken result) => throw new WikiException(CurrentCulture(EveMessages.ResultInvalid));
 		#endregion
 

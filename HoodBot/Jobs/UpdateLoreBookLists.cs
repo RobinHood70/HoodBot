@@ -121,10 +121,9 @@
 
 		#region Private Static Methods
 		private static bool ListBookValue(string value) =>
-			value == "1" ? true : // Quick check for most common value
-			int.TryParse(value, out var intVal) ? intVal != 0 :
+			value == "1" || (int.TryParse(value, out var intVal) ? intVal != 0 :
 			bool.TryParse(value, out var boolVal) ? boolVal :
-			value.ToLowerInvariant() == "no";
+			value.ToLowerInvariant() == "no");
 		#endregion
 
 		#region Private Methods

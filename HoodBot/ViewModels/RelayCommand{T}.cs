@@ -20,7 +20,7 @@
 			remove { CommandManager.RequerySuggested -= value; }
 		}
 
-		public bool CanExecute([AllowNull] T parameter) => this.canExecute == null ? true : this.canExecute(parameter!);
+		public bool CanExecute([AllowNull] T parameter) => this.canExecute == null || this.canExecute(parameter!);
 
 		public bool CanExecute(object? parameter) => this.CanExecute(parameter is null ? default : (T)parameter);
 
