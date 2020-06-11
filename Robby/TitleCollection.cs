@@ -71,14 +71,6 @@
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="TitleCollection" /> class from individual Title items.</summary>
-		/// <param name="titles">The titles to copy.</param>
-		/// <returns>A Title-only copy of the original collection. Note that this creates all new Titles based on the original objects' namespace, page name, and key.</returns>
-		public TitleCollection(params ISimpleTitle[] titles)
-			: this(titles as IEnumerable<ISimpleTitle>)
-		{
-		}
-
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection" /> class from an enumeration of any title-like objects.</summary>
 		/// <param name="titles">The enumeration to copy.</param>
 		/// <returns>A Title-only copy of the original collection. Note that this creates all new Titles based on the original objects' namespace, page name, and key.</returns>
