@@ -96,5 +96,9 @@
 			}
 		}
 		#endregion
+
+		#region Protected Abstract Overrie Methods
+		protected abstract override void BeforeLogging();
+		#endregion
 	}
 }
