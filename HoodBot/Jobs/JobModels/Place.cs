@@ -4,6 +4,7 @@
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Enumerations
@@ -95,7 +96,6 @@
 		public override int GetHashCode() => this.Key.GetHashCode(StringComparison.Ordinal);
 
 		public override string? ToString() => this.Title == null ? this.TitleName : this.Title.AsLink(true);
-
 		#endregion
 	}
 }

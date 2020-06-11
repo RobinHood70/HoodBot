@@ -174,7 +174,7 @@
 				}
 				else
 				{
-					Debug.WriteLine($"{parser.Title?.FullPageName} has no Trail template.");
+					Debug.WriteLine($"{parser.Title?.FullPageName()} has no Trail template.");
 				}
 			}
 		}
@@ -514,7 +514,7 @@
 		{
 			if (!replacement.Actions.HasFlag(ReplacementActions.Move))
 			{
-				Debug.WriteLine(page.FullPageName + " was not a move");
+				Debug.WriteLine(page.FullPageName() + " was not a move");
 				return;
 			}
 

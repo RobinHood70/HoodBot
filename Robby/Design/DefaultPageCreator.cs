@@ -12,17 +12,17 @@
 		#region Public Override Methods
 
 		/// <summary>Creates a page.</summary>
-		/// <param name="simpleTitle">The <see cref="ISimpleTitle" /> object that represents the page to create.</param>
+		/// <param name="title">The <see cref="ISimpleTitle" /> object that represents the page to create.</param>
 		/// <returns>A fully populated Page object.</returns>
-		public override Page CreatePage(ISimpleTitle simpleTitle)
+		public override Page CreatePage(ISimpleTitle title)
 		{
-			ThrowNull(simpleTitle, nameof(simpleTitle));
-			return simpleTitle.NamespaceId switch
+			ThrowNull(title, nameof(title));
+			return title.Namespace.Id switch
 			{
-				MediaWikiNamespaces.MediaWiki => new MessagePage(simpleTitle.Site, simpleTitle.PageName),
-				MediaWikiNamespaces.File => new FilePage(simpleTitle.Site, simpleTitle.PageName),
-				MediaWikiNamespaces.Category => new CategoryPage(simpleTitle.Site, simpleTitle.PageName),
-				_ => new Page(simpleTitle),
+				MediaWikiNamespaces.MediaWiki => new MessagePage(title.Namespace.Site, title.PageName),
+				MediaWikiNamespaces.File => new FilePage(title.Namespace.Site, title.PageName),
+				MediaWikiNamespaces.Category => new CategoryPage(title.Namespace.Site, title.PageName),
+				_ => new Page(title),
 			};
 		}
 

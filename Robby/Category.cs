@@ -9,11 +9,11 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="Category"/> class.</summary>
-		/// <param name="simpleTitle">The <see cref="ISimpleTitle"/> that represents the category.</param>
+		/// <param name="ISimpleTitle">The <see cref="ISimpleTitle"/> that represents the category.</param>
 		/// <param name="sortKey">The sort key.</param>
 		/// <param name="hidden">if set to <see langword="true" /> if the category is hidden.</param>
-		internal Category(ISimpleTitle simpleTitle, string? sortKey, bool hidden)
-			: base(simpleTitle)
+		internal Category(ISimpleTitle ISimpleTitle, string? sortKey, bool hidden)
+			: base(ISimpleTitle)
 		{
 			this.Hidden = hidden;
 			this.SortKey = sortKey;

@@ -43,7 +43,7 @@
 				return 1;
 			}
 
-			var nsCompare = x.NamespaceId.CompareTo(y.NamespaceId);
+			var nsCompare = x.Namespace.Id.CompareTo(y.Namespace.Id);
 			if (nsCompare != 0)
 			{
 				return nsCompare;
@@ -59,7 +59,7 @@
 				return 1;
 			}
 
-			var siteCulture = x.Site.Culture;
+			var siteCulture = x.Namespace.Site.Culture;
 			return x.Namespace.CaseSensitive
 				? string.Compare(x.PageName, y.PageName, true, siteCulture)
 				: string.Compare(x.PageName.UpperFirst(siteCulture), y.PageName.UpperFirst(siteCulture), true, siteCulture);

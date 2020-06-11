@@ -210,7 +210,7 @@
 			this.ProposedDeletions.AddRange(this.LoadProposedDeletions());
 			foreach (var template in this.Site.DeletePreventionTemplates)
 			{
-				this.doNotDelete.GetBacklinks(template.FullPageName, BacklinksTypes.EmbeddedIn, true);
+				this.doNotDelete.GetBacklinks(template.FullPageName(), BacklinksTypes.EmbeddedIn, true);
 			}
 
 			this.StatusWriteLine("Getting Replacement List");
@@ -379,7 +379,7 @@
 			for (var i = backlinkTitles.Count - 1; i >= 0; i--)
 			{
 				var title = backlinkTitles[i];
-				if (title.NamespaceId == MediaWikiNamespaces.Template && !title.PageName.EndsWith("/doc", StringComparison.OrdinalIgnoreCase))
+				if (title.Namespace == MediaWikiNamespaces.Template && !title.PageName.EndsWith("/doc", StringComparison.OrdinalIgnoreCase))
 				{
 					backlinkTitles.RemoveAt(i);
 				}
@@ -480,9 +480,9 @@
 					}
 
 					var result = fromTitle.Move(
-						replacement.To.FullPageName,
+						replacement.To.FullPageName(),
 						this.EditSummaryMove,
-						this.MoveOptions.HasFlag(MoveOptions.MoveTalkPage) && fromTitle.Namespace.TalkSpaceId != null,
+						this.MoveOptions.HasFlag(MoveOptions.MoveTalkPage) && fromTitle.Namespace.TalkSpace != null,
 						this.MoveOptions.HasFlag(MoveOptions.MoveSubPages) && fromTitle.Namespace.AllowsSubpages,
 						this.RedirectOption == RedirectOption.Suppress);
 					if (result.Value is IDictionary<string, string> values)
@@ -533,7 +533,7 @@
 				{
 					case LinkNode link:
 						// Formerly used for error reporting, but I think the page should be enough.
-						// var source = (nodes is ContextualParser parser && parser.Title != null) ? parser.Title.FullPageName : "Unknown";
+						// var source = (nodes is ContextualParser parser && parser.Title != null) ? parser.Title.FullPageName() : "Unknown";
 						this.UpdateLinkNode(page, link);
 						break;
 					case TagNode tag:
@@ -592,7 +592,7 @@
 						this.UpdateLinkText(page, link, replacement.To);
 
 						var toTitle = replacement.To;
-						if (toTitle.NamespaceId != MediaWikiNamespaces.File)
+						if (toTitle.Namespace != MediaWikiNamespaces.File)
 						{
 							this.Warn("File to non-File move skipped due to being inside a gallery.");
 						}
@@ -608,7 +608,7 @@
 					{
 						if (link.Coerced)
 						{
-							link.NamespaceId = MediaWikiNamespaces.Main;
+							link.Namespace = this.Site.Mainspace;
 						}
 
 						newLine = link.ToString();
@@ -637,7 +637,7 @@
 			if (siteLink.Link != null && (new FullTitle(this.Site, siteLink.Link) is FullTitle linkLink) && this.replacements.TryGetValue(linkLink, out var linkReplacement))
 			{
 				changed = true;
-				linkLink.NamespaceId = linkReplacement.To.NamespaceId;
+				linkLink.Namespace = linkReplacement.To.Namespace;
 				linkLink.PageName = linkReplacement.To.PageName;
 				if (linkReplacement.To is IFullTitle full)
 				{
@@ -653,7 +653,7 @@
 			{
 				changed = true;
 				this.UpdateLinkText(page, siteLink, replacement.To);
-				siteLink.NamespaceId = replacement.To.NamespaceId;
+				siteLink.Namespace = replacement.To.Namespace;
 				siteLink.PageName = replacement.To.PageName;
 				if (replacement.To is IFullTitle full)
 				{
@@ -700,7 +700,7 @@
 					var paramTitle = new FullTitle(this.Site, link.Text);
 					if (paramTitle.SimpleEquals(link))
 					{
-						link.Text = toLink.FullPageName;
+						link.Text = toLink.FullPageName();
 					}
 					else if (link.PageNameEquals(paramTitle.PageName))
 					{
@@ -708,7 +708,7 @@
 					}
 				}
 			}
-			else if (string.IsNullOrEmpty(link.Text) && (link.LeadingColon || (link.NamespaceId != MediaWikiNamespaces.File && link.NamespaceId != MediaWikiNamespaces.Category)))
+			else if (string.IsNullOrEmpty(link.Text) && (link.LeadingColon || (link.Namespace != MediaWikiNamespaces.File && link.Namespace != MediaWikiNamespaces.Category)))
 			{
 				// If no link text exists, create some from the original title.
 				link.Text = link.OriginalLink?.TrimStart(':');
@@ -727,10 +727,10 @@
 				if (this.replacements.TryGetValue(templateTitle, out var replacement))
 				{
 					var newTemplate = replacement.To;
-					templateTitle.NamespaceId = newTemplate.NamespaceId;
+					templateTitle.Namespace = newTemplate.Namespace;
 					templateTitle.PageName = newTemplate.PageName;
 					template.Title.Clear();
-					var nameText = newTemplate.NamespaceId == MediaWikiNamespaces.Template ? newTemplate.PageName : newTemplate.FullPageName;
+					var nameText = newTemplate.Namespace == MediaWikiNamespaces.Template ? newTemplate.PageName : newTemplate.FullPageName();
 					template.Title.AddText(nameText);
 				}
 				else if (this.TemplateReplacements.TryGetValue(templateTitle.PageName, out var customTemplateAction))
@@ -768,7 +768,7 @@
 			while (status != ChangeStatus.Success && status != ChangeStatus.EditingDisabled)
 			{
 				page.Text =
-					page.NamespaceId == MediaWikiNamespaces.Template ? "<noinclude>" + deletionText + "</noinclude>" :
+					page.Namespace == MediaWikiNamespaces.Template ? "<noinclude>" + deletionText + "</noinclude>" :
 					page.IsRedirect ? page.Text + '\n' + deletionText :
 					deletionText + '\n' + page.Text;
 				status = page.Save("Propose for deletion", false);
@@ -811,7 +811,7 @@
 					("bot", "1"),
 					(null, replacement.Reason ?? throw new InvalidOperationException()));
 				var text = WikiTextVisitor.Raw(deleteTemplate);
-				var noinclude = page.NamespaceId == MediaWikiNamespaces.Template;
+				var noinclude = page.Namespace == MediaWikiNamespaces.Template;
 				if (!noinclude && replacement.FromPage != null)
 				{
 					foreach (var backlink in replacement.FromPage.Backlinks)
@@ -926,7 +926,7 @@
 				return;
 			}
 
-			if (fromPage.NamespaceId == MediaWikiNamespaces.Category)
+			if (fromPage.Namespace == MediaWikiNamespaces.Category)
 			{
 				var catMembers = new TitleCollection(this.Site);
 				catMembers.GetCategoryMembers(fromPage.PageName, CategoryMemberTypes.All, false);

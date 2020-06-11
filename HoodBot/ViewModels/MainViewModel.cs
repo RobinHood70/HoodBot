@@ -16,6 +16,7 @@
 	using RobinHood70.HoodBot.Views;
 	using RobinHood70.HoodBotPlugins;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
 	using static System.Environment;
@@ -469,7 +470,7 @@
 			{
 				var token = tokens.TokenManager.SessionToken("csrf");
 				var page = eventArgs.Page;
-				var diffContent = new DiffContent(page.FullPageName, page.Text ?? string.Empty, eventArgs.EditSummary, eventArgs.Minor)
+				var diffContent = new DiffContent(page.FullPageName(), page.Text ?? string.Empty, eventArgs.EditSummary, eventArgs.Minor)
 				{
 					EditPath = page.EditPath,
 					EditToken = token,

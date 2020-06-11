@@ -192,7 +192,7 @@
 			checkNewPages.GetTitles(uncheckedSets.Keys);
 			foreach (var title in uncheckedSets)
 			{
-				if (checkNewPages[title.Key.FullPageName] is Page page && page.Exists)
+				if (checkNewPages[title.Key.FullPageName()] is Page page && page.Exists)
 				{
 					var resolved = false;
 					if (page.IsDisambiguation)
@@ -211,14 +211,14 @@
 
 					if (!resolved)
 					{
-						this.Warn($"{page.FullPageName} exists but is neither a set nor a disambiguation to one. Please check!");
+						this.Warn($"{page.FullPageName()} exists but is neither a set nor a disambiguation to one. Please check!");
 					}
 				}
 				else
 				{
 					titles.Add(title.Key);
 					this.sets.Add(title.Key.PageName, title.Value);
-					this.Warn($"{title.Key.FullPageName} does not exist and will be created.");
+					this.Warn($"{title.Key.FullPageName()} does not exist and will be created.");
 				}
 			}
 
@@ -245,7 +245,7 @@
 			var end = start >= 0 ? page.Text.IndexOf(terminator, start, StringComparison.Ordinal) : -1;
 			if (start < 0 || end < 0)
 			{
-				this.Warn($"Delimiters not found on page {page.FullPageName}");
+				this.Warn($"Delimiters not found on page {page.FullPageName()}");
 				return;
 			}
 
@@ -280,7 +280,7 @@
 			sb.Remove(sb.Length - 5, 4);
 
 			var text = sb.ToString();
-			pageData.IsNonTrivial = EsoReplacer.CompareReplacementText(this, page.Text[start..end], text, page.FullPageName);
+			pageData.IsNonTrivial = EsoReplacer.CompareReplacementText(this, page.Text[start..end], text, page.FullPageName());
 			text = EsoReplacer.FirstLinksOnly(this.Site, text);
 
 			page.Text = OnlineUpdateRegex.Replace(page.Text.Substring(0, start), this.PatchNumberReplacer) + text + page.Text.Substring(end);

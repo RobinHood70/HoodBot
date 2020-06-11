@@ -142,7 +142,7 @@
 				this.WriteLine($"== {this.TypeText} Skills With Non-Trivial Updates ==");
 				foreach (var page in this.nonTrivialChanges)
 				{
-					this.WriteLine($"* {{{{Pl|{page.FullPageName}|{page.LabelName}|diff=cur}}}}");
+					this.WriteLine($"* {{{{Pl|{page.FullPageName()}|{page.LabelName()}|diff=cur}}}}");
 				}
 
 				this.WriteLine();
@@ -212,7 +212,7 @@
 
 		private void SkillPageLoaded(object sender, Page page)
 		{
-			var nonTrivial = this.UpdatePageText(page, this.skills[page.FullPageName]);
+			var nonTrivial = this.UpdatePageText(page, this.skills[page.FullPageName()]);
 			if (sender != this && page.TextModified)
 			{
 				if (nonTrivial)

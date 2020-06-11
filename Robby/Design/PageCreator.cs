@@ -123,9 +123,9 @@
 		#region Public Abstract Methods
 
 		/// <summary>Creates a page.</summary>
-		/// <param name="simpleTitle">The <see cref="ISimpleTitle"/> object that represents the page to create.</param>
+		/// <param name="title">The <see cref="ISimpleTitle"/> object that represents the page to create.</param>
 		/// <returns>A fully populated Page object.</returns>
-		public abstract Page CreatePage(ISimpleTitle simpleTitle);
+		public abstract Page CreatePage(ISimpleTitle title);
 
 		/// <summary>Creates a page item.</summary>
 		/// <param name="ns">The namespace.</param>

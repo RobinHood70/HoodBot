@@ -108,7 +108,7 @@
 			if (catSize > 0)
 			{
 				var catMembers = new TitleCollection(this.Site);
-				catMembers.GetCategoryMembers(page.FullPageName, CategoryMemberTypes.All, false);
+				catMembers.GetCategoryMembers(page.FullPageName(), CategoryMemberTypes.All, false);
 				catMembers.Remove(page);
 				//// catMembers.Remove("Skyrim:Dragonborn");
 
@@ -165,14 +165,12 @@
 				categories.AddRange(page.Categories);
 				if (page.IsRedirect && !categories.Contains("Category:Redirects from Moves"))
 				{
-					var newTitle = new FullTitle(page)
-					{
-						NamespaceId = page.NamespaceId == UespNamespaces.Dragonborn ? UespNamespaces.Skyrim : UespNamespaces.SkyrimTalk
-					};
+					var newNs = page.Namespace == UespNamespaces.Dragonborn ? UespNamespaces.Skyrim : UespNamespaces.SkyrimTalk;
+					var newTitle = new FullTitle(page.Site, newNs, page.PageName, true);
 					var pageInfo = this.GetTextForPage(page);
 					if (pageInfo.Length > 0)
 					{
-						this.WriteLine($"* {page.PageName}: {{{{Pl|{page.FullPageName}|{page.Namespace.Name}|3=redirect=no}}}}{pageInfo} / {{{{Pl|{newTitle.FullPageName}|{newTitle.Namespace.Name}|3=redirect=no}}}}");
+						this.WriteLine($"* {page.PageName}: {{{{Pl|{page.FullPageName()}|{page.Namespace.Name}|3=redirect=no}}}}{pageInfo} / {{{{Pl|{newTitle.FullPageName()}|{newTitle.Namespace.Name}|3=redirect=no}}}}");
 					}
 				}
 			}

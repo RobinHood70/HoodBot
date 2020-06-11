@@ -62,7 +62,7 @@
 					}
 					catch (WikiException e) when (e.Code == "pagedeleted")
 					{
-						this.WriteLine($"* [[{page.FullPageName}|]] is blank, but has previously been deleted, so was not created again.");
+						this.WriteLine($"* {page.AsLink(true)} is blank, but has previously been deleted, so was not created again.");
 					}
 
 					this.Progress++;
@@ -166,7 +166,7 @@
 			foreach (var title in titlesOnly)
 			{
 				var npc = ((NpcTitle)title).Npc;
-				var page = checkPages[title.FullPageName];
+				var page = checkPages[title.FullPageName()];
 				if (page.Exists)
 				{
 					string? issue;
@@ -185,9 +185,9 @@
 							}
 						}
 					}
-					else if (checkPages.TitleMap.TryGetValue(title.FullPageName, out var redirect))
+					else if (checkPages.TitleMap.TryGetValue(title.FullPageName(), out var redirect))
 					{
-						if (allNpcs.Contains(redirect.FullPageName))
+						if (allNpcs.Contains(redirect.FullPageName()))
 						{
 							issue = null;
 							npc.PageName = redirect.PageName;
@@ -204,7 +204,7 @@
 
 					if (issue != null)
 					{
-						this.WriteLine($"* [[{page.FullPageName}|{page.LabelName}]] is {issue}. Please use the following data to create a page manually, if needed.\n*:Name: {npc.Name}\n*:Gender: {npc.Gender}\n*:Loot Type: {npc.LootType}\n*:Known Locations: {string.Join(", ", npc.Places)}\n*:Unknown Locations: {string.Join(", ", npc.UnknownLocations)}");
+						this.WriteLine($"* {page.AsLink(true)} is {issue}. Please use the following data to create a page manually, if needed.\n*:Name: {npc.Name}\n*:Gender: {npc.Gender}\n*:Loot Type: {npc.LootType}\n*:Known Locations: {string.Join(", ", npc.Places)}\n*:Unknown Locations: {string.Join(", ", npc.UnknownLocations)}");
 					}
 				}
 				else

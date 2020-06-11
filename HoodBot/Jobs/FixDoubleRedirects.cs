@@ -78,7 +78,7 @@
 					}
 					else if (fragments.Count > 1)
 					{
-						Debug.WriteLine("Fragment conflict on " + page.FullPageName);
+						Debug.WriteLine("Fragment conflict on " + page.FullPageName());
 						continue;
 					}
 
@@ -129,7 +129,7 @@
 			var retval = new TitleCollection(this.Site);
 			foreach (var title in toLoad)
 			{
-				if (this.Pages.TryGetValue(title.FullPageName, out var page))
+				if (this.Pages.TryGetValue(title.FullPageName(), out var page))
 				{
 					var nodes = WikiTextParser.Parse(page.Text);
 					if (nodes.First?.Value is TextNode textNode && this.redirectWords.Contains(textNode.Text.TrimEnd(), StringComparer.OrdinalIgnoreCase))

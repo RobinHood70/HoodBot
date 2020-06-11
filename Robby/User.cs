@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
@@ -284,8 +285,12 @@
 				},
 				() =>
 				{
-					ThrowNull(this.TalkPage, nameof(User), nameof(this.TalkPage));
-					var input = new EditInput(this.TalkPage.FullPageName, msg)
+					if (this.TalkPage == null)
+					{
+						throw PropertyNull(nameof(User), nameof(this.TalkPage));
+					}
+
+					var input = new EditInput(this.TalkPage.FullPageName(), msg)
 					{
 						Bot = true,
 						Minor = Tristate.False,

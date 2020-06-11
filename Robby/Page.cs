@@ -70,7 +70,7 @@
 		/// <value>The canonical article path.</value>
 		public Uri CanonicalPath
 		{
-			get => this.canonicalPath ?? this.Site.GetArticlePath(this.FullPageName);
+			get => this.canonicalPath ?? this.Site.GetArticlePath(this.FullPageName());
 			set => this.canonicalPath = value;
 		}
 
@@ -94,7 +94,7 @@
 		{
 			get => this.editPath ?? new UriBuilder(this.Site.ScriptPath)
 			{
-				Query = "title=" + Uri.EscapeDataString(this.FullPageName) + "&action=edit"
+				Query = "title=" + Uri.EscapeDataString(this.FullPageName()) + "&action=edit"
 			}.Uri;
 			set => this.editPath = value;
 		}
@@ -225,7 +225,7 @@
 			ThrowNull(options, nameof(options));
 			var creator = this.Site.PageCreator;
 			var propertyInputs = creator.GetPropertyInputs(options);
-			var pageSetInput = new QueryPageSetInput(new[] { this.FullPageName }) { ConvertTitles = options.ConvertTitles, Redirects = options.FollowRedirects };
+			var pageSetInput = new QueryPageSetInput(new[] { this.FullPageName() }) { ConvertTitles = options.ConvertTitles, Redirects = options.FollowRedirects };
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, propertyInputs, creator.CreatePageItem);
 			if (result.Count == 1)
 			{
@@ -267,7 +267,7 @@
 				changeArgs,
 				() => // Modification status re-checked here because a subscriber may have reverted the page.
 					!this.TextModified ? ChangeStatus.NoEffect :
-						this.Site.AbstractionLayer.Edit(new EditInput(this.FullPageName, this.Text)
+						this.Site.AbstractionLayer.Edit(new EditInput(this.FullPageName(), this.Text)
 						{
 							BaseTimestamp = this.CurrentRevision?.Timestamp,
 							StartTimestamp = this.StartTimestamp,

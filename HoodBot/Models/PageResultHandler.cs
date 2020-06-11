@@ -13,11 +13,11 @@
 		/// <summary>Initializes a new instance of the <see cref="PageResultHandler"/> class.</summary>
 		/// <param name="title">A <see cref="Robby.Title"/> that points to the results page.</param>
 		public PageResultHandler(ISimpleTitle title)
-			: base(title?.Site.Culture)
+			: base(title?.Namespace.Site.Culture)
 		{
 			ThrowNull(title, nameof(title));
 			this.Title = title;
-			this.DefaultText = this.ResourceManager.GetString("Results", title.Site.Culture);
+			this.DefaultText = this.ResourceManager.GetString("Results", title.Namespace.Site.Culture);
 		}
 		#endregion
 

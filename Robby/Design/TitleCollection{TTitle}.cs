@@ -117,19 +117,65 @@
 			this.InsertItem(this.items.Count, item);
 		}
 
+		/// <summary>Adds a new object to the collection with the specified name.</summary>
+		/// <param name="title">The title to add.</param>
+		public void Add(string title) => this.Add(this.New(title));
+
 		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
 		/// <param name="titles">The titles.</param>
 		public void Add(params string[] titles) => this.Add(titles as IEnumerable<string>);
+
+		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
+		/// <param name="titles">The titles to add.</param>
+		public void Add(IEnumerable<string> titles)
+		{
+			ThrowNull(titles, nameof(titles));
+			foreach (var title in titles)
+			{
+				this.Add(title);
+			}
+		}
+
+		/// <summary>Adds the specified titles to the collection, assuming that they are in the provided namespace if no other namespace is specified.</summary>
+		/// <param name="defaultNamespace">The namespace to coerce.</param>
+		/// <param name="titles">The titles to add, with or without the leading namespace text.</param>
+		public void Add(int defaultNamespace, IEnumerable<string> titles)
+		{
+			ThrowNull(titles, nameof(titles));
+			foreach (var title in titles)
+			{
+				this.AddNewItem(new TitleParser(this.Site, defaultNamespace, title, false));
+			}
+		}
 
 		/// <summary>Adds the specified titles to the collection, assuming that they are in the provided namespace if no other namespace is specified.</summary>
 		/// <param name="defaultNamespace">The default namespace.</param>
 		/// <param name="names">The page names, with or without the leading namespace text.</param>
 		public void Add(int defaultNamespace, params string[] names) => this.Add(defaultNamespace, names as IEnumerable<string>);
 
+		/// <summary>Adds a new item to the collection and returns that item to the caller.</summary>
+		/// <param name="title">The title to add.</param>
+		/// <returns>A new item which has already been added to the collection.</returns>
+		public TTitle AddNewItem(ISimpleTitle title)
+		{
+			var add = this.New(title);
+			this.Add(add);
+			return add;
+		}
+
 		/// <summary>Adds multiple titles to the <see cref="TitleCollection">collection</see> at once.</summary>
 		/// <param name="titles">The titles to add.</param>
 		/// <remarks>This method is for convenience only. Unlike the equivalent <see cref="List{T}" /> function, it simply calls <see cref="Add(TTitle)" /> repeatedly and provides no performance benefit.</remarks>
-		public void AddRange(IEnumerable<TTitle> titles) => CommonCode.Extensions.AddRange(this, titles);
+		public void AddRange(IEnumerable<TTitle> titles)
+		{
+			if (titles != null)
+			{
+				foreach (var title in titles)
+				{
+					this.Add(title);
+				}
+			}
+		}
 
 		/// <summary>Determines whether the <see cref="TitleCollection">collection</see> contains a specific value.</summary>
 		/// <param name="item">The object to locate in the <see cref="TitleCollection">collection</see>.</param>
@@ -162,7 +208,7 @@
 			var hash = new HashSet<int>(namespaces);
 			for (var i = this.Count - 1; i >= 0; i--)
 			{
-				if (!hash.Contains(this[i].NamespaceId))
+				if (!hash.Contains(this[i].Namespace.Id))
 				{
 					this.RemoveAt(i);
 				}
@@ -200,7 +246,7 @@
 			{
 				if (title.SimpleEquals(item)
 					|| (ignoreCase
-						&& title.NamespaceId == item.NamespaceId
+						&& title.Namespace == item.Namespace
 						&& string.Compare(title.PageName, item.PageName, StringComparison.OrdinalIgnoreCase) == 0))
 				{
 					return title;
@@ -283,7 +329,7 @@
 		public void GetCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, string? from, string? to, bool recurse)
 		{
 			var cat = new Title(this.Site, MediaWikiNamespaces.Category, category, false);
-			var input = new CategoryMembersInput(cat.FullPageName)
+			var input = new CategoryMembersInput(cat.FullPageName())
 			{
 				Properties = CategoryMembersProperties.Title,
 				Type = categoryMemberTypes,
@@ -687,7 +733,7 @@
 		public bool Remove(ISimpleTitle item)
 		{
 			ThrowNull(item, nameof(item));
-			if (this.Remove(item.FullPageName))
+			if (this.Remove(item.FullPageName()))
 			{
 				return true;
 			}
@@ -777,7 +823,7 @@
 		public bool TryGetValue(ISimpleTitle key, [MaybeNullWhen(false)] out TTitle value)
 		{
 			ThrowNull(key, nameof(key));
-			return this.dictionary.TryGetValue(key.FullPageName, out value!);
+			return this.dictionary.TryGetValue(key.FullPageName(), out value!);
 		}
 
 		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
@@ -790,7 +836,11 @@
 		/// <summary>Returns the requested value, or null if not found.</summary>
 		/// <param name="key">The key.</param>
 		/// <returns>The requested value, or null if not found.</returns>
-		public TTitle? ValueOrDefault(ISimpleTitle key) => this.ValueOrDefault((key ?? throw ArgumentNull(nameof(key))).FullPageName);
+		public TTitle? ValueOrDefault(ISimpleTitle key)
+		{
+			ThrowNull(key, nameof(key));
+			return this.ValueOrDefault(key.FullPageName());
+		}
 
 		/// <summary>Returns the requested value, or null if not found.</summary>
 		/// <param name="key">The key.</param>
@@ -803,15 +853,6 @@
 		/// <summary>Adds a copy of the specified title to the collection.</summary>
 		/// <param name="title">The title to add.</param>
 		public abstract void Add(ISimpleTitle title);
-
-		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
-		/// <param name="titles">The titles to add.</param>
-		public abstract void Add(IEnumerable<string> titles);
-
-		/// <summary>Adds the specified titles to the collection, assuming that they are in the provided namespace if no other namespace is specified.</summary>
-		/// <param name="defaultNamespace">The default namespace.</param>
-		/// <param name="titles">The titles to add, with or without the leading namespace text.</param>
-		public abstract void Add(int defaultNamespace, IEnumerable<string> titles);
 
 		/// <summary>Adds new objects to the collection based on an existing <see cref="ISimpleTitle"/> collection.</summary>
 		/// <param name="titles">The titles to be added.</param>
@@ -837,6 +878,14 @@
 		}
 		#endregion
 
+		#region Protected Methods
+
+		/// <summary>Creates a new item of the type of the collection.</summary>
+		/// <param name="title">The full name of the item to create.</param>
+		/// <returns>A new item of the same type as the collection.</returns>
+		protected TTitle New(string title) => this.New(new TitleParser(this.Site, title));
+		#endregion
+
 		#region Protected Override Methods
 
 		/// <summary>Inserts an item into the <see cref="TitleCollection">collection</see>.</summary>
@@ -847,7 +896,7 @@
 		protected virtual void InsertItem(int index, TTitle item)
 		{
 			ThrowNull(item, nameof(item));
-			if (item.Site != this.Site)
+			if (item.Namespace.Site != this.Site)
 			{
 				throw new InvalidOperationException(CurrentCulture(Resources.InvalidSite));
 			}
@@ -982,6 +1031,11 @@
 		/// <summary>Adds raw watchlist pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		protected abstract void GetWatchlistRaw(WatchlistRawInput input);
+
+		/// <summary>Creates a new item of the type of the collection.</summary>
+		/// <param name="title">The title from which to create the new item.</param>
+		/// <returns>A new item of the same type as the collection.</returns>
+		protected abstract TTitle New(ISimpleTitle title);
 		#endregion
 	}
 }

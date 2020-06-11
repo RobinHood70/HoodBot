@@ -337,7 +337,7 @@
 			cat.GetCategoryMembers(placeInfo.CategoryName);
 			foreach (var member in cat)
 			{
-				if (member.NamespaceId == UespNamespaces.Online)
+				if (member.Namespace == UespNamespaces.Online)
 				{
 					// TODO: Take another look at this later. Error catching added here that triggered on [[Online:Farm House]]. Having a bad day and not sure if this is the right thing to do.
 					try
@@ -350,7 +350,7 @@
 							}
 							else
 							{
-								Debug.WriteLine($"Multiple place types on page: {member.FullPageName}");
+								Debug.WriteLine($"Multiple place types on page: {member.FullPageName()}");
 							}
 						}
 					}
@@ -358,9 +358,9 @@
 					{
 					}
 				}
-				else if (member.NamespaceId != UespNamespaces.Category)
+				else if (member.Namespace != UespNamespaces.Category)
 				{
-					Debug.WriteLine($"Unexpected page [[{member.FullPageName}]] found in [[:Category:{placeInfo.CategoryName}]].");
+					Debug.WriteLine($"Unexpected page [[{member.FullPageName()}]] found in [[:Category:{placeInfo.CategoryName}]].");
 				}
 			}
 		}

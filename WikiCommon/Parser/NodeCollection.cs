@@ -15,7 +15,7 @@
 	/// <summary>  A delegate for the method required by the Replace method.</summary>
 	/// <param name="node">The node.</param>
 	/// <returns>A LinkedListNode&lt;IWikiNode>.</returns>
-	public delegate IWikiNode? NodeReplacer(LinkedListNode<IWikiNode> node);
+	public delegate NodeCollection? NodeReplacer(LinkedListNode<IWikiNode> node);
 
 	/// <summary>Represents a collection of <see cref="IWikiNode"/> nodes.</summary>
 	public class NodeCollection : LinkedList<IWikiNode>
@@ -671,7 +671,7 @@
 		/// <summary>Removes all nodes of the given type.</summary>
 		/// <typeparam name="T">The type of node to remove.</typeparam>
 		public void RemoveAll<T>()
-			where T : IWikiNode => this.Replace((node) => node.Value is T ? null : node.Value);
+			where T : IWikiNode => this.RemoveAll<T>(node => true);
 
 		/// <summary>Removes all nodes of the given type.</summary>
 		/// <typeparam name="T">The type of node to remove.</typeparam>
@@ -680,20 +680,29 @@
 			where T : IWikiNode
 		{
 			ThrowNull(condition, nameof(condition));
-			this.Replace((node) => node.Value is T castNode && condition(castNode) ? null : node.Value);
+			var currentNode = this.First;
+			while (currentNode != null)
+			{
+				if (currentNode.Value is T castNode && condition(castNode))
+				{
+					if (currentNode.List == null)
+					{
+						throw new InvalidOperationException();
+					}
+
+					currentNode.List.Remove(currentNode);
+				}
+
+				currentNode = currentNode.Next;
+			}
 		}
 
-		/// <summary>Replaces the specified node with a new node.</summary>
-		/// <param name="replaceMethod">A function to replace the value with a new one.</param>
-		/// <remarks>The replacement function should determine whether or not the current node is the desired one, and then return one of the following:
-		/// <list type="bullet">
-		///     <item>The current <see cref="LinkedListNode{T}.Value">Value</see> of the <see cref="LinkedListNode{T}"/> if it is not the desired node or the node has already been modified by the replacer method.</item>
-		///     <item>A single <see cref="IWikiNode"/> to replace the value of the original node with. If this is a <see cref="NodeCollection"/>, the original node will be removed, and the items of the collection inserted in its place.</item>
-		///     <item><see langword="null"/> if the node should be removed.</item>
-		/// </list>
-		/// Any new nodes that are added will not be searched by the replacer.
+		/// <summary>Replaces the specified node with zero or more new nodes.</summary>
+		/// <param name="replaceMethod">A function to replace a single node with a collection of new nodes.</param>
+		/// <param name="searchReplacements">A value indicating whether replacement nodes should be searched for new matches.</param>
+		/// <remarks>The replacement function should determine whether or not the current node will be replaced. If not, or if the function itself modified the list, it should return null; otherwise, it should return a new NodeCollection that will replace the current node.
 		/// </remarks>
-		public void Replace(NodeReplacer replaceMethod)
+		public void Replace(NodeReplacer replaceMethod, bool searchReplacements)
 		{
 			ThrowNull(replaceMethod, nameof(replaceMethod));
 			var currentNode = this.First;
@@ -701,33 +710,26 @@
 			{
 				foreach (var subnode in currentNode.Value.NodeCollections)
 				{
-					subnode.Replace(replaceMethod);
+					subnode.Replace(replaceMethod, searchReplacements);
 				}
 
-				var newNode = replaceMethod(currentNode);
-				var nextNode = currentNode.Next;
-				if (!ReferenceEquals(currentNode.Value, newNode))
+				if (replaceMethod(currentNode) is NodeCollection newNodes)
 				{
-					if (newNode == null)
+					this.Remove(currentNode);
+					foreach (var colNode in newNodes)
 					{
-						this.Remove(currentNode);
-					}
-					else if (newNode is NodeCollection newNodes)
-					{
-						foreach (var colNode in newNodes)
+						if (searchReplacements)
+						{
+							this.AddAfter(currentNode, colNode);
+						}
+						else
 						{
 							this.AddBefore(currentNode, colNode);
 						}
-
-						this.Remove(currentNode);
-					}
-					else
-					{
-						currentNode.Value = newNode;
 					}
 				}
 
-				currentNode = nextNode;
+				currentNode = currentNode.Next;
 			}
 		}
 

@@ -86,7 +86,7 @@
 		#region Public Events
 
 		/// <summary>Occurs for each page when any method in the class causes pages to be loaded.</summary>
-		/// <remarks>This event does not fire if a page is merely added to the collection, or a new blank page is created with the <see cref="AddNewPage"/> method.</remarks>
+		/// <remarks>This event does not fire if a page is merely added to the collection, or a new blank page is created with the <see cref="New"/> method.</remarks>
 		public event StrongEventHandler<PageCollection, Page>? PageLoaded;
 		#endregion
 
@@ -153,7 +153,7 @@
 		public override Page this[string key]
 		{
 			get => this.TryGetValue(key, out var retval)
-				|| (this.titleMap.TryGetValue(key, out var altKey) && this.TryGetValue(altKey.FullPageName, out retval))
+				|| (this.titleMap.TryGetValue(key, out var altKey) && this.TryGetValue(altKey, out retval))
 				? retval!
 				: throw new KeyNotFoundException();
 			set => base[key] = value;
@@ -190,17 +190,12 @@
 		/// <param name="title">The title of the page to create.</param>
 		/// <returns>The page that was created.</returns>
 		/// <remarks>If the page title specified represents a page already in the collection, that page will be overwritten.</remarks>
-		public Page AddNewPage(string title)
+		protected override Page New(ISimpleTitle title)
 		{
-			var page = this.CreatePage(title);
+			var page = this.PageCreator.CreatePage(title);
 			this[page.Key] = page;
 			return page;
 		}
-
-		/// <summary>Creates a new page using the collection's <see cref="PageCreator"/>.</summary>
-		/// <param name="title">The title of the page to create.</param>
-		/// <returns>The page that was created.</returns>
-		public Page CreatePage(string title) => this.PageCreator.CreatePage(new FullTitle(this.Site, title));
 
 		/// <summary>Loads pages into the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>
@@ -209,6 +204,10 @@
 		/// <summary>Loads pages into the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>
 		public void GetTitles(IEnumerable<string> titles) => this.GetTitles(new TitleCollection(this.Site, titles));
+
+		/// <summary>Loads pages into the collection from a series of titles.</summary>
+		/// <param name="titles">The titles.</param>
+		public void GetTitles(params ISimpleTitle[] titles) => this.GetTitles(new TitleCollection(this.Site, titles));
 
 		/// <summary>Loads pages into the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>
@@ -283,41 +282,6 @@
 			ThrowNull(title, nameof(title));
 			var page = this.PageCreator.CreatePage(title);
 			this[page.Key] = page;
-		}
-
-		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
-		/// <param name="titles">The titles to add.</param>
-		/// <remarks>Unlike <see cref="GetTitles(IEnumerable{string})"/> and related methods, which all load data from the wiki, this will simply add blank pages to the result set.</remarks>
-		public override void Add(IEnumerable<string> titles)
-		{
-			ThrowNull(titles, nameof(titles));
-			foreach (var title in titles)
-			{
-				this.AddNewPage(title);
-			}
-		}
-
-		/// <summary>Adds the specified titles to the collection, assuming that they are in the provided namespace if no other namespace is specified.</summary>
-		/// <param name="defaultNamespace">The namespace to coerce.</param>
-		/// <param name="titles">The titles to add, with or without the leading namespace text.</param>
-		public override void Add(int defaultNamespace, IEnumerable<string> titles)
-		{
-			ThrowNull(titles, nameof(titles));
-			foreach (var title in titles)
-			{
-				var titleParts = new FullTitle(this.Site, title);
-				if (titleParts.NamespaceId == MediaWikiNamespaces.Main)
-				{
-					titleParts.NamespaceId = defaultNamespace;
-				}
-				else if (titleParts.NamespaceId != defaultNamespace)
-				{
-					titleParts.NamespaceId = defaultNamespace;
-					titleParts.PageName = title;
-				}
-
-				this.Add(this.PageCreator.CreatePage(titleParts));
-			}
 		}
 
 		/// <summary>Adds new pages based on an existing <see cref="ISimpleTitle"/> collection.</summary>
@@ -405,8 +369,8 @@
 		protected bool IsTitleInLimits(ISimpleTitle page) =>
 			page != null &&
 			(this.LimitationType == LimitationType.None ||
-			(this.LimitationType == LimitationType.Remove && !this.NamespaceLimitations.Contains(page.NamespaceId)) ||
-			(this.LimitationType == LimitationType.FilterTo && this.NamespaceLimitations.Contains(page.NamespaceId)));
+			(this.LimitationType == LimitationType.Remove && !this.NamespaceLimitations.Contains(page.Namespace.Id)) ||
+			(this.LimitationType == LimitationType.FilterTo && this.NamespaceLimitations.Contains(page.Namespace.Id)));
 		#endregion
 
 		#region Protected Override Methods
@@ -418,7 +382,7 @@
 			ThrowNull(input, nameof(input));
 			ThrowNull(input.Title, nameof(input), nameof(input.Title));
 			var inputTitle = new FullTitle(this.Site, input.Title);
-			if (inputTitle.NamespaceId != MediaWikiNamespaces.File && input.LinkTypes.HasFlag(BacklinksTypes.ImageUsage))
+			if (inputTitle.Namespace != MediaWikiNamespaces.File && input.LinkTypes.HasFlag(BacklinksTypes.ImageUsage))
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
 				ThrowNull(input.Title, nameof(input), nameof(input.Title)); // Input changed, so re-check before proceeding.
@@ -600,7 +564,7 @@
 			this.PopulateMapCollections(result);
 			foreach (var item in result)
 			{
-				var page = this.CreatePage(item.Title);
+				var page = this.New(item.Title);
 				page.Populate(item, options);
 				if (pageValidator(page))
 				{
@@ -618,9 +582,9 @@
 
 		private bool RecurseCategoryHandler(Page page)
 		{
-			if (page.NamespaceId == MediaWikiNamespaces.Category)
+			if (page.Namespace == MediaWikiNamespaces.Category)
 			{
-				this.recurseCategories.Add(page.FullPageName);
+				this.recurseCategories.Add(page.FullPageName());
 			}
 
 			return this.IsTitleInLimits(page);

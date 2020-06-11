@@ -32,7 +32,7 @@
 
 			if (from == to)
 			{
-				throw new ArgumentException($"From and to pages cannot be the same: {from.FullPageName} == {to.FullPageName}");
+				throw new ArgumentException($"From and to pages cannot be the same: {from.FullPageName()} == {to.FullPageName()}");
 			}
 
 			this.From = from;
@@ -85,7 +85,7 @@
 
 		public override int GetHashCode() => this.From?.GetHashCode() ?? 0;
 
-		public override string ToString() => $"{this.Actions}: {this.From.FullPageName} → {this.To.FullPageName}";
+		public override string ToString() => $"{this.Actions}: {this.From.FullPageName()} → {this.To.FullPageName()}";
 		#endregion
 	}
 }

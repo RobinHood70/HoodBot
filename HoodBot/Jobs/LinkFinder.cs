@@ -50,7 +50,7 @@
 			}
 		}
 
-		protected override void LoadPages() => this.Pages.GetBacklinks(this.title.FullPageName, BacklinksTypes.Backlinks | BacklinksTypes.ImageUsage, false, Filter.Any);
+		protected override void LoadPages() => this.Pages.GetBacklinks(this.title.FullPageName(), BacklinksTypes.Backlinks | BacklinksTypes.ImageUsage, false, Filter.Any);
 
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{

@@ -34,7 +34,7 @@
 			{
 				foreach (var page in pagesToCheck)
 				{
-					pages.GetBacklinks(page.FullPageName, BacklinksTypes.Backlinks, true, Filter.Only);
+					pages.GetBacklinks(page.FullPageName(), BacklinksTypes.Backlinks, true, Filter.Only);
 				}
 
 				alreadyChecked.UnionWith(pagesToCheck);
@@ -47,7 +47,7 @@
 			var retval = new TitleCollection(this.Site);
 			foreach (var backlink in pages)
 			{
-				retval.GetBacklinks(backlink.FullPageName, BacklinksTypes.EmbeddedIn);
+				retval.GetBacklinks(backlink.FullPageName(), BacklinksTypes.EmbeddedIn);
 			}
 
 			return retval;

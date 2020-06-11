@@ -65,7 +65,7 @@
 			foreach (var title in titles)
 			{
 				var item = lookup[title];
-				var page = this.Pages[title.FullPageName];
+				var page = this.Pages[title.FullPageName()];
 				if (page != null && !page.IsMissing && item.DeckCode != null)
 				{
 					page.Text = this.cardSummaryFinder.Replace(page.Text, (match) => CardSummary_Replacer(match, item.DeckCode), 1);

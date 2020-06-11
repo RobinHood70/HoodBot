@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
-	using System.Text.RegularExpressions;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
@@ -31,19 +30,8 @@
 	#endregion
 
 	/// <summary>Provides a light-weight holder for titles with several information and manipulation functions.</summary>
-	public class Title : IKeyedTitle, IMessageSource
+	public class Title : SimpleTitle, IKeyedTitle, IMessageSource, ISimpleTitle
 	{
-		#region Constants
-		// The following is taken from DefaultSettings::$wgLegalTitleChars and always assumes the default setting. I believe this is emitted as part of API:Siteinfo, but I wouldn't trust any kind of automated conversion, so better to just leave it as default, which is what 99.99% of wikis will probably use.
-		private const string TitleChars = @"[ %!\""$&'()*,\-.\/0-9:;=?@A-Z\\^_`a-z~+\P{IsBasicLatin}-[()（）]]";
-		#endregion
-
-		#region Fields
-		private static readonly Regex LabelCommaRemover = new Regex(@"\ *([,，]" + TitleChars + @"*?)\Z", RegexOptions.Compiled);
-		private static readonly Regex LabelParenthesesRemover = new Regex(@"\ *(\(" + TitleChars + @"*?\)|（" + TitleChars + @"*?）)\Z", RegexOptions.Compiled);
-		private int namespaceId;
-		#endregion
-
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the site and full page name.</summary>
@@ -60,31 +48,16 @@
 		/// <param name="pageName">The page name. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
 		/// <param name="forceNamespace">If <see langword="true"/>, the namespace specified will always be used, even if the pageName begins with what looks like a namespace or interwiki prefix.</param>
 		public Title(Site site, int defaultNamespace, string pageName, bool forceNamespace)
-			: this(new TitleParser(site, defaultNamespace, pageName, forceNamespace))
-		{
-		}
+			: this(new TitleParser(site, defaultNamespace, pageName, forceNamespace)) => this.Coerced = this.Namespace.Id != defaultNamespace;
 
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class, copying the information from another <see cref="ISimpleTitle"/> object.</summary>
 		/// <param name="title">The Title object to copy from.</param>
 		/// <remarks>Note that the Key property will be set to the new full page name, regardless of the original item's key.</remarks>
 		public Title([NotNull] ISimpleTitle title)
+			: base((title ?? throw ArgumentNull(nameof(title))).Namespace, title.PageName)
 		{
-			ThrowNull(title, nameof(title));
-			this.Site = title.Site;
-			this.NamespaceId = title.NamespaceId;
-			this.PageName = title.PageName;
-			this.Key = this.FullPageName;
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="Title"/> class.</summary>
-		/// <param name="parser">The <see cref="TitleParser"/> with the desired information.</param>
-		protected Title(TitleParser parser)
-		{
-			ThrowNull(parser, nameof(parser));
-			this.Site = parser.Site;
-			this.NamespaceId = parser.NamespaceId;
-			this.PageName = parser.PageName;
-			this.Key = this.FullPageName;
+			this.Coerced = false;
+			this.Key = title is IKeyedTitle keyed ? keyed.Key : this.FullPageName();
 		}
 		#endregion
 
@@ -101,116 +74,20 @@
 
 		#region Public Properties
 
-		/// <summary>Gets the value corresponding to {{BASEPAGENAME}}.</summary>
-		/// <value>The name of the base page.</value>
-		public string BasePageName
-		{
-			get
-			{
-				if (this.Namespace.AllowsSubpages)
-				{
-					var subpageLoc = this.PageName.LastIndexOf('/');
-					if (subpageLoc >= 0)
-					{
-						return this.PageName.Substring(0, subpageLoc);
-					}
-				}
-
-				return this.PageName;
-			}
-		}
-
-		/// <summary>Gets or sets a value indicating whether the title was coerced into its namespace, or started there to being with.</summary>
+		/// <summary>Gets or sets a value indicating whether the title was coerced into its namespace, or started there to begin with.</summary>
 		/// <value><c>true</c> if coerced into the indicated namespace; otherwise, <c>false</c>.</value>
 		public bool Coerced { get; protected set; }
-
-		/// <summary>Gets the value corresponding to {{FULLPAGENAME}}.</summary>
-		/// <value>The full name of the page.</value>
-		public string FullPageName => this.Namespace.DecoratedName + this.PageName;
 
 		/// <summary>Gets or sets the key to use in dictionary lookups. This is identical to FullPageName (after any decoding and normalization), but unlike FullPagename, cannot be modified (via PageName) after being set.</summary>
 		/// <value>The key.</value>
 		public string Key { get; protected set; }
 
-		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
-		/// <value>The name of the label.</value>
-		public virtual string LabelName => PipeTrick(this.PageName);
-
 		/// <summary>Gets or sets a value indicating whether the title had a leading colon.</summary>
 		/// <value><see langword="true"/> if there was a leading colon; otherwise, <see langword="false"/>.</value>
 		public bool LeadingColon { get; set; }
-
-		/// <summary>Gets the namespace object for the title.</summary>
-		/// <value>The namespace.</value>
-		public Namespace Namespace => this.Site.Namespaces[this.namespaceId];
-
-		/// <summary>Gets or sets the namespace identifier.</summary>
-		/// <value>The namespace identifier.</value>
-		public int NamespaceId
-		{
-			get => this.namespaceId;
-			set => this.namespaceId = this.Site.Namespaces.Contains(value) ? value : throw new ArgumentOutOfRangeException(nameof(value));
-		}
-
-		/// <summary>Gets or sets the value corresponding to {{PAGENAME}}.</summary>
-		/// <value>The name of the page without the namespace.</value>
-		public string PageName { get; set; }
-
-		/// <summary>Gets the site the Title is from.</summary>
-		/// <value>The site the Title is from.</value>
-		public Site Site { get; }
-
-		/// <summary>Gets a Title object for this Title's corresponding subject page.</summary>
-		/// <value>The subject page.</value>
-		/// <remarks>If this Title is a subject page, returns itself.</remarks>
-		public ISimpleTitle SubjectPage => this.Namespace.IsSubjectSpace ? this : new Title(this.Site, this.Namespace.SubjectSpaceId, this.PageName, true);
-
-		/// <summary>Gets the value corresponding to {{SUBPAGENAME}}.</summary>
-		/// <value>The name of the subpage.</value>
-		public string SubpageName
-		{
-			get
-			{
-				if (this.Namespace.AllowsSubpages)
-				{
-					var subpageLoc = this.PageName.LastIndexOf('/') + 1;
-					if (subpageLoc > 0)
-					{
-						return this.PageName.Substring(subpageLoc);
-					}
-				}
-
-				return this.PageName;
-			}
-		}
-
-		/// <summary>Gets a Title object for this Title's corresponding subject page.</summary>
-		/// <value>The talk page.</value>
-		/// <remarks>If this Title is a talk page, the Title returned will be itself. Returns null for pages which have no associated talk page.</remarks>
-		public ISimpleTitle? TalkPage =>
-			this.Namespace.TalkSpaceId == null ? null
-			: this.Namespace.IsTalkSpace ? this
-			: new Title(this.Site, this.Namespace.TalkSpaceId.Value, this.PageName, true);
-		#endregion
-
-		#region Public Static Methods
-
-		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
-		/// <param name="pageName">The name of the page, without namespace or fragment text.</param>
-		/// <remarks>This doesn't precisely match the pipe trick logic - they differ in their handling of some abnormal page names. For example, with page names of "User:(Test)", ":(Test)", and "(Test)", the pipe trick gives "User:", ":", and "(Test)", respectively. Since this routine ignores the namespace completely and checks for empty return values, it returns "(Test)" consistently in all three cases.</remarks>
-		/// <returns>The text with the final paranthetical and/or comma-delimited text removed. Note: like the MediaWiki equivalent, when both are present, this will remove text of the form "(text), text", but text of the form ", text (text)" will become ", text". The text should already have been cleaned using Fixup().</returns>
-		public static string PipeTrick(string pageName)
-		{
-			pageName = LabelCommaRemover.Replace(pageName, string.Empty, 1, 1);
-			pageName = LabelParenthesesRemover.Replace(pageName, string.Empty, 1, 1);
-			return pageName;
-		}
 		#endregion
 
 		#region Public Methods
-
-		/// <inheritdoc/>
-		public string AsLink(bool friendly) => "[[" + this.ToString(true) + (friendly ? "|" + this.LabelName : string.Empty) + "]]";
 
 		/// <summary>Protects a non-existent page from being created.</summary>
 		/// <param name="reason">The reason for the create-protection.</param>
@@ -265,17 +142,6 @@
 			return this.Protect(reason, new[] { protection });
 		}
 
-		/// <summary>Deconstructs this instance into its constituent parts.</summary>
-		/// <param name="site">The site this title is from.</param>
-		/// <param name="ns">The value returned by <see cref="Namespace"/>.</param>
-		/// <param name="pageName">The value returned by <see cref="PageName"/>.</param>
-		public void Deconstruct(out Site site, out int ns, out string pageName)
-		{
-			site = this.Site;
-			ns = this.NamespaceId;
-			pageName = this.PageName;
-		}
-
 		/// <summary>Deletes the title for the specified reason.</summary>
 		/// <param name="reason">The reason for the deletion.</param>
 		/// <returns>A value indicating the change status of the block.</returns>
@@ -290,14 +156,14 @@
 				},
 				() =>
 				{
-					var input = new DeleteInput(this.FullPageName) { Reason = reason };
+					var input = new DeleteInput(this.FullPageName()) { Reason = reason };
 					return this.Site.AbstractionLayer.Delete(input).LogId == 0 ? ChangeStatus.Failure : ChangeStatus.Success;
 				});
 		}
 
 		/// <summary>Gets the article path for the current page.</summary>
 		/// <returns>A Uri to the index.php page.</returns>
-		public Uri GetArticlePath() => this.Site.GetArticlePath(this.FullPageName);
+		public Uri GetArticlePath() => this.Site.GetArticlePath(this.FullPageName());
 
 		/// <summary>Indicates whether the current title is equal to another title based on Namespace, PageName, and Key.</summary>
 		/// <param name="other">A title to compare with this one.</param>
@@ -323,7 +189,7 @@
 		public ChangeValue<IDictionary<string, string>> Move(Title to, string reason, bool suppressRedirect)
 		{
 			ThrowNull(to, nameof(to));
-			return this.Move(to.FullPageName, reason, false, false, suppressRedirect);
+			return this.Move(to.FullPageName(), reason, false, false, suppressRedirect);
 		}
 
 		/// <summary>Moves the title to the name specified.</summary>
@@ -343,20 +209,20 @@
 			var fakeResult = new Dictionary<string, string>();
 			if (!this.Site.EditingEnabled)
 			{
-				fakeResult.Add(this.FullPageName, to);
+				fakeResult.Add(this.FullPageName(), to);
 				if (moveTalk && this.TalkPage != null)
 				{
 					var toPage = new Title(this.Site, to);
 					if (toPage.TalkPage is Title toTalk)
 					{
-						fakeResult.Add(this.TalkPage.FullPageName, toTalk.FullPageName);
+						fakeResult.Add(this.TalkPage.FullPageName(), toTalk.FullPageName());
 					}
 				}
 
 				if (moveSubpages && this.Namespace.AllowsSubpages)
 				{
 					var toSubPage = new Title(this.Site, to + subPageName);
-					fakeResult.Add(this.FullPageName + subPageName, toSubPage.FullPageName);
+					fakeResult.Add(this.FullPageName() + subPageName, toSubPage.FullPageName());
 				}
 			}
 
@@ -373,7 +239,7 @@
 				},
 				() =>
 				{
-					var input = new MoveInput(this.FullPageName, to)
+					var input = new MoveInput(this.FullPageName(), to)
 					{
 						IgnoreWarnings = true,
 						MoveSubpages = moveSubpages,
@@ -391,7 +257,7 @@
 						{
 							if (item.Error != null)
 							{
-								this.Site.PublishWarning(this, CurrentCulture(Resources.MovePageWarning, this.FullPageName, to, item.Error.Info));
+								this.Site.PublishWarning(this, CurrentCulture(Resources.MovePageWarning, this.FullPageName(), to, item.Error.Info));
 							}
 							else if (item.From != null && item.To != null)
 							{
@@ -424,11 +290,8 @@
 		public ChangeValue<IDictionary<string, string>> Move(Title to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
 		{
 			ThrowNull(to, nameof(to));
-			return this.Move(to.FullPageName, reason, moveTalk, moveSubpages, suppressRedirect);
+			return this.Move(to.FullPageName(), reason, moveTalk, moveSubpages, suppressRedirect);
 		}
-
-		/// <inheritdoc/>
-		public bool PageNameEquals(string pageName) => this.Namespace.PageNameEquals(this.PageName, pageName);
 
 		/// <summary>Protects the title.</summary>
 		/// <param name="reason">The reason for the protection.</param>
@@ -497,22 +360,13 @@
 			return this.Protect(reason, protections);
 		}
 
-		/// <summary>Indicates whether the current title is equal to another title based on Namespace and PageName only.</summary>
-		/// <param name="other">A title to compare with this one.</param>
-		/// <returns><see langword="true"/> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false"/>.</returns>
-		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
-		public bool SimpleEquals(ISimpleTitle other) =>
-			other != null &&
-			this.Namespace == other.Namespace &&
-			this.Namespace.PageNameEquals(this.PageName, other.PageName);
-
 		/// <summary>Returns a <see cref="string" /> that represents this title.</summary>
 		/// <param name="forceLink">if set to <c>true</c>, forces link formatting in namespaces that require it (e.g., Category and File), regardless of the value of LeadingColon.</param>
 		/// <returns>A <see cref="string" /> that represents this title.</returns>
 		public virtual string ToString(bool forceLink)
 		{
 			var colon = this.LeadingColon || (forceLink && this.Namespace.IsForcedLinkSpace) ? ":" : string.Empty;
-			return colon + this.Namespace.DecoratedName + this.PageName;
+			return colon + this.FullPageName();
 		}
 
 		/// <summary>Unprotects the title for the specified reason.</summary>
@@ -575,7 +429,7 @@
 					},
 					() =>
 					{
-						var input = new ProtectInput(this.FullPageName)
+						var input = new ProtectInput(this.FullPageName())
 						{
 							Protections = protections,
 							Reason = reason

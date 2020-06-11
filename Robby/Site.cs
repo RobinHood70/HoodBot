@@ -194,6 +194,10 @@
 		/// <value>The magic words.</value>
 		public IReadOnlyDictionary<string, MagicWord> MagicWords => this.magicWords;
 
+		/// <summary>Gets the Main namespace.</summary>
+		/// <remarks>This is a simple shortcut for Main space, identical to this.Namespaces[MediaWikiNamespaces.Main].</remarks>
+		public Namespace Mainspace => this.Namespaces[MediaWikiNamespaces.Main];
+
 		/// <summary>Gets the <see cref="Title"/> for the main page of the site.</summary>
 		/// <value>The main page.</value>
 		public Title MainPage => this.mainPage ?? throw NoSite();
@@ -409,6 +413,42 @@
 			return pages.Count == 1 ? pages[0].Text : null;
 		}
 
+		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
+		/// <param name="title">Name of the page.</param>
+		/// <returns>The text of the page.</returns>
+		public string? LoadPageText(Title title)
+		{
+			var pages = PageCollection.Unlimited(this);
+			pages.GetTitles(title);
+			return pages.Count == 1 ? pages[0].Text : null;
+		}
+
+		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
+		/// <param name="pageName">Name of the page.</param>
+		/// <param name="subPageName">The subpage to get.</param>
+		/// <returns>The text of the page.</returns>
+		public string? LoadPageText(string pageName, string subPageName)
+		{
+			var pages = PageCollection.Unlimited(this);
+			pages.GetTitles(pageName + '/' + subPageName);
+			return pages.Count == 1 ? pages[0].Text : null;
+		}
+
+		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
+		/// <param name="title">Name of the page.</param>
+		/// <param name="subPageName">The subpage to get.</param>
+		/// <returns>The text of the page.</returns>
+		public string? LoadPageText(Title title, string subPageName)
+		{
+			var newTitle = new Title(title)
+			{
+				PageName = title.PageName + "/" + subPageName
+			};
+			var pages = PageCollection.Unlimited(this);
+			pages.GetTitles(newTitle);
+			return pages.Count == 1 ? pages[0].Text : null;
+		}
+
 		/// <summary>Gets a message from MediaWiki space with any magic words and the like parsed into text.</summary>
 		/// <param name="msg">The message.</param>
 		/// <param name="arguments">Optional arguments to substitute into the message.</param>
@@ -448,7 +488,7 @@
 			Messages = messages,
 			Arguments = arguments,
 			EnableParser = true,
-			EnableParserTitle = title?.FullPageName,
+			EnableParserTitle = title?.FullPageName(),
 		});
 
 		/// <summary>Gets all recent changes.</summary>

@@ -39,7 +39,7 @@
 			this.deleteTitles.Clear();
 			foreach (var title in unused)
 			{
-				if (title.NamespaceId == MediaWikiNamespaces.File && title.PageName.StartsWith("LG-audio-", StringComparison.Ordinal))
+				if (title.Namespace == MediaWikiNamespaces.File && title.PageName.StartsWith("LG-audio-", StringComparison.Ordinal))
 				{
 					this.deleteTitles.Add(title);
 				}

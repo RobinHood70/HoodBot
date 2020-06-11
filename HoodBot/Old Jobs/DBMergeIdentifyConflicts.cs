@@ -49,16 +49,16 @@
 				else if (srPages.TryGetValue("Skyrim:" + dbPage.PageName, out var srPage))
 				{
 					action =
-						deleted.Contains(srPage) ? $"Skip: [[{srPage.FullPageName}]] is proposed for deletion. Admin may want to delete before bot run." :
+						deleted.Contains(srPage) ? $"Skip: [[{srPage.FullPageName()}]] is proposed for deletion. Admin may want to delete before bot run." :
 						dbPage.IsRedirect || dbPage.IsDisambiguation ? $"Skip: redirect or disambiguation." :
-						srPage.IsRedirect || srPage.IsDisambiguation ? $"Skip: [[{srPage.FullPageName}]] is a redirect or disambiguation." :
-						$"Merge into [[{srPage.FullPageName}]]";
+						srPage.IsRedirect || srPage.IsDisambiguation ? $"Skip: [[{srPage.FullPageName()}]] is a redirect or disambiguation." :
+						$"Merge into [[{srPage.FullPageName()}]]";
 				}
 
 				if (action != null)
 				{
 					this.WriteLine("|-");
-					this.WriteLine($"| [[{dbPage.FullPageName}|{dbPage.PageName}]] || {action}");
+					this.WriteLine($"| [[{dbPage.FullPageName()}|{dbPage.PageName}]] || {action}");
 				}
 			}
 
@@ -74,7 +74,7 @@
 				if (srFiles.TryGetValue("File:SR-" + baseFileName, out var srFile))
 				{
 					this.WriteLine("|-");
-					this.WriteLine($"| [[:{dbFile.FullPageName}|{dbFile.PageName}]] || Skip: [[:{srFile.FullPageName}|{srFile.PageName}]] already exists.");
+					this.WriteLine($"| [[:{dbFile.FullPageName()}|{dbFile.PageName}]] || Skip: [[:{srFile.FullPageName()}|{srFile.PageName}]] already exists.");
 				}
 			}
 

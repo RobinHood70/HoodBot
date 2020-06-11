@@ -75,7 +75,7 @@
 				{
 					if (places.ValueOrDefault(item.PageName) is Place place && place.Zone == null)
 					{
-						this.WriteLine($"* [[{page.FullPageName}|]]: no zone information. Check <code>loc</code> to see if zone for [[{item.FullPageName}|{item.LabelName}]] needs to be removed.");
+						this.WriteLine($"* [[{page.FullPageName()}|]]: no zone information. Check <code>loc</code> to see if zone for [[{item.FullPageName()}|{item.LabelName}]] needs to be removed.");
 					}
 				}
 
@@ -113,7 +113,7 @@
 					else
 					{
 						locParameter.Value = string.Join(", ", locSplit);
-						this.WriteLine($"* [[{page.FullPageName}|]] has a specific location parameter (city, settlement, etc.), but also has one or more values in the loc parameter that were not removed.");
+						this.WriteLine($"* [[{page.FullPageName()}|]] has a specific location parameter (city, settlement, etc.), but also has one or more values in the loc parameter that were not removed.");
 					}
 
 					page.Text = page.Text
@@ -160,14 +160,14 @@
 			var value = param.Value;
 			if (value.Contains(",") || value.Contains("<br") || value.Contains("{{") || value.IndexOf("[[", 2, StringComparison.Ordinal) != -1)
 			{
-				this.WriteLine($"* [[{page.FullPageName}|]]: check <code>{param.Name}</code> manually.");
+				this.WriteLine($"* [[{page.FullPageName()}|]]: check <code>{param.Name}</code> manually.");
 			}
 			else
 			{
 				if (WikiLink.IsLink(value))
 				{
 					var link = new WikiLink(value);
-					matchAgainst.Add(new Title(this.Site, link.FullPageName));
+					matchAgainst.Add(new Title(this.Site, link.FullPageName()));
 				}
 				else
 				{

@@ -1,32 +1,39 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System;
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.HoodBot.Uesp;
+	using RobinHood70.HoodBot.Parser;
 	using RobinHood70.Robby;
+	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon.Parser;
+	using static RobinHood70.CommonCode.Globals;
 
-	public class OneOffJob : EditJob
+	public class OneOffJob : ParsedPageJob
 	{
 		#region Constructors
 		[JobInfo("One-Off Job")]
 		public OneOffJob([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo) => this.LogDetails = "Date retcon";
+			: base(site, asyncInfo)
+		{
+			this.EditSummary = "Remove unnecessary parameter";
+			this.LogDetails = "Update {{tl|Faction Contents}} - override now redundant";
+		}
+
+		protected override string EditSummary { get; }
 		#endregion
 
 		#region Protected Override Methods
-		protected override void BeforeLogging()
+		protected override void LoadPages() => this.Pages.GetBacklinks("Template:Faction Contents", BacklinksTypes.EmbeddedIn, true);
+
+		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
-			this.Pages.GetNamespace(UespNamespaces.Lore, Filter.Exclude);
-			this.Pages.Remove("Lore:Birds of Wrothgar (old)");
-			foreach (var page in this.Pages)
+			ThrowNull(parsedPage, nameof(parsedPage));
+			foreach (var template in parsedPage.FindAll<TemplateNode>(node => node.GetTitleValue() == "Faction Contents"))
 			{
-				page.Text = page.Text.Replace("2E 583", "2E 582", StringComparison.OrdinalIgnoreCase);
+				template.RemoveParameter("override");
 			}
 		}
-
-		protected override void Main() => this.SavePages("Date retcon");
 		#endregion
 	}
 }

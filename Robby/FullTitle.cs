@@ -5,8 +5,10 @@
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.CommonCode.Globals;
 
+	// TODO: Review constructors for various title objects.
+
 	/// <summary>Splits a page name into its constituent parts.</summary>
-	public class FullTitle : Title, IFullTitle, ISimpleTitle
+	public class FullTitle : Title, IFullTitle
 	{
 		#region Constructors
 
@@ -61,12 +63,12 @@
 			var split = fullPageName.Split(TextArrays.Colon, 2);
 			if ((this.Interwiki == null || this.Interwiki.LocalWiki) && site.Namespaces.ValueOrDefault(split[0]) is Namespace ns)
 			{
-				this.NamespaceId = ns.Id;
+				this.Namespace = ns;
 				this.PageName = split[1];
 			}
 			else
 			{
-				this.NamespaceId = MediaWikiNamespaces.Main;
+				this.Namespace = site.Mainspace;
 				this.PageName = fullPageName;
 			}
 
@@ -102,29 +104,19 @@
 		public bool IsLocal => this.Interwiki == null || this.Interwiki.LocalWiki;
 		#endregion
 
-		#region Public Override Properties
-
-		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
-		/// <value>The name of the label.</value>
-		/// <remarks>Unlike the regular pipe trick, this will take a non-empty fragment name in preference to the page name.</remarks>
-		public override string LabelName => string.IsNullOrWhiteSpace(this.Fragment) ? PipeTrick(this.PageName) : this.Fragment.Trim();
-		#endregion
-
 		#region Public Methods
 
 		/// <summary>Deconstructs this instance into its constituent parts.</summary>
-		/// <param name="site">The value returned by <see cref="Site"/>.</param>
 		/// <param name="leadingColon">The value returned by <see cref="Title.LeadingColon"/>.</param>
 		/// <param name="interwiki">The value returned by <see cref="Interwiki"/>.</param>
-		/// <param name="ns">The value returned by <see cref="Title.NamespaceId"/>.</param>
-		/// <param name="pageName">The value returned by <see cref="Title.PageName"/>.</param>
+		/// <param name="ns">The value returned by <see cref="ISimpleTitle.Namespace"/>.</param>
+		/// <param name="pageName">The value returned by <see cref="ISimpleTitle.PageName"/>.</param>
 		/// <param name="fragment">The value returned by <see cref="Fragment"/>.</param>
-		public void Deconstruct(out Site site, out bool leadingColon, out InterwikiEntry? interwiki, out int ns, out string pageName, out string? fragment)
+		public void Deconstruct(out bool leadingColon, out InterwikiEntry? interwiki, out Namespace ns, out string pageName, out string? fragment)
 		{
-			site = this.Site;
 			leadingColon = this.LeadingColon;
 			interwiki = this.Interwiki;
-			ns = this.NamespaceId;
+			ns = this.Namespace;
 			pageName = this.PageName;
 			fragment = this.Fragment;
 		}

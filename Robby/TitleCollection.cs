@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
@@ -10,7 +11,7 @@
 	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>A collection of Title objects.</summary>
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling is a factor of using classes to handle complex inputs and is unavoidable.")]
+	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling is a factor of using classes to handle complex inputs and is unavoidable.")]
 	public class TitleCollection : TitleCollection<Title>, IEnumerable<Title>, IMessageSource
 	{
 		#region Fields
@@ -58,10 +59,7 @@
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(titles, nameof(titles));
-			foreach (var item in titles)
-			{
-				this.Add(new Title(site, ns, item, false));
-			}
+			this.Add(ns, titles);
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class with a specific list of titles in a given namespace.</summary>
@@ -72,45 +70,43 @@
 			: this(site, ns, titles as IEnumerable<string>)
 		{
 		}
-		#endregion
-
-		#region Public Static Methods
 
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection" /> class from individual Title items.</summary>
-		/// <param name="titles">The original Title collection.</param>
+		/// <param name="titles">The titles to copy.</param>
 		/// <returns>A Title-only copy of the original collection. Note that this creates all new Titles based on the original objects' namespace, page name, and key.</returns>
-		public static TitleCollection CopyFrom(params Title[] titles) => CopyFrom(titles as IEnumerable<Title>);
+		public TitleCollection(params ISimpleTitle[] titles)
+			: this(titles as IEnumerable<ISimpleTitle>)
+		{
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="TitleCollection" /> class from an enumeration of any title-like objects.</summary>
+		/// <param name="titles">The enumeration to copy.</param>
+		/// <returns>A Title-only copy of the original collection. Note that this creates all new Titles based on the original objects' namespace, page name, and key.</returns>
+		public TitleCollection(IEnumerable<ISimpleTitle> titles)
+			: this(titles?.First() is ISimpleTitle first ? first.Namespace.Site : throw new InvalidOperationException(Resources.SourceCollectionEmpty), titles)
+		{
+		}
 
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection" /> class from another Title collection.</summary>
 		/// <param name="titles">The original Title collection.</param>
 		/// <returns>A Title-only copy of the original collection. Note that this creates all new Titles based on the original objects' namespace, page name, and key.</returns>
-		public static TitleCollection CopyFrom(IEnumerable<Title> titles)
+		public TitleCollection(ITitleCollection<ISimpleTitle> titles)
+			: this((titles ?? throw ArgumentNull(nameof(titles))).Site, titles)
+		{
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="TitleCollection" /> class from another Title collection.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="titles">The original Title collection.</param>
+		/// <returns>A Title-only copy of the original collection. Note that this creates all new Titles based on the original objects' namespace, page name, and key.</returns>
+		public TitleCollection(Site site, IEnumerable<ISimpleTitle> titles)
+			: base(site)
 		{
 			ThrowNull(titles, nameof(titles));
-			Site site;
-			if (titles is ISiteSpecific siteTitles)
-			{
-				site = siteTitles.Site;
-			}
-			else
-			{
-				var first = titles.First();
-				if (first == null)
-				{
-					throw new InvalidOperationException(Resources.SourceCollectionEmpty);
-				}
-
-				site = first.Site;
-			}
-
-			var output = new TitleCollection(site);
 			foreach (var title in titles)
 			{
-				var newTitle = new Title(title);
-				output.Add(newTitle);
+				this.Add(new Title(title));
 			}
-
-			return output;
 		}
 		#endregion
 
@@ -241,34 +237,7 @@
 
 		/// <summary>Adds a copy of the specified title to the collection.</summary>
 		/// <param name="title">The title to add.</param>
-		public override void Add(ISimpleTitle title)
-		{
-			var realTitle = new Title(title);
-			this.Add(realTitle);
-		}
-
-		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
-		/// <param name="titles">The titles to add.</param>
-		public override void Add(IEnumerable<string> titles)
-		{
-			ThrowNull(titles, nameof(titles));
-			foreach (var title in titles)
-			{
-				this.Add(new Title(this.Site, title));
-			}
-		}
-
-		/// <summary>Adds the specified titles to the collection, assuming that they are in the provided namespace if no other namespace is specified.</summary>
-		/// <param name="defaultNamespace">The default namespace.</param>
-		/// <param name="titles">The titles to add, with or without the leading namespace text.</param>
-		public override void Add(int defaultNamespace, IEnumerable<string> titles)
-		{
-			ThrowNull(titles, nameof(titles));
-			foreach (var title in titles)
-			{
-				this.Add(new Title(this.Site, defaultNamespace, title, false));
-			}
-		}
+		public override void Add(ISimpleTitle title) => this.Add(new Title(title));
 
 		/// <summary>Adds new objects to the collection based on an existing <see cref="ISimpleTitle"/> collection.</summary>
 		/// <param name="titles">The titles to be added.</param>
@@ -301,7 +270,7 @@
 			ThrowNull(input, nameof(input));
 			ThrowNull(input.Title, nameof(input), nameof(input.Title));
 			var inputTitle = new FullTitle(this.Site, input.Title);
-			if (inputTitle.NamespaceId != MediaWikiNamespaces.File && input.LinkTypes.HasFlag(BacklinksTypes.ImageUsage))
+			if (inputTitle.Namespace != MediaWikiNamespaces.File && input.LinkTypes.HasFlag(BacklinksTypes.ImageUsage))
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
 			}
@@ -508,6 +477,9 @@
 			var result = this.Site.AbstractionLayer.WatchlistRaw(input);
 			this.FillFromTitleItems(result);
 		}
+
+		/// <inheritdoc/>
+		protected override Title New(ISimpleTitle title) => new Title(title);
 		#endregion
 
 		#region Protected Virtual Methods
@@ -552,7 +524,7 @@
 			foreach (var item in result)
 			{
 				var flags = item.Flags;
-				var page = retval.AddNewPage(item.Title);
+				var page = retval.AddNewItem(new TitleParser(this.Site, item.Title));
 				page.PopulateFlags(flags.HasFlag(PurgeFlags.Invalid), flags.HasFlag(PurgeFlags.Missing));
 			}
 
@@ -570,7 +542,7 @@
 			foreach (var item in result)
 			{
 				var flags = item.Flags;
-				var page = pages.AddNewPage(item.Title);
+				var page = pages.AddNewItem(new TitleParser(this.Site, item.Title));
 				page.PopulateFlags(false, flags.HasFlag(WatchFlags.Missing));
 			}
 

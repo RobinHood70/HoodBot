@@ -6,6 +6,7 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 
 	public class WantedInMain : WikiJob
@@ -26,10 +27,10 @@
 			var sorted = new List<string>();
 			foreach (var title in titles)
 			{
-				if (title.NamespaceId == MediaWikiNamespaces.Main)
+				if (title.Namespace == MediaWikiNamespaces.Main)
 				{
-					var uri = Uri.EscapeUriString(title.FullPageName).Replace("?", "%3F", StringComparison.Ordinal);
-					sorted.Add($"* [https://en.uesp.net/wiki/Special:WhatLinksHere/{uri} {title.FullPageName}]");
+					var uri = Uri.EscapeUriString(title.FullPageName()).Replace("?", "%3F", StringComparison.Ordinal);
+					sorted.Add($"* [https://en.uesp.net/wiki/Special:WhatLinksHere/{uri} {title.FullPageName()}]");
 				}
 			}
 

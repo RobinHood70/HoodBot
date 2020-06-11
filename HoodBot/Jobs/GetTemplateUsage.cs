@@ -51,7 +51,7 @@
 			if (this.respectRedirects)
 			{
 				this.StatusWriteLine("Loading template redirects");
-				templates = TitleCollection.CopyFrom(this.FollowRedirects(templates));
+				templates = new TitleCollection(this.FollowRedirects(templates));
 				allTemplateNames = BuildRedirectList(templates);
 				this.ProgressMaximum++;
 				this.Progress++;
@@ -74,7 +74,7 @@
 		#region Private Static Methods
 		private static TitleCollection BuildRedirectList(IEnumerable<Title> titles)
 		{
-			var retval = TitleCollection.CopyFrom(titles);
+			var retval = new TitleCollection(titles);
 
 			// Loop until nothing new is added.
 			var pagesToCheck = new HashSet<Title>(retval, Title.SimpleEqualityComparer);
@@ -83,7 +83,7 @@
 			{
 				foreach (var page in pagesToCheck)
 				{
-					retval.GetBacklinks(page.FullPageName, BacklinksTypes.Backlinks, true, Filter.Only);
+					retval.GetBacklinks(page.FullPageName(), BacklinksTypes.Backlinks, true, Filter.Only);
 				}
 
 				alreadyChecked.UnionWith(pagesToCheck);

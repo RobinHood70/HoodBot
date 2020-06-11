@@ -5,6 +5,7 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WikiCommon;
@@ -58,7 +59,7 @@
 		{
 			if (this.User != null)
 			{
-				this.FilterPages.Remove(this.User.FullPageName + "/Results");
+				this.FilterPages.Remove(this.User.FullPageName() + "/Results");
 			}
 
 			if (this.LogPage != null)
@@ -97,11 +98,11 @@
 			// Messages have to be cleared in order to get pages from the wiki properly, so force that to happen, even if editing is disabled.
 			this.ClearMessage(true);
 
-			var resultPage = new Title(this, this.User.FullPageName + "/Results");
+			var resultPage = new Title(this, this.User.FullPageName() + "/Results");
 			this.ResultPageHandler = new PageResultHandler(resultPage);
 			this.FilterPages.Add(resultPage);
 
-			this.LogPage = new Page(this, this.User.FullPageName + "/Log");
+			this.LogPage = new Page(this, this.User.FullPageName() + "/Log");
 			this.FilterPages.Add(this.LogPage);
 			this.JobLogger = new PageJobLogger(JobTypes.Write, this.LogPage);
 			//// Reinstate if pages become different: this.FilterPages.Add(this.StatusPage);

@@ -23,7 +23,7 @@
 		{
 			ThrowNull(title, nameof(title));
 			this.Title = title;
-			this.Site = title.Site;
+			this.Site = title.Namespace.Site;
 		}
 		#endregion
 
@@ -67,7 +67,7 @@
 				var linkNode = (LinkNode)link.Value;
 				var titleText = WikiTextVisitor.Value(linkNode.Title);
 				var title = new FullTitle(this.Site, titleText);
-				if (title.NamespaceId == MediaWikiNamespaces.Category)
+				if (title.Namespace == MediaWikiNamespaces.Category)
 				{
 					if (title.PageName == catTitle.PageName)
 					{

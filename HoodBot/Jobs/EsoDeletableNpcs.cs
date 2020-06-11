@@ -5,6 +5,7 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 
 	internal class EsoDeletableNpcs : WikiJob
@@ -42,10 +43,11 @@
 				var npc = allNames.BinarySearch(page.PageName);
 				if (npc < 0)
 				{
-					npc = allNames.BinarySearch(page.LabelName);
+					var labelName = page.LabelName();
+					npc = allNames.BinarySearch(labelName);
 					if (npc < 0)
 					{
-						Debug.WriteLine($"* [[{page.FullPageName}|{page.LabelName}]]");
+						Debug.WriteLine($"* [[{page.FullPageName()}|{labelName}]]");
 					}
 				}
 			}

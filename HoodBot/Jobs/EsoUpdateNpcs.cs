@@ -68,7 +68,7 @@
 				{
 					if (page.Text == null)
 					{
-						this.WriteLine($"* Page load failed for {page.FullPageName}.");
+						this.WriteLine($"* Page load failed for {page.FullPageName()}.");
 					}
 					else
 					{
@@ -76,7 +76,7 @@
 						var matches = Template.Find("Online NPC Summary").Matches(page.Text);
 						if (matches.Count != 1)
 						{
-							this.WriteLine($"* [[{page.FullPageName}|]] not updated. More than one summary was found on the page.");
+							this.WriteLine($"* [[{page.FullPageName()}|]] not updated. More than one summary was found on the page.");
 							continue;
 						}
 
@@ -88,7 +88,7 @@
 							npc.Locations.AddRange(locations.Value.Split(TextArrays.CommaSpace, StringSplitOptions.None));
 						}
 
-						this.npcEntries.Add(npc.Page.FullPageName, new NpcEntry(template, match.Index, match.Length));
+						this.npcEntries.Add(npc.Page.FullPageName(), new NpcEntry(template, match.Index, match.Length));
 					}
 				}
 			}
@@ -112,7 +112,7 @@
 			foreach (var npc in this.npcData)
 			{
 				var page = npc.Page;
-				if (page != null && this.npcEntries.TryGetValue(page.FullPageName, out var entry))
+				if (page != null && this.npcEntries.TryGetValue(page.FullPageName(), out var entry))
 				{
 					var template = entry.Template;
 					var oldText = template.ToString();

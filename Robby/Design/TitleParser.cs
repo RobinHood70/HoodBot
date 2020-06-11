@@ -5,9 +5,17 @@
 	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>This class serves as a light-weight parser to split a wiki title into its constituent parts.</summary>
-	public class TitleParser
+	public class TitleParser : ISimpleTitle
 	{
 		#region Constructors
+
+		/// <summary>Initializes a new instance of the <see cref="TitleParser"/> class.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="fullPageName">Full page name, with namespace.</param>
+		public TitleParser(Site site, string fullPageName)
+			: this(site, MediaWikiNamespaces.Main, fullPageName, false)
+		{
+		}
 
 		/// <summary>Initializes a new instance of the <see cref="TitleParser"/> class.</summary>
 		/// <param name="site">The site.</param>
@@ -19,7 +27,6 @@
 			ThrowNull(site, nameof(site));
 			ThrowNull(pageName, nameof(pageName));
 
-			this.Site = site;
 			int? nsFinal = null;
 			string? originalNs = null;
 
@@ -63,7 +70,7 @@
 							nameRemaining = split[2];
 							if (nameRemaining.Length == 0)
 							{
-								this.PageName = site.MainPageName ?? "Main Page";
+								nameRemaining = site.MainPageName ?? "Main Page";
 							}
 						}
 						else
@@ -88,13 +95,13 @@
 				}
 			}
 
-			this.NamespaceId = nsFinal.Value;
+			this.Namespace = site.Namespaces[nsFinal.Value];
 			this.OriginalNamespaceText = originalNs ?? string.Empty;
 
 			if (nameRemaining.Length == 0)
 			{
 				this.OriginalPageNameText = string.Empty;
-				this.PageName = string.Empty;
+				pageName = string.Empty;
 			}
 			else
 			{
@@ -102,24 +109,24 @@
 				if (split.Length == 2)
 				{
 					this.OriginalPageNameText = split[0];
-					this.PageName = WikiTextUtilities.DecodeAndNormalize(split[0]).Trim();
+					pageName = WikiTextUtilities.DecodeAndNormalize(split[0]).Trim();
 					this.OriginalFragmentText = split[1];
 					this.Fragment = WikiTextUtilities.DecodeAndNormalize(split[1]).TrimEnd();
 				}
 				else
 				{
 					this.OriginalPageNameText = nameRemaining;
-					this.PageName = WikiTextUtilities.DecodeAndNormalize(nameRemaining).Trim();
+					pageName = WikiTextUtilities.DecodeAndNormalize(nameRemaining).Trim();
 				}
 			}
 
-			this.PageName = site.Namespaces[this.NamespaceId].CapitalizePageName(this.PageName);
+			this.PageName = this.Namespace.CapitalizePageName(pageName);
 		}
 		#endregion
 
 		#region Public Properties
 
-		/// <summary>Gets a value indicating whether the title was coerced into its namespace, or started there to being with.</summary>
+		/// <summary>Gets a value indicating whether the title was coerced into its namespace, or started there to begin with.</summary>
 		/// <value><c>true</c> if coerced into the indicated namespace; otherwise, <c>false</c>.</value>
 		public bool Coerced { get; }
 
@@ -135,9 +142,8 @@
 		/// <value><see langword="true"/> if there was a leading colon; otherwise, <see langword="false"/>.</value>
 		public bool LeadingColon { get; }
 
-		/// <summary>Gets the namespace identifier.</summary>
-		/// <value>The namespace identifier.</value>
-		public int NamespaceId { get; }
+		/// <inheritdoc/>
+		public Namespace Namespace { get; }
 
 		/// <summary>Gets the fragment text passed to the constructor, after parsing.</summary>
 		/// <value>The fragment text.</value>
@@ -159,13 +165,8 @@
 		/// <remarks>This value can be used to bypass any text changes caused by using the PageName value, such as first-letter casing. Parsing removes hidden characters and changes unusual spaces to normal spaces.</remarks>
 		public string OriginalPageNameText { get; }
 
-		/// <summary>Gets the value corresponding to {{PAGENAME}}.</summary>
-		/// <value>The name of the page without the namespace.</value>
+		/// <inheritdoc/>
 		public string PageName { get; }
-
-		/// <summary>Gets the site the Title is from.</summary>
-		/// <value>The site the Title is from.</value>
-		public Site Site { get; }
 		#endregion
 	}
 }
