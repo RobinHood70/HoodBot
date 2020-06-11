@@ -2,6 +2,7 @@
 {
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
+	using System.Text;
 	using System.Text.RegularExpressions;
 	using static RobinHood70.CommonCode.Globals;
 
@@ -24,7 +25,22 @@
 		/// <param name="title">The title to get the link text for.</param>
 		/// <param name="friendly">Whether to format the link as friendly (<c>[[Talk:Page|Page]]</c>) or raw (<c>[[Talk:Page]]</c>).</param>
 		/// <returns>The current title, formatted as a link.</returns>
-		public static string AsLink(this ISimpleTitle title, bool friendly) => "[[" + FullPageName(title) + (friendly ? "|" + LabelName(title) : string.Empty) + "]]";
+		public static string AsLink(this ISimpleTitle title, bool friendly)
+		{
+			var fullPageName = FullPageName(title);
+			var sb = new StringBuilder(fullPageName.Length << 1);
+			sb.Append("[[");
+			sb.Append(title.Namespace.LinkName);
+			sb.Append(title.PageName);
+			if (friendly)
+			{
+				sb.Append('|');
+				sb.Append(LabelName(title));
+			}
+
+			sb.Append("]]");
+			return sb.ToString();
+		}
 
 		/// <summary>Gets the full page name of a title.</summary>
 		/// <param name="title">The titles to use.</param>
