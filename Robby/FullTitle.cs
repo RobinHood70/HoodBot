@@ -13,6 +13,25 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
+		/// <param name="site">The site the title is from.</param>
+		/// <param name="fullPageName">Full name of the page.</param>
+		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
+		public FullTitle(Site site, string fullPageName)
+			: this(new TitleParser(site, MediaWikiNamespaces.Main, fullPageName, false))
+		{
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
+		/// <param name="site">The site the title is from.</param>
+		/// <param name="defaultNamespace">The default namespace if no namespace is specified in the page name.</param>
+		/// <param name="pageName">The page name. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
+		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
+		public FullTitle(Site site, int defaultNamespace, string pageName)
+			: this(new TitleParser(site, defaultNamespace, pageName, true))
+		{
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
 		/// <param name="title">The ISimpleTitle to copy values from.</param>
 		public FullTitle(ISimpleTitle title)
 			: base(title)
@@ -27,26 +46,6 @@
 			ThrowNull(title, nameof(title));
 			this.Interwiki = title.Interwiki;
 			this.Fragment = title.Fragment;
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
-		/// <param name="site">The site the title is from.</param>
-		/// <param name="fullPageName">Full name of the page.</param>
-		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		public FullTitle(Site site, string fullPageName)
-			: this(site, MediaWikiNamespaces.Main, fullPageName, false)
-		{
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
-		/// <param name="site">The site the title is from.</param>
-		/// <param name="defaultNamespace">The default namespace if no namespace is specified in the page name.</param>
-		/// <param name="pageName">The page name. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
-		/// <param name="forceNamespace">If <see langword="true"/>, the namespace specified will always be used, even if the pageName begins with what looks like a namespace or interwiki prefix.</param>
-		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		public FullTitle(Site site, int defaultNamespace, string pageName, bool forceNamespace)
-			: this(new TitleParser(site, defaultNamespace, pageName, forceNamespace))
-		{
 		}
 
 		// Designed for data coming directly from MediaWiki. Assumes all values are appropriate and pre-trimmed - only does namespace parsing. interWiki and fragment may be null; fullPageName may not.
@@ -83,9 +82,8 @@
 		protected FullTitle(TitleParser parser)
 			: base(parser)
 		{
-			this.Interwiki = parser.Interwiki;
 			this.Fragment = parser.Fragment;
-			this.Coerced = parser.Coerced;
+			this.Interwiki = parser.Interwiki;
 		}
 		#endregion
 
@@ -104,33 +102,31 @@
 		public bool IsLocal => this.Interwiki == null || this.Interwiki.LocalWiki;
 		#endregion
 
+		#region Public Static Methods
+
+		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
+		/// <param name="site">The site the title is from.</param>
+		/// <param name="defaultNamespace">The default namespace if no namespace is specified in the page name.</param>
+		/// <param name="pageName">The page name. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
+		/// <returns>A new <see cref="Title"/> with the namespace found in <paramref name="pageName"/>, if there is one, otherwise using <paramref name="defaultNamespace"/>.</returns>
+		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
+		public static new FullTitle Coerce(Site site, int defaultNamespace, string pageName) => new FullTitle(new TitleParser(site, defaultNamespace, pageName, false));
+		#endregion
+
 		#region Public Methods
 
 		/// <summary>Deconstructs this instance into its constituent parts.</summary>
-		/// <param name="leadingColon">The value returned by <see cref="Title.LeadingColon"/>.</param>
 		/// <param name="interwiki">The value returned by <see cref="Interwiki"/>.</param>
 		/// <param name="ns">The value returned by <see cref="ISimpleTitle.Namespace"/>.</param>
 		/// <param name="pageName">The value returned by <see cref="ISimpleTitle.PageName"/>.</param>
 		/// <param name="fragment">The value returned by <see cref="Fragment"/>.</param>
-		public void Deconstruct(out bool leadingColon, out InterwikiEntry? interwiki, out Namespace ns, out string pageName, out string? fragment)
+		public void Deconstruct(out InterwikiEntry? interwiki, out Namespace ns, out string pageName, out string? fragment)
 		{
-			leadingColon = this.LeadingColon;
 			interwiki = this.Interwiki;
 			ns = this.Namespace;
 			pageName = this.PageName;
 			fragment = this.Fragment;
 		}
-
-		/// <summary>Indicates whether the current title is equal to another title based on Interwiki, Namespace, PageName, and Fragment.</summary>
-		/// <param name="other">A title to compare with this one.</param>
-		/// <returns><see langword="true"/> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false"/>.</returns>
-		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
-		public bool FullEquals(IFullTitle other) =>
-			other != null &&
-			this.Interwiki == other.Interwiki &&
-			this.Namespace == other.Namespace &&
-			this.Namespace.PageNameEquals(this.PageName, other.PageName) &&
-			this.Fragment == other.Fragment;
 		#endregion
 
 		#region Public Override Methods
@@ -144,9 +140,7 @@
 			var interwiki = this.Interwiki == null ? string.Empty : this.Interwiki.Prefix + ':';
 			var fragment = this.Fragment == null ? string.Empty : '#' + this.Fragment;
 
-			return this.LeadingColon
-				? ':' + interwiki + baseText.Substring(2) + fragment
-				: interwiki + baseText + fragment;
+			return interwiki + baseText + fragment;
 		}
 		#endregion
 	}

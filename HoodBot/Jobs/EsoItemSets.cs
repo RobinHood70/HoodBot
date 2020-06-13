@@ -168,7 +168,8 @@
 					setName = set.SetName;
 				}
 
-				if ((catMembers.FindTitle(UespNamespaces.Online, setName, true) ?? catMembers.FindTitle(UespNamespaces.Online, setName + " (set)", true)) is Title foundPage)
+				var newTitle = new Title(this.Site, UespNamespaces.Online, setName);
+				if ((catMembers.FindTitle(newTitle, true) ?? catMembers.FindTitle(UespNamespaces.Online, setName + " (set)", true)) is Title foundPage)
 				{
 					titles.Add(foundPage);
 					try
@@ -182,7 +183,6 @@
 				}
 				else
 				{
-					var newTitle = new Title(this.Site, UespNamespaces.Online, setName, true);
 					uncheckedSets.Add(newTitle, set);
 				}
 			}

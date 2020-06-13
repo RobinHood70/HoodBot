@@ -723,7 +723,7 @@
 			var templateName = WikiTextVisitor.Value(template.Title);
 			if (templateName.Length > 0)
 			{
-				var templateTitle = new FullTitle(this.Site, MediaWikiNamespaces.Template, templateName, false);
+				var templateTitle = FullTitle.Coerce(this.Site, MediaWikiNamespaces.Template, templateName);
 				if (this.replacements.TryGetValue(templateTitle, out var replacement))
 				{
 					var newTemplate = replacement.To;

@@ -28,8 +28,8 @@
 			var titles = new TitleCollection(this.Site, MediaWikiNamespaces.Template, templates);
 			var pages = PageCollection.Unlimited(this.Site, PageModules.None, true);
 			pages.GetTitles(titles);
-			var pagesToCheck = new HashSet<Title>(pages, Title.SimpleEqualityComparer);
-			var alreadyChecked = new HashSet<Title>(Title.SimpleEqualityComparer);
+			var pagesToCheck = new HashSet<Page>(pages, SimpleTitleEqualityComparer.Instance);
+			var alreadyChecked = new HashSet<Page>(SimpleTitleEqualityComparer.Instance);
 			do
 			{
 				foreach (var page in pagesToCheck)

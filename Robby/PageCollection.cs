@@ -186,17 +186,6 @@
 
 		#region Public Methods
 
-		/// <summary>Creates a new page using the collection's <see cref="PageCreator"/> and adds it to the collection.</summary>
-		/// <param name="title">The title of the page to create.</param>
-		/// <returns>The page that was created.</returns>
-		/// <remarks>If the page title specified represents a page already in the collection, that page will be overwritten.</remarks>
-		protected override Page New(ISimpleTitle title)
-		{
-			var page = this.PageCreator.CreatePage(title);
-			this[page.Key] = page;
-			return page;
-		}
-
 		/// <summary>Loads pages into the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>
 		public void GetTitles(params string[] titles) => this.GetTitles(new TitleCollection(this.Site, titles));
@@ -526,6 +515,17 @@
 			{
 				base.InsertItem(index, item);
 			}
+		}
+
+		/// <summary>Creates a new page using the collection's <see cref="PageCreator"/> and adds it to the collection.</summary>
+		/// <param name="title">The title of the page to create.</param>
+		/// <returns>The page that was created.</returns>
+		/// <remarks>If the page title specified represents a page already in the collection, that page will be overwritten.</remarks>
+		protected override Page New(ISimpleTitle title)
+		{
+			var page = this.PageCreator.CreatePage(title);
+			this[page.Key] = page;
+			return page;
 		}
 		#endregion
 

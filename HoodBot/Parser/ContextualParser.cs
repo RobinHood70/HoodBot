@@ -60,7 +60,7 @@
 		public bool AddCategory(string category)
 		{
 			ThrowNull(category, nameof(category));
-			var catTitle = new FullTitle(this.Site, MediaWikiNamespaces.Category, category, false);
+			var catTitle = FullTitle.Coerce(this.Site, MediaWikiNamespaces.Category, category);
 			LinkedListNode<IWikiNode>? lastCategory = null;
 			foreach (var link in this.FindAllLinked<LinkNode>())
 			{

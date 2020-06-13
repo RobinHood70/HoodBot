@@ -64,10 +64,10 @@
 		#endregion
 
 		#region Public Static Methods
-		public static MetaNamespace? FromTitle(Title title)
+		public static MetaNamespace? FromTitle(ISimpleTitle title)
 		{
 			ThrowNull(title, nameof(title));
-			var test = title.Namespace.DecoratedName + title.BasePageName;
+			var test = title.Namespace.DecoratedName + title.RootPageName();
 			if (!Namespaces.TryGetValue(test, out var retval))
 			{
 				Namespaces.TryGetValue(title.Namespace.Name, out retval);

@@ -26,7 +26,7 @@
 		/// <param name="site">The site the user is from.</param>
 		/// <param name="name">The name of the user.</param>
 		public User(Site site, string name)
-			: base(site, MediaWikiNamespaces.User, name, true)
+			: base(site, MediaWikiNamespaces.User, name)
 		{
 		}
 
@@ -217,13 +217,13 @@
 		/// <summary>Gets the user's entire watchlist.</summary>
 		/// <param name="token">The user's watchlist token. This must be provided by the user.</param>
 		/// <returns>A read-only list of <see cref="Title"/>s in the user's watchlist.</returns>
-		public IReadOnlyList<Title> GetWatchlist(string token) => this.GetWatchlist(token, null);
+		public IReadOnlyList<ISimpleTitle> GetWatchlist(string token) => this.GetWatchlist(token, null);
 
 		/// <summary>Gets the user's watchlist.</summary>
 		/// <param name="token">The user's watchlist token. This must be provided by the user.</param>
 		/// <param name="namespaces">The namespaces of the contributions to retrieve.</param>
 		/// <returns>A read-only list of <see cref="Title"/>s in the user's watchlist.</returns>
-		public IReadOnlyList<Title> GetWatchlist(string token, IEnumerable<int>? namespaces)
+		public IReadOnlyList<ISimpleTitle> GetWatchlist(string token, IEnumerable<int>? namespaces)
 		{
 			var input = new WatchlistRawInput
 			{
@@ -232,7 +232,7 @@
 				Namespaces = namespaces
 			};
 			var result = this.Site.AbstractionLayer.WatchlistRaw(input);
-			var retval = new List<Title>();
+			var retval = new List<ISimpleTitle>();
 			foreach (var item in result)
 			{
 				retval.Add(new Title(this.Site, item.Title));
@@ -285,12 +285,12 @@
 				},
 				() =>
 				{
-					if (this.TalkPage == null)
+					if (!(this.TalkPage() is ISimpleTitle talkPage))
 					{
-						throw PropertyNull(nameof(User), nameof(this.TalkPage));
+						throw new InvalidOperationException(Resources.TitleInvalid);
 					}
 
-					var input = new EditInput(this.TalkPage.FullPageName(), msg)
+					var input = new EditInput(talkPage.FullPageName(), msg)
 					{
 						Bot = true,
 						Minor = Tristate.False,

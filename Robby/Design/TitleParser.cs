@@ -5,7 +5,7 @@
 	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>This class serves as a light-weight parser to split a wiki title into its constituent parts.</summary>
-	public class TitleParser : ISimpleTitle
+	public class TitleParser : IFullTitle
 	{
 		#region Constructors
 

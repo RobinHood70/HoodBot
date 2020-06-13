@@ -59,7 +59,7 @@
 
 		public static void FirstLinksOnly(Site site, NodeCollection nodes)
 		{
-			var uniqueLinks = new HashSet<Title>(SimpleTitleEqualityComparer.Instance);
+			var uniqueLinks = new HashSet<SiteLink>(SimpleTitleEqualityComparer.Instance);
 			if (nodes.FindFirstLinked<LinkNode>() is LinkedListNode<IWikiNode> linkedNode)
 			{
 				var link = SiteLink.FromLinkNode(site, (LinkNode)linkedNode.Value);
@@ -88,7 +88,10 @@
 					throw new InvalidOperationException("Not logged in.");
 				}
 
-				var replacements = job.Site.LoadPageText(job.Site.User.FullPageName + "/ESO Replacements");
+				var replacementsTitle = new Page(job.Site.User);
+				replacementsTitle.PageName += "/ESO Replacements";
+				replacementsTitle.Load();
+				var replacements = replacementsTitle.Text;
 				if (string.IsNullOrEmpty(replacements))
 				{
 					throw new InvalidOperationException("Replacements page not found or empty!");
@@ -165,47 +168,8 @@
 			}
 
 			var parsedText = WikiTextParser.Parse(text);
-			ReplaceLink(parsedText);
+			parsedText.Replace(ReplaceLink, true);
 			return WikiTextVisitor.Raw(parsedText);
-		}
-
-		public static void ReplaceLink(NodeCollection parsedText)
-		{
-			// TODO: This will do for now, but is not ideal in the long run since it's inserting links into the node collection without treating them as links. Replacements should be converted to NodeCollections, then inserted correctly into the existing collection.
-			var foundReplacements = new HashSet<string>();
-			foreach (var textNode in parsedText.FindAll<TextNode>())
-			{
-				var newValue = new StringBuilder();
-				var newText = textNode.Text;
-				var i = 0;
-				do
-				{
-					var foundReplacement = false;
-					foreach (var replacement in ReplaceFirstList)
-					{
-						if (!foundReplacements.Contains(replacement.From) && newText.StartsWith(replacement.From, StringComparison.Ordinal))
-						{
-							foundReplacement = true;
-							foundReplacements.Add(replacement.From);
-							UnreplacedList.Remove(replacement.From);
-							newValue.Append(replacement.To);
-							i += replacement.From.Length;
-							break;
-						}
-					}
-
-					if (!foundReplacement)
-					{
-						newValue.Append(newText[0]);
-						i++;
-					}
-
-					newText = textNode.Text.Substring(i);
-				}
-				while (i < textNode.Text.Length);
-
-				textNode.Text = newValue.ToString();
-			}
 		}
 
 		public static void ShowUnreplaced()
@@ -271,6 +235,50 @@
 				x.From.Length == y.From.Length ? 0 :
 				x.From.Length < y.From.Length ? 1 :
 				-1);
+		}
+
+		private static NodeCollection? ReplaceLink(LinkedListNode<IWikiNode> node)
+		{
+			throw new NotImplementedException(); // Needs updated to handle replacements properly. Currently incomplete.
+			var foundReplacements = new HashSet<string>();
+			if (!(node.Value is TextNode textNode))
+			{
+				return null;
+			}
+
+			var newValue = new StringBuilder();
+			var newText = textNode.Text;
+			var i = 0;
+			do
+			{
+				foreach (var replacement in ReplaceFirstList)
+				{
+					if (newText.StartsWith(replacement.From, StringComparison.Ordinal))
+					{
+						var retval = new NodeCollection(null);
+						if (i != 0)
+						{
+							retval.AddLast(new TextNode(textNode.Text.Substring(0, i)));
+						}
+
+						retval.AddRange(replacement.ToNodes);
+						i += replacement.From.Length;
+						if (i < textNode.Text.Length)
+						{
+							retval.AddLast(new TextNode(textNode.Text.Substring(i)));
+						}
+
+						foundReplacements.Add(replacement.From);
+						UnreplacedList.Remove(replacement.From);
+						return retval;
+					}
+				}
+
+				newText = textNode.Text.Substring(i);
+			}
+			while (i < textNode.Text.Length);
+
+			textNode.Text = newValue.ToString();
 		}
 
 		private static string ReplaceTemplate(Match match)

@@ -19,12 +19,12 @@
 		#endregion
 
 		#region Public Override Methods
-		public override Page CreatePage(ISimpleTitle simpleTitle)
+		public override Page CreatePage(ISimpleTitle title)
 		{
-			ThrowNull(simpleTitle, nameof(simpleTitle));
-			return this.GameSpaceOnly && simpleTitle.Namespace.Id < 100
-				? Default.CreatePage(simpleTitle)
-				: new VariablesPage(simpleTitle);
+			ThrowNull(title, nameof(title));
+			return this.GameSpaceOnly && title.Namespace.Id < 100
+				? Default.CreatePage(title)
+				: new VariablesPage(title);
 		}
 
 		public override PageItem CreatePageItem(int ns, string title, long pageId) => new VariablesPageItem(ns, title, pageId);

@@ -37,9 +37,8 @@
 		/// <param name="site">The site this page is from.</param>
 		/// <param name="ns">The namespace ID the page is in.</param>
 		/// <param name="pageName">The name of the page without the namespace.</param>
-		/// <remarks>This constructor will always assume the namespace given is correct, even if the pageName begins with something that looks like a namespace.</remarks>
 		public Page(Site site, int ns, string pageName)
-			: base(site, ns, pageName, true)
+			: base(site, ns, pageName)
 		{
 		}
 
@@ -61,7 +60,7 @@
 
 		#region Public Properties
 
-		/// <summary>Gets the backlinks on the page, if they were requested in the last load operation.</summary>
+		/// <summary>Gets the backlinks on the page if they were requested in the last load operation.</summary>
 		/// <value>The links used on the page.</value>
 		/// <remarks>This includes links, transclusions, and file usage.</remarks>
 		public IReadOnlyDictionary<Title, BacklinksTypes> Backlinks { get; } = new Dictionary<Title, BacklinksTypes>(SimpleTitleEqualityComparer.Instance);
@@ -126,7 +125,7 @@
 					throw new InvalidOperationException(CurrentCulture(Resources.ModuleNotLoaded, nameof(PageModules.Templates), nameof(this.IsDisambiguation)));
 				}
 
-				var templates = new HashSet<Title>(this.Templates);
+				var templates = new HashSet<Title>(this.Templates, SimpleTitleEqualityComparer.Instance);
 				templates.IntersectWith(this.Site.DisambiguationTemplates);
 
 				return templates.Count > 0;
@@ -333,18 +332,18 @@
 		#region Private Methods
 		private void PopulateBacklinks(PageItem pageItem)
 		{
-			var backlinks = (Dictionary<Title, BacklinksTypes>)this.Backlinks;
+			var backlinks = (Dictionary<ISimpleTitle, BacklinksTypes>)this.Backlinks;
 			backlinks.Clear();
 			this.PopulateBacklinksType(backlinks, pageItem.FileUsages, BacklinksTypes.ImageUsage);
 			this.PopulateBacklinksType(backlinks, pageItem.LinksHere, BacklinksTypes.Backlinks);
 			this.PopulateBacklinksType(backlinks, pageItem.TranscludedIn, BacklinksTypes.EmbeddedIn);
 		}
 
-		private void PopulateBacklinksType(Dictionary<Title, BacklinksTypes> backlinks, IReadOnlyList<ITitleOptional> list, BacklinksTypes type)
+		private void PopulateBacklinksType(Dictionary<ISimpleTitle, BacklinksTypes> backlinks, IReadOnlyList<ITitleOptional> list, BacklinksTypes type)
 		{
 			foreach (var link in list)
 			{
-				var title = new Title(this.Site, link.Title);
+				var title = new Title(this.Site, link.Title ?? throw PropertyNull(nameof(link), nameof(link.Title)));
 				if (backlinks.ContainsKey(title))
 				{
 					backlinks[title] |= type;
@@ -424,7 +423,7 @@
 
 		private void PopulateTemplates(PageItem pageItem)
 		{
-			var templates = (List<Title>)this.Templates;
+			var templates = (List<ISimpleTitle>)this.Templates;
 			templates.Clear();
 			foreach (var link in pageItem.Templates)
 			{

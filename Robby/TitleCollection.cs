@@ -289,7 +289,7 @@
 			var result = this.Site.AbstractionLayer.AllCategories(input);
 			foreach (var item in result)
 			{
-				this.Add(new Title(this.Site, MediaWikiNamespaces.Category, item.Category, true));
+				this.Add(new Title(this.Site, MediaWikiNamespaces.Category, item.Category));
 			}
 		}
 
@@ -483,7 +483,7 @@
 			var result = this.Site.AbstractionLayer.AllMessages(input);
 			foreach (var item in result)
 			{
-				this.Add(new Title(this.Site, MediaWikiNamespaces.MediaWiki, item.Name, true));
+				this.Add(new Title(this.Site, MediaWikiNamespaces.MediaWiki, item.Name));
 			}
 		}
 
@@ -571,7 +571,7 @@
 			var result = this.Site.AbstractionLayer.CategoryMembers(input);
 			foreach (var item in result)
 			{
-				var title = new Title(this.Site, item.Title);
+				var title = new Title(this.Site, item.Title ?? throw PropertyNull(nameof(item), nameof(item.Title)));
 				if (input.Type.HasFlag(item.Type))
 				{
 					this.Add(title);

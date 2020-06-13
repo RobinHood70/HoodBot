@@ -432,7 +432,7 @@
 			{
 				if (stage.Zone != "Tamriel" && stage.Zone != quest.Zone)
 				{
-					var title = new Title(this.Site, UespNamespaces.Online, stage.Zone, true);
+					var title = new Title(this.Site, UespNamespaces.Online, stage.Zone);
 					locs.Add(title.AsLink(true));
 				}
 

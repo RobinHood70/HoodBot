@@ -99,14 +99,14 @@
 		#region Private Methods
 		private static ISimpleTitle PageFromFile(ISimpleTitle page)
 		{
-			var pageName = page.PageName.Substring(19);
+			var pageName = page.PageName.Substring(FurnishingPrefix.Length);
 			var extension = pageName.LastIndexOf('.');
 			if (extension >= 0)
 			{
 				pageName = pageName.Substring(0, extension);
 			}
 
-			return new SimpleTitle(page.Namespace.Site, UespNamespaces.Online, pageName);
+			return new Title(page.Namespace.Site, UespNamespaces.Online, pageName);
 		}
 		#endregion
 	}

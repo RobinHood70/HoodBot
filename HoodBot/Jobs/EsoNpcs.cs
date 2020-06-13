@@ -222,7 +222,7 @@
 		private class NpcTitle : Title
 		{
 			public NpcTitle(Site site, NpcData npc)
-				: base(site, UespNamespaces.Online, npc.Name, true) => this.Npc = npc;
+				: base(site, UespNamespaces.Online, npc.Name) => this.Npc = npc;
 
 			public NpcData Npc { get; }
 		}

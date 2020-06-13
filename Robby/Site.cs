@@ -922,7 +922,7 @@
 		{
 			if (this.disambiguationTemplates == null)
 			{
-				this.disambiguationTemplates = new HashSet<Title>();
+				this.disambiguationTemplates = new HashSet<Title>(SimpleTitleEqualityComparer.Instance);
 				var page = new Page(this, MediaWikiNamespaces.MediaWiki, "Disambiguationspage");
 				page.Load(PageModules.Default | PageModules.Links);
 				if (page.Exists)

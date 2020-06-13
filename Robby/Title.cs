@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
@@ -30,61 +31,85 @@
 	#endregion
 
 	/// <summary>Provides a light-weight holder for titles with several information and manipulation functions.</summary>
-	public class Title : SimpleTitle, IKeyedTitle, IMessageSource, ISimpleTitle
+	public class Title : IKeyedTitle, IMessageSource, ISimpleTitle
 	{
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the site and full page name.</summary>
+		/// <param name="ns">The namespace of the title.</param>
+		/// <param name="pageName">The page name (without leading namespace).</param>
+		public Title([NotNull, ValidatedNotNull] Namespace ns, [NotNull, ValidatedNotNull] string pageName)
+		{
+			ThrowNull(ns, nameof(ns));
+			ThrowNull(pageName, nameof(pageName));
+			this.Namespace = ns;
+			this.PageName = pageName;
+			this.Key = this.FullPageName();
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the site and full page name.</summary>
 		/// <param name="site">The site this title is from.</param>
 		/// <param name="fullPageName">The full name of the page.</param>
-		public Title([NotNull] Site site, string? fullPageName)
-			: this(site, MediaWikiNamespaces.Main, fullPageName ?? string.Empty, false)
+		public Title([NotNull, ValidatedNotNull] Site site, [NotNull, ValidatedNotNull] string fullPageName)
+			: this(new TitleParser(site, MediaWikiNamespaces.Main, fullPageName, false))
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the namespace and page name.</summary>
-		/// <param name="site">The site the title is from.</param>
-		/// <param name="defaultNamespace">The default namespace if no namespace is specified in the page name.</param>
-		/// <param name="pageName">The page name. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
-		/// <param name="forceNamespace">If <see langword="true"/>, the namespace specified will always be used, even if the pageName begins with what looks like a namespace or interwiki prefix.</param>
-		public Title(Site site, int defaultNamespace, string pageName, bool forceNamespace)
-			: this(new TitleParser(site, defaultNamespace, pageName, forceNamespace)) => this.Coerced = this.Namespace.Id != defaultNamespace;
+		/// <summary>Initializes a new instance of the <see cref="Title"/> class.</summary>
+		/// <param name="site">The site this title is from.</param>
+		/// <param name="ns">The namespace ID of the title.</param>
+		/// <param name="pageName">The page name (without leading namespace).</param>
+		public Title(Site site, int ns, string pageName)
+		{
+			ThrowNull(site, nameof(site));
+			ThrowNull(pageName, nameof(pageName));
+			if (!site.Namespaces.Contains(ns))
+			{
+				throw new ArgumentOutOfRangeException(Resources.InvalidNamespace);
+			}
+
+			this.Namespace = site.Namespaces[ns];
+			this.PageName = pageName;
+			this.Key = this.FullPageName();
+		}
 
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class, copying the information from another <see cref="ISimpleTitle"/> object.</summary>
 		/// <param name="title">The Title object to copy from.</param>
 		/// <remarks>Note that the Key property will be set to the new full page name, regardless of the original item's key.</remarks>
-		public Title([NotNull] ISimpleTitle title)
-			: base((title ?? throw ArgumentNull(nameof(title))).Namespace, title.PageName)
+		public Title([NotNull, ValidatedNotNull] ISimpleTitle title)
 		{
-			this.Coerced = false;
+			ThrowNull(title, nameof(title));
+			this.Namespace = title.Namespace;
+			this.PageName = title.PageName;
 			this.Key = title is IKeyedTitle keyed ? keyed.Key : this.FullPageName();
 		}
 		#endregion
 
-		#region Public Static Properties
-
-		/// <summary>Gets a default equality comparer for Title objects.</summary>
-		/// <remarks>This will usually be the desire equality comparer for external usage, where the calling application could change the page name.</remarks>
-		public static IEqualityComparer<Title> DefaultEqualityComparer => KeyedTitleEqualityComparer.Instance;
-
-		/// <summary>Gets a default equality comparer for Title objects.</summary>
-		/// <remarks>This will usually be the desired equality comparer for internal usage, where the calling application cannot change the page name.</remarks>
-		public static IEqualityComparer<Title> SimpleEqualityComparer => SimpleTitleEqualityComparer.Instance;
-		#endregion
-
 		#region Public Properties
-
-		/// <summary>Gets or sets a value indicating whether the title was coerced into its namespace, or started there to begin with.</summary>
-		/// <value><c>true</c> if coerced into the indicated namespace; otherwise, <c>false</c>.</value>
-		public bool Coerced { get; protected set; }
 
 		/// <summary>Gets or sets the key to use in dictionary lookups. This is identical to FullPageName (after any decoding and normalization), but unlike FullPagename, cannot be modified (via PageName) after being set.</summary>
 		/// <value>The key.</value>
 		public string Key { get; protected set; }
 
-		/// <summary>Gets or sets a value indicating whether the title had a leading colon.</summary>
-		/// <value><see langword="true"/> if there was a leading colon; otherwise, <see langword="false"/>.</value>
-		public bool LeadingColon { get; set; }
+		/// <inheritdoc/>
+		public Namespace Namespace { get; set; }
+
+		/// <inheritdoc/>
+		public string PageName { get; set; }
+
+		/// <summary>Gets the site to which this title belongs.</summary>
+		/// <value>The site.</value>
+		public Site Site => this.Namespace.Site;
+		#endregion
+
+		#region Public Static Methods
+
+		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the namespace and page name.</summary>
+		/// <param name="site">The site the title is from.</param>
+		/// <param name="defaultNamespace">The default namespace if no namespace is specified in the page name.</param>
+		/// <param name="pageName">The page name. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
+		/// <returns>A new <see cref="Title"/> with the namespace found in <paramref name="pageName"/>, if there is one, otherwise using <paramref name="defaultNamespace"/>.</returns>
+		public static Title Coerce(Site site, int defaultNamespace, string pageName) => new Title(new TitleParser(site, defaultNamespace, pageName, false));
 		#endregion
 
 		#region Public Methods
@@ -165,13 +190,6 @@
 		/// <returns>A Uri to the index.php page.</returns>
 		public Uri GetArticlePath() => this.Site.GetArticlePath(this.FullPageName());
 
-		/// <summary>Indicates whether the current title is equal to another title based on Namespace, PageName, and Key.</summary>
-		/// <param name="other">A title to compare with this one.</param>
-		/// <returns><see langword="true"/> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false"/>.</returns>
-		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
-		[SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "IsSameTitle will return false if this is null, which will then short-circuit the remainder of the comparison.")]
-		public bool KeyedEquals(IKeyedTitle other) => this.SimpleEquals(other) && this.Key == other.Key;
-
 		/// <summary>Moves the title to the name specified.</summary>
 		/// <param name="to">The location to move the title to.</param>
 		/// <param name="reason">The reason for the move.</param>
@@ -210,12 +228,13 @@
 			if (!this.Site.EditingEnabled)
 			{
 				fakeResult.Add(this.FullPageName(), to);
-				if (moveTalk && this.TalkPage != null)
+				var talkPage = this.TalkPage();
+				if (moveTalk && talkPage != null)
 				{
 					var toPage = new Title(this.Site, to);
-					if (toPage.TalkPage is Title toTalk)
+					if (toPage.TalkPage() is Title toTalk)
 					{
-						fakeResult.Add(this.TalkPage.FullPageName(), toTalk.FullPageName());
+						fakeResult.Add(talkPage.FullPageName(), toTalk.FullPageName());
 					}
 				}
 
@@ -365,7 +384,7 @@
 		/// <returns>A <see cref="string" /> that represents this title.</returns>
 		public virtual string ToString(bool forceLink)
 		{
-			var colon = this.LeadingColon || (forceLink && this.Namespace.IsForcedLinkSpace) ? ":" : string.Empty;
+			var colon = (forceLink && this.Namespace.IsForcedLinkSpace) ? ":" : string.Empty;
 			return colon + this.FullPageName();
 		}
 
@@ -438,6 +457,6 @@
 						return this.Protect(input) ? ChangeStatus.Success : ChangeStatus.Failure;
 					});
 		}
+		#endregion
 	}
-	#endregion
 }

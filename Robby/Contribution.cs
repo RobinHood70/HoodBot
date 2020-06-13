@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.Robby
 {
 	using System.Collections.Generic;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using static RobinHood70.CommonCode.Globals;
 
@@ -17,7 +18,7 @@
 			: base(contribution)
 		{
 			ThrowNull(contribution, nameof(contribution));
-			this.Title = new Title(site, contribution.Title);
+			this.Title = new Title(site, contribution.Title ?? throw PropertyNull(nameof(contribution), nameof(contribution.Title)));
 			this.New = contribution.Flags.HasFlag(UserContributionFlags.New);
 			this.Patrolled = contribution.Flags.HasFlag(UserContributionFlags.Patrolled);
 			this.NewSize = contribution.Size;
@@ -50,7 +51,7 @@
 
 		/// <summary>Gets the page title.</summary>
 		/// <value>The title.</value>
-		public Title Title { get; }
+		public ISimpleTitle Title { get; }
 		#endregion
 	}
 }

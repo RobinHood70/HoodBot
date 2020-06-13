@@ -108,16 +108,18 @@
 		/// <param name="site">The site the title is from.</param>
 		/// <param name="fullPageName">Full name of the page to link to.</param>
 		public SiteLink(Site site, string fullPageName)
-			: base(site, fullPageName) => InitializeImageInfo(this.Site);
+			: this(new TitleParser(site, fullPageName)) => InitializeImageInfo(this.Site);
 
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
-		/// <param name="site">The site the title is from.</param>
-		/// <param name="defaultNamespace">The default namespace if no namespace is specified in the page name.</param>
-		/// <param name="pageName">The page name to link to. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
-		/// <param name="forceNamespace">If <see langword="true"/>, the namespace specified will always be used, even if the pageName begins with what looks like a namespace or interwiki prefix.</param>
+		/// <param name="parser">The <see cref="TitleParser"/> with the desired information.</param>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		public SiteLink(Site site, int defaultNamespace, string pageName, bool forceNamespace)
-			: base(site, defaultNamespace, pageName, forceNamespace) => InitializeImageInfo(this.Site);
+		public SiteLink(TitleParser parser)
+			: base(parser)
+		{
+			this.Coerced = parser.Coerced;
+			this.LeadingColon = parser.LeadingColon;
+			InitializeImageInfo(this.Site);
+		}
 		#endregion
 
 		#region Public Properties
@@ -146,6 +148,10 @@
 			get => this.GetValue(ParameterType.Class);
 			set => this.SetParameterValue(ParameterType.Class, value);
 		}
+
+		/// <summary>Gets a value indicating whether the title was coerced into its namespace, or started there to begin with.</summary>
+		/// <value><c>true</c> if coerced into the indicated namespace; otherwise, <c>false</c>.</value>
+		public bool Coerced { get; }
 
 		/// <summary>Gets or sets the image dimensions directly.</summary>
 		/// <value>The image dimensions.</value>
@@ -199,6 +205,10 @@
 			get => this.GetValue(ParameterType.Language);
 			set => this.SetParameterValue(ParameterType.Language, value);
 		}
+
+		/// <summary>Gets or sets a value indicating whether the title had a leading colon.</summary>
+		/// <value><see langword="true"/> if there was a leading colon; otherwise, <see langword="false"/>.</value>
+		public bool LeadingColon { get; set; }
 
 		/// <summary>Gets or sets the link for the image.</summary>
 		/// <value>The link for the image.</value>
@@ -301,6 +311,14 @@
 
 		#region Public Static Methods
 
+		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
+		/// <param name="site">The site the title is from.</param>
+		/// <param name="defaultNamespace">The default namespace if no namespace is specified in the page name.</param>
+		/// <param name="pageName">The page name to link to. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
+		/// <returns>A new <see cref="SiteLink"/> with the namespace found in <paramref name="pageName"/>, if there is one, otherwise using <paramref name="defaultNamespace"/>.</returns>
+		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
+		public static new SiteLink Coerce(Site site, int defaultNamespace, string pageName) => new SiteLink(new TitleParser(site, defaultNamespace, pageName, false));
+
 		/// <summary>Creates a new SiteLink instance from the provided text.</summary>
 		/// <param name="site">The site the link is from.</param>
 		/// <param name="link">The text of the link.</param>
@@ -329,7 +347,7 @@
 			ThrowNull(link, nameof(link));
 			var titleText = WikiTextVisitor.Value(link.Title);
 			var valueSplit = SplitWhitespace(titleText);
-			var retval = coerceToFile ? new SiteLink(site, MediaWikiNamespaces.File, valueSplit.Value, false) : new SiteLink(site, valueSplit.Value);
+			var retval = coerceToFile ? Coerce(site, MediaWikiNamespaces.File, valueSplit.Value) : new SiteLink(site, valueSplit.Value);
 			retval.OriginalLink = titleText;
 			retval.TitleWhitespaceBefore = valueSplit.Before;
 			retval.TitleWhitespaceAfter = valueSplit.After;

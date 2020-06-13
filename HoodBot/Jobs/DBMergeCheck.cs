@@ -166,7 +166,7 @@
 				if (page.IsRedirect && !categories.Contains("Category:Redirects from Moves"))
 				{
 					var newNs = page.Namespace == UespNamespaces.Dragonborn ? UespNamespaces.Skyrim : UespNamespaces.SkyrimTalk;
-					var newTitle = new FullTitle(page.Site, newNs, page.PageName, true);
+					var newTitle = new FullTitle(page.Site, newNs, page.PageName);
 					var pageInfo = this.GetTextForPage(page);
 					if (pageInfo.Length > 0)
 					{

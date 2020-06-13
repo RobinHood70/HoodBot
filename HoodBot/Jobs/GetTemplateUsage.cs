@@ -72,13 +72,13 @@
 		#endregion
 
 		#region Private Static Methods
-		private static TitleCollection BuildRedirectList(IEnumerable<Title> titles)
+		private static TitleCollection BuildRedirectList(IEnumerable<ISimpleTitle> titles)
 		{
 			var retval = new TitleCollection(titles);
 
 			// Loop until nothing new is added.
-			var pagesToCheck = new HashSet<Title>(retval, Title.SimpleEqualityComparer);
-			var alreadyChecked = new HashSet<Title>(Title.SimpleEqualityComparer);
+			var pagesToCheck = new HashSet<Title>(retval, SimpleTitleEqualityComparer.Instance);
+			var alreadyChecked = new HashSet<Title>(SimpleTitleEqualityComparer.Instance);
 			do
 			{
 				foreach (var page in pagesToCheck)
@@ -96,7 +96,7 @@
 			return retval;
 		}
 
-		private PageCollection FollowRedirects(IEnumerable<Title> titles)
+		private PageCollection FollowRedirects(TitleCollection titles)
 		{
 			var originalsFollowed = PageCollection.Unlimited(this.Site, PageModules.None, true);
 			originalsFollowed.GetTitles(titles);
