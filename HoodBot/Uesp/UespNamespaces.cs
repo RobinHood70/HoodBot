@@ -72,6 +72,22 @@
 		public const int EsoModTalk = 149;
 		public const int Legends = 150;
 		public const int LegendsTalk = 151;
+		public const int Blades = 152;
+		public const int BladesTalk = 153;
+		public const int Tes1Mod = 154;
+		public const int Tes1ModTalk = 155;
+		public const int Tes2Mod = 156;
+		public const int Tes2ModTalk = 157;
+		public const int CallToArms = 158;
+		public const int CallToArmsTalk = 159;
+		public const int TesOtherMod = 160;
+		public const int TesOtherModTalk = 161;
+		public const int Merchandise = 162;
+		public const int MerchandiseTalk = 163;
+		public const int Pinball = 164;
+		public const int PinballTalk = 165;
+		public const int SkyrimVse = 166;
+		public const int SkyrimVseTalk = 167;
 		public const int Dapel = 200;
 		public const int DapelTalk = 201;
 	}
