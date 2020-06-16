@@ -12,7 +12,7 @@
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0-beta3.final">
+		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -20,7 +20,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="System.ComponentModel.Composition" Version="5.0.0-preview.1.20120.5" />
+		<PackageReference Include="System.ComponentModel.Composition" Version="5.0.0-preview.5.20278.1" />
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="System.ComponentModel.Composition" />

@@ -24,7 +24,7 @@
 		<Content Include="Design Notes.txt" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0-beta3.final">
+		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -33,7 +33,7 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-		<PackageReference Include="System.Collections.Immutable" Version="5.0.0-preview.1.20120.5" />
+		<PackageReference Include="System.Collections.Immutable" Version="5.0.0-preview.5.20278.1" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\WikiCommon\WikiCommon.csproj" />
