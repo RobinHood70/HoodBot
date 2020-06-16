@@ -1,11 +1,11 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
+	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 
 	public class GenderedNPCsFromLang : WikiJob
@@ -21,8 +21,8 @@
 			var esoNpcs = new TitleCollection(this.Site);
 			esoNpcs.GetCategoryMembers("Online-NPCs");
 
-			var fileName = Environment.ExpandEnvironmentVariables(@"%BotData%\en.lang.csv");
-			var fileNameOut = Environment.ExpandEnvironmentVariables(@"%BotData%\GenderedNPCs.txt");
+			var fileName = Path.Combine(UespSite.GetBotFolder(), "en.lang.csv");
+			var fileNameOut = Path.Combine(UespSite.GetBotFolder(), "GenderedNPCs.txt");
 			using var reader = File.OpenText(fileName);
 			var csvFile = new CsvFile
 			{

@@ -332,14 +332,14 @@
 		#region Private Methods
 		private void PopulateBacklinks(PageItem pageItem)
 		{
-			var backlinks = (Dictionary<ISimpleTitle, BacklinksTypes>)this.Backlinks;
+			var backlinks = (Dictionary<Title, BacklinksTypes>)this.Backlinks;
 			backlinks.Clear();
 			this.PopulateBacklinksType(backlinks, pageItem.FileUsages, BacklinksTypes.ImageUsage);
 			this.PopulateBacklinksType(backlinks, pageItem.LinksHere, BacklinksTypes.Backlinks);
 			this.PopulateBacklinksType(backlinks, pageItem.TranscludedIn, BacklinksTypes.EmbeddedIn);
 		}
 
-		private void PopulateBacklinksType(Dictionary<ISimpleTitle, BacklinksTypes> backlinks, IReadOnlyList<ITitleOptional> list, BacklinksTypes type)
+		private void PopulateBacklinksType(Dictionary<Title, BacklinksTypes> backlinks, IReadOnlyList<ITitleOptional> list, BacklinksTypes type)
 		{
 			foreach (var link in list)
 			{
@@ -423,7 +423,7 @@
 
 		private void PopulateTemplates(PageItem pageItem)
 		{
-			var templates = (List<ISimpleTitle>)this.Templates;
+			var templates = (List<Title>)this.Templates;
 			templates.Clear();
 			foreach (var link in pageItem.Templates)
 			{

@@ -7,6 +7,7 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Models;
+	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon.Parser;
@@ -29,7 +30,7 @@
 		{
 			var titles = new TitleCollection(this.Site);
 			var titleConverter = new ISimpleTitleJsonConverter(this.Site);
-			var repFile = File.ReadAllText(Environment.ExpandEnvironmentVariables(@"%BotData%\Replacements - Merge.json"));
+			var repFile = File.ReadAllText(Path.Combine(UespSite.GetBotFolder(), "Replacements - Merge.json"));
 			var reps = JsonConvert.DeserializeObject<IEnumerable<Replacement>>(repFile, titleConverter) ?? throw new InvalidOperationException();
 			foreach (var rep in reps)
 			{

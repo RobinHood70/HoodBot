@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
@@ -38,6 +39,8 @@
 
 		#region Public Static Methods
 		public static UespSite CreateInstance(IWikiAbstractionLayer abstractionLayer) => new UespSite(abstractionLayer);
+
+		public static string GetBotFolder() => Environment.ExpandEnvironmentVariables(@"%BotData%");
 		#endregion
 
 		#region Public Methods

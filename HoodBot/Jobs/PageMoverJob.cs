@@ -12,6 +12,7 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Parser;
+	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
@@ -58,6 +59,7 @@
 		#region Fields
 		private readonly TitleCollection doNotDelete;
 		private readonly ReplacementCollection replacements = new ReplacementCollection();
+		private readonly string replacementStatusFile = Path.Combine(UespSite.GetBotFolder(), "Replacements.json");
 		private readonly ISimpleTitleJsonConverter titleConverter;
 		private PageModules fromPageModules = PageModules.None;
 		private string? logDetails = null;
@@ -131,10 +133,6 @@
 		public override string LogName => "Move Pages";
 		#endregion
 
-		#region Protected Static Properties
-		protected static string ReplacementStatusFile => Environment.ExpandEnvironmentVariables(@"%BotData%\Replacements.json");
-		#endregion
-
 		#region Protected Properties
 		protected Action<Page, Replacement>? CustomEdit { get; set; }
 
@@ -179,15 +177,12 @@
 		protected PageModules ToPageModules { get; set; }
 		#endregion
 
-		#region Protected Static Methods
-		protected static void DeleteFiles() => File.Delete(ReplacementStatusFile);
-		#endregion
-
 		#region Protected Methods
-
 		protected void AddReplacement(string from, string to) => this.Replacements.Add(new Replacement(this.Site, from, to));
 
 		protected void AddReplacement(Title from, Title to) => this.Replacements.Add(new Replacement(from, to));
+
+		protected void DeleteFiles() => File.Delete(this.replacementStatusFile);
 
 		// [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Optiona, to be called only when necessary.")]
 		protected IEnumerable<Replacement> LoadReplacementsFromFile(string fileName)
@@ -214,7 +209,7 @@
 			}
 
 			this.StatusWriteLine("Getting Replacement List");
-			var readFromFile = File.Exists(ReplacementStatusFile);
+			var readFromFile = File.Exists(this.replacementStatusFile);
 			if (readFromFile)
 			{
 				this.ReadJsonFile();
@@ -258,7 +253,7 @@
 				this.CheckRemaining();
 			}
 
-			DeleteFiles();
+			this.DeleteFiles();
 		}
 		#endregion
 
@@ -882,7 +877,7 @@
 
 		private void ReadJsonFile()
 		{
-			var repFile = File.ReadAllText(ReplacementStatusFile);
+			var repFile = File.ReadAllText(this.replacementStatusFile);
 			var reps = JsonConvert.DeserializeObject<IEnumerable<Replacement>>(repFile, this.titleConverter) ?? throw new InvalidOperationException();
 			this.replacements.AddRange(reps);
 		}
@@ -959,7 +954,7 @@
 		private void WriteJsonFile()
 		{
 			var newFile = JsonConvert.SerializeObject(this.replacements, Formatting.Indented, this.titleConverter);
-			File.WriteAllText(ReplacementStatusFile, newFile);
+			File.WriteAllText(this.replacementStatusFile, newFile);
 		}
 		#endregion
 
