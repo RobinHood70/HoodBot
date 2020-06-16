@@ -1,39 +1,81 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
+	using System.IO;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.HoodBot.Parser;
+	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
-	using RobinHood70.WikiCommon;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
-	public class OneOffJob : ParsedPageJob
+	public class OneOffJob : EditJob
 	{
 		#region Constructors
 		[JobInfo("One-Off Job")]
 		public OneOffJob([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
 		{
-			this.EditSummary = "Remove unnecessary parameter";
-			this.LogDetails = "Update {{tl|Faction Contents}} - override now redundant";
 		}
-
-		protected override string EditSummary { get; }
 		#endregion
 
 		#region Protected Override Methods
-		protected override void LoadPages() => this.Pages.GetBacklinks("Template:Faction Contents", BacklinksTypes.EmbeddedIn, true);
-
-		protected override void ParseText(object sender, ContextualParser parsedPage)
+		protected override void BeforeLogging()
 		{
-			ThrowNull(parsedPage, nameof(parsedPage));
-			foreach (var template in parsedPage.FindAll<TemplateNode>(node => node.GetTitleValue() == "Faction Contents"))
+			var text = File.ReadAllText(Path.Combine(UespSite.GetBotFolder(), "Templates.txt"));
+			var parsedText = WikiTextParser.Parse(text);
+			var pageTitles = new TitleCollection(this.Site);
+			foreach (var header in parsedText.FindAllLinked<HeaderNode>())
 			{
-				template.RemoveParameter("override");
+				var pageName = ((HeaderNode)header.Value).GetInnerText(true);
+				var section = new NodeCollection(null);
+				section.AddLast(TemplateNode.FromParts("Minimal"));
+				var node = header;
+				while (node.Next is LinkedListNode<IWikiNode> next && !(next.Value is HeaderNode))
+				{
+					node = next;
+					if (node.Value is TemplateNode template)
+					{
+						var templateName = template.GetTitleValue();
+						if (templateName != "NewLine")
+						{
+							section.AddLast(template);
+						}
+
+						if (templateName == "Blades Item Summary")
+						{
+							section.AddLast(new TextNode($"\n'''{pageName}''' {{{{Huh}}}}\n"));
+						}
+					}
+					else
+					{
+						section.AddLast(node.Value);
+					}
+				}
+
+				var page = new Page(this.Site, UespNamespaces.Blades, pageName)
+				{
+					Text = WikiTextVisitor.Raw(section).Trim() + "\n\n{{Stub|Item}}"
+				};
+				this.Pages.Add(page);
+				pageTitles.Add(page);
+			}
+
+			var exists = PageCollection.Unlimited(this.Site, PageModules.Info, false);
+			exists.GetTitles(pageTitles);
+			foreach (var page in exists)
+			{
+				if (page.Exists)
+				{
+					Debug.WriteLine($"{page} exists!");
+					this.Pages[page.FullPageName()].PageName += " (item)";
+				}
 			}
 		}
+
+		protected override void Main() => this.SavePages("Create item page", false);
 		#endregion
 	}
 }
