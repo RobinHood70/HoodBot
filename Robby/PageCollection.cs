@@ -5,6 +5,7 @@
 	using System.Diagnostics;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.CommonCode.Globals;
@@ -357,9 +358,13 @@
 		/// <returns><see langword="true"/> if the page is within the collection's limitations and can be added to it; otherwise, <see langword="false"/>.</returns>
 		protected bool IsTitleInLimits(ISimpleTitle page) =>
 			page != null &&
-			(this.LimitationType == LimitationType.None ||
-			(this.LimitationType == LimitationType.Remove && !this.NamespaceLimitations.Contains(page.Namespace.Id)) ||
-			(this.LimitationType == LimitationType.FilterTo && this.NamespaceLimitations.Contains(page.Namespace.Id)));
+			this.LimitationType switch
+			{
+				LimitationType.None => true,
+				LimitationType.Remove => !this.NamespaceLimitations.Contains(page.Namespace.Id),
+				LimitationType.FilterTo => this.NamespaceLimitations.Contains(page.Namespace.Id),
+				_ => throw new InvalidOperationException(Resources.InvalidLimitationType)
+			};
 		#endregion
 
 		#region Protected Override Methods
@@ -370,7 +375,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			ThrowNull(input.Title, nameof(input), nameof(input.Title));
-			var inputTitle = new FullTitle(this.Site, input.Title);
+			var inputTitle = new Title(this.Site, input.Title);
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && input.LinkTypes.HasFlag(BacklinksTypes.ImageUsage))
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
@@ -521,12 +526,7 @@
 		/// <param name="title">The title of the page to create.</param>
 		/// <returns>The page that was created.</returns>
 		/// <remarks>If the page title specified represents a page already in the collection, that page will be overwritten.</remarks>
-		protected override Page New(ISimpleTitle title)
-		{
-			var page = this.PageCreator.CreatePage(title);
-			this[page.Key] = page;
-			return page;
-		}
+		protected override Page New(ISimpleTitle title) => this.PageCreator.CreatePage(title);
 		#endregion
 
 		#region Protected Virtual Methods

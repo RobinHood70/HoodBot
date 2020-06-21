@@ -97,6 +97,15 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The value of LimitationType is invalid..
+        /// </summary>
+        internal static string InvalidLimitationType {
+            get {
+                return ResourceManager.GetString("InvalidLimitationType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The namespace specified is not present on this wiki..
         /// </summary>
         internal static string InvalidNamespace {
