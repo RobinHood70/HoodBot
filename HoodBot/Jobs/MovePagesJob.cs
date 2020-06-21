@@ -54,7 +54,7 @@
 	}
 	#endregion
 
-	public abstract class PageMoverJob : EditJob
+	public abstract class MovePagesJob : EditJob
 	{
 		#region Fields
 		private readonly TitleCollection doNotDelete;
@@ -66,7 +66,7 @@
 		#endregion
 
 		#region Constructors
-		protected PageMoverJob(Site site, AsyncInfo asyncInfo)
+		protected MovePagesJob(Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
 		{
 			this.ProposedDeletions = new TitleCollection(site);
