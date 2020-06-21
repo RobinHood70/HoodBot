@@ -41,7 +41,7 @@
 		public virtual void Visit(HeaderNode node)
 		{
 			ThrowNull(node, nameof(node));
-			this.Visit(node.Title);
+			node.Title.Accept(this);
 		}
 
 		/// <summary>Visits the specified <see cref="IgnoreNode"/>.</summary>
