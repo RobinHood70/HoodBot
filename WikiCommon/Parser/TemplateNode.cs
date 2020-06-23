@@ -42,9 +42,9 @@
 			}
 		}
 
-		/// <summary>Gets the numbered parameters.</summary>
+		/// <summary>Gets a simple collection of all numbered parameters.</summary>
 		/// <value>The numbered parameters.</value>
-		/// <remarks>Parameters returned by this function include both fully anonymous and number-named parameters. The index returned is not guaranteed to be unique or consecutive. For example, a template like <c>{{Test|anon1a|anon2|1=anon1b|anon3}}</c> would return, in order: 1=anon1a, 2=anon2, 1=anon1b, 3=anon3.</remarks>
+		/// <remarks>Parameters returned by this function include both fully anonymous and numerically named parameters. The index returned is not guaranteed to be unique or consecutive. For example, a template like <c>{{Test|anon1a|anon2|1=anon1b|anon3}}</c> would return, in order: 1=anon1a, 2=anon2, 1=anon1b, 3=anon3.</remarks>
 		public IEnumerable<(int Index, ParameterNode Parameter)> NumberedParameters
 		{
 			get
@@ -331,6 +331,84 @@
 		/// <summary>Parses the title and returns the trimmed value.</summary>
 		/// <returns>The title.</returns>
 		public string GetTitleValue() => WikiTextUtilities.DecodeAndNormalize(WikiTextVisitor.Value(this.Title)).Trim();
+
+		/// <summary>Determines whether any parameters have numeric names.</summary>
+		/// <returns><see langword="true"/> if the parameter collection has any names which are valid integers; otherwise, <see langword="false"/>.</returns>
+		public bool HasNumericNames()
+		{
+			foreach (var param in this.Parameters)
+			{
+				if (!param.Anonymous && int.TryParse(param.NameToText(), out _))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		/// <summary>Gets numeric parameters in order, resolving conflicts in the same manner as MediaWiki does.</summary>
+		/// <param name="addMissing">Set to <see langword="true"/> if missing parameters (e.g., <c>{{Template|1=First|3=Missing2}}</c>) should be inserted as <see langword="null"/> values.</param>
+		/// <returns>A read-only dictionary of the parameters.</returns>
+		public IReadOnlyDictionary<int, ParameterNode?> OrderedNumericParameters(bool addMissing)
+		{
+			var retval = new SortedDictionary<int, ParameterNode?>();
+			var highest = 0;
+			foreach (var (index, parameter) in this.NumberedParameters)
+			{
+				if (index > highest)
+				{
+					highest = index;
+				}
+
+				retval[index] = parameter;
+			}
+
+			if (addMissing)
+			{
+				for (var i = 1; i < highest; i++)
+				{
+					if (!retval.ContainsKey(i))
+					{
+						retval.Add(i, null);
+					}
+				}
+			}
+
+			return retval;
+		}
+
+		/// <summary>Gets template parameters grouped into clusters based on their index.</summary>
+		/// <param name="length">The length of each cluster.</param>
+		/// <returns>Numeric and numerically-numbered parameters in groups of <paramref name="length"/>.</returns>
+		/// <example>Using <c>ParameterCluster(2)</c> on <c>{{MyTemplate|A|1|B|2|C|2=0}}</c> would return three lists: { "A", "0" }, { "B", "2" }, and { "C", null }. In the first case, "0" is returned because of the overridden parameter <c>2=0</c>. In the last case, <see langword="null"/> is returned because the parameter has no pairing within the template call. </example>
+		public IEnumerable<IList<ParameterNode?>> ParameterCluster(int length)
+		{
+			var parameters = this.OrderedNumericParameters(true);
+			var i = 1;
+			var retval = new List<ParameterNode?>();
+			while (i < parameters.Count)
+			{
+				for (var j = 0; j < length; j++)
+				{
+					retval.Add(parameters[i + j]);
+				}
+
+				yield return retval;
+				retval = new List<ParameterNode?>();
+				i += length;
+			}
+
+			if (retval.Count > 0)
+			{
+				while (retval.Count < length)
+				{
+					retval.Add(null);
+				}
+
+				yield return retval;
+			}
+		}
 
 		/// <summary>Returns the wiki text of the last parameter with the specified name.</summary>
 		/// <param name="parameterName">Name of the parameter.</param>
