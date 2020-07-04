@@ -22,7 +22,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Override Properties
-		protected override RequestType RequestType => RequestType.Get;
+		protected override RequestType RequestType => RequestType.Post;
 		#endregion
 
 		#region Protected Override Methods
