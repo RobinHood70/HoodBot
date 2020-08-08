@@ -39,13 +39,23 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override TagsItem? GetItem(JToken result) => result == null
-			? null
-			: new TagsItem(
+		protected override TagsItem? GetItem(JToken result)
+		{
+			if (result == null)
+			{
+				return null;
+			}
+
+			// displayname can return false when message for tag is non-existent, blank, or "-", so check for that and convert to null.
+			var displayToken = result["displayname"];
+			var displayName = (displayToken == null || displayToken.Type != JTokenType.String) ? null : (string?)displayToken;
+
+			return new TagsItem(
 				name: result.MustHaveString("name"),
 				description: (string?)result["description"],
-				displayName: (string?)result["displayname"],
+				displayName: displayName,
 				hitCount: (int?)result["hitcount"] ?? 0);
+		}
 		#endregion
 	}
 }
