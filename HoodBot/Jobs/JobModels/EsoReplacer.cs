@@ -29,7 +29,7 @@
 		private static readonly string[] OnlineSplit = new[] { "Online:" };
 		private static readonly string[] ResistanceSplit = new[] { " Resistance" };
 
-		private static bool initialized = false;
+		private static bool initialized;
 		#endregion
 
 		#region Public Methods

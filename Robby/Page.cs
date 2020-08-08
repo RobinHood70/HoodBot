@@ -112,12 +112,9 @@
 				if (this.Site.DisambiguatorAvailable)
 				{
 					// Disambiguator is 1.21+, so we don't need to worry about the fact that page properties are 1.17+.
-					if (this.loadOptionsUsed == null || !this.loadOptionsUsed.Modules.HasFlag(PageModules.Properties))
-					{
-						throw new InvalidOperationException(CurrentCulture(Resources.ModuleNotLoaded, nameof(PageModules.Properties), nameof(this.IsDisambiguation)));
-					}
-
-					return this.Properties.ContainsKey("disambiguation");
+					return this.loadOptionsUsed == null || !this.loadOptionsUsed.Modules.HasFlag(PageModules.Properties)
+						? throw new InvalidOperationException(CurrentCulture(Resources.ModuleNotLoaded, nameof(PageModules.Properties), nameof(this.IsDisambiguation)))
+						: this.Properties.ContainsKey("disambiguation");
 				}
 
 				if (this.loadOptionsUsed == null || !this.loadOptionsUsed.Modules.HasFlag(PageModules.Templates))

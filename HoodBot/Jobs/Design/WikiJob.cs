@@ -12,7 +12,7 @@
 	public abstract class WikiJob : IMessageSource, ISiteSpecific
 	{
 		#region Fields
-		private int progress = 0;
+		private int progress;
 		private int progressMaximum = 1;
 		#endregion
 

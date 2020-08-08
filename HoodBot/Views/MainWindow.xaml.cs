@@ -108,13 +108,11 @@
 						parameter.Value = result;
 					}
 				}
-				else if (typeof(IEnumerable).IsAssignableFrom(valueType))
-				{
-					parameter.Value = text.Split(TextArrays.EnvironmentNewLine, StringSplitOptions.None);
-				}
 				else
 				{
-					throw new NotSupportedException(CurrentCulture(UnhandledConstructorParameter, valueType.Name));
+					parameter.Value = typeof(IEnumerable).IsAssignableFrom(valueType)
+						? text.Split(TextArrays.EnvironmentNewLine, StringSplitOptions.None)
+						: throw new NotSupportedException(CurrentCulture(UnhandledConstructorParameter, valueType.Name));
 				}
 			}
 		}

@@ -40,8 +40,8 @@
 		#region Fields
 		private static readonly Regex BonusFinder = new Regex(@"\s*Current [Bb]onus:.*?\.");
 		private static readonly Regex SpaceFixer = new Regex(@"[\n\ ]+");
-		private static string? esoLogConnectionString = null; // = ConfigurationManager.ConnectionStrings["EsoLog"].ConnectionString;
-		private static string? patchVersion = null;
+		private static string? esoLogConnectionString; // = ConfigurationManager.ConnectionStrings["EsoLog"].ConnectionString;
+		private static string? patchVersion;
 		#endregion
 
 		#region Public Properties
@@ -209,14 +209,9 @@
 				var pageLoadOptions = new PageLoadOptions(PageModules.Custom);
 				var pageCreator = (job.Site.PageCreator as MetaTemplateCreator) ?? new MetaTemplateCreator();
 				var patchPage = (VariablesPage)patchTitle.Load(pageLoadOptions, pageCreator)[0];
-				if (patchPage.MainSet?["number"] is string version)
-				{
-					patchVersion = version;
-				}
-				else
-				{
-					throw new InvalidOperationException("Could not find patch version on page.");
-				}
+				patchVersion = patchPage.MainSet?["number"] is string version
+					? version
+					: throw new InvalidOperationException("Could not find patch version on page.");
 			}
 
 			return patchVersion;

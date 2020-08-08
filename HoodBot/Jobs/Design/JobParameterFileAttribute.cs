@@ -13,8 +13,8 @@
 
 		public SpecialFolder InitialFolder { get; set; } = SpecialFolder.MyDocuments;
 
-		public bool MustExist { get; set; } = false;
+		public bool MustExist { get; set; }
 
-		public bool Overwrite { get; set; } = false;
+		public bool Overwrite { get; set; }
 	}
 }

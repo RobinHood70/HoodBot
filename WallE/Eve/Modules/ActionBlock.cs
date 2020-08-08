@@ -71,16 +71,10 @@ namespace RobinHood70.WallE.Eve.Modules
 				watchUser: result["watchuser"].GetBCBool());
 		}
 
-		protected override BlockResult DeserializeCustom(string? result)
-		{
-			// Throw a custom error, since MW 1.25 and under handle this incorrectly.
-			if (result != null && result.Contains("must be an instance of Block", StringComparison.OrdinalIgnoreCase))
-			{
-				throw WikiException.General("reblock-failed", EveMessages.ReblockFailed);
-			}
-
-			return base.DeserializeCustom(result);
-		}
+		protected override BlockResult DeserializeCustom(string? result) =>
+			result != null && result.Contains("must be an instance of Block", StringComparison.OrdinalIgnoreCase)
+				? throw WikiException.General("reblock-failed", EveMessages.ReblockFailed) // Throw a custom error, since MW 1.25 and under handle this incorrectly.
+				: base.DeserializeCustom(result);
 		#endregion
 	}
 }

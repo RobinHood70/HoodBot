@@ -20,12 +20,7 @@
 				type = replaceWith;
 			}
 
-			if (!validTypes.Contains(type))
-			{
-				throw new ArgumentException(EveMessages.BadTokenRequest, nameof(type));
-			}
-
-			return type;
+			return !validTypes.Contains(type) ? throw new ArgumentException(EveMessages.BadTokenRequest, nameof(type)) : type;
 		}
 		#endregion
 	}

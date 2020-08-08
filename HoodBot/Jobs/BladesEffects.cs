@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
 	using RobinHood70.CommonCode;
@@ -16,7 +15,7 @@
 	public class BladesEffects : EditJob
 	{
 		#region Static Fields
-		private static readonly string[] ignoreList = new[]
+		private static readonly string[] IgnoreList = new[]
 		{
 			"Black Green Smoke",
 			"Continuous Frost Damage",
@@ -68,9 +67,8 @@
 
 			foreach (var entry in entries)
 			{
-				var desc = entry["_description"]["_key"].Value;
-				desc = translation[desc];
-				desc = desc
+				var desc = entry["_description"]["_key"].Value ?? throw new InvalidOperationException();
+				desc = translation[desc]
 					.Replace("{0} minute", "<duration> minute", StringComparison.Ordinal)
 					.Replace("{0} second", "<duration> second", StringComparison.Ordinal)
 					.Replace("{1} second", "<duration> second", StringComparison.Ordinal)
@@ -79,7 +77,7 @@
 					.Replace("{2}", "<magnitude3>", StringComparison.Ordinal);
 
 				var template = TemplateNode.FromParts("Effect Summary", true, ("type", string.Empty), ("image", string.Empty), ("syntax", desc), ("notrail", "1"));
-				if (entry["_editorName"].Value is string pageName && !ignoreList.Contains(pageName))
+				if (entry["_editorName"].Value is string pageName && !IgnoreList.Contains(pageName))
 				{
 					if (exists["Blades:" + pageName].Exists)
 					{

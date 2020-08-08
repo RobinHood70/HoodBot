@@ -30,7 +30,7 @@
 		/// <summary>Gets or sets the edit conflict action.</summary>
 		/// <value>The edit conflict action.</value>
 		/// <remarks>During a SavePage, if an edit conflict occurs, the page will automatically be re-loaded and the method specified here will be executed.</remarks>
-		protected Action<EditJob, Page>? EditConflictAction { get; set; } = null;
+		protected Action<EditJob, Page>? EditConflictAction { get; set; }
 		#endregion
 
 		#region Protected Methods

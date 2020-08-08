@@ -62,7 +62,7 @@
 		private readonly string replacementStatusFile = Path.Combine(UespSite.GetBotFolder(), "Replacements.json");
 		private readonly ISimpleTitleJsonConverter titleConverter;
 		private PageModules fromPageModules = PageModules.None;
-		private string? logDetails = null;
+		private string? logDetails;
 		#endregion
 
 		#region Constructors
@@ -162,7 +162,7 @@
 
 		protected MoveOptions MoveOptions { get; set; } = MoveOptions.None;
 
-		protected bool MoveOverExisting { get; set; } = false;
+		protected bool MoveOverExisting { get; set; }
 
 		protected TitleCollection ProposedDeletions { get; }
 

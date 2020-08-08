@@ -33,14 +33,9 @@
 			{
 				foreach (var propertyInput in propertyInputs)
 				{
-					if (this.properties.TryGetValue(propertyInput.GetType(), out var factoryMethod))
-					{
-						yield return factoryMethod(this.wal, propertyInput);
-					}
-					else
-					{
-						throw new EntryPointNotFoundException(CurrentCulture(Properties.EveMessages.ParameterInvalid, nameof(this.CreateModules), propertyInput.GetType().Name));
-					}
+					yield return this.properties.TryGetValue(propertyInput.GetType(), out var factoryMethod)
+						? factoryMethod(this.wal, propertyInput)
+						: throw new EntryPointNotFoundException(CurrentCulture(Properties.EveMessages.ParameterInvalid, nameof(this.CreateModules), propertyInput.GetType().Name));
 				}
 			}
 		}

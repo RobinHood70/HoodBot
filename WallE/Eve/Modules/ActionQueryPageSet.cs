@@ -121,15 +121,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Override Methods
-		public override PageSetResult<PageItem> Submit(QueryInput input)
-		{
-			if (input != this.input)
-			{
-				throw new InvalidOperationException(CurrentCulture(EveMessages.UseSubmit, nameof(this.Submit)));
-			}
-
-			return base.Submit(input);
-		}
+		public override PageSetResult<PageItem> Submit(QueryInput input) => input != this.input
+			? throw new InvalidOperationException(CurrentCulture(EveMessages.UseSubmit, nameof(this.Submit)))
+			: base.Submit(input);
 		#endregion
 
 		#region Protected Override Methods

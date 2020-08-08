@@ -14,7 +14,7 @@
 		#endregion
 
 		#region Public Static Properties
-		public static PauseToken None { get; } = default;
+		public static PauseToken None { get; }
 		#endregion
 
 		#region Public Properties

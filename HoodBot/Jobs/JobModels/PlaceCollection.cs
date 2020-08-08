@@ -12,21 +12,10 @@
 		#endregion
 
 		#region Public Indexers
-		public Place? this[string name]
-		{
-			get
-			{
-				if (this.ambiguousNames.Contains(name))
-				{
-					throw new InvalidOperationException("Tried to look up amibguous name: " + name);
-				}
-
-				return
-					this.primary.TryGetValue(name, out var place) ? place :
-					this.secondary.TryGetValue(name, out place) ? place :
-					default;
-			}
-		}
+		public Place? this[string name] =>
+			this.ambiguousNames.Contains(name) ? throw new InvalidOperationException("Tried to look up amibguous name: " + name) :
+			this.primary.TryGetValue(name, out var place) || this.secondary.TryGetValue(name, out place) ? place :
+			default;
 		#endregion
 
 		#region Public Methods

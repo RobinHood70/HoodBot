@@ -8,7 +8,7 @@
 	public class BladesCodeLine : BladesCodeLineCollection
 	{
 		#region Static Fields
-		private static char[] quote = new[] { '"' };
+		private static readonly char[] Quote = new[] { '"' };
 		#endregion
 
 		#region Constructors
@@ -18,7 +18,7 @@
 			var textSplit = line.Split(TextArrays.EqualsSign, 2);
 			if (textSplit.Length == 2)
 			{
-				this.Value = textSplit[1].Trim().Trim(quote);
+				this.Value = textSplit[1].Trim().Trim(Quote);
 				line = textSplit[0];
 			}
 
@@ -53,12 +53,7 @@
 
 			var i = 0;
 			var newLine = Parse(codeLines, ref i);
-			if (i != codeLines.Count)
-			{
-				throw new InvalidOperationException("Multiple objects in file.");
-			}
-
-			return newLine;
+			return i == codeLines.Count ? newLine : throw new InvalidOperationException("Multiple objects in file.");
 		}
 		#endregion
 
