@@ -34,10 +34,10 @@
 		protected override void FilterBacklinks(TitleCollection backlinkTitles)
 		{
 			ThrowNull(backlinkTitles, nameof(backlinkTitles));
-			backlinkTitles.Remove(new Title(this.Site, "Project:Community Portal"));
-			backlinkTitles.Remove(new Title(this.Site, "Project:Dragonborn Merge Project"));
-			backlinkTitles.Remove(new Title(this.Site, "Project:Dragonborn Merge Project/Merge Results"));
-			backlinkTitles.Remove(new Title(this.Site, "User:Kiz/Sandbox1"));
+			backlinkTitles.Remove("Project:Community Portal");
+			backlinkTitles.Remove("Project:Dragonborn Merge Project");
+			backlinkTitles.Remove("Project:Dragonborn Merge Project/Merge Results");
+			backlinkTitles.Remove("User:Kiz/Sandbox1");
 			base.FilterBacklinks(backlinkTitles);
 		}
 		#endregion

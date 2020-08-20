@@ -182,19 +182,6 @@
 		public static string? LabelName(this IFullTitle? title) => title == null ? null : (title.Fragment?.Trim() ?? LabelName(title as ISimpleTitle));
 		#endregion
 
-		#region IKeyedTitleExtensions
-
-		/// <summary>Indicates whether the current title is equal to another title based on Namespace, PageName, and Key.</summary>
-		/// <param name="title">The title to check.</param>
-		/// <param name="other">The title to compare to.</param>
-		/// <returns><see langword="true"/> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false"/>.</returns>
-		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
-		[SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0", Justification = "IsSameTitle will return false if this is null, which will then short-circuit the remainder of the comparison.")]
-		public static bool KeyedEquals(this IKeyedTitle? title, IKeyedTitle other) =>
-			title == null ? other == null :
-			title.SimpleEquals(other) && title.Key == other.Key;
-		#endregion
-
 		#region IEnumerable<ISimpleTitle> Extensions
 
 		/// <summary>Convert a collection of ISimpleTitles to their full page names.</summary>

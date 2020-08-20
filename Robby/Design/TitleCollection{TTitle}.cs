@@ -11,16 +11,18 @@
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.CommonCode.Globals;
 
+	// TODO: Re-write so all lookups (Contains, IndexOf, Remove) use numeric namespace and pagename. Will probably require Key itself to be rewritten to match. Right now, things like IndexOf((string)key) will fail for alternative namespace names.
+
 	/// <summary>Provides a base class to manipulate a collection of titles.</summary>
 	/// <typeparam name="TTitle">The type of the title.</typeparam>
 	/// <seealso cref="IList{TTitle}" />
 	/// <seealso cref="IReadOnlyCollection{TTitle}" />
-	/// <remarks>This collection class functions similarly to a KeyedCollection, but automatically overwrites existing items with new ones. Unlike a KeyedCollection, however, it does not support changing an item's key, since <see cref="IKeyedTitle"/> does not allow this.</remarks>
+	/// <remarks>This collection class functions similarly to a KeyedCollection, but automatically overwrites existing items with new ones. Unlike a KeyedCollection, however, it does not support changing an item's key, since <see cref="IKeyedTitle"/> inherently does not allow this.</remarks>
 	public abstract class TitleCollection<TTitle> : IList<TTitle>, IReadOnlyCollection<TTitle>, ISiteSpecific
 		where TTitle : class, IKeyedTitle
 	{
 		#region Fields
-		private readonly Dictionary<string, TTitle> dictionary = new Dictionary<string, TTitle>();
+		private readonly Dictionary<ISimpleTitle, TTitle> dictionary = new Dictionary<ISimpleTitle, TTitle>(SimpleTitleEqualityComparer.Instance);
 		private readonly List<TTitle> items = new List<TTitle>();
 		#endregion
 
@@ -50,17 +52,6 @@
 		public Site Site { get; }
 		#endregion
 
-		#region Protected Properties
-
-		/// <summary>Gets the collection's underlying title lookup dictionary.</summary>
-		/// <value>The dictionary.</value>
-		protected IReadOnlyDictionary<string, TTitle> Dictionary => this.dictionary;
-
-		/// <summary>Gets the list of all items in the collection.</summary>
-		/// <value>The items.</value>
-		protected IReadOnlyList<TTitle> Items => this.items;
-		#endregion
-
 		#region Public Indexers
 
 		/// <summary>Gets or sets the <see cref="ISimpleTitle">Title</see> at the specified index.</summary>
@@ -80,10 +71,38 @@
 		/// <summary>Gets or sets the <see cref="ISimpleTitle">Title</see> with the specified key.</summary>
 		/// <param name="key">The key.</param>
 		/// <returns>The <see cref="ISimpleTitle">Title</see>.</returns>
-		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry if the requested entry isn't found.</remarks>
+		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry on set if the requested entry isn't found.</remarks>
 		public virtual TTitle this[string key]
 		{
-			get => this.dictionary[key];
+			get => this[this.TextToTitle(key)];
+			set
+			{
+				var index = this.IndexOf(key);
+				if (index < 0)
+				{
+					this.items.Add(value);
+				}
+				else
+				{
+					this.items[index] = value;
+				}
+
+				var title = this.TextToTitle(key);
+				this.dictionary[title] = value;
+			}
+		}
+
+		/// <summary>Gets or sets the <see cref="ISimpleTitle">Title</see> with the specified key.</summary>
+		/// <param name="key">The key.</param>
+		/// <returns>The <see cref="ISimpleTitle">Title</see>.</returns>
+		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry on set if the requested entry isn't found.</remarks>
+		[SuppressMessage("Microsoft.Design", "CA1043:UseIntegralOrStringArgumentForIndexers", Justification = @"Integer and string methods are also available, but this method provides the most accuracy.")]
+		public virtual TTitle this[ISimpleTitle key]
+		{
+			get => !this.dictionary.TryGetValue(key, out var retval)
+				? this.FindTitle(key) ?? throw new KeyNotFoundException()
+				: retval;
+
 			set
 			{
 				var index = this.IndexOf(key);
@@ -180,7 +199,7 @@
 		/// <summary>Determines whether the <see cref="TitleCollection">collection</see> contains a specific value.</summary>
 		/// <param name="item">The object to locate in the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns><see langword="true" /> if <paramref name="item" /> is found in the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />.</returns>
-		public bool Contains(ISimpleTitle item) => this.FindTitle(item, false) != null;
+		public bool Contains(ISimpleTitle item) => this.FindTitle(item) != null;
 
 		/// <summary>Determines whether the <see cref="TitleCollection">collection</see> contains a specific value.</summary>
 		/// <param name="item">The object to locate in the <see cref="TitleCollection">collection</see>.</param>
@@ -194,7 +213,12 @@
 		/// <summary>Determines whether the collection contains an item with the specified key.</summary>
 		/// <param name="key">The key to search for.</param>
 		/// <returns><see langword="true" /> if the collection contains an item with the specified key; otherwise, <see langword="true" />.</returns>
-		public bool Contains(string key) => this.dictionary.ContainsKey(key) || this.FindTitle(key, false) != null;
+		public bool Contains(string key)
+		{
+			ThrowNull(key, nameof(key));
+			var title = this.TextToTitle(key);
+			return this.dictionary.ContainsKey(title) || this.FindTitle(title) != null;
+		}
 
 		/// <summary>Copies the elements of the <see cref="TitleCollection">collection</see> to an <see cref="Array" />, starting at a particular <see cref="Array" /> index.</summary>
 		/// <param name="array">The one-dimensional <see cref="Array" /> that is the destination of the elements copied from <see cref="TitleCollection">collection</see>. The <see cref="Array" /> must have zero-based indexing.</param>
@@ -220,40 +244,27 @@
 		public void FilterToNamespaces(params int[] namespaces) => this.FilterToNamespaces(namespaces as IEnumerable<int>);
 
 		/// <summary>Finds any ISimpleTitle within the collection.</summary>
-		/// <param name="fullPageName">The full page name of the item to find.</param>
-		/// <param name="ignoreCase">If set to <see langword="true"/>, titles will match regardless of the case of the page name. (Note that namespace casing must still follow site capitalization rules.)</param>
+		/// <param name="key">The full page name of the item to find.</param>
 		/// <returns>The item from the collection, if found; otherwise, null.</returns>
 		/// <remarks>This is an O(n) operation.</remarks>
-		public TTitle? FindTitle(string fullPageName, bool ignoreCase) => this.FindTitle(new Title(this.Site, fullPageName), ignoreCase);
+		public TTitle? FindTitle(string key) => this.FindTitle(this.TextToTitle(key));
 
 		/// <summary>Finds any ISimpleTitle within the collection.</summary>
 		/// <param name="ns">The namespace the title is in.</param>
 		/// <param name="pageName">The full page name of the item to find.</param>
-		/// <param name="ignoreCase">If set to <see langword="true"/>, titles will match regardless of the case of the page name.</param>
 		/// <returns>The item from the collection, if found; otherwise, null.</returns>
 		/// <remarks>This is an O(n) operation.</remarks>
-		public TTitle? FindTitle(int ns, string pageName, bool ignoreCase) => this.FindTitle(new Title(this.Site, ns, pageName), ignoreCase);
+		public TTitle? FindTitle(int ns, string pageName) => this.FindTitle(new Title(this.Site, ns, pageName));
 
 		/// <summary>Finds any ISimpleTitle within the collection.</summary>
 		/// <param name="item">The item to find.</param>
-		/// <param name="ignoreCase">If set to <see langword="true"/>, titles will match regardless of the case of the page name.</param>
 		/// <returns>The item from the collection, if found; otherwise, null.</returns>
 		/// <remarks>This is an O(n) operation.</remarks>
-		public TTitle? FindTitle(ISimpleTitle item, bool ignoreCase)
+		public TTitle? FindTitle(ISimpleTitle item)
 		{
 			ThrowNull(item, nameof(item));
-			foreach (var title in this)
-			{
-				if (title.SimpleEquals(item)
-					|| (ignoreCase
-						&& title.Namespace == item.Namespace
-						&& string.Compare(title.PageName, item.PageName, StringComparison.OrdinalIgnoreCase) == 0))
-				{
-					return title;
-				}
-			}
-
-			return null;
+			var index = this.IndexOf(item);
+			return index == -1 ? null : this.items[index];
 		}
 
 		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
@@ -682,23 +693,42 @@
 		public int IndexOf(TTitle item) => this.IndexOf((item ?? throw ArgumentNull(nameof(item))).Key);
 
 		/// <summary>Determines the index of a specific item in the <see cref="TitleCollection">collection</see>.</summary>
-		/// <param name="key">The key of the item to locate in the <see cref="TitleCollection">collection</see>.</param>
-		/// <returns>The index of the item with the specified <paramref name="key" /> if found in the list; otherwise, -1.</returns>
-		public int IndexOf(string key)
+		/// <param name="title">The item to locate in the <see cref="TitleCollection">collection</see>.</param>
+		/// <returns>The index of <paramref name="title" /> if found in the list; otherwise, -1.</returns>
+		public int IndexOf(ISimpleTitle title)
 		{
-			// ContainsKey is O(1), so check to make sure item exists before iterating the collection.
-			if (this.dictionary.ContainsKey(key))
+			// ContainsKey is O(1), so check to see if key exists; if not, iterate looking for Namespace/PageName match.
+			if (this.dictionary.ContainsKey(title))
 			{
 				for (var i = 0; i < this.items.Count; i++)
 				{
-					if (this[i].Key == key)
+					if (this.items[i].Key.SimpleEquals(title))
 					{
 						return i;
 					}
 				}
+
+				throw new InvalidOperationException("Local dictionary and items list are out of sync.");
+			}
+
+			for (var i = 0; i < this.items.Count; i++)
+			{
+				if (this.items[i].SimpleEquals(title))
+				{
+					return i;
+				}
 			}
 
 			return -1;
+		}
+
+		/// <summary>Determines the index of a specific item in the <see cref="TitleCollection">collection</see>.</summary>
+		/// <param name="key">The key of the item to locate in the <see cref="TitleCollection">collection</see>.</param>
+		/// <returns>The index of the item with the specified <paramref name="key" /> if found in the list; otherwise, -1.</returns>
+		public int IndexOf(string key)
+		{
+			ThrowNull(key, nameof(key));
+			return this.IndexOf(this.TextToTitle(key));
 		}
 
 		/// <summary>Inserts an item into the <see cref="TitleCollection">collection</see> at the specified index.</summary>
@@ -717,14 +747,7 @@
 		public bool Remove(string key)
 		{
 			ThrowNull(key, nameof(key));
-			var index = this.IndexOf(key);
-			if (index == -1)
-			{
-				return false;
-			}
-
-			this.RemoveItem(index);
-			return true;
+			return this.Remove(this.TextToTitle(key));
 		}
 
 		/// <summary>Removes a specific item from the <see cref="TitleCollection">collection</see>.</summary>
@@ -733,18 +756,11 @@
 		public bool Remove(ISimpleTitle item)
 		{
 			ThrowNull(item, nameof(item));
-			if (this.Remove(item.FullPageName()))
+			var i = this.IndexOf(item);
+			if (i != -1)
 			{
+				this.RemoveItem(i);
 				return true;
-			}
-
-			for (var i = this.Count - 1; i >= 0; i--)
-			{
-				if (this[i].SimpleEquals(item))
-				{
-					this.RemoveAt(i);
-					return true;
-				}
 			}
 
 			return false;
@@ -820,10 +836,11 @@
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
 		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
+		/// <remarks>This methods expects an exact match between the value passed and the <see cref="IKeyedTitle.Key"/>. To also check potentially altered Namespace and PageName, use <see cref="FindTitle(ISimpleTitle, bool)"/>.</remarks>
 		public bool TryGetValue(ISimpleTitle key, [MaybeNullWhen(false)] out TTitle value)
 		{
 			ThrowNull(key, nameof(key));
-			return this.dictionary.TryGetValue(key.FullPageName(), out value!);
+			return this.dictionary.TryGetValue(key, out value!);
 		}
 
 		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
@@ -831,7 +848,12 @@
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
 		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
-		public bool TryGetValue(string key, [MaybeNullWhen(false)] out TTitle value) => this.dictionary.TryGetValue(key, out value!);
+		public bool TryGetValue(string key, [MaybeNullWhen(false)] out TTitle value)
+		{
+			ThrowNull(key, nameof(key));
+			var title = this.TextToTitle(key);
+			return this.dictionary.TryGetValue(title, out value!);
+		}
 
 		/// <summary>Returns the requested value, or null if not found.</summary>
 		/// <param name="key">The key.</param>
@@ -845,7 +867,7 @@
 		/// <summary>Returns the requested value, or null if not found.</summary>
 		/// <param name="key">The key.</param>
 		/// <returns>The requested value, or null if not found.</returns>
-		public TTitle? ValueOrDefault(string key) => key != null && this.dictionary.TryGetValue(key, out var item) ? item : default;
+		public TTitle? ValueOrDefault(string key) => key == null ? default : this.FindTitle(this.TextToTitle(key));
 		#endregion
 
 		#region Public Abstract Methods
@@ -1036,6 +1058,10 @@
 		/// <param name="title">The title from which to create the new item.</param>
 		/// <returns>A new item of the same type as the collection.</returns>
 		protected abstract TTitle New(ISimpleTitle title);
+		#endregion
+
+		#region Private Methods
+		private ISimpleTitle TextToTitle(string text) => new Title(this.Site, text);
 		#endregion
 	}
 }

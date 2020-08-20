@@ -44,7 +44,7 @@
 			ThrowNull(pageName, nameof(pageName));
 			this.Namespace = ns;
 			this.PageName = pageName;
-			this.Key = this.FullPageName();
+			this.Key = new KeyTitle(this);
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the site and full page name.</summary>
@@ -70,7 +70,7 @@
 
 			this.Namespace = site.Namespaces[ns];
 			this.PageName = pageName;
-			this.Key = this.FullPageName();
+			this.Key = new KeyTitle(this);
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class, copying the information from another <see cref="ISimpleTitle"/> object.</summary>
@@ -81,15 +81,15 @@
 			ThrowNull(title, nameof(title));
 			this.Namespace = title.Namespace;
 			this.PageName = title.PageName;
-			this.Key = title is IKeyedTitle keyed ? keyed.Key : this.FullPageName();
+			this.Key = new KeyTitle(this);
 		}
 		#endregion
 
 		#region Public Properties
 
-		/// <summary>Gets or sets the key to use in dictionary lookups. This is identical to FullPageName (after any decoding and normalization), but unlike FullPagename, cannot be modified (via PageName) after being set.</summary>
-		/// <value>The key.</value>
-		public string Key { get; protected set; }
+		/// <summary>Gets the key for the title.</summary>
+		/// <remarks>This will always be the namespace and page name from the constructor, regardless of changes to the Title's properties thereafter.</remarks>
+		public ISimpleTitle Key { get; }
 
 		/// <inheritdoc/>
 		public Namespace Namespace { get; set; }
@@ -456,6 +456,21 @@
 
 						return this.Protect(input) ? ChangeStatus.Success : ChangeStatus.Failure;
 					});
+		}
+		#endregion
+
+		#region Private Structures
+		private struct KeyTitle : ISimpleTitle
+		{
+			public KeyTitle(ISimpleTitle title)
+			{
+				this.Namespace = title.Namespace;
+				this.PageName = title.PageName;
+			}
+
+			public Namespace Namespace { get; }
+
+			public string PageName { get; }
 		}
 		#endregion
 	}

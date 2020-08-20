@@ -161,7 +161,7 @@
 				}
 
 				var newTitle = new Title(this.Site, UespNamespaces.Online, setName);
-				if ((catMembers.FindTitle(newTitle, true) ?? catMembers.FindTitle(UespNamespaces.Online, setName + " (set)", true)) is Title foundPage)
+				if ((catMembers.FindTitle(newTitle) ?? catMembers.FindTitle(UespNamespaces.Online, setName + " (set)")) is Title foundPage)
 				{
 					titles.Add(foundPage);
 					try
