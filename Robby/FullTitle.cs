@@ -132,15 +132,15 @@
 		#region Public Override Methods
 
 		/// <summary>Returns a <see cref="string" /> that represents this title.</summary>
-		/// <param name="forceLink">if set to <c>true</c>, forces link formatting in namespaces that require it (e.g., Category and File), regardless of the value of LeadingColon.</param>
+		/// <param name="forceLink">if set to <c>true</c>, forces link formatting in namespaces that require it (e.g., Category and File).</param>
 		/// <returns>A <see cref="string" /> that represents this title.</returns>
 		public override string ToString(bool forceLink)
 		{
-			var baseText = base.ToString(forceLink);
+			var colon = (forceLink && this.Namespace.IsForcedLinkSpace) ? ":" : string.Empty;
 			var interwiki = this.Interwiki == null ? string.Empty : this.Interwiki.Prefix + ':';
 			var fragment = this.Fragment == null ? string.Empty : '#' + this.Fragment;
 
-			return interwiki + baseText + fragment;
+			return colon + interwiki + this.FullPageName() + fragment;
 		}
 		#endregion
 	}
