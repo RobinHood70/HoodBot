@@ -30,6 +30,7 @@
 			{
 				checkPage,
 				"User:HoodBot/Results",
+				"User:Kiz/Sandbox1",
 				"Project:Dragonborn Merge Project",
 			};
 		}
@@ -68,7 +69,7 @@
 			pageCollection.GetNamespace(UespNamespaces.Dragonborn, Filter.Any);
 			pageCollection.GetNamespace(UespNamespaces.DragonbornTalk, Filter.Any);
 			pageCollection.GetNamespace(MediaWikiNamespaces.File, Filter.Any, "DB-");
-			pageCollection.GetNamespace(MediaWikiNamespaces.Category, Filter.Any, "Dragonborn");
+			pageCollection.GetCategories("Dragonborn");
 			this.FilterPages(pageCollection);
 			foreach (var page in ignore)
 			{
@@ -157,21 +158,29 @@
 
 		private void RemainingRedirects(PageCollection pageCollection)
 		{
-			this.WriteLine("\n== Remaining Redirect Pages ==");
-			this.WriteLine("Pages here were redirects ''before'' any page moves occurred. They should be checked against the Skyrim page of the same name to figure out what to do with them.");
+			var redirList = new Dictionary<Page, string>();
 			foreach (var page in pageCollection)
 			{
-				var categories = new TitleCollection(this.Site);
-				categories.AddRange(page.Categories);
+				var categories = new TitleCollection(this.Site, page.Categories);
 				if (page.IsRedirect && !categories.Contains("Category:Redirects from Moves"))
 				{
-					var newNs = page.Namespace == UespNamespaces.Dragonborn ? UespNamespaces.Skyrim : UespNamespaces.SkyrimTalk;
-					var newTitle = new FullTitle(page.Site, newNs, page.PageName);
 					var pageInfo = this.GetTextForPage(page);
 					if (pageInfo.Length > 0)
 					{
-						this.WriteLine($"* {page.PageName}: {{{{Pl|{page.FullPageName()}|{page.Namespace.Name}|3=redirect=no}}}}{pageInfo} / {{{{Pl|{newTitle.FullPageName()}|{newTitle.Namespace.Name}|3=redirect=no}}}}");
+						redirList.Add(page, pageInfo);
 					}
+				}
+			}
+
+			if (redirList.Count > 0)
+			{
+				this.WriteLine("\n== Remaining Redirect Pages ==");
+				this.WriteLine("Pages here were redirects ''before'' any page moves occurred. They should be checked against the Skyrim page of the same name to figure out what to do with them.");
+				foreach (var (page, pageInfo) in redirList)
+				{
+					var newNs = page.Namespace == UespNamespaces.Dragonborn ? UespNamespaces.Skyrim : UespNamespaces.SkyrimTalk;
+					var newTitle = new FullTitle(page.Site, newNs, page.PageName);
+					this.WriteLine($"* {page.PageName}: {{{{Pl|{page.FullPageName()}|{page.Namespace.Name}|3=redirect=no}}}}{pageInfo} / {{{{Pl|{newTitle.FullPageName()}|{newTitle.Namespace.Name}|3=redirect=no}}}}");
 				}
 			}
 		}
