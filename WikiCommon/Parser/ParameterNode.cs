@@ -178,6 +178,9 @@
 		/// <param name="visitor">The visiting class.</param>
 		public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
 
+		/// <summary>Removes any value stored in <see cref="Name"/>, making this an anonymous parameter.</summary>
+		public void Anonymize() => this.Name = null;
+
 		/// <summary>Gets the parameter's name, converting anonymous parameters to their numbered value.</summary>
 		/// <returns>The parameter name.</returns>
 		public string? NameToText() => this.Name == null ? null : WikiTextVisitor.Value(this.Name).Trim();
@@ -186,41 +189,29 @@
 		/// <param name="name">The name.</param>
 		public void SetName(string name)
 		{
-			if (name == null)
-			{
-				this.Name = null;
-			}
-			else
-			{
-				this.SetName(WikiTextParser.Parse(name));
-			}
+			ThrowNull(name, nameof(name));
+			this.SetName(WikiTextParser.Parse(name));
 		}
 
 		/// <summary>Sets the name from a list of nodes.</summary>
 		/// <param name="name">The name.</param>
-		public void SetName(IEnumerable<IWikiNode>? name)
+		public void SetName(IEnumerable<IWikiNode> name)
 		{
-			if (name == null)
+			ThrowNull(name, nameof(name));
+			if (this.Name == null)
 			{
-				this.Name = null;
+				this.Name = new NodeCollection(this, name);
 			}
 			else
 			{
-				if (this.Name == null)
-				{
-					this.Name = new NodeCollection(this, name);
-				}
-				else
-				{
-					this.Name.Clear();
-					this.Name.AddRange(name);
-				}
+				this.Name.Clear();
+				this.Name.AddRange(name);
 			}
 		}
 
 		/// <summary>Sets the value to the specified text.</summary>
 		/// <param name="value">The value.</param>
-		public void SetValue(string value)
+		public void SetValue(string? value)
 		{
 			if (value == null)
 			{
