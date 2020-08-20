@@ -416,6 +416,24 @@
 			}
 		}
 
+		/// <summary>Updates the SiteLink title with the values from the provided title.</summary>
+		/// <param name="title">The title to copy from.</param>
+		public void SetTitle(IFullTitle title)
+		{
+			this.SetTitle((ISimpleTitle)title);
+			this.Interwiki = title.Interwiki;
+			this.Fragment = title.Fragment;
+		}
+
+		/// <summary>Updates the SiteLink title with the values from the provided title.</summary>
+		/// <param name="title">The title to copy from.</param>
+		public void SetTitle(ISimpleTitle title)
+		{
+			ThrowNull(title, nameof(title));
+			this.Namespace = title.Namespace;
+			this.PageName = title.PageName;
+		}
+
 		/// <summary>Converts to the link to a <see cref="LinkNode"/>.</summary>
 		/// <returns>A <see cref="LinkNode"/> containing the parsed link text.</returns>
 		public LinkNode ToLinkNode()
@@ -427,7 +445,19 @@
 				values.Add(text);
 			}
 
-			return LinkNode.FromParts(this.TitleWhitespaceBefore + this.ToString(false) + this.TitleWhitespaceAfter, values);
+			return LinkNode.FromParts(this.TitleWhitespaceBefore + this.ToString(this.LeadingColon) + this.TitleWhitespaceAfter, values);
+		}
+
+		/// <summary>Copies values from the link into a <see cref="LinkNode"/>.</summary>
+		/// <param name="node">The node to update.</param>
+		public void UpdateLinkNode(LinkNode node)
+		{
+			ThrowNull(node, nameof(node));
+			var thisNode = this.ToLinkNode();
+			node.Title.Clear();
+			node.Title.AddRange(thisNode.Title);
+			node.Parameters.Clear();
+			node.Parameters.AddRange(thisNode.Parameters);
 		}
 		#endregion
 
