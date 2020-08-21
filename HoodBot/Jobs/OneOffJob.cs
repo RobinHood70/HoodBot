@@ -1,17 +1,14 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
-	using System.IO;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.HoodBot.Uesp;
+	using RobinHood70.HoodBot.Parser;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon.Parser;
+	using static RobinHood70.CommonCode.Globals;
 
-	public class OneOffJob : EditJob
+	public class OneOffJob : ParsedPageJob
 	{
 		#region Constructors
 		[JobInfo("One-Off Job")]
@@ -19,63 +16,19 @@
 			: base(site, asyncInfo)
 		{
 		}
-		#endregion
 
-		#region Protected Override Methods
-		protected override void BeforeLogging()
+		protected override string EditSummary => "Remove end parameter";
+
+		protected override void LoadPages() => this.Pages.GetBacklinks("Template:ESO Antiquity", WikiCommon.BacklinksTypes.EmbeddedIn);
+
+		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
-			var text = File.ReadAllText(Path.Combine(UespSite.GetBotFolder(), "Templates.txt"));
-			var parsedText = WikiTextParser.Parse(text);
-			var pageTitles = new TitleCollection(this.Site);
-			foreach (var header in parsedText.FindAllLinked<HeaderNode>())
+			ThrowNull(parsedPage, nameof(parsedPage));
+			foreach (var template in parsedPage.FindAllRecursive<TemplateNode>(node => node.GetTitleValue() == "ESO Antiquity"))
 			{
-				var pageName = ((HeaderNode)header.Value).GetInnerText(true);
-				var section = new NodeCollection(null);
-				section.AddLast(TemplateNode.FromParts("Minimal"));
-				var node = header;
-				while (node.Next is LinkedListNode<IWikiNode> next && !(next.Value is HeaderNode))
-				{
-					node = next;
-					if (node.Value is TemplateNode template)
-					{
-						var templateName = template.GetTitleValue();
-						if (templateName != "NewLine")
-						{
-							section.AddLast(template);
-						}
-
-						if (templateName == "Blades Item Summary")
-						{
-							section.AddLast(new TextNode($"\n'''{pageName}''' {{{{Huh}}}}\n"));
-						}
-					}
-					else
-					{
-						section.AddLast(node.Value);
-					}
-				}
-
-				var page = new Page(this.Site, UespNamespaces.Blades, pageName)
-				{
-					Text = WikiTextVisitor.Raw(section).Trim() + "\n\n{{Stub|Item}}"
-				};
-				this.Pages.Add(page);
-				pageTitles.Add(page);
-			}
-
-			var exists = PageCollection.Unlimited(this.Site, PageModules.Info, false);
-			exists.GetTitles(pageTitles);
-			foreach (var page in exists)
-			{
-				if (page.Exists)
-				{
-					Debug.WriteLine($"{page} exists!");
-					this.Pages[page.FullPageName()].PageName += " (item)";
-				}
+				template.RemoveParameter("end");
 			}
 		}
-
-		protected override void Main() => this.SavePages("Create item page", false);
 		#endregion
 	}
 }

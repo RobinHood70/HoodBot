@@ -47,7 +47,7 @@
 					npc = allNames.BinarySearch(labelName);
 					if (npc < 0)
 					{
-						Debug.WriteLine($"* [[{page.FullPageName()}|{labelName}]]");
+						Debug.WriteLine($"* [[{page.FullPageName}|{labelName}]]");
 					}
 				}
 			}

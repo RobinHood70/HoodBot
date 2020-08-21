@@ -1,5 +1,8 @@
 ﻿namespace RobinHood70.Robby
 {
+	using System;
+	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.CommonCode.Globals;
@@ -11,19 +14,42 @@
 		// TODO: MessagePage has different data loaded depending whether it's a faked page or a genuine message. Is this a good idea? Loading all data would require calls to both Load and AllMessages, which could be undesirable in the PageCreator. Might be a better idea to split this into Message and MessagePage objects depending on behaviour desired, with Message being custom and light-weight.
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="MessagePage"/> class.</summary>
-		/// <param name="site">The site the page is from.</param>
-		/// <param name="pageName">The page name (<em>without</em> the leading namespace).</param>
-		protected internal MessagePage(Site site, string pageName)
-			: base(site, MediaWikiNamespaces.MediaWiki, pageName)
+		/// <summary>Initializes a new instance of the <see cref="MessagePage" /> class.</summary>
+		/// <param name="site">The site the Message is from.</param>
+		/// <param name="pageName">The page name.</param>
+		public MessagePage(Site site, string pageName)
+			: base((site ?? throw ArgumentNull(nameof(site))).Namespaces[MediaWikiNamespaces.MediaWiki], pageName)
 		{
 		}
 
+		/// <summary>Initializes a new instance of the <see cref="MessagePage" /> class.</summary>
+		/// <param name="ns">The namespace (must be Message).</param>
+		/// <param name="pageName">The page name (<em>without</em> the leading namespace).</param>
+		public MessagePage(Namespace ns, string pageName)
+			: base(ns, pageName)
+		{
+			if (ns.Id != MediaWikiNamespaces.MediaWiki)
+			{
+				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, ns.Site.Namespaces[MediaWikiNamespaces.MediaWiki].Name), nameof(ns));
+			}
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="MessagePage" /> class.</summary>
+		/// <param name="title">The <see cref="ISimpleTitle"/> to copy values from.</param>
+		public MessagePage(ISimpleTitle title)
+			: base(title)
+		{
+			if (title.Namespace.Id != MediaWikiNamespaces.MediaWiki)
+			{
+				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, this.Site.Namespaces[MediaWikiNamespaces.MediaWiki].Name), nameof(title));
+			}
+		}
+
 		/// <summary>Initializes a new instance of the <see cref="MessagePage"/> class.</summary>
-		/// <param name="site">The site the page is from.</param>
+		/// <param name="ns">The namespace of the page (must be MediaWiki).</param>
 		/// <param name="item">The AllMessagesItem to populate this instance from.</param>
-		protected internal MessagePage(Site site, AllMessagesItem item)
-			: base(site, MediaWikiNamespaces.MediaWiki, (item ?? throw ArgumentNull(nameof(item))).Name) => this.PopulateFrom(item);
+		protected internal MessagePage(Namespace ns, AllMessagesItem item)
+			: base(ns, (item ?? throw ArgumentNull(nameof(item))).Name) => this.PopulateFrom(item);
 		#endregion
 
 		#region Public Properties

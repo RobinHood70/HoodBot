@@ -60,13 +60,13 @@
 		public bool AddCategory(string category)
 		{
 			ThrowNull(category, nameof(category));
-			var catTitle = FullTitle.Coerce(this.Site, MediaWikiNamespaces.Category, category);
+			var catTitle = LinkTitle.Coerce(this.Site, MediaWikiNamespaces.Category, category);
 			LinkedListNode<IWikiNode>? lastCategory = null;
 			foreach (var link in this.FindAllLinked<LinkNode>())
 			{
 				var linkNode = (LinkNode)link.Value;
 				var titleText = WikiTextVisitor.Value(linkNode.Title);
-				var title = new FullTitle(this.Site, titleText);
+				var title = LinkTitle.FromName(this.Site, titleText);
 				if (title.Namespace == MediaWikiNamespaces.Category)
 				{
 					if (title.PageName == catTitle.PageName)

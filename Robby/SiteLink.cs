@@ -54,7 +54,7 @@
 	#endregion
 
 	/// <summary>Represents a link with site-specific Title information and parameters in the site's language.</summary>
-	public class SiteLink : FullTitle
+	public class SiteLink : LinkTitle
 	{
 		#region Static Fields
 		private static readonly Dictionary<string, ParameterType> DirectValues = new Dictionary<string, ParameterType>();
@@ -101,7 +101,7 @@
 
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
 		/// <param name="title">The title.</param>
-		public SiteLink(IFullTitle title)
+		public SiteLink(ILinkTitle title)
 			: base(title) => InitializeImageInfo(this.Site);
 
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
@@ -418,7 +418,7 @@
 
 		/// <summary>Updates the SiteLink title with the values from the provided title.</summary>
 		/// <param name="title">The title to copy from.</param>
-		public void SetTitle(IFullTitle title)
+		public void SetTitle(ILinkTitle title)
 		{
 			this.SetTitle((ISimpleTitle)title);
 			this.Interwiki = title.Interwiki;

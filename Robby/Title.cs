@@ -31,85 +31,133 @@
 	#endregion
 
 	/// <summary>Provides a light-weight holder for titles with several information and manipulation functions.</summary>
-	public class Title : IKeyedTitle, IMessageSource, ISimpleTitle
+	public class Title : IMessageSource, IEquatable<Title>, ISimpleTitle
 	{
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the site and full page name.</summary>
+		/// <summary>Initializes a new instance of the <see cref="Title" /> class.</summary>
 		/// <param name="ns">The namespace of the title.</param>
 		/// <param name="pageName">The page name (without leading namespace).</param>
 		public Title([NotNull, ValidatedNotNull] Namespace ns, [NotNull, ValidatedNotNull] string pageName)
 		{
-			ThrowNull(ns, nameof(ns));
-			ThrowNull(pageName, nameof(pageName));
-			this.Namespace = ns;
-			this.PageName = pageName;
-			this.Key = new KeyTitle(this);
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the site and full page name.</summary>
-		/// <param name="site">The site this title is from.</param>
-		/// <param name="fullPageName">The full name of the page.</param>
-		public Title([NotNull, ValidatedNotNull] Site site, [NotNull, ValidatedNotNull] string fullPageName)
-			: this(new TitleParser(site, MediaWikiNamespaces.Main, fullPageName, false))
-		{
+			this.Namespace = ns ?? throw ArgumentNull(nameof(ns));
+			this.PageName = pageName ?? throw ArgumentNull(nameof(pageName));
+			this.Key = new KeyTitle(ns, pageName);
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Title"/> class.</summary>
-		/// <param name="site">The site this title is from.</param>
-		/// <param name="ns">The namespace ID of the title.</param>
-		/// <param name="pageName">The page name (without leading namespace).</param>
-		public Title(Site site, int ns, string pageName)
-		{
-			ThrowNull(site, nameof(site));
-			ThrowNull(pageName, nameof(pageName));
-			if (!site.Namespaces.Contains(ns))
-			{
-				throw new ArgumentOutOfRangeException(Resources.InvalidNamespace);
-			}
-
-			this.Namespace = site.Namespaces[ns];
-			this.PageName = pageName;
-			this.Key = new KeyTitle(this);
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="Title" /> class, copying the information from another <see cref="ISimpleTitle"/> object.</summary>
-		/// <param name="title">The Title object to copy from.</param>
-		/// <remarks>Note that the Key property will be set to the new full page name, regardless of the original item's key.</remarks>
+		/// <param name="title">The <see cref="ISimpleTitle"/> to copy values from.</param>
 		public Title([NotNull, ValidatedNotNull] ISimpleTitle title)
 		{
 			ThrowNull(title, nameof(title));
-			this.Namespace = title.Namespace;
-			this.PageName = title.PageName;
-			this.Key = new KeyTitle(this);
+			this.Namespace = title.Namespace ?? throw PropertyNull(nameof(title), nameof(title.Namespace));
+			this.PageName = title.PageName ?? throw PropertyNull(nameof(title), nameof(title.PageName));
+			this.Key = new KeyTitle(title.Namespace, title.PageName);
 		}
+
 		#endregion
 
 		#region Public Properties
+
+		/// <summary>Gets the value corresponding to {{BASEPAGENAME}}.</summary>
+		/// <returns>The name of the base page.</returns>
+		public string BasePageName => this.Namespace.AllowsSubpages && this.PageName.LastIndexOf('/') is var subPageLoc && subPageLoc > 0
+				? this.PageName.Substring(0, subPageLoc)
+				: this.PageName;
+
+		/// <summary>Gets the full page name of a title.</summary>
+		/// <returns>The full page name (<c>{{FULLPAGENAME}}</c>) of a title.</returns>
+		public string FullPageName => this.Namespace.DecoratedName + this.PageName;
 
 		/// <summary>Gets the key for the title.</summary>
 		/// <remarks>This will always be the namespace and page name from the constructor, regardless of changes to the Title's properties thereafter.</remarks>
 		public ISimpleTitle Key { get; }
 
-		/// <inheritdoc/>
+		/// <summary>Gets or sets the namespace object for the title.</summary>
+		/// <value>The namespace.</value>
 		public Namespace Namespace { get; set; }
 
-		/// <inheritdoc/>
+		/// <summary>Gets or sets the name of the page without the namespace.</summary>
+		/// <value>The name of the page without the namespace.</value>
 		public string PageName { get; set; }
+
+		/// <summary>Gets the value corresponding to {{ROOTPAGENAME}}.</summary>
+		/// <returns>The name of the base page.</returns>
+		public string RootPageName =>
+			this.Namespace.AllowsSubpages &&
+			this.PageName.IndexOf('/', StringComparison.Ordinal) is var subPageLoc &&
+			subPageLoc >= 0
+				? this.PageName.Substring(0, subPageLoc)
+				: this.PageName;
+
+		/// <summary>Gets a Title object for title Title's corresponding subject page.</summary>
+		/// <returns>The subject page.</returns>
+		/// <remarks>If title Title is a subject page, returns itself.</remarks>
+		public Title SubjectPage =>
+			this.Namespace.IsSubjectSpace ? this :
+			new Title(this.Namespace.SubjectSpace, this.PageName);
+
+		/// <summary>Gets the value corresponding to {{SUBPAGENAME}}.</summary>
+		/// <returns>The name of the subpage.</returns>
+		public string SubPageName =>
+			this.Namespace.AllowsSubpages &&
+			(this.PageName.LastIndexOf('/') + 1) is var subPageLoc &&
+			subPageLoc > 0
+				? this.PageName.Substring(subPageLoc)
+				: this.PageName;
+
+		/// <summary>Gets a Title object for title Title's corresponding subject page.</summary>
+		/// <returns>The talk page.</returns>
+		/// <remarks>If this object represents a talk page, returns a self-reference.</remarks>
+		public Title? TalkPage =>
+			this.Namespace.TalkSpace == null ? null :
+			this.Namespace.IsTalkSpace ? this :
+			new Title(this.Namespace.TalkSpace, this.PageName);
 
 		/// <summary>Gets the site to which this title belongs.</summary>
 		/// <value>The site.</value>
 		public Site Site => this.Namespace.Site;
 		#endregion
 
+		#region Operators
+
+		/// <summary>Implements the operator ==.</summary>
+		/// <param name="left">The left-hand side of the comparison.</param>
+		/// <param name="right">The right-hand side of the comparison.</param>
+		/// <returns><see langword="true"/> if string is equal to any of the names representing the namespace.</returns>
+		public static bool operator ==(Title? left, Title? right) => left == null ? right == null : left.Equals(right);
+
+		/// <summary>Implements the operator !=.</summary>
+		/// <param name="left">The left-hand side of the comparison.</param>
+		/// <param name="right">The right-hand side of the comparison.</param>
+		/// <returns><see langword="true"/> if the namespace Site or Id are not equal.</returns>
+		public static bool operator !=(Title? left, Title? right) => !(left == right);
+		#endregion
+
 		#region Public Static Methods
 
-		/// <summary>Initializes a new instance of the <see cref="Title" /> class using the namespace and page name.</summary>
+		/// <summary>Creates a new instance of the <see cref="Title"/> class from the full page name.</summary>
 		/// <param name="site">The site the title is from.</param>
 		/// <param name="defaultNamespace">The default namespace if no namespace is specified in the page name.</param>
 		/// <param name="pageName">The page name. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
 		/// <returns>A new <see cref="Title"/> with the namespace found in <paramref name="pageName"/>, if there is one, otherwise using <paramref name="defaultNamespace"/>.</returns>
-		public static Title Coerce(Site site, int defaultNamespace, string pageName) => new Title(new TitleParser(site, defaultNamespace, pageName, false));
+		public static Title Coerce(Site site, int defaultNamespace, string pageName)
+		{
+			ThrowNull(site, nameof(site));
+			ThrowNull(pageName, nameof(pageName));
+			var parser = new TitleParser(site, defaultNamespace, pageName, false);
+			return new Title(parser);
+		}
+
+		/// <summary>Creates a new instance of the <see cref="Title"/> class from the namespace ID and page name.</summary>
+		/// <param name="site">The site this title is from.</param>
+		/// <param name="fullPageName">The full name of the page.</param>
+		/// <returns>A new Title based on the provided values.</returns>
+		public static Title FromName([NotNull, ValidatedNotNull] Site site, [NotNull, ValidatedNotNull] string fullPageName)
+		{
+			var parser = new TitleParser(site, MediaWikiNamespaces.Main, fullPageName, false);
+			return new Title(parser);
+		}
 		#endregion
 
 		#region Public Methods
@@ -181,14 +229,23 @@
 				},
 				() =>
 				{
-					var input = new DeleteInput(this.FullPageName()) { Reason = reason };
+					var input = new DeleteInput(this.FullPageName) { Reason = reason };
 					return this.Site.AbstractionLayer.Delete(input).LogId == 0 ? ChangeStatus.Failure : ChangeStatus.Success;
 				});
 		}
 
+		/// <inheritdoc/>
+		public bool Equals([AllowNull] Title other) => other != null && this.Key.Namespace == other.Key.Namespace && this.Key.Namespace.PageNameEquals(this.Key.PageName, other.Key.PageName);
+
+		/// <inheritdoc/>
+		public sealed override bool Equals(object? obj) => this.Equals(obj as Title);
+
+		/// <inheritdoc/>
+		public sealed override int GetHashCode() => HashCode.Combine(this.Key.Namespace, this.Key.PageName);
+
 		/// <summary>Gets the article path for the current page.</summary>
 		/// <returns>A Uri to the index.php page.</returns>
-		public Uri GetArticlePath() => this.Site.GetArticlePath(this.FullPageName());
+		public Uri GetArticlePath() => this.Site.GetArticlePath(this.FullPageName);
 
 		/// <summary>Moves the title to the name specified.</summary>
 		/// <param name="to">The location to move the title to.</param>
@@ -204,10 +261,10 @@
 		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
 		/// <remarks>The original title object will remain unaltered after the move; it will not be updated to reflect the destination.</remarks>
-		public ChangeValue<IDictionary<string, string>> Move(Title to, string reason, bool suppressRedirect)
+		public ChangeValue<IDictionary<string, string>> Move(ISimpleTitle to, string reason, bool suppressRedirect)
 		{
 			ThrowNull(to, nameof(to));
-			return this.Move(to.FullPageName(), reason, false, false, suppressRedirect);
+			return this.Move(to.FullPageName, reason, false, false, suppressRedirect);
 		}
 
 		/// <summary>Moves the title to the name specified.</summary>
@@ -227,21 +284,21 @@
 			var fakeResult = new Dictionary<string, string>();
 			if (!this.Site.EditingEnabled)
 			{
-				fakeResult.Add(this.FullPageName(), to);
-				var talkPage = this.TalkPage();
+				fakeResult.Add(this.FullPageName, to);
+				var talkPage = this.TalkPage;
 				if (moveTalk && talkPage != null)
 				{
-					var toPage = new Title(this.Site, to);
-					if (toPage.TalkPage() is Title toTalk)
+					var toPage = FromName(this.Site, to);
+					if (toPage.TalkPage is Title toTalk)
 					{
-						fakeResult.Add(talkPage.FullPageName(), toTalk.FullPageName());
+						fakeResult.Add(talkPage.FullPageName, toTalk.FullPageName);
 					}
 				}
 
 				if (moveSubpages && this.Namespace.AllowsSubpages)
 				{
-					var toSubPage = new Title(this.Site, to + subPageName);
-					fakeResult.Add(this.FullPageName() + subPageName, toSubPage.FullPageName());
+					var toSubPage = FromName(this.Site, to + subPageName);
+					fakeResult.Add(this.FullPageName + subPageName, toSubPage.FullPageName);
 				}
 			}
 
@@ -258,7 +315,7 @@
 				},
 				() =>
 				{
-					var input = new MoveInput(this.FullPageName(), to)
+					var input = new MoveInput(this.FullPageName, to)
 					{
 						IgnoreWarnings = true,
 						MoveSubpages = moveSubpages,
@@ -276,7 +333,7 @@
 						{
 							if (item.Error != null)
 							{
-								this.Site.PublishWarning(this, CurrentCulture(Resources.MovePageWarning, this.FullPageName(), to, item.Error.Info));
+								this.Site.PublishWarning(this, CurrentCulture(Resources.MovePageWarning, this.FullPageName, to, item.Error.Info));
 							}
 							else if (item.From != null && item.To != null)
 							{
@@ -306,10 +363,10 @@
 		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
 		/// <remarks>The original title object will remain unaltered after the move; it will not be updated to reflect the destination.</remarks>
-		public ChangeValue<IDictionary<string, string>> Move(Title to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
+		public ChangeValue<IDictionary<string, string>> Move(ISimpleTitle to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
 		{
 			ThrowNull(to, nameof(to));
-			return this.Move(to.FullPageName(), reason, moveTalk, moveSubpages, suppressRedirect);
+			return this.Move(to.FullPageName, reason, moveTalk, moveSubpages, suppressRedirect);
 		}
 
 		/// <summary>Protects the title.</summary>
@@ -379,13 +436,21 @@
 			return this.Protect(reason, protections);
 		}
 
+		/// <summary>Compares two objects for <see cref="Namespace"/> and <see cref="PageName"/> equality.</summary>
+		/// <param name="other">The object to compare to.</param>
+		/// <returns><see langword="true"/> if the Namespace and PageName match, regardless of any other properties.</returns>
+		public bool SimpleEquals(ISimpleTitle other) =>
+			other != null &&
+			this.Namespace == other.Namespace &&
+			this.Namespace.PageNameEquals(this.PageName, other.PageName);
+
 		/// <summary>Returns a <see cref="string" /> that represents this title.</summary>
 		/// <param name="forceLink">if set to <c>true</c>, forces link formatting in namespaces that require it (e.g., Category and File), regardless of the value of LeadingColon.</param>
 		/// <returns>A <see cref="string" /> that represents this title.</returns>
 		public virtual string ToString(bool forceLink)
 		{
 			var colon = (forceLink && this.Namespace.IsForcedLinkSpace) ? ":" : string.Empty;
-			return colon + this.FullPageName();
+			return colon + this.FullPageName;
 		}
 
 		/// <summary>Unprotects the title for the specified reason.</summary>
@@ -448,7 +513,7 @@
 					},
 					() =>
 					{
-						var input = new ProtectInput(this.FullPageName())
+						var input = new ProtectInput(this.FullPageName)
 						{
 							Protections = protections,
 							Reason = reason
@@ -459,18 +524,22 @@
 		}
 		#endregion
 
-		#region Private Structures
-		private struct KeyTitle : ISimpleTitle
+		#region Private Classes
+		private class KeyTitle : ISimpleTitle
 		{
-			public KeyTitle(ISimpleTitle title)
+			public KeyTitle(Namespace ns, string pageName)
 			{
-				this.Namespace = title.Namespace;
-				this.PageName = title.PageName;
+				this.Namespace = ns;
+				this.PageName = pageName;
 			}
+
+			public string FullPageName => this.Namespace.DecoratedName + this.PageName;
 
 			public Namespace Namespace { get; }
 
 			public string PageName { get; }
+
+			public bool SimpleEquals(ISimpleTitle other) => Design.Extensions.SimpleEquals(this, other);
 		}
 		#endregion
 	}

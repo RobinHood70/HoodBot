@@ -17,7 +17,7 @@
 	}
 	#endregion
 
-	internal class NpcData
+	internal class NpcData : IComparable<NpcData>
 	{
 		#region Static Fields
 		private static readonly Dictionary<sbyte, string> Reactions = new Dictionary<sbyte, string>
@@ -101,6 +101,8 @@
 		#endregion
 
 		#region Public Methods
+		public int CompareTo([AllowNull] NpcData other) => string.Compare(this.PageName, other?.PageName, StringComparison.OrdinalIgnoreCase);
+
 		public void TrimPlaces()
 		{
 			void Remove(Func<Place, int, bool> condition)

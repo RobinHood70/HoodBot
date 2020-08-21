@@ -70,6 +70,15 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Local dictionary and items list are out of sync..
+        /// </summary>
+        internal static string DictionaryListOutOfSync {
+            get {
+                return ResourceManager.GetString("DictionaryListOutOfSync", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No e-mail subject was provided and the default subject could not be retrieved from the wiki..
         /// </summary>
         internal static string EmailSubjectNull {
@@ -156,6 +165,15 @@ namespace RobinHood70.Robby.Properties {
         internal static string MovePageWarning {
             get {
                 return ResourceManager.GetString("MovePageWarning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The namespace provided is not valid. It must be {0}..
+        /// </summary>
+        internal static string NamespaceMustBe {
+            get {
+                return ResourceManager.GetString("NamespaceMustBe", resourceCulture);
             }
         }
         

@@ -59,7 +59,7 @@
 
 		public static void FirstLinksOnly(Site site, NodeCollection nodes)
 		{
-			var uniqueLinks = new HashSet<SiteLink>(SimpleTitleEqualityComparer.Instance);
+			var uniqueLinks = new HashSet<SiteLink>();
 			if (nodes.FindFirstLinked<LinkNode>() is LinkedListNode<IWikiNode> linkedNode)
 			{
 				var link = SiteLink.FromLinkNode(site, (LinkNode)linkedNode.Value);

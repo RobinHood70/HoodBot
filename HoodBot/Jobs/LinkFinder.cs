@@ -13,7 +13,7 @@
 	public class LinkFinder : ParsedPageJob
 	{
 		#region Fields
-		private readonly IFullTitle title;
+		private readonly ILinkTitle title;
 		private readonly TitleCollection results;
 		#endregion
 
@@ -26,7 +26,7 @@
 			ThrowNull(search, nameof(search));
 			this.Pages.SetLimitations(LimitationType.None);
 			this.results = new TitleCollection(site);
-			this.title = new FullTitle(site, search);
+			this.title = LinkTitle.FromName(site, search);
 			this.Logger = null;
 		}
 		#endregion
@@ -50,7 +50,7 @@
 			}
 		}
 
-		protected override void LoadPages() => this.Pages.GetBacklinks(this.title.FullPageName(), BacklinksTypes.Backlinks | BacklinksTypes.ImageUsage, false, Filter.Any);
+		protected override void LoadPages() => this.Pages.GetBacklinks(this.title.FullPageName, BacklinksTypes.Backlinks | BacklinksTypes.ImageUsage, false, Filter.Any);
 
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{

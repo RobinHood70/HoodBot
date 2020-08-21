@@ -106,7 +106,7 @@
 				pageName = pageName.Substring(0, extension);
 			}
 
-			return new Title(page.Namespace.Site, UespNamespaces.Online, pageName);
+			return new Title(page.Namespace.Site[UespNamespaces.Online], pageName);
 		}
 		#endregion
 	}

@@ -37,7 +37,7 @@
 			ThrowNull(titles, nameof(titles));
 			foreach (var item in titles)
 			{
-				var newTitle = new Title(site, item);
+				var newTitle = Title.FromName(site, item);
 				this.Add(newTitle);
 			}
 		}
@@ -68,22 +68,6 @@
 		/// <param name="titles">The titles. Namespace text is optional and will be stripped if provided.</param>
 		public TitleCollection(Site site, int ns, params string[] titles)
 			: this(site, ns, titles as IEnumerable<string>)
-		{
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="TitleCollection" /> class from an enumeration of any title-like objects.</summary>
-		/// <param name="titles">The enumeration to copy.</param>
-		/// <returns>A Title-only copy of the original collection. Note that this creates all new Titles based on the original objects' namespace, page name, and key.</returns>
-		public TitleCollection(IEnumerable<ISimpleTitle> titles)
-			: this(titles?.First() is ISimpleTitle first ? first.Namespace.Site : throw new InvalidOperationException(Resources.SourceCollectionEmpty), titles)
-		{
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="TitleCollection" /> class from another Title collection.</summary>
-		/// <param name="titles">The original Title collection.</param>
-		/// <returns>A Title-only copy of the original collection. Note that this creates all new Titles based on the original objects' namespace, page name, and key.</returns>
-		public TitleCollection(ITitleCollection<ISimpleTitle> titles)
-			: this((titles ?? throw ArgumentNull(nameof(titles))).Site, titles)
 		{
 		}
 
@@ -234,7 +218,7 @@
 		/// <summary>Adds new objects to the collection based on an existing <see cref="ISimpleTitle"/> collection.</summary>
 		/// <param name="titles">The titles to be added.</param>
 		/// <remarks>All items added are newly created, even if the type of the titles provided matches those in the collection.</remarks>
-		public override void AddFrom(IEnumerable<ISimpleTitle> titles)
+		public override void Add(IEnumerable<ISimpleTitle> titles)
 		{
 			if (titles != null)
 			{
@@ -261,7 +245,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			ThrowNull(input.Title, nameof(input), nameof(input.Title));
-			var inputTitle = new FullTitle(this.Site, input.Title);
+			var inputTitle = LinkTitle.FromName(this.Site, input.Title);
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && input.LinkTypes.HasFlag(BacklinksTypes.ImageUsage))
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
@@ -270,13 +254,14 @@
 			var result = this.Site.AbstractionLayer.Backlinks(input);
 			foreach (var item in result)
 			{
-				var mainTitle = new Title(this.Site, item.Title);
+				var mainTitle = Title.FromName(this.Site, item.Title);
 				this.Add(mainTitle);
 				if (item.Redirects != null)
 				{
 					foreach (var redirectedItem in item.Redirects)
 					{
-						this.Add(new Backlink(this.Site, redirectedItem.Title, mainTitle));
+						var parser = new TitleParser(this.Site, redirectedItem.Title);
+						this.Add(new Backlink(parser.Namespace, parser.PageName, mainTitle));
 					}
 				}
 			}
@@ -289,7 +274,7 @@
 			var result = this.Site.AbstractionLayer.AllCategories(input);
 			foreach (var item in result)
 			{
-				this.Add(new Title(this.Site, MediaWikiNamespaces.Category, item.Category));
+				this.Add(new Title(this.Site[MediaWikiNamespaces.Category], item.Category));
 			}
 		}
 
@@ -483,7 +468,7 @@
 			var result = this.Site.AbstractionLayer.AllMessages(input);
 			foreach (var item in result)
 			{
-				this.Add(new Title(this.Site, MediaWikiNamespaces.MediaWiki, item.Name));
+				this.Add(new Title(this.Site.Namespaces[MediaWikiNamespaces.MediaWiki], item.Name));
 			}
 		}
 
@@ -547,7 +532,7 @@
 		{
 			foreach (var item in result)
 			{
-				this.Add(new Title(this.Site, item.Title));
+				this.Add(Title.FromName(this.Site, item.Title));
 			}
 		}
 
@@ -555,7 +540,7 @@
 		{
 			foreach (var item in result)
 			{
-				this.Add(new Title(this.Site, item.Title ?? throw new InvalidOperationException(Resources.TitleInvalid)));
+				this.Add(Title.FromName(this.Site, item.Title ?? throw new InvalidOperationException(Resources.TitleInvalid)));
 			}
 		}
 
@@ -571,7 +556,7 @@
 			var result = this.Site.AbstractionLayer.CategoryMembers(input);
 			foreach (var item in result)
 			{
-				var title = new Title(this.Site, item.Title ?? throw PropertyNull(nameof(item), nameof(item.Title)));
+				var title = Title.FromName(this.Site, item.Title ?? throw PropertyNull(nameof(item), nameof(item.Title)));
 				if (input.Type.HasFlag(item.Type))
 				{
 					this.Add(title);

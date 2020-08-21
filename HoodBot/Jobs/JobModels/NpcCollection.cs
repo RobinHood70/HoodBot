@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using static RobinHood70.CommonCode.Globals;
@@ -8,11 +7,7 @@
 	internal class NpcCollection : KeyedCollection<long, NpcData>
 	{
 		#region Public Methods
-		public void Sort()
-		{
-			var list = (List<NpcData>)this.Items;
-			list.Sort((x, y) => string.Compare(x.PageName, y.PageName, StringComparison.Ordinal));
-		}
+		public void Sort() => (this.Items as List<NpcData>)?.Sort();
 
 		public NpcData? ValueOrDefault(long key)
 		{
@@ -31,7 +26,6 @@
 
 			return default;
 		}
-
 		#endregion
 
 		#region Protected Override Methods

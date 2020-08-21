@@ -26,7 +26,7 @@
 		/// <param name="site">The site the user is from.</param>
 		/// <param name="name">The name of the user.</param>
 		public User(Site site, string name)
-			: base(site, MediaWikiNamespaces.User, name)
+			: base((site ?? throw ArgumentNull(nameof(site))).Namespaces[MediaWikiNamespaces.User], name)
 		{
 		}
 
@@ -235,7 +235,7 @@
 			var retval = new List<ISimpleTitle>();
 			foreach (var item in result)
 			{
-				retval.Add(new Title(this.Site, item.Title));
+				retval.Add(FromName(this.Site, item.Title));
 			}
 
 			return retval;
@@ -285,21 +285,22 @@
 				},
 				() =>
 				{
-					if (!(this.TalkPage() is ISimpleTitle talkPage))
+					if (this.TalkPage is ISimpleTitle talkPage)
 					{
-						throw new InvalidOperationException(Resources.TitleInvalid);
+						var input = new EditInput(talkPage.FullPageName, msg)
+						{
+							Bot = true,
+							Minor = Tristate.False,
+							Recreate = true,
+							Section = -1,
+							SectionTitle = header,
+							Summary = editSummary,
+						};
+
+						return this.Site.AbstractionLayer.Edit(input).Result == "Success" ? ChangeStatus.Success : ChangeStatus.Failure;
 					}
 
-					var input = new EditInput(talkPage.FullPageName(), msg)
-					{
-						Bot = true,
-						Minor = Tristate.False,
-						Recreate = true,
-						Section = -1,
-						SectionTitle = header,
-						Summary = editSummary,
-					};
-					return this.Site.AbstractionLayer.Edit(input).Result == "Success" ? ChangeStatus.Success : ChangeStatus.Failure;
+					throw new InvalidOperationException(Resources.TitleInvalid);
 				});
 		}
 

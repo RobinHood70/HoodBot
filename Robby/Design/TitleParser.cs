@@ -5,7 +5,7 @@
 	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>This class serves as a light-weight parser to split a wiki title into its constituent parts.</summary>
-	public class TitleParser : IFullTitle
+	public class TitleParser : ILinkTitle
 	{
 		#region Constructors
 
@@ -133,6 +133,9 @@
 		/// <summary>Gets the title's fragment (the section or ID to scroll to).</summary>
 		/// <value>The fragment.</value>
 		public string? Fragment { get; }
+
+		/// <inheritdoc/>
+		public string FullPageName => this.Namespace.DecoratedName + this.PageName;
 
 		/// <summary>Gets the interwiki prefix.</summary>
 		/// <value>The interwiki prefix.</value>

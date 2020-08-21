@@ -194,7 +194,7 @@
 		{
 			var retval = new PageCollection(site);
 			retval.SetLimitations(LimitationType.FilterTo, UespNamespaces.Online);
-			retval.GetPageTranscludedIn(new[] { new Title(site, UespNamespaces.Template, "Online NPC Summary") });
+			retval.GetPageTranscludedIn(new[] { new Title(site[UespNamespaces.Template], "Online NPC Summary") });
 			retval.Sort();
 
 			return retval;
@@ -242,7 +242,7 @@
 					if (retval[mappedName.Value.PageName] is Place place)
 					{
 						// In an ideal world, this would be a direct reference to the same place, rather than a copy, but that ends up being a lot of work for very little gain.
-						var key = new Title(site, mappedName.Key).PageName;
+						var key = Title.FromName(site, mappedName.Key).PageName;
 						retval.Add(Place.Copy(key, place));
 					}
 				}
@@ -345,7 +345,7 @@
 							}
 							else
 							{
-								Debug.WriteLine($"Multiple place types on page: {member.FullPageName()}");
+								Debug.WriteLine($"Multiple place types on page: {member.FullPageName}");
 							}
 						}
 					}
@@ -355,7 +355,7 @@
 				}
 				else if (member.Namespace != UespNamespaces.Category)
 				{
-					Debug.WriteLine($"Unexpected page [[{member.FullPageName()}]] found in [[:Category:{placeInfo.CategoryName}]].");
+					Debug.WriteLine($"Unexpected page [[{member.FullPageName}]] found in [[:Category:{placeInfo.CategoryName}]].");
 				}
 			}
 		}

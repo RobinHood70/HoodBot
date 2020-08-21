@@ -36,7 +36,7 @@
 			this.Progress = 0;
 			this.ProgressMaximum = this.Pages.Count;
 			this.Pages.Sort();
-			this.EditConflictAction = (job, page) => this.WriteLine($"* [[{page.FullPageName()}]] had an edit conflict and was skipped. Re-run bot job after this run is complete.");
+			this.EditConflictAction = (job, page) => this.WriteLine($"* [[{page.FullPageName}]] had an edit conflict and was skipped. Re-run bot job after this run is complete.");
 			foreach (var page in this.Pages)
 			{
 				this.SavePage(page, "Revert Sept. 19 location changes", true);
@@ -57,7 +57,7 @@
 				this.WriteLine($"The following pages have had their <code>loc</code> parameter modified since the bot ran. The location has been updated on a best-effort basis, but may need human intervention.");
 				foreach (var title in this.editedPages)
 				{
-					this.WriteLine($"* [[{title.FullPageName()}]]");
+					this.WriteLine($"* [[{title.FullPageName}]]");
 				}
 			}
 		}

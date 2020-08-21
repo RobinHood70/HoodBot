@@ -7,7 +7,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon.Parser;
 
 	public class BladesPoisons : EditJob
@@ -68,11 +67,12 @@
 
 				for (var i = 0; i < 7; i++)
 				{
-					var title = new Title(this.Site, WikiTextVisitor.Value(nameNodes[i].Title));
+					var name = WikiTextVisitor.Value(nameNodes[i].Title);
+					var title = Title.FromName(this.Site, name);
 					var recipe = matEffects[i * 2] + "<br>" + baseRecipe;
 					var effect = matEffects[i * 2 + 1];
 					/*
-					if (this.Pages.TryGetValue(title.FullPageName(), out var potionPage))
+					if (this.Pages.TryGetValue(title.FullPageName, out var potionPage))
 					{
 						var nodes = WikiTextParser.Parse(potionPage.Text);
 						if (nodes.FindFirst<TemplateNode>(node => node.GetTitleValue() == "Blades Item Summary") is TemplateNode template)
@@ -87,7 +87,7 @@
 					}
 					else
 					{ */
-					if (this.descriptions.TryGetValue(title.PageName, out var desc) && this.Pages.TryGetValue(title.FullPageName(), out var page))
+					if (this.descriptions.TryGetValue(title.PageName, out var desc) && this.Pages.TryGetValue(title.FullPageName, out var page))
 					{
 						page.Text = $"{{{{Pre-Release}}}}{{{{Minimal}}}}{{{{Blades Item Summary\n|q=c\n|type=Poison\n|buy={{{{huh}}}}\n|sell={{{{huh}}}}\n|description={desc}\n|effect=* [[{Effects[i]}|{effect}]]\n|recipe={recipe}\n}}}}\n'''{title.PageName}''' {{{{huh}}}}\n\n{{{{Stub|Item}}}}";
 

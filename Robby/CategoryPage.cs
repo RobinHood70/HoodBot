@@ -1,5 +1,8 @@
 ﻿namespace RobinHood70.Robby
 {
+	using System;
+	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.CommonCode.Globals;
@@ -12,10 +15,33 @@
 
 		/// <summary>Initializes a new instance of the <see cref="CategoryPage" /> class.</summary>
 		/// <param name="site">The site the category is from.</param>
-		/// <param name="pageName">The page name (<em>without</em> the leading namespace).</param>
+		/// <param name="pageName">The page name.</param>
 		public CategoryPage(Site site, string pageName)
-			: base(site, MediaWikiNamespaces.Category, pageName)
+			: base((site ?? throw ArgumentNull(nameof(site))).Namespaces[MediaWikiNamespaces.Category], pageName)
 		{
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="CategoryPage" /> class.</summary>
+		/// <param name="ns">The namespace (must be Category).</param>
+		/// <param name="pageName">The page name.</param>
+		public CategoryPage(Namespace ns, string pageName)
+			: base(ns, pageName)
+		{
+			if (ns.Id != MediaWikiNamespaces.Category)
+			{
+				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, ns.Site.Namespaces[MediaWikiNamespaces.Category].Name), nameof(ns));
+			}
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="CategoryPage" /> class.</summary>
+		/// <param name="title">The <see cref="ISimpleTitle"/> to copy values from.</param>
+		public CategoryPage(ISimpleTitle title)
+			: base(title)
+		{
+			if (title.Namespace.Id != MediaWikiNamespaces.Category)
+			{
+				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, this.Site.Namespaces[MediaWikiNamespaces.Category].Name), nameof(title));
+			}
 		}
 		#endregion
 

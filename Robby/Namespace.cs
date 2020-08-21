@@ -120,7 +120,7 @@
 
 		#region Public Operators
 
-		/// <summary>Implements the operator !=.</summary>
+		/// <summary>Implements the operator ==.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
 		/// <returns><see langword="true"/> if string is equal to any of the names representing the namespace.</returns>

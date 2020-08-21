@@ -21,7 +21,7 @@
 		public DBMergeCheck([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
 		{
-			var checkPage = new Title(this.Site, "Project:Dragonborn Merge Project/Merge Results");
+			var checkPage = new Title(this.Site[MediaWikiNamespaces.Project], "Dragonborn Merge Project/Merge Results");
 
 			this.Logger = null;
 			this.Results = new PageResultHandler(checkPage);
@@ -109,7 +109,7 @@
 			if (catSize > 0)
 			{
 				var catMembers = new TitleCollection(this.Site);
-				catMembers.GetCategoryMembers(page.FullPageName(), CategoryMemberTypes.All, false);
+				catMembers.GetCategoryMembers(page.FullPageName, CategoryMemberTypes.All, false);
 				catMembers.Remove(page);
 				//// catMembers.Remove("Skyrim:Dragonborn");
 
@@ -179,8 +179,8 @@
 				foreach (var (page, pageInfo) in redirList)
 				{
 					var newNs = page.Namespace == UespNamespaces.Dragonborn ? UespNamespaces.Skyrim : UespNamespaces.SkyrimTalk;
-					var newTitle = new FullTitle(page.Site, newNs, page.PageName);
-					this.WriteLine($"* {page.PageName}: {{{{Pl|{page.FullPageName()}|{page.Namespace.Name}|3=redirect=no}}}}{pageInfo} / {{{{Pl|{newTitle.FullPageName()}|{newTitle.Namespace.Name}|3=redirect=no}}}}");
+					var newTitle = new LinkTitle(page.Site[newNs], page.PageName);
+					this.WriteLine($"* {page.PageName}: {{{{Pl|{page.FullPageName}|{page.Namespace.Name}|3=redirect=no}}}}{pageInfo} / {{{{Pl|{newTitle.FullPageName}|{newTitle.Namespace.Name}|3=redirect=no}}}}");
 				}
 			}
 		}

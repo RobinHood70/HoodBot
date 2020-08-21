@@ -137,7 +137,7 @@
 				.AppendLine("{{Stub|NPC}}")
 				.ToString();
 
-			var page = new Page(this.Site, UespNamespaces.Online, npc.PageName) { Text = text };
+			var page = new Page(this.Site[UespNamespaces.Online], npc.PageName) { Text = text };
 			page.SetMinimalStartTimestamp();
 			return page;
 		}
@@ -166,7 +166,7 @@
 			foreach (var title in titlesOnly)
 			{
 				var npc = ((NpcTitle)title).Npc;
-				var page = checkPages[title.FullPageName()];
+				var page = checkPages[title.FullPageName];
 				if (page.Exists)
 				{
 					string? issue;
@@ -185,9 +185,9 @@
 							}
 						}
 					}
-					else if (checkPages.TitleMap.TryGetValue(title.FullPageName(), out var redirect))
+					else if (checkPages.TitleMap.TryGetValue(title.FullPageName, out var redirect))
 					{
-						if (allNpcs.Contains(redirect.FullPageName()))
+						if (allNpcs.Contains(redirect.FullPageName))
 						{
 							issue = null;
 							npc.PageName = redirect.PageName;
@@ -222,7 +222,7 @@
 		private class NpcTitle : Title
 		{
 			public NpcTitle(Site site, NpcData npc)
-				: base(site, UespNamespaces.Online, npc.Name) => this.Npc = npc;
+				: base(site[UespNamespaces.Online], npc.Name) => this.Npc = npc;
 
 			public NpcData Npc { get; }
 		}

@@ -238,6 +238,16 @@
 		public string Version => this.version ?? throw NoSite();
 		#endregion
 
+		#region Public Indexers
+
+		/// <summary>Gets the <see cref="Namespace"/> with the specified key.</summary>
+		/// <param name="id">The ID of the namespace.</param>
+		/// <returns>The element with the specified key. If an element with the specified key is not found, an exception is thrown.</returns>
+		/// <exception cref="KeyNotFoundException">An element with the specified key does not exist in the collection.</exception>
+		/// <remarks>This is simply short-hand for <c>this.Namespaces[id]</c>.</remarks>
+		public Namespace this[int id] => this.Namespaces[id];
+		#endregion
+
 		#region Public Static Methods
 
 		/// <summary>The <see cref="SiteFactoryMethod"/> that creates a default <see cref="Site"/> object.</summary>
@@ -300,8 +310,8 @@
 
 		/// <summary>Gets the redirect target from the page text.</summary>
 		/// <param name="text">The text to parse.</param>
-		/// <returns>A <see cref="IFullTitle"/> object with the parsed redirect.</returns>
-		public virtual IFullTitle? GetRedirectFromText(string text)
+		/// <returns>A <see cref="ILinkTitle"/> object with the parsed redirect.</returns>
+		public virtual ILinkTitle? GetRedirectFromText(string text)
 		{
 			ThrowNull(text, nameof(text));
 			var redirects = new HashSet<string>(this.MagicWords.TryGetValue("redirect", out var redirect) ? redirect.Aliases : DefaultRedirect);
@@ -318,7 +328,8 @@
 
 				if (redirects.Contains(searchText) && first.Next?.Value is LinkNode linkNode)
 				{
-					return new FullTitle(this, WikiTextVisitor.Raw(linkNode.Title));
+					var name = WikiTextVisitor.Raw(linkNode.Title);
+					return LinkTitle.FromName(this, name);
 				}
 			}
 
@@ -408,45 +419,41 @@
 		/// <returns>The text of the page.</returns>
 		public string? LoadPageText(string pageName)
 		{
-			var pages = PageCollection.Unlimited(this);
-			pages.GetTitles(pageName);
-			return pages.Count == 1 ? pages[0].Text : null;
+			ThrowNull(pageName, nameof(pageName));
+			return this.LoadPageText(Title.FromName(this, pageName));
 		}
 
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="title">Name of the page.</param>
 		/// <returns>The text of the page.</returns>
-		public string? LoadPageText(Title title)
+		public string? LoadPageText(ISimpleTitle title)
 		{
+			ThrowNull(title, nameof(title));
 			var pages = PageCollection.Unlimited(this);
 			pages.GetTitles(title);
 			return pages.Count == 1 ? pages[0].Text : null;
 		}
 
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
-		/// <param name="pageName">Name of the page.</param>
-		/// <param name="subPageName">The subpage to get.</param>
-		/// <returns>The text of the page.</returns>
-		public string? LoadPageText(string pageName, string subPageName)
-		{
-			var pages = PageCollection.Unlimited(this);
-			pages.GetTitles(pageName + '/' + subPageName);
-			return pages.Count == 1 ? pages[0].Text : null;
-		}
-
-		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="title">Name of the page.</param>
 		/// <param name="subPageName">The subpage to get.</param>
 		/// <returns>The text of the page.</returns>
-		public string? LoadPageText(Title title, string subPageName)
+		public string? LoadPageText(ISimpleTitle title, string subPageName)
 		{
-			var newTitle = new Title(title)
+			ThrowNull(title, nameof(title));
+			var titleName = title.PageName;
+			if (!string.IsNullOrEmpty(subPageName))
 			{
-				PageName = title.PageName + "/" + subPageName
-			};
-			var pages = PageCollection.Unlimited(this);
-			pages.GetTitles(newTitle);
-			return pages.Count == 1 ? pages[0].Text : null;
+				if (subPageName[0] != '/')
+				{
+					titleName += '/';
+				}
+
+				titleName += subPageName;
+			}
+
+			var newTitle = new Title(title.Namespace, titleName);
+			return this.LoadPageText(newTitle);
 		}
 
 		/// <summary>Gets a message from MediaWiki space with any magic words and the like parsed into text.</summary>
@@ -488,7 +495,7 @@
 			Messages = messages,
 			Arguments = arguments,
 			EnableParser = true,
-			EnableParserTitle = title?.FullPageName(),
+			EnableParserTitle = title?.FullPageName,
 		});
 
 		/// <summary>Gets all recent changes.</summary>
@@ -922,14 +929,14 @@
 		{
 			if (this.disambiguationTemplates == null)
 			{
-				this.disambiguationTemplates = new HashSet<Title>(SimpleTitleEqualityComparer.Instance);
-				var page = new Page(this, MediaWikiNamespaces.MediaWiki, "Disambiguationspage");
+				this.disambiguationTemplates = new HashSet<Title>();
+				var page = new Page(this.Namespaces[MediaWikiNamespaces.MediaWiki], "Disambiguationspage");
 				page.Load(PageModules.Default | PageModules.Links);
 				if (page.Exists)
 				{
 					if (page.Links.Count == 0)
 					{
-						this.disambiguationTemplates.Add(new Title(this, page.Text.Trim()));
+						this.disambiguationTemplates.Add(Title.FromName(this, page.Text.Trim()));
 					}
 					else
 					{
@@ -955,7 +962,7 @@
 			var retval = new Dictionary<string, MessagePage>(result.Count);
 			foreach (var item in result)
 			{
-				retval.Add(item.Name, new MessagePage(this, item));
+				retval.Add(item.Name, new MessagePage(this.Namespaces[MediaWikiNamespaces.MediaWiki], item));
 			}
 
 			return retval.AsReadOnly();
@@ -1090,7 +1097,7 @@
 			this.namespaces = new NamespaceCollection(namespaces, comparer);
 			if (this.mainPageName != null)
 			{
-				this.mainPage = new Title(this, this.mainPageName); // Now that we understand namespaces, we can create a Title.
+				this.mainPage = Title.FromName(this, this.mainPageName); // Now that we understand namespaces, we can create a Title.
 			}
 
 			// MagicWords

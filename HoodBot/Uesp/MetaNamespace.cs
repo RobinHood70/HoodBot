@@ -29,7 +29,7 @@
 			var parentName = nsData[2].Length == 0 ? this.Base : nsData[2];
 			this.Parent = site.Namespaces[parentName];
 			this.Name = nsData[3].Length == 0 ? this.Base : nsData[3];
-			this.MainPage = new Title(site, nsData[4].Length == 0 ? this.Full + this.Name : nsData[4]);
+			this.MainPage = Title.FromName(site, nsData[4].Length == 0 ? this.Full + this.Name : nsData[4]);
 			this.Category = nsData[5].Length == 0 ? this.Base : nsData[5];
 			this.Trail = nsData[6].Length == 0 ? string.Concat("[[", this.MainPage, "|", this.Name, "]]") : nsData[6];
 		}
@@ -64,10 +64,10 @@
 		#endregion
 
 		#region Public Static Methods
-		public static MetaNamespace? FromTitle(ISimpleTitle title)
+		public static MetaNamespace? FromTitle(Title title)
 		{
 			ThrowNull(title, nameof(title));
-			var test = title.Namespace.DecoratedName + title.RootPageName();
+			var test = title.Namespace.DecoratedName + title.RootPageName;
 			if (!Namespaces.TryGetValue(test, out var retval))
 			{
 				Namespaces.TryGetValue(title.Namespace.Name, out retval);

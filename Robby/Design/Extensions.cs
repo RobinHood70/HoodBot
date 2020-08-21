@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.Robby.Design
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Text;
@@ -28,8 +27,8 @@
 		/// <returns>The current title, formatted as a link.</returns>
 		public static string AsLink(this ISimpleTitle title, bool friendly)
 		{
-			var fullPageName = FullPageName(title);
-			var sb = new StringBuilder(fullPageName.Length << 1);
+			ThrowNull(title, nameof(title));
+			var sb = new StringBuilder(title.Namespace.LinkName.Length + 5 + (title.PageName.Length << 1));
 			sb.Append("[[");
 			sb.Append(title.Namespace.LinkName);
 			sb.Append(title.PageName);
@@ -43,6 +42,33 @@
 			return sb.ToString();
 		}
 
+		/// <summary>Compares two <see cref="ISimpleTitle"/> objects for namespace and page name equality.</summary>
+		/// <param name="title">The title to check.</param>
+		/// <param name="other">The object to compare to.</param>
+		/// <returns><see langword="true"/> if the Namespace and PageName match, regardless of any other properties.</returns>
+		public static bool SimpleEquals(this ISimpleTitle title, ISimpleTitle other) =>
+			title == null ? other == null :
+			other != null &&
+			title.Namespace == other.Namespace &&
+			title.Namespace.PageNameEquals(title.PageName, other.PageName);
+
+		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
+		/// <param name="title">The title to get the label name for.</param>
+		/// <remarks>This doesn't precisely match the pipe trick logic - they differ in their handling of some abnormal page names. For example, with page names of "User:(Test)", ":(Test)", and "(Test)", the pipe trick gives "User:", ":", and "(Test)", respectively. Since this routine ignores the namespace completely and checks for empty return values, it returns "(Test)" consistently in all three cases.</remarks>
+		/// <returns>The text with the final paranthetical and/or comma-delimited text removed. Note: like the MediaWiki equivalent, when both are present, this will remove text of the form "(text), text", but text of the form ", text (text)" will become ", text".</returns>
+		[return: NotNullIfNotNull("title")]
+		public static string? LabelName(this ISimpleTitle title)
+		{
+			if (title == null)
+			{
+				return null;
+			}
+
+			var pageName = LabelCommaRemover.Replace(title.PageName, string.Empty, 1, 1);
+			return LabelParenthesesRemover.Replace(pageName, string.Empty, 1, 1);
+		}
+
+		/*
 		/// <summary>Gets the value corresponding to {{BASEPAGENAME}}.</summary>
 		/// <param name="title">The title to get the base page name for.</param>
 		/// <returns>The name of the base page.</returns>
@@ -70,23 +96,6 @@
 			return title.Namespace.DecoratedName + title.PageName;
 		}
 
-		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
-		/// <param name="title">The title to get the label name for.</param>
-		/// <remarks>This doesn't precisely match the pipe trick logic - they differ in their handling of some abnormal page names. For example, with page names of "User:(Test)", ":(Test)", and "(Test)", the pipe trick gives "User:", ":", and "(Test)", respectively. Since this routine ignores the namespace completely and checks for empty return values, it returns "(Test)" consistently in all three cases.</remarks>
-		/// <returns>The text with the final paranthetical and/or comma-delimited text removed. Note: like the MediaWiki equivalent, when both are present, this will remove text of the form "(text), text", but text of the form ", text (text)" will become ", text".</returns>
-		[return: NotNullIfNotNull("title")]
-		public static string? LabelName(this ISimpleTitle title)
-		{
-			if (title == null)
-			{
-				return null;
-			}
-
-			var pageName = LabelCommaRemover.Replace(title.PageName, string.Empty, 1, 1);
-			pageName = LabelParenthesesRemover.Replace(pageName, string.Empty, 1, 1);
-			return pageName;
-		}
-
 		/// <summary>Checks if the current page name is the same as the specified page name, based on the case-sensitivity for the namespace.</summary>
 		/// <param name="title">The title to check.</param>
 		/// <param name="pageName">The page name to compare to.</param>
@@ -111,16 +120,6 @@
 
 			return title.PageName;
 		}
-
-		/// <summary>Indicates whether the current title is equal to another title based on Namespace and PageName only.</summary>
-		/// <param name="title">The title to check.</param>
-		/// <param name="other">The title to compare to.</param>
-		/// <returns><see langword="true"/> if the current title is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false"/>.</returns>
-		public static bool SimpleEquals(this ISimpleTitle? title, ISimpleTitle? other) =>
-			title == null ? other == null :
-			other != null &&
-			title.Namespace == other.Namespace &&
-			title.Namespace.PageNameEquals(title.PageName, other.PageName);
 
 		/// <summary>Gets a Title object for title Title's corresponding subject page.</summary>
 		/// <param name="title">The title to get the subject page for.</param>
@@ -158,6 +157,7 @@
 			title.Namespace.TalkSpace == null ? null :
 			title.Namespace.IsTalkSpace ? title :
 			new Title(title.Namespace.TalkSpace, title.PageName);
+		*/
 		#endregion
 
 		#region IFullTitle Extensions
@@ -167,7 +167,7 @@
 		/// <param name="other">The title to compare to.</param>
 		/// <returns><see langword="true"/> if the current title is equal to the <paramref name="other"/> parameter; otherwise, <see langword="false"/>.</returns>
 		/// <remarks>This method is named as it is to avoid any ambiguity about what is being checked, as well as to avoid the various issues associated with implementing IEquatable on unsealed types.</remarks>
-		public static bool FullEquals(this IFullTitle? title, IFullTitle? other) =>
+		public static bool FullEquals(this ILinkTitle? title, ILinkTitle? other) =>
 			title == null ? other == null :
 			other != null &&
 			title.Interwiki == other.Interwiki &&
@@ -179,12 +179,12 @@
 		/// <param name="title">The title to get the label name for.</param>
 		/// <remarks>Unlike the regular pipe trick, this will take a non-empty fragment name in preference to the page name.</remarks>
 		/// <returns>A name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</returns>
-		public static string? LabelName(this IFullTitle? title) => title == null ? null : (title.Fragment?.Trim() ?? LabelName(title as ISimpleTitle));
+		public static string? LabelName(this ILinkTitle? title) => title == null ? null : (title.Fragment?.Trim() ?? title.LabelName());
 		#endregion
 
 		#region IEnumerable<ISimpleTitle> Extensions
 
-		/// <summary>Convert a collection of ISimpleTitles to their full page names.</summary>
+		/// <summary>Convert a collection of SimpleTitles to their full page names.</summary>
 		/// <param name="titles">The titles to convert.</param>
 		/// <returns>An enumeration of the titles converted to their full page names.</returns>
 		public static IEnumerable<string> ToFullPageNames(this IEnumerable<ISimpleTitle> titles)
@@ -193,21 +193,7 @@
 			{
 				foreach (var title in titles)
 				{
-					yield return title.FullPageName();
-				}
-			}
-		}
-
-		/// <summary>Convert a collection of ISimpleTitles to their page names, ignoring namespace.</summary>
-		/// <param name="titles">The titles to convert.</param>
-		/// <returns>An enumeration of the titles converted to their page names, ignoring namespace.</returns>
-		public static IEnumerable<string> ToPageNames(this IEnumerable<ISimpleTitle> titles)
-		{
-			if (titles != null)
-			{
-				foreach (var title in titles)
-				{
-					yield return title.PageName;
+					yield return title.FullPageName;
 				}
 			}
 		}

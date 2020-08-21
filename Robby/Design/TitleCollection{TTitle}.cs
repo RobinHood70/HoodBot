@@ -17,9 +17,9 @@
 	/// <typeparam name="TTitle">The type of the title.</typeparam>
 	/// <seealso cref="IList{TTitle}" />
 	/// <seealso cref="IReadOnlyCollection{TTitle}" />
-	/// <remarks>This collection class functions similarly to a KeyedCollection, but automatically overwrites existing items with new ones. Unlike a KeyedCollection, however, it does not support changing an item's key, since <see cref="IKeyedTitle"/> inherently does not allow this.</remarks>
+	/// <remarks>This collection class functions similarly to a KeyedCollection, but automatically overwrites existing items with new ones. Unlike a KeyedCollection, however, it does not support changing an item's key, since <see cref="Title"/> inherently does not allow this.</remarks>
 	public abstract class TitleCollection<TTitle> : IList<TTitle>, IReadOnlyCollection<TTitle>, ISiteSpecific
-		where TTitle : class, IKeyedTitle
+		where TTitle : Title
 	{
 		#region Fields
 		private readonly Dictionary<ISimpleTitle, TTitle> dictionary = new Dictionary<ISimpleTitle, TTitle>(SimpleTitleEqualityComparer.Instance);
@@ -77,35 +77,40 @@
 			get => this[this.TextToTitle(key)];
 			set
 			{
-				var index = this.IndexOf(key);
-				if (index < 0)
+				var titleKey = this.TextToTitle(key);
+				if (this.dictionary.ContainsKey(titleKey.Key))
 				{
-					this.items.Add(value);
+					var index = this.IndexOf(titleKey);
+					this.items[index] = value;
 				}
 				else
 				{
-					this.items[index] = value;
+					this.items.Add(value);
 				}
 
-				var title = this.TextToTitle(key);
-				this.dictionary[title] = value;
+				this.dictionary[titleKey.Key] = value;
 			}
 		}
 
 		/// <summary>Gets or sets the <see cref="ISimpleTitle">Title</see> with the specified key.</summary>
-		/// <param name="key">The key.</param>
+		/// <param name="title">The key.</param>
 		/// <returns>The <see cref="ISimpleTitle">Title</see>.</returns>
 		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry on set if the requested entry isn't found.</remarks>
 		[SuppressMessage("Microsoft.Design", "CA1043:UseIntegralOrStringArgumentForIndexers", Justification = @"Integer and string methods are also available, but this method provides the most accuracy.")]
-		public virtual TTitle this[ISimpleTitle key]
+		public virtual TTitle this[Title title]
 		{
-			get => !this.dictionary.TryGetValue(key, out var retval)
-				? this.FindTitle(key) ?? throw new KeyNotFoundException()
-				: retval;
+			get
+			{
+				ThrowNull(title, nameof(title));
+				return !this.dictionary.TryGetValue(title.Key, out var retval)
+					? this.FindTitle(title) ?? throw new KeyNotFoundException()
+					: retval;
+			}
 
 			set
 			{
-				var index = this.IndexOf(key);
+				ThrowNull(title, nameof(title));
+				var index = this.IndexOf(title);
 				if (index < 0)
 				{
 					this.items.Add(value);
@@ -115,7 +120,7 @@
 					this.items[index] = value;
 				}
 
-				this.dictionary[key] = value;
+				this.dictionary[title.Key] = value;
 			}
 		}
 		#endregion
@@ -217,7 +222,7 @@
 		{
 			ThrowNull(key, nameof(key));
 			var title = this.TextToTitle(key);
-			return this.dictionary.ContainsKey(title) || this.FindTitle(title) != null;
+			return this.dictionary.ContainsKey(title.Key) || this.FindTitle(title) != null;
 		}
 
 		/// <summary>Copies the elements of the <see cref="TitleCollection">collection</see> to an <see cref="Array" />, starting at a particular <see cref="Array" /> index.</summary>
@@ -242,30 +247,6 @@
 		/// <summary>Filters the collection to one or more namespaces.</summary>
 		/// <param name="namespaces">The namespaces to filter to.</param>
 		public void FilterToNamespaces(params int[] namespaces) => this.FilterToNamespaces(namespaces as IEnumerable<int>);
-
-		/// <summary>Finds any ISimpleTitle within the collection.</summary>
-		/// <param name="key">The full page name of the item to find.</param>
-		/// <returns>The item from the collection, if found; otherwise, null.</returns>
-		/// <remarks>This is an O(n) operation.</remarks>
-		public TTitle? FindTitle(string key) => this.FindTitle(this.TextToTitle(key));
-
-		/// <summary>Finds any ISimpleTitle within the collection.</summary>
-		/// <param name="ns">The namespace the title is in.</param>
-		/// <param name="pageName">The full page name of the item to find.</param>
-		/// <returns>The item from the collection, if found; otherwise, null.</returns>
-		/// <remarks>This is an O(n) operation.</remarks>
-		public TTitle? FindTitle(int ns, string pageName) => this.FindTitle(new Title(this.Site, ns, pageName));
-
-		/// <summary>Finds any ISimpleTitle within the collection.</summary>
-		/// <param name="item">The item to find.</param>
-		/// <returns>The item from the collection, if found; otherwise, null.</returns>
-		/// <remarks>This is an O(n) operation.</remarks>
-		public TTitle? FindTitle(ISimpleTitle item)
-		{
-			ThrowNull(item, nameof(item));
-			var index = this.IndexOf(item);
-			return index == -1 ? null : this.items[index];
-		}
 
 		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
 		/// <param name="title">The title.</param>
@@ -340,7 +321,7 @@
 		public void GetCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, string? from, string? to, bool recurse)
 		{
 			var cat = Title.Coerce(this.Site, MediaWikiNamespaces.Category, category);
-			var input = new CategoryMembersInput(cat.FullPageName())
+			var input = new CategoryMembersInput(cat.FullPageName)
 			{
 				Properties = CategoryMembersProperties.Title,
 				Type = categoryMemberTypes,
@@ -698,6 +679,7 @@
 		public int IndexOf(ISimpleTitle title)
 		{
 			// ContainsKey is O(1), so check to see if key exists; if not, iterate looking for Namespace/PageName match.
+			ThrowNull(title, nameof(title));
 			if (this.dictionary.ContainsKey(title))
 			{
 				for (var i = 0; i < this.items.Count; i++)
@@ -708,7 +690,7 @@
 					}
 				}
 
-				throw new InvalidOperationException("Local dictionary and items list are out of sync.");
+				throw new InvalidOperationException(Resources.DictionaryListOutOfSync);
 			}
 
 			for (var i = 0; i < this.items.Count; i++)
@@ -836,11 +818,23 @@
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
 		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
-		/// <remarks>This methods expects an exact match between the value passed and the <see cref="IKeyedTitle.Key"/>. To also check potentially altered Namespace and PageName, use <see cref="FindTitle(ISimpleTitle, bool)"/>.</remarks>
+		/// <remarks>This methods expects an exact match between the value passed and the <see cref="Title.Key"/>. To also check potentially altered Namespace and PageName, use <see cref="FindTitle(ISimpleTitle)"/>.</remarks>
+		public bool TryGetValue(TTitle key, [MaybeNullWhen(false)] out TTitle value)
+		{
+			ThrowNull(key, nameof(key));
+			return this.dictionary.TryGetValue(key.Key, out value);
+		}
+
+		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
+		/// <param name="key">The key of the value to get.</param>
+		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
+		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
+		/// <remarks>This methods expects an exact match between the value passed and the <see cref="Title.Key"/>. To also check potentially altered Namespace and PageName, use <see cref="FindTitle(ISimpleTitle)"/>.</remarks>
 		public bool TryGetValue(ISimpleTitle key, [MaybeNullWhen(false)] out TTitle value)
 		{
 			ThrowNull(key, nameof(key));
-			return this.dictionary.TryGetValue(key, out value!);
+			return this.dictionary.TryGetValue(key, out value);
 		}
 
 		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
@@ -861,7 +855,7 @@
 		public TTitle? ValueOrDefault(ISimpleTitle key)
 		{
 			ThrowNull(key, nameof(key));
-			return this.ValueOrDefault(key.FullPageName());
+			return this.ValueOrDefault(key.FullPageName);
 		}
 
 		/// <summary>Returns the requested value, or null if not found.</summary>
@@ -879,7 +873,7 @@
 		/// <summary>Adds new objects to the collection based on an existing <see cref="ISimpleTitle"/> collection.</summary>
 		/// <param name="titles">The titles to be added.</param>
 		/// <remarks>All items added are newly created, even if the type of the titles provided matches those in the collection.</remarks>
-		public abstract void AddFrom(IEnumerable<ISimpleTitle> titles);
+		public abstract void Add(IEnumerable<ISimpleTitle> titles);
 
 		/// <summary>Adds pages returned by a custom generator.</summary>
 		/// <param name="generatorInput">The generator input.</param>
@@ -1061,7 +1055,15 @@
 		#endregion
 
 		#region Private Methods
-		private ISimpleTitle TextToTitle(string text) => new Title(this.Site, text);
+
+		private TTitle? FindTitle(ISimpleTitle item)
+		{
+			ThrowNull(item, nameof(item));
+			var index = this.IndexOf(item);
+			return index == -1 ? null : this.items[index];
+		}
+
+		private Title TextToTitle(string text) => Title.FromName(this.Site, text);
 		#endregion
 	}
 }

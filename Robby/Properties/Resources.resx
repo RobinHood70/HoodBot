@@ -120,6 +120,9 @@
   <data name="BotResults" xml:space="preserve">
     <value>Bot Results</value>
   </data>
+  <data name="DictionaryListOutOfSync" xml:space="preserve">
+    <value>Local dictionary and items list are out of sync.</value>
+  </data>
   <data name="EmailSubjectNull" xml:space="preserve">
     <value>No e-mail subject was provided and the default subject could not be retrieved from the wiki.</value>
   </data>
@@ -149,6 +152,9 @@
   </data>
   <data name="MovePageWarning" xml:space="preserve">
     <value>Moving page [[{0}]] to [[{1}]] failed: {{2}}</value>
+  </data>
+  <data name="NamespaceMustBe" xml:space="preserve">
+    <value>The namespace provided is not valid. It must be {0}.</value>
   </data>
   <data name="PageNameInterwiki" xml:space="preserve">
     <value>Invalid page name: [[{0}]]. Page is an interwiki link that doesn't resolve to the local wiki.</value>

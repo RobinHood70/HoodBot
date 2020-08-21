@@ -136,7 +136,7 @@
 		private void GetPages()
 		{
 			var allPages = new PageCollection(this.Site, new PageLoadOptions(PageModules.Default | PageModules.TranscludedIn, true));
-			//// allPages.GetPageLinks(new[] { new Title(this.Site, this.Site.User.FullPageName() + "/Lore Transclusions") });
+			//// allPages.GetPageLinks(new[] { new Title(this.Site, this.Site.User.FullPageName + "/Lore Transclusions") });
 			allPages.GetTitles("General:The Elder Scrolls", "Lore:Elder Scrolls");
 			allPages.Sort();
 
@@ -199,7 +199,7 @@
 
 			return this.noTransclusions && linkTitle.SimpleEquals(this.currentPage)
 				? new TextNode($"'''{display}'''")
-				: LinkNode.FromParts(linkPage.FullPageName(), display) as IWikiNode;
+				: LinkNode.FromParts(linkPage.FullPageName, display) as IWikiNode;
 		}
 
 		private IWikiNode LoreTransclusionReplacer(LinkedListNode<IWikiNode> node)
@@ -352,7 +352,7 @@
 
 						if (retval == null && this.currentPage.Namespace != UespNamespaces.Lore)
 						{
-							Debug.WriteLine($"{WikiTextVisitor.Raw(templateNode)} transcluding onto [[{this.currentPage.FullPageName()}]]");
+							Debug.WriteLine($"{WikiTextVisitor.Raw(templateNode)} transcluding onto [[{this.currentPage.FullPageName}]]");
 						}
 
 						return retval ?? node.Value;

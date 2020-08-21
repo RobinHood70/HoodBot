@@ -19,9 +19,9 @@
 			ThrowNull(title, nameof(title));
 			return title.Namespace.Id switch
 			{
-				MediaWikiNamespaces.MediaWiki => new MessagePage(title.Namespace.Site, title.PageName),
-				MediaWikiNamespaces.File => new FilePage(title.Namespace.Site, title.PageName),
-				MediaWikiNamespaces.Category => new CategoryPage(title.Namespace.Site, title.PageName),
+				MediaWikiNamespaces.MediaWiki => new MessagePage(title),
+				MediaWikiNamespaces.File => new FilePage(title),
+				MediaWikiNamespaces.Category => new CategoryPage(title),
 				_ => new Page(title),
 			};
 		}

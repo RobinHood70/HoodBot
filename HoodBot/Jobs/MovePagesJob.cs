@@ -60,7 +60,7 @@
 		private readonly TitleCollection doNotDelete;
 		private readonly ReplacementCollection replacements = new ReplacementCollection();
 		private readonly string replacementStatusFile = Path.Combine(UespSite.GetBotFolder(), "Replacements.json");
-		private readonly ISimpleTitleJsonConverter titleConverter;
+		private readonly SimpleTitleJsonConverter titleConverter;
 		private PageModules fromPageModules = PageModules.None;
 		private string? logDetails;
 		#endregion
@@ -71,12 +71,12 @@
 		{
 			this.ProposedDeletions = new TitleCollection(site);
 			this.doNotDelete = new TitleCollection(site);
-			this.titleConverter = new ISimpleTitleJsonConverter(this.Site);
+			this.titleConverter = new SimpleTitleJsonConverter(this.Site);
 		}
 		#endregion
 
 		#region Public Properties
-		public KeyedCollection<ISimpleTitle, Replacement> Replacements => this.replacements;
+		public KeyedCollection<Title, Replacement> Replacements => this.replacements;
 		#endregion
 
 		#region Public Override Properties
@@ -140,7 +140,7 @@
 
 		protected Action<ContextualParser, ISimpleTitle, ISimpleTitle>? CustomReplaceSpecific { get; set; }
 
-		protected Dictionary<ISimpleTitle, Replacement> EditDictionary { get; } = new Dictionary<ISimpleTitle, Replacement>(SimpleTitleEqualityComparer.Instance);
+		protected Dictionary<Title, Replacement> EditDictionary { get; } = new Dictionary<Title, Replacement>();
 
 		protected string EditSummaryEditAfterMove { get; set; } = "Update text after page move";
 
@@ -203,7 +203,7 @@
 			this.ProposedDeletions.AddRange(this.LoadProposedDeletions());
 			foreach (var template in this.Site.DeletePreventionTemplates)
 			{
-				this.doNotDelete.GetBacklinks(template.FullPageName(), BacklinksTypes.EmbeddedIn, true);
+				this.doNotDelete.GetBacklinks(template.FullPageName, BacklinksTypes.EmbeddedIn, true);
 			}
 
 			this.StatusWriteLine("Getting Replacement List");
@@ -402,7 +402,7 @@
 						if (this.FollowUpActions.HasFlag(FollowUpActions.UpdateCategoryMembers) && replacement.From.Namespace == MediaWikiNamespaces.Category && replacement.To.Namespace == MediaWikiNamespaces.Category)
 						{
 							var catMembers = new TitleCollection(this.Site);
-							catMembers.GetCategoryMembers(replacement.From.FullPageName(), CategoryMemberTypes.All, true);
+							catMembers.GetCategoryMembers(replacement.From.FullPageName, CategoryMemberTypes.All, true);
 							backlinkTitles.AddRange(catMembers);
 						}
 					}
@@ -476,7 +476,7 @@
 					}
 
 					var result = fromTitle.Move(
-						replacement.To.FullPageName(),
+						replacement.To.FullPageName,
 						this.EditSummaryMove,
 						this.MoveOptions.HasFlag(MoveOptions.MoveTalkPage) && fromTitle.Namespace.TalkSpace != null,
 						this.MoveOptions.HasFlag(MoveOptions.MoveSubPages) && fromTitle.Namespace.AllowsSubpages,
@@ -485,10 +485,10 @@
 					{
 						foreach (var item in values)
 						{
-							var from = new FullTitle(this.Site, item.Key);
+							var from = LinkTitle.FromName(this.Site, item.Key);
 							if (!from.SimpleEquals(replacement.From))
 							{
-								var to = new FullTitle(this.Site, item.Value);
+								var to = LinkTitle.FromName(this.Site, item.Value);
 								var newReplacement = new Replacement(from, to)
 								{
 									Actions = replacement.Actions,
@@ -652,7 +652,7 @@
 			var templateName = WikiTextVisitor.Value(template.Title);
 			if (templateName.Length > 0)
 			{
-				var templateTitle = FullTitle.Coerce(this.Site, MediaWikiNamespaces.Template, templateName);
+				var templateTitle = LinkTitle.Coerce(this.Site, MediaWikiNamespaces.Template, templateName);
 				if (this.replacements.TryGetValue(templateTitle, out var replacement))
 				{
 					if (replacement.Actions.HasFlag(ReplacementActions.Move))
@@ -661,7 +661,7 @@
 						templateTitle.Namespace = newTemplate.Namespace;
 						templateTitle.PageName = newTemplate.PageName;
 						template.Title.Clear();
-						var nameText = newTemplate.Namespace == MediaWikiNamespaces.Template ? newTemplate.PageName : newTemplate.FullPageName();
+						var nameText = newTemplate.Namespace == MediaWikiNamespaces.Template ? newTemplate.PageName : newTemplate.FullPageName;
 						template.Title.AddText(nameText);
 					}
 				}
@@ -892,24 +892,13 @@
 		#endregion
 
 		#region Private Classes
-		private class ReplacementCollection : KeyedCollection<ISimpleTitle, Replacement>
+		private class ReplacementCollection : KeyedCollection<Title, Replacement>
 		{
-			public ReplacementCollection()
-				: base(SimpleTitleEqualityComparer.Instance, 0)
-			{
-			}
+			public IEnumerable<Title> Keys => this.Dictionary?.Keys ?? Array.Empty<Title>();
 
-			public IEnumerable<ISimpleTitle> Keys => this.Dictionary?.Keys ?? Array.Empty<ISimpleTitle>();
+			public void Sort() => (this.Items as List<Replacement>)?.Sort();
 
-			public void Sort()
-			{
-				if (this.Items is List<Replacement> list)
-				{
-					list.Sort();
-				}
-			}
-
-			protected override ISimpleTitle GetKeyForItem(Replacement item) => item.From;
+			protected override Title GetKeyForItem(Replacement item) => item.From;
 		}
 		#endregion
 	}

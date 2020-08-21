@@ -25,25 +25,16 @@
 
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="Page" /> class based on site and page name.</summary>
-		/// <param name="site">The site the page is from.</param>
-		/// <param name="fullPageName">Full name of the page.</param>
-		public Page(Site site, string fullPageName)
-			: base(site, fullPageName)
+		/// <summary>Initializes a new instance of the <see cref="Page" /> class using the site and full page name.</summary>
+		/// <param name="ns">The namespace of the title.</param>
+		/// <param name="pageName">The page name (without leading namespace).</param>
+		public Page(Namespace ns, string pageName)
+			: base(ns, pageName)
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="Page" /> class using the namespace and page name.</summary>
-		/// <param name="site">The site this page is from.</param>
-		/// <param name="ns">The namespace ID the page is in.</param>
-		/// <param name="pageName">The name of the page without the namespace.</param>
-		public Page(Site site, int ns, string pageName)
-			: base(site, ns, pageName)
-		{
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="Page" /> class from another ISimpleTitle-based object.</summary>
-		/// <param name="title">The Title object to copy from.</param>
+		/// <summary>Initializes a new instance of the <see cref="Page"/> class.</summary>
+		/// <param name="title">The <see cref="ISimpleTitle"/> to copy values from.</param>
 		public Page(ISimpleTitle title)
 			: base(title)
 		{
@@ -63,13 +54,13 @@
 		/// <summary>Gets the backlinks on the page if they were requested in the last load operation.</summary>
 		/// <value>The links used on the page.</value>
 		/// <remarks>This includes links, transclusions, and file usage.</remarks>
-		public IReadOnlyDictionary<Title, BacklinksTypes> Backlinks { get; } = new Dictionary<Title, BacklinksTypes>(SimpleTitleEqualityComparer.Instance);
+		public IReadOnlyDictionary<Title, BacklinksTypes> Backlinks { get; } = new Dictionary<Title, BacklinksTypes>();
 
 		/// <summary>Gets or sets the canonical article path.</summary>
 		/// <value>The canonical article path.</value>
 		public Uri CanonicalPath
 		{
-			get => this.canonicalPath ?? this.Site.GetArticlePath(this.FullPageName());
+			get => this.canonicalPath ?? this.Site.GetArticlePath(this.FullPageName);
 			set => this.canonicalPath = value;
 		}
 
@@ -93,7 +84,7 @@
 		{
 			get => this.editPath ?? new UriBuilder(this.Site.ScriptPath)
 			{
-				Query = "title=" + Uri.EscapeDataString(this.FullPageName()) + "&action=edit"
+				Query = "title=" + Uri.EscapeDataString(this.FullPageName) + "&action=edit"
 			}.Uri;
 			set => this.editPath = value;
 		}
@@ -122,7 +113,7 @@
 					throw new InvalidOperationException(CurrentCulture(Resources.ModuleNotLoaded, nameof(PageModules.Templates), nameof(this.IsDisambiguation)));
 				}
 
-				var templates = new HashSet<Title>(this.Templates, SimpleTitleEqualityComparer.Instance);
+				var templates = new HashSet<Title>(this.Templates);
 				templates.IntersectWith(this.Site.DisambiguationTemplates);
 
 				return templates.Count > 0;
@@ -186,11 +177,15 @@
 
 		#region Public Static Methods
 
-		/// <summary>Returns a value indicating whether the page exists.</summary>
-		/// <param name="site">The site to search on.</param>
-		/// <param name="fullName">The full name.</param>
-		/// <returns>A value indicating whether the page exists.</returns>
-		public static bool CheckExistence(Site site, string fullName) => new Page(site, fullName).CheckExistence();
+		/// <summary>Creates a new instance of the <see cref="Page"/> class from the full page name.</summary>
+		/// <param name="site">The site this title is from.</param>
+		/// <param name="fullPageName">The full name of the page.</param>
+		/// <returns>A new Page based on the provided values.</returns>
+		public static new Page FromName(Site site, string fullPageName)
+		{
+			var parser = new TitleParser(site, fullPageName);
+			return new Page(parser);
+		}
 		#endregion
 
 		#region Public Methods
@@ -221,7 +216,7 @@
 			ThrowNull(options, nameof(options));
 			var creator = this.Site.PageCreator;
 			var propertyInputs = creator.GetPropertyInputs(options);
-			var pageSetInput = new QueryPageSetInput(new[] { this.FullPageName() }) { ConvertTitles = options.ConvertTitles, Redirects = options.FollowRedirects };
+			var pageSetInput = new QueryPageSetInput(new[] { this.FullPageName }) { ConvertTitles = options.ConvertTitles, Redirects = options.FollowRedirects };
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, propertyInputs, creator.CreatePageItem);
 			if (result.Count == 1)
 			{
@@ -263,7 +258,7 @@
 				changeArgs,
 				() => // Modification status re-checked here because a subscriber may have reverted the page.
 					!this.TextModified ? ChangeStatus.NoEffect :
-						this.Site.AbstractionLayer.Edit(new EditInput(this.FullPageName(), this.Text)
+						this.Site.AbstractionLayer.Edit(new EditInput(this.FullPageName, this.Text)
 						{
 							BaseTimestamp = this.CurrentRevision?.Timestamp,
 							StartTimestamp = this.StartTimestamp,
@@ -340,7 +335,7 @@
 		{
 			foreach (var link in list)
 			{
-				var title = new Title(this.Site, link.Title ?? throw PropertyNull(nameof(link), nameof(link.Title)));
+				var title = Title.FromName(this.Site, link.Title ?? throw PropertyNull(nameof(link), nameof(link.Title)));
 				if (backlinks.ContainsKey(title))
 				{
 					backlinks[title] |= type;
@@ -358,7 +353,8 @@
 			categories.Clear();
 			foreach (var category in pageItem.Categories)
 			{
-				categories.Add(new Category(new FullTitle(this.Site, category.Title), category.SortKey, category.Hidden));
+				var parser = new TitleParser(this.Site, category.Title);
+				categories.Add(new Category(parser, category.SortKey, category.Hidden));
 			}
 		}
 
@@ -392,7 +388,7 @@
 			links.Clear();
 			foreach (var link in pageItem.Links)
 			{
-				links.Add(new Title(this.Site, link.Title));
+				links.Add(Title.FromName(this.Site, link.Title));
 			}
 		}
 
@@ -424,7 +420,7 @@
 			templates.Clear();
 			foreach (var link in pageItem.Templates)
 			{
-				templates.Add(new Title(this.Site, link.Title));
+				templates.Add(Title.FromName(this.Site, link.Title));
 			}
 		}
 		#endregion

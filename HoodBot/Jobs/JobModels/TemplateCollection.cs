@@ -3,7 +3,6 @@
 	using System.Collections.Generic;
 	using System.Text.RegularExpressions;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 
 	public class TemplateCollection : List<TemplateUsageRow>
@@ -25,7 +24,7 @@
 				{
 					var template = Template.Parse(match.Value);
 					template.ForcePositionalNames();
-					allTemplates.Add(page.FullPageName(), template);
+					allTemplates.Add(page.FullPageName, template);
 					foreach (var param in template)
 					{
 						if (param.Name != null && headersLookup.Add(param.Name))

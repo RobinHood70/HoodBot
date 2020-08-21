@@ -130,7 +130,7 @@
 				var newList = new List<string>();
 				foreach (var page in this.trivialChanges)
 				{
-					newList.Add(new SiteLink(new FullTitle(page)).ToString());
+					newList.Add(new SiteLink(new LinkTitle(page)).ToString());
 				}
 
 				this.WriteLine(string.Join(", ", newList));
@@ -142,7 +142,7 @@
 				this.WriteLine($"== {this.TypeText} Skills With Non-Trivial Updates ==");
 				foreach (var page in this.nonTrivialChanges)
 				{
-					this.WriteLine($"* {{{{Pl|{page.FullPageName()}|{page.LabelName()}|diff=cur}}}}");
+					this.WriteLine($"* {{{{Pl|{page.FullPageName}|{page.LabelName()}|diff=cur}}}}");
 				}
 
 				this.WriteLine();
@@ -212,7 +212,7 @@
 
 		private void SkillPageLoaded(object sender, Page page)
 		{
-			var nonTrivial = this.UpdatePageText(page, this.skills[page.FullPageName()]);
+			var nonTrivial = this.UpdatePageText(page, this.skills[page.FullPageName]);
 			if (sender != this && page.TextModified)
 			{
 				if (nonTrivial)

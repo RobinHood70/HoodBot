@@ -14,8 +14,8 @@
 	public class FixDoubleRedirects : EditJob
 	{
 		#region Fields
-		private readonly Dictionary<ISimpleTitle, IFullTitle> lookup = new Dictionary<ISimpleTitle, IFullTitle>(SimpleTitleEqualityComparer.Instance);
-		private readonly Dictionary<ISimpleTitle, NodeCollection> parsedPages = new Dictionary<ISimpleTitle, NodeCollection>(SimpleTitleEqualityComparer.Instance);
+		private readonly Dictionary<Title, LinkTitle> lookup = new Dictionary<Title, LinkTitle>();
+		private readonly Dictionary<Title, NodeCollection> parsedPages = new Dictionary<Title, NodeCollection>();
 		private readonly IReadOnlyCollection<string> redirectWords;
 		#endregion
 
@@ -29,11 +29,11 @@
 		protected override void BeforeLogging()
 		{
 			this.GetDoubleRedirects();
-			var loopCheck = new HashSet<IFullTitle>();
+			var loopCheck = new HashSet<LinkTitle>();
 			var fragments = new HashSet<string>();
 			foreach (var page in this.Pages)
 			{
-				if (this.lookup.TryGetValue(new FullTitle(page), out var originalTarget))
+				if (this.lookup.TryGetValue(new LinkTitle(page), out var originalTarget))
 				{
 					loopCheck.Clear();
 					fragments.Clear();
@@ -71,14 +71,14 @@
 						continue;
 					}
 
-					var comboTarget = new FullTitle(target);
+					var comboTarget = new LinkTitle(target);
 					if (fragments.Count == 1)
 					{
 						comboTarget.Fragment = fragments.First();
 					}
 					else if (fragments.Count > 1)
 					{
-						Debug.WriteLine("Fragment conflict on " + page.FullPageName());
+						Debug.WriteLine("Fragment conflict on " + page.FullPageName);
 						continue;
 					}
 
@@ -124,12 +124,13 @@
 			}
 		}
 
-		private TitleCollection GetNewTitles(IEnumerable<ISimpleTitle> toLoad)
+		private TitleCollection GetNewTitles<TTitle>(TitleCollection<TTitle> toLoad)
+			where TTitle : Title
 		{
 			var retval = new TitleCollection(this.Site);
 			foreach (var title in toLoad)
 			{
-				if (this.Pages.TryGetValue(title.FullPageName(), out var page))
+				if (this.Pages.TryGetValue(title.FullPageName, out var page))
 				{
 					var nodes = WikiTextParser.Parse(page.Text);
 					if (nodes.First?.Value is TextNode textNode && this.redirectWords.Contains(textNode.Text.TrimEnd(), StringComparer.OrdinalIgnoreCase))
@@ -141,7 +142,7 @@
 						}
 
 						var targetText = WikiTextVisitor.Value(targetNode.Title);
-						var target = new FullTitle(this.Site, targetText);
+						var target = LinkTitle.FromName(this.Site, targetText);
 						if (this.lookup.TryAdd(title, target))
 						{
 							this.parsedPages.Add(title, nodes);

@@ -20,19 +20,19 @@
 	{
 		#region Constructors
 		public Replacement(Site site, string from, string to)
-			: this(new Title(site, from), new Title(site, to))
+			: this(Title.FromName(site, from), Title.FromName(site, to))
 		{
 		}
 
 		[JsonConstructor]
-		public Replacement(ISimpleTitle from, ISimpleTitle to)
+		public Replacement(Title from, Title to)
 		{
 			ThrowNull(from, nameof(from));
 			ThrowNull(to, nameof(to));
 
 			if (from == to)
 			{
-				throw new ArgumentException($"From and to pages cannot be the same: {from.FullPageName()} == {to.FullPageName()}");
+				throw new ArgumentException($"From and to pages cannot be the same: {from.FullPageName} == {to.FullPageName}");
 			}
 
 			this.From = from;
@@ -43,14 +43,14 @@
 		#region Public Properties
 		public ReplacementActions Actions { get; set; }
 
-		public ISimpleTitle From { get; }
+		public Title From { get; }
 
 		[JsonIgnore]
 		public Page? FromPage { get; internal set; }
 
 		public string? Reason { get; set; }
 
-		public ISimpleTitle To { get; set; }
+		public Title To { get; set; }
 
 		[JsonIgnore]
 		public Page? ToPage { get; set; }
@@ -85,7 +85,7 @@
 
 		public override int GetHashCode() => this.From?.GetHashCode() ?? 0;
 
-		public override string ToString() => $"{this.Actions}: {this.From.FullPageName()} → {this.To.FullPageName()}";
+		public override string ToString() => $"{this.Actions}: {this.From.FullPageName} → {this.To.FullPageName}";
 		#endregion
 	}
 }

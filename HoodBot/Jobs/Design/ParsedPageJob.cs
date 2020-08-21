@@ -28,13 +28,13 @@
 			var titles = new TitleCollection(this.Site, MediaWikiNamespaces.Template, templates);
 			var pages = PageCollection.Unlimited(this.Site, PageModules.None, true);
 			pages.GetTitles(titles);
-			var pagesToCheck = new HashSet<Page>(pages, SimpleTitleEqualityComparer.Instance);
-			var alreadyChecked = new HashSet<Page>(SimpleTitleEqualityComparer.Instance);
+			var pagesToCheck = new HashSet<Page>(pages);
+			var alreadyChecked = new HashSet<Page>();
 			do
 			{
 				foreach (var page in pagesToCheck)
 				{
-					pages.GetBacklinks(page.FullPageName(), BacklinksTypes.Backlinks, true, Filter.Only);
+					pages.GetBacklinks(page.FullPageName, BacklinksTypes.Backlinks, true, Filter.Only);
 				}
 
 				alreadyChecked.UnionWith(pagesToCheck);
@@ -47,7 +47,7 @@
 			var retval = new TitleCollection(this.Site);
 			foreach (var backlink in pages)
 			{
-				retval.GetBacklinks(backlink.FullPageName(), BacklinksTypes.EmbeddedIn);
+				retval.GetBacklinks(backlink.FullPageName, BacklinksTypes.EmbeddedIn);
 			}
 
 			return retval;

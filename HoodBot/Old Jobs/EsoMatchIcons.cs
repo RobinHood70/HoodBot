@@ -22,7 +22,7 @@
 		#endregion
 
 		#region Fields
-		private readonly HashSet<ISimpleTitle> licenseTemplates = new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance);
+		private readonly HashSet<Title> licenseTemplates = new HashSet<Title>();
 		private IReadOnlyDictionary<string, List<ItemInfo>> allItems;
 		private IReadOnlyDictionary<string, ICollection<string>> allIcons;
 		#endregion

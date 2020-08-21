@@ -187,7 +187,7 @@
 					if (this.Replacements.TryGetValue(title, out var replacement) && replacement.Actions.HasFlag(ReplacementActions.Move))
 					{
 						// Note: for simplicity, this pays no attention to ns_base, which is not in use anywhere on the wiki as of this writing.
-						split.Value = replacement.To.NamespaceId == page.NamespaceId ? replacement.To.PageName : replacement.To.FullPageName();
+						split.Value = replacement.To.NamespaceId == page.NamespaceId ? replacement.To.PageName : replacement.To.FullPageName;
 						value.Clear();
 						value.AddText(split.ToString());
 					}

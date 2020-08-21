@@ -200,7 +200,7 @@
 		{
 			foreach (var quest in GetDBQuests())
 			{
-				var title = new Title(this.Site, quest.FullPageName);
+				var title = Title.FromName(this.Site, quest.FullPageName);
 				var titleDisambig = new Title(title);
 				titleDisambig.PageName += " (quest)";
 				if (!wikiQuests.Contains(title) && !wikiQuests.Contains(titleDisambig))
@@ -422,7 +422,9 @@
 				.AppendLine()
 				.AppendLine("{{Stub|Quest}}");
 
-			return new Page(this.Site, quest.FullPageName ?? throw new InvalidOperationException()) { Text = sb.ToString() };
+			var retval = Page.FromName(this.Site, quest.FullPageName ?? throw new InvalidOperationException());
+			retval.Text = sb.ToString();
+			return retval;
 		}
 
 		private Dictionary<string, List<Condition>> MergeStages(QuestData quest, SortedSet<string> locs)
@@ -432,7 +434,7 @@
 			{
 				if (stage.Zone != "Tamriel" && stage.Zone != quest.Zone)
 				{
-					var title = new Title(this.Site, UespNamespaces.Online, stage.Zone);
+					var title = new Title(this.Site[UespNamespaces.Online], stage.Zone);
 					locs.Add(title.AsLink(true));
 				}
 
