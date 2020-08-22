@@ -79,7 +79,7 @@
 		private HashSet<Title>? disambiguationTemplates;
 		private IReadOnlyCollection<Title>? discussionPages;
 		private ReadOnlyKeyedCollection<string, InterwikiEntry>? interwikiMap;
-		private Title? mainPage;
+		private FullTitle? mainPage;
 		private string? mainPageName;
 		private NamespaceCollection? namespaces;
 		private string? scriptPath;
@@ -200,7 +200,7 @@
 
 		/// <summary>Gets the <see cref="Title"/> for the main page of the site.</summary>
 		/// <value>The main page.</value>
-		public Title MainPage => this.mainPage ?? throw NoSite();
+		public FullTitle MainPage => this.mainPage ?? throw NoSite();
 
 		/// <summary>Gets the name of the main page, as returned by the site.</summary>
 		/// <value>The name of the main page.</value>
@@ -310,8 +310,8 @@
 
 		/// <summary>Gets the redirect target from the page text.</summary>
 		/// <param name="text">The text to parse.</param>
-		/// <returns>A <see cref="ILinkTitle"/> object with the parsed redirect.</returns>
-		public virtual ILinkTitle? GetRedirectFromText(string text)
+		/// <returns>A <see cref="IFullTitle"/> object with the parsed redirect.</returns>
+		public virtual IFullTitle? GetRedirectFromText(string text)
 		{
 			ThrowNull(text, nameof(text));
 			var redirects = new HashSet<string>(this.MagicWords.TryGetValue("redirect", out var redirect) ? redirect.Aliases : DefaultRedirect);
@@ -329,7 +329,7 @@
 				if (redirects.Contains(searchText) && first.Next?.Value is LinkNode linkNode)
 				{
 					var name = WikiTextVisitor.Raw(linkNode.Title);
-					return LinkTitle.FromName(this, name);
+					return FullTitle.FromName(this, name);
 				}
 			}
 
@@ -1097,7 +1097,7 @@
 			this.namespaces = new NamespaceCollection(namespaces, comparer);
 			if (this.mainPageName != null)
 			{
-				this.mainPage = Title.FromName(this, this.mainPageName); // Now that we understand namespaces, we can create a Title.
+				this.mainPage = FullTitle.FromName(this, this.mainPageName); // Now that we understand namespaces, we can create a Title.
 			}
 
 			// MagicWords

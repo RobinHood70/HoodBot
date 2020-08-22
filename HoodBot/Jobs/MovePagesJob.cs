@@ -485,10 +485,10 @@
 					{
 						foreach (var item in values)
 						{
-							var from = LinkTitle.FromName(this.Site, item.Key);
+							var from = FullTitle.FromName(this.Site, item.Key);
 							if (!from.SimpleEquals(replacement.From))
 							{
-								var to = LinkTitle.FromName(this.Site, item.Value);
+								var to = FullTitle.FromName(this.Site, item.Value);
 								var newReplacement = new Replacement(from, to)
 								{
 									Actions = replacement.Actions,
@@ -574,16 +574,12 @@
 							continue;
 						}
 
-						link.PageName = replacement.To.PageName;
-						this.UpdateLinkText(page, link, false);
+						var newPageName = replacement.To.PageName;
+						var newNamespace = (replacement.From.Namespace == replacement.To.Namespace && link.Coerced) ? this.Site[MediaWikiNamespaces.Main] : replacement.To.Namespace;
+						var newLink = link.With(newNamespace, newPageName);
+						this.UpdateLinkText(page, newLink, false);
 
-						if (link.Coerced)
-						{
-							link.Namespace = this.Site.Mainspace;
-						}
-
-						newLine = link.ToString();
-						newLine = newLine[2..^2].TrimEnd();
+						newLine = newLink.ToString()[2..^2].TrimEnd();
 					}
 				}
 
@@ -606,7 +602,7 @@
 			var link = SiteLink.FromLinkNode(this.Site, node);
 			if (this.replacements.TryGetValue(link, out var replacement) && replacement.Actions.HasFlag(ReplacementActions.Move))
 			{
-				link.SetTitle(replacement.To);
+				link = link.With(replacement.To);
 				this.UpdateLinkText(page, link, true);
 				link.UpdateLinkNode(node);
 			}
@@ -623,7 +619,7 @@
 			ThrowNull(page, nameof(page));
 			if (link.Text == null)
 			{
-				if (addCaption && !page.IsRedirect && link.OriginalLink != null && (link.LeadingColon || link.Namespace != MediaWikiNamespaces.Category))
+				if (addCaption && !page.IsRedirect && link.OriginalLink != null && (link.ForcedNamespaceLink || link.Namespace != MediaWikiNamespaces.Category))
 				{
 					// CONSIDER: For now, this is a simple check for all links on a redirect page. In theory, could/should only apply to the first link, in the uncommon case where there's additional text on the page.
 					link.Text = link.OriginalLink.TrimStart(':');
@@ -652,14 +648,12 @@
 			var templateName = WikiTextVisitor.Value(template.Title);
 			if (templateName.Length > 0)
 			{
-				var templateTitle = LinkTitle.Coerce(this.Site, MediaWikiNamespaces.Template, templateName);
+				var templateTitle = FullTitle.Coerce(this.Site, MediaWikiNamespaces.Template, templateName);
 				if (this.replacements.TryGetValue(templateTitle, out var replacement))
 				{
 					if (replacement.Actions.HasFlag(ReplacementActions.Move))
 					{
 						var newTemplate = replacement.To;
-						templateTitle.Namespace = newTemplate.Namespace;
-						templateTitle.PageName = newTemplate.PageName;
 						template.Title.Clear();
 						var nameText = newTemplate.Namespace == MediaWikiNamespaces.Template ? newTemplate.PageName : newTemplate.FullPageName;
 						template.Title.AddText(nameText);

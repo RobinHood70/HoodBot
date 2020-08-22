@@ -14,7 +14,7 @@
 	public class FixDoubleRedirects : EditJob
 	{
 		#region Fields
-		private readonly Dictionary<Title, LinkTitle> lookup = new Dictionary<Title, LinkTitle>();
+		private readonly Dictionary<Title, FullTitle> lookup = new Dictionary<Title, FullTitle>();
 		private readonly Dictionary<Title, NodeCollection> parsedPages = new Dictionary<Title, NodeCollection>();
 		private readonly IReadOnlyCollection<string> redirectWords;
 		#endregion
@@ -29,11 +29,11 @@
 		protected override void BeforeLogging()
 		{
 			this.GetDoubleRedirects();
-			var loopCheck = new HashSet<LinkTitle>();
+			var loopCheck = new HashSet<FullTitle>();
 			var fragments = new HashSet<string>();
 			foreach (var page in this.Pages)
 			{
-				if (this.lookup.TryGetValue(new LinkTitle(page), out var originalTarget))
+				if (this.lookup.TryGetValue(page, out var originalTarget))
 				{
 					loopCheck.Clear();
 					fragments.Clear();
@@ -71,7 +71,7 @@
 						continue;
 					}
 
-					var comboTarget = new LinkTitle(target);
+					var comboTarget = new FullTitle(target);
 					if (fragments.Count == 1)
 					{
 						comboTarget.Fragment = fragments.First();
@@ -142,7 +142,7 @@
 						}
 
 						var targetText = WikiTextVisitor.Value(targetNode.Title);
-						var target = LinkTitle.FromName(this.Site, targetText);
+						var target = FullTitle.FromName(this.Site, targetText);
 						if (this.lookup.TryAdd(title, target))
 						{
 							this.parsedPages.Add(title, nodes);

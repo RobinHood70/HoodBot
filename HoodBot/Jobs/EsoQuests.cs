@@ -201,8 +201,7 @@
 			foreach (var quest in GetDBQuests())
 			{
 				var title = Title.FromName(this.Site, quest.FullPageName);
-				var titleDisambig = new Title(title);
-				titleDisambig.PageName += " (quest)";
+				var titleDisambig = new Title(title.Namespace, title.PageName + " (quest)");
 				if (!wikiQuests.Contains(title) && !wikiQuests.Contains(titleDisambig))
 				{
 					var missing = true;

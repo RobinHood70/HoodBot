@@ -9,7 +9,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.WikiCommon.Searches;
@@ -88,8 +87,8 @@
 					throw new InvalidOperationException("Not logged in.");
 				}
 
-				var replacementsTitle = new Page(job.Site.User);
-				replacementsTitle.PageName += "/ESO Replacements";
+				var user = job.Site.User;
+				var replacementsTitle = new Page(user.Namespace, user.PageName + "/ESO Replacements");
 				replacementsTitle.Load();
 				var replacements = replacementsTitle.Text;
 				if (string.IsNullOrEmpty(replacements))

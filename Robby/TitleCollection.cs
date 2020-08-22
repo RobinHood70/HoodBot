@@ -245,7 +245,7 @@
 		{
 			ThrowNull(input, nameof(input));
 			ThrowNull(input.Title, nameof(input), nameof(input.Title));
-			var inputTitle = LinkTitle.FromName(this.Site, input.Title);
+			var inputTitle = Title.FromName(this.Site, input.Title);
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && input.LinkTypes.HasFlag(BacklinksTypes.ImageUsage))
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);

@@ -13,7 +13,7 @@
 	public class LinkFinder : ParsedPageJob
 	{
 		#region Fields
-		private readonly ILinkTitle title;
+		private readonly IFullTitle title;
 		private readonly TitleCollection results;
 		#endregion
 
@@ -26,7 +26,7 @@
 			ThrowNull(search, nameof(search));
 			this.Pages.SetLimitations(LimitationType.None);
 			this.results = new TitleCollection(site);
-			this.title = LinkTitle.FromName(site, search);
+			this.title = FullTitle.FromName(site, search);
 			this.Logger = null;
 		}
 		#endregion

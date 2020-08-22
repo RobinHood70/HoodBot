@@ -32,7 +32,7 @@
 	public class PageCollection : TitleCollection<Page>
 	{
 		#region Fields
-		private readonly Dictionary<string, ILinkTitle> titleMap = new Dictionary<string, ILinkTitle>();
+		private readonly Dictionary<string, IFullTitle> titleMap = new Dictionary<string, IFullTitle>();
 		private readonly List<string> recurseCategories = new List<string>();
 		#endregion
 
@@ -133,7 +133,7 @@
 		/// <para>The title map allows mapping from the original name you provided for a page to the actual title that was returned. If, for example, you requested "Main Page" and got redirected to "Main page", there would be an entry in the title map indicating that. Not all titles in the title map will necessarily appear in the result set. For example, if you provided an interwiki title, the result set most likely won't include that, but the title map will still include an InterwikiTitle result for it.</para>
 		/// <para>The title map is largely for informational purposes. When accessing items in the collection, it will automatically check the title map and attempt to return the correct result.</para>
 		/// </remarks>
-		public IReadOnlyDictionary<string, ILinkTitle> TitleMap => this.titleMap;
+		public IReadOnlyDictionary<string, IFullTitle> TitleMap => this.titleMap;
 		#endregion
 
 		#region Protected Properties
@@ -327,27 +327,40 @@
 		{
 			foreach (var item in result.Interwiki)
 			{
-				var titleParts = LinkTitle.FromName(this.Site, item.Value.Title);
+				var titleParts = FullTitle.FromName(this.Site, item.Value.Title);
 				Debug.Assert(titleParts.Interwiki?.Prefix == item.Value.Prefix, "Interwiki prefixes didn't match.", titleParts.Interwiki?.Prefix + " != " + item.Value.Prefix);
 				this.titleMap[item.Key] = titleParts;
 			}
 
 			foreach (var item in result.Converted)
 			{
-				this.titleMap[item.Key] = LinkTitle.FromName(this.Site, item.Value);
+				this.titleMap[item.Key] = FullTitle.FromName(this.Site, item.Value);
 			}
 
 			foreach (var item in result.Normalized)
 			{
-				this.titleMap[item.Key] = LinkTitle.FromName(this.Site, item.Value);
+				this.titleMap[item.Key] = FullTitle.FromName(this.Site, item.Value);
 			}
 
 			foreach (var item in result.Redirects)
 			{
-				// Move interwiki redirects to InterwikiTitles collection, since lookups would try to redirect to a local page with the same name.
 				var value = item.Value;
 				var interwiki = value.Interwiki == null ? null : this.Site.InterwikiMap[value.Interwiki];
-				this.titleMap[item.Key] = LinkTitle.FromParts(this.Site, interwiki, value.Title, value.Fragment);
+
+				// If it's local, interpret the namespace; otherwise, stuff whatever value we get into the page name, since we can't interpret it reliably.
+				FullTitle title;
+				if (interwiki == null || interwiki.LocalWiki)
+				{
+					title = FullTitle.FromName(this.Site, value.Title);
+					title.Interwiki = interwiki;
+					title.Fragment = value.Fragment;
+				}
+				else
+				{
+					title = new FullTitle(this.Site.Mainspace, value.Title);
+				}
+
+				this.titleMap[item.Key] = title;
 			}
 		}
 		#endregion

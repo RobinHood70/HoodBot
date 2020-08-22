@@ -22,7 +22,8 @@
 		where TTitle : Title
 	{
 		#region Fields
-		private readonly Dictionary<ISimpleTitle, TTitle> dictionary = new Dictionary<ISimpleTitle, TTitle>(SimpleTitleEqualityComparer.Instance);
+		// This dictionary gets rather silly, since the key and value for each is the same thing, but nothing else allows the key to be an interface while also retrieving the typed value.
+		private readonly Dictionary<ISimpleTitle, TTitle> lookup = new Dictionary<ISimpleTitle, TTitle>(SimpleTitleEqualityComparer.Instance);
 		private readonly List<TTitle> items = new List<TTitle>();
 		#endregion
 
@@ -64,7 +65,7 @@
 			{
 				ThrowNull(value, nameof(value));
 				this.items[index] = value;
-				this.dictionary[value.Key] = value;
+				this.lookup[value] = value;
 			}
 		}
 
@@ -78,7 +79,7 @@
 			set
 			{
 				var titleKey = this.TextToTitle(key);
-				if (this.dictionary.ContainsKey(titleKey.Key))
+				if (this.lookup.ContainsKey(titleKey))
 				{
 					var index = this.IndexOf(titleKey);
 					this.items[index] = value;
@@ -88,7 +89,7 @@
 					this.items.Add(value);
 				}
 
-				this.dictionary[titleKey.Key] = value;
+				this.lookup[value] = value;
 			}
 		}
 
@@ -99,14 +100,7 @@
 		[SuppressMessage("Microsoft.Design", "CA1043:UseIntegralOrStringArgumentForIndexers", Justification = @"Integer and string methods are also available, but this method provides the most accuracy.")]
 		public virtual TTitle this[Title title]
 		{
-			get
-			{
-				ThrowNull(title, nameof(title));
-				return !this.dictionary.TryGetValue(title.Key, out var retval)
-					? this.FindTitle(title) ?? throw new KeyNotFoundException()
-					: retval;
-			}
-
+			get => this.lookup[title ?? throw ArgumentNull(nameof(title))];
 			set
 			{
 				ThrowNull(title, nameof(title));
@@ -120,7 +114,7 @@
 					this.items[index] = value;
 				}
 
-				this.dictionary[title.Key] = value;
+				this.lookup[value] = value;
 			}
 		}
 		#endregion
@@ -168,7 +162,7 @@
 			ThrowNull(titles, nameof(titles));
 			foreach (var title in titles)
 			{
-				this.AddNewItem(new TitleParser(this.Site, defaultNamespace, title, false));
+				this.AddNewItem(new TitleParser(this.Site, defaultNamespace, title));
 			}
 		}
 
@@ -204,16 +198,12 @@
 		/// <summary>Determines whether the <see cref="TitleCollection">collection</see> contains a specific value.</summary>
 		/// <param name="item">The object to locate in the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns><see langword="true" /> if <paramref name="item" /> is found in the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />.</returns>
-		public bool Contains(ISimpleTitle item) => this.FindTitle(item) != null;
+		public bool Contains(ISimpleTitle item) => this.lookup.ContainsKey(item ?? throw ArgumentNull(nameof(item)));
 
 		/// <summary>Determines whether the <see cref="TitleCollection">collection</see> contains a specific value.</summary>
 		/// <param name="item">The object to locate in the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns><see langword="true" /> if <paramref name="item" /> is found in the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />.</returns>
-		public bool Contains(TTitle item)
-		{
-			ThrowNull(item, nameof(item));
-			return this.dictionary.ContainsKey(item.Key);
-		}
+		public bool Contains(TTitle item) => this.lookup.ContainsKey(item ?? throw ArgumentNull(nameof(item)));
 
 		/// <summary>Determines whether the collection contains an item with the specified key.</summary>
 		/// <param name="key">The key to search for.</param>
@@ -222,7 +212,7 @@
 		{
 			ThrowNull(key, nameof(key));
 			var title = this.TextToTitle(key);
-			return this.dictionary.ContainsKey(title.Key) || this.FindTitle(title) != null;
+			return this.lookup.ContainsKey(title);
 		}
 
 		/// <summary>Copies the elements of the <see cref="TitleCollection">collection</see> to an <see cref="Array" />, starting at a particular <see cref="Array" /> index.</summary>
@@ -671,34 +661,26 @@
 		/// <summary>Determines the index of a specific item in the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="item">The item to locate in the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns>The index of <paramref name="item" /> if found in the list; otherwise, -1.</returns>
-		public int IndexOf(TTitle item) => this.IndexOf((item ?? throw ArgumentNull(nameof(item))).Key);
+		public int IndexOf(TTitle item) => this.IndexOf(item as ISimpleTitle);
 
 		/// <summary>Determines the index of a specific item in the <see cref="TitleCollection">collection</see>.</summary>
-		/// <param name="title">The item to locate in the <see cref="TitleCollection">collection</see>.</param>
-		/// <returns>The index of <paramref name="title" /> if found in the list; otherwise, -1.</returns>
-		public int IndexOf(ISimpleTitle title)
+		/// <param name="item">The item to locate in the <see cref="TitleCollection">collection</see>.</param>
+		/// <returns>The index of <paramref name="item" /> if found in the list; otherwise, -1.</returns>
+		public int IndexOf(ISimpleTitle item)
 		{
 			// ContainsKey is O(1), so check to see if key exists; if not, iterate looking for Namespace/PageName match.
-			ThrowNull(title, nameof(title));
-			if (this.dictionary.ContainsKey(title))
+			ThrowNull(item, nameof(item));
+			if (this.lookup.ContainsKey(item))
 			{
 				for (var i = 0; i < this.items.Count; i++)
 				{
-					if (this.items[i].Key.SimpleEquals(title))
+					if (this.items[i].SimpleEquals(item))
 					{
 						return i;
 					}
 				}
 
 				throw new InvalidOperationException(Resources.DictionaryListOutOfSync);
-			}
-
-			for (var i = 0; i < this.items.Count; i++)
-			{
-				if (this.items[i].SimpleEquals(title))
-				{
-					return i;
-				}
 			}
 
 			return -1;
@@ -721,7 +703,7 @@
 		/// <summary>Removes a specific item from the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="item">The item to remove from the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns><see langword="true" /> if <paramref name="item" /> was successfully removed from the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />. This method also returns <see langword="false" /> if <paramref name="item" /> is not found in the original <see cref="TitleCollection">collection</see>.</returns>
-		public bool Remove(TTitle item) => this.Remove((item ?? throw ArgumentNull(nameof(item))).Key);
+		public bool Remove(TTitle item) => this.Remove(item as ISimpleTitle);
 
 		/// <summary>Removes the item with the specified key from the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="key">The key of the item to remove from the <see cref="TitleCollection">collection</see>.</param>
@@ -729,7 +711,8 @@
 		public bool Remove(string key)
 		{
 			ThrowNull(key, nameof(key));
-			return this.Remove(this.TextToTitle(key));
+			var title = this.TextToTitle(key);
+			return this.Remove(title);
 		}
 
 		/// <summary>Removes a specific item from the <see cref="TitleCollection">collection</see>.</summary>
@@ -818,11 +801,10 @@
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
 		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
-		/// <remarks>This methods expects an exact match between the value passed and the <see cref="Title.Key"/>. To also check potentially altered Namespace and PageName, use <see cref="FindTitle(ISimpleTitle)"/>.</remarks>
 		public bool TryGetValue(TTitle key, [MaybeNullWhen(false)] out TTitle value)
 		{
 			ThrowNull(key, nameof(key));
-			return this.dictionary.TryGetValue(key.Key, out value);
+			return this.lookup.TryGetValue(key, out value);
 		}
 
 		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
@@ -830,11 +812,10 @@
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
 		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
-		/// <remarks>This methods expects an exact match between the value passed and the <see cref="Title.Key"/>. To also check potentially altered Namespace and PageName, use <see cref="FindTitle(ISimpleTitle)"/>.</remarks>
 		public bool TryGetValue(ISimpleTitle key, [MaybeNullWhen(false)] out TTitle value)
 		{
 			ThrowNull(key, nameof(key));
-			return this.dictionary.TryGetValue(key, out value);
+			return this.lookup.TryGetValue(key, out value);
 		}
 
 		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
@@ -846,7 +827,7 @@
 		{
 			ThrowNull(key, nameof(key));
 			var title = this.TextToTitle(key);
-			return this.dictionary.TryGetValue(title, out value!);
+			return this.lookup.TryGetValue(title, out value!);
 		}
 
 		/// <summary>Returns the requested value, or null if not found.</summary>
@@ -861,7 +842,7 @@
 		/// <summary>Returns the requested value, or null if not found.</summary>
 		/// <param name="key">The key.</param>
 		/// <returns>The requested value, or null if not found.</returns>
-		public TTitle? ValueOrDefault(string key) => key == null ? default : this.FindTitle(this.TextToTitle(key));
+		public TTitle? ValueOrDefault(string key) => key == null ? default : this.lookup.TryGetValue(this.TextToTitle(key), out var retval) ? retval : default;
 		#endregion
 
 		#region Public Abstract Methods
@@ -890,7 +871,7 @@
 		public virtual void Clear()
 		{
 			this.items.Clear();
-			this.dictionary.Clear();
+			this.lookup.Clear();
 		}
 		#endregion
 
@@ -917,7 +898,7 @@
 				throw new InvalidOperationException(CurrentCulture(Resources.InvalidSite));
 			}
 
-			this.dictionary[item.Key] = item;
+			this.lookup[item] = item;
 			this.items.Insert(index, item);
 		}
 
@@ -932,7 +913,7 @@
 				throw new ArgumentOutOfRangeException(nameof(index));
 			}
 
-			this.dictionary.Remove(this.items[index].Key);
+			this.lookup.Remove(this.items[index]);
 			this.items.RemoveAt(index);
 		}
 		#endregion
@@ -1055,13 +1036,6 @@
 		#endregion
 
 		#region Private Methods
-
-		private TTitle? FindTitle(ISimpleTitle item)
-		{
-			ThrowNull(item, nameof(item));
-			var index = this.IndexOf(item);
-			return index == -1 ? null : this.items[index];
-		}
 
 		private Title TextToTitle(string text) => Title.FromName(this.Site, text);
 		#endregion

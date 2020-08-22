@@ -130,7 +130,7 @@
 				var newList = new List<string>();
 				foreach (var page in this.trivialChanges)
 				{
-					newList.Add(new SiteLink(new LinkTitle(page)).ToString());
+					newList.Add(new SiteLink(page).ToString());
 				}
 
 				this.WriteLine(string.Join(", ", newList));

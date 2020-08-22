@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Globalization;
+	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
@@ -54,7 +55,7 @@
 	#endregion
 
 	/// <summary>Represents a link with site-specific Title information and parameters in the site's language.</summary>
-	public class SiteLink : LinkTitle
+	public class SiteLink : FullTitle, ILinkTitle
 	{
 		#region Static Fields
 		private static readonly Dictionary<string, ParameterType> DirectValues = new Dictionary<string, ParameterType>();
@@ -95,29 +96,40 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
+		/// <param name="ns">The namespace.</param>
+		/// <param name="pageName">The page name.</param>
+		public SiteLink(Namespace ns, string pageName)
+			: base(ns, pageName)
+		{
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
 		/// <param name="title">The title.</param>
 		public SiteLink(ISimpleTitle title)
 			: base(title) => InitializeImageInfo(this.Site);
 
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
 		/// <param name="title">The title.</param>
-		public SiteLink(ILinkTitle title)
+		public SiteLink(IFullTitle title)
 			: base(title) => InitializeImageInfo(this.Site);
 
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
 		/// <param name="site">The site the title is from.</param>
 		/// <param name="fullPageName">Full name of the page to link to.</param>
 		public SiteLink(Site site, string fullPageName)
-			: this(new TitleParser(site, fullPageName)) => InitializeImageInfo(this.Site);
+			: this(new TitleParser(site, fullPageName))
+		{
+		}
 
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
-		/// <param name="parser">The <see cref="TitleParser"/> with the desired information.</param>
+		/// <param name="title">The <see cref="TitleParser"/> with the desired information.</param>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		public SiteLink(TitleParser parser)
-			: base(parser)
+		public SiteLink(ILinkTitle title)
+			: base(title)
 		{
-			this.Coerced = parser.Coerced;
-			this.LeadingColon = parser.LeadingColon;
+			this.Coerced = title.Coerced;
+			this.ForcedInterwikiLink = title.ForcedInterwikiLink;
+			this.ForcedNamespaceLink = title.ForcedNamespaceLink;
 			InitializeImageInfo(this.Site);
 		}
 		#endregion
@@ -149,9 +161,8 @@
 			set => this.SetParameterValue(ParameterType.Class, value);
 		}
 
-		/// <summary>Gets a value indicating whether the title was coerced into its namespace, or started there to begin with.</summary>
-		/// <value><c>true</c> if coerced into the indicated namespace; otherwise, <c>false</c>.</value>
-		public bool Coerced { get; }
+		/// <inheritdoc/>
+		public bool Coerced { get; private set; }
 
 		/// <summary>Gets or sets the image dimensions directly.</summary>
 		/// <value>The image dimensions.</value>
@@ -165,6 +176,12 @@
 				this.SetParameterValue(ParameterType.Size, value);
 			}
 		}
+
+		/// <inheritdoc/>
+		public bool ForcedInterwikiLink { get; private set; }
+
+		/// <inheritdoc/>
+		public bool ForcedNamespaceLink { get; private set; }
 
 		/// <summary>Gets or sets the format (i.e., thumbnail, frame, frameless).</summary>
 		/// <value>The format.</value>
@@ -205,10 +222,6 @@
 			get => this.GetValue(ParameterType.Language);
 			set => this.SetParameterValue(ParameterType.Language, value);
 		}
-
-		/// <summary>Gets or sets a value indicating whether the title had a leading colon.</summary>
-		/// <value><see langword="true"/> if there was a leading colon; otherwise, <see langword="false"/>.</value>
-		public bool LeadingColon { get; set; }
 
 		/// <summary>Gets or sets the link for the image.</summary>
 		/// <value>The link for the image.</value>
@@ -317,7 +330,7 @@
 		/// <param name="pageName">The page name to link to. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
 		/// <returns>A new <see cref="SiteLink"/> with the namespace found in <paramref name="pageName"/>, if there is one, otherwise using <paramref name="defaultNamespace"/>.</returns>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		public static new SiteLink Coerce(Site site, int defaultNamespace, string pageName) => new SiteLink(new TitleParser(site, defaultNamespace, pageName, false));
+		public static new SiteLink Coerce(Site site, int defaultNamespace, string pageName) => new SiteLink(new TitleParser(site, defaultNamespace, pageName));
 
 		/// <summary>Creates a new SiteLink instance from the provided text.</summary>
 		/// <param name="site">The site the link is from.</param>
@@ -394,6 +407,20 @@
 			return (0, 0);
 		}
 
+		/// <summary>Builds the title portion of the link.</summary>
+		/// <returns>A string with the title text.</returns>
+		public string GetTitle()
+		{
+			var sb = new StringBuilder()
+				.Append(this.TitleWhitespaceBefore)
+				.Append(this.ForcedInterwikiLink ? ":" : string.Empty)
+				.Append(this.Interwiki == null ? string.Empty : this.Interwiki.Prefix + ':')
+				.Append(this.ForcedNamespaceLink ? ":" : string.Empty)
+				.Append(this.FullPageName)
+				.Append(this.TitleWhitespaceAfter);
+			return sb.ToString();
+		}
+
 		/// <summary>Sets the image size, formatting the <see cref="Dimensions"/> paramter appropriately.</summary>
 		/// <param name="height">The height.</param>
 		/// <param name="width">The width.</param>
@@ -416,24 +443,6 @@
 			}
 		}
 
-		/// <summary>Updates the SiteLink title with the values from the provided title.</summary>
-		/// <param name="title">The title to copy from.</param>
-		public void SetTitle(ILinkTitle title)
-		{
-			this.SetTitle((ISimpleTitle)title);
-			this.Interwiki = title.Interwiki;
-			this.Fragment = title.Fragment;
-		}
-
-		/// <summary>Updates the SiteLink title with the values from the provided title.</summary>
-		/// <param name="title">The title to copy from.</param>
-		public void SetTitle(ISimpleTitle title)
-		{
-			ThrowNull(title, nameof(title));
-			this.Namespace = title.Namespace;
-			this.PageName = title.PageName;
-		}
-
 		/// <summary>Converts to the link to a <see cref="LinkNode"/>.</summary>
 		/// <returns>A <see cref="LinkNode"/> containing the parsed link text.</returns>
 		public LinkNode ToLinkNode()
@@ -445,7 +454,7 @@
 				values.Add(text);
 			}
 
-			return LinkNode.FromParts(this.TitleWhitespaceBefore + this.ToString(this.LeadingColon) + this.TitleWhitespaceAfter, values);
+			return LinkNode.FromParts(this.GetTitle(), values);
 		}
 
 		/// <summary>Copies values from the link into a <see cref="LinkNode"/>.</summary>
@@ -459,6 +468,53 @@
 			node.Parameters.Clear();
 			node.Parameters.AddRange(thisNode.Parameters);
 		}
+
+		/// <summary>Creates a new copy of the SiteLink with a different title.</summary>
+		/// <param name="title">The title to change to.</param>
+		/// <returns>A new copy of the SiteLink with the altered title.</returns>
+		public SiteLink With(ISimpleTitle title)
+		{
+			ThrowNull(title, nameof(title));
+			return this.With(null, title.Namespace, title.PageName, null);
+		}
+
+		/// <summary>Creates a new copy of the SiteLink with a different title.</summary>
+		/// <param name="title">The title to change to.</param>
+		/// <returns>A new copy of the SiteLink with the altered title.</returns>
+		public SiteLink With(IFullTitle title)
+		{
+			ThrowNull(title, nameof(title));
+			var retval = new SiteLink(title)
+			{
+				Coerced = this.Coerced,
+				ForcedInterwikiLink = this.ForcedInterwikiLink,
+				ForcedNamespaceLink = this.ForcedNamespaceLink,
+				ParametersDropped = this.ParametersDropped,
+				TitleWhitespaceAfter = this.TitleWhitespaceAfter,
+				TitleWhitespaceBefore = this.TitleWhitespaceBefore
+			};
+
+			foreach (var parameter in this.Parameters)
+			{
+				retval.Parameters.Add(parameter.Key, parameter.Value);
+			}
+
+			return retval;
+		}
+
+		/// <summary>Creates a new copy of the SiteLink with a different title.</summary>
+		/// <param name="ns">The namespace to change to.</param>
+		/// <param name="pageName">The page name to change to.</param>
+		/// <returns>A new copy of the SiteLink with the altered title.</returns>
+		public SiteLink With(Namespace ns, string pageName) => this.With(null, ns, pageName, null);
+
+		/// <summary>Creates a new copy of the SiteLink with a different title.</summary>
+		/// <param name="iw">The interwiki to change to.</param>
+		/// <param name="ns">The namespace to change to.</param>
+		/// <param name="pageName">The page name to change to.</param>
+		/// <param name="fragment">The fragment name to change to.</param>
+		/// <returns>A new copy of the SiteLink with the altered title.</returns>
+		public SiteLink With(InterwikiEntry? iw, Namespace ns, string pageName, string? fragment) => this.With(new FullTitle(iw, ns, pageName, fragment));
 		#endregion
 
 		#region Public Override Methods

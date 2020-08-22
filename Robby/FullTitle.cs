@@ -6,28 +6,40 @@
 	// TODO: Review constructors for various title objects.
 
 	/// <summary>Splits a page name into its constituent parts.</summary>
-	public class LinkTitle : Title, ILinkTitle
+	public class FullTitle : Title, IFullTitle
 	{
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="LinkTitle" /> class using the site and full page name.</summary>
+		/// <summary>Initializes a new instance of the <see cref="FullTitle" /> class using the site and full page name.</summary>
 		/// <param name="ns">The namespace of the title.</param>
 		/// <param name="pageName">The page name (without leading namespace).</param>
-		public LinkTitle(Namespace ns, string pageName)
+		public FullTitle(Namespace ns, string pageName)
 			: base(ns, pageName)
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="LinkTitle"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="FullTitle" /> class using the site and full page name.</summary>
+		/// <param name="iw">The interwiki of the title.</param>
+		/// <param name="ns">The namespace of the title.</param>
+		/// <param name="pageName">The page name (without leading namespace).</param>
+		/// <param name="fragment">The fragment of the title.</param>
+		public FullTitle(InterwikiEntry? iw, Namespace ns, string pageName, string? fragment)
+			: base(ns, pageName)
+		{
+			this.Interwiki = iw;
+			this.Fragment = fragment;
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
 		/// <param name="title">The <see cref="ISimpleTitle"/> with the desired information.</param>
-		public LinkTitle(ISimpleTitle title)
+		public FullTitle(ISimpleTitle title)
 			: base(title)
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="LinkTitle"/> class.</summary>
-		/// <param name="title">The <see cref="ILinkTitle"/> with the desired information.</param>
-		public LinkTitle(ILinkTitle title)
+		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
+		/// <param name="title">The <see cref="IFullTitle"/> with the desired information.</param>
+		public FullTitle(IFullTitle title)
 			: base(title)
 		{
 			this.Fragment = title.Fragment;
@@ -52,31 +64,31 @@
 
 		#region Public Static Methods
 
-		/// <summary>Initializes a new instance of the <see cref="LinkTitle"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
 		/// <param name="site">The site the title is from.</param>
 		/// <param name="defaultNamespace">The default namespace if no namespace is specified in the page name.</param>
 		/// <param name="pageName">The page name. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
 		/// <returns>A new LinkTitle with the namespace found in <paramref name="pageName"/>, if there is one, otherwise using <paramref name="defaultNamespace"/>.</returns>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		public static new LinkTitle Coerce(Site site, int defaultNamespace, string pageName)
+		public static new FullTitle Coerce(Site site, int defaultNamespace, string pageName)
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(pageName, nameof(pageName));
-			var parser = new TitleParser(site, defaultNamespace, pageName, false);
-			return new LinkTitle(parser);
+			var parser = new TitleParser(site, defaultNamespace, pageName);
+			return new FullTitle(parser);
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="LinkTitle"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
 		/// <param name="site">The site the title is from.</param>
 		/// <param name="fullPageName">Full name of the page.</param>
 		/// <returns>A new Title based on the provided values.</returns>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		public static new LinkTitle FromName(Site site, string fullPageName)
+		public static new FullTitle FromName(Site site, string fullPageName)
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(fullPageName, nameof(fullPageName));
 			var parser = new TitleParser(site, fullPageName);
-			return new LinkTitle(parser);
+			return new FullTitle(parser);
 		}
 		#endregion
 
@@ -108,23 +120,6 @@
 			var fragment = this.Fragment == null ? string.Empty : '#' + this.Fragment;
 
 			return colon + interwiki + this.FullPageName + fragment;
-		}
-		#endregion
-
-		#region Internal Static Methods
-		internal static LinkTitle FromParts(Site site, InterwikiEntry? interWiki, string fullPageName, string? fragment)
-		{
-			ThrowNull(site, nameof(site));
-			ThrowNull(fullPageName, nameof(fullPageName));
-
-			var retval = interWiki == null || interWiki.LocalWiki
-				? new LinkTitle(new TitleParser(site, fullPageName))
-				: new LinkTitle(site.Mainspace, fullPageName);
-
-			retval.Interwiki = interWiki;
-			retval.Fragment = fragment;
-
-			return retval;
 		}
 		#endregion
 	}

@@ -42,7 +42,6 @@
 		{
 			this.Namespace = ns ?? throw ArgumentNull(nameof(ns));
 			this.PageName = pageName ?? throw ArgumentNull(nameof(pageName));
-			this.Key = new KeyTitle(ns, pageName);
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Title"/> class.</summary>
@@ -52,7 +51,6 @@
 			ThrowNull(title, nameof(title));
 			this.Namespace = title.Namespace ?? throw PropertyNull(nameof(title), nameof(title.Namespace));
 			this.PageName = title.PageName ?? throw PropertyNull(nameof(title), nameof(title.PageName));
-			this.Key = new KeyTitle(title.Namespace, title.PageName);
 		}
 
 		#endregion
@@ -69,17 +67,13 @@
 		/// <returns>The full page name (<c>{{FULLPAGENAME}}</c>) of a title.</returns>
 		public string FullPageName => this.Namespace.DecoratedName + this.PageName;
 
-		/// <summary>Gets the key for the title.</summary>
-		/// <remarks>This will always be the namespace and page name from the constructor, regardless of changes to the Title's properties thereafter.</remarks>
-		public ISimpleTitle Key { get; }
-
-		/// <summary>Gets or sets the namespace object for the title.</summary>
+		/// <summary>Gets the namespace object for the title.</summary>
 		/// <value>The namespace.</value>
-		public Namespace Namespace { get; set; }
+		public Namespace Namespace { get; }
 
-		/// <summary>Gets or sets the name of the page without the namespace.</summary>
+		/// <summary>Gets the name of the page without the namespace.</summary>
 		/// <value>The name of the page without the namespace.</value>
-		public string PageName { get; set; }
+		public string PageName { get; }
 
 		/// <summary>Gets the value corresponding to {{ROOTPAGENAME}}.</summary>
 		/// <returns>The name of the base page.</returns>
@@ -125,7 +119,7 @@
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
 		/// <returns><see langword="true"/> if string is equal to any of the names representing the namespace.</returns>
-		public static bool operator ==(Title? left, Title? right) => left == null ? right == null : left.Equals(right);
+		public static bool operator ==(Title? left, Title? right) => left is null ? right is null : left.Equals(right);
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
@@ -145,7 +139,7 @@
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(pageName, nameof(pageName));
-			var parser = new TitleParser(site, defaultNamespace, pageName, false);
+			var parser = new TitleParser(site, defaultNamespace, pageName);
 			return new Title(parser);
 		}
 
@@ -155,7 +149,7 @@
 		/// <returns>A new Title based on the provided values.</returns>
 		public static Title FromName([NotNull, ValidatedNotNull] Site site, [NotNull, ValidatedNotNull] string fullPageName)
 		{
-			var parser = new TitleParser(site, MediaWikiNamespaces.Main, fullPageName, false);
+			var parser = new TitleParser(site, MediaWikiNamespaces.Main, fullPageName);
 			return new Title(parser);
 		}
 		#endregion
@@ -235,13 +229,13 @@
 		}
 
 		/// <inheritdoc/>
-		public bool Equals([AllowNull] Title other) => other != null && this.Key.Namespace == other.Key.Namespace && this.Key.Namespace.PageNameEquals(this.Key.PageName, other.Key.PageName);
+		public bool Equals([AllowNull] Title other) => other != null && this.Namespace == other.Namespace && this.Namespace.PageNameEquals(this.PageName, other.PageName);
 
 		/// <inheritdoc/>
 		public sealed override bool Equals(object? obj) => this.Equals(obj as Title);
 
 		/// <inheritdoc/>
-		public sealed override int GetHashCode() => HashCode.Combine(this.Key.Namespace, this.Key.PageName);
+		public sealed override int GetHashCode() => HashCode.Combine(this.Namespace, this.PageName);
 
 		/// <summary>Gets the article path for the current page.</summary>
 		/// <returns>A Uri to the index.php page.</returns>

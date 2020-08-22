@@ -179,7 +179,7 @@
 				foreach (var (page, pageInfo) in redirList)
 				{
 					var newNs = page.Namespace == UespNamespaces.Dragonborn ? UespNamespaces.Skyrim : UespNamespaces.SkyrimTalk;
-					var newTitle = new LinkTitle(page.Site[newNs], page.PageName);
+					var newTitle = new Title(page.Site[newNs], page.PageName);
 					this.WriteLine($"* {page.PageName}: {{{{Pl|{page.FullPageName}|{page.Namespace.Name}|3=redirect=no}}}}{pageInfo} / {{{{Pl|{newTitle.FullPageName}|{newTitle.Namespace.Name}|3=redirect=no}}}}");
 				}
 			}

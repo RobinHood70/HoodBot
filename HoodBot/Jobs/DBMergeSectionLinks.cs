@@ -65,7 +65,7 @@
 				foreach (var node in parser.FindAllRecursive<LinkNode>())
 				{
 					var linkTitle = WikiTextVisitor.Value(node.Title);
-					var link = LinkTitle.FromName(this.Site, linkTitle);
+					var link = FullTitle.FromName(this.Site, linkTitle);
 					if (link.Fragment == "Dragonborn" && titles.Contains(link))
 					{
 						this.WriteLine($"* {page.AsLink(false)}: {WikiTextVisitor.Raw(node)}");
