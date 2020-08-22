@@ -19,7 +19,7 @@
 	/// <seealso cref="IReadOnlyCollection{TTitle}" />
 	/// <remarks>This collection class functions similarly to a KeyedCollection, but automatically overwrites existing items with new ones. Unlike a KeyedCollection, however, it does not support changing an item's key, since <see cref="Title"/> inherently does not allow this.</remarks>
 	public abstract class TitleCollection<TTitle> : IList<TTitle>, IReadOnlyCollection<TTitle>, ISiteSpecific
-		where TTitle : Title
+		where TTitle : class, ISimpleTitle
 	{
 		#region Fields
 		// This dictionary gets rather silly, since the key and value for each is the same thing, but nothing else allows the key to be an interface while also retrieving the typed value.
