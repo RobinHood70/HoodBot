@@ -41,7 +41,7 @@
 		public Title([NotNull, ValidatedNotNull] Namespace ns, [NotNull, ValidatedNotNull] string pageName)
 		{
 			this.Namespace = ns ?? throw ArgumentNull(nameof(ns));
-			this.PageName = pageName ?? throw ArgumentNull(nameof(pageName));
+			this.PageName = WikiTextUtilities.DecodeAndNormalize(pageName ?? throw ArgumentNull(nameof(pageName)));
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Title"/> class.</summary>
@@ -52,7 +52,6 @@
 			this.Namespace = title.Namespace ?? throw PropertyNull(nameof(title), nameof(title.Namespace));
 			this.PageName = title.PageName ?? throw PropertyNull(nameof(title), nameof(title.PageName));
 		}
-
 		#endregion
 
 		#region Public Properties
@@ -229,7 +228,7 @@
 		}
 
 		/// <inheritdoc/>
-		public bool Equals([AllowNull] Title other) => other != null && this.Namespace == other.Namespace && this.Namespace.PageNameEquals(this.PageName, other.PageName);
+		public bool Equals([AllowNull] Title other) => this.SimpleEquals(other);
 
 		/// <inheritdoc/>
 		public sealed override bool Equals(object? obj) => this.Equals(obj as Title);
@@ -433,7 +432,7 @@
 		/// <summary>Compares two objects for <see cref="Namespace"/> and <see cref="PageName"/> equality.</summary>
 		/// <param name="other">The object to compare to.</param>
 		/// <returns><see langword="true"/> if the Namespace and PageName match, regardless of any other properties.</returns>
-		public bool SimpleEquals(ISimpleTitle other) =>
+		public bool SimpleEquals(ISimpleTitle? other) =>
 			other != null &&
 			this.Namespace == other.Namespace &&
 			this.Namespace.PageNameEquals(this.PageName, other.PageName);
@@ -515,25 +514,6 @@
 
 						return this.Protect(input) ? ChangeStatus.Success : ChangeStatus.Failure;
 					});
-		}
-		#endregion
-
-		#region Private Classes
-		private class KeyTitle : ISimpleTitle
-		{
-			public KeyTitle(Namespace ns, string pageName)
-			{
-				this.Namespace = ns;
-				this.PageName = pageName;
-			}
-
-			public string FullPageName => this.Namespace.DecoratedName + this.PageName;
-
-			public Namespace Namespace { get; }
-
-			public string PageName { get; }
-
-			public bool SimpleEquals(ISimpleTitle other) => Design.Extensions.SimpleEquals(this, other);
 		}
 		#endregion
 	}
