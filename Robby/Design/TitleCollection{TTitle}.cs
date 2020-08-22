@@ -93,12 +93,12 @@
 			}
 		}
 
-		/// <summary>Gets or sets the <see cref="ISimpleTitle">Title</see> with the specified key.</summary>
+		/// <summary>Gets or sets the <see cref="ISimpleTitle"/> with the specified key.</summary>
 		/// <param name="title">The key.</param>
 		/// <returns>The <see cref="ISimpleTitle">Title</see>.</returns>
 		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry on set if the requested entry isn't found.</remarks>
 		[SuppressMessage("Microsoft.Design", "CA1043:UseIntegralOrStringArgumentForIndexers", Justification = @"Integer and string methods are also available, but this method provides the most accuracy.")]
-		public virtual TTitle this[Title title]
+		public virtual TTitle this[ISimpleTitle title]
 		{
 			get => this.lookup[title ?? throw ArgumentNull(nameof(title))];
 			set
