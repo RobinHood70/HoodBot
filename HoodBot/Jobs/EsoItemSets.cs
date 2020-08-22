@@ -18,14 +18,16 @@
 	internal class EsoItemSets : EditJob
 	{
 		#region Static Fields
-		private static readonly HashSet<int> BadRows = new HashSet<int> { 1226, 1240 };
+		private static readonly HashSet<int> BadRows = new HashSet<int> { /* 1226, 1240, */2666 };
 		private static readonly Regex OnlineUpdateRegex = Template.Find("Online Update");
 		private static readonly Regex SetBonusRegex = new Regex(@"(\([1-6] items?\))");
 		private static readonly Uri SetSummaryPage = new Uri("http://esolog.uesp.net/viewlog.php?record=setSummary&format=csv");
 		private static readonly Dictionary<string, string> TitleOverrides = new Dictionary<string, string>
 		{
-			// Title Overrides will likely only be necessary when creating new "(set)" pages that need to be disambiguated upon creation. While this could be done programatically, it's probably best not to, so that a human has verified that the page really should be created and that the existing page isn't malformed or something.
-			["Grave Guardian"] = "Grave Guardian (set)"
+			// Title Overrides should only be necessary when creating new disambiguated "(set)" pages or when pages don't conform to the base/base (set) style. While this could be done programatically, it's probably best not to, so that a human has verified that the page really should be created and that the existing page isn't malformed or something.
+			["Senche-Raht's Grit"] = "Senche-raht's Grit",
+			["Bloodspawn"] = "Bloodspawn (set)",
+			["Trial by Fire"] = "Trial by Fire (set)",
 		};
 		#endregion
 
@@ -83,11 +85,23 @@
 						this.Warn($"Set bonus for {setName} doesn't start with a bracket:{Environment.NewLine}{bonusDescription}");
 					}
 
-					sets.Add(new PageData(setName, bonusDescription));
+					var set = new PageData(setName, bonusDescription);
+					if (TitleOverrides.TryGetValue(setName, out var pageName))
+					{
+						set.PageName = pageName;
+					}
+
+					sets.Add(set);
 				}
 			}
 
-			var titles = this.ResolveAndPopulateSets(sets);
+			this.ResolveAndPopulateSets(sets);
+			var titles = new TitleCollection(this.Site);
+			foreach (var set in this.sets)
+			{
+				titles.Add(UespNamespaces.Online, set.Key);
+			}
+
 			this.Pages.PageLoaded += this.SetLoaded;
 			this.Pages.GetTitles(titles);
 			this.Pages.PageLoaded -= this.SetLoaded;
@@ -146,49 +160,51 @@
 			return template.ToString();
 		}
 
-		private TitleCollection ResolveAndPopulateSets(List<PageData> dbSets)
+		private void ResolveAndPopulateSets(List<PageData> dbSets)
 		{
-			var catMembers = new TitleCollection(this.Site);
-			catMembers.GetCategoryMembers("Online-Sets");
-
-			var titles = new TitleCollection(this.Site); // These titles are known to exist.
-			var uncheckedSets = new Dictionary<Title, PageData>(); // These titles are not in the category and need to be checked for redirects, etc.
+			var catTitles = new TitleCollection(this.Site);
+			catTitles.GetCategoryMembers("Online-Sets");
 			foreach (var set in dbSets)
 			{
-				if (!TitleOverrides.TryGetValue(set.SetName, out var setName))
-				{
-					setName = set.SetName;
-				}
+				catTitles.Add(new Title(this.Site[UespNamespaces.Online], set.PageName));
+			}
 
-				var newTitle = new Title(this.Site[UespNamespaces.Online], setName);
-				var foundPage = catMembers[newTitle];
-				if (foundPage == null)
-				{
-					foundPage = catMembers[new Title(this.Site[UespNamespaces.Online], setName + " (set)")];
-				}
+			var loadOptions = new PageLoadOptions(PageModules.Info | PageModules.Properties, true);
+			var catMembers = new PageCollection(this.Site, loadOptions);
+			catMembers.GetTitles(catTitles);
+			catMembers.Sort();
 
-				if (foundPage != null)
+			var disambigs = new Dictionary<Title, PageData>();
+			foreach (var set in dbSets)
+			{
+				var title = new Title(this.Site[UespNamespaces.Online], set.PageName); // Only used to normalize names. Some have underscores and other oddities.
+				if (catMembers.TryGetValue(title.FullPageName + " (set)", out var foundPage) || catMembers.TryGetValue(title, out foundPage))
 				{
-					titles.Add(foundPage);
-					try
+					set.PageName = foundPage.PageName;
+					if (foundPage.IsDisambiguation)
 					{
-						this.sets.Add(foundPage.PageName, set);
+						disambigs.Add(foundPage, set);
 					}
-					catch (ArgumentException)
+					else
 					{
-						Debug.WriteLine($"Duplicate entry for {set.SetName} in raw data.");
+						if (!foundPage.Exists)
+						{
+							this.Warn($"{foundPage.FullPageName} does not exist and will be created.");
+						}
+
+						this.AddToSets(set);
 					}
 				}
 				else
 				{
-					uncheckedSets.Add(newTitle, set);
+					throw new InvalidOperationException();
 				}
 			}
 
-			var loadOptions = new PageLoadOptions(PageModules.Links | PageModules.Properties, true);
+			loadOptions = new PageLoadOptions(PageModules.Links | PageModules.Properties, true);
 			var checkNewPages = new PageCollection(this.Site, loadOptions);
-			checkNewPages.GetTitles(uncheckedSets.Keys);
-			foreach (var title in uncheckedSets)
+			checkNewPages.GetTitles(disambigs.Keys);
+			foreach (var title in disambigs)
 			{
 				if (checkNewPages[title.Key.FullPageName] is Page page && page.Exists)
 				{
@@ -199,8 +215,8 @@
 						{
 							if (link.PageName.Contains(" (set)", StringComparison.OrdinalIgnoreCase))
 							{
-								titles.Add(link);
-								this.sets.Add(link.PageName, title.Value);
+								title.Value.PageName = link.PageName;
+								this.AddToSets(title.Value);
 								resolved = true;
 								break;
 							}
@@ -212,15 +228,19 @@
 						this.Warn($"{page.FullPageName} exists but is neither a set nor a disambiguation to one. Please check!");
 					}
 				}
-				else
-				{
-					titles.Add(title.Key);
-					this.sets.Add(title.Key.PageName, title.Value);
-					this.Warn($"{title.Key.FullPageName} does not exist and will be created.");
-				}
 			}
+		}
 
-			return titles;
+		private void AddToSets(PageData set)
+		{
+			try
+			{
+				this.sets.Add(set.PageName, set);
+			}
+			catch (ArgumentException)
+			{
+				this.Warn($"Duplicate entry for {set.SetName} in raw data.");
+			}
 		}
 
 		private void SetLoaded(object sender, Page page)
@@ -256,6 +276,7 @@
 				Debug.WriteLine("WTF?");
 			}
 
+			var usedList = new TitleCollection(this.Site);
 			for (var itemNum = 1; itemNum < items.Length; itemNum += 2)
 			{
 				var itemName = items[itemNum].Trim(TextArrays.Parentheses);
@@ -266,7 +287,7 @@
 				}
 
 				desc = EsoReplacer.ReplaceGlobal(desc, null);
-				desc = EsoReplacer.ReplaceLink(desc);
+				desc = EsoReplacer.ReplaceFirstLink(desc, usedList);
 				sb
 					.Append("'''")
 					.Append(itemName)
@@ -291,6 +312,7 @@
 			public PageData(string setName, string bonusDescription)
 			{
 				this.SetName = setName;
+				this.PageName = setName;
 				this.BonusDescription = bonusDescription;
 			}
 
@@ -298,7 +320,11 @@
 
 			public bool IsNonTrivial { get; set; }
 
+			public string PageName { get; set; }
+
 			public string SetName { get; }
+
+			public override string ToString() => this.SetName;
 		}
 		#endregion
 	}

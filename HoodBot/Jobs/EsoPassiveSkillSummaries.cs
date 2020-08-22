@@ -52,6 +52,7 @@
 			ThrowNull(template, nameof(template));
 			template.AddOrChange("type", "Passive");
 			template.AddOrChange("id", skillBase.Id.ToStringInvariant());
+			var usedList = new TitleCollection(this.Site);
 			foreach (var rank in skillBase.Ranks)
 			{
 				var splitDescription = Skill.Highlight.Split(rank.Description);
@@ -75,7 +76,7 @@
 
 				var description = string.Join("'''", splitDescription);
 				description = EsoReplacer.ReplaceGlobal(description, skillBase.Name);
-				description = EsoReplacer.ReplaceLink(description);
+				description = EsoReplacer.ReplaceFirstLink(description, usedList);
 				var rankText = rank.Rank.ToStringInvariant();
 				template.AddOrChange("desc" + (rank.Rank == 1 ? string.Empty : rankText), description);
 				template.AddOrChange("linerank" + rankText, rank.LearnedLevel);

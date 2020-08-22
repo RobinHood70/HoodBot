@@ -11,6 +11,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
+	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WikiCommon.Searches;
 
 	internal static class EsoReplacer
@@ -159,7 +160,7 @@
 			return text;
 		}
 
-		public static string ReplaceLink(string text)
+		public static string ReplaceFirstLink(string text, TitleCollection usedList)
 		{
 			if (string.IsNullOrEmpty(text))
 			{
@@ -167,7 +168,25 @@
 			}
 
 			var parsedText = WikiTextParser.Parse(text);
-			parsedText.Replace(ReplaceLink, true);
+			var currentNode = parsedText.First;
+			while (currentNode != null)
+			{
+				if (ReplaceLink(currentNode, usedList) is NodeCollection newNodes)
+				{
+					foreach (var colNode in newNodes)
+					{
+						parsedText.AddBefore(currentNode, colNode);
+					}
+
+					currentNode = currentNode.Previous!;
+					parsedText.Remove(currentNode.Next!);
+				}
+				else
+				{
+					currentNode = currentNode.Next;
+				}
+			}
+
 			return WikiTextVisitor.Raw(parsedText);
 		}
 
@@ -236,19 +255,19 @@
 				-1);
 		}
 
-		private static NodeCollection? ReplaceLink(LinkedListNode<IWikiNode> node)
+		private static NodeCollection? ReplaceLink(LinkedListNode<IWikiNode> node, TitleCollection usedList)
 		{
-			throw new NotImplementedException(); // Needs updated to handle replacements properly. Currently incomplete.
-			var foundReplacements = new HashSet<string>();
-			if (!(node.Value is TextNode textNode))
+			if (!(node?.Value is TextNode textNode))
 			{
 				return null;
 			}
 
-			var newValue = new StringBuilder();
+			ThrowNull(usedList, nameof(usedList));
+			var site = usedList.Site;
+			var foundReplacements = new HashSet<string>();
 			var newText = textNode.Text;
-			var i = 0;
-			do
+			var textLength = textNode.Text.Length;
+			for (var i = 0; i < textLength; i++)
 			{
 				foreach (var replacement in ReplaceFirstList)
 				{
@@ -260,11 +279,31 @@
 							retval.AddLast(new TextNode(textNode.Text.Substring(0, i)));
 						}
 
-						retval.AddRange(replacement.ToNodes);
-						i += replacement.From.Length;
-						if (i < textNode.Text.Length)
+						foreach (var newNode in replacement.ToNodes)
 						{
-							retval.AddLast(new TextNode(textNode.Text.Substring(i)));
+							if (newNode is LinkNode link)
+							{
+								var title = SiteLink.FromLinkNode(site, link);
+								if (usedList.Contains(title) && link.Parameters.Count == 1)
+								{
+									retval.AddRange(link.Parameters[0].Value);
+								}
+								else
+								{
+									retval.AddLast(link);
+									usedList.Add(title);
+								}
+							}
+							else
+							{
+								retval.AddLast(newNode);
+							}
+						}
+
+						var len = replacement.From.Length;
+						if (len < textNode.Text.Length)
+						{
+							retval.AddLast(new TextNode(newText.Substring(len)));
 						}
 
 						foundReplacements.Add(replacement.From);
@@ -273,11 +312,10 @@
 					}
 				}
 
-				newText = textNode.Text.Substring(i);
+				newText = newText.Substring(1);
 			}
-			while (i < textNode.Text.Length);
 
-			textNode.Text = newValue.ToString();
+			return null;
 		}
 
 		private static string ReplaceTemplate(Match match)

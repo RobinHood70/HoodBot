@@ -128,6 +128,7 @@
 		#region Private Methods
 		private void UpdateMorphs(ActiveSkill skillBase, Template template, Morph baseMorph, string baseSkillCost)
 		{
+			var usedList = new TitleCollection(this.Site);
 			for (var morphCounter = 0; morphCounter < skillBase.Morphs.Count; morphCounter++)
 			{
 				var descriptions = new List<string>();
@@ -182,7 +183,7 @@
 				}
 
 				var parameterName = "desc" + morphNum;
-				template.AddOrChange(parameterName, extras + EsoReplacer.ReplaceLink(morph.Description ?? string.Empty));
+				template.AddOrChange(parameterName, extras + EsoReplacer.ReplaceFirstLink(morph.Description ?? string.Empty, usedList));
 
 				if (morphCounter > 0)
 				{
@@ -191,7 +192,7 @@
 					template.AddOrChange(morphName + "id", morph.Abilities[3].Id);
 					var iconValue = MakeIcon(skillBase.SkillLine, morph.Name);
 					template.AddOrChange(morphName + "icon", IconValueFixup(template[morphName + "icon"]?.Value, iconValue));
-					template.AddOrChange(morphName + "desc", EsoReplacer.ReplaceLink(morph.EffectLine));
+					template.AddOrChange(morphName + "desc", EsoReplacer.ReplaceFirstLink(morph.EffectLine, usedList));
 				}
 			}
 		}
