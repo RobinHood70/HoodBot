@@ -796,40 +796,6 @@
 			}
 		}
 
-		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
-		/// <param name="key">The key of the value to get.</param>
-		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
-		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
-		public bool TryGetValue(TTitle key, [MaybeNullWhen(false)] out TTitle value)
-		{
-			ThrowNull(key, nameof(key));
-			return this.lookup.TryGetValue(key, out value);
-		}
-
-		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
-		/// <param name="key">The key of the value to get.</param>
-		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
-		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
-		public bool TryGetValue(ISimpleTitle key, [MaybeNullWhen(false)] out TTitle value)
-		{
-			ThrowNull(key, nameof(key));
-			return this.lookup.TryGetValue(key, out value);
-		}
-
-		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
-		/// <param name="key">The key of the value to get.</param>
-		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
-		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
-		public bool TryGetValue(string key, [MaybeNullWhen(false)] out TTitle value)
-		{
-			ThrowNull(key, nameof(key));
-			var title = this.TextToTitle(key);
-			return this.lookup.TryGetValue(title, out value!);
-		}
-
 		/// <summary>Returns the requested value, or null if not found.</summary>
 		/// <param name="key">The key.</param>
 		/// <returns>The requested value, or null if not found.</returns>
@@ -872,6 +838,40 @@
 		{
 			this.items.Clear();
 			this.lookup.Clear();
+		}
+
+		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
+		/// <param name="key">The key of the value to get.</param>
+		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
+		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
+		public virtual bool TryGetValue(TTitle key, [MaybeNullWhen(false)] out TTitle value)
+		{
+			ThrowNull(key, nameof(key));
+			return this.lookup.TryGetValue(key, out value);
+		}
+
+		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
+		/// <param name="key">The key of the value to get.</param>
+		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
+		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
+		public virtual bool TryGetValue(ISimpleTitle key, [MaybeNullWhen(false)] out TTitle value)
+		{
+			ThrowNull(key, nameof(key));
+			return this.lookup.TryGetValue(key, out value);
+		}
+
+		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
+		/// <param name="key">The key of the value to get.</param>
+		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
+		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
+		public virtual bool TryGetValue(string key, [MaybeNullWhen(false)] out TTitle value)
+		{
+			ThrowNull(key, nameof(key));
+			var title = this.TextToTitle(key);
+			return this.lookup.TryGetValue(title, out value!);
 		}
 		#endregion
 

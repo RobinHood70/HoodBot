@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
@@ -301,6 +302,48 @@
 		/// <remarks>General information about the pages for the revision IDs specified will always be loaded, regardless of the LoadOptions setting, though the revisions themselves may not be if the collection's load options would filter them out.</remarks>
 		// Note that while RevisionsInput() can be used as a generator, I have not implemented it because I can think of no situation in which it would be useful to populate a PageCollection given the existing revisions methods.
 		public override void GetRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(this.LoadOptions, QueryPageSetInput.FromRevisionIds(revisionIds));
+
+		/// <inheritdoc/>
+		public override bool TryGetValue(Page key, [MaybeNullWhen(false)] out Page value)
+		{
+			ThrowNull(key, nameof(key));
+			if (base.TryGetValue(key, out var retval) || (this.titleMap.TryGetValue(key.FullPageName, out var altKey) && base.TryGetValue(altKey, out retval)))
+			{
+				value = retval;
+				return true;
+			}
+
+			value = default;
+			return false;
+		}
+
+		/// <inheritdoc/>
+		public override bool TryGetValue(ISimpleTitle key, [MaybeNullWhen(false)] out Page value)
+		{
+			ThrowNull(key, nameof(key));
+			if (base.TryGetValue(key, out var retval) || (this.titleMap.TryGetValue(key.FullPageName, out var altKey) && base.TryGetValue(altKey, out retval)))
+			{
+				value = retval;
+				return true;
+			}
+
+			value = default;
+			return false;
+		}
+
+		/// <inheritdoc/>
+		public override bool TryGetValue(string key, [MaybeNullWhen(false)] out Page value)
+		{
+			ThrowNull(key, nameof(key));
+			if (base.TryGetValue(key, out var retval) || (this.titleMap.TryGetValue(key, out var altKey) && base.TryGetValue(altKey, out retval)))
+			{
+				value = retval;
+				return true;
+			}
+
+			value = default;
+			return false;
+		}
 		#endregion
 
 		#region Internal Static Methods
