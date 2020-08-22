@@ -332,6 +332,19 @@
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
 		public static new SiteLink Coerce(Site site, int defaultNamespace, string pageName) => new SiteLink(new TitleParser(site, defaultNamespace, pageName));
 
+		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
+		/// <param name="site">The site the title is from.</param>
+		/// <param name="fullPageName">Full name of the page.</param>
+		/// <returns>A new Title based on the provided values.</returns>
+		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
+		public static new SiteLink FromName(Site site, string fullPageName)
+		{
+			ThrowNull(site, nameof(site));
+			ThrowNull(fullPageName, nameof(fullPageName));
+			var parser = new TitleParser(site, fullPageName);
+			return new SiteLink(parser);
+		}
+
 		/// <summary>Creates a new SiteLink instance from the provided text.</summary>
 		/// <param name="site">The site the link is from.</param>
 		/// <param name="link">The text of the link.</param>
