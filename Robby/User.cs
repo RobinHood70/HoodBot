@@ -17,7 +17,7 @@
 		#endregion
 
 		#region Fields
-		private bool loaded = false;
+		private bool loaded;
 		#endregion
 
 		#region Constructors

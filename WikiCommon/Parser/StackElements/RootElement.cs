@@ -3,7 +3,7 @@
 	using System;
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.WikiCommon.Properties;
-	using static CommonCode.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	internal class RootElement : StackElement
 	{

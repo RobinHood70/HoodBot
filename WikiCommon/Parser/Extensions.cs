@@ -2,7 +2,7 @@
 {
 	using System;
 	using System.Globalization;
-	using static CommonCode.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Class Extensions.</summary>
 	public static class Extensions

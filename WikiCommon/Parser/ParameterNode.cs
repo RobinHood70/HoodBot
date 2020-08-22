@@ -3,7 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using RobinHood70.WikiCommon.Properties;
-	using static CommonCode.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Represents a parameter to a template or link.</summary>
 	public class ParameterNode : IWikiNode

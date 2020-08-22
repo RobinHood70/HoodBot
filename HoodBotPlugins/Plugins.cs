@@ -20,7 +20,7 @@
 		#region Fields
 		private readonly ComposablePartCatalog? catalog;
 		private readonly CompositionContainer? container;
-		private bool disposedValue = false; // To detect redundant calls
+		private bool disposedValue; // To detect redundant calls
 		#endregion
 
 		#region Constructors

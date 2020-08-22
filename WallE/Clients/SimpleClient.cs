@@ -25,7 +25,7 @@
 	{
 		#region Fields
 		private readonly string cookiesLocation;
-		private readonly bool useV10 = false;
+		private readonly bool useV10;
 		private CookieContainer cookieContainer;
 		#endregion
 

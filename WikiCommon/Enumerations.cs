@@ -12,13 +12,13 @@ namespace RobinHood70.WikiCommon
 		/// <summary>Regular links, including redirects.</summary>
 		Backlinks = 1,
 
-		/// <summary>Transclusions</summary>
+		/// <summary>Transclusions.</summary>
 		EmbeddedIn = 1 << 1,
 
-		/// <summary>File/image links</summary>
+		/// <summary>File/image links.</summary>
 		ImageUsage = 1 << 2,
 
-		/// <summary>All</summary>
+		/// <summary>All.</summary>
 		All = Backlinks | EmbeddedIn | ImageUsage
 	}
 
@@ -27,7 +27,7 @@ namespace RobinHood70.WikiCommon
 	[Flags]
 	public enum BlockFlags
 	{
-		/// <summary>Default value when unspecified</summary>
+		/// <summary>Default value when unspecified.</summary>
 		None = 0,
 
 		/// <summary>User is allowed to edit their own talk page.</summary>
@@ -56,16 +56,16 @@ namespace RobinHood70.WikiCommon
 		/// <summary>No value has been set or type was not recognized.</summary>
 		None = 0,
 
-		/// <summary>Regular pages</summary>
+		/// <summary>Regular pages.</summary>
 		Page = 1,
 
-		/// <summary>Subcategories</summary>
+		/// <summary>Subcategories.</summary>
 		Subcat = 1 << 1,
 
-		/// <summary>Files/images</summary>
+		/// <summary>Files/images.</summary>
 		File = 1 << 2,
 
-		/// <summary>All</summary>
+		/// <summary>All.</summary>
 		All = Page | Subcat | File
 	}
 
@@ -86,35 +86,35 @@ namespace RobinHood70.WikiCommon
 	[Flags]
 	public enum RecentChangesTypes
 	{
-		/// <summary>Default value when unspecified</summary>
+		/// <summary>Default value when unspecified.</summary>
 		None = 0,
 
-		/// <summary>A normal edit</summary>
+		/// <summary>A normal edit.</summary>
 		Edit = 1,
 
-		/// <summary>An external edit</summary>
+		/// <summary>An external edit.</summary>
 		External = 1 << 1,
 
-		/// <summary>A new page</summary>
+		/// <summary>A new page.</summary>
 		New = 1 << 2,
 
-		/// <summary>A log entry</summary>
+		/// <summary>A log entry.</summary>
 		Log = 1 << 3,
 
-		/// <summary>All</summary>
+		/// <summary>All.</summary>
 		All = Edit | External | New | Log
 	}
 
 	/// <summary>Represents the possible search types.</summary>
 	public enum WhatToSearch
 	{
-		/// <summary>Search titles only</summary>
+		/// <summary>Search titles only.</summary>
 		Title,
 
-		/// <summary>Search text</summary>
+		/// <summary>Search text.</summary>
 		Text,
 
-		/// <summary>Search text for near matches</summary>
+		/// <summary>Search text for near matches.</summary>
 		NearMatch
 	}
 	#endregion

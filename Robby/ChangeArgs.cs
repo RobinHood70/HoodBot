@@ -6,7 +6,7 @@
 	public class ChangeArgs
 	{
 		#region Fields
-		private bool cancelChange = false;
+		private bool cancelChange;
 		#endregion
 
 		#region Constructors

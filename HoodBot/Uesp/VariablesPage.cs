@@ -15,8 +15,8 @@
 		#endregion
 
 		#region Constructors
-		public VariablesPage(ISimpleTitle ISimpleTitle)
-			: base(ISimpleTitle)
+		public VariablesPage(ISimpleTitle title)
+			: base(title)
 		{
 		}
 		#endregion

@@ -4,7 +4,7 @@
 	using System.Globalization;
 	using System.Text;
 	using System.Text.Encodings.Web;
-	using static CommonCode.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Builds the XML parse tree for the nodes, similar to that of Special:ExpandTemplates.</summary>
 	/// <remarks>While highly similar, the XML representation from this method does not precisely match Special:ExpandTemplates. This is intentional, arising from the different purposes of each.</remarks>

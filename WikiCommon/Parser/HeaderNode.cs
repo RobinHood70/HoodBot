@@ -3,7 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
-	using static CommonCode.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Represents a header.</summary>
 	public class HeaderNode : IWikiNode

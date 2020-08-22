@@ -251,7 +251,7 @@
 
 		/// <summary>Gets a value indicating whether any overlapping parameters were dropped during initial parsing (e.g., left|right, multiple captions).</summary>
 		/// <value><c>true</c> if parameters were dropped; otherwise, <c>false</c>.</value>
-		public bool ParametersDropped { get; private set; } = false;
+		public bool ParametersDropped { get; private set; }
 
 		/// <summary>Gets or sets the display text (i.e., the value to the right of the pipe). For categories, this is the sortkey; for images, this is the caption.</summary>
 		public string? Text

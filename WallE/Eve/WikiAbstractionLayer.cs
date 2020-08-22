@@ -38,8 +38,8 @@
 		private readonly Dictionary<int, SiteInfoNamespace> namespaces = new Dictionary<int, SiteInfoNamespace>();
 		private readonly List<ErrorItem> warnings = new List<ErrorItem>();
 		private readonly WikiException notInitialized = new WikiException(CurrentCulture(Messages.SiteNotInitialized, nameof(Login), nameof(Initialize)));
-		private ITokenManager? tokenManager = null;
-		private int userTalkChecksIgnored = 0;
+		private ITokenManager? tokenManager;
+		private int userTalkChecksIgnored;
 		#endregion
 
 		#region Constructors
@@ -169,7 +169,7 @@
 		/// <remarks>For future expansion. Not yet implemented.
 		///
 		/// If debugging is enabled, any action can return debugging information along with the normal results. If a server does so, the results will be located here.</remarks>
-		public DebugInfoResult? DebugInfo { get; protected internal set; } = null;
+		public DebugInfoResult? DebugInfo { get; protected internal set; }
 
 		/// <summary>Gets or sets the detected format version.</summary>
 		/// <value>The detected format version.</value>

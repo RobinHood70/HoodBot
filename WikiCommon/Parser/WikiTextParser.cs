@@ -5,7 +5,7 @@
 	using System.Runtime.CompilerServices;
 	using System.Text.RegularExpressions;
 	using RobinHood70.WikiCommon.Properties;
-	using static CommonCode.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>A <see langword="static" /> class which encompasses all common methods for converting a block of text into parsed wikitext nodes.</summary>
 	public static class WikiTextParser

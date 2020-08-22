@@ -8,7 +8,7 @@
 	using System.ComponentModel;
 	using System.Runtime.Serialization;
 	using RobinHood70.WikiCommon.Properties;
-	using static CommonCode.Globals;
+	using static RobinHood70.CommonCode.Globals;
 
 	// CONSIDER: Implementing a NodeCollection<T> so that properties like Parameters can be more strongly typed as NodeCollection<ParameterNode>.
 
@@ -489,6 +489,7 @@
 		/// <returns>The first node in the collection that satisfies the specified condition.</returns>
 		public LinkedListNode<IWikiNode>? FindFirstLinked(Predicate<IWikiNode> condition)
 		{
+			ThrowNull(condition, nameof(condition));
 			foreach (var node in this.LinkedNodes)
 			{
 				if (condition(node.Value))
@@ -536,6 +537,7 @@
 		/// <returns>The last node that satisfies the specified condition.</returns>
 		public IWikiNode? FindLast(Predicate<IWikiNode> condition)
 		{
+			ThrowNull(condition, nameof(condition));
 			var node = this.Last;
 			while (node != null)
 			{

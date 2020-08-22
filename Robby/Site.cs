@@ -180,7 +180,7 @@
 		/// <summary>Gets or sets a value indicating whether methods that would alter the wiki should be disabled.</summary>
 		/// <value><see langword="true"/> if editing should be disabled; otherwise, <see langword="false"/>.</value>
 		/// <remarks>If set to true, most methods will silently fail, and their return <see cref="ChangeStatus.EditingDisabled"/>. This is primarily intended for testing new bot jobs without risking any unintended edits.</remarks>
-		public bool EditingEnabled { get; set; } = false;
+		public bool EditingEnabled { get; set; }
 
 		/// <summary>Gets the list of special pages on the site that should normally be filtered out of any results.</summary>
 		/// <value>The filter pages.</value>
