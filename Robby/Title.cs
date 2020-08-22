@@ -40,8 +40,10 @@
 		/// <param name="pageName">The page name (without leading namespace).</param>
 		public Title([NotNull, ValidatedNotNull] Namespace ns, [NotNull, ValidatedNotNull] string pageName)
 		{
+			ThrowNull(pageName, nameof(pageName));
 			this.Namespace = ns ?? throw ArgumentNull(nameof(ns));
-			this.PageName = WikiTextUtilities.DecodeAndNormalize(pageName ?? throw ArgumentNull(nameof(pageName)));
+			pageName = WikiTextUtilities.DecodeAndNormalize(pageName).Trim();
+			this.PageName = this.Namespace.CapitalizePageName(pageName);
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="Title"/> class.</summary>
