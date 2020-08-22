@@ -42,7 +42,6 @@
 			// Pipes are not allowed in page names, so if we find one, only parse the first part; the remainder is likely cruft from a category or file link.
 			pageName = pageName.Split(TextArrays.Pipe, 2)[0];
 			pageName = WikiTextUtilities.DecodeAndNormalize(pageName).Trim();
-			this.NormalizedPageName = pageName;
 			this.Namespace = site[defaultNamespace];
 
 			var (key, remaining, forced) = SplitPageName(pageName);
@@ -142,9 +141,6 @@
 		/// <value><see langword="true"/> if no namespace is present; otherwise, <see langword="false"/>.</value>
 		/// <remarks>This value will be false for Main space links without a leading colon, Template calls (unless they actually specify <c>Template:</c>), and any gallery links that don't specify <c>File:</c>.</remarks>
 		public bool NamespaceVisible { get; }
-
-		/// <summary>Gets the page name as seen by TItleParser after normalization and initial trimming.</summary>
-		public string NormalizedPageName { get; }
 
 		/// <inheritdoc/>
 		public string PageName { get; }
