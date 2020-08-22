@@ -203,9 +203,13 @@
 			}
 
 			var siteCulture = this.Site.Culture;
-			return this.CaseSensitive
-				? pageName1 == pageName2
-				: pageName1.UpperFirst(siteCulture) == pageName2.UpperFirst(siteCulture);
+			if (!this.CaseSensitive)
+			{
+				pageName1 = pageName1.UpperFirst(siteCulture);
+				pageName2 = pageName2.UpperFirst(siteCulture);
+			}
+
+			return string.Compare(pageName1, pageName2, false, this.Site.Culture) == 0;
 		}
 
 		/// <summary>Removes a name from the lookup list.</summary>
