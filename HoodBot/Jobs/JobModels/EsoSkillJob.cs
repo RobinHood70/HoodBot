@@ -282,11 +282,7 @@
 			this.UpdateSkillTemplate(skill, template);
 			template.Sort("titlename", "id", "id1", "id2", "id3", "id4", "id5", "id6", "id7", "id8", "id9", "id10", "line", "type", "icon", "icon2", "icon3", "desc", "desc1", "desc2", "desc3", "desc4", "desc5", "desc6", "desc7", "desc8", "desc9", "desc10", "linerank", "cost", "attrib", "casttime", "range", "radius", "duration", "channeltime", "target", "morph1name", "morph1id", "morph1icon", "morph1desc", "morph2name", "morph2id", "morph2icon", "morph2desc", "image", "imgdesc", "nocat", "notrail");
 
-			var newText = template.ToString();
-			newText = EsoReplacer.FirstLinksOnly(this.Site, newText);
-			page.Text = page.Text.Remove(match.Index, match.Length).Insert(match.Index, newText);
-
-			template = Template.Parse(newText);
+			page.Text = page.Text.Remove(match.Index, match.Length).Insert(match.Index, template.ToString());
 			var bigChange = false;
 			foreach (var parameter in template)
 			{

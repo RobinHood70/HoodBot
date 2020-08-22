@@ -13,13 +13,11 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
-	using RobinHood70.WikiCommon;
 
 	internal class EsoItemSets : EditJob
 	{
 		#region Static Fields
-		private static readonly HashSet<int> BadRows = new HashSet<int> { /* 1226, 1240, */2666 };
-		private static readonly Regex OnlineUpdateRegex = Template.Find("Online Update");
+		private static readonly HashSet<int> BadRows = new HashSet<int> { 2666 };
 		private static readonly Regex SetBonusRegex = new Regex(@"(\([1-6] items?\))");
 		private static readonly Uri SetSummaryPage = new Uri("http://esolog.uesp.net/viewlog.php?record=setSummary&format=csv");
 		private static readonly Dictionary<string, string> TitleOverrides = new Dictionary<string, string>
@@ -27,7 +25,6 @@
 			// Title Overrides should only be necessary when creating new disambiguated "(set)" pages or when pages don't conform to the base/base (set) style. While this could be done programatically, it's probably best not to, so that a human has verified that the page really should be created and that the existing page isn't malformed or something.
 			["Senche-Raht's Grit"] = "Senche-raht's Grit",
 			["Bloodspawn"] = "Bloodspawn (set)",
-			["Trial by Fire"] = "Trial by Fire (set)",
 		};
 		#endregion
 
@@ -147,17 +144,6 @@
 			}
 
 			this.WriteLine();
-		}
-
-		private string PatchNumberReplacer(Match match)
-		{
-			var template = Template.Parse(match.Value);
-			template.RemoveDuplicates();
-			template.Remove("update");
-			template.Remove("1");
-			template.AddOrChange("type", "itemset");
-
-			return template.ToString();
 		}
 
 		private void ResolveAndPopulateSets(List<PageData> dbSets)
@@ -300,9 +286,7 @@
 
 			var text = sb.ToString();
 			pageData.IsNonTrivial = EsoReplacer.CompareReplacementText(this, page.Text[start..end], text, page.FullPageName);
-			text = EsoReplacer.FirstLinksOnly(this.Site, text);
-
-			page.Text = OnlineUpdateRegex.Replace(page.Text.Substring(0, start), this.PatchNumberReplacer) + text + page.Text.Substring(end);
+			page.Text = page.Text.Substring(0, start) + text + page.Text.Substring(end);
 		}
 		#endregion
 

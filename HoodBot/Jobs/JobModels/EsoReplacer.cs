@@ -50,34 +50,6 @@
 			return oldText != ToPlainText(newText);
 		}
 
-		public static string FirstLinksOnly(Site site, string text)
-		{
-			var nodes = WikiTextParser.Parse(text);
-			FirstLinksOnly(site, nodes);
-			return WikiTextVisitor.Raw(nodes);
-		}
-
-		public static void FirstLinksOnly(Site site, NodeCollection nodes)
-		{
-			var uniqueLinks = new HashSet<SiteLink>();
-			if (nodes.FindFirstLinked<LinkNode>() is LinkedListNode<IWikiNode> linkedNode)
-			{
-				var link = SiteLink.FromLinkNode(site, (LinkNode)linkedNode.Value);
-				if (!uniqueLinks.Contains(link))
-				{
-					uniqueLinks.Add(link);
-				}
-				else
-				{
-					if (linkedNode.List is NodeCollection list)
-					{
-						list.AddAfter(linkedNode, new TextNode(link.Text ?? string.Empty));
-						list.Remove(linkedNode);
-					}
-				}
-			}
-		}
-
 		public static void Initialize(WikiJob job)
 		{
 			if (!initialized)
