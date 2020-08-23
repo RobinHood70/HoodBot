@@ -31,7 +31,7 @@
 	#endregion
 
 	/// <summary>Provides a light-weight holder for titles with several information and manipulation functions.</summary>
-	public class Title : IMessageSource, IEquatable<Title>, ISimpleTitle
+	public class Title : IMessageSource, ISimpleTitle
 	{
 		#region Constructors
 
@@ -230,13 +230,10 @@
 		}
 
 		/// <inheritdoc/>
-		public bool Equals([AllowNull] Title other) => this.SimpleEquals(other);
+		public override bool Equals(object? obj) => this.SimpleEquals(obj as Title);
 
 		/// <inheritdoc/>
-		public sealed override bool Equals(object? obj) => this.Equals(obj as Title);
-
-		/// <inheritdoc/>
-		public sealed override int GetHashCode() => HashCode.Combine(this.Namespace, this.PageName);
+		public override int GetHashCode() => HashCode.Combine(this.Namespace, this.PageName);
 
 		/// <summary>Gets the article path for the current page.</summary>
 		/// <returns>A Uri to the index.php page.</returns>
