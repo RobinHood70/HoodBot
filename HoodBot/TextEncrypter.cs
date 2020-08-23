@@ -7,7 +7,7 @@
 	using System.Text;
 	using static RobinHood70.CommonCode.Globals;
 
-	public class TextEncrypter
+	internal class TextEncrypter
 	{
 		private readonly byte[] encryptionKeyBytes;
 

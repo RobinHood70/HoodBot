@@ -6,7 +6,7 @@
 	using Newtonsoft.Json.Linq;
 	using static RobinHood70.CommonCode.Globals;
 
-	public class WikiInfo : ObservableObject, IEditableObject
+	public sealed class WikiInfo : ObservableObject, IEditableObject
 	{
 		#region Static Fields
 		// Yes, this key is hard-coded. There are more secure ways of doing it, but for now, this will suffice - user would have to specifically share their settings file in order to have passwords decrypted, and even then, they won't be displayed on-screen...they'd only be available in code.
@@ -26,11 +26,11 @@
 		#endregion
 
 		#region Constructors
-		public WikiInfo()
+		internal WikiInfo()
 		{
 		}
 
-		public WikiInfo(JToken node)
+		internal WikiInfo(JToken node)
 		{
 			ThrowNull(node, nameof(node));
 			this.Api = (Uri?)node[nameof(this.Api)];
