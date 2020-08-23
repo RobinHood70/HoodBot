@@ -770,7 +770,6 @@
     <Rule Id="IDE0054WithoutSuggestion" Action="Warning" />
     <Rule Id="IDE0056" Action="Warning" />
     <Rule Id="IDE0056WithoutSuggestion" Action="Warning" />
-    <Rule Id="IDE0057" Action="Warning" />
     <Rule Id="IDE0057WithoutSuggestion" Action="Warning" />
     <Rule Id="IDE0058" Action="None" />
     <Rule Id="IDE0059" Action="Warning" />
@@ -844,7 +843,6 @@
     <Rule Id="CA1707" Action="Warning" />
     <Rule Id="CA1708" Action="Warning" />
     <Rule Id="CA1710" Action="None" />
-    <Rule Id="CA1711" Action="Warning" />
     <Rule Id="CA1712" Action="Warning" />
     <Rule Id="CA1714" Action="Warning" />
     <Rule Id="CA1715" Action="Warning" />
