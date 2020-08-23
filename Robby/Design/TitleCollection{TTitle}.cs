@@ -22,9 +22,8 @@
 		where TTitle : class, ISimpleTitle
 	{
 		#region Fields
-		// This dictionary gets rather silly, since the key and value for each is the same thing, but nothing else allows the key to be an interface while also retrieving the typed value.
-		private readonly Dictionary<ISimpleTitle, TTitle> lookup = new Dictionary<ISimpleTitle, TTitle>(SimpleTitleEqualityComparer.Instance);
 		private readonly List<TTitle> items = new List<TTitle>();
+		private readonly Dictionary<ISimpleTitle, TTitle> lookup;
 		#endregion
 
 		#region Constructors
@@ -32,9 +31,19 @@
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection{TTitle}" /> class.</summary>
 		/// <param name="site">The site the titles are from. All titles in a collection must belong to the same site.</param>
 		protected TitleCollection([NotNull, ValidatedNotNull] Site site)
+			: this(site, null)
+		{
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="TitleCollection{TTitle}" /> class.</summary>
+		/// <param name="site">The site the titles are from. All titles in a collection must belong to the same site.</param>
+		/// <param name="equalityComparer">The <see cref="IEqualityComparer{T}"/> to use for lookups.</param>
+		protected TitleCollection([NotNull, ValidatedNotNull] Site site, IEqualityComparer<ISimpleTitle>? equalityComparer)
 		{
 			ThrowNull(site, nameof(site));
 			this.Site = site;
+			equalityComparer ??= SimpleTitleEqualityComparer.Instance;
+			this.lookup = new Dictionary<ISimpleTitle, TTitle>(equalityComparer);
 		}
 		#endregion
 
