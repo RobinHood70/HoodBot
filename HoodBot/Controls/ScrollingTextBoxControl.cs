@@ -1,10 +1,10 @@
-﻿namespace RobinHood70.HoodBot
+﻿namespace RobinHood70.HoodBot.Controls
 {
 	using System;
 	using System.Windows.Controls;
 
 	// Taken from https://stackoverflow.com/a/21755059/502255
-	public class ScrollingTextBox : TextBox
+	public class ScrollingTextBoxControl : TextBox
 	{
 		protected override void OnInitialized(EventArgs e)
 		{

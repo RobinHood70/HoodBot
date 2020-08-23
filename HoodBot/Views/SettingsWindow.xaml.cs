@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Views
 {
 	using System.Windows;
+	using RobinHood70.HoodBot.Models;
 	using RobinHood70.HoodBot.ViewModels;
 	using RobinHood70.WallE.Clients;
 

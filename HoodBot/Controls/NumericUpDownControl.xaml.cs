@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.HoodBot.Views
+﻿namespace RobinHood70.HoodBot.Controls
 {
 	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;

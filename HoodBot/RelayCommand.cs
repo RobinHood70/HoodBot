@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.HoodBot.ViewModels
+﻿namespace RobinHood70.HoodBot
 {
 	using System;
 	using System.Windows.Input;

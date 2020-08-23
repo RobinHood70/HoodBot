@@ -1,5 +1,7 @@
-﻿namespace RobinHood70.HoodBot.Models
+﻿namespace RobinHood70.HoodBot
 {
+	using RobinHood70.HoodBot.Models;
+
 	/// <summary>Indicates that the class supports result handling.</summary>
 	public interface IResultPageHandler
 	{

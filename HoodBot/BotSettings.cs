@@ -4,6 +4,7 @@
 	using System.Collections.ObjectModel;
 	using System.IO;
 	using Newtonsoft.Json;
+	using RobinHood70.HoodBot.Models;
 	using static RobinHood70.CommonCode.Globals;
 
 	public class BotSettings

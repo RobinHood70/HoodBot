@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
+	using RobinHood70.HoodBot;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Base;

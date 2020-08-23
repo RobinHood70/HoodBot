@@ -5,6 +5,8 @@
 	using System.Windows;
 	using System.Windows.Controls;
 	using RobinHood70.CommonCode;
+	using RobinHood70.HoodBot;
+	using RobinHood70.HoodBot.Models;
 	using RobinHood70.HoodBot.ViewModels;
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.HoodBot.Properties.Resources; // Allowing "using static" for this one due to naming conflict with framework.

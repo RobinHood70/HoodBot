@@ -1,6 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Models
 {
-	/// <summary>This provides a basic log information class to be derived from and customized as needed by custom UserFunctions implementations.</summary>
+	/// <summary>This provides a basic log information class to be derived from and customized as needed by custom JobLogger implementations.</summary>
 	public class LogInfo
 	{
 		/// <summary>Initializes a new instance of the <see cref="LogInfo"/> class.</summary>

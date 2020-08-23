@@ -1,12 +1,13 @@
-﻿namespace RobinHood70.HoodBot.ViewModels
+﻿namespace RobinHood70.HoodBot.Models
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Reflection;
+	using GalaSoft.MvvmLight;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using static RobinHood70.CommonCode.Globals;
 
-	public sealed class JobNode : Notifier, IComparable<JobNode>, IEquatable<JobNode>
+	public sealed class JobNode : ObservableObject, IComparable<JobNode>, IEquatable<JobNode>
 	{
 		#region Fields
 		private bool? isChecked;

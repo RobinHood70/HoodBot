@@ -3,13 +3,15 @@
 	using System;
 	using System.ComponentModel;
 	using System.Windows;
+	using GalaSoft.MvvmLight;
+	using RobinHood70.HoodBot.Models;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Clients;
 	using static RobinHood70.CommonCode.Globals;
 
 	// TODO: Re-examine WikiInfo vs MaxLaggableWikiInfo. Need to handle it better.
-	public class SettingsViewModel : Notifier, IEditableObject
+	public class SettingsViewModel : ViewModelBase, IEditableObject
 	{
 		#region Fields
 		private Uri? api;
@@ -212,7 +214,7 @@
 		private WikiInfo NewWiki()
 		{
 			ThrowNull(this.BotSettings, nameof(SettingsViewModel), nameof(this.BotSettings));
-			var retval = new MaxLaggableWikiInfo();
+			var retval = new WikiInfo();
 			this.BotSettings.Wikis.Add(retval);
 			this.currentItem = retval;
 

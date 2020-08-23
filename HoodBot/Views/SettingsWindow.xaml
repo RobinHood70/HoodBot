@@ -15,11 +15,6 @@
 		<Style TargetType="{x:Type Button}">
 			<Setter Property="Padding" Value="20,8" />
 		</Style>
-		<CollectionViewSource x:Key="wikiList" Source="{Binding Path='BotSettings.Wikis'}">
-			<CollectionViewSource.SortDescriptions>
-				<scm:SortDescription PropertyName="DisplayName" />
-			</CollectionViewSource.SortDescriptions>
-		</CollectionViewSource>
 	</Window.Resources>
 	<Window.DataContext>
 		<ViewModel:SettingsViewModel />
@@ -37,6 +32,13 @@
 			<RowDefinition Height="10" />
 			<RowDefinition Height="auto" />
 		</Grid.RowDefinitions>
+		<Grid.Resources>
+			<CollectionViewSource x:Key="wikiList" Source="{Binding Path='BotSettings.Wikis'}">
+				<CollectionViewSource.SortDescriptions>
+					<scm:SortDescription PropertyName="DisplayName" />
+				</CollectionViewSource.SortDescriptions>
+			</CollectionViewSource>
+		</Grid.Resources>
 		<Grid
 			Grid.Row="0"
 			Grid.Column="0"

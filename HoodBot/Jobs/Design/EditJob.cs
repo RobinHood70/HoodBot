@@ -3,7 +3,7 @@
 	using System;
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Models;
+	using RobinHood70.HoodBot;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Design;
 	using static RobinHood70.CommonCode.Globals;

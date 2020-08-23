@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.HoodBot.Models
+﻿namespace RobinHood70.HoodBot
 {
 	/// <summary>Indicates that the class supports job logging.</summary>
 	public interface IJobLogger

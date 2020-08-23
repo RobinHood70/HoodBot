@@ -1,7 +1,5 @@
 ﻿namespace RobinHood70.HoodBot
 {
-	using RobinHood70.HoodBot.ViewModels;
-
 	internal interface IParameterFetcher
 	{
 		void GetParameter(ConstructorParameter parameter);

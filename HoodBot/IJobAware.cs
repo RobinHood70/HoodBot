@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.HoodBot.Models
+﻿namespace RobinHood70.HoodBot
 {
 	public interface IJobAware
 	{

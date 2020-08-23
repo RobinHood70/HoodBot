@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.ComponentModel;
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.IO;
@@ -10,6 +9,8 @@
 	using System.Threading.Tasks;
 	using System.Windows;
 	using System.Windows.Media;
+	using GalaSoft.MvvmLight;
+	using RobinHood70.HoodBot;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.HoodBot.Properties;
@@ -18,11 +19,12 @@
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
+	using RobinHood70.WallE.Eve;
 	using static System.Environment;
 	using static RobinHood70.CommonCode.Globals;
 
 	// TODO: Decouple this into a job-runner class, or something along those lines, that notifies this one of updates.
-	public class MainViewModel : Notifier
+	public class MainViewModel : ViewModelBase
 	{
 		#region Private Constants
 		private const string ContactInfo = "robinhood70@live.ca";
@@ -171,7 +173,7 @@
 			{
 				if (this.Set(ref this.eta, value, nameof(this.UtcEta)))
 				{
-					this.OnPropertyChanged(new PropertyChangedEventArgs(nameof(this.Eta)));
+					this.RaisePropertyChanged(nameof(this.Eta));
 				}
 			}
 		}
@@ -232,6 +234,19 @@
 			.Replace(".0", string.Empty, StringComparison.Ordinal)
 			.Replace(" 0s", string.Empty, StringComparison.Ordinal)
 			.Trim();
+
+		private static IWikiAbstractionLayer GetAbstractionLayer(IMediaWikiClient client, WikiInfo info)
+		{
+			var wal = info.Api == null
+			? throw PropertyNull(nameof(WikiInfo), nameof(info.Api))
+			: new WikiAbstractionLayer(client, info.Api);
+			if (wal is IMaxLaggable maxLagWal)
+			{
+				maxLagWal.MaxLag = info.MaxLag;
+			}
+
+			return wal;
+		}
 		#endregion
 
 		#region Private Methods
@@ -371,7 +386,7 @@
 		private Site InitializeSite()
 		{
 			var wikiInfo = this.CurrentItem ?? throw new InvalidOperationException(Resources.NoWiki);
-			var abstractionLayer = wikiInfo.GetAbstractionLayer(this.client);
+			var abstractionLayer = GetAbstractionLayer(this.client, wikiInfo);
 
 #if DEBUG
 			if (abstractionLayer is IInternetEntryPoint internet)
