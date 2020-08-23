@@ -3,7 +3,7 @@
 	using System;
 	using System.Collections.ObjectModel;
 	using System.IO;
-	using Newtonsoft.Json;
+	using Newtonsoft.Json.Linq;
 	using RobinHood70.HoodBot.Models;
 	using static RobinHood70.CommonCode.Globals;
 
@@ -14,7 +14,28 @@
 		#endregion
 
 		#region Constructors
-		public BotSettings(string location) => this.Location = location;
+		private BotSettings(string location, JToken? json)
+		{
+			this.Location = location;
+			if (json == null)
+			{
+				this.BotDataFolder = DefaultBotDataFolder;
+			}
+			else
+			{
+				this.BotDataFolder = (string?)json[nameof(this.BotDataFolder)] ?? DefaultBotDataFolder;
+				if (json[nameof(this.Wikis)] is JToken wikiNode && wikiNode.Type == JTokenType.Array)
+				{
+					foreach (var node in wikiNode)
+					{
+						this.Wikis.Add(new WikiInfo(node));
+					}
+				}
+
+				this.CurrentName = (string?)json[nameof(this.CurrentName)];
+				this.GetCurrentItem();
+			}
+		}
 		#endregion
 
 		#region Public Static Properties
@@ -37,7 +58,7 @@
 
 		public string? CurrentName { get; set; }
 
-		public string Location { get; set; }
+		public string Location { get; }
 
 		public ObservableCollection<WikiInfo> Wikis { get; } = new ObservableCollection<WikiInfo>();
 		#endregion
@@ -48,14 +69,8 @@
 			try
 			{
 				var input = File.ReadAllText(location);
-				var retval = JsonConvert.DeserializeObject<BotSettings>(input);
-
-				// Set up default values if not loaded from file, or otherwise invalid.
-				if (!IsPathValid(retval.Location))
-				{
-					retval.Location = location; // For older file versions, but also works in case location has been removed from file.
-				}
-
+				var json = JObject.Parse(input);
+				var retval = new BotSettings(location, json);
 				if (!IsPathValid(retval.BotDataFolder))
 				{
 					retval.botDataFolder = DefaultBotDataFolder;
@@ -65,9 +80,8 @@
 			}
 			catch (FileNotFoundException)
 			{
+				return new BotSettings(location, null);
 			}
-
-			return new BotSettings(location);
 		}
 		#endregion
 
@@ -109,8 +123,20 @@
 
 		public void Save()
 		{
-			var output = JsonConvert.SerializeObject(this, Formatting.Indented, new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Include });
-			File.WriteAllText(this.Location, output);
+			var wikis = new JArray();
+			foreach (var wiki in this.Wikis)
+			{
+				wikis.Add(wiki.ToJson());
+			}
+
+			var json = new JObject
+			{
+				new JProperty(nameof(this.BotDataFolder), this.BotDataFolder),
+				new JProperty(nameof(this.CurrentName), this.CurrentName),
+				new JProperty(nameof(this.Wikis), wikis)
+			};
+
+			File.WriteAllText(this.Location, json.ToString());
 		}
 
 		// TODO: See if there's more that needs to be done for Add. If nothing else, it doesn't sort after adding. Was that intentional?
