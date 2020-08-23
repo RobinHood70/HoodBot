@@ -10,6 +10,7 @@
 	using System.Windows;
 	using System.Windows.Media;
 	using GalaSoft.MvvmLight;
+	using GalaSoft.MvvmLight.CommandWpf;
 	using RobinHood70.HoodBot;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Models;

@@ -4,6 +4,7 @@
 	using System.ComponentModel;
 	using System.Windows;
 	using GalaSoft.MvvmLight;
+	using GalaSoft.MvvmLight.CommandWpf;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;

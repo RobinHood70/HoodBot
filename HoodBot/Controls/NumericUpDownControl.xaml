@@ -1,12 +1,11 @@
 ﻿<UserControl
 	x:Class="RobinHood70.HoodBot.Controls.NumericUpDown"
-	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:controls="clr-namespace:RobinHood70.HoodBot.Controls"
-	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-	xmlns:local="clr-namespace:RobinHood70.HoodBot"
-	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	d:DesignWidth="100"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="clr-namespace:RobinHood70.HoodBot.Controls"
+    d:DesignWidth="100"
 	mc:Ignorable="d">
 	<UserControl.Resources>
 		<controls:NumericUpDownConverter x:Key="converter" />
