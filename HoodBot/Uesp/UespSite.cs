@@ -5,14 +5,13 @@
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot;
-	using RobinHood70.HoodBot.Models;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.CommonCode.Globals;
 
-	public class UespSite : Site, IResultPageHandler, IJobAware, IJobLogger
+	public class UespSite : Site, IResultHandler, IJobAware, IJobLogger
 	{
 		#region Constructors
 		public UespSite(IWikiAbstractionLayer abstractionLayer)
@@ -34,7 +33,7 @@
 
 		public Page? LogPage { get; private set; }
 
-		public PageResultHandler? ResultPageHandler { get; private set; }
+		public ResultHandler? ResultHandler { get; private set; }
 		#endregion
 
 		#region Public Static Methods
@@ -47,10 +46,10 @@
 		public void OnJobsCompleted(bool success)
 		{
 			this.FilterPages.Remove("Project:Bot Requests");
-			if (this.ResultPageHandler != null)
+			if (this.ResultHandler != null)
 			{
-				this.ResultPageHandler.Save();
-				this.ResultPageHandler.Clear();
+				this.ResultHandler.Save();
+				this.ResultHandler.Clear();
 			}
 		}
 
@@ -102,7 +101,7 @@
 			this.ClearMessage(true);
 
 			var resultPage = new Title(this[MediaWikiNamespaces.User], this.User.PageName + "/Results");
-			this.ResultPageHandler = new PageResultHandler(resultPage);
+			this.ResultHandler = new PageResultHandler(resultPage);
 			this.FilterPages.Add(resultPage);
 
 			this.LogPage = new Page(this[MediaWikiNamespaces.User], this.User.PageName + "/Log");

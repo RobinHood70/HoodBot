@@ -25,7 +25,7 @@
 			this.AsyncInfo = asyncInfo;
 			this.LogName = this.GetType().Name.UnCamelCase();
 			this.Logger = (site as IJobLogger)?.JobLogger;
-			this.Results = (site as IResultPageHandler)?.ResultPageHandler;
+			this.Results = (site as IResultHandler)?.ResultHandler;
 		}
 		#endregion
 
