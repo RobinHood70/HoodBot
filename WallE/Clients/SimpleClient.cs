@@ -25,7 +25,6 @@
 	{
 		#region Fields
 		private readonly string cookiesLocation;
-		private readonly bool useV10;
 		private CookieContainer cookieContainer;
 		#endregion
 
@@ -376,9 +375,7 @@
 			request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
 			request.CookieContainer = this.cookieContainer;
 			request.Headers[HttpRequestHeader.AcceptEncoding] = "gzip,deflate";
-			request.KeepAlive = !this.useV10;
 			request.Method = method;
-			request.ProtocolVersion = this.useV10 ? HttpVersion.Version10 : HttpVersion.Version11;
 			request.Proxy.Credentials = CredentialCache.DefaultCredentials;
 			request.UseDefaultCredentials = true;
 			request.UserAgent = this.UserAgent;
