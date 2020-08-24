@@ -17,7 +17,7 @@
 		#endregion
 
 		#region Constructors
-		protected WikiJob([NotNull, ValidatedNotNull]Site site, [NotNull, ValidatedNotNull]AsyncInfo asyncInfo)
+		protected WikiJob([NotNull, ValidatedNotNull] Site site, [NotNull, ValidatedNotNull] AsyncInfo asyncInfo)
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(asyncInfo, nameof(asyncInfo));

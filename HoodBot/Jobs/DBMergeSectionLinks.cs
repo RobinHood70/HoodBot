@@ -6,7 +6,6 @@
 	using Newtonsoft.Json;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
-	using RobinHood70.HoodBot.Models;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;

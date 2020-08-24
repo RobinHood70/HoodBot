@@ -16,7 +16,7 @@
 
 		/// <summary>Initializes a new instance of the <see cref="TextNode"/> class.</summary>
 		/// <param name="text">The text.</param>
-		public TextNode([Localizable(false)]string text) => this.text = text;
+		public TextNode([Localizable(false)] string text) => this.text = text;
 		#endregion
 
 		#region Public Properties

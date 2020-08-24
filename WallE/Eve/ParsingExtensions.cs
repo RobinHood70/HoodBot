@@ -426,7 +426,7 @@
 		/// <param name="name">The name.</param>
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>The value <see cref="string"/>.</returns>
-		public static string MustHaveBCString(this JToken token, string name, [CallerMemberName]string caller = FallbackText.Unknown)
+		public static string MustHaveBCString(this JToken token, string name, [CallerMemberName] string caller = FallbackText.Unknown)
 		{
 			ThrowNull(token, nameof(token));
 			var node = token[name] ?? token["*"] ?? throw MalformedException(name, token, caller);
@@ -533,7 +533,7 @@
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>RobinHood70.WallE.Design.WikiException.</returns>
 		// These methods are not extensions, but are placed in this class as useful but not warranting a class of their own yet.
-		public static WikiException MalformedException(string name, JToken? token, [CallerMemberName]string caller = FallbackText.Unknown) => new WikiException(CurrentCulture(EveMessages.MalformedData, name, token?.Path ?? FallbackText.Unknown, caller));
+		public static WikiException MalformedException(string name, JToken? token, [CallerMemberName] string caller = FallbackText.Unknown) => new WikiException(CurrentCulture(EveMessages.MalformedData, name, token?.Path ?? FallbackText.Unknown, caller));
 
 		/// <summary>
 		/// Malformeds the type exception.
@@ -542,7 +542,7 @@
 		/// <param name="token">The token.</param>
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>RobinHood70.WallE.Design.WikiException.</returns>
-		public static WikiException MalformedTypeException(string typeName, JToken? token, [CallerMemberName]string caller = FallbackText.Unknown) => new WikiException(CurrentCulture(EveMessages.MalformedDataType, typeName, token?.Path ?? FallbackText.Unknown, caller));
+		public static WikiException MalformedTypeException(string typeName, JToken? token, [CallerMemberName] string caller = FallbackText.Unknown) => new WikiException(CurrentCulture(EveMessages.MalformedDataType, typeName, token?.Path ?? FallbackText.Unknown, caller));
 
 		/// <summary>The error thrown when a parameter could not be cast to the expected type.</summary>
 		/// <param name="parameterName">Name of the parameter.</param>
