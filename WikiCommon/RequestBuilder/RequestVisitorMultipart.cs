@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
 	using System;
-	using System.Collections.Generic;
 	using System.IO;
 	using System.Text;
 	using static RobinHood70.CommonCode.Globals;
@@ -93,22 +92,26 @@
 
 			return new MultipartResult(contentType, formData);
 		}
+		#endregion
+
+		#region IParameterVisitor Methods
 
 		/// <summary>Visits the specified FileParameter object.</summary>
 		/// <param name="parameter">The FileParameter object.</param>
 		public void Visit(FileParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
-			if (ScanBoundaryConflicts && parameter.Value.Data.LongLength > 0 && CurrentEncoding.GetString(parameter.Value.Data).Contains(this.boundary, StringComparison.Ordinal))
+			var fileData = parameter.GetFileData();
+			if (ScanBoundaryConflicts && fileData.LongLength > 0 && CurrentEncoding.GetString(fileData).Contains(this.boundary, StringComparison.Ordinal))
 			{
 				this.badBoundary = true;
 				return;
 			}
 
 			ThrowNull(this.stream, nameof(RequestVisitorMultipart), nameof(this.stream));
-			var data = Invariant($"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{parameter.Name}\"; filename=\"{parameter.Value.FileName}\";\r\nContent-Type: application/octet-stream\r\n\r\n");
+			var data = Invariant($"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{parameter.Name}\"; filename=\"{parameter.FileName}\";\r\nContent-Type: application/octet-stream\r\n\r\n");
 			this.stream!.Write(CurrentEncoding.GetBytes(data), 0, CurrentEncoding.GetByteCount(data));
-			this.stream.Write(parameter.Value.Data, 0, parameter.Value.Data.Length);
+			this.stream.Write(fileData, 0, fileData.Length);
 		}
 
 		/// <summary>Visits the specified FormatParameter object.</summary>
@@ -128,12 +131,11 @@
 		}
 
 		/// <summary>Visits the specified PipedParameter or PipedListParameter object.</summary>
-		/// <typeparam name="T">An enumerable string collection.</typeparam>
 		/// <param name="parameter">The PipedParameter or PipedListParameter object.</param>
 		/// <remarks>In all cases, the PipedParameter and PipedListParameter objects are treated identically, however the value collections they're associated with differ, so the Visit method is made generic to handle both.</remarks>
-		public void Visit<T>(Parameter<T> parameter)
-			where T : IEnumerable<string>
+		public void Visit(MultiValuedParameter parameter)
 		{
+			ThrowNull(parameter, nameof(parameter));
 			var value = parameter.BuildPipedValue(this.supportsUnitSeparator);
 			this.TextMultipart(parameter.Name, value);
 		}

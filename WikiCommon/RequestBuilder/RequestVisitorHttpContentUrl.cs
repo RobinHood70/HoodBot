@@ -63,12 +63,11 @@
 		}
 
 		/// <summary>Visits the specified PipedParameter or PipedListParameter object.</summary>
-		/// <typeparam name="T">An enumerable string collection.</typeparam>
 		/// <param name="parameter">The PipedParameter or PipedListParameter object.</param>
 		/// <remarks>In all cases, the PipedParameter and PipedListParameter objects are treated identically, however the value collections they're associated with differ, so the Visit method is made generic to handle both.</remarks>
-		public void Visit<T>(Parameter<T> parameter)
-			where T : IEnumerable<string>
+		public void Visit(MultiValuedParameter parameter)
 		{
+			ThrowNull(parameter, nameof(parameter));
 			var value = parameter.BuildPipedValue(this.supportsUnitSeparator);
 			this.parameters.Add(parameter.Name, value);
 		}

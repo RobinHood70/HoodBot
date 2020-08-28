@@ -12,7 +12,7 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		public HiddenParameter(string name, string value)
-			: base(name, value)
+			: base(name ?? throw ArgumentNull(nameof(name)), value)
 		{
 		}
 		#endregion

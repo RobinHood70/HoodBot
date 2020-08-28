@@ -3,21 +3,38 @@
 	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Represents a parameter with file information.</summary>
-	/// <seealso cref="Parameter{T}" />
-	public class FileParameter : Parameter<(string FileName, byte[] Data)>
+	/// <seealso cref="Parameter" />
+	public class FileParameter : Parameter
 	{
+		#region Fields
+		private readonly byte[] fileData;
+		#endregion
+
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="FileParameter" /> class.</summary>
-		/// <param name="name">The name.</param>
-		/// <param name="fileName">Name of the file.</param>
+		/// <param name="name">The parameter name.</param>
+		/// <param name="fileName">The name of the file.</param>
 		/// <param name="fileData">The file data.</param>
 		public FileParameter(string name, string fileName, byte[] fileData)
-			: base(name, (fileName, fileData))
+			: base(name ?? throw ArgumentNull(nameof(name)))
 		{
-			ThrowNull(fileName, nameof(fileName));
-			ThrowNull(fileData, nameof(fileData));
+			this.FileName = fileName ?? throw ArgumentNull(nameof(fileName));
+			this.fileData = fileData ?? throw ArgumentNull(nameof(fileData));
 		}
+		#endregion
+
+		#region Public Properties
+
+		/// <summary>Gets the file name.</summary>
+		public string FileName { get; }
+		#endregion
+
+		#region Public Methods
+
+		/// <summary>Gets the file data.</summary>
+		/// <returns>A byte array containing the file data.</returns>
+		public byte[] GetFileData() => this.fileData; // Not a property due to CA1819.
 		#endregion
 
 		#region Public Override Methods

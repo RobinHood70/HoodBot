@@ -12,7 +12,9 @@
 		/// <summary>Initializes a new instance of the <see cref="FormatParameter" /> class.</summary>
 		/// <param name="value">The value.</param>
 		public FormatParameter(string value)
-			: base("format", value) => ThrowNull(value, nameof(value));
+			: base("format", value ?? throw ArgumentNull(nameof(value)))
+		{
+		}
 		#endregion
 
 		#region Public Override Methods

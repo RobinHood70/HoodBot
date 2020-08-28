@@ -3,8 +3,8 @@
 	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Represents a string parameter.</summary>
-	/// <seealso cref="Parameter{T}" />
-	public class StringParameter : Parameter<string>
+	/// <seealso cref="Parameter" />
+	public class StringParameter : Parameter
 	{
 		#region Constructors
 
@@ -12,10 +12,14 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <remarks><see langword="null"/> is a valid value for this parameter type, so no input validation is performed.</remarks>
-		public StringParameter(string name, string value)
-			: base(name, value)
-		{
-		}
+		public StringParameter(string name, string? value)
+			: base(name ?? throw ArgumentNull(nameof(name))) => this.Value = value ?? string.Empty;
+		#endregion
+
+		#region Public Properties
+
+		/// <summary>Gets the value of the parameter.</summary>
+		public string Value { get; }
 		#endregion
 
 		#region Public Override Methods

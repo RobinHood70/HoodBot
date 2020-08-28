@@ -30,7 +30,7 @@
 	/// <remarks>The current implementation of the Dictionary class seems to maintain insertion order, but this is not documented and should not be relied upon.</remarks>
 	// Note: Throughout this class, conditions are specified as booleans. While these could certainly be changed to Predicates to delay evaluation until execution time rather than at call time, there is no advantage to doing so here—it would only add overhead (from creating the closure), rather than reducing it.
 	[Serializable]
-	public class Request : KeyedCollection<string, IParameter>
+	public class Request : KeyedCollection<string, Parameter>
 	{
 		#region Constructors
 
@@ -149,7 +149,7 @@
 		public Request Add(string name, string? value)
 		{
 			ThrowNull(name, nameof(name));
-			this.Add(new StringParameter(this.Prefix + name, value ?? string.Empty));
+			this.Add(new StringParameter(this.Prefix + name, value));
 			return this;
 		}
 
@@ -280,11 +280,11 @@
 			ThrowNull(name, nameof(name));
 			ThrowNull(values, nameof(values));
 			var newKey = this.Prefix + name;
-			if (this.ValueOrDefault(newKey) is IParameter param)
+			if (this.ValueOrDefault(newKey) is Parameter param)
 			{
 				if (param is PipedParameter piped)
 				{
-					piped.Value.UnionWith(values);
+					piped.Add(values);
 				}
 				else
 				{
@@ -521,7 +521,7 @@
 		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
 		/// <param name="key">The key of the value to get.</param>
 		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
-		public IParameter? ValueOrDefault(string key)
+		public Parameter? ValueOrDefault(string key)
 		{
 			if (key != null)
 			{
@@ -555,7 +555,7 @@
 		/// <summary>Gets the key for item.</summary>
 		/// <param name="item">The item.</param>
 		/// <returns>The key corresponding to the item.</returns>
-		protected override string GetKeyForItem(IParameter item) => (item ?? throw ArgumentNull(nameof(item))).Name;
+		protected override string GetKeyForItem(Parameter item) => (item ?? throw ArgumentNull(nameof(item))).Name;
 		#endregion
 	}
 }

@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Text;
 	using static RobinHood70.CommonCode.Globals;
 
@@ -56,8 +55,7 @@
 			this.builder.Append("<hidden>");
 		}
 
-		public void Visit<T>(Parameter<T> parameter)
-			where T : IEnumerable<string>
+		public void Visit(MultiValuedParameter parameter)
 		{
 			this.BuildParameterName(parameter);
 			var value = parameter.BuildPipedValue(false);
@@ -72,7 +70,7 @@
 		#endregion
 
 		#region Private Methods
-		private void BuildParameterName(IParameter parameter)
+		private void BuildParameterName(Parameter parameter)
 		{
 			if (this.builder.Length > 0)
 			{
