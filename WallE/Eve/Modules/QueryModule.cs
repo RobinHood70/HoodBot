@@ -71,6 +71,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Virtual Properties
+		public virtual bool AllowMultipleModules { get; } // Currently only true for prop modules, but allowing changes on a per-module basis. StashImageInfo, for example, might make sense to be false.
+
 		public virtual string ContinueName => "continue";
 
 		public virtual bool ContinueParsing => this.ItemsRemaining > 0;
@@ -113,7 +115,14 @@ namespace RobinHood70.WallE.Eve.Modules
 			if (this.ModuleType != null && !this.IsGenerator)
 			{
 				request.Prefix = string.Empty;
-				request.AddForced(this.ModuleType, new[] { this.Name });
+				if (this.AllowMultipleModules)
+				{
+					request.AddToPiped(this.ModuleType, this.Name);
+				}
+				else
+				{
+					request.Add(this.ModuleType, this.Name);
+				}
 			}
 
 			request.Prefix = this.FullPrefix;

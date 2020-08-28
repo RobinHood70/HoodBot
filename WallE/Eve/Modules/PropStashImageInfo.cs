@@ -27,6 +27,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Override Properties
+		public override bool AllowMultipleModules => true;
+
 		protected override string ModuleType => "prop";
 
 		protected override string Prefix => "sii";
