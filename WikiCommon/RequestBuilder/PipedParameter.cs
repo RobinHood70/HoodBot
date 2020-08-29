@@ -1,36 +1,53 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
+	using System;
 	using System.Collections.Generic;
 	using static RobinHood70.CommonCode.Globals;
 
-	/// <summary>Represents a parameter with collection of unique values, normally separated by pipe characters.</summary>
+	/// <summary>Represents a parameter with collection of values, normally separated by pipe characters.</summary>
 	/// <seealso cref="Parameter" />
-	public class PipedParameter : MultiValuedParameter
+	public class PipedParameter : Parameter
 	{
-		#region Fields
-		private readonly HashSet<string> values;
-		#endregion
-
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="PipedParameter" /> class.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="values">The parameter values. Any duplicates in the input will be ignored.</param>
-		public PipedParameter(string name, IEnumerable<string> values)
-			: base(name) => this.values = new HashSet<string>(values ?? throw ArgumentNull(nameof(values)));
+		public PipedParameter(string name, ICollection<string> values)
+			: base(name) => this.Values = values ?? throw ArgumentNull(nameof(values));
 		#endregion
 
-		#region Public Properties
+		#region Public Abstract Properties
 
-		/// <inheritdoc/>
-		public override IEnumerable<string> Values => this.values;
+		/// <summary>Gets the collection of values.</summary>
+		public ICollection<string> Values { get; }
 		#endregion
 
 		#region Public Methods
 
-		/// <summary>Adds a collection of items to the Values collection.</summary>
-		/// <param name="values">The values to add.</param>
-		public void Add(IEnumerable<string> values) => this.values.UnionWith(values ?? throw ArgumentNull(nameof(values)));
+		/// <summary>Builds a pipe-separated string from an enumerable parameter.</summary>
+		/// <param name="supportsUnitSeparator">if set to <see langword="true"/>, 0x1F is supported as an alternative to pipes, when needed.</param>
+		/// <returns>A pipe-separated string with all the values from the enumeration.</returns>
+		public string BuildPipedValue(bool supportsUnitSeparator)
+		{
+			var lead = string.Empty;
+			var separator = '|';
+			if (supportsUnitSeparator)
+			{
+				foreach (var item in this.Values)
+				{
+					if (item.Contains('|', StringComparison.Ordinal))
+					{
+						separator = '\x1f';
+						lead += separator; // If using alternate separator, we have to flag this by emitting a leading separator.
+						break;
+					}
+				}
+			}
+
+			// We used to append an extra pipe to the end if the result ended in =, pipe, or alt-pipe, or if this.Values was empty, but this doesn't seem to be necessary, and could lead to unexpected errors for otherwise valid input. Might be necessary under certain conditions or for certain MW versions, though, so restore that if needed.
+			return lead + string.Join(separator, this.Values);
+		}
 		#endregion
 
 		#region Public Override Methods

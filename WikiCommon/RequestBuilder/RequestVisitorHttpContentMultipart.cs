@@ -47,29 +47,11 @@
 			this.multipartData.Add(new ByteArrayContent(parameter.GetFileData()), parameter.Name, parameter.FileName);
 		}
 
-		/// <summary>Visits the specified FormatParameter object.</summary>
-		/// <param name="parameter">The FormatParameter object.</param>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "False positive.")]
-		public void Visit(FormatParameter parameter)
-		{
-			ThrowNull(parameter, nameof(parameter));
-			this.multipartData.Add(new StringContent(parameter.Value), parameter.Name);
-		}
-
-		/// <summary>Visits the specified HiddenParameter object.</summary>
-		/// <param name="parameter">The HiddenParameter object.</param>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "False positive.")]
-		public void Visit(HiddenParameter parameter)
-		{
-			ThrowNull(parameter, nameof(parameter));
-			this.multipartData.Add(new StringContent(parameter.Value), parameter.Name);
-		}
-
 		/// <summary>Visits the specified PipedParameter or PipedListParameter object.</summary>
 		/// <param name="parameter">The PipedParameter or PipedListParameter object.</param>
 		/// <remarks>In all cases, the PipedParameter and PipedListParameter objects are treated identically, however the value collections they're associated with differ, so the Visit method is made generic to handle both.</remarks>
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "False positive.")]
-		public void Visit(MultiValuedParameter parameter)
+		public void Visit(PipedParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
 			var value = parameter.BuildPipedValue(this.supportsUnitSeparator);

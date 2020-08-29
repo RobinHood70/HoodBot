@@ -9,18 +9,10 @@
 		/// <param name="parameter">The FileParameter object.</param>
 		void Visit(FileParameter parameter);
 
-		/// <summary>Visits the specified FormatParameter object.</summary>
-		/// <param name="parameter">The FormatParameter object.</param>
-		void Visit(FormatParameter parameter);
-
-		/// <summary>Visits the specified HiddenParameter object.</summary>
-		/// <param name="parameter">The HiddenParameter object.</param>
-		void Visit(HiddenParameter parameter);
-
 		/// <summary>Visits the specified multi-valued object (specifically, PipedParameter or PipedListParameter).</summary>
 		/// <param name="parameter">The PipedParameter or PipedListParameter object.</param>
 		/// <remarks>In all cases, the PipedParameter and PipedListParameter objects are treated identically, however the value collections they're associated with differ, so the Visit method is made generic to handle both.</remarks>
-		void Visit(MultiValuedParameter parameter);
+		void Visit(PipedParameter parameter);
 
 		/// <summary>Visits the specified StringParameter object.</summary>
 		/// <param name="parameter">The StringParameter object.</param>

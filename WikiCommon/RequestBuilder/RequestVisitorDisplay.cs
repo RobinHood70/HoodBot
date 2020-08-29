@@ -43,19 +43,7 @@
 			this.builder.Append("<filedata>");
 		}
 
-		public void Visit(FormatParameter parameter)
-		{
-			this.BuildParameterName(parameter);
-			this.builder.Append(parameter?.Value).Append("fm");
-		}
-
-		public void Visit(HiddenParameter parameter)
-		{
-			this.BuildParameterName(parameter);
-			this.builder.Append("<hidden>");
-		}
-
-		public void Visit(MultiValuedParameter parameter)
+		public void Visit(PipedParameter parameter)
 		{
 			this.BuildParameterName(parameter);
 			var value = parameter.BuildPipedValue(false);
@@ -65,7 +53,12 @@
 		public void Visit(StringParameter parameter)
 		{
 			this.BuildParameterName(parameter);
-			this.builder.Append(EscapeDataString(parameter?.Value ?? string.Empty));
+			this.builder.Append(parameter.ValueType switch
+			{
+				ValueType.Hidden => "<hidden>",
+				ValueType.Modify => parameter.Value + "fm",
+				_ => EscapeDataString(parameter?.Value ?? string.Empty),
+			});
 		}
 		#endregion
 

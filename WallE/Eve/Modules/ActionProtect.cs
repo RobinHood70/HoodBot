@@ -49,7 +49,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIfNotNull("title", input.Title)
 				.AddIfPositive("pageid", input.PageId)
 				.Add("protections", protections)
-				.AddList("expiry", expiry)
+				.Add("expiry", expiry)
 				.AddIfNotNull("reason", input.Reason)
 				.Add("tags", input.Tags)
 				.Add("cascade", input.Cascade)

@@ -46,26 +46,10 @@
 		/// <exception cref="NotSupportedException">Because a FileParameter is invalid for submission in a URL or POST data, this method always throws a NotSupportedException.</exception>
 		public void Visit(FileParameter parameter) => throw new NotSupportedException();
 
-		/// <summary>Visits the specified FormatParameter object.</summary>
-		/// <param name="parameter">The FormatParameter object.</param>
-		public void Visit(FormatParameter parameter)
-		{
-			ThrowNull(parameter, nameof(parameter));
-			this.parameters.Add(parameter.Name, parameter.Value);
-		}
-
-		/// <summary>Visits the specified HiddenParameter object.</summary>
-		/// <param name="parameter">The HiddenParameter object.</param>
-		public void Visit(HiddenParameter parameter)
-		{
-			ThrowNull(parameter, nameof(parameter));
-			this.parameters.Add(parameter.Name, parameter.Value);
-		}
-
 		/// <summary>Visits the specified PipedParameter or PipedListParameter object.</summary>
 		/// <param name="parameter">The PipedParameter or PipedListParameter object.</param>
 		/// <remarks>In all cases, the PipedParameter and PipedListParameter objects are treated identically, however the value collections they're associated with differ, so the Visit method is made generic to handle both.</remarks>
-		public void Visit(MultiValuedParameter parameter)
+		public void Visit(PipedParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
 			var value = parameter.BuildPipedValue(this.supportsUnitSeparator);

@@ -2,6 +2,22 @@
 {
 	using static RobinHood70.CommonCode.Globals;
 
+	#region Public Enumerations
+
+	/// <summary>The type of value stored in the string. Note that implementers are not forced to respect these values.</summary>
+	public enum ValueType
+	{
+		/// <summary>The value remains the same, regardless of whether it's displayed or sent to the server.</summary>
+		Normal = 0,
+
+		/// <summary>The value should be hidden when displayed.</summary>
+		Hidden,
+
+		/// <summary>The value should be modified when displayed (e.g., <c>format=json</c> should be displayed as <c>format=jsonfm</c>).</summary>
+		Modify,
+	}
+	#endregion
+
 	/// <summary>Represents a string parameter.</summary>
 	/// <seealso cref="Parameter" />
 	public class StringParameter : Parameter
@@ -13,13 +29,30 @@
 		/// <param name="value">The parameter value.</param>
 		/// <remarks><see langword="null"/> is a valid value for this parameter type, so no input validation is performed.</remarks>
 		public StringParameter(string name, string? value)
-			: base(name ?? throw ArgumentNull(nameof(name))) => this.Value = value ?? string.Empty;
+			: this(name, value, ValueType.Normal)
+		{
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="StringParameter" /> class.</summary>
+		/// <param name="name">The parameter name.</param>
+		/// <param name="value">The parameter value.</param>
+		/// <param name="type">The type of data stored in the value.</param>
+		/// <remarks><see langword="null"/> is a valid value for this parameter type, so no input validation is performed.</remarks>
+		public StringParameter(string name, string? value, ValueType type)
+			: base(name ?? throw ArgumentNull(nameof(name)))
+		{
+			this.Value = value ?? string.Empty;
+			this.ValueType = type;
+		}
 		#endregion
 
 		#region Public Properties
 
 		/// <summary>Gets the value of the parameter.</summary>
 		public string Value { get; }
+
+		/// <summary>Gets the type of string stored in <see cref="Value"/>.</summary>
+		public ValueType ValueType { get; }
 		#endregion
 
 		#region Public Override Methods
