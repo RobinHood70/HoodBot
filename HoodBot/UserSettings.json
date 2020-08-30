@@ -1,0 +1,96 @@
+{
+    "AppSettings": {
+        "Wikis": [
+            {
+                "Api": "https://en.uesp.net/w/api.php",
+                "DisplayName": "UESPWiki",
+                "MaxLag": 0,
+                "Password": "eDl/U3Jb/4+rsI3gIhH+9S5PO6D91rzB/aNTY7yY3Zs=",
+                "ReadThrottling": 0,
+                "SiteClassIdentifier": "UespHoodBot",
+                "UserName": "HoodBot",
+                "WriteThrottling": 0
+            },
+            {
+                "Api": "https://en.wikipedia.org/w/api.php",
+                "DisplayName": "Wikipedia",
+                "MaxLag": 0,
+                "Password": "ODc3UEd5oNMztAYVyK+O71BofxDJMKGhTzqPadNcico=",
+                "ReadThrottling": 0,
+                "SiteClassIdentifier": null,
+                "UserName": "RobinHood70Bot",
+                "WriteThrottling": 0
+            },
+            {
+                "Api": "http://rob-centos:80/uesp/api.php",
+                "DisplayName": "UESPWiki (local)",
+                "MaxLag": 0,
+                "Password": "uYoYhqOabZ2RrfF3XXs6ZQqToKN1L7IlVfU8oRAwZFE=",
+                "ReadThrottling": 1000,
+                "SiteClassIdentifier": "UespHoodBot",
+                "UserName": "HoodBot",
+                "WriteThrottling": 5000
+            },
+            {
+                "Api": "https://fr.wikipedia.org/w/api.php",
+                "DisplayName": "Wikipédia",
+                "MaxLag": 0,
+                "Password": "fOEz4rIDcKtDZJi4NORbGjaeB/S+OC+Vb1+0ht8UbRI=",
+                "ReadThrottling": 0,
+                "SiteClassIdentifier": null,
+                "UserName": "RobinHood70Bot",
+                "WriteThrottling": 0
+            },
+            {
+                "Api": "http://rob-centos:80/w26/api.php",
+                "DisplayName": "Wiki26",
+                "MaxLag": 0,
+                "Password": "Wk5smzVpw4Kr48wXbSTDDC09RehGdVm6NFfq9N1bhFo=",
+                "ReadThrottling": 0,
+                "SiteClassIdentifier": null,
+                "UserName": "HoodBot",
+                "WriteThrottling": 0
+            },
+            {
+                "Api": "http://rob-centos:80/w25/api.php",
+                "DisplayName": "Wiki25",
+                "MaxLag": 0,
+                "Password": "YC89BE0PKCdom/OiJ2DpdzEwrK7RLHVgyk6pwq7R528=",
+                "ReadThrottling": 0,
+                "SiteClassIdentifier": null,
+                "UserName": "HoodBot",
+                "WriteThrottling": 0
+            },
+            {
+                "Api": "http://rob-centos:80/w24/api.php",
+                "DisplayName": "Wiki24",
+                "MaxLag": 0,
+                "Password": "Cu2gvVovkBxVndJeCdr00Ql7/RxEQqVd4ChgBymYF3Q=",
+                "ReadThrottling": 0,
+                "SiteClassIdentifier": null,
+                "UserName": "HoodBot",
+                "WriteThrottling": 0
+            },
+            {
+                "Api": "https://content3.uesp.net/w/api.php",
+                "DisplayName": "Content3",
+                "MaxLag": 0,
+                "Password": "UQ++QevlhdJORIqxp3gykQMjNYajV8z9xCu9dq+tYcE=",
+                "ReadThrottling": 0,
+                "SiteClassIdentifier": null,
+                "UserName": "HoodBot",
+                "WriteThrottling": 0
+            },
+            {
+                "Api": "https://dev.uesp.net/w/api.php",
+                "DisplayName": "Dev",
+                "MaxLag": 0,
+                "Password": "co2f6di7oyX3C2kM2eNAaW4TBOpCH+/S3kNrkqt5wrM=",
+                "ReadThrottling": 0,
+                "SiteClassIdentifier": "UespHoodBot",
+                "UserName": "HoodBot",
+                "WriteThrottling": 0
+            }
+        ]
+    }
+}

@@ -9,11 +9,11 @@
 	xmlns:models="clr-namespace:RobinHood70.HoodBot.Models"
 	xmlns:properties="clr-namespace:RobinHood70.HoodBot.Properties"
 	xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
-	xmlns:vm="clr-namespace:RobinHood70.HoodBot.ViewModels"
 	x:Name="mainWindow"
 	Title="{x:Static properties:Resources.HoodBotMainWindow}"
 	Width="900"
 	Height="750"
+	DataContext="{Binding Source={StaticResource Locator}, Path=MainViewModel}"
 	Style="{StaticResource GlobalWindowStyle}"
 	mc:Ignorable="d">
 	<Window.Resources>
@@ -39,15 +39,12 @@
 			<Setter Property="FontFamily" Value="WebDings" />
 			<Setter Property="HorizontalAlignment" Value="Center" />
 		</Style>
-		<CollectionViewSource x:Key="wikiList" Source="{Binding Path='BotSettings.Wikis'}">
+		<CollectionViewSource x:Key="wikiList" Source="{Binding Path='UserSettings.Wikis'}">
 			<CollectionViewSource.SortDescriptions>
 				<scm:SortDescription PropertyName="DisplayName" />
 			</CollectionViewSource.SortDescriptions>
 		</CollectionViewSource>
 	</Window.Resources>
-	<Window.DataContext>
-		<vm:MainViewModel />
-	</Window.DataContext>
 	<Grid Margin="10">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="*" />
@@ -85,7 +82,7 @@
 				VerticalAlignment="Center"
 				DisplayMemberPath="DisplayName"
 				ItemsSource="{Binding Source={StaticResource wikiList}}"
-				SelectedItem="{Binding CurrentItem}" />
+				SelectedItem="{Binding SelectedItem}" />
 			<Button
 				Grid.Column="4"
 				HorizontalAlignment="Stretch"
@@ -140,22 +137,23 @@
 				HorizontalAlignment="Center"
 				DockPanel.Dock="Top"
 				Text="{x:Static properties:Resources.AvailableJobs}" />
-			<TreeView
-				x:Name="SelectedJobs"
-				CheckBox.Checked="TreeView_Checked"
-				ItemsSource="{Binding JobTree.Children, Mode=OneTime}"
-				SelectedItemChanged="TreeView_SelectedItemChanged">
+			<TreeView x:Name="SelectedJobs" ItemsSource="{Binding JobTree.Children, Mode=OneTime}">
+				<TreeView.ItemContainerStyle>
+					<Style TargetType="TreeViewItem">
+						<Setter Property="IsSelected" Value="{Binding IsSelected}" />
+					</Style>
+				</TreeView.ItemContainerStyle>
 				<TreeView.ItemTemplate>
-					<HierarchicalDataTemplate DataType="{x:Type models:JobNode}" ItemsSource="{Binding Children, Mode=OneTime}">
+					<HierarchicalDataTemplate DataType="{x:Type models:TreeNode}" ItemsSource="{Binding Children, Mode=OneTime}">
 						<StackPanel Orientation="Horizontal">
 							<Viewbox Height="{Binding FontSize, ElementName=mainWindow}">
 								<CheckBox
 									HorizontalAlignment="Stretch"
-									VerticalAlignment="Stretch"
+									VerticalAlignment="Center"
 									Focusable="False"
 									IsChecked="{Binding IsChecked}" />
 							</Viewbox>
-							<TextBlock Margin="3,0,0,0" Text="{Binding Name, Mode=OneTime}" />
+							<TextBlock Margin="3,0,0,0" Text="{Binding DisplayText, Mode=OneTime}" />
 						</StackPanel>
 					</HierarchicalDataTemplate>
 				</TreeView.ItemTemplate>
@@ -174,13 +172,10 @@
 				Text="{x:Static properties:Resources.RequiredInfo}"
 				Visibility="{Binding JobParameterVisibility, Mode=OneWay}" />
 			<Border
-				x:Name="JobParametersBorder"
 				Padding="5"
 				BorderBrush="Gray"
 				BorderThickness="1"
-				LostFocus="JobParametersBorder_LostFocus"
-				Visibility="Visible">
-				<!--  {Binding JobParameterVisibility, Mode=OneWay}  -->
+				Visibility="{Binding JobParameterVisibility}">
 				<Border.Background>
 					<SolidColorBrush Opacity="0.9" Color="#FFFFFFFF" />
 				</Border.Background>
@@ -199,7 +194,16 @@
 							<Setter Property="VerticalAlignment" Value="Center" />
 						</Style>
 					</StackPanel.Resources>
-					<Grid x:Name="JobParameters">
+					<Grid x:Name="JobParameters" IsEnabled="{Binding JobParametersEnabled}">
+						<Grid.Style>
+							<Style TargetType="Grid">
+								<Style.Triggers>
+									<Trigger Property="IsEnabled" Value="False">
+										<Setter Property="Opacity" Value="0.75" />
+									</Trigger>
+								</Style.Triggers>
+							</Style>
+						</Grid.Style>
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="2*" />
 							<ColumnDefinition Width="10" />

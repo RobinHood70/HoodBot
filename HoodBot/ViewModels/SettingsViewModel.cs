@@ -4,7 +4,7 @@
 	using System.ComponentModel;
 	using System.Windows;
 	using GalaSoft.MvvmLight;
-	using GalaSoft.MvvmLight.CommandWpf;
+	using GalaSoft.MvvmLight.Command;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
@@ -15,164 +15,92 @@
 	public class SettingsViewModel : ViewModelBase, IEditableObject
 	{
 		#region Fields
-		private Uri? api;
-		private string? botDataFolder;
-		private BotSettings? botSettings;
-		private WikiInfo? currentItem;
-		private string? displayName;
-		private string? password;
-		private int readThrottling;
-		private string? siteClassIdentifier;
-		private string? userName;
-		private int writeThrottling;
+		private IMediaWikiClient? client;
+		private WikiInfo? selectedWiki;
+		#endregion
+
+		#region Constructors
+		public SettingsViewModel() => this.MessengerInstance.Register<MainViewModel>(this, this.Initialize);
 		#endregion
 
 		#region Public Properties
-		public RelayCommand Add => new RelayCommand(() => this.CurrentItem = null);
-
-		public Uri? Api
-		{
-			get => this.api;
-			set => this.Set(ref this.api, value, nameof(this.Api));
-		}
+		public RelayCommand Add => new RelayCommand(() => this.SelectedItem = null);
 
 		public RelayCommand<string> AutoFill => new RelayCommand<string>(this.Fill);
-
-		public string? BotDataFolder
-		{
-			get => this.botDataFolder;
-			set => this.Set(ref this.botDataFolder, value, nameof(this.BotDataFolder));
-		}
-
-		public BotSettings? BotSettings
-		{
-			get => this.botSettings;
-			set => this.Set(ref this.botSettings, value ?? throw ArgumentNull(nameof(value)), nameof(this.BotSettings));
-		}
-
-		public IMediaWikiClient? Client { get; set; }
-
-		public WikiInfo? CurrentItem
-		{
-			get => this.currentItem;
-			set
-			{
-				this.Set(ref this.currentItem, value, nameof(this.CurrentItem));
-				this.UpdateSelection(value);
-			}
-		}
-
-		public string? DisplayName
-		{
-			get => this.displayName;
-			set => this.Set(ref this.displayName, value, nameof(this.DisplayName));
-		}
-
-		public string? Password
-		{
-			get => this.password;
-			set => this.Set(ref this.password, value, nameof(this.Password));
-		}
-
-		public int ReadThrottling
-		{
-			get => this.readThrottling;
-			set => this.Set(ref this.readThrottling, value, nameof(this.ReadThrottling));
-		}
 
 		public RelayCommand Remove => new RelayCommand(() => this.RemoveCurrent());
 
 		public RelayCommand Save => new RelayCommand(() => this.EndEdit());
 
-		public string? SiteClassIdentifier
+		public WikiInfo? SelectedItem
 		{
-			get => this.siteClassIdentifier;
-			set => this.Set(ref this.siteClassIdentifier, value, nameof(this.SiteClassIdentifier));
+			get => this.selectedWiki;
+			set
+			{
+				if (value != this.selectedWiki)
+				{
+					this.CancelEdit();
+					this.Set(ref this.selectedWiki, value);
+					this.BeginEdit();
+				}
+			}
 		}
 
 		public RelayCommand Undo => new RelayCommand(() => this.CancelEdit());
 
-		public string? UserName
-		{
-			get => this.userName;
-			set => this.Set(ref this.userName, value, nameof(this.UserName));
-		}
-
-		public int WriteThrottling
-		{
-			get => this.writeThrottling;
-			set => this.Set(ref this.writeThrottling, value, nameof(this.WriteThrottling));
-		}
+		public UserSettings? UserSettings { get; private set; }
 		#endregion
 
 		#region Public Methods
 		public void BeginEdit()
 		{
+			// Could use this.SelectedWiki?.BeginEdit() but if a breakpoint is set, that always breaks, where this way won't.
+			if (this.SelectedItem != null)
+			{
+				this.SelectedItem.BeginEdit();
+			}
 		}
 
 		public void CancelEdit()
 		{
-			ThrowNull(this.BotSettings, nameof(SettingsViewModel), nameof(this.BotSettings));
-			this.UpdateSelection(this.BotSettings.GetCurrentItem());
+			if (this.SelectedItem != null)
+			{
+				this.SelectedItem.CancelEdit();
+			}
 		}
 
 		public void EndEdit()
 		{
-			ThrowNull(this.BotSettings, nameof(SettingsViewModel), nameof(this.BotSettings));
-			if (string.IsNullOrWhiteSpace(this.DisplayName) || !(this.Api?.IsWellFormedOriginalString() ?? false))
+			ThrowNull(this.UserSettings, nameof(SettingsViewModel), nameof(this.UserSettings));
+			if (this.SelectedItem != null)
 			{
-				MessageBox.Show(Resources.InvalidWikiInfo, Resources.Error, MessageBoxButton.OK, MessageBoxImage.Error);
-				return;
+				if (!this.SelectedItem.IsValid)
+				{
+					// Abort save if current wiki is invalid.
+					MessageBox.Show(Resources.InvalidWikiInfo, Resources.Error, MessageBoxButton.OK, MessageBoxImage.Error);
+					return;
+				}
+				else
+				{
+					this.SelectedItem.EndEdit();
+				}
 			}
 
-			var wikiInfo = this.CurrentItem ?? this.NewWiki();
-			wikiInfo.Api = this.Api;
-			wikiInfo.DisplayName = this.DisplayName;
-			wikiInfo.Password = this.Password;
-			wikiInfo.ReadThrottling = this.ReadThrottling;
-			wikiInfo.SiteClassIdentifier = this.SiteClassIdentifier;
-			wikiInfo.WriteThrottling = this.WriteThrottling;
-			wikiInfo.UserName = this.UserName;
-
-			this.BotSettings.Save();
-		}
-		#endregion
-
-		#region Internal Methods
-		internal void UpdateSelection(WikiInfo? wikiInfo)
-		{
-			ThrowNull(this.BotSettings, nameof(SettingsViewModel), nameof(this.BotSettings));
-			if (wikiInfo == null)
-			{
-				this.Api = null;
-				this.DisplayName = null;
-				this.Password = null;
-				this.ReadThrottling = 0;
-				this.SiteClassIdentifier = null;
-				this.WriteThrottling = 0;
-				this.UserName = null;
-			}
-			else
-			{
-				this.Api = wikiInfo.Api;
-				this.DisplayName = wikiInfo.DisplayName;
-				this.Password = wikiInfo.Password;
-				this.ReadThrottling = wikiInfo.ReadThrottling;
-				this.SiteClassIdentifier = wikiInfo.SiteClassIdentifier;
-				this.WriteThrottling = wikiInfo.WriteThrottling;
-				this.UserName = wikiInfo.UserName;
-			}
-
-			this.BotSettings.UpdateCurrentWiki(wikiInfo);
+			this.UserSettings.Save();
 		}
 		#endregion
 
 		#region Private Methods
 		private void Fill(string page)
 		{
-			if (string.IsNullOrWhiteSpace(page) && this.Api != null && this.Api.IsWellFormedOriginalString())
+			if (!(this.SelectedItem is WikiInfo selectedItem))
 			{
-				page = this.Api.OriginalString;
+				return;
+			}
+
+			if (string.IsNullOrWhiteSpace(page) && selectedItem.Api?.IsWellFormedOriginalString() == true)
+			{
+				page = selectedItem.Api.OriginalString;
 			}
 
 			if (string.IsNullOrWhiteSpace(page))
@@ -181,55 +109,65 @@
 			}
 
 			var uri = new Uri(page);
-			var capabilities = new SiteCapabilities(this.Client);
+			var capabilities = new SiteCapabilities(this.client);
 			if (capabilities.Get(uri))
 			{
-				var noName = string.IsNullOrWhiteSpace(this.DisplayName);
-				if (string.IsNullOrWhiteSpace(this.DisplayName))
+				var noName = string.IsNullOrWhiteSpace(selectedItem.DisplayName);
+				if (string.IsNullOrWhiteSpace(selectedItem.DisplayName))
 				{
-					this.DisplayName = capabilities.SiteName;
+					selectedItem.DisplayName = capabilities.SiteName;
 				}
 
-				if (string.IsNullOrWhiteSpace(this.Api?.OriginalString))
+				if (string.IsNullOrWhiteSpace(selectedItem.Api?.OriginalString))
 				{
-					this.Api = capabilities.Api;
+					selectedItem.Api = capabilities.Api;
 				}
 
-				if (string.IsNullOrWhiteSpace(this.UserName))
+				if (string.IsNullOrWhiteSpace(selectedItem.UserName))
 				{
-					this.UserName = capabilities.CurrentUser;
+					selectedItem.UserName = capabilities.CurrentUser;
 				}
 
-				if (noName || this.ReadThrottling == 0)
+				if (noName || selectedItem.ReadThrottling == 0)
 				{
-					this.ReadThrottling = capabilities.SupportsMaxLag ? 0 : 1000;
+					selectedItem.ReadThrottling = capabilities.SupportsMaxLag ? 0 : 1000;
 				}
 
-				if (noName || this.WriteThrottling == 0)
+				if (noName || selectedItem.WriteThrottling == 0)
 				{
-					this.WriteThrottling = capabilities.SupportsMaxLag ? 0 : 5000;
+					selectedItem.WriteThrottling = capabilities.SupportsMaxLag ? 0 : 5000;
 				}
 			}
 		}
 
 		private WikiInfo NewWiki()
 		{
-			ThrowNull(this.BotSettings, nameof(SettingsViewModel), nameof(this.BotSettings));
+			ThrowNull(this.UserSettings, nameof(SettingsViewModel), nameof(this.UserSettings));
 			var retval = new WikiInfo();
-			this.BotSettings.Wikis.Add(retval);
-			this.currentItem = retval;
+			this.UserSettings.Wikis.Add(retval);
+			this.selectedWiki = retval;
 
 			return retval;
 		}
 
 		private void RemoveCurrent()
 		{
-			if (this.CurrentItem != null)
+			if (this.SelectedItem != null)
 			{
-				ThrowNull(this.BotSettings, nameof(SettingsViewModel), nameof(this.BotSettings));
-				this.BotSettings.RemoveWiki(this.CurrentItem);
+				ThrowNull(this.UserSettings, nameof(SettingsViewModel), nameof(this.UserSettings));
+				this.UserSettings.RemoveWiki(this.SelectedItem);
 			}
 		}
+
+		private void Initialize(MainViewModel main)
+		{
+			this.MessengerInstance.Unregister(this);
+			this.UserSettings = main.UserSettings;
+			this.client = main.Client;
+			this.SelectedItem = main.SelectedItem;
+
+			this.RaisePropertyChanged(nameof(this.UserSettings));
+		}
 		#endregion
-	}
+}
 }

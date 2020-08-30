@@ -10,7 +10,7 @@
 	using System.Windows;
 	using System.Windows.Media;
 	using GalaSoft.MvvmLight;
-	using GalaSoft.MvvmLight.CommandWpf;
+	using GalaSoft.MvvmLight.Command;
 	using RobinHood70.HoodBot;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Models;
@@ -37,7 +37,6 @@
 		#endregion
 
 		#region Fields
-		private readonly IMediaWikiClient client;
 		private readonly string appDataFolder;
 		private readonly IProgress<double> progressMonitor;
 		private readonly IProgress<string> statusMonitor;
@@ -48,6 +47,7 @@
 		private bool editingEnabled;
 		private DateTime? eta;
 		private bool executing;
+		private bool jobParametersEnabled;
 		private Visibility jobParameterVisibility = Visibility.Hidden;
 		private DateTime jobStarted;
 		private double overallProgress;
@@ -62,44 +62,33 @@
 		#region Constructors
 		public MainViewModel()
 		{
+			// ThrowNull(options, nameof(options));
+			// this.settings = options.Value;
 			this.appDataFolder = Path.Combine(GetFolderPath(SpecialFolder.LocalApplicationData, SpecialFolderOption.Create), nameof(HoodBot));
-			this.client = new SimpleClient(ContactInfo, Path.Combine(this.appDataFolder, "Cookies.dat"));
-			this.client.RequestingDelay += this.Client_RequestingDelay;
-			this.BotSettings = BotSettings.Load(Path.Combine(this.appDataFolder, "Settings.json"));
-			this.CurrentItem = this.BotSettings.GetCurrentItem();
+			this.Client = new SimpleClient(ContactInfo, Path.Combine(this.appDataFolder, "Cookies.dat"));
+			this.Client.RequestingDelay += this.Client_RequestingDelay;
+			this.UserSettings = UserSettings.Load(Path.Combine(this.appDataFolder, "Settings.json"));
+			this.SelectedItem = this.UserSettings.GetCurrentItem();
 			this.progressMonitor = new Progress<double>(this.ProgressChanged);
 			this.statusMonitor = new Progress<string>(this.StatusWrite);
 			Site.RegisterSiteClass(Uesp.UespSite.CreateInstance, "UespHoodBot");
 			var plugins = Plugins.Instance;
 			this.DiffViewer = plugins.DiffViewers["Internet Explorer"];
+			var jobs = JobNode.Populate();
+			this.JobTree.SelectionChanged += this.JobTree_OnSelectionChanged;
 		}
 		#endregion
 
 		#region Destructor
 		~MainViewModel()
 		{
-			this.BotSettings.Save();
-			this.client.RequestingDelay -= this.Client_RequestingDelay;
+			this.UserSettings.Save();
+			this.Client.RequestingDelay -= this.Client_RequestingDelay;
 		}
 		#endregion
 
 		#region Public Properties
-		public BotSettings BotSettings { get; }
-
-		public WikiInfo? CurrentItem
-		{
-			get => this.currentItem;
-			set
-			{
-				if (this.currentItem != null)
-				{
-					this.BotSettings.UpdateCurrentWiki(value);
-					this.BotSettings.Save();
-				}
-
-				this.Set(ref this.currentItem, value, nameof(this.CurrentItem));
-			}
-		}
+		public IMediaWikiClient Client { get; }
 
 		public IDiffViewer? DiffViewer { get; set; }
 
@@ -113,13 +102,19 @@
 
 		public DateTime? Eta => this.eta?.ToLocalTime();
 
+		public bool JobParametersEnabled
+		{
+			get => this.jobParametersEnabled;
+			private set => this.Set(ref this.jobParametersEnabled, value, nameof(this.JobParametersEnabled));
+		}
+
 		public Visibility JobParameterVisibility
 		{
 			get => this.jobParameterVisibility;
 			private set => this.Set(ref this.jobParameterVisibility, value, nameof(this.JobParameterVisibility));
 		}
 
-		public JobNode JobTree { get; } = new JobNode();
+		public TreeNode JobTree { get; } = JobNode.Populate();
 
 		public double OverallProgress
 		{
@@ -149,6 +144,21 @@
 			set => this.Set(ref this.progressBarColor, value, nameof(this.ProgressBarColor));
 		}
 
+		public WikiInfo? SelectedItem
+		{
+			get => this.currentItem;
+			set
+			{
+				if (value != null)
+				{
+					this.UserSettings.UpdateCurrentWiki(value);
+					this.UserSettings.Save();
+				}
+
+				this.Set(ref this.currentItem, value, nameof(this.SelectedItem));
+			}
+		}
+
 		public bool ShowDiffs { get; private set; } = true; // Simple hard-coded setting for now.
 
 		public string Status
@@ -167,6 +177,8 @@
 			set => this.Set(ref this.userName, value, nameof(this.UserName));
 		}
 
+		public UserSettings UserSettings { get; }
+
 		public DateTime? UtcEta
 		{
 			get => this.eta;
@@ -181,7 +193,7 @@
 		#endregion
 
 		#region Internal Properties
-		internal IParameterFetcher? ParameterFetcher { get; set; }
+		internal IParameterFetcher? ParameterFetcher { get; set; } = new MainWindowParameterFetcher();
 		#endregion
 
 		#region Internal Static Methods
@@ -198,29 +210,22 @@
 		#endregion
 
 		#region Internal Methods
-		internal void GetParameters(JobNode jobNode)
+		internal void GetParametersFor(JobNode jobNode)
 		{
-			if (jobNode != null
-				&& jobNode.Constructor != null
-				&& this.ParameterFetcher != null
-				&& (jobNode.Parameters ?? jobNode.InitializeParameters()) is IReadOnlyList<ConstructorParameter> jobParams)
+			if (this.ParameterFetcher != null && jobNode?.JobInfo != null)
 			{
-				this.JobParameterVisibility = jobParams.Count > 0 ? Visibility.Visible : Visibility.Hidden;
-				foreach (var param in jobParams)
+				foreach (var param in jobNode.JobInfo.Parameters)
 				{
 					this.ParameterFetcher.GetParameter(param);
 				}
 			}
 		}
 
-		internal void SetParameters(JobNode jobNode)
+		internal void SetParametersOn(JobNode jobNode)
 		{
-			if (jobNode != null
-				&& jobNode.Constructor != null
-				&& this.ParameterFetcher != null
-				&& (jobNode.Parameters ?? jobNode.InitializeParameters()) is IReadOnlyList<ConstructorParameter> jobParams)
+			if (this.ParameterFetcher != null && jobNode?.JobInfo != null)
 			{
-				foreach (var param in jobParams)
+				foreach (var param in jobNode.JobInfo.Parameters)
 				{
 					this.ParameterFetcher.SetParameter(param);
 				}
@@ -248,6 +253,13 @@
 
 			return wal;
 		}
+
+		private void OpenEditWindow()
+		{
+			// For full MVVM compliance, this should actually be opening the window from an IWindowFactory-type class, but for now, this is fine.
+			new SettingsWindow().Show();
+			this.MessengerInstance.Send<MainViewModel, SettingsViewModel>(this);
+		}
 		#endregion
 
 		#region Private Methods
@@ -274,9 +286,10 @@
 			*/
 		}
 
-		private WikiJob ConstructJob(JobNode jobNode, Site site)
+		private WikiJob ConstructJob(JobNode selectedNode, Site site)
 		{
-			ThrowNull(jobNode.Constructor, nameof(jobNode), nameof(jobNode.Constructor));
+			ThrowNull(selectedNode, nameof(selectedNode));
+			var jobNode = selectedNode.JobInfo;
 			var objectList = new List<object?> { site, new AsyncInfo(this.progressMonitor, this.statusMonitor, this.pauser?.Token, this.canceller?.Token) };
 
 			if (jobNode.Parameters is IReadOnlyList<ConstructorParameter> jobParams)
@@ -298,7 +311,12 @@
 			}
 
 			this.executing = true;
-			var jobList = this.GetJobList();
+			if (this.JobTree.SelectedItem is JobNode selectedNode)
+			{
+				this.SetParametersOn(selectedNode);
+			}
+
+			var jobList = new List<JobNode>(this.JobTree.CheckedChildren<JobNode>());
 			if (jobList.Count == 0)
 			{
 				this.executing = false;
@@ -327,7 +345,7 @@
 					var job = this.ConstructJob(jobNode, site);
 					this.ProgressBarColor = ProgressBarGreen;
 					this.jobStarted = DateTime.UtcNow;
-					this.StatusWriteLine("Starting " + jobNode.Name);
+					this.StatusWriteLine("Starting " + jobNode.DisplayText);
 					try
 					{
 						site.EditingEnabled = this.editingEnabled; // Reset every time, in case a job has manually set the site's value.
@@ -363,31 +381,10 @@
 			this.executing = false;
 		}
 
-		private List<JobNode> GetJobList()
-		{
-			var jobList = new List<JobNode>(JobNode.GetCheckedJobs(this.JobTree.Children));
-			if (jobList.Count > 1)
-			{
-				// Remove any duplicate jobs based on Constructor equality (i.e., same job checked under multiple branches of tree). Simple nested loop algorithm is sufficient due to small size.
-				for (var outerLoop = 0; outerLoop < jobList.Count - 1; outerLoop++)
-				{
-					for (var innerLoop = jobList.Count - 1; innerLoop > outerLoop; innerLoop--)
-					{
-						if (jobList[innerLoop].ConstructorEquals(jobList[outerLoop]))
-						{
-							jobList.RemoveAt(innerLoop);
-						}
-					}
-				}
-			}
-
-			return jobList;
-		}
-
 		private Site InitializeSite()
 		{
-			var wikiInfo = this.CurrentItem ?? throw new InvalidOperationException(Resources.NoWiki);
-			var abstractionLayer = GetAbstractionLayer(this.client, wikiInfo);
+			var wikiInfo = this.SelectedItem ?? throw new InvalidOperationException(Resources.NoWiki);
+			var abstractionLayer = GetAbstractionLayer(this.Client, wikiInfo);
 
 #if DEBUG
 			if (abstractionLayer is IInternetEntryPoint internet)
@@ -415,10 +412,55 @@
 			return site;
 		}
 
-		private void OpenEditWindow()
+		private void JobTree_OnSelectionChanged(TreeNode sender, SelectedItemChangedEventArgs e)
 		{
-			new EditSettings(this.BotSettings, this.client, this.CurrentItem).ShowDialog();
-			this.CurrentItem = this.BotSettings.GetCurrentItem();
+			var main = App.Locator.MainWindow;
+			var parameterControl = main.JobParameters;
+
+			// TODO: Consider changing to attached property to be fully MVVM compliant.
+			parameterControl.Children.Clear();
+			parameterControl.RowDefinitions.Clear();
+
+			var visibility = Visibility.Hidden;
+			var enabled = false;
+			if (e.Node is JobNode job)
+			{
+				enabled = job.IsChecked == true;
+				var parameters = job.JobInfo.Parameters;
+				if (e.Selected)
+				{
+					if (parameters.Count > 0)
+					{
+						visibility = Visibility.Visible;
+						// If the box is already visible, this is a duplicate call arising from a check then a select, so skip it.
+						if (this.JobParameterVisibility == Visibility.Hidden)
+						{
+							this.GetParametersFor(job);
+						}
+					}
+					else if (job.Children != null)
+					{
+						foreach (var childNode in job.Children)
+						{
+							this.GetParametersFor((JobNode)childNode);
+						}
+					}
+				}
+				else
+				{
+					if (this.JobParameterVisibility == Visibility.Visible)
+					{
+						this.SetParametersOn(job);
+						foreach (var param in parameters)
+						{
+							main.UnregisterName(param.Name);
+						}
+					}
+				}
+			}
+
+			this.JobParametersEnabled = enabled;
+			this.JobParameterVisibility = visibility;
 		}
 
 		private void PauseJobs()
