@@ -7,14 +7,14 @@
 	using RobinHood70.HoodBot.Models;
 	using static RobinHood70.CommonCode.Globals;
 
-	public class BotSettings
+	public class UserSettings
 	{
 		#region Fields
 		private string botDataFolder = DefaultBotDataFolder;
 		#endregion
 
 		#region Constructors
-		private BotSettings(string location, JToken? json)
+		private UserSettings(string location, JToken? json)
 		{
 			this.Location = location;
 			if (json == null)
@@ -64,13 +64,13 @@
 		#endregion
 
 		#region Public Static Methods
-		public static BotSettings Load(string location)
+		public static UserSettings Load(string location)
 		{
 			try
 			{
 				var input = File.ReadAllText(location);
 				var json = JObject.Parse(input);
-				var retval = new BotSettings(location, json);
+				var retval = new UserSettings(location, json);
 				if (!IsPathValid(retval.BotDataFolder))
 				{
 					retval.botDataFolder = DefaultBotDataFolder;
@@ -80,7 +80,7 @@
 			}
 			catch (FileNotFoundException)
 			{
-				return new BotSettings(location, null);
+				return new UserSettings(location, null);
 			}
 		}
 		#endregion

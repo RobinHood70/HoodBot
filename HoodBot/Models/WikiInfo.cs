@@ -26,7 +26,7 @@
 		#endregion
 
 		#region Constructors
-		internal WikiInfo()
+		public WikiInfo()
 		{
 		}
 
@@ -60,6 +60,8 @@
 			get => this.displayName;
 			set => this.Set(ref this.displayName, value);
 		}
+
+		public bool IsValid => !string.IsNullOrWhiteSpace(this.DisplayName) && this.Api?.IsWellFormedOriginalString() == true;
 
 		public int MaxLag
 		{
@@ -139,14 +141,14 @@
 		{
 			if (from != null && to != null)
 			{
-				to.api = from.api;
-				to.displayName = from.displayName;
-				to.maxLag = from.maxLag;
-				to.password = from.password;
-				to.readThrottling = from.readThrottling;
-				to.siteClassIdentifier = from.siteClassIdentifier;
-				to.userName = from.userName;
-				to.writeThrottling = from.writeThrottling;
+				to.Api = from.Api;
+				to.DisplayName = from.DisplayName;
+				to.MaxLag = from.MaxLag;
+				to.Password = from.Password;
+				to.ReadThrottling = from.ReadThrottling;
+				to.SiteClassIdentifier = from.SiteClassIdentifier;
+				to.UserName = from.UserName;
+				to.WriteThrottling = from.WriteThrottling;
 			}
 		}
 		#endregion

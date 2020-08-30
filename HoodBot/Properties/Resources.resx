@@ -165,6 +165,9 @@
   <data name="JobCancelled" xml:space="preserve">
     <value>Job cancelled!</value>
   </data>
+  <data name="MaxLag" xml:space="preserve">
+    <value>MaxLag</value>
+  </data>
   <data name="NoAppDataPath" xml:space="preserve">
     <value>Application could not start because ApplicationData path could not be created. See InnerException for details.</value>
   </data>

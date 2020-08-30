@@ -205,6 +205,15 @@ namespace RobinHood70.HoodBot.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to MaxLag.
+        /// </summary>
+        public static string MaxLag {
+            get {
+                return ResourceManager.GetString("MaxLag", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Application could not start because ApplicationData path could not be created. See InnerException for details..
         /// </summary>
         public static string NoAppDataPath {

@@ -165,6 +165,9 @@
   <data name="JobCancelled" xml:space="preserve">
     <value>Tâche annulé !</value>
   </data>
+  <data name="MaxLag" xml:space="preserve">
+    <value>MaxLag</value>
+  </data>
   <data name="NoAppDataPath" xml:space="preserve">
     <value>L'application n'a pas pu démarrer car la répertoire ApplicationDate n'a pas pu être créé. Voir InnerException pour plus de détails.</value>
   </data>

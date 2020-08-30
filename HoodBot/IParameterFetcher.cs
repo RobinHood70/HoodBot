@@ -1,6 +1,6 @@
 ﻿namespace RobinHood70.HoodBot
 {
-	internal interface IParameterFetcher
+	public interface IParameterFetcher
 	{
 		void GetParameter(ConstructorParameter parameter);
 
