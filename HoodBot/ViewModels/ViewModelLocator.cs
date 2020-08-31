@@ -6,10 +6,15 @@
 
 	public class ViewModelLocator
 	{
+		#region Private Fields
 		private readonly IServiceProvider serviceProvider = App.ServiceProvider;
+		#endregion
 
-		public static ViewModelLocator Instance = new ViewModelLocator();
+		#region Public Static Properties
+		public static ViewModelLocator Instance { get; } = new ViewModelLocator();
+		#endregion
 
+		#region Public Properties
 		public MainViewModel MainViewModel => this.serviceProvider.GetRequiredService<MainViewModel>();
 
 		public MainWindow MainWindow => this.serviceProvider.GetRequiredService<MainWindow>();
@@ -17,6 +22,6 @@
 		public SettingsViewModel SettingsViewModel => this.serviceProvider.GetRequiredService<SettingsViewModel>();
 
 		public SettingsWindow SettingsWindow => this.serviceProvider.GetRequiredService<SettingsWindow>();
-
+		#endregion
 	}
 }
