@@ -431,10 +431,10 @@
 				{
 					if (parameters.Count > 0)
 					{
-						visibility = Visibility.Visible;
 						// If the box is already visible, this is a duplicate call arising from a check then a select, so skip it.
 						if (this.JobParameterVisibility == Visibility.Hidden)
 						{
+							visibility = Visibility.Visible;
 							this.GetParametersFor(job);
 						}
 					}
