@@ -1,14 +1,14 @@
 ﻿<Window
-	x:Class="RobinHood70.HoodBot.Views.MainWindow"
+	x:Class="RobinHood70.HoodBot.Views.RobinHood70.HoodBot.ViewModels.MainWindow"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:controls="clr-namespace:RobinHood70.HoodBot.Controls"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:local="clr-namespace:RobinHood70.HoodBot"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	xmlns:models="clr-namespace:RobinHood70.HoodBot.Models"
 	xmlns:properties="clr-namespace:RobinHood70.HoodBot.Properties"
 	xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+	xmlns:vm="clr-namespace:RobinHood70.HoodBot.ViewModels"
 	x:Name="mainWindow"
 	Title="{x:Static properties:Resources.HoodBotMainWindow}"
 	Width="900"
@@ -144,7 +144,7 @@
 					</Style>
 				</TreeView.ItemContainerStyle>
 				<TreeView.ItemTemplate>
-					<HierarchicalDataTemplate DataType="{x:Type models:TreeNode}" ItemsSource="{Binding Children, Mode=OneTime}">
+					<HierarchicalDataTemplate DataType="{x:Type vm:TreeNode}" ItemsSource="{Binding Children, Mode=OneTime}">
 						<StackPanel Orientation="Horizontal">
 							<Viewbox Height="{Binding FontSize, ElementName=mainWindow}">
 								<CheckBox

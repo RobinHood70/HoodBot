@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.HoodBot.Parser
+﻿namespace RobinHood70.Robby.Parser
 {
 	using System;
 	using System.Collections.Generic;
