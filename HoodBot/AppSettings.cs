@@ -6,9 +6,7 @@
 	public class AppSettings
 	{
 		#region Public Properties
-		public List<WikiInfo> DefaultWikis { get; set; }
-
-		public string Test { get; set; }
+		public List<WikiInfo> DefaultWikis { get; }
 		#endregion
 	}
 }
