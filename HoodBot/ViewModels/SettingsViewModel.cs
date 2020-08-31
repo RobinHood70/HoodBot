@@ -169,5 +169,5 @@
 			this.RaisePropertyChanged(nameof(this.UserSettings));
 		}
 		#endregion
-}
+	}
 }
