@@ -14,7 +14,7 @@
 	{
 		#region Static Fields
 		// Although this is IDisposable, we don't implement IDisposable here, instead using the OnStartup and OnExit methods to effectively do the same thing.
-		private static IHost host { get; } = Host
+		private static readonly IHost AppHost = Host
 				.CreateDefaultBuilder()
 				.ConfigureAppConfiguration((context, builder) => builder
 					.AddJsonFile("appsettings.json", true, false)
@@ -26,7 +26,7 @@
 		#region Public Properties
 		public static ViewModelLocator Locator => ViewModelLocator.Instance;
 
-		public static IServiceProvider ServiceProvider { get; } = host.Services;
+		public static IServiceProvider ServiceProvider { get; } = AppHost.Services;
 		#endregion
 
 		#region Public Static Methods
@@ -38,16 +38,16 @@
 		#region Protected Override Methods
 		protected override async void OnExit(ExitEventArgs e)
 		{
-			await host.StopAsync(TimeSpan.FromSeconds(5));
-			host.Dispose();
+			await AppHost.StopAsync(TimeSpan.FromSeconds(5));
+			AppHost.Dispose();
 			base.OnExit(e);
 		}
 
 		protected override async void OnStartup(StartupEventArgs e)
 		{
-			await host.StartAsync();
+			await AppHost.StartAsync();
 			base.OnStartup(e);
-			host.Services.GetRequiredService<MainWindow>().Show();
+			AppHost.Services.GetRequiredService<MainWindow>().Show();
 		}
 		#endregion
 
