@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.HoodBot.Models
+﻿namespace RobinHood70.HoodBot.ViewModels
 {
 	using System;
 	using static RobinHood70.CommonCode.Globals;

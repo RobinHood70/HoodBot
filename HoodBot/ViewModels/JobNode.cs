@@ -1,7 +1,8 @@
-﻿namespace RobinHood70.HoodBot.Models
+﻿namespace RobinHood70.HoodBot.ViewModels
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.HoodBot.Models;
 	using static RobinHood70.CommonCode.Globals;
 
 	// Parts of this class taken from https://www.codeproject.com/Articles/28306/Working-with-Checkboxes-in-the-WPF-TreeView
