@@ -5,7 +5,6 @@
 	using System.Windows;
 	using System.Windows.Controls;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.ViewModels;
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.HoodBot.Properties.Resources;
 
