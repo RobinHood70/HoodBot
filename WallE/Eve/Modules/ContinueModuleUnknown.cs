@@ -7,11 +7,17 @@ namespace RobinHood70.WallE.Eve.Modules
 
 	internal class ContinueModuleUnknown : ContinueModule
 	{
+		#region Public Override Properties
+		public override int MinimumVersion => 109;
+
+		public override string Name => string.Empty;
+		#endregion
+
 		#region Public Override Methods
 		public override void BuildRequest(Request request)
 		{
 			ThrowNull(request, nameof(request));
-			request.Add(ContinueModule2.Name);
+			request.Add(ContinueModule2.ContinueName);
 		}
 
 		public override ContinueModule Deserialize(WikiAbstractionLayer wal, JToken parent)
@@ -22,8 +28,8 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			var newVersion =
-				parent[ContinueModule2.Name] != null ? 2 :
-				parent[ContinueModule1.Name] != null ? 1 :
+				parent[ContinueModule2.ContinueName] != null ? 2 :
+				parent[ContinueModule1.ContinueName] != null ? 1 :
 				0;
 
 			if (newVersion == 0)

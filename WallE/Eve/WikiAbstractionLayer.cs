@@ -487,7 +487,7 @@
 			this.tokenManager?.Clear();
 			if (this.ContinueVersion == 0)
 			{
-				this.ContinueVersion = siteVersion >= ContinueModule2.MinimumVersion ? 2 : 1;
+				this.ContinueVersion = siteVersion >= ContinueModule2.ContinueMinimumVersion ? 2 : 1;
 			}
 
 			this.OnInitialized(new InitializedEventArgs(siteInfoInput, siteInfo));

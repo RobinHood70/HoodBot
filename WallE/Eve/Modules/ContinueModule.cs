@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
 
-	public abstract class ContinueModule
+	public abstract class ContinueModule : IModule
 	{
 		#region Constructors
 		protected ContinueModule()
@@ -18,6 +18,16 @@ namespace RobinHood70.WallE.Eve.Modules
 		public bool BatchComplete { get; protected set; }
 
 		public bool Continues { get; protected set; }
+		#endregion
+
+		#region Public Abstract Properties
+		public abstract int MinimumVersion { get; }
+
+		public abstract string Name { get; }
+		#endregion
+
+		#region Protected Virtual Properties
+		public virtual string FullPrefix { get; } = string.Empty;
 		#endregion
 
 		#region Protected Properties

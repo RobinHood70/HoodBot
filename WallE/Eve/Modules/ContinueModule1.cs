@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	internal class ContinueModule1 : ContinueModule
 	{
 		#region Public Constants
-		public const string Name = "query-continue";
+		public const string ContinueName = "query-continue";
 		#endregion
 
 		#region Fields
@@ -17,6 +17,12 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		private string? currentGeneratorValue;
 		private string? savedGeneratorValue;
+		#endregion
+
+		#region Public Override Properties
+		public override int MinimumVersion => 109;
+
+		public override string Name => ContinueName;
 		#endregion
 
 		#region Public Override Methods
@@ -42,7 +48,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		public override ContinueModule Deserialize(WikiAbstractionLayer wal, JToken parent)
 		{
-			var result = parent?[Name];
+			var result = parent?[this.Name];
 			if (result == null || result.Type == JTokenType.Null)
 			{
 				return this;

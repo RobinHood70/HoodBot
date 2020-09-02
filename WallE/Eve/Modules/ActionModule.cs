@@ -15,7 +15,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	public abstract class ActionModule
+	public abstract class ActionModule : IModule
 	{
 		#region Constructors
 		protected ActionModule(WikiAbstractionLayer wal) => this.Wal = wal ?? throw ArgumentNull(nameof(wal));
@@ -28,6 +28,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Virtual Properties
+		public virtual string FullPrefix => this.Prefix;
+
 		public virtual string Prefix => string.Empty;
 		#endregion
 
