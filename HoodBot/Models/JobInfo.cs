@@ -3,7 +3,9 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Reflection;
+	using RobinHood70.HoodBot;
 	using RobinHood70.HoodBot.Jobs.Design;
+	using RobinHood70.Robby;
 	using static RobinHood70.CommonCode.Globals;
 
 	public class JobInfo : IEquatable<JobInfo>
@@ -56,9 +58,8 @@
 		#endregion
 
 		#region Public Static Methods
-		public static IList<JobInfo> GetAllJobs()
+		public static IEnumerable<JobInfo> GetAllJobs()
 		{
-			var retval = new List<JobInfo>();
 			var wikiJobType = typeof(WikiJob);
 			foreach (var type in Assembly.GetCallingAssembly().GetTypes())
 			{
@@ -68,18 +69,32 @@
 					{
 						if (constructor.GetCustomAttribute<JobInfoAttribute>() is JobInfoAttribute jobInfo)
 						{
-							retval.Add(new JobInfo(constructor, jobInfo));
+							yield return new JobInfo(constructor, jobInfo);
 						}
 					}
 				}
 			}
-
-			return retval;
 		}
 		#endregion
 
 		#region Public Methods
 		public bool Equals(JobInfo? other) => other != null && this.Constructor == other.Constructor;
+
+		public WikiJob Instantiate(Site site, AsyncInfo asyncInfo)
+		{
+			ThrowNull(site, nameof(site));
+			var objectList = new List<object?> { site, asyncInfo };
+
+			if (this.Parameters is IReadOnlyList<ConstructorParameter> jobParams)
+			{
+				foreach (var param in jobParams)
+				{
+					objectList.Add(param.Attribute is JobParameterFileAttribute && param.Value is string value ? Environment.ExpandEnvironmentVariables(value) : param.Value);
+				}
+			}
+
+			return (WikiJob)this.Constructor.Invoke(objectList.ToArray());
+		}
 		#endregion
 
 		#region Public Override Methods

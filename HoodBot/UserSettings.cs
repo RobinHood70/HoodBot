@@ -5,6 +5,7 @@
 	using System.IO;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.HoodBot.Models;
+	using RobinHood70.HoodBot.ViewModels;
 	using static RobinHood70.CommonCode.Globals;
 
 	public class UserSettings
@@ -28,11 +29,12 @@
 				{
 					foreach (var node in wikiNode)
 					{
-						this.Wikis.Add(new WikiInfo(node));
+						var wiki = new WikiInfo(node);
+						this.Wikis.Add(new WikiInfoViewModel(wiki));
 					}
 				}
 
-				this.CurrentName = (string?)json[nameof(this.CurrentName)];
+				this.SelectedName = (string?)json[nameof(this.SelectedName)];
 				this.GetCurrentItem();
 			}
 		}
@@ -56,11 +58,14 @@
 			}
 		}
 
-		public string? CurrentName { get; set; }
+		// TODO: Add this to Load/Save when re-writing Settings class.
+		public string? ContactInfo { get; set; } = "robinhood70@live.ca";
 
 		public string Location { get; }
 
-		public ObservableCollection<WikiInfo> Wikis { get; } = new ObservableCollection<WikiInfo>();
+		public string? SelectedName { get; set; }
+
+		public ObservableCollection<WikiInfoViewModel> Wikis { get; } = new ObservableCollection<WikiInfoViewModel>();
 		#endregion
 
 		#region Public Static Methods
@@ -86,9 +91,9 @@
 		#endregion
 
 		#region Public Methods
-		public WikiInfo? GetCurrentItem()
+		public WikiInfoViewModel? GetCurrentItem()
 		{
-			if (this.CurrentName == null)
+			if (this.SelectedName == null)
 			{
 				return null;
 			}
@@ -96,7 +101,7 @@
 			// It is assumed the list will be relatively small and therefore relatively trivial to iterate through, but this is a function to indicate that it's not completely trivial.
 			foreach (var wiki in this.Wikis)
 			{
-				if (wiki.DisplayName == this.CurrentName)
+				if (wiki.DisplayName == this.SelectedName)
 				{
 					return wiki;
 				}
@@ -105,15 +110,15 @@
 			return null;
 		}
 
-		public void RemoveWiki(WikiInfo item)
+		public void RemoveWiki(WikiInfoViewModel item)
 		{
 			ThrowNull(item, nameof(item));
 			var index = this.Wikis.IndexOf(item);
 			if (index >= 0)
 			{
-				if (this.CurrentName == item.DisplayName)
+				if (this.SelectedName == item.DisplayName)
 				{
-					this.CurrentName = null;
+					this.SelectedName = null;
 				}
 
 				this.Wikis.RemoveAt(index);
@@ -126,13 +131,13 @@
 			var wikis = new JArray();
 			foreach (var wiki in this.Wikis)
 			{
-				wikis.Add(wiki.ToJson());
+				wikis.Add(wiki.WikiInfo.ToJson());
 			}
 
 			var json = new JObject
 			{
 				new JProperty(nameof(this.BotDataFolder), this.BotDataFolder),
-				new JProperty(nameof(this.CurrentName), this.CurrentName),
+				new JProperty(nameof(this.SelectedName), this.SelectedName),
 				new JProperty(nameof(this.Wikis), wikis)
 			};
 
@@ -140,7 +145,7 @@
 		}
 
 		// TODO: See if there's more that needs to be done for Add. If nothing else, it doesn't sort after adding. Was that intentional?
-		public void UpdateCurrentWiki(WikiInfo? wiki) => this.CurrentName = wiki?.DisplayName;
+		public void UpdateCurrentWiki(WikiInfoViewModel? wiki) => this.SelectedName = wiki?.DisplayName;
 		#endregion
 
 		#region Private Static Methods

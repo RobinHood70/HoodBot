@@ -5,48 +5,50 @@
 	using System.Windows;
 	using System.Windows.Controls;
 	using RobinHood70.CommonCode;
+	using RobinHood70.HoodBot.Models;
+	using RobinHood70.HoodBot.Views;
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.HoodBot.Properties.Resources;
 
 	public class MainWindowParameterFetcher : IParameterFetcher
 	{
-		#region Public Methods
-		public void GetParameter(ConstructorParameter parameter)
+		#region Fields
+		private readonly JobInfo job;
+		private readonly MainWindow main;
+		private readonly Grid jobParameters;
+		#endregion
+
+		#region Constructors
+		public MainWindowParameterFetcher(JobInfo jobInfo)
 		{
-			ThrowNull(parameter, nameof(parameter));
-			var main = App.Locator.MainWindow;
-			var grid = main.JobParameters;
-			var (label, input) = CreateControl(parameter);
-			if (grid.RowDefinitions.Count > 0)
+			this.job = jobInfo ?? throw ArgumentNull(nameof(jobInfo));
+			this.main = App.Locator.MainWindow;
+			this.jobParameters = this.main.JobParameters;
+		}
+		#endregion
+
+		#region Public Methods
+		public void GetParameters()
+		{
+			// TODO: Consider changing to attached property to be fully MVVM compliant.
+			this.jobParameters.Children.Clear();
+			this.jobParameters.RowDefinitions.Clear();
+			foreach (var param in this.job.Parameters)
 			{
-				grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(10) });
+				this.GetParameter(param);
 			}
-
-			grid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
-			var lastRow = grid.RowDefinitions.Count - 1;
-
-			Grid.SetColumn(label, 0);
-			Grid.SetRow(label, lastRow);
-			grid.Children.Add(label);
-
-			Grid.SetColumn(input, 2);
-			Grid.SetRow(input, lastRow);
-			main.RegisterName(parameter.Name, input);
-			grid.Children.Add(input);
 		}
 
-		public void SetParameter(ConstructorParameter parameter)
+		public void SetParameters()
 		{
-			ThrowNull(parameter, nameof(parameter));
-			if (App.Locator.MainWindow.JobParameters.FindName(parameter.Name) is Control control)
+			foreach (var param in this.job.Parameters)
 			{
-				parameter.Value = GetControlValue(parameter.Type, control);
+				this.SetParameter(param);
 			}
 		}
 		#endregion
 
 		#region Private Static Methods
-
 		private static (TextBlock Label, Control Input) CreateControl(ConstructorParameter parameter)
 		{
 			var valueType = parameter.Type;
@@ -96,6 +98,41 @@
 				typeof(IEnumerable).IsAssignableFrom(expectedType) ? (object)text.Split(TextArrays.EnvironmentNewLine, StringSplitOptions.None)
 					: throw new NotSupportedException(CurrentCulture(UnhandledConstructorParameter, expectedType.Name))
 				: throw new NotSupportedException(CurrentCulture(UnhandledConstructorParameter, expectedType.Name));
+		#endregion
+
+		#region Private Methods
+		private void GetParameter(ConstructorParameter parameter)
+		{
+			ThrowNull(parameter, nameof(parameter));
+			var grid = this.main.JobParameters;
+			var (label, input) = CreateControl(parameter);
+			if (grid.RowDefinitions.Count > 0)
+			{
+				grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(10) });
+			}
+
+			grid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
+			var lastRow = grid.RowDefinitions.Count - 1;
+
+			Grid.SetColumn(label, 0);
+			Grid.SetRow(label, lastRow);
+			grid.Children.Add(label);
+
+			Grid.SetColumn(input, 2);
+			Grid.SetRow(input, lastRow);
+			this.main.RegisterName(parameter.Name, input);
+			grid.Children.Add(input);
+		}
+
+		private void SetParameter(ConstructorParameter parameter)
+		{
+			ThrowNull(parameter, nameof(parameter));
+			if (this.main.JobParameters.FindName(parameter.Name) is Control control)
+			{
+				parameter.Value = GetControlValue(parameter.Type, control);
+				this.main.UnregisterName(parameter.Name);
+			}
+		}
 		#endregion
 	}
 }

@@ -6,12 +6,12 @@
 	using System.Globalization;
 	using System.IO;
 	using System.Threading;
-	using System.Threading.Tasks;
 	using System.Windows;
 	using System.Windows.Media;
 	using GalaSoft.MvvmLight;
 	using GalaSoft.MvvmLight.Command;
 	using RobinHood70.HoodBot;
+	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.HoodBot.Properties;
@@ -27,10 +27,6 @@
 	// TODO: Decouple this into a job-runner class, or something along those lines, that notifies this one of updates.
 	public class MainViewModel : ViewModelBase
 	{
-		#region Private Constants
-		private const string ContactInfo = "robinhood70@live.ca";
-		#endregion
-
 		#region Static Fields
 		private static readonly Brush ProgressBarGreen = new SolidColorBrush(Color.FromArgb(255, 6, 176, 37));
 		private static readonly Brush ProgressBarYellow = new SolidColorBrush(Color.FromArgb(255, 255, 240, 0));
@@ -38,12 +34,12 @@
 
 		#region Fields
 		private readonly string appDataFolder;
+		private readonly IDiffViewer? diffViewer;
 		private readonly IProgress<double> progressMonitor;
 		private readonly IProgress<string> statusMonitor;
 
 		private CancellationTokenSource? canceller;
 		private double completedJobs;
-		private WikiInfo? currentItem;
 		private bool editingEnabled;
 		private DateTime? eta;
 		private bool executing;
@@ -52,9 +48,11 @@
 		private DateTime jobStarted;
 		private double overallProgress;
 		private double overallProgressMax = 1;
+		private IParameterFetcher? parameterFetcher;
 		private string? password;
 		private PauseTokenSource? pauser;
 		private Brush progressBarColor = ProgressBarGreen;
+		private WikiInfoViewModel? selectedItem;
 		private string status = string.Empty;
 		private string? userName;
 		#endregion
@@ -65,16 +63,20 @@
 			// ThrowNull(options, nameof(options));
 			// this.settings = options.Value;
 			this.appDataFolder = Path.Combine(GetFolderPath(SpecialFolder.LocalApplicationData, SpecialFolderOption.Create), nameof(HoodBot));
-			this.Client = new SimpleClient(ContactInfo, Path.Combine(this.appDataFolder, "Cookies.dat"));
-			this.Client.RequestingDelay += this.Client_RequestingDelay;
 			this.UserSettings = UserSettings.Load(Path.Combine(this.appDataFolder, "Settings.json"));
 			this.SelectedItem = this.UserSettings.GetCurrentItem();
+
+			this.Client = new SimpleClient(this.UserSettings.ContactInfo, Path.Combine(this.appDataFolder, "Cookies.dat"));
+			this.Client.RequestingDelay += this.Client_RequestingDelay;
+
 			this.progressMonitor = new Progress<double>(this.ProgressChanged);
 			this.statusMonitor = new Progress<string>(this.StatusWrite);
+
 			Site.RegisterSiteClass(Uesp.UespSite.CreateInstance, "UespHoodBot");
+
 			var plugins = Plugins.Instance;
-			this.DiffViewer = plugins.DiffViewers["Internet Explorer"];
-			var jobs = JobNode.Populate();
+			this.diffViewer = plugins.DiffViewers["Internet Explorer"];
+
 			this.JobTree.SelectionChanged += this.JobTree_OnSelectionChanged;
 		}
 		#endregion
@@ -87,18 +89,26 @@
 		}
 		#endregion
 
+		#region Public Commands
+		public RelayCommand EditSettings => new RelayCommand(this.OpenEditWindow);
+
+		public RelayCommand Play => new RelayCommand(this.ExecuteJobs);
+
+		public RelayCommand Pause => new RelayCommand(this.PauseJobs);
+
+		public RelayCommand Stop => new RelayCommand(this.CancelJobs);
+
+		public RelayCommand Test => new RelayCommand(this.RunTest);
+		#endregion
+
 		#region Public Properties
 		public IMediaWikiClient Client { get; }
-
-		public IDiffViewer? DiffViewer { get; set; }
 
 		public bool EditingEnabled
 		{
 			get => this.editingEnabled;
 			set => this.Set(ref this.editingEnabled, value, nameof(this.EditingEnabled));
 		}
-
-		public RelayCommand EditSettings => new RelayCommand(this.OpenEditWindow);
 
 		public DateTime? Eta => this.eta?.ToLocalTime();
 
@@ -134,19 +144,15 @@
 			set => this.Set(ref this.password, value, nameof(this.Password));
 		}
 
-		public RelayCommand Play => new RelayCommand(this.ExecuteJobs);
-
-		public RelayCommand Pause => new RelayCommand(this.PauseJobs);
-
 		public Brush ProgressBarColor
 		{
 			get => this.progressBarColor;
 			set => this.Set(ref this.progressBarColor, value, nameof(this.ProgressBarColor));
 		}
 
-		public WikiInfo? SelectedItem
+		public WikiInfoViewModel? SelectedItem
 		{
-			get => this.currentItem;
+			get => this.selectedItem;
 			set
 			{
 				if (value != null)
@@ -155,7 +161,7 @@
 					this.UserSettings.Save();
 				}
 
-				this.Set(ref this.currentItem, value, nameof(this.SelectedItem));
+				this.Set(ref this.selectedItem, value, nameof(this.SelectedItem));
 			}
 		}
 
@@ -166,10 +172,6 @@
 			get => this.status;
 			set => this.Set(ref this.status, value ?? string.Empty, nameof(this.Status));
 		}
-
-		public RelayCommand Stop => new RelayCommand(this.CancelJobs);
-
-		public RelayCommand Test => new RelayCommand(this.RunTest);
 
 		public string? UserName
 		{
@@ -192,47 +194,6 @@
 		}
 		#endregion
 
-		#region Internal Properties
-		internal IParameterFetcher? ParameterFetcher { get; set; } = new MainWindowParameterFetcher();
-		#endregion
-
-		#region Internal Static Methods
-
-#if DEBUG
-		internal static void SiteWarningOccurred(Site sender, WarningEventArgs eventArgs) => Debug.WriteLine(eventArgs?.Warning);
-
-		internal static void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName} Response: {eventArgs.Response}");
-
-		internal static void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName} Request: {eventArgs.Request}");
-
-		internal static void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName} Warning: ({eventArgs?.Warning.Code}) {eventArgs?.Warning.Info}");
-#endif
-		#endregion
-
-		#region Internal Methods
-		internal void GetParametersFor(JobNode jobNode)
-		{
-			if (this.ParameterFetcher != null && jobNode?.JobInfo != null)
-			{
-				foreach (var param in jobNode.JobInfo.Parameters)
-				{
-					this.ParameterFetcher.GetParameter(param);
-				}
-			}
-		}
-
-		internal void SetParametersOn(JobNode jobNode)
-		{
-			if (this.ParameterFetcher != null && jobNode?.JobInfo != null)
-			{
-				foreach (var param in jobNode.JobInfo.Parameters)
-				{
-					this.ParameterFetcher.SetParameter(param);
-				}
-			}
-		}
-		#endregion
-
 		#region Private Static Methods
 		private static string FormatTimeSpan(TimeSpan allJobsTimer) => allJobsTimer.ToString(@"h\h\ m\m\ s\.f\s", CultureInfo.CurrentCulture)
 			.Replace("0h", string.Empty, StringComparison.Ordinal)
@@ -241,10 +202,10 @@
 			.Replace(" 0s", string.Empty, StringComparison.Ordinal)
 			.Trim();
 
-		private static IWikiAbstractionLayer GetAbstractionLayer(IMediaWikiClient client, WikiInfo info)
+		private static IWikiAbstractionLayer GetAbstractionLayer(IMediaWikiClient client, WikiInfoViewModel info)
 		{
 			var wal = info.Api == null
-			? throw PropertyNull(nameof(WikiInfo), nameof(info.Api))
+			? throw PropertyNull(nameof(WikiInfoViewModel), nameof(info.Api))
 			: new WikiAbstractionLayer(client, info.Api);
 			if (wal is IMaxLaggable maxLagWal)
 			{
@@ -254,12 +215,15 @@
 			return wal;
 		}
 
-		private void OpenEditWindow()
-		{
-			// For full MVVM compliance, this should actually be opening the window from an IWindowFactory-type class, but for now, this is fine.
-			new SettingsWindow().Show();
-			this.MessengerInstance.Send<MainViewModel, SettingsViewModel>(this);
-		}
+#if DEBUG
+		private static void SiteWarningOccurred(Site sender, WarningEventArgs eventArgs) => Debug.WriteLine(eventArgs?.Warning);
+
+		private static void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName} Response: {eventArgs.Response}");
+
+		private static void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName} Request: {eventArgs.Request}");
+
+		private static void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName} Warning: ({eventArgs?.Warning.Code}) {eventArgs?.Warning.Info}");
+#endif
 		#endregion
 
 		#region Private Methods
@@ -286,23 +250,6 @@
 			*/
 		}
 
-		private WikiJob ConstructJob(JobNode selectedNode, Site site)
-		{
-			ThrowNull(selectedNode, nameof(selectedNode));
-			var jobNode = selectedNode.JobInfo;
-			var objectList = new List<object?> { site, new AsyncInfo(this.progressMonitor, this.statusMonitor, this.pauser?.Token, this.canceller?.Token) };
-
-			if (jobNode.Parameters is IReadOnlyList<ConstructorParameter> jobParams)
-			{
-				foreach (var param in jobParams)
-				{
-					objectList.Add(param.Attribute is JobParameterFileAttribute && param.Value is string value ? ExpandEnvironmentVariables(value) : param.Value);
-				}
-			}
-
-			return (WikiJob)jobNode.Constructor.Invoke(objectList.ToArray());
-		}
-
 		private async void ExecuteJobs()
 		{
 			if (this.executing)
@@ -311,12 +258,14 @@
 			}
 
 			this.executing = true;
-			if (this.JobTree.SelectedItem is JobNode selectedNode)
+			this.parameterFetcher?.SetParameters();
+
+			var jobList = new List<JobInfo>();
+			foreach (var node in this.JobTree.CheckedChildren<JobNode>())
 			{
-				this.SetParametersOn(selectedNode);
+				jobList.Add(node.JobInfo);
 			}
 
-			var jobList = new List<JobNode>(this.JobTree.CheckedChildren<JobNode>());
 			if (jobList.Count == 0)
 			{
 				this.executing = false;
@@ -335,41 +284,18 @@
 
 				this.StatusWriteLine("Initializing");
 				App.WpfYield();
-				var success = true;
 				var site = this.InitializeSite();
-				var jobRunner = site as IJobAware;
-				jobRunner?.OnJobsStarted();
-
-				foreach (var jobNode in jobList)
+				var asyncInfo = new AsyncInfo(this.progressMonitor, this.statusMonitor, this.pauser?.Token, this.canceller?.Token);
+				var jobMnanager = new JobManager(jobList, site, asyncInfo);
+				if (site is IJobAware jobAwareSite)
 				{
-					var job = this.ConstructJob(jobNode, site);
-					this.ProgressBarColor = ProgressBarGreen;
-					this.jobStarted = DateTime.UtcNow;
-					this.StatusWriteLine("Starting " + jobNode.DisplayText);
-					try
-					{
-						site.EditingEnabled = this.editingEnabled; // Reset every time, in case a job has manually set the site's value.
-						await Task.Run(job.Execute).ConfigureAwait(false);
-						this.completedJobs++;
-					}
-					catch (OperationCanceledException)
-					{
-						success = false;
-						MessageBox.Show(Resources.JobCancelled, nameof(HoodBot), MessageBoxButton.OK, MessageBoxImage.Information);
-						break;
-					}
-#pragma warning disable CA1031 // Do not catch general exception types
-					catch (Exception e)
-					{
-						success = false;
-						MessageBox.Show(e.GetType().Name + ": " + e.Message, e.Source, MessageBoxButton.OK, MessageBoxImage.Error);
-						Debug.WriteLine(e.StackTrace);
-						break;
-					}
-#pragma warning restore CA1031 // Do not catch general exception types
+					jobMnanager.StartingAllJobs += (sender, eventArgs) => jobAwareSite.OnJobsStarted();
+					jobMnanager.FinishedAllJobs += (sender, eventArgs) => jobAwareSite.OnJobsCompleted(eventArgs);
 				}
 
-				jobRunner?.OnJobsCompleted(success);
+				jobMnanager.StartingJob += this.JobMnanager_StartingJob;
+				jobMnanager.FinishedJob += this.JobMnanager_FinishedJob;
+				await jobMnanager.Run().ConfigureAwait(false);
 
 				this.ResetSite(site);
 				this.pauser = null;
@@ -379,6 +305,30 @@
 			this.Reset();
 			this.StatusWriteLine("Total time for last run: " + FormatTimeSpan(allJobsTimer.Elapsed));
 			this.executing = false;
+		}
+
+		private void JobMnanager_StartingJob(JobManager sender, JobEventArgs eventArgs)
+		{
+			this.ProgressBarColor = ProgressBarGreen;
+			this.jobStarted = DateTime.UtcNow;
+			this.StatusWriteLine("Starting " + eventArgs.Job.Name);
+		}
+
+		private void JobMnanager_FinishedJob(JobManager sender, JobEventArgs eventArgs)
+		{
+			if (eventArgs.Cancelled)
+			{
+				MessageBox.Show(Resources.JobCancelled, nameof(HoodBot), MessageBoxButton.OK, MessageBoxImage.Information);
+			}
+			else if (eventArgs.Exception is Exception e)
+			{
+				MessageBox.Show(e.GetType().Name + ": " + e.Message, e.Source, MessageBoxButton.OK, MessageBoxImage.Error);
+				Debug.WriteLine(e.StackTrace);
+			}
+			else
+			{
+				this.completedJobs++;
+			}
 		}
 
 		private Site InitializeSite()
@@ -414,53 +364,29 @@
 
 		private void JobTree_OnSelectionChanged(TreeNode sender, SelectedItemChangedEventArgs e)
 		{
-			var main = App.Locator.MainWindow;
-			var parameterControl = main.JobParameters;
-
-			// TODO: Consider changing to attached property to be fully MVVM compliant.
-			parameterControl.Children.Clear();
-			parameterControl.RowDefinitions.Clear();
-
-			var visibility = Visibility.Hidden;
+			this.parameterFetcher?.SetParameters();
+			this.parameterFetcher = null;
 			var enabled = false;
 			if (e.Node is JobNode job)
 			{
-				enabled = job.IsChecked == true;
 				var parameters = job.JobInfo.Parameters;
-				if (e.Selected)
+				if (e.Selected && parameters.Count > 0)
 				{
-					if (parameters.Count > 0)
-					{
-						// If the box is already visible, this is a duplicate call arising from a check then a select, so skip it.
-						if (this.JobParameterVisibility == Visibility.Hidden)
-						{
-							visibility = Visibility.Visible;
-							this.GetParametersFor(job);
-						}
-					}
-					else if (job.Children != null)
-					{
-						foreach (var childNode in job.Children)
-						{
-							this.GetParametersFor((JobNode)childNode);
-						}
-					}
-				}
-				else
-				{
-					if (this.JobParameterVisibility == Visibility.Visible)
-					{
-						this.SetParametersOn(job);
-						foreach (var param in parameters)
-						{
-							main.UnregisterName(param.Name);
-						}
-					}
+					this.parameterFetcher = new MainWindowParameterFetcher(job.JobInfo);
+					this.parameterFetcher.GetParameters();
+					enabled = job.IsChecked == true;
 				}
 			}
 
+			this.JobParameterVisibility = this.parameterFetcher != null ? Visibility.Visible : Visibility.Hidden;
 			this.JobParametersEnabled = enabled;
-			this.JobParameterVisibility = visibility;
+		}
+
+		private void OpenEditWindow()
+		{
+			// For full MVVM compliance, this should actually be opening the window from an IWindowFactory-type class, but for now, this is fine.
+			new SettingsWindow().Show();
+			this.MessengerInstance.Send<MainViewModel, SettingsViewModel>(this);
 		}
 
 		private void PauseJobs()
@@ -523,7 +449,7 @@
 		{
 			// Until we get a menu going, specify manually.
 			// currentViewer ??= this.FindPlugin<IDiffViewer>("IeDiff");
-			if (this.DiffViewer != null && this.ShowDiffs && sender.AbstractionLayer is ITokenGenerator tokens)
+			if (this.diffViewer != null && this.ShowDiffs && sender.AbstractionLayer is ITokenGenerator tokens)
 			{
 				var token = tokens.TokenManager.SessionToken("csrf");
 				var page = eventArgs.Page;
@@ -535,8 +461,8 @@
 					LastRevisionTimestamp = page.CurrentRevision?.Timestamp,
 					StartTimestamp = page.StartTimestamp,
 				};
-				this.DiffViewer.Compare(diffContent);
-				this.DiffViewer.Wait();
+				this.diffViewer.Compare(diffContent);
+				this.diffViewer.Wait();
 			}
 		}
 

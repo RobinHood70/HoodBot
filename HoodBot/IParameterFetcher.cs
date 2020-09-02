@@ -2,8 +2,8 @@
 {
 	public interface IParameterFetcher
 	{
-		void GetParameter(ConstructorParameter parameter);
+		void GetParameters();
 
-		void SetParameter(ConstructorParameter parameter);
+		void SetParameters();
 	}
 }
