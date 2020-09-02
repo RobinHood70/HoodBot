@@ -9,8 +9,8 @@ namespace RobinHood70.WallE.Eve.Modules
 	internal class ContinueModule2 : ContinueModule
 	{
 		#region Public Constants
-		public const int MinimumVersion = 121;
-		public const string Name = "continue";
+		public const int ContinueMinimumVersion = 121;
+		public const string ContinueName = "continue";
 		#endregion
 
 		#region Private Constants
@@ -31,6 +31,12 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
+		#region Public Override Properties
+		public override int MinimumVersion => ContinueMinimumVersion;
+
+		public override string Name => ContinueName;
+		#endregion
+
 		#region Protected Override Methods
 		public override void BuildRequest(Request request)
 		{
@@ -46,7 +52,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 			else if (this.addContinue)
 			{
-				request.Add(Name);
+				request.Add(this.Name);
 			}
 		}
 
@@ -58,7 +64,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			this.BatchComplete = !this.supportsBatch || parent["batchcomplete"].GetBCBool();
-			if (parent[Name] is JToken result && result.Type != JTokenType.Null)
+			if (parent[this.Name] is JToken result && result.Type != JTokenType.Null)
 			{
 				this.Continues = true;
 				this.ContinueEntries.Clear();
