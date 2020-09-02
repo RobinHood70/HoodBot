@@ -19,18 +19,13 @@
 			}
 
 			this.Attribute = attributes.Length == 1 ? attributes[0] as JobParameterAttribute : null;
-			var name = parameter.Name ?? throw PropertyNull(nameof(parameter), nameof(parameter.Name));
-			this.Label = this.Attribute?.Label ?? name.UnCamelCase();
-			this.Name = name;
+			this.Name = parameter.Name ?? throw PropertyNull(nameof(parameter), nameof(parameter.Name));
 			this.Type = parameter.ParameterType;
-			if (this.Attribute?.DefaultValue != null)
-			{
-				this.Value = this.Attribute.DefaultValue;
-			}
-			else if (parameter.ParameterType.IsValueType)
-			{
-				this.Value = Activator.CreateInstance(parameter.ParameterType);
-			}
+			this.Label = this.Attribute?.Label ?? this.Name.UnCamelCase();
+			this.Value =
+				this.Attribute?.DefaultValue != null ? this.Attribute.DefaultValue :
+				this.Type.IsValueType ? Activator.CreateInstance(this.Type) :
+				null;
 		}
 		#endregion
 

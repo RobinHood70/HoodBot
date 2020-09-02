@@ -5,7 +5,6 @@
 	using System.Windows;
 	using GalaSoft.MvvmLight;
 	using GalaSoft.MvvmLight.Command;
-	using RobinHood70.HoodBot.Models;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Clients;
@@ -16,7 +15,7 @@
 	{
 		#region Fields
 		private IMediaWikiClient? client;
-		private WikiInfo? selectedWiki;
+		private WikiInfoViewModel? selectedWiki;
 		#endregion
 
 		#region Constructors
@@ -32,7 +31,7 @@
 
 		public RelayCommand Save => new RelayCommand(() => this.EndEdit());
 
-		public WikiInfo? SelectedItem
+		public WikiInfoViewModel? SelectedItem
 		{
 			get => this.selectedWiki;
 			set
@@ -93,7 +92,7 @@
 		#region Private Methods
 		private void Fill(string page)
 		{
-			if (!(this.SelectedItem is WikiInfo selectedItem))
+			if (!(this.SelectedItem is WikiInfoViewModel selectedItem))
 			{
 				return;
 			}
@@ -140,10 +139,10 @@
 			}
 		}
 
-		private WikiInfo NewWiki()
+		private WikiInfoViewModel NewWiki()
 		{
 			ThrowNull(this.UserSettings, nameof(SettingsViewModel), nameof(this.UserSettings));
-			var retval = new WikiInfo();
+			var retval = new WikiInfoViewModel();
 			this.UserSettings.Wikis.Add(retval);
 			this.selectedWiki = retval;
 
@@ -162,8 +161,8 @@
 		private void Initialize(MainViewModel main)
 		{
 			this.MessengerInstance.Unregister(this);
-			this.UserSettings = main.UserSettings;
 			this.client = main.Client;
+			this.UserSettings = main.UserSettings;
 			this.SelectedItem = main.SelectedItem;
 
 			this.RaisePropertyChanged(nameof(this.UserSettings));

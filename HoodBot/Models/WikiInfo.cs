@@ -1,28 +1,14 @@
 ﻿namespace RobinHood70.HoodBot.Models
 {
 	using System;
-	using System.ComponentModel;
-	using GalaSoft.MvvmLight;
 	using Newtonsoft.Json.Linq;
 	using static RobinHood70.CommonCode.Globals;
 
-	public sealed class WikiInfo : ObservableObject, IEditableObject
+	public sealed class WikiInfo
 	{
 		#region Static Fields
 		// Yes, this key is hard-coded. There are more secure ways of doing it, but for now, this will suffice - user would have to specifically share their settings file in order to have passwords decrypted, and even then, they won't be displayed on-screen...they'd only be available in code.
 		private static readonly TextEncrypter Encrypter = new TextEncrypter("¡ʇᴉ ǝʇɐɔsnɟqO");
-		#endregion
-
-		#region Fields
-		private Uri? api;
-		private string? displayName;
-		private int maxLag;
-		private string? password;
-		private int readThrottling;
-		private string? siteClassIdentifier;
-		private string? userName;
-		private int writeThrottling;
-		private WikiInfo? saved;
 		#endregion
 
 		#region Constructors
@@ -49,67 +35,23 @@
 		#endregion
 
 		#region Public Properties
-		public Uri? Api
-		{
-			get => this.api;
-			set => this.Set(ref this.api, value);
-		}
+		public Uri? Api { get; set; }
 
-		public string? DisplayName
-		{
-			get => this.displayName;
-			set => this.Set(ref this.displayName, value);
-		}
+		public string? DisplayName { get; set; }
 
 		public bool IsValid => !string.IsNullOrWhiteSpace(this.DisplayName) && this.Api?.IsWellFormedOriginalString() == true;
 
-		public int MaxLag
-		{
-			get => this.maxLag;
-			set => this.Set(ref this.maxLag, value);
-		}
+		public int MaxLag { get; set; }
 
-		public string? Password
-		{
-			get => this.password;
-			set => this.Set(ref this.password, value);
-		}
+		public string? Password { get; set; }
 
-		public int ReadThrottling
-		{
-			get => this.readThrottling;
-			set => this.Set(ref this.readThrottling, value);
-		}
+		public int ReadThrottling { get; set; }
 
-		public string? SiteClassIdentifier
-		{
-			get => this.siteClassIdentifier;
-			set => this.Set(ref this.siteClassIdentifier, value);
-		}
+		public string? SiteClassIdentifier { get; set; }
 
-		public string? UserName
-		{
-			get => this.userName;
-			set => this.Set(ref this.userName, value);
-		}
+		public string? UserName { get; set; }
 
-		public int WriteThrottling
-		{
-			get => this.writeThrottling;
-			set => this.Set(ref this.writeThrottling, value);
-		}
-
-		public void BeginEdit()
-		{
-			this.saved = new WikiInfo();
-			CopyInfo(this, this.saved);
-		}
-
-		public void CancelEdit() => CopyInfo(this.saved, this);
-
-		public void EndEdit()
-		{
-		}
+		public int WriteThrottling { get; set; }
 		#endregion
 
 		#region Public Override Methods
@@ -133,23 +75,6 @@
 			};
 
 			return json;
-		}
-		#endregion
-
-		#region Private Static Methods
-		private static void CopyInfo(WikiInfo? from, WikiInfo? to)
-		{
-			if (from != null && to != null)
-			{
-				to.Api = from.Api;
-				to.DisplayName = from.DisplayName;
-				to.MaxLag = from.MaxLag;
-				to.Password = from.Password;
-				to.ReadThrottling = from.ReadThrottling;
-				to.SiteClassIdentifier = from.SiteClassIdentifier;
-				to.UserName = from.UserName;
-				to.WriteThrottling = from.WriteThrottling;
-			}
 		}
 		#endregion
 	}

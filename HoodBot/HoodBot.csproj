@@ -74,9 +74,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Reference Include="CommonCode">
-	    <HintPath>..\CommonCode.dll</HintPath>
-	  </Reference>
+		<Reference Include="CommonCode">
+			<HintPath>..\CommonCode.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -103,10 +103,10 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="AppSettings.json">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="UserSettings.json">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 
