@@ -5,49 +5,51 @@
 	using System.Windows;
 	using GalaSoft.MvvmLight;
 	using GalaSoft.MvvmLight.Command;
+	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Clients;
-	using static RobinHood70.CommonCode.Globals;
 
 	// TODO: Re-examine WikiInfo vs MaxLaggableWikiInfo. Need to handle it better.
 	public class SettingsViewModel : ViewModelBase, IEditableObject
 	{
 		#region Fields
 		private IMediaWikiClient? client;
-		private WikiInfoViewModel? selectedWiki;
+		private WikiInfoViewModel? selectedItem;
 		#endregion
 
 		#region Constructors
 		public SettingsViewModel() => this.MessengerInstance.Register<MainViewModel>(this, this.Initialize);
 		#endregion
 
-		#region Public Properties
-		public RelayCommand Add => new RelayCommand(() => this.SelectedItem = null);
+		#region Public Commands
+		public RelayCommand Add => new RelayCommand(this.NewWiki);
 
 		public RelayCommand<string> AutoFill => new RelayCommand<string>(this.Fill);
 
-		public RelayCommand Remove => new RelayCommand(() => this.RemoveCurrent());
+		public RelayCommand Remove => new RelayCommand(this.RemoveCurrent);
 
-		public RelayCommand Save => new RelayCommand(() => this.EndEdit());
+		public RelayCommand Save => new RelayCommand(this.EndEdit);
 
+		public RelayCommand Undo => new RelayCommand(this.CancelEdit);
+		#endregion
+
+		#region Public Properties
 		public WikiInfoViewModel? SelectedItem
 		{
-			get => this.selectedWiki;
+			get => this.selectedItem;
 			set
 			{
-				if (value != this.selectedWiki)
+				if (value != this.selectedItem)
 				{
 					this.CancelEdit();
-					this.Set(ref this.selectedWiki, value);
+					this.Set(ref this.selectedItem, value);
 					this.BeginEdit();
 				}
 			}
 		}
 
-		public RelayCommand Undo => new RelayCommand(() => this.CancelEdit());
-
-		public UserSettings? UserSettings { get; private set; }
+		public UserSettings UserSettings { get; } = App.UserSettings;
 		#endregion
 
 		#region Public Methods
@@ -70,7 +72,6 @@
 
 		public void EndEdit()
 		{
-			ThrowNull(this.UserSettings, nameof(SettingsViewModel), nameof(this.UserSettings));
 			if (this.SelectedItem != null)
 			{
 				if (!this.SelectedItem.IsValid)
@@ -85,7 +86,7 @@
 				}
 			}
 
-			this.UserSettings.Save();
+			Settings.Save(App.UserSettings);
 		}
 		#endregion
 
@@ -139,22 +140,18 @@
 			}
 		}
 
-		private WikiInfoViewModel NewWiki()
+		private void NewWiki()
 		{
-			ThrowNull(this.UserSettings, nameof(SettingsViewModel), nameof(this.UserSettings));
 			var retval = new WikiInfoViewModel();
-			this.UserSettings.Wikis.Add(retval);
-			this.selectedWiki = retval;
-
-			return retval;
+			App.UserSettings.Wikis.Add(retval);
+			this.SelectedItem = retval;
 		}
 
 		private void RemoveCurrent()
 		{
 			if (this.SelectedItem != null)
 			{
-				ThrowNull(this.UserSettings, nameof(SettingsViewModel), nameof(this.UserSettings));
-				this.UserSettings.RemoveWiki(this.SelectedItem);
+				App.UserSettings.RemoveWiki(this.SelectedItem);
 			}
 		}
 
@@ -162,10 +159,7 @@
 		{
 			this.MessengerInstance.Unregister(this);
 			this.client = main.Client;
-			this.UserSettings = main.UserSettings;
 			this.SelectedItem = main.SelectedItem;
-
-			this.RaisePropertyChanged(nameof(this.UserSettings));
 		}
 		#endregion
 	}

@@ -52,7 +52,7 @@
 			<TextBox
 				Grid.Row="0"
 				Grid.Column="2"
-				Text="{Binding BotSettings.BotDataFolder}" />
+				Text="{Binding UserSettings.BotDataFolder}" />
 		</Grid>
 		<ListBox
 			Grid.Row="2"

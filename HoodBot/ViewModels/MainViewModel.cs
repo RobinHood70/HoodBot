@@ -33,7 +33,6 @@
 		#endregion
 
 		#region Fields
-		private readonly string appDataFolder;
 		private readonly IDiffViewer? diffViewer;
 		private readonly IProgress<double> progressMonitor;
 		private readonly IProgress<string> statusMonitor;
@@ -60,13 +59,9 @@
 		#region Constructors
 		public MainViewModel()
 		{
-			// ThrowNull(options, nameof(options));
-			// this.settings = options.Value;
-			this.appDataFolder = Path.Combine(GetFolderPath(SpecialFolder.LocalApplicationData, SpecialFolderOption.Create), nameof(HoodBot));
-			this.UserSettings = UserSettings.Load(Path.Combine(this.appDataFolder, "Settings.json"));
-			this.SelectedItem = this.UserSettings.GetCurrentItem();
+			this.SelectedItem = App.UserSettings.GetCurrentItem();
 
-			this.Client = new SimpleClient(this.UserSettings.ContactInfo, Path.Combine(this.appDataFolder, "Cookies.dat"));
+			this.Client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.dat"));
 			this.Client.RequestingDelay += this.Client_RequestingDelay;
 
 			this.progressMonitor = new Progress<double>(this.ProgressChanged);
@@ -82,11 +77,7 @@
 		#endregion
 
 		#region Destructor
-		~MainViewModel()
-		{
-			this.UserSettings.Save();
-			this.Client.RequestingDelay -= this.Client_RequestingDelay;
-		}
+		~MainViewModel() => this.Client.RequestingDelay -= this.Client_RequestingDelay;
 		#endregion
 
 		#region Public Commands
@@ -157,8 +148,11 @@
 			{
 				if (value != null)
 				{
-					this.UserSettings.UpdateCurrentWiki(value);
-					this.UserSettings.Save();
+					var userSettings = App.UserSettings;
+					if (userSettings.SelectedName != value.DisplayName)
+					{
+						userSettings.SelectedName = value.DisplayName;
+					}
 				}
 
 				this.Set(ref this.selectedItem, value, nameof(this.SelectedItem));
@@ -173,13 +167,13 @@
 			set => this.Set(ref this.status, value ?? string.Empty, nameof(this.Status));
 		}
 
+		public UserSettings UserSettings { get; } = App.UserSettings;
+
 		public string? UserName
 		{
 			get => this.userName;
 			set => this.Set(ref this.userName, value, nameof(this.UserName));
 		}
-
-		public UserSettings UserSettings { get; }
 
 		public DateTime? UtcEta
 		{

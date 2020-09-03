@@ -41,7 +41,7 @@
 			return Convert.ToBase64String(outputStream.ToArray());
 		}
 
-		public string? Decrypt(string value)
+		public string Decrypt(string value)
 		{
 			ThrowNull(value, nameof(value));
 			var buffer = Convert.FromBase64String(value);

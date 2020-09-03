@@ -2,36 +2,14 @@
 {
 	using System;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.HoodBot.Design;
 	using static RobinHood70.CommonCode.Globals;
 
-	public sealed class WikiInfo
+	// Note: password security for this class is minimal and fairly easily reversed. If this is a concern, it's recommended not to store passowrds and instead enter them manually every time.
+	public sealed class WikiInfo : IJsonSubSetting<WikiInfo>
 	{
-		#region Static Fields
-		// Yes, this key is hard-coded. There are more secure ways of doing it, but for now, this will suffice - user would have to specifically share their settings file in order to have passwords decrypted, and even then, they won't be displayed on-screen...they'd only be available in code.
-		private static readonly TextEncrypter Encrypter = new TextEncrypter("¡ʇᴉ ǝʇɐɔsnɟqO");
-		#endregion
-
-		#region Constructors
-		public WikiInfo()
-		{
-		}
-
-		internal WikiInfo(JToken node)
-		{
-			ThrowNull(node, nameof(node));
-			this.Api = (Uri?)node[nameof(this.Api)];
-			this.DisplayName = (string?)node[nameof(this.DisplayName)];
-			this.MaxLag = (int?)node[nameof(this.MaxLag)] ?? 5;
-			this.ReadThrottling = (int?)node[nameof(this.ReadThrottling)] ?? 0;
-			this.SiteClassIdentifier = (string?)node[nameof(this.SiteClassIdentifier)];
-			this.UserName = (string?)node[nameof(this.UserName)];
-			this.WriteThrottling = (int?)node[nameof(this.WriteThrottling)] ?? 0;
-			var password = (string?)node[nameof(this.Password)];
-			if (password != null)
-			{
-				this.Password = Encrypter.Decrypt(password);
-			}
-		}
+		#region Private Constants
+		private const int DefaultMaxLag = 5;
 		#endregion
 
 		#region Public Properties
@@ -41,7 +19,7 @@
 
 		public bool IsValid => !string.IsNullOrWhiteSpace(this.DisplayName) && this.Api?.IsWellFormedOriginalString() == true;
 
-		public int MaxLag { get; set; }
+		public int MaxLag { get; set; } = DefaultMaxLag;
 
 		public string? Password { get; set; }
 
@@ -58,23 +36,53 @@
 		public override string ToString() => this.DisplayName ?? this.GetType().Name;
 		#endregion
 
-		#region Internal Methods
-		internal JToken ToJson()
+		#region Public Methods
+		public void FromJson(JToken json)
 		{
-			var password = Encrypter.Encrypt(this.Password ?? string.Empty);
-			var json = new JObject()
+			ThrowNull(json, nameof(json));
+			this.Api = (Uri?)json[nameof(this.Api)];
+			this.DisplayName = (string?)json[nameof(this.DisplayName)];
+			this.MaxLag = (int?)json[nameof(this.MaxLag)] ?? DefaultMaxLag;
+			var password = (string?)json[nameof(this.Password)];
+			if (password != null)
 			{
-				new JProperty(nameof(this.Api), this.Api),
-				new JProperty(nameof(this.DisplayName), this.DisplayName),
-				new JProperty(nameof(this.MaxLag), this.MaxLag),
-				new JProperty(nameof(this.Password), password),
-				new JProperty(nameof(this.ReadThrottling), this.ReadThrottling),
-				new JProperty(nameof(this.SiteClassIdentifier), this.SiteClassIdentifier),
-				new JProperty(nameof(this.UserName), this.UserName),
-				new JProperty(nameof(this.WriteThrottling), this.WriteThrottling),
+				this.Password = Settings.Encrypter.Decrypt(password);
+			}
+
+			this.ReadThrottling = (int?)json[nameof(this.ReadThrottling)] ?? 0;
+			this.SiteClassIdentifier = (string?)json[nameof(this.SiteClassIdentifier)];
+			this.UserName = (string?)json[nameof(this.UserName)];
+			this.WriteThrottling = (int?)json[nameof(this.WriteThrottling)] ?? 0;
+		}
+
+		public JToken ToJson()
+		{
+			var json = new JObject
+			{
+				{ nameof(this.Api), new JValue(this.Api) },
+				{ nameof(this.DisplayName), new JValue(this.DisplayName) }
 			};
 
+			AddToJson(nameof(this.MaxLag), this.MaxLag, DefaultMaxLag);
+			if (this.Password != null)
+			{
+				json.Add(nameof(this.Password), new JValue(Settings.Encrypter.Encrypt(this.Password)));
+			}
+
+			AddToJson(nameof(this.ReadThrottling), this.ReadThrottling, 0);
+			AddToJson(nameof(this.SiteClassIdentifier), this.SiteClassIdentifier, null);
+			AddToJson(nameof(this.UserName), this.UserName, null);
+			AddToJson(nameof(this.WriteThrottling), this.WriteThrottling, 0);
+
 			return json;
+
+			void AddToJson(string name, object? property, object? defaultValue)
+			{
+				if (property is null ? !(defaultValue is null) : !property.Equals(defaultValue))
+				{
+					json.Add(name, new JValue(property));
+				}
+			}
 		}
 		#endregion
 	}
