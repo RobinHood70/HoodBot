@@ -1,43 +1,24 @@
 ﻿namespace RobinHood70.HoodBot
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using System.IO;
+	using System.Security.Cryptography;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.HoodBot.ViewModels;
 	using static RobinHood70.CommonCode.Globals;
 
-	public class UserSettings
+	public class UserSettings : IJsonSettings<UserSettings>
 	{
 		#region Fields
 		private string botDataFolder = DefaultBotDataFolder;
 		#endregion
 
 		#region Constructors
-		private UserSettings(string location, JToken? json)
-		{
-			this.Location = location;
-			if (json == null)
-			{
-				this.BotDataFolder = DefaultBotDataFolder;
-			}
-			else
-			{
-				this.BotDataFolder = (string?)json[nameof(this.BotDataFolder)] ?? DefaultBotDataFolder;
-				if (json[nameof(this.Wikis)] is JToken wikiNode && wikiNode.Type == JTokenType.Array)
-				{
-					foreach (var node in wikiNode)
-					{
-						var wiki = new WikiInfo(node);
-						this.Wikis.Add(new WikiInfoViewModel(wiki));
-					}
-				}
-
-				this.SelectedName = (string?)json[nameof(this.SelectedName)];
-				this.GetCurrentItem();
-			}
-		}
+		public UserSettings() => this.BotDataFolder = DefaultBotDataFolder;
 		#endregion
 
 		#region Public Static Properties
@@ -58,36 +39,16 @@
 			}
 		}
 
+		public Dictionary<string, string> ConnectionStrings { get; } = new Dictionary<string, string>();
+
 		// TODO: Add this to Load/Save when re-writing Settings class.
 		public string? ContactInfo { get; set; } = "robinhood70@live.ca";
 
-		public string Location { get; }
+		public string FileName => Path.Combine(App.UserFolder, "Settings.json");
 
 		public string? SelectedName { get; set; }
 
 		public ObservableCollection<WikiInfoViewModel> Wikis { get; } = new ObservableCollection<WikiInfoViewModel>();
-		#endregion
-
-		#region Public Static Methods
-		public static UserSettings Load(string location)
-		{
-			try
-			{
-				var input = File.ReadAllText(location);
-				var json = JObject.Parse(input);
-				var retval = new UserSettings(location, json);
-				if (!IsPathValid(retval.BotDataFolder))
-				{
-					retval.botDataFolder = DefaultBotDataFolder;
-				}
-
-				return retval;
-			}
-			catch (FileNotFoundException)
-			{
-				return new UserSettings(location, null);
-			}
-		}
 		#endregion
 
 		#region Public Methods
@@ -110,6 +71,49 @@
 			return null;
 		}
 
+		public void FromJson(JToken json)
+		{
+			ThrowNull(json, nameof(json));
+			var botDataFolder = (string?)json[nameof(this.BotDataFolder)];
+			if (botDataFolder == null || !IsPathValid(botDataFolder))
+			{
+				botDataFolder = DefaultBotDataFolder;
+			}
+
+			this.BotDataFolder = botDataFolder;
+			if (json[nameof(this.ConnectionStrings)] is JObject connectionStrings)
+			{
+				foreach (var node in connectionStrings.Children<JProperty>())
+				{
+					var text = (string?)node.Value ?? string.Empty;
+					try
+					{
+						text = Settings.Encrypter.Decrypt(text);
+					}
+					catch (CryptographicException)
+					{
+					}
+					catch (FormatException)
+					{
+					}
+
+					this.ConnectionStrings.Add(node.Name, text);
+				}
+			}
+
+			if (json[nameof(this.Wikis)] is JArray wikiNode)
+			{
+				foreach (var node in wikiNode)
+				{
+					var wiki = JsonSubSetting<WikiInfo>.FromJson(node);
+					this.Wikis.Add(new WikiInfoViewModel(wiki));
+				}
+			}
+
+			this.SelectedName = (string?)json[nameof(this.SelectedName)];
+			this.GetCurrentItem();
+		}
+
 		public void RemoveWiki(WikiInfoViewModel item)
 		{
 			ThrowNull(item, nameof(item));
@@ -122,11 +126,11 @@
 				}
 
 				this.Wikis.RemoveAt(index);
-				this.Save();
+				Settings.Save(this);
 			}
 		}
 
-		public void Save()
+		public JToken ToJson()
 		{
 			var wikis = new JArray();
 			foreach (var wiki in this.Wikis)
@@ -134,18 +138,23 @@
 				wikis.Add(wiki.WikiInfo.ToJson());
 			}
 
+			var connectionStrings = new JObject();
+			foreach (var connectionString in this.ConnectionStrings)
+			{
+				connectionStrings.Add(connectionString.Key, Settings.Encrypter.Encrypt(connectionString.Value));
+			}
+
 			var json = new JObject
 			{
-				new JProperty(nameof(this.BotDataFolder), this.BotDataFolder),
-				new JProperty(nameof(this.SelectedName), this.SelectedName),
-				new JProperty(nameof(this.Wikis), wikis)
+				{ nameof(this.BotDataFolder), new JValue(this.BotDataFolder) },
+				{ nameof(this.ConnectionStrings), connectionStrings },
+				{ nameof(this.ContactInfo), new JValue(this.ContactInfo) },
+				{ nameof(this.SelectedName), new JValue(this.SelectedName) },
+				{ nameof(this.Wikis), wikis }
 			};
 
-			File.WriteAllText(this.Location, json.ToString());
+			return json;
 		}
-
-		// TODO: See if there's more that needs to be done for Add. If nothing else, it doesn't sort after adding. Was that intentional?
-		public void UpdateCurrentWiki(WikiInfoViewModel? wiki) => this.SelectedName = wiki?.DisplayName;
 		#endregion
 
 		#region Private Static Methods

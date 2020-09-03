@@ -1,12 +1,47 @@
 ﻿namespace RobinHood70.HoodBot
 {
 	using System.Collections.Generic;
-	using RobinHood70.HoodBot.ViewModels;
+	using System.IO;
+	using Newtonsoft.Json.Linq;
+	using RobinHood70.HoodBot.Design;
+	using RobinHood70.HoodBot.Models;
+	using static RobinHood70.CommonCode.Globals;
 
-	public class AppSettings
+	public class AppSettings : IJsonSettings<AppSettings>
 	{
 		#region Public Properties
-		public List<WikiInfoViewModel> DefaultWikis { get; }
+		public List<WikiInfo> DefaultWikis { get; } = new List<WikiInfo>();
+
+		public string FileName => Path.Combine(App.AppFolder, nameof(AppSettings) + ".json");
+		#endregion
+
+		#region Public Methods
+		public void FromJson(JToken json)
+		{
+			ThrowNull(json, nameof(json));
+			if (json[nameof(this.DefaultWikis)] is JToken wikiNode && wikiNode.Type == JTokenType.Array)
+			{
+				foreach (var node in wikiNode)
+				{
+					var wiki = JsonSubSetting<WikiInfo>.FromJson(node);
+					this.DefaultWikis.Add(wiki);
+				}
+			}
+		}
+
+		public JToken ToJson()
+		{
+			var wikis = new JArray();
+			foreach (var wiki in this.DefaultWikis)
+			{
+				wikis.Add(wiki.ToJson());
+			}
+
+			return new JObject
+			{
+				{ nameof(this.DefaultWikis), wikis }
+			};
+		}
 		#endregion
 	}
 }

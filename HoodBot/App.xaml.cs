@@ -1,13 +1,17 @@
 ﻿namespace RobinHood70.HoodBot
 {
 	using System;
+	using System.IO;
+	using System.Reflection;
 	using System.Windows;
 	using System.Windows.Threading;
 	using Microsoft.Extensions.Configuration;
 	using Microsoft.Extensions.DependencyInjection;
 	using Microsoft.Extensions.Hosting;
+	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.ViewModels;
 	using RobinHood70.HoodBot.Views;
+	using static System.Environment;
 
 	/// <summary>Interaction logic for App.xaml.</summary>
 	public partial class App : Application
@@ -16,17 +20,22 @@
 		// Although this is IDisposable, we don't implement IDisposable here, instead using the OnStartup and OnExit methods to effectively do the same thing.
 		private static readonly IHost AppHost = Host
 				.CreateDefaultBuilder()
-				.ConfigureAppConfiguration((context, builder) => builder
-					.AddJsonFile("appsettings.json", true, false)
-					.AddJsonFile("connectionStrings.json", false, false))
 				.ConfigureServices((context, services) => ConfigureServices(context.Configuration, services))
 				.Build();
 		#endregion
 
-		#region Public Properties
+		#region Public Static Properties
+		public static string AppFolder { get; } = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+
+		public static AppSettings AppSettings { get; } = Settings.Load<AppSettings>();
+
 		public static ViewModelLocator Locator => ViewModelLocator.Instance;
 
 		public static IServiceProvider ServiceProvider { get; } = AppHost.Services;
+
+		public static string UserFolder { get; } = Path.Combine(GetFolderPath(SpecialFolder.ApplicationData, SpecialFolderOption.Create), nameof(HoodBot));
+
+		public static UserSettings UserSettings { get; } = Settings.Load<UserSettings>();
 		#endregion
 
 		#region Public Static Methods
@@ -40,6 +49,7 @@
 		{
 			await AppHost.StopAsync(TimeSpan.FromSeconds(5));
 			AppHost.Dispose();
+			Settings.Save(UserSettings);
 			base.OnExit(e);
 		}
 
