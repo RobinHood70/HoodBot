@@ -88,6 +88,10 @@
 		/// <value>The current timestamp.</value>
 		DateTime? CurrentTimestamp { get; }
 
+		/// <summary>Gets the current user information.</summary>
+		/// <value>The user information.</value>
+		public UserInfoResult? CurrentUserInfo { get; }
+
 		/// <summary>Gets or sets the custom stop check function.</summary>
 		/// <value>A function which returns true if the bot should stop what it's doing.</value>
 		Func<bool>? CustomStopCheck { get; set; }
@@ -116,11 +120,6 @@
 		/// <summary>Gets or sets how often the user talk page should be checked for non-queries.</summary>
 		/// <value>The frequency to check user name and talk page. A value of 1 or less will check with every non-query request; higher values will only check every n times.</value>
 		int UserCheckFrequency { get; set; }
-
-		/// <summary>Gets the name of the current user.</summary>
-		/// <value>The name of the current user.</value>
-		/// <remarks>It's conceivable that not every possible implementor would need a UserName, and it may be null if the user doesn't log in, but it's reasonable to assume that neither of these will be the norm, and UserName is handy to have easily accessible without having to cast to a specific implementor.</remarks>
-		string? UserName { get; }
 
 		/// <summary>Gets the stop check methods that are valid for current state.</summary>
 		/// <value>The stop methods.</value>

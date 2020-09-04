@@ -186,7 +186,7 @@
 						this.SiteName = api.SiteName;
 						this.ReadEntryPoint = EntryPoint.Api;
 						this.SupportsMaxLag = api.SupportsMaxLag;
-						this.CurrentUser = api.UserId == 0 ? null : api.UserName;
+						this.CurrentUser = (api.CurrentUserInfo?.Flags.HasFlag(UserInfoFlags.Anonymous) ?? true) ? null : api.CurrentUserInfo.Name;
 						this.WriteEntryPoint =
 							api.Flags.HasFlag(SiteInfoFlags.WriteApi) ? EntryPoint.Api :
 							this.Index == null ? EntryPoint.None :

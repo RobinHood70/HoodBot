@@ -33,6 +33,10 @@
 			SiteInfoProperties.InterwikiMap;
 		#endregion
 
+		#region Private Static Fields
+		private static readonly UserInfoInput DefaultUserInformation = new UserInfoInput() { Properties = UserInfoProperties.HasMsg };
+		#endregion
+
 		#region Fields
 		private readonly HashSet<string> interwikiPrefixes = new HashSet<string>(StringComparer.Create(CultureInfo.InvariantCulture, true));
 		private readonly Dictionary<int, SiteInfoNamespace> namespaces = new Dictionary<int, SiteInfoNamespace>();
@@ -160,6 +164,10 @@
 		/// <remarks>Depending on wiki version, this will either come from setting GetTimestamp to true and getting the result from that, or from API:Info when tokens are requested or GetTimestamp is set to true.</remarks>
 		public DateTime? CurrentTimestamp { get; protected internal set; }
 
+		/// <summary>Gets or sets the current user information.</summary>
+		/// <value>The user information.</value>
+		public UserInfoResult? CurrentUserInfo { get; protected set; }
+
 		/// <summary>Gets or sets the custom stop check function.</summary>
 		/// <value>A function which returns true if the bot should stop what it's doing.</value>
 		public Func<bool>? CustomStopCheck { get; set; }
@@ -253,14 +261,6 @@
 		/// <value>The use language.</value>
 		public string? UseLanguage { get; set; }
 
-		/// <summary>Gets or sets the user ID.</summary>
-		/// <value>The user ID.</value>
-		public long UserId { get; protected set; }
-
-		/// <summary>Gets or sets the name of the current user.</summary>
-		/// <value>The name of the current user.</value>
-		public string? UserName { get; protected set; }
-
 		/// <summary>Gets or sets how often the user talk page should be checked for non-queries.</summary>
 		/// <value>The frequency to check user name and talk page. A value of 1 or less will check with every non-query request; higher values will only check every n times.</value>
 		public int UserCheckFrequency { get; set; }
@@ -271,7 +271,9 @@
 
 		/// <summary>Gets the stop check methods that are valid for current state.</summary>
 		/// <value>The stop methods.</value>
-		public StopCheckMethods ValidStopCheckMethods => this.UserId == 0 ? this.StopCheckMethods & StopCheckMethods.LoggedOut : this.StopCheckMethods;
+		public StopCheckMethods ValidStopCheckMethods => (this.CurrentUserInfo == null || this.CurrentUserInfo.Flags.HasFlag(UserInfoFlags.Anonymous))
+			? this.StopCheckMethods & StopCheckMethods.LoggedOut
+			: this.StopCheckMethods;
 
 		/// <summary>Gets a list of all warnings.</summary>
 		/// <value>The warnings.</value>
@@ -426,7 +428,7 @@
 			};
 
 			var infoModule = new MetaSiteInfo(this, siteInfoInput);
-			var userModule = new MetaUserInfo(this, new UserInfoInput());
+			var userModule = new MetaUserInfo(this, DefaultUserInformation);
 			this.RunQuery(infoModule, userModule);
 
 			if (!(userModule.Output is UserInfoResult userInfo) || !(infoModule.Output is SiteInfoResult siteInfo) || siteInfo.General == null || siteInfo.Namespaces == null)
@@ -434,8 +436,7 @@
 				throw new WikiException(EveMessages.InitializationFailed);
 			}
 
-			this.UserId = userInfo.UserId;
-			this.UserName = userInfo.Name;
+			this.CurrentUserInfo = userInfo;
 
 			// General
 			var general = siteInfo.General;
@@ -651,8 +652,15 @@
 			}
 			catch (NotSupportedException)
 			{
-				var index = this.GetFullArticlePath(this.Namespaces[MediaWikiNamespaces.UserTalk].Name + ":" + this.UserName);
-				return this.Client.Get(index).Length > 0;
+				if (this.CurrentUserInfo == null)
+				{
+					return false;
+				}
+				else
+				{
+					var index = this.GetFullArticlePath(this.Namespaces[MediaWikiNamespaces.UserTalk].Name + ":" + this.CurrentUserInfo.Name);
+					return this.Client.Get(index).Length > 0;
+				}
 			}
 		}
 
@@ -871,16 +879,16 @@
 			if (string.IsNullOrEmpty(input.UserName))
 			{
 				this.tokenManager?.Clear();
-				return LoginResult.EditingAnonymously(this.UserName);
+				return LoginResult.EditingAnonymously(this.CurrentUserInfo?.Name);
 			}
 
 			var userNameSplit = input.UserName.Split(TextArrays.At);
 			var botPasswordName = userNameSplit[^1];
 
 			// Both checks are necessary because user names can legitimately contain @ signs.
-			if (this.UserName == input.UserName || this.UserName == botPasswordName)
+			if (this.CurrentUserInfo is UserInfoResult userInfo && (userInfo.Name == input.UserName || userInfo.Name == botPasswordName))
 			{
-				return LoginResult.AlreadyLoggedIn(this.UserId, this.UserName);
+				return LoginResult.AlreadyLoggedIn(userInfo.UserId, userInfo.Name);
 			}
 
 			// Second logins are not allowed without first logging out in later versions of the API.
@@ -902,8 +910,7 @@
 						retries--;
 						break;
 					case "Success":
-						this.UserName = output.User;
-						this.UserId = output.UserId;
+						this.CurrentUserInfo = this.UserInfo(DefaultUserInformation);
 						this.Client.SaveCookies();
 						retries = 0;
 						break;
@@ -942,7 +949,7 @@
 		/// <remarks>No stop checking is performed on logging out.</remarks>
 		public void Logout(bool clear)
 		{
-			if (this.UserId != 0)
+			if (this.CurrentUserInfo is UserInfoResult userInfo && userInfo.Flags.HasFlag(UserInfoFlags.Anonymous))
 			{
 				var input = new LogoutInput();
 				if (this.SiteVersion >= 134)
@@ -956,9 +963,8 @@
 				this.Assert = assert;
 				this.Client.SaveCookies();
 
-				// These are the only things that we absolutely must clear when logging out, since the site could conceivably still be used afterwards, even though it probably shouldn't be.
-				this.UserId = 0;
-				this.UserName = null;
+				// Re-retrieve user info since the site could conceivably still be used anonymously.
+				this.CurrentUserInfo = this.UserInfo(DefaultUserInformation);
 			}
 
 			if (clear)
@@ -1369,7 +1375,8 @@
 					Debug.Assert(this.ValidStopCheckMethods.HasFlag(StopCheckMethods.TalkCheckQuery), "Something's not right here, this should've been an integrated check!");
 					if (this.userTalkChecksIgnored >= this.UserCheckFrequency)
 					{
-						var input = new UserInfoInput() { Properties = UserInfoProperties.HasMsg };
+						var input = DefaultUserInformation;
+						input.Properties |= UserInfoProperties.HasMsg; // Default should cover this, but if that's ever changed, this still *must* have a HasMsg check.
 						userInfoResult = this.UserInfo(input);
 						if (userInfoResult == null)
 						{
@@ -1386,7 +1393,9 @@
 
 				if (userInfoResult != null)
 				{
-					if (this.ValidStopCheckMethods.HasFlag(StopCheckMethods.UserNameCheck) && this.SiteVersion < 128 && this.UserName != userInfoResult.Name)
+					if (this.ValidStopCheckMethods.HasFlag(StopCheckMethods.UserNameCheck)
+						&& this.SiteVersion < 128
+						&& this.CurrentUserInfo?.Name != userInfoResult.Name)
 					{
 						// Used to check if username has unexpectedly changed, indicating that the bot has been logged out (or conceivably logged in) unexpectedly.
 						throw new StopException(EveMessages.UserNameChanged);
