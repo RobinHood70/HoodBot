@@ -250,17 +250,15 @@
 		public Request AddFlags(string name, Enum values)
 		{
 			ThrowNull(values, nameof(values));
-			var list = new List<string>();
 			foreach (var prop in values.GetUniqueFlags())
 			{
 				// Enum.ToString() has a bug that can cause 0-valued enums to appear in outputs if there's more than one of them (e.g., None = 0, Default = None). Enum.GetName() does not seem to suffer from this.
 				if (values.GetType().GetEnumName(prop) is string enumName)
 				{
-					list.Add(enumName.ToLowerInvariant());
+					this.AddToPiped(name, enumName.ToLowerInvariant());
 				}
 			}
 
-			this.Add(name, list);
 			return this;
 		}
 
