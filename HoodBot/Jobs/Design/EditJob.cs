@@ -87,6 +87,7 @@
 			this.StatusWriteLine("Saving pages");
 			this.EditConflictAction = editConflictAction;
 			this.Pages.Sort();
+			this.Progress = 0;
 			this.ProgressMaximum = this.Pages.Count;
 
 			foreach (var page in this.Pages)
