@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Data;
 
@@ -16,18 +17,19 @@
 		public Ability(IDataRecord data)
 		{
 			this.Id = (int)data["id"];
-			if (!ReplacementData.IdReplacements.TryGetValue(this.Id, out var desc))
+			var desc = (string)data["coefDescription"];
+			if (string.IsNullOrWhiteSpace(desc))
 			{
-				desc = (string)data["coefDescription"];
-				if (string.IsNullOrWhiteSpace(desc))
-				{
-					desc = (string)data["description"];
-				}
+				desc = (string)data["description"];
 			}
 
 			desc = EsoGeneral.HarmonizeDescription(desc);
-			desc = EsoReplacer.ReplaceGlobal(desc, null);
-			this.Description = desc;
+			if (ReplacementData.IdPartialReplacements.TryGetValue(this.Id, out var partial))
+			{
+				desc = desc.Replace(partial.From, partial.To, StringComparison.Ordinal);
+			}
+
+			this.Description = EsoReplacer.ReplaceGlobal(desc, null);
 
 			var coefficients = new List<Coefficient>();
 			for (var num = '1'; num <= '6'; num++)

@@ -4,15 +4,27 @@
 
 	public static class ReplacementData
 	{
-		// This is a fugly way to fix up the descriptions, but it simplifies things enormously.
-		public static Dictionary<int, string> IdReplacements { get; } = new Dictionary<int, string>
+		// Replacements that are specific to certain IDs but do not apply to the general case.
+		public static Dictionary<int, (string From, string To)> IdPartialReplacements { get; } = new Dictionary<int, (string, string)>
 		{
-			[23234] = "Transform yourself into pure energy and flash forward, stunning enemies near your final location for |cffffff1|r seconds. This effect cannot be blocked. Casting again within |cffffff4|r seconds costs |cffffff33|r% more {{ESO Magicka Link}}.",
-			[24574] = "Place a rune of protection on yourself for |cffffff1|r minutes. While active, the next enemy to attack you is imprisoned in a constricting sphere of dark magic, stunning them after a short delay for |cffffff3|r seconds. This stun cannot be blocked.",
-			[38096] = "Conceal two sinister traps, one at the targeted location and another next to you, which take |cffffff2|r seconds to arm and last for |cffffff60|r seconds. When each trap is triggered, a dark spirit is summoned to terrify up to |cffffff6|r enemies, causing them to cower in fear for |cffffff4|r seconds.",
-			[40242] = "Hurl a ball of caltrops that scatter over the target area, dealing |cffffff$1|r Physical Damage every |cffffff1|r second to enemies inside, and reducing their Movement Speed by |cffffff50|r%. Enemies who take damage from the caltrops have Major Fracture applied to them, reducing their {{ESO Resistance Link|Physical}} by |cffffff5280|r for |cffffff1|r seconds.",
-			[62107] = "Focus your senses for |cffffff60|r seconds, reducing your damage taken by |cffffff2|r% with every Light or Heavy Attack, up to 5 times. While active, hitting an enemy with |cffffff5|r Light or Heavy Attacks converts this ability into Assassin's Scourge, allowing you to fire a spectral arrow for half cost that deals |cffffff$1|r Disease Damage, and heals for |cffffff33|r% of the damage dealt if you are within |cffffff7|r meters of the enemy.",
-			[103710] = "Bend time and space around you to gain Major Expedition for |cffffff4|r seconds and Minor Force for |cffffff12|r seconds, increasing your Movement Speed by |cffffff30|r% and Critical Damage by |cffffff10|r%. Activating this ability removes all snares and immobilizations from you and grants immunity to them for |cffffff1|r seconds.",
+			[23234] = ("|cffffff1|r second", "|cffffff1|r seconds"),
+			[24574] = ("|cffffff1|r minute", "|cffffff1|r minutes"),
+			[38096] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
+			[40242] = ("|cffffff1|r second.", "|cffffff1|r seconds."),
+			[62107] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
+			[85982] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Feral Guardian|grizzly]]"),
+			[85983] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Feral Guardian|grizzly]]"),
+			[85984] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Feral Guardian|grizzly]]"),
+			[85985] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Feral Guardian|grizzly]]"),
+			[85986] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Eternal Guardian|grizzly]]"),
+			[85987] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Eternal Guardian|grizzly]]"),
+			[85988] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Eternal Guardian|grizzly]]"),
+			[85989] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Eternal Guardian|grizzly]]"),
+			[85990] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Wild Guardian|grizzly]]"),
+			[85991] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Wild Guardian|grizzly]]"),
+			[85992] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Wild Guardian|grizzly]]"),
+			[85993] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Wild Guardian|grizzly]]"),
+			[103710] = ("|cffffff1|r second", "|cffffff1|r seconds"),
 		};
 
 		public static Dictionary<string, string> NpcNameFixes { get; } = new Dictionary<string, string>

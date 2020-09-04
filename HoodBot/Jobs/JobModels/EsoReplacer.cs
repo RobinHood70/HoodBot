@@ -117,6 +117,7 @@
 			}
 
 			text = EsoLinks.Replace(text, ReplaceTemplate);
+			text = text.Replace("<nowiki/>", string.Empty, StringComparison.Ordinal);
 
 			if (skillName != null)
 			{
@@ -314,7 +315,7 @@
 					case "ESO":
 						return match.Value;
 					case "0":
-						return "free";
+						return "Free";
 					default:
 						// Because these are anonymous parameters, we must always add the before value, even if empty.
 						linkTemplate.AddAnonymous(before.Value.Replace("'''", string.Empty, StringComparison.Ordinal));

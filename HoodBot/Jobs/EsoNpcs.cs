@@ -8,7 +8,6 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
@@ -44,9 +43,6 @@
 				npc.TrimPlaces();
 				this.Pages.Add(this.CreatePage(npc));
 			}
-
-			this.ProgressMaximum = this.Pages.Count + 4;
-			this.Progress = 4;
 		}
 
 		protected override void Main() => this.SavePages(this.LogName, false);
