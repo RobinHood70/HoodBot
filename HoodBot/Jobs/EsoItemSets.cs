@@ -23,8 +23,8 @@
 		private static readonly Dictionary<string, string> TitleOverrides = new Dictionary<string, string>
 		{
 			// Title Overrides should only be necessary when creating new disambiguated "(set)" pages or when pages don't conform to the base/base (set) style. While this could be done programatically, it's probably best not to, so that a human has verified that the page really should be created and that the existing page isn't malformed or something.
+			["Lady Thorn"] = "Lady Thorn (set)",
 			["Senche-Raht's Grit"] = "Senche-raht's Grit",
-			["Bloodspawn"] = "Bloodspawn (set)",
 		};
 		#endregion
 
