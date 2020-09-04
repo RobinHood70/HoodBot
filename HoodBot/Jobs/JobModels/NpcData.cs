@@ -68,13 +68,8 @@
 				this.Gender = (Gender)gender;
 			}
 
-			if (ReplacementData.NpcNameFixes.TryGetValue(name, out var newName))
-			{
-				name = newName;
-			}
-
-			this.Name = name;
-			this.PageName = name;
+			this.Name = ReplacementData.NpcNameFixes.TryGetValue(name, out var newName) ? newName : name;
+			this.PageName = this.Name;
 		}
 		#endregion
 
