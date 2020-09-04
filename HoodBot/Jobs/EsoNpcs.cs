@@ -49,30 +49,7 @@
 			this.Progress = 4;
 		}
 
-		protected override void Main()
-		{
-			this.StatusWriteLine("Saving");
-			try
-			{
-				foreach (var page in this.Pages)
-				{
-					try
-					{
-						page.Save(this.LogName, false, Tristate.True, false);
-					}
-					catch (WikiException e) when (e.Code == "pagedeleted")
-					{
-						this.WriteLine($"* {page.AsLink(true)} is blank, but has previously been deleted, so was not created again.");
-					}
-
-					this.Progress++;
-				}
-			}
-			catch (EditConflictException)
-			{
-				// Do nothing. If someone created the page in the meantime, it's no longer our problem.
-			}
-		}
+		protected override void Main() => this.SavePages(this.LogName, false);
 		#endregion
 
 		#region Private Static Methods
@@ -152,7 +129,7 @@
 			foreach (var npc in npcData)
 			{
 				var title = new NpcTitle(this.Site, npc);
-				if (allNpcs.ValueOrDefault(title) is null)
+				if (!allNpcs.Contains(title))
 				{
 					titlesOnly.Add(title);
 				}
@@ -160,19 +137,22 @@
 
 			titlesOnly.Sort();
 
-			var pageLoadOptions = new PageLoadOptions(PageModules.Default | PageModules.Properties, true);
+			var pageLoadOptions = new PageLoadOptions(PageModules.Default | PageModules.DeletedRevisions | PageModules.Properties, true);
 			var checkPages = titlesOnly.Load(pageLoadOptions);
-			//// checkPages.Sort();
 			foreach (var title in titlesOnly)
 			{
 				var npc = ((NpcTitle)title).Npc;
 				var page = checkPages[title.FullPageName];
-				if (page.Exists)
+				string? issue = null;
+				if (page.PreviouslyDeleted)
 				{
-					string? issue;
+					issue = "was previously deleted";
+				}
+				else if (page.Exists)
+				{
 					if (page.IsDisambiguation)
 					{
-						issue = "a disambiguation with no clear NPC link";
+						issue = "is a disambiguation with no clear NPC link";
 						var parser = WikiTextParser.Parse(page.Text);
 						foreach (var linkNode in parser.FindAllRecursive<LinkNode>())
 						{
@@ -194,22 +174,22 @@
 						}
 						else
 						{
-							issue = "a redirect to a content page without an Online NPC Summary";
+							issue = "is a redirect to a content page without an Online NPC Summary";
 						}
 					}
 					else
 					{
-						issue = "already a content page without an Online NPC Summary";
-					}
-
-					if (issue != null)
-					{
-						this.WriteLine($"* {page.AsLink(true)} is {issue}. Please use the following data to create a page manually, if needed.\n*:Name: {npc.Name}\n*:Gender: {npc.Gender}\n*:Loot Type: {npc.LootType}\n*:Known Locations: {string.Join(", ", npc.Places)}\n*:Unknown Locations: {string.Join(", ", npc.UnknownLocations)}");
+						issue = "is already a content page without an Online NPC Summary";
 					}
 				}
 				else
 				{
 					tempList.Add(npc);
+				}
+
+				if (issue != null)
+				{
+					this.WriteLine($"* {page.AsLink(true)} {issue}. Please use the following data to create a page manually, if needed.\n*:Name: {npc.Name}\n*:Gender: {npc.Gender}\n*:Loot Type: {npc.LootType}\n*:Known Locations: {string.Join(", ", npc.Places)}\n*:Unknown Locations: {string.Join(", ", npc.UnknownLocations)}");
 				}
 			}
 
