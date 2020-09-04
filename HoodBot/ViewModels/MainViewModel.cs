@@ -27,6 +27,12 @@
 	// TODO: Decouple this into a job-runner class, or something along those lines, that notifies this one of updates.
 	public class MainViewModel : ViewModelBase
 	{
+		#region Private Constants
+#if DEBUG
+		private const string SiteAgnostic = "Site-Agnostic";
+#endif
+		#endregion
+
 		#region Static Fields
 		private static readonly Brush ProgressBarGreen = new SolidColorBrush(Color.FromArgb(255, 6, 176, 37));
 		private static readonly Brush ProgressBarYellow = new SolidColorBrush(Color.FromArgb(255, 255, 240, 0));
@@ -212,11 +218,11 @@
 #if DEBUG
 		private static void SiteWarningOccurred(Site sender, WarningEventArgs eventArgs) => Debug.WriteLine(eventArgs?.Warning);
 
-		private static void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName} Response: {eventArgs.Response}");
+		private static void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName ?? SiteAgnostic} Response: {eventArgs.Response}");
 
-		private static void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName} Request: {eventArgs.Request}");
+		private static void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName ?? SiteAgnostic} Request: {eventArgs.Request}");
 
-		private static void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName} Warning: ({eventArgs?.Warning.Code}) {eventArgs?.Warning.Info}");
+		private static void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName ?? SiteAgnostic} Warning: ({eventArgs?.Warning.Code}) {eventArgs?.Warning.Info}");
 #endif
 		#endregion
 
