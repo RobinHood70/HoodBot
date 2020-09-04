@@ -70,24 +70,26 @@
 						this.Fragment = mp.Fragment;
 						isMainPage = true;
 					}
+					else
+					{
+						(key, pageName, forced) = SplitPageName(pageName);
+						if (forced)
+						{
+							this.Namespace = site[MediaWikiNamespaces.Main];
+							this.ForcedNamespaceLink = true;
+						}
+
+						if (site.Namespaces.ValueOrDefault(key) is Namespace ns2)
+						{
+							this.Namespace = ns2;
+							pageName = remaining;
+						}
+					}
 				}
 			}
 
 			if (!isMainPage)
 			{
-				(key, pageName, forced) = SplitPageName(pageName);
-				if (forced)
-				{
-					this.Namespace = site[MediaWikiNamespaces.Main];
-					this.ForcedNamespaceLink = true;
-				}
-
-				if (site.Namespaces.ValueOrDefault(key) is Namespace ns2)
-				{
-					this.Namespace = ns2;
-					pageName = remaining;
-				}
-
 				var split = pageName.Split(TextArrays.Octothorp, 2);
 				if (split.Length == 2)
 				{
