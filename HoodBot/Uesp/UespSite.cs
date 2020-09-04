@@ -97,8 +97,11 @@
 				this.AbstractionLayer.Assert = (this.User.Name == "HotnBOThered" || this.User.Name == "HoodBot") ? "bot" : "user";
 			}
 
-			// Messages have to be cleared in order to get pages from the wiki properly, so force that to happen, even if editing is disabled.
-			this.ClearMessage(true);
+			// Messages have to be cleared in order to get pages from the wiki properly, so force that to happen if there are messages waiting, even if editing is disabled.
+			if (this.AbstractionLayer.CurrentUserInfo?.Flags.HasFlag(UserInfoFlags.HasMessage) ?? false)
+			{
+				this.ClearMessage(true);
+			}
 
 			var resultPage = new Title(this[MediaWikiNamespaces.User], this.User.PageName + "/Results");
 			this.ResultHandler = new PageResultHandler(resultPage);
