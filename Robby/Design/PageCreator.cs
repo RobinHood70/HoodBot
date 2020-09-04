@@ -40,6 +40,11 @@
 				this.AddCustomPropertyInputs(propertyInputs);
 			}
 
+			if (whatToLoad.HasFlag(PageModules.DeletedRevisions))
+			{
+				propertyInputs.Add(new DeletedRevisionsInput()); // Currently only used to determine if page has previously been deleted.
+			}
+
 			if (whatToLoad.HasFlag(PageModules.FileInfo))
 			{
 				propertyInputs.Add(new ImageInfoInput()

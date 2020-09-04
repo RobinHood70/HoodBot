@@ -144,6 +144,10 @@
 		/// <value>The links used on the page.</value>
 		public IReadOnlyList<Title> Links { get; } = new List<Title>();
 
+		/// <summary>Gets or sets a value indicating whether this <see cref="Page"/> has previously been deleted.</summary>
+		/// <value><see langword="true"/> if the page has previously been deleted; toherwise, <see langword="false"/>.</value>
+		public bool PreviouslyDeleted { get; protected set; }
+
 		/// <summary>Gets the page properties, if they were requested in the last load operation.</summary>
 		/// <value>The list of page properties.</value>
 		public IReadOnlyDictionary<string, string> Properties { get; } = new Dictionary<string, string>();
@@ -288,6 +292,7 @@
 			this.PopulateFlags(pageItem.Flags.HasFlag(PageFlags.Invalid), pageItem.Flags.HasFlag(PageFlags.Missing));
 			this.PopulateRevisions(pageItem);
 			this.PopulateInfo(pageItem);
+			this.PreviouslyDeleted = this.IsMissing && pageItem.DeletedRevisions.Count > 0;
 			this.PopulateLinks(pageItem);
 			this.PopulateBacklinks(pageItem);
 			this.PopulateProperties(pageItem);

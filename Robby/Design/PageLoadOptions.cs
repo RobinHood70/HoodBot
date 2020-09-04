@@ -49,6 +49,9 @@
 		/// <summary>On File-space pages, load file backlinks.</summary>
 		FileUsage = 1 << 16,
 
+		/// <summary>Load the list of deleted revisions.</summary>
+		DeletedRevisions = 1 << 17,
+
 		/// <summary>Loads default page information, including flags, current timestamp, and current page text.</summary>
 		Default = Info | Revisions,
 
@@ -56,7 +59,7 @@
 		Backlinks = FileUsage | LinksHere | TranscludedIn,
 
 		/// <summary>Load everything Robby is capable of handling.</summary>
-		All = Categories | CategoryInfo | FileInfo | FileUsage | Info | Links | LinksHere | Properties | Revisions | Templates | TranscludedIn | Custom
+		All = Categories | CategoryInfo | DeletedRevisions | FileInfo | FileUsage | Info | Links | LinksHere | Properties | Revisions | Templates | TranscludedIn | Custom
 	}
 	#endregion
 
