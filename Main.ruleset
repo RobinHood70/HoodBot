@@ -1,6 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RuleSet Name="Rules for Main Projects" Description="Code analysis rules for projects which have been released or are about to be." ToolsVersion="16.0">
   <IncludeAll Action="Warning" />
+  <Rules AnalyzerId="Meziantou.Analyzer" RuleNamespace="Meziantou.Analyzer">
+    <Rule Id="MA0003" Action="None" />
+    <Rule Id="MA0007" Action="None" />
+    <Rule Id="MA0025" Action="None" />
+    <Rule Id="MA0026" Action="None" />
+    <Rule Id="MA0046" Action="None" />
+    <Rule Id="MA0048" Action="None" />
+    <Rule Id="MA0051" Action="None" />
+  </Rules>
   <Rules AnalyzerId="Microsoft.Analyzers.NativeCodeAnalysis" RuleNamespace="Microsoft.Rules.Native">
     <Rule Id="C26100" Action="Warning" />
     <Rule Id="C26101" Action="Warning" />

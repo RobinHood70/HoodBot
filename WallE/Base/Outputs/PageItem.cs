@@ -67,7 +67,7 @@ namespace RobinHood70.WallE.Base
 
 		public int Namespace { get; }
 
-		public IReadOnlyDictionary<string, string> Properties { get; } = new Dictionary<string, string>();
+		public IReadOnlyDictionary<string, string> Properties { get; } = new Dictionary<string, string>(StringComparer.Ordinal);
 
 		public long PageId { get; }
 

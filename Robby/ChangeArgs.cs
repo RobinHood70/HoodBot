@@ -19,7 +19,7 @@
 		{
 			this.RealSender = realSender;
 			this.MethodName = methodName;
-			this.Parameters = parameters ?? new Dictionary<string, object?>();
+			this.Parameters = parameters ?? new Dictionary<string, object?>(System.StringComparer.Ordinal);
 		}
 		#endregion
 

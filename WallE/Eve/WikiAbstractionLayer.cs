@@ -431,7 +431,7 @@
 			// General
 			var general = siteInfo.General;
 			var path = general.ArticlePath;
-			if (path.StartsWith("/", StringComparison.Ordinal))
+			if (path.StartsWith('/'))
 			{
 				var repl = path.Substring(0, path.IndexOf("$1", StringComparison.Ordinal));
 				var articleBaseIndex = general.BasePage.IndexOf(repl, StringComparison.Ordinal);
@@ -444,7 +444,7 @@
 			}
 
 			this.ArticlePath = path;
-			var versionFudged = Regex.Replace(general.Generator, @"[^0-9\.]", ".").TrimStart(TextArrays.Period);
+			var versionFudged = Regex.Replace(general.Generator, @"[^0-9\.]", ".", RegexOptions.None, TimeSpan.FromSeconds(1)).TrimStart(TextArrays.Period);
 			var versionSplit = versionFudged.Split(TextArrays.Period);
 			var siteVersion = int.Parse(versionSplit[0], CultureInfo.InvariantCulture) * 100 + int.Parse(versionSplit[1], CultureInfo.InvariantCulture);
 			this.SiteVersion = siteVersion;
@@ -508,7 +508,7 @@
 			}
 			catch (WikiException e)
 			{
-				if (e.Code != ApiDisabledCode)
+				if (!string.Equals(e.Code, ApiDisabledCode, StringComparison.Ordinal))
 				{
 					throw;
 				}
@@ -634,7 +634,8 @@
 			try
 			{
 				// We don't go through the standard SubmitValueAction here, since that would perform an inappropriate stop check.
-				return new ActionClearHasMsg(this).Submit(NullObject.Null).Result == "success";
+				var action = new ActionClearHasMsg(this).Submit(NullObject.Null);
+				return string.Equals(action.Result, "success", StringComparison.OrdinalIgnoreCase);
 			}
 			catch (NotSupportedException)
 			{
@@ -642,11 +643,9 @@
 				{
 					return false;
 				}
-				else
-				{
-					var index = this.GetFullArticlePath(this.Namespaces[MediaWikiNamespaces.UserTalk].Name + ":" + this.CurrentUserInfo.Name);
-					return this.Client.Get(index).Length > 0;
-				}
+
+				var index = this.GetFullArticlePath(this.Namespaces[MediaWikiNamespaces.UserTalk].Name + ":" + this.CurrentUserInfo.Name);
+				return this.Client.Get(index).Length > 0;
 			}
 		}
 
@@ -872,7 +871,9 @@
 			var botPasswordName = userNameSplit[^1];
 
 			// Both checks are necessary because user names can legitimately contain @ signs.
-			if (this.CurrentUserInfo is UserInfoResult userInfo && (userInfo.Name == input.UserName || userInfo.Name == botPasswordName))
+			if (this.CurrentUserInfo is UserInfoResult userInfo && (
+				string.Equals(userInfo.Name, input.UserName, StringComparison.Ordinal) ||
+				string.Equals(userInfo.Name, botPasswordName, StringComparison.Ordinal)))
 			{
 				return LoginResult.AlreadyLoggedIn(userInfo.UserId, userInfo.Name);
 			}
@@ -1018,7 +1019,7 @@
 			var internalInput = new OptionsInputInternal(input.Token, change);
 			if (input.Change != null)
 			{
-				var singleItems = new Dictionary<string, string?>();
+				var singleItems = new Dictionary<string, string?>(StringComparer.Ordinal);
 				string? lastKey = null;
 				foreach (var changeItem in input.Change)
 				{
@@ -1381,7 +1382,7 @@
 				{
 					if (this.ValidStopCheckMethods.HasFlag(StopCheckMethods.UserNameCheck)
 						&& this.SiteVersion < 128
-						&& this.CurrentUserInfo?.Name != userInfoResult.Name)
+						&& !string.Equals(this.CurrentUserInfo?.Name, userInfoResult.Name, StringComparison.Ordinal))
 					{
 						// Used to check if username has unexpectedly changed, indicating that the bot has been logged out (or conceivably logged in) unexpectedly.
 						throw new StopException(EveMessages.UserNameChanged);
@@ -1474,9 +1475,9 @@
 				uploadInput.Offset += input.ChunkSize;
 				uploadInput.FileKey = result.FileKey;
 			}
-			while (result.Result == "Continue" && readBytes > 0);
+			while (string.Equals(result.Result, "Continue", StringComparison.OrdinalIgnoreCase) && readBytes > 0);
 
-			if (result.Result == "Success")
+			if (string.Equals(result.Result, "Success", StringComparison.OrdinalIgnoreCase))
 			{
 				uploadInput.FinalChunk(input);
 				uploadInput.FileKey = result.FileKey;

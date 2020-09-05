@@ -237,7 +237,7 @@
 
 			ThrowNull(usedList, nameof(usedList));
 			var site = usedList.Site;
-			var foundReplacements = new HashSet<string>();
+			var foundReplacements = new HashSet<string>(StringComparer.Ordinal);
 			var newText = textNode.Text;
 			var textLength = textNode.Text.Length;
 			for (var i = 0; i < textLength; i++)

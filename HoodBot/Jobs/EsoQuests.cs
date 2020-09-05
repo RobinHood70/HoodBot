@@ -226,7 +226,7 @@
 		private IEnumerable<QuestData> GetQuestData(TitleCollection wikiQuests)
 		{
 			var quests = this.GetFilteredQuests(wikiQuests);
-			var questDict = new Dictionary<string, QuestData>();
+			var questDict = new Dictionary<string, QuestData>(StringComparer.Ordinal);
 			var questNames = new Dictionary<long, string>();
 			foreach (var quest in quests)
 			{
@@ -428,7 +428,7 @@
 
 		private Dictionary<string, List<Condition>> MergeStages(QuestData quest, SortedSet<string> locs)
 		{
-			var mergedStages = new Dictionary<string, List<Condition>>();
+			var mergedStages = new Dictionary<string, List<Condition>>(StringComparer.Ordinal);
 			foreach (var stage in quest.Stages)
 			{
 				if (stage.Zone != "Tamriel" && stage.Zone != quest.Zone)

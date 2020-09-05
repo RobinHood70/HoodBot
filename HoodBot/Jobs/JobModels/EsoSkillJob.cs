@@ -21,16 +21,16 @@
 
 		#region Static Fields
 		private static readonly string[] DestructionTypes = new[] { "Frost", "Shock", "Fire" };
-		private static readonly HashSet<string> UpdatedParameters = new HashSet<string> { "area", "casttime", "channelTime", "cost", "desc", "desc1", "desc2", "duration", "icon", "icon2", "icon3", "id", "line", "linerank", "morph1name", "morph1id", "morph1icon", "morph1desc", "morph2name", "morph2id", "morph2icon", "morph2desc", "radius", "range", "target", "type" };
+		private static readonly HashSet<string> UpdatedParameters = new HashSet<string>(StringComparer.Ordinal) { "area", "casttime", "channelTime", "cost", "desc", "desc1", "desc2", "duration", "icon", "icon2", "icon3", "id", "line", "linerank", "morph1name", "morph1id", "morph1icon", "morph1desc", "morph2name", "morph2id", "morph2icon", "morph2desc", "radius", "range", "target", "type" };
 
 		private static readonly SortedList<string, string> IconNameCache = new SortedList<string, string>();
-		private static readonly HashSet<string> DestructionExceptions = new HashSet<string> { "Destructive Touch", "Impulse", "Wall of Elements" };
+		private static readonly HashSet<string> DestructionExceptions = new HashSet<string>(StringComparer.Ordinal) { "Destructive Touch", "Impulse", "Wall of Elements" };
 		private static readonly Regex SkillSummaryFinder = Template.Find(TemplateName);
 		#endregion
 
 		#region Fields
 		private readonly SortedSet<Page> nonTrivialChanges = new SortedSet<Page>(TitleComparer<Page>.Instance);
-		private readonly Dictionary<string, T> skills = new Dictionary<string, T>();
+		private readonly Dictionary<string, T> skills = new Dictionary<string, T>(StringComparer.Ordinal);
 		private readonly SortedSet<Page> trivialChanges = new SortedSet<Page>(TitleComparer<Page>.Instance);
 		#endregion
 

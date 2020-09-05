@@ -13,6 +13,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Static Fields
 		private static readonly HashSet<string> KnownProps = new HashSet<string>
+(System.StringComparer.Ordinal)
 		{
 			"actionhidden", "anon", "bot", "comment", "commenthidden", "logaction", "logid", "logtype", "minor", "new", "newlen", "notificationtimestamp", "ns", "old_revid", "oldlen", "pageid", "parsedcomment", "patrolled", "revid", "suppressed", "timestamp", "title", "type", "unpatrolled", "user", "userhidden", "userid",
 		};

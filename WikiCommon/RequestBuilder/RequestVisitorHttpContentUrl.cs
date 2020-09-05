@@ -9,7 +9,7 @@
 	public class RequestVisitorHttpContentUrl : IParameterVisitor
 	{
 		#region Fields
-		private readonly Dictionary<string, string> parameters = new Dictionary<string, string>();
+		private readonly Dictionary<string, string> parameters = new Dictionary<string, string>(StringComparer.Ordinal);
 		private bool supportsUnitSeparator;
 		#endregion
 

@@ -489,7 +489,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 			}
 
-			var imageLimits = new Dictionary<string, ImageLimitsItem>();
+			var imageLimits = new Dictionary<string, ImageLimitsItem>(StringComparer.Ordinal);
 			if (node["imagelimits"] is JToken imageLimitsNode)
 			{
 				foreach (var (key, value) in GetBCIndexedList(imageLimitsNode, this.Wal.DetectedFormatVersion))
@@ -508,7 +508,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				serverName = uri.Host;
 			}
 
-			var thumbLimits = new Dictionary<string, int>();
+			var thumbLimits = new Dictionary<string, int>(StringComparer.Ordinal);
 			if (node["thumblimits"] is JToken thumbLimitsNode)
 			{
 				foreach (var (key, value) in GetBCIndexedList(thumbLimitsNode, this.Wal.DetectedFormatVersion))

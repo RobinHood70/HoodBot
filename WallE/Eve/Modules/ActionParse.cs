@@ -155,7 +155,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		private static Dictionary<string, IReadOnlyList<string>> DeserializeLimitReportData(JToken? subResult)
 		{
-			var limitData = new Dictionary<string, IReadOnlyList<string>>();
+			var limitData = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
 			if (subResult != null)
 			{
 				foreach (var entry in subResult)

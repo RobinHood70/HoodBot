@@ -10,8 +10,8 @@
 	public class VariablesPage : Page
 	{
 		#region Fields
-		private readonly Dictionary<string, string> mainSet = new Dictionary<string, string>();
-		private readonly Dictionary<string, IReadOnlyDictionary<string, string>> subsets = new Dictionary<string, IReadOnlyDictionary<string, string>>();
+		private readonly Dictionary<string, string> mainSet = new Dictionary<string, string>(System.StringComparer.Ordinal);
+		private readonly Dictionary<string, IReadOnlyDictionary<string, string>> subsets = new Dictionary<string, IReadOnlyDictionary<string, string>>(System.StringComparer.Ordinal);
 		#endregion
 
 		#region Constructors

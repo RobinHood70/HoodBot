@@ -25,15 +25,15 @@
 		#endregion
 
 		#region Static Fields
-		private static readonly HashSet<string> AllowMissingEndTag = new HashSet<string> { IncludeOnlyTag, NoIncludeTag, OnlyIncludeTag };
+		private static readonly HashSet<string> AllowMissingEndTag = new HashSet<string>(StringComparer.Ordinal) { IncludeOnlyTag, NoIncludeTag, OnlyIncludeTag };
 		#endregion
 
 		#region Fields
 		private readonly bool enableOnlyInclude;
-		private readonly HashSet<string> ignoredElements = new HashSet<string>();
-		private readonly HashSet<string> ignoredTags = new HashSet<string>();
+		private readonly HashSet<string> ignoredElements = new HashSet<string>(StringComparer.Ordinal);
+		private readonly HashSet<string> ignoredTags = new HashSet<string>(StringComparer.Ordinal);
 		private readonly bool includeIgnores;
-		private readonly HashSet<string> noMoreClosingTag = new HashSet<string>();
+		private readonly HashSet<string> noMoreClosingTag = new HashSet<string>(StringComparer.Ordinal);
 		private readonly int textLength;
 		private readonly Regex tagsRegex;
 		private StackElement[] array;
@@ -62,7 +62,7 @@
 			this.findOnlyinclude = this.enableOnlyInclude;
 			this.includeIgnores = include == null || !strictInclusion;
 
-			var allTags = new HashSet<string>(tagList);
+			var allTags = new HashSet<string>(tagList, StringComparer.Ordinal);
 			switch (include)
 			{
 				case true:

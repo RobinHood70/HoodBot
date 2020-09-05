@@ -230,7 +230,7 @@
 
 		private void Client_RequestingDelay(IMediaWikiClient sender, DelayEventArgs eventArgs)
 		{
-			this.StatusWriteLine(CurrentCulture(Resources.DelayRequested, eventArgs.Reason, $"{eventArgs.DelayTime.TotalSeconds}s", eventArgs.Description));
+			this.StatusWriteLine(CurrentCulture(Resources.DelayRequested, eventArgs.Reason, $"{eventArgs.DelayTime.TotalSeconds.ToString(CultureInfo.CurrentCulture)}s", eventArgs.Description));
 			App.WpfYield();
 
 			/*

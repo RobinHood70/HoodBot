@@ -218,7 +218,7 @@
 			ThrowNull(reason, nameof(reason));
 			return this.Site.PublishChange(
 				this,
-				new Dictionary<string, object?>
+				new Dictionary<string, object?>(StringComparer.Ordinal)
 				{
 					[nameof(reason)] = reason,
 				},
@@ -273,7 +273,7 @@
 
 			ThrowNull(to, nameof(to));
 			ThrowNull(reason, nameof(reason));
-			var fakeResult = new Dictionary<string, string>();
+			var fakeResult = new Dictionary<string, string>(StringComparer.Ordinal);
 			if (!this.Site.EditingEnabled)
 			{
 				fakeResult.Add(this.FullPageName, to);
@@ -297,7 +297,7 @@
 			return this.Site.PublishChange(
 				fakeResult,
 				this,
-				new Dictionary<string, object?>
+				new Dictionary<string, object?>(StringComparer.Ordinal)
 				{
 					[nameof(to)] = to,
 					[nameof(reason)] = reason,
@@ -317,7 +317,7 @@
 					};
 
 					var status = ChangeStatus.Success;
-					var dict = new Dictionary<string, string>();
+					var dict = new Dictionary<string, string>(StringComparer.Ordinal);
 					try
 					{
 						var result = this.Site.AbstractionLayer.Move(input);
@@ -498,7 +498,7 @@
 			return protections.Count == 0 ? ChangeStatus.NoEffect :
 				this.Site.PublishChange(
 					this,
-					new Dictionary<string, object?>
+					new Dictionary<string, object?>(StringComparer.Ordinal)
 					{
 						[nameof(reason)] = reason,
 						[nameof(protections)] = protections,

@@ -17,7 +17,7 @@
 	}
 	#endregion
 
-	internal class NpcData : IComparable<NpcData>
+	internal class NpcData
 	{
 		#region Static Fields
 		private static readonly Dictionary<sbyte, string> Reactions = new Dictionary<sbyte, string>
@@ -92,12 +92,10 @@
 
 		public string Reaction { get; }
 
-		public Dictionary<string, int> UnknownLocations { get; } = new Dictionary<string, int>();
+		public Dictionary<string, int> UnknownLocations { get; } = new Dictionary<string, int>(StringComparer.Ordinal);
 		#endregion
 
 		#region Public Methods
-		public int CompareTo([AllowNull] NpcData other) => string.Compare(this.PageName, other?.PageName, StringComparison.OrdinalIgnoreCase);
-
 		public void TrimPlaces()
 		{
 			void Remove(Func<Place, int, bool> condition)
@@ -130,7 +128,7 @@
 				{
 					foreach (var subPlace in this.Places)
 					{
-						if (subPlace.Key.PlaceType != PlaceType.Unknown && subPlace.Key.Zone == place.TitleName)
+						if (subPlace.Key.PlaceType != PlaceType.Unknown && string.Equals(subPlace.Key.Zone, place.TitleName, StringComparison.Ordinal))
 						{
 							return true;
 						}

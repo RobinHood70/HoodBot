@@ -16,6 +16,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	{
 		#region Static Fields
 		private static readonly Dictionary<string, CategoryMemberTypes> TypeLookup = new Dictionary<string, CategoryMemberTypes>
+(StringComparer.Ordinal)
 		{
 			["file"] = CategoryMemberTypes.File,
 			["page"] = CategoryMemberTypes.Page,

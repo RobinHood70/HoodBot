@@ -14,7 +14,7 @@
 			// Assumes dictionary will hold Id.
 			ThrowNull(word, nameof(word));
 			this.CaseSensitive = word.CaseSensitive;
-			this.Aliases = new HashSet<string>(word.Aliases);
+			this.Aliases = new HashSet<string>(word.Aliases, System.StringComparer.Ordinal);
 		}
 
 		/// <summary>Gets any aliases for the word.</summary>

@@ -483,6 +483,7 @@
 		private class CookieBinder : SerializationBinder
 		{
 			private static readonly HashSet<string> ValidTypes = new HashSet<string>
+(StringComparer.Ordinal)
 			{
 				"System.Collections.ArrayList",
 				"System.Collections.Comparer",

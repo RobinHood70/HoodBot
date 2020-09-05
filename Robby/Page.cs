@@ -150,7 +150,7 @@
 
 		/// <summary>Gets the page properties, if they were requested in the last load operation.</summary>
 		/// <value>The list of page properties.</value>
-		public IReadOnlyDictionary<string, string> Properties { get; } = new Dictionary<string, string>();
+		public IReadOnlyDictionary<string, string> Properties { get; } = new Dictionary<string, string>(StringComparer.Ordinal);
 
 		/// <summary>Gets the page revisions, if they were requested in the last load operation.</summary>
 		/// <value>The revisions list.</value>
@@ -176,7 +176,7 @@
 		/// <summary>Gets a value indicating whether the <see cref="Text" /> property has been modified.</summary>
 		/// <value><see langword="true" /> if the text no longer matches the first revision; otherwise, <see langword="false" />.</value>
 		/// <remarks>This is currently simply a shortcut property to compare the Text with Revisions[0]. This may not be an accurate reflection of modification status when loading a specific revision range or in other unusual circumstances.</remarks>
-		public bool TextModified => this.Text != (this.CurrentRevision?.Text ?? string.Empty);
+		public bool TextModified => !string.Equals(this.Text, this.CurrentRevision?.Text ?? string.Empty, StringComparison.Ordinal);
 		#endregion
 
 		#region Public Static Methods
@@ -261,6 +261,8 @@
 			return this.Site.PublishPageTextChange(
 				changeArgs,
 				() => // Modification status re-checked here because a subscriber may have reverted the page.
+					!this.TextModified ? ChangeStatus.NoEffect :
+					string.Equals(
 						this.Site.AbstractionLayer.Edit(new EditInput(this.FullPageName, this.Text)
 						{
 							BaseTimestamp = this.CurrentRevision?.Timestamp,
@@ -270,7 +272,11 @@
 							Recreate = changeArgs.RecreateIfJustDeleted,
 							Summary = changeArgs.EditSummary,
 							RequireNewPage = createOnly,
-						}).Result == "Success" ? ChangeStatus.Success : ChangeStatus.Failure);
+						}).Result,
+						"Success",
+						StringComparison.Ordinal)
+							? ChangeStatus.Success
+							: ChangeStatus.Failure);
 		}
 
 		/// <summary>Sets <see cref="StartTimestamp"/> to 2000-01-01. This allows the Save function to detect if a page has ever been deleted.</summary>

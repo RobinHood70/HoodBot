@@ -14,8 +14,8 @@
 	public class UpdateLoreBookLists : EditJob
 	{
 		#region Fields
-		private readonly Dictionary<string, string> linkTitles = new Dictionary<string, string>();
-		private readonly Dictionary<string, List<string>> pageBooks = new Dictionary<string, List<string>>();
+		private readonly Dictionary<string, string> linkTitles = new Dictionary<string, string>(StringComparer.Ordinal);
+		private readonly Dictionary<string, List<string>> pageBooks = new Dictionary<string, List<string>>(StringComparer.Ordinal);
 		#endregion
 
 		#region Constructors

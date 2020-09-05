@@ -33,7 +33,7 @@
 	public class PageCollection : TitleCollection<Page>
 	{
 		#region Fields
-		private readonly Dictionary<string, IFullTitle> titleMap = new Dictionary<string, IFullTitle>();
+		private readonly Dictionary<string, IFullTitle> titleMap = new Dictionary<string, IFullTitle>(StringComparer.Ordinal);
 		private readonly List<string> recurseCategories = new List<string>();
 		#endregion
 
@@ -462,7 +462,7 @@
 			ThrowNull(input, nameof(input));
 			if (recurse)
 			{
-				this.RecurseCategoryPages(input, new HashSet<string>());
+				this.RecurseCategoryPages(input, new HashSet<string>(StringComparer.Ordinal));
 			}
 			else
 			{

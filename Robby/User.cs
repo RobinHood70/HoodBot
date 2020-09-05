@@ -150,7 +150,7 @@
 			return this.Site.PublishChange(
 				string.Empty,
 				this,
-				new Dictionary<string, object?>
+				new Dictionary<string, object?>(StringComparer.Ordinal)
 				{
 					[nameof(subject)] = subject,
 					[nameof(body)] = body,
@@ -160,7 +160,7 @@
 				{
 					var input = new EmailUserInput(this.Name, body) { CCMe = ccMe, Subject = subject };
 					var result = this.Site.AbstractionLayer.EmailUser(input);
-					return new ChangeValue<string>(result.Result == "Success" ? ChangeStatus.Success : ChangeStatus.Failure, result.Message ?? result.Result);
+					return new ChangeValue<string>(string.Equals(result.Result, "Success", StringComparison.OrdinalIgnoreCase) ? ChangeStatus.Success : ChangeStatus.Failure, result.Message ?? result.Result);
 				});
 		}
 
@@ -277,7 +277,7 @@
 
 			return this.Site.PublishChange(
 				this,
-				new Dictionary<string, object?>
+				new Dictionary<string, object?>(StringComparer.Ordinal)
 				{
 					[nameof(header)] = header,
 					[nameof(msg)] = msg,
@@ -297,7 +297,7 @@
 							Summary = editSummary,
 						};
 
-						return this.Site.AbstractionLayer.Edit(input).Result == "Success" ? ChangeStatus.Success : ChangeStatus.Failure;
+						return string.Equals(this.Site.AbstractionLayer.Edit(input).Result, "Success", StringComparison.OrdinalIgnoreCase) ? ChangeStatus.Success : ChangeStatus.Failure;
 					}
 
 					throw new InvalidOperationException(Resources.TitleInvalid);
@@ -309,7 +309,7 @@
 		/// <returns>A value indicating the change status of the unblock.</returns>
 		public ChangeStatus Unblock(string reason) => this.Site.PublishChange(
 			this,
-			new Dictionary<string, object?> { [nameof(reason)] = reason, },
+			new Dictionary<string, object?>(StringComparer.Ordinal) { [nameof(reason)] = reason, },
 			() =>
 			{
 				var input = new UnblockInput(this.Name) { Reason = reason };
@@ -320,7 +320,7 @@
 		#region Private Methods
 		private ChangeStatus Block(BlockInput input) => this.Site.PublishChange(
 			this,
-			new Dictionary<string, object?>
+			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				[nameof(input.User)] = input.User,
 				[nameof(input.Reason)] = input.Reason,

@@ -14,7 +14,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	internal class PropInfo : PropModule<InfoInput>
 	{
 		#region Fields
-		private readonly Dictionary<string, bool> baseActions = new Dictionary<string, bool>();
+		private readonly Dictionary<string, bool> baseActions = new Dictionary<string, bool>(StringComparer.Ordinal);
 		#endregion
 
 		#region Constructors
@@ -83,7 +83,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				counter = (long)counterNode;
 			}
 
-			var tokens = new Dictionary<string, string>();
+			var tokens = new Dictionary<string, string>(StringComparer.Ordinal);
 			foreach (var token in parent.Children<JProperty>())
 			{
 				if (token.Name.EndsWith("token", StringComparison.Ordinal))
@@ -108,7 +108,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			// Ensure that all inputs have an output so we get consistent results between JSON1 and JSON2. To cover the corner case where some extension gives unexpected outputs that don't match the input actions, or multiple outputs for a single input, I've initialized the dictionary from the input actions, then updated from there. It is assumed that the programmer will be aware of what they're looking for should these cases ever occur, and will not be bothered by extraneous false values beyond the original input actions.
-			var testActions = new Dictionary<string, bool>(this.baseActions);
+			var testActions = new Dictionary<string, bool>(this.baseActions, StringComparer.Ordinal);
 			if (parent["actions"] is JToken testActionsNode)
 			{
 				foreach (var prop in testActionsNode.Children<JProperty>())

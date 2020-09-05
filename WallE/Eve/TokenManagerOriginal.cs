@@ -16,6 +16,7 @@
 
 		#region Protected Static Properties
 		protected static HashSet<string> ValidTypes { get; } = new HashSet<string>
+(System.StringComparer.Ordinal)
 		{
 			TokensInput.Edit,
 			TokensInput.Patrol,
@@ -24,7 +25,7 @@
 		#endregion
 
 		#region Protected Fields
-		protected Dictionary<string, string> SessionTokens { get; } = new Dictionary<string, string>(ValidTypes.Count);
+		protected Dictionary<string, string> SessionTokens { get; } = new Dictionary<string, string>(ValidTypes.Count, System.StringComparer.Ordinal);
 
 		protected WikiAbstractionLayer Wal { get; }
 		#endregion

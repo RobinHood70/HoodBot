@@ -154,7 +154,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			#endregion
 
 			#region Public Properties
-			public Dictionary<string, object?> Result { get; } = new Dictionary<string, object?>();
+			public Dictionary<string, object?> Result { get; } = new Dictionary<string, object?>(StringComparer.Ordinal);
 			#endregion
 
 			#region Private Methods

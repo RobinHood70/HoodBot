@@ -161,7 +161,7 @@
 		public ChangeValue<PageCollection> Purge(PurgeMethod method) => this.Site.PublishChange(
 			PageCollection.UnlimitedDefault(this.Site),
 			this,
-			new Dictionary<string, object?> { [nameof(method)] = method },
+			new Dictionary<string, object?>(StringComparer.Ordinal) { [nameof(method)] = method },
 			() =>
 			{
 				var pages = this.Purge(new PurgeInput(this.ToFullPageNames()) { Method = method });
@@ -189,7 +189,7 @@
 		public ChangeValue<PageCollection> Unwatch() => this.Site.PublishChange(
 			PageCollection.UnlimitedDefault(this.Site, this),
 			this,
-			new Dictionary<string, object?>(),
+			new Dictionary<string, object?>(StringComparer.Ordinal),
 			() =>
 			{
 				var pages = this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = true });
@@ -201,7 +201,7 @@
 		public ChangeValue<PageCollection> Watch() => this.Site.PublishChange(
 			PageCollection.UnlimitedDefault(this.Site, this),
 			this,
-			new Dictionary<string, object?>(),
+			new Dictionary<string, object?>(StringComparer.Ordinal),
 			() =>
 			{
 				var pages = this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = false });
@@ -288,7 +288,7 @@
 			input.Properties |= CategoryMembersProperties.Title;
 			if (recurse)
 			{
-				this.RecurseCategoryPages(input, new HashSet<string>());
+				this.RecurseCategoryPages(input, new HashSet<string>(StringComparer.Ordinal));
 			}
 			else
 			{

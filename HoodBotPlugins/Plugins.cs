@@ -38,7 +38,7 @@
 				Debug.WriteLine(ce.Message);
 			}
 
-			var diffViewers = new Dictionary<string, IDiffViewer>();
+			var diffViewers = new Dictionary<string, IDiffViewer>(StringComparer.Ordinal);
 			foreach (var plugin in this.All)
 			{
 				if (plugin.Value is IDiffViewer diffViewer)

@@ -109,7 +109,7 @@ namespace RobinHood70.WikiCommon
 		/// <returns>A EmbeddedValue with the most common formatting in use, based on the existing named parameters. If there are no named parameters, returns an empty EmbeddedValue.</returns>
 		public EmbeddedValue DefaultFormat(bool names)
 		{
-			var counts = new Dictionary<string, int>();
+			var counts = new Dictionary<string, int>(StringComparer.Ordinal);
 			var highest = 0;
 			var highestKey = string.Empty;
 			foreach (var parameter in this.Parameters)

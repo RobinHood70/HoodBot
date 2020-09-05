@@ -13,11 +13,12 @@
 	public class CheckArticleHeaders : WikiJob
 	{
 		private static readonly HashSet<string> BadHeaders = new HashSet<string>
+(StringComparer.Ordinal)
 		{
 			"Bug", "Map", "Note", "Quest", "Quests", "Related Quest"
 		};
 
-		private readonly Dictionary<string, TitleCollection> exceptions = new Dictionary<string, TitleCollection>();
+		private readonly Dictionary<string, TitleCollection> exceptions = new Dictionary<string, TitleCollection>(StringComparer.Ordinal);
 		private readonly int ns;
 
 		[JobInfo("Check Article Headers", "Maintenance|")]

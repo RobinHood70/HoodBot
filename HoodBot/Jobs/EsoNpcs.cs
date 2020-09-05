@@ -57,7 +57,7 @@
 				{ "imgdesc", string.Empty },
 				{ "race", string.Empty },
 				{ "gender", npc.Gender.ToString() },
-				{ "difficulty", npc.Difficulty > 0 ? npc.Difficulty.ToString() : string.Empty },
+				{ "difficulty", npc.Difficulty > 0 ? npc.Difficulty.ToString(this.Site.Culture) : string.Empty },
 				{ "reaction", npc.Reaction },
 				{ "pickpocket", npc.PickpocketDifficulty > 0 ? npc.PickpocketDifficulty.ToString() : string.Empty },
 				{ "loottype", npc.LootType },
@@ -90,7 +90,8 @@
 
 			var text = new StringBuilder()
 				.Append("{{Minimal|NPC}}")
-				.AppendLine(template.ToString())
+				.Append(template)
+				.AppendLine()
 				.AppendLine()
 				.AppendLine("<!-- Instructions: Provide an initial sentence summarizing the NPC (race, job, where they live). Subsequent paragraphs provide additional information about the NPC, such as related NPCs, schedule, equipment, etc. Note that quest-specific information DOES NOT belong on this page, but instead goes on the appropriate quest page. Spoilers should be avoided.-->")
 				.AppendLine("{{NewLeft}}")

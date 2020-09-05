@@ -62,11 +62,9 @@
 					{
 						throw;
 					}
-					else
-					{
-						page.Load();
-						this.EditConflictAction(this, page);
-					}
+
+					page.Load();
+					this.EditConflictAction(this, page);
 				}
 			}
 		}

@@ -26,13 +26,13 @@ namespace RobinHood70.WallE.Base
 
 		public string? Comment { get; internal set; }
 
-		public IReadOnlyDictionary<string, object> CommonMetadata { get; } = new Dictionary<string, object>();
+		public IReadOnlyDictionary<string, object> CommonMetadata { get; } = new Dictionary<string, object>(StringComparer.Ordinal);
 
 		public string? DescriptionUri { get; internal set; }
 
 		public float Duration { get; internal set; }
 
-		public IReadOnlyDictionary<string, ExtendedMetadataItem> ExtendedMetadata { get; } = new Dictionary<string, ExtendedMetadataItem>();
+		public IReadOnlyDictionary<string, ExtendedMetadataItem> ExtendedMetadata { get; } = new Dictionary<string, ExtendedMetadataItem>(StringComparer.Ordinal);
 
 		public ImageInfoFlags Flags { get; internal set; }
 
@@ -40,7 +40,7 @@ namespace RobinHood70.WallE.Base
 
 		public string? MediaType { get; internal set; }
 
-		public IReadOnlyDictionary<string, object> Metadata { get; } = new Dictionary<string, object>();
+		public IReadOnlyDictionary<string, object> Metadata { get; } = new Dictionary<string, object>(StringComparer.Ordinal);
 
 		public string? MimeType { get; internal set; }
 

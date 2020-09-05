@@ -27,7 +27,7 @@
 		#endregion
 
 		#region Fields
-		private readonly Dictionary<string, string> descriptions = new Dictionary<string, string>();
+		private readonly Dictionary<string, string> descriptions = new Dictionary<string, string>(StringComparer.Ordinal);
 		#endregion
 
 		#region Constructors
