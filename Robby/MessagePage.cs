@@ -18,7 +18,7 @@
 		/// <param name="site">The site the Message is from.</param>
 		/// <param name="pageName">The page name.</param>
 		public MessagePage(Site site, string pageName)
-			: base((site ?? throw ArgumentNull(nameof(site))).Namespaces[MediaWikiNamespaces.MediaWiki], pageName)
+			: base((site ?? throw ArgumentNull(nameof(site)))[MediaWikiNamespaces.MediaWiki], pageName)
 		{
 		}
 
@@ -30,7 +30,7 @@
 		{
 			if (ns.Id != MediaWikiNamespaces.MediaWiki)
 			{
-				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, ns.Site.Namespaces[MediaWikiNamespaces.MediaWiki].Name), nameof(ns));
+				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, ns.Site[MediaWikiNamespaces.MediaWiki].Name), nameof(ns));
 			}
 		}
 
@@ -41,7 +41,7 @@
 		{
 			if (title.Namespace.Id != MediaWikiNamespaces.MediaWiki)
 			{
-				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, this.Site.Namespaces[MediaWikiNamespaces.MediaWiki].Name), nameof(title));
+				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, this.Site[MediaWikiNamespaces.MediaWiki].Name), nameof(title));
 			}
 		}
 

@@ -468,7 +468,7 @@
 			var result = this.Site.AbstractionLayer.AllMessages(input);
 			foreach (var item in result)
 			{
-				this.Add(new Title(this.Site.Namespaces[MediaWikiNamespaces.MediaWiki], item.Name));
+				this.Add(new Title(this.Site[MediaWikiNamespaces.MediaWiki], item.Name));
 			}
 		}
 

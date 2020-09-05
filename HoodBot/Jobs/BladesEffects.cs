@@ -84,7 +84,7 @@
 						pageName += " (effect)";
 					}
 
-					var page = new Page(this.Site.Namespaces[UespNamespaces.Blades], pageName)
+					var page = new Page(this.Site[UespNamespaces.Blades], pageName)
 					{
 						Text = "{{Trail|Effects}}{{Minimal}}\n" + WikiTextVisitor.Raw(template) + "\n{{Stub|Effect}}"
 					};

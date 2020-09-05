@@ -114,7 +114,7 @@
 		}
 		#endregion
 
-		#region Events
+		#region Public Events
 
 		/// <summary>Occurs when a change is about to be made to the wiki. Subscribers have the option to indicate if they need the change to be cancelled.</summary>
 		public event StrongEventHandler<Site, ChangeArgs>? Changing;
@@ -133,15 +133,11 @@
 
 		/// <summary>Gets the wiki abstraction layer.</summary>
 		/// <value>The wiki abstraction layer.</value>
-		public IWikiAbstractionLayer AbstractionLayer { get; }
+		public IWikiAbstractionLayer AbstractionLayer { get; } // TODO: Hide this and replace it with public or internal methods for all related calls (e.g., delete page, get watchlist, etc.)
 
 		/// <summary>Gets the base article path.</summary>
 		/// <value>The base article path, where <c>$1</c> should be replaced with the URL-encoded article title. </value>
 		public string BaseArticlePath => this.baseArticlePath ?? throw NoSite();
-
-		/// <summary>Gets a value indicating whether the first letter of titles is case-sensitive.</summary>
-		/// <value><see langword="true"/> if the first letter of titles is case-sensitive; otherwise, <see langword="false"/>.</value>
-		public bool CaseSensitive { get; private set; }
 
 		/// <summary>Gets or sets a CultureInfo object base the wiki's language and variant.</summary>
 		/// <value>The culture of the wiki.</value>
@@ -194,10 +190,6 @@
 		/// <value>The magic words.</value>
 		public IReadOnlyDictionary<string, MagicWord> MagicWords => this.magicWords;
 
-		/// <summary>Gets the Main namespace.</summary>
-		/// <remarks>This is a simple shortcut for Main space, identical to this.Namespaces[MediaWikiNamespaces.Main].</remarks>
-		public Namespace Mainspace => this.Namespaces[MediaWikiNamespaces.Main];
-
 		/// <summary>Gets the <see cref="Title"/> for the main page of the site.</summary>
 		/// <value>The main page.</value>
 		public FullTitle MainPage => this.mainPage ?? throw NoSite();
@@ -246,6 +238,13 @@
 		/// <exception cref="KeyNotFoundException">An element with the specified key does not exist in the collection.</exception>
 		/// <remarks>This is simply short-hand for <c>this.Namespaces[id]</c>.</remarks>
 		public Namespace this[int id] => this.Namespaces[id];
+
+		/// <summary>Gets the <see cref="Namespace"/> with the specified key.</summary>
+		/// <param name="id">The name of the namespace.</param>
+		/// <returns>The element with the specified key. If an element with the specified key is not found, an exception is thrown.</returns>
+		/// <exception cref="KeyNotFoundException">An element with the specified key does not exist in the collection.</exception>
+		/// <remarks>This is simply short-hand for <c>this.Namespaces[id]</c>.</remarks>
+		public Namespace this[string id] => this.Namespaces[id];
 		#endregion
 
 		#region Public Static Methods
@@ -306,35 +305,7 @@
 		/// <param name="articleName">Name of the article.</param>
 		/// <param name="fragment">The fragment to jump to. May be null.</param>
 		/// <returns>A full Uri to the article.</returns>
-		public virtual Uri GetArticlePath(string articleName, string? fragment) => this.GetArticlePath(this.BaseArticlePath, articleName, fragment);
-
-		/// <summary>Gets the redirect target from the page text.</summary>
-		/// <param name="text">The text to parse.</param>
-		/// <returns>A <see cref="IFullTitle"/> object with the parsed redirect.</returns>
-		public virtual IFullTitle? GetRedirectFromText(string text)
-		{
-			ThrowNull(text, nameof(text));
-			var redirects = new HashSet<string>(this.MagicWords.TryGetValue("redirect", out var redirect) ? redirect.Aliases : DefaultRedirect);
-			var parser = WikiTextParser.Parse(text);
-			if (parser.First is LinkedListNode<IWikiNode> first && first.Value is TextNode textNode)
-			{
-				var searchText = textNode.Text.TrimEnd();
-
-				// In most cases, searchText will now be the full redirect magic word (e.g., "#REDIRECT"), but old versions of MediaWiki used colons, so strip off a single colon (only one is allowed) if needed and re-trim.
-				if (searchText.Length > 0 && searchText[^1] == ':')
-				{
-					searchText = searchText[0..^1].TrimEnd();
-				}
-
-				if (redirects.Contains(searchText) && first.Next?.Value is LinkNode linkNode)
-				{
-					var name = WikiTextVisitor.Raw(linkNode.Title);
-					return FullTitle.FromName(this, name);
-				}
-			}
-
-			return null;
-		}
+		public Uri GetArticlePath(string articleName, string? fragment) => this.GetArticlePath(this.BaseArticlePath, articleName, fragment);
 
 		/// <summary>Gets all active blocks.</summary>
 		/// <returns>All active blocks.</returns>
@@ -410,10 +381,6 @@
 			Arguments = arguments,
 		});
 
-		/// <summary>Gets all page property names in use on the wiki.</summary>
-		/// <returns>All page property names on the wiki.</returns>
-		public IReadOnlyList<string> LoadPagePropertyNames() => this.AbstractionLayer.PagePropertyNames(new PagePropertyNamesInput());
-
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="pageName">Name of the page.</param>
 		/// <returns>The text of the page.</returns>
@@ -488,14 +455,14 @@
 		/// <summary>Gets multiple messages from MediaWiki space with any magic words and the like parsed into text.</summary>
 		/// <param name="messages">The messages.</param>
 		/// <param name="arguments">Optional arguments to substitute into the message.</param>
-		/// <param name="title">The title to use for parsing.</param>
+		/// <param name="context">The title to use for parsing.</param>
 		/// <returns>A read-only dictionary of the specified arguments with their associated Message objects.</returns>
-		public IReadOnlyDictionary<string, MessagePage> LoadParsedMessages(IEnumerable<string> messages, IEnumerable<string> arguments, Title? title) => this.LoadMessages(new AllMessagesInput
+		public IReadOnlyDictionary<string, MessagePage> LoadParsedMessages(IEnumerable<string> messages, IEnumerable<string> arguments, Title? context) => this.LoadMessages(new AllMessagesInput
 		{
 			Messages = messages,
 			Arguments = arguments,
 			EnableParser = true,
-			EnableParserTitle = title?.FullPageName,
+			EnableParserTitle = context?.FullPageName,
 		});
 
 		/// <summary>Gets all recent changes.</summary>
@@ -801,13 +768,46 @@
 			return new Uri(fullPath);
 		}
 
+		/// <summary>Gets the redirect target from the page text.</summary>
+		/// <param name="text">The text to parse.</param>
+		/// <returns>A <see cref="IFullTitle"/> object with the parsed redirect.</returns>
+		public virtual IFullTitle? GetRedirectFromText(string text)
+		{
+			ThrowNull(text, nameof(text));
+			var redirects = new HashSet<string>(this.MagicWords.TryGetValue("redirect", out var redirect) ? redirect.Aliases : DefaultRedirect);
+			var parser = WikiTextParser.Parse(text);
+			if (parser.First is LinkedListNode<IWikiNode> first && first.Value is TextNode textNode)
+			{
+				var searchText = textNode.Text.TrimEnd();
+
+				// In most cases, searchText will now be the full redirect magic word (e.g., "#REDIRECT"), but old versions of MediaWiki used colons, so strip off a single colon (only one is allowed) if needed and re-trim.
+				if (searchText.Length > 0 && searchText[^1] == ':')
+				{
+					searchText = searchText[0..^1].TrimEnd();
+				}
+
+				if (redirects.Contains(searchText) && first.Next?.Value is LinkNode linkNode)
+				{
+					var name = WikiTextVisitor.Raw(linkNode.Title);
+					return FullTitle.FromName(this, name);
+				}
+			}
+
+			return null;
+		}
+
+		/// <summary>Gets all page property names in use on the wiki.</summary>
+		/// <returns>All page property names on the wiki.</returns>
+		public virtual IReadOnlyList<string> LoadPagePropertyNames() => this.AbstractionLayer.PagePropertyNames(new PagePropertyNamesInput());
+
 		/// <summary>Logs the user out.</summary>
+		/// <param name="force">If set to <see langword="true"/>, the logout will be performed, even if editing is disabled.</param>
 		/// <remarks>Like all write operations, the actual logout request will NOT be sent to the wiki unless editing is enabled.</remarks>
-		public virtual void Logout()
+		public virtual void Logout(bool force)
 		{
 			this.Clear();
 
-			if (this.EditingEnabled)
+			if (force || this.EditingEnabled)
 			{
 				this.AbstractionLayer.Logout();
 			}
@@ -858,7 +858,6 @@
 		/// <param name="changeArgs">The arguments involved in changing the page. The caller is responsible for creating the object so that it can get the various return values out of it when after the event.</param>
 		/// <param name="changeFunction">The function to execute. It should return a <see cref="ChangeStatus"/> indicating whether the call was successful, failed, or ignored.</param>
 		/// <returns>A value indicating the actions that should take place.</returns>
-		[SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
 		public virtual ChangeStatus PublishPageTextChange(PageTextChangeArgs changeArgs, Func<ChangeStatus> changeFunction)
 		{
 			ThrowNull(changeArgs, nameof(changeArgs));
@@ -930,7 +929,7 @@
 			if (this.disambiguationTemplates == null)
 			{
 				this.disambiguationTemplates = new HashSet<Title>();
-				var page = new Page(this.Namespaces[MediaWikiNamespaces.MediaWiki], "Disambiguationspage");
+				var page = new Page(this[MediaWikiNamespaces.MediaWiki], "Disambiguationspage");
 				page.Load(PageModules.Default | PageModules.Links);
 				if (page.Exists)
 				{
@@ -962,7 +961,7 @@
 			var retval = new Dictionary<string, MessagePage>(result.Count);
 			foreach (var item in result)
 			{
-				retval.Add(item.Name, new MessagePage(this.Namespaces[MediaWikiNamespaces.MediaWiki], item));
+				retval.Add(item.Name, new MessagePage(this[MediaWikiNamespaces.MediaWiki], item));
 			}
 
 			return retval.AsReadOnly();
@@ -1061,7 +1060,6 @@
 			// General
 			var general = siteInfo.General;
 			var server = general.Server; // Used to help determine if interwiki is local
-			this.CaseSensitive = general.Flags.HasFlag(SiteInfoFlags.CaseSensitive);
 			this.culture = GetCulture(general.Language);
 			this.siteName = general.SiteName;
 			this.serverName = general.ServerName;
@@ -1178,7 +1176,6 @@
 		private void Clear()
 		{
 			this.baseArticlePath = null;
-			this.CaseSensitive = false;
 			this.Culture = CultureInfo.CurrentCulture;
 			this.DisambiguatorAvailable = false;
 			this.magicWords.Clear();
