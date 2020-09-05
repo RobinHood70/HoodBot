@@ -58,9 +58,9 @@
 	public class SiteLink : FullTitle, ILinkTitle
 	{
 		#region Static Fields
-		private static readonly Dictionary<string, ParameterType> DirectValues = new Dictionary<string, ParameterType>();
+		private static readonly Dictionary<string, ParameterType> DirectValues = new Dictionary<string, ParameterType>(StringComparer.Ordinal);
 		private static readonly List<(ParameterType ParameterType, string Before, string After)> ImageParameterInfo = new List<(ParameterType ParameterType, string Before, string After)>();
-		private static readonly Dictionary<string, ParameterType> ImageWords = new Dictionary<string, ParameterType>()
+		private static readonly Dictionary<string, ParameterType> ImageWords = new Dictionary<string, ParameterType>(StringComparer.Ordinal)
 		{
 			["img_baseline"] = ParameterType.Valign, // no params
 			["img_sub"] = ParameterType.Valign, // no params

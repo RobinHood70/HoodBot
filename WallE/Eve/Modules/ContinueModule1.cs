@@ -13,7 +13,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Fields
-		private readonly HashSet<string> modules = new HashSet<string>();
+		private readonly HashSet<string> modules = new HashSet<string>(System.StringComparer.Ordinal);
 
 		private string? currentGeneratorValue;
 		private string? savedGeneratorValue;

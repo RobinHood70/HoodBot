@@ -46,7 +46,7 @@
 			server: string.Empty,
 			serverName: null,
 			siteName: "NullWiki",
-			thumbLimits: new Dictionary<string, int>
+			thumbLimits: new Dictionary<string, int>(StringComparer.Ordinal)
 			{
 				["0"] = 120
 			},
@@ -55,8 +55,7 @@
 			timeZone: "UTC",
 			variantArticlePath: null,
 			variants: new List<string>(),
-			wikiId: string.Empty
-			);
+			wikiId: string.Empty);
 
 		private static readonly List<SiteInfoNamespace> SiteInfoNamespaces = new List<SiteInfoNamespace>
 		{
@@ -223,7 +222,7 @@
 		public EditResult Edit(EditInput input)
 		{
 			ThrowNull(input, nameof(input));
-			return new EditResult("Success", input.PageId, input.Title ?? "Test Page", EditFlags.NoChange, input.ContentModel, 1, 1, this.CurrentTimestamp, new Dictionary<string, string>());
+			return new EditResult("Success", input.PageId, input.Title ?? "Test Page", EditFlags.NoChange, input.ContentModel, 1, 1, this.CurrentTimestamp, new Dictionary<string, string>(StringComparer.Ordinal));
 		}
 
 		/// <inheritdoc/>
@@ -471,9 +470,9 @@
 			email: null,
 			emailAuthenticated: null,
 			flags: UserInfoFlags.None,
-			options: new Dictionary<string, object>(),
+			options: new Dictionary<string, object>(StringComparer.Ordinal),
 			preferencesToken: null,
-			rateLimits: new Dictionary<string, RateLimitsItem?>(),
+			rateLimits: new Dictionary<string, RateLimitsItem?>(StringComparer.Ordinal),
 			realName: null,
 			unreadText: null);
 		#endregion

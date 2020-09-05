@@ -42,7 +42,7 @@
 
 			if (token.Type == JTokenType.Array)
 			{
-				var dict = new Dictionary<string, string?>();
+				var dict = new Dictionary<string, string?>(StringComparer.Ordinal);
 				foreach (var entry in token)
 				{
 					var key = (string?)entry["name"] ?? string.Empty;
@@ -214,7 +214,7 @@
 			const string toInterwikiName = "tointerwiki";
 
 			ThrowNull(interwikiPrefixes, nameof(interwikiPrefixes));
-			var redirects = new Dictionary<string, PageSetRedirectItem>();
+			var redirects = new Dictionary<string, PageSetRedirectItem>(StringComparer.Ordinal);
 			if (token != null)
 			{
 				foreach (var item in token)
@@ -232,7 +232,7 @@
 						}
 					}
 
-					var gi = item.ToObject<Dictionary<string, object>>() ?? new Dictionary<string, object>();
+					var gi = item.ToObject<Dictionary<string, object>>() ?? new Dictionary<string, object>(StringComparer.Ordinal);
 					gi.Remove(fromName);
 					gi.Remove(toName);
 					gi.Remove(toFragmentName);
@@ -323,7 +323,7 @@
 		/// <returns>A <see cref="Dictionary{TKey, TValue}"/> with a <see cref="string"/> key and values of the specified type.</returns>
 		public static IReadOnlyDictionary<string, TValue> GetStringDictionary<TValue>(this JToken? token)
 		{
-			var dict = new Dictionary<string, TValue>();
+			var dict = new Dictionary<string, TValue>(StringComparer.Ordinal);
 			if (token != null)
 			{
 				foreach (var item in token.Children<JProperty>())

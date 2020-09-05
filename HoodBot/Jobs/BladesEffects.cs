@@ -37,7 +37,7 @@
 		protected override void BeforeLogging()
 		{
 			var fileName = Path.Combine(UespSite.GetBotFolder(), "QuestLanguageDatabase.txt");
-			var translation = new Dictionary<string, string>();
+			var translation = new Dictionary<string, string>(StringComparer.Ordinal);
 			var langFile = new CsvFile();
 			langFile.ReadFile(fileName, true);
 			foreach (var entry in langFile)

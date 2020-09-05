@@ -168,7 +168,7 @@
 		public static NpcCollection GetNpcsFromDatabase()
 		{
 			var retval = new NpcCollection();
-			var nameClash = new HashSet<string>();
+			var nameClash = new HashSet<string>(StringComparer.Ordinal);
 			foreach (var row in RunQuery("SELECT id, name, gender, difficulty, ppDifficulty, ppClass, reaction FROM uesp_esolog.npc WHERE level != -1"))
 			{
 				var name = (string)row["name"];
@@ -265,7 +265,7 @@
 		{
 			foreach (var npc in npcData)
 			{
-				var locCopy = new Dictionary<string, int>(npc.UnknownLocations);
+				var locCopy = new Dictionary<string, int>(npc.UnknownLocations, StringComparer.Ordinal);
 				foreach (var kvp in locCopy)
 				{
 					var key = kvp.Key;

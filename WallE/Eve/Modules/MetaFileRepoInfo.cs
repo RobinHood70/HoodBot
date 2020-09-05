@@ -47,7 +47,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				return null;
 			}
 
-			var otherInfo = new Dictionary<string, string?>();
+			var otherInfo = new Dictionary<string, string?>(StringComparer.Ordinal);
 			foreach (var otherNode in result.Children<JProperty>())
 			{
 				var ignoreWords = new SortedSet<string>() { "apiurl", "articleurl", "descBaseUrl", "descriptionCacheExpiry", "displayname", "favicon", "fetchDescription", "initialCapital", "local", "name", "rootUrl", "scriptDirUrl", "scriptExtension", "thumbUrl", "url" };

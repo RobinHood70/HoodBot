@@ -30,7 +30,7 @@
 		{
 			this.GetDoubleRedirects();
 			var loopCheck = new HashSet<FullTitle>();
-			var fragments = new HashSet<string>();
+			var fragments = new HashSet<string>(StringComparer.Ordinal);
 			foreach (var page in this.Pages)
 			{
 				if (this.lookup.TryGetValue(page, out var originalTarget))

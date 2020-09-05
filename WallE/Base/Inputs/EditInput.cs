@@ -72,7 +72,7 @@ namespace RobinHood70.WallE.Base
 
 		public bool Bot { get; set; }
 
-		public Dictionary<string, string> CaptchaSolution { get; } = new Dictionary<string, string>();
+		public Dictionary<string, string> CaptchaSolution { get; } = new Dictionary<string, string>(StringComparer.Ordinal);
 
 		public string? ContentFormat { get; set; }
 

@@ -67,11 +67,11 @@
 		#region Static Fields
 		private static readonly string[] DefaultRedirect = { "#REDIRECT" };
 
-		private static readonly Dictionary<string, SiteFactoryMethod> SiteClasses = new Dictionary<string, SiteFactoryMethod>();
+		private static readonly Dictionary<string, SiteFactoryMethod> SiteClasses = new Dictionary<string, SiteFactoryMethod>(StringComparer.Ordinal);
 		#endregion
 
 		#region Fields
-		private readonly Dictionary<string, MagicWord> magicWords = new Dictionary<string, MagicWord>();
+		private readonly Dictionary<string, MagicWord> magicWords = new Dictionary<string, MagicWord>(StringComparer.Ordinal);
 		private string? baseArticlePath;
 		private CultureInfo culture = CultureInfo.CurrentCulture;
 		private IReadOnlyCollection<Title>? deletePreventionTemplates;
@@ -100,17 +100,6 @@
 			wiki.Initialized += this.AbstractionLayer_Initialized;
 			wiki.WarningOccurred += this.AbstractionLayer_WarningOccurred;
 			this.AbstractionLayer = wiki;
-		}
-		#endregion
-
-		#region Finalizer
-
-		/// <summary>Finalizes an instance of the <see cref="Site"/> class.</summary>
-		~Site()
-		{
-			this.AbstractionLayer.WarningOccurred -= this.AbstractionLayer_WarningOccurred;
-			this.AbstractionLayer.Initialized -= this.AbstractionLayer_Initialized;
-			this.AbstractionLayer.Initializing -= this.AbstractionLayer_Initializing;
 		}
 		#endregion
 
@@ -607,7 +596,7 @@
 		/// <returns>A value indicating the change status of the patrol.</returns>
 		public ChangeStatus Patrol(long rcid) => this.PublishChange(
 			this,
-			new Dictionary<string, object?>
+			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				[nameof(rcid)] = rcid,
 			},
@@ -618,7 +607,7 @@
 		/// <returns>A value indicating the change status of the patrol.</returns>
 		public ChangeStatus PatrolRevision(long revid) => this.PublishChange(
 			this,
-			new Dictionary<string, object?>
+			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				[nameof(revid)] = revid,
 			},
@@ -655,7 +644,7 @@
 		/// <returns>A value indicating the change status of the upload.</returns>
 		public ChangeStatus Upload(string fileName, string? destinationName, string editSummary, string? pageText) => this.PublishChange(
 			this,
-			new Dictionary<string, object?>
+			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				[nameof(fileName)] = fileName,
 				[nameof(destinationName)] = destinationName,
@@ -697,7 +686,7 @@
 		public ChangeValue<PageCollection> Watch(int ns, bool unwatch) => this.PublishChange(
 			PageCollection.UnlimitedDefault(this),
 			this,
-			new Dictionary<string, object?>
+			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				[nameof(ns)] = ns,
 			},
@@ -727,7 +716,7 @@
 		/// <returns><see cref="ChangeStatus.Success"/> if the account was successfully created; otherwise, <see cref="ChangeStatus.Failure"/>.</returns>
 		public virtual ChangeStatus CreateAccount(string name, string password, string email) => this.PublishChange(
 			this,
-			new Dictionary<string, object?>
+			new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				[nameof(name)] = name,
 				[nameof(password)] = password,
@@ -737,7 +726,7 @@
 			{
 				var input = new CreateAccountInput(name, password) { Email = email };
 				var result = this.AbstractionLayer.CreateAccount(input);
-				return result.Result == "Success" ? ChangeStatus.Success : ChangeStatus.Failure;
+				return string.Equals(result.Result, "Success", StringComparison.OrdinalIgnoreCase) ? ChangeStatus.Success : ChangeStatus.Failure;
 			});
 
 		/// <summary>Gets the article path.</summary>
@@ -751,7 +740,7 @@
 			// CONSIDER: Used to use WebUtility.UrlEncode, but Uri seems to auto-encode, so removed for now. Discussion in some places of different parts of .NET encoding differently, so may need to re-instate later. See https://stackoverflow.com/a/47877559/502255 for example.
 			if (string.IsNullOrWhiteSpace(articleName))
 			{
-				throw new ArgumentException(CurrentCulture(Resources.TitleInvalid));
+				throw new ArgumentException(CurrentCulture(Resources.TitleInvalid), nameof(articleName));
 			}
 
 			if (string.IsNullOrEmpty(unparsedPath))
@@ -774,7 +763,8 @@
 		public virtual IFullTitle? GetRedirectFromText(string text)
 		{
 			ThrowNull(text, nameof(text));
-			var redirects = new HashSet<string>(this.MagicWords.TryGetValue("redirect", out var redirect) ? redirect.Aliases : DefaultRedirect);
+			var redirectAliases = this.MagicWords.TryGetValue("redirect", out var redirect) ? redirect.Aliases : DefaultRedirect;
+			var redirects = new HashSet<string>(redirectAliases, StringComparer.Ordinal);
 			var parser = WikiTextParser.Parse(text);
 			if (parser.First is LinkedListNode<IWikiNode> first && first.Value is TextNode textNode)
 			{
@@ -958,7 +948,7 @@
 		protected virtual IReadOnlyDictionary<string, MessagePage> LoadMessages(AllMessagesInput input)
 		{
 			var result = this.AbstractionLayer.AllMessages(input);
-			var retval = new Dictionary<string, MessagePage>(result.Count);
+			var retval = new Dictionary<string, MessagePage>(result.Count, StringComparer.Ordinal);
 			foreach (var item in result)
 			{
 				retval.Add(item.Name, new MessagePage(this[MediaWikiNamespaces.MediaWiki], item));
@@ -1025,7 +1015,7 @@
 			if (this.EditingEnabled)
 			{
 				var result = this.AbstractionLayer.Login(input);
-				if (result.Result != "Success")
+				if (!string.Equals(result.Result, "Success", StringComparison.OrdinalIgnoreCase))
 				{
 					this.Clear();
 					throw new UnauthorizedAccessException(CurrentCulture(Resources.LoginFailed, result.Reason));
@@ -1066,7 +1056,7 @@
 			this.version = general.Generator;
 			var path = general.ArticlePath;
 			var basePath = general.BasePage.Substring(0, general.BasePage.IndexOf(server, StringComparison.Ordinal) + server.Length); // Search for server in BasePage and extract everything from the start of BasePage to then. This effectively converts Server to canonical if it was protocol-relative.
-			this.baseArticlePath = path.StartsWith("/", StringComparison.Ordinal) ? basePath + path : path;
+			this.baseArticlePath = path.StartsWith('/') ? basePath + path : path;
 			this.mainPageName = general.MainPage;
 			this.scriptPath = basePath + general.Script;
 
@@ -1085,14 +1075,14 @@
 
 			// Namespaces
 			var comparer = StringComparer.Create(this.Culture, true);
-			var namespaces = new List<Namespace>(siteInfo.Namespaces.Count);
+			var siteNamespaces = new List<Namespace>(siteInfo.Namespaces.Count);
 			foreach (var item in siteInfo.Namespaces)
 			{
 				allAliases.TryGetValue(item.Id, out var nsAliases);
-				namespaces.Add(new Namespace(this, comparer, item, nsAliases));
+				siteNamespaces.Add(new Namespace(this, comparer, item, nsAliases));
 			}
 
-			this.namespaces = new NamespaceCollection(namespaces, comparer);
+			this.namespaces = new NamespaceCollection(siteNamespaces, comparer);
 			if (this.mainPageName != null)
 			{
 				this.mainPage = FullTitle.FromName(this, this.mainPageName); // Now that we understand namespaces, we can create a Title.
@@ -1149,7 +1139,7 @@
 		/// <summary>Uploads a file.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <returns><see langword="true"/> if the file was successfully uploaded.</returns>
-		protected virtual bool Upload(UploadInput input) => this.AbstractionLayer.Upload(input).Result == "Success";
+		protected virtual bool Upload(UploadInput input) => string.Equals(this.AbstractionLayer.Upload(input).Result, "Success", StringComparison.OrdinalIgnoreCase);
 		#endregion
 
 		#region Private Methods

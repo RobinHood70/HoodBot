@@ -39,7 +39,7 @@
 			}
 		}
 
-		public Dictionary<string, string> ConnectionStrings { get; } = new Dictionary<string, string>();
+		public Dictionary<string, string> ConnectionStrings { get; } = new Dictionary<string, string>(StringComparer.Ordinal);
 
 		// TODO: Add this to Load/Save when re-writing Settings class.
 		public string? ContactInfo { get; set; } = "robinhood70@live.ca";

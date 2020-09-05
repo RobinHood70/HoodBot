@@ -14,7 +14,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Properties
-		public Dictionary<string, string> CaptchaSolution { get; } = new Dictionary<string, string>();
+		public Dictionary<string, string> CaptchaSolution { get; } = new Dictionary<string, string>(System.StringComparer.Ordinal);
 
 		public string? Domain { get; set; }
 

@@ -28,11 +28,11 @@
 		#endregion
 
 		#region Public Properties
-		public Dictionary<string, Func<string>> MagicWordResolvers { get; } = new Dictionary<string, Func<string>>();
+		public Dictionary<string, Func<string>> MagicWordResolvers { get; } = new Dictionary<string, Func<string>>(StringComparer.Ordinal);
 
-		public IDictionary<string, string> Parameters { get; } = new Dictionary<string, string>();
+		public IDictionary<string, string> Parameters { get; } = new Dictionary<string, string>(StringComparer.Ordinal);
 
-		public Dictionary<string, Func<string>> TemplateResolvers { get; } = new Dictionary<string, Func<string>>();
+		public Dictionary<string, Func<string>> TemplateResolvers { get; } = new Dictionary<string, Func<string>>(StringComparer.Ordinal);
 
 		public Site Site { get; }
 

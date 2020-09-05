@@ -76,7 +76,7 @@
 		public void Visit(HeaderNode node)
 		{
 			ThrowNull(node, nameof(node));
-			this.BuildTag("h", new Dictionary<string, int> { ["level"] = node.Level, ["i"] = node.Index }, node.Title);
+			this.BuildTag("h", new Dictionary<string, int>(System.StringComparer.Ordinal) { ["level"] = node.Level, ["i"] = node.Index }, node.Title);
 		}
 
 		/// <summary>Visits the specified <see cref="IgnoreNode"/>.</summary>

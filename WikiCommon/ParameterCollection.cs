@@ -401,8 +401,8 @@
 		/// <returns>A <see cref="HashSet{T}"/> of duplicate parameter names within the collection (ignoring null values).</returns>
 		public HashSet<string> DuplicateNames()
 		{
-			var names = new HashSet<string>();
-			var duplicates = new HashSet<string>();
+			var names = new HashSet<string>(StringComparer.Ordinal);
+			var duplicates = new HashSet<string>(StringComparer.Ordinal);
 			foreach (var param in this)
 			{
 				var name = param.Name;
@@ -568,7 +568,7 @@
 		public bool RemoveDuplicates()
 		{
 			var keyOrder = new List<string>();
-			var parameterCopy = new Dictionary<string, Parameter>();
+			var parameterCopy = new Dictionary<string, Parameter>(StringComparer.Ordinal);
 			foreach (var (positionalName, parameter) in this.PositionalParameters)
 			{
 				if (parameterCopy.ContainsKey(positionalName))
@@ -616,7 +616,7 @@
 			var retval = false;
 			if (names != null)
 			{
-				var uniqueNames = new HashSet<string>(names);
+				var uniqueNames = new HashSet<string>(names, StringComparer.Ordinal);
 				for (var i = this.parameters.Count - 1; i >= 0; i--)
 				{
 					var param = this[i];

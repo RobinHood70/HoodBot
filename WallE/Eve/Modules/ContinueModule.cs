@@ -33,7 +33,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Properties
 
 		// Null values are almost certainly an error, but MediaWiki knows best, so trust that if it gives us one, we should use it.
-		protected Dictionary<string, string?> ContinueEntries { get; } = new Dictionary<string, string?>();
+		protected Dictionary<string, string?> ContinueEntries { get; } = new Dictionary<string, string?>(System.StringComparer.Ordinal);
 
 		protected string? GeneratorContinue { get; private set; }
 		#endregion

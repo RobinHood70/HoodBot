@@ -15,7 +15,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	internal class ActionParamInfo : ActionModule<ParameterInfoInput, IReadOnlyDictionary<string, ParameterInfoItem>>
 	{
 		#region Static Fields
-		private static readonly HashSet<string> FormatModuleValues = new HashSet<string> { "json", "jsonfm", "php", "phpfm", "wddx", "wddxfm", "xml", "xmlfm", "yaml", "yamlfm", "rawfm", "txt", "txtfm", "dbg", "dbgfm", "dump", "dumpfm", "none" };
+		private static readonly HashSet<string> FormatModuleValues = new HashSet<string>(StringComparer.Ordinal) { "json", "jsonfm", "php", "phpfm", "wddx", "wddxfm", "xml", "xmlfm", "yaml", "yamlfm", "rawfm", "txt", "txtfm", "dbg", "dbgfm", "dump", "dumpfm", "none" };
 		private static readonly string[] ModuleTypes125 = { "querymodules", "formatmodules", "mainmodule", "pagesetmodule" };
 		#endregion
 
@@ -92,7 +92,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override IReadOnlyDictionary<string, ParameterInfoItem> DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
-			var output = new Dictionary<string, ParameterInfoItem>();
+			var output = new Dictionary<string, ParameterInfoItem>(StringComparer.Ordinal);
 			var moduleTypes = new List<string>() { "modules" };
 			if (this.SiteVersion < 125)
 			{
@@ -154,7 +154,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					var dflt = parameterNode["default"] is JValue defaultNode ? defaultNode.Value : null;
 					IReadOnlyList<string> typeValues = ImmutableList<string>.Empty;
 					string? type = null;
-					IReadOnlyDictionary<string, string> subModules = new Dictionary<string, string>();
+					IReadOnlyDictionary<string, string> subModules = new Dictionary<string, string>(StringComparer.Ordinal);
 					string? subModuleParamPrefix = null;
 					if (parameterNode["type"] is JToken typeValue)
 					{

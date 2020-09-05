@@ -76,7 +76,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Static Properties
-		public static HashSet<string> AllTypes { get; } = new HashSet<string>(ListNames.Values);
+		public static HashSet<string> AllTypes { get; } = new HashSet<string>(ListNames.Values, StringComparer.Ordinal);
 		#endregion
 
 		#region Public Properties

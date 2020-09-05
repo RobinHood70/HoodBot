@@ -55,7 +55,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				remove: token.MustHave("remove").GetList<string>(),
 				removeSelf: token.MustHave("remove-self").GetList<string>());
 
-			var rateLimits = new Dictionary<string, RateLimitsItem?>();
+			var rateLimits = new Dictionary<string, RateLimitsItem?>(System.StringComparer.Ordinal);
 			if (result["ratelimits"] is JToken rateLimitsNode)
 			{
 				foreach (var entry in rateLimitsNode.Children<JProperty>())

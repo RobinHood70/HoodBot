@@ -162,7 +162,7 @@
 		/// <remarks>Value order must not be important, and duplicate values will be removed.</remarks>
 		public Request Add(string name, IEnumerable<string>? values) => values == null || values.IsEmpty()
 			? this
-			: this.AddPiped(name, new HashSet<string>(values));
+			: this.AddPiped(name, new HashSet<string>(values, StringComparer.Ordinal));
 
 		/// <summary>Adds an enumerable string parameter if it has at least one value.</summary>
 		/// <param name="name">The parameter name.</param>
@@ -455,7 +455,7 @@
 			}
 			else
 			{
-				this.Add(new PipedParameter(newKey, new HashSet<string>() { value }));
+				this.Add(new PipedParameter(newKey, new HashSet<string>(StringComparer.Ordinal) { value }));
 			}
 
 			return this;

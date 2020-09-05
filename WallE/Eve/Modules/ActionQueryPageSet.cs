@@ -54,7 +54,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Properties
-		public HashSet<string> InactiveModules { get; } = new HashSet<string>();
+		public HashSet<string> InactiveModules { get; } = new HashSet<string>(StringComparer.Ordinal);
 
 		public UserInfoResult? UserInfo { get; protected set; }
 		#endregion

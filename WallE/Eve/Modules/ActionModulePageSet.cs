@@ -25,10 +25,10 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Fields
 		private readonly HashSet<long> badRevisionIds = new HashSet<long>();
-		private readonly Dictionary<string, string> converted = new Dictionary<string, string>();
-		private readonly Dictionary<string, InterwikiTitleItem> interwiki = new Dictionary<string, InterwikiTitleItem>();
-		private readonly Dictionary<string, string> normalized = new Dictionary<string, string>();
-		private readonly Dictionary<string, PageSetRedirectItem> redirects = new Dictionary<string, PageSetRedirectItem>();
+		private readonly Dictionary<string, string> converted = new Dictionary<string, string>(System.StringComparer.Ordinal);
+		private readonly Dictionary<string, InterwikiTitleItem> interwiki = new Dictionary<string, InterwikiTitleItem>(System.StringComparer.Ordinal);
+		private readonly Dictionary<string, string> normalized = new Dictionary<string, string>(System.StringComparer.Ordinal);
+		private readonly Dictionary<string, PageSetRedirectItem> redirects = new Dictionary<string, PageSetRedirectItem>(System.StringComparer.Ordinal);
 		private int offset;
 		#endregion
 

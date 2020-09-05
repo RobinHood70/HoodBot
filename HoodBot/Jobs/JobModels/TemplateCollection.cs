@@ -7,14 +7,14 @@
 
 	public class TemplateCollection : List<TemplateUsageRow>
 	{
-		public Dictionary<string, int> HeaderOrder { get; } = new Dictionary<string, int>();
+		public Dictionary<string, int> HeaderOrder { get; } = new Dictionary<string, int>(System.StringComparer.Ordinal);
 
 		public void Add(string page, Template template) => this.Add(new TemplateUsageRow(page, template));
 
 		internal static TemplateCollection GetTemplates(IEnumerable<string> allNames, PageCollection pages)
 		{
 			var allTemplates = new TemplateCollection();
-			var headersLookup = new HashSet<string>(); // Unordered for fast lookups.
+			var headersLookup = new HashSet<string>(System.StringComparer.Ordinal); // Unordered for fast lookups.
 			IList<string> headerNames = new List<string>(); // Ordered because order should be maintained; defined as interface because implementation may change later.
 			foreach (var page in pages)
 			{

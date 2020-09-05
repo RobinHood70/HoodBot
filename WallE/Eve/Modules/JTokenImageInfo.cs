@@ -85,7 +85,7 @@ namespace RobinHood70.WallE.Eve.Modules
 						var stringValue = (string?)value;
 						if (stringValue != null)
 						{
-							var newDict = new Dictionary<string, string> { [string.Empty] = stringValue };
+							var newDict = new Dictionary<string, string>(StringComparer.Ordinal) { [string.Empty] = stringValue };
 							dict.Add(name, new ExtendedMetadataItem(newDict, source, hidden));
 						}
 					}
@@ -101,7 +101,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				if (value.Type == JTokenType.Array)
 				{
-					var newDict = new Dictionary<string, object>();
+					var newDict = new Dictionary<string, object>(StringComparer.Ordinal);
 					foreach (var item in value)
 					{
 						ParseMetadataNode(item, newDict);

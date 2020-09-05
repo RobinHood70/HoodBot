@@ -27,9 +27,9 @@
 	public class SiteCapabilities
 	{
 		#region Static Fields
-		private static readonly Regex FindRsdLink = new Regex(@"<link rel=""EditURI"" .*?href=""(?<rsdlink>.*?)""", RegexOptions.Compiled);
-		private static readonly Regex FindScript = new Regex(@"<script>.*?(wgScriptPath=""(?<scriptpath>.*?)"".*?|wgServer=""(?<serverpath>.*?)"".*?)+</script>", RegexOptions.Singleline | RegexOptions.Compiled);
-		private static readonly Regex FindPhpLink = new Regex(@"href=""(?<scriptpath>/([!#$&-;=?-\[\]_a-z~]|%[0-9a-fA-F]{2})+?)?/(api|index).php");
+		private static readonly Regex FindRsdLink = new Regex(@"<link rel=""EditURI"" .*?href=""(?<rsdlink>.*?)""", RegexOptions.Compiled, TimeSpan.FromSeconds(3));
+		private static readonly Regex FindScript = new Regex(@"<script>.*?(wgScriptPath=""(?<scriptpath>.*?)"".*?|wgServer=""(?<serverpath>.*?)"".*?)+</script>", RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(3));
+		private static readonly Regex FindPhpLink = new Regex(@"href=""(?<scriptpath>/([!#$&-;=?-\[\]_a-z~]|%[0-9a-fA-F]{2})+?)?/(api|index).php", RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(3));
 		#endregion
 
 		#region Fields
@@ -109,7 +109,7 @@
 				tryPath = tryPath.Substring(0, offset + 1);
 			}
 
-			if (!tryPath.EndsWith("/", StringComparison.Ordinal))
+			if (!tryPath.EndsWith('/'))
 			{
 				/* If it doesn't look like a php page or blank path, try various methods of figuring out the php locations. */
 				var pageData = this.TryGet(anyPage);
