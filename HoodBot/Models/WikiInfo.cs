@@ -40,7 +40,16 @@
 		public void FromJson(JToken json)
 		{
 			ThrowNull(json, nameof(json));
-			this.Api = (Uri?)json[nameof(this.Api)];
+			var api = (string?)json[nameof(this.Api)] ?? "/";
+			try
+			{
+				this.Api = new Uri(api, UriKind.RelativeOrAbsolute);
+			}
+			catch (UriFormatException)
+			{
+				this.Api = new Uri("/", UriKind.Relative);
+			}
+
 			this.DisplayName = (string?)json[nameof(this.DisplayName)];
 			this.MaxLag = (int?)json[nameof(this.MaxLag)] ?? DefaultMaxLag;
 			var password = (string?)json[nameof(this.Password)];
