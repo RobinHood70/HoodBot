@@ -9,8 +9,12 @@
 
 	public class MetaNamespace : ISiteSpecific
 	{
+		#region Static Fields
+		private static readonly Dictionary<string, MetaNamespace> NamespacesField = new Dictionary<string, MetaNamespace>(StringComparer.Ordinal);
+		#endregion
+
 		#region Constructors
-		public MetaNamespace(Site site, string line)
+		private MetaNamespace(Site site, string line)
 		{
 			this.Site = site ?? throw ArgumentNull(nameof(site));
 			ThrowNull(line, nameof(line));
@@ -36,7 +40,7 @@
 		#endregion
 
 		#region Public Static Properties
-		public static Dictionary<string, MetaNamespace> Namespaces { get; } = new Dictionary<string, MetaNamespace>();
+		public static IReadOnlyDictionary<string, MetaNamespace> Namespaces => NamespacesField;
 		#endregion
 
 		#region Public Properties
@@ -86,7 +90,7 @@
 		{
 			// CONSIDER: Populating collection with all site namespaces, so it can respond as MetaTemplate would for those.
 			ThrowNull(site, nameof(site));
-			if (Namespaces.Count == 0 && site.LoadMessage("Uespnamespacelist") is string message)
+			if (NamespacesField.Count == 0 && site.LoadMessage("Uespnamespacelist") is string message)
 			{
 				var lines = message.Split(TextArrays.LineFeed, StringSplitOptions.RemoveEmptyEntries);
 				foreach (var line in lines)
@@ -94,7 +98,7 @@
 					if (line[0] != '<' && line[0] != '#')
 					{
 						var ns = new MetaNamespace(site, line);
-						Namespaces.Add(ns.Base, ns);
+						NamespacesField.Add(ns.Base, ns);
 					}
 				}
 			}

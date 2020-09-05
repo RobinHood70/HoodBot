@@ -24,7 +24,6 @@
 	using static System.Environment;
 	using static RobinHood70.CommonCode.Globals;
 
-	// TODO: Decouple this into a job-runner class, or something along those lines, that notifies this one of updates.
 	public class MainViewModel : ViewModelBase
 	{
 		#region Private Constants
@@ -80,10 +79,6 @@
 
 			this.JobTree.SelectionChanged += this.JobTree_OnSelectionChanged;
 		}
-		#endregion
-
-		#region Destructor
-		~MainViewModel() => this.Client.RequestingDelay -= this.Client_RequestingDelay;
 		#endregion
 
 		#region Public Commands
@@ -155,7 +150,7 @@
 				if (value != null)
 				{
 					var userSettings = App.UserSettings;
-					if (userSettings.SelectedName != value.DisplayName)
+					if (!string.Equals(userSettings.SelectedName, value.DisplayName, StringComparison.Ordinal))
 					{
 						userSettings.SelectedName = value.DisplayName;
 					}
@@ -231,14 +226,14 @@
 		{
 			this.canceller?.Cancel();
 			this.Reset();
-			this.PauseJobs(false);
+			this.PauseJobs(isPaused: false);
 		}
 
 		private void ClearStatus() => this.Status = string.Empty; // TODO: Removed from Reset, so add to a button or maybe only on Play.
 
 		private void Client_RequestingDelay(IMediaWikiClient sender, DelayEventArgs eventArgs)
 		{
-			this.StatusWriteLine(CurrentCulture(Resources.DelayRequested, eventArgs.Reason, eventArgs.DelayTime.TotalSeconds + "s", eventArgs.Description));
+			this.StatusWriteLine(CurrentCulture(Resources.DelayRequested, eventArgs.Reason, $"{eventArgs.DelayTime.TotalSeconds}s", eventArgs.Description));
 			App.WpfYield();
 
 			/*
@@ -352,11 +347,9 @@
 #endif
 			site.PagePreview += this.SitePagePreview;
 			site.EditingEnabled = this.EditingEnabled;
-			var user = this.UserName ?? wikiInfo.UserName;
-			var password = this.Password ?? wikiInfo.Password ?? throw new InvalidOperationException(Resources.PasswordNotSet);
-			if (user != null)
+			if ((this.UserName ?? wikiInfo.UserName) is string user)
 			{
-				site.Login(user, password);
+				site.Login(user, this.Password ?? wikiInfo.Password ?? throw new InvalidOperationException(Resources.PasswordNotSet));
 			}
 
 			return site;
