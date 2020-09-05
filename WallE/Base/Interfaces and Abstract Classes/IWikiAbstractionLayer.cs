@@ -68,7 +68,7 @@
 
 		/// <summary>Occurs after initialization data has been loaded and processed.</summary>
 		/// <remarks>Subscribers to this event should assume that they may get more information back than what they requested (e.g., all interwiki info instead of local only), and filter out any data that they do not require.</remarks>
-		event StrongEventHandler<IWikiAbstractionLayer, InitializedEventArgs>? Initialized;
+		event StrongEventHandler<IWikiAbstractionLayer, EventArgs>? Initialized;
 
 		/// <summary>Occurs when the wiki is about to load initialization data.</summary>
 		/// <remarks>Subscribers to this event have the opportunity to request additional SiteInfo data over what the base abstraction layer and any other layers require. It is the subscriber's responsibility to ensure that they're always requesting a superset of the information required and do not inadvertently prevent another subscriber from getting the information it requires. Most settings should be OR'd together with previous values and Filter settings should be set to Any in the event of a conflict. If there's a conflict in the interwiki language code, you will not be able to use co-initialization and should issue a separate SiteInfo request.</remarks>
@@ -79,6 +79,9 @@
 		#endregion
 
 		#region Properties
+
+		/// <summary>Gets the site information after either <see cref="Initialize"/> or <see cref="Login(LoginInput)"/> has been called.</summary>
+		public SiteInfoResult? AllSiteInfo { get; }
 
 		/// <summary>Gets or sets the assert string.</summary>
 		/// <value>The assert string to be used, such as "bot" or "user" for <c>assert=bot</c> or <c>assert=user</c>.</value>
@@ -95,18 +98,6 @@
 		/// <summary>Gets or sets the custom stop check function.</summary>
 		/// <value>A function which returns true if the bot should stop what it's doing.</value>
 		Func<bool>? CustomStopCheck { get; set; }
-
-		/// <summary>Gets various site information flags.</summary>
-		/// <value>The flags. See <see cref="SiteInfoFlags" />.</value>
-		SiteInfoFlags Flags { get; }
-
-		/// <summary>Gets the site language code.</summary>
-		/// <value>The language code.</value>
-		string? LanguageCode { get; }
-
-		/// <summary>Gets the name of the site.</summary>
-		/// <value>The name of the site.</value>
-		string? SiteName { get; }
 
 		/// <summary>Gets the detected site version.</summary>
 		/// <value>The MediaWiki version for the site, expressed as an integer (i.e., MW 1.23 = 123).</value>

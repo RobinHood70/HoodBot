@@ -172,23 +172,24 @@
 					if (api.IsEnabled())
 					{
 						api.Initialize();
+						var general = api.AllSiteInfo?.General ?? throw new InvalidOperationException();
 						this.Api = api.EntryPoint;
 						Uri? index = null;
-						if (!string.IsNullOrWhiteSpace(api.Script))
+						if (!string.IsNullOrWhiteSpace(general.Script))
 						{
 							index = new UriBuilder(fullHost)
 							{
-								Path = api.Script
+								Path = general.Script
 							}.Uri;
 						}
 
 						this.Index = index;
-						this.SiteName = api.SiteName;
+						this.SiteName = general.SiteName;
 						this.ReadEntryPoint = EntryPoint.Api;
 						this.SupportsMaxLag = api.SupportsMaxLag;
 						this.CurrentUser = (api.CurrentUserInfo?.Flags.HasFlag(UserInfoFlags.Anonymous) ?? true) ? null : api.CurrentUserInfo.Name;
 						this.WriteEntryPoint =
-							api.Flags.HasFlag(SiteInfoFlags.WriteApi) ? EntryPoint.Api :
+							general.Flags.HasFlag(SiteInfoFlags.WriteApi) ? EntryPoint.Api :
 							this.Index == null ? EntryPoint.None :
 							EntryPoint.Index;
 

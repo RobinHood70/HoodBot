@@ -65,7 +65,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			var normalizedName = (string?)result["normalizedname"];
 			if (normalizedName == null)
 			{
-				var ci = GetCulture(this.languageCode ?? this.Wal.LanguageCode);
+				var ci = GetCulture(this.languageCode ?? this.Wal.AllSiteInfo?.General?.Language);
 				normalizedName = name.Replace(' ', '_');
 				if (char.IsUpper(normalizedName[0]))
 				{
