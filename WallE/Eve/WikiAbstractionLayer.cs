@@ -26,6 +26,9 @@
 		internal const int LimitSmall1 = 50;
 		internal const int LimitSmall2 = 500;
 		internal const string ApiDisabledCode = "apidisabled";
+		#endregion
+
+		#region Private Constants
 		private const SiteInfoProperties NeededSiteInfo =
 			SiteInfoProperties.General |
 			SiteInfoProperties.DbReplLag |
@@ -196,7 +199,7 @@
 
 		/// <summary>Gets or sets the site language code.</summary>
 		/// <value>The language code.</value>
-		public string? LanguageCode { get; set; }
+		public string? LanguageCode { get; protected set; }
 
 		/// <summary>Gets or sets the maximum length of get requests for a given site. Get requests that are longer than this will be sent as POST requests instead.</summary>
 		/// <value>The maximum length of get requests.</value>
