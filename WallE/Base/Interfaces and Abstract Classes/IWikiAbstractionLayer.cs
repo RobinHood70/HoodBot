@@ -100,9 +100,9 @@
 		/// <value>The flags. See <see cref="SiteInfoFlags" />.</value>
 		SiteInfoFlags Flags { get; }
 
-		/// <summary>Gets or sets the site language code.</summary>
+		/// <summary>Gets the site language code.</summary>
 		/// <value>The language code.</value>
-		string? LanguageCode { get; set; }
+		string? LanguageCode { get; }
 
 		/// <summary>Gets the name of the site.</summary>
 		/// <value>The name of the site.</value>
