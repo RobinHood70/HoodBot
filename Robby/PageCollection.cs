@@ -400,7 +400,7 @@
 				}
 				else
 				{
-					title = new FullTitle(this.Site.Mainspace, value.Title);
+					title = new FullTitle(this.Site[MediaWikiNamespaces.Main], value.Title);
 				}
 
 				this.titleMap[item.Key] = title;

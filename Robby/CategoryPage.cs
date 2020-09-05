@@ -17,7 +17,7 @@
 		/// <param name="site">The site the category is from.</param>
 		/// <param name="pageName">The page name.</param>
 		public CategoryPage(Site site, string pageName)
-			: base((site ?? throw ArgumentNull(nameof(site))).Namespaces[MediaWikiNamespaces.Category], pageName)
+			: base((site ?? throw ArgumentNull(nameof(site)))[MediaWikiNamespaces.Category], pageName)
 		{
 		}
 
@@ -29,7 +29,7 @@
 		{
 			if (ns.Id != MediaWikiNamespaces.Category)
 			{
-				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, ns.Site.Namespaces[MediaWikiNamespaces.Category].Name), nameof(ns));
+				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, ns.Site[MediaWikiNamespaces.Category].Name), nameof(ns));
 			}
 		}
 
@@ -40,7 +40,7 @@
 		{
 			if (title.Namespace.Id != MediaWikiNamespaces.Category)
 			{
-				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, this.Site.Namespaces[MediaWikiNamespaces.Category].Name), nameof(title));
+				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, this.Site[MediaWikiNamespaces.Category].Name), nameof(title));
 			}
 		}
 		#endregion

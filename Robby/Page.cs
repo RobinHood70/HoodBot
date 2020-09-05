@@ -103,7 +103,7 @@
 				if (this.Site.DisambiguatorAvailable)
 				{
 					// Disambiguator is 1.21+, so we don't need to worry about the fact that page properties are 1.17+.
-					return this.loadOptionsUsed == null || !this.loadOptionsUsed.Modules.HasFlag(PageModules.Properties)
+					return (this.loadOptionsUsed == null || !this.loadOptionsUsed.Modules.HasFlag(PageModules.Properties))
 						? throw new InvalidOperationException(CurrentCulture(Resources.ModuleNotLoaded, nameof(PageModules.Properties), nameof(this.IsDisambiguation)))
 						: this.Properties.ContainsKey("disambiguation");
 				}
@@ -261,7 +261,6 @@
 			return this.Site.PublishPageTextChange(
 				changeArgs,
 				() => // Modification status re-checked here because a subscriber may have reverted the page.
-					!this.TextModified ? ChangeStatus.NoEffect :
 						this.Site.AbstractionLayer.Edit(new EditInput(this.FullPageName, this.Text)
 						{
 							BaseTimestamp = this.CurrentRevision?.Timestamp,

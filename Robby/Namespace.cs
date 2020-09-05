@@ -110,12 +110,12 @@
 
 		/// <summary>Gets the subject space.</summary>
 		/// <value>The subject space.</value>
-		public Namespace SubjectSpace => this.Site.Namespaces[this.subjectSpaceId];
+		public Namespace SubjectSpace => this.Site[this.subjectSpaceId];
 
 		/// <summary>Gets the talk space, if applicable.</summary>
 		/// <value>The talk space, if applicable; otherwise, <see langword="null"/>.</value>
 		/// <remarks>This will only be <see langword="null"/> for namespaces that don't support talk pages, like Media and Special.</remarks>
-		public Namespace? TalkSpace => this.talkSpaceId == null ? null : this.Site.Namespaces[this.talkSpaceId.Value];
+		public Namespace? TalkSpace => this.talkSpaceId == null ? null : this.Site[this.talkSpaceId.Value];
 		#endregion
 
 		#region Public Operators

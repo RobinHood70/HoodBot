@@ -26,7 +26,7 @@
 		/// <param name="site">The site the user is from.</param>
 		/// <param name="name">The name of the user.</param>
 		public User(Site site, string name)
-			: base((site ?? throw ArgumentNull(nameof(site))).Namespaces[MediaWikiNamespaces.User], name)
+			: base((site ?? throw ArgumentNull(nameof(site)))[MediaWikiNamespaces.User], name)
 		{
 		}
 

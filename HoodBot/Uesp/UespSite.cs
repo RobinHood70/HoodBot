@@ -57,7 +57,7 @@
 		#endregion
 
 		#region Public Override Methods
-		public override void Logout()
+		public override void Logout(bool force)
 		{
 			if (this.User != null)
 			{
@@ -69,7 +69,7 @@
 				this.FilterPages.Remove(this.LogPage);
 			}
 
-			base.Logout();
+			base.Logout(force);
 		}
 		#endregion
 

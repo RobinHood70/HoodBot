@@ -47,7 +47,7 @@
 			var (key, remaining, forced) = SplitPageName(pageName);
 			if (forced)
 			{
-				this.Namespace = site.Mainspace;
+				this.Namespace = site[MediaWikiNamespaces.Main];
 				this.ForcedNamespaceLink = true;
 			}
 

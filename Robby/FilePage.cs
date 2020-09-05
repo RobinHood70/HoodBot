@@ -24,7 +24,7 @@
 		/// <param name="site">The site the File is from.</param>
 		/// <param name="pageName">The page name.</param>
 		public FilePage(Site site, string pageName)
-			: base((site ?? throw ArgumentNull(nameof(site))).Namespaces[MediaWikiNamespaces.File], pageName)
+			: base((site ?? throw ArgumentNull(nameof(site)))[MediaWikiNamespaces.File], pageName)
 		{
 		}
 
@@ -36,7 +36,7 @@
 		{
 			if (ns.Id != MediaWikiNamespaces.File)
 			{
-				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, ns.Site.Namespaces[MediaWikiNamespaces.File].Name), nameof(ns));
+				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, ns.Site[MediaWikiNamespaces.File].Name), nameof(ns));
 			}
 		}
 
@@ -47,7 +47,7 @@
 		{
 			if (title.Namespace.Id != MediaWikiNamespaces.File)
 			{
-				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, this.Site.Namespaces[MediaWikiNamespaces.File].Name), nameof(title));
+				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, this.Site[MediaWikiNamespaces.File].Name), nameof(title));
 			}
 		}
 		#endregion

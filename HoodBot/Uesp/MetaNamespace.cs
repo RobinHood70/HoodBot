@@ -22,12 +22,12 @@
 
 			this.Base = nsData[0];
 			var baseSplit = this.Base.Split(TextArrays.Colon, 2);
-			this.BaseNamespace = site.Namespaces[baseSplit[0]];
+			this.BaseNamespace = site[baseSplit[0]];
 			this.IsPseudoNamespace = baseSplit.Length == 2;
 			this.Full = this.Base + (this.IsPseudoNamespace ? '/' : ':');
 			this.Id = nsData[1].Length == 0 ? this.Base.ToUpperInvariant() : nsData[1];
 			var parentName = nsData[2].Length == 0 ? this.Base : nsData[2];
-			this.Parent = site.Namespaces[parentName];
+			this.Parent = site[parentName];
 			this.Name = nsData[3].Length == 0 ? this.Base : nsData[3];
 			this.MainPage = Title.FromName(site, nsData[4].Length == 0 ? this.Full + this.Name : nsData[4]);
 			this.Category = nsData[5].Length == 0 ? this.Base : nsData[5];
