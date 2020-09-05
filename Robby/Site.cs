@@ -1044,9 +1044,9 @@
 
 		/// <summary>Gets all site information required for proper functioning of the framework.</summary>
 		/// <summary>Parses all site information that's needed internally for the Site object to work.</summary>
-		/// <param name="siteInfo">The site information.</param>
-		protected virtual void ParseInternalSiteInfo(SiteInfoResult siteInfo)
+		protected virtual void ParseInternalSiteInfo()
 		{
+			var siteInfo = this.AbstractionLayer.AllSiteInfo;
 			if (siteInfo == null
 				|| siteInfo.General == null
 				|| siteInfo.InterwikiMap == null
@@ -1155,7 +1155,7 @@
 		#region Private Methods
 
 		// Parse co-initialization results.
-		private void AbstractionLayer_Initialized(IWikiAbstractionLayer sender, InitializedEventArgs eventArgs) => this.ParseInternalSiteInfo(eventArgs.Result);
+		private void AbstractionLayer_Initialized(IWikiAbstractionLayer sender, EventArgs eventArgs) => this.ParseInternalSiteInfo();
 
 		// Setup co-initialization to avoid near-duplicate requests with AbstractionLayer.
 		private void AbstractionLayer_Initializing(IWikiAbstractionLayer sender, InitializingEventArgs eventArgs)

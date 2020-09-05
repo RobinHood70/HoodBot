@@ -26,12 +26,6 @@
 
 	public class MainViewModel : ViewModelBase
 	{
-		#region Private Constants
-#if DEBUG
-		private const string SiteAgnostic = "Site-Agnostic";
-#endif
-		#endregion
-
 		#region Static Fields
 		private static readonly Brush ProgressBarGreen = new SolidColorBrush(Color.FromArgb(255, 6, 176, 37));
 		private static readonly Brush ProgressBarYellow = new SolidColorBrush(Color.FromArgb(255, 255, 240, 0));
@@ -199,9 +193,10 @@
 
 		private static IWikiAbstractionLayer GetAbstractionLayer(IMediaWikiClient client, WikiInfoViewModel info)
 		{
-			var wal = info.Api == null
-			? throw PropertyNull(nameof(WikiInfoViewModel), nameof(info.Api))
-			: new WikiAbstractionLayer(client, info.Api);
+			ThrowNull(info.Api, nameof(info), nameof(info.Api));
+			var wal = string.Equals(info.Api.OriginalString, "/", StringComparison.Ordinal)
+				? new WallE.Test.WikiAbstractionLayer()
+				: (IWikiAbstractionLayer)new WikiAbstractionLayer(client, info.Api);
 			if (wal is IMaxLaggable maxLagWal)
 			{
 				maxLagWal.MaxLag = info.MaxLag;
@@ -211,13 +206,15 @@
 		}
 
 #if DEBUG
+		private static string SiteName(IWikiAbstractionLayer sender) => sender.AllSiteInfo?.General?.SiteName ?? "Site-Agnostic";
+
 		private static void SiteWarningOccurred(Site sender, WarningEventArgs eventArgs) => Debug.WriteLine(eventArgs?.Warning);
 
-		private static void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName ?? SiteAgnostic} Response: {eventArgs.Response}");
+		private static void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Response: {eventArgs.Response}");
 
-		private static void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName ?? SiteAgnostic} Request: {eventArgs.Request}");
+		private static void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Request: {eventArgs.Request}");
 
-		private static void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"{sender.SiteName ?? SiteAgnostic} Warning: ({eventArgs?.Warning.Code}) {eventArgs?.Warning.Info}");
+		private static void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Warning: ({eventArgs?.Warning.Code}) {eventArgs?.Warning.Info}");
 #endif
 		#endregion
 
@@ -281,16 +278,16 @@
 				App.WpfYield();
 				var site = this.InitializeSite();
 				var asyncInfo = new AsyncInfo(this.progressMonitor, this.statusMonitor, this.pauser?.Token, this.canceller?.Token);
-				var jobMnanager = new JobManager(jobList, site, asyncInfo);
+				var jobManager = new JobManager(jobList, site, asyncInfo);
 				if (site is IJobAware jobAwareSite)
 				{
-					jobMnanager.StartingAllJobs += (sender, eventArgs) => jobAwareSite.OnJobsStarted();
-					jobMnanager.FinishedAllJobs += (sender, eventArgs) => jobAwareSite.OnJobsCompleted(eventArgs);
+					jobManager.StartingAllJobs += (sender, eventArgs) => jobAwareSite.OnJobsStarted();
+					jobManager.FinishedAllJobs += (sender, eventArgs) => jobAwareSite.OnJobsCompleted(eventArgs);
 				}
 
-				jobMnanager.StartingJob += this.JobMnanager_StartingJob;
-				jobMnanager.FinishedJob += this.JobMnanager_FinishedJob;
-				await jobMnanager.Run().ConfigureAwait(false);
+				jobManager.StartingJob += this.JobManager_StartingJob;
+				jobManager.FinishedJob += this.JobManager_FinishedJob;
+				await jobManager.Run().ConfigureAwait(false);
 
 				this.ResetSite(site);
 				this.pauser = null;
@@ -302,14 +299,14 @@
 			this.executing = false;
 		}
 
-		private void JobMnanager_StartingJob(JobManager sender, JobEventArgs eventArgs)
+		private void JobManager_StartingJob(JobManager sender, JobEventArgs eventArgs)
 		{
 			this.ProgressBarColor = ProgressBarGreen;
 			this.jobStarted = DateTime.UtcNow;
 			this.StatusWriteLine("Starting " + eventArgs.Job.Name);
 		}
 
-		private void JobMnanager_FinishedJob(JobManager sender, JobEventArgs eventArgs)
+		private void JobManager_FinishedJob(JobManager sender, JobEventArgs eventArgs)
 		{
 			if (eventArgs.Cancelled)
 			{

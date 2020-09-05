@@ -129,7 +129,7 @@
 		public event StrongEventHandler<IWikiAbstractionLayer, CaptchaEventArgs>? CaptchaChallenge;
 
 		/// <summary>Occurs after initialization data has been loaded and processed.</summary>
-		public event StrongEventHandler<IWikiAbstractionLayer, InitializedEventArgs>? Initialized;
+		public event StrongEventHandler<IWikiAbstractionLayer, EventArgs>? Initialized;
 
 		/// <summary>Occurs when the wiki is about to load initialization data.</summary>
 		public event StrongEventHandler<IWikiAbstractionLayer, InitializingEventArgs>? Initializing;
@@ -145,6 +145,9 @@
 		#endregion
 
 		#region Public Properties
+
+		/// <inheritdoc/>
+		public SiteInfoResult? AllSiteInfo { get; private set; }
 
 		/// <summary>Gets the article path.</summary>
 		/// <value>The article path.</value>
@@ -187,19 +190,10 @@
 		/// <remarks>This should not normally need to be set, but is left as settable by derived classes, should customization be needed. Assumes version 2, then falls back to 1 in the event of an error message.</remarks>
 		public int DetectedFormatVersion { get; protected internal set; } = 2;
 
-		/// <summary>Gets or sets various site information flags.</summary>
-		/// <value>The flags. See <see cref="SiteInfoFlags" />.</value>
-		/// <remarks>This should not normally need to be set, but is left as settable by derived classes, should customization be needed.</remarks>
-		public SiteInfoFlags Flags { get; protected set; }
-
 		/// <summary>Gets the interwiki prefixes.</summary>
 		/// <value>A hashset of all interwiki prefixes, to allow <see cref="PageSetRedirectItem.Interwiki"/> emulation for MW 1.24 and below.</value>
 		/// <remarks>For some bizarre reason, there is no read-only collection in C# that implements the Contains method, so this is left as a writable HashSet, since it's the fastest lookup.</remarks>
 		public IReadOnlyCollection<string> InterwikiPrefixes => this.interwikiPrefixes;
-
-		/// <summary>Gets or sets the site language code.</summary>
-		/// <value>The language code.</value>
-		public string? LanguageCode { get; protected set; }
 
 		/// <summary>Gets or sets the maximum length of get requests for a given site. Get requests that are longer than this will be sent as POST requests instead.</summary>
 		/// <value>The maximum length of get requests.</value>
@@ -221,14 +215,6 @@
 		/// <summary>Gets the namespace collection for the site.</summary>
 		/// <value>The site's namespaces.</value>
 		public IReadOnlyDictionary<int, SiteInfoNamespace> Namespaces => this.namespaces;
-
-		/// <summary>Gets or sets the path of index.php relative to the document root.</summary>
-		/// <value>The path of index.php relative to the document root.</value>
-		public string? Script { get; protected set; }
-
-		/// <summary>Gets or sets the name of the site.</summary>
-		/// <value>The name of the site.</value>
-		public string? SiteName { get; protected set; }
 
 		/// <summary>Gets or sets the detected site version.</summary>
 		/// <value>The MediaWiki version for the site, expressed as an integer (i.e., MW 1.23 = 123).</value>
@@ -439,14 +425,11 @@
 				throw new WikiException(EveMessages.InitializationFailed);
 			}
 
+			this.AllSiteInfo = siteInfo;
 			this.CurrentUserInfo = userInfo;
 
 			// General
 			var general = siteInfo.General;
-			this.Flags = general.Flags;
-			this.LanguageCode = general.Language;
-			this.SiteName = general.SiteName;
-			this.Script = general.Script;
 			var path = general.ArticlePath;
 			if (path.StartsWith("/", StringComparison.Ordinal))
 			{
@@ -494,7 +477,7 @@
 				this.ContinueVersion = siteVersion >= ContinueModule2.ContinueMinimumVersion ? 2 : 1;
 			}
 
-			this.OnInitialized(new InitializedEventArgs(siteInfoInput, siteInfo));
+			this.OnInitialized();
 		}
 
 		/// <summary>Determines whether the API is enabled (even if read-only) on the current wiki.</summary>
@@ -1418,11 +1401,10 @@
 		protected virtual void OnCaptchaChallenge(CaptchaEventArgs e) => this.CaptchaChallenge?.Invoke(this, e);
 
 		/// <summary>Raises the <see cref="Initialized" /> event.</summary>
-		/// <param name="e">The <see cref="InitializedEventArgs"/> instance containing the event data.</param>
-		protected virtual void OnInitialized(InitializedEventArgs e) => this.Initialized?.Invoke(this, e);
+		protected virtual void OnInitialized() => this.Initialized?.Invoke(this, EventArgs.Empty);
 
 		/// <summary>Raises the <see cref="Initializing" /> event.</summary>
-		/// <param name="e">The <see cref="InitializedEventArgs"/> instance containing the event data.</param>
+		/// <param name="e">The <see cref="InitializingEventArgs"/> instance containing the event data.</param>
 		protected virtual void OnInitializing(InitializingEventArgs e) => this.Initializing?.Invoke(this, e);
 
 		/// <summary>Raises the <see cref="ResponseReceived" /> event.</summary>
@@ -1444,13 +1426,10 @@
 		private void Clear()
 		{
 			// This should be kept in sync with the Initialize() method to clear anything it sets.
+			this.AllSiteInfo = null;
 			this.ArticlePath = null;
 			this.ContinueVersion = 0;
 			this.CustomStopCheck = null;
-			this.Flags = SiteInfoFlags.None;
-			this.LanguageCode = null;
-			this.Script = null;
-			this.SiteName = null;
 			this.SiteVersion = 0;
 			this.SupportsMaxLag = false;
 			this.UseLanguage = null;

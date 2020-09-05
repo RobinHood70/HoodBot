@@ -10,6 +10,83 @@
 	/// <inheritdoc/>
 	public class WikiAbstractionLayer : IWikiAbstractionLayer
 	{
+		#region Fields
+		private static readonly SiteInfoGeneral SiteInfoGeneral = new SiteInfoGeneral(
+			articlePath: "/$1",
+			basePage: string.Empty,
+			dbType: string.Empty,
+			dbVersion: string.Empty,
+			externalImages: new List<string>(),
+			fallback8BitEncoding: "windows-1252",
+			fallbackLanguages: new List<string>(),
+			favicon: null,
+			flags: SiteInfoFlags.WriteApi,
+			generator: "MediaWiki 1.30.0",
+			gitBranch: null,
+			gitHash: null,
+			hhvmVersion: null,
+			imageLimits: new Dictionary<string, ImageLimitsItem>(StringComparer.Ordinal)
+			{
+				["0"] = new ImageLimitsItem(320, 240)
+			},
+			language: "en",
+			legalTitleChars: null,
+			linkPrefix: null,
+			linkPrefixCharset: null,
+			linkTrail: null,
+			logo: null,
+			mainPage: "Main Page",
+			maxUploadSize: 0,
+			phpSapi: string.Empty,
+			phpVersion: string.Empty,
+			readOnlyReason: null,
+			revision: 0,
+			script: "/index.php",
+			scriptPath: string.Empty,
+			server: string.Empty,
+			serverName: null,
+			siteName: "NullWiki",
+			thumbLimits: new Dictionary<string, int>
+			{
+				["0"] = 120
+			},
+			time: DateTime.Now,
+			timeOffset: TimeSpan.Zero,
+			timeZone: "UTC",
+			variantArticlePath: null,
+			variants: new List<string>(),
+			wikiId: string.Empty
+			);
+
+		private static readonly List<SiteInfoNamespace> SiteInfoNamespaces = new List<SiteInfoNamespace>
+		{
+			new SiteInfoNamespace(-2, "Media", null, NamespaceFlags.None, "Media"),
+			new SiteInfoNamespace(-1, "Special", null, NamespaceFlags.None, "Special"),
+			new SiteInfoNamespace(0, string.Empty, null, NamespaceFlags.ContentSpace, string.Empty),
+			new SiteInfoNamespace(1, "Talk", null, NamespaceFlags.Subpages, "Talk"),
+			new SiteInfoNamespace(2, "User", null, NamespaceFlags.Subpages, "User"),
+			new SiteInfoNamespace(3, "User talk", null, NamespaceFlags.Subpages, "User talk"),
+			new SiteInfoNamespace(4, "Project", null, NamespaceFlags.Subpages, "Project"),
+			new SiteInfoNamespace(5, "Project talk", null, NamespaceFlags.Subpages, "Project talk"),
+			new SiteInfoNamespace(6, "File", null, NamespaceFlags.None, "File"),
+			new SiteInfoNamespace(7, "File talk", null, NamespaceFlags.Subpages, "File talk"),
+			new SiteInfoNamespace(8, "MediaWiki", null, NamespaceFlags.None, "MediaWiki"),
+			new SiteInfoNamespace(9, "MediaWiki talk", null, NamespaceFlags.Subpages, "MediaWiki talk"),
+			new SiteInfoNamespace(10, "Template", null, NamespaceFlags.Subpages, "Template"),
+			new SiteInfoNamespace(11, "Template talk", null, NamespaceFlags.Subpages, "Template talk"),
+			new SiteInfoNamespace(12, "Help", null, NamespaceFlags.Subpages, "Help"),
+			new SiteInfoNamespace(13, "Help talk", null, NamespaceFlags.Subpages, "Help talk"),
+			new SiteInfoNamespace(14, "Category", null, NamespaceFlags.Subpages, "Category"),
+			new SiteInfoNamespace(15, "Category talk", null, NamespaceFlags.Subpages, "Category talk"),
+		};
+
+		private static readonly List<SiteInfoNamespaceAlias> SiteInfoNamespaceAliases = new List<SiteInfoNamespaceAlias>
+		{
+			new SiteInfoNamespaceAlias(6, "Image"),
+			new SiteInfoNamespaceAlias(7, "Image talk"),
+		};
+		#endregion
+
 		// Only the basics are implemented for now; the rest can come later, as needed.
 		#region Public Events
 
@@ -17,7 +94,7 @@
 		public event StrongEventHandler<IWikiAbstractionLayer, CaptchaEventArgs>? CaptchaChallenge;
 
 		/// <inheritdoc/>
-		public event StrongEventHandler<IWikiAbstractionLayer, InitializedEventArgs>? Initialized;
+		public event StrongEventHandler<IWikiAbstractionLayer, EventArgs>? Initialized;
 
 		/// <inheritdoc/>
 		public event StrongEventHandler<IWikiAbstractionLayer, InitializingEventArgs>? Initializing;
@@ -27,6 +104,9 @@
 		#endregion
 
 		#region Public Properties
+
+		/// <inheritdoc/>
+		public SiteInfoResult? AllSiteInfo { get; private set; }
 
 		/// <inheritdoc/>
 		public string? Assert { get; set; }
@@ -41,16 +121,7 @@
 		public Func<bool>? CustomStopCheck { get; set; }
 
 		/// <inheritdoc/>
-		public SiteInfoFlags Flags => SiteInfoFlags.WriteApi;
-
-		/// <inheritdoc/>
-		public string? LanguageCode => "en";
-
-		/// <inheritdoc/>
-		public string? SiteName => "Test";
-
-		/// <inheritdoc/>
-		public int SiteVersion => 130;
+		public int SiteVersion { get; }
 
 		/// <inheritdoc/>
 		public StopCheckMethods StopCheckMethods { get; set; }
@@ -183,6 +254,9 @@
 		public FileRevertResult FileRevert(FileRevertInput input) => throw new NotImplementedException();
 
 		/// <inheritdoc/>
+		public SiteInfoResult SiteInfo(SiteInfoInput input) => throw new NotImplementedException();
+
+		/// <inheritdoc/>
 		public HelpResult Help(HelpInput input) => throw new NotImplementedException();
 
 		/// <inheritdoc/>
@@ -194,35 +268,21 @@
 		/// <inheritdoc/>
 		public void Initialize()
 		{
-			if (this.CurrentUserInfo == null)
-			{
-				this.CurrentUserInfo = new UserInfoResult(
-					baseUser: new UserItem(
-						userId: 0,
-						name: "192.0.2.1",
-						blockedBy: null,
-						blockedById: 0,
-						blockExpiry: null,
-						blockHidden: false,
-						blockId: 0,
-						blockReason: null,
-						blockTimestamp: null,
-						editCount: 0,
-						groups: null,
-						implicitGroups: null,
-						registration: null,
-						rights: null),
-					changeableGroups: null,
-					email: null,
-					emailAuthenticated: null,
-					flags: UserInfoFlags.None,
-					options: new Dictionary<string, object>(),
-					preferencesToken: null,
-					rateLimits: new Dictionary<string, RateLimitsItem?>(),
-					realName: null,
-					unreadText: null);
-			}
+			this.OnInitializing(new InitializingEventArgs(new SiteInfoInput(SiteInfoProperties.None)));
 
+			var siteInfo = new SiteInfoResult
+			{
+				General = SiteInfoGeneral,
+				Namespaces = SiteInfoNamespaces,
+				NamespaceAliases = SiteInfoNamespaceAliases,
+				InterwikiMap = new List<SiteInfoInterwikiMap>(),
+				LagInfo = new List<SiteInfoLag>(),
+				MagicWords = new List<SiteInfoMagicWord>(),
+			};
+
+			this.AllSiteInfo = siteInfo;
+			this.CurrentUserInfo ??= GetUser(0, "192.0.2.1");
+			this.OnInitialized();
 			return;
 		}
 
@@ -248,31 +308,7 @@
 		public LoginResult Login(LoginInput input)
 		{
 			ThrowNull(input, nameof(input));
-			this.CurrentUserInfo = new UserInfoResult(
-				baseUser: new UserItem(
-					userId: 1,
-					name: input.UserName,
-					blockedBy: null,
-					blockedById: 0,
-					blockExpiry: null,
-					blockHidden: false,
-					blockId: 0,
-					blockReason: null,
-					blockTimestamp: null,
-					editCount: 0,
-					groups: null,
-					implicitGroups: null,
-					registration: null,
-					rights: null),
-				changeableGroups: null,
-				email: null,
-				emailAuthenticated: null,
-				flags: UserInfoFlags.None,
-				options: new Dictionary<string, object>(),
-				preferencesToken: null,
-				rateLimits: new Dictionary<string, RateLimitsItem?>(),
-				realName: null,
-				unreadText: null);
+			this.CurrentUserInfo = GetUser(1, input.UserName);
 			this.Initialize();
 
 			return LoginResult.AlreadyLoggedIn(this.CurrentUserInfo.UserId, this.CurrentUserInfo.Name);
@@ -357,9 +393,6 @@
 		public PageSetResult<SetNotificationTimestampItem> SetNotificationTimestamp(SetNotificationTimestampInput input) => throw new NotImplementedException();
 
 		/// <inheritdoc/>
-		public SiteInfoResult SiteInfo(SiteInfoInput input) => throw new NotImplementedException();
-
-		/// <inheritdoc/>
 		public IReadOnlyList<ImageInfoItem> StashImageInfo(StashImageInfoInput input) => throw new NotImplementedException();
 
 		/// <inheritdoc/>
@@ -401,13 +434,48 @@
 
 		#region Protected Virtual Methods
 
+		/// <summary>Raises the <see cref="CaptchaChallenge" /> event.</summary>
+		/// <param name="e">The <see cref="CaptchaEventArgs" /> instance containing the event data.</param>
+		protected virtual void OnCaptchaChallenge(CaptchaEventArgs e) => this.CaptchaChallenge?.Invoke(this, e);
+
 		/// <summary>Raises the <see cref="Initialized" /> event.</summary>
-		/// <param name="e">The <see cref="InitializedEventArgs"/> instance containing the event data.</param>
-		protected virtual void OnInitialized(InitializedEventArgs e) => this.Initialized?.Invoke(this, e);
+		protected virtual void OnInitialized() => this.Initialized?.Invoke(this, EventArgs.Empty);
 
 		/// <summary>Raises the <see cref="Initializing" /> event.</summary>
-		/// <param name="e">The <see cref="InitializedEventArgs"/> instance containing the event data.</param>
+		/// <param name="e">The <see cref="InitializingEventArgs"/> instance containing the event data.</param>
 		protected virtual void OnInitializing(InitializingEventArgs e) => this.Initializing?.Invoke(this, e);
+
+		/// <summary>Raises the <see cref="WarningOccurred" /> event.</summary>
+		/// <param name="e">The <see cref="WarningEventArgs" /> instance containing the event data.</param>
+		protected virtual void OnWarningOccurred(WarningEventArgs e) => this.WarningOccurred?.Invoke(this, e);
+		#endregion
+
+		#region Private Methods
+		private static UserInfoResult GetUser(long id, string name) => new UserInfoResult(
+			baseUser: new UserItem(
+				userId: id,
+				name: name ?? string.Empty,
+				blockedBy: null,
+				blockedById: 0,
+				blockExpiry: null,
+				blockHidden: false,
+				blockId: 0,
+				blockReason: null,
+				blockTimestamp: null,
+				editCount: 0,
+				groups: null,
+				implicitGroups: null,
+				registration: null,
+				rights: null),
+			changeableGroups: null,
+			email: null,
+			emailAuthenticated: null,
+			flags: UserInfoFlags.None,
+			options: new Dictionary<string, object>(),
+			preferencesToken: null,
+			rateLimits: new Dictionary<string, RateLimitsItem?>(),
+			realName: null,
+			unreadText: null);
 		#endregion
 	}
 }
