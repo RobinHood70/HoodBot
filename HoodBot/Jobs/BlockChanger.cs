@@ -48,7 +48,7 @@
 						}
 						else
 						{
-							user.Block("Re-block with finite block length", block.Flags, block.StartTime.AddYears(NumYears), true);
+							user.Block("Re-block with finite block length", block.Flags, block.StartTime.AddYears(NumYears), reblock: true);
 						}
 					}
 				}

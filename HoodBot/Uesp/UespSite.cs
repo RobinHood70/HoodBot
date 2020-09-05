@@ -94,13 +94,17 @@
 			if (this.EditingEnabled)
 			{
 				// Assumes we'll never be editing UESP anonymously.
-				this.AbstractionLayer.Assert = (this.User.Name == "HotnBOThered" || this.User.Name == "HoodBot") ? "bot" : "user";
+				this.AbstractionLayer.Assert = (
+					string.Equals(this.User.Name, "HotnBOThered", StringComparison.Ordinal) ||
+					string.Equals(this.User.Name, "HoodBot", StringComparison.Ordinal))
+						? "bot"
+						: "user";
 			}
 
 			// Messages have to be cleared in order to get pages from the wiki properly, so force that to happen if there are messages waiting, even if editing is disabled.
 			if (this.AbstractionLayer.CurrentUserInfo?.Flags.HasFlag(UserInfoFlags.HasMessage) ?? false)
 			{
-				this.ClearMessage(true);
+				this.ClearMessage(force: true);
 			}
 
 			var resultPage = new Title(this[MediaWikiNamespaces.User], this.User.PageName + "/Results");
