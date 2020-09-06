@@ -80,11 +80,11 @@
 
 		/// <summary>Gets the ID dictionary of the collection.</summary>
 		/// <value>The ID dictionary.</value>
-		protected SortedList<int, Namespace> IdsDictionary { get; } = new SortedList<int, Namespace>();
+		protected IDictionary<int, Namespace> IdsDictionary { get; } = new SortedList<int, Namespace>();
 
 		/// <summary>Gets the name dictionary of the collection.</summary>
 		/// <value>The name dictionary.</value>
-		protected Dictionary<string, Namespace> NamesDictionary { get; }
+		protected IDictionary<string, Namespace> NamesDictionary { get; }
 		#endregion
 
 		#region Public Indexers
