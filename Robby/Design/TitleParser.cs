@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.Robby.Design
 {
+	using System.Diagnostics;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.CommonCode.Globals;
@@ -32,6 +33,7 @@
 				var forced = false;
 				if (pageName.Length > 0 && pageName[0] == ':')
 				{
+					forced = true;
 					pageName = pageName.Substring(1).TrimStart();
 				}
 
@@ -62,27 +64,34 @@
 				else if (site.InterwikiMap != null && site.InterwikiMap.TryGetValue(key, out var iw))
 				{
 					this.Interwiki = iw;
-					if (iw.LocalWiki && pageName.Length == 0 && site.MainPage is FullTitle mp)
+					this.ForcedNamespaceLink = false;
+					this.ForcedInterwikiLink = forced;
+					if (iw.LocalWiki)
 					{
-						this.Interwiki = mp.Interwiki;
-						this.Namespace = mp.Namespace;
-						pageName = mp.PageName;
-						this.Fragment = mp.Fragment;
-						isMainPage = true;
-					}
-					else
-					{
-						(key, pageName, forced) = SplitPageName(pageName);
-						if (forced)
+						if (pageName.Length == 0 && site.MainPage is FullTitle mp)
 						{
-							this.Namespace = site[MediaWikiNamespaces.Main];
-							this.ForcedNamespaceLink = true;
+							this.Interwiki = mp.Interwiki ?? iw;
+							this.Namespace = mp.Namespace;
+							pageName = mp.PageName;
+							this.Fragment = mp.Fragment;
+							isMainPage = true;
 						}
-
-						if (site.Namespaces.ValueOrDefault(key) is Namespace ns2)
+						else
 						{
-							this.Namespace = ns2;
-							pageName = remaining;
+							(key, remaining, forced) = SplitPageName(pageName);
+							Debug.WriteLine($"{pageName} => {key}, {remaining}, {forced}");
+							if (forced)
+							{
+								this.Namespace = site[MediaWikiNamespaces.Main];
+								this.ForcedNamespaceLink = true;
+								pageName = pageName.Substring(1);
+							}
+							else if (site.Namespaces.ValueOrDefault(key) is Namespace ns2)
+							{
+								this.Namespace = ns2;
+								pageName = remaining;
+								Debug.WriteLine($"{this.Namespace}, {pageName}");
+							}
 						}
 					}
 				}
@@ -96,13 +105,6 @@
 					this.Fragment = split[1];
 					pageName = split[0].TrimEnd();
 				}
-			}
-
-			if (this.ForcedInterwikiLink && !this.ForcedNamespaceLink && this.Interwiki == null)
-			{
-				// Initial check has no way to know whether it's an IW or NS, so fix that.
-				this.ForcedInterwikiLink = false;
-				this.ForcedNamespaceLink = true;
 			}
 
 			this.Coerced = this.IsLocal && this.Namespace != defaultNamespace;
