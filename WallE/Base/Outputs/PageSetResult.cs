@@ -30,7 +30,7 @@ namespace RobinHood70.WallE.Base
 			IReadOnlyDictionary<string, InterwikiTitleItem> interwiki,
 			IReadOnlyDictionary<string, string> normalized,
 			IReadOnlyDictionary<string, PageSetRedirectItem> redirects)
-			: base(titles)
+			: base((item) => item?.Title ?? throw ArgumentNull(nameof(item)), titles)
 		{
 			this.BadRevisionIds = badRevisionIds;
 			this.Converted = converted;
@@ -50,10 +50,6 @@ namespace RobinHood70.WallE.Base
 		public IReadOnlyDictionary<string, string> Normalized { get; }
 
 		public IReadOnlyDictionary<string, PageSetRedirectItem> Redirects { get; }
-		#endregion
-
-		#region Protected Override Methods
-		protected override string GetKeyForItem(T item) => item != null ? item.Title : throw ArgumentNull(nameof(item));
 		#endregion
 	}
 }
