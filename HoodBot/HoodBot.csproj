@@ -16,7 +16,6 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 		<Nullable>enable</Nullable>
-		<RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -24,14 +23,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Remove="Old Jobs\DBMergeArticles.cs" />
-		<Compile Remove="Old Jobs\DBMergeFiles.cs" />
-		<Compile Remove="Old Jobs\DBMergeIdentifyConflicts.cs" />
-		<Compile Remove="Old Jobs\DBMergeMerge.cs" />
-		<Compile Remove="Old Jobs\DBMergePrep.cs" />
-		<Compile Remove="Old Jobs\EsoMatchIcons.cs" />
-		<Compile Remove="Old Jobs\UndoLocChanges.cs" />
-		<Compile Remove="Old Jobs\UntranscludeLore.cs" />
+	  <Compile Remove="Old Jobs\*" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -39,20 +31,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="Old Jobs\DBMergeArticles.cs" />
-		<None Include="Old Jobs\DBMergeFiles.cs" />
-		<None Include="Old Jobs\DBMergeIdentifyConflicts.cs" />
-		<None Include="Old Jobs\DBMergeMerge.cs" />
-		<None Include="Old Jobs\DBMergePrep.cs" />
-		<None Include="Old Jobs\EsoMatchIcons.cs" />
-		<None Include="Old Jobs\UndoLocChanges.cs" />
-		<None Include="Old Jobs\UntranscludeLore.cs" />
+	  <None Include="Old Jobs\*" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Meziantou.Analyzer" Version="1.0.561">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0">
 			<PrivateAssets>all</PrivateAssets>
