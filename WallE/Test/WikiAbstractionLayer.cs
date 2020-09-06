@@ -10,6 +10,7 @@
 	/// <inheritdoc/>
 	public class WikiAbstractionLayer : IWikiAbstractionLayer
 	{
+		// Only the basics are implemented for now; the rest can come later, as needed.
 		#region Fields
 		private static readonly SiteInfoGeneral SiteInfoGeneral = new SiteInfoGeneral(
 			articlePath: "/$1",
@@ -84,9 +85,14 @@
 			new SiteInfoNamespaceAlias(6, "Image"),
 			new SiteInfoNamespaceAlias(7, "Image talk"),
 		};
+
+		private static readonly List<SiteInfoInterwikiMap> SiteInfoInterwikiMap = new List<SiteInfoInterwikiMap>
+		{
+			new SiteInfoInterwikiMap("en", "file://Test.txt/$1", null, InterwikiMapFlags.Local | InterwikiMapFlags.LocalInterwiki, "English", null, null, null),
+			new SiteInfoInterwikiMap("MediaWikiWiki", "https://www.mediawiki.org/wiki/$1", null, InterwikiMapFlags.None, null, null, null, null),
+		};
 		#endregion
 
-		// Only the basics are implemented for now; the rest can come later, as needed.
 		#region Public Events
 
 		/// <inheritdoc/>
@@ -274,7 +280,7 @@
 				General = SiteInfoGeneral,
 				Namespaces = SiteInfoNamespaces,
 				NamespaceAliases = SiteInfoNamespaceAliases,
-				InterwikiMap = new List<SiteInfoInterwikiMap>(),
+				InterwikiMap = SiteInfoInterwikiMap,
 				LagInfo = new List<SiteInfoLag>(),
 				MagicWords = new List<SiteInfoMagicWord>(),
 			};
