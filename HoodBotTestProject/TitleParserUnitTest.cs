@@ -25,16 +25,6 @@ namespace HoodBotTestProject
 			Assert.Equal(fragment, test.Fragment);
 		}
 
-		[Theory]
-		[InlineData("test")]
-		[InlineData("en")]
-		[InlineData("MediaWikiWiki")]
-		public void TestInterwikiSpeed(string iw)
-		{
-			var test = site.InterwikiMap[iw];
-			Assert.NotNull(test);
-		}
-
 		public static TheoryData<string, string?, int, string, string?> Data =>
 			new TheoryData<string, string?, int, string, string?>
 			{
@@ -42,12 +32,13 @@ namespace HoodBotTestProject
 				{ "File:Test.png", null, MediaWikiNamespaces.File, "Test.png", null },
 				{ "Image:Test.png", null, MediaWikiNamespaces.File, "Test.png", null },
 				{ "Talk:File:Test.png", null, MediaWikiNamespaces.Talk, "File:Test.png", null },
+				{ "en", null, MediaWikiNamespaces.Main, "en", null },
+				{ ":en", null, MediaWikiNamespaces.Main, "en", null },
+				{ ":en:", "en", MediaWikiNamespaces.Main, "Main Page", null },
 				{ "en:Test", "en", MediaWikiNamespaces.Main, "Test", null },
 				{ "en:Image:Test.png", "en", MediaWikiNamespaces.File, "Test.png", null },
 				{ ":en::Image:Test.png#Everything", "en", MediaWikiNamespaces.Main, "Image:Test.png", "Everything" },
 				{ "MediaWikiWiki:File:Test.png", "MediaWikiWiki", MediaWikiNamespaces.Main, "File:Test.png", null },
-				{ "en", null, MediaWikiNamespaces.Main, "en", null },
-				{ ":en:", "en", MediaWikiNamespaces.Main, "Main Page", null }
 			};
 	}
 }
