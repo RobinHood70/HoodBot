@@ -53,10 +53,10 @@
 				this.ForcedNamespaceLink = true;
 			}
 
+			pageName = remaining;
 			var isMainPage = false;
 			if (key != null)
 			{
-				pageName = remaining;
 				if (site.Namespaces.ValueOrDefault(key) is Namespace ns)
 				{
 					this.Namespace = ns;
