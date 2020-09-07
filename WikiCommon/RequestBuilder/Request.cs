@@ -11,6 +11,8 @@
 	using static RobinHood70.CommonCode.Globals;
 	#region Public Enumerations
 
+	// Enum.ToString() has a bug that can cause 0-valued enums to appear in outputs if there's more than one of them (e.g., None = 0, Default = None). Enum.GetName() does not seem to suffer from this, so we use that throughout this class instead.
+
 	/// <summary>A combination of the HTTP method and the content type.</summary>
 	public enum RequestType
 	{
@@ -80,13 +82,13 @@
 		public Request Add(string name, bool value) => value ? this.Add(name) : this;
 
 		/// <summary>Adds an enumeration parameter if the value is non-null.</summary>
+		/// <typeparam name="T">The enumeration type.</typeparam>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		// Enum.ToString() has a bug that can cause 0-valued enums to appear in outputs if there's more than one of them (e.g., None = 0, Default = None). Enum.GetName() does not seem to suffer from this, so we use that instead.
 		[SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Not a normalization")]
-		public Request Add(string name, Enum value) =>
-			value?.GetType().GetEnumName(value) is string enumName
+		public Request Add<T>(string name, T value)
+			where T : Enum => value?.GetType().GetEnumName(value) is string enumName
 				? this.Add(name, enumName.ToLowerInvariant())
 				: this;
 
@@ -111,7 +113,7 @@
 		{
 			if (value == null || value.Length == 0)
 			{
-				throw new ArgumentException(Resources.EmptyFile);
+				throw new ArgumentException(Resources.EmptyFile, nameof(value));
 			}
 
 			this.Add(new FileParameter(this.Prefix + name, fileName, value));
@@ -243,17 +245,19 @@
 		// TODO: Add AddFlags that distinguishes between None and Default and sends empty parameter for None instead of nothing. Update all relevant calls and flag values as appropriate.
 
 		/// <summary>Adds a flags parameter as a pipe-separated string, provided at least one flag is set. The text added will be the same as the enumeration value name, converted to lower-case.</summary>
+		/// <typeparam name="T">The enumeration type.</typeparam>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="values">The parameter values.</param>
 		/// <returns>The current collection (fluent interface).</returns>
 		[SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Not a normalization")]
-		public Request AddFlags(string name, Enum values)
+		public Request AddFlags<T>(string name, T values)
+			where T : Enum
 		{
 			ThrowNull(values, nameof(values));
+			var type = values.GetType();
 			foreach (var prop in values.GetUniqueFlags())
 			{
-				// Enum.ToString() has a bug that can cause 0-valued enums to appear in outputs if there's more than one of them (e.g., None = 0, Default = None). Enum.GetName() does not seem to suffer from this.
-				if (values.GetType().GetEnumName(prop) is string enumName)
+				if (type.GetEnumName(prop) is string enumName)
 				{
 					this.AddToPiped(name, enumName.ToLowerInvariant());
 				}
@@ -263,11 +267,13 @@
 		}
 
 		/// <summary>Adds a flags parameter if the condition is true and at least one flag is set.</summary>
+		/// <typeparam name="T">The enumeration type.</typeparam>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="values">The parameter values.</param>
 		/// <param name="condition">The condition to check.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public Request AddFlagsIf(string name, Enum values, bool condition) => condition ? this.AddFlags(name, values) : this;
+		public Request AddFlagsIf<T>(string name, T values, bool condition)
+			where T : Enum => condition ? this.AddFlags(name, values) : this;
 
 		/// <summary>Adds the format parameter.</summary>
 		/// <param name="value">The format parameter value.</param>
@@ -328,11 +334,13 @@
 		public Request AddIf(string name, bool value, bool condition) => this.Add(name, value && condition);
 
 		/// <summary>Adds an enumeration parameter if the value is non-null and the condition is true.</summary>
+		/// <typeparam name="T">The enumeration type.</typeparam>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <param name="condition">The condition to check.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public Request AddIf(string name, Enum value, bool condition) => condition ? this.Add(name, value) : this;
+		public Request AddIf<T>(string name, T value, bool condition)
+			where T : Enum => condition ? this.Add(name, value) : this;
 
 		/// <summary>Adds a numeric parameter if the condition is true.</summary>
 		/// <param name="name">The parameter name.</param>
@@ -379,10 +387,12 @@
 		public Request AddIfNotNullIf(string name, string? value, bool condition) => (condition && value != null) ? this.Add(name, value) : this;
 
 		/// <summary>Adds an enumeration parameter if its integer value is greater than zero.</summary>
+		/// <typeparam name="T">The enumeration type.</typeparam>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public Request AddIfPositive(string name, Enum value) => Convert.ToUInt64(value, CultureInfo.InvariantCulture) > 0 ? this.Add(name, value) : this;
+		public Request AddIfPositive<T>(string name, T value)
+			where T : Enum => Convert.ToUInt64(value, CultureInfo.InvariantCulture) > 0 ? this.Add(name, value) : this;
 
 		/// <summary>Adds a numeric parameter if the value is greater than zero.</summary>
 		/// <param name="name">The parameter name.</param>
@@ -397,11 +407,13 @@
 		}
 
 		/// <summary>Adds an enumeration parameter if its integer value is greater than zero and the condition is true.</summary>
+		/// <typeparam name="T">The enumeration type.</typeparam>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <param name="condition">The condition to check.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public Request AddIfPositiveIf(string name, Enum value, bool condition) => condition && Convert.ToUInt64(value, CultureInfo.InvariantCulture) > 0 ? this.Add(name, value) : this;
+		public Request AddIfPositiveIf<T>(string name, T value, bool condition)
+			where T : Enum => condition && Convert.ToUInt64(value, CultureInfo.InvariantCulture) > 0 ? this.Add(name, value) : this;
 
 		/// <summary>Adds a numeric parameter if the value is greater than zero and the condition is true.</summary>
 		/// <param name="name">The parameter name.</param>
