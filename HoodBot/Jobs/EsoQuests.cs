@@ -487,7 +487,7 @@
 			#region Public Override Methods
 			public override bool Equals(object? obj) => this.Equals(obj as Condition);
 
-			public override int GetHashCode() => this.Text.GetHashCode(StringComparison.Ordinal) ^ (this.IsFail ? 1 : 0) ^ (this.IsComplete ? 2 : 0);
+			public override int GetHashCode() => HashCode.Combine(this.IsComplete, this.IsFail, this.Text);
 			#endregion
 		}
 

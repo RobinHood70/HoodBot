@@ -100,7 +100,7 @@
 		#region Public Override Methods
 		public override bool Equals(object? obj) => this.Equals(obj as JobInfo);
 
-		public override int GetHashCode() => HashCode.Combine(this.Constructor);
+		public override int GetHashCode() => this.Constructor.GetHashCode();
 
 		public override string? ToString() => this.Name;
 		#endregion
