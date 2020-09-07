@@ -3,11 +3,13 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
+	using System.Globalization;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
@@ -34,7 +36,7 @@
 				// For now, simply trimming the article so that cases like "Alik'r, The" don't sort after "Alik'r Survival". This may miss a few edge cases, though.
 				title = title.Replace("\"", string.Empty, StringComparison.Ordinal);
 				var split = title.Split(TextArrays.Space, 2, StringSplitOptions.None);
-				return split.Length > 1 && split[0] is string article && (article == "A" || article == "An" || article == "The")
+				return split.Length > 1 && split[0] is string article && (string.Equals(article, "A", StringComparison.Ordinal) || string.Equals(article, "An", StringComparison.Ordinal) || string.Equals(article, "The", StringComparison.Ordinal))
 					? split[1]
 					: title;
 			}
@@ -42,14 +44,15 @@
 			this.Pages.GetBacklinks("Template:Lore Book Entry", BacklinksTypes.EmbeddedIn);
 			foreach (var page in this.Pages)
 			{
-				var parser = WikiTextParser.Parse(page.Text);
-				var templates = parser.FindAll<TemplateNode>(node => node.GetTitleValue() == "Lore Book Entry");
-				foreach (var template in templates)
+				var parser = new ContextualParser(page);
+				foreach (var template in parser.FindTemplates("Lore Book Entry"))
 				{
 					var param2 = template.FindNumberedParameter(2);
 					if (template.FindNumberedParameter(2) is ParameterNode linkTitle)
 					{
-						this.linkTitles.Add(WikiTextVisitor.Value(template.FindNumberedParameter(1)?.Value ?? throw new InvalidOperationException()), WikiTextVisitor.Raw(linkTitle.Value));
+						var key = template.FindNumberedParameter(1)?.ValueToText() ?? throw new InvalidOperationException();
+						var value = linkTitle.ValueToText() ?? string.Empty;
+						this.linkTitles.Add(key, value);
 					}
 				}
 			}
@@ -121,22 +124,24 @@
 
 		#region Private Static Methods
 		private static bool ListBookValue(string value) =>
-			value == "1" || (int.TryParse(value, out var intVal) ? intVal != 0 :
-			bool.TryParse(value, out var boolVal) ? boolVal :
-			value.ToLowerInvariant() == "no");
+			string.Equals(value, "1", StringComparison.Ordinal) ||
+			(int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var intVal)
+				? intVal != 0
+				: bool.TryParse(value, out var boolVal) ? boolVal : string.Equals(value.ToLowerInvariant(), "no", StringComparison.Ordinal));
 		#endregion
 
 		#region Private Methods
 		private void LoreBookEntries_PageLoaded(object sender, Page page)
 		{
-			var parser = WikiTextParser.Parse(page.Text);
-			LinkedListNode<IWikiNode>? node = parser.FindFirstLinked<TemplateNode>(node => node.GetTitleValue() == "Lore Book Entry") ?? throw new InvalidOperationException();
+			var parser = new ContextualParser(page);
+			var nodes = parser.Nodes;
+			LinkedListNode<IWikiNode>? node = nodes.FindFirstLinked<TemplateNode>(node => string.Equals(node.GetTitleValue(), "Lore Book Entry", StringComparison.Ordinal)) ?? throw new InvalidOperationException();
 			var first = node?.Previous ?? throw new InvalidOperationException();
-			var last = parser.FindLastLinked<TemplateNode>(node => node.GetTitleValue() == "Lore Book Entry")?.Next ?? throw new InvalidOperationException();
+			var last = nodes.FindLastLinked<TemplateNode>(node => string.Equals(node.GetTitleValue(), "Lore Book Entry", StringComparison.Ordinal))?.Next ?? throw new InvalidOperationException();
 			while (node != null && node != last)
 			{
 				var next = node.Next;
-				parser.Remove(node);
+				nodes.Remove(node);
 				node = next;
 			}
 
@@ -150,12 +155,12 @@
 					template.AddParameter(linkTitle);
 				}
 
-				parser.AddBefore(last, new TextNode("\n"));
-				parser.AddBefore(last, template);
+				nodes.AddBefore(last, new TextNode("\n"));
+				nodes.AddBefore(last, template);
 			}
 
-			parser.Remove(first.Next!);
-			page.Text = WikiTextVisitor.Raw(parser);
+			nodes.Remove(first.Next!);
+			page.Text = parser.GetText();
 		}
 		#endregion
 	}

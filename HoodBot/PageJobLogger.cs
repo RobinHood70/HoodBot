@@ -3,9 +3,11 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.Globalization;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
@@ -55,7 +57,7 @@
 			}
 		}
 
-		private static string FormatDateTime(DateTime dt) => dt.ToString("u").TrimEnd('Z');
+		private static string FormatDateTime(DateTime dt) => dt.ToString("u", CultureInfo.InvariantCulture).TrimEnd('Z');
 		#endregion
 
 		#region Private Methods
@@ -72,31 +74,30 @@
 			var previousTask = WikiTextVisitor.Raw(NodeCollection.NodesBetween(currentTask, taskLog)).Trim().TrimEnd(TextArrays.Period);
 			NodeCollection.RemoveBetween(currentTask, taskLog, false);
 			nodes.AddAfter(currentTask, new TextNode("\n" + this.status + ".\n\n"));
-			return previousTask == this.status;
+			return string.Equals(previousTask, this.status, StringComparison.Ordinal);
 		}
 
 		private void UpdateEntry(Page sender, EventArgs eventArgs)
 		{
 			Debug.Assert(this.logInfo != null, "LogInfo is null.");
-			var parsedText = WikiTextParser.Parse(sender.Text);
-			var result = this.UpdateCurrentStatus(parsedText);
-			if (
-				parsedText.FindFirstLinked<TemplateNode>(template => template.GetTitleValue() == "/Entry") is LinkedListNode<IWikiNode> entryNode &&
+			var parser = new ContextualParser(sender);
+			var result = this.UpdateCurrentStatus(parser.Nodes);
+			if (parser.Nodes.FindFirstLinked<TemplateNode>(template => string.Equals(template.GetTitleValue(), "/Entry", StringComparison.Ordinal)) is LinkedListNode<IWikiNode> entryNode &&
 				entryNode.Value is TemplateNode entry)
 			{
 				// If the last job was the same as this job and has no end time, then it's either the current job or a resumed one.
 				if (string.IsNullOrEmpty(entry.ValueOf(3)) &&
-					entry.ValueOf(1)?.Trim() == this.logInfo.Title &&
-					(entry.ValueOf("info") ?? string.Empty) == (this.logInfo.Details ?? string.Empty))
+					string.Equals(entry.ValueOf(1)?.Trim(), this.logInfo.Title, StringComparison.Ordinal) &&
+					string.Equals(entry.ValueOf("info") ?? string.Empty, this.logInfo.Details ?? string.Empty, StringComparison.Ordinal))
 				{
 					// If the end date is not null, then we're at the end of the job, so update the end time.
 					if (this.end != null)
 					{
-						var start = entry.FindNumberedParameterIndex(2);
-						Debug.Assert(start != -1, "Start parameter not found.");
-						var end = ParameterNode.FromParts(FormatDateTime(DateTime.UtcNow));
-						entry.Parameters.Insert(start, end);
-						sender.Text = WikiTextVisitor.Raw(parsedText);
+						var startParam = entry.FindNumberedParameterIndex(2);
+						Debug.Assert(startParam != -1, "Start parameter not found.");
+						var endParam = ParameterNode.FromParts(FormatDateTime(DateTime.UtcNow));
+						entry.Parameters.Insert(startParam, endParam);
+						sender.Text = parser.GetText();
 					}
 
 					return;
@@ -117,7 +118,7 @@
 					list.AddBefore(entryNode, new TextNode("\n"));
 				}
 
-				sender.Text = WikiTextVisitor.Raw(parsedText);
+				sender.Text = parser.GetText();
 			}
 			else
 			{

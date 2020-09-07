@@ -8,6 +8,7 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
 	// TODO: Rewrite this class when more clear-headed...this is beyond fugly!
@@ -15,7 +16,7 @@
 	{
 		#region Fields
 		private readonly Dictionary<Title, FullTitle> lookup = new Dictionary<Title, FullTitle>();
-		private readonly Dictionary<Title, NodeCollection> parsedPages = new Dictionary<Title, NodeCollection>();
+		private readonly Dictionary<Title, ContextualParser> parsedPages = new Dictionary<Title, ContextualParser>();
 		private readonly IReadOnlyCollection<string> redirectWords;
 		#endregion
 
@@ -82,7 +83,7 @@
 						continue;
 					}
 
-					if (this.parsedPages.TryGetValue(page, out var parsedPage) && parsedPage.FindFirst<LinkNode>() is LinkNode linkNode)
+					if (this.parsedPages.TryGetValue(page, out var parsedPage) && parsedPage.Nodes.FindFirst<LinkNode>() is LinkNode linkNode)
 					{
 						// linkNode.Parameters.Clear();
 						if (!comboTarget.FullEquals(originalTarget) && comboTarget.ToString() is string newValue)
@@ -92,7 +93,7 @@
 							linkNode.Title.AddText(newValue);
 						}
 
-						page.Text = WikiTextVisitor.Raw(parsedPage);
+						page.Text = parsedPage.GetText();
 					}
 				}
 			}
@@ -132,10 +133,10 @@
 			{
 				if (this.Pages.TryGetValue(title.FullPageName, out var page))
 				{
-					var nodes = WikiTextParser.Parse(page.Text);
-					if (nodes.First?.Value is TextNode textNode && this.redirectWords.Contains(textNode.Text.TrimEnd(), StringComparer.OrdinalIgnoreCase))
+					var parser = new ContextualParser(page);
+					if (parser.Nodes.First?.Value is TextNode textNode && this.redirectWords.Contains(textNode.Text.TrimEnd(), StringComparer.OrdinalIgnoreCase))
 					{
-						var targetNode = nodes.FindFirst<LinkNode>();
+						var targetNode = parser.Nodes.FindFirst<LinkNode>();
 						if (targetNode == null)
 						{
 							throw new InvalidOperationException();
@@ -145,7 +146,7 @@
 						var target = FullTitle.FromName(this.Site, targetText);
 						if (this.lookup.TryAdd(title, target))
 						{
-							this.parsedPages.Add(title, nodes);
+							this.parsedPages.Add(title, parser);
 							retval.Add(target);
 						}
 					}

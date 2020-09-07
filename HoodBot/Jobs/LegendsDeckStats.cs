@@ -45,13 +45,12 @@
 		{
 			ThrowNull(parsedPage, nameof(parsedPage));
 			var powerCount = new SortedDictionary<int, int>();
-			var deckSummary = parsedPage.FindFirst<TemplateNode>(node => node.GetTitleValue() == "Legends Deck Summary");
-			if (deckSummary == null)
+			if (!(parsedPage.FindTemplate("Legends Deck Summary") is TemplateNode deckSummary))
 			{
 				throw new InvalidOperationException();
 			}
 
-			foreach (var template in parsedPage.FindAll<TemplateNode>(node => node.GetTitleValue() == "Decklist"))
+			foreach (var template in parsedPage.FindTemplates("Decklist"))
 			{
 				// The following lines set up the structure to handle skipNotes and skipQuantity, even though these are not currently used on any affected pages.
 				var specialParams = new List<ParameterNode>(template.FindParameters("skipQuantity", "skipNotes"));
@@ -74,8 +73,8 @@
 
 			foreach (var entry in powerCount)
 			{
-				var paramName = "m" + entry.Key.ToString();
-				var paramValue = entry.Value.ToString() + '\n';
+				var paramName = "m" + entry.Key.ToString(CultureInfo.InvariantCulture);
+				var paramValue = entry.Value.ToString(CultureInfo.InvariantCulture) + '\n';
 				if (deckSummary.FindParameter(paramName) is ParameterNode param)
 				{
 					param.Value.Clear();
@@ -104,7 +103,7 @@
 			{
 				if (page is VariablesPage varPage && varPage.MainSet != null)
 				{
-					this.cardPowers.Add(page.PageName, int.TryParse(varPage.GetVariable(mtCostName), out var power) ? power : 0);
+					this.cardPowers.Add(page.PageName, int.TryParse(varPage.GetVariable(mtCostName), NumberStyles.Integer, CultureInfo.InvariantCulture, out var power) ? power : 0);
 				}
 			}
 		}

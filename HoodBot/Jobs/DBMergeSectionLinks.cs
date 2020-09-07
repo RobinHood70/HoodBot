@@ -9,6 +9,7 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
@@ -60,12 +61,12 @@
 			pages.Sort();
 			foreach (var page in pages)
 			{
-				var parser = WikiTextParser.Parse(page.Text);
-				foreach (var node in parser.FindAllRecursive<LinkNode>())
+				var parser = new ContextualParser(page);
+				foreach (var node in parser.Links)
 				{
 					var linkTitle = WikiTextVisitor.Value(node.Title);
-					var link = FullTitle.FromName(this.Site, linkTitle);
-					if (link.Fragment == "Dragonborn" && titles.Contains(link))
+					var link = new TitleParser(this.Site, linkTitle);
+					if (string.Equals(link.Fragment, "Dragonborn", StringComparison.Ordinal) && titles.Contains(link))
 					{
 						this.WriteLine($"* {page.AsLink(false)}: {WikiTextVisitor.Raw(node)}");
 					}

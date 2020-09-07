@@ -65,18 +65,17 @@
 		{
 			ThrowNull(skillBase, nameof(skillBase));
 			ThrowNull(template, nameof(template));
-			ThrowNull(this.PatchVersion, nameof(EsoActiveSkillSummaries), nameof(this.PatchVersion));
 			var baseMorph = skillBase.Morphs[0];
 			template.AddOrChange("id", baseMorph.Abilities[3].Id);
-			var baseSkillCost = baseMorph.FullName(baseMorph.CalculatedCost(baseMorph.Costs[3], this.PatchVersion));
+			var baseSkillCost = baseMorph.FullName(baseMorph.CalculatedCost(baseMorph.Costs[3], EsoGeneral.GetPatchVersion(this)));
 			this.UpdateMorphs(skillBase, template, baseMorph, baseSkillCost);
 
 			template.AddOrChange("casttime", FormatSeconds(baseMorph.CastingTime));
 			template.AddOrChange("linerank", skillBase.LearnedLevel);
 			template.AddOrChange("cost", baseSkillCost);
-			template.RemoveOrChange("range", FormatMeters(baseMorph.Ranges[3]), baseMorph.Ranges[3] == "0");
+			template.RemoveOrChange("range", FormatMeters(baseMorph.Ranges[3]), string.Equals(baseMorph.Ranges[3], "0", System.StringComparison.Ordinal));
 
-			if (baseMorph.Radii[3] == "0")
+			if (string.Equals(baseMorph.Radii[3], "0", System.StringComparison.Ordinal))
 			{
 				template.Remove("radius");
 				template.Remove("area");
@@ -94,10 +93,10 @@
 				}
 			}
 
-			template.RemoveOrChange("duration", FormatSeconds(baseMorph.Durations[3]), baseMorph.Durations[3] == "0");
-			template.RemoveOrChange("channeltime", FormatSeconds(baseMorph.ChannelTimes[3]), baseMorph.ChannelTimes[3] == "0");
+			template.RemoveOrChange("duration", FormatSeconds(baseMorph.Durations[3]), string.Equals(baseMorph.Durations[3], "0", System.StringComparison.Ordinal));
+			template.RemoveOrChange("channeltime", FormatSeconds(baseMorph.ChannelTimes[3]), string.Equals(baseMorph.ChannelTimes[3], "0", System.StringComparison.Ordinal));
 			template.AddOrChange("target", baseMorph.Target);
-			template.RemoveOrChange("type", skillBase.SkillType, skillBase.SkillType == "Active");
+			template.RemoveOrChange("type", skillBase.SkillType, string.Equals(skillBase.SkillType, "Active", System.StringComparison.Ordinal));
 			EsoReplace(template["cost"], null);
 			EsoReplace(template["desc"], skillBase.Name);
 			EsoReplace(template["desc1"], skillBase.Name);
@@ -112,17 +111,20 @@
 			param.Value = EsoReplacer.ReplaceGlobal(param.Value, skillName);
 		}
 
-		private static string FormatMeters(string? value)
+		private static string FormatMeters(string? value) => value switch
 		{
-			ThrowNull(value, nameof(value));
-			return $"{value} meter{(value == "1" ? string.Empty : "s")}";
-		}
+			null => throw ArgumentNull(nameof(value)),
+			"1" => "1 meter",
+			_ => $"{value} meters"
+		};
 
-		private static string FormatSeconds(string? value)
+		private static string FormatSeconds(string? value) => value switch
 		{
-			ThrowNull(value, nameof(value));
-			return value == "0" ? "Instant" : $"{value} second{(value == "1" ? string.Empty : "s")}";
-		}
+			null => throw ArgumentNull(nameof(value)),
+			"0" => "Instant",
+			"1" => "1 second",
+			_ => $"{value} seconds"
+		};
 		#endregion
 
 		#region Private Methods
@@ -135,43 +137,43 @@
 				var morphNum = morphCounter == 0 ? string.Empty : morphCounter.ToStringInvariant();
 				var morph = skillBase.Morphs[morphCounter];
 
-				if (morph.CastingTime != baseMorph.CastingTime)
+				if (!string.Equals(morph.CastingTime, baseMorph.CastingTime, System.StringComparison.Ordinal))
 				{
 					descriptions.Add("Casting Time: " + FormatSeconds(morph.CastingTime));
 				}
 
 				var morphChannelTime = morph.ChannelTimes.ToString();
-				if (morphChannelTime != baseMorph.ChannelTimes[3])
+				if (!string.Equals(morphChannelTime, baseMorph.ChannelTimes[3], System.StringComparison.Ordinal))
 				{
 					descriptions.Add("Channel Time: " + FormatSeconds(morphChannelTime));
 				}
 
-				var morphSkillCost = morph.FullCost(this.PatchVersion!);
-				if (morph.Costs[0] != baseMorph.Costs[3] || morphSkillCost != baseSkillCost)
+				var morphSkillCost = morph.FullCost(EsoGeneral.GetPatchVersion(this));
+				if (morph.Costs[0] != baseMorph.Costs[3] || !string.Equals(morphSkillCost, baseSkillCost, System.StringComparison.Ordinal))
 				{
 					descriptions.Add("Cost: " + morphSkillCost);
 				}
 
 				var morphDuration = morph.Durations.ToString();
-				if (morphDuration != baseMorph.Durations[3] && morphDuration != "0")
+				if (!string.Equals(morphDuration, baseMorph.Durations[3], System.StringComparison.Ordinal) && !string.Equals(morphDuration, "0", System.StringComparison.Ordinal))
 				{
 					descriptions.Add("Duration: " + FormatSeconds(morphDuration));
 				}
 
 				var morphRadius = morph.Radii.ToString();
-				if (morphRadius != baseMorph.Radii[3] && morphRadius != "0" && morph.Target != "Self")
+				if (!string.Equals(morphRadius, baseMorph.Radii[3], System.StringComparison.Ordinal) && !string.Equals(morphRadius, "0", System.StringComparison.Ordinal) && !string.Equals(morph.Target, "Self", System.StringComparison.Ordinal))
 				{
 					var word = template.FindFirst("radius", "area")?.Name?.UpperFirst(this.Site.Culture) ?? "Area";
 					descriptions.Add($"{word}: {FormatMeters(morphRadius)}");
 				}
 
 				var morphRange = morph.Ranges.ToString();
-				if (morphRange != baseMorph.Ranges[3] && morphRange != "0" && morph.Target != "Self")
+				if (!string.Equals(morphRange, baseMorph.Ranges[3], System.StringComparison.Ordinal) && !string.Equals(morphRange, "0", System.StringComparison.Ordinal) && !string.Equals(morph.Target, "Self", System.StringComparison.Ordinal))
 				{
 					descriptions.Add("Range: " + FormatMeters(morphRange));
 				}
 
-				if (morph.Target != baseMorph.Target)
+				if (!string.Equals(morph.Target, baseMorph.Target, System.StringComparison.Ordinal))
 				{
 					descriptions.Add("Target: " + morph.Target);
 				}

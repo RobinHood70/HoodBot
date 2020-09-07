@@ -8,12 +8,11 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WikiCommon.Parser;
+	using RobinHood70.Robby.Parser;
 
 	public class CheckArticleHeaders : WikiJob
 	{
-		private static readonly HashSet<string> BadHeaders = new HashSet<string>
-(StringComparer.Ordinal)
+		private static readonly HashSet<string> BadHeaders = new HashSet<string>(StringComparer.Ordinal)
 		{
 			"Bug", "Map", "Note", "Quest", "Quests", "Related Quest"
 		};
@@ -33,8 +32,8 @@
 			pages.Sort();
 			foreach (var page in pages)
 			{
-				var parsedPage = WikiTextParser.Parse(page.Text);
-				foreach (var node in parsedPage.FindAll<HeaderNode>())
+				var parsedPage = new ContextualParser(page);
+				foreach (var node in parsedPage.Headers)
 				{
 					var header = node.GetInnerText(true);
 					if (BadHeaders.Contains(header) && !this.IsException(page, header))
@@ -71,7 +70,7 @@
 
 		private bool IsException(Page page, string header)
 		{
-			if (header == "Quests" && page.PageName.StartsWith("Patch/", StringComparison.Ordinal))
+			if (string.Equals(header, "Quests", StringComparison.Ordinal) && page.PageName.StartsWith("Patch/", StringComparison.Ordinal))
 			{
 				return true;
 			}

@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.Globalization;
 	using System.Text;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
@@ -11,6 +12,7 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
 
@@ -18,10 +20,9 @@
 	{
 		#region Static Fields
 		private static readonly HashSet<int> BadRows = new HashSet<int> { 2666 };
-		private static readonly Regex SetBonusRegex = new Regex(@"(\([1-6] items?\))");
+		private static readonly Regex SetBonusRegex = new Regex(@"(\([1-6] items?\))", RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(1));
 		private static readonly Uri SetSummaryPage = new Uri("http://esolog.uesp.net/viewlog.php?record=setSummary&format=csv");
-		private static readonly Dictionary<string, string> TitleOverrides = new Dictionary<string, string>
-(StringComparer.Ordinal)
+		private static readonly Dictionary<string, string> TitleOverrides = new Dictionary<string, string>(StringComparer.Ordinal)
 		{
 			// Title Overrides should only be necessary when creating new disambiguated "(set)" pages or when pages don't conform to the base/base (set) style. While this could be done programatically, it's probably best not to, so that a human has verified that the page really should be created and that the existing page isn't malformed or something.
 			["Lady Thorn"] = "Lady Thorn (set)",
@@ -71,10 +72,10 @@
 			this.Progress++;
 
 			this.StatusWriteLine("Updating");
-			var sets = new List<PageData>();
+			var setList = new List<PageData>();
 			foreach (var row in csvFile)
 			{
-				if (!BadRows.Contains(int.Parse(row["id"])))
+				if (!BadRows.Contains(int.Parse(row["id"], CultureInfo.InvariantCulture)))
 				{
 					var setName = row["setName"].Replace(@"\'", "'", StringComparison.Ordinal);
 					var bonusDescription = row["setBonusDesc"];
@@ -89,11 +90,11 @@
 						set.PageName = pageName;
 					}
 
-					sets.Add(set);
+					setList.Add(set);
 				}
 			}
 
-			this.ResolveAndPopulateSets(sets);
+			this.ResolveAndPopulateSets(setList);
 			var titles = new TitleCollection(this.Site);
 			foreach (var set in this.sets)
 			{
@@ -243,6 +244,8 @@
 
 		private void UpdatePageText(Page page, PageData pageData)
 		{
+			var parser = new ContextualParser(page);
+
 			const string marker = "<onlyinclude>";
 			const string terminator = "</onlyinclude>";
 
@@ -267,7 +270,7 @@
 			for (var itemNum = 1; itemNum < items.Length; itemNum += 2)
 			{
 				var itemName = items[itemNum].Trim(TextArrays.Parentheses);
-				var desc = Regex.Replace(items[itemNum + 1].Trim(), "[\n ]+", " ");
+				var desc = Regex.Replace(items[itemNum + 1].Trim(), "[\n ]+", " ", RegexOptions.None, TimeSpan.FromSeconds(1));
 				if (desc.StartsWith(page.PageName, StringComparison.Ordinal))
 				{
 					desc = desc.Substring(page.PageName.Length).TrimStart();

@@ -10,7 +10,6 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	public class FurnishingSplit : ParsedPageJob
@@ -71,27 +70,26 @@
 		{
 			ThrowNull(parsedPage, nameof(parsedPage));
 			ThrowNull(parsedPage.Title, nameof(parsedPage), nameof(parsedPage.Title));
-			var issues = new List<string>();
+			var pageIssues = new List<string>();
 			if (!parsedPage.Title.PageName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))
 			{
-				issues.Add("does not end in .jpg");
+				pageIssues.Add("does not end in .jpg");
 			}
 
-			var summary = parsedPage.FindFirst<TemplateNode>(node => node.GetTitleValue().ToLowerInvariant() == "furnishing summary");
-			if (summary == null)
+			if (parsedPage.FindTemplate("Furnishing Summary") == null)
 			{
-				issues.Add("does not have a Furnishing Summary");
+				pageIssues.Add("does not have a Furnishing Summary");
 			}
 
 			var title = PageFromFile(parsedPage.Title);
 			if (this.existingPages!.Contains(title))
 			{
-				issues.Add($"page exists: {title.AsLink(true)}");
+				pageIssues.Add($"page exists: {title.AsLink(true)}");
 			}
 
-			if (issues.Count > 0)
+			if (pageIssues.Count > 0)
 			{
-				this.issues.Add($"* {parsedPage.Title.AsLink(false)}: {string.Join(", ", issues)}.");
+				this.issues.Add($"* {parsedPage.Title.AsLink(false)}: {string.Join(", ", pageIssues)}.");
 			}
 		}
 		#endregion
