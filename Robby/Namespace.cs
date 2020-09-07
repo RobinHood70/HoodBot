@@ -218,7 +218,7 @@
 
 		/// <summary>Returns a hash code for this instance.</summary>
 		/// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. </returns>
-		public override int GetHashCode() => CompositeHashCode(this.Site, this.Id);
+		public override int GetHashCode() => HashCode.Combine(this.Site, this.Id);
 
 		/// <summary>Returns a <see cref="string" /> that represents this instance using the primary name of the namespace.</summary>
 		/// <returns>A <see cref="string" /> that represents this instance.</returns>

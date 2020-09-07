@@ -32,13 +32,13 @@
 	internal static class EsoGeneral
 	{
 		#region Static Fields
-		private static readonly Regex ColourCode = new Regex(@"\A\|c[0-9A-F]{6}(.*?)\|r\Z", RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(1));
-		private static readonly Regex TrailingDigits = new Regex(@"\s*\d+\Z", RegexOptions.None, TimeSpan.FromSeconds(1));
+		private static readonly Regex ColourCode = new Regex(@"\A\|c[0-9A-F]{6}(.*?)\|r\Z", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex TrailingDigits = new Regex(@"\s*\d+\Z", RegexOptions.None, DefaultRegexTimeout);
 		#endregion
 
 		#region Fields
-		private static readonly Regex BonusFinder = new Regex(@"\s*Current [Bb]onus:.*?\.", RegexOptions.None, TimeSpan.FromSeconds(1));
-		private static readonly Regex SpaceFixer = new Regex(@"[\n\ ]+", RegexOptions.None, TimeSpan.FromSeconds(1));
+		private static readonly Regex BonusFinder = new Regex(@"\s*Current [Bb]onus:.*?\.", RegexOptions.None, DefaultRegexTimeout);
+		private static readonly Regex SpaceFixer = new Regex(@"[\n\ ]+", RegexOptions.None, DefaultRegexTimeout);
 		private static string? esoLogConnectionString; // = ConfigurationManager.ConnectionStrings["EsoLog"].ConnectionString;
 		private static string? patchVersion;
 		#endregion

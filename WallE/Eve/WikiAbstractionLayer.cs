@@ -444,7 +444,7 @@
 			}
 
 			this.ArticlePath = path;
-			var versionFudged = Regex.Replace(general.Generator, @"[^0-9\.]", ".", RegexOptions.None, TimeSpan.FromSeconds(1)).TrimStart(TextArrays.Period);
+			var versionFudged = Regex.Replace(general.Generator, @"[^0-9\.]", ".", RegexOptions.None, DefaultRegexTimeout).TrimStart(TextArrays.Period);
 			var versionSplit = versionFudged.Split(TextArrays.Period);
 			var siteVersion = int.Parse(versionSplit[0], CultureInfo.InvariantCulture) * 100 + int.Parse(versionSplit[1], CultureInfo.InvariantCulture);
 			this.SiteVersion = siteVersion;

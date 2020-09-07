@@ -15,12 +15,13 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
+	using static RobinHood70.CommonCode.Globals;
 
 	internal class EsoItemSets : EditJob
 	{
 		#region Static Fields
 		private static readonly HashSet<int> BadRows = new HashSet<int> { 2666 };
-		private static readonly Regex SetBonusRegex = new Regex(@"(\([1-6] items?\))", RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(1));
+		private static readonly Regex SetBonusRegex = new Regex(@"(\([1-6] items?\))", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
 		private static readonly Uri SetSummaryPage = new Uri("http://esolog.uesp.net/viewlog.php?record=setSummary&format=csv");
 		private static readonly Dictionary<string, string> TitleOverrides = new Dictionary<string, string>(StringComparer.Ordinal)
 		{
@@ -270,7 +271,7 @@
 			for (var itemNum = 1; itemNum < items.Length; itemNum += 2)
 			{
 				var itemName = items[itemNum].Trim(TextArrays.Parentheses);
-				var desc = Regex.Replace(items[itemNum + 1].Trim(), "[\n ]+", " ", RegexOptions.None, TimeSpan.FromSeconds(1));
+				var desc = Regex.Replace(items[itemNum + 1].Trim(), "[\n ]+", " ", RegexOptions.None, DefaultRegexTimeout);
 				if (desc.StartsWith(page.PageName, StringComparison.Ordinal))
 				{
 					desc = desc.Substring(page.PageName.Length).TrimStart();

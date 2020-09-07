@@ -21,7 +21,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		where TOutput : ITitle
 	{
 		#region Static Fields
-		private static readonly Regex TooManyFinder = new Regex(@"Too many values .*?'(?<parameter>.*?)'.*?limit is (?<sizelimit>[0-9]+)", RegexOptions.Compiled, TimeSpan.FromSeconds(3));
+		private static readonly Regex TooManyFinder = new Regex(@"Too many values .*?'(?<parameter>.*?)'.*?limit is (?<sizelimit>[0-9]+)", RegexOptions.Compiled, DefaultRegexTimeout);
 		#endregion
 
 		#region Fields

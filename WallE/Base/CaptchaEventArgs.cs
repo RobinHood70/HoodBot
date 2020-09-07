@@ -5,6 +5,7 @@
 	using System.Globalization;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>This class allows Captcha data to be passed back to the user, solved, and then the solution returned to the wiki.</summary>
 	public class CaptchaEventArgs : EventArgs
@@ -46,7 +47,7 @@
 		{
 			if (e != null && string.Equals(e.CaptchaData["type"], "simple", StringComparison.Ordinal))
 			{
-				var math = new Regex(@"(?<num1>\d+)(?<num2>[+-]\d+)", RegexOptions.None, TimeSpan.FromSeconds(3));
+				var math = new Regex(@"(?<num1>\d+)(?<num2>[+-]\d+)", RegexOptions.None, DefaultRegexTimeout);
 				var nums = math.Match(e.CaptchaData["question"].Replace('−', '-'));
 				var solved = int.Parse(nums.Groups["num1"].Value, CultureInfo.InvariantCulture) + int.Parse(nums.Groups["num2"].Value, CultureInfo.InvariantCulture);
 

@@ -53,7 +53,7 @@
 		#region Public Override Methods
 		public override bool Equals(object? obj) => this.Equals(obj as ConstructorParameter);
 
-		public override int GetHashCode() => CompositeHashCode(this.Label, this.Name, this.Type, this.Value);
+		public override int GetHashCode() => HashCode.Combine(this.Label, this.Name, this.Type, this.Value);
 
 		public override string ToString() => this.Type.Name + ' ' + this.Name;
 		#endregion
