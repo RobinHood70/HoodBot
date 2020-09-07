@@ -14,6 +14,10 @@
 		/// <summary>Gets the title.</summary>
 		/// <value>The title.</value>
 		NodeCollection Title { get; }
+
+		/// <summary>Parses the title and returns the trimmed value.</summary>
+		/// <returns>The title.</returns>
+		string GetTitleValue();
 		#endregion
 	}
 }
