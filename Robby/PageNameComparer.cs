@@ -22,32 +22,36 @@
 		/// <inheritdoc/>
 		public override int Compare(string? x, string? y)
 		{
-			static int? XYCondition(bool xCondition, bool yCondition)
+			if (x is null)
 			{
-				return xCondition
-					? yCondition
-						? 0
-						: -1
-					: yCondition
-						? 1
-						: (int?)null;
+				return y is null ? 0 : -1;
 			}
 
-			if (XYCondition(x is null, y is null) is int retval)
+			if (y is null)
 			{
-				return retval;
-			}
-
-			if (XYCondition(x!.Length == 0, y!.Length == 0) is int retval2)
-			{
-				return retval2;
+				return 1;
 			}
 
 			var compareInfo = this.ns.Site.Culture.CompareInfo;
-			var firstCharCompare = compareInfo.Compare(x, 0, 1, y, 0, 1, this.ns.CaseSensitive ? CompareOptions.None : CompareOptions.IgnoreCase);
+			if (this.ns.CaseSensitive)
+			{
+				return compareInfo.Compare(x, y, CompareOptions.None);
+			}
+
+			var (xFirst, xRemainder) = Split(x);
+			var (yFirst, yRemainder) = Split(y);
+
+			var firstCharCompare = compareInfo.Compare(xFirst, yFirst, CompareOptions.IgnoreCase);
 			return firstCharCompare != 0
 				? firstCharCompare
-				: XYCondition(x!.Length == 1, y!.Length == 1) ?? compareInfo.Compare(x, 1, y, 1, CompareOptions.None);
+				: compareInfo.Compare(xRemainder, yRemainder, CompareOptions.None);
+
+			static (string First, string Remainder) Split(string input)
+			{
+				var first = input.Length > 0 ? input.Substring(0, 1) : string.Empty;
+				var remainder = input.Length > 1 ? input.Substring(1) : string.Empty;
+				return (first, remainder);
+			}
 		}
 
 		/// <inheritdoc/>
