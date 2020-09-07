@@ -140,7 +140,7 @@
 
 		protected Action<ContextualParser, ISimpleTitle, ISimpleTitle>? CustomReplaceSpecific { get; set; }
 
-		protected Dictionary<Title, Replacement> EditDictionary { get; } = new Dictionary<Title, Replacement>();
+		protected IDictionary<Title, Replacement> EditDictionary { get; } = new Dictionary<Title, Replacement>();
 
 		protected string EditSummaryEditAfterMove { get; set; } = "Update text after page move";
 
@@ -170,7 +170,7 @@
 
 		protected bool SuppressRedirects { get; set; } = true;
 
-		protected Dictionary<string, Action<Page, TemplateNode>> TemplateReplacements { get; } = new Dictionary<string, Action<Page, TemplateNode>>(StringComparer.OrdinalIgnoreCase);
+		protected IDictionary<string, Action<Page, TemplateNode>> TemplateReplacements { get; } = new Dictionary<string, Action<Page, TemplateNode>>(StringComparer.OrdinalIgnoreCase);
 
 		protected PageModules ToPageModules { get; set; }
 		#endregion
@@ -186,14 +186,14 @@
 		protected IEnumerable<Replacement> LoadReplacementsFromFile(string fileName)
 		{
 			var repFile = File.ReadLines(fileName);
-			var replacements = new List<Replacement>();
+			var replacementList = new List<Replacement>();
 			foreach (var line in repFile)
 			{
 				var rep = line.Split(TextArrays.Tab);
-				replacements.Add(new Replacement(this.Site, rep[0].Trim(), rep[1].Trim()));
+				replacementList.Add(new Replacement(this.Site, rep[0].Trim(), rep[1].Trim()));
 			}
 
-			return replacements;
+			return replacementList;
 		}
 		#endregion
 
@@ -536,7 +536,7 @@
 						this.UpdateLinkNode(page, link);
 						break;
 					case TagNode tag:
-						if (tag.Name == "gallery")
+						if (string.Equals(tag.Name, "gallery", StringComparison.Ordinal))
 						{
 							this.UpdateGalleryLinks(page, tag);
 						}
@@ -583,7 +583,7 @@
 					}
 				}
 
-				sb.Append(newLine + '\n');
+				sb.Append(newLine).Append('\n');
 			}
 
 			if (sb.Length > 0)
@@ -708,8 +708,8 @@
 			// QUESTION: Is the below still an issue?
 			// Page may not have been correctly found if it was recently moved. If it wasn't, there's little we can do here, so skip it and it'll show up in the report (assuming it's generated).
 			// TODO: See if this can be worked around, like asking the wiki to purge and reload or something.
-			var parsedPage = ContextualParser.FromPage(page);
-			this.ReplaceNodes(page, parsedPage);
+			var parsedPage = new ContextualParser(page);
+			this.ReplaceNodes(page, parsedPage.Nodes); // TODO: See if this can be re-written with ContextualParser methods.
 			if (this.CustomReplaceSpecific != null)
 			{
 				foreach (var replacement in this.replacements)
@@ -719,7 +719,7 @@
 			}
 
 			this.CustomReplaceGeneral?.Invoke(parsedPage);
-			page.Text = WikiTextVisitor.Raw(parsedPage);
+			page.Text = parsedPage.GetText();
 		}
 
 		private void EditPageLoaded(object sender, Page page)

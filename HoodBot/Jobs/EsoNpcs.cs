@@ -8,8 +8,8 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.Parser;
 
 	internal class EsoNpcs : EditJob
 	{
@@ -150,8 +150,8 @@
 					if (page.IsDisambiguation)
 					{
 						issue = "is a disambiguation with no clear NPC link";
-						var parser = WikiTextParser.Parse(page.Text);
-						foreach (var linkNode in parser.FindAllRecursive<LinkNode>())
+						var parser = new ContextualParser(page);
+						foreach (var linkNode in parser.Links)
 						{
 							var disambig = SiteLink.FromLinkNode(this.Site, linkNode, false);
 							if (allNpcs.Contains(disambig))

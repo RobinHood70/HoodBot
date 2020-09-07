@@ -7,7 +7,6 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	public class LinkFinder : ParsedPageJob
@@ -55,15 +54,9 @@
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
 			ThrowNull(parsedPage, nameof(parsedPage));
-			ThrowNull(parsedPage.Title, nameof(parsedPage), nameof(parsedPage.Title));
-			var links = parsedPage.FindAllRecursive<LinkNode>();
-			foreach (var link in links)
+			if (parsedPage.FindLink(this.title) != null)
 			{
-				var siteLink = SiteLink.FromLinkNode(this.Site, link);
-				if (siteLink.FullEquals(this.title))
-				{
-					this.results.Add(parsedPage.Title);
-				}
+				this.results.Add(parsedPage.Title);
 			}
 		}
 		#endregion

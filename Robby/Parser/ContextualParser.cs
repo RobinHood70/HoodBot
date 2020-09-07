@@ -8,52 +8,49 @@
 	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
-	public class ContextualParser : NodeCollection
+	public class ContextualParser
 	{
 		#region Constructors
-		public ContextualParser(Site site)
-			: base(null)
+
+		/// <summary>Initializes a new instance of the <see cref="ContextualParser"/> class.</summary>
+		/// <param name="page">The page to parse.</param>
+		public ContextualParser(Page page)
+			: this(page, InclusionType.Raw, false)
 		{
-			ThrowNull(site, nameof(site));
-			this.Site = site;
 		}
 
-		public ContextualParser(ISimpleTitle title, NodeCollection nodes)
-			: base(null, nodes)
+		/// <summary>Initializes a new instance of the <see cref="ContextualParser"/> class.</summary>
+		/// <param name="page">The page to parse.</param>
+		/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
+		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
+		/// <returns>A <see cref="NodeCollection"/> with the parsed text.</returns>
+		public ContextualParser(Page page, InclusionType inclusionType, bool strictInclusion)
 		{
-			ThrowNull(title, nameof(title));
-			this.Title = title;
-			this.Site = title.Namespace.Site;
+			ThrowNull(page, nameof(page));
+			this.Title = page;
+			this.Site = page.Namespace.Site;
+			this.Nodes = WikiTextParser.Parse(page.Text ?? string.Empty, inclusionType, strictInclusion);
 		}
 		#endregion
 
 		#region Public Properties
-		public Dictionary<string, Func<string>> MagicWordResolvers { get; } = new Dictionary<string, Func<string>>(StringComparer.Ordinal);
+		public IEnumerable<HeaderNode> Headers => this.Nodes.FindAllRecursive<HeaderNode>();
+
+		public IEnumerable<LinkNode> Links => this.Nodes.FindAllRecursive<LinkNode>();
+
+		public IDictionary<string, Func<string>> MagicWordResolvers { get; } = new Dictionary<string, Func<string>>(StringComparer.Ordinal);
+
+		public NodeCollection Nodes { get; }
 
 		public IDictionary<string, string> Parameters { get; } = new Dictionary<string, string>(StringComparer.Ordinal);
 
-		public Dictionary<string, Func<string>> TemplateResolvers { get; } = new Dictionary<string, Func<string>>(StringComparer.Ordinal);
-
 		public Site Site { get; }
 
-		public ISimpleTitle? Title { get; set; }
-		#endregion
+		public IEnumerable<TemplateNode> Templates => this.Nodes.FindAllRecursive<TemplateNode>();
 
-		#region Public Static Methods
-		public static ContextualParser FromPage(Page page)
-		{
-			ThrowNull(page, nameof(page));
-			ThrowNull(page.Text, nameof(page), nameof(page.Text));
-			return FromText(page, page.Text, null);
-		}
+		public IDictionary<string, Func<string>> TemplateResolvers { get; } = new Dictionary<string, Func<string>>(StringComparer.Ordinal);
 
-		public static ContextualParser FromText(ISimpleTitle title, string text, bool? inclusion)
-		{
-			ThrowNull(title, nameof(title));
-			ThrowNull(text, nameof(text));
-			var nodes = WikiTextParser.Parse(text, inclusion, false);
-			return new ContextualParser(title, nodes);
-		}
+		public ISimpleTitle Title { get; set; }
 		#endregion
 
 		#region Public Methods
@@ -62,14 +59,14 @@
 			ThrowNull(category, nameof(category));
 			var catTitle = FullTitle.Coerce(this.Site, MediaWikiNamespaces.Category, category);
 			LinkedListNode<IWikiNode>? lastCategory = null;
-			foreach (var link in this.FindAllLinked<LinkNode>())
+			foreach (var link in this.Nodes.FindAllLinked<LinkNode>())
 			{
 				var linkNode = (LinkNode)link.Value;
 				var titleText = WikiTextVisitor.Value(linkNode.Title);
 				var title = FullTitle.FromName(this.Site, titleText);
 				if (title.Namespace == MediaWikiNamespaces.Category)
 				{
-					if (title.PageName == catTitle.PageName)
+					if (string.Equals(title.PageName, catTitle.PageName, StringComparison.Ordinal))
 					{
 						return false;
 					}
@@ -81,16 +78,92 @@
 			var newCat = LinkNode.FromParts(catTitle.ToString());
 			if (lastCategory == null)
 			{
-				this.AddLast(new TextNode("\n\n"));
-				this.AddLast(newCat);
+				this.Nodes.AddLast(new TextNode("\n\n"));
+				this.Nodes.AddLast(newCat);
 			}
 			else
 			{
-				this.AddAfter(lastCategory, newCat);
+				this.Nodes.AddAfter(lastCategory, newCat);
 			}
 
 			return true;
 		}
+
+		public LinkNode? FindLink(string find) => this.FindLink(new TitleParser(this.Site, find));
+
+		public LinkNode? FindLink(ISimpleTitle find)
+		{
+			foreach (var link in this.FindLinks(find))
+			{
+				return link;
+			}
+
+			return null;
+		}
+
+		public LinkNode? FindLink(IFullTitle find)
+		{
+			foreach (var link in this.FindLinks(find))
+			{
+				return link;
+			}
+
+			return null;
+		}
+
+		public IEnumerable<LinkNode> FindLinks(string find) => this.FindLinks(new TitleParser(this.Site, find));
+
+		public IEnumerable<LinkNode> FindLinks(ISimpleTitle find)
+		{
+			foreach (var link in this.Nodes.FindAllRecursive<LinkNode>())
+			{
+				var titleText = link.GetTitleValue();
+				var linkTitle = new TitleParser(this.Site, titleText);
+				if (linkTitle.SimpleEquals(find))
+				{
+					yield return link;
+				}
+			}
+		}
+
+		public IEnumerable<LinkNode> FindLinks(IFullTitle find)
+		{
+			foreach (var link in this.Nodes.FindAllRecursive<LinkNode>())
+			{
+				var titleText = link.GetTitleValue();
+				var linkTitle = new TitleParser(this.Site, titleText);
+				if (linkTitle.FullEquals(find))
+				{
+					yield return link;
+				}
+			}
+		}
+
+		public TemplateNode? FindTemplate(string templateName)
+		{
+			foreach (var link in this.FindTemplates(templateName))
+			{
+				return link;
+			}
+
+			return null;
+		}
+
+		public IEnumerable<TemplateNode> FindTemplates(string templateName)
+		{
+			var find = new TitleParser(this.Site, MediaWikiNamespaces.Template, templateName);
+			foreach (var template in this.Nodes.FindAllRecursive<TemplateNode>())
+			{
+				var titleText = template.GetTitleValue();
+				var templateTitle = new TitleParser(this.Site, MediaWikiNamespaces.Template, titleText);
+				if (templateTitle.SimpleEquals(find))
+				{
+					yield return template;
+				}
+			}
+		}
+
+		public string? GetText() => WikiTextVisitor.Raw(this.Nodes);
 		#endregion
 	}
 }

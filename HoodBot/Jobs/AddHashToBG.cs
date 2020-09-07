@@ -25,8 +25,7 @@
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
 			ThrowNull(parsedPage, nameof(parsedPage));
-			var templates = parsedPage.FindAllRecursive<TemplateNode>();
-			foreach (var template in templates)
+			foreach (var template in parsedPage.Templates)
 			{
 				if (template.Parameters.Count >= 1)
 				{
