@@ -95,6 +95,9 @@
 		/// <summary>Accepts a visitor to process the node.</summary>
 		/// <param name="visitor">The visiting class.</param>
 		public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
+
+		/// <inheritdoc/>
+		public string GetTitleValue() => WikiTextUtilities.DecodeAndNormalize(WikiTextVisitor.Value(this.Title)).Trim();
 		#endregion
 
 		#region Public Override Methods
