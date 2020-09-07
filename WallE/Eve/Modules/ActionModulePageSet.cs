@@ -181,8 +181,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override bool HandleWarning(string from, string text)
 		{
-			if (
-				from == this.Name &&
+			if (string.Equals(from, this.Name, System.StringComparison.Ordinal) &&
 				TooManyFinder.Match(text) is var match &&
 				match.Success &&
 				PageSetInput.AllTypes.Contains(match.Groups["parameter"].Value))

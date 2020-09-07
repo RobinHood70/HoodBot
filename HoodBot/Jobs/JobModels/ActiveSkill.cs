@@ -4,6 +4,7 @@
 	using System.Data;
 	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
+	using System.Globalization;
 
 	[SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Instantiated by generic new().")]
 	internal class ActiveSkill : Skill
@@ -49,7 +50,7 @@
 
 		public override void GetData(IDataRecord row)
 		{
-			static string FormatRange(int num) => ((double)num / 100).ToString("0.##");
+			static string FormatRange(int num) => ((double)num / 100).ToString("0.##", CultureInfo.InvariantCulture);
 
 			this.LearnedLevel = (int)row["learnedLevel"];
 
@@ -72,7 +73,7 @@
 			morph.Radii.Add(FormatRange((int)row["radius"]));
 			var maxRange = FormatRange((int)row["maxRange"]);
 			var minRange = FormatRange((int)row["minRange"]);
-			var range = minRange == "0" ? maxRange : string.Concat(minRange, "-", maxRange);
+			var range = string.Equals(minRange, "0", System.StringComparison.Ordinal) ? maxRange : string.Concat(minRange, "-", maxRange);
 			morph.Ranges.Add(range);
 
 			if (morph.Abilities.Count == 4)

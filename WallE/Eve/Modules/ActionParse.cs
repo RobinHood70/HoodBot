@@ -164,7 +164,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					var limits = new List<string>();
 					foreach (var limitResult in entry.Children<JProperty>())
 					{
-						if (limitResult.Name != "name" && (string?)limitResult.Value is string value)
+						if (!string.Equals(limitResult.Name, "name", StringComparison.Ordinal) && (string?)limitResult.Value is string value)
 						{
 							limits.Add(value);
 						}

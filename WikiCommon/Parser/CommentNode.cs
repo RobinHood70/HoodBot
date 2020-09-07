@@ -30,7 +30,7 @@
 			set
 			{
 				value ??= string.Empty;
-				if (this.comment != value)
+				if (!string.Equals(this.comment, value, StringComparison.Ordinal))
 				{
 					this.comment = value;
 				}

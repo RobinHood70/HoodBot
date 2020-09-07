@@ -35,7 +35,7 @@
 		#endregion
 
 		#region Constructors
-		public EsoSkillJob(Site site, AsyncInfo asyncInfo)
+		protected EsoSkillJob(Site site, AsyncInfo asyncInfo)
 			: base(site, asyncInfo)
 		{
 		}
@@ -43,10 +43,6 @@
 
 		#region Public Override Properties
 		public override string LogName => "Update ESO " + this.TypeText + " Skills";
-		#endregion
-
-		#region Protected Properties
-		protected string? PatchVersion { get; private set; }
 		#endregion
 
 		#region Protected Abstract Properties
@@ -90,7 +86,6 @@
 
 		protected override void BeforeLogging()
 		{
-			this.PatchVersion = EsoGeneral.GetPatchVersion(this);
 			this.StatusWriteLine("Fetching data");
 			EsoReplacer.Initialize(this);
 			this.GetSkillList();
@@ -151,7 +146,7 @@
 			var iconChanges = new SortedList<string, string>(IconNameCache.Count);
 			foreach (var kvp in IconNameCache)
 			{
-				if (kvp.Key != kvp.Value)
+				if (!string.Equals(kvp.Key, kvp.Value, StringComparison.Ordinal))
 				{
 					iconChanges.Add(kvp.Key, kvp.Value);
 				}
@@ -181,7 +176,7 @@
 			foreach (var row in EsoGeneral.RunQuery(this.Query))
 			{
 				var currentName = (string)row["skillTypeName"] + "::" + (string)row["baseName"];
-				if (lastName != currentName)
+				if (!string.Equals(lastName, currentName, StringComparison.Ordinal))
 				{
 					lastName = currentName;
 					currentSkill = this.GetNewSkill(row);
@@ -261,7 +256,7 @@
 			var iconValue = MakeIcon(skill.SkillLine, skill.Name);
 
 			// Special cases
-			if (iconValue == "Woodworking-Woodworking")
+			if (string.Equals(iconValue, "Woodworking-Woodworking", StringComparison.Ordinal))
 			{
 				iconValue = "Woodworking-Woodworking Skill";
 			}

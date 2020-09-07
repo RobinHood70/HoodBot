@@ -20,7 +20,7 @@
 				.Replace("Dark Elf", "Dunmer", StringComparison.Ordinal)
 				.Replace("High Elf", "Altmer", StringComparison.Ordinal)
 				.Replace("Wood Elf", "Bosmer", StringComparison.Ordinal);
-			if (this.Class == "Craft")
+			if (string.Equals(this.Class, "Craft", StringComparison.Ordinal))
 			{
 				this.Class = "Crafting";
 			}

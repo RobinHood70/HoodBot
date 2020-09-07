@@ -193,9 +193,9 @@
 		/// <returns><see langword="true"/> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false"/>.</returns>
 		public bool Equals(EmbeddedValue? other) =>
 			other != null &&
-			this.Before == other.Before &&
-			this.After == other.After &&
-			this.Value == other.Value;
+			string.Equals(this.Before, other.Before, StringComparison.Ordinal) &&
+			string.Equals(this.After, other.After, StringComparison.Ordinal) &&
+			string.Equals(this.Value, other.Value, StringComparison.Ordinal);
 
 		/// <summary>Returns a string that represents this instance.</summary>
 		/// <returns>A <see cref="string"/> that represents this instance.</returns>

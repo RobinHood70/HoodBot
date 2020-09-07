@@ -46,7 +46,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			*/
 			this.MaximumListSize =
 				this.input.PropertyModules != null &&
-				this.input.PropertyModules.Find(module => module.Name == "revisions") is PropRevisions revModule &&
+				this.input.PropertyModules.Find(module => string.Equals(module.Name, "revisions", StringComparison.Ordinal)) is PropRevisions revModule &&
 				revModule.IsRevisionRange
 					? 1
 					: this.Wal.MaximumPageSetSize;
@@ -272,7 +272,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 					foreach (var testItem in this)
 					{
-						if (this.GetKeyForItem(testItem) == key)
+						if (string.Equals(this.GetKeyForItem(testItem), key, StringComparison.Ordinal))
 						{
 							return testItem;
 						}

@@ -58,11 +58,11 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			foreach (var module in input.Modules)
 			{
-				if (module == "main" || module == "mainmodule")
+				if (string.Equals(module, "main", StringComparison.Ordinal) || string.Equals(module, "mainmodule", StringComparison.Ordinal))
 				{
 					mainModule = true;
 				}
-				else if (module == "pageset" || module == "pagesetmodule")
+				else if (string.Equals(module, "pageset", StringComparison.Ordinal) || string.Equals(module, "pagesetmodule", StringComparison.Ordinal))
 				{
 					pagesetModule = true;
 				}

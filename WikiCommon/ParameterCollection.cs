@@ -638,7 +638,7 @@
 		{
 			ThrowNull(name, nameof(name));
 			var param = this[name];
-			if (param != null && param.Value == value)
+			if (param != null && string.Equals(param.Value, value, StringComparison.Ordinal))
 			{
 				this.Remove(param);
 				return true;
@@ -708,7 +708,7 @@
 		/// <remarks>To bypass the parameter name checks, use <see cref="Parameter.Rename(string)"/> instead.</remarks>
 		public bool RenameParameter(Parameter from, string to) =>
 			from != null &&
-			from.Name != to &&
+!string.Equals(from.Name, to, StringComparison.Ordinal) &&
 			(this.Contains(to) ? throw new InvalidOperationException(CurrentCulture(Resources.ParameterExists, to)) :
 			from.Rename(to));
 
@@ -775,7 +775,7 @@
 				return true;
 			}
 
-			if (param.Value == value)
+			if (string.Equals(param.Value, value, StringComparison.Ordinal))
 			{
 				return false;
 			}

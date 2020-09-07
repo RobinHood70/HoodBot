@@ -63,7 +63,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				foreach (var param in module.Value.Children<JProperty>())
 				{
-					if (param.Name == this.GeneratorContinue)
+					if (string.Equals(param.Name, this.GeneratorContinue, System.StringComparison.Ordinal))
 					{
 						this.savedGeneratorValue = (string?)param.Value;
 					}

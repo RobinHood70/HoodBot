@@ -146,7 +146,7 @@
 					var place = places[quest.Zone];
 					if (place != null)
 					{
-						while (place.TypeText != "Zone" && place.Zone != null && places[place.Zone] is Place newZone)
+						while (!string.Equals(place.TypeText, "Zone", StringComparison.Ordinal) && place.Zone != null && places[place.Zone] is Place newZone)
 						{
 							place = newZone;
 						}
@@ -180,7 +180,7 @@
 			var retval = new List<string>();
 			foreach (var condition in conditions)
 			{
-				if (condition.Text.Length > 0 && condition.Text != "TRACKER GOAL TEXT")
+				if (condition.Text.Length > 0 && !string.Equals(condition.Text, "TRACKER GOAL TEXT", StringComparison.Ordinal))
 				{
 					var conditionText = condition.Text.TrimEnd(TextArrays.Colon);
 					var fullText = $"{{{{Online Quest Objective|{objectiveType}|{conditionText}}}}}";
@@ -431,7 +431,7 @@
 			var mergedStages = new Dictionary<string, List<Condition>>(StringComparer.Ordinal);
 			foreach (var stage in quest.Stages)
 			{
-				if (stage.Zone != "Tamriel" && stage.Zone != quest.Zone)
+				if (!string.Equals(stage.Zone, "Tamriel", StringComparison.Ordinal) && !string.Equals(stage.Zone, quest.Zone, StringComparison.Ordinal))
 				{
 					var title = new Title(this.Site[UespNamespaces.Online], stage.Zone);
 					locs.Add(title.AsLink(true));
@@ -481,7 +481,7 @@
 				other != null &&
 				this.IsComplete == other.IsComplete &&
 				this.IsFail == other.IsFail &&
-				this.Text == other.Text;
+				string.Equals(this.Text, other.Text, StringComparison.Ordinal);
 			#endregion
 
 			#region Public Override Methods
@@ -509,10 +509,10 @@
 				this.RepeatType = (short)row["repeatType"];
 				this.Type = (short)row["type"];
 				var zone = (string)row["zone"];
-				if (zone.Length == 0 || zone == "Tamriel")
+				if (zone.Length == 0 || string.Equals(zone, "Tamriel", StringComparison.Ordinal))
 				{
 					zone = (string)row["locZone"];
-					if (zone == "Tamriel")
+					if (string.Equals(zone, "Tamriel", StringComparison.Ordinal))
 					{
 						zone = string.Empty;
 					}

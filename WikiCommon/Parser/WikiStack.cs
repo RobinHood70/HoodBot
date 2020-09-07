@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
+	using System.Runtime.InteropServices;
 	using System.Text.RegularExpressions;
 	using RobinHood70.WikiCommon.Parser.StackElements;
 	using RobinHood70.WikiCommon.Properties;
@@ -25,15 +26,15 @@
 		#endregion
 
 		#region Static Fields
-		private static readonly HashSet<string> AllowMissingEndTag = new HashSet<string>(StringComparer.Ordinal) { IncludeOnlyTag, NoIncludeTag, OnlyIncludeTag };
+		private static readonly HashSet<string> AllowMissingEndTag = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { IncludeOnlyTag, NoIncludeTag, OnlyIncludeTag };
 		#endregion
 
 		#region Fields
 		private readonly bool enableOnlyInclude;
-		private readonly HashSet<string> ignoredElements = new HashSet<string>(StringComparer.Ordinal);
-		private readonly HashSet<string> ignoredTags = new HashSet<string>(StringComparer.Ordinal);
+		private readonly HashSet<string> ignoredElements = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+		private readonly HashSet<string> ignoredTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 		private readonly bool includeIgnores;
-		private readonly HashSet<string> noMoreClosingTag = new HashSet<string>(StringComparer.Ordinal);
+		private readonly HashSet<string> noMoreClosingTag = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 		private readonly int textLength;
 		private readonly Regex tagsRegex;
 		private StackElement[] array;
@@ -58,24 +59,26 @@
 
 			this.Text = text;
 			this.textLength = text.Length;
-			this.enableOnlyInclude = (include == true) && text.Contains(OnlyIncludeTagOpen, StringComparison.OrdinalIgnoreCase);
-			this.findOnlyinclude = this.enableOnlyInclude;
-			this.includeIgnores = include == null || !strictInclusion;
 
 			var allTags = new HashSet<string>(tagList, StringComparer.Ordinal);
 			switch (include)
 			{
 				case true:
+					this.includeIgnores = !strictInclusion;
+					this.enableOnlyInclude = text.Contains(OnlyIncludeTagOpen, StringComparison.OrdinalIgnoreCase);
+					this.findOnlyinclude = this.enableOnlyInclude;
 					this.ignoredTags.UnionWith(new[] { IncludeOnlyTag, "/" + IncludeOnlyTag });
 					this.ignoredElements.Add(NoIncludeTag);
 					allTags.Add(NoIncludeTag);
 					break;
 				case false:
+					this.includeIgnores = !strictInclusion;
 					this.ignoredTags.UnionWith(new[] { NoIncludeTag, "/" + NoIncludeTag, OnlyIncludeTag, "/" + OnlyIncludeTag });
 					this.ignoredElements.Add(IncludeOnlyTag);
 					allTags.Add(IncludeOnlyTag);
 					break;
 				default:
+					this.includeIgnores = true;
 					this.ignoredTags.UnionWith(new[] { NoIncludeTag, "/" + NoIncludeTag, OnlyIncludeTag, "/" + OnlyIncludeTag, IncludeOnlyTag, "/" + IncludeOnlyTag });
 					break;
 			}
@@ -88,7 +91,7 @@
 			}
 
 			regexTags.Sort();
-			this.tagsRegex = new Regex(@"\G(" + string.Join("|", regexTags) + @")", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+			this.tagsRegex = new Regex(@"\G(" + string.Join("|", regexTags) + @")", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(3));
 
 			this.Preprocess();
 		}
@@ -306,8 +309,7 @@
 		private bool FoundTag(string tagOpen)
 		{
 			var piece = this.Top.CurrentPiece;
-			var tagNameLower = tagOpen.ToLowerInvariant();
-			var attrStart = this.Index + tagNameLower.Length + 1;
+			var attrStart = this.Index + tagOpen.Length + 1;
 			var tagEndPos = this.Text.IndexOf('>', attrStart);
 			if (tagEndPos == -1)
 			{
@@ -316,7 +318,7 @@
 				return false;
 			}
 
-			if (this.ignoredTags.Contains(tagNameLower))
+			if (this.ignoredTags.Contains(tagOpen))
 			{
 				if (this.includeIgnores)
 				{
@@ -341,15 +343,15 @@
 			else
 			{
 				attrEnd = tagEndPos;
-				var findClosing = new Regex(@"</" + tagNameLower + @"\s*>", RegexOptions.IgnoreCase);
+				var findClosing = new Regex(@"</" + tagOpen + @"\s*>", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(3));
 				Match match;
-				if (!this.noMoreClosingTag.Contains(tagNameLower) && (match = findClosing.Match(this.Text, tagEndPos + 1)).Success)
+				if (!this.noMoreClosingTag.Contains(tagOpen) && (match = findClosing.Match(this.Text, tagEndPos + 1)).Success)
 				{
 					inner = this.Text.Substring(tagEndPos + 1, match.Index - tagEndPos - 1);
 					tagClose = match.Value;
 					this.Index = match.Index + match.Length;
 				}
-				else if (AllowMissingEndTag.Contains(tagNameLower))
+				else if (AllowMissingEndTag.Contains(tagOpen))
 				{
 					inner = this.Text.Substring(tagEndPos + 1);
 					tagClose = string.Empty;
@@ -359,12 +361,12 @@
 				{
 					this.Index = tagEndPos + 1;
 					piece.AddLiteral(this.Text[tagStartPos..this.Index]);
-					this.noMoreClosingTag.Add(tagNameLower);
+					this.noMoreClosingTag.Add(tagOpen);
 					return true;
 				}
 			}
 
-			if (this.ignoredElements.Contains(tagNameLower))
+			if (this.ignoredElements.Contains(tagOpen))
 			{
 				if (this.includeIgnores)
 				{
@@ -456,6 +458,7 @@
 		#endregion
 
 		#region Private Structures
+		[StructLayout(LayoutKind.Auto)]
 		private struct Comment
 		{
 			public Comment(int start, int end, int wsLength)

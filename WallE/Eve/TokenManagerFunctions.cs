@@ -15,7 +15,7 @@
 
 		public static string ValidateTokenType(HashSet<string> validTypes, string type, string replace, string replaceWith)
 		{
-			if (type == replace)
+			if (string.Equals(type, replace, StringComparison.Ordinal))
 			{
 				type = replaceWith;
 			}

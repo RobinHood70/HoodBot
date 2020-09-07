@@ -44,8 +44,8 @@
 		#region Public Methods
 		public bool Equals(ConstructorParameter? other) =>
 			other != null &&
-			this.Label == other.Label &&
-			this.Name == other.Name &&
+			string.Equals(this.Label, other.Label, StringComparison.Ordinal) &&
+			string.Equals(this.Name, other.Name, StringComparison.Ordinal) &&
 			this.Type == other.Type &&
 			this.Value == other.Value;
 		#endregion

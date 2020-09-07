@@ -498,7 +498,7 @@
 
 				foreach (var testItem in this)
 				{
-					if (this.GetKeyForItem(testItem) == key)
+					if (string.Equals(this.GetKeyForItem(testItem), key, StringComparison.Ordinal))
 					{
 						return testItem;
 					}

@@ -81,8 +81,7 @@
 			other != null &&
 			title.Interwiki == other.Interwiki &&
 			title.Namespace == other.Namespace &&
-			title.Namespace.PageNameEquals(title.PageName, other.PageName) &&
-			title.Fragment == other.Fragment;
+			title.Namespace.PageNameEquals(title.PageName, other.PageName) && string.Equals(title.Fragment, other.Fragment, System.StringComparison.Ordinal);
 		#endregion
 
 		#region IEnumerable<ISimpleTitle> Extensions
