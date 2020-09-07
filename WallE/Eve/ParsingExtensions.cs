@@ -203,18 +203,18 @@
 
 		/// <summary>Gets a collection of redirects.</summary>
 		/// <param name="token">The token to examine.</param>
+		/// <param name="redirects">The dictionary of redirects to populate.</param>
 		/// <param name="interwikiPrefixes">The interwiki prefixes.</param>
 		/// <param name="siteVersion">The site version.</param>
-		/// <returns>A dictionary of <see cref="PageSetRedirectItem"/>s with the "from" page name as the key.</returns>
-		public static Dictionary<string, PageSetRedirectItem> GetRedirects(this JToken? token, IReadOnlyCollection<string> interwikiPrefixes, int siteVersion)
+		public static void GetRedirects(this JToken? token, IDictionary<string, PageSetRedirectItem> redirects, IReadOnlyCollection<string> interwikiPrefixes, int siteVersion)
 		{
 			const string fromName = "from";
 			const string toName = "to";
 			const string toFragmentName = "tofragment";
 			const string toInterwikiName = "tointerwiki";
 
+			ThrowNull(redirects, nameof(redirects));
 			ThrowNull(interwikiPrefixes, nameof(interwikiPrefixes));
-			var redirects = new Dictionary<string, PageSetRedirectItem>(StringComparer.Ordinal);
 			if (token != null)
 			{
 				foreach (var item in token)
@@ -246,8 +246,6 @@
 					redirects[item.MustHaveString(fromName)] = toPage;
 				}
 			}
-
-			return redirects;
 		}
 
 		/// <summary>Gets a revision.</summary>

@@ -115,7 +115,7 @@
 				if (catMembers.Count > 0)
 				{
 					var cats = "category member" + (catSize == 1 ? string.Empty : "s");
-					list.Add($"{catSize} {cats}");
+					list.Add($"{catSize.ToStringInvariant()} {cats}");
 				}
 			}
 

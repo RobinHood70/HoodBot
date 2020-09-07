@@ -74,6 +74,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected override ParseResult DeserializeResult(JToken? result)
 		{
 			ThrowNull(result, nameof(result));
+			var redirects = new Dictionary<string, PageSetRedirectItem>(StringComparer.Ordinal);
+			result["redirects"].GetRedirects(redirects, this.Wal.InterwikiPrefixes, this.SiteVersion);
 			return new ParseResult(
 				categories: DeserializeCategories(result["categories"]),
 				categoriesHtml: (string?)result["categorieshtml"],
@@ -96,7 +98,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				parsedSummary: (string?)result["parsedsummary"].GetBCSubElements(),
 				preSaveTransformText: (string?)result["psttext"].GetBCSubElements(),
 				properties: result["properties"].GetBCDictionary(),
-				redirects: result["redirects"].GetRedirects(this.Wal.InterwikiPrefixes, this.SiteVersion),
+				redirects: redirects,
 				revisionId: (long?)result["revid"] ?? 0,
 				sections: DeserializeSections(result["sections"]),
 				templates: DeserializeLinks(result["templates"]),

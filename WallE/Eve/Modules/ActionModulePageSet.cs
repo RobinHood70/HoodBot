@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Eve.Modules
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
@@ -20,15 +21,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		where TOutput : ITitle
 	{
 		#region Static Fields
-		private static readonly Regex TooManyFinder = new Regex(@"Too many values .*?'(?<parameter>.*?)'.*?limit is (?<sizelimit>[0-9]+)", RegexOptions.Compiled);
+		private static readonly Regex TooManyFinder = new Regex(@"Too many values .*?'(?<parameter>.*?)'.*?limit is (?<sizelimit>[0-9]+)", RegexOptions.Compiled, TimeSpan.FromSeconds(3));
 		#endregion
 
 		#region Fields
 		private readonly HashSet<long> badRevisionIds = new HashSet<long>();
-		private readonly Dictionary<string, string> converted = new Dictionary<string, string>(System.StringComparer.Ordinal);
-		private readonly Dictionary<string, InterwikiTitleItem> interwiki = new Dictionary<string, InterwikiTitleItem>(System.StringComparer.Ordinal);
-		private readonly Dictionary<string, string> normalized = new Dictionary<string, string>(System.StringComparer.Ordinal);
-		private readonly Dictionary<string, PageSetRedirectItem> redirects = new Dictionary<string, PageSetRedirectItem>(System.StringComparer.Ordinal);
+		private readonly Dictionary<string, string> converted = new Dictionary<string, string>(StringComparer.Ordinal);
+		private readonly Dictionary<string, InterwikiTitleItem> interwiki = new Dictionary<string, InterwikiTitleItem>(StringComparer.Ordinal);
+		private readonly Dictionary<string, string> normalized = new Dictionary<string, string>(StringComparer.Ordinal);
+		private readonly Dictionary<string, PageSetRedirectItem> redirects = new Dictionary<string, PageSetRedirectItem>(StringComparer.Ordinal);
 		private int offset;
 		#endregion
 
@@ -131,12 +132,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 
 			AddToDictionary(result["normalized"], this.normalized);
-			var redirects = result["redirects"].GetRedirects(this.Wal.InterwikiPrefixes, this.SiteVersion);
-			foreach (var redirect in redirects)
-			{
-				// Occasionally seems to pick up duplicate values, so set rather than add.
-				this.redirects[redirect.Key] = redirect.Value;
-			}
+			result["redirects"].GetRedirects(this.redirects, this.Wal.InterwikiPrefixes, this.SiteVersion);
 		}
 
 		protected void ParseResponse(string? response, IList<TOutput> pages)
@@ -181,7 +177,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override bool HandleWarning(string from, string text)
 		{
-			if (string.Equals(from, this.Name, System.StringComparison.Ordinal) &&
+			if (string.Equals(from, this.Name, StringComparison.Ordinal) &&
 				TooManyFinder.Match(text) is var match &&
 				match.Success &&
 				PageSetInput.AllTypes.Contains(match.Groups["parameter"].Value))

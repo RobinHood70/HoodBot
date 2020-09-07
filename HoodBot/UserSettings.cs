@@ -39,7 +39,7 @@
 			}
 		}
 
-		public Dictionary<string, string> ConnectionStrings { get; } = new Dictionary<string, string>(StringComparer.Ordinal);
+		public IDictionary<string, string> ConnectionStrings { get; } = new Dictionary<string, string>(StringComparer.Ordinal);
 
 		// TODO: Add this to Load/Save when re-writing Settings class.
 		public string? ContactInfo { get; set; } = "robinhood70@live.ca";
@@ -74,13 +74,9 @@
 		public void FromJson(JToken json)
 		{
 			ThrowNull(json, nameof(json));
-			var botDataFolder = (string?)json[nameof(this.BotDataFolder)];
-			if (botDataFolder == null || !IsPathValid(botDataFolder))
-			{
-				botDataFolder = DefaultBotDataFolder;
-			}
-
-			this.BotDataFolder = botDataFolder;
+			this.BotDataFolder = (string?)json[nameof(this.BotDataFolder)] is string botFolder && IsPathValid(botFolder)
+				? botFolder
+				: DefaultBotDataFolder;
 			if (json[nameof(this.ConnectionStrings)] is JObject connectionStrings)
 			{
 				foreach (var node in connectionStrings.Children<JProperty>())

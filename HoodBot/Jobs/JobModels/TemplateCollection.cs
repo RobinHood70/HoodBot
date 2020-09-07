@@ -7,7 +7,7 @@
 
 	public class TemplateCollection : List<TemplateUsageRow>
 	{
-		public Dictionary<string, int> HeaderOrder { get; } = new Dictionary<string, int>(System.StringComparer.Ordinal);
+		public IDictionary<string, int> HeaderOrder { get; } = new Dictionary<string, int>(System.StringComparer.Ordinal);
 
 		public void Add(string page, Template template) => this.Add(new TemplateUsageRow(page, template));
 
