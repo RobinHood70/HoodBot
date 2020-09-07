@@ -27,9 +27,9 @@
 	public class SiteCapabilities
 	{
 		#region Static Fields
-		private static readonly Regex FindRsdLink = new Regex(@"<link rel=""EditURI"" .*?href=""(?<rsdlink>.*?)""", RegexOptions.Compiled, TimeSpan.FromSeconds(3));
-		private static readonly Regex FindScript = new Regex(@"<script>.*?(wgScriptPath=""(?<scriptpath>.*?)"".*?|wgServer=""(?<serverpath>.*?)"".*?)+</script>", RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(3));
-		private static readonly Regex FindPhpLink = new Regex(@"href=""(?<scriptpath>/([!#$&-;=?-\[\]_a-z~]|%[0-9a-fA-F]{2})+?)?/(api|index).php", RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(3));
+		private static readonly Regex FindRsdLink = new Regex(@"<link rel=""EditURI"" .*?href=""(?<rsdlink>.*?)""", RegexOptions.Compiled, DefaultRegexTimeout);
+		private static readonly Regex FindScript = new Regex(@"<script>.*?(wgScriptPath=""(?<scriptpath>.*?)"".*?|wgServer=""(?<serverpath>.*?)"".*?)+</script>", RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex FindPhpLink = new Regex(@"href=""(?<scriptpath>/([!#$&-;=?-\[\]_a-z~]|%[0-9a-fA-F]{2})+?)?/(api|index).php", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
 		#endregion
 
 		#region Fields

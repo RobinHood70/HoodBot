@@ -408,7 +408,7 @@
 			var sb = new StringBuilder();
 			foreach (var name in names)
 			{
-				sb.Append("|" + RegexName(name));
+				sb.Append('|').Append(RegexName(name));
 			}
 
 			sb.Remove(0, 1);

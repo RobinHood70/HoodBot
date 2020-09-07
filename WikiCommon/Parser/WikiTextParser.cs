@@ -24,7 +24,7 @@
 	public static class WikiTextParser
 	{
 		#region Fields
-		private static readonly Regex EolNormalizer = new Regex(@"(\r\n|\n\r|\r)", RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(5));
+		private static readonly Regex EolNormalizer = new Regex(@"(\r\n|\n\r|\r)", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
 		#endregion
 
 		#region Public Properties

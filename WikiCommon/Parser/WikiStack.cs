@@ -7,7 +7,7 @@
 	using System.Text.RegularExpressions;
 	using RobinHood70.WikiCommon.Parser.StackElements;
 	using RobinHood70.WikiCommon.Properties;
-	using static System.FormattableString;
+	using static RobinHood70.CommonCode.Globals;
 
 	// Not a .NET Stack<T> mostly for closer parity with the original PHP version, plus it significantly outperforms the built-in one. Top, being a property, also provides a significant debugging advantage over Peek().
 	internal class WikiStack
@@ -91,7 +91,7 @@
 			}
 
 			regexTags.Sort();
-			this.tagsRegex = new Regex(@"\G(" + string.Join("|", regexTags) + @")", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(3));
+			this.tagsRegex = new Regex(@"\G(" + string.Join("|", regexTags) + @")", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
 
 			this.Preprocess();
 		}
@@ -343,7 +343,7 @@
 			else
 			{
 				attrEnd = tagEndPos;
-				var findClosing = new Regex(@"</" + tagOpen + @"\s*>", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(3));
+				var findClosing = new Regex(@"</" + tagOpen + @"\s*>", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
 				Match match;
 				if (!this.noMoreClosingTag.Contains(tagOpen) && (match = findClosing.Match(this.Text, tagEndPos + 1)).Success)
 				{

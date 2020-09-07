@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.Robby.Design
 {
+	using System;
 	using System.Collections;
 	using System.Collections.Generic;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>An ISimpleTitle equality comparer to determine equality based on the Namespace and PageName only.</summary>
 	/// <seealso cref="EqualityComparer{T}" />
@@ -34,7 +34,7 @@
 		/// <summary>Returns a hash code for this instance.</summary>
 		/// <param name="obj">The object.</param>
 		/// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
-		public int GetHashCode(ISimpleTitle? obj) => obj == null ? 0 : CompositeHashCode(obj.Namespace, obj.PageName);
+		public int GetHashCode(ISimpleTitle? obj) => obj == null ? 0 : HashCode.Combine(obj.Namespace, obj.PageName);
 
 		bool IEqualityComparer.Equals(object? x, object? y) => x == y || (x is ISimpleTitle newX && y is ISimpleTitle newY && this.Equals(newX, newY));
 
