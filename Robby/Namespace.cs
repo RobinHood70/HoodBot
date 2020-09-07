@@ -18,6 +18,7 @@
 		private readonly HashSet<string> defaultNames;
 		private readonly int subjectSpaceId;
 		private readonly int? talkSpaceId;
+		private StringComparer? stringComparer;
 		#endregion
 
 		#region Constructors
@@ -108,6 +109,8 @@
 		/// <value>The site.</value>
 		public Site Site { get; }
 
+		public StringComparer PageNameComparer => this.stringComparer ??= new PageNameComparer(this);
+
 		/// <summary>Gets the subject space.</summary>
 		/// <value>The subject space.</value>
 		public Namespace SubjectSpace => this.Site[this.subjectSpaceId];
@@ -192,25 +195,7 @@
 		/// <param name="pageName2">The page name to compare to.</param>
 		/// <returns><see langword="true" /> if the two string are considered the same; otherwise <see langword="false" />.</returns>
 		/// <remarks>It is assumed that the namespace for the second page name is equal to the current one, or at least that they have the same case-sensitivy.</remarks>
-		public bool PageNameEquals(string pageName1, string pageName2)
-		{
-			ThrowNull(pageName1, nameof(pageName1));
-			ThrowNull(pageName2, nameof(pageName2));
-			if (pageName1.Length != pageName2.Length)
-			{
-				// Quick check to rule out most cases before we do string building.
-				return false;
-			}
-
-			var siteCulture = this.Site.Culture;
-			if (!this.CaseSensitive)
-			{
-				pageName1 = pageName1.UpperFirst(siteCulture);
-				pageName2 = pageName2.UpperFirst(siteCulture);
-			}
-
-			return string.Compare(pageName1, pageName2, false, this.Site.Culture) == 0;
-		}
+		public bool PageNameEquals(string pageName1, string pageName2) => this.PageNameComparer.Compare(pageName1, pageName2) == 0;
 
 		/// <summary>Removes a name from the lookup list.</summary>
 		/// <param name="name">The name.</param>
