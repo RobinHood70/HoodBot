@@ -363,27 +363,27 @@
 
 			sb
 				.AppendLine("{{Online Quest Header")
-				.AppendLine("|ID=" + (quest.InternalId >= 0 ? quest.InternalId.ToStringInvariant() : string.Empty))
-				.AppendLine("|type=" + QuestTypeTexts[quest.Type])
+				.Append("|ID=").AppendLine(quest.InternalId >= 0 ? quest.InternalId.ToStringInvariant() : string.Empty)
+				.Append("|type=").AppendLine(QuestTypeTexts[quest.Type])
 				.AppendLine("|image=")
 				.AppendLine("|imgdesc=")
 				.AppendLine("|description=")
-				.AppendLine("|Zone=" + quest.Zone)
+				.Append("|Zone=").AppendLine(quest.Zone)
 				.AppendLine("|Faction=")
-				.AppendLine("|Obj=" + quest.Objective)
+				.Append("|Obj=").AppendLine(quest.Objective)
 				.AppendLine("|Giver=")
-				.AppendLine("|Loc=" + string.Join(", ", locs))
+				.Append("|Loc=").AppendJoin(", ", locs).AppendLine()
 				.AppendLine("|Prereq=")
 				.AppendLine("|Prev=")
 				.AppendLine("|Next=")
 				.AppendLine("|Conc=")
-				.AppendLine("|Reward=" + rewards)
-				.AppendLine("|XP=" + xp)
+				.Append("|Reward=").AppendLine(rewards)
+				.Append("|XP=").AppendLine(xp)
 				.AppendLine("|Level=")
-				.AppendLine("|Journal=" + quest.BackgroundText);
+				.Append("|Journal=").AppendLine(quest.BackgroundText);
 			if (quest.RepeatType > 0)
 			{
-				sb.AppendLine("|Repeatable=" + RepeatTypeTexts[quest.RepeatType]);
+				sb.Append("|Repeatable=").AppendLine(RepeatTypeTexts[quest.RepeatType]);
 			}
 
 			sb

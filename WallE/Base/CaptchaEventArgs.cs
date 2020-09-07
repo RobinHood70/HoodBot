@@ -14,7 +14,7 @@
 		/// <summary>Initializes a new instance of the <see cref="CaptchaEventArgs" /> class.</summary>
 		/// <param name="data">The Captcha data provided by the wiki.</param>
 		/// <param name="solution">The solution to the Captcha provided by the client.</param>
-		public CaptchaEventArgs(IReadOnlyDictionary<string, string> data, Dictionary<string, string> solution)
+		public CaptchaEventArgs(IReadOnlyDictionary<string, string> data, IDictionary<string, string> solution)
 		{
 			this.CaptchaData = data;
 			this.CaptchaSolution = solution;
@@ -31,7 +31,7 @@
 		/// <summary>Gets the dictionary containing the Captcha solution.</summary>
 		/// <value>The dictionary containing the Captcha solution.</value>
 		/// <remarks>On return, CaptchaSolve should be filled with string-string key-value pairs containing the data to solve the Captcha.</remarks>
-		public Dictionary<string, string> CaptchaSolution { get; }
+		public IDictionary<string, string> CaptchaSolution { get; }
 		#endregion
 
 		#region Public Static Methods
@@ -46,7 +46,7 @@
 		{
 			if (e != null && string.Equals(e.CaptchaData["type"], "simple", StringComparison.Ordinal))
 			{
-				var math = new Regex(@"(?<num1>\d+)(?<num2>[+-]\d+)");
+				var math = new Regex(@"(?<num1>\d+)(?<num2>[+-]\d+)", RegexOptions.None, TimeSpan.FromSeconds(3));
 				var nums = math.Match(e.CaptchaData["question"].Replace('−', '-'));
 				var solved = int.Parse(nums.Groups["num1"].Value, CultureInfo.InvariantCulture) + int.Parse(nums.Groups["num2"].Value, CultureInfo.InvariantCulture);
 
