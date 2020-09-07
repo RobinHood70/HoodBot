@@ -50,7 +50,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(result, nameof(result));
 			var resultText = result.MustHaveString("result");
-			resultText = resultText == "needtoken" ? "NeedToken" : resultText.UpperFirst(CultureInfo.InvariantCulture);
+			resultText = string.Equals(resultText, "needtoken", System.StringComparison.Ordinal) ? "NeedToken" : resultText.UpperFirst(CultureInfo.InvariantCulture);
 			return new CreateAccountResult(
 				result: resultText,
 				captchaData: result["captcha"].GetStringDictionary<string>(),

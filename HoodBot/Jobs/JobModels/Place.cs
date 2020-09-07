@@ -87,7 +87,7 @@
 		#endregion
 
 		#region Public Methods
-		public bool Equals([AllowNull] Place other) => this.Key == other?.Key;
+		public bool Equals([AllowNull] Place other) => string.Equals(this.Key, other?.Key, StringComparison.Ordinal);
 		#endregion
 
 		#region Public Override Methods

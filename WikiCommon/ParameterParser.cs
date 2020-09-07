@@ -375,7 +375,7 @@ namespace RobinHood70.WikiCommon
 					nextToken = this.GetToken(terminatorIndex);
 					terminatorIndex += nextToken?.Length ?? 0;
 				}
-				while (nextToken != null && (nextToken.Type != TokenType.DelimiterTerminator || this.TokenText(nextToken) != delimiter.Terminator));
+				while (nextToken != null && (nextToken.Type != TokenType.DelimiterTerminator || !string.Equals(this.TokenText(nextToken), delimiter.Terminator, StringComparison.Ordinal)));
 
 				return nextToken != null ? new Token(markerIndex, terminatorIndex - markerIndex, delimiter.TokenType) : null;
 			}
@@ -386,7 +386,7 @@ namespace RobinHood70.WikiCommon
 			if (this.text.Length > 0)
 			{
 				var (delimiter, isTerminator) = this.CheckForDelimiter(0);
-				if (isTerminator || delimiter == null || delimiter.Marker != marker)
+				if (isTerminator || delimiter == null || !string.Equals(delimiter.Marker, marker, StringComparison.Ordinal))
 				{
 					throw new InvalidOperationException("Text does not start with correct opening characters.");
 				}
@@ -395,7 +395,7 @@ namespace RobinHood70.WikiCommon
 				var terminator = delimiter.Terminator;
 				var index = delimiter.Marker.Length;
 				var token = this.GetToken(index);
-				while (token != null && (token.Type != TokenType.DelimiterTerminator || this.TokenText(token) != terminator))
+				while (token != null && (token.Type != TokenType.DelimiterTerminator || !string.Equals(this.TokenText(token), terminator, StringComparison.Ordinal)))
 				{
 					this.tokens.Add(token);
 					index += token.Length;

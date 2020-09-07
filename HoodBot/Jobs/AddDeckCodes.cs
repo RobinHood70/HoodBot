@@ -42,7 +42,7 @@
 			{
 				if (item.Name != null)
 				{
-					if (item.Name == item.TypeName)
+					if (string.Equals(item.Name, item.TypeName, StringComparison.Ordinal))
 					{
 						var title = new Title(this.Site[UespNamespaces.Legends], item.Name);
 						titles.Add(title);

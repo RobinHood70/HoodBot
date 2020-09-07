@@ -32,7 +32,7 @@
 			get => this.text;
 			set
 			{
-				if (value != this.text)
+				if (!string.Equals(value, this.text, StringComparison.Ordinal))
 				{
 					this.text = value;
 				}

@@ -187,7 +187,7 @@
 			if (EqualsFinder.Replace(this.Value, string.Empty).Contains('=', StringComparison.Ordinal))
 			{
 				// Can't anonymize because it contains an equals sign, so use provided label instead.
-				if (this.Name != nameIfNeeded || this.Anonymous)
+				if (!string.Equals(this.Name, nameIfNeeded, StringComparison.Ordinal) || this.Anonymous)
 				{
 					this.Rename(nameIfNeeded);
 					this.anonymous = false;
@@ -235,7 +235,7 @@
 		/// <remarks>Renaming a parameter sets <see cref="Anonymous"/> to false unless the new name is identical to the old one.</remarks>
 		public bool Rename(string newName)
 		{
-			if (this.Name != newName)
+			if (!string.Equals(this.Name, newName, StringComparison.Ordinal))
 			{
 				this.anonymous = false;
 				this.Name = newName;

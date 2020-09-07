@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Data;
 	using System.Diagnostics;
+	using System.Globalization;
 	using System.IO;
 	using System.Reflection;
 	using System.Text.RegularExpressions;
@@ -13,7 +14,9 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Enumerations
@@ -28,18 +31,14 @@
 
 	internal static class EsoGeneral
 	{
-		#region Private Constants
-		private const string PatchPageName = "Online:Patch";
-		#endregion
-
 		#region Static Fields
-		private static readonly Regex ColourCode = new Regex(@"\A\|c[0-9A-F]{6}(.*?)\|r\Z");
-		private static readonly Regex TrailingDigits = new Regex(@"\s*\d+\Z");
+		private static readonly Regex ColourCode = new Regex(@"\A\|c[0-9A-F]{6}(.*?)\|r\Z", RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(1));
+		private static readonly Regex TrailingDigits = new Regex(@"\s*\d+\Z", RegexOptions.None, TimeSpan.FromSeconds(1));
 		#endregion
 
 		#region Fields
-		private static readonly Regex BonusFinder = new Regex(@"\s*Current [Bb]onus:.*?\.");
-		private static readonly Regex SpaceFixer = new Regex(@"[\n\ ]+");
+		private static readonly Regex BonusFinder = new Regex(@"\s*Current [Bb]onus:.*?\.", RegexOptions.None, TimeSpan.FromSeconds(1));
+		private static readonly Regex SpaceFixer = new Regex(@"[\n\ ]+", RegexOptions.None, TimeSpan.FromSeconds(1));
 		private static string? esoLogConnectionString; // = ConfigurationManager.ConnectionStrings["EsoLog"].ConnectionString;
 		private static string? patchVersion;
 		#endregion
@@ -200,21 +199,27 @@
 			return retval;
 		}
 
+		public static VariablesPage GetPatchPage(WikiJob job)
+		{
+			job.StatusWriteLine("Fetching ESO update number");
+			var patchTitle = new TitleCollection(job.Site, "Online:Patch");
+			var pageLoadOptions = new PageLoadOptions(PageModules.Default | PageModules.Custom);
+			var pageCreator = (job.Site.PageCreator as MetaTemplateCreator) ?? new MetaTemplateCreator();
+			var patchPage = (VariablesPage)patchTitle.Load(pageLoadOptions, pageCreator)[0];
+			patchVersion = patchPage.MainSet?["number"] is string version
+				? version
+				: throw new InvalidOperationException("Could not find patch version on page.");
+			return patchPage;
+		}
+
 		public static string GetPatchVersion(WikiJob job)
 		{
 			if (patchVersion == null)
 			{
-				job.StatusWriteLine("Fetching ESO update number");
-				var patchTitle = new TitleCollection(job.Site, PatchPageName);
-				var pageLoadOptions = new PageLoadOptions(PageModules.Custom);
-				var pageCreator = (job.Site.PageCreator as MetaTemplateCreator) ?? new MetaTemplateCreator();
-				var patchPage = (VariablesPage)patchTitle.Load(pageLoadOptions, pageCreator)[0];
-				patchVersion = patchPage.MainSet?["number"] is string version
-					? version
-					: throw new InvalidOperationException("Could not find patch version on page.");
+				GetPatchPage(job);
 			}
 
-			return patchVersion;
+			return patchVersion!;
 		}
 
 		public static PlaceCollection GetPlaces(Site site)
@@ -300,24 +305,20 @@
 			// Assumes EsoPatchVersion has already been updated.
 			ThrowNull(pageType, nameof(pageType));
 			job.StatusWriteLine("Update patch bot parameters");
-			var paramName = "bot" + pageType;
-			var patchPage = new TitleCollection(job.Site, PatchPageName).Load()[0];
-			var match = Template.Find("Online Patch").Match(patchPage.Text);
-			var patchTemplate = Template.Parse(match.Value);
-			var oldValue = patchTemplate[paramName]?.Value;
-			var patchVersion = GetPatchVersion(job);
-			if (oldValue != patchVersion)
-			{
-				patchTemplate.AddOrChange(paramName, patchVersion);
-				patchPage.Text = patchPage.Text
-					.Remove(match.Index, match.Length)
-					.Insert(match.Index, patchTemplate.ToString());
 
+			var patchPage = GetPatchPage(job);
+			var parser = new ContextualParser(patchPage);
+			var paramName = "bot" + pageType;
+			if (parser.FindTemplate("Online Patch") is TemplateNode template && template.FindParameter(paramName) is ParameterNode param)
+			{
+				param.Value.Clear();
+				param.Value.AddText(GetPatchVersion(job));
+				patchPage.Text = parser.GetText();
 				patchPage.Save("Update " + paramName, true);
 			}
 		}
 
-		public static string TimeToText(int time) => ((double)time).ToString("0,.#");
+		public static string TimeToText(int time) => ((double)time).ToString("0,.#", CultureInfo.InvariantCulture);
 		#endregion
 
 		#region Private Methods

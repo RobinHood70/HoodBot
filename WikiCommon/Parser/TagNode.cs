@@ -39,7 +39,7 @@
 			get => this.attributes;
 			set
 			{
-				if (value != this.attributes)
+				if (!string.Equals(value, this.attributes, StringComparison.Ordinal))
 				{
 					this.attributes = value;
 				}
@@ -53,7 +53,7 @@
 			get => this.close;
 			set
 			{
-				if (value != this.close)
+				if (!string.Equals(value, this.close, StringComparison.Ordinal))
 				{
 					this.close = value;
 				}
@@ -67,7 +67,7 @@
 			get => this.innerText;
 			set
 			{
-				if (value != this.innerText)
+				if (!string.Equals(value, this.innerText, StringComparison.Ordinal))
 				{
 					this.innerText = value;
 				}
@@ -81,7 +81,7 @@
 			get => this.name;
 			set
 			{
-				if (value != this.name)
+				if (!string.Equals(value, this.name, StringComparison.Ordinal))
 				{
 					this.name = value;
 				}

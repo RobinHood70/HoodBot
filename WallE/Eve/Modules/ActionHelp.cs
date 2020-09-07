@@ -47,7 +47,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				foreach (var module in input.Modules)
 				{
 					var submodule = module.Split(TextArrays.Plus, 2, StringSplitOptions.None);
-					if (submodule.Length == 2 && submodule[0].Trim() == "query")
+					if (submodule.Length == 2 && string.Equals(submodule[0].Trim(), "query", StringComparison.Ordinal))
 					{
 						queryModules.Add(submodule[1].Trim());
 					}

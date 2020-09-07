@@ -126,7 +126,7 @@ namespace RobinHood70.WallE.Eve.Modules
 						break;
 				}
 
-				if (doBugFix && le is LogEventsItem logEventsOutput && logEventsOutput.LogType == "newusers")
+				if (doBugFix && le is LogEventsItem logEventsOutput && string.Equals(logEventsOutput.LogType, "newusers", StringComparison.Ordinal))
 				{
 					// Per https://phabricator.wikimedia.org/T73020
 					switch (logEventsOutput.LogAction)
@@ -171,7 +171,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			private void ExtraDataBlock()
 			{
-				if (this.logAction != "unblock" && this.parms["duration"] != null)
+				if (!string.Equals(this.logAction, "unblock", StringComparison.Ordinal) && this.parms["duration"] != null)
 				{
 					this.Result.Add("duration", (string?)this.parms["duration"]);
 					this.Result.Add("flags", (string?)this.parms["flags"]);
@@ -183,7 +183,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				// TODO: This code *only* seems to support 1.24 and below. Is that right? That doesn't seem like what I would've wanted, but maybe I just forgot to come back to this.
 				var valOffset = '0';
-				if (this.logAction == "event" || this.logAction == "revision")
+				if (string.Equals(this.logAction, "event", StringComparison.Ordinal) || string.Equals(this.logAction, "revision", StringComparison.Ordinal))
 				{
 					var revisionType = (string?)this.parms[new string(valOffset, 1)];
 					switch (revisionType)
@@ -254,16 +254,16 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				this.Result.Add("currentid", (long?)this.parms["curid"] ?? 0);
 				this.Result.Add("previousid", (long?)this.parms["previd"] ?? 0);
-				this.Result.Add("autopatrolled", (string?)this.parms["auto"] == "1");
+				this.Result.Add("autopatrolled", string.Equals((string?)this.parms["auto"], "1", StringComparison.Ordinal));
 			}
 
 			private void ExtraDataProtect()
 			{
-				if (this.logAction == "move_prot")
+				if (string.Equals(this.logAction, "move_prot", StringComparison.Ordinal))
 				{
 					this.Result.Add("movedpage", (string?)this.parms["0"]);
 				}
-				else if (this.logAction != "unprotect")
+				else if (!string.Equals(this.logAction, "unprotect", StringComparison.Ordinal))
 				{
 					var protections = new List<ProtectionsItem>();
 					var matches = (IEnumerable<Match>)ProtectionFinder.Matches((string?)this.parms["0"]);

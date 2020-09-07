@@ -62,7 +62,7 @@
 			// It is assumed the list will be relatively small and therefore relatively trivial to iterate through, but this is a function to indicate that it's not completely trivial.
 			foreach (var wiki in this.Wikis)
 			{
-				if (wiki.DisplayName == this.SelectedName)
+				if (string.Equals(wiki.DisplayName, this.SelectedName, StringComparison.Ordinal))
 				{
 					return wiki;
 				}
@@ -120,7 +120,7 @@
 			var index = this.Wikis.IndexOf(item);
 			if (index >= 0)
 			{
-				if (this.SelectedName == item.DisplayName)
+				if (string.Equals(this.SelectedName, item.DisplayName, StringComparison.Ordinal))
 				{
 					this.SelectedName = null;
 				}

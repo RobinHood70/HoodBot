@@ -59,7 +59,7 @@
 			for (var i = pageCollection.Count - 1; i >= 0; i--)
 			{
 				var firstWord = pageCollection[i].PageName.Split(TextArrays.CategorySeparators, 2)[0];
-				if (firstWord != "DB" && firstWord != "Dragonborn")
+				if (!string.Equals(firstWord, "DB", System.StringComparison.Ordinal) && !string.Equals(firstWord, "Dragonborn", System.StringComparison.Ordinal))
 				{
 					pageCollection.RemoveAt(i);
 				}

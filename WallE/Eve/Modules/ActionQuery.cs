@@ -97,7 +97,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					var value = (int)limit.Value;
 					foreach (var module in modules)
 					{
-						if (module.Name == limit.Name && module is IContinuableQueryModule continuableModule)
+						if (string.Equals(module.Name, limit.Name, StringComparison.Ordinal) && module is IContinuableQueryModule continuableModule)
 						{
 							continuableModule.ModuleLimit = value;
 							break;

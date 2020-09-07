@@ -371,7 +371,7 @@
 			foreach (var item in result.Interwiki)
 			{
 				var titleParts = FullTitle.FromName(this.Site, item.Value.Title);
-				Debug.Assert(titleParts.Interwiki?.Prefix == item.Value.Prefix, "Interwiki prefixes didn't match.", titleParts.Interwiki?.Prefix + " != " + item.Value.Prefix);
+				Debug.Assert(string.Equals(titleParts.Interwiki?.Prefix, item.Value.Prefix, StringComparison.Ordinal), "Interwiki prefixes didn't match.", titleParts.Interwiki?.Prefix + " != " + item.Value.Prefix);
 				this.titleMap[item.Key] = titleParts;
 			}
 

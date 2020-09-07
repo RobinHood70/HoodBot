@@ -267,7 +267,7 @@
 					// If it's all zeroes, switch it to null and ignore it. This is caused by SHA-1 values beginning with either 0x or 0b, as documented here: https://bugs.php.net/bug.php?id=50175 and https://bugs.php.net/bug.php?id=55398.
 					sha1 = null;
 				}
-				else if (content != null && content.GetHash(HashType.Sha1) != sha1)
+				else if (content != null && !string.Equals(content.GetHash(HashType.Sha1), sha1, StringComparison.Ordinal))
 				{
 					// CONSIDER: This was changed from a warning to an exception. Should it be handled in Eve or allowed to fall through to the caller?
 					throw new ChecksumException(CurrentCulture(EveMessages.RevisionSha1Failed, revId));

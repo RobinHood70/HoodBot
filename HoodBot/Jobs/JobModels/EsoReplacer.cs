@@ -47,7 +47,7 @@
 				job.Warn($"\nWatch for templates: {pageName}\nCurrent Text: {replacedText}\nNew Text: {newText}");
 			}
 
-			return oldText != ToPlainText(newText);
+			return !string.Equals(oldText, ToPlainText(newText), StringComparison.Ordinal);
 		}
 
 		public static void Initialize(WikiJob job)
@@ -111,8 +111,7 @@
 					offset = text.IndexOf(replacement.From, lastOffset, StringComparison.Ordinal);
 				}
 
-				newText.Append(text.Substring(lastOffset));
-
+				newText.Append(text, lastOffset, text.Length - lastOffset);
 				text = newText.ToString();
 			}
 
@@ -123,7 +122,7 @@
 			{
 				foreach (var synergy in ReplacementData.Synergies)
 				{
-					if (skillName == synergy.Skill)
+					if (string.Equals(skillName, synergy.Skill, StringComparison.Ordinal))
 					{
 						text = text.Replace(synergy.Text, synergy.SynergyLink, StringComparison.Ordinal);
 					}

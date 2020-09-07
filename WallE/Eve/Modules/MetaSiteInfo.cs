@@ -43,7 +43,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Public Override Methods
 		public override bool HandleWarning(string? from, string? text)
 		{
-			if (this.SiteVersion == 0 && from == "main" && text?.Contains("formatversion", StringComparison.Ordinal) == true)
+			if (this.SiteVersion == 0 && string.Equals(from, "main", StringComparison.Ordinal) && text?.Contains("formatversion", StringComparison.Ordinal) == true)
 			{
 				this.Wal.DetectedFormatVersion = 1;
 				return true;
@@ -298,7 +298,7 @@ namespace RobinHood70.WallE.Eve.Modules
 						id: (int)result.MustHave("id"),
 						canonicalName: (string?)result["canonical"] ?? string.Empty,
 						defaultContentModel: (string?)result["defaultcontentmodel"],
-						flags: ((string?)result["case"] == "case-sensitive" ? NamespaceFlags.CaseSensitive : NamespaceFlags.None) | result.GetFlags(
+						flags: (string.Equals((string?)result["case"], "case-sensitive", StringComparison.Ordinal) ? NamespaceFlags.CaseSensitive : NamespaceFlags.None) | result.GetFlags(
 							("content", NamespaceFlags.ContentSpace),
 							("nonincludable", NamespaceFlags.NonIncludable),
 							("subpages", NamespaceFlags.Subpages)),
@@ -542,7 +542,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				fallback8BitEncoding: node.MustHaveString("fallback8bitEncoding"),
 				fallbackLanguages: fallback,
 				favicon: (string?)node["favicon"],
-				flags: ((string?)node["case"] == "case-sensitive" ? SiteInfoFlags.CaseSensitive : SiteInfoFlags.None) | node.GetFlags(
+				flags: (string.Equals((string?)node["case"], "case-sensitive", StringComparison.Ordinal) ? SiteInfoFlags.CaseSensitive : SiteInfoFlags.None) | node.GetFlags(
 					("imagewhitelistenabled", SiteInfoFlags.ImageWhitelistEnabled),
 					("langconversion", SiteInfoFlags.LanguageConversion),
 					("misermode", SiteInfoFlags.MiserMode),

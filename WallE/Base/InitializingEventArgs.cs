@@ -49,7 +49,7 @@
 				{
 					this.interwikiLanguageCode = value;
 				}
-				else if (this.interwikiLanguageCode != value)
+				else if (!string.Equals(this.interwikiLanguageCode, value, StringComparison.Ordinal))
 				{
 					throw new InvalidOperationException(CurrentCulture(Messages.SiteInfoLanguageConflict));
 				}

@@ -44,7 +44,7 @@
 		public static void SolveSimple(IWikiAbstractionLayer sender, CaptchaEventArgs e)
 #pragma warning restore IDE0060 // Remove unused parameter
 		{
-			if (e != null && e.CaptchaData["type"] == "simple")
+			if (e != null && string.Equals(e.CaptchaData["type"], "simple", StringComparison.Ordinal))
 			{
 				var math = new Regex(@"(?<num1>\d+)(?<num2>[+-]\d+)");
 				var nums = math.Match(e.CaptchaData["question"].Replace('−', '-'));

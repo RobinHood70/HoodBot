@@ -530,7 +530,7 @@
 		/// <param name="headerText">Name of the header.</param>
 		/// <returns>The first header with the specified text.</returns>
 		/// <remarks>This is a temporary function until HeaderNode can be rewritten to work more like other nodes (i.e., without capturing trailing whitespace).</remarks>
-		public LinkedListNode<IWikiNode>? FindFirstHeaderLinked(string headerText) => this.FindFirstLinked<HeaderNode>(header => header.GetInnerText(true) == headerText);
+		public LinkedListNode<IWikiNode>? FindFirstHeaderLinked(string headerText) => this.FindFirstLinked<HeaderNode>(header => string.Equals(header.GetInnerText(true), headerText, StringComparison.Ordinal));
 
 		/// <summary>Finds the last node in the collection satisfying the specified condition.</summary>
 		/// <param name="condition">The condition a given node must satisfy.</param>
@@ -584,7 +584,7 @@
 		/// <param name="headerText">Name of the header.</param>
 		/// <returns>The first header with the specified text.</returns>
 		/// <remarks>This is a temporary function until HeaderNode can be rewritten to work more like other nodes (i.e., without capturing trailing whitespace).</remarks>
-		public LinkedListNode<IWikiNode>? FindLastHeaderLinked(string headerText) => this.FindLastLinked<HeaderNode>(header => header.GetInnerText(true) == headerText);
+		public LinkedListNode<IWikiNode>? FindLastHeaderLinked(string headerText) => this.FindLastLinked<HeaderNode>(header => string.Equals(header.GetInnerText(true), headerText, StringComparison.Ordinal));
 
 		/// <summary>Finds the last <see cref="LinkedListNode{T}">LinkedListNode</see> satisfying the specified condition.</summary>
 		/// <param name="condition">The condition a given node must satisfy.</param>

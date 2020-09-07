@@ -79,7 +79,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Properties
-		protected virtual bool AllowMultipleModules => this.ModuleType == "prop" || this.ModuleType == "meta";
+		protected virtual bool AllowMultipleModules => string.Equals(this.ModuleType, "prop", System.StringComparison.Ordinal) || string.Equals(this.ModuleType, "meta", System.StringComparison.Ordinal);
 
 		protected bool IsGenerator => this.pageSetGenerator?.Generator == this;
 
@@ -152,10 +152,10 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		public virtual bool HandleWarning(string? from, string? text)
 		{
-			if (from == this.Name)
+			if (string.Equals(from, this.Name, System.StringComparison.Ordinal))
 			{
 				var match = LimitFinder.Match(text);
-				if (match != null && match.Groups["module"].Value == this.FullPrefix)
+				if (match != null && string.Equals(match.Groups["module"].Value, this.FullPrefix, System.StringComparison.Ordinal))
 				{
 					this.ModuleLimit = int.Parse(match.Groups["limit"].Value, CultureInfo.InvariantCulture);
 					return true;

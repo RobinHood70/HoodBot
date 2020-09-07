@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
+	using System.Globalization;
 	using System.Text;
 	using static RobinHood70.CommonCode.Globals;
 
@@ -57,7 +58,7 @@
 						i++;
 						yield return (i, parameter);
 					}
-					else if (int.TryParse(parameter.NameToText(), out var namedNumber) && namedNumber > 0)
+					else if (int.TryParse(parameter.NameToText(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var namedNumber) && namedNumber > 0)
 					{
 						yield return (namedNumber, parameter);
 					}
@@ -268,7 +269,7 @@
 						retval = index;
 					}
 				}
-				else if (int.TryParse(node.NameToText(), out var foundNumber) && foundNumber == number)
+				else if (int.TryParse(node.NameToText(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var foundNumber) && foundNumber == number)
 				{
 					retval = index;
 				}
@@ -328,8 +329,7 @@
 			}
 		}
 
-		/// <summary>Parses the title and returns the trimmed value.</summary>
-		/// <returns>The title.</returns>
+		/// <inheritdoc/>
 		public string GetTitleValue() => WikiTextUtilities.DecodeAndNormalize(WikiTextVisitor.Value(this.Title)).Trim();
 
 		/// <summary>Determines whether any parameters have numeric names.</summary>
@@ -338,7 +338,7 @@
 		{
 			foreach (var param in this.Parameters)
 			{
-				if (!param.Anonymous && int.TryParse(param.NameToText(), out _))
+				if (!param.Anonymous && int.TryParse(param.NameToText(), NumberStyles.Integer, CultureInfo.InvariantCulture, out _))
 				{
 					return true;
 				}
@@ -426,7 +426,7 @@
 		{
 			for (var i = this.Parameters.Count - 1; i >= 0; i--)
 			{
-				if (this.Parameters[i].NameToText() == parameterName)
+				if (string.Equals(this.Parameters[i].NameToText(), parameterName, StringComparison.Ordinal))
 				{
 					this.Parameters.RemoveAt(i);
 				}

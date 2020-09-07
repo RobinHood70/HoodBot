@@ -247,7 +247,7 @@
 		/// <summary>Gets the raw parameter information.</summary>
 		/// <value>The parameters.</value>
 		/// <remarks>Parameters can be used to change low-level information, such as spacing around the parameters or choosing an alternate language for language-specific parameters. Note that these are not checked in any way, and incorrect data could cause unexpected behaviour or errors.</remarks>
-		public Dictionary<ParameterType, EmbeddedValue> Parameters { get; } = new Dictionary<ParameterType, EmbeddedValue>();
+		public IDictionary<ParameterType, EmbeddedValue> Parameters { get; } = new Dictionary<ParameterType, EmbeddedValue>();
 
 		/// <summary>Gets a value indicating whether any overlapping parameters were dropped during initial parsing (e.g., left|right, multiple captions).</summary>
 		/// <value><c>true</c> if parameters were dropped; otherwise, <c>false</c>.</value>
@@ -279,7 +279,7 @@
 				return
 					textValue == null ? (double?)null :
 					textValue.TrimEnd().Length == 0 ? 1 :
-					double.TryParse(textValue, out var retval) ? retval :
+					double.TryParse(textValue, NumberStyles.Any, this.Site.Culture, out var retval) ? retval :
 					double.NaN;
 			}
 
@@ -411,8 +411,8 @@
 				var split = dimensions.Split(SplitX, 2);
 				return split.Length switch
 				{
-					1 => (0, int.TryParse(split[0], out var result) ? result : throw NonNumeric),
-					2 => (int.TryParse("0" + split[0], out var width) ? width : throw NonNumeric, int.TryParse("0" + split[1], out var height) ? height : throw NonNumeric),
+					1 => (0, int.TryParse(split[0], NumberStyles.Integer, this.Site.Culture, out var result) ? result : throw NonNumeric),
+					2 => (int.TryParse("0" + split[0], NumberStyles.Integer, this.Site.Culture, out var width) ? width : throw NonNumeric, int.TryParse("0" + split[1], NumberStyles.Integer, this.Site.Culture, out var height) ? height : throw NonNumeric),
 					_ => (0, 0)
 				};
 			}
