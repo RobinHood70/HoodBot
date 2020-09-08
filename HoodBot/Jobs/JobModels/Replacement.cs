@@ -32,7 +32,7 @@
 
 			if (from == to)
 			{
-				throw new ArgumentException($"From and to pages cannot be the same: {from.FullPageName} == {to.FullPageName}");
+				throw new ArgumentException($"From and to pages cannot be the same: {from.FullPageName} == {to.FullPageName}", $"{nameof(from)}, {nameof(to)}");
 			}
 
 			this.From = from;

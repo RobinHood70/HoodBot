@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.Globalization;
 	using System.Text;
 	using System.Text.RegularExpressions;
@@ -15,13 +14,15 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
+	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	internal class EsoItemSets : EditJob
 	{
 		#region Static Fields
 		private static readonly HashSet<int> BadRows = new HashSet<int> { 2666 };
-		private static readonly Regex SetBonusRegex = new Regex(@"(\([1-6] items?\))", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex LineReplacer = new Regex(@"[\n ]+", RegexOptions.None, DefaultRegexTimeout);
+		private static readonly Regex SetBonusRegex = new Regex(@"\(\s*(?<items>[1-6] items?)\s*\)\s*(?<text>.*?)\s*(?=(\([1-6] items?\)|\z))", RegexOptions.ExplicitCapture | RegexOptions.Singleline, DefaultRegexTimeout);
 		private static readonly Uri SetSummaryPage = new Uri("http://esolog.uesp.net/viewlog.php?record=setSummary&format=csv");
 		private static readonly Dictionary<string, string> TitleOverrides = new Dictionary<string, string>(StringComparer.Ordinal)
 		{
@@ -245,40 +246,39 @@
 
 		private void UpdatePageText(Page page, PageData pageData)
 		{
-			var parser = new ContextualParser(page);
-
-			const string marker = "<onlyinclude>";
-			const string terminator = "</onlyinclude>";
-
-			var start = page.Text.IndexOf(marker, StringComparison.Ordinal);
-			var end = start >= 0 ? page.Text.IndexOf(terminator, start, StringComparison.Ordinal) : -1;
-			if (start < 0 || end < 0)
+			var parser = new ContextualParser(page, InclusionType.Transcluded, false);
+			var firstNode = parser.Nodes.First;
+			if (firstNode == null || !(firstNode.Value is IgnoreNode ignoreNode && ignoreNode.Value.EndsWith("<onlyinclude>", StringComparison.OrdinalIgnoreCase)))
 			{
 				this.Warn($"Delimiters not found on page {page.FullPageName}");
 				return;
 			}
 
-			start += marker.Length;
-			var sb = new StringBuilder();
-			sb.Append('\n');
-			var items = SetBonusRegex.Split(pageData.BonusDescription);
-			if (items[0].Length > 0)
+			var currentNode = firstNode.Next;
+			var oldNodes = new NodeCollection(null);
+			while (currentNode != null && !(currentNode.Value is IgnoreNode))
 			{
-				Debug.WriteLine("WTF?");
+				oldNodes.AddLast(currentNode.Value);
+				var nextNode = currentNode.Next;
+				parser.Nodes.Remove(currentNode);
+				currentNode = nextNode;
 			}
 
+			var oldText = WikiTextVisitor.Raw(oldNodes);
+			var items = (IEnumerable<Match>)SetBonusRegex.Matches(pageData.BonusDescription);
 			var usedList = new TitleCollection(this.Site);
-			for (var itemNum = 1; itemNum < items.Length; itemNum += 2)
+			var sb = new StringBuilder();
+			sb.Append('\n');
+			foreach (var item in items)
 			{
-				var itemName = items[itemNum].Trim(TextArrays.Parentheses);
-				var desc = Regex.Replace(items[itemNum + 1].Trim(), "[\n ]+", " ", RegexOptions.None, DefaultRegexTimeout);
+				var itemName = item.Groups["items"];
+				var desc = item.Groups["text"].Value;
+				desc = LineReplacer.Replace(desc, " ");
 				if (desc.StartsWith(page.PageName, StringComparison.Ordinal))
 				{
 					desc = desc.Substring(page.PageName.Length).TrimStart();
 				}
 
-				desc = EsoReplacer.ReplaceGlobal(desc, null);
-				desc = EsoReplacer.ReplaceFirstLink(desc, usedList);
 				sb
 					.Append("'''")
 					.Append(itemName)
@@ -288,10 +288,17 @@
 			}
 
 			sb.Remove(sb.Length - 5, 4);
+			var newNodes = WikiTextParser.Parse(sb.ToString());
+			firstNode.AddAfter(newNodes);
 
-			var text = sb.ToString();
-			pageData.IsNonTrivial = EsoReplacer.CompareReplacementText(this, page.Text[start..end], text, page.FullPageName);
-			page.Text = page.Text.Substring(0, start) + text + page.Text.Substring(end);
+			EsoReplacer.ReplaceGlobal(parser.Nodes);
+			EsoReplacer.ReplaceEsoLinks(parser.Nodes);
+			EsoReplacer.ReplaceFirstLink(parser.Nodes, usedList);
+
+			// TODO: Temporary until CompareReplacementText is re-written.
+			var text = parser.GetText() ?? string.Empty;
+			pageData.IsNonTrivial = EsoReplacer.CompareReplacementText(this, oldText, text, page.FullPageName);
+			page.Text = text;
 		}
 		#endregion
 
