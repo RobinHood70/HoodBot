@@ -312,7 +312,7 @@
 			if (parser.FindTemplate("Online Patch") is TemplateNode template && template.FindParameter(paramName) is ParameterNode param)
 			{
 				param.Value.Clear();
-				param.Value.AddText(GetPatchVersion(job));
+				param.Value.AddText(GetPatchVersion(job) + '\n');
 				patchPage.Text = parser.GetText();
 				patchPage.Save("Update " + paramName, true);
 			}

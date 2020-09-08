@@ -1,9 +1,8 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
-	using System;
 	using RobinHood70.WikiCommon.Parser;
 
-	internal sealed class EsoReplacement : IComparable<EsoReplacement>
+	internal sealed class EsoReplacement
 	{
 		#region Constructors
 		public EsoReplacement(string from, string to)
@@ -20,10 +19,6 @@
 		public string To { get; }
 
 		public NodeCollection ToNodes { get; }
-		#endregion
-
-		#region Public Methods
-		public int CompareTo(EsoReplacement? other) => string.Compare(this.From, other?.From, StringComparison.Ordinal);
 		#endregion
 	}
 }

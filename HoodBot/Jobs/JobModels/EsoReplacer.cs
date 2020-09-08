@@ -17,10 +17,10 @@
 	internal static class EsoReplacer
 	{
 		#region Fields
-		private static readonly Regex EsoLinks = new Regex(@"((?<before>(((''')?[0-9]+(-[0-9]+)?(''')?%?)(\smore|\smax(imum)?|\sof missing|\{\{huh}}|<br>)?|(''')?\{\{Nowrap[^}]*?}}(''')?|max(imum)?|ESO)+)\s)?(?<type>(?-i:Health|Magicka|Physical Penetration|Physical Resistance|Spell Critical|Spell Damage|Spell Penetration|Spell Resistance|Stamina|Ultimate|Weapon Critical|Weapon Damage))(\s(?<after>(Recovery|Regeneration|[0-9]+%)+))?\b", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-		private static readonly Regex ReplacementFinder = new Regex(@"^\|\ *(<nowiki/?>)?(?<from>.*?)(</?nowiki/?>)?\ *\|\|\ *(<nowiki/?>)?(?<to>.*?)(</?nowiki/?>)?\ *$", RegexOptions.Multiline);
-		private static readonly Regex TemplateStripper = new Regex(@"{{\s*(ESO Quality Color|Nowrap|ESO (Health|Magicka|MagStam|Physical Penetration|Resistance|Spell Critical|Spell Damage|Spell Penetration|Stamina|Synergy|Ultimate|Weapon Critical|Weapon Damage) Link).*?}}");
-		private static readonly Regex TextStripper = new Regex(@"({{huh}}|[0-9]+(-[0-9]+)?%?)");
+		private static readonly Regex EsoLinks = new Regex(@"((?<before>(((''')?[0-9]+(-[0-9]+)?(''')?%?)(\smore|\smax(imum)?|\sof missing|\{\{huh}}|<br>)?|(''')?\{\{Nowrap[^}]*?}}(''')?|max(imum)?|ESO)+)\s)?(?<type>(?-i:Health|Magicka|Physical Penetration|Physical Resistance|Spell Critical|Spell Damage|Spell Penetration|Spell Resistance|Stamina|Ultimate|Weapon Critical|Weapon Damage))(\s(?<after>(Recovery|Regeneration|[0-9]+%)+))?\b", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex ReplacementFinder = new Regex(@"^\|\ *(<nowiki/?>)?(?<from>.*?)(</?nowiki/?>)?\ *\|\|\ *(<nowiki/?>)?(?<to>.*?)(</?nowiki/?>)?\ *$", RegexOptions.Multiline | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex TemplateStripper = new Regex(@"{{\s*(ESO Quality Color|Nowrap|ESO (Health|Magicka|MagStam|Physical Penetration|Resistance|Spell Critical|Spell Damage|Spell Penetration|Stamina|Synergy|Ultimate|Weapon Critical|Weapon Damage) Link).*?}}", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex TextStripper = new Regex(@"({{huh}}|[0-9]+(-[0-9]+)?%?)", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
 
 		private static readonly List<EsoReplacement> ReplaceAllList = new List<EsoReplacement>();
 		private static readonly List<EsoReplacement> ReplaceFirstList = new List<EsoReplacement>();
@@ -83,6 +83,114 @@
 			}
 		}
 
+		public static void ReplaceEsoLinks(NodeCollection nodes)
+		{
+			// Iterating manually rather than with NodeCollection methods, since the list is being altered as we go and I'm not sure how foreach would deal with that in this situation.
+			var linkedNode = nodes.First;
+			while (linkedNode != null)
+			{
+				if (linkedNode.Value is TextNode textNode)
+				{
+					var text = textNode.Text;
+					var checkTemplate = EsoLinks.Match(text);
+					if (checkTemplate.Success)
+					{
+						// This is a truly fugly hack of a text modification, but is necessary until such time as Nowrap/Huh insertion can handle this on their own. The logic is to check if the first match is at the beginning of the text and, if so, and the previous value is a Huh or Nowrap template, then integrate the text of that into this node and remove the template from the collection. After that's done, we proceed as normal.
+						if (checkTemplate.Index == 0 &&
+							linkedNode.Previous?.Value is TemplateNode previous &&
+							previous.GetTitleValue() is string title &&
+							(title.Equals("huh", StringComparison.OrdinalIgnoreCase) || title.Equals("nowrap", StringComparison.OrdinalIgnoreCase)))
+						{
+							text = WikiTextVisitor.Raw(previous) + text;
+							nodes.Remove(previous);
+						}
+
+						var matches = (ICollection<Match>)EsoLinks.Matches(text);
+						var newNodes = new NodeCollection(null);
+						var startPos = 0;
+						foreach (var match in matches)
+						{
+							if (match.Index > startPos)
+							{
+								newNodes.AddLast(new TextNode(text[startPos..match.Index]));
+							}
+
+							newNodes.AddLast(ReplaceTemplatableText(match));
+							startPos = match.Index + match.Length;
+						}
+
+						linkedNode.AddBefore(newNodes);
+						if (startPos == text.Length)
+						{
+							linkedNode = linkedNode.Previous;
+							nodes.Remove(linkedNode!.Next!);
+						}
+						else
+						{
+							textNode.Text = text.Substring(startPos);
+						}
+					}
+				}
+
+				linkedNode = linkedNode.Next;
+			}
+		}
+
+		public static string ReplaceFirstLink(string text, TitleCollection usedList)
+		{
+			if (string.IsNullOrEmpty(text))
+			{
+				return text;
+			}
+
+			var parsedText = WikiTextParser.Parse(text);
+			var currentNode = parsedText.First;
+			while (currentNode != null)
+			{
+				if (ReplaceLink(currentNode, usedList) is NodeCollection newNodes)
+				{
+					foreach (var colNode in newNodes)
+					{
+						parsedText.AddBefore(currentNode, colNode);
+					}
+
+					currentNode = currentNode.Previous!;
+					parsedText.Remove(currentNode.Next!);
+				}
+				else
+				{
+					currentNode = currentNode.Next;
+				}
+			}
+
+			return WikiTextVisitor.Raw(parsedText);
+		}
+
+		public static string ReplaceFirstLink(NodeCollection nodes, TitleCollection usedList)
+		{
+			ThrowNull(nodes, nameof(nodes));
+			var currentNode = nodes.First;
+			while (currentNode != null)
+			{
+				if (ReplaceLink(currentNode, usedList) is NodeCollection newNodes)
+				{
+					foreach (var colNode in newNodes)
+					{
+						nodes.AddBefore(currentNode, colNode);
+					}
+
+					currentNode = currentNode.Previous!;
+					nodes.Remove(currentNode.Next!);
+				}
+				else
+				{
+					currentNode = currentNode.Next;
+				}
+			}
+
+			return WikiTextVisitor.Raw(nodes);
+		}
+
 		public static string ReplaceGlobal(string text, string? skillName)
 		{
 			foreach (var replacement in ReplaceAllList)
@@ -132,34 +240,74 @@
 			return text;
 		}
 
-		public static string ReplaceFirstLink(string text, TitleCollection usedList)
+		public static void ReplaceGlobal(NodeCollection nodes)
 		{
-			if (string.IsNullOrEmpty(text))
+			// We only look at the top level...anything below that represents a replacement and should not be re-evaluated.
+			var linkedNode = nodes.First;
+			var compareInfo = CultureInfo.InvariantCulture.CompareInfo;
+			while (linkedNode != null)
 			{
-				return text;
-			}
-
-			var parsedText = WikiTextParser.Parse(text);
-			var currentNode = parsedText.First;
-			while (currentNode != null)
-			{
-				if (ReplaceLink(currentNode, usedList) is NodeCollection newNodes)
+				if (linkedNode.Value is TextNode textNode)
 				{
-					foreach (var colNode in newNodes)
+					var text = textNode.Text;
+					var newNodes = new NodeCollection(null);
+					var startPos = 0;
+					for (var currentPos = 0; currentPos < text.Length; currentPos++)
 					{
-						parsedText.AddBefore(currentNode, colNode);
+						foreach (var replacement in ReplaceAllList)
+						{
+							var fromLength = replacement.From.Length;
+							if (((currentPos + fromLength) < text.Length) && compareInfo.Compare(text, currentPos, fromLength, replacement.From, 0, fromLength) == 0)
+							{
+								UnreplacedList.Remove(replacement.From);
+								if (currentPos > startPos)
+								{
+									newNodes.AddLast(new TextNode(text[startPos..currentPos]));
+								}
+
+								foreach (var node in replacement.ToNodes)
+								{
+									newNodes.AddLast(node);
+								}
+
+								startPos = currentPos + fromLength;
+								currentPos = startPos - 1; // Because the loop will increment it.
+								break;
+							}
+						}
 					}
 
-					currentNode = currentNode.Previous!;
-					parsedText.Remove(currentNode.Next!);
+					if (newNodes.Count > 0)
+					{
+						linkedNode.AddBefore(newNodes);
+						if (startPos == text.Length)
+						{
+							linkedNode = linkedNode.Previous;
+							nodes.Remove(linkedNode!.Next!);
+						}
+						else
+						{
+							textNode.Text = textNode.Text.Substring(startPos);
+						}
+					}
 				}
-				else
+
+				linkedNode = linkedNode.Next;
+			}
+		}
+
+		public static void ReplaceSkillLinks(NodeCollection nodes, string skillName)
+		{
+			foreach (var textNode in nodes.FindAll<TextNode>())
+			{
+				foreach (var synergy in ReplacementData.Synergies)
 				{
-					currentNode = currentNode.Next;
+					if (string.Equals(skillName, synergy.Skill, StringComparison.Ordinal))
+					{
+						textNode.Text = textNode.Text.Replace(synergy.Text, synergy.SynergyLink, StringComparison.Ordinal);
+					}
 				}
 			}
-
-			return WikiTextVisitor.Raw(parsedText);
 		}
 
 		public static void ShowUnreplaced()
@@ -329,6 +477,43 @@
 			}
 
 			return linkTemplate.ToString();
+		}
+
+		private static IWikiNode ReplaceTemplatableText(Match match)
+		{
+			var before = match.Groups["before"];
+			if (before != null && before.Success && string.Equals(before.Value, "0", StringComparison.Ordinal))
+			{
+				return new TextNode("Free");
+			}
+
+			var after = match.Groups["after"];
+			var type = match.Groups["type"].Value.UpperFirst(CultureInfo.InvariantCulture);
+
+			TemplateNode templateNode;
+			var resistType = type.Split(ResistanceSplit, StringSplitOptions.None);
+			templateNode = resistType.Length > 1
+				? TemplateNode.FromParts("ESO Resistance Link", (null, resistType[0]))
+				: TemplateNode.FromParts("ESO " + type + " Link");
+
+			var beforeSuccess = before != null && before.Success;
+			if (beforeSuccess)
+			{
+				templateNode.AddParameter(before!.Value.Replace("'''", string.Empty, StringComparison.Ordinal));
+			}
+
+			if (after != null && after.Success)
+			{
+				if (!beforeSuccess)
+				{
+					// Because these are anonymous parameters, we must always add the before value, even if empty.
+					templateNode.AddParameter(string.Empty);
+				}
+
+				templateNode.AddParameter(after.Value.Replace("'''", string.Empty, StringComparison.Ordinal));
+			}
+
+			return templateNode;
 		}
 		#endregion
 	}

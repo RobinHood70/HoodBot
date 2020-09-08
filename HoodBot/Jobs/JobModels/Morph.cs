@@ -5,6 +5,7 @@
 	using System.Data;
 	using System.Diagnostics;
 	using System.Globalization;
+	using RobinHood70.CommonCode;
 
 	internal class Morph
 	{
@@ -113,7 +114,7 @@
 				Debug.WriteLine($"Split lengths not equal for {this.Name}");
 				foreach (var abil in this.Abilities)
 				{
-					Debug.WriteLine($"{abil.Id}: {abil.Description}");
+					Debug.WriteLine($"{abil.Id.ToStringInvariant()}: {abil.Description}");
 				}
 
 				throw new InvalidOperationException("Split lengths not equal!");
@@ -153,7 +154,7 @@
 					Debug.WriteLine($"\nDescription mismatches in {this.Name}.");
 					foreach (var abil in this.Abilities)
 					{
-						Debug.WriteLine($"{abil.Id}: {abil.Description}");
+						Debug.WriteLine($"{abil.Id.ToStringInvariant()}: {abil.Description}");
 					}
 
 					foreach (var dataItem in data)

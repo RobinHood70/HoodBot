@@ -112,11 +112,8 @@
 				AddDateTime(parms, this.start);
 				AddDateTime(parms, this.end);
 
-				if (entryNode.List is LinkedList<IWikiNode> list)
-				{
-					list.AddBefore(entryNode, TemplateNode.FromParts("/Entry", false, parms));
-					list.AddBefore(entryNode, new TextNode("\n"));
-				}
+				entryNode.AddBefore(TemplateNode.FromParts("/Entry", false, parms));
+				entryNode.AddBefore(new TextNode("\n"));
 
 				sender.Text = parser.GetText();
 			}

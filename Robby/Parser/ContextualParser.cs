@@ -15,7 +15,15 @@
 		/// <summary>Initializes a new instance of the <see cref="ContextualParser"/> class.</summary>
 		/// <param name="page">The page to parse.</param>
 		public ContextualParser(Page page)
-			: this(page, InclusionType.Raw, false)
+			: this(page ?? throw ArgumentNull(nameof(page)), page.Text, InclusionType.Raw, false)
+		{
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="ContextualParser"/> class.</summary>
+		/// <param name="title">The <see cref="ISimpleTitle">title</see> the text will be on.</param>
+		/// <param name="text">The text to parse.</param>
+		public ContextualParser(ISimpleTitle title, string text)
+			: this(title ?? throw ArgumentNull(nameof(title)), text, InclusionType.Raw, false)
 		{
 		}
 
@@ -23,13 +31,21 @@
 		/// <param name="page">The page to parse.</param>
 		/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
-		/// <returns>A <see cref="NodeCollection"/> with the parsed text.</returns>
 		public ContextualParser(Page page, InclusionType inclusionType, bool strictInclusion)
+			: this(page ?? throw ArgumentNull(nameof(page)), page.Text, inclusionType, strictInclusion)
 		{
-			ThrowNull(page, nameof(page));
-			this.Title = page;
-			this.Site = page.Namespace.Site;
-			this.Nodes = WikiTextParser.Parse(page.Text ?? string.Empty, inclusionType, strictInclusion);
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="ContextualParser"/> class.</summary>
+		/// <param name="title">The <see cref="ISimpleTitle">title</see> the text will be on.</param>
+		/// <param name="text">The text to parse.</param>
+		/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
+		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
+		public ContextualParser(ISimpleTitle title, string text, InclusionType inclusionType, bool strictInclusion)
+		{
+			this.Title = title ?? throw ArgumentNull(nameof(title));
+			this.Site = title.Namespace.Site;
+			this.Nodes = WikiTextParser.Parse(text ?? string.Empty, inclusionType, strictInclusion);
 		}
 		#endregion
 
