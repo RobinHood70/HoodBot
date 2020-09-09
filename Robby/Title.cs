@@ -9,6 +9,7 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Enumerations
@@ -142,6 +143,17 @@
 			ThrowNull(pageName, nameof(pageName));
 			var parser = new TitleParser(site, defaultNamespace, pageName);
 			return new Title(parser);
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
+		/// <param name="site">The site the title is from.</param>
+		/// <param name="node">The <see cref="IBacklinkNode"/> to parse.</param>
+		/// <returns>A new FullTitle based on the provided values.</returns>
+		public static Title FromBacklinkNode(Site site, IBacklinkNode node)
+		{
+			ThrowNull(site, nameof(site));
+			ThrowNull(node, nameof(node));
+			return FromName(site, node.GetTitleValue());
 		}
 
 		/// <summary>Creates a new instance of the <see cref="Title"/> class from the namespace ID and page name.</summary>

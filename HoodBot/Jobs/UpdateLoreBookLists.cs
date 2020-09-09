@@ -135,9 +135,9 @@
 		{
 			var parser = new ContextualParser(page);
 			var nodes = parser.Nodes;
-			LinkedListNode<IWikiNode>? node = nodes.FindFirstLinked<TemplateNode>(node => string.Equals(node.GetTitleValue(), "Lore Book Entry", StringComparison.Ordinal)) ?? throw new InvalidOperationException();
+			var node = nodes.FindFirstLinked<TemplateNode>(node => FullTitle.FromBacklinkNode(page.Site, node).PageNameEquals("Lore Book Entry")) ?? throw new InvalidOperationException();
 			var first = node?.Previous ?? throw new InvalidOperationException();
-			var last = nodes.FindLastLinked<TemplateNode>(node => string.Equals(node.GetTitleValue(), "Lore Book Entry", StringComparison.Ordinal))?.Next ?? throw new InvalidOperationException();
+			var last = nodes.FindLastLinked<TemplateNode>(node => FullTitle.FromBacklinkNode(page.Site, node).PageNameEquals("Lore Book Entry"))?.Next ?? throw new InvalidOperationException();
 			while (node != null && node != last)
 			{
 				var next = node.Next;

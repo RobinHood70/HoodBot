@@ -142,8 +142,7 @@
 							throw new InvalidOperationException();
 						}
 
-						var targetText = WikiTextVisitor.Value(targetNode.Title);
-						var target = FullTitle.FromName(this.Site, targetText);
+						var target = FullTitle.FromBacklinkNode(this.Site, targetNode);
 						if (this.lookup.TryAdd(title, target))
 						{
 							this.parsedPages.Add(title, parser);
