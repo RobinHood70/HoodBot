@@ -12,7 +12,7 @@
 	public sealed class Parameter
 	{
 		#region Static Fields
-		private static readonly Regex EqualsFinder = new Regex(@"(&#(x3b|61);|\{\{=}}|<nowiki>=</nowiki>)", RegexOptions.IgnoreCase);
+		private static readonly Regex EqualsFinder = new Regex(@"(&#(x3b|61);|\{\{=}}|<nowiki>=</nowiki>)", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
 		#endregion
 
 		#region Private Fields

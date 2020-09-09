@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Text;
 	using System.Text.RegularExpressions;
+	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Enumerations
 
@@ -29,7 +30,7 @@
 		/// <summary>Gets the a Regex to find a table.</summary>
 		/// <value>The table finder.</value>
 		/// <remarks>This is a very simple Regex which does not attempt to handle nested tables.</remarks>
-		public static Regex TableFinder { get; } = new Regex(@"\{\|.*?\n\|\}", RegexOptions.Singleline);
+		public static Regex TableFinder { get; } = new Regex(@"\{\|.*?\n\|\}", RegexOptions.Singleline, DefaultRegexTimeout);
 		#endregion
 
 		#region Public Methods
@@ -53,7 +54,7 @@
 				{
 					if (casing == SearchCasing.IgnoreInitialCaps)
 					{
-						sb.Append("(?i:" + Regex.Escape(name.Substring(0, 1)) + ")");
+						sb.Append("(?i:").Append(Regex.Escape(name.Substring(0, 1))).Append(')');
 						if (name.Length > 1)
 						{
 							var nameRemainder = Regex.Escape(name.Substring(1));
