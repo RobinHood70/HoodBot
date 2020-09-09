@@ -275,7 +275,8 @@
 			{
 				return this.Add(name, value);
 			}
-			else if (param.Value.Length == 0 && !string.IsNullOrEmpty(value))
+
+			if (param.Value.Length == 0 && !string.IsNullOrEmpty(value))
 			{
 				param.Value = value;
 				return param;
@@ -399,7 +400,7 @@
 
 		/// <summary>Returns a <see cref="HashSet{T}"/> of duplicate parameter names within the collection.</summary>
 		/// <returns>A <see cref="HashSet{T}"/> of duplicate parameter names within the collection (ignoring null values).</returns>
-		public HashSet<string> DuplicateNames()
+		public ICollection<string> DuplicateNames()
 		{
 			var names = new HashSet<string>(StringComparer.Ordinal);
 			var duplicates = new HashSet<string>(StringComparer.Ordinal);
