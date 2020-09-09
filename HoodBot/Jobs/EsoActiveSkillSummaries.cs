@@ -74,7 +74,7 @@
 			bigChange |= TrackedUpdate(template, "casttime", FormatSeconds(baseMorph.CastingTime));
 			bigChange |= TrackedUpdate(template, "linerank", skillBase.LearnedLevel.ToStringInvariant());
 			bigChange |= TrackedUpdate(template, "cost", baseSkillCost);
-			if (template.FindParameter("cost")?.Value is NodeCollection paramValue)
+			if (template.Find("cost")?.Value is NodeCollection paramValue)
 			{
 				// Cost is an oddball where we don't need/want to do all replacements, just the global ones.
 				EsoReplacer.ReplaceGlobal(paramValue);
@@ -85,13 +85,13 @@
 
 			if (string.Equals(baseMorph.Radii[3], "0", StringComparison.Ordinal))
 			{
-				template.RemoveParameter("radius");
-				template.RemoveParameter("area");
+				template.Remove("radius");
+				template.Remove("area");
 			}
 			else
 			{
 				var newValue = FormatMeters(baseMorph.Radii[3]);
-				if (template.FindParameter("radius", "area") is ParameterNode radiusParam)
+				if (template.Find("radius", "area") is ParameterNode radiusParam)
 				{
 					var oldValue = radiusParam.ValueToText()?.Trim();
 					if (string.Equals(oldValue, newValue, StringComparison.OrdinalIgnoreCase))
@@ -102,7 +102,7 @@
 				}
 				else
 				{
-					template.AddParameter("area", newValue + '\n');
+					template.Add("area", newValue + '\n');
 					bigChange = true;
 				}
 			}
@@ -170,7 +170,7 @@
 				var morphRadius = morph.Radii.ToString();
 				if (!string.Equals(morphRadius, baseMorph.Radii[3], StringComparison.Ordinal) && !string.Equals(morphRadius, "0", StringComparison.Ordinal) && !string.Equals(morph.Target, "Self", StringComparison.Ordinal))
 				{
-					var word = template.FindParameter("radius", "area")?.NameToText()?.UpperFirst(this.Site.Culture) ?? "Area";
+					var word = template.Find("radius", "area")?.NameToText()?.UpperFirst(this.Site.Culture) ?? "Area";
 					descriptions.Add($"{word}: {FormatMeters(morphRadius)}");
 				}
 
@@ -199,7 +199,7 @@
 					bigChange |= TrackedUpdate(template, morphName + "name", morph.Name);
 					bigChange |= TrackedUpdate(template, morphName + "id", morph.Abilities[3].Id.ToStringInvariant());
 					var iconValue = MakeIcon(skillBase.SkillLine, morph.Name);
-					bigChange |= TrackedUpdate(template, morphName + "icon", IconValueFixup(template.ValueOf(morphName + "icon"), iconValue));
+					bigChange |= TrackedUpdate(template, morphName + "icon", IconValueFixup(template.ValueToText(morphName + "icon"), iconValue));
 					bigChange |= TrackedUpdate(template, morphName + "desc", morph.EffectLine, usedList, skillBase.Name);
 				}
 			}

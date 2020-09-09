@@ -440,7 +440,7 @@
 					}
 					else
 					{
-						templateNode.AddParameter(value);
+						templateNode.Add(value);
 					}
 				}
 			}
@@ -450,10 +450,10 @@
 				if (!beforeSuccess)
 				{
 					// Because these are anonymous parameters, we must always add the before value, even if empty.
-					templateNode.AddParameter(string.Empty);
+					templateNode.Add(string.Empty);
 				}
 
-				templateNode.AddParameter(after.Value.Trim().Replace("'''", string.Empty, StringComparison.Ordinal));
+				templateNode.Add(after.Value.Trim().Replace("'''", string.Empty, StringComparison.Ordinal));
 			}
 
 			return templateNode;

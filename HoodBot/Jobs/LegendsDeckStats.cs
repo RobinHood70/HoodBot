@@ -53,7 +53,7 @@
 			foreach (var template in parsedPage.FindTemplates("Decklist"))
 			{
 				// The following lines set up the structure to handle skipNotes and skipQuantity, even though these are not currently used on any affected pages.
-				var specialParams = new List<ParameterNode>(template.FindParameters("skipQuantity", "skipNotes"));
+				var specialParams = new List<ParameterNode>(template.FindAll("skipQuantity", "skipNotes"));
 				var paramCount = 3 - specialParams.Count;
 				foreach (var cluster in template.ParameterCluster(paramCount))
 				{
@@ -75,7 +75,7 @@
 			{
 				var paramName = "m" + entry.Key.ToString(CultureInfo.InvariantCulture);
 				var paramValue = entry.Value.ToString(CultureInfo.InvariantCulture) + '\n';
-				if (deckSummary.FindParameter(paramName) is ParameterNode param)
+				if (deckSummary.Find(paramName) is ParameterNode param)
 				{
 					param.Value.Clear();
 					param.Value.AddText(paramValue);

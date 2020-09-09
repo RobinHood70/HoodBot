@@ -73,9 +73,9 @@
 		protected static bool TrackedUpdate(TemplateNode template, string name, string value, TitleCollection? usedList, string? skillName)
 		{
 			ThrowNull(template, nameof(template));
-			if (!(template.FindParameter(name) is ParameterNode parameter))
+			if (!(template.Find(name) is ParameterNode parameter))
 			{
-				parameter = template.AddParameter(name, string.Empty);
+				parameter = template.Add(name, string.Empty);
 			}
 
 			value = value.Trim();
@@ -105,7 +105,7 @@
 		protected static bool TrackedUpdate(TemplateNode template, string name, string value, bool removeCondition)
 		{
 			ThrowNull(template, nameof(template));
-			return removeCondition ? template.RemoveParameter(name) : TrackedUpdate(template, name, value);
+			return removeCondition ? template.Remove(name) : TrackedUpdate(template, name, value);
 		}
 		#endregion
 
@@ -276,7 +276,7 @@
 
 			var template = skillSummaries[0];
 			template.RemoveDuplicates();
-			template.RemoveParameter("update");
+			template.Remove("update");
 
 			var bigChange = false;
 			bigChange |= TrackedUpdate(template, "line", skill.SkillLine);
@@ -297,7 +297,7 @@
 			for (var i = 0; i <= loopCount; i++)
 			{
 				var iconName = "icon" + (i > 0 ? (i + 1).ToStringInvariant() : string.Empty);
-				var iconParamater = template.FindParameter(iconName);
+				var iconParamater = template.Find(iconName);
 				var newValue = IconValueFixup(iconParamater?.ValueToText(), iconValue + (loopCount > 0 ? FormattableString.Invariant($" ({DestructionTypes[i]})") : string.Empty));
 				bigChange |= TrackedUpdate(template, iconName, newValue);
 			}
