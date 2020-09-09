@@ -193,7 +193,7 @@
 		/// <summary>Checks if two page names are the same, based on the case-sensitivity for the namespace.</summary>
 		/// <param name="pageName1">The page name to check.</param>
 		/// <param name="pageName2">The page name to compare to.</param>
-		/// <returns><see langword="true" /> if the two string are considered the same; otherwise <see langword="false" />.</returns>
+		/// <returns><see langword="true" /> if the two page names are considered the same; otherwise <see langword="false" />.</returns>
 		/// <remarks>It is assumed that the namespace for the second page name is equal to the current one, or at least that they have the same case-sensitivy.</remarks>
 		public bool PageNameEquals(string pageName1, string pageName2) => this.PageNameComparer.Compare(pageName1, pageName2) == 0;
 
