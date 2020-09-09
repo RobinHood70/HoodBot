@@ -778,8 +778,7 @@
 
 				if (redirects.Contains(searchText) && first.Next?.Value is LinkNode linkNode)
 				{
-					var name = WikiTextVisitor.Raw(linkNode.Title);
-					return FullTitle.FromName(this, name);
+					return FullTitle.FromBacklinkNode(this, linkNode);
 				}
 			}
 

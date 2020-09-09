@@ -311,12 +311,12 @@
 			var oldTemplates = new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance);
 			foreach (var node in oldNodes.FindAllRecursive<TemplateNode>())
 			{
-				oldTemplates.Add(Title.FromName(this.site, node.GetTitleValue()));
+				oldTemplates.Add(Title.FromBacklinkNode(this.site, node));
 			}
 
 			foreach (var node in newNodes.FindAllRecursive<TemplateNode>())
 			{
-				oldTemplates.Remove(Title.FromName(this.site, node.GetTitleValue()));
+				oldTemplates.Remove(Title.FromBacklinkNode(this.site, node));
 			}
 
 			return oldTemplates;
@@ -328,7 +328,7 @@
 			StringComparison.InvariantCultureIgnoreCase) == 0;
 
 		public void RemoveTrivialTemplates(NodeCollection oldNodes) =>
-			oldNodes.RemoveAll<TemplateNode>(node => this.RemoveableTemplates.Contains(new TitleParser(this.site, node.GetTitleValue())));
+			oldNodes.RemoveAll<TemplateNode>(node => this.RemoveableTemplates.Contains(Title.FromBacklinkNode(this.site, node)));
 		#endregion
 
 		#region Private Static Methods

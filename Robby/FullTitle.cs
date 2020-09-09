@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System;
+	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	// TODO: Review constructors for various title objects.
@@ -80,8 +81,19 @@
 
 		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
 		/// <param name="site">The site the title is from.</param>
+		/// <param name="node">The <see cref="IBacklinkNode"/> to parse.</param>
+		/// <returns>A new FullTitle based on the provided values.</returns>
+		public static new FullTitle FromBacklinkNode(Site site, IBacklinkNode node)
+		{
+			ThrowNull(site, nameof(site));
+			ThrowNull(node, nameof(node));
+			return FromName(site, node.GetTitleValue());
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
+		/// <param name="site">The site the title is from.</param>
 		/// <param name="fullPageName">Full name of the page.</param>
-		/// <returns>A new Title based on the provided values.</returns>
+		/// <returns>A new FullTitle based on the provided values.</returns>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
 		public static new FullTitle FromName(Site site, string fullPageName)
 		{

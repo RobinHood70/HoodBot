@@ -78,8 +78,7 @@
 			foreach (var link in this.Nodes.FindAllLinked<LinkNode>())
 			{
 				var linkNode = (LinkNode)link.Value;
-				var titleText = WikiTextVisitor.Value(linkNode.Title);
-				var title = FullTitle.FromName(this.Site, titleText);
+				var title = FullTitle.FromBacklinkNode(this.Site, linkNode);
 				if (title.Namespace == MediaWikiNamespaces.Category)
 				{
 					if (string.Equals(title.PageName, catTitle.PageName, StringComparison.Ordinal))
@@ -133,8 +132,7 @@
 		{
 			foreach (var link in this.Nodes.FindAllRecursive<LinkNode>())
 			{
-				var titleText = link.GetTitleValue();
-				var linkTitle = new TitleParser(this.Site, titleText);
+				var linkTitle = Robby.Title.FromBacklinkNode(this.Site, link);
 				if (linkTitle.SimpleEquals(find))
 				{
 					yield return link;
@@ -146,8 +144,7 @@
 		{
 			foreach (var link in this.Nodes.FindAllRecursive<LinkNode>())
 			{
-				var titleText = link.GetTitleValue();
-				var linkTitle = new TitleParser(this.Site, titleText);
+				var linkTitle = FullTitle.FromBacklinkNode(this.Site, link);
 				if (linkTitle.FullEquals(find))
 				{
 					yield return link;
