@@ -12,6 +12,7 @@
 	public abstract class WikiJob : IMessageSource, ISiteSpecific
 	{
 		#region Fields
+		private readonly string logName;
 		private int progress;
 		private int progressMaximum = 1;
 		#endregion
@@ -23,7 +24,7 @@
 			ThrowNull(asyncInfo, nameof(asyncInfo));
 			this.Site = site;
 			this.AsyncInfo = asyncInfo;
-			this.LogName = this.GetType().Name.UnCamelCase();
+			this.logName = this.GetType().Name.UnCamelCase();
 			this.Logger = (site as IJobLogger)?.JobLogger;
 			this.Results = (site as IResultHandler)?.ResultHandler;
 		}
@@ -37,6 +38,10 @@
 
 		#region Public Properties
 		public AsyncInfo AsyncInfo { get; }
+
+		public JobTypes JobType { get; protected set; } = JobTypes.Read;
+
+		public JobLogger? Logger { get; protected set; }
 
 		public int Progress
 		{
@@ -63,16 +68,10 @@
 		public Site Site { get; }
 		#endregion
 
-		#region Public Abstract Properties
-		public virtual string LogName { get; }
-		#endregion
-
 		#region Public Virtual Properties
-		public JobTypes JobType { get; protected set; } = JobTypes.Read;
-
 		public virtual string? LogDetails { get; protected set; }
 
-		public JobLogger? Logger { get; protected set; }
+		public virtual string LogName => this.logName;
 		#endregion
 
 		#region Protected Properties
@@ -133,7 +132,7 @@
 		{
 			this.Started?.Invoke(this, EventArgs.Empty);
 			this.BeforeLogging();
-			if (this.Logger != null && this.Logger.ShouldLog(this.JobType) == true)
+			if (this.Logger != null && this.Logger.ShouldLog(this.JobType))
 			{
 				this.StatusWriteLine("Adding Log Entry");
 				var logInfo = new LogInfo(this.LogName ?? "Unknown Job Type", this.LogDetails, this.JobType);
