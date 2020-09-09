@@ -1,12 +1,13 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Data;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
-	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	internal class EsoActiveSkillSummaries : EsoSkillJob<ActiveSkill>
@@ -61,56 +62,55 @@
 		#region Protected Override Methods
 		protected override ActiveSkill GetNewSkill(IDataRecord row) => new ActiveSkill(row);
 
-		protected override void UpdateSkillTemplate(ActiveSkill skillBase, Template template)
+		protected override bool UpdateSkillTemplate(ActiveSkill skillBase, TemplateNode template)
 		{
 			ThrowNull(skillBase, nameof(skillBase));
 			ThrowNull(template, nameof(template));
 			var baseMorph = skillBase.Morphs[0];
-			template.AddOrChange("id", baseMorph.Abilities[3].Id);
+			var bigChange = TrackedUpdate(template, "id", baseMorph.Abilities[3].Id.ToStringInvariant());
 			var baseSkillCost = baseMorph.FullName(baseMorph.CalculatedCost(baseMorph.Costs[3], EsoGeneral.GetPatchVersion(this)));
 			this.UpdateMorphs(skillBase, template, baseMorph, baseSkillCost);
 
-			template.AddOrChange("casttime", FormatSeconds(baseMorph.CastingTime));
-			template.AddOrChange("linerank", skillBase.LearnedLevel);
-			template.AddOrChange("cost", baseSkillCost);
-			template.RemoveOrChange("range", FormatMeters(baseMorph.Ranges[3]), string.Equals(baseMorph.Ranges[3], "0", System.StringComparison.Ordinal));
+			bigChange |= TrackedUpdate(template, "casttime", FormatSeconds(baseMorph.CastingTime));
+			bigChange |= TrackedUpdate(template, "linerank", skillBase.LearnedLevel.ToStringInvariant());
+			bigChange |= TrackedUpdate(template, "cost", baseSkillCost);
+			EsoReplacer.ReplaceGlobal(template.FindParameter("cost")?.Value!);
+			bigChange |= TrackedUpdate(template, "range", FormatMeters(baseMorph.Ranges[3]), string.Equals(baseMorph.Ranges[3], "0", StringComparison.Ordinal));
 
-			if (string.Equals(baseMorph.Radii[3], "0", System.StringComparison.Ordinal))
+			if (string.Equals(baseMorph.Radii[3], "0", StringComparison.Ordinal))
 			{
-				template.Remove("radius");
-				template.Remove("area");
+				template.RemoveParameter("radius");
+				template.RemoveParameter("area");
 			}
 			else
 			{
 				var newValue = FormatMeters(baseMorph.Radii[3]);
-				if (template.FindFirst("radius", "area") is Parameter radiusParam)
+				if (template.FindParameter("radius", "area") is ParameterNode radiusParam)
 				{
-					radiusParam.Value = newValue;
+					var oldValue = radiusParam.ValueToText();
+					if (string.Equals(oldValue, newValue, StringComparison.OrdinalIgnoreCase))
+					{
+						radiusParam.SetValue(newValue);
+						bigChange = true;
+					}
 				}
 				else
 				{
-					template.Add("area", newValue);
+					template.AddParameter("area", newValue);
+					bigChange = true;
 				}
 			}
 
-			template.RemoveOrChange("duration", FormatSeconds(baseMorph.Durations[3]), string.Equals(baseMorph.Durations[3], "0", System.StringComparison.Ordinal));
-			template.RemoveOrChange("channeltime", FormatSeconds(baseMorph.ChannelTimes[3]), string.Equals(baseMorph.ChannelTimes[3], "0", System.StringComparison.Ordinal));
-			template.AddOrChange("target", baseMorph.Target);
-			template.RemoveOrChange("type", skillBase.SkillType, string.Equals(skillBase.SkillType, "Active", System.StringComparison.Ordinal));
-			EsoReplace(template["cost"], null);
-			EsoReplace(template["desc"], skillBase.Name);
-			EsoReplace(template["desc1"], skillBase.Name);
-			EsoReplace(template["desc2"], skillBase.Name);
+			bigChange |= TrackedUpdate(template, "duration", FormatSeconds(baseMorph.Durations[3]), string.Equals(baseMorph.Durations[3], "0", StringComparison.Ordinal));
+			bigChange |= TrackedUpdate(template, "channeltime", FormatSeconds(baseMorph.ChannelTimes[3]), string.Equals(baseMorph.ChannelTimes[3], "0", StringComparison.Ordinal));
+			bigChange |= TrackedUpdate(template, "target", baseMorph.Target);
+			bigChange |= TrackedUpdate(template, "type", skillBase.SkillType, string.Equals(skillBase.SkillType, "Active", StringComparison.Ordinal));
+
+			return bigChange;
 		}
 		#endregion
 
 		#region Private Static Methods
-		private static void EsoReplace(Parameter? param, string? skillName)
-		{
-			ThrowNull(param, nameof(param));
-			param.Value = EsoReplacer.ReplaceGlobal(param.Value, skillName);
-		}
-
 		private static string FormatMeters(string? value) => value switch
 		{
 			null => throw ArgumentNull(nameof(value)),
@@ -128,8 +128,9 @@
 		#endregion
 
 		#region Private Methods
-		private void UpdateMorphs(ActiveSkill skillBase, Template template, Morph baseMorph, string baseSkillCost)
+		private bool UpdateMorphs(ActiveSkill skillBase, TemplateNode template, Morph baseMorph, string baseSkillCost)
 		{
+			var bigChange = false;
 			var usedList = new TitleCollection(this.Site);
 			for (var morphCounter = 0; morphCounter < skillBase.Morphs.Count; morphCounter++)
 			{
@@ -137,43 +138,43 @@
 				var morphNum = morphCounter == 0 ? string.Empty : morphCounter.ToStringInvariant();
 				var morph = skillBase.Morphs[morphCounter];
 
-				if (!string.Equals(morph.CastingTime, baseMorph.CastingTime, System.StringComparison.Ordinal))
+				if (!string.Equals(morph.CastingTime, baseMorph.CastingTime, StringComparison.Ordinal))
 				{
 					descriptions.Add("Casting Time: " + FormatSeconds(morph.CastingTime));
 				}
 
 				var morphChannelTime = morph.ChannelTimes.ToString();
-				if (!string.Equals(morphChannelTime, baseMorph.ChannelTimes[3], System.StringComparison.Ordinal))
+				if (!string.Equals(morphChannelTime, baseMorph.ChannelTimes[3], StringComparison.Ordinal))
 				{
 					descriptions.Add("Channel Time: " + FormatSeconds(morphChannelTime));
 				}
 
 				var morphSkillCost = morph.FullCost(EsoGeneral.GetPatchVersion(this));
-				if (morph.Costs[0] != baseMorph.Costs[3] || !string.Equals(morphSkillCost, baseSkillCost, System.StringComparison.Ordinal))
+				if (morph.Costs[0] != baseMorph.Costs[3] || !string.Equals(morphSkillCost, baseSkillCost, StringComparison.Ordinal))
 				{
 					descriptions.Add("Cost: " + morphSkillCost);
 				}
 
 				var morphDuration = morph.Durations.ToString();
-				if (!string.Equals(morphDuration, baseMorph.Durations[3], System.StringComparison.Ordinal) && !string.Equals(morphDuration, "0", System.StringComparison.Ordinal))
+				if (!string.Equals(morphDuration, baseMorph.Durations[3], StringComparison.Ordinal) && !string.Equals(morphDuration, "0", StringComparison.Ordinal))
 				{
 					descriptions.Add("Duration: " + FormatSeconds(morphDuration));
 				}
 
 				var morphRadius = morph.Radii.ToString();
-				if (!string.Equals(morphRadius, baseMorph.Radii[3], System.StringComparison.Ordinal) && !string.Equals(morphRadius, "0", System.StringComparison.Ordinal) && !string.Equals(morph.Target, "Self", System.StringComparison.Ordinal))
+				if (!string.Equals(morphRadius, baseMorph.Radii[3], StringComparison.Ordinal) && !string.Equals(morphRadius, "0", StringComparison.Ordinal) && !string.Equals(morph.Target, "Self", StringComparison.Ordinal))
 				{
-					var word = template.FindFirst("radius", "area")?.Name?.UpperFirst(this.Site.Culture) ?? "Area";
+					var word = template.FindParameter("radius", "area")?.NameToText()?.UpperFirst(this.Site.Culture) ?? "Area";
 					descriptions.Add($"{word}: {FormatMeters(morphRadius)}");
 				}
 
 				var morphRange = morph.Ranges.ToString();
-				if (!string.Equals(morphRange, baseMorph.Ranges[3], System.StringComparison.Ordinal) && !string.Equals(morphRange, "0", System.StringComparison.Ordinal) && !string.Equals(morph.Target, "Self", System.StringComparison.Ordinal))
+				if (!string.Equals(morphRange, baseMorph.Ranges[3], StringComparison.Ordinal) && !string.Equals(morphRange, "0", StringComparison.Ordinal) && !string.Equals(morph.Target, "Self", StringComparison.Ordinal))
 				{
 					descriptions.Add("Range: " + FormatMeters(morphRange));
 				}
 
-				if (!string.Equals(morph.Target, baseMorph.Target, System.StringComparison.Ordinal))
+				if (!string.Equals(morph.Target, baseMorph.Target, StringComparison.Ordinal))
 				{
 					descriptions.Add("Target: " + morph.Target);
 				}
@@ -185,18 +186,23 @@
 				}
 
 				var parameterName = "desc" + morphNum;
-				template.AddOrChange(parameterName, extras + EsoReplacer.ReplaceFirstLink(morph.Description ?? string.Empty, usedList));
+				bigChange = TrackedUpdate(template, parameterName, extras + EsoReplacer.ReplaceFirstLink(morph.Description ?? string.Empty, usedList));
+				var valueNodes = template.FindParameter(parameterName)!.Value!;
+				EsoReplacer.ReplaceGlobal(valueNodes);
+				EsoReplacer.ReplaceSkillLinks(valueNodes, skillBase.Name);
 
 				if (morphCounter > 0)
 				{
 					var morphName = "morph" + morphNum;
-					template.AddOrChange(morphName + "name", morph.Name);
-					template.AddOrChange(morphName + "id", morph.Abilities[3].Id);
+					bigChange |= TrackedUpdate(template, morphName + "name", morph.Name);
+					bigChange |= TrackedUpdate(template, morphName + "id", morph.Abilities[3].Id.ToStringInvariant());
 					var iconValue = MakeIcon(skillBase.SkillLine, morph.Name);
-					template.AddOrChange(morphName + "icon", IconValueFixup(template[morphName + "icon"]?.Value, iconValue));
-					template.AddOrChange(morphName + "desc", EsoReplacer.ReplaceFirstLink(morph.EffectLine, usedList));
+					bigChange |= TrackedUpdate(template, morphName + "icon", IconValueFixup(template.ValueOf(morphName + "icon"), iconValue));
+					bigChange |= TrackedUpdate(template, morphName + "desc", EsoReplacer.ReplaceFirstLink(morph.EffectLine, usedList));
 				}
 			}
+
+			return bigChange;
 		}
 		#endregion
 	}

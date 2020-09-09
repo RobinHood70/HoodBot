@@ -227,7 +227,7 @@
 						}
 					}
 
-					var loreText = WikiTextParser.Parse(fixedUpLoreText, true, true);
+					var loreText = NodeCollection.Parse(fixedUpLoreText, true, true);
 					if (/* templateNode.AtLineStart && */loreText.First.Value is TextNode textNode)
 					{
 						textNode.Text = textNode.Text.TrimStart();
@@ -378,7 +378,7 @@
 			foreach (var page in this.gamePages)
 			{
 				this.SetPageInfo(page);
-				var parsedText = WikiTextParser.Parse(page.Text, this.noTransclusions ? false : null as bool?, true);
+				var parsedText = NodeCollection.Parse(page.Text, this.noTransclusions ? false : null as bool?, true);
 				this.templateHappened = false;
 				parsedText.Replace(this.LoreTransclusionReplacer);
 				parsedText.Replace(this.OldLoreInserter);
@@ -393,7 +393,7 @@
 			foreach (var page in this.lorePages)
 			{
 				this.SetPageInfo(page);
-				var parsedText = WikiTextParser.Parse(page.Text, this.noTransclusions ? false : null as bool?, true);
+				var parsedText = NodeCollection.Parse(page.Text, this.noTransclusions ? false : null as bool?, true);
 				this.templateHappened = false;
 				parsedText.Replace(this.TemplateReplacer);
 				parsedText.Replace(this.OldLoreInserter);

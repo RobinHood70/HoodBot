@@ -54,7 +54,7 @@
 		/// <param name="text">The text of the link, optionally including surrounding brackets (<c>[[...]]</c>).</param>
 		/// <returns>A new LinkNode.</returns>
 		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single link (e.g., <c>[[Link]]</c>, or any variant thereof).</exception>
-		public static LinkNode FromText([Localizable(false)] string text) => WikiTextParser.SingleNode<LinkNode>(text);
+		public static LinkNode FromText([Localizable(false)] string text) => NodeCollection.SingleNode<LinkNode>(text);
 
 		/// <summary>Creates a new LinkNode from its parts.</summary>
 		/// <param name="title">The link destination.</param>

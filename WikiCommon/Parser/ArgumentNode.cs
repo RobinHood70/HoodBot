@@ -78,7 +78,7 @@
 		/// <param name="txt">The text of the argument.</param>
 		/// <returns>A new ArgumentNode.</returns>
 		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single argument (<c>{{{abc|123}}}</c>).</exception>
-		public static ArgumentNode FromText(string txt) => WikiTextParser.SingleNode<ArgumentNode>(txt);
+		public static ArgumentNode FromText(string txt) => NodeCollection.SingleNode<ArgumentNode>(txt);
 
 		/// <summary>Creates a new ArgumentNode from its parts.</summary>
 		/// <param name="name">The name.</param>
@@ -86,8 +86,8 @@
 		/// <returns>A new ArgumentNode.</returns>
 		public static ArgumentNode FromParts(string name, string defaultValue)
 		{
-			var parsedName = WikiTextParser.Parse(name ?? throw ArgumentNull(nameof(name)));
-			var parsedValue = WikiTextParser.Parse(defaultValue ?? throw ArgumentNull(nameof(defaultValue)));
+			var parsedName = NodeCollection.Parse(name ?? throw ArgumentNull(nameof(name)));
+			var parsedValue = NodeCollection.Parse(defaultValue ?? throw ArgumentNull(nameof(defaultValue)));
 			return new ArgumentNode(parsedName, parsedValue);
 		}
 		#endregion
