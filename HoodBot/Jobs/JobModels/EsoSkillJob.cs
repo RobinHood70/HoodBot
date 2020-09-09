@@ -68,41 +68,48 @@
 
 		protected static string MakeIcon(string lineName, string morphName) => lineName + "-" + morphName;
 
-		protected static bool TrackedUpdate(TemplateNode template, string name, string value)
+		protected static bool TrackedUpdate(TemplateNode template, string name, string value) => TrackedUpdate(template, name, value, null, null);
+
+		protected static bool TrackedUpdate(TemplateNode template, string name, string value, TitleCollection? usedList, string? skillName)
 		{
 			ThrowNull(template, nameof(template));
-			if (template.FindParameter(name) is ParameterNode parameter)
+			if (!(template.FindParameter(name) is ParameterNode parameter))
 			{
-				var oldValue = parameter.ValueToText();
-				parameter.SetValue(value);
-				return !string.Equals(oldValue, value, StringComparison.OrdinalIgnoreCase);
+				parameter = template.AddParameter(name, string.Empty);
 			}
 
-			template.AddParameter(name, value);
-			return true;
+			value = value.Trim();
+			var oldValue = parameter.ValueToText();
+			if (!string.Equals(oldValue, value, StringComparison.Ordinal))
+			{
+				parameter.SetValue(value + '\n');
+
+				// We use usedList as the master check, since that should always be available if we're doing checks at all.
+				if (usedList != null)
+				{
+					EsoReplacer.ReplaceGlobal(parameter.Value);
+					EsoReplacer.ReplaceEsoLinks(parameter.Value);
+					EsoReplacer.ReplaceFirstLink(parameter.Value, usedList);
+					if (skillName != null)
+					{
+						EsoReplacer.ReplaceSkillLinks(parameter.Value, skillName);
+					}
+				}
+
+				return true;
+			}
+
+			return false;
 		}
 
-		protected static bool TrackedUpdate(TemplateNode template, string name, string value, bool remove)
+		protected static bool TrackedUpdate(TemplateNode template, string name, string value, bool removeCondition)
 		{
 			ThrowNull(template, nameof(template));
-			return remove ? template.RemoveParameter(name) : TrackedUpdate(template, name, value);
+			return removeCondition ? template.RemoveParameter(name) : TrackedUpdate(template, name, value);
 		}
 		#endregion
 
 		#region Protected Override Methods
-		protected override void Main()
-		{
-			this.SavePages(this.LogName, false, this.SkillPageLoaded);
-			EsoGeneral.SetBotUpdateVersion(this, this.TypeText.ToLowerInvariant());
-			this.Progress++;
-		}
-
-		protected override void JobCompleted()
-		{
-			EsoReplacer.ShowUnreplaced();
-			base.JobCompleted();
-		}
-
 		protected override void BeforeLogging()
 		{
 			this.StatusWriteLine("Fetching data");
@@ -122,6 +129,19 @@
 			this.Pages.GetTitles(titles);
 			this.Pages.PageLoaded -= this.SkillPageLoaded;
 			this.GenerateReport();
+		}
+
+		protected override void JobCompleted()
+		{
+			EsoReplacer.ShowUnreplaced();
+			base.JobCompleted();
+		}
+
+		protected override void Main()
+		{
+			this.SavePages(this.LogName, false, this.SkillPageLoaded);
+			EsoGeneral.SetBotUpdateVersion(this, this.TypeText.ToLowerInvariant());
+			this.Progress++;
 		}
 		#endregion
 

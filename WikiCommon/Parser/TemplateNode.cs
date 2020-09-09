@@ -216,32 +216,20 @@
 		/// <param name="visitor">The visiting class.</param>
 		public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
 
-		/// <summary>Changes the value of a parameter to the specified value, or adds the parameter if it doesn't exist.</summary>
-		/// <param name="name">The name of the parameter to add.</param>
-		/// <param name="value">The value of the parameter to add.</param>
-		public void AddOrChange(string name, string value)
-		{
-			if (this.FindParameter(name) is ParameterNode parameter)
-			{
-				parameter.SetValue(value);
-			}
-			else
-			{
-				this.AddParameter(name, value);
-			}
-		}
-
 		/// <summary>Adds a new parameter to the template. Copies the format of the previous named parameter, if there is one, then adds the parameter after it.</summary>
 		/// <param name="name">The name of the parameter to add.</param>
 		/// <param name="value">The value of the parameter to add.</param>
-		public void AddParameter(string name, string value) => this.AddParameter(name, value, true);
+		/// <returns>The added parameter.</returns>
+		public ParameterNode AddParameter(string name, string value) => this.AddParameter(name, value, true);
 
 		/// <summary>Adds a new parameter to the template. Optionally, copies the format of the previous named parameter, if there is one, then adds the parameter after it.</summary>
 		/// <param name="name">The name of the parameter to add.</param>
 		/// <param name="value">The value of the parameter to add.</param>
 		/// <param name="copyFormat">Whether to copy the format of the previous parameter or use the values as provided.</param>
-		public void AddParameter(string name, string value, bool copyFormat)
+		/// <returns>The added parameter.</returns>
+		public ParameterNode AddParameter(string name, string value, bool copyFormat)
 		{
+			ParameterNode retval;
 			var index = copyFormat ? this.FindCopyParameter(false) : -1;
 			if (index != -1)
 			{
@@ -251,12 +239,16 @@
 				}
 
 				var previous = this.Parameters[index];
-				this.Parameters.Insert(index + 1, ParameterNode.CopyFormatFrom(previous, name, value));
+				retval = ParameterNode.CopyFormatFrom(previous, name, value);
+				this.Parameters.Insert(index + 1, retval);
 			}
 			else
 			{
-				this.Parameters.Add(ParameterNode.FromParts(name, value));
+				retval = ParameterNode.FromParts(name, value);
+				this.Parameters.Add(retval);
 			}
+
+			return retval;
 		}
 
 		/// <summary>Adds a new anonymous parameter to the template. Copies the format of the last anonymous parameter, if there is one, then adds the parameter after it.</summary>
@@ -277,6 +269,21 @@
 			else
 			{
 				this.Parameters.Add(ParameterNode.FromParts(value));
+			}
+		}
+
+		/// <summary>Changes the value of a parameter to the specified value, or adds the parameter if it doesn't exist.</summary>
+		/// <param name="name">The name of the parameter to add.</param>
+		/// <param name="value">The value of the parameter to add.</param>
+		public void AddOrChange(string name, string value)
+		{
+			if (this.FindParameter(name) is ParameterNode parameter)
+			{
+				parameter.SetValue(value);
+			}
+			else
+			{
+				this.AddParameter(name, value);
 			}
 		}
 
@@ -463,7 +470,7 @@
 			var nameList = new HashSet<string>(StringComparer.Ordinal);
 			var index = this.Parameters.Count;
 			var anonIndex = 0;
-			while (index >= 0)
+			while (index >= 0 && index < this.Parameters.Count)
 			{
 				var name = NameOrIndex(this.Parameters[index], ref anonIndex);
 				if (nameList.Contains(name))

@@ -109,7 +109,7 @@
 				case var n when n >= -70 && n <= -51:
 					return (int)this.A;
 				default:
-					throw new InvalidOperationException($"Invalid {nameof(this.TypeNumber)} {this.TypeNumber}");
+					throw new InvalidOperationException($"Invalid {nameof(this.TypeNumber)} {this.TypeNumber.ToStringInvariant()}");
 			}
 		}
 		#endregion
