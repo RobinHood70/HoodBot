@@ -282,6 +282,7 @@
 		/// <summary>Changes the value of a parameter to the specified value, or adds the parameter if it doesn't exist.</summary>
 		/// <param name="name">The name of the parameter to add.</param>
 		/// <param name="value">The value of the parameter to add.</param>
+		/// <returns>The parameter that was altered.</returns>
 		public ParameterNode AddOrChange(string name, string value)
 		{
 			if (!(this.Find(name) is ParameterNode parameter))
