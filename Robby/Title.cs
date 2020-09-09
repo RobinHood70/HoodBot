@@ -361,6 +361,12 @@
 			return this.Move(to.FullPageName, reason, moveTalk, moveSubpages, suppressRedirect);
 		}
 
+		/// <summary>Checks if the provided page name is equal to the title's page name, based on the case-sensitivity for the namespace.</summary>
+		/// <param name="other">The page name to compare to.</param>
+		/// <returns><see langword="true" /> if the two page names are considered the same; otherwise <see langword="false" />.</returns>
+		/// <remarks>It is assumed that the namespace for the second page name is equal to the current one, or at least that they have the same case-sensitivy.</remarks>
+		public bool PageNameEquals(string other) => this.Namespace.PageNameEquals(this.PageName, other);
+
 		/// <summary>Protects the title.</summary>
 		/// <param name="reason">The reason for the protection.</param>
 		/// <param name="editProtection">The edit-protection level.</param>
