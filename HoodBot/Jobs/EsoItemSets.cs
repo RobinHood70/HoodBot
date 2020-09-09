@@ -111,6 +111,33 @@
 		}
 		#endregion
 
+		#region Private Static Methods
+		private static string? ConstructWarning(Page page, ICollection<ISimpleTitle> titles, string warningType)
+		{
+			if (titles.Count > 0)
+			{
+				var warning = new StringBuilder();
+				warning
+					.Append("Watch for ")
+					.Append(warningType)
+					.Append(" on ")
+					.Append(page.FullPageName)
+					.Append(": ");
+				foreach (var link in titles)
+				{
+					warning
+						.Append(link)
+						.Append(", ");
+				}
+
+				warning.Remove(warning.Length - 2, 2);
+				return warning.ToString();
+			}
+
+			return null;
+		}
+		#endregion
+
 		#region Private Methods
 		private static string BuildNewPage(string setName)
 		{
@@ -264,7 +291,6 @@
 				currentNode = nextNode;
 			}
 
-			var oldText = WikiTextVisitor.Raw(oldNodes);
 			var items = (IEnumerable<Match>)SetBonusRegex.Matches(pageData.BonusDescription);
 			var usedList = new TitleCollection(this.Site);
 			var sb = new StringBuilder();
@@ -288,17 +314,26 @@
 			}
 
 			sb.Remove(sb.Length - 5, 4);
-			var newNodes = WikiTextParser.Parse(sb.ToString());
+			var newNodes = NodeCollection.Parse(sb.ToString());
 			firstNode.AddAfter(newNodes);
 
 			EsoReplacer.ReplaceGlobal(parser.Nodes);
 			EsoReplacer.ReplaceEsoLinks(parser.Nodes);
 			EsoReplacer.ReplaceFirstLink(parser.Nodes, usedList);
+			page.Text = parser.GetText() ?? string.Empty;
 
-			// TODO: Temporary until CompareReplacementText is re-written.
-			var text = parser.GetText() ?? string.Empty;
-			pageData.IsNonTrivial = EsoReplacer.CompareReplacementText(this, oldText, text, page.FullPageName);
-			page.Text = text;
+			var replacer = new EsoReplacer(this.Site);
+			if (ConstructWarning(page, replacer.CheckNewLinks(oldNodes, parser.Nodes), "links") is string linkWarning)
+			{
+				this.Warn(linkWarning);
+			}
+
+			if (ConstructWarning(page, replacer.CheckNewTemplates(oldNodes, parser.Nodes), "templates") is string templateWarning)
+			{
+				this.Warn(templateWarning);
+			}
+
+			pageData.IsNonTrivial = replacer.IsNonTrivialChange(oldNodes, parser.Nodes);
 		}
 		#endregion
 

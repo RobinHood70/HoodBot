@@ -3,12 +3,13 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Data;
-	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WikiCommon;
+	using RobinHood70.Robby.Parser;
+	using RobinHood70.WikiCommon.Parser;
+	using static RobinHood70.CommonCode.Globals;
 
 	internal abstract class EsoSkillJob<T> : EditJob
 		where T : Skill
@@ -20,12 +21,10 @@
 		#endregion
 
 		#region Static Fields
-		private static readonly string[] DestructionTypes = new[] { "Frost", "Shock", "Fire" };
-		private static readonly HashSet<string> UpdatedParameters = new HashSet<string>(StringComparer.Ordinal) { "area", "casttime", "channelTime", "cost", "desc", "desc1", "desc2", "duration", "icon", "icon2", "icon3", "id", "line", "linerank", "morph1name", "morph1id", "morph1icon", "morph1desc", "morph2name", "morph2id", "morph2icon", "morph2desc", "radius", "range", "target", "type" };
+		private static readonly string[] DestructionTypes = { "Frost", "Shock", "Fire" };
 
 		private static readonly SortedList<string, string> IconNameCache = new SortedList<string, string>();
 		private static readonly HashSet<string> DestructionExceptions = new HashSet<string>(StringComparer.Ordinal) { "Destructive Touch", "Impulse", "Wall of Elements" };
-		private static readonly Regex SkillSummaryFinder = Template.Find(TemplateName);
 		#endregion
 
 		#region Fields
@@ -68,6 +67,26 @@
 		}
 
 		protected static string MakeIcon(string lineName, string morphName) => lineName + "-" + morphName;
+
+		protected static bool TrackedUpdate(TemplateNode template, string name, string value)
+		{
+			ThrowNull(template, nameof(template));
+			if (template.FindParameter(name) is ParameterNode parameter)
+			{
+				var oldValue = parameter.ValueToText();
+				parameter.SetValue(value);
+				return !string.Equals(oldValue, value, StringComparison.OrdinalIgnoreCase);
+			}
+
+			template.AddParameter(name, value);
+			return true;
+		}
+
+		protected static bool TrackedUpdate(TemplateNode template, string name, string value, bool remove)
+		{
+			ThrowNull(template, nameof(template));
+			return remove ? template.RemoveParameter(name) : TrackedUpdate(template, name, value);
+		}
 		#endregion
 
 		#region Protected Override Methods
@@ -109,7 +128,7 @@
 		#region Protected Abstract Methods
 		protected abstract T GetNewSkill(IDataRecord row);
 
-		protected abstract void UpdateSkillTemplate(T skillBase, Template template);
+		protected abstract bool UpdateSkillTemplate(T skillBase, TemplateNode template);
 		#endregion
 
 		#region Private Static Methods
@@ -228,31 +247,19 @@
 				page.Text = NewPage(skill);
 			}
 
-			// EsoReplacer.ClearReplacementStatus();
-			if (SkillSummaryFinder.Matches(page.Text).Count != 1)
+			var parser = new ContextualParser(page);
+			var skillSummaries = new List<TemplateNode>(parser.FindTemplates(TemplateName));
+			if (skillSummaries.Count != 1)
 			{
 				this.Warn("Incorrect number of {{" + TemplateName + "}} matches on " + skill.PageName);
 			}
 
-			var match = SkillSummaryFinder.Match(page.Text);
-			var template = Template.Parse(match.Value);
-
+			var template = skillSummaries[0];
 			template.RemoveDuplicates();
-			template.Remove("update");
-			template.NameParameter.After = "\n";
-			template.DefaultValueFormat.After = "\n";
+			template.RemoveParameter("update");
 
-			var oldParameters = new ParameterCollection();
-			foreach (var paramName in UpdatedParameters)
-			{
-				var param = template[paramName];
-				if (param != null)
-				{
-					oldParameters.Add(new Parameter(paramName, param.Value));
-				}
-			}
-
-			template.AddOrChange("line", skill.SkillLine);
+			var bigChange = false;
+			bigChange |= TrackedUpdate(template, "line", skill.SkillLine);
 			var iconValue = MakeIcon(skill.SkillLine, skill.Name);
 
 			// Special cases
@@ -270,31 +277,15 @@
 			for (var i = 0; i <= loopCount; i++)
 			{
 				var iconName = "icon" + (i > 0 ? (i + 1).ToStringInvariant() : string.Empty);
-				var newValue = IconValueFixup(template[iconName]?.Value, iconValue + (loopCount > 0 ? FormattableString.Invariant($" ({DestructionTypes[i]})") : string.Empty));
-				template.AddOrChange(iconName, newValue);
+				var iconParamater = template.FindParameter(iconName);
+				var newValue = IconValueFixup(iconParamater?.ValueToText(), iconValue + (loopCount > 0 ? FormattableString.Invariant($" ({DestructionTypes[i]})") : string.Empty));
+				bigChange |= TrackedUpdate(template, iconName, newValue);
 			}
 
-			this.UpdateSkillTemplate(skill, template);
+			bigChange |= this.UpdateSkillTemplate(skill, template);
 			template.Sort("titlename", "id", "id1", "id2", "id3", "id4", "id5", "id6", "id7", "id8", "id9", "id10", "line", "type", "icon", "icon2", "icon3", "desc", "desc1", "desc2", "desc3", "desc4", "desc5", "desc6", "desc7", "desc8", "desc9", "desc10", "linerank", "cost", "attrib", "casttime", "range", "radius", "duration", "channeltime", "target", "morph1name", "morph1id", "morph1icon", "morph1desc", "morph2name", "morph2id", "morph2icon", "morph2desc", "image", "imgdesc", "nocat", "notrail");
 
-			page.Text = page.Text.Remove(match.Index, match.Length).Insert(match.Index, template.ToString());
-			var bigChange = false;
-			foreach (var parameter in template)
-			{
-				if (parameter.Name != null && UpdatedParameters.Contains(parameter.Name))
-				{
-					var oldParameter = oldParameters[parameter.Name];
-					if (oldParameter != null)
-					{
-						// Not optimized to return true immediately because Compare shows useful info in Debug mode.
-						bigChange |= EsoReplacer.CompareReplacementText(this, oldParameter.Value, parameter.Value, skill.PageName);
-					}
-					else
-					{
-						bigChange = true;
-					}
-				}
-			}
+			page.Text = parser.GetText();
 
 			return bigChange;
 		}

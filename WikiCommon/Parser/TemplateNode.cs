@@ -26,6 +26,20 @@
 
 		#region Public Properties
 
+		/// <summary>Gets the parameters with the indexed named for anonymous parameters.</summary>
+		public IEnumerable<(string Name, ParameterNode Node)> AllParametersNumbered
+		{
+			get
+			{
+				var anonIndex = 0;
+				foreach (var parameter in this.Parameters)
+				{
+					var name = NameOrIndex(parameter, ref anonIndex);
+					yield return (name, parameter);
+				}
+			}
+		}
+
 		/// <summary>Gets an enumerator that iterates through any NodeCollections this node contains.</summary>
 		/// <returns>An enumerator that can be used to iterate through additional NodeCollections.</returns>
 		public IEnumerable<NodeCollection> NodeCollections
@@ -53,10 +67,9 @@
 				var i = 0;
 				foreach (var parameter in this.Parameters)
 				{
-					if (parameter.Name == null)
+					if (parameter.Anonymous)
 					{
-						i++;
-						yield return (i, parameter);
+						yield return (++i, parameter);
 					}
 					else if (int.TryParse(parameter.NameToText(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var namedNumber) && namedNumber > 0)
 					{
@@ -81,7 +94,7 @@
 		/// <param name="text">The text of the template, including surrounding braces (<c>{{...}}</c>).</param>
 		/// <returns>A new TemplateNode.</returns>
 		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single link (e.g., <c>[[Link]]</c>, or any variant thereof).</exception>
-		public static TemplateNode FromText([Localizable(false)] string text) => WikiTextParser.SingleNode<TemplateNode>(text);
+		public static TemplateNode FromText([Localizable(false)] string text) => NodeCollection.SingleNode<TemplateNode>(text);
 
 		/// <summary>Creates a new TemplateNode from its parts.</summary>
 		/// <param name="title">The link destination.</param>
@@ -203,6 +216,21 @@
 		/// <param name="visitor">The visiting class.</param>
 		public void Accept(IWikiNodeVisitor visitor) => visitor?.Visit(this);
 
+		/// <summary>Changes the value of a parameter to the specified value, or adds the parameter if it doesn't exist.</summary>
+		/// <param name="name">The name of the parameter to add.</param>
+		/// <param name="value">The value of the parameter to add.</param>
+		public void AddOrChange(string name, string value)
+		{
+			if (this.FindParameter(name) is ParameterNode parameter)
+			{
+				parameter.SetValue(value);
+			}
+			else
+			{
+				this.AddParameter(name, value);
+			}
+		}
+
 		/// <summary>Adds a new parameter to the template. Copies the format of the previous named parameter, if there is one, then adds the parameter after it.</summary>
 		/// <param name="name">The name of the parameter to add.</param>
 		/// <param name="value">The value of the parameter to add.</param>
@@ -214,7 +242,7 @@
 		/// <param name="copyFormat">Whether to copy the format of the previous parameter or use the values as provided.</param>
 		public void AddParameter(string name, string value, bool copyFormat)
 		{
-			var index = copyFormat ? this.FindParameterIndex(false) : -1;
+			var index = copyFormat ? this.FindCopyParameter(false) : -1;
 			if (index != -1)
 			{
 				if (this.FindParameter(name) != null)
@@ -240,7 +268,7 @@
 		/// <param name="copyFormat">Whether to copy the format of the previous parameter or use the values as provided.</param>
 		public void AddParameter(string value, bool copyFormat)
 		{
-			var index = copyFormat ? this.FindParameterIndex(true) : -1;
+			var index = copyFormat ? this.FindCopyParameter(true) : -1;
 			if (index != -1)
 			{
 				var previous = this.Parameters[index];
@@ -309,22 +337,32 @@
 		/// <summary>Finds the last parameter with any of the provided names.</summary>
 		/// <param name="parameterNames">The names of the parameters to search for.</param>
 		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
-		public IEnumerable<ParameterNode> FindParameters(params string[] parameterNames) => this.FindParameters(true, parameterNames);
+		public IEnumerable<ParameterNode> FindParameters(params string[] parameterNames) => this.FindParameters(false, parameterNames);
+
+		/// <summary>Finds the last parameter with any of the provided names.</summary>
+		/// <param name="parameterNames">The names of the parameters to search for.</param>
+		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
+		public IEnumerable<ParameterNode> FindParameters(IEnumerable<string> parameterNames) => this.FindParameters(false, parameterNames);
 
 		/// <summary>Finds the last parameter with any of the provided names.</summary>
 		/// <param name="ignoreCase">Whether to ignore case when checking parameter names.</param>
 		/// <param name="parameterNames">The names of the parameters to search for.</param>
 		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
-		public IEnumerable<ParameterNode> FindParameters(bool ignoreCase, params string[] parameterNames)
+		public IEnumerable<ParameterNode> FindParameters(bool ignoreCase, params string[] parameterNames) => this.FindParameters(ignoreCase, (IEnumerable<string>)parameterNames);
+
+		/// <summary>Finds the last parameter with any of the provided names.</summary>
+		/// <param name="ignoreCase">Whether to ignore case when checking parameter names.</param>
+		/// <param name="parameterNames">The names of the parameters to search for.</param>
+		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
+		public IEnumerable<ParameterNode> FindParameters(bool ignoreCase, IEnumerable<string> parameterNames)
 		{
 			ThrowNull(parameterNames, nameof(parameterNames));
 			var nameSet = new HashSet<string>(parameterNames, ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
-			for (var i = this.Parameters.Count - 1; i >= 0; i--)
+			foreach (var (name, node) in this.AllParametersNumbered)
 			{
-				var parameter = this.Parameters[i];
-				if (parameter.NameToText() is string name && nameSet.Contains(name))
+				if (nameSet.Contains(name))
 				{
-					yield return parameter;
+					yield return node;
 				}
 			}
 		}
@@ -419,17 +457,94 @@
 			return param == null ? null : WikiTextVisitor.Raw(param.Value);
 		}
 
+		/// <summary>Removes any parameters with the same name/index as a later parameter.</summary>
+		public void RemoveDuplicates()
+		{
+			var nameList = new HashSet<string>(StringComparer.Ordinal);
+			var index = this.Parameters.Count;
+			var anonIndex = 0;
+			while (index >= 0)
+			{
+				var name = NameOrIndex(this.Parameters[index], ref anonIndex);
+				if (nameList.Contains(name))
+				{
+					this.Parameters.RemoveAt(index);
+				}
+				else
+				{
+					nameList.Add(name);
+				}
+
+				index--;
+			}
+		}
+
 		/// <summary>Finds the parameters with the given name and removes it.</summary>
 		/// <param name="parameterName">The name of the parameter.</param>
+		/// <returns><see langword="true"/>if any parameters were removed.</returns>
 		/// <remarks>In the event of a duplicate parameter, all parameters with the same name will be removed.</remarks>
-		public void RemoveParameter(string parameterName)
+		public bool RemoveParameter(string parameterName)
 		{
-			for (var i = this.Parameters.Count - 1; i >= 0; i--)
+			var retval = false;
+			var anonIndex = 0;
+			for (var i = 0; i < this.Parameters.Count; i++)
 			{
-				if (string.Equals(this.Parameters[i].NameToText(), parameterName, StringComparison.Ordinal))
+				if (string.Equals(NameOrIndex(this.Parameters[i], ref anonIndex), parameterName, StringComparison.Ordinal))
 				{
 					this.Parameters.RemoveAt(i);
+					retval = true;
 				}
+			}
+
+			return retval;
+		}
+
+		/// <summary>Sorts parameters in the order specified.</summary>
+		/// <param name="sortOrder">A list of parameter names in the order to sort them.</param>
+		/// <remarks>Any parameters not specified in <paramref name="sortOrder"/> will be moved after the specified parameters, and will otherwise retain their original order.</remarks>
+		public void Sort(params string[] sortOrder) => this.Sort(sortOrder as IEnumerable<string>);
+
+		/// <summary>Sorts parameters in the order specified.</summary>
+		/// <param name="sortOrder">A list of parameter names in the order to sort them.</param>
+		/// <remarks>Any parameters not specified in <paramref name="sortOrder"/> will be moved after the specified parameters, and will otherwise retain their original order.</remarks>
+		public void Sort(IEnumerable<string> sortOrder)
+		{
+			ThrowNull(sortOrder, nameof(sortOrder));
+			var indeces = new Dictionary<string, int>(StringComparer.Ordinal);
+			var i = 0;
+			foreach (var value in sortOrder)
+			{
+				indeces.Add(value, i);
+				i++;
+			}
+
+			var sorted = new ParameterNode?[indeces.Count];
+			var unsorted = new List<ParameterNode>();
+			foreach (var (name, node) in this.AllParametersNumbered)
+			{
+				var index = indeces.GetValueOrDefault(name, -1);
+				if (index == -1)
+				{
+					unsorted.Add(node);
+				}
+				else
+				{
+					sorted[index] = node;
+				}
+			}
+
+			this.Parameters.Clear();
+			foreach (var parameter in sorted)
+			{
+				if (parameter != null)
+				{
+					this.Parameters.Add(parameter);
+				}
+			}
+
+			foreach (var parameter in unsorted)
+			{
+				this.Parameters.Add(parameter);
 			}
 		}
 
@@ -459,8 +574,12 @@
 		public override string ToString() => this.Parameters.Count == 0 ? "{{Template}}" : $"{{Template|Count = {this.Parameters.Count}}}";
 		#endregion
 
+		#region Private STatic Methods
+		private static string NameOrIndex(ParameterNode node, ref int index) => node.NameToText() ?? (++index).ToStringInvariant();
+		#endregion
+
 		#region Private Methods
-		private int FindParameterIndex(bool isAnon)
+		private int FindCopyParameter(bool isAnon)
 		{
 			for (var i = this.Parameters.Count - 1; i >= 0; i--)
 			{

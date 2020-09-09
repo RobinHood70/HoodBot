@@ -107,7 +107,7 @@
 				return string.Empty;
 			}
 
-			var nodes = WikiTextParser.Parse(nameValue);
+			var nodes = NodeCollection.Parse(nameValue);
 			EscapeValue(nodes, false);
 			return WikiTextVisitor.Raw(nodes);
 		}
@@ -122,7 +122,7 @@
 				return string.Empty;
 			}
 
-			var nodes = WikiTextParser.Parse(value);
+			var nodes = NodeCollection.Parse(value);
 			EscapeValue(nodes, true);
 			return WikiTextVisitor.Raw(nodes);
 		}
@@ -163,13 +163,13 @@
 		/// <summary>Initializes a new instance of the <see cref="ParameterNode"/> class as an anonymous parameter.</summary>
 		/// <param name="value">The value.</param>
 		/// <returns>A new ParameterNode.</returns>
-		public static ParameterNode FromParts(string value) => new ParameterNode(WikiTextParser.Parse(value));
+		public static ParameterNode FromParts(string value) => new ParameterNode(NodeCollection.Parse(value));
 
 		/// <summary>Initializes a new instance of the <see cref="ParameterNode"/> class.</summary>
 		/// <param name="name">The name.</param>
 		/// <param name="value">The value.</param>
 		/// <returns>A new ParameterNode.</returns>
-		public static ParameterNode FromParts(string name, string value) => new ParameterNode(WikiTextParser.Parse(name), WikiTextParser.Parse(value));
+		public static ParameterNode FromParts(string name, string? value) => new ParameterNode(NodeCollection.Parse(name), NodeCollection.Parse(value));
 		#endregion
 
 		#region Public Methods
@@ -190,7 +190,7 @@
 		public void SetName(string name)
 		{
 			ThrowNull(name, nameof(name));
-			this.SetName(WikiTextParser.Parse(name));
+			this.SetName(NodeCollection.Parse(name));
 		}
 
 		/// <summary>Sets the name from a list of nodes.</summary>
@@ -219,7 +219,7 @@
 			}
 			else
 			{
-				this.SetValue(WikiTextParser.Parse(value));
+				this.SetValue(NodeCollection.Parse(value));
 			}
 		}
 

@@ -9,16 +9,19 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WikiCommon.Searches;
 
-	internal static class EsoReplacer
+	internal class EsoReplacer
 	{
-		#region Fields
+		#region Static Fields
 		private static readonly Regex EsoLinks = new Regex(@"((?<before>(((''')?[0-9]+(-[0-9]+)?(''')?%?)(\smore|\smax(imum)?|\sof missing|\{\{huh}}|<br>)?|(''')?\{\{Nowrap[^}]*?}}(''')?|max(imum)?|ESO)+)\s)?(?<type>(?-i:Health|Magicka|Physical Penetration|Physical Resistance|Spell Critical|Spell Damage|Spell Penetration|Spell Resistance|Stamina|Ultimate|Weapon Critical|Weapon Damage))(\s(?<after>(Recovery|Regeneration|[0-9]+%)+))?\b", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex NumberStripper = new Regex(@"[0-9]+(-[0-9]+)?%?\s*", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
 		private static readonly Regex ReplacementFinder = new Regex(@"^\|\ *(<nowiki/?>)?(?<from>.*?)(</?nowiki/?>)?\ *\|\|\ *(<nowiki/?>)?(?<to>.*?)(</?nowiki/?>)?\ *$", RegexOptions.Multiline | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex SpaceStripper = new Regex(@"(\s{2,}|\n)", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
 		private static readonly Regex TemplateStripper = new Regex(@"{{\s*(ESO Quality Color|Nowrap|ESO (Health|Magicka|MagStam|Physical Penetration|Resistance|Spell Critical|Spell Damage|Spell Penetration|Stamina|Synergy|Ultimate|Weapon Critical|Weapon Damage) Link).*?}}", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
 		private static readonly Regex TextStripper = new Regex(@"({{huh}}|[0-9]+(-[0-9]+)?%?)", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
 
@@ -32,7 +35,40 @@
 		private static bool initialized;
 		#endregion
 
-		#region Public Methods
+		#region Fields
+		private readonly Site site;
+		#endregion
+
+		#region Constructors
+		public EsoReplacer(Site site)
+		{
+			this.site = site ?? throw ArgumentNull(nameof(site));
+			this.RemoveableTemplates = new TitleCollection(
+				site,
+				MediaWikiNamespaces.Template,
+				"ESO Health Link",
+				"ESO MagStam Link",
+				"ESO Magicka Link",
+				"ESO Physical Penetration Link",
+				"ESO Quality Color",
+				"ESO Resistance Link",
+				"ESO Spell Critical Link",
+				"ESO Spell Damage Link",
+				"ESO Spell Penetration Link",
+				"ESO Stamina Link",
+				"ESO Synergy Link",
+				"ESO Ultimate Link",
+				"ESO Weapon Critical Link",
+				"ESO Weapon Damage Link",
+				"Nowrap");
+		}
+		#endregion
+
+		#region Public Properties
+		public TitleCollection RemoveableTemplates { get; }
+		#endregion
+
+		#region Public Static Methods
 		public static bool CompareReplacementText(WikiJob job, string oldText, string newText, string pageName)
 		{
 			oldText = ToPlainText(oldText);
@@ -143,7 +179,7 @@
 				return text;
 			}
 
-			var parsedText = WikiTextParser.Parse(text);
+			var parsedText = NodeCollection.Parse(text);
 			var currentNode = parsedText.First;
 			while (currentNode != null)
 			{
@@ -352,7 +388,52 @@
 		}
 		#endregion
 
-		#region Private Methods
+		#region Public Methods
+
+		public ICollection<ISimpleTitle> CheckNewLinks(NodeCollection oldNodes, NodeCollection newNodes)
+		{
+			var oldLinks = new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance);
+			foreach (var node in oldNodes.FindAllRecursive<LinkNode>())
+			{
+				var siteLink = SiteLink.FromLinkNode(this.site, node);
+				oldLinks.Add(siteLink);
+			}
+
+			foreach (var node in newNodes.FindAllRecursive<LinkNode>())
+			{
+				var siteLink = SiteLink.FromLinkNode(this.site, node);
+				oldLinks.Remove(siteLink);
+			}
+
+			return oldLinks;
+		}
+
+		public ICollection<ISimpleTitle> CheckNewTemplates(NodeCollection oldNodes, NodeCollection newNodes)
+		{
+			var oldTemplates = new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance);
+			foreach (var node in oldNodes.FindAllRecursive<TemplateNode>())
+			{
+				oldTemplates.Add(Title.FromName(this.site, node.GetTitleValue()));
+			}
+
+			foreach (var node in newNodes.FindAllRecursive<TemplateNode>())
+			{
+				oldTemplates.Remove(Title.FromName(this.site, node.GetTitleValue()));
+			}
+
+			return oldTemplates;
+		}
+
+		public bool IsNonTrivialChange(NodeCollection oldNodes, NodeCollection newNodes) => string.Compare(
+			this.StrippedTextFromNodes(oldNodes),
+			this.StrippedTextFromNodes(newNodes),
+			StringComparison.InvariantCultureIgnoreCase) == 0;
+
+		public void RemoveTrivialTemplates(NodeCollection oldNodes) =>
+			oldNodes.RemoveAll<TemplateNode>(node => this.RemoveableTemplates.Contains(new TitleParser(this.site, node.GetTitleValue())));
+		#endregion
+
+		#region Private Static Methods
 		private static void GetMatches(string tableText, List<EsoReplacement> list)
 		{
 			var matches = (IEnumerable<Match>)ReplacementFinder.Matches(tableText);
@@ -383,7 +464,6 @@
 			}
 
 			ThrowNull(usedList, nameof(usedList));
-			var site = usedList.Site;
 			var foundReplacements = new HashSet<string>(StringComparer.Ordinal);
 			var newText = textNode.Text;
 			var textLength = textNode.Text.Length;
@@ -403,7 +483,7 @@
 						{
 							if (newNode is LinkNode link)
 							{
-								var title = SiteLink.FromLinkNode(site, link);
+								var title = SiteLink.FromLinkNode(usedList.Site, link);
 								if (usedList.Contains(title) && link.Parameters.Count == 1)
 								{
 									retval.AddRange(link.Parameters[0].Value);
@@ -514,6 +594,16 @@
 			}
 
 			return templateNode;
+		}
+		#endregion
+
+		#region Private Methods
+		private string StrippedTextFromNodes(NodeCollection nodes)
+		{
+			this.RemoveTrivialTemplates(nodes);
+			var retval = WikiTextVisitor.Value(nodes);
+			retval = NumberStripper.Replace(retval, string.Empty);
+			return SpaceStripper.Replace(retval, string.Empty);
 		}
 		#endregion
 	}

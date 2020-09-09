@@ -64,13 +64,13 @@
 		/// <param name="text">The text of the argument.</param>
 		/// <returns>A new HeaderNode.</returns>
 		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single argument (<c>{{{abc|123}}}</c>).</exception>
-		public static HeaderNode FromParts(int level, [Localizable(false)] string text) => new HeaderNode(0, level, WikiTextParser.Parse(text));
+		public static HeaderNode FromParts(int level, [Localizable(false)] string text) => new HeaderNode(0, level, NodeCollection.Parse(text));
 
 		/// <summary>Creates a new HeaderNode from the provided text.</summary>
 		/// <param name="text">The text of the argument.</param>
 		/// <returns>A new HeaderNode.</returns>
 		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single argument (<c>{{{abc|123}}}</c>).</exception>
-		public static HeaderNode FromText([Localizable(false)] string text) => WikiTextParser.SingleNode<HeaderNode>(text);
+		public static HeaderNode FromText([Localizable(false)] string text) => NodeCollection.SingleNode<HeaderNode>(text);
 		#endregion
 
 		#region Public Methods

@@ -9,7 +9,7 @@
 		{
 			this.From = from;
 			this.To = to;
-			this.ToNodes = WikiTextParser.Parse(to);
+			this.ToNodes = NodeCollection.Parse(to);
 		}
 		#endregion
 

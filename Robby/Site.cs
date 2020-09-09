@@ -765,7 +765,7 @@
 			ThrowNull(text, nameof(text));
 			var redirectAliases = this.MagicWords.TryGetValue("redirect", out var redirect) ? redirect.Aliases : DefaultRedirect;
 			var redirects = new HashSet<string>(redirectAliases, StringComparer.Ordinal);
-			var parser = WikiTextParser.Parse(text);
+			var parser = NodeCollection.Parse(text);
 			if (parser.First is LinkedListNode<IWikiNode> first && first.Value is TextNode textNode)
 			{
 				var searchText = textNode.Text.TrimEnd();

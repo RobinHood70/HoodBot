@@ -156,9 +156,9 @@
 		{
 			if (page.Revisions.Count > 1)
 			{
-				var parser = WikiTextParser.Parse(page.CurrentRevision!.Text);
-				var newer = GetLocation(WikiTextParser.Parse(page.Revisions[1].Text));
-				var older = GetLocation(WikiTextParser.Parse(page.Revisions[0].Text));
+				var parser = NodeCollection.Parse(page.CurrentRevision!.Text);
+				var newer = GetLocation(NodeCollection.Parse(page.Revisions[1].Text));
+				var older = GetLocation(NodeCollection.Parse(page.Revisions[0].Text));
 				var current = GetLocation(parser);
 				if (current == null || newer == null)
 				{
@@ -198,7 +198,7 @@
 				{
 					var currentText = string.Join(", ", currentSplit) + '\n';
 					currentNode.Value.Clear();
-					currentNode.Value.AddRange(WikiTextParser.Parse(currentText));
+					currentNode.Value.AddRange(NodeCollection.Parse(currentText));
 
 					var olderText = olderNode == null ? "\n" : WikiTextVisitor.Raw(olderNode.Value);
 					if (removeCount < newSplit.Count && currentText != olderText)

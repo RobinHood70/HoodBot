@@ -5,7 +5,7 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
-	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	internal class EsoPassiveSkillSummaries : EsoSkillJob<PassiveSkill>
@@ -46,12 +46,13 @@
 		#region Protected Override Methods
 		protected override PassiveSkill GetNewSkill(IDataRecord row) => new PassiveSkill(row);
 
-		protected override void UpdateSkillTemplate(PassiveSkill skillBase, Template template)
+		protected override bool UpdateSkillTemplate(PassiveSkill skillBase, TemplateNode template)
 		{
 			ThrowNull(skillBase, nameof(skillBase));
 			ThrowNull(template, nameof(template));
-			template.AddOrChange("type", "Passive");
-			template.AddOrChange("id", skillBase.Id.ToStringInvariant());
+			var bigChange = false;
+			bigChange |= TrackedUpdate(template, "type", "Passive");
+			bigChange |= TrackedUpdate(template, "id", skillBase.Id.ToStringInvariant());
 			var usedList = new TitleCollection(this.Site);
 			foreach (var rank in skillBase.Ranks)
 			{
@@ -78,9 +79,11 @@
 				description = EsoReplacer.ReplaceGlobal(description, skillBase.Name);
 				description = EsoReplacer.ReplaceFirstLink(description, usedList);
 				var rankText = rank.Rank.ToStringInvariant();
-				template.AddOrChange("desc" + (rank.Rank == 1 ? string.Empty : rankText), description);
-				template.AddOrChange("linerank" + rankText, rank.LearnedLevel);
+				bigChange |= TrackedUpdate(template, "desc" + (rank.Rank == 1 ? string.Empty : rankText), description);
+				bigChange |= TrackedUpdate(template, "linerank" + rankText, rank.LearnedLevel.ToStringInvariant());
 			}
+
+			return bigChange;
 		}
 		#endregion
 	}

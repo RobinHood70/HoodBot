@@ -45,7 +45,7 @@
 		{
 			this.Title = title ?? throw ArgumentNull(nameof(title));
 			this.Site = title.Namespace.Site;
-			this.Nodes = WikiTextParser.Parse(text ?? string.Empty, inclusionType, strictInclusion);
+			this.Nodes = NodeCollection.Parse(text ?? string.Empty, inclusionType, strictInclusion);
 		}
 		#endregion
 
