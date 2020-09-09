@@ -29,7 +29,7 @@
 				desc = desc.Replace(partial.From, partial.To, StringComparison.Ordinal);
 			}
 
-			this.Description = EsoReplacer.ReplaceGlobal(desc, null);
+			this.Description = desc;
 
 			var coefficients = new List<Coefficient>();
 			for (var num = '1'; num <= '6'; num++)

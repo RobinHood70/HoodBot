@@ -82,7 +82,9 @@
 
 		public string FullName(int cost) => this.FullName(cost.ToString(CultureInfo.InvariantCulture));
 
-		public string FullName(string cost) => string.Concat(cost, " ", EsoGeneral.MechanicNames[this.Mechanic]);
+		public string FullName(string cost) => string.Equals(cost, "0", StringComparison.Ordinal)
+			? "Free"
+			: string.Concat(cost, " ", EsoGeneral.MechanicNames[this.Mechanic]);
 		#endregion
 
 		#region Private Methods

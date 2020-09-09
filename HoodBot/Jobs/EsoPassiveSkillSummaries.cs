@@ -76,10 +76,8 @@
 				}
 
 				var description = string.Join("'''", splitDescription);
-				description = EsoReplacer.ReplaceGlobal(description, skillBase.Name);
-				description = EsoReplacer.ReplaceFirstLink(description, usedList);
 				var rankText = rank.Rank.ToStringInvariant();
-				bigChange |= TrackedUpdate(template, "desc" + (rank.Rank == 1 ? string.Empty : rankText), description);
+				bigChange |= TrackedUpdate(template, "desc" + (rank.Rank == 1 ? string.Empty : rankText), description, usedList, skillBase.Name);
 				bigChange |= TrackedUpdate(template, "linerank" + rankText, rank.LearnedLevel.ToStringInvariant());
 			}
 

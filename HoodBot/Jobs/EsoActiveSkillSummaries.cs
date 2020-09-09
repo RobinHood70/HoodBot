@@ -74,7 +74,13 @@
 			bigChange |= TrackedUpdate(template, "casttime", FormatSeconds(baseMorph.CastingTime));
 			bigChange |= TrackedUpdate(template, "linerank", skillBase.LearnedLevel.ToStringInvariant());
 			bigChange |= TrackedUpdate(template, "cost", baseSkillCost);
-			EsoReplacer.ReplaceGlobal(template.FindParameter("cost")?.Value!);
+			if (template.FindParameter("cost")?.Value is NodeCollection paramValue)
+			{
+				// Cost is an oddball where we don't need/want to do all replacements, just the global ones.
+				EsoReplacer.ReplaceGlobal(paramValue);
+				EsoReplacer.ReplaceEsoLinks(paramValue);
+			}
+
 			bigChange |= TrackedUpdate(template, "range", FormatMeters(baseMorph.Ranges[3]), string.Equals(baseMorph.Ranges[3], "0", StringComparison.Ordinal));
 
 			if (string.Equals(baseMorph.Radii[3], "0", StringComparison.Ordinal))
@@ -87,16 +93,16 @@
 				var newValue = FormatMeters(baseMorph.Radii[3]);
 				if (template.FindParameter("radius", "area") is ParameterNode radiusParam)
 				{
-					var oldValue = radiusParam.ValueToText();
+					var oldValue = radiusParam.ValueToText()?.Trim();
 					if (string.Equals(oldValue, newValue, StringComparison.OrdinalIgnoreCase))
 					{
-						radiusParam.SetValue(newValue);
+						radiusParam.SetValue(newValue + '\n');
 						bigChange = true;
 					}
 				}
 				else
 				{
-					template.AddParameter("area", newValue);
+					template.AddParameter("area", newValue + '\n');
 					bigChange = true;
 				}
 			}
@@ -186,11 +192,7 @@
 				}
 
 				var parameterName = "desc" + morphNum;
-				bigChange = TrackedUpdate(template, parameterName, extras + EsoReplacer.ReplaceFirstLink(morph.Description ?? string.Empty, usedList));
-				var valueNodes = template.FindParameter(parameterName)!.Value!;
-				EsoReplacer.ReplaceGlobal(valueNodes);
-				EsoReplacer.ReplaceSkillLinks(valueNodes, skillBase.Name);
-
+				bigChange = TrackedUpdate(template, parameterName, extras + morph.Description ?? string.Empty, usedList, skillBase.Name);
 				if (morphCounter > 0)
 				{
 					var morphName = "morph" + morphNum;
@@ -198,7 +200,7 @@
 					bigChange |= TrackedUpdate(template, morphName + "id", morph.Abilities[3].Id.ToStringInvariant());
 					var iconValue = MakeIcon(skillBase.SkillLine, morph.Name);
 					bigChange |= TrackedUpdate(template, morphName + "icon", IconValueFixup(template.ValueOf(morphName + "icon"), iconValue));
-					bigChange |= TrackedUpdate(template, morphName + "desc", EsoReplacer.ReplaceFirstLink(morph.EffectLine, usedList));
+					bigChange |= TrackedUpdate(template, morphName + "desc", morph.EffectLine, usedList, skillBase.Name);
 				}
 			}
 
