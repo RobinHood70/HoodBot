@@ -199,7 +199,7 @@
 					bigChange |= TrackedUpdate(template, morphName + "name", morph.Name);
 					bigChange |= TrackedUpdate(template, morphName + "id", morph.Abilities[3].Id.ToStringInvariant());
 					var iconValue = MakeIcon(skillBase.SkillLine, morph.Name);
-					bigChange |= TrackedUpdate(template, morphName + "icon", IconValueFixup(template.ValueToText(morphName + "icon"), iconValue));
+					bigChange |= TrackedUpdate(template, morphName + "icon", IconValueFixup(template.Find(morphName + "icon")?.ValueToText(), iconValue));
 					bigChange |= TrackedUpdate(template, morphName + "desc", morph.EffectLine, usedList, skillBase.Name);
 				}
 			}
