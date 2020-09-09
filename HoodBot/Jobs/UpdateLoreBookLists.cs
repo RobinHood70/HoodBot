@@ -47,10 +47,10 @@
 				var parser = new ContextualParser(page);
 				foreach (var template in parser.FindTemplates("Lore Book Entry"))
 				{
-					var param2 = template.FindNumberedParameter(2);
-					if (template.FindNumberedParameter(2) is ParameterNode linkTitle)
+					var param2 = template.Find(2);
+					if (template.Find(2) is ParameterNode linkTitle)
 					{
-						var key = template.FindNumberedParameter(1)?.ValueToText() ?? throw new InvalidOperationException();
+						var key = template.Find(1)?.ValueToText() ?? throw new InvalidOperationException();
 						var value = linkTitle.ValueToText() ?? string.Empty;
 						this.linkTitles.Add(key, value);
 					}
@@ -152,7 +152,7 @@
 				var template = TemplateNode.FromParts("Lore Book Entry", (null, entry));
 				if (this.linkTitles.TryGetValue(entry, out var linkTitle))
 				{
-					template.AddParameter(linkTitle);
+					template.Add(linkTitle);
 				}
 
 				nodes.AddBefore(last, new TextNode("\n"));

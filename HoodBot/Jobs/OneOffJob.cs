@@ -25,7 +25,7 @@
 			ThrowNull(parsedPage, nameof(parsedPage));
 			foreach (var template in parsedPage.FindTemplates("ESO Antiquity"))
 			{
-				template.RemoveParameter("end");
+				template.Remove("end");
 			}
 		}
 		#endregion

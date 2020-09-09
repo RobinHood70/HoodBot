@@ -29,7 +29,7 @@
 			{
 				if (template.Parameters.Count >= 1)
 				{
-					if (template.FindNumberedParameter(1) is ParameterNode parameter
+					if (template.Find(1) is ParameterNode parameter
 						&& parameter.ValueToText() is string hex
 						&& hex.Length == 6
 						&& int.TryParse(hex, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out _))
