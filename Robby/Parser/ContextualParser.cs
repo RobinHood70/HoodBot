@@ -50,9 +50,9 @@
 		#endregion
 
 		#region Public Properties
-		public IEnumerable<HeaderNode> Headers => this.Nodes.FindAll<HeaderNode>();
+		public IEnumerable<HeaderNode> HeaderNodes => this.Nodes.FindAll<HeaderNode>();
 
-		public IEnumerable<LinkNode> Links => this.Nodes.FindAll<LinkNode>();
+		public IEnumerable<LinkNode> LinkNodes => this.Nodes.FindAll<LinkNode>();
 
 		public IDictionary<string, Func<string>> MagicWordResolvers { get; } = new Dictionary<string, Func<string>>(StringComparer.Ordinal);
 
@@ -62,9 +62,9 @@
 
 		public Site Site { get; }
 
-		public IEnumerable<TemplateNode> Templates => this.Nodes.FindAll<TemplateNode>();
+		public IEnumerable<TemplateNode> TemplateNodes => this.Nodes.FindAll<TemplateNode>();
 
-		public IEnumerable<TextNode> Text => this.Nodes.FindAll<TextNode>();
+		public IEnumerable<TextNode> TextNodes => this.Nodes.FindAll<TextNode>();
 
 		public IDictionary<string, Func<string>> TemplateResolvers { get; } = new Dictionary<string, Func<string>>(StringComparer.Ordinal);
 
@@ -138,7 +138,7 @@
 
 		public IEnumerable<LinkNode> FindLinks(ISimpleTitle find)
 		{
-			foreach (var link in this.Links)
+			foreach (var link in this.LinkNodes)
 			{
 				var linkTitle = Robby.Title.FromBacklinkNode(this.Site, link);
 				if (linkTitle.SimpleEquals(find))
@@ -150,7 +150,7 @@
 
 		public IEnumerable<LinkNode> FindLinks(IFullTitle find)
 		{
-			foreach (var link in this.Links)
+			foreach (var link in this.LinkNodes)
 			{
 				var linkTitle = FullTitle.FromBacklinkNode(this.Site, link);
 				if (linkTitle.FullEquals(find))
@@ -183,7 +183,7 @@
 		public IEnumerable<TemplateNode> FindTemplates(string templateName)
 		{
 			var find = new TitleParser(this.Site, MediaWikiNamespaces.Template, templateName);
-			foreach (var template in this.Templates)
+			foreach (var template in this.TemplateNodes)
 			{
 				var titleText = template.GetTitleValue();
 				var templateTitle = new TitleParser(this.Site, MediaWikiNamespaces.Template, titleText);

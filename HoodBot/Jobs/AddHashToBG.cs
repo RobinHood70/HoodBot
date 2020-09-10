@@ -25,7 +25,7 @@
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
 			ThrowNull(parsedPage, nameof(parsedPage));
-			foreach (var template in parsedPage.Templates)
+			foreach (var template in parsedPage.TemplateNodes)
 			{
 				if (template.Parameters.Count >= 1)
 				{
