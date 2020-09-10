@@ -766,7 +766,9 @@
 			var redirectAliases = this.MagicWords.TryGetValue("redirect", out var redirect) ? redirect.Aliases : DefaultRedirect;
 			var redirects = new HashSet<string>(redirectAliases, StringComparer.Ordinal);
 			var parser = NodeCollection.Parse(text);
-			if (parser.First is LinkedListNode<IWikiNode> first && first.Value is TextNode textNode)
+
+			// Is the text of the format TextNode, LinkNode?
+			if (parser.First is LinkedListNode<IWikiNode> first && first.Value is TextNode textNode && first.Next?.Value is LinkNode linkNode)
 			{
 				var searchText = textNode.Text.TrimEnd();
 
@@ -776,7 +778,7 @@
 					searchText = searchText[0..^1].TrimEnd();
 				}
 
-				if (redirects.Contains(searchText) && first.Next?.Value is LinkNode linkNode)
+				if (redirects.Contains(searchText))
 				{
 					return FullTitle.FromBacklinkNode(this, linkNode);
 				}

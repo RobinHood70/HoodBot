@@ -272,22 +272,18 @@
 
 		private void UpdatePageText(Page page, PageData pageData)
 		{
-			var parser = new ContextualParser(page, InclusionType.Transcluded, false);
-			var firstNode = parser.Nodes.First;
-			if (firstNode == null || !(firstNode.Value is IgnoreNode ignoreNode && ignoreNode.Value.EndsWith("<onlyinclude>", StringComparison.OrdinalIgnoreCase)))
+			var oldPage = new ContextualParser(page, InclusionType.Transcluded, false);
+			var newPage = new ContextualParser(page, string.Empty);
+			foreach (var ignoreNode in oldPage.Nodes.FindAll<IgnoreNode>())
+			{
+				newPage.Nodes.AddLast(ignoreNode);
+			}
+
+			var firstNode = newPage.Nodes.First;
+			if (firstNode is null)
 			{
 				this.Warn($"Delimiters not found on page {page.FullPageName}");
 				return;
-			}
-
-			var currentNode = firstNode.Next;
-			var oldNodes = new NodeCollection(null);
-			while (currentNode != null && !(currentNode.Value is IgnoreNode))
-			{
-				oldNodes.AddLast(currentNode.Value);
-				var nextNode = currentNode.Next;
-				parser.Nodes.Remove(currentNode);
-				currentNode = nextNode;
 			}
 
 			var items = (IEnumerable<Match>)SetBonusRegex.Matches(pageData.BonusDescription);
@@ -316,23 +312,23 @@
 			var newNodes = NodeCollection.Parse(sb.ToString());
 			firstNode.AddAfter(newNodes);
 
-			EsoReplacer.ReplaceGlobal(parser.Nodes);
-			EsoReplacer.ReplaceEsoLinks(parser.Nodes);
-			EsoReplacer.ReplaceFirstLink(parser.Nodes, usedList);
-			page.Text = parser.GetText() ?? string.Empty;
+			EsoReplacer.ReplaceGlobal(newPage.Nodes);
+			EsoReplacer.ReplaceEsoLinks(newPage.Nodes);
+			EsoReplacer.ReplaceFirstLink(newPage.Nodes, usedList);
+			page.Text = newPage.GetText() ?? string.Empty;
 
 			var replacer = new EsoReplacer(this.Site);
-			if (ConstructWarning(page, replacer.CheckNewLinks(oldNodes, parser.Nodes), "links") is string linkWarning)
+			if (ConstructWarning(page, replacer.CheckNewLinks(oldPage, newPage), "links") is string linkWarning)
 			{
 				this.Warn(linkWarning);
 			}
 
-			if (ConstructWarning(page, replacer.CheckNewTemplates(oldNodes, parser.Nodes), "templates") is string templateWarning)
+			if (ConstructWarning(page, replacer.CheckNewTemplates(oldPage, newPage), "templates") is string templateWarning)
 			{
 				this.Warn(templateWarning);
 			}
 
-			pageData.IsNonTrivial = replacer.IsNonTrivialChange(oldNodes, parser.Nodes);
+			pageData.IsNonTrivial = replacer.IsNonTrivialChange(oldPage, newPage);
 		}
 		#endregion
 

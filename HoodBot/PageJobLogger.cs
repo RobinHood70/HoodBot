@@ -61,11 +61,11 @@
 		#endregion
 
 		#region Private Methods
-		private bool UpdateCurrentStatus(NodeCollection nodes)
+		private bool UpdateCurrentStatus(ContextualParser parser)
 		{
 			ThrowNull(this.status, nameof(PageJobLogger), nameof(this.status));
-			var currentTask = nodes.FindFirstHeaderLinked("Current Task");
-			var taskLog = NodeCollection.FindNextLinked<HeaderNode>(currentTask?.Next ?? throw BadLogPage);
+			var currentTask = parser.FindFirstHeaderLinked("Current Task");
+			var taskLog = parser.Nodes.FindListNode<HeaderNode>(null, false, false, currentTask?.Next ?? throw BadLogPage);
 			if (taskLog == null)
 			{
 				throw BadLogPage;
@@ -73,7 +73,7 @@
 
 			var previousTask = WikiTextVisitor.Raw(NodeCollection.NodesBetween(currentTask, taskLog)).Trim().TrimEnd(TextArrays.Period);
 			NodeCollection.RemoveBetween(currentTask, taskLog, false);
-			nodes.AddAfter(currentTask, new TextNode("\n" + this.status + ".\n\n"));
+			parser.Nodes.AddAfter(currentTask, new TextNode("\n" + this.status + ".\n\n"));
 			return string.Equals(previousTask, this.status, StringComparison.Ordinal);
 		}
 
@@ -81,8 +81,8 @@
 		{
 			Debug.Assert(this.logInfo != null, "LogInfo is null.");
 			var parser = new ContextualParser(sender);
-			var result = this.UpdateCurrentStatus(parser.Nodes);
-			if (parser.Nodes.FindFirstLinked<TemplateNode>(template => string.Equals(template.GetTitleValue(), "/Entry", StringComparison.Ordinal)) is LinkedListNode<IWikiNode> entryNode &&
+			var result = this.UpdateCurrentStatus(parser);
+			if (parser.Nodes.FindListNode<TemplateNode>(template => string.Equals(template.GetTitleValue(), "/Entry", StringComparison.Ordinal), false, false, null) is LinkedListNode<IWikiNode> entryNode &&
 				entryNode.Value is TemplateNode entry)
 			{
 				// If the last job was the same as this job and has no end time, then it's either the current job or a resumed one.
