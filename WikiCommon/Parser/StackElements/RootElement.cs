@@ -5,7 +5,7 @@
 	using RobinHood70.WikiCommon.Properties;
 	using static RobinHood70.CommonCode.Globals;
 
-	internal class RootElement : StackElement
+	internal sealed class RootElement : StackElement
 	{
 		#region Constructors
 		internal RootElement(WikiStack stack)

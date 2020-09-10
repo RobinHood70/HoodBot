@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Base;
 	using static RobinHood70.CommonCode.Globals;
 
-	internal class UploadInputInternal
+	internal sealed class UploadInputInternal
 	{
 		#region Constructors
 		public UploadInputInternal(UploadInput input)

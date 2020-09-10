@@ -3,7 +3,7 @@
 	using System.Collections.Generic;
 	using System.Data;
 
-	internal class PassiveRank
+	internal sealed class PassiveRank
 	{
 		public PassiveRank(IDataRecord data)
 		{

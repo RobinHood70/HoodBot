@@ -7,6 +7,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
+	using static RobinHood70.CommonCode.Globals;
 
 	public class ManipulateImageCategory : WikiJob
 	{
@@ -39,7 +40,7 @@
 			{
 				if (image.LatestFileRevision is FileRevision imageInfo)
 				{
-					this.WriteLine($"* {image.AsLink(true)} ({imageInfo.Width}x{imageInfo.Height})");
+					this.WriteLine(Invariant($"* {image.AsLink(true)} ({imageInfo.Width}x{imageInfo.Height})"));
 				}
 			}
 		}

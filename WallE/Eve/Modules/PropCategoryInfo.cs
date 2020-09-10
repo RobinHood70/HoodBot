@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class PropCategoryInfo : PropModule<CategoryInfoInput>
+	internal sealed class PropCategoryInfo : PropModule<CategoryInfoInput>
 	{
 		#region Constructors
 		public PropCategoryInfo(WikiAbstractionLayer wal, CategoryInfoInput input)

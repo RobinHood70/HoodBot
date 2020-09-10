@@ -17,7 +17,7 @@
 	}
 	#endregion
 
-	internal class NpcData
+	internal sealed class NpcData
 	{
 		#region Static Fields
 		private static readonly Dictionary<sbyte, string> Reactions = new Dictionary<sbyte, string>

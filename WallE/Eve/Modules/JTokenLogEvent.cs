@@ -51,9 +51,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		private static IReadOnlyList<string> ParseRights(string? value) => value?.Split(TextArrays.CommaSpace, StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
 		#endregion
 
-		#region Private Classes
+		#region private sealed classes
 
-		private class ExtraDataParser
+		private sealed class ExtraDataParser
 		{
 			// TODO: Look at this code again later and rewrite, especially if updated for a later version of MW. Bug fix code is for MW 1.24 and before. I think all the ExtraData stuff is too, or much of it, anyway. For 1.25+, everything goes to result["params"]. Just convert that to a dictionary and parse it.
 			#region Fields

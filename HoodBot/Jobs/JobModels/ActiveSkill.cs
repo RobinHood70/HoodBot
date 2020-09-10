@@ -7,7 +7,7 @@
 	using System.Globalization;
 
 	[SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "Instantiated by generic new().")]
-	internal class ActiveSkill : Skill
+	internal sealed class ActiveSkill : Skill
 	{
 		public ActiveSkill(IDataRecord row)
 			: base(row) => this.SkillType = (string)row["type"];

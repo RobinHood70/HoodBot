@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class ListQueryPage : ListModule<QueryPageInput, QueryPageItem>, IGeneratorModule
+	internal sealed class ListQueryPage : ListModule<QueryPageInput, QueryPageItem>, IGeneratorModule
 	{
 		#region Fields
 		private readonly string queryPage;

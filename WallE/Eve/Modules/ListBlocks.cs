@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class ListBlocks : ListModule<BlocksInput, BlocksResult>
+	internal sealed class ListBlocks : ListModule<BlocksInput, BlocksResult>
 	{
 		#region Constructors
 		public ListBlocks(WikiAbstractionLayer wal, BlocksInput input)

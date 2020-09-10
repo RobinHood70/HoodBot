@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class ContinueModule2 : ContinueModule
+	internal sealed class ContinueModule2 : ContinueModule
 	{
 		#region Public Constants
 		public const int ContinueMinimumVersion = 121;

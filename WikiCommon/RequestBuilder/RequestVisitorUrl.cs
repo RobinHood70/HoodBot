@@ -28,10 +28,10 @@
 		public static string Build(Request request)
 		{
 			ThrowNull(request, nameof(request));
-			var builder = new StringBuilder();
-			var visitor = new RequestVisitorUrl(builder, request.SupportsUnitSeparator);
+			var sb = new StringBuilder();
+			var visitor = new RequestVisitorUrl(sb, request.SupportsUnitSeparator);
 			request.Build(visitor);
-			return builder.ToString();
+			return sb.ToString();
 		}
 		#endregion
 

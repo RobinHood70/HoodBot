@@ -1,6 +1,6 @@
 ﻿namespace RobinHood70.WikiCommon.Parser.StackElements
 {
-	internal class TemplateElement : PairedElement
+	internal sealed class TemplateElement : PairedElement
 	{
 		#region Fields
 		// private readonly bool atLineStart;

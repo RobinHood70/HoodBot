@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// MWVERSION: 1.29
-	internal class ActionUnblock : ActionModule<UnblockInput, UnblockResult>
+	internal sealed class ActionUnblock : ActionModule<UnblockInput, UnblockResult>
 	{
 		#region Constructors
 		public ActionUnblock(WikiAbstractionLayer wal)

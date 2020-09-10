@@ -427,8 +427,8 @@ namespace RobinHood70.WikiCommon
 		}
 		#endregion
 
-		#region Private Classes
-		private class Delimiter
+		#region private sealed classes
+		private sealed class Delimiter
 		{
 			public Delimiter(string marker, string terminator, TokenType tokenType, bool noparse)
 			{
@@ -449,7 +449,7 @@ namespace RobinHood70.WikiCommon
 			public override string ToString() => this.Marker + " " + this.Terminator;
 		}
 
-		private class Token
+		private sealed class Token
 		{
 			public Token(int start, int length, TokenType type)
 			{

@@ -96,7 +96,7 @@
 		{
 			ThrowNull(wiki, nameof(wiki));
 			this.FilterPages = new TitleCollection(this);
-			wiki.Initializing += this.AbstractionLayer_Initializing;
+			wiki.Initializing += AbstractionLayer_Initializing;
 			wiki.Initialized += this.AbstractionLayer_Initialized;
 			wiki.WarningOccurred += this.AbstractionLayer_WarningOccurred;
 			this.AbstractionLayer = wiki;
@@ -1141,17 +1141,20 @@
 		protected virtual bool Upload(UploadInput input) => string.Equals(this.AbstractionLayer.Upload(input).Result, "Success", StringComparison.OrdinalIgnoreCase);
 		#endregion
 
-		#region Private Methods
-
-		// Parse co-initialization results.
-		private void AbstractionLayer_Initialized(IWikiAbstractionLayer sender, EventArgs eventArgs) => this.ParseInternalSiteInfo();
+		#region Private Static Methods
 
 		// Setup co-initialization to avoid near-duplicate requests with AbstractionLayer.
-		private void AbstractionLayer_Initializing(IWikiAbstractionLayer sender, InitializingEventArgs eventArgs)
+		private static void AbstractionLayer_Initializing(IWikiAbstractionLayer sender, InitializingEventArgs eventArgs)
 		{
 			eventArgs.Properties = NeededSiteInfo;
 			eventArgs.FilterLocalInterwiki = Filter.Any;
 		}
+		#endregion
+
+		#region Private Methods
+
+		// Parse co-initialization results.
+		private void AbstractionLayer_Initialized(IWikiAbstractionLayer sender, EventArgs eventArgs) => this.ParseInternalSiteInfo();
 
 		/// <summary>Forwards warning events from the abstraction layer to the wiki.</summary>
 		/// <param name="sender">The sending abstraction layer.</param>

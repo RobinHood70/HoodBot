@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// MWVERSION: 1.29
-	internal class ListRandom : ListModule<RandomInput, WikiTitleItem>, IGeneratorModule
+	internal sealed class ListRandom : ListModule<RandomInput, WikiTitleItem>, IGeneratorModule
 	{
 		#region Constructors
 		public ListRandom(WikiAbstractionLayer wal, RandomInput input)

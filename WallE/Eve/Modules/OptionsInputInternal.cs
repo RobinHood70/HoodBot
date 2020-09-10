@@ -4,7 +4,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System;
 	using System.Collections.Generic;
 
-	internal class OptionsInputInternal
+	internal sealed class OptionsInputInternal
 	{
 		#region Constructors
 		public OptionsInputInternal(string token, string name, string? value)

@@ -8,7 +8,7 @@
 	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
-	internal class EsoPassiveSkillSummaries : EsoSkillJob<PassiveSkill>
+	internal sealed class EsoPassiveSkillSummaries : EsoSkillJob<PassiveSkill>
 	{
 		#region Constructors
 		[JobInfo("Update Passive Skills", "ESO")]

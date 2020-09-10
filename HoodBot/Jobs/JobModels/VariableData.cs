@@ -3,7 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 
-	internal class VariableData<T> : List<T>
+	internal sealed class VariableData<T> : List<T>
 		where T : IEquatable<T> // , IConvertible
 	{
 		#region Public Properties

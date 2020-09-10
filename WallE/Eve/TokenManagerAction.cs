@@ -3,7 +3,7 @@
 	using RobinHood70.WallE.Eve.Modules;
 	using static RobinHood70.WallE.Eve.TokensInput;
 
-	internal class TokenManagerAction : TokenManagerOriginal
+	internal sealed class TokenManagerAction : TokenManagerOriginal
 	{
 		#region Public Constants
 		public const int MinimumVersion = 120;

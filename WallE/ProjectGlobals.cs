@@ -22,7 +22,7 @@
 		{
 			if (collection.IsEmpty())
 			{
-				throw new ArgumentException(CurrentCulture(EveMessages.CollectionInvalid, paramName));
+				throw new ArgumentException(CurrentCulture(EveMessages.CollectionInvalid, paramName), nameof(paramName));
 			}
 		}
 
@@ -51,7 +51,7 @@
 			{
 				if (string.IsNullOrWhiteSpace(item))
 				{
-					throw new ArgumentException(CurrentCulture(EveMessages.CollectionInvalid, paramName));
+					throw new ArgumentException(CurrentCulture(EveMessages.CollectionInvalid, paramName), nameof(collection));
 				}
 			}
 		}
@@ -60,7 +60,7 @@
 		{
 			if (string.IsNullOrWhiteSpace(text))
 			{
-				throw new ArgumentException(CurrentCulture(EveMessages.StringInvalid, paramName));
+				throw new ArgumentException(CurrentCulture(EveMessages.StringInvalid, paramName), nameof(text));
 			}
 		}
 		#endregion

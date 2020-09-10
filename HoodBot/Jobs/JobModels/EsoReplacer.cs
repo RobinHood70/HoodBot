@@ -14,7 +14,7 @@
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WikiCommon.Searches;
 
-	internal class EsoReplacer
+	internal sealed class EsoReplacer
 	{
 		#region Static Fields
 		private static readonly Regex EsoLinks = new Regex(@"(?<before>(((''')?([0-9]+(-[0-9]+)?|\{\{huh}}|\{\{Nowrap[^}]*?}})(''')?)%?\s+)?(((or )?more|max(imum)?|of missing|ESO)(\s+|<br>))?)?(?<type>(?-i:Health|Magicka|Physical Penetration|Physical Resistance|Spell Critical|Spell Damage|Spell Penetration|Spell Resistance|Stamina|Ultimate|Weapon Critical|Weapon Damage))(\s(?<after>(Recovery|Regeneration|[0-9]+%)+))?\b", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.ExplicitCapture, DefaultRegexTimeout);

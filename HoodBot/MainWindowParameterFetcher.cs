@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections;
+	using System.Globalization;
 	using System.Windows;
 	using System.Windows.Controls;
 	using RobinHood70.CommonCode;
@@ -94,7 +95,7 @@
 			control is CheckBox checkBox ? (object)(checkBox.IsChecked == true) :
 			control is TextBox textBox && textBox.Text is var text ?
 				expectedType == typeof(string) ? text :
-				expectedType == typeof(int) ? int.Parse(text) :
+				expectedType == typeof(int) ? int.Parse(text, CultureInfo.InvariantCulture) :
 				typeof(IEnumerable).IsAssignableFrom(expectedType) ? (object)text.Split(TextArrays.EnvironmentNewLine, StringSplitOptions.None)
 					: throw new NotSupportedException(CurrentCulture(UnhandledConstructorParameter, expectedType.Name))
 				: throw new NotSupportedException(CurrentCulture(UnhandledConstructorParameter, expectedType.Name));

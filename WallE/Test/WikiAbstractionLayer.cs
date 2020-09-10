@@ -2,12 +2,14 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using static RobinHood70.CommonCode.Globals;
 
 	/// <inheritdoc/>
+	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "High class coupling is the result of using classes for inputs, which is a recommended design when dealing with such a high level of input variability.")]
 	public class WikiAbstractionLayer : IWikiAbstractionLayer
 	{
 		// Only the basics are implemented for now; the rest can come later, as needed.

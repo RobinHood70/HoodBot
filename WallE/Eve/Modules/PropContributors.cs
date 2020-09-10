@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class PropContributors : PropListModule<ContributorsInput, ContributorItem>
+	internal sealed class PropContributors : PropListModule<ContributorsInput, ContributorItem>
 	{
 		#region Constructors
 		public PropContributors(WikiAbstractionLayer wal, ContributorsInput input)

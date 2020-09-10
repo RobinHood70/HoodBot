@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class PropExternalLinks : PropListModule<ExternalLinksInput, string>
+	internal sealed class PropExternalLinks : PropListModule<ExternalLinksInput, string>
 	{
 		#region Constructors
 		public PropExternalLinks(WikiAbstractionLayer wal, ExternalLinksInput input)

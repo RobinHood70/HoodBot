@@ -10,7 +10,7 @@
 	public class AppSettings : IJsonSettings<AppSettings>
 	{
 		#region Public Properties
-		public List<WikiInfo> DefaultWikis { get; } = new List<WikiInfo>();
+		public IList<WikiInfo> DefaultWikis { get; } = new List<WikiInfo>();
 
 		public string FileName => Path.Combine(App.AppFolder, nameof(AppSettings) + ".json");
 		#endregion

@@ -87,9 +87,9 @@
 		}
 		#endregion
 
-		#region Private Classes
-		[SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Auto-populated by JSON deserializer.")]
-		private class DeckCodeInfo
+		#region private sealed classes
+		[SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal sealed classes", Justification = "Auto-populated by JSON deserializer.")]
+		private sealed class DeckCodeInfo
 		{
 			[JsonProperty("english_name")]
 			public string? Name { get; set; }

@@ -9,7 +9,7 @@
 		#endregion
 
 		#region Constructors
-		public PairedElement(WikiStack stack, char open, int length)
+		protected PairedElement(WikiStack stack, char open, int length)
 			: base(stack)
 		{
 			this.open = open;

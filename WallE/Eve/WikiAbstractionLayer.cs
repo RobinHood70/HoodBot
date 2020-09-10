@@ -1488,8 +1488,8 @@
 		}
 		#endregion
 
-		#region Private Classes
-		private class BacklinksOutputComparer : EqualityComparer<BacklinksItem>
+		#region private sealed classes
+		private sealed class BacklinksOutputComparer : EqualityComparer<BacklinksItem>
 		{
 			#region Public Override Methods
 			public override bool Equals(BacklinksItem? x, BacklinksItem? y) => x?.PageId == y?.PageId;

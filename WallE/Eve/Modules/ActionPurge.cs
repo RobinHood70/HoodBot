@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class ActionPurge : ActionModulePageSet<PurgeInput, PurgeItem>
+	internal sealed class ActionPurge : ActionModulePageSet<PurgeInput, PurgeItem>
 	{
 		#region Constructors
 		public ActionPurge(WikiAbstractionLayer wal)

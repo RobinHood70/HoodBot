@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 	using RobinHood70.CommonCode;
 	using static RobinHood70.CommonCode.Globals;
 
@@ -75,7 +76,7 @@
 				var text = lines[i].Text;
 				if (text.StartsWith('[') && text.EndsWith(']'))
 				{
-					var value = int.Parse(text[1..^1]);
+					var value = int.Parse(text[1..^1], CultureInfo.InvariantCulture);
 					if (value != retval.Count)
 					{
 						throw new InvalidOperationException("Non-linear array.");
@@ -108,7 +109,7 @@
 		}
 		#endregion
 
-		#region Private Classes
+		#region private sealed classes
 		private struct IndentedLine
 		{
 			public IndentedLine(int level, string text)
@@ -121,7 +122,7 @@
 
 			public string Text { get; }
 
-			public override string ToString() => $"{this.Level}, {this.Text}";
+			public override string ToString() => $"{this.Level.ToStringInvariant()}, {this.Text}";
 		}
 		#endregion
 	}

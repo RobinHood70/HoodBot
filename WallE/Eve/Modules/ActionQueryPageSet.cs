@@ -13,7 +13,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// While there's some code overlap between this and ActionQuery, having the two as separate entities significantly reduces the code complexity in ActionQuery, and in this as well, to a lesser extent.
-	internal class ActionQueryPageSet : ActionModulePageSet<QueryInput, PageItem>, IPageSetGenerator
+	internal sealed class ActionQueryPageSet : ActionModulePageSet<QueryInput, PageItem>, IPageSetGenerator
 	{
 		#region Fields
 		private readonly QueryInput input;
@@ -56,7 +56,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Public Properties
 		public HashSet<string> InactiveModules { get; } = new HashSet<string>(StringComparer.Ordinal);
 
-		public UserInfoResult? UserInfo { get; protected set; }
+		public UserInfoResult? UserInfo { get; private set; }
 		#endregion
 
 		#region Public Override Properties
@@ -257,8 +257,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 		#endregion
 
-		#region Private Classes
-		private class KeyedPages : KeyedCollection<string, PageItem>
+		#region private sealed classes
+		private sealed class KeyedPages : KeyedCollection<string, PageItem>
 		{
 			#region Public Methods
 			public PageItem? ValueOrDefault(string key)

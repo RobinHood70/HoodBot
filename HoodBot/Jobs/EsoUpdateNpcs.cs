@@ -11,7 +11,7 @@
 	using RobinHood70.WikiCommon; using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon; using RobinHood70.CommonCode;
 
-	internal class EsoUpdateNpcs : EditJob
+	internal sealed class EsoUpdateNpcs : EditJob
 	{
 		#region Fields
 		private readonly Dictionary<string, NpcEntry> npcEntries = new Dictionary<string, NpcEntry>();
@@ -163,8 +163,8 @@
 		}
 		#endregion
 
-		#region Private Classes
-		private class NpcEntry
+		#region private sealed classes
+		private sealed class NpcEntry
 		{
 			#region Constructors
 			public NpcEntry(Template template, int index, int length)

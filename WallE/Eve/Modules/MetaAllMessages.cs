@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class MetaAllMessages : ListModule<AllMessagesInput, AllMessagesItem>
+	internal sealed class MetaAllMessages : ListModule<AllMessagesInput, AllMessagesItem>
 	{
 		#region Fields
 		private string? languageCode;

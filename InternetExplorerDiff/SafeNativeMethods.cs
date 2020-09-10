@@ -4,7 +4,7 @@
 	using System.Security;
 
 	[SuppressUnmanagedCodeSecurity]
-	internal class SafeNativeMethods
+	internal static class SafeNativeMethods
 	{
 		[DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto/*, SetLastError = true*/)]
 		[DefaultDllImportSearchPaths(DllImportSearchPath.System32)]

@@ -1,6 +1,6 @@
 ﻿namespace RobinHood70.WikiCommon.Parser.StackElements
 {
-	internal class LinkElement : PairedElement
+	internal sealed class LinkElement : PairedElement
 	{
 		#region Constructors
 		public LinkElement(WikiStack stack, int length)

@@ -1,10 +1,11 @@
 ﻿namespace RobinHood70.WallE.Eve
 {
+	using System;
 	using System.Collections.Generic;
 	using RobinHood70.WallE.Eve.Modules;
 	using static RobinHood70.WallE.Eve.TokensInput;
 
-	internal class TokenManagerMeta : ITokenManager
+	internal sealed class TokenManagerMeta : ITokenManager
 	{
 		#region Public Constants
 		public const int MinimumVersion = 124;
@@ -13,8 +14,7 @@
 
 		#region Fields
 
-		private static readonly HashSet<string> ValidTypes = new HashSet<string>
-(System.StringComparer.Ordinal)
+		private static readonly HashSet<string> ValidTypes = new HashSet<string>(StringComparer.Ordinal)
 		{
 			Csrf,
 			Patrol,
@@ -23,7 +23,7 @@
 			Watch,
 		};
 
-		private readonly Dictionary<string, string> sessionTokens = new Dictionary<string, string>(6, System.StringComparer.Ordinal);
+		private readonly Dictionary<string, string> sessionTokens = new Dictionary<string, string>(6, StringComparer.Ordinal);
 		private readonly WikiAbstractionLayer wal;
 		#endregion
 

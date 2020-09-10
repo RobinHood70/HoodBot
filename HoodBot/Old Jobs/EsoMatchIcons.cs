@@ -366,7 +366,7 @@
 		}
 		#endregion
 
-		#region Private Classes
+		#region private sealed classes
 		private struct ItemInfo
 		{
 			public ItemInfo(long id, string itemName, string type)

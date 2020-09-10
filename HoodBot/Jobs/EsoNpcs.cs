@@ -11,7 +11,7 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 
-	internal class EsoNpcs : EditJob
+	internal sealed class EsoNpcs : EditJob
 	{
 		#region Constructors
 		[JobInfo("Create missing NPCs", "ESO")]
@@ -195,8 +195,8 @@
 		}
 		#endregion
 
-		#region Private Classes
-		private class NpcTitle : Title
+		#region private sealed classes
+		private sealed class NpcTitle : Title
 		{
 			public NpcTitle(Site site, NpcData npc)
 				: base(site[UespNamespaces.Online], npc.Name) => this.Npc = npc;

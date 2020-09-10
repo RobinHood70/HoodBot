@@ -17,7 +17,7 @@
 	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
-	internal class EsoItemSets : EditJob
+	internal sealed class EsoItemSets : EditJob
 	{
 		#region Static Fields
 		private static readonly HashSet<int> BadRows = new HashSet<int> { 2666 };
@@ -336,8 +336,8 @@
 		}
 		#endregion
 
-		#region Private Classes
-		private class PageData
+		#region private sealed classes
+		private sealed class PageData
 		{
 			public PageData(string setName, string bonusDescription)
 			{

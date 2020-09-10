@@ -17,7 +17,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		where TOutput : class
 	{
 		#region Static Fields
-		private static readonly Regex LimitFinder = new Regex(@"\A(?<module>.*?)limit may not be over (?<limit>[0-9]+)", RegexOptions.Compiled);
+		private static readonly Regex LimitFinder = new Regex(@"\A(?<module>.*?)limit may not be over (?<limit>[0-9]+)", RegexOptions.Compiled, DefaultRegexTimeout);
 		#endregion
 
 		#region Fields

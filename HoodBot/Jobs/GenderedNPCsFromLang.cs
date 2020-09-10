@@ -2,6 +2,7 @@
 {
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
+	using System.Globalization;
 	using System.IO;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
@@ -32,7 +33,7 @@
 			var npcs = new SortedSet<string>();
 			foreach (var row in csvFile)
 			{
-				if (int.Parse(row["ID"]) == 8290981)
+				if (int.Parse(row["ID"], CultureInfo.InvariantCulture) == 8290981)
 				{
 					var name = row["Text"];
 					if (name[^2] == '^')

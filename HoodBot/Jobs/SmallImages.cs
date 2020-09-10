@@ -3,6 +3,7 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
+	using static RobinHood70.CommonCode.Globals;
 
 	public class SmallImages : WikiJob
 	{
@@ -20,7 +21,7 @@
 			{
 				if (page is FilePage file && file.LatestFileRevision is FileRevision rev && rev.Height <= 512 && rev.Width <= 512)
 				{
-					this.WriteLine($"* {file.AsLink(true)}: {rev.Width} × {rev.Height}");
+					this.WriteLine(Invariant($"* {file.AsLink(true)}: {rev.Width} × {rev.Height}"));
 				}
 			}
 		}

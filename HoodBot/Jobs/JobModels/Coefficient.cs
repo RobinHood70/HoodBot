@@ -5,7 +5,7 @@
 	using System.Data;
 	using RobinHood70.CommonCode;
 
-	internal class Coefficient
+	internal sealed class Coefficient
 	{
 		public Coefficient(IDataRecord data, char num)
 		{
