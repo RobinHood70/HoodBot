@@ -8,7 +8,7 @@
 	using System.ComponentModel;
 	using System.Runtime.CompilerServices;
 	using System.Runtime.Serialization;
-	using System.Text.RegularExpressions;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.Properties;
 	using static RobinHood70.CommonCode.Globals;
 
@@ -35,10 +35,6 @@
 	/// <summary>Represents a collection of <see cref="IWikiNode"/> nodes.</summary>
 	public class NodeCollection : LinkedList<IWikiNode>
 	{
-		#region Static Fields
-		private static readonly Regex EolNormalizer = new Regex(@"(\r\n|\n\r|\r)", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
-		#endregion
-
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
@@ -221,7 +217,7 @@
 		/// <param name="text">The text to normalize.</param>
 		/// <remarks>Numerous parts of the parser rely on linebreaks being <c>\n</c>. This method provides offers a way to ensure that line endings conform to that expectation. This also removes null characters because while the parser can handle them fine, C# doesn't do so well with them in terms of displaying strings and such, and there really is no reason you should have null characters in wikitext anyway.</remarks>
 		/// <returns>The normalized text.</returns>
-		public static string NormalizeText(string text) => EolNormalizer.Replace(text, "\n").Replace("\0", string.Empty, StringComparison.Ordinal);
+		public static string NormalizeText(string text) => RegexLibrary.NewLinesToLineFeed(text).Replace("\0", string.Empty, StringComparison.Ordinal);
 
 		/// <summary>Parses the specified text.</summary>
 		/// <param name="text">The text to parse.</param>

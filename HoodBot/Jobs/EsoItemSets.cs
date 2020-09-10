@@ -21,7 +21,6 @@
 	{
 		#region Static Fields
 		private static readonly HashSet<int> BadRows = new HashSet<int> { 2666 };
-		private static readonly Regex LineReplacer = new Regex(@"[\n ]+", RegexOptions.None, DefaultRegexTimeout);
 		private static readonly Regex SetBonusRegex = new Regex(@"\(\s*(?<items>[1-6] items?)\s*\)\s*(?<text>.*?)\s*(?=(\([1-6] items?\)|\z))", RegexOptions.ExplicitCapture | RegexOptions.Singleline, DefaultRegexTimeout);
 		private static readonly Uri SetSummaryPage = new Uri("http://esolog.uesp.net/viewlog.php?record=setSummary&format=csv");
 		private static readonly Dictionary<string, string> TitleOverrides = new Dictionary<string, string>(StringComparer.Ordinal)
@@ -299,7 +298,7 @@
 			{
 				var itemName = item.Groups["items"];
 				var desc = item.Groups["text"].Value;
-				desc = LineReplacer.Replace(desc, " ");
+				desc = RegexLibrary.WhitespaceToSpace(desc);
 				if (desc.StartsWith(page.PageName, StringComparison.Ordinal))
 				{
 					desc = desc.Substring(page.PageName.Length).TrimStart();
