@@ -29,7 +29,7 @@
 		/// <returns><see langword="true" /> if the specified objects are equal; otherwise, <see langword="false" />.</returns>
 		public bool Equals(ISimpleTitle? x, ISimpleTitle? y) =>
 			x == null ? y == null :
-			y != null && x.Namespace == y.Namespace && x.Namespace.PageNameEquals(x.PageName, y.PageName);
+			y != null && x.Namespace == y.Namespace && x.Namespace.PageNameEquals(x.PageName, y.PageName, false);
 
 		/// <summary>Returns a hash code for this instance.</summary>
 		/// <param name="obj">The object.</param>
