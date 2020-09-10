@@ -10,6 +10,7 @@
 	using System.Text.RegularExpressions;
 	using Microsoft.Extensions.Configuration;
 	using MySql.Data.MySqlClient;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -38,7 +39,6 @@
 
 		#region Fields
 		private static readonly Regex BonusFinder = new Regex(@"\s*Current [Bb]onus:.*?\.", RegexOptions.None, DefaultRegexTimeout);
-		private static readonly Regex SpaceFixer = new Regex(@"[\n\ ]+", RegexOptions.None, DefaultRegexTimeout);
 		private static string? esoLogConnectionString; // = ConfigurationManager.ConnectionStrings["EsoLog"].ConnectionString;
 		private static string? patchVersion;
 		#endregion
@@ -264,7 +264,7 @@
 			return retval;
 		}
 
-		public static string HarmonizeDescription(string desc) => SpaceFixer.Replace(BonusFinder.Replace(desc, string.Empty), " ");
+		public static string HarmonizeDescription(string desc) => RegexLibrary.WhitespaceToSpace(BonusFinder.Replace(desc, string.Empty));
 
 		public static void ParseNpcLocations(NpcCollection npcData, PlaceCollection places)
 		{
