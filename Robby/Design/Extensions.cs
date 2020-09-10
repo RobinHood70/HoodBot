@@ -48,7 +48,7 @@
 			other != null &&
 			title.Interwiki == other.Interwiki &&
 			title.Namespace == other.Namespace &&
-			title.Namespace.PageNameEquals(title.PageName, other.PageName) && string.Equals(title.Fragment, other.Fragment, System.StringComparison.Ordinal);
+			title.Namespace.PageNameEquals(title.PageName, other.PageName, false) && string.Equals(title.Fragment, other.Fragment, System.StringComparison.Ordinal);
 		#endregion
 
 		#region ISimpleTitle Extensions
@@ -82,7 +82,7 @@
 			title == null ? other == null :
 			other != null &&
 			title.Namespace == other.Namespace &&
-			title.Namespace.PageNameEquals(title.PageName, other.PageName);
+			title.Namespace.PageNameEquals(title.PageName, other.PageName, false);
 
 		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		/// <param name="title">The title to get the label name for.</param>

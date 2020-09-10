@@ -377,7 +377,22 @@
 		/// <param name="other">The page name to compare to.</param>
 		/// <returns><see langword="true" /> if the two page names are considered the same; otherwise <see langword="false" />.</returns>
 		/// <remarks>It is assumed that the namespace for the second page name is equal to the current one, or at least that they have the same case-sensitivy.</remarks>
-		public bool PageNameEquals(string other) => this.Namespace.PageNameEquals(this.PageName, other);
+		public bool PageNameEquals(string other) => this.PageNameEquals(other, true);
+
+		/// <summary>Checks if the provided page name is equal to the title's page name, based on the case-sensitivity for the namespace.</summary>
+		/// <param name="other">The page name to compare to.</param>
+		/// <param name="normalize">Inidicates whether the page names should be normalized before comparison.</param>
+		/// <returns><see langword="true" /> if the two page names are considered the same; otherwise <see langword="false" />.</returns>
+		/// <remarks>It is assumed that the namespace for the second page name is equal to the current one, or at least that they have the same case-sensitivy.</remarks>
+		public bool PageNameEquals(string other, bool normalize)
+		{
+			if (normalize)
+			{
+				other = WikiTextUtilities.DecodeAndNormalize(other).Trim();
+			}
+
+			return this.Namespace.PageNameEquals(this.PageName, other, false);
+		}
 
 		/// <summary>Protects the title.</summary>
 		/// <param name="reason">The reason for the protection.</param>
@@ -452,7 +467,7 @@
 		public bool SimpleEquals(ISimpleTitle? other) =>
 			other != null &&
 			this.Namespace == other.Namespace &&
-			this.Namespace.PageNameEquals(this.PageName, other.PageName);
+			this.Namespace.PageNameEquals(this.PageName, other.PageName, false);
 
 		/// <summary>Returns a <see cref="string" /> that represents this title.</summary>
 		/// <param name="forceLink">if set to <c>true</c>, forces link formatting in namespaces that require it (e.g., Category and File), regardless of the value of LeadingColon.</param>

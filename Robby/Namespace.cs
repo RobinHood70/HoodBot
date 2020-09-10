@@ -109,6 +109,8 @@
 		/// <value>The site.</value>
 		public Site Site { get; }
 
+		/// <summary>Gets the StringComparer in use to compare page names within this namespace.</summary>
+		/// <value>A StringComparer that can be used to compare page names outside this class, if needed.</value>
 		public StringComparer PageNameComparer => this.stringComparer ??= new PageNameComparer(this);
 
 		/// <summary>Gets the subject space.</summary>
@@ -195,7 +197,26 @@
 		/// <param name="pageName2">The page name to compare to.</param>
 		/// <returns><see langword="true" /> if the two page names are considered the same; otherwise <see langword="false" />.</returns>
 		/// <remarks>It is assumed that the namespace for the second page name is equal to the current one, or at least that they have the same case-sensitivy.</remarks>
-		public bool PageNameEquals(string pageName1, string pageName2) => this.PageNameComparer.Compare(pageName1, pageName2) == 0;
+		public bool PageNameEquals(string pageName1, string pageName2) => this.PageNameEquals(pageName1, pageName2, true);
+
+		/// <summary>Checks if two page names are the same, based on the case-sensitivity for the namespace.</summary>
+		/// <param name="pageName1">The page name to check.</param>
+		/// <param name="pageName2">The page name to compare to.</param>
+		/// <param name="normalize">Inidicates whether the page names should be normalized before comparison.</param>
+		/// <returns><see langword="true" /> if the two page names are considered the same; otherwise <see langword="false" />.</returns>
+		/// <remarks>
+		/// <para>It is assumed that the namespace for the second page name is equal to the current one, or at least that they have the same case-sensitivy.</para>
+		/// <para>If both pages come from Title-based objects or are otherwise guaranteed to be normalized already, set <paramref name="normalize"/> to <see langword="false"/> for faster comparison; user-provided titles should be normalized to ensure correct matching.</para></remarks>
+		public bool PageNameEquals(string pageName1, string pageName2, bool normalize)
+		{
+			if (normalize)
+			{
+				pageName1 = WikiTextUtilities.DecodeAndNormalize(pageName1);
+				pageName2 = WikiTextUtilities.DecodeAndNormalize(pageName2);
+			}
+
+			return this.PageNameComparer.Compare(pageName1, pageName2) == 0;
+		}
 
 		/// <summary>Removes a name from the lookup list.</summary>
 		/// <param name="name">The name.</param>
