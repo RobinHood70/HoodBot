@@ -4,6 +4,7 @@
   <Rules AnalyzerId="Meziantou.Analyzer" RuleNamespace="Meziantou.Analyzer">
     <Rule Id="MA0003" Action="None" />
     <Rule Id="MA0007" Action="None" />
+    <Rule Id="MA0018" Action="None" />
     <Rule Id="MA0025" Action="None" />
     <Rule Id="MA0026" Action="None" />
     <Rule Id="MA0046" Action="None" />
