@@ -135,32 +135,39 @@
 		{
 			var parser = new ContextualParser(page);
 			var nodes = parser.Nodes;
-			var node = nodes.FindFirstLinked<TemplateNode>(node => FullTitle.FromBacklinkNode(page.Site, node).PageNameEquals("Lore Book Entry")) ?? throw new InvalidOperationException();
-			var first = node?.Previous ?? throw new InvalidOperationException();
-			var last = nodes.FindLastLinked<TemplateNode>(node => FullTitle.FromBacklinkNode(page.Site, node).PageNameEquals("Lore Book Entry"))?.Next ?? throw new InvalidOperationException();
-			while (node != null && node != last)
+			if (nodes.FindListNode<TemplateNode>(node => FullTitle.FromBacklinkNode(page.Site, node).PageNameEquals("Lore Book Entry"), true, false, null) is var node &&
+				node != null &&
+				node.Previous is LinkedListNode<IWikiNode> first &&
+				nodes.FindListNode<TemplateNode>(node => FullTitle.FromBacklinkNode(page.Site, node).PageNameEquals("Lore Book Entry"), true, false, null)?.Next is LinkedListNode<IWikiNode> last)
 			{
-				var next = node.Next;
-				nodes.Remove(node);
-				node = next;
-			}
-
-			var letter = page.PageName.Substring(6);
-			var entries = this.pageBooks[letter];
-			foreach (var entry in entries)
-			{
-				var template = TemplateNode.FromParts("Lore Book Entry", (null, entry));
-				if (this.linkTitles.TryGetValue(entry, out var linkTitle))
+				while (node != null && node != last)
 				{
-					template.Add(linkTitle);
+					var next = node.Next;
+					nodes.Remove(node);
+					node = next;
 				}
 
-				nodes.AddBefore(last, new TextNode("\n"));
-				nodes.AddBefore(last, template);
-			}
+				var letter = page.PageName.Substring(6);
+				var entries = this.pageBooks[letter];
+				foreach (var entry in entries)
+				{
+					var template = TemplateNode.FromParts("Lore Book Entry", (null, entry));
+					if (this.linkTitles.TryGetValue(entry, out var linkTitle))
+					{
+						template.Add(linkTitle);
+					}
 
-			nodes.Remove(first.Next!);
-			page.Text = parser.GetText();
+					nodes.AddBefore(last, new TextNode("\n"));
+					nodes.AddBefore(last, template);
+				}
+
+				nodes.Remove(first.Next!);
+				page.Text = parser.GetText();
+			}
+			else
+			{
+				throw new InvalidOperationException();
+			}
 		}
 		#endregion
 	}

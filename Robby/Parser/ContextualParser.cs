@@ -50,9 +50,9 @@
 		#endregion
 
 		#region Public Properties
-		public IEnumerable<HeaderNode> Headers => this.Nodes.FindAllRecursive<HeaderNode>();
+		public IEnumerable<HeaderNode> Headers => this.Nodes.FindAll<HeaderNode>();
 
-		public IEnumerable<LinkNode> Links => this.Nodes.FindAllRecursive<LinkNode>();
+		public IEnumerable<LinkNode> Links => this.Nodes.FindAll<LinkNode>();
 
 		public IDictionary<string, Func<string>> MagicWordResolvers { get; } = new Dictionary<string, Func<string>>(StringComparer.Ordinal);
 
@@ -62,7 +62,9 @@
 
 		public Site Site { get; }
 
-		public IEnumerable<TemplateNode> Templates => this.Nodes.FindAllRecursive<TemplateNode>();
+		public IEnumerable<TemplateNode> Templates => this.Nodes.FindAll<TemplateNode>();
+
+		public IEnumerable<TextNode> Text => this.Nodes.FindAll<TextNode>();
 
 		public IDictionary<string, Func<string>> TemplateResolvers { get; } = new Dictionary<string, Func<string>>(StringComparer.Ordinal);
 
@@ -75,7 +77,7 @@
 			ThrowNull(category, nameof(category));
 			var catTitle = FullTitle.Coerce(this.Site, MediaWikiNamespaces.Category, category);
 			LinkedListNode<IWikiNode>? lastCategory = null;
-			foreach (var link in this.Nodes.FindAllLinked<LinkNode>())
+			foreach (var link in this.Nodes.FindAllListNodes<LinkNode>())
 			{
 				var linkNode = (LinkNode)link.Value;
 				var title = FullTitle.FromBacklinkNode(this.Site, linkNode);
@@ -104,6 +106,12 @@
 			return true;
 		}
 
+		/// <summary>Finds the first header with the specified text.</summary>
+		/// <param name="headerText">Name of the header.</param>
+		/// <returns>The first header with the specified text.</returns>
+		/// <remarks>This is a temporary function until HeaderNode can be rewritten to work more like other nodes (i.e., without capturing trailing whitespace).</remarks>
+		public LinkedListNode<IWikiNode>? FindFirstHeaderLinked(string headerText) => this.Nodes.FindListNode<HeaderNode>(header => string.Equals(header.GetInnerText(true), headerText, StringComparison.Ordinal), false, true, null);
+
 		public LinkNode? FindLink(string find) => this.FindLink(new TitleParser(this.Site, find));
 
 		public LinkNode? FindLink(ISimpleTitle find)
@@ -130,7 +138,7 @@
 
 		public IEnumerable<LinkNode> FindLinks(ISimpleTitle find)
 		{
-			foreach (var link in this.Nodes.FindAllRecursive<LinkNode>())
+			foreach (var link in this.Links)
 			{
 				var linkTitle = Robby.Title.FromBacklinkNode(this.Site, link);
 				if (linkTitle.SimpleEquals(find))
@@ -142,7 +150,7 @@
 
 		public IEnumerable<LinkNode> FindLinks(IFullTitle find)
 		{
-			foreach (var link in this.Nodes.FindAllRecursive<LinkNode>())
+			foreach (var link in this.Links)
 			{
 				var linkTitle = FullTitle.FromBacklinkNode(this.Site, link);
 				if (linkTitle.FullEquals(find))
@@ -162,16 +170,43 @@
 			return null;
 		}
 
+		public TemplateNode? FindTemplateNode(string templateName)
+		{
+			foreach (var link in this.FindTemplates(templateName))
+			{
+				return link;
+			}
+
+			return null;
+		}
+
 		public IEnumerable<TemplateNode> FindTemplates(string templateName)
 		{
 			var find = new TitleParser(this.Site, MediaWikiNamespaces.Template, templateName);
-			foreach (var template in this.Nodes.FindAllRecursive<TemplateNode>())
+			foreach (var template in this.Templates)
 			{
 				var titleText = template.GetTitleValue();
 				var templateTitle = new TitleParser(this.Site, MediaWikiNamespaces.Template, titleText);
 				if (templateTitle.SimpleEquals(find))
 				{
 					yield return template;
+				}
+			}
+		}
+
+		public IEnumerable<LinkedListNode<IWikiNode>> FindTemplateNodes(string templateName)
+		{
+			var find = new TitleParser(this.Site, MediaWikiNamespaces.Template, templateName);
+			foreach (var templateNode in this.Nodes.FindAllListNodes<TemplateNode>())
+			{
+				if (templateNode.Value is TemplateNode template)
+				{
+					var titleText = template.GetTitleValue();
+					var templateTitle = new TitleParser(this.Site, MediaWikiNamespaces.Template, titleText);
+					if (templateTitle.SimpleEquals(find))
+					{
+						yield return templateNode;
+					}
 				}
 			}
 		}

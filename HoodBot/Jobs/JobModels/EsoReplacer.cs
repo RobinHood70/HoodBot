@@ -9,6 +9,7 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
@@ -229,7 +230,7 @@
 									newNodes.AddLast(new TextNode(text[startPos..currentPos]));
 								}
 
-								foreach (var node in replacement.ToNodes)
+								foreach (var node in replacement.To)
 								{
 									newNodes.AddLast(node);
 								}
@@ -260,9 +261,9 @@
 			}
 		}
 
-		public static void ReplaceSkillLinks(NodeCollection nodes, string skillName)
+		public static void ReplaceSkillLinks(ContextualParser parser, string skillName)
 		{
-			foreach (var textNode in nodes.FindAll<TextNode>())
+			foreach (var textNode in parser.Text)
 			{
 				foreach (var synergy in ReplacementData.Synergies)
 				{
@@ -288,16 +289,16 @@
 
 		#region Public Methods
 
-		public ICollection<ISimpleTitle> CheckNewLinks(NodeCollection oldNodes, NodeCollection newNodes)
+		public ICollection<ISimpleTitle> CheckNewLinks(ContextualParser oldPage, ContextualParser newPage)
 		{
 			var oldLinks = new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance);
-			foreach (var node in oldNodes.FindAllRecursive<LinkNode>())
+			foreach (var node in oldPage.Links)
 			{
 				var siteLink = SiteLink.FromLinkNode(this.site, node);
 				oldLinks.Add(siteLink);
 			}
 
-			foreach (var node in newNodes.FindAllRecursive<LinkNode>())
+			foreach (var node in newPage.Links)
 			{
 				var siteLink = SiteLink.FromLinkNode(this.site, node);
 				oldLinks.Remove(siteLink);
@@ -306,15 +307,15 @@
 			return oldLinks;
 		}
 
-		public ICollection<ISimpleTitle> CheckNewTemplates(NodeCollection oldNodes, NodeCollection newNodes)
+		public ICollection<ISimpleTitle> CheckNewTemplates(ContextualParser oldPage, ContextualParser newPage)
 		{
 			var oldTemplates = new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance);
-			foreach (var node in oldNodes.FindAllRecursive<TemplateNode>())
+			foreach (var node in oldPage.Templates)
 			{
 				oldTemplates.Add(Title.FromBacklinkNode(this.site, node));
 			}
 
-			foreach (var node in newNodes.FindAllRecursive<TemplateNode>())
+			foreach (var node in newPage.Templates)
 			{
 				oldTemplates.Remove(Title.FromBacklinkNode(this.site, node));
 			}
@@ -322,9 +323,9 @@
 			return oldTemplates;
 		}
 
-		public bool IsNonTrivialChange(NodeCollection oldNodes, NodeCollection newNodes) => string.Compare(
-			this.StrippedTextFromNodes(oldNodes),
-			this.StrippedTextFromNodes(newNodes),
+		public bool IsNonTrivialChange(ContextualParser oldPage, ContextualParser newPage) => string.Compare(
+			this.StrippedTextFromNodes(oldPage.Nodes),
+			this.StrippedTextFromNodes(newPage.Nodes),
 			StringComparison.InvariantCultureIgnoreCase) == 0;
 
 		public void RemoveTrivialTemplates(NodeCollection oldNodes) =>
@@ -377,7 +378,7 @@
 							retval.AddLast(new TextNode(textNode.Text.Substring(0, i)));
 						}
 
-						foreach (var newNode in replacement.ToNodes)
+						foreach (var newNode in replacement.To)
 						{
 							if (newNode is LinkNode link)
 							{
@@ -464,7 +465,7 @@
 		private string StrippedTextFromNodes(NodeCollection nodes)
 		{
 			this.RemoveTrivialTemplates(nodes);
-			var retval = WikiTextVisitor.Value(nodes);
+			var retval = WikiTextVisitor.Raw(nodes);
 			retval = NumberStripper.Replace(retval, string.Empty);
 			return SpaceStripper.Replace(retval, string.Empty);
 		}

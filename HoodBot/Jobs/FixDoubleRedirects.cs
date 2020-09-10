@@ -83,7 +83,7 @@
 						continue;
 					}
 
-					if (this.parsedPages.TryGetValue(page, out var parsedPage) && parsedPage.Nodes.FindFirst<LinkNode>() is LinkNode linkNode)
+					if (this.parsedPages.TryGetValue(page, out var parsedPage) && parsedPage.Nodes.Find<LinkNode>(null, false, false, null) is LinkNode linkNode)
 					{
 						// linkNode.Parameters.Clear();
 						if (!comboTarget.FullEquals(originalTarget) && comboTarget.ToString() is string newValue)
@@ -136,7 +136,7 @@
 					var parser = new ContextualParser(page);
 					if (parser.Nodes.First?.Value is TextNode textNode && this.redirectWords.Contains(textNode.Text.TrimEnd(), StringComparer.OrdinalIgnoreCase))
 					{
-						var targetNode = parser.Nodes.FindFirst<LinkNode>();
+						var targetNode = parser.Nodes.Find<LinkNode>(null, false, false, null);
 						if (targetNode == null)
 						{
 							throw new InvalidOperationException();

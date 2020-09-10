@@ -8,17 +8,14 @@
 		public EsoReplacement(string from, string to)
 		{
 			this.From = from;
-			this.To = to;
-			this.ToNodes = NodeCollection.Parse(to);
+			this.To = NodeCollection.Parse(to);
 		}
 		#endregion
 
 		#region Public Properties
 		public string From { get; }
 
-		public string To { get; }
-
-		public NodeCollection ToNodes { get; }
+		public NodeCollection To { get; }
 		#endregion
 	}
 }
