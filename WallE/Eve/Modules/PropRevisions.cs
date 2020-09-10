@@ -11,7 +11,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class PropRevisions : PropListModule<RevisionsInput, RevisionItem>, IGeneratorModule
+	internal sealed class PropRevisions : PropListModule<RevisionsInput, RevisionItem>, IGeneratorModule
 	{
 		#region Constructors
 		public PropRevisions(WikiAbstractionLayer wal, RevisionsInput input)

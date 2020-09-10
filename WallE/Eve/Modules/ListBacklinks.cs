@@ -12,8 +12,13 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class ListBacklinks : ListModule<BacklinksInput, BacklinksItem>, IGeneratorModule
+	internal sealed class ListBacklinks : ListModule<BacklinksInput, BacklinksItem>, IGeneratorModule
 	{
+		#region Fields
+		private readonly string prefix;
+		private readonly string name;
+		#endregion
+
 		#region Contructors
 		public ListBacklinks(WikiAbstractionLayer wal, BacklinksInput input)
 			: this(wal, input, null)
@@ -21,23 +26,23 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 
 		public ListBacklinks(WikiAbstractionLayer wal, BacklinksInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator) => (this.Prefix, this.Name) = input.LinkTypes switch
+			: base(wal, input, pageSetGenerator) => (this.prefix, this.name) = input.LinkTypes switch
 			{
 				BacklinksTypes.Backlinks => ("bl", "backlinks"),
 				BacklinksTypes.EmbeddedIn => ("ei", "embeddedin"),
 				BacklinksTypes.ImageUsage => ("iu", "imageusage"),
-				_ => throw new ArgumentException(CurrentCulture(input.LinkTypes.IsUniqueFlag() ? EveMessages.ParameterInvalid : EveMessages.InputNonUnique, nameof(ListAllLinks), input.LinkTypes))
+				_ => throw new InvalidOperationException(CurrentCulture(input.LinkTypes.IsUniqueFlag() ? EveMessages.ParameterInvalid : EveMessages.InputNonUnique, nameof(ListAllLinks), input.LinkTypes))
 			};
 		#endregion
 
 		#region Public Override Properties
 		public override int MinimumVersion => 109;
 
-		public override string Name { get; }
+		public override string Name => this.name;
 		#endregion
 
 		#region Protected Override Properties
-		protected override string Prefix { get; }
+		protected override string Prefix => this.prefix;
 		#endregion
 
 		#region Public Static Methods

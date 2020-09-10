@@ -76,7 +76,7 @@
 					memoryStream.Write(CurrentEncoding.GetBytes(footer), 0, CurrentEncoding.GetByteCount(footer));
 					formData = new byte[memoryStream.Length];
 					memoryStream.Position = 0;
-					memoryStream.Read(formData, 0, formData.Length);
+					_ = memoryStream.Read(formData, 0, formData.Length);
 				}
 				else
 				{

@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class ActionUserRights : ActionModule<UserRightsInput, UserRightsResult>
+	internal sealed class ActionUserRights : ActionModule<UserRightsInput, UserRightsResult>
 	{
 		#region Constructors
 		public ActionUserRights(WikiAbstractionLayer wal)

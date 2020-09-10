@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 
 	#region Public Enumerations
 	[Flags]
@@ -45,14 +46,10 @@ namespace RobinHood70.WallE.Base
 			this.RealName = realName;
 			this.UnreadCount = -1;
 			this.UnreadText = unreadText;
-			if (unreadText != null)
+			if (unreadText != null && unreadText.Length > 0)
 			{
-				if (unreadText.EndsWith("+", StringComparison.Ordinal))
-				{
-					unreadText = unreadText[0..^1];
-				}
-
-				if (int.TryParse(unreadText, out var result))
+				unreadText = unreadText.TrimEnd('+');
+				if (int.TryParse(unreadText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
 				{
 					this.UnreadCount = result;
 				}

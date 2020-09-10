@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class ListProtectedTitles : ListModule<ProtectedTitlesInput, ProtectedTitlesItem>, IGeneratorModule
+	internal sealed class ListProtectedTitles : ListModule<ProtectedTitlesInput, ProtectedTitlesItem>, IGeneratorModule
 	{
 		#region Constructors
 		public ListProtectedTitles(WikiAbstractionLayer wal, ProtectedTitlesInput input)

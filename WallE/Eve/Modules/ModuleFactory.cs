@@ -7,7 +7,7 @@
 
 	/// <summary>Concrete implementation of <see cref="IModuleFactory" />.</summary>
 	/// <seealso cref="IModuleFactory" />
-	internal class ModuleFactory : IModuleFactory
+	internal sealed class ModuleFactory : IModuleFactory
 	{
 		#region Fields
 		private readonly Dictionary<Type, GeneratorFactoryMethod> generators = new Dictionary<Type, GeneratorFactoryMethod>();

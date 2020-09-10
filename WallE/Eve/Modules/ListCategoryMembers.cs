@@ -12,11 +12,10 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class ListCategoryMembers : ListModule<CategoryMembersInput, CategoryMembersItem>, IGeneratorModule
+	internal sealed class ListCategoryMembers : ListModule<CategoryMembersInput, CategoryMembersItem>, IGeneratorModule
 	{
 		#region Static Fields
-		private static readonly Dictionary<string, CategoryMemberTypes> TypeLookup = new Dictionary<string, CategoryMemberTypes>
-(StringComparer.Ordinal)
+		private static readonly Dictionary<string, CategoryMemberTypes> TypeLookup = new Dictionary<string, CategoryMemberTypes>(StringComparer.Ordinal)
 		{
 			["file"] = CategoryMemberTypes.File,
 			["page"] = CategoryMemberTypes.Page,

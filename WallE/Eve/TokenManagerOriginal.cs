@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WallE.Eve
 {
+	using System;
 	using System.Collections.Generic;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Eve.Modules;
@@ -15,8 +16,7 @@
 		#endregion
 
 		#region Protected Static Properties
-		protected static HashSet<string> ValidTypes { get; } = new HashSet<string>
-(System.StringComparer.Ordinal)
+		protected static HashSet<string> ValidTypes { get; } = new HashSet<string>(StringComparer.Ordinal)
 		{
 			TokensInput.Edit,
 			TokensInput.Patrol,
@@ -25,7 +25,7 @@
 		#endregion
 
 		#region Protected Fields
-		protected Dictionary<string, string> SessionTokens { get; } = new Dictionary<string, string>(ValidTypes.Count, System.StringComparer.Ordinal);
+		protected Dictionary<string, string> SessionTokens { get; } = new Dictionary<string, string>(ValidTypes.Count, StringComparer.Ordinal);
 
 		protected WikiAbstractionLayer Wal { get; }
 		#endregion

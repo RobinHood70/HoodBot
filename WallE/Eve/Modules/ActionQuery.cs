@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
 
-	internal class ActionQuery : ActionModule
+	internal sealed class ActionQuery : ActionModule
 	{
 		#region Fields
 		private readonly List<IQueryModule> queryModules;
@@ -44,7 +44,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Properties
-		public UserInfoResult? UserInfo { get; protected set; }
+		public UserInfoResult? UserInfo { get; private set; }
 		#endregion
 
 		#region Public Override Properties

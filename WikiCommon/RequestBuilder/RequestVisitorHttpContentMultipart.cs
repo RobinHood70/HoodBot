@@ -28,11 +28,11 @@
 		public static MultipartFormDataContent Build(Request request)
 		{
 			ThrowNull(request, nameof(request));
-			var multipartData = new MultipartFormDataContent();
-			var visitor = new RequestVisitorHttpContentMultipart(multipartData, request.SupportsUnitSeparator);
+			var data = new MultipartFormDataContent();
+			var visitor = new RequestVisitorHttpContentMultipart(data, request.SupportsUnitSeparator);
 			request.Build(visitor);
 
-			return multipartData;
+			return data;
 		}
 		#endregion
 

@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class PropCategories : PropListModule<CategoriesInput, CategoriesItem>, IGeneratorModule
+	internal sealed class PropCategories : PropListModule<CategoriesInput, CategoriesItem>, IGeneratorModule
 	{
 		#region Constructors
 		public PropCategories(WikiAbstractionLayer wal, CategoriesInput input)

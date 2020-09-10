@@ -11,7 +11,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// MWVERSION: 1.27
-	internal class ActionHelp : ActionModule<HelpInput, HelpResult>
+	internal sealed class ActionHelp : ActionModule<HelpInput, HelpResult>
 	{
 		#region Constructors
 		public ActionHelp(WikiAbstractionLayer wal)

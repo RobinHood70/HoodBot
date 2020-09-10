@@ -458,7 +458,7 @@
 		}
 		#endregion
 
-		#region Private Classes
+		#region private sealed classes
 		private sealed class Condition : IEquatable<Condition>
 		{
 			#region Constructors
@@ -491,7 +491,7 @@
 			#endregion
 		}
 
-		private class QuestData
+		private sealed class QuestData
 		{
 			#region Constructors
 			public QuestData(IDataRecord row)
@@ -557,7 +557,7 @@
 			#endregion
 		}
 
-		private class Reward
+		private sealed class Reward
 		{
 			public Reward(IDataRecord row)
 			{
@@ -582,7 +582,7 @@
 			public int Quantity { get; }
 		}
 
-		private class Stage
+		private sealed class Stage
 		{
 			#region Constructors
 			public Stage(IDataRecord row)

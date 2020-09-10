@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class PropLanguageLinks : PropListModule<LanguageLinksInput, LanguageLinksItem>
+	internal sealed class PropLanguageLinks : PropListModule<LanguageLinksInput, LanguageLinksItem>
 	{
 		#region Constructors
 		public PropLanguageLinks(WikiAbstractionLayer wal, LanguageLinksInput input)

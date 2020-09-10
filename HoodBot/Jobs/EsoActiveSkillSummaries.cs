@@ -10,7 +10,7 @@
 	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
-	internal class EsoActiveSkillSummaries : EsoSkillJob<ActiveSkill>
+	internal sealed class EsoActiveSkillSummaries : EsoSkillJob<ActiveSkill>
 	{
 		#region Constructors
 		[JobInfo("Update Active Skills", "ESO")]

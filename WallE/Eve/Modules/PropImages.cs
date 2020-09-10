@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class PropImages : PropListModule<ImagesInput, ITitle>, IGeneratorModule
+	internal sealed class PropImages : PropListModule<ImagesInput, ITitle>, IGeneratorModule
 	{
 		#region Constructors
 		public PropImages(WikiAbstractionLayer wal, ImagesInput input)

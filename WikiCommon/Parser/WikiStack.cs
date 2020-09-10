@@ -10,7 +10,7 @@
 	using static RobinHood70.CommonCode.Globals;
 
 	// Not a .NET Stack<T> mostly for closer parity with the original PHP version, plus it significantly outperforms the built-in one. Top, being a property, also provides a significant debugging advantage over Peek().
-	internal class WikiStack
+	internal sealed class WikiStack
 	{
 		#region Internal Constants
 		internal const string CommentWhiteSpace = " \t";

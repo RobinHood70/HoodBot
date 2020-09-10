@@ -4,7 +4,7 @@
 	using System.Collections.Generic;
 	using System.Data;
 
-	internal class Ability
+	internal sealed class Ability
 	{
 		#region Fields
 		internal const int Level = 50 + 16;

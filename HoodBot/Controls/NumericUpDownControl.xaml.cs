@@ -73,7 +73,7 @@
 
 		private void Number_TextChanged(object sender, TextChangedEventArgs e)
 		{
-			if (!int.TryParse(this.Number.Text, out var value))
+			if (!int.TryParse(this.Number.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value))
 			{
 				// Simple error handling for now; should probably limit input to digits and copy-paste/select/movement keys.
 				this.Value = 0;

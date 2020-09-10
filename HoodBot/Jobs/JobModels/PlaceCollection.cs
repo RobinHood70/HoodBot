@@ -3,7 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 
-	internal class PlaceCollection
+	internal sealed class PlaceCollection
 	{
 		#region Fields
 		private readonly HashSet<string> ambiguousNames = new HashSet<string>(StringComparer.Ordinal);

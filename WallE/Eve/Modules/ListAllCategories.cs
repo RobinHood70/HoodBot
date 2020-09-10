@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class ListAllCategories : ListModule<AllCategoriesInput, AllCategoriesItem>, IGeneratorModule
+	internal sealed class ListAllCategories : ListModule<AllCategoriesInput, AllCategoriesItem>, IGeneratorModule
 	{
 		#region Constructors
 		public ListAllCategories(WikiAbstractionLayer wal, AllCategoriesInput input)

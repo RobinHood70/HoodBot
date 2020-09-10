@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class ActionMergeHistory : ActionModule<MergeHistoryInput, MergeHistoryResult>
+	internal sealed class ActionMergeHistory : ActionModule<MergeHistoryInput, MergeHistoryResult>
 	{
 		#region Constructors
 		public ActionMergeHistory(WikiAbstractionLayer wal)

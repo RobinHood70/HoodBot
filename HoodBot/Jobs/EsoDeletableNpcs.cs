@@ -8,7 +8,7 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 
-	internal class EsoDeletableNpcs : WikiJob
+	internal sealed class EsoDeletableNpcs : WikiJob
 	{
 		#region Constructors
 		[JobInfo("Find deletable NPCs", "ESO")]

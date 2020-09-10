@@ -31,7 +31,7 @@ namespace RobinHood70.WallE.Base
 			ThrowNullOrWhiteSpace(title, nameof(title));
 			if (string.IsNullOrEmpty(prependText ?? appendText))
 			{
-				throw new ArgumentException(CurrentCulture(EveMessages.PrependAppend));
+				throw new InvalidOperationException(CurrentCulture(EveMessages.PrependAppend));
 			}
 
 			this.Title = title;
@@ -43,7 +43,7 @@ namespace RobinHood70.WallE.Base
 		{
 			if (string.IsNullOrEmpty(prependText ?? appendText))
 			{
-				throw new ArgumentException(CurrentCulture(EveMessages.PrependAppend));
+				throw new InvalidOperationException(CurrentCulture(EveMessages.PrependAppend));
 			}
 
 			this.PageId = pageId;
@@ -72,7 +72,7 @@ namespace RobinHood70.WallE.Base
 
 		public bool Bot { get; set; }
 
-		public Dictionary<string, string> CaptchaSolution { get; } = new Dictionary<string, string>(StringComparer.Ordinal);
+		public IDictionary<string, string> CaptchaSolution { get; } = new Dictionary<string, string>(StringComparer.Ordinal);
 
 		public string? ContentFormat { get; set; }
 

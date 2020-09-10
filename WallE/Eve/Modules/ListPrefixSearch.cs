@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class ListPrefixSearch : ListModule<PrefixSearchInput, WikiTitleItem>, IGeneratorModule
+	internal sealed class ListPrefixSearch : ListModule<PrefixSearchInput, WikiTitleItem>, IGeneratorModule
 	{
 		#region Constructors
 		public ListPrefixSearch(WikiAbstractionLayer wal, PrefixSearchInput input)

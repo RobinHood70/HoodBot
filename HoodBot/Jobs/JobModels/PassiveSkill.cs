@@ -4,8 +4,9 @@
 	using System.Collections.Generic;
 	using System.Data;
 	using System.Diagnostics;
+	using RobinHood70.CommonCode;
 
-	internal class PassiveSkill : Skill
+	internal sealed class PassiveSkill : Skill
 	{
 		#region Fields
 		private readonly List<PassiveRank> ranks = new List<PassiveRank>();
@@ -48,7 +49,7 @@
 				if (string.IsNullOrWhiteSpace(rank.Description))
 				{
 					retval = true;
-					Debug.WriteLine($"Warning: {this.Name} - Rank {rank.Rank} has no description.");
+					Debug.WriteLine($"Warning: {this.Name} - Rank {rank.Rank.ToStringInvariant()} has no description.");
 				}
 			}
 

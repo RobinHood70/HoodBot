@@ -7,7 +7,7 @@
 	// Escaping in this class is only at the Uri level rather than the Data level because it produces much cleaner output which any browser will fix up, if needed, when the request is put through.
 
 	/// <summary>Formats a Request object for display purposes, hiding parameters that should not be revealed.</summary>
-	internal class RequestVisitorDisplay : IParameterVisitor
+	internal sealed class RequestVisitorDisplay : IParameterVisitor
 	{
 		#region Fields
 		private readonly StringBuilder builder;
@@ -24,17 +24,17 @@
 		/// <returns>A string representing the parameters, formatted for display purposes.</returns>
 		public static string Build(Request request)
 		{
-			var builder = new StringBuilder();
-			var visitor = new RequestVisitorDisplay(builder);
+			var sb = new StringBuilder();
+			var visitor = new RequestVisitorDisplay(sb);
 			request.Build(visitor);
-			builder.Replace("%20", "+");
+			sb.Replace("%20", "+");
 
 			var methodText =
 				request.Type == RequestType.Get ? "GET" :
 				request.Type == RequestType.Post ? "POST" :
 				"POST (multipart)";
 
-			return Invariant($"{methodText}: {request.Uri}?{builder}");
+			return Invariant($"{methodText}: {request.Uri}?{sb}");
 		}
 
 		public void Visit(FileParameter parameter)

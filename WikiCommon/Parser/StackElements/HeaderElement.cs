@@ -3,7 +3,7 @@
 	using System;
 	using RobinHood70.WikiCommon.Parser;
 
-	internal class HeaderElement : StackElement
+	internal sealed class HeaderElement : StackElement
 	{
 		#region Fields
 		private readonly int length;

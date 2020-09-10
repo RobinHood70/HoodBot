@@ -5,7 +5,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
 
-	internal class ContinueModuleUnknown : ContinueModule
+	internal sealed class ContinueModuleUnknown : ContinueModule
 	{
 		#region Public Override Properties
 		public override int MinimumVersion => 109;

@@ -431,9 +431,7 @@
 			site.PagePreview -= this.SitePagePreview;
 		}
 
-		private void RunTest()
-		{
-		}
+		private void RunTest() => MessageBox.Show(this.UtcEta.ToString());
 
 		private void SitePagePreview(Site sender, PagePreviewArgs eventArgs)
 		{

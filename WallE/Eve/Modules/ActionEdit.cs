@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class ActionEdit : ActionModule<EditInput, EditResult>
+	internal sealed class ActionEdit : ActionModule<EditInput, EditResult>
 	{
 		#region Constructors
 		public ActionEdit(WikiAbstractionLayer wal)

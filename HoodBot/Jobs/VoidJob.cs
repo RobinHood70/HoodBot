@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System.Threading;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 
@@ -18,7 +19,7 @@
 		{
 			for (var i = 1; i <= this.ProgressMaximum; i++)
 			{
-				this.StatusWrite($"Job {i}: Start...");
+				this.StatusWrite($"Job {i.ToStringInvariant()}: Start...");
 				Thread.Sleep(199);
 				this.StatusWriteLine("End");
 				this.Progress++;

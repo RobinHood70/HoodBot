@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// MWVERSION: 1.25
-	internal class ListSearch : ListModule<SearchInput, SearchResultItem>, IGeneratorModule
+	internal sealed class ListSearch : ListModule<SearchInput, SearchResultItem>, IGeneratorModule
 	{
 		#region Fields
 		private string? suggestion;

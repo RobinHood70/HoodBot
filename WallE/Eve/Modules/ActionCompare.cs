@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
 
-	internal class ActionCompare : ActionModule<CompareInput, CompareResult>
+	internal sealed class ActionCompare : ActionModule<CompareInput, CompareResult>
 	{
 		#region Constructors
 		public ActionCompare(WikiAbstractionLayer wal)

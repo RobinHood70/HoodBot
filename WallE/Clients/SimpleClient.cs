@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 	using System.IO;
 	using System.IO.Compression;
 	using System.Net;
@@ -348,7 +349,7 @@
 			else
 			{
 				// Regardless of status code, if we got a retry header, retry after that amount of time.
-				retryAfter = int.TryParse(retryHeader, out var retrySeconds) ? TimeSpan.FromSeconds(retrySeconds) : this.RetryDelay;
+				retryAfter = int.TryParse(retryHeader, NumberStyles.Integer, CultureInfo.InvariantCulture, out var retrySeconds) ? TimeSpan.FromSeconds(retrySeconds) : this.RetryDelay;
 			}
 
 			if (retryAfter != TimeSpan.Zero)
@@ -479,11 +480,10 @@
 		}
 		#endregion
 
-		#region Private Classes
-		private class CookieBinder : SerializationBinder
+		#region private sealed classes
+		private sealed class CookieBinder : SerializationBinder
 		{
-			private static readonly HashSet<string> ValidTypes = new HashSet<string>
-(StringComparer.Ordinal)
+			private static readonly HashSet<string> ValidTypes = new HashSet<string>(StringComparer.Ordinal)
 			{
 				"System.Collections.ArrayList",
 				"System.Collections.Comparer",

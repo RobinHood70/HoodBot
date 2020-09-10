@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class PropInterwikiLinks : PropListModule<InterwikiLinksInput, InterwikiTitleItem>
+	internal sealed class PropInterwikiLinks : PropListModule<InterwikiLinksInput, InterwikiTitleItem>
 	{
 		#region Constructors
 		public PropInterwikiLinks(WikiAbstractionLayer wal, InterwikiLinksInput input)

@@ -5,7 +5,7 @@
 	using System.Collections.ObjectModel;
 	using static RobinHood70.CommonCode.Globals;
 
-	internal class NpcCollection : KeyedCollection<long, NpcData>
+	internal sealed class NpcCollection : KeyedCollection<long, NpcData>
 	{
 		#region Public Methods
 		public void Sort() => (this.Items as List<NpcData>)?.Sort((x, y) => string.Compare(x?.PageName, y?.PageName, StringComparison.OrdinalIgnoreCase));

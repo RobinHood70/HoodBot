@@ -6,7 +6,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
 
-	internal class ContinueModule1 : ContinueModule
+	internal sealed class ContinueModule1 : ContinueModule
 	{
 		#region Public Constants
 		public const string ContinueName = "query-continue";

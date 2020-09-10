@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class ActionLogin : ActionModule<LoginInput, LoginResult>
+	internal sealed class ActionLogin : ActionModule<LoginInput, LoginResult>
 	{
 		#region Constructors
 		public ActionLogin(WikiAbstractionLayer wal)

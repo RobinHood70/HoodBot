@@ -7,7 +7,7 @@
 	using System.Globalization;
 	using RobinHood70.CommonCode;
 
-	internal class Morph
+	internal sealed class Morph
 	{
 		#region Constructors
 		public Morph(IDataRecord data)

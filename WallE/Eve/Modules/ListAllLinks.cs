@@ -10,8 +10,13 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class ListAllLinks : ListModule<IAllLinksInput, AllLinksItem>, IGeneratorModule
+	internal sealed class ListAllLinks : ListModule<IAllLinksInput, AllLinksItem>, IGeneratorModule
 	{
+		#region Fields
+		private readonly string prefix;
+		private readonly string name;
+		#endregion
+
 		#region Constructors
 		public ListAllLinks(WikiAbstractionLayer wal, IAllLinksInput input)
 			: this(wal, input, null)
@@ -19,24 +24,24 @@ namespace RobinHood70.WallE.Eve.Modules
 		}
 
 		public ListAllLinks(WikiAbstractionLayer wal, IAllLinksInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator) => (this.Prefix, this.Name) = input.LinkType switch
+			: base(wal, input, pageSetGenerator) => (this.prefix, this.name) = input.LinkType switch
 			{
 				AllLinksTypes.Links => ("al", "alllinks"),
 				AllLinksTypes.FileUsages => ("af", "allfileusages"),
 				AllLinksTypes.Redirects => ("ar", "allredirects"),
 				AllLinksTypes.Transclusions => ("at", "alltransclusions"),
-				_ => throw new ArgumentException(CurrentCulture(input.LinkType.IsUniqueFlag() ? EveMessages.ParameterInvalid : EveMessages.InputNonUnique, nameof(ListAllLinks), input.LinkType)),
+				_ => throw new InvalidOperationException(CurrentCulture(input.LinkType.IsUniqueFlag() ? EveMessages.ParameterInvalid : EveMessages.InputNonUnique, nameof(ListAllLinks), input.LinkType)),
 			};
 		#endregion
 
 		#region Public Override Properties
 		public override int MinimumVersion => 111;
 
-		public override string Name { get; }
+		public override string Name => this.name;
 		#endregion
 
 		#region Protected Override Properties
-		protected override string Prefix { get; }
+		protected override string Prefix => this.prefix;
 		#endregion
 
 		#region Public Static Methods

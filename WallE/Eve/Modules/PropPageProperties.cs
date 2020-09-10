@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class PropPageProperties : PropModule<PagePropertiesInput>
+	internal sealed class PropPageProperties : PropModule<PagePropertiesInput>
 	{
 		#region Constructors
 		public PropPageProperties(WikiAbstractionLayer wal, PagePropertiesInput input)

@@ -171,7 +171,8 @@
 						state = null;
 						break;
 					}
-					else if (state == null)
+
+					if (state == null)
 					{
 						state = child.IsChecked;
 					}

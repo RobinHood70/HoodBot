@@ -14,7 +14,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	[SuppressMessage("Maintainability", "CA1506:Avoid excessive class coupling", Justification = "SiteInfo is inherently complex.")]
-	internal class MetaSiteInfo : QueryModule<SiteInfoInput, SiteInfoResult>, IContinuableQueryModule
+	internal sealed class MetaSiteInfo : QueryModule<SiteInfoInput, SiteInfoResult>, IContinuableQueryModule
 	{
 		#region Constructors
 		public MetaSiteInfo(WikiAbstractionLayer wal, SiteInfoInput input)

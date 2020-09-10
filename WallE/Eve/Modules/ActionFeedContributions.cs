@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
 
-	internal class ActionFeedContributions : ActionModule<FeedContributionsInput, CustomResult>
+	internal sealed class ActionFeedContributions : ActionModule<FeedContributionsInput, CustomResult>
 	{
 		#region Constructors
 		public ActionFeedContributions(WikiAbstractionLayer wal)

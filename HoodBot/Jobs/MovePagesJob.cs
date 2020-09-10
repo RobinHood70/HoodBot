@@ -885,8 +885,8 @@
 		}
 		#endregion
 
-		#region Private Classes
-		private class ReplacementCollection : KeyedCollection<Title, Replacement>
+		#region private sealed classes
+		private sealed class ReplacementCollection : KeyedCollection<Title, Replacement>
 		{
 			public IEnumerable<Title> Keys => this.Dictionary?.Keys ?? Array.Empty<Title>();
 

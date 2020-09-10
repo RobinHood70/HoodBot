@@ -80,10 +80,8 @@
 					MessageBox.Show(Resources.InvalidWikiInfo, Resources.Error, MessageBoxButton.OK, MessageBoxImage.Error);
 					return;
 				}
-				else
-				{
-					this.SelectedItem.EndEdit();
-				}
+
+				this.SelectedItem.EndEdit();
 			}
 
 			Settings.Save(App.UserSettings);

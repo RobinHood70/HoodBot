@@ -11,7 +11,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class ActionBlock : ActionModule<BlockInput, BlockResult>
+	internal sealed class ActionBlock : ActionModule<BlockInput, BlockResult>
 	{
 		#region Constructors
 		public ActionBlock(WikiAbstractionLayer wal)

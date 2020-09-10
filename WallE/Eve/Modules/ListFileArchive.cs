@@ -8,7 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class ListFileArchive : ListModule<FileArchiveInput, FileArchiveItem>
+	internal sealed class ListFileArchive : ListModule<FileArchiveInput, FileArchiveItem>
 	{
 		#region Constructors
 		public ListFileArchive(WikiAbstractionLayer wal, FileArchiveInput input)

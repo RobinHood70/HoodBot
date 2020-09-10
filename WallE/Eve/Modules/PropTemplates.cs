@@ -7,7 +7,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal class PropTemplates : PropListLinks<TemplatesInput>, IGeneratorModule
+	internal sealed class PropTemplates : PropListLinks<TemplatesInput>, IGeneratorModule
 	{
 		#region Constructors
 		public PropTemplates(WikiAbstractionLayer wal, TemplatesInput input)
