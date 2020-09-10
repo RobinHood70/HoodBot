@@ -263,7 +263,7 @@
 
 		public static void ReplaceSkillLinks(ContextualParser parser, string skillName)
 		{
-			foreach (var textNode in parser.Text)
+			foreach (var textNode in parser.TextNodes)
 			{
 				foreach (var synergy in ReplacementData.Synergies)
 				{
@@ -292,13 +292,13 @@
 		public ICollection<ISimpleTitle> CheckNewLinks(ContextualParser oldPage, ContextualParser newPage)
 		{
 			var oldLinks = new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance);
-			foreach (var node in oldPage.Links)
+			foreach (var node in oldPage.LinkNodes)
 			{
 				var siteLink = SiteLink.FromLinkNode(this.site, node);
 				oldLinks.Add(siteLink);
 			}
 
-			foreach (var node in newPage.Links)
+			foreach (var node in newPage.LinkNodes)
 			{
 				var siteLink = SiteLink.FromLinkNode(this.site, node);
 				oldLinks.Remove(siteLink);
@@ -310,12 +310,12 @@
 		public ICollection<ISimpleTitle> CheckNewTemplates(ContextualParser oldPage, ContextualParser newPage)
 		{
 			var oldTemplates = new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance);
-			foreach (var node in oldPage.Templates)
+			foreach (var node in oldPage.TemplateNodes)
 			{
 				oldTemplates.Add(Title.FromBacklinkNode(this.site, node));
 			}
 
-			foreach (var node in newPage.Templates)
+			foreach (var node in newPage.TemplateNodes)
 			{
 				oldTemplates.Remove(Title.FromBacklinkNode(this.site, node));
 			}

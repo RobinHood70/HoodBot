@@ -62,7 +62,7 @@
 			foreach (var page in pages)
 			{
 				var parser = new ContextualParser(page);
-				foreach (var node in parser.Links)
+				foreach (var node in parser.LinkNodes)
 				{
 					var link = FullTitle.FromBacklinkNode(this.Site, node);
 					if (string.Equals(link.Fragment, "Dragonborn", StringComparison.Ordinal) && titles.Contains(link))

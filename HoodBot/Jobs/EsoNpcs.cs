@@ -151,7 +151,7 @@
 					{
 						issue = "is a disambiguation with no clear NPC link";
 						var parser = new ContextualParser(page);
-						foreach (var linkNode in parser.Links)
+						foreach (var linkNode in parser.LinkNodes)
 						{
 							var disambig = SiteLink.FromLinkNode(this.Site, linkNode, false);
 							if (allNpcs.Contains(disambig))

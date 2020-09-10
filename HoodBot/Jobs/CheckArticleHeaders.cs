@@ -33,7 +33,7 @@
 			foreach (var page in pages)
 			{
 				var parsedPage = new ContextualParser(page);
-				foreach (var node in parsedPage.Headers)
+				foreach (var node in parsedPage.HeaderNodes)
 				{
 					var header = node.GetInnerText(true);
 					if (BadHeaders.Contains(header) && !this.IsException(page, header))
