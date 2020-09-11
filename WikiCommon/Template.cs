@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.ComponentModel;
 	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Text;
@@ -146,22 +147,22 @@
 
 		/// <summary>Finds the first template with the specified name, within the specified text, and returns it as a <see cref="Template"/> object.</summary>
 		/// <param name="name">The name to search for.</param>
-		/// <param name="txt">The text to search in.</param>
+		/// <param name="text">The text to search in.</param>
 		/// <returns>A <see cref="Template"/> object populated with the first template found, or null if no matching template was found.</returns>
-		public static Template? FindTemplate(string name, string txt)
+		public static Template? FindTemplate(string name, [Localizable(false)] string text)
 		{
-			var finder = Find(name).Match(txt);
+			var finder = Find(name).Match(text);
 			return finder.Success ? new Template(finder.Value) : null;
 		}
 
 		/// <summary>Finds the first template that matches the provided Regex, within the specified text, and returns it as a <see cref="Template"/> object.</summary>
 		/// <param name="finder">The Regex pattern to find the template.</param>
-		/// <param name="txt">The text to search in.</param>
+		/// <param name="text">The text to search in.</param>
 		/// <returns>A <see cref="Template"/> object populated with the first template found, or null if no matching template was found.</returns>
-		public static Template? FindTemplate(Regex finder, string txt)
+		public static Template? FindTemplate(Regex finder, [Localizable(false)] string text)
 		{
 			ThrowNull(finder, nameof(finder));
-			var match = finder.Match(txt);
+			var match = finder.Match(text);
 			return match.Success ? new Template(match.Value) : null;
 		}
 
