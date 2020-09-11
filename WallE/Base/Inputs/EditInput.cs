@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
+	using System.ComponentModel;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Properties;
 	using static RobinHood70.CommonCode.Globals;
@@ -11,19 +12,19 @@ namespace RobinHood70.WallE.Base
 	public class EditInput
 	{
 		#region Constructors
-		public EditInput(string title, string txt)
+		public EditInput(string title, [Localizable(false)] string text)
 		{
 			ThrowNullOrWhiteSpace(title, nameof(title));
-			ThrowNull(txt, nameof(txt));
+			ThrowNull(text, nameof(text));
 			this.Title = title;
-			this.Text = txt;
+			this.Text = text;
 		}
 
-		public EditInput(long pageId, string txt)
+		public EditInput(long pageId, [Localizable(false)] string text)
 		{
-			ThrowNull(txt, nameof(txt));
+			ThrowNull(text, nameof(text));
 			this.PageId = pageId;
-			this.Text = txt;
+			this.Text = text;
 		}
 
 		public EditInput(string title, string prependText, string appendText)

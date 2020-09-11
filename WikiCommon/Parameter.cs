@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.WikiCommon
 {
 	using System;
+	using System.ComponentModel;
 	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Text;
@@ -162,7 +163,7 @@
 		/// <param name="text">The text to escape.</param>
 		/// <returns>The same as the input value, with <i>all</i> equals signs replaced by the HTML entity <c>&#61;</c>.</returns>
 		/// <remarks>This is currently a dumb replace. If you need something more intelligent, for example something that handles equals signs in embedded templates and image links, you will have to implement it yourself.</remarks>
-		public static string Escape(string? text) => text?.Replace("=", "&#61;", StringComparison.Ordinal) ?? string.Empty;
+		public static string Escape([Localizable(false)] string? text) => text?.Replace("=", "&#61;", StringComparison.Ordinal) ?? string.Empty;
 
 		/// <summary>Determines whether the provided parameter is null or has an empty value.</summary>
 		/// <param name="item">The item to check.</param>
@@ -170,9 +171,9 @@
 		public static bool IsNullOrEmpty(Parameter? item) => item == null || item.Value.Length == 0;
 
 		/// <summary>Unescapes the specified text, converting common equivalents of equals signs to an actual equals sign.</summary>
-		/// <param name="txt">The text to unescape.</param>
+		/// <param name="text">The text to unescape.</param>
 		/// <returns>The same as the input value, with any of the following converted back to an equals sign: <c>&#x3b;</c>, <c>&#61;</c>, <c>{{=}}</c>, <c>&lt;nowiki>=&lt;/nowiki></c>.</returns>
-		public static string Unescape(string txt) => EqualsFinder.Replace(txt, "=");
+		public static string Unescape([Localizable(false)] string text) => EqualsFinder.Replace(text, "=");
 		#endregion
 
 		#region Public Methods
