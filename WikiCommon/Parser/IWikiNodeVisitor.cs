@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WikiCommon.Parser
+﻿namespace RobinHood70.WikiCommon.BasicParser
 {
 	/// <summary>Represents an <see cref="IWikiNode"/> visitor.</summary>
 	public interface IWikiNodeVisitor

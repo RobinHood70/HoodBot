@@ -8,7 +8,7 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.Parser;
+	using RobinHood70.Robby.ContextualParser;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.CommonCode.Globals;
 
@@ -66,12 +66,12 @@
 			base.Main();
 		}
 
-		protected override void ParseText(object sender, ContextualParser parsedPage)
+		protected override void ParseText(object sender, Parser parsedPage)
 		{
 			ThrowNull(parsedPage, nameof(parsedPage));
-			ThrowNull(parsedPage.Title, nameof(parsedPage), nameof(parsedPage.Title));
+			ThrowNull(parsedPage.Context, nameof(parsedPage), nameof(parsedPage.Context));
 			var pageIssues = new List<string>();
-			if (!parsedPage.Title.PageName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))
+			if (!parsedPage.Context.PageName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))
 			{
 				pageIssues.Add("does not end in .jpg");
 			}
@@ -81,7 +81,7 @@
 				pageIssues.Add("does not have a Furnishing Summary");
 			}
 
-			var title = PageFromFile(parsedPage.Title);
+			var title = PageFromFile(parsedPage.Context);
 			if (this.existingPages!.Contains(title))
 			{
 				pageIssues.Add($"page exists: {title.AsLink(true)}");
@@ -89,7 +89,7 @@
 
 			if (pageIssues.Count > 0)
 			{
-				this.issues.Add($"* {parsedPage.Title.AsLink(false)}: {string.Join(", ", pageIssues)}.");
+				this.issues.Add($"* {parsedPage.Context.AsLink(false)}: {string.Join(", ", pageIssues)}.");
 			}
 		}
 		#endregion

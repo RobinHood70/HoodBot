@@ -1,11 +1,11 @@
-﻿namespace RobinHood70.WikiCommon.Parser
+﻿namespace RobinHood70.WikiCommon.BasicParser
 {
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Runtime.InteropServices;
 	using System.Text.RegularExpressions;
-	using RobinHood70.WikiCommon.Parser.StackElements;
+	using RobinHood70.WikiCommon.BasicParser.StackElements;
 	using RobinHood70.WikiCommon.Properties;
 	using static RobinHood70.CommonCode.Globals;
 

@@ -7,7 +7,7 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
-	using RobinHood70.WikiCommon.Parser;
+	using RobinHood70.WikiCommon.BasicParser;
 	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class EsoActiveSkillSummaries : EsoSkillJob<ActiveSkill>

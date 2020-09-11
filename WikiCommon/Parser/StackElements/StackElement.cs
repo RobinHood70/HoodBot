@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WikiCommon.Parser.StackElements
+﻿namespace RobinHood70.WikiCommon.BasicParser.StackElements
 {
 	internal abstract class StackElement
 	{

@@ -1,7 +1,7 @@
-﻿namespace RobinHood70.WikiCommon.Parser.StackElements
+﻿namespace RobinHood70.WikiCommon.BasicParser.StackElements
 {
 	using System;
-	using RobinHood70.WikiCommon.Parser;
+	using RobinHood70.WikiCommon.BasicParser;
 
 	internal sealed class HeaderElement : StackElement
 	{

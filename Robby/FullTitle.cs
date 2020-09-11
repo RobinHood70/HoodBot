@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System;
-	using RobinHood70.WikiCommon.Parser;
+	using RobinHood70.WikiCommon.BasicParser;
 	using static RobinHood70.CommonCode.Globals;
 
 	// TODO: Review constructors for various title objects.

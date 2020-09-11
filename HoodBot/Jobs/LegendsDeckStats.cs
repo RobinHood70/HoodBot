@@ -9,9 +9,9 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.Parser;
+	using RobinHood70.Robby.ContextualParser;
 	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.Parser;
+	using RobinHood70.WikiCommon.BasicParser;
 	using static RobinHood70.CommonCode.Globals;
 
 	public class LegendsDeckStats : ParsedPageJob
@@ -41,7 +41,7 @@
 
 		protected override void LoadPages() => this.Pages.GetBacklinks("Template:Legends Deck Summary", BacklinksTypes.EmbeddedIn);
 
-		protected override void ParseText(object sender, ContextualParser parsedPage)
+		protected override void ParseText(object sender, Parser parsedPage)
 		{
 			ThrowNull(parsedPage, nameof(parsedPage));
 			var powerCount = new SortedDictionary<int, int>();

@@ -13,9 +13,9 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.Parser;
+	using RobinHood70.Robby.ContextualParser;
 	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.Parser;
+	using RobinHood70.WikiCommon.BasicParser;
 	using static RobinHood70.CommonCode.Globals;
 
 	#region Internal Enums
@@ -136,9 +136,9 @@
 		#region Protected Properties
 		protected Action<Page, Replacement>? CustomEdit { get; set; }
 
-		protected Action<ContextualParser>? CustomReplaceGeneral { get; set; }
+		protected Action<Parser>? CustomReplaceGeneral { get; set; }
 
-		protected Action<ContextualParser, ISimpleTitle, ISimpleTitle>? CustomReplaceSpecific { get; set; }
+		protected Action<Parser, ISimpleTitle, ISimpleTitle>? CustomReplaceSpecific { get; set; }
 
 		protected IDictionary<Title, Replacement> EditDictionary { get; } = new Dictionary<Title, Replacement>();
 
@@ -708,7 +708,7 @@
 			// QUESTION: Is the below still an issue?
 			// Page may not have been correctly found if it was recently moved. If it wasn't, there's little we can do here, so skip it and it'll show up in the report (assuming it's generated).
 			// TODO: See if this can be worked around, like asking the wiki to purge and reload or something.
-			var parsedPage = new ContextualParser(page);
+			var parsedPage = new Parser(page);
 			this.ReplaceNodes(page, parsedPage.Nodes); // TODO: See if this can be re-written with ContextualParser methods.
 			if (this.CustomReplaceSpecific != null)
 			{
