@@ -8,10 +8,10 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.ContextualParser;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.Parser;
+	using RobinHood70.WikiCommon.BasicParser;
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WikiCommon.Searches;
 
@@ -261,9 +261,9 @@
 			}
 		}
 
-		public static void ReplaceSkillLinks(ContextualParser parser, string skillName)
+		public static void ReplaceSkillLinks(NodeCollection nodes, string skillName)
 		{
-			foreach (var textNode in parser.TextNodes)
+			foreach (var textNode in nodes.FindAll<TextNode>())
 			{
 				foreach (var synergy in ReplacementData.Synergies)
 				{
@@ -289,7 +289,7 @@
 
 		#region Public Methods
 
-		public ICollection<ISimpleTitle> CheckNewLinks(ContextualParser oldPage, ContextualParser newPage)
+		public ICollection<ISimpleTitle> CheckNewLinks(Parser oldPage, Parser newPage)
 		{
 			var oldLinks = new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance);
 			foreach (var node in oldPage.LinkNodes)
@@ -307,7 +307,7 @@
 			return oldLinks;
 		}
 
-		public ICollection<ISimpleTitle> CheckNewTemplates(ContextualParser oldPage, ContextualParser newPage)
+		public ICollection<ISimpleTitle> CheckNewTemplates(Parser oldPage, Parser newPage)
 		{
 			var oldTemplates = new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance);
 			foreach (var node in oldPage.TemplateNodes)
@@ -323,7 +323,7 @@
 			return oldTemplates;
 		}
 
-		public bool IsNonTrivialChange(ContextualParser oldPage, ContextualParser newPage) => string.Compare(
+		public bool IsNonTrivialChange(Parser oldPage, Parser newPage) => string.Compare(
 			this.StrippedTextFromNodes(oldPage.Nodes),
 			this.StrippedTextFromNodes(newPage.Nodes),
 			StringComparison.InvariantCultureIgnoreCase) == 0;

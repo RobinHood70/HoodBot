@@ -7,9 +7,9 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Parser;
+	using RobinHood70.Robby.ContextualParser;
 	using RobinHood70.WallE.Design;
-	using RobinHood70.WikiCommon.Parser;
+	using RobinHood70.WikiCommon.BasicParser;
 	using static RobinHood70.CommonCode.Globals;
 
 	public class PageJobLogger : JobLogger
@@ -61,7 +61,7 @@
 		#endregion
 
 		#region Private Methods
-		private bool UpdateCurrentStatus(ContextualParser parser)
+		private bool UpdateCurrentStatus(Parser parser)
 		{
 			ThrowNull(this.status, nameof(PageJobLogger), nameof(this.status));
 			var currentTask = parser.FindFirstHeaderLinked("Current Task");
@@ -80,7 +80,7 @@
 		private void UpdateEntry(Page sender, EventArgs eventArgs)
 		{
 			Debug.Assert(this.logInfo != null, "LogInfo is null.");
-			var parser = new ContextualParser(sender);
+			var parser = new Parser(sender);
 			var result = this.UpdateCurrentStatus(parser);
 			if (parser.Nodes.FindListNode<TemplateNode>(template => string.Equals(template.GetTitleValue(), "/Entry", StringComparison.Ordinal), false, false, null) is LinkedListNode<IWikiNode> entryNode &&
 				entryNode.Value is TemplateNode entry)

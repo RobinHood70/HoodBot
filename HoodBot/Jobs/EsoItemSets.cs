@@ -11,10 +11,10 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.Parser;
+	using RobinHood70.Robby.ContextualParser;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
-	using RobinHood70.WikiCommon.Parser;
+	using RobinHood70.WikiCommon.BasicParser;
 	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class EsoItemSets : EditJob
@@ -272,8 +272,8 @@
 
 		private void UpdatePageText(Page page, PageData pageData)
 		{
-			var oldPage = new ContextualParser(page, InclusionType.Transcluded, false);
-			var newPage = new ContextualParser(page, string.Empty);
+			var oldPage = new Parser(page, InclusionType.Transcluded, false);
+			var newPage = new Parser(page, string.Empty);
 			foreach (var ignoreNode in oldPage.Nodes.FindAll<IgnoreNode>())
 			{
 				newPage.Nodes.AddLast(ignoreNode);

@@ -5,7 +5,7 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.Parser;
+	using RobinHood70.Robby.ContextualParser;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.CommonCode.Globals;
 
@@ -51,12 +51,12 @@
 
 		protected override void LoadPages() => this.Pages.GetBacklinks(this.title.FullPageName, BacklinksTypes.Backlinks | BacklinksTypes.ImageUsage, false, Filter.Any);
 
-		protected override void ParseText(object sender, ContextualParser parsedPage)
+		protected override void ParseText(object sender, Parser parsedPage)
 		{
 			ThrowNull(parsedPage, nameof(parsedPage));
 			if (parsedPage.FindLink(this.title) != null)
 			{
-				this.results.Add(parsedPage.Title);
+				this.results.Add(parsedPage.Context);
 			}
 		}
 		#endregion

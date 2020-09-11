@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WikiCommon.Parser
+﻿namespace RobinHood70.WikiCommon.BasicParser
 {
 	using System;
 	using System.Globalization;

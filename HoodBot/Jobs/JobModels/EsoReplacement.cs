@@ -1,6 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
-	using RobinHood70.WikiCommon.Parser;
+	using RobinHood70.WikiCommon.BasicParser;
 
 	internal sealed class EsoReplacement
 	{

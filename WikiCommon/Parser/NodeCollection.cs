@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WikiCommon.Parser
+﻿namespace RobinHood70.WikiCommon.BasicParser
 {
 	// TODO: Build a custom LinkedList replacement that's observable in some fashion.
 	// CONSIDER: Implementing a NodeCollection<T> so that properties like Parameters can be more strongly typed as NodeCollection<ParameterNode>.

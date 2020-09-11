@@ -6,9 +6,9 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.ContextualParser;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.Parser;
-	using RobinHood70.WikiCommon.Parser;
+	using RobinHood70.WikiCommon.BasicParser;
 	using static RobinHood70.CommonCode.Globals;
 
 	internal abstract class EsoSkillJob<T> : EditJob
@@ -267,7 +267,7 @@
 				page.Text = NewPage(skill);
 			}
 
-			var parser = new ContextualParser(page);
+			var parser = new Parser(page);
 			var skillSummaries = new List<TemplateNode>(parser.FindTemplates(TemplateName));
 			if (skillSummaries.Count != 1)
 			{

@@ -3,7 +3,7 @@
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Parser;
+	using RobinHood70.Robby.ContextualParser;
 
 	public abstract class ParsedPageJob : EditJob
 	{
@@ -33,13 +33,13 @@
 		#region Protected Abstract Methods
 		protected abstract void LoadPages();
 
-		protected abstract void ParseText(object sender, ContextualParser parsedPage);
+		protected abstract void ParseText(object sender, Parser parsedPage);
 		#endregion
 
 		#region Private Methods
 		private void Results_PageLoaded(object sender, Page eventArgs)
 		{
-			var parsedPage = new ContextualParser(eventArgs);
+			var parsedPage = new Parser(eventArgs);
 			this.ParseText(sender, parsedPage);
 			eventArgs.Text = parsedPage.GetText();
 		}

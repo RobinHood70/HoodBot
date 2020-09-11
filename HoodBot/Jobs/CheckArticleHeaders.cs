@@ -8,7 +8,7 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.Parser;
+	using RobinHood70.Robby.ContextualParser;
 
 	public class CheckArticleHeaders : WikiJob
 	{
@@ -32,7 +32,7 @@
 			pages.Sort();
 			foreach (var page in pages)
 			{
-				var parsedPage = new ContextualParser(page);
+				var parsedPage = new Parser(page);
 				foreach (var node in parsedPage.HeaderNodes)
 				{
 					var header = node.GetInnerText(true);

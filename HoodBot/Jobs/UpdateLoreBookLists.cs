@@ -9,9 +9,9 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.Parser;
+	using RobinHood70.Robby.ContextualParser;
 	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.Parser;
+	using RobinHood70.WikiCommon.BasicParser;
 
 	public class UpdateLoreBookLists : EditJob
 	{
@@ -44,7 +44,7 @@
 			this.Pages.GetBacklinks("Template:Lore Book Entry", BacklinksTypes.EmbeddedIn);
 			foreach (var page in this.Pages)
 			{
-				var parser = new ContextualParser(page);
+				var parser = new Parser(page);
 				foreach (var template in parser.FindTemplates("Lore Book Entry"))
 				{
 					var param2 = template.Find(2);
@@ -133,7 +133,7 @@
 		#region Private Methods
 		private void LoreBookEntries_PageLoaded(object sender, Page page)
 		{
-			var parser = new ContextualParser(page);
+			var parser = new Parser(page);
 			var nodes = parser.Nodes;
 			if (nodes.FindListNode<TemplateNode>(node => FullTitle.FromBacklinkNode(page.Site, node).PageNameEquals("Lore Book Entry"), true, false, null) is var node &&
 				node != null &&

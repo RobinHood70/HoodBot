@@ -8,15 +8,15 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.Parser;
-	using RobinHood70.WikiCommon.Parser;
+	using RobinHood70.Robby.ContextualParser;
+	using RobinHood70.WikiCommon.BasicParser;
 
 	// TODO: Rewrite this class when more clear-headed...this is beyond fugly!
 	public class FixDoubleRedirects : EditJob
 	{
 		#region Fields
 		private readonly Dictionary<Title, FullTitle> lookup = new Dictionary<Title, FullTitle>();
-		private readonly Dictionary<Title, ContextualParser> parsedPages = new Dictionary<Title, ContextualParser>();
+		private readonly Dictionary<Title, Parser> parsedPages = new Dictionary<Title, Parser>();
 		private readonly IReadOnlyCollection<string> redirectWords;
 		#endregion
 
@@ -133,7 +133,7 @@
 			{
 				if (this.Pages.TryGetValue(title.FullPageName, out var page))
 				{
-					var parser = new ContextualParser(page);
+					var parser = new Parser(page);
 					if (parser.Nodes.First?.Value is TextNode textNode && this.redirectWords.Contains(textNode.Text.TrimEnd(), StringComparer.OrdinalIgnoreCase))
 					{
 						var targetNode = parser.Nodes.Find<LinkNode>(null, false, false, null);
