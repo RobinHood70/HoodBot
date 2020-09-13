@@ -12,12 +12,10 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="HeaderNode"/> class.</summary>
-		/// <param name="index">The index.</param>
 		/// <param name="level">The level.</param>
 		/// <param name="text">The text of the header.</param>
-		public HeaderNode(int index, int level, [Localizable(false)] NodeCollection text)
+		public HeaderNode(int level, [Localizable(false)] NodeCollection text)
 		{
-			this.Index = index;
 			this.Level = level;
 			this.Title = text ?? throw ArgumentNull(nameof(text));
 		}
@@ -30,9 +28,6 @@
 
 		/// <inheritdoc/>
 		public IWikiNodeFactory Factory => this.Title.Factory;
-
-		/// <inheritdoc/>
-		public int Index { get; }
 
 		/// <inheritdoc/>
 		public int Level { get; }

@@ -96,7 +96,7 @@
 		/// <param name="text">The text of the header.</param>
 		/// <returns>A new header node.</returns>
 		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single header (<c>=== ABC 123 ===</c>).</exception>
-		public IHeaderNode HeaderNodeFromParts(int level, [Localizable(false)] string text) => this.HeaderNode(0, level, this.Parse(text));
+		public IHeaderNode HeaderNodeFromParts(int level, [Localizable(false)] string text) => this.HeaderNode(level, this.Parse(text));
 
 		/// <summary>Creates a new <see cref="IHeaderNode"/> from the provided text.</summary>
 		/// <param name="wikiText">The wiki text of the header.</param>
@@ -361,8 +361,8 @@
 			new CommentNode(comment);
 
 		/// <inheritdoc/>
-		public virtual IHeaderNode HeaderNode(int index, int level, [Localizable(false)] NodeCollection text) =>
-			new HeaderNode(index, level, text);
+		public virtual IHeaderNode HeaderNode(int level, [Localizable(false)] NodeCollection text) =>
+			new HeaderNode(level, text);
 
 		/// <inheritdoc/>
 		public virtual IIgnoreNode IgnoreNode(string value) =>
