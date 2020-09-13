@@ -122,8 +122,6 @@
 		#endregion
 
 		#region Internal Properties
-		internal int HeadingIndex { get; set; } = 1;
-
 		internal int Index { get; set; }
 
 		internal IWikiNodeFactory NodeFactory { get; }

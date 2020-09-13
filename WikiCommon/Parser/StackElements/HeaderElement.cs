@@ -60,7 +60,6 @@
 					if (count > 0)
 					{
 						var headerNode = this.Stack.NodeFactory.HeaderNode(
-							stack.HeadingIndex++,
 							count,
 							this.Stack.NodeFactory.NodeCollectionFromNodes(piece));
 						stack.Pop();

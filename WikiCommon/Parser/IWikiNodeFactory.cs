@@ -38,11 +38,10 @@
 		ICommentNode CommentNode(string comment);
 
 		/// <summary>Initializes a new instance of the <see cref="HeaderNode"/> class.</summary>
-		/// <param name="index">The index.</param>
 		/// <param name="level">The level.</param>
 		/// <param name="text">The text of the header.</param>
 		/// <returns>A new instance of the <see cref="HeaderNode"/> class.</returns>
-		IHeaderNode HeaderNode(int index, int level, [Localizable(false)] NodeCollection text);
+		IHeaderNode HeaderNode(int level, [Localizable(false)] NodeCollection text);
 
 		/// <summary>Creates a new <see cref="IHeaderNode"/> from the provided text.</summary>
 		/// <param name="level">The header level (number of equals signs).</param>

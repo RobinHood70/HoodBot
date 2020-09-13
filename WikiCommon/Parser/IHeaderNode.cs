@@ -9,10 +9,6 @@
 		/// <value><see langword="true"/> if confirmed; otherwise, <see langword="false"/>.</value>
 		bool Confirmed { get; set; }
 
-		/// <summary>Gets the index.</summary>
-		/// <value>The index (count of headers to this point in the text).</value>
-		int Index { get; }
-
 		/// <summary>Gets the level.</summary>
 		/// <value>The level. This is equal to the number of visible equals signs.</value>
 		int Level { get; }
