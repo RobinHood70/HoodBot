@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WikiCommon.BasicParser.StackElements
+﻿namespace RobinHood70.WikiCommon.Parser.StackElements
 {
 	using System.Collections.Generic;
 
@@ -29,24 +29,24 @@
 		#endregion
 
 		#region Public Override Methods
-		internal override ElementNodeCollection BreakSyntax() => this.BreakSyntax(this.Length);
+		internal override List<IWikiNode> BreakSyntax() => this.BreakSyntax(this.Length);
 		#endregion
 
 		#region Protected Methods
-		protected ElementNodeCollection BreakSyntax(int matchingCount)
+		protected List<IWikiNode> BreakSyntax(int matchingCount)
 		{
-			var nodes = new ElementNodeCollection(new TextNode(new string(this.open, matchingCount)));
-			var piece = this.NameValuePieces[0];
-			nodes.Merge(piece);
+			var newPiece = new Piece { this.Stack.NodeFactory.TextNode(new string(this.open, matchingCount)) };
+			var oldPiece = this.NameValuePieces[0];
+			newPiece.Merge(oldPiece);
 			var pieceCount = this.NameValuePieces.Count;
 			for (var j = 1; j < pieceCount; j++)
 			{
-				piece = this.NameValuePieces[j];
-				nodes.AddLiteral("|");
-				nodes.Merge(piece);
+				oldPiece = this.NameValuePieces[j];
+				newPiece.AddLiteral(this.Stack.NodeFactory, "|");
+				newPiece.Merge(oldPiece);
 			}
 
-			return nodes;
+			return newPiece;
 		}
 
 		protected int ParseClose(char found)
@@ -54,26 +54,30 @@
 			var count = this.Stack.Text.Span(found, this.Stack.Index, this.Length);
 			if (count < 2)
 			{
-				this.CurrentPiece.AddLiteral(new string(found, count));
+				this.CurrentPiece.AddLiteral(this.Stack.NodeFactory, new string(found, count));
 				this.Stack.Index += count;
 				return count;
 			}
 
-			var parameters = new List<ParameterNode>();
+			var parameters = new List<IParameterNode>();
 			var pieceCount = this.NameValuePieces.Count;
 			var matchingCount = (found == ']' || count == 2) ? 2 : 3;
+			var factory = this.Stack.NodeFactory;
 			for (var i = 1; i < pieceCount; i++)
 			{
 				var nvPiece = this.NameValuePieces[i];
 				parameters.Add(nvPiece.SplitPos == -1 || matchingCount == 3
-					? new ParameterNode(nvPiece)
-					: new ParameterNode(nvPiece.GetRange(0, nvPiece.SplitPos), nvPiece.GetRange(nvPiece.SplitPos + 1, nvPiece.Count - nvPiece.SplitPos - 1)));
+					? factory.ParameterNode(null, factory.NodeCollectionFromNodes(nvPiece))
+					: factory.ParameterNode(
+						factory.NodeCollectionFromNodes(nvPiece.GetRange(0, nvPiece.SplitPos)),
+						factory.NodeCollectionFromNodes(nvPiece.GetRange(nvPiece.SplitPos + 1, nvPiece.Count - nvPiece.SplitPos - 1))));
 			}
 
+			var title = factory.NodeCollectionFromNodes(this.NameValuePieces[0]);
 			var node =
-				matchingCount == 3 ? new ArgumentNode(this.NameValuePieces[0], parameters) :
-				found == ']' ? new LinkNode(this.NameValuePieces[0], parameters) :
-				new TemplateNode(this.NameValuePieces[0], parameters) as IWikiNode;
+				matchingCount == 3 ? factory.ArgumentNode(title, parameters) :
+				found == ']' ? factory.LinkNode(title, parameters) :
+				factory.TemplateNode(title, parameters) as IWikiNode;
 			this.Stack.Index += matchingCount;
 			this.Stack.Pop();
 			if (matchingCount < this.Length)
@@ -87,7 +91,7 @@
 				}
 				else
 				{
-					this.Stack.Top.CurrentPiece.Add(new TextNode(new string(this.open, this.Length)));
+					this.Stack.Top.CurrentPiece.Add(this.Stack.NodeFactory.TextNode(new string(this.open, this.Length)));
 				}
 			}
 

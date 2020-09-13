@@ -1,5 +1,7 @@
-﻿namespace RobinHood70.WikiCommon.BasicParser.StackElements
+﻿namespace RobinHood70.WikiCommon.Parser.StackElements
 {
+	using System.Collections.Generic;
+
 	internal abstract class StackElement
 	{
 		#region Protected Constants
@@ -25,7 +27,7 @@
 		#endregion
 
 		#region Internal Abstract Methods
-		internal abstract ElementNodeCollection BreakSyntax();
+		internal abstract List<IWikiNode> BreakSyntax();
 
 		internal abstract void Parse(char found);
 		#endregion

@@ -1,16 +1,29 @@
-﻿namespace RobinHood70.WikiCommon.BasicParser
+﻿namespace RobinHood70.WikiCommon.Parser
 {
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Runtime.InteropServices;
 	using System.Text.RegularExpressions;
-	using RobinHood70.WikiCommon.BasicParser.StackElements;
+	using RobinHood70.WikiCommon.Parser.StackElements;
 	using RobinHood70.WikiCommon.Properties;
 	using static RobinHood70.CommonCode.Globals;
 
-	// Not a .NET Stack<T> mostly for closer parity with the original PHP version, plus it significantly outperforms the built-in one. Top, being a property, also provides a significant debugging advantage over Peek().
-	internal sealed class WikiStack
+	/// <summary>What to include when parsing.</summary>
+	public enum InclusionType
+	{
+		/// <summary>Parse text as if it were transcluded to another page. Ignored text and tags will be put into <see cref="IIgnoreNode"/>s unless using strict inclusion.</summary>
+		Transcluded,
+
+		/// <summary>Parse text as it would appear on the current page. Ignored text and tags will be put into <see cref="IIgnoreNode"/>s unless using strict inclusion.</summary>
+		CurrentPage,
+
+		/// <summary>Parse all text. Only inclusion tags themselves will be put into <see cref="IIgnoreNode"/>s; all remaining text will be parsed.</summary>
+		Raw,
+	}
+
+	/// <summary>This class does the core work to parse text into a list of wiki nodes. It provides factory methods for each node type, allowing implementers to override the way nodes are created.</summary>
+	public sealed class WikiStack
 	{
 		#region Internal Constants
 		internal const string CommentWhiteSpace = " \t";
@@ -37,6 +50,7 @@
 		private readonly HashSet<string> noMoreClosingTag = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 		private readonly int textLength;
 		private readonly Regex tagsRegex;
+
 		private StackElement[] array;
 		private int count;
 		private bool findOnlyinclude;
@@ -45,25 +59,29 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="WikiStack"/> class.</summary>
+		/// <param name="factory">The <see cref="IWikiNodeFactory">factory</see> to use for creating nodes.</param>
 		/// <param name="text">The text to work with.</param>
-		/// <param name="tagList">A list of tags whose contents should not be parsed.</param>
-		/// <param name="include">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
+		/// <param name="inclusionType">The inclusion type for the text. Set to <see cref="InclusionType.Transcluded"/> to return text as if transcluded to another page; <see cref="InclusionType.CurrentPage"/> to return text as it would appear on the current page; <see cref="InclusionType.Raw"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
-		public WikiStack([Localizable(false)] string text, ICollection<string> tagList, bool? include, bool strictInclusion)
+		public WikiStack(IWikiNodeFactory factory, [Localizable(false)] string? text, InclusionType inclusionType, bool strictInclusion)
 		{
+			ThrowNull(factory, nameof(factory));
+			this.NodeFactory = factory;
+
 			// Not using Push both so that nullable reference check succeeds on .Top and for a micro-optimization.
 			this.array = new StackElement[StartSize];
 			this.Top = new RootElement(this);
 			this.array[0] = this.Top;
 			this.count = 1;
+			text ??= string.Empty;
 
 			this.Text = text;
 			this.textLength = text.Length;
 
-			var allTags = new HashSet<string>(tagList, StringComparer.Ordinal);
-			switch (include)
+			var allTags = new HashSet<string>(UnparsedTags, StringComparer.Ordinal);
+			switch (inclusionType)
 			{
-				case true:
+				case InclusionType.Transcluded:
 					this.includeIgnores = !strictInclusion;
 					this.enableOnlyInclude = text.Contains(OnlyIncludeTagOpen, StringComparison.OrdinalIgnoreCase);
 					this.findOnlyinclude = this.enableOnlyInclude;
@@ -71,7 +89,7 @@
 					this.ignoredElements.Add(NoIncludeTag);
 					allTags.Add(NoIncludeTag);
 					break;
-				case false:
+				case InclusionType.CurrentPage:
 					this.includeIgnores = !strictInclusion;
 					this.ignoredTags.UnionWith(new[] { NoIncludeTag, "/" + NoIncludeTag, OnlyIncludeTag, "/" + OnlyIncludeTag });
 					this.ignoredElements.Add(IncludeOnlyTag);
@@ -92,15 +110,23 @@
 
 			regexTags.Sort();
 			this.tagsRegex = new Regex(@"\G(" + string.Join("|", regexTags) + @")", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
-
 			this.Preprocess();
 		}
+		#endregion
+
+		#region Public Static Properties
+
+		/// <summary>Gets the list of tags which are not parsed into wikitext.</summary>
+		/// <value>The unparsed tags.</value>
+		public static IList<string> UnparsedTags { get; } = new List<string> { "pre", "nowiki", "gallery", "indicator" };
 		#endregion
 
 		#region Internal Properties
 		internal int HeadingIndex { get; set; } = 1;
 
 		internal int Index { get; set; }
+
+		internal IWikiNodeFactory NodeFactory { get; }
 
 		internal string Text { get; }
 
@@ -112,34 +138,36 @@
 		#endregion
 
 		#region Public Methods
-		public ElementNodeCollection GetFinalNodes()
+
+		/// <summary>Does final processing before returning the node collection.</summary>
+		/// <returns>The <see cref="NodeCollection"/> representing the text provided in the constructor.</returns>
+		public NodeCollection GetNodes()
 		{
-			// We don't need to check that array.Length > 0 because the root node cannot be popped without throwing an error.
-			var nodes = this.array[0].CurrentPiece;
+			var finalNodes = this.array[0].CurrentPiece;
 			for (var i = 1; i < this.count; i++)
 			{
-				nodes.Merge(this.array[i].BreakSyntax());
+				finalNodes.Merge(this.array[i].BreakSyntax());
 			}
 
-			for (var i = 0; i < nodes.Count; i++)
+			foreach (var node in finalNodes)
 			{
-				if (nodes[i] is HeaderNode hNode && !hNode.Confirmed)
+				if (node is IHeaderNode hNode && !hNode.Confirmed)
 				{
 					hNode.Confirmed = true;
 				}
 			}
 
-			return nodes;
+			return this.NodeFactory.NodeCollectionFromNodes(finalNodes);
 		}
 		#endregion
 
 		#region Internal Methods
-		internal void Parse(char found)
+		internal void ParseCharacter(char found)
 		{
 			switch (found)
 			{
 				case '\n':
-					this.Top.CurrentPiece.AddLiteral("\n");
+					this.Top.CurrentPiece.AddLiteral(this.NodeFactory, "\n");
 					this.Index++;
 					this.ParseLineStart();
 					break;
@@ -160,7 +188,7 @@
 						var tagMatch = this.tagsRegex.Match(this.Text, this.Index + 1);
 						if (!tagMatch.Success || !this.FoundTag(tagMatch.Groups[1].Value))
 						{
-							this.Top.CurrentPiece.AddLiteral("<");
+							this.Top.CurrentPiece.AddLiteral(this.NodeFactory, "<");
 							this.Index++;
 						}
 					}
@@ -178,7 +206,7 @@
 					}
 					else
 					{
-						this.Top.CurrentPiece.AddLiteral(new string(found, countFound));
+						this.Top.CurrentPiece.AddLiteral(this.NodeFactory, new string(found, countFound));
 					}
 
 					this.Index += countFound;
@@ -225,7 +253,7 @@
 			var endPos = this.Text.IndexOf("-->", this.Index + 4, StringComparison.Ordinal) + 3;
 			if (endPos == 2)
 			{
-				piece.Add(new CommentNode(this.Text.Substring(this.Index)));
+				piece.Add(this.NodeFactory.CommentNode(this.Text.Substring(this.Index)));
 				this.Index = this.textLength;
 				return false;
 			}
@@ -253,7 +281,7 @@
 				var wsLength = this.Index - wsStart;
 				if (wsLength > 0)
 				{
-					if (piece[^1] is TextNode last)
+					if (piece[^1] is ITextNode last)
 					{
 						var lastValue = last.Text;
 						if (lastValue.SpanReverse(CommentWhiteSpace, lastValue.Length) == wsLength)
@@ -267,7 +295,7 @@
 				for (var j = 0; j < lastComment; j++)
 				{
 					cmt = comments[j];
-					piece.Add(new CommentNode(this.Text.Substring(cmt.Start, cmt.End - cmt.Start + cmt.WhiteSpaceLength)));
+					piece.Add(this.NodeFactory.CommentNode(this.Text.Substring(cmt.Start, cmt.End - cmt.Start + cmt.WhiteSpaceLength)));
 				}
 
 				cmt = comments[lastComment];
@@ -284,8 +312,8 @@
 				{
 					cmt = comments[j];
 					var start = j == 0 ? this.Index : cmt.Start;
-					piece.Add(new CommentNode(this.Text[start..cmt.End]));
-					piece.Add(new TextNode(this.Text.Substring(cmt.End, cmt.WhiteSpaceLength)));
+					piece.Add(this.NodeFactory.CommentNode(this.Text[start..cmt.End]));
+					piece.Add(this.NodeFactory.TextNode(this.Text.Substring(cmt.End, cmt.WhiteSpaceLength)));
 				}
 
 				cmt = comments[lastComment];
@@ -299,7 +327,7 @@
 			}
 
 			piece.CommentEnd = endPos - 1;
-			piece.Add(new CommentNode(this.Text[startPos..endPos]));
+			piece.Add(this.NodeFactory.CommentNode(this.Text[startPos..endPos]));
 			this.Index = endPos;
 
 			return retval;
@@ -313,7 +341,7 @@
 			var tagEndPos = this.Text.IndexOf('>', attrStart);
 			if (tagEndPos == -1)
 			{
-				piece.AddLiteral("<");
+				piece.AddLiteral(this.NodeFactory, "<");
 				this.Index++;
 				return false;
 			}
@@ -322,7 +350,7 @@
 			{
 				if (this.includeIgnores)
 				{
-					piece.Add(new IgnoreNode(this.Text.Substring(this.Index, tagEndPos - this.Index + 1)));
+					piece.Add(this.NodeFactory.IgnoreNode(this.Text.Substring(this.Index, tagEndPos - this.Index + 1)));
 				}
 
 				this.Index = tagEndPos + 1;
@@ -360,7 +388,7 @@
 				else
 				{
 					this.Index = tagEndPos + 1;
-					piece.AddLiteral(this.Text[tagStartPos..this.Index]);
+					piece.AddLiteral(this.NodeFactory, this.Text[tagStartPos..this.Index]);
 					this.noMoreClosingTag.Add(tagOpen);
 					return true;
 				}
@@ -370,13 +398,13 @@
 			{
 				if (this.includeIgnores)
 				{
-					piece.Add(new IgnoreNode(this.Text[tagStartPos..this.Index]));
+					piece.Add(this.NodeFactory.IgnoreNode(this.Text[tagStartPos..this.Index]));
 				}
 			}
 			else
 			{
 				var attr = attrEnd > attrStart ? this.Text[attrStart..attrEnd] : null;
-				piece.Add(new TagNode(tagOpen, attr, inner, tagClose));
+				piece.Add(this.NodeFactory.TagNode(tagOpen, attr, inner, tagClose));
 			}
 
 			return true;
@@ -415,7 +443,7 @@
 					{
 						if (this.includeIgnores)
 						{
-							this.Top.CurrentPiece.Add(new IgnoreNode(this.Text.Substring(this.Index)));
+							this.Top.CurrentPiece.Add(this.NodeFactory.IgnoreNode(this.Text.Substring(this.Index)));
 						}
 
 						break;
@@ -424,7 +452,7 @@
 					var tagEndPos = startPos + OnlyIncludeTagOpen.Length; // past-the-end
 					if (this.includeIgnores)
 					{
-						this.Top.CurrentPiece.Add(new IgnoreNode(this.Text[this.Index..tagEndPos]));
+						this.Top.CurrentPiece.Add(this.NodeFactory.IgnoreNode(this.Text[this.Index..tagEndPos]));
 					}
 
 					this.Index = tagEndPos;
@@ -440,7 +468,7 @@
 
 				if (literalOffset != this.Index)
 				{
-					this.Top.CurrentPiece.AddLiteral(this.Text[this.Index..literalOffset]);
+					this.Top.CurrentPiece.AddLiteral(this.NodeFactory, this.Text[this.Index..literalOffset]);
 					this.Index = literalOffset;
 					if (this.Index >= this.textLength)
 					{

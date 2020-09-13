@@ -1,7 +1,9 @@
-﻿namespace RobinHood70.WikiCommon.BasicParser.StackElements
+﻿namespace RobinHood70.WikiCommon.Parser.StackElements
 {
 	using System;
-	using RobinHood70.WikiCommon.BasicParser;
+	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
+	using RobinHood70.WikiCommon.Parser;
 
 	internal sealed class HeaderElement : StackElement
 	{
@@ -16,7 +18,7 @@
 		{
 			this.CurrentPiece = new Piece
 			{
-				new TextNode(new string('=', length))
+				stack.NodeFactory.TextNode(new string('=', length))
 			};
 			this.length = length;
 			this.startPos = stack.Index;
@@ -34,7 +36,7 @@
 		#endregion
 
 		#region Internal Override Methods
-		internal override ElementNodeCollection BreakSyntax() => this.CurrentPiece;
+		internal override List<IWikiNode> BreakSyntax() => this.CurrentPiece;
 
 		internal override void Parse(char found)
 		{
@@ -57,7 +59,10 @@
 						: Math.Min(equalsLength, this.length);
 					if (count > 0)
 					{
-						var headerNode = new HeaderNode(stack.HeadingIndex++, count, piece);
+						var headerNode = this.Stack.NodeFactory.HeaderNode(
+							stack.HeadingIndex++,
+							count,
+							this.Stack.NodeFactory.NodeCollectionFromNodes(piece));
 						stack.Pop();
 						stack.Top.CurrentPiece.Add(headerNode);
 						return;
@@ -69,7 +74,7 @@
 			}
 			else
 			{
-				stack.Parse(found);
+				stack.ParseCharacter(found);
 			}
 		}
 		#endregion

@@ -13,9 +13,9 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.ContextualParser;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.BasicParser;
+	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	#region Internal Enums
@@ -136,9 +136,9 @@
 		#region Protected Properties
 		protected Action<Page, Replacement>? CustomEdit { get; set; }
 
-		protected Action<Parser>? CustomReplaceGeneral { get; set; }
+		protected Action<ContextualParser>? CustomReplaceGeneral { get; set; }
 
-		protected Action<Parser, ISimpleTitle, ISimpleTitle>? CustomReplaceSpecific { get; set; }
+		protected Action<ContextualParser, ISimpleTitle, ISimpleTitle>? CustomReplaceSpecific { get; set; }
 
 		protected IDictionary<Title, Replacement> EditDictionary { get; } = new Dictionary<Title, Replacement>();
 
@@ -170,7 +170,7 @@
 
 		protected bool SuppressRedirects { get; set; } = true;
 
-		protected IDictionary<string, Action<Page, TemplateNode>> TemplateReplacements { get; } = new Dictionary<string, Action<Page, TemplateNode>>(StringComparer.OrdinalIgnoreCase);
+		protected IDictionary<string, Action<Page, ITemplateNode>> TemplateReplacements { get; } = new Dictionary<string, Action<Page, ITemplateNode>>(StringComparer.OrdinalIgnoreCase);
 
 		protected PageModules ToPageModules { get; set; }
 		#endregion
@@ -524,32 +524,35 @@
 			// Possibly better as a visitor class?
 			foreach (var node in nodes)
 			{
-				foreach (var subCollection in node.NodeCollections)
+				if (node is IParentNode parent)
 				{
-					this.ReplaceNodes(page, subCollection);
+					foreach (var subCollection in parent.NodeCollections)
+					{
+						this.ReplaceNodes(page, subCollection);
+					}
 				}
 
 				this.ReplaceSingleNode?.Invoke(page, node);
 				switch (node)
 				{
-					case LinkNode link:
+					case ILinkNode link:
 						this.UpdateLinkNode(page, link);
 						break;
-					case TagNode tag:
+					case ITagNode tag:
 						if (string.Equals(tag.Name, "gallery", StringComparison.Ordinal))
 						{
 							this.UpdateGalleryLinks(page, tag);
 						}
 
 						break;
-					case TemplateNode template:
+					case ITemplateNode template:
 						this.UpdateTemplateNode(page, template);
 						break;
 				}
 			}
 		}
 
-		protected virtual void UpdateGalleryLinks(Page page, TagNode tag)
+		protected virtual void UpdateGalleryLinks(Page page, ITagNode tag)
 		{
 			ThrowNull(tag, nameof(tag));
 			var text = tag.InnerText;
@@ -594,7 +597,7 @@
 			tag.InnerText = sb.ToString();
 		}
 
-		protected virtual void UpdateLinkNode(Page page, LinkNode node)
+		protected virtual void UpdateLinkNode(Page page, ILinkNode node)
 		{
 			ThrowNull(page, nameof(page));
 			ThrowNull(node, nameof(node));
@@ -640,7 +643,7 @@
 			}
 		}
 
-		protected virtual void UpdateTemplateNode(Page page, TemplateNode template)
+		protected virtual void UpdateTemplateNode(Page page, ITemplateNode template)
 		{
 			ThrowNull(page, nameof(page));
 			ThrowNull(template, nameof(template));
@@ -708,7 +711,7 @@
 			// QUESTION: Is the below still an issue?
 			// Page may not have been correctly found if it was recently moved. If it wasn't, there's little we can do here, so skip it and it'll show up in the report (assuming it's generated).
 			// TODO: See if this can be worked around, like asking the wiki to purge and reload or something.
-			var parsedPage = new Parser(page);
+			var parsedPage = new ContextualParser(page);
 			this.ReplaceNodes(page, parsedPage.Nodes); // TODO: See if this can be re-written with ContextualParser methods.
 			if (this.CustomReplaceSpecific != null)
 			{
@@ -732,7 +735,7 @@
 				replacement.Actions.HasFlag(ReplacementActions.Propose) &&
 				!this.ProposedDeletions.Contains(page))
 			{
-				var deleteTemplate = TemplateNode.FromParts(
+				var deleteTemplate = new WikiNodeFactory().TemplateNodeFromParts(
 					"Proposeddeletion",
 					("bot", "1"),
 					(null, replacement.Reason ?? throw new InvalidOperationException()));

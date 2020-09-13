@@ -5,7 +5,7 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
-	using RobinHood70.WikiCommon.BasicParser;
+	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class EsoPassiveSkillSummaries : EsoSkillJob<PassiveSkill>
@@ -46,7 +46,7 @@
 		#region Protected Override Methods
 		protected override PassiveSkill GetNewSkill(IDataRecord row) => new PassiveSkill(row);
 
-		protected override bool UpdateSkillTemplate(PassiveSkill skillBase, TemplateNode template)
+		protected override bool UpdateSkillTemplate(PassiveSkill skillBase, ITemplateNode template)
 		{
 			ThrowNull(skillBase, nameof(skillBase));
 			ThrowNull(template, nameof(template));

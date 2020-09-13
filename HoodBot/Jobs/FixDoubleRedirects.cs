@@ -8,15 +8,15 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.ContextualParser;
-	using RobinHood70.WikiCommon.BasicParser;
+	using RobinHood70.Robby.Parser;
+	using RobinHood70.WikiCommon.Parser;
 
 	// TODO: Rewrite this class when more clear-headed...this is beyond fugly!
 	public class FixDoubleRedirects : EditJob
 	{
 		#region Fields
 		private readonly Dictionary<Title, FullTitle> lookup = new Dictionary<Title, FullTitle>();
-		private readonly Dictionary<Title, Parser> parsedPages = new Dictionary<Title, Parser>();
+		private readonly Dictionary<Title, ContextualParser> parsedPages = new Dictionary<Title, ContextualParser>();
 		private readonly IReadOnlyCollection<string> redirectWords;
 		#endregion
 
@@ -83,7 +83,7 @@
 						continue;
 					}
 
-					if (this.parsedPages.TryGetValue(page, out var parsedPage) && parsedPage.Nodes.Find<LinkNode>(null, false, false, null) is LinkNode linkNode)
+					if (this.parsedPages.TryGetValue(page, out var parsedPage) && parsedPage.Nodes.Find<ILinkNode>(null, false, false, null) is ILinkNode linkNode)
 					{
 						// linkNode.Parameters.Clear();
 						if (!comboTarget.FullEquals(originalTarget) && comboTarget.ToString() is string newValue)
@@ -133,10 +133,10 @@
 			{
 				if (this.Pages.TryGetValue(title.FullPageName, out var page))
 				{
-					var parser = new Parser(page);
-					if (parser.Nodes.First?.Value is TextNode textNode && this.redirectWords.Contains(textNode.Text.TrimEnd(), StringComparer.OrdinalIgnoreCase))
+					var parser = new ContextualParser(page);
+					if (parser.Nodes.First?.Value is ITextNode textNode && this.redirectWords.Contains(textNode.Text.TrimEnd(), StringComparer.OrdinalIgnoreCase))
 					{
-						var targetNode = parser.Nodes.Find<LinkNode>(null, false, false, null);
+						var targetNode = parser.Nodes.Find<ILinkNode>(null, false, false, null);
 						if (targetNode == null)
 						{
 							throw new InvalidOperationException();

@@ -8,10 +8,10 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.ContextualParser;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.BasicParser;
+	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WikiCommon.Searches;
 
@@ -101,9 +101,10 @@
 		{
 			// Iterating manually rather than with NodeCollection methods, since the list is being altered as we go and I'm not sure how foreach would deal with that in this situation.
 			var linkedNode = nodes.First;
+			var factory = nodes.Factory;
 			while (linkedNode != null)
 			{
-				if (linkedNode.Value is TextNode textNode)
+				if (linkedNode.Value is ITextNode textNode)
 				{
 					var text = textNode.Text;
 					var checkTemplate = EsoLinks.Match(text);
@@ -111,7 +112,7 @@
 					{
 						// This is a truly fugly hack of a text modification, but is necessary until such time as Nowrap/Huh insertion can handle this on their own. The logic is to check if the first match is at the beginning of the text and, if so, and the previous value is a Huh or Nowrap template, then integrate the text of that into this node and remove the template from the collection. After that's done, we proceed as normal.
 						if (checkTemplate.Index == 1 &&
-							linkedNode.Previous?.Value is TemplateNode previous &&
+							linkedNode.Previous?.Value is ITemplateNode previous &&
 							previous.GetTitleValue() is string title &&
 							(title.Equals("huh", StringComparison.OrdinalIgnoreCase) || title.Equals("nowrap", StringComparison.OrdinalIgnoreCase)))
 						{
@@ -120,13 +121,13 @@
 						}
 
 						var matches = (ICollection<Match>)EsoLinks.Matches(text);
-						var newNodes = new NodeCollection(null);
+						var newNodes = factory.NodeCollection();
 						var startPos = 0;
 						foreach (var match in matches)
 						{
 							if (match.Index > startPos)
 							{
-								newNodes.AddLast(new TextNode(text[startPos..match.Index]));
+								newNodes.AddLast(factory.TextNode(text[startPos..match.Index]));
 							}
 
 							newNodes.AddLast(ReplaceTemplatableText(match));
@@ -157,7 +158,7 @@
 				return text;
 			}
 
-			var parsedText = NodeCollection.Parse(text);
+			var parsedText = new WikiNodeFactory().Parse(text);
 			var currentNode = parsedText.First;
 			while (currentNode != null)
 			{
@@ -209,13 +210,14 @@
 		{
 			// We only look at the top level...anything below that represents a replacement and should not be re-evaluated.
 			var linkedNode = nodes.First;
+			var factory = nodes.Factory;
 			var compareInfo = CultureInfo.InvariantCulture.CompareInfo;
 			while (linkedNode != null)
 			{
-				if (linkedNode.Value is TextNode textNode)
+				if (linkedNode.Value is ITextNode textNode)
 				{
 					var text = textNode.Text;
-					var newNodes = new NodeCollection(null);
+					var newNodes = factory.NodeCollection();
 					var startPos = 0;
 					for (var currentPos = 0; currentPos < text.Length; currentPos++)
 					{
@@ -227,7 +229,7 @@
 								UnreplacedList.Remove(replacement.From);
 								if (currentPos > startPos)
 								{
-									newNodes.AddLast(new TextNode(text[startPos..currentPos]));
+									newNodes.AddLast(factory.TextNode(text[startPos..currentPos]));
 								}
 
 								foreach (var node in replacement.To)
@@ -263,7 +265,7 @@
 
 		public static void ReplaceSkillLinks(NodeCollection nodes, string skillName)
 		{
-			foreach (var textNode in nodes.FindAll<TextNode>())
+			foreach (var textNode in nodes.FindAll<ITextNode>())
 			{
 				foreach (var synergy in ReplacementData.Synergies)
 				{
@@ -289,7 +291,7 @@
 
 		#region Public Methods
 
-		public ICollection<ISimpleTitle> CheckNewLinks(Parser oldPage, Parser newPage)
+		public ICollection<ISimpleTitle> CheckNewLinks(ContextualParser oldPage, ContextualParser newPage)
 		{
 			var oldLinks = new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance);
 			foreach (var node in oldPage.LinkNodes)
@@ -307,7 +309,7 @@
 			return oldLinks;
 		}
 
-		public ICollection<ISimpleTitle> CheckNewTemplates(Parser oldPage, Parser newPage)
+		public ICollection<ISimpleTitle> CheckNewTemplates(ContextualParser oldPage, ContextualParser newPage)
 		{
 			var oldTemplates = new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance);
 			foreach (var node in oldPage.TemplateNodes)
@@ -323,19 +325,20 @@
 			return oldTemplates;
 		}
 
-		public bool IsNonTrivialChange(Parser oldPage, Parser newPage) => string.Compare(
+		public bool IsNonTrivialChange(ContextualParser oldPage, ContextualParser newPage) => string.Compare(
 			this.StrippedTextFromNodes(oldPage.Nodes),
 			this.StrippedTextFromNodes(newPage.Nodes),
 			StringComparison.InvariantCultureIgnoreCase) == 0;
 
 		public void RemoveTrivialTemplates(NodeCollection oldNodes) =>
-			oldNodes.RemoveAll<TemplateNode>(node => this.RemoveableTemplates.Contains(Title.FromBacklinkNode(this.site, node)));
+			oldNodes.RemoveAll<ITemplateNode>(node => this.RemoveableTemplates.Contains(Title.FromBacklinkNode(this.site, node)));
 		#endregion
 
 		#region Private Static Methods
 		private static void GetMatches(string tableText, List<EsoReplacement> list)
 		{
 			var matches = (IEnumerable<Match>)ReplacementFinder.Matches(tableText);
+			var factory = new WikiNodeFactory();
 			foreach (var match in matches)
 			{
 				var from = match.Groups["from"].Value;
@@ -345,7 +348,7 @@
 					to = "[[Online:" + from + "|" + from + "]]";
 				}
 
-				list.Add(new EsoReplacement(from, to));
+				list.Add(new EsoReplacement(from, factory.Parse(to)));
 				UnreplacedList.Add(from);
 			}
 
@@ -357,12 +360,14 @@
 
 		private static NodeCollection? ReplaceLink(LinkedListNode<IWikiNode> node, TitleCollection usedList)
 		{
-			if (!(node?.Value is TextNode textNode))
+			if (!(node?.Value is ITextNode textNode))
 			{
 				return null;
 			}
 
 			ThrowNull(usedList, nameof(usedList));
+			var nodes = (NodeCollection)node.List!;
+			var factory = nodes.Factory;
 			var foundReplacements = new HashSet<string>(StringComparer.Ordinal);
 			var newText = textNode.Text;
 			var textLength = textNode.Text.Length;
@@ -372,20 +377,20 @@
 				{
 					if (newText.StartsWith(replacement.From, StringComparison.Ordinal))
 					{
-						var retval = new NodeCollection(null);
+						var retval = factory.NodeCollection();
 						if (i != 0)
 						{
-							retval.AddLast(new TextNode(textNode.Text.Substring(0, i)));
+							retval.AddLast(factory.TextNode(textNode.Text.Substring(0, i)));
 						}
 
 						foreach (var newNode in replacement.To)
 						{
-							if (newNode is LinkNode link)
+							if (newNode is ILinkNode link)
 							{
 								var title = SiteLink.FromLinkNode(usedList.Site, link);
-								if (usedList.Contains(title) && link.Parameters.Count == 1)
+								if (usedList.Contains(title) && link.Parameters.Count > 0 && link.Parameters[0].Value is NodeCollection valueNode)
 								{
-									retval.AddRange(link.Parameters[0].Value);
+									retval.AddRange(valueNode);
 								}
 								else
 								{
@@ -402,7 +407,7 @@
 						var len = replacement.From.Length;
 						if (len < textNode.Text.Length)
 						{
-							retval.AddLast(new TextNode(newText.Substring(len)));
+							retval.AddLast(factory.TextNode(newText.Substring(len)));
 						}
 
 						foundReplacements.Add(replacement.From);
@@ -421,11 +426,11 @@
 		{
 			var type = match.Groups["type"].Value.UpperFirst(CultureInfo.InvariantCulture);
 
-			TemplateNode templateNode;
 			var resistType = type.Split(ResistanceSplit, StringSplitOptions.None);
-			templateNode = resistType.Length > 1
-				? TemplateNode.FromParts("ESO Resistance Link", (null, resistType[0]))
-				: TemplateNode.FromParts("ESO " + type + " Link");
+			var factory = new WikiNodeFactory();
+			var templateNode = resistType.Length > 1
+				? factory.TemplateNodeFromParts("ESO Resistance Link", (null, resistType[0]))
+				: factory.TemplateNodeFromParts("ESO " + type + " Link");
 
 			var beforeSuccess = false;
 			if (match.Groups["before"] is Group before)

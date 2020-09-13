@@ -8,7 +8,7 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.BasicParser;
+	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Enumerations
@@ -357,18 +357,18 @@
 			return FromLinkNode(site, linkNode, true);
 		}
 
-		/// <summary>Creates a new SiteLink instance from a <see cref="LinkNode"/>.</summary>
+		/// <summary>Creates a new SiteLink instance from a <see cref="ILinkNode"/>.</summary>
 		/// <param name="site">The site the link is from.</param>
 		/// <param name="link">The link node.</param>
 		/// <returns>A new SiteLink.</returns>
-		public static SiteLink FromLinkNode(Site site, LinkNode link) => FromLinkNode(site, link, false);
+		public static SiteLink FromLinkNode(Site site, ILinkNode link) => FromLinkNode(site, link, false);
 
-		/// <summary>Creates a new SiteLink instance from a <see cref="LinkNode"/>.</summary>
+		/// <summary>Creates a new SiteLink instance from a <see cref="ILinkNode"/>.</summary>
 		/// <param name="site">The site the link is from.</param>
 		/// <param name="link">The link node.</param>
 		/// <param name="coerceToFile">If set to <see langword="true"/>, coerces the link to be in File space (for galleries).</param>
 		/// <returns>A new SiteLink.</returns>
-		public static SiteLink FromLinkNode(Site site, LinkNode link, bool coerceToFile)
+		public static SiteLink FromLinkNode(Site site, ILinkNode link, bool coerceToFile)
 		{
 			ThrowNull(link, nameof(link));
 			var titleText = WikiTextVisitor.Value(link.Title);
@@ -456,9 +456,9 @@
 			}
 		}
 
-		/// <summary>Converts to the link to a <see cref="LinkNode"/>.</summary>
-		/// <returns>A <see cref="LinkNode"/> containing the parsed link text.</returns>
-		public LinkNode ToLinkNode()
+		/// <summary>Converts to the link to a <see cref="ILinkNode"/>.</summary>
+		/// <returns>A <see cref="ILinkNode"/> containing the parsed link text.</returns>
+		public ILinkNode ToLinkNode()
 		{
 			var values = new List<string>();
 			foreach (var parameter in this.Parameters)
@@ -467,12 +467,12 @@
 				values.Add(text);
 			}
 
-			return LinkNode.FromParts(this.GetTitle(), values);
+			return new Parser.WikiNodeFactory().LinkNodeFromParts(this.GetTitle(), values);
 		}
 
-		/// <summary>Copies values from the link into a <see cref="LinkNode"/>.</summary>
+		/// <summary>Copies values from the link into a <see cref="ILinkNode"/>.</summary>
 		/// <param name="node">The node to update.</param>
-		public void UpdateLinkNode(LinkNode node)
+		public void UpdateLinkNode(ILinkNode node)
 		{
 			ThrowNull(node, nameof(node));
 			var thisNode = this.ToLinkNode();
@@ -578,7 +578,7 @@
 		#endregion
 
 		#region Private Static Methods
-		private static LinkNode CreateLinkNode(string link)
+		private static ILinkNode CreateLinkNode(string link)
 		{
 			// The extra space at the end, and then its later removal, is a kludgey workaround for the rare case of [[Link|Text [http://external]]], which the parser doesn't handle correctly at this point.
 			if (!link.StartsWith("[[", StringComparison.Ordinal) || !link.EndsWith("]]", StringComparison.Ordinal))
@@ -586,9 +586,9 @@
 				link = "[[" + link + " ]]";
 			}
 
-			var linkNode = LinkNode.FromText(link);
+			var linkNode = new Parser.WikiNodeFactory().LinkNodeFromWikiText(link);
 			var nodes = linkNode.Parameters.Count == 0 ? linkNode.Title : linkNode.Parameters[linkNode.Parameters.Count - 1].Value;
-			var last = (TextNode)nodes.Last!.Value;
+			var last = (ITextNode)nodes.Last!.Value;
 			if (last.Text.Length == 1)
 			{
 				nodes.Remove(nodes.Last);

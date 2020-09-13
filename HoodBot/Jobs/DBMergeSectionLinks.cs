@@ -9,9 +9,9 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.ContextualParser;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.BasicParser;
+	using RobinHood70.WikiCommon.Parser;
 
 	public class DBMergeSectionLinks : WikiJob
 	{
@@ -61,7 +61,7 @@
 			pages.Sort();
 			foreach (var page in pages)
 			{
-				var parser = new Parser(page);
+				var parser = new ContextualParser(page);
 				foreach (var node in parser.LinkNodes)
 				{
 					var link = FullTitle.FromBacklinkNode(this.Site, node);

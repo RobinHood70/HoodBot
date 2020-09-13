@@ -15,9 +15,9 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.ContextualParser;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.BasicParser;
+	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Enumerations
@@ -307,9 +307,9 @@
 			job.StatusWriteLine("Update patch bot parameters");
 
 			var patchPage = GetPatchPage(job);
-			var parser = new Parser(patchPage);
+			var parser = new ContextualParser(patchPage);
 			var paramName = "bot" + pageType;
-			if (parser.FindTemplate("Online Patch") is TemplateNode template && template.Find(paramName) is ParameterNode param)
+			if (parser.FindTemplate("Online Patch") is ITemplateNode template && template.Find(paramName) is IParameterNode param)
 			{
 				param.Value.Clear();
 				param.Value.AddText(GetPatchVersion(job) + '\n');

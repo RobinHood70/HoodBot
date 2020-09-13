@@ -9,9 +9,9 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.ContextualParser;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.BasicParser;
+	using RobinHood70.WikiCommon.Parser;
 
 	public class UpdateLoreBookLists : EditJob
 	{
@@ -44,11 +44,11 @@
 			this.Pages.GetBacklinks("Template:Lore Book Entry", BacklinksTypes.EmbeddedIn);
 			foreach (var page in this.Pages)
 			{
-				var parser = new Parser(page);
+				var parser = new ContextualParser(page);
 				foreach (var template in parser.FindTemplates("Lore Book Entry"))
 				{
 					var param2 = template.Find(2);
-					if (template.Find(2) is ParameterNode linkTitle)
+					if (template.Find(2) is IParameterNode linkTitle)
 					{
 						var key = template.Find(1)?.ValueToText() ?? throw new InvalidOperationException();
 						var value = linkTitle.ValueToText() ?? string.Empty;
@@ -133,12 +133,13 @@
 		#region Private Methods
 		private void LoreBookEntries_PageLoaded(object sender, Page page)
 		{
-			var parser = new Parser(page);
+			var parser = new ContextualParser(page);
 			var nodes = parser.Nodes;
-			if (nodes.FindListNode<TemplateNode>(node => FullTitle.FromBacklinkNode(page.Site, node).PageNameEquals("Lore Book Entry"), true, false, null) is var node &&
+			var factory = nodes.Factory;
+			if (nodes.FindListNode<ITemplateNode>(node => FullTitle.FromBacklinkNode(page.Site, node).PageNameEquals("Lore Book Entry"), true, false, null) is var node &&
 				node != null &&
 				node.Previous is LinkedListNode<IWikiNode> first &&
-				nodes.FindListNode<TemplateNode>(node => FullTitle.FromBacklinkNode(page.Site, node).PageNameEquals("Lore Book Entry"), true, false, null)?.Next is LinkedListNode<IWikiNode> last)
+				nodes.FindListNode<ITemplateNode>(node => FullTitle.FromBacklinkNode(page.Site, node).PageNameEquals("Lore Book Entry"), true, false, null)?.Next is LinkedListNode<IWikiNode> last)
 			{
 				while (node != null && node != last)
 				{
@@ -151,13 +152,13 @@
 				var entries = this.pageBooks[letter];
 				foreach (var entry in entries)
 				{
-					var template = TemplateNode.FromParts("Lore Book Entry", (null, entry));
+					var template = factory.TemplateNodeFromParts("Lore Book Entry", (null, entry));
 					if (this.linkTitles.TryGetValue(entry, out var linkTitle))
 					{
 						template.Add(linkTitle);
 					}
 
-					nodes.AddBefore(last, new TextNode("\n"));
+					nodes.AddBefore(last, factory.TextNode("\n"));
 					nodes.AddBefore(last, template);
 				}
 
