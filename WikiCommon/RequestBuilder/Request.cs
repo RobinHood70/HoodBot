@@ -426,7 +426,7 @@
 			ThrowNull(value, nameof(value));
 			var longValue = value.ToInt64(CultureInfo.CurrentCulture);
 			return (condition && longValue > 0) ? this.Add(name, value) : this;
-	}
+		}
 
 		/// <summary>Adds or changes a string parameter if the value is non-null.</summary>
 		/// <param name="name">The parameter name.</param>
