@@ -1,6 +1,7 @@
-﻿namespace RobinHood70.WikiCommon.BasicParser.StackElements
+﻿namespace RobinHood70.WikiCommon.Parser.StackElements
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.WikiCommon.Properties;
 	using static RobinHood70.CommonCode.Globals;
@@ -26,9 +27,9 @@
 
 		#region Internal Override Methods
 		[DoesNotReturn]
-		internal override ElementNodeCollection BreakSyntax() => throw new InvalidOperationException(CurrentCulture(Resources.CalledOnRoot, nameof(this.BreakSyntax)));
+		internal override List<IWikiNode> BreakSyntax() => throw new InvalidOperationException(CurrentCulture(Resources.CalledOnRoot, nameof(this.BreakSyntax)));
 
-		internal override void Parse(char found) => this.Stack.Parse(found);
+		internal override void Parse(char found) => this.Stack.ParseCharacter(found);
 		#endregion
 	}
 }

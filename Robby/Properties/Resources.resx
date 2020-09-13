@@ -126,6 +126,9 @@
   <data name="EmailSubjectNull" xml:space="preserve">
     <value>No e-mail subject was provided and the default subject could not be retrieved from the wiki.</value>
   </data>
+  <data name="FactoriesMustMatch" xml:space="preserve">
+    <value>The factories must be the same for all sub-nodes within the same object.</value>
+  </data>
   <data name="FileRevisionInvalid" xml:space="preserve">
     <value>This file has no revisions or the Uri for the file is null.</value>
   </data>
@@ -144,6 +147,9 @@
   <data name="LoginFailed" xml:space="preserve">
     <value>The attempt to log in to the wiki failed: {0}</value>
   </data>
+  <data name="MalformedNodeText" xml:space="preserve">
+    <value>The text provided to {0}.{1} was malformed.</value>
+  </data>
   <data name="MissingSiteInfo" xml:space="preserve">
     <value>The internal site information object is missing required values.</value>
   </data>
@@ -161,6 +167,9 @@
   </data>
   <data name="PageTextNull" xml:space="preserve">
     <value>The page text is currently null, which is normally unintentional. To save an intentionally blank page, set the Text property to string.Empty.</value>
+  </data>
+  <data name="ParameterExists" xml:space="preserve">
+    <value>Parameter \"{0}\" already exists.</value>
   </data>
   <data name="Results" xml:space="preserve">
     <value>Results</value>

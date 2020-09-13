@@ -7,7 +7,7 @@
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
-	using RobinHood70.WikiCommon.BasicParser;
+	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class EsoActiveSkillSummaries : EsoSkillJob<ActiveSkill>
@@ -62,7 +62,7 @@
 		#region Protected Override Methods
 		protected override ActiveSkill GetNewSkill(IDataRecord row) => new ActiveSkill(row);
 
-		protected override bool UpdateSkillTemplate(ActiveSkill skillBase, TemplateNode template)
+		protected override bool UpdateSkillTemplate(ActiveSkill skillBase, ITemplateNode template)
 		{
 			ThrowNull(skillBase, nameof(skillBase));
 			ThrowNull(template, nameof(template));
@@ -91,7 +91,7 @@
 			else
 			{
 				var newValue = FormatMeters(baseMorph.Radii[3]);
-				if (template.Find("radius", "area") is ParameterNode radiusParam)
+				if (template.Find("radius", "area") is IParameterNode radiusParam)
 				{
 					var oldValue = radiusParam.ValueToText()?.Trim();
 					if (string.Equals(oldValue, newValue, StringComparison.OrdinalIgnoreCase))
@@ -134,7 +134,7 @@
 		#endregion
 
 		#region Private Methods
-		private bool UpdateMorphs(ActiveSkill skillBase, TemplateNode template, Morph baseMorph, string baseSkillCost)
+		private bool UpdateMorphs(ActiveSkill skillBase, ITemplateNode template, Morph baseMorph, string baseSkillCost)
 		{
 			var bigChange = false;
 			var usedList = new TitleCollection(this.Site);

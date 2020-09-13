@@ -1,46 +1,46 @@
-﻿namespace RobinHood70.WikiCommon.BasicParser
+﻿namespace RobinHood70.WikiCommon.Parser
 {
 	/// <summary>Represents an <see cref="IWikiNode"/> visitor.</summary>
 	public interface IWikiNodeVisitor
 	{
-		/// <summary>Visits the specified <see cref="ArgumentNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="IArgumentNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		void Visit(ArgumentNode node);
+		void Visit(IArgumentNode node);
 
-		/// <summary>Visits the specified <see cref="CommentNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="ICommentNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		void Visit(CommentNode node);
+		void Visit(ICommentNode node);
 
-		/// <summary>Visits the specified <see cref="HeaderNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="IHeaderNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		void Visit(HeaderNode node);
+		void Visit(IHeaderNode node);
 
-		/// <summary>Visits the specified <see cref="IgnoreNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="IIgnoreNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		void Visit(IgnoreNode node);
+		void Visit(IIgnoreNode node);
 
-		/// <summary>Visits the specified <see cref="LinkNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="ILinkNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		void Visit(LinkNode node);
+		void Visit(ILinkNode node);
 
 		/// <summary>Visits the specified <see cref="NodeCollection"/>.</summary>
 		/// <param name="nodes">The node collection.</param>
 		void Visit(NodeCollection nodes);
 
-		/// <summary>Visits the specified <see cref="ParameterNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="IParameterNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		void Visit(ParameterNode node);
+		void Visit(IParameterNode node);
 
-		/// <summary>Visits the specified <see cref="TagNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="ITagNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		void Visit(TagNode node);
+		void Visit(ITagNode node);
 
-		/// <summary>Visits the specified <see cref="TemplateNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="ITemplateNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		void Visit(TemplateNode node);
+		void Visit(ITemplateNode node);
 
-		/// <summary>Visits the specified <see cref="TextNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="ITextNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		void Visit(TextNode node);
+		void Visit(ITextNode node);
 	}
 }

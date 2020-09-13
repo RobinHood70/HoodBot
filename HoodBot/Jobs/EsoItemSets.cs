@@ -11,10 +11,10 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.ContextualParser;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
-	using RobinHood70.WikiCommon.BasicParser;
+	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class EsoItemSets : EditJob
@@ -272,15 +272,10 @@
 
 		private void UpdatePageText(Page page, PageData pageData)
 		{
-			var oldPage = new Parser(page, InclusionType.Transcluded, false);
-			var newPage = new Parser(page, string.Empty);
-			foreach (var ignoreNode in oldPage.Nodes.FindAll<IgnoreNode>())
-			{
-				newPage.Nodes.AddLast(ignoreNode);
-			}
-
-			var firstNode = newPage.Nodes.First;
-			if (firstNode is null)
+			var oldPage = new ContextualParser(page, InclusionType.Transcluded, false);
+			var firstNode = oldPage.Nodes.First?.Value;
+			var lastNode = oldPage.Nodes.Last?.Value;
+			if (!(firstNode is IIgnoreNode && lastNode is IIgnoreNode))
 			{
 				this.Warn($"Delimiters not found on page {page.FullPageName}");
 				return;
@@ -309,12 +304,14 @@
 			}
 
 			sb.Remove(sb.Length - 5, 4);
-			var newNodes = NodeCollection.Parse(sb.ToString());
-			firstNode.AddAfter(newNodes);
-
+			var newPage = new ContextualParser(page, sb.ToString());
 			EsoReplacer.ReplaceGlobal(newPage.Nodes);
 			EsoReplacer.ReplaceEsoLinks(newPage.Nodes);
 			EsoReplacer.ReplaceFirstLink(newPage.Nodes, usedList);
+
+			// Now that we're done parsing, re-add the IgnoreNodes.
+			newPage.Nodes.AddFirst(firstNode);
+			newPage.Nodes.AddLast(lastNode);
 			page.Text = newPage.GetText() ?? string.Empty;
 
 			var replacer = new EsoReplacer(this.Site);

@@ -1,5 +1,7 @@
-﻿namespace RobinHood70.WikiCommon.BasicParser.StackElements
+﻿namespace RobinHood70.WikiCommon.Parser.StackElements
 {
+	using RobinHood70.WikiCommon.Parser;
+
 	internal sealed class TemplateElement : PairedElement
 	{
 		#region Fields
@@ -35,14 +37,14 @@
 					var lastPiece = this.NameValuePieces[^1];
 					lastPiece.SplitPos = lastPiece.Count;
 
-					// Node type isn't really relevant here, as long as it's not a TextNode. IgnoreNode made the most sense. This is an interim value that won't ever make it to the final output. Could probably be done with SplitPos alone, but adding this makes the TextNode checks in AddLiteral and Merge fail in their own right, without having to check SplitPos.
 					if (this.NameValuePieces.Count == 1)
 					{
-						lastPiece.AddLiteral("=");
+						lastPiece.AddLiteral(this.Stack.NodeFactory, "=");
 					}
 					else
 					{
-						lastPiece.Add(new IgnoreNode("="));
+						// Node type isn't really relevant here, as long as it's not a TextNode. IgnoreNode made the most sense. This is an interim value that won't ever make it to the final output. This could probably be done with SplitPos alone, but adding this makes the TextNode checks in AddLiteral and Merge fail in their own right, without having to check SplitPos.
+						lastPiece.Add(this.Stack.NodeFactory.IgnoreNode("="));
 					}
 
 					this.Stack.Index++;
@@ -56,7 +58,7 @@
 
 					break;
 				default:
-					this.Stack.Parse(found);
+					this.Stack.ParseCharacter(found);
 					break;
 			}
 		}

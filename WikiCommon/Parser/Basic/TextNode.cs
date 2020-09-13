@@ -1,12 +1,12 @@
-﻿namespace RobinHood70.WikiCommon.BasicParser
+﻿namespace RobinHood70.WikiCommon.Parser.Basic
 {
 	using System;
-	using System.Collections.Generic;
 	using System.ComponentModel;
 	using RobinHood70.CommonCode;
+	using RobinHood70.WikiCommon.Parser;
 
 	/// <summary>Represents a block of text.</summary>
-	public class TextNode : IWikiNode
+	public class TextNode : ITextNode
 	{
 		#region Fields
 		private string text;
@@ -21,12 +21,7 @@
 
 		#region Public Properties
 
-		/// <summary>Gets an enumerator that iterates through any NodeCollections this node contains.</summary>
-		/// <returns>An enumerator that can be used to iterate through additional NodeCollections.</returns>
-		public IEnumerable<NodeCollection> NodeCollections => Array.Empty<NodeCollection>();
-
-		/// <summary>Gets or sets the text.</summary>
-		/// <value>The text.</value>
+		/// <inheritdoc/>
 		public string Text
 		{
 			get => this.text;

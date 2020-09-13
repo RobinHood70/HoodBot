@@ -22,7 +22,7 @@ namespace RobinHood70.Robby.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal sealed class Resources {
+    internal class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -88,6 +88,15 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The factories must be the same for all sub-nodes within the same object..
+        /// </summary>
+        internal static string FactoriesMustMatch {
+            get {
+                return ResourceManager.GetString("FactoriesMustMatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This file has no revisions or the Uri for the file is null..
         /// </summary>
         internal static string FileRevisionInvalid {
@@ -142,6 +151,15 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The text provided to {0}.{1} was malformed..
+        /// </summary>
+        internal static string MalformedNodeText {
+            get {
+                return ResourceManager.GetString("MalformedNodeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The internal site information object is missing required values..
         /// </summary>
         internal static string MissingSiteInfo {
@@ -192,6 +210,15 @@ namespace RobinHood70.Robby.Properties {
         internal static string PageTextNull {
             get {
                 return ResourceManager.GetString("PageTextNull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Parameter \&quot;{0}\&quot; already exists..
+        /// </summary>
+        internal static string ParameterExists {
+            get {
+                return ResourceManager.GetString("ParameterExists", resourceCulture);
             }
         }
         

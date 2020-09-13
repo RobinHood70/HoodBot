@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WikiCommon.BasicParser
+﻿namespace RobinHood70.WikiCommon.Parser
 {
 	using System.Collections.Generic;
 	using System.Globalization;
@@ -46,50 +46,53 @@
 
 		#region IVisitor Methods
 
-		/// <summary>Visits the specified <see cref="ArgumentNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="IArgumentNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		public void Visit(ArgumentNode node)
+		public void Visit(IArgumentNode node)
 		{
 			ThrowNull(node, nameof(node));
 			this
 				.BuildTagOpen("tplarg", null, false)
 				.BuildTag("title", null, node.Name)
 				.BuildTag("default", null, node.DefaultValue);
-			foreach (var value in node.ExtraValues)
+			if (node.ExtraValues != null)
 			{
-				this.BuildTag("extra", null, value);
+				foreach (var value in node.ExtraValues)
+				{
+					this.Visit(value);
+				}
 			}
 
 			this.BuildTagClose("tplarg");
 		}
 
-		/// <summary>Visits the specified <see cref="CommentNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="ICommentNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		public void Visit(CommentNode node)
+		public void Visit(ICommentNode node)
 		{
 			ThrowNull(node, nameof(node));
 			this.BuildValueNode("comment", node.Comment);
 		}
 
-		/// <summary>Visits the specified <see cref="HeaderNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="IHeaderNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		public void Visit(HeaderNode node)
+		public void Visit(IHeaderNode node)
 		{
 			ThrowNull(node, nameof(node));
 			this.BuildTag("h", new Dictionary<string, int>(System.StringComparer.Ordinal) { ["level"] = node.Level, ["i"] = node.Index }, node.Title);
 		}
 
-		/// <summary>Visits the specified <see cref="IgnoreNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="IIgnoreNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		public void Visit(IgnoreNode node)
+		public void Visit(IIgnoreNode node)
 		{
 			ThrowNull(node, nameof(node));
 			this.BuildValueNode("ignore", node.Value);
 		}
 
-		/// <summary>Visits the specified <see cref="LinkNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="ILinkNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		public void Visit(LinkNode node)
+		public void Visit(ILinkNode node)
 		{
 			ThrowNull(node, nameof(node));
 			this
@@ -114,9 +117,9 @@
 			}
 		}
 
-		/// <summary>Visits the specified <see cref="ParameterNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="IParameterNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		public void Visit(ParameterNode node)
+		public void Visit(IParameterNode node)
 		{
 			ThrowNull(node, nameof(node));
 			this.BuildTagOpen("part", null, false);
@@ -137,9 +140,9 @@
 				.BuildTagClose("part");
 		}
 
-		/// <summary>Visits the specified <see cref="TagNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="ITagNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		public void Visit(TagNode node)
+		public void Visit(ITagNode node)
 		{
 			ThrowNull(node, nameof(node));
 			this
@@ -159,9 +162,9 @@
 			this.BuildTagClose("ext");
 		}
 
-		/// <summary>Visits the specified <see cref="TemplateNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="ITemplateNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		public void Visit(TemplateNode node)
+		public void Visit(ITemplateNode node)
 		{
 			ThrowNull(node, nameof(node));
 			this
@@ -175,9 +178,9 @@
 			this.BuildTagClose("template");
 		}
 
-		/// <summary>Visits the specified <see cref="TextNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="ITextNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		public void Visit(TextNode node)
+		public void Visit(ITextNode node)
 		{
 			ThrowNull(node, nameof(node));
 			this.Indent();

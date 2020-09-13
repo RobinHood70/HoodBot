@@ -22,7 +22,7 @@ namespace RobinHood70.WikiCommon.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal sealed class Resources {
+    internal class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -84,6 +84,15 @@ namespace RobinHood70.WikiCommon.Properties {
         internal static string EmptyFile {
             get {
                 return ResourceManager.GetString("EmptyFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The factories must be the same for all sub-nodes within the same object..
+        /// </summary>
+        internal static string FactoriesMustMatch {
+            get {
+                return ResourceManager.GetString("FactoriesMustMatch", resourceCulture);
             }
         }
         

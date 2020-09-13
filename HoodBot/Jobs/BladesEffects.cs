@@ -10,7 +10,6 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WikiCommon.BasicParser;
 
 	public class BladesEffects : EditJob
 	{
@@ -76,7 +75,6 @@
 					.Replace("{1}", "<magnitude2>", StringComparison.Ordinal)
 					.Replace("{2}", "<magnitude3>", StringComparison.Ordinal);
 
-				var template = TemplateNode.FromParts("Effect Summary", true, ("type", string.Empty), ("image", string.Empty), ("syntax", desc), ("notrail", "1"));
 				if (entry["_editorName"].Value is string pageName && !IgnoreList.Contains(pageName))
 				{
 					if (exists["Blades:" + pageName].Exists)
@@ -86,7 +84,7 @@
 
 					var page = new Page(this.Site[UespNamespaces.Blades], pageName)
 					{
-						Text = "{{Trail|Effects}}{{Minimal}}\n" + WikiTextVisitor.Raw(template) + "\n{{Stub|Effect}}"
+						Text = $"{{Trail|Effects}}{{Minimal}}\n{{Effect Summary\ntype=\nimage=\nsyntax={desc}\n|notrail=1\n}}\n{{Stub|Effect}}"
 					};
 
 					this.Pages.Add(page);

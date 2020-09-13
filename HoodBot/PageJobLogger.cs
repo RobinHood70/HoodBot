@@ -7,9 +7,9 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.ContextualParser;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.WallE.Design;
-	using RobinHood70.WikiCommon.BasicParser;
+	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	public class PageJobLogger : JobLogger
@@ -61,29 +61,30 @@
 		#endregion
 
 		#region Private Methods
-		private bool UpdateCurrentStatus(Parser parser)
+		private bool UpdateCurrentStatus(ContextualParser parser)
 		{
 			ThrowNull(this.status, nameof(PageJobLogger), nameof(this.status));
 			var currentTask = parser.FindFirstHeaderLinked("Current Task");
-			var taskLog = parser.Nodes.FindListNode<HeaderNode>(null, false, false, currentTask?.Next ?? throw BadLogPage);
-			if (taskLog == null)
+			var next = currentTask?.Next ?? throw BadLogPage;
+			if (!(parser.Nodes.FindListNode<IHeaderNode>(null, false, false, next) is LinkedListNode<IWikiNode> taskLog))
 			{
 				throw BadLogPage;
 			}
 
 			var previousTask = WikiTextVisitor.Raw(NodeCollection.NodesBetween(currentTask, taskLog)).Trim().TrimEnd(TextArrays.Period);
 			NodeCollection.RemoveBetween(currentTask, taskLog, false);
-			parser.Nodes.AddAfter(currentTask, new TextNode("\n" + this.status + ".\n\n"));
+			parser.Nodes.AddAfter(currentTask, parser.Nodes.Factory.TextNode("\n" + this.status + ".\n\n"));
 			return string.Equals(previousTask, this.status, StringComparison.Ordinal);
 		}
 
 		private void UpdateEntry(Page sender, EventArgs eventArgs)
 		{
 			Debug.Assert(this.logInfo != null, "LogInfo is null.");
-			var parser = new Parser(sender);
+			var parser = new ContextualParser(sender);
+			var factory = parser.Nodes.Factory;
 			var result = this.UpdateCurrentStatus(parser);
-			if (parser.Nodes.FindListNode<TemplateNode>(template => string.Equals(template.GetTitleValue(), "/Entry", StringComparison.Ordinal), false, false, null) is LinkedListNode<IWikiNode> entryNode &&
-				entryNode.Value is TemplateNode entry)
+			if (parser.Nodes.FindListNode<ITemplateNode>(template => string.Equals(template.GetTitleValue(), "/Entry", StringComparison.Ordinal), false, false, null) is LinkedListNode<IWikiNode> entryNode &&
+				entryNode.Value is ITemplateNode entry)
 			{
 				// If the last job was the same as this job and has no end time, then it's either the current job or a resumed one.
 				if (string.IsNullOrEmpty(entry.Find(3)?.ValueToText()) &&
@@ -95,7 +96,7 @@
 					{
 						var startParam = entry.FindNumberedIndex(2);
 						Debug.Assert(startParam != -1, "Start parameter not found.");
-						var endParam = ParameterNode.FromParts(FormatDateTime(DateTime.UtcNow));
+						var endParam = factory.ParameterNodeFromParts(FormatDateTime(DateTime.UtcNow));
 						entry.Parameters.Insert(startParam, endParam);
 						sender.Text = parser.GetText();
 					}
@@ -112,8 +113,8 @@
 				AddDateTime(parms, this.start);
 				AddDateTime(parms, this.end);
 
-				entryNode.AddBefore(TemplateNode.FromParts("/Entry", false, parms));
-				entryNode.AddBefore(new TextNode("\n"));
+				entryNode.AddBefore(factory.TemplateNodeFromParts("/Entry", false, parms));
+				entryNode.AddBefore(factory.TextNode("\n"));
 
 				sender.Text = parser.GetText();
 			}

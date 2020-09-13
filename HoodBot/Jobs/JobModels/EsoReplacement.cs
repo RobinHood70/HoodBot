@@ -1,14 +1,14 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
-	using RobinHood70.WikiCommon.BasicParser;
+	using RobinHood70.WikiCommon.Parser;
 
 	internal sealed class EsoReplacement
 	{
 		#region Constructors
-		public EsoReplacement(string from, string to)
+		public EsoReplacement(string from, NodeCollection to)
 		{
 			this.From = from;
-			this.To = NodeCollection.Parse(to);
+			this.To = to;
 		}
 		#endregion
 

@@ -6,9 +6,9 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.ContextualParser;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WikiCommon.BasicParser;
+	using RobinHood70.Robby.Parser;
+	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	internal abstract class EsoSkillJob<T> : EditJob
@@ -68,12 +68,12 @@
 
 		protected static string MakeIcon(string lineName, string morphName) => lineName + "-" + morphName;
 
-		protected static bool TrackedUpdate(TemplateNode template, string name, string value) => TrackedUpdate(template, name, value, null, null);
+		protected static bool TrackedUpdate(ITemplateNode template, string name, string value) => TrackedUpdate(template, name, value, null, null);
 
-		protected static bool TrackedUpdate(TemplateNode template, string name, string value, TitleCollection? usedList, string? skillName)
+		protected static bool TrackedUpdate(ITemplateNode template, string name, string value, TitleCollection? usedList, string? skillName)
 		{
 			ThrowNull(template, nameof(template));
-			if (!(template.Find(name) is ParameterNode parameter))
+			if (!(template.Find(name) is IParameterNode parameter))
 			{
 				parameter = template.Add(name, string.Empty);
 			}
@@ -102,7 +102,7 @@
 			return false;
 		}
 
-		protected static bool TrackedUpdate(TemplateNode template, string name, string value, bool removeCondition)
+		protected static bool TrackedUpdate(ITemplateNode template, string name, string value, bool removeCondition)
 		{
 			ThrowNull(template, nameof(template));
 			return removeCondition ? template.Remove(name) : TrackedUpdate(template, name, value);
@@ -148,7 +148,7 @@
 		#region Protected Abstract Methods
 		protected abstract T GetNewSkill(IDataRecord row);
 
-		protected abstract bool UpdateSkillTemplate(T skillBase, TemplateNode template);
+		protected abstract bool UpdateSkillTemplate(T skillBase, ITemplateNode template);
 		#endregion
 
 		#region Private Static Methods
@@ -267,8 +267,8 @@
 				page.Text = NewPage(skill);
 			}
 
-			var parser = new Parser(page);
-			var skillSummaries = new List<TemplateNode>(parser.FindTemplates(TemplateName));
+			var parser = new ContextualParser(page);
+			var skillSummaries = new List<SiteTemplateNode>(parser.FindTemplates(TemplateName));
 			if (skillSummaries.Count != 1)
 			{
 				this.Warn("Incorrect number of {{" + TemplateName + "}} matches on " + skill.PageName);

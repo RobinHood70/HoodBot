@@ -9,9 +9,9 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.ContextualParser;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.BasicParser;
+	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	public class LegendsDeckStats : ParsedPageJob
@@ -41,11 +41,11 @@
 
 		protected override void LoadPages() => this.Pages.GetBacklinks("Template:Legends Deck Summary", BacklinksTypes.EmbeddedIn);
 
-		protected override void ParseText(object sender, Parser parsedPage)
+		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
 			ThrowNull(parsedPage, nameof(parsedPage));
 			var powerCount = new SortedDictionary<int, int>();
-			if (!(parsedPage.FindTemplate("Legends Deck Summary") is TemplateNode deckSummary))
+			if (!(parsedPage.FindTemplate("Legends Deck Summary") is SiteTemplateNode deckSummary))
 			{
 				throw new InvalidOperationException();
 			}
@@ -53,7 +53,7 @@
 			foreach (var template in parsedPage.FindTemplates("Decklist"))
 			{
 				// The following lines set up the structure to handle skipNotes and skipQuantity, even though these are not currently used on any affected pages.
-				var specialParams = new List<ParameterNode>(template.FindAll("skipQuantity", "skipNotes"));
+				var specialParams = new List<IParameterNode>(template.FindAll("skipQuantity", "skipNotes"));
 				var paramCount = 3 - specialParams.Count;
 				foreach (var cluster in template.ParameterCluster(paramCount))
 				{
@@ -71,18 +71,19 @@
 				}
 			}
 
+			var factory = new WikiNodeFactory();
 			foreach (var entry in powerCount)
 			{
 				var paramName = "m" + entry.Key.ToString(CultureInfo.InvariantCulture);
 				var paramValue = entry.Value.ToString(CultureInfo.InvariantCulture) + '\n';
-				if (deckSummary.Find(paramName) is ParameterNode param)
+				if (deckSummary.Find(paramName) is IParameterNode param)
 				{
 					param.Value.Clear();
 					param.Value.AddText(paramValue);
 				}
 				else
 				{
-					param = ParameterNode.FromParts(paramName, paramValue);
+					param = factory.ParameterNodeFromParts(paramName, paramValue);
 					deckSummary.Parameters.Add(param);
 				}
 			}

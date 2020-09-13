@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WikiCommon.BasicParser.StackElements
+﻿namespace RobinHood70.WikiCommon.Parser.StackElements
 {
 	internal sealed class LinkElement : PairedElement
 	{
@@ -30,7 +30,7 @@
 					this.ParseClose(found);
 					break;
 				default:
-					this.Stack.Parse(found);
+					this.Stack.ParseCharacter(found);
 					break;
 			}
 		}

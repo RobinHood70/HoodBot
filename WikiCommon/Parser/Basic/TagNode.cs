@@ -1,11 +1,11 @@
-﻿namespace RobinHood70.WikiCommon.BasicParser
+﻿namespace RobinHood70.WikiCommon.Parser.Basic
 {
 	using System;
-	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
+	using RobinHood70.WikiCommon.Parser;
 
-	/// <summary>  Represents an unparsed tag, such as pre or nowiki.</summary>
-	public class TagNode : IWikiNode
+	/// <summary>Represents an unparsed tag, such as pre or nowiki.</summary>
+	public class TagNode : ITagNode
 	{
 		#region Fields
 		private string? attributes;
@@ -87,10 +87,6 @@
 				}
 			}
 		}
-
-		/// <summary>Gets an enumerator that iterates through any NodeCollections this node contains.</summary>
-		/// <returns>An enumerator that can be used to iterate through additional NodeCollections.</returns>
-		public IEnumerable<NodeCollection> NodeCollections => Array.Empty<NodeCollection>();
 
 		/// <summary>Gets a value indicating whether the tag is self-closed.</summary>
 		/// <value>

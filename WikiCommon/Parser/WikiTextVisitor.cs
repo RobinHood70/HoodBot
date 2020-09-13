@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.WikiCommon.BasicParser
+﻿namespace RobinHood70.WikiCommon.Parser
 {
 	using System.Collections.Generic;
 	using System.Text;
@@ -82,10 +82,10 @@
 
 		#region IVisitor Methods
 
-		/// <summary>Visits the specified <see cref="ArgumentNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="IArgumentNode"/>.</summary>
 		/// <param name="node">The node.</param>
 		/// <remarks>In values-only mode, this returns the default value (<c>{{{...|default}}}</c>) if one is available; otherwise, the full text of the argument itself (<c>{{{argument}}}</c>).</remarks>
-		public void Visit(ArgumentNode node)
+		public void Visit(IArgumentNode node)
 		{
 			ThrowNull(node, nameof(node));
 			if (this.valuesOnly && node.DefaultValue != null)
@@ -102,7 +102,7 @@
 				node.DefaultValue.Accept(this);
 			}
 
-			if (!this.valuesOnly)
+			if (!this.valuesOnly && node.ExtraValues != null)
 			{
 				foreach (var value in node.ExtraValues)
 				{
@@ -113,9 +113,9 @@
 			this.builder.Append("}}}");
 		}
 
-		/// <summary>Visits the specified <see cref="CommentNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="ICommentNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		public void Visit(CommentNode node)
+		public void Visit(ICommentNode node)
 		{
 			if (!this.valuesOnly)
 			{
@@ -124,17 +124,17 @@
 			}
 		}
 
-		/// <summary>Visits the specified <see cref="HeaderNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="IHeaderNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		public void Visit(HeaderNode node)
+		public void Visit(IHeaderNode node)
 		{
 			ThrowNull(node, nameof(node));
 			node.Title.Accept(this);
 		}
 
-		/// <summary>Visits the specified <see cref="IgnoreNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="IIgnoreNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		public void Visit(IgnoreNode node)
+		public void Visit(IIgnoreNode node)
 		{
 			if (!this.valuesOnly)
 			{
@@ -143,9 +143,9 @@
 			}
 		}
 
-		/// <summary>Visits the specified <see cref="LinkNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="ILinkNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		public void Visit(LinkNode node)
+		public void Visit(ILinkNode node)
 		{
 			ThrowNull(node, nameof(node));
 			this.builder.Append("[[");
@@ -169,9 +169,9 @@
 			}
 		}
 
-		/// <summary>Visits the specified <see cref="ParameterNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="IParameterNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		public void Visit(ParameterNode node)
+		public void Visit(IParameterNode node)
 		{
 			ThrowNull(node, nameof(node));
 			this.builder.Append('|');
@@ -184,9 +184,9 @@
 			node.Value.Accept(this);
 		}
 
-		/// <summary>Visits the specified <see cref="TagNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="ITagNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		public void Visit(TagNode node)
+		public void Visit(ITagNode node)
 		{
 			ThrowNull(node, nameof(node));
 			if (!this.valuesOnly)
@@ -210,9 +210,9 @@
 			}
 		}
 
-		/// <summary>Visits the specified <see cref="TemplateNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="ITemplateNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		public void Visit(TemplateNode node)
+		public void Visit(ITemplateNode node)
 		{
 			ThrowNull(node, nameof(node));
 			this.builder.Append("{{");
@@ -225,9 +225,9 @@
 			this.builder.Append("}}");
 		}
 
-		/// <summary>Visits the specified <see cref="TextNode"/>.</summary>
+		/// <summary>Visits the specified <see cref="ITextNode"/>.</summary>
 		/// <param name="node">The node.</param>
-		public void Visit(TextNode node)
+		public void Visit(ITextNode node)
 		{
 			ThrowNull(node, nameof(node));
 			this.builder.Append(node.Text);

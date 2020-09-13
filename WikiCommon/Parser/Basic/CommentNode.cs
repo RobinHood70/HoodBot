@@ -1,12 +1,12 @@
-﻿namespace RobinHood70.WikiCommon.BasicParser
+﻿namespace RobinHood70.WikiCommon.Parser.Basic
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
+	using RobinHood70.WikiCommon.Parser;
 
 	/// <summary>Represents a wikitext (HTML) comment.</summary>
-	public class CommentNode : IWikiNode
+	public class CommentNode : ICommentNode
 	{
 		#region Fields
 		private string comment = string.Empty;
@@ -21,8 +21,7 @@
 
 		#region Public Properties
 
-		/// <summary>Gets or sets the comment text.</summary>
-		/// <value>The comment text.</value>
+		/// <inheritdoc/>
 		[AllowNull]
 		public string Comment
 		{
@@ -36,10 +35,6 @@
 				}
 			}
 		}
-
-		/// <summary>Gets an enumerator that iterates through any NodeCollections this node contains.</summary>
-		/// <returns>An enumerator that can be used to iterate through additional NodeCollections.</returns>
-		public IEnumerable<NodeCollection> NodeCollections => Array.Empty<NodeCollection>();
 		#endregion
 
 		#region Public Methods

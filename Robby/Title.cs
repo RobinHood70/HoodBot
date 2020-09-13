@@ -9,7 +9,7 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.BasicParser;
+	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Enumerations

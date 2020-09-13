@@ -126,6 +126,9 @@
   <data name="EmptyFile" xml:space="preserve">
     <value>The file you are attempting to upload is empty, and would be rejected by the MediaWiki software.</value>
   </data>
+  <data name="FactoriesMustMatch" xml:space="preserve">
+    <value>The factories must be the same for all sub-nodes within the same object.</value>
+  </data>
   <data name="MalformedNodeText" xml:space="preserve">
     <value>The text provided to {0}.{1} was malformed.</value>
   </data>

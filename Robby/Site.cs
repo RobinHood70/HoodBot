@@ -11,10 +11,11 @@
 	using System.Runtime.CompilerServices;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.BasicParser;
+	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Delegates
@@ -765,10 +766,10 @@
 			ThrowNull(text, nameof(text));
 			var redirectAliases = this.MagicWords.TryGetValue("redirect", out var redirect) ? redirect.Aliases : DefaultRedirect;
 			var redirects = new HashSet<string>(redirectAliases, StringComparer.Ordinal);
-			var parser = NodeCollection.Parse(text);
+			var nodes = new WikiNodeFactory().Parse(text);
 
 			// Is the text of the format TextNode, LinkNode?
-			if (parser.First is LinkedListNode<IWikiNode> first && first.Value is TextNode textNode && first.Next?.Value is LinkNode linkNode)
+			if (nodes.First is LinkedListNode<IWikiNode> first && first.Value is ITextNode textNode && first.Next?.Value is ILinkNode linkNode)
 			{
 				var searchText = textNode.Text.TrimEnd();
 
