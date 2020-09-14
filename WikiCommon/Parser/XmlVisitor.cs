@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WikiCommon.Parser
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Globalization;
 	using System.Text;
@@ -46,8 +47,7 @@
 
 		#region IVisitor Methods
 
-		/// <summary>Visits the specified <see cref="IArgumentNode"/>.</summary>
-		/// <param name="node">The node.</param>
+		/// <inheritdoc/>
 		public void Visit(IArgumentNode node)
 		{
 			ThrowNull(node, nameof(node));
@@ -66,32 +66,28 @@
 			this.BuildTagClose("tplarg");
 		}
 
-		/// <summary>Visits the specified <see cref="ICommentNode"/>.</summary>
-		/// <param name="node">The node.</param>
+		/// <inheritdoc/>
 		public void Visit(ICommentNode node)
 		{
 			ThrowNull(node, nameof(node));
 			this.BuildValueNode("comment", node.Comment);
 		}
 
-		/// <summary>Visits the specified <see cref="IHeaderNode"/>.</summary>
-		/// <param name="node">The node.</param>
+		/// <inheritdoc/>
 		public void Visit(IHeaderNode node)
 		{
 			ThrowNull(node, nameof(node));
-			this.BuildTag("h", new Dictionary<string, int>(System.StringComparer.Ordinal) { ["level"] = node.Level }, node.Title);
+			this.BuildTag("h", new Dictionary<string, int>(StringComparer.Ordinal) { ["level"] = node.Level }, node.Title);
 		}
 
-		/// <summary>Visits the specified <see cref="IIgnoreNode"/>.</summary>
-		/// <param name="node">The node.</param>
+		/// <inheritdoc/>
 		public void Visit(IIgnoreNode node)
 		{
 			ThrowNull(node, nameof(node));
 			this.BuildValueNode("ignore", node.Value);
 		}
 
-		/// <summary>Visits the specified <see cref="ILinkNode"/>.</summary>
-		/// <param name="node">The node.</param>
+		/// <inheritdoc/>
 		public void Visit(ILinkNode node)
 		{
 			ThrowNull(node, nameof(node));
@@ -106,8 +102,7 @@
 			this.BuildTagClose("link");
 		}
 
-		/// <summary>Visits the specified <see cref="NodeCollection"/>.</summary>
-		/// <param name="nodes">The node collection.</param>
+		/// <inheritdoc/>
 		public void Visit(NodeCollection nodes)
 		{
 			ThrowNull(nodes, nameof(nodes));
@@ -117,8 +112,7 @@
 			}
 		}
 
-		/// <summary>Visits the specified <see cref="IParameterNode"/>.</summary>
-		/// <param name="node">The node.</param>
+		/// <inheritdoc/>
 		public void Visit(IParameterNode node)
 		{
 			ThrowNull(node, nameof(node));
@@ -140,8 +134,7 @@
 				.BuildTagClose("part");
 		}
 
-		/// <summary>Visits the specified <see cref="ITagNode"/>.</summary>
-		/// <param name="node">The node.</param>
+		/// <inheritdoc/>
 		public void Visit(ITagNode node)
 		{
 			ThrowNull(node, nameof(node));
@@ -162,8 +155,7 @@
 			this.BuildTagClose("ext");
 		}
 
-		/// <summary>Visits the specified <see cref="ITemplateNode"/>.</summary>
-		/// <param name="node">The node.</param>
+		/// <inheritdoc/>
 		public void Visit(ITemplateNode node)
 		{
 			ThrowNull(node, nameof(node));
@@ -178,8 +170,7 @@
 			this.BuildTagClose("template");
 		}
 
-		/// <summary>Visits the specified <see cref="ITextNode"/>.</summary>
-		/// <param name="node">The node.</param>
+		/// <inheritdoc/>
 		public void Visit(ITextNode node)
 		{
 			ThrowNull(node, nameof(node));

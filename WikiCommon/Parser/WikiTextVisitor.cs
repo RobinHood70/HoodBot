@@ -82,9 +82,7 @@
 
 		#region IVisitor Methods
 
-		/// <summary>Visits the specified <see cref="IArgumentNode"/>.</summary>
-		/// <param name="node">The node.</param>
-		/// <remarks>In values-only mode, this returns the default value (<c>{{{...|default}}}</c>) if one is available; otherwise, the full text of the argument itself (<c>{{{argument}}}</c>).</remarks>
+		/// <inheritdoc/>
 		public void Visit(IArgumentNode node)
 		{
 			ThrowNull(node, nameof(node));
@@ -113,8 +111,7 @@
 			this.builder.Append("}}}");
 		}
 
-		/// <summary>Visits the specified <see cref="ICommentNode"/>.</summary>
-		/// <param name="node">The node.</param>
+		/// <inheritdoc/>
 		public void Visit(ICommentNode node)
 		{
 			if (!this.valuesOnly)
@@ -124,16 +121,14 @@
 			}
 		}
 
-		/// <summary>Visits the specified <see cref="IHeaderNode"/>.</summary>
-		/// <param name="node">The node.</param>
+		/// <inheritdoc/>
 		public void Visit(IHeaderNode node)
 		{
 			ThrowNull(node, nameof(node));
 			node.Title.Accept(this);
 		}
 
-		/// <summary>Visits the specified <see cref="IIgnoreNode"/>.</summary>
-		/// <param name="node">The node.</param>
+		/// <inheritdoc/>
 		public void Visit(IIgnoreNode node)
 		{
 			if (!this.valuesOnly)
@@ -143,8 +138,7 @@
 			}
 		}
 
-		/// <summary>Visits the specified <see cref="ILinkNode"/>.</summary>
-		/// <param name="node">The node.</param>
+		/// <inheritdoc/>
 		public void Visit(ILinkNode node)
 		{
 			ThrowNull(node, nameof(node));
@@ -158,8 +152,7 @@
 			this.builder.Append("]]");
 		}
 
-		/// <summary>Visits the specified <see cref="NodeCollection"/>.</summary>
-		/// <param name="nodes">The node collection.</param>
+		/// <inheritdoc/>
 		public void Visit(NodeCollection nodes)
 		{
 			ThrowNull(nodes, nameof(nodes));
@@ -169,8 +162,7 @@
 			}
 		}
 
-		/// <summary>Visits the specified <see cref="IParameterNode"/>.</summary>
-		/// <param name="node">The node.</param>
+		/// <inheritdoc/>
 		public void Visit(IParameterNode node)
 		{
 			ThrowNull(node, nameof(node));
@@ -184,8 +176,7 @@
 			node.Value.Accept(this);
 		}
 
-		/// <summary>Visits the specified <see cref="ITagNode"/>.</summary>
-		/// <param name="node">The node.</param>
+		/// <inheritdoc/>
 		public void Visit(ITagNode node)
 		{
 			ThrowNull(node, nameof(node));
@@ -210,8 +201,7 @@
 			}
 		}
 
-		/// <summary>Visits the specified <see cref="ITemplateNode"/>.</summary>
-		/// <param name="node">The node.</param>
+		/// <inheritdoc/>
 		public void Visit(ITemplateNode node)
 		{
 			ThrowNull(node, nameof(node));
@@ -225,8 +215,7 @@
 			this.builder.Append("}}");
 		}
 
-		/// <summary>Visits the specified <see cref="ITextNode"/>.</summary>
-		/// <param name="node">The node.</param>
+		/// <inheritdoc/>
 		public void Visit(ITextNode node)
 		{
 			ThrowNull(node, nameof(node));
