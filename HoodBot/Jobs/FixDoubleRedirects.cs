@@ -46,7 +46,7 @@
 					}
 
 					loopCheck.Add(target);
-					Debug.Write(target.ToString());
+					//// Debug.Write(target.ToString());
 					while (this.lookup.TryGetValue(target, out var newTarget))
 					{
 						if (loopCheck.Contains(newTarget))
@@ -62,7 +62,7 @@
 						}
 
 						target = newTarget;
-						Debug.Write(" --> " + target.ToString());
+						//// Debug.Write(" --> " + target.ToString());
 					}
 
 					Debug.WriteLine(string.Empty);
@@ -83,7 +83,7 @@
 						continue;
 					}
 
-					if (this.parsedPages.TryGetValue(page, out var parsedPage) && parsedPage.Nodes.Find<ILinkNode>(null, false, false, null) is ILinkNode linkNode)
+					if (this.parsedPages.TryGetValue(page, out var parsedPage) && parsedPage.Nodes.Find<ILinkNode>() is ILinkNode linkNode)
 					{
 						// linkNode.Parameters.Clear();
 						if (!comboTarget.FullEquals(originalTarget) && comboTarget.ToString() is string newValue)
@@ -134,19 +134,20 @@
 				if (this.Pages.TryGetValue(title.FullPageName, out var page))
 				{
 					var parser = new ContextualParser(page);
-					if (parser.Nodes.First?.Value is ITextNode textNode && this.redirectWords.Contains(textNode.Text.TrimEnd(), StringComparer.OrdinalIgnoreCase))
+					if (parser.Nodes.Count > 0 && parser.Nodes[0] is ITextNode textNode && this.redirectWords.Contains(textNode.Text.TrimEnd(), StringComparer.OrdinalIgnoreCase))
 					{
-						var targetNode = parser.Nodes.Find<ILinkNode>(null, false, false, null);
-						if (targetNode == null)
+						if (parser.Nodes.Find<ILinkNode>() is ILinkNode targetNode)
+						{
+							var target = FullTitle.FromBacklinkNode(this.Site, targetNode);
+							if (this.lookup.TryAdd(title, target))
+							{
+								this.parsedPages.Add(title, parser);
+								retval.Add(target);
+							}
+						}
+						else
 						{
 							throw new InvalidOperationException();
-						}
-
-						var target = FullTitle.FromBacklinkNode(this.Site, targetNode);
-						if (this.lookup.TryAdd(title, target))
-						{
-							this.parsedPages.Add(title, parser);
-							retval.Add(target);
 						}
 					}
 				}

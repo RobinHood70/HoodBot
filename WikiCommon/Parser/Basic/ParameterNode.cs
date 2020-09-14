@@ -77,13 +77,13 @@
 			var name =
 				this.Anonymous
 					? string.Empty :
-				this.Name?.Count == 1 && this.Name.First is LinkedListNode<IWikiNode> firstName && firstName.Value is TextNode nameNode
+				(this.Name?.Count == 1 && this.Name[0] is TextNode nameNode
 					? nameNode.Text
-					: "<name>";
-			var value = this.Value.Count == 1 && this.Value.First is LinkedListNode<IWikiNode> firstValue && firstValue.Value is TextNode valueNode
+					: "<name>") + ' ';
+			var value = this.Value.Count == 1 && this.Value[0] is TextNode valueNode
 				? valueNode.Text
 				: "<value>";
-			return $"|{name}={value}";
+			return $"|{name}{value}";
 		}
 		#endregion
 	}

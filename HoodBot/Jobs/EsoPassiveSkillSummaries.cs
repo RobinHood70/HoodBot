@@ -51,8 +51,8 @@
 			ThrowNull(skillBase, nameof(skillBase));
 			ThrowNull(template, nameof(template));
 			var bigChange = false;
-			bigChange |= TrackedUpdate(template, "type", "Passive");
-			bigChange |= TrackedUpdate(template, "id", skillBase.Id.ToStringInvariant());
+			bigChange |= this.TrackedUpdate(template, "type", "Passive");
+			bigChange |= this.TrackedUpdate(template, "id", skillBase.Id.ToStringInvariant());
 			var usedList = new TitleCollection(this.Site);
 			foreach (var rank in skillBase.Ranks)
 			{
@@ -77,8 +77,8 @@
 
 				var description = string.Join("'''", splitDescription);
 				var rankText = rank.Rank.ToStringInvariant();
-				bigChange |= TrackedUpdate(template, "desc" + (rank.Rank == 1 ? string.Empty : rankText), description, usedList, skillBase.Name);
-				bigChange |= TrackedUpdate(template, "linerank" + rankText, rank.LearnedLevel.ToStringInvariant());
+				bigChange |= this.TrackedUpdate(template, "desc" + (rank.Rank == 1 ? string.Empty : rankText), description, usedList, skillBase.Name);
+				bigChange |= this.TrackedUpdate(template, "linerank" + rankText, rank.LearnedLevel.ToStringInvariant());
 			}
 
 			return bigChange;

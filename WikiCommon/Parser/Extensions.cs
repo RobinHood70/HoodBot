@@ -15,7 +15,7 @@
 		/// <summary>Parses the title and returns the trimmed value.</summary>
 		/// <param name="backlink">The backlink to get the title for.</param>
 		/// <returns>The title.</returns>
-		public static string GetTitleValue(this IBacklinkNode backlink)
+		public static string GetTitleText(this IBacklinkNode backlink)
 		{
 			ThrowNull(backlink, nameof(backlink));
 			var retval = WikiTextVisitor.Value(backlink.Title);

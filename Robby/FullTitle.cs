@@ -87,7 +87,7 @@
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(node, nameof(node));
-			return FromName(site, node.GetTitleValue());
+			return FromName(site, node.GetTitleText());
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>

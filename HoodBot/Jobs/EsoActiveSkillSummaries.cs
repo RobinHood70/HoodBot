@@ -67,21 +67,21 @@
 			ThrowNull(skillBase, nameof(skillBase));
 			ThrowNull(template, nameof(template));
 			var baseMorph = skillBase.Morphs[0];
-			var bigChange = TrackedUpdate(template, "id", baseMorph.Abilities[3].Id.ToStringInvariant());
+			var bigChange = this.TrackedUpdate(template, "id", baseMorph.Abilities[3].Id.ToStringInvariant());
 			var baseSkillCost = baseMorph.FullName(baseMorph.CalculatedCost(baseMorph.Costs[3], EsoGeneral.GetPatchVersion(this)));
 			this.UpdateMorphs(skillBase, template, baseMorph, baseSkillCost);
 
-			bigChange |= TrackedUpdate(template, "casttime", FormatSeconds(baseMorph.CastingTime));
-			bigChange |= TrackedUpdate(template, "linerank", skillBase.LearnedLevel.ToStringInvariant());
-			bigChange |= TrackedUpdate(template, "cost", baseSkillCost);
+			bigChange |= this.TrackedUpdate(template, "casttime", FormatSeconds(baseMorph.CastingTime));
+			bigChange |= this.TrackedUpdate(template, "linerank", skillBase.LearnedLevel.ToStringInvariant());
+			bigChange |= this.TrackedUpdate(template, "cost", baseSkillCost);
 			if (template.Find("cost")?.Value is NodeCollection paramValue)
 			{
 				// Cost is an oddball where we don't need/want to do all replacements, just the global ones.
 				EsoReplacer.ReplaceGlobal(paramValue);
-				EsoReplacer.ReplaceEsoLinks(paramValue);
+				EsoReplacer.ReplaceEsoLinks(this.Site, paramValue);
 			}
 
-			bigChange |= TrackedUpdate(template, "range", FormatMeters(baseMorph.Ranges[3]), string.Equals(baseMorph.Ranges[3], "0", StringComparison.Ordinal));
+			bigChange |= this.TrackedUpdate(template, "range", FormatMeters(baseMorph.Ranges[3]), string.Equals(baseMorph.Ranges[3], "0", StringComparison.Ordinal));
 
 			if (string.Equals(baseMorph.Radii[3], "0", StringComparison.Ordinal))
 			{
@@ -107,10 +107,10 @@
 				}
 			}
 
-			bigChange |= TrackedUpdate(template, "duration", FormatSeconds(baseMorph.Durations[3]), string.Equals(baseMorph.Durations[3], "0", StringComparison.Ordinal));
-			bigChange |= TrackedUpdate(template, "channeltime", FormatSeconds(baseMorph.ChannelTimes[3]), string.Equals(baseMorph.ChannelTimes[3], "0", StringComparison.Ordinal));
-			bigChange |= TrackedUpdate(template, "target", baseMorph.Target);
-			bigChange |= TrackedUpdate(template, "type", skillBase.SkillType, string.Equals(skillBase.SkillType, "Active", StringComparison.Ordinal));
+			bigChange |= this.TrackedUpdate(template, "duration", FormatSeconds(baseMorph.Durations[3]), string.Equals(baseMorph.Durations[3], "0", StringComparison.Ordinal));
+			bigChange |= this.TrackedUpdate(template, "channeltime", FormatSeconds(baseMorph.ChannelTimes[3]), string.Equals(baseMorph.ChannelTimes[3], "0", StringComparison.Ordinal));
+			bigChange |= this.TrackedUpdate(template, "target", baseMorph.Target);
+			bigChange |= this.TrackedUpdate(template, "type", skillBase.SkillType, string.Equals(skillBase.SkillType, "Active", StringComparison.Ordinal));
 
 			return bigChange;
 		}
@@ -192,15 +192,15 @@
 				}
 
 				var parameterName = "desc" + morphNum;
-				bigChange = TrackedUpdate(template, parameterName, extras + morph.Description ?? string.Empty, usedList, skillBase.Name);
+				bigChange = this.TrackedUpdate(template, parameterName, extras + morph.Description ?? string.Empty, usedList, skillBase.Name);
 				if (morphCounter > 0)
 				{
 					var morphName = "morph" + morphNum;
-					bigChange |= TrackedUpdate(template, morphName + "name", morph.Name);
-					bigChange |= TrackedUpdate(template, morphName + "id", morph.Abilities[3].Id.ToStringInvariant());
+					bigChange |= this.TrackedUpdate(template, morphName + "name", morph.Name);
+					bigChange |= this.TrackedUpdate(template, morphName + "id", morph.Abilities[3].Id.ToStringInvariant());
 					var iconValue = MakeIcon(skillBase.SkillLine, morph.Name);
-					bigChange |= TrackedUpdate(template, morphName + "icon", IconValueFixup(template.Find(morphName + "icon")?.ValueToText(), iconValue));
-					bigChange |= TrackedUpdate(template, morphName + "desc", morph.EffectLine, usedList, skillBase.Name);
+					bigChange |= this.TrackedUpdate(template, morphName + "icon", IconValueFixup(template.Find(morphName + "icon")?.ValueToText(), iconValue));
+					bigChange |= this.TrackedUpdate(template, morphName + "desc", morph.EffectLine, usedList, skillBase.Name);
 				}
 			}
 

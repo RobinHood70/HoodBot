@@ -153,7 +153,7 @@
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(node, nameof(node));
-			return FromName(site, node.GetTitleValue());
+			return FromName(site, node.GetTitleText());
 		}
 
 		/// <summary>Creates a new instance of the <see cref="Title"/> class from the namespace ID and page name.</summary>

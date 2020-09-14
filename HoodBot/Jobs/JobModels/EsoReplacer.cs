@@ -68,13 +68,13 @@
 		{
 			if (!initialized)
 			{
+				var jobSite = job.Site;
 				job.StatusWriteLine("Parsing replacements");
-				if (job.Site.User == null)
+				if (!(jobSite.User is User user))
 				{
 					throw new InvalidOperationException("Not logged in.");
 				}
 
-				var user = job.Site.User;
 				var replacementsTitle = new Page(user.Namespace, user.PageName + "/ESO Replacements");
 				replacementsTitle.Load();
 				var replacements = replacementsTitle.Text;
@@ -91,20 +91,19 @@
 					throw new InvalidOperationException("Tables are missing on the replacements page!");
 				}
 
-				GetMatches(replaceFirst.Value, ReplaceFirstList);
-				GetMatches(replaceAll.Value, ReplaceAllList);
+				GetMatches(jobSite, replaceFirst.Value, ReplaceFirstList);
+				GetMatches(jobSite, replaceAll.Value, ReplaceAllList);
 				initialized = true;
 			}
 		}
 
-		public static void ReplaceEsoLinks(NodeCollection nodes)
+		public static void ReplaceEsoLinks(Site site, NodeCollection nodes)
 		{
 			// Iterating manually rather than with NodeCollection methods, since the list is being altered as we go and I'm not sure how foreach would deal with that in this situation.
-			var linkedNode = nodes.First;
 			var factory = nodes.Factory;
-			while (linkedNode != null)
+			for (var i = 0; i < nodes.Count; i++)
 			{
-				if (linkedNode.Value is ITextNode textNode)
+				if (nodes[i] is ITextNode textNode)
 				{
 					var text = textNode.Text;
 					var checkTemplate = EsoLinks.Match(text);
@@ -112,8 +111,8 @@
 					{
 						// This is a truly fugly hack of a text modification, but is necessary until such time as Nowrap/Huh insertion can handle this on their own. The logic is to check if the first match is at the beginning of the text and, if so, and the previous value is a Huh or Nowrap template, then integrate the text of that into this node and remove the template from the collection. After that's done, we proceed as normal.
 						if (checkTemplate.Index == 1 &&
-							linkedNode.Previous?.Value is ITemplateNode previous &&
-							previous.GetTitleValue() is string title &&
+							nodes[i - 1] is ITemplateNode previous &&
+							previous.GetTitleText() is string title &&
 							(title.Equals("huh", StringComparison.OrdinalIgnoreCase) || title.Equals("nowrap", StringComparison.OrdinalIgnoreCase)))
 						{
 							text = WikiTextVisitor.Raw(previous) + text;
@@ -127,18 +126,19 @@
 						{
 							if (match.Index > startPos)
 							{
-								newNodes.AddLast(factory.TextNode(text[startPos..match.Index]));
+								newNodes.Add(factory.TextNode(text[startPos..match.Index]));
 							}
 
-							newNodes.AddLast(ReplaceTemplatableText(match));
+							newNodes.Add(ReplaceTemplatableText(match, site));
 							startPos = match.Index + match.Length;
 						}
 
-						linkedNode.AddBefore(newNodes);
+						nodes.InsertRange(i, newNodes);
+						i += newNodes.Count;
 						if (startPos == text.Length)
 						{
-							linkedNode = linkedNode.Previous;
-							nodes.Remove(linkedNode!.Next!);
+							nodes.RemoveAt(i);
+							i--;
 						}
 						else
 						{
@@ -146,60 +146,19 @@
 						}
 					}
 				}
-
-				linkedNode = linkedNode.Next;
 			}
-		}
-
-		public static string ReplaceFirstLink(string text, TitleCollection usedList)
-		{
-			if (string.IsNullOrEmpty(text))
-			{
-				return text;
-			}
-
-			var parsedText = new WikiNodeFactory().Parse(text);
-			var currentNode = parsedText.First;
-			while (currentNode != null)
-			{
-				if (ReplaceLink(currentNode, usedList) is NodeCollection newNodes)
-				{
-					foreach (var colNode in newNodes)
-					{
-						parsedText.AddBefore(currentNode, colNode);
-					}
-
-					currentNode = currentNode.Previous!;
-					parsedText.Remove(currentNode.Next!);
-				}
-				else
-				{
-					currentNode = currentNode.Next;
-				}
-			}
-
-			return WikiTextVisitor.Raw(parsedText);
 		}
 
 		public static string ReplaceFirstLink(NodeCollection nodes, TitleCollection usedList)
 		{
 			ThrowNull(nodes, nameof(nodes));
-			var currentNode = nodes.First;
-			while (currentNode != null)
+			for (var i = 0; i < nodes.Count; i++)
 			{
-				if (ReplaceLink(currentNode, usedList) is NodeCollection newNodes)
+				if (ReplaceLink(nodes.Factory, nodes[i], usedList) is NodeCollection newNodes)
 				{
-					foreach (var colNode in newNodes)
-					{
-						nodes.AddBefore(currentNode, colNode);
-					}
-
-					currentNode = currentNode.Previous!;
-					nodes.Remove(currentNode.Next!);
-				}
-				else
-				{
-					currentNode = currentNode.Next;
+					nodes.RemoveAt(i);
+					nodes.InsertRange(i, newNodes);
+					i += newNodes.Count - 1;
 				}
 			}
 
@@ -209,12 +168,11 @@
 		public static void ReplaceGlobal(NodeCollection nodes)
 		{
 			// We only look at the top level...anything below that represents a replacement and should not be re-evaluated.
-			var linkedNode = nodes.First;
 			var factory = nodes.Factory;
 			var compareInfo = CultureInfo.InvariantCulture.CompareInfo;
-			while (linkedNode != null)
+			for (var i = 0; i < nodes.Count; i++)
 			{
-				if (linkedNode.Value is ITextNode textNode)
+				if (nodes[i] is ITextNode textNode)
 				{
 					var text = textNode.Text;
 					var newNodes = factory.NodeCollection();
@@ -229,12 +187,12 @@
 								UnreplacedList.Remove(replacement.From);
 								if (currentPos > startPos)
 								{
-									newNodes.AddLast(factory.TextNode(text[startPos..currentPos]));
+									newNodes.Add(factory.TextNode(text[startPos..currentPos]));
 								}
 
 								foreach (var node in replacement.To)
 								{
-									newNodes.AddLast(node);
+									newNodes.Add(node);
 								}
 
 								startPos = currentPos + fromLength;
@@ -246,11 +204,11 @@
 
 					if (newNodes.Count > 0)
 					{
-						linkedNode.AddBefore(newNodes);
+						nodes.InsertRange(i, newNodes);
+						i += newNodes.Count;
 						if (startPos == text.Length)
 						{
-							linkedNode = linkedNode.Previous;
-							nodes.Remove(linkedNode!.Next!);
+							nodes.RemoveAt(i);
 						}
 						else
 						{
@@ -258,8 +216,6 @@
 						}
 					}
 				}
-
-				linkedNode = linkedNode.Next;
 			}
 		}
 
@@ -335,10 +291,10 @@
 		#endregion
 
 		#region Private Static Methods
-		private static void GetMatches(string tableText, List<EsoReplacement> list)
+		private static void GetMatches(Site site, string tableText, List<EsoReplacement> list)
 		{
 			var matches = (IEnumerable<Match>)ReplacementFinder.Matches(tableText);
-			var factory = new WikiNodeFactory();
+			var factory = new SiteNodeFactory(site);
 			foreach (var match in matches)
 			{
 				var from = match.Groups["from"].Value;
@@ -358,16 +314,15 @@
 				-1);
 		}
 
-		private static NodeCollection? ReplaceLink(LinkedListNode<IWikiNode> node, TitleCollection usedList)
+		private static NodeCollection? ReplaceLink(IWikiNodeFactory factory, IWikiNode node, TitleCollection usedList)
 		{
-			if (!(node?.Value is ITextNode textNode))
+			ThrowNull(factory, nameof(factory));
+			if (!(node is ITextNode textNode))
 			{
 				return null;
 			}
 
 			ThrowNull(usedList, nameof(usedList));
-			var nodes = (NodeCollection)node.List!;
-			var factory = nodes.Factory;
 			var foundReplacements = new HashSet<string>(StringComparer.Ordinal);
 			var newText = textNode.Text;
 			var textLength = textNode.Text.Length;
@@ -380,7 +335,7 @@
 						var retval = factory.NodeCollection();
 						if (i != 0)
 						{
-							retval.AddLast(factory.TextNode(textNode.Text.Substring(0, i)));
+							retval.Add(factory.TextNode(textNode.Text.Substring(0, i)));
 						}
 
 						foreach (var newNode in replacement.To)
@@ -394,20 +349,20 @@
 								}
 								else
 								{
-									retval.AddLast(link);
+									retval.Add(link);
 									usedList.Add(title);
 								}
 							}
 							else
 							{
-								retval.AddLast(newNode);
+								retval.Add(newNode);
 							}
 						}
 
 						var len = replacement.From.Length;
 						if (len < textNode.Text.Length)
 						{
-							retval.AddLast(factory.TextNode(newText.Substring(len)));
+							retval.Add(factory.TextNode(newText.Substring(len)));
 						}
 
 						foundReplacements.Add(replacement.From);
@@ -422,12 +377,11 @@
 			return null;
 		}
 
-		private static IWikiNode ReplaceTemplatableText(Match match)
+		private static IWikiNode ReplaceTemplatableText(Match match, Site site)
 		{
 			var type = match.Groups["type"].Value.UpperFirst(CultureInfo.InvariantCulture);
-
 			var resistType = type.Split(ResistanceSplit, StringSplitOptions.None);
-			var factory = new WikiNodeFactory();
+			var factory = new SiteNodeFactory(site);
 			var templateNode = resistType.Length > 1
 				? factory.TemplateNodeFromParts("ESO Resistance Link", (null, resistType[0]))
 				: factory.TemplateNodeFromParts("ESO " + type + " Link");

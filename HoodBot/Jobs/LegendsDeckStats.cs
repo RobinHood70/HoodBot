@@ -71,7 +71,7 @@
 				}
 			}
 
-			var factory = new WikiNodeFactory();
+			var factory = new SiteNodeFactory(this.Site);
 			foreach (var entry in powerCount)
 			{
 				var paramName = "m" + entry.Key.ToString(CultureInfo.InvariantCulture);

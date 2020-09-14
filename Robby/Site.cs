@@ -766,10 +766,10 @@
 			ThrowNull(text, nameof(text));
 			var redirectAliases = this.MagicWords.TryGetValue("redirect", out var redirect) ? redirect.Aliases : DefaultRedirect;
 			var redirects = new HashSet<string>(redirectAliases, StringComparer.Ordinal);
-			var nodes = new WikiNodeFactory().Parse(text);
+			var nodes = new SiteNodeFactory(this).Parse(text);
 
 			// Is the text of the format TextNode, LinkNode?
-			if (nodes.First is LinkedListNode<IWikiNode> first && first.Value is ITextNode textNode && first.Next?.Value is ILinkNode linkNode)
+			if (nodes.Count > 1 && nodes[0] is ITextNode textNode && nodes[1] is ILinkNode linkNode)
 			{
 				var searchText = textNode.Text.TrimEnd();
 

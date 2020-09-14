@@ -68,9 +68,9 @@
 
 		protected static string MakeIcon(string lineName, string morphName) => lineName + "-" + morphName;
 
-		protected static bool TrackedUpdate(ITemplateNode template, string name, string value) => TrackedUpdate(template, name, value, null, null);
+		protected bool TrackedUpdate(ITemplateNode template, string name, string value) => this.TrackedUpdate(template, name, value, null, null);
 
-		protected static bool TrackedUpdate(ITemplateNode template, string name, string value, TitleCollection? usedList, string? skillName)
+		protected bool TrackedUpdate(ITemplateNode template, string name, string value, TitleCollection? usedList, string? skillName)
 		{
 			ThrowNull(template, nameof(template));
 			if (!(template.Find(name) is IParameterNode parameter))
@@ -88,7 +88,7 @@
 				if (usedList != null)
 				{
 					EsoReplacer.ReplaceGlobal(parameter.Value);
-					EsoReplacer.ReplaceEsoLinks(parameter.Value);
+					EsoReplacer.ReplaceEsoLinks(this.Site, parameter.Value);
 					EsoReplacer.ReplaceFirstLink(parameter.Value, usedList);
 					if (skillName != null)
 					{
@@ -102,10 +102,10 @@
 			return false;
 		}
 
-		protected static bool TrackedUpdate(ITemplateNode template, string name, string value, bool removeCondition)
+		protected bool TrackedUpdate(ITemplateNode template, string name, string value, bool removeCondition)
 		{
 			ThrowNull(template, nameof(template));
-			return removeCondition ? template.Remove(name) : TrackedUpdate(template, name, value);
+			return removeCondition ? template.Remove(name) : this.TrackedUpdate(template, name, value);
 		}
 		#endregion
 
@@ -279,7 +279,7 @@
 			template.Remove("update");
 
 			var bigChange = false;
-			bigChange |= TrackedUpdate(template, "line", skill.SkillLine);
+			bigChange |= this.TrackedUpdate(template, "line", skill.SkillLine);
 			var iconValue = MakeIcon(skill.SkillLine, skill.Name);
 
 			// Special cases
@@ -299,7 +299,7 @@
 				var iconName = "icon" + (i > 0 ? (i + 1).ToStringInvariant() : string.Empty);
 				var iconParamater = template.Find(iconName);
 				var newValue = IconValueFixup(iconParamater?.ValueToText(), iconValue + (loopCount > 0 ? FormattableString.Invariant($" ({DestructionTypes[i]})") : string.Empty));
-				bigChange |= TrackedUpdate(template, iconName, newValue);
+				bigChange |= this.TrackedUpdate(template, iconName, newValue);
 			}
 
 			bigChange |= this.UpdateSkillTemplate(skill, template);

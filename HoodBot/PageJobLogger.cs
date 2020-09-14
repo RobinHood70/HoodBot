@@ -64,16 +64,19 @@
 		private bool UpdateCurrentStatus(ContextualParser parser)
 		{
 			ThrowNull(this.status, nameof(PageJobLogger), nameof(this.status));
-			var currentTask = parser.FindFirstHeaderLinked("Current Task");
-			var next = currentTask?.Next ?? throw BadLogPage;
-			if (!(parser.Nodes.FindListNode<IHeaderNode>(null, false, false, next) is LinkedListNode<IWikiNode> taskLog))
+			var currentTask = parser.Nodes.FindIndex<IHeaderNode>(header => string.Equals(header.GetInnerText(true), "Current Task", StringComparison.Ordinal));
+			var taskLog = parser.Nodes.FindIndex<IHeaderNode>(currentTask + 1);
+			if (currentTask == -1 || taskLog == -1)
 			{
 				throw BadLogPage;
 			}
 
-			var previousTask = WikiTextVisitor.Raw(NodeCollection.NodesBetween(currentTask, taskLog)).Trim().TrimEnd(TextArrays.Period);
-			NodeCollection.RemoveBetween(currentTask, taskLog, false);
-			parser.Nodes.AddAfter(currentTask, parser.Nodes.Factory.TextNode("\n" + this.status + ".\n\n"));
+			currentTask++;
+			var section = parser.Nodes.GetRange(currentTask, taskLog - currentTask);
+			var previousTask = WikiTextVisitor.Raw(section).Trim().TrimEnd(TextArrays.Period);
+			parser.Nodes.RemoveRange(currentTask, taskLog - currentTask);
+			parser.Nodes.Insert(currentTask, parser.Nodes.Factory.TextNode("\n" + this.status + ".\n\n"));
+
 			return string.Equals(previousTask, this.status, StringComparison.Ordinal);
 		}
 
@@ -83,9 +86,11 @@
 			var parser = new ContextualParser(sender);
 			var factory = parser.Nodes.Factory;
 			var result = this.UpdateCurrentStatus(parser);
-			if (parser.Nodes.FindListNode<ITemplateNode>(template => string.Equals(template.GetTitleValue(), "/Entry", StringComparison.Ordinal), false, false, null) is LinkedListNode<IWikiNode> entryNode &&
-				entryNode.Value is ITemplateNode entry)
+			var firstEntry = parser.Nodes.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("/Entry"));
+			if (firstEntry != -1)
 			{
+				var entry = (SiteTemplateNode)parser.Nodes[firstEntry];
+
 				// If the last job was the same as this job and has no end time, then it's either the current job or a resumed one.
 				if (string.IsNullOrEmpty(entry.Find(3)?.ValueToText()) &&
 					string.Equals(entry.Find(1)?.ValueToText()?.Trim(), this.logInfo.Title, StringComparison.Ordinal) &&
@@ -113,8 +118,11 @@
 				AddDateTime(parms, this.start);
 				AddDateTime(parms, this.end);
 
-				entryNode.AddBefore(factory.TemplateNodeFromParts("/Entry", false, parms));
-				entryNode.AddBefore(factory.TextNode("\n"));
+				parser.Nodes.InsertRange(firstEntry, new IWikiNode[]
+				{
+					factory.TemplateNodeFromParts("/Entry", false, parms),
+					factory.TextNode("\n")
+				});
 
 				sender.Text = parser.GetText();
 			}
