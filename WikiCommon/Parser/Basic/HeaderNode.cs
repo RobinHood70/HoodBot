@@ -12,12 +12,14 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="HeaderNode"/> class.</summary>
+		/// <param name="factory">The factory to use when creating new nodes.</param>
 		/// <param name="level">The level.</param>
 		/// <param name="text">The text of the header.</param>
-		public HeaderNode(int level, [Localizable(false)] NodeCollection text)
+		public HeaderNode(IWikiNodeFactory factory, int level, [Localizable(false)] IEnumerable<IWikiNode> text)
 		{
+			this.Factory = factory ?? throw ArgumentNull(nameof(factory));
 			this.Level = level;
-			this.Title = text ?? throw ArgumentNull(nameof(text));
+			this.Title = factory.NodeCollectionFromNodes(text ?? throw ArgumentNull(nameof(text)));
 		}
 		#endregion
 
@@ -27,7 +29,7 @@
 		public bool Confirmed { get; set; }
 
 		/// <inheritdoc/>
-		public IWikiNodeFactory Factory => this.Title.Factory;
+		public IWikiNodeFactory Factory { get; }
 
 		/// <inheritdoc/>
 		public int Level { get; }

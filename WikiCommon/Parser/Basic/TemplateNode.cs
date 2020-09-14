@@ -13,15 +13,17 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="TemplateNode"/> class.</summary>
+		/// <param name="factory">The factory to use when creating new nodes (must match the <paramref name="parameters"/> factory).</param>
 		/// <param name="title">The title.</param>
 		/// <param name="parameters">The parameters.</param>
-		public TemplateNode(NodeCollection title, IList<IParameterNode> parameters)
+		public TemplateNode(IWikiNodeFactory factory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters)
 		{
-			this.Title = title ?? throw ArgumentNull(nameof(title));
+			this.Factory = factory ?? throw ArgumentNull(nameof(factory));
+			this.Title = factory.NodeCollectionFromNodes(title ?? throw ArgumentNull(nameof(title)));
 			this.Parameters = parameters ?? throw ArgumentNull(nameof(parameters));
 			foreach (var parameter in parameters)
 			{
-				if (parameter.Factory != title.Factory)
+				if (parameter.Factory != factory)
 				{
 					throw new InvalidOperationException(Resources.FactoriesMustMatch);
 				}
@@ -32,7 +34,7 @@
 		#region Public Properties
 
 		/// <inheritdoc/>
-		public IWikiNodeFactory Factory => this.Title.Factory;
+		public IWikiNodeFactory Factory { get; }
 
 		/// <inheritdoc/>
 		public IEnumerable<NodeCollection> NodeCollections

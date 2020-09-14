@@ -59,9 +59,7 @@
 						: Math.Min(equalsLength, this.length);
 					if (count > 0)
 					{
-						var headerNode = this.Stack.NodeFactory.HeaderNode(
-							count,
-							this.Stack.NodeFactory.NodeCollectionFromNodes(piece));
+						var headerNode = this.Stack.NodeFactory.HeaderNode(count, piece);
 						stack.Pop();
 						stack.Top.CurrentPiece.Add(headerNode);
 						return;

@@ -67,13 +67,13 @@
 			{
 				var nvPiece = this.NameValuePieces[i];
 				parameters.Add(nvPiece.SplitPos == -1 || matchingCount == 3
-					? factory.ParameterNode(null, factory.NodeCollectionFromNodes(nvPiece))
+					? factory.ParameterNode(null, nvPiece)
 					: factory.ParameterNode(
-						factory.NodeCollectionFromNodes(nvPiece.GetRange(0, nvPiece.SplitPos)),
-						factory.NodeCollectionFromNodes(nvPiece.GetRange(nvPiece.SplitPos + 1, nvPiece.Count - nvPiece.SplitPos - 1))));
+						nvPiece.GetRange(0, nvPiece.SplitPos),
+						nvPiece.GetRange(nvPiece.SplitPos + 1, nvPiece.Count - nvPiece.SplitPos - 1)));
 			}
 
-			var title = factory.NodeCollectionFromNodes(this.NameValuePieces[0]);
+			var title = this.NameValuePieces[0];
 			var node =
 				matchingCount == 3 ? factory.ArgumentNode(title, parameters) :
 				found == ']' ? factory.LinkNode(title, parameters) :

@@ -140,6 +140,17 @@
 		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single link (e.g., <c>[[Link]]</c>, or any variant thereof).</exception>
 		public ILinkNode LinkNodeFromWikiText([Localizable(false)] string wikiText) => this.SingleNode<ILinkNode>(wikiText);
 
+		/// <inheritdoc/>
+		public NodeCollection NodeCollection() => new NodeCollection(this);
+
+		/// <inheritdoc/>
+		public NodeCollection NodeCollectionFromNodes(IEnumerable<IWikiNode> copyNodes)
+		{
+			var retval = this.NodeCollection();
+			retval.AddRange(copyNodes);
+			return retval;
+		}
+
 		/// <summary>Creates a new <see cref="IParameterNode"/> from another IParameterNode, copying surrounding whitespace from the other parameter.</summary>
 		/// <param name="other">The other parameter.</param>
 		/// <param name="value">The new parameter value.</param>
@@ -194,10 +205,7 @@
 		public NodeCollection Parse(string? text, InclusionType inclusionType, bool strictInclusion)
 		{
 			var stack = new WikiStack(this, text, inclusionType, strictInclusion);
-			var retval = this.NodeCollection();
-			retval.AddRange(stack.GetNodes());
-
-			return retval;
+			return this.NodeCollectionFromNodes(stack.GetNodes());
 		}
 
 		/// <summary>If the text provided represents a single node of the specified type, returns that node. Otherwise, throws an error.</summary>
@@ -353,46 +361,35 @@
 		#region Public Virtual Methods
 
 		/// <inheritdoc/>
-		public virtual IArgumentNode ArgumentNode(NodeCollection name, IList<IParameterNode> defaultValue) =>
-			new ArgumentNode(name, defaultValue);
+		public virtual IArgumentNode ArgumentNode(IEnumerable<IWikiNode> name, IList<IParameterNode> defaultValue) =>
+			new ArgumentNode(this, name, defaultValue);
 
 		/// <inheritdoc/>
 		public virtual ICommentNode CommentNode(string comment) =>
 			new CommentNode(comment);
 
 		/// <inheritdoc/>
-		public virtual IHeaderNode HeaderNode(int level, [Localizable(false)] NodeCollection text) =>
-			new HeaderNode(level, text);
+		public virtual IHeaderNode HeaderNode(int level, [Localizable(false)] IEnumerable<IWikiNode> text) =>
+			new HeaderNode(this, level, text);
 
 		/// <inheritdoc/>
 		public virtual IIgnoreNode IgnoreNode(string value) =>
 			new IgnoreNode(value);
 
 		/// <inheritdoc/>
-		public virtual ILinkNode LinkNode(NodeCollection title, IList<IParameterNode> parameters) =>
-			new LinkNode(title, parameters);
+		public virtual ILinkNode LinkNode(IEnumerable<IWikiNode> title, IList<IParameterNode> parameters) =>
+			new LinkNode(this, title, parameters);
 
 		/// <inheritdoc/>
-		public NodeCollection NodeCollection() => new NodeCollection(this);
-
-		/// <inheritdoc/>
-		public NodeCollection NodeCollectionFromNodes(IEnumerable<IWikiNode> copyNodes)
-		{
-			var retval = this.NodeCollection();
-			retval.AddRange(copyNodes);
-			return retval;
-		}
-
-		/// <inheritdoc/>
-		public virtual IParameterNode ParameterNode(NodeCollection? name, NodeCollection value) =>
-			new ParameterNode(name, value);
+		public virtual IParameterNode ParameterNode(IEnumerable<IWikiNode>? name, IEnumerable<IWikiNode> value) =>
+			new ParameterNode(this, name, value);
 
 		/// <inheritdoc/>
 		public virtual ITagNode TagNode(string name, string? attributes, string? innerText, string? close) =>
 			new TagNode(name, attributes, innerText, close);
 
 		/// <inheritdoc/>
-		public virtual ITemplateNode TemplateNode(NodeCollection title, IList<IParameterNode> parameters) => new TemplateNode(title, parameters);
+		public virtual ITemplateNode TemplateNode(IEnumerable<IWikiNode> title, IList<IParameterNode> parameters) => new TemplateNode(this, title, parameters);
 
 		/// <inheritdoc/>
 		public virtual ITextNode TextNode(string text) => new TextNode(text);
