@@ -294,7 +294,7 @@
 			}
 		}
 
-		private IWikiNode ReplaceLicense(LinkedListNode<IWikiNode> node)
+		private IWikiNode ReplaceLicense(IWikiNode node)
 		{
 			if (node.Value is TemplateNode template)
 			{
@@ -334,7 +334,7 @@
 				category = parsedPage.AddAfter(category, new TextNode("\n"));
 			}
 
-			if ((category ?? parsedPage.Last) is LinkedListNode<IWikiNode> addAfterNode)
+			if ((category ?? parsedPage.Last) is IWikiNode addAfterNode)
 			{
 				parsedPage.AddAfter(addAfterNode, LinkNode.FromParts("Category:Online-Icons-Missing Original File"));
 			}
@@ -349,7 +349,7 @@
 				parsedPage.AddAfter(addAfter, new TextNode("\n"));
 			}
 
-			while (addAfter.Next is LinkedListNode<IWikiNode> next && !(next.Value is HeaderNode) && !(next.Value is LinkNode link && new Title(this.Site, WikiTextVisitor.Value(link.Title)).Namespace == MediaWikiNamespaces.Category))
+			while (addAfter.Next is IWikiNode next && !(next.Value is HeaderNode) && !(next.Value is LinkNode link && new Title(this.Site, WikiTextVisitor.Value(link.Title)).Namespace == MediaWikiNamespaces.Category))
 			{
 				addAfter = next;
 			}

@@ -64,7 +64,7 @@
 		#endregion
 
 		#region Private Static Methods
-		private static LinkedListNode<IWikiNode>? GetLocation(NodeCollection parser)
+		private static IWikiNode? GetLocation(NodeCollection parser)
 		{
 			var templates = parser.FindAll<TemplateNode>(template => WikiTextVisitor.Value(template.Title).Trim() == "Online NPC Summary");
 			var list = new List<TemplateNode>(templates);

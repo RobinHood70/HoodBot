@@ -217,8 +217,8 @@
 		public T SingleNode<T>(string text, [CallerMemberName] string callerName = "<Unknown>")
 			where T : IWikiNode
 		{
-			var parser = this.Parse(text);
-			return parser.Count == 1 && parser.First is LinkedListNode<IWikiNode> first && first.Value is T node
+			var nodes = this.Parse(text);
+			return nodes.Count == 1 && nodes[0] is T node
 				? node
 				: throw new ArgumentException(CurrentCulture(Resources.MalformedNodeText, this.GetType().Name, callerName), nameof(text));
 		}

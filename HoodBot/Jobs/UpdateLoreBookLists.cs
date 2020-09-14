@@ -15,6 +15,10 @@
 
 	public class UpdateLoreBookLists : EditJob
 	{
+		#region Private Constants
+		private const string TemplateName = "Lore Book Entry";
+		#endregion
+
 		#region Fields
 		private readonly Dictionary<string, string> linkTitles = new Dictionary<string, string>(StringComparer.Ordinal);
 		private readonly Dictionary<string, List<string>> pageBooks = new Dictionary<string, List<string>>(StringComparer.Ordinal);
@@ -41,11 +45,11 @@
 					: title;
 			}
 
-			this.Pages.GetBacklinks("Template:Lore Book Entry", BacklinksTypes.EmbeddedIn);
+			this.Pages.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn);
 			foreach (var page in this.Pages)
 			{
 				var parser = new ContextualParser(page);
-				foreach (var template in parser.FindTemplates("Lore Book Entry"))
+				foreach (var template in parser.FindTemplates(TemplateName))
 				{
 					var param2 = template.Find(2);
 					if (template.Find(2) is IParameterNode linkTitle)
@@ -136,33 +140,32 @@
 			var parser = new ContextualParser(page);
 			var nodes = parser.Nodes;
 			var factory = nodes.Factory;
-			if (nodes.FindListNode<ITemplateNode>(node => FullTitle.FromBacklinkNode(page.Site, node).PageNameEquals("Lore Book Entry"), true, false, null) is var node &&
-				node != null &&
-				node.Previous is LinkedListNode<IWikiNode> first &&
-				nodes.FindListNode<ITemplateNode>(node => FullTitle.FromBacklinkNode(page.Site, node).PageNameEquals("Lore Book Entry"), true, false, null)?.Next is LinkedListNode<IWikiNode> last)
+			var first = nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
+			var last = nodes.FindLastIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
+			if (first != -1)
 			{
-				while (node != null && node != last)
-				{
-					var next = node.Next;
-					nodes.Remove(node);
-					node = next;
-				}
-
+				var newNodes = new List<IWikiNode>();
+				nodes.RemoveRange(first, last + 1 - first);
 				var letter = page.PageName.Substring(6);
 				var entries = this.pageBooks[letter];
 				foreach (var entry in entries)
 				{
-					var template = factory.TemplateNodeFromParts("Lore Book Entry", (null, entry));
+					var template = factory.TemplateNodeFromParts(TemplateName, (null, entry));
 					if (this.linkTitles.TryGetValue(entry, out var linkTitle))
 					{
 						template.Add(linkTitle);
 					}
 
-					nodes.AddBefore(last, factory.TextNode("\n"));
-					nodes.AddBefore(last, template);
+					newNodes.Add(template);
+					newNodes.Add(factory.TextNode("\n"));
 				}
 
-				nodes.Remove(first.Next!);
+				if (newNodes.Count > 0)
+				{
+					newNodes.RemoveAt(newNodes.Count - 1);
+				}
+
+				nodes.InsertRange(first, newNodes);
 				page.Text = parser.GetText();
 			}
 			else

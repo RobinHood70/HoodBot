@@ -735,11 +735,8 @@
 				replacement.Actions.HasFlag(ReplacementActions.Propose) &&
 				!this.ProposedDeletions.Contains(page))
 			{
-				var deleteTemplate = new WikiNodeFactory().TemplateNodeFromParts(
-					"Proposeddeletion",
-					("bot", "1"),
-					(null, replacement.Reason ?? throw new InvalidOperationException()));
-				var text = WikiTextVisitor.Raw(deleteTemplate);
+				ThrowNull(replacement.Reason, nameof(replacement), nameof(replacement.Reason));
+				var text = "{{Proposeddeletion|bot=1|" + replacement.Reason + "}}";
 				var noinclude = page.Namespace == MediaWikiNamespaces.Template;
 				if (!noinclude && replacement.FromPage != null)
 				{

@@ -126,7 +126,7 @@
 
 		private void IconHandler(Page page, TemplateNode template)
 		{
-			if (page.Namespace.SubjectSpaceId != UespNamespaces.Dragonborn && template.FindParameterLinked("ns_base") is LinkedListNode<IWikiNode> paramListNode && paramListNode.Value is ParameterNode nsBase)
+			if (page.Namespace.SubjectSpaceId != UespNamespaces.Dragonborn && template.FindParameterLinked("ns_base") is IWikiNode paramListNode && paramListNode.Value is ParameterNode nsBase)
 			{
 				var value = EmbeddedValue.FindWhitespace(WikiTextVisitor.Value(nsBase.Value));
 				if (this.Site.Namespaces[UespNamespaces.Dragonborn].Contains(value.Value))

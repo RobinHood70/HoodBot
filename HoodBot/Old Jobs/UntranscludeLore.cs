@@ -202,7 +202,7 @@
 				: LinkNode.FromParts(linkPage.FullPageName, display) as IWikiNode;
 		}
 
-		private IWikiNode LoreTransclusionReplacer(LinkedListNode<IWikiNode> node)
+		private IWikiNode LoreTransclusionReplacer(IWikiNode node)
 		{
 			if (node.Value is TemplateNode templateNode)
 			{
@@ -259,7 +259,7 @@
 			return retval;
 		}
 
-		private IWikiNode OldLoreInserter(LinkedListNode<IWikiNode> node)
+		private IWikiNode OldLoreInserter(IWikiNode node)
 		{
 			if (node.Value is TemplateNode templateNode)
 			{
@@ -297,7 +297,7 @@
 			this.noTransclusions = this.linkedNamespaces.Count == 0;
 		}
 
-		private IWikiNode TemplateReplacer(LinkedListNode<IWikiNode> node)
+		private IWikiNode TemplateReplacer(IWikiNode node)
 		{
 			switch (node.Value)
 			{

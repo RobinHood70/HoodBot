@@ -158,7 +158,7 @@
 		{
 			if (parser.FindFirst<TemplateNode>(item => item.GetTitleValue() == "Mod Header") == null)
 			{
-				if (parser.FindFirstLinked<TemplateNode>(item => TrailTemplates.ContainsKey(item.GetTitleValue())) is LinkedListNode<IWikiNode> trail)
+				if (parser.FindFirstLinked<TemplateNode>(item => TrailTemplates.ContainsKey(item.GetTitleValue())) is IWikiNode trail)
 				{
 					var trailTemplate = (TemplateNode)trail.Value;
 					var addAfter = TrailTemplates[trailTemplate.GetTitleValue()];
@@ -213,7 +213,7 @@
 			foreach (var archive in archiveList)
 			{
 				var text = ParameterNode.FromParts(archive);
-				var node = firstAnon == null ? template.Parameters.AddLast(text) : template.Parameters.AddBefore(firstAnon, text);
+				var node = firstAnon == null ? template.Parameters.Add(text) : template.Parameters.AddBefore(firstAnon, text);
 				node = template.Parameters.AddAfter(node, ParameterNode.FromParts(string.Empty));
 				node = template.Parameters.AddAfter(node, ParameterNode.FromParts("\n"));
 			}
@@ -415,7 +415,7 @@
 
 		private void LoreBookHandler(Page page, TemplateNode template)
 		{
-			LinkedListNode<IWikiNode>? addExtra = null;
+			IWikiNode? addExtra = null;
 			foreach (var node in template.Parameters.LinkedNodes)
 			{
 				var parameter = (ParameterNode)node.Value;

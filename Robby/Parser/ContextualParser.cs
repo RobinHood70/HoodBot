@@ -46,7 +46,7 @@
 		public ContextualParser(ISimpleTitle title, string text, InclusionType inclusionType, bool strictInclusion)
 		{
 			this.Context = title ?? throw ArgumentNull(nameof(title));
-			this.Nodes = new WikiNodeFactory().Parse(text, inclusionType, strictInclusion);
+			this.Nodes = new SiteNodeFactory(title.Namespace.Site).Parse(text, inclusionType, strictInclusion);
 		}
 		#endregion
 
@@ -105,36 +105,33 @@
 		{
 			ThrowNull(category, nameof(category));
 			var catTitle = Title.Coerce(this.Site, MediaWikiNamespaces.Category, category);
-			LinkedListNode<IWikiNode>? lastCategory = null;
-			foreach (var link in this.Nodes.FindAllListNodes<SiteLinkNode>(null, false, false, null))
+			var lastCategoryIndex = -1;
+			for (var i = 0; i < this.Nodes.Count; i++)
 			{
-				if (Title.FromBacklinkNode(this.Site, (SiteLinkNode)link.Value) == catTitle)
+				if (this.Nodes[i] is SiteLinkNode link)
 				{
-					return false;
-				}
+					if (Title.FromBacklinkNode(this.Site, link) == catTitle)
+					{
+						return false;
+					}
 
-				lastCategory = link;
+					lastCategoryIndex = i + 1;
+				}
 			}
 
 			var newCat = this.Nodes.Factory.LinkNodeFromParts(catTitle.ToString());
-			if (lastCategory == null)
+			if (lastCategoryIndex == -1)
 			{
 				this.Nodes.AddText("\n\n");
-				this.Nodes.AddLast(newCat);
+				this.Nodes.Add(newCat);
 			}
 			else
 			{
-				this.Nodes.AddAfter(lastCategory, newCat);
+				this.Nodes.Insert(lastCategoryIndex, newCat);
 			}
 
 			return true;
 		}
-
-		/// <summary>Finds the first header with the specified text.</summary>
-		/// <param name="headerText">Name of the header.</param>
-		/// <returns>The first header with the specified text.</returns>
-		/// <remarks>This is a temporary function until HeaderNode can be rewritten to work more like other nodes (i.e., without capturing trailing whitespace).</remarks>
-		public LinkedListNode<IWikiNode>? FindFirstHeaderLinked(string headerText) => this.Nodes.FindListNode<IHeaderNode>(header => string.Equals(header.GetInnerText(true), headerText, StringComparison.Ordinal), false, true, null);
 
 		/// <summary>Finds the the first link that matches the provided title.</summary>
 		/// <param name="find">The title to find.</param>
@@ -218,20 +215,7 @@
 				return link;
 			}
 
-			return null;
-		}
-
-		/// <summary>Finds the the first template that matches the provided title and returns its <see cref="LinkedListNode{T}"/>.</summary>
-		/// <param name="templateName">The name of the template to find.</param>
-		/// <returns>The first <see cref="SiteTemplateNode"/> that matches the title provided, if found.</returns>
-		public LinkedListNode<IWikiNode>? FindSiteTemplateNode(string templateName)
-		{
-			foreach (var link in this.FindSiteTemplateNodes(templateName))
-			{
-				return link;
-			}
-
-			return null;
+			return default;
 		}
 
 		/// <summary>Finds all templates that match the provided title.</summary>
@@ -242,7 +226,7 @@
 			var find = new TitleParser(this.Site, MediaWikiNamespaces.Template, templateName);
 			foreach (var template in this.TemplateNodes)
 			{
-				var titleText = template.GetTitleValue();
+				var titleText = template.GetTitleText();
 				var templateTitle = new TitleParser(this.Site, MediaWikiNamespaces.Template, titleText);
 				if (templateTitle.SimpleEquals(find))
 				{
@@ -251,25 +235,11 @@
 			}
 		}
 
-		/// <summary>Finds all templates that match the provided title and returns their <see cref="LinkedListNode{T}"/>s.</summary>
-		/// <param name="templateName">The name of the template to find.</param>
-		/// <returns>The LinkedListNodes that match the title provided, if any.</returns>
-		public IEnumerable<LinkedListNode<IWikiNode>> FindSiteTemplateNodes(string templateName)
-		{
-			var find = new TitleParser(this.Site, MediaWikiNamespaces.Template, templateName);
-			foreach (var templateNode in this.Nodes.FindAllListNodes<SiteTemplateNode>())
-			{
-				if (templateNode.Value is SiteTemplateNode template)
-				{
-					var titleText = template.GetTitleValue();
-					var templateTitle = new TitleParser(this.Site, MediaWikiNamespaces.Template, titleText);
-					if (templateTitle.SimpleEquals(find))
-					{
-						yield return templateNode;
-					}
-				}
-			}
-		}
+		/// <summary>Finds the first header with the specified text.</summary>
+		/// <param name="headerText">Name of the header.</param>
+		/// <returns>The first header with the specified text.</returns>
+		/// <remarks>This is a temporary function until HeaderNode can be rewritten to work more like other nodes (i.e., without capturing trailing whitespace).</remarks>
+		public int IndexOfHeader(string headerText) => this.Nodes.FindIndex<IHeaderNode>(header => string.Equals(header.GetInnerText(true), headerText, StringComparison.Ordinal));
 
 		/// <summary>Converts the page's <see cref="NodeCollection"/> back to text.</summary>
 		/// <returns>The page text.</returns>

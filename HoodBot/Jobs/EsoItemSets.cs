@@ -273,9 +273,9 @@
 		private void UpdatePageText(Page page, PageData pageData)
 		{
 			var oldPage = new ContextualParser(page, InclusionType.Transcluded, false);
-			var firstNode = oldPage.Nodes.First?.Value;
-			var lastNode = oldPage.Nodes.Last?.Value;
-			if (!(firstNode is IIgnoreNode && lastNode is IIgnoreNode))
+			if (oldPage.Nodes.Count < 2 || !(
+					oldPage.Nodes[0] is IIgnoreNode firstNode &&
+					oldPage.Nodes[^1] is IIgnoreNode lastNode))
 			{
 				this.Warn($"Delimiters not found on page {page.FullPageName}");
 				return;
@@ -306,12 +306,12 @@
 			sb.Remove(sb.Length - 5, 4);
 			var newPage = new ContextualParser(page, sb.ToString());
 			EsoReplacer.ReplaceGlobal(newPage.Nodes);
-			EsoReplacer.ReplaceEsoLinks(newPage.Nodes);
+			EsoReplacer.ReplaceEsoLinks(this.Site, newPage.Nodes);
 			EsoReplacer.ReplaceFirstLink(newPage.Nodes, usedList);
 
 			// Now that we're done parsing, re-add the IgnoreNodes.
-			newPage.Nodes.AddFirst(firstNode);
-			newPage.Nodes.AddLast(lastNode);
+			newPage.Nodes.Insert(0, firstNode);
+			newPage.Nodes.Add(lastNode);
 			page.Text = newPage.GetText() ?? string.Empty;
 
 			var replacer = new EsoReplacer(this.Site);

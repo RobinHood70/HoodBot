@@ -6,6 +6,7 @@
 	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
@@ -353,7 +354,7 @@
 		public static SiteLink FromGalleryText(Site site, string link)
 		{
 			ThrowNull(link, nameof(link));
-			var linkNode = CreateLinkNode(link);
+			var linkNode = CreateLinkNode(site, link);
 			return FromLinkNode(site, linkNode, true);
 		}
 
@@ -394,7 +395,7 @@
 		public static SiteLink FromText(Site site, string link)
 		{
 			ThrowNull(link, nameof(link));
-			var linkNode = CreateLinkNode(link);
+			var linkNode = CreateLinkNode(site, link);
 			return FromLinkNode(site, linkNode, false);
 		}
 		#endregion
@@ -467,7 +468,7 @@
 				values.Add(text);
 			}
 
-			return new Parser.WikiNodeFactory().LinkNodeFromParts(this.GetTitle(), values);
+			return new SiteNodeFactory(this.Site).LinkNodeFromParts(this.GetTitle(), values);
 		}
 
 		/// <summary>Copies values from the link into a <see cref="ILinkNode"/>.</summary>
@@ -578,7 +579,7 @@
 		#endregion
 
 		#region Private Static Methods
-		private static ILinkNode CreateLinkNode(string link)
+		private static ILinkNode CreateLinkNode(Site site, string link)
 		{
 			// The extra space at the end, and then its later removal, is a kludgey workaround for the rare case of [[Link|Text [http://external]]], which the parser doesn't handle correctly at this point.
 			if (!link.StartsWith("[[", StringComparison.Ordinal) || !link.EndsWith("]]", StringComparison.Ordinal))
@@ -586,12 +587,12 @@
 				link = "[[" + link + " ]]";
 			}
 
-			var linkNode = new Parser.WikiNodeFactory().LinkNodeFromWikiText(link);
+			var linkNode = new SiteNodeFactory(site).LinkNodeFromWikiText(link);
 			var nodes = linkNode.Parameters.Count == 0 ? linkNode.Title : linkNode.Parameters[linkNode.Parameters.Count - 1].Value;
-			var last = (ITextNode)nodes.Last!.Value;
+			var last = (ITextNode)nodes[^1];
 			if (last.Text.Length == 1)
 			{
-				nodes.Remove(nodes.Last);
+				nodes.RemoveAt(nodes.Count - 1);
 			}
 			else
 			{
