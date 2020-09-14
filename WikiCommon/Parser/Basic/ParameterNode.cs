@@ -1,9 +1,7 @@
 ﻿namespace RobinHood70.WikiCommon.Parser.Basic
 {
-	using System;
 	using System.Collections.Generic;
 	using RobinHood70.WikiCommon.Parser;
-	using RobinHood70.WikiCommon.Properties;
 	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Represents a parameter to a template or link.</summary>
@@ -12,16 +10,14 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="ParameterNode"/> class.</summary>
+		/// <param name="factory">The factory to use when creating new nodes.</param>
 		/// <param name="name">The name.</param>
 		/// <param name="value">The value.</param>
-		public ParameterNode(NodeCollection? name, NodeCollection value)
+		public ParameterNode(IWikiNodeFactory factory, IEnumerable<IWikiNode>? name, IEnumerable<IWikiNode> value)
 		{
-			this.Name = name;
-			this.Value = value ?? throw ArgumentNull(nameof(value));
-			if (name != null && name.Factory != value.Factory)
-			{
-				throw new InvalidOperationException(Resources.FactoriesMustMatch);
-			}
+			this.Factory = factory ?? throw ArgumentNull(nameof(factory));
+			this.Name = name == null ? null : factory.NodeCollectionFromNodes(name);
+			this.Value = factory.NodeCollectionFromNodes(value ?? throw ArgumentNull(nameof(value)));
 		}
 		#endregion
 
@@ -31,7 +27,7 @@
 		public bool Anonymous => this.Name == null;
 
 		/// <inheritdoc/>
-		public IWikiNodeFactory Factory => this.Value.Factory;
+		public IWikiNodeFactory Factory { get; }
 
 		/// <inheritdoc/>
 		public NodeCollection? Name { get; private set; }

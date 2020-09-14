@@ -6,10 +6,7 @@
 	using System.Runtime.CompilerServices;
 
 	/// <summary>Factory to create the various kinds of <see cref="IWikiNode"/>s, both from the parser itself and manually constructed nodes.</summary>
-	/// <remarks>
-	/// <para>This should always be the primary point of entry for creating new nodes.</para>
-	/// <para>For those that contain <see cref="NodeCollection"/>s (those dervied from <see cref="IParameterNode"/>), the method assumes the NodeCollection was created by the desired factory and uses that factory for any of its own methods that require one. Collections that don't contain NodeCollections are, essentially, factory-less.</para>
-	/// </remarks>
+	/// <remarks>This should always be the primary point of entry for creating new nodes.</remarks>
 	public interface IWikiNodeFactory
 	{
 		#region Methods
@@ -18,7 +15,7 @@
 		/// <param name="name">The title.</param>
 		/// <param name="defaultValue">The default value. May be null or an empty collection. If populated, this should preferentially be either a single ParameterNode or a collection of IWikiNodes representing the default value itself. For compatibility with MediaWiki, it can also be a list of parameter nodes, in which case, these will be added as individual entries to the <see cref="IArgumentNode.ExtraValues"/> collection.</param>
 		/// <returns>A new instance of the <see cref="ArgumentNode"/> class.</returns>
-		IArgumentNode ArgumentNode(NodeCollection name, IList<IParameterNode> defaultValue);
+		IArgumentNode ArgumentNode(IEnumerable<IWikiNode> name, IList<IParameterNode> defaultValue);
 
 		/// <summary>Creates a new <see cref="IArgumentNode"/>  from its parts.</summary>
 		/// <param name="name">The name.</param>
@@ -41,7 +38,7 @@
 		/// <param name="level">The level.</param>
 		/// <param name="text">The text of the header.</param>
 		/// <returns>A new instance of the <see cref="HeaderNode"/> class.</returns>
-		IHeaderNode HeaderNode(int level, [Localizable(false)] NodeCollection text);
+		IHeaderNode HeaderNode(int level, [Localizable(false)] IEnumerable<IWikiNode> text);
 
 		/// <summary>Creates a new <see cref="IHeaderNode"/> from the provided text.</summary>
 		/// <param name="level">The header level (number of equals signs).</param>
@@ -65,7 +62,7 @@
 		/// <param name="title">The title.</param>
 		/// <param name="parameters">The parameters.</param>
 		/// <returns>A new instance of the <see cref="LinkNode"/> class.</returns>
-		ILinkNode LinkNode(NodeCollection title, IList<IParameterNode> parameters);
+		ILinkNode LinkNode(IEnumerable<IWikiNode> title, IList<IParameterNode> parameters);
 
 		/// <summary>Creates a new <see cref="ILinkNode"/> from its parts.</summary>
 		/// <param name="title">The link destination.</param>
@@ -103,7 +100,7 @@
 		/// <param name="name">The name.</param>
 		/// <param name="value">The value.</param>
 		/// <returns>A new instance of the <see cref="ParameterNode"/> class.</returns>
-		IParameterNode ParameterNode(NodeCollection? name, NodeCollection value);
+		IParameterNode ParameterNode(IEnumerable<IWikiNode>? name, IEnumerable<IWikiNode> value);
 
 		/// <summary>Creates a new <see cref="IParameterNode"/> from another IParameterNode, copying surrounding whitespace from the other parameter.</summary>
 		/// <param name="other">The other parameter.</param>
@@ -162,7 +159,7 @@
 		/// <param name="title">The title.</param>
 		/// <param name="parameters">The parameters.</param>
 		/// <returns>A new instance of the <see cref="TemplateNode"/> class.</returns>
-		ITemplateNode TemplateNode(NodeCollection title, IList<IParameterNode> parameters);
+		ITemplateNode TemplateNode(IEnumerable<IWikiNode> title, IList<IParameterNode> parameters);
 
 		/// <summary>Creates a new TemplateNode from its parts.</summary>
 		/// <param name="title">The link destination.</param>

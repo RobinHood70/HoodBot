@@ -16,26 +16,27 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="ArgumentNode"/> class.</summary>
+		/// <param name="factory">The factory to use when creating new nodes (must match the <paramref name="defaultValue"/> factory).</param>
 		/// <param name="name">The title.</param>
 		/// <param name="defaultValue">The default value. May be null or an empty collection. If populated, this should preferentially be either a single ParameterNode or a collection of IWikiNodes representing the default value itself. For compatibility with MediaWiki, it can also be a list of parameter nodes, in which case, these will be added as individual entries to the <see cref="ExtraValues"/> collection.</param>
-		public ArgumentNode(NodeCollection name, IList<IParameterNode> defaultValue)
+		public ArgumentNode(IWikiNodeFactory factory, IEnumerable<IWikiNode> name, IList<IParameterNode> defaultValue)
 		{
-			ThrowNull(name, nameof(name));
+			this.Factory = factory ?? throw ArgumentNull(nameof(factory));
+			this.Name = factory.NodeCollectionFromNodes(name ?? throw ArgumentNull(nameof(name)));
 			ThrowNull(defaultValue, nameof(defaultValue));
-			this.Name = name;
 
 			if (defaultValue.Count > 0)
 			{
 				foreach (var parameter in defaultValue)
 				{
-					if (parameter.Factory != name.Factory)
+					if (parameter.Factory != factory)
 					{
 						throw new InvalidOperationException(Resources.FactoriesMustMatch);
 					}
 				}
 
 				// defaultValue comes to us from WikiStack as a list of IParameterNodes, but is never actually treated as such, so we morph the main default value into a NodeCollection then, if there are junk values after that, we add them to ExtraValues unaltered.
-				var nodes = name.Factory.NodeCollection();
+				var nodes = factory.NodeCollection();
 				if (defaultValue[0].Name is NodeCollection valueName)
 				{
 					nodes.AddRange(valueName);
@@ -68,7 +69,7 @@
 		public IReadOnlyList<IParameterNode>? ExtraValues => this.extraValues;
 
 		/// <inheritdoc/>
-		public IWikiNodeFactory Factory => this.Name.Factory;
+		public IWikiNodeFactory Factory { get; }
 
 		/// <inheritdoc/>
 		public NodeCollection Name { get; }

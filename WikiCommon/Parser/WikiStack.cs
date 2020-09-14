@@ -139,7 +139,7 @@
 
 		/// <summary>Does final processing before returning the node collection.</summary>
 		/// <returns>The <see cref="NodeCollection"/> representing the text provided in the constructor.</returns>
-		public NodeCollection GetNodes()
+		public IEnumerable<IWikiNode> GetNodes()
 		{
 			var finalNodes = this.array[0].CurrentPiece;
 			for (var i = 1; i < this.count; i++)
@@ -155,7 +155,7 @@
 				}
 			}
 
-			return this.NodeFactory.NodeCollectionFromNodes(finalNodes);
+			return finalNodes;
 		}
 		#endregion
 
