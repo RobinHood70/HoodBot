@@ -1,8 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
 	using System;
-	using System.Diagnostics.CodeAnalysis;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Design;
@@ -11,11 +9,11 @@
 	public abstract class EditJob : WikiJob
 	{
 		#region Constructors
-		protected EditJob([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		protected EditJob(JobManager jobManager)
+			: base(jobManager)
 		{
 			this.JobType = JobTypes.Read | JobTypes.Write;
-			this.Pages = new PageCollection(site);
+			this.Pages = new PageCollection(this.Site);
 		}
 		#endregion
 

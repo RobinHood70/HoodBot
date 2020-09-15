@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.HoodBot
+﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
 	using System.IO;
 	using static RobinHood70.CommonCode.Globals;

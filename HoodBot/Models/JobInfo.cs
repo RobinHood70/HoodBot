@@ -5,7 +5,6 @@
 	using System.Reflection;
 	using RobinHood70.HoodBot;
 	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.Robby;
 	using static RobinHood70.CommonCode.Globals;
 
 	public class JobInfo : IEquatable<JobInfo>
@@ -22,20 +21,16 @@
 			var constructorParameters = constructor.GetParameters();
 			ThrowNull(constructorParameters, nameof(constructor), nameof(constructor.GetParameters));
 
-			var parameters = new List<ConstructorParameter>(constructorParameters.Length - 2);
+			var parameters = new List<ConstructorParameter>(constructorParameters.Length);
 			foreach (var parameter in constructor.GetParameters())
 			{
-				switch (parameter.ParameterType.Name)
+				if (!string.Equals(parameter.ParameterType.Name, nameof(WikiJob.JobManager), StringComparison.Ordinal))
 				{
-					case nameof(WikiJob.AsyncInfo):
-					case nameof(WikiJob.Site):
-						break;
-					default:
-						parameters.Add(new ConstructorParameter(parameter));
-						break;
+					parameters.Add(new ConstructorParameter(parameter));
 				}
 			}
 
+			parameters.TrimExcess();
 			this.Parameters = parameters;
 		}
 		#endregion
@@ -80,11 +75,10 @@
 		#region Public Methods
 		public bool Equals(JobInfo? other) => other != null && this.Constructor == other.Constructor;
 
-		public WikiJob Instantiate(Site site, AsyncInfo asyncInfo)
+		public WikiJob Instantiate(JobManager jobManager)
 		{
-			ThrowNull(site, nameof(site));
-			var objectList = new List<object?> { site, asyncInfo };
-
+			ThrowNull(jobManager, nameof(jobManager));
+			var objectList = new List<object?> { jobManager };
 			if (this.Parameters is IReadOnlyList<ConstructorParameter> jobParams)
 			{
 				foreach (var param in jobParams)

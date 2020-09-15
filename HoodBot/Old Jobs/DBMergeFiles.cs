@@ -15,8 +15,8 @@
 	{
 		#region Constructors
 		[JobInfo("Merge Files", "Dragonborn Merge")]
-		public DBMergeFiles(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public DBMergeFiles(JobManager jobManager)
+			: base(jobManager)
 		{
 			// this.FollowUpActions = FollowUpActions.EmitReport;
 			this.FollowUpActions = FollowUpActions.EmitReport | FollowUpActions.ProposeUnused | FollowUpActions.FixLinks | FollowUpActions.CheckLinksRemaining;

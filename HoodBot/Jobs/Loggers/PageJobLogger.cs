@@ -1,10 +1,11 @@
-﻿namespace RobinHood70.HoodBot
+﻿namespace RobinHood70.HoodBot.Jobs.Loggers
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Globalization;
 	using RobinHood70.CommonCode;
+	using RobinHood70.HoodBot;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
@@ -27,8 +28,13 @@
 		#endregion
 
 		#region Constructors
-		public PageJobLogger(JobTypes typesToLog, Page logPage)
-			: base(typesToLog) => this.logPage = logPage ?? throw ArgumentNull(nameof(logPage));
+		public PageJobLogger(Site site, string pageName, JobTypes typesToLog)
+			: base(typesToLog)
+		{
+			ThrowNull(site, nameof(site));
+			ThrowNull(pageName, nameof(pageName));
+			this.logPage = Page.FromName(site, pageName);
+		}
 		#endregion
 
 		#region Public Override Methods

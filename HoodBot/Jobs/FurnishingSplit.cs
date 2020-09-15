@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Uesp;
@@ -25,8 +24,8 @@
 
 		#region Constructors
 		[JobInfo("Furnishing Split")]
-		public FurnishingSplit([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public FurnishingSplit(JobManager jobManager)
+			: base(jobManager)
 		{
 		}
 		#endregion

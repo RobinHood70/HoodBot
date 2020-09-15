@@ -1,9 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System.Diagnostics.CodeAnalysis;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
@@ -12,8 +9,8 @@
 	{
 		#region Constructors
 		[JobInfo("One-Off Job")]
-		public OneOffJob([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public OneOffJob(JobManager jobManager)
+			: base(jobManager)
 		{
 		}
 

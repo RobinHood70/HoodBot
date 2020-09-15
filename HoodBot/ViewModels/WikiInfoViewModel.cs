@@ -12,9 +12,11 @@
 		#region Fields
 		private Uri? api;
 		private string? displayName;
+		private string? logPage;
 		private int maxLag;
 		private string? password;
 		private int readThrottling;
+		private string? resultPage;
 		private string? siteClassIdentifier;
 		private string? userName;
 		private int writeThrottling;
@@ -48,6 +50,12 @@
 
 		public bool IsValid => !string.IsNullOrWhiteSpace(this.DisplayName) && this.Api?.IsWellFormedOriginalString() == true;
 
+		public string? LogPage
+		{
+			get => this.logPage;
+			set => this.Set(ref this.logPage, value);
+		}
+
 		public int MaxLag
 		{
 			get => this.maxLag;
@@ -64,6 +72,12 @@
 		{
 			get => this.readThrottling;
 			set => this.Set(ref this.readThrottling, value);
+		}
+
+		public string? ResultsPage
+		{
+			get => this.resultPage;
+			set => this.Set(ref this.resultPage, value);
 		}
 
 		public string? SiteClassIdentifier
@@ -96,9 +110,11 @@
 		{
 			this.Api = this.WikiInfo.Api;
 			this.DisplayName = this.WikiInfo.DisplayName;
+			this.LogPage = this.WikiInfo.LogPage;
 			this.MaxLag = this.WikiInfo.MaxLag;
 			this.Password = this.WikiInfo.Password;
 			this.ReadThrottling = this.WikiInfo.ReadThrottling;
+			this.ResultsPage = this.WikiInfo.ResultsPage;
 			this.SiteClassIdentifier = this.WikiInfo.SiteClassIdentifier;
 			this.UserName = this.WikiInfo.UserName;
 			this.WriteThrottling = this.WikiInfo.WriteThrottling;
@@ -108,9 +124,11 @@
 		{
 			this.WikiInfo.Api = this.Api;
 			this.WikiInfo.DisplayName = this.DisplayName;
+			this.WikiInfo.LogPage = this.LogPage;
 			this.WikiInfo.MaxLag = this.MaxLag;
 			this.WikiInfo.Password = this.Password;
 			this.WikiInfo.ReadThrottling = this.ReadThrottling;
+			this.WikiInfo.ResultsPage = this.ResultsPage;
 			this.WikiInfo.SiteClassIdentifier = this.SiteClassIdentifier;
 			this.WikiInfo.UserName = this.UserName;
 			this.WikiInfo.WriteThrottling = this.WriteThrottling;

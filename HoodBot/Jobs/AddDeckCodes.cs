@@ -6,7 +6,6 @@
 	using System.IO;
 	using System.Text.RegularExpressions;
 	using Newtonsoft.Json;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -21,8 +20,8 @@
 
 		#region Constructors
 		[JobInfo("Add Deck Codes", "Legends")]
-		public AddDeckCodes([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo) => this.Pages.LoadOptions = new PageLoadOptions(PageModules.Default, true);
+		public AddDeckCodes(JobManager jobManager)
+			: base(jobManager) => this.Pages.LoadOptions = new PageLoadOptions(PageModules.Default, true);
 		#endregion
 
 		#region Public Override Properties

@@ -19,11 +19,15 @@
 
 		public bool IsValid => !string.IsNullOrWhiteSpace(this.DisplayName) && this.Api?.IsWellFormedOriginalString() == true;
 
+		public string? LogPage { get; set; }
+
 		public int MaxLag { get; set; } = DefaultMaxLag;
 
 		public string? Password { get; set; }
 
 		public int ReadThrottling { get; set; }
+
+		public string? ResultsPage { get; set; }
 
 		public string? SiteClassIdentifier { get; set; }
 
@@ -51,6 +55,7 @@
 			}
 
 			this.DisplayName = (string?)json[nameof(this.DisplayName)];
+			this.LogPage = (string?)json[nameof(this.LogPage)];
 			this.MaxLag = (int?)json[nameof(this.MaxLag)] ?? DefaultMaxLag;
 			var password = (string?)json[nameof(this.Password)];
 			if (password != null)
@@ -59,6 +64,7 @@
 			}
 
 			this.ReadThrottling = (int?)json[nameof(this.ReadThrottling)] ?? 0;
+			this.ResultsPage = (string?)json[nameof(this.ResultsPage)];
 			this.SiteClassIdentifier = (string?)json[nameof(this.SiteClassIdentifier)];
 			this.UserName = (string?)json[nameof(this.UserName)];
 			this.WriteThrottling = (int?)json[nameof(this.WriteThrottling)] ?? 0;
@@ -72,6 +78,7 @@
 				{ nameof(this.DisplayName), new JValue(this.DisplayName) }
 			};
 
+			AddToJson(nameof(this.LogPage), this.LogPage, null);
 			AddToJson(nameof(this.MaxLag), this.MaxLag, DefaultMaxLag);
 			if (this.Password != null)
 			{
@@ -79,6 +86,7 @@
 			}
 
 			AddToJson(nameof(this.ReadThrottling), this.ReadThrottling, 0);
+			AddToJson(nameof(this.ResultsPage), this.ResultsPage, null);
 			AddToJson(nameof(this.SiteClassIdentifier), this.SiteClassIdentifier, null);
 			AddToJson(nameof(this.UserName), this.UserName, null);
 			AddToJson(nameof(this.WriteThrottling), this.WriteThrottling, 0);

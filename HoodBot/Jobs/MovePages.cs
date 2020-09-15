@@ -10,8 +10,8 @@
 	{
 		#region Constructors
 		[JobInfo("Page Mover")]
-		public MovePages(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public MovePages(JobManager jobManager)
+			: base(jobManager)
 		{
 			this.MoveAction = MoveAction.None;
 			this.FollowUpActions |= FollowUpActions.UpdateCategoryMembers;

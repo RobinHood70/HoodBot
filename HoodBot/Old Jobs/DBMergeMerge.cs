@@ -17,8 +17,8 @@
 		#region Constructors
 
 		[JobInfo("Merge Overlap", "Dragonborn Merge")]
-		public DBMergeMerge(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public DBMergeMerge(JobManager jobManager)
+			: base(jobManager)
 		{
 			//// this.MoveAction = MoveAction.None;
 			//// this.FollowUpActions = FollowUpActions.EmitReport;

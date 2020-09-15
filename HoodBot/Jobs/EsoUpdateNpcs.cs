@@ -20,8 +20,8 @@
 
 		#region Constructors
 		[JobInfo("Update NPC Info", "ESO")]
-		public EsoUpdateNpcs(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public EsoUpdateNpcs(JobManager jobManager)
+			: base(jobManager)
 		{
 		}
 		#endregion

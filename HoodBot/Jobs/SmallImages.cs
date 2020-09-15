@@ -8,8 +8,8 @@
 	public class SmallImages : WikiJob
 	{
 		[JobInfo("Find Small Images")]
-		public SmallImages(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public SmallImages(JobManager jobManager)
+			: base(jobManager)
 		{
 		}
 

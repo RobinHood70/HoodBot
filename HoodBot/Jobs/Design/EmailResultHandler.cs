@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.HoodBot
+﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
 	using System;
 	using RobinHood70.HoodBot.Properties;

@@ -21,12 +21,11 @@
 		#region Constructors
 		[JobInfo("Template Usage")]
 		public GetTemplateUsage(
-			Site site,
-			AsyncInfo asyncInfo,
+			JobManager jobManager,
 			IEnumerable<string> templateNames,
 			[JobParameter(DefaultValue = true)] bool respectRedirects,
 			[JobParameterFile(Overwrite = true, DefaultValue = @"%BotData%\%templateName%.txt")] string location)
-			: base(site, asyncInfo)
+			: base(jobManager)
 		{
 			ThrowNull(templateNames, nameof(templateNames));
 			ThrowNull(location, nameof(location));

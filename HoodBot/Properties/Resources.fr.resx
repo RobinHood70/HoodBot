@@ -130,7 +130,7 @@
     <value>Tâches disponibles</value>
   </data>
   <data name="BadLogPage" xml:space="preserve">
-    <value>La page de journal n'est pas au format attendu.</value>
+    <value>La page journal n'est pas au format attendu.</value>
   </data>
   <data name="BotDataFolder" xml:space="preserve">
     <value>Dossier de données :</value>
@@ -165,6 +165,9 @@
   <data name="JobCancelled" xml:space="preserve">
     <value>Tâche annulé !</value>
   </data>
+  <data name="LogPage" xml:space="preserve">
+    <value>Page journal :</value>
+  </data>
   <data name="MaxLag" xml:space="preserve">
     <value>MaxLag</value>
   </data>
@@ -188,6 +191,9 @@
   </data>
   <data name="RequiredInfo" xml:space="preserve">
     <value>Paramètres du tâche</value>
+  </data>
+  <data name="ResultsPage" xml:space="preserve">
+    <value>Page de résultats :</value>
   </data>
   <data name="Save" xml:space="preserve">
     <value>Sauvegarder</value>

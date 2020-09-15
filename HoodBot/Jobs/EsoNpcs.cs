@@ -15,8 +15,8 @@
 	{
 		#region Constructors
 		[JobInfo("Create missing NPCs", "ESO")]
-		public EsoNpcs(Site site, AsyncInfo asyncInfo)
-				: base(site, asyncInfo) => this.SetResultDescription("Existing ESO NPC pages");
+		public EsoNpcs(JobManager jobManager)
+				: base(jobManager) => this.SetResultDescription("Existing ESO NPC pages");
 		#endregion
 
 		#region Protected Override Properties

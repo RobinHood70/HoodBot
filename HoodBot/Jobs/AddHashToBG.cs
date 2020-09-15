@@ -1,10 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
@@ -13,8 +10,8 @@
 	public class AddHashToBG : ParsedPageJob
 	{
 		[JobInfo("Add hash to BG", "Maintenance")]
-		public AddHashToBG([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public AddHashToBG(JobManager jobManager)
+			: base(jobManager)
 		{
 		}
 

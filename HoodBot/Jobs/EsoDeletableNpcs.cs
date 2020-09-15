@@ -12,8 +12,8 @@
 	{
 		#region Constructors
 		[JobInfo("Find deletable NPCs", "ESO")]
-		public EsoDeletableNpcs(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo) => this.SetResultDescription("ESO NPC pages with no matching database entry");
+		public EsoDeletableNpcs(JobManager jobManager)
+			: base(jobManager) => this.SetResultDescription("ESO NPC pages with no matching database entry");
 		#endregion
 
 		#region Protected Override Methods

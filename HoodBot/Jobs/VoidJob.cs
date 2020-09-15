@@ -3,15 +3,14 @@
 	using System.Threading;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.Robby;
 
 	public class VoidJob : WikiJob
 	{
 		#region Constructors
 		// We want to keep this job around for testing, but don't need it to clutter up the main list, so comment out the JobInfo.
 		// [JobInfo("Do Nothing")]
-		public VoidJob(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo) => this.ProgressMaximum = 5;
+		public VoidJob(JobManager jobManager)
+			: base(jobManager) => this.ProgressMaximum = 5;
 		#endregion
 
 		#region Protected Override Methods

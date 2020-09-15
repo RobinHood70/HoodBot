@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.HoodBot
+﻿namespace RobinHood70.HoodBot.Jobs.Loggers
 {
 	public abstract class JobLogger
 	{

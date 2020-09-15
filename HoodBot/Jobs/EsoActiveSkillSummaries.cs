@@ -14,8 +14,8 @@
 	{
 		#region Constructors
 		[JobInfo("Update Active Skills", "ESO")]
-		public EsoActiveSkillSummaries(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public EsoActiveSkillSummaries(JobManager jobManager)
+			: base(jobManager)
 		{
 		}
 		#endregion

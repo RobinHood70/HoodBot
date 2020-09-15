@@ -42,8 +42,8 @@
 
 		#region Constructors
 		[JobInfo("Merge Pages", "Dragonborn Merge")]
-		public DBMergeArticles(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public DBMergeArticles(JobManager jobManager)
+			: base(jobManager)
 		{
 			this.CustomEdit = this.UpdatePage;
 			this.MoveAction = MoveAction.None;

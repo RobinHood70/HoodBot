@@ -19,8 +19,8 @@
 
 		#region Constructors
 		[JobInfo("One-Off Job - Fix ESO NPC Locations")]
-		public EsoNpcLocFix([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo) => this.pages = new PageCollection(site);
+		public EsoNpcLocFix(JobManager jobManager)
+			: base(jobManager) => this.pages = new PageCollection(site);
 		#endregion
 
 		#region Public Override Properties
