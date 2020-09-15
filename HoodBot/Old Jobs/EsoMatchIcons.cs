@@ -29,8 +29,8 @@
 
 		#region Constructors
 		[JobInfo("Match Icons", "ESO")]
-		public EsoMatchIcons(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public EsoMatchIcons(JobManager jobManager)
+			: base(jobManager)
 		{
 			this.Pages.LoadOptions = new PageLoadOptions(PageModules.Info | PageModules.Revisions | PageModules.Categories | PageModules.FileInfo);
 			this.Pages.SetLimitations(LimitationType.FilterTo, MediaWikiNamespaces.File);

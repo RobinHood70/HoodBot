@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.IO;
 	using RobinHood70.CommonCode;
@@ -12,8 +11,8 @@
 	public class GenderedNPCsFromLang : WikiJob
 	{
 		[JobInfo("NPCs from Lang")]
-		public GenderedNPCsFromLang([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public GenderedNPCsFromLang(JobManager jobManager)
+			: base(jobManager)
 		{
 		}
 

@@ -2,8 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon;
@@ -12,8 +10,8 @@
 	{
 		#region Constructors
 		[JobInfo("Wanted Pages in Main Space", "Maintenance")]
-		public WantedInMain([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public WantedInMain(JobManager jobManager)
+			: base(jobManager)
 		{
 		}
 		#endregion

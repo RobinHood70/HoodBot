@@ -16,8 +16,8 @@
 	public class DBMergeSectionLinks : WikiJob
 	{
 		[JobInfo("Check Dragonborn Section Links")]
-		public DBMergeSectionLinks(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public DBMergeSectionLinks(JobManager jobManager)
+			: base(jobManager)
 		{
 			if (this.Results is PageResultHandler results)
 			{

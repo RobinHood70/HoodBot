@@ -1,16 +1,13 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System.Diagnostics.CodeAnalysis;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.Robby;
 
 	public class TestJob : WikiJob
 	{
 		#region Constructors
 		[JobInfo("Test Job")]
-		public TestJob([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public TestJob(JobManager jobManager)
+			: base(jobManager)
 		{
 		}
 		#endregion

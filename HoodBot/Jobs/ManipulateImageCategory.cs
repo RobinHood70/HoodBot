@@ -1,19 +1,16 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WikiCommon;
 	using static RobinHood70.CommonCode.Globals;
 
 	public class ManipulateImageCategory : WikiJob
 	{
 		[JobInfo("Manipulate Image Category")]
-		public ManipulateImageCategory([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo) => this.Results = new PageResultHandler(new Title(site[MediaWikiNamespaces.User], "Jeancey/Kah"));
+		public ManipulateImageCategory(JobManager jobManager)
+			: base(jobManager) => this.Results = new PageResultHandler(this.Site, "User:Jeancey/Kah");
 
 		protected override void Main()
 		{

@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
-	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
@@ -22,8 +21,8 @@
 
 		#region Constructors
 		[JobInfo("Fix Double Redirects", "Maintenance|")]
-		public FixDoubleRedirects([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo) => this.redirectWords = site.MagicWords["redirect"].Aliases;
+		public FixDoubleRedirects(JobManager jobManager)
+			: base(jobManager) => this.redirectWords = this.Site.MagicWords["redirect"].Aliases;
 		#endregion
 
 		#region Protected Override Methods

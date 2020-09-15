@@ -11,8 +11,8 @@
 	using GalaSoft.MvvmLight;
 	using GalaSoft.MvvmLight.Command;
 	using RobinHood70.HoodBot;
-	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.Design;
+	using RobinHood70.HoodBot.Jobs.Loggers;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.HoodBot.Views;
@@ -244,7 +244,7 @@
 
 		private async void ExecuteJobs()
 		{
-			if (this.executing)
+			if (this.executing || this.SelectedItem == null)
 			{
 				return;
 			}
@@ -277,17 +277,27 @@
 				this.StatusWriteLine("Initializing");
 				App.WpfYield();
 				var site = this.InitializeSite();
-				var asyncInfo = new AsyncInfo(this.progressMonitor, this.statusMonitor, this.pauser?.Token, this.canceller?.Token);
-				var jobManager = new JobManager(jobList, site, asyncInfo);
-				if (site is IJobAware jobAwareSite)
+				var jobManager = new JobManager(site)
 				{
-					jobManager.StartingAllJobs += (sender, eventArgs) => jobAwareSite.OnJobsStarted();
-					jobManager.FinishedAllJobs += (sender, eventArgs) => jobAwareSite.OnJobsCompleted(eventArgs);
+					CancellationToken = this.canceller?.Token,
+					PauseToken = this.pauser?.Token,
+					ProgressMonitor = this.progressMonitor,
+					StatusMonitor = this.statusMonitor,
+				};
+
+				if (!string.IsNullOrEmpty(this.SelectedItem.LogPage))
+				{
+					jobManager.Logger = new PageJobLogger(site, this.SelectedItem.LogPage, JobTypes.Write);
+				}
+
+				if (!string.IsNullOrEmpty(this.SelectedItem.ResultsPage))
+				{
+					jobManager.ResultHandler = new PageResultHandler(site, this.SelectedItem.ResultsPage);
 				}
 
 				jobManager.StartingJob += this.JobManager_StartingJob;
 				jobManager.FinishedJob += this.JobManager_FinishedJob;
-				await jobManager.Run().ConfigureAwait(false);
+				await jobManager.Run(jobList).ConfigureAwait(false);
 
 				this.ResetSite(site);
 				this.pauser = null;
@@ -346,7 +356,8 @@
 			site.EditingEnabled = this.EditingEnabled;
 			if ((this.UserName ?? wikiInfo.UserName) is string user)
 			{
-				site.Login(user, this.Password ?? wikiInfo.Password ?? throw new InvalidOperationException(Resources.PasswordNotSet));
+				var currentPassword = this.Password ?? wikiInfo.Password ?? throw new InvalidOperationException(Resources.PasswordNotSet);
+				site.Login(user, currentPassword);
 			}
 
 			return site;

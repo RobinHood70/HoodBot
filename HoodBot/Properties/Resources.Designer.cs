@@ -205,7 +205,16 @@ namespace RobinHood70.HoodBot.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to MaxLag.
+        ///   Looks up a localized string similar to Log Page:.
+        /// </summary>
+        public static string LogPage {
+            get {
+                return ResourceManager.GetString("LogPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MaxLag:.
         /// </summary>
         public static string MaxLag {
             get {
@@ -277,6 +286,15 @@ namespace RobinHood70.HoodBot.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Results Page:.
+        /// </summary>
+        public static string ResultsPage {
+            get {
+                return ResourceManager.GetString("ResultsPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Save.
         /// </summary>
         public static string Save {
@@ -286,7 +304,7 @@ namespace RobinHood70.HoodBot.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Site Class Key.
+        ///   Looks up a localized string similar to Site Class Key:.
         /// </summary>
         public static string SiteClassKey {
             get {

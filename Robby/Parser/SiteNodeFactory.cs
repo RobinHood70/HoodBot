@@ -11,6 +11,8 @@
 		/// <param name="site">The <see cref="Site"/> value to be passed to those nodes that require it.</param>
 		public SiteNodeFactory(Site site) => this.Site = site;
 
+		/// <summary>Gets the site to use for site-specific operations like title resolution.</summary>
+		/// <value>The site.</value>
 		public Site Site { get; }
 
 		/// <inheritdoc/>

@@ -26,6 +26,9 @@
 		#endregion
 
 		#region Public Properties
+
+		/// <summary>Gets the site-specific title value.</summary>
+		/// <value>The title value.</value>
 		public Title TitleValue { get; }
 		#endregion
 	}

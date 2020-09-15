@@ -1,29 +1,19 @@
-﻿namespace RobinHood70.HoodBot.Design
+﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading;
 	using System.Threading.Tasks;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Jobs.Design;
+	using RobinHood70.HoodBot.Jobs.Loggers;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.Robby;
 	using static RobinHood70.CommonCode.Globals;
 
 	public class JobManager
 	{
-		#region Fields
-		private readonly IEnumerable<JobInfo> jobList;
-		private readonly Site site;
-		private readonly AsyncInfo asyncInfo;
-		#endregion
-
 		#region Constructors
-		public JobManager(IEnumerable<JobInfo> jobList, Site site, AsyncInfo asyncInfo)
-		{
-			this.jobList = jobList ?? throw ArgumentNull(nameof(jobList));
-			this.site = site ?? throw ArgumentNull(nameof(site));
-			this.asyncInfo = asyncInfo ?? throw ArgumentNull(nameof(asyncInfo));
-		}
+		public JobManager(Site site) => this.Site = site ?? throw ArgumentNull(nameof(site));
 		#endregion
 
 		#region Public Events
@@ -36,13 +26,31 @@
 		public event StrongEventHandler<JobManager, JobEventArgs>? StartingJob;
 		#endregion
 
+		#region Public Properties
+
+		public CancellationToken? CancellationToken { get; set; }
+
+		public JobLogger? Logger { get; set; }
+
+		public PauseToken? PauseToken { get; set; }
+
+		public IProgress<double>? ProgressMonitor { get; set; }
+
+		public ResultHandler? ResultHandler { get; set; }
+
+		public Site Site { get; }
+
+		public IProgress<string>? StatusMonitor { get; set; }
+		#endregion
+
 		#region Public Methods
-		public async Task Run()
+		public async Task Run(IEnumerable<JobInfo> jobList)
 		{
+			ThrowNull(jobList, nameof(jobList));
 			this.OnStartingAllJobs();
 			var allSuccessful = true;
-			var editingEnabledMaster = this.site.EditingEnabled;
-			foreach (var jobInfo in this.jobList)
+			var editingEnabledMaster = this.Site.EditingEnabled;
+			foreach (var jobInfo in jobList)
 			{
 				var abort = this.OnStartingJob(jobInfo);
 				if (abort)
@@ -51,7 +59,7 @@
 					break;
 				}
 
-				var job = jobInfo.Instantiate(this.site, this.asyncInfo);
+				var job = jobInfo.Instantiate(this);
 				try
 				{
 					await Task.Run(job.Execute).ConfigureAwait(false);
@@ -73,7 +81,7 @@
 				finally
 				{
 					// Reset value in case job cheated and changed it.
-					this.site.EditingEnabled = editingEnabledMaster;
+					this.Site.EditingEnabled = editingEnabledMaster;
 				}
 			}
 
@@ -82,7 +90,16 @@
 		#endregion
 
 		#region Protected Methods
-		protected void OnFinishedAllJobs(bool allSuccessful) => this.FinishedAllJobs?.Invoke(this, allSuccessful);
+		protected void OnFinishedAllJobs(bool allSuccessful)
+		{
+			if (this.ResultHandler != null)
+			{
+				this.ResultHandler.Save();
+				this.ResultHandler.Clear();
+			}
+
+			this.FinishedAllJobs?.Invoke(this, allSuccessful);
+		}
 
 		protected virtual bool OnFinishedJob(JobInfo job, Exception? e)
 		{

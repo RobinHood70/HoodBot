@@ -11,8 +11,8 @@
 	public class DBMergePrep : ParsedPageJob
 	{
 		[JobInfo("Preparation", "Dragonborn Merge")]
-		public DBMergePrep([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public DBMergePrep(JobManager jobManager)
+			: base(jobManager)
 		{
 		}
 

@@ -66,11 +66,11 @@
 		#endregion
 
 		#region Constructors
-		protected MovePagesJob(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		protected MovePagesJob(JobManager jobManager)
+			: base(jobManager)
 		{
-			this.ProposedDeletions = new TitleCollection(site);
-			this.doNotDelete = new TitleCollection(site);
+			this.ProposedDeletions = new TitleCollection(this.Site);
+			this.doNotDelete = new TitleCollection(this.Site);
 			this.titleConverter = new SimpleTitleJsonConverter(this.Site);
 		}
 		#endregion

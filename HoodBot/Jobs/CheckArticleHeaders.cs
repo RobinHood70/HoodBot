@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Uesp;
@@ -22,8 +21,8 @@
 		private readonly int ns;
 
 		[JobInfo("Check Article Headers", "Maintenance|")]
-		public CheckArticleHeaders([NotNull, ValidatedNotNull] Site site, [NotNull, ValidatedNotNull] AsyncInfo asyncInfo)
-			: base(site, asyncInfo) => this.ns = UespNamespaces.Online;
+		public CheckArticleHeaders(JobManager jobManager)
+			: base(jobManager) => this.ns = UespNamespaces.Online;
 
 		protected override void Main()
 		{

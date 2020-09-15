@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
@@ -28,8 +27,8 @@
 		#endregion
 
 		[JobInfo("Create Effects", "Blades|")]
-		public BladesEffects([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public BladesEffects(JobManager jobManager)
+			: base(jobManager)
 		{
 		}
 

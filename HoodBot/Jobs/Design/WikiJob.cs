@@ -1,10 +1,10 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
 	using System;
-	using System.Diagnostics.CodeAnalysis;
 	using System.Threading;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot;
+	using RobinHood70.HoodBot.Jobs.Loggers;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using static RobinHood70.CommonCode.Globals;
@@ -18,15 +18,14 @@
 		#endregion
 
 		#region Constructors
-		protected WikiJob([NotNull, ValidatedNotNull] Site site, [NotNull, ValidatedNotNull] AsyncInfo asyncInfo)
+		protected WikiJob(JobManager jobManager)
 		{
-			ThrowNull(site, nameof(site));
-			ThrowNull(asyncInfo, nameof(asyncInfo));
-			this.Site = site;
-			this.AsyncInfo = asyncInfo;
+			ThrowNull(jobManager, nameof(jobManager));
+			this.JobManager = jobManager;
+			this.Site = jobManager.Site; // We make a copy of this due to the high access rate in most jobs.
 			this.logName = this.GetType().Name.UnCamelCase();
-			this.Logger = (site as IJobLogger)?.JobLogger;
-			this.Results = (site as IResultHandler)?.ResultHandler;
+			this.Logger = jobManager.Logger; // We make a copy of this so that it can be overridden on a job-specific basis, if needed.
+			this.Results = jobManager.ResultHandler; // We make a copy of this so that it can be overridden on a job-specific basis, if needed.
 		}
 		#endregion
 
@@ -37,7 +36,7 @@
 		#endregion
 
 		#region Public Properties
-		public AsyncInfo AsyncInfo { get; }
+		public JobManager JobManager { get; }
 
 		public JobTypes JobType { get; protected set; } = JobTypes.Read;
 
@@ -94,7 +93,7 @@
 
 		public void StatusWrite(string status)
 		{
-			this.AsyncInfo.StatusMonitor?.Report(status);
+			this.JobManager.StatusMonitor?.Report(status);
 			this.FlowControlAsync();
 		}
 
@@ -142,12 +141,12 @@
 
 		protected virtual void FlowControlAsync()
 		{
-			if (this.AsyncInfo.PauseToken is PauseToken pause && pause.IsPaused)
+			if (this.JobManager.PauseToken is PauseToken pause && pause.IsPaused)
 			{
 				pause.WaitWhilePausedAsync().Wait();
 			}
 
-			if (this.AsyncInfo.CancellationToken is CancellationToken cancel && cancel != CancellationToken.None && cancel.IsCancellationRequested)
+			if (this.JobManager.CancellationToken is CancellationToken cancel && cancel != CancellationToken.None && cancel.IsCancellationRequested)
 			{
 				cancel.ThrowIfCancellationRequested();
 			}
@@ -166,15 +165,15 @@
 
 		protected virtual void UpdateProgress()
 		{
-			this.AsyncInfo.ProgressMonitor?.Report(this.ProgressPercent);
+			this.JobManager.ProgressMonitor?.Report(this.ProgressPercent);
 			this.FlowControlAsync();
 		}
 
 		// Same as UpdateProgress/UpdateStatus but with only one pause/cancel check.
 		protected virtual void UpdateProgressWrite(string status)
 		{
-			this.AsyncInfo.ProgressMonitor?.Report(this.ProgressPercent);
-			this.AsyncInfo.StatusMonitor?.Report(status);
+			this.JobManager.ProgressMonitor?.Report(this.ProgressPercent);
+			this.JobManager.StatusMonitor?.Report(status);
 			this.FlowControlAsync();
 		}
 

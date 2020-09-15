@@ -34,8 +34,8 @@
 		#endregion
 
 		#region Constructors
-		protected EsoSkillJob(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		protected EsoSkillJob(JobManager jobManager)
+			: base(jobManager)
 		{
 		}
 		#endregion

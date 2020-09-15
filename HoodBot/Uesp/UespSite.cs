@@ -4,14 +4,13 @@
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.CommonCode.Globals;
 
-	public class UespSite : Site, IResultHandler, IJobAware, IJobLogger
+	public class UespSite : Site
 	{
 		#region Constructors
 		public UespSite(IWikiAbstractionLayer abstractionLayer)
@@ -25,35 +24,19 @@
 				eve.StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery;
 				eve.UserCheckFrequency = 10;
 			}
+
+			this.FilterPages.Add(new Title(this[MediaWikiNamespaces.Project], "Bot Requests"));
 		}
 		#endregion
 
 		#region Public Properties
-		public JobLogger? JobLogger { get; private set; }
-
 		public Page? LogPage { get; private set; }
-
-		public ResultHandler? ResultHandler { get; private set; }
 		#endregion
 
 		#region Public Static Methods
 		public static UespSite CreateInstance(IWikiAbstractionLayer abstractionLayer) => new UespSite(abstractionLayer);
 
 		public static string GetBotFolder() => Environment.ExpandEnvironmentVariables(@"%BotData%");
-		#endregion
-
-		#region Public Methods
-		public void OnJobsCompleted(bool success)
-		{
-			this.FilterPages.Remove("Project:Bot Requests");
-			if (this.ResultHandler != null)
-			{
-				this.ResultHandler.Save();
-				this.ResultHandler.Clear();
-			}
-		}
-
-		public void OnJobsStarted() => this.FilterPages.Add(new Title(this[MediaWikiNamespaces.Project], "Bot Requests"));
 		#endregion
 
 		#region Public Override Methods
@@ -108,12 +91,10 @@
 			}
 
 			var resultPage = new Title(this[MediaWikiNamespaces.User], this.User.PageName + "/Results");
-			this.ResultHandler = new PageResultHandler(resultPage);
 			this.FilterPages.Add(resultPage);
 
 			this.LogPage = new Page(this[MediaWikiNamespaces.User], this.User.PageName + "/Log");
 			this.FilterPages.Add(this.LogPage);
-			this.JobLogger = new PageJobLogger(JobTypes.Write, this.LogPage);
 			//// Reinstate if pages become different: this.FilterPages.Add(this.StatusPage);
 		}
 		#endregion

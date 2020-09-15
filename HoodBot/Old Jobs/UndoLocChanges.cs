@@ -16,8 +16,8 @@
 
 		#region Constructors
 		[JobInfo("Undo Location Changes")]
-		public UndoLocChanges([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public UndoLocChanges(JobManager jobManager)
+			: base(jobManager)
 		{
 			this.LogDetails = "Removes all locations added during Sept. 19 bot run while leaving any other location changes intact.";
 			this.editedPages = new TitleCollection(site);

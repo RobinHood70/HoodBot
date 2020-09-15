@@ -10,8 +10,8 @@
 	public class DBMergeIdentifyConflicts : EditJob
 	{
 		[JobInfo("Identify Conflicts", "Dragonborn Merge")]
-		public DBMergeIdentifyConflicts([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public DBMergeIdentifyConflicts(JobManager jobManager)
+			: base(jobManager)
 		{
 			this.Logger = null;
 			this.Results = new PageResultHandler(new Title(this.Site, "User:HoodBot/Dragonborn Merge Actions"))

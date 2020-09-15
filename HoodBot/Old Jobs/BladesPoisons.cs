@@ -32,8 +32,8 @@
 
 		#region Constructors
 		[JobInfo("Create/Update Blades Potions"/*, "Blades"*/)]
-		public BladesPoisons([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public BladesPoisons(JobManager jobManager)
+			: base(jobManager)
 		{
 		}
 		#endregion

@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Uesp;
@@ -17,17 +16,16 @@
 
 		#region Constructors
 		[JobInfo(/*"Final Check", "Dragonborn Merge"*/ "Dragonborn Final Check")]
-		public DBMergeCheck([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public DBMergeCheck(JobManager jobManager)
+			: base(jobManager)
 		{
-			var checkPage = new Title(this.Site[MediaWikiNamespaces.Project], "Dragonborn Merge Project/Merge Results");
-
 			this.Logger = null;
-			this.Results = new PageResultHandler(checkPage);
+			var mergeResultsPage = "Project:Dragonborn Merge Project/Merge Results";
+			this.Results = new PageResultHandler(this.Site, mergeResultsPage);
 
-			this.filter = new TitleCollection(site)
+			this.filter = new TitleCollection(this.Site)
 			{
-				checkPage,
+				mergeResultsPage,
 				"User:HoodBot/Results",
 				"User:Kiz/Sandbox1",
 				"Project:Dragonborn Merge Project",

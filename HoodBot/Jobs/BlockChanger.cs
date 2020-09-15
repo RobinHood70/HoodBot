@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.Windows;
 	using RobinHood70.CommonCode;
@@ -22,8 +21,8 @@
 
 		#region Constructors
 		[JobInfo("Fix Infinite IP Blocks", "Maintenance")]
-		public BlockChanger([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public BlockChanger(JobManager jobManager)
+			: base(jobManager)
 		{
 		}
 		#endregion

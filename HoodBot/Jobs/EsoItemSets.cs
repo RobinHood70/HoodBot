@@ -38,10 +38,10 @@
 
 		#region Constructors
 		[JobInfo("Item Sets", "ESO")]
-		public EsoItemSets(Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo) => this.client = site.AbstractionLayer is IInternetEntryPoint entryPoint
+		public EsoItemSets(JobManager jobManager)
+			: base(jobManager) => this.client = this.Site.AbstractionLayer is IInternetEntryPoint entryPoint
 				? entryPoint.Client
-				: throw new InvalidCastException();
+				: throw new InvalidOperationException();
 		#endregion
 
 		#region Public Override Properties

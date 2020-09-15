@@ -2,9 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -22,8 +20,8 @@
 
 		#region Constructors
 		[JobInfo("Update Deck Magicka Stats", "Legends")]
-		public LegendsDeckStats([NotNull, ValidatedNotNull] Site site, AsyncInfo asyncInfo)
-			: base(site, asyncInfo)
+		public LegendsDeckStats(JobManager jobManager)
+			: base(jobManager)
 		{
 		}
 		#endregion
