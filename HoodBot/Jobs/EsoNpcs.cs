@@ -186,7 +186,8 @@
 
 				if (issue != null)
 				{
-					this.WriteLine($"* {page.AsLink(true)} {issue}. Please use the following data to create a page manually, if needed.\n*:Name: {npc.Name}\n*:Gender: {npc.Gender}\n*:Loot Type: {npc.LootType}\n*:Known Locations: {string.Join(", ", npc.Places)}\n*:Unknown Locations: {string.Join(", ", npc.UnknownLocations)}");
+					// We use title instead of page for the link so we're not using redirected names.
+					this.WriteLine($"* {title.AsLink(true)} {issue}. Please use the following data to create a page manually, if needed.\n*:Name: {npc.Name}\n*:Gender: {npc.Gender}\n*:Loot Type: {npc.LootType}\n*:Known Locations: {string.Join(", ", npc.Places)}\n*:Unknown Locations: {string.Join(", ", npc.UnknownLocations)}");
 				}
 			}
 
