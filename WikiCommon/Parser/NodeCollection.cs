@@ -38,15 +38,6 @@
 		public IWikiNodeFactory Factory { get; }
 		#endregion
 
-		#region Public Static Methods
-
-		/// <summary>Normalizes the specified text.</summary>
-		/// <param name="text">The text to normalize.</param>
-		/// <remarks>Numerous parts of the parser rely on linebreaks being <c>\n</c>. This method provides offers a way to ensure that line endings conform to that expectation. This also removes null characters because while the parser can handle them fine, C# doesn't do so well with them in terms of displaying strings and such, and there really is no reason you should have null characters in wikitext anyway.</remarks>
-		/// <returns>The normalized text.</returns>
-		public static string NormalizeText(string text) => RegexLibrary.NewLinesToLineFeed(text).Replace("\0", string.Empty, StringComparison.Ordinal);
-		#endregion
-
 		#region Public Methods
 
 		/// <summary>Accepts a visitor to process the node.</summary>
@@ -66,6 +57,21 @@
 			{
 				this.Add(this.Factory.TextNode(text));
 			}
+		}
+
+		/// <summary>Finds the first node of the specified type.</summary>
+		/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
+		/// <returns>The first node found, or null if no nodes of that type are in the collection.</returns>
+		[return: MaybeNull]
+		public T Find<T>()
+			where T : IWikiNode
+		{
+			foreach (var node in this.FindAll<T>())
+			{
+				return node;
+			}
+
+			return default;
 		}
 
 		/// <summary>Finds a single node of the specified type that satisfies the condition.</summary>
@@ -133,21 +139,6 @@
 
 				index += increment;
 			}
-		}
-
-		/// <summary>Finds a single node of the specified type that satisfies the condition.</summary>
-		/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
-		/// <returns>The first node found, or null if no nodes of that type are in the collection.</returns>
-		[return: MaybeNull]
-		public T Find<T>()
-			where T : IWikiNode
-		{
-			foreach (var node in this.FindAll<T>())
-			{
-				return node;
-			}
-
-			return default;
 		}
 
 		/// <summary>Finds the index of the first node of type T that satisfies the predicate.</summary>
