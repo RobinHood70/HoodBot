@@ -24,8 +24,6 @@
 				eve.StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery;
 				eve.UserCheckFrequency = 10;
 			}
-
-			this.FilterPages.Add(new Title(this[MediaWikiNamespaces.Project], "Bot Requests"));
 		}
 		#endregion
 
@@ -96,6 +94,12 @@
 			this.LogPage = new Page(this[MediaWikiNamespaces.User], this.User.PageName + "/Log");
 			this.FilterPages.Add(this.LogPage);
 			//// Reinstate if pages become different: this.FilterPages.Add(this.StatusPage);
+		}
+
+		protected override void ParseInternalSiteInfo()
+		{
+			base.ParseInternalSiteInfo();
+			this.FilterPages.Add(new Title(this[MediaWikiNamespaces.Project], "Bot Requests"));
 		}
 		#endregion
 	}
