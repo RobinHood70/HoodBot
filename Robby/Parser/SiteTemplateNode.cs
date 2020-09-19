@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.Robby.Parser
 {
 	using System.Collections.Generic;
+	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon.Parser.Basic;
 	using static RobinHood70.CommonCode.Globals;
@@ -21,7 +22,7 @@
 			: base(factory, title, parameters)
 		{
 			ThrowNull(factory, nameof(factory));
-			this.TitleValue = Robby.Title.FromName(factory.Site, this.GetTitleText());
+			this.TitleValue = Robby.Title.Coerce(factory.Site, MediaWikiNamespaces.Template, this.GetTitleText());
 		}
 		#endregion
 
