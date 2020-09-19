@@ -132,7 +132,7 @@
 
 		#region Public Static Methods
 
-		/// <summary>Creates a new instance of the <see cref="Title"/> class from the full page name.</summary>
+		/// <summary>Creates a new instance of the <see cref="Title"/> class from the page name, placing it in the default namespace if no other namespace is present in the name.</summary>
 		/// <param name="site">The site the title is from.</param>
 		/// <param name="defaultNamespace">The default namespace if no namespace is specified in the page name.</param>
 		/// <param name="pageName">The page name. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
