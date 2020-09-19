@@ -304,6 +304,27 @@
 			}
 		}
 
+		/// <summary>Finds the index of the named or numbered parameter.</summary>
+		/// <param name="template">The template.</param>
+		/// <param name="name">The name.</param>
+		/// <returns>The index of the requested parameter or -1 if not found.</returns>
+		public static int FindIndex(this ITemplateNode template, string name)
+		{
+			ThrowNull(template, nameof(template));
+			var retval = -1;
+			var anonIndex = 0;
+			for (var i = 0; i < template.Parameters.Count; i++)
+			{
+				var paramName = template.Parameters[i].NameToText() ?? (++anonIndex).ToStringInvariant();
+				if (string.Equals(paramName, name, StringComparison.Ordinal))
+				{
+					retval = i;
+				}
+			}
+
+			return retval;
+		}
+
 		/// <summary>Gets a simple collection of all numbered parameters.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <value>The numbered parameters.</value>

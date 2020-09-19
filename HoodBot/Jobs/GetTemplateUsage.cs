@@ -4,10 +4,11 @@
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	public class GetTemplateUsage : WikiJob
@@ -16,6 +17,8 @@
 		private readonly string saveLocation;
 		private readonly IReadOnlyList<string> originalTemplateNames;
 		private readonly bool respectRedirects;
+		private readonly List<(ISimpleTitle Page, ITemplateNode Template)> allTemplates = new List<(ISimpleTitle, ITemplateNode)>();
+		private readonly List<string> headerOrder = new List<string>();
 		#endregion
 
 		#region Constructors
@@ -108,9 +111,8 @@
 		#region Private Methods
 		private void ExportResults(TitleCollection allTemplateNames, PageCollection results, string location)
 		{
-			var allNames = new List<string>(allTemplateNames.ToStringEnumerable(MediaWikiNamespaces.Template));
-			var allTemplates = TemplateCollection.GetTemplates(allNames, results);
-			if (allTemplates.Count == 0)
+			this.GetTemplates(allTemplateNames, results);
+			if (this.allTemplates.Count == 0)
 			{
 				this.StatusWriteLine("No template calls found!");
 			}
@@ -118,7 +120,7 @@
 			{
 				try
 				{
-					this.WriteFile(allTemplates);
+					this.WriteFile();
 					this.StatusWriteLine("File saved to " + location);
 				}
 				catch (System.IO.IOException e)
@@ -129,28 +131,54 @@
 			}
 		}
 
-		private void WriteFile(TemplateCollection allTemplates)
+		private void GetTemplates(IReadOnlyCollection<ISimpleTitle> allNames, PageCollection pages)
+		{
+			var paramTranslator = new Dictionary<string, string>(StringComparer.Ordinal); // TODO: Empty dictionary for now, but could be pre-populated to translate synonyms to a consistent name. Similarly, name comparison can be case-sensitive or not. Need to find a useful way to do those.
+			foreach (var page in pages)
+			{
+				var parser = new ContextualParser(page);
+				foreach (var template in parser.Nodes.FindAll<SiteTemplateNode>())
+				{
+					if (allNames.Contains(template.TitleValue))
+					{
+						this.allTemplates.Add((page, template));
+						foreach (var param in template.GetResolvedParameters())
+						{
+							if (paramTranslator.TryAdd(param.Name, param.Name))
+							{
+								this.headerOrder.Add(param.Name);
+							}
+						}
+					}
+				}
+			}
+
+			var comparer = SimpleTitleComparer.Instance;
+			this.allTemplates.Sort((x, y) => comparer.Compare(x.Page, y.Page));
+		}
+
+		private void WriteFile()
 		{
 			var csvFile = new CsvFile()
 			{
 				EmptyFieldText = " ",
 			};
-			var output = new List<string>(allTemplates.HeaderOrder.Count + 2)
+			var output = new List<string>(this.headerOrder.Count + 2)
 			{
 				"Page",
 				"Template Name"
 			};
-			output.AddRange(allTemplates.HeaderOrder.Keys);
+			output.AddRange(this.headerOrder);
 			csvFile.Header = output;
 
-			foreach (var template in allTemplates)
+			foreach (var template in this.allTemplates)
 			{
-				var row = csvFile.Add(template.Page, template.Template.Name);
-				foreach (var param in template.Template)
+				var row = csvFile.Add(template.Page.FullPageName, template.Template.GetTitleText());
+				foreach (var param in template.Template.GetResolvedParameters())
 				{
 					// For now, we're assuming that trimming trailing lines from anon parameters is desirable, but could be made optional if needed.
-					ThrowNull(param.Name, nameof(param), nameof(param.Name));
-					row[param.Name] = param.Anonymous ? param.Value.TrimEnd(TextArrays.NewLineChars) : param.Value;
+					var value = WikiTextVisitor.Raw(param.Parameter.Value);
+					row[param.Name] = param.Parameter.Anonymous ? value.TrimEnd(TextArrays.NewLineChars) : value.Trim();
 				}
 			}
 
