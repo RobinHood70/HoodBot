@@ -32,7 +32,7 @@
 				}
 			}
 
-			smallImages.Sort(TitleComparer<Page>.Instance);
+			smallImages.Sort(SimpleTitleComparer.Instance);
 			foreach (var image in smallImages)
 			{
 				if (image.LatestFileRevision is FileRevision imageInfo)
