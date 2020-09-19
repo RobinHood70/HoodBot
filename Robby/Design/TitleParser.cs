@@ -108,7 +108,7 @@
 			}
 
 			this.Coerced = this.IsLocal && this.Namespace != defaultNamespace;
-			this.PageName = isMainPage || InterwikiEntry.IsLocal(this.Interwiki)
+			this.PageName = isMainPage || !InterwikiEntry.IsLocal(this.Interwiki)
 				? pageName
 				: this.Namespace.CapitalizePageName(pageName);
 		}
