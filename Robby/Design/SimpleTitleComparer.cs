@@ -7,11 +7,10 @@
 	/// <summary>An ISimpleTitle comparer which sorts by namespace and page name.</summary>
 	/// <typeparam name="T">The item types to compare. Must implement ISimpleTitle.</typeparam>
 	/// <seealso cref="Comparer{T}" />
-	public sealed class TitleComparer<T> : IComparer<T>
-		where T : class, ISimpleTitle
+	public sealed class SimpleTitleComparer : IComparer<ISimpleTitle>
 	{
 		#region Constructors
-		private TitleComparer()
+		private SimpleTitleComparer()
 		{
 		}
 		#endregion
@@ -22,7 +21,7 @@
 		/// <value>The instance.</value>
 		/// <remarks>Note that this is a pseudo-singleton, in that a new instance will be created for each type.</remarks>
 		[SuppressMessage("Design", "CA1000:Do not declare static members on generic types", Justification = "Pseudo-singleton comparable to Comparer<T>.Default.")]
-		public static TitleComparer<T> Instance { get; } = new TitleComparer<T>();
+		public static SimpleTitleComparer Instance { get; } = new SimpleTitleComparer();
 		#endregion
 
 		#region Public Methods
@@ -31,7 +30,7 @@
 		/// <param name="x">The first object to compare.</param>
 		/// <param name="y">The second object to compare.</param>
 		/// <returns>A signed integer that indicates the relative values of <paramref name="x" /> and <paramref name="y" />.</returns>
-		public int Compare(T? x, T? y)
+		public int Compare(ISimpleTitle? x, ISimpleTitle? y)
 		{
 			if (x == null)
 			{

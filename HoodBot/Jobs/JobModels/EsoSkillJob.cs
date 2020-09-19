@@ -28,9 +28,9 @@
 		#endregion
 
 		#region Fields
-		private readonly SortedSet<Page> nonTrivialChanges = new SortedSet<Page>(TitleComparer<Page>.Instance);
+		private readonly SortedSet<Page> nonTrivialChanges = new SortedSet<Page>(SimpleTitleComparer.Instance);
 		private readonly Dictionary<string, T> skills = new Dictionary<string, T>(StringComparer.Ordinal);
-		private readonly SortedSet<Page> trivialChanges = new SortedSet<Page>(TitleComparer<Page>.Instance);
+		private readonly SortedSet<Page> trivialChanges = new SortedSet<Page>(SimpleTitleComparer.Instance);
 		#endregion
 
 		#region Constructors

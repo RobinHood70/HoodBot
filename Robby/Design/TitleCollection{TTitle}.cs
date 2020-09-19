@@ -780,7 +780,7 @@
 		public void RemoveTalkNamespaces() => this.RemoveNamespaces(true, null as IEnumerable<int>);
 
 		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> by namespace, then pagename.</summary>
-		public void Sort() => this.Sort(TitleComparer<TTitle>.Instance);
+		public void Sort() => this.Sort(SimpleTitleComparer.Instance);
 
 		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> using the specified <see cref="Comparison{T}" />.</summary>
 		/// <param name="comparison">The comparison.</param>
