@@ -9,7 +9,8 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
-	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon.Parser;
+	using RobinHood70.WikiCommon.Parser.Basic;
 
 	internal sealed class EsoNpcs : EditJob
 	{
@@ -51,17 +52,10 @@
 		#region Private Static Methods
 		private Page CreatePage(NpcData npc)
 		{
-			var template = new Template("Online NPC Summary", true)
+			var parameters = new List<(string?, string)>()
 			{
-				{ "image", string.Empty },
-				{ "imgdesc", string.Empty },
-				{ "race", string.Empty },
-				{ "gender", npc.Gender.ToString() },
-				{ "difficulty", npc.Difficulty > 0 ? npc.Difficulty.ToString(this.Site.Culture) : string.Empty },
-				{ "reaction", npc.Reaction },
-				{ "pickpocket", npc.PickpocketDifficulty > 0 ? npc.PickpocketDifficulty.ToString() : string.Empty },
-				{ "loottype", npc.LootType },
-				{ "faction", string.Empty },
+				("image", string.Empty),
+				("imgdesc", string.Empty)
 			};
 
 			foreach (var (placeType, paramName, _, variesCount) in EsoGeneral.PlaceInfo)
@@ -69,28 +63,44 @@
 				var placeText = npc.GetParameterValue(placeType, variesCount);
 				if (placeText.Length > 0)
 				{
-					template.AddBefore("race", paramName, placeText);
+					parameters.Add((paramName, placeText));
 				}
 			}
 
+			parameters.AddRange(
+				("race", string.Empty),
+				("gender", npc.Gender.ToString()),
+				("difficulty", npc.Difficulty > 0 ? npc.Difficulty.ToString(this.Site.Culture) : string.Empty),
+				("reaction", npc.Reaction),
+				("pickpocket", npc.PickpocketDifficulty > 0 ? npc.PickpocketDifficulty.ToString() : string.Empty),
+				("loottype", npc.LootType),
+				("faction", string.Empty));
+
+			var factory = new WikiNodeFactory();
+			var template = factory.TemplateNodeFromParts("Online NPC Summary", true, parameters);
 			if (npc.UnknownLocations.Count > 0)
 			{
 				var list = new SortedSet<string>(npc.UnknownLocations.Keys);
 				var locText = string.Join(", ", list);
-				var loc = template["loc"];
-				if (loc != null)
+				if (locText.Length > 0)
 				{
-					loc.Value += ", " + locText;
+					locText += '\n';
+				}
+
+				if (template.Find("loc") is IParameterNode loc)
+				{
+					loc.SetValue(loc.ValueToText()?.TrimEnd() + ", " + locText);
 				}
 				else
 				{
-					template.AddBefore("race", "loc", locText);
+					var index = template.FindIndex("race");
+					template.Parameters.Insert(index, factory.ParameterNodeFromParts("loc", locText));
 				}
 			}
 
 			var text = new StringBuilder()
 				.Append("{{Minimal|NPC}}")
-				.Append(template)
+				.Append(WikiTextVisitor.Raw(template))
 				.AppendLine()
 				.AppendLine()
 				.AppendLine("<!-- Instructions: Provide an initial sentence summarizing the NPC (race, job, where they live). Subsequent paragraphs provide additional information about the NPC, such as related NPCs, schedule, equipment, etc. Note that quest-specific information DOES NOT belong on this page, but instead goes on the appropriate quest page. Spoilers should be avoided.-->")
