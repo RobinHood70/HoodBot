@@ -79,8 +79,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Properties
-		protected virtual bool AllowMultipleModules => string.Equals(this.ModuleType, "prop", System.StringComparison.Ordinal) || string.Equals(this.ModuleType, "meta", System.StringComparison.Ordinal);
-
 		protected bool IsGenerator => this.pageSetGenerator?.Generator == this;
 
 		protected int ItemsRemaining { get; set; }
@@ -115,14 +113,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			if (this.ModuleType != null && !this.IsGenerator)
 			{
 				request.Prefix = string.Empty;
-				if (this.AllowMultipleModules)
-				{
-					request.AddToPiped(this.ModuleType, this.Name);
-				}
-				else
-				{
-					request.Add(this.ModuleType, this.Name);
-				}
+				request.AddToPiped(this.ModuleType, this.Name);
 			}
 
 			request.Prefix = this.FullPrefix;
