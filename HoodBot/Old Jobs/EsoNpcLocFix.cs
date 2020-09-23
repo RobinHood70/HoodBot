@@ -1,15 +1,14 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	/*
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.HoodBot.Jobs.Eso;
+	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WikiCommon; using RobinHood70.CommonCode;
-	using RobinHood70.WikiCommon; using RobinHood70.CommonCode;
+	using static RobinHood70.CommonCode.Globals;
 
 	public class EsoNpcLocFix : EditJob
 	{
@@ -20,7 +19,11 @@
 		#region Constructors
 		[JobInfo("One-Off Job - Fix ESO NPC Locations")]
 		public EsoNpcLocFix(JobManager jobManager)
-			: base(jobManager) => this.pages = new PageCollection(site);
+			: base(jobManager)
+		{
+			ThrowNull(jobManager, nameof(jobManager));
+			this.pages = new PageCollection(jobManager.Site);
+		}			
 		#endregion
 
 		#region Public Override Properties
@@ -28,17 +31,9 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void Main()
-		{
-			this.ProgressMaximum = this.pages.Count;
-			foreach (var page in this.pages)
-			{
-				this.SavePage(page, "Remove redundant locations", true);
-				this.Progress++;
-			}
-		}
+		protected override void Main() => this.SavePages("Remove redundant locations", true);
 
-		protected override void PrepareJob()
+		protected override void BeforeLogging()
 		{
 			var places = EsoGeneral.GetPlaces(this.Site);
 			var allNpcs = EsoGeneral.GetNpcPages(this.Site);
@@ -177,5 +172,4 @@
 		}
 		#endregion
 	}
-	*/
 }
