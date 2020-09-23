@@ -142,11 +142,11 @@
 					if (allNames.Contains(template.TitleValue))
 					{
 						this.allTemplates.Add((page, template));
-						foreach (var param in template.GetResolvedParameters())
+						foreach (var (name, _) in template.GetResolvedParameters())
 						{
-							if (paramTranslator.TryAdd(param.Name, param.Name))
+							if (paramTranslator.TryAdd(name, name))
 							{
-								this.headerOrder.Add(param.Name);
+								this.headerOrder.Add(name);
 							}
 						}
 					}
