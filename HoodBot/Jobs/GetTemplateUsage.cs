@@ -174,11 +174,11 @@
 			foreach (var template in this.allTemplates)
 			{
 				var row = csvFile.Add(template.Page.FullPageName, template.Template.GetTitleText());
-				foreach (var param in template.Template.GetResolvedParameters())
+				foreach (var (name, parameter) in template.Template.GetResolvedParameters())
 				{
 					// For now, we're assuming that trimming trailing lines from anon parameters is desirable, but could be made optional if needed.
-					var value = WikiTextVisitor.Raw(param.Parameter.Value);
-					row[param.Name] = param.Parameter.Anonymous ? value.TrimEnd(TextArrays.NewLineChars) : value.Trim();
+					var value = WikiTextVisitor.Raw(parameter.Value);
+					row[name] = parameter.Anonymous ? value.TrimEnd(TextArrays.NewLineChars) : value.Trim();
 				}
 			}
 
