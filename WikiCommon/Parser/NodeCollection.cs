@@ -6,7 +6,6 @@
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Diagnostics.CodeAnalysis;
-	using RobinHood70.CommonCode;
 	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>  A delegate for the method required by the Replace method.</summary>
@@ -73,6 +72,30 @@
 
 			return default;
 		}
+
+		/// <summary>Finds a single node of the specified type that satisfies the condition.</summary>
+		/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
+		/// <param name="condition">The condition a given node must satisfy. If set to <see langword="null"/>, the first node that satisfies the reamining parameters will be returned.</param>
+		/// <param name="reverse">Set to <see langword="true"/> to reverse the search direction.</param>
+		/// <param name="recursive">Set to <see langword="true"/> to search all nodes recursively; otherwise, only the top level of nodes will be searched.</param>
+		/// <param name="startAt">The node to start searching at (inclusive). May be <see langword="null"/>.</param>
+		/// <returns>The first node (or the last, for reverse searches) in the collection that is of the specified type and satisfies the condition.</returns>
+		/// <remarks>For recursive searches, outer nodes that satisfy the condition are returned before inner nodes that satisfy the condition. For example, if searching for the template <c>{{Example}}</c> in the wiki code <c>{{Example|This is an embedded {{Example|example}}.}}</c>, the <c>{{Example|This is...}}</c> template will be returned, not the <c>{{Example|example}}</c> template.</remarks>
+		[return: MaybeNull]
+		public T Find<T>(Predicate<T>? condition)
+			where T : class, IWikiNode => this.Find(condition, false, false, 0);
+
+		/// <summary>Finds a single node of the specified type that satisfies the condition.</summary>
+		/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
+		/// <param name="condition">The condition a given node must satisfy. If set to <see langword="null"/>, the first node that satisfies the reamining parameters will be returned.</param>
+		/// <param name="reverse">Set to <see langword="true"/> to reverse the search direction.</param>
+		/// <param name="recursive">Set to <see langword="true"/> to search all nodes recursively; otherwise, only the top level of nodes will be searched.</param>
+		/// <param name="startAt">The node to start searching at (inclusive). May be <see langword="null"/>.</param>
+		/// <returns>The first node (or the last, for reverse searches) in the collection that is of the specified type and satisfies the condition.</returns>
+		/// <remarks>For recursive searches, outer nodes that satisfy the condition are returned before inner nodes that satisfy the condition. For example, if searching for the template <c>{{Example}}</c> in the wiki code <c>{{Example|This is an embedded {{Example|example}}.}}</c>, the <c>{{Example|This is...}}</c> template will be returned, not the <c>{{Example|example}}</c> template.</remarks>
+		[return: MaybeNull]
+		public T Find<T>(Predicate<T>? condition, bool reverse)
+			where T : class, IWikiNode => this.Find<T>(condition, reverse, false, reverse ? this.Count - 1 : 0);
 
 		/// <summary>Finds a single node of the specified type that satisfies the condition.</summary>
 		/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
