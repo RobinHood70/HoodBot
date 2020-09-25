@@ -24,15 +24,6 @@
 
 		/// <summary>Initializes a new instance of the <see cref="EmbeddedValue"/> class.</summary>
 		/// <param name="before">The text before the value.</param>
-		/// <param name="after">The text after the value.</param>
-		/// <remarks>This constructor is primarily intended for use with the <see cref="ParameterCollection.DefaultNameFormat"/> and <see cref="ParameterCollection.DefaultValueFormat"/> properties. It initializes only the space properties with no value.</remarks>
-		public EmbeddedValue(string before, string after)
-			: this(before, string.Empty, after)
-		{
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="EmbeddedValue"/> class.</summary>
-		/// <param name="before">The text before the value.</param>
 		/// <param name="value">The value.</param>
 		/// <param name="after">The text after the value.</param>
 		public EmbeddedValue(string before, string? value, string after)
