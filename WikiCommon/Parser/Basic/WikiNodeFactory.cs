@@ -95,8 +95,13 @@
 		/// <param name="level">The header level (number of equals signs).</param>
 		/// <param name="text">The text of the header.</param>
 		/// <returns>A new header node.</returns>
+		/// <remarks>If spaces are desired between the equals signs and the text, they must be provided as part of text.</remarks>
 		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single header (<c>=== ABC 123 ===</c>).</exception>
-		public IHeaderNode HeaderNodeFromParts(int level, [Localizable(false)] string text) => this.HeaderNode(level, this.Parse(text));
+		public IHeaderNode HeaderNodeFromParts(int level, [Localizable(false)] string text)
+		{
+			var equals = new string('=', level);
+			return this.HeaderNodeFromWikiText(equals + text + equals);
+		}
 
 		/// <summary>Creates a new <see cref="IHeaderNode"/> from the provided text.</summary>
 		/// <param name="wikiText">The wiki text of the header.</param>
@@ -122,13 +127,15 @@
 		public ILinkNode LinkNodeFromParts(string title, IEnumerable<string>? parameters)
 		{
 			ThrowNull(title, nameof(title));
-			ThrowNull(parameters, nameof(parameters));
 			var titleNodes = this.Parse(title);
 			var paramEntries = new List<IParameterNode>();
-			foreach (var parameter in parameters)
+			if (parameters != null)
 			{
-				var paramNode = this.ParameterNodeFromParts(parameter);
-				paramEntries.Add(paramNode);
+				foreach (var parameter in parameters)
+				{
+					var paramNode = this.ParameterNodeFromParts(parameter);
+					paramEntries.Add(paramNode);
+				}
 			}
 
 			return this.LinkNode(titleNodes, paramEntries);
