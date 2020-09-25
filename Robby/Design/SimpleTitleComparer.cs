@@ -5,7 +5,6 @@
 	using RobinHood70.CommonCode;
 
 	/// <summary>An ISimpleTitle comparer which sorts by namespace and page name.</summary>
-	/// <typeparam name="T">The item types to compare. Must implement ISimpleTitle.</typeparam>
 	/// <seealso cref="Comparer{T}" />
 	public sealed class SimpleTitleComparer : IComparer<ISimpleTitle>
 	{
