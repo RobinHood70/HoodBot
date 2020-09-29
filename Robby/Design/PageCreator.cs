@@ -35,11 +35,6 @@
 				propertyInputs.Add(new CategoryInfoInput());
 			}
 
-			if (whatToLoad.HasFlag(PageModules.Custom))
-			{
-				this.AddCustomPropertyInputs(propertyInputs);
-			}
-
 			if (whatToLoad.HasFlag(PageModules.DeletedRevisions))
 			{
 				propertyInputs.Add(new DeletedRevisionsInput()); // Currently only used to determine if page has previously been deleted.
@@ -121,6 +116,12 @@
 				propertyInputs.Add(new TranscludedInInput());
 			}
 
+			// Always load custom flags last so implementers can examine or alter the entire list as needed.
+			if (whatToLoad.HasFlag(PageModules.Custom))
+			{
+				this.AddCustomPropertyInputs(propertyInputs);
+			}
+
 			return propertyInputs;
 		}
 		#endregion
@@ -131,13 +132,16 @@
 		/// <param name="title">The <see cref="ISimpleTitle"/> object that represents the page to create.</param>
 		/// <returns>A fully populated Page object.</returns>
 		public abstract Page CreatePage(ISimpleTitle title);
+		#endregion
+
+		#region Public Virtual Methods
 
 		/// <summary>Creates a page item.</summary>
 		/// <param name="ns">The namespace.</param>
 		/// <param name="title">The title.</param>
 		/// <param name="pageId">The page identifier.</param>
 		/// <returns>A new PageItem for use by WallE.</returns>
-		public abstract PageItem CreatePageItem(int ns, string title, long pageId);
+		public virtual PageItem CreatePageItem(int ns, string title, long pageId) => new PageItem(ns, title, pageId);
 		#endregion
 
 		#region Protected Abstract Methods
