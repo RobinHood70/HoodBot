@@ -254,7 +254,7 @@
 			var result = this.Site.AbstractionLayer.Backlinks(input);
 			foreach (var item in result)
 			{
-				var mainTitle = Title.FromName(this.Site, item.Title);
+				var mainTitle = Title.FromWiki(this.Site, item.Title);
 				this.Add(mainTitle);
 				if (item.Redirects != null)
 				{
@@ -532,7 +532,7 @@
 		{
 			foreach (var item in result)
 			{
-				this.Add(Title.FromName(this.Site, item.Title));
+				this.Add(Title.FromWiki(this.Site, item.Title));
 			}
 		}
 
@@ -540,7 +540,12 @@
 		{
 			foreach (var item in result)
 			{
-				this.Add(Title.FromName(this.Site, item.Title ?? throw new InvalidOperationException(Resources.TitleInvalid)));
+				if (item.Title == null)
+				{
+					throw new InvalidOperationException(Resources.TitleInvalid);
+				}
+
+				this.Add(Title.FromWiki(this.Site, item.Title));
 			}
 		}
 
@@ -556,7 +561,7 @@
 			var result = this.Site.AbstractionLayer.CategoryMembers(input);
 			foreach (var item in result)
 			{
-				var title = Title.FromName(this.Site, item.Title ?? throw PropertyNull(nameof(item), nameof(item.Title)));
+				var title = Title.FromWiki(this.Site, item.Title ?? throw PropertyNull(nameof(item), nameof(item.Title)));
 				if (input.Type.HasFlag(item.Type))
 				{
 					this.Add(title);

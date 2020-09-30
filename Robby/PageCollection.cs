@@ -160,6 +160,21 @@
 				: throw new KeyNotFoundException();
 			set => base[key] = value;
 		}
+
+		/// <summary>Gets or sets the <see cref="ISimpleTitle"/> with the specified key.</summary>
+		/// <param name="key">The key.</param>
+		/// <returns>The <see cref="ISimpleTitle">Title</see>.</returns>
+		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry on set if the requested entry isn't found.</remarks>
+		[SuppressMessage("Microsoft.Design", "CA1043:UseIntegralOrStringArgumentForIndexers", Justification = @"Integer and string methods are also available, but this method provides the most accuracy.")]
+		public override Page this[ISimpleTitle key]
+		{
+			get => base.TryGetValue(key, out var page)
+				|| (this.titleMap.TryGetValue(key.FullPageName, out var altKey) && this.TryGetValue(altKey, out page))
+					? page
+					: throw new KeyNotFoundException();
+
+			set => base[key] = value;
+		}
 		#endregion
 
 		#region Public Static Methods
@@ -370,19 +385,19 @@
 		{
 			foreach (var item in result.Interwiki)
 			{
-				var titleParts = FullTitle.FromName(this.Site, item.Value.Title);
+				var titleParts = FullTitle.FromWiki(this.Site, item.Value.Title);
 				Debug.Assert(string.Equals(titleParts.Interwiki?.Prefix, item.Value.Prefix, StringComparison.Ordinal), "Interwiki prefixes didn't match.", titleParts.Interwiki?.Prefix + " != " + item.Value.Prefix);
 				this.titleMap[item.Key] = titleParts;
 			}
 
 			foreach (var item in result.Converted)
 			{
-				this.titleMap[item.Key] = FullTitle.FromName(this.Site, item.Value);
+				this.titleMap[item.Key] = FullTitle.FromWiki(this.Site, item.Value);
 			}
 
 			foreach (var item in result.Normalized)
 			{
-				this.titleMap[item.Key] = FullTitle.FromName(this.Site, item.Value);
+				this.titleMap[item.Key] = FullTitle.FromWiki(this.Site, item.Value);
 			}
 
 			foreach (var item in result.Redirects)
@@ -394,7 +409,7 @@
 				FullTitle title;
 				if (interwiki == null || interwiki.LocalWiki)
 				{
-					title = FullTitle.FromName(this.Site, value.Title);
+					title = FullTitle.FromWiki(this.Site, value.Title);
 					title.Interwiki = interwiki;
 					title.Fragment = value.Fragment;
 				}
