@@ -1087,7 +1087,7 @@
 			this.namespaces = new NamespaceCollection(siteNamespaces, comparer);
 			if (this.mainPageName != null)
 			{
-				this.mainPage = FullTitle.FromName(this, this.mainPageName); // Now that we understand namespaces, we can create a Title.
+				this.mainPage = FullTitle.FromWiki(this, this.mainPageName); // Now that we understand namespaces, we can create a Title.
 			}
 
 			// MagicWords

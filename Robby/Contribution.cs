@@ -17,7 +17,7 @@
 			: base(contribution)
 		{
 			ThrowNull(contribution, nameof(contribution));
-			this.Title = Title.FromName(site, contribution.Title ?? throw PropertyNull(nameof(contribution), nameof(contribution.Title)));
+			this.Title = Title.FromWiki(site, contribution.Title ?? throw PropertyNull(nameof(contribution), nameof(contribution.Title)));
 			this.New = contribution.Flags.HasFlag(UserContributionFlags.New);
 			this.Patrolled = contribution.Flags.HasFlag(UserContributionFlags.Patrolled);
 			this.NewSize = contribution.Size;

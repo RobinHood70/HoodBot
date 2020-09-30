@@ -14,7 +14,7 @@
 		/// <param name="site">The site.</param>
 		/// <param name="fullPageName">Full page name, with namespace.</param>
 		public TitleParser(Site site, string fullPageName)
-			: this(site, MediaWikiNamespaces.Main, fullPageName)
+			: this(site, MediaWikiNamespaces.Main, fullPageName, true)
 		{
 		}
 
@@ -23,6 +23,16 @@
 		/// <param name="defaultNamespace">The default namespace.</param>
 		/// <param name="pageName">Name of the page.</param>
 		public TitleParser(Site site, int defaultNamespace, string pageName)
+			: this(site, defaultNamespace, pageName, true)
+		{
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="TitleParser"/> class.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="defaultNamespace">The default namespace.</param>
+		/// <param name="pageName">Name of the page.</param>
+		/// <param name="fullParsing">If <see langword="true"/>, <paramref name="pageName"/> will be checked for pipes, HTML/URL codes, and alternate spaces.</param>
+		public TitleParser(Site site, int defaultNamespace, string pageName, bool fullParsing)
 		{
 			// This routine very roughly follows the logic of MediaWikiTitleCodec.splitTitleString() but skips much of the error checking and rarely encountered sanitization, which is left to the server.
 			ThrowNull(site, nameof(site));
@@ -41,9 +51,13 @@
 				return split.Length == 2 ? (split[0].TrimEnd(), split[1].TrimStart(), forced) : (null, pageName, forced);
 			}
 
-			// Pipes are not allowed in page names, so if we find one, only parse the first part; the remainder is likely cruft from a category or file link.
-			pageName = pageName.Split(TextArrays.Pipe, 2)[0];
-			pageName = WikiTextUtilities.DecodeAndNormalize(pageName).Trim();
+			if (fullParsing)
+			{
+				// Pipes are not allowed in page names, so if we find one, only parse the first part; the remainder is likely cruft from a category or file link.
+				pageName = pageName.Split(TextArrays.Pipe, 2)[0];
+				pageName = WikiTextUtilities.DecodeAndNormalize(pageName).Trim();
+			}
+
 			this.Namespace = site[defaultNamespace];
 
 			var (key, remaining, forced) = SplitPageName(pageName);

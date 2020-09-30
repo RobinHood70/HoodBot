@@ -14,7 +14,7 @@
 		protected internal RecentChange(Site site, RecentChangesItem recentChange)
 		{
 			ThrowNull(recentChange, nameof(recentChange));
-			this.Title = Title.FromName(site, recentChange.Title);
+			this.Title = Title.FromWiki(site, recentChange.Title);
 			this.Anonymous = recentChange.UserId == 0;
 			this.Comment = recentChange.Comment;
 			this.Id = recentChange.Id;
