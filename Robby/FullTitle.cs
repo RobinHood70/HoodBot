@@ -103,19 +103,6 @@
 			var parser = new TitleParser(site, fullPageName);
 			return new FullTitle(parser);
 		}
-
-		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
-		/// <param name="site">The site the title is from.</param>
-		/// <param name="fullPageName">Full name of the page.</param>
-		/// <returns>A new FullTitle based on the provided values.</returns>
-		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		internal static new FullTitle FromWiki(Site site, string fullPageName)
-		{
-			ThrowNull(site, nameof(site));
-			ThrowNull(fullPageName, nameof(fullPageName));
-			var parser = new TitleParser(site, MediaWikiNamespaces.Main, fullPageName, false);
-			return new FullTitle(parser);
-		}
 		#endregion
 
 		#region Public Methods
@@ -146,6 +133,22 @@
 			var fragment = this.Fragment == null ? string.Empty : '#' + this.Fragment;
 
 			return colon + interwiki + this.FullPageName + fragment;
+		}
+		#endregion
+
+		#region Internal Methods
+
+		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
+		/// <param name="site">The site the title is from.</param>
+		/// <param name="fullPageName">Full name of the page.</param>
+		/// <returns>A new FullTitle based on the provided values.</returns>
+		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
+		internal static new FullTitle FromWiki(Site site, string fullPageName)
+		{
+			ThrowNull(site, nameof(site));
+			ThrowNull(fullPageName, nameof(fullPageName));
+			var parser = new TitleParser(site, MediaWikiNamespaces.Main, fullPageName, false);
+			return new FullTitle(parser);
 		}
 		#endregion
 	}

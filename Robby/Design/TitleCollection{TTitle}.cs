@@ -146,7 +146,7 @@
 
 		/// <summary>Adds a new object to the collection with the specified name.</summary>
 		/// <param name="title">The title to add.</param>
-		public void Add(string title) => this.Add(this.New(title));
+		public void Add(string title) => this.Add(this.New(new TitleParser(this.Site, MediaWikiNamespaces.Main, title, true)));
 
 		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
 		/// <param name="titles">The titles.</param>
@@ -882,14 +882,6 @@
 			var title = this.TextToTitle(key);
 			return this.lookup.TryGetValue(title, out value!);
 		}
-		#endregion
-
-		#region Protected Methods
-
-		/// <summary>Creates a new item of the type of the collection.</summary>
-		/// <param name="title">The full name of the item to create.</param>
-		/// <returns>A new item of the same type as the collection.</returns>
-		protected TTitle New(string title) => this.New(new TitleParser(this.Site, title));
 		#endregion
 
 		#region Protected Override Methods

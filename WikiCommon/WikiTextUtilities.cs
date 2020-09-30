@@ -10,7 +10,7 @@
 	{
 		#region Static Fields
 		private static readonly Regex BidiText = new Regex(@"[\u200E\u200F\u202A\u202B\u202C\u202D\u202E]", RegexOptions.Compiled, DefaultRegexTimeout); // Taken from MediaWikiTitleCodec->splitTitleString, then converted to Unicode
-		private static readonly Regex TitleSpaceText = new Regex(@"[ _\xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]", RegexOptions.Compiled, DefaultRegexTimeout); // as above, but already Unicode in MW code
+		private static readonly Regex TitleSpaceText = new Regex(@"[ _\xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]", RegexOptions.Compiled, DefaultRegexTimeout);
 		private static readonly Regex SpaceTextHtml = new Regex(@"(&(#32|#x20|nbsp);|[ _\xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000])", RegexOptions.ExplicitCapture, DefaultRegexTimeout); // as above, but already Unicode in MW code, modified to add HTML spaces
 		#endregion
 
@@ -19,7 +19,11 @@
 		/// <summary>HTML- and URL-decodes the specified text, removes bidirectional text markers, and replaces space-like characters with spaces.</summary>
 		/// <param name="text">The text to decode and normalize.</param>
 		/// <returns>The original text with bidirectional text markers removed and space-like characters converted to spaces.</returns>
-		public static string DecodeAndNormalize([Localizable(false)] string text) => ReplaceTitleSpaces(RemoveInivisibleCharacters(WebUtility.HtmlDecode(WebUtility.UrlDecode(text))), false);
+		public static string DecodeAndNormalize([Localizable(false)] string text)
+		{
+			ThrowNull(text, nameof(text));
+			return ReplaceTitleSpaces(RemoveInivisibleCharacters(WebUtility.HtmlDecode(WebUtility.UrlDecode(text.Replace("+", "%2B", System.StringComparison.Ordinal)))), false);
+		}
 
 		/// <summary>Removes invisible characters from the text.</summary>
 		/// <param name="text">The text.</param>
