@@ -154,10 +154,15 @@
 		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry if the requested entry isn't found.</remarks>
 		public override Page this[string key]
 		{
-			get => this.TryGetValue(key, out var retval)
+			get
+			{
+				ThrowNull(key, nameof(key));
+				return this.TryGetValue(key, out var retval)
 				|| (this.titleMap.TryGetValue(key, out var altKey) && this.TryGetValue(altKey, out retval))
 				? retval!
 				: throw new KeyNotFoundException();
+			}
+
 			set => base[key] = value;
 		}
 
@@ -168,10 +173,14 @@
 		[SuppressMessage("Microsoft.Design", "CA1043:UseIntegralOrStringArgumentForIndexers", Justification = @"Integer and string methods are also available, but this method provides the most accuracy.")]
 		public override Page this[ISimpleTitle key]
 		{
-			get => base.TryGetValue(key, out var page)
+			get
+			{
+				ThrowNull(key, nameof(key));
+				return base.TryGetValue(key, out var page)
 				|| (this.titleMap.TryGetValue(key.FullPageName, out var altKey) && this.TryGetValue(altKey, out page))
 					? page
 					: throw new KeyNotFoundException();
+			}
 
 			set => base[key] = value;
 		}
@@ -636,7 +645,7 @@
 			this.PopulateMapCollections(result);
 			foreach (var item in result)
 			{
-				var page = this.New(item.Title);
+				var page = this.New(new TitleParser(this.Site, MediaWikiNamespaces.Main, item.Title, false));
 				page.Populate(item, options);
 				if (pageValidator(page))
 				{

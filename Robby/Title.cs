@@ -165,16 +165,6 @@
 			var parser = new TitleParser(site, MediaWikiNamespaces.Main, fullPageName, true);
 			return new Title(parser);
 		}
-
-		/// <summary>Creates a new instance of the <see cref="Title"/> class from the namespace ID and page name.</summary>
-		/// <param name="site">The site this title is from.</param>
-		/// <param name="fullPageName">The full name of the page.</param>
-		/// <returns>A new Title based on the provided values.</returns>
-		internal static Title FromWiki([NotNull, ValidatedNotNull] Site site, [NotNull, ValidatedNotNull] string fullPageName)
-		{
-			var parser = new TitleParser(site, MediaWikiNamespaces.Main, fullPageName, false);
-			return new Title(parser);
-		}
 		#endregion
 
 		#region Public Methods
@@ -505,6 +495,19 @@
 		/// <summary>Returns a string that represents the current Title.</summary>
 		/// <returns>A string that represents the current object.</returns>
 		public override string ToString() => this.ToString(false);
+		#endregion
+
+		#region Internal Methods
+
+		/// <summary>Creates a new instance of the <see cref="Title"/> class from the namespace ID and page name.</summary>
+		/// <param name="site">The site this title is from.</param>
+		/// <param name="fullPageName">The full name of the page.</param>
+		/// <returns>A new Title based on the provided values.</returns>
+		internal static Title FromWiki([NotNull, ValidatedNotNull] Site site, [NotNull, ValidatedNotNull] string fullPageName)
+		{
+			var parser = new TitleParser(site, MediaWikiNamespaces.Main, fullPageName, false);
+			return new Title(parser);
+		}
 		#endregion
 
 		#region Protected Methods
