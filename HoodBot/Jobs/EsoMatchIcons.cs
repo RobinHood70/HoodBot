@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Text;
-	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
@@ -18,9 +17,12 @@
 
 	public class EsoMatchIcons : EditJob
 	{
+		#region Constants
+		private const string MissingFileCategory = "Online-Icons-Missing Original File";
+		#endregion
+
 		#region Static Fields
-		private static readonly DateTime LastRun = new DateTime(2019, 10, 28);
-		private static readonly Regex OriginalFileFinder = new Regex(@"(https?://|Original file(name)?:\s*)(?<name>[^<\n]+?)(<br>)?\n+(used for:\s*\n)?(:?(Achievement|Book|Collectible|Mined Item|Quest Item): .+?\n)*", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly DateTime LastRun = new DateTime(2020, 9, 25);
 		private static readonly string WikiImageFolder = Environment.ExpandEnvironmentVariables(@"%BotData%\WikiImages\"); // Files in this folder come from http://esofiles.uesp.net/update-<whatever>/icons.zip
 		#endregion
 
@@ -35,11 +37,7 @@
 		public EsoMatchIcons(JobManager jobManager)
 			: base(jobManager)
 		{
-			this.Pages.LoadOptions = new PageLoadOptions(PageModules.Info | PageModules.Revisions | PageModules.FileInfo)
-			{
-				RevisionFrom = new DateTime(2020, 09, 25, 00, 53, 36, DateTimeKind.Utc),
-				RevisionNewer = false,
-			};
+			this.Pages.LoadOptions = new PageLoadOptions(PageModules.Info | PageModules.Revisions | PageModules.FileInfo);
 			this.Pages.SetLimitations(LimitationType.FilterTo, MediaWikiNamespaces.File);
 		}
 		#endregion
@@ -60,15 +58,10 @@
 			this.StatusWriteLine("Getting image info from wiki");
 			this.GetLicenseTemplates();
 
-			var titles = new TitleCollection(this.Site);
-			titles.GetNamespace(MediaWikiNamespaces.File, Filter.Exclude, "ON-icon-");
-
+			this.StatusWriteLine("Loading Pages");
 			this.Pages.PageLoaded += this.Pages_PageLoaded;
-			this.Pages.GetTitles(titles);
-			// this.Pages.GetNamespace(MediaWikiNamespaces.File, Filter.Exclude, "ON-icon-");
+			this.Pages.GetNamespace(MediaWikiNamespaces.File, Filter.Exclude, "ON-icon-achievement-");
 			this.Pages.PageLoaded -= this.Pages_PageLoaded;
-
-			this.Pages.Sort();
 		}
 
 		protected override void Main()
@@ -86,15 +79,15 @@
 		#endregion
 
 		#region Private Static Methods
-		private static bool IsBook(Page page)
+		private static bool IsBook(PageParts parts)
 		{
 			var isBook = false;
-			foreach (var category in page.Categories)
+			foreach (var link in parts.Categories)
 			{
-				if (category.PageNameEquals("Online-Icons-Books") ||
-					(category.PageNameEquals("Online-Icons-Quest Items") && page.PageName.Contains("Book", StringComparison.Ordinal)) ||
-					page.PageNameEquals("ON-icon-minor adornment-Necklace.png") ||
-					page.PageNameEquals("ON-icon-minor adornment-Ring.png"))
+				if (link.PageNameEquals("Online-Icons-Books") ||
+					(link.PageNameEquals("Online-Icons-Quest Items") && parts.Page.PageName.Contains("Book", StringComparison.Ordinal)) ||
+					link.PageNameEquals("ON-icon-minor adornment-Necklace.png") ||
+					link.PageNameEquals("ON-icon-minor adornment-Ring.png"))
 				{
 					isBook = true;
 					break;
@@ -102,37 +95,6 @@
 			}
 
 			return isBook;
-		}
-
-		private static void ReplaceNormal(ContextualParser parser, int index, string newText)
-		{
-			if (index == parser.Nodes.Count || !(parser.Nodes[index] is ITextNode textNode))
-			{
-				textNode = parser.Nodes.Factory.TextNode(string.Empty);
-				parser.Nodes.Insert(index, textNode);
-			}
-
-			textNode.Text = textNode.Text.TrimEnd();
-			textNode.Text += (textNode.Text.Length == 0) ? "\n" : "\n\n";
-			textNode.Text += newText;
-		}
-
-		private static void ReplaceNoMatch(ContextualParser parser)
-		{
-			var categoryIndex = parser.Nodes.FindLastIndex<SiteLinkNode>(link => link.TitleValue.Namespace == MediaWikiNamespaces.Category) + 1;
-			if (categoryIndex == 0)
-			{
-				categoryIndex = parser.Nodes.Count;
-			}
-
-			if (parser.Nodes.Find<SiteLinkNode>(item => item.TitleValue.PageNameEquals("Online-Icons-Missing Original File")) == null)
-			{
-				parser.Nodes.InsertRange(categoryIndex, new IWikiNode[]
-				{
-					parser.Nodes.Factory.TextNode("\n"),
-					parser.Nodes.Factory.LinkNodeFromParts("Category:Online-Icons-Missing Original File"),
-				});
-			}
 		}
 		#endregion
 
@@ -186,67 +148,39 @@
 			}
 		}
 
-		private string GetUsageList(bool isBook, IReadOnlyCollection<string> allNames)
+		private void GetUsageList(PageParts parts)
 		{
-			var matchedNames = new SortedDictionary<string, List<ItemInfo>>();
-			var unmatchedNames = new SortedSet<string>();
-			var entryList = new List<string>();
-			foreach (var name in allNames)
+			var isBook = IsBook(parts);
+			foreach (var name in parts.OriginalFiles)
 			{
 				if (isBook || !this.allItems.TryGetValue(name, out var iconItems) || iconItems.Count <= 0)
 				{
-					unmatchedNames.Add(name);
+					parts.UnmatchedNames.Add(name);
 				}
-				else
+				else if (!isBook)
 				{
-					matchedNames.Add(name, iconItems);
-				}
-			}
-
-			if (!isBook)
-			{
-				foreach (var icon in matchedNames)
-				{
-					entryList.Add($"Original file: {icon.Key}<br>\nUsed for:");
 					var sorted = new SortedSet<string>(StringComparer.Ordinal);
-					foreach (var item in icon.Value)
+					foreach (var item in iconItems)
 					{
 						var text = item.Type switch
 						{
-							"achievements" => "\n:Achievement: " + item.ItemName,
-							"book" => "\n:Book: " + item.ItemName,
-							"collectibles" => $"\n:Collectible: {{{{Item Link|{item.ItemName}|collectid={item.Id.ToStringInvariant()}}}}}",
-							"minedItemSummary" => $"\n:Mined Item: {{{{Item Link|{item.ItemName}|itemid={item.Id.ToStringInvariant()}}}}}",
-							"questItem" => $"\n:Quest Item: " + item.ItemName,
+							"achievements" => "Achievement: " + item.ItemName,
+							"book" => "Book: " + item.ItemName,
+							"collectibles" => $"Collectible: {{{{Item Link|{item.ItemName}|collectid={item.Id.ToStringInvariant()}}}}}",
+							"minedItemSummary" => $"Mined Item: {{{{Item Link|{item.ItemName}|itemid={item.Id.ToStringInvariant()}}}}}",
+							"questItem" => $"Quest Item: " + item.ItemName,
 							_ => null,
 						};
 
-						if (text != null && !entryList.Contains(text))
+						if (text != null && !sorted.Contains(text))
 						{
 							sorted.Add(text);
 						}
 					}
 
-					entryList.AddRange(sorted);
-					entryList.Add("\n\n");
+					parts.UsedFor.Add(name, sorted);
 				}
 			}
-
-			var sb = new StringBuilder();
-			if (unmatchedNames.Count > 0)
-			{
-				sb
-					.Append("Original file: ")
-					.Append(string.Join(", ", unmatchedNames))
-					.Append("\n\n");
-			}
-
-			if (matchedNames.Count > 0)
-			{
-				sb.Append(string.Join(string.Empty, entryList));
-			}
-
-			return sb.ToString().Trim() + "\n\n";
 		}
 
 		private void LoadQueryData(KeyValuePair<string, string> query)
@@ -277,101 +211,36 @@
 
 		private void Pages_PageLoaded(object sender, Page page)
 		{
-			if (page.Revisions.Count == 0)
-			{
-				return;
-			}
-
-			page.Text = page.Revisions[0].Text; // Temporary for history load
 			if (page is FilePage filePage && filePage.LatestFileRevision is FileRevision latestRevision)
 			{
 				this.allIcons.TryGetValue(latestRevision.Sha1 ?? throw PropertyNull(nameof(latestRevision), nameof(latestRevision.Sha1)), out var foundIcons);
 				var parser = new ContextualParser(page);
+				this.ReplaceLicense(parser);
+				var parts = new PageParts(filePage);
 				if (foundIcons == null || foundIcons.Count == 0)
 				{
-					if (parser.Nodes.Find<TextNode>(textNode => textNode.Text.Contains("Original file", StringComparison.OrdinalIgnoreCase)) != null)
+					if (parts.OriginalFiles.Count > 0)
 					{
+						this.WriteLine($"* [[{page.FullPageName}]] used to be identified, but no longer is. It may have been removed from the game.");
 						return;
 					}
 
 					if (latestRevision.Timestamp > LastRun)
 					{
-						ReplaceNoMatch(parser);
+						parts.Categories.Add(new SiteLink(page.Site, MissingFileCategory));
 					}
 				}
 				else
 				{
-					var summaryIndex = parser.IndexOfHeader("Summary") + 1;
-					if (summaryIndex == 0)
-					{
-						parser.Nodes.InsertRange(0, new IWikiNode[]
-						{
-							parser.Nodes.Factory.HeaderNodeFromParts(2, "Summary"),
-						});
-
-						summaryIndex = 1;
-					}
-
-					var summaryEnd = parser.Nodes.FindIndex<HeaderNode>(summaryIndex);
-					if (summaryEnd == -1)
-					{
-						summaryEnd = parser.Nodes.Count;
-					}
-
-					// Move categories to end, then parse out the text.
-					var beforeCats = summaryEnd;
-					for (var i = summaryIndex; i < beforeCats; i++)
-					{
-						if (parser.Nodes[i] is SiteLinkNode link && link.TitleValue.Namespace == MediaWikiNamespaces.Category)
-						{
-							parser.Nodes.InsertRange(summaryEnd, new IWikiNode[]
-							{
-								parser.Nodes[i],
-								parser.Nodes.Factory.TextNode("\n"),
-							});
-
-							parser.Nodes.RemoveAt(i);
-							beforeCats--;
-							summaryEnd++;
-						}
-					}
-
-					var text = WikiTextVisitor.Raw(parser.Nodes.GetRange(summaryIndex, beforeCats - summaryIndex)).Trim() + "\n";
-					parser.Nodes.RemoveRange(summaryIndex, beforeCats - summaryIndex);
-
-					var list = new SortedSet<string>();
-					var match = OriginalFileFinder.Match(text);
-					while (match.Success)
-					{
-						var split = match.Groups["name"].Value.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
-						for (var i = 0; i < split.Length; i++)
-						{
-							var name = split[i]
-								.Trim(TextArrays.SquareBrackets)
-								.Split(TextArrays.Space, 2)[0]
-								.Split("esoicons.uesp.net", 2)[^1]
-								.Split("/esoui/art/icons/", 2)[^1]
-								.Replace(".dds", string.Empty, StringComparison.OrdinalIgnoreCase)
-								.Replace(".png", string.Empty, StringComparison.OrdinalIgnoreCase)
-								.Trim();
-							list.Add(name);
-						}
-
-						text = text.Remove(match.Index, match.Length);
-						match = OriginalFileFinder.Match(text);
-					}
-
 					foreach (var icon in foundIcons)
 					{
-						list.Add(icon);
+						parts.OriginalFiles.Add(icon);
 					}
 
-					var newText = text.TrimStart() + this.GetUsageList(IsBook(page), list);
-					ReplaceNormal(parser, summaryIndex, newText);
+					this.GetUsageList(parts);
 				}
 
-				this.ReplaceLicense(parser);
-				page.Text = parser.GetText();
+				page.Text = parts.ToText();
 			}
 		}
 
@@ -401,6 +270,197 @@
 			public string ItemName { get; }
 
 			public string Type { get; }
+		}
+
+		private sealed class PageParts
+		{
+			#region Constructors
+			public PageParts(FilePage page)
+			{
+				this.Page = page;
+				var parser = new ContextualParser(page);
+				for (var i = 0; i < parser.Nodes.Count; i++)
+				{
+					if (parser.Nodes[i] is SiteLinkNode link && link.TitleValue.Namespace == MediaWikiNamespaces.Category)
+					{
+						this.Categories.Add(SiteLink.FromLinkNode(page.Site, link));
+						parser.Nodes.RemoveAt(i);
+					}
+				}
+
+				var summaryIndex = parser.IndexOfHeader("Summary") + 1;
+				this.PreSummary = summaryIndex == 0
+					? (new IWikiNode[] { parser.Nodes.Factory.HeaderNodeFromParts(2, " Summary ") })
+					: (ICollection<IWikiNode>)new List<IWikiNode>(parser.Nodes.GetRange(0, summaryIndex));
+
+				var summaryEnd = parser.Nodes.FindIndex<HeaderNode>(summaryIndex);
+				if (summaryEnd == -1)
+				{
+					summaryEnd = parser.Nodes.Count;
+				}
+				else
+				{
+					this.PostSummary = new List<IWikiNode>(parser.Nodes.GetRange(summaryEnd, parser.Nodes.Count - summaryEnd));
+				}
+
+				var preText = true;
+				var summaryLines = WikiTextVisitor.Raw(parser.Nodes.GetRange(summaryIndex, summaryEnd - summaryIndex)).Split(TextArrays.NewLineChars);
+				foreach (var line in summaryLines)
+				{
+					var http = line.Split("://esoicons.uesp.net/esoui/art/icons/", StringSplitOptions.RemoveEmptyEntries);
+					if (http.Length > 1)
+					{
+						for (var i = 1; i < http.Length; i += 2)
+						{
+							var name = http[i].Split(TextArrays.Space, 2)[0];
+							name = name
+								.Replace(".dds", string.Empty, StringComparison.Ordinal)
+								.Replace(".png", string.Empty, StringComparison.Ordinal)
+								.Replace("<br>", string.Empty, StringComparison.OrdinalIgnoreCase);
+							this.OriginalFiles.Add(name);
+						}
+					}
+					else
+					{
+						var split = line
+							.Trim()
+							.TrimStart(TextArrays.Colon)
+							.TrimStart()
+							.Split(TextArrays.Colon, 2);
+						switch (split[0].ToLowerInvariant())
+						{
+							case "original file":
+							case "original filename":
+								this.OriginalFiles.AddRange(split[1].TrimStart()
+									.Replace("<br>", string.Empty, StringComparison.OrdinalIgnoreCase)
+									.Split(TextArrays.CommaSpace, StringSplitOptions.RemoveEmptyEntries));
+								break;
+							case "achievement":
+							case "book":
+							case "collectible":
+							case "mined item":
+							case "quest item":
+							case "used for":
+								preText = false;
+								break;
+							default:
+								if (preText)
+								{
+									this.PreText += line.Trim();
+								}
+								else
+								{
+									this.PostText += line.Trim();
+								}
+
+								break;
+						}
+					}
+				}
+			}
+			#endregion
+
+			#region Public Properties
+			public ICollection<SiteLink> Categories { get; } = new SortedSet<SiteLink>(SimpleTitleComparer.Instance);
+
+			public ICollection<string> OriginalFiles { get; } = new SortedSet<string>();
+
+			public FilePage Page { get; }
+
+			public ICollection<IWikiNode>? PostSummary { get; }
+
+			public string PostText { get; } = string.Empty;
+
+			public ICollection<IWikiNode>? PreSummary { get; }
+
+			public string PreText { get; } = string.Empty;
+
+			public ICollection<string> UnmatchedNames { get; } = new SortedSet<string>();
+
+			public IDictionary<string, ICollection<string>> UsedFor { get; } = new SortedDictionary<string, ICollection<string>>();
+			#endregion
+
+			#region Public Methods
+			public string ToText()
+			{
+				var sb = new StringBuilder()
+					.Append(WikiTextVisitor.Raw(this.PreSummary).TrimEnd())
+					.Append('\n');
+				if (!string.IsNullOrEmpty(this.PreText))
+				{
+					sb
+						.Append(this.PreText)
+						.Append("\n\n");
+				}
+
+				if (this.UnmatchedNames.Count > 0)
+				{
+					DoubleSpace(sb);
+					sb
+						.Append("Original file: ")
+						.AppendJoin(", ", this.UnmatchedNames)
+						.Append('\n');
+				}
+
+				foreach (var itemList in this.UsedFor)
+				{
+					DoubleSpace(sb);
+					sb
+						.Append("Original file: ")
+						.Append(itemList.Key)
+						.Append("<br>\nUsed for:");
+					if (itemList.Value.Count == 0)
+					{
+						sb.Append(" Nothing\n");
+					}
+					else
+					{
+						sb.Append('\n');
+						foreach (var item in itemList.Value)
+						{
+							sb
+								.Append(':')
+								.Append(item)
+								.Append('\n');
+						}
+					}
+				}
+
+				if (!string.IsNullOrEmpty(this.PostText))
+				{
+					DoubleSpace(sb);
+					sb
+						.Append(this.PostText)
+						.Append('\n');
+				}
+
+				if (this.Categories.Count > 0)
+				{
+					DoubleSpace(sb);
+					foreach (var cat in this.Categories)
+					{
+						sb
+							.Append(cat)
+							.Append('\n');
+					}
+				}
+
+				if (this.PostSummary?.Count > 0)
+				{
+					sb.Append(WikiTextVisitor.Raw(this.PostSummary).TrimStart());
+				}
+
+				return sb.ToString().TrimEnd();
+
+				static void DoubleSpace(StringBuilder sb)
+				{
+					if (!"\n=".Contains(sb[^2], StringComparison.Ordinal))
+					{
+						sb.Append('\n');
+					}
+				}
+			}
+			#endregion
 		}
 		#endregion
 	}
