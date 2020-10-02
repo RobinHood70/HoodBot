@@ -109,7 +109,7 @@
 			}
 
 			regexTags.Sort();
-			this.tagsRegex = new Regex(@"\G(" + string.Join("|", regexTags) + @")", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+			this.tagsRegex = new Regex(@"\G(" + string.Join("|", regexTags) + ")", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
 			this.Preprocess();
 		}
 		#endregion
@@ -184,7 +184,7 @@
 					else
 					{
 						var tagMatch = this.tagsRegex.Match(this.Text, this.Index + 1);
-						if (!tagMatch.Success || !this.FoundTag(tagMatch.Groups[1].Value))
+						if (!tagMatch.Success || !this.FoundTag(tagMatch.Value))
 						{
 							this.Top.CurrentPiece.AddLiteral(this.NodeFactory, "<");
 							this.Index++;
