@@ -112,10 +112,10 @@
 		/// <summary>Gets the parameter's trimmed value.</summary>
 		/// <param name="parameter">The paraeter to get the value of.</param>
 		/// <returns>The parameter value.</returns>
-		public static string? ValueToText(this IParameterNode parameter)
+		public static string ValueToText(this IParameterNode parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
-			return parameter.Value == null ? null : WikiTextVisitor.Value(parameter.Value).Trim();
+			return WikiTextVisitor.Value(parameter.Value).Trim();
 		}
 		#endregion
 
