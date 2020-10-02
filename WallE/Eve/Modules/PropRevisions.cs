@@ -69,7 +69,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIfPositive("endid", input.EndId)
 				.AddIf("token", TokensInput.Rollback, input.GetRollbackToken)
 				.AddIfNotNull("tag", input.Tag)
-				.AddIf("limit", this.Limit, (input.Limit > 0 || input.MaxItems > 1 || this.IsRevisionRange) && this.Limit != "0"); // TODO: Needs testing when limits/maxitems are actually set to positive values. Limits are weird in this module, but since they're per-query, I believe this should work as written.
+				.AddIf("limit", this.Limit, (input.Limit > 0 || input.MaxItems > 1 || this.IsRevisionRange) && !string.Equals(this.Limit, "0", System.StringComparison.Ordinal)); // TODO: Needs testing when limits/maxitems are actually set to positive values. Limits are weird in this module, but since they're per-query, I believe this should work as written.
 		}
 
 		protected override RevisionItem GetItem(JToken result, PageItem page) => result.GetRevision();
