@@ -235,7 +235,7 @@
 				page.Protect(protection.Reason, protection.EditProtection, protection.MoveProtection, DateTime.MaxValue);
 				if (page.TextModified)
 				{
-					this.SavePage(page, "Consistent style with similar protected pages", true);  // "Add/update templates"
+					this.SavePage(page, "Add/update templates", true);
 				}
 
 				this.Progress++;
