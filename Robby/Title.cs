@@ -419,15 +419,16 @@
 		/// <remarks>This version allows custom protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="Protect(string, ProtectionLevel, ProtectionLevel, DateTime)"/> version of this call.</remarks>
 		public ChangeStatus Protect(string reason, string editProtection, string moveProtection, DateTime expiry)
 		{
+			var wikiExpiry = expiry == DateTime.MaxValue ? null : (DateTime?)expiry;
 			var protections = new List<ProtectInputItem>(2);
 			if (editProtection != null)
 			{
-				protections.Add(new ProtectInputItem("edit", editProtection) { Expiry = expiry });
+				protections.Add(new ProtectInputItem("edit", editProtection) { Expiry = wikiExpiry });
 			}
 
 			if (moveProtection != null)
 			{
-				protections.Add(new ProtectInputItem("move", moveProtection) { Expiry = expiry });
+				protections.Add(new ProtectInputItem("move", moveProtection) { Expiry = wikiExpiry });
 			}
 
 			return this.Protect(reason, protections);
