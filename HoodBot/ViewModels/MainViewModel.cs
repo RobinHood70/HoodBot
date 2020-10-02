@@ -206,6 +206,15 @@
 		}
 
 #if DEBUG
+		private static void Site_Changing(Site sender, ChangeArgs eventArgs)
+		{
+			Debug.WriteLine(eventArgs.MethodName);
+			foreach (var parameter in eventArgs.Parameters)
+			{
+				Debug.WriteLine($"  {parameter.Key} = {parameter.Value}");
+			}
+		}
+
 		private static string SiteName(IWikiAbstractionLayer sender) => sender.AllSiteInfo?.General?.SiteName ?? "Site-Agnostic";
 
 		private static void SiteWarningOccurred(Site sender, WarningEventArgs eventArgs) => Debug.WriteLine(eventArgs?.Warning);
@@ -360,6 +369,8 @@
 				site.Login(user, currentPassword);
 			}
 
+			site.Changing += Site_Changing;
+
 			return site;
 		}
 
@@ -436,6 +447,7 @@
 				internet.SendingRequest -= WalSendingRequest;
 			}
 
+			site.Changing -= Site_Changing;
 			site.AbstractionLayer.WarningOccurred -= WalWarningOccurred;
 			site.WarningOccurred -= SiteWarningOccurred;
 #endif
