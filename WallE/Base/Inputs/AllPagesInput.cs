@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
+	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
 
 	public class AllPagesInput : ILimitableInput, IGeneratorInput
@@ -28,9 +29,9 @@ namespace RobinHood70.WallE.Base
 
 		public string? Prefix { get; set; }
 
-		public string? ProtectionLevel { get; set; }
+		public IEnumerable<string>? ProtectionLevels { get; set; }
 
-		public string? ProtectionType { get; set; }
+		public IEnumerable<string>? ProtectionTypes { get; set; }
 
 		public bool SortDescending { get; set; }
 
