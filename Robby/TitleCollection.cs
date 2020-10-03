@@ -333,14 +333,6 @@
 			this.FillFromTitleItems(result);
 		}
 
-		/// <summary>Adds pages from a given namespace to the collection. Parameters allow filtering to a specific range of pages.</summary>
-		/// <param name="input">The input parameters.</param>
-		protected override void GetNamespace(AllPagesInput input)
-		{
-			var result = this.Site.AbstractionLayer.AllPages(input);
-			this.FillFromTitleItems(result);
-		}
-
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
@@ -355,6 +347,14 @@
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
 		protected override void GetPageLinksHere(LinksHereInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+
+		/// <summary>Adds pages with the specified filters to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected override void GetPages(AllPagesInput input)
+		{
+			var result = this.Site.AbstractionLayer.AllPages(input);
+			this.FillFromTitleItems(result);
+		}
 
 		/// <summary>Adds pages with a given property to the collection.</summary>
 		/// <param name="input">The input parameters.</param>

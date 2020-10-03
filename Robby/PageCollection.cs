@@ -516,10 +516,6 @@
 		/// <param name="input">The input parameters.</param>
 		protected override void GetLinksToNamespace(AllLinksInput input) => this.GetCustomGenerator(input);
 
-		/// <summary>Adds pages from a given namespace to the collection. Parameters allow filtering to a specific range of pages.</summary>
-		/// <param name="input">The input parameters.</param>
-		protected override void GetNamespace(AllPagesInput input) => this.GetCustomGenerator(input);
-
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
@@ -534,6 +530,10 @@
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose backlinks should be loaded.</param>
 		protected override void GetPageLinksHere(LinksHereInput input, IEnumerable<ISimpleTitle> titles) => this.LoadPages(input, titles);
+
+		/// <summary>Adds pages with the specified filters to the collection.</summary>
+		/// <param name="input">The input parameters.</param>
+		protected override void GetPages(AllPagesInput input) => this.GetCustomGenerator(input);
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>

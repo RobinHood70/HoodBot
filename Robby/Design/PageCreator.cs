@@ -64,7 +64,12 @@
 
 			if (whatToLoad.HasFlag(PageModules.Info))
 			{
-				propertyInputs.Add(new InfoInput() { Properties = InfoProperties.Url });
+				var infoInput = new InfoInput() { Properties = InfoProperties.Url };
+				propertyInputs.Add(infoInput);
+				if (options.InfoGetProtection)
+				{
+					infoInput.Properties |= InfoProperties.Protection;
+				}
 			}
 
 			if (whatToLoad.HasFlag(PageModules.Links))

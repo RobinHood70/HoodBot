@@ -12,6 +12,45 @@
 	using static RobinHood70.CommonCode.Globals;
 
 	// TODO: Re-write so all lookups (Contains, IndexOf, Remove) use numeric namespace and pagename. Will probably require Key itself to be rewritten to match. Right now, things like IndexOf((string)key) will fail for alternative namespace names.
+	#region Public Enumerations
+
+	/// <summary>The page protection types.</summary>
+	[Flags]
+	public enum ProtectionLevels
+	{
+		/// <summary>No protection level filtering.</summary>
+		None = 0,
+
+		/// <summary>Pages that are limited to autoconfirmed or higher access.</summary>
+		AutoConfirmed = 1,
+
+		/// <summary>Pages that are limited to sysop access.</summary>
+		Sysop = 1 << 1,
+
+		/// <summary>All protected pages.</summary>
+		All = AutoConfirmed | Sysop
+	}
+
+	/// <summary>The page protection types.</summary>
+	[Flags]
+	public enum ProtectionTypes
+	{
+		/// <summary>No protection type filtering.</summary>
+		None = 0,
+
+		/// <summary>Pages that are Edit protected.</summary>
+		Edit = 1,
+
+		/// <summary>Pages that are Move protected.</summary>
+		Move = 1 << 1,
+
+		/// <summary>Pages that are Upload protected.</summary>
+		Upload = 1 << 2,
+
+		/// <summary>All protected pages.</summary>
+		All = Edit | Move | Upload
+	}
+	#endregion
 
 	/// <summary>Provides a base class to manipulate a collection of titles.</summary>
 	/// <typeparam name="TTitle">The type of the title.</typeparam>
@@ -413,20 +452,20 @@
 		/// <summary>Adds pages in the given the namespace to the collection.</summary>
 		/// <param name="ns">The namespace.</param>
 		/// <param name="redirects">Whether or not to include pages that are redirects.</param>
-		public void GetNamespace(int ns, Filter redirects) => this.GetNamespace(new AllPagesInput { FilterRedirects = redirects, Namespace = ns });
+		public void GetNamespace(int ns, Filter redirects) => this.GetPages(new AllPagesInput { FilterRedirects = redirects, Namespace = ns });
 
 		/// <summary>Adds pages in the given the namespace to the collection.</summary>
 		/// <param name="ns">The namespace.</param>
 		/// <param name="redirects">Whether or not to include pages that are redirects.</param>
 		/// <param name="prefix">The prefix of the pages to load.</param>
-		public void GetNamespace(int ns, Filter redirects, string prefix) => this.GetNamespace(new AllPagesInput { FilterRedirects = redirects, Namespace = ns, Prefix = prefix });
+		public void GetNamespace(int ns, Filter redirects, string prefix) => this.GetPages(new AllPagesInput { FilterRedirects = redirects, Namespace = ns, Prefix = prefix });
 
 		/// <summary>Adds pages in the given the namespace to the collection.</summary>
 		/// <param name="ns">The namespace.</param>
 		/// <param name="redirects">Whether or not to include pages that are redirects.</param>
 		/// <param name="from">The page name to start at (inclusive).</param>
 		/// <param name="to">The page name to end at (inclusive).</param>
-		public void GetNamespace(int ns, Filter redirects, string from, string to) => this.GetNamespace(new AllPagesInput { FilterRedirects = redirects, From = from, Namespace = ns, To = to });
+		public void GetNamespace(int ns, Filter redirects, string from, string to) => this.GetPages(new AllPagesInput { FilterRedirects = redirects, From = from, Namespace = ns, To = to });
 
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
@@ -496,6 +535,53 @@
 		/// <param name="namespaces">The namespaces to search in.</param>
 		/// <remarks>As noted on the API page for PrefixSearch, this is <em>not</em> the same as other prefix-based methods in that it doesn't strictly look for pages to start with the same literal letters. It's run through the installed search engine instead, and may include such things as word substitution, spelling correction, etc.</remarks>
 		public void GetPrefixSearchResults(string prefix, IEnumerable<int> namespaces) => this.GetPrefixSearchResults(new PrefixSearchInput(prefix) { Namespaces = namespaces });
+
+		/// <summary>Adds protected page results to the collection.</summary>
+		public void GetProtectedPages() => this.GetProtectedPages(ProtectionTypes.All, ProtectionLevels.None);
+
+		/// <summary>Adds protected page results to the collection.</summary>
+		/// <param name="protectionTypes">The protection types to retrieve.</param>
+		public void GetProtectedPages(ProtectionTypes protectionTypes) => this.GetProtectedPages(protectionTypes, ProtectionLevels.None);
+
+		/// <summary>Adds protected page results to the collection.</summary>
+		/// <param name="protectionTypes">The protection types to retrieve.</param>
+		/// <param name="protectionLevels">The levels to retrieve.</param>
+		public void GetProtectedPages(ProtectionTypes protectionTypes, ProtectionLevels protectionLevels)
+		{
+			var typeList = new List<string>();
+			foreach (var protType in protectionTypes.GetUniqueFlags())
+			{
+				if (Enum.GetName(typeof(ProtectionTypes), protType) is string name)
+				{
+					typeList.Add(name.ToLowerInvariant());
+				}
+			}
+
+			var levelList = new List<string>();
+			foreach (var protLevel in protectionLevels.GetUniqueFlags())
+			{
+				if (Enum.GetName(typeof(ProtectionTypes), protLevel) is string name)
+				{
+					levelList.Add(name.ToLowerInvariant());
+				}
+			}
+
+			this.GetProtectedPages(typeList, levelList);
+		}
+
+		/// <summary>Adds protected page results to the collection.</summary>
+		/// <param name="protectionTypes">The protection types to retrieve.</param>
+		/// <param name="protectionLevels">The levels to retrieve.</param>
+		public void GetProtectedPages(IEnumerable<string> protectionTypes, IEnumerable<string>? protectionLevels)
+		{
+			ThrowNull(protectionTypes, nameof(protectionTypes));
+			if (protectionTypes.IsEmpty())
+			{
+				throw new InvalidOperationException("You must specify at least one value for protectionTypes");
+			}
+
+			this.GetPages(new AllPagesInput() { ProtectionTypes = protectionTypes, ProtectionLevels = protectionLevels });
+		}
 
 		/// <summary>Adds query page results to the collection.</summary>
 		/// <param name="page">The query-page-compatible module.</param>
@@ -958,7 +1044,7 @@
 
 		/// <summary>Adds pages from a given namespace to the collection. Parameters allow filtering to a specific range of pages.</summary>
 		/// <param name="input">The input parameters.</param>
-		protected abstract void GetNamespace(AllPagesInput input);
+		protected abstract void GetPages(AllPagesInput input);
 
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>

@@ -5,7 +5,6 @@
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -197,7 +196,11 @@
 			var titlesToProtect = this.LoadPageNames(this.NamespacesInSearchList());
 
 			this.StatusWriteLine("Loading Current Protection Levels");
-			var currentProtectionPages = titlesToProtect.Load(new PageLoadOptions(PageModules.Custom) { FollowRedirects = true }, new ProtectedPageCreator());
+			var currentProtectionPages = titlesToProtect.Load(new PageLoadOptions(PageModules.Default)
+			{
+				FollowRedirects = true,
+				InfoGetProtection = true,
+			});
 			this.FindProtectionMismatches(titlesToProtect, currentProtectionPages);
 
 			if (this.pageProtections.Count == 0)
@@ -207,7 +210,7 @@
 				return;
 			}
 
-			this.WriteLine("=== Page Protection Mismatches ===");
+			this.WriteLine("== Page Protection Mismatches ==");
 			this.WriteLine("{| class=\"wikitable sortable\"");
 			this.WriteLine("! Group");
 			this.WriteLine("! Page");
@@ -401,7 +404,7 @@
 			return insertPos + 1;
 		}
 
-		private static ProtectionLevel ProtectionFromPage(ProtectedPage protTitle, string protectionType) =>
+		private static ProtectionLevel ProtectionFromPage(Page protTitle, string protectionType) =>
 			protTitle.Protections.TryGetValue(protectionType, out var protection)
 				? protection.Level switch
 				{
@@ -516,13 +519,13 @@
 			foreach (var searchTitle in titlesToProtect)
 			{
 				var protection = ((ProtectedTitle)searchTitle).Protection;
-				if (currentProtectionPages[searchTitle] is ProtectedPage protectedPage)
+				if (currentProtectionPages.TryGetValue(searchTitle, out var page))
 				{
-					var editProtection = ProtectionFromPage(protectedPage, "edit");
-					var moveProtection = ProtectionFromPage(protectedPage, "move");
+					var editProtection = ProtectionFromPage(page, "edit");
+					var moveProtection = ProtectionFromPage(page, "move");
 					if (protection.EditProtection != editProtection || protection.MoveProtection != moveProtection)
 					{
-						this.pageProtections.TryAdd(protectedPage, protection);
+						this.pageProtections.TryAdd(page, protection);
 					}
 				}
 			}
@@ -577,7 +580,7 @@
 			foreach (var protPage in this.pageProtections)
 			{
 				var page = this.Pages[protPage.Key];
-				var currentProtection = (ProtectedPage)protPage.Key;
+				var currentProtection = (Page)protPage.Key;
 				var protection = protPage.Value;
 
 				// Skip Deletion Review pages unless the last modification is at least 30 days ago. This could be incorporated into the search data itself as a delegate, but for now, since it's a one-off. I've left it as hard-coded.
