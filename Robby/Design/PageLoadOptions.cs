@@ -125,6 +125,10 @@
 		/// <value><see langword="true"/> if redirects should be followed; otherwise, <see langword="false"/>.</value>
 		public bool FollowRedirects { get; set; }
 
+		/// <summary>Gets or sets a value indicating whether to retrieve protection information.</summary>
+		/// <value><see langword="true"/> if protection informatoin should be retrieved; otherwise, <see langword="false"/>.</value>
+		public bool InfoGetProtection { get; set; }
+
 		/// <summary>Gets the modules to load.</summary>
 		/// <value>The modules to load.</value>
 		public PageModules Modules { get; }

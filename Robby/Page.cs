@@ -152,6 +152,10 @@
 		/// <value>The list of page properties.</value>
 		public IReadOnlyDictionary<string, string> Properties { get; } = new Dictionary<string, string>(StringComparer.Ordinal);
 
+		/// <summary>Gets the protection entries for the page.</summary>
+		/// <value>The protection entries.</value>
+		public IReadOnlyDictionary<string, ProtectionEntry> Protections { get; } = new Dictionary<string, ProtectionEntry>(StringComparer.OrdinalIgnoreCase);
+
 		/// <summary>Gets the page revisions, if they were requested in the last load operation.</summary>
 		/// <value>The revisions list.</value>
 		public IReadOnlyList<Revision> Revisions { get; } = new List<Revision>();
@@ -370,6 +374,7 @@
 
 		private void PopulateInfo(PageItem pageItem)
 		{
+			var protections = (Dictionary<string, ProtectionEntry>)this.Protections;
 			if (pageItem.Info is PageInfo info)
 			{
 				this.canonicalPath = info.CanonicalUrl;
@@ -379,6 +384,10 @@
 				this.IsRedirect = info.Flags.HasFlag(PageInfoFlags.Redirect);
 				this.StartTimestamp = pageItem.Info.StartTimestamp;
 				this.Text = this.CurrentRevisionId != 0 ? this.CurrentRevision?.Text : null;
+				foreach (var protItem in pageItem.Info.Protections)
+				{
+					protections.Add(protItem.Type, new ProtectionEntry(protItem));
+				}
 			}
 			else
 			{
@@ -387,6 +396,7 @@
 				this.editPath = null;
 				this.IsNew = false;
 				this.IsRedirect = false;
+				protections.Clear();
 				this.StartTimestamp = this.Site.AbstractionLayer.CurrentTimestamp;
 				this.Text = null;
 			}
