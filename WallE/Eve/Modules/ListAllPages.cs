@@ -53,8 +53,8 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddIf("minsize", input.MinimumSize, input.MinimumSize >= 0)
 				.Add("namespace", input.Namespace)
 				.AddIfNotNull("prefix", input.Prefix)
-				.AddIfNotNull("prlevel", input.ProtectionLevel)
-				.AddIfNotNull("prtype", input.ProtectionType)
+				.Add("prlevel", input.ProtectionLevels)
+				.Add("prtype", input.ProtectionTypes)
 				.AddFilterText("prexpiry", "indefinite", "definite", input.FilterIndefinite)
 				.AddIf("dir", "descending", input.SortDescending)
 				.Add("limit", this.Limit);
