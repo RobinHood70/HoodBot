@@ -73,15 +73,18 @@
 		protected bool TrackedUpdate(ITemplateNode template, string name, string value, TitleCollection? usedList, string? skillName)
 		{
 			ThrowNull(template, nameof(template));
+			var retval = false;
 			if (!(template.Find(name) is IParameterNode parameter))
 			{
 				parameter = template.Add(name, string.Empty);
+				retval = true;
 			}
 
 			value = value.Trim();
 			var oldValue = parameter.ValueToText();
 			if (!string.Equals(oldValue, value, StringComparison.Ordinal))
 			{
+				retval = true;
 				parameter.SetValue(value + '\n');
 
 				// We use usedList as the master check, since that should always be available if we're doing checks at all.
@@ -95,11 +98,9 @@
 						EsoReplacer.ReplaceSkillLinks(parameter.Value, skillName);
 					}
 				}
-
-				return true;
 			}
 
-			return false;
+			return retval;
 		}
 
 		protected bool TrackedUpdate(ITemplateNode template, string name, string value, bool removeCondition)

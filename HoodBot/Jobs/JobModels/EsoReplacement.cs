@@ -17,5 +17,9 @@
 
 		public NodeCollection To { get; }
 		#endregion
+
+		#region Public Override Methods
+		public override string ToString() => this.From;
+		#endregion
 	}
 }
