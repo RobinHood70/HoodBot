@@ -149,20 +149,18 @@
 			}
 		}
 
-		public static string ReplaceFirstLink(NodeCollection nodes, TitleCollection usedList)
+		public static void ReplaceFirstLink(NodeCollection nodes, TitleCollection usedList)
 		{
 			ThrowNull(nodes, nameof(nodes));
 			for (var i = 0; i < nodes.Count; i++)
 			{
-				if (ReplaceLink(nodes.Factory, nodes[i], usedList) is NodeCollection newNodes)
+				if (nodes[i] is ITextNode textNode && ReplaceLink(nodes.Factory, textNode.Text, usedList) is NodeCollection newNodes)
 				{
 					nodes.RemoveAt(i);
 					nodes.InsertRange(i, newNodes);
 					i += newNodes.Count - 1;
 				}
 			}
-
-			return WikiTextVisitor.Raw(nodes);
 		}
 
 		public static void ReplaceGlobal(NodeCollection nodes)
@@ -314,28 +312,24 @@
 				-1);
 		}
 
-		private static NodeCollection? ReplaceLink(IWikiNodeFactory factory, IWikiNode node, TitleCollection usedList)
+		private static NodeCollection? ReplaceLink(IWikiNodeFactory factory, string text, TitleCollection usedList)
 		{
 			ThrowNull(factory, nameof(factory));
-			if (!(node is ITextNode textNode))
-			{
-				return null;
-			}
-
 			ThrowNull(usedList, nameof(usedList));
 			var foundReplacements = new HashSet<string>(StringComparer.Ordinal);
-			var newText = textNode.Text;
-			var textLength = textNode.Text.Length;
+			var textLength = text.Length;
+			var retval = factory.NodeCollection();
+			var start = 0;
 			for (var i = 0; i < textLength; i++)
 			{
+				var newText = text.Substring(i);
 				foreach (var replacement in ReplaceFirstList)
 				{
 					if (newText.StartsWith(replacement.From, StringComparison.Ordinal))
 					{
-						var retval = factory.NodeCollection();
-						if (i != 0)
+						if (i != start)
 						{
-							retval.Add(factory.TextNode(textNode.Text.Substring(0, i)));
+							retval.Add(factory.TextNode(text[start..i]));
 						}
 
 						foreach (var newNode in replacement.To)
@@ -359,22 +353,21 @@
 							}
 						}
 
-						var len = replacement.From.Length;
-						if (len < textNode.Text.Length)
-						{
-							retval.Add(factory.TextNode(newText.Substring(len)));
-						}
-
 						foundReplacements.Add(replacement.From);
 						UnreplacedList.Remove(replacement.From);
-						return retval;
+						i += replacement.From.Length - 1;
+						start = i + 1;
+						break;
 					}
 				}
-
-				newText = newText.Substring(1);
 			}
 
-			return null;
+			if (start < text.Length)
+			{
+				retval.Add(factory.TextNode(text.Substring(start)));
+			}
+
+			return retval;
 		}
 
 		private static IWikiNode ReplaceTemplatableText(Match match, Site site)
