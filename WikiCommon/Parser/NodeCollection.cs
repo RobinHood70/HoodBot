@@ -148,7 +148,7 @@
 				{
 					foreach (var childCollection in parent.NodeCollections)
 					{
-						foreach (var value in childCollection.FindAll(condition, recursive, reverse, 0))
+						foreach (var value in childCollection.FindAll(condition, reverse, recursive, 0))
 						{
 							yield return value;
 						}
