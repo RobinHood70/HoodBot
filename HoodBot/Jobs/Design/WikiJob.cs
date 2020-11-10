@@ -154,9 +154,9 @@
 
 		protected virtual void JobCompleted()
 		{
-			this.StatusWriteLine("Ending Log Entry");
 			if (this.Logger != null && this.Logger.ShouldLog(this.JobType))
 			{
+				this.StatusWriteLine("Ending Log Entry");
 				this.Logger.EndLogEntry();
 			}
 
