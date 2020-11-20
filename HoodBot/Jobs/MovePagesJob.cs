@@ -59,7 +59,7 @@
 		#region Fields
 		private readonly TitleCollection doNotDelete;
 		private readonly ReplacementCollection replacements = new ReplacementCollection();
-		private readonly string replacementStatusFile = Path.Combine(UespSite.GetBotFolder(), "Replacements.json");
+		private readonly string replacementStatusFile = Path.Combine(UespSite.GetBotDataFolder(), "Replacements.json");
 		private readonly SimpleTitleJsonConverter titleConverter;
 		private PageModules fromPageModules = PageModules.None;
 		private string? logDetails;
