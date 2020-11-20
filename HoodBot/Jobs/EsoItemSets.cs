@@ -26,8 +26,7 @@
 		private static readonly Dictionary<string, string> TitleOverrides = new Dictionary<string, string>(StringComparer.Ordinal)
 		{
 			// Title Overrides should only be necessary when creating new disambiguated "(set)" pages or when pages don't conform to the base/base (set) style. While this could be done programatically, it's probably best not to, so that a human has verified that the page really should be created and that the existing page isn't malformed or something.
-			["Lady Thorn"] = "Lady Thorn (set)",
-			["Senche-Raht's Grit"] = "Senche-raht's Grit",
+			["Bloodspawn"] = "Bloodspawn (set)",
 		};
 		#endregion
 
@@ -79,6 +78,19 @@
 				if (!BadRows.Contains(int.Parse(row["id"], CultureInfo.InvariantCulture)))
 				{
 					var setName = row["setName"].Replace(@"\'", "'", StringComparison.Ordinal);
+					/* switch (setName)
+					{
+						case "Ironblood":
+						case "Knightmare":
+						case "Noble's Conquest":
+						case "Oblivion's Foe":
+						case "Pirate Skeleton":
+						case "Thurvokun":
+							break;
+						default:
+							continue;
+					} */
+
 					var bonusDescription = row["setBonusDesc"];
 					if (bonusDescription[0] != '(')
 					{
@@ -107,33 +119,6 @@
 			this.Pages.PageLoaded -= this.SetLoaded;
 			this.GenerateReport();
 			this.Progress++;
-		}
-		#endregion
-
-		#region Private Static Methods
-		private static string? ConstructWarning(Page page, ICollection<ISimpleTitle> titles, string warningType)
-		{
-			if (titles.Count > 0)
-			{
-				var warning = new StringBuilder();
-				warning
-					.Append("Watch for ")
-					.Append(warningType)
-					.Append(" on ")
-					.Append(page.FullPageName)
-					.Append(": ");
-				foreach (var link in titles)
-				{
-					warning
-						.Append(link)
-						.Append(", ");
-				}
-
-				warning.Remove(warning.Length - 2, 2);
-				return warning.ToString();
-			}
-
-			return null;
 		}
 		#endregion
 
@@ -315,12 +300,12 @@
 			page.Text = newPage.GetText() ?? string.Empty;
 
 			var replacer = new EsoReplacer(this.Site);
-			if (ConstructWarning(page, replacer.CheckNewLinks(oldPage, newPage), "links") is string linkWarning)
+			if (EsoReplacer.ConstructWarning(page, replacer.CheckNewLinks(oldPage, newPage), "links") is string linkWarning)
 			{
 				this.Warn(linkWarning);
 			}
 
-			if (ConstructWarning(page, replacer.CheckNewTemplates(oldPage, newPage), "templates") is string templateWarning)
+			if (EsoReplacer.ConstructWarning(page, replacer.CheckNewTemplates(oldPage, newPage), "templates") is string templateWarning)
 			{
 				this.Warn(templateWarning);
 			}

@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Globalization;
+	using System.Text;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
@@ -18,7 +19,7 @@
 	internal sealed class EsoReplacer
 	{
 		#region Static Fields
-		private static readonly Regex EsoLinks = new Regex(@"(?<before>(((''')?([0-9]+(-[0-9]+)?|\{\{huh}}|\{\{Nowrap[^}]*?}})(''')?)%?\s+)?(((or )?more|max(imum)?|of missing|ESO)(\s+|<br>))?)?(?<type>(?-i:Health|Magicka|Physical Penetration|Physical Resistance|Spell Critical|Spell Damage|Spell Penetration|Spell Resistance|Stamina|Ultimate|Weapon Critical|Weapon Damage))(\s(?<after>(Recovery|Regeneration|[0-9]+%)+))?\b", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex EsoLinks = new Regex(@"(?<before>(((''')?([0-9]+(-[0-9]+)?|\{\{huh\}\}|\{\{Nowrap[^}]*\}\})(''')?)%?\s+)?(((or )?more|max(imum)?|of missing|ESO)(\s+|<br>))?)?(?<type>(?-i:Health|Magicka|Physical Penetration|Physical Resistance|Spell Critical|Spell Damage|Spell Penetration|Spell Resistance|Stamina|Ultimate|Weapon Critical|Weapon Damage))(\s(?<after>(Recovery|Regeneration|[0-9]+%)+))?\b", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
 		private static readonly Regex NumberStripper = new Regex(@"[0-9]+(-[0-9]+)?%?\s*", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
 		private static readonly Regex ReplacementFinder = new Regex(@"^\|\ *(<nowiki/?>)?(?<from>.*?)(</?nowiki/?>)?\ *\|\|\ *(<nowiki/?>)?(?<to>.*?)(</?nowiki/?>)?\ *$", RegexOptions.Multiline | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
 		private static readonly Regex SpaceStripper = new Regex(@"(\s{2,}|\n)", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
@@ -64,6 +65,31 @@
 		#endregion
 
 		#region Public Static Methods
+		public static string? ConstructWarning(Page page, ICollection<ISimpleTitle> titles, string warningType)
+		{
+			if (titles.Count > 0)
+			{
+				var warning = new StringBuilder();
+				warning
+					.Append("Watch for ")
+					.Append(warningType)
+					.Append(" on ")
+					.Append(page.FullPageName)
+					.Append(": ");
+				foreach (var link in titles)
+				{
+					warning
+						.Append(link)
+						.Append(", ");
+				}
+
+				warning.Remove(warning.Length - 2, 2);
+				return warning.ToString();
+			}
+
+			return null;
+		}
+
 		public static void Initialize(WikiJob job)
 		{
 			if (!initialized)
@@ -105,21 +131,50 @@
 			{
 				if (nodes[i] is ITextNode textNode)
 				{
+					// TODO: This used to just be fugly, it's now a disaster. Rewrite.
+
+					// This is a truly fugly hack of a text modification, but is necessary until such time as Nowrap/Huh insertion can handle this on their own. The logic is to check if the first match is at the beginning of the text and, if so, and the previous value is a Huh or Nowrap template, then integrate the text of that into this node and remove the template from the collection. After that's done, we proceed as normal.
 					var text = textNode.Text;
-					var checkTemplate = EsoLinks.Match(text);
-					if (checkTemplate.Success)
+					if (i > 0 &&
+						nodes[i - 1] is ITemplateNode previous &&
+						previous.GetTitleText() is string title &&
+						(title.Equals("huh", StringComparison.OrdinalIgnoreCase) || title.Equals("nowrap", StringComparison.OrdinalIgnoreCase)))
 					{
-						// This is a truly fugly hack of a text modification, but is necessary until such time as Nowrap/Huh insertion can handle this on their own. The logic is to check if the first match is at the beginning of the text and, if so, and the previous value is a Huh or Nowrap template, then integrate the text of that into this node and remove the template from the collection. After that's done, we proceed as normal.
-						if (checkTemplate.Index == 1 &&
-							nodes[i - 1] is ITemplateNode previous &&
-							previous.GetTitleText() is string title &&
-							(title.Equals("huh", StringComparison.OrdinalIgnoreCase) || title.Equals("nowrap", StringComparison.OrdinalIgnoreCase)))
+						text = WikiTextVisitor.Raw(previous) + text;
+						var boldStart = false;
+						if (i > 1 && nodes[i - 2] is ITextNode backText)
 						{
-							text = WikiTextVisitor.Raw(previous) + text;
-							nodes.Remove(previous);
+							boldStart = backText.Text.EndsWith("'''", StringComparison.Ordinal);
+							if (boldStart)
+							{
+								text = "'''" + text;
+							}
+						}
+						else
+						{
+							backText = null;
 						}
 
-						var matches = (ICollection<Match>)EsoLinks.Matches(text);
+						var firstMatch = EsoLinks.Match(text);
+						if (firstMatch.Success && firstMatch.Index == 0)
+						{
+							if (boldStart && backText != null)
+							{
+								backText.Text = backText.Text[0..^3];
+							}
+
+							nodes.Remove(previous);
+							i--;
+						}
+						else
+						{
+							text = textNode.Text;
+						}
+					}
+
+					var matches = (ICollection<Match>)EsoLinks.Matches(text);
+					if (matches.Count > 0)
+					{
 						var newNodes = factory.NodeCollection();
 						var startPos = 0;
 						foreach (var match in matches)
@@ -248,13 +303,13 @@
 		public ICollection<ISimpleTitle> CheckNewLinks(ContextualParser oldPage, ContextualParser newPage)
 		{
 			var oldLinks = new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance);
-			foreach (var node in oldPage.LinkNodes)
+			foreach (var node in oldPage.Nodes.FindAll<ILinkNode>(null, false, true, 0))
 			{
 				var siteLink = SiteLink.FromLinkNode(this.site, node);
 				oldLinks.Add(siteLink);
 			}
 
-			foreach (var node in newPage.LinkNodes)
+			foreach (var node in newPage.Nodes.FindAll<ILinkNode>(null, false, true, 0))
 			{
 				var siteLink = SiteLink.FromLinkNode(this.site, node);
 				oldLinks.Remove(siteLink);
@@ -266,12 +321,12 @@
 		public ICollection<ISimpleTitle> CheckNewTemplates(ContextualParser oldPage, ContextualParser newPage)
 		{
 			var oldTemplates = new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance);
-			foreach (var node in oldPage.TemplateNodes)
+			foreach (var node in oldPage.Nodes.FindAll<ITemplateNode>(null, false, true, 0))
 			{
 				oldTemplates.Add(Title.FromBacklinkNode(this.site, node));
 			}
 
-			foreach (var node in newPage.TemplateNodes)
+			foreach (var node in newPage.Nodes.FindAll<ITemplateNode>(null, false, true, 0))
 			{
 				oldTemplates.Remove(Title.FromBacklinkNode(this.site, node));
 			}
@@ -279,10 +334,12 @@
 			return oldTemplates;
 		}
 
-		public bool IsNonTrivialChange(ContextualParser oldPage, ContextualParser newPage) => string.Compare(
-			this.StrippedTextFromNodes(oldPage.Nodes),
-			this.StrippedTextFromNodes(newPage.Nodes),
-			StringComparison.InvariantCultureIgnoreCase) == 0;
+		public bool IsNonTrivialChange(ContextualParser oldPage, ContextualParser newPage)
+		{
+			var oldText = this.StrippedTextFromNodes(oldPage.Nodes);
+			var newText = this.StrippedTextFromNodes(newPage.Nodes);
+			return string.Compare(oldText, newText, StringComparison.InvariantCultureIgnoreCase) != 0;
+		}
 
 		public void RemoveTrivialTemplates(NodeCollection oldNodes) =>
 			oldNodes.RemoveAll<ITemplateNode>(node => this.RemoveableTemplates.Contains(Title.FromBacklinkNode(this.site, node)));

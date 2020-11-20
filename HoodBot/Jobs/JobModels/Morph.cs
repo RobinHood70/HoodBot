@@ -90,37 +90,8 @@
 		#region Private Methods
 		internal void ParseDescription()
 		{
-			var splitDescriptions = new List<string[]>(this.Abilities.Count);
-			var splitLength = 0;
-			var isBad = false;
-			foreach (var ability in this.Abilities)
-			{
-				var split = Skill.Highlight.Split(ability.Description);
-				if (split.Length != splitLength)
-				{
-					if (splitLength == 0)
-					{
-						splitLength = split.Length;
-					}
-					else
-					{
-						isBad = true;
-					}
-				}
-
-				splitDescriptions.Add(split);
-			}
-
-			if (isBad)
-			{
-				Debug.WriteLine($"Split lengths not equal for {this.Name}");
-				foreach (var abil in this.Abilities)
-				{
-					Debug.WriteLine($"{abil.Id.ToStringInvariant()}: {abil.Description}");
-				}
-
-				throw new InvalidOperationException("Split lengths not equal!");
-			}
+			var splitDescriptions = this.GetDescriptions();
+			var splitLength = splitDescriptions[0].Length;
 
 			var errors = false;
 			var variableDescriptions = new List<VariableData<string>>(splitLength);
@@ -175,16 +146,52 @@
 			if (!errors)
 			{
 				var descriptions = new List<string>();
-				foreach (var fragment in variableDescriptions)
+				for (var i = 0; i < variableDescriptions.Count; i++)
 				{
-					if (fragment.ToString() is string fragmentText)
+					// Descriptions used to be done with Join("'''") but in practice, this is unintuitive, so we surround every other value with bold instead.
+					var fragment = variableDescriptions[i].ToString() ?? string.Empty;
+					descriptions.Add((i & 1) == 1 ? "'''" + fragment + "'''" : fragment);
+				}
+
+				this.Description = string.Join(string.Empty, descriptions);
+			}
+		}
+
+		private IList<string[]> GetDescriptions()
+		{
+			var splitDescriptions = new List<string[]>(this.Abilities.Count);
+			var splitLength = 0;
+			var isBad = false;
+			foreach (var ability in this.Abilities)
+			{
+				var split = Skill.Highlight.Split(ability.Description);
+				if (split.Length != splitLength)
+				{
+					if (splitLength == 0)
 					{
-						descriptions.Add(fragmentText);
+						splitLength = split.Length;
+					}
+					else
+					{
+						isBad = true;
 					}
 				}
 
-				this.Description = string.Join("'''", descriptions);
+				splitDescriptions.Add(split);
 			}
+
+			if (isBad)
+			{
+				Debug.WriteLine($"Split lengths not equal for {this.Name}");
+				foreach (var abil in this.Abilities)
+				{
+					Debug.WriteLine($"{abil.Id.ToStringInvariant()}: {abil.Description}");
+				}
+
+				throw new InvalidOperationException("Split lengths not equal!");
+			}
+
+			return splitDescriptions;
 		}
 		#endregion
 	}

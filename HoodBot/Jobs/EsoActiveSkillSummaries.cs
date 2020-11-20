@@ -192,7 +192,7 @@
 				}
 
 				var parameterName = "desc" + morphNum;
-				bigChange = this.TrackedUpdate(template, parameterName, extras + morph.Description ?? string.Empty, usedList, skillBase.Name);
+				bigChange = this.TrackedUpdate(template, parameterName, extras + (morph.Description ?? string.Empty), usedList, skillBase.Name);
 				if (morphCounter > 0)
 				{
 					var morphName = "morph" + morphNum;
