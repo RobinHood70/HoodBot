@@ -34,7 +34,7 @@
 		#region Public Static Methods
 		public static UespSite CreateInstance(IWikiAbstractionLayer abstractionLayer) => new UespSite(abstractionLayer);
 
-		public static string GetBotFolder() => Environment.ExpandEnvironmentVariables(@"%BotData%");
+		public static string GetBotDataFolder() => Environment.ExpandEnvironmentVariables(@"%BotData%");
 		#endregion
 
 		#region Public Override Methods

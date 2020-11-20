@@ -21,8 +21,8 @@
 			var esoNpcs = new TitleCollection(this.Site);
 			esoNpcs.GetCategoryMembers("Online-NPCs");
 
-			var fileName = Path.Combine(UespSite.GetBotFolder(), "en.lang.csv");
-			var fileNameOut = Path.Combine(UespSite.GetBotFolder(), "GenderedNPCs.txt");
+			var fileName = Path.Combine(UespSite.GetBotDataFolder(), "en.lang.csv");
+			var fileNameOut = Path.Combine(UespSite.GetBotDataFolder(), "GenderedNPCs.txt");
 			using var reader = File.OpenText(fileName);
 			var csvFile = new CsvFile
 			{
