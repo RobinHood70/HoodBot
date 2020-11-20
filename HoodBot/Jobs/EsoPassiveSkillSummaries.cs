@@ -37,7 +37,7 @@
 			WHERE
 				minedSkills.isPlayer
 					AND minedSkills.isPassive
-					AND skillLine != 'Emperor'
+					AND minedSkills.skillLine != 'Emperor'
 			ORDER BY skillTree.basename, skillTree.skillTypeName, minedSkills.rank";
 
 		protected override string TypeText => "Passive";
@@ -73,9 +73,15 @@
 							splitDescription[i] = "(" + splitDescription[i] + " × " + coef.MechanicName + ")";
 						}
 					}
+
+					// Descriptions used to be done with Join("'''") but in practice, this is unintuitive, so we surround every other value with bold instead.
+					if ((i & 1) == 1)
+					{
+						splitDescription[i] = "'''" + splitDescription[i] + "'''";
+					}
 				}
 
-				var description = string.Join("'''", splitDescription);
+				var description = string.Join(string.Empty, splitDescription);
 				var rankText = rank.Rank.ToStringInvariant();
 				bigChange |= this.TrackedUpdate(template, "desc" + (rank.Rank == 1 ? string.Empty : rankText), description, usedList, skillBase.Name);
 				bigChange |= this.TrackedUpdate(template, "linerank" + rankText, rank.LearnedLevel.ToStringInvariant());

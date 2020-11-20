@@ -165,7 +165,7 @@
 				var newList = new List<string>();
 				foreach (var page in this.trivialChanges)
 				{
-					newList.Add(new SiteLink(page).ToString());
+					newList.Add(page.AsLink(true));
 				}
 
 				this.WriteLine(string.Join(", ", newList));
@@ -268,8 +268,9 @@
 				page.Text = NewPage(skill);
 			}
 
-			var parser = new ContextualParser(page);
-			var skillSummaries = new List<SiteTemplateNode>(parser.FindTemplates(TemplateName));
+			var oldPage = new ContextualParser(page);
+			var newPage = new ContextualParser(page);
+			var skillSummaries = new List<SiteTemplateNode>(newPage.FindTemplates(TemplateName));
 			if (skillSummaries.Count != 1)
 			{
 				this.Warn("Incorrect number of {{" + TemplateName + "}} matches on " + skill.PageName);
@@ -306,7 +307,18 @@
 			bigChange |= this.UpdateSkillTemplate(skill, template);
 			template.Sort("titlename", "id", "id1", "id2", "id3", "id4", "id5", "id6", "id7", "id8", "id9", "id10", "line", "type", "icon", "icon2", "icon3", "desc", "desc1", "desc2", "desc3", "desc4", "desc5", "desc6", "desc7", "desc8", "desc9", "desc10", "linerank", "cost", "attrib", "casttime", "range", "radius", "duration", "channeltime", "target", "morph1name", "morph1id", "morph1icon", "morph1desc", "morph2name", "morph2id", "morph2icon", "morph2desc", "image", "imgdesc", "nocat", "notrail");
 
-			page.Text = parser.GetText();
+			page.Text = newPage.GetText();
+
+			var replacer = new EsoReplacer(this.Site);
+			if (EsoReplacer.ConstructWarning(page, replacer.CheckNewLinks(oldPage, newPage), "links") is string linkWarning)
+			{
+				this.Warn(linkWarning);
+			}
+
+			if (EsoReplacer.ConstructWarning(page, replacer.CheckNewTemplates(oldPage, newPage), "templates") is string templateWarning)
+			{
+				this.Warn(templateWarning);
+			}
 
 			return bigChange;
 		}
