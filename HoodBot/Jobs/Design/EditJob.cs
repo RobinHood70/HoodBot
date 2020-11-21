@@ -3,6 +3,7 @@
 	using System;
 	using RobinHood70.HoodBot;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Design;
 	using static RobinHood70.CommonCode.Globals;
 
@@ -82,7 +83,7 @@
 
 			this.StatusWriteLine("Saving pages");
 			this.EditConflictAction = editConflictAction;
-			this.Pages.Sort();
+			this.Pages.Sort(NaturalTitleComparer.Instance);
 			this.Progress = 0;
 			this.ProgressMaximum = this.Pages.Count;
 
