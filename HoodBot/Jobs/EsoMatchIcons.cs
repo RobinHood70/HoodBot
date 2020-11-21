@@ -7,6 +7,7 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
+	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
@@ -23,7 +24,7 @@
 
 		#region Static Fields
 		private static readonly DateTime LastRun = new DateTime(2020, 9, 25);
-		private static readonly string WikiImageFolder = Environment.ExpandEnvironmentVariables(@"%BotData%\WikiImages\"); // Files in this folder come from http://esofiles.uesp.net/update-<whatever>/icons.zip
+		private static readonly string WikiImageFolder = UespSite.GetBotDataFolder(@"WikiImages\"); // Files in this folder come from http://esofiles.uesp.net/update-<whatever>/icons.zip
 		#endregion
 
 		#region Fields

@@ -19,12 +19,12 @@
 
 		protected override void BeforeLogging()
 		{
-			var botFolder = Path.Combine(UespSite.GetBotDataFolder(), "Blades_Generic_Items.txt");
+			var botFolder = UespSite.GetBotDataFolder("Blades_Generic_Items.txt");
 			var parsed = new SiteNodeFactory(this.Site).Parse(File.ReadAllText(botFolder));
-			for (var i = 0; i < parsed.Count; i+=4)
+			for (var i = 0; i < parsed.Count; i += 4)
 			{
-				CheckText(parsed, i+1);
-				CheckText(parsed, i+3);
+				CheckText(parsed, i + 1);
+				CheckText(parsed, i + 3);
 				var header = (IHeaderNode)parsed[i];
 				var link = (SiteLinkNode)header.Title[1];
 				var template = (ITemplateNode)parsed[i + 2];
@@ -39,7 +39,7 @@
 
 			static void CheckText(NodeCollection parsed, int offset)
 			{
-				if (offset<parsed.Count && (!(parsed[offset] is ITextNode textNode) || textNode.Text.TrimStart().Length != 0))
+				if (offset < parsed.Count && (!(parsed[offset] is ITextNode textNode) || textNode.Text.TrimStart().Length != 0))
 				{
 					throw new InvalidOperationException();
 				}
