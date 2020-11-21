@@ -138,8 +138,21 @@
 				if (allPages.Contains(quest.FullPageName))
 				{
 					quest.FullPageName += " (quest)";
+					if (allPages.Contains(quest.FullPageName))
+					{
+						continue;
+					}
 				}
 
+				GetZone(places, quest);
+				this.Pages.Add(this.NewPage(quest));
+			}
+
+			this.ProgressMaximum = this.Pages.Count + 1;
+			this.Progress++;
+
+			static void GetZone(PlaceCollection places, QuestData quest)
+			{
 				if (!string.IsNullOrEmpty(quest.Zone))
 				{
 					var place = places[quest.Zone];
@@ -156,12 +169,7 @@
 						}
 					}
 				}
-
-				this.Pages.Add(this.NewPage(quest));
 			}
-
-			this.ProgressMaximum = this.Pages.Count + 1;
-			this.Progress++;
 		}
 		#endregion
 
