@@ -59,7 +59,7 @@
 		#region Fields
 		private readonly TitleCollection doNotDelete;
 		private readonly ReplacementCollection replacements = new ReplacementCollection();
-		private readonly string replacementStatusFile = Path.Combine(UespSite.GetBotDataFolder(), "Replacements.json");
+		private readonly string replacementStatusFile = UespSite.GetBotDataFolder("Replacements.json");
 		private readonly SimpleTitleJsonConverter titleConverter;
 		private PageModules fromPageModules = PageModules.None;
 		private string? logDetails;
@@ -183,17 +183,14 @@
 		protected void DeleteFiles() => File.Delete(this.replacementStatusFile);
 
 		// [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Optiona, to be called only when necessary.")]
-		protected IEnumerable<Replacement> LoadReplacementsFromFile(string fileName)
+		protected void LoadReplacementsFromFile(string fileName)
 		{
 			var repFile = File.ReadLines(fileName);
-			var replacementList = new List<Replacement>();
 			foreach (var line in repFile)
 			{
 				var rep = line.Split(TextArrays.Tab);
-				replacementList.Add(new Replacement(this.Site, rep[0].Trim(), rep[1].Trim()));
+				this.AddReplacement(rep[0].Trim(), rep[1].Trim());
 			}
-
-			return replacementList;
 		}
 		#endregion
 
@@ -888,6 +885,11 @@
 		#region private sealed classes
 		private sealed class ReplacementCollection : KeyedCollection<Title, Replacement>
 		{
+			public ReplacementCollection()
+				: base(SimpleTitleEqualityComparer.Instance)
+			{
+			}
+
 			public IEnumerable<Title> Keys => this.Dictionary?.Keys ?? Array.Empty<Title>();
 
 			public void Sort() => (this.Items as List<Replacement>)?.Sort();
