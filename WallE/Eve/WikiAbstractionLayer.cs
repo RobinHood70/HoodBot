@@ -936,7 +936,7 @@
 		/// <remarks>No stop checking is performed on logging out.</remarks>
 		public void Logout(bool clear)
 		{
-			if (this.CurrentUserInfo is UserInfoResult userInfo && userInfo.Flags.HasFlag(UserInfoFlags.Anonymous))
+			if (this.CurrentUserInfo is UserInfoResult userInfo && !userInfo.Flags.HasFlag(UserInfoFlags.Anonymous))
 			{
 				var input = new LogoutInput();
 				if (this.SiteVersion >= 134)
