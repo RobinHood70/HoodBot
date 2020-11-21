@@ -142,17 +142,18 @@
 					{
 						text = WikiTextVisitor.Raw(previous) + text;
 						var boldStart = false;
-						if (i > 1 && nodes[i - 2] is ITextNode backText)
+						ITextNode? backText = null;
+						if (i > 1)
 						{
-							boldStart = backText.Text.EndsWith("'''", StringComparison.Ordinal);
-							if (boldStart)
+							backText = nodes[i - 2] as ITextNode;
+							if (backText != null)
 							{
-								text = "'''" + text;
+								boldStart = backText.Text.EndsWith("'''", StringComparison.Ordinal);
+								if (boldStart)
+								{
+									text = "'''" + text;
+								}
 							}
-						}
-						else
-						{
-							backText = null;
 						}
 
 						var firstMatch = EsoLinks.Match(text);
