@@ -34,7 +34,7 @@
 
 		protected override void BeforeLogging()
 		{
-			var fileName = Path.Combine(UespSite.GetBotDataFolder(), "QuestLanguageDatabase.txt");
+			var fileName = UespSite.GetBotDataFolder("QuestLanguageDatabase.txt");
 			var translation = new Dictionary<string, string>(StringComparer.Ordinal);
 			var langFile = new CsvFile();
 			langFile.ReadFile(fileName, true);
@@ -43,7 +43,7 @@
 				translation.Add(entry["ID"], entry["en-US"]);
 			}
 
-			fileName = Path.Combine(UespSite.GetBotDataFolder(), "ItemPropertyList.txt");
+			fileName = UespSite.GetBotDataFolder("ItemPropertyList.txt");
 			var lines = File.ReadAllLines(fileName);
 			var codeLines = BladesCodeLine.Parse(lines);
 

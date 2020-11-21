@@ -31,7 +31,7 @@
 		{
 			var titles = new TitleCollection(this.Site);
 			var titleConverter = new SimpleTitleJsonConverter(this.Site);
-			var repFile = File.ReadAllText(Path.Combine(UespSite.GetBotDataFolder(), "Replacements - Merge.json"));
+			var repFile = File.ReadAllText(UespSite.GetBotDataFolder("Replacements - Merge.json"));
 			var reps = JsonConvert.DeserializeObject<IEnumerable<Replacement>>(repFile, titleConverter) ?? throw new InvalidOperationException();
 			foreach (var rep in reps)
 			{
