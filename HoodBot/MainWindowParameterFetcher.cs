@@ -92,7 +92,7 @@
 		}
 
 		private static object? GetControlValue(Type expectedType, Control control) =>
-			control is CheckBox checkBox ? (object)(checkBox.IsChecked == true) :
+			control is CheckBox checkBox ? checkBox.IsChecked == true :
 			control is TextBox textBox && textBox.Text is var text ?
 				expectedType == typeof(string) ? text :
 				expectedType == typeof(int) ? int.Parse(text, CultureInfo.InvariantCulture) :

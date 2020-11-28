@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
-	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
@@ -86,7 +85,6 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		[SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Not a normalization")]
 		public Request Add<T>(string name, T value)
 			where T : Enum => value?.GetType().GetEnumName(value) is string enumName
 				? this.Add(name, enumName.ToLowerInvariant())
@@ -249,7 +247,6 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="values">The parameter values.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		[SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Not a normalization")]
 		public Request AddFlags<T>(string name, T values)
 			where T : Enum
 		{

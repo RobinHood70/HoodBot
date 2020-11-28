@@ -170,7 +170,6 @@
 		/// <param name="key">The key.</param>
 		/// <returns>The <see cref="ISimpleTitle">Title</see>.</returns>
 		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry on set if the requested entry isn't found.</remarks>
-		[SuppressMessage("Microsoft.Design", "CA1043:UseIntegralOrStringArgumentForIndexers", Justification = @"Integer and string methods are also available, but this method provides the most accuracy.")]
 		public override Page this[ISimpleTitle key]
 		{
 			get

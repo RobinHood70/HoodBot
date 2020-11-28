@@ -6,7 +6,6 @@ namespace RobinHood70.WallE.Base
 	using System.Globalization;
 	using RobinHood70.CommonCode;
 
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Project naming convention takes precedence.")]
 	public class SearchResult : ReadOnlyCollection<SearchResultItem>
 	{
 		#region Constructors

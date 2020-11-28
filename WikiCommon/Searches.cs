@@ -57,7 +57,7 @@
 						sb.Append("(?i:").Append(Regex.Escape(name.Substring(0, 1))).Append(')');
 						if (name.Length > 1)
 						{
-							var nameRemainder = Regex.Escape(name.Substring(1));
+							var nameRemainder = Regex.Escape(name[1..]);
 							nameRemainder = nameRemainder.Replace(@"\ ", @"[_\ ]+", StringComparison.Ordinal);
 
 							sb.Append(nameRemainder);

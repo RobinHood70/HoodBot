@@ -811,7 +811,6 @@
 		/// <param name="changeFunction">The function to execute. It should return a <see cref="ChangeStatus"/> indicating whether the call was successful, failed, or ignored.</param>
 		/// <param name="caller">The calling method (populated automatically with caller name).</param>
 		/// <returns>A value indicating the actions that should take place.</returns>
-		[SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
 		public virtual ChangeStatus PublishChange(object sender, IReadOnlyDictionary<string, object?>? parameters, Func<ChangeStatus> changeFunction, [CallerMemberName] string caller = "")
 		{
 			ThrowNull(changeFunction, nameof(changeFunction));
@@ -832,7 +831,6 @@
 		/// <param name="caller">The calling method (populated automatically with caller name).</param>
 		/// <returns>A value indicating the actions that should take place.</returns>
 		/// <remarks>In the event of a <see cref="ChangeStatus.Cancelled"/> result, the corresponding value will be <span class="keyword">default</span>.</remarks>
-		[SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "CallerMemberName requires it.")]
 		public virtual ChangeValue<T> PublishChange<T>(T disabledResult, object sender, IReadOnlyDictionary<string, object?>? parameters, Func<ChangeValue<T>> changeFunction, [CallerMemberName] string caller = "")
 			where T : class
 		{

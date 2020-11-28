@@ -39,7 +39,7 @@
 
 			static void CheckText(NodeCollection parsed, int offset)
 			{
-				if (offset < parsed.Count && (!(parsed[offset] is ITextNode textNode) || textNode.Text.TrimStart().Length != 0))
+				if (offset < parsed.Count && (parsed[offset] is not ITextNode textNode || textNode.Text.TrimStart().Length != 0))
 				{
 					throw new InvalidOperationException();
 				}

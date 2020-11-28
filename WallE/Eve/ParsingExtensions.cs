@@ -70,23 +70,16 @@
 		public static DateTime GetDate(this JToken? token, [CallerMemberName] string caller = FallbackText.Unknown)
 		{
 			var date = (string?)token;
-			switch (date)
+			return date switch
 			{
-				case null:
-				case "":
-					throw ArgumentNull(nameof(token));
-				case "indefinite":
-				case "infinite":
-				case "infinity":
-				case "never":
-					return DateTime.MaxValue;
-				default:
-					return (
-						DateTime.TryParse(date, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var retval) ||
-						DateTime.TryParseExact(date, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out retval))
-							? retval
-							: throw MalformedTypeException(nameof(DateTime), token, caller);
-			}
+				null or "" => throw ArgumentNull(nameof(token)),
+				"indefinite" or "infinite" or "infinity" or "never" => DateTime.MaxValue,
+				_ => (
+					DateTime.TryParse(date, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var retval) ||
+					DateTime.TryParseExact(date, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out retval))
+						? retval
+						: throw MalformedTypeException(nameof(DateTime), token, caller),
+			};
 		}
 
 		/// <summary>Gets a standard code/info-formatted error.</summary>
@@ -343,7 +336,7 @@
 
 			// Somewhere prior to 1.22, rights lists could be returned as a numbered key-value pair instead of a straight-forward string array, so this handles that situation and converts it to the expected type.
 			var userRights =
-				!(token["rights"] is JToken rights)
+				token["rights"] is not JToken rights
 					? null :
 				rights.Type == JTokenType.Array
 					? rights.GetList<string>() :
@@ -469,26 +462,16 @@
 		/// <summary>Figures out what kind of date we're dealing with (ISO 8601, all digits, or infinite and its variants) and then returns the appropriate value.</summary>
 		/// <param name="date">A string with the date.</param>
 		/// <returns>A DateTime value or null. If the date evaluates to infinity, DateTime.MaxDate.</returns>
-		public static DateTime? GetNullableDate(this string? date)
+		public static DateTime? GetNullableDate(this string? date) => date switch
 		{
-			switch (date)
-			{
-				case null:
-				case "":
-					return null;
-				case "indefinite":
-				case "infinite":
-				case "infinity":
-				case "never":
-					return DateTime.MaxValue;
-				default:
-					return (
-						DateTime.TryParse(date, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var retval) ||
-						DateTime.TryParseExact(date, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out retval))
-							? retval
-							: null as DateTime?;
-			}
-		}
+			null or "" => null,
+			"indefinite" or "infinite" or "infinity" or "never" => DateTime.MaxValue,
+			_ => (
+				DateTime.TryParse(date, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var retval) ||
+				DateTime.TryParseExact(date, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out retval))
+					? retval
+					: null as DateTime?,
+		};
 		#endregion
 
 		#region Request Methods

@@ -91,7 +91,7 @@
 		#region Private Methods
 		private void Fill(string page)
 		{
-			if (!(this.SelectedItem is WikiInfoViewModel selectedItem))
+			if (this.SelectedItem is not WikiInfoViewModel selectedItem)
 			{
 				return;
 			}

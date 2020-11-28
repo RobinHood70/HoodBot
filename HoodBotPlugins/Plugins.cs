@@ -39,11 +39,14 @@
 			}
 
 			var diffViewers = new Dictionary<string, IDiffViewer>(StringComparer.Ordinal);
-			foreach (var plugin in this.All)
+			if (this.All != null)
 			{
-				if (plugin.Value is IDiffViewer diffViewer)
+				foreach (var plugin in this.All)
 				{
-					diffViewers.Add(plugin.Metadata.DisplayName, diffViewer);
+					if (plugin.Value is IDiffViewer diffViewer)
+					{
+						diffViewers.Add(plugin.Metadata.DisplayName, diffViewer);
+					}
 				}
 			}
 

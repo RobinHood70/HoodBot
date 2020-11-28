@@ -105,7 +105,7 @@
 				tabs++;
 			}
 
-			return new IndentedLine(tabs, line.Substring(tabs));
+			return new IndentedLine(tabs, line[tabs..]);
 		}
 		#endregion
 

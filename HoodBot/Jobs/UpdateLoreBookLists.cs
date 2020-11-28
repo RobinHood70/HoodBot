@@ -166,7 +166,7 @@
 			{
 				var newNodes = new List<IWikiNode>();
 				nodes.RemoveRange(first, last + 1 - first);
-				var letter = page.PageName.Substring(6);
+				var letter = page.PageName[6..];
 				var entries = this.pageBooks[letter];
 				foreach (var entry in entries)
 				{

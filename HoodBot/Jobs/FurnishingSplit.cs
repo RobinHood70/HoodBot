@@ -96,7 +96,7 @@
 		#region Private Methods
 		private static ISimpleTitle PageFromFile(ISimpleTitle page)
 		{
-			var pageName = page.PageName.Substring(FurnishingPrefix.Length);
+			var pageName = page.PageName[FurnishingPrefix.Length..];
 			var extension = pageName.LastIndexOf('.');
 			if (extension >= 0)
 			{

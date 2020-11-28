@@ -277,7 +277,7 @@
 				desc = RegexLibrary.WhitespaceToSpace(desc);
 				if (desc.StartsWith(page.PageName, StringComparison.Ordinal))
 				{
-					desc = desc.Substring(page.PageName.Length).TrimStart();
+					desc = desc[page.PageName.Length..].TrimStart();
 				}
 
 				sb

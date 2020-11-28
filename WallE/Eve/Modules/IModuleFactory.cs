@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.WallE.Base;
 
 	#region Public Delegates
@@ -46,7 +45,6 @@
 		/// <typeparam name="T">The type of generator input that the factory method handles.</typeparam>
 		/// <param name="generatorFactoryMethod">The generator factory method.</param>
 		/// <returns>The current module factory (fluent interface).</returns>
-		[SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Shorter and simpler than using typeof() in caller.")]
 		IModuleFactory RegisterGenerator<T>(GeneratorFactoryMethod generatorFactoryMethod)
 			where T : IGeneratorInput;
 
@@ -54,7 +52,6 @@
 		/// <typeparam name="T">The type of property input that the factory method handles.</typeparam>
 		/// <param name="propertyFactoryMethod">The property factory method.</param>
 		/// <returns>The current module factory (fluent interface).</returns>
-		[SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Shorter and simpler than using typeof() in caller.")]
 		IModuleFactory RegisterProperty<T>(PropertyFactoryMethod propertyFactoryMethod)
 			where T : IPropertyInput;
 		#endregion

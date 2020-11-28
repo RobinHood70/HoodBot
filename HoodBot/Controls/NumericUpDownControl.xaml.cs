@@ -16,7 +16,6 @@
 		#endregion
 
 		#region Constructors
-		[SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Windows.Controls.TextBox.set_Text(System.String)", Justification = "Needs no translation.")]
 		public NumericUpDown()
 		{
 			this.InitializeComponent();

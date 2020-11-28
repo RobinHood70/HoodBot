@@ -69,7 +69,7 @@
 		/// <param name="fileName">Name of the file to download to. This will be overwritten if it exists. If fileName represents a path, the page name will be used as the file name.</param>
 		public void Download(string fileName)
 		{
-			if (this.fileRevisions.Count == 0 || !(this.fileRevisions[0].Uri is Uri uri))
+			if (this.fileRevisions.Count == 0 || this.fileRevisions[0].Uri is not Uri uri)
 			{
 				throw new InvalidOperationException(Resources.FileRevisionInvalid);
 			}

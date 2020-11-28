@@ -1,5 +1,4 @@
-﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
-namespace RobinHood70.WallE.Eve.Modules
+﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
@@ -69,7 +68,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				normalizedName = name.Replace(' ', '_');
 				if (char.IsUpper(normalizedName[0]))
 				{
-					normalizedName = normalizedName.Substring(0, 1).ToLower(ci) + (name.Length > 1 ? name.Substring(1) : string.Empty);
+					normalizedName = normalizedName.Substring(0, 1).ToLower(ci) + (name.Length > 1 ? name[1..] : string.Empty);
 				}
 			}
 

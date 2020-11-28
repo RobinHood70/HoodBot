@@ -430,7 +430,7 @@
 					endPos++;
 					if (endPos < textValue.Length)
 					{
-						value += textValue.Substring(endPos);
+						value += textValue[endPos..];
 					}
 				}
 			}
