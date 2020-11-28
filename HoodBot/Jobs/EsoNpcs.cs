@@ -1,48 +1,94 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System;
 	using System.Collections.Generic;
+	using System.Globalization;
 	using System.Text;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
-	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
+	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon.Parser.Basic;
+	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class EsoNpcs : EditJob
 	{
+		#region Fields
+		private readonly bool updateMode;
+		#endregion
+
 		#region Constructors
 		[JobInfo("Create missing NPCs", "ESO")]
-		public EsoNpcs(JobManager jobManager)
-				: base(jobManager) => this.SetResultDescription("Existing ESO NPC pages");
+		public EsoNpcs(JobManager jobManager, [JobParameter(DefaultValue = false)] bool updateMode)
+			: base(jobManager)
+		{
+			this.updateMode = updateMode;
+			this.SetResultDescription("Existing ESO NPC pages");
+		}
 		#endregion
 
 		#region Protected Override Properties
-		public override string LogName => "Create Missing ESO NPC Pages";
+		public override string LogName => (this.updateMode ? "Update" : "Create missing") + "ESO NPC pages";
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
-			this.StatusWriteLine("Getting NPC data from wiki");
-			var allNpcs = EsoGeneral.GetNpcsFromCategories(this.Site);
+			// TODO: This could be optimized further. Regular mode could load the page collection directly rather than by title; update mode could load pages with no loc or {{huh}} via MetaTemplate variables.
+			this.StatusWriteLine("Getting NPC data");
+			var allPages = new PageCollection(this.Site, new PageLoadOptions(PageModules.Default | PageModules.DeletedRevisions | PageModules.Properties, true));
+			allPages.GetCategoryMembers("Online-NPCs", CategoryMemberTypes.Page, false);
+			allPages.GetCategoryMembers("Online-Creatures-All", CategoryMemberTypes.Page, false);
+			var npcCollection = this.GetNpcPages(allPages);
+			var filteredNpcs = this.updateMode ? FilterNpcsUpdate(npcCollection) : this.FilterNpcs(npcCollection);
+			EsoGeneral.GetNpcLocations(filteredNpcs);
 
-			this.StatusWriteLine("Getting NPC data from database");
-			var npcData = EsoGeneral.GetNpcsFromDatabase();
-			this.FilterNpcs(allNpcs, npcData);
-			EsoGeneral.GetNpcLocations(npcData);
-
-			this.StatusWriteLine("Getting place data from wiki");
+			this.StatusWriteLine("Getting place data");
 			var places = EsoGeneral.GetPlaces(this.Site);
-			EsoGeneral.ParseNpcLocations(npcData, places);
-
-			foreach (var npc in npcData)
+			var placeInfo = EsoGeneral.PlaceInfo;
+			EsoGeneral.ParseNpcLocations(filteredNpcs, places);
+			foreach (var npc in filteredNpcs)
 			{
 				npc.TrimPlaces();
-				this.Pages.Add(this.CreatePage(npc));
+			}
+
+			if (this.updateMode)
+			{
+				foreach (var npc in filteredNpcs)
+				{
+					// TODO: We end up parsing the page twice with this design, one in FilterNpcsUpdate and once here. See if there's something that can be done to optimize this.
+					if (npc.Page is Page page &&
+						new ContextualParser(page) is var parser &&
+						parser.FindTemplate("Online NPC Summary") is ITemplateNode template)
+					{
+						UpdateLocations(npc, template, parser.Nodes.Factory, placeInfo);
+						page.Text = parser.GetText();
+						this.Pages.Add(page);
+					}
+					else
+					{
+						throw new InvalidOperationException();
+					}
+				}
+			}
+			else
+			{
+				foreach (var npc in filteredNpcs)
+				{
+					if (npc.Page is Page page)
+					{
+						page.Text = NewPageText(npc, this.Site.Culture, placeInfo);
+						page.SetMinimalStartTimestamp();
+						this.Pages.Add(page);
+					}
+					else
+					{
+						throw new InvalidOperationException();
+					}
+				}
 			}
 		}
 
@@ -50,55 +96,52 @@
 		#endregion
 
 		#region Private Static Methods
-		private Page CreatePage(NpcData npc)
+
+		private static NpcCollection FilterNpcsUpdate(NpcCollection npcs)
+		{
+			var retval = new NpcCollection();
+			foreach (var npc in npcs)
+			{
+				if (npc.Page is Page page)
+				{
+					var parsed = new ContextualParser(page);
+					if (parsed.FindTemplate("Online NPC Summary") is ITemplateNode template &&
+						template.Find("city").IsNullOrWhitespace() &&
+						template.Find("settlement").IsNullOrWhitespace() &&
+						template.Find("house").IsNullOrWhitespace() &&
+						template.Find("ship").IsNullOrWhitespace() &&
+						template.Find("store").IsNullOrWhitespace() &&
+						template.Find("loc") is IParameterNode loc &&
+						(loc.IsNullOrWhitespace() || string.Equals(loc.ValueToText(), "{{huh}}", StringComparison.OrdinalIgnoreCase)))
+					{
+						retval.Add(npc);
+					}
+				}
+			}
+
+			return retval;
+		}
+
+		private static string NewPageText(NpcData npc, CultureInfo culture, IEnumerable<PlaceInfo> placeInfo)
 		{
 			var parameters = new List<(string?, string)>()
 			{
 				("image", string.Empty),
-				("imgdesc", string.Empty)
-			};
-
-			foreach (var (placeType, paramName, _, variesCount) in EsoGeneral.PlaceInfo)
-			{
-				var placeText = npc.GetParameterValue(placeType, variesCount);
-				if (placeText.Length > 0)
-				{
-					parameters.Add((paramName, placeText));
-				}
-			}
-
-			parameters.AddRange(
+				("imgdesc", string.Empty),
 				("race", string.Empty),
 				("gender", npc.Gender.ToString()),
-				("difficulty", npc.Difficulty > 0 ? npc.Difficulty.ToString(this.Site.Culture) : string.Empty),
+				("difficulty", npc.Difficulty > 0 ? npc.Difficulty.ToString(culture) : string.Empty),
 				("reaction", npc.Reaction),
 				("pickpocket", npc.PickpocketDifficulty > 0 ? npc.PickpocketDifficulty.ToString() : string.Empty),
 				("loottype", npc.LootType),
-				("faction", string.Empty));
+				("faction", string.Empty)
+			};
 
 			var factory = new WikiNodeFactory();
 			var template = factory.TemplateNodeFromParts("Online NPC Summary", true, parameters);
-			if (npc.UnknownLocations.Count > 0)
-			{
-				var list = new SortedSet<string>(npc.UnknownLocations.Keys);
-				var locText = string.Join(", ", list);
-				if (locText.Length > 0)
-				{
-					locText += '\n';
-				}
+			UpdateLocations(npc, template, factory, placeInfo);
 
-				if (template.Find("loc") is IParameterNode loc)
-				{
-					loc.SetValue(loc.ValueToText()?.TrimEnd() + ", " + locText);
-				}
-				else
-				{
-					var index = template.FindIndex("race");
-					template.Parameters.Insert(index, factory.ParameterNodeFromParts("loc", locText));
-				}
-			}
-
-			var text = new StringBuilder()
+			return new StringBuilder()
 				.Append("{{Minimal|NPC}}")
 				.Append(WikiTextVisitor.Raw(template))
 				.AppendLine()
@@ -120,43 +163,67 @@
 				.AppendLine()
 				.AppendLine("{{Stub|NPC}}")
 				.ToString();
+		}
 
-			var page = new Page(this.Site[UespNamespaces.Online], npc.PageName) { Text = text };
-			page.SetMinimalStartTimestamp();
-			return page;
+		private static void UpdateLocations(NpcData npc, ITemplateNode template, IWikiNodeFactory factory, IEnumerable<PlaceInfo> places)
+		{
+			foreach (var (placeType, paramName, _, variesCount) in places)
+			{
+				var placeText = npc.GetParameterValue(placeType, variesCount);
+				InsertLocation(template, factory, paramName, placeText);
+			}
+
+			if (npc.UnknownLocations.Count > 0)
+			{
+				var list = new SortedSet<string>(npc.UnknownLocations.Keys);
+				var locText = string.Join(", ", list);
+				InsertLocation(template, factory, "loc", locText);
+			}
+
+			static void InsertLocation(ITemplateNode template, IWikiNodeFactory factory, string name, string locText)
+			{
+				if (locText.Length > 0)
+				{
+					locText += '\n';
+					if (template.Find(name) is IParameterNode loc)
+					{
+						loc.SetValue(loc.IsNullOrWhitespace() ? locText : (loc.ValueToText().TrimEnd() + ", " + locText));
+					}
+					else
+					{
+						var index = template.FindIndex("race");
+						template.Parameters.Insert(index, factory.ParameterNodeFromParts(name, locText));
+					}
+				}
+			}
 		}
 		#endregion
 
 		#region Private Methods
-		private void FilterNpcs(TitleCollection allNpcs, NpcCollection npcData)
+		private NpcCollection FilterNpcs(NpcCollection npcs)
 		{
 			this.StatusWriteLine("Checking for existing pages");
-			var tempList = new NpcCollection();
-			var titlesOnly = new TitleCollection(this.Site);
-			foreach (var npc in npcData)
+			var retval = new NpcCollection();
+			foreach (var npc in npcs)
 			{
-				var title = new NpcTitle(this.Site, npc);
-				if (!allNpcs.Contains(title))
+				ThrowNull(npc.Page, nameof(npc), nameof(npc.Page));
+				if (npc.Page != null)
 				{
-					titlesOnly.Add(title);
+					retval.Add(npc);
 				}
 			}
 
-			titlesOnly.Sort();
+			return retval;
+		}
 
-			var pageLoadOptions = new PageLoadOptions(PageModules.Default | PageModules.DeletedRevisions | PageModules.Properties, true);
-			var checkPages = titlesOnly.Load(pageLoadOptions);
-			foreach (var title in titlesOnly)
+		private NpcCollection GetNpcPages(PageCollection allPages)
+		{
+			var retval = EsoGeneral.GetNpcsFromDatabase();
+			foreach (var npc in retval)
 			{
-				var npc = ((NpcTitle)title).Npc;
-				var page = checkPages[title.FullPageName];
-				string? issue = null;
-				if (page.PreviouslyDeleted)
+				if (allPages.TryGetValue("Online:" + npc.Name, out var page))
 				{
-					issue = "was previously deleted";
-				}
-				else if (page.Exists)
-				{
+					string? issue = null;
 					if (page.IsDisambiguation)
 					{
 						issue = "is a disambiguation with no clear NPC link";
@@ -164,20 +231,19 @@
 						foreach (var linkNode in parser.LinkNodes)
 						{
 							var disambig = SiteLink.FromLinkNode(this.Site, linkNode, false);
-							if (allNpcs.Contains(disambig))
+							if (allPages.TryGetValue(disambig, out var disambigPage))
 							{
 								issue = null;
-								npc.PageName = disambig.PageName;
+								npc.Page = disambigPage;
 								break;
 							}
 						}
 					}
-					else if (checkPages.TitleMap.TryGetValue(title.FullPageName, out var redirect))
+					else if (allPages.TitleMap.TryGetValue(page.FullPageName, out var redirect))
 					{
-						if (allNpcs.Contains(redirect.FullPageName))
+						if (allPages.TryGetValue(redirect, out var redirectPage))
 						{
-							issue = null;
-							npc.PageName = redirect.PageName;
+							npc.Page = redirectPage;
 						}
 						else
 						{
@@ -186,33 +252,25 @@
 					}
 					else
 					{
-						issue = "is already a content page without an Online NPC Summary";
+						if (this.updateMode)
+						{
+							npc.Page = page;
+						}
+						else
+						{
+							issue = "is already a content page without an Online NPC Summary";
+						}
 					}
-				}
-				else
-				{
-					tempList.Add(npc);
-				}
 
-				if (issue != null)
-				{
-					// We use title instead of page for the link so we're not using redirected names.
-					this.WriteLine($"* {title.AsLink(true)} {issue}. Please use the following data to create a page manually, if needed.\n*:Name: {npc.Name}\n*:Gender: {npc.Gender}\n*:Loot Type: {npc.LootType}\n*:Known Locations: {string.Join(", ", npc.Places)}\n*:Unknown Locations: {string.Join(", ", npc.UnknownLocations)}");
+					if (issue != null)
+					{
+						// We use page instead of npc.Page for the link so we're not using redirected names.
+						this.WriteLine($"* {page.AsLink(true)} {issue}. Please use the following data to create a page manually, if needed.\n*:Name: {npc.Name}\n*:Gender: {npc.Gender}\n*:Loot Type: {npc.LootType}\n*:Known Locations: {string.Join(", ", npc.Places)}\n*:Unknown Locations: {string.Join(", ", npc.UnknownLocations)}");
+					}
 				}
 			}
 
-			npcData.Clear();
-			npcData.AddRange(tempList);
-		}
-		#endregion
-
-		#region private sealed classes
-		private sealed class NpcTitle : Title
-		{
-			public NpcTitle(Site site, NpcData npc)
-				: base(site[UespNamespaces.Online], npc.Name) => this.Npc = npc;
-
-			public NpcData Npc { get; }
+			return retval;
 		}
 		#endregion
 	}

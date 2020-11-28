@@ -42,6 +42,17 @@
 
 		#region IParameterNode Extensions
 
+		/// <summary>Determines whether the specified parameter node is null or whitespace.</summary>
+		/// <param name="parameter">The parameter.</param>
+		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <c>false</c>.</returns>
+		/// <remarks>For the purposes of this method, whitespace is considered to be a single text node with whitespace. Anything else, including HTML comment nodes and other unvalued nodes, will cause this to return <see langword="false"/>.</remarks>
+		public static bool IsNullOrWhitespace(this IParameterNode? parameter) => parameter == null || parameter.Value.Count switch
+		{
+			0 => true,
+			1 => parameter.Value[0] is ITextNode textNode && textNode.Text.TrimStart().Length == 0,
+			_ => false,
+		};
+
 		/// <summary>Gets the parameter's name, converting anonymous parameters to their numbered value.</summary>
 		/// <param name="parameter">The parameter to get the name of.</param>
 		/// <returns>The parameter name.</returns>

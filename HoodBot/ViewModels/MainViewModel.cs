@@ -24,6 +24,7 @@
 	using static System.Environment;
 	using static RobinHood70.CommonCode.Globals;
 
+	// FIXME: Fix re-runs with different parameters (i.e., a different template for template usage) uses existing parameters instead of new ones.
 	public class MainViewModel : ViewModelBase
 	{
 		#region Static Fields
@@ -58,6 +59,7 @@
 		#region Constructors
 		public MainViewModel()
 		{
+			this.ShowDiffs = true;
 			this.SelectedItem = App.UserSettings.GetCurrentItem();
 
 			this.Client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.dat"));

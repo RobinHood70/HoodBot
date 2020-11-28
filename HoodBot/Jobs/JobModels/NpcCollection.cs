@@ -8,7 +8,7 @@
 	internal sealed class NpcCollection : KeyedCollection<long, NpcData>
 	{
 		#region Public Methods
-		public void Sort() => (this.Items as List<NpcData>)?.Sort((x, y) => string.Compare(x?.PageName, y?.PageName, StringComparison.OrdinalIgnoreCase));
+		public void Sort() => (this.Items as List<NpcData>)?.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
 
 		public NpcData? ValueOrDefault(long key)
 		{
