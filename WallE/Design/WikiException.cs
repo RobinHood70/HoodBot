@@ -3,7 +3,6 @@
 	using System;
 	using System.ComponentModel;
 	using System.Runtime.Serialization;
-	using System.Security.Permissions;
 	using RobinHood70.WallE.Properties;
 	using static RobinHood70.CommonCode.Globals;
 
@@ -86,7 +85,6 @@
 		/// <summary>Sets the <see cref="SerializationInfo" /> with information about the exception.</summary>
 		/// <param name="info">The <see cref="SerializationInfo" /> that holds the serialized object data about the exception being thrown.</param>
 		/// <param name="context">The <see cref="StreamingContext" /> that contains contextual information about the source or destination.</param>
-		[SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			ThrowNull(info, nameof(info));
