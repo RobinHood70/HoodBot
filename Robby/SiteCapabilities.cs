@@ -112,54 +112,16 @@
 			if (!tryPath.EndsWith('/'))
 			{
 				/* If it doesn't look like a php page or blank path, try various methods of figuring out the php locations. */
-				var pageData = this.TryGet(anyPage);
-				if (pageData == null)
+				if (this.TryGet(anyPage) is not string pageData)
 				{
 					// Web page given could not be accessed, so abort.
 					return false;
 				}
 
-				var rsdLink = FindRsdLink.Match(pageData);
-				if (rsdLink.Success)
+				if (this.GetUriFromPage(fullHost, pageData) is Uri newLoc)
 				{
-					var rsdLinkFixed = rsdLink.Groups["rsdlink"].Value;
-					if (rsdLinkFixed.StartsWith("//", StringComparison.Ordinal))
-					{
-						rsdLinkFixed = anyPage.Scheme + ':' + rsdLinkFixed;
-					}
-
-					var rsdInfo = this.client.Get(new Uri(rsdLinkFixed));
-					var rsd = XDocument.Parse(rsdInfo);
-					var ns = rsd.Root.GetDefaultNamespace();
-					foreach (var descendant in rsd.Descendants(ns + "api"))
-					{
-						if ((bool)descendant.Attribute("preferred"))
-						{
-							var apiLink = WebUtility.HtmlDecode((string)descendant.Attribute("apiLink"));
-							tryLoc = new Uri(apiLink);
-							tryPath = apiLink.Substring(0, apiLink.LastIndexOf('/') + 1);
-							break;
-						}
-					}
-				}
-				else
-				{
-					var foundScript = FindScript.Match(pageData);
-					if (foundScript.Success)
-					{
-						// Should occur only in 1.16
-						tryPath = foundScript.Groups["serverpath"].Value + foundScript.Groups["scriptpath"].Value + '/';
-						tryLoc = new Uri(tryPath + "api.php");
-					}
-					else
-					{
-						var foundPhpLink = FindPhpLink.Match(pageData);
-						if (foundPhpLink.Success)
-						{
-							tryPath = fullHost + foundPhpLink.Groups["scriptpath"].Value + '/';
-							tryLoc = new Uri(tryPath + "api.php");
-						}
-					}
+					tryLoc = newLoc;
+					tryPath = tryLoc.OriginalString.Substring(0, tryPath.LastIndexOf('/') + 1);
 				}
 			}
 
@@ -220,6 +182,51 @@
 			this.client.RequestingDelay -= this.Client_RequestingDelay;
 
 			return false;
+		}
+
+		private Uri? GetUriFromPage(Uri fullHost, string pageData)
+		{
+			var rsdLink = FindRsdLink.Match(pageData);
+			if (rsdLink.Success)
+			{
+				var rsdLinkFixed = rsdLink.Groups["rsdlink"].Value;
+				if (rsdLinkFixed.StartsWith("//", StringComparison.Ordinal))
+				{
+					rsdLinkFixed = fullHost.Scheme + ':' + rsdLinkFixed;
+				}
+
+				var rsdInfo = this.client.Get(new Uri(rsdLinkFixed));
+				var rsd = XDocument.Parse(rsdInfo);
+				if (rsd.Root is XElement root)
+				{
+					var ns = root.GetDefaultNamespace();
+					foreach (var descendant in rsd.Descendants(ns + "api"))
+					{
+						if (descendant.Attribute("preferred") is XAttribute preferredAttr && (bool)preferredAttr &&
+							descendant.Attribute("apiLink") is XAttribute apiLinkAttr && (string)apiLinkAttr is string linkText)
+						{
+							return new Uri(WebUtility.HtmlDecode(linkText));
+						}
+					}
+				}
+			}
+			else
+			{
+				var foundScript = FindScript.Match(pageData);
+				if (foundScript.Success)
+				{
+					// Should occur only in 1.16
+					return new Uri(foundScript.Groups["serverpath"].Value + foundScript.Groups["scriptpath"].Value + "/api.php");
+				}
+
+				var foundPhpLink = FindPhpLink.Match(pageData);
+				if (foundPhpLink.Success)
+				{
+					return new Uri(fullHost.ToString() + foundPhpLink.Groups["scriptpath"].Value + "/api.php");
+				}
+			}
+
+			return null;
 		}
 		#endregion
 

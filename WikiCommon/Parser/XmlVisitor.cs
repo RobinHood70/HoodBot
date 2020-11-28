@@ -233,7 +233,7 @@
 
 		private XmlVisitor BuildValueNode(string name, string? value)
 		{
-			var encodedValue = HtmlEncoder.Default.Encode(value) ?? string.Empty;
+			var encodedValue = HtmlEncoder.Default.Encode(value ?? string.Empty);
 			this.Indent();
 			this.builder
 				.Append('<')

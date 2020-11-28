@@ -265,21 +265,24 @@
 				else if (!string.Equals(this.logAction, "unprotect", StringComparison.Ordinal))
 				{
 					var protections = new List<ProtectionsItem>();
-					var matches = (IEnumerable<Match>)ProtectionFinder.Matches((string?)this.parms["0"]);
-					foreach (var match in matches)
+					if ((string?)this.parms["0"] is string parm0)
 					{
-						var groups = match.Groups;
-						var expiry = groups["indef"].Success
-							? null
-							: groups["expiry"].Value.GetNullableDate();
-						var cascading = !string.IsNullOrEmpty((string?)this.parms["1"]);
+						var matches = (IEnumerable<Match>)ProtectionFinder.Matches(parm0);
+						foreach (var match in matches)
+						{
+							var groups = match.Groups;
+							var expiry = groups["indef"].Success
+								? null
+								: groups["expiry"].Value.GetNullableDate();
+							var cascading = !string.IsNullOrEmpty((string?)this.parms["1"]);
 
-						protections.Add(new ProtectionsItem(
-							type: groups["action"].Value,
-							level: groups["restrictions"].Value,
-							expiry: expiry,
-							cascading: cascading,
-							source: null));
+							protections.Add(new ProtectionsItem(
+								type: groups["action"].Value,
+								level: groups["restrictions"].Value,
+								expiry: expiry,
+								cascading: cascading,
+								source: null));
+						}
 					}
 
 					this.Result.Add("protections", protections);

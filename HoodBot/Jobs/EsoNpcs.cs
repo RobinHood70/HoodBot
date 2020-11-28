@@ -129,10 +129,10 @@
 				("image", string.Empty),
 				("imgdesc", string.Empty),
 				("race", string.Empty),
-				("gender", npc.Gender.ToString()),
+				("gender", npc.GenderText),
 				("difficulty", npc.Difficulty > 0 ? npc.Difficulty.ToString(culture) : string.Empty),
 				("reaction", npc.Reaction),
-				("pickpocket", npc.PickpocketDifficulty > 0 ? npc.PickpocketDifficulty.ToString() : string.Empty),
+				("pickpocket", npc.PickpocketDifficulty > 0 ? npc.PickpocketDifficultyText : string.Empty),
 				("loottype", npc.LootType),
 				("faction", string.Empty)
 			};
@@ -265,7 +265,7 @@
 					if (issue != null)
 					{
 						// We use page instead of npc.Page for the link so we're not using redirected names.
-						this.WriteLine($"* {page.AsLink(true)} {issue}. Please use the following data to create a page manually, if needed.\n*:Name: {npc.Name}\n*:Gender: {npc.Gender}\n*:Loot Type: {npc.LootType}\n*:Known Locations: {string.Join(", ", npc.Places)}\n*:Unknown Locations: {string.Join(", ", npc.UnknownLocations)}");
+						this.WriteLine($"* {page.AsLink(true)} {issue}. Please use the following data to create a page manually, if needed.\n*:Name: {npc.Name}\n*:Gender: {npc.GenderText}\n*:Loot Type: {npc.LootType}\n*:Known Locations: {string.Join(", ", npc.Places)}\n*:Unknown Locations: {string.Join(", ", npc.UnknownLocations)}");
 					}
 				}
 			}
