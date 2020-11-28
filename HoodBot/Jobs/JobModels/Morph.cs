@@ -49,25 +49,15 @@
 		#endregion
 
 		#region Public Methods
-		public int CalculatedCost(int baseCost, string patchVersion)
-		{
-			if (this.Mechanic == 10)
+		public int CalculatedCost(int baseCost, string patchVersion) => this.Mechanic == 10
+			? baseCost
+			: patchVersion switch
 			{
-				return baseCost;
-			}
-
-			switch (patchVersion)
-			{
-				case "10":
-				case "11":
-					return (int)Math.Round((float)baseCost * (Ability.Level + 6) / 72f);
-				default:
-					return (int)Math.Round(
-						Ability.Level <= 50
-							? ((float)baseCost * (Ability.Level + 6) / 64.96f)
-							: ((float)baseCost * (Ability.Level + 50) / 116f));
-			}
-		}
+				"10" or "11" => (int)Math.Round((float)baseCost * (Ability.Level + 6) / 72f),
+				_ => (int)Math.Round(Ability.Level <= 50
+					? ((float)baseCost * (Ability.Level + 6) / 64.96f)
+					: ((float)baseCost * (Ability.Level + 50) / 116f)),
+			};
 
 		public string FullCost(string patchVersion)
 		{

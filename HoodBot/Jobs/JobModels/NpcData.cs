@@ -5,6 +5,7 @@
 	using System.Data;
 	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
+	using RobinHood70.Robby;
 
 	#region Public Enumerations
 	public enum PickpocketDifficulty
@@ -69,7 +70,6 @@
 			}
 
 			this.Name = ReplacementData.NpcNameFixes.TryGetValue(name, out var newName) ? newName : name;
-			this.PageName = this.Name;
 		}
 		#endregion
 
@@ -84,7 +84,7 @@
 
 		public string Name { get; }
 
-		public string PageName { get; set; }
+		public Page? Page { get; set; }
 
 		public PickpocketDifficulty PickpocketDifficulty { get; }
 
@@ -159,7 +159,7 @@
 				if (placeType.Value.Count > 1)
 				{
 					wroteSomething = true;
-					Debug.Write($"[[Online:{this.PageName}|{this.Name}]] has multiple {placeType.Key} entries: {string.Join(", ", placeType.Value)}.");
+					Debug.Write($"[[Online:{this.Page?.FullPageName ?? this.Name}|{this.Name}]] has multiple {placeType.Key} entries: {string.Join(", ", placeType.Value)}.");
 				}
 			}
 

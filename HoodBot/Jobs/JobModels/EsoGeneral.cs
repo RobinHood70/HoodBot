@@ -270,18 +270,30 @@
 		{
 			foreach (var npc in npcData)
 			{
+				if (npc.Page == null)
+				{
+					continue;
+				}
+
 				var locCopy = new Dictionary<string, int>(npc.UnknownLocations, StringComparer.Ordinal);
 				foreach (var kvp in locCopy)
 				{
 					var key = kvp.Key;
-					if (places[key] is Place place)
+					try
 					{
-						npc.Places.Add(place, kvp.Value);
-						npc.UnknownLocations.Remove(key);
+						if (places[key] is Place place)
+						{
+							npc.Places.Add(place, kvp.Value);
+							npc.UnknownLocations.Remove(key);
+						}
+						else
+						{
+							Debug.WriteLine($"Location not found: {key}");
+						}
 					}
-					else
+					catch (InvalidOperationException)
 					{
-						Debug.WriteLine($"Location not found: {key}");
+						Debug.WriteLine($"Location {key} is ambiguous for NPC {npc.Name}");
 					}
 				}
 			}
