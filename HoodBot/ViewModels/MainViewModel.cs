@@ -62,7 +62,7 @@
 			this.ShowDiffs = true;
 			this.SelectedItem = App.UserSettings.GetCurrentItem();
 
-			this.Client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.dat"));
+			this.Client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.json"));
 			this.Client.RequestingDelay += this.Client_RequestingDelay;
 
 			this.progressMonitor = new Progress<double>(this.ProgressChanged);

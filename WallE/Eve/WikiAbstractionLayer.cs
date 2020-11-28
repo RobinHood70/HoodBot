@@ -500,8 +500,7 @@
 			catch (WebException e)
 			{
 				// Internal Server Error is a valid possibility from MW 1.18 on, so ignore that, but throw if we get anything else.
-				var response = (HttpWebResponse)e.Response;
-				if (response.StatusCode != HttpStatusCode.InternalServerError)
+				if (e.Response is HttpWebResponse response && response.StatusCode != HttpStatusCode.InternalServerError)
 				{
 					throw;
 				}
@@ -898,7 +897,7 @@
 						break;
 					case "Success":
 						this.CurrentUserInfo = this.UserInfo(DefaultUserInformation);
-						this.Client.SaveCookies();
+						//// this.Client.SaveCookies();
 						retries = 0;
 						break;
 					case "Throttled":
@@ -948,7 +947,7 @@
 				this.Assert = null;
 				new ActionLogout(this).Submit(input);  // Do NOT change this to use the normal StopCheck routines, as there shouldn't be any stop checks when logging out.
 				this.Assert = assert;
-				this.Client.SaveCookies();
+				//// this.Client.SaveCookies();
 
 				// Re-retrieve user info since the site could conceivably still be used anonymously.
 				this.CurrentUserInfo = this.UserInfo(DefaultUserInformation);

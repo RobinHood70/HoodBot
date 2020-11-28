@@ -44,9 +44,6 @@
 		/// <returns>The text of the result.</returns>
 		string Get(Uri uri);
 
-		/// <summary>Retrieves cookies from persistent storage.</summary>
-		void LoadCookies();
-
 		/// <summary>POSTs text data and retrieves the result.</summary>
 		/// <param name="uri">The URI to POST data to.</param>
 		/// <param name="postData">The text to POST.</param>
@@ -66,9 +63,6 @@
 		/// <param name="description">The human-readable reason for the delay, as specified by the caller.</param>
 		/// <returns>A value indicating whether or not the delay was respected.</returns>
 		bool RequestDelay(TimeSpan delayTime, DelayReason reason, string description);
-
-		/// <summary>Saves all cookies to persistent storage.</summary>
-		void SaveCookies();
 		#endregion
 	}
 }

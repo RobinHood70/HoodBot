@@ -1,17 +1,18 @@
 ﻿namespace RobinHood70.WallE.Clients
 {
 	using System;
+	using System.Collections;
 	using System.Collections.Generic;
 	using System.Globalization;
 	using System.IO;
 	using System.IO.Compression;
 	using System.Net;
-	using System.Runtime.Serialization;
-	using System.Runtime.Serialization.Formatters.Binary;
+	using System.Reflection;
 	using System.Security;
 	using System.Text;
 	using System.Threading;
 	using System.Threading.Tasks;
+	using Newtonsoft.Json;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Properties;
@@ -26,7 +27,7 @@
 	{
 		#region Fields
 		private readonly string cookiesLocation;
-		private CookieContainer cookieContainer;
+		private CookieContainer cookieContainer = new CookieContainer();
 		#endregion
 
 		#region Constructors
@@ -39,7 +40,7 @@
 
 		/// <summary>Initializes a new instance of the <see cref="SimpleClient" /> class with contact information for the User-Agent string.</summary>
 		/// <param name="contactInfo">The contact info to be displayed - typically, an e-mail address or user name on the target wiki.</param>
-		public SimpleClient(string contactInfo)
+		public SimpleClient(string? contactInfo)
 			: this(contactInfo, null)
 		{
 		}
@@ -74,7 +75,7 @@
 			ServicePointManager.Expect100Continue = false;
 			this.UserAgent = BuildUserAgent(contactInfo);
 			this.cookiesLocation = cookiesLocation ?? DefaultCookiesLocation;
-			this.cookieContainer = this.GetCookieContainer();
+			this.LoadCookies();
 		}
 		#endregion
 
@@ -92,7 +93,7 @@
 
 		/// <summary>Gets or sets the default location to store cookies. As a static variable, this will apply across all new instances of the client. Existing clients will continue to use the whatever was provided or was the default at their instantiation.</summary>
 		/// <value>The default cookies location.</value>
-		public static string DefaultCookiesLocation { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "cookies.dat");
+		public static string DefaultCookiesLocation { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "cookies.json");
 
 		/// <summary>Gets a value indicating whether the current project is using <see href="http://www.mono-project.com/">Mono</see>.</summary>
 		/// <value><see langword="true"/> if this instance is running on Mono; otherwise, <see langword="false"/>.</value>
@@ -197,9 +198,6 @@
 			return GetResponseText(response);
 		}
 
-		/// <summary>Retrieves cookies from persistent storage.</summary>
-		public void LoadCookies() => this.cookieContainer = this.GetCookieContainer();
-
 		/// <summary>POSTs text data and retrieves the result.</summary>
 		/// <param name="uri">The URI to POST data to.</param>
 		/// <param name="postData">The text to POST.</param>
@@ -247,16 +245,6 @@
 			Task.Run(() => Thread.Sleep(delayTime)).Wait();
 
 			return true;
-		}
-
-		/// <summary>Saves all cookies to persistent storage.</summary>
-		public void SaveCookies()
-		{
-			if (this.cookiesLocation != null)
-			{
-				using var stream = File.Create(this.cookiesLocation);
-				new BinaryFormatter().Serialize(stream, this.cookieContainer);
-			}
 		}
 		#endregion
 
@@ -377,34 +365,89 @@
 			request.CookieContainer = this.cookieContainer;
 			request.Headers[HttpRequestHeader.AcceptEncoding] = "gzip,deflate";
 			request.Method = method;
-			request.Proxy.Credentials = CredentialCache.DefaultCredentials;
 			request.UseDefaultCredentials = true;
 			request.UserAgent = this.UserAgent;
+			if (request.Proxy is IWebProxy proxy)
+			{
+				proxy.Credentials = CredentialCache.DefaultCredentials;
+			}
 
 			return request;
 		}
 
-		private CookieContainer GetCookieContainer()
+		private IEnumerable<Cookie> FlattenCookies()
 		{
-			// CookieContainer does not play well with serializers other than the BinaryFormatter (and reportedly SoapFormatter). Do not convert this to anything else without testing.
-			// CONSIDER: Converting this to JSON serialization (subject to the warning above). Might be doable by simply iterating the cookies in the container rather than trying to de/serialize the entire container.
+			var cookieCont = this.cookieContainer;
+			var retval = new List<Cookie>();
+			if (cookieCont.GetType().InvokeMember("m_domainTable", BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.Instance, null, cookieCont, Array.Empty<object>(), CultureInfo.CurrentCulture) is object boxedDomains && ((Hashtable)boxedDomains) is Hashtable domains)
+			{
+				foreach (var domain in domains.Values)
+				{
+					if (domain!.GetType().InvokeMember("m_list", BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.Instance, null, domain, Array.Empty<object>(), CultureInfo.CurrentCulture) is object boxedPaths && ((SortedList)boxedPaths) is SortedList paths)
+					{
+						foreach (var path in paths.Values)
+						{
+							if (path is CookieCollection cookieCollection)
+							{
+								foreach (var boxedCookie in cookieCollection)
+								{
+									if (boxedCookie is Cookie cookie && !cookie.Expired)
+									{
+										retval.Add(cookie);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			return retval;
+		}
+
+		private void LoadCookies()
+		{
 			if (this.cookiesLocation != null)
 			{
 				try
 				{
-					using var stream = File.Open(this.cookiesLocation, FileMode.Open);
-					var formatter = new BinaryFormatter() { Binder = new CookieBinder() };
-					return formatter.Deserialize(stream) as CookieContainer ?? new CookieContainer();
+					var cookieText = File.ReadAllText(this.cookiesLocation);
+					var cookies = JsonConvert.DeserializeObject<List<Cookie>>(cookieText);
+					foreach (var entry in cookies)
+					{
+						this.cookieContainer.Add(entry);
+					}
 				}
 				catch (DirectoryNotFoundException)
 				{
 				}
 				catch (FileNotFoundException)
 				{
+					/*
+					var oldFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData, Environment.SpecialFolderOption.Create), "HoodBot", "cookies.dat");
+					if (File.Exists(oldFile))
+					{
+						using var stream = File.OpenRead(oldFile);
+						var formatter = new BinaryFormatter() { Binder = new CookieBinder() };
+						if (formatter.Deserialize(stream) is CookieContainer cookies)
+						{
+							this.cookieContainer = cookies;
+						}
+					}
+					*/
 				}
 			}
+		}
 
-			return new CookieContainer();
+		/// <summary>Saves all cookies to persistent storage.</summary>
+		private void SaveCookies()
+		{
+			if (this.cookiesLocation != null)
+			{
+				var cookieList = this.FlattenCookies();
+				var jsonCookies = JsonConvert.SerializeObject(cookieList, Formatting.Indented);
+				File.WriteAllText(this.cookiesLocation, jsonCookies);
+			}
 		}
 
 		private HttpWebResponse SendRequest(Uri uri, string method, string? contentType, byte[]? postData, bool checkMaxLag)
@@ -427,12 +470,10 @@
 					response = (HttpWebResponse)request.GetResponse();
 					if (!checkMaxLag || !this.CheckDelay(response, attempts))
 					{
-						if (response.Cookies is IEnumerable<Cookie> cookies)
+						if (response.Cookies != null)
 						{
-							foreach (var cookie in cookies)
-							{
-								this.cookieContainer.Add(cookie);
-							}
+							this.cookieContainer.Add(response.Cookies);
+							this.SaveCookies();
 						}
 
 						return response;
@@ -480,6 +521,7 @@
 		}
 		#endregion
 
+		/*
 		#region private sealed classes
 		private sealed class CookieBinder : SerializationBinder
 		{
@@ -505,8 +547,7 @@
 			{
 				if (ValidTypes.Contains(typeName))
 				{
-					var type = Type.GetType(typeName + ", " + assemblyName);
-					if (type != null)
+					if (Type.GetType(typeName + ", " + assemblyName) is Type type)
 					{
 						return type;
 					}
@@ -516,5 +557,6 @@
 			}
 		}
 		#endregion
+		*/
 	}
 }
