@@ -92,9 +92,6 @@
 			return retval;
 		}
 
-		/// <summary>Retrieves cookies from persistent storage.</summary>
-		public void LoadCookies() => this.baseClient.LoadCookies();
-
 		/// <summary>POSTs text data and retrieves the result.</summary>
 		/// <param name="uri">The URI to POST data to.</param>
 		/// <param name="postData">The text to POST.</param>
@@ -130,9 +127,6 @@
 		/// <param name="description">The human-readable reason for the delay, as specified by the caller.</param>
 		/// <returns>A value indicating whether or not the delay was respected.</returns>
 		public bool RequestDelay(TimeSpan delayTime, DelayReason reason, string description) => this.baseClient.RequestDelay(delayTime, reason, description);
-
-		/// <summary>Saves all cookies to persistent storage.</summary>
-		public void SaveCookies() => this.baseClient.SaveCookies();
 		#endregion
 
 		#region Public Override Methods
