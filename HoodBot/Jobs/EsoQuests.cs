@@ -64,7 +64,7 @@
 			[4] = "Branch",
 		}; */
 
-		private static readonly Dictionary<int, string> QuestTypeTexts = new Dictionary<int, string>
+		private static readonly Dictionary<int, string> QuestTypes = new Dictionary<int, string>
 		{
 			[0] = string.Empty, // "None"
 			[1] = "Group",
@@ -81,11 +81,19 @@
 			[12] = "Holiday Event",
 		};
 
-		private static readonly Dictionary<int, string> RepeatTypeTexts = new Dictionary<int, string>
+		private static readonly Dictionary<int, string> RepeatTypes = new Dictionary<int, string>
 		{
 			[0] = string.Empty,
 			[1] = "Immediately",
 			[2] = "Daily"
+		};
+
+		private static readonly Dictionary<Visibility, string> Visibilities = new ()
+		{
+			[Visibility.Normal] = string.Empty,
+			[Visibility.Hint] = "hint",
+			[Visibility.Optional] = "optional",
+			[Visibility.Hidden] = "hidden",
 		};
 		#endregion
 
@@ -112,8 +120,6 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void Main() => this.SavePages(this.LogName);
-
 		protected override void BeforeLogging()
 		{
 			this.StatusWriteLine("Getting wiki data");
@@ -171,6 +177,8 @@
 				}
 			}
 		}
+
+		protected override void Main() => this.SavePages(this.LogName);
 		#endregion
 
 		#region Private Static Methods
@@ -371,7 +379,7 @@
 			sb
 				.AppendLine("{{Online Quest Header")
 				.Append("|ID=").AppendLine(quest.InternalId >= 0 ? quest.InternalId.ToStringInvariant() : string.Empty)
-				.Append("|type=").AppendLine(QuestTypeTexts[quest.Type])
+				.Append("|type=").AppendLine(QuestTypes[quest.Type])
 				.AppendLine("|image=")
 				.AppendLine("|imgdesc=")
 				.AppendLine("|description=")
@@ -390,7 +398,7 @@
 				.Append("|Journal=").AppendLine(quest.BackgroundText);
 			if (quest.RepeatType > 0)
 			{
-				sb.Append("|Repeatable=").AppendLine(RepeatTypeTexts[quest.RepeatType]);
+				sb.Append("|Repeatable=").AppendLine(RepeatTypes[quest.RepeatType]);
 			}
 
 			sb
@@ -445,7 +453,7 @@
 				}
 
 				var finishText = stage.FinishText;
-				var stageText = '|' + finishText + '|' + stage.Text + '@' + (stage.Visibility == Visibility.Normal ? string.Empty : stage.Visibility.ToString().ToLowerInvariant());
+				var stageText = '|' + finishText + '|' + stage.Text + '@' + Visibilities[stage.Visibility];
 				if (!mergedStages.TryGetValue(stageText, out var list))
 				{
 					list = new List<Condition>();

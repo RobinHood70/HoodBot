@@ -20,6 +20,23 @@
 	internal sealed class NpcData
 	{
 		#region Static Fields
+		private static readonly Dictionary<Gender, string> Genders = new ()
+		{
+			[Gender.None] = "None",
+			[Gender.NotApplicable] = "N/A",
+			[Gender.Female] = "Female",
+			[Gender.Male] = "Male",
+		};
+
+		private static readonly Dictionary<PickpocketDifficulty, string> PIckpocketDifficulties = new ()
+		{
+			[PickpocketDifficulty.NotApplicable] = "N/A",
+			[PickpocketDifficulty.Unknown] = "?",
+			[PickpocketDifficulty.Easy] = "Easy",
+			[PickpocketDifficulty.Medium] = "Medium",
+			[PickpocketDifficulty.Hard] = "Hard",
+		};
+
 		private static readonly Dictionary<sbyte, string> Reactions = new Dictionary<sbyte, string>
 		{
 			[1] = "Hostile",
@@ -75,6 +92,8 @@
 
 		public Gender Gender { get; }
 
+		public string GenderText => Genders[this.Gender];
+
 		public long Id { get; }
 
 		public string LootType { get; }
@@ -84,6 +103,8 @@
 		public Page? Page { get; set; }
 
 		public PickpocketDifficulty PickpocketDifficulty { get; }
+
+		public string PickpocketDifficultyText => PIckpocketDifficulties[this.PickpocketDifficulty];
 
 		public Dictionary<Place, int> Places { get; } = new Dictionary<Place, int>();
 
