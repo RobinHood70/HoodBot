@@ -115,7 +115,7 @@
 						this.allIcons.Add(checksum, list);
 					}
 
-					list.Add(file.Substring(iconFolder.Length).Replace(".png", string.Empty, StringComparison.OrdinalIgnoreCase).Replace('\\', '/'));
+					list.Add(file[iconFolder.Length..].Replace(".png", string.Empty, StringComparison.OrdinalIgnoreCase).Replace('\\', '/'));
 				}
 			}
 		}

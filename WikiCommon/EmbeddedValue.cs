@@ -95,7 +95,7 @@
 
 				if (index < value.Length)
 				{
-					after = value.Substring(index);
+					after = value[index..];
 					value = value.Substring(0, index);
 				}
 
@@ -106,7 +106,7 @@
 				if (index > 0)
 				{
 					before = value.Substring(0, index);
-					value = value.Substring(index);
+					value = value[index..];
 				}
 			}
 

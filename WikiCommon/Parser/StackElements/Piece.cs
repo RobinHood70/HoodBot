@@ -16,7 +16,7 @@
 		#region Public Methods
 		public void AddLiteral(IWikiNodeFactory factory, string literal)
 		{
-			if (this.Count == 0 || !(this[^1] is ITextNode node))
+			if (this.Count == 0 || this[^1] is not ITextNode node)
 			{
 				this.Add(factory.TextNode(literal));
 			}

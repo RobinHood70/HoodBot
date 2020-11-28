@@ -44,7 +44,7 @@
 				if (pageName.Length > 0 && pageName[0] == ':')
 				{
 					forced = true;
-					pageName = pageName.Substring(1).TrimStart();
+					pageName = pageName[1..].TrimStart();
 				}
 
 				var split = pageName.Split(TextArrays.Colon, 2);
@@ -98,7 +98,7 @@
 							{
 								this.Namespace = site[MediaWikiNamespaces.Main];
 								this.ForcedNamespaceLink = true;
-								pageName = pageName.Substring(1);
+								pageName = pageName[1..];
 							}
 							else if (site.Namespaces.ValueOrDefault(key) is Namespace ns2)
 							{

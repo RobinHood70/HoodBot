@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 
 	/// <summary>An ISimpleTitle comparer which sorts by namespace and page name.</summary>
@@ -19,7 +18,6 @@
 		/// <summary>Gets the singleton instance.</summary>
 		/// <value>The instance.</value>
 		/// <remarks>Note that this is a pseudo-singleton, in that a new instance will be created for each type.</remarks>
-		[SuppressMessage("Design", "CA1000:Do not declare static members on generic types", Justification = "Pseudo-singleton comparable to Comparer<T>.Default.")]
 		public static SimpleTitleComparer Instance { get; } = new SimpleTitleComparer();
 		#endregion
 

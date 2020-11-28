@@ -74,7 +74,7 @@
 		{
 			ThrowNull(template, nameof(template));
 			var retval = false;
-			if (!(template.Find(name) is IParameterNode parameter))
+			if (template.Find(name) is not IParameterNode parameter)
 			{
 				parameter = template.Add(name, string.Empty);
 				retval = true;

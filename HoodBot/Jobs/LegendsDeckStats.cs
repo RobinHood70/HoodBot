@@ -43,7 +43,7 @@
 		{
 			ThrowNull(parsedPage, nameof(parsedPage));
 			var powerCount = new SortedDictionary<int, int>();
-			if (!(parsedPage.FindTemplate("Legends Deck Summary") is SiteTemplateNode deckSummary))
+			if (parsedPage.FindTemplate("Legends Deck Summary") is not SiteTemplateNode deckSummary)
 			{
 				throw new InvalidOperationException();
 			}

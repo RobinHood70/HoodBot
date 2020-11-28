@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using System.Data;
 	using System.Diagnostics;
-	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.Robby;
 
 	#region Public Enumerations
@@ -32,7 +31,6 @@
 		#endregion
 
 		#region Constructors
-		[SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1122:Use string.Empty for empty strings", Justification = "False hit. Cannot use non-constant expression.")]
 		public NpcData(IDataRecord row)
 		{
 			this.Id = (long)row["id"];
@@ -48,7 +46,6 @@
 				{
 					"Bard" => "Friendly",
 					"" => string.Empty,
-					null => string.Empty,
 					_ => "Justice Neutral"
 				}
 				: Reactions[reaction];

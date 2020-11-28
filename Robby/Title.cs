@@ -99,7 +99,7 @@
 			this.Namespace.AllowsSubpages &&
 			(this.PageName.LastIndexOf('/') + 1) is var subPageLoc &&
 			subPageLoc > 0
-				? this.PageName.Substring(subPageLoc)
+				? this.PageName[subPageLoc..]
 				: this.PageName;
 
 		/// <summary>Gets a Title object for title Title's corresponding subject page.</summary>

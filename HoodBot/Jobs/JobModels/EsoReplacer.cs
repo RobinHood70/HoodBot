@@ -96,7 +96,7 @@
 			{
 				var jobSite = job.Site;
 				job.StatusWriteLine("Parsing replacements");
-				if (!(jobSite.User is User user))
+				if (jobSite.User is not User user)
 				{
 					throw new InvalidOperationException("Not logged in.");
 				}
@@ -198,7 +198,7 @@
 						}
 						else
 						{
-							textNode.Text = text.Substring(startPos);
+							textNode.Text = text[startPos..];
 						}
 					}
 				}
@@ -266,7 +266,7 @@
 						}
 						else
 						{
-							textNode.Text = textNode.Text.Substring(startPos);
+							textNode.Text = textNode.Text[startPos..];
 						}
 					}
 				}
@@ -380,7 +380,7 @@
 			var start = 0;
 			for (var i = 0; i < textLength; i++)
 			{
-				var newText = text.Substring(i);
+				var newText = text[i..];
 				foreach (var replacement in ReplaceFirstList)
 				{
 					if (newText.StartsWith(replacement.From, StringComparison.Ordinal))
@@ -422,7 +422,7 @@
 
 			if (start < text.Length)
 			{
-				retval.Add(factory.TextNode(text.Substring(start)));
+				retval.Add(factory.TextNode(text[start..]));
 			}
 
 			return retval;

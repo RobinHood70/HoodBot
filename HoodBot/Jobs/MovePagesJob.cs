@@ -467,7 +467,7 @@
 			{
 				if (replacement.Actions.HasFlag(ReplacementActions.Move) && replacement.FromPage != null && replacement.FromPage.Exists)
 				{
-					if (!(replacement.From is Title fromTitle))
+					if (replacement.From is not Title fromTitle)
 					{
 						fromTitle = new Title(replacement.From);
 					}

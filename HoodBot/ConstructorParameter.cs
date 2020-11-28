@@ -62,13 +62,12 @@
 		private static string FormatMember(ParameterInfo parameter)
 		{
 			var memberName = parameter.Member.ToString() ?? throw new InvalidOperationException();
-			return memberName
-					 .Substring(5)
-					 .Replace("System.", string.Empty, StringComparison.Ordinal)
-					 .Replace("Collections.Generic.", string.Empty, StringComparison.Ordinal)
-					 .Replace("Collections.ObjectModel.", string.Empty, StringComparison.Ordinal)
-					 .Replace("RobinHood70.Robby.", string.Empty, StringComparison.Ordinal)
-					 .Replace("RobinHood70.HoodBot.Jobs.Design.", string.Empty, StringComparison.Ordinal);
+			return memberName[5..]
+				.Replace("System.", string.Empty, StringComparison.Ordinal)
+				.Replace("Collections.Generic.", string.Empty, StringComparison.Ordinal)
+				.Replace("Collections.ObjectModel.", string.Empty, StringComparison.Ordinal)
+				.Replace("RobinHood70.Robby.", string.Empty, StringComparison.Ordinal)
+				.Replace("RobinHood70.HoodBot.Jobs.Design.", string.Empty, StringComparison.Ordinal);
 		}
 		#endregion
 	}

@@ -6,7 +6,6 @@ namespace RobinHood70.WallE.Base
 
 	// IMPNOTE: Only the base class of items is currently parsed due to the relative complexity and relative uselessness of parsing the specific info for each type. The query API should have most or all of the same info anyway, if it's really needed.
 	// IMPNOTE: Only rendered errors and warnings are returned, not the full structure. Again, it seemed like overkill to return everything. This means English-only error messages unless MW takes it further in future versions.
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Project naming convention takes precedence.")]
 	public class RevisionDeleteResult : ReadOnlyCollection<RevisionDeleteItem>
 	{
 		#region Constructors

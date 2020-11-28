@@ -208,7 +208,7 @@
 		/// <returns>The parameter that was altered.</returns>
 		public static IParameterNode AddOrChange(this ITemplateNode template, string name, string value)
 		{
-			if (!(template.Find(name) is IParameterNode parameter))
+			if (template.Find(name) is not IParameterNode parameter)
 			{
 				return template.Add(name, value);
 			}

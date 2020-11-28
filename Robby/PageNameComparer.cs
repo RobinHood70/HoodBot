@@ -49,7 +49,7 @@
 			static (string First, string Remainder) Split(string input)
 			{
 				var first = input.Length > 0 ? input.Substring(0, 1) : string.Empty;
-				var remainder = input.Length > 1 ? input.Substring(1) : string.Empty;
+				var remainder = input.Length > 1 ? input[1..] : string.Empty;
 				return (first, remainder);
 			}
 		}

@@ -251,7 +251,7 @@
 			var endPos = this.Text.IndexOf("-->", this.Index + 4, StringComparison.Ordinal) + 3;
 			if (endPos == 2)
 			{
-				piece.Add(this.NodeFactory.CommentNode(this.Text.Substring(this.Index)));
+				piece.Add(this.NodeFactory.CommentNode(this.Text[this.Index..]));
 				this.Index = this.textLength;
 				return false;
 			}
@@ -379,7 +379,7 @@
 				}
 				else if (AllowMissingEndTag.Contains(tagOpen))
 				{
-					inner = this.Text.Substring(tagEndPos + 1);
+					inner = this.Text[(tagEndPos + 1)..];
 					tagClose = string.Empty;
 					this.Index = this.textLength;
 				}
@@ -441,7 +441,7 @@
 					{
 						if (this.includeIgnores)
 						{
-							this.Top.CurrentPiece.Add(this.NodeFactory.IgnoreNode(this.Text.Substring(this.Index)));
+							this.Top.CurrentPiece.Add(this.NodeFactory.IgnoreNode(this.Text[this.Index..]));
 						}
 
 						break;

@@ -1,5 +1,4 @@
-﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
-namespace RobinHood70.WallE.Eve.Modules
+﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.Collections.Generic;
@@ -146,7 +145,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		private static List<SiteInfoLag>? GetDbReplLag(JToken parent)
 		{
-			if (!(parent["dbrepllag"] is JToken node))
+			if (parent["dbrepllag"] is not JToken node)
 			{
 				return null;
 			}
@@ -166,7 +165,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		private static List<string>? GetFileExtensions(JToken parent)
 		{
-			if (!(parent["fileextensions"] is JToken node))
+			if (parent["fileextensions"] is not JToken node)
 			{
 				return null;
 			}
@@ -184,7 +183,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		private static List<SiteInfoInterwikiMap>? GetInterwikiMap(JToken parent)
 		{
-			if (!(parent["interwikimap"] is JToken node))
+			if (parent["interwikimap"] is not JToken node)
 			{
 				return null;
 			}
@@ -213,7 +212,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		private static List<SiteInfoLanguage>? GetLanguages(JToken parent)
 		{
-			if (!(parent["languages"] is JToken node))
+			if (parent["languages"] is not JToken node)
 			{
 				return null;
 			}
@@ -229,7 +228,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		private static List<SiteInfoLibrary>? GetLibraries(JToken parent)
 		{
-			if (!(parent["libraries"] is JToken node))
+			if (parent["libraries"] is not JToken node)
 			{
 				return null;
 			}
@@ -247,7 +246,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		private static List<SiteInfoMagicWord>? GetMagicWords(JToken parent)
 		{
-			if (!(parent["magicwords"] is JToken node))
+			if (parent["magicwords"] is not JToken node)
 			{
 				return null;
 			}
@@ -266,7 +265,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		private static List<SiteInfoNamespaceAlias>? GetNamespaceAliases(JToken parent)
 		{
-			if (!(parent["namespacealiases"] is JToken node))
+			if (parent["namespacealiases"] is not JToken node)
 			{
 				return null;
 			}
@@ -284,7 +283,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		private static List<SiteInfoNamespace>? GetNamespaces(JToken parent)
 		{
-			if (!(parent["namespaces"] is JToken node))
+			if (parent["namespaces"] is not JToken node)
 			{
 				return null;
 			}
@@ -323,7 +322,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		private static (SiteInfoSkin? DefaultSkin, List<SiteInfoSkin>? Skins) GetSkins(JToken parent)
 		{
-			if (!(parent["skins"] is JToken node))
+			if (parent["skins"] is not JToken node)
 			{
 				return (null, null);
 			}
@@ -349,7 +348,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		private static List<SiteInfoSpecialPageAlias>? GetSpecialPageAliases(JToken parent)
 		{
-			if (!(parent["specialpagealiases"] is JToken node))
+			if (parent["specialpagealiases"] is not JToken node)
 			{
 				return null;
 			}
@@ -380,31 +379,31 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		private static List<SiteInfoSubscribedHook>? GetSubscribedHooks(JToken parent)
 		{
-			if (!(parent["showhooks"] is JToken node))
+			if (parent["showhooks"] is JToken node)
 			{
-				return null;
+				var retval = new List<SiteInfoSubscribedHook>();
+				foreach (var result in node)
+				{
+					// See https://phabricator.wikimedia.org/T117022 for details on the Scribunto check.
+					var subscribersNode = result.MustHave("subscribers");
+					var subscribers = subscribersNode.Type == JTokenType.Object && subscribersNode["scribunto"] is JToken scribuntoNode
+						? new List<string> { (string?)scribuntoNode ?? string.Empty }
+						: subscribersNode.GetList<string>();
+
+					retval.Add(new SiteInfoSubscribedHook(
+						name: result.MustHaveString("name"),
+						subscribers: subscribers));
+				}
+
+				return retval;
 			}
 
-			var retval = new List<SiteInfoSubscribedHook>();
-			foreach (var result in node)
-			{
-				// See https://phabricator.wikimedia.org/T117022 for details on the Scribunto check.
-				var subscribersNode = result.MustHave("subscribers");
-				var subscribers = subscribersNode.Type == JTokenType.Object && subscribersNode["scribunto"] is JToken scribuntoNode
-					? new List<string> { (string?)scribuntoNode ?? string.Empty }
-					: subscribersNode.GetList<string>();
-
-				retval.Add(new SiteInfoSubscribedHook(
-					name: result.MustHaveString("name"),
-					subscribers: subscribers));
-			}
-
-			return retval;
+			return null;
 		}
 
 		private static List<SiteInfoUserGroup>? GetUserGroups(JToken parent)
 		{
-			if (!(parent["usergroups"] is JToken node))
+			if (parent["usergroups"] is not JToken node)
 			{
 				return null;
 			}
@@ -431,7 +430,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Private Methods
 		private List<SiteInfoExtensions>? GetExtensions(JToken parent)
 		{
-			if (!(parent["extensions"] is JToken node))
+			if (parent["extensions"] is not JToken node)
 			{
 				return null;
 			}
@@ -474,7 +473,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		private SiteInfoGeneral? GetGeneral(JToken parent)
 		{
-			if (!(parent["general"] is JToken node))
+			if (parent["general"] is not JToken node)
 			{
 				return null;
 			}
