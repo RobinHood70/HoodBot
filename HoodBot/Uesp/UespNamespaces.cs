@@ -90,5 +90,11 @@
 		public const int SkyrimVseTalk = 167;
 		public const int Dapel = 200;
 		public const int DapelTalk = 201;
+		public const int TimedText = 710;
+		public const int TimedTextTalk = 711;
+		public const int Gadget = 2300;
+		public const int GadgetTalk = 2301;
+		public const int GadgetDefinition = 2302;
+		public const int GadgetDefinitionTalk = 2303;
 	}
 }
