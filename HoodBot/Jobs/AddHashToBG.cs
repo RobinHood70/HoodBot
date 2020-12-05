@@ -27,7 +27,7 @@
 				if (template.Parameters.Count >= 1)
 				{
 					if (template.Find(1) is IParameterNode parameter
-						&& parameter.ValueToText() is string hex
+						&& parameter.Value.ToValue() is string hex
 						&& hex.Length == 6
 						&& int.TryParse(hex, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out _))
 					{

@@ -177,7 +177,7 @@
 				foreach (var (name, parameter) in template.Template.GetResolvedParameters())
 				{
 					// For now, we're assuming that trimming trailing lines from anon parameters is desirable, but could be made optional if needed.
-					var value = WikiTextVisitor.Raw(parameter.Value);
+					var value = parameter.Value.ToRaw();
 					row[name] = parameter.Anonymous ? value.TrimEnd(TextArrays.NewLineChars) : value.Trim();
 				}
 			}

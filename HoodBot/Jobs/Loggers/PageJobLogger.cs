@@ -98,9 +98,9 @@
 				var entry = (SiteTemplateNode)parser.Nodes[firstEntry];
 
 				// If the last job was the same as this job and has no end time, then it's either the current job or a resumed one.
-				if (string.IsNullOrEmpty(entry.Find(3)?.ValueToText()) &&
-					string.Equals(entry.Find(1)?.ValueToText()?.Trim(), this.logInfo.Title, StringComparison.Ordinal) &&
-					string.Equals(entry.Find("info")?.ValueToText() ?? string.Empty, this.logInfo.Details ?? string.Empty, StringComparison.Ordinal))
+				if (string.IsNullOrEmpty(entry.Find(3)?.Value.ToValue()) &&
+					string.Equals(entry.Find(1)?.Value.ToValue().Trim(), this.logInfo.Title, StringComparison.Ordinal) &&
+					string.Equals(entry.Find("info")?.Value.ToValue() ?? string.Empty, this.logInfo.Details ?? string.Empty, StringComparison.Ordinal))
 				{
 					// If the end date is not null, then we're at the end of the job, so update the end time.
 					if (this.end != null)
@@ -109,7 +109,7 @@
 						Debug.Assert(startParam != -1, "Start parameter not found.");
 						var endParam = factory.ParameterNodeFromParts(FormatDateTime(DateTime.UtcNow));
 						entry.Parameters.Insert(startParam, endParam);
-						sender.Text = parser.GetText();
+						sender.Text = parser.ToRaw();
 					}
 
 					return;
@@ -130,7 +130,7 @@
 					factory.TextNode("\n")
 				});
 
-				sender.Text = parser.GetText();
+				sender.Text = parser.ToRaw();
 			}
 			else
 			{

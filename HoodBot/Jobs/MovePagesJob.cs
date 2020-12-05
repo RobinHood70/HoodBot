@@ -645,7 +645,7 @@
 			ThrowNull(page, nameof(page));
 			ThrowNull(template, nameof(template));
 
-			var templateName = WikiTextVisitor.Value(template.Title);
+			var templateName = template.Title.ToValue();
 			if (templateName.Length > 0)
 			{
 				var templateTitle = FullTitle.Coerce(this.Site, MediaWikiNamespaces.Template, templateName);
@@ -719,7 +719,7 @@
 			}
 
 			this.CustomReplaceGeneral?.Invoke(parsedPage);
-			page.Text = parsedPage.GetText();
+			page.Text = parsedPage.ToRaw();
 		}
 
 		private void EditPageLoaded(object sender, Page page)

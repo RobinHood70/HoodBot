@@ -147,8 +147,8 @@
 					var param2 = template.Find(2);
 					if (template.Find(2) is IParameterNode linkTitle)
 					{
-						var key = template.Find(1)?.ValueToText() ?? throw new InvalidOperationException();
-						var value = linkTitle.ValueToText() ?? string.Empty;
+						var key = template.Find(1)?.Value.ToValue() ?? throw new InvalidOperationException();
+						var value = linkTitle.Value.ToValue() ?? string.Empty;
 						this.titleOverrides.Add(key, value);
 					}
 				}
@@ -186,7 +186,7 @@
 				}
 
 				nodes.InsertRange(first, newNodes);
-				page.Text = parser.GetText();
+				page.Text = parser.ToRaw();
 			}
 			else
 			{

@@ -29,7 +29,7 @@
 		{
 			if (parser.FindTemplate("Game Book") is ITemplateNode gameBook &&
 				gameBook.Find("lorename") is IParameterNode loreName &&
-				loreName.ValueToText() is string loreNameValue &&
+				loreName.Value.ToValue() is string loreNameValue &&
 				new Title(this.Site[UespNamespaces.Lore], loreNameValue) is var title &&
 				this.Replacements.TryGetValue(title, out var replacement) &&
 				replacement.To is ISimpleTitle toPage)
@@ -40,7 +40,7 @@
 			foreach (var bookLink in parser.FindTemplates("Book Link"))
 			{
 				if (bookLink.Find(1) is IParameterNode link &&
-					new Title(this.Site[UespNamespaces.Lore], link.ValueToText()) is var bookLinkTitle &&
+					new Title(this.Site[UespNamespaces.Lore], link.Value.ToValue()) is var bookLinkTitle &&
 					this.Replacements.TryGetValue(bookLinkTitle, out replacement) &&
 					replacement.To is ISimpleTitle toLink)
 				{
@@ -52,7 +52,7 @@
 			foreach (var citeBook in parser.FindTemplates("Cite Book"))
 			{
 				if (citeBook.Find(1) is IParameterNode link &&
-					new Title(this.Site[UespNamespaces.Lore], link.ValueToText()) is var citeBookTitle &&
+					new Title(this.Site[UespNamespaces.Lore], link.Value.ToValue()) is var citeBookTitle &&
 					this.Replacements.TryGetValue(citeBookTitle, out replacement) &&
 					replacement.To is ISimpleTitle toLink)
 				{

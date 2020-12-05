@@ -55,10 +55,10 @@
 				var paramCount = 3 - specialParams.Count;
 				foreach (var cluster in template.ParameterCluster(paramCount))
 				{
-					var cardName = cluster[0]?.ValueToText() ?? throw new InvalidOperationException();
+					var cardName = cluster[0]?.Value.ToValue() ?? throw new InvalidOperationException();
 					var quantity = paramCount < 2
 						? 1
-						: int.Parse(cluster[1]?.ValueToText() ?? throw new InvalidOperationException(), CultureInfo.InvariantCulture);
+						: int.Parse(cluster[1]?.Value.ToValue() ?? throw new InvalidOperationException(), CultureInfo.InvariantCulture);
 					var cardPower = this.cardPowers[cardName];
 					if (!powerCount.ContainsKey(cardPower))
 					{
