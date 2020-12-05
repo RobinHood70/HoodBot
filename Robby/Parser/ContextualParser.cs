@@ -243,7 +243,7 @@
 
 		/// <summary>Converts the page's <see cref="NodeCollection"/> back to text.</summary>
 		/// <returns>The page text.</returns>
-		public string? ToRaw() => this.Nodes.ToRaw();
+		public string ToRaw() => this.Nodes.ToRaw();
 		#endregion
 	}
 }
