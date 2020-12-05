@@ -372,7 +372,7 @@
 		public static SiteLink FromLinkNode(Site site, ILinkNode link, bool coerceToFile)
 		{
 			ThrowNull(link, nameof(link));
-			var titleText = WikiTextVisitor.Value(link.Title);
+			var titleText = link.Title.ToValue();
 			var valueSplit = SplitWhitespace(titleText);
 			var retval = coerceToFile ? Coerce(site, MediaWikiNamespaces.File, valueSplit.Value) : new SiteLink(site, valueSplit.Value);
 			retval.OriginalLink = titleText;
@@ -380,7 +380,7 @@
 			retval.TitleWhitespaceAfter = valueSplit.After;
 			foreach (var parameter in link.Parameters)
 			{
-				var valueRaw = WikiTextVisitor.Raw(parameter.Value);
+				var valueRaw = parameter.Value.ToRaw();
 				retval.InitValue(valueRaw);
 			}
 

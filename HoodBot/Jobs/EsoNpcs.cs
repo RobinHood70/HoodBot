@@ -65,7 +65,7 @@
 						parser.FindTemplate("Online NPC Summary") is ITemplateNode template)
 					{
 						UpdateLocations(npc, template, parser.Nodes.Factory, placeInfo);
-						page.Text = parser.GetText();
+						page.Text = parser.ToRaw();
 						this.Pages.Add(page);
 					}
 					else
@@ -112,7 +112,7 @@
 						template.Find("ship").IsNullOrWhitespace() &&
 						template.Find("store").IsNullOrWhitespace() &&
 						template.Find("loc") is IParameterNode loc &&
-						(loc.IsNullOrWhitespace() || string.Equals(loc.ValueToText(), "{{huh}}", StringComparison.OrdinalIgnoreCase)))
+						(loc.IsNullOrWhitespace() || string.Equals(loc.Value.ToValue(), "{{huh}}", StringComparison.OrdinalIgnoreCase)))
 					{
 						retval.Add(npc);
 					}
@@ -187,7 +187,7 @@
 					locText += '\n';
 					if (template.Find(name) is IParameterNode loc)
 					{
-						loc.SetValue(loc.IsNullOrWhitespace() ? locText : (loc.ValueToText().TrimEnd() + ", " + locText));
+						loc.SetValue(loc.IsNullOrWhitespace() ? locText : (loc.Value.ToValue().TrimEnd() + ", " + locText));
 					}
 					else
 					{

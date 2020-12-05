@@ -39,7 +39,7 @@
 		{
 			var parsedPage = new ContextualParser(eventArgs);
 			this.ParseText(sender, parsedPage);
-			eventArgs.Text = parsedPage.GetText();
+			eventArgs.Text = parsedPage.ToRaw();
 		}
 		#endregion
 	}

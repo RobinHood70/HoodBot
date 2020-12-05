@@ -18,7 +18,7 @@
 		public static string GetTitleText(this IBacklinkNode backlink)
 		{
 			ThrowNull(backlink, nameof(backlink));
-			var retval = WikiTextVisitor.Value(backlink.Title);
+			var retval = backlink.Title.ToValue();
 			retval = WikiTextUtilities.DecodeAndNormalize(retval);
 			return retval.Trim();
 		}
@@ -52,15 +52,6 @@
 			1 => parameter.Value[0] is ITextNode textNode && textNode.Text.TrimStart().Length == 0,
 			_ => false,
 		};
-
-		/// <summary>Gets the parameter's name, converting anonymous parameters to their numbered value.</summary>
-		/// <param name="parameter">The parameter to get the name of.</param>
-		/// <returns>The parameter name.</returns>
-		public static string? NameToText(this IParameterNode parameter)
-		{
-			ThrowNull(parameter, nameof(parameter));
-			return parameter.Name == null ? null : WikiTextVisitor.Value(parameter.Name).Trim();
-		}
 
 		/// <summary>Sets the name to the specified text.</summary>
 		/// <param name="parameter">The parameter to set the name of.</param>
@@ -118,15 +109,6 @@
 			{
 				parameter.Value.AddRange(value);
 			}
-		}
-
-		/// <summary>Gets the parameter's trimmed value.</summary>
-		/// <param name="parameter">The paraeter to get the value of.</param>
-		/// <returns>The parameter value.</returns>
-		public static string ValueToText(this IParameterNode parameter)
-		{
-			ThrowNull(parameter, nameof(parameter));
-			return WikiTextVisitor.Value(parameter.Value).Trim();
 		}
 		#endregion
 
@@ -237,7 +219,7 @@
 						retval = index;
 					}
 				}
-				else if (string.Equals(node.NameToText(), name, StringComparison.Ordinal))
+				else if (string.Equals(node.Name?.ToValue(), name, StringComparison.Ordinal))
 				{
 					retval = index;
 				}
@@ -326,7 +308,7 @@
 			var anonIndex = 0;
 			for (var i = 0; i < template.Parameters.Count; i++)
 			{
-				var paramName = template.Parameters[i].NameToText() ?? (++anonIndex).ToStringInvariant();
+				var paramName = template.Parameters[i].Name?.ToValue() ?? (++anonIndex).ToStringInvariant();
 				if (string.Equals(paramName, name, StringComparison.Ordinal))
 				{
 					retval = i;
@@ -351,7 +333,7 @@
 				{
 					yield return (++i, parameter);
 				}
-				else if (int.TryParse(parameter.NameToText(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var namedNumber) && namedNumber > 0)
+				else if (int.TryParse(parameter.Name?.ToValue(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var namedNumber) && namedNumber > 0)
 				{
 					yield return (namedNumber, parameter);
 				}
@@ -367,7 +349,7 @@
 			var anonIndex = 0;
 			foreach (var parameter in template.Parameters)
 			{
-				var name = parameter.NameToText() ?? (++anonIndex).ToStringInvariant();
+				var name = parameter.Name?.ToValue() ?? (++anonIndex).ToStringInvariant();
 				yield return (name, parameter);
 			}
 		}
@@ -380,7 +362,7 @@
 			ThrowNull(template, nameof(template));
 			foreach (var param in template.Parameters)
 			{
-				if (!param.Anonymous && int.TryParse(param.NameToText(), NumberStyles.Integer, CultureInfo.InvariantCulture, out _))
+				if (!param.Anonymous && int.TryParse(param.Name?.ToValue(), NumberStyles.Integer, CultureInfo.InvariantCulture, out _))
 				{
 					return true;
 				}
@@ -454,16 +436,6 @@
 			}
 		}
 
-		/// <summary>Returns the wiki text of the last parameter with the specified name.</summary>
-		/// <param name="template">The template to work on.</param>
-		/// <param name="parameterName">Name of the parameter.</param>
-		/// <returns>The value of the last parameter with the specified name.</returns>
-		public static string? RawValue(this ITemplateNode template, string parameterName)
-		{
-			var param = template.Find(parameterName);
-			return param == null ? null : WikiTextVisitor.Raw(param.Value);
-		}
-
 		/// <summary>Removes any parameters with the same name/index as a later parameter.</summary>
 		/// <param name="template">The template to work on.</param>
 		public static void RemoveDuplicates(this ITemplateNode template)
@@ -474,7 +446,7 @@
 			var anonIndex = 0;
 			while (index >= 0 && index < template.Parameters.Count)
 			{
-				var name = template.Parameters[index].NameToText() ?? (++anonIndex).ToStringInvariant();
+				var name = template.Parameters[index].Name?.ToValue() ?? (++anonIndex).ToStringInvariant();
 				if (nameList.Contains(name))
 				{
 					template.Parameters.RemoveAt(index);
@@ -500,7 +472,7 @@
 			var anonIndex = 0;
 			for (var i = 0; i < template.Parameters.Count; i++)
 			{
-				if (string.Equals(template.Parameters[i].NameToText() ?? (++anonIndex).ToStringInvariant(), parameterName, StringComparison.Ordinal))
+				if (string.Equals(template.Parameters[i].Name?.ToValue() ?? (++anonIndex).ToStringInvariant(), parameterName, StringComparison.Ordinal))
 				{
 					template.Parameters.RemoveAt(i);
 					retval = true;

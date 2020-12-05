@@ -274,6 +274,14 @@
 				}
 			}
 		}
+
+		/// <summary>Converts the <see cref="NodeCollection"/> to raw text.</summary>
+		/// <returns>A <see cref="string" /> that represents this instance.</returns>
+		public string ToRaw() => WikiTextVisitor.Raw(this);
+
+		/// <summary>Converts the <see cref="NodeCollection"/> to it's value text.</summary>
+		/// <returns>A <see cref="string" /> that represents this instance.</returns>
+		public string ToValue() => WikiTextVisitor.Value(this);
 		#endregion
 	}
 }

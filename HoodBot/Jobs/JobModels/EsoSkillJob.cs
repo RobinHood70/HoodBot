@@ -81,7 +81,7 @@
 			}
 
 			value = value.Trim();
-			var oldValue = parameter.ValueToText();
+			var oldValue = parameter.Value.ToValue();
 			if (!string.Equals(oldValue, value, StringComparison.Ordinal))
 			{
 				retval = true;
@@ -300,14 +300,14 @@
 			{
 				var iconName = "icon" + (i > 0 ? (i + 1).ToStringInvariant() : string.Empty);
 				var iconParamater = template.Find(iconName);
-				var newValue = IconValueFixup(iconParamater?.ValueToText(), iconValue + (loopCount > 0 ? FormattableString.Invariant($" ({DestructionTypes[i]})") : string.Empty));
+				var newValue = IconValueFixup(iconParamater?.Value.ToValue(), iconValue + (loopCount > 0 ? FormattableString.Invariant($" ({DestructionTypes[i]})") : string.Empty));
 				bigChange |= this.TrackedUpdate(template, iconName, newValue);
 			}
 
 			bigChange |= this.UpdateSkillTemplate(skill, template);
 			template.Sort("titlename", "id", "id1", "id2", "id3", "id4", "id5", "id6", "id7", "id8", "id9", "id10", "line", "type", "icon", "icon2", "icon3", "desc", "desc1", "desc2", "desc3", "desc4", "desc5", "desc6", "desc7", "desc8", "desc9", "desc10", "linerank", "cost", "attrib", "casttime", "range", "radius", "duration", "channeltime", "target", "morph1name", "morph1id", "morph1icon", "morph1desc", "morph2name", "morph2id", "morph2icon", "morph2desc", "image", "imgdesc", "nocat", "notrail");
 
-			page.Text = newPage.GetText();
+			page.Text = newPage.ToRaw();
 
 			var replacer = new EsoReplacer(this.Site);
 			if (EsoReplacer.ConstructWarning(page, replacer.CheckNewLinks(oldPage, newPage), "links") is string linkWarning)

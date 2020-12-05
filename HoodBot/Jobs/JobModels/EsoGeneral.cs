@@ -325,7 +325,7 @@
 			{
 				param.Value.Clear();
 				param.Value.AddText(GetPatchVersion(job) + '\n');
-				patchPage.Text = parser.GetText();
+				patchPage.Text = parser.ToRaw();
 				patchPage.Save("Update " + paramName, true);
 			}
 		}

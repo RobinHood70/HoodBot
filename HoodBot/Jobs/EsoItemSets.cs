@@ -297,7 +297,7 @@
 			// Now that we're done parsing, re-add the IgnoreNodes.
 			newPage.Nodes.Insert(0, firstNode);
 			newPage.Nodes.Add(lastNode);
-			page.Text = newPage.GetText() ?? string.Empty;
+			page.Text = newPage.ToRaw();
 
 			var replacer = new EsoReplacer(this.Site);
 			if (EsoReplacer.ConstructWarning(page, replacer.CheckNewLinks(oldPage, newPage), "links") is string linkWarning)

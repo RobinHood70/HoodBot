@@ -62,7 +62,7 @@
 				}
 			}
 
-			return WikiTextVisitor.Raw(nodes);
+			return nodes.ToRaw();
 		}
 		#endregion
 
@@ -407,7 +407,7 @@
 		{
 			if (nodes != null)
 			{
-				var textValue = WikiTextVisitor.Value(nodes);
+				var textValue = nodes.ToValue();
 				var startLength = 0;
 				while (startLength < textValue.Length && char.IsWhiteSpace(textValue[startLength]))
 				{

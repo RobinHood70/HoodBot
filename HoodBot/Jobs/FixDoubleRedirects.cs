@@ -92,7 +92,7 @@
 							linkNode.Title.AddText(newValue);
 						}
 
-						page.Text = parsedPage.GetText();
+						page.Text = parsedPage.ToRaw();
 					}
 				}
 			}

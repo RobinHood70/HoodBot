@@ -292,7 +292,7 @@
 				index = existing.FindIndex("source");
 				if (index != -1)
 				{
-					var sourceTitle = Title.FromName(parser.Site, existing.Parameters[index].ValueToText());
+					var sourceTitle = Title.FromName(parser.Site, existing.Parameters[index].Value.ToValue());
 					if (sourceTitle.Namespace == title.Namespace && sourceTitle.PageName.Equals(title.BasePageName, StringComparison.Ordinal))
 					{
 						existing.Parameters.RemoveAt(index);
@@ -509,7 +509,7 @@
 				parser.Nodes.RemoveRange(insertPos, 2);
 			}
 
-			page.Text = parser.GetText();
+			page.Text = parser.ToRaw();
 		}
 		#endregion
 

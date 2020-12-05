@@ -93,7 +93,7 @@
 				var newValue = FormatMeters(baseMorph.Radii[3]);
 				if (template.Find("radius", "area") is IParameterNode radiusParam)
 				{
-					var oldValue = radiusParam.ValueToText()?.Trim();
+					var oldValue = radiusParam.Value.ToValue().Trim();
 					if (string.Equals(oldValue, newValue, StringComparison.OrdinalIgnoreCase))
 					{
 						radiusParam.SetValue(newValue + '\n');
@@ -170,7 +170,7 @@
 				var morphRadius = morph.Radii.ToString();
 				if (!string.Equals(morphRadius, baseMorph.Radii[3], StringComparison.Ordinal) && !string.Equals(morphRadius, "0", StringComparison.Ordinal) && !string.Equals(morph.Target, "Self", StringComparison.Ordinal))
 				{
-					var word = template.Find("radius", "area")?.NameToText()?.UpperFirst(this.Site.Culture) ?? "Area";
+					var word = template.Find("radius", "area")?.Name?.ToValue().UpperFirst(this.Site.Culture) ?? "Area";
 					descriptions.Add($"{word}: {FormatMeters(morphRadius)}");
 				}
 
@@ -199,7 +199,7 @@
 					bigChange |= this.TrackedUpdate(template, morphName + "name", morph.Name);
 					bigChange |= this.TrackedUpdate(template, morphName + "id", morph.Abilities[3].Id.ToStringInvariant());
 					var iconValue = MakeIcon(skillBase.SkillLine, morph.Name);
-					bigChange |= this.TrackedUpdate(template, morphName + "icon", IconValueFixup(template.Find(morphName + "icon")?.ValueToText(), iconValue));
+					bigChange |= this.TrackedUpdate(template, morphName + "icon", IconValueFixup(template.Find(morphName + "icon")?.Value.ToValue(), iconValue));
 					bigChange |= this.TrackedUpdate(template, morphName + "desc", morph.EffectLine, usedList, skillBase.Name);
 				}
 			}

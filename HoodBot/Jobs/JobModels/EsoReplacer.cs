@@ -475,7 +475,7 @@
 		private string StrippedTextFromNodes(NodeCollection nodes)
 		{
 			this.RemoveTrivialTemplates(nodes);
-			var retval = WikiTextVisitor.Raw(nodes);
+			var retval = nodes.ToRaw();
 			retval = NumberStripper.Replace(retval, string.Empty);
 			return SpaceStripper.Replace(retval, string.Empty);
 		}
