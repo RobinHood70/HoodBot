@@ -9,23 +9,23 @@
 	public class WikiTextVisitor : IWikiNodeVisitor
 	{
 		#region Static Fields
-		private static readonly WikiTextVisitor RawVisitor = new WikiTextVisitor(false);
-		private static readonly WikiTextVisitor ValueVisitor = new WikiTextVisitor(true);
+		private static readonly WikiTextVisitor RawVisitor = new WikiTextVisitor(true);
+		private static readonly WikiTextVisitor ValueVisitor = new WikiTextVisitor(false);
 		#endregion
 
 		#region Fields
 		private readonly StringBuilder builder = new StringBuilder();
-		private readonly bool valuesOnly;
+		private readonly bool raw;
 		#endregion
 
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="WikiTextVisitor"/> class.</summary>
-		/// <param name="valuesOnly"><list type="bullet">
+		/// <param name="raw"><list type="bullet">
 		/// <item>If set to <see langword="true"/>, returns only the value of each node, ignoring comments and the like. This is most useful for finding named items.</item>
 		/// <item>If set to false, returns all nodes in the collection. This is most useful for editing the collection.</item>
 		/// </list></param>
-		public WikiTextVisitor(bool valuesOnly) => this.valuesOnly = valuesOnly;
+		public WikiTextVisitor(bool raw) => this.raw = raw;
 		#endregion
 
 		#region Public Static Methods
@@ -88,7 +88,7 @@
 		public void Visit(IArgumentNode node)
 		{
 			ThrowNull(node, nameof(node));
-			if (this.valuesOnly && node.DefaultValue != null)
+			if (!this.raw && node.DefaultValue != null)
 			{
 				node.DefaultValue.Accept(this);
 				return;
@@ -102,7 +102,7 @@
 				node.DefaultValue.Accept(this);
 			}
 
-			if (!this.valuesOnly && node.ExtraValues != null)
+			if (this.raw && node.ExtraValues != null)
 			{
 				foreach (var value in node.ExtraValues)
 				{
@@ -116,7 +116,7 @@
 		/// <inheritdoc/>
 		public void Visit(ICommentNode node)
 		{
-			if (!this.valuesOnly)
+			if (this.raw)
 			{
 				ThrowNull(node, nameof(node));
 				this.builder.Append(node.Comment);
@@ -133,7 +133,7 @@
 		/// <inheritdoc/>
 		public void Visit(IIgnoreNode node)
 		{
-			if (!this.valuesOnly)
+			if (this.raw)
 			{
 				ThrowNull(node, nameof(node));
 				this.builder.Append(node.Value);
@@ -182,7 +182,7 @@
 		public void Visit(ITagNode node)
 		{
 			ThrowNull(node, nameof(node));
-			if (!this.valuesOnly)
+			if (this.raw)
 			{
 				this.builder
 					.Append('<')
