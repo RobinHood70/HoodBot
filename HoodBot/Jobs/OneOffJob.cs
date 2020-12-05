@@ -1,12 +1,10 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System;
-	using System.IO;
+	using System.Text.RegularExpressions;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Uesp;
-	using RobinHood70.Robby;
-	using RobinHood70.Robby.Parser;
-	using RobinHood70.WikiCommon.Parser;
+	using static RobinHood70.CommonCode.Globals;
 
 	public class OneOffJob : EditJob
 	{
@@ -16,37 +14,20 @@
 			: base(jobManager)
 		{
 		}
+		#endregion
 
+		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
-			var botFolder = UespSite.GetBotDataFolder("Blades_Generic_Items.txt");
-			var parsed = new SiteNodeFactory(this.Site).Parse(File.ReadAllText(botFolder));
-			for (var i = 0; i < parsed.Count; i += 4)
+			var questLinkFixer = new Regex(@"({{Quest Link.*?}}).*?(</noinclude>)?\n", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+			this.Pages.GetNamespace(UespNamespaces.Tes4Mod, Filter.Any, "Better Cities/");
+			foreach (var page in this.Pages)
 			{
-				CheckText(parsed, i + 1);
-				CheckText(parsed, i + 3);
-				var header = (IHeaderNode)parsed[i];
-				var link = (SiteLinkNode)header.Title[1];
-				var template = (ITemplateNode)parsed[i + 2];
-				var text = "{{Minimal}}\n" + WikiTextVisitor.Raw(template) + "\n{{Stub|Item}}";
-				var page = new Page(link.TitleValue)
-				{
-					Text = text
-				};
-
-				this.Pages.Add(page);
-			}
-
-			static void CheckText(NodeCollection parsed, int offset)
-			{
-				if (offset < parsed.Count && (parsed[offset] is not ITextNode textNode || textNode.Text.TrimStart().Length != 0))
-				{
-					throw new InvalidOperationException();
-				}
+				page.Text = questLinkFixer.Replace(page.Text, "$1$2\n");
 			}
 		}
 
-		protected override void Main() => this.SavePages("Create/update item page", false);
+		protected override void Main() => this.SavePages("Fix bot error");
 		#endregion
 	}
 }
