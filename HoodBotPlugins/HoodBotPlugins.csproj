@@ -1,14 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
-		<LangVersion>latest</LangVersion>
-		<CodeAnalysisRuleSet>..\Main.ruleset</CodeAnalysisRuleSet>
 		<DocumentationFile>bin\WallE.XML</DocumentationFile>
-		<Nullable>enable</Nullable>
 		<RootNamespace>RobinHood70.HoodBotPlugins</RootNamespace>
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-		<RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>

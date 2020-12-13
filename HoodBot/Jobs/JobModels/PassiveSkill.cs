@@ -38,7 +38,7 @@
 		public override bool Check()
 		{
 			var retval = false;
-			if (this.ranks.Count < 1 || this.ranks.Count > 10)
+			if (this.ranks.Count is < 1 or > 10)
 			{
 				retval = true;
 				Debug.WriteLine($"Warning: {this.Name} has an unusual number of ranks ({this.Ranks.Count}).");

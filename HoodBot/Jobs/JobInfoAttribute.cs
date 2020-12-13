@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
 
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments", Justification = "Replaces an array, which would be tagged as non-CLS compliant.")]
 	[AttributeUsage(AttributeTargets.Constructor)]
 	public sealed class JobInfoAttribute : Attribute
 	{

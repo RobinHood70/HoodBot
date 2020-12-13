@@ -1,15 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
-		<LangVersion>latest</LangVersion>
-		<CodeAnalysisRuleSet>..\Main.ruleset</CodeAnalysisRuleSet>
 		<Description>Automates Internet Explorer for on-site diffs.</Description>
-		<Nullable>enable</Nullable>
 		<RootNamespace>RobinHood70.InternetExplorerDiff</RootNamespace>
-		<NeutralLanguage>en-CA</NeutralLanguage>
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-		<RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

@@ -10,7 +10,8 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="PageResultHandler"/> class.</summary>
-		/// <param name="title">A <see cref="Robby.Title"/> that points to the results page.</param>
+		/// <param name="site">The site the results page is on.</param>
+		/// <param name="pageName">The page name to save results to.</param>
 		public PageResultHandler(Site site, string pageName)
 			: base(site?.Culture)
 		{

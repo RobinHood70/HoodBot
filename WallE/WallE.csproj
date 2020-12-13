@@ -1,17 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
-		<LangVersion>latest</LangVersion>
-		<CodeAnalysisRuleSet>WallERules.ruleset</CodeAnalysisRuleSet>
 		<DocumentationFile>bin\WallE.XML</DocumentationFile>
 		<Description>Wiki Abstraction Layer - handles all low-level communications with a wiki.</Description>
-		<Nullable>enable</Nullable>
 		<RootNamespace>RobinHood70.WallE</RootNamespace>
-		<NeutralLanguage>en-CA</NeutralLanguage>
 		<RestoreProjectStyle>PackageReference</RestoreProjectStyle>
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-		<RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>

@@ -95,7 +95,7 @@
 				var lines = message.Split(TextArrays.LineFeed, StringSplitOptions.RemoveEmptyEntries);
 				foreach (var line in lines)
 				{
-					if (line[0] != '<' && line[0] != '#')
+					if (line[0] is not '<' and not '#')
 					{
 						var ns = new MetaNamespace(site, line);
 						NamespacesField.Add(ns.Base, ns);

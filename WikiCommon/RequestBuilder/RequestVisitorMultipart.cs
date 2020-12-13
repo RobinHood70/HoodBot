@@ -141,7 +141,6 @@
 		#endregion
 
 		#region Private Methods
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5394:Do not use insecure randomness", Justification = "Security is not a requirement here.")]
 		private static string RandomBoundary(int boundaryLength)
 		{
 			// Sanity check

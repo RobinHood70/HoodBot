@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Controls
 {
-	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.Windows;
 	using System.Windows.Controls;
@@ -42,7 +41,6 @@
 			set => this.SetValue(StepValueProperty, value);
 		}
 
-		[SuppressMessage("Naming", "CA1721:Property names should not match get methods", Justification = "Can't rename methods and property name is the most logical.")]
 		public int Value
 		{
 			get => (int)this.GetValue(ValueProperty);
@@ -54,7 +52,7 @@
 		private static void ValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
 			var num = (int)e.NewValue;
-			((NumericUpDown)d).Number.Text = num.ToString(CultureInfo.CurrentUICulture);
+			((NumericUpDown)d).Number.Text = num.ToString(CultureInfo.CurrentCulture);
 		}
 		#endregion
 

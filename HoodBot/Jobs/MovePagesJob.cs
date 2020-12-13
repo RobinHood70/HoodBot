@@ -691,7 +691,7 @@
 			ThrowNull(page, nameof(page));
 			ThrowNull(deletionText, nameof(deletionText));
 			var status = ChangeStatus.Unknown;
-			while (status != ChangeStatus.Success && status != ChangeStatus.EditingDisabled)
+			while (status is not ChangeStatus.Success and not ChangeStatus.EditingDisabled)
 			{
 				page.Text =
 					page.Namespace == MediaWikiNamespaces.Template ? "<noinclude>" + deletionText + "</noinclude>" :

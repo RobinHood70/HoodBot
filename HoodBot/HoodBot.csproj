@@ -5,23 +5,14 @@
 		<RootNamespace>RobinHood70.HoodBot</RootNamespace>
 		<TargetFramework>net5.0-windows</TargetFramework>
 		<UseWPF>true</UseWPF>
-		<LangVersion>latest</LangVersion>
 		<ApplicationIcon>Assets/HoodBot.ico</ApplicationIcon>
-		<RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
 		<ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-		<CodeAnalysisRuleSet>HoodBot.ruleset</CodeAnalysisRuleSet>
-		<SignAssembly>true</SignAssembly>
-		<AssemblyOriginatorKeyFile>SharedKey.pfx</AssemblyOriginatorKeyFile>
-		<NeutralLanguage>en-CA</NeutralLanguage>
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<DefineConstants>DEBUG</DefineConstants>
 	</PropertyGroup>
-
+	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>
 	  <Compile Remove="Old Jobs\*" />
 	</ItemGroup>

@@ -78,7 +78,7 @@
 
 								break;
 							default:
-								if (value.Type == JTokenType.Object || value.Type == JTokenType.Array)
+								if (value.Type is JTokenType.Object or JTokenType.Array)
 								{
 									this.AddWarning("ActionUpload.DeserializeResult", CurrentCulture(EveMessages.NotAString, name));
 								}
