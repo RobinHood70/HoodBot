@@ -2,7 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using RobinHood70.HoodBot.Jobs.Design;
+
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon;
 
@@ -31,7 +31,7 @@
 				}
 			}
 
-			sorted.Sort();
+			sorted.Sort(StringComparer.Ordinal);
 			foreach (var item in sorted)
 			{
 				this.WriteLine(item);

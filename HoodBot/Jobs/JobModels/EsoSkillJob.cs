@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using System.Data;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
@@ -23,7 +22,7 @@
 		#region Static Fields
 		private static readonly string[] DestructionTypes = { "Frost", "Shock", "Fire" };
 
-		private static readonly SortedList<string, string> IconNameCache = new SortedList<string, string>();
+		private static readonly SortedList<string, string> IconNameCache = new SortedList<string, string>(StringComparer.Ordinal);
 		private static readonly HashSet<string> DestructionExceptions = new HashSet<string>(StringComparer.Ordinal) { "Destructive Touch", "Impulse", "Wall of Elements" };
 		#endregion
 
@@ -183,7 +182,7 @@
 				this.WriteLine();
 			}
 
-			var iconChanges = new SortedList<string, string>(IconNameCache.Count);
+			var iconChanges = new SortedList<string, string>(IconNameCache.Count, StringComparer.Ordinal);
 			foreach (var kvp in IconNameCache)
 			{
 				if (!string.Equals(kvp.Key, kvp.Value, StringComparison.Ordinal))

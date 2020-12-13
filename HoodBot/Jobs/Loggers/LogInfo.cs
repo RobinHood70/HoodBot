@@ -1,5 +1,7 @@
-﻿namespace RobinHood70.HoodBot
+﻿namespace RobinHood70.HoodBot.Jobs.Loggers
 {
+	using RobinHood70.HoodBot.Jobs;
+
 	/// <summary>This provides a basic log information class to be derived from and customized as needed by custom JobLogger implementations.</summary>
 	public class LogInfo
 	{

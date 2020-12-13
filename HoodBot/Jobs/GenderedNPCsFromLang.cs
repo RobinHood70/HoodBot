@@ -4,7 +4,7 @@
 	using System.Globalization;
 	using System.IO;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Jobs.Design;
+
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 
@@ -29,7 +29,7 @@
 				DoubleUpDelimiters = true
 			};
 			csvFile.ReadText(reader, true);
-			var npcs = new SortedSet<string>();
+			var npcs = new SortedSet<string>(System.StringComparer.Ordinal);
 			foreach (var row in csvFile)
 			{
 				if (int.Parse(row["ID"], CultureInfo.InvariantCulture) == 8290981)

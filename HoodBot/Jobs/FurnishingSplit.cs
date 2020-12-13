@@ -3,7 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Jobs.Design;
+
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -56,7 +56,7 @@
 
 		protected override void Main()
 		{
-			this.issues.Sort();
+			this.issues.Sort(StringComparer.Ordinal);
 			foreach (var issue in this.issues)
 			{
 				this.WriteLine(issue);

@@ -4,7 +4,7 @@
 	using System.Collections.Generic;
 	using System.Globalization;
 	using System.Text;
-	using RobinHood70.HoodBot.Jobs.Design;
+
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -175,7 +175,7 @@
 
 			if (npc.UnknownLocations.Count > 0)
 			{
-				var list = new SortedSet<string>(npc.UnknownLocations.Keys);
+				var list = new SortedSet<string>(npc.UnknownLocations.Keys, StringComparer.Ordinal);
 				var locText = string.Join(", ", list);
 				InsertLocation(template, factory, "loc", locText);
 			}

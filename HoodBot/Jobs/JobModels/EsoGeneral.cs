@@ -11,7 +11,6 @@
 	using Microsoft.Extensions.Configuration;
 	using MySql.Data.MySqlClient;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;

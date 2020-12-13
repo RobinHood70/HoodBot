@@ -6,7 +6,7 @@
 	using System.Text;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Jobs.Design;
+
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -31,7 +31,7 @@
 		#endregion
 
 		#region Fields
-		private readonly IDictionary<string, PageData> sets = new SortedDictionary<string, PageData>();
+		private readonly IDictionary<string, PageData> sets = new SortedDictionary<string, PageData>(StringComparer.Ordinal);
 		private readonly IMediaWikiClient client;
 		#endregion
 

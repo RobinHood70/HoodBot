@@ -4,7 +4,8 @@
 	using System.Collections.Generic;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Jobs.Design;
+	using RobinHood70.HoodBot.Jobs;
+
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;

@@ -2,7 +2,7 @@
 {
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Jobs.Design;
+
 	using RobinHood70.HoodBot.Uesp;
 	using static RobinHood70.CommonCode.Globals;
 

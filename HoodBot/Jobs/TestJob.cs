@@ -1,7 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using RobinHood70.HoodBot.Jobs.Design;
-
 	public class TestJob : WikiJob
 	{
 		#region Constructors

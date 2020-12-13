@@ -3,7 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Globalization;
-	using RobinHood70.HoodBot.Jobs.Design;
+
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;

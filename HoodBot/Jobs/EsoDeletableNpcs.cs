@@ -1,8 +1,9 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
-	using RobinHood70.HoodBot.Jobs.Design;
+
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -27,7 +28,7 @@
 				allNames.Add(npc.Name);
 			}
 
-			allNames.Sort();
+			allNames.Sort(StringComparer.Ordinal);
 
 			this.StatusWriteLine("Getting NPC data from wiki");
 			var allNpcs = new TitleCollection(this.Site);
@@ -40,11 +41,11 @@
 			Debug.WriteLine("== ESO NPCs with No Corresponding Entries in the ESO Database ==");
 			foreach (var page in allNpcs)
 			{
-				var npc = allNames.BinarySearch(page.PageName);
+				var npc = allNames.BinarySearch(page.PageName, StringComparer.Ordinal);
 				if (npc < 0)
 				{
 					var labelName = page.LabelName();
-					npc = allNames.BinarySearch(labelName);
+					npc = allNames.BinarySearch(labelName, StringComparer.Ordinal);
 					if (npc < 0)
 					{
 						Debug.WriteLine($"* [[{page.FullPageName}|{labelName}]]");

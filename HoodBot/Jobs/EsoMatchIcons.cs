@@ -5,7 +5,7 @@
 	using System.IO;
 	using System.Text;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Jobs.Design;
+
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -364,7 +364,7 @@
 			#region Public Properties
 			public ICollection<SiteLink> Categories { get; } = new SortedSet<SiteLink>(SimpleTitleComparer.Instance);
 
-			public ICollection<string> OriginalFiles { get; } = new SortedSet<string>();
+			public ICollection<string> OriginalFiles { get; } = new SortedSet<string>(StringComparer.Ordinal);
 
 			public FilePage Page { get; }
 
@@ -376,9 +376,9 @@
 
 			public string PreText { get; } = string.Empty;
 
-			public ICollection<string> UnmatchedNames { get; } = new SortedSet<string>();
+			public ICollection<string> UnmatchedNames { get; } = new SortedSet<string>(StringComparer.Ordinal);
 
-			public IDictionary<string, ICollection<string>> UsedFor { get; } = new SortedDictionary<string, ICollection<string>>();
+			public IDictionary<string, ICollection<string>> UsedFor { get; } = new SortedDictionary<string, ICollection<string>>(StringComparer.Ordinal);
 			#endregion
 
 			#region Public Methods

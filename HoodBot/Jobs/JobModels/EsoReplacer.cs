@@ -7,7 +7,6 @@
 	using System.Text;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
@@ -25,7 +24,7 @@
 		private static readonly Regex SpaceStripper = new Regex(@"(\s{2,}|\n)", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
 		private static readonly List<EsoReplacement> ReplaceAllList = new List<EsoReplacement>();
 		private static readonly List<EsoReplacement> ReplaceFirstList = new List<EsoReplacement>();
-		private static readonly ICollection<string> UnreplacedList = new SortedSet<string>();
+		private static readonly ICollection<string> UnreplacedList = new SortedSet<string>(StringComparer.Ordinal);
 		private static readonly string[] ResistanceSplit = new[] { " Resistance" };
 
 		private static bool initialized;

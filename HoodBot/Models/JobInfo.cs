@@ -3,8 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Reflection;
-	using RobinHood70.HoodBot;
-	using RobinHood70.HoodBot.Jobs.Design;
+	using RobinHood70.HoodBot.Jobs;
 	using static RobinHood70.CommonCode.Globals;
 
 	public class JobInfo : IEquatable<JobInfo>

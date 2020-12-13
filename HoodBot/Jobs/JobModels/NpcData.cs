@@ -20,7 +20,7 @@
 	internal sealed class NpcData
 	{
 		#region Static Fields
-		private static readonly Dictionary<Gender, string> Genders = new ()
+		private static readonly Dictionary<Gender, string> Genders = new()
 		{
 			[Gender.None] = "None",
 			[Gender.NotApplicable] = "N/A",
@@ -28,7 +28,7 @@
 			[Gender.Male] = "Male",
 		};
 
-		private static readonly Dictionary<PickpocketDifficulty, string> PIckpocketDifficulties = new ()
+		private static readonly Dictionary<PickpocketDifficulty, string> PIckpocketDifficulties = new()
 		{
 			[PickpocketDifficulty.NotApplicable] = "N/A",
 			[PickpocketDifficulty.Unknown] = "?",
