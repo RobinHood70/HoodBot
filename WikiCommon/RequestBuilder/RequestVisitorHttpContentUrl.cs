@@ -9,7 +9,7 @@
 	public class RequestVisitorHttpContentUrl : IParameterVisitor
 	{
 		#region Fields
-		private readonly Dictionary<string, string?> parameters = new (StringComparer.Ordinal);
+		private readonly Dictionary<string, string?> parameters = new(StringComparer.Ordinal);
 		private bool supportsUnitSeparator;
 		#endregion
 
@@ -35,11 +35,9 @@
 			visitor.parameters.Clear();
 			request.Build(visitor);
 
-			#pragma warning disable CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
-
-			// FormUrlEncodedContent only supports KVP<string?, string?>, while Dictionary explicitly forbids null in the key value.
+#pragma warning disable CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types. FormUrlEncodedContent only supports KVP<string?, string?>, while Dictionary explicitly forbids null in the key value.
 			return new FormUrlEncodedContent(visitor.parameters);
-			#pragma warning restore CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
+#pragma warning restore CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
 		}
 		#endregion
 

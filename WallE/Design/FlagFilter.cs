@@ -22,7 +22,7 @@ namespace RobinHood70.WallE.Design
 	/// <summary>A class for filtering flags enumerations based on the MediaWiki site version.</summary>
 	/// <typeparam name="T">The type of the flags filter to be checked.</typeparam>
 	public sealed class FlagFilter<T>
-		where T : Enum, IConvertible // IConvertible is apparently not implied by Enum unless declared explicity; add it so we don't have to do "as IConvertible" everywhere.
+		where T : Enum
 	{
 		#region Fields
 		private readonly int siteVersion;
@@ -36,7 +36,7 @@ namespace RobinHood70.WallE.Design
 		/// <param name="originalValue">The original value.</param>
 		public FlagFilter(int siteVersion, T originalValue)
 		{
-			this.longValue = originalValue.ToUInt64(CultureInfo.InvariantCulture);
+			this.longValue = Convert.ToUInt64(originalValue, CultureInfo.InvariantCulture);
 			this.siteVersion = siteVersion;
 		}
 		#endregion
@@ -58,7 +58,7 @@ namespace RobinHood70.WallE.Design
 		{
 			if (this.siteVersion < version)
 			{
-				this.longValue &= ~flagFilter.ToUInt64(CultureInfo.InvariantCulture);
+				this.longValue &= ~Convert.ToUInt64(flagFilter, CultureInfo.InvariantCulture);
 			}
 
 			return this;
@@ -72,7 +72,7 @@ namespace RobinHood70.WallE.Design
 		{
 			if (this.siteVersion >= version)
 			{
-				this.longValue &= ~flagFilter.ToUInt64(CultureInfo.InvariantCulture);
+				this.longValue &= ~Convert.ToUInt64(flagFilter, CultureInfo.InvariantCulture);
 			}
 
 			return this;

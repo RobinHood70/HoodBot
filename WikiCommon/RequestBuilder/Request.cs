@@ -118,11 +118,17 @@
 			return this;
 		}
 
-		/// <summary>Adds a numeric parameter.</summary>
+		/// <summary>Adds an integer parameter.</summary>
 		/// <param name="name">The parameter name.</param>
-		/// <param name="value">The parameter value. This must be an <see cref="IConvertible"/> that can be converted to a <see cref="long"/> value.</param>
+		/// <param name="value">The parameter value.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public Request Add(string name, IConvertible? value) => value == null ? this : this.Add(name, value.ToInt64(CultureInfo.CurrentCulture).ToStringInvariant());
+		public Request Add(string name, int? value) => value == null ? this : this.Add(name, value.ToStringInvariant());
+
+		/// <summary>Adds a long parameter.</summary>
+		/// <param name="name">The parameter name.</param>
+		/// <param name="value">The parameter value.</param>
+		/// <returns>The current collection (fluent interface).</returns>
+		public Request Add(string name, long? value) => value == null ? this : this.Add(name, value.ToStringInvariant());
 
 		/// <summary>Adds a string parameter.</summary>
 		/// <param name="name">The parameter name.</param>
@@ -173,24 +179,38 @@
 			? this
 			: this.AddPiped(name, values);
 
-		/// <summary>Adds a collection of numeric parameter if the collection value is non-null.</summary>
-		/// <typeparam name="T">Any <see cref="IConvertible"/> type that can be converted to a <see cref="long"/> value.</typeparam>
+		/// <summary>Adds a collection of integers if the collection value is non-null.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="values">The parameter values.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		/// <remarks>A copy of the values will be added to the request, not the original list. The new list will be converted to <see cref="long"/> numbers, sorted numerically with duplicates removed, then put into a <see cref="PipedParameter"/>.</remarks>
-		public Request Add<T>(string name, IEnumerable<T>? values)
-			where T : IConvertible
+		/// <remarks>A sorted copy of the values will be added to the request, not the original list.</remarks>
+		public Request Add(string name, IEnumerable<int>? values)
 		{
-			// Note: IEnumerable<IConvertible> fails to capture some calls, so generics are used instead.
 			if (values != null)
 			{
-				var sorted = new SortedSet<long>();
-				foreach (var value in values)
+				var sorted = new SortedSet<int>(values);
+				var newList = new List<string>(sorted.Count);
+				foreach (var value in sorted)
 				{
-					sorted.Add(value.ToInt64(CultureInfo.CurrentCulture));
+					newList.Add(value.ToStringInvariant() ?? string.Empty);
 				}
 
+				this.AddPiped(name, newList);
+			}
+
+			return this;
+		}
+
+		/// <summary>Adds a collection of long integers if the collection value is non-null.</summary>
+		/// <param name="name">The parameter name.</param>
+		/// <param name="values">The parameter values.</param>
+		/// <returns>The current collection (fluent interface).</returns>
+		/// <remarks>A sorted copy of the values will be added to the request, not the original list.</remarks>
+		public Request Add(string name, IEnumerable<long>? values)
+		{
+			if (values != null)
+			{
+				var sorted = new SortedSet<long>(values);
 				var newList = new List<string>(sorted.Count);
 				foreach (var value in sorted)
 				{
@@ -339,12 +359,19 @@
 		public Request AddIf<T>(string name, T value, bool condition)
 			where T : Enum => condition ? this.Add(name, value) : this;
 
-		/// <summary>Adds a numeric parameter if the condition is true.</summary>
+		/// <summary>Adds an integer parameter if the condition is true.</summary>
 		/// <param name="name">The parameter name.</param>
-		/// <param name="value">The parameter value. This must be an <see cref="IConvertible"/> that can be converted to a <see cref="long"/> value.</param>
+		/// <param name="value">The parameter value.</param>
 		/// <param name="condition">The condition to check.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public Request AddIf(string name, IConvertible? value, bool condition) => (condition && value != null) ? this.Add(name, value.ToInt64(CultureInfo.CurrentCulture).ToStringInvariant()) : this;
+		public Request AddIf(string name, int? value, bool condition) => (condition && value != null) ? this.Add(name, value) : this;
+
+		/// <summary>Adds a long integer parameter if the condition is true.</summary>
+		/// <param name="name">The parameter name.</param>
+		/// <param name="value">The parameter value.</param>
+		/// <param name="condition">The condition to check.</param>
+		/// <returns>The current collection (fluent interface).</returns>
+		public Request AddIf(string name, long? value, bool condition) => (condition && value != null) ? this.Add(name, value) : this;
 
 		/// <summary>Adds a string parameter if the condition is true.</summary>
 		/// <param name="name">The parameter name.</param>
@@ -360,15 +387,21 @@
 		/// <returns>The current collection (fluent interface).</returns>
 		public Request AddIf(string name, IEnumerable<string>? values, bool condition) => condition ? this.Add(name, values) : this;
 
-		/// <summary>Adds an enumerable parameter if the value collection is non-null and the condition is true.</summary>
-		/// <typeparam name="T">Any <see cref="IConvertible"/> type that can be converted to a <see cref="long"/> value.</typeparam>
+		/// <summary>Adds a collection of integers if the collection is non-null and the condition is true.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="values">The values.</param>
 		/// <param name="condition">The condition to check.</param>
 		/// <returns>The current collection (fluent interface).</returns>
 		/// <remarks>A copy of the values will be added to the request, not the original list. The new list will be converted to <see cref="long"/> numbers, sorted with duplicates removed, then put into a <see cref="PipedParameter"/>.</remarks>
-		public Request AddIf<T>(string name, IEnumerable<T>? values, bool condition)
-			where T : IConvertible => condition ? this.Add(name, values) : this;
+		public Request AddIf(string name, IEnumerable<int>? values, bool condition) => condition ? this.Add(name, values) : this;
+
+		/// <summary>Adds a collection of long integers if the collection is non-null and the condition is true.</summary>
+		/// <param name="name">The parameter name.</param>
+		/// <param name="values">The values.</param>
+		/// <param name="condition">The condition to check.</param>
+		/// <returns>The current collection (fluent interface).</returns>
+		/// <remarks>A copy of the values will be added to the request, not the original list. The new list will be converted to <see cref="long"/> numbers, sorted with duplicates removed, then put into a <see cref="PipedParameter"/>.</remarks>
+		public Request AddIf(string name, IEnumerable<long>? values, bool condition) => condition ? this.Add(name, values) : this;
 
 		/// <summary>Adds a string parameter if the value is non-null.</summary>
 		/// <param name="name">The parameter name.</param>
@@ -391,16 +424,26 @@
 		public Request AddIfPositive<T>(string name, T value)
 			where T : Enum => Convert.ToUInt64(value, CultureInfo.InvariantCulture) > 0 ? this.Add(name, value) : this;
 
-		/// <summary>Adds a numeric parameter if the value is greater than zero.</summary>
+		/// <summary>Adds an integer parameter if the value is greater than zero.</summary>
 		/// <param name="name">The parameter name.</param>
-		/// <param name="value">The parameter value. This must be an <see cref="IConvertible"/> that can be converted to a <see cref="long"/> value.</param>
+		/// <param name="value">The parameter value.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public Request AddIfPositive(string name, IConvertible value)
+		public Request AddIfPositive(string name, int value)
 		{
 			ThrowNull(name, nameof(name));
 			ThrowNull(value, nameof(value));
-			var longValue = value.ToInt64(CultureInfo.CurrentCulture);
-			return longValue > 0 ? this.Add(name, value) : this;
+			return value > 0 ? this.Add(name, value) : this;
+		}
+
+		/// <summary>Adds a long integer parameter if the value is greater than zero.</summary>
+		/// <param name="name">The parameter name.</param>
+		/// <param name="value">The parameter value.</param>
+		/// <returns>The current collection (fluent interface).</returns>
+		public Request AddIfPositive(string name, long value)
+		{
+			ThrowNull(name, nameof(name));
+			ThrowNull(value, nameof(value));
+			return value > 0 ? this.Add(name, value) : this;
 		}
 
 		/// <summary>Adds an enumeration parameter if its integer value is greater than zero and the condition is true.</summary>
@@ -412,17 +455,28 @@
 		public Request AddIfPositiveIf<T>(string name, T value, bool condition)
 			where T : Enum => condition && Convert.ToUInt64(value, CultureInfo.InvariantCulture) > 0 ? this.Add(name, value) : this;
 
-		/// <summary>Adds a numeric parameter if the value is greater than zero and the condition is true.</summary>
+		/// <summary>Adds an integer parameter if the value is greater than zero and the condition is true.</summary>
 		/// <param name="name">The parameter name.</param>
-		/// <param name="value">The parameter value. This must be an <see cref="IConvertible"/> that can be converted to a <see cref="long"/> value.</param>
+		/// <param name="value">The parameter value.</param>
 		/// <param name="condition">The condition to check.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public Request AddIfPositiveIf(string name, IConvertible value, bool condition)
+		public Request AddIfPositiveIf(string name, int value, bool condition)
 		{
 			ThrowNull(name, nameof(name));
 			ThrowNull(value, nameof(value));
-			var longValue = value.ToInt64(CultureInfo.CurrentCulture);
-			return (condition && longValue > 0) ? this.Add(name, value) : this;
+			return (condition && value > 0) ? this.Add(name, value) : this;
+		}
+
+		/// <summary>Adds a long integer parameter if the value is greater than zero and the condition is true.</summary>
+		/// <param name="name">The parameter name.</param>
+		/// <param name="value">The parameter value.</param>
+		/// <param name="condition">The condition to check.</param>
+		/// <returns>The current collection (fluent interface).</returns>
+		public Request AddIfPositiveIf(string name, long value, bool condition)
+		{
+			ThrowNull(name, nameof(name));
+			ThrowNull(value, nameof(value));
+			return (condition && value > 0) ? this.Add(name, value) : this;
 		}
 
 		/// <summary>Adds or changes a string parameter if the value is non-null.</summary>

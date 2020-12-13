@@ -1119,7 +1119,7 @@
 				interwikiList.Add(entry);
 			}
 
-			this.interwikiMap = new ReadOnlyKeyedCollection<string, InterwikiEntry>(item => (item ?? throw ArgumentNull(nameof(item))).Prefix, interwikiList);
+			this.interwikiMap = new ReadOnlyKeyedCollection<string, InterwikiEntry>(item => (item ?? throw ArgumentNull(nameof(item))).Prefix, interwikiList, StringComparer.OrdinalIgnoreCase);
 		}
 
 		/// <summary>Patrols the specified Recent Changes ID.</summary>

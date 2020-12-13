@@ -141,17 +141,17 @@
 		#endregion
 
 		#region Private Methods
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5394:Do not use insecure randomness", Justification = "Security is not a requirement here.")]
 		private static string RandomBoundary(int boundaryLength)
 		{
-			var builder = new StringBuilder();
-			var rand = new Random();
-
 			// Sanity check
 			if (boundaryLength > 70)
 			{
 				boundaryLength = 70;
 			}
 
+			var builder = new StringBuilder();
+			var rand = new Random();
 			for (var i = 0; i < boundaryLength; i++)
 			{
 				var scanLength = i == 69 ? BoundaryChars.Length - 1 : BoundaryChars.Length;

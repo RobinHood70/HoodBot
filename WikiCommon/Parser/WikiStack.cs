@@ -108,7 +108,7 @@
 				regexTags.Add(Regex.Escape(tag));
 			}
 
-			regexTags.Sort();
+			regexTags.Sort(StringComparer.Ordinal);
 			this.tagsRegex = new Regex(@"\G(" + string.Join("|", regexTags) + ")", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
 			this.Preprocess();
 		}

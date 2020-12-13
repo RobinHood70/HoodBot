@@ -293,14 +293,17 @@
 			{
 				if (resultNode.First is JToken result)
 				{
+					var flags = result.GetFlags(
+						("content", NamespaceFlags.ContentSpace),
+						("nonincludable", NamespaceFlags.NonIncludable),
+						("subpages", NamespaceFlags.Subpages))
+						.AddCaseFlag(result, NamespaceFlags.CaseSensitive);
+
 					retval.Add(new SiteInfoNamespace(
 						id: (int)result.MustHave("id"),
 						canonicalName: (string?)result["canonical"] ?? string.Empty,
 						defaultContentModel: (string?)result["defaultcontentmodel"],
-						flags: (string.Equals((string?)result["case"], "case-sensitive", StringComparison.Ordinal) ? NamespaceFlags.CaseSensitive : NamespaceFlags.None) | result.GetFlags(
-							("content", NamespaceFlags.ContentSpace),
-							("nonincludable", NamespaceFlags.NonIncludable),
-							("subpages", NamespaceFlags.Subpages)),
+						flags: flags,
 						name: result.MustHaveBCString("name")));
 				}
 			}
@@ -541,14 +544,15 @@
 				fallback8BitEncoding: node.MustHaveString("fallback8bitEncoding"),
 				fallbackLanguages: fallback,
 				favicon: (string?)node["favicon"],
-				flags: (string.Equals((string?)node["case"], "case-sensitive", StringComparison.Ordinal) ? SiteInfoFlags.CaseSensitive : SiteInfoFlags.None) | node.GetFlags(
+				flags: node.GetFlags(
 					("imagewhitelistenabled", SiteInfoFlags.ImageWhitelistEnabled),
 					("langconversion", SiteInfoFlags.LanguageConversion),
 					("misermode", SiteInfoFlags.MiserMode),
 					("readonly", SiteInfoFlags.ReadOnly),
 					("righttoleft", SiteInfoFlags.RightToLeft),
 					("titleconversion", SiteInfoFlags.TitleConversion),
-					("writeapi", SiteInfoFlags.WriteApi)),
+					("writeapi", SiteInfoFlags.WriteApi))
+					.AddCaseFlag(node, SiteInfoFlags.CaseSensitive),
 				generator: node.MustHaveString("generator"),
 				gitBranch: (string?)node["git-branch"],
 				gitHash: (string?)node["git-hash"],

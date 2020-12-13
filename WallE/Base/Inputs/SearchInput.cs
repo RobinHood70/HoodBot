@@ -3,12 +3,10 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.WallE.ProjectGlobals;
 
 	#region Public Enumerations
-	[SuppressMessage("Microsoft.Naming", "CA1714:FlagsEnumsShouldHavePluralNames", Justification = "Collective term")]
 	[Flags]
 	public enum SearchInfo
 	{
