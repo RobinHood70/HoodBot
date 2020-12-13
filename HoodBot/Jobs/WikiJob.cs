@@ -151,7 +151,7 @@
 			if (this.Logger != null && this.Logger.ShouldLog(this.JobType))
 			{
 				this.StatusWriteLine("Adding Log Entry");
-				var logInfo = new LogInfo(this.LogName ?? "Unknown Job Type", this.LogDetails, this.JobType);
+				var logInfo = new LogInfo(this.LogName ?? "Unknown Job Type", this.LogDetails);
 				this.Logger.AddLogEntry(logInfo);
 			}
 		}
