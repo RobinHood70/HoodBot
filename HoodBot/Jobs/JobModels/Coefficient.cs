@@ -106,7 +106,7 @@
 					value = (int)Math.Round(statDamage + dmgDamage);
 					maxValue = (int)this.C;
 					return value > maxValue ? maxValue : value;
-				case var n when n >= -70 && n <= -51:
+				case var n when n is >= -70 and <= -51:
 					return (int)this.A;
 				default:
 					throw new InvalidOperationException($"Invalid {nameof(this.TypeNumber)} {this.TypeNumber.ToStringInvariant()}");

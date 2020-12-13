@@ -9,22 +9,15 @@ namespace HoodBotTestProject
 
 	public class TitleParserUnitTest
 	{
-		private static readonly Site site = new Site(new WikiAbstractionLayer());
+		#region Fields
+		private static readonly Site Site = new Site(new WikiAbstractionLayer());
+		#endregion
 
-		static TitleParserUnitTest() => site.Login("RobinHood70", string.Empty);
+		#region Static Constructor
+		static TitleParserUnitTest() => Site.Login("RobinHood70", string.Empty);
+		#endregion
 
-		[Theory]
-		[MemberData(nameof(Data))]
-		public void Test1(string input, string? iw, int ns, string page, string? fragment)
-		{
-			Debug.WriteLine(input);
-			var test = new TitleParser(site, input);
-			Assert.Equal(iw, test.Interwiki?.Prefix);
-			Assert.Equal(ns, test.Namespace.Id);
-			Assert.Equal(page, test.PageName);
-			Assert.Equal(fragment, test.Fragment);
-		}
-
+		#region Public Static Properties
 		public static TheoryData<string, string?, int, string, string?> Data =>
 			new TheoryData<string, string?, int, string, string?>
 			{
@@ -40,5 +33,20 @@ namespace HoodBotTestProject
 				{ ":en::Image:Test.png#Everything", "en", MediaWikiNamespaces.Main, "Image:Test.png", "Everything" },
 				{ "MediaWikiWiki:File:Test.png", "MediaWikiWiki", MediaWikiNamespaces.Main, "File:Test.png", null },
 			};
+		#endregion
+
+		#region Public Methods
+		[Theory]
+		[MemberData(nameof(Data))]
+		public void Test1(string input, string? iw, int ns, string page, string? fragment)
+		{
+			Debug.WriteLine(input);
+			var test = new TitleParser(Site, input);
+			Assert.Equal(iw, test.Interwiki?.Prefix);
+			Assert.Equal(ns, test.Namespace.Id);
+			Assert.Equal(page, test.PageName);
+			Assert.Equal(fragment, test.Fragment);
+		}
+		#endregion
 	}
 }

@@ -46,7 +46,7 @@
 				.AddFilterPiped("wlshow", "anon", input.FilterAnonymous)
 				.AddFilterPiped("wlshow", "patrolled", input.FilterPatrolled)
 				.AddFilterPiped("wlshow", "unread", input.FilterUnread)
-				.AddIf("linktodiffs", input.LinkToDiffs, this.SiteVersion >= 117 && this.SiteVersion < 124);
+				.AddIf("linktodiffs", input.LinkToDiffs, this.SiteVersion is >= 117 and < 124);
 		}
 
 		protected override CustomResult DeserializeCustom(string? result) => new CustomResult(result);

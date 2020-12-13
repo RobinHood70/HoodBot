@@ -298,7 +298,6 @@
 			}
 		}
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities", Justification = "No user input.")]
 		public static IEnumerable<IDataRecord> RunQuery(string query)
 		{
 			using var connection = new MySqlConnection(EsoLogConnectionString);

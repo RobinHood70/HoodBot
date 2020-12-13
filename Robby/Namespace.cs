@@ -86,7 +86,7 @@
 		public bool IsContentSpace { get; }
 
 		/// <summary>Gets a value indicating whether this namespace requires a colon to be prepended in order to create a link.</summary>
-		public bool IsForcedLinkSpace => this.Id == MediaWikiNamespaces.Category || this.Id == MediaWikiNamespaces.File;
+		public bool IsForcedLinkSpace => this.Id is MediaWikiNamespaces.Category or MediaWikiNamespaces.File;
 
 		/// <summary>Gets a value indicating whether this instance is subject space.</summary>
 		/// <value><see langword="true"/> if this instance is a subject namespace; otherwise, <see langword="false"/>.</value>

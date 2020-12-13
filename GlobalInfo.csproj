@@ -1,10 +1,15 @@
 <Project>
 	<PropertyGroup>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AssemblyOriginatorKeyFile>..\SharedKey.pfx</AssemblyOriginatorKeyFile>
 		<Authors>Robert Morley</Authors>
 		<Copyright>Copyright © Robert Morley 2019</Copyright>
+		<LangVersion>latest</LangVersion>
+		<NeutralLanguage>en-CA</NeutralLanguage>
+		<Nullable>enable</Nullable>
 		<Product>HoodBot</Product>
 		<SignAssembly>true</SignAssembly>
-		<AssemblyOriginatorKeyFile>..\SharedKey.pfx</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 	<ItemGroup>
 		<AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />

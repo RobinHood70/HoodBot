@@ -159,7 +159,7 @@
 				try
 				{
 					var result = this.logPage.Save(editSummary, true);
-					saved = result == ChangeStatus.EditingDisabled || result == ChangeStatus.NoEffect || result == ChangeStatus.Success;
+					saved = result is ChangeStatus.EditingDisabled or ChangeStatus.NoEffect or ChangeStatus.Success;
 				}
 				catch (EditConflictException)
 				{
