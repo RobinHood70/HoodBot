@@ -208,7 +208,7 @@
 				}
 			}
 
-			return new ReadOnlyKeyedCollection<string, ParametersItem>(item => item.Name, parametersList);
+			return new ReadOnlyKeyedCollection<string, ParametersItem>(item => item.Name, parametersList, StringComparer.Ordinal);
 		}
 
 		private static List<ExamplesItem> GetExamples(JToken? module)

@@ -32,7 +32,7 @@
 
 			var buffer = Encoding.UTF8.GetBytes(value);
 			using (var inputStream = new MemoryStream(buffer, false))
-			using (var encryptor = aes.CreateEncryptor(this.encryptionKeyBytes, iv))
+			using (var encryptor = aes.CreateEncryptor())
 			using (var cryptoStream = new CryptoStream(outputStream, encryptor, CryptoStreamMode.Write))
 			{
 				inputStream.CopyTo(cryptoStream);

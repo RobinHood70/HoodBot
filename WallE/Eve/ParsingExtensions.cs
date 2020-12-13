@@ -19,6 +19,20 @@
 	/// <remarks>These extensions are made public to allow external classes to use the same methods as are used internally. Note that some of these methods are highly specific, but are nevertheless available here for the sake of simplicity, since multiple modules use them. Most methods will gracefully handle <see langword="null"/> tokens, typically by returning a null result. The parameter nullability indicates which is expected; those methods which expect a non-null token will also note that in the remarks.</remarks>
 	public static class ParsingExtensions
 	{
+		#region Enum Methods
+
+		/// <summary>Gets a series of flag nodes, regardless of format version.</summary>
+		/// <typeparam name="T">The enumeration type. Should normally be inferred.</typeparam>
+		/// <param name="value">The flags to modify.</param>
+		/// <param name="token">The token to examine. (Will be searched for the "case" value.</param>
+		/// <param name="flag">The flag to be added if the "case" value evaluates to "case-sensitive".</param>
+		/// <returns>The modified enumeration value.</returns>
+		public static T AddCaseFlag<T>(this T value, JToken token, T flag)
+			where T : Enum => token == null ? value : string.Equals((string?)token["case"], "case-sensitive", StringComparison.Ordinal)
+				? (T)Enum.ToObject(typeof(T), Convert.ToUInt64(value, CultureInfo.InvariantCulture) | Convert.ToUInt64(flag, CultureInfo.InvariantCulture))
+				: value;
+		#endregion
+
 		#region JToken Methods
 
 		/// <summary>Gets a boolean from the current token, regardless of format version.</summary>

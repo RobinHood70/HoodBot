@@ -41,8 +41,8 @@
 			ThrowNull(input, nameof(input));
 			if (this.SiteVersion < 121)
 			{
-				var modules = new SortedSet<string>();
-				var queryModules = new SortedSet<string>();
+				var modules = new SortedSet<string>(StringComparer.Ordinal);
+				var queryModules = new SortedSet<string>(StringComparer.Ordinal);
 				foreach (var module in input.Modules)
 				{
 					var submodule = module.Split(TextArrays.Plus, 2, StringSplitOptions.None);

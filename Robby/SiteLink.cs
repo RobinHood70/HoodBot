@@ -299,7 +299,7 @@
 					}
 					else
 					{
-						this.SetParameterValue(ParameterType.Upright, value?.ToStringInvariant());
+						this.SetParameterValue(ParameterType.Upright, value.ToStringInvariant());
 					}
 				}
 			}

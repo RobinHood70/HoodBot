@@ -80,14 +80,14 @@ namespace RobinHood70.WallE.Eve.Modules
 			// TODO: Add multiple-error support here (errorformat=raw) using new GetErrors() function.
 			if (result["error"].GetError() is ErrorItem error)
 			{
-				#pragma warning disable SA1513 // Closing brace should be followed by blank line // False hit after closing brace
+#pragma warning disable SA1513 // Closing brace should be followed by blank line // False hit after closing brace
 				throw error.Code switch
 				{
 					"assertbotfailed" or "assertuserfailed" or "assertnameduserfailed" => new StopException(error.Info),
 					"editconflict" => new EditConflictException(),
 					_ => WikiException.General(error.Code, error.Info),
 				};
-				#pragma warning restore SA1513 // Closing brace should be followed by blank line
+#pragma warning restore SA1513 // Closing brace should be followed by blank line
 			}
 
 			if (result["warnings"] is JToken warnings)

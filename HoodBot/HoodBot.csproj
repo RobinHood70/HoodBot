@@ -35,25 +35,21 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Meziantou.Analyzer" Version="1.0.561">
+		<PackageReference Include="Meziantou.Analyzer" Version="1.0.639">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0-preview.8.20407.11" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="5.0.0-preview.8.20407.11" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0-preview.8.20407.11" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0-preview.8.20407.11" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
 		<PackageReference Include="MvvmLightLibsStd10" Version="5.4.1.1" />
-		<PackageReference Include="MySql.Data" Version="8.0.21" />
-		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.205">
+		<PackageReference Include="MySql.Data" Version="8.0.22" />
+		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.312">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0-preview.8.20407.11" />
+		<PackageReference Include="System.Text.Encoding.CodePages" Version="5.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
