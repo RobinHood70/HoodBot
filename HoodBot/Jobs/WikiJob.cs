@@ -1,13 +1,30 @@
-﻿namespace RobinHood70.HoodBot.Jobs.Design
+﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System;
 	using System.Threading;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot;
+	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Loggers;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using static RobinHood70.CommonCode.Globals;
+
+	#region Public Enumerations
+	[Flags]
+	public enum JobTypes
+	{
+		/*
+		Currently only supporting simple Read/Write flags, but could be expanded to distinguish between different types of jobs, for example:
+			* PageEdit (anything that edits pages as opposed to moving them or whatever)
+			* Report (for single-page reports)
+			* User (anything that works only on users or in user space)
+			... etc.
+		*/
+		None = 0,
+		Read = 1,
+		Write = 1 << 1,
+	}
+	#endregion
 
 	public abstract class WikiJob : IMessageSource, ISiteSpecific
 	{

@@ -1,5 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Loggers
 {
+	using RobinHood70.HoodBot.Jobs;
+
 	public abstract class JobLogger
 	{
 		#region Constructors

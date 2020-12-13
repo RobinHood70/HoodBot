@@ -2,7 +2,6 @@
 {
 	using System.Threading;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Jobs.Design;
 
 	public class VoidJob : WikiJob
 	{

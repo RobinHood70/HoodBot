@@ -5,7 +5,7 @@
 	using System.Diagnostics;
 	using System.Globalization;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot;
+	using RobinHood70.HoodBot.Jobs;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;

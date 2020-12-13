@@ -1,10 +1,11 @@
-﻿namespace RobinHood70.HoodBot.Jobs.Design
+﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using RobinHood70.CommonCode;
+	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Loggers;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.Robby;

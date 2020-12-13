@@ -662,7 +662,7 @@
 				else if (this.TemplateReplacements.TryGetValue(templateTitle.PageName, out var customTemplateAction))
 				{
 					var secondAction = customTemplateAction ?? throw new InvalidOperationException();
-					secondAction?.Invoke(page, template);
+					secondAction.Invoke(page, template);
 				}
 			}
 		}

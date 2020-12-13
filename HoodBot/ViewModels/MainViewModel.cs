@@ -11,6 +11,7 @@
 	using GalaSoft.MvvmLight;
 	using GalaSoft.MvvmLight.Command;
 	using RobinHood70.HoodBot;
+	using RobinHood70.HoodBot.Jobs;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Loggers;
 	using RobinHood70.HoodBot.Models;

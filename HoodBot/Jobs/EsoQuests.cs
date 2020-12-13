@@ -6,7 +6,7 @@
 	using System.Diagnostics;
 	using System.Text;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Jobs.Design;
+
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -88,7 +88,7 @@
 			[2] = "Daily"
 		};
 
-		private static readonly Dictionary<Visibility, string> Visibilities = new ()
+		private static readonly Dictionary<Visibility, string> Visibilities = new()
 		{
 			[Visibility.Normal] = string.Empty,
 			[Visibility.Hint] = "hint",
@@ -293,7 +293,7 @@
 
 		private Page NewPage(QuestData quest)
 		{
-			var locs = new SortedSet<string>();
+			var locs = new SortedSet<string>(StringComparer.Ordinal);
 			var mergedStages = this.MergeStages(quest, locs);
 			var journalEntries = new List<string>();
 			foreach (var kvp in mergedStages)

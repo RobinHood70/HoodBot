@@ -1,9 +1,9 @@
-﻿namespace RobinHood70.HoodBot
+﻿namespace RobinHood70.HoodBot.Models
 {
 	using System;
 	using System.Reflection;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Jobs.Design;
+	using RobinHood70.HoodBot.Jobs;
 	using static RobinHood70.CommonCode.Globals;
 
 	public sealed class ConstructorParameter : IEquatable<ConstructorParameter>
