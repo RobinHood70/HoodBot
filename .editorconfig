@@ -9,6 +9,8 @@
 
 # Default severity for analyzer diagnostics - Requires **VS2019 16.5** or later
 dotnet_analyzer_diagnostic.severity = warning
+
+dotnet_diagnostic.CA1309.severity = none
 dotnet_diagnostic.CA1711.severity = none
 dotnet_diagnostic.CA1716.severity = none
 
@@ -27,6 +29,7 @@ dotnet_diagnostic.MA0046.severity = none
 dotnet_diagnostic.MA0048.severity = none
 dotnet_diagnostic.MA0051.severity = none
 
+dotnet_diagnostic.SA0001.severity = none
 dotnet_diagnostic.SA1124.severity = none
 dotnet_diagnostic.SA1407.severity = silent
 dotnet_diagnostic.SA1413.severity = none
@@ -35,9 +38,3 @@ dotnet_diagnostic.SA1515.severity = suggestion
 dotnet_diagnostic.SA1600.severity = none
 dotnet_diagnostic.SA1602.severity = none
 dotnet_diagnostic.SA1633.severity = none
-
-# CA1711: Identifiers should not have incorrect suffix
-dotnet_diagnostic.CA1711.severity = none
-
-# CA1309: Use ordinal string comparison
-dotnet_diagnostic.CA1309.severity = none
