@@ -108,7 +108,7 @@
 						var startParam = entry.FindNumberedIndex(2);
 						Debug.Assert(startParam != -1, "Start parameter not found.");
 						var endParam = factory.ParameterNodeFromParts(FormatDateTime(DateTime.UtcNow));
-						entry.Parameters.Insert(startParam, endParam);
+						entry.Parameters.Insert(startParam + 1, endParam);
 						sender.Text = parser.ToRaw();
 					}
 
