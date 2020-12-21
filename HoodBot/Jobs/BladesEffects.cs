@@ -83,7 +83,7 @@
 
 					var page = new Page(this.Site[UespNamespaces.Blades], pageName)
 					{
-						Text = $"{{Trail|Effects}}{{Minimal}}\n{{Effect Summary\ntype=\nimage=\nsyntax={desc}\n|notrail=1\n}}\n{{Stub|Effect}}"
+						Text = string.Concat("{{Trail|Effects}}{{Minimal}}\n{{Effect Summary\ntype=\nimage=\nsyntax=", desc, "\n|notrail=1\n}}\n{{Stub|Effect}}")
 					};
 
 					this.Pages.Add(page);
