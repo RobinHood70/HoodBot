@@ -206,8 +206,14 @@
 			var retval = new NpcCollection();
 			foreach (var npc in npcs)
 			{
-				ThrowNull(npc.Page, nameof(npc), nameof(npc.Page));
-				if (npc.Page != null)
+				if (npc.Page == null)
+				{
+					if (this.updateMode)
+					{
+						throw ArgumentNull(nameof(npc.Page));
+					}
+				}
+				else
 				{
 					retval.Add(npc);
 				}
