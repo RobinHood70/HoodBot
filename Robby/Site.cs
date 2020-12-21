@@ -1012,9 +1012,10 @@
 		{
 			ThrowNull(input, nameof(input));
 			string? name;
-			if (this.EditingEnabled)
+			var result = this.AbstractionLayer.Login(input);
+			// Disabled because we always need to log in for elevated permissions.
+			// if (this.EditingEnabled)
 			{
-				var result = this.AbstractionLayer.Login(input);
 				if (!string.Equals(result.Result, "Success", StringComparison.OrdinalIgnoreCase))
 				{
 					this.Clear();
@@ -1023,11 +1024,11 @@
 
 				name = result.User;
 			}
-			else
+			/* else
 			{
 				this.AbstractionLayer.Initialize();
 				name = input.UserName;
-			}
+			} */
 
 			this.User = name == null ? null : new User(this, name);
 		}
