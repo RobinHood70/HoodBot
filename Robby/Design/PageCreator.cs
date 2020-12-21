@@ -37,7 +37,7 @@
 
 			if (whatToLoad.HasFlag(PageModules.DeletedRevisions))
 			{
-				propertyInputs.Add(new DeletedRevisionsInput()); // Currently only used to determine if page has previously been deleted.
+				propertyInputs.Add(new DeletedRevisionsInput() { Properties = RevisionsProperties.Flags }); // Currently only used to determine if page has previously been deleted.
 			}
 
 			if (whatToLoad.HasFlag(PageModules.FileInfo))
