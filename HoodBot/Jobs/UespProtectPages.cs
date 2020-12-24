@@ -535,7 +535,8 @@
 		private TitleCollection LoadPageNames(ICollection<int> spacesToLoad)
 		{
 			var titlesToProtect = new TitleCollection(this.Site);
-			foreach (var ns in MetaNamespace.Namespaces)
+			var uespNamespaceList = new UespNamespaceList(this.Site);
+			foreach (var ns in uespNamespaceList)
 			{
 				var pageProtection = new PageProtection(
 					"Gamespace Pages",
@@ -547,7 +548,7 @@
 					false,
 					"main gamespace or similar page");
 
-				titlesToProtect.Add(new ProtectedTitle(ns.Value.MainPage, pageProtection));
+				titlesToProtect.Add(new ProtectedTitle(ns.MainPage, pageProtection));
 			}
 
 			this.ProgressMaximum = spacesToLoad.Count;
