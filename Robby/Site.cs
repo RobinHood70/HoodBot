@@ -1012,24 +1012,16 @@
 		{
 			ThrowNull(input, nameof(input));
 			string? name;
+
+			// Always log in in case permissions are needed.
 			var result = this.AbstractionLayer.Login(input);
-			// Disabled because we always need to log in for elevated permissions.
-			// if (this.EditingEnabled)
+			if (!string.Equals(result.Result, "Success", StringComparison.OrdinalIgnoreCase))
 			{
-				if (!string.Equals(result.Result, "Success", StringComparison.OrdinalIgnoreCase))
-				{
-					this.Clear();
-					throw new UnauthorizedAccessException(CurrentCulture(Resources.LoginFailed, result.Reason));
-				}
-
-				name = result.User;
+				this.Clear();
+				throw new UnauthorizedAccessException(CurrentCulture(Resources.LoginFailed, result.Reason));
 			}
-			/* else
-			{
-				this.AbstractionLayer.Initialize();
-				name = input.UserName;
-			} */
 
+			name = result.User;
 			this.User = name == null ? null : new User(this, name);
 		}
 
