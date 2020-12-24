@@ -4,6 +4,7 @@
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
+	using RobinHood70.WikiCommon;
 	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Read-only Namespace dictionary that can be referenced by ID and all valid names for the namespace.</summary>
@@ -97,10 +98,12 @@
 
 		/// <summary>Gets the element with the specified key.</summary>
 		/// <param name="key">Any valid name for the namespace.</param>
-		/// <returns>The element with the specified key. If an element with the specified key is not found, an exception is thrown.</returns>
+		/// <returns>The element with the specified key. If an element with the specified key is not found, it will be tried again after HTML decoding the key and normalizing space characters. If that also fails, an exception is thrown.</returns>
 		/// <exception cref="ArgumentNullException">The key was null.</exception>
 		/// <exception cref="KeyNotFoundException">An element with the specified key does not exist in the collection.</exception>
-		public Namespace this[string key] => this.NamesDictionary[key];
+		public Namespace this[string key] => this.NamesDictionary.TryGetValue(key, out var retval)
+			? retval
+			: this.NamesDictionary[WikiTextUtilities.DecodeAndNormalize(key)];
 		#endregion
 
 		#region Public Methods
@@ -130,7 +133,9 @@
 		/// <param name="name">Any of the names or aliases of the namespace to locate in the collection.</param>
 		/// <returns>True if the collection contains the relevant namespace.</returns>
 		/// <exception cref="ArgumentNullException">The name is null.</exception>
-		public bool Contains(string name) => this.NamesDictionary.ContainsKey(name);
+		public bool Contains(string name) =>
+			this.NamesDictionary.ContainsKey(name) ||
+			this.NamesDictionary.ContainsKey(WikiTextUtilities.DecodeAndNormalize(name));
 
 		/// <summary>Returns an enumerator that iterates through the collection.</summary>
 		/// <returns>An enumerator that can be used to iterate through the collection.</returns>
@@ -151,7 +156,9 @@
 		/// <param name="value">The namespace object, if found; otherwise, null.</param>
 		/// <returns>True if the collection contains the desired namespace.</returns>
 		/// <exception cref="ArgumentNullException">The name is null.</exception>
-		public bool TryGetValue(string name, [MaybeNullWhen(false)] out Namespace value) => this.NamesDictionary.TryGetValue(name, out value!);
+		public bool TryGetValue(string name, [MaybeNullWhen(false)] out Namespace value) =>
+			this.NamesDictionary.TryGetValue(name, out value) ||
+			this.NamesDictionary.TryGetValue(WikiTextUtilities.DecodeAndNormalize(name), out value);
 
 		/// <summary>Returns the namespace associated with the specified ID.</summary>
 		/// <param name="id">The namespace ID to search for.</param>
@@ -161,7 +168,7 @@
 		/// <summary>Returns the namespace associated with the specified name.</summary>
 		/// <param name="name">Any of the names or aliases of the namespace to search for.</param>
 		/// <returns>The requested value, or null if not found.</returns>
-		public Namespace? ValueOrDefault(string? name) => name != null && this.NamesDictionary.TryGetValue(name, out var value) ? value : default;
+		public Namespace? ValueOrDefault(string? name) => name != null && this.TryGetValue(name, out var value) ? value : default;
 		#endregion
 	}
 }
