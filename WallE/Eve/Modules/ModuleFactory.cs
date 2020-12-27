@@ -65,7 +65,7 @@
 			where T : IGeneratorInput
 		{
 			ThrowNull(generatorFactoryMethod, nameof(generatorFactoryMethod));
-			this.generators.Add(typeof(T), generatorFactoryMethod);
+			this.generators[typeof(T)] = generatorFactoryMethod;
 
 			return this;
 		}
@@ -78,7 +78,7 @@
 			where T : IPropertyInput
 		{
 			ThrowNull(propertyFactoryMethod, nameof(propertyFactoryMethod));
-			this.properties.Add(typeof(T), propertyFactoryMethod);
+			this.properties[typeof(T)] = propertyFactoryMethod;
 
 			return this;
 		}
