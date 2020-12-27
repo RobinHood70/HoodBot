@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.Robby.Design
 {
-	using System.Diagnostics;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.CommonCode.Globals;
@@ -37,18 +36,18 @@
 			// This routine very roughly follows the logic of MediaWikiTitleCodec.splitTitleString() but skips much of the error checking and rarely encountered sanitization, which is left to the server.
 			ThrowNull(site, nameof(site));
 			ThrowNull(pageName, nameof(pageName));
-
-			static (string? Key, string PageName, bool Forced) SplitPageName(string pageName)
+			static (string Key, string PageName, bool Forced) SplitPageName(string pageName)
 			{
-				var forced = false;
-				if (pageName.Length > 0 && pageName[0] == ':')
+				var forced = pageName.Length > 0 && pageName[0] == ':';
+				if (forced)
 				{
-					forced = true;
 					pageName = pageName[1..].TrimStart();
 				}
 
 				var split = pageName.Split(TextArrays.Colon, 2);
-				return split.Length == 2 ? (split[0].TrimEnd(), split[1].TrimStart(), forced) : (null, pageName, forced);
+				return split.Length == 2
+					? (split[0].TrimEnd(), split[1].TrimStart(), forced)
+					: (string.Empty, pageName, forced);
 			}
 
 			if (fullParsing)
@@ -61,53 +60,53 @@
 			this.Namespace = site[defaultNamespace];
 
 			var (key, remaining, forced) = SplitPageName(pageName);
-			if (forced)
-			{
-				this.Namespace = site[MediaWikiNamespaces.Main];
-				this.ForcedNamespaceLink = true;
-			}
-
-			pageName = remaining;
 			var isMainPage = false;
-			if (key != null)
+			if (!forced && key.Length == 0)
 			{
-				if (site.Namespaces.ValueOrDefault(key) is Namespace ns)
+				this.ForcedNamespaceLink = true;
+				pageName = remaining;
+			}
+			else if (site.Namespaces.ValueOrDefault(key) is Namespace ns)
+			{
+				this.Namespace = ns;
+				this.ForcedNamespaceLink = forced;
+				pageName = remaining;
+			}
+			else if (site.InterwikiMap != null && site.InterwikiMap.TryGetValue(key.ToLower(site.Culture), out var iw))
+			{
+				this.Interwiki = iw;
+				this.ForcedInterwikiLink = forced;
+				if (iw.LocalWiki)
 				{
-					this.Namespace = ns;
-				}
-				else if (site.InterwikiMap != null && site.InterwikiMap.TryGetValue(key, out var iw))
-				{
-					this.Interwiki = iw;
-					this.ForcedNamespaceLink = false;
-					this.ForcedInterwikiLink = forced;
-					if (iw.LocalWiki)
+					if (remaining.Length == 0 && site.MainPage is FullTitle mp)
 					{
-						if (pageName.Length == 0 && site.MainPage is FullTitle mp)
+						this.Interwiki = mp.Interwiki ?? iw;
+						this.Namespace = mp.Namespace;
+						pageName = mp.PageName;
+						this.Fragment = mp.Fragment;
+						isMainPage = true;
+					}
+					else
+					{
+						var before = remaining;
+						(key, remaining, forced) = SplitPageName(remaining);
+						if (forced)
 						{
-							this.Interwiki = mp.Interwiki ?? iw;
-							this.Namespace = mp.Namespace;
-							pageName = mp.PageName;
-							this.Fragment = mp.Fragment;
-							isMainPage = true;
+							// Second colon in a row. MediaWiki invalidates this, but for now, this is designed to always succeed, so return page name in main space with leading colon.
+							this.Namespace = site[MediaWikiNamespaces.Main];
+							this.ForcedNamespaceLink = false;
+							pageName = before;
 						}
-						else
+						else if (site.Namespaces.ValueOrDefault(key) is Namespace ns2)
 						{
-							(key, remaining, forced) = SplitPageName(pageName);
-							Debug.WriteLine($"{pageName} => {key}, {remaining}, {forced}");
-							if (forced)
-							{
-								this.Namespace = site[MediaWikiNamespaces.Main];
-								this.ForcedNamespaceLink = true;
-								pageName = pageName[1..];
-							}
-							else if (site.Namespaces.ValueOrDefault(key) is Namespace ns2)
-							{
-								this.Namespace = ns2;
-								pageName = remaining;
-								Debug.WriteLine($"{this.Namespace}, {pageName}");
-							}
+							this.Namespace = ns2;
+							pageName = remaining;
 						}
 					}
+				}
+				else
+				{
+					pageName = remaining;
 				}
 			}
 
