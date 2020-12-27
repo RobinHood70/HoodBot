@@ -91,7 +91,7 @@
 		private static readonly List<SiteInfoInterwikiMap> SiteInfoInterwikiMap = new List<SiteInfoInterwikiMap>
 		{
 			new SiteInfoInterwikiMap("en", "file://Test.txt/$1", null, InterwikiMapFlags.Local | InterwikiMapFlags.LocalInterwiki, "English", null, null, null),
-			new SiteInfoInterwikiMap("MediaWikiWiki", "https://www.mediawiki.org/wiki/$1", null, InterwikiMapFlags.None, null, null, null, null),
+			new SiteInfoInterwikiMap("mediawikiwiki", "https://www.mediawiki.org/wiki/$1", null, InterwikiMapFlags.None, null, null, null, null),
 		};
 		#endregion
 
@@ -148,7 +148,6 @@
 		/// <inheritdoc/>
 		public void AddWarning(string code, string info)
 		{
-			return;
 		}
 
 		/// <inheritdoc/>
@@ -205,7 +204,6 @@
 		/// <inheritdoc/>
 		public void ClearWarnings()
 		{
-			return;
 		}
 
 		/// <inheritdoc/>
@@ -223,7 +221,6 @@
 		/// <inheritdoc/>
 		public void Download(DownloadInput input)
 		{
-			return;
 		}
 
 		/// <inheritdoc/>
@@ -290,7 +287,6 @@
 			this.AllSiteInfo = siteInfo;
 			this.CurrentUserInfo ??= GetUser(0, "192.0.2.1");
 			this.OnInitialized();
-			return;
 		}
 
 		/// <inheritdoc/>
@@ -324,7 +320,6 @@
 		/// <inheritdoc/>
 		public void Logout()
 		{
-			return;
 		}
 
 		/// <inheritdoc/>
@@ -342,7 +337,6 @@
 		/// <inheritdoc/>
 		public void Options(OptionsInput input)
 		{
-			return;
 		}
 
 		/// <inheritdoc/>
