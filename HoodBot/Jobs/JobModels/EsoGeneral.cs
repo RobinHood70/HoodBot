@@ -5,10 +5,7 @@
 	using System.Data;
 	using System.Diagnostics;
 	using System.Globalization;
-	using System.IO;
-	using System.Reflection;
 	using System.Text.RegularExpressions;
-	using Microsoft.Extensions.Configuration;
 	using MySql.Data.MySqlClient;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
@@ -38,28 +35,11 @@
 
 		#region Fields
 		private static readonly Regex BonusFinder = new Regex(@"\s*Current [Bb]onus:.*?\.", RegexOptions.None, DefaultRegexTimeout);
-		private static string? esoLogConnectionString; // = ConfigurationManager.ConnectionStrings["EsoLog"].ConnectionString;
 		private static string? patchVersion;
 		#endregion
 
 		#region Public Properties
-		public static string EsoLogConnectionString
-		{
-			get
-			{
-				if (esoLogConnectionString == null)
-				{
-					var folder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-					var builder = new ConfigurationBuilder()
-						.SetBasePath(folder)
-						.AddJsonFile("connectionStrings.json", false, false);
-					var config = builder.Build();
-					esoLogConnectionString = config.GetConnectionString("EsoLog");
-				}
-
-				return esoLogConnectionString;
-			}
-		}
+		public static string EsoLogConnectionString { get; } = App.GetConnectionString("EsoLog");
 
 		public static Dictionary<int, string> MechanicNames { get; } = new Dictionary<int, string>
 		{
