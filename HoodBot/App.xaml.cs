@@ -29,6 +29,11 @@
 
 		public static AppSettings AppSettings { get; } = Settings.Load<AppSettings>();
 
+		public static IConfigurationRoot ConfigurationRoot { get; } = new ConfigurationBuilder()
+			.SetBasePath(AppFolder)
+			.AddJsonFile("connectionStrings.json", false, false)
+			.Build();
+
 		public static ViewModelLocator Locator => ViewModelLocator.Instance;
 
 		public static IServiceProvider ServiceProvider { get; } = AppHost.Services;
@@ -39,6 +44,7 @@
 		#endregion
 
 		#region Public Static Methods
+		public static string GetConnectionString(string name) => ConfigurationRoot.GetConnectionString(name);
 
 		// Ensure everything is updated on the UI end before continuing.
 		public static void WpfYield() => Current.Dispatcher.Invoke(new Action(() => { }), DispatcherPriority.ContextIdle, null);
