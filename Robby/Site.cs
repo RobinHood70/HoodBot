@@ -297,6 +297,11 @@
 		/// <returns>A full Uri to the article.</returns>
 		public Uri GetArticlePath(string articleName, string? fragment) => this.GetArticlePath(this.BaseArticlePath, articleName, fragment);
 
+		/// <summary>Determines whether the title provided is considered a discussion page on this site.</summary>
+		/// <param name="title">The title to check.</param>
+		/// <returns><see langword="true"/> if the title represents a discussion page; otherwise, <see langword="false"/>.</returns>
+		public bool IsDiscussionPage(ISimpleTitle title) => title.Namespace.IsTalkSpace || this.DiscussionPages.Contains(title);
+
 		/// <summary>Gets all active blocks.</summary>
 		/// <returns>All active blocks.</returns>
 		public IReadOnlyList<Block> LoadBlocks() => this.LoadBlocks(new BlocksInput());
