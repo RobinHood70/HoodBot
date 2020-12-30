@@ -211,11 +211,13 @@
 #if DEBUG
 		private static void Site_Changing(Site sender, ChangeArgs eventArgs)
 		{
-			Debug.WriteLine(eventArgs.MethodName);
+			Debug.Write($"{eventArgs.MethodName} (sender: {eventArgs.RealSender}");
 			foreach (var parameter in eventArgs.Parameters)
 			{
-				Debug.WriteLine($"  {parameter.Key} = {parameter.Value}");
+				Debug.Write($", {parameter.Key}: {parameter.Value}");
 			}
+
+			Debug.WriteLine(")");
 		}
 
 		private static string SiteName(IWikiAbstractionLayer sender) => sender.AllSiteInfo?.General?.SiteName ?? "Site-Agnostic";
