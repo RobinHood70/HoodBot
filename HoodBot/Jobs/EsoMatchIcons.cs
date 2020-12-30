@@ -5,7 +5,7 @@
 	using System.IO;
 	using System.Text;
 	using RobinHood70.CommonCode;
-
+	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -186,7 +186,7 @@
 
 		private void LoadQueryData(KeyValuePair<string, string> query)
 		{
-			foreach (var row in EsoGeneral.RunQuery(query.Value))
+			foreach (var row in Database.RunQuery(EsoGeneral.EsoLogConnectionString, query.Value))
 			{
 				long id;
 				var idType = row.GetDataTypeName(0);

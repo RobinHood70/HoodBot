@@ -2,12 +2,12 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Data;
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.Text.RegularExpressions;
 	using MySql.Data.MySqlClient;
 	using RobinHood70.CommonCode;
+	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -106,7 +106,7 @@
 			{
 				try
 				{
-					foreach (var row in RunQuery(query))
+					foreach (var row in Database.RunQuery(EsoLogConnectionString, query))
 					{
 						var npcId = (long)row["npcId"];
 						var location = (string)row["zone"];
@@ -147,7 +147,7 @@
 		{
 			var retval = new NpcCollection();
 			var nameClash = new HashSet<string>(StringComparer.Ordinal);
-			foreach (var row in RunQuery("SELECT id, name, gender, difficulty, ppDifficulty, ppClass, reaction FROM uesp_esolog.npc WHERE level != -1"))
+			foreach (var row in Database.RunQuery(EsoLogConnectionString, "SELECT id, name, gender, difficulty, ppDifficulty, ppClass, reaction FROM uesp_esolog.npc WHERE level != -1"))
 			{
 				var name = (string)row["name"];
 				if (!ColourCode.IsMatch(name) && !TrailingDigits.IsMatch(name))
@@ -275,18 +275,6 @@
 						Debug.WriteLine($"Location {key} is ambiguous for NPC {npc.Name}");
 					}
 				}
-			}
-		}
-
-		public static IEnumerable<IDataRecord> RunQuery(string query)
-		{
-			using var connection = new MySqlConnection(EsoLogConnectionString);
-			connection.Open();
-			using var command = new MySqlCommand(query, connection);
-			using var reader = command.ExecuteReader();
-			while (reader.Read())
-			{
-				yield return reader;
 			}
 		}
 
