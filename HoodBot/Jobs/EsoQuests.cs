@@ -6,7 +6,7 @@
 	using System.Diagnostics;
 	using System.Text;
 	using RobinHood70.CommonCode;
-
+	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -184,7 +184,7 @@
 		#region Private Static Methods
 		private static IEnumerable<QuestData> GetDBQuests()
 		{
-			foreach (var row in EsoGeneral.RunQuery(QuestQuery))
+			foreach (var row in Database.RunQuery(EsoGeneral.EsoLogConnectionString, QuestQuery))
 			{
 				yield return new QuestData(row);
 			}
@@ -251,7 +251,7 @@
 
 			var whereText = string.Join(",", questNames.Keys);
 			this.StatusWriteLine("Getting stage data");
-			foreach (var row in EsoGeneral.RunQuery(StageQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
+			foreach (var row in Database.RunQuery(EsoGeneral.EsoLogConnectionString, StageQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
 			{
 				var stage = new Stage(row);
 				var questId = (long)row["questId"];
@@ -262,7 +262,7 @@
 			}
 
 			this.StatusWriteLine("Getting condition data");
-			foreach (var row in EsoGeneral.RunQuery(ConditionQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
+			foreach (var row in Database.RunQuery(EsoGeneral.EsoLogConnectionString, ConditionQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
 			{
 				var condition = new Condition(row);
 				var questId = (long)row["questId"];
@@ -276,7 +276,7 @@
 			}
 
 			this.StatusWriteLine("Getting rewards data");
-			foreach (var row in EsoGeneral.RunQuery(RewardsQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
+			foreach (var row in Database.RunQuery(EsoGeneral.EsoLogConnectionString, RewardsQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
 			{
 				var reward = new Reward(row);
 				var questId = (long)row["questId"];
