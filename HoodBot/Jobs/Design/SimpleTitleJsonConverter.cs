@@ -2,7 +2,6 @@
 {
 	using System;
 	using Newtonsoft.Json;
-	using Newtonsoft.Json.Linq;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using static RobinHood70.CommonCode.Globals;
@@ -17,14 +16,15 @@
 		{
 			ThrowNull(reader, nameof(reader));
 			ThrowNull(reader.Value, nameof(reader), nameof(reader.Value));
-			return Title.FromName(this.site, (string)reader.Value);
+			var title = (string)reader.Value;
+			return Title.FromName(this.site, title);
 		}
 
 		public override void WriteJson(JsonWriter writer, ISimpleTitle? value, JsonSerializer serializer)
 		{
 			ThrowNull(writer, nameof(writer));
 			ThrowNull(value, nameof(value));
-			JToken.FromObject(value.ToString() ?? string.Empty).WriteTo(writer);
+			writer.WriteValue(value.ToString() ?? string.Empty);
 		}
 	}
 }
