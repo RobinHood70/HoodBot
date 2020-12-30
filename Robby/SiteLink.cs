@@ -430,8 +430,15 @@
 				.Append(this.ForcedInterwikiLink ? ":" : string.Empty)
 				.Append(this.Interwiki == null ? string.Empty : this.Interwiki.Prefix + ':')
 				.Append(this.ForcedNamespaceLink ? ":" : string.Empty)
-				.Append(this.FullPageName)
-				.Append(this.TitleWhitespaceAfter);
+				.Append(this.FullPageName);
+			if (this.Fragment != null)
+			{
+				sb
+					.Append('#')
+					.Append(this.Fragment);
+			}
+
+			sb.Append(this.TitleWhitespaceAfter);
 			return sb.ToString();
 		}
 
@@ -486,10 +493,29 @@
 		/// <summary>Creates a new copy of the SiteLink with a different title.</summary>
 		/// <param name="title">The title to change to.</param>
 		/// <returns>A new copy of the SiteLink with the altered title.</returns>
+		/// <remarks>Interwiki and Fragment will remain unaffected by the change. If those should be updated to null, use <see cref="With(IFullTitle)"/>.</remarks>
 		public SiteLink With(ISimpleTitle title)
 		{
 			ThrowNull(title, nameof(title));
-			return this.With(null, title.Namespace, title.PageName, null);
+			var retval = new SiteLink(title)
+			{
+				Coerced = this.Coerced,
+				ForcedInterwikiLink = this.ForcedInterwikiLink,
+				ForcedNamespaceLink = this.ForcedNamespaceLink,
+				Fragment = this.Fragment,
+				Interwiki = this.Interwiki,
+				OriginalLink = this.OriginalLink,
+				ParametersDropped = this.ParametersDropped,
+				TitleWhitespaceAfter = this.TitleWhitespaceAfter,
+				TitleWhitespaceBefore = this.TitleWhitespaceBefore
+			};
+
+			foreach (var parameter in this.Parameters)
+			{
+				retval.Parameters.Add(parameter.Key, parameter.Value);
+			}
+
+			return retval;
 		}
 
 		/// <summary>Creates a new copy of the SiteLink with a different title.</summary>
@@ -503,6 +529,7 @@
 				Coerced = this.Coerced,
 				ForcedInterwikiLink = this.ForcedInterwikiLink,
 				ForcedNamespaceLink = this.ForcedNamespaceLink,
+				OriginalLink = this.OriginalLink,
 				ParametersDropped = this.ParametersDropped,
 				TitleWhitespaceAfter = this.TitleWhitespaceAfter,
 				TitleWhitespaceBefore = this.TitleWhitespaceBefore
@@ -520,7 +547,13 @@
 		/// <param name="ns">The namespace to change to.</param>
 		/// <param name="pageName">The page name to change to.</param>
 		/// <returns>A new copy of the SiteLink with the altered title.</returns>
-		public SiteLink With(Namespace ns, string pageName) => this.With(null, ns, pageName, null);
+		/// <remarks>Interwiki and Fragment will remain unaffected by the change. If those should be updated to null, use <see cref="With(InterwikiEntry?, Namespace, string, string?)"/>.</remarks>
+		public SiteLink With(Namespace ns, string pageName)
+		{
+			ThrowNull(ns, nameof(ns));
+			ThrowNull(pageName, nameof(pageName));
+			return this.With(new Title(ns, pageName));
+		}
 
 		/// <summary>Creates a new copy of the SiteLink with a different title.</summary>
 		/// <param name="iw">The interwiki to change to.</param>
