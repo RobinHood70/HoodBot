@@ -68,11 +68,16 @@
 				ThrowNull(result, nameof(result));
 				this.logAction = logAction;
 
-				var doBugFix = false;
+				bool doBugFix;
 				if (result["params"] is JToken parms)
 				{
 					this.parms = parms;
 					doBugFix = true;
+				}
+				else
+				{
+					this.parms = result;
+					doBugFix = false;
 				}
 
 				if (logType != null && result[logType] is JToken logParms)
@@ -80,7 +85,6 @@
 					this.parms = logParms;
 				}
 
-				this.parms = result;
 				switch (logType)
 				{
 					case "block":
@@ -230,8 +234,8 @@
 			private void ExtraDataMove()
 			{
 				this.Result.Add("suppressredirect", this.parms["suppressredirect"] != null);
-				this.Result.Add("ns", (int?)this.parms["new_ns"]);
-				this.Result.Add("title", (string?)this.parms["new_title"]);
+				this.Result.Add("ns", (int?)(this.parms["target_ns"] ?? this.parms["new_ns"])); // MoveLog ?? RC
+				this.Result.Add("title", (string?)(this.parms["target_title"] ?? this.parms["new_title"]));
 			}
 
 			private void ExtraDataNewUsers()
