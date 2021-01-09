@@ -43,6 +43,7 @@
 			ThrowNull(info, nameof(info));
 			this.logInfo = info;
 			this.start = DateTime.UtcNow;
+			this.end = null;
 			this.UpdateLogPage("Job Started", info.Title);
 		}
 
@@ -51,6 +52,8 @@
 			ThrowNull(this.logInfo, nameof(PageJobLogger), nameof(this.logInfo));
 			this.end = DateTime.UtcNow;
 			this.UpdateLogPage("Job Finished", "None");
+			this.start = null;
+			this.end = null;
 		}
 		#endregion
 
