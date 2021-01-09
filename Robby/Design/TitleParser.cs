@@ -162,5 +162,20 @@
 		/// <inheritdoc/>
 		public string PageName { get; }
 		#endregion
+
+		#region Public Override Methods
+
+		/// <summary>Returns a <see cref="string" /> that represents this title.</summary>
+		/// <returns>A <see cref="string" /> that represents this title.</returns>
+		public override string ToString()
+		{
+			var iwColon = this.ForcedInterwikiLink ? ":" : string.Empty;
+			var interwiki = this.Interwiki == null ? string.Empty : this.Interwiki.Prefix + ':';
+			var nsColon = this.ForcedNamespaceLink ? ":" : string.Empty;
+			var fragment = this.Fragment == null ? string.Empty : '#' + this.Fragment;
+
+			return iwColon + interwiki + nsColon + this.FullPageName + fragment;
+		}
+		#endregion
 	}
 }
