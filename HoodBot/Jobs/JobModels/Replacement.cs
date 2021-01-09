@@ -3,7 +3,6 @@
 	using System;
 	using Newtonsoft.Json;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 	using static RobinHood70.CommonCode.Globals;
 
 	[Flags]
@@ -14,9 +13,10 @@
 		Edit = 1 << 1,
 		Propose = 1 << 2,
 		Skip = 1 << 3,
+		UpdateLinks = 1 << 4,
 	}
 
-	public sealed class Replacement : IComparable<Replacement>, IEquatable<Replacement>
+	public sealed class Replacement : IEquatable<Replacement>
 	{
 		#region Constructors
 		public Replacement(Site site, string from, string to)
@@ -29,12 +29,6 @@
 		{
 			ThrowNull(from, nameof(from));
 			ThrowNull(to, nameof(to));
-
-			if (from == to)
-			{
-				throw new ArgumentException($"From and to pages cannot be the same: {from.FullPageName} == {to.FullPageName}", $"{nameof(from)}, {nameof(to)}");
-			}
-
 			this.From = from;
 			this.To = to;
 		}
@@ -56,28 +50,8 @@
 		public Page? ToPage { get; set; }
 		#endregion
 
-		#region Operators
-		public static bool operator ==(Replacement? left, Replacement? right) => left is null ? right is null : left.Equals(right);
-
-		public static bool operator !=(Replacement? left, Replacement? right) => !(left == right);
-
-		public static bool operator <(Replacement? left, Replacement? right) => left is null ? !(right is null) : left.CompareTo(right) < 0;
-
-		public static bool operator <=(Replacement? left, Replacement? right) => left is null || left.CompareTo(right) <= 0;
-
-		public static bool operator >(Replacement? left, Replacement? right) => !(left is null) && left.CompareTo(right) > 0;
-
-		public static bool operator >=(Replacement? left, Replacement? right) => left is null ? right is null : left.CompareTo(right) >= 0;
-		#endregion
-
 		#region Public Methods
-		public int CompareTo(Replacement? other)
-		{
-			ThrowNull(other, nameof(other));
-			return SimpleTitleComparer.Instance.Compare(this.From, other.From);
-		}
-
-		public bool Equals(Replacement? other) => !(other is null) && this.From == other.From; // Nothing else is checked for equality, as multiple values for the same From are invalid.
+		public bool Equals(Replacement? other) => !(other is null) && this.From == other.From && this.To == other.To;
 		#endregion
 
 		#region Public Override Methods
