@@ -157,7 +157,7 @@
 		public IReadOnlyCollection<Title> DisambiguationTemplates => this.disambiguationTemplates ?? this.LoadDisambiguationTemplates();
 
 		/// <summary>Gets a list of pages that function as talk pages, but are located outside of traditional Talk spaces.</summary>
-		public IReadOnlyCollection<Title> DiscussionPages => this.discussionPages ?? this.LoadDiscussionPages();
+		public IReadOnlyCollection<Title> DiscussionPages => this.discussionPages ??= this.LoadDiscussionPages();
 
 		/// <summary>Gets a value indicating whether the Disambiguator extension is available.</summary>
 		/// <value><see langword="true"/> if the Disambiguator extension is available; otherwise, <see langword="false"/>.</value>
