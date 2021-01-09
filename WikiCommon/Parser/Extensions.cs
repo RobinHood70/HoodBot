@@ -4,12 +4,18 @@
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Globalization;
+	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Class Extensions.</summary>
 	public static class Extensions
 	{
+		#region Fields
+		private static readonly Regex LeadingSpace = new Regex(@"\A\s*", RegexOptions.None, DefaultRegexTimeout);
+		private static readonly Regex TrailingSpace = new Regex(@"\s*\Z", RegexOptions.None, DefaultRegexTimeout);
+		#endregion
+
 		#region IBacklink Methods
 
 		/// <summary>Parses the title and returns the trimmed value.</summary>
@@ -104,10 +110,15 @@
 		public static void SetValue(this IParameterNode parameter, IEnumerable<IWikiNode>? value)
 		{
 			ThrowNull(parameter, nameof(parameter));
+			var old = parameter.Value.ToValue();
+			var leading = LeadingSpace.Match(old).Value;
+			var trailing = TrailingSpace.Match(old).Value;
 			parameter.Value.Clear();
 			if (value != null)
 			{
+				parameter.Value.AddText(leading);
 				parameter.Value.AddRange(value);
+				parameter.Value.AddText(trailing);
 			}
 		}
 		#endregion
@@ -349,7 +360,7 @@
 			var anonIndex = 0;
 			foreach (var parameter in template.Parameters)
 			{
-				var name = parameter.Name?.ToValue() ?? (++anonIndex).ToStringInvariant();
+				var name = parameter.Name?.ToValue().Trim() ?? (++anonIndex).ToStringInvariant();
 				yield return (name, parameter);
 			}
 		}
@@ -480,6 +491,19 @@
 			}
 
 			return retval;
+		}
+
+		/// <summary>Sets a new Title value. preserving whitespace.</summary>
+		/// <param name="template">The template.</param>
+		/// <param name="newTitle">The new title.</param>
+		public static void SetTitle(this ITemplateNode template, string newTitle)
+		{
+			var old = template.Title.ToValue();
+			var leading = LeadingSpace.Match(old).Value;
+			var trailing = TrailingSpace.Match(old).Value;
+
+			template.Title.Clear();
+			template.Title.AddText(leading + newTitle + trailing);
 		}
 
 		/// <summary>Sorts parameters in the order specified.</summary>
