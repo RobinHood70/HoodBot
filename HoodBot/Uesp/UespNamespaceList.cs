@@ -6,6 +6,7 @@
 	using RobinHood70.Robby;
 	using static RobinHood70.CommonCode.Globals;
 
+	// TODO: Expand to add all namespaces and allow all namespace names (including aliases) as a lookup value.
 	public class UespNamespaceList : KeyedCollection<string, UespNamespace>
 	{
 		#region Constructors
