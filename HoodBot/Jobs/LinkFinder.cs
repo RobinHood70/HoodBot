@@ -1,5 +1,8 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System;
+	using System.Collections.Generic;
+	using System.Diagnostics;
 	using RobinHood70.CommonCode;
 
 	using RobinHood70.Robby;
@@ -11,8 +14,8 @@
 	public class LinkFinder : ParsedPageJob
 	{
 		#region Fields
-		private readonly IFullTitle title;
-		private readonly TitleCollection results;
+		private readonly Title search;
+		private readonly IDictionary<string, TitleCollection> results = new SortedDictionary<string, TitleCollection>(StringComparer.Ordinal);
 		#endregion
 
 		#region Constructors
@@ -23,8 +26,7 @@
 		{
 			ThrowNull(search, nameof(search));
 			this.Pages.SetLimitations(LimitationType.None);
-			this.results = new TitleCollection(this.Site);
-			this.title = FullTitle.FromName(this.Site, search);
+			this.search = Title.FromName(this.Site, search);
 			this.Logger = null;
 		}
 		#endregion
@@ -37,25 +39,40 @@
 		protected override void Main()
 		{
 			base.Main();
+			Debug.WriteLine(this.results.Count);
 			if (this.results.Count > 0)
 			{
-				this.results.Sort();
-				this.WriteLine($"Pages linking to <nowiki>[[{this.title}]]</nowiki>:");
+				this.WriteLine($"Pages linking to {this.search}");
 				foreach (var result in this.results)
 				{
-					this.WriteLine($"* {result.AsLink(false)}");
+					result.Value.Sort();
+					this.WriteLine($"* {result.Key}:");
+					foreach (var title in result.Value)
+					{
+						this.WriteLine($"** {title.AsLink(false)}");
+					}
+
+					this.WriteLine();
 				}
 			}
 		}
 
-		protected override void LoadPages() => this.Pages.GetBacklinks(this.title.FullPageName, BacklinksTypes.Backlinks | BacklinksTypes.ImageUsage, false, Filter.Any);
+		protected override void LoadPages() => this.Pages.GetBacklinks(this.search.FullPageName, BacklinksTypes.Backlinks | BacklinksTypes.ImageUsage, false, Filter.Any);
 
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
 			ThrowNull(parsedPage, nameof(parsedPage));
-			if (parsedPage.FindLink(this.title) != null)
+			foreach (var link in parsedPage.FindLinks(this.search))
 			{
-				this.results.Add(parsedPage.Context);
+				// var textTitle = link.Title.ToValue();
+				var textTitle = FullTitle.FromBacklinkNode(this.Site, link).ToString();
+				if (!this.results.TryGetValue(textTitle, out var entries))
+				{
+					entries = new TitleCollection(this.Site);
+					this.results.Add(textTitle, entries);
+				}
+
+				entries.Add(parsedPage.Context);
 			}
 		}
 		#endregion
