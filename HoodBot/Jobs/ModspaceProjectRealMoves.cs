@@ -140,11 +140,6 @@
 		#region Private Methods
 		private void AddCategories()
 		{
-			/* var client = ((WikiAbstractionLayer)this.Site.AbstractionLayer).Client;
-			var devWal = new WikiAbstractionLayer(client, new Uri("https://dev.uesp.net/w/api.php"));
-			var dev = new UespSite(devWal);
-			devWal.Initialize();
-			var uespNamespaceList = new UespNamespaceList(dev); */
 			var uespNamespaceList = new UespNamespaceList(this.Site);
 			var nsMap = new List<(string, UespNamespace)>()
 			{
@@ -165,7 +160,7 @@
 				("Tes3Mod", uespNamespaceList["Morrowind Mod"]),
 				("Tes4Mod", uespNamespaceList["Oblivion Mod"]),
 				("Tes5Mod", uespNamespaceList["Skyrim Mod"]),
-				("ESOMod", uespNamespaceList["ESO Mod"]),
+				("ESOMod", uespNamespaceList["Online Mod"]),
 			};
 
 			var allCats = new TitleCollection(this.Site);
@@ -175,6 +170,7 @@
 					!string.Equals(oldCategory, newNamespace.Category, StringComparison.Ordinal))
 				{
 					allCats.GetCategories(oldCategory);
+					allCats.GetNamespace(UespNamespaces.Category, Filter.Any, oldCategory);
 				}
 			}
 
@@ -211,9 +207,7 @@
 			{
 				var slashIndex = title.PageName.IndexOf('/', StringComparison.Ordinal) + 1;
 				var pageName = slashIndex == 0
-					? string.Equals(title.PageName, pseudoSpace, StringComparison.Ordinal)
-						? "Main Page"
-						: title.PageName.Replace(newNsName + ": ", string.Empty, StringComparison.Ordinal)
+					? title.PageName.Replace(newNsName + ": ", string.Empty, StringComparison.Ordinal)
 					: title.PageName[slashIndex..];
 				var newSpace = newNsName + (title.Namespace.IsTalkSpace ? " talk" : string.Empty) + ':';
 				var newTitle = Title.FromName(this.Site, newSpace + newPseudoSpace + pageName);
