@@ -48,7 +48,7 @@
 			: base(jobManager, "Links")
 		{
 			this.DeleteStatusFile();
-			this.FollowUpActions = FollowUpActions.UpdateCaption | FollowUpActions.FixLinks;
+			this.FollowUpActions = FollowUpActions.FixLinks | FollowUpActions.UpdateCaption;
 			this.MoveAction = MoveAction.None;
 		}
 		#endregion

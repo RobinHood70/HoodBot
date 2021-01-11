@@ -29,6 +29,7 @@
 			this.Add("Bullet Link", this.BulletLink);
 			this.Add("Cat Footer", this.CatFooter);
 			this.Add("Cite Book", this.LoreFirst);
+			this.Add("Edit Link", this.FullPageNameFirst);
 			this.Add("Lore Link", this.LoreFirst);
 			this.Add("Game Book", this.GameBookGeneral);
 			this.Add("Pages In Category", this.CategoryFirst);
@@ -106,9 +107,22 @@
 		protected void GameBookGeneral(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find("lorename"), UespNamespaces.Lore);
 
 		protected void LoreFirst(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find(1), UespNamespaces.Lore);
+
+		protected void FullPageNameFirst(Page page, SiteTemplateNode template) => this.FullPageNameReplace(page, template.Find(1));
 		#endregion
 
 		#region Private Methods
+		private void FullPageNameReplace(Page page, IParameterNode? param)
+		{
+			if (param != null
+				&& Title.FromName(page.Site, param.Value.ToValue()) is var title
+				&& this.Replacements.TryGetValue(title, out var replacement)
+				&& replacement.To is ISimpleTitle toLink)
+			{
+				param.SetValue(toLink.FullPageName);
+			}
+		}
+
 		private void PageNameReplace(IParameterNode? param, int ns)
 		{
 			if (param != null

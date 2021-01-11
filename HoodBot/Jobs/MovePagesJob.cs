@@ -26,7 +26,7 @@
 		UpdateCaption = 1 << 3,
 		ProposeUnused = 1 << 4,
 		UpdateCategoryMembers = 1 << 5,
-		Default = CheckLinksRemaining | EmitReport | UpdateCaption | FixLinks,
+		Default = CheckLinksRemaining | EmitReport | FixLinks,
 	}
 
 	public enum MoveAction
@@ -249,6 +249,14 @@
 				this.StatusWriteLine("Figuring out what to do");
 				this.WhatToDo();
 				this.WriteJsonFile();
+				var simple = new List<string>();
+				/*
+				foreach (var replacement in this.Replacements)
+				{
+					simple.Add($"{replacement.From}\t{replacement.To}");
+				}
+
+				File.WriteAllLines(@"D:\Data\HoodBot\FullList.txt", simple); */
 			}
 
 			if (this.FollowUpActions.HasFlag(FollowUpActions.EmitReport))
