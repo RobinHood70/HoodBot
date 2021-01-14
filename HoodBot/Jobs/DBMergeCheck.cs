@@ -63,8 +63,8 @@
 				}
 			}
 
-			pageCollection.GetNamespace(UespNamespaces.Dragonborn, Filter.Any);
-			pageCollection.GetNamespace(UespNamespaces.DragonbornTalk, Filter.Any);
+			pageCollection.GetNamespace(UespNamespaces.Dragonborn);
+			pageCollection.GetNamespace(UespNamespaces.DragonbornTalk);
 			pageCollection.GetNamespace(MediaWikiNamespaces.File, Filter.Any, "DB-");
 			pageCollection.GetCategories("Dragonborn");
 			this.FilterPages(pageCollection);
@@ -132,8 +132,8 @@
 		private PageCollection MainPages()
 		{
 			var pageCollection = new PageCollection(this.Site, PageModules.Categories | PageModules.CategoryInfo | PageModules.Backlinks | PageModules.Info | PageModules.Properties);
-			pageCollection.GetNamespace(UespNamespaces.Dragonborn, Filter.Any);
-			pageCollection.GetNamespace(UespNamespaces.DragonbornTalk, Filter.Any);
+			pageCollection.GetNamespace(UespNamespaces.Dragonborn);
+			pageCollection.GetNamespace(UespNamespaces.DragonbornTalk);
 			this.FilterPages(pageCollection);
 			pageCollection.Sort();
 
