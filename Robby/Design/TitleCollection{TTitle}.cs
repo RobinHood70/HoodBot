@@ -450,6 +450,10 @@
 
 		/// <summary>Adds pages in the given the namespace to the collection.</summary>
 		/// <param name="ns">The namespace.</param>
+		public void GetNamespace(int ns) => this.GetPages(new AllPagesInput { Namespace = ns });
+
+		/// <summary>Adds pages in the given the namespace to the collection.</summary>
+		/// <param name="ns">The namespace.</param>
 		/// <param name="redirects">Whether or not to include pages that are redirects.</param>
 		public void GetNamespace(int ns, Filter redirects) => this.GetPages(new AllPagesInput { FilterRedirects = redirects, Namespace = ns });
 

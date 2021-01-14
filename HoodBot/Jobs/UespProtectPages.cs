@@ -555,7 +555,7 @@
 			foreach (var ns in spacesToLoad)
 			{
 				var titles = new TitleCollection(this.Site);
-				titles.GetNamespace(ns, Filter.Any);
+				titles.GetNamespace(ns);
 				foreach (var title in titles)
 				{
 					foreach (var si in this.searchList)

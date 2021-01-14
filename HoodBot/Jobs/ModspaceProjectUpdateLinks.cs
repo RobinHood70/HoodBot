@@ -65,7 +65,7 @@
 			var titles = new TitleCollection(this.Site);
 			foreach (var ns in InPlaceNamespaces)
 			{
-				titles.GetNamespace(ns, Filter.Any);
+				titles.GetNamespace(ns);
 			}
 
 			foreach (var title in titles)
