@@ -17,9 +17,18 @@
 			}
 
 			this.Base = nsData[0];
-			var baseSplit = this.Base.Split(TextArrays.Colon, 2);
-			this.BaseNamespace = site[baseSplit[0]];
-			this.IsPseudoNamespace = baseSplit.Length == 2;
+			var baseTitle = Title.FromName(site, this.Base);
+			if (baseTitle.Namespace == UespNamespaces.Main)
+			{
+				this.IsPseudoNamespace = false;
+				this.BaseTitle = new Title(site[this.Base], string.Empty);
+			}
+			else
+			{
+				this.IsPseudoNamespace = true;
+				this.BaseTitle = baseTitle;
+			}
+
 			this.Full = this.Base + (this.IsPseudoNamespace ? '/' : ':');
 			this.Id = nsData[1].Length == 0 ? this.Base.ToUpperInvariant() : nsData[1];
 			var parentName = nsData[2].Length == 0 ? this.Base : nsData[2];
@@ -34,7 +43,7 @@
 		#region Public Properties
 		public string Base { get; }
 
-		public Namespace BaseNamespace { get; }
+		public Title BaseTitle { get; }
 
 		public string Category { get; }
 
