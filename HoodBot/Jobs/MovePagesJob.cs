@@ -226,12 +226,28 @@
 				if (this.MoveAction != MoveAction.None)
 				{
 					var inPlaceMoves = false;
+					var unique = new Dictionary<Title, Replacement>();
 					foreach (var replacement in this.Replacements)
 					{
 						if (replacement.From == replacement.To)
 						{
-							this.Warn($"From and to pages cannot be the same: {replacement.From.FullPageName} = {replacement.To.FullPageName}");
+							this.Warn($"From and To pages cannot be the same: {replacement.From.FullPageName} = {replacement.To.FullPageName}");
 							inPlaceMoves = true;
+						}
+
+						if (unique.TryGetValue(replacement.To, out var existing))
+						{
+							this.Warn("Duplicate To page. All related entries will be skipped.");
+							this.Warn($"  Original: {existing.From.FullPageName} => {existing.To.FullPageName}");
+							this.Warn($"  Second  : {replacement.From.FullPageName} => {replacement.To.FullPageName}");
+							existing.Actions = ReplacementActions.Skip;
+							existing.Reason = "duplicate To page";
+							replacement.Actions = ReplacementActions.Skip;
+							replacement.Reason = "duplicate To page";
+						}
+						else
+						{
+							unique.Add(replacement.To, replacement);
 						}
 					}
 
@@ -661,11 +677,12 @@
 				if (line.Length > 0)
 				{
 					var link = SiteLink.FromGalleryText(this.Site, line);
-					if (this.Replacements.TryGetValue(link, out var replacement) && replacement.Actions.HasFlag(ReplacementActions.Move))
+					if (this.Replacements.TryGetValue(link, out var replacement)
+						&& replacement.Actions.HasFlag(ReplacementActions.UpdateLinks))
 					{
 						if (replacement.To.Namespace != MediaWikiNamespaces.File)
 						{
-							this.Warn("File to non-File move skipped due to being inside a gallery.");
+							this.Warn($"{replacement.From.PageName} to non-File {replacement.From.FullPageName} move skipped in gallery on page: {page.FullPageName}.");
 							continue;
 						}
 
@@ -673,7 +690,6 @@
 						var newNamespace = (replacement.From.Namespace == replacement.To.Namespace && link.Coerced) ? this.Site[MediaWikiNamespaces.Main] : replacement.To.Namespace;
 						var newLink = link.With(newNamespace, newPageName);
 						this.UpdateLinkText(page, replacement.From, newLink, false);
-
 						newLine = newLink.ToString()[2..^2].TrimEnd();
 					}
 				}
@@ -695,6 +711,7 @@
 			ThrowNull(node, nameof(node));
 			var link = SiteLink.FromLinkNode(this.Site, node);
 			if (this.Replacements.TryGetValue(link, out var replacement)
+				&& replacement.Actions.HasFlag(ReplacementActions.UpdateLinks)
 				&& (link.ForcedNamespaceLink
 					|| link.Namespace != MediaWikiNamespaces.Category
 					|| replacement.To.Namespace != MediaWikiNamespaces.Category
@@ -733,7 +750,7 @@
 			else if (addCaption
 				&& newLink.Text == null
 				&& newLink.OriginalLink != null
-				&& (newLink.ForcedNamespaceLink || newLink.Namespace != MediaWikiNamespaces.Category))
+				&& (newLink.ForcedNamespaceLink || !newLink.Namespace.IsForcedLinkSpace))
 			{
 				// if UpdateCaption is false, then we want to preserve the previous display text for any caption-less links by adding a new caption. Logic further up sets addCaption appropriately so this won't occur for a redirect target or in galleries.
 				newLink.Text = newLink.OriginalLink.TrimStart(':');
@@ -753,13 +770,7 @@
 				template.SetTitle(nameText);
 			}
 
-			if (this.parameterReplacers.TryGetValue(template.TitleValue, out var replacementActions))
-			{
-				foreach (var action in replacementActions)
-				{
-					action(page, template);
-				}
-			}
+			this.parameterReplacers.ReplaceAll(page, template);
 		}
 
 		protected virtual void WhatToDo()
@@ -881,43 +892,52 @@
 		{
 			foreach (var replacement in this.Replacements)
 			{
-				if (replacement.FromPage == null)
+				if (!replacement.Actions.HasFlag(ReplacementActions.Skip))
 				{
-					this.Warn($"FromPage for {replacement.From} is null!");
-				}
-				else if (!replacement.Actions.HasFlag(ReplacementActions.Skip) && this.MoveAction != MoveAction.None)
-				{
-					if (replacement.FromPage.Exists && replacement.ToPage?.Exists == true)
+					if (replacement.FromPage == null)
 					{
-						replacement.Actions |= ReplacementActions.Skip;
-						if (!this.ProposedDeletions.Contains(replacement.From))
-						{
-							this.HandleConflict(replacement);
-						}
-
-						if (replacement.Actions.HasFlag(ReplacementActions.Skip) && replacement.Reason == null)
-						{
-							replacement.Reason = $"To page exists";
-						}
+						// From title was uninterpretable
+						this.Warn($"FromPage for {replacement.From} is null!");
+						replacement.Actions = ReplacementActions.Skip;
+						replacement.Reason = "page title is indecipherable.";
+					}
+					else if (this.MoveAction == MoveAction.None)
+					{
+						replacement.Actions |= ReplacementActions.UpdateLinks;
 					}
 					else
 					{
-						replacement.Actions |= ReplacementActions.UpdateLinks;
-						if (replacement.FromPage.Exists)
+						// Any proposed move.
+						if (!replacement.FromPage.Exists)
 						{
-							replacement.Actions |= ReplacementActions.Move;
+							// From title does not exist.
+							replacement.Actions = ReplacementActions.Skip;
+							replacement.Reason = "page doesn't exist";
 						}
-
-						if (this.RedirectOption == RedirectOption.CreateButProposeDeletion && !replacement.FromPage.IsRedirect)
+						else if (replacement.ToPage?.Exists == true)
 						{
-							replacement.Actions |= ReplacementActions.Propose;
-							replacement.Reason = "redirect from page move";
+							replacement.Actions = ReplacementActions.Skip;
+							if (!this.ProposedDeletions.Contains(replacement.From))
+							{
+								this.HandleConflict(replacement);
+							}
+
+							// HandleConflict may have resolved the issue and changed the flag, so check again.
+							if (replacement.Actions.HasFlag(ReplacementActions.Skip))
+							{
+								replacement.Reason ??= $"To page exists";
+							}
+						}
+						else
+						{
+							replacement.Actions |= ReplacementActions.Move | ReplacementActions.UpdateLinks;
+							if (this.RedirectOption == RedirectOption.CreateButProposeDeletion && !replacement.FromPage.IsRedirect)
+							{
+								replacement.Actions |= ReplacementActions.Propose;
+								replacement.Reason = "redirect from page move";
+							}
 						}
 					}
-				}
-				else
-				{
-					replacement.Actions |= ReplacementActions.UpdateLinks;
 				}
 			}
 		}

@@ -15,6 +15,9 @@
 	{
 		#region Fields
 		private readonly UespNamespaceList uespNamespaceList;
+		private readonly ReplacementCollection replacements;
+		private readonly Site site;
+		private readonly ICollection<ParameterReplacer> generic = new List<ParameterReplacer>();
 		#endregion
 
 		// TODO: Create tags similar to JobInfo that'll tag each method with the site and template it's designed for, so AddAllReplacers can be programmatic rather than a manual list.
@@ -22,8 +25,8 @@
 		public ParameterReplacers(MovePagesJob job)
 			: base(SimpleTitleEqualityComparer.Instance)
 		{
-			this.Site = job.Site;
-			this.Replacements = job.Replacements;
+			this.site = job.Site;
+			this.replacements = job.Replacements;
 			this.uespNamespaceList = new UespNamespaceList(job.Site);
 			this.Add("Book Link", this.LoreFirst);
 			this.Add("Bullet Link", this.BulletLink);
@@ -33,19 +36,15 @@
 			this.Add("Lore Link", this.LoreFirst);
 			this.Add("Game Book", this.GameBookGeneral);
 			this.Add("Pages In Category", this.CategoryFirst);
+
+			this.generic.Add(this.GenericImage);
 		}
-		#endregion
-
-		#region Public Properties
-		public ReplacementCollection Replacements { get; }
-
-		public Site Site { get; }
 		#endregion
 
 		#region Public Methods
 		public void Add(string name, ParameterReplacer replacer)
 		{
-			var title = Title.Coerce(this.Site, MediaWikiNamespaces.Template, name);
+			var title = Title.Coerce(this.site, MediaWikiNamespaces.Template, name);
 			if (!this.TryGetValue(title, out var replacers))
 			{
 				replacers = new List<ParameterReplacer>();
@@ -53,6 +52,22 @@
 			}
 
 			replacers.Add(replacer);
+		}
+
+		public void ReplaceAll(Page page, SiteTemplateNode template)
+		{
+			foreach (var action in this.generic)
+			{
+				action(page, template);
+			}
+
+			if (this.TryGetValue(template.TitleValue, out var replacementActions))
+			{
+				foreach (var action in replacementActions)
+				{
+					action(page, template);
+				}
+			}
 		}
 		#endregion
 
@@ -63,18 +78,18 @@
 			{
 				var nsBase = template.Find("ns_base", "ns_id");
 				var ns = nsBase != null && this.uespNamespaceList.TryGetValue(nsBase.Value.ToValue(), out var uespNamespace)
-					? uespNamespace.BaseNamespace
+					? uespNamespace.BaseTitle.Namespace
 					: page.Namespace;
 
 				var oldTitle = link.Value.ToValue();
 				var searchTitle = new Title(ns, oldTitle);
-				if (this.Replacements.TryGetValue(searchTitle, out var replacement))
+				if (this.replacements.TryGetValue(searchTitle, out var replacement))
 				{
 					link.Value.Clear();
 					link.SetValue(replacement.To.PageName);
 
 					if (this.uespNamespaceList.FromTitle(replacement.To) is UespNamespace newNs
-						&& newNs.BaseNamespace != ns)
+						&& newNs.BaseTitle.Namespace != ns)
 					{
 						if (nsBase == null)
 						{
@@ -104,11 +119,13 @@
 			}
 		}
 
+		protected void FullPageNameFirst(Page page, SiteTemplateNode template) => this.FullPageNameReplace(page, template.Find(1));
+
 		protected void GameBookGeneral(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find("lorename"), UespNamespaces.Lore);
 
-		protected void LoreFirst(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find(1), UespNamespaces.Lore);
+		protected void GenericImage(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find("image"), MediaWikiNamespaces.File);
 
-		protected void FullPageNameFirst(Page page, SiteTemplateNode template) => this.FullPageNameReplace(page, template.Find(1));
+		protected void LoreFirst(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find(1), UespNamespaces.Lore);
 		#endregion
 
 		#region Private Methods
@@ -116,7 +133,7 @@
 		{
 			if (param != null
 				&& Title.FromName(page.Site, param.Value.ToValue()) is var title
-				&& this.Replacements.TryGetValue(title, out var replacement)
+				&& this.replacements.TryGetValue(title, out var replacement)
 				&& replacement.To is ISimpleTitle toLink)
 			{
 				param.SetValue(toLink.FullPageName);
@@ -126,12 +143,24 @@
 		private void PageNameReplace(IParameterNode? param, int ns)
 		{
 			if (param != null
-				&& new Title(this.Site[ns], param.Value.ToValue()) is var title
-				&& this.Replacements.TryGetValue(title, out var replacement)
+				&& new Title(this.site[ns], param.Value.ToValue()) is var title
+				&& this.replacements.TryGetValue(title, out var replacement)
 				&& replacement.To is ISimpleTitle toLink
 				&& toLink.Namespace == ns)
 			{
 				param.SetValue(toLink.PageName);
+			}
+		}
+
+		private void PageNameReplaceWithExtension(IParameterNode? param, int ns, string ext)
+		{
+			if (param != null
+				&& new Title(this.site[ns], param.Value.ToValue() + ext) is var title
+				&& this.replacements.TryGetValue(title, out var replacement)
+				&& replacement.To is ISimpleTitle toLink
+				&& toLink.Namespace == ns)
+			{
+				param.SetValue(toLink.PageName[0..^ext.Length]);
 			}
 		}
 		#endregion
