@@ -21,7 +21,7 @@ namespace HoodBotTestProject
 			new TheoryData<int, string, string?, int, string>
 			{
 				{ MediaWikiNamespaces.Main, "Test", null, MediaWikiNamespaces.Main, "Test" },
-				{ MediaWikiNamespaces.Category, "Test", null, MediaWikiNamespaces.Main, "Test" },
+				{ MediaWikiNamespaces.Category, "Test", null, MediaWikiNamespaces.Category, "Test" },
 				{ MediaWikiNamespaces.Main, "File:Test.png", null, MediaWikiNamespaces.File, "Test.png" },
 				{ MediaWikiNamespaces.File, "File:Test.png", null, MediaWikiNamespaces.File, "Test.png" },
 				{ MediaWikiNamespaces.User, "File:Test.png", null, MediaWikiNamespaces.File, "Test.png" },
