@@ -57,13 +57,11 @@
 				pageName = WikiTextUtilities.DecodeAndNormalize(pageName).Trim();
 			}
 
-			this.Namespace = site[defaultNamespace];
-
 			var (key, remaining, forced) = SplitPageName(pageName);
 			var isMainPage = false;
 			if (!forced && key.Length == 0)
 			{
-				this.ForcedNamespaceLink = true;
+				this.ForcedNamespaceLink = forced;
 				pageName = remaining;
 			}
 			else if (site.Namespaces.ValueOrDefault(key) is Namespace ns)
@@ -120,7 +118,19 @@
 				}
 			}
 
-			this.Coerced = this.IsLocal && this.Namespace != defaultNamespace;
+			if (this.Namespace == null)
+			{
+				if (this.IsLocal)
+				{
+					this.Namespace = site[defaultNamespace];
+					this.Coerced = true;
+				}
+				else
+				{
+					this.Namespace = site[MediaWikiNamespaces.Main];
+				}
+			}
+
 			this.PageName = isMainPage || !InterwikiEntry.IsLocal(this.Interwiki)
 				? pageName
 				: this.Namespace.CapitalizePageName(pageName);
