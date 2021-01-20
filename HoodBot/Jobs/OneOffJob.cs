@@ -1,12 +1,12 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System.Text.RegularExpressions;
-	using RobinHood70.CommonCode;
-
+	using System;
+	using System.Diagnostics;
 	using RobinHood70.HoodBot.Uesp;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 
-	public class OneOffJob : EditJob
+	public class OneOffJob : WikiJob
 	{
 		#region Constructors
 		[JobInfo("One-Off Job")]
@@ -17,17 +17,50 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void BeforeLogging()
+
+		protected override void Main()
 		{
-			var questLinkFixer = new Regex(@"({{Quest Link.*?}}).*?(</noinclude>)?\n", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
-			this.Pages.GetNamespace(UespNamespaces.Tes4Mod, Filter.Any, "Better Cities/");
-			foreach (var page in this.Pages)
+			var titles = new TitleCollection(this.Site);
+			titles.GetNamespace(UespNamespaces.MorrowindMod);
+			titles.GetNamespace(UespNamespaces.OblivionMod);
+			titles.GetNamespace(UespNamespaces.SkyrimMod);
+			titles.GetNamespace(UespNamespaces.Mod);
+
+			var remove = new TitleCollection(this.Site);
+			remove.GetCategoryMembers("Morrowind Mod-Modding-Functions");
+			remove.GetCategoryMembers("Morrowind Mod-Modding-Mod File Format");
+			remove.GetCategoryMembers("Oblivion Mod-Modding-Mod File Format");
+			remove.GetCategoryMembers("Skyrim Mod-File Formats-Mod File Format");
+			remove.GetCategoryMembers("Skyrim Mod-File Formats-Mod File Format-Fields");
+
+			foreach (var title in remove)
 			{
-				page.Text = questLinkFixer.Replace(page.Text, "$1$2\n");
+				titles.Remove(title);
+			}
+
+			var nsList = new UespNamespaceList(this.Site);
+			foreach (var ns in nsList)
+			{
+				if (ns.IsPseudoNamespace)
+				{
+					for (var i = titles.Count - 1; i >= 0; i--)
+					{
+						var title = titles[i];
+						if (title.Namespace == ns.BaseTitle.Namespace
+							&& title.PageName.StartsWith(ns.BaseTitle.PageName, StringComparison.Ordinal))
+						{
+							titles.RemoveAt(i);
+						}
+					}
+				}
+			}
+
+			titles.Sort();
+			foreach (var title in titles)
+			{
+				Debug.WriteLine(title.AsLink(false));
 			}
 		}
-
-		protected override void Main() => this.SavePages("Fix bot error");
 		#endregion
 	}
 }
