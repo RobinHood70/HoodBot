@@ -235,7 +235,7 @@
 			var retval = new List<ISimpleTitle>();
 			foreach (var item in result)
 			{
-				retval.Add(FromWiki(this.Site, item.Title));
+				retval.Add(FromWikiTitle(this.Site, item.Title));
 			}
 
 			return retval;

@@ -349,7 +349,7 @@
 		{
 			foreach (var link in list)
 			{
-				var title = FromWiki(this.Site, link.Title ?? throw PropertyNull(nameof(link), nameof(link.Title)));
+				var title = FromWikiTitle(this.Site, link.Title ?? throw PropertyNull(nameof(link), nameof(link.Title)));
 				if (backlinks.ContainsKey(title))
 				{
 					backlinks[title] |= type;
@@ -408,7 +408,7 @@
 			links.Clear();
 			foreach (var link in pageItem.Links)
 			{
-				links.Add(FromWiki(this.Site, link.Title));
+				links.Add(FromWikiTitle(this.Site, link.Title));
 			}
 		}
 
@@ -440,7 +440,7 @@
 			templates.Clear();
 			foreach (var link in pageItem.Templates)
 			{
-				templates.Add(FromWiki(this.Site, link.Title));
+				templates.Add(FromWikiTitle(this.Site, link.Title));
 			}
 		}
 		#endregion

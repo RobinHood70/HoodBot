@@ -138,12 +138,12 @@
 
 		#region Internal Methods
 
-		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class from the site and wiki text (which must already be in standard format).</summary>
 		/// <param name="site">The site the title is from.</param>
 		/// <param name="fullPageName">Full name of the page.</param>
 		/// <returns>A new FullTitle based on the provided values.</returns>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		internal static new FullTitle FromWiki(Site site, string fullPageName)
+		internal static new FullTitle FromWikiTitle(Site site, string fullPageName)
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(fullPageName, nameof(fullPageName));

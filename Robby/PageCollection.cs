@@ -393,19 +393,19 @@
 		{
 			foreach (var item in result.Interwiki)
 			{
-				var titleParts = FullTitle.FromWiki(this.Site, item.Value.Title);
+				var titleParts = FullTitle.FromWikiTitle(this.Site, item.Value.Title);
 				Debug.Assert(string.Equals(titleParts.Interwiki?.Prefix, item.Value.Prefix, StringComparison.Ordinal), "Interwiki prefixes didn't match.", titleParts.Interwiki?.Prefix + " != " + item.Value.Prefix);
 				this.titleMap[item.Key] = titleParts;
 			}
 
 			foreach (var item in result.Converted)
 			{
-				this.titleMap[item.Key] = FullTitle.FromWiki(this.Site, item.Value);
+				this.titleMap[item.Key] = FullTitle.FromWikiTitle(this.Site, item.Value);
 			}
 
 			foreach (var item in result.Normalized)
 			{
-				this.titleMap[item.Key] = FullTitle.FromWiki(this.Site, item.Value);
+				this.titleMap[item.Key] = FullTitle.FromWikiTitle(this.Site, item.Value);
 			}
 
 			foreach (var item in result.Redirects)
@@ -417,7 +417,7 @@
 				FullTitle title;
 				if (interwiki == null || interwiki.LocalWiki)
 				{
-					title = FullTitle.FromWiki(this.Site, value.Title);
+					title = FullTitle.FromWikiTitle(this.Site, value.Title);
 					title.Interwiki = interwiki;
 					title.Fragment = value.Fragment;
 				}
