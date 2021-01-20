@@ -184,7 +184,7 @@
 
 		/// <summary>Adds a new object to the collection with the specified name.</summary>
 		/// <param name="title">The title to add.</param>
-		public void Add(string title) => this.Add(this.New(new TitleParser(this.Site, MediaWikiNamespaces.Main, title, true)));
+		public void Add(string title) => this.Add(this.New(new TitleParser(this.Site, MediaWikiNamespaces.Main, title)));
 
 		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
 		/// <param name="titles">The titles.</param>
