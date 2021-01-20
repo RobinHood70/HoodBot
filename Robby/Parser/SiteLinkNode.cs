@@ -21,7 +21,7 @@
 			: base(factory, title, parameters)
 		{
 			ThrowNull(factory, nameof(factory));
-			this.TitleValue = Robby.Title.Coerce(factory.Site, MediaWikiNamespaces.Template, this.GetTitleText());
+			this.TitleValue = Robby.Title.FromName(factory.Site, this.GetTitleText());
 		}
 		#endregion
 
