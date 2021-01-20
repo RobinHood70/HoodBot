@@ -1,7 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System;
-	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
@@ -16,23 +14,23 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override string EditSummary => "Remove redundant parameter";
+		protected override string EditSummary => "Add new template";
 		#endregion
 
 		#region Protected Override Methods
 
-		protected override void LoadPages() => this.Pages.GetNamespace(UespNamespaces.OblivionMod, CommonCode.Filter.Exclude, "Oscuro");
+		protected override void LoadPages() => this.Pages.GetBacklinks("Template:Blades Effects", WikiCommon.BacklinksTypes.EmbeddedIn, true, CommonCode.Filter.Exclude);
 
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
-			foreach (var template in parsedPage.TemplateNodes)
+			var index = parsedPage.Nodes.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("Blades Effects"));
+			if (index >= 0)
 			{
-				if (template.TitleValue.PageNameEquals("Trail")
-					&& template.Find(1) is IParameterNode param
-					&& param.Value.ToValue().Equals("OOO", StringComparison.OrdinalIgnoreCase))
+				parsedPage.Nodes.InsertRange(index, new IWikiNode[]
 				{
-					template.Parameters.Remove(param);
-				}
+					parsedPage.Nodes.Factory.TemplateNodeFromParts("Blades Items with Effect"),
+					parsedPage.Nodes.Factory.TextNode("\n")
+				});
 			}
 		}
 		#endregion
