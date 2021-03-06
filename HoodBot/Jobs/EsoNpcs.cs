@@ -31,7 +31,7 @@
 		#endregion
 
 		#region Protected Override Properties
-		public override string LogName => (this.updateMode ? "Update" : "Create missing") + "ESO NPC pages";
+		public override string LogName => (this.updateMode ? "Update" : "Create missing") + " ESO NPC pages";
 		#endregion
 
 		#region Protected Override Methods
@@ -165,9 +165,9 @@
 				.ToString();
 		}
 
-		private static void UpdateLocations(NpcData npc, ITemplateNode template, IWikiNodeFactory factory, IEnumerable<PlaceInfo> places)
+		private static void UpdateLocations(NpcData npc, ITemplateNode template, IWikiNodeFactory factory, IEnumerable<PlaceInfo> placeInfos)
 		{
-			foreach (var (placeType, paramName, _, variesCount) in places)
+			foreach (var (placeType, paramName, _, variesCount) in placeInfos)
 			{
 				var placeText = npc.GetParameterValue(placeType, variesCount);
 				InsertLocation(template, factory, paramName, placeText);
@@ -175,8 +175,22 @@
 
 			if (npc.UnknownLocations.Count > 0)
 			{
-				var list = new SortedSet<string>(npc.UnknownLocations.Keys, StringComparer.Ordinal);
-				var locText = string.Join(", ", list);
+				string locText;
+				if (npc.UnknownLocations.Count < 10)
+				{
+					var list = new SortedSet<string>(StringComparer.Ordinal);
+					foreach (var place in npc.UnknownLocations)
+					{
+						list.Add(place.Key.TitleName);
+					}
+
+					locText = string.Join(", ", list);
+				}
+				else
+				{
+					locText = "Varies";
+				}
+
 				InsertLocation(template, factory, "loc", locText);
 			}
 
@@ -187,7 +201,11 @@
 					locText += '\n';
 					if (template.Find(name) is IParameterNode loc)
 					{
-						loc.SetValue(loc.IsNullOrWhitespace() ? locText : (loc.Value.ToValue().TrimEnd() + ", " + locText));
+						var value = loc.Value.ToValue().TrimEnd();
+						if (!string.Equals(value, locText, StringComparison.Ordinal))
+						{
+							loc.SetValue(loc.IsNullOrWhitespace() ? locText : (value + ", " + locText));
+						}
 					}
 					else
 					{

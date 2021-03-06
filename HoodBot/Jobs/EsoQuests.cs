@@ -169,10 +169,7 @@
 							place = newZone;
 						}
 
-						if (place.TitleName != null)
-						{
-							quest.Zone = place.TitleName;
-						}
+						quest.Zone = place.TitleName;
 					}
 				}
 			}
