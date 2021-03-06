@@ -308,12 +308,12 @@
 				var summaryLines = WikiTextVisitor.Raw(parser.Nodes.GetRange(summaryIndex, summaryEnd - summaryIndex)).Split(TextArrays.NewLineChars);
 				foreach (var line in summaryLines)
 				{
-					var http = line.Split("://esoicons.uesp.net/esoui/art/icons/", StringSplitOptions.RemoveEmptyEntries);
-					if (http.Length > 1)
+					var fromWeb = line.Split("://esoicons.uesp.net/esoui/art/icons/", StringSplitOptions.RemoveEmptyEntries);
+					if (fromWeb.Length > 1)
 					{
-						for (var i = 1; i < http.Length; i += 2)
+						for (var i = 1; i < fromWeb.Length; i += 2)
 						{
-							var name = http[i].Split(TextArrays.Space, 2)[0];
+							var name = fromWeb[i].Split(TextArrays.Space, 2)[0];
 							name = name
 								.Replace(".dds", string.Empty, StringComparison.Ordinal)
 								.Replace(".png", string.Empty, StringComparison.Ordinal)
