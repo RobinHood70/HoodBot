@@ -43,7 +43,7 @@
 		#endregion
 
 		#region Constructors
-		[JobInfo("3-In-place Link Updates", "Modspace Project")]
+		[JobInfo("3-In-place Link Updates", "Modspace")]
 		public ModspaceProjectUpdateLinks(JobManager jobManager)
 			: base(jobManager, "Links")
 		{

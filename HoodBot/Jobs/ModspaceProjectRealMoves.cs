@@ -17,7 +17,7 @@
 	public class ModspaceProjectRealMoves : MovePagesJob
 	{
 		#region Constructors
-		[JobInfo("1-Move mod categories", "Modspace Project")]
+		[JobInfo("1-Move mod categories", "Modspace")]
 		public ModspaceProjectRealMoves(JobManager jobManager)
 			: base(jobManager, "Categories")
 		{

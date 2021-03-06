@@ -5,7 +5,7 @@
 	public class ModspaceProjectTemplateCats : MovePagesJob
 	{
 		#region Constructors
-		[JobInfo("2-Move NS_NAME categories", "Modspace Project")]
+		[JobInfo("2-Move NS_NAME categories", "Modspace")]
 		public ModspaceProjectTemplateCats(JobManager jobManager)
 			: base(jobManager, "Template")
 		{
