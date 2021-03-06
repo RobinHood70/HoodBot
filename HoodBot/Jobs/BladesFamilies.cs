@@ -513,7 +513,9 @@
 					default:
 						if (baseValue == 0)
 						{
-							sb.Append(mult);
+							sb
+								.Append(mult)
+								.Append("*lvl");
 						}
 						else
 						{
