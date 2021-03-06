@@ -1,5 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using RobinHood70.HoodBot.Uesp;
+	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
@@ -14,23 +16,28 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override string EditSummary => "Add new template";
+		protected override string EditSummary => "Update link";
 		#endregion
 
 		#region Protected Override Methods
 
-		protected override void LoadPages() => this.Pages.GetBacklinks("Template:Blades Effects", WikiCommon.BacklinksTypes.EmbeddedIn, true, CommonCode.Filter.Exclude);
+		protected override void LoadPages()
+		{
+			this.Pages.GetBacklinks("Oblivion:Undead Dungeons", WikiCommon.BacklinksTypes.Backlinks, true, CommonCode.Filter.Any);
+			this.Pages.Remove("UESPWiki:Bot Requests");
+		}
 
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
-			var index = parsedPage.Nodes.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("Blades Effects"));
-			if (index >= 0)
+			foreach (var link in parsedPage.LinkNodes)
 			{
-				parsedPage.Nodes.InsertRange(index, new IWikiNode[]
+				var fullLink = SiteLink.FromLinkNode(this.Site, link);
+				if (string.Equals(fullLink.Fragment, "Restoration Ayleid Chest", System.StringComparison.Ordinal) ||
+					string.Equals(fullLink.Fragment, "Restoration Chest", System.StringComparison.Ordinal))
 				{
-					parsedPage.Nodes.Factory.TemplateNodeFromParts("Blades Items with Effect"),
-					parsedPage.Nodes.Factory.TextNode("\n")
-				});
+					link.Title.Clear();
+					link.Title.AddRange(fullLink.With(this.Site[UespNamespaces.Oblivion], "Dungeons").ToLinkNode().Title);
+				}
 			}
 		}
 		#endregion
