@@ -481,12 +481,24 @@
 			ThrowNull(template, nameof(template));
 			var retval = false;
 			var anonIndex = 0;
-			for (var i = 0; i < template.Parameters.Count; i++)
+			var i = 0;
+			while (i < template.Parameters.Count)
 			{
-				if (string.Equals(template.Parameters[i].Name?.ToValue() ?? (++anonIndex).ToStringInvariant(), parameterName, StringComparison.Ordinal))
+				var name = template.Parameters[i].Name?.ToValue();
+				if (string.IsNullOrEmpty(name))
+				{
+					++anonIndex;
+					name = anonIndex.ToStringInvariant();
+				}
+
+				if (string.Equals(name, parameterName, StringComparison.Ordinal))
 				{
 					template.Parameters.RemoveAt(i);
 					retval = true;
+				}
+				else
+				{
+					i++;
 				}
 			}
 
