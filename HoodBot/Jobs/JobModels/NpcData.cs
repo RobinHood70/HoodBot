@@ -110,7 +110,8 @@
 
 		public string Reaction { get; }
 
-		public Dictionary<string, int> UnknownLocations { get; } = new Dictionary<string, int>(StringComparer.Ordinal);
+		// TODO: This is really just a Dictionary<string, int> but converted to Place in hopes of doing something a little better with Places, cuz it's a mess right now.
+		public Dictionary<Place, int> UnknownLocations { get; } = new Dictionary<Place, int>();
 		#endregion
 
 		#region Public Methods
@@ -205,10 +206,7 @@
 				case PlaceType.Store:
 					foreach (var item in subset)
 					{
-						if (item.TitleName != null)
-						{
-							list.Add(item.TitleName);
-						}
+						list.Add(item.TitleName);
 					}
 
 					break;
