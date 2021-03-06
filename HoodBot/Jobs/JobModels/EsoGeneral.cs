@@ -73,7 +73,7 @@
 			[-73] = "Magicka and Spell Damage",
 		};
 
-		public static IEnumerable<PlaceInfo> PlaceInfo { get; } = new PlaceInfo[]
+		public static IReadOnlyList<PlaceInfo> PlaceInfo { get; } = new PlaceInfo[]
 		{
 			new PlaceInfo(PlaceType.City, "city", "Online-Places-Cities", 5),
 			new PlaceInfo(PlaceType.Settlement, "settlement", "Online-Places-Settlements", 5),
@@ -112,7 +112,8 @@
 						var location = (string)row["zone"];
 						var count = (int)row["locCount"];
 						var npc = npcData[npcId];
-						npc.UnknownLocations.Add(location, count);
+						var place = new Place(location);
+						npc.UnknownLocations.Add(place, count);
 					}
 
 					break;
@@ -254,13 +255,13 @@
 					continue;
 				}
 
-				var locCopy = new Dictionary<string, int>(npc.UnknownLocations, StringComparer.Ordinal);
+				var locCopy = new Dictionary<Place, int>(npc.UnknownLocations);
 				foreach (var kvp in locCopy)
 				{
 					var key = kvp.Key;
 					try
 					{
-						if (places[key] is Place place)
+						if (places[key.TitleName] is Place place)
 						{
 							npc.Places.Add(place, kvp.Value);
 							npc.UnknownLocations.Remove(key);
@@ -272,7 +273,7 @@
 					}
 					catch (InvalidOperationException)
 					{
-						Debug.WriteLine($"Location {key} is ambiguous for NPC {npc.Name}");
+						Debug.WriteLine($"Location {key.TitleName} is ambiguous for NPC {npc.Name}");
 					}
 				}
 			}

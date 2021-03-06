@@ -30,7 +30,7 @@
 			this.Key = page.PageName;
 			this.Settlement = page.GetVariable("settlement");
 			this.Title = new Title(page);
-			this.TitleName = page.GetVariable("titlename");
+			this.TitleName = page.GetVariable("titlename") ?? page.PageName;
 			this.TypeText = page.GetVariable("type");
 			this.Zone = page.GetVariable("zone");
 		}
@@ -54,7 +54,7 @@
 
 		public Title? Title { get; private set; }
 
-		public string? TitleName { get; private set; }
+		public string TitleName { get; }
 
 		public string? TypeText { get; private set; }
 
