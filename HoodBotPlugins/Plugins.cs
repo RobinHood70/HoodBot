@@ -31,22 +31,20 @@
 			this.container = new CompositionContainer(this.catalog);
 			try
 			{
-				this.container.ComposeParts(this);
+				this.container.SatisfyImportsOnce(this);
 			}
 			catch (CompositionException ce)
 			{
 				Debug.WriteLine(ce.Message);
 			}
 
+			this.All ??= Array.Empty<Lazy<IPlugin, IPluginMetadata>>(); // Should have been filled in in try block, but if not, set it to empty.
 			var diffViewers = new Dictionary<string, IDiffViewer>(StringComparer.Ordinal);
-			if (this.All != null)
+			foreach (var plugin in this.All)
 			{
-				foreach (var plugin in this.All)
+				if (plugin.Value is IDiffViewer diffViewer)
 				{
-					if (plugin.Value is IDiffViewer diffViewer)
-					{
-						diffViewers.Add(plugin.Metadata.DisplayName, diffViewer);
-					}
+					diffViewers.Add(plugin.Metadata.DisplayName, diffViewer);
 				}
 			}
 
@@ -66,7 +64,7 @@
 		/// <summary>Gets all plugins available. Initialized to non-null via <see cref="ImportManyAttribute"/> in <see cref="System.ComponentModel.Composition"/>.</summary>
 		[ImportMany(typeof(IPlugin))]
 		[NotNull]
-		public IEnumerable<Lazy<IPlugin, IPluginMetadata>>? All { get; private set; }
+		public IEnumerable<Lazy<IPlugin, IPluginMetadata>> All { get; private set; }
 
 		/// <summary>Gets all difference viewers available.</summary>
 		public IReadOnlyDictionary<string, IDiffViewer> DiffViewers { get; }
