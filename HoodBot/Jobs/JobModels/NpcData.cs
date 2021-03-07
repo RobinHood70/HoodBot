@@ -37,7 +37,7 @@
 			[PickpocketDifficulty.Hard] = "Hard",
 		};
 
-		private static readonly Dictionary<sbyte, string> Reactions = new Dictionary<sbyte, string>
+		private static readonly Dictionary<sbyte, string> Reactions = new()
 		{
 			[1] = "Hostile",
 			[2] = "Neutral",

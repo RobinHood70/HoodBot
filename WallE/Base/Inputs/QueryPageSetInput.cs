@@ -38,13 +38,13 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Static Methods
-		public static QueryPageSetInput FromPageIds(IEnumerable<long> pageIds) => new QueryPageSetInput(pageIds, ListType.PageIds);
+		public static QueryPageSetInput FromPageIds(IEnumerable<long> pageIds) => new(pageIds, ListType.PageIds);
 
-		public static QueryPageSetInput FromPageIds(IEnumerable<long> pageIds, IGeneratorInput generator) => new QueryPageSetInput(generator, pageIds, ListType.PageIds);
+		public static QueryPageSetInput FromPageIds(IEnumerable<long> pageIds, IGeneratorInput generator) => new(generator, pageIds, ListType.PageIds);
 
-		public static QueryPageSetInput FromRevisionIds(IEnumerable<long> pageIds) => new QueryPageSetInput(pageIds, ListType.RevisionIds);
+		public static QueryPageSetInput FromRevisionIds(IEnumerable<long> pageIds) => new(pageIds, ListType.RevisionIds);
 
-		public static QueryPageSetInput FromRevisionIds(IEnumerable<long> pageIds, IGeneratorInput generator) => new QueryPageSetInput(generator, pageIds, ListType.RevisionIds);
+		public static QueryPageSetInput FromRevisionIds(IEnumerable<long> pageIds, IGeneratorInput generator) => new(generator, pageIds, ListType.RevisionIds);
 		#endregion
 	}
 }

@@ -23,14 +23,14 @@
 		#endregion
 
 		#region Static Fields
-		private static readonly DateTime LastRun = new DateTime(2020, 9, 25);
+		private static readonly DateTime LastRun = new(2020, 9, 25);
 		private static readonly string WikiImageFolder = UespSite.GetBotDataFolder(@"WikiImages\"); // Files in this folder come from http://esofiles.uesp.net/update-<whatever>/icons.zip
 		#endregion
 
 		#region Fields
-		private readonly HashSet<Title> licenseTemplates = new HashSet<Title>();
-		private readonly Dictionary<string, List<ItemInfo>> allItems = new Dictionary<string, List<ItemInfo>>(StringComparer.Ordinal);
-		private readonly Dictionary<string, ICollection<string>> allIcons = new Dictionary<string, ICollection<string>>(StringComparer.Ordinal);
+		private readonly HashSet<Title> licenseTemplates = new();
+		private readonly Dictionary<string, List<ItemInfo>> allItems = new(StringComparer.Ordinal);
+		private readonly Dictionary<string, ICollection<string>> allIcons = new(StringComparer.Ordinal);
 		#endregion
 
 		#region Constructors
@@ -292,7 +292,7 @@
 				var summaryIndex = parser.IndexOfHeader("Summary") + 1;
 				this.PreSummary = summaryIndex == 0
 					? (new IWikiNode[] { parser.Nodes.Factory.HeaderNodeFromParts(2, " Summary ") })
-					: (ICollection<IWikiNode>)new List<IWikiNode>(parser.Nodes.GetRange(0, summaryIndex));
+					: new List<IWikiNode>(parser.Nodes.GetRange(0, summaryIndex));
 
 				var summaryEnd = parser.Nodes.FindIndex<HeaderNode>(summaryIndex);
 				if (summaryEnd == -1)

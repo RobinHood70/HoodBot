@@ -10,7 +10,7 @@
 	{
 		#region Fields
 		private readonly IMediaWikiClient baseClient;
-		private readonly Stopwatch stopwatch = new Stopwatch();
+		private readonly Stopwatch stopwatch = new();
 		#endregion
 
 		#region Constructors

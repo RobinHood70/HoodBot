@@ -131,7 +131,7 @@
 		/// <summary>Clones this instance.</summary>
 		/// <returns>A copy of this instance.</returns>
 		/// <remarks>Since all values are strings, deep/shallow does not apply.</remarks>
-		public EmbeddedValue Clone() => new EmbeddedValue(this);
+		public EmbeddedValue Clone() => new(this);
 
 		/// <summary>Copies the entire contents from the source EmbeddedValue.</summary>
 		/// <param name="source">The source.</param>

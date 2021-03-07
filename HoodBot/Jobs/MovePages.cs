@@ -1,7 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using RobinHood70.HoodBot.Uesp;
-
 	public class MovePages : MovePagesJob
 	{
 		#region Constructors

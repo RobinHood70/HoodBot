@@ -27,7 +27,7 @@
 	{
 		#region Fields
 		private readonly string cookiesLocation;
-		private CookieContainer cookieContainer = new CookieContainer();
+		private CookieContainer cookieContainer = new();
 		#endregion
 
 		#region Constructors

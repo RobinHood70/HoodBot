@@ -12,8 +12,8 @@
 	public static class Extensions
 	{
 		#region Fields
-		private static readonly Regex LeadingSpace = new Regex(@"\A\s*", RegexOptions.None, DefaultRegexTimeout);
-		private static readonly Regex TrailingSpace = new Regex(@"\s*\Z", RegexOptions.None, DefaultRegexTimeout);
+		private static readonly Regex LeadingSpace = new(@"\A\s*", RegexOptions.None, DefaultRegexTimeout);
+		private static readonly Regex TrailingSpace = new(@"\s*\Z", RegexOptions.None, DefaultRegexTimeout);
 		#endregion
 
 		#region IBacklink Methods

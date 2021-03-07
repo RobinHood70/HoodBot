@@ -30,7 +30,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Static Methods
-		public static UnblockInput FromUserId(long userId) => new UnblockInput() { UserId = userId };
+		public static UnblockInput FromUserId(long userId) => new() { UserId = userId };
 		#endregion
 	}
 }

@@ -44,7 +44,7 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override PassiveSkill GetNewSkill(IDataRecord row) => new PassiveSkill(row);
+		protected override PassiveSkill GetNewSkill(IDataRecord row) => new(row);
 
 		protected override bool UpdateSkillTemplate(PassiveSkill skillBase, ITemplateNode template)
 		{

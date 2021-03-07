@@ -73,7 +73,7 @@
 
 		/// <summary>Gets a RecentChangesInput object based on the current object.</summary>
 		/// <value>The equivalent RecentChangesInput object.</value>
-		internal RecentChangesInput ToWallEInput => new RecentChangesInput()
+		internal RecentChangesInput ToWallEInput => new()
 		{
 			Start = this.Start,
 			End = this.End,

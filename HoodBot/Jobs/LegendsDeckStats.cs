@@ -15,7 +15,7 @@
 	public class LegendsDeckStats : ParsedPageJob
 	{
 		#region Fields
-		private readonly Dictionary<string, int> cardPowers = new Dictionary<string, int>(StringComparer.Ordinal);
+		private readonly Dictionary<string, int> cardPowers = new(StringComparer.Ordinal);
 		#endregion
 
 		#region Constructors

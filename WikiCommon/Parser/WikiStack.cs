@@ -39,15 +39,15 @@
 		#endregion
 
 		#region Static Fields
-		private static readonly HashSet<string> AllowMissingEndTag = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { IncludeOnlyTag, NoIncludeTag, OnlyIncludeTag };
+		private static readonly HashSet<string> AllowMissingEndTag = new(StringComparer.OrdinalIgnoreCase) { IncludeOnlyTag, NoIncludeTag, OnlyIncludeTag };
 		#endregion
 
 		#region Fields
 		private readonly bool enableOnlyInclude;
-		private readonly HashSet<string> ignoredElements = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-		private readonly HashSet<string> ignoredTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+		private readonly HashSet<string> ignoredElements = new(StringComparer.OrdinalIgnoreCase);
+		private readonly HashSet<string> ignoredTags = new(StringComparer.OrdinalIgnoreCase);
 		private readonly bool includeIgnores;
-		private readonly HashSet<string> noMoreClosingTag = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+		private readonly HashSet<string> noMoreClosingTag = new(StringComparer.OrdinalIgnoreCase);
 		private readonly int textLength;
 		private readonly Regex tagsRegex;
 

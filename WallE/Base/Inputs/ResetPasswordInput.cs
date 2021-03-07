@@ -22,7 +22,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Static Methods
-		public static ResetPasswordInput FromEmail(string email) => new ResetPasswordInput() { Email = email };
+		public static ResetPasswordInput FromEmail(string email) => new() { Email = email };
 		#endregion
 	}
 }

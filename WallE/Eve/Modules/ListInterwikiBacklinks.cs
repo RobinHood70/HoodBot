@@ -50,7 +50,7 @@
 				.Add("limit", this.Limit);
 		}
 
-		protected override InterwikiBacklinksItem GetItem(JToken result) => new InterwikiBacklinksItem(
+		protected override InterwikiBacklinksItem GetItem(JToken result) => new(
 			ns: (int)result.MustHave("ns"),
 			title: result.MustHaveString("title"),
 			pageId: (long)result.MustHave("pageid"),

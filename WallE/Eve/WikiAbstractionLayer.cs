@@ -37,14 +37,14 @@
 		#endregion
 
 		#region Private Static Fields
-		private static readonly UserInfoInput DefaultUserInformation = new UserInfoInput() { Properties = UserInfoProperties.HasMsg };
+		private static readonly UserInfoInput DefaultUserInformation = new() { Properties = UserInfoProperties.HasMsg };
 		#endregion
 
 		#region Fields
-		private readonly HashSet<string> interwikiPrefixes = new HashSet<string>(StringComparer.Create(CultureInfo.InvariantCulture, true));
-		private readonly Dictionary<int, SiteInfoNamespace> namespaces = new Dictionary<int, SiteInfoNamespace>();
-		private readonly List<ErrorItem> warnings = new List<ErrorItem>();
-		private readonly WikiException notInitialized = new WikiException(CurrentCulture(Messages.SiteNotInitialized, nameof(Login), nameof(Initialize)));
+		private readonly HashSet<string> interwikiPrefixes = new(StringComparer.Create(CultureInfo.InvariantCulture, true));
+		private readonly Dictionary<int, SiteInfoNamespace> namespaces = new();
+		private readonly List<ErrorItem> warnings = new();
+		private readonly WikiException notInitialized = new(CurrentCulture(Messages.SiteNotInitialized, nameof(Login), nameof(Initialize)));
 		private ITokenManager? tokenManager;
 		private int userTalkChecksIgnored;
 		#endregion
@@ -236,7 +236,7 @@
 				this.SiteVersion == 0 ? throw new InvalidOperationException(CurrentCulture(Messages.SiteNotInitialized, nameof(this.Initialize), nameof(this.Login))) :
 				this.SiteVersion >= TokenManagerMeta.MinimumVersion ? new TokenManagerMeta(this) :
 				this.SiteVersion >= TokenManagerAction.MinimumVersion ? new TokenManagerAction(this) :
-				new TokenManagerOriginal(this) as ITokenManager;
+				new TokenManagerOriginal(this);
 			set => this.tokenManager = value ?? throw ArgumentNull(nameof(this.TokenManager));
 		}
 
@@ -276,7 +276,7 @@
 		/// <param name="title">The title.</param>
 		/// <param name="pageId">The page identifier.</param>
 		/// <returns>A factory methods which creates a new PageItem.</returns>
-		public static PageItem DefaultPageFactory(int ns, string title, long pageId) => new PageItem(ns, title, pageId);
+		public static PageItem DefaultPageFactory(int ns, string title, long pageId) => new(ns, title, pageId);
 		#endregion
 
 		#region Public Methods

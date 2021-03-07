@@ -44,7 +44,7 @@
 		#region Public Static Methods
 		public static Coefficient? FromCollection(IReadOnlyList<Coefficient> list, string text)
 		{
-			if (text?.Length > 0 && text[0] == '$')
+			if (text != null && text.Length > 0 && text[0] == '$')
 			{
 				var coefNumText = text[1];
 				var coefNum = (int)char.GetNumericValue(coefNumText) - 1;

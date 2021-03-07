@@ -79,15 +79,15 @@
 		#endregion
 
 		#region Public Commands
-		public RelayCommand EditSettings => new RelayCommand(this.OpenEditWindow);
+		public RelayCommand EditSettings => new(this.OpenEditWindow);
 
-		public RelayCommand Play => new RelayCommand(this.ExecuteJobs);
+		public RelayCommand Play => new(this.ExecuteJobs);
 
-		public RelayCommand Pause => new RelayCommand(this.PauseJobs);
+		public RelayCommand Pause => new(this.PauseJobs);
 
-		public RelayCommand Stop => new RelayCommand(this.CancelJobs);
+		public RelayCommand Stop => new(this.CancelJobs);
 
-		public RelayCommand Test => new RelayCommand(this.RunTest);
+		public RelayCommand Test => new(this.RunTest);
 		#endregion
 
 		#region Public Properties

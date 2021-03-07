@@ -14,7 +14,7 @@
 
 		#region Fields
 
-		private static readonly HashSet<string> ValidTypes = new HashSet<string>(StringComparer.Ordinal)
+		private static readonly HashSet<string> ValidTypes = new(StringComparer.Ordinal)
 		{
 			Csrf,
 			Patrol,
@@ -23,7 +23,7 @@
 			Watch,
 		};
 
-		private readonly Dictionary<string, string> sessionTokens = new Dictionary<string, string>(6, StringComparer.Ordinal);
+		private readonly Dictionary<string, string> sessionTokens = new(6, StringComparer.Ordinal);
 		private readonly WikiAbstractionLayer wal;
 		#endregion
 

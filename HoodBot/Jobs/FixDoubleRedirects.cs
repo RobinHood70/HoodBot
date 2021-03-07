@@ -14,8 +14,8 @@
 	public class FixDoubleRedirects : EditJob
 	{
 		#region Fields
-		private readonly Dictionary<Title, FullTitle> lookup = new Dictionary<Title, FullTitle>();
-		private readonly Dictionary<Title, ContextualParser> parsedPages = new Dictionary<Title, ContextualParser>();
+		private readonly Dictionary<Title, FullTitle> lookup = new();
+		private readonly Dictionary<Title, ContextualParser> parsedPages = new();
 		private readonly IReadOnlyCollection<string> redirectWords;
 		#endregion
 

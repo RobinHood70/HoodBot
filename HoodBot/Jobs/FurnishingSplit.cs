@@ -18,7 +18,7 @@
 		#endregion
 
 		#region Fields
-		private readonly List<string> issues = new List<string>();
+		private readonly List<string> issues = new();
 		private PageCollection? existingPages;
 		#endregion
 

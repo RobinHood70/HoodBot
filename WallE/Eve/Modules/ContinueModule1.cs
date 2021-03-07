@@ -12,7 +12,7 @@
 		#endregion
 
 		#region Fields
-		private readonly HashSet<string> modules = new HashSet<string>(System.StringComparer.Ordinal);
+		private readonly HashSet<string> modules = new(System.StringComparer.Ordinal);
 
 		private string? currentGeneratorValue;
 		private string? savedGeneratorValue;

@@ -33,8 +33,8 @@
 	public class PageCollection : TitleCollection<Page>
 	{
 		#region Fields
-		private readonly Dictionary<string, IFullTitle> titleMap = new Dictionary<string, IFullTitle>(StringComparer.Ordinal);
-		private readonly List<string> recurseCategories = new List<string>();
+		private readonly Dictionary<string, IFullTitle> titleMap = new(StringComparer.Ordinal);
+		private readonly List<string> recurseCategories = new();
 		#endregion
 
 		#region Constructors
@@ -191,14 +191,14 @@
 		/// <param name="site">The site the pages are from. All pages in a collection must belong to the same site.</param>
 		/// <returns>A new PageCollection with all namespace limitations disabled.</returns>
 		/// <remarks>This is a simple shortcut method to create PageCollections where limitations can safely be ignored.</remarks>
-		public static PageCollection Unlimited(Site site) => new PageCollection(site) { LimitationType = LimitationType.None };
+		public static PageCollection Unlimited(Site site) => new(site) { LimitationType = LimitationType.None };
 
 		/// <summary>Initializes a new instance of the PageCollection class with no namespace limitations.</summary>
 		/// <param name="site">The site the pages are from. All pages in a collection must belong to the same site.</param>
 		/// <param name="options">A <see cref="PageLoadOptions"/> object initialized with a set of modules. Using this constructor allows you to customize some options.</param>
 		/// <returns>A new PageCollection with all namespace limitations disabled.</returns>
 		/// <remarks>This is a simple shortcut method to create PageCollections where limitations can safely be ignored.</remarks>
-		public static PageCollection Unlimited(Site site, PageLoadOptions options) => new PageCollection(site, options) { LimitationType = LimitationType.None };
+		public static PageCollection Unlimited(Site site, PageLoadOptions options) => new(site, options) { LimitationType = LimitationType.None };
 
 		/// <summary>Initializes a new instance of the PageCollection class with no namespace limitations.</summary>
 		/// <param name="site">The site the pages are from. All pages in a collection must belong to the same site.</param>
@@ -374,7 +374,7 @@
 		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
 		/// <param name="site">The site.</param>
 		/// <returns>A new PageCollection with no namespace limitations, load options set to none, and creating only default pages rather than user-specified.</returns>
-		internal static PageCollection UnlimitedDefault(Site site) => new PageCollection(site, PageLoadOptions.None, PageCreator.Default) { LimitationType = LimitationType.None };
+		internal static PageCollection UnlimitedDefault(Site site) => new(site, PageLoadOptions.None, PageCreator.Default) { LimitationType = LimitationType.None };
 
 		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
 		/// <param name="site">The site.</param>

@@ -23,14 +23,14 @@
 		#region Static Fields
 		private static readonly string[] DestructionTypes = { "Frost", "Shock", "Fire" };
 
-		private static readonly SortedList<string, string> IconNameCache = new SortedList<string, string>(StringComparer.Ordinal);
-		private static readonly HashSet<string> DestructionExceptions = new HashSet<string>(StringComparer.Ordinal) { "Destructive Touch", "Impulse", "Wall of Elements" };
+		private static readonly SortedList<string, string> IconNameCache = new(StringComparer.Ordinal);
+		private static readonly HashSet<string> DestructionExceptions = new(StringComparer.Ordinal) { "Destructive Touch", "Impulse", "Wall of Elements" };
 		#endregion
 
 		#region Fields
-		private readonly SortedSet<Page> nonTrivialChanges = new SortedSet<Page>(SimpleTitleComparer.Instance);
-		private readonly Dictionary<string, T> skills = new Dictionary<string, T>(StringComparer.Ordinal);
-		private readonly SortedSet<Page> trivialChanges = new SortedSet<Page>(SimpleTitleComparer.Instance);
+		private readonly SortedSet<Page> nonTrivialChanges = new(SimpleTitleComparer.Instance);
+		private readonly Dictionary<string, T> skills = new(StringComparer.Ordinal);
+		private readonly SortedSet<Page> trivialChanges = new(SimpleTitleComparer.Instance);
 		#endregion
 
 		#region Constructors

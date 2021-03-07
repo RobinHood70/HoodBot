@@ -6,9 +6,9 @@
 	internal sealed class PlaceCollection
 	{
 		#region Fields
-		private readonly HashSet<string> ambiguousNames = new HashSet<string>(StringComparer.Ordinal);
-		private readonly Dictionary<string, Place> primary = new Dictionary<string, Place>(StringComparer.Ordinal);
-		private readonly Dictionary<string, Place> secondary = new Dictionary<string, Place>(StringComparer.Ordinal);
+		private readonly HashSet<string> ambiguousNames = new(StringComparer.Ordinal);
+		private readonly Dictionary<string, Place> primary = new(StringComparer.Ordinal);
+		private readonly Dictionary<string, Place> secondary = new(StringComparer.Ordinal);
 		#endregion
 
 		#region Public Indexers

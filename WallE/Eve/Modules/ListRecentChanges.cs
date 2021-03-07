@@ -11,9 +11,37 @@
 	internal sealed class ListRecentChanges : ListModule<RecentChangesInput, RecentChangesItem>, IGeneratorModule
 	{
 		#region Static Fields
-		private static readonly HashSet<string> KnownProps = new HashSet<string>(StringComparer.Ordinal)
+		private static readonly HashSet<string> KnownProps = new(StringComparer.Ordinal)
 		{
-			"actionhidden", "anon", "bot", "comment", "commenthidden", "logaction", "logid", "logtype", "minor", "new", "newlen", "ns", "old_revid", "oldlen", "pageid", "parsedcomment", "patroltoken", "patrolled", "rcid", "redirect", "revid", "suppressed", "tags", "timestamp", "title", "type", "user", "userhidden", "userid",
+			"actionhidden",
+			"anon",
+			"bot",
+			"comment",
+			"commenthidden",
+			"logaction",
+			"logid",
+			"logtype",
+			"minor",
+			"new",
+			"newlen",
+			"ns",
+			"old_revid",
+			"oldlen",
+			"pageid",
+			"parsedcomment",
+			"patroltoken",
+			"patrolled",
+			"rcid",
+			"redirect",
+			"revid",
+			"suppressed",
+			"tags",
+			"timestamp",
+			"title",
+			"type",
+			"user",
+			"userhidden",
+			"userid",
 		};
 		#endregion
 

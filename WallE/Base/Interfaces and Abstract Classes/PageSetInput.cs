@@ -18,7 +18,7 @@ namespace RobinHood70.WallE.Base
 	public abstract class PageSetInput
 	{
 		#region Fields
-		private static readonly Dictionary<ListType, string> ListNames = new Dictionary<ListType, string>()
+		private static readonly Dictionary<ListType, string> ListNames = new()
 		{
 			[ListType.PageIds] = "pageids",
 			[ListType.RevisionIds] = "revids",

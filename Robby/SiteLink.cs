@@ -59,9 +59,9 @@
 	public class SiteLink : FullTitle, ILinkTitle
 	{
 		#region Static Fields
-		private static readonly Dictionary<string, ParameterType> DirectValues = new Dictionary<string, ParameterType>(StringComparer.Ordinal);
-		private static readonly List<(ParameterType ParameterType, string Before, string After)> ImageParameterInfo = new List<(ParameterType ParameterType, string Before, string After)>();
-		private static readonly Dictionary<string, ParameterType> ImageWords = new Dictionary<string, ParameterType>(StringComparer.Ordinal)
+		private static readonly Dictionary<string, ParameterType> DirectValues = new(StringComparer.Ordinal);
+		private static readonly List<(ParameterType ParameterType, string Before, string After)> ImageParameterInfo = new();
+		private static readonly Dictionary<string, ParameterType> ImageWords = new(StringComparer.Ordinal)
 		{
 			["img_baseline"] = ParameterType.Valign, // no params
 			["img_sub"] = ParameterType.Valign, // no params
@@ -89,8 +89,8 @@
 			["img_upright"] = ParameterType.Upright, // optional param (use 0 = none)
 		};
 
-		private static readonly InvalidOperationException NonNumeric = new InvalidOperationException(Resources.SizeInvalid);
-		private static readonly Dictionary<ParameterType, string> PreferredWords = new Dictionary<ParameterType, string>();
+		private static readonly InvalidOperationException NonNumeric = new(Resources.SizeInvalid);
+		private static readonly Dictionary<ParameterType, string> PreferredWords = new();
 		private static readonly char[] SplitX = new[] { 'x' };
 		#endregion
 
@@ -278,7 +278,7 @@
 			{
 				var textValue = this.GetValue(ParameterType.Upright);
 				return
-					textValue == null ? (double?)null :
+					textValue == null ? null :
 					textValue.TrimEnd().Length == 0 ? 1 :
 					double.TryParse(textValue, NumberStyles.Any, this.Site.Culture, out var retval) ? retval :
 					double.NaN;
@@ -331,7 +331,7 @@
 		/// <param name="pageName">The page name to link to. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
 		/// <returns>A new <see cref="SiteLink"/> with the namespace found in <paramref name="pageName"/>, if there is one, otherwise using <paramref name="defaultNamespace"/>.</returns>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		public static new SiteLink Coerce(Site site, int defaultNamespace, string pageName) => new SiteLink(new TitleParser(site, defaultNamespace, pageName));
+		public static new SiteLink Coerce(Site site, int defaultNamespace, string pageName) => new(new TitleParser(site, defaultNamespace, pageName));
 
 		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
 		/// <param name="site">The site the title is from.</param>

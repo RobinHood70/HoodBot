@@ -38,13 +38,13 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Static Methods
-		public static PurgeInput FromPageIds(IEnumerable<long> ids) => new PurgeInput(ids, ListType.PageIds);
+		public static PurgeInput FromPageIds(IEnumerable<long> ids) => new(ids, ListType.PageIds);
 
-		public static PurgeInput FromPageIds(IGeneratorInput generatorInput, IEnumerable<long> ids) => new PurgeInput(generatorInput, ids, ListType.PageIds);
+		public static PurgeInput FromPageIds(IGeneratorInput generatorInput, IEnumerable<long> ids) => new(generatorInput, ids, ListType.PageIds);
 
-		public static PurgeInput FromRevisionIds(IEnumerable<long> ids) => new PurgeInput(ids, ListType.RevisionIds);
+		public static PurgeInput FromRevisionIds(IEnumerable<long> ids) => new(ids, ListType.RevisionIds);
 
-		public static PurgeInput FromRevisionIds(IGeneratorInput generatorInput, IEnumerable<long> ids) => new PurgeInput(generatorInput, ids, ListType.RevisionIds);
+		public static PurgeInput FromRevisionIds(IGeneratorInput generatorInput, IEnumerable<long> ids) => new(generatorInput, ids, ListType.RevisionIds);
 		#endregion
 	}
 }

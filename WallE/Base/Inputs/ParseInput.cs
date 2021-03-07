@@ -95,7 +95,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Static Methods
-		public static ParseInput FromOldId(long oldId) => new ParseInput() { OldId = oldId };
+		public static ParseInput FromOldId(long oldId) => new() { OldId = oldId };
 
 		public static ParseInput FromPage(string page)
 		{
@@ -103,7 +103,7 @@ namespace RobinHood70.WallE.Base
 			return new ParseInput() { Page = page };
 		}
 
-		public static ParseInput FromPageId(long pageId) => new ParseInput() { PageId = pageId };
+		public static ParseInput FromPageId(long pageId) => new() { PageId = pageId };
 
 		public static ParseInput FromText(string text) => FromText(text, null);
 

@@ -23,15 +23,15 @@
 		#endregion
 
 		#region Public Commands
-		public RelayCommand Add => new RelayCommand(this.NewWiki);
+		public RelayCommand Add => new(this.NewWiki);
 
-		public RelayCommand<string> AutoFill => new RelayCommand<string>(this.Fill);
+		public RelayCommand<string> AutoFill => new(this.Fill);
 
-		public RelayCommand Remove => new RelayCommand(this.RemoveCurrent);
+		public RelayCommand Remove => new(this.RemoveCurrent);
 
-		public RelayCommand Save => new RelayCommand(this.EndEdit);
+		public RelayCommand Save => new(this.EndEdit);
 
-		public RelayCommand Undo => new RelayCommand(this.CancelEdit);
+		public RelayCommand Undo => new(this.CancelEdit);
 		#endregion
 
 		#region Public Properties

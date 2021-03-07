@@ -10,8 +10,8 @@
 	internal sealed class ModuleFactory : IModuleFactory
 	{
 		#region Fields
-		private readonly Dictionary<Type, GeneratorFactoryMethod> generators = new Dictionary<Type, GeneratorFactoryMethod>();
-		private readonly Dictionary<Type, PropertyFactoryMethod> properties = new Dictionary<Type, PropertyFactoryMethod>();
+		private readonly Dictionary<Type, GeneratorFactoryMethod> generators = new();
+		private readonly Dictionary<Type, PropertyFactoryMethod> properties = new();
 		private readonly WikiAbstractionLayer wal;
 		#endregion
 

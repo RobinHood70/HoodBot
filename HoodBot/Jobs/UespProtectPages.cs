@@ -21,19 +21,19 @@
 		#endregion
 
 		#region Static Fields
-		private static readonly Dictionary<ProtectionLevel, string> ProtectionString = new Dictionary<ProtectionLevel, string>
+		private static readonly Dictionary<ProtectionLevel, string> ProtectionString = new()
 		{
 			[ProtectionLevel.None] = "None",
 			[ProtectionLevel.Semi] = "Semi",
 			[ProtectionLevel.Full] = "Full",
 		};
 
-		private static readonly Regex Dates = new Regex("[0-9]{1,2} [a-zA-Z]+ 20[0-9]{2} ", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex Dates = new("[0-9]{1,2} [a-zA-Z]+ 20[0-9]{2} ", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
 		#endregion
 
 		#region Fields
 		private readonly IDictionary<ISimpleTitle, PageProtection> pageProtections = new SortedDictionary<ISimpleTitle, PageProtection>(SimpleTitleComparer.Instance);
-		private readonly List<ProtectionInfo> searchList = new List<ProtectionInfo>()
+		private readonly List<ProtectionInfo> searchList = new()
 		{
 			new ProtectionInfo(new[] { MediaWikiNamespaces.Project }, @"\AJavascript/.*?\.js", new PageProtection(
 				"Javascript",

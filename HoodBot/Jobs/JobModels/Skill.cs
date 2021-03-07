@@ -46,7 +46,7 @@
 		#endregion
 
 		#region Internal Static Properties
-		internal static Regex Highlight => new Regex(@"\|c[0-9a-fA-F]{6}|\|r", RegexOptions.None, DefaultRegexTimeout);
+		internal static Regex Highlight => new(@"\|c[0-9a-fA-F]{6}|\|r", RegexOptions.None, DefaultRegexTimeout);
 		#endregion
 
 		#region Public Override Methods

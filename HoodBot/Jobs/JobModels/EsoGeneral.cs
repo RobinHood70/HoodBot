@@ -29,12 +29,12 @@
 	internal static class EsoGeneral
 	{
 		#region Static Fields
-		private static readonly Regex ColourCode = new Regex(@"\A\|c[0-9A-F]{6}(.*?)\|r\Z", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
-		private static readonly Regex TrailingDigits = new Regex(@"\s*\d+\Z", RegexOptions.None, DefaultRegexTimeout);
+		private static readonly Regex ColourCode = new(@"\A\|c[0-9A-F]{6}(.*?)\|r\Z", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex TrailingDigits = new(@"\s*\d+\Z", RegexOptions.None, DefaultRegexTimeout);
 		#endregion
 
 		#region Fields
-		private static readonly Regex BonusFinder = new Regex(@"\s*Current [Bb]onus:.*?\.", RegexOptions.None, DefaultRegexTimeout);
+		private static readonly Regex BonusFinder = new(@"\s*Current [Bb]onus:.*?\.", RegexOptions.None, DefaultRegexTimeout);
 		private static string? patchVersion;
 		#endregion
 

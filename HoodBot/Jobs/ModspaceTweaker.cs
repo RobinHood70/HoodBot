@@ -18,17 +18,17 @@
 	{
 		#region Static Fields
 		// private static readonly Regex BoldBulletsReplacer = new Regex(@"\* *'''(?<line>.*?)'''", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
-		private static readonly Regex BreakReplacer = new Regex(@"\n*<br/?>\s*<br/?>\n*", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
-		private static readonly Regex ExternalLinkReplacer = new Regex(@"\[https?://www\.uesp\.net/wiki/(?<page>[^ \]]*)(?<params>&[^ \]]*)? ?(?<title>[^\]]*)\]", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
-		private static readonly List<int> Namespaces = new List<int>
+		private static readonly Regex BreakReplacer = new(@"\n*<br/?>\s*<br/?>\n*", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex ExternalLinkReplacer = new(@"\[https?://www\.uesp\.net/wiki/(?<page>[^ \]]*)(?<params>&[^ \]]*)? ?(?<title>[^\]]*)\]", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly List<int> Namespaces = new()
 		{
 			UespNamespaces.Tes3Mod,
 			UespNamespaces.Tes4Mod,
 			UespNamespaces.Tes5Mod,
 		};
 
-		private static readonly Regex QuestLinkPreFixer = new Regex(@"^\*+ *\[\[(?<quest>.*?)(\|(?<alttext>.*?))?]]:\s*(?<desc>.*?)(?<noinclude></noinclude>)?$", RegexOptions.Multiline | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
-		private static readonly Regex TrailingWhitespaceReplacer = new Regex(@"[ \t]*\n", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex QuestLinkPreFixer = new(@"^\*+ *\[\[(?<quest>.*?)(\|(?<alttext>.*?))?]]:\s*(?<desc>.*?)(?<noinclude></noinclude>)?$", RegexOptions.Multiline | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex TrailingWhitespaceReplacer = new(@"[ \t]*\n", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
 		private readonly TitleCollection quests;
 		#endregion
 

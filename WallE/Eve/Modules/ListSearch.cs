@@ -48,7 +48,7 @@
 		#endregion
 
 		#region Public Methods
-		public SearchResult AsSearchResult() => new SearchResult(
+		public SearchResult AsSearchResult() => new(
 			list: this.Output ?? Array.Empty<SearchResultItem>(),
 			suggestion: this.suggestion,
 			totalHits: this.totalHits);

@@ -13,7 +13,7 @@
 	internal sealed class PropInfo : PropModule<InfoInput>
 	{
 		#region Fields
-		private readonly Dictionary<string, bool> baseActions = new Dictionary<string, bool>(StringComparer.Ordinal);
+		private readonly Dictionary<string, bool> baseActions = new(StringComparer.Ordinal);
 		#endregion
 
 		#region Constructors

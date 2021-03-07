@@ -456,7 +456,7 @@
 		}
 
 		/// <inheritdoc/>
-		protected override Title New(ISimpleTitle title) => new Title(title);
+		protected override Title New(ISimpleTitle title) => new(title);
 		#endregion
 
 		#region Protected Virtual Methods
