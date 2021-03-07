@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using RobinHood70.HoodBot.Uesp;
-	using RobinHood70.Robby;
+	using System;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
@@ -16,27 +15,36 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override string EditSummary => "Update link";
+		protected override string EditSummary => "Remove redundant template";
 		#endregion
 
 		#region Protected Override Methods
 
-		protected override void LoadPages()
-		{
-			this.Pages.GetBacklinks("Oblivion:Undead Dungeons", WikiCommon.BacklinksTypes.Backlinks, true, CommonCode.Filter.Any);
-			this.Pages.Remove("UESPWiki:Bot Requests");
-		}
+		protected override void LoadPages() => this.Pages.GetBacklinks("Template:Lore People Summary", WikiCommon.BacklinksTypes.EmbeddedIn, true, CommonCode.Filter.Any);
 
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
-			foreach (var link in parsedPage.LinkNodes)
+			for (var i = parsedPage.Nodes.Count - 1; i >= 0; i--)
 			{
-				var fullLink = SiteLink.FromLinkNode(this.Site, link);
-				if (string.Equals(fullLink.Fragment, "Restoration Ayleid Chest", System.StringComparison.Ordinal) ||
-					string.Equals(fullLink.Fragment, "Restoration Chest", System.StringComparison.Ordinal))
+				if (parsedPage.Nodes[i] is SiteTemplateNode template && template.TitleValue.PageNameEquals("Lore People Trail"))
 				{
-					link.Title.Clear();
-					link.Title.AddRange(fullLink.With(this.Site[UespNamespaces.Oblivion], "Dungeons").ToLinkNode().Title);
+					if (template.Find(1) is IParameterNode param)
+					{
+						if (parsedPage.FindTemplate("Lore People Summary") is ITemplateNode summary)
+						{
+							summary.Add("letter", $"{param.Value.ToValue().Substring(0, 1)}\n", false);
+						}
+						else
+						{
+							throw new InvalidOperationException();
+						}
+					}
+
+					parsedPage.Nodes.RemoveAt(i);
+					if ((i < parsedPage.Parameters.Count - 1) && parsedPage.Nodes[i + 1] is ITextNode text)
+					{
+						text.Text = text.Text.TrimStart();
+					}
 				}
 			}
 		}
