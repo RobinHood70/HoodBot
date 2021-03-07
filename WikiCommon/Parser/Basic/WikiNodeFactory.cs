@@ -148,7 +148,7 @@
 		public ILinkNode LinkNodeFromWikiText([Localizable(false)] string wikiText) => this.SingleNode<ILinkNode>(wikiText);
 
 		/// <inheritdoc/>
-		public NodeCollection NodeCollection() => new NodeCollection(this);
+		public NodeCollection NodeCollection() => new(this);
 
 		/// <inheritdoc/>
 		public NodeCollection NodeCollectionFromNodes(IEnumerable<IWikiNode> copyNodes)

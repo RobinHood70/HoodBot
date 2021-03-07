@@ -37,7 +37,7 @@
 			request.Remove("utf8");
 		}
 
-		protected override CustomResult DeserializeCustom(string? result) => new CustomResult(result);
+		protected override CustomResult DeserializeCustom(string? result) => new(result);
 
 		protected override CustomResult DeserializeResult(JToken? result) => throw new NotSupportedException();
 		#endregion

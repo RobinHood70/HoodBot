@@ -60,7 +60,7 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override ActiveSkill GetNewSkill(IDataRecord row) => new ActiveSkill(row);
+		protected override ActiveSkill GetNewSkill(IDataRecord row) => new(row);
 
 		protected override bool UpdateSkillTemplate(ActiveSkill skillBase, ITemplateNode template)
 		{

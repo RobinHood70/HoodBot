@@ -15,7 +15,7 @@
 	public class FilePage : Page
 	{
 		#region Fields
-		private readonly List<FileRevision> fileRevisions = new List<FileRevision>();
+		private readonly List<FileRevision> fileRevisions = new();
 		#endregion
 
 		#region Constructors

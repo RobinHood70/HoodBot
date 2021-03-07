@@ -14,7 +14,7 @@
 	internal sealed class ActionParamInfo : ActionModule<ParameterInfoInput, IReadOnlyDictionary<string, ParameterInfoItem>>
 	{
 		#region Static Fields
-		private static readonly HashSet<string> FormatModuleValues = new HashSet<string>(StringComparer.Ordinal) { "json", "jsonfm", "php", "phpfm", "wddx", "wddxfm", "xml", "xmlfm", "yaml", "yamlfm", "rawfm", "txt", "txtfm", "dbg", "dbgfm", "dump", "dumpfm", "none" };
+		private static readonly HashSet<string> FormatModuleValues = new(StringComparer.Ordinal) { "json", "jsonfm", "php", "phpfm", "wddx", "wddxfm", "xml", "xmlfm", "yaml", "yamlfm", "rawfm", "txt", "txtfm", "dbg", "dbgfm", "dump", "dumpfm", "none" };
 		private static readonly string[] ModuleTypes125 = { "querymodules", "formatmodules", "mainmodule", "pagesetmodule" };
 		#endregion
 

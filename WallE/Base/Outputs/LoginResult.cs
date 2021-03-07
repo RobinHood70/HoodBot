@@ -38,13 +38,13 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Static Methods
-		public static LoginResult AlreadyLoggedIn(long userId, string userName) => new LoginResult(
+		public static LoginResult AlreadyLoggedIn(long userId, string userName) => new(
 			result: "Success",
 			reason: "Already logged in",
 			user: userName,
 			userId: userId);
 
-		public static LoginResult EditingAnonymously(string? userName) => new LoginResult(
+		public static LoginResult EditingAnonymously(string? userName) => new(
 			result: "Success",
 			reason: "Editing anonymously",
 			user: userName,

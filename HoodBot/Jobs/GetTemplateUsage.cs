@@ -17,8 +17,8 @@
 		private readonly string saveLocation;
 		private readonly IReadOnlyList<string> originalTemplateNames;
 		private readonly bool respectRedirects;
-		private readonly List<(ISimpleTitle Page, ITemplateNode Template)> allTemplates = new List<(ISimpleTitle, ITemplateNode)>();
-		private readonly List<string> headerOrder = new List<string>();
+		private readonly List<(ISimpleTitle Page, ITemplateNode Template)> allTemplates = new();
+		private readonly List<string> headerOrder = new();
 		#endregion
 
 		#region Constructors

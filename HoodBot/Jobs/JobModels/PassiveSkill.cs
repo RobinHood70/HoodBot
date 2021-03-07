@@ -9,7 +9,7 @@
 	internal sealed class PassiveSkill : Skill
 	{
 		#region Fields
-		private readonly List<PassiveRank> ranks = new List<PassiveRank>();
+		private readonly List<PassiveRank> ranks = new();
 		#endregion
 
 		#region Constructors

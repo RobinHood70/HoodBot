@@ -24,7 +24,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Static Methods
-		public static PatrolInput FromRevisionId(long revid) => new PatrolInput() { RevisionId = revid };
+		public static PatrolInput FromRevisionId(long revid) => new() { RevisionId = revid };
 		#endregion
 	}
 }

@@ -100,15 +100,15 @@
 
 		/// <summary>Gets a new PageLoadOptions that loads nothing but title information.</summary>
 		/// <value>A new PageLoadOptions that loads nothing but title information.</value>
-		public static PageLoadOptions None => new PageLoadOptions(PageModules.None);
+		public static PageLoadOptions None => new(PageModules.None);
 
 		/// <summary>Gets a new PageLoadOptions that loads default information.</summary>
 		/// <value>A new PageLoadOptions that loads default information.</value>
-		public static PageLoadOptions Default => new PageLoadOptions(PageModules.Default);
+		public static PageLoadOptions Default => new(PageModules.Default);
 
 		/// <summary>Gets a new PageLoadOptions that loads all available information.</summary>
 		/// <value>A new PageLoadOptions that loads all available information.</value>
-		public static PageLoadOptions All => new PageLoadOptions(PageModules.Default);
+		public static PageLoadOptions All => new(PageModules.Default);
 		#endregion
 
 		#region Public Properties

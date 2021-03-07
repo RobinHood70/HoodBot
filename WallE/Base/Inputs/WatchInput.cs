@@ -40,13 +40,13 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Static Methods
-		public static WatchInput FromPageIds(IEnumerable<long> ids) => new WatchInput(ids, ListType.PageIds);
+		public static WatchInput FromPageIds(IEnumerable<long> ids) => new(ids, ListType.PageIds);
 
-		public static WatchInput FromPageIds(IGeneratorInput generatorInput, IEnumerable<long> ids) => new WatchInput(generatorInput, ids, ListType.PageIds);
+		public static WatchInput FromPageIds(IGeneratorInput generatorInput, IEnumerable<long> ids) => new(generatorInput, ids, ListType.PageIds);
 
-		public static WatchInput FromRevisionIds(IEnumerable<long> ids) => new WatchInput(ids, ListType.RevisionIds);
+		public static WatchInput FromRevisionIds(IEnumerable<long> ids) => new(ids, ListType.RevisionIds);
 
-		public static WatchInput FromRevisionIds(IGeneratorInput generatorInput, IEnumerable<long> ids) => new WatchInput(generatorInput, ids, ListType.RevisionIds);
+		public static WatchInput FromRevisionIds(IGeneratorInput generatorInput, IEnumerable<long> ids) => new(generatorInput, ids, ListType.RevisionIds);
 		#endregion
 	}
 }

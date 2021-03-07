@@ -528,7 +528,7 @@
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>RobinHood70.WallE.Design.WikiException.</returns>
 		// These methods are not extensions, but are placed in this class as useful but not warranting a class of their own yet.
-		public static WikiException MalformedException(string name, JToken? token, [CallerMemberName] string caller = FallbackText.Unknown) => new WikiException(CurrentCulture(EveMessages.MalformedData, name, token?.Path ?? FallbackText.Unknown, caller));
+		public static WikiException MalformedException(string name, JToken? token, [CallerMemberName] string caller = FallbackText.Unknown) => new(CurrentCulture(EveMessages.MalformedData, name, token?.Path ?? FallbackText.Unknown, caller));
 
 		/// <summary>
 		/// Malformeds the type exception.
@@ -537,7 +537,7 @@
 		/// <param name="token">The token.</param>
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>RobinHood70.WallE.Design.WikiException.</returns>
-		public static WikiException MalformedTypeException(string typeName, JToken? token, [CallerMemberName] string caller = FallbackText.Unknown) => new WikiException(CurrentCulture(EveMessages.MalformedDataType, typeName, token?.Path ?? FallbackText.Unknown, caller));
+		public static WikiException MalformedTypeException(string typeName, JToken? token, [CallerMemberName] string caller = FallbackText.Unknown) => new(CurrentCulture(EveMessages.MalformedDataType, typeName, token?.Path ?? FallbackText.Unknown, caller));
 
 		/// <summary>The error thrown when a parameter could not be cast to the expected type.</summary>
 		/// <param name="parameterName">Name of the parameter.</param>
@@ -545,7 +545,7 @@
 		/// <param name="actualType">The actual type of the parameter passed.</param>
 		/// <param name="caller">The caller.</param>
 		/// <returns>An <see cref="InvalidCastException"/>.</returns>
-		public static InvalidCastException InvalidParameterType(string parameterName, string wantedType, string actualType, [CallerMemberName] string caller = FallbackText.Unknown) => new InvalidCastException(CurrentCulture(EveMessages.ParameterInvalidCast, parameterName, caller, actualType, wantedType));
+		public static InvalidCastException InvalidParameterType(string parameterName, string wantedType, string actualType, [CallerMemberName] string caller = FallbackText.Unknown) => new(CurrentCulture(EveMessages.ParameterInvalidCast, parameterName, caller, actualType, wantedType));
 		#endregion
 	}
 }

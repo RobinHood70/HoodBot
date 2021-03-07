@@ -11,9 +11,26 @@
 	internal sealed class ListLogEvents : ListModule<LogEventsInput, LogEventsItem>
 	{
 		#region Static Fields
-		private static readonly HashSet<string> KnownProps = new HashSet<string>(StringComparer.Ordinal)
+		private static readonly HashSet<string> KnownProps = new(StringComparer.Ordinal)
 		{
-			"action", "actionhidden", "anon", "comment", "commenthidden", "logid", "logpage", "ns", "pageid", "parsedcomment", "suppressed", "tags", "timestamp", "title", "type", "user", "userhidden", "userid",
+			"action",
+			"actionhidden",
+			"anon",
+			"comment",
+			"commenthidden",
+			"logid",
+			"logpage",
+			"ns",
+			"pageid",
+			"parsedcomment",
+			"suppressed",
+			"tags",
+			"timestamp",
+			"title",
+			"type",
+			"user",
+			"userhidden",
+			"userid",
 		};
 
 		private readonly bool getUserId;

@@ -21,15 +21,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		where TOutput : ITitle
 	{
 		#region Static Fields
-		private static readonly Regex TooManyFinder = new Regex(@"Too many values .*?'(?<parameter>.*?)'.*?limit is (?<sizelimit>[0-9]+)", RegexOptions.Compiled, DefaultRegexTimeout);
+		private static readonly Regex TooManyFinder = new(@"Too many values .*?'(?<parameter>.*?)'.*?limit is (?<sizelimit>[0-9]+)", RegexOptions.Compiled, DefaultRegexTimeout);
 		#endregion
 
 		#region Fields
-		private readonly HashSet<long> badRevisionIds = new HashSet<long>();
-		private readonly Dictionary<string, string> converted = new Dictionary<string, string>(StringComparer.Ordinal);
-		private readonly Dictionary<string, InterwikiTitleItem> interwiki = new Dictionary<string, InterwikiTitleItem>(StringComparer.Ordinal);
-		private readonly Dictionary<string, string> normalized = new Dictionary<string, string>(StringComparer.Ordinal);
-		private readonly Dictionary<string, PageSetRedirectItem> redirects = new Dictionary<string, PageSetRedirectItem>(StringComparer.Ordinal);
+		private readonly HashSet<long> badRevisionIds = new();
+		private readonly Dictionary<string, string> converted = new(StringComparer.Ordinal);
+		private readonly Dictionary<string, InterwikiTitleItem> interwiki = new(StringComparer.Ordinal);
+		private readonly Dictionary<string, string> normalized = new(StringComparer.Ordinal);
+		private readonly Dictionary<string, PageSetRedirectItem> redirects = new(StringComparer.Ordinal);
 		private int offset;
 		#endregion
 
@@ -101,7 +101,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Methods
-		protected PageSetResult<TOutput> CreatePageSet(IList<TOutput> pages) => new PageSetResult<TOutput>(
+		protected PageSetResult<TOutput> CreatePageSet(IList<TOutput> pages) => new(
 			titles: pages,
 			badRevisionIds: new List<long>(this.badRevisionIds),
 			converted: this.converted,

@@ -19,8 +19,8 @@
 		#endregion
 
 		#region Fields
-		private readonly Dictionary<string, string> titleOverrides = new Dictionary<string, string>(StringComparer.Ordinal);
-		private readonly Dictionary<string, List<string>> pageBooks = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+		private readonly Dictionary<string, string> titleOverrides = new(StringComparer.Ordinal);
+		private readonly Dictionary<string, List<string>> pageBooks = new(StringComparer.Ordinal);
 		#endregion
 
 		#region Constructors

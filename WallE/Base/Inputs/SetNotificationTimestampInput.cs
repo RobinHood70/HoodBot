@@ -47,13 +47,13 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Static Methods
-		public static SetNotificationTimestampInput FromPageIds(IEnumerable<long> ids) => new SetNotificationTimestampInput(ids, ListType.PageIds);
+		public static SetNotificationTimestampInput FromPageIds(IEnumerable<long> ids) => new(ids, ListType.PageIds);
 
-		public static SetNotificationTimestampInput FromPageIds(IGeneratorInput generatorInput, IEnumerable<long> ids) => new SetNotificationTimestampInput(generatorInput, ids, ListType.PageIds);
+		public static SetNotificationTimestampInput FromPageIds(IGeneratorInput generatorInput, IEnumerable<long> ids) => new(generatorInput, ids, ListType.PageIds);
 
-		public static SetNotificationTimestampInput FromRevisionIds(IEnumerable<long> ids) => new SetNotificationTimestampInput(ids, ListType.RevisionIds);
+		public static SetNotificationTimestampInput FromRevisionIds(IEnumerable<long> ids) => new(ids, ListType.RevisionIds);
 
-		public static SetNotificationTimestampInput FromRevisionIds(IGeneratorInput generatorInput, IEnumerable<long> ids) => new SetNotificationTimestampInput(generatorInput, ids, ListType.RevisionIds);
+		public static SetNotificationTimestampInput FromRevisionIds(IGeneratorInput generatorInput, IEnumerable<long> ids) => new(generatorInput, ids, ListType.RevisionIds);
 		#endregion
 	}
 }

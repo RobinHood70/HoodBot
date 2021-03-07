@@ -45,7 +45,7 @@
 				.AddIf("showsizediff", input.ShowSizeDifference, !this.Wal.AllSiteInfo?.General?.Flags.HasFlag(SiteInfoFlags.MiserMode) ?? false);
 		}
 
-		protected override CustomResult DeserializeCustom(string? result) => new CustomResult(result);
+		protected override CustomResult DeserializeCustom(string? result) => new(result);
 
 		protected override CustomResult DeserializeResult(JToken? result) => throw new NotSupportedException();
 		#endregion

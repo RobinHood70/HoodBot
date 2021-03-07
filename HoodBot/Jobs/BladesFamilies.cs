@@ -63,7 +63,7 @@
 		private sealed class BladesEnemy
 		{
 			#region Static Fields
-			private static readonly Dictionary<string, string> AbilityLookup = new Dictionary<string, string>(StringComparer.Ordinal)
+			private static readonly Dictionary<string, string> AbilityLookup = new(StringComparer.Ordinal)
 			{
 				["4e760726-b012-4b25-bc92-0cd6312d6601"] = "absorb",
 				["be56c560-a4ba-47ad-8513-f24c342ca594"] = "adrenaline_dodge",

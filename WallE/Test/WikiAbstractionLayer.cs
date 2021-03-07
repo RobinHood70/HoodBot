@@ -14,7 +14,7 @@
 	{
 		// Only the basics are implemented for now; the rest can come later, as needed.
 		#region Fields
-		private static readonly SiteInfoGeneral SiteInfoGeneral = new SiteInfoGeneral(
+		private static readonly SiteInfoGeneral SiteInfoGeneral = new(
 			articlePath: "/$1",
 			basePage: string.Empty,
 			dbType: string.Empty,
@@ -60,7 +60,7 @@
 			variants: new List<string>(),
 			wikiId: string.Empty);
 
-		private static readonly List<SiteInfoNamespace> SiteInfoNamespaces = new List<SiteInfoNamespace>
+		private static readonly List<SiteInfoNamespace> SiteInfoNamespaces = new()
 		{
 			new SiteInfoNamespace(-2, "Media", null, NamespaceFlags.None, "Media"),
 			new SiteInfoNamespace(-1, "Special", null, NamespaceFlags.None, "Special"),
@@ -82,13 +82,13 @@
 			new SiteInfoNamespace(15, "Category talk", null, NamespaceFlags.Subpages, "Category talk"),
 		};
 
-		private static readonly List<SiteInfoNamespaceAlias> SiteInfoNamespaceAliases = new List<SiteInfoNamespaceAlias>
+		private static readonly List<SiteInfoNamespaceAlias> SiteInfoNamespaceAliases = new()
 		{
 			new SiteInfoNamespaceAlias(6, "Image"),
 			new SiteInfoNamespaceAlias(7, "Image talk"),
 		};
 
-		private static readonly List<SiteInfoInterwikiMap> SiteInfoInterwikiMap = new List<SiteInfoInterwikiMap>
+		private static readonly List<SiteInfoInterwikiMap> SiteInfoInterwikiMap = new()
 		{
 			new SiteInfoInterwikiMap("en", "file://Test.txt/$1", null, InterwikiMapFlags.Local | InterwikiMapFlags.LocalInterwiki, "English", null, null, null),
 			new SiteInfoInterwikiMap("mediawikiwiki", "https://www.mediawiki.org/wiki/$1", null, InterwikiMapFlags.None, null, null, null, null),
@@ -452,7 +452,7 @@
 		#endregion
 
 		#region Private Methods
-		private static UserInfoResult GetUser(long id, string name) => new UserInfoResult(
+		private static UserInfoResult GetUser(long id, string name) => new(
 			baseUser: new UserItem(
 				userId: id,
 				name: name ?? string.Empty,

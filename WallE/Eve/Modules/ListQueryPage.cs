@@ -47,7 +47,7 @@
 		#endregion
 
 		#region Public Methods
-		public QueryPageResult AsQueryPageResult() => new QueryPageResult(
+		public QueryPageResult AsQueryPageResult() => new(
 			list: this.Output ?? Array.Empty<QueryPageItem>(),
 			cached: this.cached,
 			cachedTimestamp: this.cachedTimestamp,

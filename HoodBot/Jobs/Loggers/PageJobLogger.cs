@@ -16,7 +16,7 @@
 	public class PageJobLogger : JobLogger
 	{
 		#region Static Fields
-		private static readonly InvalidOperationException BadLogPage = new InvalidOperationException(Resources.BadLogPage);
+		private static readonly InvalidOperationException BadLogPage = new(Resources.BadLogPage);
 		#endregion
 
 		#region Fields

@@ -39,7 +39,7 @@
 			}
 		}
 
-		public PauseToken Token => new PauseToken(this);
+		public PauseToken Token => new(this);
 
 		public void ToggleState()
 		{

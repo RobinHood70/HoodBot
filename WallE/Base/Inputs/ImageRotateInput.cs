@@ -29,13 +29,13 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Static Methods
-		public static ImageRotateInput FromPageIds(IEnumerable<long> ids, int rotation) => new ImageRotateInput(ids, ListType.PageIds, rotation);
+		public static ImageRotateInput FromPageIds(IEnumerable<long> ids, int rotation) => new(ids, ListType.PageIds, rotation);
 
-		public static ImageRotateInput FromPageIds(IGeneratorInput generatorInput, IEnumerable<long> ids, int rotation) => new ImageRotateInput(generatorInput, ids, ListType.PageIds, rotation);
+		public static ImageRotateInput FromPageIds(IGeneratorInput generatorInput, IEnumerable<long> ids, int rotation) => new(generatorInput, ids, ListType.PageIds, rotation);
 
-		public static ImageRotateInput FromRevisionIds(IEnumerable<long> ids, int rotation) => new ImageRotateInput(ids, ListType.RevisionIds, rotation);
+		public static ImageRotateInput FromRevisionIds(IEnumerable<long> ids, int rotation) => new(ids, ListType.RevisionIds, rotation);
 
-		public static ImageRotateInput FromRevisionIds(IGeneratorInput generatorInput, IEnumerable<long> ids, int rotation) => new ImageRotateInput(generatorInput, ids, ListType.RevisionIds, rotation);
+		public static ImageRotateInput FromRevisionIds(IGeneratorInput generatorInput, IEnumerable<long> ids, int rotation) => new(generatorInput, ids, ListType.RevisionIds, rotation);
 		#endregion
 	}
 }

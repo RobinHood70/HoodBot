@@ -15,7 +15,7 @@ namespace RobinHood70.WallE.Design
 		/// <param name="originalValue">The value to filter.</param>
 		/// <returns>The input value with any relevant flags cleared.</returns>
 		public static FlagFilter<T> Check<T>(int siteVersion, T originalValue)
-			where T : Enum => new FlagFilter<T>(siteVersion, originalValue);
+			where T : Enum => new(siteVersion, originalValue);
 		#endregion
 	}
 

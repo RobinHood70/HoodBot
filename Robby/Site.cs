@@ -68,11 +68,11 @@
 		#region Static Fields
 		private static readonly string[] DefaultRedirect = { "#REDIRECT" };
 
-		private static readonly Dictionary<string, SiteFactoryMethod> SiteClasses = new Dictionary<string, SiteFactoryMethod>(StringComparer.Ordinal);
+		private static readonly Dictionary<string, SiteFactoryMethod> SiteClasses = new(StringComparer.Ordinal);
 		#endregion
 
 		#region Fields
-		private readonly Dictionary<string, MagicWord> magicWords = new Dictionary<string, MagicWord>(StringComparer.Ordinal);
+		private readonly Dictionary<string, MagicWord> magicWords = new(StringComparer.Ordinal);
 		private string? baseArticlePath;
 		private CultureInfo culture = CultureInfo.CurrentCulture;
 		private IReadOnlyCollection<Title>? deletePreventionTemplates;
@@ -242,7 +242,7 @@
 		/// <summary>The <see cref="SiteFactoryMethod"/> that creates a default <see cref="Site"/> object.</summary>
 		/// <param name="abstractionLayer">The abstraction layer to use with the site.</param>
 		/// <returns>A <see cref="Site"/> object.</returns>
-		public static Site DefaultSiteFactoryMethod(IWikiAbstractionLayer abstractionLayer) => new Site(abstractionLayer);
+		public static Site DefaultSiteFactoryMethod(IWikiAbstractionLayer abstractionLayer) => new(abstractionLayer);
 
 		/// <summary>Gets a factory method to create a new <see cref="Site"/> object or derivative thereof.</summary>
 		/// <param name="siteClassIdentifier">The site class identifier.</param>

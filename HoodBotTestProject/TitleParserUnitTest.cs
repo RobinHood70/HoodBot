@@ -9,7 +9,7 @@ namespace HoodBotTestProject
 	public class TitleParserUnitTest
 	{
 		#region Fields
-		private static readonly Site Site = new Site(new WikiAbstractionLayer());
+		private static readonly Site Site = new(new WikiAbstractionLayer());
 		#endregion
 
 		#region Static Constructor
@@ -18,7 +18,7 @@ namespace HoodBotTestProject
 
 		#region Public Static Properties
 		public static TheoryData<int, string, string?, int, string> CoercionTestData =>
-			new TheoryData<int, string, string?, int, string>
+			new()
 			{
 				{ MediaWikiNamespaces.Main, "Test", null, MediaWikiNamespaces.Main, "Test" },
 				{ MediaWikiNamespaces.Category, "Test", null, MediaWikiNamespaces.Category, "Test" },
@@ -32,7 +32,7 @@ namespace HoodBotTestProject
 			};
 
 		public static TheoryData<string, string?, int, string, string?> TestData =>
-			new TheoryData<string, string?, int, string, string?>
+			new()
 			{
 				{ "Test", null, MediaWikiNamespaces.Main, "Test", null },
 				{ "File:Test.png", null, MediaWikiNamespaces.File, "Test.png", null },

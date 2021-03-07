@@ -13,7 +13,7 @@
 	public class XmlVisitor : IWikiNodeVisitor
 	{
 		#region Fields
-		private readonly StringBuilder builder = new StringBuilder();
+		private readonly StringBuilder builder = new();
 		private readonly bool prettyPrint;
 		private int indent;
 		#endregion

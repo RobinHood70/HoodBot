@@ -64,7 +64,7 @@
 			[4] = "Branch",
 		}; */
 
-		private static readonly Dictionary<int, string> QuestTypes = new Dictionary<int, string>
+		private static readonly Dictionary<int, string> QuestTypes = new()
 		{
 			[0] = string.Empty, // "None"
 			[1] = "Group",
@@ -81,7 +81,7 @@
 			[12] = "Holiday Event",
 		};
 
-		private static readonly Dictionary<int, string> RepeatTypes = new Dictionary<int, string>
+		private static readonly Dictionary<int, string> RepeatTypes = new()
 		{
 			[0] = string.Empty,
 			[1] = "Immediately",

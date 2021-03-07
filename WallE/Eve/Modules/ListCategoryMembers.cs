@@ -14,7 +14,7 @@
 	internal sealed class ListCategoryMembers : ListModule<CategoryMembersInput, CategoryMembersItem>, IGeneratorModule
 	{
 		#region Static Fields
-		private static readonly Dictionary<string, CategoryMemberTypes> TypeLookup = new Dictionary<string, CategoryMemberTypes>(StringComparer.Ordinal)
+		private static readonly Dictionary<string, CategoryMemberTypes> TypeLookup = new(StringComparer.Ordinal)
 		{
 			["file"] = CategoryMemberTypes.File,
 			["page"] = CategoryMemberTypes.Page,

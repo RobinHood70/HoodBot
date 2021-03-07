@@ -9,12 +9,12 @@
 	public class WikiTextVisitor : IWikiNodeVisitor
 	{
 		#region Static Fields
-		private static readonly WikiTextVisitor RawVisitor = new WikiTextVisitor(true);
-		private static readonly WikiTextVisitor ValueVisitor = new WikiTextVisitor(false);
+		private static readonly WikiTextVisitor RawVisitor = new(true);
+		private static readonly WikiTextVisitor ValueVisitor = new(false);
 		#endregion
 
 		#region Fields
-		private readonly StringBuilder builder = new StringBuilder();
+		private readonly StringBuilder builder = new();
 		private readonly bool raw;
 		#endregion
 

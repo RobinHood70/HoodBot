@@ -20,10 +20,10 @@
 	internal sealed class EsoItemSets : EditJob
 	{
 		#region Static Fields
-		private static readonly HashSet<int> BadRows = new HashSet<int> { 2666 };
-		private static readonly Regex SetBonusRegex = new Regex(@"\(\s*(?<items>[1-6] items?)\s*\)\s*(?<text>.*?)\s*(?=(\([1-6] items?\)|\z))", RegexOptions.ExplicitCapture | RegexOptions.Singleline, DefaultRegexTimeout);
-		private static readonly Uri SetSummaryPage = new Uri("http://esolog.uesp.net/viewlog.php?record=setSummary&format=csv");
-		private static readonly Dictionary<string, string> TitleOverrides = new Dictionary<string, string>(StringComparer.Ordinal)
+		private static readonly HashSet<int> BadRows = new() { 2666 };
+		private static readonly Regex SetBonusRegex = new(@"\(\s*(?<items>[1-6] items?)\s*\)\s*(?<text>.*?)\s*(?=(\([1-6] items?\)|\z))", RegexOptions.ExplicitCapture | RegexOptions.Singleline, DefaultRegexTimeout);
+		private static readonly Uri SetSummaryPage = new("http://esolog.uesp.net/viewlog.php?record=setSummary&format=csv");
+		private static readonly Dictionary<string, string> TitleOverrides = new(StringComparer.Ordinal)
 		{
 			// Title Overrides should only be necessary when creating new disambiguated "(set)" pages or when pages don't conform to the base/base (set) style. While this could be done programatically, it's probably best not to, so that a human has verified that the page really should be created and that the existing page isn't malformed or something.
 			["Bloodspawn"] = "Bloodspawn (set)",

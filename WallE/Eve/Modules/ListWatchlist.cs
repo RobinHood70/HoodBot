@@ -12,9 +12,35 @@
 	internal sealed class ListWatchlist : ListModule<WatchlistInput, WatchlistItem>, IGeneratorModule
 	{
 		#region Static Fields
-		private static readonly HashSet<string> KnownProps = new HashSet<string>(StringComparer.Ordinal)
+		private static readonly HashSet<string> KnownProps = new(StringComparer.Ordinal)
 		{
-			"actionhidden", "anon", "bot", "comment", "commenthidden", "logaction", "logid", "logtype", "minor", "new", "newlen", "notificationtimestamp", "ns", "old_revid", "oldlen", "pageid", "parsedcomment", "patrolled", "revid", "suppressed", "timestamp", "title", "type", "unpatrolled", "user", "userhidden", "userid",
+			"actionhidden",
+			"anon",
+			"bot",
+			"comment",
+			"commenthidden",
+			"logaction",
+			"logid",
+			"logtype",
+			"minor",
+			"new",
+			"newlen",
+			"notificationtimestamp",
+			"ns",
+			"old_revid",
+			"oldlen",
+			"pageid",
+			"parsedcomment",
+			"patrolled",
+			"revid",
+			"suppressed",
+			"timestamp",
+			"title",
+			"type",
+			"unpatrolled",
+			"user",
+			"userhidden",
+			"userid",
 		};
 		#endregion
 

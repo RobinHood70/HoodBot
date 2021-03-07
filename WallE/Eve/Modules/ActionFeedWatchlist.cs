@@ -49,7 +49,7 @@
 				.AddIf("linktodiffs", input.LinkToDiffs, this.SiteVersion is >= 117 and < 124);
 		}
 
-		protected override CustomResult DeserializeCustom(string? result) => new CustomResult(result);
+		protected override CustomResult DeserializeCustom(string? result) => new(result);
 
 		protected override CustomResult DeserializeResult(JToken? result) => throw new NotSupportedException();
 		#endregion

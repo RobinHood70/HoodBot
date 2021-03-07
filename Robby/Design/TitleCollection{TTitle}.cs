@@ -61,7 +61,7 @@
 		where TTitle : class, ISimpleTitle
 	{
 		#region Fields
-		private readonly List<TTitle> items = new List<TTitle>();
+		private readonly List<TTitle> items = new();
 		private readonly Dictionary<ISimpleTitle, TTitle> lookup;
 		#endregion
 
