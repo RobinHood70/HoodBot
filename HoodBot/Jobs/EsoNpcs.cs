@@ -4,15 +4,14 @@
 	using System.Collections.Generic;
 	using System.Globalization;
 	using System.Text;
-
 	using RobinHood70.HoodBot.Jobs.JobModels;
+	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon.Parser.Basic;
-	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class EsoNpcs : EditJob
 	{
@@ -76,17 +75,34 @@
 			}
 			else
 			{
+				var createTitles = new TitleCollection(this.Site);
+				foreach (var npc in filteredNpcs)
+				{
+					if (npc.Page == null)
+					{
+						throw new InvalidOperationException();
+					}
+
+					createTitles.Add(npc.Page);
+				}
+
+				var createPages = createTitles.Load(new PageLoadOptions(PageModules.Info, false));
+				createPages.RemoveExists(false);
+
 				foreach (var npc in filteredNpcs)
 				{
 					if (npc.Page is Page page)
 					{
-						page.Text = NewPageText(npc, this.Site.Culture, placeInfo);
-						page.SetMinimalStartTimestamp();
-						this.Pages.Add(page);
-					}
-					else
-					{
-						throw new InvalidOperationException();
+						if (createPages.Contains(npc.Page))
+						{
+							this.Warn("Page exists, but wasn't caught until saving. Might need to be disambiguated: " + npc.Page.FullPageName);
+						}
+						else
+						{
+							page.Text = NewPageText(npc, this.Site.Culture, placeInfo);
+							page.SetMinimalStartTimestamp();
+							this.Pages.Add(page);
+						}
 					}
 				}
 			}
@@ -226,14 +242,8 @@
 			{
 				if (npc.Page == null)
 				{
-					if (this.updateMode)
-					{
-						throw ArgumentNull(nameof(npc.Page));
-					}
-				}
-				else
-				{
 					retval.Add(npc);
+					npc.Page = new Page(this.Site[UespNamespaces.Online], npc.Name);
 				}
 			}
 
@@ -282,6 +292,7 @@
 						}
 						else
 						{
+							npc.Page = page;
 							issue = "is already a content page without an Online NPC Summary";
 						}
 					}
