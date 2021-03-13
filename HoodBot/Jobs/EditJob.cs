@@ -54,15 +54,15 @@
 					page.Save(editSummary, isMinor);
 					saved = true;
 				}
-				catch (EditConflictException)
+				catch (EditConflictException) when (this.EditConflictAction != null)
 				{
-					if (this.EditConflictAction == null)
-					{
-						throw;
-					}
-
 					page.Load();
 					this.EditConflictAction(this, page);
+				}
+				catch (WikiException we) when (string.Equals(we.Code, "pagedeleted", StringComparison.Ordinal))
+				{
+					this.Warn("Page not saved because it was previously deleted.");
+					saved = true;
 				}
 			}
 		}
