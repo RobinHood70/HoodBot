@@ -520,43 +520,5 @@
 			throw new WikiException(CurrentCulture(Messages.ExcessiveLag));
 		}
 		#endregion
-
-		/*
-		#region private sealed classes
-		private sealed class CookieBinder : SerializationBinder
-		{
-			private static readonly HashSet<string> ValidTypes = new HashSet<string>(StringComparer.Ordinal)
-			{
-				"System.Collections.ArrayList",
-				"System.Collections.Comparer",
-				"System.Collections.Hashtable",
-				"System.Collections.SortedList",
-				"System.Collections.SortedList+SyncSortedList",
-				"System.Collections.SortedList+ValueList",
-				"System.Globalization.CompareInfo",
-				"System.Net.Cookie",
-				"System.Net.CookieCollection",
-				"System.Net.CookieContainer",
-				"System.Net.CookieVariant",
-				"System.Net.PathList",
-				"System.Net.PathList+PathListComparer",
-				"System.Object",
-			};
-
-			public override Type BindToType(string assemblyName, string typeName)
-			{
-				if (ValidTypes.Contains(typeName))
-				{
-					if (Type.GetType(typeName + ", " + assemblyName) is Type type)
-					{
-						return type;
-					}
-				}
-
-				throw new InvalidDataException();
-			}
-		}
-		#endregion
-		*/
 	}
 }
