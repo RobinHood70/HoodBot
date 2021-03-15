@@ -1487,7 +1487,7 @@
 		}
 		#endregion
 
-		#region private sealed classes
+		#region Private Classes
 		private sealed class BacklinksOutputComparer : EqualityComparer<BacklinksItem>
 		{
 			#region Public Override Methods

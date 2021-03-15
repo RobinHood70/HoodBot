@@ -50,7 +50,7 @@
 		private static IReadOnlyList<string> ParseRights(string? value) => value?.Split(TextArrays.CommaSpace, StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
 		#endregion
 
-		#region private sealed classes
+		#region Private Classes
 
 		private sealed class ExtraDataParser
 		{

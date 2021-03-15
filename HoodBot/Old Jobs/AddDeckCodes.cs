@@ -86,7 +86,7 @@
 		}
 		#endregion
 
-		#region private sealed classes
+		#region Private Classes
 		[SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal sealed classes", Justification = "Auto-populated by JSON deserializer.")]
 		private sealed class DeckCodeInfo
 		{
