@@ -256,7 +256,7 @@
 		}
 		#endregion
 
-		#region Private Sealed Classes
+		#region Private Classes
 		private sealed class ItemInfo
 		{
 			public ItemInfo(long id, string itemName, string type)

@@ -256,7 +256,7 @@
 		}
 		#endregion
 
-		#region private sealed classes
+		#region Private Classes
 		private sealed class KeyedPages : KeyedCollection<string, PageItem>
 		{
 			#region Public Methods

@@ -109,7 +109,7 @@
 		}
 		#endregion
 
-		#region private sealed classes
+		#region Private Classes
 		private struct IndentedLine
 		{
 			public IndentedLine(int level, string text)

@@ -163,7 +163,7 @@
 		}
 		#endregion
 
-		#region private sealed classes
+		#region Private Classes
 		private sealed class NpcEntry
 		{
 			#region Constructors
