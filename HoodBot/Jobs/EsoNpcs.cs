@@ -38,25 +38,21 @@
 		{
 			// TODO: This could be optimized further. Regular mode could load the page collection directly rather than by title; update mode could load pages with no loc or {{huh}} via MetaTemplate variables.
 			this.StatusWriteLine("Getting NPC data");
-			var allPages = new PageCollection(this.Site, new PageLoadOptions(PageModules.Default | PageModules.DeletedRevisions | PageModules.Properties, true));
-			allPages.GetCategoryMembers("Online-NPCs", CategoryMemberTypes.Page, false);
-			allPages.GetCategoryMembers("Online-Creatures-All", CategoryMemberTypes.Page, false);
-			var npcCollection = this.GetNpcPages(allPages);
-			var filteredNpcs = this.updateMode ? FilterNpcsUpdate(npcCollection) : this.FilterNpcs(npcCollection);
-			EsoGeneral.GetNpcLocations(filteredNpcs);
+			var npcCollection = this.GetNpcPages();
+			EsoGeneral.GetNpcLocations(npcCollection);
 
 			this.StatusWriteLine("Getting place data");
 			var places = EsoGeneral.GetPlaces(this.Site);
 			var placeInfo = EsoGeneral.PlaceInfo;
-			EsoGeneral.ParseNpcLocations(filteredNpcs, places);
-			foreach (var npc in filteredNpcs)
+			EsoGeneral.ParseNpcLocations(npcCollection, places);
+			foreach (var npc in npcCollection)
 			{
 				npc.TrimPlaces();
 			}
 
 			if (this.updateMode)
 			{
-				foreach (var npc in filteredNpcs)
+				foreach (var npc in npcCollection)
 				{
 					// TODO: We end up parsing the page twice with this design, one in FilterNpcsUpdate and once here. See if there's something that can be done to optimize this.
 					if (npc.Page is Page page &&
@@ -75,34 +71,13 @@
 			}
 			else
 			{
-				var createTitles = new TitleCollection(this.Site);
-				foreach (var npc in filteredNpcs)
-				{
-					if (npc.Page == null)
-					{
-						throw new InvalidOperationException();
-					}
-
-					createTitles.Add(npc.Page);
-				}
-
-				var createPages = createTitles.Load(new PageLoadOptions(PageModules.Info, false));
-				createPages.RemoveExists(false);
-
-				foreach (var npc in filteredNpcs)
+				foreach (var npc in npcCollection)
 				{
 					if (npc.Page is Page page)
 					{
-						if (createPages.Contains(npc.Page))
-						{
-							this.Warn("Page exists, but wasn't caught until saving. Might need to be disambiguated: " + npc.Page.FullPageName);
-						}
-						else
-						{
-							page.Text = NewPageText(npc, this.Site.Culture, placeInfo);
-							page.SetMinimalStartTimestamp();
-							this.Pages.Add(page);
-						}
+						page.Text = NewPageText(npc, this.Site.Culture, placeInfo);
+						page.SetMinimalStartTimestamp();
+						this.Pages.Add(page);
 					}
 				}
 			}
@@ -112,31 +87,6 @@
 		#endregion
 
 		#region Private Static Methods
-
-		private static NpcCollection FilterNpcsUpdate(NpcCollection npcs)
-		{
-			var retval = new NpcCollection();
-			foreach (var npc in npcs)
-			{
-				if (npc.Page is Page page)
-				{
-					var parsed = new ContextualParser(page);
-					if (parsed.FindTemplate("Online NPC Summary") is ITemplateNode template &&
-						template.Find("city").IsNullOrWhitespace() &&
-						template.Find("settlement").IsNullOrWhitespace() &&
-						template.Find("house").IsNullOrWhitespace() &&
-						template.Find("ship").IsNullOrWhitespace() &&
-						template.Find("store").IsNullOrWhitespace() &&
-						template.Find("loc") is IParameterNode loc &&
-						(loc.IsNullOrWhitespace() || string.Equals(loc.Value.ToValue(), "{{huh}}", StringComparison.OrdinalIgnoreCase)))
-					{
-						retval.Add(npc);
-					}
-				}
-			}
-
-			return retval;
-		}
 
 		private static string NewPageText(NpcData npc, CultureInfo culture, IEnumerable<PlaceInfo> placeInfo)
 		{
@@ -234,79 +184,116 @@
 		#endregion
 
 		#region Private Methods
-		private NpcCollection FilterNpcs(NpcCollection npcs)
+		private NpcCollection GetNpcPages()
 		{
-			this.StatusWriteLine("Checking for existing pages");
-			var retval = new NpcCollection();
+			Title NpcTitle(string pageName) => new(this.Site[UespNamespaces.Online], pageName);
+
+			var existingTitles = new TitleCollection(this.Site);
+			existingTitles.GetCategoryMembers("Online-NPCs", CategoryMemberTypes.Page, false);
+			existingTitles.GetCategoryMembers("Online-Creatures-All", CategoryMemberTypes.Page, false);
+			var npcs = EsoGeneral.GetNpcsFromDatabase();
+			var checkTitles = new TitleCollection(this.Site);
 			foreach (var npc in npcs)
 			{
-				if (npc.Page == null)
+				checkTitles.Add(npc.Name);
+			}
+
+			var checkPages = new PageCollection(this.Site, new PageLoadOptions(PageModules.Info | PageModules.Properties, true));
+			checkPages.GetTitles(checkTitles);
+
+			var npcRenames = new Dictionary<long, string>();
+			var loadNpcs = new NpcCollection();
+			var loadTitles = new TitleCollection(this.Site);
+			foreach (var npc in npcs)
+			{
+				ISimpleTitle title = NpcTitle(npc.Name);
+				if (checkPages.TitleMap.TryGetValue(npc.Name, out var redirect))
 				{
-					retval.Add(npc);
-					npc.Page = new Page(this.Site[UespNamespaces.Online], npc.Name);
+					npcRenames.Add(npc.Id, redirect.PageName);
+				}
+				else if (checkPages.TryGetValue(title, out var page) && page.IsDisambiguation)
+				{
+					var parser = new ContextualParser(page);
+					foreach (var linkNode in parser.LinkNodes)
+					{
+						var disambig = SiteLink.FromLinkNode(this.Site, linkNode, false);
+						if (existingTitles.TryGetValue(disambig, out var disambigPage))
+						{
+							npcRenames.Add(npc.Id, disambigPage.PageName);
+							break;
+						}
+					}
+				}
+
+				if (existingTitles.Contains(title))
+				{
+					if (this.updateMode)
+					{
+						loadNpcs.Add(npc);
+						loadTitles.Add(title);
+					}
+				}
+				else
+				{
+					loadNpcs.Add(npc);
+					loadTitles.Add(title);
 				}
 			}
 
-			return retval;
-		}
+			var loadPages = new PageCollection(this.Site, new PageLoadOptions(PageModules.Default | PageModules.DeletedRevisions | PageModules.Properties, true));
+			loadPages.GetTitles(loadTitles);
+			loadPages.Sort();
 
-		private NpcCollection GetNpcPages(PageCollection allPages)
-		{
-			var retval = EsoGeneral.GetNpcsFromDatabase();
-			foreach (var npc in retval)
+			var retval = new NpcCollection();
+			foreach (var npc in loadNpcs)
 			{
-				if (allPages.TryGetValue("Online:" + npc.Name, out var page))
+				if (!npcRenames.TryGetValue(npc.Id, out var npcName))
 				{
-					string? issue = null;
-					if (page.IsDisambiguation)
+					npcName = npc.Name;
+				}
+
+				if (loadPages.TryGetValue(NpcTitle(npcName), out var page))
+				{
+					var issue =
+						page.IsDisambiguation ? "is a disambiguation with no clear NPC link" :
+						page.IsRedirect ? "is a redirect to a content page without an Online NPC Summary" :
+						(!this.updateMode && page.IsMissing && page.PreviouslyDeleted) ? "was previously deleted" :
+						(!this.updateMode && !page.IsMissing) ? "is already a content page without an Online NPC Summary" :
+						null;
+					if (issue == null)
 					{
-						issue = "is a disambiguation with no clear NPC link";
-						var parser = new ContextualParser(page);
-						foreach (var linkNode in parser.LinkNodes)
+						npc.Page = page;
+						if (this.updateMode)
 						{
-							var disambig = SiteLink.FromLinkNode(this.Site, linkNode, false);
-							if (allPages.TryGetValue(disambig, out var disambigPage))
+							var parsed = new ContextualParser(page);
+							if (parsed.FindTemplate("Online NPC Summary") is ITemplateNode template &&
+								template.Find("city").IsNullOrWhitespace() &&
+								template.Find("settlement").IsNullOrWhitespace() &&
+								template.Find("house").IsNullOrWhitespace() &&
+								template.Find("ship").IsNullOrWhitespace() &&
+								template.Find("store").IsNullOrWhitespace() &&
+								template.Find("loc") is IParameterNode loc &&
+								(loc.IsNullOrWhitespace() || string.Equals(loc.Value.ToValue(), "{{huh}}", StringComparison.OrdinalIgnoreCase)))
 							{
-								issue = null;
-								npc.Page = disambigPage;
-								break;
+								retval.Add(npc);
 							}
-						}
-					}
-					else if (allPages.TitleMap.TryGetValue(page.FullPageName, out var redirect))
-					{
-						if (allPages.TryGetValue(redirect, out var redirectPage))
-						{
-							npc.Page = redirectPage;
 						}
 						else
 						{
-							issue = "is a redirect to a content page without an Online NPC Summary";
+							retval.Add(npc);
 						}
 					}
 					else
 					{
-						if (this.updateMode)
-						{
-							npc.Page = page;
-						}
-						else
-						{
-							npc.Page = page;
-							issue = "is already a content page without an Online NPC Summary";
-						}
-					}
-
-					if (issue != null)
-					{
-						// We use page instead of npc.Page for the link so we're not using redirected names.
-						this.WriteLine($"* {page.AsLink(true)} {issue}. Please use the following data to create a page manually, if needed.\n*:Name: {npc.Name}\n*:Gender: {npc.GenderText}\n*:Loot Type: {npc.LootType}\n*:Known Locations: {string.Join(", ", npc.Places)}\n*:Unknown Locations: {string.Join(", ", npc.UnknownLocations)}");
+						this.LogIssue(page.AsLink(true), issue, npc);
 					}
 				}
 			}
 
 			return retval;
 		}
+
+		private void LogIssue(string originalLink, string? issue, NpcData npc) => this.WriteLine($"* {originalLink} {issue}. Please use the following data to create a page manually, if needed.\n*:Name: {npc.Name}\n*:Gender: {npc.GenderText}\n*:Loot Type: {npc.LootType}\n*:Known Locations: {string.Join(", ", npc.Places)}\n*:Unknown Locations: {string.Join(", ", npc.UnknownLocations)}");
 		#endregion
 	}
 }
