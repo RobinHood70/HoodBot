@@ -48,13 +48,16 @@
 		/// <remarks>Adds text to the existing node, if the last node in the collection is a TextNode; otherwise, creates a CreateTextNode with the specified text and adds it to the collection.</remarks>
 		public void AddText([Localizable(false)] string text)
 		{
-			if (this.Count > 0 && this[^1] is ITextNode node)
+			if (!string.IsNullOrEmpty(text))
 			{
-				node.Text += text;
-			}
-			else
-			{
-				this.Add(this.Factory.TextNode(text));
+				if (this.Count > 0 && this[^1] is ITextNode node)
+				{
+					node.Text += text;
+				}
+				else
+				{
+					this.Add(this.Factory.TextNode(text));
+				}
 			}
 		}
 
