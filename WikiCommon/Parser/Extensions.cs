@@ -110,16 +110,17 @@
 		public static void SetValue(this IParameterNode parameter, IEnumerable<IWikiNode>? value)
 		{
 			ThrowNull(parameter, nameof(parameter));
-			var old = parameter.Value.ToValue();
-			var leading = LeadingSpace.Match(old).Value;
-			var trailing = TrailingSpace.Match(old).Value;
-			parameter.Value.Clear();
-			if (value != null)
+			if (value == null)
 			{
-				parameter.Value.AddText(leading);
-				parameter.Value.AddRange(value);
-				parameter.Value.AddText(trailing);
+				parameter.Value.Clear();
+				return;
 			}
+
+			var (leading, trailing) = GetSurroundingSpace(parameter.Value.ToValue());
+			parameter.Value.Clear();
+			parameter.Value.AddText(leading);
+			parameter.Value.AddRange(value);
+			parameter.Value.AddText(trailing);
 		}
 		#endregion
 
@@ -510,10 +511,7 @@
 		/// <param name="newTitle">The new title.</param>
 		public static void SetTitle(this ITemplateNode template, string newTitle)
 		{
-			var old = template.Title.ToValue();
-			var leading = LeadingSpace.Match(old).Value;
-			var trailing = TrailingSpace.Match(old).Value;
-
+			var (leading, trailing) = GetSurroundingSpace(template.Title.ToValue());
 			template.Title.Clear();
 			template.Title.AddText(leading + newTitle + trailing);
 		}
@@ -717,6 +715,24 @@
 			}
 
 			return -1;
+		}
+
+		private static (string Leading, string Trailing) GetSurroundingSpace(string old)
+		{
+			string trailingLine;
+			if (old.Length > 0 && old[^1] == '\n')
+			{
+				trailingLine = "\n";
+				old = old[0..^1];
+			}
+			else
+			{
+				trailingLine = string.Empty;
+			}
+
+			var leadingMatch = LeadingSpace.Match(old);
+			var trailingMatch = TrailingSpace.Match(old);
+			return (leadingMatch.Value, ((leadingMatch.Index == trailingMatch.Index) ? string.Empty : trailingMatch.Value) + trailingLine);
 		}
 		#endregion
 	}
