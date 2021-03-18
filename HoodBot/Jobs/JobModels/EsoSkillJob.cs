@@ -51,10 +51,11 @@
 		#endregion
 
 		#region Protected Static Methods
-		protected static string IconValueFixup(string? currentValue, string newValue)
+		protected static string IconValueFixup(IParameterNode? parameter, string newValue)
 		{
-			if (currentValue != null)
+			if (parameter != null)
 			{
+				var currentValue = parameter.Value.ToValue().Trim();
 				if (IconNameCache.TryGetValue(currentValue, out var oldValue))
 				{
 					return oldValue;
@@ -76,7 +77,7 @@
 			var retval = false;
 			if (template.Find(name) is not IParameterNode parameter)
 			{
-				parameter = template.Add(name, string.Empty);
+				parameter = template.Add(name, "\n");
 				retval = true;
 			}
 
@@ -85,7 +86,7 @@
 			if (!string.Equals(oldValue, value, StringComparison.Ordinal))
 			{
 				retval = true;
-				parameter.SetValue(value + '\n');
+				parameter.SetValue(value);
 
 				// We use usedList as the master check, since that should always be available if we're doing checks at all.
 				if (usedList != null)
@@ -299,8 +300,7 @@
 			for (var i = 0; i <= loopCount; i++)
 			{
 				var iconName = "icon" + (i > 0 ? (i + 1).ToStringInvariant() : string.Empty);
-				var iconParamater = template.Find(iconName);
-				var newValue = IconValueFixup(iconParamater?.Value.ToValue(), iconValue + (loopCount > 0 ? FormattableString.Invariant($" ({DestructionTypes[i]})") : string.Empty));
+				var newValue = IconValueFixup(template.Find(iconName), iconValue + (loopCount > 0 ? FormattableString.Invariant($" ({DestructionTypes[i]})") : string.Empty));
 				bigChange |= this.TrackedUpdate(template, iconName, newValue);
 			}
 
