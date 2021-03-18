@@ -96,7 +96,7 @@
 					var oldValue = radiusParam.Value.ToValue().Trim();
 					if (string.Equals(oldValue, newValue, StringComparison.OrdinalIgnoreCase))
 					{
-						radiusParam.SetValue(newValue + '\n');
+						radiusParam.SetValue(newValue);
 						bigChange = true;
 					}
 				}
@@ -199,7 +199,7 @@
 					bigChange |= this.TrackedUpdate(template, morphName + "name", morph.Name);
 					bigChange |= this.TrackedUpdate(template, morphName + "id", morph.Abilities[3].Id.ToStringInvariant());
 					var iconValue = MakeIcon(skillBase.SkillLine, morph.Name);
-					bigChange |= this.TrackedUpdate(template, morphName + "icon", IconValueFixup(template.Find(morphName + "icon")?.Value.ToValue(), iconValue));
+					bigChange |= this.TrackedUpdate(template, morphName + "icon", IconValueFixup(template.Find(morphName + "icon"), iconValue));
 					bigChange |= this.TrackedUpdate(template, morphName + "desc", morph.EffectLine, usedList, skillBase.Name);
 				}
 			}
