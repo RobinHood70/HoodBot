@@ -14,18 +14,20 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
+	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class EsoItemSets : EditJob
 	{
 		#region Static Fields
-		private static readonly HashSet<int> BadRows = new() { 2666 };
+		private static readonly HashSet<int> BadRows = new() { 854 };
 		private static readonly Regex SetBonusRegex = new(@"\(\s*(?<items>[1-6] items?)\s*\)\s*(?<text>.*?)\s*(?=(\([1-6] items?\)|\z))", RegexOptions.ExplicitCapture | RegexOptions.Singleline, DefaultRegexTimeout);
 		private static readonly Uri SetSummaryPage = new("http://esolog.uesp.net/viewlog.php?record=setSummary&format=csv");
 		private static readonly Dictionary<string, string> TitleOverrides = new(StringComparer.Ordinal)
 		{
 			// Title Overrides should only be necessary when creating new disambiguated "(set)" pages or when pages don't conform to the base/base (set) style. While this could be done programatically, it's probably best not to, so that a human has verified that the page really should be created and that the existing page isn't malformed or something.
+			["Baron Zaudrus"] = "Baron Zaudrus (set)",
 			["Bloodspawn"] = "Bloodspawn (set)",
 		};
 		#endregion
@@ -65,48 +67,13 @@
 		{
 			EsoReplacer.Initialize(this);
 			this.StatusWriteLine("Fetching data");
-			var csvData = this.client.Get(SetSummaryPage);
-			var csvFile = new CsvFile();
-			csvFile.ReadText(csvData, true);
-			this.ProgressMaximum = csvFile.Count + 2;
-			this.Progress++;
-
-			this.StatusWriteLine("Updating");
-			var setList = new List<PageData>();
-			foreach (var row in csvFile)
+			var setList = GetSetsFromCsv(this.client.Get(SetSummaryPage));
+			foreach (var set in setList)
 			{
-				if (!BadRows.Contains(int.Parse(row["id"], CultureInfo.InvariantCulture)))
-				{
-					var setName = row["setName"].Replace(@"\'", "'", StringComparison.Ordinal);
-					/* switch (setName)
-					{
-						case "Ironblood":
-						case "Knightmare":
-						case "Noble's Conquest":
-						case "Oblivion's Foe":
-						case "Pirate Skeleton":
-						case "Thurvokun":
-							break;
-						default:
-							continue;
-					} */
-
-					var bonusDescription = row["setBonusDesc"];
-					if (bonusDescription[0] != '(')
-					{
-						this.Warn($"Set bonus for {setName} doesn't start with a bracket:{Environment.NewLine}{bonusDescription}");
-					}
-
-					var set = new PageData(setName, bonusDescription);
-					if (TitleOverrides.TryGetValue(setName, out var pageName))
-					{
-						set.PageName = pageName;
-					}
-
-					setList.Add(set);
-				}
+				set.SetTitle(this.Site);
 			}
 
+			this.StatusWriteLine("Updating");
 			this.ResolveAndPopulateSets(setList);
 			var titles = new TitleCollection(this.Site);
 			foreach (var set in this.sets)
@@ -118,11 +85,10 @@
 			this.Pages.GetTitles(titles);
 			this.Pages.PageLoaded -= this.SetLoaded;
 			this.GenerateReport();
-			this.Progress++;
 		}
 		#endregion
 
-		#region Private Methods
+		#region Private Static Methods
 		private static string BuildNewPage(string setName)
 		{
 			var sb = new StringBuilder();
@@ -147,6 +113,46 @@
 			return sb.ToString();
 		}
 
+		private static List<PageData> GetSetsFromCsv(string csvData)
+		{
+			var csvFile = new CsvFile();
+			csvFile.ReadText(csvData, true);
+			var setList = new List<PageData>();
+			foreach (var row in csvFile)
+			{
+				if (!BadRows.Contains(int.Parse(row["id"], CultureInfo.InvariantCulture)))
+				{
+					var setName = row["setName"].Replace(@"\'", "'", StringComparison.Ordinal);
+					/* switch (setName)
+					{
+						case "Ancient Dragonguard":
+						case "Assassin's Guile":
+						case "Daring Corsair":
+						case "Grundwulf":
+						case "Innate Axiom":
+						case "New Moon Acolyte":
+						case "Sithis' Touch":
+						case "Slimecraw":
+							break;
+						default:
+							continue;
+					} */
+
+					var bonusDescription = row["setBonusDesc"];
+					if (bonusDescription[0] != '(')
+					{
+						throw new InvalidOperationException($"Set bonus for {setName} doesn't start with a bracket:{Environment.NewLine}{bonusDescription}");
+					}
+
+					setList.Add(new PageData(setName, bonusDescription));
+				}
+			}
+
+			return setList;
+		}
+		#endregion
+
+		#region Private Methods
 		private void GenerateReport()
 		{
 			this.WriteLine("== Item Sets With Non-Trivial Updates ==");
@@ -163,42 +169,44 @@
 
 		private void ResolveAndPopulateSets(List<PageData> dbSets)
 		{
-			var catTitles = new TitleCollection(this.Site);
-			catTitles.GetCategoryMembers("Online-Sets");
-			foreach (var set in dbSets)
-			{
-				catTitles.Add(new Title(this.Site[UespNamespaces.Online], set.PageName));
-			}
-
 			var loadOptions = new PageLoadOptions(PageModules.Info | PageModules.Properties, true);
 			var catMembers = new PageCollection(this.Site, loadOptions);
-			catMembers.GetTitles(catTitles);
+			catMembers.GetCategoryMembers("Online-Sets", CategoryMemberTypes.Page, false);
+
+			var catTitles = new TitleCollection(this.Site);
+			foreach (var set in dbSets)
+			{
+				if (!catMembers.Contains(set.Title))
+				{
+					catTitles.Add(set.Title);
+				}
+			}
+
+			if (catTitles.Count > 0)
+			{
+				catMembers.GetTitles(catTitles);
+			}
+
+#if DEBUG
 			catMembers.Sort();
+#endif
 
 			var disambigs = new Dictionary<Title, PageData>();
 			foreach (var set in dbSets)
 			{
-				var title = new Title(this.Site[UespNamespaces.Online], set.PageName); // Only used to normalize names. Some have underscores and other oddities.
-				if (catMembers.TryGetValue(title.FullPageName + " (set)", out var foundPage) || catMembers.TryGetValue(title, out foundPage))
+				if (!catMembers.TryGetValue(set.Title.FullPageName + " (set)", out var foundPage) && !catMembers.TryGetValue(set.Title, out foundPage))
 				{
-					set.PageName = foundPage.PageName;
-					if (foundPage.IsDisambiguation)
-					{
-						disambigs.Add(foundPage, set);
-					}
-					else
-					{
-						if (!foundPage.Exists)
-						{
-							this.Warn($"{foundPage.FullPageName} does not exist and will be created.");
-						}
+					throw new InvalidOperationException();
+				}
 
-						this.AddToSets(set);
-					}
+				set.SetPageName(this.Site, foundPage.PageName);
+				if (foundPage.IsDisambiguation)
+				{
+					disambigs.Add(foundPage, set);
 				}
 				else
 				{
-					throw new InvalidOperationException();
+					this.AddToSets(set);
 				}
 			}
 
@@ -216,7 +224,7 @@
 						{
 							if (link.PageName.Contains(" (set)", StringComparison.OrdinalIgnoreCase))
 							{
-								title.Value.PageName = link.PageName;
+								title.Value.SetPageName(this.Site, link.PageName);
 								this.AddToSets(title.Value);
 								resolved = true;
 								break;
@@ -314,25 +322,52 @@
 		}
 		#endregion
 
-		#region private sealed classes
+		#region Private Classes
 		private sealed class PageData
 		{
+			#region Fields
+			private Title? title;
+			#endregion
+
+			#region Constructors
 			public PageData(string setName, string bonusDescription)
 			{
-				this.SetName = setName;
-				this.PageName = setName;
-				this.BonusDescription = bonusDescription;
-			}
+				if (!TitleOverrides.TryGetValue(setName, out var pageName))
+				{
+					pageName = setName;
+				}
 
+				this.BonusDescription = bonusDescription;
+				this.PageName = pageName;
+				this.SetName = setName;
+			}
+			#endregion
+
+			#region Public Properties
 			public string BonusDescription { get; }
 
 			public bool IsNonTrivial { get; set; }
 
-			public string PageName { get; set; }
+			public string PageName { get; private set; }
 
 			public string SetName { get; }
 
+			public Title Title => this.title ?? throw new InvalidOperationException();
+			#endregion
+
+			#region Public Methods
+			public void SetPageName(Site site, string pageName)
+			{
+				this.PageName = pageName;
+				this.SetTitle(site);
+			}
+
+			public void SetTitle(Site site) => this.title = new Title(site[UespNamespaces.Online], this.PageName);
+			#endregion
+
+			#region Public Override Methods
 			public override string ToString() => this.SetName;
+			#endregion
 		}
 		#endregion
 	}
