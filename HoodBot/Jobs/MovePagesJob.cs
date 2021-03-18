@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Text;
+	using System.Threading;
 	using Newtonsoft.Json;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
@@ -170,6 +171,8 @@
 		}
 
 		protected MoveAction MoveAction { get; set; } = MoveAction.MoveSafely;
+
+		protected int MoveDelay { get; set; }
 
 		//// protected MoveOptions MoveOptions { get; set; } = MoveOptions.None;
 
@@ -604,6 +607,12 @@
 								toAdd.Add(newReplacement);
 							}
 						}
+					}
+
+					if (this.MoveDelay > 0)
+					{
+						// Quick hack of a delay, since UESP sometimes seems to lag, but may be version-specific, so don't want to make it too formal of a thing.
+						Thread.Sleep(this.MoveDelay);
 					}
 				}
 
