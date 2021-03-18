@@ -124,7 +124,7 @@
 
 		public static void ReplaceEsoLinks(Site site, NodeCollection nodes)
 		{
-			// Iterating manually rather than with NodeCollection methods, since the list is being altered as we go and I'm not sure how foreach would deal with that in this situation.
+			// Iterating manually rather than with NodeCollection methods, since the list is being altered as we go.
 			var factory = nodes.Factory;
 			for (var i = 0; i < nodes.Count; i++)
 			{
@@ -135,9 +135,9 @@
 					// This is a truly fugly hack of a text modification, but is necessary until such time as Nowrap/Huh insertion can handle this on their own. The logic is to check if the first match is at the beginning of the text and, if so, and the previous value is a Huh or Nowrap template, then integrate the text of that into this node and remove the template from the collection. After that's done, we proceed as normal.
 					var text = textNode.Text;
 					if (i > 0 &&
-						nodes[i - 1] is ITemplateNode previous &&
-						previous.GetTitleText() is string title &&
-						(title.Equals("huh", StringComparison.OrdinalIgnoreCase) || title.Equals("nowrap", StringComparison.OrdinalIgnoreCase)))
+						nodes[i - 1] is SiteTemplateNode previous &&
+						(previous.TitleValue.PageNameEquals("huh")
+						|| previous.TitleValue.PageNameEquals("nowrap")))
 					{
 						text = WikiTextVisitor.Raw(previous) + text;
 						var boldStart = false;
