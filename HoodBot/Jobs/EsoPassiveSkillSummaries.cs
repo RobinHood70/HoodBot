@@ -40,6 +40,9 @@
 					AND minedSkills.skillLine != 'Emperor'
 			ORDER BY skillTree.basename, skillTree.skillTypeName, minedSkills.rank";
 
+		/*
+			AND (skillTree.basename IN('Chemistry', 'Crystal Shard', 'Heavy Weapons', 'Lacerate', 'Rapid Maneuver', 'Swarm', 'Twin Blade and Blunt', 'Veiled Strike', 'Werewolf Transformation'))
+		*/
 		protected override string TypeText => "Passive";
 		#endregion
 
