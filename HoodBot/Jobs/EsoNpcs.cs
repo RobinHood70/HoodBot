@@ -36,7 +36,7 @@
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
-			// TODO: This could be optimized further. Regular mode could load the page collection directly rather than by title; update mode could load pages with no loc or {{huh}} via MetaTemplate variables.
+			// TODO: Update mode could load pages with no loc or {{huh}} via MetaTemplate variables.
 			this.StatusWriteLine("Getting NPC data");
 			var npcCollection = this.GetNpcPages();
 			EsoGeneral.GetNpcLocations(npcCollection);

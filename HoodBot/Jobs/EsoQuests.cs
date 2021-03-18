@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Data;
-	using System.Diagnostics;
 	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
@@ -79,6 +78,9 @@
 			[10] = "PVP Group",
 			[11] = "PVP Grand",
 			[12] = "Holiday Event",
+			[13] = "Battleground",
+			[14] = "Unknown (14)",
+			[15] = "Pledge",
 		};
 
 		private static readonly Dictionary<int, string> RepeatTypes = new()
@@ -125,8 +127,6 @@
 			this.StatusWriteLine("Getting wiki data");
 			var wikiQuests = new TitleCollection(this.Site);
 			wikiQuests.GetCategoryMembers("Online-Quests");
-
-			Debug.WriteLine(wikiQuests.Contains("Online:Capture Farm"));
 
 			this.StatusWriteLine("Getting quest data");
 			var quests = new List<QuestData>(this.GetQuestData(wikiQuests));
@@ -470,7 +470,7 @@
 		}
 		#endregion
 
-		#region private sealed classes
+		#region Private Classes
 		private sealed class Condition : IEquatable<Condition>
 		{
 			#region Constructors
