@@ -108,7 +108,8 @@
 			var lastCategoryIndex = -1;
 			for (var i = 0; i < this.Nodes.Count; i++)
 			{
-				if (this.Nodes[i] is SiteLinkNode link)
+				if (this.Nodes[i] is SiteLinkNode link &&
+					link.TitleValue.Namespace == MediaWikiNamespaces.Category)
 				{
 					if (Title.FromBacklinkNode(this.Site, link) == catTitle)
 					{
@@ -122,7 +123,11 @@
 			var newCat = this.Nodes.Factory.LinkNodeFromParts(catTitle.ToString());
 			if (lastCategoryIndex == -1)
 			{
-				this.Nodes.AddText("\n\n");
+				if (this.Nodes.Count > 0)
+				{
+					this.Nodes.AddText("\n\n");
+				}
+
 				this.Nodes.Add(newCat);
 			}
 			else
