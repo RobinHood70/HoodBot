@@ -12,17 +12,25 @@
 		#region Constructors
 		public UespNamespaceList(Site site)
 		{
-			if (site.LoadMessage("Uespnamespacelist") is not string message)
+			// Add defined namespaces
+			if (site.LoadMessage("Uespnamespacelist") is string message)
 			{
-				throw new InvalidOperationException();
+				var lines = message.Split(TextArrays.LineFeed, StringSplitOptions.RemoveEmptyEntries);
+				foreach (var line in lines)
+				{
+					if (line[0] is not '<' and not '#')
+					{
+						this.Add(new UespNamespace(site, line));
+					}
+				}
 			}
 
-			var lines = message.Split(TextArrays.LineFeed, StringSplitOptions.RemoveEmptyEntries);
-			foreach (var line in lines)
+			// Add remaining namespaces
+			foreach (var ns in site.Namespaces)
 			{
-				if (line[0] is not '<' and not '#')
+				if (ns.Id >= 0 && !ns.IsTalkSpace && !this.Contains(ns.Name))
 				{
-					this.Add(new UespNamespace(site, line));
+					this.Add(new UespNamespace(site, ns.Name));
 				}
 			}
 		}
