@@ -111,10 +111,13 @@
 						list.Add("move pages");
 					}
 
-					list.Add(
-						this.RedirectOption == RedirectOption.Suppress ? "suppress redirects" :
-						this.RedirectOption == RedirectOption.Create ? "create redirects" :
-						"create redirects but propose them for deletion");
+					if (this.MoveAction != MoveAction.None)
+					{
+						list.Add(
+							this.RedirectOption == RedirectOption.Suppress ? "suppress redirects" :
+							this.RedirectOption == RedirectOption.Create ? "create redirects" :
+							"create redirects but propose them for deletion");
+					}
 
 					if (this.FollowUpActions.HasFlag(FollowUpActions.FixLinks))
 					{
@@ -153,6 +156,8 @@
 		protected Action<Page, Replacement>? CustomEdit { get; set; }
 
 		protected Action<ContextualParser>? CustomReplace { get; set; }
+
+		protected bool DeleteOnSuccess { get; set; } = true;
 
 		protected string EditSummaryEditAfterMove { get; set; } = "Update text after page move";
 
@@ -320,7 +325,10 @@
 				this.CheckRemaining();
 			}
 
-			this.DeleteStatusFile();
+			if (this.DeleteOnSuccess)
+			{
+				this.DeleteStatusFile();
+			}
 		}
 		#endregion
 
@@ -400,7 +408,7 @@
 				!this.ProposedDeletions.Contains(page))
 			{
 				ThrowNull(replacement.Reason, nameof(replacement), nameof(replacement.Reason));
-				var text = "{{Proposeddeletion|bot=1|" + replacement.Reason + "}}";
+				var text = "{{Proposeddeletion|bot=1|" + replacement.Reason.UpperFirst(this.Site.Culture) + "}}";
 				var noinclude = page.Namespace == MediaWikiNamespaces.Template;
 				if (!noinclude)
 				{
@@ -730,6 +738,15 @@
 				this.UpdateLinkText(page, replacement.From, link, !isRedirectTarget);
 				link.UpdateLinkNode(node);
 			}
+
+			if (link.Namespace == MediaWikiNamespaces.Media
+				&& this.Replacements.TryGetValue(link.With(this.Site[MediaWikiNamespaces.File], link.PageName), out replacement)
+				&& replacement.Actions.HasFlag(ReplacementActions.UpdateLinks))
+			{
+				link = link.With(this.Site[MediaWikiNamespaces.Media], replacement.To.PageName);
+				this.UpdateLinkText(page, replacement.From, link, !isRedirectTarget);
+				link.UpdateLinkNode(node);
+			}
 		}
 
 		protected virtual void UpdateLinkText(Page page, Title oldTitle, SiteLink newLink, bool addCaption)
@@ -910,7 +927,7 @@
 						replacement.Actions = ReplacementActions.Skip;
 						replacement.Reason = "page title is indecipherable.";
 					}
-					else if (this.MoveAction == MoveAction.None)
+					else if (this.MoveAction == MoveAction.None && replacement.From != replacement.To)
 					{
 						replacement.Actions |= ReplacementActions.UpdateLinks;
 					}
@@ -937,7 +954,7 @@
 								replacement.Reason ??= $"To page exists";
 							}
 						}
-						else
+						else if (replacement.From != replacement.To)
 						{
 							replacement.Actions |= ReplacementActions.Move | ReplacementActions.UpdateLinks;
 							if (this.RedirectOption == RedirectOption.CreateButProposeDeletion && !replacement.FromPage.IsRedirect)
@@ -982,7 +999,7 @@
 				else
 				{
 					replacement.Actions |= ReplacementActions.Propose;
-					replacement.Reason = "unused";
+					replacement.Reason = "appears to be unused";
 				}
 			}
 		}
