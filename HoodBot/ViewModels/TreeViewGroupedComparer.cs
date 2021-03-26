@@ -44,7 +44,7 @@
 				}
 			}
 
-			return string.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCulture);
+			return string.Compare(x.DisplayText, y.DisplayText, StringComparison.Ordinal);
 		}
 	}
 	#endregion
