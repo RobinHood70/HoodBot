@@ -338,7 +338,7 @@
 		{
 			var oldText = this.StrippedTextFromNodes(oldPage.Nodes);
 			var newText = this.StrippedTextFromNodes(newPage.Nodes);
-			return string.Compare(oldText, newText, StringComparison.InvariantCultureIgnoreCase) != 0;
+			return string.Compare(oldText, newText, StringComparison.OrdinalIgnoreCase) != 0;
 		}
 
 		public void RemoveTrivialTemplates(NodeCollection oldNodes) =>
