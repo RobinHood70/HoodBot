@@ -35,23 +35,29 @@
 			this.Add("Edit Link", this.FullPageNameFirst);
 			this.Add("Lore Link", this.LoreFirst);
 			this.Add("Game Book", this.GameBookGeneral);
+			this.Add("Online NPC Summary", this.EsoNpc);
+			this.Add("Quest Header", this.GenericIcon);
 			this.Add("Pages In Category", this.CategoryFirst);
 
+			this.generic.Add(this.GenericIcon);
 			this.generic.Add(this.GenericImage);
 		}
 		#endregion
 
 		#region Public Methods
-		public void Add(string name, ParameterReplacer replacer)
+		public void Add(string name, params ParameterReplacer[] replacers)
 		{
 			var title = Title.Coerce(this.site, MediaWikiNamespaces.Template, name);
-			if (!this.TryGetValue(title, out var replacers))
+			if (!this.TryGetValue(title, out var currentReplacers))
 			{
-				replacers = new List<ParameterReplacer>();
-				this.Add(title, replacers);
+				currentReplacers = new List<ParameterReplacer>();
+				this.Add(title, currentReplacers);
 			}
 
-			replacers.Add(replacer);
+			foreach (var replacer in replacers)
+			{
+				currentReplacers.Add(replacer);
+			}
 		}
 
 		public void ReplaceAll(Page page, SiteTemplateNode template)
@@ -119,9 +125,13 @@
 			}
 		}
 
+		protected void EsoNpc(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find("condition"), UespNamespaces.Online);
+
 		protected void FullPageNameFirst(Page page, SiteTemplateNode template) => this.FullPageNameReplace(page, template.Find(1));
 
 		protected void GameBookGeneral(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find("lorename"), UespNamespaces.Lore);
+
+		protected void GenericIcon(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find("icon"), MediaWikiNamespaces.File);
 
 		protected void GenericImage(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find("image"), MediaWikiNamespaces.File);
 
@@ -152,7 +162,7 @@
 			}
 		}
 
-		private void PageNameReplaceWithExtension(IParameterNode? param, int ns, string ext)
+		private void PageNameReplaceAddExtension(IParameterNode? param, int ns, string ext)
 		{
 			if (param != null
 				&& new Title(this.site[ns], param.Value.ToValue() + ext) is var title
