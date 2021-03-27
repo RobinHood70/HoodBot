@@ -14,11 +14,6 @@
 	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling is a factor of using classes to handle complex inputs and is unavoidable.")]
 	public class TitleCollection : TitleCollection<Title>, IEnumerable<Title>, IMessageSource
 	{
-		#region Fields
-		private IEnumerable<int>? loadPageLimitations;
-		private LimitationType loadPageLimitationType;
-		#endregion
-
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class.</summary>
@@ -145,7 +140,7 @@
 		public PageCollection Load(PageLoadOptions options, PageCreator pageCreator)
 		{
 			var retval = new PageCollection(this.Site, options, pageCreator);
-			retval.SetLimitations(this.loadPageLimitationType, this.loadPageLimitations);
+			retval.SetLimitations(this.LimitationType, this.NamespaceLimitations);
 			retval.GetTitles(this);
 
 			return retval;
@@ -167,22 +162,6 @@
 				var pages = this.Purge(new PurgeInput(this.ToFullPageNames()) { Method = method });
 				return new ChangeValue<PageCollection>((pages.Count < this.Count) ? ChangeStatus.Failure : ChangeStatus.Success, pages);
 			});
-
-		/// <summary>Sets namespace limitations for the Load() methods.</summary>
-		/// <param name="limitationType">Type of the limitation.</param>
-		/// <param name="namespaceLimitations">The namespace limitations to apply to the PageCollection returned.</param>
-		/// <remarks>Currently, this applies only to the <see cref="PageCollection"/> returned by the various <see cref="Load()"/> methods. The <see cref="Purge()"/>, <see cref="Watch()"/>, and <see cref="Unwatch()"/> methods always return unfiltered results.</remarks>
-		public void SetLimitations(LimitationType limitationType, params int[] namespaceLimitations) => this.SetLimitations(limitationType, namespaceLimitations as IEnumerable<int>);
-
-		/// <summary>Sets namespace limitations for the Load() methods.</summary>
-		/// <param name="limitationType">Type of the limitation.</param>
-		/// <param name="namespaceLimitations">The namespace limitations to apply to the PageCollection returned.</param>
-		/// <remarks>Currently, this applies only to the <see cref="PageCollection"/> returned by the various <see cref="Load()"/> methods. The <see cref="Purge()"/>, <see cref="Watch()"/>, and <see cref="Unwatch()"/> methods always return unfiltered results.</remarks>
-		public void SetLimitations(LimitationType limitationType, IEnumerable<int> namespaceLimitations)
-		{
-			this.loadPageLimitations = namespaceLimitations;
-			this.loadPageLimitationType = limitationType;
-		}
 
 		/// <summary>Unwatches all pages in the collection.</summary>
 		/// <returns>A value indicating the change status of the unwatch along with a page collection with the unwatch results.</returns>
