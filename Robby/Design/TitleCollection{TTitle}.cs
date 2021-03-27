@@ -14,6 +14,19 @@
 	// TODO: Re-write so all lookups (Contains, IndexOf, Remove) use numeric namespace and pagename. Will probably require Key itself to be rewritten to match. Right now, things like IndexOf((string)key) will fail for alternative namespace names.
 	#region Public Enumerations
 
+	/// <summary>Specifies how to limit any pages added to the collection.</summary>
+	public enum LimitationType
+	{
+		/// <summary>Ignore all limitations.</summary>
+		None,
+
+		/// <summary>Automatically remove pages with namespaces specified in <see cref="TitleCollection{TTitle}.NamespaceLimitations"/> from the collection.</summary>
+		Remove,
+
+		/// <summary>Automatically limit pages in the collection to those with namespaces specified in <see cref="TitleCollection{TTitle}.NamespaceLimitations"/>.</summary>
+		FilterTo,
+	}
+
 	/// <summary>The page protection types.</summary>
 	[Flags]
 	public enum ProtectionLevels
@@ -99,6 +112,26 @@
 		/// <summary>Gets the site for the collection.</summary>
 		/// <value>The site.</value>
 		public Site Site { get; }
+		#endregion
+
+		#region Protected Properties
+
+		/// <summary>Gets or sets a value indicated whether <see cref="NamespaceLimitations"/> specifies namespaces to be removed from the collection or only allowing those namepaces.</summary>
+		/// <value>The type of the namespace limitation.</value>
+		/// <remarks>Changing this property only affects newly added pages and does not affect any existing items in the collection. Use <see cref="ReapplyLimitations"/> to do so, if needed.</remarks>
+		protected LimitationType LimitationType { get; set; } = LimitationType.Remove;
+
+		/// <summary>Gets the namespace limitations.</summary>
+		/// <value>A set of namespace IDs that will be filtered out or filtered down to automatically as pages are added.</value>
+		/// <remarks>Changing the contents of this collection only affects newly added pages and does not affect any existing items in the collection. Use <see cref="ReapplyLimitations"/> to do so, if needed.</remarks>
+		protected ICollection<int> NamespaceLimitations { get; } = new HashSet<int>
+		{
+			MediaWikiNamespaces.Media,
+			MediaWikiNamespaces.MediaWiki,
+			MediaWikiNamespaces.Special,
+			MediaWikiNamespaces.Template,
+			MediaWikiNamespaces.User,
+		};
 		#endregion
 
 		#region Public Indexers
@@ -798,6 +831,19 @@
 		/// <param name="item">The item to insert into the <see cref="TitleCollection">collection</see>.</param>
 		public void Insert(int index, TTitle item) => this.InsertItem(index, item);
 
+		/// <summary>Reapplies the namespace limitations in <see cref="NamespaceLimitations"/> to the existing collection.</summary>
+		public void ReapplyLimitations()
+		{
+			if (this.LimitationType == LimitationType.Remove)
+			{
+				this.RemoveNamespaces(this.NamespaceLimitations);
+			}
+			else if (this.LimitationType == LimitationType.FilterTo)
+			{
+				this.FilterToNamespaces(this.NamespaceLimitations);
+			}
+		}
+
 		/// <summary>Removes a specific item from the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="item">The item to remove from the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns><see langword="true" /> if <paramref name="item" /> was successfully removed from the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />. This method also returns <see langword="false" /> if <paramref name="item" /> is not found in the original <see cref="TitleCollection">collection</see>.</returns>
@@ -867,6 +913,12 @@
 
 		/// <summary>Removes all talk spaces from the collection.</summary>
 		public void RemoveTalkNamespaces() => this.RemoveNamespaces(true, null as IEnumerable<int>);
+
+		/// <summary>Sets namespace limitations for the Load() methods.</summary>
+		/// <param name="limitationType">Type of the limitation.</param>
+		/// <param name="namespaceLimitations">The namespace limitations to apply to the PageCollection returned.</param>
+		/// <remarks>Limitations apply only to the current collection; result collections will inherently be unfiltered to allow for cross-namespace redirection. Filtering can be added to result collections after they are returned.</remarks>
+		public void SetLimitations(LimitationType limitationType, params int[] namespaceLimitations) => this.SetLimitations(limitationType, namespaceLimitations as IEnumerable<int>);
 
 		/// <summary>Sorts the items in the <see cref="TitleCollection">collection</see> by namespace, then pagename.</summary>
 		public void Sort() => this.Sort(SimpleTitleComparer.Instance);
@@ -938,6 +990,20 @@
 			this.lookup.Clear();
 		}
 
+		/// <summary>Sets the namespace limitations to new values, clearing out any previous limitations.</summary>
+		/// <param name="limitationType">The type of namespace limitations to apply.</param>
+		/// <param name="namespaceLimitations">The namespace limitations. If null, only the limitation type is applied; the namespace set will remain unchanged.</param>
+		/// <remarks>If the <paramref name="namespaceLimitations"/> parameter is null, no changes will be made to either of the limitation properties. This allows current/default limitations to remain in place if needed.</remarks>
+		public virtual void SetLimitations(LimitationType limitationType, IEnumerable<int>? namespaceLimitations)
+		{
+			this.LimitationType = limitationType;
+			this.NamespaceLimitations.Clear();
+			if (limitationType != LimitationType.None && namespaceLimitations != null)
+			{
+				this.NamespaceLimitations.AddRange(namespaceLimitations);
+			}
+		}
+
 		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
 		/// <param name="key">The key of the value to get.</param>
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
@@ -973,6 +1039,22 @@
 		}
 		#endregion
 
+		#region Protected Methods
+
+		/// <summary>Gets a value indicating whether the page title is within the collection's limitations.</summary>
+		/// <param name="title">The title.</param>
+		/// <returns><see langword="true"/> if the page is within the collection's limitations and can be added to it; otherwise, <see langword="false"/>.</returns>
+		protected bool IsTitleInLimits(ISimpleTitle title) =>
+			title != null &&
+			this.LimitationType switch
+			{
+				LimitationType.None => true,
+				LimitationType.Remove => !this.NamespaceLimitations.Contains(title.Namespace.Id),
+				LimitationType.FilterTo => this.NamespaceLimitations.Contains(title.Namespace.Id),
+				_ => throw new InvalidOperationException(Resources.InvalidLimitationType)
+			};
+		#endregion
+
 		#region Protected Override Methods
 
 		/// <summary>Inserts an item into the <see cref="TitleCollection">collection</see>.</summary>
@@ -988,8 +1070,11 @@
 				throw new InvalidOperationException(CurrentCulture(Resources.InvalidSite));
 			}
 
-			this.lookup[item] = item;
-			this.items.Insert(index, item);
+			if (this.IsTitleInLimits(item))
+			{
+				this.lookup[item] = item;
+				this.items.Insert(index, item);
+			}
 		}
 
 		/// <summary>Removes the item at a specific index in the <see cref="TitleCollection">collection</see>.</summary>

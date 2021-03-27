@@ -6,26 +6,9 @@
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.CommonCode.Globals;
-
-	#region Public Enumerations
-
-	/// <summary>Specifies how to limit any pages added to the collection.</summary>
-	public enum LimitationType
-	{
-		/// <summary>Ignore all limitations.</summary>
-		None,
-
-		/// <summary>Automatically remove pages with namespaces specified in <see cref="PageCollection.NamespaceLimitations"/> from the collection.</summary>
-		Remove,
-
-		/// <summary>Automatically limit pages in the collection to those with namespaces specified in <see cref="PageCollection.NamespaceLimitations"/>.</summary>
-		FilterTo,
-	}
-	#endregion
 
 	/// <summary>Represents a collection of pages, with methods to request additional pages from the site.</summary>
 	/// <remarks>Generally speaking, a PageCollection represents data that's returned from the site, although there's nothing preventing you from creating a PageCollection to store your own newly created pages, either. In most such cases, however, it's better to create and save one page at a time than to store the entire set in memory.</remarks>
@@ -92,37 +75,11 @@
 		public event StrongEventHandler<PageCollection, Page>? PageLoaded;
 		#endregion
 
-		#region Public Static Properties
-
-		/// <summary>Gets the default namespace limitations.</summary>
-		/// <value>A set of namespace IDs that will, by default, be filtered out or filtered down to automatically as pages are added.</value>
-		/// <remarks>This collection can be changed in order to affect all new PageCollections which don't override the default. Be careful not to unintentionally set a property or variable directly to this property. Instead, it should normally be used to seed a new collection.</remarks>
-		public static IList<int> DefaultNamespaceLimitations { get; } = new List<int>
-		{
-			// TODO: Figure out a better way to handle this.
-			MediaWikiNamespaces.Media,
-			MediaWikiNamespaces.MediaWiki,
-			MediaWikiNamespaces.Special,
-			MediaWikiNamespaces.Template,
-			MediaWikiNamespaces.User,
-		};
-
-		/// <summary>Gets or sets a value indicating whether <see cref="NamespaceLimitations"/> specifies namespaces to be removed from the collection or only allowing those namepaces.</summary>
-		/// <value>The type of the namespace limitation.</value>
-		/// <remarks>This value can be changed in order to affect all new PageCollections which don't override the default.</remarks>
-		public static LimitationType DefaultLimitationType { get; set; } = LimitationType.Remove;
-		#endregion
-
 		#region Public Properties
 
 		/// <summary>Gets or sets the load options.</summary>
 		/// <value>The load options.</value>
 		public PageLoadOptions LoadOptions { get; set; }
-
-		/// <summary>Gets the namespace limitations.</summary>
-		/// <value>A set of namespace IDs that will be filtered out or filtered down to automatically as pages are added.</value>
-		/// <remarks>Changing the contents of this collection only affects newly added pages and does not affect any existing items in the collection. Use <see cref="ReapplyLimitations"/> to do so, if needed.</remarks>
-		public ICollection<int> NamespaceLimitations { get; } = new HashSet<int>(DefaultNamespaceLimitations);
 
 		/// <summary>Gets or sets the page creator.</summary>
 		/// <value>The page creator.</value>
@@ -135,14 +92,6 @@
 		/// <para>The title map is largely for informational purposes. When accessing items in the collection, it will automatically check the title map and attempt to return the correct result.</para>
 		/// </remarks>
 		public IReadOnlyDictionary<string, IFullTitle> TitleMap => this.titleMap;
-		#endregion
-
-		#region Protected Properties
-
-		/// <summary>Gets or sets a value indicated whether <see cref="NamespaceLimitations"/> specifies namespaces to be removed from the collection or only allowing those namepaces.</summary>
-		/// <value>The type of the namespace limitation.</value>
-		/// <remarks>Changing this property only affects newly added pages and does not affect any existing items in the collection. Use <see cref="ReapplyLimitations"/> to do so, if needed.</remarks>
-		protected LimitationType LimitationType { get; set; } = DefaultLimitationType;
 		#endregion
 
 		#region Public Indexers
@@ -227,19 +176,6 @@
 		/// <param name="titles">The titles.</param>
 		public void GetTitles(IEnumerable<ISimpleTitle> titles) => this.GetTitles(this.LoadOptions, titles);
 
-		/// <summary>Reapplies the namespace limitations in <see cref="NamespaceLimitations"/> to the existing collection.</summary>
-		public void ReapplyLimitations()
-		{
-			if (this.LimitationType == LimitationType.Remove)
-			{
-				this.RemoveNamespaces(this.NamespaceLimitations);
-			}
-			else if (this.LimitationType == LimitationType.FilterTo)
-			{
-				this.FilterToNamespaces(this.NamespaceLimitations);
-			}
-		}
-
 		/// <summary>Removes all pages from the collection where the page's <see cref="Page.Exists"/> property equals the value provided.</summary>
 		/// <param name="exists">If <see langword="true"/>, pages that exist will be removed from the collection; if <see langword="false"/>, non-existent pages will be removed fromt he collection.</param>
 		public void RemoveExists(bool exists)
@@ -262,26 +198,6 @@
 				{
 					this.RemoveAt(i);
 				}
-			}
-		}
-
-		/// <summary>Sets the namespace limitations to new values, clearing out any previous limitations.</summary>
-		/// <param name="limitationType">The type of namespace limitations to apply.</param>
-		/// <param name="namespaceLimitations">The namespace limitations. If null, only the limitation type is applied; the namespace set will remain unchanged.</param>
-		/// <remarks>If the <paramref name="namespaceLimitations"/> parameter is null, no changes will be made to either of the limitation properties. This allows current/default limitations to remain in place if needed.</remarks>
-		public void SetLimitations(LimitationType limitationType, params int[] namespaceLimitations) => this.SetLimitations(limitationType, namespaceLimitations as IEnumerable<int>);
-
-		/// <summary>Sets the namespace limitations to new values, clearing out any previous limitations.</summary>
-		/// <param name="limitationType">The type of namespace limitations to apply.</param>
-		/// <param name="namespaceLimitations">The namespace limitations. If null, only the limitation type is applied; the namespace set will remain unchanged.</param>
-		/// <remarks>If the <paramref name="namespaceLimitations"/> parameter is null, no changes will be made to either of the limitation properties. This allows current/default limitations to remain in place if needed.</remarks>
-		public void SetLimitations(LimitationType limitationType, IEnumerable<int>? namespaceLimitations)
-		{
-			this.LimitationType = limitationType;
-			this.NamespaceLimitations.Clear();
-			if (limitationType != LimitationType.None && namespaceLimitations != null)
-			{
-				this.NamespaceLimitations.AddRange(namespaceLimitations);
 			}
 		}
 		#endregion
@@ -431,22 +347,6 @@
 		}
 		#endregion
 
-		#region Protected Methods
-
-		/// <summary>Gets a value indicating whether the page title is within the collection's limitations.</summary>
-		/// <param name="page">The page.</param>
-		/// <returns><see langword="true"/> if the page is within the collection's limitations and can be added to it; otherwise, <see langword="false"/>.</returns>
-		protected bool IsTitleInLimits(ISimpleTitle page) =>
-			page != null &&
-			this.LimitationType switch
-			{
-				LimitationType.None => true,
-				LimitationType.Remove => !this.NamespaceLimitations.Contains(page.Namespace.Id),
-				LimitationType.FilterTo => this.NamespaceLimitations.Contains(page.Namespace.Id),
-				_ => throw new InvalidOperationException(Resources.InvalidLimitationType)
-			};
-		#endregion
-
 		#region Protected Override Methods
 
 		/// <summary>Adds backlinks (aka, What Links Here) of the specified title to the collection.</summary>
@@ -588,19 +488,6 @@
 		/// <summary>Adds raw watchlist pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		protected override void GetWatchlistRaw(WatchlistRawInput input) => this.GetCustomGenerator(input);
-
-		/// <summary>Inserts an item into the <see cref="PageCollection">collection</see>.</summary>
-		/// <param name="index">The index to insert at.</param>
-		/// <param name="item">The item.</param>
-		/// <remarks>This method underlies all of the various add methods, and can be overridden in derived classes.</remarks>
-		protected override void InsertItem(int index, Page item)
-		{
-			ThrowNull(item, nameof(item));
-			if (this.IsTitleInLimits(item))
-			{
-				base.InsertItem(index, item);
-			}
-		}
 
 		/// <summary>Creates a new page using the collection's <see cref="PageCreator"/> and adds it to the collection.</summary>
 		/// <param name="title">The title of the page to create.</param>
