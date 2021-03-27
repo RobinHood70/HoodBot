@@ -1,4 +1,4 @@
-﻿namespace RobinHood70.HoodBot.Jobs
+﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
 	using System.Collections.Generic;
 	using RobinHood70.HoodBot.Uesp;
@@ -36,8 +36,9 @@
 			this.Add("Lore Link", this.LoreFirst);
 			this.Add("Game Book", this.GameBookGeneral);
 			this.Add("Online NPC Summary", this.EsoNpc);
-			this.Add("Quest Header", this.GenericIcon);
 			this.Add("Pages In Category", this.CategoryFirst);
+			this.Add("Quest Header", this.GenericIcon);
+			this.Add("Soft Redirect", this.FullPageNameFirst);
 
 			this.generic.Add(this.GenericIcon);
 			this.generic.Add(this.GenericImage);
