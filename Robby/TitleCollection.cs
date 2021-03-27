@@ -140,7 +140,7 @@
 		public PageCollection Load(PageLoadOptions options, PageCreator pageCreator)
 		{
 			var retval = new PageCollection(this.Site, options, pageCreator);
-			retval.SetLimitations(this.LimitationType, this.NamespaceLimitations);
+			retval.SetLimitations(LimitationType.None);
 			retval.GetTitles(this);
 
 			return retval;
