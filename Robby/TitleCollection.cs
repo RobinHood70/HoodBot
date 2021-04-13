@@ -19,9 +19,7 @@
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class.</summary>
 		/// <param name="site">The site the titles are from. All titles in a collection must belong to the same site.</param>
 		public TitleCollection(Site site)
-			: base(site)
-		{
-		}
+			: base(site) => this.LimitationType = LimitationType.None;
 
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class with a specific list of titles.</summary>
 		/// <param name="site">The site.</param>
@@ -30,6 +28,7 @@
 			: base(site)
 		{
 			ThrowNull(titles, nameof(titles));
+			this.LimitationType = LimitationType.None;
 			foreach (var item in titles)
 			{
 				var newTitle = Title.FromName(site, item);
@@ -54,6 +53,7 @@
 		{
 			ThrowNull(site, nameof(site));
 			ThrowNull(titles, nameof(titles));
+			this.LimitationType = LimitationType.None;
 			this.Add(ns, titles);
 		}
 
@@ -74,6 +74,7 @@
 			: base(site)
 		{
 			ThrowNull(titles, nameof(titles));
+			this.LimitationType = LimitationType.None;
 			foreach (var title in titles)
 			{
 				this.Add(new Title(title));
