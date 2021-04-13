@@ -382,7 +382,7 @@
 				this.editPath = info.EditUrl;
 				this.IsNew = info.Flags.HasFlag(PageInfoFlags.New);
 				this.IsRedirect = info.Flags.HasFlag(PageInfoFlags.Redirect);
-				this.StartTimestamp = pageItem.Info.StartTimestamp;
+				this.StartTimestamp = pageItem.Info.StartTimestamp ?? this.Site.AbstractionLayer.CurrentTimestamp;
 				this.Text = this.CurrentRevisionId != 0 ? this.CurrentRevision?.Text : null;
 				foreach (var protItem in pageItem.Info.Protections)
 				{
