@@ -342,6 +342,7 @@
 			// QUESTION: Is the below still an issue?
 			// Page may not have been correctly found if it was recently moved. If it wasn't, there's little we can do here, so skip it and it'll show up in the report (assuming it's generated).
 			// TODO: See if this can be worked around, like asking the wiki to purge and reload or something.
+			ThrowNull(page, nameof(page));
 			var parsedPage = new ContextualParser(page);
 			this.ReplaceNodes(page, parsedPage.Nodes); // TODO: See if this can be re-written with ContextualParser methods.
 			this.CustomReplace?.Invoke(parsedPage);

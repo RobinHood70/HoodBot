@@ -485,7 +485,7 @@
 
 		#region Private Structures
 		[StructLayout(LayoutKind.Auto)]
-		private struct Comment
+		private readonly struct Comment
 		{
 			public Comment(int start, int end, int wsLength)
 			{
@@ -494,11 +494,11 @@
 				this.WhiteSpaceLength = wsLength;
 			}
 
-			public int End { get; set; }
+			public int End { get; }
 
-			public int Start { get; set; }
+			public int Start { get; }
 
-			public int WhiteSpaceLength { get; set; }
+			public int WhiteSpaceLength { get; }
 		}
 		#endregion
 	}

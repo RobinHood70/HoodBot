@@ -3,6 +3,9 @@
 		<TargetFramework>net5.0</TargetFramework>
 		<Description>Automates Internet Explorer for on-site diffs.</Description>
 		<RootNamespace>RobinHood70.InternetExplorerDiff</RootNamespace>
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<AnalysisLevel>latest</AnalysisLevel>
+		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

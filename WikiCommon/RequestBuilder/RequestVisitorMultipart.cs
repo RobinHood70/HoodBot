@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.WikiCommon.RequestBuilder
 {
 	using System;
+	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
 	using System.Text;
 	using static RobinHood70.CommonCode.Globals;
@@ -101,7 +102,7 @@
 		public void Visit(FileParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
-			var fileData = parameter.GetFileData();
+			var fileData = parameter.GetData();
 			if (ScanBoundaryConflicts && fileData.LongLength > 0 && CurrentEncoding.GetString(fileData).Contains(this.boundary, StringComparison.Ordinal))
 			{
 				this.badBoundary = true;
@@ -141,6 +142,8 @@
 		#endregion
 
 		#region Private Methods
+
+		[SuppressMessage("Security", "CA5394:Do not use insecure randomness", Justification = "Doesn't need to be secure.")]
 		private static string RandomBoundary(int boundaryLength)
 		{
 			// Sanity check

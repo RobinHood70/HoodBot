@@ -102,7 +102,7 @@
 			}
 
 			var query = $"SELECT npcId, zone, locCount FROM npcLocations WHERE npcId IN ({string.Join(", ", npcIds)}) AND zone != 'Tamriel'";
-			for (var retries = 0; retries < 4; retries++)
+			for (var retries = 0; true; retries++)
 			{
 				try
 				{
@@ -118,19 +118,11 @@
 
 					break;
 				}
-				catch (TimeoutException)
+				catch (TimeoutException) when (retries < 3)
 				{
-					if (retries == 3)
-					{
-						throw;
-					}
 				}
-				catch (MySqlException)
+				catch (MySqlException) when (retries < 3)
 				{
-					if (retries == 3)
-					{
-						throw;
-					}
 				}
 			}
 		}

@@ -412,10 +412,12 @@
 				try
 				{
 					var cookieText = File.ReadAllText(this.cookiesLocation);
-					var cookies = JsonConvert.DeserializeObject<List<Cookie>>(cookieText);
-					foreach (var entry in cookies)
+					if (JsonConvert.DeserializeObject<List<Cookie>>(cookieText) is List<Cookie> cookies)
 					{
-						this.cookieContainer.Add(entry);
+						foreach (var entry in cookies)
+						{
+							this.cookieContainer.Add(entry);
+						}
 					}
 				}
 				catch (DirectoryNotFoundException)

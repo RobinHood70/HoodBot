@@ -29,7 +29,7 @@
 							return;
 						}
 
-						if (tcs != null && Interlocked.CompareExchange(ref this.paused, null, tcs) == tcs)
+						if (Interlocked.CompareExchange(ref this.paused, null, tcs) == tcs)
 						{
 							tcs.SetResult(true);
 							break;

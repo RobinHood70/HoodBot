@@ -13,6 +13,7 @@
 		public UespNamespaceList(Site site)
 		{
 			// Add defined namespaces
+			ThrowNull(site, nameof(site));
 			if (site.LoadMessage("Uespnamespacelist") is string message)
 			{
 				var lines = message.Split(TextArrays.LineFeed, StringSplitOptions.RemoveEmptyEntries);

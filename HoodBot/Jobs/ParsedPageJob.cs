@@ -12,6 +12,10 @@
 		}
 		#endregion
 
+		#region Protected Properties
+		protected bool MinorEdit { get; set; } = true;
+		#endregion
+
 		#region Protected Abstract Properties
 		protected abstract string EditSummary { get; }
 		#endregion
@@ -20,12 +24,12 @@
 		protected override void BeforeLogging()
 		{
 			this.StatusWriteLine("Loading Pages");
-			this.Pages.PageLoaded += this.Results_PageLoaded;
+			this.Pages.PageLoaded += this.ResultsPageLoaded;
 			this.LoadPages();
-			this.Pages.PageLoaded -= this.Results_PageLoaded;
+			this.Pages.PageLoaded -= this.ResultsPageLoaded;
 		}
 
-		protected override void Main() => this.SavePages(this.EditSummary, true, this.Results_PageLoaded);
+		protected override void Main() => this.SavePages(this.EditSummary, this.MinorEdit, this.ResultsPageLoaded);
 		#endregion
 
 		#region Protected Abstract Methods
@@ -34,12 +38,12 @@
 		protected abstract void ParseText(object sender, ContextualParser parsedPage);
 		#endregion
 
-		#region Private Methods
-		private void Results_PageLoaded(object sender, Page eventArgs)
+		#region Protected Virtual Methods
+		protected virtual void ResultsPageLoaded(object sender, Page page)
 		{
-			var parsedPage = new ContextualParser(eventArgs);
+			var parsedPage = new ContextualParser(page);
 			this.ParseText(sender, parsedPage);
-			eventArgs.Text = parsedPage.ToRaw();
+			page.Text = parsedPage.ToRaw();
 		}
 		#endregion
 	}

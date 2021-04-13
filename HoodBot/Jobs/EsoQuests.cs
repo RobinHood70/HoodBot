@@ -15,43 +15,43 @@
 	{
 		#region Constants
 		private const string QuestQuery =
-			@"SELECT 
-				quest.id,
-				quest.internalId,
-				quest.name,
-				quest.type,
-				quest.repeatType,
-				quest.backgroundText,
-				quest.objective,
-				quest.zone,
-				location.zone locZone
-			FROM
-				quest INNER JOIN
-				location ON quest.locationId = location.id";
+		"SELECT\n" +
+		   "quest.id,\n" +
+		   "quest.internalId,\n" +
+		   "quest.name,\n" +
+		   "quest.type,\n" +
+		   "quest.repeatType,\n" +
+		   "quest.backgroundText,\n" +
+		   "quest.objective,\n" +
+		   "quest.zone,\n" +
+		   "location.zone locZone\n" +
+	   "FROM\n" +
+		   "quest INNER JOIN\n" +
+		   "location ON quest.locationId = location.id";
 
 		private const string StageQuery =
-			@"SELECT 
-				questStep.id,
-				questStep.questId,
-				questStep.text,
-				questStep.visibility,
-				location.zone zone
-			FROM
-				questStep INNER JOIN
-				location ON questStep.locationId = location.id
-			WHERE questStep.questId IN (<questIds>)
-			ORDER BY questStep.questId, questStep.stageIndex, questStep.stepIndex";
+		"SELECT\n" +
+		   "questStep.id,\n" +
+		   "questStep.questId,\n" +
+		   "questStep.text,\n" +
+		   "questStep.visibility,\n" +
+		   "location.zone zone\n" +
+	   "FROM\n" +
+		   "questStep INNER JOIN\n" +
+		   "location ON questStep.locationId = location.id\n" +
+	   "WHERE questStep.questId IN (<questIds>)\n" +
+	   "ORDER BY questStep.questId, questStep.stageIndex, questStep.stepIndex";
 
 		private const string ConditionQuery =
-			@"SELECT questId, questStepId, text, isFail, isComplete
-			FROM uesp_esolog.questCondition
-			WHERE questId IN (<questIds>)
-			ORDER BY questId, stepIndex, conditionIndex";
+		"SELECT questId, questStepId, text, isFail, isComplete\n" +
+		"FROM uesp_esolog.questCondition\n" +
+		"WHERE questId IN (<questIds>)\n" +
+		"ORDER BY questId, stepIndex, conditionIndex";
 
 		private const string RewardsQuery =
-			@"SELECT questId, name, itemId, collectId, quantity, quality, type
-			FROM uesp_esolog.questReward
-			WHERE questId IN (<questIds>);";
+		"SELECT questId, name, itemId, collectId, quantity, quality, type\n" +
+		"FROM uesp_esolog.questReward\n" +
+		"WHERE questId IN (<questIds>);";
 		#endregion
 
 		#region Static Fields
@@ -196,7 +196,7 @@
 				{
 					var conditionText = condition.Text.TrimEnd(TextArrays.Colon);
 					var fullText = $"{{{{Online Quest Objective|{objectiveType}|{conditionText}}}}}";
-					if (!retval.Contains(fullText))
+					if (!retval.Contains(fullText, StringComparer.Ordinal))
 					{
 						retval.Add(fullText);
 					}

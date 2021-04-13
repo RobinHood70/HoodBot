@@ -20,25 +20,24 @@
 
 		#region Protected Override Propertes
 		protected override string Query =>
-			@"SELECT
-				skillTree.basename, skillTree.skillTypeName,
-				minedSkills.id,
-				minedSkills.rank,
-				minedSkills.learnedLevel,
-				minedSkills.coefDescription,
-				minedSkills.description,
-				a1, b1, c1, R1, type1,
-				a2, b2, c2, R2, type2,
-				a3, b3, c3, R3, type3
-			FROM
-				skillTree
-					INNER JOIN
-				minedSkills ON skillTree.abilityId = minedSkills.id
-			WHERE
-				minedSkills.isPlayer
-					AND minedSkills.isPassive
-					AND minedSkills.skillLine != 'Emperor'
-			ORDER BY skillTree.basename, skillTree.skillTypeName, minedSkills.rank";
+		"SELECT\n" +
+			"skillTree.basename, skillTree.skillTypeName,\n" +
+			"minedSkills.id,\n" +
+			"minedSkills.rank,\n" +
+			"minedSkills.learnedLevel,\n" +
+			"minedSkills.coefDescription,\n" +
+			"minedSkills.description,\n" +
+			"a1, b1, c1, R1, type1,\n" +
+			"a2, b2, c2, R2, type2,\n" +
+			"a3, b3, c3, R3, type3\n" +
+		"FROM\n" +
+			"skillTree INNER JOIN\n" +
+			"minedSkills ON skillTree.abilityId = minedSkills.id\n" +
+		"WHERE\n" +
+			"minedSkills.isPlayer\n" +
+			"AND minedSkills.isPassive\n" +
+			"AND minedSkills.skillLine != 'Emperor'\n" +
+		"ORDER BY skillTree.basename, skillTree.skillTypeName, minedSkills.rank";
 
 		/*
 			AND (skillTree.basename IN('Chemistry', 'Crystal Shard', 'Heavy Weapons', 'Lacerate', 'Rapid Maneuver', 'Swarm', 'Twin Blade and Blunt', 'Veiled Strike', 'Werewolf Transformation'))

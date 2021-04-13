@@ -5,6 +5,9 @@
 		<Description>Common elements for the entire project</Description>
 		<RootNamespace>RobinHood70.WikiCommon</RootNamespace>
 		<RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<AnalysisLevel>latest</AnalysisLevel>
+		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>

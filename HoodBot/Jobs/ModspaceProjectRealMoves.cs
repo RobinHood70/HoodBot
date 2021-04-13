@@ -13,6 +13,7 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
+	using static RobinHood70.CommonCode.Globals;
 
 	public class ModspaceProjectRealMoves : MovePagesJob
 	{
@@ -32,6 +33,7 @@
 		#region Protected Override Methods
 		protected override void BacklinkPageLoaded(object sender, Page page)
 		{
+			ThrowNull(page, nameof(page));
 			base.BacklinkPageLoaded(sender, page);
 			page.Text = page?.Text.Replace("Tamriel_Data", "Tamriel Data", StringComparison.OrdinalIgnoreCase);
 		}

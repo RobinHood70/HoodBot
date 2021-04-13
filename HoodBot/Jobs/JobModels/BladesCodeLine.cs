@@ -110,7 +110,7 @@
 		#endregion
 
 		#region Private Structs
-		private struct IndentedLine
+		private readonly struct IndentedLine
 		{
 			public IndentedLine(int level, string text)
 			{

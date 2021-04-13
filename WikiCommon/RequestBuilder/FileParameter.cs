@@ -34,7 +34,7 @@
 
 		/// <summary>Gets the file data.</summary>
 		/// <returns>A byte array containing the file data.</returns>
-		public byte[] GetFileData() => this.fileData; // Not a property due to CA1819.
+		public byte[] GetData() => this.fileData; // Not a property due to CA1819.
 		#endregion
 
 		#region Public Override Methods

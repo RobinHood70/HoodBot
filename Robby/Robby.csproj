@@ -3,6 +3,9 @@
 		<TargetFramework>net5.0</TargetFramework>
 		<DocumentationFile>bin\Robby.xml</DocumentationFile>
 		<RootNamespace>RobinHood70.Robby</RootNamespace>
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<AnalysisLevel>latest</AnalysisLevel>
+		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>

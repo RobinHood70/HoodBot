@@ -365,7 +365,7 @@
 					break;
 				case RequestType.PostMultipart:
 					var result = RequestVisitorMultipart.Build(request);
-					response = this.Client.Post(request.Uri, result.ContentType, result.Data);
+					response = this.Client.Post(request.Uri, result.ContentType, result.GetData());
 					break;
 				default:
 					var query = RequestVisitorUrl.Build(request);
