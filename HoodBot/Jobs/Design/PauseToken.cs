@@ -3,14 +3,14 @@
 	using System;
 	using System.Threading.Tasks;
 
-	public struct PauseToken : IEquatable<PauseToken>
+	public readonly struct PauseToken : IEquatable<PauseToken>
 	{
 		#region Fields
 		private readonly PauseTokenSource source;
 		#endregion
 
 		#region Constructors
-		internal PauseToken(PauseTokenSource source) => this.source = source;
+		public PauseToken(PauseTokenSource source) => this.source = source;
 		#endregion
 
 		#region Public Static Properties

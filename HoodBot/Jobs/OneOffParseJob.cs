@@ -1,52 +1,71 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System;
+	using System.Text.RegularExpressions;
+	using RobinHood70.CommonCode;
+	using RobinHood70.HoodBot.Uesp;
+	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
 	public class OneOffParseJob : ParsedPageJob
 	{
+		#region Static Fields
+		private static readonly Regex JournalTable = new(@"\{\|.*?\|-\n.*?\|-\n", RegexOptions.Singleline | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		#endregion
+
 		#region Constructors
 		[JobInfo("One-Off Parse Job")]
 		public OneOffParseJob(JobManager jobManager)
-			: base(jobManager)
-		{
-		}
+			: base(jobManager) => this.MinorEdit = false;
 		#endregion
 
 		#region Protected Override Properties
-		protected override string EditSummary => "Remove redundant template";
+		protected override string EditSummary => "Convert to template (bot-assisted)";
 		#endregion
 
 		#region Protected Override Methods
-
-		protected override void LoadPages() => this.Pages.GetBacklinks("Template:Lore People Summary", WikiCommon.BacklinksTypes.EmbeddedIn, true, CommonCode.Filter.Any);
+		protected override void LoadPages()
+		{
+			this.Pages.SetLimitations(LimitationType.FilterTo, UespNamespaces.BetterCities, UespNamespaces.OblivionMod);
+			this.Pages.GetBacklinks("Template:OB Journal Entries Notes");
+		}
 
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
-			for (var i = parsedPage.Nodes.Count - 1; i >= 0; i--)
+			var header = parsedPage.IndexOfHeader("Journal Entries");
+			var nodes = parsedPage.Nodes;
+			var journalText = WikiTextVisitor.Raw(nodes.GetRange(header + 1, nodes.Count - header - 1));
+			if (JournalTable.Match(journalText) is Match journalMatch && journalMatch.Success)
 			{
-				if (parsedPage.Nodes[i] is SiteTemplateNode template && template.TitleValue.PageNameEquals("Lore People Trail"))
-				{
-					if (template.Find(1) is IParameterNode param)
-					{
-						if (parsedPage.FindTemplate("Lore People Summary") is ITemplateNode summary)
-						{
-							summary.Add("letter", $"{param.Value.ToValue().Substring(0, 1)}\n", false);
-						}
-						else
-						{
-							throw new InvalidOperationException();
-						}
-					}
+				journalText = journalText[..journalMatch.Index] + "{{Journal Entries\n" + journalText[(journalMatch.Index + journalMatch.Length)..];
+				journalText = journalText
+					.Replace("|style=\"text-align:center;\"|", string.Empty, StringComparison.OrdinalIgnoreCase)
+					.Replace("|-\n", string.Empty, StringComparison.Ordinal)
+					.Replace("[[File:Check.png|Finishes quest]]", "fin", StringComparison.OrdinalIgnoreCase)
+					.Replace("||", "|", StringComparison.Ordinal)
+					.Replace("|}", "}}", StringComparison.Ordinal)
+					.Replace("| ", "|", StringComparison.Ordinal)
+					.Replace(" |", "|", StringComparison.Ordinal)
+					.Replace("||", "|   |", StringComparison.Ordinal)
+					.Replace("\n\n{{OB", "\n{{OB", StringComparison.Ordinal);
 
-					parsedPage.Nodes.RemoveAt(i);
-					if ((i < parsedPage.Parameters.Count - 1) && parsedPage.Nodes[i + 1] is ITextNode text)
-					{
-						text.Text = text.Text.TrimStart();
-					}
+				for (var i = nodes.Count - 1; i > header; i--)
+				{
+					nodes.RemoveAt(i);
 				}
+
+				parsedPage.Nodes.AddRange(new SiteNodeFactory(this.Site).Parse(journalText));
 			}
+		}
+
+		protected override void ResultsPageLoaded(object sender, Page page)
+		{
+			page.Text = page.Text
+				.Replace(" <br", "<br", StringComparison.OrdinalIgnoreCase)
+				.Replace("=\n\n", "=\n", StringComparison.Ordinal)
+				.Replace("\n\n\n", "\n\n", StringComparison.Ordinal);
+			base.ResultsPageLoaded(sender, page);
 		}
 		#endregion
 	}

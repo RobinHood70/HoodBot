@@ -1,12 +1,14 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
+	using static RobinHood70.CommonCode.Globals;
 
 	public delegate void ParameterReplacer(Page page, SiteTemplateNode template);
 
@@ -25,6 +27,7 @@
 		public ParameterReplacers(MovePagesJob job)
 			: base(SimpleTitleEqualityComparer.Instance)
 		{
+			ThrowNull(job, nameof(job));
 			this.site = job.Site;
 			this.replacements = job.Replacements;
 			this.uespNamespaceList = new UespNamespaceList(job.Site);
@@ -63,6 +66,7 @@
 
 		public void ReplaceAll(Page page, SiteTemplateNode template)
 		{
+			ThrowNull(template, nameof(template));
 			foreach (var action in this.generic)
 			{
 				action(page, template);
@@ -83,6 +87,7 @@
 		{
 			if ((template.Find(1) ?? template.Find("link")) is IParameterNode link)
 			{
+				ThrowNull(page, nameof(page));
 				var nsBase = template.Find("ns_base", "ns_id");
 				var ns = nsBase != null && this.uespNamespaceList.TryGetValue(nsBase.Value.ToValue(), out var uespNamespace)
 					? uespNamespace.BaseTitle.Namespace
@@ -140,8 +145,9 @@
 		#endregion
 
 		#region Private Methods
-		private void FullPageNameReplace(Page page, IParameterNode? param)
+		private void FullPageNameReplace([NotNull] Page page, IParameterNode? param)
 		{
+			ThrowNull(page, nameof(page));
 			if (param != null
 				&& Title.FromName(page.Site, param.Value.ToValue()) is var title
 				&& this.replacements.TryGetValue(title, out var replacement)

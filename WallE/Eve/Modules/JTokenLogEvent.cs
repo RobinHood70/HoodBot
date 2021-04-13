@@ -165,7 +165,7 @@
 			{
 				foreach (var prop in this.parms.Children<JProperty>())
 				{
-					if (!knownProps.Contains(prop.Name))
+					if (!knownProps.Contains(prop.Name, StringComparer.Ordinal))
 					{
 						this.Result.Add(prop.Name, prop.Value.ToObject<object>());
 					}

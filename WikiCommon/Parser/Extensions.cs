@@ -511,6 +511,7 @@
 		/// <param name="newTitle">The new title.</param>
 		public static void SetTitle(this ITemplateNode template, string newTitle)
 		{
+			ThrowNull(template, nameof(template));
 			var (leading, trailing) = GetSurroundingSpace(template.Title.ToValue());
 			template.Title.Clear();
 			template.Title.AddText(leading + newTitle + trailing);

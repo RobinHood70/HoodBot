@@ -190,7 +190,22 @@
 		/// <typeparam name="T">The type to convert the values to.</typeparam>
 		/// <param name="token">The token to examine.</param>
 		/// <returns>An <see cref="IReadOnlyList{T}"/> of the specified type.</returns>
-		public static IReadOnlyList<T> GetList<T>(this JToken? token) => new List<T>(token?.Values<T>() ?? Array.Empty<T>());
+		public static IReadOnlyList<T> GetList<T>(this JToken? token)
+		{
+			var retval = new List<T>();
+			if (token != null)
+			{
+				foreach (var value in token.Values<T>())
+				{
+					if (value is not null)
+					{
+						retval.Add(value);
+					}
+				}
+			}
+
+			return retval;
+		}
 
 		/// <summary>Gets a nullable string, regardless of format version.</summary>
 		/// <param name="token">The token to examine.</param>

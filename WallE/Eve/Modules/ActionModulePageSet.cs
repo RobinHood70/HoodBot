@@ -180,7 +180,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			if (string.Equals(from, this.Name, StringComparison.Ordinal) &&
 				TooManyFinder.Match(text) is var match &&
 				match.Success &&
-				PageSetInput.AllTypes.Contains(match.Groups["parameter"].Value))
+				PageSetInput.AllTypes.Contains(match.Groups["parameter"].Value, StringComparer.Ordinal))
 			{
 				this.MaximumListSize = int.Parse(match.Groups["sizelimit"].Value, CultureInfo.InvariantCulture);
 				return true;

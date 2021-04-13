@@ -40,11 +40,9 @@
 		/// <summary>This is a quick and dirty solver for the "Simple" math algorithm provided with MediaWiki.</summary>
 		/// <param name="sender">The wiki abstraction layer sending the Captcha event.</param>
 		/// <param name="e">The Captcha event arguments.</param>
-#pragma warning disable IDE0060 // Remove unused parameter
 		public static void SolveSimple(IWikiAbstractionLayer sender, CaptchaEventArgs e)
-#pragma warning restore IDE0060 // Remove unused parameter
 		{
-			if (e != null && string.Equals(e.CaptchaData["type"], "simple", StringComparison.Ordinal))
+			if (sender != null && e != null && string.Equals(e.CaptchaData["type"], "simple", StringComparison.Ordinal))
 			{
 				var math = new Regex(@"(?<num1>\d+)(?<num2>[+-]\d+)", RegexOptions.None, DefaultRegexTimeout);
 				var nums = math.Match(e.CaptchaData["question"].Replace('−', '-'));

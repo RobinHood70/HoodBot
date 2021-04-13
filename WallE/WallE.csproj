@@ -5,6 +5,9 @@
 		<Description>Wiki Abstraction Layer - handles all low-level communications with a wiki.</Description>
 		<RootNamespace>RobinHood70.WallE</RootNamespace>
 		<RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<AnalysisLevel>latest</AnalysisLevel>
+		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>

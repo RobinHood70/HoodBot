@@ -37,12 +37,13 @@
 
 		#region IParameterVisitor Methods
 
+#pragma warning disable CA2000 // Dispose objects before losing scope: Disposed by multipart object itself.
 		/// <summary>Visits the specified FileParameter object.</summary>
 		/// <param name="parameter">The FileParameter object.</param>
 		public void Visit(FileParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
-			this.multipartData.Add(new ByteArrayContent(parameter.GetFileData()), parameter.Name, parameter.FileName);
+			this.multipartData.Add(new ByteArrayContent(parameter.GetData()), parameter.Name, parameter.FileName);
 		}
 
 		/// <summary>Visits the specified PipedParameter or PipedListParameter object.</summary>
@@ -64,6 +65,7 @@
 			// StringContent wants to be disposed, but can't be at this stage. It's only relevant to async methods anyway. Container manages disposal in any event - a very bizarre "convenience feature" that a lot of people have complained about. This whole thing seems very strangely designed - might warrant using/creating something else at some point in the future.
 			this.multipartData.Add(new StringContent(parameter.Value), parameter.Name);
 		}
+#pragma warning restore CA2000 // Dispose objects before losing scope
 		#endregion
 	}
 }
