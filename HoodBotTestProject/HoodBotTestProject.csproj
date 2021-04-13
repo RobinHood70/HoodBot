@@ -7,12 +7,12 @@
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>
-		<PackageReference Include="Meziantou.Analyzer" Version="1.0.639">
+		<PackageReference Include="Meziantou.Analyzer" Version="1.0.655">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.0-preview-20201123-03" />
-		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.312">
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0-release-20210330-02" />
+		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.333">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
