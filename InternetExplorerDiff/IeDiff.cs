@@ -8,6 +8,7 @@
 	using System.Runtime.InteropServices;
 	using System.Text;
 	using System.Threading;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBotPlugins;
 	using RobinHood70.InternetExplorerDiff.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
@@ -44,13 +45,9 @@
 					ie = new InternetExplorer();
 					break;
 				}
-				catch (COMException)
+				catch (COMException) when (i < 10)
 				{
 					Thread.Sleep(ComSleep);
-					if (i == 9)
-					{
-						throw;
-					}
 				}
 			}
 
@@ -77,9 +74,10 @@
 				.Add("wpTextbox1", diff.Text)
 				.AddIf("wpMinoredit", "1", diff.IsMinor)
 				.Add("wpSummary", diff.EditSummary)
+				.Add("wpAutoSummary", string.Empty.GetHash(HashType.Md5))
 				.Add("wpEditToken", diff.EditToken)
 				.Add("wpStarttime", IndexDateTime(diff.StartTimestamp))
-				.Add("wpEdittime", IndexDateTime(diff.LastRevisionTimestamp ?? diff.StartTimestamp ?? DateTime.UtcNow));
+				.Add("wpEdittime", IndexDateTime(diff.LastRevisionTimestamp ?? diff.StartTimestamp ?? DateTime.Now));
 			var postData = RequestVisitorUrl.Build(request);
 			var byteData = Encoding.UTF8.GetBytes(postData);
 			var empty = 0;
@@ -109,7 +107,7 @@
 
 		#region Private Methods
 		[return: NotNullIfNotNull("dt")]
-		private static string? IndexDateTime(DateTime? dt) => dt?.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+		private static string? IndexDateTime(DateTime? dt) => dt?.ToUniversalTime().ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
 		#endregion
 	}
 }
