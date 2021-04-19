@@ -2,6 +2,8 @@
 {
 	public interface IParameterFetcher
 	{
+		void ClearParameters();
+
 		void GetParameters();
 
 		void SetParameters();

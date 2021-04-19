@@ -29,6 +29,14 @@
 		#endregion
 
 		#region Public Methods
+		public void ClearParameters()
+		{
+			foreach (var param in this.job.Parameters)
+			{
+				this.main.UnregisterName(param.Name);
+			}
+		}
+
 		public void GetParameters()
 		{
 			// TODO: Consider changing to attached property to be fully MVVM compliant.
@@ -91,14 +99,38 @@
 			return (labelControl, controlToAdd);
 		}
 
-		private static object? GetControlValue(Type expectedType, Control control) =>
-			control is CheckBox checkBox ? checkBox.IsChecked == true :
-			control is TextBox textBox && textBox.Text is var text ?
-				expectedType == typeof(string) ? text :
-				expectedType == typeof(int) ? int.Parse(text, CultureInfo.InvariantCulture) :
-				typeof(IEnumerable).IsAssignableFrom(expectedType) ? (object)text.Split(TextArrays.EnvironmentNewLine, StringSplitOptions.None)
-					: throw new NotSupportedException(CurrentCulture(UnhandledConstructorParameter, expectedType.Name))
-				: throw new NotSupportedException(CurrentCulture(UnhandledConstructorParameter, expectedType.Name));
+		private static object? GetControlValue(Type expectedType, Control control)
+		{
+			if (control is CheckBox checkBox)
+			{
+				return checkBox.IsChecked == true;
+			}
+
+			if (control is TextBox textBox && textBox.Text is var text)
+			{
+				if (expectedType == typeof(string))
+				{
+					return text;
+				}
+
+				if (expectedType == typeof(int))
+				{
+					return int.Parse(text, CultureInfo.InvariantCulture);
+				}
+
+				if (typeof(IEnumerable).IsAssignableFrom(expectedType))
+				{
+					if (!text.Contains(Environment.NewLine, StringComparison.Ordinal))
+					{
+						text = text.Replace("\n", Environment.NewLine, StringComparison.Ordinal);
+					}
+
+					return text.Split(TextArrays.EnvironmentNewLine, StringSplitOptions.None);
+				}
+			}
+
+			throw new NotSupportedException(CurrentCulture(UnhandledConstructorParameter, expectedType.Name));
+		}
 		#endregion
 
 		#region Private Methods
@@ -128,10 +160,11 @@
 		private void SetParameter(ConstructorParameter parameter)
 		{
 			ThrowNull(parameter, nameof(parameter));
-			if (this.main.JobParameters.FindName(parameter.Name) is Control control)
+			var jobParams = this.main.JobParameters;
+			var foundName = jobParams.FindName(parameter.Name);
+			if (foundName is Control control)
 			{
 				parameter.Value = GetControlValue(parameter.Type, control);
-				this.main.UnregisterName(parameter.Name);
 			}
 		}
 		#endregion
