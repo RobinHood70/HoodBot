@@ -35,7 +35,6 @@ dotnet_diagnostic.MA0026.severity = none
 dotnet_diagnostic.MA0046.severity = none
 dotnet_diagnostic.MA0048.severity = none
 dotnet_diagnostic.MA0051.severity = none
-dotnet_diagnostic.MA0102.severity = none # All kinds of inappropriate hits let constructors and property getters.
 
 dotnet_diagnostic.SA0001.severity = none
 dotnet_diagnostic.SA1124.severity = none
