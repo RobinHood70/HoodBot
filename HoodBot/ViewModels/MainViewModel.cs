@@ -381,7 +381,7 @@
 
 		private void JobTree_OnSelectionChanged(TreeNode sender, SelectedItemChangedEventArgs e)
 		{
-			this.parameterFetcher?.SetParameters();
+			this.parameterFetcher?.ClearParameters();
 			this.parameterFetcher = null;
 			var enabled = false;
 			if (e.Node is JobNode job)
