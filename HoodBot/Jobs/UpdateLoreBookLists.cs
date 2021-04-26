@@ -75,9 +75,7 @@
 
 		private PageCollection FilterToListBooks()
 		{
-			var pageLoadOptions = new PageLoadOptions(PageModules.Info | PageModules.Custom, true);
-			var pageCreator = new MetaTemplateCreator("listbook");
-			var listBooks = new PageCollection(this.Site, pageLoadOptions, pageCreator);
+			var listBooks = this.Site.CreateMetaPageCollection(PageModules.Info, false, "listbook");
 			listBooks.SetLimitations(LimitationType.FilterTo, UespNamespaces.Lore);
 			listBooks.GetCustomGenerator(new VariablesInput() { Variables = new[] { "listbook" } });
 			for (var i = listBooks.Count - 1; i >= 0; i--)
