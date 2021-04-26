@@ -19,7 +19,7 @@
 
 		protected override void BeforeLogging()
 		{
-			var rowFinder = new Regex(@"\|-\ *\n[\|\t](\{\{[Ii]con\|(?<icontype>[^|]*)\|(?<icon>[^\}]*)\}\})?\ *\t\ *(\{\{LIL\|(?<item>[^|]*)\|questid=(?<id>\d*)\}\}|\[\[(ON|Online):(?<item>.*?)\|.*?\]\])\ *\t\ *(?<loc>.*?)\ *\t\ *\[\[(ON|Online):(?<quest>.*?)\|.*?\]\]\ *\t\ *(?<desc>.*)", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+			var rowFinder = new Regex(@"\|-\ *\n[\|\t](\{\{[Ii]con\|(?<icontype>[^|]*)\|(?<icon>[^\}]*)\}\})?\ *\t\ *(\{\{(LIL|Linkable Item Link)\|(?<item>[^|]*)\|questid=(?<id>\d*)\}\}|\[\[(ON|Online):(?<item>.*?)\|.*?\]\])\ *\t\ *(?<loc>.*?)\ *\t\ *\[\[(ON|Online):(?<quest>.*?)\|.*?\]\]\ *\t\ *(?<desc>.*)", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 			this.Pages.GetCategoryMembers("Online-Items-Quest Items", CategoryMemberTypes.Page, true);
 			foreach (var page in this.Pages)
 			{
