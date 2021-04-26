@@ -71,25 +71,29 @@
 
 		protected void SavePages(string editSummary, bool isMinor) => this.SavePages(editSummary, isMinor, null);
 
-		protected void SavePages(string editSummary, bool isMinor, Action<EditJob, Page>? editConflictAction)
+		protected void SavePages(string editSummary, bool isMinor, Action<EditJob, Page>? editConflictAction) => this.SavePages(this.Pages, "Saving pages", editSummary, isMinor, editConflictAction);
+
+		protected void SavePages(PageCollection pages, string status, string editSummary, bool isMinor, Action<EditJob, Page>? editConflictAction)
 		{
-			this.Pages.RemoveUnchanged();
-			if (this.Pages.Count == 0)
+			ThrowNull(pages, nameof(pages));
+			this.StatusWriteLine(status);
+			pages.RemoveUnchanged();
+			if (pages.Count == 0)
 			{
-				this.Warn("No pages to save!");
-				return;
+				this.StatusWriteLine("No pages to save!");
 			}
-
-			this.StatusWriteLine("Saving pages");
-			this.EditConflictAction = editConflictAction;
-			this.Pages.Sort(NaturalTitleComparer.Instance);
-			this.Progress = 0;
-			this.ProgressMaximum = this.Pages.Count;
-
-			foreach (var page in this.Pages)
+			else
 			{
-				this.SavePage(page, editSummary, isMinor);
-				this.Progress++;
+				this.EditConflictAction = editConflictAction;
+				pages.Sort(NaturalTitleComparer.Instance);
+				this.Progress = 0;
+				this.ProgressMaximum = pages.Count;
+
+				foreach (var page in pages)
+				{
+					this.SavePage(page, editSummary, isMinor);
+					this.Progress++;
+				}
 			}
 		}
 		#endregion
