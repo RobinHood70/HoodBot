@@ -92,9 +92,7 @@
 		private void GetCardPowers()
 		{
 			const string mtCostName = "cost";
-			var pageLoadOptions = new PageLoadOptions(PageModules.Custom, true);
-			var pageCreator = new MetaTemplateCreator(mtCostName);
-			var cards = new PageCollection(this.Site, pageLoadOptions, pageCreator);
+			var cards = this.Site.CreateMetaPageCollection(PageModules.Custom, true, mtCostName);
 			cards.SetLimitations(LimitationType.FilterTo, UespNamespaces.Legends);
 			cards.GetCategoryMembers("Legends-Cards", CategoryMemberTypes.Page, false);
 

@@ -175,13 +175,17 @@
 		{
 			job.StatusWriteLine("Fetching ESO update number");
 			var patchTitle = new TitleCollection(job.Site, "Online:Patch");
-			var pageLoadOptions = new PageLoadOptions(PageModules.Default | PageModules.Custom);
-			var pageCreator = (job.Site.PageCreator as MetaTemplateCreator) ?? new MetaTemplateCreator();
-			var patchPage = (VariablesPage)patchTitle.Load(pageLoadOptions, pageCreator)[0];
-			patchVersion = patchPage.MainSet?["number"] is string version
-				? version
-				: throw new InvalidOperationException("Could not find patch version on page.");
-			return patchPage;
+			var pages = job.Site.CreateMetaPageCollection(PageModules.Default, false);
+			pages.GetTitles(patchTitle);
+			if (pages.Count == 1
+				&& pages[0] is VariablesPage patchPage
+				&& patchPage.MainSet?["number"] is string version)
+			{
+				patchVersion = version;
+				return patchPage;
+			}
+
+			throw new InvalidOperationException("Could not find patch version on page.");
 		}
 
 		public static string GetPatchVersion(WikiJob job)
@@ -196,9 +200,8 @@
 
 		public static PlaceCollection GetPlaces(Site site)
 		{
-			var pageLoadOptions = new PageLoadOptions(PageModules.Custom, true);
-			var pageCreator = new MetaTemplateCreator("alliance", "settlement", "titlename", "type", "zone");
-			var places = new PageCollection(site, pageLoadOptions, pageCreator);
+			ThrowNull(site, nameof(site));
+			var places = site.CreateMetaPageCollection(PageModules.None, true, "alliance", "settlement", "titlename", "type", "zone");
 			places.SetLimitations(LimitationType.FilterTo, UespNamespaces.Online);
 			places.GetCategoryMembers("Online-Places");
 
