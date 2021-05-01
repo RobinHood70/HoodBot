@@ -335,7 +335,7 @@
 		/// <value>The numbered parameters.</value>
 		/// <remarks>Parameters returned by this function include both fully anonymous and numerically named parameters. The index returned is not guaranteed to be unique or consecutive. For example, a template like <c>{{Test|anon1a|anon2|1=anon1b|anon3}}</c> would return, in order: 1=anon1a, 2=anon2, 1=anon1b, 3=anon3.</remarks>
 		/// <returns>A tuple containing the parameter number as well as the parameter itself.</returns>
-		public static IEnumerable<(int Index, IParameterNode Parameter)> GetNumberedParameters(this ITemplateNode template)
+		public static IEnumerable<(int Index, IParameterNode Parameter)> GetNumericParameters(this ITemplateNode template)
 		{
 			ThrowNull(template, nameof(template));
 			var i = 0;
@@ -350,6 +350,43 @@
 					yield return (namedNumber, parameter);
 				}
 			}
+		}
+
+		/// <summary>Gets numeric parameters in order, resolving conflicts in the same manner as MediaWiki does.</summary>
+		/// <param name="template">The template to work on.</param>
+		/// <returns>A read-only dictionary of the parameters.</returns>
+		public static IReadOnlyDictionary<int, IParameterNode?> GetNumericParametersSorted(this ITemplateNode template) => GetNumericParametersSorted(template, false);
+
+		/// <summary>Gets numeric parameters in order, resolving conflicts in the same manner as MediaWiki does.</summary>
+		/// <param name="template">The template to work on.</param>
+		/// <param name="addMissing">Set to <see langword="true"/> if missing parameters (e.g., <c>{{Template|1=First|3=Missing2}}</c>) should be inserted as <see langword="null"/> values.</param>
+		/// <returns>A read-only dictionary of the parameters.</returns>
+		public static IReadOnlyDictionary<int, IParameterNode?> GetNumericParametersSorted(this ITemplateNode template, bool addMissing)
+		{
+			var retval = new SortedDictionary<int, IParameterNode?>();
+			var highest = 0;
+			foreach (var (index, parameter) in GetNumericParameters(template))
+			{
+				if (index > highest)
+				{
+					highest = index;
+				}
+
+				retval[index] = parameter;
+			}
+
+			if (addMissing)
+			{
+				for (var i = 1; i < highest; i++)
+				{
+					if (!retval.ContainsKey(i))
+					{
+						retval.Add(i, null);
+					}
+				}
+			}
+
+			return retval;
 		}
 
 		/// <summary>Gets the parameters with the indexed named for anonymous parameters.</summary>
@@ -383,38 +420,6 @@
 			return false;
 		}
 
-		/// <summary>Gets numeric parameters in order, resolving conflicts in the same manner as MediaWiki does.</summary>
-		/// <param name="template">The template to work on.</param>
-		/// <param name="addMissing">Set to <see langword="true"/> if missing parameters (e.g., <c>{{Template|1=First|3=Missing2}}</c>) should be inserted as <see langword="null"/> values.</param>
-		/// <returns>A read-only dictionary of the parameters.</returns>
-		public static IReadOnlyDictionary<int, IParameterNode?> OrderedNumericParameters(this ITemplateNode template, bool addMissing)
-		{
-			var retval = new SortedDictionary<int, IParameterNode?>();
-			var highest = 0;
-			foreach (var (index, parameter) in GetNumberedParameters(template))
-			{
-				if (index > highest)
-				{
-					highest = index;
-				}
-
-				retval[index] = parameter;
-			}
-
-			if (addMissing)
-			{
-				for (var i = 1; i < highest; i++)
-				{
-					if (!retval.ContainsKey(i))
-					{
-						retval.Add(i, null);
-					}
-				}
-			}
-
-			return retval;
-		}
-
 		/// <summary>Gets template parameters grouped into clusters based on their index.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <param name="length">The length of each cluster.</param>
@@ -422,7 +427,7 @@
 		/// <example>Using <c>ParameterCluster(2)</c> on <c>{{MyTemplate|A|1|B|2|C|2=0}}</c> would return three lists: { "A", "0" }, { "B", "2" }, and { "C", null }. In the first case, "0" is returned because of the overridden parameter <c>2=0</c>. In the last case, <see langword="null"/> is returned because the parameter has no pairing within the template call. </example>
 		public static IEnumerable<IList<IParameterNode?>> ParameterCluster(this ITemplateNode template, int length)
 		{
-			var parameters = template.OrderedNumericParameters(true);
+			var parameters = template.GetNumericParametersSorted(true);
 			var i = 1;
 			var retval = new List<IParameterNode?>();
 			while (i < parameters.Count)
