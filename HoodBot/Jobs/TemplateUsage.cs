@@ -11,7 +11,7 @@
 	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
-	public class GetTemplateUsage : WikiJob
+	public class TemplateUsage : WikiJob
 	{
 		#region Fields
 		private readonly string saveLocation;
@@ -23,7 +23,7 @@
 
 		#region Constructors
 		[JobInfo("Template Usage")]
-		public GetTemplateUsage(
+		public TemplateUsage(
 			JobManager jobManager,
 			IEnumerable<string> templateNames,
 			[JobParameter(DefaultValue = true)] bool respectRedirects,
@@ -39,7 +39,7 @@
 				allTemplateNames.AddRange(templateName.Split(TextArrays.Pipe));
 			}
 
-			this.saveLocation = location.Replace("%templateName%", allTemplateNames[0], StringComparison.Ordinal);
+			this.saveLocation = location.Replace("%templateName%", SanitizeFilename(allTemplateNames[0]), StringComparison.Ordinal);
 			this.originalTemplateNames = allTemplateNames;
 			this.ProgressMaximum = 2;
 		}
@@ -48,6 +48,8 @@
 		#region Protected Override Methods
 		protected override void Main()
 		{
+			// TODO: Handle case where a redirect was provided rather than the base...doesn't seem to be working right now. (Should it? If not, at least spit out an error.)
+			// CONSIDER: Adapt this and/or the parser to handle relative templates like {{/Template}} and {{../Template}}.
 			var templates = new TitleCollection(this.Site, MediaWikiNamespaces.Template, this.originalTemplateNames);
 			TitleCollection allTemplateNames;
 			if (this.respectRedirects)
