@@ -26,7 +26,6 @@
 				private static readonly Regex GroupFinder = new(@"^\{\{EAL/Group(?<params>.*?(\n\|first=.*?)?)\}\}$", RegexOptions.ExplicitCapture | RegexOptions.Multiline, Globals.DefaultRegexTimeout);
 				private static readonly Regex GroupFinder2 = new(@"^\{\{EAL/Group(?<params>.*?\n.*?)\}\}\n\|", RegexOptions.ExplicitCapture | RegexOptions.Multiline, Globals.DefaultRegexTimeout);
 		*/
-		private static readonly Regex RemainingEntryFinder = new(@"\{\{EAL/Entry(?<params>.*?)\}\}", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		private static readonly Regex RowEliminator = new(@"^\|-\ *\n(\|\ *(rowspan=\d+\ *)?(width=\d+\ *)?(\|\ *)?\n)?", RegexOptions.ExplicitCapture | RegexOptions.Multiline, Globals.DefaultRegexTimeout);
 		private static readonly Regex TitleFinder = new(@"^\|-\ *(?<thick>\{\{ThickLine\}\}\ *)?\n!\ *colspan=[456]\ *\|\ *(?<title>.*?)\ *\n(\|-\ *\{\{ThickLine\}\}\ *\n)?", RegexOptions.ExplicitCapture | RegexOptions.Multiline, Globals.DefaultRegexTimeout);
 		private static readonly Regex UnclosedGroups = new(@"(?<=[^\}])\n\{\{EAL/", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
@@ -397,7 +396,6 @@
 			content = RowEliminator.Replace(content, string.Empty);
 			content += "}}";
 			content = this.ParseEntries(factory.Parse(content));
-			// content = RemainingEntryFinder.Replace(content, "${params}");
 			content = DoubleGroupFinder.Replace(content, "{{EAL/Group|indent=1${params}");
 			if (content[0] == '|')
 			{
