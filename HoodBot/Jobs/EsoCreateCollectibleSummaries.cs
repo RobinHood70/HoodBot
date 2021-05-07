@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System.Diagnostics;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -82,9 +81,12 @@
 				var parsedPage = new ContextualParser(page);
 				foreach (var headerNode in parsedPage.HeaderNodes)
 				{
-					foreach (var link in headerNode.Title.FindAll<SiteLinkNode>())
+					if (headerNode.Level == 3)
 					{
-						titles.Add(link.TitleValue);
+						foreach (var link in headerNode.Title.FindAll<SiteLinkNode>())
+						{
+							titles.Add(link.TitleValue);
+						}
 					}
 				}
 			}
