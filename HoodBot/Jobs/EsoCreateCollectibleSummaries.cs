@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -8,7 +9,7 @@
 
 	public class EsoCreateCollectibleSummaries : EditJob
 	{
-		#region Static Fields
+		#region Constants
 		private const string CollectibleType = "Pet";
 		private const string CollectibleFragment = "pet";
 		private const string CollectibleTypePrefix = CollectibleType + "s ";
@@ -53,6 +54,16 @@
 			"{{Stub|Collectible}}";
 		#endregion
 
+		#region Static Fields
+		private static readonly List<string> IgnoredHeaders = new()
+		{
+			"Bugs",
+			"Notes",
+			"References",
+			"See Also"
+		};
+		#endregion
+
 		#region Fields
 		private PageCollection sourcePages;
 		#endregion
@@ -81,7 +92,8 @@
 				var parsedPage = new ContextualParser(page);
 				foreach (var headerNode in parsedPage.HeaderNodes)
 				{
-					if (headerNode.Level == 3)
+					if (headerNode.Level == 3 &&
+						!IgnoredHeaders.Contains(headerNode.GetInnerText(true), System.StringComparer.OrdinalIgnoreCase))
 					{
 						foreach (var link in headerNode.Title.FindAll<SiteLinkNode>())
 						{
