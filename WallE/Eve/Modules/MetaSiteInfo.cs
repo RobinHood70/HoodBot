@@ -476,6 +476,7 @@
 
 		private SiteInfoGeneral? GetGeneral(JToken parent)
 		{
+			// This is the one module that supports every version of the API, in order to allow at least basic info to be retrieved without error.
 			if (parent["general"] is not JToken node)
 			{
 				return null;
@@ -500,9 +501,9 @@
 				}
 			}
 
-			var server = node.MustHaveString("server");
+			var server = (string?)node["server"] ?? string.Empty;
 			var serverName = (string?)node["servername"];
-			if (serverName == null)
+			if (string.IsNullOrEmpty(serverName) && !string.IsNullOrEmpty(server))
 			{
 				// Same approach as MediaWiki uses in Setup.php
 				var canonical = server.StartsWith("//", StringComparison.Ordinal) ? "http:" + server : server;
@@ -522,9 +523,12 @@
 			var timeOffsetNode = (double)node.MustHave("timeoffset");
 			var timeOffset = TimeSpan.FromMinutes(timeOffsetNode);
 
-			// Default value is "false", which gets emitted in JSON, so check for that.
-			var variantArticlePathNode = node.MustHave("variantarticlepath");
-			var variantArticlePath = variantArticlePathNode?.Type == JTokenType.Boolean ? null : (string?)variantArticlePathNode;
+			string? variantArticlePath = null;
+			if (node["variantarticlepath"] is JToken variantArticlePathNode)
+			{
+				// Default value is "false", which gets emitted in JSON, so check for that.
+				variantArticlePath = variantArticlePathNode?.Type == JTokenType.Boolean ? null : (string?)variantArticlePathNode;
+			}
 
 			var variants = new List<string>();
 			if (node["variants"] is JToken variantsNode)
@@ -536,12 +540,12 @@
 			}
 
 			return new SiteInfoGeneral(
-				articlePath: node.MustHaveString("articlepath"),
+				articlePath: (string?)node["articlepath"] ?? string.Empty,
 				basePage: node.MustHaveString("base"),
-				dbType: node.MustHaveString("dbtype"),
-				dbVersion: node.MustHaveString("dbversion"),
+				dbType: (string?)node["dbtype"] ?? string.Empty,
+				dbVersion: (string?)node["dbversion"] ?? string.Empty,
 				externalImages: node["externalimages"].GetList<string>(),
-				fallback8BitEncoding: node.MustHaveString("fallback8bitEncoding"),
+				fallback8BitEncoding: (string?)node["fallback8bitEncoding"] ?? string.Empty,
 				fallbackLanguages: fallback,
 				favicon: (string?)node["favicon"],
 				flags: node.GetFlags(
@@ -558,7 +562,7 @@
 				gitHash: (string?)node["git-hash"],
 				hhvmVersion: (string?)node["hhvmversion"],
 				imageLimits: imageLimits,
-				language: node.MustHaveString("lang"),
+				language: (string?)node["lang"] ?? string.Empty,
 				legalTitleChars: (string?)node["legaltitlechars"],
 				linkPrefix: (string?)node["linkprefix"],
 				linkPrefixCharset: (string?)node["linkprefixcharset"],
@@ -566,22 +570,22 @@
 				logo: (string?)node["logo"],
 				mainPage: node.MustHaveString("mainpage"),
 				maxUploadSize: (long?)node["maxuploadsize"] ?? 0,
-				phpSapi: node.MustHaveString("phpsapi"),
-				phpVersion: node.MustHaveString("phpversion"),
+				phpSapi: (string?)node["phpsapi"] ?? string.Empty,
+				phpVersion: (string?)node["phpversion"] ?? string.Empty,
 				readOnlyReason: (string?)node["readonlyreason"],
 				revision: (long?)node["revision"] ?? 0,
-				script: node.MustHaveString("script"),
-				scriptPath: node.MustHaveString("scriptpath"),
+				script: (string?)node["script"] ?? string.Empty,
+				scriptPath: (string?)node["scriptpath"] ?? string.Empty,
 				server: server,
 				serverName: serverName,
 				siteName: node.MustHaveString("sitename"),
 				thumbLimits: thumbLimits,
-				time: node.MustHaveDate("time"),
+				time: (DateTime?)node["time"] ?? DateTime.Now,
 				timeOffset: timeOffset,
-				timeZone: node.MustHaveString("timezone"),
+				timeZone: (string?)node["timezone"] ?? string.Empty,
 				variantArticlePath: variantArticlePath,
 				variants: variants,
-				wikiId: node.MustHaveString("wikiid"));
+				wikiId: (string?)node["wikiid"] ?? string.Empty);
 		}
 		#endregion
 	}
