@@ -5,10 +5,13 @@
 	using System.Net;
 	using System.Text.RegularExpressions;
 	using System.Xml.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
 	using RobinHood70.WallE.Eve;
 	using static RobinHood70.CommonCode.Globals;
+
+	#region Public Enumerations
 
 	/// <summary>Methods by which the wiki can be accessed.</summary>
 	public enum EntryPoint
@@ -22,6 +25,7 @@
 		/// <summary>API access.</summary>
 		Api
 	}
+	#endregion
 
 	/// <summary>Represents what the site is capable of at a basic level.</summary>
 	public class SiteCapabilities
@@ -57,6 +61,10 @@
 		/// <value>The current user, if any; otherwise, null.</value>
 		public string? CurrentUser { get; private set; }
 
+		/// <summary>Gets the error message returned by the web request, if any.</summary>
+		/// <value>The error message.</value>
+		public string? ErrorMessage { get; private set; }
+
 		/// <summary>Gets the Uri to the index.php entry point.</summary>
 		/// <value>The index.php entry point.</value>
 		public Uri? Index { get; private set; }
@@ -76,6 +84,10 @@
 		/// <summary>Gets the entry points for write access.</summary>
 		/// <value>The entry points for write access.</value>
 		public EntryPoint WriteEntryPoint { get; private set; }
+
+		/// <summary>Gets the site's MediaWiki version.</summary>
+		/// <value>The version.</value>
+		public string? Version { get; private set; }
 		#endregion
 
 		#region Public Methods
@@ -109,77 +121,105 @@
 				tryPath = tryPath.Substring(0, offset + 1);
 			}
 
-			if (!tryPath.EndsWith('/'))
+			/* If it doesn't look like a php page or blank path, try various methods of figuring out the php locations. */
+			if (this.client.Get(anyPage) is not string pageData)
 			{
-				/* If it doesn't look like a php page or blank path, try various methods of figuring out the php locations. */
-				if (this.TryGet(anyPage) is not string pageData)
+				// Web page given could not be accessed, so abort.
+				return false;
+			}
+
+			if (this.GetUriFromPage(fullHost, pageData) is Uri newLoc)
+			{
+				tryLoc = newLoc;
+				tryPath = tryLoc.OriginalString;
+				tryPath = tryPath.Substring(0, tryPath.LastIndexOf('/') + 1);
+			}
+
+			if (tryLoc != null && this.TryApi(tryLoc, fullHost))
+			{
+				return true;
+			}
+
+			// Last resort
+			try
+			{
+				var add = "index.php";
+				if (!this.SupportsMaxLag)
 				{
-					// Web page given could not be accessed, so abort.
-					return false;
+					add += "?maxlag=-1";
 				}
 
-				if (this.GetUriFromPage(fullHost, pageData) is Uri newLoc)
-				{
-					tryLoc = newLoc;
-					tryPath = tryLoc.OriginalString.Substring(0, tryPath.LastIndexOf('/') + 1);
-				}
+				tryLoc = new Uri(tryPath + add);
+			}
+			catch (UriFormatException)
+			{
+				tryLoc = null;
 			}
 
 			if (tryLoc != null)
 			{
-				try
+				// We don't care about the result, only whether it's a valid link.
+				this.client.RequestingDelay += this.Client_RequestingDelay;
+				if (this.client.Get(tryLoc) != null)
 				{
-					// Something above gave us a tentative api.php link, so try it.
-					var api = new WikiAbstractionLayer(this.client, tryLoc);
-					if (api.IsEnabled())
-					{
-						api.Initialize();
-						var general = api.AllSiteInfo?.General ?? throw new InvalidOperationException();
-						this.Api = api.EntryPoint;
-						Uri? index = null;
-						if (!string.IsNullOrWhiteSpace(general.Script))
-						{
-							index = new UriBuilder(fullHost)
-							{
-								Path = general.Script
-							}.Uri;
-						}
+					tryPath = tryLoc.OriginalString.Split('?', 2)[0];
+					this.Index = new Uri(tryPath);
+					this.ReadEntryPoint = EntryPoint.Index;
+					this.WriteEntryPoint = EntryPoint.Index;
 
-						this.Index = index;
-						this.SiteName = general.SiteName;
-						this.ReadEntryPoint = EntryPoint.Api;
-						this.SupportsMaxLag = api.SupportsMaxLag;
-						this.CurrentUser = (api.CurrentUserInfo?.Flags.HasFlag(UserInfoFlags.Anonymous) ?? true) ? null : api.CurrentUserInfo.Name;
-						this.WriteEntryPoint =
-							general.Flags.HasFlag(SiteInfoFlags.WriteApi) ? EntryPoint.Api :
-							this.Index == null ? EntryPoint.None :
-							EntryPoint.Index;
+					tryLoc = new Uri(tryPath.Replace("index.php", "api.php", StringComparison.Ordinal));
+					this.TryApi(tryLoc, fullHost); // We don't care about the result here because we've already got at least partial success with index.
 
-						// API gave us everything we need, so skip trying index.php.
-						return true;
-					}
+					// TODO: Add more information retrieval for index.php if abstraction layer is ever written for it.
+					return true;
 				}
-				catch (InvalidOperationException)
-				{
-				}
+
+				this.client.RequestingDelay -= this.Client_RequestingDelay;
 			}
 
-			// Last resort
-			tryLoc = new Uri(tryPath + "index.php?maxlag=-1");
+			return false;
+		}
 
-			// We don't care about the result, only whether it's a valid link.
-			this.client.RequestingDelay += this.Client_RequestingDelay;
-			if (this.TryGet(tryLoc) != null)
+		private bool TryApi(Uri path, Uri fullHost)
+		{
+			try
 			{
-				this.Index = tryLoc;
-				this.ReadEntryPoint = EntryPoint.Index;
-				this.WriteEntryPoint = EntryPoint.Index;
+				// Something above gave us a tentative api.php link, so try it.
+				var api = new WikiAbstractionLayer(this.client, path);
+				if (api.IsEnabled())
+				{
+					api.Initialize();
+					var general = api.AllSiteInfo?.General ?? throw new InvalidOperationException();
+					this.Api = api.EntryPoint;
+					Uri? index = null;
+					if (!string.IsNullOrWhiteSpace(general.Script))
+					{
+						index = new UriBuilder(fullHost)
+						{
+							Path = general.Script
+						}.Uri;
+					}
 
-				// TODO: Add more information retrieval for index.php if abstraction layer is ever written for it.
-				return true;
+					this.Index = index;
+					this.SiteName = general.SiteName;
+					this.Version = general.Generator;
+					this.ReadEntryPoint = EntryPoint.Api;
+					this.SupportsMaxLag = api.SupportsMaxLag;
+					this.CurrentUser = (api.CurrentUserInfo?.Flags.HasFlag(UserInfoFlags.Anonymous) ?? true) ? null : api.CurrentUserInfo.Name;
+					this.WriteEntryPoint =
+						general.Flags.HasFlag(SiteInfoFlags.WriteApi) ? EntryPoint.Api :
+						this.Index == null ? EntryPoint.None :
+						EntryPoint.Index;
+
+					// API gave us everything we need, so skip trying index.php.
+					return true;
+				}
+
+				this.ErrorMessage = $"API disabled: {path}";
 			}
-
-			this.client.RequestingDelay -= this.Client_RequestingDelay;
+			catch (InvalidOperationException)
+			{
+			}
 
 			return false;
 		}
@@ -194,8 +234,12 @@
 				{
 					rsdLinkFixed = fullHost.Scheme + ':' + rsdLinkFixed;
 				}
+				else if (rsdLinkFixed.StartsWith('/'))
+				{
+					rsdLinkFixed = fullHost.AbsoluteUri.TrimEnd('/') + rsdLinkFixed;
+				}
 
-				var rsdInfo = this.client.Get(new Uri(rsdLinkFixed));
+				var rsdInfo = this.client.Get(new Uri(rsdLinkFixed)).Trim();
 				var rsd = XDocument.Parse(rsdInfo);
 				if (rsd.Root is XElement root)
 				{
@@ -208,6 +252,12 @@
 							return new Uri(WebUtility.HtmlDecode(linkText));
 						}
 					}
+				}
+
+				rsdLinkFixed = rsdLinkFixed.Split("?action=rsd")[0];
+				if (rsdLinkFixed.EndsWith("api.php", StringComparison.Ordinal))
+				{
+					return new Uri(rsdLinkFixed);
 				}
 			}
 			else
@@ -222,7 +272,15 @@
 				var foundPhpLink = FindPhpLink.Match(pageData);
 				if (foundPhpLink.Success)
 				{
-					return new Uri(fullHost.ToString() + foundPhpLink.Groups["scriptpath"].Value + "/api.php");
+					var newUri = fullHost.ToString().TrimEnd(TextArrays.Slash) + '/';
+					var path = foundPhpLink.Groups["scriptpath"].Value.Trim(TextArrays.Slash);
+					if (path.Length > 0)
+					{
+						newUri += path + '/';
+					}
+
+					newUri += "api.php";
+					return new Uri(newUri);
 				}
 			}
 
@@ -248,18 +306,6 @@
 			{
 				eventArgs.Cancel = true;
 				this.SupportsMaxLag = true;
-			}
-		}
-
-		private string? TryGet(Uri uri)
-		{
-			try
-			{
-				return this.client.Get(uri);
-			}
-			catch (WebException)
-			{
-				return null;
 			}
 		}
 		#endregion
