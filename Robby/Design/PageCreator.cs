@@ -44,7 +44,7 @@
 			{
 				propertyInputs.Add(new ImageInfoInput()
 				{
-					MaxItems = options.FileRevisionCount,
+					Limit = options.FileRevisionCount,
 					Properties =
 						ImageProperties.BitDepth |
 						ImageProperties.Comment |
