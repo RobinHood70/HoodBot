@@ -48,12 +48,18 @@
 			var codeLines = BladesCodeLine.Parse(lines);
 
 			var entries = codeLines["_propertyList"]["size"];
-			var allTitles = new TitleCollection(this.Site);
+			var titles = new TitleCollection(this.Site);
 			foreach (var entry in entries)
 			{
 				if (entry["_editorName"].Value is string pageName)
 				{
-					allTitles.Add(UespNamespaces.Blades, pageName);
+					if (pageName.StartsWith("Material ", StringComparison.Ordinal))
+					{
+						// pageName = pageName[9..];
+					}
+
+					titles.Add(UespNamespaces.Blades, pageName);
+					titles.Add(UespNamespaces.Blades, pageName + " (effect)");
 				}
 				else
 				{
@@ -61,8 +67,9 @@
 				}
 			}
 
-			var exists = allTitles.Load(PageModules.Info);
-
+			var pageLoadOptions = new PageLoadOptions(PageModules.Default, true);
+			var pages = titles.Load(pageLoadOptions);
+			pages.Sort();
 			foreach (var entry in entries)
 			{
 				var desc = entry["_description"]["_key"].Value ?? throw new InvalidOperationException();
@@ -76,17 +83,28 @@
 
 				if (entry["_editorName"].Value is string pageName && !IgnoreList.Contains(pageName))
 				{
-					if (exists["Blades:" + pageName].Exists)
+					var isMaterial = pageName.StartsWith("Material ", StringComparison.Ordinal);
+					if (isMaterial)
 					{
-						pageName += " (effect)";
+						// pageName = pageName[9..];
 					}
 
-					var page = new Page(this.Site[UespNamespaces.Blades], pageName)
+					pageName = "Blades:" + pageName;
+					var altPageName = pageName + " (effect)";
+					var page = pages[pageName];
+					if (pages[altPageName].Exists || (page.Exists && !page.Text.Contains("Effect Summary", StringComparison.Ordinal)))
 					{
-						Text = string.Concat("{{Trail|Effects}}{{Minimal}}\n{{Effect Summary\ntype=\nimage=\nsyntax=", desc, "\n|notrail=1\n}}\n{{Stub|Effect}}")
-					};
+						page = pages[altPageName];
+					}
 
-					this.Pages.Add(page);
+					if (!page.Exists)
+					{
+						page.Text = isMaterial
+							? $"#REDIRECT [[Blades:{page.PageName[9..]}]] [[Category:Redirects from Alternate Names]]"
+							: string.Concat("{{Trail|Effects}}{{Minimal}}\n{{Effect Summary\ntype=\nimage=\nsyntax=", desc, "\n|notrail=1\n}}\n{{Stub|Effect}}");
+
+						this.Pages.Add(page);
+					}
 				}
 			}
 		}
