@@ -5,6 +5,7 @@
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.IO;
+	using System.Text.RegularExpressions;
 	using System.Threading;
 	using System.Windows;
 	using System.Windows.Media;
@@ -461,6 +462,70 @@
 
 		private void RunTest()
 		{
+			var deleted = new List<string>();
+			var added = new List<string>();
+			var common = new List<string>();
+
+			var fullNames29 = Directory.GetFiles(@"D:\Books29");
+			var fullNames30 = Directory.GetFiles(@"D:\Books30");
+			var dir29 = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+			var dir30 = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+			foreach (var book in fullNames29)
+			{
+				dir29.Add(Path.GetFileName(book));
+			}
+
+			foreach (var book in fullNames30)
+			{
+				dir30.Add(Path.GetFileName(book));
+			}
+
+			foreach (var book in dir29)
+			{
+				if (dir30.Contains(book))
+				{
+					common.Add(book);
+				}
+				else
+				{
+					deleted.Add(book);
+				}
+			}
+
+			foreach (var book in dir30)
+			{
+				if (!dir29.Contains(book))
+				{
+					added.Add(book);
+				}
+			}
+
+			common.Sort(StringComparer.OrdinalIgnoreCase);
+			foreach (var book in common)
+			{
+				var book29 = File.ReadAllText(@"D:\Books29\" + book);
+				var book30 = File.ReadAllText(@"D:\Books30\" + book);
+				book29 = Regex.Replace(book29, @"\s+", " ", RegexOptions.None, DefaultRegexTimeout);
+				book30 = Regex.Replace(book30, @"\s+", " ", RegexOptions.None, DefaultRegexTimeout);
+
+				if (!string.Equals(book29, book30, StringComparison.Ordinal))
+				{
+					Debug.WriteLine(book + " has changed");
+				}
+			}
+
+			deleted.Sort(StringComparer.OrdinalIgnoreCase);
+			foreach (var book in deleted)
+			{
+				Debug.WriteLine(book + " deleted");
+			}
+
+			added.Sort(StringComparer.OrdinalIgnoreCase);
+			foreach (var book in added)
+			{
+				Debug.WriteLine(book + " is new");
+			}
+
 			// Dummy code just so this doesn't get all kinds of unwanted code suggestions.
 			Debug.WriteLine(this.SelectedItem?.DisplayName);
 			Debug.WriteLine(this.UserName);
