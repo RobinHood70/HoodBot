@@ -8,6 +8,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System.Globalization;
 	using System.IO;
 	using System.Text.RegularExpressions;
+	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
@@ -137,20 +138,27 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected void ParseResponse(string? response, IList<TOutput> pages)
 		{
-			var result = ToJson(response);
-			if (result.Type == JTokenType.Object)
+			try
 			{
-				this.DeserializeAction(result);
-				if (result[this.Name] is JToken node && node.Type != JTokenType.Null)
+				var result = ToJson(response);
+				if (result.Type == JTokenType.Object)
 				{
-					this.DeserializeResult(node, pages);
+					this.DeserializeAction(result);
+					if (result[this.Name] is JToken node && node.Type != JTokenType.Null)
+					{
+						this.DeserializeResult(node, pages);
+					}
+					else
+					{
+						throw WikiException.General("no-result", "The expected result node, " + this.Name + ", was not found.");
+					}
 				}
-				else
+				else if (!(result is JArray array && array.Count == 0))
 				{
-					throw WikiException.General("no-result", "The expected result node, " + this.Name + ", was not found.");
+					throw new InvalidDataException();
 				}
 			}
-			else if (!(result is JArray array && array.Count == 0))
+			catch (JsonReaderException)
 			{
 				throw new InvalidDataException();
 			}
