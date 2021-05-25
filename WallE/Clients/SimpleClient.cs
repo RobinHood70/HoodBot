@@ -117,6 +117,10 @@
 
 		#region Public Properties
 
+		/// <summary>Gets or sets a value indicating whether to honour maxlag requests.</summary>
+		/// <value><see langword="true"/> if maxlag requests should be honoured; otherwise, <see langword="false"/>.</value>
+		public bool HonourMaxLag { get; set; } = true;
+
 		/// <summary>Gets or sets a name for this instance of the client. It has no effect on operation and is provided primarily as a debugging tool to differentiate between multiple client instances.</summary>
 		/// <value>The instance name.</value>
 		public string Name { get; set; } = nameof(SimpleClient);
@@ -194,7 +198,7 @@
 		/// <returns>The text of the result.</returns>
 		public string Get(Uri uri)
 		{
-			using var response = this.SendRequest(uri, "GET", null, null, true);
+			using var response = this.SendRequest(uri, "GET", null, null, this.HonourMaxLag);
 			return GetResponseText(response);
 		}
 
@@ -204,7 +208,7 @@
 		/// <returns>The text of the result.</returns>
 		public string Post(Uri uri, string postData)
 		{
-			using var response = this.SendRequest(uri, "POST", FormUrlEncoded, Encoding.UTF8.GetBytes(postData), true);
+			using var response = this.SendRequest(uri, "POST", FormUrlEncoded, Encoding.UTF8.GetBytes(postData), this.HonourMaxLag);
 			return GetResponseText(response);
 		}
 
@@ -215,7 +219,7 @@
 		/// <returns>The text of the result.</returns>
 		public string Post(Uri uri, string contentType, byte[] postData)
 		{
-			using var response = this.SendRequest(uri, "POST", contentType, postData, true);
+			using var response = this.SendRequest(uri, "POST", contentType, postData, this.HonourMaxLag);
 			return GetResponseText(response);
 		}
 
