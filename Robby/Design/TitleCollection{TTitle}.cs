@@ -116,14 +116,14 @@
 
 		#region Protected Properties
 
-		/// <summary>Gets or sets a value indicated whether <see cref="NamespaceLimitations"/> specifies namespaces to be removed from the collection or only allowing those namepaces.</summary>
+		/// <summary>Gets or sets a value indicating whether <see cref="NamespaceLimitations"/> specifies namespaces to be removed from the collection or only allowing those namepaces.</summary>
 		/// <value>The type of the namespace limitation.</value>
-		/// <remarks>Changing this property only affects newly added pages and does not affect any existing items in the collection. Use <see cref="ReapplyLimitations"/> to do so, if needed.</remarks>
+		/// <remarks>Changing this property only affects newly added pages and does not affect any existing items in the collection. Use <see cref="FilterByLimitationRules"/> to do so, if needed.</remarks>
 		protected LimitationType LimitationType { get; set; } = LimitationType.Remove;
 
 		/// <summary>Gets the namespace limitations.</summary>
 		/// <value>A set of namespace IDs that will be filtered out or filtered down to automatically as pages are added.</value>
-		/// <remarks>Changing the contents of this collection only affects newly added pages and does not affect any existing items in the collection. Use <see cref="ReapplyLimitations"/> to do so, if needed.</remarks>
+		/// <remarks>Changing the contents of this collection only affects newly added pages and does not affect any existing items in the collection. Use <see cref="FilterByLimitationRules"/> to do so, if needed.</remarks>
 		protected ICollection<int> NamespaceLimitations { get; } = new HashSet<int>
 		{
 			MediaWikiNamespaces.Media,
@@ -299,6 +299,19 @@
 		/// <param name="array">The one-dimensional <see cref="Array" /> that is the destination of the elements copied from <see cref="TitleCollection">collection</see>. The <see cref="Array" /> must have zero-based indexing.</param>
 		/// <param name="arrayIndex">The zero-based index in <paramref name="array" /> at which copying begins.</param>
 		public void CopyTo(TTitle[] array, int arrayIndex) => this.items.CopyTo(array, arrayIndex);
+
+		/// <summary>Reapplies the namespace limitations in <see cref="NamespaceLimitations"/> to the existing collection.</summary>
+		public void FilterByLimitationRules()
+		{
+			if (this.LimitationType == LimitationType.Remove)
+			{
+				this.RemoveNamespaces(this.NamespaceLimitations);
+			}
+			else if (this.LimitationType == LimitationType.FilterTo)
+			{
+				this.FilterToNamespaces(this.NamespaceLimitations);
+			}
+		}
 
 		/// <summary>Filters the collection to one or more namespaces.</summary>
 		/// <param name="namespaces">The namespaces to filter to.</param>
@@ -830,19 +843,6 @@
 		/// <param name="index">The zero-based index at which <paramref name="item" /> should be inserted.</param>
 		/// <param name="item">The item to insert into the <see cref="TitleCollection">collection</see>.</param>
 		public void Insert(int index, TTitle item) => this.InsertItem(index, item);
-
-		/// <summary>Reapplies the namespace limitations in <see cref="NamespaceLimitations"/> to the existing collection.</summary>
-		public void ReapplyLimitations()
-		{
-			if (this.LimitationType == LimitationType.Remove)
-			{
-				this.RemoveNamespaces(this.NamespaceLimitations);
-			}
-			else if (this.LimitationType == LimitationType.FilterTo)
-			{
-				this.FilterToNamespaces(this.NamespaceLimitations);
-			}
-		}
 
 		/// <summary>Removes a specific item from the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="item">The item to remove from the <see cref="TitleCollection">collection</see>.</param>
