@@ -26,7 +26,7 @@
 
 		/// <inheritdoc/>
 		public override IArgumentNode ArgumentNode(IEnumerable<IWikiNode> name, IList<IParameterNode> defaultValue) =>
-			new SiteArgumentNode(this, name, defaultValue);
+			new ArgumentNode(this, name, defaultValue);
 
 		/// <inheritdoc/>
 		public override ILinkNode LinkNode(IEnumerable<IWikiNode> title, IList<IParameterNode> parameters) =>
@@ -34,7 +34,7 @@
 
 		/// <inheritdoc/>
 		public override IParameterNode ParameterNode(IEnumerable<IWikiNode>? name, IEnumerable<IWikiNode> value) =>
-			new SiteParameterNode(this, name, value);
+			new ParameterNode(this, name, value);
 
 		/// <inheritdoc/>
 		public override ITemplateNode TemplateNode(IEnumerable<IWikiNode> title, IList<IParameterNode> parameters) =>
