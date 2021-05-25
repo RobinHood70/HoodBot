@@ -17,7 +17,7 @@
 		#endregion
 
 		#region Constructors
-		[JobInfo("Blades Families")]
+		[JobInfo("Blades Families", "Blades")]
 		public BladesFamilies(JobManager jobManager)
 			: base(jobManager)
 		{
