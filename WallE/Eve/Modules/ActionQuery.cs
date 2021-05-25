@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
+	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Properties;
@@ -204,12 +205,19 @@
 
 		private void ParseResponse(string? response)
 		{
-			var result = ToJson(response);
-			if (result.Type == JTokenType.Object)
+			try
 			{
-				this.DeserializeAction(result);
+				var result = ToJson(response);
+				if (result.Type == JTokenType.Object)
+				{
+					this.DeserializeAction(result);
+				}
+				else if (!(result is JArray array && array.Count == 0))
+				{
+					throw new InvalidDataException();
+				}
 			}
-			else if (!(result is JArray array && array.Count == 0))
+			catch (JsonReaderException)
 			{
 				throw new InvalidDataException();
 			}
