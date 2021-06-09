@@ -123,9 +123,6 @@
   <data name="BadTokenRequest" xml:space="preserve">
     <value>A session token was requested for rollback or userrights on a wiki where these are not session tokens.</value>
   </data>
-  <data name="ColonText" xml:space="preserve">
-    <value>{0}: {1}</value>
-  </data>
   <data name="CustomStopCheckFailed" xml:space="preserve">
     <value>the custom stop check failed</value>
   </data>
@@ -171,20 +168,11 @@
   <data name="WatchNotSupported" xml:space="preserve">
     <value>MediaWiki 1.22 and below support watching titles only. Please do not use a generator, page IDs, or revision IDs.</value>
   </data>
-  <data name="CollectionInvalid" xml:space="preserve">
-    <value>An item in the collection {0} was null (or whitespace only for strings), or there were no items in the collection.</value>
-  </data>
-  <data name="StringInvalid" xml:space="preserve">
-    <value>The parameter {0} cannot be null or only whitespace.</value>
-  </data>
   <data name="PrependAppend" xml:space="preserve">
     <value>At least one of prependText or appendText must be a string of one or more characters.</value>
   </data>
   <data name="ApiDisabled" xml:space="preserve">
     <value>The API is disabled on this wiki.</value>
-  </data>
-  <data name="NotAGenerator" xml:space="preserve">
-    <value>An attempt was made to call SetAsGenerator() on a module that cannot be a generator. Please do not call this method yourself; let the framework do it when approprirate.</value>
   </data>
   <data name="InvalidApi" xml:space="preserve">
     <value>The URI passed to the constructor did not end in "api.php".</value>
@@ -204,9 +192,6 @@
   <data name="CannotDeserialize" xml:space="preserve">
     <value>This {0} module cannot be deseralized in the normal manner.</value>
   </data>
-  <data name="NoPageCreator" xml:space="preserve">
-    <value>Trying to create pages with no page creator!</value>
-  </data>
   <data name="InitializationFailed" xml:space="preserve">
     <value>Site initialization failed because required user or site information could not be found.</value>
   </data>
@@ -215,9 +200,6 @@
   </data>
   <data name="UseSubmit" xml:space="preserve">
     <value>Because of its complexity, ApiQueryPageSet does not use the normal {0}(...) mechanism. Pass all inputs in the constructor, then call Submit() instead.</value>
-  </data>
-  <data name="NullResponse" xml:space="preserve">
-    <value>The return value of the request was null.</value>
   </data>
   <data name="UserInfoCheckFailed" xml:space="preserve">
     <value>UserInfo check failed! User name and ID could not be validated.</value>

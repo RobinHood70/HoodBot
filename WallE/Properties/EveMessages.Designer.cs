@@ -22,7 +22,7 @@ namespace RobinHood70.WallE.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal sealed class EveMessages {
+    internal class EveMessages {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -106,24 +106,6 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An item in the collection {0} was null (or whitespace only for strings), or there were no items in the collection..
-        /// </summary>
-        internal static string CollectionInvalid {
-            get {
-                return ResourceManager.GetString("CollectionInvalid", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0}: {1}.
-        /// </summary>
-        internal static string ColonText {
-            get {
-                return ResourceManager.GetString("ColonText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to the custom stop check failed.
         /// </summary>
         internal static string CustomStopCheckFailed {
@@ -196,15 +178,6 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Trying to create pages with no page creator!.
-        /// </summary>
-        internal static string NoPageCreator {
-            get {
-                return ResourceManager.GetString("NoPageCreator", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The query you attempted is invalid on this wiki..
         /// </summary>
         internal static string NoSupportedModules {
@@ -214,29 +187,11 @@ namespace RobinHood70.WallE.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An attempt was made to call SetAsGenerator() on a module that cannot be a generator. Please do not call this method yourself; let the framework do it when approprirate..
-        /// </summary>
-        internal static string NotAGenerator {
-            get {
-                return ResourceManager.GetString("NotAGenerator", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to {0} is not a string value..
         /// </summary>
         internal static string NotAString {
             get {
                 return ResourceManager.GetString("NotAString", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The return value of the request was null..
-        /// </summary>
-        internal static string NullResponse {
-            get {
-                return ResourceManager.GetString("NullResponse", resourceCulture);
             }
         }
         
@@ -318,15 +273,6 @@ namespace RobinHood70.WallE.Properties {
         internal static string RevisionSha1Failed {
             get {
                 return ResourceManager.GetString("RevisionSha1Failed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The parameter {0} cannot be null or only whitespace..
-        /// </summary>
-        internal static string StringInvalid {
-            get {
-                return ResourceManager.GetString("StringInvalid", resourceCulture);
             }
         }
         

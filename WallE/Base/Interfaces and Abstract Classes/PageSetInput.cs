@@ -6,7 +6,6 @@ namespace RobinHood70.WallE.Base
 	using System.Globalization;
 	using RobinHood70.CommonCode;
 	using static RobinHood70.CommonCode.Globals;
-	using static RobinHood70.WallE.ProjectGlobals;
 
 	public enum ListType
 	{
