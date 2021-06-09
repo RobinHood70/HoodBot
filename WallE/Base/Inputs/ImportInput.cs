@@ -2,7 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
-	using static RobinHood70.WallE.ProjectGlobals;
+	using static RobinHood70.CommonCode.Globals;
 
 	public class ImportInput
 	{
