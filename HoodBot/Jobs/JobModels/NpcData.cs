@@ -44,6 +44,7 @@
 			[3] = "Friendly",
 			[4] = "Player Ally",
 			[5] = "NPC Ally",
+			[6] = "Companion",
 		};
 		#endregion
 
