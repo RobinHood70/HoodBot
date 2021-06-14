@@ -39,12 +39,12 @@
 			// TODO: Update mode could load pages with no loc or {{huh}} via MetaTemplate variables.
 			this.StatusWriteLine("Getting NPC data");
 			var npcCollection = this.GetNpcPages();
-			EsoGeneral.GetNpcLocations(npcCollection);
+			npcCollection.GetLocations();
 
 			this.StatusWriteLine("Getting place data");
 			var places = EsoGeneral.GetPlaces(this.Site);
 			var placeInfo = EsoGeneral.PlaceInfo;
-			EsoGeneral.ParseNpcLocations(npcCollection, places);
+			npcCollection.ParseLocations(places);
 			foreach (var npc in npcCollection)
 			{
 				npc.TrimPlaces();
