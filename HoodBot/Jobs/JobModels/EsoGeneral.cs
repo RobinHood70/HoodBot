@@ -12,7 +12,6 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
-	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
 
@@ -28,12 +27,9 @@
 
 	internal static class EsoGeneral
 	{
-		#region Static Fields
+		#region Fields
 		private static readonly Regex ColourCode = new(@"\A\|c[0-9A-F]{6}(.*?)\|r\Z", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
 		private static readonly Regex TrailingDigits = new(@"\s*\d+\Z", RegexOptions.None, DefaultRegexTimeout);
-		#endregion
-
-		#region Fields
 		private static readonly Regex BonusFinder = new(@"\s*Current [Bb]onus:.*?\.", RegexOptions.None, DefaultRegexTimeout);
 		private static string? patchVersion;
 		#endregion
@@ -85,53 +81,32 @@
 		#endregion
 
 		#region Public Methods
-		public static void GetNpcLocations(NpcCollection npcData)
+		public static IEnumerable<NpcLocationData> GetNpcLocationData(List<long> npcIds)
 		{
-			var npcIds = new List<long>(npcData.Count);
-			foreach (var npc in npcData)
-			{
-				if (npc.UnknownLocations.Count == 0)
-				{
-					npcIds.Add(npc.Id);
-				}
-			}
-
-			if (npcIds.Count == 0)
-			{
-				return;
-			}
-
+			var retval = new List<NpcLocationData>();
 			var query = $"SELECT npcId, zone, locCount FROM npcLocations WHERE npcId IN ({string.Join(", ", npcIds)}) AND zone != 'Tamriel'";
-			for (var retries = 0; true; retries++)
+			for (var retries = 2; retries >= 0; retries--)
 			{
 				try
 				{
 					foreach (var row in Database.RunQuery(EsoLogConnectionString, query))
 					{
-						var npcId = (long)row["npcId"];
-						var location = (string)row["zone"];
-						var count = (int)row["locCount"];
-						var npc = npcData[npcId];
-						var place = new Place(location);
-						npc.UnknownLocations.Add(place, count);
+						var data = new NpcLocationData(
+							(long)row["npcId"],
+							(string)row["zone"],
+							(int)row["locCount"]);
+						retval.Add(data);
 					}
 
-					break;
+					retries = 0;
 				}
-				catch (TimeoutException) when (retries < 3)
+				catch (TimeoutException) when (retries > 0)
 				{
 				}
-				catch (MySqlException) when (retries < 3)
+				catch (MySqlException) when (retries > 0)
 				{
 				}
 			}
-		}
-
-		public static TitleCollection GetNpcsFromCategories(Site site)
-		{
-			var retval = new TitleCollection(site);
-			retval.GetCategoryMembers("Online-NPCs", CategoryMemberTypes.Page, false);
-			retval.GetCategoryMembers("Online-Creatures-All", CategoryMemberTypes.Page, false);
 
 			return retval;
 		}
@@ -163,39 +138,9 @@
 				}
 			}
 
-			if (throwNameClash)
-			{
-				throw new InvalidOperationException("Duplicate NPCs found. Operation aborted! See debug output for specifics.");
-			}
-
-			return retval;
-		}
-
-		public static PageCollection GetNpcPages(Site site)
-		{
-			var retval = new PageCollection(site);
-			retval.SetLimitations(LimitationType.FilterTo, UespNamespaces.Online);
-			retval.GetPageTranscludedIn(new[] { new Title(site[UespNamespaces.Template], "Online NPC Summary") });
-			retval.Sort();
-
-			return retval;
-		}
-
-		public static VariablesPage GetPatchPage(WikiJob job)
-		{
-			job.StatusWriteLine("Fetching ESO update number");
-			var patchTitle = new TitleCollection(job.Site, "Online:Patch");
-			var pages = job.Site.CreateMetaPageCollection(PageModules.Default, false);
-			pages.GetTitles(patchTitle);
-			if (pages.Count == 1
-				&& pages[0] is VariablesPage patchPage
-				&& patchPage.MainSet?["number"] is string version)
-			{
-				patchVersion = version;
-				return patchPage;
-			}
-
-			throw new InvalidOperationException("Could not find patch version on page.");
+			return throwNameClash
+				? throw new InvalidOperationException("Duplicate NPCs found. Operation aborted! See debug output for specifics.")
+				: retval;
 		}
 
 		public static string GetPatchVersion(WikiJob job)
@@ -249,38 +194,39 @@
 			return retval;
 		}
 
-		public static string HarmonizeDescription(string desc) => RegexLibrary.WhitespaceToSpace(BonusFinder.Replace(desc, string.Empty));
-
-		public static void ParseNpcLocations(NpcCollection npcData, PlaceCollection places)
+		public static NpcCollection GetZonesFromDatabase()
 		{
-			foreach (var npc in npcData)
+			// Note: for now, it's assumed that the collection should be the same across all jobs, so all filtering is done here in the query (e.g., Reaction != 6 for companions). If this becomes untrue at some point, filtering will have to be shifted to the individual jobs or we could add a query string to the call.
+			var retval = new NpcCollection();
+			var nameClash = new HashSet<string>(StringComparer.Ordinal);
+			var throwNameClash = false;
+			foreach (var row in Database.RunQuery(EsoLogConnectionString, "SELECT id, name, gender, difficulty, ppDifficulty, ppClass, reaction FROM uesp_esolog.npc WHERE level != -1 AND reaction != 6"))
 			{
-				if (npc.Page != null)
+				var name = (string)row["name"];
+				if (!ColourCode.IsMatch(name) && !TrailingDigits.IsMatch(name))
 				{
-					var locCopy = new Dictionary<Place, int>(npc.UnknownLocations);
-					foreach (var kvp in locCopy)
+					var npcData = new NpcData(row);
+					if (!ReplacementData.NpcNameSkips.Contains(npcData.Name))
 					{
-						var key = kvp.Key;
-						try
+						if (nameClash.Add(npcData.Name))
 						{
-							if (places[key.TitleName] is Place place)
-							{
-								npc.Places.Add(place, kvp.Value);
-								npc.UnknownLocations.Remove(key);
-							}
-							else
-							{
-								Debug.WriteLine($"Location not found: {key}");
-							}
+							retval.Add(npcData);
 						}
-						catch (InvalidOperationException)
+						else
 						{
-							Debug.WriteLine($"Location {key.TitleName} is ambiguous for NPC {npc.Name}");
+							Debug.WriteLine($"Warning: an NPC with the name \"{npcData.Name}\" exists more than once in the database!");
+							throwNameClash = true;
 						}
 					}
 				}
 			}
+
+			return throwNameClash
+				? throw new InvalidOperationException("Duplicate NPCs found. Operation aborted! See debug output for specifics.")
+				: retval;
 		}
+
+		public static string HarmonizeDescription(string desc) => RegexLibrary.WhitespaceToSpace(BonusFinder.Replace(desc, string.Empty));
 
 		public static void SetBotUpdateVersion(WikiJob job, string pageType)
 		{
@@ -304,6 +250,23 @@
 		#endregion
 
 		#region Private Methods
+		private static VariablesPage GetPatchPage(WikiJob job)
+		{
+			job.StatusWriteLine("Fetching ESO update number");
+			var patchTitle = new TitleCollection(job.Site, "Online:Patch");
+			var pages = job.Site.CreateMetaPageCollection(PageModules.Default, false);
+			pages.GetTitles(patchTitle);
+			if (pages.Count == 1
+				&& pages[0] is VariablesPage patchPage
+				&& patchPage.MainSet?["number"] is string version)
+			{
+				patchVersion = version;
+				return patchPage;
+			}
+
+			throw new InvalidOperationException("Could not find patch version on page.");
+		}
+
 		private static void GetPlaceCategory(Site site, PlaceCollection places, PlaceInfo placeInfo)
 		{
 			if (placeInfo.CategoryName == null)
