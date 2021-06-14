@@ -37,6 +37,9 @@
 			this.MainPage = Title.FromName(site, nsData[4].Length == 0 ? this.Full + this.Name : nsData[4]);
 			this.Category = nsData[5].Length == 0 ? this.Base : nsData[5];
 			this.Trail = nsData[6].Length == 0 ? string.Concat("[[", this.MainPage, "|", this.Name, "]]") : nsData[6];
+
+			var parentId = this.Parent.Id;
+			this.IsGameSpace = (parentId & 1) == 0 && parentId >= 100 && parentId <= 200;
 		}
 		#endregion
 
@@ -50,6 +53,8 @@
 		public string Full { get; }
 
 		public string Id { get; }
+
+		public bool IsGameSpace { get; }
 
 		public bool IsPseudoNamespace { get; }
 
