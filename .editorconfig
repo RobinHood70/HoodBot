@@ -26,7 +26,7 @@ dotnet_diagnostic.IDE0010.severity = none
 dotnet_diagnostic.IDE0058.severity = none
 dotnet_diagnostic.IDE0065.severity = suggestion
 dotnet_diagnostic.IDE0072.severity = none
-dotnet_diagnostic.IDE0078.severity = none # Disabled temporarily due to bug causing erroneous detections/fixes.
+# dotnet_diagnostic.IDE0078.severity = none # Disabled temporarily due to bug causing erroneous detections/fixes.
 
 dotnet_diagnostic.MA0003.severity = none
 dotnet_diagnostic.MA0007.severity = none
