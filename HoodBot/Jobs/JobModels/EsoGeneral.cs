@@ -194,38 +194,6 @@
 			return retval;
 		}
 
-		public static NpcCollection GetZonesFromDatabase()
-		{
-			// Note: for now, it's assumed that the collection should be the same across all jobs, so all filtering is done here in the query (e.g., Reaction != 6 for companions). If this becomes untrue at some point, filtering will have to be shifted to the individual jobs or we could add a query string to the call.
-			var retval = new NpcCollection();
-			var nameClash = new HashSet<string>(StringComparer.Ordinal);
-			var throwNameClash = false;
-			foreach (var row in Database.RunQuery(EsoLogConnectionString, "SELECT id, name, gender, difficulty, ppDifficulty, ppClass, reaction FROM uesp_esolog.npc WHERE level != -1 AND reaction != 6"))
-			{
-				var name = (string)row["name"];
-				if (!ColourCode.IsMatch(name) && !TrailingDigits.IsMatch(name))
-				{
-					var npcData = new NpcData(row);
-					if (!ReplacementData.NpcNameSkips.Contains(npcData.Name))
-					{
-						if (nameClash.Add(npcData.Name))
-						{
-							retval.Add(npcData);
-						}
-						else
-						{
-							Debug.WriteLine($"Warning: an NPC with the name \"{npcData.Name}\" exists more than once in the database!");
-							throwNameClash = true;
-						}
-					}
-				}
-			}
-
-			return throwNameClash
-				? throw new InvalidOperationException("Duplicate NPCs found. Operation aborted! See debug output for specifics.")
-				: retval;
-		}
-
 		public static string HarmonizeDescription(string desc) => RegexLibrary.WhitespaceToSpace(BonusFinder.Replace(desc, string.Empty));
 
 		public static void SetBotUpdateVersion(WikiJob job, string pageType)
