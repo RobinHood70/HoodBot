@@ -131,6 +131,29 @@
 				.ToString();
 		}
 
+		private static string NpcToWikiText(NpcData npc)
+		{
+			var places = string.Join(", ", npc.Places);
+			var unknownLocs = string.Join(", ", npc.UnknownLocations);
+			var retval = $"* Name: {npc.Name}\n* Gender: {npc.GenderText}";
+			if (!string.IsNullOrWhiteSpace(npc.LootType))
+			{
+				retval += $"\n* Loot Type: {npc.LootType}";
+			}
+
+			if (!string.IsNullOrWhiteSpace(places))
+			{
+				retval += $"\n* Known Locations: {places}";
+			}
+
+			if (!string.IsNullOrWhiteSpace(unknownLocs))
+			{
+				retval += $"\n* Unknown Locations: {unknownLocs}";
+			}
+
+			return retval;
+		}
+
 		private static void UpdateLocations(NpcData npc, ITemplateNode template, IWikiNodeFactory factory, IEnumerable<PlaceInfo> placeInfos)
 		{
 			foreach (var (placeType, paramName, _, variesCount) in placeInfos)
@@ -245,6 +268,7 @@
 			loadPages.Sort();
 
 			var retval = new NpcCollection();
+			var issues = new List<(NpcData, string)>();
 			foreach (var npc in loadNpcs)
 			{
 				if (!npcRenames.TryGetValue(npc.Id, out var npcName))
@@ -254,19 +278,19 @@
 
 				if (loadPages.TryGetValue(NpcTitle(npcName), out var page))
 				{
+					npc.Page = page;
 					var issue =
 						page.IsDisambiguation ? "is a disambiguation with no clear NPC link" :
 						page.IsRedirect ? "is a redirect to a content page without an Online NPC Summary" :
 						(!this.updateMode && page.IsMissing && page.PreviouslyDeleted) ? "was previously deleted" :
-						(!this.updateMode && !page.IsMissing) ? "is already a content page without an Online NPC Summary" :
 						null;
 					if (issue == null)
 					{
-						npc.Page = page;
+						var parsed = new ContextualParser(page);
+						var template = parsed.FindTemplate("Online NPC Summary");
 						if (this.updateMode)
 						{
-							var parsed = new ContextualParser(page);
-							if (parsed.FindTemplate("Online NPC Summary") is ITemplateNode template &&
+							if (template != null &&
 								template.Find("city").IsNullOrWhitespace() &&
 								template.Find("settlement").IsNullOrWhitespace() &&
 								template.Find("house").IsNullOrWhitespace() &&
@@ -278,22 +302,54 @@
 								retval.Add(npc);
 							}
 						}
-						else
+						else if (template is null)
 						{
-							retval.Add(npc);
+							if (page.IsMissing)
+							{
+								retval.Add(npc);
+							}
+							else
+							{
+								issue = "is already a content page without an Online NPC Summary";
+							}
 						}
 					}
-					else
+
+					if (issue != null)
 					{
-						this.LogIssue(page.AsLink(true), issue, npc);
+						issues.Add((npc, issue));
 					}
 				}
 			}
 
+			issues.Sort(new NpcComparer());
+			this.WriteLine("{| class=\"wikitable sortable\"");
+			this.WriteLine("! Page !! Issue !! NPC Data");
+			foreach (var (npc, issue) in issues)
+			{
+				this.WriteLine("|-");
+				this.WriteLine($"| {npc.Page?.AsLink(true)}");
+				this.WriteLine($"| {issue}");
+				this.WriteLine("| " + NpcToWikiText(npc));
+			}
+
+			this.WriteLine("|}");
 			return retval;
 		}
+		#endregion
 
-		private void LogIssue(string originalLink, string? issue, NpcData npc) => this.WriteLine($"* {originalLink} {issue}. Please use the following data to create a page manually, if needed.\n*:Name: {npc.Name}\n*:Gender: {npc.GenderText}\n*:Loot Type: {npc.LootType}\n*:Known Locations: {string.Join(", ", npc.Places)}\n*:Unknown Locations: {string.Join(", ", npc.UnknownLocations)}");
+		#region Private Classes
+		private sealed class NpcComparer : IComparer<(NpcData Npc, string Issue)>
+		{
+			public int Compare((NpcData Npc, string Issue) x, (NpcData Npc, string Issue) y) =>
+				x.Npc.Page is null
+					? y.Npc.Page is null
+						? 0
+						: -1
+					: y.Npc.Page is null
+						? 1
+						: SimpleTitleComparer.Instance.Compare(x.Npc.Page, y.Npc.Page);
+		}
 		#endregion
 	}
 }
