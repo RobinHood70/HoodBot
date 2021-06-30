@@ -88,7 +88,6 @@
 				pages.Sort(NaturalTitleComparer.Instance);
 				this.Progress = 0;
 				this.ProgressMaximum = pages.Count;
-
 				foreach (var page in pages)
 				{
 					this.SavePage(page, editSummary, isMinor);
