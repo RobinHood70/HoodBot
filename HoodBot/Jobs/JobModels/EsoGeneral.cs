@@ -194,6 +194,21 @@
 			return retval;
 		}
 
+		public static IEnumerable<(string Name, int Data)> GetZonesFromDatabase()
+		{
+			foreach (var row in Database.RunQuery(EsoLogConnectionString, "SELECT zoneName, subZoneName, mapName, description, mapType, mapContentType, mapFilterType, isDungeon FROM uesp_esolog.zones"))
+			{
+				var mapName = (string)row["mapName"];
+				var subZoneName = (string)row["subZoneName"];
+				var zoneName = (string)row["zoneName"];
+				var name = subZoneName.Length > 0
+						? subZoneName
+						: zoneName;
+				Debug.WriteLine($"{zoneName}/{subZoneName}/{mapName} - chose {name}");
+				yield return (name, (int)row["mapType"]);
+			}
+		}
+
 		public static string HarmonizeDescription(string desc) => RegexLibrary.WhitespaceToSpace(BonusFinder.Replace(desc, string.Empty));
 
 		public static void SetBotUpdateVersion(WikiJob job, string pageType)
