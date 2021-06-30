@@ -427,7 +427,7 @@
 				return;
 			}
 
-			if (this.textLength > 0 && this.Text[0] == '=')
+			if (this.Text[0] == '=')
 			{
 				this.ParseLineStart();
 			}
