@@ -68,11 +68,6 @@
 			EsoReplacer.Initialize(this);
 			this.StatusWriteLine("Fetching data");
 			var setList = GetSetsFromCsv(this.client.Get(SetSummaryPage));
-			foreach (var set in setList)
-			{
-				set.SetTitle(this.Site);
-			}
-
 			this.StatusWriteLine("Updating");
 			this.ResolveAndPopulateSets(setList);
 			var titles = new TitleCollection(this.Site);
@@ -176,9 +171,10 @@
 			var catTitles = new TitleCollection(this.Site);
 			foreach (var set in dbSets)
 			{
-				if (!catMembers.Contains(set.Title))
+				var setTitle = new Title(this.Site.Namespaces[UespNamespaces.Online], set.PageName);
+				if (!catMembers.Contains(setTitle))
 				{
-					catTitles.Add(set.Title);
+					catTitles.Add(setTitle);
 				}
 			}
 
@@ -194,12 +190,13 @@
 			var disambigs = new Dictionary<Title, PageData>();
 			foreach (var set in dbSets)
 			{
-				if (!catMembers.TryGetValue(set.Title.FullPageName + " (set)", out var foundPage) && !catMembers.TryGetValue(set.Title, out foundPage))
+				var setTitle = new Title(this.Site.Namespaces[UespNamespaces.Online], set.PageName);
+				if (!catMembers.TryGetValue(setTitle.FullPageName + " (set)", out var foundPage) && !catMembers.TryGetValue(setTitle, out foundPage))
 				{
 					throw new InvalidOperationException();
 				}
 
-				set.SetPageName(this.Site, foundPage.PageName);
+				set.PageName = foundPage.PageName;
 				if (foundPage.IsDisambiguation)
 				{
 					disambigs.Add(foundPage, set);
@@ -224,7 +221,7 @@
 						{
 							if (link.PageName.Contains(" (set)", StringComparison.OrdinalIgnoreCase))
 							{
-								title.Value.SetPageName(this.Site, link.PageName);
+								title.Value.PageName = link.PageName;
 								this.AddToSets(title.Value);
 								resolved = true;
 								break;
@@ -325,21 +322,16 @@
 		#region Private Classes
 		private sealed class PageData
 		{
-			#region Fields
-			private Title? title;
-			#endregion
-
 			#region Constructors
 			public PageData(string setName, string bonusDescription)
 			{
-				if (!TitleOverrides.TryGetValue(setName, out var pageName))
-				{
-					pageName = setName;
-				}
-
-				this.BonusDescription = bonusDescription;
-				this.PageName = pageName;
+				ThrowNull(setName, nameof(setName));
+				ThrowNull(bonusDescription, nameof(bonusDescription));
 				this.SetName = setName;
+				this.PageName = !TitleOverrides.TryGetValue(setName, out var pageName)
+					? setName
+					: pageName;
+				this.BonusDescription = bonusDescription;
 			}
 			#endregion
 
@@ -348,21 +340,9 @@
 
 			public bool IsNonTrivial { get; set; }
 
-			public string PageName { get; private set; }
+			public string PageName { get; set; }
 
 			public string SetName { get; }
-
-			public Title Title => this.title ?? throw new InvalidOperationException();
-			#endregion
-
-			#region Public Methods
-			public void SetPageName(Site site, string pageName)
-			{
-				this.PageName = pageName;
-				this.SetTitle(site);
-			}
-
-			public void SetTitle(Site site) => this.title = new Title(site[UespNamespaces.Online], this.PageName);
 			#endregion
 
 			#region Public Override Methods
