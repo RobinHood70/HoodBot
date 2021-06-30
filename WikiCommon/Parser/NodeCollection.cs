@@ -61,6 +61,15 @@
 			}
 		}
 
+		/// <summary>Creates a shallow copy of the collection.</summary>
+		/// <returns>A shallow copy of all nodes in the collection, along with the factory.</returns>
+		public NodeCollection Clone()
+		{
+			var nodes = new IWikiNode[this.Count];
+			this.CopyTo(nodes);
+			return new NodeCollection(this.Factory, nodes);
+		}
+
 		/// <summary>Finds the first node of the specified type.</summary>
 		/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
 		/// <returns>The first node found, or null if no nodes of that type are in the collection.</returns>
