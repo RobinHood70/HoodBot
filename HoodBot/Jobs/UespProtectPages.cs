@@ -194,19 +194,20 @@
 		protected override void BeforeLogging()
 		{
 			this.StatusWriteLine("Loading Page Names");
-			var titlesToProtect = this.LoadPageNames(this.NamespacesInSearchList());
-
+			var namespacesToLoad = this.NamespacesInSearchList();
+			var titlesToProtect = this.LoadPageNames(namespacesToLoad);
 			this.StatusWriteLine("Loading Current Protection Levels");
 			var currentProtectionPages = titlesToProtect.Load(new PageLoadOptions(PageModules.Default)
 			{
 				FollowRedirects = true,
 				InfoGetProtection = true,
 			});
-			this.FindProtectionMismatches(titlesToProtect, currentProtectionPages);
 
+			currentProtectionPages.RemoveExists(false);
+			this.FindProtectionMismatches(titlesToProtect, currentProtectionPages);
 			if (this.pageProtections.Count == 0)
 			{
-				this.Logger = null; // Temporary kludge to avoid logging. Chnage BeforeMain to boolean to check if we should proceed.
+				this.Logger = null; // Temporary kludge to avoid logging. Change BeforeMain to boolean to check if we should proceed.
 				this.StatusWriteLine("No pages needed to be changed.");
 				return;
 			}
@@ -308,7 +309,13 @@
 				headerTemplate = existing;
 			}
 
+			var needsNewLine = nodes[insertPos] is IHeaderNode;
 			nodes.Insert(insertPos, headerTemplate);
+			if (needsNewLine)
+			{
+				nodes.Insert(insertPos + 1, nodes.Factory.TextNode("\n"));
+			}
+
 			return insertPos + 1;
 		}
 
@@ -538,17 +545,20 @@
 			var uespNamespaceList = new UespNamespaceList(this.Site);
 			foreach (var ns in uespNamespaceList)
 			{
-				var pageProtection = new PageProtection(
-					"Gamespace Pages",
-					ProtectionLevel.Semi,
-					ProtectionLevel.Full,
-					AddStandardProtection,
-					string.Empty,
-					string.Empty,
-					false,
-					"main gamespace or similar page");
+				if (ns.IsGameSpace)
+				{
+					var pageProtection = new PageProtection(
+						"Gamespace Pages",
+						ProtectionLevel.Semi,
+						ProtectionLevel.Full,
+						AddStandardProtection,
+						string.Empty,
+						string.Empty,
+						false,
+						"main gamespace or similar page");
 
-				titlesToProtect.Add(new ProtectedTitle(ns.MainPage, pageProtection));
+					titlesToProtect.Add(new ProtectedTitle(ns.MainPage, pageProtection));
+				}
 			}
 
 			this.ProgressMaximum = spacesToLoad.Count;
@@ -556,6 +566,7 @@
 			{
 				var titles = new TitleCollection(this.Site);
 				titles.GetNamespace(ns);
+
 				foreach (var title in titles)
 				{
 					foreach (var si in this.searchList)
@@ -589,19 +600,16 @@
 				if (page.Exists && (!string.Equals(protection.FriendlyName, "Deletion Review", StringComparison.Ordinal) || page.StartTimestamp?.AddDays(30) < DateTime.Now))
 				{
 					UpdatePage(page, protection);
-					if (page.TextModified)
-					{
-						this.WriteLine("|-");
-						this.WriteLine("| " + protection.FriendlyName);
-						this.WriteLine("| " + page.AsLink(false));
-						this.WriteLine("| " + CombinedProtectionString(
-							ProtectionFromPage(currentProtection, "edit"),
-							ProtectionFromPage(currentProtection, "move")));
-						this.WriteLine("| " + CombinedProtectionString(
-							protection.EditProtection,
-							protection.MoveProtection));
-						this.WriteLine("| " + protection.Reason.UpperFirst(this.Site.Culture));
-					}
+					this.WriteLine("|-");
+					this.WriteLine("| " + protection.FriendlyName);
+					this.WriteLine("| " + page.AsLink(false));
+					this.WriteLine("| " + CombinedProtectionString(
+						ProtectionFromPage(currentProtection, "edit"),
+						ProtectionFromPage(currentProtection, "move")));
+					this.WriteLine("| " + CombinedProtectionString(
+						protection.EditProtection,
+						protection.MoveProtection));
+					this.WriteLine("| " + protection.Reason.UpperFirst(this.Site.Culture));
 				}
 			}
 		}
