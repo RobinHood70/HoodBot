@@ -6,7 +6,6 @@
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using static RobinHood70.CommonCode.Globals;
@@ -95,21 +94,20 @@
 		/// <summary>Gets a value indicating whether the page represents a disambiguation page.</summary>
 		/// <returns><see langword="true" /> if this instance is disambiguation; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="InvalidOperationException">Thrown if the page properties (MW 1.21+) or templates (MW 1.20-) weren't loaded prior to checking.</exception>
-		public bool IsDisambiguation
+		public bool? IsDisambiguation
 		{
 			get
 			{
-				if (this.Site.DisambiguatorAvailable)
+				// Disambiguator is 1.21+, so we don't need to worry about the fact that page properties are 1.17+.
+				if (this.Site.DisambiguatorAvailable && this.ModuleLoaded(PageModules.Properties))
 				{
-					// Disambiguator is 1.21+, so we don't need to worry about the fact that page properties are 1.17+.
-					return (!this.LoadOptions.Modules.HasFlag(PageModules.Properties))
-						? throw new InvalidOperationException(CurrentCulture(Resources.ModuleNotLoaded, nameof(PageModules.Properties), nameof(this.IsDisambiguation)))
-						: this.Properties.ContainsKey("disambiguation");
+					return this.Properties.ContainsKey("disambiguation");
 				}
 
-				if (!this.LoadOptions.Modules.HasFlag(PageModules.Templates))
+				if (!this.ModuleLoaded(PageModules.Templates) ||
+					this.Site.DisambiguationTemplates.Count == 0)
 				{
-					throw new InvalidOperationException(CurrentCulture(Resources.ModuleNotLoaded, nameof(PageModules.Templates), nameof(this.IsDisambiguation)));
+					return null;
 				}
 
 				var templates = new HashSet<Title>(this.Templates);
@@ -235,6 +233,11 @@
 				this.PageLoaded?.Invoke(this, EventArgs.Empty);
 			}
 		}
+
+		/// <summary>Convenience method to determine if the page has a specific module loaded.</summary>
+		/// <param name="module">The module to check.</param>
+		/// <returns><see langword="true"/> if LoadOptions.Modules includes the specified module; otherwise, <see langword="false"/>.</returns>
+		public bool ModuleLoaded(PageModules module) => this.LoadOptions.Modules.HasFlag(module);
 
 		/// <summary>Saves the page.</summary>
 		/// <param name="editSummary">The edit summary.</param>

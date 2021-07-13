@@ -169,15 +169,6 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You must load {0} when calling the {1} method..
-        /// </summary>
-        internal static string ModuleNotLoaded {
-            get {
-                return ResourceManager.GetString("ModuleNotLoaded", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Moving page [[{0}]] to [[{1}]] failed: {{2}}.
         /// </summary>
         internal static string MovePageWarning {
