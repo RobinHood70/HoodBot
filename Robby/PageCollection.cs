@@ -174,7 +174,7 @@
 
 		/// <summary>Loads pages into the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>
-		public void GetTitles(IEnumerable<ISimpleTitle> titles) => this.GetTitles(this.LoadOptions, titles);
+		public void GetTitles(IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(titles.ToFullPageNames()));
 
 		/// <summary>Removes all pages from the collection where the page's <see cref="Page.Exists"/> property equals the value provided.</summary>
 		/// <param name="exists">If <see langword="true"/>, pages that exist will be removed from the collection; if <see langword="false"/>, non-existent pages will be removed fromt he collection.</param>
@@ -234,13 +234,13 @@
 		}
 
 		/// <inheritdoc/>
-		public override void GetCustomGenerator(IGeneratorInput generatorInput) => this.LoadPages(this.LoadOptions, new QueryPageSetInput(generatorInput));
+		public override void GetCustomGenerator(IGeneratorInput generatorInput) => this.LoadPages(new QueryPageSetInput(generatorInput));
 
 		/// <summary>Adds pages with the specified revision IDs to the collection.</summary>
 		/// <param name="revisionIds">The IDs.</param>
 		/// <remarks>General information about the pages for the revision IDs specified will always be loaded, regardless of the LoadOptions setting, though the revisions themselves may not be if the collection's load options would filter them out.</remarks>
 		// Note that while RevisionsInput() can be used as a generator, I have not implemented it because I can think of no situation in which it would be useful to populate a PageCollection given the existing revisions methods.
-		public override void GetRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(this.LoadOptions, QueryPageSetInput.FromRevisionIds(revisionIds));
+		public override void GetRevisionIds(IEnumerable<long> revisionIds) => this.LoadPages(QueryPageSetInput.FromRevisionIds(revisionIds));
 
 		/// <inheritdoc/>
 		public override bool TryGetValue(Page key, [MaybeNullWhen(false)] out Page value)
@@ -498,20 +498,14 @@
 
 		#region Protected Virtual Methods
 
-		/// <summary>Adds pages to the collection from a series of titles.</summary>
-		/// <param name="options">The page load options.</param>
-		/// <param name="titles">The titles.</param>
-		protected virtual void GetTitles(PageLoadOptions options, IEnumerable<ISimpleTitle> titles) => this.LoadPages(options, new QueryPageSetInput(titles.ToFullPageNames()));
-
 		/// <summary>Loads pages from the wiki based on a page set specifier.</summary>
-		/// <param name="options">The page load options.</param>
 		/// <param name="pageSetInput">The page set input.</param>
 		/// <param name="pageValidator">A function which validates whether a page can be added to the collection.</param>
-		protected virtual void LoadPages(PageLoadOptions options, QueryPageSetInput pageSetInput, Func<Page, bool> pageValidator)
+		protected virtual void LoadPages(QueryPageSetInput pageSetInput, Func<Page, bool> pageValidator)
 		{
-			ThrowNull(options, nameof(options));
 			ThrowNull(pageSetInput, nameof(pageSetInput));
 			ThrowNull(pageValidator, nameof(pageValidator));
+			var options = this.LoadOptions;
 			pageSetInput.ConvertTitles = options.ConvertTitles;
 			pageSetInput.Redirects = options.FollowRedirects;
 			if (pageSetInput.GeneratorInput is ILimitableInput limited)
@@ -543,9 +537,9 @@
 		#endregion
 
 		#region Private Methods
-		private void LoadPages(IGeneratorInput generator, IEnumerable<ISimpleTitle> titles) => this.LoadPages(this.LoadOptions, new QueryPageSetInput(generator, titles.ToFullPageNames()));
+		private void LoadPages(IGeneratorInput generator, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(generator, titles.ToFullPageNames()));
 
-		private void LoadPages(PageLoadOptions options, QueryPageSetInput pageSetInput) => this.LoadPages(options, pageSetInput, this.IsTitleInLimits);
+		private void LoadPages(QueryPageSetInput pageSetInput) => this.LoadPages(pageSetInput, this.IsTitleInLimits);
 
 		private bool RecurseCategoryHandler(Page page)
 		{
@@ -569,7 +563,7 @@
 			}
 
 			this.recurseCategories.Clear();
-			this.LoadPages(this.LoadOptions, new QueryPageSetInput(input), this.RecurseCategoryHandler);
+			this.LoadPages(new QueryPageSetInput(input), this.RecurseCategoryHandler);
 			if (this.recurseCategories.Count > 0)
 			{
 				var copy = new List<string>(this.recurseCategories);

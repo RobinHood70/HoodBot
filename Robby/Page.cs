@@ -19,7 +19,6 @@
 		private Uri? canonicalPath;
 		private Revision? currentRevision;
 		private Uri? editPath;
-		private PageLoadOptions? loadOptionsUsed;
 		private string text = string.Empty;
 		#endregion
 
@@ -103,12 +102,12 @@
 				if (this.Site.DisambiguatorAvailable)
 				{
 					// Disambiguator is 1.21+, so we don't need to worry about the fact that page properties are 1.17+.
-					return (this.loadOptionsUsed == null || !this.loadOptionsUsed.Modules.HasFlag(PageModules.Properties))
+					return (!this.LoadOptions.Modules.HasFlag(PageModules.Properties))
 						? throw new InvalidOperationException(CurrentCulture(Resources.ModuleNotLoaded, nameof(PageModules.Properties), nameof(this.IsDisambiguation)))
 						: this.Properties.ContainsKey("disambiguation");
 				}
 
-				if (this.loadOptionsUsed == null || !this.loadOptionsUsed.Modules.HasFlag(PageModules.Templates))
+				if (!this.LoadOptions.Modules.HasFlag(PageModules.Templates))
 				{
 					throw new InvalidOperationException(CurrentCulture(Resources.ModuleNotLoaded, nameof(PageModules.Templates), nameof(this.IsDisambiguation)));
 				}
@@ -143,6 +142,10 @@
 		/// <summary>Gets the links on the page, if they were requested in the last load operation.</summary>
 		/// <value>The links used on the page.</value>
 		public IReadOnlyList<Title> Links { get; } = new List<Title>();
+
+		/// <summary>Gets the information that was loaded for this page.</summary>
+		/// <value>The load options.</value>
+		public PageLoadOptions LoadOptions { get; private set; } = PageLoadOptions.None;
 
 		/// <summary>Gets or sets a value indicating whether this <see cref="Page"/> has previously been deleted.</summary>
 		/// <value><see langword="true"/> if the page has previously been deleted; toherwise, <see langword="false"/>.</value>
@@ -297,7 +300,7 @@
 		{
 			// Assumes title-related properties have already been provided in the constructor.
 			ThrowNull(pageItem, nameof(pageItem));
-			this.loadOptionsUsed = optionsUsed;
+			this.LoadOptions = optionsUsed;
 			this.PopulateFlags(pageItem.Flags.HasFlag(PageFlags.Invalid), pageItem.Flags.HasFlag(PageFlags.Missing));
 			this.PopulateRevisions(pageItem);
 			this.PopulateInfo(pageItem);
