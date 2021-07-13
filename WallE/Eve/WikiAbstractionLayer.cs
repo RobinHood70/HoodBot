@@ -896,7 +896,11 @@
 						retries--;
 						break;
 					case "Success":
+						// this.UserInfo() is susceptible to UserName and Talk checks, which are invalid/undesirable when logging in.
+						var saveChecks = this.StopCheckMethods;
+						this.StopCheckMethods &= ~(StopCheckMethods.TalkChecks | StopCheckMethods.UserNameCheck);
 						this.CurrentUserInfo = this.UserInfo(DefaultUserInformation);
+						this.StopCheckMethods = saveChecks;
 						//// this.Client.SaveCookies();
 						retries = 0;
 						break;
