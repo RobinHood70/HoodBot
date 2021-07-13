@@ -153,9 +153,6 @@
   <data name="MissingSiteInfo" xml:space="preserve">
     <value>The internal site information object is missing required values.</value>
   </data>
-  <data name="ModuleNotLoaded" xml:space="preserve">
-    <value>You must load {0} when calling the {1} method.</value>
-  </data>
   <data name="MovePageWarning" xml:space="preserve">
     <value>Moving page [[{0}]] to [[{1}]] failed: {{2}}</value>
   </data>
