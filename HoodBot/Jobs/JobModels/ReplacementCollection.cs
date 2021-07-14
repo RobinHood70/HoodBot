@@ -1,8 +1,7 @@
-﻿namespace RobinHood70.HoodBot.Jobs
+﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
-	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 
