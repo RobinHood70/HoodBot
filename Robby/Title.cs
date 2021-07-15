@@ -165,6 +165,17 @@
 			var parser = new TitleParser(site, MediaWikiNamespaces.Main, fullPageName);
 			return new Title(parser);
 		}
+
+		/// <summary>Creates a new instance of the <see cref="Title"/> class from the site and full page name.</summary>
+		/// <param name="site">The site this title is from.</param>
+		/// <param name="ns">The namespace of the page.</param>
+		/// <param name="pageName">The name of the page.</param>
+		/// <returns>A new Title based on the provided values.</returns>
+		public static Title FromName([NotNull, ValidatedNotNull] Site site, [NotNull, ValidatedNotNull] int ns, [NotNull, ValidatedNotNull] string pageName)
+		{
+			var parser = new TitleParser(site, ns, pageName);
+			return new Title(parser);
+		}
 		#endregion
 
 		#region Public Methods
