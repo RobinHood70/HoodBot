@@ -1,5 +1,10 @@
 ﻿namespace RobinHood70.WikiCommon.Parser
 {
+	// TODO: Switch to have Title as one NodeCollection and TrailingText as another.
+	// CONSIDER: Reintroduce confirmed/possible status for constructs like:
+	//    ===Header===<includeonly>BreaksHeader</includeonly>
+	// Might be doable inline as part of TrailingText, so check this.
+
 	/// <summary>Represents a header.</summary>
 	public interface IHeaderNode : IWikiNode, IParentNode
 	{
