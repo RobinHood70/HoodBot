@@ -79,8 +79,9 @@
 			[11] = "PVP Grand",
 			[12] = "Holiday Event",
 			[13] = "Battleground",
-			[14] = "Unknown (14)",
+			[14] = "Prologue",
 			[15] = "Pledge",
+			[16] = "Companion",
 		};
 
 		private static readonly Dictionary<int, string> RepeatTypes = new()
@@ -341,7 +342,7 @@
 								rewardText += "|quality=" + reward.Quality.ToStringInvariant();
 							}
 
-							rewardText += "}}";
+							rewardText += "|summary=1}}";
 						}
 
 						rewardList.Add(rewardText);
@@ -373,10 +374,11 @@
 					.Append("}}");
 			}
 
+			var questTypeText = QuestTypes[quest.Type]; // Split out because this can cause an error when a new type is introduced.
 			sb
 				.AppendLine("{{Online Quest Header")
 				.Append("|ID=").AppendLine(quest.InternalId >= 0 ? quest.InternalId.ToStringInvariant() : string.Empty)
-				.Append("|type=").AppendLine(QuestTypes[quest.Type])
+				.Append("|type=").AppendLine(questTypeText)
 				.AppendLine("|image=")
 				.AppendLine("|imgdesc=")
 				.AppendLine("|description=")
