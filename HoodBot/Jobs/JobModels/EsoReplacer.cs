@@ -64,29 +64,42 @@
 		#endregion
 
 		#region Public Static Methods
-		public static string? ConstructWarning(Page page, ICollection<ISimpleTitle> titles, string warningType)
+		public static string ConstructWarning(ContextualParser oldPage, ContextualParser newPage, ICollection<ISimpleTitle> titles, string warningType)
 		{
-			if (titles.Count > 0)
-			{
-				var warning = new StringBuilder();
-				warning
-					.Append("Watch for ")
-					.Append(warningType)
-					.Append(" on ")
-					.Append(page.FullPageName)
-					.Append(": ");
-				foreach (var link in titles)
-				{
-					warning
-						.Append(link)
-						.Append(", ");
-				}
+			ThrowNull(oldPage, nameof(oldPage));
+			ThrowNull(newPage, nameof(newPage));
+			ThrowNull(titles, nameof(titles));
+			ThrowNull(warningType, nameof(warningType));
+			var nodes = oldPage.Nodes.Clone();
+			nodes.RemoveAll<IIgnoreNode>();
+			var oldText = nodes.ToRaw().Trim();
+			nodes = newPage.Nodes.Clone();
+			nodes.RemoveAll<IIgnoreNode>();
+			var newText = nodes.ToRaw().Trim();
 
-				warning.Remove(warning.Length - 2, 2);
-				return warning.ToString();
+			var warning = new StringBuilder()
+				.Append("Watch for ")
+				.Append(warningType)
+				.Append(" on ")
+				.AppendLine(newPage.Context.FullPageName)
+				.Append(warningType.UpperFirst(newPage.Site.Culture))
+				.Append(": ");
+			foreach (var link in titles)
+			{
+				warning
+					.Append(link)
+					.Append(", ");
 			}
 
-			return null;
+			warning
+				.Remove(warning.Length - 2, 2)
+				.AppendLine()
+				.AppendLine("Old Text:")
+				.AppendLine(oldText)
+				.AppendLine("New Text:")
+				.AppendLine(newText)
+				.AppendLine();
+			return warning.ToString();
 		}
 
 		public static void Initialize(WikiJob job)
@@ -473,8 +486,10 @@
 		#region Private Methods
 		private string StrippedTextFromNodes(NodeCollection nodes)
 		{
-			this.RemoveTrivialTemplates(nodes);
-			var retval = nodes.ToRaw();
+			var onlyNodes = nodes.Clone();
+			onlyNodes.RemoveAll<IIgnoreNode>();
+			this.RemoveTrivialTemplates(onlyNodes);
+			var retval = onlyNodes.ToRaw();
 			retval = NumberStripper.Replace(retval, string.Empty);
 			return SpaceStripper.Replace(retval, string.Empty);
 		}
