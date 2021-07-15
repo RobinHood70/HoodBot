@@ -135,7 +135,7 @@
 		{
 			var places = string.Join(", ", npc.Places);
 			var unknownLocs = string.Join(", ", npc.UnknownLocations);
-			var retval = $"* Name: {npc.Name}\n* Gender: {npc.GenderText}";
+			var retval = $"\n* Name: {npc.Name}\n* Gender: {npc.GenderText}";
 			if (!string.IsNullOrWhiteSpace(npc.LootType))
 			{
 				retval += $"\n* Loot Type: {npc.LootType}";
@@ -234,7 +234,7 @@
 				{
 					npcRenames.Add(npc.Id, redirect.PageName);
 				}
-				else if (checkPages.TryGetValue(title, out var page) && page.IsDisambiguation)
+				else if (checkPages.TryGetValue(title, out var page) && page.IsDisambiguation == true)
 				{
 					var parser = new ContextualParser(page);
 					foreach (var linkNode in parser.LinkNodes)
@@ -280,7 +280,7 @@
 				{
 					npc.Page = page;
 					var issue =
-						page.IsDisambiguation ? "is a disambiguation with no clear NPC link" :
+						page.IsDisambiguation == true ? "is a disambiguation with no clear NPC link" :
 						page.IsRedirect ? "is a redirect to a content page without an Online NPC Summary" :
 						(!this.updateMode && page.IsMissing && page.PreviouslyDeleted) ? "was previously deleted" :
 						null;
