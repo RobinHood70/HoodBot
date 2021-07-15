@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.IO;
 	using System.Text;
 	using System.Threading;
@@ -27,6 +28,7 @@
 		UpdateCaption = 1 << 3,
 		ProposeUnused = 1 << 4,
 		UpdateCategoryMembers = 1 << 5,
+		UpdatePageNameCaption = 1 << 6,
 		Default = CheckLinksRemaining | EmitReport | FixLinks,
 	}
 
@@ -769,8 +771,13 @@
 					}
 					else if (oldTitle.SimpleEquals(textTitle))
 					{
-						var simp = new Title(textTitle);
+						var simp = this.Replacements[oldTitle].To;
 						newLink.Text = simp.ToString();
+					}
+					else if (this.FollowUpActions.HasFlag(FollowUpActions.UpdatePageNameCaption) && string.Equals(oldTitle.PageName, newLink.Text, StringComparison.Ordinal))
+					{
+						var simp = this.Replacements[oldTitle].To;
+						newLink.Text = simp.PageName;
 					}
 				}
 			}
