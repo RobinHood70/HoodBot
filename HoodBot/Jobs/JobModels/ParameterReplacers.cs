@@ -36,6 +36,7 @@
 			this.Add("Cat Footer", this.CatFooter);
 			this.Add("Cite Book", this.LoreFirst);
 			this.Add("Edit Link", this.FullPageNameFirst);
+			this.Add("ESO Set List", this.PageNameAllNumeric);
 			this.Add("Lore Link", this.LoreFirst);
 			this.Add("Game Book", this.GameBookGeneral);
 			this.Add("Online NPC Summary", this.EsoNpc);
@@ -154,6 +155,20 @@
 				&& replacement.To is ISimpleTitle toLink)
 			{
 				param.SetValue(toLink.FullPageName);
+			}
+		}
+
+		private void PageNameAllNumeric(Page page, SiteTemplateNode template)
+		{
+			foreach (var (_, param) in template.GetNumericParameters())
+			{
+				if (Title.FromName(page.Site, page.Namespace.Id, param.Value.ToValue()) is var title
+					&& this.replacements.TryGetValue(title, out var replacement)
+					&& replacement.To is ISimpleTitle toLink
+					&& replacement.From.Namespace.Id == toLink.Namespace.Id)
+				{
+					param.SetValue(toLink.PageName);
+				}
 			}
 		}
 
