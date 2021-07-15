@@ -35,6 +35,7 @@
 
 		#region Fields
 		private readonly IMediaWikiClient client;
+		private readonly List<SetData> allSets = new();
 		private readonly KeyedCollection<Page, SetData> sets = new SetCollection();
 		#endregion
 
@@ -58,10 +59,11 @@
 			this.StatusWriteLine("Fetching data");
 			this.GetSetPages();
 			var titles = new TitleCollection(this.Site);
-			foreach (var set in this.sets)
+			foreach (var set in this.allSets)
 			{
 				if (set.Page is not null)
 				{
+					this.sets.Add(set);
 					titles.Add(set.Page);
 				}
 				else
@@ -93,7 +95,7 @@
 		#region Private Methods
 		private void BuildNewPages()
 		{
-			foreach (var set in this.sets)
+			foreach (var set in this.allSets)
 			{
 				if (set.Page is null)
 				{
@@ -106,8 +108,13 @@
 		private void GenerateReport()
 		{
 			var sb = new StringBuilder();
-			foreach (var item in this.sets)
+			foreach (var item in this.allSets)
 			{
+				if (item.Page is null)
+				{
+					throw new InvalidOperationException($"{item.Name}'s Page property is null. This should never happen.");
+				}
+
 				if (item.IsNonTrivial)
 				{
 					sb
@@ -150,7 +157,7 @@
 						throw new InvalidOperationException($"Set bonus for {setName} doesn't start with a bracket:{Environment.NewLine}{bonusDescription}");
 					}
 
-					this.sets.Add(new SetData(setName, bonusDescription));
+					this.allSets.Add(new SetData(setName, bonusDescription));
 				}
 			}
 		}
@@ -165,7 +172,7 @@
 		private void MatchUnresolvedPages()
 		{
 			var titles = new TitleCollection(this.Site);
-			foreach (var set in this.sets)
+			foreach (var set in this.allSets)
 			{
 				if (set.Page == null)
 				{
@@ -230,7 +237,6 @@
 
 		private void SetLoaded(object sender, Page page)
 		{
-			ThrowNull(this.sets, nameof(EsoItemSets), nameof(this.sets));
 			var pageData = this.sets[page];
 			if (!page.Exists || string.IsNullOrEmpty(page.Text))
 			{
@@ -323,7 +329,7 @@
 
 		private void UpdateSetPages(PageCollection setMembers)
 		{
-			foreach (var set in this.sets)
+			foreach (var set in this.allSets)
 			{
 				if (set.Page is null)
 				{
@@ -367,7 +373,10 @@
 			{
 			}
 
-			protected override Page GetKeyForItem(SetData item) => item.Page ?? throw new InvalidOperationException("Item Page is null!");
+			protected override Page GetKeyForItem(SetData item)
+			{
+				return item.Page ?? throw new InvalidOperationException("Item Page is null!");
+			}
 		}
 
 		private sealed class SetData
