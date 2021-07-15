@@ -307,19 +307,20 @@
 			bigChange |= this.UpdateSkillTemplate(skill, template);
 			template.Sort("titlename", "id", "id1", "id2", "id3", "id4", "id5", "id6", "id7", "id8", "id9", "id10", "line", "type", "icon", "icon2", "icon3", "desc", "desc1", "desc2", "desc3", "desc4", "desc5", "desc6", "desc7", "desc8", "desc9", "desc10", "linerank", "cost", "attrib", "casttime", "range", "radius", "duration", "channeltime", "target", "morph1name", "morph1id", "morph1icon", "morph1desc", "morph2name", "morph2id", "morph2icon", "morph2desc", "image", "imgdesc", "nocat", "notrail");
 
-			page.Text = newPage.ToRaw();
-
 			var replacer = new EsoReplacer(this.Site);
-			if (EsoReplacer.ConstructWarning(page, replacer.CheckNewLinks(oldPage, newPage), "links") is string linkWarning)
+			var newLinks = replacer.CheckNewLinks(oldPage, newPage);
+			if (newLinks.Count > 0)
 			{
-				this.Warn(linkWarning);
+				this.Warn(EsoReplacer.ConstructWarning(oldPage, newPage, newLinks, "links"));
 			}
 
-			if (EsoReplacer.ConstructWarning(page, replacer.CheckNewTemplates(oldPage, newPage), "templates") is string templateWarning)
+			var newTemplates = replacer.CheckNewTemplates(oldPage, newPage);
+			if (newTemplates.Count > 0)
 			{
-				this.Warn(templateWarning);
+				this.Warn(EsoReplacer.ConstructWarning(oldPage, newPage, newTemplates, "templates"));
 			}
 
+			page.Text = newPage.ToRaw();
 			return bigChange;
 		}
 		#endregion
