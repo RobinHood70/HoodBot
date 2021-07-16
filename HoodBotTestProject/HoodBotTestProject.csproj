@@ -10,11 +10,11 @@
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>
-		<PackageReference Include="Meziantou.Analyzer" Version="1.0.666">
+		<PackageReference Include="Meziantou.Analyzer" Version="1.0.667">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0-release-20210626-04" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
