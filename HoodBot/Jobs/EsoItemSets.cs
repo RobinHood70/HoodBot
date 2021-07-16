@@ -3,18 +3,15 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
-	using System.Globalization;
+	using System.Data;
 	using System.Text;
-	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
-
+	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
-	using RobinHood70.WallE.Base;
-	using RobinHood70.WallE.Clients;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 	using static RobinHood70.CommonCode.Globals;
@@ -22,9 +19,10 @@
 	internal sealed class EsoItemSets : EditJob
 	{
 		#region Static Fields
-		private static readonly HashSet<int> BadRows = new(); // None atm.
-		private static readonly Regex SetBonusRegex = new(@"\(\s*(?<items>[1-6] items?)\s*\)\s*(?<text>.*?)\s*(?=(\([1-6] items?\)|\z))", RegexOptions.ExplicitCapture | RegexOptions.Singleline, DefaultRegexTimeout);
-		private static readonly Uri SetSummaryPage = new("http://esolog.uesp.net/viewlog.php?record=setSummary&format=csv");
+		private static readonly string Query =
+			"SELECT id, setName, setBonusDesc1, setBonusDesc2, setBonusDesc3, setBonusDesc4, setBonusDesc5, setBonusDesc6, setBonusDesc7\n" +
+			"FROM setSummary\n";
+
 		private static readonly Dictionary<string, string> TitleOverrides = new(StringComparer.Ordinal)
 		{
 			// Title Overrides should only be necessary when creating new disambiguated "(set)" pages or when pages don't conform to the base/base (set) style. While this could be done programatically, it's probably best not to, so that a human has verified that the page really should be created and that the existing page isn't malformed or something.
@@ -34,17 +32,15 @@
 		#endregion
 
 		#region Fields
-		private readonly IMediaWikiClient client;
-		private readonly List<SetData> allSets = new();
 		private readonly KeyedCollection<Page, SetData> sets = new SetCollection();
 		#endregion
 
 		#region Constructors
 		[JobInfo("Item Sets", "ESO")]
 		public EsoItemSets(JobManager jobManager)
-			: base(jobManager) => this.client = this.Site.AbstractionLayer is IInternetEntryPoint entryPoint
-				? entryPoint.Client
-				: throw new InvalidOperationException();
+			: base(jobManager)
+		{
+		}
 		#endregion
 
 		#region Public Override Properties
@@ -57,9 +53,9 @@
 			EsoReplacer.Initialize(this);
 
 			this.StatusWriteLine("Fetching data");
-			this.GetSetPages();
+			var allSets = this.GetSetPages();
 			var titles = new TitleCollection(this.Site);
-			foreach (var set in this.allSets)
+			foreach (var set in allSets)
 			{
 				if (set.Page is not null)
 				{
@@ -76,7 +72,9 @@
 			this.Pages.PageLoaded += this.SetLoaded;
 			this.Pages.GetTitles(titles);
 			this.Pages.PageLoaded -= this.SetLoaded;
-			this.GenerateReport();
+
+			// Needs to be after update, since update modifies item's IsNonTrivial property.
+			this.GenerateReport(allSets);
 		}
 
 		protected override void JobCompleted()
@@ -92,10 +90,23 @@
 		}
 		#endregion
 
-		#region Private Methods
-		private void BuildNewPages()
+		#region Private Static Methods
+		private static List<SetData> GetSetData()
 		{
-			foreach (var set in this.allSets)
+			var allSets = new List<SetData>();
+			foreach (var row in Database.RunQuery(EsoGeneral.EsoLogConnectionString, Query))
+			{
+				allSets.Add(new SetData(row));
+			}
+
+			return allSets;
+		}
+		#endregion
+
+		#region Private Methods
+		private void BuildNewPages(List<SetData> allSets)
+		{
+			foreach (var set in allSets)
 			{
 				if (set.Page is null)
 				{
@@ -105,10 +116,10 @@
 			}
 		}
 
-		private void GenerateReport()
+		private void GenerateReport(List<SetData> allSets)
 		{
 			var sb = new StringBuilder();
-			foreach (var item in this.allSets)
+			foreach (var item in allSets)
 			{
 				if (item.Page is null)
 				{
@@ -133,46 +144,27 @@
 			}
 		}
 
-		private void GetSetPages()
+		private List<SetData> GetSetPages()
 		{
-			this.GetSetsFromCsv();
-			this.MatchCategoryPages();
-			this.MatchUnresolvedPages();
-			this.BuildNewPages();
+			var allSets = GetSetData();
+			this.MatchCategoryPages(allSets);
+			this.MatchUnresolvedPages(allSets);
+			this.BuildNewPages(allSets);
+
+			return allSets;
 		}
 
-		private void GetSetsFromCsv()
-		{
-			var csvFile = new CsvFile();
-			var csvData = this.client.Get(SetSummaryPage);
-			csvFile.ReadText(csvData, true);
-			foreach (var row in csvFile)
-			{
-				if (!BadRows.Contains(int.Parse(row["id"], CultureInfo.InvariantCulture)))
-				{
-					var setName = row["setName"].Replace(@"\'", "'", StringComparison.Ordinal);
-					var bonusDescription = row["setBonusDesc"];
-					if (bonusDescription[0] != '(')
-					{
-						throw new InvalidOperationException($"Set bonus for {setName} doesn't start with a bracket:{Environment.NewLine}{bonusDescription}");
-					}
-
-					this.allSets.Add(new SetData(setName, bonusDescription));
-				}
-			}
-		}
-
-		private void MatchCategoryPages()
+		private void MatchCategoryPages(List<SetData> allSets)
 		{
 			var catPages = new PageCollection(this.Site, new PageLoadOptions(PageModules.Info, true));
 			catPages.GetCategoryMembers("Online-Sets", CategoryMemberTypes.Page, false);
-			this.UpdateSetPages(catPages);
+			this.UpdateSetPages(allSets, catPages);
 		}
 
-		private void MatchUnresolvedPages()
+		private void MatchUnresolvedPages(List<SetData> allSets)
 		{
 			var titles = new TitleCollection(this.Site);
-			foreach (var set in this.allSets)
+			foreach (var set in allSets)
 			{
 				if (set.Page == null)
 				{
@@ -183,10 +175,10 @@
 				}
 			}
 
-			this.ResolveDisambiguations(titles);
+			this.ResolveDisambiguations(allSets, titles);
 		}
 
-		private void ResolveDisambiguations(TitleCollection newTitles)
+		private void ResolveDisambiguations(List<SetData> allSets, TitleCollection newTitles)
 		{
 			if (newTitles.Count == 0)
 			{
@@ -232,22 +224,17 @@
 				pages.Add(addPages);
 			}
 
-			this.UpdateSetPages(pages);
+			this.UpdateSetPages(allSets, pages);
 		}
 
 		private void SetLoaded(object sender, Page page)
 		{
-			var pageData = this.sets[page];
+			var setData = this.sets[page];
 			if (!page.Exists || string.IsNullOrEmpty(page.Text))
 			{
 				throw new InvalidOperationException();
 			}
 
-			this.UpdatePageText(page, pageData);
-		}
-
-		private void UpdatePageText(Page page, SetData pageData)
-		{
 			var oldPage = new ContextualParser(page, InclusionType.Transcluded, false);
 			if (oldPage.Nodes.Count < 2 || !(
 					oldPage.Nodes[0] is IIgnoreNode firstNode &&
@@ -257,25 +244,16 @@
 				return;
 			}
 
-			var items = (IEnumerable<Match>)SetBonusRegex.Matches(pageData.BonusDescription);
 			var usedList = new TitleCollection(this.Site);
 			var sb = new StringBuilder();
 			sb.Append('\n');
-			foreach (var item in items)
+			foreach (var (itemCount, text) in setData.BonusDescriptions)
 			{
-				var itemName = item.Groups["items"];
-				var desc = item.Groups["text"].Value;
-				desc = RegexLibrary.WhitespaceToSpace(desc);
-				if (desc.StartsWith(page.PageName, StringComparison.Ordinal))
-				{
-					desc = desc[page.PageName.Length..].TrimStart();
-				}
-
 				sb
 					.Append("'''")
-					.Append(itemName)
+					.Append(itemCount)
 					.Append("''': ")
-					.Append(desc)
+					.Append(text)
 					.Append("<br>\n");
 			}
 
@@ -302,7 +280,7 @@
 				this.Warn(EsoReplacer.ConstructWarning(oldPage, newPage, newTemplates, "templates"));
 			}
 
-			pageData.IsNonTrivial = replacer.IsNonTrivialChange(oldPage, newPage);
+			setData.IsNonTrivial = replacer.IsNonTrivialChange(oldPage, newPage);
 			page.Text = newPage.ToRaw();
 		}
 
@@ -327,9 +305,9 @@
 			}
 		}
 
-		private void UpdateSetPages(PageCollection setMembers)
+		private void UpdateSetPages(List<SetData> allSets, PageCollection setMembers)
 		{
-			foreach (var set in this.allSets)
+			foreach (var set in allSets)
 			{
 				if (set.Page is null)
 				{
@@ -373,21 +351,39 @@
 			{
 			}
 
-			protected override Page GetKeyForItem(SetData item)
-			{
-				return item.Page ?? throw new InvalidOperationException("Item Page is null!");
-			}
+			protected override Page GetKeyForItem(SetData item) => item.Page ?? throw new InvalidOperationException("Item Page is null!");
 		}
 
 		private sealed class SetData
 		{
 			#region Constructors
-			public SetData(string setName, string bonusDescription)
+			public SetData(IDataRecord row)
 			{
-				ThrowNull(setName, nameof(setName));
-				ThrowNull(bonusDescription, nameof(bonusDescription));
-				this.Name = setName;
-				this.BonusDescription = bonusDescription;
+				ThrowNull(row, nameof(row));
+				this.Name = (string)row["setName"];
+				for (var c = '1'; c <= '7'; c++)
+				{
+					var bonusDesc = (string)row["setBonusDesc" + c];
+					if (!string.IsNullOrEmpty(bonusDesc))
+					{
+						var bonusSplit = bonusDesc.Split(") ", 2, StringSplitOptions.None);
+						var items = bonusSplit[0];
+						if (bonusSplit.Length != 2 || items[0] != '(')
+						{
+							throw new InvalidOperationException($"Set bonus for {this.Name} is improperly formatted: {bonusDesc}");
+						}
+
+						items = items[1..];
+						var text = bonusSplit[1].Trim();
+						text = RegexLibrary.WhitespaceToSpace(text);
+						if (text.StartsWith(this.Name, StringComparison.Ordinal))
+						{
+							text = text[this.Name.Length..].TrimStart();
+						}
+
+						this.BonusDescriptions.Add((items, text));
+					}
+				}
 			}
 			#endregion
 
@@ -402,7 +398,7 @@
 				}
 			}
 
-			public string BonusDescription { get; }
+			public List<(string ItemCount, string Text)> BonusDescriptions { get; } = new();
 
 			public bool IsNonTrivial { get; set; }
 
