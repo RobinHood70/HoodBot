@@ -106,6 +106,8 @@
 					value = (int)Math.Round(statDamage + dmgDamage);
 					maxValue = (int)this.C;
 					return value > maxValue ? maxValue : value;
+				case -77:
+					return (int)Math.Round(this.A * Ability.Resist + this.C);
 				case var n when n is >= -70 and <= -51:
 					return (int)this.A;
 				default:

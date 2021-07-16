@@ -6,10 +6,11 @@
 
 	internal sealed class Ability
 	{
-		#region Fields
+		#region Internal Constants
 		internal const int Level = 50 + 16;
-		internal const int Health = 16000;
 		internal const int Damage = 3000;
+		internal const int Health = 16000;
+		internal const int Resist = 10000;
 		internal const int Stat = 30000;
 		#endregion
 
