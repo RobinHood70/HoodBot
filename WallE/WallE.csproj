@@ -20,7 +20,7 @@
 		<Content Include="Design Notes.txt" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Meziantou.Analyzer" Version="1.0.666">
+		<PackageReference Include="Meziantou.Analyzer" Version="1.0.667">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -29,7 +29,7 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-		<PackageReference Include="System.Collections.Immutable" Version="6.0.0-preview.5.21301.5" />
+		<PackageReference Include="System.Collections.Immutable" Version="6.0.0-preview.6.21352.12" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\WikiCommon\WikiCommon.csproj" />
