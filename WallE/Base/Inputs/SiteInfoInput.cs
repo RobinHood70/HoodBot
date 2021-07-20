@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Base
 	public enum SiteInfoProperties
 	{
 		None = 0,
-		General = 1 << 0,
+		General = 1,
 		Namespaces = 1 << 1,
 		NamespaceAliases = 1 << 2,
 		SpecialPageAliases = 1 << 3,
