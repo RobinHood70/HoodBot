@@ -16,9 +16,8 @@
 	public class ParameterReplacers : Dictionary<ISimpleTitle, ICollection<ParameterReplacer>>
 	{
 		#region Fields
+		private readonly MovePagesJob job;
 		private readonly UespNamespaceList uespNamespaceList;
-		private readonly ReplacementCollection replacements;
-		private readonly Site site;
 		private readonly ICollection<ParameterReplacer> generic = new List<ParameterReplacer>();
 		#endregion
 
@@ -28,8 +27,7 @@
 			: base(SimpleTitleEqualityComparer.Instance)
 		{
 			ThrowNull(job, nameof(job));
-			this.site = job.Site;
-			this.replacements = job.Replacements;
+			this.job = job;
 			this.uespNamespaceList = new UespNamespaceList(job.Site);
 			this.Add("Book Link", this.LoreFirst);
 			this.Add("Bullet Link", this.BulletLink);
@@ -52,7 +50,7 @@
 		#region Public Methods
 		public void Add(string name, params ParameterReplacer[] replacers)
 		{
-			var title = Title.Coerce(this.site, MediaWikiNamespaces.Template, name);
+			var title = Title.Coerce(this.job.Site, MediaWikiNamespaces.Template, name);
 			if (!this.TryGetValue(title, out var currentReplacers))
 			{
 				currentReplacers = new List<ParameterReplacer>();
@@ -96,7 +94,7 @@
 
 				var oldTitle = link.Value.ToValue();
 				var searchTitle = new Title(ns, oldTitle);
-				if (this.replacements.TryGetValue(searchTitle, out var replacement))
+				if (this.job.Replacements.TryGetValue(searchTitle, out var replacement))
 				{
 					link.Value.Clear();
 					link.SetValue(replacement.To.PageName);
@@ -151,7 +149,7 @@
 			ThrowNull(page, nameof(page));
 			if (param != null
 				&& Title.FromName(page.Site, param.Value.ToValue()) is var title
-				&& this.replacements.TryGetValue(title, out var replacement)
+				&& this.job.Replacements.TryGetValue(title, out var replacement)
 				&& replacement.To is ISimpleTitle toLink)
 			{
 				param.SetValue(toLink.FullPageName);
@@ -163,7 +161,7 @@
 			foreach (var (_, param) in template.GetNumericParameters())
 			{
 				if (Title.FromName(page.Site, page.Namespace.Id, param.Value.ToValue()) is var title
-					&& this.replacements.TryGetValue(title, out var replacement)
+					&& this.job.Replacements.TryGetValue(title, out var replacement)
 					&& replacement.To is ISimpleTitle toLink
 					&& replacement.From.Namespace.Id == toLink.Namespace.Id)
 				{
@@ -175,8 +173,8 @@
 		private void PageNameReplace(IParameterNode? param, int ns)
 		{
 			if (param != null
-				&& new Title(this.site[ns], param.Value.ToValue()) is var title
-				&& this.replacements.TryGetValue(title, out var replacement)
+				&& new Title(this.job.Site[ns], param.Value.ToValue()) is var title
+				&& this.job.Replacements.TryGetValue(title, out var replacement)
 				&& replacement.To is ISimpleTitle toLink
 				&& toLink.Namespace == ns)
 			{
@@ -187,8 +185,8 @@
 		private void PageNameReplaceAddExtension(IParameterNode? param, int ns, string ext)
 		{
 			if (param != null
-				&& new Title(this.site[ns], param.Value.ToValue() + ext) is var title
-				&& this.replacements.TryGetValue(title, out var replacement)
+				&& new Title(this.job.Site[ns], param.Value.ToValue() + ext) is var title
+				&& this.job.Replacements.TryGetValue(title, out var replacement)
 				&& replacement.To is ISimpleTitle toLink
 				&& toLink.Namespace == ns)
 			{
