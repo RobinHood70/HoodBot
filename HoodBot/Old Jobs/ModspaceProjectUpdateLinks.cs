@@ -55,11 +55,7 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void GetBacklinkTitles()
-		{
-			base.GetBacklinkTitles();
-			this.BacklinkTitles.Remove("UESPWiki:Community Portal/Archive 55");
-		}
+		protected override void FilterBacklinkTitles(TitleCollection titles) => titles.Remove("UESPWiki:Community Portal/Archive 55");
 
 		protected override void PopulateReplacements()
 		{
