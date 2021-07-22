@@ -1,0 +1,18 @@
+# NOTE: Requires **VS2019 16.3** or later
+
+# HoodBot Custom Rules
+# Description: Code analysis rules for projects which have been released or are about to be.
+
+# Code files
+[*.{cs,vb}]
+
+dotnet_diagnostic.CA1303.severity = none
+dotnet_diagnostic.CA1305.severity = none
+dotnet_diagnostic.CA1501.severity = none
+dotnet_diagnostic.CA1812.severity = none
+dotnet_diagnostic.SA1601.severity = none
+dotnet_diagnostic.SA1611.severity = none
+dotnet_diagnostic.SA1615.severity = none
+dotnet_diagnostic.SA1617.severity = none
+dotnet_diagnostic.SA1618.severity = none
+dotnet_diagnostic.SA1619.severity = none
