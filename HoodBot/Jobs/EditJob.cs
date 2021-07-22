@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System;
+	using System.Collections.Generic;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Design;
@@ -29,6 +30,8 @@
 		/// <value>The edit conflict action.</value>
 		/// <remarks>During a SavePage, if an edit conflict occurs, the page will automatically be re-loaded and the method specified here will be executed.</remarks>
 		protected Action<EditJob, Page>? EditConflictAction { get; set; }
+
+		protected IDictionary<Title, SaveInfo> SaveInfo { get; } = new Dictionary<Title, SaveInfo>(SimpleTitleEqualityComparer.Instance);
 		#endregion
 
 		#region Protected Methods
@@ -67,13 +70,14 @@
 			}
 		}
 
-		protected void SavePages(string editSummary) => this.SavePages(editSummary, true, null);
+		protected void SavePages(string defaultSummary) => this.SavePages(defaultSummary, true, null);
 
-		protected void SavePages(string editSummary, bool isMinor) => this.SavePages(editSummary, isMinor, null);
+		protected void SavePages(string defaultSummary, bool defaultIsMinor) => this.SavePages(defaultSummary, defaultIsMinor, null);
 
-		protected void SavePages(string editSummary, bool isMinor, Action<EditJob, Page>? editConflictAction) => this.SavePages(this.Pages, "Saving pages", editSummary, isMinor, editConflictAction);
+		protected void SavePages(string defaultSummary, bool defaultIsMinor, Action<EditJob, Page>? editConflictAction) =>
+			this.SavePages(this.Pages, "Saving pages", new SaveInfo(defaultSummary, defaultIsMinor), editConflictAction);
 
-		protected void SavePages(PageCollection pages, string status, string editSummary, bool isMinor, Action<EditJob, Page>? editConflictAction)
+		protected void SavePages(PageCollection pages, string status, SaveInfo defaultSaveInfo, Action<EditJob, Page>? editConflictAction)
 		{
 			ThrowNull(pages, nameof(pages));
 			this.StatusWriteLine(status);
@@ -90,11 +94,16 @@
 				this.ProgressMaximum = pages.Count;
 				foreach (var page in pages)
 				{
-					this.SavePage(page, editSummary, isMinor);
+					var saveInfo = this.GetSaveInfo(page) ?? defaultSaveInfo;
+					this.SavePage(page, saveInfo.EditSummary, saveInfo.IsMinor);
 					this.Progress++;
 				}
 			}
 		}
+		#endregion
+
+		#region Protected Virtual Methods
+		protected virtual SaveInfo? GetSaveInfo(Page page) => null;
 		#endregion
 
 		#region Protected Abstract Overrie Methods
