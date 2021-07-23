@@ -228,8 +228,9 @@
 			foreach (var page in result)
 			{
 				// Some generators can return missing pages with no title (or ID?), most commonly when links tables are out of date and need refreshLinks.php run on them. If we get one of these, skip to the next page.
-				if (
-					(this.Wal.DetectedFormatVersion > 1 ? page : page?.First) is JToken innerResult
+				if ((this.Wal.DetectedFormatVersion > 1
+						? page
+						: page?.First) is JToken innerResult
 					&& ((string?)innerResult["title"] ?? FakeTitleFromId((long?)innerResult["pageid"])) is string search)
 				{
 					var item = pages.ValueOrDefault(search);
@@ -238,6 +239,7 @@
 						// If we've hit our limit, stop creating new pages, but we still need to check existing ones in case they're continued pages from previous results.
 						item = this.GetItem(innerResult);
 						pages.Add(item);
+						this.PagesProcessed++;
 						if (this.pagesRemaining != int.MaxValue)
 						{
 							this.pagesRemaining--;
