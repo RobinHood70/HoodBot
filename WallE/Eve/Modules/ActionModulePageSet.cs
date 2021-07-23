@@ -13,6 +13,7 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
+	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
@@ -22,7 +23,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		where TOutput : ITitle
 	{
 		#region Static Fields
-		private static readonly Regex TooManyFinder = new(@"Too many values .*?'(?<parameter>.*?)'.*?limit is (?<sizelimit>[0-9]+)", RegexOptions.Compiled, DefaultRegexTimeout);
+		private static readonly Regex TooManyFinder = new("Too many values .*?['\"](?<parameter>.*?)['\"].*?limit is (?<sizelimit>[0-9]+)", RegexOptions.Compiled, DefaultRegexTimeout);
 		#endregion
 
 		#region Fields
@@ -51,6 +52,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected ContinueModule ContinueModule { get; set; }
 
 		protected int MaximumListSize { get; set; }
+
+		protected int PagesProcessed { get; set; }
 		#endregion
 
 		#region Protected Override Properties
@@ -88,7 +91,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				}
 				while (this.ContinueModule.Continues && this.Continues);
 
-				this.offset += this.CurrentListSize;
+				this.offset += this.PagesProcessed;
 			}
 			while (this.offset < input.Values.Count);
 
@@ -136,10 +139,16 @@ namespace RobinHood70.WallE.Eve.Modules
 			result["redirects"].GetRedirects(this.redirects, this.Wal.InterwikiPrefixes, this.SiteVersion);
 		}
 
+		/// <summary>Parses the response.</summary>
+		/// <param name="response">The response.</param>
+		/// <param name="pages">The pages to parse.</param>
+		/// <exception cref="InvalidDataException">Thrown when the result data isn't valid Json or is anything other than an empty array.</exception>
+		/// <exception cref="WikiException">Thrown when the Json data is valid but the expected result tag could not be found.</exception>
 		protected void ParseResponse(string? response, IList<TOutput> pages)
 		{
 			try
 			{
+				this.PagesProcessed = 0;
 				var result = ToJson(response);
 				if (result.Type == JTokenType.Object)
 				{
@@ -153,14 +162,23 @@ namespace RobinHood70.WallE.Eve.Modules
 						throw WikiException.General("no-result", "The expected result node, " + this.Name + ", was not found.");
 					}
 				}
-				else if (!(result is JArray array && array.Count == 0))
+				else if (result is not JArray array || array.Count != 0)
 				{
 					throw new InvalidDataException();
 				}
 			}
-			catch (JsonReaderException)
+			catch (JsonReaderException jre)
 			{
-				throw new InvalidDataException();
+				throw new InvalidDataException(EveMessages.ResultInvalid, jre);
+			}
+			catch (WikiException we) when (
+				we.Code.StartsWith("too-many-", StringComparison.Ordinal) &&
+				TooManyFinder.Match(we.Info ?? string.Empty) is var match &&
+				match.Success &&
+				PageSetInput.AllTypes.Contains(match.Groups["parameter"].Value, StringComparer.Ordinal))
+			{
+				// TODO: This still counts 50 in the outer loop, which it shouldn't. See if we can figure out a way to report actual result size.
+				this.MaximumListSize = int.Parse(match.Groups["sizelimit"].Value, CultureInfo.InvariantCulture);
 			}
 		}
 		#endregion
