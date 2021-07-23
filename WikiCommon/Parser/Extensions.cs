@@ -195,6 +195,16 @@
 			return retval;
 		}
 
+		/// <summary>Adds a parameter with the specified value if it does not already exist.</summary>
+		/// <param name="template">The template to work on.</param>
+		/// <param name="name">The name of the parameter to add.</param>
+		/// <param name="value">The value of the parameter to add.</param>
+		/// <remarks>If the value already exists, even if blank, it will remain unchanged.</remarks>
+		/// <returns>The parameter that was altered.</returns>
+		public static IParameterNode AddIfNotExists(this ITemplateNode template, string name, string value) => template.Find(name) is IParameterNode parameter
+			? parameter
+			: template.Add(name, value);
+
 		/// <summary>Changes the value of a parameter to the specified value, or adds the parameter if it doesn't exist.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <param name="name">The name of the parameter to add.</param>
@@ -202,13 +212,13 @@
 		/// <returns>The parameter that was altered.</returns>
 		public static IParameterNode AddOrChange(this ITemplateNode template, string name, string value)
 		{
-			if (template.Find(name) is not IParameterNode parameter)
+			if (template.Find(name) is IParameterNode parameter)
 			{
-				return template.Add(name, value);
+				parameter.SetValue(value);
+				return parameter;
 			}
 
-			parameter.SetValue(value);
-			return parameter;
+			return template.Add(name, value);
 		}
 
 		/// <summary>Finds a numbered parameter, whether it's anonymous or a numerically named parameter.</summary>
