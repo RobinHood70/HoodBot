@@ -39,9 +39,6 @@
 
 		public Title From { get; }
 
-		[JsonIgnore]
-		public Page? FromPage { get; internal set; }
-
 		public bool IsSameNamespace => this.From.Namespace == this.To.Namespace;
 
 		public bool NoChange => this.From == this.To;
@@ -49,9 +46,6 @@
 		public string? Reason { get; set; }
 
 		public Title To { get; set; }
-
-		[JsonIgnore]
-		public Page? ToPage { get; set; }
 		#endregion
 
 		#region Public Methods
