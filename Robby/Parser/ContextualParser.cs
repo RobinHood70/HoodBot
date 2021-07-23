@@ -138,6 +138,19 @@
 			return true;
 		}
 
+		/// <summary>Adds a blank line to the end of the Nodes collection.</summary>
+		public void AppendLine() => this.Nodes.AddText("\n");
+
+		/// <summary>Adds a full line of text to the end of the Nodes collection.</summary>
+		/// <param name="text">The text.</param>
+		/// <seealso cref="AppendText(string)"/>
+		public void AppendLine(string text) => this.Nodes.AddText(text + '\n');
+
+		/// <summary>Adds text to the end of the Nodes collection.</summary>
+		/// <param name="text">The text.</param>
+		/// <remarks>Adds text to the final node in the Nodes collection if it's an <see cref="ITextNode"/>; otherwise, creates a text node (via the factory) with the specified text and adds it to the Nodes collection.</remarks>
+		public void AppendText(string text) => this.Nodes.AddText(text);
+
 		/// <summary>Finds the the first link that matches the provided title.</summary>
 		/// <param name="find">The title to find.</param>
 		/// <returns>The first <see cref="SiteLinkNode"/> that matches the title provided, if found.</returns>
