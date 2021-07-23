@@ -45,7 +45,7 @@
 
 		/// <summary>Adds text to the end of the collection.</summary>
 		/// <param name="text">The text.</param>
-		/// <remarks>Adds text to the existing node, if the last node in the collection is a TextNode; otherwise, creates a CreateTextNode with the specified text and adds it to the collection.</remarks>
+		/// <remarks>Adds text to the final node in the collection if it's an <see cref="ITextNode"/>; otherwise, creates a text node (via the factory) with the specified text and adds it to the collection.</remarks>
 		public void AddText([Localizable(false)] string text)
 		{
 			if (!string.IsNullOrEmpty(text))
