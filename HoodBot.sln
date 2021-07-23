@@ -29,6 +29,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HoodBot", "HoodBot\HoodBot.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HoodBotTestProject", "HoodBotTestProject\HoodBotTestProject.csproj", "{DA04F8BD-F064-454E-9112-11E010CB3685}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GC2Lib", "..\GC2\GC2Lib\GC2Lib.csproj", "{772AD29D-217A-4D7A-B3A8-2269A0348518}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{DA04F8BD-F064-454E-9112-11E010CB3685}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA04F8BD-F064-454E-9112-11E010CB3685}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA04F8BD-F064-454E-9112-11E010CB3685}.Release|Any CPU.Build.0 = Release|Any CPU
+		{772AD29D-217A-4D7A-B3A8-2269A0348518}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{772AD29D-217A-4D7A-B3A8-2269A0348518}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{772AD29D-217A-4D7A-B3A8-2269A0348518}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{772AD29D-217A-4D7A-B3A8-2269A0348518}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
