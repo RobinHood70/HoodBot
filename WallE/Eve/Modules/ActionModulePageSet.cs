@@ -172,6 +172,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				throw new InvalidDataException(EveMessages.ResultInvalid, jre);
 			}
 			catch (WikiException we) when (
+				we.Code is not null &&
 				we.Code.StartsWith("too-many-", StringComparison.Ordinal) &&
 				TooManyFinder.Match(we.Info ?? string.Empty) is var match &&
 				match.Success &&
