@@ -101,7 +101,7 @@
 			this.Throttle();
 			var retval = this.baseClient.Post(uri, postData);
 			this.stopwatch.Restart();
-			this.LastWasPost = false;
+			this.LastWasPost = true;
 
 			return retval;
 		}
@@ -116,7 +116,7 @@
 			this.Throttle();
 			var retval = this.baseClient.Post(uri, contentType, postData);
 			this.stopwatch.Restart();
-			this.LastWasPost = false;
+			this.LastWasPost = true;
 
 			return retval;
 		}
