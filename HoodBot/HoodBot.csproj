@@ -38,7 +38,7 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0-preview.6.21352.12" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0-preview.6.21352.12" />
 		<PackageReference Include="MvvmLightLibsStd10" Version="5.4.1.1" />
-		<PackageReference Include="MySql.Data" Version="8.0.25" />
+		<PackageReference Include="MySql.Data" Version="8.0.26" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -47,7 +47,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\GC2\GC2Lib\GC2Lib.csproj" />
 		<ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj" />
 		<ProjectReference Include="..\Robby\Robby.csproj" />
 		<ProjectReference Include="..\WikiCommon\WikiCommon.csproj" />
