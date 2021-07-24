@@ -74,6 +74,7 @@
 			this.Pages.PageLoaded -= this.SetLoaded;
 
 			// Needs to be after update, since update modifies item's IsNonTrivial property.
+			allSets.Sort((item, item2) => string.Compare(item.Name, item2.Name, StringComparison.Ordinal));
 			this.GenerateReport(allSets);
 		}
 
