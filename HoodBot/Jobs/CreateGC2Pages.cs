@@ -10,6 +10,7 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.GC2.GC2Lib;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
@@ -42,23 +43,25 @@
 		#endregion
 
 		#region Fields
+		private readonly FieldCollection fieldCollection;
 		private readonly bool original;
 		#endregion
 
 		#region Constructors
 		[JobInfo("Create GC2 Pages")]
-		public CreateGC2Pages(JobManager jobManager, bool originalVersion)
-			: base(jobManager) => this.original = originalVersion;
+		public CreateGC2Pages(JobManager jobManager, bool original)
+			: base(jobManager)
+		{
+			this.original = original;
+			this.fieldCollection = LoadFromFolder(original);
+		}
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
-			var fieldData = LoadFromFolder(this.original);
-			this.StatusWriteLine("Files parsed");
-
 			var titles = new TitleCollection(this.Site);
-			foreach (var field in fieldData.Values)
+			foreach (var field in this.fieldCollection.Values)
 			{
 				titles.Add(new Title(this.Site.Namespaces[MediaWikiNamespaces.Main], Field.PageName(field.Name, this.original)));
 			}
@@ -68,11 +71,10 @@
 			this.Pages.PageLoaded -= this.Pages_PageLoaded;
 		}
 
-		protected override void Main() => this.SavePages("Update field page", true);
+		protected override void Main() => this.SavePages("Update wave data", true);
 		#endregion
 
 		#region Private Static Methods
-
 		private static string CommaAndList(IReadOnlyList<string> list)
 		{
 			if (list.Count == 0)
@@ -96,6 +98,51 @@
 			}
 
 			return sb.ToString();
+		}
+
+		private static void EmitWaves(NodeCollection nodes, Field field)
+		{
+			var factory = nodes.Factory;
+			var newLine = factory.TextNode("\n");
+			foreach (var wark in field.Warks)
+			{
+				if (wark is Wave wave)
+				{
+					var waveTemplate = factory.TemplateNodeFromWikiText(FormattableString.Invariant($"{{{{Wave Table (GC2)/Row|{wave.Number}|{wave.NumMonsters}|{wave.TypeModifier.TrimEnd()}|{wave.Type}|{wave.HitPoints:#,0}|{wave.HitPointRegen:#,0}|{wave.Armor:#,0}|{wave.SpeedText}|{wave.ManaBase:#,0}|{wave.ManaBase * wave.CostToBanishMultiplier:#,0}|{wave.XpText}}}}}"));
+					if (wave.BuffTexts != null)
+					{
+						for (var i = 1; i <= wave.BuffTexts.Count; i++)
+						{
+							waveTemplate.Add("buff" + i.ToStringInvariant(), wave.BuffTexts[i - 1]);
+						}
+					}
+
+					nodes.Add(waveTemplate);
+					nodes.Add(newLine);
+				}
+
+				if (wark is Spark spark)
+				{
+					var sparkTemplate = factory.TemplateNodeFromWikiText($"{{{{Wave Table (GC2)/Spark|{spark.Text}}}}}");
+					nodes.Add(sparkTemplate);
+					nodes.Add(newLine);
+				}
+			}
+		}
+
+		private static byte[] FromBase64ToBytes(string dataIn)
+		{
+			byte[] retval;
+			var data = Convert.FromBase64String(dataIn);
+			using (var compressedStream = new MemoryStream(data, 2, data.Length - 2)) // Strip off first 2 bytes, which are zip format specifier.
+			using (var zipStream = new DeflateStream(compressedStream, CompressionMode.Decompress)) // Used to come from System.IO.Compression, now comes from Ionic.Zlib - still works?
+			using (var memoryStream = new MemoryStream())
+			{
+				zipStream.CopyTo(memoryStream);
+				retval = memoryStream.ToArray();
+			}
+
+			return retval;
 		}
 
 		private static FieldCollection LoadFromFolder(bool original)
@@ -136,7 +183,7 @@
 							: DisableType.Always;
 						break;
 					case "journeynote":
-						extra.JourneyNotes.Add(int.Parse(data, CultureInfo.InvariantCulture));
+						extra.JourneyNotes.Add(ParseInt(data));
 						break;
 					case "resembles":
 						extra.Resembles = data;
@@ -148,7 +195,7 @@
 						}
 						else
 						{
-							extra.FlyingOnes.Add(new Flying(type, int.Parse(data, CultureInfo.InvariantCulture)));
+							extra.FlyingOnes.Add(new Flying(type, ParseInt(data)));
 						}
 
 						break;
@@ -161,17 +208,17 @@
 			foreach (Match match in matches)
 			{
 				var fieldName = match.Groups["field"].Value;
-				var id = int.Parse(match.Groups["id"].Value, CultureInfo.InvariantCulture);
-				var sort = int.Parse(match.Groups["sort"].Value, CultureInfo.InvariantCulture);
+				var id = ParseInt(match.Groups["id"].Value);
+				var sort = ParseInt(match.Groups["sort"].Value);
 				var stageType = StageTypeLookups[match.Groups["stagetype"].Value];
 				var x =
-					int.Parse(match.Groups["x1"].Value, CultureInfo.InvariantCulture) +
-					int.Parse(match.Groups["x2sign"].Value + "0" + match.Groups["x2"].Value, CultureInfo.InvariantCulture) +
-					int.Parse(match.Groups["x3sign"].Value + "0" + match.Groups["x3"].Value, CultureInfo.InvariantCulture);
+					ParseInt(match.Groups["x1"].Value) +
+					ParseInt(match.Groups["x2sign"].Value + "0" + match.Groups["x2"].Value) +
+					ParseInt(match.Groups["x3sign"].Value + "0" + match.Groups["x3"].Value);
 				var y =
-					int.Parse(match.Groups["y1"].Value, CultureInfo.InvariantCulture) +
-					int.Parse(match.Groups["y2sign"].Value + "0" + match.Groups["y2"].Value, CultureInfo.InvariantCulture) +
-					int.Parse(match.Groups["y3sign"].Value + "0" + match.Groups["y3"].Value, CultureInfo.InvariantCulture);
+					ParseInt(match.Groups["y1"].Value) +
+					ParseInt(match.Groups["y2sign"].Value + "0" + match.Groups["y2"].Value) +
+					ParseInt(match.Groups["y3sign"].Value + "0" + match.Groups["y3"].Value);
 				var fieldData = match.Groups["fielddata"].Value;
 				fieldData = Encoding.ASCII.GetString(FromBase64ToBytes(fieldData)).Trim();
 				extras.TryGetValue(fieldName, out var extraFieldInfo);
@@ -187,61 +234,83 @@
 				fieldList.Add(field);
 			}
 
-			var fieldCollection = new FieldCollection(fieldList);
+			var fields = new FieldCollection(fieldList);
 			if (!original)
 			{
 				var originalFile = LoadFromFolder(true);
-				foreach (var field in fieldCollection)
+				foreach (var field in fields)
 				{
 					field.SteamExclusive = !originalFile.ContainsKey(field.Name);
 				}
 			}
 
-			return fieldCollection;
+			return fields;
 		}
 
+		private static int ParseInt(string data) => int.Parse(data, CultureInfo.InvariantCulture);
+
+		private static void UpdatePage(ContextualParser parser, Field field)
+		{
+			var nodes = parser.Nodes;
+			var start = nodes.FindIndex<SiteTemplateNode>(template => string.Equals(template.TitleValue.PageName, "Wave Table (GC2)/Start", StringComparison.Ordinal)) + 1;
+			var end = parser.Nodes.FindLastIndex<SiteTemplateNode>(template => string.Equals(template.TitleValue.PageName, "Wave Table (GC2)/End", StringComparison.Ordinal));
+			if (start == 0 || end == -1)
+			{
+				return;
+			}
+
+			nodes.RemoveRange(start, end - start);
+			var factory = nodes.Factory;
+			var newLine = factory.TextNode("\n");
+			var waveNodes = new NodeCollection(nodes.Factory)
+			{
+				newLine
+			};
+			EmitWaves(waveNodes, field);
+			parser.Nodes.InsertRange(start, waveNodes);
+		}
 		#endregion
 
 		#region Private Methods
-		private static byte[] FromBase64ToBytes(string dataIn)
+		private void DropCollectionList(DropCollection? drops, ContextualParser parser)
 		{
-			byte[] retval;
-			var data = Convert.FromBase64String(dataIn);
-			using (var compressedStream = new MemoryStream(data, 2, data.Length - 2)) // Strip off first 2 bytes, which are zip format specifier.
-			using (var zipStream = new DeflateStream(compressedStream, CompressionMode.Decompress)) // Used to come from System.IO.Compression, now comes from Ionic.Zlib - still works?
-			using (var memoryStream = new MemoryStream())
+			if (drops != null)
 			{
-				zipStream.CopyTo(memoryStream);
-				retval = memoryStream.ToArray();
-			}
-
-			return retval;
-		}
-
-		private void Pages_PageLoaded(PageCollection sender, Page eventArgs) => throw new NotImplementedException();
-
-		private string ToPercent(double value)
-		{
-			// We can't just use the format specifier because it doesn't do rounding.
-			value = Math.Round(value * 100, 2);
-			return value.ToString(this.Site.Culture);
-		}
-
-		private void UpdateWikiText(Page page, Field field, FieldCollection fieldData)
-		{
-			var parser = new ContextualParser(page);
-			this.UpdateTemplateText(parser, field, fieldData);
-
-			var difficulty = "Looming";
-			var fieldName = field.IsCompass
-				? $"[[Field {Field.PageName(field.AccessedFrom, this.original)}|Field {field.AccessedFrom}]]"
-				: "the [[Mysterious Compass (GC2)|Mysterious Compass]]";
-			if (!field.IsCompass && field.AccessedFrom.Length > 0)
-			{
-				if (field.IsSecret)
+				foreach (var drop in drops)
 				{
-					difficulty = "Glaring";
+					var glaringText = string.Empty;
+					if (drop is FieldToken ft && this.fieldCollection.TryGetValue(ft.FieldName, out var ftField) && ftField.IsSecret)
+					{
+						glaringText = " (glaring only)";
+					}
+
+					parser.AppendText(string.Concat("* ", drop.LongText(this.original), glaringText, "\n"));
 				}
+			}
+		}
+
+		private Field FieldFromPageName(ISimpleTitle title)
+		{
+			var split = title.PageName.Split(TextArrays.Space, 3);
+			return split.Length >= 2 && this.fieldCollection.TryGetValue(split[1], out var retval)
+				? retval
+				: throw new InvalidOperationException($"Title {title.PageName} does not contain a recognized field name.");
+		}
+
+		private void NewPage(ContextualParser parser, Field field)
+		{
+			this.UpdateInfobox(parser, field);
+			string difficulty;
+			string fieldName;
+			if (field.IsCompass)
+			{
+				difficulty = "Looming";
+				fieldName = "the [[Mysterious Compass (GC2)|Mysterious Compass]]";
+			}
+			else
+			{
+				difficulty = field.IsSecret ? "Glaring" : "Looming";
+				fieldName = $"[[{Field.PageName(field.AccessedFrom, this.original)}|Field {field.AccessedFrom}]]";
 			}
 
 			parser.AppendText(FormattableString.Invariant($"Field {field.Name} is obtained by completing {fieldName} in [[Gemcraft Chapter 2 (Chasing Shadows)|Gemcraft Chapter 2]] on {difficulty} difficulty. "));
@@ -400,36 +469,19 @@
 			parser.AppendLine("\n\n==Waves==");
 			parser.AppendLine("The following table applies only to Looming difficulty with no battle traits.");
 			parser.AppendLine("{{Wave Table (GC2)/Start}}");
-			foreach (var wave in field.Warks)
-			{
-				var t = parser.Nodes.Factory.TemplateNodeFromWikiText(FormattableString.Invariant($"{{{{Wave Table (GC2)/Row|{wave.Number}|{wave.NumMonsters}|{wave.TypeModifier}|{wave.Type}|{wave.HitPoints:#,0}|{wave.HitPointRegen:#,0}|{wave.Armor:#,0}|{wave.SpeedText}|{wave.ManaBase:#,0}|{wave.ManaBase * wave.CostToBanishMultiplier:#,0}|{wave.XpText}}}}}"));
-				if (wave.BuffTexts != null)
-				{
-					for (var i = 1; i <= wave.BuffTexts.Count; i++)
-					{
-						t.Add("buff" + i.ToStringInvariant(), wave.BuffTexts[i - 1]);
-					}
-				}
-
-				if (wave.Spark != null)
-				{
-					t.Add("spark", wave.Spark.Text);
-				}
-
-				parser.Nodes.Add(t);
-			}
+			EmitWaves(parser.Nodes, field);
 
 			parser.AppendLine("{{Wave Table (GC2)/End}}\n");
 
-			if (field.Flying.Count > 0 || field.Flying.Disabled > DisableType.Never)
+			if (field.FlyingCollection.Count > 0 || field.FlyingCollection.Disabled > DisableType.Never)
 			{
 				parser.AppendLine("==Flying Ones==");
-				if (field.Flying.Introduced != null)
+				if (field.FlyingCollection.IntroText != null)
 				{
-					parser.AppendText(field.Flying.Introduced.IntroText + ". ");
+					parser.AppendText(field.FlyingCollection.IntroText);
 				}
 
-				switch (field.Flying.Disabled)
+				switch (field.FlyingCollection.Disabled)
 				{
 					case DisableType.UntilBeaten:
 						parser.AppendText("Random flying ones are disabled on this field until you have beaten it at least once. ");
@@ -441,10 +493,10 @@
 						break;
 				}
 
-				if (field.Flying.Count > 0)
+				if (field.FlyingCollection.Count > 0)
 				{
 					parser.AppendText("Flying ones always appear as listed below, regardless of difficulty level or battle traits. Note that waves and sparks are both counted when determining when a flying one will appear.");
-					foreach (var flying in field.Flying)
+					foreach (var flying in field.FlyingCollection)
 					{
 						parser.AppendText("\n* " + flying.GetText(field.Type == StageType.Vision));
 					}
@@ -473,34 +525,8 @@
 			else
 			{
 				parser.AppendLine("The player receives the following drops upon completing this field:");
-				if (field.Buildings.WizardTower != null && field.Buildings.WizardTower.Drops != null)
-				{
-					foreach (var drop in field.Buildings.WizardTower.Drops)
-					{
-						var glaring = false;
-						if (drop is FieldToken ft)
-						{
-							glaring = fieldData[ft.FieldName].IsSecret;
-						}
-
-						parser.AppendText(string.Concat("* ", drop.LongText(this.original), glaring ? " (glaring only)" : string.Empty, "\n"));
-					}
-				}
-
-				if (field.Buildings.Orb.Drops != null && field.Buildings.Orb.Drops.Count > 0)
-				{
-					foreach (var drop in field.Buildings.Orb.Drops)
-					{
-						var glaring = false;
-						if (drop is FieldToken ft)
-						{
-							glaring = fieldData[ft.FieldName].IsSecret;
-						}
-
-						parser.AppendText(string.Concat("* ", drop.LongText(this.original), glaring ? " (glaring only)" : string.Empty, "\n"));
-					}
-				}
-
+				this.DropCollectionList(field.Buildings.WizardTower?.Drops, parser);
+				this.DropCollectionList(field.Buildings.Orb.Drops, parser);
 				if (field.JourneyNotes.Count > 0)
 				{
 					var plural = field.JourneyNotes.Count > 1 ? "s" : string.Empty;
@@ -521,27 +547,38 @@
 				{
 					parser.AppendLine();
 					parser.AppendLine("In addition, if the player opens the tome chamber, they will get the following drops:");
-					foreach (var drop in field.Buildings.TomeChamber.Drops)
-					{
-						var glaring = false;
-						if (drop is FieldToken ft)
-						{
-							glaring = fieldData[ft.FieldName].IsSecret;
-						}
-
-						var glaringText = glaring ? " (glaring only)" : string.Empty;
-						parser.AppendText(string.Concat("* ", drop.LongText(this.original), glaringText, "\n"));
-					}
+					this.DropCollectionList(field.Buildings.TomeChamber?.Drops, parser);
 				}
 			}
 
 			parser.AppendLine();
 			parser.AppendText("[[Category:Gemcraft Chapter 2 Levels]]\n[[Category:Levels]]\n[[Category:Gemcraft Chapter 2 (Chasing Shadows)]]");
+		}
+
+		private void Pages_PageLoaded(PageCollection sender, Page page)
+		{
+			var parser = new ContextualParser(page);
+			var field = this.FieldFromPageName(page);
+			if (page.Exists)
+			{
+				UpdatePage(parser, field);
+			}
+			else
+			{
+				this.NewPage(parser, field);
+			}
 
 			page.Text = parser.ToRaw();
 		}
 
-		private void UpdateTemplateText(ContextualParser parser, Field field, FieldCollection fieldData)
+		private string ToPercent(double value)
+		{
+			// We can't just use the format specifier because it doesn't do rounding.
+			value = Math.Round(value * 100, 2);
+			return value.ToString(this.Site.Culture);
+		}
+
+		private void UpdateInfobox(ContextualParser parser, Field field)
 		{
 			if (parser.FindTemplate(InfoboxName) is not ITemplateNode infobox)
 			{
@@ -562,7 +599,7 @@
 				infobox.Add("fieldtype", field.TypeFriendly);
 			}
 
-			infobox.Add("unlockedby", field.AccessedFrom ?? "Start");
+			infobox.Add("unlockedby", field.AccessedFrom);
 			if (field.IsSecret && !field.IsCompass)
 			{
 				infobox.Add("unlockedbyglaring", "1");
@@ -587,11 +624,11 @@
 				fieldList.Sort(StringComparer.Ordinal);
 				for (var unlockNum = 1; unlockNum <= fieldList.Count; unlockNum++)
 				{
-					var unlockField = fieldList[unlockNum - 1];
-					infobox.Add("unlocks" + unlockNum.ToStringInvariant(), unlockField);
-
-					var uf = fieldData[unlockField];
-					if (uf.IsSecret && fieldData[uf.AccessedFrom].IsCompass)
+					var unlockFieldName = fieldList[unlockNum - 1];
+					infobox.Add("unlocks" + unlockNum.ToStringInvariant(), unlockFieldName);
+					if (this.fieldCollection.TryGetValue(unlockFieldName, out var unlockField) &&
+						unlockField.IsSecret &&
+						field.IsCompass /* same as?: this.fieldCollection[unlockField.AccessedFrom].IsCompass */)
 					{
 						infobox.Add("unlocks" + unlockNum.ToStringInvariant() + "glaring", "1");
 					}
@@ -612,12 +649,15 @@
 			infobox.Add("rainchance", this.ToPercent(field.RainChance));
 			infobox.Add("snowchance", this.ToPercent(field.SnowChance));
 
-			if (field.Buildings.TomeChamber != null)
+			if (field.Buildings.TomeChamber is Building tc)
 			{
 				var drops = new List<string>();
-				foreach (var drop in field.Buildings.TomeChamber.Drops)
+				if (tc.Drops is DropCollection tcDrops)
 				{
-					drops.Add(drop.ShortText(this.original));
+					foreach (var drop in tcDrops)
+					{
+						drops.Add(drop.ShortText(this.original));
+					}
 				}
 
 				infobox.Add("tomechamber", string.Join(", ", drops));
