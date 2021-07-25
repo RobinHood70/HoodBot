@@ -39,6 +39,14 @@
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0-preview.6.21352.12" />
 		<PackageReference Include="MvvmLightLibsStd10" Version="5.4.1.1" />
 		<PackageReference Include="MySql.Data" Version="8.0.26" />
+		<PackageReference Include="Roslynator.Analyzers" Version="3.2.0">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="SonarAnalyzer.CSharp" Version="8.26.0.34506">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
