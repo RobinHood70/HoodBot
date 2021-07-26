@@ -180,9 +180,9 @@
 
 		/// <summary>Gets or sets any debug information returned by an action.</summary>
 		/// <value>The debug information.</value>
-		/// <remarks>For future expansion. Not yet implemented.
-		///
-		/// If debugging is enabled, any action can return debugging information along with the normal results. If a server does so, the results will be located here.</remarks>
+		/// <remarks>
+		/// <para>For future expansion. Not yet implemented.</para>
+		/// <para>If debugging is enabled, any action can return debugging information along with the normal results. If a server does so, the results will be located here.</para></remarks>
 		public DebugInfoResult? DebugInfo { get; protected internal set; }
 
 		/// <summary>Gets or sets the detected format version.</summary>
@@ -230,13 +230,18 @@
 
 		/// <summary>Gets or sets the token manager.</summary>
 		/// <value>The token manager.</value>
+		/// <exception cref="InvalidOperationException">Thrown when site version information was not detected.</exception>
+		/// <exception cref="ArgumentNullException">Thrown when an attempt is made to set TokenManager to <see langword="null"/>.</exception>
 		public ITokenManager TokenManager
 		{
-			get => this.tokenManager ??=
-				this.SiteVersion == 0 ? throw new InvalidOperationException(CurrentCulture(Messages.SiteNotInitialized, nameof(this.Initialize), nameof(this.Login))) :
-				this.SiteVersion >= TokenManagerMeta.MinimumVersion ? new TokenManagerMeta(this) :
-				this.SiteVersion >= TokenManagerAction.MinimumVersion ? new TokenManagerAction(this) :
-				new TokenManagerOriginal(this);
+			get => this.tokenManager ??= this.SiteVersion switch
+			{
+				0 => throw new InvalidOperationException(CurrentCulture(Messages.SiteNotInitialized, nameof(this.Initialize), nameof(this.Login))),
+				>= TokenManagerMeta.MinimumVersion => new TokenManagerMeta(this),
+				>= TokenManagerAction.MinimumVersion => new TokenManagerAction(this),
+				_ => new TokenManagerOriginal(this)
+			};
+
 			set => this.tokenManager = value ?? throw ArgumentNull(nameof(this.TokenManager));
 		}
 
@@ -260,7 +265,7 @@
 
 		/// <summary>Gets the stop check methods that are valid for current state.</summary>
 		/// <value>The stop methods.</value>
-		public StopCheckMethods ValidStopCheckMethods => (this.CurrentUserInfo == null || this.CurrentUserInfo.Flags.HasFlag(UserInfoFlags.Anonymous))
+		public StopCheckMethods ValidStopCheckMethods => (this.CurrentUserInfo?.Flags.HasFlag(UserInfoFlags.Anonymous) != false)
 			? this.StopCheckMethods & StopCheckMethods.LoggedOut
 			: this.StopCheckMethods;
 
@@ -285,6 +290,7 @@
 		/// <param name="pageName">The name of the page.</param>
 		/// <returns>An string representing either an absolute or relative URI to the article.</returns>
 		/// <remarks>This does not return a Uri object because the article path may be relative, which is not supported by the C# Uri class. Although this function could certainly be made to provide a fixed Uri, that might not be what the caller wants, so the caller is left to interpret the result value as they wish.</remarks>
+		/// <exception cref="WikiException">Thrown when <see cref="ArticlePath"/> is not initialized.</exception>
 		public Uri GetFullArticlePath(string pageName)
 		{
 			ThrowNull(pageName, nameof(pageName));
@@ -324,6 +330,7 @@
 		/// <param name="module">The input module.</param>
 		/// <returns>The module output.</returns>
 		/// <remarks>This function is used internally, but also made available externally for special situations.</remarks>
+		/// <exception cref="WikiException">Thrown when a module failed to return any output.</exception>
 		public TOutput RunModuleQuery<TInput, TOutput>(QueryModule<TInput, TOutput> module)
 			where TInput : class
 			where TOutput : class
@@ -370,7 +377,11 @@
 				default:
 					var query = RequestVisitorUrl.Build(request);
 					var urib = new UriBuilder(request.Uri) { Query = query };
-					response = urib.Uri.OriginalString.Length < this.MaximumGetLength ? this.Client.Get(urib.Uri) : this.Client.Post(request.Uri, RequestVisitorUrl.Build(request));
+
+					// TODO: Re-implement the Get->Post conversion int the client's Get method.
+					response = urib.Uri.OriginalString.Length < this.MaximumGetLength
+						? this.Client.Get(urib.Uri)
+						: this.Client.Post(request.Uri, RequestVisitorUrl.Build(request));
 					break;
 			}
 
@@ -395,6 +406,7 @@
 		public void ClearWarnings() => this.warnings.Clear();
 
 		/// <summary>Initializes any needed information without trying to login.</summary>
+		/// <exception cref="WikiException">Thrown when the wiki did not return the required site and user information.</exception>
 		public void Initialize()
 		{
 			/*
@@ -497,20 +509,11 @@
 
 				return true;
 			}
-			catch (WebException e)
+			catch (WebException e) when (e.Response is not HttpWebResponse response || response.StatusCode == HttpStatusCode.InternalServerError)
 			{
-				// Internal Server Error is a valid possibility from MW 1.18 on, so ignore that, but throw if we get anything else.
-				if (e.Response is HttpWebResponse response && response.StatusCode != HttpStatusCode.InternalServerError)
-				{
-					throw;
-				}
 			}
-			catch (WikiException e)
+			catch (WikiException e) when (string.Equals(e.Code, ApiDisabledCode, StringComparison.Ordinal))
 			{
-				if (!string.Equals(e.Code, ApiDisabledCode, StringComparison.Ordinal))
-				{
-					throw;
-				}
 			}
 
 			return false;
@@ -929,9 +932,9 @@
 		}
 
 		/// <summary>Logs the user out using the <see href="https://www.mediawiki.org/wiki/API:Logout">Logout</see> API module.</summary>
-		/// <remarks>This call does not clear site data, since the user will most likely stop using the Site object after logging out anyway. This could also be a logout due to detecting that the wrong user is currently logged in, in which case most of the site information is still valid, and the user may even be intentionally access the site anonymously. Since the user's intent is unknown, it is safer not to assume it.
-		///
-		/// No stop checking is performed on logging out.</remarks>
+		/// <remarks>
+		/// <para>This call does not clear site data, since the user will most likely stop using the Site object after logging out anyway. This could also be a logout due to detecting that the wrong user is currently logged in, in which case most of the site information is still valid, and the user may even be intentionally access the site anonymously. Since the user's intent is unknown, it is safer not to assume it.</para>
+		/// <para>No stop checking is performed on logging out.</para></remarks>
 		public void Logout() => this.Logout(false);
 
 		/// <summary>Logs the user out using the <see href="https://www.mediawiki.org/wiki/API:Logout">Logout</see> API module.</summary>
@@ -1351,6 +1354,8 @@
 		/// <summary>Performs any stop checks flagged in <see cref="ValidStopCheckMethods"/> (derived from <see cref="StopCheckMethods"/>).</summary>
 		/// <param name="userInfoResult">The user information returned by the query. Set to <see langword="null"/> if not a query or integrated check is disabled.</param>
 		/// <remarks>This version uses the integrated query results, if available.</remarks>
+		/// <exception cref="StopException">Thrown when any of the stop check methods is triggered.</exception>
+		/// <exception cref="WikiException">Thrown when user information could not be retrieved.</exception>
 		protected virtual void DoStopCheck(UserInfoResult? userInfoResult)
 		{
 			if (this.ValidStopCheckMethods.HasFlag(StopCheckMethods.Custom) && (this.CustomStopCheck?.Invoke() == true))
