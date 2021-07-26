@@ -1475,7 +1475,6 @@
 		{
 			var uploadInput = new UploadInputInternal(input);
 			UploadResult result;
-			var readBytes = 0;
 			do
 			{
 				uploadInput.NextChunk(input.FileData, input.ChunkSize);
@@ -1483,7 +1482,7 @@
 				uploadInput.Offset += input.ChunkSize;
 				uploadInput.FileKey = result.FileKey;
 			}
-			while (string.Equals(result.Result, "Continue", StringComparison.OrdinalIgnoreCase) && readBytes > 0);
+			while (string.Equals(result.Result, "Continue", StringComparison.OrdinalIgnoreCase) && uploadInput.Offset > 0);
 
 			if (string.Equals(result.Result, "Success", StringComparison.OrdinalIgnoreCase))
 			{
