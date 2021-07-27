@@ -62,7 +62,7 @@
 				.AddIf("disablelimitreport", input.DisableLimitReport, this.SiteVersion >= 126)
 				.AddIf("disableeditsection", input.DisableEditSection, this.SiteVersion >= 124)
 				.AddIf("disabletidy", input.DisableTidy, this.SiteVersion >= 126)
-				.AddIf("generatexml", input.Properties.HasFlag(ParseProperties.ParseTree), this.SiteVersion is >= 120 and < 126)
+				.AddIf("generatexml", (input.Properties & ParseProperties.ParseTree) != 0, this.SiteVersion is >= 120 and < 126)
 				.AddIf("preview", input.Preview, this.SiteVersion >= 122)
 				.AddIf("sectionpreview", input.SectionPreview, this.SiteVersion >= 122)
 				.AddIf("disabletoc", input.DisableTableOfContents, this.SiteVersion >= 123)

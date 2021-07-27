@@ -312,7 +312,7 @@
 			// Assumes title-related properties have already been provided in the constructor.
 			ThrowNull(pageItem, nameof(pageItem));
 			this.LoadOptions = optionsUsed;
-			this.PopulateFlags(pageItem.Flags.HasFlag(PageFlags.Invalid), pageItem.Flags.HasFlag(PageFlags.Missing));
+			this.PopulateFlags((pageItem.Flags & PageFlags.Invalid) != 0, (pageItem.Flags & PageFlags.Missing) != 0);
 			this.PopulateRevisions(pageItem);
 			this.PopulateInfo(pageItem);
 			this.PreviouslyDeleted = this.IsMissing && pageItem.DeletedRevisions.Count > 0;
@@ -394,8 +394,8 @@
 				this.canonicalPath = info.CanonicalUrl;
 				this.CurrentRevisionId = info.LastRevisionId;
 				this.editPath = info.EditUrl;
-				this.IsNew = info.Flags.HasFlag(PageInfoFlags.New);
-				this.IsRedirect = info.Flags.HasFlag(PageInfoFlags.Redirect);
+				this.IsNew = (info.Flags & PageInfoFlags.New) != 0;
+				this.IsRedirect = (info.Flags & PageInfoFlags.Redirect) != 0;
 				this.StartTimestamp = pageItem.Info.StartTimestamp ?? this.Site.AbstractionLayer.CurrentTimestamp;
 				this.Text = this.CurrentRevisionId != 0 ? this.CurrentRevision?.Text : null;
 				foreach (var protItem in pageItem.Info.Protections)

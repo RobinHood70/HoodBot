@@ -73,10 +73,10 @@
 
 			request
 				.AddFlags("prop", prop)
-				.AddFilterPipedIf("filteriw", "local", input.FilterLocalInterwiki, prop.HasFlag(SiteInfoProperties.InterwikiMap))
-				.AddIf("showalldb", input.ShowAllDatabases, prop.HasFlag(SiteInfoProperties.DbReplLag))
-				.AddIf("numberingroup", input.ShowNumberInGroup, prop.HasFlag(SiteInfoProperties.UserGroups))
-				.AddIfNotNullIf("inlanguagecode", input.InterwikiLanguageCode, prop.HasFlag(SiteInfoProperties.InterwikiMap));
+				.AddFilterPipedIf("filteriw", "local", input.FilterLocalInterwiki, (prop & SiteInfoProperties.InterwikiMap) != 0)
+				.AddIf("showalldb", input.ShowAllDatabases, (prop & SiteInfoProperties.DbReplLag) != 0)
+				.AddIf("numberingroup", input.ShowNumberInGroup, (prop & SiteInfoProperties.UserGroups) != 0)
+				.AddIfNotNullIf("inlanguagecode", input.InterwikiLanguageCode, (prop & SiteInfoProperties.InterwikiMap) != 0);
 		}
 
 		protected override void DeserializeParent(JToken parent)

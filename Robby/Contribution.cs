@@ -18,8 +18,8 @@
 		{
 			ThrowNull(contribution, nameof(contribution));
 			this.Title = Title.FromWikiTitle(site, contribution.Title ?? throw PropertyNull(nameof(contribution), nameof(contribution.Title)));
-			this.New = contribution.Flags.HasFlag(UserContributionFlags.New);
-			this.Patrolled = contribution.Flags.HasFlag(UserContributionFlags.Patrolled);
+			this.New = (contribution.Flags & UserContributionFlags.New) != 0;
+			this.Patrolled = (contribution.Flags & UserContributionFlags.Patrolled) != 0;
 			this.NewSize = contribution.Size;
 			this.OldSize = contribution.Size - contribution.SizeDifference;
 			this.Tags = contribution.Tags;

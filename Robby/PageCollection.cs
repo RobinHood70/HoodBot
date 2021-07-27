@@ -356,7 +356,7 @@
 			ThrowNull(input, nameof(input));
 			ThrowNull(input.Title, nameof(input), nameof(input.Title));
 			var inputTitle = Title.FromName(this.Site, input.Title);
-			if (inputTitle.Namespace != MediaWikiNamespaces.File && input.LinkTypes.HasFlag(BacklinksTypes.ImageUsage))
+			if (inputTitle.Namespace != MediaWikiNamespaces.File && (input.LinkTypes & BacklinksTypes.ImageUsage) != 0)
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
 				ThrowNull(input.Title, nameof(input), nameof(input.Title)); // Input changed, so re-check before proceeding.
@@ -514,7 +514,7 @@
 				{
 					limited.Limit = options.PageLimit;
 				}
-				else if (options.Modules.HasFlag(PageModules.Revisions))
+				else if ((options.Modules & PageModules.Revisions) != 0)
 				{
 					// API-specific. Because of the way revisions output is handled in a pageset, setting the page limit to be the same as the revisions limit results in a much more optimal result, returning less data in more evenly sized batches. This might apply to other modules as well, but revisions is likely the biggest concern, so we always set 500 here unless a higher limit was specifically requested above.
 					limited.Limit = 500;

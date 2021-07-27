@@ -25,22 +25,22 @@
 			ThrowNull(options, nameof(options));
 			var whatToLoad = options.Modules;
 			var propertyInputs = new List<IPropertyInput>();
-			if (whatToLoad.HasFlag(PageModules.Categories))
+			if ((whatToLoad & PageModules.Categories) != 0)
 			{
 				propertyInputs.Add(new CategoriesInput());
 			}
 
-			if (whatToLoad.HasFlag(PageModules.CategoryInfo))
+			if ((whatToLoad & PageModules.CategoryInfo) != 0)
 			{
 				propertyInputs.Add(new CategoryInfoInput());
 			}
 
-			if (whatToLoad.HasFlag(PageModules.DeletedRevisions))
+			if ((whatToLoad & PageModules.DeletedRevisions) != 0)
 			{
 				propertyInputs.Add(new DeletedRevisionsInput() { Properties = RevisionsProperties.Flags }); // Currently only used to determine if page has previously been deleted.
 			}
 
-			if (whatToLoad.HasFlag(PageModules.FileInfo))
+			if ((whatToLoad & PageModules.FileInfo) != 0)
 			{
 				propertyInputs.Add(new ImageInfoInput()
 				{
@@ -57,12 +57,12 @@
 				});
 			}
 
-			if (whatToLoad.HasFlag(PageModules.FileUsage))
+			if ((whatToLoad & PageModules.FileUsage) != 0)
 			{
 				propertyInputs.Add(new FileUsageInput());
 			}
 
-			if (whatToLoad.HasFlag(PageModules.Info))
+			if ((whatToLoad & PageModules.Info) != 0)
 			{
 				var infoInput = new InfoInput() { Properties = InfoProperties.Url };
 				propertyInputs.Add(infoInput);
@@ -72,22 +72,22 @@
 				}
 			}
 
-			if (whatToLoad.HasFlag(PageModules.Links))
+			if ((whatToLoad & PageModules.Links) != 0)
 			{
 				propertyInputs.Add(new LinksInput());
 			}
 
-			if (whatToLoad.HasFlag(PageModules.LinksHere))
+			if ((whatToLoad & PageModules.LinksHere) != 0)
 			{
 				propertyInputs.Add(new LinksHereInput());
 			}
 
-			if (whatToLoad.HasFlag(PageModules.Properties))
+			if ((whatToLoad & PageModules.Properties) != 0)
 			{
 				propertyInputs.Add(new PagePropertiesInput());
 			}
 
-			if (whatToLoad.HasFlag(PageModules.Revisions))
+			if ((whatToLoad & PageModules.Revisions) != 0)
 			{
 				var revs = new RevisionsInput()
 				{
@@ -111,18 +111,18 @@
 				propertyInputs.Add(revs);
 			}
 
-			if (whatToLoad.HasFlag(PageModules.Templates))
+			if ((whatToLoad & PageModules.Templates) != 0)
 			{
 				propertyInputs.Add(new TemplatesInput());
 			}
 
-			if (whatToLoad.HasFlag(PageModules.TranscludedIn))
+			if ((whatToLoad & PageModules.TranscludedIn) != 0)
 			{
 				propertyInputs.Add(new TranscludedInInput());
 			}
 
 			// Always load custom flags last so implementers can examine or alter the entire list as needed.
-			if (whatToLoad.HasFlag(PageModules.Custom))
+			if ((whatToLoad & PageModules.Custom) != 0)
 			{
 				this.AddCustomPropertyInputs(propertyInputs);
 			}

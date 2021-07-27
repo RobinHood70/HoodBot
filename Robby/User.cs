@@ -340,7 +340,7 @@
 		{
 			this.BlockInfo = new Block(user.Name, user.BlockedBy, user.BlockReason, user.BlockTimestamp ?? DateTime.MinValue, user.BlockExpiry ?? DateTime.MaxValue, BlockFlags.None, false);
 			this.EditCount = user.EditCount;
-			this.Emailable = user.Flags.HasFlag(UserFlags.Emailable);
+			this.Emailable = (user.Flags & UserFlags.Emailable) != 0;
 			this.Gender = user.Gender;
 			var groups = new List<string>();
 			if (user.Groups != null)

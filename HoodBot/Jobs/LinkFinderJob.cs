@@ -65,7 +65,7 @@
 			{
 				foreach (var backlink in page.Backlinks)
 				{
-					if (backlink.Value.HasFlag(BacklinksTypes.Backlinks) || backlink.Value.HasFlag(BacklinksTypes.ImageUsage))
+					if ((backlink.Value & BacklinksTypes.Backlinks) != 0 || (backlink.Value & BacklinksTypes.ImageUsage) != 0)
 					{
 						backTitles.Add(backlink.Key);
 					}

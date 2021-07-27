@@ -14,6 +14,7 @@
 		Propose = 1 << 2,
 		Skip = 1 << 3,
 		UpdateLinks = 1 << 4,
+		NeedsEdited = Edit | Propose
 	}
 
 	public sealed class Replacement
