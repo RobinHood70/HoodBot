@@ -6,7 +6,7 @@
 	using RobinHood70.HoodBot.Jobs;
 	using static RobinHood70.CommonCode.Globals;
 
-	public class JobInfo : IEquatable<JobInfo>
+	public sealed class JobInfo : IEquatable<JobInfo>
 	{
 		#region Constructors
 		private JobInfo(ConstructorInfo constructor, JobInfoAttribute jobInfo)
@@ -37,7 +37,7 @@
 		#region Public Properties
 		public ConstructorInfo Constructor { get; }
 
-		public IReadOnlyList<string> Groups { get; } = new List<string>();
+		public IReadOnlyList<string> Groups { get; }
 
 		public string Name { get; }
 

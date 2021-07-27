@@ -4,7 +4,7 @@
 	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Formats a Request object as <see cref="MultipartFormDataContent"/>.</summary>
-	public class RequestVisitorHttpContentMultipart : IParameterVisitor
+	public sealed class RequestVisitorHttpContentMultipart : IParameterVisitor
 	{
 		#region Fields
 		private readonly MultipartFormDataContent multipartData;

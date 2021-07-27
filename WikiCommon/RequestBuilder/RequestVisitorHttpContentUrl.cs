@@ -6,7 +6,7 @@
 	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Formats a Request object as <see cref="FormUrlEncodedContent"/>.</summary>
-	public class RequestVisitorHttpContentUrl : IParameterVisitor
+	public sealed class RequestVisitorHttpContentUrl : IParameterVisitor
 	{
 		#region Fields
 		private readonly Dictionary<string, string?> parameters = new(StringComparer.Ordinal);

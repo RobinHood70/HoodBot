@@ -4,7 +4,6 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
-	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ListPagesWithProp : ListModule<PagesWithPropertyInput, PagesWithPropertyItem>, IGeneratorModule
 	{

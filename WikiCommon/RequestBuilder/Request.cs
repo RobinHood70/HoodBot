@@ -107,6 +107,7 @@
 		/// <param name="fileName">Name of the file.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <returns>The current collection (fluent interface).</returns>
+		/// <exception cref="ArgumentException">Thrown when the byte array is null or empty.</exception>
 		public Request Add(string name, string fileName, byte[] value)
 		{
 			if (value == null || value.Length == 0)
@@ -166,7 +167,7 @@
 		/// <param name="values">The parameter values.</param>
 		/// <returns>The current collection (fluent interface).</returns>
 		/// <remarks>Value order must not be important, and duplicate values will be removed.</remarks>
-		public Request Add(string name, IEnumerable<string>? values) => values == null || values.IsEmpty()
+		public Request Add(string name, IEnumerable<string>? values) => values?.IsEmpty() != false
 			? this
 			: this.AddPiped(name, new HashSet<string>(values, StringComparer.Ordinal));
 
@@ -500,6 +501,7 @@
 		/// <param name="value">The parameter value to add to the list.</param>
 		/// <returns>The current collection (fluent interface).</returns>
 		/// <remarks>If a <see cref="PipedParameter"/> is created, the <see cref="PipedParameter.Values">Values</see> property will be a HashSet.</remarks>
+		/// <exception cref="InvalidOperationException">Thrown when the named parameter does not exist.</exception>
 		public Request AddToPiped(string name, string value)
 		{
 			ThrowNull(name, nameof(name));
@@ -584,6 +586,7 @@
 		/// <summary>Gets the key for item.</summary>
 		/// <param name="item">The item.</param>
 		/// <returns>The key corresponding to the item.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when the parameter is null.</exception>
 		protected override string GetKeyForItem(Parameter item) => (item ?? throw ArgumentNull(nameof(item))).Name;
 		#endregion
 

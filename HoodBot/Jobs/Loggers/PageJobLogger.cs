@@ -94,14 +94,14 @@
 			Debug.Assert(this.logInfo != null, "LogInfo is null.");
 			var parser = new ContextualParser(sender);
 			var factory = parser.Nodes.Factory;
-			var result = this.UpdateCurrentStatus(parser);
+			var sameTaskText = this.UpdateCurrentStatus(parser);
 			var firstEntry = parser.Nodes.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("/Entry"));
 			if (firstEntry != -1)
 			{
 				var entry = (SiteTemplateNode)parser.Nodes[firstEntry];
 
 				// If the last job was the same as this job and has no end time, then it's either the current job or a resumed one.
-				if (string.IsNullOrEmpty(entry.Find(3)?.Value.ToValue()) &&
+				if (sameTaskText && string.IsNullOrEmpty(entry.Find(3)?.Value.ToValue()) &&
 					string.Equals(entry.Find(1)?.Value.ToValue().Trim(), this.logInfo.Title, StringComparison.Ordinal) &&
 					string.Equals(entry.Find("info")?.Value.ToValue() ?? string.Empty, this.logInfo.Details ?? string.Empty, StringComparison.Ordinal))
 				{

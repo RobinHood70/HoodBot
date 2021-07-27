@@ -7,15 +7,16 @@
 	{
 		#region Fields
 		private readonly HashSet<string> ambiguousNames = new(StringComparer.Ordinal);
-		private readonly Dictionary<string, Place> primary = new(StringComparer.Ordinal);
-		private readonly Dictionary<string, Place> secondary = new(StringComparer.Ordinal);
+		private readonly Dictionary<string, Place> placesByKey = new(StringComparer.Ordinal);
+		private readonly Dictionary<string, Place> placesByTitle = new(StringComparer.Ordinal);
 		#endregion
 
 		#region Public Indexers
 		public Place? this[string name] =>
-			this.ambiguousNames.Contains(name) ? throw new InvalidOperationException("Tried to look up amibguous name: " + name) :
-			this.primary.TryGetValue(name, out var place) || this.secondary.TryGetValue(name, out place) ? place :
-			default;
+			this.placesByKey.TryGetValue(name, out var place) ||
+			this.placesByTitle.TryGetValue(name, out place)
+				? place
+				: null;
 		#endregion
 
 		#region Public Methods
@@ -23,17 +24,17 @@
 		{
 			if (place.TitleName is string titleName && !this.ambiguousNames.Contains(titleName))
 			{
-				if (this.secondary.Remove(titleName))
+				if (this.placesByTitle.Remove(titleName))
 				{
 					this.ambiguousNames.Add(titleName);
 				}
 				else
 				{
-					this.secondary.Add(titleName, place);
+					this.placesByTitle.Add(titleName, place);
 				}
 			}
 
-			this.primary.Add(place.Key, place);
+			this.placesByKey.Add(place.Key, place);
 		}
 		#endregion
 	}

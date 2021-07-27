@@ -8,10 +8,12 @@
 	internal static class TokenManagerFunctions
 	{
 		#region Public Static Methods
-		public static string TrimTokenKey(string key) =>
-			key == null ? throw ArgumentNull(nameof(key)) :
-			key.EndsWith("token", StringComparison.Ordinal) ? key[0..^5] :
-			key;
+		public static string TrimTokenKey(string key) => key switch
+		{
+			null => throw ArgumentNull(nameof(key)),
+			string when key.EndsWith("token", StringComparison.Ordinal) => key[0..^5],
+			_ => key
+		};
 
 		public static string ValidateTokenType(HashSet<string> validTypes, string type, string replace, string replaceWith)
 		{

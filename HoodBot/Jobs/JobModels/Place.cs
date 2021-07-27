@@ -95,7 +95,7 @@
 
 		public override int GetHashCode() => this.Key.GetHashCode(StringComparison.Ordinal);
 
-		public override string? ToString() => this.Title == null ? this.TitleName : this.Title.AsLink(true);
+		public override string? ToString() => this.Title is null ? this.TitleName : this.Title.AsLink(true);
 		#endregion
 	}
 }

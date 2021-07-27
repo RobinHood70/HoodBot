@@ -125,7 +125,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			if (parent == null)
 			{
-				throw ParsingExtensions.MalformedException("<Deserialize>", parent);
+				throw Exceptions.MalformedException("<Deserialize>", parent);
 			}
 
 			this.DeserializeParent(parent);
@@ -137,7 +137,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			if (this.Output == null)
 			{
 				// If we didn't find the node, or deserialization failed silently for some reason, throw an error.
-				throw ParsingExtensions.MalformedException(this.ResultName, parent);
+				throw Exceptions.MalformedException(this.ResultName, parent);
 			}
 		}
 

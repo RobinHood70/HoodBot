@@ -16,7 +16,7 @@
 		#endregion
 
 		#region Public Override Properties
-		public override int MinimumVersion => 120;
+		public override int MinimumVersion => 124;
 
 		public override string Name => "tokens";
 		#endregion

@@ -119,8 +119,8 @@
 				redirTitle: redir,
 				sectionSnippet: (string?)result["sectionsnippet"],
 				sectionTitle: (string?)result["sectiontitle"],
-				snippet: (string?)result["snippet"],
 				size: (int?)result["size"] ?? 0,
+				snippet: (string?)result["snippet"],
 				timestamp: (DateTime?)result["timestamp"],
 				titleSnippet: (string?)result["title"],
 				wordCount: (int?)result["wordcount"] ?? 0);

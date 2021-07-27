@@ -3,6 +3,7 @@
 	// TODO: See if the low-level parser (StackElement and derivatives) can be re-written to use a Node factory, then create a factory that aceepts Site and emits Site-specific wrappers around SiteTemplateNode and SiteLinkNode. This would vastly simplify a lot of the checking and inline conversion that's currently happening. In addition, SiteTemplateNode and SiteArgumentNode wrappers could add a settable CurrentValue property for use with the resolvers in this class.
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
@@ -111,7 +112,7 @@
 				if (this.Nodes[i] is SiteLinkNode link &&
 					link.TitleValue.Namespace == MediaWikiNamespaces.Category)
 				{
-					if (Title.FromBacklinkNode(this.Site, link) == catTitle)
+					if (Title.FromBacklinkNode(this.Site, link).SimpleEquals(catTitle))
 					{
 						return false;
 					}
@@ -151,39 +152,23 @@
 		/// <remarks>Adds text to the final node in the Nodes collection if it's an <see cref="ITextNode"/>; otherwise, creates a text node (via the factory) with the specified text and adds it to the Nodes collection.</remarks>
 		public void AppendText(string text) => this.Nodes.AddText(text);
 
-		/// <summary>Finds the the first link that matches the provided title.</summary>
+		/// <summary>Finds the first link that matches the provided title.</summary>
 		/// <param name="find">The title to find.</param>
 		/// <returns>The first <see cref="SiteLinkNode"/> that matches the title provided, if found.</returns>
 		/// <remarks>The text provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="ISimpleTitle"/>.</remarks>
 		public SiteLinkNode? FindLink(string find) => this.FindLink(new TitleParser(this.Site, find));
 
-		/// <summary>Finds the the first link that matches the provided title.</summary>
+		/// <summary>Finds the first link that matches the provided title.</summary>
 		/// <param name="find">The title to find.</param>
 		/// <returns>The first <see cref="SiteLinkNode"/> that matches the title provided, if found.</returns>
 		/// <remarks>As with all <see cref="ISimpleTitle"/> comparisons, only namespace and page name are checked, so trying to find <c>NS:Page</c> will match <c>NS:Page#Fragment</c> and vice versa. To match on the full title in the link, including any interwiki or fragment information, use the overload that takes an <see cref="IFullTitle"/>.</remarks>
-		public SiteLinkNode? FindLink(ISimpleTitle find)
-		{
-			foreach (var link in this.FindLinks(find))
-			{
-				return link;
-			}
+		public SiteLinkNode? FindLink(ISimpleTitle find) => this.FindLinks(find).FirstOrDefault();
 
-			return null;
-		}
-
-		/// <summary>Finds the the first link that matches the provided title.</summary>
+		/// <summary>Finds the first link that matches the provided title.</summary>
 		/// <param name="find">The title to find.</param>
 		/// <returns>The first <see cref="SiteLinkNode"/> that matches the title provided, if found.</returns>
 		/// <remarks>The title provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="ISimpleTitle"/>.</remarks>
-		public SiteLinkNode? FindLink(IFullTitle find)
-		{
-			foreach (var link in this.FindLinks(find))
-			{
-				return link;
-			}
-
-			return null;
-		}
+		public SiteLinkNode? FindLink(IFullTitle find) => this.FindLinks(find).FirstOrDefault();
 
 		/// <summary>Finds all links that match the provided title.</summary>
 		/// <param name="find">The title to find.</param>
@@ -223,18 +208,10 @@
 			}
 		}
 
-		/// <summary>Finds the the first template that matches the provided title.</summary>
+		/// <summary>Finds the first template that matches the provided title.</summary>
 		/// <param name="templateName">The name of the template to find.</param>
 		/// <returns>The first <see cref="SiteTemplateNode"/> that matches the title provided, if found.</returns>
-		public SiteTemplateNode? FindTemplate(string templateName)
-		{
-			foreach (var link in this.FindTemplates(templateName))
-			{
-				return link;
-			}
-
-			return default;
-		}
+		public SiteTemplateNode? FindTemplate(string templateName) => this.FindTemplates(templateName).FirstOrDefault();
 
 		/// <summary>Finds all templates that match the provided title.</summary>
 		/// <param name="templateName">The name of the template to find.</param>

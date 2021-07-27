@@ -21,10 +21,9 @@
 		#endregion
 
 		#region Static Fields
-		private static readonly string[] DestructionTypes = { "Frost", "Shock", "Fire" };
-
-		private static readonly SortedList<string, string> IconNameCache = new(StringComparer.Ordinal);
 		private static readonly HashSet<string> DestructionExceptions = new(StringComparer.Ordinal) { "Destructive Touch", "Impulse", "Wall of Elements" };
+		private static readonly string[] DestructionTypes = { "Frost", "Shock", "Fire" };
+		private static readonly SortedList<string, string> IconNameCache = new(StringComparer.Ordinal);
 		#endregion
 
 		#region Fields

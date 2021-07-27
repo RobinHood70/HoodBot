@@ -27,15 +27,17 @@
 		/// <summary>Creates property modules from the provided inputs.</summary>
 		/// <param name="propertyInputs">The property inputs.</param>
 		/// <returns>A set of modules that corresponds to the provided inputs.</returns>
+		/// <exception cref="KeyNotFoundException">Thrown when the one or more of the property modules requested could not be found.</exception>
 		public IEnumerable<IPropertyModule> CreateModules(IEnumerable<IPropertyInput> propertyInputs)
 		{
 			if (propertyInputs != null)
 			{
 				foreach (var propertyInput in propertyInputs)
 				{
-					yield return this.properties.TryGetValue(propertyInput.GetType(), out var factoryMethod)
+					var retval = this.properties.TryGetValue(propertyInput.GetType(), out var factoryMethod)
 						? factoryMethod(this.wal, propertyInput)
-						: throw new EntryPointNotFoundException(CurrentCulture(Properties.EveMessages.ParameterInvalid, nameof(this.CreateModules), propertyInput.GetType().Name));
+						: throw new KeyNotFoundException(CurrentCulture(Properties.EveMessages.ParameterInvalid, nameof(this.CreateModules), propertyInput.GetType().Name));
+					yield return retval;
 				}
 			}
 		}

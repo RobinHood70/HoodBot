@@ -14,6 +14,7 @@
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
+	using static RobinHood70.WallE.Eve.Exceptions;
 
 	/// <summary>Extensions that help with parsing JSON data returned by WallE.Eve.</summary>
 	/// <remarks>These extensions are made public to allow external classes to use the same methods as are used internally. Note that some of these methods are highly specific, but are nevertheless available here for the sake of simplicity, since multiple modules use them. Most methods will gracefully handle <see langword="null"/> tokens, typically by returning a null result. The parameter nullability indicates which is expected; those methods which expect a non-null token will also note that in the remarks.</remarks>
@@ -22,15 +23,28 @@
 		#region Enum Methods
 
 		/// <summary>Gets a series of flag nodes, regardless of format version.</summary>
-		/// <typeparam name="T">The enumeration type. Should normally be inferred.</typeparam>
+		/// <typeparam name="T">The enumeration type.</typeparam>
 		/// <param name="value">The flags to modify.</param>
 		/// <param name="token">The token to examine. (Will be searched for the "case" value.</param>
 		/// <param name="flag">The flag to be added if the "case" value evaluates to "case-sensitive".</param>
 		/// <returns>The modified enumeration value.</returns>
 		public static T AddCaseFlag<T>(this T value, JToken token, T flag)
-			where T : Enum => token == null ? value : string.Equals((string?)token["case"], "case-sensitive", StringComparison.Ordinal)
-				? (T)Enum.ToObject(typeof(T), Convert.ToUInt64(value, CultureInfo.InvariantCulture) | Convert.ToUInt64(flag, CultureInfo.InvariantCulture))
-				: value;
+			where T : Enum
+		{
+			if (token == null)
+			{
+				return value;
+			}
+
+			if (string.Equals((string?)token["case"], "case-sensitive", StringComparison.Ordinal))
+			{
+				var longVal = Convert.ToUInt64(value, CultureInfo.InvariantCulture);
+				var longFlag = Convert.ToUInt64(flag, CultureInfo.InvariantCulture);
+				return (T)Enum.ToObject(typeof(T), longVal | longFlag);
+			}
+
+			return value;
+		}
 		#endregion
 
 		#region JToken Methods
@@ -40,9 +54,13 @@
 		/// <returns><see langword="true"/> if the token provided is <c>true</c> or an empty string; <see langword="false"/> if the token is <c>false</c> or null.</returns>
 		/// <exception cref="WikiException">The node data was not convertible to a boolean value.</exception>
 		public static bool GetBCBool(this JToken? token) =>
-					token != null && (token.Type == JTokenType.Boolean ? (bool)token :
-					token.Type == JTokenType.String ? true :
-					throw MalformedException((token as JProperty)?.Name ?? FallbackText.Unknown, token));
+			token?.Type switch
+			{
+				JTokenType.Boolean => (bool)token,
+				JTokenType.String => true,
+				null => false,
+				_ => throw MalformedException((token as JProperty)?.Name ?? FallbackText.Unknown, token)
+			};
 
 		/// <summary>Gets a dictionary of string keys and values from the current token, regardless of format version.</summary>
 		/// <param name="token">The token to examine.</param>
@@ -75,25 +93,30 @@
 		/// <param name="token">The token to examine.</param>
 		/// <returns>The current JToken node or the "*" subnode of it.</returns>
 		/// <remarks>The naming is taken from MediaWiki's ApiResult::META_BC_SUBELEMENTS.</remarks>
-		public static JToken? GetBCSubElements(this JToken? token) => token != null && token.Type == JTokenType.Object ? token["*"] : token;
+		public static JToken? GetBCSubElements(this JToken? token) => token?.Type == JTokenType.Object ? token["*"] : token;
 
 		/// <summary>Gets a date from the current token.</summary>
 		/// <param name="token">The token to examine.</param>
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>System.DateTime.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when the token has an empty date value.</exception>
+		/// <exception cref="WikiException">Thrown when the value of the token is not a recognized date format.</exception>
 		public static DateTime GetDate(this JToken? token, [CallerMemberName] string caller = FallbackText.Unknown)
 		{
+			static DateTime? ParseWikiDate(string date) => (
+				DateTime.TryParse(date, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var retval) ||
+				DateTime.TryParseExact(date, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out retval))
+					? retval
+					: null;
+
 			var date = (string?)token;
-			return date switch
+			var dateValue = date switch
 			{
 				null or "" => throw ArgumentNull(nameof(token)),
 				"indefinite" or "infinite" or "infinity" or "never" => DateTime.MaxValue,
-				_ => (
-					DateTime.TryParse(date, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var retval) ||
-					DateTime.TryParseExact(date, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out retval))
-						? retval
-						: throw MalformedTypeException(nameof(DateTime), token, caller),
+				_ => ParseWikiDate(date) ?? throw MalformedTypeException(nameof(DateTime), token, caller),
 			};
+			return dateValue;
 		}
 
 		/// <summary>Gets a standard code/info-formatted error.</summary>
@@ -110,9 +133,9 @@
 		/// <remarks>This is used for sub-structures, such as move results, where the code/info nodes have prefixes.</remarks>
 		[return: NotNullIfNotNull("token")]
 		public static ErrorItem? GetError(this JToken? token, string codeName, string infoName) =>
-			token == null ? null :
-			token[codeName] == null ? null :
-			new ErrorItem(token.MustHaveString(codeName), token.MustHaveString(infoName));
+			token == null || token[codeName] == null
+				? null
+				: new ErrorItem(token.MustHaveString(codeName), token.MustHaveString(infoName));
 
 		/// <summary>Gets multiple error item nodes.</summary>
 		/// <param name="token">The token to examine.</param>
@@ -274,6 +297,7 @@
 		/// <param name="token">The token to examine.</param>
 		/// <returns>A <see cref="RevisionItem"/>.</returns>
 		/// <remarks>The token provided must not be <see langword="null"/>.</remarks>
+		/// <exception cref="ChecksumException">Thrown when the SHA-1 checksum does not match the text of the revision.</exception>
 		public static RevisionItem GetRevision(this JToken token)
 		{
 			ThrowNull(token, nameof(token));
@@ -343,13 +367,15 @@
 		/// <returns>A <see cref="Dictionary{TKey, TValue}"/> with a <see cref="string"/> key and values of the specified type.</returns>
 		public static IReadOnlyDictionary<string, TValue> GetStringDictionary<TValue>(this JToken? token)
 		{
-			var dict = new Dictionary<string, TValue>(StringComparer.Ordinal);
-			if (token != null)
+			if (token == null)
 			{
-				foreach (var item in token.Children<JProperty>())
-				{
-					dict.Add(item.Name, item.Value.ToObject<TValue>()!);
-				}
+				return ImmutableDictionary<string, TValue>.Empty;
+			}
+
+			var dict = new Dictionary<string, TValue>(StringComparer.Ordinal);
+			foreach (var item in token.Children<JProperty>())
+			{
+				dict.Add(item.Name, item.Value.ToObject<TValue>()!);
 			}
 
 			return dict;
@@ -359,30 +385,38 @@
 		/// <param name="token">The token to examine.</param>
 		/// <returns>An <see cref="UserItem"/> to be passed to the derived user object.</returns>
 		/// <remarks>The token provided must not be <see langword="null"/>.</remarks>
+		/// <exception cref="WikiException">Thrown when the user rights token is not in either of the expected formats.</exception>
 		public static UserItem GetUser(this JToken token)
 		{
 			ThrowNull(token, nameof(token));
 
 			// Somewhere prior to 1.22, rights lists could be returned as a numbered key-value pair instead of a straight-forward string array, so this handles that situation and converts it to the expected type.
-			var userRights =
-				token["rights"] is not JToken rights
-					? null :
-				rights.Type == JTokenType.Array
-					? rights.GetList<string>() :
-				rights.ToObject<Dictionary<int, string>>() is Dictionary<int, string> dict
-					? dict.Values.AsReadOnlyList()
-					: throw MalformedTypeException("rights", token);
+			IReadOnlyList<string>? userRights = null;
+			if (token["rights"] is JToken rights)
+			{
+				if (rights.Type == JTokenType.Array)
+				{
+					userRights = rights.GetList<string>();
+				}
+				else
+				{
+					var dict = rights.ToObject<Dictionary<int, string>>();
+					userRights = dict != null
+						? dict.Values.AsReadOnlyList()
+						: throw MalformedTypeException("rights", token);
+				}
+			}
 
 			return new UserItem(
 				userId: (long?)(token["userid"] ?? token["id"]) ?? 0,
 				name: token.MustHaveString("name"),
+				blockedBy: (string?)token["blockedby"],
+				blockedById: (long?)token["blockedbyid"] ?? 0,
 				blockExpiry: token["blockexpiry"].GetNullableDate(),
 				blockHidden: token["hidden"].GetBCBool(),
 				blockId: (long?)token["blockid"] ?? 0,
 				blockReason: (string?)token["blockreason"],
 				blockTimestamp: (DateTime?)token["blockedtimestamp"],
-				blockedBy: (string?)token["blockedby"],
-				blockedById: (long?)token["blockedbyid"] ?? 0,
 				editCount: (long?)token["editcount"] ?? 0,
 				groups: token["groups"].GetList<string>(),
 				implicitGroups: token["implicitgroups"].GetList<string>(),
@@ -412,6 +446,7 @@
 		/// <param name="token">The token to examine.</param>
 		/// <returns>A <see cref="WikiTitleItem"/>.</returns>
 		/// <remarks>The token provided must not be <see langword="null"/>.</remarks>
+		/// <exception cref="ArgumentNullException">Thrown when the token is null.</exception>
 		public static WikiTitleItem GetWikiTitle(this JToken token) => token == null
 			? throw ArgumentNull(nameof(token))
 			: new WikiTitleItem(
@@ -432,6 +467,7 @@
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>A <see cref="string"/> representing the value in the node.</returns>
 		/// <remarks>The token provided must not be <see langword="null"/> (either the token itself or the string value).</remarks>
+		/// <exception cref="WikiException">Thrown when the token cannot be converted to a string.</exception>
 		public static string MustBeString(this JToken token, [CallerMemberName] string caller = FallbackText.Unknown) => (string?)token ?? throw MalformedTypeException(nameof(String), token, caller);
 
 		/// <summary>Ensures that the token has a subnode with the given name and returns it.</summary>
@@ -439,6 +475,7 @@
 		/// <param name="name">The name to check.</param>
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>The named subnode.</returns>
+		/// <exception cref="WikiException">Thrown when the token does not have a field with the specified name.</exception>
 		public static JToken MustHave(this JToken token, string name, [CallerMemberName] string caller = FallbackText.Unknown) => token?[name] ?? throw MalformedException(name, token, caller);
 
 		/// <summary>Ensures that the token has a non-null string node with either the given name or "*", and returns the value of that node.</summary>
@@ -446,6 +483,7 @@
 		/// <param name="name">The name.</param>
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>The value <see cref="string"/>.</returns>
+		/// <exception cref="WikiException">Thrown when the token does not have a string value at either the named location or in the "*" entry.</exception>
 		public static string MustHaveBCString(this JToken token, string name, [CallerMemberName] string caller = FallbackText.Unknown)
 		{
 			ThrowNull(token, nameof(token));
@@ -458,6 +496,7 @@
 		/// <param name="name">The name.</param>
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>System.DateTime.</returns>
+		/// <exception cref="WikiException">Thrown when the token does not have a date value at the named location.</exception>
 		public static DateTime MustHaveDate(this JToken token, string name, [CallerMemberName] string caller = FallbackText.Unknown)
 		{
 			ThrowNull(token, nameof(token));
@@ -478,6 +517,7 @@
 		/// <param name="name">The name.</param>
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>A <see cref="string"/> with the value of the node.</returns>
+		/// <exception cref="WikiException">Thrown when the token does not have a string value at the named location.</exception>
 		public static string MustHaveString(this JToken token, string name, [CallerMemberName] string caller = FallbackText.Unknown)
 		{
 			ThrowNull(token, nameof(token));
@@ -531,36 +571,6 @@
 
 			return request;
 		}
-		#endregion
-
-		#region Exception Methods (not extensions)
-
-		/// <summary>
-		/// Malformeds the exception.
-		/// </summary>
-		/// <param name="name">The name.</param>
-		/// <param name="token">The token with the bad data.</param>
-		/// <param name="caller">The caller name (automatically populated).</param>
-		/// <returns>RobinHood70.WallE.Design.WikiException.</returns>
-		// These methods are not extensions, but are placed in this class as useful but not warranting a class of their own yet.
-		public static WikiException MalformedException(string name, JToken? token, [CallerMemberName] string caller = FallbackText.Unknown) => new(CurrentCulture(EveMessages.MalformedData, name, token?.Path ?? FallbackText.Unknown, caller));
-
-		/// <summary>
-		/// Malformeds the type exception.
-		/// </summary>
-		/// <param name="typeName">Name of the type.</param>
-		/// <param name="token">The token.</param>
-		/// <param name="caller">The caller name (automatically populated).</param>
-		/// <returns>RobinHood70.WallE.Design.WikiException.</returns>
-		public static WikiException MalformedTypeException(string typeName, JToken? token, [CallerMemberName] string caller = FallbackText.Unknown) => new(CurrentCulture(EveMessages.MalformedDataType, typeName, token?.Path ?? FallbackText.Unknown, caller));
-
-		/// <summary>The error thrown when a parameter could not be cast to the expected type.</summary>
-		/// <param name="parameterName">Name of the parameter.</param>
-		/// <param name="wantedType">The type that was wanted.</param>
-		/// <param name="actualType">The actual type of the parameter passed.</param>
-		/// <param name="caller">The caller.</param>
-		/// <returns>An <see cref="InvalidCastException"/>.</returns>
-		public static InvalidCastException InvalidParameterType(string parameterName, string wantedType, string actualType, [CallerMemberName] string caller = FallbackText.Unknown) => new(CurrentCulture(EveMessages.ParameterInvalidCast, parameterName, caller, actualType, wantedType));
 		#endregion
 	}
 }

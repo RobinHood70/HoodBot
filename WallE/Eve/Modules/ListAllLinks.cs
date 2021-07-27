@@ -7,15 +7,9 @@
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
-	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ListAllLinks : ListModule<IAllLinksInput, AllLinksItem>, IGeneratorModule
 	{
-		#region Fields
-		private readonly string prefix;
-		private readonly string name;
-		#endregion
-
 		#region Constructors
 		public ListAllLinks(WikiAbstractionLayer wal, IAllLinksInput input)
 			: this(wal, input, null)
@@ -23,7 +17,7 @@
 		}
 
 		public ListAllLinks(WikiAbstractionLayer wal, IAllLinksInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator) => (this.prefix, this.name) = input.LinkType switch
+			: base(wal, input, pageSetGenerator) => (this.Prefix, this.Name) = input.LinkType switch
 			{
 				AllLinksTypes.Links => ("al", "alllinks"),
 				AllLinksTypes.FileUsages => ("af", "allfileusages"),
@@ -36,11 +30,11 @@
 		#region Public Override Properties
 		public override int MinimumVersion => 111;
 
-		public override string Name => this.name;
+		public override string Name { get; }
 		#endregion
 
 		#region Protected Override Properties
-		protected override string Prefix => this.prefix;
+		protected override string Prefix { get; }
 		#endregion
 
 		#region Public Static Methods
@@ -69,7 +63,7 @@
 				.Add("limit", this.Limit);
 		}
 
-		protected override AllLinksItem? GetItem(JToken result) => result == null || !result.HasValues
+		protected override AllLinksItem? GetItem(JToken result) => result?.HasValues != true
 			? null
 			: new AllLinksItem(
 				ns: (int?)result["ns"],

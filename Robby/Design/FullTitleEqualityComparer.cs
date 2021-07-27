@@ -6,7 +6,7 @@
 
 	/// <summary>An ISimpleTitle equality comparer to determine equality based on the Namespace and PageName only.</summary>
 	/// <seealso cref="EqualityComparer{T}" />
-	public class FullTitleEqualityComparer : IEqualityComparer<IFullTitle>, IEqualityComparer
+	public sealed class FullTitleEqualityComparer : IEqualityComparer<IFullTitle>, IEqualityComparer
 	{
 		#region Constructors
 		private FullTitleEqualityComparer()

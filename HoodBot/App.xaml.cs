@@ -19,9 +19,9 @@
 		#region Static Fields
 		// Although this is IDisposable, we don't implement IDisposable here, instead using the OnStartup and OnExit methods to effectively do the same thing.
 		private static readonly IHost AppHost = Host
-				.CreateDefaultBuilder()
-				.ConfigureServices((context, services) => ConfigureServices(context.Configuration, services))
-				.Build();
+			.CreateDefaultBuilder()
+			.ConfigureServices((context, services) => ConfigureServices(context.Configuration, services))
+			.Build();
 		#endregion
 
 		#region Public Static Properties
@@ -53,7 +53,7 @@
 		#region Protected Override Methods
 		protected override async void OnExit(ExitEventArgs e)
 		{
-			await AppHost.StopAsync(TimeSpan.FromSeconds(5));
+			await AppHost.StopAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(true);
 			AppHost.Dispose();
 			Settings.Save(UserSettings);
 			base.OnExit(e);
@@ -61,7 +61,7 @@
 
 		protected override async void OnStartup(StartupEventArgs e)
 		{
-			await AppHost.StartAsync();
+			await AppHost.StartAsync().ConfigureAwait(true);
 			base.OnStartup(e);
 			AppHost.Services.GetRequiredService<MainWindow>().Show();
 		}

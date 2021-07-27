@@ -42,8 +42,8 @@
 				}
 			}
 
-			this.families.Sort((x, y) => string.Compare(x.Sort, y.Sort, StringComparison.Ordinal));
-			this.enemies.Sort((x, y) => string.Compare(x.Sort, y.Sort, StringComparison.Ordinal));
+			this.families.Sort((x, y) => string.CompareOrdinal(x.Sort, y.Sort));
+			this.enemies.Sort((x, y) => string.CompareOrdinal(x.Sort, y.Sort));
 
 			using var output = File.CreateText(UespSite.GetBotDataFolder("Enemies.txt"));
 			foreach (var family in this.families)
@@ -583,7 +583,9 @@
 			#region Public Methods
 			public string Build() => this.Variants.Count == 0 ? string.Empty : new StringBuilder()
 				.Append(this.Name)
-				.Append("  |lvl=").AppendLine(string.Join(", ", this.Variants))
+				.Append("  |lvl=")
+				.AppendJoin(", ", this.Variants)
+				.AppendLine()
 				.ToString();
 			#endregion
 

@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
+	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
@@ -31,9 +32,16 @@
 	}
 	#endregion
 
+	// TODO: Convert this to a Record and rewrite all classes deriving from it (possibly using interfaces with a composite structure, i.e. has a Title rather than is a Title). Consider splitting into a simple NS/Name vs. full Title design, or something similar, so things like SubjectPage/TalkPage can be created without special considerations for Titles within Titles.
+
 	/// <summary>Provides a light-weight holder for titles with several information and manipulation functions.</summary>
 	public class Title : IMessageSource, ISimpleTitle
 	{
+		#region Fields
+		private Title subjectPage;
+		private Title? talkPage;
+		#endregion
+
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="Title" /> class.</summary>
@@ -89,9 +97,9 @@
 		/// <summary>Gets a Title object for title Title's corresponding subject page.</summary>
 		/// <returns>The subject page.</returns>
 		/// <remarks>If title Title is a subject page, returns itself.</remarks>
-		public Title SubjectPage =>
-			this.Namespace.IsSubjectSpace ? this :
-			new Title(this.Namespace.SubjectSpace, this.PageName);
+		public Title SubjectPage => this.subjectPage ??= this.Namespace.IsSubjectSpace
+			? this
+			: new Title(this.Namespace.SubjectSpace, this.PageName);
 
 		/// <summary>Gets the value corresponding to {{SUBPAGENAME}}.</summary>
 		/// <returns>The name of the subpage.</returns>
@@ -105,7 +113,7 @@
 		/// <summary>Gets a Title object for title Title's corresponding subject page.</summary>
 		/// <returns>The talk page.</returns>
 		/// <remarks>If this object represents a talk page, returns a self-reference.</remarks>
-		public Title? TalkPage =>
+		public Title? TalkPage => this.talkPage ??=
 			this.Namespace.TalkSpace == null ? null :
 			this.Namespace.IsTalkSpace ? this :
 			new Title(this.Namespace.TalkSpace, this.PageName);
@@ -113,21 +121,6 @@
 		/// <summary>Gets the site to which this title belongs.</summary>
 		/// <value>The site.</value>
 		public Site Site => this.Namespace.Site;
-		#endregion
-
-		#region Operators
-
-		/// <summary>Implements the operator ==.</summary>
-		/// <param name="left">The left-hand side of the comparison.</param>
-		/// <param name="right">The right-hand side of the comparison.</param>
-		/// <returns><see langword="true"/> if string is equal to any of the names representing the namespace.</returns>
-		public static bool operator ==(Title? left, Title? right) => left is null ? right is null : left.Equals(right);
-
-		/// <summary>Implements the operator !=.</summary>
-		/// <param name="left">The left-hand side of the comparison.</param>
-		/// <param name="right">The right-hand side of the comparison.</param>
-		/// <returns><see langword="true"/> if the namespace Site or Id are not equal.</returns>
-		public static bool operator !=(Title? left, Title? right) => !(left == right);
 		#endregion
 
 		#region Public Static Methods
@@ -239,17 +232,21 @@
 		public ChangeStatus Delete(string reason)
 		{
 			ThrowNull(reason, nameof(reason));
-			return this.Site.PublishChange(
-				this,
-				new Dictionary<string, object?>(StringComparer.Ordinal)
-				{
-					[nameof(reason)] = reason,
-				},
-				() =>
-				{
-					var input = new DeleteInput(this.FullPageName) { Reason = reason };
-					return this.Site.AbstractionLayer.Delete(input).LogId == 0 ? ChangeStatus.Failure : ChangeStatus.Success;
-				});
+			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			{
+				[nameof(reason)] = reason,
+			};
+
+			return this.Site.PublishChange(this, parameters, ChangeFunc);
+
+			ChangeStatus ChangeFunc()
+			{
+				var input = new DeleteInput(this.FullPageName) { Reason = reason };
+				var retval = this.Site.AbstractionLayer.Delete(input);
+				return retval.LogId == 0
+					? ChangeStatus.Failure
+					: ChangeStatus.Success;
+			}
 		}
 
 		/// <inheritdoc/>
@@ -290,84 +287,84 @@
 		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
 		/// <remarks>The original title object will remain unaltered after the move; it will not be updated to reflect the destination.</remarks>
+		/// <exception cref="InvalidOperationException">Thrown when either the From page or the To page from the Move result is null.</exception>
 		public ChangeValue<IDictionary<string, string>> Move(string to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
 		{
-			const string subPageName = "/SubPage";
-
 			ThrowNull(to, nameof(to));
 			ThrowNull(reason, nameof(reason));
-			var fakeResult = new Dictionary<string, string>(StringComparer.Ordinal);
+			const string subPageName = "/SubPage";
+			var disabledResult = new Dictionary<string, string>(StringComparer.Ordinal);
 			if (!this.Site.EditingEnabled)
 			{
-				fakeResult.Add(this.FullPageName, to);
-				var talkPage = this.TalkPage;
-				if (moveTalk && talkPage != null)
+				disabledResult.Add(this.FullPageName, to);
+				var talk = this.TalkPage;
+				if (moveTalk && talk is not null)
 				{
 					var toPage = FromName(this.Site, to);
 					if (toPage.TalkPage is Title toTalk)
 					{
-						fakeResult.Add(talkPage.FullPageName, toTalk.FullPageName);
+						disabledResult.Add(talk.FullPageName, toTalk.FullPageName);
 					}
 				}
 
 				if (moveSubpages && this.Namespace.AllowsSubpages)
 				{
 					var toSubPage = FromName(this.Site, to + subPageName);
-					fakeResult.Add(this.FullPageName + subPageName, toSubPage.FullPageName);
+					disabledResult.Add(this.FullPageName + subPageName, toSubPage.FullPageName);
 				}
 			}
 
-			return this.Site.PublishChange(
-				fakeResult,
-				this,
-				new Dictionary<string, object?>(StringComparer.Ordinal)
-				{
-					[nameof(to)] = to,
-					[nameof(reason)] = reason,
-					[nameof(moveTalk)] = moveTalk,
-					[nameof(moveSubpages)] = moveSubpages,
-					[nameof(suppressRedirect)] = suppressRedirect,
-				},
-				() =>
-				{
-					var input = new MoveInput(this.FullPageName, to)
-					{
-						IgnoreWarnings = true,
-						MoveSubpages = moveSubpages,
-						MoveTalk = moveTalk,
-						NoRedirect = suppressRedirect,
-						Reason = reason
-					};
+			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			{
+				[nameof(to)] = to,
+				[nameof(reason)] = reason,
+				[nameof(moveTalk)] = moveTalk,
+				[nameof(moveSubpages)] = moveSubpages,
+				[nameof(suppressRedirect)] = suppressRedirect,
+			};
 
-					var status = ChangeStatus.Success;
-					var dict = new Dictionary<string, string>(StringComparer.Ordinal);
-					try
+			return this.Site.PublishChange(disabledResult, this, parameters, ChangeFunc);
+
+			ChangeValue<IDictionary<string, string>> ChangeFunc()
+			{
+				var input = new MoveInput(this.FullPageName, to)
+				{
+					IgnoreWarnings = true,
+					MoveSubpages = moveSubpages,
+					MoveTalk = moveTalk,
+					NoRedirect = suppressRedirect,
+					Reason = reason
+				};
+
+				var status = ChangeStatus.Success;
+				var dict = new Dictionary<string, string>(StringComparer.Ordinal);
+				try
+				{
+					var retval = this.Site.AbstractionLayer.Move(input);
+					foreach (var item in retval)
 					{
-						var result = this.Site.AbstractionLayer.Move(input);
-						foreach (var item in result)
+						if (item.Error != null)
 						{
-							if (item.Error != null)
-							{
-								this.Site.PublishWarning(this, CurrentCulture(Resources.MovePageWarning, this.FullPageName, to, item.Error.Info));
-							}
-							else if (item.From != null && item.To != null)
-							{
-								dict.Add(item.From, item.To);
-							}
-							else
-							{
-								throw new InvalidOperationException(); // item.From and/or item.To was null.
-							}
+							this.Site.PublishWarning(this, CurrentCulture(Resources.MovePageWarning, this.FullPageName, to, item.Error.Info));
+						}
+						else if (item.From != null && item.To != null)
+						{
+							dict.Add(item.From, item.To);
+						}
+						else
+						{
+							throw new InvalidOperationException(); // item.From and/or item.To was null.
 						}
 					}
-					catch (WikiException e)
-					{
-						this.Site.PublishWarning(this, e.Info ?? e.Message);
-						status = ChangeStatus.Failure;
-					}
+				}
+				catch (WikiException e)
+				{
+					this.Site.PublishWarning(this, e.Info ?? e.Message);
+					status = ChangeStatus.Failure;
+				}
 
-					return new ChangeValue<IDictionary<string, string>>(status, dict);
-				});
+				return new ChangeValue<IDictionary<string, string>>(status, dict);
+			}
 		}
 
 		/// <summary>Moves the title to the name specified.</summary>
@@ -542,35 +539,44 @@
 		#region Private Static Methods
 
 		// A dictionary is probably overkill for three items.
-		private static string ProtectionWord(ProtectionLevel level) =>
-			level == ProtectionLevel.None ? "all" :
-			level == ProtectionLevel.Semi ? "autoconfirmed" :
-			level == ProtectionLevel.Full ? "sysop" :
-			throw new ArgumentOutOfRangeException(nameof(level));
+		private static string ProtectionWord(ProtectionLevel level) => level switch
+		{
+			ProtectionLevel.None => "all",
+			ProtectionLevel.Semi => "autoconfirmed",
+			ProtectionLevel.Full => "sysop",
+			_ => throw new ArgumentOutOfRangeException(nameof(level))
+		};
 		#endregion
 
 		#region Private Methods
 		private ChangeStatus Protect(string reason, ICollection<ProtectInputItem> protections)
 		{
 			ThrowNull(reason, nameof(reason));
-			return protections.Count == 0 ? ChangeStatus.NoEffect :
-				this.Site.PublishChange(
-					this,
-					new Dictionary<string, object?>(StringComparer.Ordinal)
-					{
-						[nameof(reason)] = reason,
-						[nameof(protections)] = protections,
-					},
-					() =>
-					{
-						var input = new ProtectInput(this.FullPageName)
-						{
-							Protections = protections,
-							Reason = reason
-						};
+			if (protections.Count == 0)
+			{
+				return ChangeStatus.NoEffect;
+			}
 
-						return this.Protect(input) ? ChangeStatus.Success : ChangeStatus.Failure;
-					});
+			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			{
+				[nameof(reason)] = reason,
+				[nameof(protections)] = protections,
+			};
+
+			return this.Site.PublishChange(this, parameters, ChangeFunc);
+
+			ChangeStatus ChangeFunc()
+			{
+				var input = new ProtectInput(this.FullPageName)
+				{
+					Protections = protections,
+					Reason = reason
+				};
+
+				return this.Protect(input)
+					? ChangeStatus.Success
+					: ChangeStatus.Failure;
+			}
 		}
 		#endregion
 	}

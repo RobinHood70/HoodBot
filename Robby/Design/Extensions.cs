@@ -61,13 +61,15 @@
 		{
 			ThrowNull(title, nameof(title));
 			var sb = new StringBuilder(title.Namespace.LinkName.Length + 5 + (title.PageName.Length << 1));
-			sb.Append("[[");
-			sb.Append(title.Namespace.LinkName);
-			sb.Append(title.PageName);
+			sb
+				.Append("[[")
+				.Append(title.Namespace.LinkName)
+				.Append(title.PageName);
 			if (friendly)
 			{
-				sb.Append('|');
-				sb.Append(LabelName(title));
+				sb
+					.Append('|')
+					.Append(LabelName(title));
 			}
 
 			sb.Append("]]");

@@ -71,7 +71,7 @@
 		}
 
 		protected override BlockResult DeserializeCustom(string? result) =>
-			result != null && result.Contains("must be an instance of Block", StringComparison.OrdinalIgnoreCase)
+			result?.Contains("must be an instance of Block", StringComparison.OrdinalIgnoreCase) == true
 				? throw WikiException.General("reblock-failed", EveMessages.ReblockFailed) // Throw a custom error, since MW 1.25 and under handle this incorrectly.
 				: base.DeserializeCustom(result);
 		#endregion

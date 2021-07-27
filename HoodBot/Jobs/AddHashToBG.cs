@@ -23,15 +23,13 @@
 			ThrowNull(parsedPage, nameof(parsedPage));
 			foreach (var template in parsedPage.TemplateNodes)
 			{
-				if (template.Parameters.Count >= 1)
+				if (template.Parameters.Count >= 1 &&
+					template.Find(1) is IParameterNode parameter &&
+					parameter.Value.ToValue() is string hex &&
+					hex.Length == 6 &&
+					int.TryParse(hex, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out _))
 				{
-					if (template.Find(1) is IParameterNode parameter
-						&& parameter.Value.ToValue() is string hex
-						&& hex.Length == 6
-						&& int.TryParse(hex, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out _))
-					{
-						parameter.SetValue("#" + hex);
-					}
+					parameter.SetValue("#" + hex);
 				}
 			}
 		}

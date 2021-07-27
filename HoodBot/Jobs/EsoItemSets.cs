@@ -18,11 +18,13 @@
 
 	internal sealed class EsoItemSets : EditJob
 	{
-		#region Static Fields
-		private static readonly string Query =
+		#region Private Constants
+		private const string Query =
 			"SELECT id, setName, setBonusDesc1, setBonusDesc2, setBonusDesc3, setBonusDesc4, setBonusDesc5, setBonusDesc6, setBonusDesc7\n" +
 			"FROM setSummary\n";
+		#endregion
 
+		#region Static Fields
 		private static readonly Dictionary<string, string> TitleOverrides = new(StringComparer.Ordinal)
 		{
 			// Title Overrides should only be necessary when creating new disambiguated "(set)" pages or when pages don't conform to the base/base (set) style. While this could be done programatically, it's probably best not to, so that a human has verified that the page really should be created and that the existing page isn't malformed or something.
@@ -74,7 +76,7 @@
 			this.Pages.PageLoaded -= this.SetLoaded;
 
 			// Needs to be after update, since update modifies item's IsNonTrivial property.
-			allSets.Sort((item, item2) => string.Compare(item.Name, item2.Name, StringComparison.Ordinal));
+			allSets.Sort((item, item2) => string.CompareOrdinal(item.Name, item2.Name));
 			this.GenerateReport(allSets);
 		}
 
@@ -167,7 +169,7 @@
 			var titles = new TitleCollection(this.Site);
 			foreach (var set in allSets)
 			{
-				if (set.Page == null)
+				if (set.Page is null)
 				{
 					foreach (var setName in set.AllNames)
 					{
@@ -324,13 +326,11 @@
 						foreach (var setName in set.AllNames)
 						{
 							var checkTitle = Title.FromName(this.Site, UespNamespaces.Online, setName);
-							if (setMembers.TryGetValue(checkTitle, out var foundPage))
+							if (setMembers.TryGetValue(checkTitle, out var foundPage) &&
+								foundPage.Exists)
 							{
-								if (foundPage.Exists)
-								{
-									set.Page = foundPage;
-									break;
-								}
+								set.Page = foundPage;
+								break;
 							}
 						}
 

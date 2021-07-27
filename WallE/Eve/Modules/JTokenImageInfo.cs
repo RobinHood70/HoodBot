@@ -79,14 +79,14 @@
 						var newItem = new ExtendedMetadataItem(value.GetStringDictionary<string>(), source, hidden);
 						dict.Add(name, newItem);
 					}
-					else
+					else if ((string?)value is string stringValue)
 					{
-						var stringValue = (string?)value;
-						if (stringValue != null)
+						var newDict = new Dictionary<string, string>(StringComparer.Ordinal)
 						{
-							var newDict = new Dictionary<string, string>(StringComparer.Ordinal) { [string.Empty] = stringValue };
-							dict.Add(name, new ExtendedMetadataItem(newDict, source, hidden));
-						}
+							[string.Empty] = stringValue
+						};
+
+						dict.Add(name, new ExtendedMetadataItem(newDict, source, hidden));
 					}
 				}
 			}
@@ -108,13 +108,9 @@
 
 					dict.Add(name, newDict);
 				}
-				else
+				else if ((string?)value is string stringValue)
 				{
-					var stringValue = (string?)value;
-					if (stringValue != null)
-					{
-						dict.Add(name, stringValue);
-					}
+					dict.Add(name, stringValue);
 				}
 			}
 		}

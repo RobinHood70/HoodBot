@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.Text;
 	using RobinHood70.CommonCode;
@@ -274,15 +275,13 @@
 		/// <remarks>Setting this option will remove any <see cref="Dimensions"/> parameter, and vice versa, since they are mutually exclusive. Both may be set simultaneously, however, if the link is parsed from existing text. In that case, if either is altered, the other will be removed.</remarks>
 		public double? Upright
 		{
-			get
+			get => this.GetValue(ParameterType.Upright) switch
 			{
-				var textValue = this.GetValue(ParameterType.Upright);
-				return
-					textValue == null ? null :
-					textValue.TrimEnd().Length == 0 ? 1 :
-					double.TryParse(textValue, NumberStyles.Any, this.Site.Culture, out var retval) ? retval :
-					double.NaN;
-			}
+				null => null,
+				string tv when tv.TrimEnd().Length == 0 => 1,
+				string tv when double.TryParse(tv, NumberStyles.Any, this.Site.Culture, out var retval) => retval,
+				_ => double.NaN
+			};
 
 			set
 			{
@@ -667,6 +666,7 @@
 		#region Private Methods
 		private string? GetValue(ParameterType name) => this.Parameters.TryGetValue(name, out var value) ? value.Value : null;
 
+		[SuppressMessage("Minor Code Smell", "S1643:Strings should not be concatenated using '+' in a loop", Justification = "Conditions within loop make concatenation very rare.")]
 		private void InitValue(string value)
 		{
 			ThrowNull(value, nameof(value));
@@ -674,14 +674,14 @@
 			if (!DirectValues.TryGetValue(parameter.Value, out var parameterType))
 			{
 				parameterType = ParameterType.Caption;
-				foreach (var paramValue in ImageParameterInfo)
+				foreach (var imgParamWord in ImageParameterInfo)
 				{
-					if (parameter.Value.StartsWith(paramValue.Before, StringComparison.Ordinal) && parameter.Value.EndsWith(paramValue.After, StringComparison.Ordinal))
+					if (parameter.Value.StartsWith(imgParamWord.Before, StringComparison.Ordinal) && parameter.Value.EndsWith(imgParamWord.After, StringComparison.Ordinal))
 					{
-						parameterType = paramValue.ParameterType;
-						parameter.Before += paramValue.Before;
-						parameter.Value = parameter.Value.Substring(paramValue.Before.Length, parameter.Value.Length - paramValue.Before.Length - paramValue.After.Length);
-						parameter.After = paramValue.After + parameter.After;
+						parameterType = imgParamWord.ParameterType;
+						parameter.Before += imgParamWord.Before;
+						parameter.Value = parameter.Value.Substring(imgParamWord.Before.Length, parameter.Value.Length - imgParamWord.Before.Length - imgParamWord.After.Length);
+						parameter.After = imgParamWord.After + parameter.After;
 						break;
 					}
 				}

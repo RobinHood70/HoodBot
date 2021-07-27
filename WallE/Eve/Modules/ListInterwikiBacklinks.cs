@@ -54,9 +54,9 @@
 			ns: (int)result.MustHave("ns"),
 			title: result.MustHaveString("title"),
 			pageId: (long)result.MustHave("pageid"),
-			isRedirect: result["redirect"].GetBCBool(),
 			iwPrefix: (string?)result["iwprefix"],
-			iwTitle: (string?)result["iwtitle"]);
+			iwTitle: (string?)result["iwtitle"],
+			isRedirect: result["redirect"].GetBCBool());
 		#endregion
 	}
 }

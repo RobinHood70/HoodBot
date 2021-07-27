@@ -5,12 +5,6 @@ namespace RobinHood70.WallE.Base
 
 	public class AllFileUsagesInput : IAllLinksInput
 	{
-		#region Constructors
-		public AllFileUsagesInput()
-		{
-		}
-		#endregion
-
 		#region Public Properties
 		public string? From { get; set; }
 

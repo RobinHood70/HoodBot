@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Collections.Immutable;
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
@@ -95,6 +96,10 @@
 		};
 		#endregion
 
+		#region Fields
+		private readonly List<ErrorItem> warnings = new();
+		#endregion
+
 		#region Public Events
 
 		/// <inheritdoc/>
@@ -140,15 +145,13 @@
 		public StopCheckMethods ValidStopCheckMethods { get; }
 
 		/// <inheritdoc/>
-		public IReadOnlyList<ErrorItem> Warnings { get; } = new List<ErrorItem>();
+		public IReadOnlyList<ErrorItem> Warnings => this.warnings;
 		#endregion
 
 		#region Public Methods
 
 		/// <inheritdoc/>
-		public void AddWarning(string code, string info)
-		{
-		}
+		public void AddWarning(string code, string info) => this.warnings.Add(new ErrorItem(code, info));
 
 		/// <inheritdoc/>
 		public IReadOnlyList<AllCategoriesItem> AllCategories(AllCategoriesInput input) => throw new NotImplementedException();
@@ -202,9 +205,7 @@
 		public bool ClearHasMessage() => true;
 
 		/// <inheritdoc/>
-		public void ClearWarnings()
-		{
-		}
+		public void ClearWarnings() => this.warnings.Clear();
 
 		/// <inheritdoc/>
 		public CompareResult Compare(CompareInput input) => throw new NotImplementedException();
@@ -219,9 +220,7 @@
 		public IReadOnlyList<DeletedRevisionsItem> DeletedRevisions(ListDeletedRevisionsInput input) => throw new NotImplementedException();
 
 		/// <inheritdoc/>
-		public void Download(DownloadInput input)
-		{
-		}
+		public void Download(DownloadInput input) => throw new NotImplementedException();
 
 		/// <inheritdoc/>
 		public EditResult Edit(EditInput input)
@@ -274,15 +273,30 @@
 		{
 			this.OnInitializing(new InitializingEventArgs(new SiteInfoInput(SiteInfoProperties.None)));
 
-			var siteInfo = new SiteInfoResult
-			{
-				General = SiteInfoGeneral,
-				Namespaces = SiteInfoNamespaces,
-				NamespaceAliases = SiteInfoNamespaceAliases,
-				InterwikiMap = SiteInfoInterwikiMap,
-				LagInfo = new List<SiteInfoLag>(),
-				MagicWords = new List<SiteInfoMagicWord>(),
-			};
+			var siteInfo = new SiteInfoResult(
+				general: SiteInfoGeneral,
+				defaultOptions: ImmutableDictionary<string, object>.Empty,
+				defaultSkin: null,
+				extensions: Array.Empty<SiteInfoExtensions>(),
+				extensionTags: Array.Empty<string>(),
+				fileExtensions: Array.Empty<string>(),
+				functionHooks: Array.Empty<string>(),
+				interwikiMap: SiteInfoInterwikiMap,
+				lagInfo: Array.Empty<SiteInfoLag>(),
+				languages: Array.Empty<SiteInfoLanguage>(),
+				libraries: Array.Empty<SiteInfoLibrary>(),
+				magicWords: new List<SiteInfoMagicWord>(),
+				namespaces: SiteInfoNamespaces,
+				namespaceAliases: SiteInfoNamespaceAliases,
+				protocols: Array.Empty<string>(),
+				restrictions: null,
+				rights: null,
+				subscribedHooks: Array.Empty<SiteInfoSubscribedHook>(),
+				skins: Array.Empty<SiteInfoSkin>(),
+				specialPageAliases: Array.Empty<SiteInfoSpecialPageAlias>(),
+				statistics: null,
+				userGroups: Array.Empty<SiteInfoUserGroup>(),
+				variables: Array.Empty<string>());
 
 			this.AllSiteInfo = siteInfo;
 			this.CurrentUserInfo ??= GetUser(0, "192.0.2.1");
@@ -318,9 +332,7 @@
 		}
 
 		/// <inheritdoc/>
-		public void Logout()
-		{
-		}
+		public void Logout() => throw new NotImplementedException();
 
 		/// <inheritdoc/>
 		public ManageTagsResult ManageTags(ManageTagsInput input) => throw new NotImplementedException();
@@ -335,9 +347,7 @@
 		public IReadOnlyList<OpenSearchItem> OpenSearch(OpenSearchInput input) => throw new NotImplementedException();
 
 		/// <inheritdoc/>
-		public void Options(OptionsInput input)
-		{
-		}
+		public void Options(OptionsInput input) => throw new NotImplementedException();
 
 		/// <inheritdoc/>
 		public IReadOnlyList<string> PagePropertyNames(PagePropertyNamesInput input) => throw new NotImplementedException();

@@ -13,11 +13,6 @@
 
 	internal sealed class ListBacklinks : ListModule<BacklinksInput, BacklinksItem>, IGeneratorModule
 	{
-		#region Fields
-		private readonly string prefix;
-		private readonly string name;
-		#endregion
-
 		#region Contructors
 		public ListBacklinks(WikiAbstractionLayer wal, BacklinksInput input)
 			: this(wal, input, null)
@@ -25,7 +20,7 @@
 		}
 
 		public ListBacklinks(WikiAbstractionLayer wal, BacklinksInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator) => (this.prefix, this.name) = input.LinkTypes switch
+			: base(wal, input, pageSetGenerator) => (this.Prefix, this.Name) = input.LinkTypes switch
 			{
 				BacklinksTypes.Backlinks => ("bl", "backlinks"),
 				BacklinksTypes.EmbeddedIn => ("ei", "embeddedin"),
@@ -37,11 +32,11 @@
 		#region Public Override Properties
 		public override int MinimumVersion => 109;
 
-		public override string Name => this.name;
+		public override string Name { get; }
 		#endregion
 
 		#region Protected Override Properties
-		protected override string Prefix => this.prefix;
+		protected override string Prefix { get; }
 		#endregion
 
 		#region Public Static Methods
@@ -61,7 +56,7 @@
 				.AddIf("pageid", input.PageId, input.Title == null)
 				.Add("namespace", input.Namespace)
 				.AddIf("dir", "descending", input.SortDescending)
-				.AddIf("redirect", input.Redirect, input.LinkTypes != BacklinksTypes.EmbeddedIn)
+				.AddIf("redirect", input.Redirect, input.LinkTypes is not BacklinksTypes.EmbeddedIn and not BacklinksTypes.None)
 				.AddFilterText("filterredir", "redirects", "nonredirects", input.FilterRedirects)
 				.Add("limit", this.Limit);
 		}

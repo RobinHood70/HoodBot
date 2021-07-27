@@ -168,11 +168,12 @@
 			ThrowNull(fileName, nameof(fileName));
 			using (var response = this.SendRequest(uri, "GET", null, null, false))
 			{
-				if (GetResponseData(response) is byte[] retval)
+				var data = GetResponseData(response);
+				if (data.Length > 0)
 				{
 					try
 					{
-						File.WriteAllBytes(fileName, retval);
+						File.WriteAllBytes(fileName, data);
 						return true;
 					}
 					catch (IOException)
@@ -267,7 +268,7 @@
 		#endregion
 
 		#region Private Static Methods
-		private static byte[]? GetResponseData(HttpWebResponse response)
+		private static byte[] GetResponseData(HttpWebResponse response)
 		{
 			if (response != null)
 			{
@@ -277,7 +278,7 @@
 				return mem.ToArray();
 			}
 
-			return null;
+			return Array.Empty<byte>();
 		}
 
 		private static string GetResponseText(HttpWebResponse response)
@@ -333,8 +334,6 @@
 					case (HttpStatusCode)509:
 					case HttpStatusCode.ServiceUnavailable:
 						retryAfter = this.RetryDelay;
-						break;
-					default:
 						break;
 				}
 			}

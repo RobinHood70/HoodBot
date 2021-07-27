@@ -7,13 +7,12 @@
 	/// <seealso cref="Exception" />
 	/// <seealso cref="ISerializable" />
 	[Serializable]
-	public class ChecksumException : Exception, ISerializable
+	public class ChecksumException : Exception
 	{
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="ChecksumException" /> class.</summary>
 		public ChecksumException()
-			: base()
 		{
 		}
 

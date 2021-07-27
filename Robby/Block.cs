@@ -28,7 +28,7 @@
 		}
 		#endregion
 
-		/// <summary>Gets a value indicating whether whether the block was made automatically by the wiki software.</summary>
+		/// <summary>Gets a value indicating whether the block was made automatically by the wiki software.</summary>
 		/// <value><see langword="true"/> if it was an automatic block; otherwise, <see langword="false"/>.</value>
 		public bool Automatic { get; }
 

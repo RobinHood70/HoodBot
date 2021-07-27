@@ -1,10 +1,11 @@
 ﻿namespace RobinHood70.HoodBot.ViewModels
 {
 	using System;
+	using System.Collections;
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
+	using RobinHood70.CommonCode;
 
-	public class TreeViewGroupedComparer : IComparer<TreeNode>
+	public sealed class TreeViewGroupedComparer : IComparer<TreeNode>, IComparer
 	{
 		#region Constructors
 		private TreeViewGroupedComparer()
@@ -17,35 +18,15 @@
 		#endregion
 
 		#region Public Methods
-		public int Compare([AllowNull] TreeNode x, [AllowNull] TreeNode y)
+		public int Compare(TreeNode? x, TreeNode? y)
 		{
-			if (x is null)
-			{
-				return y is null ? 0 : -1;
-			}
-
-			if (y is null)
-			{
-				return 1;
-			}
-
-			if (x.Children is null)
-			{
-				if (y.Children is object)
-				{
-					return 1;
-				}
-			}
-			else
-			{
-				if (y.Children is null)
-				{
-					return -1;
-				}
-			}
-
-			return string.Compare(x.DisplayText, y.DisplayText, StringComparison.Ordinal);
+			var retval = Globals.NullComparer(x, y) ?? x!.IsFolder.CompareTo(y!.IsFolder);
+			return retval == 0
+				? string.Compare(x!.DisplayText, y!.DisplayText, StringComparison.CurrentCulture)
+				: retval;
 		}
+
+		int IComparer.Compare(object? x, object? y) => this.Compare(x as TreeNode, y as TreeNode);
+		#endregion
 	}
-	#endregion
 }

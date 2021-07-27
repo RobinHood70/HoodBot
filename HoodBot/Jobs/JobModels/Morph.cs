@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using System.Data;
 	using System.Diagnostics;
-	using System.Globalization;
 	using RobinHood70.CommonCode;
 
 	internal sealed class Morph
@@ -49,28 +48,17 @@
 		#endregion
 
 		#region Public Methods
-		public int CalculatedCost(int baseCost, string patchVersion) => this.Mechanic == 10
-			? baseCost
-			: patchVersion switch
-			{
-				"10" or "11" => (int)Math.Round((float)baseCost * (Ability.Level + 6) / 72f),
-				_ => (int)Math.Round(Ability.Level <= 50
-					? ((float)baseCost * (Ability.Level + 6) / 64.96f)
-					: ((float)baseCost * (Ability.Level + 50) / 116f)),
-			};
-
-		public string FullCost(string patchVersion)
+		public string FullCost()
 		{
 			var calcCosts = new VariableData<int>();
-			foreach (var cost in this.Costs)
+			foreach (var maxCost in this.Costs)
 			{
-				calcCosts.Add(this.CalculatedCost(cost, patchVersion));
+				// Actual cost is from ComputeEsoSkillCost() in ESO Log. Actual formula as of this writing is: maxCost * level / 72 + maxCost / 12, which reduces to maxCost * (level + 6) / 72). When level is set to a constant of 66 (the maximum level, as used on the wiki), this collapses to just maxCost.
+				calcCosts.Add(maxCost);
 			}
 
 			return this.FullName(calcCosts.ToString() ?? string.Empty);
 		}
-
-		public string FullName(int cost) => this.FullName(cost.ToString(CultureInfo.InvariantCulture));
 
 		public string FullName(string cost) => string.Equals(cost, "0", StringComparison.Ordinal)
 			? "Free"
@@ -143,7 +131,7 @@
 					descriptions.Add((i & 1) == 1 ? "'''" + fragment + "'''" : fragment);
 				}
 
-				this.Description = string.Join(string.Empty, descriptions);
+				this.Description = string.Concat(descriptions);
 			}
 		}
 

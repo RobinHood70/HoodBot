@@ -178,6 +178,7 @@
 		/// <param name="title">The key.</param>
 		/// <returns>The <see cref="ISimpleTitle">Title</see>.</returns>
 		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry on set if the requested entry isn't found.</remarks>
+		/// <exception cref="ArgumentNullException">Thrown when <paramref name="title"/> is null.</exception>
 		public virtual TTitle this[ISimpleTitle title]
 		{
 			get => this.lookup[title ?? throw ArgumentNull(nameof(title))];
@@ -278,11 +279,13 @@
 		/// <summary>Determines whether the <see cref="TitleCollection">collection</see> contains a specific value.</summary>
 		/// <param name="item">The object to locate in the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns><see langword="true" /> if <paramref name="item" /> is found in the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when <paramref name="item"/> is null.</exception>
 		public bool Contains(ISimpleTitle item) => this.lookup.ContainsKey(item ?? throw ArgumentNull(nameof(item)));
 
 		/// <summary>Determines whether the <see cref="TitleCollection">collection</see> contains a specific value.</summary>
 		/// <param name="item">The object to locate in the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns><see langword="true" /> if <paramref name="item" /> is found in the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when <paramref name="item"/> is null.</exception>
 		public bool Contains(TTitle item) => this.lookup.ContainsKey(item ?? throw ArgumentNull(nameof(item)));
 
 		/// <summary>Determines whether the collection contains an item with the specified key.</summary>
@@ -621,6 +624,7 @@
 		/// <summary>Adds protected page results to the collection.</summary>
 		/// <param name="protectionTypes">The protection types to retrieve.</param>
 		/// <param name="protectionLevels">The levels to retrieve.</param>
+		/// <exception cref="InvalidOperationException">Thrown when there are no valid values for <paramref name="protectionLevels"/>.</exception>
 		public void GetProtectedPages(IEnumerable<string> protectionTypes, IEnumerable<string>? protectionLevels)
 		{
 			ThrowNull(protectionTypes, nameof(protectionTypes));
@@ -810,6 +814,7 @@
 		/// <summary>Determines the index of a specific item in the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="item">The item to locate in the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns>The index of <paramref name="item" /> if found in the list; otherwise, -1.</returns>
+		/// <exception cref="KeyNotFoundException">Thrown when the item could not be found.</exception>
 		public int IndexOf(ISimpleTitle item)
 		{
 			// ContainsKey is O(1), so check to see if key exists; if not, iterate looking for Namespace/PageName match.
@@ -824,7 +829,7 @@
 					}
 				}
 
-				throw new InvalidOperationException(Resources.DictionaryListOutOfSync);
+				throw new KeyNotFoundException(Resources.DictionaryListOutOfSync);
 			}
 
 			return -1;
@@ -892,14 +897,11 @@
 		/// <param name="namespaces">The namespaces to remove.</param>
 		public void RemoveNamespaces(bool removeTalk, IEnumerable<int>? namespaces)
 		{
-			var hash =
-				namespaces == null ? new HashSet<int>() :
-				namespaces is HashSet<int> hashSet ? hashSet :
-				new HashSet<int>(namespaces);
+			var hash = namespaces as HashSet<int> ?? new(namespaces ?? Array.Empty<int>());
 			for (var i = this.Count - 1; i >= 0; i--)
 			{
 				var ns = this[i].Namespace;
-				if (hash.Contains(ns.Id) || (removeTalk && ns.IsTalkSpace))
+				if ((removeTalk && ns.IsTalkSpace) || hash.Contains(ns.Id))
 				{
 					this.RemoveAt(i);
 				}
@@ -958,7 +960,11 @@
 		/// <summary>Returns the requested value, or null if not found.</summary>
 		/// <param name="key">The key.</param>
 		/// <returns>The requested value, or null if not found.</returns>
-		public TTitle? ValueOrDefault(string key) => key == null ? default : this.lookup.TryGetValue(this.TextToTitle(key), out var retval) ? retval : default;
+		public TTitle? ValueOrDefault(string key) =>
+			key != null &&
+			this.lookup.TryGetValue(this.TextToTitle(key), out var retval)
+				? retval
+				: null;
 		#endregion
 
 		#region Public Abstract Methods
@@ -1044,6 +1050,7 @@
 		/// <summary>Gets a value indicating whether the page title is within the collection's limitations.</summary>
 		/// <param name="title">The title.</param>
 		/// <returns><see langword="true"/> if the page is within the collection's limitations and can be added to it; otherwise, <see langword="false"/>.</returns>
+		/// <exception cref="InvalidOperationException">Thrown when the <see cref="LimitationType"/> is not one of the recognized values.</exception>
 		protected bool IsTitleInLimits(ISimpleTitle title) =>
 			title != null &&
 			this.LimitationType switch

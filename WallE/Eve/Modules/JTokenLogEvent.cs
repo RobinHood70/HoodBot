@@ -91,8 +91,6 @@
 						this.ExtraDataBlock();
 						break;
 					case "delete":
-						this.ExtraDataDelete();
-						break;
 					case "suppress":
 						this.ExtraDataDelete();
 						break;
@@ -148,8 +146,6 @@
 								logEventsOutput.UserId = -1;
 							}
 
-							break;
-						default:
 							break;
 					}
 				}

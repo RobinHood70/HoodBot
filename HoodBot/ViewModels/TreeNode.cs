@@ -20,7 +20,8 @@
 			ThrowNull(displayText, nameof(displayText));
 			this.Parent = parent;
 			this.DisplayText = displayText;
-			this.Children = children;
+			this.Children = children ?? Array.Empty<TreeNode>();
+			this.IsFolder = this.Children.Count > 0;
 		}
 		#endregion
 
@@ -29,7 +30,7 @@
 		#endregion
 
 		#region Public Properties
-		public IReadOnlyCollection<TreeNode>? Children { get; }
+		public IReadOnlyCollection<TreeNode> Children { get; }
 
 		public string DisplayText { get; }
 
@@ -49,12 +50,9 @@
 					if (value != null)
 					{
 						this.OnSelectionChange(new SelectedItemChangedEventArgs(this, value.Value));
-						if (this.Children != null)
+						foreach (var c in this.Children)
 						{
-							foreach (var c in this.Children)
-							{
-								c.IsChecked = value;
-							}
+							c.IsChecked = value;
 						}
 					}
 
@@ -62,6 +60,8 @@
 				}
 			}
 		}
+
+		public bool IsFolder { get; }
 
 		public bool IsSelected
 		{
@@ -104,7 +104,7 @@
 		{
 			if (this.IsChecked != false)
 			{
-				if (this.Children == null)
+				if (this.Children.Count == 0)
 				{
 					yield return this;
 				}
@@ -138,8 +138,6 @@
 		#endregion
 
 		#region Public Override Methods
-		public override int GetHashCode() => HashCode.Combine(this.Parent, this.DisplayText);
-
 		public override string ToString() => this.DisplayText;
 		#endregion
 
@@ -162,25 +160,22 @@
 		private bool? ChildrenCheckState()
 		{
 			bool? state = null;
-			if (this.Children != null)
+			foreach (var child in this.Children)
 			{
-				foreach (var child in this.Children)
+				if (child.IsChecked == null)
 				{
-					if (child.IsChecked == null)
-					{
-						state = null;
-						break;
-					}
+					state = null;
+					break;
+				}
 
-					if (state == null)
-					{
-						state = child.IsChecked;
-					}
-					else if (state.Value != child.IsChecked)
-					{
-						state = null;
-						break;
-					}
+				if (state == null)
+				{
+					state = child.IsChecked;
+				}
+				else if (state.Value != child.IsChecked)
+				{
+					state = null;
+					break;
 				}
 			}
 

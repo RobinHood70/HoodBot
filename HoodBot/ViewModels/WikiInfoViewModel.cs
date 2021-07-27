@@ -104,6 +104,7 @@
 		#region Public Methods
 		public void BeginEdit()
 		{
+			// Required for interface but nothing needs to be done.
 		}
 
 		public void CancelEdit()

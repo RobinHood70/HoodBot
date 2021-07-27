@@ -3,10 +3,11 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Globalization;
+	using System.Text;
 	using RobinHood70.CommonCode;
 	using static RobinHood70.CommonCode.Globals;
 
-	public class BladesCodeLine : BladesCodeLineCollection
+	public class BladesCodeLine : BladesCodeLineCollection, IStringBuilder
 	{
 		#region Static Fields
 		private static readonly char[] Quote = new[] { '"' };
@@ -58,11 +59,32 @@
 		}
 		#endregion
 
+		#region Public Methods
+		public StringBuilder BuildString(StringBuilder sb)
+		{
+			sb
+				.Append(this.Name)
+				.Append(' ');
+
+			if (this.Value == null)
+			{
+				sb.Append(this.Count == 0
+					? "(declaration)"
+					: "(object)");
+			}
+			else
+			{
+				sb
+					.Append("= ")
+					.Append(this.Value);
+			}
+
+			return sb;
+		}
+		#endregion
+
 		#region Public Override Methods
-		public override string ToString() =>
-			this.Value != null ? $"{this.Name} = {this.Value}" :
-			this.Count == 0 ? $"{this.Name} (declaration)" :
-			$"{this.Name} (object)";
+		public override string? ToString() => ((IStringBuilder)this).BuildString();
 		#endregion
 
 		#region Private Static Methods

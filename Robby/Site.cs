@@ -3,6 +3,7 @@
 	// TODO: Review access rights project-wide.
 	using System;
 	using System.Collections.Generic;
+	using System.Collections.Immutable;
 	using System.ComponentModel;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
@@ -127,11 +128,13 @@
 
 		/// <summary>Gets the base article path.</summary>
 		/// <value>The base article path, where <c>$1</c> should be replaced with the URL-encoded article title. </value>
+		/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
 		public string BaseArticlePath => this.baseArticlePath ?? throw NoSite();
 
 		/// <summary>Gets or sets a CultureInfo object base the wiki's language and variant.</summary>
 		/// <value>The culture of the wiki.</value>
 		/// <remarks>Not all languages available in MediaWiki have direct equivalents in Windows. The bot will attempt to fall back to the more general language or variant when possible, but this property is left settable in the event that the choice made is unacceptable. If the culture cannot be determined, <see cref="CultureInfo.CurrentCulture"/> is used instead. Attempting to set the Culture to null will also result in CurrentCulture being used.</remarks>
+		/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
 		public CultureInfo Culture
 		{
 			get => this.culture ?? throw NoSite();
@@ -174,6 +177,7 @@
 
 		/// <summary>Gets the interwiki map.</summary>
 		/// <value>The interwiki map.</value>
+		/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
 		public ReadOnlyKeyedCollection<string, InterwikiEntry> InterwikiMap => this.interwikiMap ?? throw NoSite();
 
 		/// <summary>Gets a list of current magic words on the wiki.</summary>
@@ -182,19 +186,23 @@
 
 		/// <summary>Gets the <see cref="Title"/> for the main page of the site.</summary>
 		/// <value>The main page.</value>
+		/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
 		public FullTitle MainPage => this.mainPage ?? throw NoSite();
 
 		/// <summary>Gets the name of the main page, as returned by the site.</summary>
 		/// <value>The name of the main page.</value>
 		/// <remarks>This will normally be the same as <c><see cref="MainPage"/>.FullPageName</c>, but is provided so that the original name is available, if needed.</remarks>
+		/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
 		public string MainPageName => this.mainPageName ?? throw NoSite();
 
 		/// <summary>Gets the wiki name.</summary>
 		/// <value>The name of the wiki.</value>
+		/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
 		public string Name => this.siteName ?? throw NoSite();
 
 		/// <summary>Gets the wiki namespaces.</summary>
 		/// <value>the wiki namespaces.</value>
+		/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
 		public NamespaceCollection Namespaces => this.namespaces ?? throw NoSite();
 
 		/// <summary>Gets or sets the page creator.</summary>
@@ -205,10 +213,12 @@
 		/// <summary>Gets the script path. This is the path preceding api.php, index.php and so forth.</summary>
 		/// <value>The script path.</value>
 		/// <remarks>If not returned by the API, it will be guessed based on the path to api.php itself.</remarks>
+		/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
 		public string ScriptPath => this.scriptPath ?? throw NoSite();
 
 		/// <summary>Gets the name of the server—typically, the base URL.</summary>
 		/// <value>The name of the server.</value>
+		/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
 		public string ServerName => this.serverName ?? throw NoSite();
 
 		/// <summary>Gets the bot's user name.</summary>
@@ -217,6 +227,7 @@
 
 		/// <summary>Gets the MediaWiki version of the wiki.</summary>
 		/// <value>The MediaWiki version of the wiki.</value>
+		/// <exception cref="InvalidOperationException">Thrown when the Site hasn't been initialized.</exception>
 		public string Version => this.version ?? throw NoSite();
 		#endregion
 
@@ -604,24 +615,45 @@
 		/// <summary>Patrols the specified Recent Changes ID.</summary>
 		/// <param name="rcid">The Recent Change ID.</param>
 		/// <returns>A value indicating the change status of the patrol.</returns>
-		public ChangeStatus Patrol(long rcid) => this.PublishChange(
-			this,
-			new Dictionary<string, object?>(StringComparer.Ordinal)
+		public ChangeStatus Patrol(long rcid)
+		{
+			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				[nameof(rcid)] = rcid,
-			},
-			() => this.Patrol(new PatrolInput(rcid)).Title == null ? ChangeStatus.Failure : ChangeStatus.Success);
+			};
+
+			return this.PublishChange(this, parameters, ChangeFunc);
+
+			ChangeStatus ChangeFunc()
+			{
+				var retval = this.Patrol(new PatrolInput(rcid));
+
+				return retval.Title == null
+					? ChangeStatus.Failure
+					: ChangeStatus.Success;
+			}
+		}
 
 		/// <summary>Patrols the specified revision ID.</summary>
 		/// <param name="revid">The revision ID.</param>
 		/// <returns>A value indicating the change status of the patrol.</returns>
-		public ChangeStatus PatrolRevision(long revid) => this.PublishChange(
-			this,
-			new Dictionary<string, object?>(StringComparer.Ordinal)
+		public ChangeStatus PatrolRevision(long revid)
+		{
+			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				[nameof(revid)] = revid,
-			},
-			() => this.Patrol(new PatrolInput(revid)).Title == null ? ChangeStatus.Failure : ChangeStatus.Success);
+			};
+
+			return this.PublishChange(this, parameters, ChangeFunc);
+
+			ChangeStatus ChangeFunc()
+			{
+				var retval = this.Patrol(new PatrolInput(revid));
+				return retval.Title == null
+				? ChangeStatus.Failure
+				: ChangeStatus.Success;
+			}
+		}
 
 		/// <summary>Unwatches all pages in the specified namespace.</summary>
 		/// <param name="ns">The namespace to unwatch.</param>
@@ -652,23 +684,30 @@
 		/// <param name="pageText">Full page text for the File page. This should include the license, categories, and anything else required. Set to null to allow the wiki to generate the page text (normally just the <paramref name="editSummary" />).</param>
 		/// <exception cref="ArgumentException">Path contains an invalid character.</exception>
 		/// <returns>A value indicating the change status of the upload.</returns>
-		public ChangeStatus Upload(string fileName, string? destinationName, string editSummary, string? pageText) => this.PublishChange(
-			this,
-			new Dictionary<string, object?>(StringComparer.Ordinal)
+		public ChangeStatus Upload(string fileName, string? destinationName, string editSummary, string? pageText)
+		{
+			ThrowNull(fileName, nameof(fileName));
+			ThrowNull(editSummary, nameof(editSummary));
+
+			// Always access this, even if we don't need it, as a means of checking validity.
+			var checkedName = Path.GetFileName(fileName);
+			if (string.IsNullOrWhiteSpace(destinationName))
+			{
+				destinationName = checkedName;
+			}
+
+			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				[nameof(fileName)] = fileName,
 				[nameof(destinationName)] = destinationName,
 				[nameof(editSummary)] = editSummary,
 				[nameof(pageText)] = pageText,
-			},
-			() =>
-			{
-				var checkedName = Path.GetFileName(fileName); // Always access this, even if we don't need it, as a means of checking validity.
-				if (string.IsNullOrWhiteSpace(destinationName))
-				{
-					destinationName = checkedName;
-				}
+			};
 
+			return this.PublishChange(this, parameters, ChangeFunc);
+
+			ChangeStatus ChangeFunc()
+			{
 				using var upload = new FileStream(checkedName, FileMode.Open);
 				var uploadInput = new UploadInput(destinationName!, upload)
 				{
@@ -681,8 +720,11 @@
 					uploadInput.Text = pageText;
 				}
 
-				return this.Upload(uploadInput) ? ChangeStatus.Success : ChangeStatus.Failure;
-			});
+				return this.Upload(uploadInput)
+					? ChangeStatus.Success
+					: ChangeStatus.Failure;
+			}
+		}
 
 		/// <summary>Watches all pages in the specified namespace.</summary>
 		/// <param name="ns">The namespace to watch.</param>
@@ -693,19 +735,27 @@
 		/// <param name="ns">The namespace to watch or (un)watch.</param>
 		/// <param name="unwatch">If set to <see langword="true"/>, pages will be unwatched; otherwise, pages will be watched.</param>
 		/// <returns>A collection of pages that were (un)watched.</returns>
-		public ChangeValue<PageCollection> Watch(int ns, bool unwatch) => this.PublishChange(
-			PageCollection.UnlimitedDefault(this),
-			this,
-			new Dictionary<string, object?>(StringComparer.Ordinal)
+		public ChangeValue<PageCollection> Watch(int ns, bool unwatch)
+		{
+			var disabledResult = PageCollection.UnlimitedDefault(this);
+			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				[nameof(ns)] = ns,
-			},
-			() =>
+			};
+
+			return this.PublishChange(disabledResult, this, parameters, ChangeFunc);
+
+			ChangeValue<PageCollection> ChangeFunc()
 			{
-				var input = new WatchInput(new AllPagesInput() { Namespace = ns }) { Unwatch = unwatch };
+				var generator = new AllPagesInput() { Namespace = ns };
+				var input = new WatchInput(generator) { Unwatch = unwatch };
 				var pages = this.Watch(input);
-				return new ChangeValue<PageCollection>(pages.Count == 0 ? ChangeStatus.NoEffect : ChangeStatus.Success, pages);
-			});
+				var result = pages.Count == 0
+					? ChangeStatus.NoEffect
+					: ChangeStatus.Success;
+				return new ChangeValue<PageCollection>(result, pages);
+			}
+		}
 		#endregion
 
 		#region Public Virtual Methods
@@ -715,8 +765,13 @@
 		/// <returns><see cref="ChangeStatus.Success"/> if the flag was successfully cleared; otherwise, <see cref="ChangeStatus.Failure"/>.</returns>
 		public virtual ChangeStatus ClearMessage(bool force)
 		{
-			var func = new Func<ChangeStatus>(() => this.AbstractionLayer.ClearHasMessage() ? ChangeStatus.Success : ChangeStatus.Failure);
-			return force ? func() : this.PublishChange(this, null, func);
+			return force
+				? ChangeFunc()
+				: this.PublishChange(this, ImmutableDictionary<string, object?>.Empty, ChangeFunc);
+
+			ChangeStatus ChangeFunc() => this.AbstractionLayer.ClearHasMessage()
+				? ChangeStatus.Success
+				: ChangeStatus.Failure;
 		}
 
 		/// <summary>Creates a new account on the server.</summary>
@@ -724,20 +779,26 @@
 		/// <param name="password">The account password.</param>
 		/// <param name="email">The account email. May be null.</param>
 		/// <returns><see cref="ChangeStatus.Success"/> if the account was successfully created; otherwise, <see cref="ChangeStatus.Failure"/>.</returns>
-		public virtual ChangeStatus CreateAccount(string name, string password, string email) => this.PublishChange(
-			this,
-			new Dictionary<string, object?>(StringComparer.Ordinal)
+		public virtual ChangeStatus CreateAccount(string name, string password, string email)
+		{
+			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				[nameof(name)] = name,
 				[nameof(password)] = password,
 				[nameof(email)] = email,
-			},
-			() =>
+			};
+
+			return this.PublishChange(this, parameters, ChangeFunc);
+
+			ChangeStatus ChangeFunc()
 			{
 				var input = new CreateAccountInput(name, password) { Email = email };
-				var result = this.AbstractionLayer.CreateAccount(input);
-				return string.Equals(result.Result, "Success", StringComparison.OrdinalIgnoreCase) ? ChangeStatus.Success : ChangeStatus.Failure;
-			});
+				var retval = this.AbstractionLayer.CreateAccount(input);
+				return string.Equals(retval.Result, "Success", StringComparison.OrdinalIgnoreCase)
+					? ChangeStatus.Success
+					: ChangeStatus.Failure;
+			}
+		}
 
 		/// <summary>Gets the article path.</summary>
 		/// <param name="unparsedPath">The unparsed path. This can be a local article path or an interwiki path.</param>
@@ -820,7 +881,7 @@
 		/// <param name="changeFunction">The function to execute. It should return a <see cref="ChangeStatus"/> indicating whether the call was successful, failed, or ignored.</param>
 		/// <param name="caller">The calling method (populated automatically with caller name).</param>
 		/// <returns>A value indicating the actions that should take place.</returns>
-		public virtual ChangeStatus PublishChange(object sender, IReadOnlyDictionary<string, object?>? parameters, Func<ChangeStatus> changeFunction, [CallerMemberName] string caller = "")
+		public virtual ChangeStatus PublishChange(object sender, IReadOnlyDictionary<string, object?> parameters, Func<ChangeStatus> changeFunction, [CallerMemberName] string caller = "")
 		{
 			ThrowNull(changeFunction, nameof(changeFunction));
 			var changeArgs = new ChangeArgs(sender, caller, parameters);
@@ -840,7 +901,7 @@
 		/// <param name="caller">The calling method (populated automatically with caller name).</param>
 		/// <returns>A value indicating the actions that should take place.</returns>
 		/// <remarks>In the event of a <see cref="ChangeStatus.Cancelled"/> result, the corresponding value will be <span class="keyword">default</span>.</remarks>
-		public virtual ChangeValue<T> PublishChange<T>(T disabledResult, object sender, IReadOnlyDictionary<string, object?>? parameters, Func<ChangeValue<T>> changeFunction, [CallerMemberName] string caller = "")
+		public virtual ChangeValue<T> PublishChange<T>(T disabledResult, object sender, IReadOnlyDictionary<string, object?> parameters, Func<ChangeValue<T>> changeFunction, [CallerMemberName] string caller = "")
 			where T : class
 		{
 			// Note: disabledResult comes first in this call instead of last to prevent ambiguous calls when T is a string (i.e., same type as caller parameter).
@@ -885,7 +946,7 @@
 		/// <summary>Throws an exception indicating that the site has not been initialized.</summary>
 		/// <param name="name">The name.</param>
 		/// <returns>System.InvalidOperationException.</returns>
-		protected static InvalidOperationException NoSite([CallerMemberName] string name = "") => throw new InvalidOperationException(CurrentCulture(Resources.SiteNotInitialized, name));
+		protected static InvalidOperationException NoSite([CallerMemberName] string name = "") => new(CurrentCulture(Resources.SiteNotInitialized, name));
 		#endregion
 
 		#region Protected Virtual Methods
@@ -1036,15 +1097,14 @@
 
 		/// <summary>Gets all site information required for proper functioning of the framework.</summary>
 		/// <summary>Parses all site information that's needed internally for the Site object to work.</summary>
+		/// <exception cref="InvalidOperationException">Thrown when the site information is not valid.</exception>
 		protected virtual void ParseInternalSiteInfo()
 		{
 			var siteInfo = this.AbstractionLayer.AllSiteInfo;
 			if (siteInfo == null
 				|| siteInfo.General == null
-				|| siteInfo.InterwikiMap == null
-				|| siteInfo.NamespaceAliases == null
-				|| siteInfo.Namespaces == null
-				|| siteInfo.MagicWords == null)
+				|| siteInfo.Namespaces.Count == 0
+				|| siteInfo.MagicWords.Count == 0)
 			{
 				throw new InvalidOperationException(Resources.MissingSiteInfo);
 			}

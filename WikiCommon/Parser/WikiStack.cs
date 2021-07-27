@@ -277,15 +277,12 @@
 			if (wsStart > 0 && wsEnd < this.textLength && this.Text[wsStart - 1] == '\n' && this.Text[wsEnd] == '\n')
 			{
 				var wsLength = this.Index - wsStart;
-				if (wsLength > 0)
+				if (wsLength > 0 && piece[^1] is ITextNode last)
 				{
-					if (piece[^1] is ITextNode last)
+					var lastValue = last.Text;
+					if (lastValue.SpanReverse(CommentWhiteSpace, lastValue.Length) == wsLength)
 					{
-						var lastValue = last.Text;
-						if (lastValue.SpanReverse(CommentWhiteSpace, lastValue.Length) == wsLength)
-						{
-							last.Text = lastValue.Substring(0, lastValue.Length - wsLength);
-						}
+						last.Text = lastValue.Substring(0, lastValue.Length - wsLength);
 					}
 				}
 
@@ -369,9 +366,8 @@
 			else
 			{
 				attrEnd = tagEndPos;
-				var findClosing = new Regex(@"</" + tagOpen + @"\s*>", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
-				Match match;
-				if (!this.noMoreClosingTag.Contains(tagOpen) && (match = findClosing.Match(this.Text, tagEndPos + 1)).Success)
+				var findClosing = new Regex("</" + tagOpen + @"\s*>", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+				if (this.noMoreClosingTag.Contains(tagOpen) && findClosing.Match(this.Text, tagEndPos + 1) is Match match && match.Success)
 				{
 					inner = this.Text.Substring(tagEndPos + 1, match.Index - tagEndPos - 1);
 					tagClose = match.Value;

@@ -54,9 +54,13 @@
 				var equalsLength = text.SpanReverse('=', searchStart);
 				if (equalsLength > 0)
 				{
-					var count = (searchStart - equalsLength == this.startPos)
-						? (equalsLength < 3 ? 0 : Math.Min(6, (equalsLength - 1) / 2))
+					var endPos = searchStart - equalsLength;
+					var count = endPos == this.startPos
+						? equalsLength < 3
+							? 0
+							: Math.Min(6, (equalsLength - 1) / 2)
 						: Math.Min(equalsLength, this.length);
+
 					if (count > 0)
 					{
 						var headerNode = this.Stack.NodeFactory.HeaderNode(count, piece);

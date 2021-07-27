@@ -7,6 +7,7 @@ namespace RobinHood70.WallE.Base
 	[Flags]
 	public enum DeletedRevisionsProperties
 	{
+		None = 0,
 		RevId = 1,
 		ParentId = 1 << 1,
 		User = 1 << 2,

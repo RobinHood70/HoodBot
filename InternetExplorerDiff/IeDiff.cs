@@ -37,6 +37,9 @@
 		{
 			ThrowNull(diff, nameof(diff));
 			ThrowNull(diff.EditPath, nameof(diff), nameof(diff.EditPath));
+			const int empty = 0;
+			const string? headers = "Content-Type: application/x-www-form-urlencoded";
+
 			InternetExplorer? ie = null;
 			for (var i = 0; i < 10; i++)
 			{
@@ -80,8 +83,6 @@
 				.Add("wpEdittime", IndexDateTime(diff.LastRevisionTimestamp ?? diff.StartTimestamp ?? DateTime.Now));
 			var postData = RequestVisitorUrl.Build(request);
 			var byteData = Encoding.UTF8.GetBytes(postData);
-			var empty = 0;
-			var headers = "Content-Type: application/x-www-form-urlencoded";
 			var error = true;
 			do
 			{

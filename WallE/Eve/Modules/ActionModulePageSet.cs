@@ -172,8 +172,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				throw new InvalidDataException(EveMessages.ResultInvalid, jre);
 			}
 			catch (WikiException we) when (
-				we.Code is not null &&
-				we.Code.StartsWith("too-many-", StringComparison.Ordinal) &&
+				we.Code?.StartsWith("too-many-", StringComparison.Ordinal) == true &&
 				TooManyFinder.Match(we.Info ?? string.Empty) is var match &&
 				match.Success &&
 				PageSetInput.AllTypes.Contains(match.Groups["parameter"].Value, StringComparer.Ordinal))
@@ -256,7 +255,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				this.Generator.BuildRequest(request);
 			}
 
-			if (input.Values != null && input.Values.Count > 0)
+			if (input.Values?.Count > 0)
 			{
 				var numRemaining = input.Values.Count - this.offset;
 				var listSize = numRemaining < this.CurrentListSize

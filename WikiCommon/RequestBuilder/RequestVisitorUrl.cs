@@ -5,7 +5,7 @@
 	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Formats a Request object for use in a URL or POST data.</summary>
-	public class RequestVisitorUrl : IParameterVisitor
+	public sealed class RequestVisitorUrl : IParameterVisitor
 	{
 		#region Fields
 		private readonly StringBuilder builder;

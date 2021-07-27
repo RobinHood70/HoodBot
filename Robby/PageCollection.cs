@@ -116,21 +116,21 @@
 		}
 
 		/// <summary>Gets or sets the <see cref="ISimpleTitle"/> with the specified key.</summary>
-		/// <param name="key">The key.</param>
+		/// <param name="title">The title.</param>
 		/// <returns>The <see cref="ISimpleTitle">Title</see>.</returns>
 		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry on set if the requested entry isn't found.</remarks>
-		public override Page this[ISimpleTitle key]
+		/// <exception cref="KeyNotFoundException">Thrown when the title could not be found.</exception>
+		public override Page this[ISimpleTitle title]
 		{
 			get
 			{
-				ThrowNull(key, nameof(key));
-				return base.TryGetValue(key, out var page)
-				|| (this.titleMap.TryGetValue(key.FullPageName, out var altKey) && this.TryGetValue(altKey, out page))
+				ThrowNull(title, nameof(title));
+				return this.TryGetValue(title, out var page)
 					? page
 					: throw new KeyNotFoundException();
 			}
 
-			set => base[key] = value;
+			set => base[title] = value;
 		}
 		#endregion
 
@@ -331,7 +331,7 @@
 
 				// If it's local, interpret the namespace; otherwise, stuff whatever value we get into the page name, since we can't interpret it reliably.
 				FullTitle title;
-				if (interwiki == null || interwiki.LocalWiki)
+				if (interwiki?.LocalWiki != false)
 				{
 					title = FullTitle.FromWikiTitle(this.Site, value.Title);
 					title.Interwiki = interwiki;

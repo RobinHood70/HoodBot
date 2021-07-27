@@ -45,7 +45,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected virtual TOutput DeserializeCustom(string? result)
 		{
 			// Note that result will not yet have been checked for null in this version of deserialization.
-			if (result != null && result.Contains("$wgEnableAPI", StringComparison.Ordinal))
+			if (result?.Contains("$wgEnableAPI", StringComparison.Ordinal) == true)
 			{
 				throw WikiException.General(WikiAbstractionLayer.ApiDisabledCode, CurrentCulture(EveMessages.ApiDisabled));
 			}

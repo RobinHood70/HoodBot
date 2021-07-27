@@ -154,7 +154,7 @@
 			var isBook = IsBook(parts);
 			foreach (var name in parts.OriginalFiles)
 			{
-				if (isBook || !this.allItems.TryGetValue(name, out var iconItems) || iconItems.Count <= 0)
+				if (isBook || !this.allItems.TryGetValue(name, out var iconItems) || iconItems.Count == 0)
 				{
 					parts.UnmatchedNames.Add(name);
 				}
@@ -169,7 +169,7 @@
 							"book" => "Book: " + item.ItemName,
 							"collectibles" => $"Collectible: {{{{Item Link|{item.ItemName}|collectid={item.Id.ToStringInvariant()}}}}}",
 							"minedItemSummary" => $"Mined Item: {{{{Item Link|{item.ItemName}|itemid={item.Id.ToStringInvariant()}}}}}",
-							"questItem" => $"Quest Item: " + item.ItemName,
+							"questItem" => "Quest Item: " + item.ItemName,
 							_ => null,
 						};
 
@@ -188,13 +188,13 @@
 		{
 			foreach (var row in Database.RunQuery(EsoGeneral.EsoLogConnectionString, query.Value))
 			{
-				long id;
 				var idType = row.GetDataTypeName(0);
-				id =
-					string.Equals(idType, "INT", StringComparison.Ordinal) ? (int)row["id"] :
-					string.Equals(idType, "BIGINT", StringComparison.Ordinal) ? (long)row["id"] :
-					throw new InvalidCastException();
-
+				var id = idType switch
+				{
+					"BIGINT" => (long)row["id"],
+					"INT" => (int)row["id"],
+					_ => throw new InvalidCastException(),
+				};
 				var iconName = ((string)row["icon"]).Replace("/esoui/art/icons/", string.Empty, StringComparison.OrdinalIgnoreCase).Replace(".dds", string.Empty, StringComparison.OrdinalIgnoreCase);
 				var entry = new ItemInfo(
 					id: id,
@@ -304,9 +304,10 @@
 					this.PostSummary = new List<IWikiNode>(parser.Nodes.GetRange(summaryEnd, parser.Nodes.Count - summaryEnd));
 				}
 
-				var preText = true;
-				var summaryLines = WikiTextVisitor.Raw(parser.Nodes.GetRange(summaryIndex, summaryEnd - summaryIndex)).Split(TextArrays.NewLineChars);
-				foreach (var line in summaryLines)
+				var isPreText = true;
+				StringBuilder preText = new();
+				StringBuilder postText = new();
+				foreach (var line in WikiTextVisitor.Raw(parser.Nodes.GetRange(summaryIndex, summaryEnd - summaryIndex)).Split(TextArrays.NewLineChars))
 				{
 					var fromWeb = line.Split("://esoicons.uesp.net/esoui/art/icons/", StringSplitOptions.RemoveEmptyEntries);
 					if (fromWeb.Length > 1)
@@ -342,18 +343,10 @@
 							case "mined item":
 							case "quest item":
 							case "used for":
-								preText = false;
+								isPreText = false;
 								break;
 							default:
-								if (preText)
-								{
-									this.PreText += line.Trim();
-								}
-								else
-								{
-									this.PostText += line.Trim();
-								}
-
+								(isPreText ? preText : postText).Append(line);
 								break;
 						}
 					}

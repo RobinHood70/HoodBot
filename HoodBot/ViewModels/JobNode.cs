@@ -51,8 +51,6 @@
 		#endregion
 
 		#region Public Override Methods
-		public override int GetHashCode() => HashCode.Combine(this.Parent, this.DisplayText, this.JobInfo);
-
 		public override string ToString() => this.DisplayText;
 		#endregion
 	}
