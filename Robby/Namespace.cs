@@ -32,9 +32,9 @@
 			this.subjectSpaceId = ns.Id >= MediaWikiNamespaces.Main ? ns.Id & 0x7ffffffe : ns.Id;
 			this.talkSpaceId = ns.Id >= MediaWikiNamespaces.Main ? new int?(ns.Id | 1) : null;
 
-			this.AllowsSubpages = ns.Flags.HasFlag(NamespaceFlags.Subpages);
-			this.CaseSensitive = ns.Flags.HasFlag(NamespaceFlags.CaseSensitive);
-			this.IsContentSpace = ns.Flags.HasFlag(NamespaceFlags.ContentSpace);
+			this.AllowsSubpages = (ns.Flags & NamespaceFlags.Subpages) != 0;
+			this.CaseSensitive = (ns.Flags & NamespaceFlags.CaseSensitive) != 0;
+			this.IsContentSpace = (ns.Flags & NamespaceFlags.ContentSpace) != 0;
 
 			this.Name = ns.Name;
 			this.CanonicalName = ns.CanonicalName;

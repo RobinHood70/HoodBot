@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
-	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
@@ -38,7 +37,7 @@
 	public class Title : IMessageSource, ISimpleTitle
 	{
 		#region Fields
-		private Title subjectPage;
+		private Title? subjectPage;
 		private Title? talkPage;
 		#endregion
 

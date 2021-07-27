@@ -207,7 +207,7 @@
 					this.SupportsMaxLag = api.SupportsMaxLag;
 					this.CurrentUser = (api.CurrentUserInfo?.Flags.HasFlag(UserInfoFlags.Anonymous) ?? true) ? null : api.CurrentUserInfo.Name;
 					this.WriteEntryPoint =
-						general.Flags.HasFlag(SiteInfoFlags.WriteApi) ? EntryPoint.Api :
+						(general.Flags & SiteInfoFlags.WriteApi) != 0 ? EntryPoint.Api :
 						this.Index == null ? EntryPoint.None :
 						EntryPoint.Index;
 

@@ -67,8 +67,8 @@ namespace RobinHood70.WallE.Eve.Modules
 				.AddFormat("json")
 				.AddIf("formatversion", wal.DetectedFormatVersion, wal.DetectedFormatVersion > 1)
 				.Add("utf8", wal.Utf8 && wal.DetectedFormatVersion != 2)
-				.AddIf("assert", wal.Assert!, wal.ValidStopCheckMethods.HasFlag(StopCheckMethods.Assert) && !string.IsNullOrEmpty(wal.Assert))
-				.AddIfNotNullIf("assertuser", wal.CurrentUserInfo?.Name, wal.ValidStopCheckMethods.HasFlag(StopCheckMethods.UserNameCheck) && wal.SiteVersion >= 128)
+				.AddIf("assert", wal.Assert!, (wal.ValidStopCheckMethods & StopCheckMethods.Assert) != 0 && !string.IsNullOrEmpty(wal.Assert))
+				.AddIfNotNullIf("assertuser", wal.CurrentUserInfo?.Name, (wal.ValidStopCheckMethods & StopCheckMethods.UserNameCheck) != 0 && wal.SiteVersion >= 128)
 				.AddIf("maxlag", wal.MaxLag, wal.SupportsMaxLag && wal.MaxLag != 0) // Can be -1 for testing, so check != 0 rather than > 0
 				.Add("curtimestamp", this.GetTimeStamp && wal.SiteVersion >= 124);
 		}

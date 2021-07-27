@@ -1162,7 +1162,7 @@
 			var doGuess = true;
 			foreach (var item in siteInfo.InterwikiMap)
 			{
-				if (item.Flags.HasFlag(InterwikiMapFlags.LocalInterwiki))
+				if ((item.Flags & InterwikiMapFlags.LocalInterwiki) != 0)
 				{
 					doGuess = false;
 					break;

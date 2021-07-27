@@ -264,7 +264,7 @@
 			ThrowNull(input, nameof(input));
 			ThrowNull(input.Title, nameof(input), nameof(input.Title));
 			var inputTitle = Title.FromName(this.Site, input.Title);
-			if (inputTitle.Namespace != MediaWikiNamespaces.File && input.LinkTypes.HasFlag(BacklinksTypes.ImageUsage))
+			if (inputTitle.Namespace != MediaWikiNamespaces.File && (input.LinkTypes & BacklinksTypes.ImageUsage) != 0)
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
 			}
@@ -520,7 +520,7 @@
 			{
 				var flags = item.Flags;
 				var page = retval.AddNewItem(new TitleParser(this.Site, item.Title));
-				page.PopulateFlags(flags.HasFlag(PurgeFlags.Invalid), flags.HasFlag(PurgeFlags.Missing));
+				page.PopulateFlags((flags & PurgeFlags.Invalid) != 0, (flags & PurgeFlags.Missing) != 0);
 			}
 
 			return retval;
@@ -538,7 +538,7 @@
 			{
 				var flags = item.Flags;
 				var page = pages.AddNewItem(new TitleParser(this.Site, item.Title));
-				page.PopulateFlags(false, flags.HasFlag(WatchFlags.Missing));
+				page.PopulateFlags(false, (flags & WatchFlags.Missing) != 0);
 			}
 
 			return pages;

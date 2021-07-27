@@ -43,8 +43,8 @@
 			request
 				.AddFlags("prop", prop)
 				.Add(this.SiteVersion < 118 ? "sessionkey" : "filekey", input.FileKeys)
-				.AddIf("urlwidth", input.UrlWidth, prop.HasFlag(StashImageProperties.Url) && input.UrlWidth > 0)
-				.AddIf("urlheight", input.UrlHeight, prop.HasFlag(StashImageProperties.Url) && input.UrlHeight > 0)
+				.AddIf("urlwidth", input.UrlWidth, (prop & StashImageProperties.Url) != 0 && input.UrlWidth > 0)
+				.AddIf("urlheight", input.UrlHeight, (prop & StashImageProperties.Url) != 0 && input.UrlHeight > 0)
 				.AddIfNotNullIf("urlparam", input.UrlParameter, this.SiteVersion >= 118);
 		}
 

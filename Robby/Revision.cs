@@ -18,7 +18,7 @@
 			this.Anonymous = contributionItem.UserId == 0;
 			this.Comment = contributionItem.Comment;
 			this.Id = contributionItem.RevisionId;
-			this.Minor = contributionItem.Flags.HasFlag(UserContributionFlags.Minor);
+			this.Minor = (contributionItem.Flags & UserContributionFlags.Minor) != 0;
 			this.ParentId = contributionItem.ParentId;
 			this.Text = null;
 			this.Timestamp = contributionItem.Timestamp;
@@ -30,10 +30,10 @@
 		protected internal Revision(RevisionItem revisionItem)
 		{
 			ThrowNull(revisionItem, nameof(revisionItem));
-			this.Anonymous = revisionItem.Flags.HasFlag(RevisionFlags.Anonymous);
+			this.Anonymous = (revisionItem.Flags & RevisionFlags.Anonymous) != 0;
 			this.Comment = revisionItem.Comment;
 			this.Id = revisionItem.RevisionId;
-			this.Minor = revisionItem.Flags.HasFlag(RevisionFlags.Minor);
+			this.Minor = (revisionItem.Flags & RevisionFlags.Minor) != 0;
 			this.ParentId = revisionItem.ParentId;
 			this.Text = revisionItem.Content;
 			this.Timestamp = revisionItem.Timestamp;

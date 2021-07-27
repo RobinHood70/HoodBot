@@ -44,7 +44,7 @@
 				.AddIfPositive("revid", input.RevisionId)
 				.Add("includecomments", input.IncludeComments)
 				.AddFlagsIf("prop", prop, this.SiteVersion >= 124)
-				.AddIf("generatexml", input.Properties.HasFlag(ExpandTemplatesProperties.ParseTree), this.SiteVersion < 124);
+				.AddIf("generatexml", (input.Properties & ExpandTemplatesProperties.ParseTree) != 0, this.SiteVersion < 124);
 		}
 
 		protected override ExpandTemplatesResult DeserializeResult(JToken? result)

@@ -29,8 +29,8 @@
 			this.pageFactory = pageFactory;
 			this.input = input;
 			var props =
-				((wal.ValidStopCheckMethods.HasFlag(StopCheckMethods.UserNameCheck) && wal.SiteVersion < 128) ? UserInfoProperties.BlockInfo : UserInfoProperties.None)
-				| (wal.ValidStopCheckMethods.HasFlag(StopCheckMethods.TalkCheckQuery) ? UserInfoProperties.HasMsg : UserInfoProperties.None);
+				(((wal.ValidStopCheckMethods & StopCheckMethods.UserNameCheck) != 0 && wal.SiteVersion < 128) ? UserInfoProperties.BlockInfo : UserInfoProperties.None)
+				| ((wal.ValidStopCheckMethods & StopCheckMethods.TalkCheckQuery) != 0 ? UserInfoProperties.HasMsg : UserInfoProperties.None);
 			if (props != UserInfoProperties.None)
 			{
 				var userInfoInput = new UserInfoInput() { Properties = props };

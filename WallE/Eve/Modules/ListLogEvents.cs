@@ -38,7 +38,7 @@
 
 		#region Constructors
 		public ListLogEvents(WikiAbstractionLayer wal, LogEventsInput input)
-			: base(wal, input) => this.getUserId = input.Properties.HasFlag(LogEventsProperties.UserId);
+			: base(wal, input) => this.getUserId = (input.Properties & LogEventsProperties.UserId) != 0;
 		#endregion
 
 		#region Public Override Properties

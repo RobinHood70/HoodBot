@@ -40,7 +40,7 @@
 			ThrowNull(request, nameof(request));
 			ThrowNull(input, nameof(input));
 			request
-				.AddIf("url", input.Properties.HasFlag(InterwikiLinksProperties.Url), this.SiteVersion < 124)
+				.AddIf("url", (input.Properties & InterwikiLinksProperties.Url) != 0, this.SiteVersion < 124)
 				.AddFlagsIf("prop", input.Properties, this.SiteVersion >= 124)
 				.AddIfNotNull("prefix", input.Prefix)
 				.AddIfNotNull("title", input.Title)

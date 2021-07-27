@@ -80,9 +80,9 @@
 		protected internal void PopulateFrom(AllMessagesItem item)
 		{
 			ThrowNull(item, nameof(item));
-			this.PopulateFlags(false, item.Flags.HasFlag(MessageFlags.Missing));
-			this.Customized = item.Flags.HasFlag(MessageFlags.Customized);
-			this.DefaultMissing = item.Flags.HasFlag(MessageFlags.DefaultMissing);
+			this.PopulateFlags(false, (item.Flags & MessageFlags.Missing) != 0);
+			this.Customized = (item.Flags & MessageFlags.Customized) != 0;
+			this.DefaultMissing = (item.Flags & MessageFlags.DefaultMissing) != 0;
 			this.DefaultMessage = item.Default;
 			this.NormalizedName = item.NormalizedName;
 			this.Text = item.Content ?? item.Default;
@@ -96,7 +96,7 @@
 		protected override void PopulateCustomResults(PageItem pageItem)
 		{
 			ThrowNull(pageItem, nameof(pageItem));
-			if (pageItem.Flags.HasFlag(PageFlags.Missing))
+			if ((pageItem.Flags & PageFlags.Missing) != 0)
 			{
 				var input = new AllMessagesInput() { Messages = new[] { this.PageName } };
 				var result = this.Site.AbstractionLayer.AllMessages(input);

@@ -18,8 +18,8 @@
 			ThrowNull(item, nameof(item));
 			this.Site = site;
 			this.Language = item.Language;
-			this.LocalFarm = item.Flags.HasFlag(InterwikiMapFlags.Local);
-			this.LocalWiki = item.Flags.HasFlag(InterwikiMapFlags.LocalInterwiki);
+			this.LocalFarm = (item.Flags & InterwikiMapFlags.Local) != 0;
+			this.LocalWiki = (item.Flags & InterwikiMapFlags.LocalInterwiki) != 0;
 			this.Path = item.Url;
 			this.Prefix = item.Prefix;
 		}

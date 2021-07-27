@@ -942,7 +942,7 @@
 		/// <remarks>No stop checking is performed on logging out.</remarks>
 		public void Logout(bool clear)
 		{
-			if (this.CurrentUserInfo is UserInfoResult userInfo && !userInfo.Flags.HasFlag(UserInfoFlags.Anonymous))
+			if (this.CurrentUserInfo is UserInfoResult userInfo && (userInfo.Flags & UserInfoFlags.Anonymous) == 0)
 			{
 				var input = new LogoutInput();
 				if (this.SiteVersion >= 134)
@@ -1358,7 +1358,7 @@
 		/// <exception cref="WikiException">Thrown when user information could not be retrieved.</exception>
 		protected virtual void DoStopCheck(UserInfoResult? userInfoResult)
 		{
-			if (this.ValidStopCheckMethods.HasFlag(StopCheckMethods.Custom) && (this.CustomStopCheck?.Invoke() == true))
+			if ((this.ValidStopCheckMethods & StopCheckMethods.Custom) != 0 && (this.CustomStopCheck?.Invoke() == true))
 			{
 				throw new StopException(EveMessages.CustomStopCheckFailed);
 			}
@@ -1367,7 +1367,7 @@
 			{
 				if (userInfoResult == null)
 				{
-					Debug.Assert(this.ValidStopCheckMethods.HasFlag(StopCheckMethods.TalkCheckQuery), "Something's not right here, this should've been an integrated check!");
+					Debug.Assert((this.ValidStopCheckMethods & StopCheckMethods.TalkCheckQuery) != 0, "Something's not right here, this should've been an integrated check!");
 					if (this.userTalkChecksIgnored >= this.UserCheckFrequency)
 					{
 						var input = DefaultUserInformation;
@@ -1388,7 +1388,7 @@
 
 				if (userInfoResult != null)
 				{
-					if (this.ValidStopCheckMethods.HasFlag(StopCheckMethods.UserNameCheck)
+					if ((this.ValidStopCheckMethods & StopCheckMethods.UserNameCheck) != 0
 						&& this.SiteVersion < 128
 						&& !string.Equals(this.CurrentUserInfo?.Name, userInfoResult.Name, StringComparison.Ordinal))
 					{
@@ -1396,7 +1396,7 @@
 						throw new StopException(EveMessages.UserNameChanged);
 					}
 
-					if (userInfoResult.Flags.HasFlag(UserInfoFlags.HasMessage)
+					if ((userInfoResult.Flags & UserInfoFlags.HasMessage) != 0
 						&& ((this.ValidStopCheckMethods & StopCheckMethods.TalkChecks) != StopCheckMethods.None))
 					{
 						throw new StopException(EveMessages.TalkPageChanged);
