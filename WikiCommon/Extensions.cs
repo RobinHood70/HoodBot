@@ -3,6 +3,8 @@
 	using System;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
+	using System.Text;
+	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Extension methods for a variety of types.</summary>
 	public static class Extensions
@@ -19,6 +21,25 @@
 		/// <returns>A string with the date in the standard MediaWiki format or <see langword="null"/> if the input value was null.</returns>
 		[return: NotNullIfNotNull("timestamp")]
 		public static string? ToMediaWiki(this DateTime? timestamp) => timestamp == null ? null : ToMediaWiki(timestamp.Value);
+		#endregion
+
+		#region StringBuilderExtensions
+
+		/// <summary>Identical to <see cref="StringBuilder.AppendLine()"/>, but only appends an LF, not a full CRLF.</summary>
+		/// <param name="sb">The sb.</param>
+		/// <returns>The current StringBuilder.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when the <paramref name="sb"/> is null.</exception>
+		public static StringBuilder AppendLinefeed(this StringBuilder sb) => (sb ?? throw ArgumentNull(nameof(sb)))
+			.Append('\n');
+
+		/// <summary>Identical to <see cref="StringBuilder.AppendLine(string?)"/>, but only appends an LF, not a full CRLF.</summary>
+		/// <param name="sb">The sb.</param>
+		/// <param name="value">The text to append before the linefeed.</param>
+		/// <returns>The current StringBuilder.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when the <paramref name="sb"/> is null.</exception>
+		public static StringBuilder AppendLinefeed(this StringBuilder sb, string value) => (sb ?? throw ArgumentNull(nameof(sb)))
+			.Append(value)
+			.Append('\n');
 		#endregion
 	}
 }

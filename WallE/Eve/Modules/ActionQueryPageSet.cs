@@ -12,7 +12,7 @@
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// While there's some code overlap between this and ActionQuery, having the two as separate entities significantly reduces the code complexity in ActionQuery, and in this as well, to a lesser extent.
-	internal sealed class ActionQueryPageSet : ActionModulePageSet<QueryInput, PageItem>, IPageSetGenerator
+	internal sealed class ActionQueryPageSet : ActionModulePageSet<QueryInput, PageItem>
 	{
 		#region Fields
 		private readonly QueryInput input;
@@ -44,8 +44,7 @@
 					: this.Wal.MaximumPageSetSize;
 			*/
 			this.MaximumListSize =
-				this.input.PropertyModules != null &&
-				this.input.PropertyModules.Find(module => string.Equals(module.Name, "revisions", StringComparison.Ordinal)) is PropRevisions revModule &&
+				this.input.PropertyModules?.Find(module => string.Equals(module.Name, "revisions", StringComparison.Ordinal)) is PropRevisions revModule &&
 				revModule.IsRevisionRange
 					? 1
 					: this.Wal.MaximumPageSetSize;
@@ -69,7 +68,7 @@
 		{
 			get
 			{
-				if (this.pagesRemaining > 0 || (this.ContinueModule != null && !this.ContinueModule.BatchComplete))
+				if (this.pagesRemaining > 0 || (this.ContinueModule?.BatchComplete == false))
 				{
 					var enumerator = this.AllModules.GetEnumerator();
 					while (enumerator.MoveNext())
@@ -90,9 +89,15 @@
 		}
 
 		// The idea behind this is that some results may be disqualified or not returned (e.g., pages not found) when trying to reach a specific number of pages, so we always ask for a little extra in order to reduce the number of small queries.
-		protected override int CurrentListSize => (this.pagesRemaining == int.MaxValue || this.pagesRemaining + 10 > this.MaximumListSize)
-			? this.MaximumListSize
-			: (this.pagesRemaining <= 5 ? 10 : this.pagesRemaining + 10);
+		protected override int CurrentListSize =>
+			this.pagesRemaining > this.MaximumListSize - 10
+				? this.MaximumListSize
+				: this.pagesRemaining switch
+				{
+					int.MaxValue => this.MaximumListSize,
+					<= 5 => 10,
+					_ => this.pagesRemaining + 10
+				};
 
 		protected override RequestType RequestType => RequestType.Get;
 		#endregion

@@ -12,7 +12,7 @@
 
 	/// <summary>A collection of Title objects.</summary>
 	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling is a factor of using classes to handle complex inputs and is unavoidable.")]
-	public class TitleCollection : TitleCollection<Title>, IEnumerable<Title>, IMessageSource
+	public class TitleCollection : TitleCollection<Title>, IMessageSource
 	{
 		#region Constructors
 
@@ -154,45 +154,77 @@
 		/// <summary>Purges all pages in the collection.</summary>
 		/// <param name="method">The method.</param>
 		/// <returns>A value indicating the change status of the purge along with a page collection with the purge results.</returns>
-		public ChangeValue<PageCollection> Purge(PurgeMethod method) => this.Count == 0
-				? new ChangeValue<PageCollection>(ChangeStatus.NoEffect, PageCollection.Unlimited(this.Site))
-				: this.Site.PublishChange(
-					PageCollection.UnlimitedDefault(this.Site),
-					this,
-					new Dictionary<string, object?>(StringComparer.Ordinal) { [nameof(method)] = method },
-					() =>
-					{
-						var pages = this.Purge(new PurgeInput(this.ToFullPageNames()) { Method = method });
-						return new ChangeValue<PageCollection>((pages.Count < this.Count) ? ChangeStatus.Failure : ChangeStatus.Success, pages);
-					});
+		public ChangeValue<PageCollection> Purge(PurgeMethod method)
+		{
+			if (this.Count == 0)
+			{
+				return new ChangeValue<PageCollection>(ChangeStatus.NoEffect, PageCollection.Unlimited(this.Site));
+			}
+
+			var disabledResult = PageCollection.UnlimitedDefault(this.Site);
+			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			{
+				[nameof(method)] = method
+			};
+
+			return this.Site.PublishChange(disabledResult, this, parameters, ChangeFunc);
+
+			ChangeValue<PageCollection> ChangeFunc()
+			{
+				var pages = this.Purge(new PurgeInput(this.ToFullPageNames()) { Method = method });
+				var retval = (pages.Count < this.Count)
+					? ChangeStatus.Failure
+					: ChangeStatus.Success;
+				return new ChangeValue<PageCollection>(retval, pages);
+			}
+		}
 
 		/// <summary>Unwatches all pages in the collection.</summary>
 		/// <returns>A value indicating the change status of the unwatch along with a page collection with the unwatch results.</returns>
-		public ChangeValue<PageCollection> Unwatch() => this.Count == 0
-				? new ChangeValue<PageCollection>(ChangeStatus.NoEffect, PageCollection.Unlimited(this.Site))
-				: this.Site.PublishChange(
-					PageCollection.UnlimitedDefault(this.Site, this),
-					this,
-					new Dictionary<string, object?>(StringComparer.Ordinal),
-					() =>
-					{
-						var pages = this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = true });
-						return new ChangeValue<PageCollection>((pages.Count < this.Count) ? ChangeStatus.Failure : ChangeStatus.Success, pages);
-					});
+		public ChangeValue<PageCollection> Unwatch()
+		{
+			if (this.Count == 0)
+			{
+				return new ChangeValue<PageCollection>(ChangeStatus.NoEffect, PageCollection.Unlimited(this.Site));
+			}
+
+			var disabledResult = PageCollection.UnlimitedDefault(this.Site, this);
+			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal);
+			return this.Site.PublishChange(disabledResult, this, parameters, ChangeFunc);
+
+			ChangeValue<PageCollection> ChangeFunc()
+			{
+				var pages = this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = true });
+				var result = (pages.Count < this.Count)
+					? ChangeStatus.Failure
+					: ChangeStatus.Success;
+				return new ChangeValue<PageCollection>(result, pages);
+			}
+		}
 
 		/// <summary>Watches all pages in the collection.</summary>
 		/// <returns>A value indicating the change status of the watch along with a page collection with the watch results.</returns>
-		public ChangeValue<PageCollection> Watch() => this.Count == 0
-				? new ChangeValue<PageCollection>(ChangeStatus.NoEffect, PageCollection.Unlimited(this.Site))
-				: this.Site.PublishChange(
-					PageCollection.UnlimitedDefault(this.Site, this),
-					this,
-					new Dictionary<string, object?>(StringComparer.Ordinal),
-					() =>
-					{
-						var pages = this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = false });
-						return new ChangeValue<PageCollection>((pages.Count < this.Count) ? ChangeStatus.Failure : ChangeStatus.Success, pages);
-					});
+		public ChangeValue<PageCollection> Watch()
+		{
+			if (this.Count == 0)
+			{
+				return new ChangeValue<PageCollection>(ChangeStatus.NoEffect, PageCollection.Unlimited(this.Site));
+			}
+
+			var disabledResult = PageCollection.UnlimitedDefault(this.Site, this);
+			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal);
+
+			return this.Site.PublishChange(disabledResult, this, parameters, ChangeFunc);
+
+			ChangeValue<PageCollection> ChangeFunc()
+			{
+				var pages = this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = false });
+				var result = (pages.Count < this.Count)
+					? ChangeStatus.Failure
+					: ChangeStatus.Success;
+				return new ChangeValue<PageCollection>(result, pages);
+			}
+		}
 		#endregion
 
 		#region Public Override Methods

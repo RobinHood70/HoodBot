@@ -30,23 +30,23 @@
 		/// <returns>A pipe-separated string with all the values from the enumeration.</returns>
 		public string BuildPipedValue(bool supportsUnitSeparator)
 		{
+			const char altSep = '\x1f';
 			var lead = string.Empty;
-			var separator = '|';
 			if (supportsUnitSeparator)
 			{
 				foreach (var item in this.Values)
 				{
 					if (item.Contains('|', StringComparison.Ordinal))
 					{
-						separator = '\x1f';
-						lead += separator; // If using alternate separator, we have to flag this by emitting a leading separator.
+						lead = new string(altSep, 1);
 						break;
 					}
 				}
 			}
 
 			// We used to append an extra pipe to the end if the result ended in =, pipe, or alt-pipe, or if this.Values was empty, but this doesn't seem to be necessary, and could lead to unexpected errors for otherwise valid input. Might be necessary under certain conditions or for certain MW versions, though, so restore that if needed.
-			return lead + string.Join(separator, this.Values);
+			var sep = lead.Length == 0 ? '|' : altSep;
+			return lead + string.Join(sep, this.Values);
 		}
 		#endregion
 

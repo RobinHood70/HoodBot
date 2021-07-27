@@ -3,6 +3,7 @@
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.CommonCode.Globals;
+	using static RobinHood70.WallE.Eve.Exceptions;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ContinueModule2 : ContinueModule

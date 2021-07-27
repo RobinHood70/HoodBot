@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -37,7 +38,7 @@
 				if (page.Exists && template != null)
 				{
 					var mapType = lookup[page.PageName];
-					Debug.WriteLine($"{mapType}, {template.Find("type")?.Value}, {template.Find("zone")?.Value}, {template.Find("zoneName")?.Value}, {template.Find("settlement")?.Value}");
+					Debug.WriteLine($"{mapType.ToStringInvariant()}, {template.Find("type")?.Value}, {template.Find("zone")?.Value}, {template.Find("zoneName")?.Value}, {template.Find("settlement")?.Value}");
 				}
 			}
 		}

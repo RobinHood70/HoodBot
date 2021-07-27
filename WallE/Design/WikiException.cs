@@ -10,13 +10,12 @@
 	/// <seealso cref="Exception" />
 	/// <seealso cref="ISerializable" />
 	[Serializable]
-	public class WikiException : Exception, ISerializable
+	public class WikiException : Exception
 	{
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="WikiException" /> class.</summary>
 		public WikiException()
-			: base()
 		{
 		}
 

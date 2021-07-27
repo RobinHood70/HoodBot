@@ -142,9 +142,9 @@
 			}
 
 			var quartile = (int)((double)sum / (this.Places.Count * 2));
-			Remove((place, count) => count < quartile);
+			Remove((_, count) => count < quartile);
 			Remove(
-				(place, count) =>
+				(place, _) =>
 				{
 					foreach (var subPlace in this.Places)
 					{

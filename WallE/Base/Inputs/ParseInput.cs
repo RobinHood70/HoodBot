@@ -44,7 +44,7 @@ namespace RobinHood70.WallE.Base
 	}
 	#endregion
 
-	public class ParseInput
+	public sealed class ParseInput
 	{
 		#region Constructors
 		private ParseInput()

@@ -170,7 +170,7 @@
 				"{{Archive Footer}}",
 				false,
 				"archive protection policy")));
-			this.searchList.Add(new ProtectionInfo(talkSpaces, @"/Arc", new PageProtection(
+			this.searchList.Add(new ProtectionInfo(talkSpaces, "/Arc", new PageProtection(
 				"Unnumbered Archives",
 				ProtectionLevel.Semi,
 				ProtectionLevel.Semi,
@@ -278,7 +278,7 @@
 			}
 
 			var headerTemplate = (SiteTemplateNode)nodes.Factory.TemplateNodeFromWikiText(header);
-			var index = nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue == headerTemplate.TitleValue);
+			var index = nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue.SimpleEquals(headerTemplate.TitleValue));
 			if (index != -1)
 			{
 				var existing = (SiteTemplateNode)nodes[index];
@@ -380,20 +380,16 @@
 			{
 				foreach (var match in (IEnumerable<Match>)Dates.Matches(node.Text))
 				{
-					if (DateTime.TryParse(match.ToString(), parser.Site.Culture, System.Globalization.DateTimeStyles.AssumeUniversal, out var testDate))
+					if (DateTime.TryParse(match.ToString(), parser.Site.Culture, System.Globalization.DateTimeStyles.AssumeUniversal, out var testDate) && testDate < minDate)
 					{
-						if (testDate < minDate)
-						{
-							minDate = testDate;
-						}
+						minDate = testDate;
 					}
 				}
 			}
 
-			var replaceDate = minDate < DateTime.MaxValue
+			return minDate < DateTime.MaxValue
 				? minDate.ToString("yyyy MMMM", parser.Site.Culture)
 				: string.Empty;
-			return replaceDate;
 		}
 
 		private static int InsertStandardProtectionTemplate(ContextualParser parser, PageProtection protection, int insertPos, string editWord, string moveWord)

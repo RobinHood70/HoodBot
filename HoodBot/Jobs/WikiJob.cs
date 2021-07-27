@@ -111,7 +111,7 @@
 		public void StatusWrite(string status)
 		{
 			this.JobManager.StatusMonitor?.Report(status);
-			this.FlowControlAsync();
+			this.FlowControl();
 		}
 
 		public void StatusWriteLine(string status) => this.StatusWrite(status + Environment.NewLine);
@@ -148,7 +148,7 @@
 		{
 			this.Started?.Invoke(this, EventArgs.Empty);
 			this.BeforeLogging();
-			if (this.Logger != null && this.Logger.ShouldLog(this.JobType))
+			if (this.Logger?.ShouldLog(this.JobType) == true)
 			{
 				this.StatusWriteLine("Adding Log Entry");
 				var logInfo = new LogInfo(this.LogName ?? "Unknown Job Type", this.LogDetails);
@@ -156,7 +156,7 @@
 			}
 		}
 
-		protected virtual void FlowControlAsync()
+		protected virtual void FlowControl()
 		{
 			if (this.JobManager.PauseToken is PauseToken pause && pause.IsPaused)
 			{
@@ -171,7 +171,7 @@
 
 		protected virtual void JobCompleted()
 		{
-			if (this.Logger != null && this.Logger.ShouldLog(this.JobType))
+			if (this.Logger?.ShouldLog(this.JobType) == true)
 			{
 				this.StatusWriteLine("Ending Log Entry");
 				this.Logger.EndLogEntry();
@@ -183,7 +183,7 @@
 		protected virtual void UpdateProgress()
 		{
 			this.JobManager.ProgressMonitor?.Report(this.ProgressPercent);
-			this.FlowControlAsync();
+			this.FlowControl();
 		}
 
 		// Same as UpdateProgress/UpdateStatus but with only one pause/cancel check.
@@ -191,7 +191,7 @@
 		{
 			this.JobManager.ProgressMonitor?.Report(this.ProgressPercent);
 			this.JobManager.StatusMonitor?.Report(status);
-			this.FlowControlAsync();
+			this.FlowControl();
 		}
 
 		protected virtual void UpdateProgressWriteLine(string status) => this.UpdateProgressWrite(status + Environment.NewLine);

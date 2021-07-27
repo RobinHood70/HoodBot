@@ -76,8 +76,8 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="PageLoadOptions"/> class with a custom set of modules.</summary>
-		/// <param name="followRedirects">Indicates whether redirects should be followed when loading.</param>
 		/// <param name="modules">The modules to load.</param>
+		/// <param name="followRedirects">Indicates whether redirects should be followed when loading.</param>
 		public PageLoadOptions(PageModules modules, bool followRedirects)
 		{
 			this.FollowRedirects = followRedirects;

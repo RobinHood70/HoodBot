@@ -35,13 +35,10 @@
 
 			var merged = false;
 			var last = this.Count - 1;
-			if (last > -1)
+			if (last > -1 && this[last] is ITextNode lastNode && newList[0] is ITextNode first)
 			{
-				if (this[last] is ITextNode lastNode && newList[0] is ITextNode first)
-				{
-					lastNode.Text += first.Text;
-					merged = true;
-				}
+				lastNode.Text += first.Text;
+				merged = true;
 			}
 
 			this.AddRange(merged ? newList.GetRange(1, newList.Count - 1) : newList);

@@ -75,12 +75,9 @@
 				// Simple error handling for now; should probably limit input to digits and copy-paste/select/movement keys.
 				this.Value = 0;
 			}
-			else
+			else if (this.Value != value)
 			{
-				if (this.Value != value)
-				{
-					this.Value = value;
-				}
+				this.Value = value;
 			}
 		}
 

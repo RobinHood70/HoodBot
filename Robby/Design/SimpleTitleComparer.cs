@@ -1,11 +1,12 @@
 ﻿namespace RobinHood70.Robby.Design
 {
+	using System.Collections;
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
 
 	/// <summary>An ISimpleTitle comparer which sorts by namespace and page name.</summary>
 	/// <seealso cref="Comparer{T}" />
-	public sealed class SimpleTitleComparer : IComparer<ISimpleTitle>
+	public sealed class SimpleTitleComparer : IComparer<ISimpleTitle>, IComparer
 	{
 		#region Constructors
 		private SimpleTitleComparer()
@@ -60,6 +61,8 @@
 				? string.Compare(x.PageName, y.PageName, true, siteCulture)
 				: string.Compare(x.PageName.UpperFirst(siteCulture), y.PageName.UpperFirst(siteCulture), true, siteCulture);
 		}
+
+		int IComparer.Compare(object? x, object? y) => this.Compare(x as ISimpleTitle, y as ISimpleTitle);
 		#endregion
 	}
 }

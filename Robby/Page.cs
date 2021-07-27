@@ -268,25 +268,33 @@
 			}
 
 			var changeArgs = new PageTextChangeArgs(this, nameof(this.Save), editSummary, isMinor, isBotEdit, recreateIfJustDeleted);
-			return this.Site.PublishPageTextChange(
-				changeArgs,
-				() => // Modification status re-checked here because a subscriber may have reverted the page.
-					!this.TextModified ? ChangeStatus.NoEffect :
-					string.Equals(
-						this.Site.AbstractionLayer.Edit(new EditInput(this.FullPageName, this.Text)
-						{
-							BaseTimestamp = this.CurrentRevision?.Timestamp,
-							StartTimestamp = this.StartTimestamp,
-							Bot = changeArgs.BotEdit,
-							Minor = changeArgs.Minor ? Tristate.True : Tristate.False,
-							Recreate = changeArgs.RecreateIfJustDeleted,
-							Summary = changeArgs.EditSummary,
-							RequireNewPage = createOnly,
-						}).Result,
-						"Success",
-						StringComparison.Ordinal)
-							? ChangeStatus.Success
-							: ChangeStatus.Failure);
+
+			return this.Site.PublishPageTextChange(changeArgs, ChangeFunc);
+
+			ChangeStatus ChangeFunc()
+			{
+				// Modification status re-checked here because a subscriber may have reverted the page during PublishPageTextChage.
+				if (!this.TextModified)
+				{
+					return ChangeStatus.NoEffect;
+				}
+
+				var input = new EditInput(this.FullPageName, this.Text)
+				{
+					BaseTimestamp = this.CurrentRevision?.Timestamp,
+					StartTimestamp = this.StartTimestamp,
+					Bot = changeArgs.BotEdit,
+					Minor = changeArgs.Minor ? Tristate.True : Tristate.False,
+					Recreate = changeArgs.RecreateIfJustDeleted,
+					Summary = changeArgs.EditSummary,
+					RequireNewPage = createOnly,
+				};
+
+				var retval = this.Site.AbstractionLayer.Edit(input);
+				return string.Equals(retval.Result, "Success", StringComparison.Ordinal)
+					? ChangeStatus.Success
+					: ChangeStatus.Failure;
+			}
 		}
 
 		/// <summary>Sets <see cref="StartTimestamp"/> to 2000-01-01. This allows the Save function to detect if a page has ever been deleted.</summary>

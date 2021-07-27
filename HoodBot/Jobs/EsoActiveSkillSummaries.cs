@@ -68,8 +68,8 @@
 			ThrowNull(template, nameof(template));
 			var baseMorph = skillBase.Morphs[0];
 			var bigChange = this.TrackedUpdate(template, "id", baseMorph.Abilities[3].Id.ToStringInvariant());
-			var baseSkillCost = baseMorph.FullName(baseMorph.CalculatedCost(baseMorph.Costs[3], EsoGeneral.GetPatchVersion(this)));
-			this.UpdateMorphs(skillBase, template, baseMorph, baseSkillCost);
+			var baseSkillCost = baseMorph.FullName(/*Morph.CalculatedCost(baseMorph.Costs[3])*/baseMorph.Costs[3].ToStringInvariant());
+			bigChange |= this.UpdateMorphs(skillBase, template, baseMorph, baseSkillCost);
 
 			bigChange |= this.TrackedUpdate(template, "casttime", FormatSeconds(baseMorph.CastingTime));
 			bigChange |= this.TrackedUpdate(template, "linerank", skillBase.LearnedLevel.ToStringInvariant());
@@ -155,7 +155,7 @@
 					descriptions.Add("Channel Time: " + FormatSeconds(morphChannelTime));
 				}
 
-				var morphSkillCost = morph.FullCost(EsoGeneral.GetPatchVersion(this));
+				var morphSkillCost = morph.FullCost();
 				if (morph.Costs[0] != baseMorph.Costs[3] || !string.Equals(morphSkillCost, baseSkillCost, StringComparison.Ordinal))
 				{
 					descriptions.Add("Cost: " + morphSkillCost);

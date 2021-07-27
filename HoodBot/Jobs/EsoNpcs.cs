@@ -109,8 +109,7 @@
 
 			return new StringBuilder()
 				.Append("{{Minimal|NPC}}")
-				.Append(WikiTextVisitor.Raw(template))
-				.AppendLine()
+				.AppendLine(WikiTextVisitor.Raw(template))
 				.AppendLine()
 				.AppendLine("<!-- Instructions: Provide an initial sentence summarizing the NPC (race, job, where they live). Subsequent paragraphs provide additional information about the NPC, such as related NPCs, schedule, equipment, etc. Note that quest-specific information DOES NOT belong on this page, but instead goes on the appropriate quest page. Spoilers should be avoided.-->")
 				.AppendLine("{{NewLeft}}")
@@ -130,6 +129,8 @@
 				.AppendLine("{{Stub|NPC}}")
 				.ToString();
 		}
+
+		private static int NpcComparer((NpcData Npc, string Issue) x, (NpcData Npc, string Issue) y) => SimpleTitleComparer.Instance.Compare(x.Npc.Page, y.Npc.Page);
 
 		private static string NpcToWikiText(NpcData npc)
 		{
@@ -279,19 +280,21 @@
 				if (loadPages.TryGetValue(NpcTitle(npcName), out var page))
 				{
 					npc.Page = page;
-					var issue =
-						page.IsDisambiguation == true ? "is a disambiguation with no clear NPC link" :
-						page.IsRedirect ? "is a redirect to a content page without an Online NPC Summary" :
-						(!this.updateMode && page.IsMissing && page.PreviouslyDeleted) ? "was previously deleted" :
-						null;
+					var issue = page switch
+					{
+						Page when page.IsDisambiguation == true => "is a disambiguation with no clear NPC link",
+						Page when page.IsRedirect => "is a redirect to a content page without an Online NPC Summary",
+						Page when !this.updateMode && page.IsMissing && page.PreviouslyDeleted => "was previously deleted",
+						_ => null
+					};
+
 					if (issue == null)
 					{
 						var parsed = new ContextualParser(page);
 						var template = parsed.FindTemplate("Online NPC Summary");
 						if (this.updateMode)
 						{
-							if (template != null &&
-								template.Find("city").IsNullOrWhitespace() &&
+							if (template?.Find("city").IsNullOrWhitespace() == true &&
 								template.Find("settlement").IsNullOrWhitespace() &&
 								template.Find("house").IsNullOrWhitespace() &&
 								template.Find("ship").IsNullOrWhitespace() &&
@@ -322,7 +325,7 @@
 				}
 			}
 
-			issues.Sort(new NpcComparer());
+			issues.Sort(NpcComparer);
 			this.WriteLine("{| class=\"wikitable sortable\"");
 			this.WriteLine("! Page !! Issue !! NPC Data");
 			foreach (var (npc, issue) in issues)
@@ -335,20 +338,6 @@
 
 			this.WriteLine("|}");
 			return retval;
-		}
-		#endregion
-
-		#region Private Classes
-		private sealed class NpcComparer : IComparer<(NpcData Npc, string Issue)>
-		{
-			public int Compare((NpcData Npc, string Issue) x, (NpcData Npc, string Issue) y) =>
-				x.Npc.Page is null
-					? y.Npc.Page is null
-						? 0
-						: -1
-					: y.Npc.Page is null
-						? 1
-						: SimpleTitleComparer.Instance.Compare(x.Npc.Page, y.Npc.Page);
 		}
 		#endregion
 	}

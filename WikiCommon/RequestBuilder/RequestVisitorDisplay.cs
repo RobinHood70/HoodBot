@@ -28,12 +28,12 @@
 			var visitor = new RequestVisitorDisplay(sb);
 			request.Build(visitor);
 			sb.Replace("%20", "+");
-
-			var methodText =
-				request.Type == RequestType.Get ? "GET" :
-				request.Type == RequestType.Post ? "POST" :
-				"POST (multipart)";
-
+			var methodText = request.Type switch
+			{
+				RequestType.Get => "GET",
+				RequestType.Post => "POST",
+				_ => "POST (multipart)",
+			};
 			return Invariant($"{methodText}: {request.Uri}?{sb}");
 		}
 

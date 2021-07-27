@@ -74,16 +74,23 @@
 		public override string ToString()
 		{
 			// For simple name=value nodes, display the text; otherwise, display "name" and/or "value" as needed so we're not executing time-consuming processing here.
-			var name =
-				this.Anonymous
-					? string.Empty :
-				(this.Name?.Count == 1 && this.Name[0] is TextNode nameNode
-					? nameNode.Text
-					: "<name>") + ' ';
-			var value = this.Value.Count == 1 && this.Value[0] is TextNode valueNode
-				? valueNode.Text
-				: "<value>";
-			return $"|{name}{value}";
+			var retval =
+				this.Value.Count == 1 &&
+				this.Value[0] is TextNode valueNode
+					? valueNode.Text
+					: "<value>";
+			if (!this.Anonymous)
+			{
+				var name =
+					this.Name is NodeCollection nameNodes &&
+					nameNodes.Count == 1 &&
+					nameNodes[0] is TextNode nameNode
+						? nameNode.Text
+						: "<name>";
+				retval = string.Concat(name, "=", retval);
+			}
+
+			return retval;
 		}
 		#endregion
 	}

@@ -50,8 +50,8 @@
 			{
 				var revision = item.GetRevision();
 				list.Add(new RevisionDeleteItem(
-					id: (long)item.MustHave("id"),
 					status: item.MustHaveString("status"),
+					id: (long)item.MustHave("id"),
 					errors: GetRenderedMessages(item["errors"]),
 					warnings: GetRenderedMessages(item["warnings"]),
 					revision: revision));

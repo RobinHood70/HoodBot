@@ -11,10 +11,6 @@
 
 	internal sealed class ListUserContribs : ListModule<UserContributionsInput, UserContributionsItem>
 	{
-		#region Fields
-		private readonly string continueName;
-		#endregion
-
 		#region Constructors
 		public ListUserContribs(WikiAbstractionLayer wal, UserContributionsInput input)
 			: this(wal, input, null)
@@ -22,13 +18,13 @@
 		}
 
 		public ListUserContribs(WikiAbstractionLayer wal, UserContributionsInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator) => this.continueName = this.SiteVersion < 114 || (this.SiteVersion < 123 && input.UserPrefix == null && input.Users != null && !input.Users.IsEmpty())
+			: base(wal, input, pageSetGenerator) => this.ContinueName = this.SiteVersion < 114 || (this.SiteVersion < 123 && input.UserPrefix == null && input.Users?.IsEmpty() == false)
 			? "start"
 			: "continue";
 		#endregion
 
 		#region Public Override Properties
-		public override string ContinueName => this.continueName;
+		public override string ContinueName { get; }
 
 		public override int MinimumVersion => 109;
 

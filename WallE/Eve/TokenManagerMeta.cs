@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using RobinHood70.WallE.Eve.Modules;
 	using static RobinHood70.WallE.Eve.TokensInput;
 
@@ -37,10 +38,7 @@
 			if (this.wal.SiteVersion >= MinimumVersionLogin)
 			{
 				var tokens = this.wal.RunModuleQuery(new MetaTokens(this.wal, new TokensInput(Login)));
-				foreach (var token in tokens)
-				{
-					return token.Value;
-				}
+				return tokens.Count == 0 ? null : tokens.First().Value;
 			}
 
 			return null;
@@ -52,7 +50,7 @@
 
 		public string? SessionToken(string type) => this.AnyToken(TokenManagerFunctions.ValidateTokenType(ValidTypes, type, Edit, Csrf));
 
-		public string? UserRightsToken(string user) => this.AnyToken(UserRights);
+		public string? UserRightsToken(string userName) => this.AnyToken(UserRights);
 		#endregion
 
 		#region Public Methods

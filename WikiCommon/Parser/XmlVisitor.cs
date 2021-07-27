@@ -197,13 +197,14 @@
 			return this;
 		}
 
-		private XmlVisitor BuildTagClose(string name)
+		private void BuildTagClose(string name)
 		{
 			this.indent--;
 			this.Indent();
-			this.builder.Append("</").Append(name).Append(">\n");
-
-			return this;
+			this.builder
+				.Append("</")
+				.Append(name)
+				.Append(">\n");
 		}
 
 		private XmlVisitor BuildTagOpen(string name, Dictionary<string, int>? attributes, bool selfClosed)

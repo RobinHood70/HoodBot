@@ -10,14 +10,14 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public BacklinksInput(string title, BacklinksTypes linkTypes)
 		{
-			this.LinkTypes = linkTypes;
 			this.Title = title;
+			this.LinkTypes = linkTypes;
 		}
 
 		public BacklinksInput(long pageId, BacklinksTypes linkTypes)
 		{
-			this.LinkTypes = linkTypes;
 			this.PageId = pageId;
+			this.LinkTypes = linkTypes;
 		}
 
 		public BacklinksInput(BacklinksInput input, BacklinksTypes linkType)
@@ -25,13 +25,13 @@ namespace RobinHood70.WallE.Base
 			ThrowNull(input, nameof(input));
 			this.FilterRedirects = input.FilterRedirects;
 			this.Limit = input.Limit;
-			this.LinkTypes = linkType;
 			this.MaxItems = input.MaxItems;
 			this.PageId = input.PageId;
 			this.Redirect = input.Redirect;
 			this.SortDescending = input.SortDescending;
 			this.Title = input.Title;
 			this.Namespace = input.Namespace;
+			this.LinkTypes = linkType;
 		}
 		#endregion
 

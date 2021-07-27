@@ -88,9 +88,11 @@
 					}
 					catch (CryptographicException)
 					{
+						// Do nothing
 					}
 					catch (FormatException)
 					{
+						// Do nothing
 					}
 
 					this.ConnectionStrings.Add(node.Name, text);
@@ -140,7 +142,7 @@
 				connectionStrings.Add(connectionString.Key, Settings.Encrypter.Encrypt(connectionString.Value));
 			}
 
-			var json = new JObject
+			return new JObject
 			{
 				{ nameof(this.BotDataFolder), new JValue(this.BotDataFolder) },
 				{ nameof(this.ConnectionStrings), connectionStrings },
@@ -148,8 +150,6 @@
 				{ nameof(this.SelectedName), new JValue(this.SelectedName) },
 				{ nameof(this.Wikis), wikis }
 			};
-
-			return json;
 		}
 		#endregion
 
@@ -163,12 +163,15 @@
 			}
 			catch (ArgumentException)
 			{
+				// Do nothing
 			}
 			catch (NotSupportedException)
 			{
+				// Do nothing
 			}
 			catch (PathTooLongException)
 			{
+				// Do nothing
 			}
 
 			return false;

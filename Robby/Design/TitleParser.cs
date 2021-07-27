@@ -159,7 +159,7 @@
 		public InterwikiEntry? Interwiki { get; }
 
 		/// <summary>Gets a value indicating whether this object represents the local wiki (either via being a direct link or local interwiki link.</summary>
-		public bool IsLocal => this.Interwiki == null || this.Interwiki.LocalWiki;
+		public bool IsLocal => this.Interwiki?.LocalWiki != false;
 
 		/// <inheritdoc/>
 		public Namespace Namespace { get; }

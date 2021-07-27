@@ -142,17 +142,16 @@
 			var places = EsoGeneral.GetPlaces(this.Site);
 			foreach (var quest in quests)
 			{
-				if (allPages.Contains(quest.FullPageName))
+				var disambigName = quest.FullPageName + " (quest)";
+				if (allPages.Contains(disambigName))
 				{
-					quest.FullPageName += " (quest)";
-					if (allPages.Contains(quest.FullPageName))
-					{
-						continue;
-					}
+					quest.FullPageName = disambigName;
 				}
-
-				GetZone(places, quest);
-				this.Pages.Add(this.NewPage(quest));
+				else if (!allPages.Contains(quest.FullPageName))
+				{
+					GetZone(places, quest);
+					this.Pages.Add(this.NewPage(quest));
+				}
 			}
 
 			this.ProgressMaximum = this.Pages.Count + 1;
@@ -221,7 +220,7 @@
 					foreach (var wikiQuest in wikiQuests)
 					{
 						var splitName = wikiQuest.PageName.Split(" (", StringSplitOptions.None);
-						if (string.Compare(splitName[0], quest.Name, StringComparison.OrdinalIgnoreCase) == 0)
+						if (string.Equals(splitName[0], quest.Name, StringComparison.OrdinalIgnoreCase))
 						{
 							missing = false;
 							break;

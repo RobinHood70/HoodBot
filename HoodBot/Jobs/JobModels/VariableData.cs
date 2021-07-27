@@ -4,7 +4,7 @@
 	using System.Collections.Generic;
 
 	internal sealed class VariableData<T> : List<T>
-		where T : IEquatable<T> // , IConvertible
+		where T : IEquatable<T>
 	{
 		#region Public Properties
 		public bool AllEqual

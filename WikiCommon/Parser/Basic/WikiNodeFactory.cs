@@ -264,8 +264,9 @@
 						sb.Append('\n');
 					}
 
-					sb.Append('|');
-					sb.Append(parameter);
+					sb
+						.Append('|')
+						.Append(parameter);
 				}
 
 				if (addTrailingLine)
@@ -340,8 +341,9 @@
 					sb.Append('|');
 					if (name != null)
 					{
-						sb.Append(name);
-						sb.Append('=');
+						sb
+							.Append(name)
+							.Append('=');
 					}
 
 					sb.Append(EscapeParameterValue(value));

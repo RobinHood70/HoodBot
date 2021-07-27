@@ -46,7 +46,7 @@ namespace RobinHood70.WallE.Base
 			this.RealName = realName;
 			this.UnreadCount = -1;
 			this.UnreadText = unreadText;
-			if (unreadText != null && unreadText.Length > 0)
+			if (unreadText?.Length > 0)
 			{
 				unreadText = unreadText.TrimEnd('+');
 				if (int.TryParse(unreadText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))

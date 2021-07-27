@@ -13,48 +13,45 @@
 	public delegate void ParameterReplacer(Page page, SiteTemplateNode template);
 
 	/// <summary>Underlying job to move pages. This partial class contains the parameter replacer methods, while the other one contains the job logic.</summary>
-	public class ParameterReplacers : Dictionary<ISimpleTitle, ICollection<ParameterReplacer>>
+	public class ParameterReplacers
 	{
 		#region Fields
 		private readonly MovePagesJob job;
-		private readonly UespNamespaceList uespNamespaceList;
-		private readonly ICollection<ParameterReplacer> generic = new List<ParameterReplacer>();
+		private readonly List<ParameterReplacer> generalReplacers = new();
+		private readonly Dictionary<ISimpleTitle, List<ParameterReplacer>> templateReplacers = new(SimpleTitleEqualityComparer.Instance);
+		private UespNamespaceList? nsList;
 		#endregion
 
 		// TODO: Create tags similar to JobInfo that'll tag each method with the site and template it's designed for, so AddAllReplacers can be programmatic rather than a manual list.
 		#region Constructors
 		public ParameterReplacers(MovePagesJob job)
-			: base(SimpleTitleEqualityComparer.Instance)
 		{
 			ThrowNull(job, nameof(job));
 			this.job = job;
-			this.uespNamespaceList = new UespNamespaceList(job.Site);
-			this.Add("Book Link", this.LoreFirst);
-			this.Add("Bullet Link", this.BulletLink);
-			this.Add("Cat Footer", this.CatFooter);
-			this.Add("Cite Book", this.LoreFirst);
-			this.Add("Edit Link", this.FullPageNameFirst);
-			this.Add("ESO Set List", this.PageNameAllNumeric);
-			this.Add("Lore Link", this.LoreFirst);
-			this.Add("Game Book", this.GameBookGeneral);
-			this.Add("Online NPC Summary", this.EsoNpc);
-			this.Add("Pages In Category", this.CategoryFirst);
-			this.Add("Quest Header", this.GenericIcon);
-			this.Add("Soft Redirect", this.FullPageNameFirst);
-
-			this.generic.Add(this.GenericIcon);
-			this.generic.Add(this.GenericImage);
+			this.AddAllReplacers();
 		}
 		#endregion
 
+		#region Private Properties
+		private UespNamespaceList NamespaceList => this.nsList ??= new UespNamespaceList(this.job.Site);
+		#endregion
+
 		#region Public Methods
-		public void Add(string name, params ParameterReplacer[] replacers)
+		public void AddGeneralReplacers(params ParameterReplacer[] replacers)
+		{
+			foreach (var replacer in replacers)
+			{
+				this.generalReplacers.Add(replacer);
+			}
+		}
+
+		public void AddTemplateReplacers(string name, params ParameterReplacer[] replacers)
 		{
 			var title = Title.Coerce(this.job.Site, MediaWikiNamespaces.Template, name);
-			if (!this.TryGetValue(title, out var currentReplacers))
+			if (!this.templateReplacers.TryGetValue(title, out var currentReplacers))
 			{
 				currentReplacers = new List<ParameterReplacer>();
-				this.Add(title, currentReplacers);
+				this.templateReplacers.Add(title, currentReplacers);
 			}
 
 			foreach (var replacer in replacers)
@@ -66,12 +63,12 @@
 		public void ReplaceAll(Page page, SiteTemplateNode template)
 		{
 			ThrowNull(template, nameof(template));
-			foreach (var action in this.generic)
+			foreach (var action in this.generalReplacers)
 			{
 				action(page, template);
 			}
 
-			if (this.TryGetValue(template.TitleValue, out var replacementActions))
+			if (this.templateReplacers.TryGetValue(template.TitleValue, out var replacementActions))
 			{
 				foreach (var action in replacementActions)
 				{
@@ -88,7 +85,7 @@
 			{
 				ThrowNull(page, nameof(page));
 				var nsBase = template.Find("ns_base", "ns_id");
-				var ns = nsBase != null && this.uespNamespaceList.TryGetValue(nsBase.Value.ToValue(), out var uespNamespace)
+				var ns = nsBase != null && this.NamespaceList.TryGetValue(nsBase.Value.ToValue(), out var uespNamespace)
 					? uespNamespace.BaseTitle.Namespace
 					: page.Namespace;
 
@@ -99,7 +96,7 @@
 					link.Value.Clear();
 					link.SetValue(replacement.To.PageName);
 
-					if (this.uespNamespaceList.FromTitle(replacement.To) is UespNamespace newNs
+					if (this.NamespaceList.FromTitle(replacement.To) is UespNamespace newNs
 						&& newNs.BaseTitle.Namespace != ns)
 					{
 						if (nsBase == null)
@@ -111,7 +108,7 @@
 							nsBase.SetValue(newNs.Id);
 						}
 
-						if (replacement.To == newNs.MainPage)
+						if (replacement.To.SimpleEquals(newNs.MainPage))
 						{
 							template.Add("altname", oldTitle);
 						}
@@ -144,6 +141,23 @@
 		#endregion
 
 		#region Private Methods
+		private void AddAllReplacers()
+		{
+			this.AddGeneralReplacers(this.GenericIcon, this.GenericImage);
+			this.AddTemplateReplacers("Book Link", this.LoreFirst);
+			this.AddTemplateReplacers("Bullet Link", this.BulletLink);
+			this.AddTemplateReplacers("Cat Footer", this.CatFooter);
+			this.AddTemplateReplacers("Cite Book", this.LoreFirst);
+			this.AddTemplateReplacers("Edit Link", this.FullPageNameFirst);
+			this.AddTemplateReplacers("ESO Set List", this.PageNameAllNumeric);
+			this.AddTemplateReplacers("Lore Link", this.LoreFirst);
+			this.AddTemplateReplacers("Game Book", this.GameBookGeneral);
+			this.AddTemplateReplacers("Online NPC Summary", this.EsoNpc);
+			this.AddTemplateReplacers("Pages In Category", this.CategoryFirst);
+			this.AddTemplateReplacers("Quest Header", this.GenericIcon);
+			this.AddTemplateReplacers("Soft Redirect", this.FullPageNameFirst);
+		}
+
 		private void FullPageNameReplace([NotNull] Page page, IParameterNode? param)
 		{
 			ThrowNull(page, nameof(page));
@@ -179,18 +193,6 @@
 				&& toLink.Namespace == ns)
 			{
 				param.SetValue(toLink.PageName);
-			}
-		}
-
-		private void PageNameReplaceAddExtension(IParameterNode? param, int ns, string ext)
-		{
-			if (param != null
-				&& new Title(this.job.Site[ns], param.Value.ToValue() + ext) is var title
-				&& this.job.Replacements.TryGetValue(title, out var replacement)
-				&& replacement.To is ISimpleTitle toLink
-				&& toLink.Namespace == ns)
-			{
-				param.SetValue(toLink.PageName[0..^ext.Length]);
 			}
 		}
 		#endregion

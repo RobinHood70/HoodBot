@@ -3,7 +3,6 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Collections.Immutable;
 
 	#region Public Enumerations
 	[Flags]
@@ -71,9 +70,9 @@ namespace RobinHood70.WallE.Base
 
 		public string? Preload { get; }
 
-		public IReadOnlyList<ProtectionsItem> Protections { get; } = Array.Empty<ProtectionsItem>();
+		public IReadOnlyList<ProtectionsItem> Protections { get; }
 
-		public IReadOnlyList<string> RestrictionTypes { get; } = Array.Empty<string>();
+		public IReadOnlyList<string> RestrictionTypes { get; }
 
 		public DateTime? StartTimestamp { get; }
 
@@ -81,9 +80,9 @@ namespace RobinHood70.WallE.Base
 
 		public long TalkId { get; }
 
-		public IReadOnlyDictionary<string, bool> TestActions { get; } = ImmutableDictionary<string, bool>.Empty;
+		public IReadOnlyDictionary<string, bool> TestActions { get; }
 
-		public IReadOnlyDictionary<string, string> Tokens { get; } = ImmutableDictionary<string, string>.Empty;
+		public IReadOnlyDictionary<string, string> Tokens { get; }
 
 		public DateTime? Touched { get; }
 

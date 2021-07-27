@@ -22,6 +22,7 @@
 	[Flags]
 	public enum FollowUpActions
 	{
+		None = 0,
 		CheckLinksRemaining = 1,
 		EmitReport = 1 << 1,
 		FixLinks = 1 << 2,
@@ -110,10 +111,13 @@
 
 					if (this.MoveAction != MoveAction.None)
 					{
-						list.Add(
-							this.RedirectOption == RedirectOption.Suppress ? "suppress redirects" :
-							this.RedirectOption == RedirectOption.Create ? "create redirects" :
-							"create redirects but propose them for deletion");
+						var value = this.RedirectOption switch
+						{
+							RedirectOption.Suppress => "suppress redirects",
+							RedirectOption.Create => "create redirects",
+							_ => "create redirects but propose them for deletion",
+						};
+						list.Add(value);
 					}
 
 					if (this.FollowUpActions.HasFlag(FollowUpActions.FixLinks))
@@ -164,13 +168,13 @@
 
 		protected int MoveDelay { get; set; }
 
-		protected MoveOptions MoveExtra { get; set; } = MoveOptions.None;
+		protected MoveOptions MoveExtra { get; set; }
 
 		protected PageModules PageInfoExtraModules { get; set; }
 
 		protected bool RecursiveCategoryMembers { get; set; } = true;
 
-		protected RedirectOption RedirectOption { get; set; } = RedirectOption.Suppress;
+		protected RedirectOption RedirectOption { get; set; }
 
 		protected bool SuppressRedirects { get; set; } = true;
 		#endregion
@@ -251,7 +255,7 @@
 					foreach (var replacement in this.Replacements)
 					{
 						if (replacement.Actions.HasFlag(ReplacementActions.UpdateLinks) &&
-						replacement.IsSameNamespace)
+						replacement.From.Namespace == replacement.To.Namespace)
 						{
 							var catMembers = categoryMembers[replacement.From];
 							backlinkTitles.AddRange(catMembers);
@@ -452,7 +456,7 @@
 						var updateMembers =
 							this.FollowUpActions.HasFlag(FollowUpActions.UpdateCategoryMembers) &&
 							replacement.Actions.HasFlag(ReplacementActions.UpdateLinks) &&
-							replacement.IsSameNamespace;
+							replacement.From.Namespace == replacement.To.Namespace;
 						if (updateMembers || this.FollowUpActions.HasFlag(FollowUpActions.ProposeUnused))
 						{
 							var catMembers = new TitleCollection(this.Site);
@@ -572,7 +576,7 @@
 				if (!replacement.Actions.HasFlag(ReplacementActions.Skip))
 				{
 					var fromPage = pageInfo[replacement.From];
-					if (this.MoveAction == MoveAction.None && !replacement.NoChange)
+					if (this.MoveAction == MoveAction.None && !replacement.From.SimpleEquals(replacement.To))
 					{
 						replacement.Actions |= ReplacementActions.UpdateLinks;
 					}
@@ -596,10 +600,10 @@
 							// HandleConflict may have resolved the issue and changed the flag, so check again.
 							if (replacement.Actions.HasFlag(ReplacementActions.Skip))
 							{
-								replacement.Reason ??= $"To page exists";
+								replacement.Reason ??= "To page exists";
 							}
 						}
-						else if (replacement.From != replacement.To)
+						else if (!replacement.From.SimpleEquals(replacement.To))
 						{
 							replacement.Actions |= ReplacementActions.Move | ReplacementActions.UpdateLinks;
 							if (this.RedirectOption == RedirectOption.CreateButProposeDeletion && !fromPage.IsRedirect)
@@ -800,43 +804,40 @@
 		{
 			ThrowNull(parser, nameof(parser));
 			ThrowNull(deletionText, nameof(deletionText));
-			var status = ChangeStatus.Unknown;
-			while (status is not ChangeStatus.Success and not ChangeStatus.EditingDisabled)
+
+			// Cheating and using text throughout, since this does not need to be parsed or acted upon currently, and is likely to be moved to another job soon anyway.
+			var page = (Page)parser.Context;
+			var noinclude = page.Namespace == MediaWikiNamespaces.Template;
+			if (!noinclude)
 			{
-				// Cheating and using text throughout, since this does not need to be parsed or acted upon currently, and is likely to be moved to another job soon anyway.
-				var page = (Page)parser.Context;
-				var noinclude = page.Namespace == MediaWikiNamespaces.Template;
-				if (!noinclude)
+				foreach (var backlink in page.Backlinks)
 				{
-					foreach (var backlink in page.Backlinks)
+					if (backlink.Value == BacklinksTypes.EmbeddedIn)
 					{
-						if (backlink.Value == BacklinksTypes.EmbeddedIn)
-						{
-							noinclude = true;
-							break;
-						}
+						noinclude = true;
+						break;
 					}
 				}
-
-				if (noinclude)
-				{
-					deletionText = "<noinclude>" + deletionText + "</noinclude>";
-				}
-
-				var insertPos = 0;
-				string insertText;
-				if (page.IsRedirect)
-				{
-					insertPos = parser.Nodes.Count;
-					insertText = '\n' + deletionText;
-				}
-				else
-				{
-					insertText = deletionText + '\n';
-				}
-
-				parser.Nodes.Insert(insertPos, parser.Nodes.Factory.TextNode(insertText));
 			}
+
+			if (noinclude)
+			{
+				deletionText = "<noinclude>" + deletionText + "</noinclude>";
+			}
+
+			var insertPos = 0;
+			string insertText;
+			if (page.IsRedirect)
+			{
+				insertPos = parser.Nodes.Count;
+				insertText = '\n' + deletionText;
+			}
+			else
+			{
+				insertText = deletionText + '\n';
+			}
+
+			parser.Nodes.Insert(insertPos, parser.Nodes.Factory.TextNode(insertText));
 		}
 		#endregion
 
@@ -844,12 +845,9 @@
 		private void FullEdit(object sender, Page page)
 		{
 			var parser = new ContextualParser(page);
-			if (this.Replacements.TryGetValue(page, out var replacement))
+			if (this.Replacements.TryGetValue(page, out var replacement) && replacement.Actions.HasAnyFlag(ReplacementActions.Edit | ReplacementActions.Propose))
 			{
-				if (replacement.Actions.HasAnyFlag(ReplacementActions.Edit | ReplacementActions.Propose))
-				{
-					this.EditPageLoaded(parser, replacement);
-				}
+				this.EditPageLoaded(parser, replacement);
 			}
 
 			this.BacklinkPageLoaded(parser);
@@ -922,7 +920,7 @@
 			foreach (var replacement in this.Replacements)
 			{
 				if (replacement.Actions.HasFlag(ReplacementActions.Move) &&
-					replacement.From == replacement.To)
+					replacement.From.SimpleEquals(replacement.To))
 				{
 					this.Warn($"From and To pages cannot be the same: {replacement.From.FullPageName} = {replacement.To.FullPageName}");
 					inPlaceMoves = true;

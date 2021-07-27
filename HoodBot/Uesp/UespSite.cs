@@ -19,9 +19,9 @@
 		{
 			if (abstractionLayer is WikiAbstractionLayer eve)
 			{
-				var moduleFactory = eve.ModuleFactory;
-				moduleFactory.RegisterProperty<VariablesInput>(PropVariables.CreateInstance);
-				moduleFactory.RegisterGenerator<VariablesInput>(PropVariables.CreateInstance);
+				eve.ModuleFactory
+					.RegisterProperty<VariablesInput>(PropVariables.CreateInstance)
+					.RegisterGenerator<VariablesInput>(PropVariables.CreateInstance);
 				eve.StopCheckMethods = StopCheckMethods.Assert | StopCheckMethods.TalkCheckNonQuery | StopCheckMethods.TalkCheckQuery;
 				eve.UserCheckFrequency = 10;
 			}
@@ -35,7 +35,7 @@
 		#region Public Static Methods
 		public static UespSite CreateInstance(IWikiAbstractionLayer abstractionLayer) => new(abstractionLayer);
 
-		public static string GetBotDataFolder() => Environment.ExpandEnvironmentVariables(@"%BotData%");
+		public static string GetBotDataFolder() => Environment.ExpandEnvironmentVariables("%BotData%");
 
 		public static string GetBotDataFolder(string file) => Path.Combine(GetBotDataFolder(), file);
 		#endregion
@@ -43,12 +43,12 @@
 		#region Public Override Methods
 		public override void Logout(bool force)
 		{
-			if (this.User != null)
+			if (this.User is not null)
 			{
 				this.FilterPages.Remove(this.User.FullPageName + "/Results");
 			}
 
-			if (this.LogPage != null)
+			if (this.LogPage is not null)
 			{
 				this.FilterPages.Remove(this.LogPage);
 			}

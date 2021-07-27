@@ -351,7 +351,7 @@
 		{
 			var oldText = this.StrippedTextFromNodes(oldPage.Nodes);
 			var newText = this.StrippedTextFromNodes(newPage.Nodes);
-			return string.Compare(oldText, newText, StringComparison.OrdinalIgnoreCase) != 0;
+			return !string.Equals(oldText, newText, StringComparison.OrdinalIgnoreCase);
 		}
 
 		public void RemoveTrivialTemplates(NodeCollection oldNodes) =>
@@ -376,10 +376,7 @@
 				UnreplacedList.Add(from);
 			}
 
-			list.Sort((x, y) =>
-				x.From.Length == y.From.Length ? 0 :
-				x.From.Length < y.From.Length ? 1 :
-				-1);
+			list.Sort((x, y) => x.From.Length.CompareTo(y.From.Length));
 		}
 
 		private static NodeCollection? ReplaceLink(IWikiNodeFactory factory, string text, TitleCollection usedList)

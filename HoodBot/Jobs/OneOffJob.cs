@@ -3,9 +3,11 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.Text;
 	using System.Text.RegularExpressions;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
+	using RobinHood70.WikiCommon;
 	using static RobinHood70.CommonCode.Globals;
 
 	public class OneOffJob : EditJob
@@ -33,12 +35,14 @@
 					.Replace("{{Anchor|The Head Of Scourge|The Head of Scourge}}", "{{Anchor|The Head Of Scourge}}", StringComparison.OrdinalIgnoreCase);
 				var matches = (IReadOnlyCollection<Match>)RowFinder.Matches(pageText);
 				Debug.WriteLine(matches.Count);
+				var sb = new StringBuilder();
 				foreach (var match in matches)
 				{
 					var groups = match.Groups;
 					var pageName = groups["itemName"].Value;
 					Debug.WriteLine("Match: " + match.Value);
 					var title = new Title(this.Site.Namespaces[UespNamespaces.Morrowind], pageName);
+					sb.Clear();
 					if (!this.Pages.TryGetValue(title, out var page))
 					{
 						page = new Page(title);
@@ -46,17 +50,27 @@
 					}
 					else
 					{
-						page.Text += "\n{{NewLine}}\n";
+						sb
+							.Append(page.Text)
+							.Append("\n{{NewLine}}\n");
 					}
 
-					page.Text += "{{Item Summary" +
-						"\n|objectid=" + groups["id"].Value +
-						"\n|icon=" + Title.FromName(this.Site, groups["icon"].Value).PageName +
-						"\n|image=" + Title.FromName(this.Site, groups["image"].Value).PageName +
-						"\n|weight=" + groups["weight"].Value +
-						"\n|value=" + groups["value"].Value +
-						"\n}}" +
-						"\n" + groups["desc"].Value;
+					sb
+						.AppendLinefeed("{{Item Summary")
+						.Append("|objectid=")
+						.AppendLinefeed(groups["id"].Value)
+						.Append("|icon=")
+						.AppendLinefeed(Title.FromName(this.Site, groups["icon"].Value).PageName)
+						.Append("|image=")
+						.AppendLinefeed(Title.FromName(this.Site, groups["image"].Value).PageName)
+						.Append("|weight=")
+						.AppendLinefeed(groups["weight"].Value)
+						.Append("|value=")
+						.AppendLinefeed(groups["value"].Value)
+						.AppendLinefeed("}}")
+						.Append(groups["desc"].Value);
+
+					page.Text = sb.ToString();
 				}
 			}
 

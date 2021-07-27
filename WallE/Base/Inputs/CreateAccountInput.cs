@@ -26,7 +26,7 @@ namespace RobinHood70.WallE.Base
 
 		public string Name { get; }
 
-		public string? Password { get; private set; }
+		public string? Password { get; }
 
 		public string? RealName { get; set; }
 

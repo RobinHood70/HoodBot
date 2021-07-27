@@ -12,10 +12,6 @@
 	/// <summary>Represents a user on the wiki. This can include IP users.</summary>
 	public class User : Title
 	{
-		#region Static Fields
-		private static string? defaultSubject;
-		#endregion
-
 		#region Fields
 		private bool loaded;
 		#endregion
@@ -112,27 +108,6 @@
 		}
 
 		/// <summary>Emails the user.</summary>
-		/// <param name="body">The e-mail body.</param>
-		/// <param name="ccMe">if set to <see langword="true"/>, sends a copy of the e-mail to the user's e-mail account.</param>
-		/// <returns>A value indicating the change status of the e-mail along with a copy of the e-mail that was sent.</returns>
-		/// <remarks>The subject of the e-mail will be the wiki default.</remarks>
-		public ChangeValue<string> Email(string body, bool ccMe)
-		{
-			defaultSubject ??= this.Site.LoadParsedMessage("defemailsubject");
-			if (defaultSubject == null)
-			{
-				throw new InvalidOperationException(Resources.EmailSubjectNull);
-			}
-
-			if (this.Site.User != null)
-			{
-				defaultSubject = defaultSubject.Replace("$1", this.Site.User.Name, StringComparison.Ordinal);
-			}
-
-			return this.Email(defaultSubject, body, ccMe);
-		}
-
-		/// <summary>Emails the user.</summary>
 		/// <param name="subject">The subject line for the e-mail if not the wiki default.</param>
 		/// <param name="body">The e-mail body.</param>
 		/// <param name="ccMe">if set to <see langword="true"/>, sends a copy of the e-mail to the user's e-mail account.</param>
@@ -147,21 +122,25 @@
 				return new ChangeValue<string>(ChangeStatus.Failure, Resources.UserEmailDisabled);
 			}
 
-			return this.Site.PublishChange(
-				string.Empty,
-				this,
-				new Dictionary<string, object?>(StringComparer.Ordinal)
-				{
-					[nameof(subject)] = subject,
-					[nameof(body)] = body,
-					[nameof(ccMe)] = ccMe,
-				},
-				() =>
-				{
-					var input = new EmailUserInput(this.Name, body) { CCMe = ccMe, Subject = subject };
-					var result = this.Site.AbstractionLayer.EmailUser(input);
-					return new ChangeValue<string>(string.Equals(result.Result, "Success", StringComparison.OrdinalIgnoreCase) ? ChangeStatus.Success : ChangeStatus.Failure, result.Message ?? result.Result);
-				});
+			var disabledResult = string.Empty;
+			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			{
+				[nameof(subject)] = subject,
+				[nameof(body)] = body,
+				[nameof(ccMe)] = ccMe,
+			};
+
+			return this.Site.PublishChange(disabledResult, this, parameters, ChangeFunc);
+
+			ChangeValue<string> ChangeFunc()
+			{
+				var input = new EmailUserInput(this.Name, body) { CCMe = ccMe, Subject = subject };
+				var retval = this.Site.AbstractionLayer.EmailUser(input);
+				var result = string.Equals(retval.Result, "Success", StringComparison.OrdinalIgnoreCase)
+					? ChangeStatus.Success
+					: ChangeStatus.Failure;
+				return new ChangeValue<string>(result, retval.Message ?? retval.Result);
+			}
 		}
 
 		// CONSIDER: Adding more GetContributions() and GetWatchlist() options.
@@ -265,9 +244,15 @@
 		/// <param name="msg">The message.</param>
 		/// <param name="editSummary">The edit summary.</param>
 		/// <returns>A value indicating the change status of posting the new talk page message.</returns>
+		/// <exception cref="InvalidOperationException">Thrown when the user's talk page is invalid.</exception>
 		public ChangeStatus NewTalkPageMessage(string header, string msg, string editSummary)
 		{
 			ThrowNull(msg, nameof(msg));
+			if (this.TalkPage is not ISimpleTitle talkPage)
+			{
+				throw new InvalidOperationException(Resources.TitleInvalid);
+			}
+
 			msg = msg.Trim();
 			if (!msg.Contains("~~~", StringComparison.Ordinal) && !msg.Contains(":" + this.Name, StringComparison.Ordinal))
 			{
@@ -275,52 +260,62 @@
 				msg += " ~~~~";
 			}
 
-			return this.Site.PublishChange(
-				this,
-				new Dictionary<string, object?>(StringComparer.Ordinal)
-				{
-					[nameof(header)] = header,
-					[nameof(msg)] = msg,
-					[nameof(editSummary)] = editSummary,
-				},
-				() =>
-				{
-					if (this.TalkPage is ISimpleTitle talkPage)
-					{
-						var input = new EditInput(talkPage.FullPageName, msg)
-						{
-							Bot = true,
-							Minor = Tristate.False,
-							Recreate = true,
-							Section = -1,
-							SectionTitle = header,
-							Summary = editSummary,
-						};
+			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			{
+				[nameof(header)] = header,
+				[nameof(msg)] = msg,
+				[nameof(editSummary)] = editSummary,
+			};
 
-						return string.Equals(this.Site.AbstractionLayer.Edit(input).Result, "Success", StringComparison.OrdinalIgnoreCase) ? ChangeStatus.Success : ChangeStatus.Failure;
-					}
+			return this.Site.PublishChange(this, parameters, ChangeFunc);
 
-					throw new InvalidOperationException(Resources.TitleInvalid);
-				});
+			ChangeStatus ChangeFunc()
+			{
+				var input = new EditInput(talkPage.FullPageName, msg)
+				{
+					Bot = true,
+					Minor = Tristate.False,
+					Recreate = true,
+					Section = -1,
+					SectionTitle = header,
+					Summary = editSummary,
+				};
+
+				var retval = this.Site.AbstractionLayer.Edit(input);
+
+				return string.Equals(retval.Result, "Success", StringComparison.OrdinalIgnoreCase)
+					? ChangeStatus.Success
+					: ChangeStatus.Failure;
+			}
 		}
 
 		/// <summary>Unblocks the user for the specified reason.</summary>
 		/// <param name="reason">The unblock reason.</param>
 		/// <returns>A value indicating the change status of the unblock.</returns>
-		public ChangeStatus Unblock(string reason) => this.Site.PublishChange(
-			this,
-			new Dictionary<string, object?>(StringComparer.Ordinal) { [nameof(reason)] = reason, },
-			() =>
+		public ChangeStatus Unblock(string reason)
+		{
+			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			{
+				[nameof(reason)] = reason
+			};
+
+			return this.Site.PublishChange(this, parameters, ChangeFunc);
+
+			ChangeStatus ChangeFunc()
 			{
 				var input = new UnblockInput(this.Name) { Reason = reason };
-				return this.Site.AbstractionLayer.Unblock(input).Id == 0 ? ChangeStatus.Failure : ChangeStatus.Success;
-			});
+				var retval = this.Site.AbstractionLayer.Unblock(input);
+				return retval.Id == 0
+					? ChangeStatus.Failure
+					: ChangeStatus.Success;
+			}
+		}
 		#endregion
 
 		#region Private Methods
-		private ChangeStatus Block(BlockInput input) => this.Site.PublishChange(
-			this,
-			new Dictionary<string, object?>(StringComparer.Ordinal)
+		private ChangeStatus Block(BlockInput input)
+		{
+			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				[nameof(input.User)] = input.User,
 				[nameof(input.Reason)] = input.Reason,
@@ -328,8 +323,18 @@
 				[nameof(input.ExpiryRelative)] = input.ExpiryRelative,
 				[nameof(input.Flags)] = input.Flags,
 				[nameof(input.Reblock)] = input.Reblock,
-			},
-			() => this.Site.AbstractionLayer.Block(input).Id == 0 ? ChangeStatus.Failure : ChangeStatus.Success);
+			};
+
+			return this.Site.PublishChange(this, parameters, ChangeFunc);
+
+			ChangeStatus ChangeFunc()
+			{
+				var retval = this.Site.AbstractionLayer.Block(input);
+				return retval.Id == 0
+					? ChangeStatus.Failure
+					: ChangeStatus.Success;
+			}
+		}
 
 		private void Populate(UsersItem user)
 		{

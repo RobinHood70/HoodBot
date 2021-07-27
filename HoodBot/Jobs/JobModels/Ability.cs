@@ -7,7 +7,7 @@
 	internal sealed class Ability
 	{
 		#region Internal Constants
-		internal const int Level = 50 + 16;
+		// internal const int Level = 50 + 16;
 		internal const int Damage = 3000;
 		internal const int Health = 16000;
 		internal const int Resist = 10000;
@@ -49,7 +49,7 @@
 		#region Public Properties
 		public IReadOnlyList<Coefficient> Coefficients { get; }
 
-		public string Description { get; private set; }
+		public string Description { get; }
 
 		public int Id { get; }
 		#endregion

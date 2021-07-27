@@ -63,7 +63,7 @@
 				var job = jobInfo.Instantiate(this);
 				try
 				{
-					await Task.Run(job.Execute).ConfigureAwait(false);
+					await Task.Run(job.Execute).ConfigureAwait(true);
 					abort = this.OnFinishedJob(jobInfo, null);
 					if (abort)
 					{

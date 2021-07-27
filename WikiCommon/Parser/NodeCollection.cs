@@ -6,6 +6,7 @@
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Diagnostics.CodeAnalysis;
+	using System.Linq;
 	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>  A delegate for the method required by the Replace method.</summary>
@@ -75,15 +76,7 @@
 		/// <returns>The first node found, or null if no nodes of that type are in the collection.</returns>
 		[return: MaybeNull]
 		public T Find<T>()
-			where T : IWikiNode
-		{
-			foreach (var node in this.FindAll<T>())
-			{
-				return node;
-			}
-
-			return default;
-		}
+			where T : IWikiNode => this.FindAll<T>().FirstOrDefault();
 
 		/// <summary>Finds a single node of the specified type that satisfies the condition.</summary>
 		/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
@@ -114,15 +107,8 @@
 		/// <remarks>For recursive searches, outer nodes that satisfy the condition are returned before inner nodes that satisfy the condition. For example, if searching for the template <c>{{Example}}</c> in the wiki code <c>{{Example|This is an embedded {{Example|example}}.}}</c>, the <c>{{Example|This is...}}</c> template will be returned, not the <c>{{Example|example}}</c> template.</remarks>
 		[return: MaybeNull]
 		public T Find<T>(Predicate<T>? condition, bool reverse, bool recursive, int startAt)
-			where T : class, IWikiNode
-		{
-			foreach (var node in this.FindAll(condition, reverse, recursive, startAt))
-			{
-				return node;
-			}
-
-			return default;
-		}
+			where T : class, IWikiNode =>
+			this.FindAll(condition, reverse, recursive, startAt).FirstOrDefault();
 
 		/// <summary>Finds all <see cref="LinkedListNode{T}"/>s with a <see cref="LinkedListNode{T}.Value">Value</see> of the specified type.</summary>
 		/// <typeparam name="T">The type of node to find.</typeparam>

@@ -9,6 +9,9 @@ namespace RobinHood70.WikiCommon
 	[Flags]
 	public enum BacklinksTypes
 	{
+		/// <summary>Invalid for this enumeration.</summary>
+		None = 0,
+
 		/// <summary>Regular links, including redirects.</summary>
 		Backlinks = 1,
 

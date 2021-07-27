@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections;
 	using System.Globalization;
+	using System.Text;
 	using System.Windows;
 	using System.Windows.Controls;
 	using RobinHood70.CommonCode;
@@ -78,16 +79,16 @@
 			}
 			else if (typeof(IEnumerable).IsAssignableFrom(valueType))
 			{
-				var textValue = string.Empty;
+				StringBuilder sb = new();
 				if (parameter.Value is IEnumerable parameterValues)
 				{
 					foreach (var value in parameterValues)
 					{
-						textValue += value?.ToString();
+						sb.Append(value);
 					}
 				}
 
-				controlToAdd = new TextBox() { Text = textValue, AcceptsReturn = true };
+				controlToAdd = new TextBox() { Text = sb.ToString(), AcceptsReturn = true };
 				labelControl.VerticalAlignment = VerticalAlignment.Top;
 			}
 			else

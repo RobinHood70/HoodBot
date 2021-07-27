@@ -31,7 +31,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			ThrowNull(result, nameof(result));
 			ThrowNull(page, nameof(page));
-			using var enumeration = (result as IEnumerable<JToken>).GetEnumerator();
+			using var enumeration = ((IEnumerable<JToken>)result).GetEnumerator();
 			var list = this.GetMutableList(page) ?? throw new InvalidOperationException();
 			while (this.ItemsRemaining > 0 && enumeration.MoveNext())
 			{

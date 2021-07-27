@@ -69,9 +69,9 @@
 			return retval;
 		}
 
-		public string? UserRightsToken(string user)
+		public string? UserRightsToken(string userName)
 		{
-			var usersInput = new UsersInput(new[] { user })
+			var usersInput = new UsersInput(new[] { userName })
 			{
 				GetRightsToken = true,
 			};

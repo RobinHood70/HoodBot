@@ -15,7 +15,7 @@
 	/// <param name="title">The page title.</param>
 	/// <param name="pageId">The page identifier.</param>
 	/// <returns>An <see cref="ITitle"/> object. In external use, this will normally be a <see cref="PageItem"/> or derivative.</returns>
-	public delegate T TitleCreator<T>(int ns, string title, long pageId)
+	public delegate T TitleCreator<out T>(int ns, string title, long pageId)
 		where T : ITitle;
 	#endregion
 

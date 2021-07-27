@@ -7,7 +7,7 @@
 	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Formats a Request object as multipart (<see cref="MultipartResult"/>) data.</summary>
-	public class RequestVisitorMultipart : IParameterVisitor
+	public sealed class RequestVisitorMultipart : IParameterVisitor
 	{
 		#region Constants
 		private const int RandomBoundaryStartLength = 4;

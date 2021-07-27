@@ -139,6 +139,7 @@
 		/// <param name="value">The value of the parameter to add.</param>
 		/// <param name="copyFormat">Whether to copy the format of the previous parameter or use the values as provided.</param>
 		/// <returns>The added parameter.</returns>
+		/// <exception cref="InvalidOperationException">Thrown when the parameter is not found.</exception>
 		public static IParameterNode Add(this ITemplateNode template, string name, string value, bool copyFormat)
 		{
 			ThrowNull(template, nameof(template));

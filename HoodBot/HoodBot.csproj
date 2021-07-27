@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<RootNamespace>RobinHood70.HoodBot</RootNamespace>
@@ -10,24 +9,21 @@
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<AnalysisMode>Default</AnalysisMode>
+		<RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
 	</PropertyGroup>
-
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<DefineConstants>DEBUG</DefineConstants>
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>
-	  <Compile Remove="Old Jobs\*" />
+		<Compile Remove="Old Jobs\*" />
 	</ItemGroup>
-
 	<ItemGroup>
 		<AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
 	</ItemGroup>
-
 	<ItemGroup>
-	  <None Include="Old Jobs\*" />
+		<None Include="Old Jobs\*" />
 	</ItemGroup>
-
 	<ItemGroup>
 		<PackageReference Include="Meziantou.Analyzer" Version="1.0.667">
 			<PrivateAssets>all</PrivateAssets>
@@ -40,12 +36,8 @@
 		<PackageReference Include="MvvmLightLibsStd10" Version="5.4.1.1" />
 		<PackageReference Include="MySql.Data" Version="8.0.26" />
 		<PackageReference Include="Roslynator.Analyzers" Version="3.2.0">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="SonarAnalyzer.CSharp" Version="8.26.0.34506">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354">
 			<PrivateAssets>all</PrivateAssets>
@@ -53,23 +45,19 @@
 		</PackageReference>
 		<PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0-preview.6.21352.12" />
 	</ItemGroup>
-
 	<ItemGroup>
 		<ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj" />
 		<ProjectReference Include="..\Robby\Robby.csproj" />
 		<ProjectReference Include="..\WikiCommon\WikiCommon.csproj" />
 	</ItemGroup>
-
 	<ItemGroup>
 		<Reference Include="CommonCode">
 			<HintPath>..\CommonCode.dll</HintPath>
 		</Reference>
 	</ItemGroup>
-
 	<ItemGroup>
 		<Resource Include="Assets\HoodBot.png" />
 	</ItemGroup>
-
 	<ItemGroup>
 		<Compile Update="Properties\Resources.Designer.cs">
 			<DesignTime>True</DesignTime>
@@ -77,14 +65,12 @@
 			<DependentUpon>Resources.resx</DependentUpon>
 		</Compile>
 	</ItemGroup>
-
 	<ItemGroup>
 		<EmbeddedResource Update="Properties\Resources.resx">
 			<Generator>PublicResXFileCodeGenerator</Generator>
 			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
 		</EmbeddedResource>
 	</ItemGroup>
-
 	<ItemGroup>
 		<None Update="connectionStrings.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -96,5 +82,4 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
-
 </Project>

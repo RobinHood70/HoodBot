@@ -26,16 +26,14 @@
 				var json = JObject.Load(reader);
 				while (reader.Read())
 				{
+					// Only needs to read until done (json is filled).
 				}
 
 				settingsFile.FromJson(json);
 			}
-			catch (FileNotFoundException)
+			catch (FileNotFoundException) when (!mustExist)
 			{
-				if (mustExist)
-				{
-					throw;
-				}
+				// Do nothing
 			}
 
 			return settingsFile;

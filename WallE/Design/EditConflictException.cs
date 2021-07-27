@@ -7,13 +7,12 @@
 	/// <seealso cref="Exception" />
 	/// <seealso cref="ISerializable" />
 	[Serializable]
-	public class EditConflictException : Exception, ISerializable
+	public class EditConflictException : Exception
 	{
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="EditConflictException"/> class.</summary>
 		public EditConflictException()
-			: base()
 		{
 		}
 

@@ -67,6 +67,7 @@
 
 		/// <summary>Downloads the file to the specified location.</summary>
 		/// <param name="fileName">Name of the file to download to. This will be overwritten if it exists. If fileName represents a path, the page name will be used as the file name.</param>
+		/// <exception cref="InvalidOperationException">Thrown when the file information is invalid.</exception>
 		public void Download(string fileName)
 		{
 			if (this.fileRevisions.Count == 0 || this.fileRevisions[0].Uri is not Uri uri)

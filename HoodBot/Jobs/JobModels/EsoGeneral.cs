@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Globalization;
+	using System.Linq;
 	using System.Text.RegularExpressions;
 	using MySql.Data.MySqlClient;
 	using RobinHood70.CommonCode;
@@ -102,9 +103,11 @@
 				}
 				catch (TimeoutException) when (retries > 0)
 				{
+					// Do nothing
 				}
 				catch (MySqlException) when (retries > 0)
 				{
+					// Do nothing
 				}
 			}
 
@@ -161,7 +164,7 @@
 			places.GetCategoryMembers("Online-Places");
 
 			var retval = new PlaceCollection();
-			foreach (VariablesPage page in places)
+			foreach (var page in places.OfType<VariablesPage>())
 			{
 				if (page.MainSet != null)
 				{
@@ -183,6 +186,7 @@
 				}
 				catch (InvalidOperationException)
 				{
+					// Do nothing
 				}
 			}
 
@@ -280,6 +284,7 @@
 					}
 					catch (InvalidOperationException)
 					{
+						// Do nothing
 					}
 				}
 				else if (member.Namespace != UespNamespaces.Category)

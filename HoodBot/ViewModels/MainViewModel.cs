@@ -7,6 +7,7 @@
 	using System.IO;
 	using System.Text.RegularExpressions;
 	using System.Threading;
+	using System.Threading.Tasks;
 	using System.Windows;
 	using System.Windows.Media;
 	using GalaSoft.MvvmLight;
@@ -26,9 +27,13 @@
 	using static System.Environment;
 	using static RobinHood70.CommonCode.Globals;
 
-	// FIXME: Fix re-runs with different parameters (i.e., a different template for template usage) uses existing parameters instead of new ones.
 	public class MainViewModel : ViewModelBase
 	{
+		#region Private Constants
+		private const string Books29Path = @"D:\Books29\";
+		private const string Books30Path = @"D:\Books30\";
+		#endregion
+
 		#region Static Fields
 		private static readonly Brush ProgressBarGreen = new SolidColorBrush(Color.FromArgb(255, 6, 176, 37));
 		private static readonly Brush ProgressBarYellow = new SolidColorBrush(Color.FromArgb(255, 255, 240, 0));
@@ -64,9 +69,6 @@
 			this.ShowDiffs = true;
 			this.SelectedItem = App.UserSettings.GetCurrentItem();
 
-			this.Client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.json"));
-			this.Client.RequestingDelay += this.Client_RequestingDelay;
-
 			this.progressMonitor = new Progress<double>(this.ProgressChanged);
 			this.statusMonitor = new Progress<string>(this.StatusWrite);
 
@@ -82,7 +84,14 @@
 		#region Public Commands
 		public RelayCommand EditSettings => new(this.OpenEditWindow);
 
-		public RelayCommand Play => new(this.ExecuteJobs);
+		public RelayCommand Play
+		{
+			get
+			{
+				async void ExecuteJobsAsync() => await this.ExecuteJobs().ConfigureAwait(true);
+				return new(ExecuteJobsAsync);
+			}
+		}
 
 		public RelayCommand Pause => new(this.PauseJobs);
 
@@ -92,8 +101,6 @@
 		#endregion
 
 		#region Public Properties
-		public IMediaWikiClient Client { get; }
-
 		public bool EditingEnabled
 		{
 			get => this.editingEnabled;
@@ -158,7 +165,7 @@
 			}
 		}
 
-		public bool ShowDiffs { get; private set; } = true; // Simple hard-coded setting for now.
+		public bool ShowDiffs { get; }
 
 		public string Status
 		{
@@ -187,30 +194,16 @@
 		}
 		#endregion
 
-		#region Private Static Methods
-		private static string FormatTimeSpan(TimeSpan allJobsTimer) => allJobsTimer.ToString(@"h\h\ m\m\ s\.f\s", CultureInfo.CurrentCulture)
-			.Replace("0h", string.Empty, StringComparison.Ordinal)
-			.Replace(" 0m", string.Empty, StringComparison.Ordinal)
-			.Replace(".0", string.Empty, StringComparison.Ordinal)
-			.Replace(" 0s", string.Empty, StringComparison.Ordinal)
-			.Trim();
-
-		private static IWikiAbstractionLayer GetAbstractionLayer(IMediaWikiClient client, WikiInfoViewModel info)
-		{
-			ThrowNull(info.Api, nameof(info), nameof(info.Api));
-			var wal = string.Equals(info.Api.OriginalString, "/", StringComparison.Ordinal)
-				? new WallE.Test.WikiAbstractionLayer()
-				: (IWikiAbstractionLayer)new WikiAbstractionLayer(client, info.Api);
-			if (wal is IMaxLaggable maxLagWal)
-			{
-				maxLagWal.MaxLag = info.MaxLag;
-			}
-
-			return wal;
-		}
-
+		#region Internal Static Methods
 #if DEBUG
-		private static void Site_Changing(Site sender, ChangeArgs eventArgs)
+		internal static string SiteName(IWikiAbstractionLayer sender) => sender.AllSiteInfo?.General?.SiteName ?? "Site-Agnostic";
+#endif
+		#endregion
+
+		#region Protected Methods
+#if DEBUG
+		// These are flagged as internal mostly to stop warnings whenever they're not in use.
+		protected virtual void SiteChanging(Site sender, ChangeArgs eventArgs)
 		{
 			Debug.Write($"{eventArgs.MethodName} (sender: {eventArgs.RealSender}");
 			foreach (var parameter in eventArgs.Parameters)
@@ -221,16 +214,23 @@
 			Debug.WriteLine(")");
 		}
 
-		private static string SiteName(IWikiAbstractionLayer sender) => sender.AllSiteInfo?.General?.SiteName ?? "Site-Agnostic";
+		protected virtual void SiteWarningOccurred(Site sender, WarningEventArgs eventArgs) => Debug.WriteLine(eventArgs?.Warning);
 
-		private static void SiteWarningOccurred(Site sender, WarningEventArgs eventArgs) => Debug.WriteLine(eventArgs?.Warning);
+		protected virtual void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Response: {eventArgs.Response}");
 
-		private static void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Response: {eventArgs.Response}");
+		protected virtual void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Request: {eventArgs.Request}");
 
-		private static void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Request: {eventArgs.Request}");
-
-		private static void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Warning: ({eventArgs?.Warning.Code}) {eventArgs?.Warning.Info}");
+		protected virtual void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Warning: ({eventArgs?.Warning.Code}) {eventArgs?.Warning.Info}");
 #endif
+		#endregion
+
+		#region Private Static Methods
+		private static string FormatTimeSpan(TimeSpan allJobsTimer) => allJobsTimer.ToString(@"h\h\ m\m\ s\.f\s", CultureInfo.CurrentCulture)
+			.Replace("0h", string.Empty, StringComparison.Ordinal)
+			.Replace(" 0m", string.Empty, StringComparison.Ordinal)
+			.Replace(".0", string.Empty, StringComparison.Ordinal)
+			.Replace(" 0s", string.Empty, StringComparison.Ordinal)
+			.Trim();
 		#endregion
 
 		#region Private Methods
@@ -257,7 +257,96 @@
 			*/
 		}
 
-		private async void ExecuteJobs()
+		private IWikiAbstractionLayer CreateAbstractionLayer(IMediaWikiClient client, WikiInfoViewModel wikiInfo)
+		{
+			ThrowNull(wikiInfo.Api, nameof(wikiInfo), nameof(wikiInfo.Api));
+			var api = wikiInfo.Api;
+			IWikiAbstractionLayer abstractionLayer = string.Equals(api.OriginalString, "/", StringComparison.Ordinal)
+				? new WallE.Test.WikiAbstractionLayer()
+				: new WikiAbstractionLayer(client, api);
+			if (abstractionLayer is IMaxLaggable maxLagWal)
+			{
+				maxLagWal.MaxLag = wikiInfo.MaxLag;
+			}
+
+#if DEBUG
+			if (abstractionLayer is IInternetEntryPoint internet)
+			{
+				internet.SendingRequest += this.WalSendingRequest;
+				//// internet.ResponseReceived += WalResponseRecieved;
+			}
+
+			abstractionLayer.WarningOccurred += this.WalWarningOccurred;
+#endif
+
+			return abstractionLayer;
+		}
+
+		private IMediaWikiClient CreateClient(WikiInfoViewModel wikiInfo)
+		{
+			IMediaWikiClient client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.json"));
+			if (wikiInfo.ReadThrottling > 0 || wikiInfo.WriteThrottling > 0)
+			{
+				client = new ThrottledClient(
+					client,
+					TimeSpan.FromMilliseconds(wikiInfo.ReadThrottling),
+					TimeSpan.FromMilliseconds(wikiInfo.WriteThrottling));
+			}
+
+			client.RequestingDelay += this.Client_RequestingDelay;
+
+			return client;
+		}
+
+		private Site CreateSite(IWikiAbstractionLayer abstractionLayer, WikiInfoViewModel wikiInfo)
+		{
+			var factoryMethod = Site.GetFactoryMethod(wikiInfo.SiteClassIdentifier);
+			var site = factoryMethod(abstractionLayer);
+#if DEBUG
+			site.WarningOccurred += this.SiteWarningOccurred;
+#endif
+			site.PagePreview += this.SitePagePreview;
+			site.EditingEnabled = this.EditingEnabled;
+			if ((this.UserName ?? wikiInfo.UserName) is string user)
+			{
+				var currentPassword = this.Password ?? wikiInfo.Password ?? throw new InvalidOperationException(Resources.PasswordNotSet);
+				site.Login(user, currentPassword);
+			}
+
+			site.Changing += this.SiteChanging;
+
+			return site;
+		}
+
+		private void DestroyAbstractionLayer(IWikiAbstractionLayer abstractionLayer)
+		{
+#if DEBUG
+			abstractionLayer.WarningOccurred -= this.WalWarningOccurred;
+			if (abstractionLayer is IInternetEntryPoint internet)
+			{
+				internet.SendingRequest -= this.WalSendingRequest;
+			}
+
+#endif
+		}
+
+		private void DestroyClient(IMediaWikiClient client) => client.RequestingDelay -= this.Client_RequestingDelay;
+
+		private void DestroySite(Site site)
+		{
+			site.Changing -= this.SiteChanging;
+			site.AbstractionLayer.WarningOccurred -= this.WalWarningOccurred;
+			site.PagePreview -= this.SitePagePreview;
+#if DEBUG
+			site.WarningOccurred -= this.SiteWarningOccurred;
+#endif
+			if (site.AbstractionLayer is IInternetEntryPoint internet)
+			{
+				internet.SendingRequest -= this.WalSendingRequest;
+			}
+		}
+
+		private async Task ExecuteJobs()
 		{
 			if (this.executing || this.SelectedItem == null)
 			{
@@ -291,7 +380,10 @@
 
 				this.StatusWriteLine("Initializing");
 				App.WpfYield();
-				var site = this.InitializeSite();
+				var wikiInfo = this.ValidateWikiInfo();
+				var client = this.CreateClient(wikiInfo);
+				var abstractionLayer = this.CreateAbstractionLayer(client, wikiInfo);
+				var site = this.CreateSite(abstractionLayer, wikiInfo);
 				var jobManager = new JobManager(site)
 				{
 					CancellationToken = this.canceller?.Token,
@@ -312,9 +404,11 @@
 
 				jobManager.StartingJob += this.JobManager_StartingJob;
 				jobManager.FinishedJob += this.JobManager_FinishedJob;
-				await jobManager.Run(jobList).ConfigureAwait(false);
+				await jobManager.Run(jobList).ConfigureAwait(true);
 
-				this.ResetSite(site);
+				this.DestroySite(site);
+				this.DestroyAbstractionLayer(abstractionLayer);
+				this.DestroyClient(client);
 				this.pauser = null;
 				this.canceller = null;
 			}
@@ -346,38 +440,6 @@
 			{
 				this.completedJobs++;
 			}
-		}
-
-		private Site InitializeSite()
-		{
-			var wikiInfo = this.SelectedItem ?? throw new InvalidOperationException(Resources.NoWiki);
-			var abstractionLayer = GetAbstractionLayer(this.Client, wikiInfo);
-
-#if DEBUG
-			if (abstractionLayer is IInternetEntryPoint internet)
-			{
-				internet.SendingRequest += WalSendingRequest;
-				//// internet.ResponseReceived += WalResponseRecieved;
-			}
-
-			abstractionLayer.WarningOccurred += WalWarningOccurred;
-#endif
-			var factoryMethod = Site.GetFactoryMethod(wikiInfo.SiteClassIdentifier);
-			var site = factoryMethod(abstractionLayer);
-#if DEBUG
-			site.WarningOccurred += SiteWarningOccurred;
-#endif
-			site.PagePreview += this.SitePagePreview;
-			site.EditingEnabled = this.EditingEnabled;
-			if ((this.UserName ?? wikiInfo.UserName) is string user)
-			{
-				var currentPassword = this.Password ?? wikiInfo.Password ?? throw new InvalidOperationException(Resources.PasswordNotSet);
-				site.Login(user, currentPassword);
-			}
-
-			site.Changing += Site_Changing;
-
-			return site;
 		}
 
 		private void JobTree_OnSelectionChanged(TreeNode sender, SelectedItemChangedEventArgs e)
@@ -445,29 +507,15 @@
 			this.jobStarted = DateTime.MinValue;
 		}
 
-		private void ResetSite(Site site)
-		{
-#if DEBUG
-			if (site.AbstractionLayer is IInternetEntryPoint internet)
-			{
-				internet.SendingRequest -= WalSendingRequest;
-			}
-
-			site.Changing -= Site_Changing;
-			site.AbstractionLayer.WarningOccurred -= WalWarningOccurred;
-			site.WarningOccurred -= SiteWarningOccurred;
-#endif
-			site.PagePreview -= this.SitePagePreview;
-		}
-
 		private void RunTest()
 		{
+			// Compare Books non-job for Jeancey.
 			var deleted = new List<string>();
 			var added = new List<string>();
 			var common = new List<string>();
 
-			var fullNames29 = Directory.GetFiles(@"D:\Books29");
-			var fullNames30 = Directory.GetFiles(@"D:\Books30");
+			var fullNames29 = Directory.GetFiles(Books29Path);
+			var fullNames30 = Directory.GetFiles(Books30Path);
 			var dir29 = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 			var dir30 = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 			foreach (var book in fullNames29)
@@ -503,8 +551,8 @@
 			common.Sort(StringComparer.OrdinalIgnoreCase);
 			foreach (var book in common)
 			{
-				var book29 = File.ReadAllText(@"D:\Books29\" + book);
-				var book30 = File.ReadAllText(@"D:\Books30\" + book);
+				var book29 = File.ReadAllText(Books29Path + book);
+				var book30 = File.ReadAllText(Books30Path + book);
 				book29 = Regex.Replace(book29, @"\s+", " ", RegexOptions.None, DefaultRegexTimeout);
 				book30 = Regex.Replace(book30, @"\s+", " ", RegexOptions.None, DefaultRegexTimeout);
 
@@ -555,6 +603,13 @@
 		private void StatusWrite(string text) => this.Status += (this.Status?.Length ?? 0) == 0 ? text.TrimStart() : text;
 
 		private void StatusWriteLine(string text) => this.StatusWrite(text + NewLine);
+
+		private WikiInfoViewModel ValidateWikiInfo()
+		{
+			ThrowNull(this.SelectedItem, nameof(MainViewModel), nameof(this.SelectedItem));
+			var wikiInfo = this.SelectedItem;
+			return wikiInfo;
+		}
 		#endregion
 	}
 }

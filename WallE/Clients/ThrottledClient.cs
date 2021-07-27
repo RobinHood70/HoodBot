@@ -137,12 +137,18 @@
 		#endregion
 
 		#region Private Methods
-		private bool Throttle()
+		private void Throttle()
 		{
-			var delayTime =
-				this.LastWasPost == null ? TimeSpan.Zero :
-				(this.LastWasPost.Value ? this.WriteInterval : this.ReadInterval) - this.stopwatch.Elapsed;
-			return delayTime <= TimeSpan.Zero || this.RequestDelay(delayTime, DelayReason.ClientThrottled, "Throttled");
+			if (this.LastWasPost is not null)
+			{
+				var delayTime = this.LastWasPost.Value
+					? this.WriteInterval
+					: this.ReadInterval;
+				if (delayTime - this.stopwatch.Elapsed > TimeSpan.Zero)
+				{
+					this.RequestDelay(delayTime, DelayReason.ClientThrottled, "Throttled");
+				}
+			}
 		}
 		#endregion
 	}

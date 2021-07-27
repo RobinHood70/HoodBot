@@ -22,7 +22,7 @@
 		#endregion
 
 		#region Public Properties
-		public IReadOnlyDictionary<string, string>? MainSet => this.mainSet;
+		public IReadOnlyDictionary<string, string> MainSet => this.mainSet;
 
 		public IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> VariableSets => this.subsets;
 		#endregion
@@ -33,12 +33,25 @@
 				? retval
 				: default;
 
-		public string? GetVariable(string setName, string name) =>
-			string.IsNullOrEmpty(setName)
-				? this.GetVariable(name) :
-			this.VariableSets.TryGetValue(setName, out var set) && set.TryGetValue(name, out var retval)
-				? retval
-				: default;
+		public string? GetVariable(string setName, string name)
+		{
+			IReadOnlyDictionary<string, string> set;
+			if (string.IsNullOrEmpty(setName))
+			{
+				set = this.MainSet;
+			}
+			else if (this.VariableSets.TryGetValue(setName, out var set2))
+			{
+				set = set2;
+			}
+			else
+			{
+				return null;
+			}
+
+			set.TryGetValue(name, out var retval);
+			return retval;
+		}
 		#endregion
 
 		#region Protected Override Methods

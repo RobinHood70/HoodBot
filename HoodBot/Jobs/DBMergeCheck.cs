@@ -10,6 +10,10 @@
 
 	public class DBMergeCheck : EditJob
 	{
+		#region Constants
+		private const string MergeResultsPage = "Project:Dragonborn Merge Project/Merge Results";
+		#endregion
+
 		#region Fields
 		private readonly TitleCollection filter;
 		#endregion
@@ -20,12 +24,11 @@
 			: base(jobManager)
 		{
 			this.Logger = null;
-			var mergeResultsPage = "Project:Dragonborn Merge Project/Merge Results";
-			this.Results = new PageResultHandler(this.Site, mergeResultsPage);
+			this.Results = new PageResultHandler(this.Site, MergeResultsPage);
 
 			this.filter = new TitleCollection(this.Site)
 			{
-				mergeResultsPage,
+				MergeResultsPage,
 				"User:HoodBot/Results",
 				"User:Kiz/Sandbox1",
 				"Project:Dragonborn Merge Project",

@@ -73,22 +73,11 @@
 			return titles;
 		}
 
-		private bool IsException(Page page, string header)
-		{
-			if (string.Equals(header, "Quests", StringComparison.Ordinal) && page.PageName.StartsWith("Patch/", StringComparison.Ordinal))
-			{
-				return true;
-			}
-
-			if (this.exceptions.TryGetValue(header, out var exceptionGroup))
-			{
-				if (exceptionGroup.Contains(page))
-				{
-					return true;
-				}
-			}
-
-			return false;
-		}
+		private bool IsException(Page page, string header) =>
+			(string.Equals(header, "Quests", StringComparison.Ordinal) &&
+			page.PageName.StartsWith("Patch/", StringComparison.Ordinal))
+			||
+			(this.exceptions.TryGetValue(header, out var exceptionGroup) &&
+			exceptionGroup.Contains(page));
 	}
 }

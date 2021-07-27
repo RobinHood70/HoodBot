@@ -116,10 +116,10 @@
 					var className = module.MustHaveString("classname");
 					output.Add(className, new ParameterInfoItem(
 						className: className,
-						helpUrls: module["helpurls"].GetList<string>(),
-						parameters: parameters,
 						path: module.MustHaveString("path"),
 						prefix: module.MustHaveString("prefix"),
+						helpUrls: module["helpurls"].GetList<string>(),
+						parameters: parameters,
 						name: (string?)module["name"],
 						description: description,
 						dynamicParameters: dynamicParameters,

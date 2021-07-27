@@ -83,7 +83,7 @@
 					}
 				}
 
-				var description = string.Join(string.Empty, splitDescription);
+				var description = string.Concat(splitDescription);
 				var rankText = rank.Rank.ToStringInvariant();
 				bigChange |= this.TrackedUpdate(template, "desc" + (rank.Rank == 1 ? string.Empty : rankText), description, usedList, skillBase.Name);
 				bigChange |= this.TrackedUpdate(template, "linerank" + rankText, rank.LearnedLevel.ToStringInvariant());

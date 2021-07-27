@@ -1,11 +1,12 @@
 ﻿namespace RobinHood70.Robby.Design
 {
+	using System.Collections;
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
 
 	/// <summary>An IFullTitle comparer which sorts by namespace and page name.</summary>
 	/// <seealso cref="Comparer{T}" />
-	public sealed class FullTitleComparer : IComparer<IFullTitle>
+	public sealed class FullTitleComparer : IComparer<IFullTitle>, IComparer
 	{
 		#region Constructors
 		private FullTitleComparer()
@@ -85,6 +86,8 @@
 				? retval
 				: string.Compare(x.Fragment, y.Fragment, false, siteCulture);
 		}
+
+		int IComparer.Compare(object? x, object? y) => this.Compare(x as FullTitle, y as FullTitle);
 		#endregion
 	}
 }

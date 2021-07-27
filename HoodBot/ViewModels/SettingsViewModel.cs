@@ -19,7 +19,7 @@
 		#endregion
 
 		#region Constructors
-		public SettingsViewModel() => this.MessengerInstance.Register<MainViewModel>(this, this.Initialize);
+		public SettingsViewModel() => this.MessengerInstance.Register<SettingsParameters>(this, this.Initialize);
 		#endregion
 
 		#region Public Commands
@@ -53,22 +53,10 @@
 		#endregion
 
 		#region Public Methods
-		public void BeginEdit()
-		{
-			// Could use this.SelectedWiki?.BeginEdit() but if a breakpoint is set, that always breaks, where this way won't.
-			if (this.SelectedItem != null)
-			{
-				this.SelectedItem.BeginEdit();
-			}
-		}
 
-		public void CancelEdit()
-		{
-			if (this.SelectedItem != null)
-			{
-				this.SelectedItem.CancelEdit();
-			}
-		}
+		public void BeginEdit() => this.SelectedItem?.BeginEdit();
+
+		public void CancelEdit() => this.SelectedItem?.CancelEdit();
 
 		public void EndEdit()
 		{
@@ -153,11 +141,12 @@
 			}
 		}
 
-		private void Initialize(MainViewModel main)
+		private void Initialize(SettingsParameters parameters)
 		{
+			// TODO: main.Client no longer guaranteed to be non-null...likely not to be, in fact.
 			this.MessengerInstance.Unregister(this);
-			this.client = main.Client;
-			this.SelectedItem = main.SelectedItem;
+			this.client = parameters.Client;
+			this.SelectedItem = parameters.SelectedItem;
 		}
 		#endregion
 	}

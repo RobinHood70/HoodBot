@@ -6,7 +6,6 @@
 		/// <summary>Initializes a new instance of the <see cref="LogInfo"/> class.</summary>
 		/// <param name="title">The title for the log entry.</param>
 		/// <param name="details">The details for the log entry (typically, job parameters or notes).</param>
-		/// <param name="jobType">What type of job this represents.</param>
 		public LogInfo(string title, string? details)
 		{
 			this.Title = title;
