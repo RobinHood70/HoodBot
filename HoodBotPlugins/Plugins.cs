@@ -61,12 +61,10 @@
 
 		#region Public Properties
 
-#pragma warning disable RCS1170 // Use read-only auto-implemented property. Reason: [ImportMany] requires a setter.
 		/// <summary>Gets all plugins available. Initialized to non-null via <see cref="ImportManyAttribute"/> in <see cref="System.ComponentModel.Composition"/>.</summary>
 		[ImportMany(typeof(IPlugin))]
 		[NotNull]
 		public IEnumerable<Lazy<IPlugin, IPluginMetadata>> All { get; private set; }
-#pragma warning restore RCS1170 // Use read-only auto-implemented property.
 
 		/// <summary>Gets all difference viewers available.</summary>
 		public IReadOnlyDictionary<string, IDiffViewer> DiffViewers { get; }
