@@ -4,13 +4,13 @@ namespace RobinHood70.WallE.Base
 	using RobinHood70.WikiCommon;
 
 	// Note that FromId refers to a different page than Namespace and Title.
-	public class AllLinksItem : ITitleOptional
+	public class AllLinksItem : IApiTitleOptional
 	{
 		#region Public Constructors
 		internal AllLinksItem(int? ns, string? title, long fromId)
 		{
 			this.Namespace = ns;
-			this.Title = title;
+			this.FullPageName = title;
 			this.FromId = fromId;
 		}
 		#endregion
@@ -20,11 +20,11 @@ namespace RobinHood70.WallE.Base
 
 		public int? Namespace { get; }
 
-		public string? Title { get; }
+		public string? FullPageName { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title ?? FallbackText.NoTitle;
+		public override string ToString() => this.FullPageName ?? FallbackText.NoTitle;
 		#endregion
 	}
 }

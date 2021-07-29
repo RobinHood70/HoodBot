@@ -1,7 +1,9 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
-	public class FileArchiveItem : ImageInfoItem, ITitleOptional
+	using RobinHood70.WikiCommon;
+
+	public class FileArchiveItem : ImageInfoItem, IApiTitleOptional
 	{
 		#region Constructors
 		// MW 1.17: only name is guaranteed; MW 1.18+: namespace and title are guaranteed.
@@ -10,7 +12,7 @@ namespace RobinHood70.WallE.Base
 			this.Name = name;
 			this.FileArchiveId = fileArchiveId;
 			this.Namespace = ns;
-			this.Title = title;
+			this.FullPageName = title;
 		}
 		#endregion
 
@@ -21,7 +23,7 @@ namespace RobinHood70.WallE.Base
 
 		public long FileArchiveId { get; }
 
-		public string? Title { get; }
+		public string? FullPageName { get; }
 		#endregion
 
 		#region Public Override Methods

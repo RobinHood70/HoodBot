@@ -4,13 +4,13 @@ namespace RobinHood70.WallE.Base
 	using RobinHood70.WikiCommon;
 
 	// Despite looking like an ITitle, we cannot guarantee that it will behave like once since, at least as of MW 1.33, no part of the result is required to be emitted by the API.
-	public class ExternalUrlUsageItem : ITitleOptional
+	public class ExternalUrlUsageItem : IApiTitleOptional
 	{
 		#region Constructors
 		internal ExternalUrlUsageItem(int? ns, string? title, long pageId, string? url)
 		{
 			this.Namespace = ns;
-			this.Title = title;
+			this.FullPageName = title;
 			this.PageId = pageId;
 			this.Url = url;
 		}
@@ -21,13 +21,13 @@ namespace RobinHood70.WallE.Base
 
 		public long PageId { get; }
 
-		public string? Title { get; }
+		public string? FullPageName { get; }
 
 		public string? Url { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title ?? this.Url ?? FallbackText.NoTitle;
+		public override string ToString() => this.FullPageName ?? this.Url ?? FallbackText.NoTitle;
 		#endregion
 	}
 }

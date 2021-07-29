@@ -17,14 +17,14 @@ namespace RobinHood70.WallE.Base
 	}
 	#endregion
 
-	public class WatchlistItem : LogEvent, ITitleOptional
+	public class WatchlistItem : LogEvent, IApiTitleOptional
 	{
 		#region Constructors
 		internal WatchlistItem(string watchlistType, int? ns, string? title, WatchlistFlags flags, int newLength, int oldLength, long oldRevisionId, long revisionId)
 		{
 			this.WatchlistType = watchlistType;
 			this.Namespace = ns;
-			this.Title = title;
+			this.FullPageName = title;
 			this.Flags = flags;
 			this.NewLength = newLength;
 			this.OldLength = oldLength;
@@ -48,13 +48,13 @@ namespace RobinHood70.WallE.Base
 
 		public long RevisionId { get; }
 
-		public string? Title { get; }
+		public string? FullPageName { get; }
 
 		public string WatchlistType { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title ?? FallbackText.NoTitle;
+		public override string ToString() => this.FullPageName ?? FallbackText.NoTitle;
 		#endregion
 	}
 }
