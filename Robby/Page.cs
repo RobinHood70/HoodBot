@@ -191,8 +191,8 @@
 		/// <returns>A new Page based on the provided values.</returns>
 		public static new Page FromName(Site site, string fullPageName)
 		{
-			var parser = new TitleParser(site, fullPageName);
-			return new Page(parser);
+			var factory = TitleFactory.FromName(site, fullPageName);
+			return new Page(factory);
 		}
 		#endregion
 
@@ -361,7 +361,7 @@
 		{
 			foreach (var link in list)
 			{
-				var title = FromWikiTitle(this.Site, link.FullPageName.NotNull(nameof(link), nameof(link.FullPageName)));
+				var title = FromNormalizedTitle(this.Site, link.FullPageName.NotNull(nameof(link), nameof(link.FullPageName)));
 				if (backlinks.ContainsKey(title))
 				{
 					backlinks[title] |= type;
@@ -379,8 +379,8 @@
 			categories.Clear();
 			foreach (var category in pageItem.Categories)
 			{
-				var parser = new TitleParser(this.Site, category.FullPageName);
-				categories.Add(new Category(parser, category.SortKey, category.Hidden));
+				var factory = TitleFactory.FromName(this.Site, category.FullPageName);
+				categories.Add(new Category(factory, category.SortKey, category.Hidden));
 			}
 		}
 
@@ -420,7 +420,7 @@
 			links.Clear();
 			foreach (var link in pageItem.Links)
 			{
-				links.Add(FromWikiTitle(this.Site, link.FullPageName));
+				links.Add(FromNormalizedTitle(this.Site, link.FullPageName));
 			}
 		}
 
@@ -452,7 +452,7 @@
 			templates.Clear();
 			foreach (var link in pageItem.Templates)
 			{
-				templates.Add(FromWikiTitle(this.Site, link.FullPageName));
+				templates.Add(FromNormalizedTitle(this.Site, link.FullPageName));
 			}
 		}
 		#endregion

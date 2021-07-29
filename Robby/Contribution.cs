@@ -17,7 +17,7 @@
 			: base(contribution)
 		{
 			contribution.ThrowNull(nameof(contribution));
-			this.Title = Title.FromWikiTitle(site, contribution.FullPageName.NotNull(nameof(contribution), nameof(contribution.FullPageName)));
+			this.Title = Title.FromNormalizedTitle(site, contribution.FullPageName.NotNull(nameof(contribution), nameof(contribution.FullPageName)));
 			this.New = (contribution.Flags & UserContributionFlags.New) != 0;
 			this.Patrolled = (contribution.Flags & UserContributionFlags.Patrolled) != 0;
 			this.NewSize = contribution.Size;

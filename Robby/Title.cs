@@ -127,11 +127,7 @@
 		/// <param name="defaultNamespace">The default namespace if no namespace is specified in the page name.</param>
 		/// <param name="pageName">The page name. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
 		/// <returns>A new <see cref="Title"/> with the namespace found in <paramref name="pageName"/>, if there is one, otherwise using <paramref name="defaultNamespace"/>.</returns>
-		public static Title Coerce(Site site, int defaultNamespace, string pageName)
-		{
-			var parser = new TitleParser(site.NotNull(nameof(site)), defaultNamespace, pageName.NotNull(nameof(pageName)));
-			return new Title(parser);
-		}
+		public static Title Coerce(Site site, int defaultNamespace, string pageName) => TitleFactory.FromName(site.NotNull(nameof(site)), defaultNamespace, pageName.NotNull(nameof(pageName))).ToTitle();
 
 		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
 		/// <param name="site">The site the title is from.</param>
@@ -143,22 +139,16 @@
 		/// <param name="site">The site this title is from.</param>
 		/// <param name="fullPageName">The full name of the page.</param>
 		/// <returns>A new Title based on the provided values.</returns>
-		public static Title FromName([NotNull, ValidatedNotNull] Site site, [NotNull, ValidatedNotNull] string fullPageName)
-		{
-			var parser = new TitleParser(site, MediaWikiNamespaces.Main, fullPageName);
-			return new Title(parser);
-		}
+		public static Title FromName([NotNull, ValidatedNotNull] Site site, [NotNull, ValidatedNotNull] string fullPageName) => TitleFactory
+			.FromName(site.NotNull(nameof(site)), fullPageName.NotNull(nameof(fullPageName)))
+			.ToTitle();
 
 		/// <summary>Creates a new instance of the <see cref="Title"/> class from the site and full page name.</summary>
 		/// <param name="site">The site this title is from.</param>
 		/// <param name="ns">The namespace of the page.</param>
 		/// <param name="pageName">The name of the page.</param>
 		/// <returns>A new Title based on the provided values.</returns>
-		public static Title FromName([NotNull, ValidatedNotNull] Site site, [NotNull, ValidatedNotNull] int ns, [NotNull, ValidatedNotNull] string pageName)
-		{
-			var parser = new TitleParser(site, ns, pageName);
-			return new Title(parser);
-		}
+		public static Title FromName([NotNull, ValidatedNotNull] Site site, [NotNull, ValidatedNotNull] int ns, [NotNull, ValidatedNotNull] string pageName) => TitleFactory.FromName(site, ns, pageName).ToTitle();
 		#endregion
 
 		#region Public Methods
@@ -493,11 +483,7 @@
 		/// <param name="site">The site this title is from.</param>
 		/// <param name="fullPageName">The full name of the page.</param>
 		/// <returns>A new Title based on the provided values.</returns>
-		internal static Title FromWikiTitle([NotNull, ValidatedNotNull] Site site, [NotNull, ValidatedNotNull] string fullPageName)
-		{
-			var parser = new TitleParser(site, MediaWikiNamespaces.Main, fullPageName, false);
-			return new Title(parser);
-		}
+		internal static Title FromNormalizedTitle([NotNull, ValidatedNotNull] Site site, [NotNull, ValidatedNotNull] string fullPageName) => TitleFactory.FromNormalizedName(site, fullPageName).ToTitle();
 		#endregion
 
 		#region Protected Methods

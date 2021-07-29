@@ -266,14 +266,14 @@
 			var result = this.Site.AbstractionLayer.Backlinks(input);
 			foreach (var item in result)
 			{
-				var mainTitle = Title.FromWikiTitle(this.Site, item.FullPageName);
+				var mainTitle = Title.FromNormalizedTitle(this.Site, item.FullPageName);
 				this.Add(mainTitle);
 				if (item.Redirects != null)
 				{
 					foreach (var redirectedItem in item.Redirects)
 					{
-						var parser = new TitleParser(this.Site, redirectedItem.FullPageName);
-						this.Add(new Backlink(parser.Namespace, parser.PageName, mainTitle));
+						var factory = TitleFactory.FromName(this.Site, redirectedItem.FullPageName);
+						this.Add(new Backlink(factory.Namespace, factory.PageName, mainTitle));
 					}
 				}
 			}
@@ -467,7 +467,7 @@
 		}
 
 		/// <inheritdoc/>
-		protected override Title New(ISimpleTitle title) => new(title);
+		protected override Title New(string title) => TitleFactory.FromNormalizedName(this.Site, title).ToTitle();
 		#endregion
 
 		#region Protected Virtual Methods
@@ -511,7 +511,7 @@
 			foreach (var item in result)
 			{
 				var flags = item.Flags;
-				var page = retval.AddNewItem(new TitleParser(this.Site, item.FullPageName));
+				var page = retval.AddNewItem(item.FullPageName);
 				page.PopulateFlags((flags & PurgeFlags.Invalid) != 0, (flags & PurgeFlags.Missing) != 0);
 			}
 
@@ -529,7 +529,7 @@
 			foreach (var item in result)
 			{
 				var flags = item.Flags;
-				var page = pages.AddNewItem(new TitleParser(this.Site, item.FullPageName));
+				var page = pages.AddNewItem(item.FullPageName);
 				page.PopulateFlags(false, (flags & WatchFlags.Missing) != 0);
 			}
 
@@ -542,7 +542,7 @@
 		{
 			foreach (var item in result)
 			{
-				this.Add(Title.FromWikiTitle(this.Site, item.FullPageName));
+				this.Add(Title.FromNormalizedTitle(this.Site, item.FullPageName));
 			}
 		}
 
@@ -550,7 +550,7 @@
 		{
 			foreach (var item in result)
 			{
-				this.Add(Title.FromWikiTitle(this.Site, item.FullPageName.NotNull(nameof(item), nameof(item.FullPageName))));
+				this.Add(Title.FromNormalizedTitle(this.Site, item.FullPageName.NotNull(nameof(item), nameof(item.FullPageName))));
 			}
 		}
 
@@ -566,7 +566,7 @@
 			var result = this.Site.AbstractionLayer.CategoryMembers(input);
 			foreach (var item in result)
 			{
-				var title = Title.FromWikiTitle(this.Site, item.FullPageName.NotNull(nameof(item), nameof(item.FullPageName)));
+				var title = Title.FromNormalizedTitle(this.Site, item.FullPageName.NotNull(nameof(item), nameof(item.FullPageName)));
 				if (input.Type.HasFlag(item.Type))
 				{
 					this.Add(title);

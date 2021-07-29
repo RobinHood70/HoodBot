@@ -227,7 +227,7 @@
 
 					if (latestRevision.Timestamp > LastRun)
 					{
-						parts.Categories.Add(new SiteLink(page.Site, MissingFileCategory));
+						parts.Categories.Add(TitleFactory.FromNormalizedName(page.Site, MissingFileCategory).ToSiteLink());
 					}
 				}
 				else
