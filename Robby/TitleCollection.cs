@@ -5,7 +5,6 @@
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 
@@ -547,16 +546,11 @@
 			}
 		}
 
-		private void FillFromTitleItems(IEnumerable<ITitleOptional> result)
+		private void FillFromTitleItems(IEnumerable<IApiTitleOptional> result)
 		{
 			foreach (var item in result)
 			{
-				if (item.Title == null)
-				{
-					throw new InvalidOperationException(Resources.TitleInvalid);
-				}
-
-				this.Add(Title.FromWikiTitle(this.Site, item.Title));
+				this.Add(Title.FromWikiTitle(this.Site, item.FullPageName.NotNull(nameof(item), nameof(item.FullPageName))));
 			}
 		}
 
@@ -572,13 +566,13 @@
 			var result = this.Site.AbstractionLayer.CategoryMembers(input);
 			foreach (var item in result)
 			{
-				var title = Title.FromWikiTitle(this.Site, item.Title.NotNull(nameof(item), nameof(item.Title)));
+				var title = Title.FromWikiTitle(this.Site, item.FullPageName.NotNull(nameof(item), nameof(item.FullPageName)));
 				if (input.Type.HasFlag(item.Type))
 				{
 					this.Add(title);
 				}
 
-				if (item.Type == CategoryMemberTypes.Subcat && item.Title is string itemTitle)
+				if (item.Type == CategoryMemberTypes.Subcat && item.FullPageName is string itemTitle)
 				{
 					var originalTitle = input.Title;
 					input.ChangeTitle(itemTitle);

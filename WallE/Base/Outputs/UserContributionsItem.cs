@@ -21,7 +21,7 @@ namespace RobinHood70.WallE.Base
 	}
 	#endregion
 
-	public class UserContributionsItem : ITitleOptional
+	public class UserContributionsItem : IApiTitleOptional
 	{
 		#region Constructors
 		internal UserContributionsItem(string user, long userId, int? ns, string? title, long pageId, string? comment, UserContributionFlags flags, long parentId, string? parsedComment, long revId, int size, int sizeDiff, IReadOnlyList<string> tags, DateTime? timestamp)
@@ -29,7 +29,7 @@ namespace RobinHood70.WallE.Base
 			this.User = user;
 			this.UserId = userId;
 			this.Namespace = ns;
-			this.Title = title;
+			this.FullPageName = title;
 			this.PageId = pageId;
 			this.Comment = comment;
 			this.Flags = flags;
@@ -66,7 +66,7 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Timestamp { get; }
 
-		public string? Title { get; }
+		public string? FullPageName { get; }
 
 		public string User { get; }
 
@@ -74,7 +74,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title ?? this.User ?? FallbackText.NoTitle;
+		public override string ToString() => this.FullPageName ?? this.User ?? FallbackText.NoTitle;
 		#endregion
 	}
 }

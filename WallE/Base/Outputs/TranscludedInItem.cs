@@ -3,13 +3,13 @@ namespace RobinHood70.WallE.Base
 {
 	using RobinHood70.WikiCommon;
 
-	public class TranscludedInItem : ITitleOptional
+	public class TranscludedInItem : IApiTitleOptional
 	{
 		#region Constructors
 		internal TranscludedInItem(int? ns, string? title, long pageId, bool redirect)
 		{
 			this.Namespace = ns;
-			this.Title = title;
+			this.FullPageName = title;
 			this.PageId = pageId;
 			this.Redirect = redirect;
 		}
@@ -22,11 +22,11 @@ namespace RobinHood70.WallE.Base
 
 		public long PageId { get; }
 
-		public string? Title { get; }
+		public string? FullPageName { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title ?? FallbackText.NoTitle;
+		public override string ToString() => this.FullPageName ?? FallbackText.NoTitle;
 		#endregion
 	}
 }

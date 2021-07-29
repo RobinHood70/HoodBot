@@ -3,13 +3,13 @@ namespace RobinHood70.WallE.Base
 {
 	using RobinHood70.WikiCommon;
 
-	public class RedirectItem : ITitleOptional
+	public class RedirectItem : IApiTitleOptional
 	{
 		#region Constructors
 		internal RedirectItem(int? ns, string? title, long pageId, string? fragment)
 		{
 			this.Namespace = ns;
-			this.Title = title;
+			this.FullPageName = title;
 			this.PageId = pageId;
 			this.Fragment = fragment;
 		}
@@ -22,11 +22,11 @@ namespace RobinHood70.WallE.Base
 
 		public long PageId { get; }
 
-		public string? Title { get; }
+		public string? FullPageName { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title ?? FallbackText.NoTitle;
+		public override string ToString() => this.FullPageName ?? FallbackText.NoTitle;
 		#endregion
 	}
 }

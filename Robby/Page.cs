@@ -357,11 +357,11 @@
 			this.PopulateBacklinksType(backlinks, pageItem.TranscludedIn, BacklinksTypes.EmbeddedIn);
 		}
 
-		private void PopulateBacklinksType(Dictionary<Title, BacklinksTypes> backlinks, IReadOnlyList<ITitleOptional> list, BacklinksTypes type)
+		private void PopulateBacklinksType(Dictionary<Title, BacklinksTypes> backlinks, IReadOnlyList<IApiTitleOptional> list, BacklinksTypes type)
 		{
 			foreach (var link in list)
 			{
-				var title = FromWikiTitle(this.Site, link.Title.NotNull(nameof(link), nameof(link.Title)));
+				var title = FromWikiTitle(this.Site, link.FullPageName.NotNull(nameof(link), nameof(link.FullPageName)));
 				if (backlinks.ContainsKey(title))
 				{
 					backlinks[title] |= type;

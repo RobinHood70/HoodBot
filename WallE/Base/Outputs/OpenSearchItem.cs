@@ -3,13 +3,14 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using RobinHood70.CommonCode;
+	using RobinHood70.WikiCommon;
 
-	public class OpenSearchItem : ITitleOptional
+	public class OpenSearchItem : IApiTitleOptional
 	{
 		#region Constructors
 		internal OpenSearchItem(string? title, string? description, Uri? uri)
 		{
-			this.Title = title;
+			this.FullPageName = title;
 			this.Description = description;
 			this.Uri = uri;
 		}
@@ -18,13 +19,13 @@ namespace RobinHood70.WallE.Base
 		#region Public Properties
 		public string? Description { get; }
 
-		public string? Title { get; }
+		public string? FullPageName { get; }
 
 		public Uri? Uri { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title ?? Globals.Unknown;
+		public override string ToString() => this.FullPageName ?? Globals.Unknown;
 		#endregion
 	}
 }
