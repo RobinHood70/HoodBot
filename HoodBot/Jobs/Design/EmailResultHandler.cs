@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
 	using System;
-using RobinHood70.CommonCode;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
 

@@ -17,7 +17,7 @@
 		/// <param name="site">The site the category is from.</param>
 		/// <param name="pageName">The page name.</param>
 		public CategoryPage(Site site, string pageName)
-			: base((site.NotNull(nameof(site)))[MediaWikiNamespaces.Category], pageName)
+			: base(site.NotNull(nameof(site))[MediaWikiNamespaces.Category], pageName)
 		{
 		}
 

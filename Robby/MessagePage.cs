@@ -18,7 +18,7 @@
 		/// <param name="site">The site the Message is from.</param>
 		/// <param name="pageName">The page name.</param>
 		public MessagePage(Site site, string pageName)
-			: base((site.NotNull(nameof(site)))[MediaWikiNamespaces.MediaWiki], pageName)
+			: base(site.NotNull(nameof(site))[MediaWikiNamespaces.MediaWiki], pageName)
 		{
 		}
 
@@ -49,7 +49,7 @@
 		/// <param name="ns">The namespace of the page (must be MediaWiki).</param>
 		/// <param name="item">The AllMessagesItem to populate this instance from.</param>
 		protected internal MessagePage(Namespace ns, AllMessagesItem item)
-			: base(ns, (item.NotNull(nameof(item))).Name) => this.PopulateFrom(item);
+			: base(ns, item.NotNull(nameof(item)).Name) => this.PopulateFrom(item);
 		#endregion
 
 		#region Public Properties

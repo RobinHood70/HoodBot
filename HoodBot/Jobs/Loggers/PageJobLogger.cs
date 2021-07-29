@@ -28,10 +28,7 @@
 
 		#region Constructors
 		public PageJobLogger(Site site, string pageName, JobTypes typesToLog)
-			: base(typesToLog)
-		{
-			this.logPage = Page.FromName(site.NotNull(nameof(site)), pageName.NotNull(nameof(pageName)));
-		}
+			: base(typesToLog) => this.logPage = Page.FromName(site.NotNull(nameof(site)), pageName.NotNull(nameof(pageName)));
 		#endregion
 
 		#region Public Override Methods

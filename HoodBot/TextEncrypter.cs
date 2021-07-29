@@ -5,7 +5,7 @@
 	using System.IO;
 	using System.Security.Cryptography;
 	using System.Text;
-using RobinHood70.CommonCode;
+	using RobinHood70.CommonCode;
 
 	internal sealed class TextEncrypter
 	{

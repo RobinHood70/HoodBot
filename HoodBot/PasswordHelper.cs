@@ -2,9 +2,9 @@
 {
 	using System.Windows;
 	using System.Windows.Controls;
-using RobinHood70.CommonCode;
+	using RobinHood70.CommonCode;
 
-// Taken from https://www.wpftutorial.net/PasswordBox.html
+	// Taken from https://www.wpftutorial.net/PasswordBox.html
 	public static class PasswordHelper
 	{
 		#region Public Fields

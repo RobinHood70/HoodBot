@@ -2,7 +2,7 @@
 {
 	using System;
 	using Newtonsoft.Json;
-using RobinHood70.CommonCode;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 
 	[Flags]

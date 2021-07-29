@@ -10,7 +10,7 @@
 	{
 		#region Constructors
 		public JobNode(TreeNode parent, JobInfo jobInfo)
-			: base(parent, (jobInfo.NotNull(nameof(jobInfo))).Name, null) => this.JobInfo = jobInfo;
+			: base(parent, jobInfo.NotNull(nameof(jobInfo)).Name, null) => this.JobInfo = jobInfo;
 		#endregion
 
 		#region Public Properties

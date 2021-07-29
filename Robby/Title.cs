@@ -360,10 +360,7 @@
 		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
 		/// <remarks>The original title object will remain unaltered after the move; it will not be updated to reflect the destination.</remarks>
-		public ChangeValue<IDictionary<string, string>> Move(ISimpleTitle to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
-		{
-			return this.Move(to.NotNull(nameof(to)).FullPageName, reason, moveTalk, moveSubpages, suppressRedirect);
-		}
+		public ChangeValue<IDictionary<string, string>> Move(ISimpleTitle to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect) => this.Move(to.NotNull(nameof(to)).FullPageName, reason, moveTalk, moveSubpages, suppressRedirect);
 
 		/// <summary>Checks if the provided page name is equal to the title's page name, based on the case-sensitivity for the namespace.</summary>
 		/// <param name="other">The page name to compare to.</param>

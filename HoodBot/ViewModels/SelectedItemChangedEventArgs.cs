@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.ViewModels
 {
 	using System;
-using RobinHood70.CommonCode;
+	using RobinHood70.CommonCode;
 
 	public class SelectedItemChangedEventArgs : EventArgs
 	{

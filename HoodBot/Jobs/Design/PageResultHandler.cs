@@ -1,6 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
-using RobinHood70.CommonCode;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 
 	/// <summary>Implements the <see cref="ResultHandler" /> class and saves results to a wiki page.</summary>

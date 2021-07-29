@@ -2,7 +2,7 @@
 {
 	using System;
 	using Newtonsoft.Json.Linq;
-using RobinHood70.CommonCode;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
 
 	// Note: password security for this class is minimal and fairly easily reversed. If this is a concern, it's recommended not to store passowrds and instead enter them manually every time.
