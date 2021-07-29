@@ -4,10 +4,11 @@
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	internal sealed class PropImages : PropListModule<ImagesInput, ITitle>, IGeneratorModule
+	internal sealed class PropImages : PropListModule<ImagesInput, IApiTitle>, IGeneratorModule
 	{
 		#region Constructors
 		public PropImages(WikiAbstractionLayer wal, ImagesInput input)
@@ -48,9 +49,9 @@
 				.Add("limit", this.Limit);
 		}
 
-		protected override ITitle GetItem(JToken result, PageItem page) => result.GetWikiTitle();
+		protected override IApiTitle GetItem(JToken result, PageItem page) => result.GetWikiTitle();
 
-		protected override ICollection<ITitle> GetMutableList(PageItem page) => (ICollection<ITitle>)page.Images;
+		protected override ICollection<IApiTitle> GetMutableList(PageItem page) => (ICollection<IApiTitle>)page.Images;
 		#endregion
 	}
 }

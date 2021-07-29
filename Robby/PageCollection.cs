@@ -506,7 +506,7 @@
 			this.PopulateMapCollections(result);
 			foreach (var item in result)
 			{
-				var page = this.New(new TitleParser(this.Site, MediaWikiNamespaces.Main, item.Title, false));
+				var page = this.New(new TitleParser(this.Site, MediaWikiNamespaces.Main, item.FullPageName, false));
 				page.Populate(item, options);
 				if (pageValidator(page))
 				{

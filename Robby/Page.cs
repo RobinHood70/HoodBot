@@ -379,7 +379,7 @@
 			categories.Clear();
 			foreach (var category in pageItem.Categories)
 			{
-				var parser = new TitleParser(this.Site, category.Title);
+				var parser = new TitleParser(this.Site, category.FullPageName);
 				categories.Add(new Category(parser, category.SortKey, category.Hidden));
 			}
 		}
@@ -420,7 +420,7 @@
 			links.Clear();
 			foreach (var link in pageItem.Links)
 			{
-				links.Add(FromWikiTitle(this.Site, link.Title));
+				links.Add(FromWikiTitle(this.Site, link.FullPageName));
 			}
 		}
 
@@ -452,7 +452,7 @@
 			templates.Clear();
 			foreach (var link in pageItem.Templates)
 			{
-				templates.Add(FromWikiTitle(this.Site, link.Title));
+				templates.Add(FromWikiTitle(this.Site, link.FullPageName));
 			}
 		}
 		#endregion

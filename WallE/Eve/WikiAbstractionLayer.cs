@@ -1416,7 +1416,7 @@
 
 		private PageSetResult<TOutput> SubmitPageSet<TInput, TOutput>(ActionModulePageSet<TInput, TOutput> action, TInput input)
 			where TInput : PageSetInput
-			where TOutput : class, ITitle
+			where TOutput : class, IApiTitle
 		{
 			var retval = action.Submit(input);
 			this.DoStopCheck();

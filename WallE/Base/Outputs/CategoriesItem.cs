@@ -2,14 +2,15 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
+	using RobinHood70.WikiCommon;
 
-	public class CategoriesItem : ITitle
+	public class CategoriesItem : IApiTitle
 	{
 		#region Constructors
 		public CategoriesItem(int ns, string title, bool hidden, string? sortkey, string? sortkeyPrefix, DateTime? timestamp)
 		{
 			this.Namespace = ns;
-			this.Title = title;
+			this.FullPageName = title;
 			this.Hidden = hidden;
 			this.SortKey = sortkey;
 			this.SortKeyPrefix = sortkeyPrefix;
@@ -28,11 +29,11 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Timestamp { get; }
 
-		public string Title { get; }
+		public string FullPageName { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title;
+		public override string ToString() => this.FullPageName;
 		#endregion
 	}
 }

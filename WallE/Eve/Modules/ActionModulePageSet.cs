@@ -14,12 +14,13 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Properties;
+	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	public abstract class ActionModulePageSet<TInput, TOutput> : ActionModule, IPageSetGenerator
 		where TInput : PageSetInput
-		where TOutput : class, ITitle
+		where TOutput : class, IApiTitle
 	{
 		#region Static Fields
 		private static readonly Regex TooManyFinder = new("Too many values .*?['\"](?<parameter>.*?)['\"].*?limit is (?<sizelimit>[0-9]+)", RegexOptions.Compiled, Globals.DefaultRegexTimeout);

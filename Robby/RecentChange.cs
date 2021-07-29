@@ -13,7 +13,7 @@
 		/// <param name="recentChange">The <see cref="RecentChangesItem"/> to initialize from.</param>
 		protected internal RecentChange(Site site, RecentChangesItem recentChange)
 		{
-			this.Title = Title.FromWikiTitle(site, recentChange.NotNull(nameof(recentChange)).Title);
+			this.Title = Title.FromWikiTitle(site, recentChange.NotNull(nameof(recentChange)).FullPageName);
 			this.Anonymous = recentChange.UserId == 0;
 			this.Comment = recentChange.Comment;
 			this.Id = recentChange.Id;
