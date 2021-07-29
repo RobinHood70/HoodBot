@@ -3,9 +3,9 @@
 	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class PropCategories : PropListModule<CategoriesInput, CategoriesItem>, IGeneratorModule
@@ -33,23 +33,17 @@
 		#endregion
 
 		#region Public Static Methods
-		public static PropCategories CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is CategoriesInput propInput
-				? new PropCategories(wal, propInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(CategoriesInput), input.GetType().Name);
+		public static PropCategories CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (CategoriesInput)input, pageSetGenerator);
 
-		public static PropCategories CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
-			input is CategoriesInput propInput
-				? new PropCategories(wal, propInput)
-				: throw InvalidParameterType(nameof(input), nameof(CategoriesInput), input.GetType().Name);
+		public static PropCategories CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new(wal, (CategoriesInput)input);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, CategoriesInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddFlags("prop", input.Properties)
 				.AddFilterPiped("show", "hidden", input.FilterHidden)
 				.Add("categories", input.Categories)

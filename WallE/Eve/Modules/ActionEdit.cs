@@ -5,11 +5,14 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ActionEdit : ActionModule<EditInput, EditResult>
 	{
+		#region Private Constants
+		private const int GetMultipartThreshold = 8000;
+		#endregion
+
 		#region Constructors
 		public ActionEdit(WikiAbstractionLayer wal)
 			: base(wal)
@@ -30,9 +33,8 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, EditInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
-			if (input.Text?.Length > 8000)
+			request.ThrowNull(nameof(request));
+			if (input.NotNull(nameof(input)).Text?.Length > GetMultipartThreshold)
 			{
 				request.Type = RequestType.PostMultipart;
 			}
@@ -68,7 +70,7 @@
 
 		protected override EditResult DeserializeResult(JToken? result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			return new EditResult(
 				result: result.MustHaveString("result"),
 				pageId: (long?)result.MustHave("pageid") ?? 0,

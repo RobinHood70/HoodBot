@@ -5,10 +5,10 @@
 	using System.IO;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class ActionQuery : ActionModule
 	{
@@ -119,7 +119,7 @@
 			}
 		}
 
-		public static bool HandleWarning(string? from, string? text, IEnumerable<IQueryModule> queryModules, MetaUserInfo? userModule)
+		public static bool HandleWarning(string from, string? text, IEnumerable<IQueryModule> queryModules, MetaUserInfo? userModule)
 		{
 			foreach (var module in queryModules)
 			{
@@ -157,7 +157,7 @@
 
 		protected override void DeserializeActionExtra(JToken result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			if (result[this.Name] is JToken node && node.Type != JTokenType.Null)
 			{
 				foreach (var module in this.queryModules)
@@ -180,12 +180,7 @@
 			CheckResult(result, this.queryModules);
 		}
 
-		protected override bool HandleWarning(string from, string text)
-		{
-			ThrowNull(from, nameof(from));
-			ThrowNull(text, nameof(text));
-			return HandleWarning(from, text, this.queryModules, this.userModule) || base.HandleWarning(from, text);
-		}
+		protected override bool HandleWarning(string from, string text) => HandleWarning(from, text, this.queryModules, this.userModule) || base.HandleWarning(from, text);
 		#endregion
 
 		#region Private Methods
@@ -207,7 +202,7 @@
 		{
 			try
 			{
-				var result = ToJson(response);
+				var result = ToJson(response.NotNull(nameof(response)));
 				if (result.Type == JTokenType.Object)
 				{
 					this.DeserializeAction(result);

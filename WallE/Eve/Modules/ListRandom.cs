@@ -4,7 +4,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// MWVERSION: 1.29
@@ -33,18 +32,15 @@
 		#endregion
 
 		#region Public Static Methods
-		public static ListRandom CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is RandomInput listInput
-				? new ListRandom(wal, listInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(RandomInput), input.GetType().Name);
+		public static ListRandom CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (RandomInput)input, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, RandomInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.Add("namespace", input.Namespaces)
 				.AddIf("filterredir", "redirects", input.FilterRedirects == Filter.Only && this.SiteVersion >= 126)
 				.AddIf("filterredir", "all", input.FilterRedirects == Filter.Any && this.SiteVersion >= 126)

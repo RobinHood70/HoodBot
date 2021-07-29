@@ -3,10 +3,10 @@
 	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ListWatchlist : ListModule<WatchlistInput, WatchlistItem>, IGeneratorModule
@@ -67,23 +67,19 @@
 		#endregion
 
 		#region Public Static Methods
-		public static ListWatchlist CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is WatchlistInput listInput
-				? new ListWatchlist(wal, listInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(WatchlistInput), input.GetType().Name);
+		public static ListWatchlist CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (WatchlistInput)input, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, WatchlistInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.Properties)
+				.Check(this.SiteVersion, input.NotNull(nameof(input)).Properties)
 				.FilterBefore(117, WatchlistProperties.UserId)
 				.FilterBefore(118, WatchlistProperties.LogInfo)
 				.Value;
 			request
+				.NotNull(nameof(request))
 				.Add("allrev", input.AllRevisions)
 				.Add("start", input.Start)
 				.Add("end", input.End)

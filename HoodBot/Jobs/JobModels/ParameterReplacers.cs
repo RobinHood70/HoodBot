@@ -2,13 +2,13 @@
 {
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
 	public delegate void ParameterReplacer(Page page, SiteTemplateNode template);
 
@@ -26,8 +26,7 @@
 		#region Constructors
 		public ParameterReplacers(MovePagesJob job)
 		{
-			ThrowNull(job, nameof(job));
-			this.job = job;
+			this.job = job.NotNull(nameof(job));
 			this.AddAllReplacers();
 		}
 		#endregion
@@ -62,7 +61,7 @@
 
 		public void ReplaceAll(Page page, SiteTemplateNode template)
 		{
-			ThrowNull(template, nameof(template));
+			template.ThrowNull(nameof(template));
 			foreach (var action in this.generalReplacers)
 			{
 				action(page, template);
@@ -81,14 +80,10 @@
 		#region Protected Methods
 		protected void BulletLink(Page page, SiteTemplateNode template)
 		{
-			if ((template.Find(1) ?? template.Find("link")) is IParameterNode link)
+			page.ThrowNull(nameof(page));
+			if ((template.NotNull(nameof(template)).Find(1) ?? template.Find("link")) is IParameterNode link)
 			{
-				ThrowNull(page, nameof(page));
-				var nsBase = template.Find("ns_base", "ns_id");
-				var ns = nsBase != null && this.NamespaceList.TryGetValue(nsBase.Value.ToValue(), out var uespNamespace)
-					? uespNamespace.BaseTitle.Namespace
-					: page.Namespace;
-
+				var (ns, nsBase) = this.GetNsBase(page, template);
 				var oldTitle = link.Value.ToValue();
 				var searchTitle = new Title(ns, oldTitle);
 				if (this.job.Replacements.TryGetValue(searchTitle, out var replacement))
@@ -160,7 +155,7 @@
 
 		private void FullPageNameReplace([NotNull] Page page, IParameterNode? param)
 		{
-			ThrowNull(page, nameof(page));
+			page.ThrowNull(nameof(page));
 			if (param != null
 				&& Title.FromName(page.Site, param.Value.ToValue()) is var title
 				&& this.job.Replacements.TryGetValue(title, out var replacement)
@@ -168,6 +163,16 @@
 			{
 				param.SetValue(toLink.FullPageName);
 			}
+		}
+
+		private (Namespace Namespace, IParameterNode? NsBase) GetNsBase(Page page, SiteTemplateNode template)
+		{
+			var nsBase = template.Find("ns_base", "ns_id");
+			var ns = nsBase != null && this.NamespaceList.TryGetValue(nsBase.Value.ToValue(), out var uespNamespace)
+				? uespNamespace.BaseTitle.Namespace
+				: page.Namespace;
+
+			return (ns, nsBase);
 		}
 
 		private void PageNameAllNumeric(Page page, SiteTemplateNode template)

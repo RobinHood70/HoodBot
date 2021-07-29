@@ -2,10 +2,10 @@
 {
 	using System;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// MWVERSION: 1.25
@@ -41,10 +41,7 @@
 		#endregion
 
 		#region Public Static Methods
-		public static ListSearch CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is SearchInput listInput
-				? new ListSearch(wal, listInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(SearchInput), input.GetType().Name);
+		public static ListSearch CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (SearchInput)input, pageSetGenerator);
 		#endregion
 
 		#region Public Methods
@@ -57,14 +54,13 @@
 		#region Public Override Methods
 		protected override void BuildRequestLocal(Request request, SearchInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.Properties)
+				.Check(this.SiteVersion, input.NotNull(nameof(input)).Properties)
 				.FilterBefore(117, SearchProperties.Score | SearchProperties.TitleSnippet | SearchProperties.RedirectTitle | SearchProperties.RedirectSnippet | SearchProperties.SectionTitle | SearchProperties.SectionSnippet | SearchProperties.HasRelated)
 				.FilterFrom(124, SearchProperties.HasRelated | SearchProperties.Score)
 				.Value;
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("search", input.Search)
 				.Add("namespace", input.Namespaces)
 				.AddIfPositiveIf("what", input.What, this.SiteVersion >= 117)
@@ -77,7 +73,7 @@
 
 		protected override void DeserializeParent(JToken parent)
 		{
-			ThrowNull(parent, nameof(parent));
+			parent.ThrowNull(nameof(parent));
 			if (parent["searchinfo"] is JToken infoNode)
 			{
 				this.suggestion = (string?)infoNode["suggestion"];

@@ -5,9 +5,9 @@
 	using System.ComponentModel;
 	using System.Runtime.CompilerServices;
 	using System.Text;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon.Properties;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>A concrete factory for creating <see cref="IWikiNode"/>s to be added to a <see cref="Parser.NodeCollection"/>.</summary>
 	/// <seealso cref="IWikiNodeFactory" />
@@ -74,8 +74,7 @@
 		/// <returns>A new argument node.</returns>
 		public IArgumentNode ArgumentNodeFromParts(string name, string? defaultValue)
 		{
-			ThrowNull(name, nameof(name));
-			var text = "{{{" + name;
+			var text = "{{{" + name.NotNull(nameof(name));
 			if (defaultValue != null)
 			{
 				text += '|' + defaultValue;
@@ -126,8 +125,7 @@
 		/// <returns>A new link node.</returns>
 		public ILinkNode LinkNodeFromParts(string title, IEnumerable<string>? parameters)
 		{
-			ThrowNull(title, nameof(title));
-			var titleNodes = this.Parse(title);
+			var titleNodes = this.Parse(title.NotNull(nameof(title)));
 			var paramEntries = new List<IParameterNode>();
 			if (parameters != null)
 			{
@@ -227,7 +225,7 @@
 			var nodes = this.Parse(text);
 			return nodes.Count == 1 && nodes[0] is T node
 				? node
-				: throw new ArgumentException(CurrentCulture(Resources.MalformedNodeText, this.GetType().Name, callerName), nameof(text));
+				: throw new ArgumentException(Globals.CurrentCulture(Resources.MalformedNodeText, this.GetType().Name, callerName), nameof(text));
 		}
 
 		/// <summary>Creates a new TemplateNode from its parts.</summary>
@@ -248,7 +246,7 @@
 		/// </remarks>
 		public ITemplateNode TemplateNodeFromParts(string title, bool onePerLine, IEnumerable<string>? parameters)
 		{
-			ThrowNull(title, nameof(title));
+			title.ThrowNull(nameof(title));
 			var sb = new StringBuilder();
 			sb
 				.Append("{{")
@@ -322,7 +320,7 @@
 		/// </remarks>
 		public ITemplateNode TemplateNodeFromParts(string title, bool onePerLine, IEnumerable<(string? Name, string Value)> parameters)
 		{
-			ThrowNull(title, nameof(title));
+			title.ThrowNull(nameof(title));
 			var sb = new StringBuilder();
 			sb
 				.Append("{{")

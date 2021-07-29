@@ -2,7 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	/// <summary>Represents a parameter with collection of values, normally separated by pipe characters.</summary>
 	/// <seealso cref="Parameter" />
@@ -14,7 +14,7 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="values">The parameter values. Any duplicates in the input will be ignored.</param>
 		public PipedParameter(string name, ICollection<string> values)
-			: base(name) => this.Values = values ?? throw ArgumentNull(nameof(values));
+			: base(name) => this.Values = values.NotNull(nameof(values));
 		#endregion
 
 		#region Public Abstract Properties
@@ -53,11 +53,7 @@
 		#region Public Override Methods
 
 		/// <inheritdoc/>
-		public override void Accept(IParameterVisitor visitor)
-		{
-			ThrowNull(visitor, nameof(visitor));
-			visitor.Visit(this);
-		}
+		public override void Accept(IParameterVisitor visitor) => visitor.NotNull(nameof(visitor)).Visit(this);
 
 		/// <inheritdoc/>
 		public override string ToString() => this.Name + "=" + string.Join("|", this.Values);

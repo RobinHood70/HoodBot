@@ -5,9 +5,9 @@
 	using System.ComponentModel;
 	using System.Runtime.InteropServices;
 	using System.Text.RegularExpressions;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.Parser.StackElements;
 	using RobinHood70.WikiCommon.Properties;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>What to include when parsing.</summary>
 	public enum InclusionType
@@ -65,8 +65,7 @@
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
 		public WikiStack(IWikiNodeFactory factory, [Localizable(false)] string? text, InclusionType inclusionType, bool strictInclusion)
 		{
-			ThrowNull(factory, nameof(factory));
-			this.NodeFactory = factory;
+			this.NodeFactory = factory.NotNull(nameof(factory));
 
 			// Not using Push both so that nullable reference check succeeds on .Top and for a micro-optimization.
 			this.array = new StackElement[StartSize];
@@ -109,7 +108,7 @@
 			}
 
 			regexTags.Sort(StringComparer.Ordinal);
-			this.tagsRegex = new Regex(@"\G(" + string.Join("|", regexTags) + ")", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+			this.tagsRegex = new Regex(@"\G(" + string.Join("|", regexTags) + ")", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 			this.Preprocess();
 		}
 		#endregion
@@ -211,7 +210,7 @@
 					break;
 				default:
 					var curChar = this.Index < this.Text.Length ? this.Text[this.Index] : '\uffff';
-					throw new InvalidOperationException(Invariant($"Found unexpected character '{curChar}' at position {this.Index}."));
+					throw new InvalidOperationException(FormattableString.Invariant($"Found unexpected character '{curChar}' at position {this.Index}."));
 			}
 		}
 
@@ -366,7 +365,7 @@
 			else
 			{
 				attrEnd = tagEndPos;
-				var findClosing = new Regex("</" + tagOpen + @"\s*>", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+				var findClosing = new Regex("</" + tagOpen + @"\s*>", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 				if (this.noMoreClosingTag.Contains(tagOpen) && findClosing.Match(this.Text, tagEndPos + 1) is Match match && match.Success)
 				{
 					inner = this.Text.Substring(tagEndPos + 1, match.Index - tagEndPos - 1);

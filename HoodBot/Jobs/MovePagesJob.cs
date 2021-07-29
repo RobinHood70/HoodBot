@@ -16,7 +16,6 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
 	#region Internal Enums
 	[Flags]
@@ -303,13 +302,7 @@
 		#endregion
 
 		#region Protected Virtual Methods
-		protected virtual void BacklinkPageLoaded(ContextualParser parser)
-		{
-			// Page may not have been correctly found if it was recently moved. If it wasn't, there's little we can do here, so skip it and it'll show up in the report (assuming it's generated).
-			// TODO: See if this can be worked around, like asking the wiki to purge and reload or something.
-			ThrowNull(parser, nameof(parser));
-			this.ReplaceBacklinks((Page)parser.Context, parser.Nodes); // TODO: See if this can be re-written with ContextualParser methods.
-		}
+		protected virtual void BacklinkPageLoaded(ContextualParser parser) => this.ReplaceBacklinks((Page)parser.NotNull(nameof(parser)).Context, parser.Nodes); // TODO: See if this can be re-written with ContextualParser methods.
 
 		protected virtual void CheckRemaining()
 		{
@@ -357,7 +350,7 @@
 				(this.FollowUpActions & FollowUpActions.ProposeUnused) != 0 &&
 				(replacement.Actions & ReplacementActions.Propose) != 0)
 			{
-				ThrowNull(replacement.Reason, nameof(replacement), nameof(replacement.Reason));
+				replacement.Reason.ThrowNull(nameof(replacement), nameof(replacement.Reason));
 				ProposeForDeletion(parser, "{{Proposeddeletion|bot=1|" + replacement.Reason.UpperFirst(this.Site.Culture) + "}}");
 				this.SaveInfo[replacement.From] = new SaveInfo(this.EditSummaryPropose, false);
 			}
@@ -375,7 +368,7 @@
 			foreach (var replacement in this.Replacements)
 			{
 				this.WriteLine("|-");
-				this.Write(Invariant($"| {replacement.From} ([[Special:WhatLinksHere/{replacement.From}|links]]) || "));
+				this.Write(FormattableString.Invariant($"| {replacement.From} ([[Special:WhatLinksHere/{replacement.From}|links]]) || "));
 				var actions = new List<string>();
 				if (this.MoveAction != MoveAction.None)
 				{
@@ -476,8 +469,7 @@
 
 		protected virtual void HandleConflict(Replacement replacement)
 		{
-			ThrowNull(replacement, nameof(replacement));
-			replacement.Actions &= ~ReplacementActions.Move;
+			replacement.NotNull(nameof(replacement)).Actions &= ~ReplacementActions.Move;
 			replacement.Reason = $"{replacement.To.AsLink(false)} exists";
 		}
 
@@ -512,12 +504,11 @@
 
 		protected virtual void ReplaceBacklinks(Page page, NodeCollection nodes)
 		{
-			ThrowNull(page, nameof(page));
-			ThrowNull(nodes, nameof(nodes));
+			page.ThrowNull(nameof(page));
 
 			// Possibly better as a visitor class?
 			this.isFirstLink = true;
-			foreach (var node in nodes)
+			foreach (var node in nodes.NotNull(nameof(nodes)))
 			{
 				if (node is IParentNode parent)
 				{
@@ -659,8 +650,7 @@
 
 		protected virtual void UpdateGalleryLinks(Page page, ITagNode tag)
 		{
-			ThrowNull(tag, nameof(tag));
-			var text = tag.InnerText;
+			var text = tag.NotNull(nameof(tag)).InnerText;
 			if (text == null)
 			{
 				return;
@@ -704,9 +694,8 @@
 
 		protected virtual void UpdateLinkNode(Page page, SiteLinkNode node, bool isRedirectTarget)
 		{
-			ThrowNull(page, nameof(page));
-			ThrowNull(node, nameof(node));
-			var link = SiteLink.FromLinkNode(this.Site, node);
+			page.ThrowNull(nameof(page));
+			var link = SiteLink.FromLinkNode(this.Site, node.NotNull(nameof(node)));
 			if (this.Replacements.TryGetValue(link, out var replacement)
 				&& (replacement.Actions & ReplacementActions.UpdateLinks) != 0
 				&& (link.ForcedNamespaceLink
@@ -731,9 +720,9 @@
 
 		protected virtual void UpdateLinkText(Page page, Title oldTitle, SiteLink newLink, bool addCaption)
 		{
-			ThrowNull(page, nameof(page));
-			ThrowNull(oldTitle, nameof(oldTitle));
-			ThrowNull(newLink, nameof(newLink));
+			page.ThrowNull(nameof(page));
+			oldTitle.ThrowNull(nameof(oldTitle));
+			newLink.ThrowNull(nameof(newLink));
 			if ((this.FollowUpActions & FollowUpActions.UpdateCaption) != 0)
 			{
 				// If UpdateCaption is true and caption exactly matches either the full page name or the simple page name, update it.
@@ -770,10 +759,8 @@
 
 		protected virtual void UpdateTemplateNode(Page page, SiteTemplateNode template)
 		{
-			ThrowNull(page, nameof(page));
-			ThrowNull(template, nameof(template));
-
-			if (this.Replacements.TryGetValue(template.TitleValue, out var replacement) &&
+			page.ThrowNull(nameof(page));
+			if (this.Replacements.TryGetValue(template.NotNull(nameof(template)).TitleValue, out var replacement) &&
 				(replacement.Actions & ReplacementActions.UpdateLinks) != 0)
 			{
 				var newTemplate = replacement.To;
@@ -801,11 +788,10 @@
 
 		private static void ProposeForDeletion(ContextualParser parser, string deletionText)
 		{
-			ThrowNull(parser, nameof(parser));
-			ThrowNull(deletionText, nameof(deletionText));
+			deletionText.ThrowNull(nameof(deletionText));
 
 			// Cheating and using text throughout, since this does not need to be parsed or acted upon currently, and is likely to be moved to another job soon anyway.
-			var page = (Page)parser.Context;
+			var page = (Page)parser.NotNull(nameof(parser)).Context;
 			var noinclude = page.Namespace == MediaWikiNamespaces.Template;
 			if (!noinclude)
 			{

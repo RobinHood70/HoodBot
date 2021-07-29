@@ -5,7 +5,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ActionCreateAccount : ActionModule<CreateAccountInput, CreateAccountResult>
@@ -30,9 +29,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, CreateAccountInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("name", input.Name)
 				.AddIfNotNull("password", input.Password)
 				.AddIfNotNull("domain", input.Domain)
@@ -47,7 +46,7 @@
 
 		protected override CreateAccountResult DeserializeResult(JToken? result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			var resultText = result.MustHaveString("result");
 			resultText = string.Equals(resultText, "needtoken", System.StringComparison.Ordinal) ? "NeedToken" : resultText.UpperFirst(CultureInfo.InvariantCulture);
 			return new CreateAccountResult(

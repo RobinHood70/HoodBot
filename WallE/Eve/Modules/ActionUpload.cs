@@ -6,7 +6,6 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ActionUpload : ActionModule<UploadInputInternal, UploadResult>
@@ -31,11 +30,10 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, UploadInputInternal input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
-
 			// Upload by URL is not implemented due to rarity of use and the level of complexity it adds to the code.
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("filename", input.FileName)
 				.AddIfNotNull("comment", input.Comment)
 				.AddIfNotNull("text", input.Text)
@@ -53,7 +51,7 @@
 
 		protected override UploadResult DeserializeResult(JToken? result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			var resultText = result.MustHaveString("result");
 			IReadOnlyList<string> duplicates = new List<string>();
 			var outputWarnings = new Dictionary<string, string>(System.StringComparer.Ordinal);
@@ -80,7 +78,7 @@
 							default:
 								if (value.Type is JTokenType.Object or JTokenType.Array)
 								{
-									this.AddWarning("ActionUpload.DeserializeResult", CurrentCulture(EveMessages.NotAString, name));
+									this.AddWarning("ActionUpload.DeserializeResult", Globals.CurrentCulture(EveMessages.NotAString, name));
 								}
 								else if ((string?)value is string valueString)
 								{

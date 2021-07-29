@@ -3,10 +3,10 @@
 	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// MWVERSION: 1.28
@@ -32,8 +32,7 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ParseInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			var prop = FlagFilter
 				.Check(this.SiteVersion, input.Properties)
 				.FilterBefore(126, ParseProperties.JsConfigVars | ParseProperties.ParseTree)
@@ -45,6 +44,7 @@
 				.FilterFrom(124, ParseProperties.LanguagesHtml)
 				.Value;
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("title", input.Title)
 				.AddIfNotNull("text", input.Text)
 				.AddIfNotNull("summary", input.Summary)
@@ -72,7 +72,7 @@
 
 		protected override ParseResult DeserializeResult(JToken? result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			var redirects = new Dictionary<string, PageSetRedirectItem>(StringComparer.Ordinal);
 			result["redirects"].GetRedirects(redirects, this.Wal.InterwikiPrefixes, this.SiteVersion);
 			return new ParseResult(
@@ -107,12 +107,11 @@
 		}
 
 		// 1.26 and 1.27 always emit a warning when the Modules property is specified, even though only one section of it is deprecated, so swallow that.
-		protected override bool HandleWarning(string? from, string? text)
-		{
-			ThrowNull(from, nameof(from));
-			ThrowNull(text, nameof(text));
-			return text.StartsWith("modulemessages", StringComparison.Ordinal) || base.HandleWarning(from, text);
-		}
+		protected override bool HandleWarning(string from, string? text) =>
+			text
+				.NotNull(nameof(text))
+				.StartsWith("modulemessages", StringComparison.Ordinal) ||
+			base.HandleWarning(from, text);
 		#endregion
 
 		#region Private Static Methods

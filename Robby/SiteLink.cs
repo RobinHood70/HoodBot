@@ -11,7 +11,6 @@
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Enumerations
 
@@ -339,9 +338,7 @@
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
 		public static new SiteLink FromName(Site site, string fullPageName)
 		{
-			ThrowNull(site, nameof(site));
-			ThrowNull(fullPageName, nameof(fullPageName));
-			var parser = new TitleParser(site, fullPageName);
+			var parser = new TitleParser(site.NotNull(nameof(site)), fullPageName.NotNull(nameof(fullPageName)));
 			return new SiteLink(parser);
 		}
 
@@ -352,8 +349,7 @@
 		/// <remarks>The text may include or exclude surrounding brackets. Pipes in the text are handled properly either way in order to support gallery links.</remarks>
 		public static SiteLink FromGalleryText(Site site, string link)
 		{
-			ThrowNull(link, nameof(link));
-			var linkNode = CreateLinkNode(site, link);
+			var linkNode = CreateLinkNode(site, link.NotNull(nameof(link)));
 			return FromLinkNode(site, linkNode, true);
 		}
 
@@ -370,8 +366,7 @@
 		/// <returns>A new SiteLink.</returns>
 		public static SiteLink FromLinkNode(Site site, ILinkNode link, bool coerceToFile)
 		{
-			ThrowNull(link, nameof(link));
-			var titleText = link.Title.ToValue();
+			var titleText = link.NotNull(nameof(link)).Title.ToValue();
 			var valueSplit = SplitWhitespace(titleText);
 			var retval = coerceToFile ? Coerce(site, MediaWikiNamespaces.File, valueSplit.Value) : new SiteLink(site, valueSplit.Value);
 			retval.OriginalLink = titleText;
@@ -393,8 +388,7 @@
 		/// <remarks>The text may include or exclude surrounding brackets. Pipes in the text are handled properly either way in order to support gallery links.</remarks>
 		public static SiteLink FromText(Site site, string link)
 		{
-			ThrowNull(link, nameof(link));
-			var linkNode = CreateLinkNode(site, link);
+			var linkNode = CreateLinkNode(site, link.NotNull(nameof(link)));
 			return FromLinkNode(site, linkNode, false);
 		}
 		#endregion
@@ -481,9 +475,8 @@
 		/// <param name="node">The node to update.</param>
 		public void UpdateLinkNode(ILinkNode node)
 		{
-			ThrowNull(node, nameof(node));
 			var thisNode = this.ToLinkNode();
-			node.Title.Clear();
+			node.NotNull(nameof(node)).Title.Clear();
 			node.Title.AddRange(thisNode.Title);
 			node.Parameters.Clear();
 			node.Parameters.AddRange(thisNode.Parameters);
@@ -495,8 +488,7 @@
 		/// <remarks>Interwiki and Fragment will remain unaffected by the change. If those should be updated to null, use <see cref="With(IFullTitle)"/>.</remarks>
 		public SiteLink With(ISimpleTitle title)
 		{
-			ThrowNull(title, nameof(title));
-			var retval = new SiteLink(title)
+			var retval = new SiteLink(title.NotNull(nameof(title)))
 			{
 				Coerced = this.Coerced,
 				ForcedInterwikiLink = this.ForcedInterwikiLink,
@@ -522,8 +514,7 @@
 		/// <returns>A new copy of the SiteLink with the altered title.</returns>
 		public SiteLink With(IFullTitle title)
 		{
-			ThrowNull(title, nameof(title));
-			var retval = new SiteLink(title)
+			var retval = new SiteLink(title.NotNull(nameof(title)))
 			{
 				Coerced = this.Coerced,
 				ForcedInterwikiLink = this.ForcedInterwikiLink,
@@ -547,12 +538,7 @@
 		/// <param name="pageName">The page name to change to.</param>
 		/// <returns>A new copy of the SiteLink with the altered title.</returns>
 		/// <remarks>Interwiki and Fragment will remain unaffected by the change. If those should be updated to null, use <see cref="With(InterwikiEntry?, Namespace, string, string?)"/>.</remarks>
-		public SiteLink With(Namespace ns, string pageName)
-		{
-			ThrowNull(ns, nameof(ns));
-			ThrowNull(pageName, nameof(pageName));
-			return this.With(new Title(ns, pageName));
-		}
+		public SiteLink With(Namespace ns, string pageName) => this.With(new Title(ns.NotNull(nameof(ns)), pageName.NotNull(nameof(pageName))));
 
 		/// <summary>Creates a new copy of the SiteLink with a different title.</summary>
 		/// <param name="iw">The interwiki to change to.</param>
@@ -669,8 +655,7 @@
 		[SuppressMessage("Minor Code Smell", "S1643:Strings should not be concatenated using '+' in a loop", Justification = "Conditions within loop make concatenation very rare.")]
 		private void InitValue(string value)
 		{
-			ThrowNull(value, nameof(value));
-			var parameter = SplitWhitespace(value);
+			var parameter = SplitWhitespace(value.NotNull(nameof(value)));
 			if (!DirectValues.TryGetValue(parameter.Value, out var parameterType))
 			{
 				parameterType = ParameterType.Caption;

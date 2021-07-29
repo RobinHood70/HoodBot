@@ -2,7 +2,7 @@
 {
 	using System.Collections.Generic;
 	using System.Text;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	/// <summary>Visitor to build wiki text, optionally ignoring text that has no value to the parser, such as comments or nowiki text.</summary>
 	/// <seealso cref="IWikiNodeVisitor" />
@@ -58,9 +58,8 @@
 		/// <returns>The wiki text of the collection.</returns>
 		public string Build(IWikiNode node)
 		{
-			ThrowNull(node, nameof(node));
 			this.builder.Clear();
-			node.Accept(this);
+			node.NotNull(nameof(node)).Accept(this);
 			return this.builder.ToString();
 		}
 
@@ -87,30 +86,31 @@
 		/// <inheritdoc/>
 		public void Visit(IArgumentNode node)
 		{
-			ThrowNull(node, nameof(node));
-			if (!this.raw && node.DefaultValue != null)
+			node.ThrowNull(nameof(node));
+			if (this.raw || node.DefaultValue == null)
 			{
-				node.DefaultValue.Accept(this);
-				return;
-			}
-
-			this.builder.Append("{{{");
-			node.Name.Accept(this);
-			if (node.DefaultValue != null)
-			{
-				this.builder.Append('|');
-				node.DefaultValue.Accept(this);
-			}
-
-			if (this.raw && node.ExtraValues != null)
-			{
-				foreach (var value in node.ExtraValues)
+				this.builder.Append("{{{");
+				node.Name.Accept(this);
+				if (node.DefaultValue != null)
 				{
-					value.Accept(this);
+					this.builder.Append('|');
+					node.DefaultValue.Accept(this);
 				}
-			}
 
-			this.builder.Append("}}}");
+				if (this.raw && node.ExtraValues != null)
+				{
+					foreach (var value in node.ExtraValues)
+					{
+						value.Accept(this);
+					}
+				}
+
+				this.builder.Append("}}}");
+			}
+			else
+			{
+				node.DefaultValue.Accept(this);
+			}
 		}
 
 		/// <inheritdoc/>
@@ -118,34 +118,27 @@
 		{
 			if (this.raw)
 			{
-				ThrowNull(node, nameof(node));
-				this.builder.Append(node.Comment);
+				this.builder.Append(node.NotNull(nameof(node)).Comment);
 			}
 		}
 
 		/// <inheritdoc/>
-		public void Visit(IHeaderNode node)
-		{
-			ThrowNull(node, nameof(node));
-			node.Title.Accept(this);
-		}
+		public void Visit(IHeaderNode node) => node.NotNull(nameof(node)).Title.Accept(this);
 
 		/// <inheritdoc/>
 		public void Visit(IIgnoreNode node)
 		{
 			if (this.raw)
 			{
-				ThrowNull(node, nameof(node));
-				this.builder.Append(node.Value);
+				this.builder.Append(node.NotNull(nameof(node)).Value);
 			}
 		}
 
 		/// <inheritdoc/>
 		public void Visit(ILinkNode node)
 		{
-			ThrowNull(node, nameof(node));
 			this.builder.Append("[[");
-			node.Title.Accept(this);
+			node.NotNull(nameof(node)).Title.Accept(this);
 			foreach (var param in node.Parameters)
 			{
 				param.Accept(this);
@@ -157,8 +150,7 @@
 		/// <inheritdoc/>
 		public void Visit(NodeCollection nodes)
 		{
-			ThrowNull(nodes, nameof(nodes));
-			foreach (var node in nodes)
+			foreach (var node in nodes.NotNull(nameof(nodes)))
 			{
 				node.Accept(this);
 			}
@@ -167,9 +159,9 @@
 		/// <inheritdoc/>
 		public void Visit(IParameterNode node)
 		{
-			ThrowNull(node, nameof(node));
 			this.builder.Append('|');
-			if (node.Name != null)
+			node.ThrowNull(nameof(node));
+			if (node.Name is not null)
 			{
 				node.Name.Accept(this);
 				this.builder.Append('=');
@@ -181,7 +173,7 @@
 		/// <inheritdoc/>
 		public void Visit(ITagNode node)
 		{
-			ThrowNull(node, nameof(node));
+			node.ThrowNull(nameof(node));
 			if (this.raw)
 			{
 				this.builder
@@ -206,9 +198,8 @@
 		/// <inheritdoc/>
 		public void Visit(ITemplateNode node)
 		{
-			ThrowNull(node, nameof(node));
 			this.builder.Append("{{");
-			node.Title.Accept(this);
+			node.NotNull(nameof(node)).Title.Accept(this);
 			foreach (var param in node.Parameters)
 			{
 				param.Accept(this);
@@ -218,11 +209,7 @@
 		}
 
 		/// <inheritdoc/>
-		public void Visit(ITextNode node)
-		{
-			ThrowNull(node, nameof(node));
-			this.builder.Append(node.Text);
-		}
+		public void Visit(ITextNode node) => this.builder.Append(node.NotNull(nameof(node)).Text);
 		#endregion
 	}
 }

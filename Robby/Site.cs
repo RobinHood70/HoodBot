@@ -17,7 +17,6 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Delegates
 
@@ -96,12 +95,11 @@
 		/// <param name="wiki">The <see cref="IWikiAbstractionLayer"/> to use. This controls whether the API is used or some other access method.</param>
 		public Site(IWikiAbstractionLayer wiki)
 		{
-			ThrowNull(wiki, nameof(wiki));
-			this.FilterPages = new TitleCollection(this);
+			this.AbstractionLayer = wiki.NotNull(nameof(wiki));
 			wiki.Initializing += AbstractionLayer_Initializing;
 			wiki.Initialized += this.AbstractionLayer_Initialized;
 			wiki.WarningOccurred += this.AbstractionLayer_WarningOccurred;
-			this.AbstractionLayer = wiki;
+			this.FilterPages = new TitleCollection(this);
 		}
 		#endregion
 
@@ -311,11 +309,7 @@
 		/// <summary>Determines whether the title provided is considered a discussion page on this site.</summary>
 		/// <param name="title">The title to check.</param>
 		/// <returns><see langword="true"/> if the title represents a discussion page; otherwise, <see langword="false"/>.</returns>
-		public bool IsDiscussionPage(ISimpleTitle title)
-		{
-			ThrowNull(title, nameof(title));
-			return title.Namespace.IsTalkSpace || this.DiscussionPages.Contains(title);
-		}
+		public bool IsDiscussionPage(ISimpleTitle title) => title.NotNull(nameof(title)).Namespace.IsTalkSpace || this.DiscussionPages.Contains(title);
 
 		/// <summary>Gets all active blocks.</summary>
 		/// <returns>All active blocks.</returns>
@@ -369,9 +363,7 @@
 		/// <returns>The text of the message.</returns>
 		public string? LoadMessage([Localizable(false)] string message, IEnumerable<string> arguments)
 		{
-			ThrowNull(message, nameof(message));
-			ThrowNull(arguments, nameof(arguments));
-			var messages = this.LoadMessages(new[] { message }, arguments);
+			var messages = this.LoadMessages(new[] { message.NotNull(nameof(message)) }, arguments.NotNull(nameof(arguments)));
 			return messages.TryGetValue(message, out var retval) ? retval.Text : string.Empty;
 		}
 
@@ -394,20 +386,15 @@
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="pageName">Name of the page.</param>
 		/// <returns>The text of the page.</returns>
-		public string? LoadPageText(string pageName)
-		{
-			ThrowNull(pageName, nameof(pageName));
-			return this.LoadPageText(Title.FromName(this, pageName));
-		}
+		public string? LoadPageText(string pageName) => this.LoadPageText(Title.FromName(this, pageName.NotNull(nameof(pageName))));
 
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="title">Name of the page.</param>
 		/// <returns>The text of the page.</returns>
 		public string? LoadPageText(ISimpleTitle title)
 		{
-			ThrowNull(title, nameof(title));
 			var pages = PageCollection.Unlimited(this);
-			pages.GetTitles(title);
+			pages.GetTitles(title.NotNull(nameof(title)));
 			return pages.Count == 1 ? pages[0].Text : null;
 		}
 
@@ -417,8 +404,7 @@
 		/// <returns>The text of the page.</returns>
 		public string? LoadPageText(ISimpleTitle title, string subPageName)
 		{
-			ThrowNull(title, nameof(title));
-			var titleName = title.PageName;
+			var titleName = title.NotNull(nameof(title)).PageName;
 			if (!string.IsNullOrEmpty(subPageName))
 			{
 				if (subPageName[0] != '/')
@@ -532,11 +518,7 @@
 		/// <summary>Gets recent changes according to a customized set of filter options.</summary>
 		/// <param name="options">The filter options to apply.</param>
 		/// <returns>A read-only list of recent changes that conform to the options specified.</returns>
-		public virtual IReadOnlyList<RecentChange> LoadRecentChanges(RecentChangesOptions options)
-		{
-			ThrowNull(options, nameof(options));
-			return this.LoadRecentChanges(options.ToWallEInput);
-		}
+		public virtual IReadOnlyList<RecentChange> LoadRecentChanges(RecentChangesOptions options) => this.LoadRecentChanges(options.NotNull(nameof(options)).ToWallEInput);
 
 		/// <summary>Gets public information about the specified users.</summary>
 		/// <param name="users">The users.</param>
@@ -686,11 +668,9 @@
 		/// <returns>A value indicating the change status of the upload.</returns>
 		public ChangeStatus Upload(string fileName, string? destinationName, string editSummary, string? pageText)
 		{
-			ThrowNull(fileName, nameof(fileName));
-			ThrowNull(editSummary, nameof(editSummary));
-
+			editSummary.NotNull(nameof(editSummary));
 			// Always access this, even if we don't need it, as a means of checking validity.
-			var checkedName = Path.GetFileName(fileName);
+			var checkedName = Path.GetFileName(fileName.NotNull(nameof(fileName)));
 			if (string.IsNullOrWhiteSpace(destinationName))
 			{
 				destinationName = checkedName;
@@ -811,7 +791,7 @@
 			// CONSIDER: Used to use WebUtility.UrlEncode, but Uri seems to auto-encode, so removed for now. Discussion in some places of different parts of .NET encoding differently, so may need to re-instate later. See https://stackoverflow.com/a/47877559/502255 for example.
 			if (string.IsNullOrWhiteSpace(articleName))
 			{
-				throw new ArgumentException(CurrentCulture(Resources.TitleInvalid), nameof(articleName));
+				throw new ArgumentException(Globals.CurrentCulture(Resources.TitleInvalid), nameof(articleName));
 			}
 
 			if (string.IsNullOrEmpty(unparsedPath))
@@ -833,7 +813,7 @@
 		/// <returns>A <see cref="IFullTitle"/> object with the parsed redirect.</returns>
 		public virtual IFullTitle? GetRedirectFromText(string text)
 		{
-			ThrowNull(text, nameof(text));
+			text.ThrowNull(nameof(text));
 			var redirectAliases = this.MagicWords.TryGetValue("redirect", out var redirect) ? redirect.Aliases : DefaultRedirect;
 			var redirects = new HashSet<string>(redirectAliases, StringComparer.Ordinal);
 			var nodes = new SiteNodeFactory(this).Parse(text);
@@ -883,7 +863,7 @@
 		/// <returns>A value indicating the actions that should take place.</returns>
 		public virtual ChangeStatus PublishChange(object sender, IReadOnlyDictionary<string, object?> parameters, Func<ChangeStatus> changeFunction, [CallerMemberName] string caller = "")
 		{
-			ThrowNull(changeFunction, nameof(changeFunction));
+			changeFunction.ThrowNull(nameof(changeFunction));
 			var changeArgs = new ChangeArgs(sender, caller, parameters);
 			this.Changing?.Invoke(this, changeArgs);
 			return
@@ -905,7 +885,7 @@
 			where T : class
 		{
 			// Note: disabledResult comes first in this call instead of last to prevent ambiguous calls when T is a string (i.e., same type as caller parameter).
-			ThrowNull(changeFunction, nameof(changeFunction));
+			changeFunction.ThrowNull(nameof(changeFunction));
 			var changeArgs = new ChangeArgs(sender, caller, parameters);
 			this.Changing?.Invoke(this, changeArgs);
 			return
@@ -920,9 +900,8 @@
 		/// <returns>A value indicating the actions that should take place.</returns>
 		public virtual ChangeStatus PublishPageTextChange(PageTextChangeArgs changeArgs, Func<ChangeStatus> changeFunction)
 		{
-			ThrowNull(changeArgs, nameof(changeArgs));
-			ThrowNull(changeFunction, nameof(changeFunction));
-			this.PageTextChanging?.Invoke(this, changeArgs);
+			changeFunction.ThrowNull(nameof(changeFunction));
+			this.PageTextChanging?.Invoke(this, changeArgs.NotNull(nameof(changeArgs)));
 			var retval =
 				changeArgs.CancelChange ? ChangeStatus.Cancelled :
 				this.EditingEnabled ? changeFunction() :
@@ -946,7 +925,7 @@
 		/// <summary>Throws an exception indicating that the site has not been initialized.</summary>
 		/// <param name="name">The name.</param>
 		/// <returns>System.InvalidOperationException.</returns>
-		protected static InvalidOperationException NoSite([CallerMemberName] string name = "") => new(CurrentCulture(Resources.SiteNotInitialized, name));
+		protected static InvalidOperationException NoSite([CallerMemberName] string name = "") => new(Globals.CurrentCulture(Resources.SiteNotInitialized, name));
 		#endregion
 
 		#region Protected Virtual Methods
@@ -960,8 +939,7 @@
 		/// <returns>A read-only list of <see cref="Block"/> objects, as specified by the input parameters.</returns>
 		protected virtual IReadOnlyList<Block> LoadBlocks(BlocksInput input)
 		{
-			ThrowNull(input, nameof(input));
-			input.Properties = BlocksProperties.User | BlocksProperties.By | BlocksProperties.Timestamp | BlocksProperties.Expiry | BlocksProperties.Reason | BlocksProperties.Flags;
+			input.NotNull(nameof(input)).Properties = BlocksProperties.User | BlocksProperties.By | BlocksProperties.Timestamp | BlocksProperties.Expiry | BlocksProperties.Reason | BlocksProperties.Flags;
 			var result = this.AbstractionLayer.Blocks(input);
 			var retval = new List<Block>(result.Count);
 			foreach (var item in result)
@@ -1062,8 +1040,7 @@
 		/// <returns>A read-only list of <see cref="User"/> objects, as specified by the input parameters.</returns>
 		protected virtual IReadOnlyList<User> LoadUsers(AllUsersInput input)
 		{
-			ThrowNull(input, nameof(input));
-			input.Properties = AllUsersProperties.None;
+			input.NotNull(nameof(input)).Properties = AllUsersProperties.None;
 			var result = this.AbstractionLayer.AllUsers(input);
 			var retval = new List<User>(result.Count);
 			foreach (var item in result)
@@ -1080,15 +1057,14 @@
 		/// <remarks>Even if you wish to edit anonymously, you <em>must</em> still log in by passing <see langword="null" /> for the input.</remarks>
 		protected virtual void Login([NotNull, ValidatedNotNull] LoginInput input)
 		{
-			ThrowNull(input, nameof(input));
 			string? name;
 
 			// Always log in in case permissions are needed.
-			var result = this.AbstractionLayer.Login(input);
+			var result = this.AbstractionLayer.Login(input.NotNull(nameof(input)));
 			if (!string.Equals(result.Result, "Success", StringComparison.OrdinalIgnoreCase))
 			{
 				this.Clear();
-				throw new UnauthorizedAccessException(CurrentCulture(Resources.LoginFailed, result.Reason));
+				throw new UnauthorizedAccessException(Globals.CurrentCulture(Resources.LoginFailed, result.Reason));
 			}
 
 			name = result.User;
@@ -1112,7 +1088,7 @@
 			// General
 			var general = siteInfo.General;
 			var server = general.Server; // Used to help determine if interwiki is local
-			this.culture = GetCulture(general.Language);
+			this.culture = Globals.GetCulture(general.Language);
 			this.siteName = general.SiteName;
 			this.serverName = general.ServerName;
 			this.version = general.Generator;
@@ -1181,7 +1157,7 @@
 				interwikiList.Add(entry);
 			}
 
-			this.interwikiMap = new ReadOnlyKeyedCollection<string, InterwikiEntry>(item => (item ?? throw ArgumentNull(nameof(item))).Prefix, interwikiList, StringComparer.OrdinalIgnoreCase);
+			this.interwikiMap = new ReadOnlyKeyedCollection<string, InterwikiEntry>(item => (item.NotNull(nameof(item))).Prefix, interwikiList, StringComparer.OrdinalIgnoreCase);
 		}
 
 		/// <summary>Patrols the specified Recent Changes ID.</summary>

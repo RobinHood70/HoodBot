@@ -9,7 +9,6 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class UespSite : Site
 	{
@@ -73,7 +72,7 @@
 		{
 			base.Login(input);
 
-			ThrowNull(this.User, nameof(UespSite), nameof(this.User));
+			this.User.ThrowNull(nameof(UespSite), nameof(this.User));
 
 			if (this.EditingEnabled)
 			{

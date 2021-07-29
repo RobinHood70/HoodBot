@@ -1,17 +1,15 @@
-﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
-namespace RobinHood70.WallE.Base
+﻿namespace RobinHood70.WallE.Base
 {
-	using static RobinHood70.CommonCode.Globals;
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
+	using RobinHood70.CommonCode;
 
 	public class FileRevertInput
 	{
 		#region Constructors
 		public FileRevertInput(string fileName, string archiveName)
 		{
-			ThrowNullOrWhiteSpace(fileName, nameof(fileName));
-			ThrowNullOrWhiteSpace(archiveName, nameof(archiveName));
-			this.FileName = fileName;
-			this.ArchiveName = archiveName;
+			this.FileName = fileName.NotNullOrWhiteSpace(nameof(fileName));
+			this.ArchiveName = archiveName.NotNullOrWhiteSpace(nameof(archiveName));
 		}
 		#endregion
 

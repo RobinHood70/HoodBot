@@ -12,16 +12,15 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WikiCommon.Searches;
 
 	internal sealed class EsoReplacer
 	{
 		#region Static Fields
-		private static readonly Regex EsoLinks = new(@"(?<before>(((''')?([0-9]+(-[0-9]+)?|\{\{huh\}\}|\{\{Nowrap[^}]*\}\})(''')?)%?\s+)?(((or )?more|max(imum)?|of missing|ESO)(\s+|<br>))?)?(?<type>(?-i:Health|Magicka|Physical Penetration|Physical Resistance|Spell Critical|Spell Damage|Spell Penetration|Spell Resistance|Stamina|Ultimate|Weapon Critical|Weapon Damage))(\s(?<after>(Recovery|Regeneration|[0-9]+%)+))?\b", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
-		private static readonly Regex NumberStripper = new(@"[0-9]+(-[0-9]+)?%?\s*", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
-		private static readonly Regex ReplacementFinder = new(@"^\|\ *(<nowiki/?>)?(?<from>.*?)(</?nowiki/?>)?\ *\|\|\ *(<nowiki/?>)?(?<to>.*?)(</?nowiki/?>)?\ *$", RegexOptions.Multiline | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
-		private static readonly Regex SpaceStripper = new(@"(\s{2,}|\n)", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex EsoLinks = new(@"(?<before>(((''')?([0-9]+(-[0-9]+)?|\{\{huh\}\}|\{\{Nowrap[^}]*\}\})(''')?)%?\s+)?(((or )?more|max(imum)?|of missing|ESO)(\s+|<br>))?)?(?<type>(?-i:Health|Magicka|Physical Penetration|Physical Resistance|Spell Critical|Spell Damage|Spell Penetration|Spell Resistance|Stamina|Ultimate|Weapon Critical|Weapon Damage))(\s(?<after>(Recovery|Regeneration|[0-9]+%)+))?\b", RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		private static readonly Regex NumberStripper = new(@"[0-9]+(-[0-9]+)?%?\s*", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		private static readonly Regex ReplacementFinder = new(@"^\|\ *(<nowiki/?>)?(?<from>.*?)(</?nowiki/?>)?\ *\|\|\ *(<nowiki/?>)?(?<to>.*?)(</?nowiki/?>)?\ *$", RegexOptions.Multiline | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		private static readonly Regex SpaceStripper = new(@"(\s{2,}|\n)", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		private static readonly List<EsoReplacement> ReplaceAllList = new();
 		private static readonly List<EsoReplacement> ReplaceFirstList = new();
 		private static readonly ICollection<string> UnreplacedList = new SortedSet<string>(StringComparer.Ordinal);
@@ -37,7 +36,7 @@
 		#region Constructors
 		public EsoReplacer(Site site)
 		{
-			this.site = site ?? throw ArgumentNull(nameof(site));
+			this.site = site.NotNull(nameof(site));
 			this.RemoveableTemplates = new TitleCollection(
 				site,
 				MediaWikiNamespaces.Template,
@@ -66,17 +65,14 @@
 		#region Public Static Methods
 		public static string ConstructWarning(ContextualParser oldPage, ContextualParser newPage, ICollection<ISimpleTitle> titles, string warningType)
 		{
-			ThrowNull(oldPage, nameof(oldPage));
-			ThrowNull(newPage, nameof(newPage));
-			ThrowNull(titles, nameof(titles));
-			ThrowNull(warningType, nameof(warningType));
-			var nodes = oldPage.Nodes.Clone();
+			titles.ThrowNull(nameof(titles));
+			warningType.ThrowNull(nameof(warningType));
+			var nodes = oldPage.NotNull(nameof(oldPage)).Nodes.Clone();
 			nodes.RemoveAll<IIgnoreNode>();
 			var oldText = nodes.ToRaw().Trim();
-			nodes = newPage.Nodes.Clone();
+			nodes = newPage.NotNull(nameof(newPage)).Nodes.Clone();
 			nodes.RemoveAll<IIgnoreNode>();
 			var newText = nodes.ToRaw().Trim();
-
 			var warning = new StringBuilder()
 				.Append("Watch for ")
 				.Append(warningType)
@@ -219,8 +215,7 @@
 
 		public static void ReplaceFirstLink(NodeCollection nodes, TitleCollection usedList)
 		{
-			ThrowNull(nodes, nameof(nodes));
-			for (var i = 0; i < nodes.Count; i++)
+			for (var i = 0; i < nodes.NotNull(nameof(nodes)).Count; i++)
 			{
 				if (nodes[i] is ITextNode textNode && ReplaceLink(nodes.Factory, textNode.Text, usedList) is NodeCollection newNodes)
 				{
@@ -381,11 +376,10 @@
 
 		private static NodeCollection? ReplaceLink(IWikiNodeFactory factory, string text, TitleCollection usedList)
 		{
-			ThrowNull(factory, nameof(factory));
-			ThrowNull(usedList, nameof(usedList));
+			usedList.ThrowNull(nameof(usedList));
 			var foundReplacements = new HashSet<string>(StringComparer.Ordinal);
 			var textLength = text.Length;
-			var retval = factory.NodeCollection();
+			var retval = factory.NotNull(nameof(factory)).NodeCollection();
 			var start = 0;
 			for (var i = 0; i < textLength; i++)
 			{

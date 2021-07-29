@@ -7,7 +7,6 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class PropInfo : PropModule<InfoInput>
@@ -34,17 +33,13 @@
 		#endregion
 
 		#region Public Static Methods
-		public static PropInfo CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
-			input is InfoInput propInput
-				? new PropInfo(wal, propInput)
-				: throw InvalidParameterType(nameof(input), nameof(InfoInput), input.GetType().Name);
+		public static PropInfo CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new(wal, (InfoInput)input);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, InfoInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			if (input.TestActions != null)
 			{
 				this.baseActions.Clear();
@@ -60,6 +55,7 @@
 				.FilterBefore(120, InfoProperties.NotificationTimestamp)
 				.Value;
 			request
+				.NotNull(nameof(request))
 				.AddFlags("prop", prop)
 				.AddIf("testactions", input.TestActions, this.SiteVersion >= 125)
 				.Add("token", input.Tokens)
@@ -68,16 +64,14 @@
 
 		protected override void DeserializeParentToPage(JToken parent, PageItem page)
 		{
-			ThrowNull(parent, nameof(parent));
-			ThrowNull(page, nameof(page));
-			if (page.Info != null)
+			if (page.NotNull(nameof(page)).Info != null)
 			{
 				// We already have an Info from a previous query - do not overwrite it, as the results would be empty and produce invalid information. If needed, this could also be converted to check presense of each response field individually.
 				return;
 			}
 
 			var counter = -1L;
-			if (parent["counter"] is JToken counterNode && counterNode.Type == JTokenType.Integer)
+			if (parent.NotNull(nameof(parent))["counter"] is JToken counterNode && counterNode.Type == JTokenType.Integer)
 			{
 				counter = (long)counterNode;
 			}

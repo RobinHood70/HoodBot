@@ -2,16 +2,15 @@
 {
 	using System;
 	using System.IO;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
-	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class UploadInputInternal
 	{
 		#region Constructors
 		public UploadInputInternal(UploadInput input)
 		{
-			ThrowNull(input, nameof(input));
-			this.IgnoreWarnings = input.IgnoreWarnings;
+			this.IgnoreWarnings = input.NotNull(nameof(input)).IgnoreWarnings;
 			this.Offset = 0;
 			this.FileName = input.RemoteFileName;
 			this.Token = input.Token;
@@ -74,8 +73,7 @@
 		#region Public Methods
 		public void FinalChunk(UploadInput input)
 		{
-			ThrowNull(input, nameof(input));
-			this.Comment = input.Comment;
+			this.Comment = input.NotNull(nameof(input)).Comment;
 			this.FileData = Array.Empty<byte>();
 			this.FileSize = 0;
 			this.IgnoreWarnings = input.IgnoreWarnings;
@@ -87,7 +85,7 @@
 
 		public void NextChunk(Stream input, int chunkSize)
 		{
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			var copySize = this.FileSize - this.Offset;
 			if (copySize > chunkSize)
 			{

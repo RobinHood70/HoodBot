@@ -14,7 +14,6 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Enumerations
 	public enum Gender
@@ -29,9 +28,9 @@
 	internal static class EsoGeneral
 	{
 		#region Fields
-		private static readonly Regex ColourCode = new(@"\A\|c[0-9A-F]{6}(.*?)\|r\Z", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
-		private static readonly Regex TrailingDigits = new(@"\s*\d+\Z", RegexOptions.None, DefaultRegexTimeout);
-		private static readonly Regex BonusFinder = new(@"\s*Current [Bb]onus:.*?\.", RegexOptions.None, DefaultRegexTimeout);
+		private static readonly Regex ColourCode = new(@"\A\|c[0-9A-F]{6}(.*?)\|r\Z", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		private static readonly Regex TrailingDigits = new(@"\s*\d+\Z", RegexOptions.None, Globals.DefaultRegexTimeout);
+		private static readonly Regex BonusFinder = new(@"\s*Current [Bb]onus:.*?\.", RegexOptions.None, Globals.DefaultRegexTimeout);
 		private static string? patchVersion;
 		#endregion
 
@@ -158,8 +157,7 @@
 
 		public static PlaceCollection GetPlaces(Site site)
 		{
-			ThrowNull(site, nameof(site));
-			var places = site.CreateMetaPageCollection(PageModules.None, true, "alliance", "settlement", "titlename", "type", "zone");
+			var places = site.NotNull(nameof(site)).CreateMetaPageCollection(PageModules.None, true, "alliance", "settlement", "titlename", "type", "zone");
 			places.SetLimitations(LimitationType.FilterTo, UespNamespaces.Online);
 			places.GetCategoryMembers("Online-Places");
 
@@ -218,12 +216,10 @@
 		public static void SetBotUpdateVersion(WikiJob job, string pageType)
 		{
 			// Assumes EsoPatchVersion has already been updated.
-			ThrowNull(pageType, nameof(pageType));
 			job.StatusWriteLine("Update patch bot parameters");
-
 			var patchPage = GetPatchPage(job);
 			var parser = new ContextualParser(patchPage);
-			var paramName = "bot" + pageType;
+			var paramName = "bot" + pageType.NotNull(nameof(pageType));
 			if (parser.FindTemplate("Online Patch") is ITemplateNode template && template.Find(paramName) is IParameterNode param)
 			{
 				param.Value.Clear();

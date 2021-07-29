@@ -3,7 +3,6 @@
 	using System;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Properties;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Stores the inputs and the responses for any requests made to the wiki during the initialization routine. This potentially allows requests to be combined between layers.</summary>
 	/// <seealso cref="EventArgs" />
@@ -21,8 +20,7 @@
 		/// <param name="input">The SiteInfo input.</param>
 		public InitializingEventArgs(SiteInfoInput input)
 		{
-			ThrowNull(input, nameof(input));
-			this.filterLocalInterwiki = input.FilterLocalInterwiki;
+			this.filterLocalInterwiki = input.NotNull(nameof(input)).FilterLocalInterwiki;
 			this.interwikiLanguageCode = input.InterwikiLanguageCode;
 			this.properties = input.Properties;
 			this.showAllDatabases = input.ShowAllDatabases;
@@ -51,7 +49,7 @@
 				}
 				else if (!string.Equals(this.interwikiLanguageCode, value, StringComparison.Ordinal))
 				{
-					throw new InvalidOperationException(CurrentCulture(Messages.SiteInfoLanguageConflict));
+					throw new InvalidOperationException(Globals.CurrentCulture(Messages.SiteInfoLanguageConflict));
 				}
 			}
 		}

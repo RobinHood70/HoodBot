@@ -2,16 +2,12 @@
 namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	public class QueryPageInput : ILimitableInput, IGeneratorInput
 	{
 		#region Constructors
-		public QueryPageInput(string page)
-		{
-			ThrowNullOrWhiteSpace(page, nameof(page));
-			this.Page = page;
-		}
+		public QueryPageInput(string page) => this.Page = page.NotNullOrWhiteSpace(nameof(page));
 		#endregion
 
 		#region Public Properties

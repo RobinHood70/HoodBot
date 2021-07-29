@@ -8,7 +8,6 @@
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class EsoActiveSkillSummaries : EsoSkillJob<ActiveSkill>
 	{
@@ -64,10 +63,8 @@
 
 		protected override bool UpdateSkillTemplate(ActiveSkill skillBase, ITemplateNode template)
 		{
-			ThrowNull(skillBase, nameof(skillBase));
-			ThrowNull(template, nameof(template));
-			var baseMorph = skillBase.Morphs[0];
-			var bigChange = this.TrackedUpdate(template, "id", baseMorph.Abilities[3].Id.ToStringInvariant());
+			var baseMorph = skillBase.NotNull(nameof(skillBase)).Morphs[0];
+			var bigChange = this.TrackedUpdate(template.NotNull(nameof(template)), "id", baseMorph.Abilities[3].Id.ToStringInvariant());
 			var baseSkillCost = baseMorph.FullName(/*Morph.CalculatedCost(baseMorph.Costs[3])*/baseMorph.Costs[3].ToStringInvariant());
 			bigChange |= this.UpdateMorphs(skillBase, template, baseMorph, baseSkillCost);
 
@@ -117,16 +114,12 @@
 		#endregion
 
 		#region Private Static Methods
-		private static string FormatMeters(string? value) => value switch
-		{
-			null => throw ArgumentNull(nameof(value)),
-			"1" => "1 meter",
-			_ => $"{value} meters"
-		};
+		private static string FormatMeters(string? value) => string.Equals(value.NotNull(nameof(value)), "1", StringComparison.Ordinal)
+			? "1 meter"
+			: $"{value} meters";
 
-		private static string FormatSeconds(string? value) => value switch
+		private static string FormatSeconds(string? value) => value.NotNull(nameof(value)) switch
 		{
-			null => throw ArgumentNull(nameof(value)),
 			"0" => "Instant",
 			"1" => "1 second",
 			_ => $"{value} seconds"

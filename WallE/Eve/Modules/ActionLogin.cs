@@ -2,9 +2,9 @@
 {
 	using System;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ActionLogin : ActionModule<LoginInput, LoginResult>
@@ -31,9 +31,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, LoginInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("name", input.UserName)
 				.AddHiddenIfNotNull("password", input.Password)
 				.AddIfNotNull("domain", input.Domain)
@@ -42,7 +42,7 @@
 
 		protected override LoginResult DeserializeResult(JToken? result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			return new LoginResult(
 				result: result.MustHaveString("result"),
 				reason: (string?)result["reason"],
@@ -52,11 +52,9 @@
 				waitTime: TimeSpan.FromSeconds((int?)result["wait"] ?? 0));
 		}
 
-		protected override bool HandleWarning(string from, string text)
-		{
-			ThrowNull(text, nameof(text));
-			return text.StartsWith("Main-account login", StringComparison.Ordinal) || base.HandleWarning(from, text);
-		}
+		protected override bool HandleWarning(string from, string text) => text
+			.NotNull(nameof(text))
+			.StartsWith("Main-account login", StringComparison.Ordinal) || base.HandleWarning(from, text);
 		#endregion
 	}
 }

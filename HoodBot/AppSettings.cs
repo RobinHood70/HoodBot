@@ -3,9 +3,9 @@
 	using System.Collections.Generic;
 	using System.IO;
 	using Newtonsoft.Json.Linq;
+using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Models;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class AppSettings : IJsonSettings<AppSettings>
 	{
@@ -18,8 +18,7 @@
 		#region Public Methods
 		public void FromJson(JToken json)
 		{
-			ThrowNull(json, nameof(json));
-			if (json[nameof(this.DefaultWikis)] is JToken wikiNode && wikiNode.Type == JTokenType.Array)
+			if (json.NotNull(nameof(json))[nameof(this.DefaultWikis)] is JToken wikiNode && wikiNode.Type == JTokenType.Array)
 			{
 				foreach (var node in wikiNode)
 				{

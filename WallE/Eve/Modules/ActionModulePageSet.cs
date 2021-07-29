@@ -15,15 +15,14 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	public abstract class ActionModulePageSet<TInput, TOutput> : ActionModule, IPageSetGenerator
 		where TInput : PageSetInput
-		where TOutput : ITitle
+		where TOutput : class, ITitle
 	{
 		#region Static Fields
-		private static readonly Regex TooManyFinder = new("Too many values .*?['\"](?<parameter>.*?)['\"].*?limit is (?<sizelimit>[0-9]+)", RegexOptions.Compiled, DefaultRegexTimeout);
+		private static readonly Regex TooManyFinder = new("Too many values .*?['\"](?<parameter>.*?)['\"].*?limit is (?<sizelimit>[0-9]+)", RegexOptions.Compiled, Globals.DefaultRegexTimeout);
 		#endregion
 
 		#region Fields
@@ -69,11 +68,11 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Public Methods
 		public virtual PageSetResult<TOutput> Submit(TInput input)
 		{
-			ThrowNull(input, nameof(input));
 			this.Wal.ClearWarnings();
-			if (input.GeneratorInput != null)
+			input.ThrowNull(nameof(input));
+			if (input.GeneratorInput is IGeneratorInput genInput)
 			{
-				this.Generator = this.Wal.ModuleFactory.CreateGenerator(input.GeneratorInput, this);
+				this.Generator = this.Wal.ModuleFactory.CreateGenerator(genInput, this);
 			}
 
 			this.BeforeSubmit();
@@ -115,7 +114,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected void GetPageSetNodes(JToken result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			if (result["badrevids"] is JToken node)
 			{
 				foreach (var item in node)
@@ -149,7 +148,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			try
 			{
 				this.PagesProcessed = 0;
-				var result = ToJson(response);
+				var result = ToJson(response.NotNull(nameof(response)));
 				if (result.Type == JTokenType.Object)
 				{
 					this.DeserializeAction(result);
@@ -192,7 +191,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Override Methods
 		protected override void DeserializeActionExtra(JToken result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			if (this.ContinueModule != null)
 			{
 				this.ContinueModule = this.ContinueModule.Deserialize(this.Wal, result);
@@ -221,9 +220,8 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected virtual void DeserializeResult(JToken result, IList<TOutput> pages)
 		{
-			ThrowNull(result, nameof(result));
-			ThrowNull(pages, nameof(pages));
-			foreach (var item in result)
+			pages.ThrowNull(nameof(pages));
+			foreach (var item in result.NotNull(nameof(result)))
 			{
 				pages.Add(this.GetItem(item));
 			}
@@ -246,7 +244,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Private Methods
 		private Request CreateRequest(TInput input)
 		{
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			var request = this.CreateBaseRequest();
 			request.Prefix = this.Prefix;
 			if (this.Generator != null)

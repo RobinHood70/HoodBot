@@ -1,16 +1,15 @@
-﻿namespace RobinHood70.HoodBot.Uesp
-{
-	using static RobinHood70.CommonCode.Globals;
+﻿using RobinHood70.CommonCode;
 
+namespace RobinHood70.HoodBot.Uesp
+{
 	public static class UespFunctions
 	{
 		public static string IconAbbreviation(string iconType, string icon) => IconAbbreviation(iconType, icon, "png");
 
 		public static string IconAbbreviation(string iconType, string icon, string extension)
 		{
-			ThrowNull(iconType, nameof(iconType));
-			ThrowNull(icon, nameof(icon));
-			var unabbreviated = iconType switch
+			icon.ThrowNull(nameof(icon));
+			var unabbreviated = iconType.NotNull(nameof(iconType)) switch
 			{
 				"" => string.Empty,
 				"a" => "armor-",

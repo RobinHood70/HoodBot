@@ -3,11 +3,11 @@
 	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WallE.Eve.Modules;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	public class PropVariables : PropListModule<VariablesInput, VariableItem>, IGeneratorModule
@@ -35,23 +35,16 @@
 		#endregion
 
 		#region Public Static Methods
-		public static PropVariables CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			(input ?? throw ArgumentNull(nameof(input))) is VariablesInput propInput
-				? new PropVariables(wal, propInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(CategoriesInput), input.GetType().Name);
+		public static PropVariables CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (VariablesInput)input, pageSetGenerator);
 
-		public static PropVariables CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
-			(input ?? throw ArgumentNull(nameof(input))) is VariablesInput propInput
-				? new PropVariables(wal, propInput)
-				: throw InvalidParameterType(nameof(input), nameof(CategoriesInput), input.GetType().Name);
+		public static PropVariables CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new(wal, (VariablesInput)input);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, VariablesInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
-			request
+			input.ThrowNull(nameof(input));
+			request.NotNull(nameof(request))
 				.Add("var", input.Variables)
 				.Add("subset", input.Subsets)
 				.Add("limit", this.Limit);
@@ -59,8 +52,7 @@
 
 		protected override VariableItem GetItem(JToken result, PageItem page)
 		{
-			ThrowNull(result, nameof(result));
-			var vars = result["vars"].GetStringDictionary<string>();
+			var vars = result.NotNull(nameof(result))["vars"].GetStringDictionary<string>();
 			var subset = (string?)result["subset"];
 			return new VariableItem(vars, subset);
 		}

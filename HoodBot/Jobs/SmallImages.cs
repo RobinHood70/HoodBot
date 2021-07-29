@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+using System;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class SmallImages : WikiJob
 	{
@@ -20,7 +20,7 @@
 			{
 				if (page is FilePage file && file.LatestFileRevision is FileRevision rev && rev.Height <= 512 && rev.Width <= 512)
 				{
-					this.WriteLine(Invariant($"* {file.AsLink(true)}: {rev.Width} × {rev.Height}"));
+					this.WriteLine(FormattableString.Invariant($"* {file.AsLink(true)}: {rev.Width} × {rev.Height}"));
 				}
 			}
 		}

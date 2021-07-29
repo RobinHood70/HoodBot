@@ -2,9 +2,9 @@
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ActionTag : ActionModule<TagInput, List<TagItem>>
@@ -29,9 +29,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, TagInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.Add("rcid", input.RecentChangesIds)
 				.Add("revid", input.RevisionIds)
 				.Add("logid", input.LogIds)
@@ -43,7 +43,7 @@
 
 		protected override List<TagItem> DeserializeResult(JToken? result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			var tags = new List<TagItem>();
 			if (result.Type == JTokenType.Array)
 			{

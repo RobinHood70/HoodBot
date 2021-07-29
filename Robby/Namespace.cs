@@ -6,7 +6,6 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.CommonCode.Globals;
 
 	// Class is sealed since it can be extended through extension methods if needed, and any derivation that would require value equality to change is both unlikely and inadvisable.
 
@@ -24,8 +23,7 @@
 		#region Constructors
 		internal Namespace(Site site, StringComparer comparer, SiteInfoNamespace ns, IEnumerable<string>? aliases)
 		{
-			ThrowNull(site, nameof(site));
-			this.Site = site;
+			this.Site = site.NotNull(nameof(site));
 			this.Id = ns.Id;
 
 			// We can't actually populate SubjectSpace and TalkSpace here because they may not both be present in Site.Namespaces at this time, so only populate the local variables.
@@ -176,11 +174,11 @@
 		/// <summary>Capitalizes the page name based on the namespace's case-sensitivity.</summary>
 		/// <param name="pageName">Name of the page.</param>
 		/// <returns>If the namespace isn't case sensitive, and the page name begins with a lower-case letter, returns the capitalized version of the page name; otherwise, the page name is returned unaltered.</returns>
-		public string CapitalizePageName(string pageName)
-		{
-			ThrowNull(pageName, nameof(pageName));
-			return this.CaseSensitive || pageName.Length == 0 ? pageName : pageName.UpperFirst(this.Site.Culture);
-		}
+		public string CapitalizePageName(string pageName) =>
+			this.CaseSensitive ||
+			pageName.NotNull(nameof(pageName)).Length == 0
+				? pageName
+				: pageName.UpperFirst(this.Site.Culture);
 
 		/// <summary>Determines whether the name specified is in the list of names for this namespace.</summary>
 		/// <param name="name">The name to locate.</param>

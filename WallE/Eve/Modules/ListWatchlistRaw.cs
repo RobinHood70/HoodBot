@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ListWatchlistRaw : ListModule<WatchlistRawInput, WatchlistRawItem>, IGeneratorModule
@@ -37,18 +37,15 @@
 		#endregion
 
 		#region Public Static Methods
-		public static ListWatchlistRaw CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is WatchlistRawInput listInput
-				? new ListWatchlistRaw(wal, listInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(WatchlistRawInput), input.GetType().Name);
+		public static ListWatchlistRaw CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (WatchlistRawInput)input, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, WatchlistRawInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.Add("namespace", input.Namespaces)
 				.AddFlags("prop", input.Properties)
 				.AddFilterPiped("show", "changed", input.FilterChanged)

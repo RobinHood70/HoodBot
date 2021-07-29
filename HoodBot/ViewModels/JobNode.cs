@@ -2,15 +2,15 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Models;
-	using static RobinHood70.CommonCode.Globals;
 
 	// Parts of this class taken from https://www.codeproject.com/Articles/28306/Working-with-Checkboxes-in-the-WPF-TreeView
 	public sealed class JobNode : TreeNode
 	{
 		#region Constructors
 		public JobNode(TreeNode parent, JobInfo jobInfo)
-			: base(parent, (jobInfo ?? throw ArgumentNull(nameof(jobInfo))).Name, null) => this.JobInfo = jobInfo;
+			: base(parent, (jobInfo.NotNull(nameof(jobInfo))).Name, null) => this.JobInfo = jobInfo;
 		#endregion
 
 		#region Public Properties

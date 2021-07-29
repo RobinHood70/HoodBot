@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ListPrefixSearch : ListModule<PrefixSearchInput, WikiTitleItem>, IGeneratorModule
@@ -31,18 +31,15 @@
 		#endregion
 
 		#region Public Static Methods
-		public static ListPrefixSearch CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is PrefixSearchInput listInput
-				? new ListPrefixSearch(wal, listInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(PrefixSearchInput), input.GetType().Name);
+		public static ListPrefixSearch CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (PrefixSearchInput)input, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, PrefixSearchInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("search", input.Search)
 				.Add("namespace", input.Namespaces)
 				.Add("limit", this.Limit);

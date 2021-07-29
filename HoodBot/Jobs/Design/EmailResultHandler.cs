@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
 	using System;
+using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Implements the <see cref="ResultHandler" /> class and e-mails results to the user if they have e-mail enabled.</summary>
 	/// <seealso cref="ResultHandler" />
@@ -20,8 +20,7 @@
 		public EmailResultHandler(User user)
 			: base(user?.Site.Culture)
 		{
-			ThrowNull(user, nameof(user));
-			user.Load();
+			user.NotNull(nameof(user)).Load();
 			if (!user.Emailable)
 			{
 				throw new InvalidOperationException(Resources.UserEmailDisabled);

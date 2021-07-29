@@ -1,10 +1,10 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ListFileArchive : ListModule<FileArchiveInput, FileArchiveItem>
@@ -29,14 +29,13 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, FileArchiveInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.Properties)
+				.Check(this.SiteVersion, input.NotNull(nameof(input)).Properties)
 				.FilterBefore(120, FileArchiveProperties.ArchiveName | FileArchiveProperties.MediaType)
 				.FilterBefore(118, FileArchiveProperties.ParsedDescription)
 				.Value;
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("from", input.From)
 				.AddIfNotNull("to", input.To)
 				.AddIfNotNull("prefix", input.Prefix)

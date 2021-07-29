@@ -5,10 +5,10 @@
 	using System.Diagnostics.CodeAnalysis;
 	using System.Text;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ListCategoryMembers : ListModule<CategoryMembersInput, CategoryMembersItem>, IGeneratorModule
@@ -45,18 +45,15 @@
 		#endregion
 
 		#region Public Static Methods
-		public static ListCategoryMembers CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is CategoryMembersInput listInput
-				? new ListCategoryMembers(wal, listInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(CategoryMembersInput), input.GetType().Name);
+		public static ListCategoryMembers CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (CategoryMembersInput)input, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, CategoryMembersInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("title", input.Title)
 				.AddIf("pageid", input.PageId, input.Title == null)
 				.AddFlags("prop", input.Properties)
@@ -77,7 +74,7 @@
 
 		protected override CategoryMembersItem GetItem(JToken result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			var typeText = (string?)result["type"];
 			if (typeText == null || !TypeLookup.TryGetValue(typeText, out var itemType))
 			{

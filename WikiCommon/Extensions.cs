@@ -4,7 +4,7 @@
 	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.Text;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	/// <summary>Extension methods for a variety of types.</summary>
 	public static class Extensions
@@ -29,7 +29,7 @@
 		/// <param name="sb">The sb.</param>
 		/// <returns>The current StringBuilder.</returns>
 		/// <exception cref="ArgumentNullException">Thrown when the <paramref name="sb"/> is null.</exception>
-		public static StringBuilder AppendLinefeed(this StringBuilder sb) => (sb ?? throw ArgumentNull(nameof(sb)))
+		public static StringBuilder AppendLinefeed(this StringBuilder sb) => sb.NotNull(nameof(sb))
 			.Append('\n');
 
 		/// <summary>Identical to <see cref="StringBuilder.AppendLine(string?)"/>, but only appends an LF, not a full CRLF.</summary>
@@ -37,7 +37,7 @@
 		/// <param name="value">The text to append before the linefeed.</param>
 		/// <returns>The current StringBuilder.</returns>
 		/// <exception cref="ArgumentNullException">Thrown when the <paramref name="sb"/> is null.</exception>
-		public static StringBuilder AppendLinefeed(this StringBuilder sb, string value) => (sb ?? throw ArgumentNull(nameof(sb)))
+		public static StringBuilder AppendLinefeed(this StringBuilder sb, string value) => sb.NotNull(nameof(sb))
 			.Append(value)
 			.Append('\n');
 		#endregion

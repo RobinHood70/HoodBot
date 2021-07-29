@@ -2,7 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
-	using RobinHood70.WikiCommon;
+	using RobinHood70.CommonCode;
 
 	public class LoginResult
 	{
@@ -52,7 +52,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.User ?? FallbackText.Unknown;
+		public override string ToString() => this.User ?? Globals.Unknown;
 		#endregion
 	}
 }

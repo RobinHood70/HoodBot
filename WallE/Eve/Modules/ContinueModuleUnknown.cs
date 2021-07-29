@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class ContinueModuleUnknown : ContinueModule
 	{
@@ -13,11 +13,9 @@
 		#endregion
 
 		#region Public Override Methods
-		public override void BuildRequest(Request request)
-		{
-			ThrowNull(request, nameof(request));
-			request.Add(ContinueModule2.ContinueName);
-		}
+		public override void BuildRequest(Request request) => request
+				.NotNull(nameof(request))
+				.Add(ContinueModule2.ContinueName);
 
 		public override ContinueModule Deserialize(WikiAbstractionLayer wal, JToken parent)
 		{

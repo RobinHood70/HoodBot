@@ -3,23 +3,20 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Reflection;
+using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs;
-	using static RobinHood70.CommonCode.Globals;
 
 	public sealed class JobInfo : IEquatable<JobInfo>
 	{
 		#region Constructors
 		private JobInfo(ConstructorInfo constructor, JobInfoAttribute jobInfo)
 		{
-			ThrowNull(constructor, nameof(constructor));
-			ThrowNull(jobInfo, nameof(jobInfo));
-			this.Constructor = constructor;
-			this.Groups = jobInfo.Groups;
+			this.Constructor = constructor.NotNull(nameof(constructor));
+			this.Groups = jobInfo.NotNull(nameof(jobInfo)).Groups;
 			this.Name = jobInfo.Name;
 
-			var constructorParameters = constructor.GetParameters();
-			ThrowNull(constructorParameters, nameof(constructor), nameof(constructor.GetParameters));
-
+			var constructorParameters = constructor.GetParameters()
+				.NotNull(ValidationType.Method, nameof(constructor), nameof(constructor.GetParameters));
 			var parameters = new List<ConstructorParameter>(constructorParameters.Length);
 			foreach (var parameter in constructor.GetParameters())
 			{
@@ -76,8 +73,7 @@
 
 		public WikiJob Instantiate(JobManager jobManager)
 		{
-			ThrowNull(jobManager, nameof(jobManager));
-			var objectList = new List<object?> { jobManager };
+			var objectList = new List<object?> { jobManager.NotNull(nameof(jobManager)) };
 			if (this.Parameters is IReadOnlyList<ConstructorParameter> jobParams)
 			{
 				foreach (var param in jobParams)

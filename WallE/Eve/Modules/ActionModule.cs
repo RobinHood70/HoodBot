@@ -12,13 +12,12 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	public abstract class ActionModule : IModule
 	{
 		#region Constructors
-		protected ActionModule(WikiAbstractionLayer wal) => this.Wal = wal ?? throw ArgumentNull(nameof(wal));
+		protected ActionModule(WikiAbstractionLayer wal) => this.Wal = wal.NotNull(nameof(wal));
 		#endregion
 
 		#region Public Abstract Properties
@@ -48,10 +47,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Protected Static Methods
-		protected static JToken ToJson(string? response)
+		protected static JToken ToJson(string response)
 		{
-			ThrowNull(response, nameof(response));
-			using var responseReader = new StringReader(response);
+			using var responseReader = new StringReader(response.NotNull(nameof(response)));
 			using var reader = new JsonTextReader(responseReader) { DateParseHandling = DateParseHandling.None };
 			return JToken.Load(reader); // using JToken.Load instead of .Parse so we can ignore date parsing.
 		}
@@ -75,7 +73,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected void DeserializeAction(JToken result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 
 			// TODO: Add multiple-error support here (errorformat=raw) using new GetErrors() function.
 			if (result["error"].GetError() is ErrorItem error)
@@ -167,8 +165,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected int FindRequiredNamespace(string title)
 		{
-			ThrowNull(title, nameof(title));
-			var nsSplit = title.Split(TextArrays.Colon, 2);
+			var nsSplit = title.NotNull(nameof(title)).Split(TextArrays.Colon, 2);
 			if (nsSplit.Length == 2)
 			{
 				var nsText = nsSplit[0];
@@ -199,7 +196,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			if (this.SiteVersion != 0 && this.MinimumVersion > this.SiteVersion)
 			{
-				throw new InvalidOperationException(CurrentCulture(EveMessages.ActionNotSupported, this.GetType().Name));
+				throw new InvalidOperationException(Globals.CurrentCulture(EveMessages.ActionNotSupported, this.GetType().Name));
 			}
 		}
 
@@ -207,14 +204,12 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 		}
 
-		protected virtual bool HandleWarning(string from, string text)
-		{
-			ThrowNull(from, nameof(from));
-			ThrowNull(text, nameof(text));
-
-			// Swallow all token warnings. Currently emitted primarily by queries, but also by ApiTokens.
-			return text.StartsWith("Action '", StringComparison.Ordinal) && text.EndsWith("' is not allowed for the current user", StringComparison.Ordinal);
-		}
+		// Swallow all token warnings. Currently emitted primarily by queries, but also by ApiTokens.
+		protected virtual bool HandleWarning(string from, string text) =>
+			text
+				.NotNull(nameof(text))
+				.StartsWith("Action '", StringComparison.Ordinal) &&
+			text.EndsWith("' is not allowed for the current user", StringComparison.Ordinal);
 		#endregion
 	}
 }

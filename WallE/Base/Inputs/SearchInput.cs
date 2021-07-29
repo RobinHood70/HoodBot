@@ -3,8 +3,8 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Enumerations
 	[Flags]
@@ -38,11 +38,7 @@ namespace RobinHood70.WallE.Base
 	public class SearchInput : ILimitableInput, IGeneratorInput
 	{
 		#region Constructors
-		public SearchInput(string search)
-		{
-			ThrowNullOrWhiteSpace(search, nameof(search));
-			this.Search = search;
-		}
+		public SearchInput(string search) => this.Search = search.NotNullOrWhiteSpace(nameof(search));
 		#endregion
 
 		#region Public Properties

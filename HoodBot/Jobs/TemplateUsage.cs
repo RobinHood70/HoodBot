@@ -9,7 +9,6 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class TemplateUsage : WikiJob
 	{
@@ -30,16 +29,15 @@
 			[JobParameterFile(Overwrite = true, DefaultValue = @"%BotData%\%templateName%.txt")] string location)
 			: base(jobManager)
 		{
-			ThrowNull(templateNames, nameof(templateNames));
-			ThrowNull(location, nameof(location));
+			location.ThrowNull(nameof(location));
 			this.respectRedirects = respectRedirects;
 			var allTemplateNames = new List<string>();
-			foreach (var templateName in templateNames)
+			foreach (var templateName in templateNames.NotNull(nameof(templateNames)))
 			{
 				allTemplateNames.AddRange(templateName.Split(TextArrays.Pipe));
 			}
 
-			this.saveLocation = location.Replace("%templateName%", SanitizeFilename(allTemplateNames[0]), StringComparison.Ordinal);
+			this.saveLocation = location.Replace("%templateName%", Globals.SanitizeFilename(allTemplateNames[0]), StringComparison.Ordinal);
 			this.originalTemplateNames = allTemplateNames;
 			this.ProgressMaximum = 2;
 		}

@@ -2,9 +2,9 @@
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ActionImport : ActionModule<ImportInput, IReadOnlyList<ImportItem>>
@@ -29,15 +29,14 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ImportInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
-			if (input.GetXmlData() is byte[] xmlData)
+			if (input.NotNull(nameof(input)).GetXmlData() is byte[] xmlData)
 			{
 				request.Type = RequestType.PostMultipart;
 				request.Add("xml", "dummyName", xmlData);
 			}
 
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("summary", input.Summary)
 				.AddIfNotNull("interwikisource", input.InterwikiSource)
 				.AddIfNotNull("interwikipage", input.InterwikiPage)
@@ -50,7 +49,7 @@
 
 		protected override IReadOnlyList<ImportItem> DeserializeResult(JToken? result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			var output = new List<ImportItem>();
 			foreach (var item in result)
 			{

@@ -7,7 +7,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// MWVERSION: 1.28
@@ -38,9 +37,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ParameterInfoInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
-			ThrowNull(input.Modules, nameof(input), nameof(input.Modules));
+			request.ThrowNull(nameof(request));
+			input.ThrowNull(nameof(input));
+			input.Modules.ThrowNull(nameof(input), nameof(input.Modules));
 			if (this.SiteVersion >= 125)
 			{
 				request
@@ -90,7 +89,7 @@
 
 		protected override IReadOnlyDictionary<string, ParameterInfoItem> DeserializeResult(JToken? result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			var output = new Dictionary<string, ParameterInfoItem>(StringComparer.Ordinal);
 			var moduleTypes = new List<string>() { "modules" };
 			if (this.SiteVersion < 125)

@@ -5,7 +5,6 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System.Diagnostics.CodeAnalysis;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
-	using static RobinHood70.CommonCode.Globals;
 
 	public abstract class ListModule<TInput, TItem> : QueryModule<TInput, IList<TItem>>, IContinuableQueryModule
 		where TInput : class
@@ -34,7 +33,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Override Methods
 		protected override void DeserializeResult(JToken? result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			this.Output ??= new List<TItem>();
 			using var enumerator = result.Children().GetEnumerator();
 			while (this.ItemsRemaining > 0 && enumerator.MoveNext())

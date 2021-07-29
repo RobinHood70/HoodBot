@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.Robby
 {
 	using System;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Represents information about an interwiki entry.</summary>
 	public class InterwikiEntry : ISiteSpecific
@@ -15,9 +15,8 @@
 		/// <param name="item">The <see cref="SiteInfoInterwikiMap"/> item to initialize from.</param>
 		protected internal InterwikiEntry(Site site, SiteInfoInterwikiMap item)
 		{
-			ThrowNull(item, nameof(item));
 			this.Site = site;
-			this.Language = item.Language;
+			this.Language = item.NotNull(nameof(item)).Language;
 			this.LocalFarm = (item.Flags & InterwikiMapFlags.Local) != 0;
 			this.LocalWiki = (item.Flags & InterwikiMapFlags.LocalInterwiki) != 0;
 			this.Path = item.Url;

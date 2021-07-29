@@ -8,7 +8,6 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Represents a collection of pages, with methods to request additional pages from the site.</summary>
 	/// <remarks>Generally speaking, a PageCollection represents data that's returned from the site, although there's nothing preventing you from creating a PageCollection to store your own newly created pages, either. In most such cases, however, it's better to create and save one page at a time than to store the entire set in memory.</remarks>
@@ -61,11 +60,7 @@
 		/// <param name="result">The result set.</param>
 		/// <remarks>Note that this does <em>not</em> populate the collection itself, leaving that to the caller, since IPageSetResult does not provide enough information to do so.</remarks>
 		public PageCollection(Site site, IPageSetResult result)
-			: this(site)
-		{
-			ThrowNull(result, nameof(result));
-			this.PopulateMapCollections(result);
-		}
+			: this(site) => this.PopulateMapCollections(result.NotNull(nameof(result)));
 		#endregion
 
 		#region Public Events
@@ -103,14 +98,10 @@
 		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry if the requested entry isn't found.</remarks>
 		public override Page this[string key]
 		{
-			get
-			{
-				ThrowNull(key, nameof(key));
-				return this.TryGetValue(key, out var retval)
-				|| (this.titleMap.TryGetValue(key, out var altKey) && this.TryGetValue(altKey, out retval))
-				? retval!
-				: throw new KeyNotFoundException();
-			}
+			get => this.TryGetValue(key.NotNull(nameof(key)), out var retval) ||
+				(this.titleMap.TryGetValue(key, out var altKey) && this.TryGetValue(altKey, out retval))
+					? retval!
+					: throw new KeyNotFoundException();
 
 			set => base[key] = value;
 		}
@@ -122,13 +113,9 @@
 		/// <exception cref="KeyNotFoundException">Thrown when the title could not be found.</exception>
 		public override Page this[ISimpleTitle title]
 		{
-			get
-			{
-				ThrowNull(title, nameof(title));
-				return this.TryGetValue(title, out var page)
-					? page
-					: throw new KeyNotFoundException();
-			}
+			get => this.TryGetValue(title.NotNull(nameof(title)), out var page)
+				? page
+				: throw new KeyNotFoundException();
 
 			set => base[title] = value;
 		}
@@ -209,8 +196,7 @@
 		/// <remarks>Unlike <see cref="GetTitles(IEnumerable{string})"/> and related methods, which all load data from the wiki, this will simply add blank pages to the result set.</remarks>
 		public override void Add(ISimpleTitle title)
 		{
-			ThrowNull(title, nameof(title));
-			var page = this.PageCreator.CreatePage(title);
+			var page = this.PageCreator.CreatePage(title.NotNull(nameof(title)));
 			this[page] = page;
 		}
 
@@ -218,8 +204,7 @@
 		/// <param name="titles">The titles to be added.</param>
 		public override void Add(IEnumerable<ISimpleTitle> titles)
 		{
-			ThrowNull(titles, nameof(titles));
-			foreach (var title in titles)
+			foreach (var title in titles.NotNull(nameof(titles)))
 			{
 				var page = this.PageCreator.CreatePage(title);
 				this[page] = page;
@@ -245,8 +230,7 @@
 		/// <inheritdoc/>
 		public override bool TryGetValue(Page key, [MaybeNullWhen(false)] out Page value)
 		{
-			ThrowNull(key, nameof(key));
-			if (base.TryGetValue(key, out var retval) || (this.titleMap.TryGetValue(key.FullPageName, out var altKey) && base.TryGetValue(altKey, out retval)))
+			if (base.TryGetValue(key, out var retval) || (this.titleMap.TryGetValue(key.NotNull(nameof(key)).FullPageName, out var altKey) && base.TryGetValue(altKey, out retval)))
 			{
 				value = retval;
 				return true;
@@ -259,8 +243,7 @@
 		/// <inheritdoc/>
 		public override bool TryGetValue(ISimpleTitle key, [MaybeNullWhen(false)] out Page value)
 		{
-			ThrowNull(key, nameof(key));
-			if (base.TryGetValue(key, out var retval) || (this.titleMap.TryGetValue(key.FullPageName, out var altKey) && base.TryGetValue(altKey, out retval)))
+			if (base.TryGetValue(key, out var retval) || (this.titleMap.TryGetValue(key.NotNull(nameof(key)).FullPageName, out var altKey) && base.TryGetValue(altKey, out retval)))
 			{
 				value = retval;
 				return true;
@@ -273,8 +256,7 @@
 		/// <inheritdoc/>
 		public override bool TryGetValue(string key, [MaybeNullWhen(false)] out Page value)
 		{
-			ThrowNull(key, nameof(key));
-			if (base.TryGetValue(key, out var retval) || (this.titleMap.TryGetValue(key, out var altKey) && base.TryGetValue(altKey, out retval)))
+			if (base.TryGetValue(key.NotNull(nameof(key)), out var retval) || (this.titleMap.TryGetValue(key, out var altKey) && base.TryGetValue(altKey, out retval)))
 			{
 				value = retval;
 				return true;
@@ -353,13 +335,13 @@
 		/// <param name="input">The input parameters.</param>
 		protected override void GetBacklinks(BacklinksInput input)
 		{
-			ThrowNull(input, nameof(input));
-			ThrowNull(input.Title, nameof(input), nameof(input.Title));
+			input.ThrowNull(nameof(input));
+			input.Title.ThrowNull(nameof(input), nameof(input.Title));
 			var inputTitle = Title.FromName(this.Site, input.Title);
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && (input.LinkTypes & BacklinksTypes.ImageUsage) != 0)
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
-				ThrowNull(input.Title, nameof(input), nameof(input.Title)); // Input changed, so re-check before proceeding.
+				input.Title.ThrowNull(nameof(input), nameof(input.Title)); // Input changed, so re-check before proceeding.
 			}
 
 			foreach (var type in input.LinkTypes.GetUniqueFlags())
@@ -382,7 +364,7 @@
 		/// <param name="recurse">if set to <see langword="true"/> load the entire category tree recursively.</param>
 		protected override void GetCategoryMembers(CategoryMembersInput input, bool recurse)
 		{
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			if (recurse)
 			{
 				this.RecurseCategoryPages(input, new HashSet<string>(StringComparer.Ordinal));
@@ -503,10 +485,9 @@
 		/// <param name="pageValidator">A function which validates whether a page can be added to the collection.</param>
 		protected virtual void LoadPages(QueryPageSetInput pageSetInput, Func<Page, bool> pageValidator)
 		{
-			ThrowNull(pageSetInput, nameof(pageSetInput));
-			ThrowNull(pageValidator, nameof(pageValidator));
+			pageValidator.NotNull(nameof(pageValidator));
 			var options = this.LoadOptions;
-			pageSetInput.ConvertTitles = options.ConvertTitles;
+			pageSetInput.NotNull(nameof(pageSetInput)).ConvertTitles = options.ConvertTitles;
 			pageSetInput.Redirects = options.FollowRedirects;
 			if (pageSetInput.GeneratorInput is ILimitableInput limited)
 			{
@@ -556,7 +537,7 @@
 		/// <param name="categoryTree">A hashet used to track which categories have already been loaded. This avoids loading the same category if it appears in the tree more than once, and breaks possible recursion loops.</param>
 		private void RecurseCategoryPages(CategoryMembersInput input, HashSet<string> categoryTree)
 		{
-			ThrowNull(input.Title, nameof(input), nameof(input.Title));
+			input.Title.ThrowNull(nameof(input), nameof(input.Title));
 			if (!categoryTree.Add(input.Title))
 			{
 				return;

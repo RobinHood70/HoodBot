@@ -3,7 +3,6 @@ namespace RobinHood70.WallE.Base
 {
 	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class BacklinksInput : ILimitableInput, IGeneratorInput
 	{
@@ -22,8 +21,7 @@ namespace RobinHood70.WallE.Base
 
 		public BacklinksInput(BacklinksInput input, BacklinksTypes linkType)
 		{
-			ThrowNull(input, nameof(input));
-			this.FilterRedirects = input.FilterRedirects;
+			this.FilterRedirects = input.NotNull(nameof(input)).FilterRedirects;
 			this.Limit = input.Limit;
 			this.MaxItems = input.MaxItems;
 			this.PageId = input.PageId;

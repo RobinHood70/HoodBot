@@ -13,7 +13,6 @@
 	using RobinHood70.InternetExplorerDiff.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using SHDocVw;
-	using static RobinHood70.CommonCode.Globals;
 
 	[Export(typeof(IPlugin))]
 	[ExportMetadata("DisplayName", "Internet Explorer")]
@@ -35,8 +34,8 @@
 		[STAThread]
 		public void Compare(DiffContent diff)
 		{
-			ThrowNull(diff, nameof(diff));
-			ThrowNull(diff.EditPath, nameof(diff), nameof(diff.EditPath));
+			diff.ThrowNull(nameof(diff));
+			diff.EditPath.ThrowNull(ValidationType.Property, Validator.Join(nameof(IeDiff), nameof(diff.EditPath)));
 			const int empty = 0;
 			const string? headers = "Content-Type: application/x-www-form-urlencoded";
 

@@ -2,7 +2,6 @@
 namespace RobinHood70.WallE.Base
 {
 	using RobinHood70.CommonCode;
-	using RobinHood70.WikiCommon;
 
 	public class SiteInfoRights
 	{
@@ -21,7 +20,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Text.Ellipsis(30) ?? FallbackText.Unknown;
+		public override string ToString() => this.Text.Ellipsis(30) ?? Globals.Unknown;
 		#endregion
 	}
 }

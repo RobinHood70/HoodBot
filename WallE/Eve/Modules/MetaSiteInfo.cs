@@ -10,7 +10,6 @@
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	[SuppressMessage("Maintainability", "CA1506:Avoid excessive class coupling", Justification = "SiteInfo is inherently complex.")]
@@ -41,7 +40,7 @@
 		#endregion
 
 		#region Public Override Methods
-		public override bool HandleWarning(string? from, string? text)
+		public override bool HandleWarning(string from, string? text)
 		{
 			if (this.SiteVersion == 0 && string.Equals(from, "main", StringComparison.Ordinal) && text?.Contains("formatversion", StringComparison.Ordinal) == true)
 			{
@@ -56,9 +55,7 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, SiteInfoInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
-			var prop = input.Properties;
+			var prop = input.NotNull(nameof(input)).Properties;
 			if (this.SiteVersion != 0)
 			{
 				prop = FlagFilter
@@ -72,6 +69,7 @@
 			}
 
 			request
+				.NotNull(nameof(request))
 				.AddFlags("prop", prop)
 				.AddFilterPipedIf("filteriw", "local", input.FilterLocalInterwiki, (prop & SiteInfoProperties.InterwikiMap) != 0)
 				.AddIf("showalldb", input.ShowAllDatabases, (prop & SiteInfoProperties.DbReplLag) != 0)
@@ -81,8 +79,7 @@
 
 		protected override void DeserializeParent(JToken parent)
 		{
-			ThrowNull(parent, nameof(parent));
-			var (defaultSkin, skins) = GetSkins(parent);
+			var (defaultSkin, skins) = GetSkins(parent.NotNull(nameof(parent)));
 			var output = new SiteInfoResult(
 				general: this.GetGeneral(parent),
 				defaultOptions: GetDefaultOptions(parent),
@@ -449,7 +446,7 @@
 				}
 				catch (InvalidCastException)
 				{
-					this.Wal.AddWarning("siteinfo-unhandledparams", CurrentCulture(EveMessages.UnhandledParams, name));
+					this.Wal.AddWarning("siteinfo-unhandledparams", Globals.CurrentCulture(EveMessages.UnhandledParams, name));
 				}
 
 				retval.Add(new SiteInfoExtensions(

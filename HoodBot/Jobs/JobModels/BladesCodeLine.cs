@@ -5,7 +5,6 @@
 	using System.Globalization;
 	using System.Text;
 	using RobinHood70.CommonCode;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class BladesCodeLine : BladesCodeLineCollection, IStringBuilder
 	{
@@ -16,8 +15,7 @@
 		#region Constructors
 		public BladesCodeLine(string line)
 		{
-			ThrowNull(line, nameof(line));
-			var textSplit = line.Split(TextArrays.EqualsSign, 2);
+			var textSplit = line.NotNull(nameof(line)).Split(TextArrays.EqualsSign, 2);
 			if (textSplit.Length == 2)
 			{
 				this.Value = textSplit[1].Trim().Trim(Quote);
@@ -46,9 +44,8 @@
 		#region Public Static Methods
 		public static BladesCodeLine Parse(IList<string> lines)
 		{
-			ThrowNull(lines, nameof(lines));
-			var codeLines = new List<IndentedLine>();
-			foreach (var line in lines)
+			var codeLines = new List<IndentedLine>(lines.Count);
+			foreach (var line in lines.NotNull(nameof(lines)))
 			{
 				codeLines.Add(SplitTabs(line));
 			}

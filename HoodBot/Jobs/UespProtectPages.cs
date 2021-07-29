@@ -12,7 +12,6 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class UespProtectPages : EditJob
 	{
@@ -28,7 +27,7 @@
 			[ProtectionLevel.Full] = "Full",
 		};
 
-		private static readonly Regex Dates = new("[0-9]{1,2} [a-zA-Z]+ 20[0-9]{2} ", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex Dates = new("[0-9]{1,2} [a-zA-Z]+ 20[0-9]{2} ", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		#endregion
 
 		#region Fields
@@ -679,7 +678,7 @@
 			public ProtectionInfo(ICollection<int> namespaces, string regexPattern, PageProtection pageProtection)
 			{
 				this.Namespaces = namespaces;
-				this.SearchPattern = new Regex(regexPattern, RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+				this.SearchPattern = new Regex(regexPattern, RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 				this.PageProtection = pageProtection;
 			}
 			#endregion

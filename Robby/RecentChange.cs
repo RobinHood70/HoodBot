@@ -2,8 +2,8 @@
 {
 	using System;
 	using System.Collections.Generic;
+using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Stores information about a Recent Change entry.</summary>
 	public class RecentChange
@@ -13,8 +13,7 @@
 		/// <param name="recentChange">The <see cref="RecentChangesItem"/> to initialize from.</param>
 		protected internal RecentChange(Site site, RecentChangesItem recentChange)
 		{
-			ThrowNull(recentChange, nameof(recentChange));
-			this.Title = Title.FromWikiTitle(site, recentChange.Title);
+			this.Title = Title.FromWikiTitle(site, recentChange.NotNull(nameof(recentChange)).Title);
 			this.Anonymous = recentChange.UserId == 0;
 			this.Comment = recentChange.Comment;
 			this.Id = recentChange.Id;

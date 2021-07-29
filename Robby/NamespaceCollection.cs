@@ -4,8 +4,8 @@
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
+using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Read-only Namespace dictionary that can be referenced by ID and all valid names for the namespace.</summary>
 	public class NamespaceCollection : IReadOnlyCollection<Namespace>
@@ -18,7 +18,6 @@
 		internal NamespaceCollection(IEnumerable<Namespace> namespaces, IEqualityComparer<string> comparer)
 		{
 			// CONSIDER: Implementing namespace-specific case-sensitivity, which is supported by the wiki software, though rarely used.
-			ThrowNull(namespaces, nameof(namespaces));
 			var names = new Dictionary<string, Namespace>(comparer);
 			this.NamesDictionary = names;
 			foreach (var ns in namespaces)
@@ -118,9 +117,7 @@
 		/// <param name="ns">The namespace to associate the name with.</param>
 		public void AddToNames(string name, Namespace ns)
 		{
-			ThrowNull(name, nameof(name));
-			ThrowNull(ns, nameof(ns));
-			this.NamesDictionary.Add(name, ns);
+			this.NamesDictionary.Add(name.NotNull(nameof(name)), ns.NotNull(nameof(ns)));
 			ns.AddName(name);
 		}
 

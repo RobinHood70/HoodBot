@@ -16,7 +16,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Properties;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Clients.ClientShared;
 
 	// TODO: Add cancellation token possibilities so requests can be cancelled if they're failing without waiting for all retries.
@@ -164,8 +163,8 @@
 		/// <exception cref="WikiException">HTTP request failed.</exception>
 		public bool DownloadFile(Uri uri, string fileName)
 		{
-			ThrowNull(uri, nameof(uri));
-			ThrowNull(fileName, nameof(fileName));
+			uri.ThrowNull(nameof(uri));
+			fileName.ThrowNull(nameof(fileName));
 			using (var response = this.SendRequest(uri, "GET", null, null, false))
 			{
 				var data = GetResponseData(response);
@@ -283,8 +282,7 @@
 
 		private static string GetResponseText(HttpWebResponse response)
 		{
-			ThrowNull(response, nameof(response));
-			using var respStream = response.GetResponseStream();
+			using var respStream = response.NotNull(nameof(response)).GetResponseStream();
 			using var reader = new StreamReader(respStream);
 			return reader.ReadToEnd();
 		}
@@ -522,7 +520,7 @@
 				}
 			}
 
-			throw new WikiException(CurrentCulture(Messages.ExcessiveLag));
+			throw new WikiException(Globals.CurrentCulture(Messages.ExcessiveLag));
 		}
 		#endregion
 	}

@@ -2,10 +2,9 @@
 {
 	using System.Runtime.CompilerServices;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Properties;
-	using RobinHood70.WikiCommon;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Generic set of exceptions used across multiple modules.</summary>
 	public static class Exceptions
@@ -20,16 +19,14 @@
 		/// <param name="caller">The caller name (automatically populated).</param>
 		/// <returns>RobinHood70.WallE.Design.WikiException.</returns>
 		// These methods are not extensions, but are placed in this class as useful but not warranting a class of their own yet.
-		public static WikiException MalformedException(string name, JToken? token, [CallerMemberName] string caller = FallbackText.Unknown) => new(CurrentCulture(EveMessages.MalformedData, name, token?.Path ?? FallbackText.Unknown, caller));
+		public static WikiException MalformedException(string name, JToken? token, [CallerMemberName] string caller = Globals.Unknown) => new(Globals.CurrentCulture(EveMessages.MalformedData, name, token?.Path ?? Globals.Unknown, caller));
 
-		/// <summary>
-		/// Malformeds the type exception.
-		/// </summary>
-		/// <param name="typeName">Name of the type.</param>
+		/// <summary>Creates a new WikiException with a message indicating malformed data.</summary>
+		/// <param name="typeName">Name of the expected type.</param>
 		/// <param name="token">The token.</param>
 		/// <param name="caller">The caller name (automatically populated).</param>
-		/// <returns>RobinHood70.WallE.Design.WikiException.</returns>
-		public static WikiException MalformedTypeException(string typeName, JToken? token, [CallerMemberName] string caller = FallbackText.Unknown) => new(CurrentCulture(EveMessages.MalformedDataType, typeName, token?.Path ?? FallbackText.Unknown, caller));
+		/// <returns>A new <see cref="WikiException"/>.</returns>
+		public static WikiException MalformedTypeException(string typeName, JToken? token, [CallerMemberName] string caller = Globals.Unknown) => new(Globals.CurrentCulture(EveMessages.MalformedDataType, typeName, token?.Path ?? Globals.Unknown, caller));
 		#endregion
 	}
 }

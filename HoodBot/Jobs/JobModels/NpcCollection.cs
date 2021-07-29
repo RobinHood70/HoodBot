@@ -4,7 +4,7 @@
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using System.Diagnostics;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	internal sealed class NpcCollection : KeyedCollection<long, NpcData>
 	{
@@ -84,7 +84,7 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override long GetKeyForItem(NpcData item) => item == null ? throw ArgumentNull(nameof(item)) : item.Id;
+		protected override long GetKeyForItem(NpcData item) => item.NotNull(nameof(item)).Id;
 		#endregion
 	}
 }

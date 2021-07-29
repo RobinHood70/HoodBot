@@ -2,9 +2,9 @@
 {
 	using System;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class ActionRsd : ActionModule<NullObject, CustomResult>
 	{
@@ -31,8 +31,9 @@
 		protected override void BuildRequestLocal(Request request, NullObject input)
 		{
 			// Custom request which doesn't honour format parameter; remove that one and those that cause warnings.
-			ThrowNull(request, nameof(request));
-			request.Remove("format");
+			request
+				.NotNull(nameof(request))
+				.Remove("format");
 			request.Remove("formatversion");
 			request.Remove("utf8");
 		}

@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class ListPagesWithProp : ListModule<PagesWithPropertyInput, PagesWithPropertyItem>, IGeneratorModule
 	{
@@ -30,18 +30,15 @@
 		#endregion
 
 		#region Public Static Methods
-		public static ListPagesWithProp CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is PagesWithPropertyInput listInput
-				? new ListPagesWithProp(wal, listInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(PagesWithPropertyInput), input.GetType().Name);
+		public static ListPagesWithProp CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (PagesWithPropertyInput)input, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, PagesWithPropertyInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("propname", input.PropertyName)
 				.AddFlags("prop", input.Properties)
 				.AddIf("dir", "descending", input.SortDescending)

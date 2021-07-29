@@ -8,7 +8,6 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class EsoNpcLocFix : EditJob
 	{
@@ -21,8 +20,7 @@
 		public EsoNpcLocFix(JobManager jobManager)
 			: base(jobManager)
 		{
-			ThrowNull(jobManager, nameof(jobManager));
-			this.pages = new PageCollection(jobManager.Site);
+			this.pages = new PageCollection(jobManager.NotNull(nameof(jobManager)).Site);
 		}			
 		#endregion
 

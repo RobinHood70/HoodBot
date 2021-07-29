@@ -12,6 +12,7 @@
 	using System.Windows.Media;
 	using GalaSoft.MvvmLight;
 	using GalaSoft.MvvmLight.Command;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot;
 	using RobinHood70.HoodBot.Jobs;
 	using RobinHood70.HoodBot.Jobs.Design;
@@ -25,7 +26,6 @@
 	using RobinHood70.WallE.Clients;
 	using RobinHood70.WallE.Eve;
 	using static System.Environment;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class MainViewModel : ViewModelBase
 	{
@@ -245,7 +245,7 @@
 
 		private void Client_RequestingDelay(IMediaWikiClient sender, DelayEventArgs eventArgs)
 		{
-			this.StatusWriteLine(CurrentCulture(Resources.DelayRequested, eventArgs.Reason, $"{eventArgs.DelayTime.TotalSeconds.ToString(CultureInfo.CurrentCulture)}s", eventArgs.Description));
+			this.StatusWriteLine(Globals.CurrentCulture(Resources.DelayRequested, eventArgs.Reason, $"{eventArgs.DelayTime.TotalSeconds.ToString(CultureInfo.CurrentCulture)}s", eventArgs.Description));
 			App.WpfYield();
 
 			/*
@@ -259,8 +259,7 @@
 
 		private IWikiAbstractionLayer CreateAbstractionLayer(IMediaWikiClient client, WikiInfoViewModel wikiInfo)
 		{
-			ThrowNull(wikiInfo.Api, nameof(wikiInfo), nameof(wikiInfo.Api));
-			var api = wikiInfo.Api;
+			var api = wikiInfo.Api.NotNull(nameof(wikiInfo), nameof(wikiInfo.Api));
 			IWikiAbstractionLayer abstractionLayer = string.Equals(api.OriginalString, "/", StringComparison.Ordinal)
 				? new WallE.Test.WikiAbstractionLayer()
 				: new WikiAbstractionLayer(client, api);
@@ -553,8 +552,8 @@
 			{
 				var book29 = File.ReadAllText(Books29Path + book);
 				var book30 = File.ReadAllText(Books30Path + book);
-				book29 = Regex.Replace(book29, @"\s+", " ", RegexOptions.None, DefaultRegexTimeout);
-				book30 = Regex.Replace(book30, @"\s+", " ", RegexOptions.None, DefaultRegexTimeout);
+				book29 = Regex.Replace(book29, @"\s+", " ", RegexOptions.None, Globals.DefaultRegexTimeout);
+				book30 = Regex.Replace(book30, @"\s+", " ", RegexOptions.None, Globals.DefaultRegexTimeout);
 
 				if (!string.Equals(book29, book30, StringComparison.Ordinal))
 				{
@@ -604,12 +603,7 @@
 
 		private void StatusWriteLine(string text) => this.StatusWrite(text + NewLine);
 
-		private WikiInfoViewModel ValidateWikiInfo()
-		{
-			ThrowNull(this.SelectedItem, nameof(MainViewModel), nameof(this.SelectedItem));
-			var wikiInfo = this.SelectedItem;
-			return wikiInfo;
-		}
+		private WikiInfoViewModel ValidateWikiInfo() => this.SelectedItem.NotNull(nameof(MainViewModel), nameof(this.SelectedItem));
 		#endregion
 	}
 }

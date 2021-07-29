@@ -2,7 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	#region Public Enumerations
 	[Flags]
@@ -32,11 +32,7 @@ namespace RobinHood70.WallE.Base
 
 		public LogEventsInput(int ns) => this.Namespace = ns;
 
-		public LogEventsInput(string title)
-		{
-			ThrowNullOrWhiteSpace(title, nameof(title));
-			this.Title = title;
-		}
+		public LogEventsInput(string title) => this.Title = title.NotNullOrWhiteSpace(nameof(title));
 		#endregion
 
 		#region Public Properties
@@ -68,11 +64,10 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Static Methods
-		public static LogEventsInput FromPrefix(string prefix)
+		public static LogEventsInput FromPrefix(string prefix) => new()
 		{
-			ThrowNullOrWhiteSpace(prefix, nameof(prefix));
-			return new LogEventsInput() { Prefix = prefix };
-		}
+			Prefix = prefix.NotNullOrWhiteSpace(nameof(prefix))
+		};
 		#endregion
 	}
 }

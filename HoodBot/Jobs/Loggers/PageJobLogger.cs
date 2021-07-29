@@ -11,7 +11,6 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class PageJobLogger : JobLogger
 	{
@@ -31,17 +30,14 @@
 		public PageJobLogger(Site site, string pageName, JobTypes typesToLog)
 			: base(typesToLog)
 		{
-			ThrowNull(site, nameof(site));
-			ThrowNull(pageName, nameof(pageName));
-			this.logPage = Page.FromName(site, pageName);
+			this.logPage = Page.FromName(site.NotNull(nameof(site)), pageName.NotNull(nameof(pageName)));
 		}
 		#endregion
 
 		#region Public Override Methods
 		public override void AddLogEntry(LogInfo info)
 		{
-			ThrowNull(info, nameof(info));
-			this.logInfo = info;
+			this.logInfo = info.NotNull(nameof(info));
 			this.start = DateTime.UtcNow;
 			this.end = null;
 			this.UpdateLogPage("Job Started", info.Title);
@@ -49,7 +45,7 @@
 
 		public override void EndLogEntry()
 		{
-			ThrowNull(this.logInfo, nameof(PageJobLogger), nameof(this.logInfo));
+			this.logInfo.ThrowNull(nameof(PageJobLogger), nameof(this.logInfo));
 			this.end = DateTime.UtcNow;
 			this.UpdateLogPage("Job Finished", "None");
 			this.start = null;
@@ -72,7 +68,7 @@
 		#region Private Methods
 		private bool UpdateCurrentStatus(ContextualParser parser)
 		{
-			ThrowNull(this.status, nameof(PageJobLogger), nameof(this.status));
+			this.status.ThrowNull(nameof(PageJobLogger), nameof(this.status));
 			var currentTask = parser.Nodes.FindIndex<IHeaderNode>(header => string.Equals(header.GetInnerText(true), "Current Task", StringComparison.Ordinal));
 			var taskLog = parser.Nodes.FindIndex<IHeaderNode>(currentTask + 1);
 			if (currentTask == -1 || taskLog == -1)

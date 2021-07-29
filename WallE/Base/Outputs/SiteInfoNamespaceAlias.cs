@@ -1,8 +1,8 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Properties;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class SiteInfoNamespaceAlias
 	{
@@ -21,7 +21,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => CurrentCulture(Messages.ColonText, this.Id, this.Alias);
+		public override string ToString() => Globals.CurrentCulture(Messages.ColonText, this.Id, this.Alias);
 		#endregion
 	}
 }

@@ -6,7 +6,6 @@
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon; using RobinHood70.CommonCode;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class DBMergePrep : ParsedPageJob
 	{
@@ -27,8 +26,7 @@
 
 		protected override void ParseText(object sender, Page page, ContextualParser parsedPage)
 		{
-			ThrowNull(parsedPage, nameof(parsedPage));
-			foreach (var template in parsedPage.FindAllRecursive<TemplateNode>())
+			foreach (var template in parsedPage.NotNull(nameof(parsedPage)).FindAllRecursive<TemplateNode>())
 			{
 				var paramName = template.GetTitleValue() switch
 				{

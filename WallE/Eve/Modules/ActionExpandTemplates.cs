@@ -2,10 +2,10 @@
 {
 	using System;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// HACK: Much of this module remains untested, as there is virtually no documentation on it, and example outputs were mostly impossible to find.
@@ -31,14 +31,14 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ExpandTemplatesInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			var prop = FlagFilter
 				.Check(this.SiteVersion, input.Properties)
 				.FilterBefore(126, ExpandTemplatesProperties.Modules | ExpandTemplatesProperties.JsConfigVars)
 				.FilterBefore(125, ExpandTemplatesProperties.Properties)
 				.Value;
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("text", input.Text)
 				.AddIfNotNull("title", input.Title)
 				.AddIfPositive("revid", input.RevisionId)
@@ -49,7 +49,7 @@
 
 		protected override ExpandTemplatesResult DeserializeResult(JToken? result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			return new ExpandTemplatesResult(
 				categories: result["categories"].GetList<string>(),
 				javaScriptConfigVars: result["jsconfigvars"].GetStringDictionary<string>(),

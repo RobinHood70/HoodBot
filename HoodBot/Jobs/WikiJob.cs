@@ -7,7 +7,6 @@
 	using RobinHood70.HoodBot.Jobs.Loggers;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Enumerations
 	[Flags]
@@ -37,8 +36,7 @@
 		#region Constructors
 		protected WikiJob(JobManager jobManager)
 		{
-			ThrowNull(jobManager, nameof(jobManager));
-			this.JobManager = jobManager;
+			this.JobManager = jobManager.NotNull(nameof(jobManager));
 			this.Site = jobManager.Site; // We make a copy of this due to the high access rate in most jobs.
 			this.logName = this.GetType().Name.UnCamelCase();
 			this.Logger = jobManager.Logger; // We make a copy of this so that it can be overridden on a job-specific basis, if needed.

@@ -2,10 +2,10 @@
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class PropImageInfo : PropListModule<ImageInfoInput, ImageInfoItem>
 	{
@@ -27,24 +27,20 @@
 		#endregion
 
 		#region Public Static Methods
-		public static PropImageInfo CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
-			input is ImageInfoInput propInput
-				? new PropImageInfo(wal, propInput)
-				: throw InvalidParameterType(nameof(input), nameof(ImageInfoInput), input.GetType().Name);
+		public static PropImageInfo CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new(wal, (ImageInfoInput)input);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ImageInfoInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.Properties)
+				.Check(this.SiteVersion, input.NotNull(nameof(input)).Properties)
 				.FilterBefore(123, ImageProperties.CanonicalTitle | ImageProperties.CommonMetadata | ImageProperties.ExtMetadata)
 				.FilterBefore(118, ImageProperties.MediaType)
 				.FilterBefore(117, ImageProperties.ParsedComment | ImageProperties.ThumbMime | ImageProperties.UserId)
 				.Value;
 			request
+				.NotNull(nameof(request))
 				.AddFlags("prop", prop)
 				.Add("start", input.Start)
 				.Add("end", input.End)
@@ -59,12 +55,10 @@
 				.AddIf("limit", this.Limit, input.Limit > 1);
 		}
 
-		protected override void DeserializeParentToPage(JToken parent, PageItem page)
-		{
-			ThrowNull(parent, nameof(parent));
-			ThrowNull(page, nameof(page));
-			page.ImageRepository = (string?)parent["imagerepository"];
-		}
+		protected override void DeserializeParentToPage(JToken parent, PageItem page) => page
+			.NotNull(nameof(page))
+			.ImageRepository = (string?)parent
+				.NotNull(nameof(parent))["imagerepository"];
 
 		protected override ImageInfoItem GetItem(JToken result, PageItem page) => JTokenImageInfo.ParseImageInfo(result, new ImageInfoItem());
 

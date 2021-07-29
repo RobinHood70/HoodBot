@@ -2,12 +2,12 @@
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class PropRevisions : PropListModule<RevisionsInput, RevisionItem>, IGeneratorModule
@@ -41,15 +41,9 @@
 		#endregion
 
 		#region Public Static Methods
-		public static PropRevisions CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is RevisionsInput propInput
-				? new PropRevisions(wal, propInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(RevisionsInput), input.GetType().Name);
+		public static PropRevisions CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (RevisionsInput)input, pageSetGenerator);
 
-		public static PropRevisions CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
-			input is RevisionsInput propInput
-				? new PropRevisions(wal, propInput)
-				: throw InvalidParameterType(nameof(input), nameof(RevisionsInput), input.GetType().Name);
+		public static PropRevisions CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new(wal, (RevisionsInput)input);
 		#endregion
 
 		#region Protected Override Methods
@@ -60,9 +54,9 @@
 				throw new WikiException(EveMessages.RevisionsGeneratorVersionInvalid);
 			}
 
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.BuildRevisions(input, this.SiteVersion)
 				.AddIfPositive("startid", input.StartId)
 				.AddIfPositive("endid", input.EndId)

@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ListAllImages : ListModule<AllImagesInput, AllImagesItem>, IGeneratorModule
@@ -31,20 +31,17 @@
 		#endregion
 
 		#region Public Static Methods
-		public static ListAllImages CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is AllImagesInput listInput
-				? new ListAllImages(wal, listInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(AllImagesInput), input.GetType().Name);
+		public static ListAllImages CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (AllImagesInput)input, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, AllImagesInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
-
-			// request.AddIf("dir", "newer", input.SortDescending && input.SortBy == AllImagesSort.Timestamp); does not seem to be necessary, as module appears to handle either term correctly, even though inline comments in it would suggest otherwise.
+			input.ThrowNull(nameof(input));
 			request
+				//// .AddIf("dir", "newer", input.SortDescending && input.SortBy == AllImagesSort.Timestamp);
+				//// does not seem to be necessary, as module appears to handle either term correctly, even though inline comments in it would suggest otherwise.
+				.NotNull(nameof(request))
 				.AddIfPositive("sort", input.SortBy)
 				.AddIf("dir", "descending", input.SortDescending) // && input.SortBy != AllImagesSort.Timestamp
 				.AddIfNotNull("from", input.From)

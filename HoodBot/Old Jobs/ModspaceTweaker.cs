@@ -12,14 +12,13 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class ModspaceTweaker : EditJob
 	{
 		#region Static Fields
-		// private static readonly Regex BoldBulletsReplacer = new Regex(@"\* *'''(?<line>.*?)'''", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
-		private static readonly Regex BreakReplacer = new(@"\n*<br/?>\s*<br/?>\n*", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
-		private static readonly Regex ExternalLinkReplacer = new(@"\[https?://www\.uesp\.net/wiki/(?<page>[^ \]]*)(?<params>&[^ \]]*)? ?(?<title>[^\]]*)\]", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		// private static readonly Regex BoldBulletsReplacer = new Regex(@"\* *'''(?<line>.*?)'''", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		private static readonly Regex BreakReplacer = new(@"\n*<br/?>\s*<br/?>\n*", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		private static readonly Regex ExternalLinkReplacer = new(@"\[https?://www\.uesp\.net/wiki/(?<page>[^ \]]*)(?<params>&[^ \]]*)? ?(?<title>[^\]]*)\]", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		private static readonly List<int> Namespaces = new()
 		{
 			UespNamespaces.Tes3Mod,
@@ -27,8 +26,8 @@
 			UespNamespaces.Tes5Mod,
 		};
 
-		private static readonly Regex QuestLinkPreFixer = new(@"^\*+ *\[\[(?<quest>.*?)(\|(?<alttext>.*?))?]]:\s*(?<desc>.*?)(?<noinclude></noinclude>)?$", RegexOptions.Multiline | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
-		private static readonly Regex TrailingWhitespaceReplacer = new(@"[ \t]*\n", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex QuestLinkPreFixer = new(@"^\*+ *\[\[(?<quest>.*?)(\|(?<alttext>.*?))?]]:\s*(?<desc>.*?)(?<noinclude></noinclude>)?$", RegexOptions.Multiline | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		private static readonly Regex TrailingWhitespaceReplacer = new(@"[ \t]*\n", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		private readonly TitleCollection quests;
 		#endregion
 

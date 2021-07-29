@@ -12,7 +12,6 @@
 	using RobinHood70.WikiCommon; using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon; using RobinHood70.CommonCode;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class DBMergeArticles : PageMoverJob
 	{
@@ -81,10 +80,8 @@
 		#region Public Static Methods
 		public static void UpdateFileParameter(PageMoverJob job, int ns, NodeCollection value)
 		{
-			ThrowNull(job, nameof(job));
-			ThrowNull(value, nameof(value));
-			var split = EmbeddedValue.FindWhitespace(WikiTextVisitor.Value(value));
-			var title = new Title(job.Site, ns, split.Value);
+			var split = EmbeddedValue.FindWhitespace(WikiTextVisitor.Value(value.NotNull(nameof(value))));
+			var title = new Title(job.NotNull(nameof(job)).Site, ns, split.Value);
 			if (job.Replacements.TryGetValue(title, out var replacement))
 			{
 				split.Value = replacement.To.PageName;
@@ -126,9 +123,8 @@
 
 		protected override void FilterBacklinks(TitleCollection backlinkTitles)
 		{
-			ThrowNull(backlinkTitles, nameof(backlinkTitles));
 			//// base.FilterBacklinks(backlinkTitles);
-			backlinkTitles.Remove("User:HoodBot/Dragonborn Merge Actions");
+			backlinkTitles.NotNull(nameof(backlinkTitles)).Remove("User:HoodBot/Dragonborn Merge Actions");
 			backlinkTitles.Remove("UESPWiki:Dragonborn Merge Project");
 
 			// Fix Lore Books

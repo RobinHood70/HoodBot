@@ -4,10 +4,10 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System;
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 
 	public abstract class ActionModule<TInput, TOutput> : ActionModule
 		where TInput : class
@@ -47,20 +47,20 @@ namespace RobinHood70.WallE.Eve.Modules
 			// Note that result will not yet have been checked for null in this version of deserialization.
 			if (result?.Contains("$wgEnableAPI", StringComparison.Ordinal) == true)
 			{
-				throw WikiException.General(WikiAbstractionLayer.ApiDisabledCode, CurrentCulture(EveMessages.ApiDisabled));
+				throw WikiException.General(WikiAbstractionLayer.ApiDisabledCode, Globals.CurrentCulture(EveMessages.ApiDisabled));
 			}
 
-			throw new WikiException(CurrentCulture(EveMessages.ResultInvalid));
+			throw new WikiException(Globals.CurrentCulture(EveMessages.ResultInvalid));
 		}
 
 		// This version is for responses like OpenSearch where the Json should be valid, but is an array rather than an object.
-		protected virtual TOutput DeserializeCustom(JToken result) => throw new WikiException(CurrentCulture(EveMessages.ResultInvalid));
+		protected virtual TOutput DeserializeCustom(JToken result) => throw new WikiException(Globals.CurrentCulture(EveMessages.ResultInvalid));
 		#endregion
 
 		#region Private Methods
 		private Request CreateRequest(TInput input)
 		{
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			var request = this.CreateBaseRequest();
 			request.Prefix = this.Prefix;
 			this.BuildRequestLocal(request, input);
@@ -71,6 +71,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		private TOutput ParseResponse(string? response)
 		{
+			response.ThrowNull(nameof(response));
 			if (this.ForceCustomDeserialization)
 			{
 				return this.DeserializeCustom(response);

@@ -14,7 +14,6 @@
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon.Parser.Basic;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class EsoMatchIcons : EditJob
 	{
@@ -108,7 +107,7 @@
 				foreach (var file in Directory.EnumerateFiles(iconFolder, "*.*", SearchOption.AllDirectories))
 				{
 					var fileData = File.ReadAllBytes(file);
-					var checksum = GetHash(fileData, HashType.Sha1);
+					var checksum = Globals.GetHash(fileData, HashType.Sha1);
 					if (!this.allIcons.TryGetValue(checksum, out var list))
 					{
 						list = new HashSet<string>(1, StringComparer.Ordinal);
@@ -214,7 +213,7 @@
 		{
 			if (page is FilePage filePage && filePage.LatestFileRevision is FileRevision latestRevision)
 			{
-				this.allIcons.TryGetValue(latestRevision.Sha1 ?? throw PropertyNull(nameof(latestRevision), nameof(latestRevision.Sha1)), out var foundIcons);
+				this.allIcons.TryGetValue(latestRevision.Sha1.NotNull(nameof(latestRevision), nameof(latestRevision.Sha1)), out var foundIcons);
 				var parser = new ContextualParser(page);
 				this.ReplaceLicense(parser);
 				var parts = new PageParts(filePage);

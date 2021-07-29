@@ -3,9 +3,9 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Properties;
-	using static RobinHood70.CommonCode.Globals;
 
 	// Property modules will be called repeatedly as each page's data is parsed. Input values will be stable between iterations, but the output being worked on may not. Do not persist output data between calls.
 	public abstract class PropModule<TInput> : QueryModule<TInput, PageItem>, IPropertyModule
@@ -25,10 +25,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region PUblic Virtual Methods
 		public virtual void Deserialize(JToken result, PageItem page)
 		{
-			ThrowNull(page, nameof(page));
 			if (result != null)
 			{
-				this.DeserializeParentToPage(result, page);
+				this.DeserializeParentToPage(result, page.NotNull(nameof(page)));
 				if (result[this.ResultName] is JToken node && node.Type != JTokenType.Null)
 				{
 					this.DeserializeToPage(node, page);

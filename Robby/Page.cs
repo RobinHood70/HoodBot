@@ -8,7 +8,6 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Represents a wiki page.</summary>
 	/// <seealso cref="Title" />
@@ -222,9 +221,8 @@
 		/// <param name="options">The options.</param>
 		public void Load(PageLoadOptions options)
 		{
-			ThrowNull(options, nameof(options));
 			var creator = this.Site.PageCreator;
-			var propertyInputs = creator.GetPropertyInputs(options);
+			var propertyInputs = creator.GetPropertyInputs(options.NotNull(nameof(options)));
 			var pageSetInput = new QueryPageSetInput(new[] { this.FullPageName }) { ConvertTitles = options.ConvertTitles, Redirects = options.FollowRedirects };
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, propertyInputs, creator.CreatePageItem);
 			if (result.Count == 1)
@@ -310,7 +308,7 @@
 		internal void Populate(PageItem pageItem, PageLoadOptions optionsUsed)
 		{
 			// Assumes title-related properties have already been provided in the constructor.
-			ThrowNull(pageItem, nameof(pageItem));
+			pageItem.ThrowNull(nameof(pageItem));
 			this.LoadOptions = optionsUsed;
 			this.PopulateFlags((pageItem.Flags & PageFlags.Invalid) != 0, (pageItem.Flags & PageFlags.Missing) != 0);
 			this.PopulateRevisions(pageItem);
@@ -363,7 +361,7 @@
 		{
 			foreach (var link in list)
 			{
-				var title = FromWikiTitle(this.Site, link.Title ?? throw PropertyNull(nameof(link), nameof(link.Title)));
+				var title = FromWikiTitle(this.Site, link.Title.NotNull(nameof(link), nameof(link.Title)));
 				if (backlinks.ContainsKey(title))
 				{
 					backlinks[title] |= type;

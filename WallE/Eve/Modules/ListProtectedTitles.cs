@@ -2,10 +2,10 @@
 {
 	using System;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ListProtectedTitles : ListModule<ProtectedTitlesInput, ProtectedTitlesItem>, IGeneratorModule
@@ -33,23 +33,19 @@
 		#endregion
 
 		#region Public Static Methods
-		public static ListProtectedTitles CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is ProtectedTitlesInput listInput
-				? new ListProtectedTitles(wal, listInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(ProtectedTitlesInput), input.GetType().Name);
+		public static ListProtectedTitles CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (ProtectedTitlesInput)input, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ProtectedTitlesInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.Properties)
+				.Check(this.SiteVersion, input.NotNull(nameof(input)).Properties)
 				.FilterBefore(117, ProtectedTitlesProperties.UserId)
 				.FilterBefore(116, ProtectedTitlesProperties.ParsedComment)
 				.Value;
 			request
+				.NotNull(nameof(request))
 				.Add("namespace", input.Namespaces)
 				.Add("level", input.Levels)
 				.AddIf("dir", "newer", input.SortAscending)

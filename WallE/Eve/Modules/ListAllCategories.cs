@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ListAllCategories : ListModule<AllCategoriesInput, AllCategoriesItem>, IGeneratorModule
@@ -31,18 +31,15 @@
 		#endregion
 
 		#region Public Static Methods
-		public static ListAllCategories CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is AllCategoriesInput listInput
-				? new ListAllCategories(wal, listInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(AllCategoriesInput), input.GetType().Name);
+		public static ListAllCategories CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (AllCategoriesInput)input, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, AllCategoriesInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("from", input.From)
 				.AddIfNotNull("to", input.To)
 				.AddIfNotNull("prefix", input.Prefix)
@@ -55,7 +52,7 @@
 
 		protected override AllCategoriesItem GetItem(JToken result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			return new AllCategoriesItem(
 				category: result.MustHaveBCString("category"),
 				files: (int?)result["files"] ?? 0,

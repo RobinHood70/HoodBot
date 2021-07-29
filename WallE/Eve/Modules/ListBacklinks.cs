@@ -8,7 +8,6 @@
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ListBacklinks : ListModule<BacklinksInput, BacklinksItem>, IGeneratorModule
@@ -25,7 +24,7 @@
 				BacklinksTypes.Backlinks => ("bl", "backlinks"),
 				BacklinksTypes.EmbeddedIn => ("ei", "embeddedin"),
 				BacklinksTypes.ImageUsage => ("iu", "imageusage"),
-				_ => throw new InvalidOperationException(CurrentCulture(input.LinkTypes.IsUniqueFlag() ? EveMessages.ParameterInvalid : EveMessages.InputNonUnique, nameof(ListAllLinks), input.LinkTypes))
+				_ => throw new InvalidOperationException(Globals.CurrentCulture(input.LinkTypes.IsUniqueFlag() ? EveMessages.ParameterInvalid : EveMessages.InputNonUnique, nameof(ListAllLinks), input.LinkTypes))
 			};
 		#endregion
 
@@ -40,18 +39,15 @@
 		#endregion
 
 		#region Public Static Methods
-		public static ListBacklinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is BacklinksInput listInput
-				? new ListBacklinks(wal, listInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(BacklinksInput), input.GetType().Name);
+		public static ListBacklinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (BacklinksInput)input, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, BacklinksInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("title", input.Title)
 				.AddIf("pageid", input.PageId, input.Title == null)
 				.Add("namespace", input.Namespace)

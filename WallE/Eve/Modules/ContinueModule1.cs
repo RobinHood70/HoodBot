@@ -2,8 +2,8 @@
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class ContinueModule1 : ContinueModule
 	{
@@ -27,12 +27,12 @@
 		#region Public Override Methods
 		public override void BuildRequest(Request request)
 		{
-			ThrowNull(request, nameof(request));
+			request.ThrowNull(nameof(request));
 
 			// Check if query continue type has been set manually or a previous result did not emit a query-continue.
 			if (this.Continues)
 			{
-				ThrowNull(this.GeneratorContinue, nameof(ContinueModule1), nameof(this.GeneratorContinue));
+				this.GeneratorContinue.ThrowNull(nameof(ContinueModule1), nameof(this.GeneratorContinue));
 
 				// We must allow for changing, since some query-continues re-use parameters that may have already been added by the module.
 				request.AddOrChangeIfNotNull(this.GeneratorContinue!, this.currentGeneratorValue);

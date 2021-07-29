@@ -7,13 +7,12 @@
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal static class JTokenLogEvent
 	{
 		#region Fields
-		private static readonly Regex ProtectionFinder = new(@"\[(?<action>[^=]*?)=(?<restrictions>[^\]]*?)\] \((?<indef>indefinite|infinit[ey]|never)?(expires (?<expiry>.*?) \(UTC\))?\)", RegexOptions.Compiled | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex ProtectionFinder = new(@"\[(?<action>[^=]*?)=(?<restrictions>[^\]]*?)\] \((?<indef>indefinite|infinit[ey]|never)?(expires (?<expiry>.*?) \(UTC\))?\)", RegexOptions.Compiled | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		#endregion
 
 		#region Internal Extension Methods
@@ -41,8 +40,7 @@
 		#region Private Static Classes
 		private static RevisionDeleteTypes LogEventGetRDType(string? param)
 		{
-			ThrowNull(param, nameof(param));
-			var info = param.Split(TextArrays.EqualsSign);
+			var info = param.NotNull(nameof(param)).Split(TextArrays.EqualsSign);
 			var type = info[^1];
 			return (RevisionDeleteTypes)int.Parse(type, CultureInfo.InvariantCulture);
 		}
@@ -65,7 +63,7 @@
 			// hasUserIdFlag only necessary for list=logevents bug fix, can presumably be removed when we get to Json2 format.
 			public ExtraDataParser(JToken result, LogEvent le, string? logType, string? logAction, ICollection<string> knownProps, bool hasUserIdFlag)
 			{
-				ThrowNull(result, nameof(result));
+				result.ThrowNull(nameof(result));
 				this.logAction = logAction;
 
 				bool doBugFix;

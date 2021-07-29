@@ -14,7 +14,6 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class EsoItemSets : EditJob
 	{
@@ -360,8 +359,7 @@
 			#region Constructors
 			public SetData(IDataRecord row)
 			{
-				ThrowNull(row, nameof(row));
-				this.Name = (string)row["setName"];
+				this.Name = (string)row.NotNull(nameof(row))["setName"];
 				for (var c = '1'; c <= '7'; c++)
 				{
 					var bonusDesc = (string)row["setBonusDesc" + c];

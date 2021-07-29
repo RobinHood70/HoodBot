@@ -2,9 +2,9 @@
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class PropContributors : PropListModule<ContributorsInput, ContributorItem>
@@ -27,28 +27,23 @@
 		#endregion
 
 		#region Public Static Methods
-		public static PropContributors CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
-			input is ContributorsInput propInput
-				? new PropContributors(wal, propInput)
-				: throw InvalidParameterType(nameof(input), nameof(ContributorsInput), input.GetType().Name);
+		public static PropContributors CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new(wal, (ContributorsInput)input);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ContributorsInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddIf(input.FilterType.ToString().ToLowerInvariant(), input.FilterValues, input.FilterType != ContributorsFilterType.None)
 				.Add("limit", this.Limit);
 		}
 
-		protected override void DeserializeParentToPage(JToken parent, PageItem page)
-		{
-			ThrowNull(parent, nameof(parent));
-			ThrowNull(page, nameof(page));
-			page.AnonContributors = (int?)parent["anoncontributors"] ?? 0;
-		}
+		protected override void DeserializeParentToPage(JToken parent, PageItem page) => page
+			.NotNull(nameof(page))
+			.AnonContributors = (int?)parent
+				.NotNull(nameof(parent))["anoncontributors"] ?? 0;
 
 		protected override ContributorItem? GetItem(JToken result, PageItem page) => result == null
 			? null

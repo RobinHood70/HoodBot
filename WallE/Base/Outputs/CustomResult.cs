@@ -1,7 +1,7 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
-	using RobinHood70.WikiCommon;
+	using RobinHood70.CommonCode;
 
 	public class CustomResult
 	{
@@ -14,7 +14,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Result ?? FallbackText.Unknown;
+		public override string ToString() => this.Result ?? Globals.Unknown;
 		#endregion
 	}
 }

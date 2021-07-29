@@ -2,9 +2,9 @@
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class PropTranscludedIn : PropListModule<TranscludedInInput, TranscludedInItem>, IGeneratorModule
@@ -32,23 +32,17 @@
 		#endregion
 
 		#region Public Static Methods
-		public static PropTranscludedIn CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is TranscludedInInput propInput
-				? new PropTranscludedIn(wal, propInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(TranscludedInInput), input.GetType().Name);
+		public static PropTranscludedIn CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (TranscludedInInput)input, pageSetGenerator);
 
-		public static PropTranscludedIn CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
-			input is TranscludedInInput propInput
-				? new PropTranscludedIn(wal, propInput)
-				: throw InvalidParameterType(nameof(input), nameof(TranscludedInInput), input.GetType().Name);
+		public static PropTranscludedIn CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new(wal, (TranscludedInInput)input);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, TranscludedInInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddFlags("prop", input.Properties)
 				.Add("namespace", input.Namespaces)
 				.AddFilterPiped("show", "redirect", input.FilterRedirects)

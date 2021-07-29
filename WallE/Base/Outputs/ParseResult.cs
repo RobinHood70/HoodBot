@@ -2,7 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
-	using RobinHood70.WikiCommon;
+	using RobinHood70.CommonCode;
 
 	// IMPNOTE: HeadItems is not currently supported due to being deprecated, being largely redundant to HeadHtml, and having an odd, complex format. If someone really needs it for some strange reason, let me know and I'll implement it.
 	// IMPNOTE: EncodedJavaScriptConfigurationVariables is not implemented as it seems fairly useless when you've already got JavaScriptConfigurationVariables.
@@ -102,7 +102,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title ?? FallbackText.Unknown;
+		public override string ToString() => this.Title ?? Globals.Unknown;
 		#endregion
 	}
 }

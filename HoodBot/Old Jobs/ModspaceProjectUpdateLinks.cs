@@ -6,7 +6,6 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class ModspaceProjectUpdateLinks : MovePagesJob
 	{
@@ -86,8 +85,7 @@
 
 		protected override void UpdateLinkText(Page page, Title oldTitle, SiteLink newLink, bool addCaption)
 		{
-			ThrowNull(newLink, nameof(newLink));
-			base.UpdateLinkText(page, oldTitle, newLink, addCaption);
+			base.UpdateLinkText(page, oldTitle, newLink.NotNull(nameof(newLink)), addCaption);
 			//// Checking for "Mod" in text so this only changes a full namespace name and not a short one.
 			if (newLink.Text != null
 				&& newLink.Text.EndsWith("Mod", StringComparison.Ordinal)

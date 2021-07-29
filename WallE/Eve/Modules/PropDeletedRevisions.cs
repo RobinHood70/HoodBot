@@ -2,12 +2,12 @@
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class PropDeletedRevisions : PropListModule<DeletedRevisionsInput, RevisionItem>, IGeneratorModule
@@ -35,15 +35,9 @@
 		#endregion
 
 		#region Public Static Methods
-		public static PropDeletedRevisions CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is DeletedRevisionsInput propInput
-				? new PropDeletedRevisions(wal, propInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(DeletedRevisionsInput), input.GetType().Name);
+		public static PropDeletedRevisions CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (DeletedRevisionsInput)input, pageSetGenerator);
 
-		public static PropDeletedRevisions CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
-			input is DeletedRevisionsInput propInput
-				? new PropDeletedRevisions(wal, propInput)
-				: throw InvalidParameterType(nameof(input), nameof(DeletedRevisionsInput), input.GetType().Name);
+		public static PropDeletedRevisions CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new(wal, (DeletedRevisionsInput)input);
 		#endregion
 
 		#region Protected Override Methods
@@ -54,9 +48,9 @@
 				throw new WikiException(EveMessages.RevisionsGeneratorVersionInvalid);
 			}
 
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.BuildRevisions(input, this.SiteVersion)
 				.AddIfNotNull("tag", input.Tag)
 				.AddIf("limit", this.Limit, input.Limit > 0 || input.MaxItems > 1); // TODO: Needs testing when limits/maxitems are actually set to positive values. Limits are weird in this module, but since they're per-query, I believe this should work as written.

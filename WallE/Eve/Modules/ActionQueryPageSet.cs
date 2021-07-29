@@ -4,11 +4,10 @@
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Properties;
-	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// While there's some code overlap between this and ActionQuery, having the two as separate entities significantly reduces the code complexity in ActionQuery, and in this as well, to a lesser extent.
@@ -25,8 +24,7 @@
 		public ActionQueryPageSet(WikiAbstractionLayer wal, QueryInput input, TitleCreator<PageItem> pageFactory)
 			: base(wal)
 		{
-			ThrowNull(pageFactory, nameof(pageFactory));
-			this.pageFactory = pageFactory;
+			this.pageFactory = pageFactory.NotNull(nameof(pageFactory));
 			this.input = input;
 			var props =
 				(((wal.ValidStopCheckMethods & StopCheckMethods.UserNameCheck) != 0 && wal.SiteVersion < 128) ? UserInfoProperties.BlockInfo : UserInfoProperties.None)
@@ -126,7 +124,7 @@
 
 		#region Public Override Methods
 		public override PageSetResult<PageItem> Submit(QueryInput input) => input != this.input
-			? throw new InvalidOperationException(CurrentCulture(EveMessages.UseSubmit, nameof(this.Submit)))
+			? throw new InvalidOperationException(Globals.CurrentCulture(EveMessages.UseSubmit, nameof(this.Submit)))
 			: base.Submit(input);
 		#endregion
 
@@ -145,7 +143,7 @@
 
 		protected override void DeserializeActionExtra(JToken result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			base.DeserializeActionExtra(result);
 			var list = new List<IQueryModule>(this.AllModules);
 			if (this.Generator != null)
@@ -158,7 +156,7 @@
 
 		protected override void DeserializeResult(JToken result, IList<PageItem> pages)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			this.GetPageSetNodes(result);
 			if (result["pages"] is JToken pagesNode)
 			{
@@ -179,7 +177,7 @@
 
 		protected override PageItem GetItem(JToken result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			if (this.pageFactory == null)
 			{
 				throw new InvalidOperationException(EveMessages.PageFactoryNotSet);
@@ -197,18 +195,13 @@
 			return page;
 		}
 
-		protected override bool HandleWarning(string from, string text)
-		{
-			ThrowNull(from, nameof(from));
-			ThrowNull(text, nameof(text));
-			return ActionQuery.HandleWarning(from, text, this.input.QueryModules, this.userModule) || base.HandleWarning(from, text);
-		}
+		protected override bool HandleWarning(string from, string text) => ActionQuery.HandleWarning(from, text, this.input.QueryModules, this.userModule) || base.HandleWarning(from, text);
 		#endregion
 
 		#region Private Methods
 		private void BuildRequestPageSet(Request request)
 		{
-			ThrowNull(request, nameof(request));
+			request.ThrowNull(nameof(request));
 			foreach (var module in this.input.PropertyModules)
 			{
 				if (!this.InactiveModules.Contains(module.Name))
@@ -228,7 +221,7 @@
 
 		private void DeserializePages(JToken result, IList<PageItem> pagesIn)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			var pages = (KeyedPages)pagesIn;
 			foreach (var page in result)
 			{
@@ -290,7 +283,7 @@
 			#endregion
 
 			#region Protected Override Methods
-			protected override string GetKeyForItem(PageItem item) => item?.Title ?? FallbackText.Unknown;
+			protected override string GetKeyForItem(PageItem item) => item?.Title ?? Globals.Unknown;
 			#endregion
 		}
 		#endregion

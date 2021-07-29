@@ -4,7 +4,7 @@
 	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
 	using System.Text;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	/// <summary>Formats a Request object as multipart (<see cref="MultipartResult"/>) data.</summary>
 	public sealed class RequestVisitorMultipart : IParameterVisitor
@@ -38,7 +38,7 @@
 		public static MultipartResult Build(Request request)
 		{
 			// TODO: Rewrite to use request.Build().
-			ThrowNull(request, nameof(request));
+			request.ThrowNull(nameof(request));
 			var visitor = new RequestVisitorMultipart
 			{
 				supportsUnitSeparator = request.SupportsUnitSeparator,
@@ -101,16 +101,15 @@
 		/// <param name="parameter">The FileParameter object.</param>
 		public void Visit(FileParameter parameter)
 		{
-			ThrowNull(parameter, nameof(parameter));
-			var fileData = parameter.GetData();
+			var fileData = parameter.NotNull(nameof(parameter)).GetData();
 			if (ScanBoundaryConflicts && fileData.LongLength > 0 && CurrentEncoding.GetString(fileData).Contains(this.boundary, StringComparison.Ordinal))
 			{
 				this.badBoundary = true;
 				return;
 			}
 
-			ThrowNull(this.stream, nameof(RequestVisitorMultipart), nameof(this.stream));
-			var data = Invariant($"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{parameter.Name}\"; filename=\"{parameter.FileName}\";\r\nContent-Type: application/octet-stream\r\n\r\n");
+			this.stream.ThrowNull(nameof(RequestVisitorMultipart), nameof(this.stream));
+			var data = FormattableString.Invariant($"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{parameter.Name}\"; filename=\"{parameter.FileName}\";\r\nContent-Type: application/octet-stream\r\n\r\n");
 			this.stream!.Write(CurrentEncoding.GetBytes(data), 0, CurrentEncoding.GetByteCount(data));
 			this.stream.Write(fileData, 0, fileData.Length);
 		}
@@ -120,18 +119,13 @@
 		/// <remarks>In all cases, the PipedParameter and PipedListParameter objects are treated identically, however the value collections they're associated with differ, so the Visit method is made generic to handle both.</remarks>
 		public void Visit(PipedParameter parameter)
 		{
-			ThrowNull(parameter, nameof(parameter));
-			var value = parameter.BuildPipedValue(this.supportsUnitSeparator);
+			var value = parameter.NotNull(nameof(parameter)).BuildPipedValue(this.supportsUnitSeparator);
 			this.TextMultipart(parameter.Name, value);
 		}
 
 		/// <summary>Visits the specified StringParameter object.</summary>
 		/// <param name="parameter">The StringParameter object.</param>
-		public void Visit(StringParameter parameter)
-		{
-			ThrowNull(parameter, nameof(parameter));
-			this.TextMultipart(parameter.Name, parameter.Value);
-		}
+		public void Visit(StringParameter parameter) => this.TextMultipart(parameter.NotNull(nameof(parameter)).Name, parameter.Value);
 		#endregion
 
 		#region Public Methods
@@ -171,8 +165,8 @@
 				return;
 			}
 
-			ThrowNull(this.stream, nameof(RequestVisitorMultipart), nameof(this.stream));
-			var postData = Invariant($"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{name}\"\r\n\r\n{value}");
+			this.stream.ThrowNull(nameof(RequestVisitorMultipart), nameof(this.stream));
+			var postData = FormattableString.Invariant($"--{this.boundary}\r\nContent-Disposition: form-data; name=\"{name}\"\r\n\r\n{value}");
 			this.stream!.Write(CurrentEncoding.GetBytes(postData), 0, CurrentEncoding.GetByteCount(postData));
 		}
 		#endregion

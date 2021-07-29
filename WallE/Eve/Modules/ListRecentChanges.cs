@@ -3,9 +3,9 @@
 	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ListRecentChanges : ListModule<RecentChangesInput, RecentChangesItem>, IGeneratorModule
@@ -68,18 +68,15 @@
 		#endregion
 
 		#region Public Static Methods
-		public static ListRecentChanges CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is RecentChangesInput listInput
-				? new ListRecentChanges(wal, listInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(RecentChangesInput), input.GetType().Name);
+		public static ListRecentChanges CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (RecentChangesInput)input, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, RecentChangesInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.Add("start", input.Start)
 				.Add("end", input.End)
 				.AddIf("dir", "newer", input.Start < input.End || input.SortAscending)

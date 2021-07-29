@@ -3,8 +3,8 @@
 	using System;
 	using System.ComponentModel;
 	using System.Runtime.Serialization;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Properties;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>The exception thrown when the wiki returns an error instead of the expected result.</summary>
 	/// <seealso cref="Exception" />
@@ -76,7 +76,7 @@
 		/// <param name="code">The error's <c>code</c> value.</param>
 		/// <param name="info">The error's <c>info</c> value.</param>
 		/// <returns>A new WikiException instance with a general error message.</returns>
-		public static WikiException General(string code, [Localizable(true)] string info) => new(CurrentCulture(Messages.WikiExceptionGeneral, code, info), code, info);
+		public static WikiException General(string code, [Localizable(true)] string info) => new(Globals.CurrentCulture(Messages.WikiExceptionGeneral, code, info), code, info);
 		#endregion
 
 		#region Public Override Methods
@@ -86,8 +86,7 @@
 		/// <param name="context">The <see cref="StreamingContext" /> that contains contextual information about the source or destination.</param>
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			ThrowNull(info, nameof(info));
-			base.GetObjectData(info, context);
+			base.GetObjectData(info.NotNull(nameof(info)), context);
 			info.AddValue("ErrorCode", this.Code);
 			info.AddValue("ErrorInfo", this.Info);
 		}

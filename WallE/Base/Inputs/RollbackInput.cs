@@ -2,24 +2,21 @@
 namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	public class RollbackInput
 	{
 		#region Constructors
 		public RollbackInput(string title, string user)
 		{
-			ThrowNullOrWhiteSpace(title, nameof(title));
-			ThrowNullOrWhiteSpace(user, nameof(user));
-			this.Title = title;
-			this.User = user;
+			this.Title = title.NotNullOrWhiteSpace(nameof(title));
+			this.User = user.NotNullOrWhiteSpace(nameof(user));
 		}
 
 		public RollbackInput(long pageId, string user)
 		{
-			ThrowNullOrWhiteSpace(user, nameof(user));
 			this.PageId = pageId;
-			this.User = user;
+			this.User = user.NotNullOrWhiteSpace(nameof(user));
 		}
 		#endregion
 

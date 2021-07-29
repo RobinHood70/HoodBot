@@ -102,7 +102,7 @@
 			[JsonProperty("type_name")]
 			public string? TypeName { get; set; }
 
-			public override string ToString() => this.Name ?? FallbackText.Unknown;
+			public override string ToString() => this.Name ?? Globals.Unknown;
 		}
 		#endregion
 	}

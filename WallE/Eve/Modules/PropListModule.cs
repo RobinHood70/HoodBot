@@ -4,8 +4,8 @@ namespace RobinHood70.WallE.Eve.Modules
 	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
-	using static RobinHood70.CommonCode.Globals;
 
 	// Property modules will be called repeatedly as each page's data is parsed. Input values will be stable between iterations, but the output being worked on may not. Do not persist output data between calls.
 	// See ListModuleBase for comments on methods they have in common.
@@ -29,10 +29,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Override Methods
 		protected override void DeserializeToPage(JToken result, PageItem page)
 		{
-			ThrowNull(result, nameof(result));
-			ThrowNull(page, nameof(page));
-			using var enumeration = ((IEnumerable<JToken>)result).GetEnumerator();
-			var list = this.GetMutableList(page) ?? throw new InvalidOperationException();
+			using var enumeration = ((IEnumerable<JToken>)result.NotNull(nameof(result))).GetEnumerator();
+			var list = this.GetMutableList(page.NotNull(nameof(page))) ?? throw new InvalidOperationException();
 			while (this.ItemsRemaining > 0 && enumeration.MoveNext())
 			{
 				var item = this.GetItem(enumeration.Current, page);
