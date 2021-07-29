@@ -4,33 +4,15 @@
 	using RobinHood70.WikiCommon;
 
 	/// <summary>This class serves as a light-weight parser to split a wiki title into its constituent parts.</summary>
-	public class TitleParser : ILinkTitle
+	public class TitleFactory : ILinkTitle
 	{
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="TitleParser"/> class.</summary>
-		/// <param name="site">The site.</param>
-		/// <param name="fullPageName">Full page name, with namespace.</param>
-		public TitleParser(Site site, string fullPageName)
-			: this(site, MediaWikiNamespaces.Main, fullPageName, true)
-		{
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="TitleParser"/> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="site">The site.</param>
 		/// <param name="defaultNamespace">The default namespace.</param>
 		/// <param name="pageName">Name of the page.</param>
-		public TitleParser(Site site, int defaultNamespace, string pageName)
-			: this(site, defaultNamespace, pageName, true)
-		{
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="TitleParser"/> class.</summary>
-		/// <param name="site">The site.</param>
-		/// <param name="defaultNamespace">The default namespace.</param>
-		/// <param name="pageName">Name of the page.</param>
-		/// <param name="fullParsing">If <see langword="true"/>, <paramref name="pageName"/> will be checked for pipes, HTML/URL codes, and alternate spaces.</param>
-		public TitleParser(Site site, int defaultNamespace, string pageName, bool fullParsing)
+		private TitleFactory(Site site, int defaultNamespace, string pageName)
 		{
 			// This routine very roughly follows the logic of MediaWikiTitleCodec.splitTitleString() but skips much of the error checking and rarely encountered sanitization, which is left to the server.
 			site.ThrowNull(nameof(site));
@@ -47,13 +29,6 @@
 				return split.Length == 2
 					? (split[0].TrimEnd(), split[1].TrimStart(), forced)
 					: (string.Empty, pageName, forced);
-			}
-
-			if (fullParsing)
-			{
-				// Pipes are not allowed in page names, so if we find one, only parse the first part; the remainder is likely cruft from a category or file link.
-				pageName = pageName.Split(TextArrays.Pipe, 2)[0];
-				pageName = WikiTextUtilities.DecodeAndNormalize(pageName).Trim();
 			}
 
 			var (key, remaining, forced) = SplitPageName(pageName);
@@ -170,6 +145,55 @@
 
 		/// <inheritdoc/>
 		public string PageName { get; }
+		#endregion
+
+		#region Public Static Methods
+
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="pageName">Name of the page.</param>
+		public static TitleFactory FromName(Site site, string pageName) => new(site.NotNull(nameof(site)), MediaWikiNamespaces.Main, Normalize(pageName.NotNull(nameof(pageName))));
+
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="defaultNamespace">The default namespace.</param>
+		/// <param name="pageName">Name of the page.</param>
+		public static TitleFactory FromName(Site site, int defaultNamespace, string pageName) => new(site.NotNull(nameof(site)), defaultNamespace, Normalize(pageName.NotNull(nameof(pageName))));
+
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="pageName">Name of the page.</param>
+		public static TitleFactory FromNormalizedName(Site site, string pageName) => new(site.NotNull(nameof(site)), MediaWikiNamespaces.Main, pageName.NotNull(nameof(pageName)));
+
+		/// <summary>Normalizes a page name text for parsing. Page names coming directly from the API are already normalized.</summary>
+		/// <param name="text">The page name to normalize.</param>
+		/// <remarks>The following changes are applied:
+		/// <list type="bullet">
+		/// <item><description>All text after the first pipe (if any) is removed.</description></item>
+		/// <item><description>HTML- and URL-encoded characters are decoded.</description></item>
+		/// <item><description>Variants of the space character—such as hard spaces, em spaces, and underscores—are all converted to normal spaces.</description></item>
+		/// </list></remarks>
+		/// <returns>The normalized text, ready to be parsed.</returns>
+		public static string Normalize(string text)
+		{
+			var retval = text.NotNull(nameof(text)).Split(TextArrays.Pipe, 2)[0];
+			return WikiTextUtilities.DecodeAndNormalize(retval).Trim();
+		}
+		#endregion
+
+		#region Public Methods
+
+		/// <summary>Creates a new LinkTarget from the parsed text.</summary>
+		/// <returns>A new <see cref="FullTitle"/>.</returns>
+		public FullTitle ToLinkTarget() => new(this);
+
+		/// <summary>Creates a new SiteLink from the parsed text.</summary>
+		/// <returns>A new <see cref="FullTitle"/>.</returns>
+		public SiteLink ToSiteLink() => new(this);
+
+		/// <summary>Creates a new title from the parsed text.</summary>
+		/// <returns>A new <see cref="Title"/>.</returns>
+		public Title ToTitle() => new(this);
 		#endregion
 
 		#region Public Override Methods

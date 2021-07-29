@@ -730,7 +730,7 @@
 					&& page.Namespace != MediaWikiNamespaces.User
 					&& !page.Site.IsDiscussionPage(page))
 				{
-					var textTitle = new TitleParser(this.Site, newLink.Text);
+					var textTitle = TitleFactory.FromName(this.Site, newLink.Text);
 					if (oldTitle is IFullTitle fullTitle && fullTitle.FullEquals(textTitle))
 					{
 						newLink.Text = textTitle.ToString();

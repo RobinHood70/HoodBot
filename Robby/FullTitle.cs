@@ -2,7 +2,6 @@
 {
 	using System;
 	using RobinHood70.CommonCode;
-	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
 	// TODO: Review constructors for various title objects.
@@ -72,11 +71,7 @@
 		/// <param name="pageName">The page name. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
 		/// <returns>A new LinkTitle with the namespace found in <paramref name="pageName"/>, if there is one, otherwise using <paramref name="defaultNamespace"/>.</returns>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		public static new FullTitle Coerce(Site site, int defaultNamespace, string pageName)
-		{
-			var parser = new TitleParser(site.NotNull(nameof(site)), defaultNamespace, pageName.NotNull(nameof(pageName)));
-			return new FullTitle(parser);
-		}
+		public static new FullTitle Coerce(Site site, int defaultNamespace, string pageName) => TitleFactory.FromName(site.NotNull(nameof(site)), defaultNamespace, pageName.NotNull(nameof(pageName))).ToLinkTarget();
 
 		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
 		/// <param name="site">The site the title is from.</param>
@@ -89,11 +84,7 @@
 		/// <param name="fullPageName">Full name of the page.</param>
 		/// <returns>A new FullTitle based on the provided values.</returns>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		public static new FullTitle FromName(Site site, string fullPageName)
-		{
-			var parser = new TitleParser(site.NotNull(nameof(site)), fullPageName.NotNull(nameof(fullPageName)));
-			return new FullTitle(parser);
-		}
+		public static new FullTitle FromName(Site site, string fullPageName) => TitleFactory.FromName(site.NotNull(nameof(site)), fullPageName.NotNull(nameof(fullPageName))).ToLinkTarget();
 		#endregion
 
 		#region Public Methods
@@ -134,11 +125,7 @@
 		/// <param name="fullPageName">Full name of the page.</param>
 		/// <returns>A new FullTitle based on the provided values.</returns>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		internal static new FullTitle FromWikiTitle(Site site, string fullPageName)
-		{
-			var parser = new TitleParser(site.NotNull(nameof(site)), MediaWikiNamespaces.Main, fullPageName.NotNull(nameof(fullPageName)), false);
-			return new FullTitle(parser);
-		}
+		internal static FullTitle FromNormalizedName(Site site, string fullPageName) => TitleFactory.FromNormalizedName(site.NotNull(nameof(site)), fullPageName.NotNull(nameof(fullPageName))).ToLinkTarget();
 		#endregion
 	}
 }

@@ -155,7 +155,7 @@
 		/// <param name="find">The title to find.</param>
 		/// <returns>The first <see cref="SiteLinkNode"/> that matches the title provided, if found.</returns>
 		/// <remarks>The text provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="ISimpleTitle"/>.</remarks>
-		public SiteLinkNode? FindLink(string find) => this.FindLink(new TitleParser(this.Site, find));
+		public SiteLinkNode? FindLink(string find) => this.FindLink(TitleFactory.FromName(this.Site, find));
 
 		/// <summary>Finds the first link that matches the provided title.</summary>
 		/// <param name="find">The title to find.</param>
@@ -173,7 +173,7 @@
 		/// <param name="find">The title to find.</param>
 		/// <returns>The <see cref="SiteLinkNode"/>s that match the title provided, if found.</returns>
 		/// <remarks>The text provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="ISimpleTitle"/>.</remarks>
-		public IEnumerable<SiteLinkNode> FindLinks(string find) => this.FindLinks(new TitleParser(this.Site, find));
+		public IEnumerable<SiteLinkNode> FindLinks(string find) => this.FindLinks(TitleFactory.FromName(this.Site, find));
 
 		/// <summary>Finds all links that match the provided title.</summary>
 		/// <param name="find">The title to find.</param>
@@ -217,11 +217,11 @@
 		/// <returns>The templates that match the title provided, if any.</returns>
 		public IEnumerable<SiteTemplateNode> FindTemplates(string templateName)
 		{
-			var find = new TitleParser(this.Site, MediaWikiNamespaces.Template, templateName);
+			var find = TitleFactory.FromName(this.Site, MediaWikiNamespaces.Template, templateName);
 			foreach (var template in this.TemplateNodes)
 			{
 				var titleText = template.GetTitleText();
-				var templateTitle = new TitleParser(this.Site, MediaWikiNamespaces.Template, titleText);
+				var templateTitle = TitleFactory.FromName(this.Site, MediaWikiNamespaces.Template, titleText);
 				if (templateTitle.SimpleEquals(find))
 				{
 					yield return template;

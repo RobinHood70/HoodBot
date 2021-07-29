@@ -213,7 +213,7 @@
 			var retval = new List<ISimpleTitle>();
 			foreach (var item in result)
 			{
-				retval.Add(FromWikiTitle(this.Site, item.FullPageName));
+				retval.Add(FromNormalizedTitle(this.Site, item.FullPageName));
 			}
 
 			return retval;

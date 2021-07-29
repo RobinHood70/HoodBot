@@ -291,19 +291,19 @@
 		{
 			foreach (var item in result.Interwiki)
 			{
-				var titleParts = FullTitle.FromWikiTitle(this.Site, item.Value.Title);
+				var titleParts = FullTitle.FromNormalizedName(this.Site, item.Value.Title);
 				Debug.Assert(string.Equals(titleParts.Interwiki?.Prefix, item.Value.Prefix, StringComparison.Ordinal), "Interwiki prefixes didn't match.", titleParts.Interwiki?.Prefix + " != " + item.Value.Prefix);
 				this.titleMap[item.Key] = titleParts;
 			}
 
 			foreach (var item in result.Converted)
 			{
-				this.titleMap[item.Key] = FullTitle.FromWikiTitle(this.Site, item.Value);
+				this.titleMap[item.Key] = FullTitle.FromNormalizedName(this.Site, item.Value);
 			}
 
 			foreach (var item in result.Normalized)
 			{
-				this.titleMap[item.Key] = FullTitle.FromWikiTitle(this.Site, item.Value);
+				this.titleMap[item.Key] = FullTitle.FromNormalizedName(this.Site, item.Value);
 			}
 
 			foreach (var item in result.Redirects)
@@ -315,7 +315,7 @@
 				FullTitle title;
 				if (interwiki?.LocalWiki != false)
 				{
-					title = FullTitle.FromWikiTitle(this.Site, value.Title);
+					title = FullTitle.FromNormalizedName(this.Site, value.Title);
 					title.Interwiki = interwiki;
 					title.Fragment = value.Fragment;
 				}
@@ -475,7 +475,7 @@
 		/// <param name="title">The title of the page to create.</param>
 		/// <returns>The page that was created.</returns>
 		/// <remarks>If the page title specified represents a page already in the collection, that page will be overwritten.</remarks>
-		protected override Page New(ISimpleTitle title) => this.PageCreator.CreatePage(title);
+		protected override Page New(string title) => this.PageCreator.CreatePage(TitleFactory.FromName(this.Site, title));
 		#endregion
 
 		#region Protected Virtual Methods
@@ -506,7 +506,7 @@
 			this.PopulateMapCollections(result);
 			foreach (var item in result)
 			{
-				var page = this.New(new TitleParser(this.Site, MediaWikiNamespaces.Main, item.FullPageName, false));
+				var page = this.New(item.FullPageName);
 				page.Populate(item, options);
 				if (pageValidator(page))
 				{

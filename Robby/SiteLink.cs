@@ -114,15 +114,7 @@
 			: base(title) => InitializeImageInfo(this.Site);
 
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
-		/// <param name="site">The site the title is from.</param>
-		/// <param name="fullPageName">Full name of the page to link to.</param>
-		public SiteLink(Site site, string fullPageName)
-			: this(new TitleParser(site, fullPageName))
-		{
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
-		/// <param name="title">The <see cref="TitleParser"/> with the desired information.</param>
+		/// <param name="title">The <see cref="TitleFactory"/> with the desired information.</param>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
 		public SiteLink(ILinkTitle title)
 			: base(title)
@@ -328,18 +320,14 @@
 		/// <param name="pageName">The page name to link to. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
 		/// <returns>A new <see cref="SiteLink"/> with the namespace found in <paramref name="pageName"/>, if there is one, otherwise using <paramref name="defaultNamespace"/>.</returns>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		public static new SiteLink Coerce(Site site, int defaultNamespace, string pageName) => new(new TitleParser(site, defaultNamespace, pageName));
+		public static new SiteLink Coerce(Site site, int defaultNamespace, string pageName) => TitleFactory.FromName(site, defaultNamespace, pageName).ToSiteLink();
 
 		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
 		/// <param name="site">The site the title is from.</param>
 		/// <param name="fullPageName">Full name of the page.</param>
 		/// <returns>A new Title based on the provided values.</returns>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		public static new SiteLink FromName(Site site, string fullPageName)
-		{
-			var parser = new TitleParser(site.NotNull(nameof(site)), fullPageName.NotNull(nameof(fullPageName)));
-			return new SiteLink(parser);
-		}
+		public static new SiteLink FromName(Site site, string fullPageName) => TitleFactory.FromName(site.NotNull(nameof(site)), fullPageName.NotNull(nameof(fullPageName))).ToSiteLink();
 
 		/// <summary>Creates a new SiteLink instance from the provided text.</summary>
 		/// <param name="site">The site the link is from.</param>
@@ -367,7 +355,9 @@
 		{
 			var titleText = link.NotNull(nameof(link)).Title.ToValue();
 			var valueSplit = SplitWhitespace(titleText);
-			var retval = coerceToFile ? Coerce(site, MediaWikiNamespaces.File, valueSplit.Value) : new SiteLink(site, valueSplit.Value);
+			var retval = coerceToFile
+				? Coerce(site, MediaWikiNamespaces.File, valueSplit.Value)
+				: TitleFactory.FromName(site, valueSplit.Value).ToSiteLink();
 			retval.OriginalLink = titleText;
 			retval.TitleWhitespaceBefore = valueSplit.Before;
 			retval.TitleWhitespaceAfter = valueSplit.After;
