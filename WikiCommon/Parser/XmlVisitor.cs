@@ -5,7 +5,7 @@
 	using System.Globalization;
 	using System.Text;
 	using System.Text.Encodings.Web;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	/// <summary>Builds the XML parse tree for the nodes, similar to that of Special:ExpandTemplates.</summary>
 	/// <remarks>While highly similar, the XML representation from this method does not precisely match Special:ExpandTemplates. This is intentional, arising from the different purposes of each.</remarks>
@@ -32,9 +32,8 @@
 		/// <returns>The XML text of the collection.</returns>
 		public string Build(IEnumerable<IWikiNode> nodes)
 		{
-			ThrowNull(nodes, nameof(nodes));
 			this.BuildTagOpen("root", null, false);
-			foreach (var node in nodes)
+			foreach (var node in nodes.NotNull(nameof(nodes)))
 			{
 				node.Accept(this);
 			}
@@ -50,7 +49,7 @@
 		/// <inheritdoc/>
 		public void Visit(IArgumentNode node)
 		{
-			ThrowNull(node, nameof(node));
+			node.ThrowNull(nameof(node));
 			this
 				.BuildTagOpen("tplarg", null, false)
 				.BuildTag("title", null, node.Name)
@@ -67,30 +66,22 @@
 		}
 
 		/// <inheritdoc/>
-		public void Visit(ICommentNode node)
-		{
-			ThrowNull(node, nameof(node));
-			this.BuildValueNode("comment", node.Comment);
-		}
+		public void Visit(ICommentNode node) => this.BuildValueNode("comment", node.NotNull(nameof(node)).Comment);
 
 		/// <inheritdoc/>
 		public void Visit(IHeaderNode node)
 		{
-			ThrowNull(node, nameof(node));
+			node.ThrowNull(nameof(node));
 			this.BuildTag("h", new Dictionary<string, int>(StringComparer.Ordinal) { ["level"] = node.Level }, node.Title);
 		}
 
 		/// <inheritdoc/>
-		public void Visit(IIgnoreNode node)
-		{
-			ThrowNull(node, nameof(node));
-			this.BuildValueNode("ignore", node.Value);
-		}
+		public void Visit(IIgnoreNode node) => this.BuildValueNode("ignore", node.NotNull(nameof(node)).Value);
 
 		/// <inheritdoc/>
 		public void Visit(ILinkNode node)
 		{
-			ThrowNull(node, nameof(node));
+			node.ThrowNull(nameof(node));
 			this
 				.BuildTagOpen("link", null, false)
 				.BuildTag("title", null, node.Title); // Title is always emitted, even if empty.
@@ -105,8 +96,7 @@
 		/// <inheritdoc/>
 		public void Visit(NodeCollection nodes)
 		{
-			ThrowNull(nodes, nameof(nodes));
-			foreach (var node in nodes)
+			foreach (var node in nodes.NotNull(nameof(nodes)))
 			{
 				node.Accept(this);
 			}
@@ -115,9 +105,8 @@
 		/// <inheritdoc/>
 		public void Visit(IParameterNode node)
 		{
-			ThrowNull(node, nameof(node));
 			this.BuildTagOpen("part", null, false);
-			if (!node.Anonymous)
+			if (!node.NotNull(nameof(node)).Anonymous)
 			{
 				this
 					.BuildTag("name", null, node.Name)
@@ -137,7 +126,7 @@
 		/// <inheritdoc/>
 		public void Visit(ITagNode node)
 		{
-			ThrowNull(node, nameof(node));
+			node.ThrowNull(nameof(node));
 			this
 				.BuildTagOpen("ext", null, false)
 				.BuildValueNode("name", node.Name)
@@ -158,7 +147,7 @@
 		/// <inheritdoc/>
 		public void Visit(ITemplateNode node)
 		{
-			ThrowNull(node, nameof(node));
+			node.ThrowNull(nameof(node));
 			this
 				.BuildTagOpen("template", null, false)
 				.BuildTag("title", null, node.Title); // Title is always emitted, even if empty.
@@ -173,9 +162,8 @@
 		/// <inheritdoc/>
 		public void Visit(ITextNode node)
 		{
-			ThrowNull(node, nameof(node));
 			this.Indent();
-			this.builder.Append(HtmlEncoder.Default.Encode(node.Text.Replace(' ', '_')));
+			this.builder.Append(HtmlEncoder.Default.Encode(node.NotNull(nameof(node)).Text.Replace(' ', '_')));
 		}
 		#endregion
 

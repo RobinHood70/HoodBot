@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ListAllPages : ListModule<AllPagesInput, WikiTitleItem>, IGeneratorModule
@@ -31,18 +31,15 @@
 		#endregion
 
 		#region Public Static Methods
-		public static ListAllPages CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is AllPagesInput listInput
-				? new ListAllPages(wal, listInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(AllPagesInput), input.GetType().Name);
+		public static ListAllPages CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (AllPagesInput)input, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, AllPagesInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("from", input.From)
 				.AddIfNotNull("to", input.To)
 				.AddFilterText("prfiltercascade", "cascading", "noncascading", input.FilterCascading)

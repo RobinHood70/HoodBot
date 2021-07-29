@@ -2,8 +2,8 @@
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class MetaTokens : QueryModule<TokensInput, IReadOnlyDictionary<string, string>>
@@ -28,18 +28,13 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void BuildRequestLocal(Request request, TokensInput input)
-		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
-			request.Add("type", input.Types);
-		}
+		protected override void BuildRequestLocal(Request request, TokensInput input) => request
+			.NotNull(nameof(request))
+			.Add("type", input.NotNull(nameof(input)).Types);
 
-		protected override void DeserializeResult(JToken? result)
-		{
-			ThrowNull(result, nameof(result));
-			this.Output = result.GetStringDictionary<string>();
-		}
+		protected override void DeserializeResult(JToken? result) => this.Output = result
+			.NotNull(nameof(result))
+			.GetStringDictionary<string>();
 		#endregion
 	}
 }

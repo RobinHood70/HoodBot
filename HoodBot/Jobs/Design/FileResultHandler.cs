@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
 	using System.IO;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	/// <summary>Implements the <see cref="ResultHandler" /> class and stores results in a local file.</summary>
 	/// <seealso cref="ResultHandler" />
@@ -16,7 +16,7 @@
 		public FileResultHandler(string fileName)
 			: base(null)
 		{
-			this.fileName = fileName ?? throw ArgumentNull(nameof(fileName));
+			this.fileName = fileName.NotNull(nameof(fileName));
 			_ = new FileInfo(fileName); // This will throw if the fileName is invalid.
 		}
 

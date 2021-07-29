@@ -3,14 +3,13 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Globalization;
-
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class LegendsDeckStats : ParsedPageJob
 	{
@@ -41,9 +40,8 @@
 
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
-			ThrowNull(parsedPage, nameof(parsedPage));
 			var powerCount = new SortedDictionary<int, int>();
-			if (parsedPage.FindTemplate("Legends Deck Summary") is not SiteTemplateNode deckSummary)
+			if (parsedPage.NotNull(nameof(parsedPage)).FindTemplate("Legends Deck Summary") is not SiteTemplateNode deckSummary)
 			{
 				throw new InvalidOperationException();
 			}

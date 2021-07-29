@@ -8,7 +8,6 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.CommonCode.Globals;
 
 	public abstract class LinkFinderJob : ParsedPageJob
 	{
@@ -57,9 +56,8 @@
 
 		protected override void LoadPages()
 		{
-			ThrowNull(this.titles, nameof(LinkFinderJob), nameof(this.titles));
 			var pages = PageCollection.Unlimited(this.Site, PageModules.Backlinks, false);
-			pages.GetTitles(this.titles);
+			pages.GetTitles(this.titles.NotNull(nameof(LinkFinderJob), nameof(this.titles)));
 			var backTitles = new TitleCollection(this.Site);
 			foreach (var page in pages)
 			{
@@ -77,10 +75,9 @@
 
 		protected void SetTitlesFromSubpages(IEnumerable<ISimpleTitle> titles)
 		{
-			ThrowNull(titles, nameof(titles));
 			var allTitles = new TitleCollection(this.Site)
 			{
-				titles
+				titles.NotNull(nameof(titles))
 			};
 
 			foreach (var title in titles)
@@ -93,9 +90,8 @@
 
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
-			ThrowNull(parsedPage, nameof(parsedPage));
-			ThrowNull(this.titles, nameof(LinkFinderJob), nameof(this.titles));
-			foreach (var title in this.titles)
+			parsedPage.ThrowNull(nameof(parsedPage));
+			foreach (var title in this.titles.NotNull(nameof(LinkFinderJob), nameof(this.titles)))
 			{
 				if (!this.results.TryGetValue(parsedPage.Context, out var links))
 				{

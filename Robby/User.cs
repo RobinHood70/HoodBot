@@ -7,7 +7,6 @@
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Represents a user on the wiki. This can include IP users.</summary>
 	public class User : Title
@@ -22,7 +21,7 @@
 		/// <param name="site">The site the user is from.</param>
 		/// <param name="name">The name of the user.</param>
 		public User(Site site, string name)
-			: base((site ?? throw ArgumentNull(nameof(site)))[MediaWikiNamespaces.User], name)
+			: base((site.NotNull(nameof(site)))[MediaWikiNamespaces.User], name)
 		{
 		}
 
@@ -30,7 +29,7 @@
 		/// <param name="site">The site the user is from.</param>
 		/// <param name="user">The WallE <see cref="UsersInput"/> to populate the data from.</param>
 		protected internal User(Site site, UsersItem user)
-			: this(site, (user ?? throw ArgumentNull(nameof(user))).Name) => this.Populate(user);
+			: this(site, (user.NotNull(nameof(user))).Name) => this.Populate(user);
 		#endregion
 
 		#region Public Properties
@@ -114,8 +113,8 @@
 		/// <returns>A value indicating the change status of the e-mail along with a copy of the e-mail that was sent.</returns>
 		public ChangeValue<string> Email(string subject, string body, bool ccMe)
 		{
-			ThrowNull(subject, nameof(subject));
-			ThrowNull(body, nameof(body));
+			subject.ThrowNull(nameof(subject));
+			body.ThrowNull(nameof(body));
 			if (this.loaded && !this.Emailable)
 			{
 				// Don't ask the wiki what the result will be if we already know we can't e-mail them.
@@ -247,13 +246,12 @@
 		/// <exception cref="InvalidOperationException">Thrown when the user's talk page is invalid.</exception>
 		public ChangeStatus NewTalkPageMessage(string header, string msg, string editSummary)
 		{
-			ThrowNull(msg, nameof(msg));
+			msg = msg.NotNull(nameof(msg)).Trim();
 			if (this.TalkPage is not ISimpleTitle talkPage)
 			{
 				throw new InvalidOperationException(Resources.TitleInvalid);
 			}
 
-			msg = msg.Trim();
 			if (!msg.Contains("~~~", StringComparison.Ordinal) && !msg.Contains(":" + this.Name, StringComparison.Ordinal))
 			{
 				// If at least the name wasn't found in the message, then add a normal signature.

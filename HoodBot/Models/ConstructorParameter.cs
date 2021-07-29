@@ -4,22 +4,20 @@
 	using System.Reflection;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs;
-	using static RobinHood70.CommonCode.Globals;
 
 	public sealed class ConstructorParameter : IEquatable<ConstructorParameter>
 	{
 		#region Constructors
 		public ConstructorParameter(ParameterInfo parameter)
 		{
-			ThrowNull(parameter, nameof(parameter));
-			var attributes = parameter.GetCustomAttributes(typeof(JobParameterAttribute), true);
+			var attributes = parameter.NotNull(nameof(parameter)).GetCustomAttributes(typeof(JobParameterAttribute), true);
 			if (attributes.Length > 1)
 			{
 				throw new InvalidOperationException($"Multiple JobParameterAttribute derivatives specified on parameter \"{parameter.Name}\" in constructor: {FormatMember(parameter)}");
 			}
 
 			this.Attribute = attributes.Length == 1 ? attributes[0] as JobParameterAttribute : null;
-			this.Name = parameter.Name ?? throw PropertyNull(nameof(parameter), nameof(parameter.Name));
+			this.Name = parameter.Name.NotNull(nameof(parameter), nameof(parameter.Name));
 			this.Type = parameter.ParameterType;
 			this.Label = this.Attribute?.Label ?? this.Name.UnCamelCase();
 			this.Value =

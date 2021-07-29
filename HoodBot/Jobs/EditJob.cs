@@ -2,10 +2,10 @@
 {
 	using System;
 	using System.Collections.Generic;
+using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Design;
-	using static RobinHood70.CommonCode.Globals;
 
 	public abstract class EditJob : WikiJob
 	{
@@ -48,7 +48,7 @@
 
 		protected void SavePage(Page page, string editSummary, bool isMinor)
 		{
-			ThrowNull(page, nameof(page));
+			page.ThrowNull(nameof(page));
 			var saved = false;
 			while (!saved)
 			{
@@ -79,9 +79,8 @@
 
 		protected void SavePages(PageCollection pages, string status, SaveInfo defaultSaveInfo, Action<EditJob, Page>? editConflictAction)
 		{
-			ThrowNull(pages, nameof(pages));
 			this.StatusWriteLine(status);
-			pages.RemoveUnchanged();
+			pages.NotNull(nameof(pages)).RemoveUnchanged();
 			if (pages.Count == 0)
 			{
 				this.StatusWriteLine("No pages to save!");

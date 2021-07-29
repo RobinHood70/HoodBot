@@ -6,35 +6,27 @@ namespace RobinHood70.WallE.Base
 	using System.ComponentModel;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Properties;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class EditInput
 	{
 		#region Constructors
 		public EditInput(string title, [Localizable(false)] string text)
 		{
-			ThrowNullOrWhiteSpace(title, nameof(title));
-			ThrowNull(text, nameof(text));
-			this.Title = title;
-			this.Text = text;
+			this.Title = title.NotNullOrWhiteSpace(nameof(title));
+			this.Text = text.NotNull(nameof(text));
 		}
 
 		public EditInput(long pageId, [Localizable(false)] string text)
 		{
-			ThrowNull(text, nameof(text));
 			this.PageId = pageId;
-			this.Text = text;
+			this.Text = text.NotNull(nameof(text));
 		}
 
 		public EditInput(string title, string prependText, string appendText)
 		{
-			ThrowNullOrWhiteSpace(title, nameof(title));
-			if (string.IsNullOrEmpty(prependText ?? appendText))
-			{
-				throw new InvalidOperationException(CurrentCulture(EveMessages.PrependAppend));
-			}
-
-			this.Title = title;
+			this.Title = title.NotNullOrWhiteSpace(nameof(title));
+			(prependText ?? appendText)
+				.ThrowNull(nameof(prependText) + " or " + nameof(appendText));
 			this.PrependText = prependText;
 			this.AppendText = appendText;
 		}
@@ -43,7 +35,7 @@ namespace RobinHood70.WallE.Base
 		{
 			if (string.IsNullOrEmpty(prependText ?? appendText))
 			{
-				throw new InvalidOperationException(CurrentCulture(EveMessages.PrependAppend));
+				throw new InvalidOperationException(Globals.CurrentCulture(EveMessages.PrependAppend));
 			}
 
 			this.PageId = pageId;
@@ -53,8 +45,7 @@ namespace RobinHood70.WallE.Base
 
 		public EditInput(string title, long undoRevision)
 		{
-			ThrowNullOrWhiteSpace(title, nameof(title));
-			this.Title = title;
+			this.Title = title.NotNullOrWhiteSpace(nameof(title));
 			this.UndoRevision = undoRevision;
 		}
 

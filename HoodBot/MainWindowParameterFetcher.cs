@@ -9,7 +9,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.HoodBot.Views;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.HoodBot.Properties.Resources;
 
 	public class MainWindowParameterFetcher : IParameterFetcher
@@ -23,7 +22,7 @@
 		#region Constructors
 		public MainWindowParameterFetcher(JobInfo jobInfo)
 		{
-			this.job = jobInfo ?? throw ArgumentNull(nameof(jobInfo));
+			this.job = jobInfo.NotNull(nameof(jobInfo));
 			this.main = App.Locator.MainWindow;
 			this.jobParameters = this.main.JobParameters;
 		}
@@ -93,7 +92,7 @@
 			}
 			else
 			{
-				throw new NotSupportedException(CurrentCulture(UnhandledConstructorParameter, valueType.Name));
+				throw new NotSupportedException(Globals.CurrentCulture(UnhandledConstructorParameter, valueType.Name));
 			}
 
 			controlToAdd.Name = parameter.Name;
@@ -130,16 +129,15 @@
 				}
 			}
 
-			throw new NotSupportedException(CurrentCulture(UnhandledConstructorParameter, expectedType.Name));
+			throw new NotSupportedException(Globals.CurrentCulture(UnhandledConstructorParameter, expectedType.Name));
 		}
 		#endregion
 
 		#region Private Methods
 		private void GetParameter(ConstructorParameter parameter)
 		{
-			ThrowNull(parameter, nameof(parameter));
 			var grid = this.main.JobParameters;
-			var (label, input) = CreateControl(parameter);
+			var (label, input) = CreateControl(parameter.NotNull(nameof(parameter)));
 			if (grid.RowDefinitions.Count > 0)
 			{
 				grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(10) });
@@ -160,7 +158,6 @@
 
 		private void SetParameter(ConstructorParameter parameter)
 		{
-			ThrowNull(parameter, nameof(parameter));
 			var jobParams = this.main.JobParameters;
 			var foundName = jobParams.FindName(parameter.Name);
 			if (foundName is Control control)

@@ -2,9 +2,9 @@
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// IMPNOTE: Result is slightly reformatted from the API to provide a straight-forward collection of pages that were moved.
@@ -30,9 +30,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, MoveInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("from", input.From)
 				.AddIfPositive("fromid", input.FromId)
 				.AddIfNotNull("to", input.To)
@@ -50,7 +50,7 @@
 		protected override IReadOnlyList<MoveItem> DeserializeResult(JToken? result)
 		{
 			// Errors occur at multiple levels during a move operation and can represent partial success, so instead of throwing them, we gather them into the result and let the user figure out what to do.
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			var list = new List<MoveItem>();
 			DeserializeMove(result, list, string.Empty);
 			DeserializeMove(result, list, "talk");

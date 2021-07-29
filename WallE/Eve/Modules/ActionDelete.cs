@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ActionDelete : ActionModule<DeleteInput, DeleteResult>
@@ -28,9 +28,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, DeleteInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("title", input.Title)
 				.AddIfPositive("pageid", input.PageId)
 				.AddIfNotNull("reason", input.Reason)
@@ -44,7 +44,7 @@
 
 		protected override DeleteResult DeserializeResult(JToken? result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			return new DeleteResult(
 				title: result.MustHaveString("title"),
 				reason: result.MustHaveString("reason"),

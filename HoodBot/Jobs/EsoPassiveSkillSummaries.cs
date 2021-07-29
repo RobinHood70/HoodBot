@@ -6,7 +6,6 @@
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class EsoPassiveSkillSummaries : EsoSkillJob<PassiveSkill>
 	{
@@ -50,8 +49,8 @@
 
 		protected override bool UpdateSkillTemplate(PassiveSkill skillBase, ITemplateNode template)
 		{
-			ThrowNull(skillBase, nameof(skillBase));
-			ThrowNull(template, nameof(template));
+			skillBase.ThrowNull(nameof(skillBase));
+			template.ThrowNull(nameof(template));
 			var bigChange = false;
 			bigChange |= this.TrackedUpdate(template, "type", "Passive");
 			bigChange |= this.TrackedUpdate(template, "id", skillBase.Id.ToStringInvariant());

@@ -2,9 +2,9 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon.Properties;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Represents a template argument, such as <c>{{{1|}}}</c>.</summary>
 	public class ArgumentNode : IArgumentNode
@@ -21,11 +21,9 @@
 		/// <param name="defaultValue">The default value. May be null or an empty collection. If populated, this should preferentially be either a single ParameterNode or a collection of IWikiNodes representing the default value itself. For compatibility with MediaWiki, it can also be a list of parameter nodes, in which case, these will be added as individual entries to the <see cref="ExtraValues"/> collection.</param>
 		public ArgumentNode(IWikiNodeFactory factory, IEnumerable<IWikiNode> name, IList<IParameterNode> defaultValue)
 		{
-			this.Factory = factory ?? throw ArgumentNull(nameof(factory));
-			this.Name = factory.NodeCollectionFromNodes(name ?? throw ArgumentNull(nameof(name)));
-			ThrowNull(defaultValue, nameof(defaultValue));
-
-			if (defaultValue.Count > 0)
+			this.Factory = factory.NotNull(nameof(factory));
+			this.Name = factory.NodeCollectionFromNodes(name.NotNull(nameof(name)));
+			if (defaultValue.NotNull(nameof(defaultValue)).Count > 0)
 			{
 				foreach (var parameter in defaultValue)
 				{

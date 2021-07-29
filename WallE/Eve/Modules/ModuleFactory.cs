@@ -2,8 +2,8 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Concrete implementation of <see cref="IModuleFactory" />.</summary>
 	/// <seealso cref="IModuleFactory" />
@@ -36,7 +36,7 @@
 				{
 					var retval = this.properties.TryGetValue(propertyInput.GetType(), out var factoryMethod)
 						? factoryMethod(this.wal, propertyInput)
-						: throw new KeyNotFoundException(CurrentCulture(Properties.EveMessages.ParameterInvalid, nameof(this.CreateModules), propertyInput.GetType().Name));
+						: throw new KeyNotFoundException(Globals.CurrentCulture(Properties.EveMessages.ParameterInvalid, nameof(this.CreateModules), propertyInput.GetType().Name));
 					yield return retval;
 				}
 			}
@@ -66,9 +66,7 @@
 		public IModuleFactory RegisterGenerator<T>(GeneratorFactoryMethod generatorFactoryMethod)
 			where T : IGeneratorInput
 		{
-			ThrowNull(generatorFactoryMethod, nameof(generatorFactoryMethod));
-			this.generators[typeof(T)] = generatorFactoryMethod;
-
+			this.generators[typeof(T)] = generatorFactoryMethod.NotNull(nameof(generatorFactoryMethod));
 			return this;
 		}
 
@@ -79,9 +77,7 @@
 		public IModuleFactory RegisterProperty<T>(PropertyFactoryMethod propertyFactoryMethod)
 			where T : IPropertyInput
 		{
-			ThrowNull(propertyFactoryMethod, nameof(propertyFactoryMethod));
-			this.properties[typeof(T)] = propertyFactoryMethod;
-
+			this.properties[typeof(T)] = propertyFactoryMethod.NotNull(nameof(propertyFactoryMethod));
 			return this;
 		}
 		#endregion

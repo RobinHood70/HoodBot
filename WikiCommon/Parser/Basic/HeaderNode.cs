@@ -2,8 +2,8 @@
 {
 	using System.Collections.Generic;
 	using System.ComponentModel;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Represents a header.</summary>
 	public class HeaderNode : IHeaderNode
@@ -17,9 +17,9 @@
 		/// <param name="text">The text of the header.</param>
 		public HeaderNode(IWikiNodeFactory factory, int level, [Localizable(false)] IEnumerable<IWikiNode> text)
 		{
-			this.Factory = factory ?? throw ArgumentNull(nameof(factory));
+			this.Factory = factory.NotNull(nameof(factory));
 			this.Level = level;
-			this.Title = factory.NodeCollectionFromNodes(text ?? throw ArgumentNull(nameof(text)));
+			this.Title = factory.NodeCollectionFromNodes(text.NotNull(nameof(text)));
 		}
 		#endregion
 

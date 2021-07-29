@@ -2,9 +2,9 @@
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class PropImages : PropListModule<ImagesInput, ITitle>, IGeneratorModule
@@ -32,23 +32,17 @@
 		#endregion
 
 		#region Public Static Methods
-		public static PropImages CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is ImagesInput propInput
-				? new PropImages(wal, propInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(ImagesInput), input.GetType().Name);
+		public static PropImages CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (ImagesInput)input, pageSetGenerator);
 
-		public static PropImages CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
-			input is ImagesInput propInput
-				? new PropImages(wal, propInput)
-				: throw InvalidParameterType(nameof(input), nameof(ImagesInput), input.GetType().Name);
+		public static PropImages CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new(wal, (ImagesInput)input);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ImagesInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddIf("images", input.Images, this.SiteVersion >= 118)
 				.AddIf("dir", "descending", input.SortDescending && this.SiteVersion >= 119)
 				.Add("limit", this.Limit);

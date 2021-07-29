@@ -5,15 +5,15 @@
 	using System.Diagnostics;
 	using System.Text;
 	using System.Text.RegularExpressions;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class OneOffJob : EditJob
 	{
 		#region Static Fields
-		private static readonly Regex RowFinder = new(@"\|-\ *\n[!\|]\ *\[\[(?<icon>.*?)(?<iconSize>\|.*?)?\]\]\ *\n[!\|]\ *\{\{Anchor\|(?<itemName>.*?)\}\}\ *(\|\||<br>)\ *(\{\{Small\|)?(?<id>.*)(\}\})?\n\|\ *(?<weight>.*?)\ *\|\|\ *(?<value>.*?)\ *\n\|(\{\{AL\|L\}\}\|)?(?<desc>.*?)\n(\|\ *\[\[(?<image>.*?)(?<imageSize>\|.*?)?\]\]\ *\n)?", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex RowFinder = new(@"\|-\ *\n[!\|]\ *\[\[(?<icon>.*?)(?<iconSize>\|.*?)?\]\]\ *\n[!\|]\ *\{\{Anchor\|(?<itemName>.*?)\}\}\ *(\|\||<br>)\ *(\{\{Small\|)?(?<id>.*)(\}\})?\n\|\ *(?<weight>.*?)\ *\|\|\ *(?<value>.*?)\ *\n\|(\{\{AL\|L\}\}\|)?(?<desc>.*?)\n(\|\ *\[\[(?<image>.*?)(?<imageSize>\|.*?)?\]\]\ *\n)?", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		#endregion
 
 		#region Constructors

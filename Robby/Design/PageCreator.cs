@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System.Collections.Generic;
+using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Provides a base class for creating Page objects. This serves as a go-between for customized page extensions in WallE and Robby.</summary>
 	public abstract class PageCreator
@@ -22,8 +22,7 @@
 		/// <seealso cref="AddCustomPropertyInputs" />
 		public IList<IPropertyInput> GetPropertyInputs(PageLoadOptions options)
 		{
-			ThrowNull(options, nameof(options));
-			var whatToLoad = options.Modules;
+			var whatToLoad = options.NotNull(nameof(options)).Modules;
 			var propertyInputs = new List<IPropertyInput>();
 			if ((whatToLoad & PageModules.Categories) != 0)
 			{

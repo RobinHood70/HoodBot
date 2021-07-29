@@ -9,7 +9,6 @@ namespace RobinHood70.WallE.Eve.Modules
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 
 	// TODO: Consider allowing modules to remove inappropriate inputs/outputs from modules when in generator mode. Easiest implementation is probably to allow normal Build, then implement a RemoveForGenerator virtual method that will come along behind after the build and remove inappropriate parameters from the request.
 	public abstract class QueryModule<TInput, TOutput> : IQueryModule
@@ -17,7 +16,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		where TOutput : class
 	{
 		#region Static Fields
-		private static readonly Regex LimitFinder = new(@"\A(?<module>.*?)limit may not be over (?<limit>[0-9]+)", RegexOptions.Compiled, DefaultRegexTimeout);
+		private static readonly Regex LimitFinder = new(@"\A(?<module>.*?)limit may not be over (?<limit>[0-9]+)", RegexOptions.Compiled, Globals.DefaultRegexTimeout);
 		#endregion
 
 		#region Fields
@@ -29,11 +28,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Constructors
 		protected QueryModule([NotNull, ValidatedNotNull] WikiAbstractionLayer wal, [NotNull, ValidatedNotNull] TInput input, IPageSetGenerator? pageSetGenerator)
 		{
-			ThrowNull(wal, nameof(wal));
-			ThrowNull(input, nameof(input));
-			this.Wal = wal;
+			this.Wal = wal.NotNull(nameof(wal));
 			this.SiteVersion = wal.SiteVersion;
-			this.Input = input;
+			this.Input = input.NotNull(nameof(input));
 			if (input is ILimitableInput limitable)
 			{
 				this.maxItems = limitable.MaxItems;
@@ -109,7 +106,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Public Virtual Methods
 		public virtual void BuildRequest(Request request)
 		{
-			ThrowNull(request, nameof(request));
+			request.ThrowNull(nameof(request));
 			if (this.ModuleType != null && !this.IsGenerator)
 			{
 				request.Prefix = string.Empty;
@@ -141,7 +138,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			}
 		}
 
-		public virtual bool HandleWarning(string? from, string? text)
+		public virtual bool HandleWarning(string from, string? text)
 		{
 			if (text != null && string.Equals(from, this.Name, System.StringComparison.Ordinal))
 			{

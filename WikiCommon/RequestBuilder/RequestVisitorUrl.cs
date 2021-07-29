@@ -2,7 +2,7 @@
 {
 	using System;
 	using System.Text;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	/// <summary>Formats a Request object for use in a URL or POST data.</summary>
 	public sealed class RequestVisitorUrl : IParameterVisitor
@@ -27,9 +27,8 @@
 		/// <returns>A string representing the parameters, as they would be used in a URL or POST data.</returns>
 		public static string Build(Request request)
 		{
-			ThrowNull(request, nameof(request));
 			var sb = new StringBuilder();
-			var visitor = new RequestVisitorUrl(sb, request.SupportsUnitSeparator);
+			var visitor = new RequestVisitorUrl(sb, request.NotNull(nameof(request)).SupportsUnitSeparator);
 			request.Build(visitor);
 			return sb.ToString();
 		}
@@ -47,19 +46,17 @@
 		/// <remarks>In all cases, the PipedParameter and PipedListParameter objects are treated identically, however the value collections they're associated with differ, so the Visit method is made generic to handle both.</remarks>
 		public void Visit(PipedParameter parameter)
 		{
-			ThrowNull(parameter, nameof(parameter));
-			this.BuildParameterName(parameter);
+			this.BuildParameterName(parameter.NotNull(nameof(parameter)));
 			var value = parameter.BuildPipedValue(this.supportsUnitSeparator);
-			this.builder.Append(EscapeDataString(value));
+			this.builder.Append(Globals.EscapeDataString(value));
 		}
 
 		/// <summary>Visits the specified StringParameter object.</summary>
 		/// <param name="parameter">The StringParameter object.</param>
 		public void Visit(StringParameter parameter)
 		{
-			ThrowNull(parameter, nameof(parameter));
-			this.BuildParameterName(parameter);
-			this.builder.Append(EscapeDataString(parameter.Value ?? string.Empty));
+			this.BuildParameterName(parameter.NotNull(nameof(parameter)));
+			this.builder.Append(Globals.EscapeDataString(parameter.Value ?? string.Empty));
 		}
 		#endregion
 

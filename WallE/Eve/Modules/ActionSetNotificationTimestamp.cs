@@ -2,9 +2,9 @@
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ActionSetNotificationTimestamp : ActionModulePageSet<SetNotificationTimestampInput, SetNotificationTimestampItem>
@@ -25,9 +25,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestPageSet(Request request, SetNotificationTimestampInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.Add("entirewatchlist", input.EntireWatchlist)
 				.Add("timestamp", input.Timestamp)
 				.AddIfPositive("torevid", input.ToRevisionId)
@@ -37,7 +37,7 @@
 
 		protected override SetNotificationTimestampItem GetItem(JToken result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			return new SetNotificationTimestampItem(
 				ns: (int)result.MustHave("ns"),
 				title: result.MustHaveString("title"),
@@ -53,7 +53,7 @@
 
 		protected override void DeserializeResult(JToken result, IList<SetNotificationTimestampItem> pages)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 
 			// If using entirewatchlist, return a single page with the notification timestamp and faked page data.
 			if (result.Type == JTokenType.Object && result["notificationtimestamp"] != null)

@@ -4,7 +4,6 @@
 	using System.Collections.ObjectModel;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
-	using static RobinHood70.CommonCode.Globals;
 
 	// TODO: Expand to add all namespaces and allow all namespace names (including aliases) as a lookup value.
 	public class UespNamespaceList : KeyedCollection<string, UespNamespace>
@@ -13,8 +12,7 @@
 		public UespNamespaceList(Site site)
 		{
 			// Add defined namespaces
-			ThrowNull(site, nameof(site));
-			if (site.LoadMessage("Uespnamespacelist") is string message)
+			if (site.NotNull(nameof(site)).LoadMessage("Uespnamespacelist") is string message)
 			{
 				var lines = message.Split(TextArrays.LineFeed, StringSplitOptions.RemoveEmptyEntries);
 				foreach (var line in lines)
@@ -41,8 +39,7 @@
 
 		public UespNamespace? FromTitle(Title title)
 		{
-			ThrowNull(title, nameof(title));
-			var test = title.Namespace.DecoratedName + title.RootPageName;
+			var test = title.NotNull(nameof(title)).Namespace.DecoratedName + title.RootPageName;
 			if (!this.TryGetValue(test, out var retval))
 			{
 				this.TryGetValue(title.Namespace.Name, out retval);

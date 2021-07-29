@@ -2,9 +2,9 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon.Properties;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Represents a link, including embedded images.</summary>
 	public class LinkNode : ILinkNode
@@ -17,9 +17,9 @@
 		/// <param name="parameters">The parameters.</param>
 		public LinkNode(IWikiNodeFactory factory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters)
 		{
-			this.Factory = factory ?? throw ArgumentNull(nameof(factory));
-			this.Title = factory.NodeCollectionFromNodes(title ?? throw ArgumentNull(nameof(title)));
-			this.Parameters = parameters ?? throw ArgumentNull(nameof(parameters));
+			this.Factory = factory.NotNull(nameof(factory));
+			this.Title = factory.NodeCollectionFromNodes(title.NotNull(nameof(title)));
+			this.Parameters = parameters.NotNull(nameof(parameters));
 			foreach (var parameter in parameters)
 			{
 				if (parameter.Factory != factory)

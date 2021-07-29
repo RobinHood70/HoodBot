@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ListLanguageBacklinks : ListModule<LanguageBacklinksInput, LanguageBacklinksItem>, IGeneratorModule
@@ -31,18 +31,15 @@
 		#endregion
 
 		#region Public Static Methods
-		public static ListLanguageBacklinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is LanguageBacklinksInput listInput
-				? new ListLanguageBacklinks(wal, listInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(LanguageBacklinksInput), input.GetType().Name);
+		public static ListLanguageBacklinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (LanguageBacklinksInput)input, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, LanguageBacklinksInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("lang", input.Language)
 				.AddIfNotNull("title", input.Title)
 				.AddFlags("prop", input.Properties)

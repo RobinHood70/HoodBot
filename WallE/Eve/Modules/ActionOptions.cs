@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class ActionOptions : ActionModule<OptionsInputInternal, NullObject>
 	{
@@ -26,9 +26,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, OptionsInputInternal input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.Add("reset", input.Reset)
 				.AddIf("resetkinds", input.ResetKinds, this.SiteVersion >= 120)
 				.Add("change", input.Change)

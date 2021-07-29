@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ActionPatrol : ActionModule<PatrolInput, PatrolResult>
@@ -28,9 +28,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, PatrolInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddIfPositive("rcid", input.RecentChangesId)
 				.AddIfPositive("revid", input.RevisionId)
 				.Add("tags", input.Tags)
@@ -39,7 +39,7 @@
 
 		protected override PatrolResult DeserializeResult(JToken? result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			return new PatrolResult(
 				ns: (int)result.MustHave("ns"),
 				title: result.MustHaveString("title"),

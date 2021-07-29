@@ -2,7 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	public class ImportInput
 	{
@@ -17,11 +17,7 @@ namespace RobinHood70.WallE.Base
 
 		public ImportInput(int ns) => this.Namespace = ns;
 
-		public ImportInput(string rootPage)
-		{
-			ThrowNullOrWhiteSpace(rootPage, nameof(rootPage));
-			this.RootPage = rootPage;
-		}
+		public ImportInput(string rootPage) => this.RootPage = rootPage.NotNullOrWhiteSpace(nameof(rootPage));
 		#endregion
 
 		#region Public Properties

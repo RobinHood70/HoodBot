@@ -3,9 +3,9 @@
 	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class MetaFileRepoInfo : ListModule<FileRepositoryInfoInput, FileRepositoryInfoItem>
@@ -34,9 +34,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, FileRepositoryInfoInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
-			request.Add("prop", input.Properties);
+			input.ThrowNull(nameof(input));
+			request
+				.NotNull(nameof(request)).Add("prop", input.Properties);
 		}
 
 		protected override FileRepositoryInfoItem? GetItem(JToken result)

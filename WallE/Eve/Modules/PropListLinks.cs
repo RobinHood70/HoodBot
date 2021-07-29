@@ -2,9 +2,9 @@
 namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	public abstract class PropListLinks<TInput> : PropListModule<TInput, ITitle>
@@ -25,15 +25,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, TInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.Add("namespace", input.Namespaces)
 				.Add("dir", input.SortDescending)
 				.Add("limit", this.Limit);
 		}
 
-		protected override ITitle GetItem(JToken result, PageItem page) => (result ?? throw ArgumentNull(nameof(result))).GetWikiTitle();
+		protected override ITitle GetItem(JToken result, PageItem page) => result.NotNull(nameof(result)).GetWikiTitle();
 		#endregion
 	}
 }

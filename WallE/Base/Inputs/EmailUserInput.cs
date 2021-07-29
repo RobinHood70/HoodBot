@@ -1,17 +1,15 @@
-﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
-namespace RobinHood70.WallE.Base
+﻿namespace RobinHood70.WallE.Base
 {
-	using static RobinHood70.CommonCode.Globals;
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
+	using RobinHood70.CommonCode;
 
 	public class EmailUserInput
 	{
 		#region Constructors
 		public EmailUserInput(string target, string text)
 		{
-			ThrowNullOrWhiteSpace(target, nameof(target));
-			ThrowNullOrWhiteSpace(text, nameof(text));
-			this.Target = target;
-			this.Text = text;
+			this.Target = target.NotNullOrWhiteSpace(nameof(target));
+			this.Text = text.NotNullOrWhiteSpace(nameof(text));
 		}
 		#endregion
 

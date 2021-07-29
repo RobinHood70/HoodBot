@@ -3,7 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	#region Public Enumerations
 	[Flags]
@@ -38,9 +38,8 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public RevisionDeleteInput(RevisionDeleteType type, IEnumerable<long> ids)
 		{
-			ThrowNull(ids, nameof(ids));
 			this.Type = type;
-			this.Ids = ids;
+			this.Ids = ids.NotNull(nameof(ids));
 		}
 		#endregion
 

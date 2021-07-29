@@ -2,8 +2,8 @@
 {
 	using System;
 	using Newtonsoft.Json;
+using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
-	using static RobinHood70.CommonCode.Globals;
 
 	[Flags]
 	public enum ReplacementActions
@@ -28,10 +28,8 @@
 		[JsonConstructor]
 		public Replacement(Title from, Title to)
 		{
-			ThrowNull(from, nameof(from));
-			ThrowNull(to, nameof(to));
-			this.From = from;
-			this.To = to;
+			this.From = from.NotNull(nameof(from));
+			this.To = to.NotNull(nameof(to));
 		}
 		#endregion
 

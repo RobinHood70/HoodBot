@@ -2,10 +2,10 @@
 {
 	using System;
 	using System.Diagnostics.CodeAnalysis;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Enumerations
 	public enum PlaceType
@@ -25,8 +25,7 @@
 		#region Constructors
 		public Place(VariablesPage page)
 		{
-			ThrowNull(page, nameof(page));
-			this.Alliance = page.GetVariable("alliance");
+			this.Alliance = page.NotNull(nameof(page)).GetVariable("alliance");
 			this.Key = page.PageName;
 			this.Settlement = page.GetVariable("settlement");
 			this.Title = new Title(page);
@@ -38,7 +37,7 @@
 		// For ad-hoc places created when no place was found.
 		public Place(string titleName)
 		{
-			this.TitleName = titleName ?? throw ArgumentNull(nameof(titleName));
+			this.TitleName = titleName.NotNull(nameof(titleName));
 			this.Key = titleName;
 		}
 		#endregion
@@ -70,11 +69,9 @@
 		#region Public Static Methods
 		public static Place Copy(string titleName, Place other)
 		{
-			ThrowNull(titleName, nameof(titleName));
-			ThrowNull(other, nameof(other));
-			var retval = new Place(titleName)
+			var retval = new Place(titleName.NotNull(nameof(titleName)))
 			{
-				Alliance = other.Alliance,
+				Alliance = other.NotNull(nameof(other)).Alliance,
 				Settlement = other.Settlement,
 				Title = other.Title,
 				PlaceType = other.PlaceType,

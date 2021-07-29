@@ -2,9 +2,9 @@
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class PropPageProperties : PropModule<PagePropertiesInput>
 	{
@@ -26,25 +26,21 @@
 		#endregion
 
 		#region Public Static Methods
-		public static PropPageProperties CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
-			input is PagePropertiesInput propInput
-				? new PropPageProperties(wal, propInput)
-				: throw InvalidParameterType(nameof(input), nameof(PagePropertiesInput), input.GetType().Name);
+		public static PropPageProperties CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new(wal, (PagePropertiesInput)input);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, PagePropertiesInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
-			request.Add("prop", input.Properties);
+			input.ThrowNull(nameof(input));
+			request
+				.NotNull(nameof(request)).Add("prop", input.Properties);
 		}
 
 		protected override void DeserializeToPage(JToken result, PageItem page)
 		{
-			ThrowNull(result, nameof(result));
-			ThrowNull(page, nameof(page));
-			if (page.Properties is Dictionary<string, string?> dictionary)
+			result.ThrowNull(nameof(result));
+			if (page.NotNull(nameof(page)).Properties is Dictionary<string, string?> dictionary)
 			{
 				dictionary.Clear();
 				foreach (var item in result.Children<JProperty>())

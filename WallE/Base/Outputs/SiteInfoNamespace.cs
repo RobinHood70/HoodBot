@@ -2,8 +2,8 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Properties;
-	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Enumerations
 	[Flags]
@@ -43,7 +43,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => CurrentCulture(Messages.ColonText, this.Id, this.Name);
+		public override string ToString() => Globals.CurrentCulture(Messages.ColonText, this.Id, this.Name);
 		#endregion
 	}
 }

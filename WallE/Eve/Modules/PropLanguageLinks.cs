@@ -2,9 +2,9 @@
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class PropLanguageLinks : PropListModule<LanguageLinksInput, LanguageLinksItem>
@@ -27,18 +27,15 @@
 		#endregion
 
 		#region Public Static Methods
-		public static PropLanguageLinks CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
-			input is LanguageLinksInput propInput
-				? new PropLanguageLinks(wal, propInput)
-				: throw InvalidParameterType(nameof(input), nameof(LanguageLinksInput), input.GetType().Name);
+		public static PropLanguageLinks CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new(wal, (LanguageLinksInput)input);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, LanguageLinksInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddFlagsIf("prop", input.Properties, this.SiteVersion >= 123)
 				.AddIf("url", (input.Properties & LanguageLinksProperties.Url) != 0, this.SiteVersion is >= 117 and < 123)
 				.AddIfNotNull("lang", input.Language)

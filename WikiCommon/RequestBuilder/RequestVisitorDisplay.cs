@@ -2,7 +2,7 @@
 {
 	using System;
 	using System.Text;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	// Escaping in this class is only at the Uri level rather than the Data level because it produces much cleaner output which any browser will fix up, if needed, when the request is put through.
 
@@ -34,7 +34,7 @@
 				RequestType.Post => "POST",
 				_ => "POST (multipart)",
 			};
-			return Invariant($"{methodText}: {request.Uri}?{sb}");
+			return FormattableString.Invariant($"{methodText}: {request.Uri}?{sb}");
 		}
 
 		public void Visit(FileParameter parameter)
@@ -47,7 +47,7 @@
 		{
 			this.BuildParameterName(parameter);
 			var value = parameter.BuildPipedValue(false);
-			this.builder.Append(EscapeDataString(value).Replace("%7C", "|", StringComparison.Ordinal).Replace("%20", "+", StringComparison.Ordinal));
+			this.builder.Append(Globals.EscapeDataString(value).Replace("%7C", "|", StringComparison.Ordinal).Replace("%20", "+", StringComparison.Ordinal));
 		}
 
 		public void Visit(StringParameter parameter)
@@ -57,7 +57,7 @@
 			{
 				ValueType.Hidden => "<hidden>",
 				ValueType.Modify => parameter.Value + "fm",
-				_ => EscapeDataString(parameter?.Value ?? string.Empty),
+				_ => Globals.EscapeDataString(parameter?.Value ?? string.Empty),
 			});
 		}
 		#endregion

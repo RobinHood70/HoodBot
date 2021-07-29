@@ -4,11 +4,11 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>This is a higher-level parser that works on a NodeCollection, but adds functionality to resolve magic words and templates within the context of the page.</summary>
 	public class ContextualParser
@@ -18,7 +18,7 @@
 		/// <summary>Initializes a new instance of the <see cref="ContextualParser"/> class.</summary>
 		/// <param name="page">The page to parse.</param>
 		public ContextualParser(Page page)
-			: this(page ?? throw ArgumentNull(nameof(page)), page.Text, InclusionType.Raw, false)
+			: this(page.NotNull(nameof(page)), page.Text, InclusionType.Raw, false)
 		{
 		}
 
@@ -26,7 +26,7 @@
 		/// <param name="title">The <see cref="ISimpleTitle">title</see> the text will be on.</param>
 		/// <param name="text">The text to parse.</param>
 		public ContextualParser(ISimpleTitle title, string text)
-			: this(title ?? throw ArgumentNull(nameof(title)), text, InclusionType.Raw, false)
+			: this(title.NotNull(nameof(title)), text, InclusionType.Raw, false)
 		{
 		}
 
@@ -35,7 +35,7 @@
 		/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
 		public ContextualParser(Page page, InclusionType inclusionType, bool strictInclusion)
-			: this(page ?? throw ArgumentNull(nameof(page)), page.Text, inclusionType, strictInclusion)
+			: this(page.NotNull(nameof(page)), page.Text, inclusionType, strictInclusion)
 		{
 		}
 
@@ -46,7 +46,7 @@
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
 		public ContextualParser(ISimpleTitle title, string text, InclusionType inclusionType, bool strictInclusion)
 		{
-			this.Context = title ?? throw ArgumentNull(nameof(title));
+			this.Context = title.NotNull(nameof(title));
 			this.Nodes = new SiteNodeFactory(title.Namespace.Site).Parse(text, inclusionType, strictInclusion);
 		}
 		#endregion
@@ -104,8 +104,7 @@
 		/// <remarks>The category will be added after the last category found on the page, or at the end of the page (preceded by two newlines) if no categories were found.</remarks>
 		public bool AddCategory(string category)
 		{
-			ThrowNull(category, nameof(category));
-			var catTitle = Title.Coerce(this.Site, MediaWikiNamespaces.Category, category);
+			var catTitle = Title.Coerce(this.Site, MediaWikiNamespaces.Category, category.NotNull(nameof(category)));
 			var lastCategoryIndex = -1;
 			for (var i = 0; i < this.Nodes.Count; i++)
 			{

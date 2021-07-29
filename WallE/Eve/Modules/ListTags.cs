@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ListTags : ListModule<TagsInput, TagsItem>
@@ -28,12 +28,10 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, TagsInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
-
 			// At least up to 1.26, name is always included, so strip that off.
-			var prop = input.Properties & ~TagProperties.Name;
+			var prop = input.NotNull(nameof(input)).Properties & ~TagProperties.Name;
 			request
+				.NotNull(nameof(request))
 				.AddFlags("prop", prop)
 				.Add("limit", this.Limit);
 		}

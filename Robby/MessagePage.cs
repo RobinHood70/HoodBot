@@ -1,11 +1,11 @@
 ﻿namespace RobinHood70.Robby
 {
 	using System;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Stores a MediaWiki page along with associated data.</summary>
 	/// <seealso cref="Page" />
@@ -18,7 +18,7 @@
 		/// <param name="site">The site the Message is from.</param>
 		/// <param name="pageName">The page name.</param>
 		public MessagePage(Site site, string pageName)
-			: base((site ?? throw ArgumentNull(nameof(site)))[MediaWikiNamespaces.MediaWiki], pageName)
+			: base((site.NotNull(nameof(site)))[MediaWikiNamespaces.MediaWiki], pageName)
 		{
 		}
 
@@ -30,7 +30,7 @@
 		{
 			if (ns.Id != MediaWikiNamespaces.MediaWiki)
 			{
-				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, ns.Site[MediaWikiNamespaces.MediaWiki].Name), nameof(ns));
+				throw new ArgumentException(Globals.CurrentCulture(Resources.NamespaceMustBe, ns.Site[MediaWikiNamespaces.MediaWiki].Name), nameof(ns));
 			}
 		}
 
@@ -41,7 +41,7 @@
 		{
 			if (title.Namespace.Id != MediaWikiNamespaces.MediaWiki)
 			{
-				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, this.Site[MediaWikiNamespaces.MediaWiki].Name), nameof(title));
+				throw new ArgumentException(Globals.CurrentCulture(Resources.NamespaceMustBe, this.Site[MediaWikiNamespaces.MediaWiki].Name), nameof(title));
 			}
 		}
 
@@ -49,7 +49,7 @@
 		/// <param name="ns">The namespace of the page (must be MediaWiki).</param>
 		/// <param name="item">The AllMessagesItem to populate this instance from.</param>
 		protected internal MessagePage(Namespace ns, AllMessagesItem item)
-			: base(ns, (item ?? throw ArgumentNull(nameof(item))).Name) => this.PopulateFrom(item);
+			: base(ns, (item.NotNull(nameof(item))).Name) => this.PopulateFrom(item);
 		#endregion
 
 		#region Public Properties
@@ -79,8 +79,7 @@
 		/// <param name="item">The item to populate from.</param>
 		protected internal void PopulateFrom(AllMessagesItem item)
 		{
-			ThrowNull(item, nameof(item));
-			this.PopulateFlags(false, (item.Flags & MessageFlags.Missing) != 0);
+			this.PopulateFlags(false, (item.NotNull(nameof(item)).Flags & MessageFlags.Missing) != 0);
 			this.Customized = (item.Flags & MessageFlags.Customized) != 0;
 			this.DefaultMissing = (item.Flags & MessageFlags.DefaultMissing) != 0;
 			this.DefaultMessage = item.Default;
@@ -95,8 +94,7 @@
 		/// <param name="pageItem">The page item.</param>
 		protected override void PopulateCustomResults(PageItem pageItem)
 		{
-			ThrowNull(pageItem, nameof(pageItem));
-			if ((pageItem.Flags & PageFlags.Missing) != 0)
+			if ((pageItem.NotNull(nameof(pageItem)).Flags & PageFlags.Missing) != 0)
 			{
 				var input = new AllMessagesInput() { Messages = new[] { this.PageName } };
 				var result = this.Site.AbstractionLayer.AllMessages(input);

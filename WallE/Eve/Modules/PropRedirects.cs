@@ -2,9 +2,9 @@
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class PropRedirects : PropListModule<RedirectsInput, RedirectItem>, IGeneratorModule
 	{
@@ -31,23 +31,17 @@
 		#endregion
 
 		#region Public Static Methods
-		public static PropRedirects CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is RedirectsInput propInput
-				? new PropRedirects(wal, propInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(RedirectsInput), input.GetType().Name);
+		public static PropRedirects CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (RedirectsInput)input, pageSetGenerator);
 
-		public static PropRedirects CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
-			input is RedirectsInput propInput
-				? new PropRedirects(wal, propInput)
-				: throw InvalidParameterType(nameof(input), nameof(RedirectsInput), input.GetType().Name);
+		public static PropRedirects CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new(wal, (RedirectsInput)input);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, RedirectsInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddFlags("prop", input.Properties)
 				.Add("namespace", input.Namespaces)
 				.AddFilterPiped("show", "fragment", input.FilterFragments)

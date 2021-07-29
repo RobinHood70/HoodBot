@@ -2,9 +2,9 @@
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class PropExternalLinks : PropListModule<ExternalLinksInput, string>
@@ -27,18 +27,15 @@
 		#endregion
 
 		#region Public Static Methods
-		public static PropExternalLinks CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
-			input is ExternalLinksInput propInput
-				? new PropExternalLinks(wal, propInput)
-				: throw InvalidParameterType(nameof(input), nameof(ExternalLinksInput), input.GetType().Name);
+		public static PropExternalLinks CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new(wal, (ExternalLinksInput)input);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ExternalLinksInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.Add("expandurl", input.ExpandUrl)
 				.AddIfNotNull("protocol", input.Protocol)
 				.AddIfNotNull("query", input.Query)

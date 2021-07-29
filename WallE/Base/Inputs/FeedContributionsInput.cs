@@ -2,16 +2,12 @@
 namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	public class FeedContributionsInput
 	{
 		#region Constructors
-		public FeedContributionsInput(string user)
-		{
-			ThrowNullOrWhiteSpace(user, nameof(user));
-			this.User = user;
-		}
+		public FeedContributionsInput(string user) => this.User = user.NotNullOrWhiteSpace(nameof(user));
 		#endregion
 
 		#region Public Properties

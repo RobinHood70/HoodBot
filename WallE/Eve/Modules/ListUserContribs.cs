@@ -6,7 +6,6 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ListUserContribs : ListModule<UserContributionsInput, UserContributionsItem>
@@ -38,13 +37,12 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, UserContributionsInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.Properties)
+				.Check(this.SiteVersion, input.NotNull(nameof(input)).Properties)
 				.FilterBefore(120, UserContribsProperties.SizeDiff)
 				.Value;
 			request
+				.NotNull(nameof(request))
 				.Add("start", input.Start)
 				.Add("end", input.End)
 				.Add("user", input.Users)

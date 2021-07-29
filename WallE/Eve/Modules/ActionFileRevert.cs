@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// MWVERSION: 1.27
@@ -29,9 +29,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, FileRevertInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("filename", input.FileName)
 				.AddIfNotNull("archivename", input.ArchiveName)
 				.AddIfNotNull("comment", input.Comment)
@@ -40,7 +40,7 @@
 
 		protected override FileRevertResult DeserializeResult(JToken? result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			return new FileRevertResult(result.MustHaveString("result"));
 		}
 		#endregion

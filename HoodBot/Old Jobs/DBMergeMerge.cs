@@ -10,7 +10,6 @@
 	using RobinHood70.WikiCommon; using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon; using RobinHood70.CommonCode;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class DBMergeMerge : PageMoverJob
 	{
@@ -34,8 +33,7 @@
 		#region Protected Override Methods
 		protected override void FilterBacklinks(TitleCollection backlinkTitles)
 		{
-			ThrowNull(backlinkTitles, nameof(backlinkTitles));
-			base.FilterBacklinks(backlinkTitles);
+			base.FilterBacklinks(backlinkTitles.NotNull(nameof(backlinkTitles)));
 			backlinkTitles.Remove("User:HoodBot/Dragonborn Merge Actions");
 			backlinkTitles.Remove("UESPWiki:Dragonborn Merge Project");
 
@@ -50,8 +48,7 @@
 
 		protected override void HandleConflict(Replacement replacement)
 		{
-			ThrowNull(replacement, nameof(replacement));
-			if (replacement.FromPage != null && (replacement.FromPage.IsRedirect || replacement.FromPage.IsDisambiguation))
+			if (replacement.NotNull(nameof(replacement)).FromPage != null && (replacement.FromPage.IsRedirect || replacement.FromPage.IsDisambiguation))
 			{
 				replacement.Actions |= ReplacementActions.Edit;
 				replacement.Reason = "Dragonborn page is redirect or disambig";

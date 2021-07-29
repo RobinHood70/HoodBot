@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class PropLinks : PropListLinks<LinksInput>, IGeneratorModule
 	{
@@ -30,23 +30,17 @@
 		#endregion
 
 		#region Public Static Methods
-		public static PropLinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is LinksInput propInput
-				? new PropLinks(wal, propInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(LinksInput), input.GetType().Name);
+		public static PropLinks CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (LinksInput)input, pageSetGenerator);
 
-		public static PropLinks CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
-			input is LinksInput propInput
-				? new PropLinks(wal, propInput)
-				: throw InvalidParameterType(nameof(input), nameof(LinksInput), input.GetType().Name);
+		public static PropLinks CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new(wal, (LinksInput)input);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, LinksInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
-			request.Add("titles", input.Titles);
+			input.ThrowNull(nameof(input));
+			request
+				.NotNull(nameof(request)).Add("titles", input.Titles);
 			base.BuildRequestLocal(request, input);
 		}
 

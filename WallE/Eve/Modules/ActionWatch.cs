@@ -2,9 +2,9 @@
 {
 	using System.Diagnostics;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ActionWatch : ActionModulePageSet<WatchInput, WatchItem>
@@ -25,9 +25,7 @@
 		#region Protected Override Methods
 		protected override void BuildRequestPageSet(Request request, WatchInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
-			if (this.SiteVersion < 123 && input.Values != null)
+			if (input.NotNull(nameof(input)).Values != null && this.SiteVersion < 123)
 			{
 				Debug.Assert(input.ListType == ListType.Titles && input.Values.Count == 1 && this.Generator == null, "Incorrect values sent to < MW 1.23 Watch");
 				request.Remove("titles");
@@ -37,13 +35,14 @@
 			}
 
 			request
+				.NotNull(nameof(request))
 				.Add("unwatch", input.Unwatch)
 				.AddHidden("token", input.Token);
 		}
 
 		protected override WatchItem GetItem(JToken result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			var title = result.MustHaveString("title");
 			return new WatchItem(
 				ns: (int?)result["ns"] ?? this.FindRequiredNamespace(title),

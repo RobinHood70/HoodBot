@@ -1,11 +1,11 @@
 ﻿namespace RobinHood70.Robby
 {
 	using System;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>In addition to regular page data, stores information about a category.</summary>
 	/// <seealso cref="Page" />
@@ -17,7 +17,7 @@
 		/// <param name="site">The site the category is from.</param>
 		/// <param name="pageName">The page name.</param>
 		public CategoryPage(Site site, string pageName)
-			: base((site ?? throw ArgumentNull(nameof(site)))[MediaWikiNamespaces.Category], pageName)
+			: base((site.NotNull(nameof(site)))[MediaWikiNamespaces.Category], pageName)
 		{
 		}
 
@@ -29,7 +29,7 @@
 		{
 			if (ns.Id != MediaWikiNamespaces.Category)
 			{
-				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, ns.Site[MediaWikiNamespaces.Category].Name), nameof(ns));
+				throw new ArgumentException(Globals.CurrentCulture(Resources.NamespaceMustBe, ns.Site[MediaWikiNamespaces.Category].Name), nameof(ns));
 			}
 		}
 
@@ -40,7 +40,7 @@
 		{
 			if (title.Namespace.Id != MediaWikiNamespaces.Category)
 			{
-				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, this.Site[MediaWikiNamespaces.Category].Name), nameof(title));
+				throw new ArgumentException(Globals.CurrentCulture(Resources.NamespaceMustBe, this.Site[MediaWikiNamespaces.Category].Name), nameof(title));
 			}
 		}
 		#endregion
@@ -74,8 +74,7 @@
 		/// <param name="pageItem">The page item.</param>
 		protected override void PopulateCustomResults(PageItem pageItem)
 		{
-			ThrowNull(pageItem, nameof(pageItem));
-			if (pageItem.CategoryInfo is CategoryInfoResult catInfo)
+			if (pageItem.NotNull(nameof(pageItem)).CategoryInfo is CategoryInfoResult catInfo)
 			{
 				this.FileCount = catInfo.Files;
 				this.FullCount = catInfo.Size;

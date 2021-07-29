@@ -9,7 +9,6 @@
 	using RobinHood70.WikiCommon; using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon; using RobinHood70.CommonCode;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class DBMergeFiles : PageMoverJob
 	{
@@ -47,8 +46,7 @@
 		#region Protected Override Methods
 		protected override void FilterBacklinks(TitleCollection backlinkTitles)
 		{
-			ThrowNull(backlinkTitles, nameof(backlinkTitles));
-			base.FilterBacklinks(backlinkTitles);
+			base.FilterBacklinks(backlinkTitles.NotNull(nameof(backlinkTitles)));
 			backlinkTitles.Remove("User:HoodBot/Dragonborn Merge Actions");
 			backlinkTitles.Remove("UESPWiki:Dragonborn Merge Project");
 		}

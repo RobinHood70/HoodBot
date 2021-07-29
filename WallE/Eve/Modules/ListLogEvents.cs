@@ -3,9 +3,9 @@
 	using System;
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ListLogEvents : ListModule<LogEventsInput, LogEventsItem>
@@ -54,9 +54,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, LogEventsInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddFlags("prop", input.Properties)
 				.AddIfNotNull("type", input.Type)
 				.AddIfNotNull("action", input.Action)

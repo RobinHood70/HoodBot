@@ -2,10 +2,10 @@
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ActionProtect : ActionModule<ProtectInput, ProtectResult>
@@ -30,10 +30,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ProtectInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
 			var protections = new List<string>();
 			var expiry = new List<string>();
+			input.ThrowNull(nameof(input));
 			if (input.Protections != null)
 			{
 				foreach (var protection in input.Protections)
@@ -45,6 +44,7 @@
 			}
 
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("title", input.Title)
 				.AddIfPositive("pageid", input.PageId)
 				.Add("protections", protections)
@@ -59,7 +59,7 @@
 
 		protected override ProtectResult DeserializeResult(JToken? result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			var protections = new List<ProtectResultItem>();
 			if (result["protections"] is JToken protectionsNode)
 			{

@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class MetaAllMessages : ListModule<AllMessagesInput, AllMessagesItem>
@@ -34,10 +34,8 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, AllMessagesInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
-			this.languageCode = input.LanguageCode;
-			request
+			this.languageCode = input.NotNull(nameof(input)).LanguageCode;
+			request.NotNull(nameof(request))
 				.Add("messages", input.Messages)
 				.AddFlags("prop", input.Properties)
 				.Add("enableparser", input.EnableParser)
@@ -64,7 +62,7 @@
 			var normalizedName = (string?)result["normalizedname"];
 			if (normalizedName == null)
 			{
-				var ci = GetCulture(this.languageCode ?? this.Wal.AllSiteInfo?.General?.Language);
+				var ci = Globals.GetCulture(this.languageCode ?? this.Wal.AllSiteInfo?.General?.Language);
 				normalizedName = name.Replace(' ', '_');
 				if (char.IsUpper(normalizedName[0]))
 				{

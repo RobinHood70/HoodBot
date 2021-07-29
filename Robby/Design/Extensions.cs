@@ -4,7 +4,7 @@
 	using System.Diagnostics.CodeAnalysis;
 	using System.Text;
 	using System.Text.RegularExpressions;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	/// <summary>A generic set of extensions useful in the program's design.</summary>
 	public static class Extensions
@@ -15,8 +15,8 @@
 		#endregion
 
 		#region Fields
-		private static readonly Regex LabelCommaRemover = new(@"\ *([,，]" + TitleChars + @"*?)\Z", RegexOptions.Compiled | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
-		private static readonly Regex LabelParenthesesRemover = new(@"\ *(\(" + TitleChars + @"*?\)|（" + TitleChars + @"*?）)\Z", RegexOptions.Compiled | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex LabelCommaRemover = new(@"\ *([,，]" + TitleChars + @"*?)\Z", RegexOptions.Compiled | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		private static readonly Regex LabelParenthesesRemover = new(@"\ *(\(" + TitleChars + @"*?\)|（" + TitleChars + @"*?）)\Z", RegexOptions.Compiled | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		#endregion
 
 		#region IEnumerable<ISimpleTitle> Extensions
@@ -59,11 +59,11 @@
 		/// <returns>The current title, formatted as a link.</returns>
 		public static string AsLink(this ISimpleTitle title, bool friendly)
 		{
-			ThrowNull(title, nameof(title));
-			var sb = new StringBuilder(title.Namespace.LinkName.Length + 5 + (title.PageName.Length << 1));
+			var linkName = title.NotNull(nameof(title)).Namespace.LinkName;
+			var sb = new StringBuilder(linkName.Length + 5 + (title.PageName.Length << 1));
 			sb
 				.Append("[[")
-				.Append(title.Namespace.LinkName)
+				.Append(linkName)
 				.Append(title.PageName);
 			if (friendly)
 			{

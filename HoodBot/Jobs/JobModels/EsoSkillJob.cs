@@ -9,7 +9,6 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
 	internal abstract class EsoSkillJob<T> : EditJob
 		where T : Skill
@@ -72,9 +71,8 @@
 
 		protected bool TrackedUpdate(ITemplateNode template, string name, string value, TitleCollection? usedList, string? skillName)
 		{
-			ThrowNull(template, nameof(template));
 			var retval = false;
-			if (template.Find(name) is not IParameterNode parameter)
+			if (template.NotNull(nameof(template)).Find(name) is not IParameterNode parameter)
 			{
 				parameter = template.Add(name, "\n");
 				retval = true;
@@ -103,11 +101,9 @@
 			return retval;
 		}
 
-		protected bool TrackedUpdate(ITemplateNode template, string name, string value, bool removeCondition)
-		{
-			ThrowNull(template, nameof(template));
-			return removeCondition ? template.Remove(name) : this.TrackedUpdate(template, name, value);
-		}
+		protected bool TrackedUpdate(ITemplateNode template, string name, string value, bool removeCondition) => removeCondition
+			? template.NotNull(nameof(template)).Remove(name)
+			: this.TrackedUpdate(template, name, value);
 		#endregion
 
 		#region Protected Override Methods

@@ -3,16 +3,12 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	public class UndeleteInput
 	{
 		#region Constructors
-		public UndeleteInput(string title)
-		{
-			ThrowNullOrWhiteSpace(title, nameof(title));
-			this.Title = title;
-		}
+		public UndeleteInput(string title) => this.Title = title.NotNullOrWhiteSpace(nameof(title));
 		#endregion
 
 		#region Public Properties

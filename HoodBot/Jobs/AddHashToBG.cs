@@ -1,10 +1,11 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System.Globalization;
+using Google.Protobuf.WellKnownTypes;
+using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class AddHashToBG : ParsedPageJob
 	{
@@ -19,9 +20,8 @@
 		protected override void LoadPages() => this.Pages.GetBacklinks("Template:BG", BacklinksTypes.EmbeddedIn);
 
 		protected override void ParseText(object sender, ContextualParser parsedPage)
-		{
-			ThrowNull(parsedPage, nameof(parsedPage));
-			foreach (var template in parsedPage.TemplateNodes)
+{
+			foreach (var template in parsedPage.NotNull(nameof(parsedPage)).TemplateNodes)
 			{
 				if (template.Parameters.Count >= 1 &&
 					template.Find(1) is IParameterNode parameter &&

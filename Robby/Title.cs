@@ -10,7 +10,6 @@
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Enumerations
 
@@ -48,9 +47,8 @@
 		/// <param name="pageName">The page name (without leading namespace).</param>
 		public Title([NotNull, ValidatedNotNull] Namespace ns, [NotNull, ValidatedNotNull] string pageName)
 		{
-			ThrowNull(pageName, nameof(pageName));
-			this.Namespace = ns ?? throw ArgumentNull(nameof(ns));
-			pageName = WikiTextUtilities.DecodeAndNormalize(pageName).Trim();
+			this.Namespace = ns.NotNull(nameof(ns));
+			pageName = WikiTextUtilities.DecodeAndNormalize(pageName.NotNull(nameof(pageName))).Trim();
 			this.PageName = this.Namespace.CapitalizePageName(pageName);
 		}
 
@@ -58,9 +56,9 @@
 		/// <param name="title">The <see cref="ISimpleTitle"/> to copy values from.</param>
 		public Title([NotNull, ValidatedNotNull] ISimpleTitle title)
 		{
-			ThrowNull(title, nameof(title));
-			this.Namespace = title.Namespace ?? throw PropertyNull(nameof(title), nameof(title.Namespace));
-			this.PageName = title.PageName ?? throw PropertyNull(nameof(title), nameof(title.PageName));
+			title.ThrowNull(nameof(title));
+			this.Namespace = title.Namespace.NotNull(nameof(title), nameof(title.Namespace));
+			this.PageName = title.PageName.NotNull(nameof(title), nameof(title.PageName));
 		}
 		#endregion
 
@@ -131,9 +129,7 @@
 		/// <returns>A new <see cref="Title"/> with the namespace found in <paramref name="pageName"/>, if there is one, otherwise using <paramref name="defaultNamespace"/>.</returns>
 		public static Title Coerce(Site site, int defaultNamespace, string pageName)
 		{
-			ThrowNull(site, nameof(site));
-			ThrowNull(pageName, nameof(pageName));
-			var parser = new TitleParser(site, defaultNamespace, pageName);
+			var parser = new TitleParser(site.NotNull(nameof(site)), defaultNamespace, pageName.NotNull(nameof(pageName)));
 			return new Title(parser);
 		}
 
@@ -141,12 +137,7 @@
 		/// <param name="site">The site the title is from.</param>
 		/// <param name="node">The <see cref="IBacklinkNode"/> to parse.</param>
 		/// <returns>A new FullTitle based on the provided values.</returns>
-		public static Title FromBacklinkNode(Site site, IBacklinkNode node)
-		{
-			ThrowNull(site, nameof(site));
-			ThrowNull(node, nameof(node));
-			return FromName(site, node.GetTitleText());
-		}
+		public static Title FromBacklinkNode(Site site, IBacklinkNode node) => FromName(site.NotNull(nameof(site)), node.NotNull(nameof(node)).GetTitleText());
 
 		/// <summary>Creates a new instance of the <see cref="Title"/> class from the site and full page name.</summary>
 		/// <param name="site">The site this title is from.</param>
@@ -211,8 +202,7 @@
 		/// <remarks>This version allows custom create-protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="CreateProtect(string, ProtectionLevel, string)"/> version of this call.</remarks>
 		public ChangeStatus CreateProtect(string reason, string createProtection, string duration)
 		{
-			ThrowNull(createProtection, nameof(createProtection));
-			var protection = new ProtectInputItem("create", createProtection) { ExpiryRelative = duration };
+			var protection = new ProtectInputItem("create", createProtection.NotNull(nameof(createProtection))) { ExpiryRelative = duration };
 			return this.Protect(reason, new[] { protection });
 		}
 
@@ -230,7 +220,7 @@
 		/// <returns>A value indicating the change status of the block.</returns>
 		public ChangeStatus Delete(string reason)
 		{
-			ThrowNull(reason, nameof(reason));
+			reason.ThrowNull(nameof(reason));
 			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
 			{
 				[nameof(reason)] = reason,
@@ -272,11 +262,7 @@
 		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
 		/// <remarks>The original title object will remain unaltered after the move; it will not be updated to reflect the destination.</remarks>
-		public ChangeValue<IDictionary<string, string>> Move(ISimpleTitle to, string reason, bool suppressRedirect)
-		{
-			ThrowNull(to, nameof(to));
-			return this.Move(to.FullPageName, reason, false, false, suppressRedirect);
-		}
+		public ChangeValue<IDictionary<string, string>> Move(ISimpleTitle to, string reason, bool suppressRedirect) => this.Move(to.NotNull(nameof(to)).FullPageName, reason, false, false, suppressRedirect);
 
 		/// <summary>Moves the title to the name specified.</summary>
 		/// <param name="to">The location to move the title to.</param>
@@ -289,8 +275,8 @@
 		/// <exception cref="InvalidOperationException">Thrown when either the From page or the To page from the Move result is null.</exception>
 		public ChangeValue<IDictionary<string, string>> Move(string to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
 		{
-			ThrowNull(to, nameof(to));
-			ThrowNull(reason, nameof(reason));
+			to.ThrowNull(nameof(to));
+			reason.ThrowNull(nameof(reason));
 			const string subPageName = "/SubPage";
 			var disabledResult = new Dictionary<string, string>(StringComparer.Ordinal);
 			if (!this.Site.EditingEnabled)
@@ -344,7 +330,7 @@
 					{
 						if (item.Error != null)
 						{
-							this.Site.PublishWarning(this, CurrentCulture(Resources.MovePageWarning, this.FullPageName, to, item.Error.Info));
+							this.Site.PublishWarning(this, Globals.CurrentCulture(Resources.MovePageWarning, this.FullPageName, to, item.Error.Info));
 						}
 						else if (item.From != null && item.To != null)
 						{
@@ -376,8 +362,7 @@
 		/// <remarks>The original title object will remain unaltered after the move; it will not be updated to reflect the destination.</remarks>
 		public ChangeValue<IDictionary<string, string>> Move(ISimpleTitle to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
 		{
-			ThrowNull(to, nameof(to));
-			return this.Move(to.FullPageName, reason, moveTalk, moveSubpages, suppressRedirect);
+			return this.Move(to.NotNull(nameof(to)).FullPageName, reason, moveTalk, moveSubpages, suppressRedirect);
 		}
 
 		/// <summary>Checks if the provided page name is equal to the title's page name, based on the case-sensitivity for the namespace.</summary>
@@ -525,8 +510,8 @@
 		/// <returns><see langword="true"/> if all protections were set to the specified values.</returns>
 		protected virtual bool Protect(ProtectInput input)
 		{
-			ThrowNull(input, nameof(input));
-			ThrowNull(input.Protections, nameof(input), nameof(input.Protections));
+			input.ThrowNull(nameof(input));
+			input.Protections.ThrowNull(nameof(input), nameof(input.Protections));
 			var inputCount = new List<ProtectInputItem>(input.Protections).Count;
 			var result = this.Site.AbstractionLayer.Protect(input);
 
@@ -550,7 +535,7 @@
 		#region Private Methods
 		private ChangeStatus Protect(string reason, ICollection<ProtectInputItem> protections)
 		{
-			ThrowNull(reason, nameof(reason));
+			reason.ThrowNull(nameof(reason));
 			if (protections.Count == 0)
 			{
 				return ChangeStatus.NoEffect;

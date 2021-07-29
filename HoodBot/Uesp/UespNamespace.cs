@@ -2,15 +2,13 @@
 {
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class UespNamespace
 	{
 		#region Constructors
 		internal UespNamespace(Site site, string line)
 		{
-			ThrowNull(line, nameof(line));
-			var nsData = string.Concat(line, ";;;;;;").Split(TextArrays.Semicolon);
+			var nsData = string.Concat(line.NotNull(nameof(line)), ";;;;;;").Split(TextArrays.Semicolon);
 			for (var i = 0; i < nsData.Length; i++)
 			{
 				nsData[i] = nsData[i].Trim();

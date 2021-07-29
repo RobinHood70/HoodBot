@@ -1,11 +1,11 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System;
-	using static RobinHood70.CommonCode.Globals;
+using RobinHood70.CommonCode;
 
-	#region Public Enumerations
 
-	/// <summary>Controls which modules are loaded during a page load operation.</summary>
+#region Public Enumerations
+/// <summary>Controls which modules are loaded during a page load operation.</summary>
 	[Flags]
 	public enum PageModules
 	{
@@ -89,8 +89,7 @@
 		/// <param name="modules">The set of modules to be loaded.</param>
 		public PageLoadOptions(PageLoadOptions copy, PageModules modules)
 		{
-			ThrowNull(copy, nameof(copy));
-			this.ConvertTitles = copy.ConvertTitles;
+			this.ConvertTitles = copy.NotNull(nameof(copy)).ConvertTitles;
 			this.FollowRedirects = copy.FollowRedirects;
 			this.Modules = modules;
 		}

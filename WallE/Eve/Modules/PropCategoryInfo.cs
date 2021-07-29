@@ -1,9 +1,9 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class PropCategoryInfo : PropModule<CategoryInfoInput>
@@ -26,10 +26,7 @@
 		#endregion
 
 		#region Public Static Methods
-		public static PropCategoryInfo CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
-			input is CategoryInfoInput propInput
-				? new PropCategoryInfo(wal, propInput)
-				: throw InvalidParameterType(nameof(input), nameof(CategoryInfoInput), input.GetType().Name);
+		public static PropCategoryInfo CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new(wal, (CategoryInfoInput)input);
 		#endregion
 
 		#region Protected Override Methods
@@ -39,7 +36,7 @@
 
 		protected override void DeserializeToPage(JToken result, PageItem page)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			page.CategoryInfo = new CategoryInfoResult(
 				files: (int)result.MustHave("files"),
 				pages: (int)result.MustHave("pages"),

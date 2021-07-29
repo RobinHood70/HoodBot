@@ -2,9 +2,9 @@
 {
 	using System;
 	using Newtonsoft.Json;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class SimpleTitleJsonConverter : JsonConverter<ISimpleTitle>
 	{
@@ -14,17 +14,11 @@
 
 		public override ISimpleTitle ReadJson(JsonReader reader, Type objectType, ISimpleTitle? existingValue, bool hasExistingValue, JsonSerializer serializer)
 		{
-			ThrowNull(reader, nameof(reader));
-			ThrowNull(reader.Value, nameof(reader), nameof(reader.Value));
-			var title = (string)reader.Value;
+			var title = (string)reader.NotNull(nameof(reader))
+				.Value.NotNull(nameof(reader), nameof(reader.Value));
 			return Title.FromName(this.site, title);
 		}
 
-		public override void WriteJson(JsonWriter writer, ISimpleTitle? value, JsonSerializer serializer)
-		{
-			ThrowNull(writer, nameof(writer));
-			ThrowNull(value, nameof(value));
-			writer.WriteValue(value.ToString() ?? string.Empty);
-		}
+		public override void WriteJson(JsonWriter writer, ISimpleTitle? value, JsonSerializer serializer) => writer.NotNull(nameof(writer)).WriteValue(value.NotNull(nameof(value)).ToString() ?? string.Empty);
 	}
 }

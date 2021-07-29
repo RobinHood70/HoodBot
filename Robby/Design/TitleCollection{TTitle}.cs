@@ -9,7 +9,6 @@
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.CommonCode.Globals;
 
 	// TODO: Re-write so all lookups (Contains, IndexOf, Remove) use numeric namespace and pagename. Will probably require Key itself to be rewritten to match. Right now, things like IndexOf((string)key) will fail for alternative namespace names.
 	#region Public Enumerations
@@ -92,10 +91,8 @@
 		/// <param name="equalityComparer">The <see cref="IEqualityComparer{T}"/> to use for lookups.</param>
 		protected TitleCollection([NotNull, ValidatedNotNull] Site site, IEqualityComparer<ISimpleTitle>? equalityComparer)
 		{
-			ThrowNull(site, nameof(site));
-			this.Site = site;
-			equalityComparer ??= SimpleTitleEqualityComparer.Instance;
-			this.lookup = new Dictionary<ISimpleTitle, TTitle>(equalityComparer);
+			this.Site = site.NotNull(nameof(site));
+			this.lookup = new Dictionary<ISimpleTitle, TTitle>(equalityComparer ?? SimpleTitleEqualityComparer.Instance);
 		}
 		#endregion
 
@@ -144,8 +141,7 @@
 			get => this.items[index];
 			set
 			{
-				ThrowNull(value, nameof(value));
-				this.items[index] = value;
+				this.items[index] = value.NotNull(nameof(value));
 				this.lookup[value] = value;
 			}
 		}
@@ -181,11 +177,10 @@
 		/// <exception cref="ArgumentNullException">Thrown when <paramref name="title"/> is null.</exception>
 		public virtual TTitle this[ISimpleTitle title]
 		{
-			get => this.lookup[title ?? throw ArgumentNull(nameof(title))];
+			get => this.lookup[title.NotNull(nameof(title))];
 			set
 			{
-				ThrowNull(title, nameof(title));
-				var index = this.IndexOf(title);
+				var index = this.IndexOf(title.NotNull(nameof(title)));
 				if (index < 0)
 				{
 					this.items.Add(value);
@@ -228,8 +223,7 @@
 		/// <param name="titles">The titles to add.</param>
 		public void Add(IEnumerable<string> titles)
 		{
-			ThrowNull(titles, nameof(titles));
-			foreach (var title in titles)
+			foreach (var title in titles.NotNull(nameof(titles)))
 			{
 				this.Add(title);
 			}
@@ -240,8 +234,7 @@
 		/// <param name="titles">The titles to add, with or without the leading namespace text.</param>
 		public void Add(int defaultNamespace, IEnumerable<string> titles)
 		{
-			ThrowNull(titles, nameof(titles));
-			foreach (var title in titles)
+			foreach (var title in titles.NotNull(nameof(titles)))
 			{
 				this.AddNewItem(new TitleParser(this.Site, defaultNamespace, title));
 			}
@@ -280,21 +273,20 @@
 		/// <param name="item">The object to locate in the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns><see langword="true" /> if <paramref name="item" /> is found in the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException">Thrown when <paramref name="item"/> is null.</exception>
-		public bool Contains(ISimpleTitle item) => this.lookup.ContainsKey(item ?? throw ArgumentNull(nameof(item)));
+		public bool Contains(ISimpleTitle item) => this.lookup.ContainsKey(item.NotNull(nameof(item)));
 
 		/// <summary>Determines whether the <see cref="TitleCollection">collection</see> contains a specific value.</summary>
 		/// <param name="item">The object to locate in the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns><see langword="true" /> if <paramref name="item" /> is found in the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException">Thrown when <paramref name="item"/> is null.</exception>
-		public bool Contains(TTitle item) => this.lookup.ContainsKey(item ?? throw ArgumentNull(nameof(item)));
+		public bool Contains(TTitle item) => this.lookup.ContainsKey(item.NotNull(nameof(item)));
 
 		/// <summary>Determines whether the collection contains an item with the specified key.</summary>
 		/// <param name="key">The key to search for.</param>
 		/// <returns><see langword="true" /> if the collection contains an item with the specified key; otherwise, <see langword="true" />.</returns>
 		public bool Contains(string key)
 		{
-			ThrowNull(key, nameof(key));
-			var title = this.TextToTitle(key);
+			var title = this.TextToTitle(key.NotNull(nameof(key)));
 			return this.lookup.ContainsKey(title);
 		}
 
@@ -627,8 +619,7 @@
 		/// <exception cref="InvalidOperationException">Thrown when there are no valid values for <paramref name="protectionLevels"/>.</exception>
 		public void GetProtectedPages(IEnumerable<string> protectionTypes, IEnumerable<string>? protectionLevels)
 		{
-			ThrowNull(protectionTypes, nameof(protectionTypes));
-			if (protectionTypes.IsEmpty())
+			if (protectionTypes.NotNull(nameof(protectionTypes)).IsEmpty())
 			{
 				throw new InvalidOperationException("You must specify at least one value for protectionTypes");
 			}
@@ -702,11 +693,7 @@
 
 		/// <summary>Adds recent changes pages to the collection based on complex criteria.</summary>
 		/// <param name="options">The options to be applied to the results.</param>
-		public void GetRecentChanges(RecentChangesOptions options)
-		{
-			ThrowNull(options, nameof(options));
-			this.GetRecentChanges(options.ToWallEInput);
-		}
+		public void GetRecentChanges(RecentChangesOptions options) => this.GetRecentChanges(options.NotNull(nameof(options)).ToWallEInput);
 
 		/// <summary>Adds redirects to a namespace to the collection.</summary>
 		/// <param name="ns">The namespace.</param>
@@ -818,8 +805,7 @@
 		public int IndexOf(ISimpleTitle item)
 		{
 			// ContainsKey is O(1), so check to see if key exists; if not, iterate looking for Namespace/PageName match.
-			ThrowNull(item, nameof(item));
-			if (this.lookup.ContainsKey(item))
+			if (this.lookup.ContainsKey(item.NotNull(nameof(item))))
 			{
 				for (var i = 0; i < this.items.Count; i++)
 				{
@@ -838,11 +824,7 @@
 		/// <summary>Determines the index of a specific item in the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="key">The key of the item to locate in the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns>The index of the item with the specified <paramref name="key" /> if found in the list; otherwise, -1.</returns>
-		public int IndexOf(string key)
-		{
-			ThrowNull(key, nameof(key));
-			return this.IndexOf(this.TextToTitle(key));
-		}
+		public int IndexOf(string key) => this.IndexOf(this.TextToTitle(key.NotNull(nameof(key))));
 
 		/// <summary>Inserts an item into the <see cref="TitleCollection">collection</see> at the specified index.</summary>
 		/// <param name="index">The zero-based index at which <paramref name="item" /> should be inserted.</param>
@@ -859,8 +841,7 @@
 		/// <returns><see langword="true" /> if and item with the specified <paramref name="key" /> was successfully removed from the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />. This method also returns <see langword="false" /> if an item with the specified <paramref name="key" /> is not found in the original <see cref="TitleCollection">collection</see>.</returns>
 		public bool Remove(string key)
 		{
-			ThrowNull(key, nameof(key));
-			var title = this.TextToTitle(key);
+			var title = this.TextToTitle(key.NotNull(nameof(key)));
 			return this.Remove(title);
 		}
 
@@ -869,8 +850,7 @@
 		/// <returns><see langword="true" /> if <paramref name="item" /> was successfully removed from the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />. This method also returns <see langword="false" /> if <paramref name="item" /> is not found in the original <see cref="TitleCollection">collection</see>.</returns>
 		public bool Remove(ISimpleTitle item)
 		{
-			ThrowNull(item, nameof(item));
-			var i = this.IndexOf(item);
+			var i = this.IndexOf(item.NotNull(nameof(item)));
 			if (i != -1)
 			{
 				this.RemoveItem(i);
@@ -951,11 +931,7 @@
 		/// <summary>Returns the requested value, or null if not found.</summary>
 		/// <param name="key">The key.</param>
 		/// <returns>The requested value, or null if not found.</returns>
-		public TTitle? ValueOrDefault(ISimpleTitle key)
-		{
-			ThrowNull(key, nameof(key));
-			return this.ValueOrDefault(key.FullPageName);
-		}
+		public TTitle? ValueOrDefault(ISimpleTitle key) => this.ValueOrDefault(key.NotNull(nameof(key)).FullPageName);
 
 		/// <summary>Returns the requested value, or null if not found.</summary>
 		/// <param name="key">The key.</param>
@@ -1015,22 +991,14 @@
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
 		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
-		public virtual bool TryGetValue(TTitle key, [MaybeNullWhen(false)] out TTitle value)
-		{
-			ThrowNull(key, nameof(key));
-			return this.lookup.TryGetValue(key, out value);
-		}
+		public virtual bool TryGetValue(TTitle key, [MaybeNullWhen(false)] out TTitle value) => this.lookup.TryGetValue(key.NotNull(nameof(key)), out value);
 
 		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
 		/// <param name="key">The key of the value to get.</param>
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
 		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
-		public virtual bool TryGetValue(ISimpleTitle key, [MaybeNullWhen(false)] out TTitle value)
-		{
-			ThrowNull(key, nameof(key));
-			return this.lookup.TryGetValue(key, out value);
-		}
+		public virtual bool TryGetValue(ISimpleTitle key, [MaybeNullWhen(false)] out TTitle value) => this.lookup.TryGetValue(key.NotNull(nameof(key)), out value);
 
 		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
 		/// <param name="key">The key of the value to get.</param>
@@ -1039,8 +1007,7 @@
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
 		public virtual bool TryGetValue(string key, [MaybeNullWhen(false)] out TTitle value)
 		{
-			ThrowNull(key, nameof(key));
-			var title = this.TextToTitle(key);
+			var title = this.TextToTitle(key.NotNull(nameof(key)));
 			return this.lookup.TryGetValue(title, out value!);
 		}
 		#endregion
@@ -1071,10 +1038,9 @@
 		/// <remarks>This method underlies all methods that insert pages into the collection, and can be overridden in derived classes.</remarks>
 		protected virtual void InsertItem(int index, TTitle item)
 		{
-			ThrowNull(item, nameof(item));
-			if (item.Namespace.Site != this.Site)
+			if (item.NotNull(nameof(item)).Namespace.Site != this.Site)
 			{
-				throw new InvalidOperationException(CurrentCulture(Resources.InvalidSite));
+				throw new InvalidOperationException(Globals.CurrentCulture(Resources.InvalidSite));
 			}
 
 			if (this.IsTitleInLimits(item))

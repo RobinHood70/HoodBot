@@ -2,10 +2,10 @@
 {
 	using System;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ListQueryPage : ListModule<QueryPageInput, QueryPageItem>, IGeneratorModule
@@ -40,10 +40,7 @@
 		#endregion
 
 		#region Public Static Methods
-		public static ListQueryPage CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is QueryPageInput listInput
-				? new ListQueryPage(wal, listInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(QueryPageInput), input.GetType().Name);
+		public static ListQueryPage CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (QueryPageInput)input, pageSetGenerator);
 		#endregion
 
 		#region Public Methods
@@ -57,9 +54,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, QueryPageInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("page", input.Page)
 				.Add("limit", this.Limit);
 			if (input.Parameters != null)
@@ -74,10 +71,10 @@
 
 		protected override void DeserializeResult(JToken? result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			if (result["disabled"] != null)
 			{
-				this.Wal.AddWarning("querypage-disabled", CurrentCulture(EveMessages.QueryPageDisabled, this.queryPage));
+				this.Wal.AddWarning("querypage-disabled", Globals.CurrentCulture(EveMessages.QueryPageDisabled, this.queryPage));
 				return;
 			}
 

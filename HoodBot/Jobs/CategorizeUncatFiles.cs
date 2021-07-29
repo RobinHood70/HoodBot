@@ -5,7 +5,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby.Parser;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class CategorizeUncatFiles : ParsedPageJob
 	{
@@ -49,9 +48,8 @@
 
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
-			ThrowNull(parsedPage, nameof(parsedPage));
 			var headerFound = false;
-			foreach (var header in parsedPage.HeaderNodes)
+			foreach (var header in parsedPage.NotNull(nameof(parsedPage)).HeaderNodes)
 			{
 				var title = header.Title.ToValue().Trim(TextArrays.EqualsSign).Trim();
 				if (string.Equals(title, "Licensing", StringComparison.Ordinal))

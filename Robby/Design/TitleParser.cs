@@ -2,7 +2,6 @@
 {
 	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>This class serves as a light-weight parser to split a wiki title into its constituent parts.</summary>
 	public class TitleParser : ILinkTitle
@@ -34,8 +33,8 @@
 		public TitleParser(Site site, int defaultNamespace, string pageName, bool fullParsing)
 		{
 			// This routine very roughly follows the logic of MediaWikiTitleCodec.splitTitleString() but skips much of the error checking and rarely encountered sanitization, which is left to the server.
-			ThrowNull(site, nameof(site));
-			ThrowNull(pageName, nameof(pageName));
+			site.ThrowNull(nameof(site));
+			pageName.ThrowNull(nameof(pageName));
 			static (string Key, string PageName, bool Forced) SplitPageName(string pageName)
 			{
 				var forced = pageName.Length > 0 && pageName[0] == ':';

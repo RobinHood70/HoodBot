@@ -5,7 +5,7 @@
 	using System.IO;
 	using System.Security.Cryptography;
 	using System.Text;
-	using static RobinHood70.CommonCode.Globals;
+using RobinHood70.CommonCode;
 
 	internal sealed class TextEncrypter
 	{
@@ -14,9 +14,8 @@
 		public TextEncrypter(string encryptionKey)
 		{
 			// Hash the key to ensure it is exactly 256 bits long, as required by AES-256
-			ThrowNull(encryptionKey, nameof(encryptionKey));
 			using var sha = new SHA256Managed();
-			this.encryptionKeyBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(encryptionKey));
+			this.encryptionKeyBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(encryptionKey.NotNull(nameof(encryptionKey))));
 		}
 
 		public string Encrypt(string value)
@@ -43,8 +42,7 @@
 
 		public string Decrypt(string value)
 		{
-			ThrowNull(value, nameof(value));
-			var buffer = Convert.FromBase64String(value);
+			var buffer = Convert.FromBase64String(value.NotNull(nameof(value)));
 			using var inputStream = new MemoryStream(buffer, false);
 			var iv = new byte[16];
 			var bytesRead = inputStream.Read(iv, 0, 16);

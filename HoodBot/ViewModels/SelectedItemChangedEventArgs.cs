@@ -1,14 +1,13 @@
 ﻿namespace RobinHood70.HoodBot.ViewModels
 {
 	using System;
-	using static RobinHood70.CommonCode.Globals;
+using RobinHood70.CommonCode;
 
 	public class SelectedItemChangedEventArgs : EventArgs
 	{
 		public SelectedItemChangedEventArgs(TreeNode node, bool selected)
 		{
-			ThrowNull(node, nameof(node));
-			this.Node = node;
+			this.Node = node.NotNull(nameof(node));
 			this.Selected = selected;
 		}
 

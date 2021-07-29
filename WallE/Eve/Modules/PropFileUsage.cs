@@ -2,9 +2,9 @@
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	// For the time being, the complexity involved in implementing FileUsage, LinksHere, Redirects, and TranscludedIn as derived modules is just not worth it in C#. MediaWiki gets away with it much more easily due to the fact that it's mostly working with strings, along with PHP's looser type system. It may become more worthwhile to implement these modules as inherited in the future, however, or do it like the Revisions classes do and have a static base builder/deserializer but remain otherwise uninherited.
@@ -33,23 +33,17 @@
 		#endregion
 
 		#region Public Static Methods
-		public static PropFileUsage CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is FileUsageInput propInput
-				? new PropFileUsage(wal, propInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(FileUsageInput), input.GetType().Name);
+		public static PropFileUsage CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (FileUsageInput)input, pageSetGenerator);
 
-		public static PropFileUsage CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) =>
-			input is FileUsageInput propInput
-				? new PropFileUsage(wal, propInput)
-				: throw InvalidParameterType(nameof(input), nameof(FileUsageInput), input.GetType().Name);
+		public static PropFileUsage CreateInstance(WikiAbstractionLayer wal, IPropertyInput input) => new(wal, (FileUsageInput)input);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, FileUsageInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddFlags("prop", input.Properties)
 				.Add("namespace", input.Namespaces)
 				.AddFilterPiped("show", "redirect", input.FilterRedirects)

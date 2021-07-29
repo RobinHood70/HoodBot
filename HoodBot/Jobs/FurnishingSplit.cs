@@ -9,7 +9,6 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class FurnishingSplit : ParsedPageJob
 	{
@@ -67,8 +66,8 @@
 
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
-			ThrowNull(parsedPage, nameof(parsedPage));
-			ThrowNull(parsedPage.Context, nameof(parsedPage), nameof(parsedPage.Context));
+			parsedPage.ThrowNull(nameof(parsedPage));
+			parsedPage.Context.ThrowNull(nameof(parsedPage), nameof(parsedPage.Context));
 			var pageIssues = new List<string>();
 			if (!parsedPage.Context.PageName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))
 			{

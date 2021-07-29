@@ -5,7 +5,6 @@ namespace RobinHood70.WallE.Base
 	using System.Collections.Generic;
 	using System.Globalization;
 	using RobinHood70.CommonCode;
-	using static RobinHood70.CommonCode.Globals;
 
 	public enum ListType
 	{
@@ -28,8 +27,7 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		protected PageSetInput(PageSetInput input)
 		{
-			ThrowNull(input, nameof(input));
-			this.ConvertTitles = input.ConvertTitles;
+			this.ConvertTitles = input.NotNull(nameof(input)).ConvertTitles;
 			this.GeneratorInput = input.GeneratorInput;
 			this.ListType = input.ListType;
 			this.Redirects = input.Redirects;
@@ -38,31 +36,24 @@ namespace RobinHood70.WallE.Base
 
 		protected PageSetInput(IEnumerable<string> titles)
 		{
-			ThrowNullOrWhiteSpace(titles, nameof(titles));
 			this.ListType = ListType.Titles;
-			this.Values = titles.AsReadOnlyList();
+			this.Values = titles.NotNullOrWhiteSpace(nameof(titles)).AsReadOnlyList();
 		}
 
 		protected PageSetInput(IGeneratorInput generatorInput)
 		{
-			ThrowNull(generatorInput, nameof(generatorInput));
-			this.GeneratorInput = generatorInput;
+			this.GeneratorInput = generatorInput.NotNull(nameof(generatorInput));
 			this.Values = Array.Empty<string>();
 		}
 
 		protected PageSetInput(IGeneratorInput generatorInput, IEnumerable<string> titles)
-			: this(titles)
-		{
-			ThrowNull(generatorInput, nameof(generatorInput));
-			this.GeneratorInput = generatorInput;
-		}
+			: this(titles) => this.GeneratorInput = generatorInput.NotNull(nameof(generatorInput));
 
 		protected PageSetInput(IEnumerable<long> ids, ListType listType)
 		{
-			ThrowNull(ids, nameof(ids));
 			this.ListType = listType;
 			var list = new List<string>();
-			foreach (var id in ids)
+			foreach (var id in ids.NotNull(nameof(ids)))
 			{
 				list.Add(id.ToString(CultureInfo.InvariantCulture));
 			}

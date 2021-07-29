@@ -7,7 +7,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <inheritdoc/>
 	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "High class coupling is the result of using classes for inputs, which is a recommended design when dealing with such a high level of input variability.")]
@@ -225,7 +224,7 @@
 		/// <inheritdoc/>
 		public EditResult Edit(EditInput input)
 		{
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			return new EditResult("Success", input.PageId, input.Title ?? "Test Page", EditFlags.NoChange, input.ContentModel, 1, 1, this.CurrentTimestamp, new Dictionary<string, string>(StringComparer.Ordinal));
 		}
 
@@ -324,8 +323,7 @@
 		/// <inheritdoc/>
 		public LoginResult Login(LoginInput input)
 		{
-			ThrowNull(input, nameof(input));
-			this.CurrentUserInfo = GetUser(1, input.UserName);
+			this.CurrentUserInfo = GetUser(1, input.NotNull(nameof(input)).UserName);
 			this.Initialize();
 
 			return LoginResult.AlreadyLoggedIn(this.CurrentUserInfo.UserId, this.CurrentUserInfo.Name);

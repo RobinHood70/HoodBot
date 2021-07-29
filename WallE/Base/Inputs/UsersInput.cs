@@ -3,7 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	#region Public Enumerations
 	[Flags]
@@ -27,11 +27,7 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public UsersInput(IEnumerable<string> users) => this.Users = users;
 
-		public UsersInput(IEnumerable<long> userIds)
-		{
-			ThrowCollectionEmpty(userIds, nameof(userIds));
-			this.UserIds = userIds;
-		}
+		public UsersInput(IEnumerable<long> userIds) => this.UserIds = userIds.NotNullOrEmpty(nameof(userIds));
 		#endregion
 
 		#region Public Properties

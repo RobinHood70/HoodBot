@@ -2,8 +2,8 @@
 {
 	using System;
 	using Newtonsoft.Json.Linq;
+using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
-	using static RobinHood70.CommonCode.Globals;
 
 	// Note: password security for this class is minimal and fairly easily reversed. If this is a concern, it's recommended not to store passowrds and instead enter them manually every time.
 	public sealed class WikiInfo : IJsonSubSetting<WikiInfo>
@@ -43,8 +43,7 @@
 		#region Public Methods
 		public void FromJson(JToken json)
 		{
-			ThrowNull(json, nameof(json));
-			var api = (string?)json[nameof(this.Api)] ?? "/";
+			var api = (string?)json.NotNull(nameof(json))[nameof(this.Api)] ?? "/";
 			try
 			{
 				this.Api = new Uri(api, UriKind.RelativeOrAbsolute);

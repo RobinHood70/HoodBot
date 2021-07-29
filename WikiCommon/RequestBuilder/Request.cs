@@ -7,7 +7,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Properties;
-	using static RobinHood70.CommonCode.Globals;
 	#region Public Enumerations
 
 	// Enum.ToString() has a bug that can cause 0-valued enums to appear in outputs if there's more than one of them (e.g., None = 0, Default = None). Enum.GetName() does not seem to suffer from this, so we use that throughout this class instead.
@@ -41,8 +40,7 @@
 		/// <param name="supportsUnitSeparator">if set to <see langword="true" /> [supports unit separator].</param>
 		public Request(Uri baseUri, RequestType requestType, bool supportsUnitSeparator)
 		{
-			ThrowNull(baseUri, nameof(baseUri));
-			this.Uri = baseUri;
+			this.Uri = baseUri.NotNull(nameof(baseUri));
 			this.Type = requestType;
 			this.SupportsUnitSeparator = supportsUnitSeparator;
 		}
@@ -137,8 +135,7 @@
 		/// <returns>The current collection (fluent interface).</returns>
 		public Request Add(string name, string? value)
 		{
-			ThrowNull(name, nameof(name));
-			this.Add(new StringParameter(this.Prefix + name, value));
+			this.Add(new StringParameter(this.Prefix + name.NotNull(nameof(name)), value));
 			return this;
 		}
 
@@ -231,7 +228,7 @@
 		/// <returns>The current collection (fluent interface).</returns>
 		public Request AddFilterPiped(string name, string trueValue, Filter filter)
 		{
-			ThrowNull(trueValue, nameof(trueValue));
+			trueValue.ThrowNull(nameof(trueValue));
 			return filter switch
 			{
 				Filter.Only => this.AddToPiped(name, trueValue),
@@ -271,7 +268,7 @@
 		public Request AddFlags<T>(string name, T values)
 			where T : Enum
 		{
-			ThrowNull(values, nameof(values));
+			values.ThrowNull(nameof(values));
 			var type = values.GetType();
 			foreach (var prop in values.GetUniqueFlags())
 			{
@@ -298,8 +295,7 @@
 		/// <returns>The current collection (fluent interface).</returns>
 		public Request AddFormat(string value)
 		{
-			ThrowNull(value, nameof(value));
-			this.Add(new StringParameter("format", value, ValueType.Modify));
+			this.Add(new StringParameter("format", value.NotNull(nameof(value)), ValueType.Modify));
 			return this;
 		}
 
@@ -309,9 +305,8 @@
 		/// <returns>The current collection (fluent interface).</returns>
 		public Request AddHidden(string name, string? value)
 		{
-			ThrowNull(name, nameof(name));
-			ThrowNull(value, nameof(value)); // Unlike regular Add, there is no condition in which this should be null.
-			this.Add(new StringParameter(this.Prefix + name, value, ValueType.Hidden));
+			// Unlike regular Add, there is no condition in which value should be null.
+			this.Add(new StringParameter(this.Prefix + name.NotNull(nameof(name)), value.NotNull(nameof(value)), ValueType.Hidden));
 			return this;
 		}
 
@@ -429,23 +424,17 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public Request AddIfPositive(string name, int value)
-		{
-			ThrowNull(name, nameof(name));
-			ThrowNull(value, nameof(value));
-			return value > 0 ? this.Add(name, value) : this;
-		}
+		public Request AddIfPositive(string name, int value) => value > 0
+			? this.Add(name.NotNull(nameof(name)), value)
+			: this;
 
 		/// <summary>Adds a long integer parameter if the value is greater than zero.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public Request AddIfPositive(string name, long value)
-		{
-			ThrowNull(name, nameof(name));
-			ThrowNull(value, nameof(value));
-			return value > 0 ? this.Add(name, value) : this;
-		}
+		public Request AddIfPositive(string name, long value) => value > 0
+			? this.Add(name.NotNull(nameof(name)), value)
+			: this;
 
 		/// <summary>Adds an enumeration parameter if its integer value is greater than zero and the condition is true.</summary>
 		/// <typeparam name="T">The enumeration type.</typeparam>
@@ -461,24 +450,16 @@
 		/// <param name="value">The parameter value.</param>
 		/// <param name="condition">The condition to check.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public Request AddIfPositiveIf(string name, int value, bool condition)
-		{
-			ThrowNull(name, nameof(name));
-			ThrowNull(value, nameof(value));
-			return (condition && value > 0) ? this.Add(name, value) : this;
-		}
+		public Request AddIfPositiveIf(string name, int value, bool condition) => (condition && value > 0)
+			? this.Add(name.NotNull(nameof(name)), value)
+			: this;
 
 		/// <summary>Adds a long integer parameter if the value is greater than zero and the condition is true.</summary>
 		/// <param name="name">The parameter name.</param>
 		/// <param name="value">The parameter value.</param>
 		/// <param name="condition">The condition to check.</param>
 		/// <returns>The current collection (fluent interface).</returns>
-		public Request AddIfPositiveIf(string name, long value, bool condition)
-		{
-			ThrowNull(name, nameof(name));
-			ThrowNull(value, nameof(value));
-			return (condition && value > 0) ? this.Add(name, value) : this;
-		}
+		public Request AddIfPositiveIf(string name, long value, bool condition) => (condition && value > 0) ? this.Add(name.NotNull(nameof(name)), value) : this;
 
 		/// <summary>Adds or changes a string parameter if the value is non-null.</summary>
 		/// <param name="name">The parameter name.</param>
@@ -504,9 +485,8 @@
 		/// <exception cref="InvalidOperationException">Thrown when the named parameter does not exist.</exception>
 		public Request AddToPiped(string name, string value)
 		{
-			ThrowNull(name, nameof(name));
-			ThrowNull(value, nameof(value));
-			var newKey = this.Prefix + name;
+			value.ThrowNull(nameof(value));
+			var newKey = this.Prefix + name.NotNull(nameof(name));
 			if (this.TryGetValue(newKey, out var param))
 			{
 				if (param is PipedParameter piped)
@@ -515,7 +495,7 @@
 				}
 				else
 				{
-					throw new InvalidOperationException(CurrentCulture(Resources.NotAPipedParameter, name));
+					throw new InvalidOperationException(Globals.CurrentCulture(Resources.NotAPipedParameter, name));
 				}
 			}
 			else
@@ -542,7 +522,7 @@
 		/// <param name="visitor">The visitor.</param>
 		public void Build(IParameterVisitor visitor)
 		{
-			ThrowNull(visitor, nameof(visitor));
+			visitor.ThrowNull(nameof(visitor));
 			foreach (var param in this)
 			{
 				param.Accept(visitor);
@@ -587,7 +567,7 @@
 		/// <param name="item">The item.</param>
 		/// <returns>The key corresponding to the item.</returns>
 		/// <exception cref="ArgumentNullException">Thrown when the parameter is null.</exception>
-		protected override string GetKeyForItem(Parameter item) => (item ?? throw ArgumentNull(nameof(item))).Name;
+		protected override string GetKeyForItem(Parameter item) => item.NotNull(nameof(item)).Name;
 		#endregion
 
 		#region Private Methods
@@ -599,10 +579,8 @@
 		/// <remarks>Values added by this method can be modified using the source collection.</remarks>
 		private Request AddPiped(string name, ICollection<string> values)
 		{
-			ThrowNull(name, nameof(name));
-			ThrowNull(values, nameof(values));
-			var newKey = this.Prefix + name;
-			this.Add(new PipedParameter(newKey, values));
+			var newKey = this.Prefix + name.NotNull(nameof(name));
+			this.Add(new PipedParameter(newKey, values.NotNull(nameof(values))));
 
 			return this;
 		}

@@ -3,8 +3,8 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.Properties;
-	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class RootElement : StackElement
 	{
@@ -27,7 +27,7 @@
 
 		#region Internal Override Methods
 		[DoesNotReturn]
-		internal override List<IWikiNode> BreakSyntax() => throw new InvalidOperationException(CurrentCulture(Resources.CalledOnRoot, nameof(this.BreakSyntax)));
+		internal override List<IWikiNode> BreakSyntax() => throw new InvalidOperationException(Globals.CurrentCulture(Resources.CalledOnRoot, nameof(this.BreakSyntax)));
 
 		internal override void Parse(char found) => this.Stack.ParseCharacter(found);
 		#endregion

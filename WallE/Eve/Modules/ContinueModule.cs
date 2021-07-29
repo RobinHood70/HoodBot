@@ -3,8 +3,8 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 
 	public abstract class ContinueModule : IModule
 	{
@@ -46,13 +46,11 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Public Virtual Methods
-		public virtual void BeforePageSetSubmit(IPageSetGenerator pageSet)
-		{
-			ThrowNull(pageSet, nameof(pageSet));
-			this.GeneratorContinue = pageSet.Generator is IGeneratorModule generator
+		public virtual void BeforePageSetSubmit(IPageSetGenerator pageSet) => this.GeneratorContinue = pageSet
+			.NotNull(nameof(pageSet))
+			.Generator is IGeneratorModule generator
 				? generator.FullPrefix + generator.ContinueName
 				: null;
-		}
 		#endregion
 	}
 }

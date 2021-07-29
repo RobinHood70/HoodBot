@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.Design
 {
+using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Implements the <see cref="ResultHandler" /> class and saves results to a wiki page.</summary>
 	/// <seealso cref="ResultHandler" />
@@ -15,9 +15,7 @@
 		public PageResultHandler(Site site, string pageName)
 			: base(site?.Culture)
 		{
-			ThrowNull(site, nameof(site));
-			ThrowNull(pageName, nameof(pageName));
-			this.Title = Page.FromName(site, pageName);
+			this.Title = Page.FromName(site.NotNull(nameof(site)), pageName.NotNull(nameof(pageName)));
 			this.DefaultText = this.ResourceManager.GetString("Results", site.Culture);
 		}
 		#endregion

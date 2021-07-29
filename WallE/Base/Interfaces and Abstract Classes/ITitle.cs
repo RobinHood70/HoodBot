@@ -3,10 +3,8 @@ namespace RobinHood70.WallE.Base
 {
 	public interface ITitle
 	{
-		#region Properties
 		int Namespace { get; }
 
 		string Title { get; }
-		#endregion
 	}
 }

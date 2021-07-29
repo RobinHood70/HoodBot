@@ -2,9 +2,9 @@
 {
 	using System;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 
 	internal sealed class ActionFeedContributions : ActionModule<FeedContributionsInput, CustomResult>
 	{
@@ -30,9 +30,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, FeedContributionsInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.AddIfNotNull("user", input.User)
 				.AddIfNotNull("feedformat", input.FeedFormat)
 				.Add("namespace", input.Namespace)

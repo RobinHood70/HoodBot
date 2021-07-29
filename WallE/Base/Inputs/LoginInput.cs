@@ -1,17 +1,15 @@
-﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
-namespace RobinHood70.WallE.Base
+﻿namespace RobinHood70.WallE.Base
 {
-	using static RobinHood70.CommonCode.Globals;
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
+	using RobinHood70.CommonCode;
 
 	public class LoginInput
 	{
 		#region Constructors
 		public LoginInput(string userName, string password)
 		{
-			ThrowNull(userName, nameof(userName));
-			ThrowNull(password, nameof(password));
-			this.UserName = userName;
-			this.Password = password;
+			this.UserName = userName.NotNull(nameof(userName));
+			this.Password = password.NotNull(nameof(password));
 		}
 		#endregion
 

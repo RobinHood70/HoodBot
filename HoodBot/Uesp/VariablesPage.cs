@@ -5,7 +5,6 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class VariablesPage : Page
 	{
@@ -57,8 +56,7 @@
 		#region Protected Override Methods
 		protected override void PopulateCustomResults(PageItem pageItem)
 		{
-			ThrowNull(pageItem, nameof(pageItem));
-			if (pageItem is VariablesPageItem varPageItem)
+			if (pageItem.NotNull(nameof(pageItem)) is VariablesPageItem varPageItem)
 			{
 				this.mainSet.Clear();
 				this.subsets.Clear();

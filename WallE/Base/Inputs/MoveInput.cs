@@ -1,24 +1,21 @@
-﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
-namespace RobinHood70.WallE.Base
+﻿namespace RobinHood70.WallE.Base
 {
-	using static RobinHood70.CommonCode.Globals;
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
+	using RobinHood70.CommonCode;
 
 	public class MoveInput
 	{
 		#region Constructors
 		public MoveInput(string from, string to)
 		{
-			ThrowNullOrWhiteSpace(from, nameof(from));
-			ThrowNullOrWhiteSpace(to, nameof(to));
-			this.From = from;
-			this.To = to;
+			this.From = from.NotNullOrWhiteSpace(nameof(from));
+			this.To = to.NotNullOrWhiteSpace(nameof(to));
 		}
 
 		public MoveInput(long from, string to)
 		{
-			ThrowNullOrWhiteSpace(to, nameof(to));
 			this.FromId = from;
-			this.To = to;
+			this.To = to.NotNullOrWhiteSpace(nameof(to));
 		}
 		#endregion
 

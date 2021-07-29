@@ -2,6 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
 
 	public class AllRevisionsItem : ITitle
 	{
@@ -9,7 +10,7 @@ namespace RobinHood70.WallE.Base
 		internal AllRevisionsItem(int ns, string title, long pageId, IReadOnlyList<RevisionItem> revisions)
 		{
 			this.Namespace = ns;
-			this.Title = title;
+			this.Title = title.NotNull(nameof(title));
 			this.PageId = pageId;
 			this.Revisions = revisions;
 		}

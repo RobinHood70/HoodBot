@@ -2,16 +2,12 @@
 namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	public class HelpInput
 	{
 		#region Public Constructors
-		public HelpInput(IEnumerable<string> modules)
-		{
-			ThrowNullOrWhiteSpace(modules, nameof(modules));
-			this.Modules = modules;
-		}
+		public HelpInput(IEnumerable<string> modules) => this.Modules = modules.NotNullOrWhiteSpace(nameof(modules));
 		#endregion
 
 		#region Public Properties

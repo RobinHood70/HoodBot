@@ -1,10 +1,10 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
 	internal sealed class ListAllRevisions : ListModule<AllRevisionsInput, AllRevisionsItem>, IGeneratorModule
@@ -32,18 +32,15 @@
 		#endregion
 
 		#region Public Static Methods
-		public static ListAllRevisions CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) =>
-			input is AllRevisionsInput listInput
-				? new ListAllRevisions(wal, listInput, pageSetGenerator)
-				: throw InvalidParameterType(nameof(input), nameof(AllRevisionsInput), input.GetType().Name);
+		public static ListAllRevisions CreateInstance(WikiAbstractionLayer wal, IGeneratorInput input, IPageSetGenerator pageSetGenerator) => new(wal, (AllRevisionsInput)input, pageSetGenerator);
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, AllRevisionsInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
+			input.ThrowNull(nameof(input));
 			request
+				.NotNull(nameof(request))
 				.BuildRevisions(input, this.SiteVersion)
 				.Add("namespace", input.Namespaces)
 				.Add("generatetitles", input.GenerateTitles);

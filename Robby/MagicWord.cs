@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.Robby
 {
 	using System.Collections.Generic;
+using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Represents a MediaWiki magic word.</summary>
 	public class MagicWord
@@ -12,8 +12,7 @@
 		protected internal MagicWord(SiteInfoMagicWord word)
 		{
 			// Assumes dictionary will hold Id.
-			ThrowNull(word, nameof(word));
-			this.CaseSensitive = word.CaseSensitive;
+			this.CaseSensitive = word.NotNull(nameof(word)).CaseSensitive;
 			this.Aliases = new HashSet<string>(word.Aliases, System.StringComparer.Ordinal);
 		}
 

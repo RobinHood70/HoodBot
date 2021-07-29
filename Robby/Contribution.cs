@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.Robby
 {
 	using System.Collections.Generic;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Stores information about a single user contribution.</summary>
 	/// <seealso cref="Revision" />
@@ -16,8 +16,8 @@
 		protected internal Contribution(Site site, UserContributionsItem contribution)
 			: base(contribution)
 		{
-			ThrowNull(contribution, nameof(contribution));
-			this.Title = Title.FromWikiTitle(site, contribution.Title ?? throw PropertyNull(nameof(contribution), nameof(contribution.Title)));
+			contribution.ThrowNull(nameof(contribution));
+			this.Title = Title.FromWikiTitle(site, contribution.Title.NotNull(nameof(contribution), nameof(contribution.Title)));
 			this.New = (contribution.Flags & UserContributionFlags.New) != 0;
 			this.Patrolled = (contribution.Flags & UserContributionFlags.Patrolled) != 0;
 			this.NewSize = contribution.Size;

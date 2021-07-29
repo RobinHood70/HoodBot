@@ -8,7 +8,6 @@
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>A collection of Title objects.</summary>
 	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling is a factor of using classes to handle complex inputs and is unavoidable.")]
@@ -27,9 +26,8 @@
 		public TitleCollection(Site site, IEnumerable<string> titles)
 			: base(site)
 		{
-			ThrowNull(titles, nameof(titles));
 			this.LimitationType = LimitationType.None;
-			foreach (var item in titles)
+			foreach (var item in titles.NotNull(nameof(titles)))
 			{
 				var newTitle = Title.FromName(site, item);
 				this.Add(newTitle);
@@ -51,10 +49,8 @@
 		public TitleCollection(Site site, int ns, IEnumerable<string> titles)
 			: base(site)
 		{
-			ThrowNull(site, nameof(site));
-			ThrowNull(titles, nameof(titles));
 			this.LimitationType = LimitationType.None;
-			this.Add(ns, titles);
+			this.Add(ns, titles.NotNull(nameof(titles)));
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class with a specific list of titles in a given namespace.</summary>
@@ -73,9 +69,8 @@
 		public TitleCollection(Site site, IEnumerable<ISimpleTitle> titles)
 			: base(site)
 		{
-			ThrowNull(titles, nameof(titles));
 			this.LimitationType = LimitationType.None;
-			foreach (var title in titles)
+			foreach (var title in titles.NotNull(nameof(titles)))
 			{
 				this.Add(new Title(title));
 			}
@@ -261,8 +256,8 @@
 		/// <param name="input">The input parameters.</param>
 		protected override void GetBacklinks(BacklinksInput input)
 		{
-			ThrowNull(input, nameof(input));
-			ThrowNull(input.Title, nameof(input), nameof(input.Title));
+			input.ThrowNull(nameof(input));
+			input.Title.ThrowNull(nameof(input), nameof(input.Title));
 			var inputTitle = Title.FromName(this.Site, input.Title);
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && (input.LinkTypes & BacklinksTypes.ImageUsage) != 0)
 			{
@@ -301,8 +296,7 @@
 		/// <param name="recurse">if set to <see langword="true"/> load the entire category tree recursively.</param>
 		protected override void GetCategoryMembers(CategoryMembersInput input, bool recurse)
 		{
-			ThrowNull(input, nameof(input));
-			var originalProps = input.Properties;
+			var originalProps = input.NotNull(nameof(input)).Properties;
 			input.Properties |= CategoryMembersProperties.Title;
 			if (recurse)
 			{
@@ -502,9 +496,8 @@
 		/// <param name="pageSetInput">The pageset inputs.</param>
 		protected virtual void LoadPages(QueryPageSetInput pageSetInput)
 		{
-			ThrowNull(pageSetInput, nameof(pageSetInput));
 			var loadOptions = new PageLoadOptions(this.Site.DefaultLoadOptions, PageModules.Info);
-			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, PageCreator.Default.GetPropertyInputs(loadOptions), PageCreator.Default.CreatePageItem);
+			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput.NotNull(nameof(pageSetInput)), PageCreator.Default.GetPropertyInputs(loadOptions), PageCreator.Default.CreatePageItem);
 			this.FillFromTitleItems(result);
 		}
 
@@ -569,8 +562,8 @@
 
 		private void RecurseCategoryPages(CategoryMembersInput input, HashSet<string> categoryTree)
 		{
-			ThrowNull(input, nameof(input));
-			ThrowNull(input.Title, nameof(input), nameof(input.Title));
+			input.ThrowNull(nameof(input));
+			input.Title.ThrowNull(nameof(input), nameof(input.Title));
 			if (!categoryTree.Add(input.Title))
 			{
 				return;
@@ -579,7 +572,7 @@
 			var result = this.Site.AbstractionLayer.CategoryMembers(input);
 			foreach (var item in result)
 			{
-				var title = Title.FromWikiTitle(this.Site, item.Title ?? throw PropertyNull(nameof(item), nameof(item.Title)));
+				var title = Title.FromWikiTitle(this.Site, item.Title.NotNull(nameof(item), nameof(item.Title)));
 				if (input.Type.HasFlag(item.Type))
 				{
 					this.Add(title);

@@ -4,7 +4,7 @@
 	using System.Data;
 	using System.Diagnostics;
 	using System.Text.RegularExpressions;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	internal abstract class Skill
 	{
@@ -46,7 +46,7 @@
 		#endregion
 
 		#region Internal Static Properties
-		internal static Regex Highlight => new(@"\|c[0-9a-fA-F]{6}|\|r", RegexOptions.None, DefaultRegexTimeout);
+		internal static Regex Highlight => new(@"\|c[0-9a-fA-F]{6}|\|r", RegexOptions.None, Globals.DefaultRegexTimeout);
 		#endregion
 
 		#region Public Override Methods

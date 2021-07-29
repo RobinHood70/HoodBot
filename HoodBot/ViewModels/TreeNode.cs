@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using GalaSoft.MvvmLight;
 	using RobinHood70.CommonCode;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class TreeNode : ObservableObject
 	{
@@ -17,9 +16,8 @@
 		#region Constructors
 		public TreeNode(TreeNode? parent, string displayText, IReadOnlyCollection<TreeNode>? children)
 		{
-			ThrowNull(displayText, nameof(displayText));
 			this.Parent = parent;
-			this.DisplayText = displayText;
+			this.DisplayText = displayText.NotNull(nameof(displayText));
 			this.Children = children ?? Array.Empty<TreeNode>();
 			this.IsFolder = this.Children.Count > 0;
 		}
@@ -89,7 +87,7 @@
 		#region Public Methods
 		public void AddChild(TreeNode child)
 		{
-			ThrowNull(child, nameof(child));
+			child.ThrowNull(nameof(child));
 			if (this.Children is ICollection<TreeNode> editable)
 			{
 				editable.Add(child);
@@ -144,7 +142,7 @@
 		#region Protected Methods
 		protected void OnSelectionChange(SelectedItemChangedEventArgs eventArgs)
 		{
-			ThrowNull(eventArgs, nameof(eventArgs));
+			eventArgs.ThrowNull(nameof(eventArgs));
 			if (this.Parent == null)
 			{
 				this.SelectionChanged?.Invoke(this, eventArgs);

@@ -6,14 +6,13 @@
 	using System.Globalization;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Class Extensions.</summary>
 	public static class Extensions
 	{
 		#region Fields
-		private static readonly Regex LeadingSpace = new(@"\A\s*", RegexOptions.None, DefaultRegexTimeout);
-		private static readonly Regex TrailingSpace = new(@"\s*\Z", RegexOptions.None, DefaultRegexTimeout);
+		private static readonly Regex LeadingSpace = new(@"\A\s*", RegexOptions.None, Globals.DefaultRegexTimeout);
+		private static readonly Regex TrailingSpace = new(@"\s*\Z", RegexOptions.None, Globals.DefaultRegexTimeout);
 		#endregion
 
 		#region IBacklink Methods
@@ -23,8 +22,7 @@
 		/// <returns>The title.</returns>
 		public static string GetTitleText(this IBacklinkNode backlink)
 		{
-			ThrowNull(backlink, nameof(backlink));
-			var retval = backlink.Title.ToValue();
+			var retval = backlink.NotNull(nameof(backlink)).Title.ToValue();
 			retval = WikiTextUtilities.DecodeAndNormalize(retval);
 			return retval.Trim();
 		}
@@ -39,8 +37,7 @@
 		/// <remarks>This is method is provided as a temporary measure. The intent is to alter the parser itself so as to make this method unnecessary.</remarks>
 		public static string GetInnerText(this IHeaderNode header, bool innerTrim)
 		{
-			ThrowNull(header, nameof(header));
-			var text = WikiTextVisitor.Value(header).TrimEnd();
+			var text = WikiTextVisitor.Value(header.NotNull(nameof(header))).TrimEnd();
 			text = text.Substring(header.Level, text.Length - header.Level * 2);
 			return innerTrim ? text.Trim() : text;
 		}
@@ -62,21 +59,18 @@
 		/// <summary>Sets the name to the specified text.</summary>
 		/// <param name="parameter">The parameter to set the name of.</param>
 		/// <param name="name">The name.</param>
-		public static void SetName(this IParameterNode parameter, string name)
-		{
-			ThrowNull(parameter, nameof(parameter));
-			ThrowNull(name, nameof(name));
-			parameter.SetName(parameter.Factory.Parse(name));
-		}
+		public static void SetName(this IParameterNode parameter, string name) => parameter
+			.NotNull(nameof(parameter))
+			.SetName(parameter.Factory.Parse(name.NotNull(nameof(name))));
 
 		/// <summary>Sets the name from a list of nodes.</summary>
 		/// <param name="parameter">The parameter to set the name of.</param>
 		/// <param name="name">The name.</param>
 		public static void SetName(this IParameterNode parameter, IEnumerable<IWikiNode> name)
 		{
-			ThrowNull(parameter, nameof(parameter));
-			ThrowNull(name, nameof(name));
-			if (parameter.Name == null)
+			parameter.ThrowNull(nameof(parameter));
+			name.ThrowNull(nameof(name));
+			if (parameter.Name is null)
 			{
 				parameter.AddName(name);
 			}
@@ -92,7 +86,7 @@
 		/// <param name="value">The value.</param>
 		public static void SetValue(this IParameterNode parameter, string? value)
 		{
-			ThrowNull(parameter, nameof(parameter));
+			parameter.ThrowNull(nameof(parameter));
 			if (value == null)
 			{
 				parameter.Value.Clear();
@@ -109,7 +103,7 @@
 		/// <param name="value">The value.</param>
 		public static void SetValue(this IParameterNode parameter, IEnumerable<IWikiNode>? value)
 		{
-			ThrowNull(parameter, nameof(parameter));
+			parameter.ThrowNull(nameof(parameter));
 			if (value == null)
 			{
 				parameter.Value.Clear();
@@ -142,14 +136,14 @@
 		/// <exception cref="InvalidOperationException">Thrown when the parameter is not found.</exception>
 		public static IParameterNode Add(this ITemplateNode template, string name, string value, bool copyFormat)
 		{
-			ThrowNull(template, nameof(template));
+			template.ThrowNull(nameof(template));
 			IParameterNode retval;
 			var index = copyFormat ? template.FindCopyParameter(false) : -1;
 			if (index != -1)
 			{
 				if (template.Find(name) != null)
 				{
-					throw new InvalidOperationException(CurrentCulture(Properties.Resources.ParameterExists, name));
+					throw new InvalidOperationException(Globals.CurrentCulture(Properties.Resources.ParameterExists, name));
 				}
 
 				var previous = template.Parameters[index];
@@ -178,7 +172,7 @@
 		/// <returns>The added parameter.</returns>
 		public static IParameterNode Add(this ITemplateNode template, string value, bool copyFormat)
 		{
-			ThrowNull(template, nameof(template));
+			template.ThrowNull(nameof(template));
 			IParameterNode retval;
 			var index = copyFormat ? template.FindCopyParameter(true) : -1;
 			if (index != -1)
@@ -228,7 +222,7 @@
 		/// <returns>The parameter, if found; otherwise, <see langword="null"/>.</returns>
 		public static int FindNumberedIndex(this ITemplateNode template, int number)
 		{
-			ThrowNull(template, nameof(template));
+			template.ThrowNull(nameof(template));
 			var retval = -1;
 			var i = 0;
 			var name = number.ToStringInvariant();
@@ -309,8 +303,7 @@
 		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
 		public static IEnumerable<IParameterNode> FindAll(this ITemplateNode template, bool ignoreCase, IEnumerable<string> parameterNames)
 		{
-			ThrowNull(parameterNames, nameof(parameterNames));
-			var nameSet = new HashSet<string>(parameterNames, ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
+			var nameSet = new HashSet<string>(parameterNames.NotNull(nameof(parameterNames)), ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
 			foreach (var (name, parameter) in GetResolvedParameters(template))
 			{
 				if (nameSet.Contains(name))
@@ -326,10 +319,9 @@
 		/// <returns>The index of the requested parameter or -1 if not found.</returns>
 		public static int FindIndex(this ITemplateNode template, string name)
 		{
-			ThrowNull(template, nameof(template));
 			var retval = -1;
 			var anonIndex = 0;
-			for (var i = 0; i < template.Parameters.Count; i++)
+			for (var i = 0; i < template.NotNull(nameof(template)).Parameters.Count; i++)
 			{
 				var paramName = template.Parameters[i].Name?.ToValue() ?? (++anonIndex).ToStringInvariant();
 				if (string.Equals(paramName, name, StringComparison.Ordinal))
@@ -348,9 +340,8 @@
 		/// <returns>A tuple containing the parameter number as well as the parameter itself.</returns>
 		public static IEnumerable<(int Index, IParameterNode Parameter)> GetNumericParameters(this ITemplateNode template)
 		{
-			ThrowNull(template, nameof(template));
 			var i = 0;
-			foreach (var parameter in template.Parameters)
+			foreach (var parameter in template.NotNull(nameof(template)).Parameters)
 			{
 				if (parameter.Anonymous)
 				{
@@ -405,9 +396,8 @@
 		/// <returns>A tuple containing the parameter name as well as the parameter itself.</returns>
 		public static IEnumerable<(string Name, IParameterNode Parameter)> GetResolvedParameters(this ITemplateNode template)
 		{
-			ThrowNull(template, nameof(template));
 			var anonIndex = 0;
-			foreach (var parameter in template.Parameters)
+			foreach (var parameter in template.NotNull(nameof(template)).Parameters)
 			{
 				var name = parameter.Name?.ToValue().Trim() ?? (++anonIndex).ToStringInvariant();
 				yield return (name, parameter);
@@ -419,8 +409,7 @@
 		/// <returns><see langword="true"/> if the parameter collection has any names which are valid integers; otherwise, <see langword="false"/>.</returns>
 		public static bool HasNumericNames(this ITemplateNode template)
 		{
-			ThrowNull(template, nameof(template));
-			foreach (var param in template.Parameters)
+			foreach (var param in template.NotNull(nameof(template)).Parameters)
 			{
 				if (!param.Anonymous && int.TryParse(param.Name?.ToValue(), NumberStyles.Integer, CultureInfo.InvariantCulture, out _))
 				{
@@ -468,9 +457,8 @@
 		/// <param name="template">The template to work on.</param>
 		public static void RemoveDuplicates(this ITemplateNode template)
 		{
-			ThrowNull(template, nameof(template));
+			var index = template.NotNull(nameof(template)).Parameters.Count;
 			var nameList = new HashSet<string>(StringComparer.Ordinal);
-			var index = template.Parameters.Count;
 			var anonIndex = 0;
 			while (index >= 0 && index < template.Parameters.Count)
 			{
@@ -495,11 +483,10 @@
 		/// <remarks>In the event of a duplicate parameter, all parameters with the same name will be removed.</remarks>
 		public static bool Remove(this ITemplateNode template, string parameterName)
 		{
-			ThrowNull(template, nameof(template));
 			var retval = false;
 			var anonIndex = 0;
 			var i = 0;
-			while (i < template.Parameters.Count)
+			while (i < template.NotNull(nameof(template)).Parameters.Count)
 			{
 				var name = template.Parameters[i].Name?.ToValue();
 				if (string.IsNullOrEmpty(name))
@@ -527,8 +514,7 @@
 		/// <param name="newTitle">The new title.</param>
 		public static void SetTitle(this ITemplateNode template, string newTitle)
 		{
-			ThrowNull(template, nameof(template));
-			var (leading, trailing) = GetSurroundingSpace(template.Title.ToValue());
+			var (leading, trailing) = GetSurroundingSpace(template.NotNull(nameof(template)).Title.ToValue());
 			template.Title.Clear();
 			template.Title.AddText(leading + newTitle + trailing);
 		}
@@ -545,10 +531,10 @@
 		/// <remarks>Any parameters not specified in <paramref name="sortOrder"/> will be moved after the specified parameters, and will otherwise retain their original order.</remarks>
 		public static void Sort(this ITemplateNode template, IEnumerable<string> sortOrder)
 		{
-			ThrowNull(sortOrder, nameof(sortOrder));
+			template.ThrowNull(nameof(template));
 			var indeces = new Dictionary<string, int>(StringComparer.Ordinal);
 			var i = 0;
-			foreach (var value in sortOrder)
+			foreach (var value in sortOrder.NotNull(nameof(sortOrder)))
 			{
 				indeces.Add(value, i);
 				i++;
@@ -617,8 +603,8 @@
 		/// <returns>The matching character count.</returns>
 		public static int Span([Localizable(false)] this string text, string mask, int offset, int limit)
 		{
-			ThrowNull(text, nameof(text));
-			ThrowNull(mask, nameof(mask));
+			text.ThrowNull(nameof(text));
+			mask.ThrowNull(nameof(mask));
 			if (offset < 0)
 			{
 				offset += text.Length;
@@ -686,8 +672,8 @@
 		/// <returns>The matching character count.</returns>
 		public static int SpanReverse([Localizable(false)] this string text, string mask, int offset, int limit)
 		{
-			ThrowNull(text, nameof(text));
-			ThrowNull(mask, nameof(mask));
+			text.ThrowNull(nameof(text));
+			mask.ThrowNull(nameof(mask));
 			if (offset < 0)
 			{
 				offset += text.Length;

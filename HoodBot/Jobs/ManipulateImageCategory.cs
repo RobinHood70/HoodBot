@@ -1,10 +1,10 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System;
 	using System.Collections.Generic;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class ManipulateImageCategory : WikiJob
 	{
@@ -37,7 +37,7 @@
 			{
 				if (image.LatestFileRevision is FileRevision imageInfo)
 				{
-					this.WriteLine(Invariant($"* {image.AsLink(true)} ({imageInfo.Width}x{imageInfo.Height})"));
+					this.WriteLine(FormattableString.Invariant($"* {image.AsLink(true)} ({imageInfo.Width}x{imageInfo.Height})"));
 				}
 			}
 		}

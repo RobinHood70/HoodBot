@@ -8,7 +8,6 @@
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Represents a file on the wiki. Includes all page data as well as file revisions and file-specific methods.</summary>
 	/// <seealso cref="Page" />
@@ -24,7 +23,7 @@
 		/// <param name="site">The site the File is from.</param>
 		/// <param name="pageName">The page name.</param>
 		public FilePage(Site site, string pageName)
-			: base((site ?? throw ArgumentNull(nameof(site)))[MediaWikiNamespaces.File], pageName)
+			: base((site.NotNull(nameof(site)))[MediaWikiNamespaces.File], pageName)
 		{
 		}
 
@@ -36,7 +35,7 @@
 		{
 			if (ns.Id != MediaWikiNamespaces.File)
 			{
-				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, ns.Site[MediaWikiNamespaces.File].Name), nameof(ns));
+				throw new ArgumentException(Globals.CurrentCulture(Resources.NamespaceMustBe, ns.Site[MediaWikiNamespaces.File].Name), nameof(ns));
 			}
 		}
 
@@ -47,7 +46,7 @@
 		{
 			if (title.Namespace.Id != MediaWikiNamespaces.File)
 			{
-				throw new ArgumentException(CurrentCulture(Resources.NamespaceMustBe, this.Site[MediaWikiNamespaces.File].Name), nameof(title));
+				throw new ArgumentException(Globals.CurrentCulture(Resources.NamespaceMustBe, this.Site[MediaWikiNamespaces.File].Name), nameof(title));
 			}
 		}
 		#endregion
@@ -128,9 +127,8 @@
 		/// <param name="pageItem">The page item.</param>
 		protected override void PopulateCustomResults(PageItem pageItem)
 		{
-			ThrowNull(pageItem, nameof(pageItem));
 			this.fileRevisions.Clear();
-			if (pageItem.ImageInfoEntries != null)
+			if (pageItem.NotNull(nameof(pageItem)).ImageInfoEntries != null)
 			{
 				var latest = DateTime.MinValue;
 				foreach (var imageInfoEntry in pageItem.ImageInfoEntries)

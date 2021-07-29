@@ -9,12 +9,11 @@
 	using RobinHood70.HoodBot.Jobs.Loggers;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.Robby;
-	using static RobinHood70.CommonCode.Globals;
 
 	public class JobManager
 	{
 		#region Constructors
-		public JobManager(Site site) => this.Site = site ?? throw ArgumentNull(nameof(site));
+		public JobManager(Site site) => this.Site = site.NotNull(nameof(site));
 		#endregion
 
 		#region Public Events
@@ -47,11 +46,10 @@
 		#region Public Methods
 		public async Task Run(IEnumerable<JobInfo> jobList)
 		{
-			ThrowNull(jobList, nameof(jobList));
 			this.OnStartingAllJobs();
 			var allSuccessful = true;
 			var editingEnabledMaster = this.Site.EditingEnabled;
-			foreach (var jobInfo in jobList)
+			foreach (var jobInfo in jobList.NotNull(nameof(jobList)))
 			{
 				var abort = this.OnStartingJob(jobInfo);
 				if (abort)

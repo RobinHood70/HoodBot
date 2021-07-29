@@ -3,8 +3,8 @@
 	using System;
 	using System.ComponentModel;
 	using GalaSoft.MvvmLight;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Models;
-	using static RobinHood70.CommonCode.Globals;
 
 	// TODO: Spit into separate model and viewmodel. Model should take care of saving/loading data (or use HostBuilder in App).
 	public sealed class WikiInfoViewModel : ObservableObject, IEditableObject
@@ -30,7 +30,7 @@
 
 		public WikiInfoViewModel(WikiInfo wikiInfo)
 		{
-			this.WikiInfo = wikiInfo ?? throw ArgumentNull(nameof(wikiInfo));
+			this.WikiInfo = wikiInfo.NotNull(nameof(wikiInfo));
 			this.CancelEdit();
 		}
 		#endregion

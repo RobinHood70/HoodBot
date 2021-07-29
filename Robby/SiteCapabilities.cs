@@ -9,7 +9,6 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
 	using RobinHood70.WallE.Eve;
-	using static RobinHood70.CommonCode.Globals;
 
 	#region Public Enumerations
 
@@ -31,9 +30,9 @@
 	public class SiteCapabilities
 	{
 		#region Static Fields
-		private static readonly Regex FindRsdLink = new(@"<link rel=""EditURI"" .*?href=""(?<rsdlink>.*?)""", RegexOptions.Compiled, DefaultRegexTimeout);
-		private static readonly Regex FindScript = new(@"<script>.*?(wgScriptPath=""(?<scriptpath>.*?)"".*?|wgServer=""(?<serverpath>.*?)"".*?)+</script>", RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.ExplicitCapture, DefaultRegexTimeout);
-		private static readonly Regex FindPhpLink = new(@"href=""(?<scriptpath>/([!#$&-;=?-\[\]_a-z~]|%[0-9a-fA-F]{2})+?)?/(api|index).php", RegexOptions.ExplicitCapture, DefaultRegexTimeout);
+		private static readonly Regex FindRsdLink = new(@"<link rel=""EditURI"" .*?href=""(?<rsdlink>.*?)""", RegexOptions.Compiled, Globals.DefaultRegexTimeout);
+		private static readonly Regex FindScript = new(@"<script>.*?(wgScriptPath=""(?<scriptpath>.*?)"".*?|wgServer=""(?<serverpath>.*?)"".*?)+</script>", RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		private static readonly Regex FindPhpLink = new(@"href=""(?<scriptpath>/([!#$&-;=?-\[\]_a-z~]|%[0-9a-fA-F]{2})+?)?/(api|index).php", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		#endregion
 
 		#region Fields
@@ -44,11 +43,7 @@
 
 		/// <summary>Initializes a new instance of the <see cref="SiteCapabilities"/> class.</summary>
 		/// <param name="client">The <see cref="IMediaWikiClient"/> client to be used to access the site.</param>
-		public SiteCapabilities([NotNull] IMediaWikiClient? client)
-		{
-			ThrowNull(client, nameof(client));
-			this.client = client;
-		}
+		public SiteCapabilities([NotNull] IMediaWikiClient? client) => this.client = client.NotNull(nameof(client));
 		#endregion
 
 		#region Public Properties
@@ -99,10 +94,8 @@
 		public bool Get(Uri anyPage)
 		{
 			// TODO: Convert to use URIs and related objects instead of strings whenever possible.
-			ThrowNull(anyPage, nameof(anyPage));
-
 			this.Clear();
-			var fullHost = new UriBuilder(anyPage.Scheme, anyPage.Host).Uri;
+			var fullHost = new UriBuilder(anyPage.NotNull(nameof(anyPage)).Scheme, anyPage.Host).Uri;
 			var tryPath = anyPage.AbsolutePath;
 			Uri? tryLoc = null;
 			var offset = tryPath.IndexOf("/index.php", StringComparison.Ordinal);

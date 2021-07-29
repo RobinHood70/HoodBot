@@ -2,7 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	#region Public Enumerations
 	[Flags]
@@ -97,21 +97,15 @@ namespace RobinHood70.WallE.Base
 		#region Public Static Methods
 		public static ParseInput FromOldId(long oldId) => new() { OldId = oldId };
 
-		public static ParseInput FromPage(string page)
-		{
-			ThrowNull(page, nameof(page));
-			return new ParseInput() { Page = page };
-		}
+		public static ParseInput FromPage(string page) => new() { Page = page.NotNull(nameof(page)) };
 
 		public static ParseInput FromPageId(long pageId) => new() { PageId = pageId };
 
 		public static ParseInput FromText(string text) => FromText(text, null);
 
-		public static ParseInput FromText(string text, string? title)
-		{
-			ThrowNull(text, nameof(text)); // Odd that someone would pass whitespace here, but not inconceivable, so only check for null. Title can be null, so no check.
-			return new ParseInput() { Text = text, Title = title };
-		}
+		// Odd that someone would pass whitespace here, but not inconceivable, so only check text for null. Title can be null, so no check.
+		public static ParseInput FromText(string text, string? title) =>
+			new() { Text = text.NotNull(nameof(text)), Title = title };
 		#endregion
 	}
 }

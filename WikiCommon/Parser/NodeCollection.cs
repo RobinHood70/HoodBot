@@ -2,12 +2,13 @@
 {
 	// TODO: This class still needs some work to make sure it's consistent and has all reasonably useful methods (and possibly removing any kruft).
 	// TODO: Make this observable in some fashion. Might mean using an embedded list rather than inheriting from List<T> directly.
+	// TODO: Make this fluent.
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Linq;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	/// <summary>  A delegate for the method required by the Replace method.</summary>
 	/// <param name="node">The node.</param>
@@ -245,7 +246,7 @@
 		/// </remarks>
 		public void Replace(NodeReplacer replaceMethod, bool searchReplacements)
 		{
-			ThrowNull(replaceMethod, nameof(replaceMethod));
+			replaceMethod.ThrowNull(nameof(replaceMethod));
 			for (var i = 0; i < this.Count; i++)
 			{
 				var currentNode = this[i];

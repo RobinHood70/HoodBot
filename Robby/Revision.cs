@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.Robby
 {
 	using System;
+using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
-	using static RobinHood70.CommonCode.Globals;
 
 	/// <summary>Stores all information related to a specific revision.</summary>
 	/// <remarks>Revisions can apply to users or pages. Pages store title information at the parent level, thus they are not included in the base Revision object.</remarks>
@@ -14,8 +14,7 @@
 		/// <param name="contributionItem">The <see cref="UserContributionsItem"/>.</param>
 		protected internal Revision(UserContributionsItem contributionItem)
 		{
-			ThrowNull(contributionItem, nameof(contributionItem));
-			this.Anonymous = contributionItem.UserId == 0;
+			this.Anonymous = contributionItem.NotNull(nameof(contributionItem)).UserId == 0;
 			this.Comment = contributionItem.Comment;
 			this.Id = contributionItem.RevisionId;
 			this.Minor = (contributionItem.Flags & UserContributionFlags.Minor) != 0;
@@ -29,8 +28,7 @@
 		/// <param name="revisionItem">The <see cref="RevisionItem"/>.</param>
 		protected internal Revision(RevisionItem revisionItem)
 		{
-			ThrowNull(revisionItem, nameof(revisionItem));
-			this.Anonymous = (revisionItem.Flags & RevisionFlags.Anonymous) != 0;
+			this.Anonymous = (revisionItem.NotNull(nameof(revisionItem)).Flags & RevisionFlags.Anonymous) != 0;
 			this.Comment = revisionItem.Comment;
 			this.Id = revisionItem.RevisionId;
 			this.Minor = (revisionItem.Flags & RevisionFlags.Minor) != 0;

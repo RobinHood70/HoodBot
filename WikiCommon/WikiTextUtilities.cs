@@ -1,17 +1,18 @@
 ﻿namespace RobinHood70.WikiCommon
 {
+	using System;
 	using System.ComponentModel;
 	using System.Net;
 	using System.Text.RegularExpressions;
-	using static RobinHood70.CommonCode.Globals;
+	using RobinHood70.CommonCode;
 
 	/// <summary>Provides methods to normalize wiki text or titles.</summary>
 	public static class WikiTextUtilities
 	{
 		#region Static Fields
-		private static readonly Regex BidiText = new(@"[\u200E\u200F\u202A\u202B\u202C\u202D\u202E]", RegexOptions.Compiled, DefaultRegexTimeout); // Taken from MediaWikiTitleCodec->splitTitleString, then converted to Unicode
-		private static readonly Regex TitleSpaceText = new(@"[ _\xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]", RegexOptions.Compiled, DefaultRegexTimeout);
-		private static readonly Regex SpaceTextHtml = new(@"(&(#32|#x20|nbsp);|[ _\xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000])", RegexOptions.ExplicitCapture, DefaultRegexTimeout); // as above, but already Unicode in MW code, modified to add HTML spaces
+		private static readonly Regex BidiText = new(@"[\u200E\u200F\u202A\u202B\u202C\u202D\u202E]", RegexOptions.Compiled, Globals.DefaultRegexTimeout); // Taken from MediaWikiTitleCodec->splitTitleString, then converted to Unicode
+		private static readonly Regex TitleSpaceText = new(@"[ _\xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]", RegexOptions.Compiled, Globals.DefaultRegexTimeout);
+		private static readonly Regex SpaceTextHtml = new(@"(&(#32|#x20|nbsp);|[ _\xA0\u1680\u180E\u2000-\u200A\u2028\u2029\u202F\u205F\u3000])", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout); // as above, but already Unicode in MW code, modified to add HTML spaces
 		#endregion
 
 		#region Public Methods
@@ -21,8 +22,11 @@
 		/// <returns>The original text with bidirectional text markers removed and space-like characters converted to spaces.</returns>
 		public static string DecodeAndNormalize([Localizable(false)] string text)
 		{
-			ThrowNull(text, nameof(text));
-			return ReplaceTitleSpaces(RemoveInivisibleCharacters(WebUtility.HtmlDecode(WebUtility.UrlDecode(text.Replace("+", "%2B", System.StringComparison.Ordinal)))), false);
+			text = text.NotNull(nameof(text)).Replace("+", "%2B", StringComparison.Ordinal);
+			text = WebUtility.UrlDecode(text);
+			text = WebUtility.HtmlDecode(text);
+			text = RemoveInivisibleCharacters(text);
+			return ReplaceTitleSpaces(text, false);
 		}
 
 		/// <summary>Removes invisible characters from the text.</summary>

@@ -2,10 +2,10 @@
 {
 	using System.Collections.Generic;
 	using Newtonsoft.Json.Linq;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.RequestBuilder;
-	using static RobinHood70.CommonCode.Globals;
 
 	// TODO: Monitor the links below and see if this is ultimately implemented as a list or with Special:UploadStash/$key as a valid page title, then adapt code as needed.
 	// This behaves more like a List module, but does not support limits or continuation, and is therefore internally treated as just a normal query module. It is not (and should not be made into) a property module internally. The entire PHP version of the module will likely be re-written in the future.
@@ -34,13 +34,12 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, StashImageInfoInput input)
 		{
-			ThrowNull(request, nameof(request));
-			ThrowNull(input, nameof(input));
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.Properties)
+				.Check(this.SiteVersion, input.NotNull(nameof(input)).Properties)
 				.FilterBefore(123, StashImageProperties.CanonicalTitle | StashImageProperties.CommonMetadata | StashImageProperties.ExtMetadata)
 				.Value;
 			request
+				.NotNull(nameof(request))
 				.AddFlags("prop", prop)
 				.Add(this.SiteVersion < 118 ? "sessionkey" : "filekey", input.FileKeys)
 				.AddIf("urlwidth", input.UrlWidth, (prop & StashImageProperties.Url) != 0 && input.UrlWidth > 0)
@@ -50,7 +49,7 @@
 
 		protected override void DeserializeResult(JToken? result)
 		{
-			ThrowNull(result, nameof(result));
+			result.ThrowNull(nameof(result));
 			this.Output = new List<ImageInfoItem>();
 			foreach (var item in result)
 			{
