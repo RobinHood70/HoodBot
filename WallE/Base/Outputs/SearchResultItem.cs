@@ -2,14 +2,15 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
+	using RobinHood70.WikiCommon;
 
-	public class SearchResultItem : ITitle
+	public class SearchResultItem : IApiTitle
 	{
 		#region Constructors
 		public SearchResultItem(int ns, string title, string? redirSnippet, string? redirTitle, string? sectionSnippet, string? sectionTitle, int size, string? snippet, DateTime? timestamp, string? titleSnippet, int wordCount)
 		{
 			this.Namespace = ns;
-			this.Title = title;
+			this.FullPageName = title;
 			this.RedirectSnippet = redirSnippet;
 			this.RedirectTitle = redirTitle;
 			this.SectionSnippet = sectionSnippet;
@@ -42,7 +43,7 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Timestamp { get; }
 
-		public string Title { get; }
+		public string FullPageName { get; }
 
 		public string? TitleSnippet { get; }
 
@@ -50,7 +51,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title;
+		public override string ToString() => this.FullPageName;
 		#endregion
 	}
 }

@@ -3,6 +3,7 @@
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
 	internal sealed class PropTemplates : PropListLinks<TemplatesInput>, IGeneratorModule
@@ -45,7 +46,7 @@
 			base.BuildRequestLocal(request, input);
 		}
 
-		protected override ICollection<ITitle> GetMutableList(PageItem page) => (ICollection<ITitle>)page.Templates;
+		protected override ICollection<IApiTitle> GetMutableList(PageItem page) => (ICollection<IApiTitle>)page.Templates;
 		#endregion
 	}
 }

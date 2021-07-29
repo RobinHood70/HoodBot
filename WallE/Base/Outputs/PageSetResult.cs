@@ -5,9 +5,10 @@ namespace RobinHood70.WallE.Base
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using RobinHood70.CommonCode;
+	using RobinHood70.WikiCommon;
 
 	public class PageSetResult<T> : ReadOnlyKeyedCollection<string, T>, IPageSetResult
-		where T : class, ITitle
+		where T : class, IApiTitle
 	{
 		#region Constructors
 		internal PageSetResult(IEnumerable<T> titles)
@@ -28,7 +29,7 @@ namespace RobinHood70.WallE.Base
 			IReadOnlyDictionary<string, InterwikiTitleItem> interwiki,
 			IReadOnlyDictionary<string, string> normalized,
 			IReadOnlyDictionary<string, PageSetRedirectItem> redirects)
-			: base((item) => item.NotNull(nameof(item)).Title, titles, StringComparer.Ordinal)
+			: base((item) => item.NotNull(nameof(item)).FullPageName, titles, StringComparer.Ordinal)
 		{
 			this.BadRevisionIds = badRevisionIds;
 			this.Converted = converted;

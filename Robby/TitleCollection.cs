@@ -267,13 +267,13 @@
 			var result = this.Site.AbstractionLayer.Backlinks(input);
 			foreach (var item in result)
 			{
-				var mainTitle = Title.FromWikiTitle(this.Site, item.Title);
+				var mainTitle = Title.FromWikiTitle(this.Site, item.FullPageName);
 				this.Add(mainTitle);
 				if (item.Redirects != null)
 				{
 					foreach (var redirectedItem in item.Redirects)
 					{
-						var parser = new TitleParser(this.Site, redirectedItem.Title);
+						var parser = new TitleParser(this.Site, redirectedItem.FullPageName);
 						this.Add(new Backlink(parser.Namespace, parser.PageName, mainTitle));
 					}
 				}
@@ -512,7 +512,7 @@
 			foreach (var item in result)
 			{
 				var flags = item.Flags;
-				var page = retval.AddNewItem(new TitleParser(this.Site, item.Title));
+				var page = retval.AddNewItem(new TitleParser(this.Site, item.FullPageName));
 				page.PopulateFlags((flags & PurgeFlags.Invalid) != 0, (flags & PurgeFlags.Missing) != 0);
 			}
 
@@ -530,7 +530,7 @@
 			foreach (var item in result)
 			{
 				var flags = item.Flags;
-				var page = pages.AddNewItem(new TitleParser(this.Site, item.Title));
+				var page = pages.AddNewItem(new TitleParser(this.Site, item.FullPageName));
 				page.PopulateFlags(false, (flags & WatchFlags.Missing) != 0);
 			}
 
@@ -539,11 +539,11 @@
 		#endregion
 
 		#region Private Methods
-		private void FillFromTitleItems(IEnumerable<ITitle> result)
+		private void FillFromTitleItems(IEnumerable<IApiTitle> result)
 		{
 			foreach (var item in result)
 			{
-				this.Add(Title.FromWikiTitle(this.Site, item.Title));
+				this.Add(Title.FromWikiTitle(this.Site, item.FullPageName));
 			}
 		}
 

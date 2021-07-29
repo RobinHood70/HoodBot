@@ -4,10 +4,11 @@ namespace RobinHood70.WallE.Eve.Modules
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
-	public abstract class PropListLinks<TInput> : PropListModule<TInput, ITitle>
+	public abstract class PropListLinks<TInput> : PropListModule<TInput, IApiTitle>
 		where TInput : class, ILinksInput
 	{
 		#region Constructors
@@ -33,7 +34,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				.Add("limit", this.Limit);
 		}
 
-		protected override ITitle GetItem(JToken result, PageItem page) => result.NotNull(nameof(result)).GetWikiTitle();
+		protected override IApiTitle GetItem(JToken result, PageItem page) => result.NotNull(nameof(result)).GetWikiTitle();
 		#endregion
 	}
 }

@@ -2,14 +2,15 @@
 namespace RobinHood70.WallE.Base
 {
 	using System;
+	using RobinHood70.WikiCommon;
 
-	public class ProtectedTitlesItem : ITitle
+	public class ProtectedTitlesItem : IApiTitle
 	{
 		#region Constructors
 		public ProtectedTitlesItem(int ns, string title, string? comment, DateTime? expiry, string? level, string? parsedComment, DateTime? timestamp, string? user, long userId)
 		{
 			this.Namespace = ns;
-			this.Title = title;
+			this.FullPageName = title;
 			this.Comment = comment;
 			this.Expiry = expiry;
 			this.Level = level;
@@ -33,7 +34,7 @@ namespace RobinHood70.WallE.Base
 
 		public DateTime? Timestamp { get; }
 
-		public string Title { get; }
+		public string FullPageName { get; }
 
 		public string? User { get; }
 
@@ -41,7 +42,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title;
+		public override string ToString() => this.FullPageName;
 		#endregion
 	}
 }

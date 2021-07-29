@@ -2,14 +2,15 @@
 namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
+	using RobinHood70.WikiCommon;
 
-	public class ProtectResult : ITitle
+	public class ProtectResult : IApiTitle
 	{
 		#region Constructors
 		internal ProtectResult(int ns, string title, string reason, bool cascade, IReadOnlyList<ProtectResultItem> protections)
 		{
 			this.Namespace = ns;
-			this.Title = title;
+			this.FullPageName = title;
 			this.Reason = reason;
 			this.Cascade = cascade;
 			this.Protections = protections;
@@ -25,11 +26,11 @@ namespace RobinHood70.WallE.Base
 
 		public string Reason { get; }
 
-		public string Title { get; }
+		public string FullPageName { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title;
+		public override string ToString() => this.FullPageName;
 		#endregion
 	}
 }

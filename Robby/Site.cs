@@ -610,7 +610,7 @@
 			{
 				var retval = this.Patrol(new PatrolInput(rcid));
 
-				return retval.Title == null
+				return retval.FullPageName == null
 					? ChangeStatus.Failure
 					: ChangeStatus.Success;
 			}
@@ -631,7 +631,7 @@
 			ChangeStatus ChangeFunc()
 			{
 				var retval = this.Patrol(new PatrolInput(revid));
-				return retval.Title == null
+				return retval.FullPageName == null
 				? ChangeStatus.Failure
 				: ChangeStatus.Success;
 			}

@@ -4,13 +4,13 @@ namespace RobinHood70.WallE.Base
 	using System.Collections.Generic;
 	using RobinHood70.WikiCommon;
 
-	public class BacklinksItem : ITitle
+	public class BacklinksItem : IApiTitle
 	{
 		#region Constructors
-		internal BacklinksItem(int ns, string title, bool isRedirect, long pageId, IReadOnlyList<ITitle> redirects, BacklinksTypes type)
+		internal BacklinksItem(int ns, string title, bool isRedirect, long pageId, IReadOnlyList<IApiTitle> redirects, BacklinksTypes type)
 		{
 			this.Namespace = ns;
-			this.Title = title;
+			this.FullPageName = title;
 			this.PageId = pageId;
 			this.IsRedirect = isRedirect;
 			this.Redirects = redirects;
@@ -25,15 +25,15 @@ namespace RobinHood70.WallE.Base
 
 		public long PageId { get; }
 
-		public IReadOnlyList<ITitle> Redirects { get; }
+		public IReadOnlyList<IApiTitle> Redirects { get; }
 
-		public string Title { get; }
+		public string FullPageName { get; }
 
 		public BacklinksTypes Type { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title;
+		public override string ToString() => this.FullPageName;
 		#endregion
 	}
 }

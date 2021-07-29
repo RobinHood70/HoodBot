@@ -64,7 +64,7 @@
 				return null;
 			}
 
-			var redirects = new List<ITitle>();
+			var redirects = new List<IApiTitle>();
 			if (result["redirlinks"] is JToken redirLinks)
 			{
 				if (redirLinks.Type == JTokenType.Array)

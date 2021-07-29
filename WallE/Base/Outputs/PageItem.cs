@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.WikiCommon;
 
 	#region Public Enumerations
 	[Flags]
@@ -14,13 +15,13 @@ namespace RobinHood70.WallE.Base
 	}
 	#endregion
 
-	public class PageItem : ITitle
+	public class PageItem : IApiTitle
 	{
 		#region Constructors
 		public PageItem(int ns, string title, long pageId)
 		{
 			this.Namespace = ns;
-			this.Title = title;
+			this.FullPageName = title;
 			this.PageId = pageId;
 		}
 		#endregion
@@ -51,7 +52,7 @@ namespace RobinHood70.WallE.Base
 
 		public IReadOnlyList<ImageInfoItem> ImageInfoEntries { get; } = new List<ImageInfoItem>();
 
-		public IReadOnlyList<ITitle> Images { get; } = new List<ITitle>();
+		public IReadOnlyList<IApiTitle> Images { get; } = new List<IApiTitle>();
 
 		public string? ImageRepository { get; internal set; }
 
@@ -61,7 +62,7 @@ namespace RobinHood70.WallE.Base
 
 		public IReadOnlyList<LanguageLinksItem> LanguageLinks { get; } = new List<LanguageLinksItem>();
 
-		public IReadOnlyList<ITitle> Links { get; } = new List<ITitle>();
+		public IReadOnlyList<IApiTitle> Links { get; } = new List<IApiTitle>();
 
 		public IReadOnlyList<LinksHereItem> LinksHere { get; } = new List<LinksHereItem>();
 
@@ -75,15 +76,15 @@ namespace RobinHood70.WallE.Base
 
 		public IReadOnlyList<RevisionItem> Revisions { get; } = new List<RevisionItem>();
 
-		public IReadOnlyList<ITitle> Templates { get; } = new List<ITitle>();
+		public IReadOnlyList<IApiTitle> Templates { get; } = new List<IApiTitle>();
 
-		public string Title { get; }
+		public string FullPageName { get; }
 
 		public IReadOnlyList<TranscludedInItem> TranscludedIn { get; } = new List<TranscludedInItem>();
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title;
+		public override string ToString() => this.FullPageName;
 		#endregion
 	}
 }

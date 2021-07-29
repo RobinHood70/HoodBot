@@ -1,13 +1,15 @@
 ﻿#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member (no intention to document this file)
 namespace RobinHood70.WallE.Base
 {
-	public class RollbackResult : ITitle
+	using RobinHood70.WikiCommon;
+
+	public class RollbackResult : IApiTitle
 	{
 		#region Constructors
 		internal RollbackResult(int ns, string title, long pageId, string summary, long revisionId, long oldRevisionId, long lastRevisionId)
 		{
 			this.Namespace = ns;
-			this.Title = title;
+			this.FullPageName = title;
 			this.PageId = pageId;
 			this.Summary = summary;
 			this.RevisionId = revisionId;
@@ -29,11 +31,11 @@ namespace RobinHood70.WallE.Base
 
 		public string Summary { get; }
 
-		public string Title { get; }
+		public string FullPageName { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title;
+		public override string ToString() => this.FullPageName;
 		#endregion
 	}
 }

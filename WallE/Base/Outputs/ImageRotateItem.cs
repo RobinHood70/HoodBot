@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Base
 {
 	using System;
 	using System.Collections.Generic;
+	using RobinHood70.WikiCommon;
 
 	#region Public Enumerations
 	[Flags]
@@ -14,13 +15,13 @@ namespace RobinHood70.WallE.Base
 	}
 	#endregion
 
-	public class ImageRotateItem : ITitle
+	public class ImageRotateItem : IApiTitle
 	{
 		#region Constructors
 		internal ImageRotateItem(int ns, string title, long pageId, IReadOnlyList<WarningsItem> errorMessage, string? result, ImageRotateFlags flags)
 		{
 			this.Namespace = ns;
-			this.Title = title;
+			this.FullPageName = title;
 			this.PageId = pageId;
 			this.ErrorMessage = errorMessage;
 			this.Result = result;
@@ -39,11 +40,11 @@ namespace RobinHood70.WallE.Base
 
 		public string? Result { get; }
 
-		public string Title { get; }
+		public string FullPageName { get; }
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Title;
+		public override string ToString() => this.FullPageName;
 		#endregion
 	}
 }
