@@ -1,7 +1,7 @@
-﻿using RobinHood70.CommonCode;
-
-namespace RobinHood70.HoodBot.Uesp
+﻿namespace RobinHood70.HoodBot.Uesp
 {
+	using RobinHood70.CommonCode;
+
 	public static class UespFunctions
 	{
 		public static string IconAbbreviation(string iconType, string icon) => IconAbbreviation(iconType, icon, "png");

@@ -669,6 +669,7 @@
 		public ChangeStatus Upload(string fileName, string? destinationName, string editSummary, string? pageText)
 		{
 			editSummary.NotNull(nameof(editSummary));
+
 			// Always access this, even if we don't need it, as a means of checking validity.
 			var checkedName = Path.GetFileName(fileName.NotNull(nameof(fileName)));
 			if (string.IsNullOrWhiteSpace(destinationName))
@@ -900,8 +901,9 @@
 		/// <returns>A value indicating the actions that should take place.</returns>
 		public virtual ChangeStatus PublishPageTextChange(PageTextChangeArgs changeArgs, Func<ChangeStatus> changeFunction)
 		{
+			changeArgs.ThrowNull(nameof(changeArgs));
 			changeFunction.ThrowNull(nameof(changeFunction));
-			this.PageTextChanging?.Invoke(this, changeArgs.NotNull(nameof(changeArgs)));
+			this.PageTextChanging?.Invoke(this, changeArgs);
 			var retval =
 				changeArgs.CancelChange ? ChangeStatus.Cancelled :
 				this.EditingEnabled ? changeFunction() :
@@ -1157,7 +1159,7 @@
 				interwikiList.Add(entry);
 			}
 
-			this.interwikiMap = new ReadOnlyKeyedCollection<string, InterwikiEntry>(item => (item.NotNull(nameof(item))).Prefix, interwikiList, StringComparer.OrdinalIgnoreCase);
+			this.interwikiMap = new ReadOnlyKeyedCollection<string, InterwikiEntry>(item => item.NotNull(nameof(item)).Prefix, interwikiList, StringComparer.OrdinalIgnoreCase);
 		}
 
 		/// <summary>Patrols the specified Recent Changes ID.</summary>

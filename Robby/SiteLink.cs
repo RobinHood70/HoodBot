@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.Text;
 	using RobinHood70.CommonCode;
@@ -652,7 +651,6 @@
 		#region Private Methods
 		private string? GetValue(ParameterType name) => this.Parameters.TryGetValue(name, out var value) ? value.Value : null;
 
-		[SuppressMessage("Minor Code Smell", "S1643:Strings should not be concatenated using '+' in a loop", Justification = "Conditions within loop make concatenation very rare.")]
 		private void InitValue(string value)
 		{
 			var parameter = SplitWhitespace(value.NotNull(nameof(value)));

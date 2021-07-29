@@ -21,7 +21,7 @@
 		/// <param name="site">The site the user is from.</param>
 		/// <param name="name">The name of the user.</param>
 		public User(Site site, string name)
-			: base((site.NotNull(nameof(site)))[MediaWikiNamespaces.User], name)
+			: base(site.NotNull(nameof(site))[MediaWikiNamespaces.User], name)
 		{
 		}
 
@@ -29,7 +29,7 @@
 		/// <param name="site">The site the user is from.</param>
 		/// <param name="user">The WallE <see cref="UsersInput"/> to populate the data from.</param>
 		protected internal User(Site site, UsersItem user)
-			: this(site, (user.NotNull(nameof(user))).Name) => this.Populate(user);
+			: this(site, user.NotNull(nameof(user)).Name) => this.Populate(user);
 		#endregion
 
 		#region Public Properties

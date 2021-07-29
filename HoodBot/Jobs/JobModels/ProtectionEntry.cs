@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
 	using System;
-using RobinHood70.CommonCode;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 
 	public sealed class ProtectionEntry

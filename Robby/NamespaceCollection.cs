@@ -4,7 +4,7 @@
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
-using RobinHood70.CommonCode;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
 
 	/// <summary>Read-only Namespace dictionary that can be referenced by ID and all valid names for the namespace.</summary>

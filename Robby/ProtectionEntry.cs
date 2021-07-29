@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby
 {
 	using System;
-using RobinHood70.CommonCode;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 
 	/// <summary>Contains information about page protections.</summary>

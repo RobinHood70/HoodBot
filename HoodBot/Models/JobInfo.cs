@@ -3,7 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Reflection;
-using RobinHood70.CommonCode;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs;
 
 	public sealed class JobInfo : IEquatable<JobInfo>

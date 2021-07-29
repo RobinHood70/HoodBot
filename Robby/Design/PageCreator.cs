@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	using System.Collections.Generic;
-using RobinHood70.CommonCode;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 
 	/// <summary>Provides a base class for creating Page objects. This serves as a go-between for customized page extensions in WallE and Robby.</summary>

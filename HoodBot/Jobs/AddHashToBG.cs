@@ -1,8 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System.Globalization;
-using Google.Protobuf.WellKnownTypes;
-using RobinHood70.CommonCode;
+	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
@@ -20,7 +19,7 @@ using RobinHood70.CommonCode;
 		protected override void LoadPages() => this.Pages.GetBacklinks("Template:BG", BacklinksTypes.EmbeddedIn);
 
 		protected override void ParseText(object sender, ContextualParser parsedPage)
-{
+		{
 			foreach (var template in parsedPage.NotNull(nameof(parsedPage)).TemplateNodes)
 			{
 				if (template.Parameters.Count >= 1 &&

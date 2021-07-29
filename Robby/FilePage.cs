@@ -23,7 +23,7 @@
 		/// <param name="site">The site the File is from.</param>
 		/// <param name="pageName">The page name.</param>
 		public FilePage(Site site, string pageName)
-			: base((site.NotNull(nameof(site)))[MediaWikiNamespaces.File], pageName)
+			: base(site.NotNull(nameof(site))[MediaWikiNamespaces.File], pageName)
 		{
 		}
 

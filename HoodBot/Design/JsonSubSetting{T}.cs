@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Design
 {
 	using Newtonsoft.Json.Linq;
-using RobinHood70.CommonCode;
+	using RobinHood70.CommonCode;
 
 	internal static class JsonSubSetting<T>
 		where T : IJsonSubSetting<T>, new()

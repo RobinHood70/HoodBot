@@ -2,7 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
-using RobinHood70.CommonCode;
+	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 
 	/// <summary>Stores information about a Recent Change entry.</summary>
