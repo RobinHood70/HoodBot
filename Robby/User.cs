@@ -18,18 +18,17 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="User"/> class.</summary>
-		/// <param name="site">The site the user is from.</param>
-		/// <param name="name">The name of the user.</param>
-		public User(Site site, string name)
-			: base(site.NotNull(nameof(site))[MediaWikiNamespaces.User], name)
+		/// <param name="title">The title to copy values from.</param>
+		public User(ISimpleTitle title)
+			: base(title)
 		{
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="User"/> class.</summary>
-		/// <param name="site">The site the user is from.</param>
+		/// <param name="title">The title to copy values from.</param>
 		/// <param name="user">The WallE <see cref="UsersInput"/> to populate the data from.</param>
-		protected internal User(Site site, UsersItem user)
-			: this(site, user.NotNull(nameof(user)).Name) => this.Populate(user);
+		internal User(ISimpleTitle title, UsersItem user)
+			: this(title) => this.Populate(user);
 		#endregion
 
 		#region Public Properties
@@ -66,6 +65,15 @@
 		/// <summary>Gets the user's rights.</summary>
 		/// <value>The user's rights.</value>
 		public IReadOnlyList<string>? Rights { get; private set; }
+		#endregion
+
+		#region Public Static Methods
+
+		/// <summary>Gets the title of the user page, given the name.</summary>
+		/// <param name="site">The site the user is from.</param>
+		/// <param name="name">The username.</param>
+		/// <returns>A title corresponding to the User page.</returns>
+		public static ISimpleTitle GetTitle(Site site, string name) => TitleFactory.DirectNormalized(site.NotNull(nameof(site)), MediaWikiNamespaces.User, name.NotNull(nameof(name)));
 		#endregion
 
 		#region Public Methods
@@ -213,7 +221,7 @@
 			var retval = new List<ISimpleTitle>();
 			foreach (var item in result)
 			{
-				retval.Add(FromNormalizedTitle(this.Site, item.FullPageName));
+				retval.Add(TitleFactory.FromApi(this.Site, item).ToTitle());
 			}
 
 			return retval;

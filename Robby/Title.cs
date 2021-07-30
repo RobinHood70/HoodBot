@@ -42,16 +42,6 @@
 
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="Title" /> class.</summary>
-		/// <param name="ns">The namespace of the title.</param>
-		/// <param name="pageName">The page name (without leading namespace).</param>
-		public Title([NotNull, ValidatedNotNull] Namespace ns, [NotNull, ValidatedNotNull] string pageName)
-		{
-			this.Namespace = ns.NotNull(nameof(ns));
-			pageName = WikiTextUtilities.DecodeAndNormalize(pageName.NotNull(nameof(pageName))).Trim();
-			this.PageName = this.Namespace.CapitalizePageName(pageName);
-		}
-
 		/// <summary>Initializes a new instance of the <see cref="Title"/> class.</summary>
 		/// <param name="title">The <see cref="ISimpleTitle"/> to copy values from.</param>
 		public Title([NotNull, ValidatedNotNull] ISimpleTitle title)
@@ -96,7 +86,7 @@
 		/// <remarks>If title Title is a subject page, returns itself.</remarks>
 		public Title SubjectPage => this.subjectPage ??= this.Namespace.IsSubjectSpace
 			? this
-			: new Title(this.Namespace.SubjectSpace, this.PageName);
+			: TitleFactory.DirectNormalized(this.Namespace.SubjectSpace, this.PageName).ToTitle();
 
 		/// <summary>Gets the value corresponding to {{SUBPAGENAME}}.</summary>
 		/// <returns>The name of the subpage.</returns>
@@ -113,7 +103,7 @@
 		public Title? TalkPage => this.talkPage ??=
 			this.Namespace.TalkSpace == null ? null :
 			this.Namespace.IsTalkSpace ? this :
-			new Title(this.Namespace.TalkSpace, this.PageName);
+			TitleFactory.DirectNormalized(this.Namespace.TalkSpace, this.PageName).ToTitle();
 
 		/// <summary>Gets the site to which this title belongs.</summary>
 		/// <value>The site.</value>
@@ -133,22 +123,11 @@
 		/// <param name="site">The site the title is from.</param>
 		/// <param name="node">The <see cref="IBacklinkNode"/> to parse.</param>
 		/// <returns>A new FullTitle based on the provided values.</returns>
-		public static Title FromBacklinkNode(Site site, IBacklinkNode node) => FromName(site.NotNull(nameof(site)), node.NotNull(nameof(node)).GetTitleText());
-
-		/// <summary>Creates a new instance of the <see cref="Title"/> class from the site and full page name.</summary>
-		/// <param name="site">The site this title is from.</param>
-		/// <param name="fullPageName">The full name of the page.</param>
-		/// <returns>A new Title based on the provided values.</returns>
-		public static Title FromName([NotNull, ValidatedNotNull] Site site, [NotNull, ValidatedNotNull] string fullPageName) => TitleFactory
-			.FromName(site.NotNull(nameof(site)), fullPageName.NotNull(nameof(fullPageName)))
-			.ToTitle();
-
-		/// <summary>Creates a new instance of the <see cref="Title"/> class from the site and full page name.</summary>
-		/// <param name="site">The site this title is from.</param>
-		/// <param name="ns">The namespace of the page.</param>
-		/// <param name="pageName">The name of the page.</param>
-		/// <returns>A new Title based on the provided values.</returns>
-		public static Title FromName([NotNull, ValidatedNotNull] Site site, [NotNull, ValidatedNotNull] int ns, [NotNull, ValidatedNotNull] string pageName) => TitleFactory.FromName(site, ns, pageName).ToTitle();
+		public static Title FromBacklinkNode(Site site, IBacklinkNode node)
+		{
+			var title = node.NotNull(nameof(node)).GetTitleText();
+			return TitleFactory.FromName(site.NotNull(nameof(site)), title).ToTitle();
+		}
 		#endregion
 
 		#region Public Methods
@@ -275,7 +254,7 @@
 				var talk = this.TalkPage;
 				if (moveTalk && talk is not null)
 				{
-					var toPage = FromName(this.Site, to);
+					var toPage = TitleFactory.FromName(this.Site, to).ToTitle();
 					if (toPage.TalkPage is Title toTalk)
 					{
 						disabledResult.Add(talk.FullPageName, toTalk.FullPageName);
@@ -284,7 +263,7 @@
 
 				if (moveSubpages && this.Namespace.AllowsSubpages)
 				{
-					var toSubPage = FromName(this.Site, to + subPageName);
+					var toSubPage = TitleFactory.FromName(this.Site, to + subPageName).ToTitle();
 					disabledResult.Add(this.FullPageName + subPageName, toSubPage.FullPageName);
 				}
 			}
@@ -475,15 +454,6 @@
 		/// <summary>Returns a string that represents the current Title.</summary>
 		/// <returns>A string that represents the current object.</returns>
 		public override string ToString() => this.ToString(false);
-		#endregion
-
-		#region Internal Methods
-
-		/// <summary>Creates a new instance of the <see cref="Title"/> class from the site and wiki text (which must already be in standard format).</summary>
-		/// <param name="site">The site this title is from.</param>
-		/// <param name="fullPageName">The full name of the page.</param>
-		/// <returns>A new Title based on the provided values.</returns>
-		internal static Title FromNormalizedTitle([NotNull, ValidatedNotNull] Site site, [NotNull, ValidatedNotNull] string fullPageName) => TitleFactory.FromNormalizedName(site, fullPageName).ToTitle();
 		#endregion
 
 		#region Protected Methods

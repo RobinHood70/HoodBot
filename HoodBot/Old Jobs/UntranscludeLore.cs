@@ -136,7 +136,7 @@
 		private void GetPages()
 		{
 			var allPages = new PageCollection(this.Site, new PageLoadOptions(PageModules.Default | PageModules.TranscludedIn, true));
-			//// allPages.GetPageLinks(new[] { new Title(this.Site, this.Site.User.FullPageName + "/Lore Transclusions") });
+			//// allPages.GetPageLinks(new[] { TitleFactory.FromName(this.Site, this.Site.User.FullPageName + "/Lore Transclusions") });
 			allPages.GetTitles("General:The Elder Scrolls", "Lore:Elder Scrolls");
 			allPages.Sort();
 
@@ -182,7 +182,7 @@
 			if (
 				!this.allPageNames.TryGetValue(linkTitle, out var linkPage) &&
 				metaNamespace.Parent != null &&
-				!this.allPageNames.TryGetValue(new Title(metaNamespace.Parent, linkTitle.PageName), out linkPage))
+				!this.allPageNames.TryGetValue(TitleFactory.FromName(metaNamespace.Parent, linkTitle.PageName), out linkPage))
 			{
 				node.Title.Clear();
 				node.Title.AddFirst(new TextNode("Future Link"));

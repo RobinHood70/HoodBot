@@ -4,6 +4,7 @@
 	using Newtonsoft.Json;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 
 	[Flags]
 	public enum ReplacementActions
@@ -21,7 +22,7 @@
 	{
 		#region Constructors
 		public Replacement(Site site, string from, string to)
-			: this(Title.FromName(site, from), Title.FromName(site, to))
+			: this(TitleFactory.FromName(site, from).ToTitle(), TitleFactory.FromName(site, to).ToTitle())
 		{
 		}
 

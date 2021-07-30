@@ -15,26 +15,6 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="MessagePage" /> class.</summary>
-		/// <param name="site">The site the Message is from.</param>
-		/// <param name="pageName">The page name.</param>
-		public MessagePage(Site site, string pageName)
-			: base(site.NotNull(nameof(site))[MediaWikiNamespaces.MediaWiki], pageName)
-		{
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="MessagePage" /> class.</summary>
-		/// <param name="ns">The namespace (must be Message).</param>
-		/// <param name="pageName">The page name (<em>without</em> the leading namespace).</param>
-		public MessagePage(Namespace ns, string pageName)
-			: base(ns, pageName)
-		{
-			if (ns.Id != MediaWikiNamespaces.MediaWiki)
-			{
-				throw new ArgumentException(Globals.CurrentCulture(Resources.NamespaceMustBe, ns.Site[MediaWikiNamespaces.MediaWiki].Name), nameof(ns));
-			}
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="MessagePage" /> class.</summary>
 		/// <param name="title">The <see cref="ISimpleTitle"/> to copy values from.</param>
 		public MessagePage(ISimpleTitle title)
 			: base(title)
@@ -46,10 +26,10 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="MessagePage"/> class.</summary>
-		/// <param name="ns">The namespace of the page (must be MediaWiki).</param>
+		/// <param name="title">The <see cref="ISimpleTitle"/> to copy values from.</param>
 		/// <param name="item">The AllMessagesItem to populate this instance from.</param>
-		protected internal MessagePage(Namespace ns, AllMessagesItem item)
-			: base(ns, item.NotNull(nameof(item)).Name) => this.PopulateFrom(item);
+		protected internal MessagePage(ISimpleTitle title, AllMessagesItem item)
+			: base(title) => this.PopulateFrom(item);
 		#endregion
 
 		#region Public Properties

@@ -113,7 +113,7 @@
 				if (set.Page is null)
 				{
 					this.Warn($"New Page: {set.Name}");
-					set.BuildNewPage(new Title(this.Site.Namespaces[UespNamespaces.Online], set.Name));
+					set.BuildNewPage(TitleFactory.Direct(this.Site, UespNamespaces.Online, set.Name));
 				}
 			}
 		}
@@ -315,7 +315,7 @@
 				{
 					if (TitleOverrides.TryGetValue(set.Name, out var overrideName))
 					{
-						var checkTitle = Title.FromName(this.Site, UespNamespaces.Online, overrideName);
+						var checkTitle = TitleFactory.FromName(this.Site, UespNamespaces.Online, overrideName);
 						set.Page = setMembers.TryGetValue(checkTitle, out var foundPage)
 							? foundPage
 							: throw new InvalidOperationException($"TitleOverride for {set.Name} => {overrideName} doesn't match any known sets.");
@@ -324,7 +324,7 @@
 					{
 						foreach (var setName in set.AllNames)
 						{
-							var checkTitle = Title.FromName(this.Site, UespNamespaces.Online, setName);
+							var checkTitle = TitleFactory.FromName(this.Site, UespNamespaces.Online, setName);
 							if (setMembers.TryGetValue(checkTitle, out var foundPage) &&
 								foundPage.Exists)
 							{
@@ -407,7 +407,7 @@
 			#endregion
 
 			#region Public Methods
-			public void BuildNewPage(Title pageName)
+			public void BuildNewPage(ISimpleTitle pageName)
 			{
 				var sb = new StringBuilder();
 				sb

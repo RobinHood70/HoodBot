@@ -182,14 +182,14 @@
 
 		#region Protected Methods
 		protected void AddReplacement(string from, string to) => this.AddReplacement(
-			Title.FromName(this.Site, from),
-			Title.FromName(this.Site, to));
+			TitleFactory.FromName(this.Site, from).ToTitle(),
+			TitleFactory.FromName(this.Site, to).ToTitle());
 
 		protected void AddReplacement(Title from, Title to) => this.Replacements.Add(new Replacement(from, to));
 
 		protected void AddReplacement(string from, string to, ReplacementActions initialActions) => this.AddReplacement(
-			Title.FromName(this.Site, from),
-			Title.FromName(this.Site, to),
+			TitleFactory.FromName(this.Site, from).ToTitle(),
+			TitleFactory.FromName(this.Site, to).ToTitle(),
 			initialActions);
 
 		protected void AddReplacement(Title from, Title to, ReplacementActions initialActions) => this.Replacements.Add(new Replacement(from, to) { Actions = initialActions });
@@ -675,7 +675,8 @@
 
 						var newPageName = replacement.To.PageName;
 						var newNamespace = (replacement.From.Namespace == replacement.To.Namespace && link.Coerced) ? this.Site[MediaWikiNamespaces.Main] : replacement.To.Namespace;
-						var newLink = link.With(newNamespace, newPageName);
+						var newTitle = TitleFactory.DirectNormalized(newNamespace, newPageName);
+						var newLink = link.With(newTitle);
 						this.UpdateLinkText(page, replacement.From, newLink, false);
 						newLine = newLink.ToString()[2..^2].TrimEnd();
 					}
@@ -708,13 +709,17 @@
 				link.UpdateLinkNode(node);
 			}
 
-			if (link.Namespace == MediaWikiNamespaces.Media
-				&& this.Replacements.TryGetValue(link.With(this.Site[MediaWikiNamespaces.File], link.PageName), out replacement)
-				&& (replacement.Actions & ReplacementActions.UpdateLinks) != 0)
+			if (link.Namespace == MediaWikiNamespaces.Media)
 			{
-				link = link.With(this.Site[MediaWikiNamespaces.Media], replacement.To.PageName);
-				this.UpdateLinkText(page, replacement.From, link, !isRedirectTarget);
-				link.UpdateLinkNode(node);
+				var key = TitleFactory.DirectNormalized(this.Site, MediaWikiNamespaces.File, link.PageName).ToTitle();
+				if (this.Replacements.TryGetValue(link.With(key), out replacement)
+				&& (replacement.Actions & ReplacementActions.UpdateLinks) != 0)
+				{
+					var newtitle = TitleFactory.DirectNormalized(this.Site, MediaWikiNamespaces.Media, replacement.To.PageName);
+					link = link.With(newtitle);
+					this.UpdateLinkText(page, replacement.From, link, !isRedirectTarget);
+					link.UpdateLinkNode(node);
+				}
 			}
 		}
 

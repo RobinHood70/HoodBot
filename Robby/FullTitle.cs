@@ -11,33 +11,6 @@
 	{
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="FullTitle" /> class using the site and full page name.</summary>
-		/// <param name="ns">The namespace of the title.</param>
-		/// <param name="pageName">The page name (without leading namespace).</param>
-		public FullTitle(Namespace ns, string pageName)
-			: base(ns, pageName)
-		{
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="FullTitle" /> class using the site and full page name.</summary>
-		/// <param name="iw">The interwiki of the title.</param>
-		/// <param name="ns">The namespace of the title.</param>
-		/// <param name="pageName">The page name (without leading namespace).</param>
-		/// <param name="fragment">The fragment of the title.</param>
-		public FullTitle(InterwikiEntry? iw, Namespace ns, string pageName, string? fragment)
-			: base(ns, pageName)
-		{
-			this.Interwiki = iw;
-			this.Fragment = fragment;
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
-		/// <param name="title">The <see cref="ISimpleTitle"/> with the desired information.</param>
-		public FullTitle(ISimpleTitle title)
-			: base(title)
-		{
-		}
-
 		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
 		/// <param name="title">The <see cref="IFullTitle"/> with the desired information.</param>
 		public FullTitle(IFullTitle title)
@@ -71,20 +44,13 @@
 		/// <param name="pageName">The page name. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
 		/// <returns>A new LinkTitle with the namespace found in <paramref name="pageName"/>, if there is one, otherwise using <paramref name="defaultNamespace"/>.</returns>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		public static new FullTitle Coerce(Site site, int defaultNamespace, string pageName) => TitleFactory.FromName(site.NotNull(nameof(site)), defaultNamespace, pageName.NotNull(nameof(pageName))).ToLinkTarget();
+		public static new FullTitle Coerce(Site site, int defaultNamespace, string pageName) => TitleFactory.FromName(site.NotNull(nameof(site)), defaultNamespace, pageName.NotNull(nameof(pageName))).ToFullTitle();
 
 		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
 		/// <param name="site">The site the title is from.</param>
 		/// <param name="node">The <see cref="IBacklinkNode"/> to parse.</param>
 		/// <returns>A new FullTitle based on the provided values.</returns>
-		public static new FullTitle FromBacklinkNode(Site site, IBacklinkNode node) => FromName(site.NotNull(nameof(site)), node.NotNull(nameof(node)).GetTitleText());
-
-		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
-		/// <param name="site">The site the title is from.</param>
-		/// <param name="fullPageName">Full name of the page.</param>
-		/// <returns>A new FullTitle based on the provided values.</returns>
-		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		public static new FullTitle FromName(Site site, string fullPageName) => TitleFactory.FromName(site.NotNull(nameof(site)), fullPageName.NotNull(nameof(fullPageName))).ToLinkTarget();
+		public static new FullTitle FromBacklinkNode(Site site, IBacklinkNode node) => TitleFactory.FromName(site.NotNull(nameof(site)), node.NotNull(nameof(node)).GetTitleText()).ToFullTitle();
 		#endregion
 
 		#region Public Methods
@@ -125,7 +91,7 @@
 		/// <param name="fullPageName">Full name of the page.</param>
 		/// <returns>A new FullTitle based on the provided values.</returns>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		internal static FullTitle FromNormalizedName(Site site, string fullPageName) => TitleFactory.FromNormalizedName(site.NotNull(nameof(site)), fullPageName.NotNull(nameof(fullPageName))).ToLinkTarget();
+		internal static FullTitle FromNormalizedName(Site site, string fullPageName) => TitleFactory.FromNormalizedName(site.NotNull(nameof(site)), fullPageName.NotNull(nameof(fullPageName))).ToFullTitle();
 		#endregion
 	}
 }

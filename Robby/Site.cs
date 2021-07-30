@@ -206,7 +206,7 @@
 		/// <summary>Gets or sets the page creator.</summary>
 		/// <value>The page creator.</value>
 		/// <remarks>A PageCreator is an abstract factory which serves as a bridge between customized PageItem types from WallE and the corresponding custom Page type for Robby.</remarks>
-		public PageCreator PageCreator { get; set; } = PageCreator.Default;
+		public PageCreator PageCreator { get; set; } = new DefaultPageCreator();
 
 		/// <summary>Gets the script path. This is the path preceding api.php, index.php and so forth.</summary>
 		/// <value>The script path.</value>
@@ -386,7 +386,7 @@
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="pageName">Name of the page.</param>
 		/// <returns>The text of the page.</returns>
-		public string? LoadPageText(string pageName) => this.LoadPageText(Title.FromName(this, pageName.NotNull(nameof(pageName))));
+		public string? LoadPageText(string pageName) => this.LoadPageText(TitleFactory.FromName(this, pageName.NotNull(nameof(pageName))));
 
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="title">Name of the page.</param>
@@ -415,7 +415,7 @@
 				titleName += subPageName;
 			}
 
-			var newTitle = new Title(title.Namespace, titleName);
+			var newTitle = TitleFactory.Direct(title.Namespace, titleName);
 			return this.LoadPageText(newTitle);
 		}
 
@@ -969,13 +969,13 @@
 			if (this.disambiguationTemplates == null)
 			{
 				this.disambiguationTemplates = new HashSet<Title>();
-				var page = new Page(this[MediaWikiNamespaces.MediaWiki], "Disambiguationspage");
+				var page = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.MediaWiki, "Disambiguationspage").ToPageForced();
 				page.Load(PageModules.Default | PageModules.Links);
 				if (page.Exists)
 				{
 					if (page.Links.Count == 0)
 					{
-						this.disambiguationTemplates.Add(Title.FromName(this, page.Text.Trim()));
+						this.disambiguationTemplates.Add(TitleFactory.FromName(this, page.Text.Trim()).ToTitle());
 					}
 					else
 					{
@@ -1001,7 +1001,13 @@
 			var retval = new Dictionary<string, MessagePage>(result.Count, StringComparer.Ordinal);
 			foreach (var item in result)
 			{
-				retval.Add(item.Name, new MessagePage(this[MediaWikiNamespaces.MediaWiki], item));
+				var factory = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.MediaWiki, item.Name);
+				if (factory.ToPage() is not MessagePage mp)
+				{
+					mp = new MessagePage(factory, item);
+				}
+
+				retval.Add(item.Name, mp);
 			}
 
 			return retval.AsReadOnly();
@@ -1031,7 +1037,8 @@
 			var retval = new List<User>(result.Count);
 			foreach (var item in result)
 			{
-				retval.Add(new User(this, item));
+				var userTitle = User.GetTitle(this, item.Name);
+				retval.Add(new User(userTitle));
 			}
 
 			return retval.AsReadOnly();
@@ -1047,7 +1054,7 @@
 			var retval = new List<User>(result.Count);
 			foreach (var item in result)
 			{
-				retval.Add(new User(this, item.Name));
+				retval.Add(new User(User.GetTitle(this, item.Name)));
 			}
 
 			return retval;
@@ -1070,7 +1077,7 @@
 			}
 
 			name = result.User;
-			this.User = name == null ? null : new User(this, name);
+			this.User = name == null ? null : new User(User.GetTitle(this, name));
 		}
 
 		/// <summary>Gets all site information required for proper functioning of the framework.</summary>

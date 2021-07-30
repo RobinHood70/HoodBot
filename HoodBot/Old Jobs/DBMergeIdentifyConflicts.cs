@@ -14,7 +14,7 @@
 			: base(jobManager)
 		{
 			this.Logger = null;
-			this.Results = new PageResultHandler(new Title(this.Site, "User:HoodBot/Dragonborn Merge Actions"))
+			this.Results = new PageResultHandler(TitleFactory.FromName(this.Site, "User:HoodBot/Dragonborn Merge Actions"))
 			{
 				Description = "Update List"
 			};

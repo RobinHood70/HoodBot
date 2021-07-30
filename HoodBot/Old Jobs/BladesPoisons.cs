@@ -68,7 +68,7 @@
 				for (var i = 0; i < 7; i++)
 				{
 					var name = WikiTextVisitor.Value(nameNodes[i].Title);
-					var title = Title.FromName(this.Site, name);
+					var title = TitleFactory.FromName(this.Site, name);
 					var recipe = matEffects[i * 2] + "<br>" + baseRecipe;
 					var effect = matEffects[i * 2 + 1];
 					/*

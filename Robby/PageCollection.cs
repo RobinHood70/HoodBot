@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
+	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
@@ -15,8 +16,9 @@
 	public class PageCollection : TitleCollection<Page>
 	{
 		#region Fields
-		private readonly Dictionary<string, IFullTitle> titleMap = new(StringComparer.Ordinal);
+		private readonly PageCreator pageCreator;
 		private readonly List<string> recurseCategories = new();
+		private readonly Dictionary<string, IFullTitle> titleMap = new(StringComparer.Ordinal);
 		#endregion
 
 		#region Constructors
@@ -24,7 +26,7 @@
 		/// <summary>Initializes a new instance of the <see cref="PageCollection"/> class.</summary>
 		/// <param name="site">The site the pages are from. All pages in a collection must belong to the same site.</param>
 		public PageCollection(Site site)
-			: this(site, null, null)
+			: this(site, site.NotNull(nameof(site)).DefaultLoadOptions)
 		{
 		}
 
@@ -32,7 +34,7 @@
 		/// <param name="site">The site the pages are from. All pages in a collection must belong to the same site.</param>
 		/// <param name="modules">The module types indicating which data to retrieve from the site. Using this constructor, all modules will be loaded using default parameters.</param>
 		public PageCollection(Site site, PageModules modules)
-			: this(site, new PageLoadOptions(modules), null)
+			: this(site, new PageLoadOptions(modules))
 		{
 		}
 
@@ -40,19 +42,10 @@
 		/// <param name="site">The site the pages are from. All pages in a collection must belong to the same site.</param>
 		/// <param name="options">A <see cref="PageLoadOptions"/> object initialized with a set of modules. Using this constructor allows you to customize some options.</param>
 		public PageCollection(Site site, PageLoadOptions options)
-			: this(site, options, null)
-		{
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="PageCollection"/> class.</summary>
-		/// <param name="site">The site the pages are from. All pages in a collection must belong to the same site.</param>
-		/// <param name="options">A <see cref="PageLoadOptions"/> object initialized with a set of modules. Using this constructor allows you to customize some options.</param>
-		/// <param name="creator">A custom page creator. Use this to create Page items that include page data from custom property modules. On Wikipedia, for example, this might be used to create pages that include geographic coordinates from the GeoData exstension.</param>
-		public PageCollection(Site site, PageLoadOptions? options, PageCreator? creator)
 			: base(site)
 		{
-			this.LoadOptions = options ?? site.DefaultLoadOptions;
-			this.PageCreator = creator ?? site.PageCreator;
+			this.LoadOptions = options ?? site.NotNull(nameof(site)).DefaultLoadOptions;
+			this.pageCreator = this.LoadOptions.PageCreator;
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="PageCollection"/> class from a WallE result set and populates the title map from it.</summary>
@@ -75,10 +68,6 @@
 		/// <summary>Gets or sets the load options.</summary>
 		/// <value>The load options.</value>
 		public PageLoadOptions LoadOptions { get; set; }
-
-		/// <summary>Gets or sets the page creator.</summary>
-		/// <value>The page creator.</value>
-		public PageCreator PageCreator { get; set; }
 
 		/// <summary>Gets the title map.</summary>
 		/// <value>The title map.</value>
@@ -196,7 +185,7 @@
 		/// <remarks>Unlike <see cref="GetTitles(IEnumerable{string})"/> and related methods, which all load data from the wiki, this will simply add blank pages to the result set.</remarks>
 		public override void Add(ISimpleTitle title)
 		{
-			var page = this.PageCreator.CreatePage(title.NotNull(nameof(title)));
+			var page = this.pageCreator.CreatePage(title.NotNull(nameof(title)));
 			this[page] = page;
 		}
 
@@ -206,7 +195,7 @@
 		{
 			foreach (var title in titles.NotNull(nameof(titles)))
 			{
-				var page = this.PageCreator.CreatePage(title);
+				var page = this.pageCreator.CreatePage(title);
 				this[page] = page;
 			}
 		}
@@ -272,7 +261,7 @@
 		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
 		/// <param name="site">The site.</param>
 		/// <returns>A new PageCollection with no namespace limitations, load options set to none, and creating only default pages rather than user-specified.</returns>
-		internal static PageCollection UnlimitedDefault(Site site) => new(site, PageLoadOptions.None, PageCreator.Default) { LimitationType = LimitationType.None };
+		internal static PageCollection UnlimitedDefault(Site site) => new(site, PageLoadOptions.None) { LimitationType = LimitationType.None };
 
 		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
 		/// <param name="site">The site.</param>
@@ -308,22 +297,25 @@
 
 			foreach (var item in result.Redirects)
 			{
-				var value = item.Value;
-				var interwiki = value.Interwiki == null ? null : this.Site.InterwikiMap[value.Interwiki];
-
-				// If it's local, interpret the namespace; otherwise, stuff whatever value we get into the page name, since we can't interpret it reliably.
-				FullTitle title;
-				if (interwiki?.LocalWiki != false)
+				// Reconstruct the redirect title, then run it through the standard parser.
+				var redirect = item.Value;
+				var target = new StringBuilder();
+				if (!string.IsNullOrWhiteSpace(redirect.Interwiki))
 				{
-					title = FullTitle.FromNormalizedName(this.Site, value.Title);
-					title.Interwiki = interwiki;
-					title.Fragment = value.Fragment;
-				}
-				else
-				{
-					title = new FullTitle(this.Site[MediaWikiNamespaces.Main], value.Title);
+					target.Append(redirect.Interwiki).Append(':');
 				}
 
+				if (!string.IsNullOrWhiteSpace(redirect.FullPageName))
+				{
+					target.Append(redirect.FullPageName);
+				}
+
+				if (!string.IsNullOrWhiteSpace(redirect.Fragment))
+				{
+					target.Append('#').Append(redirect.Interwiki);
+				}
+
+				var title = TitleFactory.FromNormalizedName(this.Site, target.ToString()).ToFullTitle();
 				this.titleMap[item.Key] = title;
 			}
 		}
@@ -337,7 +329,7 @@
 		{
 			input.ThrowNull(nameof(input));
 			input.Title.ThrowNull(nameof(input), nameof(input.Title));
-			var inputTitle = Title.FromName(this.Site, input.Title);
+			var inputTitle = TitleFactory.FromName(this.Site, input.Title).ToTitle();
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && (input.LinkTypes & BacklinksTypes.ImageUsage) != 0)
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
@@ -471,11 +463,11 @@
 		/// <param name="input">The input parameters.</param>
 		protected override void GetWatchlistRaw(WatchlistRawInput input) => this.GetCustomGenerator(input);
 
-		/// <summary>Creates a new page using the collection's <see cref="PageCreator"/> and adds it to the collection.</summary>
+		/// <summary>Creates a new page using the collection's <see cref="pageCreator"/> and adds it to the collection.</summary>
 		/// <param name="title">The title of the page to create.</param>
 		/// <returns>The page that was created.</returns>
 		/// <remarks>If the page title specified represents a page already in the collection, that page will be overwritten.</remarks>
-		protected override Page New(string title) => this.PageCreator.CreatePage(TitleFactory.FromName(this.Site, title));
+		protected override Page New(string title) => this.pageCreator.CreatePage(TitleFactory.FromName(this.Site, title));
 		#endregion
 
 		#region Protected Virtual Methods
@@ -502,7 +494,7 @@
 				}
 			}
 
-			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, this.PageCreator.GetPropertyInputs(options), this.PageCreator.CreatePageItem);
+			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, this.pageCreator.GetPropertyInputs(options), this.pageCreator.CreatePageItem);
 			this.PopulateMapCollections(result);
 			foreach (var item in result)
 			{

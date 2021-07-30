@@ -210,7 +210,7 @@
 		#region Private Methods
 		private NpcCollection GetNpcPages()
 		{
-			Title NpcTitle(string pageName) => new(this.Site[UespNamespaces.Online], pageName);
+			Title NpcTitle(string pageName) => TitleFactory.Direct(this.Site, UespNamespaces.Online, pageName).ToTitle();
 
 			var existingTitles = new TitleCollection(this.Site);
 			existingTitles.GetCategoryMembers("Online-NPCs", CategoryMemberTypes.Page, false);

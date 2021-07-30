@@ -5,6 +5,7 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
@@ -85,7 +86,7 @@
 				var imageName = pageParts[^1];
 				var rep = new Replacement(
 					title,
-					Title.FromName(this.Site, MediaWikiNamespaces.File, $"User-{author}-{imageName}"));
+					TitleFactory.FromName(this.Site, MediaWikiNamespaces.File, $"User-{author}-{imageName}").ToTitle());
 				rep.Actions |= ReplacementActions.Edit;
 				this.Replacements.Add(rep);
 			}

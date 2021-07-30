@@ -22,14 +22,6 @@
 
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="Page" /> class using the site and full page name.</summary>
-		/// <param name="ns">The namespace of the title.</param>
-		/// <param name="pageName">The page name (without leading namespace).</param>
-		public Page(Namespace ns, string pageName)
-			: base(ns, pageName)
-		{
-		}
-
 		/// <summary>Initializes a new instance of the <see cref="Page"/> class.</summary>
 		/// <param name="title">The <see cref="ISimpleTitle"/> to copy values from.</param>
 		public Page(ISimpleTitle title)
@@ -181,19 +173,6 @@
 		/// <value><see langword="true" /> if the text no longer matches the first revision; otherwise, <see langword="false" />.</value>
 		/// <remarks>This is currently simply a shortcut property to compare the Text with Revisions[0]. This may not be an accurate reflection of modification status when loading a specific revision range or in other unusual circumstances.</remarks>
 		public bool TextModified => !string.Equals(this.Text, this.CurrentRevision?.Text ?? string.Empty, StringComparison.Ordinal);
-		#endregion
-
-		#region Public Static Methods
-
-		/// <summary>Creates a new instance of the <see cref="Page"/> class from the full page name.</summary>
-		/// <param name="site">The site this title is from.</param>
-		/// <param name="fullPageName">The full name of the page.</param>
-		/// <returns>A new Page based on the provided values.</returns>
-		public static new Page FromName(Site site, string fullPageName)
-		{
-			var factory = TitleFactory.FromName(site, fullPageName);
-			return new Page(factory);
-		}
 		#endregion
 
 		#region Public Methods
@@ -361,7 +340,7 @@
 		{
 			foreach (var link in list)
 			{
-				var title = FromNormalizedTitle(this.Site, link.FullPageName.NotNull(nameof(link), nameof(link.FullPageName)));
+				var title = TitleFactory.FromApi(this.Site, link).ToTitle();
 				if (backlinks.ContainsKey(title))
 				{
 					backlinks[title] |= type;
@@ -420,7 +399,7 @@
 			links.Clear();
 			foreach (var link in pageItem.Links)
 			{
-				links.Add(FromNormalizedTitle(this.Site, link.FullPageName));
+				links.Add(TitleFactory.FromApi(this.Site, link).ToTitle());
 			}
 		}
 
@@ -452,7 +431,7 @@
 			templates.Clear();
 			foreach (var link in pageItem.Templates)
 			{
-				templates.Add(FromNormalizedTitle(this.Site, link.FullPageName));
+				templates.Add(TitleFactory.FromApi(this.Site, link).ToTitle());
 			}
 		}
 		#endregion

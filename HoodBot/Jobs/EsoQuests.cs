@@ -212,8 +212,8 @@
 		{
 			foreach (var quest in GetDBQuests())
 			{
-				var title = Title.FromName(this.Site, quest.FullPageName);
-				var titleDisambig = new Title(title.Namespace, title.PageName + " (quest)");
+				var title = TitleFactory.FromName(this.Site, quest.FullPageName);
+				var titleDisambig = TitleFactory.DirectNormalized(title.Namespace, title.PageName + " (quest)");
 				if (!wikiQuests.Contains(title) && !wikiQuests.Contains(titleDisambig))
 				{
 					var missing = true;
@@ -434,7 +434,7 @@
 				.AppendLine()
 				.AppendLine("{{Stub|Quest}}");
 
-			var retval = Page.FromName(this.Site, quest.FullPageName ?? throw new InvalidOperationException());
+			var retval = TitleFactory.Direct(this.Site, UespNamespaces.Online, quest.FullPageName.NotNull(nameof(quest), nameof(quest.FullPageName))).ToPage();
 			retval.Text = sb.ToString();
 			return retval;
 		}
@@ -446,7 +446,7 @@
 			{
 				if (!string.Equals(stage.Zone, "Tamriel", StringComparison.Ordinal) && !string.Equals(stage.Zone, quest.Zone, StringComparison.Ordinal))
 				{
-					var title = new Title(this.Site[UespNamespaces.Online], stage.Zone);
+					var title = TitleFactory.Direct(this.Site, UespNamespaces.Online, stage.Zone);
 					locs.Add(title.AsLink(true));
 				}
 

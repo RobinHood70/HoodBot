@@ -2,7 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using RobinHood70.CommonCode;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 
 	/// <summary>Stores information about a Recent Change entry.</summary>
@@ -13,7 +13,7 @@
 		/// <param name="recentChange">The <see cref="RecentChangesItem"/> to initialize from.</param>
 		protected internal RecentChange(Site site, RecentChangesItem recentChange)
 		{
-			this.Title = Title.FromNormalizedTitle(site, recentChange.NotNull(nameof(recentChange)).FullPageName);
+			this.Title = TitleFactory.FromApi(site, recentChange).ToTitle();
 			this.Anonymous = recentChange.UserId == 0;
 			this.Comment = recentChange.Comment;
 			this.Id = recentChange.Id;
@@ -27,7 +27,7 @@
 			this.RevisionId = recentChange.RevisionId;
 			this.Tags = recentChange.Tags;
 			this.Timestamp = recentChange.Timestamp ?? DateTime.MinValue;
-			this.User = recentChange.User == null ? null : new User(site, recentChange.User);
+			this.User = recentChange.User == null ? null : new User(User.GetTitle(site, recentChange.User));
 		}
 
 		#region Public Properties
