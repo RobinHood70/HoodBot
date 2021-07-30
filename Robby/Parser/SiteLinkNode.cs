@@ -2,6 +2,7 @@
 {
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon.Parser.Basic;
 
@@ -13,11 +14,11 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="SiteLinkNode"/> class.</summary>
-		/// <param name="factory">The factory to use when creating new nodes (must match the <paramref name="parameters"/> factory).</param>
+		/// <param name="nodeFactory">The factory to use when creating new nodes (must match the <paramref name="parameters"/> factory).</param>
 		/// <param name="title">The title.</param>
 		/// <param name="parameters">The parameters.</param>
-		public SiteLinkNode(SiteNodeFactory factory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters)
-			: base(factory, title, parameters) => this.TitleValue = Robby.Title.FromName(factory.NotNull(nameof(factory)).Site, this.GetTitleText());
+		public SiteLinkNode(SiteNodeFactory nodeFactory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters)
+			: base(nodeFactory, title, parameters) => this.TitleValue = TitleFactory.FromName(nodeFactory.NotNull(nameof(nodeFactory)).Site, this.GetTitleText()).ToTitle();
 		#endregion
 
 		#region Public Properties

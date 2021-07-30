@@ -213,7 +213,7 @@
 		{
 			var retval = new StringBuilder(match.Length); // Unlikely to be anywhere near that long, but should be a good way to ensure that enough space is always allocated initially.
 			var quest = match.Groups["quest"].Value;
-			var questTitle = Title.FromName(this.Site, quest);
+			var questTitle = TitleFactory.FromName(this.Site, quest);
 			if (!this.quests.Contains(questTitle))
 			{
 				return match.Value;

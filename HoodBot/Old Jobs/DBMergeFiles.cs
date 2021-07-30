@@ -107,7 +107,7 @@
 					fileName = $"{fileName} {numText}";
 				}
 
-				var srFile = new Title(this.Site, dbFile.Namespace.DecoratedName + fileName + extension);
+				var srFile = TitleFactory.FromName(this.Site, dbFile.Namespace.DecoratedName + fileName + extension);
 				this.Replacements.Add(new Replacement(dbFile, srFile));
 			}
 		}

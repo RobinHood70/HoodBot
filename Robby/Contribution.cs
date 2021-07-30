@@ -2,6 +2,7 @@
 {
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 
 	/// <summary>Stores information about a single user contribution.</summary>
@@ -17,7 +18,7 @@
 			: base(contribution)
 		{
 			contribution.ThrowNull(nameof(contribution));
-			this.Title = Title.FromNormalizedTitle(site, contribution.FullPageName.NotNull(nameof(contribution), nameof(contribution.FullPageName)));
+			this.Title = TitleFactory.FromApi(site, contribution).ToTitle();
 			this.New = (contribution.Flags & UserContributionFlags.New) != 0;
 			this.Patrolled = (contribution.Flags & UserContributionFlags.Patrolled) != 0;
 			this.NewSize = contribution.Size;

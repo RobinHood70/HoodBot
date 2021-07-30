@@ -213,7 +213,7 @@
 
 		/// <summary>Adds a new object to the collection with the specified name.</summary>
 		/// <param name="title">The title to add.</param>
-		public void Add(string title) => this.Add(this.New(TitleFactory.Normalize(title)));
+		public void Add(string title) => this.Add(this.New(title));
 
 		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
 		/// <param name="titles">The titles.</param>
@@ -1185,7 +1185,7 @@
 
 		#region Private Methods
 
-		private Title TextToTitle(string text) => Title.FromName(this.Site, text);
+		private Title TextToTitle(string text) => TitleFactory.FromName(this.Site, text).ToTitle();
 		#endregion
 	}
 }

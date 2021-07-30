@@ -293,7 +293,7 @@
 				index = existing.FindIndex("source");
 				if (index != -1)
 				{
-					var sourceTitle = Title.FromName(parser.Site, existing.Parameters[index].Value.ToValue());
+					var sourceTitle = TitleFactory.FromName(parser.Site, existing.Parameters[index].Value.ToValue());
 					if (sourceTitle.Namespace == title.Namespace && sourceTitle.PageName.Equals(title.BasePageName, StringComparison.Ordinal))
 					{
 						existing.Parameters.RemoveAt(index);

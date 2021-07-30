@@ -96,24 +96,6 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
-		/// <param name="ns">The namespace.</param>
-		/// <param name="pageName">The page name.</param>
-		public SiteLink(Namespace ns, string pageName)
-			: base(ns, pageName)
-		{
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
-		/// <param name="title">The title.</param>
-		public SiteLink(ISimpleTitle title)
-			: base(title) => InitializeImageInfo(this.Site);
-
-		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
-		/// <param name="title">The title.</param>
-		public SiteLink(IFullTitle title)
-			: base(title) => InitializeImageInfo(this.Site);
-
-		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
 		/// <param name="title">The <see cref="TitleFactory"/> with the desired information.</param>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
 		public SiteLink(ILinkTitle title)
@@ -322,13 +304,6 @@
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
 		public static new SiteLink Coerce(Site site, int defaultNamespace, string pageName) => TitleFactory.FromName(site, defaultNamespace, pageName).ToSiteLink();
 
-		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
-		/// <param name="site">The site the title is from.</param>
-		/// <param name="fullPageName">Full name of the page.</param>
-		/// <returns>A new Title based on the provided values.</returns>
-		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		public static new SiteLink FromName(Site site, string fullPageName) => TitleFactory.FromName(site.NotNull(nameof(site)), fullPageName.NotNull(nameof(fullPageName))).ToSiteLink();
-
 		/// <summary>Creates a new SiteLink instance from the provided text.</summary>
 		/// <param name="site">The site the link is from.</param>
 		/// <param name="link">The text of the link.</param>
@@ -477,7 +452,8 @@
 		/// <remarks>Interwiki and Fragment will remain unaffected by the change. If those should be updated to null, use <see cref="With(IFullTitle)"/>.</remarks>
 		public SiteLink With(ISimpleTitle title)
 		{
-			var retval = new SiteLink(title.NotNull(nameof(title)))
+			var upcast = TitleFactory.DirectNormalized(title.NotNull(nameof(title)).Namespace, title.PageName);
+			var retval = new SiteLink(upcast)
 			{
 				Coerced = this.Coerced,
 				ForcedInterwikiLink = this.ForcedInterwikiLink,
@@ -503,7 +479,8 @@
 		/// <returns>A new copy of the SiteLink with the altered title.</returns>
 		public SiteLink With(IFullTitle title)
 		{
-			var retval = new SiteLink(title.NotNull(nameof(title)))
+			var upcast = TitleFactory.DirectNormalized(title.NotNull(nameof(title)).Namespace, title.PageName);
+			var retval = new SiteLink(upcast)
 			{
 				Coerced = this.Coerced,
 				ForcedInterwikiLink = this.ForcedInterwikiLink,
@@ -521,21 +498,6 @@
 
 			return retval;
 		}
-
-		/// <summary>Creates a new copy of the SiteLink with a different title.</summary>
-		/// <param name="ns">The namespace to change to.</param>
-		/// <param name="pageName">The page name to change to.</param>
-		/// <returns>A new copy of the SiteLink with the altered title.</returns>
-		/// <remarks>Interwiki and Fragment will remain unaffected by the change. If those should be updated to null, use <see cref="With(InterwikiEntry?, Namespace, string, string?)"/>.</remarks>
-		public SiteLink With(Namespace ns, string pageName) => this.With(new Title(ns.NotNull(nameof(ns)), pageName.NotNull(nameof(pageName))));
-
-		/// <summary>Creates a new copy of the SiteLink with a different title.</summary>
-		/// <param name="iw">The interwiki to change to.</param>
-		/// <param name="ns">The namespace to change to.</param>
-		/// <param name="pageName">The page name to change to.</param>
-		/// <param name="fragment">The fragment name to change to.</param>
-		/// <returns>A new copy of the SiteLink with the altered title.</returns>
-		public SiteLink With(InterwikiEntry? iw, Namespace ns, string pageName, string? fragment) => this.With(new FullTitle(iw, ns, pageName, fragment));
 		#endregion
 
 		#region Public Override Methods

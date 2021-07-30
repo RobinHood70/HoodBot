@@ -6,6 +6,7 @@
 	using System.IO;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WikiCommon;
@@ -90,10 +91,10 @@
 				this.ClearMessage(force: true);
 			}
 
-			var resultPage = new Title(this[MediaWikiNamespaces.User], this.User.PageName + "/Results");
+			var resultPage = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.User, this.User.PageName + "/Results");
 			this.FilterPages.Add(resultPage);
 
-			this.LogPage = new Page(this[MediaWikiNamespaces.User], this.User.PageName + "/Log");
+			this.LogPage = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.User, this.User.PageName + "/Log").ToPage();
 			this.FilterPages.Add(this.LogPage);
 			//// Reinstate if pages become different: this.FilterPages.Add(this.StatusPage);
 		}
@@ -101,7 +102,7 @@
 		protected override void ParseInternalSiteInfo()
 		{
 			base.ParseInternalSiteInfo();
-			this.FilterPages.Add(new Title(this[MediaWikiNamespaces.Project], "Bot Requests"));
+			this.FilterPages.Add(TitleFactory.Direct(this, MediaWikiNamespaces.Project, "Bot Requests"));
 		}
 		#endregion
 	}

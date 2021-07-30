@@ -63,7 +63,7 @@
 			var titles = new TitleCollection(this.Site);
 			foreach (var field in this.fieldCollection.Values)
 			{
-				titles.Add(new Title(this.Site.Namespaces[MediaWikiNamespaces.Main], Field.PageName(field.Name, this.original)));
+				titles.Add(TitleFactory.FromName(this.Site.Namespaces[MediaWikiNamespaces.Main], Field.PageName(field.Name, this.original)));
 			}
 
 			this.Pages.PageLoaded += this.Pages_PageLoaded;

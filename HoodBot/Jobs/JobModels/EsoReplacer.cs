@@ -109,7 +109,7 @@
 					throw new InvalidOperationException("Not logged in.");
 				}
 
-				var replacementsTitle = new Page(user.Namespace, user.PageName + "/ESO Replacements");
+				var replacementsTitle = TitleFactory.DirectNormalized(user.Namespace, user.PageName + "/ESO Replacements").ToPage();
 				replacementsTitle.Load();
 				var replacements = replacementsTitle.Text;
 				if (string.IsNullOrEmpty(replacements))

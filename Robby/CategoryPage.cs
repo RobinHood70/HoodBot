@@ -14,26 +14,6 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="CategoryPage" /> class.</summary>
-		/// <param name="site">The site the category is from.</param>
-		/// <param name="pageName">The page name.</param>
-		public CategoryPage(Site site, string pageName)
-			: base(site.NotNull(nameof(site))[MediaWikiNamespaces.Category], pageName)
-		{
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="CategoryPage" /> class.</summary>
-		/// <param name="ns">The namespace (must be Category).</param>
-		/// <param name="pageName">The page name.</param>
-		public CategoryPage(Namespace ns, string pageName)
-			: base(ns, pageName)
-		{
-			if (ns.Id != MediaWikiNamespaces.Category)
-			{
-				throw new ArgumentException(Globals.CurrentCulture(Resources.NamespaceMustBe, ns.Site[MediaWikiNamespaces.Category].Name), nameof(ns));
-			}
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="CategoryPage" /> class.</summary>
 		/// <param name="title">The <see cref="ISimpleTitle"/> to copy values from.</param>
 		public CategoryPage(ISimpleTitle title)
 			: base(title)

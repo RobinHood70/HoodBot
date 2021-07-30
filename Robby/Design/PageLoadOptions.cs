@@ -92,6 +92,7 @@
 			this.ConvertTitles = copy.NotNull(nameof(copy)).ConvertTitles;
 			this.FollowRedirects = copy.FollowRedirects;
 			this.Modules = modules;
+			this.PageCreator = copy.PageCreator;
 		}
 		#endregion
 
@@ -131,6 +132,10 @@
 		/// <summary>Gets the modules to load.</summary>
 		/// <value>The modules to load.</value>
 		public PageModules Modules { get; }
+
+		/// <summary>Gets or sets the page creator.</summary>
+		/// <value>The page creator.</value>
+		public PageCreator PageCreator { get; set; } = PageCreator.Default;
 
 		/// <summary>Gets or sets the maximum number of pages to load in a single batch.</summary>
 		/// <value>The batch page limit.</value>

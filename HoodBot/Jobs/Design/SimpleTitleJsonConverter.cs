@@ -14,9 +14,11 @@
 
 		public override ISimpleTitle ReadJson(JsonReader reader, Type objectType, ISimpleTitle? existingValue, bool hasExistingValue, JsonSerializer serializer)
 		{
-			var title = (string)reader.NotNull(nameof(reader))
-				.Value.NotNull(nameof(reader), nameof(reader.Value));
-			return Title.FromName(this.site, title);
+			var title = (string)reader
+				.NotNull(nameof(reader))
+				.Value
+				.NotNull(nameof(reader), nameof(reader.Value));
+			return TitleFactory.FromName(this.site, title).ToTitle();
 		}
 
 		public override void WriteJson(JsonWriter writer, ISimpleTitle? value, JsonSerializer serializer) => writer.NotNull(nameof(writer)).WriteValue(value.NotNull(nameof(value)).ToString() ?? string.Empty);

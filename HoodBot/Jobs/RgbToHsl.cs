@@ -5,6 +5,7 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
@@ -16,7 +17,7 @@
 		#region Constructors
 		[JobInfo("RGB to HSL")]
 		public RgbToHsl(JobManager jobManager)
-			: base(jobManager) => this.dyes = new Page(this.Site.Namespaces[UespNamespaces.Online], "Dyes");
+			: base(jobManager) => this.dyes = TitleFactory.DirectNormalized(this.Site, UespNamespaces.Online, "Dyes").ToPage();
 		#endregion
 
 		protected override void BeforeLogging()

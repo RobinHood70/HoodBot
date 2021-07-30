@@ -83,24 +83,23 @@
 			page.ThrowNull(nameof(page));
 			if ((template.NotNull(nameof(template)).Find(1) ?? template.Find("link")) is IParameterNode link)
 			{
-				var (ns, nsBase) = this.GetNsBase(page, template);
+				var (oldNs, nsParam) = this.GetNsBase(page, template);
 				var oldTitle = link.Value.ToValue();
-				var searchTitle = new Title(ns, oldTitle);
+				var searchTitle = TitleFactory.FromName(page.Site, oldNs.Full + oldTitle).ToTitle();
 				if (this.job.Replacements.TryGetValue(searchTitle, out var replacement))
 				{
 					link.Value.Clear();
 					link.SetValue(replacement.To.PageName);
-
-					if (this.NamespaceList.FromTitle(replacement.To) is UespNamespace newNs
-						&& newNs.BaseTitle.Namespace != ns)
+					if (this.NamespaceList.FromTitle(replacement.To) is UespNamespace newNs &&
+						string.Equals(oldNs.Id, newNs.Id, System.StringComparison.Ordinal))
 					{
-						if (nsBase == null)
+						if (nsParam == null)
 						{
 							template.Add("ns_base", newNs.Id);
 						}
 						else
 						{
-							nsBase.SetValue(newNs.Id);
+							nsParam.SetValue(newNs.Id);
 						}
 
 						if (replacement.To.SimpleEquals(newNs.MainPage))
@@ -157,7 +156,7 @@
 		{
 			page.ThrowNull(nameof(page));
 			if (param != null
-				&& Title.FromName(page.Site, param.Value.ToValue()) is var title
+				&& TitleFactory.FromName(page.Site, param.Value.ToValue()).ToTitle() is var title
 				&& this.job.Replacements.TryGetValue(title, out var replacement)
 				&& replacement.To is ISimpleTitle toLink)
 			{
@@ -165,12 +164,12 @@
 			}
 		}
 
-		private (Namespace Namespace, IParameterNode? NsBase) GetNsBase(Page page, SiteTemplateNode template)
+		private (UespNamespace Namespace, IParameterNode? NsParameter) GetNsBase(Page page, SiteTemplateNode template)
 		{
 			var nsBase = template.Find("ns_base", "ns_id");
 			var ns = nsBase != null && this.NamespaceList.TryGetValue(nsBase.Value.ToValue(), out var uespNamespace)
-				? uespNamespace.BaseTitle.Namespace
-				: page.Namespace;
+				? uespNamespace
+				: this.NamespaceList[page.Namespace.CanonicalName];
 
 			return (ns, nsBase);
 		}
@@ -179,7 +178,7 @@
 		{
 			foreach (var (_, param) in template.GetNumericParameters())
 			{
-				if (Title.FromName(page.Site, page.Namespace.Id, param.Value.ToValue()) is var title
+				if (TitleFactory.FromName(page.Site, page.Namespace.Id, param.Value.ToValue()).ToTitle() is var title
 					&& this.job.Replacements.TryGetValue(title, out var replacement)
 					&& replacement.To is ISimpleTitle toLink
 					&& replacement.From.Namespace.Id == toLink.Namespace.Id)
@@ -192,7 +191,7 @@
 		private void PageNameReplace(IParameterNode? param, int ns)
 		{
 			if (param != null
-				&& new Title(this.job.Site[ns], param.Value.ToValue()) is var title
+				&& TitleFactory.Direct(this.job.Site, ns, param.Value.ToValue()).ToTitle() is var title
 				&& this.job.Replacements.TryGetValue(title, out var replacement)
 				&& replacement.To is ISimpleTitle toLink
 				&& toLink.Namespace == ns)

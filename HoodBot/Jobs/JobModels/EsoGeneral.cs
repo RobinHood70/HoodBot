@@ -178,7 +178,7 @@
 					if (retval[mappedName.Value.PageName] is Place place)
 					{
 						// In an ideal world, this would be a direct reference to the same place, rather than a copy, but that ends up being a lot of work for very little gain.
-						var key = Title.FromName(site, mappedName.Key).PageName;
+						var key = TitleFactory.FromName(site, mappedName.Key).PageName;
 						retval.Add(Place.Copy(key, place));
 					}
 				}

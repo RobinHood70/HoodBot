@@ -28,7 +28,7 @@
 			this.LimitationType = LimitationType.None;
 			foreach (var item in titles.NotNull(nameof(titles)))
 			{
-				var newTitle = Title.FromName(site, item);
+				var newTitle = TitleFactory.FromName(site, item).ToTitle();
 				this.Add(newTitle);
 			}
 		}
@@ -126,15 +126,9 @@
 		/// <summary>Loads the specified information for all pages in the collection.</summary>
 		/// <param name="options">The page load options.</param>
 		/// <returns>A <see cref="PageCollection"/> containing the specified pages, including status information for pages that could not be loaded.</returns>
-		public PageCollection Load(PageLoadOptions options) => this.Load(options, this.Site.PageCreator);
-
-		/// <summary>Loads the specified information for all pages in the collection using the specified PageCreator.</summary>
-		/// <param name="options">The page load options.</param>
-		/// <param name="pageCreator">The page creator to use for this job only.</param>
-		/// <returns>A <see cref="PageCollection" /> containing the specified pages, including status information for pages that could not be loaded.</returns>
-		public PageCollection Load(PageLoadOptions options, PageCreator pageCreator)
+		public PageCollection Load(PageLoadOptions options)
 		{
-			var retval = new PageCollection(this.Site, options, pageCreator);
+			var retval = new PageCollection(this.Site, options);
 			retval.SetLimitations(LimitationType.None);
 			retval.GetTitles(this);
 
@@ -257,7 +251,7 @@
 		{
 			input.ThrowNull(nameof(input));
 			input.Title.ThrowNull(nameof(input), nameof(input.Title));
-			var inputTitle = Title.FromName(this.Site, input.Title);
+			var inputTitle = TitleFactory.FromName(this.Site, input.Title);
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && (input.LinkTypes & BacklinksTypes.ImageUsage) != 0)
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
@@ -266,14 +260,14 @@
 			var result = this.Site.AbstractionLayer.Backlinks(input);
 			foreach (var item in result)
 			{
-				var mainTitle = Title.FromNormalizedTitle(this.Site, item.FullPageName);
+				var mainTitle = TitleFactory.FromApi(this.Site, item).ToTitle();
 				this.Add(mainTitle);
 				if (item.Redirects != null)
 				{
 					foreach (var redirectedItem in item.Redirects)
 					{
 						var factory = TitleFactory.FromName(this.Site, redirectedItem.FullPageName);
-						this.Add(new Backlink(factory.Namespace, factory.PageName, mainTitle));
+						this.Add(new Backlink(factory, mainTitle));
 					}
 				}
 			}
@@ -286,7 +280,7 @@
 			var result = this.Site.AbstractionLayer.AllCategories(input);
 			foreach (var item in result)
 			{
-				this.Add(new Title(this.Site[MediaWikiNamespaces.Category], item.Category));
+				this.Add(TitleFactory.DirectNormalized(this.Site, MediaWikiNamespaces.Category, item.Category).ToTitle());
 			}
 		}
 
@@ -467,7 +461,7 @@
 		}
 
 		/// <inheritdoc/>
-		protected override Title New(string title) => TitleFactory.FromNormalizedName(this.Site, title).ToTitle();
+		protected override Title New(string title) => TitleFactory.FromName(this.Site, title).ToTitle();
 		#endregion
 
 		#region Protected Virtual Methods
@@ -479,7 +473,7 @@
 			var result = this.Site.AbstractionLayer.AllMessages(input);
 			foreach (var item in result)
 			{
-				this.Add(new Title(this.Site[MediaWikiNamespaces.MediaWiki], item.Name));
+				this.Add(TitleFactory.DirectNormalized(this.Site[MediaWikiNamespaces.MediaWiki], item.Name).ToTitle());
 			}
 		}
 
@@ -496,7 +490,8 @@
 		protected virtual void LoadPages(QueryPageSetInput pageSetInput)
 		{
 			var loadOptions = new PageLoadOptions(this.Site.DefaultLoadOptions, PageModules.Info);
-			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput.NotNull(nameof(pageSetInput)), PageCreator.Default.GetPropertyInputs(loadOptions), PageCreator.Default.CreatePageItem);
+			var creator = this.Site.PageCreator;
+			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput.NotNull(nameof(pageSetInput)), creator.GetPropertyInputs(loadOptions), creator.CreatePageItem);
 			this.FillFromTitleItems(result);
 		}
 
@@ -542,7 +537,7 @@
 		{
 			foreach (var item in result)
 			{
-				this.Add(Title.FromNormalizedTitle(this.Site, item.FullPageName));
+				this.Add(TitleFactory.FromApi(this.Site, item).ToTitle());
 			}
 		}
 
@@ -550,7 +545,7 @@
 		{
 			foreach (var item in result)
 			{
-				this.Add(Title.FromNormalizedTitle(this.Site, item.FullPageName.NotNull(nameof(item), nameof(item.FullPageName))));
+				this.Add(TitleFactory.FromApi(this.Site, item));
 			}
 		}
 
@@ -566,7 +561,7 @@
 			var result = this.Site.AbstractionLayer.CategoryMembers(input);
 			foreach (var item in result)
 			{
-				var title = Title.FromNormalizedTitle(this.Site, item.FullPageName.NotNull(nameof(item), nameof(item.FullPageName)));
+				var title = TitleFactory.FromApi(this.Site, item).ToTitle();
 				if (input.Type.HasFlag(item.Type))
 				{
 					this.Add(title);

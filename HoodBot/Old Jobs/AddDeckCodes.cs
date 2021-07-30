@@ -43,7 +43,7 @@
 				{
 					if (string.Equals(item.Name, item.TypeName, StringComparison.Ordinal))
 					{
-						var title = new Title(this.Site[UespNamespaces.Legends], item.Name);
+						var title = TitleFactory.FromName(this.Site[UespNamespaces.Legends], item.Name);
 						titles.Add(title);
 						lookup.Add(title, item);
 					}

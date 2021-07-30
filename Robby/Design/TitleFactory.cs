@@ -4,7 +4,7 @@
 	using RobinHood70.WikiCommon;
 
 	/// <summary>This class serves as a light-weight parser to split a wiki title into its constituent parts.</summary>
-	public class TitleFactory : ILinkTitle
+	public sealed class TitleFactory : ILinkTitle
 	{
 		#region Constructors
 
@@ -109,6 +109,21 @@
 				? pageName
 				: this.Namespace.CapitalizePageName(pageName);
 		}
+
+		private TitleFactory(Namespace ns, string pageName)
+		{
+			// Shortcut constructor for times when a pre-validated, local page is be provided.
+			this.Namespace = ns;
+
+			var split = pageName.Split(TextArrays.Octothorp, 2);
+			if (split.Length == 2)
+			{
+				this.Fragment = split[1];
+				pageName = split[0].TrimEnd();
+			}
+
+			this.PageName = pageName;
+		}
 		#endregion
 
 		#region Public Properties
@@ -150,6 +165,48 @@
 		#region Public Static Methods
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
+		/// <param name="ns">The namespace the page is in.</param>
+		/// <param name="pageName">Name of the page.</param>
+		public static TitleFactory Direct(Namespace ns, string pageName)
+		{
+			ns.ThrowNull(nameof(ns));
+			pageName.ThrowNull(nameof(pageName));
+			pageName = ns.CapitalizePageName(Normalize(pageName));
+			return new(ns, pageName);
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="nsid">The namespace the page is in.</param>
+		/// <param name="pageName">Name of the page.</param>
+		public static TitleFactory Direct(Site site, int nsid, string pageName) => Direct(site.NotNull(nameof(site))[nsid], pageName);
+
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
+		/// <param name="ns">The namespace the page is in.</param>
+		/// <param name="pageName">Name of the page.</param>
+		public static TitleFactory DirectNormalized(Namespace ns, string pageName) => new(ns.NotNull(nameof(ns)), pageName.NotNull(nameof(pageName)));
+
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="nsid">The namespace the page is in.</param>
+		/// <param name="pageName">Name of the page.</param>
+		public static TitleFactory DirectNormalized(Site site, int nsid, string pageName) => Direct(site.NotNull(nameof(site))[nsid], pageName);
+
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="apiTitle">An <see cref="IApiTitle"/>.</param>
+		public static TitleFactory FromApi(Site site, IApiTitle apiTitle) => new(site.NotNull(nameof(site)), MediaWikiNamespaces.Main, apiTitle.NotNull(nameof(apiTitle)).FullPageName);
+
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="apiTitle">An <see cref="IApiTitle"/>.</param>
+		public static TitleFactory FromApi(Site site, IApiTitleOptional apiTitle) => new(
+			site.NotNull(nameof(site)),
+			MediaWikiNamespaces.Main,
+			apiTitle.NotNull(nameof(apiTitle))
+				.FullPageName.NotNull(nameof(apiTitle), nameof(apiTitle.FullPageName)));
+
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="site">The site.</param>
 		/// <param name="pageName">Name of the page.</param>
 		public static TitleFactory FromName(Site site, string pageName) => new(site.NotNull(nameof(site)), MediaWikiNamespaces.Main, Normalize(pageName.NotNull(nameof(pageName))));
@@ -185,10 +242,22 @@
 
 		/// <summary>Creates a new LinkTarget from the parsed text.</summary>
 		/// <returns>A new <see cref="FullTitle"/>.</returns>
-		public FullTitle ToLinkTarget() => new(this);
+		public FullTitle ToFullTitle() => new(this);
+
+		/// <summary>Creates a new Page or Page derivative from the parsed text using the site's <see cref="Site.PageCreator"/>.</summary>
+		/// <returns>A new <see cref="Page"/>.</returns>
+		public Page ToPage() => this.Namespace == null ? new(this) : this.ToPage(this.Namespace.Site.PageCreator);
+
+		/// <summary>Creates a new Page or Page derivative using the specified <see cref="PageCreator"/>.</summary>
+		/// <returns>A new <see cref="Page"/>.</returns>
+		public Page ToPage(PageCreator creator) => creator.NotNull(nameof(creator)).CreatePage(this);
+
+		/// <summary>Creates a new Page from the parsed text.</summary>
+		/// <returns>A new <see cref="Page"/>.</returns>
+		public Page ToPageForced() => new(this);
 
 		/// <summary>Creates a new SiteLink from the parsed text.</summary>
-		/// <returns>A new <see cref="FullTitle"/>.</returns>
+		/// <returns>A new <see cref="SiteLink"/>.</returns>
 		public SiteLink ToSiteLink() => new(this);
 
 		/// <summary>Creates a new title from the parsed text.</summary>

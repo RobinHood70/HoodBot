@@ -127,7 +127,7 @@
 		{
 			var allTitles = new TitleCollection(this.Site);
 			allTitles.SetLimitations(LimitationType.FilterTo, UespNamespaces.Online);
-			allTitles.GetPageTranscludedIn(new[] { new Title(this.Site, UespNamespaces.Template, "Online NPC Summary") });
+			allTitles.GetPageTranscludedIn(new[] { TitleFactory.FromName(this.Site, UespNamespaces.Template, "Online NPC Summary") });
 			allTitles.Sort();
 			var i = allTitles.Count - 1;
 			while (allTitles[i].PageName[0] != 'A')
@@ -160,11 +160,11 @@
 				if (WikiLink.IsLink(value))
 				{
 					var link = new WikiLink(value);
-					matchAgainst.Add(new Title(this.Site, link.FullPageName));
+					matchAgainst.Add(TitleFactory.FromName(this.Site, link.FullPageName));
 				}
 				else
 				{
-					matchAgainst.Add(new Title(page.Namespace, value));
+					matchAgainst.Add(TitleFactory.FromName(page.Namespace, value));
 				}
 			}
 		}

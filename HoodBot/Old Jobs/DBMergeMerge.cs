@@ -150,7 +150,7 @@
 			var srTitles = new TitleCollection(this.Site);
 			foreach (var dbCheckPage in dbCheckPages)
 			{
-				srTitles.Add(new Title(this.Site, UespNamespaces.Skyrim, dbCheckPage.PageName));
+				srTitles.Add(TitleFactory.FromName(this.Site, UespNamespaces.Skyrim, dbCheckPage.PageName));
 			}
 
 			var srPages = new PageCollection(this.Site, PageModules.Info | PageModules.Properties | PageModules.Revisions);
@@ -159,7 +159,7 @@
 			srPages.Sort();
 			foreach (var srPage in srPages)
 			{
-				var dbTitle = new Title(this.Site, UespNamespaces.Dragonborn, srPage.PageName);
+				var dbTitle = TitleFactory.FromName(this.Site, UespNamespaces.Dragonborn, srPage.PageName);
 				var srFragmented = new TitleParts(srPage)
 				{
 					Fragment = "Dragonborn"
@@ -180,7 +180,7 @@
 				{
 					var value = parameter.Parameter.Value;
 					var split = EmbeddedValue.FindWhitespace(WikiTextVisitor.Value(value));
-					var title = new Title(this.Site, page.NamespaceId, split.Value);
+					var title = TitleFactory.FromName(this.Site, page.NamespaceId, split.Value);
 					if (this.Replacements.TryGetValue(title, out var replacement) && replacement.Actions.HasFlag(ReplacementActions.Move))
 					{
 						// Note: for simplicity, this pays no attention to ns_base, which is not in use anywhere on the wiki as of this writing.

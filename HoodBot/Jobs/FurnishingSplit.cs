@@ -102,7 +102,7 @@
 				pageName = pageName.Substring(0, extension);
 			}
 
-			return new Title(page.Namespace.Site[UespNamespaces.Online], pageName);
+			return TitleFactory.Direct(page.Namespace.Site, UespNamespaces.Online, pageName);
 		}
 		#endregion
 	}

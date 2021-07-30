@@ -2,6 +2,7 @@
 {
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 
 	public class LinkFinder : LinkFinderJob
 	{
@@ -20,7 +21,7 @@
 			{
 				foreach (var search in searches.Split(TextArrays.Pipe))
 				{
-					this.searches.Add(Title.FromName(this.Site, search));
+					this.searches.Add(TitleFactory.FromName(this.Site, search));
 				}
 
 				this.searches.Sort();

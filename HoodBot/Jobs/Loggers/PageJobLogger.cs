@@ -8,6 +8,7 @@
 	using RobinHood70.HoodBot.Jobs;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.Parser;
@@ -28,7 +29,7 @@
 
 		#region Constructors
 		public PageJobLogger(Site site, string pageName, JobTypes typesToLog)
-			: base(typesToLog) => this.logPage = Page.FromName(site.NotNull(nameof(site)), pageName.NotNull(nameof(pageName)));
+			: base(typesToLog) => this.logPage = TitleFactory.FromName(site.NotNull(nameof(site)), pageName.NotNull(nameof(pageName))).ToPage();
 		#endregion
 
 		#region Public Override Methods

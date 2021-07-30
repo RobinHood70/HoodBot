@@ -8,6 +8,7 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 
 	public class OneOffJob : EditJob
@@ -41,7 +42,7 @@
 					var groups = match.Groups;
 					var pageName = groups["itemName"].Value;
 					Debug.WriteLine("Match: " + match.Value);
-					var title = new Title(this.Site.Namespaces[UespNamespaces.Morrowind], pageName);
+					var title = TitleFactory.Direct(this.Site, UespNamespaces.Morrowind, pageName);
 					sb.Clear();
 					if (!this.Pages.TryGetValue(title, out var page))
 					{
@@ -60,9 +61,9 @@
 						.Append("|objectid=")
 						.AppendLinefeed(groups["id"].Value)
 						.Append("|icon=")
-						.AppendLinefeed(Title.FromName(this.Site, groups["icon"].Value).PageName)
+						.AppendLinefeed(TitleFactory.FromName(this.Site, groups["icon"].Value).PageName)
 						.Append("|image=")
-						.AppendLinefeed(Title.FromName(this.Site, groups["image"].Value).PageName)
+						.AppendLinefeed(TitleFactory.FromName(this.Site, groups["image"].Value).PageName)
 						.Append("|weight=")
 						.AppendLinefeed(groups["weight"].Value)
 						.Append("|value=")

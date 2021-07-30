@@ -65,7 +65,7 @@
 					{
 						var ns = (int)row["page_namespace"];
 						var name = (string)row["page_title"];
-						this.BacklinkTitles.Add(new Title(this.Site[ns], name));
+						this.BacklinkTitles.Add(TitleFactory.FromName(this.Site[ns], name));
 					}
 				}
 			}
@@ -181,7 +181,7 @@
 				{
 					if (cat.PageName.StartsWith(oldCategory, StringComparison.Ordinal))
 					{
-						newTitle = new Title(this.Site[UespNamespaces.Category], newNamespace.Category + cat.PageName[oldCategory.Length..]);
+						newTitle = TitleFactory.FromName(this.Site[UespNamespaces.Category], newNamespace.Category + cat.PageName[oldCategory.Length..]);
 						break;
 					}
 				}
@@ -210,7 +210,7 @@
 					? title.PageName.Replace(newNsName + ": ", string.Empty, StringComparison.Ordinal)
 					: title.PageName[slashIndex..];
 				var newSpace = newNsName + (title.Namespace.IsTalkSpace ? " talk" : string.Empty) + ':';
-				var newTitle = Title.FromName(this.Site, newSpace + newPseudoSpace + pageName);
+				var newTitle = TitleFactory.FromName(this.Site, newSpace + newPseudoSpace + pageName);
 				//// Debug.WriteLine($"{title}\t{newTitle}");
 				if (!this.Replacements.Contains(title))
 				{

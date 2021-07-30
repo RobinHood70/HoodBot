@@ -20,26 +20,6 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="FilePage" /> class.</summary>
-		/// <param name="site">The site the File is from.</param>
-		/// <param name="pageName">The page name.</param>
-		public FilePage(Site site, string pageName)
-			: base(site.NotNull(nameof(site))[MediaWikiNamespaces.File], pageName)
-		{
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="FilePage" /> class.</summary>
-		/// <param name="ns">The namespace (must be File).</param>
-		/// <param name="pageName">The page name.</param>
-		public FilePage(Namespace ns, string pageName)
-			: base(ns, pageName)
-		{
-			if (ns.Id != MediaWikiNamespaces.File)
-			{
-				throw new ArgumentException(Globals.CurrentCulture(Resources.NamespaceMustBe, ns.Site[MediaWikiNamespaces.File].Name), nameof(ns));
-			}
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="FilePage" /> class.</summary>
 		/// <param name="title">The <see cref="ISimpleTitle"/> to copy values from.</param>
 		public FilePage(ISimpleTitle title)
 			: base(title)

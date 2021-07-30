@@ -81,7 +81,7 @@
 		public static void UpdateFileParameter(PageMoverJob job, int ns, NodeCollection value)
 		{
 			var split = EmbeddedValue.FindWhitespace(WikiTextVisitor.Value(value.NotNull(nameof(value))));
-			var title = new Title(job.NotNull(nameof(job)).Site, ns, split.Value);
+			var title = TitleFactory.FromName(job.NotNull(nameof(job)).Site, ns, split.Value);
 			if (job.Replacements.TryGetValue(title, out var replacement))
 			{
 				split.Value = replacement.To.PageName;
@@ -251,7 +251,7 @@
 					srPageName = dbPage.PageName;
 				}
 
-				var srTitle = new Title(this.Site, dbPage.Namespace.IsTalkSpace ? UespNamespaces.SkyrimTalk : UespNamespaces.Skyrim, srPageName);
+				var srTitle = TitleFactory.FromName(this.Site, dbPage.Namespace.IsTalkSpace ? UespNamespaces.SkyrimTalk : UespNamespaces.Skyrim, srPageName);
 				if (this.ProposedDeletions.Contains(srTitle))
 				{
 					this.Warn($"* {srTitle.AsLink()} is proposed for deletion. Admin may want to delete before bot run.");
