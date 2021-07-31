@@ -7,7 +7,6 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 
-	// CONSIDER: This class is a strong candidate for conversion to a record.
 	// Class is sealed since it can be extended through extension methods if needed, and any derivation that would require value equality to change is both unlikely and inadvisable.
 
 	/// <summary>Represents a MediaWiki namespace for a specific site.</summary>
@@ -16,6 +15,7 @@
 		#region Fields
 		private readonly HashSet<string> allNames;
 		private readonly HashSet<string> defaultNames;
+		private readonly int hashCode;
 		private readonly int subjectSpaceId;
 		private readonly int? talkSpaceId;
 		private StringComparer? stringComparer;
@@ -26,6 +26,7 @@
 		{
 			this.Site = site.NotNull(nameof(site));
 			this.Id = ns.Id;
+			this.hashCode = HashCode.Combine(site, ns.Id);
 
 			// We can't actually populate SubjectSpace and TalkSpace here because they may not both be present in Site.Namespaces at this time, so only populate the local variables.
 			this.subjectSpaceId = ns.Id >= MediaWikiNamespaces.Main ? ns.Id & 0x7ffffffe : ns.Id;
@@ -75,10 +76,9 @@
 		/// <value><see langword="true"/> if the first letter of the namespace name is case-sensitive; otherwise, <see langword="false"/>.</value>
 		public bool CaseSensitive { get; }
 
-		/// <summary>Gets or sets the decorated name of the namespace.</summary>
+		/// <summary>Gets the decorated name of the namespace.</summary>
 		/// <value>The decorated name of the namespace.</value>
-		/// <remarks>By default, this is the primary name with a trailing colon for most namespaces; in Main space, however, it's an empty string. It is publicly settable for special cases.</remarks>
-		public string DecoratedName { get; set; }
+		public string DecoratedName { get; }
 
 		/// <summary>Gets the MediaWiki ID for the namespace.</summary>
 		/// <value>The MediaWiki ID for the namespace.</value>
@@ -99,10 +99,10 @@
 		/// <value><see langword="true"/> if this instance is talk namespace; otherwise, <see langword="false"/>.</value>
 		public bool IsTalkSpace => this.Id == this.talkSpaceId;
 
-		/// <summary>Gets or sets the name to be used in links.</summary>
+		/// <summary>Gets the name to be used in links.</summary>
 		/// <value>The name of the namespace as used in a link.</value>
-		/// <remarks>By default, in Category and File space, a colon will automatically be prepended to skip the magic linking and use normal linking instead. It is left publicly settable for special cases.</remarks>
-		public string LinkName { get; set; }
+		/// <remarks>By default, in Category and File space, a colon will automatically be prepended to skip the magic linking and use normal linking instead.</remarks>
+		public string LinkName { get; }
 
 		/// <summary>Gets the primary name of the namespace.</summary>
 		/// <value>The primary name of the namespace.</value>
@@ -193,7 +193,11 @@
 		/// <summary>Indicates whether the current object is equal to another object of the same type.</summary>
 		/// <param name="other">An object to compare with this object.</param>
 		/// <returns><see langword="true"/> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false"/>.</returns>
-		public bool Equals(Namespace? other) => !(other is null) && this.Site == other.Site && this.Id == other.Id;
+		public bool Equals(Namespace? other) =>
+			!(other is null) &&
+			this.GetHashCode() == other.GetHashCode() &&
+			this.Id == other.Id &&
+			this.Site == other.Site;
 
 		/// <summary>Checks if two page names are the same, based on the case-sensitivity for the namespace.</summary>
 		/// <param name="pageName1">The page name to check.</param>
@@ -242,7 +246,7 @@
 
 		/// <summary>Returns a hash code for this instance.</summary>
 		/// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. </returns>
-		public override int GetHashCode() => HashCode.Combine(this.Site, this.Id);
+		public override int GetHashCode() => this.hashCode;
 
 		/// <summary>Returns a <see cref="string" /> that represents this instance using the primary name of the namespace.</summary>
 		/// <returns>A <see cref="string" /> that represents this instance.</returns>
