@@ -72,6 +72,32 @@ namespace RobinHood70.WikiCommon
 		All = Page | Subcat | File
 	}
 
+	/// <summary>The attributes of the namespace.</summary>
+	[Flags]
+	public enum NamespaceFlags
+	{
+		/// <summary>No value has been set or type was not recognized.</summary>
+		None = 0,
+
+		/// <summary>The first character of the page name is case-sensitive.</summary>
+		CaseSensitive = 1,
+
+		/// <summary>The namespace is considered as having content.</summary>
+		ContentSpace = 1 << 1,
+
+		/// <summary>Whether pages in the namespace can be transcluded. Set when non-includable.</summary>
+		NonIncludable = 1 << 2,
+
+		/// <summary>Whether the namespace allows subpages.</summary>
+		AllowsSubpages = 1 << 3,
+
+		/// <summary>Links in this namespace require a leading : in order to link normally.</summary>
+		ForcedLinkSpace = 1 << 4,
+
+		/// <summary>Whether the namespace allows Talk pages.</summary>
+		CanTalk = 1 << 5
+	}
+
 	/// <summary>The methods to use to purge pages.</summary>
 	public enum PurgeMethod
 	{

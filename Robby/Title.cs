@@ -158,7 +158,7 @@
 		/// <returns>A page for this title.</returns>
 		public Page Load(PageLoadOptions options)
 		{
-			if (this.Namespace.CanExist)
+			if (this.Namespace.CanTalk)
 			{
 				var pages = PageCollection.Unlimited(this.Site, options);
 				pages.GetTitles(this);

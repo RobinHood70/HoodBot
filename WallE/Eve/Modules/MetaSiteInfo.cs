@@ -9,6 +9,7 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WallE.Properties;
+	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
@@ -290,14 +291,24 @@
 			{
 				if (resultNode.First is JToken result)
 				{
+					var id = (int)result.MustHave("id");
 					var flags = result.GetFlags(
 						("content", NamespaceFlags.ContentSpace),
 						("nonincludable", NamespaceFlags.NonIncludable),
-						("subpages", NamespaceFlags.Subpages))
+						("subpages", NamespaceFlags.AllowsSubpages))
 						.AddCaseFlag(result, NamespaceFlags.CaseSensitive);
 
+					if (id >= MediaWikiNamespaces.Main)
+					{
+						flags |= NamespaceFlags.CanTalk;
+						if (id is MediaWikiNamespaces.Category or MediaWikiNamespaces.File)
+						{
+							flags |= NamespaceFlags.ForcedLinkSpace;
+						}
+					}
+
 					retval.Add(new SiteInfoNamespace(
-						id: (int)result.MustHave("id"),
+						id: id,
 						canonicalName: (string?)result["canonical"] ?? string.Empty,
 						defaultContentModel: (string?)result["defaultcontentmodel"],
 						flags: flags,

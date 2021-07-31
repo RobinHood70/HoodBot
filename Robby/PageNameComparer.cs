@@ -7,14 +7,20 @@
 	public class PageNameComparer : StringComparer
 	{
 		#region FIelds
-		private readonly Namespace ns;
+		private readonly CultureInfo culture;
+		private readonly bool caseSensitive;
 		#endregion
 
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="PageNameComparer"/> class.</summary>
-		/// <param name="ns">The namespace the pages belong to.</param>
-		public PageNameComparer(Namespace ns) => this.ns = ns;
+		/// <param name="culture">The culture to use for the comparison.</param>
+		/// <param name="caseSensitive">Whether the first character of the page name is case-sensitive.</param>
+		public PageNameComparer(CultureInfo culture, bool caseSensitive)
+		{
+			this.culture = culture;
+			this.caseSensitive = caseSensitive;
+		}
 		#endregion
 
 		#region Public Override Methods
@@ -32,8 +38,8 @@
 				return 1;
 			}
 
-			var compareInfo = this.ns.Site.Culture.CompareInfo;
-			if (this.ns.CaseSensitive)
+			var compareInfo = this.culture.CompareInfo;
+			if (this.caseSensitive)
 			{
 				return compareInfo.Compare(x, y, CompareOptions.None);
 			}
