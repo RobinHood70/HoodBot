@@ -7,6 +7,7 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Design;
+	using RobinHood70.WikiCommon;
 
 	/// <inheritdoc/>
 	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "High class coupling is the result of using classes for inputs, which is a recommended design when dealing with such a high level of input variability.")]
@@ -65,21 +66,21 @@
 			new SiteInfoNamespace(-2, "Media", null, NamespaceFlags.None, "Media"),
 			new SiteInfoNamespace(-1, "Special", null, NamespaceFlags.None, "Special"),
 			new SiteInfoNamespace(0, string.Empty, null, NamespaceFlags.ContentSpace, string.Empty),
-			new SiteInfoNamespace(1, "Talk", null, NamespaceFlags.Subpages, "Talk"),
-			new SiteInfoNamespace(2, "User", null, NamespaceFlags.Subpages, "User"),
-			new SiteInfoNamespace(3, "User talk", null, NamespaceFlags.Subpages, "User talk"),
-			new SiteInfoNamespace(4, "Project", null, NamespaceFlags.Subpages, "Project"),
-			new SiteInfoNamespace(5, "Project talk", null, NamespaceFlags.Subpages, "Project talk"),
+			new SiteInfoNamespace(1, "Talk", null, NamespaceFlags.AllowsSubpages, "Talk"),
+			new SiteInfoNamespace(2, "User", null, NamespaceFlags.AllowsSubpages, "User"),
+			new SiteInfoNamespace(3, "User talk", null, NamespaceFlags.AllowsSubpages, "User talk"),
+			new SiteInfoNamespace(4, "Project", null, NamespaceFlags.AllowsSubpages, "Project"),
+			new SiteInfoNamespace(5, "Project talk", null, NamespaceFlags.AllowsSubpages, "Project talk"),
 			new SiteInfoNamespace(6, "File", null, NamespaceFlags.None, "File"),
-			new SiteInfoNamespace(7, "File talk", null, NamespaceFlags.Subpages, "File talk"),
+			new SiteInfoNamespace(7, "File talk", null, NamespaceFlags.AllowsSubpages, "File talk"),
 			new SiteInfoNamespace(8, "MediaWiki", null, NamespaceFlags.None, "MediaWiki"),
-			new SiteInfoNamespace(9, "MediaWiki talk", null, NamespaceFlags.Subpages, "MediaWiki talk"),
-			new SiteInfoNamespace(10, "Template", null, NamespaceFlags.Subpages, "Template"),
-			new SiteInfoNamespace(11, "Template talk", null, NamespaceFlags.Subpages, "Template talk"),
-			new SiteInfoNamespace(12, "Help", null, NamespaceFlags.Subpages, "Help"),
-			new SiteInfoNamespace(13, "Help talk", null, NamespaceFlags.Subpages, "Help talk"),
-			new SiteInfoNamespace(14, "Category", null, NamespaceFlags.Subpages, "Category"),
-			new SiteInfoNamespace(15, "Category talk", null, NamespaceFlags.Subpages, "Category talk"),
+			new SiteInfoNamespace(9, "MediaWiki talk", null, NamespaceFlags.AllowsSubpages, "MediaWiki talk"),
+			new SiteInfoNamespace(10, "Template", null, NamespaceFlags.AllowsSubpages, "Template"),
+			new SiteInfoNamespace(11, "Template talk", null, NamespaceFlags.AllowsSubpages, "Template talk"),
+			new SiteInfoNamespace(12, "Help", null, NamespaceFlags.AllowsSubpages, "Help"),
+			new SiteInfoNamespace(13, "Help talk", null, NamespaceFlags.AllowsSubpages, "Help talk"),
+			new SiteInfoNamespace(14, "Category", null, NamespaceFlags.AllowsSubpages, "Category"),
+			new SiteInfoNamespace(15, "Category talk", null, NamespaceFlags.AllowsSubpages, "Category talk"),
 		};
 
 		private static readonly List<SiteInfoNamespaceAlias> SiteInfoNamespaceAliases = new()

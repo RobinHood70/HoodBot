@@ -7,78 +7,65 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 
-	// Class is sealed since it can be extended through extension methods if needed, and any derivation that would require value equality to change is both unlikely and inadvisable.
-
 	/// <summary>Represents a MediaWiki namespace for a specific site.</summary>
 	public sealed class Namespace : IEquatable<Namespace>, ISiteSpecific
 	{
 		#region Fields
 		private readonly HashSet<string> allNames;
-		private readonly HashSet<string> defaultNames;
 		private readonly int hashCode;
 		private readonly int subjectSpaceId;
 		private readonly int? talkSpaceId;
-		private StringComparer? stringComparer;
 		#endregion
 
 		#region Constructors
-		internal Namespace(Site site, StringComparer comparer, SiteInfoNamespace ns, IEnumerable<string>? aliases)
+		internal Namespace(Site site, SiteInfoNamespace ns, HashSet<string> allNames)
 		{
 			this.Site = site.NotNull(nameof(site));
 			this.Id = ns.Id;
 			this.hashCode = HashCode.Combine(site, ns.Id);
-
-			// We can't actually populate SubjectSpace and TalkSpace here because they may not both be present in Site.Namespaces at this time, so only populate the local variables.
-			this.subjectSpaceId = ns.Id >= MediaWikiNamespaces.Main ? ns.Id & 0x7ffffffe : ns.Id;
-			this.talkSpaceId = ns.Id >= MediaWikiNamespaces.Main ? new int?(ns.Id | 1) : null;
-
-			this.AllowsSubpages = (ns.Flags & NamespaceFlags.Subpages) != 0;
-			this.CaseSensitive = (ns.Flags & NamespaceFlags.CaseSensitive) != 0;
-			this.IsContentSpace = (ns.Flags & NamespaceFlags.ContentSpace) != 0;
-
+			this.Flags = ns.Flags;
 			this.Name = ns.Name;
 			this.CanonicalName = ns.CanonicalName;
-			this.DecoratedName = this.Id == MediaWikiNamespaces.Main ? string.Empty : this.Name + ':';
+			this.DecoratedName = ns.Id == MediaWikiNamespaces.Main ? string.Empty : ns.Name + ':';
+			this.allNames = allNames;
+
+			// Everything below this relies on class information set above.
+			// We can't actually populate SubjectSpace and TalkSpace here because they may not both be present in Site.Namespaces at this time, so only populate the local variables.
 			this.LinkName = (this.IsForcedLinkSpace ? ":" : string.Empty) + this.DecoratedName;
-			this.Aliases = aliases == null ? new List<string>() : new List<string>(aliases);
-
-			this.defaultNames = new HashSet<string>(this.Aliases, comparer)
-			{
-				ns.Name,
-				ns.CanonicalName
-			};
-			this.defaultNames.TrimExcess();
-
-			this.allNames = new HashSet<string>(comparer);
-			this.ResetAllNames();
+			this.PageNameComparer = new PageNameComparer(site.Culture, this.CaseSensitive);
+			this.subjectSpaceId = this.CanTalk ? ns.Id & 0x7ffffffe : ns.Id;
+			this.talkSpaceId = this.CanTalk ? ns.Id | 1 : null;
 		}
 		#endregion
 
 		#region Public Properties
 
-		/// <summary>Gets a list of aliases for the namespace (e.g., "WP" for "Wikipedia" space).</summary>
-		/// <value>The aliases for the namespace, as defined by the specific MediaWiki installation.</value>
-		public IReadOnlyList<string> Aliases { get; }
+		/// <summary>Gets all valid names for the namespace, including the <see cref="CanonicalName"/>, <see cref="Name"/>, and any aliases defined for the namespace.</summary>
+		public IReadOnlyCollection<string> AllNames => this.allNames;
 
 		/// <summary>Gets a value indicating whether the namespace allows subpages.</summary>
 		/// <value><see langword="true"/> if the namespace allows subpages; otherwise, <see langword="false"/>.</value>
-		public bool AllowsSubpages { get; }
-
-		/// <summary>Gets a value indicating whether this page can have editable content.</summary>
-		/// <value><see langword="true"/> if the namespace can have editable content; otherwise, <see langword="false"/> (e.g., for Special and Media spaces).</value>
-		public bool CanExist => this.Id >= MediaWikiNamespaces.Main;
+		public bool AllowsSubpages => (this.Flags & NamespaceFlags.AllowsSubpages) != 0;
 
 		/// <summary>Gets the canonical name of the namespace.</summary>
 		/// <value>The canonical name of the namespace. For built-in namespaces, this is the default English name of the namespace (e.g., File, Project talk, etc.).</value>
 		public string CanonicalName { get; }
 
+		/// <summary>Gets a value indicating whether this page can have editable content.</summary>
+		/// <value><see langword="true"/> if the namespace can have editable content; otherwise, <see langword="false"/> (e.g., for Special and Media spaces).</value>
+		public bool CanTalk => (this.Flags & NamespaceFlags.CanTalk) != 0;
+
 		/// <summary>Gets a value indicating whether the first letter of the namespace name is case-sensitive.</summary>
 		/// <value><see langword="true"/> if the first letter of the namespace name is case-sensitive; otherwise, <see langword="false"/>.</value>
-		public bool CaseSensitive { get; }
+		public bool CaseSensitive => (this.Flags & NamespaceFlags.CaseSensitive) != 0;
 
 		/// <summary>Gets the decorated name of the namespace.</summary>
 		/// <value>The decorated name of the namespace.</value>
 		public string DecoratedName { get; }
+
+		/// <summary>Gets the behavioural properties of the namespace.</summary>
+		/// <value>The various boolean flags indicating which behaviours are permitted.</value>
+		public NamespaceFlags Flags { get; }
 
 		/// <summary>Gets the MediaWiki ID for the namespace.</summary>
 		/// <value>The MediaWiki ID for the namespace.</value>
@@ -86,10 +73,10 @@
 
 		/// <summary>Gets a value indicating whether this namespace is counted as content space.</summary>
 		/// <value><see langword="true"/> if this namespace is counted as content space; otherwise, <see langword="false"/>.</value>
-		public bool IsContentSpace { get; }
+		public bool IsContentSpace => (this.Flags & NamespaceFlags.ContentSpace) != 0;
 
 		/// <summary>Gets a value indicating whether this namespace requires a colon to be prepended in order to create a link.</summary>
-		public bool IsForcedLinkSpace => this.Id is MediaWikiNamespaces.Category or MediaWikiNamespaces.File;
+		public bool IsForcedLinkSpace => (this.Flags & NamespaceFlags.ForcedLinkSpace) != 0;
 
 		/// <summary>Gets a value indicating whether this instance is subject space.</summary>
 		/// <value><see langword="true"/> if this instance is a subject namespace; otherwise, <see langword="false"/>.</value>
@@ -108,13 +95,13 @@
 		/// <value>The primary name of the namespace.</value>
 		public string Name { get; }
 
+		/// <summary>Gets the StringComparer in use to compare page names within this namespace.</summary>
+		/// <value>A StringComparer that can be used to compare page names outside this class, if needed.</value>
+		public StringComparer PageNameComparer { get; }
+
 		/// <summary>Gets the site to which this namespace belongs.</summary>
 		/// <value>The site.</value>
 		public Site Site { get; }
-
-		/// <summary>Gets the StringComparer in use to compare page names within this namespace.</summary>
-		/// <value>A StringComparer that can be used to compare page names outside this class, if needed.</value>
-		public StringComparer PageNameComparer => this.stringComparer ??= new PageNameComparer(this);
 
 		/// <summary>Gets the subject space.</summary>
 		/// <value>The subject space.</value>
@@ -166,10 +153,6 @@
 		#endregion
 
 		#region Public Methods
-
-		/// <summary>Adds a name to the lookup list.</summary>
-		/// <param name="name">The name.</param>
-		public void AddName(string name) => this.allNames.Add(name);
 
 		/// <summary>Gets a name that's suitable for cases when a namespace is assumed, such as template calls.</summary>
 		/// <param name="ns">The namespace ID.</param>
@@ -223,17 +206,6 @@
 			}
 
 			return this.PageNameComparer.Compare(pageName1, pageName2) == 0;
-		}
-
-		/// <summary>Removes a name from the lookup list.</summary>
-		/// <param name="name">The name.</param>
-		public void RemoveName(string name) => this.allNames.Remove(name);
-
-		/// <summary>Resets the internal name list to the default one provided by the wiki, in the event that the name list has been altered by <see cref="AddName(string)"/> or <see cref="RemoveName(string)"/>.</summary>
-		public void ResetAllNames()
-		{
-			this.allNames.Clear();
-			this.allNames.UnionWith(this.defaultNames);
 		}
 		#endregion
 

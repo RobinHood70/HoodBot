@@ -1198,30 +1198,7 @@
 			this.baseArticlePath = path.StartsWith('/') ? basePath + path : path;
 			this.mainPageName = general.MainPage;
 			this.scriptPath = basePath + general.Script;
-
-			// NamespaceAliases
-			var allAliases = new Dictionary<int, List<string>>();
-			foreach (var item in siteInfo.NamespaceAliases)
-			{
-				if (!allAliases.TryGetValue(item.Id, out var list))
-				{
-					list = new List<string>();
-					allAliases.Add(item.Id, list);
-				}
-
-				list.Add(item.Alias);
-			}
-
-			// Namespaces
-			var comparer = StringComparer.Create(this.Culture, true);
-			var siteNamespaces = new List<Namespace>(siteInfo.Namespaces.Count);
-			foreach (var item in siteInfo.Namespaces)
-			{
-				allAliases.TryGetValue(item.Id, out var nsAliases);
-				siteNamespaces.Add(new Namespace(this, comparer, item, nsAliases));
-			}
-
-			this.namespaces = new NamespaceCollection(siteNamespaces, comparer);
+			this.namespaces = new NamespaceCollection(this, siteInfo.Namespaces, siteInfo.NamespaceAliases);
 			if (this.mainPageName != null)
 			{
 				this.mainPage = FullTitle.FromNormalizedName(this, this.mainPageName); // Now that we understand namespaces, we can create a Title.
