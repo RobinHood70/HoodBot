@@ -27,7 +27,7 @@
 			this.RevisionId = recentChange.RevisionId;
 			this.Tags = recentChange.Tags;
 			this.Timestamp = recentChange.Timestamp ?? DateTime.MinValue;
-			this.User = recentChange.User == null ? null : new User(User.GetTitle(site, recentChange.User));
+			this.User = recentChange.User == null ? null : new User(site, recentChange.User);
 		}
 
 		#region Public Properties

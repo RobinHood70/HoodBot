@@ -159,6 +159,9 @@
   <data name="NamespaceMustBe" xml:space="preserve">
     <value>The namespace provided is not valid. It must be {0}.</value>
   </data>
+  <data name="PageCouldNotBeLoaded" xml:space="preserve">
+    <value>The page {0} could not be loaded, probably because it's not an article or the title is invalid.</value>
+  </data>
   <data name="PageNameInterwiki" xml:space="preserve">
     <value>Invalid page name: [[{0}]]. Page is an interwiki link that doesn't resolve to the local wiki.</value>
   </data>

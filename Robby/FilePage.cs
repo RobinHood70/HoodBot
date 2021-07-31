@@ -11,7 +11,7 @@
 
 	/// <summary>Represents a file on the wiki. Includes all page data as well as file revisions and file-specific methods.</summary>
 	/// <seealso cref="Page" />
-	public class FilePage : Page
+	public sealed class FilePage : Page
 	{
 		#region Fields
 		private readonly List<FileRevision> fileRevisions = new();
@@ -19,14 +19,43 @@
 
 		#region Constructors
 
-		/// <summary>Initializes a new instance of the <see cref="FilePage" /> class.</summary>
+		/// <summary>Initializes a new instance of the <see cref="FilePage"/> class.</summary>
 		/// <param name="title">The <see cref="ISimpleTitle"/> to copy values from.</param>
-		public FilePage(ISimpleTitle title)
-			: base(title)
+		/// <param name="options">The load options used for this page. Can be used to detect if default-valued information is legitimate or was never loaded.</param>
+		/// <param name="apiItem">The API item to extract information from.</param>
+		internal FilePage(ISimpleTitle title, PageLoadOptions options, IApiTitle? apiItem)
+			: base(title, options, apiItem)
 		{
 			if (title.Namespace.Id != MediaWikiNamespaces.File)
 			{
 				throw new ArgumentException(Globals.CurrentCulture(Resources.NamespaceMustBe, this.Site[MediaWikiNamespaces.File].Name), nameof(title));
+			}
+
+			this.fileRevisions.Clear();
+			if (apiItem is PageItem pageItem && pageItem.ImageInfoEntries != null)
+			{
+				var latest = DateTime.MinValue;
+				foreach (var imageInfoEntry in pageItem.ImageInfoEntries)
+				{
+					var fileRevision = new FileRevision(
+						bitDepth: imageInfoEntry.BitDepth,
+						size: imageInfoEntry.Size,
+						height: imageInfoEntry.Height,
+						width: imageInfoEntry.Width,
+						comment: imageInfoEntry.Comment,
+						mimeType: imageInfoEntry.MimeType,
+						sha1: imageInfoEntry.Sha1,
+						user: imageInfoEntry.User,
+						timestamp: imageInfoEntry.Timestamp,
+						uri: imageInfoEntry.Uri == null ? null : new Uri(imageInfoEntry.Uri));
+					this.fileRevisions.Add(fileRevision);
+
+					if (fileRevision.Timestamp > latest)
+					{
+						this.LatestFileRevision = fileRevision;
+						latest = fileRevision.Timestamp.Value;
+					}
+				}
 			}
 		}
 		#endregion
@@ -39,7 +68,7 @@
 
 		/// <summary>Gets the latest file revision.</summary>
 		/// <value>The latest file revision.</value>
-		public FileRevision? LatestFileRevision { get; private set; }
+		public FileRevision? LatestFileRevision { get; }
 		#endregion
 
 		#region Public Methods
@@ -98,41 +127,6 @@
 			titles.GetDuplicateFiles(new[] { this }, localOnly);
 
 			return titles;
-		}
-		#endregion
-
-		#region Protected Override Methods
-
-		/// <summary>Populates file properties with relevant data from the WallE PageItem.</summary>
-		/// <param name="pageItem">The page item.</param>
-		protected override void PopulateCustomResults(PageItem pageItem)
-		{
-			this.fileRevisions.Clear();
-			if (pageItem.NotNull(nameof(pageItem)).ImageInfoEntries != null)
-			{
-				var latest = DateTime.MinValue;
-				foreach (var imageInfoEntry in pageItem.ImageInfoEntries)
-				{
-					var fileRevision = new FileRevision(
-						bitDepth: imageInfoEntry.BitDepth,
-						size: imageInfoEntry.Size,
-						height: imageInfoEntry.Height,
-						width: imageInfoEntry.Width,
-						comment: imageInfoEntry.Comment,
-						mimeType: imageInfoEntry.MimeType,
-						sha1: imageInfoEntry.Sha1,
-						user: imageInfoEntry.User,
-						timestamp: imageInfoEntry.Timestamp,
-						uri: imageInfoEntry.Uri == null ? null : new Uri(imageInfoEntry.Uri));
-					this.fileRevisions.Add(fileRevision);
-
-					if (fileRevision.Timestamp > latest)
-					{
-						this.LatestFileRevision = fileRevision;
-						latest = fileRevision.Timestamp.Value;
-					}
-				}
-			}
 		}
 		#endregion
 	}

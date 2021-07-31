@@ -77,7 +77,7 @@
 				.Append("Watch for ")
 				.Append(warningType)
 				.Append(" on ")
-				.AppendLine(newPage.Context.FullPageName)
+				.AppendLine(newPage.Context.FullPageName())
 				.Append(warningType.UpperFirst(newPage.Site.Culture))
 				.Append(": ");
 			foreach (var link in titles)
@@ -104,14 +104,14 @@
 			{
 				var jobSite = job.Site;
 				job.StatusWriteLine("Parsing replacements");
-				if (jobSite.User is not User user)
+				if (jobSite.User is not ISimpleTitle user)
 				{
 					throw new InvalidOperationException("Not logged in.");
 				}
 
-				var replacementsTitle = TitleFactory.DirectNormalized(user.Namespace, user.PageName + "/ESO Replacements").ToPage();
-				replacementsTitle.Load();
-				var replacements = replacementsTitle.Text;
+				var replacementsTitle = TitleFactory.DirectNormalized(user.Namespace, user.PageName + "/ESO Replacements").ToTitle();
+				var page = replacementsTitle.Load();
+				var replacements = page.Text;
 				if (string.IsNullOrEmpty(replacements))
 				{
 					throw new InvalidOperationException("Replacements page not found or empty!");

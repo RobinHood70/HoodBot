@@ -12,20 +12,20 @@
 
 	public class RgbToHsl : EditJob
 	{
-		private readonly Page dyes;
+		private readonly Title dyesTitle;
 
 		#region Constructors
 		[JobInfo("RGB to HSL")]
 		public RgbToHsl(JobManager jobManager)
-			: base(jobManager) => this.dyes = TitleFactory.DirectNormalized(this.Site, UespNamespaces.Online, "Dyes").ToPage();
+			: base(jobManager) => this.dyesTitle = TitleFactory.DirectNormalized(this.Site, UespNamespaces.Online, "Dyes").ToTitle();
 		#endregion
 
 		protected override void BeforeLogging()
 		{
 			var pages = PageCollection.Unlimited(this.Site);
 			pages.GetNamespace(MediaWikiNamespaces.Template, Filter.Any, "ESO ArmorDye Icon/");
-			this.dyes.Load();
-			var parser = new ContextualParser(this.dyes);
+			var dyes = this.dyesTitle.Load();
+			var parser = new ContextualParser(dyes);
 			foreach (var templateNode in parser.FindTemplates("ESO Dye"))
 			{
 				var name = templateNode.Find(1)?.Value.ToValue();
@@ -45,9 +45,10 @@
 				}
 			}
 
-			this.dyes.Text = parser.ToRaw();
+			dyes.Text = parser.ToRaw();
+			this.Pages.Add(dyes);
 		}
 
-		protected override void Main() => this.dyes.Save("Add color information", false);
+		protected override void Main() => this.SavePages("Add color information", false);
 	}
 }

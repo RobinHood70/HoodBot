@@ -29,7 +29,7 @@
 		#endregion
 
 		#region Public Properties
-		public Page? LogPage { get; private set; }
+		public ISimpleTitle? LogTitle { get; private set; }
 		#endregion
 
 		#region Public Static Methods
@@ -43,14 +43,15 @@
 		#region Public Override Methods
 		public override void Logout(bool force)
 		{
-			if (this.User is not null)
+			if (this.User is ISimpleTitle user)
 			{
-				this.FilterPages.Remove(this.User.FullPageName + "/Results");
+				this.FilterPages.Remove(user.FullPageName() + "/Results");
 			}
 
-			if (this.LogPage is not null)
+			if (this.LogTitle is not null)
 			{
-				this.FilterPages.Remove(this.LogPage);
+				this.FilterPages.Remove(this.LogTitle);
+				this.LogTitle = null;
 			}
 
 			base.Logout(force);
@@ -58,11 +59,11 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override IReadOnlyCollection<Title> LoadDeletionCategories() => new TitleCollection(this, MediaWikiNamespaces.Category, "Marked for Deletion");
+		protected override IReadOnlyCollection<ISimpleTitle> LoadDeletionCategories() => new TitleCollection(this, MediaWikiNamespaces.Category, "Marked for Deletion");
 
-		protected override IReadOnlyCollection<Title> LoadDeletePreventionTemplates() => new TitleCollection(this, MediaWikiNamespaces.Template, "Empty category", "Linked image");
+		protected override IReadOnlyCollection<ISimpleTitle> LoadDeletePreventionTemplates() => new TitleCollection(this, MediaWikiNamespaces.Template, "Empty category", "Linked image");
 
-		protected override IReadOnlyCollection<Title> LoadDiscussionPages()
+		protected override IReadOnlyCollection<ISimpleTitle> LoadDiscussionPages()
 		{
 			var titles = new TitleCollection(this);
 			titles.GetCategoryMembers("Message Boards");
@@ -79,8 +80,8 @@
 			{
 				// Assumes we'll never be editing UESP anonymously.
 				this.AbstractionLayer.Assert = (
-					string.Equals(this.User.Name, "HotnBOThered", StringComparison.Ordinal) ||
-					string.Equals(this.User.Name, "HoodBot", StringComparison.Ordinal))
+					string.Equals(this.User.PageName, "HotnBOThered", StringComparison.Ordinal) ||
+					string.Equals(this.User.PageName, "HoodBot", StringComparison.Ordinal))
 						? "bot"
 						: "user";
 			}
@@ -94,8 +95,8 @@
 			var resultPage = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.User, this.User.PageName + "/Results");
 			this.FilterPages.Add(resultPage);
 
-			this.LogPage = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.User, this.User.PageName + "/Log").ToPage();
-			this.FilterPages.Add(this.LogPage);
+			this.LogTitle = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.User, this.User.PageName + "/Log").ToTitle();
+			this.FilterPages.Add(this.LogTitle);
 			//// Reinstate if pages become different: this.FilterPages.Add(this.StatusPage);
 		}
 

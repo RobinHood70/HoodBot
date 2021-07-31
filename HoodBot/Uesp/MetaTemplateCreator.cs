@@ -5,6 +5,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WikiCommon;
 
 	public class MetaTemplateCreator : PageCreator
 	{
@@ -27,9 +28,11 @@
 		#endregion
 
 		#region Public Override Methods
-		public override Page CreatePage(ISimpleTitle title) => this.GameSpaceOnly && title.NotNull(nameof(title)).Namespace.Id < 100
-				? this.FallbackCreator.CreatePage(title)
-				: new VariablesPage(title);
+
+		/// <inheritdoc/>
+		public override Page CreatePage(ISimpleTitle title, PageLoadOptions options, IApiTitle? apiItem) => this.GameSpaceOnly && title.NotNull(nameof(title)).Namespace.Id < 100
+				? this.FallbackCreator.CreatePage(title, options, apiItem)
+				: new VariablesPage(title, options, apiItem);
 
 		public override PageItem CreatePageItem(int ns, string title, long pageId) => new VariablesPageItem(ns, title, pageId);
 		#endregion

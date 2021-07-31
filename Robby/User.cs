@@ -11,60 +11,41 @@
 	/// <summary>Represents a user on the wiki. This can include IP users.</summary>
 	public class User : Title
 	{
-		#region Fields
-		private bool loaded;
-		#endregion
-
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="User"/> class.</summary>
-		/// <param name="title">The title to copy values from.</param>
-		public User(ISimpleTitle title)
-			: base(title)
+		/// <param name="site">The site the user is from.</param>
+		/// <param name="user">The user's name.</param>
+		public User(Site site, string user)
+			: base(GetTitle(
+				site.NotNull(nameof(site)),
+				user.NotNull(nameof(user))))
 		{
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="User"/> class.</summary>
-		/// <param name="title">The title to copy values from.</param>
-		/// <param name="user">The WallE <see cref="UsersInput"/> to populate the data from.</param>
-		internal User(ISimpleTitle title, UsersItem user)
-			: this(title) => this.Populate(user);
+		/// <param name="site">The site the user is from.</param>
+		/// <param name="userInfo">The API user information.</param>
+		public User(Site site, AllUsersItem userInfo)
+			: this(site, userInfo.NotNull(nameof(userInfo)).Name) =>
+			this.Info = new UserInfo(this.Site, userInfo);
+
+		/// <summary>Initializes a new instance of the <see cref="User"/> class.</summary>
+		/// <param name="title">The base user page.</param>
+		/// <param name="userInfo">The API user information.</param>
+		public User(ISimpleTitle title, UsersItem userInfo)
+			: base(title) => this.Info = new UserInfo(this.Site, userInfo);
 		#endregion
 
 		#region Public Properties
 
-		/// <summary>Gets information about any active blocks on the user.</summary>
-		/// <value>The block information.</value>
-		public Block? BlockInfo { get; private set; }
-
-		/// <summary>Gets the user's edit count.</summary>
-		/// <value>The user's edit count.</value>
-		public long EditCount { get; private set; }
-
-		/// <summary>Gets a value indicating whether this <see cref="User"/> can be e-mailed.</summary>
-		/// <value><see langword="true"/> if the user is emailable; otherwise, <see langword="false"/>.</value>
-		public bool Emailable { get; private set; }
-
-		/// <summary>Gets the user's gender.</summary>
-		/// <value>The user's gender.</value>
-		public string? Gender { get; private set; }
-
-		/// <summary>Gets the groups the user belongs to.</summary>
-		/// <value>The groups the user belongs to.</value>
-		public IReadOnlyList<string>? Groups { get; private set; }
+		/// <summary>Gets extended user information, if loaded via <see cref="LoadUserInfo"/>.</summary>
+		public UserInfo? Info { get; private set; }
 
 		/// <summary>Gets the user's name.</summary>
 		/// <value>The name.</value>
 		/// <remarks>This is an alias to PageName for ease-of-use.</remarks>
 		public string Name => this.PageName;
-
-		/// <summary>Gets the date and time the user account was created.</summary>
-		/// <value>The user's registration date.</value>
-		public DateTime Registration { get; private set; }
-
-		/// <summary>Gets the user's rights.</summary>
-		/// <value>The user's rights.</value>
-		public IReadOnlyList<string>? Rights { get; private set; }
 		#endregion
 
 		#region Public Static Methods
@@ -123,7 +104,7 @@
 		{
 			subject.ThrowNull(nameof(subject));
 			body.ThrowNull(nameof(body));
-			if (this.loaded && !this.Emailable)
+			if (this.Info?.Emailable == false)
 			{
 				// Don't ask the wiki what the result will be if we already know we can't e-mail them.
 				return new ChangeValue<string>(ChangeStatus.Failure, Resources.UserEmailDisabled);
@@ -146,6 +127,11 @@
 				var result = string.Equals(retval.Result, "Success", StringComparison.OrdinalIgnoreCase)
 					? ChangeStatus.Success
 					: ChangeStatus.Failure;
+				if (this.Info is null)
+				{
+					this.Info = new UserInfo(result == ChangeStatus.Success);
+				}
+
 				return new ChangeValue<string>(result, retval.Message ?? retval.Result);
 			}
 		}
@@ -229,20 +215,16 @@
 
 		/// <summary>Loads all user information. This is necessary for any User object not provided by one of the <see cref="Site"/>.LoadUserInformation() methods.</summary>
 		/// <remarks>The information loaded includes the following properties: BlockInfo, EditCount, Emailable, Gender, Groups, Registration, and Rights.</remarks>
-		public void Load()
+		public void LoadUserInfo()
 		{
-			if (!this.loaded)
+			var input = new UsersInput(new[] { this.Name })
 			{
-				var input = new UsersInput(new[] { this.Name })
-				{
-					Properties = UsersProperties.All
-				};
-				var result = this.Site.AbstractionLayer.Users(input);
-				if (result.Count == 1)
-				{
-					var user = result[0];
-					this.Populate(user);
-				}
+				Properties = UsersProperties.All
+			};
+			var result = this.Site.AbstractionLayer.Users(input);
+			if (result.Count == 1)
+			{
+				this.Info = new UserInfo(this.Site, result[0]);
 			}
 		}
 
@@ -277,7 +259,7 @@
 
 			ChangeStatus ChangeFunc()
 			{
-				var input = new EditInput(talkPage.FullPageName, msg)
+				var input = new EditInput(talkPage.FullPageName(), msg)
 				{
 					Bot = true,
 					Minor = Tristate.False,
@@ -340,29 +322,6 @@
 					? ChangeStatus.Failure
 					: ChangeStatus.Success;
 			}
-		}
-
-		private void Populate(UsersItem user)
-		{
-			this.BlockInfo = new Block(user.Name, user.BlockedBy, user.BlockReason, user.BlockTimestamp ?? DateTime.MinValue, user.BlockExpiry ?? DateTime.MaxValue, BlockFlags.None, false);
-			this.EditCount = user.EditCount;
-			this.Emailable = (user.Flags & UserFlags.Emailable) != 0;
-			this.Gender = user.Gender;
-			var groups = new List<string>();
-			if (user.Groups != null)
-			{
-				groups.AddRange(user.Groups);
-			}
-
-			if (user.ImplicitGroups != null)
-			{
-				groups.AddRange(user.ImplicitGroups);
-			}
-
-			this.Groups = groups;
-			this.Registration = user.Registration ?? DateTime.MinValue;
-			this.Rights = user.Rights ?? Array.Empty<string>();
-			this.loaded = true;
 		}
 		#endregion
 	}

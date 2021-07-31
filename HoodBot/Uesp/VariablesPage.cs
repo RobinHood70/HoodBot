@@ -4,7 +4,7 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.WallE.Base;
+	using RobinHood70.WikiCommon;
 
 	public class VariablesPage : Page
 	{
@@ -14,9 +14,28 @@
 		#endregion
 
 		#region Constructors
-		public VariablesPage(ISimpleTitle title)
-			: base(title)
+
+		/// <summary>Initializes a new instance of the <see cref="VariablesPage"/> class.</summary>
+		/// <param name="title">The <see cref="ISimpleTitle"/> to copy values from.</param>
+		/// <param name="options">The load options used for this page. Can be used to detect if default-valued information is legitimate or was never loaded.</param>
+		/// <param name="apiItem">The API item to extract information from.</param>
+		public VariablesPage(ISimpleTitle title, PageLoadOptions options, IApiTitle? apiItem)
+			: base(title, options, apiItem)
 		{
+			if (apiItem is VariablesPageItem varItem)
+			{
+				foreach (var item in varItem.Variables)
+				{
+					if (item.Subset == null)
+					{
+						this.mainSet.AddRange(item.Dictionary);
+					}
+					else
+					{
+						this.subsets.Add(item.Subset, item.Dictionary);
+					}
+				}
+			}
 		}
 		#endregion
 
@@ -50,29 +69,6 @@
 
 			set.TryGetValue(name, out var retval);
 			return retval;
-		}
-		#endregion
-
-		#region Protected Override Methods
-		protected override void PopulateCustomResults(PageItem pageItem)
-		{
-			if (pageItem.NotNull(nameof(pageItem)) is VariablesPageItem varPageItem)
-			{
-				this.mainSet.Clear();
-				this.subsets.Clear();
-				foreach (var item in varPageItem.Variables)
-				{
-					if (item.Subset == null)
-					{
-						this.mainSet.Clear();
-						this.mainSet.AddRange(item.Dictionary);
-					}
-					else
-					{
-						this.subsets[item.Subset] = item.Dictionary;
-					}
-				}
-			}
 		}
 		#endregion
 	}

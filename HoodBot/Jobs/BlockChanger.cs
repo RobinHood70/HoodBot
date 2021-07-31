@@ -38,9 +38,8 @@
 			{
 				try
 				{
-					if (block.User is string userName)
+					if (block.User is User user)
 					{
-						var user = new User(User.GetTitle(this.Site, block.User));
 						if (block.StartTime <= DateTime.Now.AddYears(-NumYears))
 						{
 							user.Unblock("Remove infinite IP block");

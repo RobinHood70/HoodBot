@@ -140,7 +140,8 @@
 		/// <inheritdoc/>
 		public string? Fragment { get; }
 
-		/// <inheritdoc/>
+		/// <summary>Gets the full page name of a title.</summary>
+		/// <returns>The full page name (<c>{{FULLPAGENAME}}</c>) of a title.</returns>
 		public string FullPageName => this.Namespace.DecoratedName + this.PageName;
 
 		/// <summary>Gets the interwiki prefix.</summary>
@@ -185,6 +186,10 @@
 		/// <param name="ns">The namespace the page is in.</param>
 		/// <param name="pageName">Name of the page.</param>
 		public static TitleFactory DirectNormalized(Namespace ns, string pageName) => new(ns.NotNull(nameof(ns)), pageName.NotNull(nameof(pageName)));
+
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
+		/// <param name="title">The title to copy from.</param>
+		public static TitleFactory DirectNormalized(ISimpleTitle title) => new(title.NotNull(nameof(title)).Namespace, title.PageName);
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="site">The site.</param>
@@ -246,15 +251,22 @@
 
 		/// <summary>Creates a new Page or Page derivative from the parsed text using the site's <see cref="Site.PageCreator"/>.</summary>
 		/// <returns>A new <see cref="Page"/>.</returns>
-		public Page ToPage() => this.Namespace == null ? new(this) : this.ToPage(this.Namespace.Site.PageCreator);
+		public Page ToNewPage(string text) => this.Namespace == null
+			? new(this, PageLoadOptions.None, null) { Text = text }
+			: this.ToNewPage(this.Namespace.Site.PageCreator, text);
 
 		/// <summary>Creates a new Page or Page derivative using the specified <see cref="PageCreator"/>.</summary>
 		/// <returns>A new <see cref="Page"/>.</returns>
-		public Page ToPage(PageCreator creator) => creator.NotNull(nameof(creator)).CreatePage(this);
+		public Page ToNewPage(PageCreator creator, string text)
+		{
+			var page = creator.NotNull(nameof(creator)).CreateEmptyPage(this);
+			page.Text = text;
+			return page;
+		}
 
 		/// <summary>Creates a new Page from the parsed text.</summary>
 		/// <returns>A new <see cref="Page"/>.</returns>
-		public Page ToPageForced() => new(this);
+		public Page ToNewDefaultPage() => new(this, PageLoadOptions.None, null);
 
 		/// <summary>Creates a new SiteLink from the parsed text.</summary>
 		/// <returns>A new <see cref="SiteLink"/>.</returns>

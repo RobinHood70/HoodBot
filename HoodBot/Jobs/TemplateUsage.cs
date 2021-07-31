@@ -79,21 +79,21 @@
 			var retval = new TitleCollection(titles.Site, titles);
 
 			// Loop until nothing new is added.
-			var pagesToCheck = new HashSet<Title>(titles);
-			var alreadyChecked = new HashSet<Title>();
+			var titlesToCheck = new HashSet<ISimpleTitle>(titles);
+			var alreadyChecked = new HashSet<ISimpleTitle>();
 			do
 			{
-				foreach (var page in pagesToCheck)
+				foreach (var title in titlesToCheck)
 				{
-					retval.GetBacklinks(page.FullPageName, BacklinksTypes.Backlinks, true, Filter.Only);
+					retval.GetBacklinks(title.FullPageName(), BacklinksTypes.Backlinks, true, Filter.Only);
 				}
 
-				alreadyChecked.UnionWith(pagesToCheck);
-				pagesToCheck.Clear();
-				pagesToCheck.UnionWith(retval);
-				pagesToCheck.ExceptWith(alreadyChecked);
+				alreadyChecked.UnionWith(titlesToCheck);
+				titlesToCheck.Clear();
+				titlesToCheck.UnionWith(retval);
+				titlesToCheck.ExceptWith(alreadyChecked);
 			}
-			while (pagesToCheck.Count > 0);
+			while (titlesToCheck.Count > 0);
 
 			return retval;
 		}
@@ -173,7 +173,7 @@
 
 			foreach (var template in this.allTemplates)
 			{
-				var row = csvFile.Add(template.Page.FullPageName, template.Template.GetTitleText());
+				var row = csvFile.Add(template.Page.FullPageName(), template.Template.GetTitleText());
 				foreach (var (name, parameter) in template.Template.GetResolvedParameters())
 				{
 					// For now, we're assuming that trimming trailing lines from anon parameters is desirable, but could be made optional if needed.

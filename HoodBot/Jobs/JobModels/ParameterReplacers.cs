@@ -160,7 +160,7 @@
 				&& this.job.Replacements.TryGetValue(title, out var replacement)
 				&& replacement.To is ISimpleTitle toLink)
 			{
-				param.SetValue(toLink.FullPageName);
+				param.SetValue(toLink.FullPageName());
 			}
 		}
 

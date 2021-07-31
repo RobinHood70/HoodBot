@@ -58,7 +58,7 @@
 
 		#region Public Events
 
-		/// <summary>Occurs for each page when any method in the class causes pages to be loaded.</summary>
+		/// <summary>Occurs for each page when it is loaded.</summary>
 		/// <remarks>This event does not fire if a page is merely added to the collection, or a new blank page is created with the <see cref="New"/> method.</remarks>
 		public event StrongEventHandler<PageCollection, Page>? PageLoaded;
 		#endregion
@@ -180,26 +180,6 @@
 
 		#region Public Override Methods
 
-		/// <summary>Adds a copy of the specified title to the collection.</summary>
-		/// <param name="title">The title to add.</param>
-		/// <remarks>Unlike <see cref="GetTitles(IEnumerable{string})"/> and related methods, which all load data from the wiki, this will simply add blank pages to the result set.</remarks>
-		public override void Add(ISimpleTitle title)
-		{
-			var page = this.pageCreator.CreatePage(title.NotNull(nameof(title)));
-			this[page] = page;
-		}
-
-		/// <summary>Adds new pages based on an existing <see cref="ISimpleTitle"/> collection.</summary>
-		/// <param name="titles">The titles to be added.</param>
-		public override void Add(IEnumerable<ISimpleTitle> titles)
-		{
-			foreach (var title in titles.NotNull(nameof(titles)))
-			{
-				var page = this.pageCreator.CreatePage(title);
-				this[page] = page;
-			}
-		}
-
 		/// <summary>Removes all items from the <see cref="TitleCollection">collection</see>, as well as those in the <see cref="TitleMap"/>.</summary>
 		public override void Clear()
 		{
@@ -232,7 +212,7 @@
 		/// <inheritdoc/>
 		public override bool TryGetValue(ISimpleTitle key, [MaybeNullWhen(false)] out Page value)
 		{
-			if (base.TryGetValue(key, out var retval) || (this.titleMap.TryGetValue(key.NotNull(nameof(key)).FullPageName, out var altKey) && base.TryGetValue(altKey, out retval)))
+			if (base.TryGetValue(key, out var retval) || (this.titleMap.TryGetValue(key.NotNull(nameof(key)).FullPageName(), out var altKey) && base.TryGetValue(altKey, out retval)))
 			{
 				value = retval;
 				return true;
@@ -260,17 +240,58 @@
 
 		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
 		/// <param name="site">The site.</param>
+		/// <param name="other">The collection to initialize this instance from.</param>
 		/// <returns>A new PageCollection with no namespace limitations, load options set to none, and creating only default pages rather than user-specified.</returns>
-		internal static PageCollection UnlimitedDefault(Site site) => new(site, PageLoadOptions.None) { LimitationType = LimitationType.None };
+		internal static PageCollection CreateEmptyPages(Site site, IEnumerable<ISimpleTitle> other)
+		{
+			// Currently only used for Purge, Watch, and Unwatch when returning fake results.
+			var retval = UnlimitedDefault(site);
+			foreach (var title in other.NotNull(nameof(other)))
+			{
+				var page = retval.pageCreator.CreateEmptyPage(title);
+				retval[page] = page;
+			}
+
+			return retval;
+		}
+
+		/// <summary>Purges all pages in the collection.</summary>
+		/// <param name="site">The site to work on.</param>
+		/// <param name="input">The input.</param>
+		/// <returns>A <see cref="PageCollection"/> with the purge results.</returns>
+		internal static PageCollection Purge(Site site, PurgeInput input)
+		{
+			var result = site.NotNull(nameof(site)).AbstractionLayer.Purge(input);
+			var retval = UnlimitedDefault(site);
+			retval.PopulateMapCollections(result);
+			foreach (var item in result)
+			{
+				var page = retval.New(item);
+				retval[page] = page;
+			}
+
+			return retval;
+		}
 
 		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
 		/// <param name="site">The site.</param>
-		/// <param name="other">The collection to initialize this instance from.</param>
 		/// <returns>A new PageCollection with no namespace limitations, load options set to none, and creating only default pages rather than user-specified.</returns>
-		internal static PageCollection UnlimitedDefault(Site site, IEnumerable<ISimpleTitle> other)
+		internal static PageCollection UnlimitedDefault(Site site) => new(site, PageLoadOptions.None) { LimitationType = LimitationType.None };
+
+		/// <summary>Watches or unwatches all pages in the collection.</summary>
+		/// <param name="site">The site to work on.</param>
+		/// <param name="input">The input parameters.</param>
+		/// <returns>A <see cref="PageCollection"/> with the watch/unwatch results.</returns>
+		internal static PageCollection Watch(Site site, WatchInput input)
 		{
-			var retval = UnlimitedDefault(site);
-			retval.Add(other);
+			var result = site.NotNull(nameof(site)).AbstractionLayer.Watch(input);
+			var retval = new PageCollection(site, result);
+			foreach (var item in result)
+			{
+				var page = retval.New(item);
+				retval[page] = page;
+			}
+
 			return retval;
 		}
 		#endregion
@@ -462,12 +483,6 @@
 		/// <summary>Adds raw watchlist pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		protected override void GetWatchlistRaw(WatchlistRawInput input) => this.GetCustomGenerator(input);
-
-		/// <summary>Creates a new page using the collection's <see cref="pageCreator"/> and adds it to the collection.</summary>
-		/// <param name="title">The title of the page to create.</param>
-		/// <returns>The page that was created.</returns>
-		/// <remarks>If the page title specified represents a page already in the collection, that page will be overwritten.</remarks>
-		protected override Page New(string title) => this.pageCreator.CreatePage(TitleFactory.FromName(this.Site, title));
 		#endregion
 
 		#region Protected Virtual Methods
@@ -498,8 +513,7 @@
 			this.PopulateMapCollections(result);
 			foreach (var item in result)
 			{
-				var page = this.New(item.FullPageName);
-				page.Populate(item, options);
+				var page = this.New(item);
 				if (pageValidator(page))
 				{
 					this[page] = page;
@@ -513,6 +527,16 @@
 		private void LoadPages(IGeneratorInput generator, IEnumerable<ISimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(generator, titles.ToFullPageNames()));
 
 		private void LoadPages(QueryPageSetInput pageSetInput) => this.LoadPages(pageSetInput, this.IsTitleInLimits);
+
+		/// <summary>Creates a new page using the collection's <see cref="pageCreator"/> and adds it to the collection.</summary>
+		/// <param name="item">The <see cref="IApiTitle"/> with all the information for the page.</param>
+		/// <returns>The page that was created.</returns>
+		/// <remarks>If the page title specified represents a page already in the collection, that page will be overwritten.</remarks>
+		private Page New(IApiTitle item)
+		{
+			var pageTitle = TitleFactory.FromNormalizedName(this.Site, item.FullPageName);
+			return this.pageCreator.CreatePage(pageTitle, this.LoadOptions, item);
+		}
 
 		private bool RecurseCategoryHandler(Page page)
 		{

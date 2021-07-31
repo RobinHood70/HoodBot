@@ -211,50 +211,6 @@
 			this.InsertItem(this.items.Count, item);
 		}
 
-		/// <summary>Adds a new object to the collection with the specified name.</summary>
-		/// <param name="title">The title to add.</param>
-		public void Add(string title) => this.Add(this.New(title));
-
-		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
-		/// <param name="titles">The titles.</param>
-		public void Add(params string[] titles) => this.Add(titles as IEnumerable<string>);
-
-		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
-		/// <param name="titles">The titles to add.</param>
-		public void Add(IEnumerable<string> titles)
-		{
-			foreach (var title in titles.NotNull(nameof(titles)))
-			{
-				this.Add(title);
-			}
-		}
-
-		/// <summary>Adds the specified titles to the collection, assuming that they are in the provided namespace if no other namespace is specified.</summary>
-		/// <param name="defaultNamespace">The namespace to coerce.</param>
-		/// <param name="titles">The titles to add, with or without the leading namespace text.</param>
-		public void Add(int defaultNamespace, IEnumerable<string> titles)
-		{
-			foreach (var title in titles.NotNull(nameof(titles)))
-			{
-				this.Add(TitleFactory.FromName(this.Site, defaultNamespace, title).ToTitle());
-			}
-		}
-
-		/// <summary>Adds the specified titles to the collection, assuming that they are in the provided namespace if no other namespace is specified.</summary>
-		/// <param name="defaultNamespace">The default namespace.</param>
-		/// <param name="names">The page names, with or without the leading namespace text.</param>
-		public void Add(int defaultNamespace, params string[] names) => this.Add(defaultNamespace, names as IEnumerable<string>);
-
-		/// <summary>Adds a new item to the collection and returns that item to the caller.</summary>
-		/// <param name="title">The title to add. Note that the title must be normalized prior to calling this function.</param>
-		/// <returns>A new item which has already been added to the collection.</returns>
-		public TTitle AddNewItem(string title)
-		{
-			var add = this.New(title);
-			this.Add(add);
-			return add;
-		}
-
 		/// <summary>Adds multiple titles to the <see cref="TitleCollection">collection</see> at once.</summary>
 		/// <param name="titles">The titles to add.</param>
 		/// <remarks>This method is for convenience only. Unlike the equivalent <see cref="List{T}" /> function, it simply calls <see cref="Add(TTitle)" /> repeatedly and provides no performance benefit.</remarks>
@@ -931,7 +887,7 @@
 		/// <summary>Returns the requested value, or null if not found.</summary>
 		/// <param name="key">The key.</param>
 		/// <returns>The requested value, or null if not found.</returns>
-		public TTitle? ValueOrDefault(ISimpleTitle key) => this.ValueOrDefault(key.NotNull(nameof(key)).FullPageName);
+		public TTitle? ValueOrDefault(ISimpleTitle key) => this.ValueOrDefault(key.NotNull(nameof(key)).FullPageName());
 
 		/// <summary>Returns the requested value, or null if not found.</summary>
 		/// <param name="key">The key.</param>
@@ -944,15 +900,6 @@
 		#endregion
 
 		#region Public Abstract Methods
-
-		/// <summary>Adds a copy of the specified title to the collection.</summary>
-		/// <param name="title">The title to add.</param>
-		public abstract void Add(ISimpleTitle title);
-
-		/// <summary>Adds new objects to the collection based on an existing <see cref="ISimpleTitle"/> collection.</summary>
-		/// <param name="titles">The titles to be added.</param>
-		/// <remarks>All items added are newly created, even if the type of the titles provided matches those in the collection.</remarks>
-		public abstract void Add(IEnumerable<ISimpleTitle> titles);
 
 		/// <summary>Adds pages returned by a custom generator.</summary>
 		/// <param name="generatorInput">The generator input.</param>
@@ -1176,11 +1123,6 @@
 		/// <summary>Adds raw watchlist pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		protected abstract void GetWatchlistRaw(WatchlistRawInput input);
-
-		/// <summary>Creates a new item of the type of the collection.</summary>
-		/// <param name="title">The title from which to create the new item. Note that this title must be normalized (see <see cref="TitleFactory.Normalize(string)"/>) prior to calling this method.</param>
-		/// <returns>A new item of the same type as the collection.</returns>
-		protected abstract TTitle New(string title);
 		#endregion
 
 		#region Private Methods

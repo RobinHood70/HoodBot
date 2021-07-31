@@ -20,8 +20,8 @@
 		public EmailResultHandler(User user)
 			: base(user?.Site.Culture)
 		{
-			user.NotNull(nameof(user)).Load();
-			if (!user.Emailable)
+			user.NotNull(nameof(user)).LoadUserInfo();
+			if (user.Info?.Emailable == false)
 			{
 				throw new InvalidOperationException(Resources.UserEmailDisabled);
 			}

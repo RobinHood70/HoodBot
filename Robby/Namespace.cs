@@ -7,6 +7,7 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 
+	// CONSIDER: This class is a strong candidate for conversion to a record.
 	// Class is sealed since it can be extended through extension methods if needed, and any derivation that would require value equality to change is both unlikely and inadvisable.
 
 	/// <summary>Represents a MediaWiki namespace for a specific site.</summary>
@@ -61,6 +62,10 @@
 		/// <summary>Gets a value indicating whether the namespace allows subpages.</summary>
 		/// <value><see langword="true"/> if the namespace allows subpages; otherwise, <see langword="false"/>.</value>
 		public bool AllowsSubpages { get; }
+
+		/// <summary>Gets a value indicating whether this page can have editable content.</summary>
+		/// <value><see langword="true"/> if the namespace can have editable content; otherwise, <see langword="false"/> (e.g., for Special and Media spaces).</value>
+		public bool CanExist => this.Id >= MediaWikiNamespaces.Main;
 
 		/// <summary>Gets the canonical name of the namespace.</summary>
 		/// <value>The canonical name of the namespace. For built-in namespaces, this is the default English name of the namespace (e.g., File, Project talk, etc.).</value>

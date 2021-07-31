@@ -3,6 +3,7 @@
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WikiCommon;
 
 	/// <summary>Provides a base class for creating Page objects. This serves as a go-between for customized page extensions in WallE and Robby.</summary>
 	public abstract class PageCreator
@@ -15,6 +16,11 @@
 		#endregion
 
 		#region Public Methods
+
+		/// <summary>Creates a page.</summary>
+		/// <param name="title">The <see cref="ISimpleTitle"/> object that represents the page to create.</param>
+		/// <returns>A fully populated Page object.</returns>
+		public Page CreateEmptyPage(ISimpleTitle title) => this.CreatePage(title, PageLoadOptions.None, null);
 
 		/// <summary>Gets regular and custom property inputs.</summary>
 		/// <param name="options">Page load options.</param>
@@ -134,8 +140,11 @@
 
 		/// <summary>Creates a page.</summary>
 		/// <param name="title">The <see cref="ISimpleTitle"/> object that represents the page to create.</param>
+		/// <param name="options">The load options used for this page. Can be used to detect if default-valued information is legitimate or was never loaded.</param>
+		/// <param name="apiItem">The API item to populate page data from.</param>
 		/// <returns>A fully populated Page object.</returns>
-		public abstract Page CreatePage(ISimpleTitle title);
+		// Changed apiItem to IApiTitle instead of object as a primitive means of ensuring we're dealing with API stuff and not some random item. Not sure if this is necessary or relevant, though, considering the constructors with this signature all have to do type checking anyway.
+		public abstract Page CreatePage(ISimpleTitle title, PageLoadOptions options, IApiTitle? apiItem);
 		#endregion
 
 		#region Public Virtual Methods
