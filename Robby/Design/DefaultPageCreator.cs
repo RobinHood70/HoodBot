@@ -13,13 +13,15 @@
 
 		/// <summary>Creates a page.</summary>
 		/// <param name="title">The <see cref="ISimpleTitle" /> object that represents the page to create.</param>
+		/// <param name="options">The load options used for this page. Can be used to detect if default-valued information is legitimate or was never loaded.</param>
+		/// <param name="apiItem">The API item to populate the page data from.</param>
 		/// <returns>A fully populated Page object.</returns>
-		public override Page CreatePage(ISimpleTitle title) => title.NotNull(nameof(title)).Namespace.Id switch
+		public override Page CreatePage(ISimpleTitle title, PageLoadOptions options, IApiTitle? apiItem) => title.NotNull(nameof(title)).Namespace.Id switch
 		{
-			MediaWikiNamespaces.MediaWiki => new MessagePage(title),
-			MediaWikiNamespaces.File => new FilePage(title),
-			MediaWikiNamespaces.Category => new CategoryPage(title),
-			_ => new Page(title),
+			MediaWikiNamespaces.Category => new CategoryPage(title, options, apiItem),
+			MediaWikiNamespaces.File => new FilePage(title, options, apiItem),
+			MediaWikiNamespaces.MediaWiki => new MessagePage(title, options, apiItem),
+			_ => new Page(title, options, apiItem),
 		};
 		#endregion
 

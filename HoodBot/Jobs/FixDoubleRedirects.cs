@@ -14,8 +14,8 @@
 	public class FixDoubleRedirects : EditJob
 	{
 		#region Fields
-		private readonly Dictionary<Title, FullTitle> lookup = new();
-		private readonly Dictionary<Title, ContextualParser> parsedPages = new();
+		private readonly Dictionary<ISimpleTitle, FullTitle> lookup = new();
+		private readonly Dictionary<ISimpleTitle, ContextualParser> parsedPages = new();
 		private readonly IReadOnlyCollection<string> redirectWords;
 		#endregion
 
@@ -124,13 +124,12 @@
 			}
 		}
 
-		private TitleCollection GetNewTitles<TTitle>(TitleCollection<TTitle> toLoad)
-			where TTitle : Title
+		private TitleCollection GetNewTitles(IReadOnlyCollection<ISimpleTitle> toLoad)
 		{
 			var retval = new TitleCollection(this.Site);
 			foreach (var title in toLoad)
 			{
-				if (this.Pages.TryGetValue(title.FullPageName, out var page))
+				if (this.Pages.TryGetValue(title, out var page))
 				{
 					var parser = new ContextualParser(page);
 					if (parser.Nodes.Count > 0 && parser.Nodes[0] is ITextNode textNode && this.redirectWords.Contains(textNode.Text.TrimEnd(), StringComparer.OrdinalIgnoreCase))

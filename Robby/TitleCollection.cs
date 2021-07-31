@@ -10,7 +10,7 @@
 
 	/// <summary>A collection of Title objects.</summary>
 	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling is a factor of using classes to handle complex inputs and is unavoidable.")]
-	public class TitleCollection : TitleCollection<Title>, IMessageSource
+	public class TitleCollection : TitleCollection<ISimpleTitle>, IMessageSource
 	{
 		#region Constructors
 
@@ -71,12 +71,28 @@
 			this.LimitationType = LimitationType.None;
 			foreach (var title in titles.NotNull(nameof(titles)))
 			{
-				this.Add(new Title(title));
+				this.Add(title);
 			}
 		}
 		#endregion
 
 		#region Public Methods
+
+		/// <summary>Adds the specified titles to the collection, assuming that they are in the provided namespace if no other namespace is specified.</summary>
+		/// <param name="defaultNamespace">The namespace to coerce.</param>
+		/// <param name="titles">The titles to add, with or without the leading namespace text.</param>
+		public void Add(int defaultNamespace, IEnumerable<string> titles)
+		{
+			foreach (var title in titles.NotNull(nameof(titles)))
+			{
+				this.Add(TitleFactory.FromName(this.Site, defaultNamespace, title).ToTitle());
+			}
+		}
+
+		/// <summary>Adds the specified titles to the collection, assuming that they are in the provided namespace if no other namespace is specified.</summary>
+		/// <param name="defaultNamespace">The default namespace.</param>
+		/// <param name="names">The page names, with or without the leading namespace text.</param>
+		public void Add(int defaultNamespace, params string[] names) => this.Add(defaultNamespace, names as IEnumerable<string>);
 
 		/// <summary>Converts all MediaWiki messages to titles based on their modification status and adds them to the collection.</summary>
 		/// <param name="modifiedMessages">Filter for whether the messages have been modified.</param>
@@ -128,12 +144,13 @@
 		/// <returns>A <see cref="PageCollection"/> containing the specified pages, including status information for pages that could not be loaded.</returns>
 		public PageCollection Load(PageLoadOptions options)
 		{
-			var retval = new PageCollection(this.Site, options);
-			retval.SetLimitations(LimitationType.None);
+			var retval = PageCollection.Unlimited(this.Site, options);
 			retval.GetTitles(this);
 
 			return retval;
 		}
+
+		// TODO: Might make sense to move Purge, Watch, and Unwatch to PageCollection static or even Site.
 
 		/// <summary>Purges all pages in the collection.</summary>
 		/// <returns>A value indicating the change status of the purge along with a page collection with the purge results.</returns>
@@ -159,7 +176,7 @@
 
 			ChangeValue<PageCollection> ChangeFunc()
 			{
-				var pages = this.Purge(new PurgeInput(this.ToFullPageNames()) { Method = method });
+				var pages = PageCollection.Purge(this.Site, new PurgeInput(this.ToFullPageNames()) { Method = method });
 				var retval = (pages.Count < this.Count)
 					? ChangeStatus.Failure
 					: ChangeStatus.Success;
@@ -176,13 +193,13 @@
 				return new ChangeValue<PageCollection>(ChangeStatus.NoEffect, PageCollection.Unlimited(this.Site));
 			}
 
-			var disabledResult = PageCollection.UnlimitedDefault(this.Site, this);
+			var disabledResult = PageCollection.CreateEmptyPages(this.Site, this);
 			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal);
 			return this.Site.PublishChange(disabledResult, this, parameters, ChangeFunc);
 
 			ChangeValue<PageCollection> ChangeFunc()
 			{
-				var pages = this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = true });
+				var pages = PageCollection.Watch(this.Site, new WatchInput(this.ToFullPageNames()) { Unwatch = true });
 				var result = (pages.Count < this.Count)
 					? ChangeStatus.Failure
 					: ChangeStatus.Success;
@@ -199,14 +216,14 @@
 				return new ChangeValue<PageCollection>(ChangeStatus.NoEffect, PageCollection.Unlimited(this.Site));
 			}
 
-			var disabledResult = PageCollection.UnlimitedDefault(this.Site, this);
+			var disabledResult = PageCollection.CreateEmptyPages(this.Site, this);
 			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal);
 
 			return this.Site.PublishChange(disabledResult, this, parameters, ChangeFunc);
 
 			ChangeValue<PageCollection> ChangeFunc()
 			{
-				var pages = this.Watch(new WatchInput(this.ToFullPageNames()) { Unwatch = false });
+				var pages = PageCollection.Watch(this.Site, new WatchInput(this.ToFullPageNames()) { Unwatch = false });
 				var result = (pages.Count < this.Count)
 					? ChangeStatus.Failure
 					: ChangeStatus.Success;
@@ -217,21 +234,35 @@
 
 		#region Public Override Methods
 
-		/// <summary>Adds a copy of the specified title to the collection.</summary>
+		/// <summary>Adds a new object to the collection with the specified name.</summary>
 		/// <param name="title">The title to add.</param>
-		public override void Add(ISimpleTitle title) => this.Add(new Title(title));
+		public void Add(string title) => this.Add(TitleFactory.FromName(this.Site, title).ToTitle());
 
 		/// <summary>Adds new objects to the collection based on an existing <see cref="ISimpleTitle"/> collection.</summary>
 		/// <param name="titles">The titles to be added.</param>
 		/// <remarks>All items added are newly created, even if the type of the titles provided matches those in the collection.</remarks>
-		public override void Add(IEnumerable<ISimpleTitle> titles)
+		public void Add(IEnumerable<ISimpleTitle> titles)
 		{
 			if (titles != null)
 			{
 				foreach (var title in titles)
 				{
-					this.Add(new Title(title));
+					this.Add(title);
 				}
+			}
+		}
+
+		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
+		/// <param name="titles">The titles.</param>
+		public void Add(params string[] titles) => this.Add(titles as IEnumerable<string>);
+
+		/// <summary>Adds the specified titles to the collection, creating new objects for each.</summary>
+		/// <param name="titles">The titles to add.</param>
+		public void Add(IEnumerable<string> titles)
+		{
+			foreach (var title in titles.NotNull(nameof(titles)))
+			{
+				this.Add(title);
 			}
 		}
 
@@ -459,9 +490,6 @@
 			var result = this.Site.AbstractionLayer.WatchlistRaw(input);
 			this.FillFromTitleItems(result);
 		}
-
-		/// <inheritdoc/>
-		protected override Title New(string title) => TitleFactory.FromName(this.Site, title).ToTitle();
 		#endregion
 
 		#region Protected Virtual Methods
@@ -494,45 +522,10 @@
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput.NotNull(nameof(pageSetInput)), creator.GetPropertyInputs(loadOptions), creator.CreatePageItem);
 			this.FillFromTitleItems(result);
 		}
-
-		/// <summary>Purges all pages in the collection.</summary>
-		/// <param name="input">The input.</param>
-		/// <returns>A <see cref="PageCollection"/> with the purge results.</returns>
-		protected virtual PageCollection Purge(PurgeInput input)
-		{
-			var result = this.Site.AbstractionLayer.Purge(input);
-			var retval = PageCollection.UnlimitedDefault(this.Site);
-			retval.PopulateMapCollections(result);
-			foreach (var item in result)
-			{
-				var flags = item.Flags;
-				var page = retval.AddNewItem(item.FullPageName);
-				page.PopulateFlags((flags & PurgeFlags.Invalid) != 0, (flags & PurgeFlags.Missing) != 0);
-			}
-
-			return retval;
-		}
-
-		/// <summary>Watches or unwatches all pages in the collection.</summary>
-		/// <param name="input">The input parameters.</param>
-		/// <returns>A <see cref="PageCollection"/> with the watch/unwatch results.</returns>
-		protected virtual PageCollection Watch(WatchInput input)
-		{
-			var pages = PageCollection.UnlimitedDefault(this.Site);
-			var result = this.Site.AbstractionLayer.Watch(input);
-			pages.PopulateMapCollections(result);
-			foreach (var item in result)
-			{
-				var flags = item.Flags;
-				var page = pages.AddNewItem(item.FullPageName);
-				page.PopulateFlags(false, (flags & WatchFlags.Missing) != 0);
-			}
-
-			return pages;
-		}
 		#endregion
 
 		#region Private Methods
+
 		private void FillFromTitleItems(IEnumerable<IApiTitle> result)
 		{
 			foreach (var item in result)

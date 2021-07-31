@@ -89,7 +89,7 @@
 		#endregion
 
 		#region Public Properties
-		public KeyedCollection<Title, Replacement> Replacements { get; } = new ReplacementCollection();
+		public KeyedCollection<ISimpleTitle, Replacement> Replacements { get; } = new ReplacementCollection();
 		#endregion
 
 		#region Public Override Properties
@@ -434,9 +434,9 @@
 			FilterTemplatesExceptDocs(titles);
 		}
 
-		protected virtual IReadOnlyDictionary<Title, TitleCollection> GetCategoryMembers()
+		protected virtual IReadOnlyDictionary<ISimpleTitle, TitleCollection> GetCategoryMembers()
 		{
-			var retval = new Dictionary<Title, TitleCollection>();
+			var retval = new Dictionary<ISimpleTitle, TitleCollection>();
 			if ((this.FollowUpActions & FollowUpActions.NeedsCategoryMembers) != 0)
 			{
 				this.StatusWriteLine("Getting category members");
@@ -485,8 +485,9 @@
 					var fromTitle = replacement.From;
 					var moveTalkPage = (this.MoveExtra & MoveOptions.MoveTalkPage) != 0 && fromTitle.Namespace.IsTalkSpace;
 					var moveSubPages = (this.MoveExtra & MoveOptions.MoveSubPages) != 0 && fromTitle.Namespace.AllowsSubpages;
-					fromTitle.Move(
-						replacement.To.FullPageName,
+					this.Site.Move(
+						fromTitle,
+						replacement.To,
 						this.EditSummaryMove,
 						moveTalkPage,
 						moveSubPages,
@@ -607,7 +608,7 @@
 			}
 		}
 
-		protected virtual void SetupProposedDeletions(PageCollection pageInfo, IReadOnlyDictionary<Title, TitleCollection> catMembers)
+		protected virtual void SetupProposedDeletions(PageCollection pageInfo, IReadOnlyDictionary<ISimpleTitle, TitleCollection> catMembers)
 		{
 			if ((this.FollowUpActions & FollowUpActions.ProposeUnused) != 0)
 			{
@@ -615,7 +616,7 @@
 				var doNotDelete = new TitleCollection(this.Site);
 				foreach (var template in this.Site.DeletePreventionTemplates)
 				{
-					doNotDelete.GetBacklinks(template.FullPageName, BacklinksTypes.EmbeddedIn, true);
+					doNotDelete.GetBacklinks(template.FullPageName(), BacklinksTypes.EmbeddedIn, true);
 				}
 
 				foreach (var replacement in this.Replacements)
@@ -669,7 +670,7 @@
 					{
 						if (replacement.To.Namespace != MediaWikiNamespaces.File)
 						{
-							this.Warn($"{replacement.From.PageName} to non-File {replacement.From.FullPageName} move skipped in gallery on page: {page.FullPageName}.");
+							this.Warn($"{replacement.From.PageName} to non-File {replacement.From.FullPageName()} move skipped in gallery on page: {page.FullPageName}.");
 							continue;
 						}
 
@@ -723,7 +724,7 @@
 			}
 		}
 
-		protected virtual void UpdateLinkText(Page page, Title oldTitle, SiteLink newLink, bool addCaption)
+		protected virtual void UpdateLinkText(Page page, ISimpleTitle oldTitle, SiteLink newLink, bool addCaption)
 		{
 			page.ThrowNull(nameof(page));
 			oldTitle.ThrowNull(nameof(oldTitle));
@@ -910,15 +911,15 @@
 				if ((replacement.Actions & ReplacementActions.Move) != 0 &&
 					replacement.From.SimpleEquals(replacement.To))
 				{
-					this.Warn($"From and To pages cannot be the same: {replacement.From.FullPageName} = {replacement.To.FullPageName}");
+					this.Warn($"From and To pages cannot be the same: {replacement.From.FullPageName()} = {replacement.To.FullPageName}");
 					inPlaceMoves = true;
 				}
 
 				if (unique.TryGetValue(replacement.To, out var existing))
 				{
 					this.Warn("Duplicate To page. All related entries will be skipped.");
-					this.Warn($"  Original: {existing.From.FullPageName} => {existing.To.FullPageName}");
-					this.Warn($"  Second  : {replacement.From.FullPageName} => {replacement.To.FullPageName}");
+					this.Warn($"  Original: {existing.From.FullPageName()} => {existing.To.FullPageName}");
+					this.Warn($"  Second  : {replacement.From.FullPageName()} => {replacement.To.FullPageName}");
 					existing.Actions = ReplacementActions.Skip;
 					existing.Reason = "duplicate To page";
 					replacement.Actions = ReplacementActions.Skip;
@@ -944,7 +945,7 @@
 		#endregion
 
 		#region Private Classes
-		private sealed class ReplacementCollection : KeyedCollection<Title, Replacement>
+		private sealed class ReplacementCollection : KeyedCollection<ISimpleTitle, Replacement>
 		{
 			#region Constructors
 			public ReplacementCollection()
@@ -958,7 +959,7 @@
 			#endregion
 
 			#region Protected Override Methods
-			protected override Title GetKeyForItem(Replacement item) => item.From;
+			protected override ISimpleTitle GetKeyForItem(Replacement item) => item.From;
 			#endregion
 		}
 		#endregion

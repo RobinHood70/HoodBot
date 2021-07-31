@@ -94,7 +94,7 @@
 		{
 			var catSize = page is CategoryPage catPage ? catPage.FullCount : 0;
 			var list = new List<string>();
-			var backlinks = (Dictionary<Title, BacklinksTypes>)page.Backlinks;
+			var backlinks = (Dictionary<ISimpleTitle, BacklinksTypes>)page.Backlinks;
 			foreach (var title in this.filter)
 			{
 				backlinks.Remove(title);

@@ -27,7 +27,7 @@
 			// Add remaining namespaces
 			foreach (var ns in site.Namespaces)
 			{
-				if (ns.Id >= 0 && !ns.IsTalkSpace && !this.Contains(ns.Name))
+				if (ns.CanExist && !ns.IsTalkSpace && !this.Contains(ns.Name))
 				{
 					this.Add(new UespNamespace(site, ns.Name));
 				}

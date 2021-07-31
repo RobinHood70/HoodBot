@@ -16,7 +16,7 @@
 		public PageResultHandler(Site site, string pageName)
 			: base(site?.Culture)
 		{
-			this.Page = TitleFactory.FromName(site.NotNull(nameof(site)), pageName.NotNull(nameof(pageName))).ToPage();
+			this.Page = TitleFactory.FromName(site.NotNull(nameof(site)), pageName.NotNull(nameof(pageName))).ToNewPage(string.Empty);
 			this.DefaultText = this.ResourceManager.GetString("Results", site.Culture);
 		}
 		#endregion

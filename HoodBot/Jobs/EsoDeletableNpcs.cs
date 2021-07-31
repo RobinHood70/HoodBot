@@ -39,16 +39,16 @@
 			allNpcs.Sort();
 
 			Debug.WriteLine("== ESO NPCs with No Corresponding Entries in the ESO Database ==");
-			foreach (var page in allNpcs)
+			foreach (var title in allNpcs)
 			{
-				var npc = allNames.BinarySearch(page.PageName, StringComparer.Ordinal);
+				var npc = allNames.BinarySearch(title.PageName, StringComparer.Ordinal);
 				if (npc < 0)
 				{
-					var labelName = page.LabelName();
+					var labelName = title.LabelName();
 					npc = allNames.BinarySearch(labelName, StringComparer.Ordinal);
 					if (npc < 0)
 					{
-						Debug.WriteLine($"* [[{page.FullPageName}|{labelName}]]");
+						Debug.WriteLine($"* [[{title.FullPageName()}|{labelName}]]");
 					}
 				}
 			}

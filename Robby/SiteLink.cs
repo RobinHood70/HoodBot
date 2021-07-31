@@ -101,7 +101,7 @@
 		public SiteLink(ILinkTitle title)
 			: base(title)
 		{
-			this.Coerced = title.Coerced;
+			this.Coerced = title.NotNull(nameof(title)).Coerced;
 			this.ForcedInterwikiLink = title.ForcedInterwikiLink;
 			this.ForcedNamespaceLink = title.ForcedNamespaceLink;
 			InitializeImageInfo(this.Site);

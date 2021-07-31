@@ -24,18 +24,149 @@
 
 		/// <summary>Initializes a new instance of the <see cref="Page"/> class.</summary>
 		/// <param name="title">The <see cref="ISimpleTitle"/> to copy values from.</param>
-		public Page(ISimpleTitle title)
+		/// <param name="options">The load options used for this page. Can be used to detect if default-valued information is legitimate or was never loaded.</param>
+		/// <param name="apiItem">The API item to extract information from.</param>
+		protected internal Page([NotNull, ValidatedNotNull] ISimpleTitle title, PageLoadOptions options, IApiTitle? apiItem)
 			: base(title)
 		{
+			// TODO: This should probably be re-written as some kind of inheritance thing, but I'm not qute sure how that would work and it's not the priority right now.
+			this.LoadOptions = options;
+			switch (apiItem)
+			{
+				case null:
+					break;
+				case PurgeItem purgeItem:
+					this.IsInvalid = (purgeItem.Flags & PurgeFlags.Invalid) != 0;
+					this.IsMissing = (purgeItem.Flags & PurgeFlags.Missing) != 0;
+					break;
+				case WatchItem watchItem:
+					this.IsInvalid = false;
+					this.IsMissing = (watchItem.Flags & WatchFlags.Missing) != 0;
+					break;
+				case PageItem pageItem:
+					this.IsInvalid = (pageItem.Flags & PageFlags.Invalid) != 0;
+					this.IsMissing = (pageItem.Flags & PageFlags.Missing) != 0;
+					PopulateRevisions(pageItem);
+					PopulateInfo(pageItem);
+					this.PreviouslyDeleted = this.IsMissing && pageItem.DeletedRevisions.Count > 0;
+					PopulateLinks(pageItem);
+					PopulateBacklinks(pageItem);
+					PopulateProperties(pageItem);
+					PopulateTemplates(pageItem);
+					PopulateCategories(pageItem);
+
+					this.IsLoaded = true;
+					break;
+			}
+
+			void PopulateBacklinks(PageItem pageItem)
+			{
+				var backlinks = (Dictionary<Title, BacklinksTypes>)this.Backlinks;
+				backlinks.Clear();
+				PopulateBacklinksType(backlinks, pageItem.FileUsages, BacklinksTypes.ImageUsage);
+				PopulateBacklinksType(backlinks, pageItem.LinksHere, BacklinksTypes.Backlinks);
+				PopulateBacklinksType(backlinks, pageItem.TranscludedIn, BacklinksTypes.EmbeddedIn);
+			}
+
+			void PopulateBacklinksType(Dictionary<Title, BacklinksTypes> backlinks, IReadOnlyList<IApiTitleOptional> list, BacklinksTypes type)
+			{
+				foreach (var link in list)
+				{
+					var title = TitleFactory.FromApi(this.Site, link).ToTitle();
+					if (backlinks.ContainsKey(title))
+					{
+						backlinks[title] |= type;
+					}
+					else
+					{
+						backlinks[title] = type;
+					}
+				}
+			}
+
+			void PopulateCategories(PageItem pageItem)
+			{
+				var categories = (List<Category>)this.Categories;
+				categories.Clear();
+				foreach (var category in pageItem.Categories)
+				{
+					var factory = TitleFactory.FromName(this.Site, category.FullPageName);
+					categories.Add(new Category(factory, category.SortKey, category.Hidden));
+				}
+			}
+
+			void PopulateInfo(PageItem pageItem)
+			{
+				var protections = (Dictionary<string, ProtectionEntry>)this.Protections;
+				if (pageItem.Info is PageInfo info)
+				{
+					this.canonicalPath = info.CanonicalUrl;
+					this.CurrentRevisionId = info.LastRevisionId;
+					this.editPath = info.EditUrl;
+					this.IsNew = (info.Flags & PageInfoFlags.New) != 0;
+					this.IsRedirect = (info.Flags & PageInfoFlags.Redirect) != 0;
+					this.StartTimestamp = pageItem.Info.StartTimestamp ?? this.Site.AbstractionLayer.CurrentTimestamp;
+					this.Text = this.CurrentRevisionId != 0 ? this.CurrentRevision?.Text : null;
+					foreach (var protItem in pageItem.Info.Protections)
+					{
+						protections.Add(protItem.Type, new ProtectionEntry(protItem));
+					}
+				}
+				else
+				{
+					this.canonicalPath = null;
+					this.CurrentRevisionId = 0;
+					this.editPath = null;
+					this.IsNew = false;
+					this.IsRedirect = false;
+					protections.Clear();
+					this.StartTimestamp = this.Site.AbstractionLayer.CurrentTimestamp;
+					this.Text = null;
+				}
+			}
+
+			void PopulateLinks(PageItem pageItem)
+			{
+				var links = (List<Title>)this.Links;
+				links.Clear();
+				foreach (var link in pageItem.Links)
+				{
+					links.Add(TitleFactory.FromApi(this.Site, link).ToTitle());
+				}
+			}
+
+			void PopulateProperties(PageItem pageItem)
+			{
+				var properties = (Dictionary<string, string>)this.Properties;
+				properties.Clear();
+				if (pageItem.Properties?.Count > 0)
+				{
+					properties.Clear();
+					properties.AddRange(pageItem.Properties);
+				}
+			}
+
+			void PopulateRevisions(PageItem pageItem)
+			{
+				var revs = (List<Revision>)this.Revisions;
+				revs.Clear();
+				this.currentRevision = null;
+				foreach (var rev in pageItem.Revisions)
+				{
+					revs.Add(new Revision(rev));
+				}
+			}
+
+			void PopulateTemplates(PageItem pageItem)
+			{
+				var templates = (List<Title>)this.Templates;
+				templates.Clear();
+				foreach (var link in pageItem.Templates)
+				{
+					templates.Add(TitleFactory.FromApi(this.Site, link).ToTitle());
+				}
+			}
 		}
-		#endregion
-
-		#region Public Events
-
-		/// <summary>Occurs when the page is loaded.</summary>
-		/// <remarks>Note that this event is only raised when the page is loaded individually.</remarks>
-		/// <seealso cref="PageCollection.PageLoaded"/>
-		public event StrongEventHandler<Page, EventArgs>? PageLoaded;
 		#endregion
 
 		#region Public Properties
@@ -101,7 +232,7 @@
 					return null;
 				}
 
-				var templates = new HashSet<Title>(this.Templates);
+				var templates = new HashSet<ISimpleTitle>(this.Templates);
 				templates.IntersectWith(this.Site.DisambiguationTemplates);
 
 				return templates.Count > 0;
@@ -114,7 +245,7 @@
 
 		/// <summary>Gets a value indicating whether this <see cref="Page" /> has been loaded.</summary>
 		/// <value><see langword="true" /> if loaded; otherwise, <see langword="false" />.</value>
-		public bool IsLoaded { get; private set; }
+		public bool IsLoaded { get; }
 
 		/// <summary>Gets or sets a value indicating whether this <see cref="Page" /> is missing.</summary>
 		/// <value><see langword="true" /> if the page is missing; otherwise, <see langword="false" />.</value>
@@ -134,7 +265,7 @@
 
 		/// <summary>Gets the information that was loaded for this page.</summary>
 		/// <value>The load options.</value>
-		public PageLoadOptions LoadOptions { get; private set; } = PageLoadOptions.None;
+		public PageLoadOptions LoadOptions { get; } = PageLoadOptions.None;
 
 		/// <summary>Gets or sets a value indicating whether this <see cref="Page"/> has previously been deleted.</summary>
 		/// <value><see langword="true"/> if the page has previously been deleted; toherwise, <see langword="false"/>.</value>
@@ -176,40 +307,6 @@
 		#endregion
 
 		#region Public Methods
-
-		/// <summary>Returns a value indicating if the page exists. This will trigger a Load operation if necessary.</summary>
-		/// <returns><see langword="true" /> if the page exists; otherwise <see langword="false" />.</returns>
-		public bool CheckExistence()
-		{
-			if (!this.IsLoaded)
-			{
-				this.Load(PageModules.None);
-			}
-
-			return this.Exists;
-		}
-
-		/// <summary>Loads or reloads the page.</summary>
-		public void Load() => this.Load(this.Site.DefaultLoadOptions);
-
-		/// <summary>Loads the specified page modules.</summary>
-		/// <param name="pageModules">The page modules.</param>
-		public void Load(PageModules pageModules) => this.Load(new PageLoadOptions(pageModules));
-
-		/// <summary>Loads the page with the specified load options.</summary>
-		/// <param name="options">The options.</param>
-		public void Load(PageLoadOptions options)
-		{
-			var creator = this.Site.PageCreator;
-			var propertyInputs = creator.GetPropertyInputs(options.NotNull(nameof(options)));
-			var pageSetInput = new QueryPageSetInput(new[] { this.FullPageName }) { ConvertTitles = options.ConvertTitles, Redirects = options.FollowRedirects };
-			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, propertyInputs, creator.CreatePageItem);
-			if (result.Count == 1)
-			{
-				this.Populate(result[0], options);
-				this.PageLoaded?.Invoke(this, EventArgs.Empty);
-			}
-		}
 
 		/// <summary>Convenience method to determine if the page has a specific module loaded.</summary>
 		/// <param name="module">The module to check.</param>
@@ -278,161 +375,11 @@
 		public void SetMinimalStartTimestamp() => this.StartTimestamp = new DateTime(2000, 1, 1);
 		#endregion
 
-		#region Internal Methods
-
-		/// <summary>Populates page data from the specified WallE PageItem.</summary>
-		/// <param name="pageItem">The page item.</param>
-		/// <param name="optionsUsed">The options that were used to load the page. This can be used to reload the page.</param>
-		/// <remarks>This item is publicly available so it can be called from other load-like routines if necessary, such as from a PageCollection's LoadPages routine.</remarks>
-		internal void Populate(PageItem pageItem, PageLoadOptions optionsUsed)
-		{
-			// Assumes title-related properties have already been provided in the constructor.
-			pageItem.ThrowNull(nameof(pageItem));
-			this.LoadOptions = optionsUsed;
-			this.PopulateFlags((pageItem.Flags & PageFlags.Invalid) != 0, (pageItem.Flags & PageFlags.Missing) != 0);
-			this.PopulateRevisions(pageItem);
-			this.PopulateInfo(pageItem);
-			this.PreviouslyDeleted = this.IsMissing && pageItem.DeletedRevisions.Count > 0;
-			this.PopulateLinks(pageItem);
-			this.PopulateBacklinks(pageItem);
-			this.PopulateProperties(pageItem);
-			this.PopulateTemplates(pageItem);
-			this.PopulateCategories(pageItem);
-			this.PopulateCustomResults(pageItem);
-			this.IsLoaded = true;
-		}
-
-		/// <summary>Populates only flag data. This is useful for results that return more than straight titles, but less than full page data (e.g., Purge, Watch).</summary>
-		/// <param name="invalid">Whether the page is invalid.</param>
-		/// <param name="missing">Whether the page is missing.</param>
-		internal void PopulateFlags(bool invalid, bool missing)
-		{
-			this.IsInvalid = invalid;
-			this.IsMissing = missing;
-		}
-		#endregion
-
 		#region Protected Virtual Methods
 
 		/// <summary>When overridden in a derived class, allows custom property inputs to be specified as necessary.</summary>
 		protected virtual void BuildCustomPropertyInputs()
 		{
-		}
-
-		/// <summary>When overridden in a derived class, populates custom page properties with custom data from the WallE PageItem.</summary>
-		/// <param name="pageItem">The page item.</param>
-		protected virtual void PopulateCustomResults(PageItem pageItem)
-		{
-		}
-		#endregion
-
-		#region Private Methods
-		private void PopulateBacklinks(PageItem pageItem)
-		{
-			var backlinks = (Dictionary<Title, BacklinksTypes>)this.Backlinks;
-			backlinks.Clear();
-			this.PopulateBacklinksType(backlinks, pageItem.FileUsages, BacklinksTypes.ImageUsage);
-			this.PopulateBacklinksType(backlinks, pageItem.LinksHere, BacklinksTypes.Backlinks);
-			this.PopulateBacklinksType(backlinks, pageItem.TranscludedIn, BacklinksTypes.EmbeddedIn);
-		}
-
-		private void PopulateBacklinksType(Dictionary<Title, BacklinksTypes> backlinks, IReadOnlyList<IApiTitleOptional> list, BacklinksTypes type)
-		{
-			foreach (var link in list)
-			{
-				var title = TitleFactory.FromApi(this.Site, link).ToTitle();
-				if (backlinks.ContainsKey(title))
-				{
-					backlinks[title] |= type;
-				}
-				else
-				{
-					backlinks[title] = type;
-				}
-			}
-		}
-
-		private void PopulateCategories(PageItem pageItem)
-		{
-			var categories = (List<Category>)this.Categories;
-			categories.Clear();
-			foreach (var category in pageItem.Categories)
-			{
-				var factory = TitleFactory.FromName(this.Site, category.FullPageName);
-				categories.Add(new Category(factory, category.SortKey, category.Hidden));
-			}
-		}
-
-		private void PopulateInfo(PageItem pageItem)
-		{
-			var protections = (Dictionary<string, ProtectionEntry>)this.Protections;
-			if (pageItem.Info is PageInfo info)
-			{
-				this.canonicalPath = info.CanonicalUrl;
-				this.CurrentRevisionId = info.LastRevisionId;
-				this.editPath = info.EditUrl;
-				this.IsNew = (info.Flags & PageInfoFlags.New) != 0;
-				this.IsRedirect = (info.Flags & PageInfoFlags.Redirect) != 0;
-				this.StartTimestamp = pageItem.Info.StartTimestamp ?? this.Site.AbstractionLayer.CurrentTimestamp;
-				this.Text = this.CurrentRevisionId != 0 ? this.CurrentRevision?.Text : null;
-				foreach (var protItem in pageItem.Info.Protections)
-				{
-					protections.Add(protItem.Type, new ProtectionEntry(protItem));
-				}
-			}
-			else
-			{
-				this.canonicalPath = null;
-				this.CurrentRevisionId = 0;
-				this.editPath = null;
-				this.IsNew = false;
-				this.IsRedirect = false;
-				protections.Clear();
-				this.StartTimestamp = this.Site.AbstractionLayer.CurrentTimestamp;
-				this.Text = null;
-			}
-		}
-
-		private void PopulateLinks(PageItem pageItem)
-		{
-			var links = (List<Title>)this.Links;
-			links.Clear();
-			foreach (var link in pageItem.Links)
-			{
-				links.Add(TitleFactory.FromApi(this.Site, link).ToTitle());
-			}
-		}
-
-		private void PopulateProperties(PageItem pageItem)
-		{
-			var properties = (Dictionary<string, string>)this.Properties;
-			properties.Clear();
-			if (pageItem.Properties?.Count > 0)
-			{
-				properties.Clear();
-				properties.AddRange(pageItem.Properties);
-			}
-		}
-
-		private void PopulateRevisions(PageItem pageItem)
-		{
-			var revs = (List<Revision>)this.Revisions;
-			revs.Clear();
-			this.currentRevision = null;
-			foreach (var rev in pageItem.Revisions)
-			{
-				revs.Add(new Revision(rev));
-			}
-		}
-
-		private void PopulateTemplates(PageItem pageItem)
-		{
-			var templates = (List<Title>)this.Templates;
-			templates.Clear();
-			foreach (var link in pageItem.Templates)
-			{
-				templates.Add(TitleFactory.FromApi(this.Site, link).ToTitle());
-			}
 		}
 		#endregion
 	}

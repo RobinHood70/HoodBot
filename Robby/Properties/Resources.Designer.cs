@@ -187,6 +187,15 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The page {0} could not be loaded, probably because it&apos;s not an article or the title is invalid..
+        /// </summary>
+        internal static string PageCouldNotBeLoaded {
+            get {
+                return ResourceManager.GetString("PageCouldNotBeLoaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid page name: [[{0}]]. Page is an interwiki link that doesn&apos;t resolve to the local wiki..
         /// </summary>
         internal static string PageNameInterwiki {

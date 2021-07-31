@@ -27,7 +27,7 @@
 		}
 
 		[JsonConstructor]
-		public Replacement(Title from, Title to)
+		public Replacement(ISimpleTitle from, Title to)
 		{
 			this.From = from.NotNull(nameof(from));
 			this.To = to.NotNull(nameof(to));
@@ -37,7 +37,7 @@
 		#region Public Properties
 		public ReplacementActions Actions { get; set; }
 
-		public Title From { get; }
+		public ISimpleTitle From { get; }
 
 		public string? Reason { get; set; }
 
@@ -45,7 +45,7 @@
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => $"{this.Actions}: {this.From.FullPageName} → {this.To.FullPageName}";
+		public override string ToString() => $"{this.Actions}: {this.From.FullPageName()} → {this.To.FullPageName()}";
 		#endregion
 	}
 }

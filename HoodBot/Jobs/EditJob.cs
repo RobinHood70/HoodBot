@@ -31,7 +31,7 @@
 		/// <remarks>During a SavePage, if an edit conflict occurs, the page will automatically be re-loaded and the method specified here will be executed.</remarks>
 		protected Action<EditJob, Page>? EditConflictAction { get; set; }
 
-		protected IDictionary<Title, SaveInfo> SaveInfo { get; } = new Dictionary<Title, SaveInfo>(SimpleTitleEqualityComparer.Instance);
+		protected IDictionary<ISimpleTitle, SaveInfo> SaveInfo { get; } = new Dictionary<ISimpleTitle, SaveInfo>(SimpleTitleEqualityComparer.Instance);
 		#endregion
 
 		#region Protected Methods
@@ -59,7 +59,7 @@
 				}
 				catch (EditConflictException) when (this.EditConflictAction != null)
 				{
-					page.Load();
+					page = page.Load();
 					this.EditConflictAction(this, page);
 				}
 				catch (WikiException we) when (string.Equals(we.Code, "pagedeleted", StringComparison.Ordinal))

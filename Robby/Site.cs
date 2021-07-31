@@ -15,6 +15,7 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
@@ -75,10 +76,10 @@
 		private readonly Dictionary<string, MagicWord> magicWords = new(StringComparer.Ordinal);
 		private string? baseArticlePath;
 		private CultureInfo culture = CultureInfo.CurrentCulture;
-		private IReadOnlyCollection<Title>? deletePreventionTemplates;
-		private IReadOnlyCollection<Title>? deletionCategories;
-		private HashSet<Title>? disambiguationTemplates;
-		private IReadOnlyCollection<Title>? discussionPages;
+		private IReadOnlyCollection<ISimpleTitle>? deletePreventionTemplates;
+		private IReadOnlyCollection<ISimpleTitle>? deletionCategories;
+		private HashSet<ISimpleTitle>? disambiguationTemplates;
+		private IReadOnlyCollection<ISimpleTitle>? discussionPages;
 		private ReadOnlyKeyedCollection<string, InterwikiEntry>? interwikiMap;
 		private FullTitle? mainPage;
 		private string? mainPageName;
@@ -146,19 +147,19 @@
 
 		/// <summary>Gets a list of templates indicating a page should never be flagged for deletion.</summary>
 		/// <value>A list of templates indicating a page should never be flagged for deletion.</value>
-		public IReadOnlyCollection<Title> DeletePreventionTemplates => this.deletePreventionTemplates ?? this.LoadDeletePreventionTemplates();
+		public IReadOnlyCollection<ISimpleTitle> DeletePreventionTemplates => this.deletePreventionTemplates ?? this.LoadDeletePreventionTemplates();
 
 		/// <summary>Gets a list of templates indicating a page is flagged for deletion.</summary>
 		/// <value>A list of templates indicating a page is flagged for deletion.</value>
-		public IReadOnlyCollection<Title> DeletionCategories => this.deletionCategories ?? this.LoadDeletionCategories();
+		public IReadOnlyCollection<ISimpleTitle> DeletionCategories => this.deletionCategories ?? this.LoadDeletionCategories();
 
 		/// <summary>Gets the list of disambiguation templates on wikis that aren't using Disambiguator.</summary>
 		/// <value>The disambiguation templates.</value>
 		/// <remarks>This will be auto-populated on first use if not already set.</remarks>
-		public IReadOnlyCollection<Title> DisambiguationTemplates => this.disambiguationTemplates ?? this.LoadDisambiguationTemplates();
+		public IReadOnlyCollection<ISimpleTitle> DisambiguationTemplates => this.disambiguationTemplates ?? this.LoadDisambiguationTemplates();
 
 		/// <summary>Gets a list of pages that function as talk pages, but are located outside of traditional Talk spaces.</summary>
-		public IReadOnlyCollection<Title> DiscussionPages => this.discussionPages ??= this.LoadDiscussionPages();
+		public IReadOnlyCollection<ISimpleTitle> DiscussionPages => this.discussionPages ??= this.LoadDiscussionPages();
 
 		/// <summary>Gets a value indicating whether the Disambiguator extension is available.</summary>
 		/// <value><see langword="true"/> if the Disambiguator extension is available; otherwise, <see langword="false"/>.</value>
@@ -309,7 +310,9 @@
 		/// <summary>Determines whether the title provided is considered a discussion page on this site.</summary>
 		/// <param name="title">The title to check.</param>
 		/// <returns><see langword="true"/> if the title represents a discussion page; otherwise, <see langword="false"/>.</returns>
-		public bool IsDiscussionPage(ISimpleTitle title) => title.NotNull(nameof(title)).Namespace.IsTalkSpace || this.DiscussionPages.Contains(title);
+		public bool IsDiscussionPage(ISimpleTitle title) =>
+			title.NotNull(nameof(title)).Namespace.IsTalkSpace ||
+			this.DiscussionPages.Contains(title);
 
 		/// <summary>Gets all active blocks.</summary>
 		/// <returns>All active blocks.</returns>
@@ -856,6 +859,101 @@
 			}
 		}
 
+		/// <summary>Moves the title to the name specified.</summary>
+		/// <param name="from">The title to move.</param>
+		/// <param name="to">Where to move the title to.</param>
+		/// <param name="reason">The reason for the move.</param>
+		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
+		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
+		/// <remarks>The original title object will remain unaltered after the move; it will not be updated to reflect the destination.</remarks>
+		public ChangeValue<IDictionary<string, string>> Move(ISimpleTitle from, ISimpleTitle to, string reason, bool suppressRedirect) => this.Move(from, to, reason, false, false, suppressRedirect);
+
+		/// <summary>Moves the title to the name specified.</summary>
+		/// <param name="from">The title to move.</param>
+		/// <param name="to">Where to move the title to.</param>
+		/// <param name="reason">The reason for the move.</param>
+		/// <param name="moveTalk">if set to <see langword="true"/>, moves the talk page as well as the original page.</param>
+		/// <param name="moveSubpages">if set to <see langword="true"/>, moves all sub-pages of the original page.</param>
+		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
+		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
+		/// <remarks>The original title object will remain unaltered after the move; it will not be updated to reflect the destination.</remarks>
+		public ChangeValue<IDictionary<string, string>> Move(ISimpleTitle from, ISimpleTitle to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
+		{
+			from.ThrowNull(nameof(from));
+			to.ThrowNull(nameof(to));
+			reason.ThrowNull(nameof(reason));
+			const string subPageName = "/SubPage";
+			var disabledResult = new Dictionary<string, string>(StringComparer.Ordinal);
+			if (!this.EditingEnabled)
+			{
+				disabledResult.Add(from.FullPageName(), to.FullPageName());
+				var fromTalk = from.TalkPage();
+				if (moveTalk && fromTalk is not null)
+				{
+					var toTalk = to.TalkPage();
+					disabledResult.Add(fromTalk.FullPageName(), toTalk?.FullPageName() ?? string.Empty);
+				}
+
+				if (moveSubpages && from.Namespace.AllowsSubpages)
+				{
+					var toSubPage = TitleFactory.FromName(this, to + subPageName).ToTitle();
+					disabledResult.Add(from.FullPageName() + subPageName, toSubPage.FullPageName);
+				}
+			}
+
+			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			{
+				[nameof(to)] = to,
+				[nameof(reason)] = reason,
+				[nameof(moveTalk)] = moveTalk,
+				[nameof(moveSubpages)] = moveSubpages,
+				[nameof(suppressRedirect)] = suppressRedirect,
+			};
+
+			return this.PublishChange(disabledResult, this, parameters, ChangeFunc);
+
+			ChangeValue<IDictionary<string, string>> ChangeFunc()
+			{
+				var input = new MoveInput(from.FullPageName(), to.FullPageName())
+				{
+					IgnoreWarnings = true,
+					MoveSubpages = moveSubpages,
+					MoveTalk = moveTalk,
+					NoRedirect = suppressRedirect,
+					Reason = reason
+				};
+
+				var status = ChangeStatus.Success;
+				var dict = new Dictionary<string, string>(StringComparer.Ordinal);
+				try
+				{
+					var retval = this.AbstractionLayer.Move(input);
+					foreach (var item in retval)
+					{
+						if (item.Error != null)
+						{
+							this.PublishWarning(this, Globals.CurrentCulture(Resources.MovePageWarning, from.FullPageName(), to, item.Error.Info));
+						}
+						else if (item.From != null && item.To != null)
+						{
+							dict.Add(item.From, item.To);
+						}
+						else
+						{
+							throw new InvalidOperationException(); // item.From and/or item.To was null.
+						}
+					}
+				}
+				catch (WikiException e)
+				{
+					this.PublishWarning(this, e.Info ?? e.Message);
+					status = ChangeStatus.Failure;
+				}
+
+				return new ChangeValue<IDictionary<string, string>>(status, dict);
+			}
+		}
+
 		/// <summary>Raises the <see cref="Changing"/> event with the supplied arguments and indicates what actions should be taken.</summary>
 		/// <param name="sender">The sending object.</param>
 		/// <param name="parameters">A dictionary of parameters that were sent to the calling method.</param>
@@ -946,7 +1044,9 @@
 			var retval = new List<Block>(result.Count);
 			foreach (var item in result)
 			{
-				retval.Add(new Block(item.User, item.By, item.Reason, item.Timestamp ?? DateTime.MinValue, item.Expiry ?? DateTime.MaxValue, item.Flags, item.Automatic));
+				var user = item.User == null ? null : new User(this, item.User);
+				var by = item.By == null ? null : new User(this, item.By);
+				retval.Add(new Block(user, by, item.Reason, item.Timestamp ?? DateTime.MinValue, item.Expiry ?? DateTime.MaxValue, item.Flags, item.Automatic));
 			}
 
 			return retval;
@@ -955,22 +1055,22 @@
 		/// <summary>When overridden in a derived class, loads the list of templates indicating a page should never be flagged for deletion.</summary>
 		/// <returns>A list of templates indicating a page should never be flagged for deletion.</returns>
 		/// <remarks>If not overridden, this will return an empty collection.</remarks>
-		protected virtual IReadOnlyCollection<Title> LoadDeletePreventionTemplates() => this.deletePreventionTemplates = Array.Empty<Title>();
+		protected virtual IReadOnlyCollection<ISimpleTitle> LoadDeletePreventionTemplates() => this.deletePreventionTemplates = Array.Empty<Title>();
 
 		/// <summary>When overridden in a derived class, loads the list of templates indicating a page is flagged for deletion.</summary>
 		/// <returns>A list of templates indicating a page is flagged for deletion.</returns>
 		/// <remarks>If not overridden, this will return an empty collection.</remarks>
-		protected virtual IReadOnlyCollection<Title> LoadDeletionCategories() => this.deletionCategories = Array.Empty<Title>();
+		protected virtual IReadOnlyCollection<ISimpleTitle> LoadDeletionCategories() => this.deletionCategories = Array.Empty<Title>();
 
 		/// <summary>Loads the disambiguation templates for wikis that don't use Disambiguator.</summary>
 		/// <returns>A collection of titles of disambiguation templates.</returns>
-		protected virtual IReadOnlyCollection<Title> LoadDisambiguationTemplates()
+		protected virtual IReadOnlyCollection<ISimpleTitle> LoadDisambiguationTemplates()
 		{
 			if (this.disambiguationTemplates == null)
 			{
-				this.disambiguationTemplates = new HashSet<Title>();
-				var page = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.MediaWiki, "Disambiguationspage").ToPageForced();
-				page.Load(PageModules.Default | PageModules.Links);
+				this.disambiguationTemplates = new HashSet<ISimpleTitle>();
+				var title = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.MediaWiki, "Disambiguationspage").ToTitle();
+				var page = title.Load(PageModules.Default | PageModules.Links, false);
 				if (page.Exists)
 				{
 					if (page.Links.Count == 0)
@@ -990,7 +1090,7 @@
 		/// <summary>When overridden in a derived class, loads the list of pages that function as talk pages, but are located outside of traditional Talk spaces.</summary>
 		/// <returns>A list of pages that function as talk pages.</returns>
 		/// <remarks>If not overridden, this will return an empty collection.</remarks>
-		protected virtual IReadOnlyCollection<Title> LoadDiscussionPages() => this.discussionPages = Array.Empty<Title>();
+		protected virtual IReadOnlyCollection<ISimpleTitle> LoadDiscussionPages() => this.discussionPages = Array.Empty<Title>();
 
 		/// <summary>Gets one or more messages from MediaWiki space.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -1002,12 +1102,7 @@
 			foreach (var item in result)
 			{
 				var factory = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.MediaWiki, item.Name);
-				if (factory.ToPage() is not MessagePage mp)
-				{
-					mp = new MessagePage(factory, item);
-				}
-
-				retval.Add(item.Name, mp);
+				retval.Add(item.Name, new MessagePage(factory, item));
 			}
 
 			return retval.AsReadOnly();
@@ -1037,8 +1132,7 @@
 			var retval = new List<User>(result.Count);
 			foreach (var item in result)
 			{
-				var userTitle = User.GetTitle(this, item.Name);
-				retval.Add(new User(userTitle));
+				retval.Add(new User(TitleFactory.DirectNormalized(this, MediaWikiNamespaces.User, item.Name), item));
 			}
 
 			return retval.AsReadOnly();
@@ -1054,7 +1148,7 @@
 			var retval = new List<User>(result.Count);
 			foreach (var item in result)
 			{
-				retval.Add(new User(User.GetTitle(this, item.Name)));
+				retval.Add(new User(this, item));
 			}
 
 			return retval;
@@ -1066,8 +1160,6 @@
 		/// <remarks>Even if you wish to edit anonymously, you <em>must</em> still log in by passing <see langword="null" /> for the input.</remarks>
 		protected virtual void Login([NotNull, ValidatedNotNull] LoginInput input)
 		{
-			string? name;
-
 			// Always log in in case permissions are needed.
 			var result = this.AbstractionLayer.Login(input.NotNull(nameof(input)));
 			if (!string.Equals(result.Result, "Success", StringComparison.OrdinalIgnoreCase))
@@ -1076,8 +1168,8 @@
 				throw new UnauthorizedAccessException(Globals.CurrentCulture(Resources.LoginFailed, result.Reason));
 			}
 
-			name = result.User;
-			this.User = name == null ? null : new User(User.GetTitle(this, name));
+			var name = result.User;
+			this.User = name == null ? null : new User(this, name);
 		}
 
 		/// <summary>Gets all site information required for proper functioning of the framework.</summary>

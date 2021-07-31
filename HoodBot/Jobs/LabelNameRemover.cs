@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
@@ -28,7 +29,7 @@
 		{
 			if (template.Find("titlename") != null)
 			{
-				Debug.WriteLine(parsedPage.Context.FullPageName);
+				Debug.WriteLine(parsedPage.Context.FullPageName());
 			}
 			else if (template.Find("imgdesc") is IParameterNode imgdesc &&
 				string.Equals(imgdesc.Value.ToValue().Trim(), parsedPage.Context.LabelName(), StringComparison.Ordinal))

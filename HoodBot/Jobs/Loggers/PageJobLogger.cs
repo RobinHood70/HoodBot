@@ -20,7 +20,8 @@
 		#endregion
 
 		#region Fields
-		private readonly Page logPage;
+		private readonly Title logTitle;
+		private Page? logPage;
 		private DateTime? end;
 		private LogInfo? logInfo;
 		private DateTime? start;
@@ -29,7 +30,7 @@
 
 		#region Constructors
 		public PageJobLogger(Site site, string pageName, JobTypes typesToLog)
-			: base(typesToLog) => this.logPage = TitleFactory.FromName(site.NotNull(nameof(site)), pageName.NotNull(nameof(pageName))).ToPage();
+			: base(typesToLog) => this.logTitle = TitleFactory.FromName(site.NotNull(nameof(site)), pageName.NotNull(nameof(pageName))).ToTitle();
 		#endregion
 
 		#region Public Override Methods
@@ -83,10 +84,10 @@
 			return string.Equals(previousTask, this.status, StringComparison.Ordinal);
 		}
 
-		private void UpdateEntry(Page sender, EventArgs eventArgs)
+		private void UpdateEntry(Page page)
 		{
 			Debug.Assert(this.logInfo != null, "LogInfo is null.");
-			var parser = new ContextualParser(sender);
+			var parser = new ContextualParser(page);
 			var factory = parser.Nodes.Factory;
 			var sameTaskText = this.UpdateCurrentStatus(parser);
 			var firstEntry = parser.Nodes.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("/Entry"));
@@ -106,7 +107,7 @@
 						Debug.Assert(startParam != -1, "Start parameter not found.");
 						var endParam = factory.ParameterNodeFromParts(FormatDateTime(DateTime.UtcNow));
 						entry.Parameters.Insert(startParam + 1, endParam);
-						sender.Text = parser.ToRaw();
+						page.Text = parser.ToRaw();
 					}
 
 					return;
@@ -127,7 +128,7 @@
 					factory.TextNode("\n")
 				});
 
-				sender.Text = parser.ToRaw();
+				page.Text = parser.ToRaw();
 			}
 			else
 			{
@@ -140,18 +141,12 @@
 		{
 			this.status = status;
 			var saved = false;
-			this.logPage.PageLoaded += this.UpdateEntry;
-			if (this.logPage.IsLoaded)
-			{
-				this.UpdateEntry(this.logPage, EventArgs.Empty);
-			}
-			else
-			{
-				this.logPage.Load();
-			}
+			this.logPage ??= this.logTitle.Load() ?? throw new InvalidOperationException();
 
 			do
 			{
+				this.UpdateEntry(this.logPage);
+
 				// Assumes that its current LogPage.Text is still valid and tries to update, then save that directly. Loads only if it gets an edit conflict.
 				try
 				{
@@ -160,7 +155,7 @@
 				}
 				catch (EditConflictException)
 				{
-					this.logPage.Load();
+					this.logPage = this.logTitle.Load();
 				}
 				catch (StopException)
 				{
@@ -168,7 +163,6 @@
 				}
 			}
 			while (!saved);
-			this.logPage.PageLoaded -= this.UpdateEntry;
 		}
 		#endregion
 	}

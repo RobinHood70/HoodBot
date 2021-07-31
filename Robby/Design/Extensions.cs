@@ -30,7 +30,7 @@
 			{
 				foreach (var title in titles)
 				{
-					yield return title.FullPageName;
+					yield return title.FullPageName();
 				}
 			}
 		}

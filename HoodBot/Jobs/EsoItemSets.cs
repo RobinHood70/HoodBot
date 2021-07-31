@@ -223,7 +223,10 @@
 
 				var addPages = new PageCollection(this.Site, PageModules.Info);
 				addPages.GetTitles(addTitles);
-				pages.Add(addPages);
+				foreach (var page in addPages)
+				{
+					pages.Add(page);
+				}
 			}
 
 			this.UpdateSetPages(allSets, pages);
@@ -407,7 +410,7 @@
 			#endregion
 
 			#region Public Methods
-			public void BuildNewPage(ISimpleTitle pageName)
+			public void BuildNewPage(ISimpleTitle title)
 			{
 				var sb = new StringBuilder();
 				sb
@@ -428,10 +431,7 @@
 					.Append("{{ESO Sets With|subtype=|source=}}\n")
 					.Append("{{Stub|Item Set}}");
 
-				this.Page = new Page(pageName)
-				{
-					Text = sb.ToString()
-				};
+				this.Page = TitleFactory.DirectNormalized(title).ToNewPage(sb.ToString());
 			}
 			#endregion
 

@@ -7,7 +7,6 @@
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
-	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 
@@ -44,16 +43,16 @@
 					Debug.WriteLine("Match: " + match.Value);
 					var title = TitleFactory.Direct(this.Site, UespNamespaces.Morrowind, pageName);
 					sb.Clear();
-					if (!this.Pages.TryGetValue(title, out var page))
-					{
-						page = new Page(title);
-						this.Pages.Add(page);
-					}
-					else
+					if (this.Pages.TryGetValue(title, out var page))
 					{
 						sb
 							.Append(page.Text)
 							.Append("\n{{NewLine}}\n");
+					}
+					else
+					{
+						page = TitleFactory.DirectNormalized(title).ToNewPage(string.Empty);
+						this.Pages.Add(page);
 					}
 
 					sb
