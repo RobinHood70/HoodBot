@@ -281,9 +281,9 @@
 			return abstractionLayer;
 		}
 
-		private IMediaWikiClient CreateClient(WikiInfoViewModel wikiInfo)
+		private IMediaWikiClient CreateClient(WikiInfoViewModel wikiInfo, CancellationToken cancellationToken)
 		{
-			IMediaWikiClient client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.json"));
+			IMediaWikiClient client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.json"), cancellationToken);
 			if (wikiInfo.ReadThrottling > 0 || wikiInfo.WriteThrottling > 0)
 			{
 				client = new ThrottledClient(
@@ -295,6 +295,37 @@
 			client.RequestingDelay += this.Client_RequestingDelay;
 
 			return client;
+		}
+
+		private JobManager CreateJobManager(Site site, CancellationToken cancellationToken, WikiInfoViewModel wikiInfo)
+		{
+			// We pass wikiInfo here only because it's already validated as not null.
+			var pauseSource = new PauseTokenSource();
+			this.pauser = pauseSource;
+			var pauseToken = pauseSource.Token;
+
+			var jobManager = new JobManager(site, cancellationToken, pauseToken)
+			{
+				Logger = string.IsNullOrEmpty(wikiInfo.LogPage)
+					? null
+					: new PageJobLogger(site, wikiInfo.LogPage, JobTypes.Write),
+				ProgressMonitor = this.progressMonitor,
+				ResultHandler = string.IsNullOrEmpty(wikiInfo.ResultsPage)
+					? null
+					: new PageResultHandler(site, wikiInfo.ResultsPage),
+				StatusMonitor = this.statusMonitor,
+			};
+
+			jobManager.StartingJob += this.JobManager_StartingJob;
+			jobManager.FinishedJob += this.JobManager_FinishedJob;
+			return jobManager;
+		}
+
+		private void DestroyJobManager(JobManager jobManager)
+		{
+			jobManager.FinishedJob -= this.JobManager_FinishedJob;
+			jobManager.StartingJob -= this.JobManager_StartingJob;
+			this.pauser = null;
 		}
 
 		private Site CreateSite(IWikiAbstractionLayer abstractionLayer, WikiInfoViewModel wikiInfo)
@@ -347,10 +378,13 @@
 
 		private async Task ExecuteJobs()
 		{
-			if (this.executing || this.SelectedItem == null)
+			if (this.executing || this.selectedItem is not WikiInfoViewModel wikiInfo)
 			{
 				return;
 			}
+
+			this.StatusWriteLine("Initializing");
+			App.WpfYield();
 
 			this.executing = true;
 			this.parameterFetcher?.SetParameters();
@@ -372,45 +406,23 @@
 			this.ClearStatus();
 			this.completedJobs = 0;
 			this.OverallProgressMax = jobList.Count;
-			using (var cancelSource = new CancellationTokenSource())
-			{
-				this.canceller = cancelSource;
-				this.pauser = new PauseTokenSource();
 
-				this.StatusWriteLine("Initializing");
-				App.WpfYield();
-				var wikiInfo = this.ValidateWikiInfo();
-				var client = this.CreateClient(wikiInfo);
-				var abstractionLayer = this.CreateAbstractionLayer(client, wikiInfo);
-				var site = this.CreateSite(abstractionLayer, wikiInfo);
-				var jobManager = new JobManager(site)
-				{
-					CancellationToken = this.canceller?.Token,
-					PauseToken = this.pauser?.Token,
-					ProgressMonitor = this.progressMonitor,
-					StatusMonitor = this.statusMonitor,
-				};
+			using var cancelSource = new CancellationTokenSource();
+			this.canceller = cancelSource;
+			var cancellationToken = cancelSource.Token;
 
-				if (!string.IsNullOrEmpty(this.SelectedItem.LogPage))
-				{
-					jobManager.Logger = new PageJobLogger(site, this.SelectedItem.LogPage, JobTypes.Write);
-				}
+			var client = this.CreateClient(wikiInfo, cancellationToken);
+			var abstractionLayer = this.CreateAbstractionLayer(client, wikiInfo);
+			var site = this.CreateSite(abstractionLayer, wikiInfo);
 
-				if (!string.IsNullOrEmpty(this.SelectedItem.ResultsPage))
-				{
-					jobManager.ResultHandler = new PageResultHandler(site, this.SelectedItem.ResultsPage);
-				}
+			var jobManager = this.CreateJobManager(site, cancellationToken, wikiInfo);
+			await jobManager.Run(jobList).ConfigureAwait(true);
 
-				jobManager.StartingJob += this.JobManager_StartingJob;
-				jobManager.FinishedJob += this.JobManager_FinishedJob;
-				await jobManager.Run(jobList).ConfigureAwait(true);
-
-				this.DestroySite(site);
-				this.DestroyAbstractionLayer(abstractionLayer);
-				this.DestroyClient(client);
-				this.pauser = null;
-				this.canceller = null;
-			}
+			this.DestroyJobManager(jobManager);
+			this.DestroySite(site);
+			this.DestroyAbstractionLayer(abstractionLayer);
+			this.DestroyClient(client);
+			this.canceller = null;
 
 			this.Reset();
 			this.StatusWriteLine("Total time for last run: " + FormatTimeSpan(allJobsTimer.Elapsed));
@@ -574,7 +586,7 @@
 			}
 
 			// Dummy code just so this doesn't get all kinds of unwanted code suggestions.
-			Debug.WriteLine(this.SelectedItem?.DisplayName);
+			Debug.WriteLine(this.selectedItem?.DisplayName);
 			Debug.WriteLine(this.UserName);
 		}
 
@@ -602,8 +614,6 @@
 		private void StatusWrite(string text) => this.Status += (this.Status?.Length ?? 0) == 0 ? text.TrimStart() : text;
 
 		private void StatusWriteLine(string text) => this.StatusWrite(text + NewLine);
-
-		private WikiInfoViewModel ValidateWikiInfo() => this.SelectedItem.NotNull(nameof(MainViewModel), nameof(this.SelectedItem));
 		#endregion
 	}
 }

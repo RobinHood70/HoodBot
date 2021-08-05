@@ -26,6 +26,7 @@
 	{
 		#region Fields
 		private readonly string cookiesLocation;
+		private readonly CancellationToken cancellationToken;
 		private CookieContainer cookieContainer = new();
 		#endregion
 
@@ -33,48 +34,30 @@
 
 		/// <summary>Initializes a new instance of the <see cref="SimpleClient" /> class.</summary>
 		public SimpleClient()
-			: this(null, null)
+			: this(null, null, CancellationToken.None)
 		{
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="SimpleClient" /> class with contact information for the User-Agent string.</summary>
 		/// <param name="contactInfo">The contact info to be displayed - typically, an e-mail address or user name on the target wiki.</param>
 		public SimpleClient(string? contactInfo)
-			: this(contactInfo, null)
+			: this(contactInfo, null, CancellationToken.None)
 		{
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="SimpleClient" /> class with contact information for the User-Agent string.</summary>
 		/// <param name="contactInfo">The contact info to be displayed - typically, an e-mail address or user name on the target wiki.</param>
 		/// <param name="cookiesLocation">The location and file name to store cookies in across sessions. If null, the default location specified in <see cref="DefaultCookiesLocation" /> will be used.</param>
-		public SimpleClient(string? contactInfo, string? cookiesLocation)
+		/// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
+		public SimpleClient(string? contactInfo, string? cookiesLocation, CancellationToken
+			cancellationToken)
 		{
-			// Test for the Mono Z-Stream bug on Windows: http://stackoverflow.com/a/32958861/502255
-			if (HasMono && OnWindows && (DefaultAcceptEncoding.Contains("gzip", StringComparison.OrdinalIgnoreCase) || DefaultAcceptEncoding.Contains("deflate", StringComparison.OrdinalIgnoreCase)))
-			{
-				try
-				{
-					var bytes = new byte[] { 0x1f, 0x8b, 0x08, 0, 0, 0, 0, 0, 4, 0, 0x63, 0, 0, 0x8d, 0xef, 2, 0xd2, 1, 0, 0, 0 };
-					using var compressedStream = new MemoryStream(bytes);
-					using var zipStream = new GZipStream(compressedStream, CompressionMode.Decompress);
-					using var resultStream = new MemoryStream();
-					zipStream.CopyTo(resultStream);
-					resultStream.ToArray(); // We don't actually need the result, we just want to be sure the stream has been checked.
-				}
-				catch (EntryPointNotFoundException)
-				{
-					throw new InvalidOperationException(Messages.MonoCreateZStreamBug);
-				}
-				catch (DllNotFoundException)
-				{
-					throw new InvalidOperationException(Messages.MonoCreateZStreamBug);
-				}
-			}
-
+			CheckMonoBug();
 			ServicePointManager.Expect100Continue = false;
 			this.UserAgent = BuildUserAgent(contactInfo);
 			this.cookiesLocation = cookiesLocation ?? DefaultCookiesLocation;
 			this.LoadCookies();
+			this.cancellationToken = cancellationToken;
 		}
 		#endregion
 
@@ -223,11 +206,7 @@
 			return GetResponseText(response);
 		}
 
-		/// <summary>This method is used both to throttle clients as well as to forward any wiki-requested delays, such as from maxlag. Clients should respect any delays requested by the wiki unless they expect to abort the procedure, or for testing.</summary>
-		/// <param name="delayTime">The amount of time to delay for.</param>
-		/// <param name="reason">The reason for the delay, as specified by the caller.</param>
-		/// <param name="description">The human-readable reason for the delay, as specified by the caller.</param>
-		/// <returns>A value indicating whether or not the delay was respected.</returns>
+		/// <inheritdoc/>
 		public bool RequestDelay(TimeSpan delayTime, DelayReason reason, string description)
 		{
 			if (delayTime <= TimeSpan.Zero)
@@ -242,11 +221,7 @@
 				return false;
 			}
 
-			// Thread.Sleep(delayTime);
-
-			// Temporary workaround for Thread.Sleep locking the UI thread.
-			// TODO: Make this work with pause/cancel tokens. Right now, this bypasses that process completely.
-			Task.Run(() => Thread.Sleep(delayTime)).Wait();
+			Task.Delay(delayTime, this.cancellationToken).Wait(this.cancellationToken);
 
 			return true;
 		}
@@ -267,6 +242,31 @@
 		#endregion
 
 		#region Private Static Methods
+		private static void CheckMonoBug()
+		{
+			// Test for the Mono Z-Stream bug on Windows: http://stackoverflow.com/a/32958861/502255
+			if (HasMono && OnWindows && (DefaultAcceptEncoding.Contains("gzip", StringComparison.OrdinalIgnoreCase) || DefaultAcceptEncoding.Contains("deflate", StringComparison.OrdinalIgnoreCase)))
+			{
+				try
+				{
+					var bytes = new byte[] { 0x1f, 0x8b, 0x08, 0, 0, 0, 0, 0, 4, 0, 0x63, 0, 0, 0x8d, 0xef, 2, 0xd2, 1, 0, 0, 0 };
+					using var compressedStream = new MemoryStream(bytes);
+					using var zipStream = new GZipStream(compressedStream, CompressionMode.Decompress);
+					using var resultStream = new MemoryStream();
+					zipStream.CopyTo(resultStream);
+					resultStream.ToArray(); // We don't actually need the result, we just want to be sure the stream has been checked.
+				}
+				catch (EntryPointNotFoundException)
+				{
+					throw new InvalidOperationException(Messages.MonoCreateZStreamBug);
+				}
+				catch (DllNotFoundException)
+				{
+					throw new InvalidOperationException(Messages.MonoCreateZStreamBug);
+				}
+			}
+		}
+
 		private static byte[] GetResponseData(HttpWebResponse response)
 		{
 			if (response != null)

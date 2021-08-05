@@ -229,7 +229,6 @@
 				return;
 			}
 
-			this.Logger = this.JobManager.Logger;
 			this.Pages.Sort();
 			this.ProgressMaximum = this.Pages.Count;
 			this.StatusWriteLine(string.Format(this.Site.Culture, "Protecting {0} pages", this.Pages.Count));
