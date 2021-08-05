@@ -136,8 +136,6 @@
 		#endregion
 
 		#region Private Methods
-
-		[SuppressMessage("Security", "CA5394:Do not use insecure randomness", Justification = "Doesn't need to be secure.")]
 		private static string RandomBoundary(int boundaryLength)
 		{
 			// Sanity check
