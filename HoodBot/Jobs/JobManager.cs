@@ -13,7 +13,12 @@
 	public class JobManager
 	{
 		#region Constructors
-		public JobManager(Site site) => this.Site = site.NotNull(nameof(site));
+		public JobManager(Site site, CancellationToken cancellationToken, PauseToken pauseToken)
+		{
+			this.Site = site.NotNull(nameof(site));
+			this.CancellationToken = cancellationToken;
+			this.PauseToken = pauseToken;
+		}
 		#endregion
 
 		#region Public Events
@@ -28,19 +33,19 @@
 
 		#region Public Properties
 
-		public CancellationToken? CancellationToken { get; set; }
+		public CancellationToken CancellationToken { get; }
 
-		public JobLogger? Logger { get; set; }
+		public JobLogger? Logger { get; init; }
 
-		public PauseToken? PauseToken { get; set; }
+		public PauseToken PauseToken { get; }
 
-		public IProgress<double>? ProgressMonitor { get; set; }
+		public IProgress<double>? ProgressMonitor { get; init; }
 
-		public ResultHandler? ResultHandler { get; set; }
+		public ResultHandler? ResultHandler { get; init; }
 
 		public Site Site { get; }
 
-		public IProgress<string>? StatusMonitor { get; set; }
+		public IProgress<string>? StatusMonitor { get; init; }
 		#endregion
 
 		#region Public Methods
