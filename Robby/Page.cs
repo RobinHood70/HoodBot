@@ -191,7 +191,7 @@
 		/// <summary>Gets the current revision.</summary>
 		/// <value>The current revision.</value>
 		/// <remarks>If revisions are loaded which do not include the current revision, this will be null.</remarks>
-		public Revision? CurrentRevision => this.currentRevision ??= (this.Revisions as List<Revision>)!.Find(item => item.Id == this.CurrentRevisionId);
+		public Revision? CurrentRevision => this.currentRevision ??= ((List<Revision>)this.Revisions).Find(item => item.Id == this.CurrentRevisionId);
 
 		/// <summary>Gets the ID of the current revision.</summary>
 		/// <value>The ID of the current revision.</value>
@@ -311,7 +311,7 @@
 		/// <summary>Convenience method to determine if the page has a specific module loaded.</summary>
 		/// <param name="module">The module to check.</param>
 		/// <returns><see langword="true"/> if LoadOptions.Modules includes the specified module; otherwise, <see langword="false"/>.</returns>
-		public bool ModuleLoaded(PageModules module) => this.LoadOptions.Modules.HasFlag(module);
+		public bool ModuleLoaded(PageModules module) => (this.LoadOptions.Modules & module) != 0;
 
 		/// <summary>Saves the page.</summary>
 		/// <param name="editSummary">The edit summary.</param>

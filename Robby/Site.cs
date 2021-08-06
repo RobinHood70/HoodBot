@@ -1165,7 +1165,7 @@
 			if (!string.Equals(result.Result, "Success", StringComparison.OrdinalIgnoreCase))
 			{
 				this.Clear();
-				throw new UnauthorizedAccessException(Globals.CurrentCulture(Resources.LoginFailed, result.Reason));
+				throw new UnauthorizedAccessException(Globals.CurrentCulture(Resources.LoginFailed, result.Reason ?? string.Empty));
 			}
 
 			var name = result.User;

@@ -35,7 +35,7 @@
 		public void Compare(DiffContent diff)
 		{
 			diff.ThrowNull(nameof(diff));
-			diff.EditPath.ThrowNull(ValidationType.Property, Validator.Join(nameof(IeDiff), nameof(diff.EditPath)));
+			diff.EditPath.ThrowNull(nameof(IeDiff), nameof(diff.EditPath));
 			const int empty = 0;
 			const string? headers = "Content-Type: application/x-www-form-urlencoded";
 
