@@ -106,7 +106,7 @@
 
 			if (offset >= 0)
 			{
-				var urib = new UriBuilder(fullHost)
+				UriBuilder urib = new(fullHost)
 				{
 					Path = tryPath.Replace("index.php", "api.php", StringComparison.Ordinal).Substring(0, offset + 8)
 				};
@@ -178,7 +178,7 @@
 			try
 			{
 				// Something above gave us a tentative api.php link, so try it.
-				var api = new WikiAbstractionLayer(this.client, path);
+				WikiAbstractionLayer api = new(this.client, path);
 				if (api.IsEnabled())
 				{
 					api.Initialize();
@@ -233,7 +233,7 @@
 				}
 
 				var rsdInfo = this.client.Get(new Uri(rsdLinkFixed)).Trim();
-				var rsd = XDocument.Parse(rsdInfo);
+				XDocument? rsd = XDocument.Parse(rsdInfo);
 				if (rsd.Root is XElement root)
 				{
 					var ns = root.GetDefaultNamespace();

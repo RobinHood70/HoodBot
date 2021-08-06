@@ -48,7 +48,7 @@
 			}
 
 			// Because we're not returning a NodeCollection, the default factory does everything we need here.
-			var factory = new WikiNodeFactory();
+			WikiNodeFactory factory = new();
 			var nodes = factory.Parse(value);
 			foreach (var node in nodes)
 			{
@@ -126,7 +126,7 @@
 		public ILinkNode LinkNodeFromParts(string title, IEnumerable<string>? parameters)
 		{
 			var titleNodes = this.Parse(title.NotNull(nameof(title)));
-			var paramEntries = new List<IParameterNode>();
+			List<IParameterNode> paramEntries = new();
 			if (parameters != null)
 			{
 				foreach (var parameter in parameters)
@@ -209,7 +209,7 @@
 		/// <returns>A <see cref="NodeCollection"/> with the parsed text.</returns>
 		public NodeCollection Parse(string? text, InclusionType inclusionType, bool strictInclusion)
 		{
-			var stack = new WikiStack(this, text, inclusionType, strictInclusion);
+			WikiStack stack = new(this, text, inclusionType, strictInclusion);
 			return this.NodeCollectionFromNodes(stack.GetNodes());
 		}
 
@@ -247,7 +247,7 @@
 		public ITemplateNode TemplateNodeFromParts(string title, bool onePerLine, IEnumerable<string>? parameters)
 		{
 			title.ThrowNull(nameof(title));
-			var sb = new StringBuilder();
+			StringBuilder sb = new();
 			sb
 				.Append("{{")
 				.Append(title);
@@ -321,7 +321,7 @@
 		public ITemplateNode TemplateNodeFromParts(string title, bool onePerLine, IEnumerable<(string? Name, string Value)> parameters)
 		{
 			title.ThrowNull(nameof(title));
-			var sb = new StringBuilder();
+			StringBuilder sb = new();
 			sb
 				.Append("{{")
 				.Append(title);

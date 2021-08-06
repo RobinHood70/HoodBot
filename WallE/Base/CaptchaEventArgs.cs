@@ -43,7 +43,7 @@
 		{
 			if (sender != null && e != null && string.Equals(e.CaptchaData["type"], "simple", StringComparison.Ordinal))
 			{
-				var math = new Regex(@"(?<num1>\d+)(?<num2>[+-]\d+)", RegexOptions.None, Globals.DefaultRegexTimeout);
+				Regex math = new(@"(?<num1>\d+)(?<num2>[+-]\d+)", RegexOptions.None, Globals.DefaultRegexTimeout);
 				var nums = math.Match(e.CaptchaData["question"].Replace('−', '-'));
 				var solved = int.Parse(nums.Groups["num1"].Value, CultureInfo.InvariantCulture) + int.Parse(nums.Groups["num2"].Value, CultureInfo.InvariantCulture);
 

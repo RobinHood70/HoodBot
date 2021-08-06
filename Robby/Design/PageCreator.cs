@@ -29,7 +29,7 @@
 		public IList<IPropertyInput> GetPropertyInputs(PageLoadOptions options)
 		{
 			var whatToLoad = options.NotNull(nameof(options)).Modules;
-			var propertyInputs = new List<IPropertyInput>();
+			List<IPropertyInput> propertyInputs = new();
 			if ((whatToLoad & PageModules.Categories) != 0)
 			{
 				propertyInputs.Add(new CategoriesInput());
@@ -69,7 +69,7 @@
 
 			if ((whatToLoad & PageModules.Info) != 0)
 			{
-				var infoInput = new InfoInput() { Properties = InfoProperties.Url };
+				InfoInput infoInput = new() { Properties = InfoProperties.Url };
 				propertyInputs.Add(infoInput);
 				if (options.InfoGetProtection)
 				{
@@ -94,7 +94,7 @@
 
 			if ((whatToLoad & PageModules.Revisions) != 0)
 			{
-				var revs = new RevisionsInput()
+				RevisionsInput revs = new()
 				{
 					End = options.RevisionTo,
 					EndId = options.RevisionToId,

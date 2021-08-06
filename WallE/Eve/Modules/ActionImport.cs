@@ -50,7 +50,7 @@
 		protected override IReadOnlyList<ImportItem> DeserializeResult(JToken? result)
 		{
 			result.ThrowNull(nameof(result));
-			var output = new List<ImportItem>();
+			List<ImportItem> output = new();
 			foreach (var item in result)
 			{
 				output.Add(new ImportItem(

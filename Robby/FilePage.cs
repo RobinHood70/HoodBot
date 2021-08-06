@@ -37,7 +37,7 @@
 				var latest = DateTime.MinValue;
 				foreach (var imageInfoEntry in pageItem.ImageInfoEntries)
 				{
-					var fileRevision = new FileRevision(
+					FileRevision fileRevision = new(
 						bitDepth: imageInfoEntry.BitDepth,
 						size: imageInfoEntry.Size,
 						height: imageInfoEntry.Height,
@@ -108,7 +108,7 @@
 		/// <returns>A list of <see cref="Title"/>s that the file is used on.</returns>
 		public TitleCollection FileUsage(Filter filterRedirects, IEnumerable<int> namespaces)
 		{
-			var titles = new TitleCollection(this.Site);
+			TitleCollection titles = new(this.Site);
 			titles.GetFileUsage(new[] { this }, filterRedirects, namespaces);
 
 			return titles;
@@ -123,7 +123,7 @@
 		/// <returns>A collection of duplicate file titles.</returns>
 		public TitleCollection FindDuplicateFiles(bool localOnly)
 		{
-			var titles = new TitleCollection(this.Site);
+			TitleCollection titles = new(this.Site);
 			titles.GetDuplicateFiles(new[] { this }, localOnly);
 
 			return titles;

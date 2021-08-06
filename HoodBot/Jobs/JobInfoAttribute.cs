@@ -16,7 +16,7 @@
 		public JobInfoAttribute(string name, string? groupsText)
 		{
 			this.Name = name;
-			var groups = new List<string>();
+			List<string> groups = new();
 			if (!string.IsNullOrWhiteSpace(groupsText))
 			{
 				var groupSplit = groupsText.Split(TextArrays.Pipe);

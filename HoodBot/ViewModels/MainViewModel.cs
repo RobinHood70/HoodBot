@@ -300,11 +300,11 @@
 		private JobManager CreateJobManager(Site site, WikiInfoViewModel wikiInfo, CancellationToken cancellationToken)
 		{
 			// We pass wikiInfo here only because it's already validated as not null.
-			var pauseSource = new PauseTokenSource();
+			PauseTokenSource pauseSource = new();
 			this.pauser = pauseSource;
 			var pauseToken = pauseSource.Token;
 
-			var jobManager = new JobManager(site, pauseToken, cancellationToken)
+			JobManager jobManager = new(site, pauseToken, cancellationToken)
 			{
 				Logger = string.IsNullOrEmpty(wikiInfo.LogPage)
 					? null
@@ -389,7 +389,7 @@
 			this.executing = true;
 			this.parameterFetcher?.SetParameters();
 
-			var jobList = new List<JobInfo>();
+			List<JobInfo> jobList = new();
 			foreach (var node in this.JobTree.CheckedChildren<JobNode>())
 			{
 				jobList.Add(node.JobInfo);
@@ -401,13 +401,13 @@
 				return;
 			}
 
-			var allJobsTimer = new Stopwatch();
+			Stopwatch allJobsTimer = new();
 			allJobsTimer.Start();
 			this.ClearStatus();
 			this.completedJobs = 0;
 			this.OverallProgressMax = jobList.Count;
 
-			using var cancelSource = new CancellationTokenSource();
+			using CancellationTokenSource cancelSource = new();
 			this.canceller = cancelSource;
 			var cancellationToken = cancelSource.Token;
 
@@ -521,14 +521,14 @@
 		private void RunTest()
 		{
 			// Compare Books non-job for Jeancey.
-			var deleted = new List<string>();
-			var added = new List<string>();
-			var common = new List<string>();
+			List<string> deleted = new();
+			List<string> added = new();
+			List<string> common = new();
 
 			var fullNames29 = Directory.GetFiles(Books29Path);
 			var fullNames30 = Directory.GetFiles(Books30Path);
-			var dir29 = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-			var dir30 = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+			HashSet<string> dir29 = new(StringComparer.OrdinalIgnoreCase);
+			HashSet<string> dir30 = new(StringComparer.OrdinalIgnoreCase);
 			foreach (var book in fullNames29)
 			{
 				dir29.Add(Path.GetFileName(book));
@@ -598,7 +598,7 @@
 			{
 				var token = tokens.TokenManager.SessionToken("csrf");
 				var page = eventArgs.Page;
-				var diffContent = new DiffContent(page.FullPageName, page.Text ?? string.Empty, eventArgs.EditSummary, eventArgs.Minor)
+				DiffContent diffContent = new(page.FullPageName, page.Text ?? string.Empty, eventArgs.EditSummary, eventArgs.Minor)
 				{
 					EditPath = page.EditPath,
 					EditToken = token,

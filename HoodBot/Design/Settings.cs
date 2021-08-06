@@ -18,12 +18,12 @@
 		public static T Load<T>(bool mustExist)
 			where T : IJsonSettings<T>, new()
 		{
-			var settingsFile = new T();
+			T settingsFile = new();
 			try
 			{
 				using var file = File.OpenText(settingsFile.FileName);
-				using var reader = new JsonTextReader(file);
-				var json = JObject.Load(reader);
+				using JsonTextReader reader = new(file);
+				JObject? json = JObject.Load(reader);
 				while (reader.Read())
 				{
 					// Only needs to read until done (json is filled).
@@ -44,7 +44,7 @@
 		{
 			var json = settings.ToJson();
 			using var textWriter = File.CreateText(settings.FileName);
-			using var writer = new JsonTextWriter(textWriter)
+			using JsonTextWriter writer = new(textWriter)
 			{
 				Formatting = Formatting.Indented,
 				IndentChar = '\t',

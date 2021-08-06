@@ -55,7 +55,7 @@
 
 			this.StatusWriteLine("Fetching data");
 			var allSets = this.GetSetPages();
-			var titles = new TitleCollection(this.Site);
+			TitleCollection titles = new(this.Site);
 			foreach (var set in allSets)
 			{
 				if (set.Page is not null)
@@ -95,7 +95,7 @@
 		#region Private Static Methods
 		private static List<SetData> GetSetData()
 		{
-			var allSets = new List<SetData>();
+			List<SetData> allSets = new();
 			foreach (var row in Database.RunQuery(EsoGeneral.EsoLogConnectionString, Query))
 			{
 				allSets.Add(new SetData(row));
@@ -120,7 +120,7 @@
 
 		private void GenerateReport(List<SetData> allSets)
 		{
-			var sb = new StringBuilder();
+			StringBuilder sb = new();
 			foreach (var item in allSets)
 			{
 				if (item.Page is null)
@@ -158,14 +158,14 @@
 
 		private void MatchCategoryPages(List<SetData> allSets)
 		{
-			var catPages = new PageCollection(this.Site, new PageLoadOptions(PageModules.Info, true));
+			PageCollection catPages = new(this.Site, new PageLoadOptions(PageModules.Info, true));
 			catPages.GetCategoryMembers("Online-Sets", CategoryMemberTypes.Page, false);
 			this.UpdateSetPages(allSets, catPages);
 		}
 
 		private void MatchUnresolvedPages(List<SetData> allSets)
 		{
-			var titles = new TitleCollection(this.Site);
+			TitleCollection titles = new(this.Site);
 			foreach (var set in allSets)
 			{
 				if (set.Page is null)
@@ -187,9 +187,9 @@
 				return;
 			}
 
-			var removePages = new List<Page>();
-			var addTitles = new List<Title>();
-			var pages = new PageCollection(this.Site, new PageLoadOptions(PageModules.Info | PageModules.Links | PageModules.Properties, true));
+			List<Page> removePages = new();
+			List<Title> addTitles = new();
+			PageCollection pages = new(this.Site, new PageLoadOptions(PageModules.Info | PageModules.Links | PageModules.Properties, true));
 			pages.GetTitles(newTitles);
 			foreach (var page in pages)
 			{
@@ -221,7 +221,7 @@
 					pages.Remove(page);
 				}
 
-				var addPages = new PageCollection(this.Site, PageModules.Info);
+				PageCollection addPages = new(this.Site, PageModules.Info);
 				addPages.GetTitles(addTitles);
 				foreach (var page in addPages)
 				{
@@ -240,7 +240,7 @@
 				throw new InvalidOperationException();
 			}
 
-			var oldPage = new ContextualParser(page, InclusionType.Transcluded, false);
+			ContextualParser oldPage = new(page, InclusionType.Transcluded, false);
 			if (oldPage.Nodes.Count < 2 || !(
 					oldPage.Nodes[0] is IIgnoreNode firstNode &&
 					oldPage.Nodes[^1] is IIgnoreNode lastNode))
@@ -249,8 +249,8 @@
 				return;
 			}
 
-			var usedList = new TitleCollection(this.Site);
-			var sb = new StringBuilder();
+			TitleCollection usedList = new(this.Site);
+			StringBuilder sb = new();
 			sb.Append('\n');
 			foreach (var (itemCount, text) in setData.BonusDescriptions)
 			{
@@ -263,7 +263,7 @@
 			}
 
 			sb.Remove(sb.Length - 5, 4);
-			var newPage = new ContextualParser(page, sb.ToString());
+			ContextualParser newPage = new(page, sb.ToString());
 			EsoReplacer.ReplaceGlobal(newPage.Nodes);
 			EsoReplacer.ReplaceEsoLinks(this.Site, newPage.Nodes);
 			EsoReplacer.ReplaceFirstLink(newPage.Nodes, usedList);
@@ -272,7 +272,7 @@
 			newPage.Nodes.Insert(0, firstNode);
 			newPage.Nodes.Add(lastNode);
 
-			var replacer = new EsoReplacer(this.Site);
+			EsoReplacer replacer = new(this.Site);
 			var newLinks = replacer.CheckNewLinks(oldPage, newPage);
 			if (newLinks.Count > 0)
 			{
@@ -318,7 +318,7 @@
 				{
 					if (TitleOverrides.TryGetValue(set.Name, out var overrideName))
 					{
-						var checkTitle = TitleFactory.FromName(this.Site, UespNamespaces.Online, overrideName);
+						TitleFactory? checkTitle = TitleFactory.FromName(this.Site, UespNamespaces.Online, overrideName);
 						set.Page = setMembers.TryGetValue(checkTitle, out var foundPage)
 							? foundPage
 							: throw new InvalidOperationException($"TitleOverride for {set.Name} => {overrideName} doesn't match any known sets.");
@@ -327,7 +327,7 @@
 					{
 						foreach (var setName in set.AllNames)
 						{
-							var checkTitle = TitleFactory.FromName(this.Site, UespNamespaces.Online, setName);
+							TitleFactory? checkTitle = TitleFactory.FromName(this.Site, UespNamespaces.Online, setName);
 							if (setMembers.TryGetValue(checkTitle, out var foundPage) &&
 								foundPage.Exists)
 							{
@@ -412,7 +412,7 @@
 			#region Public Methods
 			public void BuildNewPage(ISimpleTitle title)
 			{
-				var sb = new StringBuilder();
+				StringBuilder sb = new();
 				sb
 					.Append("{{Trail|Sets}}{{Online Update}}{{Minimal}}\n")
 					.Append("'''").Append(this.Name).Append("''' is a {{huh}}-rank [[Online:Sets|item set]] found in {{huh}}.\n\n")

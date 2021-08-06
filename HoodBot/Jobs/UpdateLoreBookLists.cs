@@ -80,7 +80,7 @@
 			listBooks.GetCustomGenerator(new VariablesInput() { Variables = new[] { "listbook" } });
 			for (var i = listBooks.Count - 1; i >= 0; i--)
 			{
-				var varPage = (VariablesPage)listBooks[i];
+				VariablesPage? varPage = (VariablesPage)listBooks[i];
 				var value = varPage.GetVariable("listbook");
 				if (value != null && !ListBookValue(value))
 				{
@@ -114,7 +114,7 @@
 
 		private void GetPageBooks(PageCollection listBooks)
 		{
-			var loreBookTitles = new TitleCollection(this.Site);
+			TitleCollection loreBookTitles = new(this.Site);
 			foreach (var book in listBooks)
 			{
 				var label = SortableName(book.PageName);
@@ -139,7 +139,7 @@
 		{
 			foreach (var page in this.Pages)
 			{
-				var parser = new ContextualParser(page);
+				ContextualParser parser = new(page);
 				foreach (var template in parser.FindTemplates(TemplateName))
 				{
 					if (template.Find(2) is IParameterNode linkTitle)
@@ -154,14 +154,14 @@
 
 		private void LoreBookEntries_PageLoaded(object sender, Page page)
 		{
-			var parser = new ContextualParser(page);
+			ContextualParser parser = new(page);
 			var nodes = parser.Nodes;
 			var factory = nodes.Factory;
 			var first = nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
 			var last = nodes.FindLastIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
 			if (first != -1)
 			{
-				var newNodes = new List<IWikiNode>();
+				List<IWikiNode> newNodes = new();
 				nodes.RemoveRange(first, last + 1 - first);
 				var letter = page.PageName[6..];
 				var entries = this.pageBooks[letter];

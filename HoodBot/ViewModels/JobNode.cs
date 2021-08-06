@@ -21,9 +21,9 @@
 		public static TreeNode Populate()
 		{
 			const string rootName = "<Root>";
-			var groups = new Dictionary<string, TreeNode>(StringComparer.Ordinal);
+			Dictionary<string, TreeNode> groups = new(StringComparer.Ordinal);
 			var jobList = JobInfo.GetAllJobs();
-			var root = new TreeNode(null, rootName, new SortedSet<TreeNode>(TreeViewGroupedComparer.Instance));
+			TreeNode root = new(null, rootName, new SortedSet<TreeNode>(TreeViewGroupedComparer.Instance));
 			groups.Add(root.DisplayText, root);
 			foreach (var job in jobList)
 			{

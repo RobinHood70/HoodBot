@@ -30,8 +30,8 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ProtectInput input)
 		{
-			var protections = new List<string>();
-			var expiry = new List<string>();
+			List<string> protections = new();
+			List<string> expiry = new();
 			input.ThrowNull(nameof(input));
 			if (input.Protections != null)
 			{
@@ -60,7 +60,7 @@
 		protected override ProtectResult DeserializeResult(JToken? result)
 		{
 			result.ThrowNull(nameof(result));
-			var protections = new List<ProtectResultItem>();
+			List<ProtectResultItem> protections = new();
 			if (result["protections"] is JToken protectionsNode)
 			{
 				foreach (var protection in protectionsNode)

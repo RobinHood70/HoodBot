@@ -35,8 +35,8 @@
 		protected override void BeforeLogging()
 		{
 			var fileName = UespSite.GetBotDataFolder("QuestLanguageDatabase.txt");
-			var translation = new Dictionary<string, string>(StringComparer.Ordinal);
-			var langFile = new CsvFile();
+			Dictionary<string, string> translation = new(StringComparer.Ordinal);
+			CsvFile langFile = new();
 			langFile.ReadFile(fileName, true);
 			foreach (var entry in langFile)
 			{
@@ -45,10 +45,10 @@
 
 			fileName = UespSite.GetBotDataFolder("ItemPropertyList.txt");
 			var lines = File.ReadAllLines(fileName);
-			var codeLines = BladesCodeLine.Parse(lines);
+			BladesCodeLine? codeLines = BladesCodeLine.Parse(lines);
 
 			var entries = codeLines["_propertyList"]["size"];
-			var titles = new TitleCollection(this.Site);
+			TitleCollection titles = new(this.Site);
 			foreach (var entry in entries)
 			{
 				if (entry["_editorName"].Value is string pageName)
@@ -67,7 +67,7 @@
 				}
 			}
 
-			var pageLoadOptions = new PageLoadOptions(PageModules.Default, true);
+			PageLoadOptions pageLoadOptions = new(PageModules.Default, true);
 			var pages = titles.Load(pageLoadOptions);
 			pages.Sort();
 			foreach (var entry in entries)

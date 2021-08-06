@@ -46,7 +46,7 @@
 				return null;
 			}
 
-			var sb = new StringBuilder();
+			StringBuilder sb = new();
 			foreach (var name in input)
 			{
 				sb.Append('|');

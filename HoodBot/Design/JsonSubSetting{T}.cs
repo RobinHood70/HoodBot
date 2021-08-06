@@ -8,7 +8,7 @@
 	{
 		public static T FromJson(JToken json)
 		{
-			var subSetting = new T();
+			T subSetting = new();
 			subSetting.FromJson(json.NotNull(nameof(json)));
 
 			return subSetting;

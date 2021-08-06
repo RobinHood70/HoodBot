@@ -29,8 +29,8 @@
 		protected override void BeforeLogging()
 		{
 			this.GetDoubleRedirects();
-			var loopCheck = new HashSet<FullTitle>();
-			var fragments = new HashSet<string>(StringComparer.Ordinal);
+			HashSet<FullTitle> loopCheck = new();
+			HashSet<string> fragments = new(StringComparer.Ordinal);
 			foreach (var page in this.Pages)
 			{
 				if (this.lookup.TryGetValue(page, out var originalTarget))
@@ -71,7 +71,7 @@
 						continue;
 					}
 
-					var comboTarget = new FullTitle(target);
+					FullTitle comboTarget = new(target);
 					if (fragments.Count == 1)
 					{
 						comboTarget.Fragment = fragments.First();
@@ -110,7 +110,7 @@
 			var toLoad = this.GetNewTitles(this.Pages);
 			while (toLoad.Count > 0)
 			{
-				var tempPages = new PageCollection(this.Site);
+				PageCollection tempPages = new(this.Site);
 				tempPages.GetTitles(toLoad);
 				foreach (var page in tempPages)
 				{
@@ -126,17 +126,17 @@
 
 		private TitleCollection GetNewTitles(IReadOnlyCollection<ISimpleTitle> toLoad)
 		{
-			var retval = new TitleCollection(this.Site);
+			TitleCollection retval = new(this.Site);
 			foreach (var title in toLoad)
 			{
 				if (this.Pages.TryGetValue(title, out var page))
 				{
-					var parser = new ContextualParser(page);
+					ContextualParser parser = new(page);
 					if (parser.Nodes.Count > 0 && parser.Nodes[0] is ITextNode textNode && this.redirectWords.Contains(textNode.Text.TrimEnd(), StringComparer.OrdinalIgnoreCase))
 					{
 						if (parser.Nodes.Find<ILinkNode>() is ILinkNode targetNode)
 						{
-							var target = FullTitle.FromBacklinkNode(this.Site, targetNode);
+							FullTitle? target = FullTitle.FromBacklinkNode(this.Site, targetNode);
 							if (this.lookup.TryAdd(title, target))
 							{
 								this.parsedPages.Add(title, parser);

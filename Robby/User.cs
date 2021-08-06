@@ -67,7 +67,7 @@
 		/// <returns>A value indicating the change status of the block.</returns>
 		public ChangeStatus Block(string reason, BlockFlags flags, DateTime expiry, bool reblock)
 		{
-			var input = new BlockInput(this.Name)
+			BlockInput input = new(this.Name)
 			{
 				Expiry = expiry,
 				Flags = flags,
@@ -85,7 +85,7 @@
 		/// <returns>A value indicating the change status of the block.</returns>
 		public ChangeStatus Block(string reason, BlockFlags flags, string duration, bool reblock)
 		{
-			var input = new BlockInput(this.Name)
+			BlockInput input = new(this.Name)
 			{
 				ExpiryRelative = duration,
 				Flags = flags,
@@ -111,7 +111,7 @@
 			}
 
 			var disabledResult = string.Empty;
-			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
 				[nameof(subject)] = subject,
 				[nameof(body)] = body,
@@ -122,7 +122,7 @@
 
 			ChangeValue<string> ChangeFunc()
 			{
-				var input = new EmailUserInput(this.Name, body) { CCMe = ccMe, Subject = subject };
+				EmailUserInput input = new(this.Name, body) { CCMe = ccMe, Subject = subject };
 				var retval = this.Site.AbstractionLayer.EmailUser(input);
 				var result = string.Equals(retval.Result, "Success", StringComparison.OrdinalIgnoreCase)
 					? ChangeStatus.Success
@@ -142,9 +142,9 @@
 		/// <returns>A read-only list with the user's entire contribution history.</returns>
 		public IReadOnlyList<Contribution> GetContributions()
 		{
-			var input = new UserContributionsInput(this.Name);
+			UserContributionsInput input = new(this.Name);
 			var result = this.Site.AbstractionLayer.UserContributions(input);
-			var retval = new List<Contribution>();
+			List<Contribution> retval = new();
 			foreach (var item in result)
 			{
 				retval.Add(new Contribution(this.Site, item));
@@ -158,9 +158,9 @@
 		/// <returns>A read-only list with the user's contribution history in the specified namespaces.</returns>
 		public IReadOnlyList<Contribution> GetContributions(IEnumerable<int> namespaces)
 		{
-			var input = new UserContributionsInput(this.Name) { Namespaces = namespaces };
+			UserContributionsInput input = new(this.Name) { Namespaces = namespaces };
 			var result = this.Site.AbstractionLayer.UserContributions(input);
-			var retval = new List<Contribution>();
+			List<Contribution> retval = new();
 			foreach (var item in result)
 			{
 				retval.Add(new Contribution(this.Site, item));
@@ -175,9 +175,9 @@
 		/// <returns>A read-only list with the user's entire contribution history.</returns>
 		public IReadOnlyList<Contribution> GetContributions(DateTime? from, DateTime? to)
 		{
-			var input = new UserContributionsInput(this.Name) { Start = from, End = to, SortAscending = (from ?? DateTime.MinValue) < (to ?? DateTime.MaxValue) };
+			UserContributionsInput input = new(this.Name) { Start = from, End = to, SortAscending = (from ?? DateTime.MinValue) < (to ?? DateTime.MaxValue) };
 			var result = this.Site.AbstractionLayer.UserContributions(input);
-			var retval = new List<Contribution>();
+			List<Contribution> retval = new();
 			foreach (var item in result)
 			{
 				retval.Add(new Contribution(this.Site, item));
@@ -197,14 +197,14 @@
 		/// <returns>A read-only list of <see cref="Title"/>s in the user's watchlist.</returns>
 		public IReadOnlyList<ISimpleTitle> GetWatchlist(string token, IEnumerable<int>? namespaces)
 		{
-			var input = new WatchlistRawInput
+			WatchlistRawInput input = new()
 			{
 				Owner = this.Name,
 				Token = token,
 				Namespaces = namespaces
 			};
 			var result = this.Site.AbstractionLayer.WatchlistRaw(input);
-			var retval = new List<ISimpleTitle>();
+			List<ISimpleTitle> retval = new();
 			foreach (var item in result)
 			{
 				retval.Add(TitleFactory.FromApi(this.Site, item).ToTitle());
@@ -217,7 +217,7 @@
 		/// <remarks>The information loaded includes the following properties: BlockInfo, EditCount, Emailable, Gender, Groups, Registration, and Rights.</remarks>
 		public void LoadUserInfo()
 		{
-			var input = new UsersInput(new[] { this.Name })
+			UsersInput input = new(new[] { this.Name })
 			{
 				Properties = UsersProperties.All
 			};
@@ -248,7 +248,7 @@
 				msg += " ~~~~";
 			}
 
-			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
 				[nameof(header)] = header,
 				[nameof(msg)] = msg,
@@ -259,7 +259,7 @@
 
 			ChangeStatus ChangeFunc()
 			{
-				var input = new EditInput(talkPage.FullPageName(), msg)
+				EditInput input = new(talkPage.FullPageName(), msg)
 				{
 					Bot = true,
 					Minor = Tristate.False,
@@ -282,7 +282,7 @@
 		/// <returns>A value indicating the change status of the unblock.</returns>
 		public ChangeStatus Unblock(string reason)
 		{
-			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
 				[nameof(reason)] = reason
 			};
@@ -291,7 +291,7 @@
 
 			ChangeStatus ChangeFunc()
 			{
-				var input = new UnblockInput(this.Name) { Reason = reason };
+				UnblockInput input = new(this.Name) { Reason = reason };
 				var retval = this.Site.AbstractionLayer.Unblock(input);
 				return retval.Id == 0
 					? ChangeStatus.Failure
@@ -303,7 +303,7 @@
 		#region Private Methods
 		private ChangeStatus Block(BlockInput input)
 		{
-			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
 				[nameof(input.User)] = input.User,
 				[nameof(input.Reason)] = input.Reason,

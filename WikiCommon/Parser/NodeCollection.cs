@@ -67,7 +67,7 @@
 		/// <returns>A shallow copy of all nodes in the collection, along with the factory.</returns>
 		public NodeCollection Clone()
 		{
-			var nodes = new IWikiNode[this.Count];
+			IWikiNode[]? nodes = new IWikiNode[this.Count];
 			this.CopyTo(nodes);
 			return new NodeCollection(this.Factory, nodes);
 		}

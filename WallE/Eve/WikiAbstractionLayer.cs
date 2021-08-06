@@ -298,7 +298,7 @@
 		/// <param name="https">If set to <see langword="true" />, forces the URI to be a secure URI (https://); if false, forces it to be insecure (http://).</param>
 		public void MakeUriSecure(bool https)
 		{
-			var urib = new UriBuilder(this.EntryPoint)
+			UriBuilder urib = new(this.EntryPoint)
 			{
 				Scheme = https ? "https" : "http",
 			};
@@ -310,7 +310,7 @@
 		/// <remarks>This function is used internally, but also made available externally for special situations. The caller is responsible for deciding whether any given query is continuable.</remarks>
 		public void RunQuery(IEnumerable<IQueryModule> input)
 		{
-			var query = new ActionQuery(this, input);
+			ActionQuery query = new(this, input);
 			query.Submit();
 			this.DoStopCheck(query.UserInfo);
 		}
@@ -342,7 +342,7 @@
 		/// <returns>A list of <see cref="PageItem"/>s of the specified underlying type.</returns>
 		public PageSetResult<PageItem> RunPageSetQuery(QueryInput input, TitleCreator<PageItem> pageFactory)
 		{
-			var query = new ActionQueryPageSet(this, input.NotNull(nameof(input)), pageFactory.NotNull(nameof(pageFactory)));
+			ActionQueryPageSet query = new(this, input.NotNull(nameof(input)), pageFactory.NotNull(nameof(pageFactory)));
 			var retval = query.Submit();
 			this.DoStopCheck(query.UserInfo);
 
@@ -367,7 +367,7 @@
 					break;
 				default:
 					var query = RequestVisitorUrl.Build(request);
-					var urib = new UriBuilder(request.Uri) { Query = query };
+					UriBuilder urib = new(request.Uri) { Query = query };
 
 					// TODO: Re-implement the Get->Post conversion int the client's Get method.
 					response = urib.Uri.OriginalString.Length < this.MaximumGetLength
@@ -388,7 +388,7 @@
 		/// <param name="info">The informative text returned by the wiki.</param>
 		public void AddWarning(string code, string info)
 		{
-			var warning = new ErrorItem(code, info);
+			ErrorItem warning = new(code, info);
 			this.warnings.Add(warning);
 			this.OnWarningOccurred(new WarningEventArgs(warning));
 		}
@@ -407,11 +407,11 @@
 				* converting WatchItem's Title to a traditional ITitle value.
 			InterwikiMap is only required to emulate PageSet redirects' tointerwiki property for < 1.25.
 			*/
-			var eventArgs = new InitializingEventArgs(new SiteInfoInput(NeededSiteInfo));
+			InitializingEventArgs eventArgs = new(new SiteInfoInput(NeededSiteInfo));
 			this.OnInitializing(eventArgs);
 
 			// Create input from return values in eventArgs
-			var siteInfoInput = new SiteInfoInput(eventArgs.Properties)
+			SiteInfoInput siteInfoInput = new(eventArgs.Properties)
 			{
 				FilterLocalInterwiki = eventArgs.FilterLocalInterwiki,
 				InterwikiLanguageCode = eventArgs.InterwikiLanguageCode,
@@ -419,8 +419,8 @@
 				ShowNumberInGroup = eventArgs.ShowNumberInGroup,
 			};
 
-			var infoModule = new MetaSiteInfo(this, siteInfoInput);
-			var userModule = new MetaUserInfo(this, DefaultUserInformation);
+			MetaSiteInfo infoModule = new(this, siteInfoInput);
+			MetaUserInfo userModule = new(this, DefaultUserInformation);
 			this.RunQuery(infoModule, userModule);
 
 			if (userModule.Output is not UserInfoResult userInfo || infoModule.Output is not SiteInfoResult siteInfo || siteInfo.General == null || siteInfo.Namespaces == null)
@@ -576,14 +576,14 @@
 		public IReadOnlyList<BacklinksItem> Backlinks(BacklinksInput input)
 		{
 			input.ThrowNull(nameof(input));
-			var modules = new List<ListBacklinks>();
+			List<ListBacklinks> modules = new();
 			foreach (var type in input.LinkTypes.GetUniqueFlags())
 			{
 				modules.Add(new ListBacklinks(this, new BacklinksInput(input, type)));
 			}
 
 			this.RunQuery(modules);
-			var output = new HashSet<BacklinksItem>(new BacklinksOutputComparer());
+			HashSet<BacklinksItem> output = new(new BacklinksOutputComparer());
 			foreach (var module in modules)
 			{
 				if (module.Output != null)
@@ -651,7 +651,7 @@
 		/// <returns>Information about the account created.</returns>
 		public CreateAccountResult CreateAccount(CreateAccountInput input)
 		{
-			var create = new ActionCreateAccount(this);
+			ActionCreateAccount create = new(this);
 			var retval = create.Submit(input.NotNull(nameof(input)));
 			if (input.Token == null)
 			{
@@ -661,7 +661,7 @@
 
 			if (retval.CaptchaData.Count > 0)
 			{
-				var eventArgs = new CaptchaEventArgs(retval.CaptchaData, input.CaptchaSolution);
+				CaptchaEventArgs eventArgs = new(retval.CaptchaData, input.CaptchaSolution);
 				this.OnCaptchaChallenge(eventArgs);
 				if (eventArgs.CaptchaSolution.Count > 0)
 				{
@@ -694,7 +694,7 @@
 		/// <remarks>This is not part of the API, but since Upload is, it makes sense to provide its counterpart so the end-user is not left accessing Client directly. No stop checks are performed when using this method, since this could be downloading from anywhere.</remarks>
 		public void Download(DownloadInput input)
 		{
-			var uri = new Uri(input.NotNull(nameof(input)).Resource);
+			Uri uri = new(input.NotNull(nameof(input)).Resource);
 			this.Client.DownloadFile(uri, input.FileName);
 		}
 
@@ -704,11 +704,11 @@
 		public EditResult Edit(EditInput input)
 		{
 			input.NotNull(nameof(input)).Token ??= this.GetSessionToken(TokensInput.Csrf);
-			var edit = new ActionEdit(this);
+			ActionEdit edit = new(this);
 			var retval = edit.Submit(input);
 			if (retval.CaptchaData.Count > 0)
 			{
-				var eventArgs = new CaptchaEventArgs(retval.CaptchaData, input.CaptchaSolution);
+				CaptchaEventArgs eventArgs = new(retval.CaptchaData, input.CaptchaSolution);
 				this.OnCaptchaChallenge(eventArgs);
 				if (eventArgs.CaptchaSolution.Count > 0)
 				{
@@ -925,7 +925,7 @@
 		{
 			if (this.CurrentUserInfo is UserInfoResult userInfo && (userInfo.Flags & UserInfoFlags.Anonymous) == 0)
 			{
-				var input = new LogoutInput();
+				LogoutInput input = new();
 				if (this.SiteVersion >= 134)
 				{
 					input.Token = this.GetSessionToken(TokensInput.Csrf);
@@ -994,11 +994,11 @@
 			// Set input Token, even though it's not used directly, so this behaves like other routines.
 			input.ThrowNull(nameof(input));
 			input.Token ??= this.GetSessionToken(TokensInput.Csrf);
-			var change = new List<string>();
-			var internalInput = new OptionsInputInternal(input.Token, change);
+			List<string> change = new();
+			OptionsInputInternal internalInput = new(input.Token, change);
 			if (input.Change != null)
 			{
-				var singleItems = new Dictionary<string, string?>(StringComparer.Ordinal);
+				Dictionary<string, string?> singleItems = new(StringComparer.Ordinal);
 				string? lastKey = null;
 				foreach (var changeItem in input.Change)
 				{
@@ -1021,7 +1021,7 @@
 					singleItems.Remove(lastKey);
 					foreach (var value in singleItems)
 					{
-						var singleInput = new OptionsInputInternal(input.Token, value.Key, value.Value);
+						OptionsInputInternal singleInput = new(input.Token, value.Key, value.Value);
 						this.SubmitValueAction(new ActionOptions(this), singleInput);
 					}
 				}
@@ -1090,7 +1090,7 @@
 		/// <returns>A list of pages titles and, when available, the related value. Other fields will be returned as a set of name-value pairs in the <see cref="QueryPageItem.DatabaseResult" /> dictionary.</returns>
 		public QueryPageResult QueryPage(QueryPageInput input)
 		{
-			var module = new ListQueryPage(this, input);
+			ListQueryPage module = new(this, input);
 			this.RunQuery(module);
 
 			return module.AsQueryPageResult();
@@ -1149,7 +1149,7 @@
 		/// <seealso cref="PrefixSearch" />
 		public SearchResult Search(SearchInput input)
 		{
-			var module = new ListSearch(this, input);
+			ListSearch module = new(this, input);
 			this.RunQuery(module);
 
 			return module.AsSearchResult();
@@ -1220,7 +1220,7 @@
 				return this.UploadFileChunked(input);
 			}
 
-			var uploadInput = new UploadInputInternal(input);
+			UploadInputInternal uploadInput = new(input);
 			return this.SubmitValueAction(new ActionUpload(this), uploadInput);
 		}
 
@@ -1275,12 +1275,12 @@
 			}
 
 			// Watch each page individually, then merge the individual result into a constructed PageSetResult.
-			var list = new List<WatchItem>();
+			List<WatchItem> list = new();
 			if (input.Values != null)
 			{
 				foreach (var title in input.Values)
 				{
-					var newInput = new WatchInput(new[] { title }) { Token = input.Token, Unwatch = input.Unwatch };
+					WatchInput newInput = new(new[] { title }) { Token = input.Token, Unwatch = input.Unwatch };
 					var result = this.SubmitPageSet(new ActionWatch(this), newInput);
 					foreach (var item in result)
 					{
@@ -1434,7 +1434,7 @@
 
 		private UploadResult UploadFileChunked(UploadInput input)
 		{
-			var uploadInput = new UploadInputInternal(input);
+			UploadInputInternal uploadInput = new(input);
 			UploadResult result;
 			do
 			{

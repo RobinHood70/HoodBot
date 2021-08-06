@@ -46,7 +46,7 @@
 
 				if (defaultValue.Count > 1)
 				{
-					var remaining = new List<IParameterNode>();
+					List<IParameterNode> remaining = new();
 					for (var i = 1; i < defaultValue.Count; i++)
 					{
 						remaining.Add(defaultValue[i]);

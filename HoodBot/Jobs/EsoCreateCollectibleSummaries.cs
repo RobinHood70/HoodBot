@@ -86,10 +86,10 @@
 			this.sourcePages.GetNamespace(UespNamespaces.Online, Filter.Exclude, CollectibleTypePrefix);
 			this.sourcePages.PageLoaded -= AddHeaderLinks;
 
-			var titles = new TitleCollection(this.Site);
+			TitleCollection titles = new(this.Site);
 			foreach (var page in this.sourcePages)
 			{
-				var parsedPage = new ContextualParser(page);
+				ContextualParser parsedPage = new(page);
 				foreach (var headerNode in parsedPage.HeaderNodes)
 				{
 					if (headerNode.Level == 3 &&
@@ -118,7 +118,7 @@
 		#region Private Methods
 		private static void AddHeaderLinks(object sender, Page page)
 		{
-			var parsedPage = new ContextualParser(page);
+			ContextualParser parsedPage = new(page);
 			var factory = parsedPage.Nodes.Factory;
 			foreach (var headerNode in parsedPage.HeaderNodes)
 			{

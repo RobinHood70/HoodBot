@@ -32,12 +32,12 @@
 		protected override void Main()
 		{
 			this.LoadExceptionsForNamespace();
-			var pages = new PageCollection(this.Site);
+			PageCollection pages = new(this.Site);
 			pages.GetNamespace(this.ns, Filter.Exclude);
 			pages.Sort();
 			foreach (var page in pages)
 			{
-				var parsedPage = new ContextualParser(page);
+				ContextualParser parsedPage = new(page);
 				foreach (var node in parsedPage.HeaderNodes)
 				{
 					var header = node.GetInnerText(true);

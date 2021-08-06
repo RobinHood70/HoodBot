@@ -106,7 +106,7 @@
 				return null;
 			}
 
-			var item = new WatchlistItem(
+			WatchlistItem item = new(
 				watchlistType: result.MustHaveString("type"),
 				ns: (int?)result["ns"],
 				title: (string?)result["title"],

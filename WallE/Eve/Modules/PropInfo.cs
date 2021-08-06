@@ -76,7 +76,7 @@
 				counter = (long)counterNode;
 			}
 
-			var tokens = new Dictionary<string, string>(StringComparer.Ordinal);
+			Dictionary<string, string> tokens = new(StringComparer.Ordinal);
 			foreach (var token in parent.Children<JProperty>())
 			{
 				if (token.Name.EndsWith("token", StringComparison.Ordinal))
@@ -86,7 +86,7 @@
 			}
 
 			// Protection can apply even when there's no page
-			var protections = new List<ProtectionsItem>();
+			List<ProtectionsItem> protections = new();
 			if (parent["protection"] is JToken protectionNode)
 			{
 				foreach (var result in protectionNode)
@@ -101,7 +101,7 @@
 			}
 
 			// Ensure that all inputs have an output so we get consistent results between JSON1 and JSON2. To cover the corner case where some extension gives unexpected outputs that don't match the input actions, or multiple outputs for a single input, I've initialized the dictionary from the input actions, then updated from there. It is assumed that the programmer will be aware of what they're looking for should these cases ever occur, and will not be bothered by extraneous false values beyond the original input actions.
-			var testActions = new Dictionary<string, bool>(this.baseActions, StringComparer.Ordinal);
+			Dictionary<string, bool> testActions = new(this.baseActions, StringComparer.Ordinal);
 			if (parent["actions"] is JToken testActionsNode)
 			{
 				foreach (var prop in testActionsNode.Children<JProperty>())

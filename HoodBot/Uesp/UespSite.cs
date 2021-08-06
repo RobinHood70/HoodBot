@@ -65,7 +65,7 @@
 
 		protected override IReadOnlyCollection<ISimpleTitle> LoadDiscussionPages()
 		{
-			var titles = new TitleCollection(this);
+			TitleCollection titles = new(this);
 			titles.GetCategoryMembers("Message Boards");
 			return titles;
 		}
@@ -92,7 +92,7 @@
 				this.ClearMessage(force: true);
 			}
 
-			var resultPage = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.User, this.User.PageName + "/Results");
+			TitleFactory? resultPage = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.User, this.User.PageName + "/Results");
 			this.FilterPages.Add(resultPage);
 
 			this.LogTitle = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.User, this.User.PageName + "/Log").ToTitle();

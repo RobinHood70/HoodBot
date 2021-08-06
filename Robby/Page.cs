@@ -61,7 +61,7 @@
 
 			void PopulateBacklinks(PageItem pageItem)
 			{
-				var backlinks = (Dictionary<Title, BacklinksTypes>)this.Backlinks;
+				Dictionary<Title, BacklinksTypes>? backlinks = (Dictionary<Title, BacklinksTypes>)this.Backlinks;
 				backlinks.Clear();
 				PopulateBacklinksType(backlinks, pageItem.FileUsages, BacklinksTypes.ImageUsage);
 				PopulateBacklinksType(backlinks, pageItem.LinksHere, BacklinksTypes.Backlinks);
@@ -72,7 +72,7 @@
 			{
 				foreach (var link in list)
 				{
-					var title = TitleFactory.FromApi(this.Site, link).ToTitle();
+					Title? title = TitleFactory.FromApi(this.Site, link).ToTitle();
 					if (backlinks.ContainsKey(title))
 					{
 						backlinks[title] |= type;
@@ -86,18 +86,18 @@
 
 			void PopulateCategories(PageItem pageItem)
 			{
-				var categories = (List<Category>)this.Categories;
+				List<Category>? categories = (List<Category>)this.Categories;
 				categories.Clear();
 				foreach (var category in pageItem.Categories)
 				{
-					var factory = TitleFactory.FromName(this.Site, category.FullPageName);
+					TitleFactory? factory = TitleFactory.FromName(this.Site, category.FullPageName);
 					categories.Add(new Category(factory, category.SortKey, category.Hidden));
 				}
 			}
 
 			void PopulateInfo(PageItem pageItem)
 			{
-				var protections = (Dictionary<string, ProtectionEntry>)this.Protections;
+				Dictionary<string, ProtectionEntry>? protections = (Dictionary<string, ProtectionEntry>)this.Protections;
 				if (pageItem.Info is PageInfo info)
 				{
 					this.canonicalPath = info.CanonicalUrl;
@@ -127,7 +127,7 @@
 
 			void PopulateLinks(PageItem pageItem)
 			{
-				var links = (List<Title>)this.Links;
+				List<Title>? links = (List<Title>)this.Links;
 				links.Clear();
 				foreach (var link in pageItem.Links)
 				{
@@ -137,7 +137,7 @@
 
 			void PopulateProperties(PageItem pageItem)
 			{
-				var properties = (Dictionary<string, string>)this.Properties;
+				Dictionary<string, string>? properties = (Dictionary<string, string>)this.Properties;
 				properties.Clear();
 				if (pageItem.Properties?.Count > 0)
 				{
@@ -148,7 +148,7 @@
 
 			void PopulateRevisions(PageItem pageItem)
 			{
-				var revs = (List<Revision>)this.Revisions;
+				List<Revision>? revs = (List<Revision>)this.Revisions;
 				revs.Clear();
 				this.currentRevision = null;
 				foreach (var rev in pageItem.Revisions)
@@ -159,7 +159,7 @@
 
 			void PopulateTemplates(PageItem pageItem)
 			{
-				var templates = (List<Title>)this.Templates;
+				List<Title>? templates = (List<Title>)this.Templates;
 				templates.Clear();
 				foreach (var link in pageItem.Templates)
 				{
@@ -232,7 +232,7 @@
 					return null;
 				}
 
-				var templates = new HashSet<ISimpleTitle>(this.Templates);
+				HashSet<ISimpleTitle> templates = new(this.Templates);
 				templates.IntersectWith(this.Site.DisambiguationTemplates);
 
 				return templates.Count > 0;
@@ -341,7 +341,7 @@
 				return ChangeStatus.NoEffect;
 			}
 
-			var changeArgs = new PageTextChangeArgs(this, nameof(this.Save), editSummary, isMinor, isBotEdit, recreateIfJustDeleted);
+			PageTextChangeArgs changeArgs = new(this, nameof(this.Save), editSummary, isMinor, isBotEdit, recreateIfJustDeleted);
 
 			return this.Site.PublishPageTextChange(changeArgs, ChangeFunc);
 
@@ -353,7 +353,7 @@
 					return ChangeStatus.NoEffect;
 				}
 
-				var input = new EditInput(this.FullPageName, this.Text)
+				EditInput input = new(this.FullPageName, this.Text)
 				{
 					BaseTimestamp = this.CurrentRevision?.Timestamp,
 					StartTimestamp = this.StartTimestamp,

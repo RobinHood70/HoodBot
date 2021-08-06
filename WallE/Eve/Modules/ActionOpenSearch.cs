@@ -54,7 +54,7 @@
 
 				if (array.Count == 4 && array[1] is JArray titles && array[2] is JArray descriptions && array[3] is JArray urls)
 				{
-					var output = new List<OpenSearchItem>(titles.Count);
+					List<OpenSearchItem> output = new(titles.Count);
 					for (var i = 0; i < titles.Count; i++)
 					{
 						output.Add(new OpenSearchItem(

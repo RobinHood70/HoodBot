@@ -288,7 +288,7 @@
 		/// <param name="fileName">Name of the file.</param>
 		public void DownloadFile(string pageName, string fileName)
 		{
-			var fileTitle = new TitleCollection(this, MediaWikiNamespaces.File, pageName);
+			TitleCollection fileTitle = new(this, MediaWikiNamespaces.File, pageName);
 			var filePages = fileTitle.Load(PageModules.FileInfo);
 			if (filePages.Count == 1 && filePages[0] is FilePage filePage)
 			{
@@ -396,7 +396,7 @@
 		/// <returns>The text of the page.</returns>
 		public string? LoadPageText(ISimpleTitle title)
 		{
-			var pages = PageCollection.Unlimited(this);
+			PageCollection? pages = PageCollection.Unlimited(this);
 			pages.GetTitles(title.NotNull(nameof(title)));
 			return pages.Count == 1 ? pages[0].Text : null;
 		}
@@ -418,7 +418,7 @@
 				titleName += subPageName;
 			}
 
-			var newTitle = TitleFactory.Direct(title.Namespace, titleName);
+			TitleFactory? newTitle = TitleFactory.Direct(title.Namespace, titleName);
 			return this.LoadPageText(newTitle);
 		}
 
@@ -602,7 +602,7 @@
 		/// <returns>A value indicating the change status of the patrol.</returns>
 		public ChangeStatus Patrol(long rcid)
 		{
-			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
 				[nameof(rcid)] = rcid,
 			};
@@ -624,7 +624,7 @@
 		/// <returns>A value indicating the change status of the patrol.</returns>
 		public ChangeStatus PatrolRevision(long revid)
 		{
-			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
 				[nameof(revid)] = revid,
 			};
@@ -680,7 +680,7 @@
 				destinationName = checkedName;
 			}
 
-			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
 				[nameof(fileName)] = fileName,
 				[nameof(destinationName)] = destinationName,
@@ -692,8 +692,8 @@
 
 			ChangeStatus ChangeFunc()
 			{
-				using var upload = new FileStream(checkedName, FileMode.Open);
-				var uploadInput = new UploadInput(destinationName!, upload)
+				using FileStream upload = new(checkedName, FileMode.Open);
+				UploadInput uploadInput = new(destinationName!, upload)
 				{
 					IgnoreWarnings = true,
 					Comment = editSummary,
@@ -721,8 +721,8 @@
 		/// <returns>A collection of pages that were (un)watched.</returns>
 		public ChangeValue<PageCollection> Watch(int ns, bool unwatch)
 		{
-			var disabledResult = PageCollection.UnlimitedDefault(this);
-			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			PageCollection? disabledResult = PageCollection.UnlimitedDefault(this);
+			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
 				[nameof(ns)] = ns,
 			};
@@ -731,8 +731,8 @@
 
 			ChangeValue<PageCollection> ChangeFunc()
 			{
-				var generator = new AllPagesInput() { Namespace = ns };
-				var input = new WatchInput(generator) { Unwatch = unwatch };
+				AllPagesInput generator = new() { Namespace = ns };
+				WatchInput input = new(generator) { Unwatch = unwatch };
 				var pages = this.Watch(input);
 				var result = pages.Count == 0
 					? ChangeStatus.NoEffect
@@ -765,7 +765,7 @@
 		/// <returns><see cref="ChangeStatus.Success"/> if the account was successfully created; otherwise, <see cref="ChangeStatus.Failure"/>.</returns>
 		public virtual ChangeStatus CreateAccount(string name, string password, string email)
 		{
-			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
 				[nameof(name)] = name,
 				[nameof(password)] = password,
@@ -776,7 +776,7 @@
 
 			ChangeStatus ChangeFunc()
 			{
-				var input = new CreateAccountInput(name, password) { Email = email };
+				CreateAccountInput input = new(name, password) { Email = email };
 				var retval = this.AbstractionLayer.CreateAccount(input);
 				return string.Equals(retval.Result, "Success", StringComparison.OrdinalIgnoreCase)
 					? ChangeStatus.Success
@@ -819,7 +819,7 @@
 		{
 			text.ThrowNull(nameof(text));
 			var redirectAliases = this.MagicWords.TryGetValue("redirect", out var redirect) ? redirect.Aliases : DefaultRedirect;
-			var redirects = new HashSet<string>(redirectAliases, StringComparer.Ordinal);
+			HashSet<string> redirects = new(redirectAliases, StringComparer.Ordinal);
 			var nodes = new SiteNodeFactory(this).Parse(text);
 
 			// Is the text of the format TextNode, LinkNode?
@@ -883,7 +883,7 @@
 			to.ThrowNull(nameof(to));
 			reason.ThrowNull(nameof(reason));
 			const string subPageName = "/SubPage";
-			var disabledResult = new Dictionary<string, string>(StringComparer.Ordinal);
+			Dictionary<string, string> disabledResult = new(StringComparer.Ordinal);
 			if (!this.EditingEnabled)
 			{
 				disabledResult.Add(from.FullPageName(), to.FullPageName());
@@ -896,12 +896,12 @@
 
 				if (moveSubpages && from.Namespace.AllowsSubpages)
 				{
-					var toSubPage = TitleFactory.FromName(this, to + subPageName).ToTitle();
+					Title? toSubPage = TitleFactory.FromName(this, to + subPageName).ToTitle();
 					disabledResult.Add(from.FullPageName() + subPageName, toSubPage.FullPageName);
 				}
 			}
 
-			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
 				[nameof(to)] = to,
 				[nameof(reason)] = reason,
@@ -914,7 +914,7 @@
 
 			ChangeValue<IDictionary<string, string>> ChangeFunc()
 			{
-				var input = new MoveInput(from.FullPageName(), to.FullPageName())
+				MoveInput input = new(from.FullPageName(), to.FullPageName())
 				{
 					IgnoreWarnings = true,
 					MoveSubpages = moveSubpages,
@@ -924,7 +924,7 @@
 				};
 
 				var status = ChangeStatus.Success;
-				var dict = new Dictionary<string, string>(StringComparer.Ordinal);
+				Dictionary<string, string> dict = new(StringComparer.Ordinal);
 				try
 				{
 					var retval = this.AbstractionLayer.Move(input);
@@ -963,7 +963,7 @@
 		public virtual ChangeStatus PublishChange(object sender, IReadOnlyDictionary<string, object?> parameters, Func<ChangeStatus> changeFunction, [CallerMemberName] string caller = "")
 		{
 			changeFunction.ThrowNull(nameof(changeFunction));
-			var changeArgs = new ChangeArgs(sender, caller, parameters);
+			ChangeArgs changeArgs = new(sender, caller, parameters);
 			this.Changing?.Invoke(this, changeArgs);
 			return
 				changeArgs.CancelChange ? ChangeStatus.Cancelled :
@@ -985,7 +985,7 @@
 		{
 			// Note: disabledResult comes first in this call instead of last to prevent ambiguous calls when T is a string (i.e., same type as caller parameter).
 			changeFunction.ThrowNull(nameof(changeFunction));
-			var changeArgs = new ChangeArgs(sender, caller, parameters);
+			ChangeArgs changeArgs = new(sender, caller, parameters);
 			this.Changing?.Invoke(this, changeArgs);
 			return
 				changeArgs.CancelChange ? new ChangeValue<T>(ChangeStatus.Cancelled, default) :
@@ -1041,7 +1041,7 @@
 		{
 			input.NotNull(nameof(input)).Properties = BlocksProperties.User | BlocksProperties.By | BlocksProperties.Timestamp | BlocksProperties.Expiry | BlocksProperties.Reason | BlocksProperties.Flags;
 			var result = this.AbstractionLayer.Blocks(input);
-			var retval = new List<Block>(result.Count);
+			List<Block> retval = new(result.Count);
 			foreach (var item in result)
 			{
 				var user = item.User == null ? null : new User(this, item.User);
@@ -1069,7 +1069,7 @@
 			if (this.disambiguationTemplates == null)
 			{
 				this.disambiguationTemplates = new HashSet<ISimpleTitle>();
-				var title = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.MediaWiki, "Disambiguationspage").ToTitle();
+				Title? title = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.MediaWiki, "Disambiguationspage").ToTitle();
 				var page = title.Load(PageModules.Default | PageModules.Links, false);
 				if (page.Exists)
 				{
@@ -1098,10 +1098,10 @@
 		protected virtual IReadOnlyDictionary<string, MessagePage> LoadMessages(AllMessagesInput input)
 		{
 			var result = this.AbstractionLayer.AllMessages(input);
-			var retval = new Dictionary<string, MessagePage>(result.Count, StringComparer.Ordinal);
+			Dictionary<string, MessagePage> retval = new(result.Count, StringComparer.Ordinal);
 			foreach (var item in result)
 			{
-				var factory = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.MediaWiki, item.Name);
+				TitleFactory? factory = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.MediaWiki, item.Name);
 				retval.Add(item.Name, new MessagePage(factory, item));
 			}
 
@@ -1114,7 +1114,7 @@
 		protected virtual IReadOnlyList<RecentChange> LoadRecentChanges(RecentChangesInput input)
 		{
 			var result = this.AbstractionLayer.RecentChanges(input);
-			var retval = new List<RecentChange>(result.Count);
+			List<RecentChange> retval = new(result.Count);
 			foreach (var item in result)
 			{
 				retval.Add(new RecentChange(this, item));
@@ -1129,7 +1129,7 @@
 		protected virtual IReadOnlyList<User> LoadUserInformation(UsersInput input)
 		{
 			var result = this.AbstractionLayer.Users(input);
-			var retval = new List<User>(result.Count);
+			List<User> retval = new(result.Count);
 			foreach (var item in result)
 			{
 				retval.Add(new User(TitleFactory.DirectNormalized(this, MediaWikiNamespaces.User, item.Name), item));
@@ -1145,7 +1145,7 @@
 		{
 			input.NotNull(nameof(input)).Properties = AllUsersProperties.None;
 			var result = this.AbstractionLayer.AllUsers(input);
-			var retval = new List<User>(result.Count);
+			List<User> retval = new(result.Count);
 			foreach (var item in result)
 			{
 				retval.Add(new User(this, item));
@@ -1223,10 +1223,10 @@
 				}
 			}
 
-			var interwikiList = new List<InterwikiEntry>();
+			List<InterwikiEntry> interwikiList = new();
 			foreach (var item in siteInfo.InterwikiMap)
 			{
-				var entry = new InterwikiEntry(this, item);
+				InterwikiEntry entry = new(this, item);
 				if (doGuess && server != null)
 				{
 					entry.GuessLocalWikiFromServer(server);

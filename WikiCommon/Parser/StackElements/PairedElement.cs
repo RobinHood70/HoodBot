@@ -35,7 +35,7 @@
 		#region Protected Methods
 		protected List<IWikiNode> BreakSyntax(int matchingCount)
 		{
-			var newPiece = new Piece { this.Stack.NodeFactory.TextNode(new string(this.open, matchingCount)) };
+			Piece newPiece = new() { this.Stack.NodeFactory.TextNode(new string(this.open, matchingCount)) };
 			var oldPiece = this.NameValuePieces[0];
 			newPiece.Merge(oldPiece);
 			var pieceCount = this.NameValuePieces.Count;
@@ -59,7 +59,7 @@
 				return count;
 			}
 
-			var parameters = new List<IParameterNode>();
+			List<IParameterNode> parameters = new();
 			var pieceCount = this.NameValuePieces.Count;
 			var matchingCount = (found == ']' || count == 2) ? 2 : 3;
 			var factory = this.Stack.NodeFactory;

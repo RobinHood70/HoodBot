@@ -8,7 +8,7 @@
 	{
 		public static PageCollection CreateMetaPageCollection(this Site site, PageModules pageModules, bool followRedirects, params string[] variables)
 		{
-			var pageLoadOptions = new PageLoadOptions(pageModules | PageModules.Custom, followRedirects)
+			PageLoadOptions pageLoadOptions = new(pageModules | PageModules.Custom, followRedirects)
 			{
 				PageCreator = new MetaTemplateCreator(site.DefaultLoadOptions.PageCreator, variables)
 			};

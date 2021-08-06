@@ -40,7 +40,7 @@
 
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
-			var powerCount = new SortedDictionary<int, int>();
+			SortedDictionary<int, int> powerCount = new();
 			if (parsedPage.NotNull(nameof(parsedPage)).FindTemplate("Legends Deck Summary") is not SiteTemplateNode deckSummary)
 			{
 				throw new InvalidOperationException();
@@ -49,7 +49,7 @@
 			foreach (var template in parsedPage.FindTemplates("Decklist"))
 			{
 				// The following lines set up the structure to handle skipNotes and skipQuantity, even though these are not currently used on any affected pages.
-				var specialParams = new List<IParameterNode>(template.FindAll("skipQuantity", "skipNotes"));
+				List<IParameterNode> specialParams = new(template.FindAll("skipQuantity", "skipNotes"));
 				var paramCount = 3 - specialParams.Count;
 				foreach (var cluster in template.ParameterCluster(paramCount))
 				{
@@ -67,7 +67,7 @@
 				}
 			}
 
-			var factory = new SiteNodeFactory(this.Site);
+			SiteNodeFactory factory = new(this.Site);
 			foreach (var entry in powerCount)
 			{
 				var paramName = "m" + entry.Key.ToString(CultureInfo.InvariantCulture);

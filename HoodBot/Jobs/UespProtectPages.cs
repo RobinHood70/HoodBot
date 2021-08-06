@@ -151,7 +151,7 @@
 			: base(jobManager)
 		{
 			this.Pages.SetLimitations(LimitationType.None);
-			var talkSpaces = new List<int>();
+			List<int> talkSpaces = new();
 			foreach (var ns in this.Site.Namespaces)
 			{
 				if (ns.Id == MediaWikiNamespaces.Project || (ns.IsTalkSpace && ns.Id != MediaWikiNamespaces.UserTalk))
@@ -251,7 +251,7 @@
 		private static void AddFooter(ContextualParser parser, PageProtection protection)
 		{
 			var footer = protection.Footer;
-			var footerTemplate = (SiteTemplateNode)parser.Nodes.Factory.TemplateNodeFromWikiText(footer);
+			SiteTemplateNode? footerTemplate = (SiteTemplateNode)parser.Nodes.Factory.TemplateNodeFromWikiText(footer);
 			if (parser.FindTemplate(footerTemplate.TitleValue.PageName) is SiteTemplateNode existing)
 			{
 				existing.Title.Clear();
@@ -275,11 +275,11 @@
 				header = header.Replace("<date>", replaceDate, StringComparison.Ordinal);
 			}
 
-			var headerTemplate = (SiteTemplateNode)nodes.Factory.TemplateNodeFromWikiText(header);
+			SiteTemplateNode? headerTemplate = (SiteTemplateNode)nodes.Factory.TemplateNodeFromWikiText(header);
 			var index = nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue.SimpleEquals(headerTemplate.TitleValue));
 			if (index != -1)
 			{
-				var existing = (SiteTemplateNode)nodes[index];
+				SiteTemplateNode? existing = (SiteTemplateNode)nodes[index];
 				existing.Title.Clear();
 				existing.Title.AddRange(headerTemplate.Title);
 				nodes.RemoveAt(index);
@@ -288,11 +288,11 @@
 					insertPos--;
 				}
 
-				var title = new Title(parser.Context);
+				Title title = new(parser.Context);
 				index = existing.FindIndex("source");
 				if (index != -1)
 				{
-					var sourceTitle = TitleFactory.FromName(parser.Site, existing.Parameters[index].Value.ToValue());
+					TitleFactory? sourceTitle = TitleFactory.FromName(parser.Site, existing.Parameters[index].Value.ToValue());
 					if (sourceTitle.Namespace == title.Namespace && sourceTitle.PageName.Equals(title.BasePageName, StringComparison.Ordinal))
 					{
 						existing.Parameters.RemoveAt(index);
@@ -421,7 +421,7 @@
 			var currentPos = parser.Nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(ProtectionTemplateName));
 			if (currentPos != -1)
 			{
-				var existing = (SiteTemplateNode)parser.Nodes[currentPos];
+				SiteTemplateNode? existing = (SiteTemplateNode)parser.Nodes[currentPos];
 				existing.Title.Clear();
 				existing.Title.AddText(ProtectionTemplateName);
 				existing.Remove("edit");
@@ -443,7 +443,7 @@
 		private static void UpdatePage(Page page, PageProtection protection)
 		{
 			var insertPos = 0;
-			var parser = new ContextualParser(page);
+			ContextualParser parser = new(page);
 			var nodes = parser.Nodes;
 
 			// Figure out where to put a new Protection tempalte: for redirects, immediately after the link with no noincludes added; for pages with noincludes, inside the noinclude if it's early in the page. For anything else, add noincludes if needed, then insert inside the noinclude.
@@ -535,13 +535,13 @@
 
 		private TitleCollection LoadPageNames(ICollection<int> spacesToLoad)
 		{
-			var titlesToProtect = new TitleCollection(this.Site);
-			var uespNamespaceList = new UespNamespaceList(this.Site);
+			TitleCollection titlesToProtect = new(this.Site);
+			UespNamespaceList uespNamespaceList = new(this.Site);
 			foreach (var ns in uespNamespaceList)
 			{
 				if (ns.IsGameSpace)
 				{
-					var pageProtection = new PageProtection(
+					PageProtection pageProtection = new(
 						"Gamespace Pages",
 						ProtectionLevel.Semi,
 						ProtectionLevel.Full,
@@ -558,7 +558,7 @@
 			this.ProgressMaximum = spacesToLoad.Count;
 			foreach (var ns in spacesToLoad)
 			{
-				var titles = new TitleCollection(this.Site);
+				TitleCollection titles = new(this.Site);
 				titles.GetNamespace(ns);
 
 				foreach (var title in titles)
@@ -587,7 +587,7 @@
 			foreach (var protPage in this.pageProtections)
 			{
 				var page = this.Pages[protPage.Key];
-				var currentProtection = (Page)protPage.Key;
+				Page? currentProtection = (Page)protPage.Key;
 				var protection = protPage.Value;
 
 				// Skip Deletion Review pages unless the last modification is at least 30 days ago. This could be incorporated into the search data itself as a delegate, but for now, since it's a one-off. I've left it as hard-coded.
@@ -610,7 +610,7 @@
 
 		private ICollection<int> NamespacesInSearchList()
 		{
-			var retval = new HashSet<int>();
+			HashSet<int> retval = new();
 			foreach (var search in this.searchList)
 			{
 				foreach (var ns in search.Namespaces)

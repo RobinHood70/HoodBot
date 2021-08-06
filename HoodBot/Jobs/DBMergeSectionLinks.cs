@@ -27,8 +27,8 @@
 
 		protected override void Main()
 		{
-			var titles = new TitleCollection(this.Site);
-			var titleConverter = new SimpleTitleJsonConverter(this.Site);
+			TitleCollection titles = new(this.Site);
+			SimpleTitleJsonConverter titleConverter = new(this.Site);
 			var repFile = File.ReadAllText(UespSite.GetBotDataFolder("Replacements - Merge.json"));
 			var reps = JsonConvert.DeserializeObject<IEnumerable<Replacement>>(repFile, titleConverter) ?? throw new InvalidOperationException();
 			foreach (var rep in reps)
@@ -38,10 +38,10 @@
 
 			titles.Remove("Skyrim:Miscellaneous Items"); // This one is legitimately #Dragonborn
 
-			var pages = new PageCollection(this.Site, PageModules.LinksHere);
+			PageCollection pages = new(this.Site, PageModules.LinksHere);
 			pages.GetTitles(titles);
 
-			var backlinks = new TitleCollection(this.Site);
+			TitleCollection backlinks = new(this.Site);
 			foreach (var page in pages)
 			{
 				foreach (var item in page.Backlinks)
@@ -59,10 +59,10 @@
 			pages.Sort();
 			foreach (var page in pages)
 			{
-				var parser = new ContextualParser(page);
+				ContextualParser parser = new(page);
 				foreach (var node in parser.LinkNodes)
 				{
-					var link = FullTitle.FromBacklinkNode(this.Site, node);
+					FullTitle? link = FullTitle.FromBacklinkNode(this.Site, node);
 					if (string.Equals(link.Fragment, "Dragonborn", StringComparison.Ordinal) && titles.Contains(link))
 					{
 						this.WriteLine($"* {page.AsLink(false)}: {WikiTextVisitor.Raw(node)}");

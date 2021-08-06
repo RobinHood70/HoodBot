@@ -93,7 +93,7 @@
 				return ChangeStatus.NoEffect;
 			}
 
-			var protection = new ProtectInputItem("create", createProtection) { Expiry = expiry };
+			ProtectInputItem protection = new("create", createProtection) { Expiry = expiry };
 			return title.NotNull(nameof(title)).Protect(reason, new[] { protection });
 		}
 
@@ -117,7 +117,7 @@
 		/// <remarks>title version allows custom create-protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="CreateProtect(ISimpleTitle, string, ProtectionLevel, string)"/> version of title call.</remarks>
 		public static ChangeStatus CreateProtect(this ISimpleTitle title, string reason, string createProtection, string duration)
 		{
-			var protection = new ProtectInputItem("create", createProtection.NotNull(nameof(createProtection))) { ExpiryRelative = duration };
+			ProtectInputItem protection = new("create", createProtection.NotNull(nameof(createProtection))) { ExpiryRelative = duration };
 			return title.NotNull(nameof(title)).Protect(reason, new[] { protection });
 		}
 
@@ -127,7 +127,7 @@
 		/// <returns>A value indicating the change status of the unprotection.</returns>
 		public static ChangeStatus CreateUnprotect(this ISimpleTitle title, string reason)
 		{
-			var protection = new ProtectInputItem("create", ProtectionWord(ProtectionLevel.Remove)!);
+			ProtectInputItem protection = new("create", ProtectionWord(ProtectionLevel.Remove)!);
 			return title.NotNull(nameof(title)).Protect(reason, new[] { protection });
 		}
 
@@ -140,7 +140,7 @@
 			title.ThrowNull(nameof(title));
 			reason.ThrowNull(nameof(reason));
 			var site = title.Namespace.Site;
-			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
 				[nameof(reason)] = reason,
 			};
@@ -149,7 +149,7 @@
 
 			ChangeStatus ChangeFunc()
 			{
-				var input = new DeleteInput(FullPageName(title)) { Reason = reason };
+				DeleteInput input = new(FullPageName(title)) { Reason = reason };
 				var retval = title.Namespace.Site.AbstractionLayer.Delete(input);
 				return retval.LogId == 0
 					? ChangeStatus.Failure
@@ -186,7 +186,7 @@
 		public static ChangeStatus Protect(this ISimpleTitle title, string reason, string? editProtection, string? moveProtection, DateTime expiry)
 		{
 			var wikiExpiry = expiry == DateTime.MaxValue ? null : (DateTime?)expiry;
-			var protections = new List<ProtectInputItem>(2);
+			List<ProtectInputItem> protections = new(2);
 			if (editProtection != null)
 			{
 				protections.Add(new ProtectInputItem("edit", editProtection) { Expiry = wikiExpiry });
@@ -215,7 +215,7 @@
 				duration = "infinite";
 			}
 
-			var protections = new List<ProtectInputItem>(2);
+			List<ProtectInputItem> protections = new(2);
 			if (editProtection != null)
 			{
 				protections.Add(new ProtectInputItem("edit", editProtection) { ExpiryRelative = duration });
@@ -251,7 +251,7 @@
 				return ChangeStatus.NoEffect;
 			}
 
-			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
 				[nameof(reason)] = reason,
 				[nameof(protections)] = protections,
@@ -261,7 +261,7 @@
 
 			ChangeStatus ChangeFunc()
 			{
-				var input = new ProtectInput(FullPageName(title))
+				ProtectInput input = new(FullPageName(title))
 				{
 					Protections = protections,
 					Reason = reason

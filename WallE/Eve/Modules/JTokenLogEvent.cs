@@ -196,7 +196,7 @@
 
 					if (this.parms[new string(valOffset, 1)] is JToken logIdsNode && (string?)logIdsNode is string ids)
 					{
-						var logIds = new List<long>();
+						List<long> logIds = new();
 						foreach (var commaSplit in ids.Split(TextArrays.Comma))
 						{
 							logIds.Add(long.Parse(commaSplit, CultureInfo.InvariantCulture));
@@ -262,10 +262,10 @@
 				}
 				else if (!string.Equals(this.logAction, "unprotect", StringComparison.Ordinal))
 				{
-					var protections = new List<ProtectionsItem>();
+					List<ProtectionsItem> protections = new();
 					if ((string?)this.parms["0"] is string parm0)
 					{
-						var matches = (IEnumerable<Match>)ProtectionFinder.Matches(parm0);
+						IEnumerable<Match> matches = ProtectionFinder.Matches(parm0);
 						foreach (var match in matches)
 						{
 							var groups = match.Groups;

@@ -268,7 +268,7 @@
 		/// <param name="namespaces">The namespaces to filter to.</param>
 		public void FilterToNamespaces(IEnumerable<int> namespaces)
 		{
-			var hash = new HashSet<int>(namespaces);
+			HashSet<int> hash = new(namespaces);
 			for (var i = this.Count - 1; i >= 0; i--)
 			{
 				if (!hash.Contains(this[i].Namespace.Id))
@@ -354,8 +354,8 @@
 		/// <remarks>If subcategories are loaded, they will be limited to the <paramref name="categoryMemberTypes"/> requested. However, they will <em>not</em> be limited by the <paramref name="from"/> and <paramref name="to"/> parameters.</remarks>
 		public void GetCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, string? from, string? to, bool recurse)
 		{
-			var cat = Title.Coerce(this.Site, MediaWikiNamespaces.Category, category);
-			var input = new CategoryMembersInput(cat.FullPageName)
+			Title? cat = Title.Coerce(this.Site, MediaWikiNamespaces.Category, category);
+			CategoryMembersInput input = new(cat.FullPageName)
 			{
 				Properties = CategoryMembersProperties.Title,
 				Type = categoryMemberTypes,
@@ -548,7 +548,7 @@
 		/// <param name="protectionLevels">The levels to retrieve.</param>
 		public void GetProtectedPages(ProtectionTypes protectionTypes, ProtectionLevels protectionLevels)
 		{
-			var typeList = new List<string>();
+			List<string> typeList = new();
 			foreach (var protType in protectionTypes.GetUniqueFlags())
 			{
 				if (Enum.GetName(typeof(ProtectionTypes), protType) is string name)
@@ -557,7 +557,7 @@
 				}
 			}
 
-			var levelList = new List<string>();
+			List<string> levelList = new();
 			foreach (var protLevel in protectionLevels.GetUniqueFlags())
 			{
 				if (Enum.GetName(typeof(ProtectionTypes), protLevel) is string name)

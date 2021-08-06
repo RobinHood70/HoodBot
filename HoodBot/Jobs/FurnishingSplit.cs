@@ -36,15 +36,15 @@
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
-			var furnishingFiles = new TitleCollection(this.Site);
+			TitleCollection furnishingFiles = new(this.Site);
 			furnishingFiles.GetNamespace(MediaWikiNamespaces.File, Filter.Exclude, FurnishingPrefix);
-			var allTitles = new TitleCollection(this.Site);
+			TitleCollection allTitles = new(this.Site);
 			foreach (var page in furnishingFiles)
 			{
 				allTitles.Add(PageFromFile(page));
 			}
 
-			var allPages = new PageCollection(this.Site, PageLoadOptions.None);
+			PageCollection allPages = new(this.Site, PageLoadOptions.None);
 			allPages.GetTitles(allTitles);
 			allPages.RemoveExists(false);
 			this.existingPages = allPages;
@@ -68,7 +68,7 @@
 		{
 			parsedPage.ThrowNull(nameof(parsedPage));
 			parsedPage.Context.ThrowNull(nameof(parsedPage), nameof(parsedPage.Context));
-			var pageIssues = new List<string>();
+			List<string> pageIssues = new();
 			if (!parsedPage.Context.PageName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))
 			{
 				pageIssues.Add("does not end in .jpg");

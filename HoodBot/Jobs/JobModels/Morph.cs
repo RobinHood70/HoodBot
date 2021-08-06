@@ -50,7 +50,7 @@
 		#region Public Methods
 		public string FullCost()
 		{
-			var calcCosts = new VariableData<int>();
+			VariableData<int> calcCosts = new();
 			foreach (var maxCost in this.Costs)
 			{
 				// Actual cost is from ComputeEsoSkillCost() in ESO Log. Actual formula as of this writing is: maxCost * level / 72 + maxCost / 12, which reduces to maxCost * (level + 6) / 72). When level is set to a constant of 66 (the maximum level, as used on the wiki), this collapses to just maxCost.
@@ -72,15 +72,15 @@
 			var splitLength = splitDescriptions[0].Length;
 
 			var errors = false;
-			var variableDescriptions = new List<VariableData<string>>(splitLength);
+			List<VariableData<string>> variableDescriptions = new(splitLength);
 			for (var i = 0; i < splitLength; i++)
 			{
-				var data = new VariableData<string>();
+				VariableData<string> data = new();
 				for (var j = 0; j < this.Abilities.Count; j++)
 				{
 					try
 					{
-						var coef = Coefficient.FromCollection(this.Abilities[j].Coefficients, splitDescriptions[j][i]);
+						Coefficient? coef = Coefficient.FromCollection(this.Abilities[j].Coefficients, splitDescriptions[j][i]);
 						if (coef != null)
 						{
 							splitDescriptions[j][i] = coef.SkillDamageText();
@@ -123,7 +123,7 @@
 
 			if (!errors)
 			{
-				var descriptions = new List<string>();
+				List<string> descriptions = new();
 				for (var i = 0; i < variableDescriptions.Count; i++)
 				{
 					// Descriptions used to be done with Join("'''") but in practice, this is unintuitive, so we surround every other value with bold instead.
@@ -137,7 +137,7 @@
 
 		private IList<string[]> GetDescriptions()
 		{
-			var splitDescriptions = new List<string[]>(this.Abilities.Count);
+			List<string[]> splitDescriptions = new(this.Abilities.Count);
 			var splitLength = 0;
 			var isBad = false;
 			foreach (var ability in this.Abilities)

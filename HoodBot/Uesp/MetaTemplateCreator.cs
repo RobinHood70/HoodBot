@@ -40,7 +40,7 @@
 		#region Protected Override Methods
 		protected override void AddCustomPropertyInputs(IList<IPropertyInput> propertyInputs)
 		{
-			var variablesInput = new VariablesInput() { Variables = this.VariableNames };
+			VariablesInput variablesInput = new() { Variables = this.VariableNames };
 			propertyInputs.NotNull(nameof(propertyInputs)).Add(variablesInput);
 		}
 		#endregion

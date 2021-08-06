@@ -69,7 +69,7 @@
 		#region Public Static Methods
 		public static Place Copy(string titleName, Place other)
 		{
-			var retval = new Place(titleName.NotNull(nameof(titleName)))
+			Place retval = new(titleName.NotNull(nameof(titleName)))
 			{
 				Alliance = other.NotNull(nameof(other)).Alliance,
 				Settlement = other.Settlement,

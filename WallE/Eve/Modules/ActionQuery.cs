@@ -28,7 +28,7 @@
 				| ((wal.ValidStopCheckMethods & StopCheckMethods.TalkCheckQuery) != 0 ? UserInfoProperties.HasMsg : UserInfoProperties.None);
 			if (props != UserInfoProperties.None)
 			{
-				var userInfoInput = new UserInfoInput() { Properties = props };
+				UserInfoInput userInfoInput = new() { Properties = props };
 				this.userModule = new MetaUserInfo(wal, userInfoInput);
 			}
 

@@ -22,8 +22,8 @@
 			type = TokenManagerFunctions.ValidateTokenType(ValidTypes, type, Csrf, Edit);
 			if (this.SessionTokens.Count == 0)
 			{
-				var action = new ActionTokens(this.Wal);
-				var tokensInput = new TokensInput(ValidTypes);
+				ActionTokens action = new(this.Wal);
+				TokensInput tokensInput = new(ValidTypes);
 				var tokens = action.Submit(tokensInput);
 				foreach (var token in tokens)
 				{

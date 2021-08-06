@@ -31,7 +31,7 @@
 			{
 				// var fi = new FileInfo(file);
 				var text = File.ReadAllText(file);
-				var token = JToken.Parse(text);
+				JToken? token = JToken.Parse(text);
 				if (token["_stats"] != null)
 				{
 					this.enemies.Add(new BladesEnemy(token));
@@ -361,7 +361,7 @@
 			#region Public Methods
 			public string Build(CultureInfo siteCulture)
 			{
-				var sb = new StringBuilder();
+				StringBuilder sb = new();
 				sb
 					.Append("== ")
 					.Append(this.EnemyName)

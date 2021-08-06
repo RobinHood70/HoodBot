@@ -44,7 +44,7 @@
 		protected override List<TagItem> DeserializeResult(JToken? result)
 		{
 			result.ThrowNull(nameof(result));
-			var tags = new List<TagItem>();
+			List<TagItem> tags = new();
 			if (result.Type == JTokenType.Array)
 			{
 				foreach (var item in result)

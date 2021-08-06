@@ -14,14 +14,14 @@
 		public TextEncrypter(string encryptionKey)
 		{
 			// Hash the key to ensure it is exactly 256 bits long, as required by AES-256
-			using var sha = new SHA256Managed();
+			using SHA256Managed sha = new();
 			this.encryptionKeyBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(encryptionKey.NotNull(nameof(encryptionKey))));
 		}
 
 		public string Encrypt(string value)
 		{
-			using var outputStream = new MemoryStream();
-			using var aes = new AesManaged
+			using MemoryStream outputStream = new();
+			using AesManaged aes = new()
 			{
 				Key = this.encryptionKeyBytes
 			};
@@ -30,9 +30,9 @@
 			outputStream.Flush();
 
 			var buffer = Encoding.UTF8.GetBytes(value);
-			using (var inputStream = new MemoryStream(buffer, false))
+			using (MemoryStream? inputStream = new(buffer, false))
 			using (var encryptor = aes.CreateEncryptor())
-			using (var cryptoStream = new CryptoStream(outputStream, encryptor, CryptoStreamMode.Write))
+			using (CryptoStream? cryptoStream = new(outputStream, encryptor, CryptoStreamMode.Write))
 			{
 				inputStream.CopyTo(cryptoStream);
 			}
@@ -43,7 +43,7 @@
 		public string Decrypt(string value)
 		{
 			var buffer = Convert.FromBase64String(value.NotNull(nameof(value)));
-			using var inputStream = new MemoryStream(buffer, false);
+			using MemoryStream inputStream = new(buffer, false);
 			var iv = new byte[16];
 			var bytesRead = inputStream.Read(iv, 0, 16);
 			if (bytesRead < 16)
@@ -51,13 +51,13 @@
 				throw new CryptographicException("IV is missing or invalid.");
 			}
 
-			using var outputStream = new MemoryStream();
-			using var aes = new AesManaged
+			using MemoryStream outputStream = new();
+			using AesManaged aes = new()
 			{
 				Key = this.encryptionKeyBytes
 			};
 			using (var decryptor = aes.CreateDecryptor(this.encryptionKeyBytes, iv))
-			using (var cryptoStream = new CryptoStream(inputStream, decryptor, CryptoStreamMode.Read))
+			using (CryptoStream? cryptoStream = new(inputStream, decryptor, CryptoStreamMode.Read))
 			{
 				cryptoStream.CopyTo(outputStream);
 			}

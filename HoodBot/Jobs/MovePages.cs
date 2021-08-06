@@ -41,7 +41,7 @@
 		#region Protected Override Methods
 		protected override void CustomEdit(Page page, Replacement replacement)
 		{
-			var parsedPage = new ContextualParser(page);
+			ContextualParser parsedPage = new(page);
 			var nodes = parsedPage.Nodes;
 			for (var i = nodes.Count - 1; i >= 0; i--)
 			{
@@ -78,13 +78,13 @@
 		private void GetAuthorReplacements(string authorCat)
 		{
 			var author = authorCat.Split(TextArrays.CategorySeparators, 3)[^1];
-			var titles = new TitleCollection(this.Site);
+			TitleCollection titles = new(this.Site);
 			titles.GetCategoryMembers(authorCat);
 			foreach (var title in titles)
 			{
 				var pageParts = title.PageName.Split(TextArrays.CategorySeparators, 3);
 				var imageName = pageParts[^1];
-				var rep = new Replacement(
+				Replacement rep = new(
 					title,
 					TitleFactory.FromName(this.Site, MediaWikiNamespaces.File, $"User-{author}-{imageName}").ToTitle());
 				rep.Actions |= ReplacementActions.Edit;

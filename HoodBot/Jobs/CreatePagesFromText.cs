@@ -29,13 +29,13 @@
 			{
 				CheckText(parser, i + 1);
 				CheckText(parser, i + 3);
-				var header = (IHeaderNode)parser[i];
+				IHeaderNode? header = (IHeaderNode)parser[i];
 				if (header.Title.Count < 3 || header.Title[1] is not SiteLinkNode link)
 				{
 					link = (SiteLinkNode)parser.Factory.LinkNodeFromParts("Blades:" + header.Title.ToValue().Trim(TextArrays.EqualsSign));
 				}
 
-				var template = (ITemplateNode)parser[i + 2];
+				ITemplateNode? template = (ITemplateNode)parser[i + 2];
 				var text = "{{Minimal}}\n" + WikiTextVisitor.Raw(template) + "\n{{Stub|Item}}";
 				var page = TitleFactory.DirectNormalized(link.TitleValue).ToNewPage(text);
 				this.Pages.Add(page);

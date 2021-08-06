@@ -303,7 +303,7 @@
 		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
 		public static IEnumerable<IParameterNode> FindAll(this ITemplateNode template, bool ignoreCase, IEnumerable<string> parameterNames)
 		{
-			var nameSet = new HashSet<string>(parameterNames.NotNull(nameof(parameterNames)), ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
+			HashSet<string> nameSet = new(parameterNames.NotNull(nameof(parameterNames)), ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
 			foreach (var (name, parameter) in GetResolvedParameters(template))
 			{
 				if (nameSet.Contains(name))
@@ -365,7 +365,7 @@
 		/// <returns>A read-only dictionary of the parameters.</returns>
 		public static IReadOnlyDictionary<int, IParameterNode?> GetNumericParametersSorted(this ITemplateNode template, bool addMissing)
 		{
-			var retval = new SortedDictionary<int, IParameterNode?>();
+			SortedDictionary<int, IParameterNode?> retval = new();
 			var highest = 0;
 			foreach (var (index, parameter) in GetNumericParameters(template))
 			{
@@ -429,7 +429,7 @@
 		{
 			var parameters = template.GetNumericParametersSorted(true);
 			var i = 1;
-			var retval = new List<IParameterNode?>();
+			List<IParameterNode?> retval = new();
 			while (i < parameters.Count)
 			{
 				for (var j = 0; j < length; j++)
@@ -458,7 +458,7 @@
 		public static void RemoveDuplicates(this ITemplateNode template)
 		{
 			var index = template.NotNull(nameof(template)).Parameters.Count;
-			var nameList = new HashSet<string>(StringComparer.Ordinal);
+			HashSet<string> nameList = new(StringComparer.Ordinal);
 			var anonIndex = 0;
 			while (index >= 0 && index < template.Parameters.Count)
 			{
@@ -532,7 +532,7 @@
 		public static void Sort(this ITemplateNode template, IEnumerable<string> sortOrder)
 		{
 			template.ThrowNull(nameof(template));
-			var indeces = new Dictionary<string, int>(StringComparer.Ordinal);
+			Dictionary<string, int> indeces = new(StringComparer.Ordinal);
 			var i = 0;
 			foreach (var value in sortOrder.NotNull(nameof(sortOrder)))
 			{
@@ -540,8 +540,8 @@
 				i++;
 			}
 
-			var sorted = new IParameterNode?[indeces.Count];
-			var unsorted = new List<IParameterNode>();
+			IParameterNode?[]? sorted = new IParameterNode?[indeces.Count];
+			List<IParameterNode> unsorted = new();
 			foreach (var (name, parameter) in GetResolvedParameters(template))
 			{
 				var index = indeces.GetValueOrDefault(name, -1);

@@ -128,13 +128,13 @@
 
 		public JToken ToJson()
 		{
-			var wikis = new JArray();
+			JArray wikis = new();
 			foreach (var wiki in this.Wikis)
 			{
 				wikis.Add(wiki.WikiInfo.ToJson());
 			}
 
-			var connectionStrings = new JObject();
+			JObject connectionStrings = new();
 			foreach (var connectionString in this.ConnectionStrings)
 			{
 				connectionStrings.Add(connectionString.Key, Settings.Encrypter.Encrypt(connectionString.Value));

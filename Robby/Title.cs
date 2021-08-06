@@ -160,7 +160,7 @@
 		{
 			if (this.Namespace.CanTalk)
 			{
-				var pages = PageCollection.Unlimited(this.Site, options);
+				PageCollection? pages = PageCollection.Unlimited(this.Site, options);
 				pages.GetTitles(this);
 				if (pages.Count == 1)
 				{

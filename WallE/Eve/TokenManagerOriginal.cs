@@ -44,12 +44,12 @@
 			type = TokenManagerFunctions.ValidateTokenType(ValidTypes, type, TokensInput.Csrf, TokensInput.Edit);
 			if (this.SessionTokens.Count == 0)
 			{
-				var pageSetInput = new QueryPageSetInput(DummyPage);
-				var propInfoInput = new InfoInput { Tokens = new[] { TokensInput.Edit, TokensInput.Watch } };
-				var input = new RecentChangesInput { GetPatrolToken = true, MaxItems = 1 };
-				var recentChanges = new ListRecentChanges(this.Wal, input);
+				QueryPageSetInput pageSetInput = new(DummyPage);
+				InfoInput propInfoInput = new() { Tokens = new[] { TokensInput.Edit, TokensInput.Watch } };
+				RecentChangesInput input = new() { GetPatrolToken = true, MaxItems = 1 };
+				ListRecentChanges recentChanges = new(this.Wal, input);
 				var propertyModules = this.Wal.ModuleFactory.CreateModules(new[] { propInfoInput });
-				var queryInput = new QueryInput(pageSetInput, propertyModules, new[] { recentChanges });
+				QueryInput queryInput = new(pageSetInput, propertyModules, new[] { recentChanges });
 				var pageSet = this.Wal.RunPageSetQuery(queryInput, WikiAbstractionLayer.DefaultPageFactory);
 				if (pageSet.Count == 1 && pageSet[0].Info is PageInfo info)
 				{
@@ -71,7 +71,7 @@
 
 		public string? UserRightsToken(string userName)
 		{
-			var usersInput = new UsersInput(new[] { userName })
+			UsersInput usersInput = new(new[] { userName })
 			{
 				GetRightsToken = true,
 			};
@@ -83,7 +83,7 @@
 		#region Private Methods
 		private string? GetRollbackToken(QueryPageSetInput pageSetInput)
 		{
-			var revisions = new RevisionsInput() { GetRollbackToken = true };
+			RevisionsInput revisions = new() { GetRollbackToken = true };
 			var pages = this.Wal.LoadPages(pageSetInput, new[] { revisions });
 
 			// By all rights, there should only be one page and one revision in the collection, but we don't really care if something very weird happens here, just as long as at least ONE of them has a rollback token, so just iterate the entire set if somehow there are multiple results.

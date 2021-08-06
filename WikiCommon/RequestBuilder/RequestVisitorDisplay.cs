@@ -25,8 +25,8 @@
 		/// <returns>A string representing the parameters, formatted for display purposes.</returns>
 		public static string Build(Request request)
 		{
-			var sb = new StringBuilder();
-			var visitor = new RequestVisitorDisplay(sb);
+			StringBuilder sb = new();
+			RequestVisitorDisplay visitor = new(sb);
 			request.Build(visitor);
 			sb.Replace("%20", "+");
 			var methodText = request.Type switch

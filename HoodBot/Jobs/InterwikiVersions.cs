@@ -17,7 +17,7 @@
 
 		protected override void Main()
 		{
-			var client = (SimpleClient)((WikiAbstractionLayer)this.Site.AbstractionLayer).Client;
+			SimpleClient? client = (SimpleClient)((WikiAbstractionLayer)this.Site.AbstractionLayer).Client;
 			client.HonourMaxLag = false;
 			client.Retries = 3;
 			this.ProgressMaximum = this.Site.InterwikiMap.Count;
@@ -35,8 +35,8 @@
 
 					path = path[0..^2];
 					path = path.Split('?', 2)[0];
-					var uri = new Uri(path);
-					var capabilities = new SiteCapabilities(client);
+					Uri uri = new(path);
+					SiteCapabilities capabilities = new(client);
 					try
 					{
 						if (capabilities.Get(uri))

@@ -55,7 +55,7 @@ namespace HoodBotTestProject
 		[MemberData(nameof(TestData))]
 		public void Test1(string input, string? iw, int ns, string page, string? fragment)
 		{
-			var test = TitleFactory.FromName(Site, input);
+			TitleFactory? test = TitleFactory.FromName(Site, input);
 			Assert.Equal(iw, test.Interwiki?.Prefix);
 			Assert.Equal(ns, test.Namespace.Id);
 			Assert.Equal(page, test.PageName);
@@ -66,7 +66,7 @@ namespace HoodBotTestProject
 		[MemberData(nameof(CoercionTestData))]
 		public void Test2(int nsInput, string nameInput, string? iw, int ns, string page)
 		{
-			var test = TitleFactory.FromName(Site, nsInput, nameInput);
+			TitleFactory? test = TitleFactory.FromName(Site, nsInput, nameInput);
 			Assert.Equal(iw, test.Interwiki?.Prefix);
 			Assert.Equal(ns, test.Namespace.Id);
 			Assert.Equal(page, test.PageName);

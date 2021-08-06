@@ -274,7 +274,7 @@
 		{
 			this.OnInitializing(new InitializingEventArgs(new SiteInfoInput(SiteInfoProperties.None)));
 
-			var siteInfo = new SiteInfoResult(
+			SiteInfoResult siteInfo = new(
 				general: SiteInfoGeneral,
 				defaultOptions: ImmutableDictionary<string, object>.Empty,
 				defaultSkin: null,

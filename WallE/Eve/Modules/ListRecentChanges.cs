@@ -103,7 +103,7 @@
 				return null;
 			}
 
-			var item = new RecentChangesItem(
+			RecentChangesItem item = new(
 				ns: (int)result.MustHave("ns"),
 				title: result.MustHaveString("title"),
 				flags: result.GetFlags(

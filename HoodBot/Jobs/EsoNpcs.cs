@@ -90,7 +90,7 @@
 
 		private static string NewPageText(NpcData npc, CultureInfo culture, IEnumerable<PlaceInfo> placeInfo)
 		{
-			var parameters = new List<(string?, string)>()
+			List<(string?, string)> parameters = new()
 			{
 				("image", string.Empty),
 				("imgdesc", string.Empty),
@@ -103,7 +103,7 @@
 				("faction", string.Empty)
 			};
 
-			var factory = new WikiNodeFactory();
+			WikiNodeFactory factory = new();
 			var template = factory.TemplateNodeFromParts("Online NPC Summary", true, parameters);
 			UpdateLocations(npc, template, factory, placeInfo);
 
@@ -168,7 +168,7 @@
 				string locText;
 				if (npc.UnknownLocations.Count < 10)
 				{
-					var list = new SortedSet<string>(StringComparer.Ordinal);
+					SortedSet<string> list = new(StringComparer.Ordinal);
 					foreach (var place in npc.UnknownLocations)
 					{
 						list.Add(place.Key.TitleName);
@@ -212,22 +212,22 @@
 		{
 			Title NpcTitle(string pageName) => TitleFactory.Direct(this.Site, UespNamespaces.Online, pageName).ToTitle();
 
-			var existingTitles = new TitleCollection(this.Site);
+			TitleCollection existingTitles = new(this.Site);
 			existingTitles.GetCategoryMembers("Online-NPCs", CategoryMemberTypes.Page, false);
 			existingTitles.GetCategoryMembers("Online-Creatures-All", CategoryMemberTypes.Page, false);
 			var npcs = EsoGeneral.GetNpcsFromDatabase();
-			var checkTitles = new TitleCollection(this.Site);
+			TitleCollection checkTitles = new(this.Site);
 			foreach (var npc in npcs)
 			{
 				checkTitles.Add(npc.Name);
 			}
 
-			var checkPages = new PageCollection(this.Site, new PageLoadOptions(PageModules.Info | PageModules.Properties, true));
+			PageCollection checkPages = new(this.Site, new PageLoadOptions(PageModules.Info | PageModules.Properties, true));
 			checkPages.GetTitles(checkTitles);
 
-			var npcRenames = new Dictionary<long, string>();
-			var loadNpcs = new NpcCollection();
-			var loadTitles = new TitleCollection(this.Site);
+			Dictionary<long, string> npcRenames = new();
+			NpcCollection loadNpcs = new();
+			TitleCollection loadTitles = new(this.Site);
 			foreach (var npc in npcs)
 			{
 				ISimpleTitle title = NpcTitle(npc.Name);
@@ -237,10 +237,10 @@
 				}
 				else if (checkPages.TryGetValue(title, out var page) && page.IsDisambiguation == true)
 				{
-					var parser = new ContextualParser(page);
+					ContextualParser parser = new(page);
 					foreach (var linkNode in parser.LinkNodes)
 					{
-						var disambig = SiteLink.FromLinkNode(this.Site, linkNode, false);
+						SiteLink? disambig = SiteLink.FromLinkNode(this.Site, linkNode, false);
 						if (existingTitles.TryGetValue(disambig, out var disambigPage))
 						{
 							npcRenames.Add(npc.Id, disambigPage.PageName);
@@ -264,12 +264,12 @@
 				}
 			}
 
-			var loadPages = new PageCollection(this.Site, new PageLoadOptions(PageModules.Default | PageModules.DeletedRevisions | PageModules.Properties, true));
+			PageCollection loadPages = new(this.Site, new PageLoadOptions(PageModules.Default | PageModules.DeletedRevisions | PageModules.Properties, true));
 			loadPages.GetTitles(loadTitles);
 			loadPages.Sort();
 
-			var retval = new NpcCollection();
-			var issues = new List<(NpcData, string)>();
+			NpcCollection retval = new();
+			List<(NpcData, string)> issues = new();
 			foreach (var npc in loadNpcs)
 			{
 				if (!npcRenames.TryGetValue(npc.Id, out var npcName))
@@ -290,7 +290,7 @@
 
 					if (issue == null)
 					{
-						var parsed = new ContextualParser(page);
+						ContextualParser parsed = new(page);
 						var template = parsed.FindTemplate("Online NPC Summary");
 						if (this.updateMode)
 						{

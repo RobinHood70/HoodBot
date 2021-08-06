@@ -126,12 +126,12 @@
 		protected override void BeforeLogging()
 		{
 			this.StatusWriteLine("Getting wiki data");
-			var wikiQuests = new TitleCollection(this.Site);
+			TitleCollection wikiQuests = new(this.Site);
 			wikiQuests.GetCategoryMembers("Online-Quests");
 
 			this.StatusWriteLine("Getting quest data");
-			var quests = new List<QuestData>(this.GetQuestData(wikiQuests));
-			var allTitles = new TitleCollection(this.Site);
+			List<QuestData> quests = new(this.GetQuestData(wikiQuests));
+			TitleCollection allTitles = new(this.Site);
 			foreach (var quest in quests)
 			{
 				allTitles.Add(quest.FullPageName);
@@ -189,7 +189,7 @@
 
 		private static List<string> QuestObjectives(string objectiveType, List<Condition> conditions)
 		{
-			var retval = new List<string>();
+			List<string> retval = new();
 			foreach (var condition in conditions)
 			{
 				if (condition.Text.Length > 0 && !string.Equals(condition.Text, "TRACKER GOAL TEXT", StringComparison.Ordinal))
@@ -212,8 +212,8 @@
 		{
 			foreach (var quest in GetDBQuests())
 			{
-				var title = TitleFactory.FromName(this.Site, quest.FullPageName);
-				var titleDisambig = TitleFactory.DirectNormalized(title.Namespace, title.PageName + " (quest)");
+				TitleFactory? title = TitleFactory.FromName(this.Site, quest.FullPageName);
+				TitleFactory? titleDisambig = TitleFactory.DirectNormalized(title.Namespace, title.PageName + " (quest)");
 				if (!wikiQuests.Contains(title) && !wikiQuests.Contains(titleDisambig))
 				{
 					var missing = true;
@@ -238,8 +238,8 @@
 		private IEnumerable<QuestData> GetQuestData(TitleCollection wikiQuests)
 		{
 			var quests = this.GetFilteredQuests(wikiQuests);
-			var questDict = new Dictionary<string, QuestData>(StringComparer.Ordinal);
-			var questNames = new Dictionary<long, string>();
+			Dictionary<string, QuestData> questDict = new(StringComparer.Ordinal);
+			Dictionary<long, string> questNames = new();
 			foreach (var quest in quests)
 			{
 				questDict.TryAdd(quest.Name, quest);
@@ -250,7 +250,7 @@
 			this.StatusWriteLine("Getting stage data");
 			foreach (var row in Database.RunQuery(EsoGeneral.EsoLogConnectionString, StageQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
 			{
-				var stage = new Stage(row);
+				Stage stage = new(row);
 				var questId = (long)row["questId"];
 				var questName = questNames[questId];
 				var stages = questDict[questName].Stages;
@@ -261,7 +261,7 @@
 			this.StatusWriteLine("Getting condition data");
 			foreach (var row in Database.RunQuery(EsoGeneral.EsoLogConnectionString, ConditionQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
 			{
-				var condition = new Condition(row);
+				Condition condition = new(row);
 				var questId = (long)row["questId"];
 				var stageId = (long)row["questStepId"];
 				var questName = questNames[questId];
@@ -275,7 +275,7 @@
 			this.StatusWriteLine("Getting rewards data");
 			foreach (var row in Database.RunQuery(EsoGeneral.EsoLogConnectionString, RewardsQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
 			{
-				var reward = new Reward(row);
+				Reward reward = new(row);
 				var questId = (long)row["questId"];
 				var questName = questNames[questId];
 				var rewards = questDict[questName].Rewards;
@@ -290,9 +290,9 @@
 
 		private Page NewPage(QuestData quest)
 		{
-			var locs = new SortedSet<string>(StringComparer.Ordinal);
+			SortedSet<string> locs = new(StringComparer.Ordinal);
 			var mergedStages = this.MergeStages(quest, locs);
-			var journalEntries = new List<string>();
+			List<string> journalEntries = new();
 			foreach (var kvp in mergedStages)
 			{
 				var split = kvp.Key.Split(TextArrays.At);
@@ -304,7 +304,7 @@
 				journalEntries.AddRange(QuestObjectives(split[1], kvp.Value));
 			}
 
-			var rewardList = new List<string>();
+			List<string> rewardList = new();
 			var xp = string.Empty;
 			var gold = false;
 			foreach (var reward in quest.Rewards)
@@ -440,12 +440,12 @@
 
 		private Dictionary<string, List<Condition>> MergeStages(QuestData quest, SortedSet<string> locs)
 		{
-			var mergedStages = new Dictionary<string, List<Condition>>(StringComparer.Ordinal);
+			Dictionary<string, List<Condition>> mergedStages = new(StringComparer.Ordinal);
 			foreach (var stage in quest.Stages)
 			{
 				if (!string.Equals(stage.Zone, "Tamriel", StringComparison.Ordinal) && !string.Equals(stage.Zone, quest.Zone, StringComparison.Ordinal))
 				{
-					var title = TitleFactory.Direct(this.Site, UespNamespaces.Online, stage.Zone);
+					TitleFactory? title = TitleFactory.Direct(this.Site, UespNamespaces.Online, stage.Zone);
 					locs.Add(title.AsLink(true));
 				}
 

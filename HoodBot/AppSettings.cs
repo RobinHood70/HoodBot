@@ -30,7 +30,7 @@
 
 		public JToken ToJson()
 		{
-			var wikis = new JArray();
+			JArray wikis = new();
 			foreach (var wiki in this.DefaultWikis)
 			{
 				wikis.Add(wiki.ToJson());

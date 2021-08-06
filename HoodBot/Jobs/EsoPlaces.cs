@@ -20,20 +20,20 @@
 
 		protected override void BeforeLogging()
 		{
-			var lookup = new Dictionary<string, int>(StringComparer.Ordinal);
-			var titles = new TitleCollection(this.Site);
+			Dictionary<string, int> lookup = new(StringComparer.Ordinal);
+			TitleCollection titles = new(this.Site);
 			foreach (var (name, data) in EsoGeneral.GetZonesFromDatabase())
 			{
 				lookup.TryAdd(name, data);
 				titles.Add(UespNamespaces.Online, name);
 			}
 
-			var pages = PageCollection.Unlimited(this.Site);
+			PageCollection? pages = PageCollection.Unlimited(this.Site);
 			pages.GetTitles(titles);
 			foreach (var page in pages)
 			{
 				Debug.WriteLine($"* [[{page.FullPageName}]]");
-				var parsedPage = new ContextualParser(page);
+				ContextualParser parsedPage = new(page);
 				var template = parsedPage.FindTemplate("Online Page Summary");
 				if (page.Exists && template != null)
 				{

@@ -39,7 +39,7 @@
 			}
 
 			this.All ??= Array.Empty<Lazy<IPlugin, IPluginMetadata>>(); // Should have been filled in in try block, but if not, set it to empty.
-			var diffViewers = new Dictionary<string, IDiffViewer>(StringComparer.Ordinal);
+			Dictionary<string, IDiffViewer> diffViewers = new(StringComparer.Ordinal);
 			foreach (var plugin in this.All)
 			{
 				if (plugin.Value is IDiffViewer diffViewer)

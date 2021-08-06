@@ -77,7 +77,7 @@
 			this.Text = text;
 			this.textLength = text.Length;
 
-			var allTags = new HashSet<string>(UnparsedTags, StringComparer.Ordinal);
+			HashSet<string> allTags = new(UnparsedTags, StringComparer.Ordinal);
 			switch (inclusionType)
 			{
 				case InclusionType.Transcluded:
@@ -101,7 +101,7 @@
 			}
 
 			allTags.UnionWith(this.ignoredTags);
-			var regexTags = new List<string>(allTags.Count);
+			List<string> regexTags = new(allTags.Count);
 			foreach (var tag in allTags)
 			{
 				regexTags.Add(Regex.Escape(tag));
@@ -230,7 +230,7 @@
 		{
 			if (this.count == this.array.Length)
 			{
-				var newArray = new StackElement[this.count << 1];
+				StackElement[]? newArray = new StackElement[this.count << 1];
 				Array.Copy(this.array, newArray, this.count);
 				this.array = newArray;
 			}
@@ -255,7 +255,7 @@
 				return false;
 			}
 
-			var comments = new List<Comment>();
+			List<Comment> comments = new();
 			var wsStart = this.Index - this.Text.SpanReverse(CommentWhiteSpace, this.Index);
 			var closing = endPos;
 			var wsEnd = wsStart;
@@ -365,7 +365,7 @@
 			else
 			{
 				attrEnd = tagEndPos;
-				var findClosing = new Regex("</" + tagOpen + @"\s*>", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+				Regex findClosing = new("</" + tagOpen + @"\s*>", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 				if (this.noMoreClosingTag.Contains(tagOpen) && findClosing.Match(this.Text, tagEndPos + 1) is Match match && match.Success)
 				{
 					inner = this.Text.Substring(tagEndPos + 1, match.Index - tagEndPos - 1);
@@ -473,7 +473,7 @@
 			}
 			while (this.Index < this.textLength);
 
-			var lastHeader = this.Top as HeaderElement;
+			HeaderElement? lastHeader = this.Top as HeaderElement;
 			lastHeader?.Parse('\n');
 		}
 		#endregion

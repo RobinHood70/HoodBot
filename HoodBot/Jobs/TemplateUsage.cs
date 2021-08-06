@@ -31,7 +31,7 @@
 		{
 			location.ThrowNull(nameof(location));
 			this.respectRedirects = respectRedirects;
-			var allTemplateNames = new List<string>();
+			List<string> allTemplateNames = new();
 			foreach (var templateName in templateNames.NotNull(nameof(templateNames)))
 			{
 				allTemplateNames.AddRange(templateName.Split(TextArrays.Pipe));
@@ -48,7 +48,7 @@
 		{
 			// TODO: Handle case where a redirect was provided rather than the base...doesn't seem to be working right now. (Should it? If not, at least spit out an error.)
 			// CONSIDER: Adapt this and/or the parser to handle relative templates like {{/Template}} and {{../Template}}.
-			var templates = new TitleCollection(this.Site, MediaWikiNamespaces.Template, this.originalTemplateNames);
+			TitleCollection templates = new(this.Site, MediaWikiNamespaces.Template, this.originalTemplateNames);
 			TitleCollection allTemplateNames;
 			if (this.respectRedirects)
 			{
@@ -64,7 +64,7 @@
 			}
 
 			this.StatusWriteLine("Loading pages");
-			var results = PageCollection.Unlimited(this.Site);
+			PageCollection? results = PageCollection.Unlimited(this.Site);
 			results.GetPageTranscludedIn(templates);
 			this.Progress++;
 			this.StatusWriteLine("Exporting");
@@ -76,11 +76,11 @@
 		#region Private Static Methods
 		private static TitleCollection BuildRedirectList(TitleCollection titles)
 		{
-			var retval = new TitleCollection(titles.Site, titles);
+			TitleCollection retval = new(titles.Site, titles);
 
 			// Loop until nothing new is added.
-			var titlesToCheck = new HashSet<ISimpleTitle>(titles);
-			var alreadyChecked = new HashSet<ISimpleTitle>();
+			HashSet<ISimpleTitle> titlesToCheck = new(titles);
+			HashSet<ISimpleTitle> alreadyChecked = new();
 			do
 			{
 				foreach (var title in titlesToCheck)
@@ -100,7 +100,7 @@
 
 		private PageCollection FollowRedirects(TitleCollection titles)
 		{
-			var originalsFollowed = PageCollection.Unlimited(this.Site, PageModules.None, true);
+			PageCollection? originalsFollowed = PageCollection.Unlimited(this.Site, PageModules.None, true);
 			originalsFollowed.GetTitles(titles);
 
 			return originalsFollowed;
@@ -133,10 +133,10 @@
 
 		private void GetTemplates(IReadOnlyCollection<ISimpleTitle> allNames, PageCollection pages)
 		{
-			var paramTranslator = new Dictionary<string, string>(StringComparer.Ordinal); // TODO: Empty dictionary for now, but could be pre-populated to translate synonyms to a consistent name. Similarly, name comparison can be case-sensitive or not. Need to find a useful way to do those.
+			Dictionary<string, string> paramTranslator = new(StringComparer.Ordinal); // TODO: Empty dictionary for now, but could be pre-populated to translate synonyms to a consistent name. Similarly, name comparison can be case-sensitive or not. Need to find a useful way to do those.
 			foreach (var page in pages)
 			{
-				var parser = new ContextualParser(page);
+				ContextualParser parser = new(page);
 				foreach (var template in parser.Nodes.FindAll<SiteTemplateNode>())
 				{
 					if (allNames.Contains(template.TitleValue))
@@ -159,11 +159,11 @@
 
 		private void WriteFile()
 		{
-			var csvFile = new CsvFile()
+			CsvFile csvFile = new()
 			{
 				EmptyFieldText = " ",
 			};
-			var output = new List<string>(this.headerOrder.Count + 2)
+			List<string> output = new(this.headerOrder.Count + 2)
 			{
 				"Page",
 				"Template Name"

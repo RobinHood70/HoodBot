@@ -32,10 +32,10 @@
 
 			this.Description = desc;
 
-			var coefficients = new List<Coefficient>();
+			List<Coefficient> coefficients = new();
 			for (var num = '1'; num <= '6'; num++)
 			{
-				var coefficient = new Coefficient(data, num);
+				Coefficient coefficient = new(data, num);
 				if (coefficient.IsValid)
 				{
 					coefficients.Add(coefficient);

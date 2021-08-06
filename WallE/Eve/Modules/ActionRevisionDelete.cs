@@ -45,7 +45,7 @@
 		protected override RevisionDeleteResult DeserializeResult(JToken? result)
 		{
 			result.ThrowNull(nameof(result));
-			var list = new List<RevisionDeleteItem>();
+			List<RevisionDeleteItem> list = new();
 			foreach (var item in result.MustHave("items"))
 			{
 				var revision = item.GetRevision();
@@ -69,7 +69,7 @@
 		#region Private Static Methods
 		private static IReadOnlyList<string> GetRenderedMessages(JToken? messages)
 		{
-			var output = new List<string>();
+			List<string> output = new();
 			if (messages != null)
 			{
 				foreach (var msg in messages)

@@ -37,7 +37,7 @@
 		#region Protected Methods
 		protected TitleCollection LoadProposedDeletions()
 		{
-			var deleted = new TitleCollection(this.Site);
+			TitleCollection deleted = new(this.Site);
 			foreach (var title in this.Site.DeletionCategories)
 			{
 				deleted.GetCategoryMembers(title.PageName);

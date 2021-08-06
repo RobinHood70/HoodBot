@@ -285,7 +285,7 @@
 		internal static PageCollection Watch(Site site, WatchInput input)
 		{
 			var result = site.NotNull(nameof(site)).AbstractionLayer.Watch(input);
-			var retval = new PageCollection(site, result);
+			PageCollection retval = new(site, result);
 			foreach (var item in result)
 			{
 				var page = retval.New(item);
@@ -301,7 +301,7 @@
 		{
 			foreach (var item in result.Interwiki)
 			{
-				var titleParts = FullTitle.FromNormalizedName(this.Site, item.Value.Title);
+				FullTitle? titleParts = FullTitle.FromNormalizedName(this.Site, item.Value.Title);
 				Debug.Assert(string.Equals(titleParts.Interwiki?.Prefix, item.Value.Prefix, StringComparison.Ordinal), "Interwiki prefixes didn't match.", titleParts.Interwiki?.Prefix + " != " + item.Value.Prefix);
 				this.titleMap[item.Key] = titleParts;
 			}
@@ -320,7 +320,7 @@
 			{
 				// Reconstruct the redirect title, then run it through the standard parser.
 				var redirect = item.Value;
-				var target = new StringBuilder();
+				StringBuilder target = new();
 				if (!string.IsNullOrWhiteSpace(redirect.Interwiki))
 				{
 					target.Append(redirect.Interwiki).Append(':');
@@ -336,7 +336,7 @@
 					target.Append('#').Append(redirect.Interwiki);
 				}
 
-				var title = TitleFactory.FromNormalizedName(this.Site, target.ToString()).ToFullTitle();
+				FullTitle? title = TitleFactory.FromNormalizedName(this.Site, target.ToString()).ToFullTitle();
 				this.titleMap[item.Key] = title;
 			}
 		}
@@ -350,7 +350,7 @@
 		{
 			input.ThrowNull(nameof(input));
 			input.Title.ThrowNull(nameof(input), nameof(input.Title));
-			var inputTitle = TitleFactory.FromName(this.Site, input.Title).ToTitle();
+			Title? inputTitle = TitleFactory.FromName(this.Site, input.Title).ToTitle();
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && (input.LinkTypes & BacklinksTypes.ImageUsage) != 0)
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
@@ -534,7 +534,7 @@
 		/// <remarks>If the page title specified represents a page already in the collection, that page will be overwritten.</remarks>
 		private Page New(IApiTitle item)
 		{
-			var pageTitle = TitleFactory.FromNormalizedName(this.Site, item.FullPageName);
+			TitleFactory? pageTitle = TitleFactory.FromNormalizedName(this.Site, item.FullPageName);
 			return this.pageCreator.CreatePage(pageTitle, this.LoadOptions, item);
 		}
 
@@ -563,7 +563,7 @@
 			this.LoadPages(new QueryPageSetInput(input), this.RecurseCategoryHandler);
 			if (this.recurseCategories.Count > 0)
 			{
-				var copy = new List<string>(this.recurseCategories);
+				List<string> copy = new(this.recurseCategories);
 				this.recurseCategories.Clear();
 				var originalTitle = input.Title;
 				foreach (var category in copy)

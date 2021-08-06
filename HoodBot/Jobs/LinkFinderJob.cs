@@ -56,9 +56,9 @@
 
 		protected override void LoadPages()
 		{
-			var pages = PageCollection.Unlimited(this.Site, PageModules.Backlinks, false);
+			PageCollection? pages = PageCollection.Unlimited(this.Site, PageModules.Backlinks, false);
 			pages.GetTitles(this.titles.NotNull(nameof(LinkFinderJob), nameof(this.titles)));
-			var backTitles = new TitleCollection(this.Site);
+			TitleCollection backTitles = new(this.Site);
 			foreach (var page in pages)
 			{
 				foreach (var backlink in page.Backlinks)
@@ -75,7 +75,7 @@
 
 		protected void SetTitlesFromSubpages(IEnumerable<ISimpleTitle> titles)
 		{
-			var allTitles = new TitleCollection(this.Site)
+			TitleCollection allTitles = new(this.Site)
 			{
 				titles.NotNull(nameof(titles))
 			};
@@ -101,7 +101,7 @@
 
 				foreach (var link in parsedPage.FindLinks(title))
 				{
-					var linkTitle = FullTitle.FromBacklinkNode(this.Site, link);
+					FullTitle? linkTitle = FullTitle.FromBacklinkNode(this.Site, link);
 					if (!this.sectionLinksOnly || linkTitle.Fragment != null)
 					{
 						var textTitle = linkTitle.ToString();

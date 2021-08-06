@@ -72,7 +72,7 @@
 
 			if (token.Type == JTokenType.Array)
 			{
-				var dict = new Dictionary<string, string?>(StringComparer.Ordinal);
+				Dictionary<string, string?> dict = new(StringComparer.Ordinal);
 				foreach (var entry in token)
 				{
 					var key = (string?)entry["name"] ?? string.Empty;
@@ -141,7 +141,7 @@
 		// Currently unused - intended for later development because newer versions of the API can return multiple errors in a single response.
 		public static IReadOnlyList<ErrorItem> GetErrors(this JToken? token)
 		{
-			var list = new List<ErrorItem>();
+			List<ErrorItem> list = new();
 			if (token != null)
 			{
 				foreach (var node in token)
@@ -182,7 +182,7 @@
 		/// <returns>A list containing the interwiki links.</returns>
 		public static IReadOnlyList<InterwikiTitleItem> GetInterwikiLinks(this JToken? token)
 		{
-			var output = new List<InterwikiTitleItem>();
+			List<InterwikiTitleItem> output = new();
 			if (token != null)
 			{
 				foreach (var item in token)
@@ -213,7 +213,7 @@
 		/// <returns>An <see cref="IReadOnlyList{T}"/> of the specified type.</returns>
 		public static IReadOnlyList<T> GetList<T>(this JToken? token)
 		{
-			var retval = new List<T>();
+			List<T> retval = new();
 			if (token != null)
 			{
 				foreach (var value in token.Values<T>())
@@ -282,7 +282,7 @@
 					gi.Remove(toFragmentName);
 					gi.Remove(toInterwikiName);
 
-					var toPage = new PageSetRedirectItem(
+					PageSetRedirectItem toPage = new(
 						title: to,
 						fragment: (string?)item[toFragmentName],
 						interwiki: interwiki,
@@ -347,7 +347,7 @@
 		/// <returns>A list of <see cref="RevisionItem"/>s.</returns>
 		public static IReadOnlyList<RevisionItem> GetRevisions(this JToken? token)
 		{
-			var revisions = new List<RevisionItem>();
+			List<RevisionItem> revisions = new();
 			if (token?["revisions"] is JToken resultNode)
 			{
 				foreach (var revisionNode in resultNode)
@@ -370,7 +370,7 @@
 				return ImmutableDictionary<string, TValue>.Empty;
 			}
 
-			var dict = new Dictionary<string, TValue>(StringComparer.Ordinal);
+			Dictionary<string, TValue> dict = new(StringComparer.Ordinal);
 			foreach (var item in token.Children<JProperty>())
 			{
 				dict.Add(item.Name, item.Value.ToObject<TValue>()!);
@@ -425,12 +425,12 @@
 		/// <returns>System.Collections.Generic.IReadOnlyList&lt;RobinHood70.WallE.Base.WarningsItem&gt;.</returns>
 		public static IReadOnlyList<WarningsItem> GetWarnings(this JToken? token)
 		{
-			var list = new List<WarningsItem>();
+			List<WarningsItem> list = new();
 			if (token != null)
 			{
 				foreach (var item in token)
 				{
-					var warning = new WarningsItem((string?)item["type"] ?? string.Empty, (string?)item["message"], (item["params"]?.ToObject<IEnumerable<object>>()).AsReadOnlyList());
+					WarningsItem warning = new((string?)item["type"] ?? string.Empty, (string?)item["message"], (item["params"]?.ToObject<IEnumerable<object>>()).AsReadOnlyList());
 					list.Add(warning);
 				}
 			}
