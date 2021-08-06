@@ -215,7 +215,7 @@
 			TitleCollection existingTitles = new(this.Site);
 			existingTitles.GetCategoryMembers("Online-NPCs", CategoryMemberTypes.Page, false);
 			existingTitles.GetCategoryMembers("Online-Creatures-All", CategoryMemberTypes.Page, false);
-			var npcs = EsoGeneral.GetNpcsFromDatabase();
+			var npcs = EsoLog.GetNpcs();
 			TitleCollection checkTitles = new(this.Site);
 			foreach (var npc in npcs)
 			{

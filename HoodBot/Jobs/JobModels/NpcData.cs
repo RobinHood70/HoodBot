@@ -7,6 +7,14 @@
 	using RobinHood70.Robby;
 
 	#region Public Enumerations
+	public enum Gender
+	{
+		None = -1,
+		NotApplicable = 0,
+		Female = 1,
+		Male = 2
+	}
+
 	public enum PickpocketDifficulty
 	{
 		NotApplicable = -1,

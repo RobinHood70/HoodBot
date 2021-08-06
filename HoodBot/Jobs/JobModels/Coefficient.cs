@@ -34,7 +34,7 @@
 
 		public bool IsValid => this.A != -1;
 
-		public string MechanicName => EsoGeneral.MechanicNames[this.TypeNumber];
+		public string MechanicName => EsoLog.MechanicNames[this.TypeNumber];
 
 		//// public float R { get; }
 

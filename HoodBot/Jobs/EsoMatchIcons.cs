@@ -2,10 +2,10 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Data;
 	using System.IO;
 	using System.Text;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -185,24 +185,13 @@
 
 		private void LoadQueryData(KeyValuePair<string, string> query)
 		{
-			foreach (var row in Database.RunQuery(EsoGeneral.EsoLogConnectionString, query.Value))
+			foreach (var row in EsoLog.RunQuery(query.Value))
 			{
-				var idType = row.GetDataTypeName(0);
-				var id = idType switch
-				{
-					"BIGINT" => (long)row["id"],
-					"INT" => (int)row["id"],
-					_ => throw new InvalidCastException(),
-				};
-				var iconName = ((string)row["icon"]).Replace("/esoui/art/icons/", string.Empty, StringComparison.OrdinalIgnoreCase).Replace(".dds", string.Empty, StringComparison.OrdinalIgnoreCase);
-				ItemInfo entry = new(
-					id: id,
-					itemName: (string)row["name"],
-					type: query.Key);
-				if (!this.allItems.TryGetValue(iconName, out var list))
+				ItemInfo entry = new(row, query.Key);
+				if (!this.allItems.TryGetValue(entry.IconName, out var list))
 				{
 					list = new List<ItemInfo>(1);
-					this.allItems.Add(iconName, list);
+					this.allItems.Add(entry.IconName, list);
 				}
 
 				list.Add(entry);
@@ -258,12 +247,22 @@
 		#region Private Classes
 		private sealed class ItemInfo
 		{
-			public ItemInfo(long id, string itemName, string type)
+			public ItemInfo(IDataRecord row, string type)
 			{
+				var idType = row.GetDataTypeName(0);
+				var id = idType switch
+				{
+					"BIGINT" => (long)row["id"],
+					"INT" => (int)row["id"],
+					_ => throw new InvalidCastException(),
+				};
+				this.IconName = ((string)row["icon"]).Replace("/esoui/art/icons/", string.Empty, StringComparison.OrdinalIgnoreCase).Replace(".dds", string.Empty, StringComparison.OrdinalIgnoreCase);
 				this.Id = id;
-				this.ItemName = itemName;
+				this.ItemName = (string)row["name"];
 				this.Type = type;
 			}
+
+			public string IconName { get; }
 
 			public long Id { get; }
 
