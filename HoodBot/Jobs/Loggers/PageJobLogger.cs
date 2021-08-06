@@ -25,7 +25,7 @@
 		private DateTime? end;
 		private LogInfo? logInfo;
 		private DateTime? start;
-		private string? status;
+		private string status = "None";
 		#endregion
 
 		#region Constructors
@@ -39,14 +39,26 @@
 			this.logInfo = info.NotNull(nameof(info));
 			this.start = DateTime.UtcNow;
 			this.end = null;
-			this.UpdateLogPage("Job Started", info.Title);
+			this.status = info.Title;
+			this.UpdateEntry();
+			this.SaveLogPage("Job Started", this.UpdateEntry);
 		}
 
 		public override void EndLogEntry()
 		{
 			this.logInfo.ThrowNull(nameof(PageJobLogger), nameof(this.logInfo));
 			this.end = DateTime.UtcNow;
-			this.UpdateLogPage("Job Finished", "None");
+			this.status = "None";
+			this.UpdateEntry();
+		}
+
+		public override void CloseLog()
+		{
+			if (this.logPage != null)
+			{
+				this.SaveLogPage("Job Finished", this.EndLogEntry);
+			}
+
 			this.start = null;
 			this.end = null;
 		}
@@ -65,9 +77,8 @@
 		#endregion
 
 		#region Private Methods
-		private bool UpdateCurrentStatus(ContextualParser parser)
+		private static bool UpdateCurrentStatus(ContextualParser parser, string status)
 		{
-			this.status.ThrowNull(nameof(PageJobLogger), nameof(this.status));
 			var currentTask = parser.Nodes.FindIndex<IHeaderNode>(header => string.Equals(header.GetInnerText(true), "Current Task", StringComparison.Ordinal));
 			var taskLog = parser.Nodes.FindIndex<IHeaderNode>(currentTask + 1);
 			if (currentTask == -1 || taskLog == -1)
@@ -79,78 +90,76 @@
 			var section = parser.Nodes.GetRange(currentTask, taskLog - currentTask);
 			var previousTask = WikiTextVisitor.Raw(section).Trim().TrimEnd(TextArrays.Period);
 			parser.Nodes.RemoveRange(currentTask, taskLog - currentTask);
-			parser.Nodes.Insert(currentTask, parser.Nodes.Factory.TextNode("\n" + this.status + ".\n\n"));
+			parser.Nodes.Insert(currentTask, parser.Nodes.Factory.TextNode("\n" + status + ".\n\n"));
 
-			return string.Equals(previousTask, this.status, StringComparison.Ordinal);
+			return string.Equals(previousTask, status, StringComparison.Ordinal);
 		}
 
-		private void UpdateEntry(Page page)
+		private void UpdateEntry()
 		{
 			Debug.Assert(this.logInfo != null, "LogInfo is null.");
-			ContextualParser parser = new(page);
+			this.logPage ??= this.logTitle.Load();
+			ContextualParser parser = new(this.logPage);
 			var factory = parser.Nodes.Factory;
-			var sameTaskText = this.UpdateCurrentStatus(parser);
+			var sameTaskText = UpdateCurrentStatus(parser, this.status);
 			var firstEntry = parser.Nodes.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("/Entry"));
-			if (firstEntry != -1)
-			{
-				SiteTemplateNode? entry = (SiteTemplateNode)parser.Nodes[firstEntry];
-
-				// If the last job was the same as this job and has no end time, then it's either the current job or a resumed one.
-				if (string.IsNullOrEmpty(entry.Find(3)?.Value.ToValue()) &&
-					string.Equals(entry.Find(1)?.Value.ToValue().Trim(), this.logInfo.Title, StringComparison.Ordinal) &&
-					string.Equals(entry.Find("info")?.Value.ToValue() ?? string.Empty, this.logInfo.Details ?? string.Empty, StringComparison.Ordinal))
-				{
-					// If the end date is not null, then we're at the end of the job, so update the end time.
-					if (this.end != null)
-					{
-						var startParam = entry.FindNumberedIndex(2);
-						Debug.Assert(startParam != -1, "Start parameter not found.");
-						var endParam = factory.ParameterNodeFromParts(FormatDateTime(DateTime.UtcNow));
-						entry.Parameters.Insert(startParam + 1, endParam);
-						page.Text = parser.ToRaw();
-					}
-
-					return;
-				}
-
-				List<(string?, string)> parms = new() { (null, this.logInfo.Title) };
-				if (!string.IsNullOrEmpty(this.logInfo.Details))
-				{
-					parms.Add(("info", this.logInfo.Details));
-				}
-
-				AddDateTime(parms, this.start);
-				AddDateTime(parms, this.end);
-
-				parser.Nodes.InsertRange(firstEntry, new IWikiNode[]
-				{
-					factory.TemplateNodeFromParts("/Entry", false, parms),
-					factory.TextNode("\n")
-				});
-
-				page.Text = parser.ToRaw();
-			}
-			else
+			if (firstEntry == -1)
 			{
 				// CONSIDER: This used to insert a /Entry into an empty table, but given that we're not currently parsing tables, that would've required far too much code for a one-off situation, so it's been left out. Could theoretically be reintroduced once table parsing is in place.
 				throw BadLogPage;
 			}
+
+			SiteTemplateNode? entry = (SiteTemplateNode)parser.Nodes[firstEntry];
+			if (
+				this.end == null &&
+				sameTaskText &&
+				string.IsNullOrEmpty(entry.Find(3)?.Value.ToValue()) &&
+				this.logInfo.Title.OrdinalEquals(entry.Find(1)?.Value.ToValue().Trim()) &&
+				(this.logInfo.Details ?? string.Empty).OrdinalEquals(entry.Find("info")?.Value.ToValue() ?? string.Empty))
+			{
+				return;
+			}
+
+			if (this.end != null)
+			{
+				// If the last job was the same as this job and has no end time, then it's either the current job or a resumed one.
+				var startParam = entry.FindNumberedIndex(2);
+				if (startParam >= 0)
+				{
+					var endParam = factory.ParameterNodeFromParts(FormatDateTime(DateTime.UtcNow));
+					entry.Parameters.Insert(startParam + 1, endParam);
+					this.logPage.Text = parser.ToRaw();
+					return;
+				}
+			}
+
+			List<(string?, string)> parms = new() { (null, this.logInfo.Title) };
+			if (!string.IsNullOrEmpty(this.logInfo.Details))
+			{
+				parms.Add(("info", this.logInfo.Details));
+			}
+
+			AddDateTime(parms, this.start);
+			AddDateTime(parms, this.end);
+
+			parser.Nodes.InsertRange(firstEntry, new IWikiNode[]
+			{
+						factory.TemplateNodeFromParts("/Entry", false, parms),
+						factory.TextNode("\n")
+			});
+
+			this.logPage.Text = parser.ToRaw();
 		}
 
-		private void UpdateLogPage(string editSummary, string status)
+		private void SaveLogPage(string editSummary, Action editConflictAction)
 		{
-			this.status = status;
 			var saved = false;
-			this.logPage ??= this.logTitle.Load() ?? throw new InvalidOperationException();
-
 			do
 			{
-				this.UpdateEntry(this.logPage);
-
 				// Assumes that its current LogPage.Text is still valid and tries to update, then save that directly. Loads only if it gets an edit conflict.
 				try
 				{
-					var result = this.logPage.Save(editSummary, true);
+					var result = this.logPage?.Save(editSummary, true);
 					saved = result is
 						ChangeStatus.EditingDisabled or
 						ChangeStatus.NoEffect or
@@ -158,7 +167,8 @@
 				}
 				catch (EditConflictException)
 				{
-					this.logPage = this.logTitle.Load();
+					this.logPage = null;
+					editConflictAction();
 				}
 				catch (StopException)
 				{
