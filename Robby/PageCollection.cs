@@ -166,11 +166,12 @@
 		}
 
 		/// <summary>Removes all pages from the collection where the page's <see cref="Page.Exists"/> property is false.</summary>
-		public void RemoveUnchanged()
+		/// <param name="changed"><see langword="true"/>to remove changed pages; <see langword="false"/> to remove unchanged pages.</param>
+		public void RemoveChanged(bool changed)
 		{
 			for (var i = this.Count - 1; i >= 0; i--)
 			{
-				if (!this[i].TextModified)
+				if (this[i].TextModified == changed)
 				{
 					this.RemoveAt(i);
 				}
