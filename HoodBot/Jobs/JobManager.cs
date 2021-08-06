@@ -13,7 +13,7 @@
 	public class JobManager
 	{
 		#region Constructors
-		public JobManager(Site site, CancellationToken cancellationToken, PauseToken pauseToken)
+		public JobManager(Site site, PauseToken pauseToken, CancellationToken cancellationToken)
 		{
 			this.Site = site.NotNull(nameof(site));
 			this.CancellationToken = cancellationToken;
@@ -66,7 +66,7 @@
 				var job = jobInfo.Instantiate(this);
 				try
 				{
-					await Task.Run(job.Execute).ConfigureAwait(true);
+					await Task.Run(job.Execute, this.CancellationToken).ConfigureAwait(true);
 					abort = this.OnFinishedJob(jobInfo, null);
 					if (abort)
 					{

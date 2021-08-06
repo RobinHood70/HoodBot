@@ -520,7 +520,7 @@
 				}
 			}
 
-			throw new WikiException(Globals.CurrentCulture(Messages.ExcessiveLag));
+			throw new WikiException(Messages.ExcessiveLag);
 		}
 		#endregion
 	}

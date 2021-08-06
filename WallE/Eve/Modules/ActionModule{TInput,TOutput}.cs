@@ -47,14 +47,14 @@ namespace RobinHood70.WallE.Eve.Modules
 			// Note that result will not yet have been checked for null in this version of deserialization.
 			if (result?.Contains("$wgEnableAPI", StringComparison.Ordinal) == true)
 			{
-				throw WikiException.General(WikiAbstractionLayer.ApiDisabledCode, Globals.CurrentCulture(EveMessages.ApiDisabled));
+				throw WikiException.General(WikiAbstractionLayer.ApiDisabledCode, EveMessages.ApiDisabled);
 			}
 
-			throw new WikiException(Globals.CurrentCulture(EveMessages.ResultInvalid));
+			throw new WikiException(EveMessages.ResultInvalid);
 		}
 
 		// This version is for responses like OpenSearch where the Json should be valid, but is an array rather than an object.
-		protected virtual TOutput DeserializeCustom(JToken result) => throw new WikiException(Globals.CurrentCulture(EveMessages.ResultInvalid));
+		protected virtual TOutput DeserializeCustom(JToken result) => throw new WikiException(EveMessages.ResultInvalid);
 		#endregion
 
 		#region Private Methods

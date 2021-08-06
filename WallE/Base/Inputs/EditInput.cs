@@ -35,7 +35,7 @@ namespace RobinHood70.WallE.Base
 		{
 			if (string.IsNullOrEmpty(prependText ?? appendText))
 			{
-				throw new InvalidOperationException(Globals.CurrentCulture(EveMessages.PrependAppend));
+				throw new InvalidOperationException(EveMessages.PrependAppend);
 			}
 
 			this.PageId = pageId;

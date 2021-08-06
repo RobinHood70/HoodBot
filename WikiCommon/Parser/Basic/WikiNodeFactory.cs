@@ -225,7 +225,7 @@
 			var nodes = this.Parse(text);
 			return nodes.Count == 1 && nodes[0] is T node
 				? node
-				: throw new ArgumentException(Globals.CurrentCulture(Resources.MalformedNodeText, this.GetType().Name, callerName), nameof(text));
+				: throw new ArgumentException(paramName: nameof(text), message: Globals.CurrentCulture(Resources.MalformedNodeText, this.GetType().Name, callerName));
 		}
 
 		/// <summary>Creates a new TemplateNode from its parts.</summary>

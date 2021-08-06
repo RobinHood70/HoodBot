@@ -22,7 +22,7 @@
 		#region Static Fields
 		private static readonly Dictionary<ProtectionLevel, string> ProtectionString = new()
 		{
-			[ProtectionLevel.None] = "None",
+			[ProtectionLevel.Remove] = "None",
 			[ProtectionLevel.Semi] = "Semi",
 			[ProtectionLevel.Full] = "Full",
 		};
@@ -81,8 +81,8 @@
 				"archive protection policy")),
 			new ProtectionInfo(new[] { MediaWikiNamespaces.Project }, @"\AAdministrator Noticeboard/Vandalism\Z", new PageProtection(
 				"Non-archive AN Subpages",
-				ProtectionLevel.None,
-				ProtectionLevel.None,
+				ProtectionLevel.Remove,
+				ProtectionLevel.Remove,
 				null,
 				string.Empty,
 				string.Empty,
@@ -99,8 +99,8 @@
 				"archive protection policy")),
 			new ProtectionInfo(new[] { MediaWikiNamespaces.Project }, @"\ACommunity Portal/Templates\Z", new PageProtection(
 				"Non-archive CP Subpages",
-				ProtectionLevel.None,
-				ProtectionLevel.None,
+				ProtectionLevel.Remove,
+				ProtectionLevel.Remove,
 				null,
 				string.Empty,
 				string.Empty,
@@ -393,7 +393,7 @@
 		private static int InsertStandardProtectionTemplate(ContextualParser parser, PageProtection protection, int insertPos, string editWord, string moveWord)
 		{
 			var protectionTemplate = parser.Nodes.Factory.TemplateNodeFromParts(ProtectionTemplateName);
-			if (protection.EditProtection != ProtectionLevel.None || protection.MoveProtection != ProtectionLevel.None)
+			if (protection.EditProtection != ProtectionLevel.Remove || protection.MoveProtection != ProtectionLevel.Remove)
 			{
 				protectionTemplate.Add(editWord);
 				if (protection.MoveProtection != protection.EditProtection)
@@ -412,9 +412,9 @@
 				{
 					"sysop" => ProtectionLevel.Full,
 					"autoconfirmed" => ProtectionLevel.Semi,
-					_ => ProtectionLevel.None
+					_ => ProtectionLevel.Remove
 				}
-				: ProtectionLevel.None;
+				: ProtectionLevel.Remove;
 
 		private static int RemoveProtectionTemplate(ContextualParser parser, int insertPos)
 		{
@@ -457,7 +457,7 @@
 				insertPos++;
 			}
 			else if (protection.NoInclude && (
-				(protection.AddProtectionTemplate != null && (protection.EditProtection != ProtectionLevel.None || protection.MoveProtection != ProtectionLevel.None))
+				(protection.AddProtectionTemplate != null && (protection.EditProtection != ProtectionLevel.Remove || protection.MoveProtection != ProtectionLevel.Remove))
 				|| !string.IsNullOrEmpty(protection.Header)
 				|| !string.IsNullOrEmpty(protection.Footer)))
 			{

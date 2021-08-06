@@ -16,6 +16,7 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
+	using RobinHood70.WikiCommon.Properties;
 
 	#region Internal Enums
 	[Flags]
@@ -116,8 +117,10 @@
 						{
 							RedirectOption.Suppress => "suppress redirects",
 							RedirectOption.Create => "create redirects",
-							_ => "create redirects but propose them for deletion",
+							RedirectOption.CreateButProposeDeletion => "create redirects but propose them for deletion",
+							_ => throw new InvalidOperationException(GlobalMessages.InvalidSwitchValue)
 						};
+
 						list.Add(value);
 					}
 

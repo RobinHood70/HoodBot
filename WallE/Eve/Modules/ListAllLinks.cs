@@ -1,10 +1,12 @@
 ﻿namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
+	using System.Diagnostics.CodeAnalysis;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Properties;
+	using RobinHood70.WikiCommon.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
 
 	internal sealed class ListAllLinks : ListModule<IAllLinksInput, AllLinksItem>, IGeneratorModule
@@ -15,15 +17,24 @@
 		{
 		}
 
+		[SuppressMessage("Style", "IDE0072:Add missing cases", Justification = "Other cases are covered by preceding error message.")]
 		public ListAllLinks(WikiAbstractionLayer wal, IAllLinksInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator) => (this.Prefix, this.Name) = input.LinkType switch
+			: base(wal, input, pageSetGenerator)
+		{
+			if (!input.LinkType.IsUniqueFlag())
+			{
+				throw new InvalidOperationException(Globals.CurrentCulture(EveMessages.InputNonUnique, nameof(ListAllLinks), input.LinkType));
+			}
+
+			(this.Prefix, this.Name) = input.LinkType switch
 			{
 				AllLinksTypes.Links => ("al", "alllinks"),
 				AllLinksTypes.FileUsages => ("af", "allfileusages"),
 				AllLinksTypes.Redirects => ("ar", "allredirects"),
 				AllLinksTypes.Transclusions => ("at", "alltransclusions"),
-				_ => throw new InvalidOperationException(Globals.CurrentCulture(input.LinkType.IsUniqueFlag() ? EveMessages.ParameterInvalid : EveMessages.InputNonUnique, nameof(ListAllLinks), input.LinkType)),
+				_ => throw new InvalidOperationException(GlobalMessages.InvalidSwitchValue),
 			};
+		}
 		#endregion
 
 		#region Public Override Properties

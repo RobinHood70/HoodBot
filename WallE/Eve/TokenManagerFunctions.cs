@@ -21,7 +21,7 @@
 				type = replaceWith;
 			}
 
-			return !validTypes.Contains(type) ? throw new ArgumentException(EveMessages.BadTokenRequest, nameof(type)) : type;
+			return !validTypes.Contains(type) ? throw new ArgumentException(paramName: nameof(type), message: EveMessages.BadTokenRequest) : type;
 		}
 		#endregion
 	}

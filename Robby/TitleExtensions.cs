@@ -5,6 +5,7 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WikiCommon.Properties;
 
 	/// <summary>These extensions add a number of useful pseudo-properties and methods that can all be determined from the base namespace and page name properties of any <see cref="ISimpleTitle"/>.</summary>
 	public static class TitleExtensions
@@ -12,16 +13,19 @@
 		#region Public Property=Like Methods
 
 		/// <summary>Gets the value corresponding to {{BASEPAGENAME}}.</summary>
+		/// <param name="title">The title representing the page.</param>
 		/// <returns>The name of the base page.</returns>
 		public static string BasePageName(this ISimpleTitle title) => title.NotNull(nameof(title)).Namespace.AllowsSubpages && title.PageName.LastIndexOf('/') is var subPageLoc && subPageLoc > 0
 				? title.PageName.Substring(0, subPageLoc)
 				: title.PageName;
 
 		/// <summary>Gets the full page name of a title.</summary>
+		/// <param name="title">The title representing the page.</param>
 		/// <returns>The full page name (<c>{{FULLPAGENAME}}</c>) of a title.</returns>
 		public static string FullPageName(this ISimpleTitle title) => title.NotNull(nameof(title)).Namespace.DecoratedName + title.PageName;
 
 		/// <summary>Gets the value corresponding to {{ROOTPAGENAME}}.</summary>
+		/// <param name="title">The title representing the page.</param>
 		/// <returns>The name of the base page.</returns>
 		public static string RootPageName(this ISimpleTitle title) =>
 			title.NotNull(nameof(title)).Namespace.AllowsSubpages &&
@@ -32,12 +36,14 @@
 
 		/// <summary>Gets a Title object for title Title's corresponding subject page.</summary>
 		/// <returns>The subject page.</returns>
+		/// <param name="title">The title representing the page.</param>
 		/// <remarks>If title Title is a subject page, returns itself.</remarks>
 		public static ISimpleTitle SubjectPage(this ISimpleTitle title) => title.NotNull(nameof(title)).Namespace.IsSubjectSpace
 			? title
 			: TitleFactory.DirectNormalized(title.Namespace.SubjectSpace, title.PageName).ToTitle();
 
 		/// <summary>Gets the value corresponding to {{SUBPAGENAME}}.</summary>
+		/// <param name="title">The title representing the page.</param>
 		/// <returns>The name of the subpage.</returns>
 		public static string SubPageName(this ISimpleTitle title) =>
 			title.NotNull(nameof(title)).Namespace.AllowsSubpages &&
@@ -48,6 +54,7 @@
 
 		/// <summary>Gets a Title object for title Title's corresponding subject page.</summary>
 		/// <returns>The talk page.</returns>
+		/// <param name="title">The title representing the page.</param>
 		/// <remarks>If title object represents a talk page, returns a self-reference.</remarks>
 		public static ISimpleTitle? TalkPage(this ISimpleTitle title)
 		{
@@ -67,7 +74,10 @@
 		/// <param name="createProtection">The protection level.</param>
 		/// <param name="expiry">The expiry date and time.</param>
 		/// <returns>A value indicating the change status of the protection.</returns>
-		public static ChangeStatus CreateProtect(this ISimpleTitle title, string reason, ProtectionLevel createProtection, DateTime expiry) => title.CreateProtect(reason, ProtectionWord(createProtection), expiry);
+		public static ChangeStatus CreateProtect(this ISimpleTitle title, string reason, ProtectionLevel createProtection, DateTime expiry) =>
+			createProtection == ProtectionLevel.NoChange
+				? ChangeStatus.NoEffect
+				: title.CreateProtect(reason, ProtectionWord(createProtection), expiry);
 
 		/// <summary>Protects a non-existent page from being created.</summary>
 		/// <param name="title">The title to protect from creation.</param>
@@ -93,7 +103,10 @@
 		/// <param name="createProtection">The protection level.</param>
 		/// <param name="duration">The duration of the create-protection (e.g., "2 weeks").</param>
 		/// <returns>A value indicating the change status of the protection.</returns>
-		public static ChangeStatus CreateProtect(this ISimpleTitle title, string reason, ProtectionLevel createProtection, string duration) => title.CreateProtect(reason, ProtectionWord(createProtection), duration);
+		public static ChangeStatus CreateProtect(this ISimpleTitle title, string reason, ProtectionLevel createProtection, string duration) =>
+			createProtection == ProtectionLevel.NoChange
+				? ChangeStatus.NoEffect
+				: title.CreateProtect(reason, ProtectionWord(createProtection)!, duration);
 
 		/// <summary>Protects a non-existent page from being created.</summary>
 		/// <param name="title">The title to protect from creation.</param>
@@ -114,7 +127,7 @@
 		/// <returns>A value indicating the change status of the unprotection.</returns>
 		public static ChangeStatus CreateUnprotect(this ISimpleTitle title, string reason)
 		{
-			var protection = new ProtectInputItem("create", ProtectionWord(ProtectionLevel.None)!);
+			var protection = new ProtectInputItem("create", ProtectionWord(ProtectionLevel.Remove)!);
 			return title.NotNull(nameof(title)).Protect(reason, new[] { protection });
 		}
 
@@ -170,7 +183,7 @@
 		/// <param name="expiry">The expiry date and time.</param>
 		/// <returns>A value indicating the change status of the protection.</returns>
 		/// <remarks>title version allows custom protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="Protect(ISimpleTitle, string, ProtectionLevel, ProtectionLevel, DateTime)"/> version of title call.</remarks>
-		public static ChangeStatus Protect(this ISimpleTitle title, string reason, string editProtection, string moveProtection, DateTime expiry)
+		public static ChangeStatus Protect(this ISimpleTitle title, string reason, string? editProtection, string? moveProtection, DateTime expiry)
 		{
 			var wikiExpiry = expiry == DateTime.MaxValue ? null : (DateTime?)expiry;
 			var protections = new List<ProtectInputItem>(2);
@@ -224,8 +237,8 @@
 		/// <returns>A value indicating the change status of the unprotection.</returns>
 		public static ChangeStatus Unprotect(this ISimpleTitle title, string reason, bool editUnprotect, bool moveUnprotect) => title.Protect(
 			reason,
-			editUnprotect ? ProtectionLevel.None : ProtectionLevel.NoChange,
-			moveUnprotect ? ProtectionLevel.None : ProtectionLevel.NoChange,
+			editUnprotect ? ProtectionLevel.Remove : ProtectionLevel.NoChange,
+			moveUnprotect ? ProtectionLevel.Remove : ProtectionLevel.NoChange,
 			null);
 		#endregion
 
@@ -279,12 +292,13 @@
 		#endregion
 
 		// A dictionary is probably overkill for three items.
-		private static string ProtectionWord(ProtectionLevel level) => level switch
+		private static string? ProtectionWord(ProtectionLevel level) => level switch
 		{
-			ProtectionLevel.None => "all",
+			ProtectionLevel.Remove => "all",
 			ProtectionLevel.Semi => "autoconfirmed",
 			ProtectionLevel.Full => "sysop",
-			_ => throw new ArgumentOutOfRangeException(nameof(level))
+			ProtectionLevel.NoChange => null,
+			_ => throw new ArgumentOutOfRangeException(paramName: nameof(level), message: GlobalMessages.InvalidSwitchValue)
 		};
 		#endregion
 	}

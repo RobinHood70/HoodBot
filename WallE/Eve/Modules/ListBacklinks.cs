@@ -2,11 +2,13 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics.CodeAnalysis;
 	using Newtonsoft.Json.Linq;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Properties;
 	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon.Properties;
 	using RobinHood70.WikiCommon.RequestBuilder;
 	using static RobinHood70.WallE.Eve.ParsingExtensions;
 
@@ -18,14 +20,23 @@
 		{
 		}
 
+		[SuppressMessage("Style", "IDE0072:Add missing cases", Justification = "Other cases are covered by preceding error message.")]
 		public ListBacklinks(WikiAbstractionLayer wal, BacklinksInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator) => (this.Prefix, this.Name) = input.LinkTypes switch
+			: base(wal, input, pageSetGenerator)
+		{
+			if (!input.LinkTypes.IsUniqueFlag())
+			{
+				throw new InvalidOperationException(Globals.CurrentCulture(EveMessages.InputNonUnique, nameof(ListAllLinks), input.LinkTypes));
+			}
+
+			(this.Prefix, this.Name) = input.LinkTypes switch
 			{
 				BacklinksTypes.Backlinks => ("bl", "backlinks"),
 				BacklinksTypes.EmbeddedIn => ("ei", "embeddedin"),
 				BacklinksTypes.ImageUsage => ("iu", "imageusage"),
-				_ => throw new InvalidOperationException(Globals.CurrentCulture(input.LinkTypes.IsUniqueFlag() ? EveMessages.ParameterInvalid : EveMessages.InputNonUnique, nameof(ListAllLinks), input.LinkTypes))
+				_ => throw new InvalidOperationException(GlobalMessages.InvalidSwitchValue)
 			};
+		}
 		#endregion
 
 		#region Public Override Properties

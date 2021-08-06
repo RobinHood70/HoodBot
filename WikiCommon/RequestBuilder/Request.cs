@@ -110,7 +110,7 @@
 		{
 			if (value == null || value.Length == 0)
 			{
-				throw new ArgumentException(Resources.EmptyFile, nameof(value));
+				throw new ArgumentException(paramName: nameof(value), message: Resources.EmptyFile);
 			}
 
 			this.Add(new FileParameter(this.Prefix + name, fileName, value));
@@ -233,7 +233,8 @@
 			{
 				Filter.Only => this.AddToPiped(name, trueValue),
 				Filter.Exclude => this.AddToPiped(name, '!' + trueValue),
-				_ => this,
+				Filter.Any => this,
+				_ => throw new ArgumentOutOfRangeException(paramName: nameof(filter), message: GlobalMessages.InvalidSwitchValue)
 			};
 		}
 
@@ -255,7 +256,8 @@
 		{
 			Filter.Only => this.Add(name, onlyName),
 			Filter.Exclude => this.Add(name, filterName),
-			_ => this,
+			Filter.Any => this,
+			_ => throw new ArgumentOutOfRangeException(paramName: nameof(filter), message: GlobalMessages.InvalidSwitchValue),
 		};
 
 		// TODO: Add AddFlags that distinguishes between None and Default and sends empty parameter for None instead of nothing. Update all relevant calls and flag values as appropriate.
@@ -515,7 +517,8 @@
 		{
 			Tristate.True => this.Add(trueName),
 			Tristate.False => this.Add(falseName),
-			_ => this,
+			Tristate.Unknown => this,
+			_ => throw new ArgumentOutOfRangeException(paramName: nameof(tristateVar), message: GlobalMessages.InvalidSwitchValue),
 		};
 
 		/// <summary>Builds the request using the specified IParameterVisitor.</summary>

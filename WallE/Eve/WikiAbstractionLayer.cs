@@ -58,7 +58,7 @@
 		{
 			if (!apiUri.NotNull(nameof(apiUri)).AbsolutePath.EndsWith("api.php", StringComparison.OrdinalIgnoreCase))
 			{
-				throw new InvalidOperationException(Globals.CurrentCulture(EveMessages.InvalidApi));
+				throw new InvalidOperationException(EveMessages.InvalidApi);
 			}
 
 			this.Client = client.NotNull(nameof(client));

@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System.Diagnostics;
-
 	using RobinHood70.WikiCommon;
 
 	public class WatchTemplates : WikiJob

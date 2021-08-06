@@ -28,7 +28,7 @@
 		{
 			if (title.Namespace.Id != MediaWikiNamespaces.File)
 			{
-				throw new ArgumentException(Globals.CurrentCulture(Resources.NamespaceMustBe, this.Site[MediaWikiNamespaces.File].Name), nameof(title));
+				throw new ArgumentException(paramName: nameof(title), message: Globals.CurrentCulture(Resources.NamespaceMustBe, this.Site[MediaWikiNamespaces.File].Name));
 			}
 
 			this.fileRevisions.Clear();

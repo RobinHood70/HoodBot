@@ -5,6 +5,9 @@
 	"settings": {
 		"indentation": {
 			"useTabs": true
+		},
+		"orderingRules": {
+			"blankLinesBetweenUsingGroups": "omit"
 		}
 	}
 }

@@ -457,7 +457,7 @@
 				}
 				catch (InvalidCastException)
 				{
-					this.Wal.AddWarning("siteinfo-unhandledparams", Globals.CurrentCulture(EveMessages.UnhandledParams, name));
+					this.Wal.AddWarning("siteinfo-unhandledparams", Globals.CurrentCulture(EveMessages.UnhandledParams, name ?? Globals.Unknown));
 				}
 
 				retval.Add(new SiteInfoExtensions(

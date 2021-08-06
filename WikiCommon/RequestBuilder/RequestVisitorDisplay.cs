@@ -3,6 +3,7 @@
 	using System;
 	using System.Text;
 	using RobinHood70.CommonCode;
+	using RobinHood70.WikiCommon.Properties;
 
 	// Escaping in this class is only at the Uri level rather than the Data level because it produces much cleaner output which any browser will fix up, if needed, when the request is put through.
 
@@ -32,8 +33,10 @@
 			{
 				RequestType.Get => "GET",
 				RequestType.Post => "POST",
-				_ => "POST (multipart)",
+				RequestType.PostMultipart => "POST (multipart)",
+				_ => throw new InvalidOperationException(GlobalMessages.InvalidSwitchValue)
 			};
+
 			return FormattableString.Invariant($"{methodText}: {request.Uri}?{sb}");
 		}
 
@@ -57,7 +60,8 @@
 			{
 				ValueType.Hidden => "<hidden>",
 				ValueType.Modify => parameter.Value + "fm",
-				_ => Globals.EscapeDataString(parameter?.Value ?? string.Empty),
+				ValueType.Normal => Globals.EscapeDataString(parameter?.Value ?? string.Empty),
+				_ => throw new InvalidOperationException(GlobalMessages.InvalidSwitchValue)
 			});
 		}
 		#endregion

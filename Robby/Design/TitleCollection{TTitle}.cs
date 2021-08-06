@@ -972,7 +972,7 @@
 				LimitationType.None => true,
 				LimitationType.Remove => !this.NamespaceLimitations.Contains(title.Namespace.Id),
 				LimitationType.FilterTo => this.NamespaceLimitations.Contains(title.Namespace.Id),
-				_ => throw new InvalidOperationException(Resources.InvalidLimitationType)
+				_ => throw new ArgumentOutOfRangeException(Resources.InvalidLimitationType)
 			};
 		#endregion
 
@@ -987,7 +987,7 @@
 		{
 			if (item.NotNull(nameof(item)).Namespace.Site != this.Site)
 			{
-				throw new InvalidOperationException(Globals.CurrentCulture(Resources.InvalidSite));
+				throw new InvalidOperationException(Resources.InvalidSite);
 			}
 
 			if (this.IsTitleInLimits(item))
