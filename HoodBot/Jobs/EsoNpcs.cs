@@ -42,8 +42,8 @@
 			npcCollection.GetLocations();
 
 			this.StatusWriteLine("Getting place data");
-			var places = EsoGeneral.GetPlaces(this.Site);
-			var placeInfo = EsoGeneral.PlaceInfo;
+			var places = EsoSpace.GetPlaces(this.Site);
+			var placeInfo = EsoSpace.PlaceInfo;
 			npcCollection.ParseLocations(places);
 			foreach (var npc in npcCollection)
 			{
