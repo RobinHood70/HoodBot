@@ -23,7 +23,7 @@
 
 			if (npcIds.Count > 0)
 			{
-				foreach (var npc in EsoGeneral.GetNpcLocationData(npcIds))
+				foreach (var npc in EsoLog.GetNpcLocations(npcIds))
 				{
 					Place place = new(npc.Zone);
 					this[npc.Id].UnknownLocations.Add(place, npc.LocCount);

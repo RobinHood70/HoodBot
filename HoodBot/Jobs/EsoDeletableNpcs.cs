@@ -20,7 +20,7 @@
 		protected override void Main()
 		{
 			this.StatusWriteLine("Getting NPC data from database");
-			var unfilteredNpcList = EsoGeneral.GetNpcsFromDatabase();
+			var unfilteredNpcList = EsoLog.GetNpcs();
 			List<string> allNames = new();
 			foreach (var npc in unfilteredNpcList)
 			{

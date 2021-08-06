@@ -62,7 +62,7 @@
 
 		public string FullName(string cost) => string.Equals(cost, "0", StringComparison.Ordinal)
 			? "Free"
-			: string.Concat(cost, " ", EsoGeneral.MechanicNames[this.Mechanic]);
+			: string.Concat(cost, " ", EsoLog.MechanicNames[this.Mechanic]);
 		#endregion
 
 		#region Private Methods

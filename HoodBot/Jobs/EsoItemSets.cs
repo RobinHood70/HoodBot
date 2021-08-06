@@ -6,7 +6,6 @@
 	using System.Data;
 	using System.Text;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -96,7 +95,7 @@
 		private static List<SetData> GetSetData()
 		{
 			List<SetData> allSets = new();
-			foreach (var row in Database.RunQuery(EsoGeneral.EsoLogConnectionString, Query))
+			foreach (var row in EsoLog.RunQuery(Query))
 			{
 				allSets.Add(new SetData(row));
 			}

@@ -22,7 +22,7 @@
 		{
 			Dictionary<string, int> lookup = new(StringComparer.Ordinal);
 			TitleCollection titles = new(this.Site);
-			foreach (var (name, data) in EsoGeneral.GetZonesFromDatabase())
+			foreach (var (name, data) in EsoLog.GetZones())
 			{
 				lookup.TryAdd(name, data);
 				titles.Add(UespNamespaces.Online, name);
