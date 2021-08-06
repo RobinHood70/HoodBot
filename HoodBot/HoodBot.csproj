@@ -25,26 +25,23 @@
 		<None Include="Old Jobs\*" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Meziantou.Analyzer" Version="1.0.667">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0-preview.6.21352.12" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="6.0.0-preview.6.21352.12" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0-preview.6.21352.12" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0-preview.6.21352.12" />
-		<PackageReference Include="MvvmLightLibsStd10" Version="5.4.1.1" />
-		<PackageReference Include="MySql.Data" Version="8.0.26" />
-		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0-preview.6.21352.12" />
+	  <PackageReference Include="Meziantou.Analyzer" Version="1.0.667">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	  <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
+	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
+	  <PackageReference Include="MvvmLightLibsStd10" Version="5.4.1.1" />
+	  <PackageReference Include="MySql.Data" Version="8.0.26" />
+	  <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj" />
 		<ProjectReference Include="..\Robby\Robby.csproj" />
-		<ProjectReference Include="..\WikiCommon\WikiCommon.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="CommonCode">
