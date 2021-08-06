@@ -56,8 +56,8 @@
 
 		#region Private Properties
 		private int ColumnCount => 1 +
-			(this.columns.HasFlag(ColumnNames.Notes) ? 1 : 0) +
-			(this.columns.HasFlag(ColumnNames.Reward) ? 1 : 0);
+			((this.columns & ColumnNames.Notes) == 0 ? 0 : 1) +
+			((this.columns & ColumnNames.Reward) == 0 ? 0 : 1);
 		#endregion
 
 		#region Protected Override Methods

@@ -15,14 +15,14 @@ namespace RobinHood70.WallE.Design
 		/// <param name="originalValue">The value to filter.</param>
 		/// <returns>The input value with any relevant flags cleared.</returns>
 		public static FlagFilter<T> Check<T>(int siteVersion, T originalValue)
-			where T : Enum => new(siteVersion, originalValue);
+			where T : struct, Enum => new(siteVersion, originalValue);
 		#endregion
 	}
 
 	/// <summary>A class for filtering flags enumerations based on the MediaWiki site version.</summary>
 	/// <typeparam name="T">The type of the flags filter to be checked.</typeparam>
 	public sealed class FlagFilter<T>
-		where T : Enum
+		where T : struct, Enum
 	{
 		#region Fields
 		private readonly int siteVersion;

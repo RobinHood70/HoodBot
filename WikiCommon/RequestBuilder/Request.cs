@@ -84,7 +84,7 @@
 		/// <param name="value">The parameter value.</param>
 		/// <returns>The current collection (fluent interface).</returns>
 		public Request Add<T>(string name, T value)
-			where T : Enum => value?.GetType().GetEnumName(value) is string enumName
+			where T : struct, Enum => Enum.GetName(value) is string enumName
 				? this.Add(name, enumName.ToLowerInvariant())
 				: this;
 
@@ -266,7 +266,7 @@
 		/// <param name="values">The parameter values.</param>
 		/// <returns>The current collection (fluent interface).</returns>
 		public Request AddFlags<T>(string name, T values)
-			where T : Enum
+			where T : struct, Enum
 		{
 			values.ThrowNull(nameof(values));
 			var type = values.GetType();
@@ -288,7 +288,7 @@
 		/// <param name="condition">The condition to check.</param>
 		/// <returns>The current collection (fluent interface).</returns>
 		public Request AddFlagsIf<T>(string name, T values, bool condition)
-			where T : Enum => condition ? this.AddFlags(name, values) : this;
+			where T : struct, Enum => condition ? this.AddFlags(name, values) : this;
 
 		/// <summary>Adds the format parameter.</summary>
 		/// <param name="value">The format parameter value.</param>
@@ -353,7 +353,7 @@
 		/// <param name="condition">The condition to check.</param>
 		/// <returns>The current collection (fluent interface).</returns>
 		public Request AddIf<T>(string name, T value, bool condition)
-			where T : Enum => condition ? this.Add(name, value) : this;
+			where T : struct, Enum => condition ? this.Add(name, value) : this;
 
 		/// <summary>Adds an integer parameter if the condition is true.</summary>
 		/// <param name="name">The parameter name.</param>
@@ -418,7 +418,7 @@
 		/// <param name="value">The parameter value.</param>
 		/// <returns>The current collection (fluent interface).</returns>
 		public Request AddIfPositive<T>(string name, T value)
-			where T : Enum => Convert.ToUInt64(value, CultureInfo.InvariantCulture) > 0 ? this.Add(name, value) : this;
+			where T : struct, Enum => Convert.ToUInt64(value, CultureInfo.InvariantCulture) > 0 ? this.Add(name, value) : this;
 
 		/// <summary>Adds an integer parameter if the value is greater than zero.</summary>
 		/// <param name="name">The parameter name.</param>
@@ -443,7 +443,7 @@
 		/// <param name="condition">The condition to check.</param>
 		/// <returns>The current collection (fluent interface).</returns>
 		public Request AddIfPositiveIf<T>(string name, T value, bool condition)
-			where T : Enum => condition && Convert.ToUInt64(value, CultureInfo.InvariantCulture) > 0 ? this.Add(name, value) : this;
+			where T : struct, Enum => condition && Convert.ToUInt64(value, CultureInfo.InvariantCulture) > 0 ? this.Add(name, value) : this;
 
 		/// <summary>Adds an integer parameter if the value is greater than zero and the condition is true.</summary>
 		/// <param name="name">The parameter name.</param>

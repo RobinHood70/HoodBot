@@ -27,7 +27,7 @@
 		/// <param name="flag">The flag to be added if the "case" value evaluates to "case-sensitive".</param>
 		/// <returns>The modified enumeration value.</returns>
 		public static T AddCaseFlag<T>(this T value, JToken token, T flag)
-			where T : Enum
+			where T : struct, Enum
 		{
 			if (token == null)
 			{
@@ -162,7 +162,7 @@
 		/// <example><c>result.GetFlags(("new", EditFlags.New), ("nochange", EditFlags.NoChange))</c>.</example>
 		/// <returns>The combined enumeration values.</returns>
 		public static T GetFlags<T>(this JToken? token, params (string Key, T Value)[] nodeNames)
-				where T : Enum
+				where T : struct, Enum
 		{
 			ulong retval = 0;
 			if (token != null && nodeNames != null)
