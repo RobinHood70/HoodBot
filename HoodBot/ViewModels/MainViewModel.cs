@@ -297,14 +297,14 @@
 			return client;
 		}
 
-		private JobManager CreateJobManager(Site site, CancellationToken cancellationToken, WikiInfoViewModel wikiInfo)
+		private JobManager CreateJobManager(Site site, WikiInfoViewModel wikiInfo, CancellationToken cancellationToken)
 		{
 			// We pass wikiInfo here only because it's already validated as not null.
 			var pauseSource = new PauseTokenSource();
 			this.pauser = pauseSource;
 			var pauseToken = pauseSource.Token;
 
-			var jobManager = new JobManager(site, cancellationToken, pauseToken)
+			var jobManager = new JobManager(site, pauseToken, cancellationToken)
 			{
 				Logger = string.IsNullOrEmpty(wikiInfo.LogPage)
 					? null
@@ -415,7 +415,7 @@
 			var abstractionLayer = this.CreateAbstractionLayer(client, wikiInfo);
 			var site = this.CreateSite(abstractionLayer, wikiInfo);
 
-			var jobManager = this.CreateJobManager(site, cancellationToken, wikiInfo);
+			var jobManager = this.CreateJobManager(site, wikiInfo, cancellationToken);
 			await jobManager.Run(jobList).ConfigureAwait(true);
 
 			this.DestroyJobManager(jobManager);

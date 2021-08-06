@@ -250,12 +250,15 @@
 		public FullTitle ToFullTitle() => new(this);
 
 		/// <summary>Creates a new Page or Page derivative from the parsed text using the site's <see cref="Site.PageCreator"/>.</summary>
+		/// <param name="text">The page text.</param>
 		/// <returns>A new <see cref="Page"/>.</returns>
 		public Page ToNewPage(string text) => this.Namespace == null
 			? new(this, PageLoadOptions.None, null) { Text = text }
 			: this.ToNewPage(this.Namespace.Site.PageCreator, text);
 
 		/// <summary>Creates a new Page or Page derivative using the specified <see cref="PageCreator"/>.</summary>
+		/// <param name="creator">The page creator to use.</param>
+		/// <param name="text">The page text.</param>
 		/// <returns>A new <see cref="Page"/>.</returns>
 		public Page ToNewPage(PageCreator creator, string text)
 		{

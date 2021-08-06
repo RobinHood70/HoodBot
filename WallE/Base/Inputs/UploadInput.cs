@@ -4,7 +4,6 @@ namespace RobinHood70.WallE.Base
 	using System;
 	using System.ComponentModel;
 	using System.IO;
-	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Properties;
 
 	public class UploadInput
@@ -44,7 +43,7 @@ namespace RobinHood70.WallE.Base
 			{
 				if (value == WatchlistOption.Unwatch)
 				{
-					throw new ArgumentOutOfRangeException(nameof(value), Globals.CurrentCulture(Messages.UploadUnwatchInvalid));
+					throw new ArgumentOutOfRangeException(paramName: nameof(value), message: Messages.UploadUnwatchInvalid);
 				}
 
 				this.watchlist = value;

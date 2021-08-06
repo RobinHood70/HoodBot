@@ -158,7 +158,7 @@
 		{
 			if (this.JobManager.PauseToken is PauseToken pause && pause.IsPaused)
 			{
-				pause.WaitWhilePausedAsync().Wait();
+				pause.WaitWhilePausedAsync().Wait(this.JobManager.CancellationToken);
 			}
 
 			if (this.JobManager.CancellationToken is CancellationToken cancel && cancel != CancellationToken.None && cancel.IsCancellationRequested)

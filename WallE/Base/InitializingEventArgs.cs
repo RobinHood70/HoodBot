@@ -49,7 +49,7 @@
 				}
 				else if (!string.Equals(this.interwikiLanguageCode, value, StringComparison.Ordinal))
 				{
-					throw new InvalidOperationException(Globals.CurrentCulture(Messages.SiteInfoLanguageConflict));
+					throw new InvalidOperationException(Messages.SiteInfoLanguageConflict);
 				}
 			}
 		}

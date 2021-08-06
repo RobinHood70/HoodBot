@@ -51,6 +51,7 @@
 		/// <param name="token">The token to examine.</param>
 		/// <returns><see langword="true"/> if the token provided is <c>true</c> or an empty string; <see langword="false"/> if the token is <c>false</c> or null.</returns>
 		/// <exception cref="WikiException">The node data was not convertible to a boolean value.</exception>
+		[SuppressMessage("Style", "IDE0072:Add missing cases", Justification = "Default case is intended to cover all remaining possibilities.")]
 		public static bool GetBCBool(this JToken? token) => token?.Type switch
 		{
 			JTokenType.Boolean => (bool)token,

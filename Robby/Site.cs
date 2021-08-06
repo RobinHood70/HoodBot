@@ -795,7 +795,7 @@
 			// CONSIDER: Used to use WebUtility.UrlEncode, but Uri seems to auto-encode, so removed for now. Discussion in some places of different parts of .NET encoding differently, so may need to re-instate later. See https://stackoverflow.com/a/47877559/502255 for example.
 			if (string.IsNullOrWhiteSpace(articleName))
 			{
-				throw new ArgumentException(Globals.CurrentCulture(Resources.TitleInvalid), nameof(articleName));
+				throw new ArgumentException(paramName: nameof(articleName), message: Resources.TitleInvalid);
 			}
 
 			if (string.IsNullOrEmpty(unparsedPath))

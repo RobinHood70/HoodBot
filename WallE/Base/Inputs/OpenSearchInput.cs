@@ -28,7 +28,7 @@ namespace RobinHood70.WallE.Base
 		{
 			if (string.IsNullOrWhiteSpace(search))
 			{
-				throw new ArgumentException(Messages.InvalidSearchString, search);
+				throw new ArgumentException(paramName: nameof(search), message: Messages.InvalidSearchString);
 			}
 
 			this.Search = search;

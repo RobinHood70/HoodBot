@@ -17,7 +17,7 @@
 		NoChange,
 
 		/// <summary>Remove the protection.</summary>
-		None,
+		Remove,
 
 		/// <summary>Change to semi-protection.</summary>
 		Semi,

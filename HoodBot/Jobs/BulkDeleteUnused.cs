@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System;
-
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon;
 

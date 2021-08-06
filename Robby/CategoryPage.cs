@@ -22,7 +22,8 @@
 		{
 			if (title.Namespace.Id != MediaWikiNamespaces.Category)
 			{
-				throw new ArgumentException(Globals.CurrentCulture(Resources.NamespaceMustBe, this.Site[MediaWikiNamespaces.Category].Name), nameof(title));
+				throw new ArgumentException(paramName: nameof(title), message: Globals.CurrentCulture(Resources.NamespaceMustBe, this.Site[MediaWikiNamespaces.Category].Name))
+				;
 			}
 
 			if (apiItem is PageItem pageItem &&
