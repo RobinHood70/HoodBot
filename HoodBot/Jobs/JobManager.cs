@@ -89,6 +89,7 @@
 				}
 			}
 
+			this.Logger?.CloseLog();
 			this.OnFinishedAllJobs(allSuccessful);
 		}
 		#endregion
