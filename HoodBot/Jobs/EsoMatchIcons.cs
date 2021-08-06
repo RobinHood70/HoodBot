@@ -64,18 +64,7 @@
 			this.Pages.PageLoaded -= this.Pages_PageLoaded;
 		}
 
-		protected override void Main()
-		{
-			this.StatusWriteLine("Saving pages");
-			this.Pages.RemoveUnchanged();
-			this.ProgressMaximum = this.Pages.Count;
-			this.EditConflictAction = this.Pages_PageLoaded;
-			foreach (var page in this.Pages)
-			{
-				this.SavePage(page, this.LogName, true);
-				this.Progress++;
-			}
-		}
+		protected override void Main() => this.SavePages(this.LogName, true, this.Pages_PageLoaded);
 		#endregion
 
 		#region Private Static Methods
