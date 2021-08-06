@@ -80,7 +80,7 @@
 		protected void SavePages(PageCollection pages, string status, SaveInfo defaultSaveInfo, Action<EditJob, Page>? editConflictAction)
 		{
 			this.StatusWriteLine(status);
-			pages.NotNull(nameof(pages)).RemoveUnchanged();
+			pages.NotNull(nameof(pages)).RemoveChanged(false);
 			if (pages.Count == 0)
 			{
 				this.StatusWriteLine("No pages to save!");
