@@ -54,7 +54,7 @@
 			result.ThrowNull(nameof(result));
 			var resultText = result.MustHaveString("result");
 			IReadOnlyList<string> duplicates = new List<string>();
-			var outputWarnings = new Dictionary<string, string>(System.StringComparer.Ordinal);
+			Dictionary<string, string> outputWarnings = new(System.StringComparer.Ordinal);
 			if (result["warnings"] is JToken warnings)
 			{
 				foreach (var prop in warnings.Children<JProperty>())

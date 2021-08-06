@@ -28,8 +28,8 @@
 		{
 			// Note: the returned data should be iterated over and each individual HttpContent should be disposed.
 			request.ThrowNull(nameof(request));
-			var data = new MultipartFormDataContent();
-			var visitor = new RequestVisitorHttpContentMultipart(data, request.SupportsUnitSeparator);
+			MultipartFormDataContent data = new();
+			RequestVisitorHttpContentMultipart visitor = new(data, request.SupportsUnitSeparator);
 			request.Build(visitor);
 
 			return data;

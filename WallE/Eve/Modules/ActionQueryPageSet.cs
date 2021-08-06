@@ -31,7 +31,7 @@
 				| ((wal.ValidStopCheckMethods & StopCheckMethods.TalkCheckQuery) != 0 ? UserInfoProperties.HasMsg : UserInfoProperties.None);
 			if (props != UserInfoProperties.None)
 			{
-				var userInfoInput = new UserInfoInput() { Properties = props };
+				UserInfoInput userInfoInput = new() { Properties = props };
 				this.userModule = new MetaUserInfo(wal, userInfoInput);
 			}
 
@@ -145,7 +145,7 @@
 		{
 			result.ThrowNull(nameof(result));
 			base.DeserializeActionExtra(result);
-			var list = new List<IQueryModule>(this.AllModules);
+			List<IQueryModule> list = new(this.AllModules);
 			if (this.Generator != null)
 			{
 				list.Add(this.Generator);
@@ -222,7 +222,7 @@
 		private void DeserializePages(JToken result, IList<PageItem> pagesIn)
 		{
 			result.ThrowNull(nameof(result));
-			var pages = (KeyedPages)pagesIn;
+			KeyedPages? pages = (KeyedPages)pagesIn;
 			foreach (var page in result)
 			{
 				// Some generators can return missing pages with no title (or ID?), most commonly when links tables are out of date and need refreshLinks.php run on them. If we get one of these, skip to the next page.

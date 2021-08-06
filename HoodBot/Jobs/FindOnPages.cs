@@ -18,7 +18,7 @@
 		#region Protected Override Methods
 		protected override void Main()
 		{
-			var pages = new PageCollection(this.Site);
+			PageCollection pages = new(this.Site);
 			pages.GetBacklinks("Template:Online Ingredient Summary", BacklinksTypes.EmbeddedIn);
 			if (pages.Count == 0)
 			{

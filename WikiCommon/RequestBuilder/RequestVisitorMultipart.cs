@@ -38,7 +38,7 @@
 		{
 			// TODO: Rewrite to use request.Build().
 			request.ThrowNull(nameof(request));
-			var visitor = new RequestVisitorMultipart
+			RequestVisitorMultipart visitor = new()
 			{
 				supportsUnitSeparator = request.SupportsUnitSeparator,
 			};
@@ -52,7 +52,7 @@
 				visitor.badBoundary = false;
 				contentType = "multipart/form-data; boundary=\"" + visitor.boundary + "\"";
 
-				using var memoryStream = new MemoryStream();
+				using MemoryStream memoryStream = new();
 				visitor.stream = memoryStream;
 				var first = true;
 				foreach (var parameter in request)
@@ -143,8 +143,8 @@
 				boundaryLength = 70;
 			}
 
-			var builder = new StringBuilder();
-			var rand = new Random();
+			StringBuilder builder = new();
+			Random rand = new();
 			for (var i = 0; i < boundaryLength; i++)
 			{
 				var scanLength = i == 69 ? BoundaryChars.Length - 1 : BoundaryChars.Length;

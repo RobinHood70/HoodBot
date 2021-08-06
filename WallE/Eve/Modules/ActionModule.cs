@@ -49,8 +49,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Static Methods
 		protected static JToken ToJson(string response)
 		{
-			using var responseReader = new StringReader(response.NotNull(nameof(response)));
-			using var reader = new JsonTextReader(responseReader) { DateParseHandling = DateParseHandling.None };
+			using StringReader responseReader = new(response.NotNull(nameof(response)));
+			using JsonTextReader reader = new(responseReader) { DateParseHandling = DateParseHandling.None };
 			return JToken.Load(reader); // using JToken.Load instead of .Parse so we can ignore date parsing.
 		}
 		#endregion
@@ -105,7 +105,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 			if (result["debuginfo"] is JToken debugInfo)
 			{
-				var includes = new List<DebugInfoInclude>();
+				List<DebugInfoInclude> includes = new();
 				foreach (var include in debugInfo.MustHave("includes"))
 				{
 					includes.Add(new DebugInfoInclude(
@@ -113,7 +113,7 @@ namespace RobinHood70.WallE.Eve.Modules
 						size: include.MustHaveString("size")));
 				}
 
-				var logs = new List<DebugInfoLog>();
+				List<DebugInfoLog> logs = new();
 				foreach (var log in debugInfo.MustHave("log"))
 				{
 					logs.Add(new DebugInfoLog(
@@ -122,7 +122,7 @@ namespace RobinHood70.WallE.Eve.Modules
 						message: log.MustHaveString("msg")));
 				}
 
-				var queries = new List<DebugInfoQuery>();
+				List<DebugInfoQuery> queries = new();
 				foreach (var query in debugInfo.MustHave("queries"))
 				{
 					queries.Add(new DebugInfoQuery(
@@ -134,7 +134,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 				var requestNode = debugInfo.MustHave("request");
 				var fullHost = this.Wal.EntryPoint.AbsoluteUri.Replace(this.Wal.EntryPoint.AbsolutePath, string.Empty, StringComparison.Ordinal);
-				var request = new DebugInfoRequest(
+				DebugInfoRequest request = new(
 						headers: requestNode.MustHave("headers").GetStringDictionary<string>(),
 						method: requestNode.MustHaveString("method"),
 						parameters: requestNode.MustHave("params").GetStringDictionary<string>(),

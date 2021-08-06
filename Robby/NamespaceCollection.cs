@@ -24,10 +24,10 @@
 		internal NamespaceCollection(Site site, IReadOnlyList<SiteInfoNamespace> namespaces, IReadOnlyList<SiteInfoNamespaceAlias> namespaceAliases)
 		{
 			// From Language->getNsIndeix(), creates a case-insensitive comparer for the wiki's culture.
-			var comparer = StringComparer.Create(site.NotNull(nameof(site)).Culture, true);
+			StringComparer? comparer = StringComparer.Create(site.NotNull(nameof(site)).Culture, true);
 
 			// NamespaceAliases
-			var aliasesById = new Dictionary<int, HashSet<string>>();
+			Dictionary<int, HashSet<string>> aliasesById = new();
 			foreach (var ns in namespaces)
 			{
 				aliasesById.Add(ns.Id, new HashSet<string>(new[] { ns.CanonicalName, ns.Name }, comparer));
@@ -39,12 +39,12 @@
 			}
 
 			this.idsDictionary = new SortedList<int, Namespace>(namespaces.Count);
-			var names = new Dictionary<string, Namespace>(namespaces.Count * 2 + namespaceAliases.Count, comparer);
+			Dictionary<string, Namespace> names = new(namespaces.Count * 2 + namespaceAliases.Count, comparer);
 			foreach (var item in namespaces)
 			{
 				var allNames = aliasesById[item.Id];
 				allNames.TrimExcess();
-				var ns = new Namespace(site, item, allNames);
+				Namespace ns = new(site, item, allNames);
 				this.idsDictionary.Add(ns.Id, ns);
 				foreach (var name in allNames)
 				{

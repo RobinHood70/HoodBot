@@ -41,7 +41,7 @@
 		#region Protected Virtual Methods
 		protected virtual void ResultsPageLoaded(object sender, Page page)
 		{
-			var parsedPage = new ContextualParser(page);
+			ContextualParser parsedPage = new(page);
 			this.ParseText(sender, parsedPage);
 			page.Text = parsedPage.ToRaw();
 		}

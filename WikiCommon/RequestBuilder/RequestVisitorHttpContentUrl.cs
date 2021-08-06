@@ -27,7 +27,7 @@
 		public static FormUrlEncodedContent Build(Request request)
 		{
 			request.ThrowNull(nameof(request));
-			var visitor = new RequestVisitorHttpContentUrl
+			RequestVisitorHttpContentUrl visitor = new()
 			{
 				supportsUnitSeparator = request.SupportsUnitSeparator,
 			};

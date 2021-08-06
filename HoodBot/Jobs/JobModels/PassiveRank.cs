@@ -18,10 +18,10 @@
 
 			this.Description = EsoGeneral.HarmonizeDescription(description);
 
-			var coefficients = new List<Coefficient>(3);
+			List<Coefficient> coefficients = new(3);
 			for (var i = '1'; i <= '3'; i++)
 			{
-				var coefficient = new Coefficient(data, i);
+				Coefficient coefficient = new(data, i);
 				if (coefficient.IsValid)
 				{
 					coefficients.Add(coefficient);

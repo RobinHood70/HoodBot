@@ -73,7 +73,7 @@
 		protected override ParseResult DeserializeResult(JToken? result)
 		{
 			result.ThrowNull(nameof(result));
-			var redirects = new Dictionary<string, PageSetRedirectItem>(StringComparer.Ordinal);
+			Dictionary<string, PageSetRedirectItem> redirects = new(StringComparer.Ordinal);
 			result["redirects"].GetRedirects(redirects, this.Wal.InterwikiPrefixes, this.SiteVersion);
 			return new ParseResult(
 				categories: DeserializeCategories(result["categories"]),
@@ -118,7 +118,7 @@
 
 		private static List<ParseCategoriesItem> DeserializeCategories(JToken? subResult)
 		{
-			var categories = new List<ParseCategoriesItem>();
+			List<ParseCategoriesItem> categories = new();
 			if (subResult != null)
 			{
 				foreach (var catResult in subResult)
@@ -138,7 +138,7 @@
 
 		private static IReadOnlyList<LanguageLinksItem> DeserializeLanguageLinks(JToken? subResult)
 		{
-			var langLinks = new List<LanguageLinksItem>();
+			List<LanguageLinksItem> langLinks = new();
 			if (subResult != null)
 			{
 				foreach (var link in subResult)
@@ -155,13 +155,13 @@
 
 		private static Dictionary<string, IReadOnlyList<string>> DeserializeLimitReportData(JToken? subResult)
 		{
-			var limitData = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
+			Dictionary<string, IReadOnlyList<string>> limitData = new(StringComparer.Ordinal);
 			if (subResult != null)
 			{
 				foreach (var entry in subResult)
 				{
 					var name = entry.MustHaveString("name");
-					var limits = new List<string>();
+					List<string> limits = new();
 					foreach (var limitResult in entry.Children<JProperty>())
 					{
 						if (!string.Equals(limitResult.Name, "name", StringComparison.Ordinal) && (string?)limitResult.Value is string value)
@@ -179,7 +179,7 @@
 
 		private static List<ParseLinksItem> DeserializeLinks(JToken? linkResults)
 		{
-			var links = new List<ParseLinksItem>();
+			List<ParseLinksItem> links = new();
 			if (linkResults != null)
 			{
 				foreach (var result in linkResults)
@@ -193,7 +193,7 @@
 
 		private static IReadOnlyList<SectionsItem> DeserializeSections(JToken? subResult)
 		{
-			var sections = new List<SectionsItem>();
+			List<SectionsItem> sections = new();
 			if (subResult != null)
 			{
 				foreach (var secResult in subResult)

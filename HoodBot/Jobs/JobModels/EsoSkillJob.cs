@@ -115,7 +115,7 @@
 			this.ProgressMaximum = this.skills.Count + 4;
 			this.Progress = 3;
 
-			var titles = new TitleCollection(this.Site);
+			TitleCollection titles = new(this.Site);
 			foreach (var skill in this.skills)
 			{
 				titles.Add(skill.Key);
@@ -158,7 +158,7 @@
 			if (this.trivialChanges.Count > 0)
 			{
 				this.WriteLine($"== {this.TypeText} Skills With Trivial Updates ==");
-				var newList = new List<string>();
+				List<string> newList = new();
 				foreach (var page in this.trivialChanges)
 				{
 					newList.Add(page.AsLink(true));
@@ -179,7 +179,7 @@
 				this.WriteLine();
 			}
 
-			var iconChanges = new SortedList<string, string>(IconNameCache.Count, StringComparer.Ordinal);
+			SortedList<string, string> iconChanges = new(IconNameCache.Count, StringComparer.Ordinal);
 			foreach (var kvp in IconNameCache)
 			{
 				if (!string.Equals(kvp.Key, kvp.Value, StringComparison.Ordinal))
@@ -264,9 +264,9 @@
 				page.Text = NewPage(skill);
 			}
 
-			var oldPage = new ContextualParser(page);
-			var newPage = new ContextualParser(page);
-			var skillSummaries = new List<SiteTemplateNode>(newPage.FindTemplates(TemplateName));
+			ContextualParser oldPage = new(page);
+			ContextualParser newPage = new(page);
+			List<SiteTemplateNode> skillSummaries = new(newPage.FindTemplates(TemplateName));
 			if (skillSummaries.Count != 1)
 			{
 				this.Warn("Incorrect number of {{" + TemplateName + "}} matches on " + skill.PageName);
@@ -302,7 +302,7 @@
 			bigChange |= this.UpdateSkillTemplate(skill, template);
 			template.Sort("titlename", "id", "id1", "id2", "id3", "id4", "id5", "id6", "id7", "id8", "id9", "id10", "line", "type", "icon", "icon2", "icon3", "desc", "desc1", "desc2", "desc3", "desc4", "desc5", "desc6", "desc7", "desc8", "desc9", "desc10", "linerank", "cost", "attrib", "casttime", "range", "radius", "duration", "channeltime", "target", "morph1name", "morph1id", "morph1icon", "morph1desc", "morph2name", "morph2id", "morph2icon", "morph2desc", "image", "imgdesc", "nocat", "notrail");
 
-			var replacer = new EsoReplacer(this.Site);
+			EsoReplacer replacer = new(this.Site);
 			var newLinks = replacer.CheckNewLinks(oldPage, newPage);
 			if (newLinks.Count > 0)
 			{

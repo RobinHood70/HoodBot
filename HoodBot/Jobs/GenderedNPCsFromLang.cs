@@ -18,18 +18,18 @@
 
 		protected override void Main()
 		{
-			var esoNpcs = new TitleCollection(this.Site);
+			TitleCollection esoNpcs = new(this.Site);
 			esoNpcs.GetCategoryMembers("Online-NPCs");
 
 			var fileName = UespSite.GetBotDataFolder("en.lang.csv");
 			var fileNameOut = UespSite.GetBotDataFolder("GenderedNPCs.txt");
 			using var reader = File.OpenText(fileName);
-			var csvFile = new CsvFile
+			CsvFile csvFile = new()
 			{
 				DoubleUpDelimiters = true
 			};
 			csvFile.ReadText(reader, true);
-			var npcs = new SortedSet<string>(System.StringComparer.Ordinal);
+			SortedSet<string> npcs = new(System.StringComparer.Ordinal);
 			foreach (var row in csvFile)
 			{
 				if (int.Parse(row["ID"], CultureInfo.InvariantCulture) == 8290981)

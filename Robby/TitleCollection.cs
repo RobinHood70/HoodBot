@@ -28,7 +28,7 @@
 			this.LimitationType = LimitationType.None;
 			foreach (var item in titles.NotNull(nameof(titles)))
 			{
-				var newTitle = TitleFactory.FromName(site, item).ToTitle();
+				Title? newTitle = TitleFactory.FromName(site, item).ToTitle();
 				this.Add(newTitle);
 			}
 		}
@@ -144,7 +144,7 @@
 		/// <returns>A <see cref="PageCollection"/> containing the specified pages, including status information for pages that could not be loaded.</returns>
 		public PageCollection Load(PageLoadOptions options)
 		{
-			var retval = PageCollection.Unlimited(this.Site, options);
+			PageCollection? retval = PageCollection.Unlimited(this.Site, options);
 			retval.GetTitles(this);
 
 			return retval;
@@ -166,8 +166,8 @@
 				return new ChangeValue<PageCollection>(ChangeStatus.NoEffect, PageCollection.Unlimited(this.Site));
 			}
 
-			var disabledResult = PageCollection.UnlimitedDefault(this.Site);
-			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal)
+			PageCollection? disabledResult = PageCollection.UnlimitedDefault(this.Site);
+			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
 				[nameof(method)] = method
 			};
@@ -176,7 +176,7 @@
 
 			ChangeValue<PageCollection> ChangeFunc()
 			{
-				var pages = PageCollection.Purge(this.Site, new PurgeInput(this.ToFullPageNames()) { Method = method });
+				PageCollection? pages = PageCollection.Purge(this.Site, new PurgeInput(this.ToFullPageNames()) { Method = method });
 				var retval = (pages.Count < this.Count)
 					? ChangeStatus.Failure
 					: ChangeStatus.Success;
@@ -193,13 +193,13 @@
 				return new ChangeValue<PageCollection>(ChangeStatus.NoEffect, PageCollection.Unlimited(this.Site));
 			}
 
-			var disabledResult = PageCollection.CreateEmptyPages(this.Site, this);
-			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal);
+			PageCollection? disabledResult = PageCollection.CreateEmptyPages(this.Site, this);
+			Dictionary<string, object?> parameters = new(StringComparer.Ordinal);
 			return this.Site.PublishChange(disabledResult, this, parameters, ChangeFunc);
 
 			ChangeValue<PageCollection> ChangeFunc()
 			{
-				var pages = PageCollection.Watch(this.Site, new WatchInput(this.ToFullPageNames()) { Unwatch = true });
+				PageCollection? pages = PageCollection.Watch(this.Site, new WatchInput(this.ToFullPageNames()) { Unwatch = true });
 				var result = (pages.Count < this.Count)
 					? ChangeStatus.Failure
 					: ChangeStatus.Success;
@@ -216,14 +216,14 @@
 				return new ChangeValue<PageCollection>(ChangeStatus.NoEffect, PageCollection.Unlimited(this.Site));
 			}
 
-			var disabledResult = PageCollection.CreateEmptyPages(this.Site, this);
-			var parameters = new Dictionary<string, object?>(StringComparer.Ordinal);
+			PageCollection? disabledResult = PageCollection.CreateEmptyPages(this.Site, this);
+			Dictionary<string, object?> parameters = new(StringComparer.Ordinal);
 
 			return this.Site.PublishChange(disabledResult, this, parameters, ChangeFunc);
 
 			ChangeValue<PageCollection> ChangeFunc()
 			{
-				var pages = PageCollection.Watch(this.Site, new WatchInput(this.ToFullPageNames()) { Unwatch = false });
+				PageCollection? pages = PageCollection.Watch(this.Site, new WatchInput(this.ToFullPageNames()) { Unwatch = false });
 				var result = (pages.Count < this.Count)
 					? ChangeStatus.Failure
 					: ChangeStatus.Success;
@@ -282,7 +282,7 @@
 		{
 			input.ThrowNull(nameof(input));
 			input.Title.ThrowNull(nameof(input), nameof(input.Title));
-			var inputTitle = TitleFactory.FromName(this.Site, input.Title);
+			TitleFactory? inputTitle = TitleFactory.FromName(this.Site, input.Title);
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && (input.LinkTypes & BacklinksTypes.ImageUsage) != 0)
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
@@ -291,13 +291,13 @@
 			var result = this.Site.AbstractionLayer.Backlinks(input);
 			foreach (var item in result)
 			{
-				var mainTitle = TitleFactory.FromApi(this.Site, item).ToTitle();
+				Title? mainTitle = TitleFactory.FromApi(this.Site, item).ToTitle();
 				this.Add(mainTitle);
 				if (item.Redirects != null)
 				{
 					foreach (var redirectedItem in item.Redirects)
 					{
-						var factory = TitleFactory.FromName(this.Site, redirectedItem.FullPageName);
+						TitleFactory? factory = TitleFactory.FromName(this.Site, redirectedItem.FullPageName);
 						this.Add(new Backlink(factory, mainTitle));
 					}
 				}
@@ -517,7 +517,7 @@
 		/// <param name="pageSetInput">The pageset inputs.</param>
 		protected virtual void LoadPages(QueryPageSetInput pageSetInput)
 		{
-			var loadOptions = new PageLoadOptions(this.Site.DefaultLoadOptions, PageModules.Info);
+			PageLoadOptions loadOptions = new(this.Site.DefaultLoadOptions, PageModules.Info);
 			var creator = this.Site.PageCreator;
 			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput.NotNull(nameof(pageSetInput)), creator.GetPropertyInputs(loadOptions), creator.CreatePageItem);
 			this.FillFromTitleItems(result);
@@ -554,7 +554,7 @@
 			var result = this.Site.AbstractionLayer.CategoryMembers(input);
 			foreach (var item in result)
 			{
-				var title = TitleFactory.FromApi(this.Site, item).ToTitle();
+				Title? title = TitleFactory.FromApi(this.Site, item).ToTitle();
 				if (input.Type.HasFlag(item.Type))
 				{
 					this.Add(title);

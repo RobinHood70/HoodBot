@@ -130,10 +130,10 @@
 		private bool UpdateMorphs(ActiveSkill skillBase, ITemplateNode template, Morph baseMorph, string baseSkillCost)
 		{
 			var bigChange = false;
-			var usedList = new TitleCollection(this.Site);
+			TitleCollection usedList = new(this.Site);
 			for (var morphCounter = 0; morphCounter < skillBase.Morphs.Count; morphCounter++)
 			{
-				var descriptions = new List<string>();
+				List<string> descriptions = new();
 				var morphNum = morphCounter == 0 ? string.Empty : morphCounter.ToStringInvariant();
 				var morph = skillBase.Morphs[morphCounter];
 

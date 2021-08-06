@@ -21,7 +21,7 @@
 		{
 			if (apiItem is PageItem && !this.IsMissing)
 			{
-				var input = new AllMessagesInput() { Messages = new[] { this.PageName } };
+				AllMessagesInput input = new() { Messages = new[] { this.PageName } };
 				var result = this.Site.AbstractionLayer.AllMessages(input);
 				switch (result.Count)
 				{

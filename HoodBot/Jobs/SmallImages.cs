@@ -14,7 +14,7 @@
 
 		protected override void Main()
 		{
-			var files = new PageCollection(this.Site, PageModules.FileInfo);
+			PageCollection files = new(this.Site, PageModules.FileInfo);
 			files.GetCategoryMembers("Category:Legends-Art", true);
 			foreach (var page in files)
 			{

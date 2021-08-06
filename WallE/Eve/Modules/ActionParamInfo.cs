@@ -48,11 +48,11 @@
 				return;
 			}
 
-			var modules = new List<string>();
-			var queryModules = new List<string>();
+			List<string> modules = new();
+			List<string> queryModules = new();
 			var mainModule = false;
 			var pagesetModule = false;
-			var formatModules = new List<string>();
+			List<string> formatModules = new();
 
 			foreach (var module in input.Modules)
 			{
@@ -90,8 +90,8 @@
 		protected override IReadOnlyDictionary<string, ParameterInfoItem> DeserializeResult(JToken? result)
 		{
 			result.ThrowNull(nameof(result));
-			var output = new Dictionary<string, ParameterInfoItem>(StringComparer.Ordinal);
-			var moduleTypes = new List<string>() { "modules" };
+			Dictionary<string, ParameterInfoItem> output = new(StringComparer.Ordinal);
+			List<string> moduleTypes = new() { "modules" };
 			if (this.SiteVersion < 125)
 			{
 				moduleTypes.AddRange(ModuleTypes125);
@@ -144,7 +144,7 @@
 
 		private static IReadOnlyDictionary<string, ParametersItem> GetParameters(JToken? token)
 		{
-			var parametersList = new List<ParametersItem>();
+			List<ParametersItem> parametersList = new();
 			if (token != null)
 			{
 				foreach (var parameterNode in token)
@@ -169,7 +169,7 @@
 						}
 					}
 
-					var newInfoList = new List<InformationItem>();
+					List<InformationItem> newInfoList = new();
 					var infoArrayNode = parameterNode["info"];
 					if (infoArrayNode != null)
 					{
@@ -212,12 +212,12 @@
 
 		private static List<ExamplesItem> GetExamples(JToken? module)
 		{
-			var examplesList = new List<ExamplesItem>();
+			List<ExamplesItem> examplesList = new();
 			if (module != null)
 			{
 				foreach (var example in module)
 				{
-					var newExample = new ExamplesItem(example.MustHaveString("query"), GetMessage(example.MustHave("description")));
+					ExamplesItem newExample = new(example.MustHaveString("query"), GetMessage(example.MustHave("description")));
 					examplesList.Add(newExample);
 				}
 			}
@@ -229,7 +229,7 @@
 		#region Private Static Methods
 		private static RawMessageInfo GetMessages(JToken? node)
 		{
-			var messageList = new List<MessageItem>();
+			List<MessageItem> messageList = new();
 			if (node != null)
 			{
 				if (node.Type == JTokenType.String)
@@ -250,7 +250,7 @@
 		private static MessageItem GetMessage(JToken message)
 		{
 			// TODO: Perhaps add functionality to handle cases of parameter substitution (parameterList => num=1, comma-separated list, parameters) and perhaps even other advanced outputs, if any.
-			var parameterList = new List<string>();
+			List<string> parameterList = new();
 			var parameters = message["params"];
 			if (parameters != null)
 			{
@@ -269,7 +269,7 @@
 								System.Diagnostics.Debug.WriteLine("Array: " + parameter.ToString());
 								break;
 							case JTokenType.Object:
-								var mergeList = new List<string>();
+								List<string> mergeList = new();
 								foreach (var kvp in parameter.Children<JProperty>())
 								{
 									mergeList.Add(kvp.Name + '=' + kvp.Value);

@@ -76,12 +76,12 @@
 					var hidden = itemValue["hidden"].GetBCBool();
 					if (value.Type == JTokenType.Object)
 					{
-						var newItem = new ExtendedMetadataItem(value.GetStringDictionary<string>(), source, hidden);
+						ExtendedMetadataItem newItem = new(value.GetStringDictionary<string>(), source, hidden);
 						dict.Add(name, newItem);
 					}
 					else if ((string?)value is string stringValue)
 					{
-						var newDict = new Dictionary<string, string>(StringComparer.Ordinal)
+						Dictionary<string, string> newDict = new(StringComparer.Ordinal)
 						{
 							[string.Empty] = stringValue
 						};
@@ -100,7 +100,7 @@
 			{
 				if (value.Type == JTokenType.Array)
 				{
-					var newDict = new Dictionary<string, object>(StringComparer.Ordinal);
+					Dictionary<string, object> newDict = new(StringComparer.Ordinal);
 					foreach (var item in value)
 					{
 						ParseMetadataNode(item, newDict);

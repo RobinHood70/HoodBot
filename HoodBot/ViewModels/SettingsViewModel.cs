@@ -94,8 +94,8 @@
 				return;
 			}
 
-			var uri = new Uri(page);
-			var capabilities = new SiteCapabilities(this.client);
+			Uri uri = new(page);
+			SiteCapabilities capabilities = new(this.client);
 			if (capabilities.Get(uri))
 			{
 				var noName = string.IsNullOrWhiteSpace(selectedItem.DisplayName);
@@ -128,7 +128,7 @@
 
 		private void NewWiki()
 		{
-			var retval = new WikiInfoViewModel();
+			WikiInfoViewModel retval = new();
 			App.UserSettings.Wikis.Add(retval);
 			this.SelectedItem = retval;
 		}

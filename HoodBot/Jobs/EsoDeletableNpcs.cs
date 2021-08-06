@@ -21,7 +21,7 @@
 		{
 			this.StatusWriteLine("Getting NPC data from database");
 			var unfilteredNpcList = EsoGeneral.GetNpcsFromDatabase();
-			var allNames = new List<string>();
+			List<string> allNames = new();
 			foreach (var npc in unfilteredNpcList)
 			{
 				allNames.Add(npc.Name);
@@ -30,8 +30,8 @@
 			allNames.Sort(StringComparer.Ordinal);
 
 			this.StatusWriteLine("Getting NPC data from wiki");
-			var allNpcs = new TitleCollection(this.Site);
-			var templates = new TitleCollection(this.Site, MediaWikiNamespaces.Template, "Online NPC Summary");
+			TitleCollection allNpcs = new(this.Site);
+			TitleCollection templates = new(this.Site, MediaWikiNamespaces.Template, "Online NPC Summary");
 			allNpcs.GetPageTranscludedIn(templates);
 			//// allNpcs.GetCategoryMembers("Online-NPCs", CategoryMemberTypes.Page, false);
 			//// allNpcs.GetCategoryMembers("Online-Creatures-All", CategoryMemberTypes.Page, false);

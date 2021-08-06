@@ -12,7 +12,7 @@
 
 		public void GetLocations()
 		{
-			var npcIds = new List<long>(this.Count);
+			List<long> npcIds = new(this.Count);
 			foreach (var npc in this)
 			{
 				if (npc.UnknownLocations.Count == 0)
@@ -25,7 +25,7 @@
 			{
 				foreach (var npc in EsoGeneral.GetNpcLocationData(npcIds))
 				{
-					var place = new Place(npc.Zone);
+					Place place = new(npc.Zone);
 					this[npc.Id].UnknownLocations.Add(place, npc.LocCount);
 				}
 			}
@@ -37,7 +37,7 @@
 			{
 				if (npc.Page is not null)
 				{
-					var locCopy = new Dictionary<Place, int>(npc.UnknownLocations);
+					Dictionary<Place, int> locCopy = new(npc.UnknownLocations);
 					foreach (var kvp in locCopy)
 					{
 						var key = kvp.Key;

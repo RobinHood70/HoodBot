@@ -81,7 +81,7 @@
 				itemType = CategoryMemberTypes.None;
 			}
 
-			var item = new CategoryMembersItem(
+			CategoryMembersItem item = new(
 				(int)result.MustHave("ns"),
 				result.MustHaveString("title"),
 				(long?)result["pageid"] ?? 0,

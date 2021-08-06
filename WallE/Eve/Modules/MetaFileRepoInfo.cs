@@ -46,10 +46,10 @@
 				return null;
 			}
 
-			var otherInfo = new Dictionary<string, string?>(StringComparer.Ordinal);
+			Dictionary<string, string?> otherInfo = new(StringComparer.Ordinal);
 			foreach (var otherNode in result.Children<JProperty>())
 			{
-				var ignoreWords = new SortedSet<string>(StringComparer.Ordinal) { "apiurl", "articleurl", "descBaseUrl", "descriptionCacheExpiry", "displayname", "favicon", "fetchDescription", "initialCapital", "local", "name", "rootUrl", "scriptDirUrl", "scriptExtension", "thumbUrl", "url" };
+				SortedSet<string> ignoreWords = new(StringComparer.Ordinal) { "apiurl", "articleurl", "descBaseUrl", "descriptionCacheExpiry", "displayname", "favicon", "fetchDescription", "initialCapital", "local", "name", "rootUrl", "scriptDirUrl", "scriptExtension", "thumbUrl", "url" };
 				if (!ignoreWords.Contains(otherNode.Name))
 				{
 					otherInfo.Add(otherNode.Name, (string?)otherNode.Value);

@@ -31,7 +31,7 @@
 		{
 			this.StatusWriteLine("Loading pages");
 			this.ProgressMaximum = 2;
-			var results = PageCollection.Unlimited(this.Site);
+			PageCollection? results = PageCollection.Unlimited(this.Site);
 			results.GetNamespace(MediaWikiNamespaces.Template);
 			this.Progress++;
 			this.StatusWriteLine("Exporting");
@@ -84,7 +84,7 @@
 
 		private void WriteFile(bool isLoadCall)
 		{
-			var csvFile = new CsvFile();
+			CsvFile csvFile = new();
 			//// csvFile.EmptyFieldText = " ";
 
 			var list = isLoadCall ? this.loadCalls : this.saveCalls;
@@ -97,7 +97,7 @@
 				}
 			}
 
-			var header = new List<string>(maxCount + 3)
+			List<string> header = new(maxCount + 3)
 			{
 				"Template Name"
 			};
@@ -118,7 +118,7 @@
 
 			foreach (var call in list)
 			{
-				var cells = new List<string>(call.Variables.Count + 3)
+				List<string> cells = new(call.Variables.Count + 3)
 				{
 					call.Page.PageName
 				};
@@ -144,7 +144,7 @@
 		{
 			public LoadSaveCall(ISimpleTitle page, ITemplateNode loadSave)
 			{
-				var variables = new List<string>();
+				List<string> variables = new();
 				this.Page = page;
 				var title = loadSave.Title.ToRaw();
 				var split = title.Split(TextArrays.Colon, 2);

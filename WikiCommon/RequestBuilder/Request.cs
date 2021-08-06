@@ -147,7 +147,7 @@
 		{
 			if (values != null)
 			{
-				var newList = new List<string>();
+				List<string> newList = new();
 				foreach (var value in values)
 				{
 					newList.Add(value.ToMediaWiki());
@@ -186,8 +186,8 @@
 		{
 			if (values != null)
 			{
-				var sorted = new SortedSet<int>(values);
-				var newList = new List<string>(sorted.Count);
+				SortedSet<int> sorted = new(values);
+				List<string> newList = new(sorted.Count);
 				foreach (var value in sorted)
 				{
 					newList.Add(value.ToStringInvariant() ?? string.Empty);
@@ -208,8 +208,8 @@
 		{
 			if (values != null)
 			{
-				var sorted = new SortedSet<long>(values);
-				var newList = new List<string>(sorted.Count);
+				SortedSet<long> sorted = new(values);
+				List<string> newList = new(sorted.Count);
 				foreach (var value in sorted)
 				{
 					newList.Add(value.ToStringInvariant() ?? string.Empty);

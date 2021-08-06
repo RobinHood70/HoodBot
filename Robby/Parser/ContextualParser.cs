@@ -104,7 +104,7 @@
 		/// <remarks>The category will be added after the last category found on the page, or at the end of the page (preceded by two newlines) if no categories were found.</remarks>
 		public bool AddCategory(string category)
 		{
-			var catTitle = Title.Coerce(this.Site, MediaWikiNamespaces.Category, category.NotNull(nameof(category)));
+			Title? catTitle = Title.Coerce(this.Site, MediaWikiNamespaces.Category, category.NotNull(nameof(category)));
 			var lastCategoryIndex = -1;
 			for (var i = 0; i < this.Nodes.Count; i++)
 			{
@@ -183,7 +183,7 @@
 		{
 			foreach (var link in this.LinkNodes)
 			{
-				var linkTitle = Title.FromBacklinkNode(this.Site, link);
+				Title? linkTitle = Title.FromBacklinkNode(this.Site, link);
 				if (linkTitle.SimpleEquals(find))
 				{
 					yield return link;
@@ -199,7 +199,7 @@
 		{
 			foreach (var link in this.LinkNodes)
 			{
-				var linkTitle = FullTitle.FromBacklinkNode(this.Site, link);
+				FullTitle? linkTitle = FullTitle.FromBacklinkNode(this.Site, link);
 				if (linkTitle.FullEquals(find))
 				{
 					yield return link;
@@ -217,11 +217,11 @@
 		/// <returns>The templates that match the title provided, if any.</returns>
 		public IEnumerable<SiteTemplateNode> FindTemplates(string templateName)
 		{
-			var find = TitleFactory.FromName(this.Site, MediaWikiNamespaces.Template, templateName);
+			TitleFactory? find = TitleFactory.FromName(this.Site, MediaWikiNamespaces.Template, templateName);
 			foreach (var template in this.TemplateNodes)
 			{
 				var titleText = template.GetTitleText();
-				var templateTitle = TitleFactory.FromName(this.Site, MediaWikiNamespaces.Template, titleText);
+				TitleFactory? templateTitle = TitleFactory.FromName(this.Site, MediaWikiNamespaces.Template, titleText);
 				if (templateTitle.SimpleEquals(find))
 				{
 					yield return template;

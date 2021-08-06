@@ -32,7 +32,7 @@
 
 		protected override void BeforeLogging()
 		{
-			var unused = new TitleCollection(this.Site);
+			TitleCollection unused = new(this.Site);
 			unused.GetQueryPage("Unusedimages");
 
 			this.deleteTitles.Clear();

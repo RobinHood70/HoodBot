@@ -20,12 +20,12 @@
 		/// <param name="userItem">The API user information.</param>
 		public UserInfo(Site site, AllUsersItem userItem)
 		{
-			var user = new User(site, userItem.NotNull(nameof(userItem)).Name);
+			User user = new(site, userItem.NotNull(nameof(userItem)).Name);
 			var by = userItem.BlockedBy == null ? null : new User(site, userItem.BlockedBy);
 			var timestamp = userItem.BlockTimestamp ?? DateTime.MinValue;
 			this.BlockInfo = new Block(user, by, userItem.BlockReason, timestamp, userItem.BlockExpiry ?? DateTime.MaxValue, BlockFlags.None, false);
 			this.EditCount = userItem.EditCount;
-			var groups = new List<string>();
+			List<string> groups = new();
 			if (userItem.Groups != null)
 			{
 				groups.AddRange(userItem.Groups);
@@ -46,14 +46,14 @@
 		/// <param name="userItem">The API user information.</param>
 		public UserInfo(Site site, UsersItem userItem)
 		{
-			var user = new User(site, userItem.NotNull(nameof(userItem)).Name);
+			User user = new(site, userItem.NotNull(nameof(userItem)).Name);
 			var by = userItem.BlockedBy == null ? null : new User(site, userItem.BlockedBy);
 			var timestamp = userItem.BlockTimestamp ?? DateTime.MinValue;
 			this.BlockInfo = new Block(user, by, userItem.BlockReason, timestamp, userItem.BlockExpiry ?? DateTime.MaxValue, BlockFlags.None, false);
 			this.EditCount = userItem.EditCount;
 			this.Emailable = (userItem.Flags & UserFlags.Emailable) != 0;
 			this.Gender = userItem.Gender;
-			var groups = new List<string>();
+			List<string> groups = new();
 			if (userItem.Groups != null)
 			{
 				groups.AddRange(userItem.Groups);

@@ -59,7 +59,7 @@
 			}
 
 			var disposable = new object();
-			var hwnd = new HandleRef(disposable, (IntPtr)ie.HWND);
+			HandleRef hwnd = new(disposable, (IntPtr)ie.HWND);
 			_ = SafeNativeMethods.GetWindowThreadProcessId(hwnd, out var processId);
 			var processId32 = Convert.ToInt32(processId);
 			if (processId32 == 0)
@@ -69,8 +69,8 @@
 
 			this.ieProcess = Process.GetProcessById(processId32);
 
-			var uri = new Uri(diff.EditPath.ToString().Replace("action=edit", "action=submit", StringComparison.Ordinal));
-			var request = new Request(uri, RequestType.Post, false);
+			Uri uri = new(diff.EditPath.ToString().Replace("action=edit", "action=submit", StringComparison.Ordinal));
+			Request request = new(uri, RequestType.Post, false);
 			request
 				.Add("wpDiff", "Show changes")
 				.Add("wpTextbox1", diff.Text)

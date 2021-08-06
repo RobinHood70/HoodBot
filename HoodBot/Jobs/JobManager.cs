@@ -107,14 +107,14 @@
 
 		protected virtual bool OnFinishedJob(JobInfo job, Exception? e)
 		{
-			var eventArgs = new JobEventArgs(job, e);
+			JobEventArgs eventArgs = new(job, e);
 			this.FinishedJob?.Invoke(this, eventArgs);
 			return eventArgs.Abort;
 		}
 
 		protected virtual bool OnStartingJob(JobInfo job)
 		{
-			var eventArgs = new JobEventArgs(job, null);
+			JobEventArgs eventArgs = new(job, null);
 			this.StartingJob?.Invoke(this, eventArgs);
 			return eventArgs.Abort;
 		}

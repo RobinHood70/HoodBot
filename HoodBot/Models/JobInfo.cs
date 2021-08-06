@@ -17,7 +17,7 @@
 
 			var constructorParameters = constructor.GetParameters()
 				.NotNull(ValidationType.Method, nameof(constructor), nameof(constructor.GetParameters));
-			var parameters = new List<ConstructorParameter>(constructorParameters.Length);
+			List<ConstructorParameter> parameters = new(constructorParameters.Length);
 			foreach (var parameter in constructor.GetParameters())
 			{
 				if (!string.Equals(parameter.ParameterType.Name, nameof(WikiJob.JobManager), StringComparison.Ordinal))
@@ -73,7 +73,7 @@
 
 		public WikiJob Instantiate(JobManager jobManager)
 		{
-			var objectList = new List<object?> { jobManager.NotNull(nameof(jobManager)) };
+			List<object?> objectList = new() { jobManager.NotNull(nameof(jobManager)) };
 			if (this.Parameters is IReadOnlyList<ConstructorParameter> jobParams)
 			{
 				foreach (var param in jobParams)

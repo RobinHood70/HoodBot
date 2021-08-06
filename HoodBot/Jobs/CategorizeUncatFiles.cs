@@ -35,7 +35,7 @@
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
-			var nsList = new UespNamespaceList(this.Site);
+			UespNamespaceList nsList = new(this.Site);
 			foreach (var ns in nsList)
 			{
 				this.nsIds.Add(ns.Id, ns);

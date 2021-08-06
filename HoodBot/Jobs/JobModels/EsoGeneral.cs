@@ -83,7 +83,7 @@
 		#region Public Methods
 		public static IEnumerable<NpcLocationData> GetNpcLocationData(List<long> npcIds)
 		{
-			var retval = new List<NpcLocationData>();
+			List<NpcLocationData> retval = new();
 			var query = $"SELECT npcId, zone, locCount FROM npcLocations WHERE npcId IN ({string.Join(", ", npcIds)}) AND zone != 'Tamriel'";
 			for (var retries = 2; retries >= 0; retries--)
 			{
@@ -91,7 +91,7 @@
 				{
 					foreach (var row in Database.RunQuery(EsoLogConnectionString, query))
 					{
-						var data = new NpcLocationData(
+						NpcLocationData data = new(
 							(long)row["npcId"],
 							(string)row["zone"],
 							(int)row["locCount"]);
@@ -116,15 +116,15 @@
 		public static NpcCollection GetNpcsFromDatabase()
 		{
 			// Note: for now, it's assumed that the collection should be the same across all jobs, so all filtering is done here in the query (e.g., Reaction != 6 for companions). If this becomes untrue at some point, filtering will have to be shifted to the individual jobs or we could add a query string to the call.
-			var retval = new NpcCollection();
-			var nameClash = new HashSet<string>(StringComparer.Ordinal);
+			NpcCollection retval = new();
+			HashSet<string> nameClash = new(StringComparer.Ordinal);
 			var throwNameClash = false;
 			foreach (var row in Database.RunQuery(EsoLogConnectionString, "SELECT id, name, gender, difficulty, ppDifficulty, ppClass, reaction FROM uesp_esolog.npc WHERE level != -1 AND reaction != 6"))
 			{
 				var name = (string)row["name"];
 				if (!ColourCode.IsMatch(name) && !TrailingDigits.IsMatch(name))
 				{
-					var npcData = new NpcData(row);
+					NpcData npcData = new(row);
 					if (!ReplacementData.NpcNameSkips.Contains(npcData.Name))
 					{
 						if (nameClash.Add(npcData.Name))
@@ -161,7 +161,7 @@
 			places.SetLimitations(LimitationType.FilterTo, UespNamespaces.Online);
 			places.GetCategoryMembers("Online-Places");
 
-			var retval = new PlaceCollection();
+			PlaceCollection retval = new();
 			foreach (var page in places.OfType<VariablesPage>())
 			{
 				if (page.MainSet != null)
@@ -218,7 +218,7 @@
 			// Assumes EsoPatchVersion has already been updated.
 			job.StatusWriteLine("Update patch bot parameters");
 			var patchPage = GetPatchPage(job);
-			var parser = new ContextualParser(patchPage);
+			ContextualParser parser = new(patchPage);
 			var paramName = "bot" + pageType.NotNull(nameof(pageType));
 			if (parser.FindTemplate("Online Patch") is ITemplateNode template && template.Find(paramName) is IParameterNode param)
 			{
@@ -236,7 +236,7 @@
 		private static VariablesPage GetPatchPage(WikiJob job)
 		{
 			job.StatusWriteLine("Fetching ESO update number");
-			var patchTitle = new TitleCollection(job.Site, "Online:Patch");
+			TitleCollection patchTitle = new(job.Site, "Online:Patch");
 			var pages = job.Site.CreateMetaPageCollection(PageModules.Default, false);
 			pages.GetTitles(patchTitle);
 			if (pages.Count == 1
@@ -257,7 +257,7 @@
 				return;
 			}
 
-			var cat = new PageCollection(site);
+			PageCollection cat = new(site);
 			cat.GetCategoryMembers(placeInfo.CategoryName);
 			foreach (var member in cat)
 			{

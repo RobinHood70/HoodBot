@@ -54,7 +54,7 @@
 		#region Private Methods
 		private void Backlinks(PageCollection ignore)
 		{
-			var pageCollection = new PageCollection(this.Site, PageModules.CategoryInfo | PageModules.Backlinks);
+			PageCollection pageCollection = new(this.Site, PageModules.CategoryInfo | PageModules.Backlinks);
 			pageCollection.GetQueryPage("Wantedcategories");
 			pageCollection.GetQueryPage("Wantedfiles");
 			for (var i = pageCollection.Count - 1; i >= 0; i--)
@@ -93,8 +93,8 @@
 		private string GetTextForPage(Page page)
 		{
 			var catSize = page is CategoryPage catPage ? catPage.FullCount : 0;
-			var list = new List<string>();
-			var backlinks = (Dictionary<ISimpleTitle, BacklinksTypes>)page.Backlinks;
+			List<string> list = new();
+			Dictionary<ISimpleTitle, BacklinksTypes>? backlinks = (Dictionary<ISimpleTitle, BacklinksTypes>)page.Backlinks;
 			foreach (var title in this.filter)
 			{
 				backlinks.Remove(title);
@@ -108,7 +108,7 @@
 
 			if (catSize > 0)
 			{
-				var catMembers = new TitleCollection(this.Site);
+				TitleCollection catMembers = new(this.Site);
 				catMembers.GetCategoryMembers(page.FullPageName, CategoryMemberTypes.All, false);
 				catMembers.Remove(page);
 				//// catMembers.Remove("Skyrim:Dragonborn");
@@ -134,7 +134,7 @@
 
 		private PageCollection MainPages()
 		{
-			var pageCollection = new PageCollection(this.Site, PageModules.Categories | PageModules.CategoryInfo | PageModules.Backlinks | PageModules.Info | PageModules.Properties);
+			PageCollection pageCollection = new(this.Site, PageModules.Categories | PageModules.CategoryInfo | PageModules.Backlinks | PageModules.Info | PageModules.Properties);
 			pageCollection.GetNamespace(UespNamespaces.Dragonborn);
 			pageCollection.GetNamespace(UespNamespaces.DragonbornTalk);
 			this.FilterPages(pageCollection);
@@ -158,10 +158,10 @@
 
 		private void RemainingRedirects(PageCollection pageCollection)
 		{
-			var redirList = new Dictionary<Page, string>();
+			Dictionary<Page, string> redirList = new();
 			foreach (var page in pageCollection)
 			{
-				var categories = new TitleCollection(this.Site, page.Categories);
+				TitleCollection categories = new(this.Site, page.Categories);
 				if (page.IsRedirect && !categories.Contains("Category:Redirects from Moves"))
 				{
 					var pageInfo = this.GetTextForPage(page);
@@ -179,7 +179,7 @@
 				foreach (var (page, pageInfo) in redirList)
 				{
 					var newNs = page.Namespace == UespNamespaces.Dragonborn ? UespNamespaces.Skyrim : UespNamespaces.SkyrimTalk;
-					var newTitle = TitleFactory.DirectNormalized(page.Site, newNs, page.PageName);
+					TitleFactory? newTitle = TitleFactory.DirectNormalized(page.Site, newNs, page.PageName);
 					this.WriteLine($"* {page.PageName}: {{{{Pl|{page.FullPageName}|{page.Namespace.Name}|3=redirect=no}}}}{pageInfo} / {{{{Pl|{newTitle.FullPageName}|{newTitle.Namespace.Name}|3=redirect=no}}}}");
 				}
 			}
@@ -187,13 +187,13 @@
 
 		private void SeeAlso()
 		{
-			var pageCollection = new PageCollection(this.Site, PageModules.CategoryInfo);
+			PageCollection pageCollection = new(this.Site, PageModules.CategoryInfo);
 			pageCollection.GetTitles("Category:DBMerge-Merged", "Category:DBMerge-Redirects");
 
 			var doSeeAlso = false;
 			foreach (var page in pageCollection)
 			{
-				var catPage = (CategoryPage)page;
+				CategoryPage? catPage = (CategoryPage)page;
 				if (catPage.FullCount > 0)
 				{
 					doSeeAlso = true;
@@ -206,7 +206,7 @@
 				this.WriteLine("\n== See Also ==");
 				foreach (var page in pageCollection)
 				{
-					var catPage = (CategoryPage)page;
+					CategoryPage? catPage = (CategoryPage)page;
 					if (catPage.FullCount > 0)
 					{
 						this.WriteLine($"* {page.AsLink(false)}{this.GetTextForPage(page)}");

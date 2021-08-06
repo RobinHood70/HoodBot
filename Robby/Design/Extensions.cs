@@ -60,7 +60,7 @@
 		public static string AsLink(this ISimpleTitle title, bool friendly)
 		{
 			var linkName = title.NotNull(nameof(title)).Namespace.LinkName;
-			var sb = new StringBuilder(linkName.Length + 5 + (title.PageName.Length << 1));
+			StringBuilder sb = new(linkName.Length + 5 + (title.PageName.Length << 1));
 			sb
 				.Append("[[")
 				.Append(linkName)

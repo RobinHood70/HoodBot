@@ -214,7 +214,7 @@
 				return true;
 			}
 
-			var e = new DelayEventArgs(delayTime, reason, description);
+			DelayEventArgs e = new(delayTime, reason, description);
 			this.OnRequestingDelay(e);
 			if (e.Cancel)
 			{
@@ -250,9 +250,9 @@
 				try
 				{
 					var bytes = new byte[] { 0x1f, 0x8b, 0x08, 0, 0, 0, 0, 0, 4, 0, 0x63, 0, 0, 0x8d, 0xef, 2, 0xd2, 1, 0, 0, 0 };
-					using var compressedStream = new MemoryStream(bytes);
-					using var zipStream = new GZipStream(compressedStream, CompressionMode.Decompress);
-					using var resultStream = new MemoryStream();
+					using MemoryStream compressedStream = new(bytes);
+					using GZipStream zipStream = new(compressedStream, CompressionMode.Decompress);
+					using MemoryStream resultStream = new();
 					zipStream.CopyTo(resultStream);
 					resultStream.ToArray(); // We don't actually need the result, we just want to be sure the stream has been checked.
 				}
@@ -272,7 +272,7 @@
 			if (response != null)
 			{
 				using var respStream = response.GetResponseStream();
-				using var mem = new MemoryStream();
+				using MemoryStream mem = new();
 				respStream.CopyTo(mem);
 				return mem.ToArray();
 			}
@@ -283,7 +283,7 @@
 		private static string GetResponseText(HttpWebResponse response)
 		{
 			using var respStream = response.NotNull(nameof(response)).GetResponseStream();
-			using var reader = new StreamReader(respStream);
+			using StreamReader reader = new(respStream);
 			return reader.ReadToEnd();
 		}
 
@@ -360,7 +360,7 @@
 
 		private HttpWebRequest CreateRequest(Uri uri, string method)
 		{
-			var request = (HttpWebRequest)WebRequest.Create(uri);
+			HttpWebRequest? request = (HttpWebRequest)WebRequest.Create(uri);
 			request.AllowAutoRedirect = true;
 			request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
 			request.CookieContainer = this.cookieContainer;
@@ -379,7 +379,7 @@
 		private IEnumerable<Cookie> FlattenCookies()
 		{
 			var cookieCont = this.cookieContainer;
-			var retval = new List<Cookie>();
+			List<Cookie> retval = new();
 			if (cookieCont.GetType().InvokeMember("m_domainTable", BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.Instance, null, cookieCont, Array.Empty<object>(), CultureInfo.CurrentCulture) is object boxedDomains && ((Hashtable)boxedDomains) is Hashtable domains)
 			{
 				foreach (var domain in domains.Values)

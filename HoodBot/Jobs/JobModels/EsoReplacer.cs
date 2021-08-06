@@ -109,7 +109,7 @@
 					throw new InvalidOperationException("Not logged in.");
 				}
 
-				var replacementsTitle = TitleFactory.DirectNormalized(user.Namespace, user.PageName + "/ESO Replacements").ToTitle();
+				Title? replacementsTitle = TitleFactory.DirectNormalized(user.Namespace, user.PageName + "/ESO Replacements").ToTitle();
 				var page = replacementsTitle.Load();
 				var replacements = page.Text;
 				if (string.IsNullOrEmpty(replacements))
@@ -181,7 +181,7 @@
 						}
 					}
 
-					var matches = (ICollection<Match>)EsoLinks.Matches(text);
+					ICollection<Match> matches = EsoLinks.Matches(text);
 					if (matches.Count > 0)
 					{
 						var newNodes = factory.NodeCollection();
@@ -310,16 +310,16 @@
 
 		public ICollection<ISimpleTitle> CheckNewLinks(ContextualParser oldPage, ContextualParser newPage)
 		{
-			var oldLinks = new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance);
+			HashSet<ISimpleTitle> oldLinks = new(SimpleTitleEqualityComparer.Instance);
 			foreach (var node in oldPage.Nodes.FindAll<ILinkNode>(null, false, true, 0))
 			{
-				var siteLink = SiteLink.FromLinkNode(this.site, node);
+				SiteLink? siteLink = SiteLink.FromLinkNode(this.site, node);
 				oldLinks.Add(siteLink);
 			}
 
 			foreach (var node in newPage.Nodes.FindAll<ILinkNode>(null, false, true, 0))
 			{
-				var siteLink = SiteLink.FromLinkNode(this.site, node);
+				SiteLink? siteLink = SiteLink.FromLinkNode(this.site, node);
 				oldLinks.Remove(siteLink);
 			}
 
@@ -328,7 +328,7 @@
 
 		public ICollection<ISimpleTitle> CheckNewTemplates(ContextualParser oldPage, ContextualParser newPage)
 		{
-			var oldTemplates = new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance);
+			HashSet<ISimpleTitle> oldTemplates = new(SimpleTitleEqualityComparer.Instance);
 			foreach (var node in oldPage.Nodes.FindAll<ITemplateNode>(null, false, true, 0))
 			{
 				oldTemplates.Add(Title.FromBacklinkNode(this.site, node));
@@ -356,8 +356,8 @@
 		#region Private Static Methods
 		private static void GetMatches(Site site, string tableText, List<EsoReplacement> list)
 		{
-			var matches = (IEnumerable<Match>)ReplacementFinder.Matches(tableText);
-			var factory = new SiteNodeFactory(site);
+			IEnumerable<Match> matches = ReplacementFinder.Matches(tableText);
+			SiteNodeFactory factory = new(site);
 			foreach (var match in matches)
 			{
 				var from = match.Groups["from"].Value;
@@ -377,7 +377,7 @@
 		private static NodeCollection? ReplaceLink(IWikiNodeFactory factory, string text, TitleCollection usedList)
 		{
 			usedList.ThrowNull(nameof(usedList));
-			var foundReplacements = new HashSet<string>(StringComparer.Ordinal);
+			HashSet<string> foundReplacements = new(StringComparer.Ordinal);
 			var textLength = text.Length;
 			var retval = factory.NotNull(nameof(factory)).NodeCollection();
 			var start = 0;
@@ -397,7 +397,7 @@
 						{
 							if (newNode is ILinkNode link)
 							{
-								var title = SiteLink.FromLinkNode(usedList.Site, link);
+								SiteLink? title = SiteLink.FromLinkNode(usedList.Site, link);
 								if (usedList.Contains(title) && link.Parameters.Count > 0 && link.Parameters[0].Value is NodeCollection valueNode)
 								{
 									retval.AddRange(valueNode);
@@ -435,7 +435,7 @@
 		{
 			var type = match.Groups["type"].Value.UpperFirst(CultureInfo.InvariantCulture);
 			var resistType = type.Split(ResistanceSplit, StringSplitOptions.None);
-			var factory = new SiteNodeFactory(site);
+			SiteNodeFactory factory = new(site);
 			var templateNode = resistType.Length > 1
 				? factory.TemplateNodeFromParts("ESO Resistance Link", (null, resistType[0]))
 				: factory.TemplateNodeFromParts("ESO " + type + " Link");

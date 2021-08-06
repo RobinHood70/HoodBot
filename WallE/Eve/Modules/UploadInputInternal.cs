@@ -30,7 +30,7 @@
 				this.Watchlist = input.Watchlist;
 
 				var buffer = new byte[32768];
-				using var fileData = new MemoryStream();
+				using MemoryStream fileData = new();
 				var readBytes = 0;
 				do
 				{

@@ -61,7 +61,7 @@
 		private static (TextBlock Label, Control Input) CreateControl(ConstructorParameter parameter)
 		{
 			var valueType = parameter.Type;
-			var labelControl = new TextBlock() { Text = parameter.Label + (valueType == typeof(bool) ? '?' : ':') };
+			TextBlock labelControl = new() { Text = parameter.Label + (valueType == typeof(bool) ? '?' : ':') };
 
 			Control controlToAdd;
 			if (valueType == typeof(bool))

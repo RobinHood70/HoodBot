@@ -52,7 +52,7 @@ namespace RobinHood70.WallE.Base
 		protected PageSetInput(IEnumerable<long> ids, ListType listType)
 		{
 			this.ListType = listType;
-			var list = new List<string>();
+			List<string> list = new();
 			foreach (var id in ids.NotNull(nameof(ids)))
 			{
 				list.Add(id.ToString(CultureInfo.InvariantCulture));

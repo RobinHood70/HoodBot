@@ -27,8 +27,8 @@
 		/// <returns>A string representing the parameters, as they would be used in a URL or POST data.</returns>
 		public static string Build(Request request)
 		{
-			var sb = new StringBuilder();
-			var visitor = new RequestVisitorUrl(sb, request.NotNull(nameof(request)).SupportsUnitSeparator);
+			StringBuilder sb = new();
+			RequestVisitorUrl visitor = new(sb, request.NotNull(nameof(request)).SupportsUnitSeparator);
 			request.Build(visitor);
 			return sb.ToString();
 		}

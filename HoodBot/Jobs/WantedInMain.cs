@@ -18,9 +18,9 @@
 		#region Protected Override Methods
 		protected override void Main()
 		{
-			var titles = new TitleCollection(this.Site);
+			TitleCollection titles = new(this.Site);
 			titles.GetQueryPage("Wantedpages");
-			var sorted = new List<string>();
+			List<string> sorted = new();
 			foreach (var title in titles)
 			{
 				if (title.Namespace == MediaWikiNamespaces.Main)

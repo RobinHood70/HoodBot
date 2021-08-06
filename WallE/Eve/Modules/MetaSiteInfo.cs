@@ -81,7 +81,7 @@
 		protected override void DeserializeParent(JToken parent)
 		{
 			var (defaultSkin, skins) = GetSkins(parent.NotNull(nameof(parent)));
-			var output = new SiteInfoResult(
+			SiteInfoResult output = new(
 				general: this.GetGeneral(parent),
 				defaultOptions: GetDefaultOptions(parent),
 				defaultSkin: defaultSkin,
@@ -148,7 +148,7 @@
 				return Array.Empty<SiteInfoLag>();
 			}
 
-			var retval = new List<SiteInfoLag>();
+			List<SiteInfoLag> retval = new();
 			foreach (var result in node)
 			{
 				retval.Add(new SiteInfoLag(result.MustHaveString("host"), (int)result.MustHave("lag")));
@@ -168,7 +168,7 @@
 				return Array.Empty<string>();
 			}
 
-			var retval = new List<string>();
+			List<string> retval = new();
 			foreach (var result in node)
 			{
 				retval.Add(result.MustHaveString("ext"));
@@ -186,7 +186,7 @@
 				return Array.Empty<SiteInfoInterwikiMap>();
 			}
 
-			var retval = new List<SiteInfoInterwikiMap>();
+			List<SiteInfoInterwikiMap> retval = new();
 			foreach (var result in node)
 			{
 				retval.Add(new SiteInfoInterwikiMap(
@@ -215,7 +215,7 @@
 				return Array.Empty<SiteInfoLanguage>();
 			}
 
-			var retval = new List<SiteInfoLanguage>();
+			List<SiteInfoLanguage> retval = new();
 			foreach (var result in node)
 			{
 				retval.Add(new SiteInfoLanguage(result.MustHaveString("code"), result.MustHaveBCString("name")));
@@ -231,7 +231,7 @@
 				return Array.Empty<SiteInfoLibrary>();
 			}
 
-			var retval = new List<SiteInfoLibrary>();
+			List<SiteInfoLibrary> retval = new();
 			foreach (var result in node)
 			{
 				retval.Add(new SiteInfoLibrary(
@@ -249,7 +249,7 @@
 				return Array.Empty<SiteInfoMagicWord>();
 			}
 
-			var retval = new List<SiteInfoMagicWord>();
+			List<SiteInfoMagicWord> retval = new();
 			foreach (var result in node)
 			{
 				retval.Add(new SiteInfoMagicWord(
@@ -268,7 +268,7 @@
 				return Array.Empty<SiteInfoNamespaceAlias>();
 			}
 
-			var retval = new List<SiteInfoNamespaceAlias>();
+			List<SiteInfoNamespaceAlias> retval = new();
 			foreach (var result in node)
 			{
 				retval.Add(new SiteInfoNamespaceAlias(
@@ -286,7 +286,7 @@
 				return Array.Empty<SiteInfoNamespace>();
 			}
 
-			var retval = new List<SiteInfoNamespace>();
+			List<SiteInfoNamespace> retval = new();
 			foreach (var resultNode in node)
 			{
 				if (resultNode.First is JToken result)
@@ -339,10 +339,10 @@
 			}
 
 			SiteInfoSkin? defaultSkin = null;
-			var retval = new List<SiteInfoSkin>();
+			List<SiteInfoSkin> retval = new();
 			foreach (var result in node)
 			{
-				var item = new SiteInfoSkin(
+				SiteInfoSkin item = new(
 					code: result.MustHaveString("code"),
 					name: result.MustHaveBCString("name"),
 					unusable: result["unusable"].GetBCBool());
@@ -364,7 +364,7 @@
 				return Array.Empty<SiteInfoSpecialPageAlias>();
 			}
 
-			var retval = new List<SiteInfoSpecialPageAlias>();
+			List<SiteInfoSpecialPageAlias> retval = new();
 			foreach (var result in node)
 			{
 				retval.Add(new SiteInfoSpecialPageAlias(
@@ -395,7 +395,7 @@
 				return Array.Empty<SiteInfoSubscribedHook>();
 			}
 
-			var retval = new List<SiteInfoSubscribedHook>();
+			List<SiteInfoSubscribedHook> retval = new();
 			foreach (var result in node)
 			{
 				// See https://phabricator.wikimedia.org/T117022 for details on the Scribunto check.
@@ -419,7 +419,7 @@
 				return Array.Empty<SiteInfoUserGroup>();
 			}
 
-			var retval = new List<SiteInfoUserGroup>();
+			List<SiteInfoUserGroup> retval = new();
 			foreach (var result in node)
 			{
 				retval.Add(new SiteInfoUserGroup(
@@ -446,7 +446,7 @@
 				return Array.Empty<SiteInfoExtensions>();
 			}
 
-			var retval = new List<SiteInfoExtensions>();
+			List<SiteInfoExtensions> retval = new();
 			foreach (var result in node)
 			{
 				var name = (string?)result["name"];
@@ -490,7 +490,7 @@
 				return null;
 			}
 
-			var fallback = new List<string>();
+			List<string> fallback = new();
 			var fallbacksNode = node["fallback"];
 			if (fallbacksNode != null)
 			{
@@ -500,7 +500,7 @@
 				}
 			}
 
-			var imageLimits = new Dictionary<string, ImageLimitsItem>(StringComparer.Ordinal);
+			Dictionary<string, ImageLimitsItem> imageLimits = new(StringComparer.Ordinal);
 			if (node["imagelimits"] is JToken imageLimitsNode)
 			{
 				foreach (var (key, value) in GetBCIndexedList(imageLimitsNode, this.Wal.DetectedFormatVersion))
@@ -515,11 +515,11 @@
 			{
 				// Same approach as MediaWiki uses in Setup.php
 				var canonical = server.StartsWith("//", StringComparison.Ordinal) ? "http:" + server : server;
-				var uri = new Uri(canonical);
+				Uri uri = new(canonical);
 				serverName = uri.Host;
 			}
 
-			var thumbLimits = new Dictionary<string, int>(StringComparer.Ordinal);
+			Dictionary<string, int> thumbLimits = new(StringComparer.Ordinal);
 			if (node["thumblimits"] is JToken thumbLimitsNode)
 			{
 				foreach (var (key, value) in GetBCIndexedList(thumbLimitsNode, this.Wal.DetectedFormatVersion))
@@ -529,7 +529,7 @@
 			}
 
 			var timeOffsetNode = (double)node.MustHave("timeoffset");
-			var timeOffset = TimeSpan.FromMinutes(timeOffsetNode);
+			TimeSpan timeOffset = TimeSpan.FromMinutes(timeOffsetNode);
 
 			string? variantArticlePath = null;
 			if (node["variantarticlepath"] is JToken variantArticlePathNode)
@@ -538,7 +538,7 @@
 				variantArticlePath = variantArticlePathNode?.Type == JTokenType.Boolean ? null : (string?)variantArticlePathNode;
 			}
 
-			var variants = new List<string>();
+			List<string> variants = new();
 			if (node["variants"] is JToken variantsNode)
 			{
 				foreach (var token in variantsNode)

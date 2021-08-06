@@ -44,7 +44,7 @@
 		#region Public Static Methods
 		public static BladesCodeLine Parse(IList<string> lines)
 		{
-			var codeLines = new List<IndentedLine>(lines.Count);
+			List<IndentedLine> codeLines = new(lines.Count);
 			foreach (var line in lines.NotNull(nameof(lines)))
 			{
 				codeLines.Add(SplitTabs(line));
@@ -88,7 +88,7 @@
 		private static BladesCodeLine Parse(List<IndentedLine> lines, ref int i)
 		{
 			var parentLine = lines[i];
-			var retval = new BladesCodeLine(parentLine.Text);
+			BladesCodeLine retval = new(parentLine.Text);
 			i++;
 			while (i < lines.Count && lines[i].Level == parentLine.Level + 1)
 			{

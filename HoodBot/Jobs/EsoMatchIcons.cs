@@ -121,7 +121,7 @@
 
 		private void GetItems()
 		{
-			var queries = new Dictionary<string, string>(StringComparer.Ordinal)
+			Dictionary<string, string> queries = new(StringComparer.Ordinal)
 			{
 				["achievements"] = "SELECT id, name, icon FROM achievements WHERE icon != '/esoui/art/icons/icon_missing.dds'",
 				["book"] = "SELECT id, title name, icon FROM book WHERE icon != '/esoui/art/icons/icon_missing.dds'",
@@ -139,7 +139,7 @@
 
 		private void GetLicenseTemplates()
 		{
-			var copyrightTemplates = new TitleCollection(this.Site);
+			TitleCollection copyrightTemplates = new(this.Site);
 			copyrightTemplates.GetCategoryMembers("Image Copyright Templates");
 			copyrightTemplates.Remove("Template:Zenimage");
 			foreach (var template in copyrightTemplates)
@@ -159,7 +159,7 @@
 				}
 				else if (!isBook)
 				{
-					var sorted = new SortedSet<string>(StringComparer.Ordinal);
+					SortedSet<string> sorted = new(StringComparer.Ordinal);
 					foreach (var item in iconItems)
 					{
 						var text = item.Type switch
@@ -195,7 +195,7 @@
 					_ => throw new InvalidCastException(),
 				};
 				var iconName = ((string)row["icon"]).Replace("/esoui/art/icons/", string.Empty, StringComparison.OrdinalIgnoreCase).Replace(".dds", string.Empty, StringComparison.OrdinalIgnoreCase);
-				var entry = new ItemInfo(
+				ItemInfo entry = new(
 					id: id,
 					itemName: (string)row["name"],
 					type: query.Key);
@@ -214,9 +214,9 @@
 			if (page is FilePage filePage && filePage.LatestFileRevision is FileRevision latestRevision)
 			{
 				this.allIcons.TryGetValue(latestRevision.Sha1.NotNull(nameof(latestRevision), nameof(latestRevision.Sha1)), out var foundIcons);
-				var parser = new ContextualParser(page);
+				ContextualParser parser = new(page);
 				this.ReplaceLicense(parser);
-				var parts = new PageParts(filePage);
+				PageParts parts = new(filePage);
 				if (foundIcons == null || foundIcons.Count == 0)
 				{
 					if (parts.OriginalFiles.Count > 0)
@@ -278,7 +278,7 @@
 			public PageParts(FilePage page)
 			{
 				this.Page = page;
-				var parser = new ContextualParser(page);
+				ContextualParser parser = new(page);
 				for (var i = 0; i < parser.Nodes.Count; i++)
 				{
 					if (parser.Nodes[i] is SiteLinkNode link && link.TitleValue.Namespace == MediaWikiNamespaces.Category)

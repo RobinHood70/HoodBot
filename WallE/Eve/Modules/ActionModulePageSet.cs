@@ -261,7 +261,7 @@ namespace RobinHood70.WallE.Eve.Modules
 					? numRemaining
 					: this.CurrentListSize;
 				Debug.Assert(listSize >= 0, "listSize was 0 or negative!");
-				var currentGroup = new List<string>(listSize);
+				List<string> currentGroup = new(listSize);
 				for (var i = 0; i < listSize; i++)
 				{
 					currentGroup.Add(input.Values[this.offset + i]);

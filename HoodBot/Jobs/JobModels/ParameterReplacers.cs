@@ -46,7 +46,7 @@
 
 		public void AddTemplateReplacers(string name, params ParameterReplacer[] replacers)
 		{
-			var title = Title.Coerce(this.job.Site, MediaWikiNamespaces.Template, name);
+			Title? title = Title.Coerce(this.job.Site, MediaWikiNamespaces.Template, name);
 			if (!this.templateReplacers.TryGetValue(title, out var currentReplacers))
 			{
 				currentReplacers = new List<ParameterReplacer>();
@@ -85,7 +85,7 @@
 			{
 				var (oldNs, nsParam) = this.GetNsBase(page, template);
 				var oldTitle = link.Value.ToValue();
-				var searchTitle = TitleFactory.FromName(page.Site, oldNs.Full + oldTitle).ToTitle();
+				Title? searchTitle = TitleFactory.FromName(page.Site, oldNs.Full + oldTitle).ToTitle();
 				if (this.job.Replacements.TryGetValue(searchTitle, out var replacement))
 				{
 					link.Value.Clear();

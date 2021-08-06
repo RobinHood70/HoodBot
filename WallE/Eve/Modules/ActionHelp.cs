@@ -40,8 +40,8 @@
 			input.ThrowNull(nameof(input));
 			if (this.SiteVersion < 121)
 			{
-				var modules = new SortedSet<string>(StringComparer.Ordinal);
-				var queryModules = new SortedSet<string>(StringComparer.Ordinal);
+				SortedSet<string> modules = new(StringComparer.Ordinal);
+				SortedSet<string> queryModules = new(StringComparer.Ordinal);
 				foreach (var module in input.Modules)
 				{
 					var submodule = module.Split(TextArrays.Plus, 2, StringSplitOptions.None);

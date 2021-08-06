@@ -425,7 +425,7 @@
 		/// <returns>A <see cref="ILinkNode"/> containing the parsed link text.</returns>
 		public ILinkNode ToLinkNode()
 		{
-			var values = new List<string>();
+			List<string> values = new();
 			foreach (var parameter in this.Parameters)
 			{
 				var text = parameter.Value.ToString();
@@ -452,8 +452,8 @@
 		/// <remarks>Interwiki and Fragment will remain unaffected by the change. If those should be updated to null, use <see cref="With(IFullTitle)"/>.</remarks>
 		public SiteLink With(ISimpleTitle title)
 		{
-			var upcast = TitleFactory.DirectNormalized(title.NotNull(nameof(title)).Namespace, title.PageName);
-			var retval = new SiteLink(upcast)
+			TitleFactory? upcast = TitleFactory.DirectNormalized(title.NotNull(nameof(title)).Namespace, title.PageName);
+			SiteLink retval = new(upcast)
 			{
 				Coerced = this.Coerced,
 				ForcedInterwikiLink = this.ForcedInterwikiLink,
@@ -479,8 +479,8 @@
 		/// <returns>A new copy of the SiteLink with the altered title.</returns>
 		public SiteLink With(IFullTitle title)
 		{
-			var upcast = TitleFactory.DirectNormalized(title.NotNull(nameof(title)).Namespace, title.PageName);
-			var retval = new SiteLink(upcast)
+			TitleFactory? upcast = TitleFactory.DirectNormalized(title.NotNull(nameof(title)).Namespace, title.PageName);
+			SiteLink retval = new(upcast)
 			{
 				Coerced = this.Coerced,
 				ForcedInterwikiLink = this.ForcedInterwikiLink,
@@ -515,7 +515,7 @@
 		#region Private Static Methods
 		private static EmbeddedValue SplitWhitespace(string titleText)
 		{
-			var value = new EmbeddedValue();
+			EmbeddedValue value = new();
 			var index = 0;
 			while (index < titleText.Length && char.IsWhiteSpace(titleText[index]))
 			{
@@ -558,7 +558,7 @@
 
 			var linkNode = new SiteNodeFactory(site).LinkNodeFromWikiText(link);
 			var nodes = linkNode.Parameters.Count == 0 ? linkNode.Title : linkNode.Parameters[linkNode.Parameters.Count - 1].Value;
-			var last = (ITextNode)nodes[^1];
+			ITextNode? last = (ITextNode)nodes[^1];
 			if (last.Text.Length == 1)
 			{
 				nodes.RemoveAt(nodes.Count - 1);
@@ -651,7 +651,7 @@
 			}
 			else if (parameterType == ParameterType.Caption || (DirectValues.TryGetValue(value, out var valueType) && parameterType == valueType))
 			{
-				var paramValue = new EmbeddedValue(value);
+				EmbeddedValue paramValue = new(value);
 				this.Parameters.Add(parameterType, paramValue);
 			}
 			else

@@ -87,13 +87,13 @@
 		private void UpdateEntry(Page page)
 		{
 			Debug.Assert(this.logInfo != null, "LogInfo is null.");
-			var parser = new ContextualParser(page);
+			ContextualParser parser = new(page);
 			var factory = parser.Nodes.Factory;
 			var sameTaskText = this.UpdateCurrentStatus(parser);
 			var firstEntry = parser.Nodes.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("/Entry"));
 			if (firstEntry != -1)
 			{
-				var entry = (SiteTemplateNode)parser.Nodes[firstEntry];
+				SiteTemplateNode? entry = (SiteTemplateNode)parser.Nodes[firstEntry];
 
 				// If the last job was the same as this job and has no end time, then it's either the current job or a resumed one.
 				if (sameTaskText && string.IsNullOrEmpty(entry.Find(3)?.Value.ToValue()) &&
@@ -113,7 +113,7 @@
 					return;
 				}
 
-				var parms = new List<(string?, string)> { (null, this.logInfo.Title) };
+				List<(string?, string)> parms = new() { (null, this.logInfo.Title) };
 				if (!string.IsNullOrEmpty(this.logInfo.Details))
 				{
 					parms.Add(("info", this.logInfo.Details));

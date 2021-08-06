@@ -71,7 +71,7 @@
 
 		public JToken ToJson()
 		{
-			var json = new JObject
+			JObject json = new()
 			{
 				{ nameof(this.Api), new JValue(this.Api) },
 				{ nameof(this.DisplayName), new JValue(this.DisplayName) }

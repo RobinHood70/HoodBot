@@ -86,7 +86,7 @@
 				return null;
 			}
 
-			var item = new LogEventsItem(
+			LogEventsItem item = new(
 				ns: (int?)result["ns"],
 				title: (string?)result["title"],
 				logPageId: (long?)result["logpage"] ?? 0,

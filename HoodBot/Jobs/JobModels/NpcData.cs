@@ -120,7 +120,7 @@
 		{
 			void Remove(Func<Place, int, bool> condition)
 			{
-				var remove = new List<Place>();
+				List<Place> remove = new();
 				foreach (var kvp in this.Places)
 				{
 					if (condition(kvp.Key, kvp.Value))
@@ -157,7 +157,7 @@
 					return false;
 				});
 
-			var showPlaces = new Dictionary<PlaceType, List<Place>>();
+			Dictionary<PlaceType, List<Place>> showPlaces = new();
 			foreach (var kvp in this.Places)
 			{
 				var placeType = kvp.Key.PlaceType;
@@ -199,7 +199,7 @@
 				return "Varies";
 			}
 
-			var list = new List<string>();
+			List<string> list = new();
 			switch (placeType)
 			{
 				case PlaceType.City:
@@ -233,7 +233,7 @@
 		#region Private Methods
 		private List<Place> Subset(PlaceType placeType)
 		{
-			var list = new List<Place>();
+			List<Place> list = new();
 			foreach (var place in this.Places.Keys)
 			{
 				if (place.PlaceType == placeType)

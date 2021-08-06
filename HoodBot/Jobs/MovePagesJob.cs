@@ -101,7 +101,7 @@
 			{
 				if (this.logDetails == null)
 				{
-					var list = new List<string>();
+					List<string> list = new();
 					if (this.MoveAction == MoveAction.MoveOverExisting)
 					{
 						list.Add("move pages over existing pages");
@@ -246,7 +246,7 @@
 				this.EmitReport();
 			}
 
-			var loadTitles = new TitleCollection(this.Site);
+			TitleCollection loadTitles = new(this.Site);
 			if ((this.FollowUpActions & FollowUpActions.AffectsBacklinks) != 0)
 			{
 				// This can be long, so we do it beforehand and save it, rather than showing a lengthy pause between moving pages and fixing links. This will also potentially allow a merger with this.editDictionary later.
@@ -310,9 +310,9 @@
 		protected virtual void CheckRemaining()
 		{
 			this.StatusWriteLine("Checking remaining pages");
-			var leftovers = new TitleCollection(this.Site);
-			var allBacklinks = PageCollection.Unlimited(this.Site, PageModules.Info | PageModules.Backlinks, false);
-			var backlinkTitles = new TitleCollection(this.Site);
+			TitleCollection leftovers = new(this.Site);
+			PageCollection? allBacklinks = PageCollection.Unlimited(this.Site, PageModules.Info | PageModules.Backlinks, false);
+			TitleCollection backlinkTitles = new(this.Site);
 			foreach (var item in this.Replacements)
 			{
 				backlinkTitles.Add(item.From);
@@ -347,7 +347,7 @@
 
 		protected virtual void EditPageLoaded(ContextualParser parser, Replacement replacement)
 		{
-			var page = (Page)parser.Context;
+			Page? page = (Page)parser.Context;
 			if (
 				page.Exists &&
 				(this.FollowUpActions & FollowUpActions.ProposeUnused) != 0 &&
@@ -372,7 +372,7 @@
 			{
 				this.WriteLine("|-");
 				this.Write(FormattableString.Invariant($"| {replacement.From} ([[Special:WhatLinksHere/{replacement.From}|links]]) || "));
-				var actions = new List<string>();
+				List<string> actions = new();
 				if (this.MoveAction != MoveAction.None)
 				{
 					if ((replacement.Actions & ReplacementActions.Move) != 0)
@@ -439,7 +439,7 @@
 
 		protected virtual IReadOnlyDictionary<ISimpleTitle, TitleCollection> GetCategoryMembers()
 		{
-			var retval = new Dictionary<ISimpleTitle, TitleCollection>();
+			Dictionary<ISimpleTitle, TitleCollection> retval = new();
 			if ((this.FollowUpActions & FollowUpActions.NeedsCategoryMembers) != 0)
 			{
 				this.StatusWriteLine("Getting category members");
@@ -454,7 +454,7 @@
 							replacement.From.Namespace == replacement.To.Namespace;
 						if (updateMembers || (this.FollowUpActions & FollowUpActions.ProposeUnused) != 0)
 						{
-							var catMembers = new TitleCollection(this.Site);
+							TitleCollection catMembers = new(this.Site);
 							catMembers.GetCategoryMembers(replacement.From.PageName, CategoryMemberTypes.All, this.RecursiveCategoryMembers);
 							if (catMembers.Count > 0)
 							{
@@ -549,10 +549,10 @@
 
 		protected virtual void SetupMoves(PageCollection pageInfo)
 		{
-			var toPages = PageCollection.Unlimited(this.Site, PageModules.Info, false);
+			PageCollection? toPages = PageCollection.Unlimited(this.Site, PageModules.Info, false);
 			if (this.MoveAction == MoveAction.MoveSafely)
 			{
-				var toTitles = new TitleCollection(this.Site);
+				TitleCollection toTitles = new(this.Site);
 				foreach (var replacement in this.Replacements)
 				{
 					if ((replacement.Actions & ReplacementActions.Move) != 0)
@@ -616,7 +616,7 @@
 			if ((this.FollowUpActions & FollowUpActions.ProposeUnused) != 0)
 			{
 				var deletions = this.LoadProposedDeletions();
-				var doNotDelete = new TitleCollection(this.Site);
+				TitleCollection doNotDelete = new(this.Site);
 				foreach (var template in this.Site.DeletePreventionTemplates)
 				{
 					doNotDelete.GetBacklinks(template.FullPageName(), BacklinksTypes.EmbeddedIn, true);
@@ -660,14 +660,14 @@
 				return;
 			}
 
-			var sb = new StringBuilder();
+			StringBuilder sb = new();
 			var lines = text.Split(TextArrays.LineFeed);
 			foreach (var line in lines)
 			{
 				var newLine = line;
 				if (line.Length > 0)
 				{
-					var link = SiteLink.FromGalleryText(this.Site, line);
+					SiteLink? link = SiteLink.FromGalleryText(this.Site, line);
 					if (this.Replacements.TryGetValue(link, out var replacement)
 						&& (replacement.Actions & ReplacementActions.UpdateLinks) != 0)
 					{
@@ -679,7 +679,7 @@
 
 						var newPageName = replacement.To.PageName;
 						var newNamespace = (replacement.From.Namespace == replacement.To.Namespace && link.Coerced) ? this.Site[MediaWikiNamespaces.Main] : replacement.To.Namespace;
-						var newTitle = TitleFactory.DirectNormalized(newNamespace, newPageName);
+						TitleFactory? newTitle = TitleFactory.DirectNormalized(newNamespace, newPageName);
 						var newLink = link.With(newTitle);
 						this.UpdateLinkText(page, replacement.From, newLink, false);
 						newLine = newLink.ToString()[2..^2].TrimEnd();
@@ -700,7 +700,7 @@
 		protected virtual void UpdateLinkNode(Page page, SiteLinkNode node, bool isRedirectTarget)
 		{
 			page.ThrowNull(nameof(page));
-			var link = SiteLink.FromLinkNode(this.Site, node.NotNull(nameof(node)));
+			SiteLink? link = SiteLink.FromLinkNode(this.Site, node.NotNull(nameof(node)));
 			if (this.Replacements.TryGetValue(link, out var replacement)
 				&& (replacement.Actions & ReplacementActions.UpdateLinks) != 0
 				&& (link.ForcedNamespaceLink
@@ -715,11 +715,11 @@
 
 			if (link.Namespace == MediaWikiNamespaces.Media)
 			{
-				var key = TitleFactory.DirectNormalized(this.Site, MediaWikiNamespaces.File, link.PageName).ToTitle();
+				Title? key = TitleFactory.DirectNormalized(this.Site, MediaWikiNamespaces.File, link.PageName).ToTitle();
 				if (this.Replacements.TryGetValue(link.With(key), out replacement)
 				&& (replacement.Actions & ReplacementActions.UpdateLinks) != 0)
 				{
-					var newtitle = TitleFactory.DirectNormalized(this.Site, MediaWikiNamespaces.Media, replacement.To.PageName);
+					TitleFactory? newtitle = TitleFactory.DirectNormalized(this.Site, MediaWikiNamespaces.Media, replacement.To.PageName);
 					link = link.With(newtitle);
 					this.UpdateLinkText(page, replacement.From, link, !isRedirectTarget);
 					link.UpdateLinkNode(node);
@@ -739,7 +739,7 @@
 					&& page.Namespace != MediaWikiNamespaces.User
 					&& !page.Site.IsDiscussionPage(page))
 				{
-					var textTitle = TitleFactory.FromName(this.Site, newLink.Text);
+					TitleFactory? textTitle = TitleFactory.FromName(this.Site, newLink.Text);
 					if (oldTitle is IFullTitle fullTitle && fullTitle.FullEquals(textTitle))
 					{
 						newLink.Text = textTitle.ToString();
@@ -800,7 +800,7 @@
 			deletionText.ThrowNull(nameof(deletionText));
 
 			// Cheating and using text throughout, since this does not need to be parsed or acted upon currently, and is likely to be moved to another job soon anyway.
-			var page = (Page)parser.NotNull(nameof(parser)).Context;
+			Page? page = (Page)parser.NotNull(nameof(parser)).Context;
 			var noinclude = page.Namespace == MediaWikiNamespaces.Template;
 			if (!noinclude)
 			{
@@ -838,7 +838,7 @@
 		#region Private Methods
 		private void FullEdit(object sender, Page page)
 		{
-			var parser = new ContextualParser(page);
+			ContextualParser parser = new(page);
 			if (this.Replacements.TryGetValue(page, out var replacement) &&
 				(replacement.Actions & ReplacementActions.NeedsEdited) != 0)
 			{
@@ -851,7 +851,7 @@
 
 		private TitleCollection GetBacklinkTitles(PageCollection pageInfo)
 		{
-			var retval = new TitleCollection(this.Site);
+			TitleCollection retval = new(this.Site);
 			foreach (var replacement in this.Replacements)
 			{
 				if (pageInfo[replacement.From] is Page fromPage && (replacement.Actions & ReplacementActions.UpdateLinks) != 0)
@@ -875,13 +875,13 @@
 			}
 
 			// Do not filter the From lists to only-existent pages, or backlinks and category members for non-existent pages will be missed.
-			var fromTitles = new TitleCollection(this.Site);
+			TitleCollection fromTitles = new(this.Site);
 			foreach (var replacement in this.Replacements)
 			{
 				fromTitles.Add(replacement.From);
 			}
 
-			var retval = PageCollection.Unlimited(this.Site, modules, false);
+			PageCollection? retval = PageCollection.Unlimited(this.Site, modules, false);
 			retval.GetTitles(fromTitles);
 
 			return retval;
@@ -908,7 +908,7 @@
 		private void ValidateMoves()
 		{
 			var inPlaceMoves = false;
-			var unique = new Dictionary<Title, Replacement>();
+			Dictionary<Title, Replacement> unique = new();
 			foreach (var replacement in this.Replacements)
 			{
 				if ((replacement.Actions & ReplacementActions.Move) != 0 &&

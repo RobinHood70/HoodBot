@@ -54,7 +54,7 @@
 			var bigChange = false;
 			bigChange |= this.TrackedUpdate(template, "type", "Passive");
 			bigChange |= this.TrackedUpdate(template, "id", skillBase.Id.ToStringInvariant());
-			var usedList = new TitleCollection(this.Site);
+			TitleCollection usedList = new(this.Site);
 			foreach (var rank in skillBase.Ranks)
 			{
 				var splitDescription = Skill.Highlight.Split(rank.Description);
@@ -65,7 +65,7 @@
 
 				for (var i = 0; i < splitDescription.Length; i++)
 				{
-					var coef = Coefficient.FromCollection(rank.Coefficients, splitDescription[i]);
+					Coefficient? coef = Coefficient.FromCollection(rank.Coefficients, splitDescription[i]);
 					if (coef != null)
 					{
 						splitDescription[i] = coef.SkillDamageText();
