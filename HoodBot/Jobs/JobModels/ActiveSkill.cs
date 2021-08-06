@@ -67,9 +67,9 @@
 			}
 
 			morph.Abilities.Add(new Ability(row));
-			morph.ChannelTimes.Add(EsoGeneral.TimeToText((int)row["channelTime"]));
+			morph.ChannelTimes.Add(EsoSpace.TimeToText((int)row["channelTime"]));
 			morph.Costs.Add((int)row["cost"]);
-			morph.Durations.Add(EsoGeneral.TimeToText((int)row["duration"]));
+			morph.Durations.Add(EsoSpace.TimeToText((int)row["duration"]));
 			morph.Radii.Add(FormatRange((int)row["radius"]));
 			var maxRange = FormatRange((int)row["maxRange"]);
 			var minRange = FormatRange((int)row["minRange"]);

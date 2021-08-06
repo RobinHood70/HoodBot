@@ -87,7 +87,7 @@
 		protected override void Main()
 		{
 			this.SavePages(this.LogName, false);
-			EsoGeneral.SetBotUpdateVersion(this, "itemset");
+			EsoSpace.SetBotUpdateVersion(this, "itemset");
 		}
 		#endregion
 

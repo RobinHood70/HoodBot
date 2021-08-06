@@ -16,7 +16,7 @@
 				description = (string)data["description"];
 			}
 
-			this.Description = EsoGeneral.HarmonizeDescription(description);
+			this.Description = EsoSpace.HarmonizeDescription(description);
 
 			List<Coefficient> coefficients = new(3);
 			for (var i = '1'; i <= '3'; i++)

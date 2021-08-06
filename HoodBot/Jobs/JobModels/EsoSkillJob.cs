@@ -136,7 +136,7 @@
 		protected override void Main()
 		{
 			this.SavePages(this.LogName, false, this.SkillPageLoaded);
-			EsoGeneral.SetBotUpdateVersion(this, this.TypeText.ToLowerInvariant());
+			EsoSpace.SetBotUpdateVersion(this, this.TypeText.ToLowerInvariant());
 			this.Progress++;
 		}
 		#endregion

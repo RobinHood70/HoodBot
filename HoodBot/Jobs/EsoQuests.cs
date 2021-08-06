@@ -138,7 +138,7 @@
 
 			var allPages = allTitles.Load(PageModules.Info);
 			allPages.RemoveExists(false);
-			var places = EsoGeneral.GetPlaces(this.Site);
+			var places = EsoSpace.GetPlaces(this.Site);
 			foreach (var quest in quests)
 			{
 				var disambigName = quest.FullPageName + " (quest)";

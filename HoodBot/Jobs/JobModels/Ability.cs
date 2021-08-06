@@ -24,7 +24,7 @@
 				desc = (string)data["description"];
 			}
 
-			desc = EsoGeneral.HarmonizeDescription(desc);
+			desc = EsoSpace.HarmonizeDescription(desc);
 			if (ReplacementData.IdPartialReplacements.TryGetValue(this.Id, out var partial))
 			{
 				desc = desc.Replace(partial.From, partial.To, StringComparison.Ordinal);

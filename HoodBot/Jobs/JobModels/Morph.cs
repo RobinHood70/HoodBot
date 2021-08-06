@@ -12,7 +12,7 @@
 		public Morph(IDataRecord data)
 		{
 			this.Name = (string)data["name"];
-			this.CastingTime = EsoGeneral.TimeToText((int)data["castTime"]);
+			this.CastingTime = EsoSpace.TimeToText((int)data["castTime"]);
 			this.EffectLine = (string)data["effectLines"];
 			this.Target = (string)data["target"];
 			this.Mechanic = (int)data["mechanic"];

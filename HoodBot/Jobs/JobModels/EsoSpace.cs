@@ -13,7 +13,7 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
-	internal static class EsoGeneral
+	internal static class EsoSpace
 	{
 		#region Fields
 		private static readonly Regex BonusFinder = new(@"\s*Current [Bb]onus:.*?\.", RegexOptions.None, Globals.DefaultRegexTimeout);
