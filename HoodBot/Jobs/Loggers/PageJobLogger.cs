@@ -96,7 +96,7 @@
 				SiteTemplateNode? entry = (SiteTemplateNode)parser.Nodes[firstEntry];
 
 				// If the last job was the same as this job and has no end time, then it's either the current job or a resumed one.
-				if (sameTaskText && string.IsNullOrEmpty(entry.Find(3)?.Value.ToValue()) &&
+				if (string.IsNullOrEmpty(entry.Find(3)?.Value.ToValue()) &&
 					string.Equals(entry.Find(1)?.Value.ToValue().Trim(), this.logInfo.Title, StringComparison.Ordinal) &&
 					string.Equals(entry.Find("info")?.Value.ToValue() ?? string.Empty, this.logInfo.Details ?? string.Empty, StringComparison.Ordinal))
 				{
@@ -151,7 +151,10 @@
 				try
 				{
 					var result = this.logPage.Save(editSummary, true);
-					saved = result is ChangeStatus.EditingDisabled or ChangeStatus.NoEffect or ChangeStatus.Success;
+					saved = result is
+						ChangeStatus.EditingDisabled or
+						ChangeStatus.NoEffect or
+						ChangeStatus.Success;
 				}
 				catch (EditConflictException)
 				{
@@ -159,7 +162,7 @@
 				}
 				catch (StopException)
 				{
-					saved = true; // Lie about it so the job stops.
+					break;
 				}
 			}
 			while (!saved);
