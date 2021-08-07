@@ -212,6 +212,21 @@ namespace RobinHood70.WallE.Eve.Modules
 				return true;
 			}
 
+			if ((text?.Contains("truncated", StringComparison.Ordinal) ?? false) && this.MaximumListSize > 1)
+			{
+				if (this.MaximumListSize < 10)
+				{
+					this.MaximumListSize--;
+				}
+				else
+				{
+					this.MaximumListSize = this.MaximumListSize * 9 / 10;
+				}
+
+				return true;
+			}
+
+
 			return base.HandleWarning(from, text);
 		}
 		#endregion
