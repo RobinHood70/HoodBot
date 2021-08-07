@@ -32,7 +32,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		private readonly Dictionary<string, InterwikiTitleItem> interwiki = new(StringComparer.Ordinal);
 		private readonly Dictionary<string, string> normalized = new(StringComparer.Ordinal);
 		private readonly Dictionary<string, PageSetRedirectItem> redirects = new(StringComparer.Ordinal);
-		private int offset;
 		#endregion
 
 		#region Constructors
@@ -52,8 +51,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		protected ContinueModule ContinueModule { get; set; }
 
 		protected int MaximumListSize { get; set; }
-
-		protected int PagesProcessed { get; set; }
 		#endregion
 
 		#region Protected Override Properties
@@ -76,25 +73,49 @@ namespace RobinHood70.WallE.Eve.Modules
 				this.Generator = this.Wal.ModuleFactory.CreateGenerator(genInput, this);
 			}
 
+			HashSet<string> uniqueTitles = new(input.Values, StringComparer.Ordinal);
 			this.BeforeSubmit();
 			this.ContinueModule.BeforePageSetSubmit(this);
-			this.offset = 0;
 			var pages = this.CreatePageList();
+			var lastRequest = string.Empty;
 
+			int uniqueTitlesCount;
 			do
 			{
+				uniqueTitlesCount = uniqueTitles.Count;
 				do
 				{
-					var request = this.CreateRequest(input);
+					var numRemaining = uniqueTitles.Count;
+					var listSize = numRemaining < this.CurrentListSize
+						? numRemaining
+						: this.CurrentListSize;
+					var currentGroup = new string[listSize];
+					uniqueTitles.CopyTo(currentGroup, 0, listSize);
+
+					var request = this.CreateRequest(input, currentGroup);
+					var requestText = RequestVisitorUrl.Build(request);
+					if (requestText.OrdinalEquals(lastRequest))
+					{
+						throw new InvalidOperationException("Infinite query loop detected.");
+					}
+
 					var response = this.Wal.SendRequest(request);
 					this.ParseResponse(response, pages);
 				}
 				while (this.ContinueModule.Continues && this.Continues);
 
-				this.offset += this.PagesProcessed;
-			}
-			while (this.offset < input.Values.Count);
+				// Because pages may have returned less than we asked for (e.g., due to limits being surpassed), we remove all the pages we got back from our input set and continue from there.
+				List<string>? returnedNames = new();
+				foreach (var title in pages)
+				{
+					returnedNames.Add(title.FullPageName);
+				}
 
+				uniqueTitles.ExceptWith(returnedNames);
+				uniqueTitles.ExceptWith(this.converted.Keys);
+				uniqueTitles.ExceptWith(this.redirects.Keys);
+			}
+			while (uniqueTitles.Count > 0 && uniqueTitlesCount != uniqueTitles.Count);
 			return this.CreatePageSet(pages);
 		}
 		#endregion
@@ -148,7 +169,6 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			try
 			{
-				this.PagesProcessed = 0;
 				var result = ToJson(response.NotNull(nameof(response)));
 				if (result.Type == JTokenType.Object)
 				{
@@ -203,6 +223,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override bool HandleWarning(string from, string text)
 		{
+			text.ThrowNull(nameof(text));
 			if (string.Equals(from, this.Name, StringComparison.Ordinal) &&
 				TooManyFinder.Match(text) is var match &&
 				match.Success &&
@@ -211,21 +232,6 @@ namespace RobinHood70.WallE.Eve.Modules
 				this.MaximumListSize = int.Parse(match.Groups["sizelimit"].Value, CultureInfo.InvariantCulture);
 				return true;
 			}
-
-			if ((text?.Contains("truncated", StringComparison.Ordinal) ?? false) && this.MaximumListSize > 1)
-			{
-				if (this.MaximumListSize < 10)
-				{
-					this.MaximumListSize--;
-				}
-				else
-				{
-					this.MaximumListSize = this.MaximumListSize * 9 / 10;
-				}
-
-				return true;
-			}
-
 
 			return base.HandleWarning(from, text);
 		}
@@ -258,7 +264,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#endregion
 
 		#region Private Methods
-		private Request CreateRequest(TInput input)
+		private Request CreateRequest(TInput input, IEnumerable<string> currentGroup)
 		{
 			input.ThrowNull(nameof(input));
 			var request = this.CreateBaseRequest();
@@ -269,22 +275,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				this.Generator.BuildRequest(request);
 			}
 
-			if (input.Values?.Count > 0)
-			{
-				var numRemaining = input.Values.Count - this.offset;
-				var listSize = numRemaining < this.CurrentListSize
-					? numRemaining
-					: this.CurrentListSize;
-				Debug.Assert(listSize >= 0, "listSize was 0 or negative!");
-				List<string> currentGroup = new(listSize);
-				for (var i = 0; i < listSize; i++)
-				{
-					currentGroup.Add(input.Values[this.offset + i]);
-				}
-
-				request.Add(input.TypeName, currentGroup);
-			}
-
+			request.Add(input.TypeName, currentGroup);
 			request
 				.AddIf("converttitles", input.ConvertTitles, input.GeneratorInput != null || input.ListType == ListType.Titles)
 				.AddIf("redirects", input.Redirects, input.ListType != ListType.RevisionIds);

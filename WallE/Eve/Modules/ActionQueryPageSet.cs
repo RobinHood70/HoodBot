@@ -237,7 +237,6 @@
 						// If we've hit our limit, stop creating new pages, but we still need to check existing ones in case they're continued pages from previous results.
 						item = this.GetItem(innerResult);
 						pages.Add(item);
-						this.PagesProcessed++;
 						if (this.pagesRemaining != int.MaxValue)
 						{
 							this.pagesRemaining--;
