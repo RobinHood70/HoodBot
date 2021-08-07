@@ -408,8 +408,20 @@
 			if (nodes != null)
 			{
 				var textValue = nodes.ToValue();
+				var endPos = textValue.Length - 1;
+				while (endPos >= 0 && char.IsWhiteSpace(textValue[endPos]))
+				{
+					endPos--;
+				}
+
+				endPos++;
+				if (endPos < textValue.Length)
+				{
+					value += textValue[endPos..];
+				}
+
 				var startLength = 0;
-				while (startLength < textValue.Length && char.IsWhiteSpace(textValue[startLength]))
+				while (startLength < endPos && char.IsWhiteSpace(textValue[startLength]))
 				{
 					startLength++;
 				}
@@ -417,21 +429,6 @@
 				if (startLength > 0)
 				{
 					value = textValue.Substring(0, startLength) + value;
-				}
-
-				if (startLength < textValue.Length)
-				{
-					var endPos = textValue.Length - 1;
-					while (endPos >= 0 && char.IsWhiteSpace(textValue[endPos]))
-					{
-						endPos--;
-					}
-
-					endPos++;
-					if (endPos < textValue.Length)
-					{
-						value += textValue[endPos..];
-					}
 				}
 			}
 
