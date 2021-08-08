@@ -42,6 +42,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\HoodBotPlugins\HoodBotPlugins.csproj" />
 		<ProjectReference Include="..\Robby\Robby.csproj" />
+		<ProjectReference Include="..\WallE\WallE.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="CommonCode">
