@@ -12,7 +12,7 @@
 	x:Name="mainWindow"
 	Title="{x:Static properties:Resources.HoodBotMainWindow}"
 	Width="900"
-	Height="750"
+	Height="700"
 	DataContext="{Binding Source={StaticResource Locator}, Path=MainViewModel}"
 	Style="{StaticResource GlobalWindowStyle}"
 	mc:Ignorable="d">
