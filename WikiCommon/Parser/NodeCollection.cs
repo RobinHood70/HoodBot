@@ -204,6 +204,19 @@
 		public int FindLastIndex<T>(int startIndex)
 			where T : IWikiNode => (startIndex >= this.Count) ? -1 : this.FindLastIndex(startIndex, item => item is T);
 
+		/// <summary>Determines if the collection has any nodes of the specified type.</summary>
+		/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
+		/// <returns><see langword="true"/> if any nodes of the specified type were found; otherwise, <see langword="false"/>.</returns>
+		public bool Has<T>()
+			where T : IWikiNode => this.Find<T>() is not null;
+
+		/// <summary>Determines if the collection has any nodes of the specified type that satisfy the conditions given.</summary>
+		/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
+		/// <param name="condition">The condition a given node must satisfy.</param>
+		/// <returns><see langword="true"/> if any nodes of the specified type were found that satisfied the specified condition; otherwise, <see langword="false"/>.</returns>
+		public bool Has<T>(Predicate<T>? condition)
+			where T : class, IWikiNode => this.Find(condition, false, false, 0) is not null;
+
 		/// <summary>Merges any adjacent TextNodes in the collection.</summary>
 		/// <param name="recursive">if set to <see langword="true"/>, merges the entire tree.</param>
 		/// <remarks>While the parser does this while parsing wiki text, user manipulation can lead to multiple adjacent TextNodes. Use this function if you require your tree to be well formed, or before intensive operations if you believe it could be heavily fragmented.</remarks>
