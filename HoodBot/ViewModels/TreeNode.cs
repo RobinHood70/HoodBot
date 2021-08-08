@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.ViewModels
 {
-	using System;
 	using System.Collections.Generic;
 	using GalaSoft.MvvmLight;
 	using RobinHood70.CommonCode;
@@ -8,18 +7,17 @@
 	public class TreeNode : ObservableObject
 	{
 		#region Fields
+		private readonly List<TreeNode> children = new();
 		private bool? isChecked = false;
 		private bool isSelected;
 		private TreeNode? selectedItem;
 		#endregion
 
 		#region Constructors
-		public TreeNode(TreeNode? parent, string displayText, IReadOnlyCollection<TreeNode>? children)
+		public TreeNode(TreeNode? parent, string displayText)
 		{
 			this.Parent = parent;
 			this.DisplayText = displayText.NotNull(nameof(displayText));
-			this.Children = children ?? Array.Empty<TreeNode>();
-			this.IsFolder = this.Children.Count > 0;
 		}
 		#endregion
 
@@ -28,7 +26,7 @@
 		#endregion
 
 		#region Public Properties
-		public IReadOnlyCollection<TreeNode> Children { get; }
+		public IReadOnlyCollection<TreeNode> Children => this.children;
 
 		public string DisplayText { get; }
 
@@ -59,7 +57,7 @@
 			}
 		}
 
-		public bool IsFolder { get; }
+		public bool IsFolder => this.Children.Count != 0;
 
 		public bool IsSelected
 		{
@@ -85,28 +83,13 @@
 		#endregion
 
 		#region Public Methods
-		public void AddChild(TreeNode child)
-		{
-			child.ThrowNull(nameof(child));
-			if (this.Children is ICollection<TreeNode> editable)
-			{
-				editable.Add(child);
-			}
-			else
-			{
-				throw new InvalidOperationException();
-			}
-		}
+		public void AddChild(TreeNode child) => this.children.Add(child.NotNull(nameof(child)));
 
 		public IEnumerable<TreeNode> CheckedChildren()
 		{
 			if (this.IsChecked != false)
 			{
-				if (this.Children.Count == 0)
-				{
-					yield return this;
-				}
-				else
+				if (this.IsFolder)
 				{
 					foreach (var node in this.Children)
 					{
@@ -115,6 +98,10 @@
 							yield return item;
 						}
 					}
+				}
+				else
+				{
+					yield return this;
 				}
 			}
 		}
@@ -132,6 +119,25 @@
 		{
 			var value = this.ChildrenCheckState();
 			this.IsChecked = value;
+		}
+
+		public void Sort() => this.Sort(TreeViewGroupedComparer.Instance, true);
+
+		public void Sort(IComparer<TreeNode> comparer, bool recursive)
+		{
+			if (this.children.Count == 0)
+			{
+				return;
+			}
+
+			this.children.Sort(comparer);
+			if (recursive)
+			{
+				foreach (var child in this.children)
+				{
+					child.Sort(comparer, recursive);
+				}
+			}
 		}
 		#endregion
 
