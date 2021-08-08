@@ -69,7 +69,7 @@
 		#endregion
 
 		#region Constructors
-		[JobInfo("Create Collectible Summaries", "ESO")]
+		[JobInfo("Create Collectible Pets", "ESO")]
 		public EsoCreateCollectibleSummaries(JobManager jobManager)
 			: base(jobManager) => this.sourcePages = new PageCollection(jobManager.Site);
 		#endregion
