@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.Robby.Parser
 {
-	// TODO: See if the low-level parser (StackElement and derivatives) can be re-written to use a Node factory, then create a factory that aceepts Site and emits Site-specific wrappers around SiteTemplateNode and SiteLinkNode. This would vastly simplify a lot of the checking and inline conversion that's currently happening. In addition, SiteTemplateNode and SiteArgumentNode wrappers could add a settable CurrentValue property for use with the resolvers in this class.
+	//// TODO: See if the low-level parser (StackElement and derivatives) can be re-written to use a Node factory, then create a factory that aceepts Site and emits Site-specific wrappers around SiteTemplateNode and SiteLinkNode. This would vastly simplify a lot of the checking and inline conversion that's currently happening. In addition, SiteTemplateNode and SiteArgumentNode wrappers could add a settable CurrentValue property for use with the resolvers in this class.
+
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
@@ -57,6 +58,11 @@
 		/// <value>The title.</value>
 		/// <remarks>This provides the context for resolving magic words.</remarks>
 		public ISimpleTitle Context { get; set; }
+
+		/// <summary>Gets the <see cref="IWikiNodeFactory"/> used to create new nodes.</summary>
+		/// <value>The factory.</value>
+		/// <remarks>This is a shortcut to <see cref="Nodes"/>.<see cref="NodeCollection.Factory">Factory</see>.</remarks>
+		public IWikiNodeFactory Factory => this.Nodes.Factory;
 
 		/// <summary>Gets the <see cref="IHeaderNode"/>s on the page.</summary>
 		/// <value>The header nodes.</value>
@@ -229,6 +235,23 @@
 			}
 		}
 
+		/// <summary>Replaces all current content with the content of the sections provided.</summary>
+		/// <param name="sections">The new sections for the page.</param>
+		public void FromSections(IEnumerable<Section> sections)
+		{
+			sections.ThrowNull(nameof(sections));
+			this.Nodes.Clear();
+			foreach (var section in sections)
+			{
+				if (section.Header is IHeaderNode header)
+				{
+					this.Nodes.Add(header);
+				}
+
+				this.Nodes.AddRange(section.Content);
+			}
+		}
+
 		/// <summary>Finds the first header with the specified text.</summary>
 		/// <param name="headerText">Name of the header.</param>
 		/// <returns>The first header with the specified text.</returns>
@@ -238,6 +261,31 @@
 		/// <summary>Converts the page's <see cref="NodeCollection"/> back to text.</summary>
 		/// <returns>The page text.</returns>
 		public string ToRaw() => this.Nodes.ToRaw();
+
+		/// <summary>Splits a page into its individual sections. </summary>
+		/// <returns>An enumeration of the sections of the page.</returns>
+		public IEnumerable<Section> ToSections()
+		{
+			Section? section = new(null, this.Factory);
+			foreach (var node in this.Nodes)
+			{
+				if (node is IHeaderNode header)
+				{
+					if (section.Header != null || section.Content.Count > 0)
+					{
+						yield return section;
+					}
+
+					section = new Section(header, this.Factory);
+				}
+				else
+				{
+					section.Content.Add(node);
+				}
+			}
+
+			yield return section;
+		}
 		#endregion
 	}
 }
