@@ -334,6 +334,7 @@
 			var site = factoryMethod(abstractionLayer);
 #if DEBUG
 			site.WarningOccurred += this.SiteWarningOccurred;
+			site.Changing += this.SiteChanging;
 #endif
 			site.PagePreview += this.SitePagePreview;
 			site.EditingEnabled = this.EditingEnabled;
@@ -342,8 +343,6 @@
 				var currentPassword = this.Password ?? wikiInfo.Password ?? throw new InvalidOperationException(Resources.PasswordNotSet);
 				site.Login(user, currentPassword);
 			}
-
-			site.Changing += this.SiteChanging;
 
 			return site;
 		}
@@ -356,7 +355,6 @@
 			{
 				internet.SendingRequest -= this.WalSendingRequest;
 			}
-
 #endif
 		}
 
@@ -364,16 +362,11 @@
 
 		private void DestroySite(Site site)
 		{
-			site.Changing -= this.SiteChanging;
-			site.AbstractionLayer.WarningOccurred -= this.WalWarningOccurred;
 			site.PagePreview -= this.SitePagePreview;
 #if DEBUG
+			site.Changing -= this.SiteChanging;
 			site.WarningOccurred -= this.SiteWarningOccurred;
 #endif
-			if (site.AbstractionLayer is IInternetEntryPoint internet)
-			{
-				internet.SendingRequest -= this.WalSendingRequest;
-			}
 		}
 
 		private async Task ExecuteJobs()
