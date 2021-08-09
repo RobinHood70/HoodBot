@@ -118,6 +118,14 @@
 		public IEnumerable<T> FindAll<T>()
 			where T : IWikiNode => this.FindAll<T>(null, false, true, 0);
 
+		/// <summary>Finds all <see cref="LinkedListNode{T}"/>s with a <see cref="LinkedListNode{T}.Value">Value</see> of the specified type.</summary>
+		/// <typeparam name="T">The type of node to find.</typeparam>
+		/// <param name="condition">The condition a given node must satisfy. If set to <see langword="null"/>, the first node that satisfies the reamining parameters will be returned.</param>
+		/// <returns>The nodes in the collection that are of the specified type.</returns>
+		/// <remarks>Outer nodes that satisfy the condition are returned before inner nodes that satisfy the condition. For example, if searching for the template <c>{{Example}}</c> in the wiki code <c>{{Example|This is an embedded {{Example|example}}.}}</c>, the <c>{{Example|This is...}}</c> template will be returned before the <c>{{Example|example}}</c> template.</remarks>
+		public IEnumerable<T> FindAll<T>(Predicate<T>? condition)
+			where T : IWikiNode => this.FindAll(condition, false, true, 0);
+
 		/// <summary>Finds all <see cref="LinkedListNode{T}"/>s with a <see cref="LinkedListNode{T}.Value">Value</see> of the specified type that satisfy the condition.</summary>
 		/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
 		/// <param name="condition">The condition a given node must satisfy. If set to <see langword="null"/>, the first node that satisfies the reamining parameters will be returned.</param>
