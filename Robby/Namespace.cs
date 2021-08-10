@@ -97,7 +97,7 @@
 
 		/// <summary>Gets the StringComparer in use to compare page names within this namespace.</summary>
 		/// <value>A StringComparer that can be used to compare page names outside this class, if needed.</value>
-		public StringComparer PageNameComparer { get; }
+		public PageNameComparer PageNameComparer { get; }
 
 		/// <summary>Gets the site to which this namespace belongs.</summary>
 		/// <value>The site.</value>
