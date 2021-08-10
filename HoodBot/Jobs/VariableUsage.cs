@@ -173,10 +173,10 @@
 						case "ifnot":
 							break;
 						default:
-							var fullParam = WikiTextVisitor.Raw(param);
+							var fullParam = param.ToKeyValue();
 							if (fullParam.Length > 0)
 							{
-								variables.Add(fullParam[1..]);
+								variables.Add(fullParam);
 							}
 
 							break;
