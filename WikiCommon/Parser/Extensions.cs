@@ -116,6 +116,12 @@
 			parameter.Value.AddRange(value);
 			parameter.Value.AddText(trailing);
 		}
+
+		/// <summary>Converts a parameter to its raw key=value format without a leading pipe.</summary>
+		/// <param name="parameter">The parameter to convert.</param>
+		public static string ToKeyValue(this IParameterNode parameter) => parameter.NotNull(nameof(parameter)).Name is NodeCollection name
+			? name.ToRaw() + '=' + parameter.Value.ToRaw()
+			: parameter.Value.ToRaw();
 		#endregion
 
 		#region ITemplateNode Extensions
@@ -357,15 +363,15 @@
 		/// <summary>Gets numeric parameters in order, resolving conflicts in the same manner as MediaWiki does.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <returns>A read-only dictionary of the parameters.</returns>
-		public static IReadOnlyDictionary<int, IParameterNode?> GetNumericParametersSorted(this ITemplateNode template) => GetNumericParametersSorted(template, false);
+		public static IReadOnlyDictionary<int, IParameterNode> GetNumericParametersSorted(this ITemplateNode template) => GetNumericParametersSorted(template, false);
 
 		/// <summary>Gets numeric parameters in order, resolving conflicts in the same manner as MediaWiki does.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <param name="addMissing">Set to <see langword="true"/> if missing parameters (e.g., <c>{{Template|1=First|3=Missing2}}</c>) should be inserted as <see langword="null"/> values.</param>
 		/// <returns>A read-only dictionary of the parameters.</returns>
-		public static IReadOnlyDictionary<int, IParameterNode?> GetNumericParametersSorted(this ITemplateNode template, bool addMissing)
+		public static IReadOnlyDictionary<int, IParameterNode> GetNumericParametersSorted(this ITemplateNode template, bool addMissing)
 		{
-			SortedDictionary<int, IParameterNode?> retval = new();
+			SortedDictionary<int, IParameterNode> retval = new();
 			var highest = 0;
 			foreach (var (index, parameter) in GetNumericParameters(template))
 			{
@@ -383,7 +389,7 @@
 				{
 					if (!retval.ContainsKey(i))
 					{
-						retval.Add(i, null);
+						retval.Add(i, template.Factory.ParameterNodeFromParts(string.Empty));
 					}
 				}
 			}
@@ -425,11 +431,11 @@
 		/// <param name="length">The length of each cluster.</param>
 		/// <returns>Numeric and numerically-numbered parameters in groups of <paramref name="length"/>.</returns>
 		/// <example>Using <c>ParameterCluster(2)</c> on <c>{{MyTemplate|A|1|B|2|C|2=0}}</c> would return three lists: { "A", "0" }, { "B", "2" }, and { "C", null }. In the first case, "0" is returned because of the overridden parameter <c>2=0</c>. In the last case, <see langword="null"/> is returned because the parameter has no pairing within the template call. </example>
-		public static IEnumerable<IList<IParameterNode?>> ParameterCluster(this ITemplateNode template, int length)
+		public static IEnumerable<IList<IParameterNode>> ParameterCluster(this ITemplateNode template, int length)
 		{
-			var parameters = template.GetNumericParametersSorted(true);
+			var parameters = template.NotNull(nameof(template)).GetNumericParametersSorted(true);
 			var i = 1;
-			List<IParameterNode?> retval = new();
+			List<IParameterNode> retval = new();
 			while (i < parameters.Count)
 			{
 				for (var j = 0; j < length; j++)
@@ -438,7 +444,7 @@
 				}
 
 				yield return retval;
-				retval = new List<IParameterNode?>();
+				retval = new List<IParameterNode>();
 				i += length;
 			}
 
@@ -446,7 +452,7 @@
 			{
 				while (retval.Count < length)
 				{
-					retval.Add(null);
+					retval.Add(template.Factory.ParameterNodeFromParts(string.Empty));
 				}
 
 				yield return retval;
