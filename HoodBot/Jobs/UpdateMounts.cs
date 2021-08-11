@@ -55,7 +55,7 @@
 				ContextualParser parser = new(page);
 				if (parser.FindTemplate("Online Collectible Summary") is ITemplateNode template)
 				{
-					template.AddOrChange("id", id.ToStringInvariant());
+					template.Update("id", id.ToStringInvariant());
 					page.Text = parser.ToRaw();
 				}
 			}
