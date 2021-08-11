@@ -211,7 +211,7 @@
 		/// <param name="name">The name of the parameter to add.</param>
 		/// <param name="value">The value of the parameter to add.</param>
 		/// <returns>The parameter that was altered.</returns>
-		public static IParameterNode AddOrChange(this ITemplateNode template, string name, string value)
+		public static IParameterNode Update(this ITemplateNode template, string name, string value)
 		{
 			if (template.Find(name) is IParameterNode parameter)
 			{
@@ -574,6 +574,26 @@
 			{
 				template.Parameters.Add(parameter);
 			}
+		}
+
+		/// <summary>Updates a parameter value if the current value is entirely whitespace or the parameter is missing.</summary>
+		/// <param name="template">The template to update.</param>
+		/// <param name="name">The name of the parameter to update.</param>
+		/// <param name="value">The value to update the parameter to.</param>
+		/// <returns>The parameter affected, regardless of whether it was changed.</returns>
+		public static IParameterNode UpdateIfEmpty(this ITemplateNode template, string name, string value)
+		{
+			if (template.Find(name) is IParameterNode parameter)
+			{
+				if (parameter.Value.ToRaw().Trim().Length == 0)
+				{
+					parameter.SetValue(value);
+				}
+
+				return parameter;
+			}
+
+			return template.Add(name, value);
 		}
 		#endregion
 
