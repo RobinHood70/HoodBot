@@ -1,9 +1,31 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
+	using System;
 	using RobinHood70.CommonCode;
+	using RobinHood70.Robby.Parser;
+	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon.Parser;
 
 	public static class UespFunctions
 	{
+		public static string IconAbbreviation(SiteTemplateNode template)
+		{
+			var templateTitle = template.TitleValue;
+			if (templateTitle.Namespace != MediaWikiNamespaces.Template ||
+				!templateTitle.PageNameEquals("Icon") ||
+				template.Find(1) is not IParameterNode iconTypeParam ||
+				template.Find(2) is not IParameterNode iconNameParam)
+			{
+				throw new InvalidOperationException();
+			}
+
+			var iconType = iconTypeParam.Value.ToRaw();
+			var iconName = iconNameParam.Value.ToRaw();
+			var extension = template.Find(3)?.ToString() ?? "png";
+
+			return IconAbbreviation(iconType, iconName, extension);
+		}
+
 		public static string IconAbbreviation(string iconType, string icon) => IconAbbreviation(iconType, icon, "png");
 
 		public static string IconAbbreviation(string iconType, string icon, string extension)
