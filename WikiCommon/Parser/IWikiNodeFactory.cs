@@ -87,15 +87,6 @@
 		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single link (e.g., <c>[[Link]]</c>, or any variant thereof).</exception>
 		ILinkNode LinkNodeFromWikiText([Localizable(false)] string wikiText);
 
-		/// <summary>Creates a new <see cref="NodeCollection"/> that uses the current factory.</summary>
-		/// <returns>A new instance of the <see cref="NodeCollection"/> class.</returns>
-		NodeCollection NodeCollection();
-
-		/// <summary>Creates a new <see cref="NodeCollection"/> that uses the current factory.</summary>
-		/// <param name="copyNodes">A collection of nodes to copy to the new node collection.</param>
-		/// <returns>A new instance of the <see cref="NodeCollection"/> class.</returns>
-		NodeCollection NodeCollectionFromNodes(IEnumerable<IWikiNode> copyNodes);
-
 		/// <summary>Initializes a new instance of the <see cref="ParameterNode"/> class.</summary>
 		/// <param name="name">The name.</param>
 		/// <param name="value">The value.</param>
