@@ -184,7 +184,7 @@
 					ICollection<Match> matches = EsoLinks.Matches(text);
 					if (matches.Count > 0)
 					{
-						var newNodes = factory.NodeCollection();
+						NodeCollection newNodes = new(factory);
 						var startPos = 0;
 						foreach (var match in matches)
 						{
@@ -236,7 +236,7 @@
 				if (nodes[i] is ITextNode textNode)
 				{
 					var text = textNode.Text;
-					var newNodes = factory.NodeCollection();
+					NodeCollection newNodes = new(factory);
 					var startPos = 0;
 					for (var currentPos = 0; currentPos < text.Length; currentPos++)
 					{
@@ -379,7 +379,7 @@
 			usedList.ThrowNull(nameof(usedList));
 			HashSet<string> foundReplacements = new(StringComparer.Ordinal);
 			var textLength = text.Length;
-			var retval = factory.NotNull(nameof(factory)).NodeCollection();
+			NodeCollection retval = new(factory.NotNull(nameof(factory)));
 			var start = 0;
 			for (var i = 0; i < textLength; i++)
 			{

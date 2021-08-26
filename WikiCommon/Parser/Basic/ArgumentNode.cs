@@ -22,7 +22,7 @@
 		public ArgumentNode(IWikiNodeFactory factory, IEnumerable<IWikiNode> name, IList<IParameterNode> defaultValue)
 		{
 			this.Factory = factory.NotNull(nameof(factory));
-			this.Name = factory.NodeCollectionFromNodes(name.NotNull(nameof(name)));
+			this.Name = new NodeCollection(factory, name.NotNull(nameof(name)));
 			if (defaultValue.NotNull(nameof(defaultValue)).Count > 0)
 			{
 				foreach (var parameter in defaultValue)
@@ -34,7 +34,7 @@
 				}
 
 				// defaultValue comes to us from WikiStack as a list of IParameterNodes, but is never actually treated as such, so we morph the main default value into a NodeCollection then, if there are junk values after that, we add them to ExtraValues unaltered.
-				var nodes = factory.NodeCollection();
+				NodeCollection nodes = new(factory);
 				if (defaultValue[0].Name is NodeCollection valueName)
 				{
 					nodes.AddRange(valueName);
@@ -114,7 +114,7 @@
 
 		/// <summary>Adds a default value. If one exists, this will overwrite it.</summary>
 		/// <param name="value">The value to add.</param>
-		public void SetDefaultValue(IEnumerable<IWikiNode> value) => this.DefaultValue = this.Factory.NodeCollectionFromNodes(value);
+		public void SetDefaultValue(IEnumerable<IWikiNode> value) => this.DefaultValue = new NodeCollection(this.Factory, value);
 
 		/// <summary>Trims all extra values from the argument.</summary>
 		public void TrimExtraValues() => this.extraValues = null;

@@ -9,7 +9,7 @@
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon.Properties;
 
-	/// <summary>A concrete factory for creating <see cref="IWikiNode"/>s to be added to a <see cref="Parser.NodeCollection"/>.</summary>
+	/// <summary>A concrete factory for creating <see cref="IWikiNode"/>s to be added to a <see cref="NodeCollection"/>.</summary>
 	/// <seealso cref="IWikiNodeFactory" />
 	public class WikiNodeFactory : IWikiNodeFactory
 	{
@@ -145,17 +145,6 @@
 		/// <exception cref="ArgumentException">Thrown if the text provided does not represent a single link (e.g., <c>[[Link]]</c>, or any variant thereof).</exception>
 		public ILinkNode LinkNodeFromWikiText([Localizable(false)] string wikiText) => this.SingleNode<ILinkNode>(wikiText);
 
-		/// <inheritdoc/>
-		public NodeCollection NodeCollection() => new(this);
-
-		/// <inheritdoc/>
-		public NodeCollection NodeCollectionFromNodes(IEnumerable<IWikiNode> copyNodes)
-		{
-			var retval = this.NodeCollection();
-			retval.AddRange(copyNodes);
-			return retval;
-		}
-
 		/// <summary>Creates a new <see cref="IParameterNode"/> from another IParameterNode, copying surrounding whitespace from the other parameter.</summary>
 		/// <param name="other">The other parameter.</param>
 		/// <param name="value">The new parameter value.</param>
@@ -210,7 +199,7 @@
 		public NodeCollection Parse(string? text, InclusionType inclusionType, bool strictInclusion)
 		{
 			WikiStack stack = new(this, text, inclusionType, strictInclusion);
-			return this.NodeCollectionFromNodes(stack.GetNodes());
+			return new NodeCollection(this, stack.GetNodes());
 		}
 
 		/// <summary>If the text provided represents a single node of the specified type, returns that node. Otherwise, throws an error.</summary>

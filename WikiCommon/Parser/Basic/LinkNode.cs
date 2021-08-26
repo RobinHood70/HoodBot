@@ -18,7 +18,7 @@
 		public LinkNode(IWikiNodeFactory factory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters)
 		{
 			this.Factory = factory.NotNull(nameof(factory));
-			this.Title = factory.NodeCollectionFromNodes(title.NotNull(nameof(title)));
+			this.Title = new NodeCollection(factory, title.NotNull(nameof(title)));
 			this.Parameters = parameters.NotNull(nameof(parameters));
 			foreach (var parameter in parameters)
 			{

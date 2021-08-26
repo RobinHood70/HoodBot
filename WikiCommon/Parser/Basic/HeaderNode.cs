@@ -19,7 +19,7 @@
 		{
 			this.Factory = factory.NotNull(nameof(factory));
 			this.Level = level;
-			this.Title = factory.NodeCollectionFromNodes(text.NotNull(nameof(text)));
+			this.Title = new NodeCollection(factory, text.NotNull(nameof(text)));
 		}
 		#endregion
 

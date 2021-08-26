@@ -23,13 +23,13 @@
 
 		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
 		/// <param name="factory">The factory to use to create new nodes.</param>
-		public NodeCollection(IWikiNodeFactory? factory) => this.Factory = factory ?? new Basic.WikiNodeFactory();
+		public NodeCollection(IWikiNodeFactory factory) => this.Factory = factory.NotNull(nameof(factory));
 
 		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
 		/// <param name="factory">The factory to use to create new nodes.</param>
 		/// <param name="nodes">The nodes to initialize the collection with.</param>
-		public NodeCollection(IWikiNodeFactory? factory, IEnumerable<IWikiNode> nodes)
-			: base(nodes) => this.Factory = factory ?? new Basic.WikiNodeFactory();
+		public NodeCollection(IWikiNodeFactory factory, IEnumerable<IWikiNode> nodes)
+			: base(nodes) => this.Factory = factory.NotNull(nameof(factory));
 		#endregion
 
 		#region Public Properties
