@@ -30,9 +30,9 @@
 
 		#region Public Static Methods
 
-		/// <summary>Returns the raw text for a node or node collection.</summary>
+		/// <summary>Returns the raw text for a node.</summary>
 		/// <param name="node">The node.</param>
-		/// <returns>The raw text for a node or node collection.</returns>
+		/// <returns>The raw text for the specified node.</returns>
 		public static string Raw(IWikiNode node) => RawVisitor.Build(node);
 
 		/// <summary>Returns the raw text for a set of nodes.</summary>
@@ -40,12 +40,12 @@
 		/// <returns>The raw text for the specified nodes.</returns>
 		public static string Raw(IEnumerable<IWikiNode>? nodes) => RawVisitor.Build(nodes);
 
-		/// <summary>Returns the value text for a node or node collection.</summary>
+		/// <summary>Returns the value text for a node.</summary>
 		/// <param name="node">The node.</param>
-		/// <returns>The value text for a node or node collection.</returns>
+		/// <returns>The value text for the specified node.</returns>
 		public static string Value(IWikiNode node) => ValueVisitor.Build(node);
 
-		/// <summary>Returns the value text for a node or node collection.</summary>
+		/// <summary>Returns the value text for a node collection.</summary>
 		/// <param name="nodes">The nodes.</param>
 		/// <returns>The value text for the specified nodes.</returns>
 		public static string Value(IEnumerable<IWikiNode>? nodes) => ValueVisitor.Build(nodes);
