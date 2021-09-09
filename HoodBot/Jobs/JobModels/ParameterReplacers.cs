@@ -78,6 +78,14 @@
 		#endregion
 
 		#region Protected Methods
+		protected void BasicNpc(Page page, SiteTemplateNode template)
+		{
+			if (this.NamespaceList.FromTitle(page) is UespNamespace nsPage)
+			{
+				this.PageNameReplace(template.Find("race"), nsPage.Parent.Id);
+			}
+		}
+
 		protected void BulletLink(Page page, SiteTemplateNode template)
 		{
 			page.ThrowNull(nameof(page));
@@ -121,7 +129,11 @@
 			}
 		}
 
-		protected void EsoNpc(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find("condition"), UespNamespaces.Online);
+		protected void EsoNpc(Page page, SiteTemplateNode template)
+		{
+			this.PageNameReplace(template.Find("condition"), UespNamespaces.Online);
+			this.PageNameReplace(template.Find("race"), UespNamespaces.Online);
+		}
 
 		protected void FullPageNameFirst(Page page, SiteTemplateNode template) => this.FullPageNameReplace(page, template.Find(1));
 
@@ -132,12 +144,21 @@
 		protected void GenericImage(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find("image"), MediaWikiNamespaces.File);
 
 		protected void LoreFirst(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find(1), UespNamespaces.Lore);
+
+		protected void NpcSummary(Page page, SiteTemplateNode template)
+		{
+			if (this.NamespaceList.FromTitle(page) is UespNamespace nsPage)
+			{
+				this.PageNameReplace(template.Find("race"), nsPage.Parent.Id);
+			}
+		}
 		#endregion
 
-		#region Private Methods
-		private void AddAllReplacers()
+			#region Private Methods
+			private void AddAllReplacers()
 		{
 			this.AddGeneralReplacers(this.GenericIcon, this.GenericImage);
+			this.AddTemplateReplacers("Basic NPC Summary", this.BasicNpc);
 			this.AddTemplateReplacers("Book Link", this.LoreFirst);
 			this.AddTemplateReplacers("Bullet Link", this.BulletLink);
 			this.AddTemplateReplacers("Cat Footer", this.CatFooter);
@@ -146,6 +167,7 @@
 			this.AddTemplateReplacers("ESO Set List", this.PageNameAllNumeric);
 			this.AddTemplateReplacers("Lore Link", this.LoreFirst);
 			this.AddTemplateReplacers("Game Book", this.GameBookGeneral);
+			this.AddTemplateReplacers("NPC Summary", this.NpcSummary);
 			this.AddTemplateReplacers("Online NPC Summary", this.EsoNpc);
 			this.AddTemplateReplacers("Pages In Category", this.CategoryFirst);
 			this.AddTemplateReplacers("Quest Header", this.GenericIcon);
