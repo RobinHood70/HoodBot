@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
 	using System.Collections.Generic;
+	using System.Collections.Immutable;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -9,8 +10,7 @@
 	public class VariablesPage : Page
 	{
 		#region Fields
-		private readonly Dictionary<string, string> mainSet = new(System.StringComparer.Ordinal);
-		private readonly Dictionary<string, IReadOnlyDictionary<string, string>> subsets = new(System.StringComparer.Ordinal);
+		private readonly Dictionary<string, IDictionary<string, string>> subsets = new(System.StringComparer.Ordinal);
 		#endregion
 
 		#region Constructors
@@ -26,13 +26,16 @@
 			{
 				foreach (var item in varItem.Variables)
 				{
-					if (item.Subset == null)
+					var subsetName = item.Subset ?? string.Empty;
+					if (!this.subsets.TryGetValue(subsetName, out var subset))
 					{
-						this.mainSet.AddRange(item.Dictionary);
+						subset = new Dictionary<string, string>(System.StringComparer.Ordinal);
+						this.subsets.Add(subsetName, subset);
 					}
-					else
+
+					foreach (var entry in item.Dictionary)
 					{
-						this.subsets.Add(item.Subset, item.Dictionary);
+						subset[entry.Key] = entry.Value;
 					}
 				}
 			}
@@ -40,9 +43,9 @@
 		#endregion
 
 		#region Public Properties
-		public IReadOnlyDictionary<string, string> MainSet => this.mainSet;
-
-		public IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> VariableSets => this.subsets;
+		public IReadOnlyDictionary<string, string> MainSet => this.subsets.TryGetValue(string.Empty, out var mainSet)
+			? mainSet.AsReadOnly()
+			: ImmutableDictionary<string, string>.Empty;
 		#endregion
 
 		#region Public Methods
@@ -51,25 +54,11 @@
 				? retval
 				: default;
 
-		public string? GetVariable(string setName, string name)
-		{
-			IReadOnlyDictionary<string, string> set;
-			if (string.IsNullOrEmpty(setName))
-			{
-				set = this.MainSet;
-			}
-			else if (this.VariableSets.TryGetValue(setName, out var set2))
-			{
-				set = set2;
-			}
-			else
-			{
-				return null;
-			}
-
-			set.TryGetValue(name, out var retval);
-			return retval;
-		}
+		public string? GetVariable(string setName, string name) =>
+			this.subsets.TryGetValue(setName ?? string.Empty, out var set) &&
+			set.TryGetValue(name, out var retval)
+				? retval
+				: null;
 		#endregion
 	}
 }
