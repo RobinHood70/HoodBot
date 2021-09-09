@@ -10,7 +10,7 @@
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>
-	  <PackageReference Include="Meziantou.Analyzer" Version="1.0.667">
+	  <PackageReference Include="Meziantou.Analyzer" Version="1.0.670">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
@@ -18,7 +18,7 @@
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	  <PackageReference Include="System.ComponentModel.Composition" Version="5.0.0" />
+	  <PackageReference Include="System.ComponentModel.Composition" Version="6.0.0-preview.7.21377.19" />
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="System.ComponentModel.Composition" />
