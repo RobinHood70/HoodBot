@@ -73,12 +73,12 @@
 			var retval = false;
 			if (template.NotNull(nameof(template)).Find(name) is not IParameterNode parameter)
 			{
-				parameter = template.Add(name, "\n");
+				parameter = template.Add(name, string.Empty);
 				retval = true;
 			}
 
 			value = value.Trim();
-			var oldValue = parameter.Value.ToValue();
+			var oldValue = parameter.Value.ToValue().Trim();
 			if (!string.Equals(oldValue, value, StringComparison.Ordinal))
 			{
 				retval = true;
