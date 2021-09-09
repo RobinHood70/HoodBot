@@ -371,7 +371,8 @@
 				UnreplacedList.Add(from);
 			}
 
-			list.Sort((x, y) => x.From.Length.CompareTo(y.From.Length));
+			// Sort by longest first for most accurate matches.
+			list.Sort((x, y) => y.From.Length.CompareTo(x.From.Length));
 		}
 
 		private static NodeCollection? ReplaceLink(IWikiNodeFactory factory, string text, TitleCollection usedList)
