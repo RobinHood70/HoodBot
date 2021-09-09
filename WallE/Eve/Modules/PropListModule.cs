@@ -33,8 +33,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			var list = this.GetMutableList(page.NotNull(nameof(page))) ?? throw new InvalidOperationException();
 			while (this.ItemsRemaining > 0 && enumeration.MoveNext())
 			{
-				var item = this.GetItem(enumeration.Current, page);
-				if (item != null)
+				if (this.GetItem(enumeration.Current, page) is TItem item)
 				{
 					list.Add(item);
 					if (this.ItemsRemaining != int.MaxValue)
