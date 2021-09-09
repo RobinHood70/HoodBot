@@ -27,6 +27,7 @@
 		{
 			// Title Overrides should only be necessary when creating new disambiguated "(set)" pages or when pages don't conform to the base/base (set) style. While this could be done programatically, it's probably best not to, so that a human has verified that the page really should be created and that the existing page isn't malformed or something.
 			["Immolator Charr"] = "Immolator Charr (set)",
+			["Magma Incarnate"] = "Magma Incarnate (set)",
 			["Zoal the Ever-Wakeful"] = "Zoal the Ever-Wakeful (set)",
 		};
 		#endregion
@@ -109,10 +110,10 @@
 		{
 			foreach (var set in allSets)
 			{
-				if (set.Page is null)
+				if (set.Page is null || !set.Page.Exists)
 				{
 					this.Warn($"New Page: {set.Name}");
-					set.BuildNewPage(TitleFactory.Direct(this.Site, UespNamespaces.Online, set.Name));
+					set.Page = set.BuildNewPage(TitleFactory.Direct(this.Site, UespNamespaces.Online, set.Name));
 				}
 			}
 		}
@@ -234,9 +235,10 @@
 		private void SetLoaded(object sender, Page page)
 		{
 			var setData = this.sets[page];
-			if (!page.Exists || string.IsNullOrEmpty(page.Text))
+			if (!page.Exists && setData.Page is not null)
 			{
-				throw new InvalidOperationException();
+				// TODO: Check this, it's definitely not the optimal way of doing it. Why do we have loaded pages and a page object as part of .sets?
+				page.Text = setData.Page.Text;
 			}
 
 			ContextualParser oldPage = new(page, InclusionType.Transcluded, false);
@@ -320,7 +322,7 @@
 						TitleFactory? checkTitle = TitleFactory.FromName(this.Site, UespNamespaces.Online, overrideName);
 						set.Page = setMembers.TryGetValue(checkTitle, out var foundPage)
 							? foundPage
-							: throw new InvalidOperationException($"TitleOverride for {set.Name} => {overrideName} doesn't match any known sets.");
+							: set.BuildNewPage(TitleFactory.Direct(this.Site, UespNamespaces.Online, set.Name));
 					}
 					else
 					{
@@ -409,7 +411,7 @@
 			#endregion
 
 			#region Public Methods
-			public void BuildNewPage(ISimpleTitle title)
+			public Page BuildNewPage(ISimpleTitle title)
 			{
 				StringBuilder sb = new();
 				sb
@@ -430,7 +432,7 @@
 					.Append("{{ESO Sets With|subtype=|source=}}\n")
 					.Append("{{Stub|Item Set}}");
 
-				this.Page = TitleFactory.DirectNormalized(title).ToNewPage(sb.ToString());
+				return TitleFactory.DirectNormalized(title).ToNewPage(sb.ToString());
 			}
 			#endregion
 
