@@ -1,7 +1,10 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
+	using System.Collections.Generic;
+
 	public static class UespNamespaces
 	{
+		#region Public Constants
 		public const int Media = -2;
 		public const int Special = -1;
 		public const int Main = 0;
@@ -122,5 +125,56 @@
 		public const int GadgetTalk = 2301;
 		public const int GadgetDefinition = 2302;
 		public const int GadgetDefinitionTalk = 2303;
+		#endregion
+
+		#region Fields
+		private static readonly List<int> Gamespaces = new()
+		{
+			Arena,
+			Daggerfall,
+			Battlespire,
+			Redguard,
+			Morrowind,
+			Tribunal,
+			Bloodmoon,
+			Oblivion,
+			Tes3Mod,
+			MorrowindMod,
+			Tes4Mod,
+			OblivionMod,
+			Shivering,
+			Shadowkey,
+			Dawnstar,
+			Skyrim,
+			OBMobile,
+			Stormhold,
+			Tes5Mod,
+			SkyrimMod,
+			Online,
+			Dragonborn,
+			EsoMod,
+			Legends,
+			Blades,
+			Tes1Mod,
+			ArenaMod,
+			Tes2Mod,
+			DaggerfallMod,
+			CallToArms,
+			TesOtherMod,
+			Mod,
+			Pinball,
+			SkyrimVse,
+			TamrielRebuilt,
+			ProjectTamriel,
+			BetterCities,
+			MorrowindRebirth,
+			Stirk,
+			BeyondSkyrim,
+		};
+		#endregion
+
+		#region Public Functions
+		public static bool IsGamespace(int id) => Gamespaces.BinarySearch(id) >= 0;
+		#endregion
 	}
 }

@@ -29,9 +29,7 @@
 			this.MainPage = TitleFactory.FromName(site, nsData[4].Length == 0 ? this.Full + this.Name : nsData[4]).ToTitle();
 			this.Category = nsData[5].Length == 0 ? baseName : nsData[5];
 			this.Trail = nsData[6].Length == 0 ? string.Concat("[[", this.MainPage, "|", this.Name, "]]") : nsData[6];
-
-			var parentId = this.Parent.Id;
-			this.IsGameSpace = (parentId & 1) == 0 && parentId >= 100 && parentId <= 200;
+			this.IsGameSpace = UespNamespaces.IsGamespace(this.Parent.Id);
 		}
 		#endregion
 
