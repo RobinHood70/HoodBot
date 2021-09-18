@@ -8,13 +8,13 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
+	using RobinHood70.WikiCommon.Parser;
 
 	public abstract class LinkFinderJob : ParsedPageJob
 	{
 		#region Fields
 		private readonly IDictionary<ISimpleTitle, List<string>> results = new SortedDictionary<ISimpleTitle, List<string>>(SimpleTitleComparer.Instance);
 		private readonly bool sectionLinksOnly;
-		private IEnumerable<ISimpleTitle>? titles;
 		#endregion
 
 		#region Constructors
@@ -25,11 +25,14 @@
 			this.Pages.SetLimitations(LimitationType.None);
 			this.sectionLinksOnly = sectionLinksOnly;
 			this.Logger = null;
+			this.Titles = new TitleCollection(this.Site);
 		}
 		#endregion
 
 		#region Protected Override Properties
 		protected override string EditSummary => "Found links";
+
+		protected TitleCollection Titles { get; }
 		#endregion
 
 		#region Protected Override Methods
@@ -38,26 +41,24 @@
 			base.Main();
 			if (this.results.Count > 0)
 			{
+				this.WriteLine("{| class=\"wikitable sortable compressed\"");
 				foreach (var result in this.results)
 				{
 					if (result.Value.Count > 0)
 					{
-						this.WriteLine($"* {result.Key.AsLink(false)}:");
-						foreach (var link in result.Value)
-						{
-							this.WriteLine($"** {link}");
-						}
-
-						this.WriteLine();
+						this.WriteLine($"|-\n| {result.Key.AsLink(false)}:");
+						this.WriteLine("| " + string.Join("<br>", result.Value));
 					}
 				}
+
+				this.WriteLine("|}");
 			}
 		}
 
 		protected override void LoadPages()
 		{
-			PageCollection? pages = PageCollection.Unlimited(this.Site, PageModules.Backlinks, false);
-			pages.GetTitles(this.titles.NotNull(nameof(LinkFinderJob), nameof(this.titles)));
+			PageCollection pages = PageCollection.Unlimited(this.Site, PageModules.Backlinks, false);
+			pages.GetTitles(this.Titles);
 			TitleCollection backTitles = new(this.Site);
 			foreach (var page in pages)
 			{
@@ -85,13 +86,13 @@
 				allTitles.GetNamespace(title.Namespace.Id, Filter.Exclude, title.PageName + ' ');
 			}
 
-			this.titles = allTitles;
+			this.Titles.AddRange(allTitles);
 		}
 
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
 			parsedPage.ThrowNull(nameof(parsedPage));
-			foreach (var title in this.titles.NotNull(nameof(LinkFinderJob), nameof(this.titles)))
+			foreach (var title in this.Titles)
 			{
 				if (!this.results.TryGetValue(parsedPage.Context, out var links))
 				{
@@ -101,18 +102,21 @@
 
 				foreach (var link in parsedPage.FindLinks(title))
 				{
-					FullTitle? linkTitle = FullTitle.FromBacklinkNode(this.Site, link);
-					if (!this.sectionLinksOnly || linkTitle.Fragment != null)
+					if (this.CheckLink(link) &&
+						WikiTextVisitor.Raw(link) is var textTitle &&
+						!links.Contains(textTitle, StringComparer.Ordinal))
 					{
-						var textTitle = linkTitle.ToString();
-						if (!links.Contains(textTitle, StringComparer.Ordinal))
-						{
-							links.Add(textTitle);
-						}
+						links.Add(WikiTextVisitor.Raw(link));
 					}
 				}
 			}
 		}
+
+		protected virtual bool CheckLink(SiteLinkNode link) =>
+			!(
+				this.sectionLinksOnly &&
+				SiteLink.FromLinkNode(this.Site, link) is var linkTitle &&
+				linkTitle.Fragment == null);
 		#endregion
 	}
 }
