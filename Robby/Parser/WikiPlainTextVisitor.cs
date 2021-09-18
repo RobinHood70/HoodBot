@@ -5,7 +5,6 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon.Parser;
 
-
 	/// <summary>Visitor to build wiki text, optionally ignoring text that has no value to the parser, such as comments or nowiki text.</summary>
 	/// <seealso cref="IWikiNodeVisitor" />
 	public class WikiPlainTextVisitor : IWikiNodeVisitor
