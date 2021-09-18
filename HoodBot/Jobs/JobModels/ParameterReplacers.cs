@@ -154,8 +154,8 @@
 		}
 		#endregion
 
-			#region Private Methods
-			private void AddAllReplacers()
+		#region Private Methods
+		private void AddAllReplacers()
 		{
 			this.AddGeneralReplacers(this.GenericIcon, this.GenericImage);
 			this.AddTemplateReplacers("Basic NPC Summary", this.BasicNpc);
