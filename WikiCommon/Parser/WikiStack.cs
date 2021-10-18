@@ -366,7 +366,9 @@
 			{
 				attrEnd = tagEndPos;
 				Regex findClosing = new("</" + tagOpen + @"\s*>", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
-				if (this.noMoreClosingTag.Contains(tagOpen) && findClosing.Match(this.Text, tagEndPos + 1) is Match match && match.Success)
+				var noClose = this.noMoreClosingTag.Contains(tagOpen);
+				var match = findClosing.Match(this.Text, tagEndPos + 1);
+				if (match is not null && match.Success && !noClose)
 				{
 					inner = this.Text.Substring(tagEndPos + 1, match.Index - tagEndPos - 1);
 					tagClose = match.Value;
