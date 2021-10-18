@@ -28,6 +28,24 @@
 		}
 		#endregion
 
+		#region IEnumerable<IParameterNode> Methods
+
+		/// <summary>Converts a collection of <see cref="IParameterNode"/>s to key and value strings.</summary>
+		/// <param name="parameters">The parameters to convert.</param>
+		/// <returns>An enumeration of key/value strings. The key string is nullable.</returns>
+		public static IEnumerable<(string? Key, string Value)> ToKeyValue(this IEnumerable<IParameterNode> parameters)
+		{
+			parameters.ThrowNull(nameof(parameters));
+			foreach (var param in parameters)
+			{
+				var value = param.Value.ToRaw();
+				yield return param.Name is NodeCollection name
+					? (name.ToRaw().Trim(), value.Trim())
+					: (null, value);
+			}
+		}
+		#endregion
+
 		#region IHeaderNode Extensions
 
 		/// <summary>Gets the text inside the heading delimiters.</summary>
