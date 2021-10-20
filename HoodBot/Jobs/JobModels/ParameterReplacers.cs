@@ -18,15 +18,17 @@
 		#region Fields
 		private readonly MovePagesJob job;
 		private readonly List<ParameterReplacer> generalReplacers = new();
+		private readonly ReplacementCollection replacements;
 		private readonly Dictionary<ISimpleTitle, List<ParameterReplacer>> templateReplacers = new(SimpleTitleEqualityComparer.Instance);
 		private UespNamespaceList? nsList;
 		#endregion
 
 		// TODO: Create tags similar to JobInfo that'll tag each method with the site and template it's designed for, so AddAllReplacers can be programmatic rather than a manual list.
 		#region Constructors
-		public ParameterReplacers(MovePagesJob job)
+		internal ParameterReplacers(MovePagesJob job, ReplacementCollection replacements)
 		{
 			this.job = job.NotNull(nameof(job));
+			this.replacements = replacements.NotNull(nameof(replacements));
 			this.AddAllReplacers();
 		}
 		#endregion
@@ -94,7 +96,7 @@
 				var (oldNs, nsParam) = this.GetNsBase(page, template);
 				var oldTitle = link.Value.ToValue();
 				Title? searchTitle = TitleFactory.FromName(page.Site, oldNs.Full + oldTitle).ToTitle();
-				if (this.job.Replacements.TryGetValue(searchTitle, out var replacement))
+				if (this.replacements.TryGetValue(searchTitle, out var replacement))
 				{
 					link.Value.Clear();
 					link.SetValue(replacement.To.PageName);
@@ -179,7 +181,7 @@
 			page.ThrowNull(nameof(page));
 			if (param != null
 				&& TitleFactory.FromName(page.Site, param.Value.ToValue()).ToTitle() is var title
-				&& this.job.Replacements.TryGetValue(title, out var replacement)
+				&& this.replacements.TryGetValue(title, out var replacement)
 				&& replacement.To is ISimpleTitle toLink)
 			{
 				param.SetValue(toLink.FullPageName());
@@ -201,7 +203,7 @@
 			foreach (var (_, param) in template.GetNumericParameters())
 			{
 				if (TitleFactory.FromName(page.Site, page.Namespace.Id, param.Value.ToValue()).ToTitle() is var title
-					&& this.job.Replacements.TryGetValue(title, out var replacement)
+					&& this.replacements.TryGetValue(title, out var replacement)
 					&& replacement.To is ISimpleTitle toLink
 					&& replacement.From.Namespace.Id == toLink.Namespace.Id)
 				{
@@ -214,7 +216,7 @@
 		{
 			if (param != null
 				&& TitleFactory.Direct(this.job.Site, ns, param.Value.ToValue()).ToTitle() is var title
-				&& this.job.Replacements.TryGetValue(title, out var replacement)
+				&& this.replacements.TryGetValue(title, out var replacement)
 				&& replacement.To is ISimpleTitle toLink
 				&& toLink.Namespace == ns)
 			{
