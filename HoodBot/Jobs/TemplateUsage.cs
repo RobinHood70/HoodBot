@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.IO;
 	using RobinHood70.CommonCode;
 
 	using RobinHood70.Robby;
@@ -16,7 +17,6 @@
 		private readonly string saveLocation;
 		private readonly IReadOnlyList<string> originalTemplateNames;
 		private readonly bool respectRedirects;
-		private readonly List<(ISimpleTitle Page, ITemplateNode Template)> allTemplates = new();
 		private readonly List<string> headerOrder = new();
 		#endregion
 
@@ -64,11 +64,12 @@
 			}
 
 			this.StatusWriteLine("Loading pages");
-			PageCollection? results = PageCollection.Unlimited(this.Site);
+			PageCollection results = PageCollection.Unlimited(this.Site);
 			results.GetPageTranscludedIn(templates);
 			this.Progress++;
 			this.StatusWriteLine("Exporting");
-			this.ExportResults(allTemplateNames, results, this.saveLocation);
+			results.Sort();
+			this.ExportTemplates(allTemplateNames, results);
 			this.Progress++;
 		}
 		#endregion
@@ -109,30 +110,30 @@
 		#endregion
 
 		#region Private Methods
-		private void ExportResults(TitleCollection allTemplateNames, PageCollection results, string location)
+		private void ExportTemplates(IReadOnlyCollection<ISimpleTitle> allNames, PageCollection pages)
 		{
-			this.GetTemplates(allTemplateNames, results);
-			if (this.allTemplates.Count == 0)
+			var templates = this.ExtractTemplates(allNames, pages);
+			if (templates.Count == 0)
 			{
 				this.StatusWriteLine("No template calls found!");
+				return;
 			}
-			else if (!string.IsNullOrWhiteSpace(this.saveLocation))
+
+			try
 			{
-				try
-				{
-					this.WriteFile();
-					this.StatusWriteLine("File saved to " + location);
-				}
-				catch (System.IO.IOException e)
-				{
-					this.StatusWriteLine("Couldn't save file to " + location);
-					this.StatusWriteLine(e.Message);
-				}
+				this.WriteFile(templates, this.saveLocation);
+				this.StatusWriteLine("File saved to " + this.saveLocation);
+			}
+			catch (IOException e)
+			{
+				this.StatusWriteLine("Couldn't save file to " + this.saveLocation);
+				this.StatusWriteLine(e.Message);
 			}
 		}
 
-		private void GetTemplates(IReadOnlyCollection<ISimpleTitle> allNames, PageCollection pages)
+		private List<(ISimpleTitle Page, ITemplateNode Template)> ExtractTemplates(IReadOnlyCollection<ISimpleTitle> allNames, PageCollection pages)
 		{
+			List<(ISimpleTitle Page, ITemplateNode Template)> templates = new();
 			Dictionary<string, string> paramTranslator = new(StringComparer.Ordinal); // TODO: Empty dictionary for now, but could be pre-populated to translate synonyms to a consistent name. Similarly, name comparison can be case-sensitive or not. Need to find a useful way to do those.
 			foreach (var page in pages)
 			{
@@ -141,7 +142,7 @@
 				{
 					if (allNames.Contains(template.TitleValue))
 					{
-						this.allTemplates.Add((page, template));
+						templates.Add((page, template));
 						foreach (var (name, _) in template.GetResolvedParameters())
 						{
 							if (paramTranslator.TryAdd(name, name))
@@ -153,16 +154,12 @@
 				}
 			}
 
-			var comparer = SimpleTitleComparer.Instance;
-			this.allTemplates.Sort((x, y) => comparer.Compare(x.Page, y.Page));
+			return templates;
 		}
 
-		private void WriteFile()
+		private void WriteFile(List<(ISimpleTitle Page, ITemplateNode Template)> results, string location)
 		{
-			CsvFile csvFile = new()
-			{
-				EmptyFieldText = " ",
-			};
+			CsvFile csvFile = new() { EmptyFieldText = " " };
 			List<string> output = new(this.headerOrder.Count + 2)
 			{
 				"Page",
@@ -171,7 +168,7 @@
 			output.AddRange(this.headerOrder);
 			csvFile.Header = output;
 
-			foreach (var template in this.allTemplates)
+			foreach (var template in results)
 			{
 				var row = csvFile.Add(template.Page.FullPageName(), template.Template.GetTitleText());
 				foreach (var (name, parameter) in template.Template.GetResolvedParameters())
@@ -182,7 +179,7 @@
 				}
 			}
 
-			csvFile.WriteFile(this.saveLocation);
+			csvFile.WriteFile(location);
 		}
 		#endregion
 	}
