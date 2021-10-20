@@ -426,7 +426,7 @@
 				.AppendLine()
 				.AppendLine("{{Stub|Quest}}");
 
-			var retval = TitleFactory.Direct(this.Site, UespNamespaces.Online, quest.FullPageName.NotNull(nameof(quest), nameof(quest.FullPageName))).ToNewPage(sb.ToString());
+			var retval = TitleFactory.FromName(this.Site, quest.FullPageName.NotNull(nameof(quest), nameof(quest.FullPageName))).ToNewPage(sb.ToString());
 			return retval;
 		}
 
