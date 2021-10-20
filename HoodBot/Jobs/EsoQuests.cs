@@ -87,7 +87,8 @@
 		{
 			[0] = string.Empty,
 			[1] = "Immediately",
-			[2] = "Daily"
+			[2] = "Daily",
+			[3] = "Once per event"
 		};
 
 		private static readonly Dictionary<Visibility, string> Visibilities = new()
