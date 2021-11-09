@@ -101,7 +101,7 @@
 		#endregion
 
 		#region Constructors
-		[JobInfo("Quests", "ESO")]
+		[JobInfo("Quests", "ESO Update")]
 		public EsoQuests(JobManager jobManager)
 			: base(jobManager)
 		{

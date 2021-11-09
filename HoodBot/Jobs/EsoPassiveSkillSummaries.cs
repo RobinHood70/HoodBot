@@ -10,7 +10,7 @@
 	internal sealed class EsoPassiveSkillSummaries : EsoSkillJob<PassiveSkill>
 	{
 		#region Constructors
-		[JobInfo("Update Passive Skills", "ESO")]
+		[JobInfo("Update Passive Skills", "ESO Update")]
 		public EsoPassiveSkillSummaries(JobManager jobManager)
 			: base(jobManager)
 		{
