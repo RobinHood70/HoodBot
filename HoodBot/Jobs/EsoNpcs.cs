@@ -20,7 +20,7 @@
 		#endregion
 
 		#region Constructors
-		[JobInfo("Create missing NPCs", "ESO")]
+		[JobInfo("Create Missing NPCs", "ESO Update")]
 		public EsoNpcs(JobManager jobManager, [JobParameter(DefaultValue = false)] bool updateMode)
 			: base(jobManager)
 		{
