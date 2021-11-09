@@ -47,7 +47,7 @@
 		#endregion
 
 		#region Constructors
-		[JobInfo("Create Collectibles", "ESO")]
+		[JobInfo("Create Collectibles", "ESO Update")]
 		public EsoCollections(JobManager jobManager)
 			: base(jobManager)
 		{

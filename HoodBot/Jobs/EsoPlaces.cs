@@ -12,7 +12,7 @@
 
 	public class EsoPlaces : EditJob
 	{
-		[JobInfo("Create Missing Places", "ESO")]
+		[JobInfo("Create Missing Places", "ESO")] // ESO Update if this ever becomes reliable
 		public EsoPlaces(JobManager jobManager)
 			: base(jobManager)
 		{

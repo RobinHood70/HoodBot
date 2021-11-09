@@ -12,7 +12,7 @@
 	internal sealed class EsoActiveSkillSummaries : EsoSkillJob<ActiveSkill>
 	{
 		#region Constructors
-		[JobInfo("Update Active Skills", "ESO")]
+		[JobInfo("Update Active Skills", "ESO Update")]
 		public EsoActiveSkillSummaries(JobManager jobManager)
 			: base(jobManager)
 		{
