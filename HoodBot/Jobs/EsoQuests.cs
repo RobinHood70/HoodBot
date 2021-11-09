@@ -350,7 +350,7 @@
 			var rewards = string.Join("<br>", rewardList);
 
 			var sb = new StringBuilder()
-				.AppendLine("{{Empty|quest}}{{ONQP Header")
+				.AppendLine("{{Minimal|quest}}{{ONQP Header")
 				.AppendLine("|summaryWritten=")
 				.AppendLine("|summaryChecked=")
 				.AppendLine("|walkthroughWritten=")
