@@ -11,7 +11,7 @@
 	internal sealed class EsoDeletableNpcs : WikiJob
 	{
 		#region Constructors
-		[JobInfo("Find deletable NPCs", "ESO")]
+		[JobInfo("Find Deletable NPCs", "ESO")]
 		public EsoDeletableNpcs(JobManager jobManager)
 			: base(jobManager) => this.SetResultDescription("ESO NPC pages with no matching database entry");
 		#endregion
