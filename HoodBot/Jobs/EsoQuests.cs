@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Data;
-	using System.Diagnostics;
 	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
@@ -129,6 +128,7 @@
 			this.StatusWriteLine("Getting wiki data");
 			TitleCollection wikiQuests = new(this.Site);
 			wikiQuests.GetCategoryMembers("Online-Quests");
+
 			this.StatusWriteLine("Getting quest data");
 			List<QuestData> quests = new(this.GetQuestData(wikiQuests));
 			TitleCollection allTitles = new(this.Site);
@@ -139,11 +139,9 @@
 
 			var allPages = allTitles.Load(PageModules.Info);
 			allPages.RemoveExists(false);
-			allPages.Clear();
 			var places = EsoSpace.GetPlaces(this.Site);
 			foreach (var quest in quests)
 			{
-				Debug.WriteLine(quest.FullPageName);
 				var disambigName = quest.FullPageName + " (quest)";
 				if (allPages.Contains(disambigName))
 				{
@@ -177,15 +175,7 @@
 			}
 		}
 
-		protected override void Main()
-		{
-			this.SavePages(this.LogName);
-			foreach (var page in this.Pages)
-			{
-				Debug.WriteLine($"==[[{page.FullPageName}|]]==");
-				Debug.WriteLine(page.Text.Replace("==", "==="));
-			}
-		}
+		protected override void Main() => this.SavePages(this.LogName);
 		#endregion
 
 		#region Private Static Methods
@@ -212,34 +202,12 @@
 		#region Private Methods
 		private IEnumerable<QuestData> GetFilteredQuests(TitleCollection wikiQuests)
 		{
-			HashSet<string> specificQuests = new(StringComparer.OrdinalIgnoreCase)
-			{
-				"The Celestial Palanquin",
-				"Destruction Incarnate",
-				"The Durance Vile",
-				"Born of Grief",
-				"Deadlight (quest)",
-				"Against All Hope",
-				"The Last Ambition",
-				"Ambition's End",
-				"Hope Springs Eternal"
-			};
-
-			foreach (var quest in specificQuests)
-			{
-				wikiQuests.Remove("Online:" + quest);
-			}
-
 			foreach (var row in EsoLog.RunQuery(QuestQuery))
 			{
 				QuestData quest = new(row);
 				TitleFactory title = TitleFactory.FromName(this.Site, quest.FullPageName);
-				if (quest.FullPageName == "Online:The Celestial Palanquin")
-				{
-				}
-
 				TitleFactory titleDisambig = TitleFactory.DirectNormalized(title.Namespace, title.PageName + " (quest)");
-				if (specificQuests.Contains(title.PageName) || specificQuests.Contains(titleDisambig.PageName))
+				if (!wikiQuests.Contains(title) && !wikiQuests.Contains(titleDisambig))
 				{
 					var missing = true;
 					foreach (var wikiQuest in wikiQuests)
