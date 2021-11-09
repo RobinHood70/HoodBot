@@ -223,7 +223,7 @@
 		/// <returns>The templates that match the title provided, if any.</returns>
 		public IEnumerable<SiteTemplateNode> FindTemplates(string templateName)
 		{
-			TitleFactory? find = TitleFactory.FromName(this.Site, MediaWikiNamespaces.Template, templateName);
+			TitleFactory find = TitleFactory.FromName(this.Site, MediaWikiNamespaces.Template, templateName);
 			foreach (var template in this.TemplateNodes)
 			{
 				var titleText = template.GetTitleText();
