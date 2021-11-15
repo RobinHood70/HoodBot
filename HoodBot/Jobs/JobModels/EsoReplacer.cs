@@ -339,6 +339,9 @@
 				oldTemplates.Remove(Title.FromBacklinkNode(this.site, node));
 			}
 
+			// Always ignore these
+			oldTemplates.Remove(TitleFactory.FromName(this.site, "Huh"));
+
 			return oldTemplates;
 		}
 
