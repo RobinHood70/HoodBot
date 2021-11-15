@@ -296,7 +296,7 @@
 			{
 				foreach (var setMember in setMembers)
 				{
-					if (string.Compare(setMember.PageName, setName, true, this.Site.Culture) == 0)
+					if (string.Compare(setMember.PageName, setName, true, this.Site.Culture) == 0 && string.Compare(setMember.PageName, setName, false, this.Site.Culture) != 0)
 					{
 						this.Warn($"Substituted {setMember.PageName} for {setName}");
 						set.Page = setMember;
