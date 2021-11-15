@@ -54,6 +54,10 @@
 		}
 		#endregion
 
+		#region Public Override Properties
+		public override string LogName => "ESO Collections";
+		#endregion
+
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
@@ -69,7 +73,7 @@
 			this.StatusWriteLine("Loading collections");
 			var titles = this.LoadCollections();
 
-			this.StatusWriteLine("Loading group pages");
+			this.StatusWriteLine("Loading list pages");
 			this.Pages.PageLoaded += this.PageLoaded;
 			this.Pages.GetTitles(titles);
 			this.Pages.PageLoaded -= this.PageLoaded;
