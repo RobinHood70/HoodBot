@@ -29,7 +29,10 @@
 		#endregion
 
 		#region Constructors
-		public TokenManagerMeta(WikiAbstractionLayer wal) => this.wal = wal;
+		public TokenManagerMeta(WikiAbstractionLayer wal)
+		{
+			this.wal = wal;
+		}
 		#endregion
 
 		#region Public Override Methods

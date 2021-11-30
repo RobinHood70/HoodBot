@@ -6,7 +6,10 @@ namespace RobinHood70.WallE.Base
 	public class PatrolInput
 	{
 		#region Constructors
-		public PatrolInput(long rcid) => this.RecentChangesId = rcid;
+		public PatrolInput(long rcid)
+		{
+			this.RecentChangesId = rcid;
+		}
 
 		private PatrolInput()
 		{

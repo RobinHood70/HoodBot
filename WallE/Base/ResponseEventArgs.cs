@@ -6,7 +6,10 @@ namespace RobinHood70.WallE.Base
 	public class ResponseEventArgs : EventArgs
 	{
 		#region Constructors
-		public ResponseEventArgs(string response) => this.Response = response;
+		public ResponseEventArgs(string response)
+		{
+			this.Response = response;
+		}
 		#endregion
 
 		#region Public Properties

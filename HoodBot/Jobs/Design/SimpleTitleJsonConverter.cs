@@ -10,7 +10,10 @@
 	{
 		private readonly Site site;
 
-		public SimpleTitleJsonConverter(Site site) => this.site = site;
+		public SimpleTitleJsonConverter(Site site)
+		{
+			this.site = site;
+		}
 
 		public override ISimpleTitle ReadJson(JsonReader reader, Type objectType, ISimpleTitle? existingValue, bool hasExistingValue, JsonSerializer serializer)
 		{

@@ -19,7 +19,10 @@
 
 		/// <summary>Initializes a new instance of the <see cref="ModuleFactory" /> class.</summary>
 		/// <param name="wal">The parent wiki abstraction layer.</param>
-		public ModuleFactory(WikiAbstractionLayer wal) => this.wal = wal;
+		public ModuleFactory(WikiAbstractionLayer wal)
+		{
+			this.wal = wal;
+		}
 		#endregion
 
 		#region Public Methods

@@ -6,9 +6,15 @@ namespace RobinHood70.WallE.Base
 	public class DeleteInput
 	{
 		#region Constructors
-		public DeleteInput(string title) => this.Title = title;
+		public DeleteInput(string title)
+		{
+			this.Title = title;
+		}
 
-		public DeleteInput(long pageId) => this.PageId = pageId;
+		public DeleteInput(long pageId)
+		{
+			this.PageId = pageId;
+		}
 		#endregion
 
 		#region Public Properties

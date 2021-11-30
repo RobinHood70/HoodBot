@@ -5,7 +5,10 @@ namespace RobinHood70.WallE.Base
 	public class FileRevertResult
 	{
 		#region Constructors
-		internal FileRevertResult(string result) => this.Result = result;
+		internal FileRevertResult(string result)
+		{
+			this.Result = result;
+		}
 		#endregion
 
 		#region Public Properties

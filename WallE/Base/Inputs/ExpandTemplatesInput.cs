@@ -23,7 +23,10 @@ namespace RobinHood70.WallE.Base
 	public class ExpandTemplatesInput
 	{
 		#region Constructors
-		public ExpandTemplatesInput(string text) => this.Text = text.NotNullOrWhiteSpace(nameof(text));
+		public ExpandTemplatesInput(string text)
+		{
+			this.Text = text.NotNullOrWhiteSpace(nameof(text));
+		}
 		#endregion
 
 		#region Public Properties

@@ -12,7 +12,10 @@
 
 		/// <summary>Initializes a new instance of the <see cref="SiteNodeFactory"/> class.</summary>
 		/// <param name="site">The <see cref="Site"/> value to be passed to those nodes that require it.</param>
-		public SiteNodeFactory(Site site) => this.Site = site;
+		public SiteNodeFactory(Site site)
+		{
+			this.Site = site;
+		}
 		#endregion
 
 		#region Public Properties

@@ -26,7 +26,10 @@
 		#endregion
 
 		#region Constructors
-		private RequestVisitorMultipart() => this.boundary = RandomBoundary(RandomBoundaryStartLength);
+		private RequestVisitorMultipart()
+		{
+			this.boundary = RandomBoundary(RandomBoundaryStartLength);
+		}
 		#endregion
 
 		#region Public Static Methods

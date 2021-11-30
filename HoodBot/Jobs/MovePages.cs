@@ -15,12 +15,10 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void PopulateReplacements()
-		{
-			// this.AddReplacement("File:ON-item-furnishing-Abecean Ratter Cat.jpg", "File:ON-furnishing-Abecean Ratter Cat.jpg");
+		protected override void PopulateReplacements() =>
 			this.AddReplacement("Skyrim:Map Notes", "Skyrim:Treasure Maps");
-			// this.LoadReplacementsFromFile(@"D:\Data\HoodBot\FileList.txt");
-		}
+		//// this.LoadReplacementsFromFile(@"D:\Data\HoodBot\FileList.txt");
+		//// this.AddReplacement("File:ON-item-furnishing-Abecean Ratter Cat.jpg", "File:ON-furnishing-Abecean Ratter Cat.jpg");
 		#endregion
 	}
 }

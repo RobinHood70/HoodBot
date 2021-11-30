@@ -10,7 +10,10 @@
 	internal sealed class ActiveSkill : Skill
 	{
 		public ActiveSkill(IDataRecord row)
-			: base(row) => this.SkillType = (string)row["type"];
+			: base(row)
+		{
+			this.SkillType = (string)row["type"];
+		}
 
 		#region Public Properties
 		public int LearnedLevel { get; private set; }

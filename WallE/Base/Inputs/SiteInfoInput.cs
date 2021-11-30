@@ -38,7 +38,10 @@ namespace RobinHood70.WallE.Base
 	public class SiteInfoInput
 	{
 		#region Constructors
-		public SiteInfoInput(SiteInfoProperties properties) => this.Properties = properties;
+		public SiteInfoInput(SiteInfoProperties properties)
+		{
+			this.Properties = properties;
+		}
 		#endregion
 
 		#region Public Properties

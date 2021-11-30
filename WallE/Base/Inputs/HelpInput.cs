@@ -7,7 +7,10 @@ namespace RobinHood70.WallE.Base
 	public class HelpInput
 	{
 		#region Public Constructors
-		public HelpInput(IEnumerable<string> modules) => this.Modules = modules.NotNullOrWhiteSpace(nameof(modules));
+		public HelpInput(IEnumerable<string> modules)
+		{
+			this.Modules = modules.NotNullOrWhiteSpace(nameof(modules));
+		}
 		#endregion
 
 		#region Public Properties

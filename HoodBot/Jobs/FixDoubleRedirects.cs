@@ -22,7 +22,10 @@
 		#region Constructors
 		[JobInfo("Fix Double Redirects", "Maintenance|")]
 		public FixDoubleRedirects(JobManager jobManager)
-			: base(jobManager) => this.redirectWords = this.Site.MagicWords["redirect"].Aliases;
+			: base(jobManager)
+		{
+			this.redirectWords = this.Site.MagicWords["redirect"].Aliases;
+		}
 		#endregion
 
 		#region Protected Override Methods

@@ -51,7 +51,10 @@
 		}
 
 		public ListWatchlist(WikiAbstractionLayer wal, WatchlistInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator) => this.ContinueName = this.SiteVersion < 123 ? "start" : "continue";
+			: base(wal, input, pageSetGenerator)
+		{
+			this.ContinueName = this.SiteVersion < 123 ? "start" : "continue";
+		}
 		#endregion
 
 		#region Public Override Properties

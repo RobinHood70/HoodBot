@@ -19,11 +19,14 @@
 		}
 
 		public PropRevisions(WikiAbstractionLayer wal, RevisionsInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator) => this.IsRevisionRange =
-				input.Start != null ||
-				input.End != null ||
-				input.StartId > 0 ||
-				input.EndId > 0;
+			: base(wal, input, pageSetGenerator)
+		{
+			this.IsRevisionRange =
+input.Start != null ||
+input.End != null ||
+input.StartId > 0 ||
+input.EndId > 0;
+		}
 		#endregion
 
 		#region Public Override Properties

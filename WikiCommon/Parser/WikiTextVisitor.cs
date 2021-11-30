@@ -25,7 +25,10 @@
 		/// <item>If set to <see langword="true"/>, returns only the value of each node, ignoring comments and the like. This is most useful for finding named items.</item>
 		/// <item>If set to false, returns all nodes in the collection. This is most useful for editing the collection.</item>
 		/// </list></param>
-		public WikiTextVisitor(bool raw) => this.raw = raw;
+		public WikiTextVisitor(bool raw)
+		{
+			this.raw = raw;
+		}
 		#endregion
 
 		#region Public Static Methods

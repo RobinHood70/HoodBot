@@ -18,7 +18,10 @@
 		/// <param name="title">The title.</param>
 		/// <param name="parameters">The parameters.</param>
 		public SiteLinkNode(SiteNodeFactory nodeFactory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters)
-			: base(nodeFactory, title, parameters) => this.TitleValue = TitleFactory.FromName(nodeFactory.NotNull(nameof(nodeFactory)).Site, this.GetTitleText()).ToTitle();
+			: base(nodeFactory, title, parameters)
+		{
+			this.TitleValue = TitleFactory.FromName(nodeFactory.NotNull(nameof(nodeFactory)).Site, this.GetTitleText()).ToTitle();
+		}
 		#endregion
 
 		#region Public Properties

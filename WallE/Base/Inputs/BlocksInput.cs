@@ -32,9 +32,15 @@ namespace RobinHood70.WallE.Base
 		{
 		}
 
-		public BlocksInput(IPAddress ip) => this.IP = ip;
+		public BlocksInput(IPAddress ip)
+		{
+			this.IP = ip;
+		}
 
-		public BlocksInput(IEnumerable<string> users) => this.Users = users;
+		public BlocksInput(IEnumerable<string> users)
+		{
+			this.Users = users;
+		}
 		#endregion
 
 		#region Public Properties

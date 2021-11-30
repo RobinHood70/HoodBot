@@ -18,7 +18,10 @@
 		#endregion
 
 		#region Constructors
-		public UserSettings() => this.BotDataFolder = DefaultBotDataFolder;
+		public UserSettings()
+		{
+			this.BotDataFolder = DefaultBotDataFolder;
+		}
 		#endregion
 
 		#region Public Static Properties

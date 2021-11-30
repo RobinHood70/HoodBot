@@ -14,7 +14,10 @@
 		/// <param name="name">The parameter name.</param>
 		/// <param name="values">The parameter values. Any duplicates in the input will be ignored.</param>
 		public PipedParameter(string name, ICollection<string> values)
-			: base(name) => this.Values = values.NotNull(nameof(values));
+			: base(name)
+		{
+			this.Values = values.NotNull(nameof(values));
+		}
 		#endregion
 
 		#region Public Abstract Properties

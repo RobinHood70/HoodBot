@@ -15,7 +15,10 @@ namespace RobinHood70.WallE.Base
 	public class ParameterInfoInput
 	{
 		#region Public Properties
-		public ParameterInfoInput(IEnumerable<string> modules) => this.Modules = modules.NotNullOrWhiteSpace(nameof(modules));
+		public ParameterInfoInput(IEnumerable<string> modules)
+		{
+			this.Modules = modules.NotNullOrWhiteSpace(nameof(modules));
+		}
 
 		/// <summary>Gets or sets the modules to retrieve parameter information for.</summary>
 		/// <value>The modules.</value>

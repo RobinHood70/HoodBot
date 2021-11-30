@@ -5,7 +5,10 @@
 	public abstract class JobLogger
 	{
 		#region Constructors
-		protected JobLogger(JobTypes typesToLog) => this.JobTypes = typesToLog;
+		protected JobLogger(JobTypes typesToLog)
+		{
+			this.JobTypes = typesToLog;
+		}
 		#endregion
 
 		#region Public Properties

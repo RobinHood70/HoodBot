@@ -15,10 +15,10 @@
 			this.Groups = jobInfo.NotNull(nameof(jobInfo)).Groups;
 			this.Name = jobInfo.Name;
 
-			var constructorParameters = constructor.GetParameters()
+			ParameterInfo[] constructorParameters = constructor.GetParameters()
 				.NotNull(ValidationType.Method, nameof(constructor), nameof(constructor.GetParameters));
 			List<ConstructorParameter> parameters = new(constructorParameters.Length);
-			foreach (var parameter in constructor.GetParameters())
+			foreach (ParameterInfo parameter in constructor.GetParameters())
 			{
 				if (!string.Equals(parameter.ParameterType.Name, nameof(WikiJob.JobManager), StringComparison.Ordinal))
 				{
@@ -43,7 +43,7 @@
 
 		#region Public Operators
 		public static bool operator ==(JobInfo? left, JobInfo? right) =>
-			ReferenceEquals(left, right) || (!(left is null) && left.Equals(right));
+			ReferenceEquals(left, right) || (left is not null && left.Equals(right));
 
 		public static bool operator !=(JobInfo? left, JobInfo? right) => !(left == right);
 		#endregion
@@ -51,12 +51,12 @@
 		#region Public Static Methods
 		public static IEnumerable<JobInfo> GetAllJobs()
 		{
-			var wikiJobType = typeof(WikiJob);
-			foreach (var type in Assembly.GetCallingAssembly().GetTypes())
+			Type wikiJobType = typeof(WikiJob);
+			foreach (Type type in Assembly.GetCallingAssembly().GetTypes())
 			{
 				if (type.IsSubclassOf(wikiJobType))
 				{
-					foreach (var constructor in type.GetConstructors(BindingFlags.Public | BindingFlags.Instance))
+					foreach (ConstructorInfo constructor in type.GetConstructors(BindingFlags.Public | BindingFlags.Instance))
 					{
 						if (constructor.GetCustomAttribute<JobInfoAttribute>() is JobInfoAttribute jobInfo)
 						{
@@ -76,7 +76,7 @@
 			List<object?> objectList = new() { jobManager.NotNull(nameof(jobManager)) };
 			if (this.Parameters is IReadOnlyList<ConstructorParameter> jobParams)
 			{
-				foreach (var param in jobParams)
+				foreach (ConstructorParameter param in jobParams)
 				{
 					objectList.Add(param.Attribute is JobParameterFileAttribute && param.Value is string value ? Environment.ExpandEnvironmentVariables(value) : param.Value);
 				}

@@ -11,7 +11,10 @@
 
 		#region Constructors
 		public TemplateElement(WikiStack stack, int length)
-			: base(stack, '{', length) => this.braceLength = length; // this.atLineStart = atLineStart;
+			: base(stack, '{', length)
+		{
+			this.braceLength = length; // this.atLineStart = atLineStart;
+		}
 		#endregion
 
 		#region Internal Override Properties

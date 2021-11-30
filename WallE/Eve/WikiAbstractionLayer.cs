@@ -436,14 +436,14 @@
 			var path = general.ArticlePath;
 			if (path.StartsWith('/'))
 			{
-				var repl = path.Substring(0, path.IndexOf("$1", StringComparison.Ordinal));
+				var repl = path[..path.IndexOf("$1", StringComparison.Ordinal)];
 				var articleBaseIndex = general.BasePage.IndexOf(repl, StringComparison.Ordinal);
 				if (articleBaseIndex < 0)
 				{
 					articleBaseIndex = general.BasePage.IndexOf("/", general.BasePage.IndexOf("//", StringComparison.Ordinal) + 2, StringComparison.Ordinal);
 				}
 
-				path = general.BasePage.Substring(0, articleBaseIndex) + path;
+				path = general.BasePage[..articleBaseIndex] + path;
 			}
 
 			this.ArticlePath = path;

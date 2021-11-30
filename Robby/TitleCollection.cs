@@ -17,7 +17,10 @@
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class.</summary>
 		/// <param name="site">The site the titles are from. All titles in a collection must belong to the same site.</param>
 		public TitleCollection(Site site)
-			: base(site) => this.LimitationType = LimitationType.None;
+			: base(site)
+		{
+			this.LimitationType = LimitationType.None;
+		}
 
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class with a specific list of titles.</summary>
 		/// <param name="site">The site.</param>

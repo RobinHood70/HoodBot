@@ -7,9 +7,15 @@ namespace RobinHood70.WallE.Base
 	public class ProtectInput
 	{
 		#region Constructors
-		public ProtectInput(string title) => this.Title = title.NotNullOrWhiteSpace(nameof(title));
+		public ProtectInput(string title)
+		{
+			this.Title = title.NotNullOrWhiteSpace(nameof(title));
+		}
 
-		public ProtectInput(long pageId) => this.PageId = pageId;
+		public ProtectInput(long pageId)
+		{
+			this.PageId = pageId;
+		}
 		#endregion
 
 		#region Public Properties

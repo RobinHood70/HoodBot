@@ -1,10 +1,5 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System.Text;
-	using System.Text.RegularExpressions;
-	using RobinHood70.CommonCode;
-	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
@@ -28,7 +23,7 @@
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
 			var templateIndex = parsedPage.Nodes.FindIndex<SiteTemplateNode>(t => t.TitleValue.PageNameEquals("Similar Images"));
-			var header = parsedPage.Nodes.Find<IHeaderNode>(h => string.Equals(h.GetInnerText(true), "Similar Iamges", System.StringComparison.Ordinal));
+			IHeaderNode? header = parsedPage.Nodes.Find<IHeaderNode>(h => string.Equals(h.GetInnerText(true), "Similar Iamges", System.StringComparison.Ordinal));
 			if (header == null)
 			{
 				parsedPage.Nodes.Insert(templateIndex, parsedPage.Factory.TextNode("== Similar Images ==\n"));

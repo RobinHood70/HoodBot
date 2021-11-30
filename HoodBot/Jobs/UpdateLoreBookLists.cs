@@ -118,7 +118,7 @@
 			foreach (var book in listBooks)
 			{
 				var label = SortableName(book.PageName);
-				var letter = label.Substring(0, 1).ToUpperInvariant();
+				var letter = label[..1].ToUpperInvariant();
 				if (!char.IsLetter(label[0]))
 				{
 					letter = "Numeric";

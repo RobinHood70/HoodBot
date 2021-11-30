@@ -17,7 +17,10 @@
 		#region Constructors
 		[JobInfo("Create Pages From Text")]
 		public CreatePagesFromText(JobManager jobManager)
-			: base(jobManager) => this.fileName = "Divine_List.txt";
+			: base(jobManager)
+		{
+			this.fileName = "Divine_List.txt";
+		}
 		#endregion
 
 		#region Protected Override Methods

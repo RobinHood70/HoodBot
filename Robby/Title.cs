@@ -54,7 +54,7 @@
 		/// <summary>Gets the value corresponding to {{BASEPAGENAME}}.</summary>
 		/// <returns>The name of the base page.</returns>
 		public string BasePageName => this.Namespace.AllowsSubpages && this.PageName.LastIndexOf('/') is var subPageLoc && subPageLoc > 0
-				? this.PageName.Substring(0, subPageLoc)
+				? this.PageName[..subPageLoc]
 				: this.PageName;
 
 		/// <summary>Gets the full page name of a title.</summary>
@@ -75,7 +75,7 @@
 			this.Namespace.AllowsSubpages &&
 			this.PageName.IndexOf('/', StringComparison.Ordinal) is var subPageLoc &&
 			subPageLoc >= 0
-				? this.PageName.Substring(0, subPageLoc)
+				? this.PageName[..subPageLoc]
 				: this.PageName;
 
 		/// <summary>Gets the site to which this title belongs.</summary>

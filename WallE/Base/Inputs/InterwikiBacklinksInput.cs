@@ -17,7 +17,10 @@ namespace RobinHood70.WallE.Base
 	public class InterwikiBacklinksInput : ILimitableInput, IGeneratorInput
 	{
 		#region Constructors
-		public InterwikiBacklinksInput(string prefix) => this.Prefix = prefix;
+		public InterwikiBacklinksInput(string prefix)
+		{
+			this.Prefix = prefix;
+		}
 		#endregion
 
 		#region Public Properties

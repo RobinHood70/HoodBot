@@ -24,7 +24,10 @@
 		}
 
 		public ListQueryPage(WikiAbstractionLayer wal, QueryPageInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator) => this.queryPage = input.Page;
+			: base(wal, input, pageSetGenerator)
+		{
+			this.queryPage = input.Page;
+		}
 		#endregion
 
 		#region Public Override Properties

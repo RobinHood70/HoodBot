@@ -9,7 +9,10 @@
 
 		/// <summary>Initializes a new instance of the <see cref="IgnoreNode"/> class.</summary>
 		/// <param name="value">The value.</param>
-		public IgnoreNode(string value) => this.Value = value;
+		public IgnoreNode(string value)
+		{
+			this.Value = value;
+		}
 		#endregion
 
 		#region Public Properties

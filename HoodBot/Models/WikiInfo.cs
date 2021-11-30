@@ -94,7 +94,7 @@
 
 			void AddToJson(string name, object? property, object? defaultValue)
 			{
-				if (property is null ? !(defaultValue is null) : !property.Equals(defaultValue))
+				if (property is null ? defaultValue is not null : !property.Equals(defaultValue))
 				{
 					json.Add(name, new JValue(property));
 				}

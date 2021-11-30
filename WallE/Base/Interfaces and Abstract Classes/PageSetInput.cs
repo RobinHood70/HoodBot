@@ -47,7 +47,10 @@ namespace RobinHood70.WallE.Base
 		}
 
 		protected PageSetInput(IGeneratorInput generatorInput, IEnumerable<string> titles)
-			: this(titles) => this.GeneratorInput = generatorInput.NotNull(nameof(generatorInput));
+			: this(titles)
+		{
+			this.GeneratorInput = generatorInput.NotNull(nameof(generatorInput));
+		}
 
 		protected PageSetInput(IEnumerable<long> ids, ListType listType)
 		{
@@ -62,7 +65,10 @@ namespace RobinHood70.WallE.Base
 		}
 
 		protected PageSetInput(IGeneratorInput generatorInput, IEnumerable<long> ids, ListType listType)
-			: this(ids, listType) => this.GeneratorInput = generatorInput;
+			: this(ids, listType)
+		{
+			this.GeneratorInput = generatorInput;
+		}
 		#endregion
 
 		#region Public Static Properties

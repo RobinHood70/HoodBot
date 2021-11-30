@@ -38,7 +38,10 @@ namespace RobinHood70.WallE.Base
 	public class SearchInput : ILimitableInput, IGeneratorInput
 	{
 		#region Constructors
-		public SearchInput(string search) => this.Search = search.NotNullOrWhiteSpace(nameof(search));
+		public SearchInput(string search)
+		{
+			this.Search = search.NotNullOrWhiteSpace(nameof(search));
+		}
 		#endregion
 
 		#region Public Properties

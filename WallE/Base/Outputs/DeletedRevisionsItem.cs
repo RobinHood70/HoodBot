@@ -7,7 +7,10 @@ namespace RobinHood70.WallE.Base
 	{
 		#region Constructors
 		internal DeletedRevisionsItem(int ns, string title, long pageId, IReadOnlyList<RevisionItem> revisions, string? token)
-			: base(ns, title, pageId, revisions) => this.DeletedRevisionsToken = token;
+			: base(ns, title, pageId, revisions)
+		{
+			this.DeletedRevisionsToken = token;
+		}
 		#endregion
 
 		#region Public Properties

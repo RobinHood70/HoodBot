@@ -27,14 +27,19 @@
 		/// <param name="site">The site the user is from.</param>
 		/// <param name="userInfo">The API user information.</param>
 		public User(Site site, AllUsersItem userInfo)
-			: this(site, userInfo.NotNull(nameof(userInfo)).Name) =>
+			: this(site, userInfo.NotNull(nameof(userInfo)).Name)
+		{
 			this.Info = new UserInfo(this.Site, userInfo);
+		}
 
 		/// <summary>Initializes a new instance of the <see cref="User"/> class.</summary>
 		/// <param name="title">The base user page.</param>
 		/// <param name="userInfo">The API user information.</param>
 		public User(ISimpleTitle title, UsersItem userInfo)
-			: base(title) => this.Info = new UserInfo(this.Site, userInfo);
+			: base(title)
+		{
+			this.Info = new UserInfo(this.Site, userInfo);
+		}
 		#endregion
 
 		#region Public Properties

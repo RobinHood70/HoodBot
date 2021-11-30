@@ -17,9 +17,12 @@
 		}
 
 		public ListUserContribs(WikiAbstractionLayer wal, UserContributionsInput input, IPageSetGenerator? pageSetGenerator)
-			: base(wal, input, pageSetGenerator) => this.ContinueName = this.SiteVersion < 114 || (this.SiteVersion < 123 && input.UserPrefix == null && input.Users?.IsEmpty() == false)
-			? "start"
-			: "continue";
+			: base(wal, input, pageSetGenerator)
+		{
+			this.ContinueName = this.SiteVersion < 114 || (this.SiteVersion < 123 && input.UserPrefix == null && input.Users?.IsEmpty() == false)
+? "start"
+: "continue";
+		}
 		#endregion
 
 		#region Public Override Properties

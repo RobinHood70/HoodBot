@@ -6,7 +6,10 @@ namespace RobinHood70.WallE.Base
 	public class PrefixSearchInput : ILimitableInput, IGeneratorInput
 	{
 		#region Constructors
-		public PrefixSearchInput(string search) => this.Search = search;
+		public PrefixSearchInput(string search)
+		{
+			this.Search = search;
+		}
 		#endregion
 
 		#region Public Properties

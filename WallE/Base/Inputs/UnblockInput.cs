@@ -6,9 +6,15 @@ namespace RobinHood70.WallE.Base
 	public class UnblockInput
 	{
 		#region Constructors
-		public UnblockInput(long blockId) => this.Id = blockId;
+		public UnblockInput(long blockId)
+		{
+			this.Id = blockId;
+		}
 
-		public UnblockInput(string user) => this.User = user;
+		public UnblockInput(string user)
+		{
+			this.User = user;
+		}
 
 		private UnblockInput()
 		{

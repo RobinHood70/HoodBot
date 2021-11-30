@@ -6,9 +6,15 @@ namespace RobinHood70.WallE.Base
 	public class UserRightsInput
 	{
 		#region Constructors
-		public UserRightsInput(string user) => this.User = user;
+		public UserRightsInput(string user)
+		{
+			this.User = user;
+		}
 
-		public UserRightsInput(long userId) => this.UserId = userId;
+		public UserRightsInput(long userId)
+		{
+			this.UserId = userId;
+		}
 		#endregion
 
 		#region Public Properties

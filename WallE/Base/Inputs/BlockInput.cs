@@ -7,9 +7,15 @@ namespace RobinHood70.WallE.Base
 	public class BlockInput
 	{
 		#region Constructors
-		public BlockInput(string user) => this.User = user;
+		public BlockInput(string user)
+		{
+			this.User = user;
+		}
 
-		public BlockInput(long userId) => this.UserId = userId;
+		public BlockInput(long userId)
+		{
+			this.UserId = userId;
+		}
 		#endregion
 
 		#region Public Properties

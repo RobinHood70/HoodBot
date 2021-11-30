@@ -10,7 +10,10 @@
 		#endregion
 
 		#region Constructors
-		public PauseToken(PauseTokenSource source) => this.source = source;
+		public PauseToken(PauseTokenSource source)
+		{
+			this.source = source;
+		}
 		#endregion
 
 		#region Public Static Properties

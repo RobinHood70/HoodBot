@@ -30,7 +30,10 @@
 
 		#region Constructors
 		public PageJobLogger(Site site, string pageName, JobTypes typesToLog)
-			: base(typesToLog) => this.logTitle = TitleFactory.FromName(site.NotNull(nameof(site)), pageName.NotNull(nameof(pageName))).ToTitle();
+			: base(typesToLog)
+		{
+			this.logTitle = TitleFactory.FromName(site.NotNull(nameof(site)), pageName.NotNull(nameof(pageName))).ToTitle();
+		}
 		#endregion
 
 		#region Public Override Methods

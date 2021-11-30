@@ -18,7 +18,10 @@ namespace RobinHood70.WallE.Base
 	public class PagesWithPropertyInput : ILimitableInput, IGeneratorInput
 	{
 		#region Constructors
-		public PagesWithPropertyInput(string propertyName) => this.PropertyName = propertyName;
+		public PagesWithPropertyInput(string propertyName)
+		{
+			this.PropertyName = propertyName;
+		}
 		#endregion
 
 		#region Public Properties

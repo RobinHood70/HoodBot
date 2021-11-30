@@ -6,7 +6,10 @@ namespace RobinHood70.WallE.Base
 	public class CustomResult
 	{
 		#region Constructors
-		internal CustomResult(string? result) => this.Result = result;
+		internal CustomResult(string? result)
+		{
+			this.Result = result;
+		}
 		#endregion
 
 		#region Public Properties

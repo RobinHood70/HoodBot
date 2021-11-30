@@ -525,7 +525,7 @@
 			value.Before = string.Empty;
 			if (index > 0)
 			{
-				value.Before = titleText.Substring(0, index);
+				value.Before = titleText[..index];
 				titleText = titleText[index..];
 			}
 
@@ -539,7 +539,7 @@
 			if (index < titleText.Length)
 			{
 				value.After = titleText[index..];
-				titleText = titleText.Substring(0, index);
+				titleText = titleText[..index];
 			}
 
 			value.Value = titleText;

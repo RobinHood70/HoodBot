@@ -30,9 +30,15 @@ namespace RobinHood70.WallE.Base
 	public class CategoryMembersInput : ILimitableInput, IGeneratorInput
 	{
 		#region Constructors
-		public CategoryMembersInput(string title) => this.Title = title.NotNull(nameof(title));
+		public CategoryMembersInput(string title)
+		{
+			this.Title = title.NotNull(nameof(title));
+		}
 
-		public CategoryMembersInput(long pageId) => this.PageId = pageId;
+		public CategoryMembersInput(long pageId)
+		{
+			this.PageId = pageId;
+		}
 		#endregion
 
 		#region Public Properties
