@@ -43,7 +43,10 @@
 
 		/// <summary>Initializes a new instance of the <see cref="SiteCapabilities"/> class.</summary>
 		/// <param name="client">The <see cref="IMediaWikiClient"/> client to be used to access the site.</param>
-		public SiteCapabilities([NotNull] IMediaWikiClient? client) => this.client = client.NotNull(nameof(client));
+		public SiteCapabilities([NotNull] IMediaWikiClient? client)
+		{
+			this.client = client.NotNull(nameof(client));
+		}
 		#endregion
 
 		#region Public Properties
@@ -95,7 +98,7 @@
 		{
 			// TODO: Convert to use URIs and related objects instead of strings whenever possible.
 			this.Clear();
-			var fullHost = new UriBuilder(anyPage.NotNull(nameof(anyPage)).Scheme, anyPage.Host).Uri;
+			Uri fullHost = new UriBuilder(anyPage.NotNull(nameof(anyPage)).Scheme, anyPage.Host).Uri;
 			var tryPath = anyPage.AbsolutePath;
 			Uri? tryLoc = null;
 			var offset = tryPath.IndexOf("/index.php", StringComparison.Ordinal);
@@ -108,10 +111,10 @@
 			{
 				UriBuilder urib = new(fullHost)
 				{
-					Path = tryPath.Replace("index.php", "api.php", StringComparison.Ordinal).Substring(0, offset + 8)
+					Path = tryPath.Replace("index.php", "api.php", StringComparison.Ordinal)[..(offset + 8)]
 				};
 				tryLoc = urib.Uri;
-				tryPath = tryPath.Substring(0, offset + 1);
+				tryPath = tryPath[..(offset + 1)];
 			}
 
 			/* If it doesn't look like a php page or blank path, try various methods of figuring out the php locations. */
@@ -125,7 +128,7 @@
 			{
 				tryLoc = newLoc;
 				tryPath = tryLoc.OriginalString;
-				tryPath = tryPath.Substring(0, tryPath.LastIndexOf('/') + 1);
+				tryPath = tryPath[..(tryPath.LastIndexOf('/') + 1)];
 			}
 
 			if (tryLoc != null && this.TryApi(tryLoc, fullHost))
@@ -182,7 +185,7 @@
 				if (api.IsEnabled())
 				{
 					api.Initialize();
-					var general = api.AllSiteInfo?.General ?? throw new InvalidOperationException();
+					SiteInfoGeneral general = api.AllSiteInfo?.General ?? throw new InvalidOperationException();
 					this.Api = api.EntryPoint;
 					Uri? index = null;
 					if (!string.IsNullOrWhiteSpace(general.Script))
@@ -219,7 +222,7 @@
 
 		private Uri? GetUriFromPage(Uri fullHost, string pageData)
 		{
-			var rsdLink = FindRsdLink.Match(pageData);
+			Match rsdLink = FindRsdLink.Match(pageData);
 			if (rsdLink.Success)
 			{
 				var rsdLinkFixed = rsdLink.Groups["rsdlink"].Value;
@@ -236,8 +239,8 @@
 				XDocument? rsd = XDocument.Parse(rsdInfo);
 				if (rsd.Root is XElement root)
 				{
-					var ns = root.GetDefaultNamespace();
-					foreach (var descendant in rsd.Descendants(ns + "api"))
+					XNamespace ns = root.GetDefaultNamespace();
+					foreach (XElement descendant in rsd.Descendants(ns + "api"))
 					{
 						if (descendant.Attribute("preferred") is XAttribute preferredAttr && (bool)preferredAttr &&
 							descendant.Attribute("apiLink") is XAttribute apiLinkAttr && (string)apiLinkAttr is string linkText)
@@ -255,14 +258,14 @@
 			}
 			else
 			{
-				var foundScript = FindScript.Match(pageData);
+				Match foundScript = FindScript.Match(pageData);
 				if (foundScript.Success)
 				{
 					// Should occur only in 1.16
 					return new Uri(foundScript.Groups["serverpath"].Value + foundScript.Groups["scriptpath"].Value + "/api.php");
 				}
 
-				var foundPhpLink = FindPhpLink.Match(pageData);
+				Match foundPhpLink = FindPhpLink.Match(pageData);
 				if (foundPhpLink.Success)
 				{
 					var newUri = fullHost.ToString().TrimEnd(TextArrays.Slash) + '/';

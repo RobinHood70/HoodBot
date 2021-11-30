@@ -30,9 +30,15 @@ namespace RobinHood70.WallE.Base
 		{
 		}
 
-		public LogEventsInput(int ns) => this.Namespace = ns;
+		public LogEventsInput(int ns)
+		{
+			this.Namespace = ns;
+		}
 
-		public LogEventsInput(string title) => this.Title = title.NotNullOrWhiteSpace(nameof(title));
+		public LogEventsInput(string title)
+		{
+			this.Title = title.NotNullOrWhiteSpace(nameof(title));
+		}
 		#endregion
 
 		#region Public Properties

@@ -25,9 +25,15 @@ namespace RobinHood70.WallE.Base
 	public class UsersInput
 	{
 		#region Constructors
-		public UsersInput(IEnumerable<string> users) => this.Users = users;
+		public UsersInput(IEnumerable<string> users)
+		{
+			this.Users = users;
+		}
 
-		public UsersInput(IEnumerable<long> userIds) => this.UserIds = userIds.NotNullOrEmpty(nameof(userIds));
+		public UsersInput(IEnumerable<long> userIds)
+		{
+			this.UserIds = userIds.NotNullOrEmpty(nameof(userIds));
+		}
 		#endregion
 
 		#region Public Properties

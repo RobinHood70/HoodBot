@@ -22,7 +22,10 @@
 
 		/// <summary>Initializes a new instance of the <see cref="ResultHandler"/> class.</summary>
 		/// <param name="culture">The culture for the class. This controls localization of messages. If <see langword="null"/>, <see cref="CultureInfo.CurrentUICulture"/> will be used.</param>
-		protected ResultHandler(CultureInfo? culture) => this.Culture = culture ?? CultureInfo.CurrentUICulture;
+		protected ResultHandler(CultureInfo? culture)
+		{
+			this.Culture = culture ?? CultureInfo.CurrentUICulture;
+		}
 		#endregion
 
 		#region Public Properties

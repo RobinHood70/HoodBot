@@ -13,7 +13,10 @@
 		#region Constructors
 		[JobInfo("Bulk Delete Unused")]
 		public BulkDeleteUnused(JobManager jobManager)
-			: base(jobManager) => this.deleteTitles = new TitleCollection(this.Site);
+			: base(jobManager)
+		{
+			this.deleteTitles = new TitleCollection(this.Site);
+		}
 		#endregion
 
 		#region Public Override Properties

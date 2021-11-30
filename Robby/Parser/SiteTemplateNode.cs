@@ -19,7 +19,10 @@
 		/// <param name="title">The title.</param>
 		/// <param name="parameters">The parameters.</param>
 		public SiteTemplateNode(SiteNodeFactory factory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters)
-			: base(factory, title, parameters) => this.TitleValue = Robby.Title.Coerce(factory.NotNull(nameof(factory)).Site, MediaWikiNamespaces.Template, this.GetTitleText());
+			: base(factory, title, parameters)
+		{
+			this.TitleValue = Robby.Title.Coerce(factory.NotNull(nameof(factory)).Site, MediaWikiNamespaces.Template, this.GetTitleText());
+		}
 		#endregion
 
 		#region Public Properties

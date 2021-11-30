@@ -131,13 +131,13 @@
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
 		/// <returns><see langword="true"/> if string is equal to any of the names representing the namespace.</returns>
-		public static bool operator ==(Namespace? left, int right) => !(left is null) && left.Id == right;
+		public static bool operator ==(Namespace? left, int right) => left is not null && left.Id == right;
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
 		/// <param name="right">The right-hand side of the comparison.</param>
 		/// <returns><see langword="true"/> if string is equal to any of the names representing the namespace.</returns>
-		public static bool operator ==(int left, Namespace? right) => !(right is null) && left == right.Id;
+		public static bool operator ==(int left, Namespace? right) => right is not null && left == right.Id;
 
 		/// <summary>Implements the operator !=.</summary>
 		/// <param name="left">The left-hand side of the comparison.</param>
@@ -177,7 +177,7 @@
 		/// <param name="other">An object to compare with this object.</param>
 		/// <returns><see langword="true"/> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <see langword="false"/>.</returns>
 		public bool Equals(Namespace? other) =>
-			!(other is null) &&
+			other is not null &&
 			this.GetHashCode() == other.GetHashCode() &&
 			this.Id == other.Id &&
 			this.Site == other.Site;

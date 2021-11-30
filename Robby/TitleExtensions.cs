@@ -16,7 +16,7 @@
 		/// <param name="title">The title representing the page.</param>
 		/// <returns>The name of the base page.</returns>
 		public static string BasePageName(this ISimpleTitle title) => title.NotNull(nameof(title)).Namespace.AllowsSubpages && title.PageName.LastIndexOf('/') is var subPageLoc && subPageLoc > 0
-				? title.PageName.Substring(0, subPageLoc)
+				? title.PageName[..subPageLoc]
 				: title.PageName;
 
 		/// <summary>Gets the full page name of a title.</summary>
@@ -31,7 +31,7 @@
 			title.NotNull(nameof(title)).Namespace.AllowsSubpages &&
 			title.PageName.IndexOf('/', StringComparison.Ordinal) is var subPageLoc &&
 			subPageLoc >= 0
-				? title.PageName.Substring(0, subPageLoc)
+				? title.PageName[..subPageLoc]
 				: title.PageName;
 
 		/// <summary>Gets a Title object for title Title's corresponding subject page.</summary>

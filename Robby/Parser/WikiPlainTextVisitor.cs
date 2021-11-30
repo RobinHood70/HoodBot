@@ -18,7 +18,10 @@
 
 		/// <summary>Initializes a new instance of the <see cref="WikiPlainTextVisitor"/> class.</summary>
 		/// <param name="site">The site to use when resolving link nodes.</param>
-		public WikiPlainTextVisitor(Site site) => this.site = site.NotNull(nameof(site));
+		public WikiPlainTextVisitor(Site site)
+		{
+			this.site = site.NotNull(nameof(site));
+		}
 		#endregion
 
 		#region Public Methods

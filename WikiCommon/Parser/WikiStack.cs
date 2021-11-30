@@ -140,13 +140,13 @@
 		/// <returns>The <see cref="NodeCollection"/> representing the text provided in the constructor.</returns>
 		public IEnumerable<IWikiNode> GetNodes()
 		{
-			var finalNodes = this.array[0].CurrentPiece;
+			Piece finalNodes = this.array[0].CurrentPiece;
 			for (var i = 1; i < this.count; i++)
 			{
 				finalNodes.Merge(this.array[i].BreakSyntax());
 			}
 
-			foreach (var node in finalNodes)
+			foreach (IWikiNode node in finalNodes)
 			{
 				if (node is IHeaderNode hNode && !hNode.Confirmed)
 				{
@@ -182,7 +182,7 @@
 					}
 					else
 					{
-						var tagMatch = this.tagsRegex.Match(this.Text, this.Index + 1);
+						Match tagMatch = this.tagsRegex.Match(this.Text, this.Index + 1);
 						if (!tagMatch.Success || !this.FoundTag(tagMatch.Value))
 						{
 							this.Top.CurrentPiece.AddLiteral(this.NodeFactory, "<");
@@ -196,9 +196,9 @@
 					var countFound = this.Text.Span(found, this.Index);
 					if (countFound >= 2)
 					{
-						var element = found == '['
+						StackElement element = found == '['
 							? new LinkElement(this, countFound)
-							: new TemplateElement(this, countFound/*, this.Index > 0 && this.Text[this.Index - 1] == '\n'*/) as StackElement;
+							: new TemplateElement(this, countFound/*, this.Index > 0 && this.Text[this.Index - 1] == '\n'*/);
 						this.Push(element);
 					}
 					else
@@ -246,7 +246,7 @@
 		// Returns true if comment(s) are surrounded by NewLines, so caller knows whether to check for a possible header.
 		private bool FoundComment()
 		{
-			var piece = this.Top.CurrentPiece;
+			Piece piece = this.Top.CurrentPiece;
 			var endPos = this.Text.IndexOf("-->", this.Index + 4, StringComparison.Ordinal) + 3;
 			if (endPos == 2)
 			{
@@ -281,7 +281,7 @@
 					var lastValue = last.Text;
 					if (lastValue.SpanReverse(CommentWhiteSpace, lastValue.Length) == wsLength)
 					{
-						last.Text = lastValue.Substring(0, lastValue.Length - wsLength);
+						last.Text = lastValue[..^wsLength];
 					}
 				}
 
@@ -330,7 +330,7 @@
 		// Returns true if a valid tag was found.
 		private bool FoundTag(string tagOpen)
 		{
-			var piece = this.Top.CurrentPiece;
+			Piece piece = this.Top.CurrentPiece;
 			var attrStart = this.Index + tagOpen.Length + 1;
 			var tagEndPos = this.Text.IndexOf('>', attrStart);
 			if (tagEndPos == -1)
@@ -367,8 +367,8 @@
 				attrEnd = tagEndPos;
 				Regex findClosing = new("</" + tagOpen + @"\s*>", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 				var noClose = this.noMoreClosingTag.Contains(tagOpen);
-				var match = findClosing.Match(this.Text, tagEndPos + 1);
-				if (match is not null && match.Success && !noClose)
+				Match match = findClosing.Match(this.Text, tagEndPos + 1);
+				if (match.Success && !noClose)
 				{
 					inner = this.Text.Substring(tagEndPos + 1, match.Index - tagEndPos - 1);
 					tagClose = match.Value;

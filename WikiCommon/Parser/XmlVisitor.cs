@@ -22,7 +22,10 @@
 
 		/// <summary>Initializes a new instance of the <see cref="XmlVisitor"/> class.</summary>
 		/// <param name="prettyPrint">if set to <c>true</c> pretty printing is enabled, providing text that is indented and on separate lines, as needed.</param>
-		public XmlVisitor(bool prettyPrint) => this.prettyPrint = prettyPrint;
+		public XmlVisitor(bool prettyPrint)
+		{
+			this.prettyPrint = prettyPrint;
+		}
 		#endregion
 
 		#region Public Methods

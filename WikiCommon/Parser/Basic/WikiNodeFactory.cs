@@ -49,8 +49,8 @@
 
 			// Because we're not returning a NodeCollection, the default factory does everything we need here.
 			WikiNodeFactory factory = new();
-			var nodes = factory.Parse(value);
-			foreach (var node in nodes)
+			NodeCollection nodes = factory.Parse(value);
+			foreach (IWikiNode node in nodes)
 			{
 				if (node is TextNode textNode)
 				{
@@ -125,13 +125,13 @@
 		/// <returns>A new link node.</returns>
 		public ILinkNode LinkNodeFromParts(string title, IEnumerable<string>? parameters)
 		{
-			var titleNodes = this.Parse(title.NotNull(nameof(title)));
+			NodeCollection titleNodes = this.Parse(title.NotNull(nameof(title)));
 			List<IParameterNode> paramEntries = new();
 			if (parameters != null)
 			{
 				foreach (var parameter in parameters)
 				{
-					var paramNode = this.ParameterNodeFromParts(parameter);
+					IParameterNode paramNode = this.ParameterNodeFromParts(parameter);
 					paramEntries.Add(paramNode);
 				}
 			}
@@ -211,7 +211,7 @@
 		public T SingleNode<T>(string text, [CallerMemberName] string callerName = "<Unknown>")
 			where T : IWikiNode
 		{
-			var nodes = this.Parse(text);
+			NodeCollection nodes = this.Parse(text);
 			return nodes.Count == 1 && nodes[0] is T node
 				? node
 				: throw new ArgumentException(paramName: nameof(text), message: Globals.CurrentCulture(Resources.MalformedNodeText, this.GetType().Name, callerName));
@@ -317,7 +317,7 @@
 			if (parameters != null)
 			{
 				var addTrailingLine = false;
-				foreach (var (name, value) in parameters)
+				foreach ((var name, var value) in parameters)
 				{
 					if (onePerLine)
 					{
@@ -417,7 +417,7 @@
 
 				if (startLength > 0)
 				{
-					value = textValue.Substring(0, startLength) + value;
+					value = string.Concat(textValue.AsSpan(0, startLength), value);
 				}
 			}
 

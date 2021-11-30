@@ -666,7 +666,10 @@
 		private sealed class ProtectedTitle : Title
 		{
 			public ProtectedTitle(ISimpleTitle title, PageProtection protection)
-				: base(title) => this.Protection = protection;
+				: base(title)
+			{
+				this.Protection = protection;
+			}
 
 			public PageProtection Protection { get; }
 		}

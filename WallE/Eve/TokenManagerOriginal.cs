@@ -12,7 +12,10 @@
 		#endregion
 
 		#region Constructors
-		public TokenManagerOriginal(WikiAbstractionLayer wal) => this.Wal = wal;
+		public TokenManagerOriginal(WikiAbstractionLayer wal)
+		{
+			this.Wal = wal;
+		}
 		#endregion
 
 		#region Protected Static Properties

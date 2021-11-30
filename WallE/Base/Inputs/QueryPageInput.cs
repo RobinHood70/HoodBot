@@ -7,7 +7,10 @@ namespace RobinHood70.WallE.Base
 	public class QueryPageInput : ILimitableInput, IGeneratorInput
 	{
 		#region Constructors
-		public QueryPageInput(string page) => this.Page = page.NotNullOrWhiteSpace(nameof(page));
+		public QueryPageInput(string page)
+		{
+			this.Page = page.NotNullOrWhiteSpace(nameof(page));
+		}
 		#endregion
 
 		#region Public Properties

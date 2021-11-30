@@ -4,7 +4,10 @@ namespace RobinHood70.WallE.Base
 	public class ResetPasswordInput
 	{
 		#region Constructors
-		public ResetPasswordInput(string user) => this.User = user;
+		public ResetPasswordInput(string user)
+		{
+			this.User = user;
+		}
 
 		private ResetPasswordInput()
 		{

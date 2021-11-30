@@ -66,7 +66,7 @@
 				normalizedName = name.Replace(' ', '_');
 				if (char.IsUpper(normalizedName[0]))
 				{
-					normalizedName = normalizedName.Substring(0, 1).ToLower(ci) + (name.Length > 1 ? name[1..] : string.Empty);
+					normalizedName = normalizedName[..1].ToLower(ci) + (name.Length > 1 ? name[1..] : string.Empty);
 				}
 			}
 

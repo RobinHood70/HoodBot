@@ -16,7 +16,10 @@
 
 		/// <summary>Initializes a new instance of the <see cref="CommentNode"/> class.</summary>
 		/// <param name="comment">The comment.</param>
-		public CommentNode(string comment) => this.Comment = comment;
+		public CommentNode(string comment)
+		{
+			this.Comment = comment;
+		}
 		#endregion
 
 		#region Public Properties

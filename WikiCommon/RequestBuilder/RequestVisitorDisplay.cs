@@ -15,7 +15,10 @@
 		#endregion
 
 		#region Constructors
-		private RequestVisitorDisplay(StringBuilder builder) => this.builder = builder;
+		private RequestVisitorDisplay(StringBuilder builder)
+		{
+			this.builder = builder;
+		}
 		#endregion
 
 		#region IParameterVisitor Methods

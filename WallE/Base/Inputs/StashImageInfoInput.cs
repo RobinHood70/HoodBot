@@ -30,7 +30,10 @@ namespace RobinHood70.WallE.Base
 	public class StashImageInfoInput : IPropertyInput
 	{
 		#region Constructors
-		public StashImageInfoInput(IEnumerable<string> fileKeys) => this.FileKeys = fileKeys;
+		public StashImageInfoInput(IEnumerable<string> fileKeys)
+		{
+			this.FileKeys = fileKeys;
+		}
 		#endregion
 
 		#region Public Properties

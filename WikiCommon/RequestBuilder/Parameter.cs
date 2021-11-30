@@ -10,7 +10,10 @@
 
 		/// <summary>Initializes a new instance of the <see cref="Parameter" /> class.</summary>
 		/// <param name="name">The parameter name.</param>
-		protected Parameter(string name) => this.Name = name.NotNull(nameof(name));
+		protected Parameter(string name)
+		{
+			this.Name = name.NotNull(nameof(name));
+		}
 		#endregion
 
 		#region Public Properties

@@ -9,7 +9,10 @@
 		#endregion
 
 		#region Constructors
-		protected StackElement(WikiStack stack) => this.Stack = stack;
+		protected StackElement(WikiStack stack)
+		{
+			this.Stack = stack;
+		}
 		#endregion
 
 		#region Internal Abstract Properties

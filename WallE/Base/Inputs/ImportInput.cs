@@ -15,9 +15,15 @@ namespace RobinHood70.WallE.Base
 		{
 		}
 
-		public ImportInput(int ns) => this.Namespace = ns;
+		public ImportInput(int ns)
+		{
+			this.Namespace = ns;
+		}
 
-		public ImportInput(string rootPage) => this.RootPage = rootPage.NotNullOrWhiteSpace(nameof(rootPage));
+		public ImportInput(string rootPage)
+		{
+			this.RootPage = rootPage.NotNullOrWhiteSpace(nameof(rootPage));
+		}
 		#endregion
 
 		#region Public Properties

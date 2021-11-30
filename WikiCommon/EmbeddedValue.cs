@@ -95,7 +95,7 @@
 				if (index < value.Length)
 				{
 					after = value[index..];
-					value = value.Substring(0, index);
+					value = value[..index];
 				}
 
 				for (index = 0; index < value.Length && char.IsWhiteSpace(value[index]); index++)
@@ -104,7 +104,7 @@
 
 				if (index > 0)
 				{
-					before = value.Substring(0, index);
+					before = value[..index];
 					value = value[index..];
 				}
 			}

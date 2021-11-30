@@ -19,7 +19,10 @@ namespace RobinHood70.WallE.Base
 				  groups: baseUser.Groups,
 				  implicitGroups: baseUser.ImplicitGroups,
 				  registration: baseUser.Registration,
-				  rights: baseUser.Rights) => this.RecentActions = recentActions;
+				  rights: baseUser.Rights)
+		{
+			this.RecentActions = recentActions;
+		}
 		#endregion
 
 		#region Public Properties

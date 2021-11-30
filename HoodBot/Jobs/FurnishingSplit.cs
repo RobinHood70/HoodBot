@@ -99,7 +99,7 @@
 			var extension = pageName.LastIndexOf('.');
 			if (extension >= 0)
 			{
-				pageName = pageName.Substring(0, extension);
+				pageName = pageName[..extension];
 			}
 
 			return TitleFactory.Direct(page.Namespace.Site, UespNamespaces.Online, pageName);

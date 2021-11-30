@@ -13,7 +13,10 @@
 
 		/// <summary>Initializes a new instance of the <see cref="UserInfo"/> class.</summary>
 		/// <param name="emailable">Whether the user is emailable or not.</param>
-		public UserInfo(bool emailable) => this.Emailable = emailable;
+		public UserInfo(bool emailable)
+		{
+			this.Emailable = emailable;
+		}
 
 		/// <summary>Initializes a new instance of the <see cref="UserInfo"/> class.</summary>
 		/// <param name="site">The site the user is on.</param>

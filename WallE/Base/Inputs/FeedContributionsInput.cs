@@ -7,7 +7,10 @@ namespace RobinHood70.WallE.Base
 	public class FeedContributionsInput
 	{
 		#region Constructors
-		public FeedContributionsInput(string user) => this.User = user.NotNullOrWhiteSpace(nameof(user));
+		public FeedContributionsInput(string user)
+		{
+			this.User = user.NotNullOrWhiteSpace(nameof(user));
+		}
 		#endregion
 
 		#region Public Properties

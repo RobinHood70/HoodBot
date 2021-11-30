@@ -10,7 +10,10 @@
 
 		/// <summary>Initializes a new instance of the <see cref="RequestEventArgs" /> class.</summary>
 		/// <param name="request">The request object being submitted.</param>
-		public RequestEventArgs(Request request) => this.Request = request;
+		public RequestEventArgs(Request request)
+		{
+			this.Request = request;
+		}
 		#endregion
 
 		#region Public Properties

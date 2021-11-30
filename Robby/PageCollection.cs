@@ -53,7 +53,10 @@
 		/// <param name="result">The result set.</param>
 		/// <remarks>Note that this does <em>not</em> populate the collection itself, leaving that to the caller, since IPageSetResult does not provide enough information to do so.</remarks>
 		public PageCollection(Site site, IPageSetResult result)
-			: this(site) => this.PopulateMapCollections(result.NotNull(nameof(result)));
+			: this(site)
+		{
+			this.PopulateMapCollections(result.NotNull(nameof(result)));
+		}
 		#endregion
 
 		#region Public Events

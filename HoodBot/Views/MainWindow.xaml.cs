@@ -6,7 +6,10 @@
 	public partial class MainWindow : Window
 	{
 		#region Constructors
-		public MainWindow() => this.InitializeComponent();
+		public MainWindow()
+		{
+			this.InitializeComponent();
+		}
 		#endregion
 	}
 }

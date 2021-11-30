@@ -12,14 +12,20 @@ namespace RobinHood70.WallE.Base
 		/// <param name="pageSetInput">Page set information.</param>
 		/// <param name="propertyModules">Property modules to use.</param>
 		public QueryInput(QueryPageSetInput pageSetInput, IEnumerable<IPropertyModule> propertyModules)
-			: base(pageSetInput) => this.PropertyModules.AddRange(propertyModules);
+			: base(pageSetInput)
+		{
+			this.PropertyModules.AddRange(propertyModules);
+		}
 
 		/// <summary>Initializes a new instance of the <see cref="QueryInput" /> class for combining multiple standard query modules with a pageset query module.</summary>
 		/// <param name="pageSetInput">Page set information.</param>
 		/// <param name="propertyModules">Property modules to use.</param>
 		/// <param name="queryModules">Query modules to use.</param>
 		public QueryInput(QueryPageSetInput pageSetInput, IEnumerable<IPropertyModule> propertyModules, IEnumerable<IQueryModule> queryModules)
-			: this(pageSetInput, propertyModules) => this.QueryModules.AddRange(queryModules);
+			: this(pageSetInput, propertyModules)
+		{
+			this.QueryModules.AddRange(queryModules);
+		}
 
 		internal QueryInput(QueryInput input)
 			: base(input)

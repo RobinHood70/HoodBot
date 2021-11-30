@@ -10,7 +10,10 @@
 	{
 		[JobInfo("Manipulate Image Category")]
 		public ManipulateImageCategory(JobManager jobManager)
-			: base(jobManager) => this.Results = new PageResultHandler(this.Site, "User:Jeancey/Kah");
+			: base(jobManager)
+		{
+			this.Results = new PageResultHandler(this.Site, "User:Jeancey/Kah");
+		}
 
 		protected override void Main()
 		{

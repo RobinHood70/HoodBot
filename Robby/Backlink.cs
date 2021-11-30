@@ -10,7 +10,10 @@
 		/// <param name="title">The original page.</param>
 		/// <param name="redirectTitle">The title the redirect points to.</param>
 		internal Backlink(ISimpleTitle title, Title redirectTitle)
-			: base(title) => this.RedirectTitle = redirectTitle;
+			: base(title)
+		{
+			this.RedirectTitle = redirectTitle;
+		}
 
 		/// <summary>Gets the title of the redirect page that links to this page.</summary>
 		/// <value>The title of the redirect page that links to this page.</value>

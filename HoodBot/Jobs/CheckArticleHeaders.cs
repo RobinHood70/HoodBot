@@ -27,7 +27,10 @@
 
 		[JobInfo("Check Article Headers", "Maintenance|")]
 		public CheckArticleHeaders(JobManager jobManager)
-			: base(jobManager) => this.ns = UespNamespaces.Online;
+			: base(jobManager)
+		{
+			this.ns = UespNamespaces.Online;
+		}
 
 		protected override void Main()
 		{

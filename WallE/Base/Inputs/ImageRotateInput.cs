@@ -7,19 +7,34 @@ namespace RobinHood70.WallE.Base
 	{
 		#region Constructors
 		public ImageRotateInput(IEnumerable<string> titles, int rotation)
-			: base(titles) => this.Rotation = rotation;
+			: base(titles)
+		{
+			this.Rotation = rotation;
+		}
 
 		public ImageRotateInput(IGeneratorInput generatorInput, int rotation)
-			: base(generatorInput) => this.Rotation = rotation;
+			: base(generatorInput)
+		{
+			this.Rotation = rotation;
+		}
 
 		public ImageRotateInput(IGeneratorInput generatorInput, IEnumerable<string> titles, int rotation)
-			: base(generatorInput, titles) => this.Rotation = rotation;
+			: base(generatorInput, titles)
+		{
+			this.Rotation = rotation;
+		}
 
 		protected ImageRotateInput(IEnumerable<long> ids, ListType listType, int rotation)
-			: base(ids, listType) => this.Rotation = rotation;
+			: base(ids, listType)
+		{
+			this.Rotation = rotation;
+		}
 
 		protected ImageRotateInput(IGeneratorInput generatorInput, IEnumerable<long> ids, ListType listType, int rotation)
-			: base(generatorInput, ids, listType) => this.Rotation = rotation;
+			: base(generatorInput, ids, listType)
+		{
+			this.Rotation = rotation;
+		}
 		#endregion
 
 		#region Public Properties

@@ -17,7 +17,10 @@ namespace RobinHood70.WallE.Eve.Modules
 	public abstract class ActionModule : IModule
 	{
 		#region Constructors
-		protected ActionModule(WikiAbstractionLayer wal) => this.Wal = wal.NotNull(nameof(wal));
+		protected ActionModule(WikiAbstractionLayer wal)
+		{
+			this.Wal = wal.NotNull(nameof(wal));
+		}
 		#endregion
 
 		#region Public Abstract Properties

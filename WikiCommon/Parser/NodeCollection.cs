@@ -23,13 +23,19 @@
 
 		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
 		/// <param name="factory">The factory to use to create new nodes.</param>
-		public NodeCollection(IWikiNodeFactory factory) => this.Factory = factory.NotNull(nameof(factory));
+		public NodeCollection(IWikiNodeFactory factory)
+		{
+			this.Factory = factory.NotNull(nameof(factory));
+		}
 
 		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
 		/// <param name="factory">The factory to use to create new nodes.</param>
 		/// <param name="nodes">The nodes to initialize the collection with.</param>
 		public NodeCollection(IWikiNodeFactory factory, IEnumerable<IWikiNode> nodes)
-			: base(nodes) => this.Factory = factory.NotNull(nameof(factory));
+			: base(nodes)
+		{
+			this.Factory = factory.NotNull(nameof(factory));
+		}
 		#endregion
 
 		#region Public Properties
@@ -153,9 +159,9 @@
 
 				if (recursive && this[index] is IParentNode parent)
 				{
-					foreach (var childCollection in parent.NodeCollections)
+					foreach (NodeCollection childCollection in parent.NodeCollections)
 					{
-						foreach (var value in childCollection.FindAll(condition, reverse, recursive, 0))
+						foreach (T value in childCollection.FindAll(condition, reverse, recursive, 0))
 						{
 							yield return value;
 						}
@@ -241,7 +247,7 @@
 				}
 				else if (recursive && this[i] is IParentNode parent)
 				{
-					foreach (var childCollection in parent.NodeCollections)
+					foreach (NodeCollection childCollection in parent.NodeCollections)
 					{
 						childCollection.MergeText(recursive);
 					}
@@ -270,10 +276,10 @@
 			replaceMethod.ThrowNull(nameof(replaceMethod));
 			for (var i = 0; i < this.Count; i++)
 			{
-				var currentNode = this[i];
+				IWikiNode currentNode = this[i];
 				if (currentNode is IParentNode parent)
 				{
-					foreach (var childCollection in parent.NodeCollections)
+					foreach (NodeCollection childCollection in parent.NodeCollections)
 					{
 						childCollection.Replace(replaceMethod, searchReplacements);
 					}

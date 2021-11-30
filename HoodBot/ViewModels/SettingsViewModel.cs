@@ -19,7 +19,10 @@
 		#endregion
 
 		#region Constructors
-		public SettingsViewModel() => this.MessengerInstance.Register<SettingsParameters>(this, this.Initialize);
+		public SettingsViewModel()
+		{
+			this.MessengerInstance.Register<SettingsParameters>(this, this.Initialize);
+		}
 		#endregion
 
 		#region Public Commands
