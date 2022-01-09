@@ -32,6 +32,8 @@
 		protected Action<EditJob, Page>? EditConflictAction { get; set; }
 
 		protected IDictionary<ISimpleTitle, SaveInfo> SaveInfo { get; } = new Dictionary<ISimpleTitle, SaveInfo>(SimpleTitleEqualityComparer.Instance);
+
+		protected bool Shuffle { get; set; }
 		#endregion
 
 		#region Protected Methods
@@ -88,7 +90,15 @@
 			else
 			{
 				this.EditConflictAction = editConflictAction;
-				pages.Sort(NaturalTitleComparer.Instance);
+				if (this.Shuffle)
+				{
+					pages.Shuffle();
+				}
+				else
+				{
+					pages.Sort(NaturalTitleComparer.Instance);
+				}
+
 				this.Progress = 0;
 				this.ProgressMaximum = pages.Count;
 				foreach (var page in pages)
