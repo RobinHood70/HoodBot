@@ -1,5 +1,10 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System.Collections.Generic;
+	using Ardalis.GuardClauses;
+	using RobinHood70.CommonCode;
+	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
@@ -10,23 +15,64 @@
 		public OneOffParseJob(JobManager jobManager)
 			: base(jobManager)
 		{
+#if DEBUG
+			this.Shuffle = true;
+#endif
 		}
 		#endregion
 
 		#region Protected Override Properties
-		protected override string EditSummary => "Add explicit header";
+		protected override string EditSummary => "Convert Mod Header to CC Header";
 		#endregion
 
 		#region Protected Override Methods
-		protected override void LoadPages() => this.Pages.GetBacklinks("Template:Similar Images");
+		protected override void Main()
+		{
+			this.Pages.Shuffle();
+			base.Main();
+		}
+
+		protected override void LoadPages()
+		{
+			var templates = new TitleCollection(this.Site);
+			var catPages = new TitleCollection(this.Site);
+			var hashset = new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance);
+			templates.GetBacklinks("Template:Mod Header");
+			catPages.GetCategoryMembers("Category:Skyrim-Creation Club", true);
+			hashset.UnionWith(templates);
+			hashset.IntersectWith(catPages);
+			this.Pages.GetTitles(hashset);
+		}
 
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
-			var templateIndex = parsedPage.Nodes.FindIndex<SiteTemplateNode>(t => t.TitleValue.PageNameEquals("Similar Images"));
-			IHeaderNode? header = parsedPage.Nodes.Find<IHeaderNode>(h => string.Equals(h.GetInnerText(true), "Similar Iamges", System.StringComparison.Ordinal));
-			if (header == null)
+			Guard.Against.Null(parsedPage, nameof(parsedPage));
+			var nodes = parsedPage.Nodes;
+			var count = 0;
+			for (var nodeIndex = nodes.Count - 1; nodeIndex >= 0; nodeIndex--)
 			{
-				parsedPage.Nodes.Insert(templateIndex, parsedPage.Factory.TextNode("== Similar Images ==\n"));
+				if (nodes[nodeIndex] is SiteTemplateNode template &&
+					template.TitleValue.PageNameEquals("Mod Header") &&
+					template.FindNumberedIndex(1) is var paramIndex &&
+					paramIndex >= 0)
+				{
+					template.Title.Clear();
+					template.Title.AddText("CC Header");
+					template.Remove("ns_base");
+					if (string.Equals(template.Parameters[paramIndex].Value.ToRaw(), "Creation Club", System.StringComparison.Ordinal))
+					{
+						if (count == 0)
+						{
+							template.Parameters.RemoveAt(paramIndex);
+						}
+						else
+						{
+							nodes.RemoveAt(nodeIndex);
+						}
+					}
+
+					count++;
+				}
 			}
 		}
 		#endregion
