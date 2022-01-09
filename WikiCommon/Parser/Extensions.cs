@@ -5,9 +5,31 @@
 	using System.ComponentModel;
 	using System.Globalization;
 	using System.Text.RegularExpressions;
+	using Ardalis.GuardClauses;
 	using RobinHood70.CommonCode;
 
-	/// <summary>Class Extensions.</summary>
+	#region Public Enumerations
+
+	/// <summary>The format to use when adding new parameters or reformatting existing ones.</summary>
+	public enum ParameterFormat
+	{
+		/// <summary>Parameter values will not be changed.</summary>
+		NoChange,
+
+		/// <summary>Remove all trailing whitespace.</summary>
+		PackedTrail,
+
+		/// <summary>Remove all leading and trailing whitespace.</summary>
+		Packed,
+
+		/// <summary>Change trailing space to a single carriage return.</summary>
+		OnePerLine,
+
+		/// <summary>Replace leading and trailing space with the spacing from the previous parameter of the same type.</summary>
+		Copy,
+	}
+	#endregion
+
 	public static class Extensions
 	{
 		#region Fields
@@ -149,20 +171,22 @@
 		/// <param name="name">The name of the parameter to add.</param>
 		/// <param name="value">The value of the parameter to add.</param>
 		/// <returns>The added parameter.</returns>
-		public static IParameterNode Add(this ITemplateNode template, string name, string value) => template.Add(name, value, true);
+		public static IParameterNode Add(this ITemplateNode template, string name, string value) => template.Add(name, value, ParameterFormat.Copy);
 
 		/// <summary>Adds a new parameter to the template. Optionally, copies the format of the previous named parameter, if there is one, then adds the parameter after it.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <param name="name">The name of the parameter to add.</param>
 		/// <param name="value">The value of the parameter to add.</param>
-		/// <param name="copyFormat">Whether to copy the format of the previous parameter or use the values as provided.</param>
+		/// <param name="paramFormat">The type of formatting to apply to the parameter value.</param>
 		/// <returns>The added parameter.</returns>
 		/// <exception cref="InvalidOperationException">Thrown when the parameter is not found.</exception>
-		public static IParameterNode Add(this ITemplateNode template, string name, string value, bool copyFormat)
+		public static IParameterNode Add(this ITemplateNode template, string name, string value, ParameterFormat paramFormat)
 		{
-			template.ThrowNull(nameof(template));
+			Guard.Against.Null(template, nameof(template));
 			IParameterNode retval;
-			var index = copyFormat ? template.FindCopyParameter(false) : -1;
+			value = FormatValue(value, paramFormat);
+
+			var index = paramFormat == ParameterFormat.Copy ? template.FindCopyParameter(false) : -1;
 			if (index != -1)
 			{
 				if (template.Find(name) != null)
@@ -170,7 +194,7 @@
 					throw new InvalidOperationException(Globals.CurrentCulture(Properties.Resources.ParameterExists, name));
 				}
 
-				var previous = template.Parameters[index];
+				IParameterNode previous = template.Parameters[index];
 				retval = template.Factory.ParameterNodeFromOther(previous, name, value);
 				template.Parameters.Insert(index + 1, retval);
 			}
@@ -187,21 +211,23 @@
 		/// <param name="template">The template to work on.</param>
 		/// <param name="value">The value of the parameter to add.</param>
 		/// <returns>The added parameter.</returns>
-		public static IParameterNode Add(this ITemplateNode template, string value) => template.Add(value, true);
+		public static IParameterNode Add(this ITemplateNode template, string value) => template.Add(value, ParameterFormat.Copy);
 
 		/// <summary>Adds a new anonymous parameter to the template. Copies the format of the last anonymous parameter, if there is one, then adds the parameter after it.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <param name="value">The value of the parameter to add.</param>
-		/// <param name="copyFormat">Whether to copy the format of the previous parameter or use the values as provided.</param>
+		/// <param name="paramFormat">The type of formatting to apply to the parameter value.</param>
 		/// <returns>The added parameter.</returns>
-		public static IParameterNode Add(this ITemplateNode template, string value, bool copyFormat)
+		public static IParameterNode Add(this ITemplateNode template, string value, ParameterFormat paramFormat)
 		{
-			template.ThrowNull(nameof(template));
+			Guard.Against.Null(template, nameof(template));
 			IParameterNode retval;
-			var index = copyFormat ? template.FindCopyParameter(true) : -1;
+			value = FormatValue(value, paramFormat);
+
+			var index = paramFormat == ParameterFormat.Copy ? template.FindCopyParameter(true) : -1;
 			if (index != -1)
 			{
-				var previous = template.Parameters[index];
+				IParameterNode previous = template.Parameters[index];
 				retval = template.Factory.ParameterNodeFromOther(previous, value);
 				template.Parameters.Insert(index + 1, retval);
 			}
@@ -762,6 +788,21 @@
 			}
 
 			return -1;
+		}
+
+		private static string FormatValue(string value, ParameterFormat paramFormat)
+		{
+			value ??= string.Empty;
+			value = paramFormat switch
+			{
+				ParameterFormat.NoChange => value,
+				ParameterFormat.PackedTrail => value.TrimEnd(),
+				ParameterFormat.Packed => value.Trim(),
+				ParameterFormat.OnePerLine => value.TrimEnd() + '\n',
+				ParameterFormat.Copy => value.Trim(),
+				_ => value,
+			};
+			return value;
 		}
 
 		private static (string Leading, string Trailing) GetSurroundingSpace(string old)
