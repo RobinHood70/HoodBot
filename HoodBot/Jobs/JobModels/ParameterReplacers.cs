@@ -139,6 +139,10 @@
 
 		protected void FullPageNameFirst(Page page, SiteTemplateNode template) => this.FullPageNameReplace(page, template.Find(1));
 
+		protected void FurnishingLink(Page page, SiteTemplateNode template) => this.FurnishingLinkReplace(template.Find(1));
+
+		protected void FurnishingGeneralEntry(Page page, SiteTemplateNode template) => this.FurnishingLinkReplace(template.Find("page"));
+
 		protected void GameBookGeneral(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find("lorename"), UespNamespaces.Lore);
 
 		protected void GenericIcon(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find("icon"), MediaWikiNamespaces.File);
@@ -159,7 +163,7 @@
 		#region Private Methods
 		private void AddAllReplacers()
 		{
-			this.AddGeneralReplacers(this.GenericIcon, this.GenericImage);
+			// this.AddGeneralReplacers(this.GenericIcon, this.GenericImage);
 			this.AddTemplateReplacers("Basic NPC Summary", this.BasicNpc);
 			this.AddTemplateReplacers("Book Link", this.LoreFirst);
 			this.AddTemplateReplacers("Bullet Link", this.BulletLink);
@@ -167,6 +171,11 @@
 			this.AddTemplateReplacers("Cite Book", this.LoreFirst);
 			this.AddTemplateReplacers("Edit Link", this.FullPageNameFirst);
 			this.AddTemplateReplacers("ESO Set List", this.PageNameAllNumeric);
+			this.AddTemplateReplacers("Furnishing Crafting Entry", this.FurnishingLink);
+			this.AddTemplateReplacers("Furnishing Link", this.FurnishingLink);
+			this.AddTemplateReplacers("Furnishing Luxury Entry", this.FurnishingLink);
+			this.AddTemplateReplacers("Furnishing Recipe Link", this.FurnishingLink);
+			this.AddTemplateReplacers("Furnishing Recipe Short", this.FurnishingLink);
 			this.AddTemplateReplacers("Lore Link", this.LoreFirst);
 			this.AddTemplateReplacers("Game Book", this.GameBookGeneral);
 			this.AddTemplateReplacers("NPC Summary", this.NpcSummary);
@@ -185,6 +194,29 @@
 				&& replacement.To is ISimpleTitle toLink)
 			{
 				param.SetValue(toLink.FullPageName());
+			}
+		}
+
+		private void FurnishingLinkReplace(IParameterNode? param)
+		{
+			if (param != null)
+			{
+				var name = "ON-furnishing-" + param.Value.ToValue() + ".jpg";
+				if (TitleFactory.Direct(this.job.Site, MediaWikiNamespaces.File, name).ToTitle() is var title
+					&& this.replacements.TryGetValue(title, out var replacement)
+					&& replacement.To is ISimpleTitle toLink)
+				{
+					param.SetValue(toLink.PageName);
+					return;
+				}
+
+				name = "ON-item-furnishing-" + param.Value.ToValue() + ".jpg";
+				if (TitleFactory.Direct(this.job.Site, MediaWikiNamespaces.File, name).ToTitle() is var title2
+					&& this.replacements.TryGetValue(title2, out var replacement2)
+					&& replacement2.To is ISimpleTitle toLink2)
+				{
+					param.SetValue(toLink2.PageName);
+				}
 			}
 		}
 
