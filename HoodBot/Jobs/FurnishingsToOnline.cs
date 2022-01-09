@@ -3,9 +3,12 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.IO;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
+	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
@@ -41,45 +44,135 @@
 		private static readonly Regex OtherMat = new(@"\s*(?<material>.*?)\s*\((?<count>\d+)\)", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		#endregion
 
+		#region Fields
+		private readonly PageCollection filePages;
+		private readonly Dictionary<ISimpleTitle, string> nameLookup = new(SimpleTitleEqualityComparer.Instance);
+		#endregion
+
 		#region Constructors
 		[JobInfo("Furnishings to Online")]
 		public FurnishingsToOnline(JobManager jobManager)
 			: base(jobManager)
 		{
+			this.filePages = new PageCollection(this.Site);
 		}
 		#endregion
 
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
-			PageCollection files = new(this.Site);
-			files.PageLoaded += FilesPageLoaded;
-			files.GetBacklinks("Template:Furnishing Summary", BacklinksTypes.EmbeddedIn);
-			files.PageLoaded -= FilesPageLoaded;
-
-			foreach (var item in Unknowns)
+			File.Delete(UespSite.GetBotDataFolder("Furnishing Moves.txt"));
+			var oldTitles = new TitleCollection(this.Site, this.Pages);
+			oldTitles.GetBacklinks("Template:Furnishing Summary", BacklinksTypes.EmbeddedIn);
+			var newTitles = new TitleCollection(this.Site);
+			var reverse = new Dictionary<ISimpleTitle, ISimpleTitle>();
+			foreach (var title in oldTitles)
 			{
-				Debug.WriteLine(item);
+				var pageName = title.PageName
+					.Replace("ON-", string.Empty, StringComparison.Ordinal)
+					.Replace("furnishing-", string.Empty, StringComparison.Ordinal)
+					.Replace("item-", string.Empty, StringComparison.Ordinal)
+					.Replace(".jpg", string.Empty, StringComparison.Ordinal)
+					.Replace(".png", string.Empty, StringComparison.Ordinal);
+				if (pageName.EndsWith(')'))
+				{
+					Debug.WriteLine("Disambiguation: " + title.FullPageName());
+				}
+
+				this.nameLookup.Add(title, pageName);
+				var newTitle = Title.Coerce(this.Site, UespNamespaces.Online, pageName);
+				newTitles.Add(newTitle);
+				reverse.Add(newTitle, title);
+			}
+
+			var newPages = newTitles.Load(PageModules.Info);
+			newPages.Sort();
+			foreach (var page in newPages)
+			{
+				if (page.Exists)
+				{
+					var filePage = reverse[page];
+					this.nameLookup[filePage] += " (furnishing)";
+				}
+			}
+
+			PageCollection files = new(this.Site);
+			files.PageLoaded += this.FilesPageLoaded;
+			files.GetBacklinks("Template:Furnishing Summary", BacklinksTypes.EmbeddedIn);
+			files.PageLoaded -= this.FilesPageLoaded;
+
+			if (Unknowns.Count > 0)
+			{
+				foreach (var item in Unknowns)
+				{
+					Debug.WriteLine(item);
+				}
+
+				throw new InvalidOperationException();
 			}
 		}
 
-		protected override void Main() => this.SavePages("Create Furniture Summary page", false, FilesPageLoaded);
+		protected override void Main()
+		{
+			this.StatusWriteLine("Creating Pages");
+			this.Pages.RemoveChanged(false);
+			this.SavePages("Create Furniture Summary page", false, this.FilesPageLoaded);
+
+			SaveInfo fileSaveInfo = new("Check for Existing Furnishings", true);
+			this.filePages.RemoveChanged(false);
+			this.SavePages(this.filePages, "Removing Furnishing Summaries", fileSaveInfo, null);
+		}
+		#endregion
+
+		#region Private Static Methods
+		private static string RemoveTemplate(NodeCollection nodes, int templateIndex)
+		{
+			nodes.RemoveAt(templateIndex);
+			var placeHolder = nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals("Placeholder"));
+			if (placeHolder != -1)
+			{
+				nodes.RemoveAt(placeHolder);
+				nodes.Insert(0, nodes.Factory.TextNode("<noinclude>{{Prod|Unneeded Placeholder|bot=1}}\n</noinclude>"));
+			}
+
+			var text = nodes.ToRaw();
+			return Regex.Replace(text, @"==\s*Summary\s*==\s*\n(?===|\Z|\[\[Category:)", string.Empty, RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		}
 		#endregion
 
 		#region Private Methods
-		private static void FilesPageLoaded(object sender, Page page)
+		private void FilesPageLoaded(object sender, Page page)
 		{
+			if (page.Namespace != MediaWikiNamespaces.File || page.PageName.Contains("-crown store-", StringComparison.Ordinal))
+			{
+				return;
+			}
+
 			ContextualParser originalParser = new(page);
 			SortedDictionary<string, string> skills = new(StringComparer.Ordinal);
 			SortedDictionary<string, string> materials = new(StringComparer.Ordinal);
-			if (originalParser.FindTemplate("Furnishing Summary") is SiteTemplateNode originalTemplate)
+			var templateIndex = originalParser.Nodes.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("Furnishing Summary"));
+			if (templateIndex > -1)
 			{
+				SiteTemplateNode originalTemplate = (SiteTemplateNode)originalParser.Nodes[templateIndex];
+				IParameterNode? collectible = originalTemplate.Find("collectible");
+				IEnumerable<(string? Key, string Value)> originalParams = originalTemplate.Parameters.ToKeyValue();
+
+				page.Text = RemoveTemplate(originalParser.Nodes, templateIndex);
+				this.filePages.Add(page);
 				ContextualParser parser = new(page, string.Empty);
+				SiteTemplateNode newTemplate = (SiteTemplateNode)parser.Factory.TemplateNodeFromParts("Online Furnishing Summary\n");
 				parser.Nodes.Add(parser.Factory.TemplateNodeFromParts("Minimal"));
-				var template = parser.Factory.TemplateNodeFromParts("Online Furnishing Summary");
+				parser.Nodes.Add(newTemplate);
+				var autoPagename = "ON-" + (collectible is null ? "item-" : string.Empty) + "furnishing-";
 				string? stylemat = null;
 				string? stylematcount = null;
-				foreach (var (key, value) in originalTemplate.Parameters.ToKeyValue())
+				if (page.PageName.EndsWith(".png", StringComparison.Ordinal) || !page.PageName.Contains(autoPagename, StringComparison.Ordinal))
+				{
+					newTemplate.Add("image", page.PageName, ParameterFormat.OnePerLine);
+				}
+
+				foreach (var (key, value) in originalParams)
 				{
 					switch (key)
 					{
@@ -103,7 +196,7 @@
 						case "subcat":
 						case "type":
 							// Straight copy (`bindtype` and `type` are not in the old template but leftovers from testing the new template):
-							template.Add(key, value);
+							newTemplate.Add(key, value, ParameterFormat.OnePerLine);
 							break;
 						case "creature":
 						case "interactable":
@@ -116,7 +209,7 @@
 						case "titlename":
 						case "visualfx":
 							// Straight copy, but currently unused (needs template programming):
-							template.Add(key, value);
+							newTemplate.Add(key, value, ParameterFormat.OnePerLine);
 							break;
 						case "bast":
 						case "clean pelt":
@@ -128,7 +221,7 @@
 						case "rune":
 						case "wax":
 							// Move into catchall `materials` parameter:
-							materials[MaterialsLookup[key]] = value;
+							materials[MaterialsLookup[key]] = value.Trim();
 							break;
 						case "alchemy":
 						case "blacksmithing":
@@ -138,20 +231,20 @@
 						case "provisioning":
 						case "woodworking":
 							// Move into catchall `skills` parameter.
-							skills[SkillsLookup[key]] = value;
+							skills[SkillsLookup[key]] = value.Trim();
 							break;
 						case "stylemat":
-							stylemat = value;
+							stylemat = value.Trim();
 							break;
 						case "stylematcount":
-							stylematcount = value;
+							stylematcount = value.Trim();
 							break;
 						case "othermat1":
 						case "othermat2":
 						case "othermat3":
 						case "othermat4":
 						case "othermats":
-							var otherMatch = OtherMat.Match(value);
+							var otherMatch = OtherMat.Match(value.Trim());
 							if (otherMatch.Success)
 							{
 								var otherMaterial = otherMatch.Groups["material"].Value;
@@ -177,7 +270,7 @@
 						case "loot":
 						case "quest":
 							// Straight copy, used for categorization only in template. Also used in body text:
-							template.Add(key, value);
+							newTemplate.Add(key, value, ParameterFormat.OnePerLine);
 							break;
 						case "achievement":
 						case "book1":
@@ -217,11 +310,17 @@
 						case "book35":
 						case "book36":
 						case "bookcollection":
+						case "bound":
 						case "first":
 						case "houses":
+						case "itemicon":
+						case "name":
 						case "note":
 						case "other":
 						case "questalt":
+						case "skills":
+						case "source":
+						case "tags":
 						case "vendor":
 						case "vendorap":
 						case "vendorcg":
@@ -231,6 +330,7 @@
 						case "vendorcity3":
 						case "vendorcityap":
 						case "vendorcrowns":
+						case "vendoret":
 						case "vendorgold":
 						case "vendorother":
 						case "vendorother2":
@@ -238,12 +338,13 @@
 						case "vendortv":
 						case "vendorwv":
 							// Body text (in theory, no actual body text defined yet...someone tell me what to do.
-							template.Add(key, value);
+							newTemplate.Add(key, value, ParameterFormat.OnePerLine);
 							break;
 						case "achievecat":
 						case "achievecat2":
 						case "achievementalt":
 						case "luxury":
+						case "materials":
 						case "nocat":
 						case "questcat":
 						case "recipename":
@@ -267,6 +368,11 @@
 				{
 					throw new InvalidOperationException();
 				}
+
+				var pageName = this.nameLookup[page];
+				File.AppendAllText(UespSite.GetBotDataFolder("Furnishing Moves.txt"), $"{page.FullPageName}\t{pageName}\t{WikiTextVisitor.Raw(originalTemplate)}~\n");
+				Page newPage = TitleFactory.DirectNormalized(this.Site, UespNamespaces.Online, pageName).ToNewPage(parser.ToRaw());
+				this.Pages.Add(newPage);
 			}
 		}
 		#endregion
