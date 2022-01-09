@@ -1,8 +1,8 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System;
+	using System.Diagnostics;
+	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
-	using RobinHood70.WikiCommon.Parser;
 
 	public class TemplateEdit : TemplateJob
 	{
@@ -12,17 +12,19 @@
 		{
 		}
 
-		protected override string TemplateName => "Icon";
+		protected override string TemplateName => "Mod Header";
 
-		protected override string EditSummary => "Use built-in replacement";
+		protected override string EditSummary => "Use CC template";
+
+		protected override void LoadPages() => this.Pages.GetCategoryMembers("Category:Skyrim-Creation Club", true);
 
 		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parsedPage)
 		{
-			if (template.Find(1) is IParameterNode param &&
-				param.Value.ToRaw() is var value &&
-				string.Equals(value, "furniture", StringComparison.Ordinal))
+			template.Title.Clear();
+			template.Title.AddText("CC Header");
+			if (template.Parameters.Count > 1)
 			{
-				param.SetValue("furn");
+				Debug.WriteLine(parsedPage.Context.FullPageName());
 			}
 		}
 	}
