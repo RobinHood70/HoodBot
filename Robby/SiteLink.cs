@@ -551,21 +551,26 @@
 		private static ILinkNode CreateLinkNode(Site site, string link)
 		{
 			// The extra space at the end, and then its later removal, is a kludgey workaround for the rare case of [[Link|Text [http://external]]], which the parser doesn't handle correctly at this point.
+			bool removeSpace = false;
 			if (!link.StartsWith("[[", StringComparison.Ordinal) || !link.EndsWith("]]", StringComparison.Ordinal))
 			{
+				removeSpace = true;
 				link = "[[" + link + " ]]";
 			}
 
-			var linkNode = new SiteNodeFactory(site).LinkNodeFromWikiText(link);
-			var nodes = linkNode.Parameters.Count == 0 ? linkNode.Title : linkNode.Parameters[linkNode.Parameters.Count - 1].Value;
+			ILinkNode linkNode = new SiteNodeFactory(site).LinkNodeFromWikiText(link);
+			NodeCollection nodes = linkNode.Parameters.Count == 0 ? linkNode.Title : linkNode.Parameters[linkNode.Parameters.Count - 1].Value;
 			ITextNode? last = (ITextNode)nodes[^1];
-			if (last.Text.Length == 1)
+			if (removeSpace)
 			{
-				nodes.RemoveAt(nodes.Count - 1);
-			}
-			else
-			{
-				last.Text = last.Text[0..^1];
+				if (last.Text.Length == 1)
+				{
+					nodes.RemoveAt(nodes.Count - 1);
+				}
+				else
+				{
+					last.Text = last.Text[0..^1];
+				}
 			}
 
 			return linkNode;
