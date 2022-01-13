@@ -153,7 +153,7 @@
 		{
 			if (other != null)
 			{
-				value = AddWhitespace(other.Value, value);
+				value = other.Value.CopyFormatTo(value);
 			}
 
 			return this.ParameterNodeFromParts(value);
@@ -168,8 +168,12 @@
 		{
 			if (other != null)
 			{
-				name = AddWhitespace(other.Name, name);
-				value = AddWhitespace(other.Value, value);
+				if (other.Name != null)
+				{
+					name = other.Name.CopyFormatTo(name);
+				}
+
+				value = other.Value.CopyFormatTo(value);
 			}
 
 			return this.ParameterNodeFromParts(name, value);
@@ -389,40 +393,6 @@
 
 		/// <inheritdoc/>
 		public virtual ITextNode TextNode(string text) => new TextNode(text);
-		#endregion
-
-		#region Private Methods
-		private static string AddWhitespace(NodeCollection? nodes, string value)
-		{
-			if (nodes != null)
-			{
-				var textValue = nodes.ToValue();
-				var endPos = textValue.Length - 1;
-				while (endPos >= 0 && char.IsWhiteSpace(textValue[endPos]))
-				{
-					endPos--;
-				}
-
-				endPos++;
-				if (endPos < textValue.Length)
-				{
-					value += textValue[endPos..];
-				}
-
-				var startLength = 0;
-				while (startLength < endPos && char.IsWhiteSpace(textValue[startLength]))
-				{
-					startLength++;
-				}
-
-				if (startLength > 0)
-				{
-					value = string.Concat(textValue.AsSpan(0, startLength), value);
-				}
-			}
-
-			return value;
-		}
 		#endregion
 	}
 }
