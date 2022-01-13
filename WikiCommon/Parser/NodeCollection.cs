@@ -78,6 +78,39 @@
 			return new NodeCollection(this.Factory, nodes);
 		}
 
+		/// <summary>Copies the surrounding whitespace from the current NodeCollection to the provided value.</summary>
+		/// <param name="value">The value to format.</param>
+		/// <returns>The value with the same surrounding whitespace as the provided NodeCollection.</returns>
+		public string CopyFormatTo(string value)
+		{
+			var textValue = this.ToValue();
+			var endPos = textValue.Length - 1;
+			value = value is null ? string.Empty : value.Trim();
+			while (endPos >= 0 && char.IsWhiteSpace(textValue[endPos]))
+			{
+				endPos--;
+			}
+
+			endPos++;
+			if (endPos < textValue.Length)
+			{
+				value += textValue[endPos..];
+			}
+
+			var startLength = 0;
+			while (startLength < endPos && char.IsWhiteSpace(textValue[startLength]))
+			{
+				startLength++;
+			}
+
+			if (startLength > 0)
+			{
+				value = string.Concat(textValue.AsSpan(0, startLength), value);
+			}
+
+			return value;
+		}
+
 		/// <summary>Finds the first node of the specified type.</summary>
 		/// <typeparam name="T">The type of node to find. Must be derived from <see cref="IWikiNode"/>.</typeparam>
 		/// <returns>The first node found, or null if no nodes of that type are in the collection.</returns>
