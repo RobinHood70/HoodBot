@@ -155,15 +155,17 @@
 						break;
 					case "achievecat":
 					case "achievecat2":
-					case "achievementalt":
-					case "luxury":
-					case "materials":
 					case "nocat":
 					case "questcat":
 					case "recipename":
-					case "species":
 					case "style":
+						template.AddOrChange(key, value.Trim(), ParameterFormat.OnePerLine);
+						break;
+					case "achievementalt":
 					case "trainingdummy":
+					case "luxury":
+					case "materials":
+					case "species":
 						// Unused and will be discarded if nothing else changes (let me know if you want a list of values and where they're used):
 						break;
 					default:
