@@ -206,7 +206,6 @@
 
 			return retval;
 		}
-
 		/// <summary>Adds a new anonymous parameter to the template. Copies the format of the last anonymous parameter, if there is one, then adds the parameter after it.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <param name="value">The value of the parameter to add.</param>
@@ -239,7 +238,6 @@
 
 			return retval;
 		}
-
 		/// <summary>Adds a parameter with the specified value if it does not already exist.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <param name="name">The name of the parameter to add.</param>
@@ -249,6 +247,44 @@
 		public static IParameterNode AddIfNotExists(this ITemplateNode template, string name, string value) => template.Find(name) is IParameterNode parameter
 			? parameter
 			: template.Add(name, value);
+
+		/// <summary>Adds a new parameter to the template. Optionally, copies the format of the previous named parameter, if there is one, then adds the parameter after it.</summary>
+		/// <param name="template">The template to work on.</param>
+		/// <param name="name">The name of the parameter to add.</param>
+		/// <param name="value">The value of the parameter to add.</param>
+		/// <param name="paramFormat">The type of formatting to apply to the parameter value if being added. For existing parameters, the existing format will be retained.</param>
+		/// <returns>The added parameter.</returns>
+		/// <exception cref="InvalidOperationException">Thrown when the parameter is not found.</exception>
+		public static IParameterNode AddOrChange(this ITemplateNode template, string name, string value, ParameterFormat paramFormat)
+		{
+			Guard.Against.Null(template, nameof(template));
+			IParameterNode retval;
+			value = FormatValue(value, paramFormat);
+
+			if (template.Find(name) is IParameterNode existing)
+			{
+				value = existing.Value.CopyFormatTo(value);
+				existing.SetValue(value);
+				retval = existing;
+			}
+			else
+			{
+				var index = paramFormat == ParameterFormat.Copy ? template.FindCopyParameter(false) : -1;
+				if (index == -1)
+				{
+					retval = template.Factory.ParameterNodeFromParts(name, value);
+					template.Parameters.Add(retval);
+				}
+				else
+				{
+					IParameterNode previous = template.Parameters[index];
+					retval = template.Factory.ParameterNodeFromOther(previous, name, value);
+					template.Parameters.Insert(index + 1, retval);
+				}
+			}
+
+			return retval;
+		}
 
 		/// <summary>Changes the value of a parameter to the specified value, or adds the parameter if it doesn't exist.</summary>
 		/// <param name="template">The template to work on.</param>
