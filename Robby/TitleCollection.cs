@@ -147,7 +147,7 @@
 		/// <returns>A <see cref="PageCollection"/> containing the specified pages, including status information for pages that could not be loaded.</returns>
 		public PageCollection Load(PageLoadOptions options)
 		{
-			PageCollection? retval = PageCollection.Unlimited(this.Site, options);
+			PageCollection retval = PageCollection.Unlimited(this.Site, options);
 			retval.GetTitles(this);
 
 			return retval;
