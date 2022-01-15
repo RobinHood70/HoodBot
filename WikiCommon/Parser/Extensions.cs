@@ -30,6 +30,7 @@
 	}
 	#endregion
 
+	/// <summary>Parser extensions class.</summary>
 	public static class Extensions
 	{
 		#region Fields
@@ -162,6 +163,34 @@
 		public static string ToKeyValue(this IParameterNode parameter) => parameter.NotNull(nameof(parameter)).Name is NodeCollection name
 			? name.ToRaw() + '=' + parameter.Value.ToRaw()
 			: parameter.Value.ToRaw();
+
+		/// <summary>Determines whether the specified parameter node is null or whitespace.</summary>
+		/// <param name="parameter">The parameter.</param>
+		/// <param name="value">A variable to place the value into. Note that blank values will still be returned here with their full content, even when the return value is true.</param>
+		/// <remarks>For the purposes of this method, whitespace is considered to be a single text node with whitespace. Anything else, including HTML comment nodes and other unvalued nodes, will cause this to return <see langword="false"/>.</remarks>
+		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <c>false</c>.</returns>
+		public static bool TryGetValue(this IParameterNode? parameter, out NodeCollection? value)
+		{
+			value = parameter?.Value;
+			return value?.Count > 0 && value[0] is ITextNode && value?.ToRaw().Trim().Length > 0; // Check the whole thing in case of fragmented text nodes.
+		}
+
+		/// <summary>Returns the value of a template parameter or the default value.</summary>
+		/// <param name="parameter">The parameter.</param>
+		/// <param name="defaultValue">The value to return if the node is absent or empty.</param>
+		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <c>false</c>.</returns>
+		public static string ValueOrDefault(this IParameterNode? parameter, string defaultValue)
+		{
+			if (parameter?.Value is not NodeCollection nullNodes || nullNodes.Count == 0)
+			{
+				return defaultValue;
+			}
+
+			var retval = nullNodes.ToRaw();
+			return retval.Trim().Length == 0
+				? defaultValue
+				: retval;
+		}
 		#endregion
 
 		#region ITemplateNode Extensions
@@ -284,22 +313,6 @@
 			}
 
 			return retval;
-		}
-
-		/// <summary>Changes the value of a parameter to the specified value, or adds the parameter if it doesn't exist.</summary>
-		/// <param name="template">The template to work on.</param>
-		/// <param name="name">The name of the parameter to add.</param>
-		/// <param name="value">The value of the parameter to add.</param>
-		/// <returns>The parameter that was altered.</returns>
-		public static IParameterNode Update(this ITemplateNode template, string name, string value)
-		{
-			if (template.Find(name) is IParameterNode parameter)
-			{
-				parameter.SetValue(value);
-				return parameter;
-			}
-
-			return template.Add(name, value);
 		}
 
 		/// <summary>Finds a numbered parameter, whether it's anonymous or a numerically named parameter.</summary>
@@ -656,6 +669,22 @@
 			}
 		}
 
+		/// <summary>Changes the value of a parameter to the specified value, or adds the parameter if it doesn't exist.</summary>
+		/// <param name="template">The template to work on.</param>
+		/// <param name="name">The name of the parameter to add.</param>
+		/// <param name="value">The value of the parameter to add.</param>
+		/// <returns>The parameter that was altered.</returns>
+		public static IParameterNode Update(this ITemplateNode template, string name, string value)
+		{
+			if (template.Find(name) is IParameterNode parameter)
+			{
+				parameter.SetValue(value);
+				return parameter;
+			}
+
+			return template.Add(name, value);
+		}
+
 		/// <summary>Updates a parameter value if the current value is entirely whitespace or the parameter is missing.</summary>
 		/// <param name="template">The template to update.</param>
 		/// <param name="name">The name of the parameter to update.</param>
@@ -675,6 +704,33 @@
 
 			return template.Add(name, value);
 		}
+
+		/// <summary>Returns the value of a template parameter or the default value.</summary>
+		/// <param name="template">The template to search.</param>
+		/// <param name="parameterName">The parameter name.</param>
+		/// <param name="defaultValue">The value to return if the node is absent or empty.</param>
+		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <c>false</c>.</returns>
+		public static string ValueOrDefault(this ITemplateNode? template, string parameterName, string defaultValue)
+		{
+			if (template?.Find(parameterName)?.Value is not NodeCollection nullNodes || nullNodes.Count == 0)
+			{
+				return defaultValue;
+			}
+
+			var retval = nullNodes.ToRaw();
+			return retval.Trim().Length == 0
+				? defaultValue
+				: retval;
+		}
+
+		/// <summary>Returns the value of a template parameter or the default value.</summary>
+		/// <param name="template">The template to search.</param>
+		/// <param name="parameterName">The parameter name.</param>
+		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <c>false</c>.</returns>
+		public static bool TrueOrFalse(this ITemplateNode? template, string parameterName) =>
+			template?.Find(parameterName)?.Value is NodeCollection nullNodes &&
+			nullNodes.Count != 0 &&
+			nullNodes.ToRaw().Trim().Length != 0;
 		#endregion
 
 		#region String Extensions

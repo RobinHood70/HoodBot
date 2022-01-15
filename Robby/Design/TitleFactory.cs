@@ -1,11 +1,18 @@
 ﻿namespace RobinHood70.Robby.Design
 {
+	using System.Diagnostics.CodeAnalysis;
+	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
 
 	/// <summary>This class serves as a light-weight parser to split a wiki title into its constituent parts.</summary>
 	public sealed class TitleFactory : ILinkTitle
 	{
+		#region Constants
+		// The following is taken from DefaultSettings::$wgLegalTitleChars and always assumes the default setting. I believe this is emitted as part of API:Siteinfo, but I wouldn't trust any kind of automated conversion, so better to just leave it as default, which is what 99.99% of wikis will probably use.
+		private const string TitleChars = @"[ %!\""$&'()*,\-.\/0-9:;=?@A-Z\\^_`a-z~+\P{IsBasicLatin}-[()（）]]";
+		#endregion
+
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
@@ -126,6 +133,15 @@
 		}
 		#endregion
 
+		#region Public Static Properties
+
+		/// <summary>Gets a regular expression matching all comma-like characters in a stirng.</summary>
+		public static Regex LabelCommaRemover { get; } = new(@"\ *([,，]" + TitleChars + @"*?)\Z", RegexOptions.Compiled | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+
+		/// <summary>Gets a regular expression matching all parenthetical text in a stirng.</summary>
+		public static Regex LabelParenthesesRemover { get; } = new(@"\ *(\(" + TitleChars + @"*?\)|（" + TitleChars + @"*?）)\Z", RegexOptions.Compiled | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		#endregion
+
 		#region Public Properties
 
 		/// <inheritdoc/>
@@ -226,6 +242,18 @@
 		/// <param name="site">The site.</param>
 		/// <param name="pageName">Name of the page.</param>
 		public static TitleFactory FromNormalizedName(Site site, string pageName) => new(site.NotNull(nameof(site)), MediaWikiNamespaces.Main, pageName.NotNull(nameof(pageName)));
+
+		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
+		/// <param name="title">The title to get the label name for.</param>
+		/// <remarks>This doesn't precisely match the pipe trick logic - they differ in their handling of some abnormal page names. For example, with page names of "User:(Test)", ":(Test)", and "(Test)", the pipe trick gives "User:", ":", and "(Test)", respectively. Since this routine ignores the namespace completely and checks for empty return values, it returns "(Test)" consistently in all three cases.</remarks>
+		/// <returns>The text with the final paranthetical and/or comma-delimited text removed. Note: like the MediaWiki equivalent, when both are present, this will remove text of the form "(text), text", but text of the form ", text (text)" will become ", text".</returns>
+		[return: NotNullIfNotNull("title")]
+		public static string LabelName(string title)
+		{
+			title.ThrowNull(nameof(title));
+			var pageName = LabelCommaRemover.Replace(title, string.Empty, 1, 1);
+			return LabelParenthesesRemover.Replace(pageName, string.Empty, 1, 1);
+		}
 
 		/// <summary>Normalizes a page name text for parsing. Page names coming directly from the API are already normalized.</summary>
 		/// <param name="text">The page name to normalize.</param>
