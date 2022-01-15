@@ -108,7 +108,7 @@
 		/// <param name="category">The category to add.</param>
 		/// <returns><see langword="true"/> if the category was added to the page; <see langword="false"/> if was already on the page.</returns>
 		/// <remarks>The category will be added after the last category found on the page, or at the end of the page (preceded by two newlines) if no categories were found.</remarks>
-		public bool AddCategory(string category)
+		public bool AddCategory(string category, bool newLineBefore)
 		{
 			Title? catTitle = Title.Coerce(this.Site, MediaWikiNamespaces.Category, category.NotNull(nameof(category)));
 			var lastCategoryIndex = -1;
@@ -126,21 +126,26 @@
 				}
 			}
 
-			var newCat = this.Nodes.Factory.LinkNodeFromParts(catTitle.ToString());
+			ILinkNode newCat = this.Nodes.Factory.LinkNodeFromParts(catTitle.ToString());
 			if (lastCategoryIndex == -1)
 			{
 				if (this.Nodes.Count > 0)
 				{
-					this.Nodes.AddText("\n\n");
+					// makes sure two LFs are added no matter what, since newLineBefore adds a LF already
+					this.Nodes.AddText(newLineBefore ? "\n" : "\n\n");
 				}
 
-				this.Nodes.Add(newCat);
-			}
-			else
-			{
-				this.Nodes.Insert(lastCategoryIndex, newCat);
+				lastCategoryIndex = this.Nodes.Count;
+				//// this.Nodes.Add(newCat);
 			}
 
+			if (newLineBefore && lastCategoryIndex > 0)
+			{
+				this.Nodes.Insert(lastCategoryIndex, this.Factory.TextNode("\n"));
+				lastCategoryIndex++;
+			}
+
+			this.Nodes.Insert(lastCategoryIndex, newCat);
 			return true;
 		}
 

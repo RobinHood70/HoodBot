@@ -81,7 +81,7 @@
 				}
 
 				// Debug.WriteLine($"*{cat}: [[:{parsedPage.Context.FullPageName}|]]");
-				parsedPage.AddCategory(cat);
+				parsedPage.AddCategory(cat, false);
 			}
 		}
 		#endregion
