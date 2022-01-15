@@ -558,7 +558,7 @@
 				link = "[[" + link + " ]]";
 			}
 
-			ILinkNode linkNode = new SiteNodeFactory(site).LinkNodeFromWikiText(link);
+			ILinkNode linkNode = new SiteNodeFactory(site).LinkNodeFromParts(link);
 			NodeCollection nodes = linkNode.Parameters.Count == 0 ? linkNode.Title : linkNode.Parameters[linkNode.Parameters.Count - 1].Value;
 			ITextNode? last = (ITextNode)nodes[^1];
 			if (removeSpace)

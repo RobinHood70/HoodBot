@@ -3,22 +3,11 @@
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Text;
-	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 
 	/// <summary>A generic set of extensions useful in the program's design.</summary>
 	public static class Extensions
 	{
-		#region Constants
-		// The following is taken from DefaultSettings::$wgLegalTitleChars and always assumes the default setting. I believe this is emitted as part of API:Siteinfo, but I wouldn't trust any kind of automated conversion, so better to just leave it as default, which is what 99.99% of wikis will probably use.
-		private const string TitleChars = @"[ %!\""$&'()*,\-.\/0-9:;=?@A-Z\\^_`a-z~+\P{IsBasicLatin}-[()（）]]";
-		#endregion
-
-		#region Fields
-		private static readonly Regex LabelCommaRemover = new(@"\ *([,，]" + TitleChars + @"*?)\Z", RegexOptions.Compiled | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
-		private static readonly Regex LabelParenthesesRemover = new(@"\ *(\(" + TitleChars + @"*?\)|（" + TitleChars + @"*?）)\Z", RegexOptions.Compiled | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
-		#endregion
-
 		#region IEnumerable<ISimpleTitle> Extensions
 
 		/// <summary>Convert a collection of SimpleTitles to their full page names.</summary>
@@ -69,7 +58,7 @@
 			{
 				sb
 					.Append('|')
-					.Append(LabelName(title));
+					.Append(title.LabelName());
 			}
 
 			sb.Append("]]");
@@ -91,16 +80,9 @@
 		/// <remarks>This doesn't precisely match the pipe trick logic - they differ in their handling of some abnormal page names. For example, with page names of "User:(Test)", ":(Test)", and "(Test)", the pipe trick gives "User:", ":", and "(Test)", respectively. Since this routine ignores the namespace completely and checks for empty return values, it returns "(Test)" consistently in all three cases.</remarks>
 		/// <returns>The text with the final paranthetical and/or comma-delimited text removed. Note: like the MediaWiki equivalent, when both are present, this will remove text of the form "(text), text", but text of the form ", text (text)" will become ", text".</returns>
 		[return: NotNullIfNotNull("title")]
-		public static string? LabelName(this ISimpleTitle title)
-		{
-			if (title == null)
-			{
-				return null;
-			}
-
-			var pageName = LabelCommaRemover.Replace(title.PageName, string.Empty, 1, 1);
-			return LabelParenthesesRemover.Replace(pageName, string.Empty, 1, 1);
-		}
+		public static string? LabelName(this ISimpleTitle? title) => title == null
+			? null
+			: TitleFactory.LabelName(title.PageName);
 		#endregion
 	}
 }
