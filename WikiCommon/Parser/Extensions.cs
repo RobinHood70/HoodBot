@@ -223,7 +223,7 @@
 					throw new InvalidOperationException(Globals.CurrentCulture(Properties.Resources.ParameterExists, name));
 				}
 
-				IParameterNode previous = template.Parameters[index];
+				var previous = template.Parameters[index];
 				retval = template.Factory.ParameterNodeFromOther(previous, name, value);
 				template.Parameters.Insert(index + 1, retval);
 			}
@@ -235,6 +235,7 @@
 
 			return retval;
 		}
+
 		/// <summary>Adds a new anonymous parameter to the template. Copies the format of the last anonymous parameter, if there is one, then adds the parameter after it.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <param name="value">The value of the parameter to add.</param>
@@ -255,7 +256,7 @@
 			var index = paramFormat == ParameterFormat.Copy ? template.FindCopyParameter(true) : -1;
 			if (index != -1)
 			{
-				IParameterNode previous = template.Parameters[index];
+				var previous = template.Parameters[index];
 				retval = template.Factory.ParameterNodeFromOther(previous, value);
 				template.Parameters.Insert(index + 1, retval);
 			}
@@ -267,6 +268,7 @@
 
 			return retval;
 		}
+
 		/// <summary>Adds a parameter with the specified value if it does not already exist.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <param name="name">The name of the parameter to add.</param>
@@ -306,7 +308,7 @@
 				}
 				else
 				{
-					IParameterNode previous = template.Parameters[index];
+					var previous = template.Parameters[index];
 					retval = template.Factory.ParameterNodeFromOther(previous, name, value);
 					template.Parameters.Insert(index + 1, retval);
 				}

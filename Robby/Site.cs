@@ -259,9 +259,9 @@
 		/// <returns>RobinHood70.Robby.SiteFactoryMethod.</returns>
 		/// <remarks>Note that the identifier does <i>not</i> have to be the class name. It can be a user-friendly name, as long as the factory method for the <see cref="Site"/> derivative has been registered with <see cref="RegisterSiteClass(SiteFactoryMethod, string[])"/>. If the requested name is not found, the default <see cref="Site"/> factory method will be returned.</remarks>
 		public static SiteFactoryMethod GetFactoryMethod(string? siteClassIdentifier) =>
-					!string.IsNullOrEmpty(siteClassIdentifier) && SiteClasses.TryGetValue(siteClassIdentifier, out SiteFactoryMethod? factoryMethod)
-						? factoryMethod
-						: DefaultSiteFactoryMethod;
+			!string.IsNullOrEmpty(siteClassIdentifier) && SiteClasses.TryGetValue(siteClassIdentifier, out var factoryMethod)
+				? factoryMethod
+				: DefaultSiteFactoryMethod;
 
 		/// <summary>Registers a user functions class under all site and username combinations.</summary>
 		/// <param name="factoryMethod">The factory method that creates the correct UserFunctions class for the combination of site(s) and user(s).</param>
@@ -290,7 +290,7 @@
 		public void DownloadFile(string pageName, string fileName)
 		{
 			TitleCollection fileTitle = new(this, MediaWikiNamespaces.File, pageName);
-			PageCollection filePages = fileTitle.Load(PageModules.FileInfo);
+			var filePages = fileTitle.Load(PageModules.FileInfo);
 			if (filePages.Count == 1 && filePages[0] is FilePage filePage)
 			{
 				filePage.Download(fileName);
@@ -367,8 +367,8 @@
 		/// <returns>The text of the message.</returns>
 		public string? LoadMessage([Localizable(false)] string message, IEnumerable<string> arguments)
 		{
-			IReadOnlyDictionary<string, MessagePage> messages = this.LoadMessages(new[] { message.NotNull(nameof(message)) }, arguments.NotNull(nameof(arguments)));
-			return messages.TryGetValue(message, out MessagePage? retval) ? retval.Text : string.Empty;
+			var messages = this.LoadMessages(new[] { message.NotNull(nameof(message)) }, arguments.NotNull(nameof(arguments)));
+			return messages.TryGetValue(message, out var retval) ? retval.Text : string.Empty;
 		}
 
 		/// <summary>Gets multiple messages from MediaWiki space.</summary>
@@ -442,8 +442,8 @@
 		/// <returns>The text of the message.</returns>
 		public string? LoadParsedMessage(string msg, IEnumerable<string> arguments, Title? title)
 		{
-			IReadOnlyDictionary<string, MessagePage> messages = this.LoadParsedMessages(new[] { msg }, arguments, title);
-			return messages.TryGetValue(msg, out MessagePage? retval) ? retval.Text : null;
+			var messages = this.LoadParsedMessages(new[] { msg }, arguments, title);
+			return messages.TryGetValue(msg, out var retval) ? retval.Text : null;
 		}
 
 		/// <summary>Gets multiple messages from MediaWiki space with any magic words and the like parsed into text.</summary>
@@ -612,7 +612,7 @@
 
 			ChangeStatus ChangeFunc()
 			{
-				PatrolResult retval = this.Patrol(new PatrolInput(rcid));
+				var retval = this.Patrol(new PatrolInput(rcid));
 
 				return retval.FullPageName == null
 					? ChangeStatus.Failure
@@ -634,7 +634,7 @@
 
 			ChangeStatus ChangeFunc()
 			{
-				PatrolResult retval = this.Patrol(new PatrolInput(revid));
+				var retval = this.Patrol(new PatrolInput(revid));
 				return retval.FullPageName == null
 				? ChangeStatus.Failure
 				: ChangeStatus.Success;
@@ -734,8 +734,8 @@
 			{
 				AllPagesInput generator = new() { Namespace = ns };
 				WatchInput input = new(generator) { Unwatch = unwatch };
-				PageCollection pages = this.Watch(input);
-				ChangeStatus result = pages.Count == 0
+				var pages = this.Watch(input);
+				var result = pages.Count == 0
 					? ChangeStatus.NoEffect
 					: ChangeStatus.Success;
 				return new ChangeValue<PageCollection>(result, pages);
@@ -778,7 +778,7 @@
 			ChangeStatus ChangeFunc()
 			{
 				CreateAccountInput input = new(name, password) { Email = email };
-				CreateAccountResult retval = this.AbstractionLayer.CreateAccount(input);
+				var retval = this.AbstractionLayer.CreateAccount(input);
 				return string.Equals(retval.Result, "Success", StringComparison.OrdinalIgnoreCase)
 					? ChangeStatus.Success
 					: ChangeStatus.Failure;
@@ -819,9 +819,9 @@
 		public virtual IFullTitle? GetRedirectFromText(string text)
 		{
 			text.ThrowNull(nameof(text));
-			IReadOnlyCollection<string> redirectAliases = this.MagicWords.TryGetValue("redirect", out MagicWord? redirect) ? redirect.Aliases : DefaultRedirect;
+			var redirectAliases = this.MagicWords.TryGetValue("redirect", out var redirect) ? redirect.Aliases : DefaultRedirect;
 			HashSet<string> redirects = new(redirectAliases, StringComparer.Ordinal);
-			NodeCollection nodes = new SiteNodeFactory(this).Parse(text);
+			var nodes = new SiteNodeFactory(this).Parse(text);
 
 			// Is the text of the format TextNode, LinkNode?
 			if (nodes.Count > 1 && nodes[0] is ITextNode textNode && nodes[1] is ILinkNode linkNode)
@@ -888,10 +888,10 @@
 			if (!this.EditingEnabled)
 			{
 				disabledResult.Add(from.FullPageName(), to.FullPageName());
-				ISimpleTitle? fromTalk = from.TalkPage();
+				var fromTalk = from.TalkPage();
 				if (moveTalk && fromTalk is not null)
 				{
-					ISimpleTitle? toTalk = to.TalkPage();
+					var toTalk = to.TalkPage();
 					disabledResult.Add(fromTalk.FullPageName(), toTalk?.FullPageName() ?? string.Empty);
 				}
 
@@ -924,12 +924,12 @@
 					Reason = reason
 				};
 
-				ChangeStatus status = ChangeStatus.Success;
+				var status = ChangeStatus.Success;
 				Dictionary<string, string> dict = new(StringComparer.Ordinal);
 				try
 				{
-					IReadOnlyList<MoveItem> retval = this.AbstractionLayer.Move(input);
-					foreach (MoveItem item in retval)
+					var retval = this.AbstractionLayer.Move(input);
+					foreach (var item in retval)
 					{
 						if (item.Error != null)
 						{
@@ -1003,7 +1003,7 @@
 			changeArgs.ThrowNull(nameof(changeArgs));
 			changeFunction.ThrowNull(nameof(changeFunction));
 			this.PageTextChanging?.Invoke(this, changeArgs);
-			ChangeStatus retval =
+			var retval =
 				changeArgs.CancelChange ? ChangeStatus.Cancelled :
 				this.EditingEnabled ? changeFunction() :
 				ChangeStatus.EditingDisabled;
@@ -1041,12 +1041,12 @@
 		protected virtual IReadOnlyList<Block> LoadBlocks(BlocksInput input)
 		{
 			input.NotNull(nameof(input)).Properties = BlocksProperties.User | BlocksProperties.By | BlocksProperties.Timestamp | BlocksProperties.Expiry | BlocksProperties.Reason | BlocksProperties.Flags;
-			IReadOnlyList<BlocksResult> result = this.AbstractionLayer.Blocks(input);
+			var result = this.AbstractionLayer.Blocks(input);
 			List<Block> retval = new(result.Count);
-			foreach (BlocksResult item in result)
+			foreach (var item in result)
 			{
-				User? user = item.User == null ? null : new User(this, item.User);
-				User? by = item.By == null ? null : new User(this, item.By);
+				var user = item.User == null ? null : new User(this, item.User);
+				var by = item.By == null ? null : new User(this, item.By);
 				retval.Add(new Block(user, by, item.Reason, item.Timestamp ?? DateTime.MinValue, item.Expiry ?? DateTime.MaxValue, item.Flags, item.Automatic));
 			}
 
@@ -1071,7 +1071,7 @@
 			{
 				this.disambiguationTemplates = new HashSet<ISimpleTitle>();
 				Title? title = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.MediaWiki, "Disambiguationspage").ToTitle();
-				Page page = title.Load(PageModules.Default | PageModules.Links, false);
+				var page = title.Load(PageModules.Default | PageModules.Links, false);
 				if (page.Exists)
 				{
 					if (page.Links.Count == 0)
@@ -1098,9 +1098,9 @@
 		/// <returns>A read-only dictionary of message names and their associated <see cref="MessagePage"/> objects, as specified by the input parameters.</returns>
 		protected virtual IReadOnlyDictionary<string, MessagePage> LoadMessages(AllMessagesInput input)
 		{
-			IReadOnlyList<AllMessagesItem> result = this.AbstractionLayer.AllMessages(input);
+			var result = this.AbstractionLayer.AllMessages(input);
 			Dictionary<string, MessagePage> retval = new(result.Count, StringComparer.Ordinal);
-			foreach (AllMessagesItem item in result)
+			foreach (var item in result)
 			{
 				TitleFactory? factory = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.MediaWiki, item.Name);
 				retval.Add(item.Name, new MessagePage(factory, item));
@@ -1114,9 +1114,9 @@
 		/// <returns>A read-only list of <see cref="RecentChange"/> objects, as specified by the input parameters.</returns>
 		protected virtual IReadOnlyList<RecentChange> LoadRecentChanges(RecentChangesInput input)
 		{
-			IReadOnlyList<RecentChangesItem> result = this.AbstractionLayer.RecentChanges(input);
+			var result = this.AbstractionLayer.RecentChanges(input);
 			List<RecentChange> retval = new(result.Count);
-			foreach (RecentChangesItem item in result)
+			foreach (var item in result)
 			{
 				retval.Add(new RecentChange(this, item));
 			}
@@ -1129,9 +1129,9 @@
 		/// <returns>A read-only list of <see cref="User"/> objects, as specified by the input parameters.</returns>
 		protected virtual IReadOnlyList<User> LoadUserInformation(UsersInput input)
 		{
-			IReadOnlyList<UsersItem> result = this.AbstractionLayer.Users(input);
+			var result = this.AbstractionLayer.Users(input);
 			List<User> retval = new(result.Count);
-			foreach (UsersItem item in result)
+			foreach (var item in result)
 			{
 				retval.Add(new User(TitleFactory.DirectNormalized(this, MediaWikiNamespaces.User, item.Name), item));
 			}
@@ -1145,9 +1145,9 @@
 		protected virtual IReadOnlyList<User> LoadUsers(AllUsersInput input)
 		{
 			input.NotNull(nameof(input)).Properties = AllUsersProperties.None;
-			IReadOnlyList<AllUsersItem> result = this.AbstractionLayer.AllUsers(input);
+			var result = this.AbstractionLayer.AllUsers(input);
 			List<User> retval = new(result.Count);
-			foreach (AllUsersItem item in result)
+			foreach (var item in result)
 			{
 				retval.Add(new User(this, item));
 			}
@@ -1162,7 +1162,7 @@
 		protected virtual void Login([NotNull, ValidatedNotNull] LoginInput input)
 		{
 			// Always log in in case permissions are needed.
-			LoginResult result = this.AbstractionLayer.Login(input.NotNull(nameof(input)));
+			var result = this.AbstractionLayer.Login(input.NotNull(nameof(input)));
 			if (!string.Equals(result.Result, "Success", StringComparison.OrdinalIgnoreCase))
 			{
 				this.Clear();
@@ -1178,7 +1178,7 @@
 		/// <exception cref="InvalidOperationException">Thrown when the site information is not valid.</exception>
 		protected virtual void ParseInternalSiteInfo()
 		{
-			SiteInfoResult? siteInfo = this.AbstractionLayer.AllSiteInfo;
+			var siteInfo = this.AbstractionLayer.AllSiteInfo;
 			if (siteInfo == null
 				|| siteInfo.General == null
 				|| siteInfo.Namespaces.Count == 0
@@ -1188,7 +1188,7 @@
 			}
 
 			// General
-			SiteInfoGeneral? general = siteInfo.General;
+			var general = siteInfo.General;
 			var server = general.Server; // Used to help determine if interwiki is local
 			this.culture = Globals.GetCulture(general.Language);
 			this.siteName = general.SiteName;
@@ -1206,7 +1206,7 @@
 			}
 
 			// MagicWords
-			foreach (SiteInfoMagicWord word in siteInfo.MagicWords)
+			foreach (var word in siteInfo.MagicWords)
 			{
 				this.magicWords.Add(word.Name, new MagicWord(word));
 			}
@@ -1215,7 +1215,7 @@
 
 			// InterwikiMap
 			var doGuess = true;
-			foreach (SiteInfoInterwikiMap item in siteInfo.InterwikiMap)
+			foreach (var item in siteInfo.InterwikiMap)
 			{
 				if ((item.Flags & InterwikiMapFlags.LocalInterwiki) != 0)
 				{
@@ -1225,7 +1225,7 @@
 			}
 
 			List<InterwikiEntry> interwikiList = new();
-			foreach (SiteInfoInterwikiMap item in siteInfo.InterwikiMap)
+			foreach (var item in siteInfo.InterwikiMap)
 			{
 				InterwikiEntry entry = new(this, item);
 				if (doGuess && server != null)
@@ -1249,7 +1249,7 @@
 		/// <returns>A collection of the pages that were watched or unwatched.</returns>
 		protected virtual PageCollection Watch(WatchInput input)
 		{
-			PageSetResult<WatchItem> result = this.AbstractionLayer.Watch(input);
+			var result = this.AbstractionLayer.Watch(input);
 			return new PageCollection(this, result);
 		}
 
@@ -1279,7 +1279,7 @@
 		/// <param name="eventArgs">The event arguments.</param>
 		private void AbstractionLayer_WarningOccurred(IWikiAbstractionLayer sender, /* Overlapping type names, so must use full name here */ WallE.Design.WarningEventArgs eventArgs)
 		{
-			ErrorItem warning = eventArgs.Warning;
+			var warning = eventArgs.Warning;
 			this.PublishWarning(this, "(" + warning.Code + ") " + warning.Info);
 		}
 

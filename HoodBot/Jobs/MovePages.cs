@@ -32,14 +32,19 @@
 				var text = line.Split(TextArrays.Tab);
 				this.AddReplacement(text[0], "Online:" + text[1]);
 			}
-		//// this.AddReplacement("Skyrim:Map Notes", "Skyrim:Treasure Maps");
-		//// this.LoadReplacementsFromFile(@"D:\Data\HoodBot\FileList.txt");
-		//// this.AddReplacement("File:ON-item-furnishing-Abecean Ratter Cat.jpg", "File:ON-furnishing-Abecean Ratter Cat.jpg");
+
+			//// this.AddReplacement("Skyrim:Map Notes", "Skyrim:Treasure Maps");
+			//// this.LoadReplacementsFromFile(@"D:\Data\HoodBot\FileList.txt");
+			//// this.AddReplacement("File:ON-item-furnishing-Abecean Ratter Cat.jpg", "File:ON-furnishing-Abecean Ratter Cat.jpg");
 		}
 
-		protected override void UpdateGalleryLinks(Page page, ITagNode tag) { }
+		protected override void UpdateGalleryLinks(Page page, ITagNode tag)
+		{
+		}
 
-		protected override void UpdateLinkNode(Page page, SiteLinkNode node, bool isRedirectTarget) { }
+		protected override void UpdateLinkNode(Page page, SiteLinkNode node, bool isRedirectTarget)
+		{
+		}
 		#endregion
 	}
 }

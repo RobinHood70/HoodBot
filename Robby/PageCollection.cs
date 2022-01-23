@@ -340,7 +340,7 @@
 					target.Append('#').Append(redirect.Interwiki);
 				}
 
-				var title = TitleFactory.FromNormalizedName(this.Site, target.ToString()).ToFullTitle();
+				FullTitle title = TitleFactory.FromNormalizedName(this.Site, target.ToString()).ToFullTitle();
 				this.titleMap[item.Key] = title;
 			}
 		}
