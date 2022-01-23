@@ -297,7 +297,7 @@
 
 		/// <summary>Creates a new Page from the parsed text.</summary>
 		/// <returns>A new <see cref="Page"/>.</returns>
-		public Page ToNewDefaultPage() => new(this, PageLoadOptions.None, null);
+		public Page ToNewPage() => new(this, PageLoadOptions.None, null);
 
 		/// <summary>Creates a new SiteLink from the parsed text.</summary>
 		/// <returns>A new <see cref="SiteLink"/>.</returns>
