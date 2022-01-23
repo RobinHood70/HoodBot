@@ -62,10 +62,10 @@
 		protected override void BeforeLogging()
 		{
 			File.Delete(UespSite.GetBotDataFolder("Furnishing Moves.txt"));
-			var oldTitles = new TitleCollection(this.Site, this.Pages);
+			TitleCollection oldTitles = new(this.Site, this.Pages);
 			oldTitles.GetBacklinks("Template:Furnishing Summary", BacklinksTypes.EmbeddedIn);
-			var newTitles = new TitleCollection(this.Site);
-			var reverse = new Dictionary<ISimpleTitle, ISimpleTitle>();
+			TitleCollection newTitles = new(this.Site);
+			Dictionary<ISimpleTitle, ISimpleTitle>? reverse = new();
 			foreach (var title in oldTitles)
 			{
 				var pageName = title.PageName
@@ -80,7 +80,7 @@
 				}
 
 				this.nameLookup.Add(title, pageName);
-				var newTitle = Title.Coerce(this.Site, UespNamespaces.Online, pageName);
+				Title? newTitle = Title.Coerce(this.Site, UespNamespaces.Online, pageName);
 				newTitles.Add(newTitle);
 				reverse.Add(newTitle, title);
 			}
@@ -155,8 +155,8 @@
 			if (templateIndex > -1)
 			{
 				SiteTemplateNode originalTemplate = (SiteTemplateNode)originalParser.Nodes[templateIndex];
-				IParameterNode? collectible = originalTemplate.Find("collectible");
-				IEnumerable<(string? Key, string Value)> originalParams = originalTemplate.Parameters.ToKeyValue();
+				var collectible = originalTemplate.Find("collectible");
+				var originalParams = originalTemplate.Parameters.ToKeyValue();
 
 				page.Text = RemoveTemplate(originalParser.Nodes, templateIndex);
 				this.filePages.Add(page);
@@ -371,7 +371,7 @@
 
 				var pageName = this.nameLookup[page];
 				File.AppendAllText(UespSite.GetBotDataFolder("Furnishing Moves.txt"), $"{page.FullPageName}\t{pageName}\t{WikiTextVisitor.Raw(originalTemplate)}~\n");
-				Page newPage = TitleFactory.DirectNormalized(this.Site, UespNamespaces.Online, pageName).ToNewPage(parser.ToRaw());
+				var newPage = TitleFactory.DirectNormalized(this.Site, UespNamespaces.Online, pageName).ToNewPage(parser.ToRaw());
 				this.Pages.Add(newPage);
 			}
 		}

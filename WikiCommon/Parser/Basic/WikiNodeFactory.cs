@@ -49,8 +49,8 @@
 
 			// Because we're not returning a NodeCollection, the default factory does everything we need here.
 			WikiNodeFactory factory = new();
-			NodeCollection nodes = factory.Parse(value);
-			foreach (IWikiNode node in nodes)
+			var nodes = factory.Parse(value);
+			foreach (var node in nodes)
 			{
 				if (node is TextNode textNode)
 				{
@@ -125,13 +125,13 @@
 		/// <returns>A new link node.</returns>
 		public ILinkNode LinkNodeFromParts(string title, IEnumerable<string>? parameters)
 		{
-			NodeCollection titleNodes = this.Parse(title.NotNull(nameof(title)));
+			var titleNodes = this.Parse(title.NotNull(nameof(title)));
 			List<IParameterNode> paramEntries = new();
 			if (parameters != null)
 			{
 				foreach (var parameter in parameters)
 				{
-					IParameterNode paramNode = this.ParameterNodeFromParts(parameter);
+					var paramNode = this.ParameterNodeFromParts(parameter);
 					paramEntries.Add(paramNode);
 				}
 			}
@@ -215,7 +215,7 @@
 		public T SingleNode<T>(string text, [CallerMemberName] string callerName = "<Unknown>")
 			where T : IWikiNode
 		{
-			NodeCollection nodes = this.Parse(text);
+			var nodes = this.Parse(text);
 			return nodes.Count == 1 && nodes[0] is T node
 				? node
 				: throw new ArgumentException(paramName: nameof(text), message: Globals.CurrentCulture(Resources.MalformedNodeText, this.GetType().Name, callerName));

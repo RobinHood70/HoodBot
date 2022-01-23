@@ -34,9 +34,9 @@
 
 		protected override void LoadPages()
 		{
-			var templates = new TitleCollection(this.Site);
-			var catPages = new TitleCollection(this.Site);
-			var hashset = new HashSet<ISimpleTitle>(SimpleTitleEqualityComparer.Instance);
+			TitleCollection templates = new(this.Site);
+			TitleCollection catPages = new(this.Site);
+			HashSet<ISimpleTitle> hashset = new(SimpleTitleEqualityComparer.Instance);
 			templates.GetBacklinks("Template:Mod Header");
 			catPages.GetCategoryMembers("Category:Skyrim-Creation Club", true);
 			hashset.UnionWith(templates);

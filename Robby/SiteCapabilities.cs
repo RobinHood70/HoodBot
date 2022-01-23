@@ -98,7 +98,7 @@
 		{
 			// TODO: Convert to use URIs and related objects instead of strings whenever possible.
 			this.Clear();
-			Uri fullHost = new UriBuilder(anyPage.NotNull(nameof(anyPage)).Scheme, anyPage.Host).Uri;
+			var fullHost = new UriBuilder(anyPage.NotNull(nameof(anyPage)).Scheme, anyPage.Host).Uri;
 			var tryPath = anyPage.AbsolutePath;
 			Uri? tryLoc = null;
 			var offset = tryPath.IndexOf("/index.php", StringComparison.Ordinal);
@@ -185,7 +185,7 @@
 				if (api.IsEnabled())
 				{
 					api.Initialize();
-					SiteInfoGeneral general = api.AllSiteInfo?.General ?? throw new InvalidOperationException();
+					var general = api.AllSiteInfo?.General ?? throw new InvalidOperationException();
 					this.Api = api.EntryPoint;
 					Uri? index = null;
 					if (!string.IsNullOrWhiteSpace(general.Script))
@@ -222,7 +222,7 @@
 
 		private Uri? GetUriFromPage(Uri fullHost, string pageData)
 		{
-			Match rsdLink = FindRsdLink.Match(pageData);
+			var rsdLink = FindRsdLink.Match(pageData);
 			if (rsdLink.Success)
 			{
 				var rsdLinkFixed = rsdLink.Groups["rsdlink"].Value;
@@ -239,8 +239,8 @@
 				XDocument? rsd = XDocument.Parse(rsdInfo);
 				if (rsd.Root is XElement root)
 				{
-					XNamespace ns = root.GetDefaultNamespace();
-					foreach (XElement descendant in rsd.Descendants(ns + "api"))
+					var ns = root.GetDefaultNamespace();
+					foreach (var descendant in rsd.Descendants(ns + "api"))
 					{
 						if (descendant.Attribute("preferred") is XAttribute preferredAttr && (bool)preferredAttr &&
 							descendant.Attribute("apiLink") is XAttribute apiLinkAttr && (string)apiLinkAttr is string linkText)
@@ -258,14 +258,14 @@
 			}
 			else
 			{
-				Match foundScript = FindScript.Match(pageData);
+				var foundScript = FindScript.Match(pageData);
 				if (foundScript.Success)
 				{
 					// Should occur only in 1.16
 					return new Uri(foundScript.Groups["serverpath"].Value + foundScript.Groups["scriptpath"].Value + "/api.php");
 				}
 
-				Match foundPhpLink = FindPhpLink.Match(pageData);
+				var foundPhpLink = FindPhpLink.Match(pageData);
 				if (foundPhpLink.Success)
 				{
 					var newUri = fullHost.ToString().TrimEnd(TextArrays.Slash) + '/';

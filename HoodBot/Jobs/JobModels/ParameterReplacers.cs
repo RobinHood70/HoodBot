@@ -141,13 +141,13 @@
 
 		protected void FurnishingLink(Page page, SiteTemplateNode template) => this.FurnishingLinkReplace(template.Find(1));
 
-		protected void FurnishingGeneralEntry(Page page, SiteTemplateNode template) => this.FurnishingLinkReplace(template.Find("page"));
+		protected void FurnishingGeneralEntry(SiteTemplateNode template) => this.FurnishingLinkReplace(template.Find("page"));
 
 		protected void GameBookGeneral(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find("lorename"), UespNamespaces.Lore);
 
 		protected void GenericIcon(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find("icon"), MediaWikiNamespaces.File);
 
-		protected void GenericImage(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find("image"), MediaWikiNamespaces.File);
+		protected void GenericImage(SiteTemplateNode template) => this.PageNameReplace(template.Find("image"), MediaWikiNamespaces.File);
 
 		protected void LoreFirst(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find(1), UespNamespaces.Lore);
 

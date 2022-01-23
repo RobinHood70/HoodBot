@@ -106,6 +106,7 @@
 
 		/// <summary>Adds a category to the page.</summary>
 		/// <param name="category">The category to add.</param>
+		/// <param name="newLineBefore">Whether to add a new line before the category.</param>
 		/// <returns><see langword="true"/> if the category was added to the page; <see langword="false"/> if was already on the page.</returns>
 		/// <remarks>The category will be added after the last category found on the page, or at the end of the page (preceded by two newlines) if no categories were found.</remarks>
 		public bool AddCategory(string category, bool newLineBefore)
@@ -126,7 +127,7 @@
 				}
 			}
 
-			ILinkNode newCat = this.Nodes.Factory.LinkNodeFromParts(catTitle.ToString());
+			var newCat = this.Nodes.Factory.LinkNodeFromParts(catTitle.ToString());
 			if (lastCategoryIndex == -1)
 			{
 				if (this.Nodes.Count > 0)

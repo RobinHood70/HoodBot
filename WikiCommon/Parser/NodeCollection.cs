@@ -192,9 +192,9 @@
 
 				if (recursive && this[index] is IParentNode parent)
 				{
-					foreach (NodeCollection childCollection in parent.NodeCollections)
+					foreach (var childCollection in parent.NodeCollections)
 					{
-						foreach (T value in childCollection.FindAll(condition, reverse, recursive, 0))
+						foreach (var value in childCollection.FindAll(condition, reverse, recursive, 0))
 						{
 							yield return value;
 						}
@@ -280,7 +280,7 @@
 				}
 				else if (recursive && this[i] is IParentNode parent)
 				{
-					foreach (NodeCollection childCollection in parent.NodeCollections)
+					foreach (var childCollection in parent.NodeCollections)
 					{
 						childCollection.MergeText(recursive);
 					}
@@ -309,10 +309,10 @@
 			replaceMethod.ThrowNull(nameof(replaceMethod));
 			for (var i = 0; i < this.Count; i++)
 			{
-				IWikiNode currentNode = this[i];
+				var currentNode = this[i];
 				if (currentNode is IParentNode parent)
 				{
-					foreach (NodeCollection childCollection in parent.NodeCollections)
+					foreach (var childCollection in parent.NodeCollections)
 					{
 						childCollection.Replace(replaceMethod, searchReplacements);
 					}

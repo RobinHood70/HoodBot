@@ -32,14 +32,13 @@
 		#region Protected Override Methods
 		protected override void Main()
 		{
-			var titles = new TitleCollection(this.Site, this.imageCategories.Keys);
+			TitleCollection titles = new(this.Site, this.imageCategories.Keys);
 			PageCollection pages = PageCollection.Unlimited(this.Site, PageModules.Default, false);
-			var saveInfo = new SaveInfo("Update categories", true);
+			SaveInfo saveInfo = new("Update categories", true);
 			pages.PageLoaded += this.ImagePageLoaded;
 			pages.GetTitles(titles);
 			pages.PageLoaded -= this.ImagePageLoaded;
 			this.SavePages(pages, "Saving image categories", saveInfo, this.ImagePageLoaded);
-
 		}
 
 		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parsedPage)
@@ -95,7 +94,7 @@
 		{
 			if (page.Exists)
 			{
-				IEnumerable<string> catsToAdd = this.imageCategories[page];
+				var catsToAdd = this.imageCategories[page];
 				ContextualParser parser = new(page);
 				foreach (var cat in catsToAdd)
 				{
