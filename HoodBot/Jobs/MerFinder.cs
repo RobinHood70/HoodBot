@@ -10,7 +10,8 @@
 		public MerFinder(JobManager jobManager)
 			: base(jobManager, false)
 		{
-			TitleCollection titles = new(this.Site,
+			TitleCollection titles = new(
+				this.Site,
 				"Blades:Altmer",
 				"Blades:Bosmer",
 				"Blades:Dark Elf",
