@@ -18,7 +18,7 @@
 		#region Fields
 		private readonly PageCreator pageCreator;
 		private readonly List<string> recurseCategories = new();
-		private readonly Dictionary<string, IFullTitle> titleMap = new(StringComparer.Ordinal);
+		private readonly Dictionary<string, FullTitle> titleMap = new(StringComparer.Ordinal);
 		#endregion
 
 		#region Constructors
@@ -78,7 +78,7 @@
 		/// <para>The title map allows mapping from the original name you provided for a page to the actual title that was returned. If, for example, you requested "Main Page" and got redirected to "Main page", there would be an entry in the title map indicating that. Not all titles in the title map will necessarily appear in the result set. For example, if you provided an interwiki title, the result set most likely won't include that, but the title map will still include an InterwikiTitle result for it.</para>
 		/// <para>The title map is largely for informational purposes. When accessing items in the collection, it will automatically check the title map and attempt to return the correct result.</para>
 		/// </remarks>
-		public IReadOnlyDictionary<string, IFullTitle> TitleMap => this.titleMap;
+		public IReadOnlyDictionary<string, FullTitle> TitleMap => this.titleMap;
 		#endregion
 
 		#region Public Indexers
@@ -305,19 +305,19 @@
 		{
 			foreach (var item in result.Interwiki)
 			{
-				FullTitle? titleParts = FullTitle.FromNormalizedName(this.Site, item.Value.Title);
-				Debug.Assert(string.Equals(titleParts.Interwiki?.Prefix, item.Value.Prefix, StringComparison.Ordinal), "Interwiki prefixes didn't match.", titleParts.Interwiki?.Prefix + " != " + item.Value.Prefix);
-				this.titleMap[item.Key] = titleParts;
+				FullTitle title = TitleFactory.FromNormalizedName(this.Site, item.Value.Title).ToFullTitle();
+				Debug.Assert(string.Equals(title.Interwiki?.Prefix, item.Value.Prefix, StringComparison.Ordinal), "Interwiki prefixes didn't match.", title.Interwiki?.Prefix + " != " + item.Value.Prefix);
+				this.titleMap[item.Key] = title;
 			}
 
 			foreach (var item in result.Converted)
 			{
-				this.titleMap[item.Key] = FullTitle.FromNormalizedName(this.Site, item.Value);
+				this.titleMap[item.Key] = TitleFactory.FromNormalizedName(this.Site, item.Value).ToFullTitle();
 			}
 
 			foreach (var item in result.Normalized)
 			{
-				this.titleMap[item.Key] = FullTitle.FromNormalizedName(this.Site, item.Value);
+				this.titleMap[item.Key] = TitleFactory.FromNormalizedName(this.Site, item.Value).ToFullTitle();
 			}
 
 			foreach (var item in result.Redirects)
@@ -340,7 +340,7 @@
 					target.Append('#').Append(redirect.Interwiki);
 				}
 
-				FullTitle? title = TitleFactory.FromNormalizedName(this.Site, target.ToString()).ToFullTitle();
+				var title = TitleFactory.FromNormalizedName(this.Site, target.ToString()).ToFullTitle();
 				this.titleMap[item.Key] = title;
 			}
 		}
