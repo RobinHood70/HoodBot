@@ -25,17 +25,17 @@
 		<None Include="Old Jobs\*" />
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="Ardalis.GuardClauses" Version="3.2.0" />
-	  <PackageReference Include="Meziantou.Analyzer" Version="1.0.670">
+	  <PackageReference Include="Ardalis.GuardClauses" Version="4.0.0" />
+	  <PackageReference Include="Meziantou.Analyzer" Version="1.0.688">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	  <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0-preview.7.21377.19" />
-	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0-preview.7.21377.19" />
-	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0-preview.7.21377.19" />
+	  <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.2-mauipre.1.22054.8" />
+	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.2-mauipre.1.22054.8" />
+	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.2-mauipre.1.22054.8" />
 	  <PackageReference Include="MvvmLightLibsStd10" Version="5.4.1.1" />
-	  <PackageReference Include="MySql.Data" Version="8.0.26" />
-	  <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354">
+	  <PackageReference Include="MySql.Data" Version="8.0.28" />
+	  <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.376">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
