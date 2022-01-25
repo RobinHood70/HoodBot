@@ -6,6 +6,7 @@
 	using System.IO;
 	using System.Text;
 	using RobinHood70.CommonCode;
+	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -174,16 +175,15 @@
 
 		private void LoadQueryData(KeyValuePair<string, string> query)
 		{
-			foreach (var row in EsoLog.RunQuery(query.Value))
+			foreach (var item in Database.RunQuery(EsoLog.Connection, query.Value, row => new ItemInfo(row, query.Key)))
 			{
-				ItemInfo entry = new(row, query.Key);
-				if (!this.allItems.TryGetValue(entry.IconName, out var list))
+				if (!this.allItems.TryGetValue(item.IconName, out var list))
 				{
 					list = new List<ItemInfo>(1);
-					this.allItems.Add(entry.IconName, list);
+					this.allItems.Add(item.IconName, list);
 				}
 
-				list.Add(entry);
+				list.Add(item);
 			}
 		}
 

@@ -1,12 +1,14 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
+	using System.Data;
+
 	public class NpcLocationData
 	{
-		public NpcLocationData(long id, string zone, int count)
+		public NpcLocationData(IDataRecord row)
 		{
-			this.Id = id;
-			this.Zone = zone;
-			this.LocCount = count;
+			this.Id = (long)row["npcId"];
+			this.Zone = (string)row["zone"];
+			this.LocCount = (int)row["locCount"];
 		}
 
 		public long Id { get; }

@@ -2,20 +2,22 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Data;
 	using System.Diagnostics;
 	using System.Text.RegularExpressions;
 	using MySql.Data.MySqlClient;
 	using RobinHood70.CommonCode;
+	using RobinHood70.HoodBot.Design;
 
 	internal static class EsoLog
 	{
-		#region Fields
+		#region Static Fields
 		private static readonly Regex ColourCode = new(@"\A\|c[0-9A-F]{6}(.*?)\|r\Z", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		private static readonly Regex TrailingDigits = new(@"\s*\d+\Z", RegexOptions.None, Globals.DefaultRegexTimeout);
 		#endregion
 
 		#region Public Properties
+		public static string Connection { get; } = App.GetConnectionString("EsoLog");
+
 		public static Dictionary<int, string> MechanicNames { get; } = new Dictionary<int, string>
 		{
 			[-2] = "Health",
@@ -58,13 +60,9 @@
 			{
 				try
 				{
-					foreach (var row in RunQuery(query))
+					foreach (var location in Database.RunQuery(Connection, query, row => new NpcLocationData(row)))
 					{
-						NpcLocationData data = new(
-							(long)row["npcId"],
-							(string)row["zone"],
-							(int)row["locCount"]);
-						retval.Add(data);
+						retval.Add(location);
 					}
 
 					retries = 0;
@@ -88,23 +86,21 @@
 			NpcCollection retval = new();
 			HashSet<string> nameClash = new(StringComparer.Ordinal);
 			var throwNameClash = false;
-			foreach (var row in RunQuery("SELECT id, name, gender, difficulty, ppDifficulty, ppClass, reaction FROM uesp_esolog.npc WHERE level != -1 AND reaction != 6"))
+			var query = "SELECT id, name, gender, difficulty, ppDifficulty, ppClass, reaction FROM uesp_esolog.npc WHERE level != -1 AND reaction != 6";
+			foreach (var npcData in Database.RunQuery(Connection, query, row => new NpcData(row)))
 			{
-				var name = (string)row["name"];
-				if (!ColourCode.IsMatch(name) && !TrailingDigits.IsMatch(name))
+				if (!ColourCode.IsMatch(npcData.Name) &&
+					!TrailingDigits.IsMatch(npcData.Name) &&
+					!ReplacementData.NpcNameSkips.Contains(npcData.Name))
 				{
-					NpcData npcData = new(row);
-					if (!ReplacementData.NpcNameSkips.Contains(npcData.Name))
+					if (nameClash.Add(npcData.Name))
 					{
-						if (nameClash.Add(npcData.Name))
-						{
-							retval.Add(npcData);
-						}
-						else
-						{
-							Debug.WriteLine($"Warning: an NPC with the name \"{npcData.Name}\" exists more than once in the database!");
-							throwNameClash = true;
-						}
+						retval.Add(npcData);
+					}
+					else
+					{
+						Debug.WriteLine($"Warning: an NPC with the name \"{npcData.Name}\" exists more than once in the database!");
+						throwNameClash = true;
 					}
 				}
 			}
@@ -116,7 +112,8 @@
 
 		public static IEnumerable<(string Name, int Data)> GetZones()
 		{
-			foreach (var row in RunQuery("SELECT zoneName, subZoneName, mapName, description, mapType, mapContentType, mapFilterType, isDungeon FROM uesp_esolog.zones"))
+			var query = "SELECT zoneName, subZoneName, mapName, description, mapType, mapContentType, mapFilterType, isDungeon FROM uesp_esolog.zones";
+			foreach (var row in Database.RunQuery(Connection, query))
 			{
 				var mapName = (string)row["mapName"];
 				var subZoneName = (string)row["subZoneName"];
@@ -126,19 +123,6 @@
 						: zoneName;
 				Debug.WriteLine($"{zoneName}/{subZoneName}/{mapName} - chose {name}");
 				yield return (name, (int)row["mapType"]);
-			}
-		}
-
-		public static IEnumerable<IDataRecord> RunQuery(string query)
-		{
-			// Little point in calling Database.RunQuery for such simple code, so just duplicated it.
-			using MySqlConnection connection = new(App.GetConnectionString("EsoLog"));
-			connection.Open();
-			using MySqlCommand command = new(query, connection);
-			using var reader = command.ExecuteReader();
-			while (reader.Read())
-			{
-				yield return reader;
 			}
 		}
 		#endregion

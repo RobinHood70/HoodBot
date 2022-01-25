@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
+	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
@@ -26,7 +27,8 @@
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
-			foreach (var row in EsoLog.RunQuery("SELECT id, name FROM uesp_esolog.collectibles WHERE categoryType = 2 AND furnCategory = 'Mounts'"))
+			var query = "SELECT id, name FROM uesp_esolog.collectibles WHERE categoryType = 2 AND furnCategory = 'Mounts'";
+			foreach (var row in Database.RunQuery(EsoLog.Connection, query))
 			{
 				this.ids.Add((string)row["name"], (int)(long)row["id"]);
 			}

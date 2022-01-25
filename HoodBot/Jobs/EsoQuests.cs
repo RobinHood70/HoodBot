@@ -5,6 +5,7 @@
 	using System.Data;
 	using System.Text;
 	using RobinHood70.CommonCode;
+	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -202,9 +203,8 @@
 		#region Private Methods
 		private IEnumerable<QuestData> GetFilteredQuests(TitleCollection wikiQuests)
 		{
-			foreach (var row in EsoLog.RunQuery(QuestQuery))
+			foreach (var quest in Database.RunQuery(EsoLog.Connection, QuestQuery, row => new QuestData(row)))
 			{
-				QuestData quest = new(row);
 				TitleFactory title = TitleFactory.FromName(this.Site, quest.FullPageName);
 				TitleFactory titleDisambig = TitleFactory.DirectNormalized(title.Namespace, title.PageName + " (quest)");
 				if (!wikiQuests.Contains(title) && !wikiQuests.Contains(titleDisambig))
@@ -241,7 +241,7 @@
 
 			var whereText = string.Join(",", questNames.Keys);
 			this.StatusWriteLine("Getting stage data");
-			foreach (var row in EsoLog.RunQuery(StageQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
+			foreach (var row in Database.RunQuery(EsoLog.Connection, StageQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
 			{
 				Stage stage = new(row);
 				var questId = (long)row["questId"];
@@ -252,7 +252,7 @@
 			}
 
 			this.StatusWriteLine("Getting condition data");
-			foreach (var row in EsoLog.RunQuery(ConditionQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
+			foreach (var row in Database.RunQuery(EsoLog.Connection, ConditionQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
 			{
 				Condition condition = new(row);
 				var questId = (long)row["questId"];
@@ -266,7 +266,7 @@
 			}
 
 			this.StatusWriteLine("Getting rewards data");
-			foreach (var row in EsoLog.RunQuery(RewardsQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
+			foreach (var row in Database.RunQuery(EsoLog.Connection, RewardsQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
 			{
 				Reward reward = new(row);
 				var questId = (long)row["questId"];

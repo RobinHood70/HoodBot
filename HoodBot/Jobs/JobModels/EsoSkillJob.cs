@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Data;
 	using RobinHood70.CommonCode;
+	using RobinHood70.HoodBot.Design;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
@@ -208,7 +209,7 @@
 			var errors = false;
 			T? currentSkill = null;
 			string? lastName = null; // We use a string for comparison because the skill itself will sometimes massage the data.
-			foreach (var row in EsoLog.RunQuery(this.Query))
+			foreach (var row in Database.RunQuery(EsoLog.Connection, this.Query))
 			{
 				var currentName = (string)row["skillTypeName"] + "::" + (string)row["baseName"];
 				if (!string.Equals(lastName, currentName, StringComparison.Ordinal))
