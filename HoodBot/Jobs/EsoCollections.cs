@@ -7,6 +7,7 @@
 	using System.Text;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
+	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -628,10 +629,9 @@
 			internal static Dictionary<string, DbCollectible> RunQuery()
 			{
 				Dictionary<string, DbCollectible>? retval = new(StringComparer.Ordinal);
-				foreach (var row in EsoLog.RunQuery(Query))
+				foreach (var item in Database.RunQuery(EsoLog.Connection, Query, row => new DbCollectible(row)))
 				{
-					DbCollectible collectible = new(row);
-					retval.Add(collectible.LookupName, collectible);
+					retval.Add(item.LookupName, item);
 				}
 
 				return retval;
