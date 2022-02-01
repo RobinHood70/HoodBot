@@ -538,7 +538,7 @@
 		/// <remarks>If the page title specified represents a page already in the collection, that page will be overwritten.</remarks>
 		private Page New(IApiTitle item)
 		{
-			TitleFactory? pageTitle = TitleFactory.FromNormalizedName(this.Site, item.FullPageName);
+			TitleFactory pageTitle = TitleFactory.FromNormalizedName(this.Site, item.FullPageName);
 			return this.pageCreator.CreatePage(pageTitle, this.LoadOptions, item);
 		}
 
