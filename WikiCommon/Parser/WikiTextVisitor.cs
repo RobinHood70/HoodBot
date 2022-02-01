@@ -140,14 +140,26 @@
 		/// <inheritdoc/>
 		public void Visit(ILinkNode node)
 		{
-			this.builder.Append("[[");
-			node.NotNull(nameof(node)).Title.Accept(this);
-			foreach (var param in node.Parameters)
+			if (node != null)
 			{
-				param.Accept(this);
-			}
+				if (node.Parameters.Count > 0)
+				{
+					foreach (var parameter in node.Parameters)
+					{
+						if (parameter.Name is not null)
+						{
+							parameter.Name.Accept(this);
+							this.builder.Append('=');
+						}
 
-			this.builder.Append("]]");
+						parameter.Value.Accept(this);
+					}
+				}
+				else
+				{
+					node.Title.Accept(this);
+				}
+			}
 		}
 
 		/// <inheritdoc/>
