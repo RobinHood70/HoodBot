@@ -1,21 +1,13 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Diagnostics;
-	using System.Text;
-	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot.Uesp;
+	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 
 	public class OneOffJob : EditJob
 	{
-		#region Static Fields
-		private static readonly Regex RowFinder = new(@"\|-\ *\n[!\|]\ *\[\[(?<icon>.*?)(?<iconSize>\|.*?)?\]\]\ *\n[!\|]\ *\{\{Anchor\|(?<itemName>.*?)\}\}\ *(\|\||<br>)\ *(\{\{Small\|)?(?<id>.*)(\}\})?\n\|\ *(?<weight>.*?)\ *\|\|\ *(?<value>.*?)\ *\n\|(\{\{AL\|L\}\}\|)?(?<desc>.*?)\n(\|\ *\[\[(?<image>.*?)(?<imageSize>\|.*?)?\]\]\ *\n)?", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
-		#endregion
-
 		#region Constructors
 		[JobInfo("One-Off Job")]
 		public OneOffJob(JobManager jobManager)
@@ -27,60 +19,49 @@
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
-			var pageText = this.Site.LoadPageText("Morrowind:Miscellaneous Items");
-			if (pageText != null)
+			TitleCollection allTitles = new(this.Site);
+			TitleCollection imageCats = new(this.Site);
+			imageCats.GetNamespace(MediaWikiNamespaces.Category, Filter.Any, "Online-Furnishing Images-");
+			foreach (var title in imageCats)
 			{
-				pageText = pageText
-					.Replace("{{sic|Dewmer|Dwemer|nolink=1}}", "Dewmer", StringComparison.OrdinalIgnoreCase)
-					.Replace("{{Anchor|The Head Of Scourge|The Head of Scourge}}", "{{Anchor|The Head Of Scourge}}", StringComparison.OrdinalIgnoreCase);
-				IReadOnlyCollection<Match> matches = RowFinder.Matches(pageText);
-				Debug.WriteLine(matches.Count);
-				StringBuilder sb = new();
-				foreach (var match in matches)
+				allTitles.Add(title);
+				allTitles.Add(FurnishingTitle(title));
+			}
+
+			PageCollection pages = new(this.Site, PageModules.Default | PageModules.CategoryInfo);
+			pages.GetTitles(allTitles);
+			foreach (var page in pages)
+			{
+				var newTitle = FurnishingTitle(page);
+				if (page is CategoryPage catPage && catPage.FullCount == 0)
 				{
-					var groups = match.Groups;
-					var pageName = groups["itemName"].Value;
-					Debug.WriteLine("Match: " + match.Value);
-					TitleFactory? title = TitleFactory.Direct(this.Site, UespNamespaces.Morrowind, pageName);
-					sb.Clear();
-					if (this.Pages.TryGetValue(title, out var page))
+					if (catPage.Exists)
 					{
-						sb
-							.Append(page.Text)
-							.Append("\n{{NewLine}}\n");
+						catPage.Text = "{{Proposeddeletion|bot=1|Unused category.}}";
+						this.Pages.Add(catPage);
 					}
-					else
+				}
+				else if (pages[newTitle] is CategoryPage catPageNew && catPageNew.FullCount == 0)
+				{
+					if (catPageNew.Exists)
 					{
-						page = TitleFactory.DirectNormalized(title).ToNewPage(string.Empty);
-						this.Pages.Add(page);
+						catPageNew.Text = "{{Proposeddeletion|bot=1|Unused category.}}";
+						this.Pages.Add(catPageNew);
 					}
-
-					sb
-						.AppendLinefeed("{{Item Summary")
-						.Append("|objectid=")
-						.AppendLinefeed(groups["id"].Value)
-						.Append("|icon=")
-						.AppendLinefeed(TitleFactory.FromName(this.Site, groups["icon"].Value).PageName)
-						.Append("|image=")
-						.AppendLinefeed(TitleFactory.FromName(this.Site, groups["image"].Value).PageName)
-						.Append("|weight=")
-						.AppendLinefeed(groups["weight"].Value)
-						.Append("|value=")
-						.AppendLinefeed(groups["value"].Value)
-						.AppendLinefeed("}}")
-						.Append(groups["desc"].Value);
-
-					page.Text = sb.ToString();
+				}
+				else if (page != newTitle && !pages[newTitle].Exists)
+				{
+					var newPage = this.Site.CreatePage(newTitle, page.Text
+						.Replace("images of ", string.Empty, StringComparison.Ordinal)
+						.Replace("Online-Furnishing Images", "Online-Furnishings", StringComparison.Ordinal));
+					this.Pages.Add(newPage);
 				}
 			}
 
-			foreach (var page in this.Pages)
-			{
-				page.Text = "{{Trail|Items}}{{Minimal}}\n" + page.Text;
-			}
+			static ISimpleTitle FurnishingTitle(ISimpleTitle title) => TitleFactory.Direct(title.Namespace, title.PageName.Replace("-Furnishing Images-", "-Furnishings-", StringComparison.Ordinal));
 		}
 
-		protected override void Main() => this.SavePages("Create item page", false);
+		protected override void Main() => this.SavePages("Create furnishing redirects", false);
 		#endregion
 	}
 }
