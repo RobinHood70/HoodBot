@@ -142,22 +142,36 @@
 		{
 			if (node != null)
 			{
-				if (node.Parameters.Count > 0)
+				if (this.raw)
 				{
-					foreach (var parameter in node.Parameters)
+					this.builder.Append("[[");
+					node.NotNull(nameof(node)).Title.Accept(this);
+					foreach (var param in node.Parameters)
 					{
-						if (parameter.Name is not null)
-						{
-							parameter.Name.Accept(this);
-							this.builder.Append('=');
-						}
-
-						parameter.Value.Accept(this);
+						param.Accept(this);
 					}
+
+					this.builder.Append("]]");
 				}
 				else
 				{
-					node.Title.Accept(this);
+					if (node.Parameters.Count > 0)
+					{
+						foreach (var parameter in node.Parameters)
+						{
+							if (parameter.Name is not null)
+							{
+								parameter.Name.Accept(this);
+								this.builder.Append('=');
+							}
+
+							parameter.Value.Accept(this);
+						}
+					}
+					else
+					{
+						node.Title.Accept(this);
+					}
 				}
 			}
 		}
