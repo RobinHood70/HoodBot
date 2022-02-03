@@ -3,6 +3,7 @@ namespace RobinHood70.WallE.Eve.Modules
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.IO;
@@ -100,6 +101,11 @@ namespace RobinHood70.WallE.Eve.Modules
 
 					var response = this.Wal.SendRequest(request);
 					this.ParseResponse(response, pages);
+					if (input.ListType != ListType.Titles)
+					{
+						// This is a kludge to deal with the fact that there's often no clear identifier between input and results. For example, when purging by Page ID, no Page ID is ever returned, so we have to take it on faith that what was requested was purged.
+						uniqueTitles.ExceptWith(currentGroup);
+					}
 				}
 				while (this.ContinueModule.Continues && this.Continues);
 
@@ -110,9 +116,12 @@ namespace RobinHood70.WallE.Eve.Modules
 					returnedNames.Add(title.FullPageName);
 				}
 
-				uniqueTitles.ExceptWith(returnedNames);
-				uniqueTitles.ExceptWith(this.converted.Keys);
-				uniqueTitles.ExceptWith(this.redirects.Keys);
+				if (input.ListType == ListType.Titles)
+				{
+					uniqueTitles.ExceptWith(returnedNames);
+					uniqueTitles.ExceptWith(this.converted.Keys);
+					uniqueTitles.ExceptWith(this.redirects.Keys);
+				}
 			}
 			while (uniqueTitles.Count > 0 && uniqueTitlesCount != uniqueTitles.Count);
 			return this.CreatePageSet(pages);
