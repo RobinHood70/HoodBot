@@ -310,7 +310,7 @@
 
 		public ICollection<ISimpleTitle> CheckNewLinks(ContextualParser oldPage, ContextualParser newPage)
 		{
-			HashSet<ISimpleTitle> oldLinks = new(SimpleTitleEqualityComparer.Instance);
+			HashSet<ISimpleTitle> oldLinks = new(SimpleTitleComparer.Instance);
 			foreach (var node in oldPage.Nodes.FindAll<ILinkNode>(null, false, true, 0))
 			{
 				SiteLink? siteLink = SiteLink.FromLinkNode(this.site, node);
@@ -328,7 +328,7 @@
 
 		public ICollection<ISimpleTitle> CheckNewTemplates(ContextualParser oldPage, ContextualParser newPage)
 		{
-			HashSet<ISimpleTitle> oldTemplates = new(SimpleTitleEqualityComparer.Instance);
+			HashSet<ISimpleTitle> oldTemplates = new(SimpleTitleComparer.Instance);
 			foreach (var node in oldPage.Nodes.FindAll<ITemplateNode>(null, false, true, 0))
 			{
 				oldTemplates.Add(Title.FromBacklinkNode(this.site, node));

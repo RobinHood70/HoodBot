@@ -31,7 +31,7 @@
 		/// <remarks>During a SavePage, if an edit conflict occurs, the page will automatically be re-loaded and the method specified here will be executed.</remarks>
 		protected Action<EditJob, Page>? EditConflictAction { get; set; }
 
-		protected IDictionary<ISimpleTitle, SaveInfo> SaveInfo { get; } = new Dictionary<ISimpleTitle, SaveInfo>(SimpleTitleEqualityComparer.Instance);
+		protected IDictionary<ISimpleTitle, SaveInfo> SaveInfo { get; } = new Dictionary<ISimpleTitle, SaveInfo>(SimpleTitleComparer.Instance);
 
 		protected bool Shuffle { get; set; }
 		#endregion

@@ -352,7 +352,7 @@
 		private sealed class SetCollection : KeyedCollection<Page, SetData>
 		{
 			public SetCollection()
-				: base(SimpleTitleEqualityComparer.Instance)
+				: base(SimpleTitleComparer.Instance)
 			{
 			}
 

@@ -19,7 +19,7 @@
 		private readonly MovePagesJob job;
 		private readonly List<ParameterReplacer> generalReplacers = new();
 		private readonly ReplacementCollection replacements;
-		private readonly Dictionary<ISimpleTitle, List<ParameterReplacer>> templateReplacers = new(SimpleTitleEqualityComparer.Instance);
+		private readonly Dictionary<ISimpleTitle, List<ParameterReplacer>> templateReplacers = new(SimpleTitleComparer.Instance);
 		private UespNamespaceList? nsList;
 		#endregion
 
