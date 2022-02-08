@@ -8,7 +8,7 @@
 	{
 		#region Constructors
 		public ReplacementCollection()
-			: base(SimpleTitleEqualityComparer.Instance)
+			: base(SimpleTitleComparer.Instance)
 		{
 		}
 		#endregion

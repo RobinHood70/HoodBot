@@ -90,7 +90,7 @@
 			this.AddPseudospace(UespNamespaces.Tes5Mod, "Beyond Skyrim/", "Beyond Skyrim", "Wares of Tamriel/");
 			this.AddPseudospace(UespNamespaces.Tes5Mod, "Beyond Skyrim", "Beyond Skyrim", string.Empty);
 
-			var verification = new HashSet<Title>(SimpleTitleEqualityComparer.Instance);
+			var verification = new HashSet<Title>(SimpleTitleComparer.Instance);
 			var remove = new List<Title>();
 			foreach (var replacement in this.Replacements)
 			{

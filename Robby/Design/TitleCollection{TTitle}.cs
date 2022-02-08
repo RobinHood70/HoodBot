@@ -92,7 +92,7 @@
 		protected TitleCollection([NotNull, ValidatedNotNull] Site site, IEqualityComparer<ISimpleTitle>? equalityComparer)
 		{
 			this.Site = site.NotNull(nameof(site));
-			this.lookup = new Dictionary<ISimpleTitle, TTitle>(equalityComparer ?? SimpleTitleEqualityComparer.Instance);
+			this.lookup = new Dictionary<ISimpleTitle, TTitle>(equalityComparer ?? SimpleTitleComparer.Instance);
 		}
 		#endregion
 

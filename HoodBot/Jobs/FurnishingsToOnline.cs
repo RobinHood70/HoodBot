@@ -46,7 +46,7 @@
 
 		#region Fields
 		private readonly PageCollection filePages;
-		private readonly Dictionary<ISimpleTitle, string> nameLookup = new(SimpleTitleEqualityComparer.Instance);
+		private readonly Dictionary<ISimpleTitle, string> nameLookup = new(SimpleTitleComparer.Instance);
 		#endregion
 
 		#region Constructors
