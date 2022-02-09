@@ -517,11 +517,16 @@
 		protected virtual void GetPageActions(PageCollection fromPages)
 		{
 			var toPages = this.GetToPages();
-			var skipReplacements = new List<Replacement>(this.replacements).FindAll(replacement => !replacement.MoveActions.HasAction(ReplacementActions.Skip));
-			foreach (var replacement in skipReplacements)
+			// var skipReplacements = new List<Replacement>(this.replacements).FindAll(replacement => !replacement.MoveActions.HasAction(ReplacementActions.Skip));
+			this.replacements.Sort();
+			foreach (var replacement in this.replacements)
 			{
-				var fromPage = fromPages[replacement.From];
-				replacement.SetMoveActions(this.GetPageAction(replacement, fromPage, toPages));
+				if (!replacement.MoveActions.HasAction(ReplacementActions.Skip))
+				{
+					var fromPage = fromPages[replacement.From];
+					var actions = this.GetPageActions(replacement, fromPage, toPages);
+					replacement.SetMoveActions(actions);
+				}
 			}
 		}
 
@@ -846,7 +851,7 @@
 			return loadTitles;
 		}
 
-		private Replacement.DetailedActions GetPageAction(Replacement replacement, Page fromPage, PageCollection toPages)
+		private Replacement.DetailedActions GetPageActions(Replacement replacement, Page fromPage, PageCollection toPages)
 		{
 			var actions = replacement.MoveActions.NotNull(nameof(replacement), nameof(replacement.MoveActions)).Actions;
 			if (this.MoveAction == MoveAction.None && !replacement.From.SimpleEquals(replacement.To))

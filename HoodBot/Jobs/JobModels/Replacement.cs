@@ -30,7 +30,7 @@
 
 		[JsonConstructor]
 		public Replacement(ISimpleTitle from, Title to)
-			: this(from, to, DetailedActions.Empty)
+			: this(from, to, new DetailedActions(ReplacementActions.None, string.Empty))
 		{
 		}
 		#endregion
@@ -81,10 +81,6 @@
 			}
 			#endregion
 
-			#region Public Static Properties
-			public static DetailedActions Empty { get; } = new DetailedActions(ReplacementActions.None, string.Empty);
-			#endregion
-
 			#region Public Properties
 			public ReplacementActions Actions { get; set; }
 
@@ -93,6 +89,10 @@
 
 			#region Public Methods
 			public bool HasAction(ReplacementActions action) => (this.Actions & action) != 0;
+			#endregion
+
+			#region Public Override Methods
+			public override string ToString() => this.Actions.ToString() + (string.IsNullOrEmpty(this.Reason) ? string.Empty : " (" + this.Reason + ")");
 			#endregion
 		}
 		#endregion
