@@ -228,8 +228,8 @@
 
 			this.replacements.Sort();
 			var fromPages = this.GetFromPages();
-			var categoryMembers = this.GetCategoryMembers(fromPages);
 			this.GetPageActions(fromPages);
+			var categoryMembers = this.GetCategoryMembers(fromPages);
 			var loadTitles = this.GetLoadTitles(fromPages, categoryMembers);
 			if (!readFromFile)
 			{
@@ -410,7 +410,7 @@
 		{
 			this.StatusWriteLine("Getting category members");
 			Dictionary<ISimpleTitle, TitleCollection> retval = new();
-			if ((this.FollowUpActions & (FollowUpActions.ProposeUnused | FollowUpActions.UpdateCategoryMembers)) != 0)
+			if ((this.FollowUpActions & FollowUpActions.NeedsCategoryMembers) != 0)
 			{
 				var skipCats = (this.FollowUpActions & FollowUpActions.NeedsCategoryMembers) == 0;
 				var categoryReplacements = new List<Replacement>(this.replacements).FindAll(replacement => replacement.From.Namespace == MediaWikiNamespaces.Category);
