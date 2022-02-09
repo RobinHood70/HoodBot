@@ -517,7 +517,6 @@
 		protected virtual void GetPageActions(PageCollection fromPages)
 		{
 			var toPages = this.GetToPages();
-			// var skipReplacements = new List<Replacement>(this.replacements).FindAll(replacement => !replacement.MoveActions.HasAction(ReplacementActions.Skip));
 			this.replacements.Sort();
 			foreach (var replacement in this.replacements)
 			{
