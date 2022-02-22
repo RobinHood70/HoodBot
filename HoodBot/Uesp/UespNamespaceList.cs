@@ -37,12 +37,30 @@
 
 		#region Public Methods
 
+		public UespNamespace? FromId(string id)
+		{
+			foreach (var ns in this)
+			{
+				if (string.Equals(id, ns.Id, StringComparison.Ordinal))
+				{
+					return ns;
+				}
+			}
+
+			return null;
+		}
+
+		public UespNamespace? FromNamespace(Namespace ns) =>
+			this.TryGetValue(ns.Name, out var retval) ? retval : null;
+
 		public UespNamespace? FromTitle(Title title)
 		{
-			var test = title.NotNull(nameof(title)).Namespace.DecoratedName + title.RootPageName;
-			if (!this.TryGetValue(test, out var retval))
+			title.ThrowNull(nameof(title));
+			var ns = title.Namespace.SubjectSpace;
+			var tryName = ns.DecoratedName + title.RootPageName;
+			if (!this.TryGetValue(tryName, out var retval))
 			{
-				this.TryGetValue(title.Namespace.Name, out retval);
+				this.TryGetValue(ns.Name, out retval);
 			}
 
 			return retval;

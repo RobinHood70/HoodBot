@@ -115,7 +115,6 @@
 
 		private static string GetLookupName(string catName, Section section)
 		{
-			var content = section.Content;
 			var header = section.Header!;
 			var name = GetSectionTitle(header);
 			var localCat = catName;
@@ -509,7 +508,7 @@
 				{
 					var fileName = this.NewContent[iconOffset] switch
 					{
-						SiteTemplateNode iconTemplate => UespFunctions.IconAbbreviation(iconTemplate),
+						SiteTemplateNode iconTemplate => UespFunctions.IconAbbreviation("ON", iconTemplate),
 						SiteLinkNode iconLink => iconLink.TitleValue.PageName,
 						_ => throw new InvalidOperationException(),
 					};
