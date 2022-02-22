@@ -1,5 +1,9 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System;
+	using RobinHood70.Robby;
+	using RobinHood70.WikiCommon;
+
 	public class MovePages : MovePagesJob
 	{
 		#region Constructors
@@ -8,9 +12,9 @@
 				: base(jobManager)
 		{
 			this.DeleteStatusFile();
-			this.MoveAction = MoveAction.MoveSafely;
+			this.MoveAction = MoveAction.None;
+			this.FollowUpActions = FollowUpActions.FixLinks;
 			this.MoveDelay = 500;
-			this.FollowUpActions = FollowUpActions.Default | FollowUpActions.UpdateCategoryMembers;
 			this.EditSummaryMove = "Move to in-game name";
 		}
 		#endregion
@@ -18,15 +22,24 @@
 		#region Protected Override Methods
 		protected override void PopulateReplacements()
 		{
-			this.AddReplacement("Category:Online-Icons-Abilities-Altmer", "Category:Online-Icons-Abilities-High Elf");
-			this.AddReplacement("Category:Online-Icons-Abilities-Bosmer", "Category:Online-Icons-Abilities-Wood Elf");
-			this.AddReplacement("Category:Online-Icons-Abilities-Dunmer", "Category:Online-Icons-Abilities-Dark Elf");
-			this.AddReplacement("Category:Online-Icons-Armor-Altmer", "Category:Online-Icons-Armor-High Elf");
-			this.AddReplacement("Category:Online-Icons-Armor-Bosmer", "Category:Online-Icons-Armor-Wood Elf");
-			this.AddReplacement("Category:Online-Icons-Armor-Dunmer", "Category:Online-Icons-Armor-Dark Elf");
-			this.AddReplacement("Category:Online-Icons-Weapons-Altmer", "Category:Online-Icons-Weapons-High Elf");
-			this.AddReplacement("Category:Online-Icons-Weapons-Bosmer", "Category:Online-Icons-Weapons-Wood Elf");
-			this.AddReplacement("Category:Online-Icons-Weapons-Dunmer", "Category:Online-Icons-Weapons-Dark Elf");
+			TitleCollection titles = new(this.Site);
+			titles.GetCategoryMembers("Category:Online-Icons-Abilities-High Elf", CategoryMemberTypes.File, false);
+			titles.GetCategoryMembers("Category:Online-Icons-Abilities-Wood Elf", CategoryMemberTypes.File, false);
+			titles.GetCategoryMembers("Category:Online-Icons-Abilities-Dark Elf", CategoryMemberTypes.File, false);
+			titles.GetCategoryMembers("Category:Online-Icons-Armor-High Elf", CategoryMemberTypes.File, false);
+			titles.GetCategoryMembers("Category:Online-Icons-Armor-Wood Elf", CategoryMemberTypes.File, false);
+			titles.GetCategoryMembers("Category:Online-Icons-Armor-Dark Elf", CategoryMemberTypes.File, false);
+			titles.GetCategoryMembers("Category:Online-Icons-Weapons-High Elf", CategoryMemberTypes.File, false);
+			titles.GetCategoryMembers("Category:Online-Icons-Weapons-Wood Elf", CategoryMemberTypes.File, false);
+			titles.GetCategoryMembers("Category:Online-Icons-Weapons-Dark Elf", CategoryMemberTypes.File, false);
+			foreach (var title in titles)
+			{
+				var oldTitle = title.FullPageName()
+					.Replace("High Elf", "Altmer", StringComparison.Ordinal)
+					.Replace("Wood Elf", "Bosmer", StringComparison.Ordinal)
+					.Replace("Dark Elf", "Dunmer", StringComparison.Ordinal);
+				this.AddReplacement(oldTitle, title.FullPageName());
+			}
 
 			//// this.AddReplacement("Skyrim:Map Notes", "Skyrim:Treasure Maps");
 			//// this.LoadReplacementsFromFile(@"D:\Data\HoodBot\FileList.txt");
