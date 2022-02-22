@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
@@ -91,33 +92,44 @@
 		protected void BulletLink(Page page, SiteTemplateNode template)
 		{
 			page.ThrowNull(nameof(page));
-			if ((template.NotNull(nameof(template)).Find(1) ?? template.Find("link")) is IParameterNode link)
+			if ((template.NotNull(nameof(template)).Find(1)
+				?? template.Find("link")) is not IParameterNode link)
 			{
-				var (oldNs, nsParam) = this.GetNsBase(page, template);
-				var oldTitle = link.Value.ToValue();
-				Title? searchTitle = TitleFactory.FromName(page.Site, oldNs.Full + oldTitle).ToTitle();
-				if (this.replacements.TryGetValue(searchTitle, out var replacement))
-				{
-					link.Value.Clear();
-					link.SetValue(replacement.To.PageName);
-					if (this.NamespaceList.FromTitle(replacement.To) is UespNamespace newNs &&
-						string.Equals(oldNs.Id, newNs.Id, System.StringComparison.Ordinal))
-					{
-						if (nsParam == null)
-						{
-							template.Add("ns_base", newNs.Id);
-						}
-						else
-						{
-							nsParam.SetValue(newNs.Id);
-						}
+				return;
+			}
 
-						if (replacement.To.SimpleEquals(newNs.MainPage))
-						{
-							template.Add("altname", oldTitle);
-						}
-					}
-				}
+			var (oldNs, nsParam) = this.GetNsBase(page, template);
+			if (oldNs is null)
+			{
+				return;
+			}
+
+			var oldTitle = link.Value.ToValue();
+			Title? searchTitle = TitleFactory.FromName(page.Site, oldNs.Full + oldTitle).ToTitle();
+			if (!this.replacements.TryGetValue(searchTitle, out var replacement))
+			{
+				return;
+			}
+
+			link.Value.Clear();
+			link.SetValue(replacement.To.PageName);
+			if (this.NamespaceList.FromTitle(replacement.To) is not UespNamespace newNs || !string.Equals(oldNs.Id, newNs.Id, StringComparison.Ordinal))
+			{
+				return;
+			}
+
+			if (nsParam == null)
+			{
+				template.Add("ns_base", newNs.Id);
+			}
+			else
+			{
+				nsParam.SetValue(newNs.Id);
+			}
+
+			if (replacement.To.SimpleEquals(newNs.MainPage))
+			{
+				template.Add("altname", oldTitle);
 			}
 		}
 
@@ -149,6 +161,28 @@
 
 		protected void GenericImage(SiteTemplateNode template) => this.PageNameReplace(template.Find("image"), MediaWikiNamespaces.File);
 
+		protected void Icon(Page page, SiteTemplateNode template)
+		{
+			var (oldNs, _) = this.GetNsBase(page, template);
+			if (oldNs is null)
+			{
+				return;
+			}
+
+			var iconName = UespFunctions.IconAbbreviation(oldNs.Id, template);
+			TitleFactory title = TitleFactory.Direct(this.job.Site, MediaWikiNamespaces.File, iconName);
+			if (this.replacements.TryGetValue(title, out var replacement))
+			{
+				var (_, abbr, name, _) = UespFunctions.AbbreviationFromIconName(this.NamespaceList, replacement.To.PageName);
+				if (template.Find(1) is IParameterNode param1 &&
+					template.Find(2) is IParameterNode param2)
+				{
+					param1.SetValue(abbr);
+					param2.SetValue(name);
+				}
+			}
+		}
+
 		protected void LoreFirst(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find(1), UespNamespaces.Lore);
 
 		protected void NpcSummary(Page page, SiteTemplateNode template)
@@ -176,6 +210,7 @@
 			this.AddTemplateReplacers("Furnishing Luxury Entry", this.FurnishingLink);
 			this.AddTemplateReplacers("Furnishing Recipe Link", this.FurnishingLink);
 			this.AddTemplateReplacers("Furnishing Recipe Short", this.FurnishingLink);
+			this.AddTemplateReplacers("Icon", this.Icon);
 			this.AddTemplateReplacers("Lore Link", this.LoreFirst);
 			this.AddTemplateReplacers("Game Book", this.GameBookGeneral);
 			this.AddTemplateReplacers("NPC Summary", this.NpcSummary);
@@ -220,12 +255,12 @@
 			}
 		}
 
-		private (UespNamespace Namespace, IParameterNode? NsParameter) GetNsBase(Page page, SiteTemplateNode template)
+		private (UespNamespace? Namespace, IParameterNode? NsParameter) GetNsBase(Page page, SiteTemplateNode template)
 		{
 			var nsBase = template.Find("ns_base", "ns_id");
 			var ns = nsBase != null && this.NamespaceList.TryGetValue(nsBase.Value.ToValue(), out var uespNamespace)
 				? uespNamespace
-				: this.NamespaceList[page.Namespace.CanonicalName];
+				: this.NamespaceList.FromTitle(page);
 
 			return (ns, nsBase);
 		}
@@ -249,10 +284,9 @@
 			if (param != null
 				&& TitleFactory.Direct(this.job.Site, ns, param.Value.ToValue()).ToTitle() is var title
 				&& this.replacements.TryGetValue(title, out var replacement)
-				&& replacement.To is ISimpleTitle toLink
-				&& toLink.Namespace == ns)
+				&& replacement.To.Namespace == ns)
 			{
-				param.SetValue(toLink.PageName);
+				param.SetValue(replacement.To.PageName);
 			}
 		}
 		#endregion
