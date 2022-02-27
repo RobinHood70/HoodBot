@@ -229,8 +229,8 @@
 
 		private static string TrimHeader(SiteTemplateNode template) => template.TitleValue.PageName switch
 		{
-			"Anchor" or "Item Link" => template.Find(1)?.ToString() ?? string.Empty,
-			"ESO Quality Color" => template.Find(2)?.ToString() ?? string.Empty,
+			"Anchor" or "Item Link" => template.GetValue(1) ?? string.Empty,
+			"ESO Quality Color" => template.GetValue(2) ?? string.Empty,
 			_ => throw new InvalidOperationException(),
 		};
 

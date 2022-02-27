@@ -38,7 +38,7 @@
 				if (page.Exists && template != null)
 				{
 					var mapType = lookup[page.PageName];
-					Debug.WriteLine($"{mapType.ToStringInvariant()}, {template.Find("type")?.Value}, {template.Find("zone")?.Value}, {template.Find("zoneName")?.Value}, {template.Find("settlement")?.Value}");
+					Debug.WriteLine($"{mapType.ToStringInvariant()}, {template.GetValue("type")}, {template.GetValue("zone")}, {template.GetValue("zoneName")}, {template.GetValue("settlement")}");
 				}
 			}
 		}

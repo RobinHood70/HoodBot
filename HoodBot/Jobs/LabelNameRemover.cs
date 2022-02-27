@@ -31,8 +31,10 @@
 			{
 				Debug.WriteLine(parsedPage.Context.FullPageName());
 			}
-			else if (template.Find("imgdesc") is IParameterNode imgdesc &&
-				string.Equals(imgdesc.Value.ToValue().Trim(), parsedPage.Context.LabelName(), StringComparison.Ordinal))
+			else if (string.Equals(
+				template.GetValue("imgdesc"),
+				parsedPage.Context.LabelName(),
+				StringComparison.Ordinal))
 			{
 				template.Remove("imgdesc");
 			}

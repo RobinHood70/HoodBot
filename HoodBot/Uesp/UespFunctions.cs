@@ -13,15 +13,13 @@
 			var templateTitle = template.TitleValue;
 			if (templateTitle.Namespace != MediaWikiNamespaces.Template ||
 				!templateTitle.PageNameEquals("Icon") ||
-				template.Find(1) is not IParameterNode iconTypeParam ||
-				template.Find(2) is not IParameterNode iconNameParam)
+				template.GetValue(1) is not string iconType ||
+				template.GetValue(2) is not string iconName)
 			{
 				throw new InvalidOperationException();
 			}
 
-			var iconType = iconTypeParam.Value.ToRaw();
-			var iconName = iconNameParam.Value.ToRaw();
-			var extension = template.Find(3)?.ToString() ?? "png";
+			var extension = template.GetValue(3) ?? "png";
 
 			return IconAbbreviation(nsId, iconType, iconName, extension);
 		}

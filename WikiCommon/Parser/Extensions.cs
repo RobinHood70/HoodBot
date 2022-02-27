@@ -492,7 +492,19 @@
 			return retval;
 		}
 
-		/// <summary>Gets the parameters with the indexed named for anonymous parameters.</summary>
+		/// <summary>Get the raw value of a parameter or null.</summary>
+		/// <param name="template">The template to work on.</param>
+		/// <param name="number">The numbered parameter to search for.</param>
+		/// <returns>The raw text of the parameter value or <see langword="null"/> if not found.</returns>
+		public static string? GetRaw(this ITemplateNode template, int number) => template.NotNull(nameof(template)).Find(number)?.Value.ToRaw().Trim();
+
+		/// <summary>Get the raw value of a parameter or null.</summary>
+		/// <param name="template">The template to work on.</param>
+		/// <param name="name">The name of the parameter to search for.</param>
+		/// <returns>The raw text of the parameter value or <see langword="null"/> if not found.</returns>
+		public static string? GetRaw(this ITemplateNode template, string name) => template.NotNull(nameof(template)).Find(name)?.Value.ToRaw().Trim();
+
+/// <summary>Gets the parameters with the indexed named for anonymous parameters.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <returns>A tuple containing the parameter name as well as the parameter itself.</returns>
 		public static IEnumerable<(string Name, IParameterNode Parameter)> GetResolvedParameters(this ITemplateNode template)
@@ -504,6 +516,18 @@
 				yield return (name, parameter);
 			}
 		}
+
+		/// <summary>Get the value of a parameter or null.</summary>
+		/// <param name="template">The template to work on.</param>
+		/// <param name="number">The numbered parameter to search for.</param>
+		/// <returns>The raw text of the parameter value or <see langword="null"/> if not found.</returns>
+		public static string? GetValue(this ITemplateNode template, int number) => template.NotNull(nameof(template)).Find(number)?.Value.ToValue().Trim();
+
+		/// <summary>Get the value of a parameter or null.</summary>
+		/// <param name="template">The template to work on.</param>
+		/// <param name="name">The name of the parameter to search for.</param>
+		/// <returns>The raw text of the parameter value or <see langword="null"/> if not found.</returns>
+		public static string? GetValue(this ITemplateNode template, string name) => template.NotNull(nameof(template)).Find(name)?.Value.ToValue().Trim();
 
 		/// <summary>Determines whether any parameters have numeric names.</summary>
 		/// <param name="template">The template to work on.</param>
@@ -671,6 +695,14 @@
 			}
 		}
 
+		/// <summary>Returns the value of a template parameter or the default value.</summary>
+		/// <param name="template">The template to search.</param>
+		/// <param name="parameterName">The parameter name.</param>
+		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <c>false</c>.</returns>
+		public static bool TrueOrFalse(this ITemplateNode? template, string parameterName) =>
+			template?.Find(parameterName)?.Value is NodeCollection nullNodes &&
+			nullNodes.Count != 0 &&
+			nullNodes.ToRaw().Trim().Length != 0;
 		/// <summary>Changes the value of a parameter to the specified value, or adds the parameter if it doesn't exist.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <param name="name">The name of the parameter to add.</param>
@@ -724,15 +756,6 @@
 				? defaultValue
 				: retval;
 		}
-
-		/// <summary>Returns the value of a template parameter or the default value.</summary>
-		/// <param name="template">The template to search.</param>
-		/// <param name="parameterName">The parameter name.</param>
-		/// <returns><see langword="true"/> if the parameter is null or consists entirely of whitespace; otherwise, <c>false</c>.</returns>
-		public static bool TrueOrFalse(this ITemplateNode? template, string parameterName) =>
-			template?.Find(parameterName)?.Value is NodeCollection nullNodes &&
-			nullNodes.Count != 0 &&
-			nullNodes.ToRaw().Trim().Length != 0;
 		#endregion
 
 		#region String Extensions
