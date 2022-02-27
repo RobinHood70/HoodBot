@@ -116,8 +116,8 @@
 			if (
 				this.end == null &&
 				sameTaskText &&
-				string.IsNullOrEmpty(entry.Find(3)?.Value.ToValue()) &&
-				this.logInfo.Title.OrdinalEquals(entry.Find(1)?.Value.ToValue().Trim()) &&
+				string.IsNullOrEmpty(entry.GetValue(3)) &&
+				this.logInfo.Title.OrdinalEquals(entry.GetValue(1)) &&
 				(this.logInfo.Details ?? string.Empty).OrdinalEquals(entry.Find("info")?.Value.ToValue() ?? string.Empty))
 			{
 				return;

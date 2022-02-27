@@ -142,10 +142,9 @@
 				ContextualParser parser = new(page);
 				foreach (var template in parser.FindTemplates(TemplateName))
 				{
-					if (template.Find(2) is IParameterNode linkTitle)
+					if (template.GetValue(2) is string value)
 					{
-						var key = template.Find(1)?.Value.ToValue() ?? throw new InvalidOperationException();
-						var value = linkTitle.Value.ToValue() ?? string.Empty;
+						var key = template.GetValue(1) ?? throw new InvalidOperationException();
 						this.titleOverrides.Add(key, value);
 					}
 				}
