@@ -243,17 +243,10 @@
 		/// <param name="pageName">Name of the page.</param>
 		public static TitleFactory FromNormalizedName(Site site, string pageName) => new(site.NotNull(nameof(site)), MediaWikiNamespaces.Main, pageName.NotNull(nameof(pageName)));
 
-		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
+		/// <summary>Trims the disambiguator off of a title (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		/// <param name="title">The title to get the label name for.</param>
-		/// <remarks>This doesn't precisely match the pipe trick logic - they differ in their handling of some abnormal page names. For example, with page names of "User:(Test)", ":(Test)", and "(Test)", the pipe trick gives "User:", ":", and "(Test)", respectively. Since this routine ignores the namespace completely and checks for empty return values, it returns "(Test)" consistently in all three cases.</remarks>
-		/// <returns>The text with the final paranthetical and/or comma-delimited text removed. Note: like the MediaWiki equivalent, when both are present, this will remove text of the form "(text), text", but text of the form ", text (text)" will become ", text".</returns>
-		[return: NotNullIfNotNull("title")]
-		public static string LabelName(string title)
-		{
-			title.ThrowNull(nameof(title));
-			var pageName = LabelCommaRemover.Replace(title, string.Empty, 1, 1);
-			return LabelParenthesesRemover.Replace(pageName, string.Empty, 1, 1);
-		}
+		/// <returns>The text with the final paranthetical text removed.</returns>
+		public static string LabelName(string title) => LabelParenthesesRemover.Replace(title.NotNull(nameof(title)), string.Empty, 1, 1);
 
 		/// <summary>Normalizes a page name text for parsing. Page names coming directly from the API are already normalized.</summary>
 		/// <param name="text">The page name to normalize.</param>
@@ -268,6 +261,18 @@
 		{
 			var retval = text.NotNull(nameof(text)).Split(TextArrays.Pipe, 2)[0];
 			return WikiTextUtilities.DecodeAndNormalize(retval).Trim();
+		}
+
+		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
+		/// <param name="title">The title to modify.</param>
+		/// <remarks>This doesn't precisely match the MediaWiki pipe trick logic. The two differ in their handling of edge cases. For example, with page names of "User:(Test)", ":(Test)", and "(Test)", the pipe trick gives "User:", ":", and "(Test)", respectively. Since this routine ignores the namespace completely and checks for empty return values, it returns "(Test)" consistently in all three cases.</remarks>
+		/// <returns>The text with the final paranthetical and/or comma-delimited text removed. Note: like the MediaWiki equivalent, when both are present, this will remove text of the form "(text), text", but text of the form ", text (text)" will become ", text".</returns>
+		[return: NotNullIfNotNull("title")]
+		public static string PipeTrick(string title)
+		{
+			title.ThrowNull(nameof(title));
+			var pageName = LabelCommaRemover.Replace(title, string.Empty, 1, 1);
+			return LabelParenthesesRemover.Replace(pageName, string.Empty, 1, 1);
 		}
 		#endregion
 
