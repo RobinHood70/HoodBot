@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 		<DocumentationFile>bin\Robby.xml</DocumentationFile>
 		<RootNamespace>RobinHood70.Robby</RootNamespace>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
