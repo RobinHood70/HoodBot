@@ -173,7 +173,7 @@
 				this.WriteLine($"== {this.TypeText} Skills With Non-Trivial Updates ==");
 				foreach (var page in this.nonTrivialChanges)
 				{
-					this.WriteLine($"* {{{{Pl|{page.FullPageName}|{page.LabelName()}|diff=cur}}}}");
+					this.WriteLine($"* {{{{Pl|{page.FullPageName}|{page.PipeTrick()}|diff=cur}}}}");
 				}
 
 				this.WriteLine();

@@ -58,12 +58,29 @@
 			{
 				sb
 					.Append('|')
-					.Append(title.LabelName());
+					.Append(title.PipeTrick());
 			}
 
 			sb.Append("]]");
 			return sb.ToString();
 		}
+
+		/// <summary>Trims the disambiguator off of a title (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
+		/// <param name="title">The title to get the label name for.</param>
+		/// <returns>The text with the final paranthetical text removed.</returns>
+		[return: NotNullIfNotNull("title")]
+		public static string? LabelName(this ISimpleTitle? title) => title == null
+			? null
+			: TitleFactory.LabelName(title.PageName);
+
+		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
+		/// <param name="title">The title to get the pipe-trick name for.</param>
+		/// <remarks>This doesn't precisely match the pipe trick logic - they differ in their handling of some abnormal page names. For example, with page names of "User:(Test)", ":(Test)", and "(Test)", the pipe trick gives "User:", ":", and "(Test)", respectively. Since this routine ignores the namespace completely and checks for empty return values, it returns "(Test)" consistently in all three cases.</remarks>
+		/// <returns>The text with the final paranthetical and/or comma-delimited text removed. Note: like the MediaWiki equivalent, when both are present, this will remove text of the form "(text), text", but text of the form ", text (text)" will become ", text".</returns>
+		[return: NotNullIfNotNull("title")]
+		public static string? PipeTrick(this ISimpleTitle? title) => title == null
+			? null
+			: TitleFactory.PipeTrick(title.PageName);
 
 		/// <summary>Compares two <see cref="ISimpleTitle"/> objects for namespace and page name equality.</summary>
 		/// <param name="title">The title to check.</param>
@@ -74,15 +91,6 @@
 			other != null &&
 			title.Namespace == other.Namespace &&
 			title.Namespace.PageNameEquals(title.PageName, other.PageName, false);
-
-		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
-		/// <param name="title">The title to get the label name for.</param>
-		/// <remarks>This doesn't precisely match the pipe trick logic - they differ in their handling of some abnormal page names. For example, with page names of "User:(Test)", ":(Test)", and "(Test)", the pipe trick gives "User:", ":", and "(Test)", respectively. Since this routine ignores the namespace completely and checks for empty return values, it returns "(Test)" consistently in all three cases.</remarks>
-		/// <returns>The text with the final paranthetical and/or comma-delimited text removed. Note: like the MediaWiki equivalent, when both are present, this will remove text of the form "(text), text", but text of the form ", text (text)" will become ", text".</returns>
-		[return: NotNullIfNotNull("title")]
-		public static string? LabelName(this ISimpleTitle? title) => title == null
-			? null
-			: TitleFactory.LabelName(title.PageName);
 		#endregion
 	}
 }
