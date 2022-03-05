@@ -2,18 +2,39 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
+	using System.Data;
+	using System.Globalization;
+	using RobinHood70.HoodBot.Design;
+	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
-	internal sealed class EsoFurnishingUpdater : TemplateJob
+	internal enum ItemType
 	{
-		#region Fields
-		private readonly Dictionary<Title, IEnumerable<string>> imageCategories = new(SimpleTitleEqualityComparer.Instance);
+		Recipes = 29,
+		Furnishing = 61,
+	}
+
+	internal sealed class EsoFurnishingUpdater : ParsedPageJob
+	{
+		#region Private Static Fields
+		private static readonly string Query = "SELECT * FROM uesp_esolog.minedItemSummary WHERE type=" + (int)ItemType.Furnishing;
 		#endregion
+
+		#region Fields
+		private readonly Dictionary<int, Furnishing> furnishings = new();
+		private readonly List<string> fileMessages = new();
+		private readonly List<string> pageMessages = new();
+		#endregion
+
+		/*
+		#region Fields
+		private readonly Dictionary<Title, Furnishing> furnishingDictionary = new(SimpleTitleComparer.Instance);
+		#endregion
+		*/
 
 		#region Constructors
 		[JobInfo("ESO Furnishing Updater", "|ESO")]
@@ -23,90 +44,130 @@
 		}
 		#endregion
 
+		#region Public Static Properties
+		public static bool RemoveColons { get; set; } // = true;
+		#endregion
+
 		#region Protected Override Properties
 		protected override string EditSummary { get; } = "Update info from ESO database";
-
-		protected override string TemplateName { get; } = "Online Furnishing Summary";
 		#endregion
 
 		#region Protected Override Methods
-		protected override void Main()
+		protected override void AfterLoadPages()
 		{
-			TitleCollection titles = new(this.Site, this.imageCategories.Keys);
-			PageCollection pages = PageCollection.Unlimited(this.Site, PageModules.Default, false);
-			SaveInfo saveInfo = new("Update categories", true);
-			pages.PageLoaded += this.ImagePageLoaded;
-			pages.GetTitles(titles);
-			pages.PageLoaded -= this.ImagePageLoaded;
-			this.SavePages(pages, "Saving image categories", saveInfo, this.ImagePageLoaded);
+			this.WriteLine("__FORCETOC__");
+			this.WriteLine("== Online Page Name Issues ==");
+			this.pageMessages.Sort(StringComparer.Ordinal);
+			foreach (var message in this.pageMessages)
+			{
+				this.WriteLine(message);
+				this.WriteLine();
+			}
+
+			this.WriteLine("== File Page Name Issues ==");
+			this.fileMessages.Sort(StringComparer.Ordinal);
+			foreach (var message in this.fileMessages)
+			{
+				this.WriteLine(message);
+				this.WriteLine();
+			}
 		}
 
-		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parsedPage)
+		protected override void BeforeLoadPages()
 		{
-			var isCollectible = template.TrueOrFalse("collectible");
-			var itemName = parsedPage.Context.PageName
-				.Replace("item-", string.Empty, StringComparison.Ordinal)
-				.Replace("furnishing-", string.Empty, StringComparison.Ordinal)
-				.Replace(" (furnishing)", string.Empty, StringComparison.Ordinal)
-				.Replace(".jpg", string.Empty, StringComparison.Ordinal);
-			var defaultFile = $"ON-{(isCollectible ? string.Empty : "item-")}furnishing-{itemName}.jpg";
+			/*
+			TitleCollection furnishingFiles = new(this.Site);
+			furnishingFiles.GetNamespace(MediaWikiNamespaces.File, CommonCode.Filter.Any, "ON-furnishing-");
+			furnishingFiles.GetNamespace(MediaWikiNamespaces.File, CommonCode.Filter.Any, "ON-item-furnishing-");
+			*/
 
-			var image = template.ValueOrDefault("image", defaultFile).Trim();
-			List<string> imgCats = new();
-			imgCats.Add("Category:Online-Furnishings");
-			var baseCat = "Category:Online-Furnishing Images-";
-			var cat = AddCategory(imgCats, template, "cat", $"{baseCat}$1");
-			AddCategory(imgCats, template, "subcat", $"{baseCat}{cat}-$1");
-			AddCategory(imgCats, template, "size", $"{baseCat}$1");
-			AddCategory(imgCats, template, "style", $"{baseCat}$1");
-			AddCategory(imgCats, template, "achievement", $"{baseCat}Achievement");
-			AddCategory(imgCats, template, "antiquity", $"{baseCat}Antiquities");
-			AddCategory(imgCats, template, "tags", $"{baseCat}By Behavior");
-			AddCategory(imgCats, template, "craft", $"{baseCat}By Profession");
-			AddCategory(imgCats, template, "collectible", $"{baseCat}Collectible");
-			AddCategory(imgCats, template, "luxury", $"{baseCat}Luxury");
-			AddCategory(imgCats, template, "master", $"{baseCat}Masterworks");
-			AddCategory(imgCats, template, "source", $"{baseCat}Sources");
+			foreach (var furnishing in Database.RunQuery(EsoLog.Connection, Query, Furnishing.Create))
+			{
+				this.furnishings.Add(furnishing.Id, furnishing);
+			}
+		}
 
-			Title imageTitle = TitleFactory.FromName(this.Site, MediaWikiNamespaces.File, image).ToTitle();
-			this.imageCategories.Add(imageTitle, imgCats);
+		protected override void LoadPages() => this.Pages.GetBacklinks("Template:Online Furnishing Summary");
+
+		protected override void ParseText(object sender, ContextualParser parsedPage)
+		{
+			Page title = (Page)parsedPage.Context;
+			if (parsedPage.FindTemplate("Online Furnishing Summary") is SiteTemplateNode template)
+			{
+				if (this.DoPageChecks(template, title) is string pageMessage)
+				{
+					this.pageMessages.Add(pageMessage);
+				}
+
+				if (this.DoImageChecks(template, title) is string fileMessage)
+				{
+					this.fileMessages.Add(fileMessage);
+				}
+			}
 		}
 		#endregion
 
-		#region Private Static Methods
-		private static string? AddCategory(ICollection<string> imgCats, SiteTemplateNode template, string paramName, string pattern)
+		#region Private Methods
+		private string? DoImageChecks(SiteTemplateNode template, Page page)
 		{
-			if (template.Find(paramName) is IParameterNode cat)
+			var collectible = template.GetValue("collectible")?.Length > 0;
+			var prefix = "ON-" + (collectible ? string.Empty : "item-") + "furnishing-";
+			var name = template.GetValue("name") ?? page.LabelName();
+			var fileName = template.GetValue("image") ?? (prefix + name + ".jpg");
+			var fileNameFix = prefix + name.Replace(":", RemoveColons ? string.Empty : ",", StringComparison.Ordinal) + ".jpg";
+			TitleFactory fileTitle = TitleFactory.Direct(this.Site, MediaWikiNamespaces.File, fileName);
+			var fixMatch = string.Equals(fileName, fileNameFix, StringComparison.Ordinal);
+			return fixMatch
+				? null
+				: $":{fileTitle.AsLink(true)} on {page.AsLink(true)} ''should be''\n" +
+					$":{fileNameFix}";
+		}
+
+		private string? DoPageChecks(SiteTemplateNode template, Page page)
+		{
+			if (template.GetValue("id") is string idText &&
+				!string.IsNullOrEmpty(idText) &&
+				int.TryParse(idText, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, page.Site.Culture, out var id))
 			{
-				var catName = cat.Value.ToRaw().Trim();
-				var fullName = pattern.Replace("$1", catName, StringComparison.Ordinal);
-				imgCats.Add(fullName);
-				return catName;
+				if (this.furnishings.TryGetValue(id, out var furnishing))
+				{
+					if (!string.Equals(furnishing.Name, page.LabelName(), StringComparison.Ordinal))
+					{
+						return
+							$":[[{page.FullPageName}|{page.LabelName()}]] ''should be''\n" +
+							$":{furnishing.Name}";
+					}
+				}
 			}
 
 			return null;
 		}
 		#endregion
 
-		#region Private Methods
-
-		private void ImagePageLoaded(object sender, Page page)
+		#region Private Classes
+		private sealed class Furnishing
 		{
-			if (page.Exists)
+			#region Constructors
+			public Furnishing(IDataRecord record)
 			{
-				var catsToAdd = this.imageCategories[page];
-				ContextualParser parser = new(page);
-				foreach (var cat in catsToAdd)
-				{
-					parser.AddCategory(cat, true);
-				}
+				this.Id = (int)record["itemId"];
+				this.Name = (string)record["name"];
+			}
+			#endregion
 
-				page.Text = parser.ToRaw();
-			}
-			else
-			{
-				Debug.WriteLine($"Missing page: {page.FullPageName}");
-			}
+			#region Public Properties
+			public int Id { get; set; }
+
+			public string Name { get; set; }
+			#endregion
+
+			#region Public Static Methods
+			public static Furnishing Create(IDataRecord record) => new(record);
+			#endregion
+
+			#region Public Override Methods
+			public override string ToString() => this.Name;
+			#endregion
 		}
 		#endregion
 	}
