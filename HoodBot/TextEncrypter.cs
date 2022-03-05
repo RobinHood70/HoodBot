@@ -14,25 +14,23 @@
 		public TextEncrypter(string encryptionKey)
 		{
 			// Hash the key to ensure it is exactly 256 bits long, as required by AES-256
-			using SHA256Managed sha = new();
+			using SHA256 sha = SHA256.Create();
 			this.encryptionKeyBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(encryptionKey.NotNull(nameof(encryptionKey))));
 		}
 
 		public string Encrypt(string value)
 		{
 			using MemoryStream outputStream = new();
-			using AesManaged aes = new()
-			{
-				Key = this.encryptionKeyBytes
-			};
+			using Aes aes = Aes.Create();
+			aes.Key = this.encryptionKeyBytes;
 			var iv = aes.IV; // first access generates a new IV
 			outputStream.Write(iv, 0, iv.Length);
 			outputStream.Flush();
 
 			var buffer = Encoding.UTF8.GetBytes(value);
-			using (MemoryStream? inputStream = new(buffer, false))
+			using (MemoryStream inputStream = new(buffer, false))
 			using (var encryptor = aes.CreateEncryptor())
-			using (CryptoStream? cryptoStream = new(outputStream, encryptor, CryptoStreamMode.Write))
+			using (CryptoStream cryptoStream = new(outputStream, encryptor, CryptoStreamMode.Write))
 			{
 				inputStream.CopyTo(cryptoStream);
 			}
@@ -52,12 +50,10 @@
 			}
 
 			using MemoryStream outputStream = new();
-			using AesManaged aes = new()
-			{
-				Key = this.encryptionKeyBytes
-			};
+			using Aes aes = Aes.Create();
+			aes.Key = this.encryptionKeyBytes;
 			using (var decryptor = aes.CreateDecryptor(this.encryptionKeyBytes, iv))
-			using (CryptoStream? cryptoStream = new(inputStream, decryptor, CryptoStreamMode.Read))
+			using (CryptoStream cryptoStream = new(inputStream, decryptor, CryptoStreamMode.Read))
 			{
 				cryptoStream.CopyTo(outputStream);
 			}
