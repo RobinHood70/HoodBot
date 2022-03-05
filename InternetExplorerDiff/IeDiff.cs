@@ -100,7 +100,7 @@
 			SafeNativeMethods.ShowWindow(hwnd, 3);
 		}
 
-		public bool Validate() => Type.GetTypeFromProgID("InternetExplorer.Application") != null;
+		public bool Validate() => OperatingSystem.IsWindows() && Type.GetTypeFromProgID("InternetExplorer.Application") != null;
 
 		public void Wait() => this.ieProcess?.WaitForExit();
 		#endregion
