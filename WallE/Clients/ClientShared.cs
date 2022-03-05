@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.WallE.Clients
 {
+	using System;
 	using System.Reflection;
 	using static System.FormattableString;
 
@@ -27,8 +28,11 @@
 			}
 			else
 			{
-				var currentName = currentAssembly.GetName();
-				botInfo = currentName.Name + " v" + currentName.Version;
+				botInfo = currentAssembly.GetName().Name ?? "unknown";
+				if (currentAssembly.GetName().Version is Version currentVersion)
+				{
+					botInfo += " v" + currentVersion.ToString();
+				}
 			}
 
 			if (string.IsNullOrWhiteSpace(contactInfo))
