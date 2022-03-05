@@ -24,7 +24,7 @@
 
 		#region Static Fields
 		private static readonly DateTime LastRun = new(2020, 9, 25);
-		private static readonly string WikiImageFolder = UespSite.GetBotDataFolder(@"WikiImages\"); // Files in this folder come from http://esofiles.uesp.net/update-<whatever>/icons.zip
+		private static readonly string WikiImageFolder = UespSite.GetBotDataFolder(@"WikiIcons\"); // Files in this folder come from http://esofiles.uesp.net/update-<whatever>/icons.zip
 		#endregion
 
 		#region Fields
