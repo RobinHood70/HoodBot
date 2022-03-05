@@ -23,10 +23,14 @@
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
+			this.BeforeLoadPages();
+
 			this.StatusWriteLine("Loading Pages");
 			this.Pages.PageLoaded += this.ResultsPageLoaded;
 			this.LoadPages();
 			this.Pages.PageLoaded -= this.ResultsPageLoaded;
+
+			this.AfterLoadPages();
 		}
 
 		protected override void Main() => this.SavePages(this.EditSummary, this.MinorEdit, this.ResultsPageLoaded);
@@ -39,6 +43,14 @@
 		#endregion
 
 		#region Protected Virtual Methods
+		protected virtual void AfterLoadPages()
+		{
+		}
+
+		protected virtual void BeforeLoadPages()
+		{
+		}
+
 		protected virtual void ResultsPageLoaded(object sender, Page page)
 		{
 			ContextualParser parsedPage = new(page);
