@@ -703,6 +703,7 @@
 			template?.Find(parameterName)?.Value is NodeCollection nullNodes &&
 			nullNodes.Count != 0 &&
 			nullNodes.ToRaw().Trim().Length != 0;
+
 		/// <summary>Changes the value of a parameter to the specified value, or adds the parameter if it doesn't exist.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <param name="name">The name of the parameter to add.</param>
