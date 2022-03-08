@@ -69,6 +69,20 @@
 		#endregion
 
 		#region Private Static Methods
+		private static (int Index, int End) FindSummary(ContextualParser parser)
+		{
+			int summaryIndex;
+			int summaryEnd;
+			summaryIndex = parser.IndexOfHeader("Summary") + 1;
+			summaryEnd = parser.Nodes.FindIndex<HeaderNode>(summaryIndex);
+			if (summaryEnd == -1)
+			{
+				summaryEnd = parser.Nodes.Count;
+			}
+
+			return (summaryIndex, summaryEnd);
+		}
+
 		private static bool IsBook(PageParts parts)
 		{
 			var isBook = false;
@@ -85,6 +99,21 @@
 			}
 
 			return isBook;
+		}
+
+		private static ICollection<SiteLink> ParseCatgories(Site site, ContextualParser parser)
+		{
+			List<SiteLink>? retval = new();
+			for (var i = 0; i < parser.Nodes.Count; i++)
+			{
+				if (parser.Nodes[i] is SiteLinkNode link && link.TitleValue.Namespace == MediaWikiNamespaces.Category)
+				{
+					retval.Add(SiteLink.FromLinkNode(site, link));
+					parser.Nodes.RemoveAt(i);
+				}
+			}
+
+			return retval;
 		}
 		#endregion
 
@@ -263,81 +292,22 @@
 		private sealed class PageParts
 		{
 			#region Constructors
-			public PageParts(FilePage page)
+			public PageParts(Page page)
 			{
 				this.Page = page;
 				ContextualParser parser = new(page);
-				for (var i = 0; i < parser.Nodes.Count; i++)
-				{
-					if (parser.Nodes[i] is SiteLinkNode link && link.TitleValue.Namespace == MediaWikiNamespaces.Category)
-					{
-						this.Categories.Add(SiteLink.FromLinkNode(page.Site, link));
-						parser.Nodes.RemoveAt(i);
-					}
-				}
+				this.Categories.AddRange(ParseCatgories(page.Site, parser));
 
-				var summaryIndex = parser.IndexOfHeader("Summary") + 1;
-				this.PreSummary = summaryIndex == 0
+				(var index, var end) = FindSummary(parser);
+				this.PreSummary = index == 0
 					? (new IWikiNode[] { parser.Nodes.Factory.HeaderNodeFromParts(2, " Summary ") })
-					: new List<IWikiNode>(parser.Nodes.GetRange(0, summaryIndex));
-
-				var summaryEnd = parser.Nodes.FindIndex<HeaderNode>(summaryIndex);
-				if (summaryEnd == -1)
+					: new List<IWikiNode>(parser.Nodes.GetRange(0, index));
+				if (end < parser.Nodes.Count)
 				{
-					summaryEnd = parser.Nodes.Count;
-				}
-				else
-				{
-					this.PostSummary = new List<IWikiNode>(parser.Nodes.GetRange(summaryEnd, parser.Nodes.Count - summaryEnd));
+					this.PostSummary = new List<IWikiNode>(parser.Nodes.GetRange(end, parser.Nodes.Count - end));
 				}
 
-				var isPreText = true;
-				StringBuilder preText = new();
-				StringBuilder postText = new();
-				foreach (var line in WikiTextVisitor.Raw(parser.Nodes.GetRange(summaryIndex, summaryEnd - summaryIndex)).Split(TextArrays.NewLineChars))
-				{
-					var fromWeb = line.Split("://esoicons.uesp.net/esoui/art/icons/", StringSplitOptions.RemoveEmptyEntries);
-					if (fromWeb.Length > 1)
-					{
-						for (var i = 1; i < fromWeb.Length; i += 2)
-						{
-							var name = fromWeb[i].Split(TextArrays.Space, 2)[0];
-							name = name
-								.Replace(".dds", string.Empty, StringComparison.Ordinal)
-								.Replace(".png", string.Empty, StringComparison.Ordinal)
-								.Replace("<br>", string.Empty, StringComparison.OrdinalIgnoreCase);
-							this.OriginalFiles.Add(name);
-						}
-					}
-					else
-					{
-						var split = line
-							.Trim()
-							.TrimStart(TextArrays.Colon)
-							.TrimStart()
-							.Split(TextArrays.Colon, 2);
-						switch (split[0].ToLowerInvariant())
-						{
-							case "original file":
-							case "original filename":
-								this.OriginalFiles.AddRange(split[1].TrimStart()
-									.Replace("<br>", string.Empty, StringComparison.OrdinalIgnoreCase)
-									.Split(TextArrays.CommaSpace, StringSplitOptions.RemoveEmptyEntries));
-								break;
-							case "achievement":
-							case "book":
-							case "collectible":
-							case "mined item":
-							case "quest item":
-							case "used for":
-								isPreText = false;
-								break;
-							default:
-								(isPreText ? preText : postText).Append(line);
-								break;
-						}
-					}
-				}
+				this.ParseSummary(parser, index, end);
 			}
 			#endregion
 
@@ -346,7 +316,7 @@
 
 			public ICollection<string> OriginalFiles { get; } = new SortedSet<string>(StringComparer.Ordinal);
 
-			public FilePage Page { get; }
+			public Page Page { get; }
 
 			public ICollection<IWikiNode>? PostSummary { get; }
 
@@ -438,6 +408,59 @@
 					if (!"\n=".Contains(sb[^2], StringComparison.Ordinal))
 					{
 						sb.Append('\n');
+					}
+				}
+			}
+			#endregion
+
+			#region Private Methods
+			private void ParseSummary(ContextualParser parser, int summaryIndex, int summaryEnd)
+			{
+				var isPreText = true;
+				StringBuilder preText = new();
+				StringBuilder postText = new();
+				foreach (var line in WikiTextVisitor.Raw(parser.Nodes.GetRange(summaryIndex, summaryEnd - summaryIndex)).Split(TextArrays.NewLineChars))
+				{
+					var fromWeb = line.Split("://esoicons.uesp.net/esoui/art/icons/", StringSplitOptions.RemoveEmptyEntries);
+					if (fromWeb.Length > 1)
+					{
+						for (var i = 1; i < fromWeb.Length; i += 2)
+						{
+							var name = fromWeb[i].Split(TextArrays.Space, 2)[0];
+							name = name
+								.Replace(".dds", string.Empty, StringComparison.Ordinal)
+								.Replace(".png", string.Empty, StringComparison.Ordinal)
+								.Replace("<br>", string.Empty, StringComparison.OrdinalIgnoreCase);
+							this.OriginalFiles.Add(name);
+						}
+					}
+					else
+					{
+						var split = line
+							.Trim()
+							.TrimStart(TextArrays.Colon)
+							.TrimStart()
+							.Split(TextArrays.Colon, 2);
+						switch (split[0].ToLowerInvariant())
+						{
+							case "original file":
+							case "original filename":
+								this.OriginalFiles.AddRange(split[1].TrimStart()
+									.Replace("<br>", string.Empty, StringComparison.OrdinalIgnoreCase)
+									.Split(TextArrays.CommaSpace, StringSplitOptions.RemoveEmptyEntries));
+								break;
+							case "achievement":
+							case "book":
+							case "collectible":
+							case "mined item":
+							case "quest item":
+							case "used for":
+								isPreText = false;
+								break;
+							default:
+								(isPreText ? preText : postText).Append(line);
+								break;
+						}
 					}
 				}
 			}
