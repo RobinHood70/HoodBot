@@ -201,17 +201,19 @@
 		#endregion
 
 		#region Protected Methods
-#if DEBUG
 		// These are flagged as internal mostly to stop warnings whenever they're not in use.
 		protected virtual void SiteChanging(Site sender, ChangeArgs eventArgs)
 		{
-			Debug.Write($"{eventArgs.MethodName} (sender: {eventArgs.RealSender}");
-			foreach (var parameter in eventArgs.Parameters)
+			if (!sender.EditingEnabled)
 			{
-				Debug.Write($", {parameter.Key}: {parameter.Value}");
-			}
+				Debug.Write($"{eventArgs.MethodName} (sender: {eventArgs.RealSender}");
+				foreach (var parameter in eventArgs.Parameters)
+				{
+					Debug.Write($", {parameter.Key}: {parameter.Value}");
+				}
 
-			Debug.WriteLine(")");
+				Debug.WriteLine(")");
+			}
 		}
 
 		protected virtual void SiteWarningOccurred(Site sender, WarningEventArgs eventArgs) => Debug.WriteLine(eventArgs?.Warning);
@@ -221,7 +223,6 @@
 		protected virtual void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Request: {eventArgs.Request}");
 
 		protected virtual void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Warning: ({eventArgs?.Warning.Code}) {eventArgs?.Warning.Info}");
-#endif
 		#endregion
 
 		#region Private Static Methods
@@ -496,7 +497,14 @@
 			var timeDiff = DateTime.UtcNow - this.jobStarted;
 			if (this.OverallProgress > 0 && timeDiff.TotalSeconds > 0)
 			{
-				this.UtcEta = this.jobStarted + TimeSpan.FromTicks((long)(timeDiff.Ticks * this.OverallProgressMax / this.OverallProgress));
+				try
+				{
+					this.UtcEta = this.jobStarted + TimeSpan.FromTicks((long)(timeDiff.Ticks * this.OverallProgressMax / this.OverallProgress));
+				}
+				catch (ArgumentOutOfRangeException)
+				{
+					this.UtcEta = DateTime.UtcNow;
+				}
 			}
 		}
 
