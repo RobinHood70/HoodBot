@@ -85,7 +85,7 @@
 						continue;
 					}
 
-					if (this.parsedPages.TryGetValue(page, out var parsedPage) && parsedPage.Nodes.Find<ILinkNode>() is ILinkNode linkNode)
+					if (this.parsedPages.TryGetValue(page, out var parsedPage) && parsedPage.Find<ILinkNode>() is ILinkNode linkNode)
 					{
 						// linkNode.Parameters.Clear();
 						if (!comboTarget.FullEquals(originalTarget) && comboTarget.ToString() is string newValue)
@@ -135,9 +135,9 @@
 				if (this.Pages.TryGetValue(title, out var page))
 				{
 					ContextualParser parser = new(page);
-					if (parser.Nodes.Count > 0 && parser.Nodes[0] is ITextNode textNode && this.redirectWords.Contains(textNode.Text.TrimEnd(), StringComparer.OrdinalIgnoreCase))
+					if (parser.Count > 0 && parser[0] is ITextNode textNode && this.redirectWords.Contains(textNode.Text.TrimEnd(), StringComparer.OrdinalIgnoreCase))
 					{
-						if (parser.Nodes.Find<ILinkNode>() is ILinkNode targetNode)
+						if (parser.Find<ILinkNode>() is ILinkNode targetNode)
 						{
 							FullTitle? target = FullTitle.FromBacklinkNode(this.Site, targetNode);
 							if (this.lookup.TryAdd(title, target))

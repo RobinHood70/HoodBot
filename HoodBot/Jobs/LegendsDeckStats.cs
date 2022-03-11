@@ -38,15 +38,15 @@
 
 		protected override void LoadPages() => this.Pages.GetBacklinks("Template:Legends Deck Summary", BacklinksTypes.EmbeddedIn);
 
-		protected override void ParseText(object sender, ContextualParser parsedPage)
+		protected override void ParseText(object sender, ContextualParser parser)
 		{
 			SortedDictionary<int, int> powerCount = new();
-			if (parsedPage.NotNull(nameof(parsedPage)).FindTemplate("Legends Deck Summary") is not SiteTemplateNode deckSummary)
+			if (parser.NotNull(nameof(parser)).FindSiteTemplate("Legends Deck Summary") is not SiteTemplateNode deckSummary)
 			{
 				throw new InvalidOperationException();
 			}
 
-			foreach (var template in parsedPage.FindTemplates("Decklist"))
+			foreach (var template in parser.FindSiteTemplates("Decklist"))
 			{
 				// The following lines set up the structure to handle skipNotes and skipQuantity, even though these are not currently used on any affected pages.
 				List<IParameterNode> specialParams = new(template.FindAll("skipQuantity", "skipNotes"));

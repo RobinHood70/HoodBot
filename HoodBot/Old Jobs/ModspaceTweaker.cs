@@ -74,7 +74,7 @@
 		private static void AddBold(ContextualParser parser, string pageName)
 		{
 			var headerNodes = 0;
-			foreach (var node in parser.Nodes)
+			foreach (var node in parser)
 			{
 				if (node is IHeaderNode)
 				{
@@ -108,11 +108,11 @@
 
 		private static void DoBookSummary(ContextualParser parser, HashSet<string> loreBooks)
 		{
-			var nodes = parser.Nodes;
+			var nodes = parser;
 			var i = nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals("Book Summary"));
 			if (i != -1)
 			{
-				var template = (SiteTemplateNode)parser.Nodes[i];
+				var template = (SiteTemplateNode)parser[i];
 				template.Title.Clear();
 				template.Title.AddText("Game Book\n");
 				if ((template.Find("Fancy") ?? template.Find("fancy")) is IParameterNode fancy)
@@ -173,7 +173,7 @@
 								value.AddText(", ");
 							}
 
-							value.Add(parser.Nodes.Factory.TemplateNodeFromParts("Faction", (null, trimmed)));
+							value.Add(parser.Factory.TemplateNodeFromParts("Faction", (null, trimmed)));
 						}
 					}
 

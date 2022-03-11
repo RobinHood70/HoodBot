@@ -122,7 +122,7 @@
 		private static void AddHeaderLinks(object sender, Page page)
 		{
 			ContextualParser parsedPage = new(page);
-			var factory = parsedPage.Nodes.Factory;
+			var factory = parsedPage.Factory;
 			foreach (var headerNode in parsedPage.HeaderNodes)
 			{
 				if (headerNode.Title.Count == 1 && headerNode.Title[0] is ITextNode textNode)

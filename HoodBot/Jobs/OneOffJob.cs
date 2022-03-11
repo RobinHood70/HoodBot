@@ -24,8 +24,8 @@
 			this.Pages.Sort();
 			foreach (var page in this.Pages)
 			{
-				ContextualParser parsedText = new(page);
-				if (parsedText.Nodes.ToValue() is string reText &&
+				ContextualParser parser = new(page);
+				if (parser.ToValue() is string reText &&
 					wordCount.Matches(reText) is MatchCollection matches)
 				{
 					if (matches.Count < 25)

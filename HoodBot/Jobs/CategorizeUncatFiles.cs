@@ -46,10 +46,10 @@
 
 		protected override void LoadPages() => this.Pages.GetQueryPage("Uncategorizedimages");
 
-		protected override void ParseText(object sender, ContextualParser parsedPage)
+		protected override void ParseText(object sender, ContextualParser parser)
 		{
 			var headerFound = false;
-			foreach (var header in parsedPage.NotNull(nameof(parsedPage)).HeaderNodes)
+			foreach (var header in parser.NotNull(nameof(parser)).HeaderNodes)
 			{
 				var title = header.Title.ToValue().Trim(TextArrays.EqualsSign).Trim();
 				if (string.Equals(title, "Licensing", StringComparison.Ordinal))
@@ -64,12 +64,12 @@
 				}
 			}
 
-			if (this.CategoryFromName(parsedPage.Context.PageName) is string cat)
+			if (this.CategoryFromName(parser.Title.PageName) is string cat)
 			{
 				if (!headerFound)
 				{
-					var nodes = parsedPage.Nodes;
-					var factory = parsedPage.Nodes.Factory;
+					var nodes = parser;
+					var factory = parser.Factory;
 					if (nodes.Count > 0)
 					{
 						nodes.AddText("\n\n");
@@ -81,7 +81,7 @@
 				}
 
 				// Debug.WriteLine($"*{cat}: [[:{parsedPage.Context.FullPageName}|]]");
-				parsedPage.AddCategory(cat, false);
+				parser.AddCategory(cat, false);
 			}
 		}
 		#endregion

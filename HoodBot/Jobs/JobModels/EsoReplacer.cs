@@ -67,17 +67,17 @@
 		{
 			titles.ThrowNull(nameof(titles));
 			warningType.ThrowNull(nameof(warningType));
-			var nodes = oldPage.NotNull(nameof(oldPage)).Nodes.Clone();
+			var nodes = oldPage.NotNull(nameof(oldPage)).Clone();
 			nodes.RemoveAll<IIgnoreNode>();
 			var oldText = nodes.ToRaw().Trim();
-			nodes = newPage.NotNull(nameof(newPage)).Nodes.Clone();
+			nodes = newPage.NotNull(nameof(newPage)).Clone();
 			nodes.RemoveAll<IIgnoreNode>();
 			var newText = nodes.ToRaw().Trim();
 			var warning = new StringBuilder()
 				.Append("Watch for ")
 				.Append(warningType)
 				.Append(" on ")
-				.AppendLine(newPage.Context.FullPageName())
+				.AppendLine(newPage.Title.FullPageName())
 				.Append(warningType.UpperFirst(newPage.Site.Culture))
 				.Append(": ");
 			foreach (var link in titles)
@@ -311,13 +311,13 @@
 		public ICollection<ISimpleTitle> CheckNewLinks(ContextualParser oldPage, ContextualParser newPage)
 		{
 			HashSet<ISimpleTitle> oldLinks = new(SimpleTitleComparer.Instance);
-			foreach (var node in oldPage.Nodes.FindAll<ILinkNode>(null, false, true, 0))
+			foreach (var node in oldPage.FindAll<ILinkNode>(null, false, true, 0))
 			{
 				SiteLink? siteLink = SiteLink.FromLinkNode(this.site, node);
 				oldLinks.Add(siteLink);
 			}
 
-			foreach (var node in newPage.Nodes.FindAll<ILinkNode>(null, false, true, 0))
+			foreach (var node in newPage.FindAll<ILinkNode>(null, false, true, 0))
 			{
 				SiteLink? siteLink = SiteLink.FromLinkNode(this.site, node);
 				oldLinks.Remove(siteLink);
@@ -329,12 +329,12 @@
 		public ICollection<ISimpleTitle> CheckNewTemplates(ContextualParser oldPage, ContextualParser newPage)
 		{
 			HashSet<ISimpleTitle> oldTemplates = new(SimpleTitleComparer.Instance);
-			foreach (var node in oldPage.Nodes.FindAll<ITemplateNode>(null, false, true, 0))
+			foreach (var node in oldPage.FindAll<ITemplateNode>(null, false, true, 0))
 			{
 				oldTemplates.Add(Title.FromBacklinkNode(this.site, node));
 			}
 
-			foreach (var node in newPage.Nodes.FindAll<ITemplateNode>(null, false, true, 0))
+			foreach (var node in newPage.FindAll<ITemplateNode>(null, false, true, 0))
 			{
 				oldTemplates.Remove(Title.FromBacklinkNode(this.site, node));
 			}
@@ -347,8 +347,8 @@
 
 		public bool IsNonTrivialChange(ContextualParser oldPage, ContextualParser newPage)
 		{
-			var oldText = this.StrippedTextFromNodes(oldPage.Nodes);
-			var newText = this.StrippedTextFromNodes(newPage.Nodes);
+			var oldText = this.StrippedTextFromNodes(oldPage);
+			var newText = this.StrippedTextFromNodes(newPage);
 			return !string.Equals(oldText, newText, StringComparison.OrdinalIgnoreCase);
 		}
 

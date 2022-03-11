@@ -25,15 +25,15 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parsedPage)
+		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
 		{
 			if (template.Find("titlename") != null)
 			{
-				Debug.WriteLine(parsedPage.Context.FullPageName());
+				Debug.WriteLine(parser.Title.FullPageName());
 			}
 			else if (string.Equals(
 				template.GetValue("imgdesc"),
-				parsedPage.Context.LabelName(),
+				parser.Title.LabelName(),
 				StringComparison.Ordinal))
 			{
 				template.Remove("imgdesc");

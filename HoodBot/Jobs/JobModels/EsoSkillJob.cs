@@ -266,7 +266,7 @@
 
 			ContextualParser oldPage = new(page);
 			ContextualParser newPage = new(page);
-			List<SiteTemplateNode> skillSummaries = new(newPage.FindTemplates(TemplateName));
+			List<SiteTemplateNode> skillSummaries = new(newPage.FindSiteTemplates(TemplateName));
 			if (skillSummaries.Count != 1)
 			{
 				this.Warn("Incorrect number of {{" + TemplateName + "}} matches on " + skill.PageName);

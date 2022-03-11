@@ -693,7 +693,7 @@
 
 			ChangeStatus ChangeFunc()
 			{
-				using FileStream upload = new(checkedName, FileMode.Open);
+				using FileStream upload = new(fileName, FileMode.Open);
 				UploadInput uploadInput = new(destinationName!, upload)
 				{
 					IgnoreWarnings = true,

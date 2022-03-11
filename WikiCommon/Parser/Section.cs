@@ -1,7 +1,6 @@
-﻿namespace RobinHood70.Robby.Parser
+﻿namespace RobinHood70.WikiCommon.Parser
 {
 	using RobinHood70.CommonCode;
-	using RobinHood70.WikiCommon.Parser;
 
 	/// <summary>Houses the information for a page section.</summary>
 	public class Section

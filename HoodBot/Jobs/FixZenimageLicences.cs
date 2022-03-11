@@ -41,7 +41,7 @@
 			{
 				page.Text = page.Revisions[0].Text;
 				ContextualParser parser = new(page);
-				foreach (var template in parser.FindTemplates("Uespimage"))
+				foreach (var template in parser.FindSiteTemplates("Uespimage"))
 				{
 					this.ParseTemplate(template, parser);
 				}
@@ -77,7 +77,7 @@
 			*/
 		}
 
-		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parsedPage)
+		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
 		{
 			template.Title.Clear();
 			template.Title.AddText("Zenimage");

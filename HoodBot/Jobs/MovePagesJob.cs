@@ -274,7 +274,7 @@
 		#endregion
 
 		#region Protected Virtual Methods
-		protected virtual void BacklinkPageLoaded(ContextualParser parser) => this.ReplaceBacklinks((Page)parser.NotNull(nameof(parser)).Context, parser.Nodes); // TODO: See if this can be re-written with ContextualParser methods.
+		protected virtual void BacklinkPageLoaded(ContextualParser parser) => this.ReplaceBacklinks((Page)parser.NotNull(nameof(parser)).Title, parser); // TODO: See if this can be re-written with ContextualParser methods.
 
 		protected virtual void CheckRemaining()
 		{
@@ -316,7 +316,7 @@
 
 		protected virtual void EditPageLoaded(ContextualParser parser, Replacement replacement)
 		{
-			Page page = (Page)parser.Context;
+			Page page = (Page)parser.Title;
 			var moveActions = replacement.MoveActions.NotNull(nameof(replacement), nameof(replacement.MoveActions));
 			if (page.Exists &&
 				(this.FollowUpActions & FollowUpActions.ProposeUnused) != 0 &&
@@ -724,7 +724,7 @@
 			deletionText.ThrowNull(nameof(deletionText));
 
 			// Cheating and using text throughout, since this does not need to be parsed or acted upon currently, and is likely to be moved to another job soon anyway.
-			Page? page = (Page)parser.NotNull(nameof(parser)).Context;
+			Page? page = (Page)parser.NotNull(nameof(parser)).Title;
 			var noinclude = page.Namespace == MediaWikiNamespaces.Template;
 			if (!noinclude)
 			{
@@ -747,7 +747,7 @@
 			string insertText;
 			if (page.IsRedirect)
 			{
-				insertPos = parser.Nodes.Count;
+				insertPos = parser.Count;
 				insertText = '\n' + deletionText;
 			}
 			else
@@ -755,7 +755,7 @@
 				insertText = deletionText + '\n';
 			}
 
-			parser.Nodes.Insert(insertPos, parser.Nodes.Factory.TextNode(insertText));
+			parser.Insert(insertPos, parser.Factory.TextNode(insertText));
 		}
 		#endregion
 

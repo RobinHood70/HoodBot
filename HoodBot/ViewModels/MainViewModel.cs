@@ -196,12 +196,12 @@
 
 		#region Internal Static Methods
 #if DEBUG
+		// This is flagged as internal mostly to stop warnings whenever it's not in use.
 		internal static string SiteName(IWikiAbstractionLayer sender) => sender.AllSiteInfo?.General?.SiteName ?? "Site-Agnostic";
 #endif
 		#endregion
 
 		#region Protected Methods
-		// These are flagged as internal mostly to stop warnings whenever they're not in use.
 		protected virtual void SiteChanging(Site sender, ChangeArgs eventArgs)
 		{
 			if (!sender.EditingEnabled)

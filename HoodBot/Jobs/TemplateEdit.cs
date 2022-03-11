@@ -18,13 +18,13 @@
 
 		protected override void LoadPages() => this.Pages.GetCategoryMembers("Category:Skyrim-Creation Club", true);
 
-		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parsedPage)
+		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
 		{
 			template.Title.Clear();
 			template.Title.AddText("CC Header");
 			if (template.Parameters.Count > 1)
 			{
-				Debug.WriteLine(parsedPage.Context.FullPageName());
+				Debug.WriteLine(parser.Title.FullPageName());
 			}
 		}
 	}

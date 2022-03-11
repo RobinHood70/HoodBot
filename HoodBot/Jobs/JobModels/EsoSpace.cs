@@ -93,7 +93,7 @@
 			var patchPage = GetPatchPage(job);
 			ContextualParser parser = new(patchPage);
 			var paramName = "bot" + pageType.NotNull(nameof(pageType));
-			if (parser.FindTemplate("Online Patch") is ITemplateNode template && template.Find(paramName) is IParameterNode param)
+			if (parser.FindSiteTemplate("Online Patch") is ITemplateNode template && template.Find(paramName) is IParameterNode param)
 			{
 				param.Value.Clear();
 				param.Value.AddText(GetPatchVersion(job) + '\n');

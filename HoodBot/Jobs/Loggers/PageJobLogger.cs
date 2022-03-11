@@ -82,18 +82,18 @@
 		#region Private Methods
 		private static bool UpdateCurrentStatus(ContextualParser parser, string status)
 		{
-			var currentTask = parser.Nodes.FindIndex<IHeaderNode>(header => string.Equals(header.GetInnerText(true), "Current Task", StringComparison.Ordinal));
-			var taskLog = parser.Nodes.FindIndex<IHeaderNode>(currentTask + 1);
+			var currentTask = parser.FindIndex<IHeaderNode>(header => string.Equals(header.GetInnerText(true), "Current Task", StringComparison.Ordinal));
+			var taskLog = parser.FindIndex<IHeaderNode>(currentTask + 1);
 			if (currentTask == -1 || taskLog == -1)
 			{
 				throw BadLogPage;
 			}
 
 			currentTask++;
-			var section = parser.Nodes.GetRange(currentTask, taskLog - currentTask);
+			var section = parser.GetRange(currentTask, taskLog - currentTask);
 			var previousTask = WikiTextVisitor.Raw(section).Trim().TrimEnd(TextArrays.Period);
-			parser.Nodes.RemoveRange(currentTask, taskLog - currentTask);
-			parser.Nodes.Insert(currentTask, parser.Nodes.Factory.TextNode("\n" + status + ".\n\n"));
+			parser.RemoveRange(currentTask, taskLog - currentTask);
+			parser.Insert(currentTask, parser.Factory.TextNode("\n" + status + ".\n\n"));
 
 			return string.Equals(previousTask, status, StringComparison.Ordinal);
 		}
@@ -103,16 +103,16 @@
 			Debug.Assert(this.logInfo != null, "LogInfo is null.");
 			this.logPage ??= this.logTitle.Load();
 			ContextualParser parser = new(this.logPage);
-			var factory = parser.Nodes.Factory;
+			var factory = parser.Factory;
 			var sameTaskText = UpdateCurrentStatus(parser, this.status);
-			var firstEntry = parser.Nodes.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("/Entry"));
+			var firstEntry = parser.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("/Entry"));
 			if (firstEntry == -1)
 			{
 				// CONSIDER: This used to insert a /Entry into an empty table, but given that we're not currently parsing tables, that would've required far too much code for a one-off situation, so it's been left out. Could theoretically be reintroduced once table parsing is in place.
 				throw BadLogPage;
 			}
 
-			SiteTemplateNode? entry = (SiteTemplateNode)parser.Nodes[firstEntry];
+			SiteTemplateNode? entry = (SiteTemplateNode)parser[firstEntry];
 			if (
 				this.end == null &&
 				sameTaskText &&
@@ -145,7 +145,7 @@
 			AddDateTime(parms, this.start);
 			AddDateTime(parms, this.end);
 
-			parser.Nodes.InsertRange(firstEntry, new IWikiNode[]
+			parser.InsertRange(firstEntry, new IWikiNode[]
 			{
 						factory.TemplateNodeFromParts("/Entry", false, parms),
 						factory.TextNode("\n")

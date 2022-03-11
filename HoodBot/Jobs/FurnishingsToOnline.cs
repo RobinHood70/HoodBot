@@ -151,19 +151,19 @@
 			ContextualParser originalParser = new(page);
 			SortedDictionary<string, string> skills = new(StringComparer.Ordinal);
 			SortedDictionary<string, string> materials = new(StringComparer.Ordinal);
-			var templateIndex = originalParser.Nodes.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("Furnishing Summary"));
+			var templateIndex = originalParser.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("Furnishing Summary"));
 			if (templateIndex > -1)
 			{
-				SiteTemplateNode originalTemplate = (SiteTemplateNode)originalParser.Nodes[templateIndex];
+				SiteTemplateNode originalTemplate = (SiteTemplateNode)originalParser[templateIndex];
 				var collectible = originalTemplate.Find("collectible");
 				var originalParams = originalTemplate.Parameters.ToKeyValue();
 
-				page.Text = RemoveTemplate(originalParser.Nodes, templateIndex);
+				page.Text = RemoveTemplate(originalParser, templateIndex);
 				this.filePages.Add(page);
 				ContextualParser parser = new(page, string.Empty);
 				SiteTemplateNode newTemplate = (SiteTemplateNode)parser.Factory.TemplateNodeFromParts("Online Furnishing Summary\n");
-				parser.Nodes.Add(parser.Factory.TemplateNodeFromParts("Minimal"));
-				parser.Nodes.Add(newTemplate);
+				parser.Add(parser.Factory.TemplateNodeFromParts("Minimal"));
+				parser.Add(newTemplate);
 				var autoPagename = "ON-" + (collectible is null ? "item-" : string.Empty) + "furnishing-";
 				string? stylemat = null;
 				string? stylematcount = null;

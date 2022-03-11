@@ -138,7 +138,7 @@
 			foreach (var page in pages)
 			{
 				ContextualParser parser = new(page);
-				foreach (var template in parser.Nodes.FindAll<SiteTemplateNode>())
+				foreach (var template in parser.FindAll<SiteTemplateNode>())
 				{
 					if (allNames.Contains(template.TitleValue))
 					{

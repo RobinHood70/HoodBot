@@ -44,10 +44,10 @@
 			this.Pages.GetTitles(hashset);
 		}
 
-		protected override void ParseText(object sender, ContextualParser parsedPage)
+		protected override void ParseText(object sender, ContextualParser parser)
 		{
-			Guard.Against.Null(parsedPage, nameof(parsedPage));
-			var nodes = parsedPage.Nodes;
+			Guard.Against.Null(parser, nameof(parser));
+			var nodes = parser;
 			var count = 0;
 			for (var nodeIndex = nodes.Count - 1; nodeIndex >= 0; nodeIndex--)
 			{

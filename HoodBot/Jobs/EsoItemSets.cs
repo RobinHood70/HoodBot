@@ -243,9 +243,9 @@
 			}
 
 			ContextualParser oldPage = new(page, InclusionType.Transcluded, false);
-			if (oldPage.Nodes.Count < 2 || !(
-					oldPage.Nodes[0] is IIgnoreNode firstNode &&
-					oldPage.Nodes[^1] is IIgnoreNode lastNode))
+			if (oldPage.Count < 2 || !(
+					oldPage[0] is IIgnoreNode firstNode &&
+					oldPage[^1] is IIgnoreNode lastNode))
 			{
 				this.Warn($"Delimiters not found on page {page.FullPageName}\n");
 				return;
@@ -266,13 +266,13 @@
 
 			sb.Remove(sb.Length - 5, 4);
 			ContextualParser newPage = new(page, sb.ToString());
-			EsoReplacer.ReplaceGlobal(newPage.Nodes);
-			EsoReplacer.ReplaceEsoLinks(this.Site, newPage.Nodes);
-			EsoReplacer.ReplaceFirstLink(newPage.Nodes, usedList);
+			EsoReplacer.ReplaceGlobal(newPage);
+			EsoReplacer.ReplaceEsoLinks(this.Site, newPage);
+			EsoReplacer.ReplaceFirstLink(newPage, usedList);
 
 			// Now that we're done parsing, re-add the IgnoreNodes.
-			newPage.Nodes.Insert(0, firstNode);
-			newPage.Nodes.Add(lastNode);
+			newPage.Insert(0, firstNode);
+			newPage.Add(lastNode);
 
 			EsoReplacer replacer = new(this.Site);
 			var newLinks = replacer.CheckNewLinks(oldPage, newPage);
