@@ -65,7 +65,7 @@
 					FullTitle? link = FullTitle.FromBacklinkNode(this.Site, node);
 					if (string.Equals(link.Fragment, "Dragonborn", StringComparison.Ordinal) && titles.Contains(link))
 					{
-						this.WriteLine($"* {page.AsLink(false)}: {WikiTextVisitor.Raw(node)}");
+						this.WriteLine($"* {page.AsLink()}: {WikiTextVisitor.Raw(node)}");
 					}
 				}
 			}

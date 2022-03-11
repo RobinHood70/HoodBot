@@ -100,7 +100,7 @@
 							MerText.TryGetValue(siteLink.Text, out var linkPage) &&
 							siteLink.PageNameEquals(linkPage))
 						{
-							results.Add($"* {page.AsLink(false)}: {siteLink} may need adjusted.");
+							results.Add($"* {page.AsLink()}: {siteLink} may need adjusted.");
 						}
 					}
 				}

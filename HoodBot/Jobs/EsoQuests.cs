@@ -439,7 +439,7 @@
 				if (!string.Equals(stage.Zone, "Tamriel", StringComparison.Ordinal) && !string.Equals(stage.Zone, quest.Zone, StringComparison.Ordinal))
 				{
 					TitleFactory? title = TitleFactory.Direct(this.Site, UespNamespaces.Online, stage.Zone);
-					locs.Add(title.AsLink(true));
+					locs.Add(title.AsLink(LinkFormat.LabelName));
 				}
 
 				var finishText = stage.FinishText;

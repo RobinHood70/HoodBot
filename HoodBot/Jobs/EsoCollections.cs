@@ -353,7 +353,7 @@
 
 			if (sectionInfo.Collectibles.Count == 0)
 			{
-				Debug.WriteLine($"* {page.AsLink(true)} does not appear to be a list page.");
+				Debug.WriteLine($"* {page.AsLink(LinkFormat.LabelName)} does not appear to be a list page.");
 				return;
 			}
 
@@ -403,7 +403,7 @@
 		{
 			if (invalidHeaders.Count > 0)
 			{
-				this.WriteLine($"* {page.AsLink(true)} has invalid sections:");
+				this.WriteLine($"* {page.AsLink(LinkFormat.LabelName)} has invalid sections:");
 				foreach (var header in invalidHeaders)
 				{
 					this.WriteLine(':' + header.GetInnerText(true));
@@ -415,7 +415,7 @@
 		{
 			if (notFound.Count > 0)
 			{
-				this.WriteLine($"* {page.AsLink(true)} has sections that could not be matched with anything in the database:");
+				this.WriteLine($"* {page.AsLink(LinkFormat.LabelName)} has sections that could not be matched with anything in the database:");
 				foreach (var header in notFound)
 				{
 					this.WriteLine(':' + header.GetInnerText(true));

@@ -5,6 +5,19 @@
 	using System.Text;
 	using RobinHood70.CommonCode;
 
+	/// <summary>The format to use for the link text.</summary>
+	public enum LinkFormat
+	{
+		/// <summary>Plain link with no text.</summary>
+		Plain,
+
+		/// <summary>Link text should follow "pipe trick" rules.</summary>
+		PipeTrick,
+
+		/// <summary>Link text should strip paranthetical text only.</summary>
+		LabelName
+	}
+
 	/// <summary>A generic set of extensions useful in the program's design.</summary>
 	public static class Extensions
 	{
@@ -44,9 +57,31 @@
 
 		/// <summary>Returns the provided title as link text.</summary>
 		/// <param name="title">The title to get the link text for.</param>
-		/// <param name="friendly">Whether to format the link as friendly (<c>[[Talk:Page|Page]]</c>) or raw (<c>[[Talk:Page]]</c>).</param>
 		/// <returns>The current title, formatted as a link.</returns>
-		public static string AsLink(this ISimpleTitle title, bool friendly)
+		public static string AsLink(this ISimpleTitle title) => AsLink(title, null);
+
+		/// <summary>Returns the provided title as link text.</summary>
+		/// <param name="title">The title to get the link text for.</param>
+		/// <param name="linkType">The default text to use for the link.</param>
+		/// <returns>The current title, formatted as a link.</returns>
+		public static string AsLink(this ISimpleTitle title, LinkFormat linkType)
+		{
+			var text = linkType switch
+			{
+				LinkFormat.LabelName => title.LabelName(),
+				LinkFormat.PipeTrick => title.PipeTrick(),
+				LinkFormat.Plain => null,
+				_ => throw new System.ArgumentOutOfRangeException(nameof(linkType)),
+			};
+
+			return AsLink(title, text);
+		}
+
+		/// <summary>Returns the provided title as link text.</summary>
+		/// <param name="title">The title to get the link text for.</param>
+		/// <param name="linkText">The text to use for the link.</param>
+		/// <returns>The current title, formatted as a link.</returns>
+		public static string AsLink(this ISimpleTitle title, string? linkText)
 		{
 			var linkName = title.NotNull(nameof(title)).Namespace.LinkName;
 			StringBuilder sb = new(linkName.Length + 5 + (title.PageName.Length << 1));
@@ -54,11 +89,11 @@
 				.Append("[[")
 				.Append(linkName)
 				.Append(title.PageName);
-			if (friendly)
+			if (linkText != null)
 			{
 				sb
 					.Append('|')
-					.Append(title.PipeTrick());
+					.Append(linkText);
 			}
 
 			sb.Append("]]");

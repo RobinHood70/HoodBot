@@ -596,7 +596,7 @@
 					UpdatePage(page, protection);
 					this.WriteLine("|-");
 					this.WriteLine("| " + protection.FriendlyName);
-					this.WriteLine("| " + page.AsLink(false));
+					this.WriteLine("| " + page.AsLink());
 					this.WriteLine("| " + CombinedProtectionString(
 						ProtectionFromPage(currentProtection, "edit"),
 						ProtectionFromPage(currentProtection, "move")));

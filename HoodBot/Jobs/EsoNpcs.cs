@@ -331,7 +331,7 @@
 			foreach (var (npc, issue) in issues)
 			{
 				this.WriteLine("|-");
-				this.WriteLine($"| {npc.Page?.AsLink(true)}");
+				this.WriteLine($"| {npc.Page?.AsLink(LinkFormat.LabelName)}");
 				this.WriteLine($"| {issue}");
 				this.WriteLine("| " + NpcToWikiText(npc));
 			}

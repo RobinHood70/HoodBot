@@ -161,7 +161,7 @@
 				List<string> newList = new();
 				foreach (var page in this.trivialChanges)
 				{
-					newList.Add(page.AsLink(true));
+					newList.Add(page.AsLink(LinkFormat.LabelName));
 				}
 
 				this.WriteLine(string.Join(", ", newList));

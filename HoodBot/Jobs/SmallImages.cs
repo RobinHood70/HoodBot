@@ -20,7 +20,7 @@
 			{
 				if (page is FilePage file && file.LatestFileRevision is FileRevision rev && rev.Height <= 512 && rev.Width <= 512)
 				{
-					this.WriteLine(FormattableString.Invariant($"* {file.AsLink(true)}: {rev.Width} × {rev.Height}"));
+					this.WriteLine(FormattableString.Invariant($"* {file.AsLink(LinkFormat.LabelName)}: {rev.Width} × {rev.Height}"));
 				}
 			}
 		}
