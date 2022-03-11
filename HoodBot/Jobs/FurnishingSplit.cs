@@ -82,12 +82,12 @@
 			var title = PageFromFile(parser.Title);
 			if (this.existingPages!.Contains(title))
 			{
-				pageIssues.Add($"page exists: {title.AsLink(true)}");
+				pageIssues.Add($"page exists: {title.AsLink(LinkFormat.LabelName)}");
 			}
 
 			if (pageIssues.Count > 0)
 			{
-				this.issues.Add($"* {parser.Title.AsLink(false)}: {string.Join(", ", pageIssues)}.");
+				this.issues.Add($"* {parser.Title.AsLink()}: {string.Join(", ", pageIssues)}.");
 			}
 		}
 		#endregion

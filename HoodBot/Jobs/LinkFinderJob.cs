@@ -46,7 +46,7 @@
 				{
 					if (result.Value.Count > 0)
 					{
-						this.WriteLine($"|-\n| {result.Key.AsLink(false)}:");
+						this.WriteLine($"|-\n| {result.Key.AsLink()}:");
 						this.WriteLine("| " + string.Join("<br>", result.Value));
 					}
 				}

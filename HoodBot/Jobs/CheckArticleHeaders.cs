@@ -46,7 +46,7 @@
 					var header = node.GetInnerText(true);
 					if (BadHeaders.Contains(header) && !this.IsException(page, header))
 					{
-						this.WriteLine($"* {page.AsLink(false)} has a {header} header.");
+						this.WriteLine($"* {page.AsLink()} has a {header} header.");
 					}
 				}
 			}

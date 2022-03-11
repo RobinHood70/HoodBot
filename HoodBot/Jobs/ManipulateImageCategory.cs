@@ -40,7 +40,7 @@
 			{
 				if (image.LatestFileRevision is FileRevision imageInfo)
 				{
-					this.WriteLine(FormattableString.Invariant($"* {image.AsLink(true)} ({imageInfo.Width}x{imageInfo.Height})"));
+					this.WriteLine(FormattableString.Invariant($"* {image.AsLink(LinkFormat.LabelName)} ({imageInfo.Width}x{imageInfo.Height})"));
 				}
 			}
 		}

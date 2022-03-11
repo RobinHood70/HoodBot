@@ -119,7 +119,7 @@
 			var fixMatch = string.Equals(fileName, fileNameFix, StringComparison.Ordinal);
 			return fixMatch
 				? null
-				: $":{fileTitle.AsLink(true)} on {page.AsLink(true)} ''should be''\n" +
+				: $":{fileTitle.AsLink(LinkFormat.LabelName)} on {page.AsLink(LinkFormat.LabelName)} ''should be''\n" +
 					$":{fileNameFix}";
 		}
 

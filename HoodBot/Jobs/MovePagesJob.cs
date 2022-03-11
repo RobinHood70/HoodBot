@@ -346,12 +346,12 @@
 				{
 					if ((actions & ReplacementActions.UpdateLinks) != 0)
 					{
-						actionsList.Add("update links to " + replacement.To.AsLink(false));
+						actionsList.Add("update links to " + replacement.To.AsLink());
 					}
 				}
 				else if ((actions & ReplacementActions.Move) != 0)
 				{
-					actionsList.Add("move to " + replacement.To.AsLink(false));
+					actionsList.Add("move to " + replacement.To.AsLink());
 				}
 
 				if ((actions & ReplacementActions.Edit) != 0)
@@ -443,7 +443,7 @@
 
 		protected virtual Replacement.DetailedActions HandleConflict(Replacement replacement) => new(
 			replacement.MoveActions.Actions & ~ReplacementActions.Move,
-			$"{replacement.To.AsLink(false)} exists");
+			$"{replacement.To.AsLink()} exists");
 
 		protected virtual void MovePages()
 		{

@@ -85,7 +85,7 @@
 				var text = this.GetTextForPage(page);
 				if (text.Length > 0)
 				{
-					this.WriteLine($"* {page.AsLink(false)}{text}");
+					this.WriteLine($"* {page.AsLink()}{text}");
 				}
 			}
 		}
@@ -151,7 +151,7 @@
 			{
 				if (!page.IsRedirect)
 				{
-					this.WriteLine("* " + page.AsLink(false));
+					this.WriteLine("* " + page.AsLink());
 				}
 			}
 		}
@@ -209,7 +209,7 @@
 					CategoryPage? catPage = (CategoryPage)page;
 					if (catPage.FullCount > 0)
 					{
-						this.WriteLine($"* {page.AsLink(false)}{this.GetTextForPage(page)}");
+						this.WriteLine($"* {page}{this.GetTextForPage(page)}");
 					}
 				}
 			}
