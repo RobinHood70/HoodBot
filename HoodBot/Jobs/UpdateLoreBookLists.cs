@@ -140,7 +140,7 @@
 			foreach (var page in this.Pages)
 			{
 				ContextualParser parser = new(page);
-				foreach (var template in parser.FindTemplates(TemplateName))
+				foreach (var template in parser.FindSiteTemplates(TemplateName))
 				{
 					if (template.GetValue(2) is string value)
 					{
@@ -154,7 +154,7 @@
 		private void LoreBookEntries_PageLoaded(object sender, Page page)
 		{
 			ContextualParser parser = new(page);
-			var nodes = parser.Nodes;
+			var nodes = parser;
 			var factory = nodes.Factory;
 			var first = nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
 			var last = nodes.FindLastIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));

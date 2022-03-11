@@ -64,22 +64,22 @@
 			base.Main();
 		}
 
-		protected override void ParseText(object sender, ContextualParser parsedPage)
+		protected override void ParseText(object sender, ContextualParser parser)
 		{
-			parsedPage.ThrowNull(nameof(parsedPage));
-			parsedPage.Context.ThrowNull(nameof(parsedPage), nameof(parsedPage.Context));
+			parser.ThrowNull(nameof(parser));
+			parser.Title.ThrowNull(nameof(parser), nameof(parser.Title));
 			List<string> pageIssues = new();
-			if (!parsedPage.Context.PageName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))
+			if (!parser.Title.PageName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))
 			{
 				pageIssues.Add("does not end in .jpg");
 			}
 
-			if (parsedPage.FindTemplate("Furnishing Summary") == null)
+			if (parser.FindSiteTemplate("Furnishing Summary") == null)
 			{
 				pageIssues.Add("does not have a Furnishing Summary");
 			}
 
-			var title = PageFromFile(parsedPage.Context);
+			var title = PageFromFile(parser.Title);
 			if (this.existingPages!.Contains(title))
 			{
 				pageIssues.Add($"page exists: {title.AsLink(true)}");
@@ -87,7 +87,7 @@
 
 			if (pageIssues.Count > 0)
 			{
-				this.issues.Add($"* {parsedPage.Context.AsLink(false)}: {string.Join(", ", pageIssues)}.");
+				this.issues.Add($"* {parser.Title.AsLink(false)}: {string.Join(", ", pageIssues)}.");
 			}
 		}
 		#endregion

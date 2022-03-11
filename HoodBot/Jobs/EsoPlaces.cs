@@ -34,7 +34,7 @@
 			{
 				Debug.WriteLine($"* [[{page.FullPageName}]]");
 				ContextualParser parsedPage = new(page);
-				var template = parsedPage.FindTemplate("Online Page Summary");
+				var template = parsedPage.FindSiteTemplate("Online Page Summary");
 				if (page.Exists && template != null)
 				{
 					var mapType = lookup[page.PageName];

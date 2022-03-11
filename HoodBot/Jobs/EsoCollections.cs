@@ -100,7 +100,7 @@
 				(pages.TryGetValue(newPage.PageName, out page) && page.Exists))
 			{
 				ContextualParser? parser = new(page);
-				if (parser.Nodes.Has<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName)))
+				if (parser.Has<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName)))
 				{
 					return page;
 				}
@@ -170,8 +170,8 @@
 		private static void ParseCollectible(CollectibleInfo collectible, Page page)
 		{
 			ContextualParser parser = new(page);
-			var templateIndex = parser.Nodes.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals(TemplateName));
-			SiteTemplateNode template = (SiteTemplateNode)parser.Nodes[templateIndex];
+			var templateIndex = parser.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals(TemplateName));
+			SiteTemplateNode template = (SiteTemplateNode)parser[templateIndex];
 			var removeParens = page.PageName.Split(" (", 2)[0];
 			template.Update("collectibletype", CategorySingular(collectible.CollectibleType));
 			template.Update("type", CategorySingular(collectible.Type));
@@ -221,7 +221,7 @@
 
 			if (page.IsRedirect || !page.Exists)
 			{
-				parser.Nodes.InsertRange(templateIndex + 1, collectible.NewContent);
+				parser.InsertRange(templateIndex + 1, collectible.NewContent);
 			}
 
 			page.Text = parser.ToRaw();
@@ -256,7 +256,7 @@
 			{
 				ContextualParser parser = new(crate);
 				var tier = string.Empty;
-				foreach (var node in parser.Nodes)
+				foreach (var node in parser)
 				{
 					if (node is IHeaderNode header)
 					{

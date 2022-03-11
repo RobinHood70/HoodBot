@@ -12,6 +12,7 @@
 
 	internal sealed class BulkUploadIcons : EditJob
 	{
+		// Images should be downloaded from latest version on https://esofiles.uesp.net/ in the icons.zip file before running this job.
 		#region Static Fields
 		private static readonly Dictionary<long, string> NameFixes = new()
 		{
@@ -61,7 +62,7 @@
 			"Annihilarch's Chosen",
 			"Arkthzand Armory",
 			"Crimson Oath",
-			// "Crusader",
+			//// "Crusader",
 			"Dremora Kynreeve",
 			"Fargrave Guardian",
 			"Gloambound",

@@ -18,6 +18,7 @@
 
 	public class EsoMatchIcons : EditJob
 	{
+		// Images should be downloaded from latest version on https://esofiles.uesp.net/ in the icons.zip file before running this job.
 		#region Constants
 		private const string MissingFileCategory = "Online-Icons-Missing Original File";
 		#endregion
@@ -69,15 +70,41 @@
 		#endregion
 
 		#region Private Static Methods
+		private static (int Index, int End) FindLicense(ContextualParser parser)
+		{
+			int summaryIndex;
+			int summaryEnd;
+			summaryIndex = parser.IndexOfHeader("Summary");
+			if (summaryIndex == -1)
+			{
+				summaryIndex = parser.IndexOfHeader("{{int:filedesc}}");
+			}
+
+			summaryIndex++;
+			summaryEnd = parser.FindIndex<HeaderNode>(summaryIndex);
+			if (summaryEnd == -1)
+			{
+				summaryEnd = parser.Count;
+			}
+
+			return (summaryIndex, summaryEnd);
+		}
+
 		private static (int Index, int End) FindSummary(ContextualParser parser)
 		{
 			int summaryIndex;
 			int summaryEnd;
-			summaryIndex = parser.IndexOfHeader("Summary") + 1;
-			summaryEnd = parser.Nodes.FindIndex<HeaderNode>(summaryIndex);
+			summaryIndex = parser.IndexOfHeader("Summary");
+			if (summaryIndex == -1)
+			{
+				summaryIndex = parser.IndexOfHeader("{{int:filedesc}}");
+			}
+
+			summaryIndex++;
+			summaryEnd = parser.FindIndex<HeaderNode>(summaryIndex);
 			if (summaryEnd == -1)
 			{
-				summaryEnd = parser.Nodes.Count;
+				summaryEnd = parser.Count;
 			}
 
 			return (summaryIndex, summaryEnd);
@@ -104,12 +131,12 @@
 		private static ICollection<SiteLink> ParseCatgories(Site site, ContextualParser parser)
 		{
 			List<SiteLink>? retval = new();
-			for (var i = 0; i < parser.Nodes.Count; i++)
+			for (var i = 0; i < parser.Count; i++)
 			{
-				if (parser.Nodes[i] is SiteLinkNode link && link.TitleValue.Namespace == MediaWikiNamespaces.Category)
+				if (parser[i] is SiteLinkNode link && link.TitleValue.Namespace == MediaWikiNamespaces.Category)
 				{
 					retval.Add(SiteLink.FromLinkNode(site, link));
-					parser.Nodes.RemoveAt(i);
+					parser.RemoveAt(i);
 				}
 			}
 
@@ -253,7 +280,7 @@
 
 		private void ReplaceLicense(ContextualParser parsedPage)
 		{
-			if (parsedPage.Nodes.Find<SiteTemplateNode>(template => this.licenseTemplates.Contains(template.TitleValue)) is SiteTemplateNode license)
+			if (parsedPage.Find<SiteTemplateNode>(template => this.licenseTemplates.Contains(template.TitleValue)) is SiteTemplateNode license)
 			{
 				license.Title.Clear();
 				license.Title.AddText("Zenimage");
@@ -300,11 +327,11 @@
 
 				(var index, var end) = FindSummary(parser);
 				this.PreSummary = index == 0
-					? (new IWikiNode[] { parser.Nodes.Factory.HeaderNodeFromParts(2, " Summary ") })
-					: new List<IWikiNode>(parser.Nodes.GetRange(0, index));
-				if (end < parser.Nodes.Count)
+					? (new IWikiNode[] { parser.Factory.HeaderNodeFromParts(2, " Summary ") })
+					: new List<IWikiNode>(parser.GetRange(0, index));
+				if (end < parser.Count)
 				{
-					this.PostSummary = new List<IWikiNode>(parser.Nodes.GetRange(end, parser.Nodes.Count - end));
+					this.PostSummary = new List<IWikiNode>(parser.GetRange(end, parser.Count - end));
 				}
 
 				this.ParseSummary(parser, index, end);
@@ -419,7 +446,7 @@
 				var isPreText = true;
 				StringBuilder preText = new();
 				StringBuilder postText = new();
-				foreach (var line in WikiTextVisitor.Raw(parser.Nodes.GetRange(summaryIndex, summaryEnd - summaryIndex)).Split(TextArrays.NewLineChars))
+				foreach (var line in WikiTextVisitor.Raw(parser.GetRange(summaryIndex, summaryEnd - summaryIndex)).Split(TextArrays.NewLineChars))
 				{
 					var fromWeb = line.Split("://esoicons.uesp.net/esoui/art/icons/", StringSplitOptions.RemoveEmptyEntries);
 					if (fromWeb.Length > 1)

@@ -25,15 +25,15 @@
 			this.Pages.GetBacklinks(title.FullPageName);
 		}
 
-		protected override void ParseText(object sender, ContextualParser parsedPage)
+		protected override void ParseText(object sender, ContextualParser parser)
 		{
-			foreach (var template in parsedPage.FindTemplates(this.TemplateName))
+			foreach (var template in parser.FindSiteTemplates(this.TemplateName))
 			{
-				this.ParseTemplate(template, parsedPage);
+				this.ParseTemplate(template, parser);
 			}
 		}
 
-		protected abstract void ParseTemplate(SiteTemplateNode template, ContextualParser parsedPage);
+		protected abstract void ParseTemplate(SiteTemplateNode template, ContextualParser parser);
 		#endregion
 	}
 }

@@ -251,9 +251,9 @@
 
 		private static void UpdatePage(ContextualParser parser, Field field)
 		{
-			var nodes = parser.Nodes;
+			var nodes = parser;
 			var start = nodes.FindIndex<SiteTemplateNode>(template => string.Equals(template.TitleValue.PageName, "Wave Table (GC2)/Start", StringComparison.Ordinal)) + 1;
-			var end = parser.Nodes.FindLastIndex<SiteTemplateNode>(template => string.Equals(template.TitleValue.PageName, "Wave Table (GC2)/End", StringComparison.Ordinal));
+			var end = parser.FindLastIndex<SiteTemplateNode>(template => string.Equals(template.TitleValue.PageName, "Wave Table (GC2)/End", StringComparison.Ordinal));
 			if (start == 0 || end == -1)
 			{
 				return;
@@ -267,7 +267,7 @@
 				newLine
 			};
 			EmitWaves(waveNodes, field);
-			parser.Nodes.InsertRange(start, waveNodes);
+			parser.InsertRange(start, waveNodes);
 		}
 		#endregion
 
@@ -469,7 +469,7 @@
 			parser.AppendLine("\n\n==Waves==");
 			parser.AppendLine("The following table applies only to Looming difficulty with no battle traits.");
 			parser.AppendLine("{{Wave Table (GC2)/Start}}");
-			EmitWaves(parser.Nodes, field);
+			EmitWaves(parser, field);
 
 			parser.AppendLine("{{Wave Table (GC2)/End}}\n");
 
@@ -582,8 +582,8 @@
 		{
 			if (parser.FindTemplate(InfoboxName) is not ITemplateNode infobox)
 			{
-				infobox = parser.Nodes.Factory.TemplateNodeFromParts(InfoboxName);
-				parser.Nodes.Insert(0, infobox);
+				infobox = parser.Factory.TemplateNodeFromParts(InfoboxName);
+				parser.Insert(0, infobox);
 			}
 
 			infobox.AddOrChange("field", field.Name);
@@ -690,7 +690,7 @@
 				infobox.Add("steam", field.SteamExclusive ? "only" : "yes");
 			}
 
-			parser.Nodes.Add(infobox);
+			parser.Add(infobox);
 		}
 		#endregion
 	}

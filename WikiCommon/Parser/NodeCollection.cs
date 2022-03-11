@@ -43,9 +43,86 @@
 		/// <summary>Gets the <see cref="IWikiNodeFactory"/> used to create new nodes.</summary>
 		/// <value>The factory.</value>
 		public IWikiNodeFactory Factory { get; }
+
+		/// <summary>Gets the <see cref="IHeaderNode"/>s on the page.</summary>
+		/// <value>The header nodes.</value>
+		public IEnumerable<IHeaderNode> HeaderNodes => this.FindAll<IHeaderNode>();
+
+		/// <summary>Gets the <see cref="ILinkNode"/>s on the page.</summary>
+		/// <value>The header nodes.</value>
+		public IEnumerable<ILinkNode> LinkNodes => this.FindAll<ILinkNode>();
+
+		/// <summary>Gets the <see cref="ITemplateNode"/>s on the page.</summary>
+		/// <value>The header nodes.</value>
+		public IEnumerable<ITemplateNode> TemplateNodes => this.FindAll<ITemplateNode>();
+
+		/// <summary>Gets the <see cref="ITextNode"/>s on the page.</summary>
+		/// <value>The header nodes.</value>
+		public IEnumerable<ITextNode> TextNodes => this.FindAll<ITextNode>();
 		#endregion
 
 		#region Public Methods
+
+		/// <summary>Adds a blank line to the end of the Nodes collection.</summary>
+		public void AppendLine() => this.AddText("\n");
+
+		/// <summary>Adds a full line of text to the end of the Nodes collection.</summary>
+		/// <param name="text">The text.</param>
+		/// <seealso cref="AppendText(string)"/>
+		public void AppendLine(string text) => this.AddText(text + '\n');
+
+		/// <summary>Adds text to the end of the Nodes collection.</summary>
+		/// <param name="text">The text.</param>
+		/// <remarks>Adds text to the final node in the Nodes collection if it's an <see cref="ITextNode"/>; otherwise, creates a text node (via the factory) with the specified text and adds it to the Nodes collection.</remarks>
+		public void AppendText(string text) => this.AddText(text);
+
+		/// <summary>Replaces all current content with the content of the sections provided.</summary>
+		/// <param name="sections">The new sections for the page.</param>
+		public void FromSections(IEnumerable<Section> sections)
+		{
+			sections.ThrowNull(nameof(sections));
+			this.Clear();
+			foreach (var section in sections)
+			{
+				if (section.Header is IHeaderNode header)
+				{
+					this.Add(header);
+				}
+
+				this.AddRange(section.Content);
+			}
+		}
+
+		/// <summary>Finds the first header with the specified text.</summary>
+		/// <param name="headerText">Name of the header.</param>
+		/// <returns>The first header with the specified text.</returns>
+		/// <remarks>This is a temporary function until HeaderNode can be rewritten to work more like other nodes (i.e., without capturing trailing whitespace).</remarks>
+		public int IndexOfHeader(string headerText) => this.FindIndex<IHeaderNode>(header => string.Equals(header.GetInnerText(true), headerText, StringComparison.Ordinal));
+
+		/// <summary>Splits a page into its individual sections. </summary>
+		/// <returns>An enumeration of the sections of the page.</returns>
+		public IEnumerable<Section> ToSections()
+		{
+			Section? section = new(null, this.Factory);
+			foreach (var node in this)
+			{
+				if (node is IHeaderNode header)
+				{
+					if (section.Header != null || section.Content.Count > 0)
+					{
+						yield return section;
+					}
+
+					section = new Section(header, this.Factory);
+				}
+				else
+				{
+					section.Content.Add(node);
+				}
+			}
+
+			yield return section;
+		}
 
 		/// <summary>Accepts a visitor to process the node.</summary>
 		/// <param name="visitor">The visiting class.</param>

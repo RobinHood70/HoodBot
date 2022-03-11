@@ -91,8 +91,8 @@
 
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
-			Page title = (Page)parsedPage.Context;
-			if (parsedPage.FindTemplate("Online Furnishing Summary") is SiteTemplateNode template)
+			Page title = (Page)parsedPage.Title;
+			if (parsedPage.FindSiteTemplate("Online Furnishing Summary") is SiteTemplateNode template)
 			{
 				if (this.DoPageChecks(template, title) is string pageMessage)
 				{

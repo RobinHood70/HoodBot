@@ -55,7 +55,7 @@
 			{
 				this.ids.Remove(idPageName);
 				ContextualParser parser = new(page);
-				if (parser.FindTemplate("Online Collectible Summary") is ITemplateNode template)
+				if (parser.FindSiteTemplate("Online Collectible Summary") is ITemplateNode template)
 				{
 					template.Update("id", id.ToStringInvariant());
 					page.Text = parser.ToRaw();

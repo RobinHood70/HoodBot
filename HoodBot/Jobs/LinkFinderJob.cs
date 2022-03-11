@@ -89,18 +89,18 @@
 			this.Titles.AddRange(allTitles);
 		}
 
-		protected override void ParseText(object sender, ContextualParser parsedPage)
+		protected override void ParseText(object sender, ContextualParser parser)
 		{
-			parsedPage.ThrowNull(nameof(parsedPage));
+			parser.ThrowNull(nameof(parser));
 			foreach (var title in this.Titles)
 			{
-				if (!this.results.TryGetValue(parsedPage.Context, out var links))
+				if (!this.results.TryGetValue(parser.Title, out var links))
 				{
 					links = new List<string>();
-					this.results.Add(parsedPage.Context, links);
+					this.results.Add(parser.Title, links);
 				}
 
-				foreach (var link in parsedPage.FindLinks(title))
+				foreach (var link in parser.FindSiteLinks(title))
 				{
 					if (this.CheckLink(link) &&
 						WikiTextVisitor.Raw(link) is var textTitle &&

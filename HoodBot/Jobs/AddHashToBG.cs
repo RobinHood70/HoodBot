@@ -18,9 +18,9 @@
 
 		protected override void LoadPages() => this.Pages.GetBacklinks("Template:BG", BacklinksTypes.EmbeddedIn);
 
-		protected override void ParseText(object sender, ContextualParser parsedPage)
+		protected override void ParseText(object sender, ContextualParser parser)
 		{
-			foreach (var template in parsedPage.NotNull(nameof(parsedPage)).TemplateNodes)
+			foreach (var template in parser.NotNull(nameof(parser)).TemplateNodes)
 			{
 				if (template.Parameters.Count >= 1 &&
 					template.Find(1) is IParameterNode parameter &&

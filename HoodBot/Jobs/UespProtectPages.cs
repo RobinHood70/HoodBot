@@ -251,22 +251,22 @@
 		private static void AddFooter(ContextualParser parser, PageProtection protection)
 		{
 			var footer = protection.Footer;
-			SiteTemplateNode? footerTemplate = (SiteTemplateNode)parser.Nodes.Factory.TemplateNodeFromWikiText(footer);
-			if (parser.FindTemplate(footerTemplate.TitleValue.PageName) is SiteTemplateNode existing)
+			SiteTemplateNode? footerTemplate = (SiteTemplateNode)parser.Factory.TemplateNodeFromWikiText(footer);
+			if (parser.FindSiteTemplate(footerTemplate.TitleValue.PageName) is SiteTemplateNode existing)
 			{
 				existing.Title.Clear();
 				existing.Title.AddRange(footerTemplate.Title);
 			}
 			else
 			{
-				parser.Nodes.AddText("\n\n");
-				parser.Nodes.AddRange(footerTemplate);
+				parser.AddText("\n\n");
+				parser.AddRange(footerTemplate);
 			}
 		}
 
 		private static int AddHeader(ContextualParser parser, PageProtection protection, int insertPos)
 		{
-			var nodes = parser.Nodes;
+			var nodes = parser;
 			var header = protection.Header;
 			var replaceDate = string.Empty;
 			if (header.Contains("<date>", StringComparison.Ordinal))
@@ -288,7 +288,7 @@
 					insertPos--;
 				}
 
-				Title title = new(parser.Context);
+				Title title = new(parser.Title);
 				index = existing.FindIndex("source");
 				if (index != -1)
 				{
@@ -320,12 +320,12 @@
 		private static int AddJavascriptProtection(ContextualParser parser, PageProtection protection, int insertPos)
 		{
 			ITemplateNode protectionTemplate;
-			var currentPos = parser.Nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(ProtectionTemplateName));
+			var currentPos = parser.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(ProtectionTemplateName));
 			if (currentPos != -1)
 			{
-				if (currentPos > 0 && parser.Nodes[currentPos - 1] is ITextNode textNode && textNode.Text.Equals("// ", StringComparison.Ordinal))
+				if (currentPos > 0 && parser[currentPos - 1] is ITextNode textNode && textNode.Text.Equals("// ", StringComparison.Ordinal))
 				{
-					protectionTemplate = (ITemplateNode)parser.Nodes[currentPos];
+					protectionTemplate = (ITemplateNode)parser[currentPos];
 					protectionTemplate.Title.Clear();
 					protectionTemplate.Title.AddText(ProtectionTemplateName);
 					protectionTemplate.Remove("edit");
@@ -334,7 +334,7 @@
 					protectionTemplate.Remove("1");
 
 					// Remove existing template and parameter values, then put them where we want them.
-					parser.Nodes.RemoveRange(0, 2);
+					parser.RemoveRange(0, 2);
 				}
 				else
 				{
@@ -343,7 +343,7 @@
 			}
 			else
 			{
-				protectionTemplate = parser.Nodes.Factory.TemplateNodeFromParts(ProtectionTemplateName);
+				protectionTemplate = parser.Factory.TemplateNodeFromParts(ProtectionTemplateName);
 			}
 
 			protectionTemplate.Add(ProtectionString[protection.EditProtection].ToLowerInvariant());
@@ -352,9 +352,9 @@
 				protectionTemplate.Add(ProtectionString[protection.MoveProtection].ToLowerInvariant());
 			}
 
-			parser.Nodes.InsertRange(insertPos, new IWikiNode[]
+			parser.InsertRange(insertPos, new IWikiNode[]
 			{
-				parser.Nodes.Factory.TextNode("// "),
+				parser.Factory.TextNode("// "),
 				protectionTemplate
 			});
 
@@ -374,7 +374,7 @@
 		private static string GetDate(ContextualParser parser)
 		{
 			var minDate = DateTime.MaxValue;
-			foreach (var node in parser.Nodes.FindAll<ITextNode>())
+			foreach (var node in parser.FindAll<ITextNode>())
 			{
 				foreach (var match in (IEnumerable<Match>)Dates.Matches(node.Text))
 				{
@@ -392,7 +392,7 @@
 
 		private static int InsertStandardProtectionTemplate(ContextualParser parser, PageProtection protection, int insertPos, string editWord, string moveWord)
 		{
-			var protectionTemplate = parser.Nodes.Factory.TemplateNodeFromParts(ProtectionTemplateName);
+			var protectionTemplate = parser.Factory.TemplateNodeFromParts(ProtectionTemplateName);
 			if (protection.EditProtection != ProtectionLevel.Remove || protection.MoveProtection != ProtectionLevel.Remove)
 			{
 				protectionTemplate.Add(editWord);
@@ -402,7 +402,7 @@
 				}
 			}
 
-			parser.Nodes.Insert(insertPos, protectionTemplate);
+			parser.Insert(insertPos, protectionTemplate);
 			return insertPos + 1;
 		}
 
@@ -418,10 +418,10 @@
 
 		private static int RemoveProtectionTemplate(ContextualParser parser, int insertPos)
 		{
-			var currentPos = parser.Nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(ProtectionTemplateName));
+			var currentPos = parser.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(ProtectionTemplateName));
 			if (currentPos != -1)
 			{
-				SiteTemplateNode? existing = (SiteTemplateNode)parser.Nodes[currentPos];
+				SiteTemplateNode? existing = (SiteTemplateNode)parser[currentPos];
 				existing.Title.Clear();
 				existing.Title.AddText(ProtectionTemplateName);
 				existing.Remove("edit");
@@ -430,7 +430,7 @@
 				existing.Remove("1");
 
 				// Remove existing template and parameter values, then put them where we want them.
-				parser.Nodes.RemoveAt(currentPos);
+				parser.RemoveAt(currentPos);
 				if (currentPos < insertPos)
 				{
 					insertPos--;
@@ -444,7 +444,7 @@
 		{
 			var insertPos = 0;
 			ContextualParser parser = new(page);
-			var nodes = parser.Nodes;
+			var nodes = parser;
 
 			// Figure out where to put a new Protection tempalte: for redirects, immediately after the link with no noincludes added; for pages with noincludes, inside the noinclude if it's early in the page. For anything else, add noincludes if needed, then insert inside the noinclude.
 			if (page.IsRedirect)
@@ -504,11 +504,11 @@
 			}
 
 			// Check if we've pulled stuff out of an unwanted noinclude block.
-			if (parser.Nodes.Count > insertPos &&
-				parser.Nodes[insertPos] is IIgnoreNode open && open.Value.Equals("<noinclude>", StringComparison.OrdinalIgnoreCase) &&
-				parser.Nodes[insertPos + 1] is IIgnoreNode close && close.Value.Equals("</noinclude>", StringComparison.OrdinalIgnoreCase))
+			if (parser.Count > insertPos &&
+				parser[insertPos] is IIgnoreNode open && open.Value.Equals("<noinclude>", StringComparison.OrdinalIgnoreCase) &&
+				parser[insertPos + 1] is IIgnoreNode close && close.Value.Equals("</noinclude>", StringComparison.OrdinalIgnoreCase))
 			{
-				parser.Nodes.RemoveRange(insertPos, 2);
+				parser.RemoveRange(insertPos, 2);
 			}
 
 			page.Text = parser.ToRaw();

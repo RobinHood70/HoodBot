@@ -78,7 +78,7 @@
 		/// <remarks>This is method is provided as a temporary measure. The intent is to alter the parser itself so as to make this method unnecessary.</remarks>
 		public static string GetInnerText(this IHeaderNode header, bool innerTrim)
 		{
-			var text = WikiTextVisitor.Value(header.NotNull(nameof(header))).TrimEnd();
+			var text = WikiTextVisitor.Raw(header.NotNull(nameof(header))).TrimEnd();
 			text = text.Substring(header.Level, text.Length - header.Level * 2);
 			return innerTrim ? text.Trim() : text;
 		}

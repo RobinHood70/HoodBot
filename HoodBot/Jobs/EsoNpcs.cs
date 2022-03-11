@@ -57,9 +57,9 @@
 					// TODO: We end up parsing the page twice with this design, one in FilterNpcsUpdate and once here. See if there's something that can be done to optimize this.
 					if (npc.Page is Page page &&
 						new ContextualParser(page) is var parser &&
-						parser.FindTemplate("Online NPC Summary") is ITemplateNode template)
+						parser.FindSiteTemplate("Online NPC Summary") is ITemplateNode template)
 					{
-						UpdateLocations(npc, template, parser.Nodes.Factory, placeInfo);
+						UpdateLocations(npc, template, parser.Factory, placeInfo);
 						page.Text = parser.ToRaw();
 						this.Pages.Add(page);
 					}
@@ -291,7 +291,7 @@
 					if (issue == null)
 					{
 						ContextualParser parsed = new(page);
-						var template = parsed.FindTemplate("Online NPC Summary");
+						var template = parsed.FindSiteTemplate("Online NPC Summary");
 						if (this.updateMode)
 						{
 							if (template?.Find("city").IsNullOrWhitespace() == true &&

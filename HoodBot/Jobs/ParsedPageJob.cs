@@ -39,7 +39,7 @@
 		#region Protected Abstract Methods
 		protected abstract void LoadPages();
 
-		protected abstract void ParseText(object sender, ContextualParser parsedPage);
+		protected abstract void ParseText(object sender, ContextualParser parser);
 		#endregion
 
 		#region Protected Virtual Methods
