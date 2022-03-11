@@ -38,7 +38,7 @@
 					break;
 				case '=':
 					var lastPiece = this.NameValuePieces[^1];
-					lastPiece.SplitPos = lastPiece.Count;
+					lastPiece.SplitPos = lastPiece.Nodes.Count;
 
 					if (this.NameValuePieces.Count == 1)
 					{
@@ -47,7 +47,7 @@
 					else
 					{
 						// Node type isn't really relevant here, as long as it's not a TextNode. IgnoreNode made the most sense. This is an interim value that won't ever make it to the final output. This could probably be done with SplitPos alone, but adding this makes the TextNode checks in AddLiteral and Merge fail in their own right, without having to check SplitPos.
-						lastPiece.Add(this.Stack.NodeFactory.IgnoreNode("="));
+						lastPiece.Nodes.Add(this.Stack.NodeFactory.IgnoreNode("="));
 					}
 
 					this.Stack.Index++;

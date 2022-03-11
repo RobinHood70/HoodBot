@@ -16,10 +16,8 @@
 		internal HeaderElement(WikiStack stack, int length)
 			: base(stack)
 		{
-			this.CurrentPiece = new Piece
-			{
-				stack.NodeFactory.TextNode(new string('=', length))
-			};
+			this.CurrentPiece = new Piece();
+			this.CurrentPiece.Nodes.Add(stack.NodeFactory.TextNode(new string('=', length)));
 			this.length = length;
 			this.startPos = stack.Index;
 		}
@@ -36,7 +34,7 @@
 		#endregion
 
 		#region Internal Override Methods
-		internal override List<IWikiNode> BreakSyntax() => this.CurrentPiece;
+		internal override List<IWikiNode> BreakSyntax() => this.CurrentPiece.Nodes;
 
 		internal override void Parse(char found)
 		{
@@ -63,15 +61,15 @@
 
 					if (count > 0)
 					{
-						var headerNode = this.Stack.NodeFactory.HeaderNode(count, piece);
+						var headerNode = this.Stack.NodeFactory.HeaderNode(count, piece.Nodes);
 						stack.Pop();
-						stack.Top.CurrentPiece.Add(headerNode);
+						stack.Top.CurrentPiece.Nodes.Add(headerNode);
 						return;
 					}
 				}
 
 				stack.Pop();
-				stack.Top.CurrentPiece.Merge(piece);
+				stack.Top.CurrentPiece.Merge(piece.Nodes);
 			}
 			else
 			{
