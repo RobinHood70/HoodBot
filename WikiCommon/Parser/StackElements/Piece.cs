@@ -3,10 +3,12 @@
 	using System.Collections.Generic;
 	using RobinHood70.WikiCommon.Parser;
 
-	internal sealed class Piece : List<IWikiNode>
+	internal sealed class Piece
 	{
 		#region Public Properties
 		public int CommentEnd { get; set; } = -1;
+
+		public List<IWikiNode> Nodes { get; } = new List<IWikiNode>();
 
 		public int SplitPos { get; set; } = -1; // Not needed everywhere, but kind of silly to have two separate classes for the sake of a single property.
 
@@ -16,9 +18,9 @@
 		#region Public Methods
 		public void AddLiteral(IWikiNodeFactory factory, string literal)
 		{
-			if (this.Count == 0 || this[^1] is not ITextNode node)
+			if (this.Nodes.Count == 0 || this.Nodes[^1] is not ITextNode node)
 			{
-				this.Add(factory.TextNode(literal));
+				this.Nodes.Add(factory.TextNode(literal));
 			}
 			else
 			{
@@ -34,14 +36,14 @@
 			}
 
 			var merged = false;
-			var last = this.Count - 1;
-			if (last > -1 && this[last] is ITextNode lastNode && newList[0] is ITextNode first)
+			var last = this.Nodes.Count - 1;
+			if (last > -1 && this.Nodes[last] is ITextNode lastNode && newList[0] is ITextNode first)
 			{
 				lastNode.Text += first.Text;
 				merged = true;
 			}
 
-			this.AddRange(merged ? newList.GetRange(1, newList.Count - 1) : newList);
+			this.Nodes.AddRange(merged ? newList.GetRange(1, newList.Count - 1) : newList);
 		}
 		#endregion
 	}

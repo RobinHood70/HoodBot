@@ -35,18 +35,19 @@
 		#region Protected Methods
 		protected List<IWikiNode> BreakSyntax(int matchingCount)
 		{
-			Piece newPiece = new() { this.Stack.NodeFactory.TextNode(new string(this.open, matchingCount)) };
+			Piece newPiece = new();
+			newPiece.Nodes.Add(this.Stack.NodeFactory.TextNode(new string(this.open, matchingCount)));
 			var oldPiece = this.NameValuePieces[0];
-			newPiece.Merge(oldPiece);
+			newPiece.Merge(oldPiece.Nodes);
 			var pieceCount = this.NameValuePieces.Count;
 			for (var j = 1; j < pieceCount; j++)
 			{
 				oldPiece = this.NameValuePieces[j];
 				newPiece.AddLiteral(this.Stack.NodeFactory, "|");
-				newPiece.Merge(oldPiece);
+				newPiece.Merge(oldPiece.Nodes);
 			}
 
-			return newPiece;
+			return newPiece.Nodes;
 		}
 
 		protected int ParseClose(char found)
@@ -67,17 +68,17 @@
 			{
 				var nvPiece = this.NameValuePieces[i];
 				parameters.Add(nvPiece.SplitPos == -1 || matchingCount == 3
-					? factory.ParameterNode(null, nvPiece)
+					? factory.ParameterNode(null, nvPiece.Nodes)
 					: factory.ParameterNode(
-						nvPiece.GetRange(0, nvPiece.SplitPos),
-						nvPiece.GetRange(nvPiece.SplitPos + 1, nvPiece.Count - nvPiece.SplitPos - 1)));
+						nvPiece.Nodes.GetRange(0, nvPiece.SplitPos),
+						nvPiece.Nodes.GetRange(nvPiece.SplitPos + 1, nvPiece.Nodes.Count - nvPiece.SplitPos - 1)));
 			}
 
 			var title = this.NameValuePieces[0];
 			var node =
-				matchingCount == 3 ? factory.ArgumentNode(title, parameters) :
-				found == ']' ? factory.LinkNode(title, parameters) :
-				factory.TemplateNode(title, parameters) as IWikiNode;
+				matchingCount == 3 ? factory.ArgumentNode(title.Nodes, parameters) :
+				found == ']' ? factory.LinkNode(title.Nodes, parameters) :
+				factory.TemplateNode(title.Nodes, parameters) as IWikiNode;
 			this.Stack.Index += matchingCount;
 			this.Stack.Pop();
 			if (matchingCount < this.Length)
@@ -91,11 +92,11 @@
 				}
 				else
 				{
-					this.Stack.Top.CurrentPiece.Add(this.Stack.NodeFactory.TextNode(new string(this.open, this.Length)));
+					this.Stack.Top.CurrentPiece.Nodes.Add(this.Stack.NodeFactory.TextNode(new string(this.open, this.Length)));
 				}
 			}
 
-			this.Stack.Top.CurrentPiece.Add(node);
+			this.Stack.Top.CurrentPiece.Nodes.Add(node);
 			return matchingCount;
 		}
 		#endregion

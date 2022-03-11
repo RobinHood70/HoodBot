@@ -49,7 +49,7 @@
 			: base(new SiteNodeFactory(title.NotNull(nameof(title)).Namespace.Site))
 		{
 			this.Title = title;
-			this.Factory.Parse(text, inclusionType, strictInclusion);
+			this.Factory.ParseInto(this, text, inclusionType, strictInclusion);
 		}
 		#endregion
 

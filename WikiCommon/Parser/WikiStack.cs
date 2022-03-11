@@ -146,7 +146,7 @@
 				finalNodes.Merge(this.array[i].BreakSyntax());
 			}
 
-			foreach (var node in finalNodes)
+			foreach (var node in finalNodes.Nodes)
 			{
 				if (node is IHeaderNode hNode && !hNode.Confirmed)
 				{
@@ -154,7 +154,7 @@
 				}
 			}
 
-			return finalNodes;
+			return finalNodes.Nodes;
 		}
 		#endregion
 
@@ -250,7 +250,7 @@
 			var endPos = this.Text.IndexOf("-->", this.Index + 4, StringComparison.Ordinal) + 3;
 			if (endPos == 2)
 			{
-				piece.Add(this.NodeFactory.CommentNode(this.Text[this.Index..]));
+				piece.Nodes.Add(this.NodeFactory.CommentNode(this.Text[this.Index..]));
 				this.Index = this.textLength;
 				return false;
 			}
@@ -276,7 +276,7 @@
 			if (wsStart > 0 && wsEnd < this.textLength && this.Text[wsStart - 1] == '\n' && this.Text[wsEnd] == '\n')
 			{
 				var wsLength = this.Index - wsStart;
-				if (wsLength > 0 && piece[^1] is ITextNode last)
+				if (wsLength > 0 && piece.Nodes[^1] is ITextNode last)
 				{
 					var lastValue = last.Text;
 					if (lastValue.SpanReverse(CommentWhiteSpace, lastValue.Length) == wsLength)
@@ -289,7 +289,7 @@
 				for (var j = 0; j < lastComment; j++)
 				{
 					cmt = comments[j];
-					piece.Add(this.NodeFactory.CommentNode(this.Text.Substring(cmt.Start, cmt.End - cmt.Start + cmt.WhiteSpaceLength)));
+					piece.Nodes.Add(this.NodeFactory.CommentNode(this.Text.Substring(cmt.Start, cmt.End - cmt.Start + cmt.WhiteSpaceLength)));
 				}
 
 				cmt = comments[lastComment];
@@ -306,8 +306,8 @@
 				{
 					cmt = comments[j];
 					var start = j == 0 ? this.Index : cmt.Start;
-					piece.Add(this.NodeFactory.CommentNode(this.Text[start..cmt.End]));
-					piece.Add(this.NodeFactory.TextNode(this.Text.Substring(cmt.End, cmt.WhiteSpaceLength)));
+					piece.Nodes.Add(this.NodeFactory.CommentNode(this.Text[start..cmt.End]));
+					piece.Nodes.Add(this.NodeFactory.TextNode(this.Text.Substring(cmt.End, cmt.WhiteSpaceLength)));
 				}
 
 				cmt = comments[lastComment];
@@ -321,7 +321,7 @@
 			}
 
 			piece.CommentEnd = endPos - 1;
-			piece.Add(this.NodeFactory.CommentNode(this.Text[startPos..endPos]));
+			piece.Nodes.Add(this.NodeFactory.CommentNode(this.Text[startPos..endPos]));
 			this.Index = endPos;
 
 			return retval;
@@ -344,7 +344,7 @@
 			{
 				if (this.includeIgnores)
 				{
-					piece.Add(this.NodeFactory.IgnoreNode(this.Text.Substring(this.Index, tagEndPos - this.Index + 1)));
+					piece.Nodes.Add(this.NodeFactory.IgnoreNode(this.Text.Substring(this.Index, tagEndPos - this.Index + 1)));
 				}
 
 				this.Index = tagEndPos + 1;
@@ -393,13 +393,13 @@
 			{
 				if (this.includeIgnores)
 				{
-					piece.Add(this.NodeFactory.IgnoreNode(this.Text[tagStartPos..this.Index]));
+					piece.Nodes.Add(this.NodeFactory.IgnoreNode(this.Text[tagStartPos..this.Index]));
 				}
 			}
 			else
 			{
 				var attr = attrEnd > attrStart ? this.Text[attrStart..attrEnd] : null;
-				piece.Add(this.NodeFactory.TagNode(tagOpen, attr, inner, tagClose));
+				piece.Nodes.Add(this.NodeFactory.TagNode(tagOpen, attr, inner, tagClose));
 			}
 
 			return true;
@@ -438,7 +438,7 @@
 					{
 						if (this.includeIgnores)
 						{
-							this.Top.CurrentPiece.Add(this.NodeFactory.IgnoreNode(this.Text[this.Index..]));
+							this.Top.CurrentPiece.Nodes.Add(this.NodeFactory.IgnoreNode(this.Text[this.Index..]));
 						}
 
 						break;
@@ -447,7 +447,7 @@
 					var tagEndPos = startPos + OnlyIncludeTagOpen.Length; // past-the-end
 					if (this.includeIgnores)
 					{
-						this.Top.CurrentPiece.Add(this.NodeFactory.IgnoreNode(this.Text[this.Index..tagEndPos]));
+						this.Top.CurrentPiece.Nodes.Add(this.NodeFactory.IgnoreNode(this.Text[this.Index..tagEndPos]));
 					}
 
 					this.Index = tagEndPos;
