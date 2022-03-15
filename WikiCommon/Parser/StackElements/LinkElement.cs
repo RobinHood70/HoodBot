@@ -23,7 +23,7 @@
 			switch (found)
 			{
 				case '|':
-					this.NameValuePieces.Add(new Piece());
+					this.PairedPieces.Add(new());
 					this.Stack.Index++;
 					break;
 				case ']':

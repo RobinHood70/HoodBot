@@ -14,18 +14,18 @@
 		{
 			this.open = open;
 			this.Length = length;
-			this.NameValuePieces.Add(new Piece());
+			this.PairedPieces.Add(new());
 		}
 		#endregion
 
 		#region Internal Override Properties
-		internal override Piece CurrentPiece => this.NameValuePieces[^1];
+		internal override PairedPiece CurrentPiece => this.PairedPieces[^1];
 		#endregion
 
 		#region Protected Properties
 		protected int Length { get; set; }
 
-		protected List<Piece> NameValuePieces { get; } = new List<Piece>();
+		protected List<PairedPiece> PairedPieces { get; } = new List<PairedPiece>();
 		#endregion
 
 		#region Public Override Methods
@@ -37,12 +37,12 @@
 		{
 			Piece newPiece = new();
 			newPiece.Nodes.Add(this.Stack.NodeFactory.TextNode(new string(this.open, matchingCount)));
-			var oldPiece = this.NameValuePieces[0];
+			var oldPiece = this.PairedPieces[0];
 			newPiece.Merge(oldPiece.Nodes);
-			var pieceCount = this.NameValuePieces.Count;
+			var pieceCount = this.PairedPieces.Count;
 			for (var j = 1; j < pieceCount; j++)
 			{
-				oldPiece = this.NameValuePieces[j];
+				oldPiece = this.PairedPieces[j];
 				newPiece.AddLiteral(this.Stack.NodeFactory, "|");
 				newPiece.Merge(oldPiece.Nodes);
 			}
@@ -61,20 +61,29 @@
 			}
 
 			List<IParameterNode> parameters = new();
-			var pieceCount = this.NameValuePieces.Count;
+			var pieceCount = this.PairedPieces.Count;
 			var matchingCount = (found == ']' || count == 2) ? 2 : 3;
 			var factory = this.Stack.NodeFactory;
 			for (var i = 1; i < pieceCount; i++)
 			{
-				var nvPiece = this.NameValuePieces[i];
-				parameters.Add(nvPiece.SplitPos == -1 || matchingCount == 3
-					? factory.ParameterNode(null, nvPiece.Nodes)
-					: factory.ParameterNode(
-						nvPiece.Nodes.GetRange(0, nvPiece.SplitPos),
-						nvPiece.Nodes.GetRange(nvPiece.SplitPos + 1, nvPiece.Nodes.Count - nvPiece.SplitPos - 1)));
+				var nvPiece = this.PairedPieces[i];
+				List<IWikiNode>? name;
+				List<IWikiNode> value;
+				if (matchingCount != 3 && nvPiece is PairedPiece pp && pp.SplitPos != -1)
+				{
+					name = pp.Nodes.GetRange(0, pp.SplitPos);
+					value = pp.Nodes.GetRange(pp.SplitPos + 1, pp.Nodes.Count - pp.SplitPos - 1);
+				}
+				else
+				{
+					name = null;
+					value = nvPiece.Nodes;
+				}
+
+				parameters.Add(factory.ParameterNode(name, value));
 			}
 
-			var title = this.NameValuePieces[0];
+			var title = this.PairedPieces[0];
 			var node =
 				matchingCount == 3 ? factory.ArgumentNode(title.Nodes, parameters) :
 				found == ']' ? factory.LinkNode(title.Nodes, parameters) :
@@ -83,8 +92,8 @@
 			this.Stack.Pop();
 			if (matchingCount < this.Length)
 			{
-				this.NameValuePieces.Clear();
-				this.NameValuePieces.Add(new Piece());
+				this.PairedPieces.Clear();
+				this.PairedPieces.Add(new());
 				this.Length -= matchingCount;
 				if (this.Length >= 2)
 				{

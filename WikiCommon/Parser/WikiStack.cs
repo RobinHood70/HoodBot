@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
+	using System.Diagnostics;
 	using System.Runtime.InteropServices;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
@@ -175,7 +176,7 @@
 					}
 					else if (string.Compare(this.Text, this.Index + 1, "!--", 0, 3, StringComparison.Ordinal) == 0)
 					{
-						if (this.FoundComment())
+						if (this.ParseComment())
 						{
 							this.ParseLineStart();
 						}
@@ -244,31 +245,20 @@
 		#region Private Methods
 
 		// Returns true if comment(s) are surrounded by NewLines, so caller knows whether to check for a possible header.
-		private bool FoundComment()
+		private bool ParseComment()
 		{
 			var piece = this.Top.CurrentPiece;
-			var endPos = this.Text.IndexOf("-->", this.Index + 4, StringComparison.Ordinal) + 3;
-			if (endPos == 2)
+			var endPos = this.Text.IndexOf("-->", this.Index + 4, StringComparison.Ordinal);
+			if (endPos == -1)
 			{
 				piece.Nodes.Add(this.NodeFactory.CommentNode(this.Text[this.Index..]));
 				this.Index = this.textLength;
 				return false;
 			}
 
-			List<Comment> comments = new();
 			var wsStart = this.Index - this.Text.SpanReverse(CommentWhiteSpace, this.Index);
-			var closing = endPos;
 			var wsEnd = wsStart;
-			do
-			{
-				var length = this.Text.Span(CommentWhiteSpace, closing);
-				comments.Add(new Comment(wsEnd, closing, length));
-				wsEnd = closing + length;
-				closing = string.Compare(this.Text, wsEnd, "<!--", 0, 4, StringComparison.Ordinal) == 0
-					? this.Text.IndexOf("-->", wsEnd + 4, StringComparison.Ordinal) + 3
-					: 2;
-			}
-			while (closing != 2);
+			(wsEnd, var comments) = this.GetComments(endPos + 3, wsEnd);
 
 			var retval = false;
 			int startPos;
@@ -315,16 +305,38 @@
 				endPos = cmt.End;
 			}
 
-			if (piece.CommentEnd != wsStart - 1)
+			Debug.WriteLine(piece is HeaderPiece ? "HeaderPiece" : piece.GetType().Name);
+			if (piece is HeaderPiece header)
 			{
-				piece.VisualEnd = wsStart;
+				if (header.CommentEnd != wsStart - 1)
+				{
+					header.VisualEnd = wsStart;
+				}
+
+				header.CommentEnd = endPos - 1;
 			}
 
-			piece.CommentEnd = endPos - 1;
 			piece.Nodes.Add(this.NodeFactory.CommentNode(this.Text[startPos..endPos]));
 			this.Index = endPos;
 
 			return retval;
+		}
+
+		private (int NewEnd, List<Comment> Comments) GetComments(int closing, int wsEnd)
+		{
+			List<Comment> comments = new();
+			do
+			{
+				var length = this.Text.Span(CommentWhiteSpace, closing);
+				comments.Add(new Comment(wsEnd, closing, length));
+				wsEnd = closing + length;
+				closing = string.Compare(this.Text, wsEnd, "<!--", 0, 4, StringComparison.Ordinal) == 0
+					? this.Text.IndexOf("-->", wsEnd + 4, StringComparison.Ordinal) + 3
+					: 2;
+			}
+			while (closing != 2);
+
+			return (wsEnd, comments);
 		}
 
 		// Returns true if a valid tag was found.
