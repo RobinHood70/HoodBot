@@ -18,7 +18,7 @@
 		#endregion
 
 		#region Internal Override Properties
-		internal override string SearchString => this.NameValuePieces[^1].SplitPos == -1
+		internal override string SearchString => (this.PairedPieces[^1] is PairedPiece pp && pp.SplitPos == -1)
 			? SearchBase + "|}="
 			: SearchBase + "|}";
 		#endregion
@@ -33,14 +33,13 @@
 			switch (found)
 			{
 				case '|':
-					this.NameValuePieces.Add(new Piece());
+					this.PairedPieces.Add(new());
 					this.Stack.Index++;
 					break;
 				case '=':
-					var lastPiece = this.NameValuePieces[^1];
+					var lastPiece = this.PairedPieces[^1];
 					lastPiece.SplitPos = lastPiece.Nodes.Count;
-
-					if (this.NameValuePieces.Count == 1)
+					if (this.PairedPieces.Count == 1)
 					{
 						lastPiece.AddLiteral(this.Stack.NodeFactory, "=");
 					}

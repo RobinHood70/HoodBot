@@ -16,7 +16,6 @@
 		internal HeaderElement(WikiStack stack, int length)
 			: base(stack)
 		{
-			this.CurrentPiece = new Piece();
 			this.CurrentPiece.Nodes.Add(stack.NodeFactory.TextNode(new string('=', length)));
 			this.length = length;
 			this.startPos = stack.Index;
@@ -24,7 +23,7 @@
 		#endregion
 
 		#region Internal Override Properties
-		internal override Piece CurrentPiece { get; }
+		internal override HeaderPiece CurrentPiece { get; } = new HeaderPiece();
 
 		internal override string SearchString => SearchBase;
 		#endregion
