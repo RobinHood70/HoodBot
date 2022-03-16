@@ -99,7 +99,7 @@
 			if ((pages.TryGetValue(newPage.DisambigName, out var page) && page.Exists) ||
 				(pages.TryGetValue(newPage.PageName, out page) && page.Exists))
 			{
-				ContextualParser? parser = new(page);
+				ContextualParser parser = new(page);
 				if (parser.Has<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName)))
 				{
 					return page;

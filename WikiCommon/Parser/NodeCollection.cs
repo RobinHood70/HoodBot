@@ -103,7 +103,7 @@
 		/// <returns>An enumeration of the sections of the page.</returns>
 		public IEnumerable<Section> ToSections()
 		{
-			Section? section = new(null, this.Factory);
+			Section section = new(null, this.Factory);
 			foreach (var node in this)
 			{
 				if (node is IHeaderNode header)

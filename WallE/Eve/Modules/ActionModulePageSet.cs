@@ -109,7 +109,7 @@ namespace RobinHood70.WallE.Eve.Modules
 				while (this.ContinueModule.Continues && this.Continues);
 
 				// Because pages may have returned less than we asked for (e.g., due to limits being surpassed), we remove all the pages we got back from our input set and continue from there.
-				List<string>? returnedNames = new();
+				List<string> returnedNames = new();
 				foreach (var title in pages)
 				{
 					returnedNames.Add(title.FullPageName);
