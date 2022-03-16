@@ -25,7 +25,7 @@
 
 		#region Static Fields
 		private static readonly DateTime LastRun = new(2020, 9, 25);
-		private static readonly string WikiImageFolder = UespSite.GetBotDataFolder(@"WikiIcons\"); // Files in this folder come from http://esofiles.uesp.net/update-<whatever>/icons.zip
+		private static readonly string WikiIconsFolder = UespSite.GetBotDataFolder(@"WikiIcons\"); // Files in this folder come from http://esofiles.uesp.net/update-<whatever>/icons.zip
 		#endregion
 
 		#region Fields
@@ -130,7 +130,7 @@
 
 		private static ICollection<SiteLink> ParseCatgories(Site site, ContextualParser parser)
 		{
-			List<SiteLink>? retval = new();
+			List<SiteLink> retval = new();
 			for (var i = 0; i < parser.Count; i++)
 			{
 				if (parser[i] is SiteLinkNode link && link.TitleValue.Namespace == MediaWikiNamespaces.Category)
@@ -147,10 +147,9 @@
 		#region Private Methods
 		private void GetIconChecksums()
 		{
-			var iconFolder = WikiImageFolder;
-			if (Directory.Exists(iconFolder))
+			if (Directory.Exists(WikiIconsFolder))
 			{
-				foreach (var file in Directory.EnumerateFiles(iconFolder, "*.*", SearchOption.AllDirectories))
+				foreach (var file in Directory.EnumerateFiles(WikiIconsFolder, "*.*", SearchOption.AllDirectories))
 				{
 					var fileData = File.ReadAllBytes(file);
 					var checksum = Globals.GetHash(fileData, HashType.Sha1);
@@ -160,7 +159,7 @@
 						this.allIcons.Add(checksum, list);
 					}
 
-					list.Add(file[iconFolder.Length..].Replace(".png", string.Empty, StringComparison.OrdinalIgnoreCase).Replace('\\', '/'));
+					list.Add(file[WikiIconsFolder.Length..].Replace(".png", string.Empty, StringComparison.OrdinalIgnoreCase).Replace('\\', '/'));
 				}
 			}
 		}
