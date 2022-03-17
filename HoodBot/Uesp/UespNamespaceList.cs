@@ -53,7 +53,7 @@
 		public UespNamespace? FromNamespace(Namespace ns) =>
 			this.TryGetValue(ns.Name, out var retval) ? retval : null;
 
-		public UespNamespace? FromTitle(SimpleTitle title)
+		public UespNamespace? FromTitle(Title title)
 		{
 			title.ThrowNull(nameof(title));
 			var ns = title.Namespace.SubjectSpace;

@@ -28,7 +28,7 @@
 				titles.Add(UespNamespaces.Online, name);
 			}
 
-			PageCollection? pages = PageCollection.Unlimited(this.Site);
+			PageCollection pages = PageCollection.Unlimited(this.Site);
 			pages.GetTitles(titles);
 			foreach (var page in pages)
 			{

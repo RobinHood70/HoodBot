@@ -10,8 +10,8 @@
 	using RobinHood70.WikiCommon;
 
 	/// <summary>Represents a wiki page.</summary>
-	/// <seealso cref="SimpleTitle" />
-	public class Page : SimpleTitle
+	/// <seealso cref="Title" />
+	public class Page : Title
 	{
 		#region Fields
 		private Uri? canonicalPath;
@@ -23,10 +23,10 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="Page"/> class.</summary>
-		/// <param name="title">The <see cref="SimpleTitle"/> to copy values from.</param>
+		/// <param name="title">The <see cref="Title"/> to copy values from.</param>
 		/// <param name="options">The load options used for this page. Can be used to detect if default-valued information is legitimate or was never loaded.</param>
 		/// <param name="apiItem">The API item to extract information from.</param>
-		protected internal Page([NotNull, ValidatedNotNull] SimpleTitle title, PageLoadOptions options, IApiTitle? apiItem)
+		protected internal Page([NotNull, ValidatedNotNull] Title title, PageLoadOptions options, IApiTitle? apiItem)
 			: base(title)
 		{
 			// TODO: This should probably be re-written as some kind of inheritance thing, but I'm not qute sure how that would work and it's not the priority right now.
@@ -61,7 +61,7 @@
 
 			void PopulateBacklinks(PageItem pageItem)
 			{
-				Dictionary<Title, BacklinksTypes>? backlinks = (Dictionary<Title, BacklinksTypes>)this.Backlinks;
+				Dictionary<Title, BacklinksTypes> backlinks = (Dictionary<Title, BacklinksTypes>)this.Backlinks;
 				backlinks.Clear();
 				PopulateBacklinksType(backlinks, pageItem.FileUsages, BacklinksTypes.ImageUsage);
 				PopulateBacklinksType(backlinks, pageItem.LinksHere, BacklinksTypes.Backlinks);
@@ -72,7 +72,7 @@
 			{
 				foreach (var link in list)
 				{
-					Title title = Title.FromValidated(this.Site, link.FullPageName.NotNull(nameof(link), nameof(link.FullPageName)));
+					var title = CreateTitle.FromValidated(this.Site, link.FullPageName.NotNull(nameof(link), nameof(link.FullPageName)));
 					if (backlinks.ContainsKey(title))
 					{
 						backlinks[title] |= type;
@@ -86,18 +86,18 @@
 
 			void PopulateCategories(PageItem pageItem)
 			{
-				List<Category>? categories = (List<Category>)this.Categories;
+				List<Category> categories = (List<Category>)this.Categories;
 				categories.Clear();
 				foreach (var category in pageItem.Categories)
 				{
-					Title factory = Title.FromValidated(this.Site, category.FullPageName);
+					var factory = CreateTitle.FromValidated(this.Site, category.FullPageName);
 					categories.Add(new Category(factory, category.SortKey, category.Hidden));
 				}
 			}
 
 			void PopulateInfo(PageItem pageItem)
 			{
-				Dictionary<string, ProtectionEntry>? protections = (Dictionary<string, ProtectionEntry>)this.Protections;
+				Dictionary<string, ProtectionEntry> protections = (Dictionary<string, ProtectionEntry>)this.Protections;
 				if (pageItem.Info is PageInfo info)
 				{
 					this.canonicalPath = info.CanonicalUrl;
@@ -127,17 +127,17 @@
 
 			void PopulateLinks(PageItem pageItem)
 			{
-				List<Title>? links = (List<Title>)this.Links;
+				List<Title> links = (List<Title>)this.Links;
 				links.Clear();
 				foreach (var link in pageItem.Links)
 				{
-					links.Add(Title.FromValidated(this.Site, link.FullPageName));
+					links.Add(CreateTitle.FromValidated(this.Site, link.FullPageName));
 				}
 			}
 
 			void PopulateProperties(PageItem pageItem)
 			{
-				Dictionary<string, string>? properties = (Dictionary<string, string>)this.Properties;
+				Dictionary<string, string> properties = (Dictionary<string, string>)this.Properties;
 				properties.Clear();
 				if (pageItem.Properties?.Count > 0)
 				{
@@ -148,7 +148,7 @@
 
 			void PopulateRevisions(PageItem pageItem)
 			{
-				List<Revision>? revs = (List<Revision>)this.Revisions;
+				List<Revision> revs = (List<Revision>)this.Revisions;
 				revs.Clear();
 				this.currentRevision = null;
 				foreach (var rev in pageItem.Revisions)
@@ -163,7 +163,7 @@
 				templates.Clear();
 				foreach (var link in pageItem.Templates)
 				{
-					templates.Add(Title.FromValidated(this.Site, link.FullPageName));
+					templates.Add(CreateTitle.FromValidated(this.Site, link.FullPageName));
 				}
 			}
 		}
@@ -232,7 +232,7 @@
 					return null;
 				}
 
-				HashSet<SimpleTitle> templates = new(this.Templates);
+				HashSet<Title> templates = new(this.Templates);
 				templates.IntersectWith(this.Site.DisambiguationTemplates);
 
 				return templates.Count > 0;

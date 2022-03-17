@@ -28,7 +28,7 @@
 		{
 			foreach (var simpleTitle in this.deleteTitles)
 			{
-				Title title = Title.FromValidated(simpleTitle.Namespace, simpleTitle.PageName);
+				Title title = new(simpleTitle);
 				title.Delete("Unused audio file.");
 				this.Progress++;
 			}

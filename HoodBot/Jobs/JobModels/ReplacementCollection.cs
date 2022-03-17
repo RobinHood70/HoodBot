@@ -5,7 +5,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 
-	internal sealed class ReplacementCollection : KeyedCollection<SimpleTitle, Replacement>
+	internal sealed class ReplacementCollection : KeyedCollection<Title, Replacement>
 	{
 		#region Constructors
 		public ReplacementCollection()
@@ -19,7 +19,7 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override SimpleTitle GetKeyForItem(Replacement item) => item.From;
+		protected override Title GetKeyForItem(Replacement item) => item.From;
 		#endregion
 	}
 }

@@ -504,7 +504,7 @@
 		/// <returns>The raw text of the parameter value or <see langword="null"/> if not found.</returns>
 		public static string? GetRaw(this ITemplateNode template, string name) => template.NotNull(nameof(template)).Find(name)?.Value.ToRaw().Trim();
 
-/// <summary>Gets the parameters with the indexed named for anonymous parameters.</summary>
+		/// <summary>Gets the parameters with the indexed named for anonymous parameters.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <returns>A tuple containing the parameter name as well as the parameter itself.</returns>
 		public static IEnumerable<(string Name, IParameterNode Parameter)> GetResolvedParameters(this ITemplateNode template)

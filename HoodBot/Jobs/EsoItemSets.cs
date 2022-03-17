@@ -114,7 +114,7 @@
 				if (set.Page is null || !set.Page.Exists)
 				{
 					this.Warn($"New Page: {set.Name}");
-					set.Page = set.BuildNewPage(Title.FromUnvalidated(this.Site, UespNamespaces.Online, set.Name));
+					set.Page = set.BuildNewPage(CreateTitle.FromUnvalidated(this.Site, UespNamespaces.Online, set.Name));
 				}
 			}
 		}
@@ -320,16 +320,16 @@
 				{
 					if (TitleOverrides.TryGetValue(set.Name, out var overrideName))
 					{
-						Title checkTitle = Title.FromValidated(this.Site, UespNamespaces.Online, overrideName);
+						var checkTitle = CreateTitle.FromValidated(this.Site, UespNamespaces.Online, overrideName);
 						set.Page = setMembers.TryGetValue(checkTitle, out var foundPage)
 							? foundPage
-							: set.BuildNewPage(Title.FromUnvalidated(this.Site, UespNamespaces.Online, set.Name));
+							: set.BuildNewPage(CreateTitle.FromUnvalidated(this.Site, UespNamespaces.Online, set.Name));
 					}
 					else
 					{
 						foreach (var setName in set.AllNames)
 						{
-							Title checkTitle = Title.FromUnvalidated(this.Site, UespNamespaces.Online, setName);
+							var checkTitle = CreateTitle.FromUnvalidated(this.Site, UespNamespaces.Online, setName);
 							if (setMembers.TryGetValue(checkTitle, out var foundPage) &&
 								foundPage.Exists)
 							{
@@ -412,7 +412,7 @@
 			#endregion
 
 			#region Public Methods
-			public Page BuildNewPage(SimpleTitle title)
+			public Page BuildNewPage(Title title)
 			{
 				StringBuilder sb = new();
 				sb

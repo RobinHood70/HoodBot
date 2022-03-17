@@ -80,8 +80,8 @@
 			TitleCollection retval = new(titles.Site, titles);
 
 			// Loop until nothing new is added.
-			HashSet<SimpleTitle> titlesToCheck = new(titles);
-			HashSet<SimpleTitle> alreadyChecked = new();
+			HashSet<Title> titlesToCheck = new(titles);
+			HashSet<Title> alreadyChecked = new();
 			do
 			{
 				foreach (var title in titlesToCheck)
@@ -101,7 +101,7 @@
 
 		private PageCollection FollowRedirects(TitleCollection titles)
 		{
-			PageCollection? originalsFollowed = PageCollection.Unlimited(this.Site, PageModules.None, true);
+			PageCollection originalsFollowed = PageCollection.Unlimited(this.Site, PageModules.None, true);
 			originalsFollowed.GetTitles(titles);
 
 			return originalsFollowed;
@@ -110,7 +110,7 @@
 		#endregion
 
 		#region Private Methods
-		private void ExportTemplates(IReadOnlyCollection<SimpleTitle> allNames, PageCollection pages)
+		private void ExportTemplates(IReadOnlyCollection<Title> allNames, PageCollection pages)
 		{
 			var templates = this.ExtractTemplates(allNames, pages);
 			if (templates.Count == 0)
@@ -131,9 +131,9 @@
 			}
 		}
 
-		private List<(SimpleTitle Page, ITemplateNode Template)> ExtractTemplates(IReadOnlyCollection<SimpleTitle> allNames, PageCollection pages)
+		private List<(Title Page, ITemplateNode Template)> ExtractTemplates(IReadOnlyCollection<Title> allNames, PageCollection pages)
 		{
-			List<(SimpleTitle Page, ITemplateNode Template)> templates = new();
+			List<(Title Page, ITemplateNode Template)> templates = new();
 			Dictionary<string, string> paramTranslator = new(StringComparer.Ordinal); // TODO: Empty dictionary for now, but could be pre-populated to translate synonyms to a consistent name. Similarly, name comparison can be case-sensitive or not. Need to find a useful way to do those.
 			foreach (var page in pages)
 			{
@@ -157,7 +157,7 @@
 			return templates;
 		}
 
-		private void WriteFile(List<(SimpleTitle Page, ITemplateNode Template)> results, string location)
+		private void WriteFile(List<(Title Page, ITemplateNode Template)> results, string location)
 		{
 			CsvFile csvFile = new() { EmptyFieldText = " " };
 			List<string> output = new(this.headerOrder.Count + 2)

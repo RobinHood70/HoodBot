@@ -176,7 +176,7 @@
 
 			foreach (var cat in allCats)
 			{
-				Title? newTitle = null;
+				Title newTitle = null;
 				foreach (var (oldCategory, newNamespace) in nsMap)
 				{
 					if (cat.PageName.StartsWith(oldCategory, StringComparison.Ordinal))

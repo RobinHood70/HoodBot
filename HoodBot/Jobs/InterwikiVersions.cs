@@ -17,7 +17,7 @@
 
 		protected override void Main()
 		{
-			SimpleClient? client = (SimpleClient)((WikiAbstractionLayer)this.Site.AbstractionLayer).Client;
+			SimpleClient client = (SimpleClient)((WikiAbstractionLayer)this.Site.AbstractionLayer).Client;
 			client.HonourMaxLag = false;
 			client.Retries = 3;
 			this.ProgressMaximum = this.Site.InterwikiMap.Count;

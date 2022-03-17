@@ -339,7 +339,7 @@
 			}
 
 			SiteInfoSkin? defaultSkin = null;
-			List<SiteInfoSkin> retval = new();
+			List<SiteInfoSkin>? retval = new();
 			foreach (var result in node)
 			{
 				SiteInfoSkin item = new(

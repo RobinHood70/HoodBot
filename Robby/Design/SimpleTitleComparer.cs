@@ -7,7 +7,7 @@
 
 	/// <summary>An ISimpleTitle comparer which sorts by namespace and page name.</summary>
 	/// <seealso cref="Comparer{T}" />
-	public sealed class SimpleTitleComparer : IComparer<SimpleTitle>, IComparer, IEqualityComparer<SimpleTitle>, IEqualityComparer
+	public sealed class SimpleTitleComparer : IComparer<Title>, IComparer, IEqualityComparer<Title>, IEqualityComparer
 	{
 		#region Constructors
 		private SimpleTitleComparer()
@@ -29,7 +29,7 @@
 		/// <param name="x">The first object to compare.</param>
 		/// <param name="y">The second object to compare.</param>
 		/// <returns>A signed integer that indicates the relative values of <paramref name="x" /> and <paramref name="y" />.</returns>
-		public int Compare(SimpleTitle? x, SimpleTitle? y)
+		public int Compare(Title? x, Title? y)
 		{
 			if (x == null)
 			{
@@ -63,24 +63,24 @@
 				: string.Compare(x.PageName.UpperFirst(siteCulture), y.PageName.UpperFirst(siteCulture), true, siteCulture);
 		}
 
-		int IComparer.Compare(object? x, object? y) => this.Compare(x as SimpleTitle, y as SimpleTitle);
+		int IComparer.Compare(object? x, object? y) => this.Compare(x as Title, y as Title);
 		#endregion
 
 		/// <summary>Determines whether the specified objects are equal.</summary>
-		/// <param name="x">The first object of type <see cref="SimpleTitle" /> to compare.</param>
-		/// <param name="y">The second object of type <see cref="SimpleTitle" /> to compare.</param>
+		/// <param name="x">The first object of type <see cref="Title" /> to compare.</param>
+		/// <param name="y">The second object of type <see cref="Title" /> to compare.</param>
 		/// <returns><see langword="true" /> if the specified objects are equal; otherwise, <see langword="false" />.</returns>
-		public bool Equals(SimpleTitle? x, SimpleTitle? y) =>
+		public bool Equals(Title? x, Title? y) =>
 			x == null ? y == null :
 			y != null && x.Namespace == y.Namespace && x.Namespace.PageNameEquals(x.PageName, y.PageName, false);
 
-		bool IEqualityComparer.Equals(object? x, object? y) => x == y || (x is SimpleTitle newX && y is SimpleTitle newY && this.Equals(newX, newY));
+		bool IEqualityComparer.Equals(object? x, object? y) => x == y || (x is Title newX && y is Title newY && this.Equals(newX, newY));
 
 		/// <summary>Returns a hash code for this instance.</summary>
 		/// <param name="obj">The object.</param>
 		/// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
-		public int GetHashCode(SimpleTitle? obj) => obj == null ? 0 : HashCode.Combine(obj.Namespace, obj.PageName);
+		public int GetHashCode(Title? obj) => obj == null ? 0 : HashCode.Combine(obj.Namespace, obj.PageName);
 
-		int IEqualityComparer.GetHashCode(object obj) => this.GetHashCode(obj as SimpleTitle);
+		int IEqualityComparer.GetHashCode(object obj) => this.GetHashCode(obj as Title);
 	}
 }

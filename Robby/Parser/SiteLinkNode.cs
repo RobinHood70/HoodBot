@@ -20,7 +20,7 @@
 		public SiteLinkNode(SiteNodeFactory nodeFactory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters)
 			: base(nodeFactory, title, parameters)
 		{
-			this.TitleValue = Robby.Title.FromUnvalidated(nodeFactory.NotNull(nameof(nodeFactory)).Site, this.GetTitleText());
+			this.TitleValue = CreateTitle.FromUnvalidated(nodeFactory.NotNull(nameof(nodeFactory)).Site, this.GetTitleText());
 		}
 		#endregion
 

@@ -70,11 +70,11 @@
 	/// <seealso cref="IReadOnlyCollection{TTitle}" />
 	/// <remarks>This collection class functions similarly to a KeyedCollection, but automatically overwrites existing items with new ones. Unlike a KeyedCollection, however, it does not support changing an item's key, since <see cref="Title"/> inherently does not allow this.</remarks>
 	public abstract class TitleCollection<TTitle> : IList<TTitle>, IReadOnlyCollection<TTitle>, ISiteSpecific
-		where TTitle : SimpleTitle
+		where TTitle : Title
 	{
 		#region Fields
 		private readonly List<TTitle> items = new();
-		private readonly Dictionary<SimpleTitle, TTitle> lookup;
+		private readonly Dictionary<Title, TTitle> lookup;
 		#endregion
 
 		#region Constructors
@@ -89,10 +89,10 @@
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection{TTitle}" /> class.</summary>
 		/// <param name="site">The site the titles are from. All titles in a collection must belong to the same site.</param>
 		/// <param name="equalityComparer">The <see cref="IEqualityComparer{T}"/> to use for lookups.</param>
-		protected TitleCollection([NotNull, ValidatedNotNull] Site site, IEqualityComparer<SimpleTitle>? equalityComparer)
+		protected TitleCollection([NotNull, ValidatedNotNull] Site site, IEqualityComparer<Title>? equalityComparer)
 		{
 			this.Site = site.NotNull(nameof(site));
-			this.lookup = new Dictionary<SimpleTitle, TTitle>(equalityComparer ?? SimpleTitleComparer.Instance);
+			this.lookup = new Dictionary<Title, TTitle>(equalityComparer ?? SimpleTitleComparer.Instance);
 		}
 		#endregion
 
@@ -133,9 +133,9 @@
 
 		#region Public Indexers
 
-		/// <summary>Gets or sets the <see cref="SimpleTitle">Title</see> at the specified index.</summary>
+		/// <summary>Gets or sets the <see cref="Title">Title</see> at the specified index.</summary>
 		/// <param name="index">The index.</param>
-		/// <returns>The <see cref="SimpleTitle">Title</see> at the specified index.</returns>
+		/// <returns>The <see cref="Title">Title</see> at the specified index.</returns>
 		public TTitle this[int index]
 		{
 			get => this.items[index];
@@ -146,9 +146,9 @@
 			}
 		}
 
-		/// <summary>Gets or sets the <see cref="SimpleTitle">Title</see> with the specified key.</summary>
+		/// <summary>Gets or sets the <see cref="Title">Title</see> with the specified key.</summary>
 		/// <param name="key">The key.</param>
-		/// <returns>The <see cref="SimpleTitle">Title</see>.</returns>
+		/// <returns>The <see cref="Title">Title</see>.</returns>
 		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry on set if the requested entry isn't found.</remarks>
 		public virtual TTitle this[string key]
 		{
@@ -170,12 +170,12 @@
 			}
 		}
 
-		/// <summary>Gets or sets the <see cref="SimpleTitle"/> with the specified key.</summary>
+		/// <summary>Gets or sets the <see cref="Title"/> with the specified key.</summary>
 		/// <param name="title">The key.</param>
-		/// <returns>The <see cref="SimpleTitle">Title</see>.</returns>
+		/// <returns>The <see cref="Title">Title</see>.</returns>
 		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry on set if the requested entry isn't found.</remarks>
 		/// <exception cref="ArgumentNullException">Thrown when <paramref name="title"/> is null.</exception>
-		public virtual TTitle this[SimpleTitle title]
+		public virtual TTitle this[Title title]
 		{
 			get => this.lookup[title.NotNull(nameof(title))];
 			set
@@ -229,7 +229,7 @@
 		/// <param name="item">The object to locate in the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns><see langword="true" /> if <paramref name="item" /> is found in the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException">Thrown when <paramref name="item"/> is null.</exception>
-		public bool Contains(SimpleTitle item) => this.lookup.ContainsKey(item.NotNull(nameof(item)));
+		public bool Contains(Title item) => this.lookup.ContainsKey(item.NotNull(nameof(item)));
 
 		/// <summary>Determines whether the <see cref="TitleCollection">collection</see> contains a specific value.</summary>
 		/// <param name="item">The object to locate in the <see cref="TitleCollection">collection</see>.</param>
@@ -354,7 +354,7 @@
 		/// <remarks>If subcategories are loaded, they will be limited to the <paramref name="categoryMemberTypes"/> requested. However, they will <em>not</em> be limited by the <paramref name="from"/> and <paramref name="to"/> parameters.</remarks>
 		public void GetCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, string? from, string? to, bool recurse)
 		{
-			Title? cat = Title.FromUnvalidated(this.Site, MediaWikiNamespaces.Category, category);
+			var cat = CreateTitle.FromUnvalidated(this.Site, MediaWikiNamespaces.Category, category);
 			CategoryMembersInput input = new(cat.FullPageName)
 			{
 				Properties = CategoryMembersProperties.Title,
@@ -374,12 +374,12 @@
 
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
 		/// <param name="titles">The titles to find duplicates of.</param>
-		public void GetDuplicateFiles(IEnumerable<SimpleTitle> titles) => this.GetDuplicateFiles(titles, false);
+		public void GetDuplicateFiles(IEnumerable<Title> titles) => this.GetDuplicateFiles(titles, false);
 
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
 		/// <param name="titles">The titles to find duplicates of.</param>
 		/// <param name="localOnly">if set to <see langword="true"/> [local only].</param>
-		public void GetDuplicateFiles(IEnumerable<SimpleTitle> titles, bool localOnly) => this.GetDuplicateFiles(new DuplicateFilesInput() { LocalOnly = localOnly }, titles);
+		public void GetDuplicateFiles(IEnumerable<Title> titles, bool localOnly) => this.GetDuplicateFiles(new DuplicateFilesInput() { LocalOnly = localOnly }, titles);
 
 		/// <summary>Returns an enumerator that iterates through the collection.</summary>
 		/// <returns>An enumerator that can be used to iterate through the collection.</returns>
@@ -417,18 +417,18 @@
 
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
 		/// <param name="titles">The titles.</param>
-		public void GetFileUsage(IEnumerable<SimpleTitle> titles) => this.GetFileUsage(new FileUsageInput(), titles);
+		public void GetFileUsage(IEnumerable<Title> titles) => this.GetFileUsage(new FileUsageInput(), titles);
 
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
 		/// <param name="titles">The titles.</param>
 		/// <param name="redirects">Filter for redirects.</param>
-		public void GetFileUsage(IEnumerable<SimpleTitle> titles, Filter redirects) => this.GetFileUsage(new FileUsageInput() { FilterRedirects = redirects }, titles);
+		public void GetFileUsage(IEnumerable<Title> titles, Filter redirects) => this.GetFileUsage(new FileUsageInput() { FilterRedirects = redirects }, titles);
 
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
 		/// <param name="titles">The titles.</param>
 		/// <param name="redirects">Filter for redirects.</param>
 		/// <param name="namespaces">The namespaces to limit results to.</param>
-		public void GetFileUsage(IEnumerable<SimpleTitle> titles, Filter redirects, IEnumerable<int> namespaces) => this.GetFileUsage(new FileUsageInput() { Namespaces = namespaces, FilterRedirects = redirects }, titles);
+		public void GetFileUsage(IEnumerable<Title> titles, Filter redirects, IEnumerable<int> namespaces) => this.GetFileUsage(new FileUsageInput() { Namespaces = namespaces, FilterRedirects = redirects }, titles);
 
 		/// <summary>Adds pages that link to a given namespace to the collection.</summary>
 		/// <param name="ns">The namespace.</param>
@@ -469,31 +469,31 @@
 
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		public void GetPageCategories(IEnumerable<SimpleTitle> titles) => this.GetPageCategories(new CategoriesInput(), titles);
+		public void GetPageCategories(IEnumerable<Title> titles) => this.GetPageCategories(new CategoriesInput(), titles);
 
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
 		/// <param name="hidden">Filter for hidden categories.</param>
-		public void GetPageCategories(IEnumerable<SimpleTitle> titles, Filter hidden) => this.GetPageCategories(new CategoriesInput { FilterHidden = hidden }, titles);
+		public void GetPageCategories(IEnumerable<Title> titles, Filter hidden) => this.GetPageCategories(new CategoriesInput { FilterHidden = hidden }, titles);
 
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
 		/// <param name="hidden">Filter for hidden categories.</param>
 		/// <param name="limitTo">Limit the results to these categories.</param>
-		public void GetPageCategories(IEnumerable<SimpleTitle> titles, Filter hidden, IEnumerable<string> limitTo) => this.GetPageCategories(new CategoriesInput { Categories = limitTo, FilterHidden = hidden }, titles);
+		public void GetPageCategories(IEnumerable<Title> titles, Filter hidden, IEnumerable<string> limitTo) => this.GetPageCategories(new CategoriesInput { Categories = limitTo, FilterHidden = hidden }, titles);
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		public void GetPageLinks(IEnumerable<SimpleTitle> titles) => this.GetPageLinks(titles, null);
+		public void GetPageLinks(IEnumerable<Title> titles) => this.GetPageLinks(titles, null);
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
 		/// <param name="namespaces">The namespaces to limit results to.</param>
-		public void GetPageLinks(IEnumerable<SimpleTitle> titles, IEnumerable<int>? namespaces) => this.GetPageLinks(new LinksInput() { Namespaces = namespaces }, titles);
+		public void GetPageLinks(IEnumerable<Title> titles, IEnumerable<int>? namespaces) => this.GetPageLinks(new LinksInput() { Namespaces = namespaces }, titles);
 
 		/// <summary>Adds pages that link to the given titles to the collection.</summary>
 		/// <param name="titles">The titles.</param>
-		public void GetPageLinksHere(IEnumerable<SimpleTitle> titles) => this.GetPageLinksHere(new LinksHereInput(), titles);
+		public void GetPageLinksHere(IEnumerable<Title> titles) => this.GetPageLinksHere(new LinksHereInput(), titles);
 
 		/// <summary>Adds pages with a given page property (e.g., notrail, breadCrumbTrail) to the collection.</summary>
 		/// <param name="property">The property to find.</param>
@@ -501,7 +501,7 @@
 
 		/// <summary>Adds pages that transclude the given titles to the collection.</summary>
 		/// <param name="titles">The titles.</param>
-		public void GetPageTranscludedIn(IEnumerable<SimpleTitle> titles) => this.GetPageTranscludedIn(new TranscludedInInput(), titles);
+		public void GetPageTranscludedIn(IEnumerable<Title> titles) => this.GetPageTranscludedIn(new TranscludedInInput(), titles);
 
 		/// <summary>Adds pages that transclude the given titles to the collection.</summary>
 		/// <param name="titles">The titles.</param>
@@ -513,17 +513,17 @@
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		public void GetPageTransclusions(IEnumerable<SimpleTitle> titles) => this.GetPageTransclusions(new TemplatesInput(), titles);
+		public void GetPageTransclusions(IEnumerable<Title> titles) => this.GetPageTransclusions(new TemplatesInput(), titles);
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
 		/// <param name="limitTo">Limit the results to these transclusions.</param>
-		public void GetPageTransclusions(IEnumerable<SimpleTitle> titles, IEnumerable<string> limitTo) => this.GetPageTransclusions(new TemplatesInput() { Templates = limitTo }, titles);
+		public void GetPageTransclusions(IEnumerable<Title> titles, IEnumerable<string> limitTo) => this.GetPageTransclusions(new TemplatesInput() { Templates = limitTo }, titles);
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
 		/// <param name="namespaces">Limit the results to these namespaces.</param>
-		public void GetPageTransclusions(IEnumerable<SimpleTitle> titles, IEnumerable<int> namespaces) => this.GetPageTransclusions(new TemplatesInput() { Namespaces = namespaces }, titles);
+		public void GetPageTransclusions(IEnumerable<Title> titles, IEnumerable<int> namespaces) => this.GetPageTransclusions(new TemplatesInput() { Namespaces = namespaces }, titles);
 
 		/// <summary>Adds prefix-search results to the collection.</summary>
 		/// <param name="prefix">The prefix to search for.</param>
@@ -752,13 +752,13 @@
 		/// <summary>Determines the index of a specific item in the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="item">The item to locate in the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns>The index of <paramref name="item" /> if found in the list; otherwise, -1.</returns>
-		public int IndexOf(TTitle item) => this.IndexOf(item as SimpleTitle);
+		public int IndexOf(TTitle item) => this.IndexOf(item as Title);
 
 		/// <summary>Determines the index of a specific item in the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="item">The item to locate in the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns>The index of <paramref name="item" /> if found in the list; otherwise, -1.</returns>
 		/// <exception cref="KeyNotFoundException">Thrown when the item could not be found.</exception>
-		public int IndexOf(SimpleTitle item)
+		public int IndexOf(Title item)
 		{
 			// ContainsKey is O(1), so check to see if key exists; if not, iterate looking for Namespace/PageName match.
 			if (this.lookup.ContainsKey(item.NotNull(nameof(item))))
@@ -790,7 +790,7 @@
 		/// <summary>Removes a specific item from the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="item">The item to remove from the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns><see langword="true" /> if <paramref name="item" /> was successfully removed from the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />. This method also returns <see langword="false" /> if <paramref name="item" /> is not found in the original <see cref="TitleCollection">collection</see>.</returns>
-		public bool Remove(TTitle item) => this.Remove(item as SimpleTitle);
+		public bool Remove(TTitle item) => this.Remove(item as Title);
 
 		/// <summary>Removes the item with the specified key from the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="key">The key of the item to remove from the <see cref="TitleCollection">collection</see>.</param>
@@ -804,7 +804,7 @@
 		/// <summary>Removes a specific item from the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="item">The item to remove from the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns><see langword="true" /> if <paramref name="item" /> was successfully removed from the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />. This method also returns <see langword="false" /> if <paramref name="item" /> is not found in the original <see cref="TitleCollection">collection</see>.</returns>
-		public bool Remove(SimpleTitle item)
+		public bool Remove(Title item)
 		{
 			var i = this.IndexOf(item.NotNull(nameof(item)));
 			if (i != -1)
@@ -887,7 +887,7 @@
 		/// <summary>Returns the requested value, or null if not found.</summary>
 		/// <param name="key">The key.</param>
 		/// <returns>The requested value, or null if not found.</returns>
-		public TTitle? ValueOrDefault(SimpleTitle key) => this.ValueOrDefault(key.NotNull(nameof(key)).FullPageName);
+		public TTitle? ValueOrDefault(Title key) => this.ValueOrDefault(key.NotNull(nameof(key)).FullPageName);
 
 		/// <summary>Returns the requested value, or null if not found.</summary>
 		/// <param name="key">The key.</param>
@@ -945,7 +945,7 @@
 		/// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the value parameter. This parameter is passed uninitialized.</param>
 		/// <returns><see langword="true" /> if the collection contains an element with the specified key; otherwise, <see langword="false" />.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
-		public virtual bool TryGetValue(SimpleTitle key, [MaybeNullWhen(false)] out TTitle value) => this.lookup.TryGetValue(key.NotNull(nameof(key)), out value);
+		public virtual bool TryGetValue(Title key, [MaybeNullWhen(false)] out TTitle value) => this.lookup.TryGetValue(key.NotNull(nameof(key)), out value);
 
 		/// <summary>Comparable to <see cref="Dictionary{TKey, TValue}.TryGetValue(TKey, out TValue)" />, attempts to get the value associated with the specified key.</summary>
 		/// <param name="key">The key of the value to get.</param>
@@ -965,7 +965,7 @@
 		/// <param name="title">The title.</param>
 		/// <returns><see langword="true"/> if the page is within the collection's limitations and can be added to it; otherwise, <see langword="false"/>.</returns>
 		/// <exception cref="InvalidOperationException">Thrown when the <see cref="LimitationType"/> is not one of the recognized values.</exception>
-		protected bool IsTitleInLimits(SimpleTitle title) =>
+		protected bool IsTitleInLimits(Title title) =>
 			title != null &&
 			this.LimitationType switch
 			{
@@ -1031,7 +1031,7 @@
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles to find duplicates of.</param>
-		protected abstract void GetDuplicateFiles(DuplicateFilesInput input, IEnumerable<SimpleTitle> titles);
+		protected abstract void GetDuplicateFiles(DuplicateFilesInput input, IEnumerable<Title> titles);
 
 		/// <summary>Adds files to the collection, based on optionally file-specific parameters.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -1044,7 +1044,7 @@
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected abstract void GetFileUsage(FileUsageInput input, IEnumerable<SimpleTitle> titles);
+		protected abstract void GetFileUsage(FileUsageInput input, IEnumerable<Title> titles);
 
 		/// <summary>Adds pages that link to a given namespace.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -1057,17 +1057,17 @@
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected abstract void GetPageCategories(CategoriesInput input, IEnumerable<SimpleTitle> titles);
+		protected abstract void GetPageCategories(CategoriesInput input, IEnumerable<Title> titles);
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected abstract void GetPageLinks(LinksInput input, IEnumerable<SimpleTitle> titles);
+		protected abstract void GetPageLinks(LinksInput input, IEnumerable<Title> titles);
 
 		/// <summary>Adds pages that link to the given pages.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected abstract void GetPageLinksHere(LinksHereInput input, IEnumerable<SimpleTitle> titles);
+		protected abstract void GetPageLinksHere(LinksHereInput input, IEnumerable<Title> titles);
 
 		/// <summary>Adds pages with a given property to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -1076,12 +1076,12 @@
 		/// <summary>Adds pages that transclude the given pages.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected abstract void GetPageTranscludedIn(TranscludedInInput input, IEnumerable<SimpleTitle> titles);
+		protected abstract void GetPageTranscludedIn(TranscludedInInput input, IEnumerable<Title> titles);
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected abstract void GetPageTransclusions(TemplatesInput input, IEnumerable<SimpleTitle> titles);
+		protected abstract void GetPageTransclusions(TemplatesInput input, IEnumerable<Title> titles);
 
 		/// <summary>Adds prefix-search results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -1127,7 +1127,7 @@
 
 		#region Private Methods
 
-		private Title TextToTitle(string text) => Title.FromUnvalidated(this.Site, text);
+		private Title TextToTitle(string text) => CreateTitle.FromUnvalidated(this.Site, text);
 		#endregion
 	}
 }

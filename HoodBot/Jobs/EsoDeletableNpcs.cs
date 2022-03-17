@@ -5,7 +5,6 @@
 	using System.Diagnostics;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 
 	internal sealed class EsoDeletableNpcs : WikiJob

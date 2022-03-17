@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 

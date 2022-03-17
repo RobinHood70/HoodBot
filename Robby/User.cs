@@ -8,7 +8,7 @@
 	using RobinHood70.WikiCommon;
 
 	/// <summary>Represents a user on the wiki. This can include IP users.</summary>
-	public class User : SimpleTitle
+	public class User : Title
 	{
 		#region Constructors
 
@@ -34,7 +34,7 @@
 		/// <summary>Initializes a new instance of the <see cref="User"/> class.</summary>
 		/// <param name="title">The base user page.</param>
 		/// <param name="userInfo">The API user information.</param>
-		public User(SimpleTitle title, UsersItem userInfo)
+		public User(Title title, UsersItem userInfo)
 			: base(title)
 		{
 			this.Info = new UserInfo(this.Site, userInfo);
@@ -58,7 +58,7 @@
 		/// <param name="site">The site the user is from.</param>
 		/// <param name="name">The username.</param>
 		/// <returns>A title corresponding to the User page.</returns>
-		public static Title GetTitle(Site site, string name) => Title.FromValidated(site.NotNull(nameof(site)), MediaWikiNamespaces.User, name.NotNull(nameof(name)));
+		public static Title GetTitle(Site site, string name) => CreateTitle.FromValidated(site.NotNull(nameof(site)), MediaWikiNamespaces.User, name.NotNull(nameof(name)));
 		#endregion
 
 		#region Public Methods
@@ -193,13 +193,13 @@
 		/// <summary>Gets the user's entire watchlist.</summary>
 		/// <param name="token">The user's watchlist token. This must be provided by the user.</param>
 		/// <returns>A read-only list of <see cref="Title"/>s in the user's watchlist.</returns>
-		public IReadOnlyList<SimpleTitle> GetWatchlist(string token) => this.GetWatchlist(token, null);
+		public IReadOnlyList<Title> GetWatchlist(string token) => this.GetWatchlist(token, null);
 
 		/// <summary>Gets the user's watchlist.</summary>
 		/// <param name="token">The user's watchlist token. This must be provided by the user.</param>
 		/// <param name="namespaces">The namespaces of the contributions to retrieve.</param>
 		/// <returns>A read-only list of <see cref="Title"/>s in the user's watchlist.</returns>
-		public IReadOnlyList<SimpleTitle> GetWatchlist(string token, IEnumerable<int>? namespaces)
+		public IReadOnlyList<Title> GetWatchlist(string token, IEnumerable<int>? namespaces)
 		{
 			WatchlistRawInput input = new()
 			{
@@ -208,10 +208,10 @@
 				Namespaces = namespaces
 			};
 			var result = this.Site.AbstractionLayer.WatchlistRaw(input);
-			List<SimpleTitle> retval = new();
+			List<Title> retval = new();
 			foreach (var item in result)
 			{
-				retval.Add(Title.FromValidated(this.Site, item.FullPageName));
+				retval.Add(CreateTitle.FromValidated(this.Site, item.FullPageName));
 			}
 
 			return retval;
@@ -241,7 +241,7 @@
 		public ChangeStatus NewTalkPageMessage(string header, string msg, string editSummary)
 		{
 			msg = msg.NotNull(nameof(msg)).Trim();
-			if (this.TalkPage is not SimpleTitle talkPage)
+			if (this.TalkPage is not Title talkPage)
 			{
 				throw new InvalidOperationException(Resources.TitleInvalid);
 			}

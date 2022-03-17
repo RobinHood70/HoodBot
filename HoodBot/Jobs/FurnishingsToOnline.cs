@@ -46,7 +46,7 @@
 
 		#region Fields
 		private readonly PageCollection filePages;
-		private readonly Dictionary<SimpleTitle, string> nameLookup = new(SimpleTitleComparer.Instance);
+		private readonly Dictionary<Title, string> nameLookup = new(SimpleTitleComparer.Instance);
 		#endregion
 
 		#region Constructors
@@ -65,7 +65,7 @@
 			TitleCollection oldTitles = new(this.Site, this.Pages);
 			oldTitles.GetBacklinks("Template:Furnishing Summary", BacklinksTypes.EmbeddedIn);
 			TitleCollection newTitles = new(this.Site);
-			Dictionary<SimpleTitle, SimpleTitle>? reverse = new();
+			Dictionary<Title, Title> reverse = new();
 			foreach (var title in oldTitles)
 			{
 				var pageName = title.PageName
@@ -80,7 +80,7 @@
 				}
 
 				this.nameLookup.Add(title, pageName);
-				Title? newTitle = Title.FromUnvalidated(this.Site, UespNamespaces.Online, pageName);
+				var newTitle = CreateTitle.FromUnvalidated(this.Site, UespNamespaces.Online, pageName);
 				newTitles.Add(newTitle);
 				reverse.Add(newTitle, title);
 			}

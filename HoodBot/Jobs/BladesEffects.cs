@@ -45,7 +45,7 @@
 
 			fileName = UespSite.GetBotDataFolder("ItemPropertyList.txt");
 			var lines = File.ReadAllLines(fileName);
-			BladesCodeLine? codeLines = BladesCodeLine.Parse(lines);
+			BladesCodeLine codeLines = BladesCodeLine.Parse(lines);
 
 			var entries = codeLines["_propertyList"]["size"];
 			TitleCollection titles = new(this.Site);

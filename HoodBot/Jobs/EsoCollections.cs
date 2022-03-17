@@ -440,9 +440,9 @@
 			{
 				this.CollectibleType = dbData.Category;
 				this.Type = dbData.Subcategory;
-				this.PageName = Title.FromUnvalidated(site, UespNamespaces.Online, dbData.Name);
+				this.PageName = CreateTitle.FromUnvalidated(site, UespNamespaces.Online, dbData.Name);
 				var disambig = $"{dbData.Name} ({CategorySingular(this.CollectibleType).ToLowerInvariant()})";
-				this.DisambigName = Title.FromUnvalidated(site, UespNamespaces.Online, disambig);
+				this.DisambigName = CreateTitle.FromUnvalidated(site, UespNamespaces.Online, disambig);
 				this.Description = dbData.Description;
 				this.Id = dbData.Id;
 				this.NickName = dbData.NickName;
@@ -637,7 +637,7 @@
 			#region Internal Methods
 			internal static Dictionary<string, DbCollectible> RunQuery()
 			{
-				Dictionary<string, DbCollectible>? retval = new(StringComparer.Ordinal);
+				Dictionary<string, DbCollectible> retval = new(StringComparer.Ordinal);
 				foreach (var item in Database.RunQuery(EsoLog.Connection, Query, row => new DbCollectible(row)))
 				{
 					retval.Add(item.LookupName, item);

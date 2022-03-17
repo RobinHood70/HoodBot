@@ -14,7 +14,7 @@
 		protected internal RecentChange(Site site, RecentChangesItem recentChange)
 		{
 			recentChange.ThrowNull(nameof(recentChange));
-			this.Title = Title.FromValidated(site, recentChange.FullPageName);
+			this.Title = CreateTitle.FromValidated(site, recentChange.FullPageName);
 			this.Anonymous = recentChange.UserId == 0;
 			this.Comment = recentChange.Comment;
 			this.Id = recentChange.Id;

@@ -1,369 +1,237 @@
 ﻿namespace RobinHood70.Robby
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
+	using System.Text;
+	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.Properties;
-	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.Parser;
-	using RobinHood70.WikiCommon.Properties;
-
-	#region Public Enumerations
-
-	/// <summary>The possible protection levels on a standard wiki.</summary>
-	public enum ProtectionLevel
-	{
-		/// <summary>Do not make any changes to the protection.</summary>
-		NoChange,
-
-		/// <summary>Remove the protection.</summary>
-		Remove,
-
-		/// <summary>Change to semi-protection.</summary>
-		Semi,
-
-		/// <summary>Change to full-protection.</summary>
-		Full,
-	}
-	#endregion
 
 	/// <summary>Provides a light-weight holder for titles with several information and manipulation functions.</summary>
-	public class Title : SimpleTitle, IMessageSource
+	public class Title
 	{
+		#region Constants
+		// The following is taken from DefaultSettings::$wgLegalTitleChars and always assumes the default setting. I believe this is emitted as part of API:Siteinfo, but I wouldn't trust any kind of automated conversion, so better to just leave it as default, which is what 99.99% of wikis will probably use.
+		private const string TitleChars = @"[ %!\""$&'()*,\-.\/0-9:;=?@A-Z\\^_`a-z~+\P{IsBasicLatin}-[()（）]]";
+		#endregion
+
+		#region Static Fields
+
+		/// <summary>Gets a regular expression matching all comma-like characters in a stirng.</summary>
+		private static readonly Regex LabelCommaRemover = new(@"\ *([,，]" + TitleChars + @"*?)\Z", RegexOptions.Compiled | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+
+		/// <summary>Gets a regular expression matching all parenthetical text in a stirng.</summary>
+		private static readonly Regex LabelParenthesesRemover = new(@"\ *(\(" + TitleChars + @"*?\)|（" + TitleChars + @"*?）)\Z", RegexOptions.Compiled | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		#endregion
+
+		#region Fields
+		private Title? subjectPage;
+		private Title? talkPage;
+		#endregion
+
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="Title"/> class.</summary>
-		private Title(Namespace ns, string pageName)
-			: base(ns, pageName)
+		/// <param name="title">The title to copy from.</param>
+		public Title([NotNull, ValidatedNotNull] TitleFactory title)
 		{
+			title.ThrowNull(nameof(title));
+			this.Namespace = title.Namespace;
+			this.PageName = title.PageName;
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="Title"/> class.</summary>
+		/// <param name="title">The title to copy from.</param>
+		public Title([NotNull, ValidatedNotNull] Title title)
+		{
+			title.ThrowNull(nameof(title));
+			this.Namespace = title.Namespace;
+			this.PageName = title.PageName;
+		}
+
+		// This method is strictly internal, since we need a way to create titles from their parts, but this *must* be a validated source.
+		internal Title([NotNull, ValidatedNotNull] Namespace ns, [NotNull, ValidatedNotNull] string pageName)
+		{
+			this.Namespace = ns.NotNull(nameof(ns));
+			this.PageName = pageName.NotNull(nameof(pageName));
 		}
 		#endregion
 
-		#region Public Static Methods
+		#region Public Properties
 
-		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
-		/// <param name="site">The site the title is from.</param>
-		/// <param name="node">The <see cref="IBacklinkNode"/> to parse.</param>
-		/// <returns>A new FullTitle based on the provided values.</returns>
-		public static Title FromBacklinkNode(Site site, IBacklinkNode node)
-		{
-			var title = node.NotNull(nameof(node)).GetTitleText();
-			return FromUnvalidated(site.NotNull(nameof(site)), title);
-		}
+		/// <summary>Gets the value corresponding to {{BASEPAGENAME}}.</summary>
+		/// <returns>The name of the base page.</returns>
+		public string BasePageName => this.Namespace.AllowsSubpages && this.PageName.LastIndexOf('/') is var subPageLoc && subPageLoc > 0
+				? this.PageName[..subPageLoc]
+				: this.PageName;
 
-		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
-		/// <param name="ns">The namespace the page is in.</param>
-		/// <param name="pageName">Name of the page.</param>
-		public static Title FromUnvalidated(Namespace ns, string pageName)
-		{
-			ns.ThrowNull(nameof(ns));
-			pageName.ThrowNull(nameof(pageName));
-			pageName = ns.CapitalizePageName(WikiTextUtilities.TrimToTitle(pageName));
-			return new Title(ns, pageName);
-		}
+		/// <summary>Gets the full page name of a title.</summary>
+		/// <returns>The full page name (<c>{{FULLPAGENAME}}</c>) of a title.</returns>
+		public string FullPageName => this.Namespace.DecoratedName + this.PageName;
 
-		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
-		/// <param name="site">The site.</param>
-		/// <param name="nsid">The namespace the page is in.</param>
-		/// <param name="pageName">Name of the page.</param>
-		public static Title FromUnvalidated(Site site, int nsid, string pageName) => FromUnvalidated(site.NotNull(nameof(site))[nsid], pageName);
+		/// <summary>Gets the namespace object for the title.</summary>
+		/// <value>The namespace.</value>
+		public Namespace Namespace { get; }
 
-		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
-		/// <param name="site">The site.</param>
-		/// <param name="fullPageName">Name of the page.</param>
-		public static Title FromUnvalidated(Site site, string fullPageName)
-		{
-			TitleFactory title = TitleFactory.Create(site.NotNull(nameof(site)), MediaWikiNamespaces.Main, WikiTextUtilities.TrimToTitle(fullPageName.NotNull(nameof(fullPageName))));
-			return new Title(title.Namespace, title.PageName);
-		}
+		/// <summary>Gets the name of the page without the namespace.</summary>
+		/// <value>The name of the page without the namespace.</value>
+		public string PageName { get; }
 
-		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
-		/// <param name="ns">The namespace the page is in.</param>
-		/// <param name="pageName">Name of the page.</param>
-		public static Title FromValidated(Namespace ns, string pageName) => new(ns.NotNull(nameof(ns)), pageName.NotNull(nameof(pageName)));
+		/// <summary>Gets the value corresponding to {{ROOTPAGENAME}}.</summary>
+		/// <returns>The name of the base page.</returns>
+		public string RootPageName =>
+			this.Namespace.AllowsSubpages &&
+			this.PageName.IndexOf('/', StringComparison.Ordinal) is var subPageLoc &&
+			subPageLoc >= 0
+				? this.PageName[..subPageLoc]
+				: this.PageName;
 
-		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
-		/// <param name="site">The site.</param>
-		/// <param name="nsid">The namespace the page is in.</param>
-		/// <param name="pageName">Name of the page.</param>
-		public static Title FromValidated(Site site, int nsid, string pageName) => FromValidated(site.NotNull(nameof(site))[nsid], pageName);
+		/// <summary>Gets the site to which this title belongs.</summary>
+		/// <value>The site.</value>
+		public Site Site => this.Namespace.Site;
 
-		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
-		/// <param name="site">The site.</param>
-		/// <param name="fullPageName">Name of the page.</param>
-		public static Title FromValidated([NotNull][ValidatedNotNull] Site site, [NotNull][ValidatedNotNull] string fullPageName)
-		{
-			TitleFactory title = TitleFactory.Create(site.NotNull(nameof(site)), MediaWikiNamespaces.Main, fullPageName.NotNull(nameof(fullPageName)));
-			return new(title.Namespace, title.PageName);
-		}
+		/// <summary>Gets a Title object for title Title's corresponding subject page.</summary>
+		/// <returns>The subject page.</returns>
+		/// <remarks>If title Title is a subject page, returns itself.</remarks>
+		public Title SubjectPage => this.subjectPage ??= CreateTitle.FromValidated(this.Namespace.SubjectSpace, this.PageName);
+
+		/// <summary>Gets the value corresponding to {{SUBPAGENAME}}.</summary>
+		/// <returns>The name of the subpage.</returns>
+		public string SubPageName =>
+			this.Namespace.AllowsSubpages &&
+			(this.PageName.LastIndexOf('/') + 1) is var subPageLoc &&
+			subPageLoc > 0
+				? this.PageName[subPageLoc..]
+				: this.PageName;
+
+		/// <summary>Gets a Title object for title Title's corresponding subject page.</summary>
+		/// <returns>The talk page.</returns>
+		/// <remarks>If this object represents a talk page, returns a self-reference.</remarks>
+		public Title? TalkPage => this.talkPage ??=
+			this.Namespace.TalkSpace == null ? null :
+			CreateTitle.FromValidated(this.Namespace.TalkSpace, this.PageName);
 		#endregion
 
 		#region Public Methods
 
-		/// <summary>Protects a non-existent page from being created.</summary>
-		/// <param name="reason">The reason for the create-protection.</param>
-		/// <param name="createProtection">The protection level.</param>
-		/// <param name="expiry">The expiry date and time.</param>
-		/// <returns>A value indicating the change status of the protection.</returns>
-		public ChangeStatus CreateProtect(string reason, ProtectionLevel createProtection, DateTime expiry) =>
-			createProtection == ProtectionLevel.NoChange
-				? ChangeStatus.NoEffect
-				: this.CreateProtect(reason, ProtectionWord(createProtection), expiry);
+		/// <summary>Returns the provided title as link text.</summary>
+		/// <returns>The current title, formatted as a link.</returns>
+		public string AsLink() => this.AsLink(null);
 
-		/// <summary>Protects a non-existent page from being created.</summary>
-		/// <param name="reason">The reason for the create-protection.</param>
-		/// <param name="createProtection">The protection level.</param>
-		/// <param name="expiry">The expiry date and time.</param>
-		/// <returns>A value indicating the change status of the protection.</returns>
-		/// <remarks>title version allows custom create-protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="CreateProtect(string, ProtectionLevel, DateTime)"/> version of title call.</remarks>
-		public ChangeStatus CreateProtect(string reason, string? createProtection, DateTime expiry)
+		/// <summary>Returns the provided title as link text.</summary>
+		/// <param name="linkType">The default text to use for the link.</param>
+		/// <returns>The current title, formatted as a link.</returns>
+		public string AsLink(LinkFormat linkType)
 		{
-			if (createProtection == null)
+			var text = linkType switch
 			{
-				return ChangeStatus.NoEffect;
-			}
-
-			ProtectInputItem protection = new("create", createProtection) { Expiry = expiry };
-			return this.Protect(reason, new[] { protection });
-		}
-
-		/// <summary>Protects a non-existent page from being created.</summary>
-		/// <param name="reason">The reason for the create-protection.</param>
-		/// <param name="createProtection">The protection level.</param>
-		/// <param name="duration">The duration of the create-protection (e.g., "2 weeks").</param>
-		/// <returns>A value indicating the change status of the protection.</returns>
-		public ChangeStatus CreateProtect(string reason, ProtectionLevel createProtection, string duration) =>
-			createProtection == ProtectionLevel.NoChange
-				? ChangeStatus.NoEffect
-				: this.CreateProtect(reason, ProtectionWord(createProtection)!, duration);
-
-		/// <summary>Protects a non-existent page from being created.</summary>
-		/// <param name="reason">The reason for the create-protection.</param>
-		/// <param name="createProtection">The protection level.</param>
-		/// <param name="duration">The duration of the create-protection (e.g., "2 weeks").</param>
-		/// <returns>A value indicating the change status of the protection.</returns>
-		/// <remarks>title version allows custom create-protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="CreateProtect(string, ProtectionLevel, string)"/> version of title call.</remarks>
-		public ChangeStatus CreateProtect(string reason, string createProtection, string duration)
-		{
-			ProtectInputItem protection = new("create", createProtection.NotNull(nameof(createProtection))) { ExpiryRelative = duration };
-			return this.Protect(reason, new[] { protection });
-		}
-
-		/// <summary>Unprotects the title.</summary>
-		/// <param name="reason">The reason for the unprotection.</param>
-		/// <returns>A value indicating the change status of the unprotection.</returns>
-		public ChangeStatus CreateUnprotect(string reason)
-		{
-			ProtectInputItem protection = new("create", ProtectionWord(ProtectionLevel.Remove)!);
-			return this.Protect(reason, new[] { protection });
-		}
-
-		/// <summary>Deletes the title for the specified reason.</summary>
-		/// <param name="reason">The reason for the deletion.</param>
-		/// <returns>A value indicating the change status of the block.</returns>
-		public ChangeStatus Delete(string reason)
-		{
-			reason.ThrowNull(nameof(reason));
-			var site = this.Namespace.Site;
-			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
-			{
-				[nameof(reason)] = reason,
+				LinkFormat.LabelName => this.LabelName(),
+				LinkFormat.PipeTrick => this.PipeTrick(),
+				LinkFormat.Plain => null,
+				_ => throw new ArgumentOutOfRangeException(nameof(linkType)),
 			};
 
-			return site.PublishChange(site, parameters, ChangeFunc);
-
-			ChangeStatus ChangeFunc()
-			{
-				DeleteInput input = new(this.FullPageName) { Reason = reason };
-				var retval = this.Namespace.Site.AbstractionLayer.Delete(input);
-				return retval.LogId == 0
-					? ChangeStatus.Failure
-					: ChangeStatus.Success;
-			}
+			return this.AsLink(text);
 		}
 
-		/// <summary>Returns a value indicating if the page exists. This will trigger a Load operation.</summary>
-		/// <returns><see langword="true" /> if the page exists; otherwise <see langword="false" />.</returns>
-		public bool Exists() => this.Load(PageModules.None, false).Exists;
-
-		/// <summary>Loads the page found at this title.</summary>
-		/// <returns>A page for this title. Can be null if the title is a Special or Media page.</returns>
-		public Page Load() => this.Load(PageLoadOptions.Default);
-
-		/// <summary>Loads the page found at this title.</summary>
-		/// <param name="modules">The modules to load.</param>
-		/// <param name="followRedirects">Indicates whether redirects should be followed when loading.</param>
-		/// <returns>A page for this title. Can be null if the title is a Special or Media page.</returns>
-		public Page Load(PageModules modules, bool followRedirects) => this.Load(new PageLoadOptions(modules, followRedirects));
-
-		/// <summary>Loads the page found at this title.</summary>
-		/// <param name="options">The page load options.</param>
-		/// <returns>A page for this title.</returns>
-		public Page Load(PageLoadOptions options)
+		/// <summary>Returns the provided title as link text.</summary>
+		/// <param name="linkText">The text to use for the link.</param>
+		/// <returns>The current title, formatted as a link.</returns>
+		public string AsLink(string? linkText)
 		{
-			if (this.Namespace.CanTalk)
+			var linkName = this.Namespace.LinkName;
+			StringBuilder sb = new(linkName.Length + 5 + (this.PageName.Length << 1));
+			sb
+				.Append("[[")
+				.Append(linkName)
+				.Append(this.PageName);
+			if (linkText != null)
 			{
-				PageCollection? pages = PageCollection.Unlimited(this.Site, options);
-				pages.GetTitles(this);
-				if (pages.Count == 1)
-				{
-					return pages[0];
-				}
+				sb
+					.Append('|')
+					.Append(linkText);
 			}
 
-			throw new InvalidOperationException(Globals.CurrentCulture(Resources.PageCouldNotBeLoaded, this.FullPageName));
+			sb.Append("]]");
+			return sb.ToString();
 		}
 
-		/// <summary>Protects the title.</summary>
-		/// <param name="reason">The reason for the protection.</param>
-		/// <param name="editProtection">The edit-protection level.</param>
-		/// <param name="moveProtection">The move-protection level.</param>
-		/// <param name="expiry">The expiry date and time.</param>
-		/// <returns>A value indicating the change status of the protection.</returns>
-		public ChangeStatus Protect(string reason, ProtectionLevel editProtection, ProtectionLevel moveProtection, DateTime expiry) => this.Protect(reason, ProtectionWord(editProtection), ProtectionWord(moveProtection), expiry);
+		/// <summary>Trims the disambiguator off of a title (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
+		/// <returns>The text with the final paranthetical text removed.</returns>
+		[return: NotNullIfNotNull("title")]
+		public string LabelName() => LabelParenthesesRemover.Replace(this.PageName, string.Empty, 1, 1);
 
-		/// <summary>Protects the title.</summary>
-		/// <param name="reason">The reason for the protection.</param>
-		/// <param name="editProtection">The edit-protection level.</param>
-		/// <param name="moveProtection">The move-protection level.</param>
-		/// <param name="duration">The duration of the protection (e.g., "2 weeks").</param>
-		/// <returns>A value indicating the change status of the protection.</returns>
-		public ChangeStatus Protect(string reason, ProtectionLevel editProtection, ProtectionLevel moveProtection, string? duration) => this.Protect(reason, ProtectionWord(editProtection), ProtectionWord(moveProtection), duration);
+		/// <summary>Checks if the provided page name is equal to the title's page name, based on the case-sensitivity for the namespace.</summary>
+		/// <param name="other">The title to compare to.</param>
+		/// <returns><see langword="true" /> if the two page names are considered the same; otherwise <see langword="false" />.</returns>
+		/// <remarks>It is assumed that the namespace for the second page name is equal to the current one, or at least that they have the same case-sensitivy.</remarks>
+		public bool PageNameEquals(string other) => this.PageNameEquals(other, true);
 
-		/// <summary>Protects the title.</summary>
-		/// <param name="reason">The reason for the protection.</param>
-		/// <param name="editProtection">The edit-protection level.</param>
-		/// <param name="moveProtection">The move-protection level.</param>
-		/// <param name="expiry">The expiry date and time.</param>
-		/// <returns>A value indicating the change status of the protection.</returns>
-		/// <remarks>title version allows custom protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="Protect(string, ProtectionLevel, ProtectionLevel, DateTime)"/> version of title call.</remarks>
-		public ChangeStatus Protect(string reason, string? editProtection, string? moveProtection, DateTime expiry)
+		/// <summary>Checks if the provided page name is equal to the title's page name, based on the case-sensitivity for the namespace.</summary>
+		/// <param name="other">The page name to compare to.</param>
+		/// <param name="normalize">Inidicates whether the page names should be normalized before comparison.</param>
+		/// <returns><see langword="true" /> if the two page names are considered the same; otherwise <see langword="false" />.</returns>
+		/// <remarks>It is assumed that the namespace for the second page name is equal to the current one, or at least that they have the same case-sensitivy.</remarks>
+		public bool PageNameEquals(string other, bool normalize)
 		{
-			var wikiExpiry = expiry == DateTime.MaxValue ? null : (DateTime?)expiry;
-			List<ProtectInputItem> protections = new(2);
-			if (editProtection != null)
+			if (normalize)
 			{
-				protections.Add(new ProtectInputItem("edit", editProtection) { Expiry = wikiExpiry });
+				other = WikiTextUtilities.DecodeAndNormalize(other).Trim();
 			}
 
-			if (moveProtection != null)
-			{
-				protections.Add(new ProtectInputItem("move", moveProtection) { Expiry = wikiExpiry });
-			}
-
-			return this.Protect(reason, protections);
+			return this.Namespace.PageNameEquals(this.PageName, other, false);
 		}
 
-		/// <summary>Protects the title.</summary>
-		/// <param name="reason">The reason for the protection.</param>
-		/// <param name="editProtection">The edit-protection level.</param>
-		/// <param name="moveProtection">The move-protection level.</param>
-		/// <param name="duration">The duration of the protection (e.g., "2 weeks").</param>
-		/// <returns>A value indicating the change status of the protection.</returns>
-		/// <remarks>title version allows custom protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="Protect(string, ProtectionLevel, ProtectionLevel, string)"/> version of title call.</remarks>
-		public ChangeStatus Protect(string reason, string? editProtection, string? moveProtection, string? duration)
+		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
+		/// <remarks>This doesn't precisely match the pipe trick logic - they differ in their handling of some abnormal page names. For example, with page names of "User:(Test)", ":(Test)", and "(Test)", the pipe trick gives "User:", ":", and "(Test)", respectively. Since this routine ignores the namespace completely and checks for empty return values, it returns "(Test)" consistently in all three cases.</remarks>
+		/// <returns>The text with the final paranthetical and/or comma-delimited text removed. Note: like the MediaWiki equivalent, when both are present, this will remove text of the form "(text), text", but text of the form ", text (text)" will become ", text".</returns>
+		public string PipeTrick()
 		{
-			if (duration == null)
-			{
-				duration = "infinite";
-			}
-
-			List<ProtectInputItem> protections = new(2);
-			if (editProtection != null)
-			{
-				protections.Add(new ProtectInputItem("edit", editProtection) { ExpiryRelative = duration });
-			}
-
-			if (moveProtection != null)
-			{
-				protections.Add(new ProtectInputItem("move", moveProtection) { ExpiryRelative = duration });
-			}
-
-			return this.Protect(reason, protections);
+			var pageName = LabelCommaRemover.Replace(this.PageName, string.Empty, 1, 1);
+			return LabelParenthesesRemover.Replace(pageName, string.Empty, 1, 1);
 		}
 
-		/// <summary>Unprotects the title for the specified reason.</summary>
-		/// <param name="reason">The reason.</param>
-		/// <param name="editUnprotect">if set to <see langword="true"/>, removes edit protection.</param>
-		/// <param name="moveUnprotect">if set to <see langword="true"/>, removes move protection.</param>
-		/// <returns>A value indicating the change status of the unprotection.</returns>
-		public ChangeStatus Unprotect(string reason, bool editUnprotect, bool moveUnprotect) => this.Protect(
-			reason,
-			editUnprotect ? ProtectionLevel.Remove : ProtectionLevel.NoChange,
-			moveUnprotect ? ProtectionLevel.Remove : ProtectionLevel.NoChange,
-			null);
+		/*
+		/// <summary>Compares two <see cref="SimpleTitle"/> objects for namespace and page name equality.</summary>
+		/// <param name="other">The object to compare to.</param>
+		/// <returns><see langword="true"/> if the Namespace and PageName match, regardless of any other properties.</returns>
+		public bool SimpleEquals(this SimpleTitle title, SimpleTitle other) =>
+			title == null ? other == null :
+			other != null &&
+			this.Namespace == other.Namespace &&
+			this.Namespace.PageNameEquals(this.PageName, other.PageName, false);
+		*/
+
+		/// <summary>Gets the article path for the current page.</summary>
+		/// <returns>A Uri to the index.php page.</returns>
+		public Uri GetArticlePath() => this.Site.GetArticlePath(this.FullPageName);
+
+		/// <summary>Compares two objects for <see cref="Namespace"/> and <see cref="PageName"/> equality.</summary>
+		/// <param name="other">The object to compare to.</param>
+		/// <returns><see langword="true"/> if the Namespace and PageName match, regardless of any other properties.</returns>
+		public bool SimpleEquals(Title? other) =>
+			other != null &&
+			this.Namespace == other.Namespace &&
+			this.Namespace.PageNameEquals(this.PageName, other.PageName, false);
+		#endregion
+
+		#region Public Virtual Methods
+
+		/// <summary>Returns a <see cref="string" /> that represents this title.</summary>
+		/// <param name="forceLink">if set to <c>true</c>, forces link formatting in namespaces that require it (e.g., Category and File), regardless of the value of LeadingColon.</param>
+		/// <returns>A <see cref="string" /> that represents this title.</returns>
+		public virtual string ToString(bool forceLink)
+		{
+			var colon = (forceLink && this.Namespace.IsForcedLinkSpace) ? ":" : string.Empty;
+			return colon + this.FullPageName;
+		}
 		#endregion
 
 		#region Public Override Methods
 
 		/// <inheritdoc/>
-		public override bool Equals(object? obj) => this == (obj as Title);
-
-		/// <inheritdoc/>
-		public override int GetHashCode() => HashCode.Combine(this.Namespace, this.PageName);
-		#endregion
-
-		#region Private Static Methods
-
-		/// <summary>Protects the title based on the specified input.</summary>
-		/// <param name="site">The site the title is on.</param>
-		/// <param name="input">The input.</param>
-		/// <returns><see langword="true"/> if all protections were set to the specified values.</returns>
-		private static bool Protect(Site site, ProtectInput input)
-		{
-			input.ThrowNull(nameof(input));
-			input.Protections.ThrowNull(nameof(input), nameof(input.Protections));
-			var inputCount = new List<ProtectInputItem>(input.Protections).Count;
-			var result = site.AbstractionLayer.Protect(input);
-
-			// This is a simple count comparison, because matching up inputs and outputs would be more intensive and should not be necessary, barring any breaking changes to the MediaWiki protection algorithm.
-			return result.Protections.Count == inputCount;
-		}
-
-		// A dictionary is probably overkill for three items.
-		private static string? ProtectionWord(ProtectionLevel level) => level switch
-		{
-			ProtectionLevel.Remove => "all",
-			ProtectionLevel.Semi => "autoconfirmed",
-			ProtectionLevel.Full => "sysop",
-			ProtectionLevel.NoChange => null,
-			_ => throw new ArgumentOutOfRangeException(paramName: nameof(level), message: GlobalMessages.InvalidSwitchValue)
-		};
-		#endregion
-
-		#region Private Methods
-		private ChangeStatus Protect(string reason, ICollection<ProtectInputItem> protections)
-		{
-			reason.ThrowNull(nameof(reason));
-			if (protections.Count == 0)
-			{
-				return ChangeStatus.NoEffect;
-			}
-
-			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
-			{
-				[nameof(reason)] = reason,
-				[nameof(protections)] = protections,
-			};
-
-			return this.Namespace.Site.PublishChange(this, parameters, ChangeFunc);
-
-			ChangeStatus ChangeFunc()
-			{
-				ProtectInput input = new(this.FullPageName)
-				{
-					Protections = protections,
-					Reason = reason
-				};
-
-				return Protect(this.Site, input)
-					? ChangeStatus.Success
-					: ChangeStatus.Failure;
-			}
-		}
+		public override string ToString() => this.ToString(false);
 		#endregion
 	}
 }

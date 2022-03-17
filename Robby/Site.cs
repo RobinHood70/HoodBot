@@ -76,10 +76,10 @@
 		private readonly Dictionary<string, MagicWord> magicWords = new(StringComparer.Ordinal);
 		private string? baseArticlePath;
 		private CultureInfo culture = CultureInfo.CurrentCulture;
-		private IReadOnlyCollection<SimpleTitle>? deletePreventionTemplates;
-		private IReadOnlyCollection<SimpleTitle>? deletionCategories;
-		private HashSet<SimpleTitle>? disambiguationTemplates;
-		private IReadOnlyCollection<SimpleTitle>? discussionPages;
+		private IReadOnlyCollection<Title>? deletePreventionTemplates;
+		private IReadOnlyCollection<Title>? deletionCategories;
+		private HashSet<Title>? disambiguationTemplates;
+		private IReadOnlyCollection<Title>? discussionPages;
 		private ReadOnlyKeyedCollection<string, InterwikiEntry>? interwikiMap;
 		private FullTitle? mainPage;
 		private string? mainPageName;
@@ -147,19 +147,19 @@
 
 		/// <summary>Gets a list of templates indicating a page should never be flagged for deletion.</summary>
 		/// <value>A list of templates indicating a page should never be flagged for deletion.</value>
-		public IReadOnlyCollection<SimpleTitle> DeletePreventionTemplates => this.deletePreventionTemplates ?? this.LoadDeletePreventionTemplates();
+		public IReadOnlyCollection<Title> DeletePreventionTemplates => this.deletePreventionTemplates ?? this.LoadDeletePreventionTemplates();
 
 		/// <summary>Gets a list of templates indicating a page is flagged for deletion.</summary>
 		/// <value>A list of templates indicating a page is flagged for deletion.</value>
-		public IReadOnlyCollection<SimpleTitle> DeletionCategories => this.deletionCategories ?? this.LoadDeletionCategories();
+		public IReadOnlyCollection<Title> DeletionCategories => this.deletionCategories ?? this.LoadDeletionCategories();
 
 		/// <summary>Gets the list of disambiguation templates on wikis that aren't using Disambiguator.</summary>
 		/// <value>The disambiguation templates.</value>
 		/// <remarks>This will be auto-populated on first use if not already set.</remarks>
-		public IReadOnlyCollection<SimpleTitle> DisambiguationTemplates => this.disambiguationTemplates ?? this.LoadDisambiguationTemplates();
+		public IReadOnlyCollection<Title> DisambiguationTemplates => this.disambiguationTemplates ?? this.LoadDisambiguationTemplates();
 
 		/// <summary>Gets a list of pages that function as talk pages, but are located outside of traditional Talk spaces.</summary>
-		public IReadOnlyCollection<SimpleTitle> DiscussionPages => this.discussionPages ??= this.LoadDiscussionPages();
+		public IReadOnlyCollection<Title> DiscussionPages => this.discussionPages ??= this.LoadDiscussionPages();
 
 		/// <summary>Gets a value indicating whether the Disambiguator extension is available.</summary>
 		/// <value><see langword="true"/> if the Disambiguator extension is available; otherwise, <see langword="false"/>.</value>
@@ -282,20 +282,20 @@
 		/// <param name="fullPageName">The full name of the page to create.</param>
 		/// <param name="text">The text of the page.</param>
 		/// <returns>The newly created page. Note that this does not automatically save the page.</returns>
-		public Page CreatePage(string fullPageName, string text) => this.CreatePage(Title.FromUnvalidated(this, fullPageName), text);
+		public Page CreatePage(string fullPageName, string text) => this.CreatePage(CreateTitle.FromUnvalidated(this, fullPageName), text);
 
 		/// <summary>Creates a new, blank page.</summary>
 		/// <param name="ns">The namespace of the page to create.</param>
 		/// <param name="pageName">The name of the page to create.</param>
 		/// <param name="text">The text of the page.</param>
 		/// <returns>The newly created page. Note that this does not automatically save the page.</returns>
-		public Page CreatePage(int ns, string pageName, string text) => this.CreatePage(Title.FromUnvalidated(this, ns, pageName), text);
+		public Page CreatePage(int ns, string pageName, string text) => this.CreatePage(CreateTitle.FromUnvalidated(this, ns, pageName), text);
 
 		/// <summary>Creates a new, blank page.</summary>
 		/// <param name="title">The <see cref="Title"/> of the page to create.</param>
 		/// <param name="text">The text of the page.</param>
 		/// <returns>The newly created page. Note that this does not automatically save the page.</returns>
-		public Page CreatePage(SimpleTitle title, string text)
+		public Page CreatePage(Title title, string text)
 		{
 			var retval = this.PageCreator.CreateEmptyPage(title);
 			retval.Text = text;
@@ -335,7 +335,7 @@
 		/// <summary>Determines whether the title provided is considered a discussion page on this site.</summary>
 		/// <param name="title">The title to check.</param>
 		/// <returns><see langword="true"/> if the title represents a discussion page; otherwise, <see langword="false"/>.</returns>
-		public bool IsDiscussionPage(SimpleTitle title) =>
+		public bool IsDiscussionPage(Title title) =>
 			title.NotNull(nameof(title)).Namespace.IsTalkSpace ||
 			this.DiscussionPages.Contains(title);
 
@@ -414,14 +414,14 @@
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="pageName">Name of the page.</param>
 		/// <returns>The text of the page.</returns>
-		public string? LoadPageText(string pageName) => this.LoadPageText(Title.FromUnvalidated(this, pageName.NotNull(nameof(pageName))));
+		public string? LoadPageText(string pageName) => this.LoadPageText(CreateTitle.FromUnvalidated(this, pageName.NotNull(nameof(pageName))));
 
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="title">Name of the page.</param>
 		/// <returns>The text of the page.</returns>
-		public string? LoadPageText(SimpleTitle title)
+		public string? LoadPageText(Title title)
 		{
-			PageCollection? pages = PageCollection.Unlimited(this);
+			PageCollection pages = PageCollection.Unlimited(this);
 			pages.GetTitles(title.NotNull(nameof(title)));
 			return pages.Count == 1 ? pages[0].Text : null;
 		}
@@ -430,7 +430,7 @@
 		/// <param name="title">Name of the page.</param>
 		/// <param name="subPageName">The subpage to get.</param>
 		/// <returns>The text of the page.</returns>
-		public string? LoadPageText(SimpleTitle title, string subPageName)
+		public string? LoadPageText(Title title, string subPageName)
 		{
 			var titleName = title.NotNull(nameof(title)).PageName;
 			if (!string.IsNullOrEmpty(subPageName))
@@ -443,7 +443,7 @@
 				titleName += subPageName;
 			}
 
-			Title? newTitle = Title.FromUnvalidated(title.Namespace, titleName);
+			var newTitle = CreateTitle.FromUnvalidated(title.Namespace, titleName);
 			return this.LoadPageText(newTitle);
 		}
 
@@ -746,7 +746,7 @@
 		/// <returns>A collection of pages that were (un)watched.</returns>
 		public ChangeValue<PageCollection> Watch(int ns, bool unwatch)
 		{
-			PageCollection? disabledResult = PageCollection.UnlimitedDefault(this);
+			PageCollection disabledResult = PageCollection.UnlimitedDefault(this);
 			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
 				[nameof(ns)] = ns,
@@ -860,7 +860,7 @@
 
 				if (redirects.Contains(searchText))
 				{
-					return FullTitle.FromBacklinkNode(this, linkNode);
+					return new FullTitle(TitleFactory.FromBacklinkNode(this, linkNode));
 				}
 			}
 
@@ -891,7 +891,7 @@
 		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
 		/// <remarks>The original title object will remain unaltered after the move; it will not be updated to reflect the destination.</remarks>
-		public ChangeValue<IDictionary<string, string>> Move(SimpleTitle from, SimpleTitle to, string reason, bool suppressRedirect) => this.Move(from, to, reason, false, false, suppressRedirect);
+		public ChangeValue<IDictionary<string, string>> Move(Title from, Title to, string reason, bool suppressRedirect) => this.Move(from, to, reason, false, false, suppressRedirect);
 
 		/// <summary>Moves the title to the name specified.</summary>
 		/// <param name="from">The title to move.</param>
@@ -902,7 +902,7 @@
 		/// <param name="suppressRedirect">if set to <see langword="true"/>, suppress the redirect that would normally be created.</param>
 		/// <returns>A value indicating the change status of the move along with the list of pages that were moved and where they were moved to.</returns>
 		/// <remarks>The original title object will remain unaltered after the move; it will not be updated to reflect the destination.</remarks>
-		public ChangeValue<IDictionary<string, string>> Move(SimpleTitle from, SimpleTitle to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
+		public ChangeValue<IDictionary<string, string>> Move(Title from, Title to, string reason, bool moveTalk, bool moveSubpages, bool suppressRedirect)
 		{
 			from.ThrowNull(nameof(from));
 			to.ThrowNull(nameof(to));
@@ -921,7 +921,7 @@
 
 				if (moveSubpages && from.Namespace.AllowsSubpages)
 				{
-					Title? toSubPage = Title.FromUnvalidated(this, to + subPageName);
+					var toSubPage = CreateTitle.FromUnvalidated(this, to + subPageName);
 					disabledResult.Add(from.FullPageName + subPageName, toSubPage.FullPageName);
 				}
 			}
@@ -1080,27 +1080,27 @@
 		/// <summary>When overridden in a derived class, loads the list of templates indicating a page should never be flagged for deletion.</summary>
 		/// <returns>A list of templates indicating a page should never be flagged for deletion.</returns>
 		/// <remarks>If not overridden, this will return an empty collection.</remarks>
-		protected virtual IReadOnlyCollection<SimpleTitle> LoadDeletePreventionTemplates() => this.deletePreventionTemplates = Array.Empty<Title>();
+		protected virtual IReadOnlyCollection<Title> LoadDeletePreventionTemplates() => this.deletePreventionTemplates = Array.Empty<Title>();
 
 		/// <summary>When overridden in a derived class, loads the list of templates indicating a page is flagged for deletion.</summary>
 		/// <returns>A list of templates indicating a page is flagged for deletion.</returns>
 		/// <remarks>If not overridden, this will return an empty collection.</remarks>
-		protected virtual IReadOnlyCollection<SimpleTitle> LoadDeletionCategories() => this.deletionCategories = Array.Empty<Title>();
+		protected virtual IReadOnlyCollection<Title> LoadDeletionCategories() => this.deletionCategories = Array.Empty<Title>();
 
 		/// <summary>Loads the disambiguation templates for wikis that don't use Disambiguator.</summary>
 		/// <returns>A collection of titles of disambiguation templates.</returns>
-		protected virtual IReadOnlyCollection<SimpleTitle> LoadDisambiguationTemplates()
+		protected virtual IReadOnlyCollection<Title> LoadDisambiguationTemplates()
 		{
 			if (this.disambiguationTemplates == null)
 			{
-				this.disambiguationTemplates = new HashSet<SimpleTitle>();
-				Title? title = Title.FromValidated(this, MediaWikiNamespaces.MediaWiki, "Disambiguationspage");
+				this.disambiguationTemplates = new HashSet<Title>();
+				var title = CreateTitle.FromValidated(this, MediaWikiNamespaces.MediaWiki, "Disambiguationspage");
 				var page = title.Load(PageModules.Default | PageModules.Links, false);
 				if (page.Exists)
 				{
 					if (page.Links.Count == 0)
 					{
-						this.disambiguationTemplates.Add(Title.FromUnvalidated(this, page.Text.Trim()));
+						this.disambiguationTemplates.Add(CreateTitle.FromUnvalidated(this, page.Text.Trim()));
 					}
 					else
 					{
@@ -1115,7 +1115,7 @@
 		/// <summary>When overridden in a derived class, loads the list of pages that function as talk pages, but are located outside of traditional Talk spaces.</summary>
 		/// <returns>A list of pages that function as talk pages.</returns>
 		/// <remarks>If not overridden, this will return an empty collection.</remarks>
-		protected virtual IReadOnlyCollection<SimpleTitle> LoadDiscussionPages() => this.discussionPages = Array.Empty<Title>();
+		protected virtual IReadOnlyCollection<Title> LoadDiscussionPages() => this.discussionPages = Array.Empty<Title>();
 
 		/// <summary>Gets one or more messages from MediaWiki space.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -1126,7 +1126,7 @@
 			Dictionary<string, MessagePage> retval = new(result.Count, StringComparer.Ordinal);
 			foreach (var item in result)
 			{
-				Title? factory = Title.FromValidated(this, MediaWikiNamespaces.MediaWiki, item.Name);
+				var factory = CreateTitle.FromValidated(this, MediaWikiNamespaces.MediaWiki, item.Name);
 				retval.Add(item.Name, new MessagePage(factory, item));
 			}
 
@@ -1157,7 +1157,7 @@
 			List<User> retval = new(result.Count);
 			foreach (var item in result)
 			{
-				retval.Add(new User(Title.FromValidated(this, MediaWikiNamespaces.User, item.Name), item));
+				retval.Add(new User(CreateTitle.FromValidated(this, MediaWikiNamespaces.User, item.Name), item));
 			}
 
 			return retval.AsReadOnly();

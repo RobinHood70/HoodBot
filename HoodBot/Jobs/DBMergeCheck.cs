@@ -94,7 +94,7 @@
 		{
 			var catSize = page is CategoryPage catPage ? catPage.FullCount : 0;
 			List<string> list = new();
-			Dictionary<SimpleTitle, BacklinksTypes>? backlinks = (Dictionary<SimpleTitle, BacklinksTypes>)page.Backlinks;
+			Dictionary<Title, BacklinksTypes> backlinks = (Dictionary<Title, BacklinksTypes>)page.Backlinks;
 			foreach (var title in this.filter)
 			{
 				backlinks.Remove(title);
@@ -179,7 +179,7 @@
 				foreach (var (page, pageInfo) in redirList)
 				{
 					var newNs = page.Namespace == UespNamespaces.Dragonborn ? UespNamespaces.Skyrim : UespNamespaces.SkyrimTalk;
-					Title? newTitle = Title.FromValidated(page.Site, newNs, page.PageName);
+					var newTitle = CreateTitle.FromValidated(page.Site, newNs, page.PageName);
 					this.WriteLine($"* {page.PageName}: {{{{Pl|{page.FullPageName}|{page.Namespace.Name}|3=redirect=no}}}}{pageInfo} / {{{{Pl|{newTitle.FullPageName}|{newTitle.Namespace.Name}|3=redirect=no}}}}");
 				}
 			}
@@ -193,7 +193,7 @@
 			var doSeeAlso = false;
 			foreach (var page in pageCollection)
 			{
-				CategoryPage? catPage = (CategoryPage)page;
+				CategoryPage catPage = (CategoryPage)page;
 				if (catPage.FullCount > 0)
 				{
 					doSeeAlso = true;
@@ -206,7 +206,7 @@
 				this.WriteLine("\n== See Also ==");
 				foreach (var page in pageCollection)
 				{
-					CategoryPage? catPage = (CategoryPage)page;
+					CategoryPage catPage = (CategoryPage)page;
 					if (catPage.FullCount > 0)
 					{
 						this.WriteLine($"* {page}{this.GetTextForPage(page)}");

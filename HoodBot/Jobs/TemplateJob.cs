@@ -21,7 +21,7 @@
 		#region Protected Override Methods
 		protected override void LoadPages()
 		{
-			Title title = Title.FromUnvalidated(this.Site, MediaWikiNamespaces.Template, this.TemplateName);
+			var title = CreateTitle.FromUnvalidated(this.Site, MediaWikiNamespaces.Template, this.TemplateName);
 			this.Pages.GetBacklinks(title.FullPageName);
 		}
 

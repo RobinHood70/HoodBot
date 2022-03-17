@@ -182,14 +182,14 @@
 
 		#region Protected Methods
 		protected void AddReplacement(string from, string to) => this.AddReplacement(
-			Title.FromUnvalidated(this.Site, from),
-			Title.FromUnvalidated(this.Site, to));
+			CreateTitle.FromUnvalidated(this.Site, from),
+			CreateTitle.FromUnvalidated(this.Site, to));
 
 		protected void AddReplacement(Title from, Title to) => this.replacements.Add(new Replacement(from, to));
 
 		protected void AddReplacement(string from, string to, ReplacementActions initialActions) => this.AddReplacement(
-			Title.FromUnvalidated(this.Site, from),
-			Title.FromUnvalidated(this.Site, to),
+			CreateTitle.FromUnvalidated(this.Site, from),
+			CreateTitle.FromUnvalidated(this.Site, to),
 			initialActions);
 
 		protected void AddReplacement(Title from, Title to, ReplacementActions initialActions) => this.replacements.Add(new Replacement(from, to, new Replacement.DetailedActions(initialActions)));
@@ -280,7 +280,7 @@
 		{
 			this.StatusWriteLine("Checking remaining pages");
 			TitleCollection leftovers = new(this.Site);
-			PageCollection? allBacklinks = PageCollection.Unlimited(this.Site, PageModules.Info | PageModules.Backlinks, false);
+			PageCollection allBacklinks = PageCollection.Unlimited(this.Site, PageModules.Info | PageModules.Backlinks, false);
 			TitleCollection backlinkTitles = new(this.Site);
 			foreach (var item in this.replacements)
 			{
@@ -406,17 +406,17 @@
 			FilterTemplatesExceptDocs(titles);
 		}
 
-		protected virtual IReadOnlyDictionary<SimpleTitle, TitleCollection> GetCategoryMembers(PageCollection fromPages)
+		protected virtual IReadOnlyDictionary<Title, TitleCollection> GetCategoryMembers(PageCollection fromPages)
 		{
 			this.StatusWriteLine("Getting category members");
-			Dictionary<SimpleTitle, TitleCollection> retval = new();
+			Dictionary<Title, TitleCollection> retval = new();
 			if ((this.FollowUpActions & FollowUpActions.NeedsCategoryMembers) != 0)
 			{
 				var skipCats = (this.FollowUpActions & FollowUpActions.NeedsCategoryMembers) == 0;
 				var categoryReplacements = new List<Replacement>(this.replacements).FindAll(replacement => replacement.From.Namespace == MediaWikiNamespaces.Category);
 				if (skipCats || categoryReplacements.Count == 0)
 				{
-					return ImmutableDictionary<SimpleTitle, TitleCollection>.Empty;
+					return ImmutableDictionary<Title, TitleCollection>.Empty;
 				}
 
 				this.ResetProgress(categoryReplacements.Count);
@@ -529,7 +529,7 @@
 			}
 		}
 
-		protected virtual void SetupProposedDeletions(PageCollection pageInfo, IReadOnlyDictionary<SimpleTitle, TitleCollection> catMembers)
+		protected virtual void SetupProposedDeletions(PageCollection pageInfo, IReadOnlyDictionary<Title, TitleCollection> catMembers)
 		{
 			if ((this.FollowUpActions & FollowUpActions.ProposeUnused) == 0)
 			{
@@ -586,7 +586,7 @@
 				{
 					try
 					{
-						SiteLink? link = SiteLink.FromGalleryText(this.Site, line);
+						SiteLink link = SiteLink.FromGalleryText(this.Site, line);
 						if (this.replacements.TryGetValue(link, out var replacement)
 							&& replacement.MoveActions.HasAction(ReplacementActions.UpdateLinks))
 						{
@@ -598,7 +598,7 @@
 
 							var newPageName = replacement.To.PageName;
 							var newNamespace = (replacement.From.Namespace == replacement.To.Namespace && link.Coerced) ? this.Site[MediaWikiNamespaces.Main] : replacement.To.Namespace;
-							Title? newTitle = Title.FromValidated(newNamespace, newPageName);
+							var newTitle = CreateTitle.FromValidated(newNamespace, newPageName);
 							var newLink = link.With(newTitle);
 							this.UpdateLinkText(page, replacement.From, newLink, false);
 							newLine = newLink.ToString()[2..^2].TrimEnd();
@@ -624,7 +624,7 @@
 		protected virtual void UpdateLinkNode(Page page, SiteLinkNode node, bool isRedirectTarget)
 		{
 			page.ThrowNull(nameof(page));
-			SiteLink? link = SiteLink.FromLinkNode(this.Site, node.NotNull(nameof(node)));
+			SiteLink link = SiteLink.FromLinkNode(this.Site, node.NotNull(nameof(node)));
 			if (this.replacements.TryGetValue(link, out var replacement)
 				&& replacement.MoveActions.HasAction(ReplacementActions.UpdateLinks)
 				&& (link.ForcedNamespaceLink
@@ -639,11 +639,11 @@
 
 			if (link.Namespace == MediaWikiNamespaces.Media)
 			{
-				Title? key = Title.FromValidated(this.Site, MediaWikiNamespaces.File, link.PageName);
+				var key = CreateTitle.FromValidated(this.Site, MediaWikiNamespaces.File, link.PageName);
 				if (this.replacements.TryGetValue(link.With(key), out replacement) &&
 					replacement.MoveActions.HasAction(ReplacementActions.UpdateLinks))
 				{
-					Title? newtitle = Title.FromValidated(this.Site, MediaWikiNamespaces.Media, replacement.To.PageName);
+					var newtitle = CreateTitle.FromValidated(this.Site, MediaWikiNamespaces.Media, replacement.To.PageName);
 					link = link.With(newtitle);
 					this.UpdateLinkText(page, replacement.From, link, !isRedirectTarget);
 					link.UpdateLinkNode(node);
@@ -651,7 +651,7 @@
 			}
 		}
 
-		protected virtual void UpdateLinkText(Page page, SimpleTitle oldTitle, SiteLink newLink, bool addCaption)
+		protected virtual void UpdateLinkText(Page page, Title oldTitle, SiteLink newLink, bool addCaption)
 		{
 			page.ThrowNull(nameof(page));
 			oldTitle.ThrowNull(nameof(oldTitle));
@@ -760,7 +760,7 @@
 		#endregion
 
 		#region Private Methods
-		private void AddCategoryMembers(IReadOnlyDictionary<SimpleTitle, TitleCollection> categoryMembers, TitleCollection backlinkTitles)
+		private void AddCategoryMembers(IReadOnlyDictionary<Title, TitleCollection> categoryMembers, TitleCollection backlinkTitles)
 		{
 			foreach (var replacement in this.replacements)
 			{
@@ -819,13 +819,13 @@
 				fromTitles.Add(replacement.From);
 			}
 
-			PageCollection? retval = PageCollection.Unlimited(this.Site, modules, false);
+			PageCollection retval = PageCollection.Unlimited(this.Site, modules, false);
 			retval.GetTitles(fromTitles);
 
 			return retval;
 		}
 
-		private TitleCollection GetLoadTitles(PageCollection fromPages, IReadOnlyDictionary<SimpleTitle, TitleCollection> categoryMembers)
+		private TitleCollection GetLoadTitles(PageCollection fromPages, IReadOnlyDictionary<Title, TitleCollection> categoryMembers)
 		{
 			TitleCollection loadTitles = new(this.Site);
 			if ((this.FollowUpActions & FollowUpActions.AffectsBacklinks) != 0)

@@ -28,7 +28,7 @@
 		#endregion
 
 		#region Public Properties
-		public SimpleTitle? LogTitle { get; private set; }
+		public Title? LogTitle { get; private set; }
 		#endregion
 
 		#region Public Static Methods
@@ -42,7 +42,7 @@
 		#region Public Override Methods
 		public override void Logout(bool force)
 		{
-			if (this.User is SimpleTitle user)
+			if (this.User is Title user)
 			{
 				this.FilterPages.Remove(user.FullPageName + "/Results");
 			}
@@ -58,11 +58,11 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override IReadOnlyCollection<SimpleTitle> LoadDeletionCategories() => new TitleCollection(this, MediaWikiNamespaces.Category, "Marked for Deletion");
+		protected override IReadOnlyCollection<Title> LoadDeletionCategories() => new TitleCollection(this, MediaWikiNamespaces.Category, "Marked for Deletion");
 
-		protected override IReadOnlyCollection<SimpleTitle> LoadDeletePreventionTemplates() => new TitleCollection(this, MediaWikiNamespaces.Template, "Empty category", "Linked image");
+		protected override IReadOnlyCollection<Title> LoadDeletePreventionTemplates() => new TitleCollection(this, MediaWikiNamespaces.Template, "Empty category", "Linked image");
 
-		protected override IReadOnlyCollection<SimpleTitle> LoadDiscussionPages()
+		protected override IReadOnlyCollection<Title> LoadDiscussionPages()
 		{
 			TitleCollection titles = new(this);
 			titles.GetCategoryMembers("Message Boards");
@@ -91,10 +91,10 @@
 				this.ClearMessage(force: true);
 			}
 
-			Title? resultPage = Title.FromValidated(this, MediaWikiNamespaces.User, this.User.PageName + "/Results");
+			var resultPage = CreateTitle.FromValidated(this, MediaWikiNamespaces.User, this.User.PageName + "/Results");
 			this.FilterPages.Add(resultPage);
 
-			this.LogTitle = Title.FromValidated(this, MediaWikiNamespaces.User, this.User.PageName + "/Log");
+			this.LogTitle = CreateTitle.FromValidated(this, MediaWikiNamespaces.User, this.User.PageName + "/Log");
 			this.FilterPages.Add(this.LogTitle);
 			//// Reinstate if pages become different: this.FilterPages.Add(this.StatusPage);
 		}
@@ -102,7 +102,7 @@
 		protected override void ParseInternalSiteInfo()
 		{
 			base.ParseInternalSiteInfo();
-			this.FilterPages.Add(Title.FromUnvalidated(this, MediaWikiNamespaces.Project, "Bot Requests"));
+			this.FilterPages.Add(CreateTitle.FromUnvalidated(this, MediaWikiNamespaces.Project, "Bot Requests"));
 		}
 		#endregion
 	}

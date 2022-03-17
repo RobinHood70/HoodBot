@@ -14,7 +14,7 @@
 			{
 				foreach (var search in searches.Split(TextArrays.Pipe))
 				{
-					this.Titles.Add(Title.FromUnvalidated(this.Site, search));
+					this.Titles.Add(CreateTitle.FromUnvalidated(this.Site, search));
 				}
 
 				this.Titles.Sort();

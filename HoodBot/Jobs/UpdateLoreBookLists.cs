@@ -80,7 +80,7 @@
 			listBooks.GetCustomGenerator(new VariablesInput() { Variables = new[] { "listbook" } });
 			for (var i = listBooks.Count - 1; i >= 0; i--)
 			{
-				VariablesPage? varPage = (VariablesPage)listBooks[i];
+				VariablesPage varPage = (VariablesPage)listBooks[i];
 				var value = varPage.GetVariable("listbook");
 				if (value != null && !ListBookValue(value))
 				{
