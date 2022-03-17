@@ -360,7 +360,7 @@
 
 		private HttpWebRequest CreateRequest(Uri uri, string method)
 		{
-			HttpWebRequest? request = (HttpWebRequest)WebRequest.Create(uri);
+			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
 			request.AllowAutoRedirect = true;
 			request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
 			request.CookieContainer = this.cookieContainer;

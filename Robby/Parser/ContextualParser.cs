@@ -24,7 +24,7 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="ContextualParser"/> class.</summary>
-		/// <param name="title">The <see cref="SimpleTitle">title</see> the text will be on.</param>
+		/// <param name="title">The <see cref="Title">title</see> the text will be on.</param>
 		/// <param name="text">The text to parse.</param>
 		public ContextualParser(Page title, string text)
 			: this(title.NotNull(nameof(title)), text, InclusionType.Raw, false)
@@ -41,7 +41,7 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="ContextualParser"/> class.</summary>
-		/// <param name="title">The <see cref="SimpleTitle">title</see> the text will be on.</param>
+		/// <param name="title">The <see cref="Title">title</see> the text will be on.</param>
 		/// <param name="text">The text to parse.</param>
 		/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
@@ -87,14 +87,14 @@
 		/// <remarks>The category will be added after the last category found on the page, or at the end of the page (preceded by two newlines) if no categories were found.</remarks>
 		public bool AddCategory(string category, bool newLineBefore)
 		{
-			Title catTitle = Title.FromUnvalidated(this.Site, MediaWikiNamespaces.Category, category.NotNull(nameof(category)));
+			var catTitle = CreateTitle.FromUnvalidated(this.Site, MediaWikiNamespaces.Category, category.NotNull(nameof(category)));
 			var lastCategoryIndex = -1;
 			for (var i = 0; i < this.Count; i++)
 			{
 				if (this[i] is SiteLinkNode link &&
 					link.TitleValue.Namespace == MediaWikiNamespaces.Category)
 				{
-					if (Title.FromBacklinkNode(this.Site, link).SimpleEquals(catTitle))
+					if (TitleFactory.FromBacklinkNode(this.Site, link).SimpleEquals(catTitle))
 					{
 						return false;
 					}
@@ -129,36 +129,36 @@
 		/// <summary>Finds the first link that matches the provided title.</summary>
 		/// <param name="find">The title to find.</param>
 		/// <returns>The first <see cref="SiteLinkNode"/> that matches the title provided, if found.</returns>
-		/// <remarks>The text provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="SimpleTitle"/>.</remarks>
-		public SiteLinkNode? FindSiteLink(string find) => this.FindSiteLink(Title.FromUnvalidated(this.Site, find));
+		/// <remarks>The text provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
+		public SiteLinkNode? FindSiteLink(string find) => this.FindSiteLink(CreateTitle.FromUnvalidated(this.Site, find));
 
 		/// <summary>Finds the first link that matches the provided title.</summary>
 		/// <param name="find">The title to find.</param>
 		/// <returns>The first <see cref="SiteLinkNode"/> that matches the title provided, if found.</returns>
-		/// <remarks>As with all <see cref="SimpleTitle"/> comparisons, only namespace and page name are checked, so trying to find <c>NS:Page</c> will match <c>NS:Page#Fragment</c> and vice versa. To match on the full title in the link, including any interwiki or fragment information, use the overload that takes an <see cref="IFullTitle"/>.</remarks>
-		public SiteLinkNode? FindSiteLink(SimpleTitle find) => this.FindSiteLinks(find).FirstOrDefault();
+		/// <remarks>As with all <see cref="Title"/> comparisons, only namespace and page name are checked, so trying to find <c>NS:Page</c> will match <c>NS:Page#Fragment</c> and vice versa. To match on the full title in the link, including any interwiki or fragment information, use the overload that takes an <see cref="IFullTitle"/>.</remarks>
+		public SiteLinkNode? FindSiteLink(Title find) => this.FindSiteLinks(find).FirstOrDefault();
 
 		/// <summary>Finds the first link that matches the provided title.</summary>
 		/// <param name="find">The title to find.</param>
 		/// <returns>The first <see cref="SiteLinkNode"/> that matches the title provided, if found.</returns>
-		/// <remarks>The title provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="SimpleTitle"/>.</remarks>
+		/// <remarks>The title provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
 		public SiteLinkNode? FindSiteLink(IFullTitle find) => this.FindSiteLinks(find).FirstOrDefault();
 
 		/// <summary>Finds all links that match the provided title.</summary>
 		/// <param name="find">The title to find.</param>
 		/// <returns>The <see cref="SiteLinkNode"/>s that match the title provided, if found.</returns>
-		/// <remarks>The text provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="SimpleTitle"/>.</remarks>
-		public IEnumerable<SiteLinkNode> FindSiteLinks(string find) => this.FindSiteLinks(Title.FromUnvalidated(this.Site, find));
+		/// <remarks>The text provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
+		public IEnumerable<SiteLinkNode> FindSiteLinks(string find) => this.FindSiteLinks(CreateTitle.FromUnvalidated(this.Site, find));
 
 		/// <summary>Finds all links that match the provided title.</summary>
 		/// <param name="find">The title to find.</param>
 		/// <returns>The <see cref="SiteLinkNode"/>s that match the title provided, if found.</returns>
-		/// <remarks>As with all <see cref="SimpleTitle"/> comparisons, only namespace and page name are checked, so trying to find <c>NS:Page</c> will match <c>NS:Page#Fragment</c> and vice versa. To match on the full title in the link, including any interwiki or fragment information, use the overload that takes an <see cref="IFullTitle"/>.</remarks>
-		public IEnumerable<SiteLinkNode> FindSiteLinks(SimpleTitle find)
+		/// <remarks>As with all <see cref="Title"/> comparisons, only namespace and page name are checked, so trying to find <c>NS:Page</c> will match <c>NS:Page#Fragment</c> and vice versa. To match on the full title in the link, including any interwiki or fragment information, use the overload that takes an <see cref="IFullTitle"/>.</remarks>
+		public IEnumerable<SiteLinkNode> FindSiteLinks(Title find)
 		{
 			foreach (var link in this.LinkNodes)
 			{
-				Title? linkTitle = Title.FromBacklinkNode(this.Site, link);
+				Title linkTitle = new(TitleFactory.FromBacklinkNode(this.Site, link));
 				if (link is SiteLinkNode siteLink && linkTitle.SimpleEquals(find))
 				{
 					yield return siteLink;
@@ -169,12 +169,12 @@
 		/// <summary>Finds all links that match the provided title.</summary>
 		/// <param name="find">The title to find.</param>
 		/// <returns>The <see cref="SiteLinkNode"/>s that match the title provided, if found.</returns>
-		/// <remarks>The title provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="SimpleTitle"/>.</remarks>
+		/// <remarks>The title provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
 		public IEnumerable<SiteLinkNode> FindSiteLinks(IFullTitle find)
 		{
 			foreach (var link in this.LinkNodes)
 			{
-				FullTitle? linkTitle = FullTitle.FromBacklinkNode(this.Site, link);
+				FullTitle linkTitle = new(TitleFactory.FromBacklinkNode(this.Site, link));
 				if (link is SiteLinkNode siteLink && linkTitle.FullEquals(find))
 				{
 					yield return siteLink;
@@ -192,11 +192,11 @@
 		/// <returns>The templates that match the title provided, if any.</returns>
 		public IEnumerable<SiteTemplateNode> FindSiteTemplates(string templateName)
 		{
-			Title find = Title.FromUnvalidated(this.Site, MediaWikiNamespaces.Template, templateName);
+			var find = CreateTitle.FromUnvalidated(this.Site, MediaWikiNamespaces.Template, templateName);
 			foreach (var template in this.TemplateNodes)
 			{
 				var titleText = template.GetTitleText();
-				Title templateTitle = Title.FromUnvalidated(this.Site, MediaWikiNamespaces.Template, titleText);
+				var templateTitle = CreateTitle.FromUnvalidated(this.Site, MediaWikiNamespaces.Template, titleText);
 				if (template is SiteTemplateNode siteTemplate && templateTitle.SimpleEquals(find))
 				{
 					yield return siteTemplate;

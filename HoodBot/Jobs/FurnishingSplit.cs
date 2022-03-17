@@ -93,7 +93,7 @@
 		#endregion
 
 		#region Private Methods
-		private static SimpleTitle PageFromFile(SimpleTitle page)
+		private static Title PageFromFile(Title page)
 		{
 			var pageName = page.PageName[FurnishingPrefix.Length..];
 			var extension = pageName.LastIndexOf('.');
@@ -102,7 +102,7 @@
 				pageName = pageName[..extension];
 			}
 
-			return Title.FromUnvalidated(page.Namespace.Site, UespNamespaces.Online, pageName);
+			return CreateTitle.FromUnvalidated(page.Namespace.Site, UespNamespaces.Online, pageName);
 		}
 		#endregion
 	}

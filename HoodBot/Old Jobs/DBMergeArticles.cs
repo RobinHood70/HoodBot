@@ -411,7 +411,7 @@
 
 		private void LoreBookHandler(Page page, TemplateNode template)
 		{
-			IWikiNode? addExtra = null;
+			IWikiNode addExtra = null;
 			foreach (var node in template.Parameters.LinkedNodes)
 			{
 				var parameter = (ParameterNode)node.Value;

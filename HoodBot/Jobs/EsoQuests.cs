@@ -205,8 +205,8 @@
 		{
 			foreach (var quest in Database.RunQuery(EsoLog.Connection, QuestQuery, row => new QuestData(row)))
 			{
-				Title? title = Title.FromUnvalidated(this.Site, quest.FullPageName);
-				Title? titleDisambig = Title.FromValidated(title.Namespace, title.PageName + " (quest)");
+				var title = CreateTitle.FromUnvalidated(this.Site, quest.FullPageName);
+				var titleDisambig = CreateTitle.FromValidated(title.Namespace, title.PageName + " (quest)");
 				if (!wikiQuests.Contains(title) && !wikiQuests.Contains(titleDisambig))
 				{
 					var missing = true;
@@ -438,7 +438,7 @@
 			{
 				if (!string.Equals(stage.Zone, "Tamriel", StringComparison.Ordinal) && !string.Equals(stage.Zone, quest.Zone, StringComparison.Ordinal))
 				{
-					Title? title = Title.FromUnvalidated(this.Site, UespNamespaces.Online, stage.Zone);
+					var title = CreateTitle.FromUnvalidated(this.Site, UespNamespaces.Online, stage.Zone);
 					locs.Add(title.AsLink(LinkFormat.LabelName));
 				}
 

@@ -29,7 +29,7 @@
 		#endregion
 
 		#region Fields
-		private readonly HashSet<SimpleTitle> licenseTemplates = new();
+		private readonly HashSet<Title> licenseTemplates = new();
 		private readonly Dictionary<string, List<ItemInfo>> allItems = new(StringComparer.Ordinal);
 		private readonly Dictionary<string, ICollection<string>> allIcons = new(StringComparer.Ordinal);
 		#endregion

@@ -31,7 +31,7 @@
 		#endregion
 
 		#region Fields
-		private readonly IDictionary<SimpleTitle, PageProtection> pageProtections = new SortedDictionary<SimpleTitle, PageProtection>(SimpleTitleComparer.Instance);
+		private readonly IDictionary<Title, PageProtection> pageProtections = new SortedDictionary<Title, PageProtection>(SimpleTitleComparer.Instance);
 		private readonly List<ProtectionInfo> searchList = new()
 		{
 			new ProtectionInfo(new[] { MediaWikiNamespaces.Project }, @"\AJavascript/.*?\.js", new PageProtection(
@@ -235,7 +235,7 @@
 			foreach (var page in this.Pages)
 			{
 				var protection = this.pageProtections[page];
-				Title title = Title.FromValidated(page.Namespace, page.PageName);
+				Title title = new(page);
 				title.Protect(protection.Reason, protection.EditProtection, protection.MoveProtection, DateTime.MaxValue);
 				if (page.TextModified)
 				{
@@ -252,7 +252,7 @@
 		private static void AddFooter(ContextualParser parser, PageProtection protection)
 		{
 			var footer = protection.Footer;
-			SiteTemplateNode? footerTemplate = (SiteTemplateNode)parser.Factory.TemplateNodeFromWikiText(footer);
+			SiteTemplateNode footerTemplate = (SiteTemplateNode)parser.Factory.TemplateNodeFromWikiText(footer);
 			if (parser.FindSiteTemplate(footerTemplate.TitleValue.PageName) is SiteTemplateNode existing)
 			{
 				existing.Title.Clear();
@@ -276,11 +276,11 @@
 				header = header.Replace("<date>", replaceDate, StringComparison.Ordinal);
 			}
 
-			SiteTemplateNode? headerTemplate = (SiteTemplateNode)nodes.Factory.TemplateNodeFromWikiText(header);
+			SiteTemplateNode headerTemplate = (SiteTemplateNode)nodes.Factory.TemplateNodeFromWikiText(header);
 			var index = nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue.SimpleEquals(headerTemplate.TitleValue));
 			if (index != -1)
 			{
-				SiteTemplateNode? existing = (SiteTemplateNode)nodes[index];
+				SiteTemplateNode existing = (SiteTemplateNode)nodes[index];
 				existing.Title.Clear();
 				existing.Title.AddRange(headerTemplate.Title);
 				nodes.RemoveAt(index);
@@ -289,11 +289,11 @@
 					insertPos--;
 				}
 
-				Title title = Title.FromValidated(parser.Page.Namespace, parser.Page.PageName);
+				Title title = new(parser.Page);
 				index = existing.FindIndex("source");
 				if (index != -1)
 				{
-					Title? sourceTitle = Title.FromUnvalidated(parser.Site, existing.Parameters[index].Value.ToValue());
+					var sourceTitle = CreateTitle.FromUnvalidated(parser.Site, existing.Parameters[index].Value.ToValue());
 					if (sourceTitle.Namespace == title.Namespace && sourceTitle.PageName.Equals(title.BasePageName, StringComparison.Ordinal))
 					{
 						existing.Parameters.RemoveAt(index);
@@ -422,7 +422,7 @@
 			var currentPos = parser.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(ProtectionTemplateName));
 			if (currentPos != -1)
 			{
-				SiteTemplateNode? existing = (SiteTemplateNode)parser[currentPos];
+				SiteTemplateNode existing = (SiteTemplateNode)parser[currentPos];
 				existing.Title.Clear();
 				existing.Title.AddText(ProtectionTemplateName);
 				existing.Remove("edit");
@@ -588,7 +588,7 @@
 			foreach (var protPage in this.pageProtections)
 			{
 				var page = this.Pages[protPage.Key];
-				Page? currentProtection = (Page)protPage.Key;
+				Page currentProtection = (Page)protPage.Key;
 				var protection = protPage.Value;
 
 				// Skip Deletion Review pages unless the last modification is at least 30 days ago. This could be incorporated into the search data itself as a delegate, but for now, since it's a one-off. I've left it as hard-coded.
@@ -664,9 +664,9 @@
 			#endregion
 		}
 
-		private sealed class ProtectedTitle : SimpleTitle
+		private sealed class ProtectedTitle : Title
 		{
-			public ProtectedTitle(SimpleTitle title, PageProtection protection)
+			public ProtectedTitle(Title title, PageProtection protection)
 				: base(title)
 			{
 				this.Protection = protection;

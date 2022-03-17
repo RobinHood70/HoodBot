@@ -62,7 +62,7 @@
 				ContextualParser parser = new(page);
 				foreach (var node in parser.LinkNodes)
 				{
-					FullTitle? link = FullTitle.FromBacklinkNode(this.Site, node);
+					FullTitle link = new(TitleFactory.FromBacklinkNode(this.Site, node));
 					if (string.Equals(link.Fragment, "Dragonborn", StringComparison.Ordinal) && titles.Contains(link))
 					{
 						this.WriteLine($"* {page.AsLink()}: {WikiTextVisitor.Raw(node)}");

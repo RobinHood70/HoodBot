@@ -115,7 +115,7 @@
 			var name = template.GetValue("name") ?? page.LabelName();
 			var fileName = template.GetValue("image") ?? (prefix + name + ".jpg");
 			var fileNameFix = prefix + name.Replace(":", RemoveColons ? string.Empty : ",", StringComparison.Ordinal) + ".jpg";
-			Title? fileTitle = Title.FromUnvalidated(this.Site, MediaWikiNamespaces.File, fileName);
+			var fileTitle = CreateTitle.FromUnvalidated(this.Site, MediaWikiNamespaces.File, fileName);
 			var fixMatch = string.Equals(fileName, fileNameFix, StringComparison.Ordinal);
 			return fixMatch
 				? null

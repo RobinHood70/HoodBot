@@ -236,7 +236,7 @@
 				}
 
 				var rsdInfo = this.client.Get(new Uri(rsdLinkFixed)).Trim();
-				XDocument? rsd = XDocument.Parse(rsdInfo);
+				XDocument rsd = XDocument.Parse(rsdInfo);
 				if (rsd.Root is XElement root)
 				{
 					var ns = root.GetDefaultNamespace();

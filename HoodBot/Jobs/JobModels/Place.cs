@@ -28,7 +28,7 @@
 			this.Alliance = page.NotNull(nameof(page)).GetVariable("alliance");
 			this.Key = page.PageName;
 			this.Settlement = page.GetVariable("settlement");
-			this.Title = Title.FromValidated(page.Namespace, page.PageName);
+			this.Title = new Title(page);
 			this.TitleName = page.GetVariable("titlename") ?? page.PageName;
 			this.TypeText = page.GetVariable("type");
 			this.Zone = page.GetVariable("zone");

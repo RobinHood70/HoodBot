@@ -23,7 +23,7 @@
 			{
 				using var file = File.OpenText(settingsFile.FileName);
 				using JsonTextReader reader = new(file);
-				JObject? json = JObject.Load(reader);
+				JObject json = JObject.Load(reader);
 				while (reader.Read())
 				{
 					// Only needs to read until done (json is filled).

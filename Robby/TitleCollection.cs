@@ -10,7 +10,7 @@
 
 	/// <summary>A collection of Title objects.</summary>
 	[SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling is a factor of using classes to handle complex inputs and is unavoidable.")]
-	public class TitleCollection : TitleCollection<SimpleTitle>, IMessageSource
+	public class TitleCollection : TitleCollection<Title>, IMessageSource
 	{
 		#region Constructors
 
@@ -31,7 +31,7 @@
 			this.LimitationType = LimitationType.None;
 			foreach (var item in titles.NotNull(nameof(titles)))
 			{
-				Title? newTitle = Title.FromUnvalidated(site, item);
+				var newTitle = CreateTitle.FromUnvalidated(site, item);
 				this.Add(newTitle);
 			}
 		}
@@ -68,7 +68,7 @@
 		/// <param name="site">The site.</param>
 		/// <param name="titles">The original Title collection.</param>
 		/// <returns>A Title-only copy of the original collection. Note that this creates all new Titles based on the original objects' namespace, page name, and key.</returns>
-		public TitleCollection(Site site, IEnumerable<SimpleTitle> titles)
+		public TitleCollection(Site site, IEnumerable<Title> titles)
 			: base(site)
 		{
 			this.LimitationType = LimitationType.None;
@@ -88,7 +88,7 @@
 		{
 			foreach (var title in titles.NotNull(nameof(titles)))
 			{
-				this.Add(Title.FromUnvalidated(this.Site, defaultNamespace, title));
+				this.Add(CreateTitle.FromUnvalidated(this.Site, defaultNamespace, title));
 			}
 		}
 
@@ -169,7 +169,7 @@
 				return new ChangeValue<PageCollection>(ChangeStatus.NoEffect, PageCollection.Unlimited(this.Site));
 			}
 
-			PageCollection? disabledResult = PageCollection.UnlimitedDefault(this.Site);
+			PageCollection disabledResult = PageCollection.UnlimitedDefault(this.Site);
 			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
 				[nameof(method)] = method
@@ -179,7 +179,7 @@
 
 			ChangeValue<PageCollection> ChangeFunc()
 			{
-				PageCollection? pages = PageCollection.Purge(this.Site, new PurgeInput(this.ToFullPageNames()) { Method = method });
+				PageCollection pages = PageCollection.Purge(this.Site, new PurgeInput(this.ToFullPageNames()) { Method = method });
 				var retval = (pages.Count < this.Count)
 					? ChangeStatus.Failure
 					: ChangeStatus.Success;
@@ -196,13 +196,13 @@
 				return new ChangeValue<PageCollection>(ChangeStatus.NoEffect, PageCollection.Unlimited(this.Site));
 			}
 
-			PageCollection? disabledResult = PageCollection.CreateEmptyPages(this.Site, this);
+			PageCollection disabledResult = PageCollection.CreateEmptyPages(this.Site, this);
 			Dictionary<string, object?> parameters = new(StringComparer.Ordinal);
 			return this.Site.PublishChange(disabledResult, this, parameters, ChangeFunc);
 
 			ChangeValue<PageCollection> ChangeFunc()
 			{
-				PageCollection? pages = PageCollection.Watch(this.Site, new WatchInput(this.ToFullPageNames()) { Unwatch = true });
+				PageCollection pages = PageCollection.Watch(this.Site, new WatchInput(this.ToFullPageNames()) { Unwatch = true });
 				var result = (pages.Count < this.Count)
 					? ChangeStatus.Failure
 					: ChangeStatus.Success;
@@ -219,14 +219,14 @@
 				return new ChangeValue<PageCollection>(ChangeStatus.NoEffect, PageCollection.Unlimited(this.Site));
 			}
 
-			PageCollection? disabledResult = PageCollection.CreateEmptyPages(this.Site, this);
+			PageCollection disabledResult = PageCollection.CreateEmptyPages(this.Site, this);
 			Dictionary<string, object?> parameters = new(StringComparer.Ordinal);
 
 			return this.Site.PublishChange(disabledResult, this, parameters, ChangeFunc);
 
 			ChangeValue<PageCollection> ChangeFunc()
 			{
-				PageCollection? pages = PageCollection.Watch(this.Site, new WatchInput(this.ToFullPageNames()) { Unwatch = false });
+				PageCollection pages = PageCollection.Watch(this.Site, new WatchInput(this.ToFullPageNames()) { Unwatch = false });
 				var result = (pages.Count < this.Count)
 					? ChangeStatus.Failure
 					: ChangeStatus.Success;
@@ -239,12 +239,12 @@
 
 		/// <summary>Adds a new object to the collection with the specified name.</summary>
 		/// <param name="title">The title to add.</param>
-		public void Add(string title) => this.Add(Title.FromUnvalidated(this.Site, title));
+		public void Add(string title) => this.Add(CreateTitle.FromUnvalidated(this.Site, title));
 
-		/// <summary>Adds new objects to the collection based on an existing <see cref="SimpleTitle"/> collection.</summary>
+		/// <summary>Adds new objects to the collection based on an existing <see cref="Title"/> collection.</summary>
 		/// <param name="titles">The titles to be added.</param>
 		/// <remarks>All items added are newly created, even if the type of the titles provided matches those in the collection.</remarks>
-		public void Add(IEnumerable<SimpleTitle> titles)
+		public void Add(IEnumerable<Title> titles)
 		{
 			if (titles != null)
 			{
@@ -285,7 +285,7 @@
 		{
 			input.ThrowNull(nameof(input));
 			input.Title.ThrowNull(nameof(input), nameof(input.Title));
-			Title? inputTitle = Title.FromUnvalidated(this.Site, input.Title);
+			var inputTitle = CreateTitle.FromUnvalidated(this.Site, input.Title);
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && (input.LinkTypes & BacklinksTypes.ImageUsage) != 0)
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
@@ -294,13 +294,13 @@
 			var result = this.Site.AbstractionLayer.Backlinks(input);
 			foreach (var item in result)
 			{
-				Title mainTitle = Title.FromValidated(this.Site, item.FullPageName);
+				var mainTitle = CreateTitle.FromValidated(this.Site, item.FullPageName);
 				this.Add(mainTitle);
 				if (item.Redirects != null)
 				{
 					foreach (var redirectedItem in item.Redirects)
 					{
-						Title title = Title.FromUnvalidated(this.Site, redirectedItem.FullPageName);
+						var title = CreateTitle.FromUnvalidated(this.Site, redirectedItem.FullPageName);
 						this.Add(new Backlink(title, mainTitle));
 					}
 				}
@@ -314,7 +314,7 @@
 			var result = this.Site.AbstractionLayer.AllCategories(input);
 			foreach (var item in result)
 			{
-				this.Add(Title.FromValidated(this.Site, MediaWikiNamespaces.Category, item.Category));
+				this.Add(CreateTitle.FromValidated(this.Site, MediaWikiNamespaces.Category, item.Category));
 			}
 		}
 
@@ -341,7 +341,7 @@
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles to find duplicates of.</param>
-		protected override void GetDuplicateFiles(DuplicateFilesInput input, IEnumerable<SimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetDuplicateFiles(DuplicateFilesInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds files to the collection, based on optionally file-specific parameters.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -362,7 +362,7 @@
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected override void GetFileUsage(FileUsageInput input, IEnumerable<SimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetFileUsage(FileUsageInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages that link to a given namespace.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -375,17 +375,17 @@
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected override void GetPageCategories(CategoriesInput input, IEnumerable<SimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetPageCategories(CategoriesInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected override void GetPageLinks(LinksInput input, IEnumerable<SimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetPageLinks(LinksInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages that link to the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected override void GetPageLinksHere(LinksHereInput input, IEnumerable<SimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetPageLinksHere(LinksHereInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages with the specified filters to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -406,12 +406,12 @@
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected override void GetPageTranscludedIn(TranscludedInInput input, IEnumerable<SimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetPageTranscludedIn(TranscludedInInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected override void GetPageTransclusions(TemplatesInput input, IEnumerable<SimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
+		protected override void GetPageTransclusions(TemplatesInput input, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(input, titles.ToFullPageNames()));
 
 		/// <summary>Adds prefix-search results to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -504,7 +504,7 @@
 			var result = this.Site.AbstractionLayer.AllMessages(input);
 			foreach (var item in result)
 			{
-				this.Add(Title.FromValidated(this.Site[MediaWikiNamespaces.MediaWiki], item.Name));
+				this.Add(CreateTitle.FromValidated(this.Site[MediaWikiNamespaces.MediaWiki], item.Name));
 			}
 		}
 
@@ -533,7 +533,7 @@
 		{
 			foreach (var item in result)
 			{
-				this.Add(Title.FromValidated(this.Site, item.FullPageName));
+				this.Add(CreateTitle.FromValidated(this.Site, item.FullPageName));
 			}
 		}
 
@@ -541,7 +541,7 @@
 		{
 			foreach (var item in result)
 			{
-				this.Add(Title.FromValidated(this.Site, item.FullPageName.NotNull(nameof(item), nameof(item.FullPageName))));
+				this.Add(CreateTitle.FromValidated(this.Site, item.FullPageName.NotNull(nameof(item), nameof(item.FullPageName))));
 			}
 		}
 
@@ -557,7 +557,7 @@
 			var result = this.Site.AbstractionLayer.CategoryMembers(input);
 			foreach (var item in result)
 			{
-				Title? title = Title.FromValidated(this.Site, item.FullPageName.NotNull(nameof(item), nameof(item.FullPageName)));
+				var title = CreateTitle.FromValidated(this.Site, item.FullPageName.NotNull(nameof(item), nameof(item.FullPageName)));
 				if (input.Type.HasFlag(item.Type))
 				{
 					this.Add(title);

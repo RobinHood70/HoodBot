@@ -41,7 +41,7 @@
 			this.WriteLine("! Page !! Action");
 			foreach (var dbPage in dbPages)
 			{
-				string? action = null;
+				string action = null;
 				if (deleted.Contains(dbPage))
 				{
 					action = "Skip: proposed for deletion.";

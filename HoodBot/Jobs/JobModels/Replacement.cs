@@ -20,7 +20,7 @@
 	public sealed class Replacement
 	{
 		#region Constructors
-		public Replacement(SimpleTitle from, Title to, DetailedActions actions)
+		public Replacement(Title from, Title to, DetailedActions actions)
 		{
 			this.From = from.NotNull(nameof(from));
 			this.To = to.NotNull(nameof(to));
@@ -28,14 +28,14 @@
 		}
 
 		[JsonConstructor]
-		public Replacement(SimpleTitle from, Title to)
+		public Replacement(Title from, Title to)
 			: this(from, to, new DetailedActions(ReplacementActions.None, string.Empty))
 		{
 		}
 		#endregion
 
 		#region Public Properties
-		public SimpleTitle From { get; }
+		public Title From { get; }
 
 		public DetailedActions MoveActions { get; }
 

@@ -37,7 +37,7 @@
 			diff.ThrowNull(nameof(diff));
 			diff.EditPath.ThrowNull(nameof(IeDiff), nameof(diff.EditPath));
 			const int empty = 0;
-			const string? headers = "Content-Type: application/x-www-form-urlencoded";
+			const string headers = "Content-Type: application/x-www-form-urlencoded";
 
 			InternetExplorer? ie = null;
 			for (var i = 0; i < 10; i++)

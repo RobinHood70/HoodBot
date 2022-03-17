@@ -98,12 +98,12 @@
 			set => base[key] = value;
 		}
 
-		/// <summary>Gets or sets the <see cref="SimpleTitle"/> with the specified key.</summary>
+		/// <summary>Gets or sets the <see cref="Title"/> with the specified key.</summary>
 		/// <param name="title">The title.</param>
-		/// <returns>The <see cref="SimpleTitle">Title</see>.</returns>
+		/// <returns>The <see cref="Title">Title</see>.</returns>
 		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry on set if the requested entry isn't found.</remarks>
 		/// <exception cref="KeyNotFoundException">Thrown when the title could not be found.</exception>
-		public override Page this[SimpleTitle title]
+		public override Page this[Title title]
 		{
 			get => this.TryGetValue(title.NotNull(nameof(title)), out var page)
 				? page
@@ -149,11 +149,11 @@
 
 		/// <summary>Loads pages into the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>
-		public void GetTitles(params SimpleTitle[] titles) => this.GetTitles(new TitleCollection(this.Site, titles));
+		public void GetTitles(params Title[] titles) => this.GetTitles(new TitleCollection(this.Site, titles));
 
 		/// <summary>Loads pages into the collection from a series of titles.</summary>
 		/// <param name="titles">The titles.</param>
-		public void GetTitles(IEnumerable<SimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(titles.ToFullPageNames()));
+		public void GetTitles(IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(titles.ToFullPageNames()));
 
 		/// <summary>Removes all pages from the collection where the page's <see cref="Page.Exists"/> property equals the value provided.</summary>
 		/// <param name="exists">If <see langword="true"/>, pages that exist will be removed from the collection; if <see langword="false"/>, non-existent pages will be removed fromt he collection.</param>
@@ -214,7 +214,7 @@
 		}
 
 		/// <inheritdoc/>
-		public override bool TryGetValue(SimpleTitle key, [MaybeNullWhen(false)] out Page value)
+		public override bool TryGetValue(Title key, [MaybeNullWhen(false)] out Page value)
 		{
 			if (base.TryGetValue(key, out var retval) || (this.titleMap.TryGetValue(key.NotNull(nameof(key)).FullPageName, out var altKey) && base.TryGetValue(altKey, out retval)))
 			{
@@ -246,7 +246,7 @@
 		/// <param name="site">The site.</param>
 		/// <param name="other">The collection to initialize this instance from.</param>
 		/// <returns>A new PageCollection with no namespace limitations, load options set to none, and creating only default pages rather than user-specified.</returns>
-		internal static PageCollection CreateEmptyPages(Site site, IEnumerable<SimpleTitle> other)
+		internal static PageCollection CreateEmptyPages(Site site, IEnumerable<Title> other)
 		{
 			// Currently only used for Purge, Watch, and Unwatch when returning fake results.
 			var retval = UnlimitedDefault(site);
@@ -305,19 +305,19 @@
 		{
 			foreach (var item in result.Interwiki)
 			{
-				FullTitle title = TitleFactory.FromNormalizedName(this.Site, item.Value.Title).ToFullTitle();
+				FullTitle title = new(TitleFactory.FromNormalizedName(this.Site, item.Value.Title));
 				Debug.Assert(string.Equals(title.Interwiki?.Prefix, item.Value.Prefix, StringComparison.Ordinal), "Interwiki prefixes didn't match.", title.Interwiki?.Prefix + " != " + item.Value.Prefix);
 				this.titleMap[item.Key] = title;
 			}
 
 			foreach (var item in result.Converted)
 			{
-				this.titleMap[item.Key] = TitleFactory.FromNormalizedName(this.Site, item.Value).ToFullTitle();
+				this.titleMap[item.Key] = new FullTitle(TitleFactory.FromNormalizedName(this.Site, item.Value));
 			}
 
 			foreach (var item in result.Normalized)
 			{
-				this.titleMap[item.Key] = TitleFactory.FromNormalizedName(this.Site, item.Value).ToFullTitle();
+				this.titleMap[item.Key] = new FullTitle(TitleFactory.FromNormalizedName(this.Site, item.Value));
 			}
 
 			foreach (var item in result.Redirects)
@@ -340,7 +340,7 @@
 					target.Append('#').Append(redirect.Interwiki);
 				}
 
-				FullTitle title = TitleFactory.FromNormalizedName(this.Site, target.ToString()).ToFullTitle();
+				FullTitle title = new(TitleFactory.FromNormalizedName(this.Site, target.ToString()));
 				this.titleMap[item.Key] = title;
 			}
 		}
@@ -354,7 +354,7 @@
 		{
 			input.ThrowNull(nameof(input));
 			input.Title.ThrowNull(nameof(input), nameof(input.Title));
-			Title? inputTitle = Title.FromUnvalidated(this.Site, input.Title);
+			var inputTitle = CreateTitle.FromUnvalidated(this.Site, input.Title);
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && (input.LinkTypes & BacklinksTypes.ImageUsage) != 0)
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
@@ -395,7 +395,7 @@
 		/// <summary>Adds duplicate files of the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles to find duplicates of.</param>
-		protected override void GetDuplicateFiles(DuplicateFilesInput input, IEnumerable<SimpleTitle> titles) => this.LoadPages(input, titles);
+		protected override void GetDuplicateFiles(DuplicateFilesInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds files to the collection, based on optionally file-specific parameters.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -408,7 +408,7 @@
 		/// <summary>Adds pages that use the files given in titles (via File/Image/Media links) to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles.</param>
-		protected override void GetFileUsage(FileUsageInput input, IEnumerable<SimpleTitle> titles) => this.LoadPages(input, titles);
+		protected override void GetFileUsage(FileUsageInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages that link to a given namespace.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -417,17 +417,17 @@
 		/// <summary>Adds category pages that are referenced by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected override void GetPageCategories(CategoriesInput input, IEnumerable<SimpleTitle> titles) => this.LoadPages(input, titles);
+		protected override void GetPageCategories(CategoriesInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose categories should be loaded.</param>
-		protected override void GetPageLinks(LinksInput input, IEnumerable<SimpleTitle> titles) => this.LoadPages(input, titles);
+		protected override void GetPageLinks(LinksInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages that are linked to by the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose backlinks should be loaded.</param>
-		protected override void GetPageLinksHere(LinksHereInput input, IEnumerable<SimpleTitle> titles) => this.LoadPages(input, titles);
+		protected override void GetPageLinksHere(LinksHereInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages with the specified filters to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -436,12 +436,12 @@
 		/// <summary>Adds pages that are transcluded from the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected override void GetPageTransclusions(TemplatesInput input, IEnumerable<SimpleTitle> titles) => this.LoadPages(input, titles);
+		protected override void GetPageTransclusions(TemplatesInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages that transclude the given titles to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		/// <param name="titles">The titles whose transclusions should be loaded.</param>
-		protected override void GetPageTranscludedIn(TranscludedInInput input, IEnumerable<SimpleTitle> titles) => this.LoadPages(input, titles);
+		protected override void GetPageTranscludedIn(TranscludedInInput input, IEnumerable<Title> titles) => this.LoadPages(input, titles);
 
 		/// <summary>Adds pages with a given property to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
@@ -528,7 +528,7 @@
 		#endregion
 
 		#region Private Methods
-		private void LoadPages(IGeneratorInput generator, IEnumerable<SimpleTitle> titles) => this.LoadPages(new QueryPageSetInput(generator, titles.ToFullPageNames()));
+		private void LoadPages(IGeneratorInput generator, IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(generator, titles.ToFullPageNames()));
 
 		private void LoadPages(QueryPageSetInput pageSetInput) => this.LoadPages(pageSetInput, this.IsTitleInLimits);
 
@@ -538,7 +538,7 @@
 		/// <remarks>If the page title specified represents a page already in the collection, that page will be overwritten.</remarks>
 		private Page New(IApiTitle item)
 		{
-			Title pageTitle = Title.FromValidated(this.Site, item.FullPageName);
+			var pageTitle = CreateTitle.FromValidated(this.Site, item.FullPageName);
 			return this.pageCreator.CreatePage(pageTitle, this.LoadOptions, item);
 		}
 

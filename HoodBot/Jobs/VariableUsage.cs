@@ -31,7 +31,7 @@
 		{
 			this.StatusWriteLine("Loading pages");
 			this.ProgressMaximum = 2;
-			PageCollection? results = PageCollection.Unlimited(this.Site);
+			PageCollection results = PageCollection.Unlimited(this.Site);
 			results.GetNamespace(MediaWikiNamespaces.Template);
 			this.Progress++;
 			this.StatusWriteLine("Exporting");
@@ -142,7 +142,7 @@
 		#region Private Classes
 		private sealed class LoadSaveCall
 		{
-			public LoadSaveCall(SimpleTitle page, ITemplateNode loadSave)
+			public LoadSaveCall(Title page, ITemplateNode loadSave)
 			{
 				List<string> variables = new();
 				this.Page = page;
@@ -188,7 +188,7 @@
 
 			public string LoadPage { get; } = string.Empty;
 
-			public SimpleTitle Page { get; }
+			public Title Page { get; }
 
 			public string Subset { get; } = string.Empty;
 

@@ -18,9 +18,9 @@
 		#region Public Methods
 
 		/// <summary>Creates a page.</summary>
-		/// <param name="title">The <see cref="SimpleTitle"/> object that represents the page to create.</param>
+		/// <param name="title">The <see cref="Title"/> object that represents the page to create.</param>
 		/// <returns>A fully populated Page object.</returns>
-		public Page CreateEmptyPage(SimpleTitle title) => this.CreatePage(title, PageLoadOptions.None, null);
+		public Page CreateEmptyPage(Title title) => this.CreatePage(title, PageLoadOptions.None, null);
 
 		/// <summary>Gets regular and custom property inputs.</summary>
 		/// <param name="options">Page load options.</param>
@@ -139,12 +139,12 @@
 		#region Public Abstract Methods
 
 		/// <summary>Creates a page.</summary>
-		/// <param name="title">The <see cref="SimpleTitle"/> object that represents the page to create.</param>
+		/// <param name="title">The <see cref="Title"/> object that represents the page to create.</param>
 		/// <param name="options">The load options used for this page. Can be used to detect if default-valued information is legitimate or was never loaded.</param>
 		/// <param name="apiItem">The API item to populate page data from.</param>
 		/// <returns>A fully populated Page object.</returns>
 		// Changed apiItem to IApiTitle instead of object as a primitive means of ensuring we're dealing with API stuff and not some random item. Not sure if this is necessary or relevant, though, considering the constructors with this signature all have to do type checking anyway.
-		public abstract Page CreatePage(SimpleTitle title, PageLoadOptions options, IApiTitle? apiItem);
+		public abstract Page CreatePage(Title title, PageLoadOptions options, IApiTitle? apiItem);
 		#endregion
 
 		#region Public Virtual Methods
