@@ -94,7 +94,7 @@
 		{
 			var catSize = page is CategoryPage catPage ? catPage.FullCount : 0;
 			List<string> list = new();
-			Dictionary<ISimpleTitle, BacklinksTypes>? backlinks = (Dictionary<ISimpleTitle, BacklinksTypes>)page.Backlinks;
+			Dictionary<SimpleTitle, BacklinksTypes>? backlinks = (Dictionary<SimpleTitle, BacklinksTypes>)page.Backlinks;
 			foreach (var title in this.filter)
 			{
 				backlinks.Remove(title);
@@ -179,7 +179,7 @@
 				foreach (var (page, pageInfo) in redirList)
 				{
 					var newNs = page.Namespace == UespNamespaces.Dragonborn ? UespNamespaces.Skyrim : UespNamespaces.SkyrimTalk;
-					TitleFactory? newTitle = TitleFactory.DirectNormalized(page.Site, newNs, page.PageName);
+					Title? newTitle = Title.FromValidated(page.Site, newNs, page.PageName);
 					this.WriteLine($"* {page.PageName}: {{{{Pl|{page.FullPageName}|{page.Namespace.Name}|3=redirect=no}}}}{pageInfo} / {{{{Pl|{newTitle.FullPageName}|{newTitle.Namespace.Name}|3=redirect=no}}}}");
 				}
 			}

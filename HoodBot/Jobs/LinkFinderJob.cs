@@ -13,7 +13,7 @@
 	public abstract class LinkFinderJob : ParsedPageJob
 	{
 		#region Fields
-		private readonly IDictionary<ISimpleTitle, List<string>> results = new SortedDictionary<ISimpleTitle, List<string>>(SimpleTitleComparer.Instance);
+		private readonly IDictionary<SimpleTitle, List<string>> results = new SortedDictionary<SimpleTitle, List<string>>(SimpleTitleComparer.Instance);
 		private readonly bool sectionLinksOnly;
 		#endregion
 
@@ -74,7 +74,7 @@
 			this.Pages.GetTitles(backTitles);
 		}
 
-		protected void SetTitlesFromSubpages(IEnumerable<ISimpleTitle> titles)
+		protected void SetTitlesFromSubpages(IEnumerable<SimpleTitle> titles)
 		{
 			TitleCollection allTitles = new(this.Site)
 			{
@@ -94,10 +94,10 @@
 			parser.ThrowNull(nameof(parser));
 			foreach (var title in this.Titles)
 			{
-				if (!this.results.TryGetValue(parser.Title, out var links))
+				if (!this.results.TryGetValue(parser.Page, out var links))
 				{
 					links = new List<string>();
-					this.results.Add(parser.Title, links);
+					this.results.Add(parser.Page, links);
 				}
 
 				foreach (var link in parser.FindSiteLinks(title))

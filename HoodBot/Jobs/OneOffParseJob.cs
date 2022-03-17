@@ -36,7 +36,7 @@
 		{
 			TitleCollection templates = new(this.Site);
 			TitleCollection catPages = new(this.Site);
-			HashSet<ISimpleTitle> hashset = new(SimpleTitleComparer.Instance);
+			HashSet<SimpleTitle> hashset = new(SimpleTitleComparer.Instance);
 			templates.GetBacklinks("Template:Mod Header");
 			catPages.GetCategoryMembers("Category:Skyrim-Creation Club", true);
 			hashset.UnionWith(templates);

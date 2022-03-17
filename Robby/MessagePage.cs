@@ -13,10 +13,10 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="MessagePage"/> class.</summary>
-		/// <param name="title">The <see cref="ISimpleTitle"/> to copy values from.</param>
+		/// <param name="title">The <see cref="SimpleTitle"/> to copy values from.</param>
 		/// <param name="options">The load options used for this page. Can be used to detect if default-valued information is legitimate or was never loaded.</param>
 		/// <param name="apiItem">The API item to extract information from.</param>
-		internal MessagePage(ISimpleTitle title, PageLoadOptions options, IApiTitle? apiItem)
+		internal MessagePage(SimpleTitle title, PageLoadOptions options, IApiTitle? apiItem)
 		: base(title, options, apiItem)
 		{
 			if (apiItem is PageItem && !this.IsMissing)
@@ -47,9 +47,9 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="MessagePage"/> class.</summary>
-		/// <param name="title">The <see cref="ISimpleTitle"/> to copy values from.</param>
+		/// <param name="title">The <see cref="SimpleTitle"/> to copy values from.</param>
 		/// <param name="item">The AllMessagesItem to populate this instance from.</param>
-		internal MessagePage(ISimpleTitle title, AllMessagesItem item)
+		internal MessagePage(SimpleTitle title, AllMessagesItem item)
 			: base(title, PageLoadOptions.None, null)
 		{
 			this.IsInvalid = false;

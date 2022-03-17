@@ -2,9 +2,10 @@
 {
 	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
+	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 
-	internal sealed class ReplacementCollection : KeyedCollection<ISimpleTitle, Replacement>
+	internal sealed class ReplacementCollection : KeyedCollection<SimpleTitle, Replacement>
 	{
 		#region Constructors
 		public ReplacementCollection()
@@ -18,7 +19,7 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override ISimpleTitle GetKeyForItem(Replacement item) => item.From;
+		protected override SimpleTitle GetKeyForItem(Replacement item) => item.From;
 		#endregion
 	}
 }

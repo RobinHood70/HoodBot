@@ -10,9 +10,9 @@
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon;
 
+	// Images should be downloaded from latest version on https://esofiles.uesp.net/ in the icons.zip file before running this job.
 	internal sealed class BulkUploadIcons : EditJob
 	{
-		// Images should be downloaded from latest version on https://esofiles.uesp.net/ in the icons.zip file before running this job.
 		#region Static Fields
 		private static readonly Dictionary<long, string> NameFixes = new()
 		{
@@ -57,25 +57,16 @@
 
 		private static readonly List<string> Styles = new()
 		{
-			"Ancestral Akaviri",
-			"Ancient Daedric",
-			"Annihilarch's Chosen",
-			"Arkthzand Armory",
-			"Crimson Oath",
-			//// "Crusader",
-			"Dremora Kynreeve",
-			"Fargrave Guardian",
-			"Gloambound",
-			"Maniacal Jester",
-			"Nord Carved",
-			"Scorianite Gladiator",
-			"Second Seed",
-			"Silver Rose",
-			"Spellscar Lithoarms",
-			"Waking Flame"
+			"Ascendant Order",
+			"Dragonguard Berserker",
+			"Dreadsails",
+			"Reefborn",
+			"Saberkeel Panoply",
 		};
 
 		private static readonly string Query = "SELECT id, name, icon FROM collectibles WHERE categoryName IN('Armor Styles', 'Weapon Styles');";
+
+		private static readonly string WikiIconFolder = Path.Combine(UespSite.GetBotDataFolder(), "WikiIcons");
 		#endregion
 
 		#region Fields
@@ -94,10 +85,10 @@
 		protected override void BeforeLogging()
 		{
 			var iconLookup = GetIcons();
-			var allFiles = Directory.GetFiles(Path.Combine(UespSite.GetBotDataFolder(), "WikiIcons"));
+			var allFiles = Directory.GetFiles(WikiIconFolder);
 			HashSet<string> files = new(allFiles.Length, StringComparer.OrdinalIgnoreCase);
 
-			TitleCollection? fileTitles = new(this.Site);
+			TitleCollection fileTitles = new(this.Site);
 			fileTitles.GetNamespace(MediaWikiNamespaces.File, Filter.Any, "ON-icon-");
 			foreach (var file in allFiles)
 			{
@@ -105,8 +96,10 @@
 				files.Add(fileName);
 			}
 
+			Styles.Sort(StringComparer.Ordinal);
 			foreach (var style in Styles)
 			{
+				this.WriteLine($"=={style} Style==");
 				foreach (var part in Parts)
 				{
 					var dbName = $"{style} {part.Name}";
@@ -120,10 +113,13 @@
 						Upload upload = new(idIcon.Id, idIcon.Icon, style, part);
 						if (!fileTitles.Contains("File:" + upload.DestinationName))
 						{
+							this.WriteLine($"* [[:File:{upload.DestinationName}|{part.BodyPart}]]");
 							this.uploads.Add(upload);
 						}
 					}
 				}
+
+				this.WriteLine();
 			}
 
 			this.uploads.TrimExcess();
@@ -146,7 +142,7 @@
 						$"[[Category:Online-Icons-{typeUcfirst}-{upload.Part.BodyPart}]]\n" +
 						$"== Licensing ==\n" +
 						$"{{{{Zenimage}}}}";
-					var fileName = UespSite.GetBotDataFolder("WikiIcons\\" + upload.Icon + ".png");
+					var fileName = Path.Combine(WikiIconFolder, upload.Icon + ".png");
 					this.Site.Upload(fileName, upload.DestinationName, "Bulk upload ESO style icons", pageText);
 				}
 			}

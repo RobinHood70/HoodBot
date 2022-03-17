@@ -121,9 +121,9 @@
 		#region Private Methods
 		private static void AddHeaderLinks(object sender, Page page)
 		{
-			ContextualParser parsedPage = new(page);
-			var factory = parsedPage.Factory;
-			foreach (var headerNode in parsedPage.HeaderNodes)
+			ContextualParser parser = new(page);
+			var factory = parser.Factory;
+			foreach (var headerNode in parser.HeaderNodes)
 			{
 				if (headerNode.Title.Count == 1 && headerNode.Title[0] is ITextNode textNode)
 				{
@@ -143,7 +143,7 @@
 				}
 			}
 
-			page.Text = parsedPage.ToRaw();
+			parser.UpdatePage();
 		}
 
 		private static void CreateCollectiblePage(object sender, Page page)

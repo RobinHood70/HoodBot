@@ -1,15 +1,13 @@
 ﻿namespace RobinHood70.Robby
 {
-	using RobinHood70.Robby.Design;
-
 	/// <summary>Represents a backlink title which has been redirected from another title.</summary>
 	/// <seealso cref="Title" />
-	public sealed class Backlink : Title
+	public sealed class Backlink : SimpleTitle
 	{
 		/// <summary>Initializes a new instance of the <see cref="Backlink"/> class.</summary>
 		/// <param name="title">The original page.</param>
 		/// <param name="redirectTitle">The title the redirect points to.</param>
-		internal Backlink(ISimpleTitle title, Title redirectTitle)
+		internal Backlink(SimpleTitle title, Title redirectTitle)
 			: base(title)
 		{
 			this.RedirectTitle = redirectTitle;

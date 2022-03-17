@@ -67,9 +67,9 @@
 		protected override void ParseText(object sender, ContextualParser parser)
 		{
 			parser.ThrowNull(nameof(parser));
-			parser.Title.ThrowNull(nameof(parser), nameof(parser.Title));
+			parser.Page.ThrowNull(nameof(parser), nameof(parser.Page));
 			List<string> pageIssues = new();
-			if (!parser.Title.PageName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))
+			if (!parser.Page.PageName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))
 			{
 				pageIssues.Add("does not end in .jpg");
 			}
@@ -79,7 +79,7 @@
 				pageIssues.Add("does not have a Furnishing Summary");
 			}
 
-			var title = PageFromFile(parser.Title);
+			var title = PageFromFile(parser.Page);
 			if (this.existingPages!.Contains(title))
 			{
 				pageIssues.Add($"page exists: {title.AsLink(LinkFormat.LabelName)}");
@@ -87,13 +87,13 @@
 
 			if (pageIssues.Count > 0)
 			{
-				this.issues.Add($"* {parser.Title.AsLink()}: {string.Join(", ", pageIssues)}.");
+				this.issues.Add($"* {parser.Page.AsLink()}: {string.Join(", ", pageIssues)}.");
 			}
 		}
 		#endregion
 
 		#region Private Methods
-		private static ISimpleTitle PageFromFile(ISimpleTitle page)
+		private static SimpleTitle PageFromFile(SimpleTitle page)
 		{
 			var pageName = page.PageName[FurnishingPrefix.Length..];
 			var extension = pageName.LastIndexOf('.');
@@ -102,7 +102,7 @@
 				pageName = pageName[..extension];
 			}
 
-			return TitleFactory.Direct(page.Namespace.Site, UespNamespaces.Online, pageName);
+			return Title.FromUnvalidated(page.Namespace.Site, UespNamespaces.Online, pageName);
 		}
 		#endregion
 	}

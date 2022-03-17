@@ -63,7 +63,7 @@
 		#endregion
 
 		#region Public Static Methods
-		public static string ConstructWarning(ContextualParser oldPage, ContextualParser newPage, ICollection<ISimpleTitle> titles, string warningType)
+		public static string ConstructWarning(ContextualParser oldPage, ContextualParser newPage, ICollection<SimpleTitle> titles, string warningType)
 		{
 			titles.ThrowNull(nameof(titles));
 			warningType.ThrowNull(nameof(warningType));
@@ -77,7 +77,7 @@
 				.Append("Watch for ")
 				.Append(warningType)
 				.Append(" on ")
-				.AppendLine(newPage.Title.FullPageName())
+				.AppendLine(newPage.Page.FullPageName)
 				.Append(warningType.UpperFirst(newPage.Site.Culture))
 				.Append(": ");
 			foreach (var link in titles)
@@ -104,12 +104,12 @@
 			{
 				var jobSite = job.Site;
 				job.StatusWriteLine("Parsing replacements");
-				if (jobSite.User is not ISimpleTitle user)
+				if (jobSite.User is not SimpleTitle user)
 				{
 					throw new InvalidOperationException("Not logged in.");
 				}
 
-				Title? replacementsTitle = TitleFactory.DirectNormalized(user.Namespace, user.PageName + "/ESO Replacements").ToTitle();
+				Title? replacementsTitle = Title.FromValidated(user.Namespace, user.PageName + "/ESO Replacements");
 				var page = replacementsTitle.Load();
 				var replacements = page.Text;
 				if (string.IsNullOrEmpty(replacements))
@@ -308,9 +308,9 @@
 
 		#region Public Methods
 
-		public ICollection<ISimpleTitle> CheckNewLinks(ContextualParser oldPage, ContextualParser newPage)
+		public ICollection<SimpleTitle> CheckNewLinks(ContextualParser oldPage, ContextualParser newPage)
 		{
-			HashSet<ISimpleTitle> oldLinks = new(SimpleTitleComparer.Instance);
+			HashSet<SimpleTitle> oldLinks = new(SimpleTitleComparer.Instance);
 			foreach (var node in oldPage.FindAll<ILinkNode>(null, false, true, 0))
 			{
 				SiteLink? siteLink = SiteLink.FromLinkNode(this.site, node);
@@ -326,9 +326,9 @@
 			return oldLinks;
 		}
 
-		public ICollection<ISimpleTitle> CheckNewTemplates(ContextualParser oldPage, ContextualParser newPage)
+		public ICollection<SimpleTitle> CheckNewTemplates(ContextualParser oldPage, ContextualParser newPage)
 		{
-			HashSet<ISimpleTitle> oldTemplates = new(SimpleTitleComparer.Instance);
+			HashSet<SimpleTitle> oldTemplates = new(SimpleTitleComparer.Instance);
 			foreach (var node in oldPage.FindAll<ITemplateNode>(null, false, true, 0))
 			{
 				oldTemplates.Add(Title.FromBacklinkNode(this.site, node));
@@ -340,7 +340,7 @@
 			}
 
 			// Always ignore these
-			oldTemplates.Remove(TitleFactory.FromName(this.site, "Huh"));
+			oldTemplates.Remove(Title.FromUnvalidated(this.site, "Huh"));
 
 			return oldTemplates;
 		}
@@ -401,15 +401,15 @@
 						{
 							if (newNode is ILinkNode link)
 							{
-								SiteLink? title = SiteLink.FromLinkNode(usedList.Site, link);
-								if (usedList.Contains(title) && link.Parameters.Count > 0 && link.Parameters[0].Value is NodeCollection valueNode)
+								SiteLink siteLink = SiteLink.FromLinkNode(usedList.Site, link);
+								if (usedList.Contains(siteLink) && link.Parameters.Count > 0 && link.Parameters[0].Value is NodeCollection valueNode)
 								{
 									retval.AddRange(valueNode);
 								}
 								else
 								{
 									retval.Add(link);
-									usedList.Add(title);
+									usedList.Add(siteLink);
 								}
 							}
 							else

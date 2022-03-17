@@ -4,7 +4,6 @@
 	using Newtonsoft.Json;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 
 	[Flags]
 	public enum ReplacementActions
@@ -21,7 +20,7 @@
 	public sealed class Replacement
 	{
 		#region Constructors
-		public Replacement(ISimpleTitle from, Title to, DetailedActions actions)
+		public Replacement(SimpleTitle from, Title to, DetailedActions actions)
 		{
 			this.From = from.NotNull(nameof(from));
 			this.To = to.NotNull(nameof(to));
@@ -29,14 +28,14 @@
 		}
 
 		[JsonConstructor]
-		public Replacement(ISimpleTitle from, Title to)
+		public Replacement(SimpleTitle from, Title to)
 			: this(from, to, new DetailedActions(ReplacementActions.None, string.Empty))
 		{
 		}
 		#endregion
 
 		#region Public Properties
-		public ISimpleTitle From { get; }
+		public SimpleTitle From { get; }
 
 		public DetailedActions MoveActions { get; }
 
@@ -62,7 +61,7 @@
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => $"{this.MoveActions}: {this.From.FullPageName()} → {this.To.FullPageName()}";
+		public override string ToString() => $"{this.MoveActions}: {this.From.FullPageName} → {this.To.FullPageName}";
 		#endregion
 
 		#region Public Classes

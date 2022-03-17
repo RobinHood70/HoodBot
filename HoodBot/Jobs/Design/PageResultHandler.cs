@@ -2,7 +2,6 @@
 {
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 
 	/// <summary>Implements the <see cref="ResultHandler" /> class and saves results to a wiki page.</summary>
 	/// <seealso cref="ResultHandler" />
@@ -16,7 +15,9 @@
 		public PageResultHandler(Site site, string pageName)
 			: base(site?.Culture)
 		{
-			this.Page = TitleFactory.FromName(site.NotNull(nameof(site)), pageName.NotNull(nameof(pageName))).ToNewPage(string.Empty);
+			site.ThrowNull(nameof(site));
+			pageName.ThrowNull(nameof(pageName));
+			this.Page = site.CreatePage(pageName, string.Empty);
 			this.DefaultText = this.ResourceManager.GetString("Results", site.Culture);
 		}
 		#endregion

@@ -142,7 +142,7 @@
 		#region Private Classes
 		private sealed class LoadSaveCall
 		{
-			public LoadSaveCall(ISimpleTitle page, ITemplateNode loadSave)
+			public LoadSaveCall(SimpleTitle page, ITemplateNode loadSave)
 			{
 				List<string> variables = new();
 				this.Page = page;
@@ -188,7 +188,7 @@
 
 			public string LoadPage { get; } = string.Empty;
 
-			public ISimpleTitle Page { get; }
+			public SimpleTitle Page { get; }
 
 			public string Subset { get; } = string.Empty;
 

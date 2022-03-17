@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
-	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
@@ -29,11 +28,11 @@
 		{
 			if (template.Find("titlename") != null)
 			{
-				Debug.WriteLine(parser.Title.FullPageName());
+				Debug.WriteLine(parser.Page.FullPageName);
 			}
 			else if (string.Equals(
 				template.GetValue("imgdesc"),
-				parser.Title.LabelName(),
+				parser.Page.LabelName(),
 				StringComparison.Ordinal))
 			{
 				template.Remove("imgdesc");

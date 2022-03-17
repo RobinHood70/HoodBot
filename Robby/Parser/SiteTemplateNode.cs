@@ -21,7 +21,7 @@
 		public SiteTemplateNode(SiteNodeFactory factory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters)
 			: base(factory, title, parameters)
 		{
-			this.TitleValue = Robby.Title.Coerce(factory.NotNull(nameof(factory)).Site, MediaWikiNamespaces.Template, this.GetTitleText());
+			this.TitleValue = Robby.Title.FromUnvalidated(factory.NotNull(nameof(factory)).Site, MediaWikiNamespaces.Template, this.GetTitleText());
 		}
 		#endregion
 

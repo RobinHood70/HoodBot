@@ -4,7 +4,6 @@
 	using System.IO;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
@@ -40,7 +39,7 @@
 
 				ITemplateNode? template = (ITemplateNode)parser[i + 2];
 				var text = "{{Minimal}}\n" + WikiTextVisitor.Raw(template) + "\n{{Stub|Item}}";
-				var page = TitleFactory.DirectNormalized(link.TitleValue).ToNewPage(text);
+				var page = this.Site.CreatePage(link.TitleValue, text);
 				this.Pages.Add(page);
 			}
 

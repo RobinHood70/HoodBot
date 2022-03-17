@@ -31,7 +31,7 @@
 		#endregion
 
 		#region Fields
-		private readonly IDictionary<ISimpleTitle, PageProtection> pageProtections = new SortedDictionary<ISimpleTitle, PageProtection>(SimpleTitleComparer.Instance);
+		private readonly IDictionary<SimpleTitle, PageProtection> pageProtections = new SortedDictionary<SimpleTitle, PageProtection>(SimpleTitleComparer.Instance);
 		private readonly List<ProtectionInfo> searchList = new()
 		{
 			new ProtectionInfo(new[] { MediaWikiNamespaces.Project }, @"\AJavascript/.*?\.js", new PageProtection(
@@ -235,7 +235,8 @@
 			foreach (var page in this.Pages)
 			{
 				var protection = this.pageProtections[page];
-				page.Protect(protection.Reason, protection.EditProtection, protection.MoveProtection, DateTime.MaxValue);
+				Title title = Title.FromValidated(page.Namespace, page.PageName);
+				title.Protect(protection.Reason, protection.EditProtection, protection.MoveProtection, DateTime.MaxValue);
 				if (page.TextModified)
 				{
 					this.SavePage(page, "Add/update templates", true);
@@ -288,11 +289,11 @@
 					insertPos--;
 				}
 
-				Title title = new(parser.Title);
+				Title title = Title.FromValidated(parser.Page.Namespace, parser.Page.PageName);
 				index = existing.FindIndex("source");
 				if (index != -1)
 				{
-					TitleFactory sourceTitle = TitleFactory.FromName(parser.Site, existing.Parameters[index].Value.ToValue());
+					Title? sourceTitle = Title.FromUnvalidated(parser.Site, existing.Parameters[index].Value.ToValue());
 					if (sourceTitle.Namespace == title.Namespace && sourceTitle.PageName.Equals(title.BasePageName, StringComparison.Ordinal))
 					{
 						existing.Parameters.RemoveAt(index);
@@ -511,7 +512,7 @@
 				parser.RemoveRange(insertPos, 2);
 			}
 
-			page.Text = parser.ToRaw();
+			parser.UpdatePage();
 		}
 		#endregion
 
@@ -663,9 +664,9 @@
 			#endregion
 		}
 
-		private sealed class ProtectedTitle : Title
+		private sealed class ProtectedTitle : SimpleTitle
 		{
-			public ProtectedTitle(ISimpleTitle title, PageProtection protection)
+			public ProtectedTitle(SimpleTitle title, PageProtection protection)
 				: base(title)
 			{
 				this.Protection = protection;

@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
-	using System.Diagnostics;
 	using System.Runtime.InteropServices;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
@@ -305,7 +304,6 @@
 				endPos = cmt.End;
 			}
 
-			Debug.WriteLine(piece is HeaderPiece ? "HeaderPiece" : piece.GetType().Name);
 			if (piece is HeaderPiece header)
 			{
 				if (header.CommentEnd != wsStart - 1)

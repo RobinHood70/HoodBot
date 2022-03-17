@@ -2,7 +2,6 @@
 {
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 
 	public class UespNamespace
 	{
@@ -18,15 +17,15 @@
 			var baseName = nsData[0];
 			this.Base = baseName;
 			this.IsPseudoNamespace = !site.Namespaces.TryGetValue(baseName, out var nsBase);
-			this.BaseTitle = (nsBase is not null
-				? TitleFactory.Direct(nsBase, string.Empty)
-				: TitleFactory.FromName(site, baseName)).ToTitle();
+			this.BaseTitle = nsBase is not null
+				? Title.FromUnvalidated(nsBase, string.Empty)
+				: Title.FromUnvalidated(site, baseName);
 			this.Full = baseName + (this.IsPseudoNamespace ? '/' : ':');
 			this.Id = nsData[1].Length == 0 ? baseName.ToUpperInvariant() : nsData[1];
 			var parentName = nsData[2].Length == 0 ? baseName : nsData[2];
 			this.Parent = site[parentName];
 			this.Name = nsData[3].Length == 0 ? baseName : nsData[3];
-			this.MainPage = TitleFactory.FromName(site, nsData[4].Length == 0 ? this.Full + this.Name : nsData[4]).ToTitle();
+			this.MainPage = Title.FromUnvalidated(site, nsData[4].Length == 0 ? this.Full + this.Name : nsData[4]);
 			this.Category = nsData[5].Length == 0 ? baseName : nsData[5];
 			this.Trail = nsData[6].Length == 0 ? string.Concat("[[", this.MainPage, "|", this.Name, "]]") : nsData[6];
 			this.IsGameSpace = UespNamespaces.IsGamespace(this.Parent.Id);

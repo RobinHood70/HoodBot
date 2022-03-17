@@ -1,18 +1,16 @@
 ﻿namespace RobinHood70.Robby
 {
-	using RobinHood70.Robby.Design;
-
 	/// <summary>Stores information about a category link. This includes the sort key and whether or not the category is hidden.</summary>
 	/// <seealso cref="Title" />
-	public class Category : Title
+	public class Category : SimpleTitle
 	{
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="Category"/> class.</summary>
-		/// <param name="title">The <see cref="ISimpleTitle"/> that represents the category.</param>
+		/// <param name="title">The <see cref="SimpleTitle"/> that represents the category.</param>
 		/// <param name="sortKey">The sort key.</param>
 		/// <param name="hidden">if set to <see langword="true" /> if the category is hidden.</param>
-		internal Category(ISimpleTitle title, string? sortKey, bool hidden)
+		internal Category(SimpleTitle title, string? sortKey, bool hidden)
 			: base(title)
 		{
 			this.Hidden = hidden;

@@ -6,7 +6,6 @@
 	using System.IO;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Eve;
 	using RobinHood70.WikiCommon;
@@ -29,7 +28,7 @@
 		#endregion
 
 		#region Public Properties
-		public ISimpleTitle? LogTitle { get; private set; }
+		public SimpleTitle? LogTitle { get; private set; }
 		#endregion
 
 		#region Public Static Methods
@@ -43,9 +42,9 @@
 		#region Public Override Methods
 		public override void Logout(bool force)
 		{
-			if (this.User is ISimpleTitle user)
+			if (this.User is SimpleTitle user)
 			{
-				this.FilterPages.Remove(user.FullPageName() + "/Results");
+				this.FilterPages.Remove(user.FullPageName + "/Results");
 			}
 
 			if (this.LogTitle is not null)
@@ -59,11 +58,11 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override IReadOnlyCollection<ISimpleTitle> LoadDeletionCategories() => new TitleCollection(this, MediaWikiNamespaces.Category, "Marked for Deletion");
+		protected override IReadOnlyCollection<SimpleTitle> LoadDeletionCategories() => new TitleCollection(this, MediaWikiNamespaces.Category, "Marked for Deletion");
 
-		protected override IReadOnlyCollection<ISimpleTitle> LoadDeletePreventionTemplates() => new TitleCollection(this, MediaWikiNamespaces.Template, "Empty category", "Linked image");
+		protected override IReadOnlyCollection<SimpleTitle> LoadDeletePreventionTemplates() => new TitleCollection(this, MediaWikiNamespaces.Template, "Empty category", "Linked image");
 
-		protected override IReadOnlyCollection<ISimpleTitle> LoadDiscussionPages()
+		protected override IReadOnlyCollection<SimpleTitle> LoadDiscussionPages()
 		{
 			TitleCollection titles = new(this);
 			titles.GetCategoryMembers("Message Boards");
@@ -92,10 +91,10 @@
 				this.ClearMessage(force: true);
 			}
 
-			TitleFactory? resultPage = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.User, this.User.PageName + "/Results");
+			Title? resultPage = Title.FromValidated(this, MediaWikiNamespaces.User, this.User.PageName + "/Results");
 			this.FilterPages.Add(resultPage);
 
-			this.LogTitle = TitleFactory.DirectNormalized(this, MediaWikiNamespaces.User, this.User.PageName + "/Log").ToTitle();
+			this.LogTitle = Title.FromValidated(this, MediaWikiNamespaces.User, this.User.PageName + "/Log");
 			this.FilterPages.Add(this.LogTitle);
 			//// Reinstate if pages become different: this.FilterPages.Add(this.StatusPage);
 		}
@@ -103,7 +102,7 @@
 		protected override void ParseInternalSiteInfo()
 		{
 			base.ParseInternalSiteInfo();
-			this.FilterPages.Add(TitleFactory.Direct(this, MediaWikiNamespaces.Project, "Bot Requests"));
+			this.FilterPages.Add(Title.FromUnvalidated(this, MediaWikiNamespaces.Project, "Bot Requests"));
 		}
 		#endregion
 	}

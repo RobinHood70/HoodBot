@@ -114,7 +114,7 @@
 				if (set.Page is null || !set.Page.Exists)
 				{
 					this.Warn($"New Page: {set.Name}");
-					set.Page = set.BuildNewPage(TitleFactory.Direct(this.Site, UespNamespaces.Online, set.Name));
+					set.Page = set.BuildNewPage(Title.FromUnvalidated(this.Site, UespNamespaces.Online, set.Name));
 				}
 			}
 		}
@@ -265,30 +265,30 @@
 			}
 
 			sb.Remove(sb.Length - 5, 4);
-			ContextualParser newPage = new(page, sb.ToString());
-			EsoReplacer.ReplaceGlobal(newPage);
-			EsoReplacer.ReplaceEsoLinks(this.Site, newPage);
-			EsoReplacer.ReplaceFirstLink(newPage, usedList);
+			ContextualParser parser = new(page, sb.ToString());
+			EsoReplacer.ReplaceGlobal(parser);
+			EsoReplacer.ReplaceEsoLinks(this.Site, parser);
+			EsoReplacer.ReplaceFirstLink(parser, usedList);
 
 			// Now that we're done parsing, re-add the IgnoreNodes.
-			newPage.Insert(0, firstNode);
-			newPage.Add(lastNode);
+			parser.Insert(0, firstNode);
+			parser.Add(lastNode);
 
 			EsoReplacer replacer = new(this.Site);
-			var newLinks = replacer.CheckNewLinks(oldPage, newPage);
+			var newLinks = replacer.CheckNewLinks(oldPage, parser);
 			if (newLinks.Count > 0)
 			{
-				this.Warn(EsoReplacer.ConstructWarning(oldPage, newPage, newLinks, "links"));
+				this.Warn(EsoReplacer.ConstructWarning(oldPage, parser, newLinks, "links"));
 			}
 
-			var newTemplates = replacer.CheckNewTemplates(oldPage, newPage);
+			var newTemplates = replacer.CheckNewTemplates(oldPage, parser);
 			if (newTemplates.Count > 0)
 			{
-				this.Warn(EsoReplacer.ConstructWarning(oldPage, newPage, newTemplates, "templates"));
+				this.Warn(EsoReplacer.ConstructWarning(oldPage, parser, newTemplates, "templates"));
 			}
 
-			setData.IsNonTrivial = replacer.IsNonTrivialChange(oldPage, newPage);
-			page.Text = newPage.ToRaw();
+			setData.IsNonTrivial = replacer.IsNonTrivialChange(oldPage, parser);
+			parser.UpdatePage();
 		}
 
 		private void UpdateSetPageAnyCase(SetData set, PageCollection setMembers)
@@ -320,16 +320,16 @@
 				{
 					if (TitleOverrides.TryGetValue(set.Name, out var overrideName))
 					{
-						TitleFactory? checkTitle = TitleFactory.FromName(this.Site, UespNamespaces.Online, overrideName);
+						Title checkTitle = Title.FromValidated(this.Site, UespNamespaces.Online, overrideName);
 						set.Page = setMembers.TryGetValue(checkTitle, out var foundPage)
 							? foundPage
-							: set.BuildNewPage(TitleFactory.Direct(this.Site, UespNamespaces.Online, set.Name));
+							: set.BuildNewPage(Title.FromUnvalidated(this.Site, UespNamespaces.Online, set.Name));
 					}
 					else
 					{
 						foreach (var setName in set.AllNames)
 						{
-							TitleFactory? checkTitle = TitleFactory.FromName(this.Site, UespNamespaces.Online, setName);
+							Title checkTitle = Title.FromUnvalidated(this.Site, UespNamespaces.Online, setName);
 							if (setMembers.TryGetValue(checkTitle, out var foundPage) &&
 								foundPage.Exists)
 							{
@@ -412,7 +412,7 @@
 			#endregion
 
 			#region Public Methods
-			public Page BuildNewPage(ISimpleTitle title)
+			public Page BuildNewPage(SimpleTitle title)
 			{
 				StringBuilder sb = new();
 				sb
@@ -433,7 +433,7 @@
 					.Append("{{ESO Sets With|subtype=|source=}}\n")
 					.Append("{{Stub|Item Set}}");
 
-				return TitleFactory.DirectNormalized(title).ToNewPage(sb.ToString());
+				return title.Namespace.Site.CreatePage(title, sb.ToString());
 			}
 			#endregion
 

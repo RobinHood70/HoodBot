@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.Robby.Design
 {
 	/// <summary>Represents link information, including whether the link was coerced and initial colons that affect the interpretation of the interwiki and namespace text. Does not attempt to track spacing.</summary>
-	/// <seealso cref="ISimpleTitle" />
+	/// <seealso cref="SimpleTitle" />
 	public interface ILinkTitle : IFullTitle
 	{
 		/// <summary>Gets a value indicating whether the title was coerced into its namespace, or started there to begin with.</summary>

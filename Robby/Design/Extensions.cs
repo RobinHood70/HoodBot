@@ -4,6 +4,7 @@
 	using System.Diagnostics.CodeAnalysis;
 	using System.Text;
 	using RobinHood70.CommonCode;
+	using RobinHood70.WikiCommon;
 
 	/// <summary>The format to use for the link text.</summary>
 	public enum LinkFormat
@@ -26,13 +27,13 @@
 		/// <summary>Convert a collection of SimpleTitles to their full page names.</summary>
 		/// <param name="titles">The titles to convert.</param>
 		/// <returns>An enumeration of the titles converted to their full page names.</returns>
-		public static IEnumerable<string> ToFullPageNames(this IEnumerable<ISimpleTitle> titles)
+		public static IEnumerable<string> ToFullPageNames(this IEnumerable<SimpleTitle> titles)
 		{
 			if (titles != null)
 			{
 				foreach (var title in titles)
 				{
-					yield return title.FullPageName();
+					yield return title.FullPageName;
 				}
 			}
 		}
@@ -58,13 +59,13 @@
 		/// <summary>Returns the provided title as link text.</summary>
 		/// <param name="title">The title to get the link text for.</param>
 		/// <returns>The current title, formatted as a link.</returns>
-		public static string AsLink(this ISimpleTitle title) => AsLink(title, null);
+		public static string AsLink(this SimpleTitle title) => AsLink(title, null);
 
 		/// <summary>Returns the provided title as link text.</summary>
 		/// <param name="title">The title to get the link text for.</param>
 		/// <param name="linkType">The default text to use for the link.</param>
 		/// <returns>The current title, formatted as a link.</returns>
-		public static string AsLink(this ISimpleTitle title, LinkFormat linkType)
+		public static string AsLink(this SimpleTitle title, LinkFormat linkType)
 		{
 			var text = linkType switch
 			{
@@ -81,7 +82,7 @@
 		/// <param name="title">The title to get the link text for.</param>
 		/// <param name="linkText">The text to use for the link.</param>
 		/// <returns>The current title, formatted as a link.</returns>
-		public static string AsLink(this ISimpleTitle title, string? linkText)
+		public static string AsLink(this SimpleTitle title, string? linkText)
 		{
 			var linkName = title.NotNull(nameof(title)).Namespace.LinkName;
 			StringBuilder sb = new(linkName.Length + 5 + (title.PageName.Length << 1));
@@ -104,28 +105,52 @@
 		/// <param name="title">The title to get the label name for.</param>
 		/// <returns>The text with the final paranthetical text removed.</returns>
 		[return: NotNullIfNotNull("title")]
-		public static string? LabelName(this ISimpleTitle? title) => title == null
+		public static string? LabelName(this SimpleTitle? title) => title == null
 			? null
 			: TitleFactory.LabelName(title.PageName);
+
+		/// <summary>Checks if the provided page name is equal to the title's page name, based on the case-sensitivity for the namespace.</summary>
+		/// <param name="title">The title to compare.</param>
+		/// <param name="other">The title to compare to.</param>
+		/// <returns><see langword="true" /> if the two page names are considered the same; otherwise <see langword="false" />.</returns>
+		/// <remarks>It is assumed that the namespace for the second page name is equal to the current one, or at least that they have the same case-sensitivy.</remarks>
+		public static bool PageNameEquals(this SimpleTitle title, string other) => PageNameEquals(title, other, true);
+
+		/// <summary>Checks if the provided page name is equal to the title's page name, based on the case-sensitivity for the namespace.</summary>
+		/// <param name="title">The title to compare.</param>
+		/// <param name="other">The page name to compare to.</param>
+		/// <param name="normalize">Inidicates whether the page names should be normalized before comparison.</param>
+		/// <returns><see langword="true" /> if the two page names are considered the same; otherwise <see langword="false" />.</returns>
+		/// <remarks>It is assumed that the namespace for the second page name is equal to the current one, or at least that they have the same case-sensitivy.</remarks>
+		public static bool PageNameEquals(this SimpleTitle title, string other, bool normalize)
+		{
+			title.ThrowNull(nameof(title));
+			if (normalize)
+			{
+				other = WikiTextUtilities.DecodeAndNormalize(other).Trim();
+			}
+
+			return title.Namespace.PageNameEquals(title.PageName, other, false);
+		}
 
 		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		/// <param name="title">The title to get the pipe-trick name for.</param>
 		/// <remarks>This doesn't precisely match the pipe trick logic - they differ in their handling of some abnormal page names. For example, with page names of "User:(Test)", ":(Test)", and "(Test)", the pipe trick gives "User:", ":", and "(Test)", respectively. Since this routine ignores the namespace completely and checks for empty return values, it returns "(Test)" consistently in all three cases.</remarks>
 		/// <returns>The text with the final paranthetical and/or comma-delimited text removed. Note: like the MediaWiki equivalent, when both are present, this will remove text of the form "(text), text", but text of the form ", text (text)" will become ", text".</returns>
 		[return: NotNullIfNotNull("title")]
-		public static string? PipeTrick(this ISimpleTitle? title) => title == null
+		public static string? PipeTrick(this SimpleTitle? title) => title == null
 			? null
 			: TitleFactory.PipeTrick(title.PageName);
-
-		/// <summary>Compares two <see cref="ISimpleTitle"/> objects for namespace and page name equality.</summary>
+/*
+		/// <summary>Compares two <see cref="SimpleTitle"/> objects for namespace and page name equality.</summary>
 		/// <param name="title">The title to check.</param>
 		/// <param name="other">The object to compare to.</param>
 		/// <returns><see langword="true"/> if the Namespace and PageName match, regardless of any other properties.</returns>
-		public static bool SimpleEquals(this ISimpleTitle title, ISimpleTitle other) =>
+		public static bool SimpleEquals(this SimpleTitle title, SimpleTitle other) =>
 			title == null ? other == null :
 			other != null &&
 			title.Namespace == other.Namespace &&
-			title.Namespace.PageNameEquals(title.PageName, other.PageName, false);
+			title.Namespace.PageNameEquals(title.PageName, other.PageName, false); */
 		#endregion
 	}
 }

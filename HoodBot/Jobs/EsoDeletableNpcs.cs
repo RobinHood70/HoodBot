@@ -50,7 +50,7 @@
 					npc = allNames.BinarySearch(labelName, StringComparer.Ordinal);
 					if (npc < 0)
 					{
-						Debug.WriteLine($"* [[{title.FullPageName()}|{labelName}]]");
+						Debug.WriteLine($"* [[{title.FullPageName}|{labelName}]]");
 					}
 				}
 			}

@@ -265,8 +265,8 @@
 			}
 
 			ContextualParser oldPage = new(page);
-			ContextualParser newPage = new(page);
-			List<SiteTemplateNode> skillSummaries = new(newPage.FindSiteTemplates(TemplateName));
+			ContextualParser parser = new(page);
+			List<SiteTemplateNode> skillSummaries = new(parser.FindSiteTemplates(TemplateName));
 			if (skillSummaries.Count != 1)
 			{
 				this.Warn("Incorrect number of {{" + TemplateName + "}} matches on " + skill.PageName);
@@ -303,19 +303,19 @@
 			template.Sort("titlename", "id", "id1", "id2", "id3", "id4", "id5", "id6", "id7", "id8", "id9", "id10", "line", "type", "icon", "icon2", "icon3", "desc", "desc1", "desc2", "desc3", "desc4", "desc5", "desc6", "desc7", "desc8", "desc9", "desc10", "linerank", "cost", "attrib", "casttime", "range", "radius", "duration", "channeltime", "target", "morph1name", "morph1id", "morph1icon", "morph1desc", "morph2name", "morph2id", "morph2icon", "morph2desc", "image", "imgdesc", "nocat", "notrail");
 
 			EsoReplacer replacer = new(this.Site);
-			var newLinks = replacer.CheckNewLinks(oldPage, newPage);
+			var newLinks = replacer.CheckNewLinks(oldPage, parser);
 			if (newLinks.Count > 0)
 			{
-				this.Warn(EsoReplacer.ConstructWarning(oldPage, newPage, newLinks, "links"));
+				this.Warn(EsoReplacer.ConstructWarning(oldPage, parser, newLinks, "links"));
 			}
 
-			var newTemplates = replacer.CheckNewTemplates(oldPage, newPage);
+			var newTemplates = replacer.CheckNewTemplates(oldPage, parser);
 			if (newTemplates.Count > 0)
 			{
-				this.Warn(EsoReplacer.ConstructWarning(oldPage, newPage, newTemplates, "templates"));
+				this.Warn(EsoReplacer.ConstructWarning(oldPage, parser, newTemplates, "templates"));
 			}
 
-			page.Text = newPage.ToRaw();
+			parser.UpdatePage();
 			return bigChange;
 		}
 		#endregion

@@ -39,6 +39,21 @@
 		/// <param name="includeHtmlEntities">if set to <see langword="true"/> also replaces <c>&amp;#32;</c>, <c>&amp;#x20;</c> and <c>&amp;nbsp;</c>.</param>
 		/// <returns>The provided text with anything resembling a space converted to a normal space.</returns>
 		public static string ReplaceTitleSpaces([Localizable(false)] string text, bool includeHtmlEntities) => (includeHtmlEntities ? SpaceTextHtml : TitleSpaceText).Replace(text, " ");
+
+		/// <summary>Normalizes a page name text for parsing. Page names coming directly from the API are already normalized.</summary>
+		/// <param name="text">The page name to normalize.</param>
+		/// <remarks>The following changes are applied:
+		/// <list type="bullet">
+		/// <item><description>All text after the first pipe (if any) is removed.</description></item>
+		/// <item><description>HTML- and URL-encoded characters are decoded.</description></item>
+		/// <item><description>Variants of the space character—such as hard spaces, em spaces, and underscores—are all converted to normal spaces.</description></item>
+		/// </list></remarks>
+		/// <returns>The normalized text, ready to be parsed.</returns>
+		public static string TrimToTitle(string text)
+		{
+			var retval = text.NotNull(nameof(text)).Split(TextArrays.Pipe, 2)[0];
+			return DecodeAndNormalize(retval).Trim();
+		}
 		#endregion
 	}
 }

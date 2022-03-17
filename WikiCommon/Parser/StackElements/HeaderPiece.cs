@@ -5,6 +5,5 @@
 		public int CommentEnd { get; set; } = -1;
 
 		public int VisualEnd { get; set; } = -1;
-
 	}
 }

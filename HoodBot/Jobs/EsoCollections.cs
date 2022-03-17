@@ -94,25 +94,6 @@
 			_ => category.TrimEnd('s'),
 		};
 
-		private static Page FindPage(PageCollection pages, CollectibleInfo newPage)
-		{
-			if ((pages.TryGetValue(newPage.DisambigName, out var page) && page.Exists) ||
-				(pages.TryGetValue(newPage.PageName, out page) && page.Exists))
-			{
-				ContextualParser parser = new(page);
-				if (parser.Has<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName)))
-				{
-					return page;
-				}
-			}
-
-			return
-				(pages.TryGetValue(newPage.PageName, out page) && (!page.Exists || page.IsRedirect)) ||
-				(pages.TryGetValue(newPage.DisambigName, out page) && (!page.Exists || page.IsRedirect))
-					? page
-					: throw new InvalidOperationException($"Both {newPage.PageName} and {newPage.DisambigName} are in use and not collectible pages.");
-		}
-
 		private static string GetLookupName(string catName, Section section)
 		{
 			var header = section.Header!;
@@ -167,9 +148,17 @@
 				.Trim();
 		}
 
-		private static void ParseCollectible(CollectibleInfo collectible, Page page)
+		private static ContextualParser? ParsablePage(Page page)
 		{
 			ContextualParser parser = new(page);
+			return parser.Has<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName))
+				? parser
+				: null;
+		}
+
+		private static void ParseCollectible(CollectibleInfo collectible, ContextualParser parser)
+		{
+			var page = parser.Page;
 			var templateIndex = parser.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals(TemplateName));
 			SiteTemplateNode template = (SiteTemplateNode)parser[templateIndex];
 			var removeParens = page.PageName.Split(" (", 2)[0];
@@ -224,7 +213,7 @@
 				parser.InsertRange(templateIndex + 1, collectible.NewContent);
 			}
 
-			page.Text = parser.ToRaw();
+			parser.UpdatePage();
 		}
 
 		private static string TrimHeader(SiteTemplateNode template) => template.TitleValue.PageName switch
@@ -242,6 +231,29 @@
 		#endregion
 
 		#region Private Methods
+
+		private ContextualParser? FindOrCreatePage(PageCollection pages, CollectibleInfo newPage)
+		{
+			pages.TryGetValue(newPage.DisambigName, out var page);
+			if (page is not null && page.Exists)
+			{
+				return ParsablePage(page) is ContextualParser parser
+					? parser
+					: null; // throw new InvalidOperationException($"{newPage.DisambigName} found, but no template on it.");
+			}
+
+			pages.TryGetValue(newPage.DisambigName, out page);
+			Debug.Assert(this.blankText != null, $"{nameof(this.blankText)} is null!");
+			return page switch
+			{
+				not null when page.Exists => ParsablePage(page) is ContextualParser parser
+				  ? parser
+				  : new ContextualParser(this.Site.CreatePage(newPage.DisambigName, this.blankText)),
+				not null when !page.Exists => new ContextualParser(page, this.blankText),
+				_ => throw new InvalidOperationException($"{newPage.PageName} found, but no template on it.")
+			};
+		}
+
 		private void GetCollectiblesFromDatabase()
 		{
 			var queryResults = DbCollectible.RunQuery();
@@ -325,23 +337,19 @@
 			var pages = this.GetSectionPages(collectibles);
 			foreach (var collectible in collectibles)
 			{
-				var newPage = FindPage(pages, collectible);
-				if (newPage.IsRedirect || !newPage.Exists)
+				if (this.FindOrCreatePage(pages, collectible) is ContextualParser parser)
 				{
-					newPage.Text = this.blankText;
-				}
-
-				ParseCollectible(collectible, newPage);
-				this.Pages.Add(newPage);
-
-				if (collectible.AssociatedSection.Header is IHeaderNode header)
-				{
-					var equalsSigns = new string('=', header.Level);
-					var title = header.Title;
-					title.Clear();
-					title.AddText(equalsSigns);
-					title.Add(title.Factory.LinkNodeFromParts(newPage.FullPageName, collectible.Name));
-					title.AddText(equalsSigns);
+					ParseCollectible(collectible, parser);
+					this.Pages.Add(parser.Page);
+					if (collectible.AssociatedSection.Header is IHeaderNode header)
+					{
+						var equalsSigns = new string('=', header.Level);
+						var title = header.Title;
+						title.Clear();
+						title.AddText(equalsSigns);
+						title.Add(title.Factory.LinkNodeFromParts(parser.Page.FullPageName, collectible.Name));
+						title.AddText(equalsSigns);
+					}
 				}
 			}
 		}
@@ -361,7 +369,7 @@
 			this.ReportNotFoundSections(page, sectionInfo.NotFound);
 			this.ParseCollectibles(sectionInfo.Collectibles);
 			parser.FromSections(sectionInfo.Sections);
-			page.Text = parser.ToRaw();
+			parser.UpdatePage();
 		}
 
 		private SectionInfo ParseSections(Page page, ContextualParser parser)
@@ -432,7 +440,9 @@
 			{
 				this.CollectibleType = dbData.Category;
 				this.Type = dbData.Subcategory;
-				this.PageName = "Online:" + dbData.Name;
+				this.PageName = Title.FromUnvalidated(site, UespNamespaces.Online, dbData.Name);
+				var disambig = $"{dbData.Name} ({CategorySingular(this.CollectibleType).ToLowerInvariant()})";
+				this.DisambigName = Title.FromUnvalidated(site, UespNamespaces.Online, disambig);
 				this.Description = dbData.Description;
 				this.Id = dbData.Id;
 				this.NickName = dbData.NickName;
@@ -534,7 +544,7 @@
 
 			public string Description { get; }
 
-			public string DisambigName => this.PageName + $" ({CategorySingular(this.CollectibleType).ToLowerInvariant()})";
+			public Title DisambigName { get; }
 
 			public string? Icon { get; }
 
@@ -550,7 +560,7 @@
 
 			public string NickName { get; }
 
-			public string PageName { get; }
+			public Title PageName { get; }
 
 			public SiteTemplateNode? Price { get; }
 
