@@ -60,7 +60,7 @@
 						parser.FindSiteTemplate("Online NPC Summary") is ITemplateNode template)
 					{
 						UpdateLocations(npc, template, parser.Factory, placeInfo);
-						page.Text = parser.ToRaw();
+						parser.UpdatePage();
 						this.Pages.Add(page);
 					}
 					else
@@ -210,8 +210,7 @@
 		#region Private Methods
 		private NpcCollection GetNpcPages()
 		{
-			Title NpcTitle(string pageName) => TitleFactory.Direct(this.Site, UespNamespaces.Online, pageName).ToTitle();
-
+			Title NpcTitle(string pageName) => Title.FromUnvalidated(this.Site, UespNamespaces.Online, pageName);
 			TitleCollection existingTitles = new(this.Site);
 			existingTitles.GetCategoryMembers("Online-NPCs", CategoryMemberTypes.Page, false);
 			existingTitles.GetCategoryMembers("Online-Creatures-All", CategoryMemberTypes.Page, false);
@@ -230,7 +229,7 @@
 			TitleCollection loadTitles = new(this.Site);
 			foreach (var npc in npcs)
 			{
-				ISimpleTitle title = NpcTitle(npc.Name);
+				SimpleTitle title = NpcTitle(npc.Name);
 				if (checkPages.TitleMap.TryGetValue(npc.Name, out var redirect))
 				{
 					npcRenames.Add(npc.Id, redirect.PageName);

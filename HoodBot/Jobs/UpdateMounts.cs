@@ -58,7 +58,7 @@
 				if (parser.FindSiteTemplate("Online Collectible Summary") is ITemplateNode template)
 				{
 					template.Update("id", id.ToStringInvariant());
-					page.Text = parser.ToRaw();
+					parser.UpdatePage();
 				}
 			}
 		}

@@ -21,7 +21,7 @@
 		{
 			if (this.Results is PageResultHandler results)
 			{
-				results.Page = TitleFactory.DirectNormalized(this.Site, MediaWikiNamespaces.User, "Kiz/Sandbox1").ToNewPage("{{#addtotrail:[[User:Kiz|Kiz]]: [[User:Kiz/Subpages|Subpages]]}}{{Notice|<onlyinclude>DBMerge - Outstanding Links</onlyinclude>}}\n----");
+				results.Page = this.Site.CreatePage(MediaWikiNamespaces.User, "Kiz/Sandbox1", "{{#addtotrail:[[User:Kiz|Kiz]]: [[User:Kiz/Subpages|Subpages]]}}{{Notice|<onlyinclude>DBMerge - Outstanding Links</onlyinclude>}}\n----");
 			}
 		}
 

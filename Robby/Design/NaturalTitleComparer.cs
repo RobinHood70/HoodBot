@@ -7,7 +7,7 @@
 
 	/// <summary>An ISimpleTitle comparer which sorts by namespace and page name.</summary>
 	/// <seealso cref="Comparer{T}" />
-	public sealed class NaturalTitleComparer : IComparer<ISimpleTitle>, IComparer
+	public sealed class NaturalTitleComparer : IComparer<SimpleTitle>, IComparer
 	{
 		#region Constructors
 		private NaturalTitleComparer()
@@ -29,7 +29,7 @@
 		/// <param name="x">The first object to compare.</param>
 		/// <param name="y">The second object to compare.</param>
 		/// <returns>A signed integer that indicates the relative values of <paramref name="x" /> and <paramref name="y" />.</returns>
-		public int Compare(ISimpleTitle? x, ISimpleTitle? y)
+		public int Compare(SimpleTitle? x, SimpleTitle? y)
 		{
 			if (x == null)
 			{
@@ -63,7 +63,7 @@
 				: NaturalSort.Compare(x.PageName.UpperFirst(siteCulture), y.PageName.UpperFirst(siteCulture), siteCulture, CompareOptions.IgnoreCase);
 		}
 
-		int IComparer.Compare(object? x, object? y) => this.Compare(x as ISimpleTitle, y as ISimpleTitle);
+		int IComparer.Compare(object? x, object? y) => this.Compare(x as SimpleTitle, y as SimpleTitle);
 		#endregion
 	}
 }

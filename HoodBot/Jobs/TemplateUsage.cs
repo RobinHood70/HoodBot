@@ -80,13 +80,13 @@
 			TitleCollection retval = new(titles.Site, titles);
 
 			// Loop until nothing new is added.
-			HashSet<ISimpleTitle> titlesToCheck = new(titles);
-			HashSet<ISimpleTitle> alreadyChecked = new();
+			HashSet<SimpleTitle> titlesToCheck = new(titles);
+			HashSet<SimpleTitle> alreadyChecked = new();
 			do
 			{
 				foreach (var title in titlesToCheck)
 				{
-					retval.GetBacklinks(title.FullPageName(), BacklinksTypes.Backlinks, true, Filter.Only);
+					retval.GetBacklinks(title.FullPageName, BacklinksTypes.Backlinks, true, Filter.Only);
 				}
 
 				alreadyChecked.UnionWith(titlesToCheck);
@@ -110,7 +110,7 @@
 		#endregion
 
 		#region Private Methods
-		private void ExportTemplates(IReadOnlyCollection<ISimpleTitle> allNames, PageCollection pages)
+		private void ExportTemplates(IReadOnlyCollection<SimpleTitle> allNames, PageCollection pages)
 		{
 			var templates = this.ExtractTemplates(allNames, pages);
 			if (templates.Count == 0)
@@ -131,9 +131,9 @@
 			}
 		}
 
-		private List<(ISimpleTitle Page, ITemplateNode Template)> ExtractTemplates(IReadOnlyCollection<ISimpleTitle> allNames, PageCollection pages)
+		private List<(SimpleTitle Page, ITemplateNode Template)> ExtractTemplates(IReadOnlyCollection<SimpleTitle> allNames, PageCollection pages)
 		{
-			List<(ISimpleTitle Page, ITemplateNode Template)> templates = new();
+			List<(SimpleTitle Page, ITemplateNode Template)> templates = new();
 			Dictionary<string, string> paramTranslator = new(StringComparer.Ordinal); // TODO: Empty dictionary for now, but could be pre-populated to translate synonyms to a consistent name. Similarly, name comparison can be case-sensitive or not. Need to find a useful way to do those.
 			foreach (var page in pages)
 			{
@@ -157,7 +157,7 @@
 			return templates;
 		}
 
-		private void WriteFile(List<(ISimpleTitle Page, ITemplateNode Template)> results, string location)
+		private void WriteFile(List<(SimpleTitle Page, ITemplateNode Template)> results, string location)
 		{
 			CsvFile csvFile = new() { EmptyFieldText = " " };
 			List<string> output = new(this.headerOrder.Count + 2)
@@ -170,7 +170,7 @@
 
 			foreach (var template in results)
 			{
-				var row = csvFile.Add(template.Page.FullPageName(), template.Template.GetTitleText());
+				var row = csvFile.Add(template.Page.FullPageName, template.Template.GetTitleText());
 				foreach (var (name, parameter) in template.Template.GetResolvedParameters())
 				{
 					// For now, we're assuming that trimming trailing lines from anon parameters is desirable, but could be made optional if needed.

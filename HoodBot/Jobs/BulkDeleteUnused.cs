@@ -26,8 +26,9 @@
 		#region Protected Override Methods
 		protected override void Main()
 		{
-			foreach (var title in this.deleteTitles)
+			foreach (var simpleTitle in this.deleteTitles)
 			{
+				Title title = Title.FromValidated(simpleTitle.Namespace, simpleTitle.PageName);
 				title.Delete("Unused audio file.");
 				this.Progress++;
 			}

@@ -2,19 +2,20 @@
 {
 	using System;
 	using RobinHood70.CommonCode;
+	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
 	// TODO: Review constructors for various title objects.
 
 	/// <summary>Splits a page name into its constituent parts.</summary>
-	public class FullTitle : Title, IFullTitle
+	public class FullTitle : SimpleTitle, IFullTitle
 	{
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
 		/// <param name="title">The <see cref="IFullTitle"/> with the desired information.</param>
 		public FullTitle(IFullTitle title)
-			: base(title)
+			: base(title.NotNull(nameof(title)).Namespace, title.PageName)
 		{
 			this.Fragment = title.Fragment;
 			this.Interwiki = title.Interwiki;
@@ -44,21 +45,21 @@
 		/// <param name="pageName">The page name. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
 		/// <returns>A new LinkTitle with the namespace found in <paramref name="pageName"/>, if there is one, otherwise using <paramref name="defaultNamespace"/>.</returns>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		public static new FullTitle Coerce(Site site, int defaultNamespace, string pageName) => TitleFactory.FromName(site.NotNull(nameof(site)), defaultNamespace, pageName.NotNull(nameof(pageName))).ToFullTitle();
+		public static FullTitle Coerce(Site site, int defaultNamespace, string pageName) => TitleFactory.FromName(site.NotNull(nameof(site)), defaultNamespace, pageName.NotNull(nameof(pageName))).ToFullTitle();
 
 		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
 		/// <param name="site">The site the title is from.</param>
 		/// <param name="node">The <see cref="IBacklinkNode"/> to parse.</param>
 		/// <returns>A new FullTitle based on the provided values.</returns>
-		public static new FullTitle FromBacklinkNode(Site site, IBacklinkNode node) => TitleFactory.FromName(site.NotNull(nameof(site)), node.NotNull(nameof(node)).GetTitleText()).ToFullTitle();
+		public static FullTitle FromBacklinkNode(Site site, IBacklinkNode node) => TitleFactory.Create(site.NotNull(nameof(site)), MediaWikiNamespaces.Main, node.NotNull(nameof(node)).GetTitleText()).ToFullTitle();
 		#endregion
 
 		#region Public Methods
 
 		/// <summary>Deconstructs this instance into its constituent parts.</summary>
 		/// <param name="interwiki">The value returned by <see cref="Interwiki"/>.</param>
-		/// <param name="ns">The value returned by <see cref="ISimpleTitle.Namespace"/>.</param>
-		/// <param name="pageName">The value returned by <see cref="ISimpleTitle.PageName"/>.</param>
+		/// <param name="ns">The value returned by <see cref="SimpleTitle.Namespace"/>.</param>
+		/// <param name="pageName">The value returned by <see cref="SimpleTitle.PageName"/>.</param>
 		/// <param name="fragment">The value returned by <see cref="Fragment"/>.</param>
 		public void Deconstruct(out InterwikiEntry? interwiki, out Namespace ns, out string pageName, out string? fragment)
 		{

@@ -16,10 +16,10 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="VariablesPage"/> class.</summary>
-		/// <param name="title">The <see cref="ISimpleTitle"/> to copy values from.</param>
+		/// <param name="title">The <see cref="SimpleTitle"/> to copy values from.</param>
 		/// <param name="options">The load options used for this page. Can be used to detect if default-valued information is legitimate or was never loaded.</param>
 		/// <param name="apiItem">The API item to extract information from.</param>
-		public VariablesPage(ISimpleTitle title, PageLoadOptions options, IApiTitle? apiItem)
+		public VariablesPage(SimpleTitle title, PageLoadOptions options, IApiTitle? apiItem)
 			: base(title, options, apiItem)
 		{
 			if (apiItem is VariablesPageItem varItem)

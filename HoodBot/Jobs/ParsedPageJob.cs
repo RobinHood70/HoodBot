@@ -53,9 +53,9 @@
 
 		protected virtual void ResultsPageLoaded(object sender, Page page)
 		{
-			ContextualParser parsedPage = new(page);
-			this.ParseText(sender, parsedPage);
-			page.Text = parsedPage.ToRaw();
+			ContextualParser parser = new(page);
+			this.ParseText(sender, parser);
+			parser.UpdatePage();
 		}
 		#endregion
 	}

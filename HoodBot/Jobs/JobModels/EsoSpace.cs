@@ -66,7 +66,7 @@
 					if (retval[mappedName.Value.PageName] is Place place)
 					{
 						// In an ideal world, this would be a direct reference to the same place, rather than a copy, but that ends up being a lot of work for very little gain.
-						var key = TitleFactory.FromName(site, mappedName.Key).PageName;
+						var key = Title.FromUnvalidated(site, mappedName.Key).PageName;
 						retval.Add(Place.Copy(key, place));
 					}
 				}
@@ -97,7 +97,7 @@
 			{
 				param.Value.Clear();
 				param.Value.AddText(GetPatchVersion(job) + '\n');
-				patchPage.Text = parser.ToRaw();
+				parser.UpdatePage();
 				patchPage.Save("Update " + paramName, true);
 			}
 		}

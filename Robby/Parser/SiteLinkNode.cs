@@ -2,7 +2,7 @@
 {
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
-	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon.Parser.Basic;
 
@@ -20,7 +20,7 @@
 		public SiteLinkNode(SiteNodeFactory nodeFactory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters)
 			: base(nodeFactory, title, parameters)
 		{
-			this.TitleValue = TitleFactory.FromName(nodeFactory.NotNull(nameof(nodeFactory)).Site, this.GetTitleText()).ToTitle();
+			this.TitleValue = Robby.Title.FromUnvalidated(nodeFactory.NotNull(nameof(nodeFactory)).Site, this.GetTitleText());
 		}
 		#endregion
 

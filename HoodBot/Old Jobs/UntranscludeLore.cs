@@ -197,7 +197,7 @@
 				return node;
 			}
 
-			return this.noTransclusions && linkTitle.SimpleEquals(this.currentPage)
+			return this.noTransclusions && linkTitle == (this.currentPage)
 				? new TextNode($"'''{display}'''")
 				: LinkNode.FromParts(linkPage.FullPageName, display) as IWikiNode;
 		}
@@ -284,7 +284,7 @@
 			this.linkedNamespaces = new HashSet<int>();
 			foreach (var linkedPage in page.TranscludedIn)
 			{
-				if (!linkedPage.SimpleEquals(page))
+				if (!linkedPage == (page))
 				{
 					if (this.currentPage.NamespaceId != UespNamespaces.Lore || !this.gamePages.Contains(linkedPage))
 					{

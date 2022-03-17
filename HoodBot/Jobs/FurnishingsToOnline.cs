@@ -46,7 +46,7 @@
 
 		#region Fields
 		private readonly PageCollection filePages;
-		private readonly Dictionary<ISimpleTitle, string> nameLookup = new(SimpleTitleComparer.Instance);
+		private readonly Dictionary<SimpleTitle, string> nameLookup = new(SimpleTitleComparer.Instance);
 		#endregion
 
 		#region Constructors
@@ -65,7 +65,7 @@
 			TitleCollection oldTitles = new(this.Site, this.Pages);
 			oldTitles.GetBacklinks("Template:Furnishing Summary", BacklinksTypes.EmbeddedIn);
 			TitleCollection newTitles = new(this.Site);
-			Dictionary<ISimpleTitle, ISimpleTitle>? reverse = new();
+			Dictionary<SimpleTitle, SimpleTitle>? reverse = new();
 			foreach (var title in oldTitles)
 			{
 				var pageName = title.PageName
@@ -76,11 +76,11 @@
 					.Replace(".png", string.Empty, StringComparison.Ordinal);
 				if (pageName.EndsWith(')'))
 				{
-					Debug.WriteLine("Disambiguation: " + title.FullPageName());
+					Debug.WriteLine("Disambiguation: " + title.FullPageName);
 				}
 
 				this.nameLookup.Add(title, pageName);
-				Title? newTitle = Title.Coerce(this.Site, UespNamespaces.Online, pageName);
+				Title? newTitle = Title.FromUnvalidated(this.Site, UespNamespaces.Online, pageName);
 				newTitles.Add(newTitle);
 				reverse.Add(newTitle, title);
 			}
@@ -371,7 +371,7 @@
 
 				var pageName = this.nameLookup[page];
 				File.AppendAllText(UespSite.GetBotDataFolder("Furnishing Moves.txt"), $"{page.FullPageName}\t{pageName}\t{WikiTextVisitor.Raw(originalTemplate)}~\n");
-				var newPage = TitleFactory.DirectNormalized(this.Site, UespNamespaces.Online, pageName).ToNewPage(parser.ToRaw());
+				var newPage = this.Site.CreatePage(UespNamespaces.Online, pageName, parser.ToRaw());
 				this.Pages.Add(newPage);
 			}
 		}

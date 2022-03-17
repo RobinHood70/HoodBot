@@ -182,14 +182,14 @@
 
 		#region Protected Methods
 		protected void AddReplacement(string from, string to) => this.AddReplacement(
-			TitleFactory.FromName(this.Site, from).ToTitle(),
-			TitleFactory.FromName(this.Site, to).ToTitle());
+			Title.FromUnvalidated(this.Site, from),
+			Title.FromUnvalidated(this.Site, to));
 
 		protected void AddReplacement(Title from, Title to) => this.replacements.Add(new Replacement(from, to));
 
 		protected void AddReplacement(string from, string to, ReplacementActions initialActions) => this.AddReplacement(
-			TitleFactory.FromName(this.Site, from).ToTitle(),
-			TitleFactory.FromName(this.Site, to).ToTitle(),
+			Title.FromUnvalidated(this.Site, from),
+			Title.FromUnvalidated(this.Site, to),
 			initialActions);
 
 		protected void AddReplacement(Title from, Title to, ReplacementActions initialActions) => this.replacements.Add(new Replacement(from, to, new Replacement.DetailedActions(initialActions)));
@@ -274,7 +274,7 @@
 		#endregion
 
 		#region Protected Virtual Methods
-		protected virtual void BacklinkPageLoaded(ContextualParser parser) => this.ReplaceBacklinks((Page)parser.NotNull(nameof(parser)).Title, parser); // TODO: See if this can be re-written with ContextualParser methods.
+		protected virtual void BacklinkPageLoaded(ContextualParser parser) => this.ReplaceBacklinks(parser.NotNull(nameof(parser)).Page, parser); // TODO: See if this can be re-written with ContextualParser methods.
 
 		protected virtual void CheckRemaining()
 		{
@@ -292,7 +292,7 @@
 			{
 				foreach (var backlink in page.Backlinks)
 				{
-					if (!page.SimpleEquals(backlink.Key))
+					if (!page.Equals(backlink.Key))
 					{
 						leftovers.Add(page);
 					}
@@ -316,7 +316,7 @@
 
 		protected virtual void EditPageLoaded(ContextualParser parser, Replacement replacement)
 		{
-			Page page = (Page)parser.Title;
+			var page = parser.Page;
 			var moveActions = replacement.MoveActions.NotNull(nameof(replacement), nameof(replacement.MoveActions));
 			if (page.Exists &&
 				(this.FollowUpActions & FollowUpActions.ProposeUnused) != 0 &&
@@ -406,17 +406,17 @@
 			FilterTemplatesExceptDocs(titles);
 		}
 
-		protected virtual IReadOnlyDictionary<ISimpleTitle, TitleCollection> GetCategoryMembers(PageCollection fromPages)
+		protected virtual IReadOnlyDictionary<SimpleTitle, TitleCollection> GetCategoryMembers(PageCollection fromPages)
 		{
 			this.StatusWriteLine("Getting category members");
-			Dictionary<ISimpleTitle, TitleCollection> retval = new();
+			Dictionary<SimpleTitle, TitleCollection> retval = new();
 			if ((this.FollowUpActions & FollowUpActions.NeedsCategoryMembers) != 0)
 			{
 				var skipCats = (this.FollowUpActions & FollowUpActions.NeedsCategoryMembers) == 0;
 				var categoryReplacements = new List<Replacement>(this.replacements).FindAll(replacement => replacement.From.Namespace == MediaWikiNamespaces.Category);
 				if (skipCats || categoryReplacements.Count == 0)
 				{
-					return ImmutableDictionary<ISimpleTitle, TitleCollection>.Empty;
+					return ImmutableDictionary<SimpleTitle, TitleCollection>.Empty;
 				}
 
 				this.ResetProgress(categoryReplacements.Count);
@@ -529,7 +529,7 @@
 			}
 		}
 
-		protected virtual void SetupProposedDeletions(PageCollection pageInfo, IReadOnlyDictionary<ISimpleTitle, TitleCollection> catMembers)
+		protected virtual void SetupProposedDeletions(PageCollection pageInfo, IReadOnlyDictionary<SimpleTitle, TitleCollection> catMembers)
 		{
 			if ((this.FollowUpActions & FollowUpActions.ProposeUnused) == 0)
 			{
@@ -540,7 +540,7 @@
 			TitleCollection doNotDelete = new(this.Site);
 			foreach (var template in this.Site.DeletePreventionTemplates)
 			{
-				doNotDelete.GetBacklinks(template.FullPageName(), BacklinksTypes.EmbeddedIn, true);
+				doNotDelete.GetBacklinks(template.FullPageName, BacklinksTypes.EmbeddedIn, true);
 			}
 
 			foreach (var replacement in this.replacements)
@@ -592,13 +592,13 @@
 						{
 							if (replacement.To.Namespace != MediaWikiNamespaces.File)
 							{
-								this.Warn($"{replacement.From.PageName} to non-File {replacement.From.FullPageName()} move skipped in gallery on page: {page.FullPageName}.");
+								this.Warn($"{replacement.From.PageName} to non-File {replacement.From.FullPageName} move skipped in gallery on page: {page.FullPageName}.");
 								continue;
 							}
 
 							var newPageName = replacement.To.PageName;
 							var newNamespace = (replacement.From.Namespace == replacement.To.Namespace && link.Coerced) ? this.Site[MediaWikiNamespaces.Main] : replacement.To.Namespace;
-							TitleFactory? newTitle = TitleFactory.DirectNormalized(newNamespace, newPageName);
+							Title? newTitle = Title.FromValidated(newNamespace, newPageName);
 							var newLink = link.With(newTitle);
 							this.UpdateLinkText(page, replacement.From, newLink, false);
 							newLine = newLink.ToString()[2..^2].TrimEnd();
@@ -639,11 +639,11 @@
 
 			if (link.Namespace == MediaWikiNamespaces.Media)
 			{
-				Title? key = TitleFactory.DirectNormalized(this.Site, MediaWikiNamespaces.File, link.PageName).ToTitle();
+				Title? key = Title.FromValidated(this.Site, MediaWikiNamespaces.File, link.PageName);
 				if (this.replacements.TryGetValue(link.With(key), out replacement) &&
 					replacement.MoveActions.HasAction(ReplacementActions.UpdateLinks))
 				{
-					TitleFactory? newtitle = TitleFactory.DirectNormalized(this.Site, MediaWikiNamespaces.Media, replacement.To.PageName);
+					Title? newtitle = Title.FromValidated(this.Site, MediaWikiNamespaces.Media, replacement.To.PageName);
 					link = link.With(newtitle);
 					this.UpdateLinkText(page, replacement.From, link, !isRedirectTarget);
 					link.UpdateLinkNode(node);
@@ -651,7 +651,7 @@
 			}
 		}
 
-		protected virtual void UpdateLinkText(Page page, ISimpleTitle oldTitle, SiteLink newLink, bool addCaption)
+		protected virtual void UpdateLinkText(Page page, SimpleTitle oldTitle, SiteLink newLink, bool addCaption)
 		{
 			page.ThrowNull(nameof(page));
 			oldTitle.ThrowNull(nameof(oldTitle));
@@ -663,12 +663,12 @@
 					&& page.Namespace != MediaWikiNamespaces.User
 					&& !page.Site.IsDiscussionPage(page))
 				{
-					TitleFactory? textTitle = TitleFactory.FromName(this.Site, newLink.Text);
+					TitleFactory textTitle = TitleFactory.Create(this.Site, MediaWikiNamespaces.Main, newLink.Text);
 					if (oldTitle is IFullTitle fullTitle && fullTitle.FullEquals(textTitle))
 					{
 						newLink.Text = textTitle.ToString();
 					}
-					else if (oldTitle.SimpleEquals(textTitle))
+					else if (oldTitle.Equals(textTitle))
 					{
 						var simp = this.replacements[oldTitle].To;
 						newLink.Text = simp.ToString();
@@ -724,7 +724,7 @@
 			deletionText.ThrowNull(nameof(deletionText));
 
 			// Cheating and using text throughout, since this does not need to be parsed or acted upon currently, and is likely to be moved to another job soon anyway.
-			Page? page = (Page)parser.NotNull(nameof(parser)).Title;
+			var page = parser.NotNull(nameof(parser)).Page;
 			var noinclude = page.Namespace == MediaWikiNamespaces.Template;
 			if (!noinclude)
 			{
@@ -760,7 +760,7 @@
 		#endregion
 
 		#region Private Methods
-		private void AddCategoryMembers(IReadOnlyDictionary<ISimpleTitle, TitleCollection> categoryMembers, TitleCollection backlinkTitles)
+		private void AddCategoryMembers(IReadOnlyDictionary<SimpleTitle, TitleCollection> categoryMembers, TitleCollection backlinkTitles)
 		{
 			foreach (var replacement in this.replacements)
 			{
@@ -783,7 +783,7 @@
 			}
 
 			this.BacklinkPageLoaded(parser);
-			page.Text = parser.ToRaw();
+			parser.UpdatePage();
 		}
 
 		private TitleCollection GetBacklinkTitles(PageCollection pageInfo)
@@ -825,7 +825,7 @@
 			return retval;
 		}
 
-		private TitleCollection GetLoadTitles(PageCollection fromPages, IReadOnlyDictionary<ISimpleTitle, TitleCollection> categoryMembers)
+		private TitleCollection GetLoadTitles(PageCollection fromPages, IReadOnlyDictionary<SimpleTitle, TitleCollection> categoryMembers)
 		{
 			TitleCollection loadTitles = new(this.Site);
 			if ((this.FollowUpActions & FollowUpActions.AffectsBacklinks) != 0)
@@ -932,15 +932,15 @@
 				if (replacement.MoveActions.HasAction(ReplacementActions.Move) &&
 					replacement.From.SimpleEquals(replacement.To))
 				{
-					this.Warn($"From and To pages cannot be the same: {replacement.From.FullPageName()} = {replacement.To.FullPageName}");
+					this.Warn($"From and To pages cannot be the same: {replacement.From.FullPageName} = {replacement.To.FullPageName}");
 					inPlaceMoves = true;
 				}
 
 				if (unique.TryGetValue(replacement.To, out var existing))
 				{
 					this.Warn("Duplicate To page. All related entries will be skipped.");
-					this.Warn($"  Original: {existing.From.FullPageName()} => {existing.To.FullPageName}");
-					this.Warn($"  Second  : {replacement.From.FullPageName()} => {replacement.To.FullPageName}");
+					this.Warn($"  Original: {existing.From.FullPageName} => {existing.To.FullPageName}");
+					this.Warn($"  Second  : {replacement.From.FullPageName} => {replacement.To.FullPageName}");
 					existing.SetMoveActions(ReplacementActions.Skip, "duplicate To page");
 					replacement.SetMoveActions(ReplacementActions.Skip, "duplicate To page");
 				}

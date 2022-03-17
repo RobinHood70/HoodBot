@@ -10,8 +10,8 @@
 	using RobinHood70.WikiCommon;
 
 	/// <summary>Represents a wiki page.</summary>
-	/// <seealso cref="Title" />
-	public class Page : Title
+	/// <seealso cref="SimpleTitle" />
+	public class Page : SimpleTitle
 	{
 		#region Fields
 		private Uri? canonicalPath;
@@ -23,10 +23,10 @@
 		#region Constructors
 
 		/// <summary>Initializes a new instance of the <see cref="Page"/> class.</summary>
-		/// <param name="title">The <see cref="ISimpleTitle"/> to copy values from.</param>
+		/// <param name="title">The <see cref="SimpleTitle"/> to copy values from.</param>
 		/// <param name="options">The load options used for this page. Can be used to detect if default-valued information is legitimate or was never loaded.</param>
 		/// <param name="apiItem">The API item to extract information from.</param>
-		protected internal Page([NotNull, ValidatedNotNull] ISimpleTitle title, PageLoadOptions options, IApiTitle? apiItem)
+		protected internal Page([NotNull, ValidatedNotNull] SimpleTitle title, PageLoadOptions options, IApiTitle? apiItem)
 			: base(title)
 		{
 			// TODO: This should probably be re-written as some kind of inheritance thing, but I'm not qute sure how that would work and it's not the priority right now.
@@ -72,7 +72,7 @@
 			{
 				foreach (var link in list)
 				{
-					Title? title = TitleFactory.FromApi(this.Site, link).ToTitle();
+					Title title = Title.FromValidated(this.Site, link.FullPageName.NotNull(nameof(link), nameof(link.FullPageName)));
 					if (backlinks.ContainsKey(title))
 					{
 						backlinks[title] |= type;
@@ -90,7 +90,7 @@
 				categories.Clear();
 				foreach (var category in pageItem.Categories)
 				{
-					TitleFactory? factory = TitleFactory.FromName(this.Site, category.FullPageName);
+					Title factory = Title.FromValidated(this.Site, category.FullPageName);
 					categories.Add(new Category(factory, category.SortKey, category.Hidden));
 				}
 			}
@@ -131,7 +131,7 @@
 				links.Clear();
 				foreach (var link in pageItem.Links)
 				{
-					links.Add(TitleFactory.FromApi(this.Site, link).ToTitle());
+					links.Add(Title.FromValidated(this.Site, link.FullPageName));
 				}
 			}
 
@@ -159,11 +159,11 @@
 
 			void PopulateTemplates(PageItem pageItem)
 			{
-				List<Title>? templates = (List<Title>)this.Templates;
+				List<Title> templates = (List<Title>)this.Templates;
 				templates.Clear();
 				foreach (var link in pageItem.Templates)
 				{
-					templates.Add(TitleFactory.FromApi(this.Site, link).ToTitle());
+					templates.Add(Title.FromValidated(this.Site, link.FullPageName));
 				}
 			}
 		}
@@ -232,7 +232,7 @@
 					return null;
 				}
 
-				HashSet<ISimpleTitle> templates = new(this.Templates);
+				HashSet<SimpleTitle> templates = new(this.Templates);
 				templates.IntersectWith(this.Site.DisambiguationTemplates);
 
 				return templates.Count > 0;

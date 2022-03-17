@@ -32,7 +32,7 @@
 		public PageJobLogger(Site site, string pageName, JobTypes typesToLog)
 			: base(typesToLog)
 		{
-			this.logTitle = TitleFactory.FromName(site.NotNull(nameof(site)), pageName.NotNull(nameof(pageName))).ToTitle();
+			this.logTitle = Title.FromUnvalidated(site.NotNull(nameof(site)), pageName.NotNull(nameof(pageName)));
 		}
 		#endregion
 
@@ -112,7 +112,7 @@
 				throw BadLogPage;
 			}
 
-			SiteTemplateNode? entry = (SiteTemplateNode)parser[firstEntry];
+			SiteTemplateNode entry = (SiteTemplateNode)parser[firstEntry];
 			if (
 				this.end == null &&
 				sameTaskText &&
@@ -131,7 +131,7 @@
 				{
 					var endParam = factory.ParameterNodeFromParts(FormatDateTime(DateTime.UtcNow));
 					entry.Parameters.Insert(startParam + 1, endParam);
-					this.logPage.Text = parser.ToRaw();
+					parser.UpdatePage();
 					return;
 				}
 			}
@@ -151,7 +151,7 @@
 						factory.TextNode("\n")
 			});
 
-			this.logPage.Text = parser.ToRaw();
+			parser.UpdatePage();
 		}
 
 		private void SaveLogPage(string editSummary, Action editConflictAction)

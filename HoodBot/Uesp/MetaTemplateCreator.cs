@@ -30,7 +30,7 @@
 		#region Public Override Methods
 
 		/// <inheritdoc/>
-		public override Page CreatePage(ISimpleTitle title, PageLoadOptions options, IApiTitle? apiItem) => this.GameSpaceOnly && title.NotNull(nameof(title)).Namespace.Id < 100
+		public override Page CreatePage(SimpleTitle title, PageLoadOptions options, IApiTitle? apiItem) => this.GameSpaceOnly && title.NotNull(nameof(title)).Namespace.Id < 100
 				? this.FallbackCreator.CreatePage(title, options, apiItem)
 				: new VariablesPage(title, options, apiItem);
 

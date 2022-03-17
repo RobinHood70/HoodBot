@@ -91,7 +91,7 @@
 
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
-			Page title = (Page)parsedPage.Title;
+			var title = parsedPage.Page;
 			if (parsedPage.FindSiteTemplate("Online Furnishing Summary") is SiteTemplateNode template)
 			{
 				if (this.DoPageChecks(template, title) is string pageMessage)
@@ -115,7 +115,7 @@
 			var name = template.GetValue("name") ?? page.LabelName();
 			var fileName = template.GetValue("image") ?? (prefix + name + ".jpg");
 			var fileNameFix = prefix + name.Replace(":", RemoveColons ? string.Empty : ",", StringComparison.Ordinal) + ".jpg";
-			TitleFactory fileTitle = TitleFactory.Direct(this.Site, MediaWikiNamespaces.File, fileName);
+			Title? fileTitle = Title.FromUnvalidated(this.Site, MediaWikiNamespaces.File, fileName);
 			var fixMatch = string.Equals(fileName, fileNameFix, StringComparison.Ordinal);
 			return fixMatch
 				? null

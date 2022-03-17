@@ -46,7 +46,7 @@
 					this.ParseTemplate(template, parser);
 				}
 
-				page.Text = parser.ToRaw();
+				parser.UpdatePage();
 			}
 
 			TitleCollection uespImageTitles = new(this.Site);

@@ -154,14 +154,13 @@
 		private void LoreBookEntries_PageLoaded(object sender, Page page)
 		{
 			ContextualParser parser = new(page);
-			var nodes = parser;
-			var factory = nodes.Factory;
-			var first = nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
-			var last = nodes.FindLastIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
+			var factory = parser.Factory;
+			var first = parser.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
+			var last = parser.FindLastIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
 			if (first != -1)
 			{
 				List<IWikiNode> newNodes = new();
-				nodes.RemoveRange(first, last + 1 - first);
+				parser.RemoveRange(first, last + 1 - first);
 				var letter = page.PageName[6..];
 				var entries = this.pageBooks[letter];
 				foreach (var entry in entries)
@@ -181,8 +180,8 @@
 					newNodes.RemoveAt(newNodes.Count - 1);
 				}
 
-				nodes.InsertRange(first, newNodes);
-				page.Text = parser.ToRaw();
+				parser.InsertRange(first, newNodes);
+				parser.UpdatePage();
 			}
 			else
 			{

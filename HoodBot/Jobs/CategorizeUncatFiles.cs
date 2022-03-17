@@ -64,7 +64,7 @@
 				}
 			}
 
-			if (this.CategoryFromName(parser.Title.PageName) is string cat)
+			if (this.CategoryFromName(parser.Page.PageName) is string cat)
 			{
 				if (!headerFound)
 				{

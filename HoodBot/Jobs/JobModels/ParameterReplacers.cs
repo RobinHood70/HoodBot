@@ -20,7 +20,7 @@
 		private readonly MovePagesJob job;
 		private readonly List<ParameterReplacer> generalReplacers = new();
 		private readonly ReplacementCollection replacements;
-		private readonly Dictionary<ISimpleTitle, List<ParameterReplacer>> templateReplacers = new(SimpleTitleComparer.Instance);
+		private readonly Dictionary<SimpleTitle, List<ParameterReplacer>> templateReplacers = new(SimpleTitleComparer.Instance);
 		private UespNamespaceList? nsList;
 		#endregion
 
@@ -49,7 +49,7 @@
 
 		public void AddTemplateReplacers(string name, params ParameterReplacer[] replacers)
 		{
-			Title? title = Title.Coerce(this.job.Site, MediaWikiNamespaces.Template, name);
+			Title? title = Title.FromUnvalidated(this.job.Site, MediaWikiNamespaces.Template, name);
 			if (!this.templateReplacers.TryGetValue(title, out var currentReplacers))
 			{
 				currentReplacers = new List<ParameterReplacer>();
@@ -105,7 +105,7 @@
 			}
 
 			var oldTitle = link.Value.ToValue();
-			Title? searchTitle = TitleFactory.FromName(page.Site, oldNs.Full + oldTitle).ToTitle();
+			Title? searchTitle = Title.FromUnvalidated(page.Site, oldNs.Full + oldTitle);
 			if (!this.replacements.TryGetValue(searchTitle, out var replacement))
 			{
 				return;
@@ -170,7 +170,7 @@
 			}
 
 			var iconName = UespFunctions.IconAbbreviation(oldNs.Id, template);
-			TitleFactory title = TitleFactory.Direct(this.job.Site, MediaWikiNamespaces.File, iconName);
+			Title? title = Title.FromUnvalidated(this.job.Site, MediaWikiNamespaces.File, iconName);
 			if (this.replacements.TryGetValue(title, out var replacement))
 			{
 				var (_, abbr, name, _) = UespFunctions.AbbreviationFromIconName(this.NamespaceList, replacement.To.PageName);
@@ -224,11 +224,11 @@
 		{
 			page.ThrowNull(nameof(page));
 			if (param != null
-				&& TitleFactory.FromName(page.Site, param.Value.ToValue()).ToTitle() is var title
+				&& Title.FromUnvalidated(page.Site, param.Value.ToValue()) is var title
 				&& this.replacements.TryGetValue(title, out var replacement)
-				&& replacement.To is ISimpleTitle toLink)
+				&& replacement.To is SimpleTitle toLink)
 			{
-				param.SetValue(toLink.FullPageName());
+				param.SetValue(toLink.FullPageName);
 			}
 		}
 
@@ -237,18 +237,18 @@
 			if (param != null)
 			{
 				var name = "ON-furnishing-" + param.Value.ToValue() + ".jpg";
-				if (TitleFactory.Direct(this.job.Site, MediaWikiNamespaces.File, name).ToTitle() is var title
+				if (Title.FromUnvalidated(this.job.Site, MediaWikiNamespaces.File, name) is var title
 					&& this.replacements.TryGetValue(title, out var replacement)
-					&& replacement.To is ISimpleTitle toLink)
+					&& replacement.To is SimpleTitle toLink)
 				{
 					param.SetValue(toLink.PageName);
 					return;
 				}
 
 				name = "ON-item-furnishing-" + param.Value.ToValue() + ".jpg";
-				if (TitleFactory.Direct(this.job.Site, MediaWikiNamespaces.File, name).ToTitle() is var title2
+				if (Title.FromUnvalidated(this.job.Site, MediaWikiNamespaces.File, name) is var title2
 					&& this.replacements.TryGetValue(title2, out var replacement2)
-					&& replacement2.To is ISimpleTitle toLink2)
+					&& replacement2.To is SimpleTitle toLink2)
 				{
 					param.SetValue(toLink2.PageName);
 				}
@@ -269,9 +269,9 @@
 		{
 			foreach (var (_, param) in template.GetNumericParameters())
 			{
-				if (TitleFactory.FromName(page.Site, page.Namespace.Id, param.Value.ToValue()).ToTitle() is var title
+				if (Title.FromUnvalidated(page.Site, page.Namespace.Id, param.Value.ToValue()) is var title
 					&& this.replacements.TryGetValue(title, out var replacement)
-					&& replacement.To is ISimpleTitle toLink
+					&& replacement.To is SimpleTitle toLink
 					&& replacement.From.Namespace.Id == toLink.Namespace.Id)
 				{
 					param.SetValue(toLink.PageName);
@@ -282,7 +282,7 @@
 		private void PageNameReplace(IParameterNode? param, int ns)
 		{
 			if (param != null
-				&& TitleFactory.Direct(this.job.Site, ns, param.Value.ToValue()).ToTitle() is var title
+				&& Title.FromUnvalidated(this.job.Site, ns, param.Value.ToValue()) is var title
 				&& this.replacements.TryGetValue(title, out var replacement)
 				&& replacement.To.Namespace == ns)
 			{

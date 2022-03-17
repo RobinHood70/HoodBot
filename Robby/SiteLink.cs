@@ -302,7 +302,7 @@
 		/// <param name="pageName">The page name to link to. If a namespace is present, it will override <paramref name="defaultNamespace"/>.</param>
 		/// <returns>A new <see cref="SiteLink"/> with the namespace found in <paramref name="pageName"/>, if there is one, otherwise using <paramref name="defaultNamespace"/>.</returns>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		public static new SiteLink Coerce(Site site, int defaultNamespace, string pageName) => TitleFactory.FromName(site, defaultNamespace, pageName).ToSiteLink();
+		public static new SiteLink Coerce(Site site, int defaultNamespace, string pageName) => TitleFactory.Create(site, defaultNamespace, pageName).ToSiteLink();
 
 		/// <summary>Creates a new SiteLink instance from the provided text.</summary>
 		/// <param name="site">The site the link is from.</param>
@@ -332,7 +332,7 @@
 			var valueSplit = SplitWhitespace(titleText);
 			var retval = coerceToFile
 				? Coerce(site, MediaWikiNamespaces.File, valueSplit.Value)
-				: TitleFactory.FromName(site, valueSplit.Value).ToSiteLink();
+				: TitleFactory.Create(site, MediaWikiNamespaces.Main, valueSplit.Value).ToSiteLink();
 			retval.OriginalLink = titleText;
 			retval.TitleWhitespaceBefore = valueSplit.Before;
 			retval.TitleWhitespaceAfter = valueSplit.After;
@@ -450,9 +450,9 @@
 		/// <param name="title">The title to change to.</param>
 		/// <returns>A new copy of the SiteLink with the altered title.</returns>
 		/// <remarks>Interwiki and Fragment will remain unaffected by the change. If those should be updated to null, use <see cref="With(IFullTitle)"/>.</remarks>
-		public SiteLink With(ISimpleTitle title)
+		public SiteLink With(SimpleTitle title)
 		{
-			TitleFactory? upcast = TitleFactory.DirectNormalized(title.NotNull(nameof(title)).Namespace, title.PageName);
+			TitleFactory? upcast = TitleFactory.CreateFromValidated(title.NotNull(nameof(title)).Namespace, title.PageName);
 			SiteLink retval = new(upcast)
 			{
 				Coerced = this.Coerced,
@@ -479,7 +479,7 @@
 		/// <returns>A new copy of the SiteLink with the altered title.</returns>
 		public SiteLink With(IFullTitle title)
 		{
-			TitleFactory? upcast = TitleFactory.DirectNormalized(title.NotNull(nameof(title)).Namespace, title.PageName);
+			TitleFactory? upcast = TitleFactory.CreateFromValidated(title.NotNull(nameof(title)).Namespace, title.PageName);
 			SiteLink retval = new(upcast)
 			{
 				Coerced = this.Coerced,

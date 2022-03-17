@@ -6,7 +6,7 @@
 	using RobinHood70.WikiCommon;
 
 	/// <summary>This class serves as a light-weight parser to split a wiki title into its constituent parts.</summary>
-	public sealed class TitleFactory : ILinkTitle
+	public sealed class TitleFactory : ILinkTitle, IFullTitle
 	{
 		#region Constants
 		// The following is taken from DefaultSettings::$wgLegalTitleChars and always assumes the default setting. I believe this is emitted as part of API:Siteinfo, but I wouldn't trust any kind of automated conversion, so better to just leave it as default, which is what 99.99% of wikis will probably use.
@@ -22,8 +22,6 @@
 		private TitleFactory(Site site, int defaultNamespace, string pageName)
 		{
 			// This routine very roughly follows the logic of MediaWikiTitleCodec.splitTitleString() but skips much of the error checking and rarely encountered sanitization, which is left to the server.
-			site.ThrowNull(nameof(site));
-			pageName.ThrowNull(nameof(pageName));
 			static (string Key, string PageName, bool Forced) SplitPageName(string pageName)
 			{
 				var forced = pageName.Length > 0 && pageName[0] == ':';
@@ -182,61 +180,21 @@
 		#region Public Static Methods
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
-		/// <param name="ns">The namespace the page is in.</param>
-		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory Direct(Namespace ns, string pageName)
-		{
-			ns.ThrowNull(nameof(ns));
-			pageName.ThrowNull(nameof(pageName));
-			pageName = ns.CapitalizePageName(Normalize(pageName));
-			return new(ns, pageName);
-		}
-
-		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="site">The site.</param>
-		/// <param name="nsid">The namespace the page is in.</param>
+		/// <param name="defaultNamespace">The default namespace.</param>
 		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory Direct(Site site, int nsid, string pageName) => Direct(site.NotNull(nameof(site))[nsid], pageName);
+		public static TitleFactory Create(Site site, int defaultNamespace, string pageName) => new(site.NotNull(nameof(site)), defaultNamespace, WikiTextUtilities.TrimToTitle(pageName.NotNull(nameof(pageName))));
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="ns">The namespace the page is in.</param>
 		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory DirectNormalized(Namespace ns, string pageName) => new(ns.NotNull(nameof(ns)), pageName.NotNull(nameof(pageName)));
-
-		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
-		/// <param name="title">The title to copy from.</param>
-		public static TitleFactory DirectNormalized(ISimpleTitle title) => new(title.NotNull(nameof(title)).Namespace, title.PageName);
-
-		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
-		/// <param name="site">The site.</param>
-		/// <param name="nsid">The namespace the page is in.</param>
-		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory DirectNormalized(Site site, int nsid, string pageName) => Direct(site.NotNull(nameof(site))[nsid], pageName);
-
-		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
-		/// <param name="site">The site.</param>
-		/// <param name="apiTitle">An <see cref="IApiTitle"/>.</param>
-		public static TitleFactory FromApi(Site site, IApiTitle apiTitle) => new(site.NotNull(nameof(site)), MediaWikiNamespaces.Main, apiTitle.NotNull(nameof(apiTitle)).FullPageName);
-
-		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
-		/// <param name="site">The site.</param>
-		/// <param name="apiTitle">An <see cref="IApiTitle"/>.</param>
-		public static TitleFactory FromApi(Site site, IApiTitleOptional apiTitle) => new(
-			site.NotNull(nameof(site)),
-			MediaWikiNamespaces.Main,
-			apiTitle.NotNull(nameof(apiTitle))
-				.FullPageName.NotNull(nameof(apiTitle), nameof(apiTitle.FullPageName)));
-
-		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
-		/// <param name="site">The site.</param>
-		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory FromName(Site site, string pageName) => new(site.NotNull(nameof(site)), MediaWikiNamespaces.Main, Normalize(pageName.NotNull(nameof(pageName))));
+		public static TitleFactory CreateFromValidated(Namespace ns, string pageName) => new(ns.NotNull(nameof(ns)), pageName.NotNull(nameof(pageName)));
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="site">The site.</param>
 		/// <param name="defaultNamespace">The default namespace.</param>
 		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory FromName(Site site, int defaultNamespace, string pageName) => new(site.NotNull(nameof(site)), defaultNamespace, Normalize(pageName.NotNull(nameof(pageName))));
+		public static TitleFactory FromName(Site site, int defaultNamespace, string pageName) => new(site.NotNull(nameof(site)), defaultNamespace, WikiTextUtilities.TrimToTitle(pageName.NotNull(nameof(pageName))));
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="site">The site.</param>
@@ -247,21 +205,6 @@
 		/// <param name="title">The title to get the label name for.</param>
 		/// <returns>The text with the final paranthetical text removed.</returns>
 		public static string LabelName(string title) => LabelParenthesesRemover.Replace(title.NotNull(nameof(title)), string.Empty, 1, 1);
-
-		/// <summary>Normalizes a page name text for parsing. Page names coming directly from the API are already normalized.</summary>
-		/// <param name="text">The page name to normalize.</param>
-		/// <remarks>The following changes are applied:
-		/// <list type="bullet">
-		/// <item><description>All text after the first pipe (if any) is removed.</description></item>
-		/// <item><description>HTML- and URL-encoded characters are decoded.</description></item>
-		/// <item><description>Variants of the space character—such as hard spaces, em spaces, and underscores—are all converted to normal spaces.</description></item>
-		/// </list></remarks>
-		/// <returns>The normalized text, ready to be parsed.</returns>
-		public static string Normalize(string text)
-		{
-			var retval = text.NotNull(nameof(text)).Split(TextArrays.Pipe, 2)[0];
-			return WikiTextUtilities.DecodeAndNormalize(retval).Trim();
-		}
 
 		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		/// <param name="title">The title to modify.</param>
@@ -282,35 +225,9 @@
 		/// <returns>A new <see cref="FullTitle"/>.</returns>
 		public FullTitle ToFullTitle() => new(this);
 
-		/// <summary>Creates a new Page or Page derivative from the parsed text using the site's <see cref="Site.PageCreator"/>.</summary>
-		/// <param name="text">The page text.</param>
-		/// <returns>A new <see cref="Page"/>.</returns>
-		public Page ToNewPage(string text) => this.Namespace == null
-			? new(this, PageLoadOptions.None, null) { Text = text }
-			: this.ToNewPage(this.Namespace.Site.PageCreator, text);
-
-		/// <summary>Creates a new Page or Page derivative using the specified <see cref="PageCreator"/>.</summary>
-		/// <param name="creator">The page creator to use.</param>
-		/// <param name="text">The page text.</param>
-		/// <returns>A new <see cref="Page"/>.</returns>
-		public Page ToNewPage(PageCreator creator, string text)
-		{
-			var page = creator.NotNull(nameof(creator)).CreateEmptyPage(this);
-			page.Text = text;
-			return page;
-		}
-
-		/// <summary>Creates a new Page from the parsed text.</summary>
-		/// <returns>A new <see cref="Page"/>.</returns>
-		public Page ToNewPage() => new(this, PageLoadOptions.None, null);
-
 		/// <summary>Creates a new SiteLink from the parsed text.</summary>
 		/// <returns>A new <see cref="SiteLink"/>.</returns>
 		public SiteLink ToSiteLink() => new(this);
-
-		/// <summary>Creates a new title from the parsed text.</summary>
-		/// <returns>A new <see cref="Title"/>.</returns>
-		public Title ToTitle() => new(this);
 		#endregion
 
 		#region Public Override Methods
