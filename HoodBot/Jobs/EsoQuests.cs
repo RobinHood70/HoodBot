@@ -27,7 +27,8 @@
 		   "location.zone locZone\n" +
 	   "FROM\n" +
 		   "quest INNER JOIN\n" +
-		   "location ON quest.locationId = location.id";
+		   "location ON quest.locationId = location.id\n" +
+	   "ORDER BY quest.id";
 
 		private const string StageQuery =
 		"SELECT\n" +
@@ -203,7 +204,7 @@
 		#region Private Methods
 		private IEnumerable<QuestData> GetFilteredQuests(TitleCollection wikiQuests)
 		{
-			foreach (var quest in Database.RunQuery(EsoLog.Connection, QuestQuery, row => new QuestData(row)))
+			foreach (var quest in Database.RunQuery(EsoLog.Connection, QuestQuery, 100000, row => new QuestData(row)))
 			{
 				var title = CreateTitle.FromUnvalidated(this.Site, quest.FullPageName);
 				var titleDisambig = CreateTitle.FromValidated(title.Namespace, title.PageName + " (quest)");
@@ -239,42 +240,45 @@
 				questNames.Add(quest.Id, quest.Name);
 			}
 
-			var whereText = string.Join(",", questNames.Keys);
-			this.StatusWriteLine("Getting stage data");
-			foreach (var row in Database.RunQuery(EsoLog.Connection, StageQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
+			if (questNames.Count > 0)
 			{
-				Stage stage = new(row);
-				var questId = (long)row["questId"];
-				var questName = questNames[questId];
-				var stages = questDict[questName].Stages;
-
-				stages.Add(stage);
-			}
-
-			this.StatusWriteLine("Getting condition data");
-			foreach (var row in Database.RunQuery(EsoLog.Connection, ConditionQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
-			{
-				Condition condition = new(row);
-				var questId = (long)row["questId"];
-				var stageId = (long)row["questStepId"];
-				var questName = questNames[questId];
-				var stages = questDict[questName].Stages;
-				if (stages.Find(item => item.Id == stageId) is Stage stage)
+				var whereText = string.Join(",", questNames.Keys);
+				this.StatusWriteLine("Getting stage data");
+				foreach (var row in Database.RunQuery(EsoLog.Connection, StageQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
 				{
-					stage.Conditions.Add(condition);
+					Stage stage = new(row);
+					var questId = (long)row["questId"];
+					var questName = questNames[questId];
+					var stages = questDict[questName].Stages;
+
+					stages.Add(stage);
 				}
-			}
 
-			this.StatusWriteLine("Getting rewards data");
-			foreach (var row in Database.RunQuery(EsoLog.Connection, RewardsQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
-			{
-				Reward reward = new(row);
-				var questId = (long)row["questId"];
-				var questName = questNames[questId];
-				var rewards = questDict[questName].Rewards;
-				if (rewards.Find(item => item.ItemId == reward.ItemId) == null)
+				this.StatusWriteLine("Getting condition data");
+				foreach (var row in Database.RunQuery(EsoLog.Connection, ConditionQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
 				{
-					rewards.Add(reward);
+					Condition condition = new(row);
+					var questId = (long)row["questId"];
+					var stageId = (long)row["questStepId"];
+					var questName = questNames[questId];
+					var stages = questDict[questName].Stages;
+					if (stages.Find(item => item.Id == stageId) is Stage stage)
+					{
+						stage.Conditions.Add(condition);
+					}
+				}
+
+				this.StatusWriteLine("Getting rewards data");
+				foreach (var row in Database.RunQuery(EsoLog.Connection, RewardsQuery.Replace("<questIds>", whereText, StringComparison.Ordinal)))
+				{
+					Reward reward = new(row);
+					var questId = (long)row["questId"];
+					var questName = questNames[questId];
+					var rewards = questDict[questName].Rewards;
+					if (rewards.Find(item => item.ItemId == reward.ItemId) == null)
+					{
+						rewards.Add(reward);
+					}
 				}
 			}
 
