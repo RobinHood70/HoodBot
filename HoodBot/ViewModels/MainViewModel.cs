@@ -206,13 +206,11 @@
 		{
 			if (!sender.EditingEnabled)
 			{
-				Debug.Write($"{eventArgs.MethodName} (sender: {eventArgs.RealSender}");
+				Debug.WriteLine($"{eventArgs.MethodName} (sender: {eventArgs.RealSender})");
 				foreach (var parameter in eventArgs.Parameters)
 				{
-					Debug.Write($", {parameter.Key}: {parameter.Value}");
+					Debug.WriteLine($"  {parameter.Key} = {parameter.Value}");
 				}
-
-				Debug.WriteLine(")");
 			}
 		}
 
