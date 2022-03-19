@@ -48,6 +48,12 @@
 			[-71] = "Spell Damage Capped",
 			[-72] = "Magicka and Weapon Damage",
 			[-73] = "Magicka and Spell Damage",
+			[-74] = "Weapon Power",
+			[-75] = "Constant Value",
+			[-76] = "Health or Spell Damage",
+			[-77] = "Max Resistance",
+			[-78] = "Magicka and Light Armor (Health Capped)",
+			[-79] = "Health or Weapon/Spell Damage",
 		};
 		#endregion
 

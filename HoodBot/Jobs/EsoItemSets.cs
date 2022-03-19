@@ -27,9 +27,14 @@
 		private static readonly Dictionary<string, string> TitleOverrides = new(StringComparer.Ordinal)
 		{
 			// Title Overrides should only be necessary when creating new disambiguated "(set)" pages or when pages don't conform to the base/base (set) style. While this could be done programatically, it's probably best not to, so that a human has verified that the page really should be created and that the existing page isn't malformed or something.
-			["Immolator Charr"] = "Immolator Charr (set)",
+			/* ["Immolator Charr"] = "Immolator Charr (set)",
 			["Magma Incarnate"] = "Magma Incarnate (set)",
-			["Zoal the Ever-Wakeful"] = "Zoal the Ever-Wakeful (set)",
+			["Zoal the Ever-Wakeful"] = "Zoal the Ever-Wakeful (set)", */
+			["Baron Thirsk"] = "Baron Thirsk (set)",
+			["Lady Malygda"] = "Lady Malygda (set)",
+			["Kargaeda"] = "Kargaeda (set)",
+			["Nazaray"] = "Nazaray (set)",
+			["Nunatak"] = "Nunatak (set)",
 		};
 		#endregion
 
@@ -111,7 +116,7 @@
 		{
 			foreach (var set in allSets)
 			{
-				if (set.Page is null || !set.Page.Exists)
+				if (set.Page is null)
 				{
 					this.Warn($"New Page: {set.Name}");
 					set.Page = set.BuildNewPage(CreateTitle.FromUnvalidated(this.Site, UespNamespaces.Online, set.Name));
@@ -299,8 +304,8 @@
 				{
 					if (string.Compare(setMember.PageName, setName, true, this.Site.Culture) == 0 && string.Compare(setMember.PageName, setName, false, this.Site.Culture) != 0)
 					{
-						this.Warn($"Substituted {setMember.PageName} for {setName}");
 						set.Page = setMember;
+						this.Warn($"Substituted {setMember.PageName} for {setName}");
 						break;
 					}
 				}
@@ -323,7 +328,7 @@
 						var checkTitle = CreateTitle.FromValidated(this.Site, UespNamespaces.Online, overrideName);
 						set.Page = setMembers.TryGetValue(checkTitle, out var foundPage)
 							? foundPage
-							: set.BuildNewPage(CreateTitle.FromUnvalidated(this.Site, UespNamespaces.Online, set.Name));
+							: set.BuildNewPage(checkTitle);
 					}
 					else
 					{

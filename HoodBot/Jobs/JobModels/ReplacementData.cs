@@ -25,6 +25,7 @@
 			[85991] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Wild Guardian|grizzly]]"),
 			[85992] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Wild Guardian|grizzly]]"),
 			[85993] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Wild Guardian|grizzly]]"),
+			[93914] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
 			[103710] = ("|cffffff1|r second", "|cffffff1|r seconds"),
 		};
 
