@@ -43,7 +43,6 @@
 
 		#region Fields
 		private readonly Dictionary<string, List<string>> crateTiers = new(StringComparer.OrdinalIgnoreCase);
-		private readonly Dictionary<string, DbCollectible> dbCollectibles = new(StringComparer.OrdinalIgnoreCase);
 		private string? blankText;
 		#endregion
 
@@ -62,11 +61,8 @@
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
-			this.StatusWriteLine("Loading blank template page");
-			this.blankText = this.GetPageTemplate();
-
 			this.StatusWriteLine("Getting collectibles from database");
-			this.GetCollectiblesFromDatabase();
+			var dbCollectibles = GetCollectiblesFromDatabase();
 
 			this.StatusWriteLine("Getting crown crates from wiki");
 			this.GetCrownCrates();
@@ -75,12 +71,15 @@
 			var titles = this.LoadCollections();
 
 			this.StatusWriteLine("Loading list pages");
-			this.Pages.PageLoaded += this.PageLoaded;
-			this.Pages.GetTitles(titles);
-			this.Pages.PageLoaded -= this.PageLoaded;
+			PageCollection listPages = new(this.Site);
+			listPages.GetTitles(titles);
+			foreach (var page in listPages)
+			{
+				this.ParseListPage(page, dbCollectibles);
+			}
 		}
 
-		protected override void Main() => this.SavePages("Update collections");
+		protected override void Main() => this.SavePages("Update collectible info");
 		#endregion
 
 		#region Private Static Methods
@@ -93,6 +92,8 @@
 			"Undaunted Trophies" => "Undaunted Trophy",
 			_ => category.TrimEnd('s'),
 		};
+
+		private static Dictionary<string, DbCollectible> GetCollectiblesFromDatabase() => DbCollectible.RunQuery();
 
 		private static string GetLookupName(string catName, Section section)
 		{
@@ -146,14 +147,6 @@
 				.Trim()
 				.Trim(TextArrays.EqualsSign)
 				.Trim();
-		}
-
-		private static ContextualParser? ParsablePage(Page page)
-		{
-			ContextualParser parser = new(page);
-			return parser.Has<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName))
-				? parser
-				: null;
 		}
 
 		private static void ParseCollectible(CollectibleInfo collectible, ContextualParser parser)
@@ -234,30 +227,33 @@
 
 		private ContextualParser? FindOrCreatePage(PageCollection pages, CollectibleInfo newPage)
 		{
+			this.blankText ??= this.GetPageTemplate();
 			pages.TryGetValue(newPage.DisambigName, out var page);
 			if (page is not null && page.Exists)
 			{
-				return ParsablePage(page) is ContextualParser parser
-					? parser
-					: null; // throw new InvalidOperationException($"{newPage.DisambigName} found, but no template on it.");
+				ContextualParser disambigParser = new(page);
+				return ParserHasTemplate(disambigParser)
+					? disambigParser
+					: throw new InvalidOperationException($"{newPage.DisambigName} found, but no template on it.");
 			}
 
-			pages.TryGetValue(newPage.DisambigName, out page);
-			Debug.Assert(this.blankText != null, $"{nameof(this.blankText)} is null!");
-			return page switch
+			pages.TryGetValue(newPage.PageName, out page);
+			if (page is null)
 			{
-				not null when page.Exists => ParsablePage(page) is ContextualParser parser
-				  ? parser
-				  : new ContextualParser(this.Site.CreatePage(newPage.DisambigName, this.blankText)),
-				not null when !page.Exists => new ContextualParser(page, this.blankText),
-				_ => throw new InvalidOperationException($"{newPage.PageName} found, but no template on it.")
-			};
-		}
+				throw new InvalidOperationException($"{newPage.PageName} found, but no template on it.");
+			}
 
-		private void GetCollectiblesFromDatabase()
-		{
-			var queryResults = DbCollectible.RunQuery();
-			this.dbCollectibles.AddRange(queryResults);
+			if (!page.Exists || page.IsRedirect)
+			{
+				return new ContextualParser(page, this.blankText);
+			}
+
+			ContextualParser parser = new(page);
+			return ParserHasTemplate(parser)
+				? parser
+				: new ContextualParser(this.Site.CreatePage(newPage.DisambigName, this.blankText));
+
+			static bool ParserHasTemplate(ContextualParser parser) => parser.Has<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
 		}
 
 		private void GetCrownCrates()
@@ -340,7 +336,11 @@
 				if (this.FindOrCreatePage(pages, collectible) is ContextualParser parser)
 				{
 					ParseCollectible(collectible, parser);
-					this.Pages.Add(parser.Page);
+					if (parser.Page.TextModified)
+					{
+						this.Pages.Add(parser.Page);
+					}
+
 					if (collectible.AssociatedSection.Header is IHeaderNode header)
 					{
 						var equalsSigns = new string('=', header.Level);
@@ -354,11 +354,10 @@
 			}
 		}
 
-		private void PageLoaded(object sender, Page page)
+		private void ParseListPage(Page page, Dictionary<string, DbCollectible> dbCollectibles)
 		{
 			ContextualParser parser = new(page);
-			var sectionInfo = this.ParseSections(page, parser);
-
+			var sectionInfo = this.ParseSections(page, parser, dbCollectibles);
 			if (sectionInfo.Collectibles.Count == 0)
 			{
 				Debug.WriteLine($"* {page.AsLink(LinkFormat.LabelName)} does not appear to be a list page.");
@@ -372,7 +371,7 @@
 			parser.UpdatePage();
 		}
 
-		private SectionInfo ParseSections(Page page, ContextualParser parser)
+		private SectionInfo ParseSections(Page page, ContextualParser parser, Dictionary<string, DbCollectible> dbCollectibles)
 		{
 			SectionInfo sectionInfo = new();
 			var sections = parser.ToSections();
@@ -387,7 +386,7 @@
 					if (ValidateSection(section))
 					{
 						var lookup = GetLookupName(page.BasePageName, section);
-						if (this.dbCollectibles.TryGetValue(lookup, out var collectible))
+						if (dbCollectibles.TryGetValue(lookup, out var collectible))
 						{
 							CollectibleInfo templateInfo = new(this.Site, collectible, lookup.Split(TextArrays.Colon, 2)[1], section, this.crateTiers);
 							sectionInfo.Collectibles.Add(templateInfo);
@@ -441,8 +440,8 @@
 				this.CollectibleType = dbData.Category;
 				this.Type = dbData.Subcategory;
 				this.PageName = CreateTitle.FromUnvalidated(site, UespNamespaces.Online, dbData.Name);
-				var disambig = $"{dbData.Name} ({CategorySingular(this.CollectibleType).ToLowerInvariant()})";
-				this.DisambigName = CreateTitle.FromUnvalidated(site, UespNamespaces.Online, disambig);
+				var disambig = $"{this.PageName.PageName} ({CategorySingular(this.CollectibleType).ToLowerInvariant()})";
+				this.DisambigName = CreateTitle.FromValidated(site, UespNamespaces.Online, disambig);
 				this.Description = dbData.Description;
 				this.Id = dbData.Id;
 				this.NickName = dbData.NickName;
@@ -611,7 +610,7 @@
 			#endregion
 
 			#region Public Static Properties
-			public static string Query { get; } = "SELECT id, name, nickname, description, categoryName, subCategoryName FROM collectibles ORDER BY name";
+			public static string Query { get; } = "SELECT id, name, nickname, description, categoryName, subCategoryName FROM collectibles WHERE categoryName != 'Furnishings' ORDER BY name, id";
 			#endregion
 
 			#region Public Properties
