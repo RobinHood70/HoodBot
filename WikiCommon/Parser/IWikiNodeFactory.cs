@@ -104,7 +104,7 @@
 		/// <param name="name">The new parameter name.</param>
 		/// <param name="value">The new parameter value.</param>
 		/// <returns>A new instance of the <see cref="ParameterNode"/> class.</returns>
-		IParameterNode ParameterNodeFromOther(IParameterNode? other, string name, string value);
+		IParameterNode ParameterNodeFromOther(IParameterNode? other, string? name, string value);
 
 		/// <summary>Creates a new anonymous <see cref="IParameterNode"/> from a value.</summary>
 		/// <param name="value">The value.</param>
@@ -115,26 +115,26 @@
 		/// <param name="name">The name.</param>
 		/// <param name="value">The value.</param>
 		/// <returns>A new instance of the <see cref="ParameterNode"/> class.</returns>
-		IParameterNode ParameterNodeFromParts(string name, string? value);
+		IParameterNode ParameterNodeFromParts(string? name, string value);
 
 		/// <summary>Parses the specified text.</summary>
 		/// <param name="text">The text to parse.</param>
 		/// <returns>A <see cref="NodeCollection"/> with the parsed text.</returns>
-		NodeCollection Parse(string? text);
+		NodeCollection Parse(string text);
 
 		/// <summary>Parses the specified text.</summary>
 		/// <param name="text">The text to parse.</param>
 		/// <param name="inclusionType">What to include or ignore when parsing text.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
 		/// <returns>A <see cref="NodeCollection"/> with the parsed text.</returns>
-		NodeCollection Parse(string? text, InclusionType inclusionType, bool strictInclusion);
+		NodeCollection Parse(string text, InclusionType inclusionType, bool strictInclusion);
 
 		/// <summary>Parses the specified text.</summary>
 		/// <param name="nodes">The <see cref="NodeCollection"/> to add to.</param>
 		/// <param name="text">The text to parse.</param>
 		/// <param name="inclusionType">What to include or ignore when parsing text.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
-		public void ParseInto(NodeCollection nodes, string? text, InclusionType inclusionType, bool strictInclusion);
+		public void ParseInto(NodeCollection nodes, string text, InclusionType inclusionType, bool strictInclusion);
 
 		/// <summary>If the text provided represents a single node of the specified type, returns that node. Otherwise, throws an error.</summary>
 		/// <typeparam name="T">The type of node desired.</typeparam>
