@@ -10,6 +10,7 @@
 	using System.IO;
 	using System.Net;
 	using System.Runtime.CompilerServices;
+	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
@@ -1043,6 +1044,24 @@
 		/// <param name="sender">The sending object.</param>
 		/// <param name="warning">The warning.</param>
 		public virtual void PublishWarning(IMessageSource sender, string warning) => this.WarningOccurred?.Invoke(this, new WarningEventArgs(sender, warning));
+
+		/// <summary>Removes invalid characters from title and replaces quote-like characters with quotes.</summary>
+		/// <param name="pageName">The page name to sanitize.</param>
+		/// <returns>The original title with special characters replaced or removed as necessary.</returns>
+		public virtual string SanitizePageName(string pageName)
+		{
+			pageName = Regex.Replace(pageName, @"#<>\[\]\|{}", " ", RegexOptions.None, Globals.DefaultRegexTimeout);
+			pageName = Regex.Replace(pageName, "`´’ʻʾʿ᾿῾‘’c", "'", RegexOptions.None, Globals.DefaultRegexTimeout);
+			pageName = Regex.Replace(pageName, "“”„“«»", "\"", RegexOptions.None, Globals.DefaultRegexTimeout);
+			pageName = Regex.Replace(pageName, " {2,}", " ", RegexOptions.None, Globals.DefaultRegexTimeout);
+
+			return pageName;
+		}
+
+		/// <summary>Removes invalid characters from the title's PageName and replaces quote-like characters with quotes.</summary>
+		/// <param name="title">The title to sanitize.</param>
+		/// <returns>The original title with special characters replaced or removed as necessary.</returns>
+		public virtual Title SanitizeTitle(Title title) => CreateTitle.FromValidated(title.NotNull(nameof(title)).Namespace, this.SanitizePageName(title.PageName));
 		#endregion
 
 		#region Protected Static Methods
