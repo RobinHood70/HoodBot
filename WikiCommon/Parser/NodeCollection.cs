@@ -158,7 +158,7 @@
 		/// <summary>Copies the surrounding whitespace from the current NodeCollection to the provided value.</summary>
 		/// <param name="value">The value to format.</param>
 		/// <returns>The value with the same surrounding whitespace as the provided NodeCollection.</returns>
-		public string CopyFormatTo(string value)
+		public string CopyFormatTo(string? value)
 		{
 			var textValue = this.ToValue();
 			var endPos = textValue.Length - 1;

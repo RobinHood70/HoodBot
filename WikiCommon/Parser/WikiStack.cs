@@ -63,7 +63,7 @@
 		/// <param name="text">The text to work with.</param>
 		/// <param name="inclusionType">The inclusion type for the text. Set to <see cref="InclusionType.Transcluded"/> to return text as if transcluded to another page; <see cref="InclusionType.CurrentPage"/> to return text as it would appear on the current page; <see cref="InclusionType.Raw"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
-		public WikiStack(IWikiNodeFactory factory, [Localizable(false)] string? text, InclusionType inclusionType, bool strictInclusion)
+		public WikiStack(IWikiNodeFactory factory, [Localizable(false)] string text, InclusionType inclusionType, bool strictInclusion)
 		{
 			this.NodeFactory = factory.NotNull(nameof(factory));
 
@@ -72,8 +72,8 @@
 			this.Top = new RootElement(this);
 			this.array[0] = this.Top;
 			this.count = 1;
-			text ??= string.Empty;
 
+			text ??= string.Empty;
 			this.Text = text;
 			this.textLength = text.Length;
 

@@ -128,7 +128,7 @@
 		public static void SetValue(this IParameterNode parameter, string? value)
 		{
 			parameter.ThrowNull(nameof(parameter));
-			if (value == null)
+			if (value == null || value.Length == 0)
 			{
 				parameter.Value.Clear();
 			}
@@ -286,34 +286,35 @@
 		/// <param name="paramFormat">The type of formatting to apply to the parameter value if being added. For existing parameters, the existing format will be retained.</param>
 		/// <returns>The added parameter.</returns>
 		/// <exception cref="InvalidOperationException">Thrown when the parameter is not found.</exception>
-		public static IParameterNode AddOrChange(this ITemplateNode template, string name, string value, ParameterFormat paramFormat)
+		public static IParameterNode? AddOrChange(this ITemplateNode template, string name, string? value, ParameterFormat paramFormat)
 		{
 			Guard.Against.Null(template, nameof(template));
+			Guard.Against.Null(name, nameof(name));
 			IParameterNode retval;
-			value = FormatValue(value, paramFormat);
+			if (value == null)
+			{
+				template.Remove(name);
+				return null;
+			}
 
+			value = FormatValue(value, paramFormat);
 			if (template.Find(name) is IParameterNode existing)
 			{
-				value = existing.Value.CopyFormatTo(value);
 				existing.SetValue(value);
-				retval = existing;
-			}
-			else
-			{
-				var index = paramFormat == ParameterFormat.Copy ? template.FindCopyParameter(false) : -1;
-				if (index == -1)
-				{
-					retval = template.Factory.ParameterNodeFromParts(name, value);
-					template.Parameters.Add(retval);
-				}
-				else
-				{
-					var previous = template.Parameters[index];
-					retval = template.Factory.ParameterNodeFromOther(previous, name, value);
-					template.Parameters.Insert(index + 1, retval);
-				}
+				return existing;
 			}
 
+			var index = paramFormat == ParameterFormat.Copy ? template.FindCopyParameter(false) : -1;
+			if (index == -1)
+			{
+				retval = template.Factory.ParameterNodeFromParts(name, value);
+				template.Parameters.Add(retval);
+				return retval;
+			}
+
+			var previous = template.Parameters[index];
+			retval = template.Factory.ParameterNodeFromOther(previous, name, value);
+			template.Parameters.Insert(index + 1, retval);
 			return retval;
 		}
 
@@ -908,7 +909,7 @@
 			return -1;
 		}
 
-		private static string FormatValue(string value, ParameterFormat paramFormat)
+		private static string FormatValue(string? value, ParameterFormat paramFormat)
 		{
 			value ??= string.Empty;
 			value = paramFormat switch

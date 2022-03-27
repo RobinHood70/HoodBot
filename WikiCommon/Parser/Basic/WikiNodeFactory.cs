@@ -164,11 +164,11 @@
 		/// <param name="name">The new parameter name.</param>
 		/// <param name="value">The new parameter value.</param>
 		/// <returns>A new, formatted <see cref="IParameterNode"/> with the specified name and value.</returns>
-		public IParameterNode ParameterNodeFromOther(IParameterNode? other, string name, string value)
+		public IParameterNode ParameterNodeFromOther(IParameterNode? other, string? name, string value)
 		{
 			if (other != null)
 			{
-				if (other.Name != null)
+				if (other.Name is not null)
 				{
 					name = other.Name.CopyFormatTo(name);
 				}
@@ -188,19 +188,19 @@
 		/// <param name="name">The name.</param>
 		/// <param name="value">The value.</param>
 		/// <returns>A new ParameterNode.</returns>
-		public IParameterNode ParameterNodeFromParts(string name, string? value) => this.ParameterNode(this.Parse(name), this.Parse(value));
+		public IParameterNode ParameterNodeFromParts(string? name, string value) => this.ParameterNode(name == null ? null : this.Parse(name), this.Parse(value));
 
 		/// <summary>Parses the specified text.</summary>
 		/// <param name="text">The text to parse.</param>
 		/// <returns>A <see cref="NodeCollection"/> with the parsed text.</returns>
-		public NodeCollection Parse(string? text) => this.Parse(text, InclusionType.Raw, false);
+		public NodeCollection Parse(string text) => this.Parse(text, InclusionType.Raw, false);
 
 		/// <summary>Parses the specified text.</summary>
 		/// <param name="text">The text to parse.</param>
 		/// <param name="inclusionType">What to include or ignore when parsing text.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
 		/// <returns>A <see cref="NodeCollection"/> with the parsed text.</returns>
-		public NodeCollection Parse(string? text, InclusionType inclusionType, bool strictInclusion)
+		public NodeCollection Parse(string text, InclusionType inclusionType, bool strictInclusion)
 		{
 			WikiStack stack = new(this, text, inclusionType, strictInclusion);
 			return new NodeCollection(this, stack.GetNodes());
@@ -211,7 +211,7 @@
 		/// <param name="text">The text to parse.</param>
 		/// <param name="inclusionType">What to include or ignore when parsing text.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
-		public void ParseInto(NodeCollection nodes, string? text, InclusionType inclusionType, bool strictInclusion)
+		public void ParseInto(NodeCollection nodes, string text, InclusionType inclusionType, bool strictInclusion)
 		{
 			nodes.ThrowNull(nameof(nodes));
 			WikiStack stack = new(this, text, inclusionType, strictInclusion);
