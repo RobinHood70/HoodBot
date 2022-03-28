@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Text;
 	using RobinHood70.CommonCode;
 
 	using RobinHood70.Robby;
@@ -13,7 +14,7 @@
 	public abstract class LinkFinderJob : ParsedPageJob
 	{
 		#region Fields
-		private readonly IDictionary<Title, List<string>> results = new SortedDictionary<Title, List<string>>(SimpleTitleComparer.Instance);
+		private readonly IDictionary<Title, PageLinkList> results = new SortedDictionary<Title, PageLinkList>();
 		private readonly bool sectionLinksOnly;
 		#endregion
 
@@ -39,19 +40,29 @@
 		protected override void Main()
 		{
 			base.Main();
-			if (this.results.Count > 0)
+			if (this.results.Count == 0)
 			{
+				return;
+			}
+
+			foreach (var section in this.results)
+			{
+				var linkTitle = this.sectionLinksOnly ? "Section " : string.Empty;
+				this.WriteLine($"== {linkTitle}Links to [[{section.Key}]] ==");
 				this.WriteLine("{| class=\"wikitable sortable compressed\"");
-				foreach (var result in this.results)
+				this.WriteLine("! Link Found On !! Link");
+				foreach (var title in section.Value)
 				{
-					if (result.Value.Count > 0)
+					if (title.Value.Count > 0)
 					{
-						this.WriteLine($"|-\n| {result.Key.AsLink()}:");
-						this.WriteLine("| " + string.Join("<br>", result.Value));
+						this.WriteLine($"|-\n| {title.Key.AsLink()}");
+						this.Write("| ");
+						this.WriteLine(string.Join("<br>", title.Value));
 					}
 				}
 
 				this.WriteLine("|}");
+				this.WriteLine();
 			}
 		}
 
@@ -64,7 +75,7 @@
 			{
 				foreach (var backlink in page.Backlinks)
 				{
-					if ((backlink.Value & BacklinksTypes.Backlinks) != 0 || (backlink.Value & BacklinksTypes.ImageUsage) != 0)
+					if ((backlink.Value & (BacklinksTypes.Backlinks | BacklinksTypes.ImageUsage)) != 0)
 					{
 						backTitles.Add(backlink.Key);
 					}
@@ -94,10 +105,16 @@
 			parser.ThrowNull(nameof(parser));
 			foreach (var title in this.Titles)
 			{
-				if (!this.results.TryGetValue(parser.Page, out var links))
+				if (!this.results.TryGetValue(title, out var section))
 				{
-					links = new List<string>();
-					this.results.Add(parser.Page, links);
+					section = new PageLinkList();
+					this.results.Add(title, section);
+				}
+
+				if (!section.TryGetValue(parser.Page, out var links))
+				{
+					links = new LinkTargets();
+					section.Add(parser.Page, links);
 				}
 
 				foreach (var link in parser.FindSiteLinks(title))
@@ -106,7 +123,7 @@
 						WikiTextVisitor.Raw(link) is var textTitle &&
 						!links.Contains(textTitle, StringComparer.Ordinal))
 					{
-						links.Add(WikiTextVisitor.Raw(link));
+						links.Add(link.Title.ToRaw().Trim());
 					}
 				}
 			}
@@ -117,6 +134,27 @@
 				this.sectionLinksOnly &&
 				SiteLink.FromLinkNode(this.Site, link) is var linkTitle &&
 				linkTitle.Fragment == null);
+		#endregion
+
+		#region Private Classes
+
+		//// These are simple wrappers for the relevant classes due to the complex nesting. It also ensures that list styles and such can be changed with a minimum of fuss.
+
+		private sealed class LinkTargets : List<string>
+		{
+			public LinkTargets()
+				: base()
+			{
+			}
+		}
+
+		private sealed class PageLinkList : SortedDictionary<Title, LinkTargets>
+		{
+			public PageLinkList()
+				: base(SimpleTitleComparer.Instance)
+			{
+			}
+		}
 		#endregion
 	}
 }
