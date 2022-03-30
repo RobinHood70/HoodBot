@@ -161,7 +161,7 @@
 			{
 				if (parameter.Value.ToRaw().Trim().Length == 0)
 				{
-					parameter.SetValue(collectible.Image ?? string.Empty);
+					parameter.SetValue(collectible.Image, ParameterFormat.Copy);
 					if (collectible.ImageDescription != null && !page.PageNameEquals(collectible.ImageDescription))
 					{
 						template.UpdateIfEmpty("imgdesc", collectible.ImageDescription ?? string.Empty);

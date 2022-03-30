@@ -28,7 +28,7 @@
 					hex.Length == 6 &&
 					int.TryParse(hex, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out _))
 				{
-					parameter.SetValue("#" + hex);
+					parameter.SetValue("#" + hex, ParameterFormat.Copy);
 				}
 			}
 		}

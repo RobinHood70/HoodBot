@@ -83,7 +83,7 @@
 			if (!string.Equals(oldValue, value, StringComparison.Ordinal))
 			{
 				retval = true;
-				parameter.SetValue(value);
+				parameter.SetValue(value, ParameterFormat.Copy);
 
 				// We use usedList as the master check, since that should always be available if we're doing checks at all.
 				if (usedList != null)

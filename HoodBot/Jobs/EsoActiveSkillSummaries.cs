@@ -93,7 +93,7 @@
 					var oldValue = radiusParam.Value.ToValue().Trim();
 					if (string.Equals(oldValue, newValue, StringComparison.OrdinalIgnoreCase))
 					{
-						radiusParam.SetValue(newValue);
+						radiusParam.SetValue(newValue, ParameterFormat.Copy);
 						bigChange = true;
 					}
 				}

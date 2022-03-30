@@ -125,37 +125,32 @@
 		/// <summary>Sets the value to the specified text.</summary>
 		/// <param name="parameter">The parameter to set the value of.</param>
 		/// <param name="value">The value.</param>
-		public static void SetValue(this IParameterNode parameter, string? value)
+		public static void SetValue(this IParameterNode parameter, string? value, ParameterFormat format)
 		{
 			parameter.ThrowNull(nameof(parameter));
+			var paramValue = parameter.Value;
 			if (value == null || value.Length == 0)
 			{
-				parameter.Value.Clear();
-			}
-			else
-			{
-				var nodes = parameter.Factory.Parse(value);
-				parameter.SetValue(nodes);
-			}
-		}
-
-		/// <summary>Sets the value from a list of nodes.</summary>
-		/// <param name="parameter">The parameter to set the value of.</param>
-		/// <param name="value">The value.</param>
-		public static void SetValue(this IParameterNode parameter, IEnumerable<IWikiNode>? value)
-		{
-			parameter.ThrowNull(nameof(parameter));
-			if (value == null)
-			{
-				parameter.Value.Clear();
+				paramValue.Clear();
 				return;
 			}
 
-			var (leading, trailing) = GetSurroundingSpace(parameter.Value.ToValue());
-			parameter.Value.Clear();
-			parameter.Value.AddText(leading);
-			parameter.Value.AddRange(value);
-			parameter.Value.AddText(trailing);
+			if (format == ParameterFormat.Copy)
+			{
+				var (leading, trailing) = GetSurroundingSpace(paramValue.ToValue());
+				value = TrimValue(value, format);
+				var copyNodes = parameter.Factory.Parse(value);
+				paramValue.Clear();
+				paramValue.AddText(leading);
+				paramValue.AddRange(copyNodes);
+				paramValue.AddText(trailing);
+				return;
+			}
+
+			value = TrimValue(value, format);
+			var nodes = parameter.Factory.Parse(value);
+			paramValue.Clear();
+			paramValue.AddRange(nodes);
 		}
 
 		/// <summary>Converts a parameter to its raw key=value format without a leading pipe.</summary>
@@ -213,7 +208,7 @@
 		{
 			Guard.Against.Null(template, nameof(template));
 			IParameterNode retval;
-			value = FormatValue(value, paramFormat);
+			value = TrimValue(value, paramFormat);
 
 			var index = paramFormat == ParameterFormat.Copy ? template.FindCopyParameter(false) : -1;
 			if (index != -1)
@@ -251,7 +246,7 @@
 		{
 			Guard.Against.Null(template, nameof(template));
 			IParameterNode retval;
-			value = FormatValue(value, paramFormat);
+			value = TrimValue(value, paramFormat);
 
 			var index = paramFormat == ParameterFormat.Copy ? template.FindCopyParameter(true) : -1;
 			if (index != -1)
@@ -278,45 +273,6 @@
 		public static IParameterNode AddIfNotExists(this ITemplateNode template, string name, string value) => template.Find(name) is IParameterNode parameter
 			? parameter
 			: template.Add(name, value);
-
-		/// <summary>Adds a new parameter to the template. Optionally, copies the format of the previous named parameter, if there is one, then adds the parameter after it.</summary>
-		/// <param name="template">The template to work on.</param>
-		/// <param name="name">The name of the parameter to add.</param>
-		/// <param name="value">The value of the parameter to add.</param>
-		/// <param name="paramFormat">The type of formatting to apply to the parameter value if being added. For existing parameters, the existing format will be retained.</param>
-		/// <returns>The added parameter.</returns>
-		/// <exception cref="InvalidOperationException">Thrown when the parameter is not found.</exception>
-		public static IParameterNode? AddOrChange(this ITemplateNode template, string name, string? value, ParameterFormat paramFormat)
-		{
-			Guard.Against.Null(template, nameof(template));
-			Guard.Against.Null(name, nameof(name));
-			IParameterNode retval;
-			if (value == null)
-			{
-				template.Remove(name);
-				return null;
-			}
-
-			value = FormatValue(value, paramFormat);
-			if (template.Find(name) is IParameterNode existing)
-			{
-				existing.SetValue(value);
-				return existing;
-			}
-
-			var index = paramFormat == ParameterFormat.Copy ? template.FindCopyParameter(false) : -1;
-			if (index == -1)
-			{
-				retval = template.Factory.ParameterNodeFromParts(name, value);
-				template.Parameters.Add(retval);
-				return retval;
-			}
-
-			var previous = template.Parameters[index];
-			retval = template.Factory.ParameterNodeFromOther(previous, name, value);
-			template.Parameters.Insert(index + 1, retval);
-			return retval;
-		}
 
 		/// <summary>Finds a numbered parameter, whether it's anonymous or a numerically named parameter.</summary>
 		/// <param name="template">The template to work on.</param>
@@ -710,15 +666,45 @@
 		/// <param name="name">The name of the parameter to add.</param>
 		/// <param name="value">The value of the parameter to add.</param>
 		/// <returns>The parameter that was altered.</returns>
-		public static IParameterNode Update(this ITemplateNode template, string name, string value)
+		public static IParameterNode? Update(this ITemplateNode template, string name, string? value) => Update(template, name, value, ParameterFormat.Copy);
+
+		/// <summary>Adds a new parameter to the template. Optionally, copies the format of the previous named parameter, if there is one, then adds the parameter after it.</summary>
+		/// <param name="template">The template to work on.</param>
+		/// <param name="name">The name of the parameter to add.</param>
+		/// <param name="value">The value of the parameter to add.</param>
+		/// <param name="format">The type of formatting to apply to the parameter value if being added. For existing parameters, the existing format will be retained.</param>
+		/// <returns>The added parameter.</returns>
+		/// <exception cref="InvalidOperationException">Thrown when the parameter is not found.</exception>
+		public static IParameterNode? Update(this ITemplateNode template, string name, string? value, ParameterFormat format)
 		{
-			if (template.Find(name) is IParameterNode parameter)
+			Guard.Against.Null(template, nameof(template));
+			Guard.Against.Null(name, nameof(name));
+			IParameterNode retval;
+			if (value == null)
 			{
-				parameter.SetValue(value);
-				return parameter;
+				template.Remove(name);
+				return null;
 			}
 
-			return template.Add(name, value);
+			if (template.Find(name) is IParameterNode existing)
+			{
+				existing.SetValue(value, format);
+				return existing;
+			}
+
+			var index = format == ParameterFormat.Copy ? template.FindCopyParameter(false) : -1;
+			if (index == -1)
+			{
+				value = TrimValue(value, format);
+				retval = template.Factory.ParameterNodeFromParts(name, value);
+				template.Parameters.Add(retval);
+				return retval;
+			}
+
+			var previous = template.Parameters[index];
+			retval = template.Factory.ParameterNodeFromOther(previous, name, value);
+			template.Parameters.Insert(index + 1, retval);
+			return retval;
 		}
 
 		/// <summary>Updates a parameter value if the current value is entirely whitespace or the parameter is missing.</summary>
@@ -730,9 +716,9 @@
 		{
 			if (template.Find(name) is IParameterNode parameter)
 			{
-				if (parameter.Value.ToRaw().Trim().Length == 0)
+				if (parameter.Value.ToValue().Trim().Length == 0)
 				{
-					parameter.SetValue(value);
+					Update(template, name, value);
 				}
 
 				return parameter;
@@ -909,21 +895,6 @@
 			return -1;
 		}
 
-		private static string FormatValue(string? value, ParameterFormat paramFormat)
-		{
-			value ??= string.Empty;
-			value = paramFormat switch
-			{
-				ParameterFormat.NoChange => value,
-				ParameterFormat.PackedTrail => value.TrimEnd(),
-				ParameterFormat.Packed => value.Trim(),
-				ParameterFormat.OnePerLine => value.TrimEnd() + '\n',
-				ParameterFormat.Copy => value.Trim(),
-				_ => value,
-			};
-			return value;
-		}
-
 		private static (string Leading, string Trailing) GetSurroundingSpace(string old)
 		{
 			string trailingLine;
@@ -940,6 +911,21 @@
 			var leadingMatch = LeadingSpace.Match(old);
 			var trailingMatch = TrailingSpace.Match(old);
 			return (leadingMatch.Value, ((leadingMatch.Index == trailingMatch.Index) ? string.Empty : trailingMatch.Value) + trailingLine);
+		}
+
+		private static string TrimValue(string? value, ParameterFormat paramFormat)
+		{
+			value ??= string.Empty;
+			value = paramFormat switch
+			{
+				ParameterFormat.NoChange => value,
+				ParameterFormat.PackedTrail => value.TrimEnd(),
+				ParameterFormat.Packed => value.Trim(),
+				ParameterFormat.OnePerLine => value.TrimEnd() + '\n',
+				ParameterFormat.Copy => value.Trim(),
+				_ => value,
+			};
+			return value;
 		}
 		#endregion
 	}
