@@ -112,7 +112,7 @@
 			}
 
 			link.Value.Clear();
-			link.SetValue(replacement.To.PageName);
+			link.SetValue(replacement.To.PageName, ParameterFormat.Copy);
 			if (this.NamespaceList.FromTitle(replacement.To) is not UespNamespace newNs || !string.Equals(oldNs.Id, newNs.Id, StringComparison.Ordinal))
 			{
 				return;
@@ -124,7 +124,7 @@
 			}
 			else
 			{
-				nsParam.SetValue(newNs.Id);
+				nsParam.SetValue(newNs.Id, ParameterFormat.Copy);
 			}
 
 			if (replacement.To.SimpleEquals(newNs.MainPage))
@@ -177,8 +177,8 @@
 				if (template.Find(1) is IParameterNode param1 &&
 					template.Find(2) is IParameterNode param2)
 				{
-					param1.SetValue(abbr);
-					param2.SetValue(name);
+					param1.SetValue(abbr, ParameterFormat.Copy);
+					param2.SetValue(name, ParameterFormat.Copy);
 				}
 			}
 		}
@@ -228,7 +228,7 @@
 				&& this.replacements.TryGetValue(title, out var replacement)
 				&& replacement.To is Title toLink)
 			{
-				param.SetValue(toLink.FullPageName);
+				param.SetValue(toLink.FullPageName, ParameterFormat.Copy);
 			}
 		}
 
@@ -241,7 +241,7 @@
 					&& this.replacements.TryGetValue(title, out var replacement)
 					&& replacement.To is Title toLink)
 				{
-					param.SetValue(toLink.PageName);
+					param.SetValue(toLink.PageName, ParameterFormat.Copy);
 					return;
 				}
 
@@ -250,7 +250,7 @@
 					&& this.replacements.TryGetValue(title2, out var replacement2)
 					&& replacement2.To is Title toLink2)
 				{
-					param.SetValue(toLink2.PageName);
+					param.SetValue(toLink2.PageName, ParameterFormat.Copy);
 				}
 			}
 		}
@@ -274,7 +274,7 @@
 					&& replacement.To is Title toLink
 					&& replacement.From.Namespace.Id == toLink.Namespace.Id)
 				{
-					param.SetValue(toLink.PageName);
+					param.SetValue(toLink.PageName, ParameterFormat.Copy);
 				}
 			}
 		}
@@ -286,7 +286,7 @@
 				&& this.replacements.TryGetValue(title, out var replacement)
 				&& replacement.To.Namespace == ns)
 			{
-				param.SetValue(replacement.To.PageName);
+				param.SetValue(replacement.To.PageName, ParameterFormat.Copy);
 			}
 		}
 		#endregion

@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Data;
 	using System.Globalization;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
@@ -21,20 +22,15 @@
 	internal sealed class EsoFurnishingUpdater : ParsedPageJob
 	{
 		#region Private Static Fields
-		private static readonly string Query = "SELECT * FROM uesp_esolog.minedItemSummary WHERE type=" + (int)ItemType.Furnishing;
+		private static readonly string Query = $"SELECT itemId, name, furnCategory, quality, tags, description, abilityDesc, resultitemLink FROM uesp_esolog.minedItemSummary WHERE type IN({(int)ItemType.Recipes}, {(int)ItemType.Furnishing});";
 		#endregion
 
 		#region Fields
 		private readonly Dictionary<int, Furnishing> furnishings = new();
 		private readonly List<string> fileMessages = new();
 		private readonly List<string> pageMessages = new();
+		//// private readonly Dictionary<Title, Furnishing> furnishingDictionary = new(SimpleTitleComparer.Instance);
 		#endregion
-
-		/*
-		#region Fields
-		private readonly Dictionary<Title, Furnishing> furnishingDictionary = new(SimpleTitleComparer.Instance);
-		#endregion
-		*/
 
 		#region Constructors
 		[JobInfo("ESO Furnishing Updater", "|ESO")]
@@ -81,7 +77,7 @@
 			furnishingFiles.GetNamespace(MediaWikiNamespaces.File, CommonCode.Filter.Any, "ON-item-furnishing-");
 			*/
 
-			foreach (var furnishing in Database.RunQuery(EsoLog.Connection, Query, Furnishing.Create))
+			foreach (var furnishing in Database.RunQuery(EsoLog.Connection, Query, (IDataRecord record) => new Furnishing(record, this.Site)))
 			{
 				this.furnishings.Add(furnishing.Id, furnishing);
 			}
@@ -91,15 +87,54 @@
 
 		protected override void ParseText(object sender, ContextualParser parsedPage)
 		{
-			var title = parsedPage.Page;
+			var page = parsedPage.Page;
 			if (parsedPage.FindSiteTemplate("Online Furnishing Summary") is SiteTemplateNode template)
 			{
-				if (this.DoPageChecks(template, title) is string pageMessage)
+				if (template.GetValue("id") is string idText &&
+					!string.IsNullOrEmpty(idText) &&
+					int.TryParse(idText, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, page.Site.Culture, out var id))
 				{
-					this.pageMessages.Add(pageMessage);
+					var collectible = string.IsNullOrEmpty(template.GetValue("collectible"));
+					if (collectible && this.furnishings.TryGetValue(id, out var furnishing))
+					{
+						if (this.DoPageChecks(page, id) is string pageMessage)
+						{
+							this.pageMessages.Add(pageMessage);
+						}
+
+						if (!page.PageNameEquals(furnishing.PageName))
+						{
+							this.pageMessages.Add($"Page name mismatch: {furnishing.PageName} != {page.PageName}");
+						}
+
+						if (furnishing.TitleName != null)
+						{
+							template.Update("titlename", furnishing.TitleName, ParameterFormat.NoChange);
+						}
+
+						template.Update("cat", furnishing.FurnitureCategory, ParameterFormat.OnePerLine);
+						template.Update("subcat", furnishing.FurnitureSubcategory, ParameterFormat.OnePerLine);
+						template.Update("desc", furnishing.Description, ParameterFormat.OnePerLine);
+						template.Update("quality", furnishing.Quality, ParameterFormat.OnePerLine);
+						template.Update("tags", furnishing.Tags, ParameterFormat.OnePerLine);
+						template.Update("skillsIngredients", furnishing.AbilityDescription, ParameterFormat.OnePerLine);
+						//// template.AddOrChange("result", )
+						/*
+									public string AbilityDescription { get; }
+									public int ResultItemLink { get; }
+									public string Tags { get; }
+						*/
+					}
+					else if (!collectible)
+					{
+					}
+					else
+					{
+						this.WriteLine($"{id} ({page.PageName}) not found.");
+					}
 				}
 
-				if (this.DoImageChecks(template, title) is string fileMessage)
+				if (this.DoImageChecks(template, page) is string fileMessage)
 				{
 					this.fileMessages.Add(fileMessage);
 				}
@@ -123,50 +158,81 @@
 					$":{fileNameFix}";
 		}
 
-		private string? DoPageChecks(SiteTemplateNode template, Page page)
-		{
-			if (template.GetValue("id") is string idText &&
-				!string.IsNullOrEmpty(idText) &&
-				int.TryParse(idText, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, page.Site.Culture, out var id))
-			{
-				if (this.furnishings.TryGetValue(id, out var furnishing))
-				{
-					if (!string.Equals(furnishing.Name, page.LabelName(), StringComparison.Ordinal))
-					{
-						return
-							$":[[{page.FullPageName}|{page.LabelName()}]] ''should be''\n" +
-							$":{furnishing.Name}";
-					}
-				}
-			}
-
-			return null;
-		}
+		private string? DoPageChecks(Page page, int id) =>
+			this.furnishings.TryGetValue(id, out var furnishing) &&
+			!string.Equals(furnishing.PageName, page.LabelName(), StringComparison.Ordinal)
+				? $":[[{page.FullPageName}|{page.LabelName()}]] ''should be''\n" +
+					$":{furnishing.PageName}"
+				: null;
 		#endregion
 
 		#region Private Classes
 		private sealed class Furnishing
 		{
 			#region Constructors
-			public Furnishing(IDataRecord record)
+			public Furnishing(IDataRecord record, Site site)
 			{
 				this.Id = (int)record["itemId"];
-				this.Name = (string)record["name"];
+				var titleName = (string)record["name"];
+				this.PageName = site.SanitizePageName(titleName);
+				if (!string.Equals(this.PageName, titleName, StringComparison.Ordinal))
+				{
+					this.TitleName = titleName;
+				}
+
+				var furnCategory = (string)record["furnCategory"];
+				if (!string.IsNullOrEmpty(furnCategory))
+				{
+					var furnSplit = furnCategory.Split(TextArrays.Colon, 2);
+					if (furnSplit.Length > 0)
+					{
+						this.FurnitureCategory = furnSplit[0];
+						this.FurnitureSubcategory = furnSplit[1]
+							.Split(TextArrays.Parentheses)[0]
+							.TrimEnd();
+					}
+				}
+
+				this.Quality = (string)record["quality"];
+				this.Tags = (string)record["tags"];
+				this.Description = (string)record["description"];
+				this.AbilityDescription = (string)record["abilityDesc"];
+				var itemLinkText = (string)record["resultitemLink"];
+				var itemLinkOffset1 = itemLinkText.IndexOf(":item:", StringComparison.Ordinal) + 6;
+				if (itemLinkOffset1 != 5 &&
+					itemLinkText.IndexOf(':', itemLinkOffset1) is var itemLinkOffset2 &&
+					itemLinkOffset2 != -1 &&
+					int.TryParse(itemLinkText[itemLinkOffset1..itemLinkOffset2], NumberStyles.Integer, site.Culture, out var itemLink))
+				{
+					this.ResultItemLink = itemLink;
+				}
 			}
 			#endregion
 
 			#region Public Properties
-			public int Id { get; set; }
+			public string AbilityDescription { get; }
 
-			public string Name { get; set; }
-			#endregion
+			public string Description { get; }
 
-			#region Public Static Methods
-			public static Furnishing Create(IDataRecord record) => new(record);
+			public string? FurnitureCategory { get; }
+
+			public string? FurnitureSubcategory { get; }
+
+			public int Id { get; }
+
+			public string PageName { get; }
+
+			public string Quality { get; }
+
+			public int ResultItemLink { get; }
+
+			public string Tags { get; }
+
+			public string? TitleName { get; }
 			#endregion
 
 			#region Public Override Methods
-			public override string ToString() => this.Name;
+			public override string ToString() => $"({this.Id}) {this.TitleName}";
 			#endregion
 		}
 		#endregion

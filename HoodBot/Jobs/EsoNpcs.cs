@@ -194,7 +194,7 @@
 						var value = loc.Value.ToValue().TrimEnd();
 						if (!string.Equals(value, locText, StringComparison.Ordinal))
 						{
-							loc.SetValue(loc.IsNullOrWhitespace() ? locText : (value + ", " + locText));
+							loc.SetValue(loc.IsNullOrWhitespace() ? locText : (value + ", " + locText), ParameterFormat.Copy);
 						}
 					}
 					else
