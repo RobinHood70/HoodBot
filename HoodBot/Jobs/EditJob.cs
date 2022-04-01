@@ -50,7 +50,7 @@
 
 		protected void SavePage(Page page, string editSummary, bool isMinor)
 		{
-			page.ThrowNull(nameof(page));
+			page.ThrowNull();
 			var saved = false;
 			while (!saved)
 			{
@@ -82,7 +82,7 @@
 		protected void SavePages(PageCollection pages, string status, SaveInfo defaultSaveInfo, Action<EditJob, Page>? editConflictAction)
 		{
 			this.StatusWriteLine(status);
-			pages.NotNull(nameof(pages)).RemoveChanged(false);
+			pages.NotNull().RemoveChanged(false);
 			if (pages.Count == 0)
 			{
 				this.StatusWriteLine("No pages to save!");

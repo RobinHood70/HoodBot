@@ -21,9 +21,9 @@
 		/// <param name="defaultValue">The default value. May be null or an empty collection. If populated, this should preferentially be either a single ParameterNode or a collection of IWikiNodes representing the default value itself. For compatibility with MediaWiki, it can also be a list of parameter nodes, in which case, these will be added as individual entries to the <see cref="ExtraValues"/> collection.</param>
 		public ArgumentNode(IWikiNodeFactory factory, IEnumerable<IWikiNode> name, IList<IParameterNode> defaultValue)
 		{
-			this.Factory = factory.NotNull(nameof(factory));
-			this.Name = new NodeCollection(factory, name.NotNull(nameof(name)));
-			if (defaultValue.NotNull(nameof(defaultValue)).Count > 0)
+			this.Factory = factory.NotNull();
+			this.Name = new NodeCollection(factory, name.NotNull());
+			if (defaultValue.NotNull().Count > 0)
 			{
 				foreach (var parameter in defaultValue)
 				{

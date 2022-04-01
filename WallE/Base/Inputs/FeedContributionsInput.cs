@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public FeedContributionsInput(string user)
 		{
-			this.User = user.NotNullOrWhiteSpace(nameof(user));
+			this.User = user.NotNullOrWhiteSpace();
 		}
 		#endregion
 

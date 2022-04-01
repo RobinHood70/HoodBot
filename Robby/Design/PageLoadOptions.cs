@@ -89,7 +89,7 @@
 		/// <param name="modules">The set of modules to be loaded.</param>
 		public PageLoadOptions(PageLoadOptions copy, PageModules modules)
 		{
-			this.ConvertTitles = copy.NotNull(nameof(copy)).ConvertTitles;
+			this.ConvertTitles = copy.NotNull().ConvertTitles;
 			this.FollowRedirects = copy.FollowRedirects;
 			this.Modules = modules;
 			this.PageCreator = copy.PageCreator;

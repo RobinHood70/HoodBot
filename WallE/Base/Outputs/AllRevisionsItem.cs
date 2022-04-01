@@ -11,7 +11,7 @@ namespace RobinHood70.WallE.Base
 		internal AllRevisionsItem(int ns, string title, long pageId, IReadOnlyList<RevisionItem> revisions)
 		{
 			this.Namespace = ns;
-			this.FullPageName = title.NotNull(nameof(title));
+			this.FullPageName = title.NotNull();
 			this.PageId = pageId;
 			this.Revisions = revisions;
 		}

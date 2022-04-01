@@ -20,7 +20,7 @@
 		#region Constructors
 		internal Namespace(Site site, SiteInfoNamespace ns, HashSet<string> allNames)
 		{
-			this.Site = site.NotNull(nameof(site));
+			this.Site = site.NotNull();
 			this.Id = ns.Id;
 			this.hashCode = HashCode.Combine(site, ns.Id);
 			this.Flags = ns.Flags;
@@ -164,7 +164,7 @@
 		/// <returns>If the namespace isn't case sensitive, and the page name begins with a lower-case letter, returns the capitalized version of the page name; otherwise, the page name is returned unaltered.</returns>
 		public string CapitalizePageName(string pageName) =>
 			this.CaseSensitive ||
-			pageName.NotNull(nameof(pageName)).Length == 0
+			pageName.NotNull().Length == 0
 				? pageName
 				: pageName.UpperFirst(this.Site.Culture);
 

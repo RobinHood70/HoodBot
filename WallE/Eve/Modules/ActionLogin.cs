@@ -31,9 +31,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, LoginInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("name", input.UserName)
 				.AddHiddenIfNotNull("password", input.Password)
 				.AddIfNotNull("domain", input.Domain)
@@ -42,7 +42,7 @@
 
 		protected override LoginResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			return new LoginResult(
 				result: result.MustHaveString("result"),
 				reason: (string?)result["reason"],
@@ -53,7 +53,7 @@
 		}
 
 		protected override bool HandleWarning(string from, string text) => text
-			.NotNull(nameof(text))
+			.NotNull()
 			.StartsWith("Main-account login", StringComparison.Ordinal) || base.HandleWarning(from, text);
 		#endregion
 	}

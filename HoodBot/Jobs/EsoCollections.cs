@@ -293,7 +293,7 @@
 		{
 			var retval = this.Site.LoadPageText("Template:" + TemplateName + "/Blank");
 			var nowiki = retval
-				.NotNull(ValidationType.Value, nameof(retval))
+				.NotNull(ValidationType.Value)
 				.IndexOf("<nowiki>", StringComparison.Ordinal);
 			if (nowiki >= 0)
 			{

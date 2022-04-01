@@ -33,8 +33,8 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, EditInput input)
 		{
-			request.ThrowNull(nameof(request));
-			if (input.NotNull(nameof(input)).Text?.Length > GetMultipartThreshold)
+			request.ThrowNull();
+			if (input.NotNull().Text?.Length > GetMultipartThreshold)
 			{
 				request.Type = RequestType.PostMultipart;
 			}
@@ -70,7 +70,7 @@
 
 		protected override EditResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			return new EditResult(
 				result: result.MustHaveString("result"),
 				pageId: (long?)result.MustHave("pageid") ?? 0,

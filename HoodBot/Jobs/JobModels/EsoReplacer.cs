@@ -36,7 +36,7 @@
 		#region Constructors
 		public EsoReplacer(Site site)
 		{
-			this.site = site.NotNull(nameof(site));
+			this.site = site.NotNull();
 			this.RemoveableTemplates = new TitleCollection(
 				site,
 				MediaWikiNamespaces.Template,
@@ -65,12 +65,12 @@
 		#region Public Static Methods
 		public static string ConstructWarning(ContextualParser oldPage, ContextualParser newPage, ICollection<Title> titles, string warningType)
 		{
-			titles.ThrowNull(nameof(titles));
-			warningType.ThrowNull(nameof(warningType));
-			var nodes = oldPage.NotNull(nameof(oldPage)).Clone();
+			titles.ThrowNull();
+			warningType.ThrowNull();
+			var nodes = oldPage.NotNull().Clone();
 			nodes.RemoveAll<IIgnoreNode>();
 			var oldText = nodes.ToRaw().Trim();
-			nodes = newPage.NotNull(nameof(newPage)).Clone();
+			nodes = newPage.NotNull().Clone();
 			nodes.RemoveAll<IIgnoreNode>();
 			var newText = nodes.ToRaw().Trim();
 			var warning = new StringBuilder()
@@ -215,7 +215,7 @@
 
 		public static void ReplaceFirstLink(NodeCollection nodes, TitleCollection usedList)
 		{
-			for (var i = 0; i < nodes.NotNull(nameof(nodes)).Count; i++)
+			for (var i = 0; i < nodes.NotNull().Count; i++)
 			{
 				if (nodes[i] is ITextNode textNode && ReplaceLink(nodes.Factory, textNode.Text, usedList) is NodeCollection newNodes)
 				{
@@ -384,10 +384,10 @@
 
 		private static NodeCollection? ReplaceLink(IWikiNodeFactory factory, string text, TitleCollection usedList)
 		{
-			usedList.ThrowNull(nameof(usedList));
+			usedList.ThrowNull();
 			HashSet<string> foundReplacements = new(StringComparer.Ordinal);
 			var textLength = text.Length;
-			NodeCollection retval = new(factory.NotNull(nameof(factory)));
+			NodeCollection retval = new(factory.NotNull());
 			var start = 0;
 			for (var i = 0; i < textLength; i++)
 			{

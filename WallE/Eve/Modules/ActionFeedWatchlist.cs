@@ -30,9 +30,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, FeedWatchlistInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("feedformat", input.FeedFormat)
 				.AddIfPositive("hours", input.Hours > 72 ? 72 : input.Hours)
 				.Add("linktosections", input.LinkToSections)

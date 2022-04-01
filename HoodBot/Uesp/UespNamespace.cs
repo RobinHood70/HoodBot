@@ -8,7 +8,7 @@
 		#region Constructors
 		internal UespNamespace(Site site, string line)
 		{
-			var nsData = string.Concat(line.NotNull(nameof(line)), ";;;;;;").Split(TextArrays.Semicolon);
+			var nsData = string.Concat(line.NotNull(), ";;;;;;").Split(TextArrays.Semicolon);
 			for (var i = 0; i < nsData.Length; i++)
 			{
 				nsData[i] = nsData[i].Trim();

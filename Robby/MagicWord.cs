@@ -12,7 +12,7 @@
 		protected internal MagicWord(SiteInfoMagicWord word)
 		{
 			// Assumes dictionary will hold Id.
-			this.CaseSensitive = word.NotNull(nameof(word)).CaseSensitive;
+			this.CaseSensitive = word.NotNull().CaseSensitive;
 			this.Aliases = new HashSet<string>(word.Aliases, System.StringComparer.Ordinal);
 		}
 

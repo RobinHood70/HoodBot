@@ -27,7 +27,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			if (result != null)
 			{
-				this.DeserializeParentToPage(result, page.NotNull(nameof(page)));
+				this.DeserializeParentToPage(result, page.NotNull());
 				if (result[this.ResultName] is JToken node && node.Type != JTokenType.Null)
 				{
 					this.DeserializeToPage(node, page);

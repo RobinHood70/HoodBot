@@ -97,7 +97,7 @@ namespace RobinHood70.WallE.Base
 		#region Public Static Methods
 		public static ParseInput FromOldId(long oldId) => new() { OldId = oldId };
 
-		public static ParseInput FromPage(string page) => new() { Page = page.NotNull(nameof(page)) };
+		public static ParseInput FromPage(string page) => new() { Page = page.NotNull() };
 
 		public static ParseInput FromPageId(long pageId) => new() { PageId = pageId };
 
@@ -105,7 +105,7 @@ namespace RobinHood70.WallE.Base
 
 		// Odd that someone would pass whitespace here, but not inconceivable, so only check text for null. Title can be null, so no check.
 		public static ParseInput FromText(string text, string? title) =>
-			new() { Text = text.NotNull(nameof(text)), Title = title };
+			new() { Text = text.NotNull(), Title = title };
 		#endregion
 	}
 }

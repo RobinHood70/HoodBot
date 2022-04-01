@@ -28,9 +28,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, UndeleteInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Add("title", input.Title)
 				.AddIfNotNull("reason", input.Reason)
 				.AddIf("tags", input.Tags, this.SiteVersion >= 125)
@@ -42,7 +42,7 @@
 
 		protected override UndeleteResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			var title = result.MustHaveString("title");
 			return new UndeleteResult(
 				ns: this.FindRequiredNamespace(title),

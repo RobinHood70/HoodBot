@@ -28,9 +28,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, MergeHistoryInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("from", input.From)
 				.AddIfPositive("fromid", input.FromId)
 				.AddIfNotNull("to", input.To)
@@ -42,7 +42,7 @@
 
 		protected override MergeHistoryResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			return new MergeHistoryResult(
 				from: result.MustHaveString("from"),
 				reason: result.MustHaveString("reason"),

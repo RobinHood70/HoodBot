@@ -14,7 +14,7 @@
 		/// <param name="contributionItem">The <see cref="UserContributionsItem"/>.</param>
 		protected internal Revision(UserContributionsItem contributionItem)
 		{
-			this.Anonymous = contributionItem.NotNull(nameof(contributionItem)).UserId == 0;
+			this.Anonymous = contributionItem.NotNull().UserId == 0;
 			this.Comment = contributionItem.Comment;
 			this.Id = contributionItem.RevisionId;
 			this.Minor = (contributionItem.Flags & UserContributionFlags.Minor) != 0;
@@ -28,7 +28,7 @@
 		/// <param name="revisionItem">The <see cref="RevisionItem"/>.</param>
 		protected internal Revision(RevisionItem revisionItem)
 		{
-			this.Anonymous = (revisionItem.NotNull(nameof(revisionItem)).Flags & RevisionFlags.Anonymous) != 0;
+			this.Anonymous = (revisionItem.NotNull().Flags & RevisionFlags.Anonymous) != 0;
 			this.Comment = revisionItem.Comment;
 			this.Id = revisionItem.RevisionId;
 			this.Minor = (revisionItem.Flags & RevisionFlags.Minor) != 0;

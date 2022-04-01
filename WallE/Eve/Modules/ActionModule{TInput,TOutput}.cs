@@ -60,7 +60,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Private Methods
 		private Request CreateRequest(TInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			var request = this.CreateBaseRequest();
 			request.Prefix = this.Prefix;
 			this.BuildRequestLocal(request, input);
@@ -71,7 +71,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		private TOutput ParseResponse(string? response)
 		{
-			response.ThrowNull(nameof(response));
+			response.ThrowNull();
 			if (this.ForceCustomDeserialization)
 			{
 				return this.DeserializeCustom(response);

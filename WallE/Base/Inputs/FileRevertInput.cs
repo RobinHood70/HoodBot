@@ -8,8 +8,8 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public FileRevertInput(string fileName, string archiveName)
 		{
-			this.FileName = fileName.NotNullOrWhiteSpace(nameof(fileName));
-			this.ArchiveName = archiveName.NotNullOrWhiteSpace(nameof(archiveName));
+			this.FileName = fileName.NotNullOrWhiteSpace();
+			this.ArchiveName = archiveName.NotNullOrWhiteSpace();
 		}
 		#endregion
 

@@ -24,7 +24,7 @@
 		public ActionQueryPageSet(WikiAbstractionLayer wal, QueryInput input, TitleCreator<PageItem> pageFactory)
 			: base(wal)
 		{
-			this.pageFactory = pageFactory.NotNull(nameof(pageFactory));
+			this.pageFactory = pageFactory.NotNull();
 			this.input = input;
 			var props =
 				(((wal.ValidStopCheckMethods & StopCheckMethods.UserNameCheck) != 0 && wal.SiteVersion < 128) ? UserInfoProperties.BlockInfo : UserInfoProperties.None)
@@ -143,7 +143,7 @@
 
 		protected override void DeserializeActionExtra(JToken result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			base.DeserializeActionExtra(result);
 			List<IQueryModule> list = new(this.AllModules);
 			if (this.Generator != null)
@@ -156,7 +156,7 @@
 
 		protected override void DeserializeResult(JToken result, IList<PageItem> pages)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			this.GetPageSetNodes(result);
 			if (result["pages"] is JToken pagesNode)
 			{
@@ -177,7 +177,7 @@
 
 		protected override PageItem GetItem(JToken result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			if (this.pageFactory == null)
 			{
 				throw new InvalidOperationException(EveMessages.PageFactoryNotSet);
@@ -201,7 +201,7 @@
 		#region Private Methods
 		private void BuildRequestPageSet(Request request)
 		{
-			request.ThrowNull(nameof(request));
+			request.ThrowNull();
 			foreach (var module in this.input.PropertyModules)
 			{
 				if (!this.InactiveModules.Contains(module.Name))
@@ -221,7 +221,7 @@
 
 		private void DeserializePages(JToken result, IList<PageItem> pagesIn)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			KeyedPages pages = (KeyedPages)pagesIn;
 			foreach (var page in result)
 			{

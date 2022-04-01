@@ -66,7 +66,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		public virtual PageSetResult<TOutput> Submit(TInput input)
 		{
 			this.Wal.ClearWarnings();
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			if (input.GeneratorInput is IGeneratorInput genInput)
 			{
 				this.Generator = this.Wal.ModuleFactory.CreateGenerator(genInput, this);
@@ -143,7 +143,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected void GetPageSetNodes(JToken result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			if (result["badrevids"] is JToken node)
 			{
 				foreach (var item in node)
@@ -176,7 +176,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		{
 			try
 			{
-				var result = ToJson(response.NotNull(nameof(response)));
+				var result = ToJson(response.NotNull());
 				if (result.Type == JTokenType.Object)
 				{
 					this.DeserializeAction(result);
@@ -219,7 +219,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Override Methods
 		protected override void DeserializeActionExtra(JToken result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			if (this.ContinueModule != null)
 			{
 				this.ContinueModule = this.ContinueModule.Deserialize(this.Wal, result);
@@ -230,7 +230,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected override bool HandleWarning(string from, string text)
 		{
-			text.ThrowNull(nameof(text));
+			text.ThrowNull();
 			if (string.Equals(from, this.Name, StringComparison.Ordinal) &&
 				TooManyFinder.Match(text) is var match &&
 				match.Success &&
@@ -249,8 +249,8 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected virtual void DeserializeResult(JToken result, IList<TOutput> pages)
 		{
-			pages.ThrowNull(nameof(pages));
-			foreach (var item in result.NotNull(nameof(result)))
+			pages.ThrowNull();
+			foreach (var item in result.NotNull())
 			{
 				pages.Add(this.GetItem(item));
 			}
@@ -273,7 +273,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Private Methods
 		private Request CreateRequest(TInput input, IEnumerable<string> currentGroup)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			var request = this.CreateBaseRequest();
 			request.Prefix = this.Prefix;
 			if (this.Generator != null)

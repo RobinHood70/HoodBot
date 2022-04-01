@@ -34,9 +34,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, FileRepositoryInfoInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request)).Add("prop", input.Properties);
+				.NotNull().Add("prop", input.Properties);
 		}
 
 		protected override FileRepositoryInfoItem? GetItem(JToken result)

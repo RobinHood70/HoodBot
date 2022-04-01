@@ -14,7 +14,7 @@
 
 		#region Public Override Methods
 		public override void BuildRequest(Request request) => request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Add(ContinueModule2.ContinueName);
 
 		public override ContinueModule Deserialize(WikiAbstractionLayer wal, JToken parent)

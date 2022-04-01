@@ -1,7 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System.Collections.Generic;
-	using Ardalis.GuardClauses;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -46,7 +45,7 @@
 
 		protected override void ParseText(object sender, ContextualParser parser)
 		{
-			Guard.Against.Null(parser, nameof(parser));
+			parser.ThrowNull();
 			var nodes = parser;
 			var count = 0;
 			for (var nodeIndex = nodes.Count - 1; nodeIndex >= 0; nodeIndex--)

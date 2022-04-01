@@ -69,7 +69,7 @@
 		public IModuleFactory RegisterGenerator<T>(GeneratorFactoryMethod generatorFactoryMethod)
 			where T : IGeneratorInput
 		{
-			this.generators[typeof(T)] = generatorFactoryMethod.NotNull(nameof(generatorFactoryMethod));
+			this.generators[typeof(T)] = generatorFactoryMethod.NotNull();
 			return this;
 		}
 
@@ -80,7 +80,7 @@
 		public IModuleFactory RegisterProperty<T>(PropertyFactoryMethod propertyFactoryMethod)
 			where T : IPropertyInput
 		{
-			this.properties[typeof(T)] = propertyFactoryMethod.NotNull(nameof(propertyFactoryMethod));
+			this.properties[typeof(T)] = propertyFactoryMethod.NotNull();
 			return this;
 		}
 		#endregion

@@ -12,7 +12,7 @@
 		/// <param name="item">The <see cref="ProtectionsItem"/> to copy information from.</param>
 		public ProtectionEntry(ProtectionsItem item)
 		{
-			this.Expiry = item.NotNull(nameof(item)).Expiry;
+			this.Expiry = item.NotNull().Expiry;
 			this.Level = item.Level;
 		}
 

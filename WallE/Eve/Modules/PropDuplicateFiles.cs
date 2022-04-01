@@ -40,9 +40,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, DuplicateFilesInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Add("localonly", input.LocalOnly)
 				.AddIf("dir", "descending", input.SortDescending)
 				.Add("limit", this.Limit);

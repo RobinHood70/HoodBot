@@ -56,7 +56,7 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, SiteInfoInput input)
 		{
-			var prop = input.NotNull(nameof(input)).Properties;
+			var prop = input.NotNull().Properties;
 			if (this.SiteVersion != 0)
 			{
 				prop = FlagFilter
@@ -70,7 +70,7 @@
 			}
 
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddFlags("prop", prop)
 				.AddFilterPipedIf("filteriw", "local", input.FilterLocalInterwiki, (prop & SiteInfoProperties.InterwikiMap) != 0)
 				.AddIf("showalldb", input.ShowAllDatabases, (prop & SiteInfoProperties.DbReplLag) != 0)
@@ -80,7 +80,7 @@
 
 		protected override void DeserializeParent(JToken parent)
 		{
-			var (defaultSkin, skins) = GetSkins(parent.NotNull(nameof(parent)));
+			var (defaultSkin, skins) = GetSkins(parent.NotNull());
 			SiteInfoResult output = new(
 				general: this.GetGeneral(parent),
 				defaultOptions: GetDefaultOptions(parent),

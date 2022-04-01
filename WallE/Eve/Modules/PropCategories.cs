@@ -41,9 +41,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, CategoriesInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddFlags("prop", input.Properties)
 				.AddFilterPiped("show", "hidden", input.FilterHidden)
 				.Add("categories", input.Categories)

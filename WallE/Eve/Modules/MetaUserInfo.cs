@@ -33,19 +33,19 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, UserInfoInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			var prop = FlagFilter
 				.Check(this.SiteVersion, input.Properties)
 				.FilterBefore(124, UserInfoProperties.UnreadCount)
 				.FilterBefore(118, UserInfoProperties.ImplicitGroups | UserInfoProperties.RegistrationDate)
 				.FilterBefore(117, UserInfoProperties.AcceptLang)
 				.Value;
-			request.NotNull(nameof(request)).AddFlags("prop", prop);
+			request.NotNull().AddFlags("prop", prop);
 		}
 
 		protected override void DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			var token = result["changeablegroups"];
 			var changeableGroups = token == null ? null : new ChangeableGroupsInfo(
 				add: token.MustHave("add").GetList<string>(),

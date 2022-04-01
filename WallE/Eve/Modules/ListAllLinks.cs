@@ -55,11 +55,11 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, IAllLinksInput input)
 		{
-			var prop = input.NotNull(nameof(input)).LinkType == AllLinksTypes.Redirects ?
+			var prop = input.NotNull().LinkType == AllLinksTypes.Redirects ?
 				input.Properties :
 				input.Properties & (AllLinksProperties.Ids | AllLinksProperties.Title);
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("from", input.From)
 				.AddIfNotNull("to", input.To)
 				.AddIf("namespace", input.Namespace, input.LinkType != AllLinksTypes.FileUsages)

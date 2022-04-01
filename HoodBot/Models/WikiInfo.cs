@@ -43,7 +43,7 @@
 		#region Public Methods
 		public void FromJson(JToken json)
 		{
-			var api = (string?)json.NotNull(nameof(json))[nameof(this.Api)] ?? "/";
+			var api = (string?)json.NotNull()[nameof(this.Api)] ?? "/";
 			try
 			{
 				this.Api = new Uri(api, UriKind.RelativeOrAbsolute);

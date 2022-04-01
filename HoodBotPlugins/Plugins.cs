@@ -26,8 +26,13 @@
 		#region Constructors
 		private Plugins()
 		{
-			var folder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-			this.catalog = new DirectoryCatalog(folder + @"\Plugins", "*Diff*.dll");
+			var assemblyLocation = Assembly.GetExecutingAssembly().Location;
+			var folder =
+				Path.GetDirectoryName(assemblyLocation) ??
+				Path.GetPathRoot(assemblyLocation) ??
+				throw new InvalidOperationException();
+			folder = Path.Combine(folder, "Plugins");
+			this.catalog = new DirectoryCatalog(folder, searchPattern: "*Diff*.dll");
 			this.container = new CompositionContainer(this.catalog);
 			try
 			{

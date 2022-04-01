@@ -40,7 +40,7 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public SearchInput(string search)
 		{
-			this.Search = search.NotNullOrWhiteSpace(nameof(search));
+			this.Search = search.NotNullOrWhiteSpace();
 		}
 		#endregion
 

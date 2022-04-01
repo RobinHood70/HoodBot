@@ -37,9 +37,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, PrefixSearchInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("search", input.Search)
 				.Add("namespace", input.Namespaces)
 				.Add("limit", this.Limit);

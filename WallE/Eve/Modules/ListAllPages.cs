@@ -37,9 +37,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, AllPagesInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("from", input.From)
 				.AddIfNotNull("to", input.To)
 				.AddFilterText("prfiltercascade", "cascading", "noncascading", input.FilterCascading)

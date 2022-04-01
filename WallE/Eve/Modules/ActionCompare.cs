@@ -27,9 +27,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, CompareInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfPositive("fromid", input.FromId)
 				.AddIfPositive("fromrev", input.FromRevision)
 				.AddIfNotNull("fromtitle", input.FromTitle)
@@ -40,7 +40,7 @@
 
 		protected override CompareResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			return new CompareResult(
 				body: (string?)result["body"],
 				fromId: (int?)result["fromid"] ?? 0,

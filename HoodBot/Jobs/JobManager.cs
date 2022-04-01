@@ -15,7 +15,7 @@
 		#region Constructors
 		public JobManager(Site site, PauseToken pauseToken, CancellationToken cancellationToken)
 		{
-			this.Site = site.NotNull(nameof(site));
+			this.Site = site.NotNull();
 			this.CancellationToken = cancellationToken;
 			this.PauseToken = pauseToken;
 		}
@@ -54,7 +54,7 @@
 			this.OnStartingAllJobs();
 			var allSuccessful = true;
 			var editingEnabledMaster = this.Site.EditingEnabled;
-			foreach (var jobInfo in jobList.NotNull(nameof(jobList)))
+			foreach (var jobInfo in jobList.NotNull())
 			{
 				var abort = this.OnStartingJob(jobInfo);
 				if (abort)

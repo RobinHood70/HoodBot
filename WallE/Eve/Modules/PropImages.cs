@@ -41,9 +41,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ImagesInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIf("images", input.Images, this.SiteVersion >= 118)
 				.AddIf("dir", "descending", input.SortDescending && this.SiteVersion >= 119)
 				.Add("limit", this.Limit);

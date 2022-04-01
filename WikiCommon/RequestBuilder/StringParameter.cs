@@ -39,7 +39,7 @@
 		/// <param name="type">The type of data stored in the value.</param>
 		/// <remarks><see langword="null"/> is a valid value for this parameter type, so no input validation is performed.</remarks>
 		public StringParameter(string name, string? value, ValueType type)
-			: base(name.NotNull(nameof(name)))
+			: base(name.NotNull())
 		{
 			this.Value = value ?? string.Empty;
 			this.ValueType = type;
@@ -60,7 +60,7 @@
 		/// <summary>Accepts the specified visitor.</summary>
 		/// <param name="visitor">The visitor.</param>
 		/// <remarks>See Wikipedia's <see href="https://en.wikipedia.org/wiki/Visitor_pattern">Visitor pattern</see> article if you are not familiar with this pattern.</remarks>
-		public override void Accept(IParameterVisitor visitor) => visitor.NotNull(nameof(visitor)).Visit(this);
+		public override void Accept(IParameterVisitor visitor) => visitor.NotNull().Visit(this);
 
 		/// <summary>Returns a <see cref="string" /> that represents this instance.</summary>
 		/// <returns>A <see cref="string" /> that represents this instance.</returns>

@@ -40,7 +40,7 @@
 		#region Protected Override Methods
 		public override void BuildRequest(Request request)
 		{
-			request.ThrowNull(nameof(request));
+			request.ThrowNull();
 			if (this.Continues)
 			{
 				foreach (var entry in this.ContinueEntries)

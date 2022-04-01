@@ -40,12 +40,12 @@
 		protected override void BuildRequestLocal(Request request, ProtectedTitlesInput input)
 		{
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.NotNull(nameof(input)).Properties)
+				.Check(this.SiteVersion, input.NotNull().Properties)
 				.FilterBefore(117, ProtectedTitlesProperties.UserId)
 				.FilterBefore(116, ProtectedTitlesProperties.ParsedComment)
 				.Value;
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Add("namespace", input.Namespaces)
 				.Add("level", input.Levels)
 				.AddIf("dir", "newer", input.SortAscending)

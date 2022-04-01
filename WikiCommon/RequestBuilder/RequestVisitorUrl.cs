@@ -28,7 +28,7 @@
 		public static string Build(Request request)
 		{
 			StringBuilder sb = new();
-			RequestVisitorUrl visitor = new(sb, request.NotNull(nameof(request)).SupportsUnitSeparator);
+			RequestVisitorUrl visitor = new(sb, request.NotNull().SupportsUnitSeparator);
 			request.Build(visitor);
 			return sb.ToString();
 		}
@@ -46,7 +46,7 @@
 		/// <remarks>In all cases, the PipedParameter and PipedListParameter objects are treated identically, however the value collections they're associated with differ, so the Visit method is made generic to handle both.</remarks>
 		public void Visit(PipedParameter parameter)
 		{
-			this.BuildParameterName(parameter.NotNull(nameof(parameter)));
+			this.BuildParameterName(parameter.NotNull());
 			var value = parameter.BuildPipedValue(this.supportsUnitSeparator);
 			this.builder.Append(Globals.EscapeDataString(value));
 		}
@@ -55,7 +55,7 @@
 		/// <param name="parameter">The StringParameter object.</param>
 		public void Visit(StringParameter parameter)
 		{
-			this.BuildParameterName(parameter.NotNull(nameof(parameter)));
+			this.BuildParameterName(parameter.NotNull());
 			this.builder.Append(Globals.EscapeDataString(parameter.Value ?? string.Empty));
 		}
 		#endregion

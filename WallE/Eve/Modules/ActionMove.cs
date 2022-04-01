@@ -30,9 +30,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, MoveInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("from", input.From)
 				.AddIfPositive("fromid", input.FromId)
 				.AddIfNotNull("to", input.To)
@@ -50,7 +50,7 @@
 		protected override IReadOnlyList<MoveItem> DeserializeResult(JToken? result)
 		{
 			// Errors occur at multiple levels during a move operation and can represent partial success, so instead of throwing them, we gather them into the result and let the user figure out what to do.
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			List<MoveItem> list = new();
 			DeserializeMove(result, list, string.Empty);
 			DeserializeMove(result, list, "talk");

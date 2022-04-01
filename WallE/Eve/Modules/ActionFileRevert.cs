@@ -29,9 +29,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, FileRevertInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("filename", input.FileName)
 				.AddIfNotNull("archivename", input.ArchiveName)
 				.AddIfNotNull("comment", input.Comment)
@@ -40,7 +40,7 @@
 
 		protected override FileRevertResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			return new FileRevertResult(result.MustHaveString("result"));
 		}
 		#endregion

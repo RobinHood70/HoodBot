@@ -26,7 +26,7 @@
 		/// <summary>Initializes a new instance of the <see cref="PageCollection"/> class.</summary>
 		/// <param name="site">The site the pages are from. All pages in a collection must belong to the same site.</param>
 		public PageCollection(Site site)
-			: this(site, site.NotNull(nameof(site)).DefaultLoadOptions)
+			: this(site, site.NotNull().DefaultLoadOptions)
 		{
 		}
 
@@ -44,7 +44,7 @@
 		public PageCollection(Site site, PageLoadOptions options)
 			: base(site)
 		{
-			this.LoadOptions = options ?? site.NotNull(nameof(site)).DefaultLoadOptions;
+			this.LoadOptions = options ?? site.NotNull().DefaultLoadOptions;
 			this.pageCreator = this.LoadOptions.PageCreator;
 		}
 
@@ -55,7 +55,7 @@
 		public PageCollection(Site site, IPageSetResult result)
 			: this(site)
 		{
-			this.PopulateMapCollections(result.NotNull(nameof(result)));
+			this.PopulateMapCollections(result.NotNull());
 		}
 		#endregion
 
@@ -90,7 +90,7 @@
 		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry if the requested entry isn't found.</remarks>
 		public override Page this[string key]
 		{
-			get => this.TryGetValue(key.NotNull(nameof(key)), out var retval) ||
+			get => this.TryGetValue(key.NotNull(), out var retval) ||
 				(this.titleMap.TryGetValue(key, out var altKey) && this.TryGetValue(altKey, out retval))
 					? retval!
 					: throw new KeyNotFoundException();
@@ -105,7 +105,7 @@
 		/// <exception cref="KeyNotFoundException">Thrown when the title could not be found.</exception>
 		public override Page this[Title title]
 		{
-			get => this.TryGetValue(title.NotNull(nameof(title)), out var page)
+			get => this.TryGetValue(title.NotNull(), out var page)
 				? page
 				: throw new KeyNotFoundException();
 
@@ -203,7 +203,7 @@
 		/// <inheritdoc/>
 		public override bool TryGetValue(Page key, [MaybeNullWhen(false)] out Page value)
 		{
-			if (base.TryGetValue(key, out var retval) || (this.titleMap.TryGetValue(key.NotNull(nameof(key)).FullPageName, out var altKey) && base.TryGetValue(altKey, out retval)))
+			if (base.TryGetValue(key, out var retval) || (this.titleMap.TryGetValue(key.NotNull().FullPageName, out var altKey) && base.TryGetValue(altKey, out retval)))
 			{
 				value = retval;
 				return true;
@@ -216,7 +216,7 @@
 		/// <inheritdoc/>
 		public override bool TryGetValue(Title key, [MaybeNullWhen(false)] out Page value)
 		{
-			if (base.TryGetValue(key, out var retval) || (this.titleMap.TryGetValue(key.NotNull(nameof(key)).FullPageName, out var altKey) && base.TryGetValue(altKey, out retval)))
+			if (base.TryGetValue(key, out var retval) || (this.titleMap.TryGetValue(key.NotNull().FullPageName, out var altKey) && base.TryGetValue(altKey, out retval)))
 			{
 				value = retval;
 				return true;
@@ -229,7 +229,7 @@
 		/// <inheritdoc/>
 		public override bool TryGetValue(string key, [MaybeNullWhen(false)] out Page value)
 		{
-			if (base.TryGetValue(key.NotNull(nameof(key)), out var retval) || (this.titleMap.TryGetValue(key, out var altKey) && base.TryGetValue(altKey, out retval)))
+			if (base.TryGetValue(key.NotNull(), out var retval) || (this.titleMap.TryGetValue(key, out var altKey) && base.TryGetValue(altKey, out retval)))
 			{
 				value = retval;
 				return true;
@@ -250,7 +250,7 @@
 		{
 			// Currently only used for Purge, Watch, and Unwatch when returning fake results.
 			var retval = UnlimitedDefault(site);
-			foreach (var title in other.NotNull(nameof(other)))
+			foreach (var title in other.NotNull())
 			{
 				var page = retval.pageCreator.CreateEmptyPage(title);
 				retval[page] = page;
@@ -265,7 +265,7 @@
 		/// <returns>A <see cref="PageCollection"/> with the purge results.</returns>
 		internal static PageCollection Purge(Site site, PurgeInput input)
 		{
-			var result = site.NotNull(nameof(site)).AbstractionLayer.Purge(input);
+			var result = site.NotNull().AbstractionLayer.Purge(input);
 			var retval = UnlimitedDefault(site);
 			retval.PopulateMapCollections(result);
 			foreach (var item in result)
@@ -288,7 +288,7 @@
 		/// <returns>A <see cref="PageCollection"/> with the watch/unwatch results.</returns>
 		internal static PageCollection Watch(Site site, WatchInput input)
 		{
-			var result = site.NotNull(nameof(site)).AbstractionLayer.Watch(input);
+			var result = site.NotNull().AbstractionLayer.Watch(input);
 			PageCollection retval = new(site, result);
 			foreach (var item in result)
 			{
@@ -352,7 +352,7 @@
 		/// <param name="input">The input parameters.</param>
 		protected override void GetBacklinks(BacklinksInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			input.Title.ThrowNull(nameof(input), nameof(input.Title));
 			var inputTitle = CreateTitle.FromUnvalidated(this.Site, input.Title);
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && (input.LinkTypes & BacklinksTypes.ImageUsage) != 0)
@@ -381,7 +381,7 @@
 		/// <param name="recurse">if set to <see langword="true"/> load the entire category tree recursively.</param>
 		protected override void GetCategoryMembers(CategoryMembersInput input, bool recurse)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			if (recurse)
 			{
 				this.RecurseCategoryPages(input, new HashSet<string>(StringComparer.Ordinal));
@@ -496,9 +496,9 @@
 		/// <param name="pageValidator">A function which validates whether a page can be added to the collection.</param>
 		protected virtual void LoadPages(QueryPageSetInput pageSetInput, Func<Page, bool> pageValidator)
 		{
-			pageValidator.NotNull(nameof(pageValidator));
+			pageValidator.NotNull();
 			var options = this.LoadOptions;
-			pageSetInput.NotNull(nameof(pageSetInput)).ConvertTitles = options.ConvertTitles;
+			pageSetInput.NotNull().ConvertTitles = options.ConvertTitles;
 			pageSetInput.Redirects = options.FollowRedirects;
 			if (pageSetInput.GeneratorInput is ILimitableInput limited)
 			{

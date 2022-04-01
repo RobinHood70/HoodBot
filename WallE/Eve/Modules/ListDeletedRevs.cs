@@ -30,7 +30,7 @@
 		protected override void BuildRequestLocal(Request request, ListDeletedRevisionsInput input)
 		{
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.NotNull(nameof(input)).Properties)
+				.Check(this.SiteVersion, input.NotNull().Properties)
 				.FilterBefore(123, DeletedRevisionsProperties.Tags)
 				.FilterBefore(119, DeletedRevisionsProperties.Sha1)
 				.FilterBefore(118, DeletedRevisionsProperties.ParentId)
@@ -38,7 +38,7 @@
 				.FilterBefore(116, DeletedRevisionsProperties.ParsedComment)
 				.Value;
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Add("start", input.Start)
 				.Add("end", input.End)
 				.AddIf("dir", "newer", input.SortAscending)

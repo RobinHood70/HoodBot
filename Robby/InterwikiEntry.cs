@@ -16,7 +16,7 @@
 		protected internal InterwikiEntry(Site site, SiteInfoInterwikiMap item)
 		{
 			this.Site = site;
-			this.Language = item.NotNull(nameof(item)).Language;
+			this.Language = item.NotNull().Language;
 			this.LocalFarm = (item.Flags & InterwikiMapFlags.Local) != 0;
 			this.LocalWiki = (item.Flags & InterwikiMapFlags.LocalInterwiki) != 0;
 			this.Path = item.Url;

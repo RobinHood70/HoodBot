@@ -28,9 +28,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, UserRightsInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("user", input.User)
 				.AddIfPositiveIf("userid", input.UserId, this.SiteVersion >= 123)
 				.Add("add", input.Add)
@@ -41,7 +41,7 @@
 
 		protected override UserRightsResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			return new UserRightsResult(
 				user: result.MustHaveString("user"),
 				userId: (long?)result["userid"] ?? 0,

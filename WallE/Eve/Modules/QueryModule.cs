@@ -28,9 +28,9 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Constructors
 		protected QueryModule([NotNull, ValidatedNotNull] WikiAbstractionLayer wal, [NotNull, ValidatedNotNull] TInput input, IPageSetGenerator? pageSetGenerator)
 		{
-			this.Wal = wal.NotNull(nameof(wal));
+			this.Wal = wal.NotNull();
 			this.SiteVersion = wal.SiteVersion;
-			this.Input = input.NotNull(nameof(input));
+			this.Input = input.NotNull();
 			if (input is ILimitableInput limitable)
 			{
 				this.maxItems = limitable.MaxItems;
@@ -106,7 +106,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Public Virtual Methods
 		public virtual void BuildRequest(Request request)
 		{
-			request.ThrowNull(nameof(request));
+			request.ThrowNull();
 			if (this.ModuleType != null && !this.IsGenerator)
 			{
 				request.Prefix = string.Empty;

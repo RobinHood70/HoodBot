@@ -7,7 +7,7 @@
 	{
 		public SelectedItemChangedEventArgs(TreeNode node, bool selected)
 		{
-			this.Node = node.NotNull(nameof(node));
+			this.Node = node.NotNull();
 			this.Selected = selected;
 		}
 

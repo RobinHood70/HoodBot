@@ -25,7 +25,7 @@
 		#region Constructors
 		public Place(VariablesPage page)
 		{
-			this.Alliance = page.NotNull(nameof(page)).GetVariable("alliance");
+			this.Alliance = page.NotNull().GetVariable("alliance");
 			this.Key = page.PageName;
 			this.Settlement = page.GetVariable("settlement");
 			this.Title = new Title(page);
@@ -37,7 +37,7 @@
 		// For ad-hoc places created when no place was found.
 		public Place(string titleName)
 		{
-			this.TitleName = titleName.NotNull(nameof(titleName));
+			this.TitleName = titleName.NotNull();
 			this.Key = titleName;
 		}
 		#endregion
@@ -69,9 +69,9 @@
 		#region Public Static Methods
 		public static Place Copy(string titleName, Place other)
 		{
-			Place retval = new(titleName.NotNull(nameof(titleName)))
+			Place retval = new(titleName.NotNull())
 			{
-				Alliance = other.NotNull(nameof(other)).Alliance,
+				Alliance = other.NotNull().Alliance,
 				Settlement = other.Settlement,
 				Title = other.Title,
 				PlaceType = other.PlaceType,

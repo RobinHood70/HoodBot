@@ -31,9 +31,9 @@
 		protected override void BuildRequestLocal(Request request, UploadInputInternal input)
 		{
 			// Upload by URL is not implemented due to rarity of use and the level of complexity it adds to the code.
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("filename", input.FileName)
 				.AddIfNotNull("comment", input.Comment)
 				.AddIfNotNull("text", input.Text)
@@ -51,7 +51,7 @@
 
 		protected override UploadResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			var resultText = result.MustHaveString("result");
 			IReadOnlyList<string> duplicates = new List<string>();
 			Dictionary<string, string> outputWarnings = new(System.StringComparer.Ordinal);

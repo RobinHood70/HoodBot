@@ -25,7 +25,7 @@
 		/// <param name="factory">The factory to use to create new nodes.</param>
 		public NodeCollection(IWikiNodeFactory factory)
 		{
-			this.Factory = factory.NotNull(nameof(factory));
+			this.Factory = factory.NotNull();
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="NodeCollection"/> class.</summary>
@@ -34,7 +34,7 @@
 		public NodeCollection(IWikiNodeFactory factory, IEnumerable<IWikiNode> nodes)
 			: base(nodes)
 		{
-			this.Factory = factory.NotNull(nameof(factory));
+			this.Factory = factory.NotNull();
 		}
 		#endregion
 
@@ -80,7 +80,7 @@
 		/// <param name="sections">The new sections for the page.</param>
 		public void FromSections(IEnumerable<Section> sections)
 		{
-			sections.ThrowNull(nameof(sections));
+			sections.ThrowNull();
 			this.Clear();
 			foreach (var section in sections)
 			{
@@ -383,7 +383,7 @@
 		/// </remarks>
 		public void Replace(NodeReplacer replaceMethod, bool searchReplacements)
 		{
-			replaceMethod.ThrowNull(nameof(replaceMethod));
+			replaceMethod.ThrowNull();
 			for (var i = 0; i < this.Count; i++)
 			{
 				var currentNode = this[i];

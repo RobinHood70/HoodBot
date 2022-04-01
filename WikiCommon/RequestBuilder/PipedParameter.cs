@@ -16,7 +16,7 @@
 		public PipedParameter(string name, ICollection<string> values)
 			: base(name)
 		{
-			this.Values = values.NotNull(nameof(values));
+			this.Values = values.NotNull();
 		}
 		#endregion
 
@@ -56,7 +56,7 @@
 		#region Public Override Methods
 
 		/// <inheritdoc/>
-		public override void Accept(IParameterVisitor visitor) => visitor.NotNull(nameof(visitor)).Visit(this);
+		public override void Accept(IParameterVisitor visitor) => visitor.NotNull().Visit(this);
 
 		/// <inheritdoc/>
 		public override string ToString() => this.Name + "=" + string.Join("|", this.Values);

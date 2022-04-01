@@ -36,7 +36,7 @@
 		public string Build(IEnumerable<IWikiNode> nodes)
 		{
 			this.BuildTagOpen("root", null, false);
-			foreach (var node in nodes.NotNull(nameof(nodes)))
+			foreach (var node in nodes.NotNull())
 			{
 				node.Accept(this);
 			}
@@ -52,7 +52,7 @@
 		/// <inheritdoc/>
 		public void Visit(IArgumentNode node)
 		{
-			node.ThrowNull(nameof(node));
+			node.ThrowNull();
 			this
 				.BuildTagOpen("tplarg", null, false)
 				.BuildTag("title", null, node.Name)
@@ -69,22 +69,22 @@
 		}
 
 		/// <inheritdoc/>
-		public void Visit(ICommentNode node) => this.BuildValueNode("comment", node.NotNull(nameof(node)).Comment);
+		public void Visit(ICommentNode node) => this.BuildValueNode("comment", node.NotNull().Comment);
 
 		/// <inheritdoc/>
 		public void Visit(IHeaderNode node)
 		{
-			node.ThrowNull(nameof(node));
+			node.ThrowNull();
 			this.BuildTag("h", new Dictionary<string, int>(StringComparer.Ordinal) { ["level"] = node.Level }, node.Title);
 		}
 
 		/// <inheritdoc/>
-		public void Visit(IIgnoreNode node) => this.BuildValueNode("ignore", node.NotNull(nameof(node)).Value);
+		public void Visit(IIgnoreNode node) => this.BuildValueNode("ignore", node.NotNull().Value);
 
 		/// <inheritdoc/>
 		public void Visit(ILinkNode node)
 		{
-			node.ThrowNull(nameof(node));
+			node.ThrowNull();
 			this
 				.BuildTagOpen("link", null, false)
 				.BuildTag("title", null, node.Title); // Title is always emitted, even if empty.
@@ -99,7 +99,7 @@
 		/// <inheritdoc/>
 		public void Visit(NodeCollection nodes)
 		{
-			foreach (var node in nodes.NotNull(nameof(nodes)))
+			foreach (var node in nodes.NotNull())
 			{
 				node.Accept(this);
 			}
@@ -109,7 +109,7 @@
 		public void Visit(IParameterNode node)
 		{
 			this.BuildTagOpen("part", null, false);
-			if (!node.NotNull(nameof(node)).Anonymous)
+			if (!node.NotNull().Anonymous)
 			{
 				this
 					.BuildTag("name", null, node.Name)
@@ -129,7 +129,7 @@
 		/// <inheritdoc/>
 		public void Visit(ITagNode node)
 		{
-			node.ThrowNull(nameof(node));
+			node.ThrowNull();
 			this
 				.BuildTagOpen("ext", null, false)
 				.BuildValueNode("name", node.Name)
@@ -150,7 +150,7 @@
 		/// <inheritdoc/>
 		public void Visit(ITemplateNode node)
 		{
-			node.ThrowNull(nameof(node));
+			node.ThrowNull();
 			this
 				.BuildTagOpen("template", null, false)
 				.BuildTag("title", null, node.Title); // Title is always emitted, even if empty.
@@ -166,7 +166,7 @@
 		public void Visit(ITextNode node)
 		{
 			this.Indent();
-			this.builder.Append(HtmlEncoder.Default.Encode(node.NotNull(nameof(node)).Text.Replace(' ', '_')));
+			this.builder.Append(HtmlEncoder.Default.Encode(node.NotNull().Text.Replace(' ', '_')));
 		}
 		#endregion
 

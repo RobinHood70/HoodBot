@@ -21,13 +21,13 @@
 		#endregion
 
 		#region Public Methods
-		public static bool GetAttach(DependencyObject dp) => (bool)dp.NotNull(nameof(dp)).GetValue(AttachProperty);
+		public static bool GetAttach(DependencyObject dp) => (bool)dp.NotNull().GetValue(AttachProperty);
 
-		public static string GetPassword(DependencyObject dp) => (string)dp.NotNull(nameof(dp)).GetValue(PasswordProperty);
+		public static string GetPassword(DependencyObject dp) => (string)dp.NotNull().GetValue(PasswordProperty);
 
-		public static void SetAttach(DependencyObject dp, bool value) => dp.NotNull(nameof(dp)).SetValue(AttachProperty, value);
+		public static void SetAttach(DependencyObject dp, bool value) => dp.NotNull().SetValue(AttachProperty, value);
 
-		public static void SetPassword(DependencyObject dp, string value) => dp.NotNull(nameof(dp)).SetValue(PasswordProperty, value);
+		public static void SetPassword(DependencyObject dp, string value) => dp.NotNull().SetValue(PasswordProperty, value);
 		#endregion
 
 		#region Private Methods

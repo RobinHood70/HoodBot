@@ -8,8 +8,8 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public CheckTokenInput(string type, string token)
 		{
-			this.Type = type.NotNullOrWhiteSpace(nameof(type));
-			this.Token = token.NotNullOrWhiteSpace(nameof(token));
+			this.Type = type.NotNullOrWhiteSpace();
+			this.Token = token.NotNullOrWhiteSpace();
 		}
 		#endregion
 

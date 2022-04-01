@@ -101,7 +101,7 @@
 		public SiteLink(ILinkTitle title)
 			: base(title)
 		{
-			this.Coerced = title.NotNull(nameof(title)).Coerced;
+			this.Coerced = title.NotNull().Coerced;
 			this.ForcedInterwikiLink = title.ForcedInterwikiLink;
 			this.ForcedNamespaceLink = title.ForcedNamespaceLink;
 			InitializeImageInfo(this.Site);
@@ -303,7 +303,7 @@
 		/// <remarks>The text may include or exclude surrounding brackets. Pipes in the text are handled properly either way in order to support gallery links.</remarks>
 		public static SiteLink FromGalleryText(Site site, string link)
 		{
-			var linkNode = CreateLinkNode(site, link.NotNull(nameof(link)));
+			var linkNode = CreateLinkNode(site, link.NotNull());
 			return FromLinkNode(site, linkNode, true);
 		}
 
@@ -320,7 +320,7 @@
 		/// <returns>A new SiteLink.</returns>
 		public static SiteLink FromLinkNode(Site site, ILinkNode link, bool coerceToFile)
 		{
-			var titleText = link.NotNull(nameof(link)).Title.ToValue();
+			var titleText = link.NotNull().Title.ToValue();
 			var valueSplit = SplitWhitespace(titleText);
 			var ns = coerceToFile ? MediaWikiNamespaces.File : MediaWikiNamespaces.Main;
 			SiteLink retval = new(TitleFactory.Create(site, ns, valueSplit.Value));
@@ -343,7 +343,7 @@
 		/// <remarks>The text may include or exclude surrounding brackets. Pipes in the text are handled properly either way in order to support gallery links.</remarks>
 		public static SiteLink FromText(Site site, string link)
 		{
-			var linkNode = CreateLinkNode(site, link.NotNull(nameof(link)));
+			var linkNode = CreateLinkNode(site, link.NotNull());
 			return FromLinkNode(site, linkNode, false);
 		}
 		#endregion
@@ -431,7 +431,7 @@
 		public void UpdateLinkNode(ILinkNode node)
 		{
 			var thisNode = this.ToLinkNode();
-			node.NotNull(nameof(node)).Title.Clear();
+			node.NotNull().Title.Clear();
 			node.Title.AddRange(thisNode.Title);
 			node.Parameters.Clear();
 			node.Parameters.AddRange(thisNode.Parameters);
@@ -443,7 +443,7 @@
 		/// <remarks>Interwiki and Fragment will remain unaffected by the change. If those should be updated to null, use <see cref="With(IFullTitle)"/>.</remarks>
 		public SiteLink With(Title title)
 		{
-			TitleFactory upcast = TitleFactory.CreateFromValidated(title.NotNull(nameof(title)).Namespace, title.PageName);
+			TitleFactory upcast = TitleFactory.CreateFromValidated(title.NotNull().Namespace, title.PageName);
 			SiteLink retval = new(upcast)
 			{
 				Coerced = this.Coerced,
@@ -470,7 +470,7 @@
 		/// <returns>A new copy of the SiteLink with the altered title.</returns>
 		public SiteLink With(IFullTitle title)
 		{
-			TitleFactory upcast = TitleFactory.CreateFromValidated(title.NotNull(nameof(title)).Namespace, title.PageName);
+			TitleFactory upcast = TitleFactory.CreateFromValidated(title.NotNull().Namespace, title.PageName);
 			SiteLink retval = new(upcast)
 			{
 				Coerced = this.Coerced,
@@ -601,7 +601,7 @@
 
 		private void InitValue(string value)
 		{
-			var parameter = SplitWhitespace(value.NotNull(nameof(value)));
+			var parameter = SplitWhitespace(value.NotNull());
 			if (!DirectValues.TryGetValue(parameter.Value, out var parameterType))
 			{
 				parameterType = ParameterType.Caption;

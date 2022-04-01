@@ -30,7 +30,7 @@
 
 		public WikiInfoViewModel(WikiInfo wikiInfo)
 		{
-			this.WikiInfo = wikiInfo.NotNull(nameof(wikiInfo));
+			this.WikiInfo = wikiInfo.NotNull();
 			this.CancelEdit();
 		}
 		#endregion

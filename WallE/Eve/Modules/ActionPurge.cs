@@ -25,16 +25,16 @@
 		#region Protected Override Methods
 		protected override void BuildRequestPageSet(Request request, PurgeInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIf("forcelinkupdate", input.Method == PurgeMethod.LinkUpdate, this.SiteVersion >= 118)
 				.AddIf("forcerecursivelinkupdate", input.Method == PurgeMethod.RecursiveLinkUpdate, this.SiteVersion >= 122);
 		}
 
 		protected override PurgeItem GetItem(JToken result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			return new PurgeItem(
 				ns: (int)result.MustHave("ns"),
 				title: result.MustHaveString("title"),

@@ -29,9 +29,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, UnblockInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfPositive("id", input.Id)
 				.AddIfPositive("userid", input.UserId)
 				.AddIfNotNull("user", input.User)
@@ -44,7 +44,7 @@
 		{
 			string user;
 			long userId;
-			var userNode = result.NotNull(nameof(result)).MustHave("user");
+			var userNode = result.NotNull().MustHave("user");
 			if (userNode.Type == JTokenType.Object)
 			{
 				// Deals with https://phabricator.wikimedia.org/T45518 in MW 1.18 and early versions of 1.19/1.20

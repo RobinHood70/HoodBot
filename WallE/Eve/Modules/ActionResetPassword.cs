@@ -29,9 +29,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ResetPasswordInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("user", input.User)
 				.AddIfNotNull("email", input.Email)
 				.Add("capture", input.Capture)
@@ -40,7 +40,7 @@
 
 		protected override ResetPasswordResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			return new ResetPasswordResult(
 				status: result.MustHaveString("status"),
 				passwords: result["passwords"].GetStringDictionary<string>());

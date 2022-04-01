@@ -8,8 +8,8 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public LoginInput(string userName, string password)
 		{
-			this.UserName = userName.NotNull(nameof(userName));
-			this.Password = password.NotNull(nameof(password));
+			this.UserName = userName.NotNull();
+			this.Password = password.NotNull();
 		}
 		#endregion
 

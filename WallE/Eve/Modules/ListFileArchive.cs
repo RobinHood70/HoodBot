@@ -30,12 +30,12 @@
 		protected override void BuildRequestLocal(Request request, FileArchiveInput input)
 		{
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.NotNull(nameof(input)).Properties)
+				.Check(this.SiteVersion, input.NotNull().Properties)
 				.FilterBefore(120, FileArchiveProperties.ArchiveName | FileArchiveProperties.MediaType)
 				.FilterBefore(118, FileArchiveProperties.ParsedDescription)
 				.Value;
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("from", input.From)
 				.AddIfNotNull("to", input.To)
 				.AddIfNotNull("prefix", input.Prefix)

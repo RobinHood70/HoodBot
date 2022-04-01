@@ -22,7 +22,7 @@
 		#region Constructors
 		public MainWindowParameterFetcher(JobInfo jobInfo)
 		{
-			this.job = jobInfo.NotNull(nameof(jobInfo));
+			this.job = jobInfo.NotNull();
 			this.main = App.Locator.MainWindow;
 			this.jobParameters = this.main.JobParameters;
 		}
@@ -137,7 +137,7 @@
 		private void GetParameter(ConstructorParameter parameter)
 		{
 			var grid = this.main.JobParameters;
-			var (label, input) = CreateControl(parameter.NotNull(nameof(parameter)));
+			var (label, input) = CreateControl(parameter.NotNull());
 			if (grid.RowDefinitions.Count > 0)
 			{
 				grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(10) });

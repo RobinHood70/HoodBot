@@ -13,7 +13,7 @@
 		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
 		/// <param name="fullTitle">The <see cref="IFullTitle"/> with the desired information.</param>
 		public FullTitle(IFullTitle fullTitle)
-			: base(fullTitle.NotNull(nameof(fullTitle)).Namespace, fullTitle.PageName)
+			: base(fullTitle.NotNull().Namespace, fullTitle.PageName)
 		{
 			this.Fragment = fullTitle.Fragment;
 			this.Interwiki = fullTitle.Interwiki;
@@ -73,7 +73,7 @@
 		/// <param name="fullPageName">Full name of the page.</param>
 		/// <returns>A new FullTitle based on the provided values.</returns>
 		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		internal static FullTitle FromNormalizedName(Site site, string fullPageName) => new(TitleFactory.FromNormalizedName(site.NotNull(nameof(site)), fullPageName.NotNull(nameof(fullPageName))));
+		internal static FullTitle FromNormalizedName(Site site, string fullPageName) => new(TitleFactory.FromNormalizedName(site.NotNull(), fullPageName.NotNull()));
 		#endregion
 	}
 }

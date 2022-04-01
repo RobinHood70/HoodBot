@@ -33,7 +33,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Override Methods
 		protected override void DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			this.Output ??= new List<TItem>();
 			using var enumerator = result.Children().GetEnumerator();
 			while (this.ItemsRemaining > 0 && enumerator.MoveNext())

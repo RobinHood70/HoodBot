@@ -38,7 +38,7 @@
 		/// <remarks>Since all values are strings, deep/shallow does not apply.</remarks>
 		private EmbeddedValue(EmbeddedValue copy)
 		{
-			this.Before = copy.NotNull(nameof(copy)).Before;
+			this.Before = copy.NotNull().Before;
 			this.After = copy.After;
 			this.Value = copy.Value;
 		}
@@ -119,7 +119,7 @@
 		/// <param name="builder">The StringBuilder to append to.</param>
 		/// <returns>The original StringBuilder.</returns>
 		public StringBuilder Build(StringBuilder builder) => builder
-			.NotNull(nameof(builder))
+			.NotNull()
 			.Append(this.Before)
 			.Append(this.Value)
 			.Append(this.After);
@@ -133,7 +133,7 @@
 		/// <param name="source">The source.</param>
 		public void CopyFrom(EmbeddedValue source)
 		{
-			this.CopySurroundingText(source.NotNull(nameof(source)));
+			this.CopySurroundingText(source.NotNull());
 			this.Value = source.Value;
 		}
 
@@ -141,7 +141,7 @@
 		/// <param name="source">The source.</param>
 		public void CopySurroundingText(EmbeddedValue source)
 		{
-			this.Before = source.NotNull(nameof(source)).Before;
+			this.Before = source.NotNull().Before;
 			this.After = source.After;
 		}
 

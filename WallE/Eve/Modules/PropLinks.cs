@@ -39,9 +39,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, LinksInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request)).Add("titles", input.Titles);
+				.NotNull().Add("titles", input.Titles);
 			base.BuildRequestLocal(request, input);
 		}
 

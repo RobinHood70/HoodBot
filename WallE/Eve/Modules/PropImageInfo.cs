@@ -34,13 +34,13 @@
 		protected override void BuildRequestLocal(Request request, ImageInfoInput input)
 		{
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.NotNull(nameof(input)).Properties)
+				.Check(this.SiteVersion, input.NotNull().Properties)
 				.FilterBefore(123, ImageProperties.CanonicalTitle | ImageProperties.CommonMetadata | ImageProperties.ExtMetadata)
 				.FilterBefore(118, ImageProperties.MediaType)
 				.FilterBefore(117, ImageProperties.ParsedComment | ImageProperties.ThumbMime | ImageProperties.UserId)
 				.Value;
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddFlags("prop", prop)
 				.Add("start", input.Start)
 				.Add("end", input.End)
@@ -56,9 +56,9 @@
 		}
 
 		protected override void DeserializeParentToPage(JToken parent, PageItem page) => page
-			.NotNull(nameof(page))
+			.NotNull()
 			.ImageRepository = (string?)parent
-				.NotNull(nameof(parent))["imagerepository"];
+				.NotNull()["imagerepository"];
 
 		protected override ImageInfoItem GetItem(JToken result, PageItem page) => JTokenImageInfo.ParseImageInfo(result, new ImageInfoItem());
 

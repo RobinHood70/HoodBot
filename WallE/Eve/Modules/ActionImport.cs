@@ -29,14 +29,14 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ImportInput input)
 		{
-			if (input.NotNull(nameof(input)).GetXmlData() is byte[] xmlData)
+			if (input.NotNull().GetXmlData() is byte[] xmlData)
 			{
 				request.Type = RequestType.PostMultipart;
 				request.Add("xml", "dummyName", xmlData);
 			}
 
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("summary", input.Summary)
 				.AddIfNotNull("interwikisource", input.InterwikiSource)
 				.AddIfNotNull("interwikipage", input.InterwikiPage)
@@ -49,7 +49,7 @@
 
 		protected override IReadOnlyList<ImportItem> DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			List<ImportItem> output = new();
 			foreach (var item in result)
 			{

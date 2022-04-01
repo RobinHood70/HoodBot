@@ -22,7 +22,7 @@ namespace RobinHood70.WallE.Base
 
 		public ImportInput(string rootPage)
 		{
-			this.RootPage = rootPage.NotNullOrWhiteSpace(nameof(rootPage));
+			this.RootPage = rootPage.NotNullOrWhiteSpace();
 		}
 		#endregion
 

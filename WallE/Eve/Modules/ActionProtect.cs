@@ -32,7 +32,7 @@
 		{
 			List<string> protections = new();
 			List<string> expiry = new();
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			if (input.Protections != null)
 			{
 				foreach (var protection in input.Protections)
@@ -44,7 +44,7 @@
 			}
 
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("title", input.Title)
 				.AddIfPositive("pageid", input.PageId)
 				.Add("protections", protections)
@@ -59,7 +59,7 @@
 
 		protected override ProtectResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			List<ProtectResultItem> protections = new();
 			if (result["protections"] is JToken protectionsNode)
 			{

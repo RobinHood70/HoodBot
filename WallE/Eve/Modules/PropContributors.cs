@@ -33,17 +33,17 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ContributorsInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIf(input.FilterType.ToString().ToLowerInvariant(), input.FilterValues, input.FilterType != ContributorsFilterType.None)
 				.Add("limit", this.Limit);
 		}
 
 		protected override void DeserializeParentToPage(JToken parent, PageItem page) => page
-			.NotNull(nameof(page))
+			.NotNull()
 			.AnonContributors = (int?)parent
-				.NotNull(nameof(parent))["anoncontributors"] ?? 0;
+				.NotNull()["anoncontributors"] ?? 0;
 
 		protected override ContributorItem? GetItem(JToken result, PageItem page) => result == null
 			? null

@@ -84,7 +84,7 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override long GetKeyForItem(NpcData item) => item.NotNull(nameof(item)).Id;
+		protected override long GetKeyForItem(NpcData item) => item.NotNull().Id;
 		#endregion
 	}
 }

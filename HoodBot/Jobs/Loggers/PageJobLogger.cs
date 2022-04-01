@@ -31,14 +31,14 @@
 		public PageJobLogger(Site site, string pageName, JobTypes typesToLog)
 			: base(typesToLog)
 		{
-			this.logTitle = CreateTitle.FromUnvalidated(site.NotNull(nameof(site)), pageName.NotNull(nameof(pageName)));
+			this.logTitle = CreateTitle.FromUnvalidated(site.NotNull(), pageName.NotNull());
 		}
 		#endregion
 
 		#region Public Override Methods
 		public override void AddLogEntry(LogInfo info)
 		{
-			this.logInfo = info.NotNull(nameof(info));
+			this.logInfo = info.NotNull();
 			this.start = DateTime.UtcNow;
 			this.end = null;
 			this.status = info.Title;

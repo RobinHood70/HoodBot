@@ -76,7 +76,7 @@
 
 		public void FromJson(JToken json)
 		{
-			this.BotDataFolder = (string?)json.NotNull(nameof(json))[nameof(this.BotDataFolder)] is string botFolder && IsPathValid(botFolder)
+			this.BotDataFolder = (string?)json.NotNull()[nameof(this.BotDataFolder)] is string botFolder && IsPathValid(botFolder)
 				? botFolder
 				: DefaultBotDataFolder;
 			if (json[nameof(this.ConnectionStrings)] is JObject connectionStrings)
@@ -116,7 +116,7 @@
 
 		public void RemoveWiki(WikiInfoViewModel item)
 		{
-			var index = this.Wikis.IndexOf(item.NotNull(nameof(item)));
+			var index = this.Wikis.IndexOf(item.NotNull());
 			if (index >= 0)
 			{
 				if (string.Equals(this.SelectedName, item.DisplayName, StringComparison.Ordinal))

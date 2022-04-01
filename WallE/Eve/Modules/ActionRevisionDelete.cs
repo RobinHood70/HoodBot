@@ -29,9 +29,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, RevisionDeleteInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Add("type", input.Type)
 				.AddIfNotNull("target", input.Target)
 				.Add("ids", input.Ids)
@@ -44,7 +44,7 @@
 
 		protected override RevisionDeleteResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			List<RevisionDeleteItem> list = new();
 			foreach (var item in result.MustHave("items"))
 			{

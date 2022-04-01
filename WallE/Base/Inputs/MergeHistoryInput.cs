@@ -9,20 +9,20 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public MergeHistoryInput(string from, string to)
 		{
-			this.From = from.NotNullOrWhiteSpace(nameof(from));
-			this.To = to.NotNullOrWhiteSpace(nameof(to));
+			this.From = from.NotNullOrWhiteSpace();
+			this.To = to.NotNullOrWhiteSpace();
 		}
 
 		public MergeHistoryInput(string from, long toId)
 		{
-			this.From = from.NotNullOrWhiteSpace(nameof(from));
+			this.From = from.NotNullOrWhiteSpace();
 			this.ToId = toId;
 		}
 
 		public MergeHistoryInput(long fromId, string to)
 		{
 			this.FromId = fromId;
-			this.To = to.NotNullOrWhiteSpace(nameof(to));
+			this.To = to.NotNullOrWhiteSpace();
 		}
 
 		public MergeHistoryInput(long fromId, long toId)

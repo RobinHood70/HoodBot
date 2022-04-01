@@ -16,7 +16,7 @@
 		#endregion
 
 		#region Public Properties
-		public static string Connection { get; } = App.GetConnectionString("EsoLog");
+		public static string Connection { get; } = App.GetConnectionString("EsoLog") ?? throw new InvalidOperationException();
 
 		public static Dictionary<int, string> MechanicNames { get; } = new Dictionary<int, string>
 		{

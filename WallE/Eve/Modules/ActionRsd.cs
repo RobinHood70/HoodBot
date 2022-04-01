@@ -32,7 +32,7 @@
 		{
 			// Custom request which doesn't honour format parameter; remove that one and those that cause warnings.
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Remove("format");
 			request.Remove("formatversion");
 			request.Remove("utf8");

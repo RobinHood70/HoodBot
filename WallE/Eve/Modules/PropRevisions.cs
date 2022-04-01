@@ -57,9 +57,9 @@ input.EndId > 0;
 				throw new WikiException(EveMessages.RevisionsGeneratorVersionInvalid);
 			}
 
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.BuildRevisions(input, this.SiteVersion)
 				.AddIfPositive("startid", input.StartId)
 				.AddIfPositive("endid", input.EndId)

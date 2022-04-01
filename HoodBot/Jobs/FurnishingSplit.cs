@@ -66,7 +66,7 @@
 
 		protected override void ParseText(object sender, ContextualParser parser)
 		{
-			parser.ThrowNull(nameof(parser));
+			parser.ThrowNull();
 			parser.Page.ThrowNull(nameof(parser), nameof(parser.Page));
 			List<string> pageIssues = new();
 			if (!parser.Page.PageName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase))

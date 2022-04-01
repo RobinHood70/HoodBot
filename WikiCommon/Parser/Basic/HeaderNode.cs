@@ -17,9 +17,9 @@
 		/// <param name="text">The text of the header.</param>
 		public HeaderNode(IWikiNodeFactory factory, int level, [Localizable(false)] IEnumerable<IWikiNode> text)
 		{
-			this.Factory = factory.NotNull(nameof(factory));
+			this.Factory = factory.NotNull();
 			this.Level = level;
-			this.Title = new NodeCollection(factory, text.NotNull(nameof(text)));
+			this.Title = new NodeCollection(factory, text.NotNull());
 		}
 		#endregion
 

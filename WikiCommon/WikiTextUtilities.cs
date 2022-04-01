@@ -22,7 +22,7 @@
 		/// <returns>The original text with bidirectional text markers removed and space-like characters converted to spaces.</returns>
 		public static string DecodeAndNormalize([Localizable(false)] string text)
 		{
-			text = text.NotNull(nameof(text)).Replace("+", "%2B", StringComparison.Ordinal);
+			text = text.NotNull().Replace("+", "%2B", StringComparison.Ordinal);
 			text = WebUtility.UrlDecode(text);
 			text = WebUtility.HtmlDecode(text);
 			text = RemoveInivisibleCharacters(text);
@@ -51,7 +51,7 @@
 		/// <returns>The normalized text, ready to be parsed.</returns>
 		public static string TrimToTitle(string text)
 		{
-			var retval = text.NotNull(nameof(text)).Split(TextArrays.Pipe, 2)[0];
+			var retval = text.NotNull().Split(TextArrays.Pipe, 2)[0];
 			return DecodeAndNormalize(retval).Trim();
 		}
 		#endregion

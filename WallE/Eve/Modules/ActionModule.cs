@@ -19,7 +19,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Constructors
 		protected ActionModule(WikiAbstractionLayer wal)
 		{
-			this.Wal = wal.NotNull(nameof(wal));
+			this.Wal = wal.NotNull();
 		}
 		#endregion
 
@@ -52,7 +52,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Static Methods
 		protected static JToken ToJson(string response)
 		{
-			using StringReader responseReader = new(response.NotNull(nameof(response)));
+			using StringReader responseReader = new(response.NotNull());
 			using JsonTextReader reader = new(responseReader) { DateParseHandling = DateParseHandling.None };
 			return JToken.Load(reader); // using JToken.Load instead of .Parse so we can ignore date parsing.
 		}
@@ -76,7 +76,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected void DeserializeAction(JToken result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 
 			// TODO: Add multiple-error support here (errorformat=raw) using new GetErrors() function.
 			if (result["error"].GetError() is ErrorItem error)
@@ -166,7 +166,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		protected int FindRequiredNamespace(string title)
 		{
-			var nsSplit = title.NotNull(nameof(title)).Split(TextArrays.Colon, 2);
+			var nsSplit = title.NotNull().Split(TextArrays.Colon, 2);
 			if (nsSplit.Length == 2)
 			{
 				var nsText = nsSplit[0];
@@ -208,7 +208,7 @@ namespace RobinHood70.WallE.Eve.Modules
 		// Swallow all token warnings. Currently emitted primarily by queries, but also by ApiTokens.
 		protected virtual bool HandleWarning(string from, string text) =>
 			text
-				.NotNull(nameof(text))
+				.NotNull()
 				.StartsWith("Action '", StringComparison.Ordinal) &&
 			text.EndsWith("' is not allowed for the current user", StringComparison.Ordinal);
 		#endregion

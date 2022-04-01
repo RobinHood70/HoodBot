@@ -39,9 +39,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, TemplatesInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Add("templates", input.Templates);
 			base.BuildRequestLocal(request, input);
 		}

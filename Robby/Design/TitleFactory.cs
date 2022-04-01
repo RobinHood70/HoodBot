@@ -168,29 +168,29 @@
 		/// <param name="site">The site.</param>
 		/// <param name="defaultNamespace">The default namespace.</param>
 		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory Create(Site site, int defaultNamespace, string pageName) => new(site.NotNull(nameof(site)), defaultNamespace, WikiTextUtilities.TrimToTitle(pageName.NotNull(nameof(pageName))));
+		public static TitleFactory Create(Site site, int defaultNamespace, string pageName) => new(site.NotNull(), defaultNamespace, WikiTextUtilities.TrimToTitle(pageName.NotNull()));
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="ns">The namespace the page is in.</param>
 		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory CreateFromValidated(Namespace ns, string pageName) => new(ns.NotNull(nameof(ns)), pageName.NotNull(nameof(pageName)));
+		public static TitleFactory CreateFromValidated(Namespace ns, string pageName) => new(ns.NotNull(), pageName.NotNull());
 
 		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
 		/// <param name="site">The site the title is from.</param>
 		/// <param name="node">The <see cref="IBacklinkNode"/> to parse.</param>
 		/// <returns>A new FullTitle based on the provided values.</returns>
-		public static TitleFactory FromBacklinkNode(Site site, IBacklinkNode node) => Create(site.NotNull(nameof(site)), MediaWikiNamespaces.Main, node.NotNull(nameof(node)).GetTitleText());
+		public static TitleFactory FromBacklinkNode(Site site, IBacklinkNode node) => Create(site.NotNull(), MediaWikiNamespaces.Main, node.NotNull().GetTitleText());
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="site">The site.</param>
 		/// <param name="defaultNamespace">The default namespace.</param>
 		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory FromName(Site site, int defaultNamespace, string pageName) => new(site.NotNull(nameof(site)), defaultNamespace, WikiTextUtilities.TrimToTitle(pageName.NotNull(nameof(pageName))));
+		public static TitleFactory FromName(Site site, int defaultNamespace, string pageName) => new(site.NotNull(), defaultNamespace, WikiTextUtilities.TrimToTitle(pageName.NotNull()));
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="site">The site.</param>
 		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory FromNormalizedName(Site site, string pageName) => new(site.NotNull(nameof(site)), MediaWikiNamespaces.Main, pageName.NotNull(nameof(pageName)));
+		public static TitleFactory FromNormalizedName(Site site, string pageName) => new(site.NotNull(), MediaWikiNamespaces.Main, pageName.NotNull());
 		#endregion
 
 		#region Public Methods

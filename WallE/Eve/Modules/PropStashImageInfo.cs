@@ -35,11 +35,11 @@
 		protected override void BuildRequestLocal(Request request, StashImageInfoInput input)
 		{
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.NotNull(nameof(input)).Properties)
+				.Check(this.SiteVersion, input.NotNull().Properties)
 				.FilterBefore(123, StashImageProperties.CanonicalTitle | StashImageProperties.CommonMetadata | StashImageProperties.ExtMetadata)
 				.Value;
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddFlags("prop", prop)
 				.Add(this.SiteVersion < 118 ? "sessionkey" : "filekey", input.FileKeys)
 				.AddIf("urlwidth", input.UrlWidth, (prop & StashImageProperties.Url) != 0 && input.UrlWidth > 0)
@@ -49,7 +49,7 @@
 
 		protected override void DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			this.Output = new List<ImageInfoItem>();
 			foreach (var item in result)
 			{

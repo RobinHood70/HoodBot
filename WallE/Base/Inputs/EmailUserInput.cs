@@ -8,8 +8,8 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public EmailUserInput(string target, string text)
 		{
-			this.Target = target.NotNullOrWhiteSpace(nameof(target));
-			this.Text = text.NotNullOrWhiteSpace(nameof(text));
+			this.Target = target.NotNullOrWhiteSpace();
+			this.Text = text.NotNullOrWhiteSpace();
 		}
 		#endregion
 

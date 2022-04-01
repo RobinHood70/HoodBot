@@ -37,8 +37,8 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ParameterInfoInput input)
 		{
-			request.ThrowNull(nameof(request));
-			input.ThrowNull(nameof(input));
+			request.ThrowNull();
+			input.ThrowNull();
 			input.Modules.ThrowNull(nameof(input), nameof(input.Modules));
 			if (this.SiteVersion >= 125)
 			{
@@ -89,7 +89,7 @@
 
 		protected override IReadOnlyDictionary<string, ParameterInfoItem> DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			Dictionary<string, ParameterInfoItem> output = new(StringComparer.Ordinal);
 			List<string> moduleTypes = new() { "modules" };
 			if (this.SiteVersion < 125)

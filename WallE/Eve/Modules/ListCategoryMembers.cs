@@ -51,9 +51,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, CategoryMembersInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("title", input.Title)
 				.AddIf("pageid", input.PageId, input.Title == null)
 				.AddFlags("prop", input.Properties)
@@ -74,7 +74,7 @@
 
 		protected override CategoryMembersItem GetItem(JToken result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			var typeText = (string?)result["type"];
 			if (typeText == null || !TypeLookup.TryGetValue(typeText, out var itemType))
 			{

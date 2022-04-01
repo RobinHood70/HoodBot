@@ -10,7 +10,7 @@
 		#region Constructors
 		public UploadInputInternal(UploadInput input)
 		{
-			this.IgnoreWarnings = input.NotNull(nameof(input)).IgnoreWarnings;
+			this.IgnoreWarnings = input.NotNull().IgnoreWarnings;
 			this.Offset = 0;
 			this.FileName = input.RemoteFileName;
 			this.Token = input.Token;
@@ -73,7 +73,7 @@
 		#region Public Methods
 		public void FinalChunk(UploadInput input)
 		{
-			this.Comment = input.NotNull(nameof(input)).Comment;
+			this.Comment = input.NotNull().Comment;
 			this.FileData = Array.Empty<byte>();
 			this.FileSize = 0;
 			this.IgnoreWarnings = input.IgnoreWarnings;
@@ -85,7 +85,7 @@
 
 		public void NextChunk(Stream input, int chunkSize)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			var copySize = this.FileSize - this.Offset;
 			if (copySize > chunkSize)
 			{

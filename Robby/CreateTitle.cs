@@ -16,8 +16,8 @@
 		/// <param name="pageName">Name of the page.</param>
 		public static Title FromUnvalidated(Namespace ns, string pageName)
 		{
-			ns.ThrowNull(nameof(ns));
-			pageName.ThrowNull(nameof(pageName));
+			ns.ThrowNull();
+			pageName.ThrowNull();
 			pageName = ns.CapitalizePageName(WikiTextUtilities.TrimToTitle(pageName));
 			return new Title(ns, pageName);
 		}
@@ -26,34 +26,34 @@
 		/// <param name="site">The site.</param>
 		/// <param name="nsid">The namespace the page is in.</param>
 		/// <param name="pageName">Name of the page.</param>
-		public static Title FromUnvalidated(Site site, int nsid, string pageName) => FromUnvalidated(site.NotNull(nameof(site))[nsid], pageName);
+		public static Title FromUnvalidated(Site site, int nsid, string pageName) => FromUnvalidated(site.NotNull()[nsid], pageName);
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="site">The site.</param>
 		/// <param name="fullPageName">Name of the page.</param>
 		public static Title FromUnvalidated(Site site, string fullPageName)
 		{
-			TitleFactory title = TitleFactory.Create(site.NotNull(nameof(site)), MediaWikiNamespaces.Main, WikiTextUtilities.TrimToTitle(fullPageName.NotNull(nameof(fullPageName))));
+			TitleFactory title = TitleFactory.Create(site.NotNull(), MediaWikiNamespaces.Main, WikiTextUtilities.TrimToTitle(fullPageName.NotNull()));
 			return new Title(title);
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="ns">The namespace the page is in.</param>
 		/// <param name="pageName">Name of the page.</param>
-		public static Title FromValidated(Namespace ns, string pageName) => new(ns.NotNull(nameof(ns)), pageName.NotNull(nameof(pageName)));
+		public static Title FromValidated(Namespace ns, string pageName) => new(ns.NotNull(), pageName.NotNull());
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="site">The site.</param>
 		/// <param name="nsid">The namespace the page is in.</param>
 		/// <param name="pageName">Name of the page.</param>
-		public static Title FromValidated(Site site, int nsid, string pageName) => FromValidated(site.NotNull(nameof(site))[nsid], pageName);
+		public static Title FromValidated(Site site, int nsid, string pageName) => FromValidated(site.NotNull()[nsid], pageName);
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="site">The site.</param>
 		/// <param name="fullPageName">Name of the page.</param>
 		public static Title FromValidated([NotNull][ValidatedNotNull] Site site, [NotNull][ValidatedNotNull] string fullPageName)
 		{
-			TitleFactory title = TitleFactory.Create(site.NotNull(nameof(site)), MediaWikiNamespaces.Main, fullPageName.NotNull(nameof(fullPageName)));
+			TitleFactory title = TitleFactory.Create(site.NotNull(), MediaWikiNamespaces.Main, fullPageName.NotNull());
 			return new(title);
 		}
 		#endregion

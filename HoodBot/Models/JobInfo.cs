@@ -11,8 +11,8 @@
 		#region Constructors
 		private JobInfo(ConstructorInfo constructor, JobInfoAttribute jobInfo)
 		{
-			this.Constructor = constructor.NotNull(nameof(constructor));
-			this.Groups = jobInfo.NotNull(nameof(jobInfo)).Groups;
+			this.Constructor = constructor.NotNull();
+			this.Groups = jobInfo.NotNull().Groups;
 			this.Name = jobInfo.Name;
 
 			var constructorParameters = constructor.GetParameters()
@@ -73,7 +73,7 @@
 
 		public WikiJob Instantiate(JobManager jobManager)
 		{
-			List<object?> objectList = new() { jobManager.NotNull(nameof(jobManager)) };
+			List<object?> objectList = new() { jobManager.NotNull() };
 			if (this.Parameters is IReadOnlyList<ConstructorParameter> jobParams)
 			{
 				foreach (var param in jobParams)

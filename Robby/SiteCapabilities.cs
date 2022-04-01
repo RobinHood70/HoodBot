@@ -45,7 +45,7 @@
 		/// <param name="client">The <see cref="IMediaWikiClient"/> client to be used to access the site.</param>
 		public SiteCapabilities([NotNull] IMediaWikiClient? client)
 		{
-			this.client = client.NotNull(nameof(client));
+			this.client = client.NotNull();
 		}
 		#endregion
 
@@ -98,7 +98,7 @@
 		{
 			// TODO: Convert to use URIs and related objects instead of strings whenever possible.
 			this.Clear();
-			var fullHost = new UriBuilder(anyPage.NotNull(nameof(anyPage)).Scheme, anyPage.Host).Uri;
+			var fullHost = new UriBuilder(anyPage.NotNull().Scheme, anyPage.Host).Uri;
 			var tryPath = anyPage.AbsolutePath;
 			Uri? tryLoc = null;
 			var offset = tryPath.IndexOf("/index.php", StringComparison.Ordinal);

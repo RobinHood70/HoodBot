@@ -27,11 +27,11 @@
 		public static string IconAbbreviation(string nsId, string iconType, string icon) => IconAbbreviation(nsId, iconType, icon, "png");
 
 		public static string IconAbbreviation(string nsId, string iconType, string icon, string extension) =>
-			nsId + "-icon-" + IconNameFromAbbreviation(iconType) + icon.NotNull(nameof(icon)) + '.' + extension;
+			nsId + "-icon-" + IconNameFromAbbreviation(iconType) + icon.NotNull() + '.' + extension;
 
 		public static (UespNamespace? Ns, string? Abbr, string? Name, string? Ext) AbbreviationFromIconName(UespNamespaceList nsList, string iconName)
 		{
-			iconName.ThrowNull(nameof(iconName));
+			iconName.ThrowNull();
 			var nsNameSplit = iconName.Split("-icon-", 2);
 			if (nsNameSplit.Length == 2)
 			{
@@ -95,7 +95,7 @@
 			return (null, null, null, null);
 		}
 
-		public static string IconNameFromAbbreviation(string iconType) => iconType.NotNull(nameof(iconType)) switch
+		public static string IconNameFromAbbreviation(string iconType) => iconType.NotNull() switch
 		{
 			"" => string.Empty,
 			"a" => "armor-",

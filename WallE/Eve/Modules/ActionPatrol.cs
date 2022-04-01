@@ -28,9 +28,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, PatrolInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfPositive("rcid", input.RecentChangesId)
 				.AddIfPositive("revid", input.RevisionId)
 				.Add("tags", input.Tags)
@@ -39,7 +39,7 @@
 
 		protected override PatrolResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			return new PatrolResult(
 				ns: (int)result.MustHave("ns"),
 				title: result.MustHaveString("title"),

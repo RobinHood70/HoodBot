@@ -32,7 +32,7 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public CategoryMembersInput(string title)
 		{
-			this.Title = title.NotNull(nameof(title));
+			this.Title = title.NotNull();
 		}
 
 		public CategoryMembersInput(long pageId)
@@ -74,7 +74,7 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Methods
-		public void ChangeTitle(string newTitle) => this.Title = newTitle.NotNull(nameof(newTitle));
+		public void ChangeTitle(string newTitle) => this.Title = newTitle.NotNull();
 		#endregion
 	}
 }

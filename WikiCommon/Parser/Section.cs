@@ -12,7 +12,7 @@
 		/// <param name="content">The <see cref="NodeCollection"/> representing the content of the section.</param>
 		public Section(IHeaderNode? header, NodeCollection content)
 		{
-			this.Content = content.NotNull(nameof(content));
+			this.Content = content.NotNull();
 			this.Header = header;
 		}
 

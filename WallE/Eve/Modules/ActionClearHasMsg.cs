@@ -31,7 +31,7 @@
 
 		protected override CustomResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			return new CustomResult((string?)result ?? string.Empty);
 		}
 		#endregion

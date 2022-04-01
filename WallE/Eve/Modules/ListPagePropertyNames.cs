@@ -26,7 +26,7 @@
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, PagePropertyNamesInput input) => request
-			.NotNull(nameof(request))
+			.NotNull()
 			.Add("limit", this.Limit);
 
 		protected override string? GetItem(JToken result) => (string?)result?["propname"];

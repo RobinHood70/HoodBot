@@ -15,7 +15,7 @@
 		{
 			// Hash the key to ensure it is exactly 256 bits long, as required by AES-256
 			using SHA256 sha = SHA256.Create();
-			this.encryptionKeyBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(encryptionKey.NotNull(nameof(encryptionKey))));
+			this.encryptionKeyBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(encryptionKey.NotNull()));
 		}
 
 		public string Encrypt(string value)
@@ -40,7 +40,7 @@
 
 		public string Decrypt(string value)
 		{
-			var buffer = Convert.FromBase64String(value.NotNull(nameof(value)));
+			var buffer = Convert.FromBase64String(value.NotNull());
 			using MemoryStream inputStream = new(buffer, false);
 			var iv = new byte[16];
 			var bytesRead = inputStream.Read(iv, 0, 16);
