@@ -31,16 +31,15 @@
 				botInfo = currentAssembly.GetName().Name ?? "unknown";
 				if (currentAssembly.GetName().Version is Version currentVersion)
 				{
-					botInfo += " v" + currentVersion.ToString();
+					botInfo += '/' + currentVersion.ToString();
 				}
 			}
 
-			if (string.IsNullOrWhiteSpace(contactInfo))
-			{
-				contactInfo = "none";
-			}
+			contactInfo = string.IsNullOrWhiteSpace(contactInfo)
+				? string.Empty
+				: $" ({contactInfo.Trim()})";
 
-			return Invariant($"Bot: {botInfo} ({libraryName.Name} v{libraryName.Version}); Contact: {contactInfo!.Trim()}");
+			return Invariant($"{botInfo}{contactInfo} {libraryName.Name}/{libraryName.Version}");
 		}
 	}
 }
