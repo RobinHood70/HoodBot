@@ -264,7 +264,7 @@
 				: new WikiAbstractionLayer(client, api);
 			if (abstractionLayer is IMaxLaggable maxLagWal)
 			{
-				maxLagWal.MaxLag = -1; // wikiInfo.MaxLag;
+				maxLagWal.MaxLag = wikiInfo.MaxLag;
 			}
 
 #if DEBUG
