@@ -43,9 +43,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, WatchlistRawInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Add("namespace", input.Namespaces)
 				.AddFlags("prop", input.Properties)
 				.AddFilterPiped("show", "changed", input.FilterChanged)

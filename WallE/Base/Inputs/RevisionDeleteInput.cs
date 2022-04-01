@@ -39,7 +39,7 @@ namespace RobinHood70.WallE.Base
 		public RevisionDeleteInput(RevisionDeleteType type, IEnumerable<long> ids)
 		{
 			this.Type = type;
-			this.Ids = ids.NotNull(nameof(ids));
+			this.Ids = ids.NotNull();
 		}
 		#endregion
 

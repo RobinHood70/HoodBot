@@ -56,9 +56,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, BacklinksInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("title", input.Title)
 				.AddIf("pageid", input.PageId, input.Title == null)
 				.Add("namespace", input.Namespace)

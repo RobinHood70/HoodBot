@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Base
 		#region Public Constructors
 		public HelpInput(IEnumerable<string> modules)
 		{
-			this.Modules = modules.NotNullOrWhiteSpace(nameof(modules));
+			this.Modules = modules.NotNullOrWhiteSpace();
 		}
 		#endregion
 

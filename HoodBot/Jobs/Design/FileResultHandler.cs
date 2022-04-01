@@ -16,7 +16,7 @@
 		public FileResultHandler(string fileName)
 			: base(null)
 		{
-			this.fileName = fileName.NotNull(nameof(fileName));
+			this.fileName = fileName.NotNull();
 			_ = new FileInfo(fileName); // This will throw if the fileName is invalid.
 		}
 

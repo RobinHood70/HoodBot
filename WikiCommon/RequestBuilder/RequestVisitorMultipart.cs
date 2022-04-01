@@ -40,7 +40,7 @@
 		public static MultipartResult Build(Request request)
 		{
 			// TODO: Rewrite to use request.Build().
-			request.ThrowNull(nameof(request));
+			request.ThrowNull();
 			RequestVisitorMultipart visitor = new()
 			{
 				supportsUnitSeparator = request.SupportsUnitSeparator,
@@ -103,7 +103,7 @@
 		/// <param name="parameter">The FileParameter object.</param>
 		public void Visit(FileParameter parameter)
 		{
-			var fileData = parameter.NotNull(nameof(parameter)).GetData();
+			var fileData = parameter.NotNull().GetData();
 			if (ScanBoundaryConflicts && fileData.LongLength > 0 && CurrentEncoding.GetString(fileData).Contains(this.boundary, StringComparison.Ordinal))
 			{
 				this.badBoundary = true;
@@ -121,13 +121,13 @@
 		/// <remarks>In all cases, the PipedParameter and PipedListParameter objects are treated identically, however the value collections they're associated with differ, so the Visit method is made generic to handle both.</remarks>
 		public void Visit(PipedParameter parameter)
 		{
-			var value = parameter.NotNull(nameof(parameter)).BuildPipedValue(this.supportsUnitSeparator);
+			var value = parameter.NotNull().BuildPipedValue(this.supportsUnitSeparator);
 			this.TextMultipart(parameter.Name, value);
 		}
 
 		/// <summary>Visits the specified StringParameter object.</summary>
 		/// <param name="parameter">The StringParameter object.</param>
-		public void Visit(StringParameter parameter) => this.TextMultipart(parameter.NotNull(nameof(parameter)).Name, parameter.Value);
+		public void Visit(StringParameter parameter) => this.TextMultipart(parameter.NotNull().Name, parameter.Value);
 		#endregion
 
 		#region Public Methods

@@ -30,12 +30,12 @@
 		protected override void BuildRequestLocal(Request request, UsersInput input)
 		{
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.NotNull(nameof(input)).Properties)
+				.Check(this.SiteVersion, input.NotNull().Properties)
 				.FilterBefore(117, UsersProperties.Rights)
 				.FilterBefore(118, UsersProperties.ImplicitGroups)
 				.Value;
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Add("users", input.Users)
 				.AddIf("token", TokensInput.UserRights, input.GetRightsToken)
 				.AddFlags("prop", prop);

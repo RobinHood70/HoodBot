@@ -9,7 +9,7 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public QueryPageInput(string page)
 		{
-			this.Page = page.NotNullOrWhiteSpace(nameof(page));
+			this.Page = page.NotNullOrWhiteSpace();
 		}
 		#endregion
 

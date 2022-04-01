@@ -34,9 +34,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, InterwikiLinksInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIf("url", (input.Properties & InterwikiLinksProperties.Url) != 0, this.SiteVersion < 124)
 				.AddFlagsIf("prop", input.Properties, this.SiteVersion >= 124)
 				.AddIfNotNull("prefix", input.Prefix)

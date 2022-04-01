@@ -27,7 +27,7 @@
 		public static MultipartFormDataContent Build(Request request)
 		{
 			// Note: the returned data should be iterated over and each individual HttpContent should be disposed.
-			request.ThrowNull(nameof(request));
+			request.ThrowNull();
 			MultipartFormDataContent data = new();
 			RequestVisitorHttpContentMultipart visitor = new(data, request.SupportsUnitSeparator);
 			request.Build(visitor);
@@ -45,7 +45,7 @@
 		/// <param name="parameter">The FileParameter object.</param>
 		public void Visit(FileParameter parameter)
 		{
-			parameter.ThrowNull(nameof(parameter));
+			parameter.ThrowNull();
 			this.multipartData.Add(new ByteArrayContent(parameter.GetData()), parameter.Name, parameter.FileName);
 		}
 
@@ -54,13 +54,13 @@
 		/// <remarks>In all cases, the PipedParameter and PipedListParameter objects are treated identically, however the value collections they're associated with differ, so the Visit method is made generic to handle both.</remarks>
 		public void Visit(PipedParameter parameter)
 		{
-			var value = parameter.NotNull(nameof(parameter)).BuildPipedValue(this.supportsUnitSeparator);
+			var value = parameter.NotNull().BuildPipedValue(this.supportsUnitSeparator);
 			this.multipartData.Add(new StringContent(value), parameter.Name);
 		}
 
 		/// <summary>Visits the specified StringParameter object.</summary>
 		/// <param name="parameter">The StringParameter object.</param>
-		public void Visit(StringParameter parameter) => this.multipartData.Add(new StringContent(parameter.NotNull(nameof(parameter)).Value), parameter.Name);
+		public void Visit(StringParameter parameter) => this.multipartData.Add(new StringContent(parameter.NotNull().Value), parameter.Name);
 #pragma warning restore CA2000
 		#endregion
 	}

@@ -16,7 +16,7 @@
 		/// <param name="options">The load options used for this page. Can be used to detect if default-valued information is legitimate or was never loaded.</param>
 		/// <param name="apiItem">The API item to populate the page data from.</param>
 		/// <returns>A fully populated Page object.</returns>
-		public override Page CreatePage(Title title, PageLoadOptions options, IApiTitle? apiItem) => title.NotNull(nameof(title)).Namespace.Id switch
+		public override Page CreatePage(Title title, PageLoadOptions options, IApiTitle? apiItem) => title.NotNull().Namespace.Id switch
 		{
 			MediaWikiNamespaces.Category => new CategoryPage(title, options, apiItem),
 			MediaWikiNamespaces.File => new FilePage(title, options, apiItem),

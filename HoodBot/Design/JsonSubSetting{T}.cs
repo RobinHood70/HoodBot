@@ -9,7 +9,7 @@
 		public static T FromJson(JToken json)
 		{
 			T subSetting = new();
-			subSetting.FromJson(json.NotNull(nameof(json)));
+			subSetting.FromJson(json.NotNull());
 
 			return subSetting;
 		}

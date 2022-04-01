@@ -15,9 +15,9 @@
 		/// <param name="value">The value.</param>
 		public ParameterNode(IWikiNodeFactory factory, IEnumerable<IWikiNode>? name, IEnumerable<IWikiNode> value)
 		{
-			this.Factory = factory.NotNull(nameof(factory));
+			this.Factory = factory.NotNull();
 			this.Name = name == null ? null : new NodeCollection(factory, name);
-			this.Value = new NodeCollection(factory, value.NotNull(nameof(value)));
+			this.Value = new NodeCollection(factory, value.NotNull());
 		}
 		#endregion
 
@@ -58,7 +58,7 @@
 
 		/// <inheritdoc/>
 		public void AddName(IEnumerable<IWikiNode> name) => this.Name =
-			new NodeCollection(this.Factory, name.NotNull(nameof(name)));
+			new NodeCollection(this.Factory, name.NotNull());
 
 		/// <inheritdoc/>
 		public void Anonymize() => this.Name = null;

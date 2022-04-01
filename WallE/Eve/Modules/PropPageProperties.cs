@@ -32,15 +32,15 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, PagePropertiesInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request)).Add("prop", input.Properties);
+				.NotNull().Add("prop", input.Properties);
 		}
 
 		protected override void DeserializeToPage(JToken result, PageItem page)
 		{
-			result.ThrowNull(nameof(result));
-			if (page.NotNull(nameof(page)).Properties is Dictionary<string, string?> dictionary)
+			result.ThrowNull();
+			if (page.NotNull().Properties is Dictionary<string, string?> dictionary)
 			{
 				dictionary.Clear();
 				foreach (var item in result.Children<JProperty>())

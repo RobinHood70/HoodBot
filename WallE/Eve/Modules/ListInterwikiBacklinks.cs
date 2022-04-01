@@ -37,9 +37,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, InterwikiBacklinksInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("prefix", input.Prefix)
 				.AddIfNotNull("title", input.Title)
 				.AddFlags("prop", input.Properties)

@@ -62,7 +62,7 @@
 		public string Build(IWikiNode node)
 		{
 			this.builder.Clear();
-			node.NotNull(nameof(node)).Accept(this);
+			node.NotNull().Accept(this);
 			return this.builder.ToString();
 		}
 
@@ -89,7 +89,7 @@
 		/// <inheritdoc/>
 		public void Visit(IArgumentNode node)
 		{
-			node.ThrowNull(nameof(node));
+			node.ThrowNull();
 			if (this.raw || node.DefaultValue == null)
 			{
 				this.builder.Append("{{{");
@@ -121,19 +121,19 @@
 		{
 			if (this.raw)
 			{
-				this.builder.Append(node.NotNull(nameof(node)).Comment);
+				this.builder.Append(node.NotNull().Comment);
 			}
 		}
 
 		/// <inheritdoc/>
-		public void Visit(IHeaderNode node) => node.NotNull(nameof(node)).Title.Accept(this);
+		public void Visit(IHeaderNode node) => node.NotNull().Title.Accept(this);
 
 		/// <inheritdoc/>
 		public void Visit(IIgnoreNode node)
 		{
 			if (this.raw)
 			{
-				this.builder.Append(node.NotNull(nameof(node)).Value);
+				this.builder.Append(node.NotNull().Value);
 			}
 		}
 
@@ -145,7 +145,7 @@
 				if (this.raw)
 				{
 					this.builder.Append("[[");
-					node.NotNull(nameof(node)).Title.Accept(this);
+					node.NotNull().Title.Accept(this);
 					foreach (var param in node.Parameters)
 					{
 						param.Accept(this);
@@ -179,7 +179,7 @@
 		/// <inheritdoc/>
 		public void Visit(NodeCollection nodes)
 		{
-			foreach (var node in nodes.NotNull(nameof(nodes)))
+			foreach (var node in nodes.NotNull())
 			{
 				node.Accept(this);
 			}
@@ -189,7 +189,7 @@
 		public void Visit(IParameterNode node)
 		{
 			this.builder.Append('|');
-			node.ThrowNull(nameof(node));
+			node.ThrowNull();
 			if (node.Name is not null)
 			{
 				node.Name.Accept(this);
@@ -202,7 +202,7 @@
 		/// <inheritdoc/>
 		public void Visit(ITagNode node)
 		{
-			node.ThrowNull(nameof(node));
+			node.ThrowNull();
 			if (this.raw)
 			{
 				this.builder
@@ -228,7 +228,7 @@
 		public void Visit(ITemplateNode node)
 		{
 			this.builder.Append("{{");
-			node.NotNull(nameof(node)).Title.Accept(this);
+			node.NotNull().Title.Accept(this);
 			foreach (var param in node.Parameters)
 			{
 				param.Accept(this);
@@ -238,7 +238,7 @@
 		}
 
 		/// <inheritdoc/>
-		public void Visit(ITextNode node) => this.builder.Append(node.NotNull(nameof(node)).Text);
+		public void Visit(ITextNode node) => this.builder.Append(node.NotNull().Text);
 		#endregion
 	}
 }

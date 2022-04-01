@@ -27,7 +27,7 @@
 		#region Public Override Methods
 		public override void BuildRequest(Request request)
 		{
-			request.ThrowNull(nameof(request));
+			request.ThrowNull();
 
 			// Check if query continue type has been set manually or a previous result did not emit a query-continue.
 			if (this.Continues)

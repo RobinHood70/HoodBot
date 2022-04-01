@@ -57,9 +57,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, QueryPageInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("page", input.Page)
 				.Add("limit", this.Limit);
 			if (input.Parameters != null)
@@ -74,7 +74,7 @@
 
 		protected override void DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			if (result["disabled"] != null)
 			{
 				this.Wal.AddWarning("querypage-disabled", Globals.CurrentCulture(EveMessages.QueryPageDisabled, this.queryPage));

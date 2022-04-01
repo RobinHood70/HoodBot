@@ -20,7 +20,7 @@
 		/// <param name="input">The SiteInfo input.</param>
 		public InitializingEventArgs(SiteInfoInput input)
 		{
-			this.filterLocalInterwiki = input.NotNull(nameof(input)).FilterLocalInterwiki;
+			this.filterLocalInterwiki = input.NotNull().FilterLocalInterwiki;
 			this.interwikiLanguageCode = input.InterwikiLanguageCode;
 			this.properties = input.Properties;
 			this.showAllDatabases = input.ShowAllDatabases;

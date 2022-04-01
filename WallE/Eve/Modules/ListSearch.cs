@@ -55,12 +55,12 @@
 		protected override void BuildRequestLocal(Request request, SearchInput input)
 		{
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.NotNull(nameof(input)).Properties)
+				.Check(this.SiteVersion, input.NotNull().Properties)
 				.FilterBefore(117, SearchProperties.Score | SearchProperties.TitleSnippet | SearchProperties.RedirectTitle | SearchProperties.RedirectSnippet | SearchProperties.SectionTitle | SearchProperties.SectionSnippet | SearchProperties.HasRelated)
 				.FilterFrom(124, SearchProperties.HasRelated | SearchProperties.Score)
 				.Value;
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("search", input.Search)
 				.Add("namespace", input.Namespaces)
 				.AddIfPositiveIf("what", input.What, this.SiteVersion >= 117)
@@ -73,7 +73,7 @@
 
 		protected override void DeserializeParent(JToken parent)
 		{
-			parent.ThrowNull(nameof(parent));
+			parent.ThrowNull();
 			if (parent["searchinfo"] is JToken infoNode)
 			{
 				this.suggestion = (string?)infoNode["suggestion"];

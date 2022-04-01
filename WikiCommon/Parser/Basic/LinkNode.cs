@@ -17,9 +17,9 @@
 		/// <param name="parameters">The parameters.</param>
 		public LinkNode(IWikiNodeFactory factory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters)
 		{
-			this.Factory = factory.NotNull(nameof(factory));
-			this.Title = new NodeCollection(factory, title.NotNull(nameof(title)));
-			this.Parameters = parameters.NotNull(nameof(parameters));
+			this.Factory = factory.NotNull();
+			this.Title = new NodeCollection(factory, title.NotNull());
+			this.Parameters = parameters.NotNull();
 			foreach (var parameter in parameters)
 			{
 				if (parameter.Factory != factory)

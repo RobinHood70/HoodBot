@@ -37,7 +37,7 @@ namespace RobinHood70.WallE.Base
 
 		public LogEventsInput(string title)
 		{
-			this.Title = title.NotNullOrWhiteSpace(nameof(title));
+			this.Title = title.NotNullOrWhiteSpace();
 		}
 		#endregion
 
@@ -72,7 +72,7 @@ namespace RobinHood70.WallE.Base
 		#region Public Static Methods
 		public static LogEventsInput FromPrefix(string prefix) => new()
 		{
-			Prefix = prefix.NotNullOrWhiteSpace(nameof(prefix))
+			Prefix = prefix.NotNullOrWhiteSpace()
 		};
 		#endregion
 	}

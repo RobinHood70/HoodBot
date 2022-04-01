@@ -21,7 +21,7 @@
 		public SiteTemplateNode(SiteNodeFactory factory, IEnumerable<IWikiNode> title, IList<IParameterNode> parameters)
 			: base(factory, title, parameters)
 		{
-			this.TitleValue = CreateTitle.FromUnvalidated(factory.NotNull(nameof(factory)).Site, MediaWikiNamespaces.Template, this.GetTitleText());
+			this.TitleValue = CreateTitle.FromUnvalidated(factory.NotNull().Site, MediaWikiNamespaces.Template, this.GetTitleText());
 		}
 		#endregion
 

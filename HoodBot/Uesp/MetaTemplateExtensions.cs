@@ -13,7 +13,7 @@
 				PageCreator = new MetaTemplateCreator(site.DefaultLoadOptions.PageCreator, variables)
 			};
 
-			return new PageCollection(site.NotNull(nameof(site)), pageLoadOptions);
+			return new PageCollection(site.NotNull(), pageLoadOptions);
 		}
 	}
 }

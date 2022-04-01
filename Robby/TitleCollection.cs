@@ -29,7 +29,7 @@
 			: base(site)
 		{
 			this.LimitationType = LimitationType.None;
-			foreach (var item in titles.NotNull(nameof(titles)))
+			foreach (var item in titles.NotNull())
 			{
 				var newTitle = CreateTitle.FromUnvalidated(site, item);
 				this.Add(newTitle);
@@ -52,7 +52,7 @@
 			: base(site)
 		{
 			this.LimitationType = LimitationType.None;
-			this.Add(ns, titles.NotNull(nameof(titles)));
+			this.Add(ns, titles.NotNull());
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="TitleCollection"/> class with a specific list of titles in a given namespace.</summary>
@@ -72,7 +72,7 @@
 			: base(site)
 		{
 			this.LimitationType = LimitationType.None;
-			foreach (var title in titles.NotNull(nameof(titles)))
+			foreach (var title in titles.NotNull())
 			{
 				this.Add(title);
 			}
@@ -86,7 +86,7 @@
 		/// <param name="titles">The titles to add, with or without the leading namespace text.</param>
 		public void Add(int defaultNamespace, IEnumerable<string> titles)
 		{
-			foreach (var title in titles.NotNull(nameof(titles)))
+			foreach (var title in titles.NotNull())
 			{
 				this.Add(CreateTitle.FromUnvalidated(this.Site, defaultNamespace, title));
 			}
@@ -263,7 +263,7 @@
 		/// <param name="titles">The titles to add.</param>
 		public void Add(IEnumerable<string> titles)
 		{
-			foreach (var title in titles.NotNull(nameof(titles)))
+			foreach (var title in titles.NotNull())
 			{
 				this.Add(title);
 			}
@@ -283,7 +283,7 @@
 		/// <param name="input">The input parameters.</param>
 		protected override void GetBacklinks(BacklinksInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			input.Title.ThrowNull(nameof(input), nameof(input.Title));
 			var inputTitle = CreateTitle.FromUnvalidated(this.Site, input.Title);
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && (input.LinkTypes & BacklinksTypes.ImageUsage) != 0)
@@ -323,7 +323,7 @@
 		/// <param name="recurse">if set to <see langword="true"/> load the entire category tree recursively.</param>
 		protected override void GetCategoryMembers(CategoryMembersInput input, bool recurse)
 		{
-			var originalProps = input.NotNull(nameof(input)).Properties;
+			var originalProps = input.NotNull().Properties;
 			input.Properties |= CategoryMembersProperties.Title;
 			if (recurse)
 			{
@@ -522,7 +522,7 @@
 		{
 			PageLoadOptions loadOptions = new(this.Site.DefaultLoadOptions, PageModules.Info);
 			var creator = this.Site.PageCreator;
-			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput.NotNull(nameof(pageSetInput)), creator.GetPropertyInputs(loadOptions), creator.CreatePageItem);
+			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput.NotNull(), creator.GetPropertyInputs(loadOptions), creator.CreatePageItem);
 			this.FillFromTitleItems(result);
 		}
 		#endregion
@@ -547,7 +547,7 @@
 
 		private void RecurseCategoryPages(CategoryMembersInput input, HashSet<string> categoryTree)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			input.Title.ThrowNull(nameof(input), nameof(input.Title));
 			if (!categoryTree.Add(input.Title))
 			{

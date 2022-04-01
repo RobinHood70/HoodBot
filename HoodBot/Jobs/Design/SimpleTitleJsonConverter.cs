@@ -17,12 +17,12 @@
 		public override Title ReadJson(JsonReader reader, Type objectType, Title? existingValue, bool hasExistingValue, JsonSerializer serializer)
 		{
 			var title = (string)reader
-				.NotNull(nameof(reader))
+				.NotNull()
 				.Value
 				.NotNull(nameof(reader), nameof(reader.Value));
 			return CreateTitle.FromUnvalidated(this.site, title);
 		}
 
-		public override void WriteJson(JsonWriter writer, Title? value, JsonSerializer serializer) => writer.NotNull(nameof(writer)).WriteValue(value.NotNull(nameof(value)).ToString() ?? string.Empty);
+		public override void WriteJson(JsonWriter writer, Title? value, JsonSerializer serializer) => writer.NotNull().WriteValue(value.NotNull().ToString() ?? string.Empty);
 	}
 }

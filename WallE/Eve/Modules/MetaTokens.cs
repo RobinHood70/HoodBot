@@ -29,11 +29,11 @@
 
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, TokensInput input) => request
-			.NotNull(nameof(request))
-			.Add("type", input.NotNull(nameof(input)).Types);
+			.NotNull()
+			.Add("type", input.NotNull().Types);
 
 		protected override void DeserializeResult(JToken? result) => this.Output = result
-			.NotNull(nameof(result))
+			.NotNull()
 			.GetStringDictionary<string>();
 		#endregion
 	}

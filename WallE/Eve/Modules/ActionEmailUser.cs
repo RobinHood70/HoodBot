@@ -28,9 +28,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, EmailUserInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Add("target", input.Target)
 				.Add("text", input.Text)
 				.AddIfNotNull("subject", input.Subject)
@@ -40,7 +40,7 @@
 
 		protected override EmailUserResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			return new EmailUserResult(
 				result: result.MustHaveString("result"),
 				message: (string?)result["message"]);

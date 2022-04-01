@@ -25,7 +25,7 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public ExpandTemplatesInput(string text)
 		{
-			this.Text = text.NotNullOrWhiteSpace(nameof(text));
+			this.Text = text.NotNullOrWhiteSpace();
 		}
 		#endregion
 

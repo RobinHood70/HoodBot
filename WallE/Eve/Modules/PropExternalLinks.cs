@@ -33,9 +33,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ExternalLinksInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Add("expandurl", input.ExpandUrl)
 				.AddIfNotNull("protocol", input.Protocol)
 				.AddIfNotNull("query", input.Query)

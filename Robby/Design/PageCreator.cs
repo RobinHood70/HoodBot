@@ -28,7 +28,7 @@
 		/// <seealso cref="AddCustomPropertyInputs" />
 		public IList<IPropertyInput> GetPropertyInputs(PageLoadOptions options)
 		{
-			var whatToLoad = options.NotNull(nameof(options)).Modules;
+			var whatToLoad = options.NotNull().Modules;
 			List<IPropertyInput> propertyInputs = new();
 			if ((whatToLoad & PageModules.Categories) != 0)
 			{

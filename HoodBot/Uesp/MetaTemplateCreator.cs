@@ -30,7 +30,7 @@
 		#region Public Override Methods
 
 		/// <inheritdoc/>
-		public override Page CreatePage(Title title, PageLoadOptions options, IApiTitle? apiItem) => this.GameSpaceOnly && title.NotNull(nameof(title)).Namespace.Id < 100
+		public override Page CreatePage(Title title, PageLoadOptions options, IApiTitle? apiItem) => this.GameSpaceOnly && title.NotNull().Namespace.Id < 100
 				? this.FallbackCreator.CreatePage(title, options, apiItem)
 				: new VariablesPage(title, options, apiItem);
 
@@ -41,7 +41,7 @@
 		protected override void AddCustomPropertyInputs(IList<IPropertyInput> propertyInputs)
 		{
 			VariablesInput variablesInput = new() { Variables = this.VariableNames };
-			propertyInputs.NotNull(nameof(propertyInputs)).Add(variablesInput);
+			propertyInputs.NotNull().Add(variablesInput);
 		}
 		#endregion
 	}

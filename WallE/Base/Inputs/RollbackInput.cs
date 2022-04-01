@@ -9,14 +9,14 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public RollbackInput(string title, string user)
 		{
-			this.Title = title.NotNullOrWhiteSpace(nameof(title));
-			this.User = user.NotNullOrWhiteSpace(nameof(user));
+			this.Title = title.NotNullOrWhiteSpace();
+			this.User = user.NotNullOrWhiteSpace();
 		}
 
 		public RollbackInput(long pageId, string user)
 		{
 			this.PageId = pageId;
-			this.User = user.NotNullOrWhiteSpace(nameof(user));
+			this.User = user.NotNullOrWhiteSpace();
 		}
 		#endregion
 

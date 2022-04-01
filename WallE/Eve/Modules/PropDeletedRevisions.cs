@@ -48,9 +48,9 @@
 				throw new WikiException(EveMessages.RevisionsGeneratorVersionInvalid);
 			}
 
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.BuildRevisions(input, this.SiteVersion)
 				.AddIfNotNull("tag", input.Tag)
 				.AddIf("limit", this.Limit, input.Limit > 0 || input.MaxItems > 1); // TODO: Needs testing when limits/maxitems are actually set to positive values. Limits are weird in this module, but since they're per-query, I believe this should work as written.

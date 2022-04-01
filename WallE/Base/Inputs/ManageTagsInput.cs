@@ -19,7 +19,7 @@ namespace RobinHood70.WallE.Base
 		public ManageTagsInput(TagOperation operation, string tag)
 		{
 			this.Operation = operation;
-			this.Tag = tag.NotNullOrWhiteSpace(nameof(tag));
+			this.Tag = tag.NotNullOrWhiteSpace();
 		}
 		#endregion
 

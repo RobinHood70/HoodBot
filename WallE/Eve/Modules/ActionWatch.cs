@@ -25,7 +25,7 @@
 		#region Protected Override Methods
 		protected override void BuildRequestPageSet(Request request, WatchInput input)
 		{
-			if (input.NotNull(nameof(input)).Values != null && this.SiteVersion < 123)
+			if (input.NotNull().Values != null && this.SiteVersion < 123)
 			{
 				Debug.Assert(input.ListType == ListType.Titles && input.Values.Count == 1 && this.Generator == null, "Incorrect values sent to < MW 1.23 Watch");
 				request.Remove("titles");
@@ -35,14 +35,14 @@
 			}
 
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Add("unwatch", input.Unwatch)
 				.AddHidden("token", input.Token);
 		}
 
 		protected override WatchItem GetItem(JToken result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			var title = result.MustHaveString("title");
 			return new WatchItem(
 				ns: (int?)result["ns"] ?? this.FindRequiredNamespace(title),

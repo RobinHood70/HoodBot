@@ -49,7 +49,7 @@
 		protected override void ParseText(object sender, ContextualParser parser)
 		{
 			var headerFound = false;
-			foreach (var header in parser.NotNull(nameof(parser)).HeaderNodes)
+			foreach (var header in parser.NotNull().HeaderNodes)
 			{
 				var title = header.Title.ToValue().Trim(TextArrays.EqualsSign).Trim();
 				if (string.Equals(title, "Licensing", StringComparison.Ordinal))

@@ -17,7 +17,7 @@
 		public TreeNode(TreeNode? parent, string displayText)
 		{
 			this.Parent = parent;
-			this.DisplayText = displayText.NotNull(nameof(displayText));
+			this.DisplayText = displayText.NotNull();
 		}
 		#endregion
 
@@ -83,7 +83,7 @@
 		#endregion
 
 		#region Public Methods
-		public void AddChild(TreeNode child) => this.children.Add(child.NotNull(nameof(child)));
+		public void AddChild(TreeNode child) => this.children.Add(child.NotNull());
 
 		public IEnumerable<TreeNode> CheckedChildren()
 		{
@@ -148,7 +148,7 @@
 		#region Protected Methods
 		protected void OnSelectionChange(SelectedItemChangedEventArgs eventArgs)
 		{
-			eventArgs.ThrowNull(nameof(eventArgs));
+			eventArgs.ThrowNull();
 			if (this.Parent == null)
 			{
 				this.SelectionChanged?.Invoke(this, eventArgs);

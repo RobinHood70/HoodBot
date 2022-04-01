@@ -28,14 +28,14 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, TokensInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request)).Add("type", input.Types);
+				.NotNull().Add("type", input.Types);
 		}
 
 		protected override IReadOnlyDictionary<string, string> DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			return result.GetStringDictionary<string>();
 		}
 		#endregion

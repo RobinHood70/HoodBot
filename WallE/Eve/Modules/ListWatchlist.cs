@@ -77,12 +77,12 @@
 		protected override void BuildRequestLocal(Request request, WatchlistInput input)
 		{
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.NotNull(nameof(input)).Properties)
+				.Check(this.SiteVersion, input.NotNull().Properties)
 				.FilterBefore(117, WatchlistProperties.UserId)
 				.FilterBefore(118, WatchlistProperties.LogInfo)
 				.Value;
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Add("allrev", input.AllRevisions)
 				.Add("start", input.Start)
 				.Add("end", input.End)

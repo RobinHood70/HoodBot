@@ -29,9 +29,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, OpenSearchInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Add("search", input.Search)
 				.Add("namespace", input.Namespaces)
 				.AddIfPositive("limit", input.Limit)
@@ -42,7 +42,7 @@
 
 		protected override IReadOnlyList<OpenSearchItem> DeserializeCustom(JToken result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 
 			// 0th term is the search term, so we ignore that.
 			if (result is JArray array)

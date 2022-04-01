@@ -16,7 +16,7 @@
 		protected internal Contribution(Site site, UserContributionsItem contribution)
 			: base(contribution)
 		{
-			contribution.ThrowNull(nameof(contribution));
+			contribution.ThrowNull();
 			this.Title = CreateTitle.FromValidated(site, contribution.FullPageName.NotNull(nameof(contribution), nameof(contribution.FullPageName)));
 			this.New = (contribution.Flags & UserContributionFlags.New) != 0;
 			this.Patrolled = (contribution.Flags & UserContributionFlags.Patrolled) != 0;

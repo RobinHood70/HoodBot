@@ -10,16 +10,15 @@
 	</PropertyGroup>
 	<Import Project="..\GlobalInfo.csproj" />
 	<ItemGroup>
-	  <PackageReference Include="Ardalis.GuardClauses" Version="4.0.0" />
-	  <PackageReference Include="Meziantou.Analyzer" Version="1.0.688">
+	  <PackageReference Include="Meziantou.Analyzer" Version="1.0.698">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	  <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.376">
+	  <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.406">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
-	  <PackageReference Include="System.ComponentModel.Composition" Version="6.0.2-mauipre.1.22054.8" />
+	  <PackageReference Include="System.ComponentModel.Composition" Version="7.0.0-preview.2.22152.2" />
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="System.ComponentModel.Composition" />

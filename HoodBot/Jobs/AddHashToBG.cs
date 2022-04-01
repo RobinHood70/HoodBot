@@ -20,7 +20,7 @@
 
 		protected override void ParseText(object sender, ContextualParser parser)
 		{
-			foreach (var template in parser.NotNull(nameof(parser)).TemplateNodes)
+			foreach (var template in parser.NotNull().TemplateNodes)
 			{
 				if (template.Parameters.Count >= 1 &&
 					template.Find(1) is IParameterNode parameter &&

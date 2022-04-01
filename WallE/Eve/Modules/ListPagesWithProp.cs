@@ -36,9 +36,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, PagesWithPropertyInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("propname", input.PropertyName)
 				.AddFlags("prop", input.Properties)
 				.AddIf("dir", "descending", input.SortDescending)

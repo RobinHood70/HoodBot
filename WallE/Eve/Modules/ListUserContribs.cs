@@ -41,11 +41,11 @@
 		protected override void BuildRequestLocal(Request request, UserContributionsInput input)
 		{
 			var prop = FlagFilter
-				.Check(this.SiteVersion, input.NotNull(nameof(input)).Properties)
+				.Check(this.SiteVersion, input.NotNull().Properties)
 				.FilterBefore(120, UserContribsProperties.SizeDiff)
 				.Value;
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Add("start", input.Start)
 				.Add("end", input.End)
 				.Add("user", input.Users)

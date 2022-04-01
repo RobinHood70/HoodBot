@@ -39,7 +39,7 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, InfoInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			if (input.TestActions != null)
 			{
 				this.baseActions.Clear();
@@ -55,7 +55,7 @@
 				.FilterBefore(120, InfoProperties.NotificationTimestamp)
 				.Value;
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddFlags("prop", prop)
 				.AddIf("testactions", input.TestActions, this.SiteVersion >= 125)
 				.Add("token", input.Tokens)
@@ -64,14 +64,14 @@
 
 		protected override void DeserializeParentToPage(JToken parent, PageItem page)
 		{
-			if (page.NotNull(nameof(page)).Info != null)
+			if (page.NotNull().Info != null)
 			{
 				// We already have an Info from a previous query - do not overwrite it, as the results would be empty and produce invalid information. If needed, this could also be converted to check presense of each response field individually.
 				return;
 			}
 
 			var counter = -1L;
-			if (parent.NotNull(nameof(parent))["counter"] is JToken counterNode && counterNode.Type == JTokenType.Integer)
+			if (parent.NotNull()["counter"] is JToken counterNode && counterNode.Type == JTokenType.Integer)
 			{
 				counter = (long)counterNode;
 			}

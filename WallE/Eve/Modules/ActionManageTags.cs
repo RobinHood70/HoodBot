@@ -28,9 +28,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, ManageTagsInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Add("operation", input.Operation)
 				.Add("tag", input.Tag)
 				.AddIfNotNull("reason", input.Reason)
@@ -40,7 +40,7 @@
 
 		protected override ManageTagsResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			return new ManageTagsResult(
 				operation: result.MustHaveString("operation"),
 				tag: result.MustHaveString("tag"),

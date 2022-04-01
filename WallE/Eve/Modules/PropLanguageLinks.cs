@@ -33,9 +33,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, LanguageLinksInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddFlagsIf("prop", input.Properties, this.SiteVersion >= 123)
 				.AddIf("url", (input.Properties & LanguageLinksProperties.Url) != 0, this.SiteVersion is >= 117 and < 123)
 				.AddIfNotNull("lang", input.Language)

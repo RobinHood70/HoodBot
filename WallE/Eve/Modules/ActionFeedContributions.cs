@@ -30,9 +30,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, FeedContributionsInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("user", input.User)
 				.AddIfNotNull("feedformat", input.FeedFormat)
 				.Add("namespace", input.Namespace)

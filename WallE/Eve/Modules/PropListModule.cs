@@ -29,8 +29,8 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Override Methods
 		protected override void DeserializeToPage(JToken result, PageItem page)
 		{
-			using var enumeration = ((IEnumerable<JToken>)result.NotNull(nameof(result))).GetEnumerator();
-			var list = this.GetMutableList(page.NotNull(nameof(page))) ?? throw new InvalidOperationException();
+			using var enumeration = ((IEnumerable<JToken>)result.NotNull()).GetEnumerator();
+			var list = this.GetMutableList(page.NotNull()) ?? throw new InvalidOperationException();
 			while (this.ItemsRemaining > 0 && enumeration.MoveNext())
 			{
 				if (this.GetItem(enumeration.Current, page) is TItem item)

@@ -15,8 +15,8 @@
 		public PageResultHandler(Site site, string pageName)
 			: base(site?.Culture)
 		{
-			site.ThrowNull(nameof(site));
-			pageName.ThrowNull(nameof(pageName));
+			site.ThrowNull();
+			pageName.ThrowNull();
 			this.Page = site.CreatePage(pageName, string.Empty);
 			this.DefaultText = this.ResourceManager.GetString("Results", site.Culture);
 		}

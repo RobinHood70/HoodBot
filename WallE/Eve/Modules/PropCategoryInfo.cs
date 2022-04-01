@@ -36,7 +36,7 @@
 
 		protected override void DeserializeToPage(JToken result, PageItem page)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			page.CategoryInfo = new CategoryInfoResult(
 				files: (int)result.MustHave("files"),
 				pages: (int)result.MustHave("pages"),

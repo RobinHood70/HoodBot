@@ -34,8 +34,8 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, AllMessagesInput input)
 		{
-			this.languageCode = input.NotNull(nameof(input)).LanguageCode;
-			request.NotNull(nameof(request))
+			this.languageCode = input.NotNull().LanguageCode;
+			request.NotNull()
 				.Add("messages", input.Messages)
 				.AddFlags("prop", input.Properties)
 				.Add("enableparser", input.EnableParser)

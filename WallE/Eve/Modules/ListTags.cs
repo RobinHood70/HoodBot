@@ -29,9 +29,9 @@
 		protected override void BuildRequestLocal(Request request, TagsInput input)
 		{
 			// At least up to 1.26, name is always included, so strip that off.
-			var prop = input.NotNull(nameof(input)).Properties & ~TagProperties.Name;
+			var prop = input.NotNull().Properties & ~TagProperties.Name;
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddFlags("prop", prop)
 				.Add("limit", this.Limit);
 		}

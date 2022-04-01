@@ -8,14 +8,14 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public MoveInput(string from, string to)
 		{
-			this.From = from.NotNullOrWhiteSpace(nameof(from));
-			this.To = to.NotNullOrWhiteSpace(nameof(to));
+			this.From = from.NotNullOrWhiteSpace();
+			this.To = to.NotNullOrWhiteSpace();
 		}
 
 		public MoveInput(long from, string to)
 		{
 			this.FromId = from;
-			this.To = to.NotNullOrWhiteSpace(nameof(to));
+			this.To = to.NotNullOrWhiteSpace();
 		}
 		#endregion
 

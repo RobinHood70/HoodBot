@@ -26,15 +26,15 @@ namespace RobinHood70.WallE.Eve.Modules
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, TInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Add("namespace", input.Namespaces)
 				.Add("dir", input.SortDescending)
 				.Add("limit", this.Limit);
 		}
 
-		protected override IApiTitle GetItem(JToken result, PageItem page) => result.NotNull(nameof(result)).GetWikiTitle();
+		protected override IApiTitle GetItem(JToken result, PageItem page) => result.NotNull().GetWikiTitle();
 		#endregion
 	}
 }

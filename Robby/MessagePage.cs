@@ -31,7 +31,7 @@
 					case 1:
 						var item = result[0];
 						this.IsInvalid = false;
-						this.IsMissing = (item.NotNull(nameof(item)).Flags & MessageFlags.Missing) != 0;
+						this.IsMissing = (item.NotNull().Flags & MessageFlags.Missing) != 0;
 						this.Customized = (item.Flags & MessageFlags.Customized) != 0;
 						this.DefaultMissing = (item.Flags & MessageFlags.DefaultMissing) != 0;
 						this.DefaultMessage = item.Default;
@@ -53,7 +53,7 @@
 			: base(title, PageLoadOptions.None, null)
 		{
 			this.IsInvalid = false;
-			this.IsMissing = (item.NotNull(nameof(item)).Flags & MessageFlags.Missing) != 0;
+			this.IsMissing = (item.NotNull().Flags & MessageFlags.Missing) != 0;
 			this.Customized = (item.Flags & MessageFlags.Customized) != 0;
 			this.DefaultMissing = (item.Flags & MessageFlags.DefaultMissing) != 0;
 			this.DefaultMessage = item.Default;

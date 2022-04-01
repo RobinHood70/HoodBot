@@ -32,7 +32,7 @@ namespace RobinHood70.WallE.Base
 
 		public UsersInput(IEnumerable<long> userIds)
 		{
-			this.UserIds = userIds.NotNullOrEmpty(nameof(userIds));
+			this.UserIds = userIds.NotNullOrEmpty();
 		}
 		#endregion
 

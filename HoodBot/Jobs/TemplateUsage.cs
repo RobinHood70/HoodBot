@@ -29,10 +29,10 @@
 			[JobParameterFile(Overwrite = true, DefaultValue = @"%BotData%\%templateName%.txt")] string location)
 			: base(jobManager)
 		{
-			location.ThrowNull(nameof(location));
+			location.ThrowNull();
 			this.respectRedirects = respectRedirects;
 			List<string> allTemplateNames = new();
-			foreach (var templateName in templateNames.NotNull(nameof(templateNames)))
+			foreach (var templateName in templateNames.NotNull())
 			{
 				allTemplateNames.AddRange(templateName.Split(TextArrays.Pipe));
 			}

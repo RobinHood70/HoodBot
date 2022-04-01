@@ -29,9 +29,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, TagInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Add("rcid", input.RecentChangesIds)
 				.Add("revid", input.RevisionIds)
 				.Add("logid", input.LogIds)
@@ -43,7 +43,7 @@
 
 		protected override List<TagItem> DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			List<TagItem> tags = new();
 			if (result.Type == JTokenType.Array)
 			{

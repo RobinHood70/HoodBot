@@ -12,19 +12,19 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public EditInput(string title, [Localizable(false)] string text)
 		{
-			this.Title = title.NotNullOrWhiteSpace(nameof(title));
-			this.Text = text.NotNull(nameof(text));
+			this.Title = title.NotNullOrWhiteSpace();
+			this.Text = text.NotNull();
 		}
 
 		public EditInput(long pageId, [Localizable(false)] string text)
 		{
 			this.PageId = pageId;
-			this.Text = text.NotNull(nameof(text));
+			this.Text = text.NotNull();
 		}
 
 		public EditInput(string title, string prependText, string appendText)
 		{
-			this.Title = title.NotNullOrWhiteSpace(nameof(title));
+			this.Title = title.NotNullOrWhiteSpace();
 			(prependText ?? appendText)
 				.ThrowNull(nameof(prependText) + " or " + nameof(appendText));
 			this.PrependText = prependText;
@@ -45,7 +45,7 @@ namespace RobinHood70.WallE.Base
 
 		public EditInput(string title, long undoRevision)
 		{
-			this.Title = title.NotNullOrWhiteSpace(nameof(title));
+			this.Title = title.NotNullOrWhiteSpace();
 			this.UndoRevision = undoRevision;
 		}
 

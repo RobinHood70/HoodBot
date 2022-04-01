@@ -86,7 +86,7 @@
 		/// <param name="context">The <see cref="StreamingContext" /> that contains contextual information about the source or destination.</param>
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			base.GetObjectData(info.NotNull(nameof(info)), context);
+			base.GetObjectData(info.NotNull(), context);
 			info.AddValue("ErrorCode", this.Code);
 			info.AddValue("ErrorInfo", this.Info);
 		}

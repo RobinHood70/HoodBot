@@ -39,9 +39,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, RedirectsInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddFlags("prop", input.Properties)
 				.Add("namespace", input.Namespaces)
 				.AddFilterPiped("show", "fragment", input.FilterFragments)

@@ -49,8 +49,8 @@
 
 		protected override bool UpdateSkillTemplate(PassiveSkill skillBase, ITemplateNode template)
 		{
-			skillBase.ThrowNull(nameof(skillBase));
-			template.ThrowNull(nameof(template));
+			skillBase.ThrowNull();
+			template.ThrowNull();
 			var bigChange = false;
 			bigChange |= this.TrackedUpdate(template, "type", "Passive");
 			bigChange |= this.TrackedUpdate(template, "id", skillBase.Id.ToStringInvariant());

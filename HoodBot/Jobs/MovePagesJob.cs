@@ -274,7 +274,7 @@
 		#endregion
 
 		#region Protected Virtual Methods
-		protected virtual void BacklinkPageLoaded(ContextualParser parser) => this.ReplaceBacklinks(parser.NotNull(nameof(parser)).Page, parser); // TODO: See if this can be re-written with ContextualParser methods.
+		protected virtual void BacklinkPageLoaded(ContextualParser parser) => this.ReplaceBacklinks(parser.NotNull().Page, parser); // TODO: See if this can be re-written with ContextualParser methods.
 
 		protected virtual void CheckRemaining()
 		{
@@ -475,11 +475,11 @@
 
 		protected virtual void ReplaceBacklinks(Page page, NodeCollection nodes)
 		{
-			page.ThrowNull(nameof(page));
+			page.ThrowNull();
 
 			// Possibly better as a visitor class?
 			this.isFirstLink = true;
-			foreach (var node in nodes.NotNull(nameof(nodes)))
+			foreach (var node in nodes.NotNull())
 			{
 				if (node is IParentNode parent)
 				{
@@ -571,7 +571,7 @@
 
 		protected virtual void UpdateGalleryLinks(Page page, ITagNode tag)
 		{
-			var text = tag.NotNull(nameof(tag)).InnerText;
+			var text = tag.NotNull().InnerText;
 			if (text == null)
 			{
 				return;
@@ -623,8 +623,8 @@
 
 		protected virtual void UpdateLinkNode(Page page, SiteLinkNode node, bool isRedirectTarget)
 		{
-			page.ThrowNull(nameof(page));
-			SiteLink link = SiteLink.FromLinkNode(this.Site, node.NotNull(nameof(node)));
+			page.ThrowNull();
+			SiteLink link = SiteLink.FromLinkNode(this.Site, node.NotNull());
 			if (this.replacements.TryGetValue(link, out var replacement)
 				&& replacement.MoveActions.HasAction(ReplacementActions.UpdateLinks)
 				&& (link.ForcedNamespaceLink
@@ -653,9 +653,9 @@
 
 		protected virtual void UpdateLinkText(Page page, Title oldTitle, SiteLink newLink, bool addCaption)
 		{
-			page.ThrowNull(nameof(page));
-			oldTitle.ThrowNull(nameof(oldTitle));
-			newLink.ThrowNull(nameof(newLink));
+			page.ThrowNull();
+			oldTitle.ThrowNull();
+			newLink.ThrowNull();
 			if ((this.FollowUpActions & FollowUpActions.UpdateCaption) != 0)
 			{
 				// If UpdateCaption is true and caption exactly matches either the full page name or the simple page name, update it.
@@ -692,8 +692,8 @@
 
 		protected virtual void UpdateTemplateNode(Page page, SiteTemplateNode template)
 		{
-			page.ThrowNull(nameof(page));
-			if (this.replacements.TryGetValue(template.NotNull(nameof(template)).TitleValue, out var replacement) &&
+			page.ThrowNull();
+			if (this.replacements.TryGetValue(template.NotNull().TitleValue, out var replacement) &&
 				replacement.MoveActions.HasAction(ReplacementActions.UpdateLinks))
 			{
 				var newTemplate = replacement.To;
@@ -721,10 +721,10 @@
 
 		private static void ProposeForDeletion(ContextualParser parser, string deletionText)
 		{
-			deletionText.ThrowNull(nameof(deletionText));
+			deletionText.ThrowNull();
 
 			// Cheating and using text throughout, since this does not need to be parsed or acted upon currently, and is likely to be moved to another job soon anyway.
-			var page = parser.NotNull(nameof(parser)).Page;
+			var page = parser.NotNull().Page;
 			var noinclude = page.Namespace == MediaWikiNamespaces.Template;
 			if (!noinclude)
 			{

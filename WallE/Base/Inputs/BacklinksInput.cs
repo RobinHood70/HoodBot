@@ -21,7 +21,7 @@ namespace RobinHood70.WallE.Base
 
 		public BacklinksInput(BacklinksInput input, BacklinksTypes linkType)
 		{
-			this.FilterRedirects = input.NotNull(nameof(input)).FilterRedirects;
+			this.FilterRedirects = input.NotNull().FilterRedirects;
 			this.Limit = input.Limit;
 			this.MaxItems = input.MaxItems;
 			this.PageId = input.PageId;

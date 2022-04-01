@@ -8,7 +8,7 @@
 	{
 		public ProtectionEntry(ProtectionsItem item)
 		{
-			this.Expiry = item.NotNull(nameof(item)).Expiry;
+			this.Expiry = item.NotNull().Expiry;
 			this.Level = item.Level;
 		}
 

@@ -26,9 +26,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, OptionsInputInternal input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Add("reset", input.Reset)
 				.AddIf("resetkinds", input.ResetKinds, this.SiteVersion >= 120)
 				.Add("change", input.Change)

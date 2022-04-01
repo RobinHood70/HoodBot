@@ -18,7 +18,7 @@
 		#region Public Methods
 		public void FromJson(JToken json)
 		{
-			if (json.NotNull(nameof(json))[nameof(this.DefaultWikis)] is JToken wikiNode && wikiNode.Type == JTokenType.Array)
+			if (json.NotNull()[nameof(this.DefaultWikis)] is JToken wikiNode && wikiNode.Type == JTokenType.Array)
 			{
 				foreach (var node in wikiNode)
 				{

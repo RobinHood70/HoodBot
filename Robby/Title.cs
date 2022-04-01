@@ -36,7 +36,7 @@
 		/// <param name="title">The title to copy from.</param>
 		public Title([NotNull, ValidatedNotNull] TitleFactory title)
 		{
-			title.ThrowNull(nameof(title));
+			title.ThrowNull();
 			this.Namespace = title.Namespace;
 			this.PageName = title.PageName;
 		}
@@ -45,7 +45,7 @@
 		/// <param name="title">The title to copy from.</param>
 		public Title([NotNull, ValidatedNotNull] Title title)
 		{
-			title.ThrowNull(nameof(title));
+			title.ThrowNull();
 			this.Namespace = title.Namespace;
 			this.PageName = title.PageName;
 		}
@@ -53,8 +53,8 @@
 		// This method is strictly internal, since we need a way to create titles from their parts, but this *must* be a validated source.
 		internal Title([NotNull, ValidatedNotNull] Namespace ns, [NotNull, ValidatedNotNull] string pageName)
 		{
-			this.Namespace = ns.NotNull(nameof(ns));
-			this.PageName = pageName.NotNull(nameof(pageName));
+			this.Namespace = ns.NotNull();
+			this.PageName = pageName.NotNull();
 		}
 		#endregion
 

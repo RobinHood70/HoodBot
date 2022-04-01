@@ -10,7 +10,7 @@ namespace RobinHood70.WallE.Base
 		#region Constructors
 		public UndeleteInput(string title)
 		{
-			this.Title = title.NotNullOrWhiteSpace(nameof(title));
+			this.Title = title.NotNullOrWhiteSpace();
 		}
 		#endregion
 

@@ -32,9 +32,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, BlockInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("user", input.User)
 				.AddIfPositiveIf("userid", input.UserId, this.SiteVersion >= 129)
 				.Add("expiry", input.Expiry)
@@ -53,7 +53,7 @@
 
 		protected override BlockResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			return new BlockResult(
 				user: result.MustHaveString("user"),
 				userId: (long)result.MustHave("userID"),

@@ -17,8 +17,8 @@
 		/// <param name="user">The user's name.</param>
 		public User(Site site, string user)
 			: base(GetTitle(
-				site.NotNull(nameof(site)),
-				user.NotNull(nameof(user))))
+				site.NotNull(),
+				user.NotNull()))
 		{
 		}
 
@@ -26,7 +26,7 @@
 		/// <param name="site">The site the user is from.</param>
 		/// <param name="userInfo">The API user information.</param>
 		public User(Site site, AllUsersItem userInfo)
-			: this(site, userInfo.NotNull(nameof(userInfo)).Name)
+			: this(site, userInfo.NotNull().Name)
 		{
 			this.Info = new UserInfo(this.Site, userInfo);
 		}
@@ -58,7 +58,7 @@
 		/// <param name="site">The site the user is from.</param>
 		/// <param name="name">The username.</param>
 		/// <returns>A title corresponding to the User page.</returns>
-		public static Title GetTitle(Site site, string name) => CreateTitle.FromValidated(site.NotNull(nameof(site)), MediaWikiNamespaces.User, name.NotNull(nameof(name)));
+		public static Title GetTitle(Site site, string name) => CreateTitle.FromValidated(site.NotNull(), MediaWikiNamespaces.User, name.NotNull());
 		#endregion
 
 		#region Public Methods
@@ -106,8 +106,8 @@
 		/// <returns>A value indicating the change status of the e-mail along with a copy of the e-mail that was sent.</returns>
 		public ChangeValue<string> Email(string subject, string body, bool ccMe)
 		{
-			subject.ThrowNull(nameof(subject));
-			body.ThrowNull(nameof(body));
+			subject.ThrowNull();
+			body.ThrowNull();
 			if (this.Info?.Emailable == false)
 			{
 				// Don't ask the wiki what the result will be if we already know we can't e-mail them.
@@ -240,7 +240,7 @@
 		/// <exception cref="InvalidOperationException">Thrown when the user's talk page is invalid.</exception>
 		public ChangeStatus NewTalkPageMessage(string header, string msg, string editSummary)
 		{
-			msg = msg.NotNull(nameof(msg)).Trim();
+			msg = msg.NotNull().Trim();
 			if (this.TalkPage is not Title talkPage)
 			{
 				throw new InvalidOperationException(Resources.TitleInvalid);

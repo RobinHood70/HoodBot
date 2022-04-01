@@ -12,7 +12,7 @@
 		/// <param name="name">The parameter name.</param>
 		protected Parameter(string name)
 		{
-			this.Name = name.NotNull(nameof(name));
+			this.Name = name.NotNull();
 		}
 		#endregion
 

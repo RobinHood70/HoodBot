@@ -22,8 +22,8 @@
 		#region Constructors
 		public Replacement(Title from, Title to, DetailedActions actions)
 		{
-			this.From = from.NotNull(nameof(from));
-			this.To = to.NotNull(nameof(to));
+			this.From = from.NotNull();
+			this.To = to.NotNull();
 			this.MoveActions = actions;
 		}
 

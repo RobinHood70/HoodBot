@@ -28,9 +28,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, DeleteInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("title", input.Title)
 				.AddIfPositive("pageid", input.PageId)
 				.AddIfNotNull("reason", input.Reason)
@@ -44,7 +44,7 @@
 
 		protected override DeleteResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			return new DeleteResult(
 				title: result.MustHaveString("title"),
 				reason: result.MustHaveString("reason"),

@@ -20,7 +20,7 @@
 		/// <param name="site">The site to use when resolving link nodes.</param>
 		public WikiPlainTextVisitor(Site site)
 		{
-			this.site = site.NotNull(nameof(site));
+			this.site = site.NotNull();
 		}
 		#endregion
 
@@ -32,7 +32,7 @@
 		public string Build(IWikiNode node)
 		{
 			this.builder.Clear();
-			node.NotNull(nameof(node)).Accept(this);
+			node.NotNull().Accept(this);
 			return this.builder.ToString();
 		}
 
@@ -65,7 +65,7 @@
 		}
 
 		/// <inheritdoc/>
-		public void Visit(IHeaderNode node) => node.NotNull(nameof(node)).Title.Accept(this);
+		public void Visit(IHeaderNode node) => node.NotNull().Title.Accept(this);
 
 		/// <inheritdoc/>
 		public void Visit(IIgnoreNode node)
@@ -82,7 +82,7 @@
 		/// <inheritdoc/>
 		public void Visit(NodeCollection nodes)
 		{
-			foreach (var node in nodes.NotNull(nameof(nodes)))
+			foreach (var node in nodes.NotNull())
 			{
 				node.Accept(this);
 			}
@@ -93,7 +93,7 @@
 		{
 			// It would rarely make sense to resolve a parameter node in this context, but code is left unadulterated for special purposes like manually iterating through parameters in a link.
 			this.builder.Append('|');
-			node.ThrowNull(nameof(node));
+			node.ThrowNull();
 			if (node.Name is not null)
 			{
 				node.Name.Accept(this);
@@ -114,7 +114,7 @@
 		}
 
 		/// <inheritdoc/>
-		public void Visit(ITextNode node) => this.builder.Append(node.NotNull(nameof(node)).Text);
+		public void Visit(ITextNode node) => this.builder.Append(node.NotNull().Text);
 		#endregion
 	}
 }

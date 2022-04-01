@@ -25,9 +25,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestPageSet(Request request, SetNotificationTimestampInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.Add("entirewatchlist", input.EntireWatchlist)
 				.Add("timestamp", input.Timestamp)
 				.AddIfPositive("torevid", input.ToRevisionId)
@@ -37,7 +37,7 @@
 
 		protected override SetNotificationTimestampItem GetItem(JToken result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			return new SetNotificationTimestampItem(
 				ns: (int)result.MustHave("ns"),
 				title: result.MustHaveString("title"),
@@ -53,7 +53,7 @@
 
 		protected override void DeserializeResult(JToken result, IList<SetNotificationTimestampItem> pages)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 
 			// If using entirewatchlist, return a single page with the notification timestamp and faked page data.
 			if (result.Type == JTokenType.Object && result["notificationtimestamp"] != null)

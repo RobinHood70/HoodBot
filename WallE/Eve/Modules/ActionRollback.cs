@@ -28,9 +28,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, RollbackInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("title", input.Title)
 				.AddIfPositiveIf("pageid", input.PageId, this.SiteVersion >= 124)
 				.AddIf("tags", input.Tags, this.SiteVersion >= 127)
@@ -43,7 +43,7 @@
 
 		protected override RollbackResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			var title = result.MustHaveString("title");
 			return new RollbackResult(
 				ns: this.FindRequiredNamespace(title),

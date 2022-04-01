@@ -9,7 +9,7 @@
 	{
 		#region Public Static Methods
 		public static string TrimTokenKey(string key) => key
-			.NotNull(nameof(key))
+			.NotNull()
 			.EndsWith("token", StringComparison.Ordinal)
 				? key[0..^5]
 				: key;

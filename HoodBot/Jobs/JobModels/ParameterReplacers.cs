@@ -28,8 +28,8 @@
 		#region Constructors
 		internal ParameterReplacers(MovePagesJob job, ReplacementCollection replacements)
 		{
-			this.job = job.NotNull(nameof(job));
-			this.replacements = replacements.NotNull(nameof(replacements));
+			this.job = job.NotNull();
+			this.replacements = replacements.NotNull();
 			this.AddAllReplacers();
 		}
 		#endregion
@@ -64,7 +64,7 @@
 
 		public void ReplaceAll(Page page, SiteTemplateNode template)
 		{
-			template.ThrowNull(nameof(template));
+			template.ThrowNull();
 			foreach (var action in this.generalReplacers)
 			{
 				action(page, template);
@@ -91,8 +91,8 @@
 
 		protected void BulletLink(Page page, SiteTemplateNode template)
 		{
-			page.ThrowNull(nameof(page));
-			if ((template.NotNull(nameof(template)).Find(1)
+			page.ThrowNull();
+			if ((template.NotNull().Find(1)
 				?? template.Find("link")) is not IParameterNode link)
 			{
 				return;
@@ -222,7 +222,7 @@
 
 		private void FullPageNameReplace([NotNull] Page page, IParameterNode? param)
 		{
-			page.ThrowNull(nameof(page));
+			page.ThrowNull();
 			if (param != null
 				&& CreateTitle.FromUnvalidated(page.Site, param.Value.ToValue()) is var title
 				&& this.replacements.TryGetValue(title, out var replacement)

@@ -369,7 +369,7 @@
 			#region Constructors
 			public SetData(IDataRecord row)
 			{
-				this.Name = (string)row.NotNull(nameof(row))["setName"];
+				this.Name = (string)row.NotNull()["setName"];
 				for (var c = '1'; c <= '7'; c++)
 				{
 					var bonusDesc = (string)row["setBonusDesc" + c];

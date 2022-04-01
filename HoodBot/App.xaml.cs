@@ -44,7 +44,7 @@
 		#endregion
 
 		#region Public Static Methods
-		public static string GetConnectionString(string name) => ConfigurationRoot.GetConnectionString(name);
+		public static string? GetConnectionString(string name) => ConfigurationRoot.GetConnectionString(name);
 
 		// Ensure everything is updated on the UI end before continuing.
 		public static void WpfYield() => Current.Dispatcher.Invoke(new Action(() => { }), DispatcherPriority.ContextIdle, null);

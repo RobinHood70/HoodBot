@@ -12,7 +12,7 @@
 		public UespNamespaceList(Site site)
 		{
 			// Add defined namespaces
-			if (site.NotNull(nameof(site)).LoadMessage("Uespnamespacelist") is string message)
+			if (site.NotNull().LoadMessage("Uespnamespacelist") is string message)
 			{
 				var lines = message.Split(TextArrays.LineFeed, StringSplitOptions.RemoveEmptyEntries);
 				foreach (var line in lines)
@@ -55,7 +55,7 @@
 
 		public UespNamespace? FromTitle(Title title)
 		{
-			title.ThrowNull(nameof(title));
+			title.ThrowNull();
 			var ns = title.Namespace.SubjectSpace;
 			var tryName = ns.DecoratedName + title.RootPageName;
 			if (!this.TryGetValue(tryName, out var retval))

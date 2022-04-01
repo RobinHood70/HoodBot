@@ -28,9 +28,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, CheckTokenInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("type", input.Type)
 				.AddIfPositive("maxtokenage", input.MaxTokenAge)
 				.AddHidden("token", input.Token);
@@ -38,7 +38,7 @@
 
 		protected override CheckTokenResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			return new CheckTokenResult(
 				result: result.MustHaveString("result"),
 				generated: result["generated"].GetNullableDate());

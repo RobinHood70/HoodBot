@@ -29,9 +29,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, CreateAccountInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfNotNull("name", input.Name)
 				.AddIfNotNull("password", input.Password)
 				.AddIfNotNull("domain", input.Domain)
@@ -46,7 +46,7 @@
 
 		protected override CreateAccountResult DeserializeResult(JToken? result)
 		{
-			result.ThrowNull(nameof(result));
+			result.ThrowNull();
 			var resultText = result.MustHaveString("result");
 			resultText = string.Equals(resultText, "needtoken", System.StringComparison.Ordinal) ? "NeedToken" : resultText.UpperFirst(CultureInfo.InvariantCulture);
 			return new CreateAccountResult(

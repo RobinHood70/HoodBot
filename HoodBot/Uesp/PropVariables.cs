@@ -43,8 +43,8 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, VariablesInput input)
 		{
-			input.ThrowNull(nameof(input));
-			request.NotNull(nameof(request))
+			input.ThrowNull();
+			request.NotNull()
 				.Add("var", input.Variables)
 				.Add("subset", input.Subsets)
 				.Add("limit", this.Limit);
@@ -52,7 +52,7 @@
 
 		protected override VariableItem GetItem(JToken result, PageItem page)
 		{
-			var vars = result.NotNull(nameof(result))["vars"].GetStringDictionary<string>();
+			var vars = result.NotNull()["vars"].GetStringDictionary<string>();
 			var subset = (string?)result["subset"];
 			return new VariableItem(vars, subset);
 		}

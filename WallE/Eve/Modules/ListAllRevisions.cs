@@ -38,9 +38,9 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, AllRevisionsInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
-				.NotNull(nameof(request))
+				.NotNull()
 				.BuildRevisions(input, this.SiteVersion)
 				.Add("namespace", input.Namespaces)
 				.Add("generatetitles", input.GenerateTitles);

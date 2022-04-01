@@ -37,11 +37,11 @@
 		#region Protected Override Methods
 		protected override void BuildRequestLocal(Request request, AllImagesInput input)
 		{
-			input.ThrowNull(nameof(input));
+			input.ThrowNull();
 			request
 				//// .AddIf("dir", "newer", input.SortDescending && input.SortBy == AllImagesSort.Timestamp);
 				//// does not seem to be necessary, as module appears to handle either term correctly, even though inline comments in it would suggest otherwise.
-				.NotNull(nameof(request))
+				.NotNull()
 				.AddIfPositive("sort", input.SortBy)
 				.AddIf("dir", "descending", input.SortDescending) // && input.SortBy != AllImagesSort.Timestamp
 				.AddIfNotNull("from", input.From)

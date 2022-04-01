@@ -47,7 +47,7 @@ namespace RobinHood70.WallE.Eve.Modules
 
 		#region Public Virtual Methods
 		public virtual void BeforePageSetSubmit(IPageSetGenerator pageSet) => this.GeneratorContinue = pageSet
-			.NotNull(nameof(pageSet))
+			.NotNull()
 			.Generator is IGeneratorModule generator
 				? generator.FullPrefix + generator.ContinueName
 				: null;

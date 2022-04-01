@@ -72,7 +72,7 @@
 		protected bool TrackedUpdate(ITemplateNode template, string name, string value, TitleCollection? usedList, string? skillName)
 		{
 			var retval = false;
-			if (template.NotNull(nameof(template)).Find(name) is not IParameterNode parameter)
+			if (template.NotNull().Find(name) is not IParameterNode parameter)
 			{
 				parameter = template.Add(name, string.Empty);
 				retval = true;
@@ -102,7 +102,7 @@
 		}
 
 		protected bool TrackedUpdate(ITemplateNode template, string name, string value, bool removeCondition) => removeCondition
-			? template.NotNull(nameof(template)).Remove(name)
+			? template.NotNull().Remove(name)
 			: this.TrackedUpdate(template, name, value);
 		#endregion
 

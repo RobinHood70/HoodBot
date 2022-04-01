@@ -45,7 +45,7 @@
 
 		public static PlaceCollection GetPlaces(Site site)
 		{
-			var places = site.NotNull(nameof(site)).CreateMetaPageCollection(PageModules.None, true, "alliance", "settlement", "titlename", "type", "zone");
+			var places = site.NotNull().CreateMetaPageCollection(PageModules.None, true, "alliance", "settlement", "titlename", "type", "zone");
 			places.SetLimitations(LimitationType.FilterTo, UespNamespaces.Online);
 			places.GetCategoryMembers("Online-Places");
 
@@ -92,7 +92,7 @@
 			job.StatusWriteLine("Update patch bot parameters");
 			var patchPage = GetPatchPage(job);
 			ContextualParser parser = new(patchPage);
-			var paramName = "bot" + pageType.NotNull(nameof(pageType));
+			var paramName = "bot" + pageType.NotNull();
 			if (parser.FindSiteTemplate("Online Patch") is ITemplateNode template && template.Find(paramName) is IParameterNode param)
 			{
 				param.Value.Clear();

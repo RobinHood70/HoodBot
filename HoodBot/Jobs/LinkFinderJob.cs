@@ -2,9 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Text;
 	using RobinHood70.CommonCode;
-
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
@@ -89,7 +87,7 @@
 		{
 			TitleCollection allTitles = new(this.Site)
 			{
-				titles.NotNull(nameof(titles))
+				titles.NotNull()
 			};
 
 			foreach (var title in titles)
@@ -102,7 +100,7 @@
 
 		protected override void ParseText(object sender, ContextualParser parser)
 		{
-			parser.ThrowNull(nameof(parser));
+			parser.ThrowNull();
 			foreach (var title in this.Titles)
 			{
 				if (!this.results.TryGetValue(title, out var section))
