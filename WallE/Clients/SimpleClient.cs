@@ -1,100 +1,71 @@
-﻿namespace RobinHood70.WallE.Clients
+﻿#pragma warning disable CS1591 // Missing XML comment for privately visible type or member (file is not currently being maintained)
+namespace RobinHood70.WallE.Clients
 {
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Globalization;
 	using System.IO;
-	using System.IO.Compression;
 	using System.Net;
+	using System.Net.Http;
+	using System.Net.Http.Headers;
 	using System.Reflection;
 	using System.Security;
-	using System.Text;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using Newtonsoft.Json;
 	using RobinHood70.CommonCode;
-	using RobinHood70.WallE.Design;
-	using RobinHood70.WallE.Properties;
-	using static RobinHood70.WallE.Clients.ClientShared;
 
-	// TODO: Add cancellation token possibilities so requests can be cancelled if they're failing without waiting for all retries.
-
-	/// <summary>This class provides basic HTTP and cookie handling, with MediaWiki maxlag support.</summary>
-	/// <seealso cref="IMediaWikiClient" />
-	public class SimpleClient : IMediaWikiClient
+	public class SimpleClient : IMediaWikiClient, IDisposable
 	{
 		#region Fields
-		private readonly string cookiesLocation;
 		private readonly CancellationToken cancellationToken;
-		private CookieContainer cookieContainer = new();
+		private readonly CookieContainer cookieContainer = new();
+		private readonly string cookiesLocation;
+		private readonly SimpleClientRetryHandler retryHandler;
+		private readonly HttpClient httpClient;
+		private readonly HttpClientHandler webHandler;
+		private bool disposed;
 		#endregion
 
 		#region Constructors
-
-		/// <summary>Initializes a new instance of the <see cref="SimpleClient" /> class.</summary>
-		public SimpleClient()
-			: this(null, null, CancellationToken.None)
+		public SimpleClient(CancellationToken cancellationToken)
+			: this(null, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "cookies.dat"), cancellationToken)
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="SimpleClient" /> class with contact information for the User-Agent string.</summary>
-		/// <param name="contactInfo">The contact info to be displayed - typically, an e-mail address or user name on the target wiki.</param>
-		public SimpleClient(string? contactInfo)
-			: this(contactInfo, null, CancellationToken.None)
+		public SimpleClient(string cookiesLocation, CancellationToken cancellationToken)
+			: this(null, cookiesLocation, cancellationToken)
 		{
 		}
 
-		/// <summary>Initializes a new instance of the <see cref="SimpleClient" /> class with contact information for the User-Agent string.</summary>
-		/// <param name="contactInfo">The contact info to be displayed - typically, an e-mail address or user name on the target wiki.</param>
-		/// <param name="cookiesLocation">The location and file name to store cookies in across sessions. If null, the default location specified in <see cref="DefaultCookiesLocation" /> will be used.</param>
-		/// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
-		public SimpleClient(string? contactInfo, string? cookiesLocation, CancellationToken
-			cancellationToken)
+		public SimpleClient(string? contactInfo, string cookiesLocation, CancellationToken cancellationToken)
 		{
-			CheckMonoBug();
 			ServicePointManager.Expect100Continue = false;
-			this.UserAgent = BuildUserAgent(contactInfo);
-			this.cookiesLocation = cookiesLocation ?? DefaultCookiesLocation;
+			this.UserAgent = ClientShared.BuildUserAgent(contactInfo);
+			this.cookiesLocation = cookiesLocation;
 			this.LoadCookies();
 			this.cancellationToken = cancellationToken;
+
+			// See http://stackoverflow.com/questions/8739065/using-object-initializer-generates-ca-2000-warning for why we're not using an object initializer.
+			this.webHandler = new()
+			{
+				AllowAutoRedirect = true,
+				AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
+				CookieContainer = this.cookieContainer,
+			};
+			this.retryHandler = new SimpleClientRetryHandler(this, this.webHandler);
+
+			HttpClient client = new(this.retryHandler);
+			var headers = client.DefaultRequestHeaders;
+			headers.UserAgent.ParseAdd(this.UserAgent);
+			headers.CacheControl = new CacheControlHeaderValue { NoCache = true };
+			this.httpClient = client;
 		}
 		#endregion
 
 		#region Events
-
-		/// <summary>The event raised when either the site or the client is requesting a delay.</summary>
 		public event StrongEventHandler<IMediaWikiClient, DelayEventArgs>? RequestingDelay;
-		#endregion
-
-		#region Public Static Properties
-
-		/// <summary>Gets or sets the default encoding types. There is normally no need to change this value; it is provided to overcome an old Mono bug, and for the rare case that the default encodings are unavailable or new encodings are.</summary>
-		/// <value>The default AcceptEncoding value.</value>
-		public static string DefaultAcceptEncoding { get; set; } = "gzip, deflate";
-
-		/// <summary>Gets or sets the default location to store cookies. As a static variable, this will apply across all new instances of the client. Existing clients will continue to use the whatever was provided or was the default at their instantiation.</summary>
-		/// <value>The default cookies location.</value>
-		public static string DefaultCookiesLocation { get; set; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "cookies.json");
-
-		/// <summary>Gets a value indicating whether the current project is using <see href="http://www.mono-project.com/">Mono</see>.</summary>
-		/// <value><see langword="true"/> if this instance is running on Mono; otherwise, <see langword="false"/>.</value>
-		public static bool HasMono { get; } = Type.GetType("Mono.Runtime") != null;
-
-		/// <summary>Gets a value indicating whether the current project is running on Windows.</summary>
-		/// <value><see langword="true"/> if running on Windows; otherwise, <see langword="false"/>.</value>
-		public static bool OnWindows { get; } = Environment.OSVersion.Platform < PlatformID.Unix;
-
-		/// <summary>Gets the amount of time (in seconds) to add to retries if they occur in succession.</summary>
-		/// <value>The retry delay bonuses.</value>
-		/// <remarks>Although default values are provided, these are user-settable. In the event that more retries are allowed than there are entries in this list, the last retry delay bonus will be used.</remarks>
-		public static IList<int> RetryDelayBonuses { get; } = new List<int>()
-		{
-			0, 0, 0, 0, 0,
-			5, 10, 15, 20, 25,
-			30, 30, 30, 60, 60,
-			120, 120, 300, 1800, 3600
-		};
 		#endregion
 
 		#region Public Properties
@@ -103,52 +74,33 @@
 		/// <value><see langword="true"/> if maxlag requests should be honoured; otherwise, <see langword="false"/>.</value>
 		public bool HonourMaxLag { get; set; } = true;
 
-		/// <summary>Gets or sets a name for this instance of the client. It has no effect on operation and is provided primarily as a debugging tool to differentiate between multiple client instances.</summary>
-		/// <value>The instance name.</value>
-		public string Name { get; set; } = nameof(SimpleClient);
+		public int Retries { get; set; } = 3;
 
-		/// <summary>Gets or sets the number of times to retry an operation in the event of a temporary failure such as a connection loss.</summary>
-		/// <value>The number of retries.</value>
-		public int Retries { get; set; } = 20;
-
-		/// <summary>Gets or sets the amount of time to wait between retries of an operation in the event of a temporary failure such as a connection loss.</summary>
-		/// <value>The retry delay.</value>
 		public TimeSpan RetryDelay { get; set; } = TimeSpan.FromSeconds(10);
 
-		/// <summary>Gets or sets the User-Agent string to be sent with each request. If not specified, or if contact info is specified, a default User-Agent string similar to.</summary>
-		/// <value>The user agent.</value>
-		public string UserAgent { get; set; }
+		private string UserAgent { get; }
 		#endregion
 
 		#region Public Methods
 
-		/// <summary>Deletes all cookies from persistent storage and clears the cookie cache.</summary>
-		public void DeleteCookies()
+		public void Dispose()
 		{
-			if (this.cookiesLocation != null)
-			{
-				try
-				{
-					File.Delete(this.cookiesLocation);
-				}
-				catch (FileNotFoundException)
-				{
-				}
-			}
-
-			this.cookieContainer = new CookieContainer();
+			this.Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
 		/// <summary>Downloads a file directly to disk instead of returning it as a string.</summary>
 		/// <param name="uri">The URI to download from.</param>
 		/// <param name="fileName">The filename to save to.</param>
 		/// <returns><see langword="true"/> if the download succeeded; otherwise <see langword="false"/>.</returns>
-		/// <exception cref="WikiException">HTTP request failed.</exception>
 		public bool DownloadFile(Uri uri, string fileName)
 		{
-			uri.ThrowNull(nameof(uri));
-			fileName.ThrowNull(nameof(fileName));
-			using (var response = this.SendRequest(uri, "GET", null, null, false))
+			uri.ThrowNull();
+			fileName.ThrowNull();
+			using HttpRequestMessage request = new(HttpMethod.Get, uri);
+			var maxLag = this.HonourMaxLag;
+			this.HonourMaxLag = false;
+			using var response = this.httpClient.Send(request, this.cancellationToken);
 			{
 				var data = GetResponseData(response);
 				if (data.Length > 0)
@@ -170,39 +122,44 @@
 					catch (SecurityException)
 					{
 					}
+					finally
+					{
+						this.HonourMaxLag = maxLag;
+					}
 				}
 			}
 
+			this.SaveCookies();
+			this.HonourMaxLag = maxLag;
 			return false;
 		}
 
-		/// <summary>Gets the text of the result returned by the given URI.</summary>
-		/// <param name="uri">The URI to get.</param>
-		/// <returns>The text of the result.</returns>
+		/// <inheritdoc/>
+		public void ExpireAll()
+		{
+#if NET6_0
+			foreach (var cookie in (IEnumerable<Cookie>)this.cookieContainer.GetAllCookies())
+			{
+				cookie.Expired = true;
+			}
+#endif
+		}
+
 		public string Get(Uri uri)
 		{
-			using var response = this.SendRequest(uri, "GET", null, null, this.HonourMaxLag);
+			using HttpRequestMessage request = new(HttpMethod.Get, uri);
+			using var response = this.httpClient.Send(request, this.cancellationToken);
+			this.SaveCookies();
 			return GetResponseText(response);
 		}
 
-		/// <summary>POSTs text data and retrieves the result.</summary>
-		/// <param name="uri">The URI to POST data to.</param>
-		/// <param name="postData">The text to POST.</param>
-		/// <returns>The text of the result.</returns>
-		public string Post(Uri uri, string postData)
+		/// <inheritdoc/>
+		public string Post(Uri uri, HttpContent content)
 		{
-			using var response = this.SendRequest(uri, "POST", FormUrlEncoded, Encoding.UTF8.GetBytes(postData), this.HonourMaxLag);
-			return GetResponseText(response);
-		}
-
-		/// <summary>POSTs text data and retrieves the result.</summary>
-		/// <param name="uri">The URI to POST data to.</param>
-		/// <param name="contentType">The text of the content type. Typicially <c>x-www-form-urlencoded</c> or <c>multipart/form-data (...)</c>, but there is no restriction on values.</param>
-		/// <param name="postData">The text to POST.</param>
-		/// <returns>The text of the result.</returns>
-		public string Post(Uri uri, string contentType, byte[] postData)
-		{
-			using var response = this.SendRequest(uri, "POST", contentType, postData, this.HonourMaxLag);
+			using HttpRequestMessage request = new(HttpMethod.Post, uri);
+			request.Content = content;
+			using var response = this.httpClient.Send(request, this.cancellationToken);
+			this.SaveCookies();
 			return GetResponseText(response);
 		}
 
@@ -227,153 +184,37 @@
 		}
 		#endregion
 
-		#region Public Override Methods
-
-		/// <summary>Returns a <see cref="string" /> that represents this instance.</summary>
-		/// <returns>A <see cref="string" /> that represents this instance.</returns>
-		public override string ToString() => this.Name;
-		#endregion
-
 		#region Protected Virtual Methods
+		protected virtual void Dispose(bool disposing)
+		{
+			if (disposing && !this.disposed)
+			{
+				this.webHandler.Dispose();
+				this.retryHandler.Dispose();
+				this.httpClient.Dispose();
+			}
 
-		/// <summary>Raises the <see cref="RequestingDelay" /> event.</summary>
-		/// <param name="e">The <see cref="DelayEventArgs" /> instance containing the event data.</param>
+			this.disposed = true;
+		}
+
 		protected virtual void OnRequestingDelay(DelayEventArgs e) => this.RequestingDelay?.Invoke(this, e);
 		#endregion
 
-		#region Private Static Methods
-		private static void CheckMonoBug()
+		#region Private Methods
+
+		private static byte[] GetResponseData(HttpResponseMessage response)
 		{
-			// Test for the Mono Z-Stream bug on Windows: http://stackoverflow.com/a/32958861/502255
-			if (HasMono && OnWindows && (DefaultAcceptEncoding.Contains("gzip", StringComparison.OrdinalIgnoreCase) || DefaultAcceptEncoding.Contains("deflate", StringComparison.OrdinalIgnoreCase)))
-			{
-				try
-				{
-					var bytes = new byte[] { 0x1f, 0x8b, 0x08, 0, 0, 0, 0, 0, 4, 0, 0x63, 0, 0, 0x8d, 0xef, 2, 0xd2, 1, 0, 0, 0 };
-					using MemoryStream compressedStream = new(bytes);
-					using GZipStream zipStream = new(compressedStream, CompressionMode.Decompress);
-					using MemoryStream resultStream = new();
-					zipStream.CopyTo(resultStream);
-					resultStream.ToArray(); // We don't actually need the result, we just want to be sure the stream has been checked.
-				}
-				catch (EntryPointNotFoundException)
-				{
-					throw new InvalidOperationException(Messages.MonoCreateZStreamBug);
-				}
-				catch (DllNotFoundException)
-				{
-					throw new InvalidOperationException(Messages.MonoCreateZStreamBug);
-				}
-			}
+			using var respStream = response.Content.ReadAsStream();
+			using MemoryStream mem = new();
+			respStream.CopyTo(mem);
+			return mem.ToArray();
 		}
 
-		private static byte[] GetResponseData(HttpWebResponse response)
+		private static string GetResponseText(HttpResponseMessage response)
 		{
-			if (response != null)
-			{
-				using var respStream = response.GetResponseStream();
-				using MemoryStream mem = new();
-				respStream.CopyTo(mem);
-				return mem.ToArray();
-			}
-
-			return Array.Empty<byte>();
-		}
-
-		private static string GetResponseText(HttpWebResponse response)
-		{
-			using var respStream = response.NotNull(nameof(response)).GetResponseStream();
+			using var respStream = response.Content.ReadAsStream();
 			using StreamReader reader = new(respStream);
 			return reader.ReadToEnd();
-		}
-
-		/*
-		private static bool PerSessionUnsafeHeaderParsing(Exception ex)
-		{
-			if (!ex.Message.Contains("Section=ResponseStatusLine"))
-			{
-				return false;
-			}
-
-			// Adapted from http://stackoverflow.com/a/8523437/502255
-			var assembly = Assembly.GetAssembly(typeof(SettingsSection));
-			var type = assembly?.GetType("System.Net.Configuration.SettingsSectionInternal");
-			var section = type?.InvokeMember("Section", BindingFlags.Static | BindingFlags.GetProperty | BindingFlags.NonPublic, null, null, Array.Empty<object>(), CultureInfo.InvariantCulture);
-			var useUnsafeHeaderParsing = type?.GetField("useUnsafeHeaderParsing", BindingFlags.NonPublic | BindingFlags.Instance);
-			if (section != null && useUnsafeHeaderParsing != null)
-			{
-				useUnsafeHeaderParsing.SetValue(section, true);
-				return true;
-			}
-
-			return false;
-		}
-		*/
-		#endregion
-
-		#region Private Methods
-		private bool CheckDelay(HttpWebResponse response, int attemptNumber)
-		{
-			if (response == null)
-			{
-				return false;
-			}
-
-			var retryAfter = TimeSpan.Zero;
-			var retryHeader = response.Headers[HttpResponseHeader.RetryAfter];
-			if (retryHeader == null)
-			{
-				// If we didn't get a retry header, check if the response status code indicates a retriable error. If so, use the client's RetryDelay value.
-				switch (response.StatusCode)
-				{
-					case HttpStatusCode.RequestTimeout:
-					case HttpStatusCode.BadGateway:
-					case HttpStatusCode.GatewayTimeout:
-					case (HttpStatusCode)509:
-					case HttpStatusCode.ServiceUnavailable:
-						retryAfter = this.RetryDelay;
-						break;
-				}
-			}
-			else
-			{
-				// Regardless of status code, if we got a retry header, retry after that amount of time.
-				retryAfter = int.TryParse(retryHeader, NumberStyles.Integer, CultureInfo.InvariantCulture, out var retrySeconds) ? TimeSpan.FromSeconds(retrySeconds) : this.RetryDelay;
-			}
-
-			if (retryAfter != TimeSpan.Zero)
-			{
-				if (attemptNumber >= RetryDelayBonuses.Count)
-				{
-					attemptNumber = RetryDelayBonuses.Count - 1;
-				}
-
-				retryAfter += TimeSpan.FromSeconds(RetryDelayBonuses[attemptNumber]);
-				var maxlag = response.Headers["X-Database-Lag"];
-				var reason = maxlag == null ? DelayReason.Error : DelayReason.MaxLag;
-				var description = maxlag == null ? response.StatusDescription : "Database lag: " + maxlag + " seconds.";
-				return this.RequestDelay(retryAfter, reason, description);
-			}
-
-			return false;
-		}
-
-		private HttpWebRequest CreateRequest(Uri uri, string method)
-		{
-			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
-			request.AllowAutoRedirect = true;
-			request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
-			request.CookieContainer = this.cookieContainer;
-			request.Headers[HttpRequestHeader.AcceptEncoding] = "gzip,deflate";
-			request.Method = method;
-			request.UseDefaultCredentials = true;
-			request.UserAgent = this.UserAgent;
-			if (request.Proxy is IWebProxy proxy)
-			{
-				proxy.Credentials = CredentialCache.DefaultCredentials;
-			}
-
-			return request;
 		}
 
 		private IEnumerable<Cookie> FlattenCookies()
@@ -451,76 +292,6 @@
 				var jsonCookies = JsonConvert.SerializeObject(cookieList, Formatting.Indented);
 				File.WriteAllText(this.cookiesLocation, jsonCookies);
 			}
-		}
-
-		private HttpWebResponse SendRequest(Uri uri, string method, string? contentType, byte[]? postData, bool checkMaxLag)
-		{
-			HttpWebResponse? response = null;
-			for (var attempts = 0; attempts < this.Retries; attempts++)
-			{
-				// Do not try to optimize this out of the loop. A new request must be created every time or else the response returned will be the same response as the previous loop.
-				var request = this.CreateRequest(uri, method);
-				if (postData?.Length > 0)
-				{
-					request.ContentType = contentType;
-					request.ContentLength = postData.Length;
-					using var stream = request.GetRequestStream();
-					stream.Write(postData, 0, postData.Length);
-				}
-
-				try
-				{
-					response = (HttpWebResponse)request.GetResponse();
-					if (!checkMaxLag || !this.CheckDelay(response, attempts))
-					{
-						if (response.Cookies != null)
-						{
-							this.cookieContainer.Add(response.Cookies);
-							this.SaveCookies();
-						}
-
-						return response;
-					}
-
-					response.Dispose();
-					response = null;
-				}
-				catch (WebException ex)
-				{
-					response?.Dispose();
-					response = null;
-					/*
-					if (PerSessionUnsafeHeaderParsing(ex))
-					{
-						this.useV10 = true;
-						continue;
-					}
-					*/
-
-					if (ex.Response is HttpWebResponse errorResponse)
-					{
-						using (ex.Response)
-						{
-							if (!this.CheckDelay(errorResponse, attempts))
-							{
-								// If we didn't get a retry header or a retriable error, then throw the error.
-								throw;
-							}
-						}
-					}
-
-					if (attempts == this.Retries - 1)
-					{
-						throw;
-					}
-				}
-				catch (OperationCanceledException)
-				{
-					this.RequestDelay(TimeSpan.FromSeconds(5), DelayReason.Error, "Http timeout.");
-				}
-			}
-
-			throw new WikiException(Messages.ExcessiveLag);
 		}
 		#endregion
 	}

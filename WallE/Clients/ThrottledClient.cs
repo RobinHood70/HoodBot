@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Diagnostics;
+	using System.Net.Http;
 	using RobinHood70.CommonCode;
 
 	/// <summary>This class wraps around any other <see cref="IMediaWikiClient" /> providing simple throttling based on whether the previous request was a GET request or a POST request.</summary>
@@ -63,7 +64,7 @@
 		#region Public Methods
 
 		/// <summary>Deletes all cookies from persistent storage and clears the cookie cache.</summary>
-		public void DeleteCookies() => this.baseClient.DeleteCookies();
+		public void ExpireAll() => this.baseClient.ExpireAll();
 
 		/// <summary>Downloads a file directly to disk instead of returning it as a string.</summary>
 		/// <param name="uri">The URI to download from.</param>
@@ -92,29 +93,11 @@
 			return retval;
 		}
 
-		/// <summary>POSTs text data and retrieves the result.</summary>
-		/// <param name="uri">The URI to POST data to.</param>
-		/// <param name="postData">The text to POST.</param>
-		/// <returns>The text of the result.</returns>
-		public string Post(Uri uri, string postData)
+		/// <inheritdoc/>
+		public string Post(Uri uri, HttpContent content)
 		{
 			this.Throttle();
-			var retval = this.baseClient.Post(uri, postData);
-			this.stopwatch.Restart();
-			this.LastWasPost = true;
-
-			return retval;
-		}
-
-		/// <summary>POSTs byte data and retrieves the result.</summary>
-		/// <param name="uri">The URI to POST data to.</param>
-		/// <param name="contentType">The text of the content type. Typicially "<c>x-www-form-urlencoded</c>" or "<c>multipart/form-data ...</c>", but there is no restriction on values.</param>
-		/// <param name="postData">The byte array to POST.</param>
-		/// <returns>The text of the result.</returns>
-		public string Post(Uri uri, string contentType, byte[] postData)
-		{
-			this.Throttle();
-			var retval = this.baseClient.Post(uri, contentType, postData);
+			var retval = this.baseClient.Post(uri, content);
 			this.stopwatch.Restart();
 			this.LastWasPost = true;
 

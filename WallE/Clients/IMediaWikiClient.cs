@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.WallE.Clients
 {
 	using System;
+	using System.Net.Http;
 	using RobinHood70.CommonCode;
 
 	/// <summary>The reason for requested delay.</summary>
@@ -30,14 +31,14 @@
 
 		#region Methods
 
-		/// <summary>Deletes all cookies from persistent storage and clears the cookie cache.</summary>
-		void DeleteCookies();
-
 		/// <summary>Downloads a file directly to disk instead of returning it as a string.</summary>
 		/// <param name="uri">The URI to download from.</param>
 		/// <param name="fileName">The filename to save to.</param>
 		/// <returns><see langword="true"/> if the download succeeded; otherwise <see langword="false"/>.</returns>
 		bool DownloadFile(Uri uri, string fileName);
+
+		/// <summary>Expires all cookies.</summary>
+		void ExpireAll();
 
 		/// <summary>Gets the text of the result returned by the given URI.</summary>
 		/// <param name="uri">The URI to get.</param>
@@ -46,16 +47,9 @@
 
 		/// <summary>POSTs text data and retrieves the result.</summary>
 		/// <param name="uri">The URI to POST data to.</param>
-		/// <param name="postData">The text to POST.</param>
+		/// <param name="content">The content to POST.</param>
 		/// <returns>The text of the result.</returns>
-		string Post(Uri uri, string postData);
-
-		/// <summary>POSTs byte data and retrieves the result.</summary>
-		/// <param name="uri">The URI to POST data to.</param>
-		/// <param name="contentType">The text of the content type. Typicially "<c>x-www-form-urlencoded</c>" or "<c>multipart/form-data ...</c>", but there is no restriction on values.</param>
-		/// <param name="postData">The byte array to POST.</param>
-		/// <returns>The text of the result.</returns>
-		string Post(Uri uri, string contentType, byte[] postData);
+		string Post(Uri uri, HttpContent content);
 
 		/// <summary>This method is used both to throttle clients as well as to forward any wiki-requested delays, such as from maxlag. Clients should respect any delays requested by the wiki unless they expect to abort the procedure, or for testing.</summary>
 		/// <param name="delayTime">The amount of time to delay for.</param>
