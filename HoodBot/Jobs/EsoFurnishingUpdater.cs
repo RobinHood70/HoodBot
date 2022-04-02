@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Data;
 	using System.Globalization;
+	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
 	using RobinHood70.HoodBot.Jobs.JobModels;
@@ -21,8 +22,8 @@
 
 	internal sealed class EsoFurnishingUpdater : ParsedPageJob
 	{
-		#region Private Static Fields
-		private static readonly string Query = $"SELECT itemId, name, furnCategory, quality, tags, description, abilityDesc, resultitemLink FROM uesp_esolog.minedItemSummary WHERE type IN({(int)ItemType.Recipes}, {(int)ItemType.Furnishing});";
+		#region Static Fields
+		private static readonly string Query = $"SELECT itemId, name, furnCategory, quality, tags, type, description, abilityDesc, resultitemLink FROM uesp_esolog.minedItemSummary WHERE type IN({(int)ItemType.Recipes}, {(int)ItemType.Furnishing});";
 		#endregion
 
 		#region Fields
@@ -107,17 +108,29 @@
 							this.pageMessages.Add($"Page name mismatch: {furnishing.PageName} != {page.PageName}");
 						}
 
-						if (furnishing.TitleName != null)
+						if (string.Equals(template.GetValue("name"), page.LabelName(), StringComparison.Ordinal))
 						{
-							template.Update("titlename", furnishing.TitleName, ParameterFormat.NoChange);
+							template.Remove("name");
 						}
 
-						template.Update("cat", furnishing.FurnitureCategory, ParameterFormat.OnePerLine);
-						template.Update("subcat", furnishing.FurnitureSubcategory, ParameterFormat.OnePerLine);
-						template.Update("desc", furnishing.Description, ParameterFormat.OnePerLine);
-						template.Update("quality", furnishing.Quality, ParameterFormat.OnePerLine);
-						template.Update("tags", furnishing.Tags, ParameterFormat.OnePerLine);
-						template.Update("skillsIngredients", furnishing.AbilityDescription, ParameterFormat.OnePerLine);
+						if (furnishing.TitleName == null)
+						{
+							if (string.Equals(template.GetValue("titlename"), page.LabelName(), StringComparison.Ordinal))
+							{
+								template.Remove("titlename");
+							}
+						}
+						else
+						{
+							template.Update("titlename", furnishing.TitleName, ParameterFormat.NoChange, true);
+						}
+
+						template.Update("cat", furnishing.FurnitureCategory, ParameterFormat.OnePerLine, true);
+						template.Update("subcat", furnishing.FurnitureSubcategory, ParameterFormat.OnePerLine, true);
+						template.Update("desc", furnishing.Description, ParameterFormat.OnePerLine, false);
+						template.Update("quality", furnishing.Quality, ParameterFormat.OnePerLine, true);
+						template.Update("tags", furnishing.Tags, ParameterFormat.OnePerLine, true);
+						template.Update("skillsIngredients", furnishing.AbilityDescription, ParameterFormat.OnePerLine, true);
 						//// template.AddOrChange("result", )
 						/*
 									public string AbilityDescription { get; }
@@ -162,13 +175,17 @@
 			this.furnishings.TryGetValue(id, out var furnishing) &&
 			!string.Equals(furnishing.PageName, page.LabelName(), StringComparison.Ordinal)
 				? $":[[{page.FullPageName}|{page.LabelName()}]] ''should be''\n" +
-					$":{furnishing.PageName}"
+				  $":{furnishing.PageName}"
 				: null;
 		#endregion
 
 		#region Private Classes
 		private sealed class Furnishing
 		{
+			#region Static Fields
+			private static readonly Regex SizeFinder = new(@"This is a (?<size>\w+) house item.", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+			#endregion
+
 			#region Constructors
 			public Furnishing(IDataRecord record, Site site)
 			{
@@ -193,10 +210,19 @@
 					}
 				}
 
-				this.Quality = (string)record["quality"];
+				var quality = (string)record["quality"];
+				this.Quality = int.TryParse(quality, NumberStyles.Integer, site.Culture, out var qualityNum)
+					? "nfsel".Substring(qualityNum - 1, 1)
+					: quality;
 				this.Tags = (string)record["tags"];
-				this.Description = (string)record["description"];
+				this.Type = (ItemType)record["type"];
+
+				var desc = (string)record["description"];
+				var sizeMatch = SizeFinder.Match(desc);
+				this.Size = sizeMatch.Success ? sizeMatch.Groups["size"].Value : null;
+				this.Description = sizeMatch.Index == 0 && sizeMatch.Length == desc.Length ? null : desc;
 				this.AbilityDescription = (string)record["abilityDesc"];
+
 				var itemLinkText = (string)record["resultitemLink"];
 				var itemLinkOffset1 = itemLinkText.IndexOf(":item:", StringComparison.Ordinal) + 6;
 				if (itemLinkOffset1 != 5 &&
@@ -212,7 +238,7 @@
 			#region Public Properties
 			public string AbilityDescription { get; }
 
-			public string Description { get; }
+			public string? Description { get; }
 
 			public string? FurnitureCategory { get; }
 
@@ -226,9 +252,13 @@
 
 			public int ResultItemLink { get; }
 
+			public string? Size { get; }
+
 			public string Tags { get; }
 
 			public string? TitleName { get; }
+
+			public ItemType Type { get; }
 			#endregion
 
 			#region Public Override Methods
