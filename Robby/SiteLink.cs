@@ -443,7 +443,7 @@
 		/// <remarks>Interwiki and Fragment will remain unaffected by the change. If those should be updated to null, use <see cref="With(IFullTitle)"/>.</remarks>
 		public SiteLink With(Title title)
 		{
-			TitleFactory upcast = TitleFactory.CreateFromValidated(title.NotNull().Namespace, title.PageName);
+			var upcast = TitleFactory.CreateFromValidated(title.NotNull().Namespace, title.PageName);
 			SiteLink retval = new(upcast)
 			{
 				Coerced = this.Coerced,
@@ -470,7 +470,7 @@
 		/// <returns>A new copy of the SiteLink with the altered title.</returns>
 		public SiteLink With(IFullTitle title)
 		{
-			TitleFactory upcast = TitleFactory.CreateFromValidated(title.NotNull().Namespace, title.PageName);
+			var upcast = TitleFactory.CreateFromValidated(title.NotNull().Namespace, title.PageName);
 			SiteLink retval = new(upcast)
 			{
 				Coerced = this.Coerced,
@@ -551,7 +551,7 @@
 
 			var linkNode = new SiteNodeFactory(site).LinkNodeFromParts(link);
 			var nodes = linkNode.Parameters.Count == 0 ? linkNode.Title : linkNode.Parameters[linkNode.Parameters.Count - 1].Value;
-			ITextNode? last = nodes[^1] as ITextNode;
+			var last = nodes[^1] as ITextNode;
 			if (removeSpace && last is not null)
 			{
 				if (last.Text.Length == 1)

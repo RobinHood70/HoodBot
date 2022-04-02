@@ -230,7 +230,7 @@
 		{
 			if (this.count == this.array.Length)
 			{
-				StackElement[]? newArray = new StackElement[this.count << 1];
+				var newArray = new StackElement[this.count << 1];
 				Array.Copy(this.array, newArray, this.count);
 				this.array = newArray;
 			}
@@ -485,7 +485,7 @@
 			}
 			while (this.Index < this.textLength);
 
-			HeaderElement? lastHeader = this.Top as HeaderElement;
+			var lastHeader = this.Top as HeaderElement;
 			lastHeader?.Parse('\n');
 		}
 		#endregion

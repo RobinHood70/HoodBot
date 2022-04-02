@@ -422,7 +422,7 @@
 		/// <returns>The text of the page.</returns>
 		public string? LoadPageText(Title title)
 		{
-			PageCollection pages = PageCollection.Unlimited(this);
+			var pages = PageCollection.Unlimited(this);
 			pages.GetTitles(title.NotNull());
 			return pages.Count == 1 ? pages[0].Text : null;
 		}
@@ -747,7 +747,7 @@
 		/// <returns>A collection of pages that were (un)watched.</returns>
 		public ChangeValue<PageCollection> Watch(int ns, bool unwatch)
 		{
-			PageCollection disabledResult = PageCollection.UnlimitedDefault(this);
+			var disabledResult = PageCollection.UnlimitedDefault(this);
 			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
 				[nameof(ns)] = ns,

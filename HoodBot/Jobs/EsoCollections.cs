@@ -153,7 +153,7 @@
 		{
 			var page = parser.Page;
 			var templateIndex = parser.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals(TemplateName));
-			SiteTemplateNode template = (SiteTemplateNode)parser[templateIndex];
+			var template = (SiteTemplateNode)parser[templateIndex];
 			var removeParens = page.PageName.Split(" (", 2)[0];
 			template.Update("collectibletype", CategorySingular(collectible.CollectibleType));
 			template.Update("type", CategorySingular(collectible.Type));
@@ -503,7 +503,7 @@
 				if (fileCount == 1 && this.NewContent[fileOffset] is SiteLinkNode imageLink)
 				{
 					this.Image = imageLink.TitleValue.PageName[0..^4];
-					SiteLink link = SiteLink.FromLinkNode(site, imageLink);
+					var link = SiteLink.FromLinkNode(site, imageLink);
 					this.ImageDescription = link.Text;
 					this.NewContent.RemoveAt(fileOffset);
 					if (iconOffset > fileOffset)

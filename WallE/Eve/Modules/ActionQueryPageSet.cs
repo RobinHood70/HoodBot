@@ -222,7 +222,7 @@
 		private void DeserializePages(JToken result, IList<PageItem> pagesIn)
 		{
 			result.ThrowNull();
-			KeyedPages pages = (KeyedPages)pagesIn;
+			var pages = (KeyedPages)pagesIn;
 			foreach (var page in result)
 			{
 				// Some generators can return missing pages with no title (or ID?), most commonly when links tables are out of date and need refreshLinks.php run on them. If we get one of these, skip to the next page.

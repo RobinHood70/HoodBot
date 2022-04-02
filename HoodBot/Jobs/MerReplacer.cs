@@ -63,7 +63,7 @@
 		protected override void BeforeLogging()
 		{
 			this.StatusWriteLine("Getting mer pages");
-			PageCollection pages = PageCollection.Unlimited(this.Site, PageModules.Backlinks, false);
+			var pages = PageCollection.Unlimited(this.Site, PageModules.Backlinks, false);
 			pages.GetTitles(this.merPages);
 
 			this.StatusWriteLine("Getting backlinks");

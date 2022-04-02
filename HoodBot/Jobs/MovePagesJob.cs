@@ -280,7 +280,7 @@
 		{
 			this.StatusWriteLine("Checking remaining pages");
 			TitleCollection leftovers = new(this.Site);
-			PageCollection allBacklinks = PageCollection.Unlimited(this.Site, PageModules.Info | PageModules.Backlinks, false);
+			var allBacklinks = PageCollection.Unlimited(this.Site, PageModules.Info | PageModules.Backlinks, false);
 			TitleCollection backlinkTitles = new(this.Site);
 			foreach (var item in this.replacements)
 			{
@@ -586,7 +586,7 @@
 				{
 					try
 					{
-						SiteLink link = SiteLink.FromGalleryText(this.Site, line);
+						var link = SiteLink.FromGalleryText(this.Site, line);
 						if (this.replacements.TryGetValue(link, out var replacement)
 							&& replacement.MoveActions.HasAction(ReplacementActions.UpdateLinks))
 						{
@@ -624,7 +624,7 @@
 		protected virtual void UpdateLinkNode(Page page, SiteLinkNode node, bool isRedirectTarget)
 		{
 			page.ThrowNull();
-			SiteLink link = SiteLink.FromLinkNode(this.Site, node.NotNull());
+			var link = SiteLink.FromLinkNode(this.Site, node.NotNull());
 			if (this.replacements.TryGetValue(link, out var replacement)
 				&& replacement.MoveActions.HasAction(ReplacementActions.UpdateLinks)
 				&& (link.ForcedNamespaceLink
@@ -663,7 +663,7 @@
 					&& page.Namespace != MediaWikiNamespaces.User
 					&& !page.Site.IsDiscussionPage(page))
 				{
-					TitleFactory textTitle = TitleFactory.Create(this.Site, MediaWikiNamespaces.Main, newLink.Text);
+					var textTitle = TitleFactory.Create(this.Site, MediaWikiNamespaces.Main, newLink.Text);
 					if (oldTitle is IFullTitle fullTitle && fullTitle.FullEquals(textTitle))
 					{
 						newLink.Text = textTitle.ToString();
@@ -819,7 +819,7 @@
 				fromTitles.Add(replacement.From);
 			}
 
-			PageCollection retval = PageCollection.Unlimited(this.Site, modules, false);
+			var retval = PageCollection.Unlimited(this.Site, modules, false);
 			retval.GetTitles(fromTitles);
 
 			return retval;
@@ -886,7 +886,7 @@
 
 		private PageCollection GetToPages()
 		{
-			PageCollection toPages = PageCollection.Unlimited(this.Site, PageModules.Info, false);
+			var toPages = PageCollection.Unlimited(this.Site, PageModules.Info, false);
 			if (this.MoveAction == MoveAction.MoveSafely)
 			{
 				TitleCollection toTitles = new(this.Site);

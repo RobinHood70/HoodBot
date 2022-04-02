@@ -252,7 +252,7 @@
 		private static void AddFooter(ContextualParser parser, PageProtection protection)
 		{
 			var footer = protection.Footer;
-			SiteTemplateNode footerTemplate = (SiteTemplateNode)parser.Factory.TemplateNodeFromWikiText(footer);
+			var footerTemplate = (SiteTemplateNode)parser.Factory.TemplateNodeFromWikiText(footer);
 			if (parser.FindSiteTemplate(footerTemplate.TitleValue.PageName) is SiteTemplateNode existing)
 			{
 				existing.Title.Clear();
@@ -276,11 +276,11 @@
 				header = header.Replace("<date>", replaceDate, StringComparison.Ordinal);
 			}
 
-			SiteTemplateNode headerTemplate = (SiteTemplateNode)nodes.Factory.TemplateNodeFromWikiText(header);
+			var headerTemplate = (SiteTemplateNode)nodes.Factory.TemplateNodeFromWikiText(header);
 			var index = nodes.FindIndex<SiteTemplateNode>(node => node.TitleValue.SimpleEquals(headerTemplate.TitleValue));
 			if (index != -1)
 			{
-				SiteTemplateNode existing = (SiteTemplateNode)nodes[index];
+				var existing = (SiteTemplateNode)nodes[index];
 				existing.Title.Clear();
 				existing.Title.AddRange(headerTemplate.Title);
 				nodes.RemoveAt(index);
@@ -422,7 +422,7 @@
 			var currentPos = parser.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(ProtectionTemplateName));
 			if (currentPos != -1)
 			{
-				SiteTemplateNode existing = (SiteTemplateNode)parser[currentPos];
+				var existing = (SiteTemplateNode)parser[currentPos];
 				existing.Title.Clear();
 				existing.Title.AddText(ProtectionTemplateName);
 				existing.Remove("edit");
@@ -588,7 +588,7 @@
 			foreach (var protPage in this.pageProtections)
 			{
 				var page = this.Pages[protPage.Key];
-				Page currentProtection = (Page)protPage.Key;
+				var currentProtection = (Page)protPage.Key;
 				var protection = protPage.Value;
 
 				// Skip Deletion Review pages unless the last modification is at least 30 days ago. This could be incorporated into the search data itself as a delegate, but for now, since it's a one-off. I've left it as hard-coded.

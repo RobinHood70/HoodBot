@@ -146,7 +146,7 @@
 		{
 			if (title.NotNull().Namespace.CanTalk)
 			{
-				PageCollection pages = PageCollection.Unlimited(title.Namespace.Site, options);
+				var pages = PageCollection.Unlimited(title.Namespace.Site, options);
 				pages.GetTitles(FullPageName(title));
 				if (pages.Count == 1)
 				{

@@ -622,7 +622,7 @@
 				i++;
 			}
 
-			IParameterNode?[]? sorted = new IParameterNode?[indeces.Count];
+			var sorted = new IParameterNode?[indeces.Count];
 			List<IParameterNode> unsorted = new();
 			foreach (var (name, parameter) in GetResolvedParameters(template))
 			{

@@ -64,7 +64,7 @@
 			}
 
 			this.StatusWriteLine("Loading pages");
-			PageCollection results = PageCollection.Unlimited(this.Site);
+			var results = PageCollection.Unlimited(this.Site);
 			results.GetPageTranscludedIn(templates);
 			this.Progress++;
 			this.StatusWriteLine("Exporting");
@@ -101,7 +101,7 @@
 
 		private PageCollection FollowRedirects(TitleCollection titles)
 		{
-			PageCollection originalsFollowed = PageCollection.Unlimited(this.Site, PageModules.None, true);
+			var originalsFollowed = PageCollection.Unlimited(this.Site, PageModules.None, true);
 			originalsFollowed.GetTitles(titles);
 
 			return originalsFollowed;

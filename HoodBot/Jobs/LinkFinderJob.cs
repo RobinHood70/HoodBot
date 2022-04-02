@@ -66,7 +66,7 @@
 
 		protected override void LoadPages()
 		{
-			PageCollection pages = PageCollection.Unlimited(this.Site, PageModules.Backlinks, false);
+			var pages = PageCollection.Unlimited(this.Site, PageModules.Backlinks, false);
 			pages.GetTitles(this.Titles);
 			TitleCollection backTitles = new(this.Site);
 			foreach (var page in pages)

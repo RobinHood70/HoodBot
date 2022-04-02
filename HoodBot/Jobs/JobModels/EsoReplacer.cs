@@ -313,13 +313,13 @@
 			HashSet<Title> oldLinks = new(SimpleTitleComparer.Instance);
 			foreach (var node in oldPage.FindAll<ILinkNode>(null, false, true, 0))
 			{
-				SiteLink siteLink = SiteLink.FromLinkNode(this.site, node);
+				var siteLink = SiteLink.FromLinkNode(this.site, node);
 				oldLinks.Add(siteLink);
 			}
 
 			foreach (var node in newPage.FindAll<ILinkNode>(null, false, true, 0))
 			{
-				SiteLink siteLink = SiteLink.FromLinkNode(this.site, node);
+				var siteLink = SiteLink.FromLinkNode(this.site, node);
 				oldLinks.Remove(siteLink);
 			}
 
@@ -405,7 +405,7 @@
 						{
 							if (newNode is ILinkNode link)
 							{
-								SiteLink siteLink = SiteLink.FromLinkNode(usedList.Site, link);
+								var siteLink = SiteLink.FromLinkNode(usedList.Site, link);
 								if (usedList.Contains(siteLink) && link.Parameters.Count > 0 && link.Parameters[0].Value is NodeCollection valueNode)
 								{
 									retval.AddRange(valueNode);

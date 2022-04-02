@@ -24,7 +24,7 @@
 		internal NamespaceCollection(Site site, IReadOnlyList<SiteInfoNamespace> namespaces, IReadOnlyList<SiteInfoNamespaceAlias> namespaceAliases)
 		{
 			// From Language->getNsIndeix(), creates a case-insensitive comparer for the wiki's culture.
-			StringComparer comparer = StringComparer.Create(site.NotNull().Culture, true);
+			var comparer = StringComparer.Create(site.NotNull().Culture, true);
 
 			// NamespaceAliases
 			Dictionary<int, HashSet<string>> aliasesById = new();

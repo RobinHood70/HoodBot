@@ -31,7 +31,7 @@
 		{
 			this.StatusWriteLine("Loading pages");
 			this.ProgressMaximum = 2;
-			PageCollection results = PageCollection.Unlimited(this.Site);
+			var results = PageCollection.Unlimited(this.Site);
 			results.GetNamespace(MediaWikiNamespaces.Template);
 			this.Progress++;
 			this.StatusWriteLine("Exporting");
