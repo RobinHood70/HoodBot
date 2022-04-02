@@ -72,7 +72,7 @@
 			{
 				foreach (var link in list)
 				{
-					var title = CreateTitle.FromValidated(this.Site, link.FullPageName.NotNull(nameof(link), nameof(link.FullPageName)));
+					var title = CreateTitle.FromValidated(this.Site, link.FullPageName.PropertyNotNull(nameof(link), nameof(link.FullPageName)));
 					if (backlinks.ContainsKey(title))
 					{
 						backlinks[title] |= type;

@@ -353,12 +353,12 @@
 		protected override void GetBacklinks(BacklinksInput input)
 		{
 			input.ThrowNull();
-			input.Title.ThrowNull(nameof(input), nameof(input.Title));
+			input.Title.PropertyThrowNull(nameof(input), nameof(input.Title));
 			var inputTitle = CreateTitle.FromUnvalidated(this.Site, input.Title);
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && (input.LinkTypes & BacklinksTypes.ImageUsage) != 0)
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
-				input.Title.ThrowNull(nameof(input), nameof(input.Title)); // Input changed, so re-check before proceeding.
+				input.Title.PropertyThrowNull(nameof(input), nameof(input.Title)); // Input changed, so re-check before proceeding.
 			}
 
 			foreach (var type in input.LinkTypes.GetUniqueFlags())
@@ -557,7 +557,7 @@
 		/// <param name="categoryTree">A hashet used to track which categories have already been loaded. This avoids loading the same category if it appears in the tree more than once, and breaks possible recursion loops.</param>
 		private void RecurseCategoryPages(CategoryMembersInput input, HashSet<string> categoryTree)
 		{
-			input.Title.ThrowNull(nameof(input), nameof(input.Title));
+			input.Title.PropertyThrowNull(nameof(input), nameof(input.Title));
 			if (!categoryTree.Add(input.Title))
 			{
 				return;

@@ -48,7 +48,7 @@
 
 		public override void EndLogEntry()
 		{
-			this.logInfo.ThrowNull(nameof(PageJobLogger), nameof(this.logInfo));
+			this.logInfo.PropertyThrowNull(nameof(PageJobLogger), nameof(this.logInfo));
 			this.end = DateTime.UtcNow;
 			this.status = "None";
 			this.UpdateEntry();

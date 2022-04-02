@@ -19,7 +19,7 @@
 			var title = (string)reader
 				.NotNull()
 				.Value
-				.NotNull(nameof(reader), nameof(reader.Value));
+				.PropertyNotNull(nameof(reader), nameof(reader.Value));
 			return CreateTitle.FromUnvalidated(this.site, title);
 		}
 

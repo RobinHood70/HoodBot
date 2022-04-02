@@ -39,7 +39,7 @@
 		{
 			request.ThrowNull();
 			input.ThrowNull();
-			input.Modules.ThrowNull(nameof(input), nameof(input.Modules));
+			input.Modules.PropertyThrowNull(nameof(input), nameof(input.Modules));
 			if (this.SiteVersion >= 125)
 			{
 				request

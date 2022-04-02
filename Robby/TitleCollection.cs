@@ -284,7 +284,7 @@
 		protected override void GetBacklinks(BacklinksInput input)
 		{
 			input.ThrowNull();
-			input.Title.ThrowNull(nameof(input), nameof(input.Title));
+			input.Title.PropertyThrowNull(nameof(input), nameof(input.Title));
 			var inputTitle = CreateTitle.FromUnvalidated(this.Site, input.Title);
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && (input.LinkTypes & BacklinksTypes.ImageUsage) != 0)
 			{
@@ -541,14 +541,14 @@
 		{
 			foreach (var item in result)
 			{
-				this.Add(CreateTitle.FromValidated(this.Site, item.FullPageName.NotNull(nameof(item), nameof(item.FullPageName))));
+				this.Add(CreateTitle.FromValidated(this.Site, item.FullPageName.PropertyNotNull(nameof(item), nameof(item.FullPageName))));
 			}
 		}
 
 		private void RecurseCategoryPages(CategoryMembersInput input, HashSet<string> categoryTree)
 		{
 			input.ThrowNull();
-			input.Title.ThrowNull(nameof(input), nameof(input.Title));
+			input.Title.PropertyThrowNull(nameof(input), nameof(input.Title));
 			if (!categoryTree.Add(input.Title))
 			{
 				return;
@@ -557,7 +557,7 @@
 			var result = this.Site.AbstractionLayer.CategoryMembers(input);
 			foreach (var item in result)
 			{
-				var title = CreateTitle.FromValidated(this.Site, item.FullPageName.NotNull(nameof(item), nameof(item.FullPageName)));
+				var title = CreateTitle.FromValidated(this.Site, item.FullPageName.PropertyNotNull(nameof(item), nameof(item.FullPageName)));
 				if (input.Type.HasFlag(item.Type))
 				{
 					this.Add(title);
