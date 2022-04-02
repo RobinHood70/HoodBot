@@ -666,21 +666,22 @@
 		/// <param name="name">The name of the parameter to add.</param>
 		/// <param name="value">The value of the parameter to add.</param>
 		/// <returns>The parameter that was altered.</returns>
-		public static IParameterNode? Update(this ITemplateNode template, string name, string? value) => Update(template, name, value, ParameterFormat.Copy);
+		public static IParameterNode? Update(this ITemplateNode template, string name, string? value) => Update(template, name, value, ParameterFormat.Copy, false);
 
 		/// <summary>Adds a new parameter to the template. Optionally, copies the format of the previous named parameter, if there is one, then adds the parameter after it.</summary>
 		/// <param name="template">The template to work on.</param>
 		/// <param name="name">The name of the parameter to add.</param>
 		/// <param name="value">The value of the parameter to add.</param>
 		/// <param name="format">The type of formatting to apply to the parameter value if being added. For existing parameters, the existing format will be retained.</param>
+		/// <param name="removeIfEmpty">If set to <see langword="true"/> and <paramref name="value"/> is an empty string, remove the parameter. Otherwise, the parameter will only be removed if <paramref name="value"/> is <see langword="null"/>.</param>
 		/// <returns>The added parameter.</returns>
 		/// <exception cref="InvalidOperationException">Thrown when the parameter is not found.</exception>
-		public static IParameterNode? Update(this ITemplateNode template, string name, string? value, ParameterFormat format)
+		public static IParameterNode? Update(this ITemplateNode template, string name, string? value, ParameterFormat format, bool removeIfEmpty)
 		{
 			template.ThrowNull();
 			name.ThrowNull();
 			IParameterNode retval;
-			if (value == null)
+			if (value == null || (removeIfEmpty && value.Length == 0))
 			{
 				template.Remove(name);
 				return null;

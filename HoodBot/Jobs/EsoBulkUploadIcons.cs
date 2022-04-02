@@ -11,7 +11,7 @@
 	using RobinHood70.WikiCommon;
 
 	// Images should be downloaded from latest version on https://esofiles.uesp.net/ in the icons.zip file before running this job.
-	internal sealed class BulkUploadIcons : EditJob
+	internal sealed class EsoBulkUploadIcons : EditJob
 	{
 		#region Static Fields
 		private static readonly Dictionary<long, string> NameFixes = new()
@@ -57,11 +57,11 @@
 
 		private static readonly List<string> Styles = new()
 		{
-			"Ascendant Order",
-			"Dragonguard Berserker",
 			"Dreadsails",
-			"Reefborn",
-			"Saberkeel Panoply",
+			"Ascendant Order",
+			"Black Drake Clanwrap",
+			"Second Seed Raiment",
+			"Deadlands Gladiator",
 		};
 
 		private static readonly string Query = "SELECT id, name, icon FROM collectibles WHERE categoryName IN('Armor Styles', 'Weapon Styles');";
@@ -70,12 +70,12 @@
 		#endregion
 
 		#region Fields
-		private readonly List<Upload> uploads = new();
+		private List<Upload>? uploads;
 		#endregion
 
 		#region Constructors
-		[JobInfo("Bulk Upload Icons", "ESO")]
-		public BulkUploadIcons(JobManager jobManager)
+		[JobInfo("Bulk Upload Icons", "ESO Update")]
+		public EsoBulkUploadIcons(JobManager jobManager)
 			: base(jobManager)
 		{
 		}
@@ -84,7 +84,6 @@
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
-			var iconLookup = GetIcons();
 			var allFiles = Directory.GetFiles(WikiIconFolder);
 			HashSet<string> files = new(allFiles.Length, StringComparer.OrdinalIgnoreCase);
 
@@ -97,37 +96,12 @@
 			}
 
 			Styles.Sort(StringComparer.Ordinal);
-			foreach (var style in Styles)
-			{
-				this.WriteLine($"=={style} Style==");
-				foreach (var part in Parts)
-				{
-					var dbName = $"{style} {part.Name}";
-					if (!iconLookup.TryGetValue(dbName, out var idIcon))
-					{
-						continue;
-					}
-
-					if (files.Contains(idIcon.Icon))
-					{
-						Upload upload = new(idIcon.Id, idIcon.Icon, style, part);
-						if (!fileTitles.Contains("File:" + upload.DestinationName))
-						{
-							this.WriteLine($"* [[:File:{upload.DestinationName}|{part.BodyPart}]]");
-							this.uploads.Add(upload);
-						}
-					}
-				}
-
-				this.WriteLine();
-			}
-
-			this.uploads.TrimExcess();
+			this.uploads = this.GetUploads(files, fileTitles);
 		}
 
 		protected override void Main()
 		{
-			if (this.uploads.Count > 0)
+			if (this.uploads?.Count > 0)
 			{
 				this.ProgressMaximum = this.uploads.Count;
 				foreach (var upload in this.uploads)
@@ -169,6 +143,42 @@
 			}
 
 			return iconLookup;
+		}
+		#endregion
+
+		#region Private Methods
+		private List<Upload> GetUploads(HashSet<string> files, TitleCollection fileTitles)
+		{
+			List<Upload> retval = new(Styles.Count * Parts.Count);
+			var iconLookup = GetIcons();
+			foreach (var style in Styles)
+			{
+				this.WriteLine($"=={style} Style==");
+				foreach (var part in Parts)
+				{
+					var dbName = $"{style} {part.Name}";
+					if (iconLookup.TryGetValue(dbName, out var idIcon) && files.Contains(idIcon.Icon))
+					{
+						Upload upload = new(idIcon.Id, idIcon.Icon, style, part);
+						var exists = fileTitles.Contains("File:" + upload.DestinationName);
+						this.Write($"* [[:File:{upload.DestinationName}|{part.Name}]]");
+						if (exists)
+						{
+							this.WriteLine(" (already exists)");
+						}
+						else
+						{
+							this.WriteLine();
+							retval.Add(upload);
+						}
+					}
+				}
+
+				this.WriteLine();
+			}
+
+			retval.TrimExcess();
+			return retval;
 		}
 		#endregion
 
