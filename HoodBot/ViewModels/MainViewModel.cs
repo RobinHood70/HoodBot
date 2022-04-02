@@ -258,7 +258,7 @@
 
 		private IWikiAbstractionLayer CreateAbstractionLayer(IMediaWikiClient client, WikiInfoViewModel wikiInfo)
 		{
-			var api = wikiInfo.Api.NotNull(nameof(wikiInfo), nameof(wikiInfo.Api));
+			var api = wikiInfo.Api.PropertyNotNull(nameof(wikiInfo), nameof(wikiInfo.Api));
 			IWikiAbstractionLayer abstractionLayer = string.Equals(api.OriginalString, "/", StringComparison.Ordinal)
 				? new WallE.Test.WikiAbstractionLayer()
 				: new WikiAbstractionLayer(client, api);

@@ -317,7 +317,7 @@
 		protected virtual void EditPageLoaded(ContextualParser parser, Replacement replacement)
 		{
 			var page = parser.Page;
-			var moveActions = replacement.MoveActions.NotNull(nameof(replacement), nameof(replacement.MoveActions));
+			var moveActions = replacement.MoveActions.PropertyNotNull(nameof(replacement), nameof(replacement.MoveActions));
 			if (page.Exists &&
 				(this.FollowUpActions & FollowUpActions.ProposeUnused) != 0 &&
 				moveActions.HasAction(ReplacementActions.Propose))
@@ -340,7 +340,7 @@
 			{
 				this.WriteLine("|-");
 				this.Write(FormattableString.Invariant($"| {replacement.From} ([[Special:WhatLinksHere/{replacement.From}|links]]) || "));
-				var actions = replacement.MoveActions.NotNull(nameof(replacement), nameof(replacement.MoveActions)).Actions;
+				var actions = replacement.MoveActions.PropertyNotNull(nameof(replacement), nameof(replacement.MoveActions)).Actions;
 				List<string> actionsList = new();
 				if (this.MoveAction == MoveAction.None)
 				{
@@ -852,7 +852,7 @@
 
 		private Replacement.DetailedActions GetPageActions(Replacement replacement, Page fromPage, PageCollection toPages)
 		{
-			var actions = replacement.MoveActions.NotNull(nameof(replacement), nameof(replacement.MoveActions)).Actions;
+			var actions = replacement.MoveActions.PropertyNotNull(nameof(replacement), nameof(replacement.MoveActions)).Actions;
 			if (this.MoveAction == MoveAction.None && !replacement.From.SimpleEquals(replacement.To))
 			{
 				return new(actions | ReplacementActions.UpdateLinks, replacement.MoveActions.Reason);

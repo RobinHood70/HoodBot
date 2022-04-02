@@ -73,7 +73,7 @@
 		{
 			base.Login(input);
 
-			this.User.ThrowNull(nameof(UespSite), nameof(this.User));
+			this.User.PropertyThrowNull(nameof(UespSite), nameof(this.User));
 
 			if (this.EditingEnabled)
 			{

@@ -16,7 +16,7 @@
 			this.Name = jobInfo.Name;
 
 			var constructorParameters = constructor.GetParameters()
-				.NotNull(ValidationType.Method, nameof(constructor), nameof(constructor.GetParameters));
+				.PropertyNotNull(ValidationType.Method, nameof(constructor));
 			List<ConstructorParameter> parameters = new(constructorParameters.Length);
 			foreach (var parameter in constructor.GetParameters())
 			{

@@ -253,7 +253,7 @@
 		private static bool Protect(Site site, ProtectInput input)
 		{
 			input.ThrowNull();
-			input.Protections.ThrowNull(nameof(input), nameof(input.Protections));
+			input.Protections.PropertyThrowNull(nameof(input), nameof(input.Protections));
 			var inputCount = new List<ProtectInputItem>(input.Protections).Count;
 			var result = site.AbstractionLayer.Protect(input);
 

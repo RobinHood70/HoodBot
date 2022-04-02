@@ -17,7 +17,7 @@
 			}
 
 			this.Attribute = attributes.Length == 1 ? attributes[0] as JobParameterAttribute : null;
-			this.Name = parameter.Name.NotNull(nameof(parameter), nameof(parameter.Name));
+			this.Name = parameter.Name.PropertyNotNull(nameof(parameter));
 			this.Type = parameter.ParameterType;
 			this.Label = this.Attribute?.Label ?? this.Name.UnCamelCase();
 			this.Value =
