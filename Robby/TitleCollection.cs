@@ -147,7 +147,7 @@
 		/// <returns>A <see cref="PageCollection"/> containing the specified pages, including status information for pages that could not be loaded.</returns>
 		public PageCollection Load(PageLoadOptions options)
 		{
-			PageCollection retval = PageCollection.Unlimited(this.Site, options);
+			var retval = PageCollection.Unlimited(this.Site, options);
 			retval.GetTitles(this);
 
 			return retval;
@@ -169,7 +169,7 @@
 				return new ChangeValue<PageCollection>(ChangeStatus.NoEffect, PageCollection.Unlimited(this.Site));
 			}
 
-			PageCollection disabledResult = PageCollection.UnlimitedDefault(this.Site);
+			var disabledResult = PageCollection.UnlimitedDefault(this.Site);
 			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
 			{
 				[nameof(method)] = method
@@ -179,7 +179,7 @@
 
 			ChangeValue<PageCollection> ChangeFunc()
 			{
-				PageCollection pages = PageCollection.Purge(this.Site, new PurgeInput(this.ToFullPageNames()) { Method = method });
+				var pages = PageCollection.Purge(this.Site, new PurgeInput(this.ToFullPageNames()) { Method = method });
 				var retval = (pages.Count < this.Count)
 					? ChangeStatus.Failure
 					: ChangeStatus.Success;
@@ -196,13 +196,13 @@
 				return new ChangeValue<PageCollection>(ChangeStatus.NoEffect, PageCollection.Unlimited(this.Site));
 			}
 
-			PageCollection disabledResult = PageCollection.CreateEmptyPages(this.Site, this);
+			var disabledResult = PageCollection.CreateEmptyPages(this.Site, this);
 			Dictionary<string, object?> parameters = new(StringComparer.Ordinal);
 			return this.Site.PublishChange(disabledResult, this, parameters, ChangeFunc);
 
 			ChangeValue<PageCollection> ChangeFunc()
 			{
-				PageCollection pages = PageCollection.Watch(this.Site, new WatchInput(this.ToFullPageNames()) { Unwatch = true });
+				var pages = PageCollection.Watch(this.Site, new WatchInput(this.ToFullPageNames()) { Unwatch = true });
 				var result = (pages.Count < this.Count)
 					? ChangeStatus.Failure
 					: ChangeStatus.Success;
@@ -219,14 +219,14 @@
 				return new ChangeValue<PageCollection>(ChangeStatus.NoEffect, PageCollection.Unlimited(this.Site));
 			}
 
-			PageCollection disabledResult = PageCollection.CreateEmptyPages(this.Site, this);
+			var disabledResult = PageCollection.CreateEmptyPages(this.Site, this);
 			Dictionary<string, object?> parameters = new(StringComparer.Ordinal);
 
 			return this.Site.PublishChange(disabledResult, this, parameters, ChangeFunc);
 
 			ChangeValue<PageCollection> ChangeFunc()
 			{
-				PageCollection pages = PageCollection.Watch(this.Site, new WatchInput(this.ToFullPageNames()) { Unwatch = false });
+				var pages = PageCollection.Watch(this.Site, new WatchInput(this.ToFullPageNames()) { Unwatch = false });
 				var result = (pages.Count < this.Count)
 					? ChangeStatus.Failure
 					: ChangeStatus.Success;

@@ -94,7 +94,7 @@
 		{
 			var catSize = page is CategoryPage catPage ? catPage.FullCount : 0;
 			List<string> list = new();
-			Dictionary<Title, BacklinksTypes> backlinks = (Dictionary<Title, BacklinksTypes>)page.Backlinks;
+			var backlinks = (Dictionary<Title, BacklinksTypes>)page.Backlinks;
 			foreach (var title in this.filter)
 			{
 				backlinks.Remove(title);
@@ -193,7 +193,7 @@
 			var doSeeAlso = false;
 			foreach (var page in pageCollection)
 			{
-				CategoryPage catPage = (CategoryPage)page;
+				var catPage = (CategoryPage)page;
 				if (catPage.FullCount > 0)
 				{
 					doSeeAlso = true;
@@ -206,7 +206,7 @@
 				this.WriteLine("\n== See Also ==");
 				foreach (var page in pageCollection)
 				{
-					CategoryPage catPage = (CategoryPage)page;
+					var catPage = (CategoryPage)page;
 					if (catPage.FullCount > 0)
 					{
 						this.WriteLine($"* {page}{this.GetTextForPage(page)}");

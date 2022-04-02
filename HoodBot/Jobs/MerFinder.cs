@@ -54,7 +54,7 @@
 
 		protected override bool CheckLink(SiteLinkNode link)
 		{
-			SiteLink siteLink = SiteLink.FromLinkNode(this.Site, link);
+			var siteLink = SiteLink.FromLinkNode(this.Site, link);
 			return siteLink.Text is not "Dark Elf" and not "High Elf" and not "Wood Elf";
 		}
 	}

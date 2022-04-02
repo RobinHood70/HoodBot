@@ -14,14 +14,14 @@
 		public TextEncrypter(string encryptionKey)
 		{
 			// Hash the key to ensure it is exactly 256 bits long, as required by AES-256
-			using SHA256 sha = SHA256.Create();
+			using var sha = SHA256.Create();
 			this.encryptionKeyBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(encryptionKey.NotNull()));
 		}
 
 		public string Encrypt(string value)
 		{
 			using MemoryStream outputStream = new();
-			using Aes aes = Aes.Create();
+			using var aes = Aes.Create();
 			aes.Key = this.encryptionKeyBytes;
 			var iv = aes.IV; // first access generates a new IV
 			outputStream.Write(iv, 0, iv.Length);
@@ -50,7 +50,7 @@
 			}
 
 			using MemoryStream outputStream = new();
-			using Aes aes = Aes.Create();
+			using var aes = Aes.Create();
 			aes.Key = this.encryptionKeyBytes;
 			using (var decryptor = aes.CreateDecryptor(this.encryptionKeyBytes, iv))
 			using (CryptoStream cryptoStream = new(inputStream, decryptor, CryptoStreamMode.Read))

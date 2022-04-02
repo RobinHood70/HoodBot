@@ -61,7 +61,7 @@
 
 			void PopulateBacklinks(PageItem pageItem)
 			{
-				Dictionary<Title, BacklinksTypes> backlinks = (Dictionary<Title, BacklinksTypes>)this.Backlinks;
+				var backlinks = (Dictionary<Title, BacklinksTypes>)this.Backlinks;
 				backlinks.Clear();
 				PopulateBacklinksType(backlinks, pageItem.FileUsages, BacklinksTypes.ImageUsage);
 				PopulateBacklinksType(backlinks, pageItem.LinksHere, BacklinksTypes.Backlinks);
@@ -86,7 +86,7 @@
 
 			void PopulateCategories(PageItem pageItem)
 			{
-				List<Category> categories = (List<Category>)this.Categories;
+				var categories = (List<Category>)this.Categories;
 				categories.Clear();
 				foreach (var category in pageItem.Categories)
 				{
@@ -97,7 +97,7 @@
 
 			void PopulateInfo(PageItem pageItem)
 			{
-				Dictionary<string, ProtectionEntry> protections = (Dictionary<string, ProtectionEntry>)this.Protections;
+				var protections = (Dictionary<string, ProtectionEntry>)this.Protections;
 				if (pageItem.Info is PageInfo info)
 				{
 					this.canonicalPath = info.CanonicalUrl;
@@ -127,7 +127,7 @@
 
 			void PopulateLinks(PageItem pageItem)
 			{
-				List<Title> links = (List<Title>)this.Links;
+				var links = (List<Title>)this.Links;
 				links.Clear();
 				foreach (var link in pageItem.Links)
 				{
@@ -137,7 +137,7 @@
 
 			void PopulateProperties(PageItem pageItem)
 			{
-				Dictionary<string, string> properties = (Dictionary<string, string>)this.Properties;
+				var properties = (Dictionary<string, string>)this.Properties;
 				properties.Clear();
 				if (pageItem.Properties?.Count > 0)
 				{
@@ -148,7 +148,7 @@
 
 			void PopulateRevisions(PageItem pageItem)
 			{
-				List<Revision> revs = (List<Revision>)this.Revisions;
+				var revs = (List<Revision>)this.Revisions;
 				revs.Clear();
 				this.currentRevision = null;
 				foreach (var rev in pageItem.Revisions)
@@ -159,7 +159,7 @@
 
 			void PopulateTemplates(PageItem pageItem)
 			{
-				List<Title> templates = (List<Title>)this.Templates;
+				var templates = (List<Title>)this.Templates;
 				templates.Clear();
 				foreach (var link in pageItem.Templates)
 				{

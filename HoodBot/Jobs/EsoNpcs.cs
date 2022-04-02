@@ -239,7 +239,7 @@
 					ContextualParser parser = new(page);
 					foreach (var linkNode in parser.LinkNodes)
 					{
-						SiteLink disambig = SiteLink.FromLinkNode(this.Site, linkNode, false);
+						var disambig = SiteLink.FromLinkNode(this.Site, linkNode, false);
 						if (existingTitles.TryGetValue(disambig, out var disambigPage))
 						{
 							npcRenames.Add(npc.Id, disambigPage.PageName);

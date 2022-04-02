@@ -21,7 +21,7 @@
 			// This routine is deliberately not localized.
 			string botInfo;
 			var libraryName = Assembly.GetExecutingAssembly().GetName();
-			Assembly? currentAssembly = Assembly.GetEntryAssembly();
+			var currentAssembly = Assembly.GetEntryAssembly();
 			if (currentAssembly == null)
 			{
 				botInfo = "unknown";

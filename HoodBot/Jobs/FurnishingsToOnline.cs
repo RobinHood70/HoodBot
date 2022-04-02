@@ -154,14 +154,14 @@
 			var templateIndex = originalParser.FindIndex<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("Furnishing Summary"));
 			if (templateIndex > -1)
 			{
-				SiteTemplateNode originalTemplate = (SiteTemplateNode)originalParser[templateIndex];
+				var originalTemplate = (SiteTemplateNode)originalParser[templateIndex];
 				var collectible = originalTemplate.Find("collectible");
 				var originalParams = originalTemplate.Parameters.ToKeyValue();
 
 				page.Text = RemoveTemplate(originalParser, templateIndex);
 				this.filePages.Add(page);
 				ContextualParser parser = new(page, string.Empty);
-				SiteTemplateNode newTemplate = (SiteTemplateNode)parser.Factory.TemplateNodeFromParts("Online Furnishing Summary\n");
+				var newTemplate = (SiteTemplateNode)parser.Factory.TemplateNodeFromParts("Online Furnishing Summary\n");
 				parser.Add(parser.Factory.TemplateNodeFromParts("Minimal"));
 				parser.Add(newTemplate);
 				var autoPagename = "ON-" + (collectible is null ? "item-" : string.Empty) + "furnishing-";
@@ -251,7 +251,7 @@
 								var otherCount = otherMatch.Groups["count"].Value;
 								try
 								{
-									SiteLink siteLink = SiteLink.FromText(page.Site, otherMaterial);
+									var siteLink = SiteLink.FromText(page.Site, otherMaterial);
 									var otherKey = siteLink.Text ?? siteLink.PageName;
 									materials[otherKey] = otherCount;
 								}

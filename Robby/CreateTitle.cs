@@ -33,7 +33,7 @@
 		/// <param name="fullPageName">Name of the page.</param>
 		public static Title FromUnvalidated(Site site, string fullPageName)
 		{
-			TitleFactory title = TitleFactory.Create(site.NotNull(), MediaWikiNamespaces.Main, WikiTextUtilities.TrimToTitle(fullPageName.NotNull()));
+			var title = TitleFactory.Create(site.NotNull(), MediaWikiNamespaces.Main, WikiTextUtilities.TrimToTitle(fullPageName.NotNull()));
 			return new Title(title);
 		}
 
@@ -53,7 +53,7 @@
 		/// <param name="fullPageName">Name of the page.</param>
 		public static Title FromValidated([NotNull][ValidatedNotNull] Site site, [NotNull][ValidatedNotNull] string fullPageName)
 		{
-			TitleFactory title = TitleFactory.Create(site.NotNull(), MediaWikiNamespaces.Main, fullPageName.NotNull());
+			var title = TitleFactory.Create(site.NotNull(), MediaWikiNamespaces.Main, fullPageName.NotNull());
 			return new(title);
 		}
 		#endregion

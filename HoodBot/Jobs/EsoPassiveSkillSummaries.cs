@@ -65,7 +65,7 @@
 
 				for (var i = 0; i < splitDescription.Length; i++)
 				{
-					Coefficient? coef = Coefficient.FromCollection(rank.Coefficients, splitDescription[i]);
+					var coef = Coefficient.FromCollection(rank.Coefficients, splitDescription[i]);
 					if (coef != null)
 					{
 						splitDescription[i] = coef.SkillDamageText();

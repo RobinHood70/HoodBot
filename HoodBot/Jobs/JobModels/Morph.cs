@@ -80,7 +80,7 @@
 				{
 					try
 					{
-						Coefficient? coef = Coefficient.FromCollection(this.Abilities[j].Coefficients, splitDescriptions[j][i]);
+						var coef = Coefficient.FromCollection(this.Abilities[j].Coefficients, splitDescriptions[j][i]);
 						if (coef != null)
 						{
 							splitDescriptions[j][i] = coef.SkillDamageText();

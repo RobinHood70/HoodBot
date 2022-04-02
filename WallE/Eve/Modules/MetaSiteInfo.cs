@@ -529,7 +529,7 @@
 			}
 
 			var timeOffsetNode = (double)node.MustHave("timeoffset");
-			TimeSpan timeOffset = TimeSpan.FromMinutes(timeOffsetNode);
+			var timeOffset = TimeSpan.FromMinutes(timeOffsetNode);
 
 			string? variantArticlePath = null;
 			if (node["variantarticlepath"] is JToken variantArticlePathNode)

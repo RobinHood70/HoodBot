@@ -111,7 +111,7 @@
 				throw BadLogPage;
 			}
 
-			SiteTemplateNode entry = (SiteTemplateNode)parser[firstEntry];
+			var entry = (SiteTemplateNode)parser[firstEntry];
 			if (
 				this.end == null &&
 				sameTaskText &&

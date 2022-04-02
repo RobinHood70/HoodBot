@@ -75,7 +75,7 @@
 		/// <inheritdoc/>
 		public void Visit(ILinkNode node)
 		{
-			SiteLink link = SiteLink.FromLinkNode(this.site, node);
+			var link = SiteLink.FromLinkNode(this.site, node);
 			this.builder.Append(link.Text);
 		}
 

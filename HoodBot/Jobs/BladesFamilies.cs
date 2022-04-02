@@ -31,7 +31,7 @@
 			{
 				// var fi = new FileInfo(file);
 				var text = File.ReadAllText(file);
-				JToken token = JToken.Parse(text);
+				var token = JToken.Parse(text);
 				if (token["_stats"] != null)
 				{
 					this.enemies.Add(new BladesEnemy(token));
