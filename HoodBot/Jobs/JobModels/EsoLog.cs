@@ -58,6 +58,17 @@
 		#endregion
 
 		#region Public Methods
+
+		public static string? ExtractItemId(string itemLinkText)
+		{
+			var itemLinkOffset1 = itemLinkText.IndexOf(":item:", StringComparison.Ordinal) + 6;
+			return itemLinkOffset1 != 5 &&
+				itemLinkText.IndexOf(':', itemLinkOffset1) is var itemLinkOffset2 &&
+				itemLinkOffset2 != -1
+					? itemLinkText[itemLinkOffset1..itemLinkOffset2]
+					: null;
+		}
+
 		public static IEnumerable<NpcLocationData> GetNpcLocations(List<long> npcIds)
 		{
 			List<NpcLocationData> retval = new();
