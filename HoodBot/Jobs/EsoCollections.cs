@@ -62,7 +62,7 @@
 		protected override void BeforeLogging()
 		{
 			this.StatusWriteLine("Getting collectibles from database");
-			var dbCollectibles = GetCollectiblesFromDatabase();
+			var dbCollectibles = DbCollectible.RunQuery();
 
 			this.StatusWriteLine("Getting crown crates from wiki");
 			this.GetCrownCrates();
@@ -92,8 +92,6 @@
 			"Undaunted Trophies" => "Undaunted Trophy",
 			_ => category.TrimEnd('s'),
 		};
-
-		private static Dictionary<string, DbCollectible> GetCollectiblesFromDatabase() => DbCollectible.RunQuery();
 
 		private static string GetLookupName(string catName, Section section)
 		{
