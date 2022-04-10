@@ -17,7 +17,7 @@
 	public class ParameterReplacers
 	{
 		#region Fields
-		private readonly MovePagesJob job;
+		private readonly Site site;
 		private readonly List<ParameterReplacer> generalReplacers = new();
 		private readonly ReplacementCollection replacements;
 		private readonly Dictionary<Title, List<ParameterReplacer>> templateReplacers = new(SimpleTitleComparer.Instance);
@@ -26,16 +26,16 @@
 
 		// TODO: Create tags similar to JobInfo that'll tag each method with the site and template it's designed for, so AddAllReplacers can be programmatic rather than a manual list.
 		#region Constructors
-		internal ParameterReplacers(MovePagesJob job, ReplacementCollection replacements)
+		internal ParameterReplacers(Site site, ReplacementCollection replacements)
 		{
-			this.job = job.NotNull();
+			this.site = site.NotNull();
 			this.replacements = replacements.NotNull();
 			this.AddAllReplacers();
 		}
 		#endregion
 
 		#region Private Properties
-		private UespNamespaceList NamespaceList => this.nsList ??= new UespNamespaceList(this.job.Site);
+		private UespNamespaceList NamespaceList => this.nsList ??= new UespNamespaceList(this.site);
 		#endregion
 
 		#region Public Methods
@@ -49,7 +49,7 @@
 
 		public void AddTemplateReplacers(string name, params ParameterReplacer[] replacers)
 		{
-			var title = CreateTitle.FromUnvalidated(this.job.Site, MediaWikiNamespaces.Template, name);
+			var title = CreateTitle.FromUnvalidated(this.site, MediaWikiNamespaces.Template, name);
 			if (!this.templateReplacers.TryGetValue(title, out var currentReplacers))
 			{
 				currentReplacers = new List<ParameterReplacer>();
@@ -85,7 +85,7 @@
 		{
 			if (this.NamespaceList.FromTitle(page) is UespNamespace nsPage)
 			{
-				this.PageNameReplace(template.Find("race"), nsPage.Parent.Id);
+				this.PageNameReplace(nsPage.Parent, template.Find("race"));
 			}
 		}
 
@@ -133,33 +133,31 @@
 			}
 		}
 
-		protected void CategoryFirst(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find(1), MediaWikiNamespaces.Category);
+		protected void CategoryFirst(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Site[MediaWikiNamespaces.Category], template.Find(1));
 
 		protected void CatFooter(Page page, SiteTemplateNode template)
 		{
 			foreach (var param in template.FindAll("Prev", "Prev2", "Next", "Next2", "Conc", "Up"))
 			{
-				this.PageNameReplace(param, MediaWikiNamespaces.Category);
+				this.PageNameReplace(page.Site[UespNamespaces.Category], param);
 			}
 		}
 
 		protected void EsoNpc(Page page, SiteTemplateNode template)
 		{
-			this.PageNameReplace(template.Find("condition"), UespNamespaces.Online);
-			this.PageNameReplace(template.Find("race"), UespNamespaces.Online);
+			this.PageNameReplace(page.Site[UespNamespaces.Online], template.Find("condition"));
+			this.PageNameReplace(page.Site[UespNamespaces.Online], template.Find("race"));
 		}
 
 		protected void FullPageNameFirst(Page page, SiteTemplateNode template) => this.FullPageNameReplace(page, template.Find(1));
 
 		protected void FurnishingLink(Page page, SiteTemplateNode template) => this.FurnishingLinkReplace(template.Find(1));
 
-		protected void FurnishingGeneralEntry(SiteTemplateNode template) => this.FurnishingLinkReplace(template.Find("page"));
+		protected void GameBookGeneral(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Site[UespNamespaces.Lore], template.Find("lorename"));
 
-		protected void GameBookGeneral(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find("lorename"), UespNamespaces.Lore);
+		protected void GenericIcon(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Namespace, template.Find("icon"));
 
-		protected void GenericIcon(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find("icon"), MediaWikiNamespaces.File);
-
-		protected void GenericImage(SiteTemplateNode template) => this.PageNameReplace(template.Find("image"), MediaWikiNamespaces.File);
+		protected void GenericImage(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("image"));
 
 		protected void Icon(Page page, SiteTemplateNode template)
 		{
@@ -170,7 +168,7 @@
 			}
 
 			var iconName = UespFunctions.IconAbbreviation(oldNs.Id, template);
-			var title = CreateTitle.FromUnvalidated(this.job.Site, MediaWikiNamespaces.File, iconName);
+			var title = CreateTitle.FromUnvalidated(this.site, MediaWikiNamespaces.File, iconName);
 			if (this.replacements.TryGetValue(title, out var replacement))
 			{
 				var (_, abbr, name, _) = UespFunctions.AbbreviationFromIconName(this.NamespaceList, replacement.To.PageName);
@@ -183,15 +181,17 @@
 			}
 		}
 
-		protected void LoreFirst(Page page, SiteTemplateNode template) => this.PageNameReplace(template.Find(1), UespNamespaces.Lore);
+		protected void LoreFirst(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Site[UespNamespaces.Lore], template.Find(1));
 
 		protected void NpcSummary(Page page, SiteTemplateNode template)
 		{
 			if (this.NamespaceList.FromTitle(page) is UespNamespace nsPage)
 			{
-				this.PageNameReplace(template.Find("race"), nsPage.Parent.Id);
+				this.PageNameReplace(nsPage.Parent, template.Find("race"));
 			}
 		}
+
+		protected void PageNameFirst(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Namespace, template.Find(1));
 		#endregion
 
 		#region Private Methods
@@ -206,6 +206,7 @@
 			this.AddTemplateReplacers("Edit Link", this.FullPageNameFirst);
 			this.AddTemplateReplacers("ESO Set List", this.PageNameAllNumeric);
 			this.AddTemplateReplacers("Furnishing Crafting Entry", this.FurnishingLink);
+			this.AddTemplateReplacers("Furnishing General Entry", this.PageNameFirst);
 			this.AddTemplateReplacers("Furnishing Link", this.FurnishingLink);
 			this.AddTemplateReplacers("Furnishing Luxury Entry", this.FurnishingLink);
 			this.AddTemplateReplacers("Furnishing Recipe Link", this.FurnishingLink);
@@ -214,6 +215,7 @@
 			this.AddTemplateReplacers("Lore Link", this.LoreFirst);
 			this.AddTemplateReplacers("Game Book", this.GameBookGeneral);
 			this.AddTemplateReplacers("NPC Summary", this.NpcSummary);
+			this.AddTemplateReplacers("Online Furnishing Summary", this.GenericImage);
 			this.AddTemplateReplacers("Online NPC Summary", this.EsoNpc);
 			this.AddTemplateReplacers("Pages In Category", this.CategoryFirst);
 			this.AddTemplateReplacers("Quest Header", this.GenericIcon);
@@ -236,22 +238,31 @@
 		{
 			if (param != null)
 			{
-				var name = "ON-furnishing-" + param.Value.ToValue() + ".jpg";
-				if (CreateTitle.FromUnvalidated(this.job.Site, MediaWikiNamespaces.File, name) is var title
+				this.PageNameReplace(this.site[UespNamespaces.Online], param);
+				/* var name = "ON-furnishing-" + param.Value.ToValue() + ".jpg";
+				if (CreateTitle.FromUnvalidated(this.site, MediaWikiNamespaces.File, name) is var title
 					&& this.replacements.TryGetValue(title, out var replacement)
 					&& replacement.To is Title toLink)
 				{
-					param.SetValue(toLink.PageName, ParameterFormat.Copy);
+					var newValue = toLink.PageName
+						.Replace("-item-", "-", StringComparison.Ordinal)
+						.Replace("ON-furnishing-", string.Empty, StringComparison.Ordinal)
+						.Replace(".jpg", string.Empty, StringComparison.Ordinal);
+					param.SetValue(newValue, ParameterFormat.Copy);
 					return;
 				}
 
 				name = "ON-item-furnishing-" + param.Value.ToValue() + ".jpg";
-				if (CreateTitle.FromUnvalidated(this.job.Site, MediaWikiNamespaces.File, name) is var title2
+				if (CreateTitle.FromUnvalidated(this.site, MediaWikiNamespaces.File, name) is var title2
 					&& this.replacements.TryGetValue(title2, out var replacement2)
 					&& replacement2.To is Title toLink2)
 				{
-					param.SetValue(toLink2.PageName, ParameterFormat.Copy);
-				}
+					var newValue = toLink2.PageName
+						.Replace("-item-", "-", StringComparison.Ordinal)
+						.Replace("ON-furnishing-", string.Empty, StringComparison.Ordinal)
+						.Replace(".jpg", string.Empty, StringComparison.Ordinal);
+					param.SetValue(newValue, ParameterFormat.Copy);
+				} */
 			}
 		}
 
@@ -279,10 +290,13 @@
 			}
 		}
 
-		private void PageNameReplace(IParameterNode? param, int ns)
+		private void PageNameReplace(Namespace ns, IParameterNode? param)
 		{
+			/* var title2 = CreateTitle.FromUnvalidated(ns, param.Value.ToValue());
+			var rep2 = this.replacements.TryGetValue(title2, out var replacement2);
+			var ns2 = rep2 ? replacement2.To.Namespace : null; */
 			if (param != null
-				&& CreateTitle.FromUnvalidated(this.job.Site, ns, param.Value.ToValue()) is var title
+				&& CreateTitle.FromUnvalidated(ns, param.Value.ToValue()) is var title
 				&& this.replacements.TryGetValue(title, out var replacement)
 				&& replacement.To.Namespace == ns)
 			{
