@@ -83,7 +83,7 @@
 		protected MovePagesJob(JobManager jobManager, string? replacementName)
 			: base(jobManager)
 		{
-			this.parameterReplacers = new ParameterReplacers(this, this.replacements);
+			this.parameterReplacers = new ParameterReplacers(jobManager.Site, this.replacements);
 			this.titleConverter = new(this.Site);
 			replacementName = replacementName == null ? string.Empty : " - " + replacementName;
 			this.replacementStatusFile = UespSite.GetBotDataFolder($"Replacements{replacementName}.json");
@@ -441,6 +441,21 @@
 			return retval;
 		}
 
+		protected virtual void GetPageActions(PageCollection fromPages)
+		{
+			var toPages = this.GetToPages();
+			this.replacements.Sort();
+			foreach (var replacement in this.replacements)
+			{
+				if (!replacement.MoveActions.HasAction(ReplacementActions.Skip))
+				{
+					var fromPage = fromPages[replacement.From];
+					var actions = this.GetPageActions(replacement, fromPage, toPages);
+					replacement.SetMoveActions(actions);
+				}
+			}
+		}
+
 		protected virtual Replacement.DetailedActions HandleConflict(Replacement replacement) => new(
 			replacement.MoveActions.Actions & ~ReplacementActions.Move,
 			$"{replacement.To.AsLink()} exists");
@@ -511,21 +526,6 @@
 				case SiteTemplateNode template:
 					this.UpdateTemplateNode(page, template);
 					break;
-			}
-		}
-
-		protected virtual void GetPageActions(PageCollection fromPages)
-		{
-			var toPages = this.GetToPages();
-			this.replacements.Sort();
-			foreach (var replacement in this.replacements)
-			{
-				if (!replacement.MoveActions.HasAction(ReplacementActions.Skip))
-				{
-					var fromPage = fromPages[replacement.From];
-					var actions = this.GetPageActions(replacement, fromPage, toPages);
-					replacement.SetMoveActions(actions);
-				}
 			}
 		}
 
