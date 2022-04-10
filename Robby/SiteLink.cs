@@ -549,7 +549,7 @@
 				link = "[[" + link + " ]]";
 			}
 
-			var linkNode = new SiteNodeFactory(site).LinkNodeFromParts(link);
+			var linkNode = new SiteNodeFactory(site).LinkNodeFromWikiText(link);
 			var nodes = linkNode.Parameters.Count == 0 ? linkNode.Title : linkNode.Parameters[linkNode.Parameters.Count - 1].Value;
 			var last = nodes[^1] as ITextNode;
 			if (removeSpace && last is not null)
