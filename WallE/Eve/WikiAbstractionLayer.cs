@@ -377,7 +377,15 @@
 					using (var data = RequestVisitorHttpContentUrl.Build(request))
 					{
 						urib.Query = data.ReadAsStringAsync().Result;
-						response = this.Client.Get(urib.Uri);
+						if (urib.Query.Length < 4096)
+						{
+							response = this.Client.Get(urib.Uri);
+						}
+						else
+						{
+							request.Type = RequestType.Post;
+							response = this.SendRequest(request);
+						}
 					}
 
 					break;
