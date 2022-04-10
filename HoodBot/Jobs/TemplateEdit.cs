@@ -17,20 +17,21 @@
 		#region Protected Override Properties
 		protected override string EditSummary => "Fix bot error";
 
-		protected override string TemplateName => "Online Furnishing Summary";
+		protected override string TemplateName => "Furnishing Link";
 		#endregion
 
 		#region Protected Override Methods
 		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
 		{
-			if (template.Find("skills") is IParameterNode param)
+			if (template.Find(1) is IParameterNode param)
 			{
-				foreach (var node in param.Value.TextNodes)
-				{
-					node.Text = node.Text
-						.Replace("Woodworking (skill", "Woodworking (skill)", StringComparison.Ordinal)
-						.Replace("Woodworking (skill))", "Woodworking (skill)", StringComparison.Ordinal);
-				}
+				var value = param.Value.ToRaw();
+				value = value
+					.Replace("ON-item-furnishing-", string.Empty)
+					.Replace("ON-furnishing-", string.Empty)
+					.Replace(".jpg", string.Empty);
+				param.Value.Clear();
+				param.Value.AddText(value);
 			}
 		}
 		#endregion

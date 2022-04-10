@@ -129,13 +129,8 @@
 		{
 			parameter.ThrowNull();
 			var paramValue = parameter.Value;
-			if (value == null || value.Length == 0)
-			{
-				paramValue.Clear();
-				return;
-			}
-
-			if (format == ParameterFormat.Copy)
+			value ??= string.Empty;
+			if (format is ParameterFormat.Copy or ParameterFormat.NoChange)
 			{
 				var (leading, trailing) = GetSurroundingSpace(paramValue.ToValue());
 				value = TrimValue(value, format);
@@ -268,11 +263,12 @@
 		/// <param name="template">The template to work on.</param>
 		/// <param name="name">The name of the parameter to add.</param>
 		/// <param name="value">The value of the parameter to add.</param>
+		/// <param name="paramFormat">The type of formatting to apply to the parameter value.</param>
 		/// <remarks>If the value already exists, even if blank, it will remain unchanged.</remarks>
 		/// <returns>The parameter that was altered.</returns>
-		public static IParameterNode AddIfNotExists(this ITemplateNode template, string name, string value) => template.Find(name) is IParameterNode parameter
+		public static IParameterNode AddIfNotExists(this ITemplateNode template, string name, string value, ParameterFormat paramFormat) => template.Find(name) is IParameterNode parameter
 			? parameter
-			: template.Add(name, value);
+			: template.Add(name, value, paramFormat);
 
 		/// <summary>Finds a numbered parameter, whether it's anonymous or a numerically named parameter.</summary>
 		/// <param name="template">The template to work on.</param>
