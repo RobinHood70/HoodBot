@@ -27,9 +27,9 @@
 			{
 				var value = param.Value.ToRaw();
 				value = value
-					.Replace("ON-item-furnishing-", string.Empty)
-					.Replace("ON-furnishing-", string.Empty)
-					.Replace(".jpg", string.Empty);
+					.Replace("ON-item-furnishing-", string.Empty, StringComparison.Ordinal)
+					.Replace("ON-furnishing-", string.Empty, StringComparison.Ordinal)
+					.Replace(".jpg", string.Empty, StringComparison.Ordinal);
 				param.Value.Clear();
 				param.Value.AddText(value);
 			}
