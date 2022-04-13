@@ -15,7 +15,7 @@
 				: base(jobManager)
 		{
 			this.DeleteStatusFile();
-			this.MoveAction = MoveAction.None;
+			this.MoveAction = MoveAction.MoveSafely;
 			this.MoveDelay = 500;
 			this.EditSummaryMove = "Match page name to item";
 		}
@@ -55,7 +55,7 @@
 			*/
 
 			// this.AddReplacement("Online:Bust, The Stonekeeper", "Online:Bust: The Stonekeeper");
-			this.LoadReplacementsFromFile(UespSite.GetBotDataFolder("Comma Replacements Oops.txt"));
+			this.LoadReplacementsFromFile(UespSite.GetBotDataFolder("Comma Replacements5.txt"));
 		}
 
 		protected override void FilterBacklinkTitles(TitleCollection titles)
