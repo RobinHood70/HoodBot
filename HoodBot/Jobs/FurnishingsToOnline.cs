@@ -118,9 +118,9 @@
 			this.Pages.RemoveChanged(false);
 			this.SavePages("Create Furniture Summary page", false, this.FilesPageLoaded);
 
-			SaveInfo fileSaveInfo = new("Check for Existing Furnishings", true);
 			this.filePages.RemoveChanged(false);
-			this.SavePages(this.filePages, "Removing Furnishing Summaries", fileSaveInfo, null);
+			this.StatusWriteLine("Removing Furnishing Summaries");
+			this.SavePages(this.filePages, "Check for Existing Furnishings", true, null);
 		}
 		#endregion
 

@@ -9,6 +9,10 @@
 
 	public abstract class EditJob : WikiJob
 	{
+		#region Fields
+		private readonly IDictionary<Title, SaveInfo> saveInfo = new Dictionary<Title, SaveInfo>(SimpleTitleComparer.Instance);
+		#endregion
+
 		#region Constructors
 		protected EditJob(JobManager jobManager)
 			: base(jobManager)
@@ -30,8 +34,6 @@
 		/// <value>The edit conflict action.</value>
 		/// <remarks>During a SavePage, if an edit conflict occurs, the page will automatically be re-loaded and the method specified here will be executed.</remarks>
 		protected Action<EditJob, Page>? EditConflictAction { get; set; }
-
-		protected IDictionary<Title, SaveInfo> SaveInfo { get; } = new Dictionary<Title, SaveInfo>(SimpleTitleComparer.Instance);
 
 		protected bool Shuffle { get; set; }
 		#endregion
@@ -76,12 +78,14 @@
 
 		protected void SavePages(string defaultSummary, bool defaultIsMinor) => this.SavePages(defaultSummary, defaultIsMinor, null);
 
-		protected void SavePages(string defaultSummary, bool defaultIsMinor, Action<EditJob, Page>? editConflictAction) =>
-			this.SavePages(this.Pages, "Saving pages", new SaveInfo(defaultSummary, defaultIsMinor), editConflictAction);
-
-		protected void SavePages(PageCollection pages, string status, SaveInfo defaultSaveInfo, Action<EditJob, Page>? editConflictAction)
+		protected void SavePages(string defaultSummary, bool defaultIsMinor, Action<EditJob, Page>? editConflictAction)
 		{
-			this.StatusWriteLine(status);
+			this.StatusWriteLine("Saving pages");
+			this.SavePages(this.Pages, defaultSummary, defaultIsMinor, editConflictAction);
+		}
+
+		protected void SavePages(PageCollection pages, string defaultSummary, bool defaultIsMinor, Action<EditJob, Page>? editConflictAction)
+		{
 			pages.NotNull().RemoveChanged(false);
 			if (pages.Count == 0)
 			{
@@ -103,20 +107,42 @@
 				this.ProgressMaximum = pages.Count;
 				foreach (var page in pages)
 				{
-					var saveInfo = this.GetSaveInfo(page) ?? defaultSaveInfo;
-					this.SavePage(page, saveInfo.EditSummary, saveInfo.IsMinor);
+					if (this.saveInfo.TryGetValue(page, out var retval))
+					{
+						defaultSummary = retval.EditSummary;
+						defaultIsMinor = retval.IsMinor;
+					}
+
+					this.SavePage(page, defaultSummary, defaultIsMinor);
 					this.Progress++;
 				}
 			}
 		}
-		#endregion
 
-		#region Protected Virtual Methods
-		protected virtual SaveInfo? GetSaveInfo(Page page) => null;
+		protected void SetSaveInfoForPage(Title page, string editSummary, bool isMinor) => this.saveInfo[page.NotNull()] = new SaveInfo(editSummary.NotNull(), isMinor);
 		#endregion
 
 		#region Protected Abstract Overrie Methods
 		protected abstract override void BeforeLogging();
+		#endregion
+
+		#region Private Structures
+		public struct SaveInfo
+		{
+			#region Constructors
+			public SaveInfo(string editSummary, bool isMinor)
+			{
+				this.EditSummary = editSummary;
+				this.IsMinor = isMinor;
+			}
+			#endregion
+
+			#region Public Properties
+			public string EditSummary { get; }
+
+			public bool IsMinor { get; }
+			#endregion
+		}
 		#endregion
 	}
 }

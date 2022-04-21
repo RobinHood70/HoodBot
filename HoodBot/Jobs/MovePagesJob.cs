@@ -298,8 +298,9 @@
 				(this.FollowUpActions & FollowUpActions.ProposeUnused) != 0 &&
 				action.HasAction(ReplacementActions.Propose))
 			{
-				ProposeForDeletion(parser, "{{Proposeddeletion|bot=1|" + action.Reason.UpperFirst(this.Site.Culture) + "}}");
-				this.SaveInfo[from] = new SaveInfo(this.EditSummaryPropose, false);
+				var reason = action.Reason.NotNull();
+				ProposeForDeletion(parser, "{{Proposeddeletion|bot=1|" + reason.UpperFirst(this.Site.Culture) + "}}");
+				this.SetSaveInfoForPage(from, this.EditSummaryPropose, false);
 			}
 
 			if (action.HasAction(ReplacementActions.Edit))
