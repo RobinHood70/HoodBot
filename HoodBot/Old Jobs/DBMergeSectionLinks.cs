@@ -30,7 +30,7 @@
 			TitleCollection titles = new(this.Site);
 			SimpleTitleJsonConverter titleConverter = new(this.Site);
 			var repFile = File.ReadAllText(UespSite.GetBotDataFolder("Replacements - Merge.json"));
-			var reps = JsonConvert.DeserializeObject<IEnumerable<Replacement>>(repFile, titleConverter) ?? throw new InvalidOperationException();
+			var reps = JsonConvert.DeserializeObject<IEnumerable<Replacement<Title, Title>>>(repFile, titleConverter) ?? throw new InvalidOperationException();
 			foreach (var rep in reps)
 			{
 				titles.Add(rep.To);
