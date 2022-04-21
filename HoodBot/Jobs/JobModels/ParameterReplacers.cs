@@ -19,17 +19,17 @@
 		#region Fields
 		private readonly Site site;
 		private readonly List<ParameterReplacer> generalReplacers = new();
-		private readonly ReplacementCollection replacements;
+		private readonly IReadOnlyDictionary<Title, Title> globalUpdates;
 		private readonly Dictionary<Title, List<ParameterReplacer>> templateReplacers = new(SimpleTitleComparer.Instance);
 		private UespNamespaceList? nsList;
 		#endregion
 
 		// TODO: Create tags similar to JobInfo that'll tag each method with the site and template it's designed for, so AddAllReplacers can be programmatic rather than a manual list.
 		#region Constructors
-		internal ParameterReplacers(Site site, ReplacementCollection replacements)
+		internal ParameterReplacers(Site site, IReadOnlyDictionary<Title, Title> linkUpdates)
 		{
 			this.site = site.NotNull();
-			this.replacements = replacements.NotNull();
+			this.globalUpdates = linkUpdates.NotNull();
 			this.AddAllReplacers();
 		}
 		#endregion
@@ -49,7 +49,7 @@
 
 		public void AddTemplateReplacers(string name, params ParameterReplacer[] replacers)
 		{
-			var title = CreateTitle.FromUnvalidated(this.site, MediaWikiNamespaces.Template, name);
+			var title = TitleFactory.FromUnvalidated(this.site[MediaWikiNamespaces.Template], name);
 			if (!this.templateReplacers.TryGetValue(title, out var currentReplacers))
 			{
 				currentReplacers = new List<ParameterReplacer>();
@@ -105,15 +105,15 @@
 			}
 
 			var oldTitle = link.Value.ToValue();
-			var searchTitle = CreateTitle.FromUnvalidated(page.Site, oldNs.Full + oldTitle);
-			if (!this.replacements.TryGetValue(searchTitle, out var replacement))
+			var searchTitle = TitleFactory.FromUnvalidated(page.Site, oldNs.Full + oldTitle);
+			if (!this.globalUpdates.TryGetValue(searchTitle, out var toTitle))
 			{
 				return;
 			}
 
 			link.Value.Clear();
-			link.SetValue(replacement.To.PageName, ParameterFormat.Copy);
-			if (this.NamespaceList.FromTitle(replacement.To) is not UespNamespace newNs || !string.Equals(oldNs.Id, newNs.Id, StringComparison.Ordinal))
+			link.SetValue(toTitle.PageName, ParameterFormat.Copy);
+			if (this.NamespaceList.FromTitle(new Title(toTitle)) is not UespNamespace newNs || !string.Equals(oldNs.Id, newNs.Id, StringComparison.Ordinal))
 			{
 				return;
 			}
@@ -127,7 +127,7 @@
 				nsParam.SetValue(newNs.Id, ParameterFormat.Copy);
 			}
 
-			if (replacement.To.SimpleEquals(newNs.MainPage))
+			if (toTitle.SimpleEquals(newNs.MainPage))
 			{
 				template.Add("altname", oldTitle);
 			}
@@ -168,10 +168,10 @@
 			}
 
 			var iconName = UespFunctions.IconAbbreviation(oldNs.Id, template);
-			var title = CreateTitle.FromUnvalidated(this.site, MediaWikiNamespaces.File, iconName);
-			if (this.replacements.TryGetValue(title, out var replacement))
+			var title = TitleFactory.FromUnvalidated(this.site[MediaWikiNamespaces.File], iconName);
+			if (this.globalUpdates.TryGetValue(title, out var toTitle))
 			{
-				var (_, abbr, name, _) = UespFunctions.AbbreviationFromIconName(this.NamespaceList, replacement.To.PageName);
+				var (_, abbr, name, _) = UespFunctions.AbbreviationFromIconName(this.NamespaceList, toTitle.PageName);
 				if (template.Find(1) is IParameterNode param1 &&
 					template.Find(2) is IParameterNode param2)
 				{
@@ -226,11 +226,10 @@
 		{
 			page.ThrowNull();
 			if (param != null
-				&& CreateTitle.FromUnvalidated(page.Site, param.Value.ToValue()) is var title
-				&& this.replacements.TryGetValue(title, out var replacement)
-				&& replacement.To is Title toLink)
+				&& TitleFactory.FromUnvalidated(page.Site, param.Value.ToValue()) is var from
+				&& this.globalUpdates.TryGetValue(from, out var to))
 			{
-				param.SetValue(toLink.FullPageName, ParameterFormat.Copy);
+				param.SetValue(to.Namespace.DecoratedName + to.PageName, ParameterFormat.Copy);
 			}
 		}
 
@@ -240,7 +239,7 @@
 			{
 				this.PageNameReplace(this.site[UespNamespaces.Online], param);
 				/* var name = "ON-furnishing-" + param.Value.ToValue() + ".jpg";
-				if (CreateTitle.FromUnvalidated(this.site, MediaWikiNamespaces.File, name) is var title
+				if (TitleFactory.FromUnvalidated(this.site, MediaWikiNamespaces.File, name) is var title
 					&& this.replacements.TryGetValue(title, out var replacement)
 					&& replacement.To is Title toLink)
 				{
@@ -253,7 +252,7 @@
 				}
 
 				name = "ON-item-furnishing-" + param.Value.ToValue() + ".jpg";
-				if (CreateTitle.FromUnvalidated(this.site, MediaWikiNamespaces.File, name) is var title2
+				if (TitleFactory.FromUnvalidated(this.site, MediaWikiNamespaces.File, name) is var title2
 					&& this.replacements.TryGetValue(title2, out var replacement2)
 					&& replacement2.To is Title toLink2)
 				{
@@ -280,27 +279,29 @@
 		{
 			foreach (var (_, param) in template.GetNumericParameters())
 			{
-				if (CreateTitle.FromUnvalidated(page.Site, page.Namespace.Id, param.Value.ToValue()) is var title
-					&& this.replacements.TryGetValue(title, out var replacement)
-					&& replacement.To is Title toLink
-					&& replacement.From.Namespace.Id == toLink.Namespace.Id)
+				if ((Title)TitleFactory.FromUnvalidated(page.Namespace, param.Value.ToValue()) is var from
+					&& this.globalUpdates.TryGetValue(from, out var to)
+					&& from.Namespace.Id == to.Namespace.Id)
 				{
-					param.SetValue(toLink.PageName, ParameterFormat.Copy);
+					param.SetValue(to.PageName, ParameterFormat.Copy);
 				}
 			}
 		}
 
 		private void PageNameReplace(Namespace ns, IParameterNode? param)
 		{
-			/* var title2 = CreateTitle.FromUnvalidated(ns, param.Value.ToValue());
+			/* var title2 = TitleFactory.FromUnvalidated(ns, param.Value.ToValue());
 			var rep2 = this.replacements.TryGetValue(title2, out var replacement2);
 			var ns2 = rep2 ? replacement2.To.Namespace : null; */
-			if (param != null
-				&& CreateTitle.FromUnvalidated(ns, param.Value.ToValue()) is var title
-				&& this.replacements.TryGetValue(title, out var replacement)
-				&& replacement.To.Namespace == ns)
+			if (param != null)
 			{
-				param.SetValue(replacement.To.PageName, ParameterFormat.Copy);
+				var titleFactory = TitleFactory.FromUnvalidated(ns, param.Value.ToValue());
+				var title = new Title(titleFactory);
+				if (this.globalUpdates.TryGetValue(title, out var target) &&
+					target.Namespace == ns)
+				{
+					param.SetValue(target.PageName, ParameterFormat.Copy);
+				}
 			}
 		}
 		#endregion
