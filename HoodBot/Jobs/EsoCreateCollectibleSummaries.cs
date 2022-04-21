@@ -114,7 +114,8 @@
 		protected override void Main()
 		{
 			this.SavePages("Create Collectible page", false, CreateCollectiblePage);
-			this.SavePages(this.sourcePages, $"Saving {CollectibleType} pages", new SaveInfo("Add links to headers", true), AddHeaderLinks);
+			this.StatusWriteLine($"Saving {CollectibleType} pages");
+			this.SavePages(this.sourcePages, "Add links to headers", true, AddHeaderLinks);
 		}
 		#endregion
 
