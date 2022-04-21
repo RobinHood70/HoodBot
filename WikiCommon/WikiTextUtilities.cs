@@ -49,7 +49,7 @@
 		/// <item><description>Variants of the space character—such as hard spaces, em spaces, and underscores—are all converted to normal spaces.</description></item>
 		/// </list></remarks>
 		/// <returns>The normalized text, ready to be parsed.</returns>
-		public static string TrimToTitle(string text)
+		public static string TrimCruft(string text)
 		{
 			var retval = text.NotNull().Split(TextArrays.Pipe, 2)[0];
 			return DecodeAndNormalize(retval).Trim();

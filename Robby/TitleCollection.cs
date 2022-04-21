@@ -31,7 +31,7 @@
 			this.LimitationType = LimitationType.None;
 			foreach (var item in titles.NotNull())
 			{
-				var newTitle = CreateTitle.FromUnvalidated(site, item);
+				var newTitle = TitleFactory.FromUnvalidated(site, item);
 				this.Add(newTitle);
 			}
 		}
@@ -88,7 +88,7 @@
 		{
 			foreach (var title in titles.NotNull())
 			{
-				this.Add(CreateTitle.FromUnvalidated(this.Site, defaultNamespace, title));
+				this.Add(TitleFactory.FromUnvalidated(this.Site[defaultNamespace], title));
 			}
 		}
 
@@ -239,7 +239,7 @@
 
 		/// <summary>Adds a new object to the collection with the specified name.</summary>
 		/// <param name="title">The title to add.</param>
-		public void Add(string title) => this.Add(CreateTitle.FromUnvalidated(this.Site, title));
+		public void Add(string title) => this.Add(TitleFactory.FromUnvalidated(this.Site, title));
 
 		/// <summary>Adds new objects to the collection based on an existing <see cref="Title"/> collection.</summary>
 		/// <param name="titles">The titles to be added.</param>
@@ -285,7 +285,7 @@
 		{
 			input.ThrowNull();
 			input.Title.PropertyThrowNull(nameof(input), nameof(input.Title));
-			var inputTitle = CreateTitle.FromUnvalidated(this.Site, input.Title);
+			var inputTitle = TitleFactory.FromUnvalidated(this.Site, input.Title);
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && (input.LinkTypes & BacklinksTypes.ImageUsage) != 0)
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
@@ -294,13 +294,13 @@
 			var result = this.Site.AbstractionLayer.Backlinks(input);
 			foreach (var item in result)
 			{
-				var mainTitle = CreateTitle.FromValidated(this.Site, item.FullPageName);
+				var mainTitle = TitleFactory.FromValidated(this.Site, item.FullPageName);
 				this.Add(mainTitle);
 				if (item.Redirects != null)
 				{
 					foreach (var redirectedItem in item.Redirects)
 					{
-						var title = CreateTitle.FromUnvalidated(this.Site, redirectedItem.FullPageName);
+						var title = TitleFactory.FromUnvalidated(this.Site, redirectedItem.FullPageName);
 						this.Add(new Backlink(title, mainTitle));
 					}
 				}
@@ -314,7 +314,7 @@
 			var result = this.Site.AbstractionLayer.AllCategories(input);
 			foreach (var item in result)
 			{
-				this.Add(CreateTitle.FromValidated(this.Site, MediaWikiNamespaces.Category, item.Category));
+				this.Add(TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Category], item.Category));
 			}
 		}
 
@@ -504,7 +504,7 @@
 			var result = this.Site.AbstractionLayer.AllMessages(input);
 			foreach (var item in result)
 			{
-				this.Add(CreateTitle.FromValidated(this.Site[MediaWikiNamespaces.MediaWiki], item.Name));
+				this.Add(TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.MediaWiki], item.Name));
 			}
 		}
 
@@ -533,7 +533,7 @@
 		{
 			foreach (var item in result)
 			{
-				this.Add(CreateTitle.FromValidated(this.Site, item.FullPageName));
+				this.Add(TitleFactory.FromValidated(this.Site, item.FullPageName));
 			}
 		}
 
@@ -541,7 +541,8 @@
 		{
 			foreach (var item in result)
 			{
-				this.Add(CreateTitle.FromValidated(this.Site, item.FullPageName.PropertyNotNull(nameof(item), nameof(item.FullPageName))));
+				item.FullPageName.PropertyThrowNull(nameof(item));
+				this.Add(TitleFactory.FromValidated(this.Site, item.FullPageName));
 			}
 		}
 
@@ -557,7 +558,8 @@
 			var result = this.Site.AbstractionLayer.CategoryMembers(input);
 			foreach (var item in result)
 			{
-				var title = CreateTitle.FromValidated(this.Site, item.FullPageName.PropertyNotNull(nameof(item), nameof(item.FullPageName)));
+				item.FullPageName.PropertyThrowNull(nameof(item));
+				var title = TitleFactory.FromValidated(this.Site, item.FullPageName);
 				if (input.Type.HasFlag(item.Type))
 				{
 					this.Add(title);

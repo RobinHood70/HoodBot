@@ -109,9 +109,7 @@
 					throw new InvalidOperationException("Not logged in.");
 				}
 
-				var replacementsTitle = CreateTitle.FromValidated(user.Namespace, user.PageName + "/ESO Replacements");
-				var page = replacementsTitle.Load();
-				var replacements = page.Text;
+				var replacements = jobSite.LoadPageText(user, "/ESO Replacements");
 				if (string.IsNullOrEmpty(replacements))
 				{
 					throw new InvalidOperationException("Replacements page not found or empty!");
@@ -331,16 +329,16 @@
 			HashSet<Title> oldTemplates = new(SimpleTitleComparer.Instance);
 			foreach (var node in oldPage.FindAll<ITemplateNode>(null, false, true, 0))
 			{
-				oldTemplates.Add(new(TitleFactory.FromBacklinkNode(this.site, node)));
+				oldTemplates.Add(TitleFactory.FromBacklinkNode(this.site, node));
 			}
 
 			foreach (var node in newPage.FindAll<ITemplateNode>(null, false, true, 0))
 			{
-				oldTemplates.Remove(new(TitleFactory.FromBacklinkNode(this.site, node)));
+				oldTemplates.Remove(TitleFactory.FromBacklinkNode(this.site, node));
 			}
 
 			// Always ignore these
-			oldTemplates.Remove(CreateTitle.FromUnvalidated(this.site, "Huh"));
+			oldTemplates.Remove(TitleFactory.FromUnvalidated(this.site, "Huh"));
 
 			return oldTemplates;
 		}
@@ -354,7 +352,7 @@
 
 		public void RemoveTrivialTemplates(NodeCollection oldNodes)
 		{
-			bool IsRemovable(ITemplateNode node) => this.RemoveableTemplates.Contains(new Title(TitleFactory.FromBacklinkNode(this.site, node)));
+			bool IsRemovable(ITemplateNode node) => this.RemoveableTemplates.Contains(TitleFactory.FromBacklinkNode(this.site, node));
 
 			oldNodes.RemoveAll<ITemplateNode>(node => IsRemovable(node));
 		}

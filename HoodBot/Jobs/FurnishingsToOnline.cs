@@ -80,7 +80,7 @@
 				}
 
 				this.nameLookup.Add(title, pageName);
-				var newTitle = CreateTitle.FromUnvalidated(this.Site, UespNamespaces.Online, pageName);
+				Title newTitle = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], pageName);
 				newTitles.Add(newTitle);
 				reverse.Add(newTitle, title);
 			}

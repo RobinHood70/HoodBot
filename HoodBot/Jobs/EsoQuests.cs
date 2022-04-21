@@ -206,24 +206,27 @@
 		{
 			foreach (var quest in Database.RunQuery(EsoLog.Connection, QuestQuery, 100000, row => new QuestData(row)))
 			{
-				var title = CreateTitle.FromUnvalidated(this.Site, quest.FullPageName);
-				var titleDisambig = CreateTitle.FromValidated(title.Namespace, title.PageName + " (quest)");
-				if (!wikiQuests.Contains(title) && !wikiQuests.Contains(titleDisambig))
+				if (!quest.Name.Contains('\n', StringComparison.Ordinal))
 				{
-					var missing = true;
-					foreach (var wikiQuest in wikiQuests)
+					var title = TitleFactory.FromUnvalidated(this.Site, quest.FullPageName);
+					var titleDisambig = TitleFactory.FromValidated(title.Namespace, title.PageName + " (quest)");
+					if (!wikiQuests.Contains(title) && !wikiQuests.Contains(titleDisambig))
 					{
-						var splitName = wikiQuest.PageName.Split(" (", StringSplitOptions.None);
-						if (string.Equals(splitName[0], quest.Name, StringComparison.OrdinalIgnoreCase))
+						var missing = true;
+						foreach (var wikiQuest in wikiQuests)
 						{
-							missing = false;
-							break;
+							var splitName = wikiQuest.PageName.Split(" (", StringSplitOptions.None);
+							if (string.Equals(splitName[0], quest.Name, StringComparison.OrdinalIgnoreCase))
+							{
+								missing = false;
+								break;
+							}
 						}
-					}
 
-					if (missing)
-					{
-						yield return quest;
+						if (missing)
+						{
+							yield return quest;
+						}
 					}
 				}
 			}
@@ -442,7 +445,7 @@
 			{
 				if (!string.Equals(stage.Zone, "Tamriel", StringComparison.Ordinal) && !string.Equals(stage.Zone, quest.Zone, StringComparison.Ordinal))
 				{
-					var title = CreateTitle.FromUnvalidated(this.Site, UespNamespaces.Online, stage.Zone);
+					Title title = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], stage.Zone);
 					locs.Add(title.AsLink(LinkFormat.LabelName));
 				}
 
@@ -512,7 +515,8 @@
 				this.BackgroundText = toEncoding.GetString(bgBytes); // Fix UTF8 stored as CP-1252
 				this.Id = (long)row["id"];
 				this.InternalId = (int)row["internalId"];
-				this.Name = ((string)row["name"]).Replace("  ", " ", StringComparison.Ordinal); // Handles "Capture  Farm" with two spaces.
+				this.Name = ((string)row["name"])
+					.Replace("  ", " ", StringComparison.Ordinal); // Handles "Capture  Farm" with two spaces.
 				this.FullPageName = "Online:" + this.Name;
 				this.Objective = (string)row["objective"];
 				this.RepeatType = (short)row["repeatType"];

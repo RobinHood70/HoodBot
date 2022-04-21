@@ -1,7 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using RobinHood70.CommonCode;
-	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 
 	public class LinkFinder : LinkFinderJob
 	{
@@ -14,7 +14,7 @@
 			{
 				foreach (var search in searches.Split(TextArrays.Pipe))
 				{
-					this.Titles.Add(CreateTitle.FromUnvalidated(this.Site, search));
+					this.Titles.Add(TitleFactory.FromUnvalidated(this.Site, search));
 				}
 
 				this.Titles.Sort();

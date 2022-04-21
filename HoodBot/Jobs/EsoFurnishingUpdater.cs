@@ -37,7 +37,7 @@
 		#endregion
 
 		#region Constructors
-		[JobInfo("ESO Furnishing Updater", "|ESO")]
+		[JobInfo("ESO Furnishing Updater", "ESO")]
 		public EsoFurnishingUpdater(JobManager jobManager)
 			: base(jobManager)
 		{
@@ -204,8 +204,8 @@
 			var fileName = template.GetValue("image") ?? Furnishing.ImageName(name, collectible);
 
 			var nameFix = name.Replace(":", RemoveColons ? string.Empty : ",", StringComparison.Ordinal);
-			var fileTitle = CreateTitle.FromUnvalidated(page.Site, MediaWikiNamespaces.File, fileName);
-			var fileNameFix = CreateTitle.FromUnvalidated(page.Site, MediaWikiNamespaces.File, Furnishing.ImageName(nameFix, collectible));
+			var fileTitle = TitleFactory.FromUnvalidated(page.Site[MediaWikiNamespaces.File], fileName);
+			var fileNameFix = TitleFactory.FromUnvalidated(page.Site[MediaWikiNamespaces.File], Furnishing.ImageName(nameFix, collectible));
 			return (fileTitle, fileNameFix);
 		}
 		#endregion
@@ -237,7 +237,7 @@
 				var titleName = (string)record["name"];
 				titleName = titleName.TrimEnd(',');
 				titleName = site.SanitizePageName(titleName);
-				this.Title = CreateTitle.FromUnvalidated(site, UespNamespaces.Online, titleName);
+				this.Title = TitleFactory.FromUnvalidated(site[UespNamespaces.Online], titleName);
 				if (!this.Title.PageNameEquals(titleName))
 				{
 					this.TitleName = titleName;

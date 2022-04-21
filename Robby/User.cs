@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
@@ -16,9 +17,7 @@
 		/// <param name="site">The site the user is from.</param>
 		/// <param name="user">The user's name.</param>
 		public User(Site site, string user)
-			: base(GetTitle(
-				site.NotNull(),
-				user.NotNull()))
+			: base(site.NotNull()[MediaWikiNamespaces.User], user.NotNull())
 		{
 		}
 
@@ -58,7 +57,7 @@
 		/// <param name="site">The site the user is from.</param>
 		/// <param name="name">The username.</param>
 		/// <returns>A title corresponding to the User page.</returns>
-		public static Title GetTitle(Site site, string name) => CreateTitle.FromValidated(site.NotNull(), MediaWikiNamespaces.User, name.NotNull());
+		public static Title GetTitle(Site site, string name) => new(TitleFactory.FromValidated(site.NotNull()[MediaWikiNamespaces.User], name.NotNull()));
 		#endregion
 
 		#region Public Methods
@@ -211,7 +210,7 @@
 			List<Title> retval = new();
 			foreach (var item in result)
 			{
-				retval.Add(CreateTitle.FromValidated(this.Site, item.FullPageName));
+				retval.Add(TitleFactory.FromValidated(this.Site, item.FullPageName));
 			}
 
 			return retval;

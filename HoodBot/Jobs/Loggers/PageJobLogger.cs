@@ -8,6 +8,7 @@
 	using RobinHood70.HoodBot.Jobs;
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon.Parser;
@@ -31,7 +32,7 @@
 		public PageJobLogger(Site site, string pageName, JobTypes typesToLog)
 			: base(typesToLog)
 		{
-			this.logTitle = CreateTitle.FromUnvalidated(site.NotNull(), pageName.NotNull());
+			this.logTitle = TitleFactory.FromUnvalidated(site.NotNull(), pageName.NotNull());
 		}
 		#endregion
 

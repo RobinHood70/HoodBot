@@ -4,6 +4,7 @@
 	using Newtonsoft.Json;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 
 	public class SimpleTitleJsonConverter : JsonConverter<Title>
 	{
@@ -20,7 +21,7 @@
 				.NotNull()
 				.Value
 				.PropertyNotNull(nameof(reader), nameof(reader.Value));
-			return CreateTitle.FromUnvalidated(this.site, title);
+			return TitleFactory.FromUnvalidated(this.site, title);
 		}
 
 		public override void WriteJson(JsonWriter writer, Title? value, JsonSerializer serializer) => writer.NotNull().WriteValue(value.NotNull().ToString() ?? string.Empty);

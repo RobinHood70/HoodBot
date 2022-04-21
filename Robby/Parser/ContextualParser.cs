@@ -87,7 +87,7 @@
 		/// <remarks>The category will be added after the last category found on the page, or at the end of the page (preceded by two newlines) if no categories were found.</remarks>
 		public bool AddCategory(string category, bool newLineBefore)
 		{
-			var catTitle = CreateTitle.FromUnvalidated(this.Site, MediaWikiNamespaces.Category, category.NotNull());
+			var catTitle = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Category], category.NotNull());
 			var lastCategoryIndex = -1;
 			for (var i = 0; i < this.Count; i++)
 			{
@@ -130,7 +130,7 @@
 		/// <param name="find">The title to find.</param>
 		/// <returns>The first <see cref="SiteLinkNode"/> that matches the title provided, if found.</returns>
 		/// <remarks>The text provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
-		public SiteLinkNode? FindSiteLink(string find) => this.FindSiteLink(CreateTitle.FromUnvalidated(this.Site, find));
+		public SiteLinkNode? FindSiteLink(string find) => this.FindSiteLink((IFullTitle)TitleFactory.FromUnvalidated(this.Site, find));
 
 		/// <summary>Finds the first link that matches the provided title.</summary>
 		/// <param name="find">The title to find.</param>
@@ -148,7 +148,7 @@
 		/// <param name="find">The title to find.</param>
 		/// <returns>The <see cref="SiteLinkNode"/>s that match the title provided, if found.</returns>
 		/// <remarks>The text provided will be evaluated as an <see cref="IFullTitle"/>, so trying to find <c>NS:Page</c> will not match <c>NS:Page#Fragment</c> and vice versa. To only match on the root of the link, use the overload that takes an <see cref="Title"/>.</remarks>
-		public IEnumerable<SiteLinkNode> FindSiteLinks(string find) => this.FindSiteLinks(CreateTitle.FromUnvalidated(this.Site, find));
+		public IEnumerable<SiteLinkNode> FindSiteLinks(string find) => this.FindSiteLinks((IFullTitle)TitleFactory.FromUnvalidated(this.Site, find));
 
 		/// <summary>Finds all links that match the provided title.</summary>
 		/// <param name="find">The title to find.</param>
@@ -158,7 +158,7 @@
 		{
 			foreach (var link in this.LinkNodes)
 			{
-				Title linkTitle = new(TitleFactory.FromBacklinkNode(this.Site, link));
+				Title linkTitle = TitleFactory.FromBacklinkNode(this.Site, link);
 				if (link is SiteLinkNode siteLink && linkTitle.SimpleEquals(find))
 				{
 					yield return siteLink;
@@ -174,7 +174,7 @@
 		{
 			foreach (var link in this.LinkNodes)
 			{
-				FullTitle linkTitle = new(TitleFactory.FromBacklinkNode(this.Site, link));
+				FullTitle linkTitle = TitleFactory.FromBacklinkNode(this.Site, link);
 				if (link is SiteLinkNode siteLink && linkTitle.FullEquals(find))
 				{
 					yield return siteLink;
@@ -192,11 +192,11 @@
 		/// <returns>The templates that match the title provided, if any.</returns>
 		public IEnumerable<SiteTemplateNode> FindSiteTemplates(string templateName)
 		{
-			var find = CreateTitle.FromUnvalidated(this.Site, MediaWikiNamespaces.Template, templateName);
+			var find = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Template], templateName);
 			foreach (var template in this.TemplateNodes)
 			{
 				var titleText = template.GetTitleText();
-				var templateTitle = CreateTitle.FromUnvalidated(this.Site, MediaWikiNamespaces.Template, titleText);
+				var templateTitle = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Template], titleText);
 				if (template is SiteTemplateNode siteTemplate && templateTitle.SimpleEquals(find))
 				{
 					yield return siteTemplate;

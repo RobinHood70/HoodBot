@@ -305,19 +305,19 @@
 		{
 			foreach (var item in result.Interwiki)
 			{
-				FullTitle title = new(TitleFactory.FromNormalizedName(this.Site, item.Value.Title));
+				FullTitle title = TitleFactory.FromValidated(this.Site, item.Value.Title);
 				Debug.Assert(string.Equals(title.Interwiki?.Prefix, item.Value.Prefix, StringComparison.Ordinal), "Interwiki prefixes didn't match.", title.Interwiki?.Prefix + " != " + item.Value.Prefix);
 				this.titleMap[item.Key] = title;
 			}
 
 			foreach (var item in result.Converted)
 			{
-				this.titleMap[item.Key] = new FullTitle(TitleFactory.FromNormalizedName(this.Site, item.Value));
+				this.titleMap[item.Key] = TitleFactory.FromValidated(this.Site, item.Value);
 			}
 
 			foreach (var item in result.Normalized)
 			{
-				this.titleMap[item.Key] = new FullTitle(TitleFactory.FromNormalizedName(this.Site, item.Value));
+				this.titleMap[item.Key] = TitleFactory.FromValidated(this.Site, item.Value);
 			}
 
 			foreach (var item in result.Redirects)
@@ -340,7 +340,7 @@
 					target.Append('#').Append(redirect.Interwiki);
 				}
 
-				FullTitle title = new(TitleFactory.FromNormalizedName(this.Site, target.ToString()));
+				FullTitle title = TitleFactory.FromValidated(this.Site, target.ToString());
 				this.titleMap[item.Key] = title;
 			}
 		}
@@ -354,7 +354,7 @@
 		{
 			input.ThrowNull();
 			input.Title.PropertyThrowNull(nameof(input), nameof(input.Title));
-			var inputTitle = CreateTitle.FromUnvalidated(this.Site, input.Title);
+			var inputTitle = TitleFactory.FromUnvalidated(this.Site, input.Title);
 			if (inputTitle.Namespace != MediaWikiNamespaces.File && (input.LinkTypes & BacklinksTypes.ImageUsage) != 0)
 			{
 				input = new BacklinksInput(input, input.LinkTypes & ~BacklinksTypes.ImageUsage);
@@ -538,7 +538,7 @@
 		/// <remarks>If the page title specified represents a page already in the collection, that page will be overwritten.</remarks>
 		private Page New(IApiTitle item)
 		{
-			var pageTitle = CreateTitle.FromValidated(this.Site, item.FullPageName);
+			var pageTitle = TitleFactory.FromValidated(this.Site, item.FullPageName);
 			return this.pageCreator.CreatePage(pageTitle, this.LoadOptions, item);
 		}
 

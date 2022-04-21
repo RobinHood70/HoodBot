@@ -235,10 +235,10 @@
 					: throw new InvalidOperationException($"{newPage.DisambigName} found, but no template on it.");
 			}
 
-			pages.TryGetValue(newPage.PageName, out page);
+			pages.TryGetValue(newPage.Title, out page);
 			if (page is null)
 			{
-				throw new InvalidOperationException($"{newPage.PageName} found, but no template on it.");
+				throw new InvalidOperationException($"{newPage.Title} found, but no template on it.");
 			}
 
 			if (!page.Exists || page.IsRedirect)
@@ -308,7 +308,7 @@
 			TitleCollection loadTitles = new(this.Site);
 			foreach (var collectible in collectibles)
 			{
-				loadTitles.Add(collectible.PageName);
+				loadTitles.Add(collectible.Title);
 				loadTitles.Add(collectible.DisambigName);
 			}
 
@@ -437,9 +437,9 @@
 			{
 				this.CollectibleType = dbData.Category;
 				this.Type = dbData.Subcategory;
-				this.PageName = CreateTitle.FromUnvalidated(site, UespNamespaces.Online, dbData.Name);
-				var disambig = $"{this.PageName.PageName} ({CategorySingular(this.CollectibleType).ToLowerInvariant()})";
-				this.DisambigName = CreateTitle.FromValidated(site, UespNamespaces.Online, disambig);
+				this.Title = TitleFactory.FromUnvalidated(site[UespNamespaces.Online], dbData.Name);
+				var disambig = $"{this.Title.PageName} ({CategorySingular(this.CollectibleType).ToLowerInvariant()})";
+				this.DisambigName = TitleFactory.FromValidated(site[UespNamespaces.Online], disambig);
 				this.Description = dbData.Description;
 				this.Id = dbData.Id;
 				this.NickName = dbData.NickName;
@@ -557,11 +557,11 @@
 
 			public string NickName { get; }
 
-			public Title PageName { get; }
-
 			public SiteTemplateNode? Price { get; }
 
 			public string? Tier { get; }
+
+			public Title Title { get; }
 
 			public string Type { get; }
 			#endregion

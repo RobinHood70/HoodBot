@@ -72,7 +72,8 @@
 			{
 				foreach (var link in list)
 				{
-					var title = CreateTitle.FromValidated(this.Site, link.FullPageName.PropertyNotNull(nameof(link), nameof(link.FullPageName)));
+					link.FullPageName.PropertyThrowNull(nameof(link));
+					Title title = TitleFactory.FromValidated(this.Site, link.FullPageName);
 					if (backlinks.ContainsKey(title))
 					{
 						backlinks[title] |= type;
@@ -90,7 +91,7 @@
 				categories.Clear();
 				foreach (var category in pageItem.Categories)
 				{
-					var factory = CreateTitle.FromValidated(this.Site, category.FullPageName);
+					var factory = TitleFactory.FromValidated(this.Site, category.FullPageName);
 					categories.Add(new Category(factory, category.SortKey, category.Hidden));
 				}
 			}
@@ -131,7 +132,7 @@
 				links.Clear();
 				foreach (var link in pageItem.Links)
 				{
-					links.Add(CreateTitle.FromValidated(this.Site, link.FullPageName));
+					links.Add(TitleFactory.FromValidated(this.Site, link.FullPageName));
 				}
 			}
 
@@ -163,7 +164,7 @@
 				templates.Clear();
 				foreach (var link in pageItem.Templates)
 				{
-					templates.Add(CreateTitle.FromValidated(this.Site, link.FullPageName));
+					templates.Add(TitleFactory.FromValidated(this.Site, link.FullPageName));
 				}
 			}
 		}
