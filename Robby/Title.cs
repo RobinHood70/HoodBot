@@ -43,6 +43,16 @@
 
 		/// <summary>Initializes a new instance of the <see cref="Title"/> class.</summary>
 		/// <param name="title">The title to copy from.</param>
+		/// <remarks>Temporary kludge until titles are fully redesigned.</remarks>
+		public Title([NotNull, ValidatedNotNull] IFullTitle title)
+		{
+			title.ThrowNull();
+			this.Namespace = title.Namespace;
+			this.PageName = title.PageName;
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="Title"/> class.</summary>
+		/// <param name="title">The title to copy from.</param>
 		public Title([NotNull, ValidatedNotNull] Title title)
 		{
 			title.ThrowNull();
@@ -94,7 +104,7 @@
 		/// <summary>Gets a Title object for title Title's corresponding subject page.</summary>
 		/// <returns>The subject page.</returns>
 		/// <remarks>If title Title is a subject page, returns itself.</remarks>
-		public Title SubjectPage => this.subjectPage ??= CreateTitle.FromValidated(this.Namespace.SubjectSpace, this.PageName);
+		public Title SubjectPage => this.subjectPage ??= TitleFactory.FromValidated(this.Namespace.SubjectSpace, this.PageName);
 
 		/// <summary>Gets the value corresponding to {{SUBPAGENAME}}.</summary>
 		/// <returns>The name of the subpage.</returns>
@@ -108,9 +118,9 @@
 		/// <summary>Gets a Title object for title Title's corresponding subject page.</summary>
 		/// <returns>The talk page.</returns>
 		/// <remarks>If this object represents a talk page, returns a self-reference.</remarks>
-		public Title? TalkPage => this.talkPage ??=
-			this.Namespace.TalkSpace == null ? null :
-			CreateTitle.FromValidated(this.Namespace.TalkSpace, this.PageName);
+		public Title? TalkPage => this.Namespace.TalkSpace == null
+			? null
+			: this.talkPage ??= TitleFactory.FromValidated(this.Namespace.TalkSpace, this.PageName);
 		#endregion
 
 		#region Public Methods

@@ -1,6 +1,5 @@
 ﻿namespace RobinHood70.Robby.Design
 {
-	using System;
 	using RobinHood70.CommonCode;
 
 	// TODO: Review constructors for various title objects.
@@ -17,6 +16,13 @@
 		{
 			this.Fragment = fullTitle.Fragment;
 			this.Interwiki = fullTitle.Interwiki;
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
+		/// <param name="title">The <see cref="Title"/> to downcast.</param>
+		public FullTitle(Title title)
+			: base(title.NotNull())
+		{
 		}
 		#endregion
 
@@ -64,16 +70,6 @@
 
 			return colon + interwiki + this.FullPageName + fragment;
 		}
-		#endregion
-
-		#region Internal Methods
-
-		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class from the site and wiki text (which must already be in standard format).</summary>
-		/// <param name="site">The site the title is from.</param>
-		/// <param name="fullPageName">Full name of the page.</param>
-		/// <returns>A new FullTitle based on the provided values.</returns>
-		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
-		internal static FullTitle FromNormalizedName(Site site, string fullPageName) => new(TitleFactory.FromNormalizedName(site.NotNull(), fullPageName.NotNull()));
 		#endregion
 	}
 }

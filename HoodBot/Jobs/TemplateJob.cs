@@ -1,6 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using RobinHood70.Robby;
+	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 
@@ -21,7 +21,7 @@
 		#region Protected Override Methods
 		protected override void LoadPages()
 		{
-			var title = CreateTitle.FromUnvalidated(this.Site, MediaWikiNamespaces.Template, this.TemplateName);
+			var title = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Template], this.TemplateName);
 			this.Pages.GetBacklinks(title.FullPageName);
 		}
 

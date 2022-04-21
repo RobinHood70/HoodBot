@@ -283,14 +283,14 @@
 		/// <param name="fullPageName">The full name of the page to create.</param>
 		/// <param name="text">The text of the page.</param>
 		/// <returns>The newly created page. Note that this does not automatically save the page.</returns>
-		public Page CreatePage(string fullPageName, string text) => this.CreatePage(CreateTitle.FromUnvalidated(this, fullPageName), text);
+		public Page CreatePage(string fullPageName, string text) => this.CreatePage(TitleFactory.FromUnvalidated(this, fullPageName), text);
 
 		/// <summary>Creates a new, blank page.</summary>
 		/// <param name="ns">The namespace of the page to create.</param>
 		/// <param name="pageName">The name of the page to create.</param>
 		/// <param name="text">The text of the page.</param>
 		/// <returns>The newly created page. Note that this does not automatically save the page.</returns>
-		public Page CreatePage(int ns, string pageName, string text) => this.CreatePage(CreateTitle.FromUnvalidated(this, ns, pageName), text);
+		public Page CreatePage(int ns, string pageName, string text) => this.CreatePage(TitleFactory.FromUnvalidated(this[ns], pageName), text);
 
 		/// <summary>Creates a new, blank page.</summary>
 		/// <param name="title">The <see cref="Title"/> of the page to create.</param>
@@ -415,7 +415,7 @@
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="pageName">Name of the page.</param>
 		/// <returns>The text of the page.</returns>
-		public string? LoadPageText(string pageName) => this.LoadPageText(CreateTitle.FromUnvalidated(this, pageName.NotNull()));
+		public string? LoadPageText(string pageName) => this.LoadPageText(TitleFactory.FromUnvalidated(this, pageName.NotNull()));
 
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="title">Name of the page.</param>
@@ -444,7 +444,7 @@
 				titleName += subPageName;
 			}
 
-			var newTitle = CreateTitle.FromUnvalidated(title.Namespace, titleName);
+			var newTitle = TitleFactory.FromUnvalidated(title.Namespace, titleName);
 			return this.LoadPageText(newTitle);
 		}
 
@@ -861,7 +861,7 @@
 
 				if (redirects.Contains(searchText))
 				{
-					return new FullTitle(TitleFactory.FromBacklinkNode(this, linkNode));
+					return TitleFactory.FromBacklinkNode(this, linkNode);
 				}
 			}
 
@@ -922,7 +922,7 @@
 
 				if (moveSubpages && from.Namespace.AllowsSubpages)
 				{
-					var toSubPage = CreateTitle.FromUnvalidated(this, to + subPageName);
+					var toSubPage = TitleFactory.FromUnvalidated(this, to + subPageName);
 					disabledResult.Add(from.FullPageName + subPageName, toSubPage.FullPageName);
 				}
 			}
@@ -1061,7 +1061,7 @@
 		/// <summary>Removes invalid characters from the title's PageName and replaces quote-like characters with quotes.</summary>
 		/// <param name="title">The title to sanitize.</param>
 		/// <returns>The original title with special characters replaced or removed as necessary.</returns>
-		public virtual Title SanitizeTitle(Title title) => CreateTitle.FromValidated(title.NotNull().Namespace, this.SanitizePageName(title.PageName));
+		public virtual Title SanitizeTitle(Title title) => new(TitleFactory.FromValidated(title.NotNull().Namespace, this.SanitizePageName(title.PageName)));
 		#endregion
 
 		#region Protected Static Methods
@@ -1113,13 +1113,13 @@
 			if (this.disambiguationTemplates == null)
 			{
 				this.disambiguationTemplates = new HashSet<Title>();
-				var title = CreateTitle.FromValidated(this, MediaWikiNamespaces.MediaWiki, "Disambiguationspage");
+				Title title = TitleFactory.FromValidated(this[MediaWikiNamespaces.MediaWiki], "Disambiguationspage");
 				var page = title.Load(PageModules.Default | PageModules.Links, false);
 				if (page.Exists)
 				{
 					if (page.Links.Count == 0)
 					{
-						this.disambiguationTemplates.Add(CreateTitle.FromUnvalidated(this, page.Text.Trim()));
+						this.disambiguationTemplates.Add(TitleFactory.FromUnvalidated(this, page.Text.Trim()));
 					}
 					else
 					{
@@ -1145,7 +1145,7 @@
 			Dictionary<string, MessagePage> retval = new(result.Count, StringComparer.Ordinal);
 			foreach (var item in result)
 			{
-				var factory = CreateTitle.FromValidated(this, MediaWikiNamespaces.MediaWiki, item.Name);
+				var factory = TitleFactory.FromValidated(this[MediaWikiNamespaces.MediaWiki], item.Name);
 				retval.Add(item.Name, new MessagePage(factory, item));
 			}
 
@@ -1176,7 +1176,7 @@
 			List<User> retval = new(result.Count);
 			foreach (var item in result)
 			{
-				retval.Add(new User(CreateTitle.FromValidated(this, MediaWikiNamespaces.User, item.Name), item));
+				retval.Add(new User(TitleFactory.FromValidated(this[MediaWikiNamespaces.User], item.Name), item));
 			}
 
 			return retval.AsReadOnly();
@@ -1245,7 +1245,7 @@
 			this.namespaces = new NamespaceCollection(this, siteInfo.Namespaces, siteInfo.NamespaceAliases);
 			if (this.mainPageName != null)
 			{
-				this.mainPage = FullTitle.FromNormalizedName(this, this.mainPageName); // Now that we understand namespaces, we can create a Title.
+				this.mainPage = TitleFactory.FromValidated(this, this.mainPageName); // Now that we understand namespaces, we can create a Title.
 			}
 
 			// MagicWords

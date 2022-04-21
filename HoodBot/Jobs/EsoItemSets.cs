@@ -119,7 +119,7 @@
 				if (set.Page is null)
 				{
 					this.Warn($"New Page: {set.Name}");
-					set.Page = set.BuildNewPage(CreateTitle.FromUnvalidated(this.Site, UespNamespaces.Online, set.Name));
+					set.Page = set.BuildNewPage(TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], set.Name));
 				}
 			}
 		}
@@ -325,7 +325,7 @@
 				{
 					if (TitleOverrides.TryGetValue(set.Name, out var overrideName))
 					{
-						var checkTitle = CreateTitle.FromValidated(this.Site, UespNamespaces.Online, overrideName);
+						var checkTitle = TitleFactory.FromValidated(this.Site[UespNamespaces.Online], overrideName);
 						set.Page = setMembers.TryGetValue(checkTitle, out var foundPage)
 							? foundPage
 							: set.BuildNewPage(checkTitle);
@@ -334,7 +334,7 @@
 					{
 						foreach (var setName in set.AllNames)
 						{
-							var checkTitle = CreateTitle.FromUnvalidated(this.Site, UespNamespaces.Online, setName);
+							var checkTitle = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], setName);
 							if (setMembers.TryGetValue(checkTitle, out var foundPage) &&
 								foundPage.Exists)
 							{
@@ -370,9 +370,9 @@
 			public SetData(IDataRecord row)
 			{
 				this.Name = (string)row.NotNull()["setName"];
-				for (var c = '1'; c <= '7'; c++)
+				for (var i = 1; i <= 12; i++)
 				{
-					var bonusDesc = (string)row["setBonusDesc" + c];
+					var bonusDesc = (string)row[$"setBonusDesc{i}"];
 					if (!string.IsNullOrEmpty(bonusDesc))
 					{
 						var bonusSplit = bonusDesc.Split(") ", 2, StringSplitOptions.None);

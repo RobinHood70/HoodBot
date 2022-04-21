@@ -354,7 +354,7 @@
 		/// <remarks>If subcategories are loaded, they will be limited to the <paramref name="categoryMemberTypes"/> requested. However, they will <em>not</em> be limited by the <paramref name="from"/> and <paramref name="to"/> parameters.</remarks>
 		public void GetCategoryMembers(string category, CategoryMemberTypes categoryMemberTypes, string? from, string? to, bool recurse)
 		{
-			var cat = CreateTitle.FromUnvalidated(this.Site, MediaWikiNamespaces.Category, category);
+			var cat = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Category], category);
 			CategoryMembersInput input = new(cat.FullPageName)
 			{
 				Properties = CategoryMembersProperties.Title,
@@ -1127,7 +1127,7 @@
 
 		#region Private Methods
 
-		private Title TextToTitle(string text) => CreateTitle.FromUnvalidated(this.Site, text);
+		private Title TextToTitle(string text) => new(TitleFactory.FromUnvalidated(this.Site, text));
 		#endregion
 	}
 }

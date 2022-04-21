@@ -102,7 +102,7 @@
 				pageName = pageName[..extension];
 			}
 
-			return CreateTitle.FromUnvalidated(page.Namespace.Site, UespNamespaces.Online, pageName);
+			return TitleFactory.FromUnvalidated(page.Namespace.Site[UespNamespaces.Online], pageName);
 		}
 		#endregion
 	}

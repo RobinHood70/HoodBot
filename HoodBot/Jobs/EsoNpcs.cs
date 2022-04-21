@@ -210,7 +210,7 @@
 		#region Private Methods
 		private NpcCollection GetNpcPages()
 		{
-			Title NpcTitle(string pageName) => CreateTitle.FromUnvalidated(this.Site, UespNamespaces.Online, pageName);
+			Title NpcTitle(string pageName) => TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], pageName);
 			TitleCollection existingTitles = new(this.Site);
 			existingTitles.GetCategoryMembers("Online-NPCs", CategoryMemberTypes.Page, false);
 			existingTitles.GetCategoryMembers("Online-Creatures-All", CategoryMemberTypes.Page, false);
@@ -239,7 +239,7 @@
 					ContextualParser parser = new(page);
 					foreach (var linkNode in parser.LinkNodes)
 					{
-						var disambig = SiteLink.FromLinkNode(this.Site, linkNode, false);
+						var disambig = SiteLink.FromLinkNode(this.Site, linkNode);
 						if (existingTitles.TryGetValue(disambig, out var disambigPage))
 						{
 							npcRenames.Add(npc.Id, disambigPage.PageName);

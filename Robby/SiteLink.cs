@@ -97,7 +97,6 @@
 
 		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
 		/// <param name="title">The <see cref="TitleFactory"/> with the desired information.</param>
-		/// <exception cref="ArgumentException">Thrown when the page name is invalid.</exception>
 		public SiteLink(ILinkTitle title)
 			: base(title)
 		{
@@ -105,6 +104,20 @@
 			this.ForcedInterwikiLink = title.ForcedInterwikiLink;
 			this.ForcedNamespaceLink = title.ForcedNamespaceLink;
 			InitializeImageInfo(this.Site);
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
+		/// <param name="title">The <see cref="IFullTitle"/> to downcast.</param>
+		public SiteLink(IFullTitle title)
+			: base(title)
+		{
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="SiteLink"/> class.</summary>
+		/// <param name="title">The <see cref="Title"/> to downcast.</param>
+		public SiteLink(Title title)
+			: base(title)
+		{
 		}
 		#endregion
 
@@ -208,7 +221,7 @@
 		/// <summary>Gets the original text of the link, in case we need to make display text out of it.</summary>
 		/// <value>The original link.</value>
 		/// <remarks>This will normally only be null if the title was created from scratch using one of the constructors.</remarks>
-		public string? OriginalLink { get; private set; }
+		public string? OriginalTitle { get; private set; }
 
 		/// <summary>Gets or sets the <see cref="Robby.Page"/> value as an integer.</summary>
 		/// <value>The page value.</value>
@@ -303,28 +316,27 @@
 		/// <remarks>The text may include or exclude surrounding brackets. Pipes in the text are handled properly either way in order to support gallery links.</remarks>
 		public static SiteLink FromGalleryText(Site site, string link)
 		{
-			var linkNode = CreateLinkNode(site, link.NotNull());
-			return FromLinkNode(site, linkNode, true);
+			var linkNode = CreateLinkNode(site.NotNull(), link.NotNull());
+			return FromLinkNode(site[MediaWikiNamespaces.File], linkNode);
 		}
 
 		/// <summary>Creates a new SiteLink instance from a <see cref="ILinkNode"/>.</summary>
 		/// <param name="site">The site the link is from.</param>
 		/// <param name="link">The link node.</param>
 		/// <returns>A new SiteLink.</returns>
-		public static SiteLink FromLinkNode(Site site, ILinkNode link) => FromLinkNode(site, link, false);
+		public static SiteLink FromLinkNode(Site site, ILinkNode link) => FromLinkNode(site.NotNull()[MediaWikiNamespaces.Main], link);
 
 		/// <summary>Creates a new SiteLink instance from a <see cref="ILinkNode"/>.</summary>
-		/// <param name="site">The site the link is from.</param>
+		/// <param name="ns">The default namespace. Main for most; File for gallery links.</param>
 		/// <param name="link">The link node.</param>
-		/// <param name="coerceToFile">If set to <see langword="true"/>, coerces the link to be in File space (for galleries).</param>
 		/// <returns>A new SiteLink.</returns>
-		public static SiteLink FromLinkNode(Site site, ILinkNode link, bool coerceToFile)
+		public static SiteLink FromLinkNode(Namespace ns, ILinkNode link)
 		{
-			var titleText = link.NotNull().Title.ToValue();
+			ns.ThrowNull();
+			var titleText = link.NotNull().Title.ToRaw();
 			var valueSplit = SplitWhitespace(titleText);
-			var ns = coerceToFile ? MediaWikiNamespaces.File : MediaWikiNamespaces.Main;
-			SiteLink retval = new(TitleFactory.Create(site, ns, valueSplit.Value));
-			retval.OriginalLink = titleText;
+			SiteLink retval = TitleFactory.FromUnvalidated(ns, valueSplit.Value);
+			retval.OriginalTitle = titleText;
 			retval.TitleWhitespaceBefore = valueSplit.Before;
 			retval.TitleWhitespaceAfter = valueSplit.After;
 			foreach (var parameter in link.Parameters)
@@ -336,6 +348,30 @@
 			return retval;
 		}
 
+		/// <summary>Returns all the links in a gallery node.</summary>
+		/// <param name="factory">The factory to use to create internal links.</param>
+		/// <param name="tag">The gallery tag to work on.</param>
+		/// <returns>A collection of <see cref="SiteLink"/>s, one for each line in the gallyer tag.</returns>
+		public static IEnumerable<SiteLink> FromGalleryNode(SiteNodeFactory factory, ITagNode tag)
+		{
+			if (tag is not null &&
+				tag.InnerText?.Trim() is string innerText &&
+				innerText.Length > 0)
+			{
+				var ns = factory.NotNull().Site[MediaWikiNamespaces.File];
+				var lines = innerText.Split(TextArrays.LineFeed);
+				foreach (var line in lines)
+				{
+					if (line.Trim() is var trimmedLine && trimmedLine.Length > 0)
+					{
+						var linkNode = factory.LinkNodeFromWikiText("[[" + trimmedLine + " ]]");
+						TrimTrailingSpace(linkNode);
+						yield return FromLinkNode(ns, linkNode);
+					}
+				}
+			}
+		}
+
 		/// <summary>Creates a new SiteLink instance from the provided text.</summary>
 		/// <param name="site">The site the link is from.</param>
 		/// <param name="link">The text of the link.</param>
@@ -344,7 +380,7 @@
 		public static SiteLink FromText(Site site, string link)
 		{
 			var linkNode = CreateLinkNode(site, link.NotNull());
-			return FromLinkNode(site, linkNode, false);
+			return FromLinkNode(site, linkNode);
 		}
 		#endregion
 
@@ -440,43 +476,16 @@
 		/// <summary>Creates a new copy of the SiteLink with a different title.</summary>
 		/// <param name="title">The title to change to.</param>
 		/// <returns>A new copy of the SiteLink with the altered title.</returns>
-		/// <remarks>Interwiki and Fragment will remain unaffected by the change. If those should be updated to null, use <see cref="With(IFullTitle)"/>.</remarks>
-		public SiteLink With(Title title)
+		public SiteLink WithTitle(Title title)
 		{
-			var upcast = TitleFactory.CreateFromValidated(title.NotNull().Namespace, title.PageName);
-			SiteLink retval = new(upcast)
+			SiteLink retval = new(title)
 			{
 				Coerced = this.Coerced,
 				ForcedInterwikiLink = this.ForcedInterwikiLink,
 				ForcedNamespaceLink = this.ForcedNamespaceLink,
 				Fragment = this.Fragment,
 				Interwiki = this.Interwiki,
-				OriginalLink = this.OriginalLink,
-				ParametersDropped = this.ParametersDropped,
-				TitleWhitespaceAfter = this.TitleWhitespaceAfter,
-				TitleWhitespaceBefore = this.TitleWhitespaceBefore
-			};
-
-			foreach (var parameter in this.Parameters)
-			{
-				retval.Parameters.Add(parameter.Key, parameter.Value);
-			}
-
-			return retval;
-		}
-
-		/// <summary>Creates a new copy of the SiteLink with a different title.</summary>
-		/// <param name="title">The title to change to.</param>
-		/// <returns>A new copy of the SiteLink with the altered title.</returns>
-		public SiteLink With(IFullTitle title)
-		{
-			var upcast = TitleFactory.CreateFromValidated(title.NotNull().Namespace, title.PageName);
-			SiteLink retval = new(upcast)
-			{
-				Coerced = this.Coerced,
-				ForcedInterwikiLink = this.ForcedInterwikiLink,
-				ForcedNamespaceLink = this.ForcedNamespaceLink,
-				OriginalLink = this.OriginalLink,
+				OriginalTitle = this.OriginalTitle,
 				ParametersDropped = this.ParametersDropped,
 				TitleWhitespaceAfter = this.TitleWhitespaceAfter,
 				TitleWhitespaceBefore = this.TitleWhitespaceBefore
@@ -550,18 +559,9 @@
 			}
 
 			var linkNode = new SiteNodeFactory(site).LinkNodeFromWikiText(link);
-			var nodes = linkNode.Parameters.Count == 0 ? linkNode.Title : linkNode.Parameters[linkNode.Parameters.Count - 1].Value;
-			var last = nodes[^1] as ITextNode;
-			if (removeSpace && last is not null)
+			if (removeSpace)
 			{
-				if (last.Text.Length == 1)
-				{
-					nodes.RemoveAt(nodes.Count - 1);
-				}
-				else
-				{
-					last.Text = last.Text[0..^1];
-				}
+				TrimTrailingSpace(linkNode);
 			}
 
 			return linkNode;
@@ -591,6 +591,24 @@
 							ImageParameterInfo.Add((word.Value, split[0], split[1]));
 						}
 					}
+				}
+			}
+		}
+
+		private static void TrimTrailingSpace(ILinkNode linkNode)
+		{
+			var nodes = linkNode.Parameters.Count == 0
+				? linkNode.Title
+				: linkNode.Parameters[^1].Value;
+			if (nodes[^1] is ITextNode last)
+			{
+				if (last.Text.Length == 1)
+				{
+					nodes.RemoveAt(nodes.Count - 1);
+				}
+				else
+				{
+					last.Text = last.Text[0..^1];
 				}
 			}
 		}

@@ -162,35 +162,60 @@
 		public string PageName { get; }
 		#endregion
 
+		#region Public Implicit Operators
+
+		/// <summary>Implicit conversion to <see cref="FullTitle"/>.</summary>
+		/// <param name="factory">The value to convert.</param>
+		public static implicit operator FullTitle(TitleFactory factory) => new((IFullTitle)factory);
+
+		/// <summary>Implicit conversion to <see cref="FullTitle"/>.</summary>
+		/// <param name="factory">The value to convert.</param>
+		public static implicit operator SiteLink(TitleFactory factory) => new((ILinkTitle)factory);
+
+		/// <summary>Implicit conversion to <see cref="Title"/>.</summary>
+		/// <param name="factory">The value to convert.</param>
+		public static implicit operator Title(TitleFactory factory) => new(factory);
+		#endregion
+
 		#region Public Static Methods
-
-		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
-		/// <param name="site">The site.</param>
-		/// <param name="defaultNamespace">The default namespace.</param>
-		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory Create(Site site, int defaultNamespace, string pageName) => new(site.NotNull(), defaultNamespace, WikiTextUtilities.TrimToTitle(pageName.NotNull()));
-
-		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
-		/// <param name="ns">The namespace the page is in.</param>
-		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory CreateFromValidated(Namespace ns, string pageName) => new(ns.NotNull(), pageName.NotNull());
 
 		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
 		/// <param name="site">The site the title is from.</param>
 		/// <param name="node">The <see cref="IBacklinkNode"/> to parse.</param>
 		/// <returns>A new FullTitle based on the provided values.</returns>
-		public static TitleFactory FromBacklinkNode(Site site, IBacklinkNode node) => Create(site.NotNull(), MediaWikiNamespaces.Main, node.NotNull().GetTitleText());
-
-		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
-		/// <param name="site">The site.</param>
-		/// <param name="defaultNamespace">The default namespace.</param>
-		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory FromName(Site site, int defaultNamespace, string pageName) => new(site.NotNull(), defaultNamespace, WikiTextUtilities.TrimToTitle(pageName.NotNull()));
+		public static TitleFactory FromBacklinkNode(Site site, IBacklinkNode node) => FromUnvalidated(site.NotNull()[MediaWikiNamespaces.Main], node.NotNull().GetTitleText());
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="site">The site.</param>
 		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory FromNormalizedName(Site site, string pageName) => new(site.NotNull(), MediaWikiNamespaces.Main, pageName.NotNull());
+		public static TitleFactory FromValidated(Site site, string pageName) => new(site.NotNull(), MediaWikiNamespaces.Main, pageName.NotNull());
+
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
+		/// <param name="ns">The namespace the page is in.</param>
+		/// <param name="pageName">Name of the page.</param>
+		public static TitleFactory FromValidated(Namespace ns, string pageName) => new(ns.NotNull(), pageName.NotNull());
+
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
+		/// <param name="site">The namespace the page is in.</param>
+		/// <param name="pageName">Name of the page.</param>
+		public static TitleFactory FromUnvalidated(Site site, string pageName)
+		{
+			site.ThrowNull();
+			pageName.ThrowNull();
+			pageName = WikiTextUtilities.TrimCruft(pageName);
+			return FromValidated(site, pageName);
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
+		/// <param name="ns">The namespace the page is in.</param>
+		/// <param name="pageName">Name of the page.</param>
+		public static TitleFactory FromUnvalidated(Namespace ns, string pageName)
+		{
+			ns.ThrowNull();
+			pageName.ThrowNull();
+			pageName = WikiTextUtilities.TrimCruft(pageName);
+			return new TitleFactory(ns.Site, ns.Id, pageName);
+		}
 		#endregion
 
 		#region Public Methods
@@ -202,14 +227,6 @@
 			other != null &&
 			this.Namespace == other.Namespace &&
 			this.Namespace.PageNameEquals(this.PageName, other.PageName, false);
-
-		/// <summary>Creates a new LinkTarget from the parsed text.</summary>
-		/// <returns>A new <see cref="FullTitle"/>.</returns>
-		public FullTitle ToFullTitle() => new(this);
-
-		/// <summary>Creates a new SiteLink from the parsed text.</summary>
-		/// <returns>A new <see cref="SiteLink"/>.</returns>
-		public SiteLink ToSiteLink() => new(this);
 		#endregion
 
 		#region Public Override Methods
@@ -225,6 +242,18 @@
 
 			return iwColon + interwiki + nsColon + this.FullPageName + fragment;
 		}
+
+		/// <summary>Converts the current title to a <see cref="FullTitle"/>.</summary>
+		/// <returns>A new FullTitle with the relevant properties set.</returns>
+		public FullTitle ToFullTitle() => new((IFullTitle)this);
+
+		/// <summary>Converts the current title to a <see cref="SiteLink"/>.</summary>
+		/// <returns>A new SiteLink with the relevant properties set.</returns>
+		public SiteLink ToSiteLink() => new((ILinkTitle)this);
+
+		/// <summary>Converts the current title to a <see cref="Title"/>.</summary>
+		/// <returns>A new Title with the relevant properties set.</returns>
+		public Title ToTitle() => new(this);
 		#endregion
 	}
 }

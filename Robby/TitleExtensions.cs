@@ -113,7 +113,7 @@
 
 			ChangeStatus ChangeFunc()
 			{
-				DeleteInput input = new(FullPageName(title)) { Reason = reason };
+				DeleteInput input = new(title.FullPageName) { Reason = reason };
 				var retval = title.Namespace.Site.AbstractionLayer.Delete(input);
 				return retval.LogId == 0
 					? ChangeStatus.Failure
@@ -147,14 +147,14 @@
 			if (title.NotNull().Namespace.CanTalk)
 			{
 				var pages = PageCollection.Unlimited(title.Namespace.Site, options);
-				pages.GetTitles(FullPageName(title));
+				pages.GetTitles(title.FullPageName);
 				if (pages.Count == 1)
 				{
 					return pages[0];
 				}
 			}
 
-			throw new InvalidOperationException(Globals.CurrentCulture(Resources.PageCouldNotBeLoaded, FullPageName(title)));
+			throw new InvalidOperationException(Globals.CurrentCulture(Resources.PageCouldNotBeLoaded, title.FullPageName));
 		}
 
 		/// <summary>Protects the title.</summary>
@@ -244,8 +244,6 @@
 
 		#region Private Methods
 
-		private static string FullPageName(Title title) => title.Namespace.DecoratedName + title.PageName;
-
 		/// <summary>Protects the title based on the specified input.</summary>
 		/// <param name="site">The site the title is on.</param>
 		/// <param name="input">The input.</param>
@@ -280,7 +278,7 @@
 
 			ChangeStatus ChangeFunc()
 			{
-				ProtectInput input = new(FullPageName(title))
+				ProtectInput input = new(title.FullPageName)
 				{
 					Protections = protections,
 					Reason = reason

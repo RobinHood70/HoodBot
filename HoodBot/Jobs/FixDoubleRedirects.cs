@@ -74,7 +74,7 @@
 						continue;
 					}
 
-					FullTitle comboTarget = new(target);
+					FullTitle comboTarget = new((IFullTitle)target);
 					if (fragments.Count == 1)
 					{
 						comboTarget.Fragment = fragments.First();
@@ -139,7 +139,7 @@
 					{
 						if (parser.Find<ILinkNode>() is ILinkNode targetNode)
 						{
-							FullTitle target = new(TitleFactory.FromBacklinkNode(this.Site, targetNode));
+							FullTitle target = TitleFactory.FromBacklinkNode(this.Site, targetNode);
 							if (this.lookup.TryAdd(title, target))
 							{
 								this.parsedPages.Add(title, parser);

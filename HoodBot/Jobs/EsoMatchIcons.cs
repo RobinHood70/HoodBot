@@ -260,7 +260,8 @@
 
 					if (latestRevision.Timestamp > LastRun)
 					{
-						parts.Categories.Add(TitleFactory.FromNormalizedName(page.Site, MissingFileCategory).ToSiteLink());
+						SiteLink link = TitleFactory.FromValidated(page.Site, MissingFileCategory);
+						parts.Categories.Add(link);
 					}
 				}
 				else
