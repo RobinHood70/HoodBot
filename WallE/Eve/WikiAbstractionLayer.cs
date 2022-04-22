@@ -355,6 +355,7 @@
 		public string SendRequest(Request request)
 		{
 			request.ThrowNull();
+			this.OnSendingRequest(new RequestEventArgs(request.NotNull()));
 			string? response = null;
 			switch (request.Type)
 			{
