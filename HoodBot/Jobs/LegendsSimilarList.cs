@@ -18,11 +18,15 @@
 		#endregion
 
 		#region Constructors
-		[JobInfo("List Legends Images", "Legends")]
+		[JobInfo("List Similar Images", "Legends")]
 		public LegendsSimilarList(JobManager jobManager)
 				: base(jobManager)
 		{
 		}
+		#endregion
+
+		#region Public Properties
+		public override string LogName => "Legends Similar Images";
 		#endregion
 
 		#region Protected Override Properties
