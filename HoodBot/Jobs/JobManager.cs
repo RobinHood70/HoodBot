@@ -2,22 +2,43 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
+	using System.Globalization;
+	using System.IO;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Loggers;
 	using RobinHood70.HoodBot.Models;
+	using RobinHood70.HoodBot.Properties;
+	using RobinHood70.HoodBot.Uesp;
+	using RobinHood70.HoodBotPlugins;
 	using RobinHood70.Robby;
+	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Clients;
+	using RobinHood70.WallE.Eve;
 
-	public class JobManager
+	public class JobManager : IDisposable
 	{
+		#region Fields
+		private readonly WikiInfo wikiInfo;
+		private bool disposedValue;
+		#endregion
+
 		#region Constructors
-		public JobManager(Site site, PauseToken pauseToken, CancellationToken cancellationToken)
+		public JobManager(WikiInfo wikiInfo, IProgress<double>? progressMonitor, IProgress<string>? statusMonitor, PauseTokenSource pauseSource, CancellationTokenSource cancelSource)
 		{
-			this.Site = site.NotNull();
-			this.CancellationToken = cancellationToken;
-			this.PauseToken = pauseToken;
+			this.wikiInfo = wikiInfo;
+			this.CancelToken = cancelSource.Token;
+			this.PauseToken = pauseSource.Token;
+			this.Client = this.CreateClient();
+			this.Client.RequestingDelay += this.Client_RequestingDelay;
+			this.AbstractionLayer = this.CreateAbstractionLayer();
+			Site.RegisterSiteClass(UespSite.CreateInstance, "UespHoodBot");
+			this.Site = this.CreateSite();
+			this.ProgressMonitor = progressMonitor;
+			this.StatusMonitor = statusMonitor;
 		}
 		#endregion
 
@@ -26,29 +47,41 @@
 
 		public event StrongEventHandler<JobManager, JobEventArgs>? FinishedJob;
 
+		public event StrongEventHandler<JobManager, DiffContent>? PagePreview;
+
 		public event StrongEventHandler<JobManager, EventArgs>? StartingAllJobs;
 
 		public event StrongEventHandler<JobManager, JobEventArgs>? StartingJob;
 		#endregion
 
 		#region Public Properties
+		public IWikiAbstractionLayer AbstractionLayer { get; }
 
-		public CancellationToken CancellationToken { get; }
+		public CancellationToken CancelToken { get; init; }
 
-		public JobLogger? Logger { get; init; }
+		public IMediaWikiClient Client { get; }
 
-		public PauseToken PauseToken { get; }
+		public JobLogger? Logger { get; set; }
 
-		public IProgress<double>? ProgressMonitor { get; init; }
+		public PauseToken? PauseToken { get; }
 
-		public ResultHandler? ResultHandler { get; init; }
+		public IProgress<double>? ProgressMonitor { get; }
+
+		public ResultHandler? ResultHandler { get; set; }
 
 		public Site Site { get; }
 
-		public IProgress<string>? StatusMonitor { get; init; }
+		public IProgress<string>? StatusMonitor { get; }
 		#endregion
 
 		#region Public Methods
+
+		public void Dispose()
+		{
+			this.Dispose(disposing: true);
+			GC.SuppressFinalize(this);
+		}
+
 		public async Task Run(IEnumerable<JobInfo> jobList)
 		{
 			this.OnStartingAllJobs();
@@ -66,7 +99,7 @@
 				var job = jobInfo.Instantiate(this);
 				try
 				{
-					await Task.Run(job.Execute, this.CancellationToken).ConfigureAwait(true);
+					await Task.Run(job.Execute, this.CancelToken).ConfigureAwait(true);
 					abort = this.OnFinishedJob(jobInfo, null);
 					if (abort)
 					{
@@ -89,14 +122,37 @@
 				}
 			}
 
-			this.Logger?.CloseLog();
 			this.OnFinishedAllJobs(allSuccessful);
 		}
 		#endregion
 
-		#region Protected Methods
-		protected void OnFinishedAllJobs(bool allSuccessful)
+		#region Internal Static Methods
+#if DEBUG
+		// This is flagged as internal mostly to stop warnings whenever it's not in use.
+		internal static string SiteName(IWikiAbstractionLayer sender) => sender.AllSiteInfo?.General?.SiteName ?? "Site-Agnostic";
+#endif
+		#endregion
+
+		#region Protected Virtual Methods
+		protected virtual void Dispose(bool disposing)
 		{
+			if (!this.disposedValue)
+			{
+				if (disposing)
+				{
+					this.DisposeSite();
+					this.DisposeAbstractionLayer();
+					this.DisposeClient();
+				}
+
+				this.disposedValue = true;
+			}
+		}
+
+		protected virtual void OnFinishedAllJobs(bool allSuccessful)
+		{
+			this.Logger?.CloseLog();
+
 			if (this.ResultHandler != null)
 			{
 				this.ResultHandler.Save();
@@ -113,6 +169,28 @@
 			return eventArgs.Abort;
 		}
 
+		protected virtual void OnPagePreview(Site sender, PagePreviewArgs eventArgs)
+		{
+			// Until we get a menu going, specify manually.
+			// currentViewer ??= this.FindPlugin<IDiffViewer>("IeDiff");
+			if (sender.AbstractionLayer is ITokenGenerator tokens)
+			{
+				eventArgs.Token = tokens.TokenManager.SessionToken("csrf");
+			}
+
+			var page = eventArgs.Page;
+			DiffContent diffContent = new(page.FullPageName, page.Text ?? string.Empty, eventArgs.EditSummary, eventArgs.Minor)
+			{
+				EditPath = page.EditPath,
+				EditToken = eventArgs.Token,
+				LastRevisionText = page.CurrentRevision?.Text,
+				LastRevisionTimestamp = page.CurrentRevision?.Timestamp,
+				StartTimestamp = page.StartTimestamp,
+			};
+
+			this.PagePreview?.Invoke(this, diffContent);
+		}
+
 		protected virtual bool OnStartingJob(JobInfo job)
 		{
 			JobEventArgs eventArgs = new(job, null);
@@ -121,6 +199,117 @@
 		}
 
 		protected virtual void OnStartingAllJobs() => this.StartingAllJobs?.Invoke(this, EventArgs.Empty);
+
+		protected virtual void OnStatusUpdate(string status) => this.StatusMonitor?.Report(status);
+
+		protected virtual void SiteChanging(Site sender, ChangeArgs eventArgs)
+		{
+			if (!sender.EditingEnabled)
+			{
+				Debug.WriteLine($"{eventArgs.MethodName} (sender: {eventArgs.RealSender})");
+				foreach (var parameter in eventArgs.Parameters)
+				{
+					Debug.WriteLine($"  {parameter.Key} = {parameter.Value}");
+				}
+			}
+		}
+
+		protected virtual void SiteWarningOccurred(Site sender, WarningEventArgs eventArgs) => Debug.WriteLine(eventArgs?.Warning);
+
+		protected virtual void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Response: {eventArgs.Response}");
+
+		protected virtual void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Request: {eventArgs.Request}");
+
+		protected virtual void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Warning: ({eventArgs?.Warning.Code}) {eventArgs?.Warning.Info}");
+		#endregion
+
+		#region Private Methods
+		private void Client_RequestingDelay(IMediaWikiClient sender, DelayEventArgs eventArgs)
+		{
+			var text = Globals.CurrentCulture(
+				Resources.DelayRequested,
+				eventArgs.Reason,
+				$"{eventArgs.DelayTime.TotalSeconds.ToString(CultureInfo.CurrentCulture)}s",
+				eventArgs.Description);
+			App.WpfYield();
+			this.StatusMonitor?.Report(text);
+			/*
+				// Half-assed workaround for pausing and cancelling that ultimately just ends in the wiki throwing an error. See TODO in SimpleClient.RequestDelay().
+				if (this.pauser.IsPaused || this.canceller.IsCancellationRequested)
+				{
+					eventArgs.Cancel = true;
+				}
+			*/
+		}
+
+		private IWikiAbstractionLayer CreateAbstractionLayer()
+		{
+			var api = this.wikiInfo.Api.PropertyNotNull(nameof(this.wikiInfo), nameof(this.wikiInfo.Api));
+			IWikiAbstractionLayer abstractionLayer = string.Equals(api.OriginalString, "/", StringComparison.Ordinal)
+				? new WallE.Test.WikiAbstractionLayer()
+				: new WikiAbstractionLayer(this.Client, api);
+			if (abstractionLayer is IMaxLaggable maxLagWal)
+			{
+				maxLagWal.MaxLag = this.wikiInfo.MaxLag;
+			}
+
+#if DEBUG
+			if (abstractionLayer is IInternetEntryPoint internet)
+			{
+				internet.SendingRequest += this.WalSendingRequest;
+				//// internet.ResponseReceived += WalResponseRecieved;
+			}
+
+			abstractionLayer.WarningOccurred += this.WalWarningOccurred;
+#endif
+
+			return abstractionLayer;
+		}
+
+		private IMediaWikiClient CreateClient()
+		{
+			IMediaWikiClient client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.json"), this.CancelToken);
+			if (this.wikiInfo.ReadThrottling > 0 || this.wikiInfo.WriteThrottling > 0)
+			{
+				client = new ThrottledClient(
+					client,
+					TimeSpan.FromMilliseconds(this.wikiInfo.ReadThrottling),
+					TimeSpan.FromMilliseconds(this.wikiInfo.WriteThrottling));
+			}
+
+			client.RequestingDelay += this.Client_RequestingDelay;
+
+			return client;
+		}
+
+		private Site CreateSite()
+		{
+			var retval = Site.GetFactoryMethod(this.wikiInfo.SiteClassIdentifier)(this.AbstractionLayer);
+			retval.PagePreview += this.OnPagePreview;
+			return retval;
+		}
+
+		private void DisposeAbstractionLayer()
+		{
+#if DEBUG
+			this.AbstractionLayer.WarningOccurred -= this.WalWarningOccurred;
+			if (this.AbstractionLayer is IInternetEntryPoint internet)
+			{
+				internet.SendingRequest -= this.WalSendingRequest;
+			}
+#endif
+		}
+
+		private void DisposeClient() => this.Client.RequestingDelay -= this.Client_RequestingDelay;
+
+		private void DisposeSite()
+		{
+			this.Site.PagePreview -= this.OnPagePreview;
+#if DEBUG
+			this.Site.Changing -= this.SiteChanging;
+			this.Site.WarningOccurred -= this.SiteWarningOccurred;
+#endif
+		}
 		#endregion
 	}
 }

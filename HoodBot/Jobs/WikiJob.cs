@@ -158,12 +158,13 @@
 		{
 			if (this.JobManager.PauseToken is PauseToken pause && pause.IsPaused)
 			{
-				pause.WaitWhilePausedAsync().Wait(this.JobManager.CancellationToken);
+				pause.WaitWhilePausedAsync().Wait(this.JobManager.CancelToken);
 			}
 
-			if (this.JobManager.CancellationToken is CancellationToken cancel && cancel != CancellationToken.None && cancel.IsCancellationRequested)
+			if (this.JobManager.CancelToken is CancellationToken token &&
+				token != CancellationToken.None)
 			{
-				cancel.ThrowIfCancellationRequested();
+				token.ThrowIfCancellationRequested();
 			}
 		}
 

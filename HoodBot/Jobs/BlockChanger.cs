@@ -5,7 +5,6 @@
 	using System.Globalization;
 	using System.Windows;
 	using RobinHood70.CommonCode;
-
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Design;
 

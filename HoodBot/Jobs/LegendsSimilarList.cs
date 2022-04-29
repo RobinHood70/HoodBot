@@ -93,7 +93,6 @@
 							{
 								newLine += "|Card art";
 							}
-
 						}
 
 						newLines.Add(newLine);
@@ -121,7 +120,7 @@
 			{
 				this.WriteLine("|}");
 				this.resultCount = 0;
-				// this.Results.Save();
+				this.Results.Save();
 				this.Results.Clear();
 			}
 		}

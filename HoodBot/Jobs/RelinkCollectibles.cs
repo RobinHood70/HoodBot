@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
@@ -13,10 +12,6 @@
 
 	public class RelinkCollectibles : MovePagesJob
 	{
-		#region Static Fields
-		private static readonly Regex CollectionFinder = new(@"^\*+'''\[\[(?<page>.*?)\|.*?\]\]'''$", RegexOptions.ExplicitCapture | RegexOptions.Multiline, Globals.DefaultRegexTimeout);
-		#endregion
-
 		#region Fields
 		private readonly List<Title> esoTitles = new();
 		private readonly Dictionary<Title, string> disambigs = new(SimpleTitleComparer.Instance);
@@ -68,8 +63,9 @@
 			allTitles.Sort();
 			this.esoTitles.AddRange(allTitles);
 
-			var collectionTitles = this.GetCollectionTitles();
-			var collectionPages = this.GetCollectionPages(collectionTitles);
+			// var collectionTitles = this.GetCollectionTitles();
+			var collectionTitles = GetTitles();
+			var collectionPages = this.GetPages(collectionTitles);
 			this.PopulateFromCollections(collectionPages);
 		}
 
@@ -103,8 +99,11 @@
 		#endregion
 
 		#region Private Static Methods
+		/*
 		private IEnumerable<string> GetCollectionTitles()
 		{
+			Regex CollectionFinder = new(@"^\*+'''\[\[(?<page>.*?)\|.*?\]\]'''$", RegexOptions.ExplicitCapture | RegexOptions.Multiline, Globals.DefaultRegexTimeout);
+
 			var text = this.Site.LoadPageText("Online:Collections") ?? throw new InvalidOperationException();
 			foreach (Match match in CollectionFinder.Matches(text))
 			{
@@ -115,10 +114,13 @@
 				}
 			}
 		}
+		*/
+
+		private static IEnumerable<string> GetTitles() => new List<string> { "Online:Antiquity Furnishings", "Online:Antique Maps" }; // GetCollectionTitles();
 		#endregion
 
 		#region Private Methods
-		private PageCollection GetCollectionPages(IEnumerable<string> collectionTitles)
+		private PageCollection GetPages(IEnumerable<string> collectionTitles)
 		{
 			var plm = TitleFactory.FromValidated(this.Site[MediaWikiNamespaces.Template], "PageLetterMenu");
 			var collectionPages = new PageCollection(this.Site, PageModules.Templates);
