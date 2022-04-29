@@ -19,7 +19,7 @@ namespace RobinHood70.HoodBot.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class Resources {
@@ -250,7 +250,7 @@ namespace RobinHood70.HoodBot.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You must enter a password, either in the saved wiki information or on th emain form..
+        ///   Looks up a localized string similar to You must enter a password, either in the saved wiki information or on the main form..
         /// </summary>
         public static string PasswordNotSet {
             get {
@@ -345,6 +345,15 @@ namespace RobinHood70.HoodBot.Properties {
         public static string UserName {
             get {
                 return ResourceManager.GetString("UserName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You must enter a user name, either in the saved wiki information or on the main form..
+        /// </summary>
+        public static string UserNameNotSet {
+            get {
+                return ResourceManager.GetString("UserNameNotSet", resourceCulture);
             }
         }
         

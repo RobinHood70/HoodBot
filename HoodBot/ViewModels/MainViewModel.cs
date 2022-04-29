@@ -4,16 +4,12 @@
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Globalization;
-	using System.IO;
-	using System.Text.RegularExpressions;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using System.Windows;
 	using System.Windows.Media;
 	using GalaSoft.MvvmLight;
 	using GalaSoft.MvvmLight.Command;
-	using RobinHood70.CommonCode;
-	using RobinHood70.HoodBot;
 	using RobinHood70.HoodBot.Jobs;
 	using RobinHood70.HoodBot.Jobs.Design;
 	using RobinHood70.HoodBot.Jobs.Loggers;
@@ -21,30 +17,22 @@
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.HoodBot.Views;
 	using RobinHood70.HoodBotPlugins;
-	using RobinHood70.Robby;
-	using RobinHood70.WallE.Base;
-	using RobinHood70.WallE.Clients;
-	using RobinHood70.WallE.Eve;
 	using static System.Environment;
 
 	public class MainViewModel : ViewModelBase
 	{
-		#region Private Constants
-		private const string Books29Path = @"D:\Books29\";
-		private const string Books30Path = @"D:\Books30\";
-		#endregion
-
 		#region Static Fields
 		private static readonly Brush ProgressBarGreen = new SolidColorBrush(Color.FromArgb(255, 6, 176, 37));
 		private static readonly Brush ProgressBarYellow = new SolidColorBrush(Color.FromArgb(255, 255, 240, 0));
 		#endregion
 
 		#region Fields
+		private readonly CancellationTokenSource canceller = new();
 		private readonly IDiffViewer? diffViewer;
+		private readonly PauseTokenSource pauser = new();
 		private readonly IProgress<double> progressMonitor;
 		private readonly IProgress<string> statusMonitor;
 
-		private CancellationTokenSource? canceller;
 		private double completedJobs;
 		private bool editingEnabled;
 		private DateTime? eta;
@@ -56,7 +44,6 @@
 		private double overallProgressMax = 1;
 		private IParameterFetcher? parameterFetcher;
 		private string? password;
-		private PauseTokenSource? pauser;
 		private Brush progressBarColor = ProgressBarGreen;
 		private WikiInfoViewModel? selectedItem;
 		private string status = string.Empty;
@@ -72,8 +59,6 @@
 			this.progressMonitor = new Progress<double>(this.ProgressChanged);
 			this.statusMonitor = new Progress<string>(this.StatusWrite);
 
-			Site.RegisterSiteClass(Uesp.UespSite.CreateInstance, "UespHoodBot");
-
 			var plugins = Plugins.Instance;
 			this.diffViewer = plugins.DiffViewers["Internet Explorer"];
 
@@ -88,7 +73,20 @@
 		{
 			get
 			{
-				async void ExecuteJobsAsync() => await this.ExecuteJobs().ConfigureAwait(true);
+				async void ExecuteJobsAsync()
+				{
+					if (!this.executing && this.selectedItem is WikiInfoViewModel wikiInfo)
+					{
+						this.executing = true;
+						this.StatusWriteLine("Initializing");
+						App.WpfYield();
+						var allJobsTimer = Stopwatch.StartNew();
+						await this.ExecuteJobs(wikiInfo).ConfigureAwait(true);
+						this.StatusWriteLine("Total time for last run: " + FormatTimeSpan(allJobsTimer.Elapsed));
+						this.executing = false;
+					}
+				}
+
 				return new(ExecuteJobsAsync);
 			}
 		}
@@ -194,35 +192,6 @@
 		}
 		#endregion
 
-		#region Internal Static Methods
-#if DEBUG
-		// This is flagged as internal mostly to stop warnings whenever it's not in use.
-		internal static string SiteName(IWikiAbstractionLayer sender) => sender.AllSiteInfo?.General?.SiteName ?? "Site-Agnostic";
-#endif
-		#endregion
-
-		#region Protected Methods
-		protected virtual void SiteChanging(Site sender, ChangeArgs eventArgs)
-		{
-			if (!sender.EditingEnabled)
-			{
-				Debug.WriteLine($"{eventArgs.MethodName} (sender: {eventArgs.RealSender})");
-				foreach (var parameter in eventArgs.Parameters)
-				{
-					Debug.WriteLine($"  {parameter.Key} = {parameter.Value}");
-				}
-			}
-		}
-
-		protected virtual void SiteWarningOccurred(Site sender, WarningEventArgs eventArgs) => Debug.WriteLine(eventArgs?.Warning);
-
-		protected virtual void WalResponseRecieved(IWikiAbstractionLayer sender, ResponseEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Response: {eventArgs.Response}");
-
-		protected virtual void WalSendingRequest(IWikiAbstractionLayer sender, RequestEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Request: {eventArgs.Request}");
-
-		protected virtual void WalWarningOccurred(IWikiAbstractionLayer sender, WallE.Design.WarningEventArgs eventArgs) => Debug.WriteLine($"{SiteName(sender)} Warning: ({eventArgs?.Warning.Code}) {eventArgs?.Warning.Info}");
-		#endregion
-
 		#region Private Static Methods
 		private static string FormatTimeSpan(TimeSpan allJobsTimer) => allJobsTimer.ToString(@"h\h\ m\m\ s\.f\s", CultureInfo.CurrentCulture)
 			.Replace("0h", string.Empty, StringComparison.Ordinal)
@@ -235,150 +204,15 @@
 		#region Private Methods
 		private void CancelJobs()
 		{
-			this.canceller?.Cancel();
+			this.canceller.Cancel();
 			this.Reset();
 			this.PauseJobs(isPaused: false);
 		}
 
 		private void ClearStatus() => this.Status = string.Empty; // TODO: Removed from Reset, so add to a button or maybe only on Play.
 
-		private void Client_RequestingDelay(IMediaWikiClient sender, DelayEventArgs eventArgs)
+		private async Task ExecuteJobs(WikiInfoViewModel wikiInfo)
 		{
-			this.StatusWriteLine(Globals.CurrentCulture(Resources.DelayRequested, eventArgs.Reason, $"{eventArgs.DelayTime.TotalSeconds.ToString(CultureInfo.CurrentCulture)}s", eventArgs.Description));
-			App.WpfYield();
-
-			/*
-			// Half-assed workaround for pausing and cancelling that ultimately just ends in the wiki throwing an error. See TODO in SimpleClient.RequestDelay().
-			if (this.pauser.IsPaused || this.canceller.IsCancellationRequested)
-			{
-				eventArgs.Cancel = true;
-			}
-			*/
-		}
-
-		private IWikiAbstractionLayer CreateAbstractionLayer(IMediaWikiClient client, WikiInfoViewModel wikiInfo)
-		{
-			var api = wikiInfo.Api.PropertyNotNull(nameof(wikiInfo), nameof(wikiInfo.Api));
-			IWikiAbstractionLayer abstractionLayer = string.Equals(api.OriginalString, "/", StringComparison.Ordinal)
-				? new WallE.Test.WikiAbstractionLayer()
-				: new WikiAbstractionLayer(client, api);
-			if (abstractionLayer is IMaxLaggable maxLagWal)
-			{
-				maxLagWal.MaxLag = wikiInfo.MaxLag;
-			}
-
-#if DEBUG
-			if (abstractionLayer is IInternetEntryPoint internet)
-			{
-				internet.SendingRequest += this.WalSendingRequest;
-				//// internet.ResponseReceived += WalResponseRecieved;
-			}
-
-			abstractionLayer.WarningOccurred += this.WalWarningOccurred;
-#endif
-
-			return abstractionLayer;
-		}
-
-		private IMediaWikiClient CreateClient(WikiInfoViewModel wikiInfo, CancellationToken cancellationToken)
-		{
-			IMediaWikiClient client = new SimpleClient(App.UserSettings.ContactInfo, Path.Combine(App.UserFolder, "Cookies.json"), cancellationToken);
-			if (wikiInfo.ReadThrottling > 0 || wikiInfo.WriteThrottling > 0)
-			{
-				client = new ThrottledClient(
-					client,
-					TimeSpan.FromMilliseconds(wikiInfo.ReadThrottling),
-					TimeSpan.FromMilliseconds(wikiInfo.WriteThrottling));
-			}
-
-			client.RequestingDelay += this.Client_RequestingDelay;
-
-			return client;
-		}
-
-		private JobManager CreateJobManager(Site site, WikiInfoViewModel wikiInfo, CancellationToken cancellationToken)
-		{
-			// We pass wikiInfo here only because it's already validated as not null.
-			PauseTokenSource pauseSource = new();
-			this.pauser = pauseSource;
-			var pauseToken = pauseSource.Token;
-
-			JobManager jobManager = new(site, pauseToken, cancellationToken)
-			{
-				Logger = string.IsNullOrEmpty(wikiInfo.LogPage)
-					? null
-					: new PageJobLogger(site, wikiInfo.LogPage, JobTypes.Write),
-				ProgressMonitor = this.progressMonitor,
-				ResultHandler = string.IsNullOrEmpty(wikiInfo.ResultsPage)
-					? null
-					: new PageResultHandler(site, wikiInfo.ResultsPage),
-				StatusMonitor = this.statusMonitor,
-			};
-
-			jobManager.StartingJob += this.JobManager_StartingJob;
-			jobManager.FinishedJob += this.JobManager_FinishedJob;
-			return jobManager;
-		}
-
-		private void DestroyJobManager(JobManager jobManager)
-		{
-			jobManager.FinishedJob -= this.JobManager_FinishedJob;
-			jobManager.StartingJob -= this.JobManager_StartingJob;
-			this.pauser = null;
-		}
-
-		private Site CreateSite(IWikiAbstractionLayer abstractionLayer, WikiInfoViewModel wikiInfo)
-		{
-			var factoryMethod = Site.GetFactoryMethod(wikiInfo.SiteClassIdentifier);
-			var site = factoryMethod(abstractionLayer);
-#if DEBUG
-			site.WarningOccurred += this.SiteWarningOccurred;
-			site.Changing += this.SiteChanging;
-#endif
-			site.PagePreview += this.SitePagePreview;
-			site.EditingEnabled = this.EditingEnabled;
-			if ((this.UserName ?? wikiInfo.UserName) is string user)
-			{
-				var currentPassword = this.Password ?? wikiInfo.Password ?? throw new InvalidOperationException(Resources.PasswordNotSet);
-				site.Login(user, currentPassword);
-			}
-
-			return site;
-		}
-
-		private void DestroyAbstractionLayer(IWikiAbstractionLayer abstractionLayer)
-		{
-#if DEBUG
-			abstractionLayer.WarningOccurred -= this.WalWarningOccurred;
-			if (abstractionLayer is IInternetEntryPoint internet)
-			{
-				internet.SendingRequest -= this.WalSendingRequest;
-			}
-#endif
-		}
-
-		private void DestroyClient(IMediaWikiClient client) => client.RequestingDelay -= this.Client_RequestingDelay;
-
-		private void DestroySite(Site site)
-		{
-			site.PagePreview -= this.SitePagePreview;
-#if DEBUG
-			site.Changing -= this.SiteChanging;
-			site.WarningOccurred -= this.SiteWarningOccurred;
-#endif
-		}
-
-		private async Task ExecuteJobs()
-		{
-			if (this.executing || this.selectedItem is not WikiInfoViewModel wikiInfo)
-			{
-				return;
-			}
-
-			this.StatusWriteLine("Initializing");
-			App.WpfYield();
-
-			this.executing = true;
 			this.parameterFetcher?.SetParameters();
 
 			List<JobInfo> jobList = new();
@@ -393,32 +227,37 @@
 				return;
 			}
 
-			Stopwatch allJobsTimer = new();
-			allJobsTimer.Start();
 			this.ClearStatus();
 			this.completedJobs = 0;
 			this.OverallProgressMax = jobList.Count;
 
-			using CancellationTokenSource cancelSource = new();
-			this.canceller = cancelSource;
-			var cancellationToken = cancelSource.Token;
+			var jobManager = new JobManager(wikiInfo.WikiInfo, this.progressMonitor, this.statusMonitor, this.pauser, this.canceller);
+			try
+			{
+				jobManager.StartingJob += this.JobManager_StartingJob;
+				jobManager.FinishedJob += this.JobManager_FinishedJob;
+				jobManager.PagePreview += this.SitePagePreview;
+				jobManager.Site.EditingEnabled = this.EditingEnabled;
 
-			var client = this.CreateClient(wikiInfo, cancellationToken);
-			var abstractionLayer = this.CreateAbstractionLayer(client, wikiInfo);
-			var site = this.CreateSite(abstractionLayer, wikiInfo);
-
-			var jobManager = this.CreateJobManager(site, wikiInfo, cancellationToken);
-			await jobManager.Run(jobList).ConfigureAwait(true);
-
-			this.DestroyJobManager(jobManager);
-			this.DestroySite(site);
-			this.DestroyAbstractionLayer(abstractionLayer);
-			this.DestroyClient(client);
-			this.canceller = null;
+				var loginName = this.UserName ?? wikiInfo.UserName ?? throw new InvalidOperationException(Resources.UserNameNotSet);
+				var loginPassword = this.Password ?? wikiInfo.Password ?? throw new InvalidOperationException(Resources.PasswordNotSet);
+				jobManager.Site.Login(loginName, loginPassword);
+				jobManager.Logger = string.IsNullOrEmpty(wikiInfo.LogPage)
+					? null
+					: new PageJobLogger(jobManager.Site, wikiInfo.LogPage, JobTypes.Write);
+				jobManager.ResultHandler = string.IsNullOrEmpty(wikiInfo.ResultsPage)
+					? null
+					: new PageResultHandler(jobManager.Site, wikiInfo.ResultsPage);
+				await jobManager.Run(jobList).ConfigureAwait(true);
+			}
+			finally
+			{
+				jobManager.PagePreview -= this.SitePagePreview;
+				jobManager.FinishedJob -= this.JobManager_FinishedJob;
+				jobManager.StartingJob -= this.JobManager_StartingJob;
+			}
 
 			this.Reset();
-			this.StatusWriteLine("Total time for last run: " + FormatTimeSpan(allJobsTimer.Elapsed));
-			this.executing = false;
 		}
 
 		private void JobManager_StartingJob(JobManager sender, JobEventArgs eventArgs)
@@ -519,93 +358,18 @@
 
 		private void RunTest()
 		{
-			// Compare Books non-job for Jeancey.
-			List<string> deleted = new();
-			List<string> added = new();
-			List<string> common = new();
-
-			var fullNames29 = Directory.GetFiles(Books29Path);
-			var fullNames30 = Directory.GetFiles(Books30Path);
-			HashSet<string> dir29 = new(StringComparer.OrdinalIgnoreCase);
-			HashSet<string> dir30 = new(StringComparer.OrdinalIgnoreCase);
-			foreach (var book in fullNames29)
-			{
-				dir29.Add(Path.GetFileName(book));
-			}
-
-			foreach (var book in fullNames30)
-			{
-				dir30.Add(Path.GetFileName(book));
-			}
-
-			foreach (var book in dir29)
-			{
-				if (dir30.Contains(book))
-				{
-					common.Add(book);
-				}
-				else
-				{
-					deleted.Add(book);
-				}
-			}
-
-			foreach (var book in dir30)
-			{
-				if (!dir29.Contains(book))
-				{
-					added.Add(book);
-				}
-			}
-
-			common.Sort(StringComparer.OrdinalIgnoreCase);
-			foreach (var book in common)
-			{
-				var book29 = File.ReadAllText(Books29Path + book);
-				var book30 = File.ReadAllText(Books30Path + book);
-				book29 = Regex.Replace(book29, @"\s+", " ", RegexOptions.None, Globals.DefaultRegexTimeout);
-				book30 = Regex.Replace(book30, @"\s+", " ", RegexOptions.None, Globals.DefaultRegexTimeout);
-
-				if (!string.Equals(book29, book30, StringComparison.Ordinal))
-				{
-					Debug.WriteLine(book + " has changed");
-				}
-			}
-
-			deleted.Sort(StringComparer.OrdinalIgnoreCase);
-			foreach (var book in deleted)
-			{
-				Debug.WriteLine(book + " deleted");
-			}
-
-			added.Sort(StringComparer.OrdinalIgnoreCase);
-			foreach (var book in added)
-			{
-				Debug.WriteLine(book + " is new");
-			}
-
 			// Dummy code just so this doesn't get all kinds of unwanted code suggestions.
 			Debug.WriteLine(this.selectedItem?.DisplayName);
 			Debug.WriteLine(this.UserName);
 		}
 
-		private void SitePagePreview(Site sender, PagePreviewArgs eventArgs)
+		private void SitePagePreview(JobManager sender, DiffContent eventArgs)
 		{
 			// Until we get a menu going, specify manually.
 			// currentViewer ??= this.FindPlugin<IDiffViewer>("IeDiff");
-			if (this.diffViewer != null && this.ShowDiffs && sender.AbstractionLayer is ITokenGenerator tokens)
+			if (this.diffViewer != null && this.ShowDiffs)
 			{
-				var token = tokens.TokenManager.SessionToken("csrf");
-				var page = eventArgs.Page;
-				DiffContent diffContent = new(page.FullPageName, page.Text ?? string.Empty, eventArgs.EditSummary, eventArgs.Minor)
-				{
-					EditPath = page.EditPath,
-					EditToken = token,
-					LastRevisionText = page.CurrentRevision?.Text,
-					LastRevisionTimestamp = page.CurrentRevision?.Timestamp,
-					StartTimestamp = page.StartTimestamp,
-				};
-				this.diffViewer.Compare(diffContent);
+				this.diffViewer.Compare(eventArgs);
 				this.diffViewer.Wait();
 			}
 		}

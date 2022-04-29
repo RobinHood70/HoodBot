@@ -37,6 +37,9 @@
 
 		/// <summary>Gets a value indicating whether the page should be recreated if it was deleted since the edit began.</summary>
 		public bool RecreateIfJustDeleted { get; }
+
+		/// <summary>Gets or sets the edit token.</summary>
+		public string? Token { get; set; }
 		#endregion
 	}
 }

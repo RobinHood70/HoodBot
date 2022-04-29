@@ -181,7 +181,7 @@
     <value>Password:</value>
   </data>
   <data name="PasswordNotSet" xml:space="preserve">
-    <value>You must enter a password, either in the saved wiki information or on th emain form.</value>
+    <value>You must enter a password, either in the saved wiki information or on the main form.</value>
   </data>
   <data name="ReadThrottle" xml:space="preserve">
     <value>Read Throttle:</value>
@@ -212,6 +212,9 @@
   </data>
   <data name="UserName" xml:space="preserve">
     <value>User Name:</value>
+  </data>
+  <data name="UserNameNotSet" xml:space="preserve">
+    <value>You must enter a user name, either in the saved wiki information or on the main form.</value>
   </data>
   <data name="Wiki" xml:space="preserve">
     <value>Wiki:</value>
