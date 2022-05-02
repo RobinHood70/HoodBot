@@ -60,6 +60,11 @@
 		/// <returns>A <see cref="string"/> that represents this instance.</returns>
 		public override string ToString()
 		{
+			if (this.Title.Count == 1 && this.Title[0] is ITextNode text)
+			{
+				return text.Text;
+			}
+
 			var equalsSigns = new string('=', this.Level);
 			return equalsSigns + "Header" + equalsSigns;
 		}
