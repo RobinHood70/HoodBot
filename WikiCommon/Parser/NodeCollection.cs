@@ -101,12 +101,17 @@
 
 		/// <summary>Splits a page into its individual sections. </summary>
 		/// <returns>An enumeration of the sections of the page.</returns>
-		public IEnumerable<Section> ToSections()
+		public IEnumerable<Section> ToSections() => this.ToSections(6);
+
+		/// <summary>Splits a page into its individual sections. </summary>
+		/// <param name="level">Only split on sections of this level or lower.</param>
+		/// <returns>An enumeration of the sections of the page.</returns>
+		public IEnumerable<Section> ToSections(int level)
 		{
 			Section section = new(null, this.Factory);
 			foreach (var node in this)
 			{
-				if (node is IHeaderNode header)
+				if (node is IHeaderNode header && header.Level <= level)
 				{
 					if (section.Header != null || section.Content.Count > 0)
 					{
