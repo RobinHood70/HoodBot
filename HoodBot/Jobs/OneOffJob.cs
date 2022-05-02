@@ -1,10 +1,8 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System.Diagnostics;
+	using System;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
-	using RobinHood70.Robby.Parser;
-	using RobinHood70.WikiCommon;
 
 	public class OneOffJob : EditJob
 	{
@@ -19,31 +17,29 @@
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
-			Regex wordCount = new(@"[\w-]+", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
-			this.Pages.GetCategoryMembers("Lore-Books", CategoryMemberTypes.Page, true);
-			this.Pages.Sort();
+			var hide = new Regex(@"{{Hide\|(?<value>.+)}}", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+			this.Pages.GetBacklinks("Template:Hide");
 			foreach (var page in this.Pages)
 			{
-				ContextualParser parser = new(page);
-				if (parser.ToValue() is string reText &&
-					wordCount.Matches(reText) is MatchCollection matches)
+				page.Text = page.Text.Replace("!class=sort_desc|", "!", StringComparison.Ordinal);
+				if (!page.Text.Contains("{{Key Table", StringComparison.Ordinal))
 				{
-					if (matches.Count < 25)
-					{
-						Debug.WriteLine("Words:");
-						foreach (var match in matches)
-						{
-							Debug.WriteLine("  " + match);
-						}
-					}
-
-					Debug.WriteLine($"{page.FullPageName}: {matches.Count} words");
+					page.Text = hide.Replace(page.Text, ReplaceHide);
 				}
 			}
 		}
 
-		protected override void Main()
+		protected override void Main() => this.SavePages("Update old sorting");
+		#endregion
+
+		#region Private Methods
+		private static string ReplaceHide(Match match)
 		{
+			var value = match.Groups["value"].Value.Trim();
+			return match.Success &&
+				string.Equals(value, "ZZ", StringComparison.Ordinal)
+					? "{{Blank}}"
+					: "{{Sort|" + value + "}}|";
 		}
 		#endregion
 	}
