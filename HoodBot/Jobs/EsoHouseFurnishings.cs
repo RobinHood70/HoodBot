@@ -48,8 +48,8 @@
 		protected override void LoadPages()
 		{
 			var titles = new TitleCollection(this.Site, "Template:ESO Houses");
-			// this.Pages.GetPageLinks(titles);
-			this.Pages.GetTitles("Online:Enchanted Snow Globe Home", "Online:Lucky Cat Landing", "Online:Potentate's Retreat", "Online:Varlaisvea Ayleid Ruins", "Online:Varlaisvea Ayleid Ruins", "Online:Stone Eagle Aerie", "Online:Pantherfang Chapel", "Online:Sweetwater Cascades");
+			this.Pages.GetPageLinks(titles);
+			//// this.Pages.GetTitles("Online:Enchanted Snow Globe Home", "Online:Lucky Cat Landing", "Online:Potentate's Retreat", "Online:Varlaisvea Ayleid Ruins", "Online:Varlaisvea Ayleid Ruins", "Online:Stone Eagle Aerie", "Online:Pantherfang Chapel", "Online:Sweetwater Cascades");
 		}
 
 		protected override void ParseText(object sender, ContextualParser parser)
@@ -91,7 +91,6 @@
 				{
 					text = text.Insert(insert, "\n{{ESO House Furnishings");
 					insert = text.IndexOf("\n", StringComparison.Ordinal);
-
 					insert = text.LastIndexOf("\n|", StringComparison.Ordinal);
 					if (insert == -1)
 					{
@@ -105,7 +104,14 @@
 					}
 
 					itemList.Sort(StringComparer.Ordinal);
-					text = text.Insert(insert, string.Join("\n", itemList) + "\n}}") + "\n\n";
+					var insertText = string.Join("\n", itemList) + "\n";
+					if (string.Equals(section.Header?.GetInnerText(true), "Furnishings", StringComparison.Ordinal))
+					{
+						insertText += "furniture=1\n";
+					}
+
+					insertText += "}}";
+					text = text.Insert(insert, insertText) + "\n\n";
 
 					section.Content.Clear();
 					section.Content.AddText(text);
