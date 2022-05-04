@@ -107,7 +107,7 @@
 					var insertText = string.Join("\n", itemList) + "\n";
 					if (string.Equals(section.Header?.GetInnerText(true), "Furnishings", StringComparison.Ordinal))
 					{
-						insertText += "furniture=1\n";
+						insertText += "furnished=1\n";
 					}
 
 					insertText += "}}";
