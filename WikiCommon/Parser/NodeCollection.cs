@@ -101,13 +101,15 @@
 
 		/// <summary>Splits a page into its individual sections. </summary>
 		/// <returns>An enumeration of the sections of the page.</returns>
-		public IEnumerable<Section> ToSections() => this.ToSections(6);
+		public IList<Section> ToSections() => this.ToSections(6);
 
 		/// <summary>Splits a page into its individual sections. </summary>
 		/// <param name="level">Only split on sections of this level or lower.</param>
 		/// <returns>An enumeration of the sections of the page.</returns>
-		public IEnumerable<Section> ToSections(int level)
+		/// <remarks>This returns an <see cref="IList{T}"/> instead of an <see cref="IEnumerable{T}"/> to avoid the possibility of indirectly passing ToSections to FromSections, having them both working on the same list at the same time.</remarks>
+		public IList<Section> ToSections(int level)
 		{
+			var sections = new List<Section>();
 			Section section = new(null, this.Factory);
 			foreach (var node in this)
 			{
@@ -115,7 +117,7 @@
 				{
 					if (section.Header != null || section.Content.Count > 0)
 					{
-						yield return section;
+						sections.Add(section);
 					}
 
 					section = new Section(header, this.Factory);
@@ -126,7 +128,8 @@
 				}
 			}
 
-			yield return section;
+			sections.Add(section);
+			return sections;
 		}
 
 		/// <summary>Accepts a visitor to process the node.</summary>
