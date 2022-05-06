@@ -14,9 +14,7 @@
 		public OneOffParseJob(JobManager jobManager)
 			: base(jobManager)
 		{
-#if DEBUG
 			this.Shuffle = true;
-#endif
 		}
 		#endregion
 

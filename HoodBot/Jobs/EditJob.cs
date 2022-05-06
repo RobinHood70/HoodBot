@@ -96,7 +96,11 @@
 				this.EditConflictAction = editConflictAction;
 				if (this.Shuffle)
 				{
+#if DEBUG
 					pages.Shuffle();
+#else
+					pages.Sort(NaturalTitleComparer.Instance);
+#endif
 				}
 				else
 				{
