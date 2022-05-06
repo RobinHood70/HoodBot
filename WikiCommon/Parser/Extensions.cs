@@ -587,6 +587,41 @@
 			return retval;
 		}
 
+		/// <summary>Finds the parameters with the given name and removes it.</summary>
+		/// <param name="template">The template to work on.</param>
+		/// <param name="parameterName">The name of the parameter.</param>
+		/// <param name="condition">The condition for the parameter to be removed.</param>
+		/// <returns><see langword="true"/>if any parameters were removed.</returns>
+		/// <remarks>In the event of a duplicate parameter, all parameters with the same name will be removed.</remarks>
+		public static bool RemoveIfValue(this ITemplateNode template, string parameterName, Predicate<NodeCollection?> condition) => condition.NotNull()(template.Find("parameterName")?.Value) && Remove(template, parameterName);
+
+		/// <summary>Finds the parameters with the given name and removes it.</summary>
+		/// <param name="template">The template to work on.</param>
+		/// <param name="parameterName">The name of the parameter.</param>
+		/// <param name="condition">The condition for the parameter to be removed.</param>
+		/// <returns><see langword="true"/>if any parameters were removed.</returns>
+		/// <remarks>In the event of a duplicate parameter, all parameters with the same name will be removed.</remarks>
+		public static bool RemoveIf(this ITemplateNode template, string parameterName, bool condition) => condition && Remove(template, parameterName);
+
+		/// <summary>Finds the parameters with the given name and removes it.</summary>
+		/// <param name="template">The template to work on.</param>
+		/// <param name="from">The current name of the parameter to rename.</param>
+		/// <param name="to">What to rename the parameter to.</param>
+		/// <returns><see langword="true"/>if any parameters were removed.</returns>
+		/// <remarks>In the event of a duplicate parameter, all parameters with the same name will be removed.</remarks>
+		public static bool RenameParameter(this ITemplateNode template, string from, string to)
+		{
+			var retval = false;
+			foreach (var parameter in template.FindAll(from))
+			{
+				parameter.Name?.Clear();
+				parameter.SetName(to);
+				retval = true;
+			}
+
+			return retval;
+		}
+
 		/// <summary>Sets a new Title value. preserving whitespace.</summary>
 		/// <param name="template">The template.</param>
 		/// <param name="newTitle">The new title.</param>
