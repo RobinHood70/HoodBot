@@ -167,7 +167,7 @@
 			template.Update("desc", furnishing.Description, ParameterFormat.OnePerLine, false);
 			template.Update("cat", furnishing.FurnitureCategory, ParameterFormat.OnePerLine, true);
 			template.Update("subcat", furnishing.FurnitureSubcategory, ParameterFormat.OnePerLine, true);
-			if (furnishing.Tags?.Length > 0)
+			if (furnishing.Behavior?.Length > 0)
 			{
 				if (template.GetValue("tags")?.Trim(',').Replace(",,", ",", StringComparison.Ordinal).Length == 0)
 				{
@@ -175,7 +175,7 @@
 				}
 				else
 				{
-					template.AddIfNotExists("tags", furnishing.Tags, ParameterFormat.OnePerLine);
+					template.AddIfNotExists("tags", furnishing.Behavior, ParameterFormat.OnePerLine);
 				}
 			}
 
@@ -275,7 +275,7 @@
 					this.Quality = int.TryParse(quality, NumberStyles.Integer, site.Culture, out var qualityNum)
 						? "nfsel".Substring(qualityNum - 1, 1)
 						: quality;
-					this.Tags = ((string)record["tags"])
+					this.Behavior = ((string)record["behavior"])
 						.Trim(',')
 						.Replace(",,", ",", StringComparison.Ordinal);
 					this.Type = (ItemType)record["type"];
@@ -309,6 +309,8 @@
 			#endregion
 
 			#region Public Properties
+			public string? Behavior { get; }
+
 			public bool Collectible { get; }
 
 			public string? Description { get; }
@@ -330,8 +332,6 @@
 			public string? Size { get; }
 
 			public SortedSet<string> Skills { get; } = new(StringComparer.Ordinal);
-
-			public string? Tags { get; }
 
 			public Title Title { get; }
 
