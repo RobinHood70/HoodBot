@@ -18,6 +18,10 @@
 		}
 		#endregion
 
+		#region Public Override Properties
+		public override string LogName => "One-Off Parse Job";
+		#endregion
+
 		#region Protected Override Properties
 		protected override string EditSummary => "Convert Mod Header to CC Header";
 		#endregion

@@ -94,13 +94,9 @@
 			else
 			{
 				this.EditConflictAction = editConflictAction;
-				if (this.Shuffle)
+				if (this.Shuffle && !this.Site.EditingEnabled)
 				{
-#if DEBUG
 					pages.Shuffle();
-#else
-					pages.Sort(NaturalTitleComparer.Instance);
-#endif
 				}
 				else
 				{
