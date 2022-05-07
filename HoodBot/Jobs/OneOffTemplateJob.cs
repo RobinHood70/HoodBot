@@ -25,7 +25,6 @@
 		public override string LogName => "One-Off Template Job";
 		#endregion
 
-
 		#region Protected Override Properties
 		protected override string EditSummary => "Update for changes in template";
 
@@ -87,8 +86,10 @@
 					{
 						var siteLink = SiteLink.FromLinkNode(this.Site, link);
 						value.RemoveAt(i);
-						var text = siteLink.Text;
-						value.Insert(i, factory.TextNode(text));
+						if (siteLink.Text is string text)
+						{
+							value.Insert(i, factory.TextNode(text));
+						}
 					}
 				}
 			}
