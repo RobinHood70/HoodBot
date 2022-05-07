@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.ComponentModel;
+	using System.Threading;
 	using System.Windows;
 	using GalaSoft.MvvmLight;
 	using GalaSoft.MvvmLight.Command;
@@ -14,7 +15,7 @@
 	public class SettingsViewModel : ViewModelBase, IEditableObject
 	{
 		#region Fields
-		private IMediaWikiClient? client;
+		private readonly IMediaWikiClient client = new SimpleClient(CancellationToken.None);
 		private WikiInfoViewModel? selectedItem;
 		#endregion
 
@@ -148,7 +149,6 @@
 		{
 			// TODO: main.Client no longer guaranteed to be non-null...likely not to be, in fact.
 			this.MessengerInstance.Unregister(this);
-			this.client = parameters.Client;
 			this.SelectedItem = parameters.SelectedItem;
 		}
 		#endregion
