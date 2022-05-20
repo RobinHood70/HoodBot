@@ -170,7 +170,7 @@
 		/// <summary>Trims the disambiguator off of a title (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		/// <returns>The text with the final paranthetical text removed.</returns>
 		[return: NotNullIfNotNull("title")]
-		public string LabelName() => LabelParenthesesRemover.Replace(this.PageName, string.Empty, 1, 1);
+		public string LabelName() => this.PageName.Length == 0 ? this.PageName : LabelParenthesesRemover.Replace(this.PageName, string.Empty, 1, 1);
 
 		/// <summary>Checks if the provided page name is equal to the title's page name, based on the case-sensitivity for the namespace.</summary>
 		/// <param name="other">The title to compare to.</param>
