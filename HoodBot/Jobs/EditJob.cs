@@ -90,32 +90,31 @@
 			if (pages.Count == 0)
 			{
 				this.StatusWriteLine("No pages to save!");
+				return;
+			}
+
+			this.EditConflictAction = editConflictAction;
+			if (this.Shuffle && !this.Site.EditingEnabled)
+			{
+				pages.Shuffle();
 			}
 			else
 			{
-				this.EditConflictAction = editConflictAction;
-				if (this.Shuffle && !this.Site.EditingEnabled)
+				pages.Sort(NaturalTitleComparer.Instance);
+			}
+
+			this.Progress = 0;
+			this.ProgressMaximum = pages.Count;
+			foreach (var page in pages)
+			{
+				if (this.saveInfo.TryGetValue(page, out var retval))
 				{
-					pages.Shuffle();
-				}
-				else
-				{
-					pages.Sort(NaturalTitleComparer.Instance);
+					defaultSummary = retval.EditSummary;
+					defaultIsMinor = retval.IsMinor;
 				}
 
-				this.Progress = 0;
-				this.ProgressMaximum = pages.Count;
-				foreach (var page in pages)
-				{
-					if (this.saveInfo.TryGetValue(page, out var retval))
-					{
-						defaultSummary = retval.EditSummary;
-						defaultIsMinor = retval.IsMinor;
-					}
-
-					this.SavePage(page, defaultSummary, defaultIsMinor);
-					this.Progress++;
-				}
+				this.SavePage(page, defaultSummary, defaultIsMinor);
+				this.Progress++;
 			}
 		}
 
