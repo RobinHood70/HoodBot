@@ -51,8 +51,17 @@
 		{
 		}
 
+		protected virtual void FillPage(Page page)
+		{
+		}
+
 		protected virtual void ResultsPageLoaded(object sender, Page page)
 		{
+			if (page.IsMissing || page.Text.Trim().Length == 0)
+			{
+				this.FillPage(page);
+			}
+
 			ContextualParser parser = new(page);
 			this.ParseText(sender, parser);
 			parser.UpdatePage();
