@@ -41,8 +41,8 @@
 		/// <summary>The event raised when either the site or the client is requesting a delay.</summary>
 		public event StrongEventHandler<IMediaWikiClient, DelayEventArgs> RequestingDelay
 		{
-			add { this.baseClient.RequestingDelay += value; }
-			remove { this.baseClient.RequestingDelay -= value; }
+			add => this.baseClient.RequestingDelay += value;
+			remove => this.baseClient.RequestingDelay -= value;
 		}
 		#endregion
 
