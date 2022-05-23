@@ -183,21 +183,28 @@
 		}
 
 		/// <summary>Finds the first template that matches the provided title.</summary>
-		/// <param name="templateName">The name of the template to find.</param>
+		/// <param name="find">The name of the template to find.</param>
 		/// <returns>The first <see cref="SiteTemplateNode"/> that matches the title provided, if found.</returns>
-		public SiteTemplateNode? FindSiteTemplate(string templateName) => this.FindSiteTemplates(templateName).FirstOrDefault();
+		public SiteTemplateNode? FindSiteTemplate(string find) => this.FindSiteTemplates(find).FirstOrDefault();
 
 		/// <summary>Finds all templates that match the provided title.</summary>
-		/// <param name="templateName">The name of the template to find.</param>
+		/// <param name="find">The template to find.</param>
 		/// <returns>The templates that match the title provided, if any.</returns>
-		public IEnumerable<SiteTemplateNode> FindSiteTemplates(string templateName)
+		public IEnumerable<SiteTemplateNode> FindSiteTemplate(Title find) => this.FindSiteTemplates(find);
+
+		/// <summary>Finds all templates that match the provided title.</summary>
+		/// <param name="find">The name of the template to find.</param>
+		/// <returns>The templates that match the title provided, if any.</returns>
+		public IEnumerable<SiteTemplateNode> FindSiteTemplates(string find) => this.FindSiteTemplates(TitleFactory.FromUnvalidated(this.Site, find));
+
+		/// <summary>Finds all templates that match the provided title.</summary>
+		/// <param name="find">The template to find.</param>
+		/// <returns>The templates that match the title provided, if any.</returns>
+		public IEnumerable<SiteTemplateNode> FindSiteTemplates(Title find)
 		{
-			var find = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Template], templateName);
-			foreach (var template in this.TemplateNodes)
+			foreach (SiteTemplateNode siteTemplate in this.TemplateNodes)
 			{
-				var titleText = template.GetTitleText();
-				var templateTitle = TitleFactory.FromUnvalidated(this.Site[MediaWikiNamespaces.Template], titleText);
-				if (template is SiteTemplateNode siteTemplate && templateTitle.SimpleEquals(find))
+				if (siteTemplate.TitleValue == find)
 				{
 					yield return siteTemplate;
 				}
