@@ -143,15 +143,15 @@
 				{
 					for (var c = 'A'; c <= 'Z'; c++)
 					{
-						var title = page.FullPageName + ' ' + c;
-						allTitles.Add(title);
-						this.disambigs.Add(TitleFactory.FromValidated(this.Site, title), disambig);
+						var title = page.PageName + ' ' + c;
+						allTitles.Add(page.Namespace.DecoratedName + title);
+						this.disambigs.Add(TitleFactory.FromValidated(page.Namespace, title), disambig);
 					}
 				}
 				else
 				{
 					allTitles.Add(page.FullPageName);
-					this.disambigs.Add(TitleFactory.FromValidated(this.Site, page.FullPageName), disambig);
+					this.disambigs.Add(TitleFactory.FromValidated(page.Namespace, page.PageName), disambig);
 				}
 			}
 

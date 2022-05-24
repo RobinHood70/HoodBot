@@ -2,6 +2,7 @@
 namespace RobinHood70.WallE.Base
 {
 	using System.Collections.Generic;
+	using System.Text;
 	using RobinHood70.WikiCommon;
 
 	public class PageSetRedirectItem : IApiTitle
@@ -28,7 +29,26 @@ namespace RobinHood70.WallE.Base
 		#endregion
 
 		#region Public Override Methods
-		public override string ToString() => this.Interwiki + this.FullPageName + (this.Fragment == null ? null : '#' + this.Fragment);
+		public override string ToString()
+		{
+			StringBuilder target = new();
+			if (!string.IsNullOrWhiteSpace(this.Interwiki))
+			{
+				target
+					.Append(this.Interwiki)
+					.Append(':');
+			}
+
+			target.Append(this.FullPageName ?? string.Empty);
+			if (this.Fragment is not null)
+			{
+				target
+					.Append('#')
+					.Append(this.Interwiki);
+			}
+
+			return target.ToString();
+		}
 		#endregion
 	}
 }

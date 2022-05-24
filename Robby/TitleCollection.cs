@@ -294,7 +294,7 @@
 			var result = this.Site.AbstractionLayer.Backlinks(input);
 			foreach (var item in result)
 			{
-				var mainTitle = TitleFactory.FromValidated(this.Site, item.FullPageName);
+				var mainTitle = TitleFactory.CoValidate(this.Site, item.Namespace, item.FullPageName);
 				this.Add(mainTitle);
 				if (item.Redirects != null)
 				{
@@ -533,7 +533,7 @@
 		{
 			foreach (var item in result)
 			{
-				this.Add(TitleFactory.FromValidated(this.Site, item.FullPageName));
+				this.Add(TitleFactory.FromUnvalidated(this.Site, item.FullPageName));
 			}
 		}
 
@@ -542,7 +542,7 @@
 			foreach (var item in result)
 			{
 				item.FullPageName.PropertyThrowNull(nameof(item));
-				this.Add(TitleFactory.FromValidated(this.Site, item.FullPageName));
+				this.Add(TitleFactory.FromUnvalidated(this.Site, item.FullPageName));
 			}
 		}
 
@@ -559,7 +559,7 @@
 			foreach (var item in result)
 			{
 				item.FullPageName.PropertyThrowNull(nameof(item));
-				var title = TitleFactory.FromValidated(this.Site, item.FullPageName);
+				var title = TitleFactory.CoValidate(this.Site, item.Namespace, item.FullPageName);
 				if (input.Type.HasFlag(item.Type))
 				{
 					this.Add(title);
