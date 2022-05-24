@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.Robby.Design
 {
+	using System;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
@@ -30,6 +31,7 @@
 					: (string.Empty, pageName, forced);
 			}
 
+			WikiTextUtilities.TrimCruft(pageName);
 			var (key, remaining, forced) = SplitPageName(pageName);
 			var isMainPage = false;
 			if (!forced && key.Length == 0)
@@ -179,16 +181,28 @@
 
 		#region Public Static Methods
 
+		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
+		/// <param name="site">The site the page is in.</param>
+		/// <param name="nsId">The namespace the page should resolve to.</param>
+		/// <param name="fullPageName">Full name of the page.</param>
+		public static TitleFactory CoValidate(Site site, int? nsId, string fullPageName)
+		{
+			if (nsId is null)
+			{
+				return FromUnvalidated(site, fullPageName);
+			}
+
+			TitleFactory retval = new(site.NotNull(), MediaWikiNamespaces.Main, fullPageName.NotNull());
+			return retval.Namespace.Id == nsId
+				? retval
+				: throw new InvalidOperationException("Namespace validation failed.");
+		}
+
 		/// <summary>Initializes a new instance of the <see cref="FullTitle"/> class.</summary>
 		/// <param name="site">The site the title is from.</param>
 		/// <param name="node">The <see cref="IBacklinkNode"/> to parse.</param>
 		/// <returns>A new FullTitle based on the provided values.</returns>
 		public static TitleFactory FromBacklinkNode(Site site, IBacklinkNode node) => FromUnvalidated(site.NotNull()[MediaWikiNamespaces.Main], node.NotNull().GetTitleText());
-
-		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
-		/// <param name="site">The site.</param>
-		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory FromValidated(Site site, string pageName) => new(site.NotNull(), MediaWikiNamespaces.Main, pageName.NotNull());
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="ns">The namespace the page is in.</param>
@@ -198,24 +212,12 @@
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="site">The namespace the page is in.</param>
 		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory FromUnvalidated(Site site, string pageName)
-		{
-			site.ThrowNull();
-			pageName.ThrowNull();
-			pageName = WikiTextUtilities.TrimCruft(pageName);
-			return FromValidated(site, pageName);
-		}
+		public static TitleFactory FromUnvalidated(Site site, string pageName) => new(site.NotNull(), MediaWikiNamespaces.Main, pageName.NotNull());
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="ns">The namespace the page is in.</param>
 		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory FromUnvalidated(Namespace ns, string pageName)
-		{
-			ns.ThrowNull();
-			pageName.ThrowNull();
-			pageName = WikiTextUtilities.TrimCruft(pageName);
-			return new TitleFactory(ns.Site, ns.Id, pageName);
-		}
+		public static TitleFactory FromUnvalidated(Namespace ns, string pageName) => new(ns.NotNull().Site, ns.Id, pageName.NotNull());
 		#endregion
 
 		#region Public Methods

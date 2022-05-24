@@ -19,7 +19,7 @@
 		{
 			contribution.ThrowNull();
 			contribution.FullPageName.PropertyThrowNull(nameof(contribution));
-			this.Title = TitleFactory.FromValidated(site, contribution.FullPageName);
+			this.Title = TitleFactory.CoValidate(site, contribution.Namespace, contribution.FullPageName);
 			this.New = (contribution.Flags & UserContributionFlags.New) != 0;
 			this.Patrolled = (contribution.Flags & UserContributionFlags.Patrolled) != 0;
 			this.NewSize = contribution.Size;

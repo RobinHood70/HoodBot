@@ -210,7 +210,7 @@
 			List<Title> retval = new();
 			foreach (var item in result)
 			{
-				retval.Add(TitleFactory.FromValidated(this.Site, item.FullPageName));
+				retval.Add(TitleFactory.CoValidate(this.Site, item.Namespace, item.FullPageName));
 			}
 
 			return retval;

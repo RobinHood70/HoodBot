@@ -1245,7 +1245,7 @@
 			this.namespaces = new NamespaceCollection(this, siteInfo.Namespaces, siteInfo.NamespaceAliases);
 			if (this.mainPageName != null)
 			{
-				this.mainPage = TitleFactory.FromValidated(this, this.mainPageName); // Now that we understand namespaces, we can create a Title.
+				this.mainPage = TitleFactory.FromUnvalidated(this, this.mainPageName); // Now that we understand namespaces, we can create a Title.
 			}
 
 			// MagicWords

@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
-	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WallE.Base;
@@ -305,42 +304,24 @@
 		{
 			foreach (var item in result.Interwiki)
 			{
-				FullTitle title = TitleFactory.FromValidated(this.Site, item.Value.Title);
+				FullTitle title = TitleFactory.FromUnvalidated(this.Site, item.Value.Title);
 				Debug.Assert(string.Equals(title.Interwiki?.Prefix, item.Value.Prefix, StringComparison.Ordinal), "Interwiki prefixes didn't match.", title.Interwiki?.Prefix + " != " + item.Value.Prefix);
 				this.titleMap[item.Key] = title;
 			}
 
 			foreach (var item in result.Converted)
 			{
-				this.titleMap[item.Key] = TitleFactory.FromValidated(this.Site, item.Value);
+				this.titleMap[item.Key] = TitleFactory.FromUnvalidated(this.Site, item.Value);
 			}
 
 			foreach (var item in result.Normalized)
 			{
-				this.titleMap[item.Key] = TitleFactory.FromValidated(this.Site, item.Value);
+				this.titleMap[item.Key] = TitleFactory.FromUnvalidated(this.Site, item.Value);
 			}
 
 			foreach (var item in result.Redirects)
 			{
-				// Reconstruct the redirect title, then run it through the standard parser.
-				var redirect = item.Value;
-				StringBuilder target = new();
-				if (!string.IsNullOrWhiteSpace(redirect.Interwiki))
-				{
-					target.Append(redirect.Interwiki).Append(':');
-				}
-
-				if (!string.IsNullOrWhiteSpace(redirect.FullPageName))
-				{
-					target.Append(redirect.FullPageName);
-				}
-
-				if (!string.IsNullOrWhiteSpace(redirect.Fragment))
-				{
-					target.Append('#').Append(redirect.Interwiki);
-				}
-
-				FullTitle title = TitleFactory.FromValidated(this.Site, target.ToString());
+				FullTitle title = TitleFactory.FromUnvalidated(this.Site, result.ToString()!);
 				this.titleMap[item.Key] = title;
 			}
 		}
@@ -538,7 +519,7 @@
 		/// <remarks>If the page title specified represents a page already in the collection, that page will be overwritten.</remarks>
 		private Page New(IApiTitle item)
 		{
-			var pageTitle = TitleFactory.FromValidated(this.Site, item.FullPageName);
+			var pageTitle = TitleFactory.FromUnvalidated(this.Site, item.FullPageName);
 			return this.pageCreator.CreatePage(pageTitle, this.LoadOptions, item);
 		}
 
