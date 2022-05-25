@@ -5,6 +5,7 @@
 	using System.Data;
 	using System.Diagnostics;
 	using System.Globalization;
+	using System.Text;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
@@ -18,15 +19,30 @@
 
 	internal enum ItemType
 	{
+		Container = 18,
 		Recipes = 29,
 		Furnishing = 61,
 	}
 
-	internal sealed class EsoFurnishingUpdater : ParsedPageJob
+	internal sealed class EsoFurnishingUpdater : TemplateJob
 	{
 		#region Static Fields
-		private static readonly string CollectiblesQuery = $"SELECT id itemId, name, nickname, convert(cast(convert(description using latin1) as binary) using utf8) description, itemLink resultitemLink, furnCategory, furnSubCategory FROM collectibles WHERE furnCategory != ''";
-		private static readonly string MinedItemsQuery = $"SELECT itemId, name, furnCategory, quality, tags, type, convert(cast(convert(description using latin1) as binary) using utf8) description, abilityDesc, resultitemLink FROM uesp_esolog.minedItemSummary WHERE type IN({(int)ItemType.Recipes}, {(int)ItemType.Furnishing})";
+		private static readonly string CollectiblesQuery = $"SELECT convert(cast(convert(description using latin1) as binary) using utf8) description, furnCategory, furnLimitType, furnSubCategory, id itemId, itemLink resultitemLink, name, nickname FROM collectibles WHERE furnCategory != ''";
+		private static readonly string MinedItemsQuery = $"SELECT abilityDesc, bindType, convert(cast(convert(description using latin1) as binary) using utf8) description, furnCategory, furnLimitType, itemId, name, quality, resultitemLink, tags, type FROM uesp_esolog.minedItemSummary WHERE type IN({(int)ItemType.Container}, {(int)ItemType.Recipes}, {(int)ItemType.Furnishing})";
+
+		private static readonly HashSet<string> AliveCats = new(StringComparer.Ordinal)
+		{
+			"Amory Assitants",
+			"Banking Assistants",
+			"Companions",
+			"Creatures",
+			"Deconstruction Assistants",
+			"Houseguests",
+			"Merchant Assistants",
+			"Mounts",
+			"Non-Combat Pets",
+			"Statues",
+		};
 		#endregion
 
 		#region Fields
@@ -37,19 +53,17 @@
 		#endregion
 
 		#region Constructors
-		[JobInfo("ESO Furnishing Updater", "ESO")]
+		[JobInfo("ESO Furnishing Updater", "ESO Update")]
 		public EsoFurnishingUpdater(JobManager jobManager)
 			: base(jobManager)
 		{
 		}
 		#endregion
 
-		#region Public Static Properties
-		public static bool RemoveColons { get; set; } // = true;
-		#endregion
-
 		#region Protected Override Properties
 		protected override string EditSummary { get; } = "Update info from ESO database";
+
+		protected override string TemplateName { get; } = "Online Furnishing Summary";
 		#endregion
 
 		#region Protected Override Methods
@@ -103,21 +117,169 @@
 			}
 		}
 
-		protected override void LoadPages() => this.Pages.GetBacklinks("Template:Online Furnishing Summary");
+		protected override void FillPage(Page page) => Debug.WriteLine($"{page.AsLink()} doesn't exist and will be created.");
 
-		protected override void ParseText(object sender, ContextualParser parsedPage)
+		protected override void LoadPages()
 		{
-			var page = parsedPage.Page;
-			if (parsedPage.FindSiteTemplate("Online Furnishing Summary") is not SiteTemplateNode template ||
-				template.GetValue("id") is not string idText ||
-				string.IsNullOrEmpty(idText) ||
-				!int.TryParse(idText, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, page.Site.Culture, out var id) ||
-				!this.furnishings.TryGetValue(id, out var furnishing))
+			var titles = new TitleCollection(this.Site,
+				"Online:Statue, Kaalgrontiid's Ascent (aeonfire)",
+				"Online:Statue, Kaalgrontiid's Ascent (flame)",
+				"Online:Statue, Kaalgrontiid's Ascent (frost)",
+				"Online:Statue, Kaalgrontiid's Ascent (shock)",
+				"Online:Statue, Kaalgrontiid's Ascent",
+				"Online:Statue, Prince of Ambition",
+				"Online:Witches Festival Scarecrow",
+				"Online:Jellyfish Bloom, Heliotrope",
+				"Online:Minnow School",
+				"Online:Soul-Shriven, Armored",
+				"Online:Soul-Shriven, Robed",
+				"Online:Bubbles of Aeration",
+				"Online:Steam of Repose",
+				"Online:Transliminal Rupture",
+				"Online:Fogs of the Hag Fen",
+				"Online:Mists of the Hag Fen",
+				"Online:Nightmare Stick Horse (furnishing)",
+				"Online:Echalette (furnishing)"
+				);
+
+			this.Pages.GetTitles(titles);
+
+		}
+
+		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
+		{
+			parser.ThrowNull();
+			var labelName = parser.Page.LabelName();
+			if (string.Equals(template.GetValue("name"), labelName, StringComparison.Ordinal))
 			{
+				template.Remove("name");
+			}
+
+			this.GenericTemplateFixes(template);
+			this.FurnishingFixes(template, parser.Page);
+		}
+		#endregion
+
+		#region Private Static Methods
+		private static (Title OldTitle, Title NewTitle) CheckImageName(Page page, SiteTemplateNode template, bool collectible)
+		{
+			var name = template.GetValue("name") ?? page.LabelName();
+			var fileName = template.GetValue("image") ?? Furnishing.ImageName(name, collectible);
+
+			var nameFix = name.Replace(':', ',');
+			var fileTitle = TitleFactory.FromUnvalidated(page.Site[MediaWikiNamespaces.File], fileName);
+			var fileNameFix = TitleFactory.FromUnvalidated(page.Site[MediaWikiNamespaces.File], Furnishing.ImageName(nameFix, collectible));
+			return (fileTitle, fileNameFix);
+		}
+		#endregion
+
+		#region Private Methods
+		private static void FixBehavior(SiteTemplateNode template)
+		{
+			if (template.Find("behavior") is IParameterNode behavior)
+			{
+				var list = new List<string>(behavior.Value.ToRaw().Split(TextArrays.Comma));
+				for (var i = list.Count - 1; i >= 0; i--)
+				{
+					list[i] = list[i].Trim();
+					if (list[i].Length == 0)
+					{
+						list.RemoveAt(i);
+					}
+					else if (list[i].StartsWith("Light ", StringComparison.OrdinalIgnoreCase))
+					{
+						list[i] = "Light";
+					}
+				}
+
+				behavior.SetValue(string.Join(",", list), ParameterFormat.OnePerLine);
+			}
+		}
+
+		private void FixBundles(SiteTemplateNode template)
+		{
+			if (template.Find("bundles") is IParameterNode bundles)
+			{
+				var value = bundles.Value;
+				var factory = template.Factory;
+				for (var i = 0; i < value.Count; i++)
+				{
+					if (value is ILinkNode link)
+					{
+						var siteLink = SiteLink.FromLinkNode(this.Site, link);
+						value.RemoveAt(i);
+						if (siteLink.Text is string text)
+						{
+							value.Insert(i, factory.TextNode(text));
+						}
+					}
+				}
+			}
+		}
+
+		private void FixList(SiteTemplateNode template, string parameterName)
+		{
+			var plural = parameterName + "s";
+			if (template.Find(plural, parameterName) is IParameterNode param)
+			{
+				param.SetName(plural);
+				var curValue = param.Value;
+				var curText = curValue.ToRaw();
+				var splitOn = curText.Contains('~', StringComparison.Ordinal) ? '~' : ',';
+				var split = curText.Split(splitOn, StringSplitOptions.None);
+				var list = new List<(string Name, int Value)>(split.Length / 2);
+				for (var i = 0; i < split.Length; i += 2)
+				{
+					split[i + 1] = split[i + 1]
+						.Replace(" ", string.Empty, StringComparison.Ordinal)
+						.Replace("(", string.Empty, StringComparison.Ordinal)
+						.Replace(")", string.Empty, StringComparison.Ordinal);
+					var intValue = split[i + 1].Length == 0 ? 1 : int.Parse(split[i + 1], this.Site.Culture);
+					list.Add((split[i], intValue));
+				}
+
+				if (string.Equals(parameterName, "material", StringComparison.Ordinal))
+				{
+					list.Sort((item1, item2) =>
+						item2.Value.CompareTo(item1.Value) is int result && result == 0
+							? string.Compare(item1.Name, item2.Name, false, this.Site.Culture)
+							: result);
+				}
+
+				var sb = new StringBuilder(list.Count * 10);
+				foreach (var (name, value) in list)
+				{
+					sb
+						.Append(name)
+						.Append('~')
+						.Append(value.ToStringInvariant())
+						.Append('~');
+				}
+
+				if (sb.Length > 0)
+				{
+					sb.Remove(sb.Length - 1, 1);
+				}
+
+				param.SetValue(sb.ToString(), ParameterFormat.OnePerLine);
+			}
+		}
+
+		private void FurnishingFixes(SiteTemplateNode template, Page? page)
+		{
+			page.ThrowNull();
+			if (template.GetValue("id") is not string idText || string.IsNullOrEmpty(idText) || !int.TryParse(idText, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, page.Site.Culture, out var id))
+			{
+				Debug.WriteLine($"Furnishing ID on {page.AsLink()} is missing or nonsensical.");
 				return;
 			}
 
-			template.Remove("1");
+			if (!this.furnishings.TryGetValue(id, out var furnishing))
+			{
+				Debug.WriteLine($"Furnishing ID {id} not found on page {page.AsLink()}.");
+				return;
+			}
+
 			if (!string.Equals(page.LabelName(), furnishing.Title.LabelName(), StringComparison.Ordinal))
 			{
 				this.pageMessages.Add($"[[{page.FullPageName}|{page.LabelName()}]] ''should be''<br>\n" +
@@ -140,15 +302,9 @@
 						newTitle.PageName.Contains("-item-", StringComparison.Ordinal)) &&
 						string.Equals(noItem1, noItem2, StringComparison.Ordinal))
 					{
-						Debug.WriteLine($"File Replace: {oldTitle.FullPageName}\t{newTitle.FullPageName}");
+						Debug.WriteLine($"File Replace Needed:\n  {oldTitle.FullPageName} with\n  {newTitle.FullPageName}");
 					}
 				}
-			}
-
-			var labelName = page.LabelName();
-			if (string.Equals(template.GetValue("name"), labelName, StringComparison.Ordinal))
-			{
-				template.Remove("name");
 			}
 
 			template.Update("titlename", furnishing.TitleName, ParameterFormat.NoChange, true);
@@ -157,7 +313,7 @@
 				template.Update("nickname", furnishing.NickName, ParameterFormat.NoChange, true);
 			}
 
-			var imageName = Furnishing.ImageName(labelName, furnishing.Collectible);
+			var imageName = Furnishing.ImageName(page.LabelName(), furnishing.Collectible);
 			if (string.Equals(template.GetValue("image"), imageName, StringComparison.Ordinal))
 			{
 				template.Remove("image");
@@ -165,17 +321,17 @@
 
 			template.Update("quality", furnishing.Quality, ParameterFormat.OnePerLine, true);
 			template.Update("desc", furnishing.Description, ParameterFormat.OnePerLine, false);
-			template.Update("cat", furnishing.FurnitureCategory, ParameterFormat.OnePerLine, true);
-			template.Update("subcat", furnishing.FurnitureSubcategory, ParameterFormat.OnePerLine, true);
+			template.Update("cat", furnishing.FurnishingCategory, ParameterFormat.OnePerLine, true);
+			template.Update("subcat", furnishing.FurnishingSubcategory, ParameterFormat.OnePerLine, true);
 			if (furnishing.Behavior?.Length > 0)
 			{
-				if (template.GetValue("tags")?.Trim(',').Replace(",,", ",", StringComparison.Ordinal).Length == 0)
+				if (template.GetValue("behavior")?.Trim(',').Replace(",,", ",", StringComparison.Ordinal).Length == 0)
 				{
-					template.Remove("tags");
+					template.Remove("behavior");
 				}
 				else
 				{
-					template.AddIfNotExists("tags", furnishing.Behavior, ParameterFormat.OnePerLine);
+					template.AddIfNotExists("behavior", furnishing.Behavior, ParameterFormat.OnePerLine);
 				}
 			}
 
@@ -189,24 +345,50 @@
 				template.Update("skills", string.Join("~", furnishing.Skills), ParameterFormat.OnePerLine, true);
 			}
 
-			if (string.IsNullOrEmpty(template.GetValue("collectible")) == furnishing.Collectible)
+			if (string.IsNullOrEmpty(furnishing.BindType))
 			{
-				this.StatusWriteLine("Collectible value changing for " + furnishing.Title.PageName);
-				template.Update("collectible", furnishing.Collectible ? "y" : string.Empty, ParameterFormat.OnePerLine, true);
+				template.Remove("bindtype");
+			}
+			else
+			{
+				template.Update("bindtype", furnishing.BindType);
+			}
+
+			if (furnishing.FurnishingLimitType.Length > 0)
+			{
+				template.Update("furnLimitType", furnishing.FurnishingLimitType);
 			}
 		}
-		#endregion
 
-		#region Private Methods
-		private static (Title OldTitle, Title NewTitle) CheckImageName(Page page, SiteTemplateNode template, bool collectible)
+		private void GenericTemplateFixes(SiteTemplateNode template)
 		{
-			var name = template.GetValue("name") ?? page.LabelName();
-			var fileName = template.GetValue("image") ?? Furnishing.ImageName(name, collectible);
+			template.Remove("1");
+			template.Remove("animated");
+			template.Remove("audible");
+			template.Remove("collectible");
+			template.Remove("creature");
+			template.Remove("houses");
+			template.Remove("interactable");
+			template.Remove("light");
+			template.Remove("lightcolour");
+			template.Remove("luxury");
+			template.Remove("master");
+			template.Remove("readable");
+			template.Remove("sittable");
+			template.Remove("visualfx");
 
-			var nameFix = name.Replace(":", RemoveColons ? string.Empty : ",", StringComparison.Ordinal);
-			var fileTitle = TitleFactory.FromUnvalidated(page.Site[MediaWikiNamespaces.File], fileName);
-			var fileNameFix = TitleFactory.FromUnvalidated(page.Site[MediaWikiNamespaces.File], Furnishing.ImageName(nameFix, collectible));
-			return (fileTitle, fileNameFix);
+			template.RenameParameter("other", "source");
+			template.RenameParameter("recipeid", "planid");
+			template.RenameParameter("recipename", "planname");
+			template.RenameParameter("recipequality", "planquality");
+			template.RenameParameter("style", "theme");
+			template.RenameParameter("tags", "behavior");
+			template.RenameParameter("type", "furnLimitType");
+
+			FixBehavior(template);
+			this.FixBundles(template);
+			this.FixList(template, "material");
+			this.FixList(template, "skill");
 		}
 		#endregion
 
@@ -251,21 +433,33 @@
 					.Replace("|r", string.Empty, StringComparison.Ordinal);
 				this.Description = sizeMatch.Index == 0 && sizeMatch.Length == desc.Length ? null : desc;
 				var furnCategory = (string)record["furnCategory"];
+				var furnishingLimitType = collectible ? (sbyte)record["furnLimitType"] : (int)record["furnLimitType"];
 				if (collectible)
 				{
-					this.FurnitureCategory = furnCategory;
-					this.FurnitureSubcategory = (string)record["furnSubCategory"];
+					this.FurnishingCategory = furnCategory;
+					this.FurnishingSubcategory = (string)record["furnSubCategory"];
 					this.NickName = (string)record["nickname"];
 				}
 				else
 				{
+					var bindType = (int)record["bindType"];
+					this.BindType = bindType switch
+					{
+						-1 => string.Empty,
+						0 => string.Empty,
+						1 => "Bind on Pickup",
+						2 => "Bind on Equip",
+						3 => "Backpack Bind on Pickup",
+						_ => throw new InvalidOperationException()
+					};
+
 					if (!string.IsNullOrEmpty(furnCategory))
 					{
 						var furnSplit = furnCategory.Split(TextArrays.Colon, 2);
 						if (furnSplit.Length > 0)
 						{
-							this.FurnitureCategory = furnSplit[0];
-							this.FurnitureSubcategory = furnSplit[1]
+							this.FurnishingCategory = furnSplit[0];
+							this.FurnishingSubcategory = furnSplit[1]
 								.Split(TextArrays.Parentheses)[0]
 								.TrimEnd();
 						}
@@ -275,9 +469,9 @@
 					this.Quality = int.TryParse(quality, NumberStyles.Integer, site.Culture, out var qualityNum)
 						? "nfsel".Substring(qualityNum - 1, 1)
 						: quality;
-					this.Behavior = ((string)record["behavior"])
-						.Trim(',')
-						.Replace(",,", ",", StringComparison.Ordinal);
+					this.Behavior = ((string)record["tags"])
+						.Replace(",,", ",", StringComparison.Ordinal)
+						.Trim(',');
 					this.Type = (ItemType)record["type"];
 					var abilityDesc = (string)record["abilityDesc"];
 					var ingrMatch = IngredientsFinder.Match(abilityDesc);
@@ -303,6 +497,27 @@
 					}
 				}
 
+				if (furnishingLimitType == -1)
+				{
+					furnishingLimitType =
+						(AliveCats.Contains(this.FurnishingCategory!) || AliveCats.Contains(this.FurnishingSubcategory!))
+							? this.Collectible
+								? 3
+								: 1
+							: this.Collectible
+								? 2
+								: 0;
+				}
+
+				this.FurnishingLimitType = furnishingLimitType switch
+				{
+					0 => "Traditional Furnishings",
+					1 => "Special Furnishings",
+					2 => "Collectible Furnishings",
+					3 => "Special Collectibles",
+					_ => throw new InvalidOperationException()
+				};
+
 				var itemLink = (string)record["resultitemLink"];
 				this.ResultItemLink = EsoLog.ExtractItemId(itemLink);
 			}
@@ -311,13 +526,17 @@
 			#region Public Properties
 			public string? Behavior { get; }
 
+			public string? BindType { get; }
+
 			public bool Collectible { get; }
 
 			public string? Description { get; }
 
-			public string? FurnitureCategory { get; }
+			public string FurnishingLimitType { get; }
 
-			public string? FurnitureSubcategory { get; }
+			public string? FurnishingCategory { get; }
+
+			public string? FurnishingSubcategory { get; }
 
 			public long Id { get; }
 
