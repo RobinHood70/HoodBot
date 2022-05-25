@@ -260,7 +260,7 @@
 
 					if (latestRevision.Timestamp > LastRun)
 					{
-						SiteLink link = TitleFactory.FromValidated(page.Site, MissingFileCategory);
+						SiteLink link = TitleFactory.FromValidated(page.Site[MediaWikiNamespaces.Category], MissingFileCategory);
 						parts.Categories.Add(link);
 					}
 				}
