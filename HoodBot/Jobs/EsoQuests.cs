@@ -10,6 +10,7 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
+	using RobinHood70.Robby.Parser;
 
 	public class EsoQuests : EditJob
 	{
@@ -127,37 +128,49 @@
 		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
-			this.StatusWriteLine("Getting wiki data");
+			this.StatusWriteLine("Getting ESO titles");
+			var allTitles = new TitleCollection(this.Site);
+			allTitles.GetNamespace(UespNamespaces.Online);
+
+			this.StatusWriteLine("Getting wiki quest data");
 			TitleCollection wikiQuests = new(this.Site);
 			wikiQuests.GetCategoryMembers("Online-Quests");
 
-			this.StatusWriteLine("Getting quest data");
+			this.StatusWriteLine("Getting database quest data");
 			List<QuestData> quests = new(this.GetQuestData(wikiQuests));
-			TitleCollection allTitles = new(this.Site);
+			TitleCollection questTitles = new(this.Site);
 			foreach (var quest in quests)
 			{
-				allTitles.Add(quest.FullPageName);
+				questTitles.Add(quest.FullPageName);
 			}
 
-			var allPages = allTitles.Load(PageModules.Info);
-			allPages.RemoveExists(false);
+			var questPages = questTitles.Load(PageModules.Info);
 			var places = EsoSpace.GetPlaces(this.Site);
 			foreach (var quest in quests)
 			{
 				var disambigName = quest.FullPageName + " (quest)";
-				if (allPages.Contains(disambigName))
+				if (questPages.Contains(disambigName))
 				{
 					quest.FullPageName = disambigName;
 				}
-				else if (!allPages.Contains(quest.FullPageName))
+				else
 				{
-					GetZone(places, quest);
-					this.Pages.Add(this.NewPage(quest));
+					if (questPages.TryGetValue(quest.FullPageName, out var questPage))
+					{
+						if (questPage.Exists)
+						{
+							var parser = new ContextualParser(questPage);
+							if (parser.FindSiteTemplate("Online Quest Summary") == null)
+							{
+								quest.FullPageName += " (quest)";
+							}
+						}
+
+						GetZone(places, quest);
+						this.Pages.Add(this.NewPage(quest));
+					}
 				}
 			}
-
-			this.ProgressMaximum = this.Pages.Count + 1;
-			this.Progress++;
 
 			static void GetZone(PlaceCollection places, QuestData quest)
 			{
@@ -204,30 +217,26 @@
 		#region Private Methods
 		private IEnumerable<QuestData> GetFilteredQuests(TitleCollection wikiQuests)
 		{
+			var splitNames = new HashSet<string>(StringComparer.Ordinal);
+			foreach (var wikiQuest in wikiQuests)
+			{
+				splitNames.Add(wikiQuest.FullPageName.Split(" (", StringSplitOptions.None)[0]);
+			}
+
+			foreach (var quest in QuestData.PageNameOverrides)
+			{
+				// splitNames.Add(quest.Value);
+			}
+
 			foreach (var quest in Database.RunQuery(EsoLog.Connection, QuestQuery, 100000, row => new QuestData(row)))
 			{
-				if (!quest.Name.Contains('\n', StringComparison.Ordinal))
+				var title = TitleFactory.FromUnvalidated(this.Site, quest.FullPageName);
+				var titleDisambig = TitleFactory.FromUnvalidated(this.Site, quest.FullPageName + " (quest)");
+				if (/* !wikiQuests.Contains(title) &&
+					!wikiQuests.Contains(titleDisambig) && */
+					!splitNames.Contains(quest.FullPageName, StringComparer.OrdinalIgnoreCase))
 				{
-					var title = TitleFactory.FromUnvalidated(this.Site, quest.FullPageName);
-					var titleDisambig = TitleFactory.FromValidated(title.Namespace, title.PageName + " (quest)");
-					if (!wikiQuests.Contains(title) && !wikiQuests.Contains(titleDisambig))
-					{
-						var missing = true;
-						foreach (var wikiQuest in wikiQuests)
-						{
-							var splitName = wikiQuest.PageName.Split(" (", StringSplitOptions.None);
-							if (string.Equals(splitName[0], quest.Name, StringComparison.OrdinalIgnoreCase))
-							{
-								missing = false;
-								break;
-							}
-						}
-
-						if (missing)
-						{
-							yield return quest;
-						}
-					}
+					yield return quest;
 				}
 			}
 		}
@@ -515,9 +524,16 @@
 				this.BackgroundText = toEncoding.GetString(bgBytes); // Fix UTF8 stored as CP-1252
 				this.Id = (long)row["id"];
 				this.InternalId = (int)row["internalId"];
-				this.Name = ((string)row["name"])
-					.Replace("  ", " ", StringComparison.Ordinal); // Handles "Capture  Farm" with two spaces.
-				this.FullPageName = "Online:" + this.Name;
+				var name = (string)row["name"];
+				name = name.Replace("  ", " ", StringComparison.Ordinal); // Handles "Capture  Farm"
+				var offset = name.IndexOf('\n', StringComparison.Ordinal);
+				if (offset != -1)
+				{
+					name = name[0..offset];
+				}
+
+				this.Name = name;
+				this.FullPageName = "Online:" + (PageNameOverrides.TryGetValue(this.InternalId, out var pageName) ? pageName : name);
 				this.Objective = (string)row["objective"];
 				this.RepeatType = (short)row["repeatType"];
 				this.Type = (short)row["type"];
@@ -533,6 +549,13 @@
 
 				this.Zone = zone;
 			}
+			#endregion
+
+			#region Public Static Properties
+			public static Dictionary<long, string> PageNameOverrides { get; } = new()
+			{
+				[6780] = "The Long Game (High Isle)"
+			};
 			#endregion
 
 			#region Public Properties
