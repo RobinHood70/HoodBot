@@ -29,7 +29,7 @@
 				throw new InvalidOperationException();
 			}
 
-			List<long> revlist = new();
+			/* List<long> revlist = new();
 			var history = this.Site.User.GetContributions(new DateTime(2022, 02, 01), new DateTime(2022, 02, 02, 0, 3, 0));
 			foreach (var item in history)
 			{
@@ -48,6 +48,7 @@
 
 				parser.UpdatePage();
 			}
+			*/
 
 			TitleCollection uespImageTitles = new(this.Site);
 			uespImageTitles.GetBacklinks("Template:Uespimage", BacklinksTypes.EmbeddedIn);
