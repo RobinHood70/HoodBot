@@ -79,7 +79,6 @@
 					{
 						this.executing = true;
 						this.StatusWriteLine("Initializing");
-						App.WpfYield();
 						var allJobsTimer = Stopwatch.StartNew();
 						await this.ExecuteJobs(wikiInfo).ConfigureAwait(true);
 						this.StatusWriteLine("Total time for last run: " + FormatTimeSpan(allJobsTimer.Elapsed));
@@ -343,6 +342,8 @@
 					this.UtcEta = DateTime.UtcNow;
 				}
 			}
+
+			App.WpfYield();
 		}
 
 		private void Reset()
@@ -374,7 +375,11 @@
 			}
 		}
 
-		private void StatusWrite(string text) => this.Status += (this.Status?.Length ?? 0) == 0 ? text.TrimStart() : text;
+		private void StatusWrite(string text)
+		{
+			this.Status += (this.Status?.Length ?? 0) == 0 ? text.TrimStart() : text;
+			App.WpfYield();
+		}
 
 		private void StatusWriteLine(string text) => this.StatusWrite(text + NewLine);
 		#endregion
