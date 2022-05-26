@@ -17,31 +17,27 @@
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
+	#region Internal Enumerations
 	internal enum ItemType
 	{
 		Container = 18,
 		Recipes = 29,
 		Furnishing = 61,
 	}
+	#endregion
 
 	internal sealed class EsoFurnishingUpdater : TemplateJob
 	{
 		#region Static Fields
 		private static readonly string CollectiblesQuery = $"SELECT convert(cast(convert(description using latin1) as binary) using utf8) description, furnCategory, furnLimitType, furnSubCategory, id itemId, itemLink resultitemLink, name, nickname FROM collectibles WHERE furnCategory != ''";
 		private static readonly string MinedItemsQuery = $"SELECT abilityDesc, bindType, convert(cast(convert(description using latin1) as binary) using utf8) description, furnCategory, furnLimitType, itemId, name, quality, resultitemLink, tags, type FROM uesp_esolog.minedItemSummary WHERE type IN({(int)ItemType.Container}, {(int)ItemType.Recipes}, {(int)ItemType.Furnishing})";
-
-		private static readonly HashSet<string> AliveCats = new(StringComparer.Ordinal)
+		private static readonly Dictionary<FurnishingType, string> FurnishingLimitTypes = new()
 		{
-			"Amory Assitants",
-			"Banking Assistants",
-			"Companions",
-			"Creatures",
-			"Deconstruction Assistants",
-			"Houseguests",
-			"Merchant Assistants",
-			"Mounts",
-			"Non-Combat Pets",
-			"Statues",
+			[FurnishingType.None] = string.Empty,
+			[FurnishingType.TraditionalFurnishings] = "Traditional Furnishing",
+			[FurnishingType.SpecialFurnishings] = "Special Furnishing",
+			[FurnishingType.CollectibleFurnishings] = "Collectible Furnishing",
+			[FurnishingType.SpecialCollectibles] = "Special Collectible",
 		};
 		#endregion
 
@@ -53,10 +49,21 @@
 		#endregion
 
 		#region Constructors
-		[JobInfo("ESO Furnishing Updater", "ESO Update")]
+		[JobInfo("Furnishings", "ESO Update")]
 		public EsoFurnishingUpdater(JobManager jobManager)
 			: base(jobManager)
 		{
+		}
+		#endregion
+
+		#region Private Enumerations
+		private enum FurnishingType
+		{
+			None = -1,
+			TraditionalFurnishings,
+			SpecialFurnishings,
+			CollectibleFurnishings,
+			SpecialCollectibles
 		}
 		#endregion
 
@@ -119,33 +126,6 @@
 
 		protected override void FillPage(Page page) => Debug.WriteLine($"{page.AsLink()} doesn't exist and will be created.");
 
-		protected override void LoadPages()
-		{
-			var titles = new TitleCollection(this.Site,
-				"Online:Statue, Kaalgrontiid's Ascent (aeonfire)",
-				"Online:Statue, Kaalgrontiid's Ascent (flame)",
-				"Online:Statue, Kaalgrontiid's Ascent (frost)",
-				"Online:Statue, Kaalgrontiid's Ascent (shock)",
-				"Online:Statue, Kaalgrontiid's Ascent",
-				"Online:Statue, Prince of Ambition",
-				"Online:Witches Festival Scarecrow",
-				"Online:Jellyfish Bloom, Heliotrope",
-				"Online:Minnow School",
-				"Online:Soul-Shriven, Armored",
-				"Online:Soul-Shriven, Robed",
-				"Online:Bubbles of Aeration",
-				"Online:Steam of Repose",
-				"Online:Transliminal Rupture",
-				"Online:Fogs of the Hag Fen",
-				"Online:Mists of the Hag Fen",
-				"Online:Nightmare Stick Horse (furnishing)",
-				"Online:Echalette (furnishing)"
-				);
-
-			this.Pages.GetTitles(titles);
-
-		}
-
 		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
 		{
 			parser.ThrowNull();
@@ -192,7 +172,7 @@
 					}
 				}
 
-				behavior.SetValue(string.Join(",", list), ParameterFormat.OnePerLine);
+				behavior.SetValue(string.Join(", ", list), ParameterFormat.OnePerLine);
 			}
 		}
 
@@ -286,7 +266,7 @@
 				  $"{furnishing.Title.PageName}");
 				if (!page.PageName.Contains(':', StringComparison.Ordinal) && furnishing.Title.PageName.Contains(':', StringComparison.Ordinal) && string.Equals(page.PageName.Replace(',', ':'), furnishing.Title.PageName, StringComparison.Ordinal))
 				{
-					Debug.WriteLine($"Page Replace: {page.FullPageName}\t{furnishing.Title}");
+					Debug.WriteLine($"Page Replace Needed: {page.FullPageName}\t{furnishing.Title}");
 				}
 			}
 
@@ -307,10 +287,10 @@
 				}
 			}
 
-			template.Update("titlename", furnishing.TitleName, ParameterFormat.NoChange, true);
+			template.Update("titlename", furnishing.TitleName, ParameterFormat.OnePerLine, true);
 			if (furnishing.Collectible)
 			{
-				template.Update("nickname", furnishing.NickName, ParameterFormat.NoChange, true);
+				template.Update("nickname", furnishing.NickName, ParameterFormat.OnePerLine, true);
 			}
 
 			var imageName = Furnishing.ImageName(page.LabelName(), furnishing.Collectible);
@@ -347,16 +327,24 @@
 
 			if (string.IsNullOrEmpty(furnishing.BindType))
 			{
-				template.Remove("bindtype");
+				if (furnishing.Collectible)
+				{
+					template.Remove("bindtype");
+				}
+				else
+				{
+					// bindType = -1 probably means we can remove, but we don't know that for sure yet.
+					// template.Remove("bindtype");
+				}
 			}
 			else
 			{
 				template.Update("bindtype", furnishing.BindType);
 			}
 
-			if (furnishing.FurnishingLimitType.Length > 0)
+			if (furnishing.FurnishingLimitType != FurnishingType.None)
 			{
-				template.Update("furnLimitType", furnishing.FurnishingLimitType);
+				template.Update("furnLimitType", FurnishingLimitTypes[furnishing.FurnishingLimitType]);
 			}
 		}
 
@@ -370,6 +358,7 @@
 			template.Remove("houses");
 			template.Remove("interactable");
 			template.Remove("light");
+			template.Remove("lightcolor");
 			template.Remove("lightcolour");
 			template.Remove("luxury");
 			template.Remove("master");
@@ -396,6 +385,20 @@
 		private sealed class Furnishing
 		{
 			#region Static Fields
+			private static readonly HashSet<string> AliveCats = new(StringComparer.Ordinal)
+			{
+				"Amory Assitants",
+				"Banking Assistants",
+				"Companions",
+				"Creatures",
+				"Deconstruction Assistants",
+				"Houseguests",
+				"Merchant Assistants",
+				"Mounts",
+				"Non-Combat Pets",
+				"Statues",
+			};
+
 			private static readonly Regex IngredientsFinder = new(@"\|cffffffINGREDIENTS\|r\n(?<ingredients>.+)$", RegexOptions.ExplicitCapture | RegexOptions.Multiline, Globals.DefaultRegexTimeout);
 			private static readonly Regex SizeFinder = new(@"This is a (?<size>\w+) house item.", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 			private static readonly HashSet<string> AllSkills = new(StringComparer.Ordinal)
@@ -433,7 +436,6 @@
 					.Replace("|r", string.Empty, StringComparison.Ordinal);
 				this.Description = sizeMatch.Index == 0 && sizeMatch.Length == desc.Length ? null : desc;
 				var furnCategory = (string)record["furnCategory"];
-				var furnishingLimitType = collectible ? (sbyte)record["furnLimitType"] : (int)record["furnLimitType"];
 				if (collectible)
 				{
 					this.FurnishingCategory = furnCategory;
@@ -445,7 +447,7 @@
 					var bindType = (int)record["bindType"];
 					this.BindType = bindType switch
 					{
-						-1 => string.Empty,
+						-1 => null,
 						0 => string.Empty,
 						1 => "Bind on Pickup",
 						2 => "Bind on Equip",
@@ -497,27 +499,29 @@
 					}
 				}
 
-				if (furnishingLimitType == -1)
+				/*
+				var furnishingLimitType = FurnTypeOverrides.TryGetValue(titleName, out var furnTypeOverride)
+					? furnTypeOverride
+					: collectible
+						? (FurnishingType)(sbyte)record["furnLimitType"]
+						: (FurnishingType)record["furnLimitType"];
+				*/
+				var furnishingLimitType = collectible
+					? (FurnishingType)(sbyte)record["furnLimitType"]
+					: (FurnishingType)record["furnLimitType"];
+				if (furnishingLimitType == FurnishingType.None)
 				{
 					furnishingLimitType =
 						(AliveCats.Contains(this.FurnishingCategory!) || AliveCats.Contains(this.FurnishingSubcategory!))
-							? this.Collectible
-								? 3
-								: 1
-							: this.Collectible
-								? 2
-								: 0;
+							? collectible
+								? FurnishingType.SpecialCollectibles
+								: FurnishingType.SpecialFurnishings
+							: collectible
+								? FurnishingType.CollectibleFurnishings
+								: FurnishingType.TraditionalFurnishings;
 				}
 
-				this.FurnishingLimitType = furnishingLimitType switch
-				{
-					0 => "Traditional Furnishings",
-					1 => "Special Furnishings",
-					2 => "Collectible Furnishings",
-					3 => "Special Collectibles",
-					_ => throw new InvalidOperationException()
-				};
-
+				this.FurnishingLimitType = furnishingLimitType;
 				var itemLink = (string)record["resultitemLink"];
 				this.ResultItemLink = EsoLog.ExtractItemId(itemLink);
 			}
@@ -532,7 +536,7 @@
 
 			public string? Description { get; }
 
-			public string FurnishingLimitType { get; }
+			public FurnishingType FurnishingLimitType { get; }
 
 			public string? FurnishingCategory { get; }
 
