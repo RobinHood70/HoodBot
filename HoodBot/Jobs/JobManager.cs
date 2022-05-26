@@ -230,7 +230,6 @@
 				eventArgs.Reason,
 				$"{eventArgs.DelayTime.TotalSeconds.ToString(CultureInfo.CurrentCulture)}s",
 				eventArgs.Description);
-			App.WpfYield();
 			this.StatusMonitor?.Report(text);
 			/*
 				// Half-assed workaround for pausing and cancelling that ultimately just ends in the wiki throwing an error. See TODO in SimpleClient.RequestDelay().
