@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
+	using System.IO;
 	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
@@ -190,6 +191,19 @@
 			}
 
 			this.actions.Add(from, new DetailedActions(initialActions, reason));
+		}
+
+		// [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Optiona, to be called only when necessary.")]
+		protected void LoadReplacementsFromFile(string fileName, ReplacementActions actions, string reason)
+		{
+			var repFile = File.ReadLines(fileName);
+			foreach (var line in repFile)
+			{
+				var rep = line.Split(TextArrays.Tab);
+				var from = TitleFactory.FromUnvalidated(this.Site, rep[0].Trim());
+				var to = TitleFactory.FromUnvalidated(this.Site, rep[1].Trim());
+				this.AddReplacement(from, to, actions, null);
+			}
 		}
 		#endregion
 
@@ -709,13 +723,13 @@
 					if (!fromPage.Exists)
 					{
 						// From title does not exist. Should still have an entry in linkUpdates, if appropriate.
-						this.actions[move.Key] = new(ReplacementActions.Skip, "page doesn't exist");
+						this.actions[move.Key] = new(ReplacementActions.Skip, $"{fromPage.AsLink()} doesn't exist");
 					}
 					else if (toPages.Contains(move.Value))
 					{
 						this.actions[move.Key] = (action.Actions & ReplacementActions.Propose) != 0
 							? this.HandleConflict(move.Key, move.Value)
-							: new(ReplacementActions.Skip, "To page exists");
+							: new(ReplacementActions.Skip, $"{move.Value.AsLink()} exists");
 					}
 				}
 			}
