@@ -194,7 +194,7 @@
 		}
 
 		// [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Optiona, to be called only when necessary.")]
-		protected void LoadReplacementsFromFile(string fileName, ReplacementActions actions, string reason)
+		protected void LoadReplacementsFromFile(string fileName, ReplacementActions actions)
 		{
 			var repFile = File.ReadLines(fileName);
 			foreach (var line in repFile)
