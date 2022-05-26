@@ -33,7 +33,6 @@
 			this.CancelToken = cancelSource.Token;
 			this.PauseToken = pauseSource.Token;
 			this.Client = this.CreateClient();
-			this.Client.RequestingDelay += this.Client_RequestingDelay;
 			this.AbstractionLayer = this.CreateAbstractionLayer();
 			Site.RegisterSiteClass(UespSite.CreateInstance, "UespHoodBot");
 			this.Site = this.CreateSite();
@@ -278,7 +277,6 @@
 			}
 
 			client.RequestingDelay += this.Client_RequestingDelay;
-
 			return client;
 		}
 
