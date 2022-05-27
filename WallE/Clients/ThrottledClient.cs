@@ -39,6 +39,13 @@
 		#region Public Events
 
 		/// <summary>The event raised when either the site or the client is requesting a delay.</summary>
+		public event StrongEventHandler<IMediaWikiClient, DelayEventArgs> DelayComplete
+		{
+			add => this.baseClient.DelayComplete += value;
+			remove => this.baseClient.DelayComplete -= value;
+		}
+
+		/// <summary>The event raised when either the site or the client is requesting a delay.</summary>
 		public event StrongEventHandler<IMediaWikiClient, DelayEventArgs> RequestingDelay
 		{
 			add => this.baseClient.RequestingDelay += value;

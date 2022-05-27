@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Net.Http;
+	using System.Threading.Tasks;
 	using RobinHood70.CommonCode;
 
 	/// <summary>The reason for requested delay.</summary>
@@ -24,6 +25,9 @@
 	public interface IMediaWikiClient
 	{
 		#region Events
+
+		/// <summary>The event raised when after a requested delay has completed.</summary>
+		event StrongEventHandler<IMediaWikiClient, DelayEventArgs> DelayComplete;
 
 		/// <summary>The event raised when either the site or the client is requesting a delay.</summary>
 		event StrongEventHandler<IMediaWikiClient, DelayEventArgs> RequestingDelay;
