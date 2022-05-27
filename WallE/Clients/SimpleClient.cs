@@ -2,14 +2,11 @@
 namespace RobinHood70.WallE.Clients
 {
 	using System;
-	using System.Collections;
 	using System.Collections.Generic;
-	using System.Globalization;
 	using System.IO;
 	using System.Net;
 	using System.Net.Http;
 	using System.Net.Http.Headers;
-	using System.Reflection;
 	using System.Security;
 	using System.Threading;
 	using System.Threading.Tasks;
@@ -53,6 +50,7 @@ namespace RobinHood70.WallE.Clients
 				AllowAutoRedirect = true,
 				AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip,
 				CookieContainer = this.cookieContainer,
+				UseCookies = true,
 			};
 			this.retryHandler = new SimpleClientRetryHandler(this, this.webHandler);
 
@@ -65,6 +63,8 @@ namespace RobinHood70.WallE.Clients
 		#endregion
 
 		#region Events
+		public event StrongEventHandler<IMediaWikiClient, DelayEventArgs>? DelayComplete;
+
 		public event StrongEventHandler<IMediaWikiClient, DelayEventArgs>? RequestingDelay;
 		#endregion
 
@@ -179,6 +179,7 @@ namespace RobinHood70.WallE.Clients
 			}
 
 			Task.Delay(delayTime, this.cancellationToken).Wait(this.cancellationToken);
+			this.OnDelayComplete(e);
 
 			return true;
 		}
@@ -196,6 +197,8 @@ namespace RobinHood70.WallE.Clients
 
 			this.disposed = true;
 		}
+
+		protected virtual void OnDelayComplete(DelayEventArgs e) => this.DelayComplete?.Invoke(this, e);
 
 		protected virtual void OnRequestingDelay(DelayEventArgs e) => this.RequestingDelay?.Invoke(this, e);
 		#endregion
@@ -217,36 +220,6 @@ namespace RobinHood70.WallE.Clients
 			return reader.ReadToEnd();
 		}
 
-		private IEnumerable<Cookie> FlattenCookies()
-		{
-			var cookieCont = this.cookieContainer;
-			List<Cookie> retval = new();
-			if (cookieCont.GetType().InvokeMember("m_domainTable", BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.Instance, null, cookieCont, Array.Empty<object>(), CultureInfo.CurrentCulture) is object boxedDomains && ((Hashtable)boxedDomains) is Hashtable domains)
-			{
-				foreach (var domain in domains.Values)
-				{
-					if (domain!.GetType().InvokeMember("m_list", BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.Instance, null, domain, Array.Empty<object>(), CultureInfo.CurrentCulture) is object boxedPaths && ((SortedList)boxedPaths) is SortedList paths)
-					{
-						foreach (var path in paths.Values)
-						{
-							if (path is CookieCollection cookieCollection)
-							{
-								foreach (var boxedCookie in cookieCollection)
-								{
-									if (boxedCookie is Cookie cookie && !cookie.Expired)
-									{
-										retval.Add(cookie);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-
-			return retval;
-		}
-
 		private void LoadCookies()
 		{
 			if (this.cookiesLocation != null)
@@ -254,12 +227,9 @@ namespace RobinHood70.WallE.Clients
 				try
 				{
 					var cookieText = File.ReadAllText(this.cookiesLocation);
-					if (JsonConvert.DeserializeObject<List<Cookie>>(cookieText) is List<Cookie> cookies)
+					if (JsonConvert.DeserializeObject<CookieCollection>(cookieText) is CookieCollection cookies)
 					{
-						foreach (var entry in cookies)
-						{
-							this.cookieContainer.Add(entry);
-						}
+						this.cookieContainer.Add(cookies);
 					}
 				}
 				catch (DirectoryNotFoundException)
@@ -286,12 +256,8 @@ namespace RobinHood70.WallE.Clients
 		/// <summary>Saves all cookies to persistent storage.</summary>
 		private void SaveCookies()
 		{
-			if (this.cookiesLocation != null)
-			{
-				var cookieList = this.FlattenCookies();
-				var jsonCookies = JsonConvert.SerializeObject(cookieList, Formatting.Indented);
-				File.WriteAllText(this.cookiesLocation, jsonCookies);
-			}
+			var jsonCookies = JsonConvert.SerializeObject(this.cookieContainer.GetAllCookies());
+			File.WriteAllText(this.cookiesLocation, jsonCookies);
 		}
 		#endregion
 	}
