@@ -39,7 +39,6 @@
 
 			this.saveLocation = location.Replace("%templateName%", Globals.SanitizeFilename(allTemplateNames[0]), StringComparison.Ordinal);
 			this.originalTemplateNames = allTemplateNames;
-			this.ProgressMaximum = 2;
 		}
 		#endregion
 
@@ -55,8 +54,6 @@
 				this.StatusWriteLine("Loading template redirects");
 				templates = new TitleCollection(this.Site, this.FollowRedirects(templates));
 				allTemplateNames = BuildRedirectList(templates);
-				this.ProgressMaximum++;
-				this.Progress++;
 			}
 			else
 			{
@@ -66,11 +63,9 @@
 			this.StatusWriteLine("Loading pages");
 			var results = PageCollection.Unlimited(this.Site);
 			results.GetPageTranscludedIn(templates);
-			this.Progress++;
 			this.StatusWriteLine("Exporting");
 			results.Sort();
 			this.ExportTemplates(allTemplateNames, results);
-			this.Progress++;
 		}
 		#endregion
 
