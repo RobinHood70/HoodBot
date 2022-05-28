@@ -219,10 +219,6 @@
 		{
 			var fileSpace = template.TitleValue.Site[MediaWikiNamespaces.File];
 			var imageName = Furnishing.ImageName(name, isCollectible);
-			if (name.Contains("Antique Map of Craglorn"))
-			{
-			}
-
 			if (template.GetValue("image") is string imageValue)
 			{
 				imageValue = imageValue.Trim();
