@@ -19,7 +19,7 @@ namespace RobinHood70.Robby.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -61,38 +61,11 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bot Results.
-        /// </summary>
-        internal static string BotResults {
-            get {
-                return ResourceManager.GetString("BotResults", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Local dictionary and items list are out of sync..
         /// </summary>
         internal static string DictionaryListOutOfSync {
             get {
                 return ResourceManager.GetString("DictionaryListOutOfSync", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No e-mail subject was provided and the default subject could not be retrieved from the wiki..
-        /// </summary>
-        internal static string EmailSubjectNull {
-            get {
-                return ResourceManager.GetString("EmailSubjectNull", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The factories must be the same for all sub-nodes within the same object..
-        /// </summary>
-        internal static string FactoriesMustMatch {
-            get {
-                return ResourceManager.GetString("FactoriesMustMatch", resourceCulture);
             }
         }
         
@@ -106,29 +79,11 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The interwiki specified is not present on this wiki..
-        /// </summary>
-        internal static string InvalidInterwiki {
-            get {
-                return ResourceManager.GetString("InvalidInterwiki", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The value of LimitationType is invalid..
         /// </summary>
         internal static string InvalidLimitationType {
             get {
                 return ResourceManager.GetString("InvalidLimitationType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The namespace specified is not present on this wiki..
-        /// </summary>
-        internal static string InvalidNamespace {
-            get {
-                return ResourceManager.GetString("InvalidNamespace", resourceCulture);
             }
         }
         
@@ -147,15 +102,6 @@ namespace RobinHood70.Robby.Properties {
         internal static string LoginFailed {
             get {
                 return ResourceManager.GetString("LoginFailed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The text provided to {0}.{1} was malformed..
-        /// </summary>
-        internal static string MalformedNodeText {
-            get {
-                return ResourceManager.GetString("MalformedNodeText", resourceCulture);
             }
         }
         
@@ -196,42 +142,6 @@ namespace RobinHood70.Robby.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid page name: [[{0}]]. Page is an interwiki link that doesn&apos;t resolve to the local wiki..
-        /// </summary>
-        internal static string PageNameInterwiki {
-            get {
-                return ResourceManager.GetString("PageNameInterwiki", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The page text is currently null, which is normally unintentional. To save an intentionally blank page, set the Text property to string.Empty..
-        /// </summary>
-        internal static string PageTextNull {
-            get {
-                return ResourceManager.GetString("PageTextNull", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Parameter \&quot;{0}\&quot; already exists..
-        /// </summary>
-        internal static string ParameterExists {
-            get {
-                return ResourceManager.GetString("ParameterExists", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Results.
-        /// </summary>
-        internal static string Results {
-            get {
-                return ResourceManager.GetString("Results", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to {0} is invalid until the site has been initialized..
         /// </summary>
         internal static string SiteNotInitialized {
@@ -246,24 +156,6 @@ namespace RobinHood70.Robby.Properties {
         internal static string SizeInvalid {
             get {
                 return ResourceManager.GetString("SizeInvalid", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Source collection is empty - TitleCollection could not be initialized..
-        /// </summary>
-        internal static string SourceCollectionEmpty {
-            get {
-                return ResourceManager.GetString("SourceCollectionEmpty", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The title cannot be in Talk namespace and followed immediately by another namespace or interwiki prefix..
-        /// </summary>
-        internal static string TitleDoubleNamespace {
-            get {
-                return ResourceManager.GetString("TitleDoubleNamespace", resourceCulture);
             }
         }
         
