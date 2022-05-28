@@ -45,6 +45,8 @@
 		private readonly Dictionary<long, Furnishing> furnishings = new();
 		private readonly List<string> fileMessages = new();
 		private readonly List<string> pageMessages = new();
+		private readonly Dictionary<string, long> nameLookup = new(StringComparer.Ordinal);
+
 		//// private readonly Dictionary<Title, Furnishing> furnishingDictionary = new(SimpleTitleComparer.Instance);
 		#endregion
 
@@ -65,6 +67,10 @@
 			CollectibleFurnishings,
 			SpecialCollectibles
 		}
+		#endregion
+
+		#region Public Override Properties
+		public override string LogName { get; } = "ESO Furnishing Update";
 		#endregion
 
 		#region Protected Override Properties
@@ -122,6 +128,18 @@
 			{
 				this.furnishings.Add(furnishing.Id, furnishing);
 			}
+
+			var dupes = new HashSet<string>(StringComparer.Ordinal);
+			foreach (var furnishingKvp in this.furnishings)
+			{
+				var furnishing = furnishingKvp.Value;
+				var labelName = furnishing.Title.LabelName();
+				if (!dupes.Contains(labelName) && !this.nameLookup.TryAdd(labelName, furnishingKvp.Key))
+				{
+					dupes.Add(labelName);
+					this.nameLookup.Remove(labelName);
+				}
+			}
 		}
 
 		protected override void FillPage(Page page) => Debug.WriteLine($"{page.AsLink()} doesn't exist and will be created.");
@@ -129,31 +147,50 @@
 		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
 		{
 			parser.ThrowNull();
-			var labelName = parser.Page.LabelName();
-			if (string.Equals(template.GetValue("name"), labelName, StringComparison.Ordinal))
-			{
-				template.Remove("name");
-			}
-
 			this.GenericTemplateFixes(template);
 			this.FurnishingFixes(template, parser.Page);
 		}
 		#endregion
 
 		#region Private Static Methods
-		private static (Title OldTitle, Title NewTitle) CheckImageName(Page page, SiteTemplateNode template, bool collectible)
+		private static void CheckBehavior(SiteTemplateNode template, Furnishing furnishing)
 		{
-			var name = template.GetValue("name") ?? page.LabelName();
-			var fileName = template.GetValue("image") ?? Furnishing.ImageName(name, collectible);
-
-			var nameFix = name.Replace(':', ',');
-			var fileTitle = TitleFactory.FromUnvalidated(page.Site[MediaWikiNamespaces.File], fileName);
-			var fileNameFix = TitleFactory.FromUnvalidated(page.Site[MediaWikiNamespaces.File], Furnishing.ImageName(nameFix, collectible));
-			return (fileTitle, fileNameFix);
+			if (furnishing.Behavior?.Length > 0)
+			{
+				if (template.GetValue("behavior")?.Trim(',').Replace(",,", ",", StringComparison.Ordinal).Length == 0)
+				{
+					template.Remove("behavior");
+				}
+				else
+				{
+					template.AddIfNotExists("behavior", furnishing.Behavior, ParameterFormat.OnePerLine);
+				}
+			}
 		}
-		#endregion
 
-		#region Private Methods
+		private static void CheckIcon(SiteTemplateNode template, string labelName)
+		{
+			if (string.Equals(template.GetValue("icon"), $"ON-icon-furnishing-{labelName}.png", StringComparison.Ordinal))
+			{
+				template.Remove("icon");
+			}
+		}
+
+		private static string CheckName(SiteTemplateNode template, string labelName)
+		{
+			if (template.GetValue("name") is string nameValue)
+			{
+				if (!string.Equals(nameValue, labelName, StringComparison.Ordinal))
+				{
+					return nameValue;
+				}
+
+				template.Remove("name");
+			}
+
+			return labelName;
+		}
+
 		private static void FixBehavior(SiteTemplateNode template)
 		{
 			if (template.Find("behavior") is IParameterNode behavior)
@@ -173,6 +210,65 @@
 				}
 
 				behavior.SetValue(string.Join(", ", list), ParameterFormat.OnePerLine);
+			}
+		}
+		#endregion
+
+		#region Private Methods
+		private void CheckImage(SiteTemplateNode template, string name, bool isCollectible, string link)
+		{
+			var fileSpace = template.TitleValue.Site[MediaWikiNamespaces.File];
+			var imageName = Furnishing.ImageName(name, isCollectible);
+			if (name.Contains("Antique Map of Craglorn"))
+			{
+			}
+
+			if (template.GetValue("image") is string imageValue)
+			{
+				imageValue = imageValue.Trim();
+				if (imageValue.Length != 0 &&
+					!string.Equals(imageValue, imageName, StringComparison.Ordinal))
+				{
+					imageName = imageValue;
+				}
+				else
+				{
+					template.Remove("image");
+				}
+			}
+
+			var nameFix = imageName.Replace(':', ',');
+			var oldTitle = TitleFactory.FromUnvalidated(fileSpace, imageName).ToTitle();
+			var newTitle = TitleFactory.FromUnvalidated(fileSpace, nameFix).ToTitle();
+
+			if (!string.Equals(oldTitle.LabelName(), newTitle.LabelName(), StringComparison.Ordinal))
+			{
+				this.fileMessages.Add($"{oldTitle.AsLink(LinkFormat.LabelName)} on {link} ''should be''<br>\n{newTitle.PageName}");
+
+				var noItem1 = oldTitle.PageName.Replace("-item-", "-", StringComparison.Ordinal);
+				var noItem2 = newTitle.PageName.Replace("-item-", "-", StringComparison.Ordinal);
+				if ((oldTitle.PageName.Contains("-item-", StringComparison.Ordinal) ||
+					newTitle.PageName.Contains("-item-", StringComparison.Ordinal)) &&
+					string.Equals(noItem1, noItem2, StringComparison.Ordinal))
+				{
+					Debug.WriteLine($"File Replace Needed:\n  {oldTitle.FullPageName} with\n  {newTitle.FullPageName}");
+				}
+			}
+		}
+
+		private void CheckPageName(Page? page, string labelName, Furnishing furnishing)
+		{
+			page.ThrowNull();
+			if (!string.Equals(labelName, furnishing.Title.LabelName(), StringComparison.Ordinal))
+			{
+				this.pageMessages.Add($"[[{page.FullPageName}|{labelName}]] ''should be''<br>\n" +
+				  $"{furnishing.Title.PageName}");
+				if (!page.PageName.Contains(':', StringComparison.Ordinal) &&
+					furnishing.Title.PageName.Contains(':', StringComparison.Ordinal) &&
+					string.Equals(page.PageName.Replace(',', ':'), furnishing.Title.PageName, StringComparison.Ordinal))
+				{
+					Debug.WriteLine($"Page Replace Needed: {page.FullPageName}\t{furnishing.Title}");
+				}
 			}
 		}
 
@@ -248,72 +344,29 @@
 		private void FurnishingFixes(SiteTemplateNode template, Page? page)
 		{
 			page.ThrowNull();
-			if (template.GetValue("id") is not string idText || string.IsNullOrEmpty(idText) || !int.TryParse(idText, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, page.Site.Culture, out var id))
+			var labelName = page.LabelName();
+			var name = CheckName(template, labelName);
+			CheckIcon(template, labelName);
+			if (this.FindFurnishing(template, page, labelName) is not Furnishing furnishing)
 			{
-				Debug.WriteLine($"Furnishing ID on {page.AsLink()} is missing or nonsensical.");
 				return;
 			}
 
-			if (!this.furnishings.TryGetValue(id, out var furnishing))
-			{
-				Debug.WriteLine($"Furnishing ID {id} not found on page {page.AsLink()}.");
-				return;
-			}
-
-			if (!string.Equals(page.LabelName(), furnishing.Title.LabelName(), StringComparison.Ordinal))
-			{
-				this.pageMessages.Add($"[[{page.FullPageName}|{page.LabelName()}]] ''should be''<br>\n" +
-				  $"{furnishing.Title.PageName}");
-				if (!page.PageName.Contains(':', StringComparison.Ordinal) && furnishing.Title.PageName.Contains(':', StringComparison.Ordinal) && string.Equals(page.PageName.Replace(',', ':'), furnishing.Title.PageName, StringComparison.Ordinal))
-				{
-					Debug.WriteLine($"Page Replace Needed: {page.FullPageName}\t{furnishing.Title}");
-				}
-			}
-
-			var (oldTitle, newTitle) = CheckImageName(page, template, furnishing.Collectible);
-			{
-				if (!string.Equals(oldTitle.LabelName(), newTitle.LabelName(), StringComparison.Ordinal))
-				{
-					this.fileMessages.Add($"{oldTitle.AsLink(LinkFormat.LabelName)} on {page.AsLink(LinkFormat.LabelName)} ''should be''<br>\n{newTitle.PageName}");
-
-					var noItem1 = oldTitle.PageName.Replace("-item-", "-", StringComparison.Ordinal);
-					var noItem2 = newTitle.PageName.Replace("-item-", "-", StringComparison.Ordinal);
-					if ((oldTitle.PageName.Contains("-item-", StringComparison.Ordinal) ||
-						newTitle.PageName.Contains("-item-", StringComparison.Ordinal)) &&
-						string.Equals(noItem1, noItem2, StringComparison.Ordinal))
-					{
-						Debug.WriteLine($"File Replace Needed:\n  {oldTitle.FullPageName} with\n  {newTitle.FullPageName}");
-					}
-				}
-			}
+			var isCollectible = furnishing.Collectible;
+			this.CheckImage(template, name, isCollectible, page.AsLink(LinkFormat.LabelName));
+			this.CheckPageName(page, labelName, furnishing);
 
 			template.Update("titlename", furnishing.TitleName, ParameterFormat.OnePerLine, true);
-			if (furnishing.Collectible)
+			if (isCollectible)
 			{
 				template.Update("nickname", furnishing.NickName, ParameterFormat.OnePerLine, true);
 			}
 
-			var imageName = Furnishing.ImageName(page.LabelName(), furnishing.Collectible);
-			if (string.Equals(template.GetValue("image"), imageName, StringComparison.Ordinal))
-			{
-				template.Remove("image");
-			}
-
 			template.Update("quality", furnishing.Quality, ParameterFormat.OnePerLine, true);
 			template.Update("desc", furnishing.Description, ParameterFormat.OnePerLine, false);
-			template.Update("cat", furnishing.FurnishingCategory, ParameterFormat.OnePerLine, true);
-			template.Update("subcat", furnishing.FurnishingSubcategory, ParameterFormat.OnePerLine, true);
-			if (furnishing.Behavior?.Length > 0)
-			{
-				if (template.GetValue("behavior")?.Trim(',').Replace(",,", ",", StringComparison.Ordinal).Length == 0)
-				{
-					template.Remove("behavior");
-				}
-				else
-				{
-					template.AddIfNotExists("behavior", furnishing.Behavior, ParameterFormat.OnePerLine);
-				}
-			}
+			template.Update("cat", furnishing.FurnishingCategory, ParameterFormat.OnePerLine, false);
+			template.Update("subcat", furnishing.FurnishingSubcategory, ParameterFormat.OnePerLine, false);
+			CheckBehavior(template, furnishing);
 
 			if (furnishing.Materials.Count > 0)
 			{
@@ -325,27 +378,59 @@
 				template.Update("skills", string.Join("~", furnishing.Skills), ParameterFormat.OnePerLine, true);
 			}
 
-			if (string.IsNullOrEmpty(furnishing.BindType))
+			var bindTypeValue = template.GetValue("bindtype");
+			var bindType = (furnishing.Collectible ||
+				string.Equals(bindTypeValue, "0", StringComparison.Ordinal))
+					? null
+					: furnishing.BindType;
+			template.Update("bindtype", bindType, ParameterFormat.OnePerLine, true);
+
+			if (furnishing.FurnishingLimitType == FurnishingType.None)
 			{
-				if (furnishing.Collectible)
-				{
-					template.Remove("bindtype");
-				}
-				else
-				{
-					// bindType = -1 probably means we can remove, but we don't know that for sure yet.
-					// template.Remove("bindtype");
-				}
+				template.Remove("collectible");
 			}
 			else
 			{
-				template.Update("bindtype", furnishing.BindType);
+				template.Update("furnLimitType", FurnishingLimitTypes[furnishing.FurnishingLimitType]);
+				var showCollectible = furnishing.FurnishingLimitType switch
+				{
+					FurnishingType.TraditionalFurnishings => furnishing.Collectible,
+					FurnishingType.SpecialFurnishings => furnishing.Collectible,
+					FurnishingType.CollectibleFurnishings => !furnishing.Collectible,
+					FurnishingType.SpecialCollectibles => !furnishing.Collectible,
+					FurnishingType.None => throw new InvalidOperationException(),
+					_ => throw new InvalidOperationException()
+				};
+
+				if (showCollectible)
+				{
+					template.Update("collectible", furnishing.Collectible ? "1" : "0");
+				}
+			}
+		}
+
+		private Furnishing? FindFurnishing(SiteTemplateNode template, Page page, string labelName)
+		{
+			Furnishing? furnishing = null;
+			if (template.GetValue("id") is not string idText ||
+				string.IsNullOrEmpty(idText) ||
+				!int.TryParse(idText, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, page.Site.Culture, out var id))
+			{
+				Debug.WriteLine($"Furnishing ID on {page.AsLink()} is missing or nonsensical.");
+			}
+			else if (!this.furnishings.TryGetValue(id, out furnishing))
+			{
+				Debug.WriteLine($"Furnishing ID {id} not found on page {page.AsLink()}.");
 			}
 
-			if (furnishing.FurnishingLimitType != FurnishingType.None)
+			if (furnishing is null && this.nameLookup.TryGetValue(labelName, out var recoveredId))
 			{
-				template.Update("furnLimitType", FurnishingLimitTypes[furnishing.FurnishingLimitType]);
+				Debug.WriteLine($"  Recovered ID {recoveredId} from {labelName}.");
+				furnishing = this.furnishings[recoveredId];
+				template.Update("id", recoveredId.ToStringInvariant());
 			}
+
+			return furnishing;
 		}
 
 		private void GenericTemplateFixes(SiteTemplateNode template)
@@ -499,27 +584,25 @@
 					}
 				}
 
-				/*
-				var furnishingLimitType = FurnTypeOverrides.TryGetValue(titleName, out var furnTypeOverride)
-					? furnTypeOverride
-					: collectible
-						? (FurnishingType)(sbyte)record["furnLimitType"]
-						: (FurnishingType)record["furnLimitType"];
-				*/
 				var furnishingLimitType = collectible
 					? (FurnishingType)(sbyte)record["furnLimitType"]
 					: (FurnishingType)record["furnLimitType"];
 				if (furnishingLimitType == FurnishingType.None)
 				{
-					furnishingLimitType =
-						(AliveCats.Contains(this.FurnishingCategory!) || AliveCats.Contains(this.FurnishingSubcategory!))
+					furnishingLimitType = (
+						AliveCats.Contains(this.FurnishingCategory!) ||
+						AliveCats.Contains(this.FurnishingSubcategory!))
 							? collectible
 								? FurnishingType.SpecialCollectibles
 								: FurnishingType.SpecialFurnishings
 							: collectible
 								? FurnishingType.CollectibleFurnishings
 								: FurnishingType.TraditionalFurnishings;
-				}
+				}/*
+				else if (collectible)
+				{
+					furnishingLimitType += 2;
+				}*/
 
 				this.FurnishingLimitType = furnishingLimitType;
 				var itemLink = (string)record["resultitemLink"];
