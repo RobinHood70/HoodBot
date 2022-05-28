@@ -24,10 +24,10 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="ContextualParser"/> class.</summary>
-		/// <param name="title">The <see cref="Title">title</see> the text will be on.</param>
+		/// <param name="page">The <see cref="Title">title</see> the text will be on.</param>
 		/// <param name="text">The text to parse.</param>
-		public ContextualParser(Page title, string text)
-			: this(title.NotNull(), text, InclusionType.Raw, false)
+		public ContextualParser(Page page, string text)
+			: this(page.NotNull(), text, InclusionType.Raw, false)
 		{
 		}
 
@@ -41,14 +41,14 @@
 		}
 
 		/// <summary>Initializes a new instance of the <see cref="ContextualParser"/> class.</summary>
-		/// <param name="title">The <see cref="Title">title</see> the text will be on.</param>
+		/// <param name="page">The <see cref="Title">title</see> the text will be on.</param>
 		/// <param name="text">The text to parse.</param>
 		/// <param name="inclusionType">The inclusion type for the text. <see langword="true"/> to return text as if transcluded to another page; <see langword="false"/> to return local text only; <see langword="null"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</param>
 		/// <param name="strictInclusion"><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</param>
-		public ContextualParser(Page title, string text, InclusionType inclusionType, bool strictInclusion)
-			: base(new SiteNodeFactory(title.NotNull().Namespace.Site))
+		public ContextualParser(Page page, string text, InclusionType inclusionType, bool strictInclusion)
+			: base(new SiteNodeFactory(page.NotNull().Namespace.Site))
 		{
-			this.Page = title;
+			this.Page = page;
 			this.Factory.ParseInto(this, text, inclusionType, strictInclusion);
 		}
 		#endregion
