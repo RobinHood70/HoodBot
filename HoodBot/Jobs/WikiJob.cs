@@ -31,6 +31,7 @@
 		private readonly string logName;
 		private int progress;
 		private int progressMaximum = 1;
+		private bool progressing = false;
 		#endregion
 
 		#region Constructors
@@ -72,12 +73,17 @@
 			get => this.progressMaximum;
 			protected set
 			{
+				if (!this.progressing)
+				{
+					this.JobManager.StartProgressing();
+				}
+
 				this.progressMaximum = value <= 0 ? 1 : value;
 				this.UpdateProgress();
 			}
 		}
 
-		public double ProgressPercent => (double)this.Progress / this.ProgressMaximum;
+		public double ProgressPercent => (double)this.progress / this.progressMaximum;
 
 		public Site Site { get; }
 		#endregion
@@ -93,6 +99,8 @@
 		#endregion
 
 		#region Public Methods
+		public void ClearStatus() => this.StatusWrite(null);
+
 		public void Execute()
 		{
 			this.BeforeMain();
@@ -106,9 +114,9 @@
 			this.ProgressMaximum = progressMax;
 		}
 
-		public void StatusWrite(string status)
+		public void StatusWrite(string? status)
 		{
-			this.JobManager.StatusMonitor?.Report(status);
+			this.JobManager.UpdateStatus(status);
 			this.FlowControl();
 		}
 
@@ -181,19 +189,9 @@
 
 		protected virtual void UpdateProgress()
 		{
-			this.JobManager.ProgressMonitor?.Report(this.ProgressPercent);
+			this.JobManager.UpdateProgress(this.ProgressPercent);
 			this.FlowControl();
 		}
-
-		// Same as UpdateProgress/UpdateStatus but with only one pause/cancel check.
-		protected virtual void UpdateProgressWrite(string status)
-		{
-			this.JobManager.ProgressMonitor?.Report(this.ProgressPercent);
-			this.JobManager.StatusMonitor?.Report(status);
-			this.FlowControl();
-		}
-
-		protected virtual void UpdateProgressWriteLine(string status) => this.UpdateProgressWrite(status + Environment.NewLine);
 		#endregion
 	}
 }
