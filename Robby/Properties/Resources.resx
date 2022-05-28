@@ -156,4 +156,7 @@
   <data name="UserEmailDisabled" xml:space="preserve">
     <value>It is not possible to send an e-mail to this user.</value>
   </data>
+  <data name="WaitingForJobQueue" xml:space="preserve">
+    <value>Waiting for job queue to clear: {0} jobs remaining.</value>
+  </data>
 </root>
