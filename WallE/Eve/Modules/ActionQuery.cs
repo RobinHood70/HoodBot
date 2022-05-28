@@ -34,7 +34,7 @@
 
 			foreach (var module in this.queryModules)
 			{
-				if (module is IContinuableQueryModule)
+				if (this.continueModule is null && module is IContinuableQueryModule)
 				{
 					this.continueModule = wal.ModuleFactory.CreateContinue();
 					break;
