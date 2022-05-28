@@ -27,7 +27,7 @@
 		#endregion
 
 		#region Constructors
-		public JobManager(WikiInfo wikiInfo, IProgress<double>? progressMonitor, IProgress<string>? statusMonitor, PauseTokenSource pauseSource, CancellationTokenSource cancelSource)
+		public JobManager(WikiInfo wikiInfo, PauseTokenSource pauseSource, CancellationTokenSource cancelSource)
 		{
 			this.wikiInfo = wikiInfo;
 			this.CancelToken = cancelSource.Token;
@@ -36,8 +36,6 @@
 			this.AbstractionLayer = this.CreateAbstractionLayer();
 			Site.RegisterSiteClass(UespSite.CreateInstance, "UespHoodBot");
 			this.Site = this.CreateSite();
-			this.ProgressMonitor = progressMonitor;
-			this.StatusMonitor = statusMonitor;
 		}
 		#endregion
 
@@ -48,9 +46,15 @@
 
 		public event StrongEventHandler<JobManager, DiffContent>? PagePreview;
 
+		public event EventHandler? ProgressStarted;
+
+		public event StrongEventHandler<JobManager, double>? ProgressUpdated;
+
 		public event StrongEventHandler<JobManager, EventArgs>? StartingAllJobs;
 
 		public event StrongEventHandler<JobManager, JobEventArgs>? StartingJob;
+
+		public event StrongEventHandler<JobManager, string?>? StatusUpdated;
 		#endregion
 
 		#region Public Properties
@@ -64,13 +68,9 @@
 
 		public PauseToken? PauseToken { get; }
 
-		public IProgress<double>? ProgressMonitor { get; }
-
 		public ResultHandler? ResultHandler { get; set; }
 
 		public Site Site { get; }
-
-		public IProgress<string>? StatusMonitor { get; }
 		#endregion
 
 		#region Public Methods
@@ -86,6 +86,7 @@
 			this.OnStartingAllJobs();
 			var allSuccessful = true;
 			var editingEnabledMaster = this.Site.EditingEnabled;
+			var allJobsTimer = Stopwatch.StartNew();
 			foreach (var jobInfo in jobList.NotNull())
 			{
 				var abort = this.OnStartingJob(jobInfo);
@@ -123,6 +124,12 @@
 
 			this.OnFinishedAllJobs(allSuccessful);
 		}
+
+		public void StartProgressing() => this.ProgressStarted?.Invoke(this, EventArgs.Empty);
+
+		public void UpdateProgress(double progressPercent) => this.OnUpdateProgress(progressPercent);
+
+		public void UpdateStatus(string? status) => this.OnUpdateStatus(status);
 		#endregion
 
 		#region Internal Static Methods
@@ -199,7 +206,9 @@
 
 		protected virtual void OnStartingAllJobs() => this.StartingAllJobs?.Invoke(this, EventArgs.Empty);
 
-		protected virtual void OnStatusUpdate(string status) => this.StatusMonitor?.Report(status);
+		protected virtual void OnUpdateProgress(double progressPercent) => this.ProgressUpdated?.Invoke(this, progressPercent);
+
+		protected virtual void OnUpdateStatus(string? status) => this.StatusUpdated?.Invoke(this, status);
 
 		protected virtual void SiteChanging(Site sender, ChangeArgs eventArgs)
 		{
@@ -230,7 +239,7 @@
 				eventArgs.Reason,
 				$"{eventArgs.DelayTime.TotalSeconds.ToString(CultureInfo.CurrentCulture)}s",
 				eventArgs.Description);
-			this.StatusMonitor?.Report(text);
+			this.OnUpdateStatus(text + '\n');
 			/*
 				// Half-assed workaround for pausing and cancelling that ultimately just ends in the wiki throwing an error. See TODO in SimpleClient.RequestDelay().
 				if (this.pauser.IsPaused || this.canceller.IsCancellationRequested)

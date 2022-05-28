@@ -17,7 +17,6 @@
 	using RobinHood70.HoodBot.Properties;
 	using RobinHood70.HoodBot.Views;
 	using RobinHood70.HoodBotPlugins;
-	using static System.Environment;
 
 	public class MainViewModel : ViewModelBase
 	{
@@ -30,8 +29,7 @@
 		private readonly CancellationTokenSource canceller = new();
 		private readonly IDiffViewer? diffViewer;
 		private readonly PauseTokenSource pauser = new();
-		private readonly IProgress<double> progressMonitor;
-		private readonly IProgress<string> statusMonitor;
+		private readonly Stopwatch timer = new();
 
 		private double completedJobs;
 		private bool editingEnabled;
@@ -55,10 +53,6 @@
 		{
 			this.ShowDiffs = true;
 			this.SelectedItem = App.UserSettings.GetCurrentItem();
-
-			this.progressMonitor = new Progress<double>(this.ProgressChanged);
-			this.statusMonitor = new Progress<string>(this.StatusWrite);
-
 			var plugins = Plugins.Instance;
 			this.diffViewer = plugins.DiffViewers["Internet Explorer"];
 
@@ -78,10 +72,8 @@
 					if (!this.executing && this.selectedItem is WikiInfoViewModel wikiInfo)
 					{
 						this.executing = true;
-						this.StatusWriteLine("Initializing");
-						var allJobsTimer = Stopwatch.StartNew();
+						this.StatusWrite("Initializing" + Environment.NewLine);
 						await this.ExecuteJobs(wikiInfo).ConfigureAwait(true);
-						this.StatusWriteLine("Total time for last run: " + FormatTimeSpan(allJobsTimer.Elapsed));
 						this.executing = false;
 					}
 				}
@@ -208,7 +200,7 @@
 			this.PauseJobs(isPaused: false);
 		}
 
-		private void ClearStatus() => this.Status = string.Empty; // TODO: Removed from Reset, so add to a button or maybe only on Play.
+		private void ClearStatus() => this.StatusWrite(null);
 
 		private async Task ExecuteJobs(WikiInfoViewModel wikiInfo)
 		{
@@ -230,12 +222,16 @@
 			this.completedJobs = 0;
 			this.OverallProgressMax = jobList.Count;
 
-			var jobManager = new JobManager(wikiInfo.WikiInfo, this.progressMonitor, this.statusMonitor, this.pauser, this.canceller);
+			var jobManager = new JobManager(wikiInfo.WikiInfo, this.pauser, this.canceller);
 			try
 			{
 				jobManager.StartingJob += this.JobManager_StartingJob;
 				jobManager.FinishedJob += this.JobManager_FinishedJob;
+				jobManager.ProgressUpdated += this.JobManager_ProgressUpdated;
+				jobManager.StatusUpdated += this.JobManager_StatusUpdated;
 				jobManager.PagePreview += this.SitePagePreview;
+				jobManager.FinishedAllJobs += this.JobManager_FinishedAllJobs;
+
 				jobManager.Site.EditingEnabled = this.EditingEnabled;
 
 				var loginName = this.UserName ?? wikiInfo.UserName ?? throw new InvalidOperationException(Resources.UserNameNotSet);
@@ -259,11 +255,16 @@
 			this.Reset();
 		}
 
+		private void JobManager_FinishedAllJobs(JobManager sender, bool eventArgs) =>
+			this.StatusWrite($"Total time for last run: {FormatTimeSpan(this.timer.Elapsed)}{Environment.NewLine}");
+
+		private void JobManager_BeforeFirstWrite(object? sender, EventArgs e) => this.timer.Restart();
+
 		private void JobManager_StartingJob(JobManager sender, JobEventArgs eventArgs)
 		{
 			this.ProgressBarColor = ProgressBarGreen;
 			this.jobStarted = DateTime.UtcNow;
-			this.StatusWriteLine("Starting " + eventArgs.Job.Name);
+			this.StatusWrite($"Starting {eventArgs.Job.Name}{Environment.NewLine}");
 		}
 
 		private void JobManager_FinishedJob(JobManager sender, JobEventArgs eventArgs)
@@ -327,28 +328,12 @@
 			}
 		}
 
-		private void ProgressChanged(double e)
-		{
-			this.OverallProgress = this.completedJobs + e;
-			var timeDiff = DateTime.UtcNow - this.jobStarted;
-			if (this.OverallProgress > 0 && timeDiff.TotalSeconds > 0)
-			{
-				try
-				{
-					this.UtcEta = this.jobStarted + TimeSpan.FromTicks((long)(timeDiff.Ticks * this.OverallProgressMax / this.OverallProgress));
-				}
-				catch (ArgumentOutOfRangeException)
-				{
-					this.UtcEta = DateTime.UtcNow;
-				}
-			}
+		private void JobManager_ProgressUpdated(JobManager sender, double e) => this.UpdateProgress(e);
 
-			App.WpfYield();
-		}
+		private void JobManager_StatusUpdated(JobManager sender, string? text) => this.StatusWrite(text);
 
 		private void Reset()
 		{
-			App.WpfYield();
 			this.OverallProgress = 0;
 			this.OverallProgressMax = 1;
 			this.UtcEta = null;
@@ -375,13 +360,47 @@
 			}
 		}
 
-		private void StatusWrite(string text)
+		private void StatusWrite(string? text)
 		{
-			this.Status += (this.Status?.Length ?? 0) == 0 ? text.TrimStart() : text;
-			App.WpfYield();
+			if (text is null)
+			{
+				this.Status = string.Empty;
+			}
+			else if (this.Status.Length == 0)
+			{
+				this.Status = text.TrimStart();
+			}
+			else
+			{
+				this.Status += text;
+			}
 		}
 
-		private void StatusWriteLine(string text) => this.StatusWrite(text + NewLine);
+		private void UpdateProgress(double progress)
+		{
+			if (progress == 0)
+			{
+				this.timer.Restart();
+			}
+			else if (!this.timer.IsRunning)
+			{
+				throw new InvalidOperationException("Timer is not running!");
+			}
+
+			this.OverallProgress = this.completedJobs + progress;
+			var timeDiff = DateTime.UtcNow - this.jobStarted;
+			if (this.OverallProgress > 0 && timeDiff.TotalSeconds > 0)
+			{
+				try
+				{
+					this.UtcEta = this.jobStarted + TimeSpan.FromTicks((long)(timeDiff.Ticks * this.OverallProgressMax / this.OverallProgress));
+				}
+				catch (ArgumentOutOfRangeException)
+				{
+					this.UtcEta = DateTime.UtcNow;
+				}
+			}
+		}
 		#endregion
 	}
 }
