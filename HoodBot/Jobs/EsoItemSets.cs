@@ -40,6 +40,7 @@
 
 		#region Fields
 		private readonly KeyedCollection<Page, SetData> sets = new SetCollection();
+		private readonly List<SetData> allSets = new();
 		#endregion
 
 		#region Constructors
@@ -54,15 +55,26 @@
 		public override string LogName => "Update ESO Item Sets";
 		#endregion
 
+		#region Protected Override Properties
+		protected override Action<EditJob, Page>? EditConflictAction => this.SetLoaded;
+
+		protected override string EditSummary => this.LogName;
+
+		protected override bool MinorEdit => false;
+		#endregion
+
 		#region Protected Override Methods
-		protected override void BeforeLogging()
+		protected override void BeforeLoadPages()
 		{
 			EsoReplacer.Initialize(this);
-
 			this.StatusWriteLine("Fetching data");
-			var allSets = this.GetSetPages();
+			this.GetSetPages();
+		}
+
+		protected override void LoadPages()
+		{
 			TitleCollection titles = new(this.Site);
-			foreach (var set in allSets)
+			foreach (var set in this.allSets)
 			{
 				if (set.Page is not null)
 				{
@@ -75,14 +87,14 @@
 				}
 			}
 
-			this.StatusWriteLine("Updating");
-			this.Pages.PageLoaded += this.SetLoaded;
 			this.Pages.GetTitles(titles);
-			this.Pages.PageLoaded -= this.SetLoaded;
+		}
 
+		protected override void AfterLoadPages()
+		{
 			// Needs to be after update, since update modifies item's IsNonTrivial property.
-			allSets.Sort((item, item2) => string.CompareOrdinal(item.Name, item2.Name));
-			this.GenerateReport(allSets);
+			this.allSets.Sort((item, item2) => string.CompareOrdinal(item.Name, item2.Name));
+			this.GenerateReport();
 		}
 
 		protected override void JobCompleted()
@@ -93,28 +105,25 @@
 
 		protected override void Main()
 		{
-			this.SavePages(this.LogName, false);
+			this.SavePages();
 			EsoSpace.SetBotUpdateVersion(this, "itemset");
 		}
 		#endregion
 
 		#region Private Static Methods
-		private static List<SetData> GetSetData()
+		private void GetSetData()
 		{
-			List<SetData> allSets = new();
 			foreach (var item in Database.RunQuery(EsoLog.Connection, Query, row => new SetData(row)))
 			{
-				allSets.Add(item);
+				this.allSets.Add(item);
 			}
-
-			return allSets;
 		}
 		#endregion
 
 		#region Private Methods
-		private void BuildNewPages(List<SetData> allSets)
+		private void BuildNewPages()
 		{
-			foreach (var set in allSets)
+			foreach (var set in this.allSets)
 			{
 				if (set.Page is null)
 				{
@@ -124,10 +133,10 @@
 			}
 		}
 
-		private void GenerateReport(List<SetData> allSets)
+		private void GenerateReport()
 		{
 			StringBuilder sb = new();
-			foreach (var item in allSets)
+			foreach (var item in this.allSets)
 			{
 				if (item.Page is null)
 				{
@@ -152,27 +161,25 @@
 			}
 		}
 
-		private List<SetData> GetSetPages()
+		private void GetSetPages()
 		{
-			var allSets = GetSetData();
-			this.MatchCategoryPages(allSets);
-			this.MatchUnresolvedPages(allSets);
-			this.BuildNewPages(allSets);
-
-			return allSets;
+			this.GetSetData();
+			this.MatchCategoryPages();
+			this.MatchUnresolvedPages();
+			this.BuildNewPages();
 		}
 
-		private void MatchCategoryPages(List<SetData> allSets)
+		private void MatchCategoryPages()
 		{
 			PageCollection catPages = new(this.Site, new PageLoadOptions(PageModules.Info, true));
 			catPages.GetCategoryMembers("Online-Sets", CategoryMemberTypes.Page, false);
-			this.UpdateSetPages(allSets, catPages);
+			this.UpdateSetPages(catPages);
 		}
 
-		private void MatchUnresolvedPages(List<SetData> allSets)
+		private void MatchUnresolvedPages()
 		{
 			TitleCollection titles = new(this.Site);
-			foreach (var set in allSets)
+			foreach (var set in this.allSets)
 			{
 				if (set.Page is null)
 				{
@@ -183,10 +190,10 @@
 				}
 			}
 
-			this.ResolveDisambiguations(allSets, titles);
+			this.ResolveDisambiguations(titles);
 		}
 
-		private void ResolveDisambiguations(List<SetData> allSets, TitleCollection newTitles)
+		private void ResolveDisambiguations(TitleCollection newTitles)
 		{
 			if (newTitles.Count == 0)
 			{
@@ -235,7 +242,7 @@
 				}
 			}
 
-			this.UpdateSetPages(allSets, pages);
+			this.UpdateSetPages(pages);
 		}
 
 		private void SetLoaded(object sender, Page page)
@@ -317,9 +324,9 @@
 			}
 		}
 
-		private void UpdateSetPages(List<SetData> allSets, PageCollection setMembers)
+		private void UpdateSetPages(PageCollection setMembers)
 		{
-			foreach (var set in allSets)
+			foreach (var set in this.allSets)
 			{
 				if (set.Page is null)
 				{

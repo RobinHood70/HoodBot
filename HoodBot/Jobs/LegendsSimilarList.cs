@@ -37,22 +37,6 @@
 
 		#region Protected Override Methods
 
-		protected override void BeforeLogging()
-		{
-			this.BeforeLoadPages();
-			this.StatusWriteLine("Loading Pages");
-			this.LoadPages();
-			this.Pages.Sort();
-			foreach (var page in this.Pages)
-			{
-				this.ResultsPageLoaded(this, page);
-			}
-
-			this.WriteLine("|}");
-			this.Results?.Clear();
-			this.AfterLoadPages();
-		}
-
 		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
 		{
 			if (this.resultCount == 0 && this.Results is PageResultHandler pageResults)

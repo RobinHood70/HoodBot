@@ -24,19 +24,15 @@
 		}
 		#endregion
 
+		#region Protected Override Properties
+		protected override Action<EditJob, Page>? EditConflictAction => this.Pages_PageLoaded;
+
+		protected override string EditSummary => "Update mount ID";
+		#endregion
+
 		#region Protected Override Methods
-		protected override void BeforeLogging()
+		protected override void AfterLoadPages()
 		{
-			var query = "SELECT id, name FROM uesp_esolog.collectibles WHERE categoryType = 2 AND furnCategory = 'Mounts'";
-			foreach (var row in Database.RunQuery(EsoLog.Connection, query))
-			{
-				this.ids.Add((string)row["name"], (int)(long)row["id"]);
-			}
-
-			this.Pages.PageLoaded += this.Pages_PageLoaded;
-			this.Pages.GetCategoryMembers("Online-Mounts", CategoryMemberTypes.Page, false);
-			this.Pages.PageLoaded -= this.Pages_PageLoaded;
-
 			this.WriteLine("Found in database but not in Online-Mounts.");
 			foreach (var dbMount in this.ids)
 			{
@@ -44,7 +40,16 @@
 			}
 		}
 
-		protected override void Main() => this.SavePages("Update mount ID", true, this.Pages_PageLoaded);
+		protected override void LoadPages()
+		{
+			var query = "SELECT id, name FROM uesp_esolog.collectibles WHERE categoryType = 2 AND furnCategory = 'Mounts'";
+			foreach (var row in Database.RunQuery(EsoLog.Connection, query))
+			{
+				this.ids.Add((string)row["name"], (int)(long)row["id"]);
+			}
+
+			this.Pages.GetCategoryMembers("Online-Mounts", CategoryMemberTypes.Page, false);
+		}
 		#endregion
 
 		#region Private Methods

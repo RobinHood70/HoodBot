@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System;
 	using System.Collections.Generic;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
@@ -77,8 +78,16 @@
 		}
 		#endregion
 
-		#region Protected Override Properties
+		#region Public Override Properties
 		public override string LogName => "Create Collectible Summaries";
+		#endregion
+
+		#region Protected Override Properties
+		protected override Action<EditJob, Page>? EditConflictAction => CreateCollectiblePage;
+
+		protected override string EditSummary => "Create Collectible page";
+
+		protected override bool MinorEdit => false;
 		#endregion
 
 		#region Protected Override Methods
@@ -89,6 +98,12 @@
 			this.sourcePages.GetNamespace(UespNamespaces.Online, Filter.Exclude, CollectibleTypePrefix);
 			this.sourcePages.PageLoaded -= AddHeaderLinks;
 
+
+			base.BeforeLogging();
+		}
+
+		protected override void LoadPages()
+		{
 			TitleCollection titles = new(this.Site);
 			foreach (var page in this.sourcePages)
 			{
@@ -96,7 +111,7 @@
 				foreach (var headerNode in parsedPage.HeaderNodes)
 				{
 					if (headerNode.Level == 3 &&
-						!IgnoredHeaders.Contains(headerNode.GetInnerText(true), System.StringComparer.OrdinalIgnoreCase))
+						!IgnoredHeaders.Contains(headerNode.GetInnerText(true), StringComparer.OrdinalIgnoreCase))
 					{
 						foreach (var link in headerNode.Title.FindAll<SiteLinkNode>())
 						{
@@ -106,14 +121,12 @@
 				}
 			}
 
-			this.Pages.PageLoaded += CreateCollectiblePage;
 			this.Pages.GetTitles(titles);
-			this.Pages.PageLoaded -= CreateCollectiblePage;
 		}
 
 		protected override void Main()
 		{
-			this.SavePages("Create Collectible page", false, CreateCollectiblePage);
+			base.Main();
 			this.StatusWriteLine($"Saving {CollectibleType} pages");
 			this.SavePages(this.sourcePages, "Add links to headers", true, AddHeaderLinks);
 		}

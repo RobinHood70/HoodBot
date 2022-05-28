@@ -1,5 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 
@@ -12,12 +13,8 @@
 		}
 		#endregion
 
-		#region Protected Properties
-		protected bool MinorEdit { get; set; } = true;
-		#endregion
-
-		#region Protected Abstract Properties
-		protected abstract string EditSummary { get; }
+		#region Protected Override Properties
+		protected override Action<EditJob, Page>? EditConflictAction => this.PageLoaded;
 		#endregion
 
 		#region Protected Override Methods
@@ -26,42 +23,22 @@
 			this.BeforeLoadPages();
 
 			this.StatusWriteLine("Loading Pages");
-			this.Pages.PageLoaded += this.ResultsPageLoaded;
+			this.Pages.PageLoaded += this.PageLoaded;
 			this.LoadPages();
-			this.Pages.PageLoaded -= this.ResultsPageLoaded;
+			this.Pages.PageLoaded -= this.PageLoaded;
 
 			this.AfterLoadPages();
 		}
-
-		protected override void Main() => this.SavePages(this.EditSummary, this.MinorEdit, this.ResultsPageLoaded);
 		#endregion
 
 		#region Protected Abstract Methods
-		protected abstract void LoadPages();
-
 		protected abstract void ParseText(object sender, ContextualParser parser);
 		#endregion
 
-		#region Protected Virtual Methods
-		protected virtual void AfterLoadPages()
+		#region Protected Override Methods
+		protected override void PageLoaded(object sender, Page page)
 		{
-		}
-
-		protected virtual void BeforeLoadPages()
-		{
-		}
-
-		protected virtual void FillPage(Page page)
-		{
-		}
-
-		protected virtual void ResultsPageLoaded(object sender, Page page)
-		{
-			if (page.IsMissing || page.Text.Trim().Length == 0)
-			{
-				this.FillPage(page);
-			}
-
+			base.PageLoaded(sender, page);
 			ContextualParser parser = new(page);
 			this.ParseText(sender, parser);
 			parser.UpdatePage();

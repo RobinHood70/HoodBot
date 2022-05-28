@@ -42,6 +42,15 @@
 		public override string LogName => "Update ESO " + this.TypeText + " Skills";
 		#endregion
 
+		#region Protected Override Properties
+		protected override Action<EditJob, Page>? EditConflictAction => this.SkillPageLoaded;
+
+		protected override string EditSummary => this.LogName;
+
+		protected override bool MinorEdit => false;
+
+		#endregion
+
 		#region Protected Abstract Properties
 		protected abstract string Query { get; }
 
@@ -107,25 +116,25 @@
 		#endregion
 
 		#region Protected Override Methods
+
+		protected override void AfterLoadPages() => this.GenerateReport();
+
 		protected override void BeforeLogging()
 		{
 			this.StatusWriteLine("Fetching data");
 			EsoReplacer.Initialize(this);
 			this.GetSkillList();
-			this.ProgressMaximum = this.skills.Count + 4;
-			this.Progress = 3;
+		}
 
+		protected override void LoadPages()
+		{
 			TitleCollection titles = new(this.Site);
 			foreach (var skill in this.skills)
 			{
 				titles.Add(skill.Key);
 			}
 
-			this.StatusWriteLine("Loading pages");
-			this.Pages.PageLoaded += this.SkillPageLoaded;
 			this.Pages.GetTitles(titles);
-			this.Pages.PageLoaded -= this.SkillPageLoaded;
-			this.GenerateReport();
 		}
 
 		protected override void JobCompleted()
@@ -136,9 +145,8 @@
 
 		protected override void Main()
 		{
-			this.SavePages(this.LogName, false, this.SkillPageLoaded);
+			base.Main();
 			EsoSpace.SetBotUpdateVersion(this, this.TypeText.ToLowerInvariant());
-			this.Progress++;
 		}
 		#endregion
 

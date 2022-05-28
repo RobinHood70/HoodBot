@@ -28,10 +28,15 @@
 		}
 		#endregion
 
+		#region Protected Override Properties
+		protected override Action<EditJob, Page>? EditConflictAction => null;
+
+		protected override string EditSummary => "Fix double redirect";
+		#endregion
+
 		#region Protected Override Methods
-		protected override void BeforeLogging()
+		protected override void AfterLoadPages()
 		{
-			this.GetDoubleRedirects();
 			HashSet<FullTitle> loopCheck = new();
 			HashSet<string> fragments = new(StringComparer.Ordinal);
 			foreach (var page in this.Pages)
@@ -101,15 +106,9 @@
 			}
 		}
 
-		protected override void Main() => this.SavePages("Fix double redirect", true);
-		#endregion
-
-		#region Private Methods
-		private void GetDoubleRedirects()
+		protected override void LoadPages()
 		{
 			this.Pages.GetQueryPage("DoubleRedirects");
-			//// var testCollection = new TitleCollection(this.Site, "Dragonborn:Armour");
-			this.Pages.Sort();
 			var toLoad = this.GetNewTitles(this.Pages);
 			while (toLoad.Count > 0)
 			{
@@ -126,7 +125,9 @@
 				toLoad = this.GetNewTitles(toLoad);
 			}
 		}
+		#endregion
 
+		#region Private Methods
 		private TitleCollection GetNewTitles(IReadOnlyCollection<Title> toLoad)
 		{
 			TitleCollection retval = new(this.Site);

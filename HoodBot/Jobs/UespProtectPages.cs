@@ -189,8 +189,42 @@
 		public override string LogName => "Protect Pages";
 		#endregion
 
+		#region Protected Override Properties
+		protected override Action<EditJob, Page>? EditConflictAction => null;
+
+		protected override string EditSummary => "Add/update templates";
+		#endregion
+
 		#region Protected Override Methods
-		protected override void BeforeLogging()
+		protected override void AfterLoadPages()
+		{
+			this.WriteLine("== Page Protection Mismatches ==");
+			this.WriteLine("{| class=\"wikitable sortable\"");
+			this.WriteLine("! Group");
+			this.WriteLine("! Page");
+			this.WriteLine("! Original Protection");
+			this.WriteLine("! New Protection");
+			this.WriteLine("! Reason");
+
+			foreach (var page in this.Pages)
+			{
+				var protection = this.pageProtections[page];
+				this.WriteLine("|-");
+				this.WriteLine("| " + protection.FriendlyName);
+				this.WriteLine("| " + page.AsLink());
+				this.WriteLine("| " + CombinedProtectionString(
+					ProtectionFromPage(page, "edit"),
+					ProtectionFromPage(page, "move")));
+				this.WriteLine("| " + CombinedProtectionString(
+					protection.EditProtection,
+					protection.MoveProtection));
+				this.WriteLine("| " + protection.Reason.UpperFirst(this.Site.Culture));
+			}
+
+			this.WriteLine("|}");
+		}
+
+		protected override void BeforeLoadPages()
 		{
 			this.StatusWriteLine("Loading Page Names");
 			var namespacesToLoad = this.NamespacesInSearchList();
@@ -208,43 +242,57 @@
 			{
 				this.Logger = null; // Temporary kludge to avoid logging. Change BeforeMain to boolean to check if we should proceed.
 				this.StatusWriteLine("No pages needed to be changed.");
-				return;
 			}
-
-			this.WriteLine("== Page Protection Mismatches ==");
-			this.WriteLine("{| class=\"wikitable sortable\"");
-			this.WriteLine("! Group");
-			this.WriteLine("! Page");
-			this.WriteLine("! Original Protection");
-			this.WriteLine("! New Protection");
-			this.WriteLine("! Reason");
-			this.LoadProtectablePages();
-			this.WriteLine("|}");
 		}
+
+		protected override void PageLoaded(object sender, Page page) => this.UpdatePage(page);
 
 		protected override void Main()
 		{
 			if (this.Pages.Count == 0)
 			{
+				this.StatusWriteLine("No pages to save!");
 				return;
 			}
 
+			this.StatusWriteLine(string.Format(this.Site.Culture, "Protecting {0} pages", this.Pages.Count));
 			this.Pages.Sort();
 			this.ProgressMaximum = this.Pages.Count;
-			this.StatusWriteLine(string.Format(this.Site.Culture, "Protecting {0} pages", this.Pages.Count));
+			this.Progress = 0;
 			foreach (var page in this.Pages)
 			{
 				var protection = this.pageProtections[page];
+
+				// Skip Deletion Review pages unless the last modification is at least 30 days ago. This could be incorporated into the search data itself as a delegate, but for now, since it's a one-off. I've left it as hard-coded.
+				if (page.Exists &&
+					(!string.Equals(protection.FriendlyName, "Deletion Review", StringComparison.Ordinal) ||
+					page.StartTimestamp?.AddDays(30) < DateTime.Now))
+				{
+					this.WriteLine("|-");
+					this.WriteLine("| " + protection.FriendlyName);
+					this.WriteLine("| " + page.AsLink());
+					this.WriteLine("| " + CombinedProtectionString(
+						ProtectionFromPage(page, "edit"),
+						ProtectionFromPage(page, "move")));
+					this.WriteLine("| " + CombinedProtectionString(
+						protection.EditProtection,
+						protection.MoveProtection));
+					this.WriteLine("| " + protection.Reason.UpperFirst(this.Site.Culture));
+				}
+
 				Title title = new(page);
 				title.Protect(protection.Reason, protection.EditProtection, protection.MoveProtection, DateTime.MaxValue);
+
 				if (page.TextModified)
 				{
-					this.SavePage(page, "Add/update templates", true);
+					this.SavePage(page);
 				}
 
 				this.Progress++;
 			}
 		}
+
+		protected override void LoadPages() => this.Pages.GetTitles(this.pageProtections.Keys);
 		#endregion
 
 		#region Private Static Methods
@@ -441,8 +489,9 @@
 			return insertPos;
 		}
 
-		private static void UpdatePage(Page page, PageProtection protection)
+		private void UpdatePage(Page page)
 		{
+			var protection = this.pageProtections[page];
 			var insertPos = 0;
 			ContextualParser parser = new(page);
 			var nodes = parser;
@@ -453,7 +502,7 @@
 				insertPos = nodes.FindIndex<ILinkNode>(0) + 1;
 				nodes.InsertRange(insertPos, new IWikiNode[]
 				{
-							nodes.Factory.TextNode("\n"),
+					nodes.Factory.TextNode("\n"),
 				});
 				insertPos++;
 			}
@@ -478,9 +527,9 @@
 					insertPos = 1;
 					nodes.InsertRange(0, new IWikiNode[]
 					{
-								nodes.Factory.IgnoreNode("<noinclude>"),
-								nodes.Factory.IgnoreNode("</noinclude>"),
-								nodes.Factory.TextNode("\n")
+						nodes.Factory.IgnoreNode("<noinclude>"),
+						nodes.Factory.IgnoreNode("</noinclude>"),
+						nodes.Factory.TextNode("\n")
 					});
 				}
 				else
@@ -579,34 +628,6 @@
 
 			this.Progress = 0;
 			return titlesToProtect;
-		}
-
-		private void LoadProtectablePages()
-		{
-			this.StatusWriteLine("Loading Pages Needing Protection");
-			this.Pages.GetTitles(this.pageProtections.Keys);
-			foreach (var protPage in this.pageProtections)
-			{
-				var page = this.Pages[protPage.Key];
-				var currentProtection = (Page)protPage.Key;
-				var protection = protPage.Value;
-
-				// Skip Deletion Review pages unless the last modification is at least 30 days ago. This could be incorporated into the search data itself as a delegate, but for now, since it's a one-off. I've left it as hard-coded.
-				if (page.Exists && (!string.Equals(protection.FriendlyName, "Deletion Review", StringComparison.Ordinal) || page.StartTimestamp?.AddDays(30) < DateTime.Now))
-				{
-					UpdatePage(page, protection);
-					this.WriteLine("|-");
-					this.WriteLine("| " + protection.FriendlyName);
-					this.WriteLine("| " + page.AsLink());
-					this.WriteLine("| " + CombinedProtectionString(
-						ProtectionFromPage(currentProtection, "edit"),
-						ProtectionFromPage(currentProtection, "move")));
-					this.WriteLine("| " + CombinedProtectionString(
-						protection.EditProtection,
-						protection.MoveProtection));
-					this.WriteLine("| " + protection.Reason.UpperFirst(this.Site.Culture));
-				}
-			}
 		}
 
 		private ICollection<int> NamespacesInSearchList()

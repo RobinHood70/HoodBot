@@ -109,7 +109,7 @@
 
 		public string Name { get; }
 
-		public Page? Page { get; set; }
+		public Title? Title { get; set; }
 
 		public PickpocketDifficulty PickpocketDifficulty { get; }
 
@@ -187,7 +187,7 @@
 				if (placeType.Value.Count > 1)
 				{
 					wroteSomething = true;
-					Debug.Write($"[[Online:{this.Page?.FullPageName ?? this.Name}|{this.Name}]] has multiple {placeType.Key} entries: {string.Join(", ", placeType.Value)}.");
+					Debug.Write($"[[Online:{this.Title?.FullPageName ?? this.Name}|{this.Name}]] has multiple {placeType.Key} entries: {string.Join(", ", placeType.Value)}.");
 				}
 			}
 

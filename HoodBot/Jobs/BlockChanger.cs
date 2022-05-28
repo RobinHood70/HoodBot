@@ -8,7 +8,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Design;
 
-	public class BlockChanger : EditJob
+	public class BlockChanger : WikiJob
 	{
 		#region Private Constants
 		private const int NumYears = 1;
@@ -28,6 +28,10 @@
 
 		#region Public Override Properties
 		public override string LogName => "Fix Infinite IP Blocks";
+		#endregion
+
+		#region Protected Overwrite Properties
+		public override JobTypes JobType => JobTypes.Read | JobTypes.Write;
 		#endregion
 
 		#region Protected Override Methods

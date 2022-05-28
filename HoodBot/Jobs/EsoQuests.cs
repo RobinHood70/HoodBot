@@ -57,14 +57,6 @@
 		#endregion
 
 		#region Static Fields
-		/* private static readonly Dictionary<int, string> questStepTypeTexts = new Dictionary<int, string>
-		{
-			[1] = "And",
-			[2] = "Or",
-			[3] = "End",
-			[4] = "Branch",
-		}; */
-
 		private static readonly Dictionary<int, string> QuestTypes = new()
 		{
 			[0] = string.Empty, // "None"
@@ -103,6 +95,10 @@
 		};
 		#endregion
 
+		#region Fields
+		private readonly List<QuestData> quests = new();
+		#endregion
+
 		#region Constructors
 		[JobInfo("Update Quests", "ESO Update")]
 		public EsoQuests(JobManager jobManager)
@@ -125,28 +121,55 @@
 		public override string LogName => "Create Missing ESO Quests";
 		#endregion
 
+		#region Protected Override Properties
+		protected override Action<EditJob, Page>? EditConflictAction => null;
+
+		protected override string EditSummary => this.LogName;
+		#endregion
+
 		#region Protected Override Methods
-		protected override void BeforeLogging()
+		protected override void BeforeLoadPages()
 		{
 			this.StatusWriteLine("Getting ESO titles");
 			var allTitles = new TitleCollection(this.Site);
 			allTitles.GetNamespace(UespNamespaces.Online);
 
 			this.StatusWriteLine("Getting wiki quest data");
-			TitleCollection wikiQuests = new(this.Site);
+			var wikiQuests = new TitleCollection(this.Site);
 			wikiQuests.GetCategoryMembers("Online-Quests");
 
 			this.StatusWriteLine("Getting database quest data");
-			List<QuestData> quests = new(this.GetQuestData(wikiQuests));
-			TitleCollection questTitles = new(this.Site);
-			foreach (var quest in quests)
+			this.quests.AddRange(this.GetQuestData(wikiQuests));
+		}
+
+		protected override void LoadPages()
+		{
+			static void GetZone(PlaceCollection places, QuestData quest)
+			{
+				if (!string.IsNullOrEmpty(quest.Zone))
+				{
+					var place = places[quest.Zone];
+					if (place != null)
+					{
+						while (!string.Equals(place.TypeText, "Zone", StringComparison.Ordinal) && place.Zone != null && places[place.Zone] is Place newZone)
+						{
+							place = newZone;
+						}
+
+						quest.Zone = place.TitleName;
+					}
+				}
+			}
+
+			var questTitles = new TitleCollection(this.Site);
+			foreach (var quest in this.quests)
 			{
 				questTitles.Add(quest.FullPageName);
 			}
 
 			var questPages = questTitles.Load(PageModules.Info);
 			var places = EsoSpace.GetPlaces(this.Site);
-			foreach (var quest in quests)
+			foreach (var quest in this.quests)
 			{
 				var disambigName = quest.FullPageName + " (quest)";
 				if (questPages.Contains(disambigName))
@@ -171,26 +194,7 @@
 					}
 				}
 			}
-
-			static void GetZone(PlaceCollection places, QuestData quest)
-			{
-				if (!string.IsNullOrEmpty(quest.Zone))
-				{
-					var place = places[quest.Zone];
-					if (place != null)
-					{
-						while (!string.Equals(place.TypeText, "Zone", StringComparison.Ordinal) && place.Zone != null && places[place.Zone] is Place newZone)
-						{
-							place = newZone;
-						}
-
-						quest.Zone = place.TitleName;
-					}
-				}
-			}
 		}
-
-		protected override void Main() => this.SavePages(this.LogName);
 		#endregion
 
 		#region Private Static Methods
@@ -243,10 +247,10 @@
 
 		private IEnumerable<QuestData> GetQuestData(TitleCollection wikiQuests)
 		{
-			var quests = this.GetFilteredQuests(wikiQuests);
+			var filteredQuests = this.GetFilteredQuests(wikiQuests);
 			Dictionary<string, QuestData> questDict = new(StringComparer.Ordinal);
 			Dictionary<long, string> questNames = new();
-			foreach (var quest in quests)
+			foreach (var quest in filteredQuests)
 			{
 				questDict.TryAdd(quest.Name, quest);
 				questNames.Add(quest.Id, quest.Name);

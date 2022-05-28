@@ -11,7 +11,7 @@
 	using RobinHood70.WikiCommon;
 
 	// Images should be downloaded from latest version on https://esofiles.uesp.net/ in the icons.zip file before running this job.
-	internal sealed class EsoBulkUploadIcons : EditJob
+	internal sealed class EsoBulkUploadIcons : WikiJob
 	{
 		#region Static Fields
 		private static readonly Dictionary<long, string> NameFixes = new()
@@ -79,6 +79,10 @@
 			: base(jobManager)
 		{
 		}
+		#endregion
+
+		#region Protected Overwrite Properties
+		public override JobTypes JobType => JobTypes.Read | JobTypes.Write;
 		#endregion
 
 		#region Protected Override Methods

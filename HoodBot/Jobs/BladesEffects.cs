@@ -26,13 +26,22 @@
 		};
 		#endregion
 
+		#region Constructors
 		[JobInfo("Create Effects", "Blades|")]
 		public BladesEffects(JobManager jobManager)
 			: base(jobManager)
 		{
 		}
+		#endregion
 
-		protected override void BeforeLogging()
+		#region Protected Override Properties
+		protected override Action<EditJob, Page>? EditConflictAction => null;
+
+		protected override string EditSummary => "Create Effects Page";
+		#endregion
+
+		#region Protected Override Methods
+		protected override void LoadPages()
 		{
 			var fileName = UespSite.GetBotDataFolder("QuestLanguageDatabase.txt");
 			Dictionary<string, string> translation = new(StringComparer.Ordinal);
@@ -108,7 +117,6 @@
 				}
 			}
 		}
-
-		protected override void Main() => this.SavePages("Create Effects Page");
+		#endregion
 	}
 }

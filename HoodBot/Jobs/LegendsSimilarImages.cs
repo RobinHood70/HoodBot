@@ -12,22 +12,33 @@
 
 	internal sealed class LegendsSimilarImages : EditJob
 	{
+		#region Fields
+		private readonly TitleCollection allTitles;
+		private readonly Dictionary<Title, Title> primaryLookup;
+		#endregion
+
 		#region Constructors
 		[JobInfo("Add Similar Images", "Legends")]
 		public LegendsSimilarImages(JobManager jobManager)
 			: base(jobManager)
 		{
+			this.allTitles = new TitleCollection(this.Site);
+			this.primaryLookup = new Dictionary<Title, Title>(SimpleTitleComparer.Instance);
 		}
 		#endregion
 
+		#region Protected Override Properties
+		protected override Action<EditJob, Page>? EditConflictAction => null;
+
+		protected override string EditSummary => "Add Similar Images";
+		#endregion
+
 		#region Protected Override Methods
-		protected override void BeforeLogging()
+		protected override void BeforeLoadPages()
 		{
 			var factory = new SiteNodeFactory(this.Site);
 			var entryPages = PageCollection.Unlimited(this.Site);
 			entryPages.GetNamespace(MediaWikiNamespaces.User, Filter.Exclude, "HoodBot/Legends Images");
-			var primaryLookup = new Dictionary<Title, Title>(SimpleTitleComparer.Instance);
-			var allTitles = new TitleCollection(this.Site);
 			foreach (var entry in entryPages)
 			{
 				foreach (var section in entry.Text.Split("\n|-\n"))
@@ -37,38 +48,40 @@
 					foreach (var linkNode in nodes.FindAll<SiteLinkNode>(null, false, false, 0))
 					{
 						var title = linkNode.TitleValue;
-						allTitles.Add(title);
+						this.allTitles.Add(title);
 						if (first is null)
 						{
 							first = title;
 						}
 						else
 						{
-							if (!primaryLookup.TryAdd(title, first))
+							if (!this.primaryLookup.TryAdd(title, first))
 							{
 								Debug.WriteLine($"\nDuplicate entries for {title.FullPageName}");
-								Debug.WriteLine("  " + primaryLookup[title]);
+								Debug.WriteLine("  " + this.primaryLookup[title]);
 								Debug.WriteLine("  " + first);
 							}
 						}
 					}
 				}
 			}
+		}
 
-			var allPages = allTitles.Load();
+		protected override void LoadPages()
+		{
+			var allPages = this.allTitles.Load();
 			foreach (var page in allPages)
 			{
 				page.Text = page.Text.Replace("==Licensing== {{esimage}}", "==Licensing==\n{{esimage}}", StringComparison.Ordinal);
-				_ = primaryLookup.TryGetValue(page, out var title);
-				this.AddSimilarImages(page, title);
+				_ = this.primaryLookup.TryGetValue(page, out var title);
+				AddSimilarImages(page, title);
+				this.Pages.Add(page);
 			}
 		}
-
-		protected override void Main() => this.SavePages("Add Similar Images");
 		#endregion
 
 		#region Private Methods
-		private void AddSimilarImages(Page page, Title? title)
+		private static void AddSimilarImages(Page page, Title? title)
 		{
 			var parser = new ContextualParser(page);
 			if (parser.FindSiteTemplate("Similar Images") is null)
@@ -101,7 +114,6 @@
 				parser.FromSections(sections);
 				parser.UpdatePage();
 				page.Text = page.Text.Replace("\n\n\n==Similar Images==", "\n\n==Similar Images==", StringComparison.Ordinal);
-				this.Pages.Add(page);
 			}
 		}
 		#endregion
