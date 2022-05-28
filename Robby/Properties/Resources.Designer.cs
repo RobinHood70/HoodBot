@@ -176,5 +176,14 @@ namespace RobinHood70.Robby.Properties {
                 return ResourceManager.GetString("UserEmailDisabled", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Waiting for job queue to clear: {0} jobs remaining..
+        /// </summary>
+        internal static string WaitingForJobQueue {
+            get {
+                return ResourceManager.GetString("WaitingForJobQueue", resourceCulture);
+            }
+        }
     }
 }

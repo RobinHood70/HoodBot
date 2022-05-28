@@ -5,17 +5,20 @@
 	using System.Collections.Generic;
 	using System.Collections.Immutable;
 	using System.ComponentModel;
+	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.IO;
 	using System.Net;
 	using System.Runtime.CompilerServices;
 	using System.Text.RegularExpressions;
+	using System.Threading;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.Robby.Properties;
 	using RobinHood70.WallE.Base;
+	using RobinHood70.WallE.Clients;
 	using RobinHood70.WallE.Design;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
@@ -734,6 +737,39 @@
 					? ChangeStatus.Success
 					: ChangeStatus.Failure;
 			}
+		}
+
+		/// <summary>Waits for the job queue to reach zero.</summary>
+		/// <remarks>Waits for 10 seconds between each request.</remarks>
+		public void WaitForJobQueue() => this.WaitForJobQueue(TimeSpan.FromSeconds(10), 0);
+
+		/// <summary>Waits for the job queue to reach zero.</summary>
+		/// <param name="timeBetweenChecks">The amount of time to wait between requests for the number of jobs remaining.</param>
+		/// <param name="atOrBelow">Wait until the job queue is at or below this value.</param>
+		public void WaitForJobQueue(TimeSpan timeBetweenChecks, int atOrBelow)
+		{
+			long jobsRemaining;
+			var client = (this.AbstractionLayer as IInternetEntryPoint)?.Client;
+			do
+			{
+				var input = new SiteInfoInput(SiteInfoProperties.Statistics);
+				var results = this.AbstractionLayer.SiteInfo(input);
+				jobsRemaining = results.Statistics?.Jobs ?? 0;
+				Debug.WriteLine(jobsRemaining);
+				if (jobsRemaining > atOrBelow)
+				{
+					if (client == null)
+					{
+						Thread.Sleep(timeBetweenChecks);
+					}
+					else
+					{
+						Debug.WriteLine("Request Delay Start");
+						client.RequestDelay(timeBetweenChecks, DelayReason.ClientThrottled, Globals.CurrentCulture(Resources.WaitingForJobQueue, jobsRemaining));
+					}
+				}
+			}
+			while (jobsRemaining > 0);
 		}
 
 		/// <summary>Watches all pages in the specified namespace.</summary>
