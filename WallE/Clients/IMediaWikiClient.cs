@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Net.Http;
-	using System.Threading.Tasks;
 	using RobinHood70.CommonCode;
 
 	/// <summary>The reason for requested delay.</summary>
