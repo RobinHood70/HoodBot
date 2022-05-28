@@ -439,7 +439,10 @@
 			MetaUserInfo userModule = new(this, DefaultUserInformation);
 			this.RunQuery(infoModule, userModule);
 
-			if (userModule.Output is not UserInfoResult userInfo || infoModule.Output is not SiteInfoResult siteInfo || siteInfo.General == null || siteInfo.Namespaces == null)
+			if (userModule.Output is not UserInfoResult userInfo ||
+				infoModule.Output is not SiteInfoResult siteInfo ||
+				siteInfo.General == null ||
+				siteInfo.Namespaces == null)
 			{
 				throw new WikiException(EveMessages.InitializationFailed);
 			}
