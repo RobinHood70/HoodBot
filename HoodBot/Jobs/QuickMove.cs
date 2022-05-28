@@ -7,7 +7,6 @@
 		public QuickMove(JobManager jobManager, string from, string to)
 				: base(jobManager)
 		{
-			this.MoveAction = MoveAction.MoveSafely;
 			this.FollowUpActions = FollowUpActions.FixLinks;
 			this.EditSummaryMove = $"Move to [[{to}]]";
 			this.AddMove(from, to);
