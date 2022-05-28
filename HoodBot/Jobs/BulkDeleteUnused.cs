@@ -4,7 +4,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon;
 
-	public class BulkDeleteUnused : EditJob
+	public class BulkDeleteUnused : WikiJob
 	{
 		#region Fields
 		private readonly TitleCollection deleteTitles;
@@ -23,17 +23,11 @@
 		public override string LogName => "Bulk Delete";
 		#endregion
 
-		#region Protected Override Methods
-		protected override void Main()
-		{
-			foreach (var simpleTitle in this.deleteTitles)
-			{
-				Title title = new(simpleTitle);
-				title.Delete("Unused audio file.");
-				this.Progress++;
-			}
-		}
+		#region Protected Override Properties
+		public override JobTypes JobType => JobTypes.Read | JobTypes.Write;
+		#endregion
 
+		#region Protected Override Methods
 		protected override void BeforeLogging()
 		{
 			TitleCollection unused = new(this.Site);
@@ -50,6 +44,17 @@
 
 			this.ProgressMaximum = this.deleteTitles.Count + 1;
 			this.Progress = 1;
+		}
+
+		protected override void Main()
+		{
+			this.ProgressMaximum = this.deleteTitles.Count;
+			foreach (var simpleTitle in this.deleteTitles)
+			{
+				Title title = new(simpleTitle);
+				title.Delete("Unused audio file.");
+				this.Progress++;
+			}
 		}
 		#endregion
 	}

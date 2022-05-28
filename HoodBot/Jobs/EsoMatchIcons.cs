@@ -48,8 +48,14 @@
 		public override string LogName => "Match ON-icons with log viewer";
 		#endregion
 
+		#region Protected Override Properties
+		protected override Action<EditJob, Page>? EditConflictAction => this.Pages_PageLoaded;
+
+		protected override string EditSummary => this.LogName;
+		#endregion
+
 		#region Protected Override Methods
-		protected override void BeforeLogging()
+		protected override void BeforeLoadPages()
 		{
 			this.StatusWriteLine("Getting database info");
 			this.GetItems();
@@ -59,14 +65,9 @@
 
 			this.StatusWriteLine("Getting image info from wiki");
 			this.GetLicenseTemplates();
-
-			this.StatusWriteLine("Loading Pages");
-			this.Pages.PageLoaded += this.Pages_PageLoaded;
-			this.Pages.GetNamespace(MediaWikiNamespaces.File, Filter.Exclude, "ON-icon-achievement-");
-			this.Pages.PageLoaded -= this.Pages_PageLoaded;
 		}
 
-		protected override void Main() => this.SavePages(this.LogName, true, this.Pages_PageLoaded);
+		protected override void LoadPages() => this.Pages.GetNamespace(MediaWikiNamespaces.File, Filter.Exclude, "ON-icon-achievement-");
 		#endregion
 
 		#region Private Static Methods

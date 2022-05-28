@@ -4,6 +4,7 @@
 	using System.IO;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
+	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
@@ -23,7 +24,16 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void BeforeLogging()
+
+		protected override Action<EditJob, Page>? EditConflictAction => null;
+
+		protected override string EditSummary => "Create/update item page";
+
+		protected override bool MinorEdit => false;
+		#endregion
+
+		#region Protected Override Methods
+		protected override void LoadPages()
 		{
 			var botFolder = UespSite.GetBotDataFolder(this.fileName);
 			var parser = new SiteNodeFactory(this.Site).Parse(File.ReadAllText(botFolder));
@@ -51,8 +61,6 @@
 				}
 			}
 		}
-
-		protected override void Main() => this.SavePages("Create/update item page", false);
 		#endregion
 	}
 }

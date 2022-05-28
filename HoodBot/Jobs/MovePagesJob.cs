@@ -53,10 +53,10 @@
 	public abstract class MovePagesJob : EditJob
 	{
 		#region Fields
-		private readonly IDictionary<Title, DetailedActions> actions;
+		private readonly IDictionary<Title, DetailedActions> actions = new Dictionary<Title, DetailedActions>(SimpleTitleComparer.Instance);
 		private readonly ParameterReplacers parameterReplacers;
-		private readonly IDictionary<Title, Title> moves;
-		private readonly IDictionary<Title, Title> linkUpdates;
+		private readonly IDictionary<Title, Title> moves = new Dictionary<Title, Title>(SimpleTitleComparer.Instance);
+		private readonly IDictionary<Title, Title> linkUpdates = new Dictionary<Title, Title>(SimpleTitleComparer.Instance);
 		private bool isRedirectLink;
 		private string? logDetails;
 		#endregion
@@ -65,11 +65,6 @@
 		protected MovePagesJob(JobManager jobManager)
 			: base(jobManager)
 		{
-			this.linkUpdates = new Dictionary<Title, Title>(SimpleTitleComparer.Instance);
-
-			this.actions = new Dictionary<Title, DetailedActions>(SimpleTitleComparer.Instance);
-			this.moves = new Dictionary<Title, Title>(SimpleTitleComparer.Instance);
-
 			this.parameterReplacers = new ParameterReplacers(jobManager.Site, this.LinkUpdates);
 		}
 		#endregion
@@ -157,6 +152,12 @@
 		protected bool SuppressRedirects { get; set; } = true;
 		#endregion
 
+		#region Protected Override Properties
+		protected override Action<EditJob, Page>? EditConflictAction => this.FullEdit;
+
+		protected override string EditSummary => this.EditSummaryUpdateLinks;
+		#endregion
+
 		#region Protected Methods
 
 		protected void AddLinkUpdate(string from, string to) => this.AddLinkUpdate(
@@ -208,7 +209,7 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void BeforeLogging()
+		protected override void BeforeLoadPages()
 		{
 			this.StatusWriteLine("Getting Replacement List");
 			this.PopulateMoves();
@@ -216,7 +217,10 @@
 			{
 				this.ValidateMoves();
 			}
+		}
 
+		protected override void LoadPages()
+		{
 			var fromPages = this.GetFromPages();
 			this.ValidateMoveActions(fromPages);
 			var categoryMembers = this.GetCategoryMembers(fromPages);
@@ -239,14 +243,12 @@
 				this.Results?.Save();
 			}
 
-			this.Pages.PageLoaded += this.FullEdit;
 			this.Pages.GetTitles(loadTitles);
-			this.Pages.PageLoaded -= this.FullEdit;
 		}
 
 		protected override void Main()
 		{
-			this.SavePages(this.EditSummaryUpdateLinks, true, this.FullEdit);
+			this.SavePages();
 			if (this.MoveAction != MoveAction.None)
 			{
 				this.MovePages();
@@ -268,6 +270,7 @@
 
 		protected virtual void CheckRemaining()
 		{
+			this.Site.WaitForJobQueue();
 			this.StatusWriteLine("Checking remaining pages");
 			TitleCollection leftovers = new(this.Site);
 			var allBacklinks = PageCollection.Unlimited(this.Site, PageModules.Info | PageModules.Backlinks, false);
@@ -314,7 +317,8 @@
 			{
 				var reason = action.Reason.NotNull();
 				ProposeForDeletion(parser, "{{Proposeddeletion|bot=1|" + reason.UpperFirst(this.Site.Culture) + "}}");
-				this.SetSaveInfoForPage(from, this.EditSummaryPropose, false);
+				this.CustomEditSummaries[from] = this.EditSummaryPropose;
+				this.CustomMinorEdits[from] = false;
 			}
 
 			if (action.HasAction(ReplacementActions.Edit))
@@ -881,6 +885,17 @@
 			}
 
 			return toPages;
+		}
+
+		private TitleCollection LoadProposedDeletions()
+		{
+			TitleCollection deleted = new(this.Site);
+			foreach (var title in this.Site.DeletionCategories)
+			{
+				deleted.GetCategoryMembers(title.PageName);
+			}
+
+			return deleted;
 		}
 
 		private string UpdateGalleryLink(Page page, string line)

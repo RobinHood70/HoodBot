@@ -21,6 +21,7 @@
 		#region Fields
 		private readonly Dictionary<string, string> titleOverrides = new(StringComparer.Ordinal);
 		private readonly Dictionary<string, List<string>> pageBooks = new(StringComparer.Ordinal);
+		private readonly PageCollection loreBookPages;
 		#endregion
 
 		#region Constructors
@@ -28,24 +29,35 @@
 		public UpdateLoreBookLists(JobManager jobManager)
 			: base(jobManager)
 		{
+			this.loreBookPages = new PageCollection(this.Site);
 		}
 		#endregion
 
+		#region Protected Override Properties
+		protected override Action<EditJob, Page>? EditConflictAction => this.LoreBookEntries_PageLoaded;
+
+		protected override string EditSummary => "Update list";
+		#endregion
+
 		#region Protected Override Methods
-		protected override void BeforeLogging()
+		protected override void BeforeLoadPages()
 		{
-			this.Pages.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn);
+			this.loreBookPages.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn);
 			this.GetTitleOverrides();
 			var listBooks = this.FilterToListBooks();
 			this.GetPageBooks(listBooks);
-			foreach (var page in this.Pages)
-			{
-				// This couldn't be done earlier, since we needed to parse information from the pages first, so we manually trigger the update here.
-				this.LoreBookEntries_PageLoaded(this, page);
-			}
 		}
 
-		protected override void Main() => this.SavePages("Update list", true, this.LoreBookEntries_PageLoaded);
+		protected override void LoadPages()
+		{
+			this.EditConflictAction.ThrowNull();
+			foreach (var page in this.loreBookPages)
+			{
+				// Add and update manually since we needed to parse information from the pages first.
+				this.Pages.Add(page);
+				this.EditConflictAction(this, page);
+			}
+		}
 		#endregion
 
 		#region Private Static Methods
@@ -137,7 +149,7 @@
 
 		private void GetTitleOverrides()
 		{
-			foreach (var page in this.Pages)
+			foreach (var page in this.loreBookPages)
 			{
 				ContextualParser parser = new(page);
 				foreach (var template in parser.FindSiteTemplates(TemplateName))

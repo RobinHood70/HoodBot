@@ -31,7 +31,7 @@
 		private readonly string logName;
 		private int progress;
 		private int progressMaximum = 1;
-		private bool progressing = false;
+		private bool progressing;
 		#endregion
 
 		#region Constructors
@@ -54,8 +54,6 @@
 		#region Public Properties
 		public JobManager JobManager { get; }
 
-		public JobTypes JobType { get; protected set; } = JobTypes.Read;
-
 		public JobLogger? Logger { get; protected set; }
 
 		public int Progress
@@ -75,6 +73,7 @@
 			{
 				if (!this.progressing)
 				{
+					this.progressing = true;
 					this.JobManager.StartProgressing();
 				}
 
@@ -89,6 +88,8 @@
 		#endregion
 
 		#region Public Virtual Properties
+		public virtual JobTypes JobType => JobTypes.Read;
+
 		public virtual string? LogDetails { get; protected set; }
 
 		public virtual string LogName => this.logName;

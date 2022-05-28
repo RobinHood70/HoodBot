@@ -35,7 +35,7 @@
 		{
 			foreach (var npc in this)
 			{
-				if (npc.Page is not null)
+				if (npc.Title is not null)
 				{
 					Dictionary<Place, int> locCopy = new(npc.UnknownLocations);
 					foreach (var kvp in locCopy)

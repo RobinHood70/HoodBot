@@ -43,6 +43,7 @@
 
 		#region Fields
 		private readonly Dictionary<string, List<string>> crateTiers = new(StringComparer.OrdinalIgnoreCase);
+		private readonly Dictionary<string, DbCollectible> dbCollectibles = new(StringComparer.Ordinal);
 		private string? blankText;
 		#endregion
 
@@ -56,30 +57,30 @@
 
 		#region Public Override Properties
 		public override string LogName => "ESO Collections";
+
+		protected override Action<EditJob, Page>? EditConflictAction => this.ParseListPage;
+
+		protected override string EditSummary => "Update collectible info";
 		#endregion
 
 		#region Protected Override Methods
-		protected override void BeforeLogging()
+		protected override void BeforeLoadPages()
 		{
 			this.StatusWriteLine("Getting collectibles from database");
-			var dbCollectibles = DbCollectible.RunQuery();
+			foreach (var item in Database.RunQuery(EsoLog.Connection, DbCollectible.Query, row => new DbCollectible(row)))
+			{
+				this.dbCollectibles.Add(item.LookupName, item);
+			}
 
 			this.StatusWriteLine("Getting crown crates from wiki");
 			this.GetCrownCrates();
-
-			this.StatusWriteLine("Loading collections");
-			var titles = this.LoadCollections();
-
-			this.StatusWriteLine("Loading list pages");
-			PageCollection listPages = new(this.Site);
-			listPages.GetTitles(titles);
-			foreach (var page in listPages)
-			{
-				this.ParseListPage(page, dbCollectibles);
-			}
 		}
 
-		protected override void Main() => this.SavePages("Update collectible info");
+		protected override void LoadPages()
+		{
+			var titles = this.LoadCollections();
+			this.Pages.GetTitles(titles);
+		}
 		#endregion
 
 		#region Private Static Methods
@@ -352,10 +353,10 @@
 			}
 		}
 
-		private void ParseListPage(Page page, Dictionary<string, DbCollectible> dbCollectibles)
+		private void ParseListPage(object sender, Page page)
 		{
 			ContextualParser parser = new(page);
-			var sectionInfo = this.ParseSections(page, parser, dbCollectibles);
+			var sectionInfo = this.ParseSections(page, parser);
 			if (sectionInfo.Collectibles.Count == 0)
 			{
 				Debug.WriteLine($"* {page.AsLink(LinkFormat.LabelName)} does not appear to be a list page.");
@@ -369,7 +370,7 @@
 			parser.UpdatePage();
 		}
 
-		private SectionInfo ParseSections(Page page, ContextualParser parser, Dictionary<string, DbCollectible> dbCollectibles)
+		private SectionInfo ParseSections(Page page, ContextualParser parser)
 		{
 			SectionInfo sectionInfo = new();
 			var sections = parser.ToSections();
@@ -384,7 +385,7 @@
 					if (ValidateSection(section))
 					{
 						var lookup = GetLookupName(page.BasePageName, section);
-						if (dbCollectibles.TryGetValue(lookup, out var collectible))
+						if (this.dbCollectibles.TryGetValue(lookup, out var collectible))
 						{
 							CollectibleInfo templateInfo = new(this.Site, collectible, lookup.Split(TextArrays.Colon, 2)[1], section, this.crateTiers);
 							sectionInfo.Collectibles.Add(templateInfo);
@@ -629,19 +630,6 @@
 
 			#region Public Override Methods
 			public override string ToString() => this.Name;
-			#endregion
-
-			#region Internal Methods
-			internal static Dictionary<string, DbCollectible> RunQuery()
-			{
-				Dictionary<string, DbCollectible> retval = new(StringComparer.Ordinal);
-				foreach (var item in Database.RunQuery(EsoLog.Connection, Query, row => new DbCollectible(row)))
-				{
-					retval.Add(item.LookupName, item);
-				}
-
-				return retval;
-			}
 			#endregion
 		}
 

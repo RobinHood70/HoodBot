@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Globalization;
 	using System.Text;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
@@ -16,87 +15,76 @@
 	internal sealed class EsoNpcs : EditJob
 	{
 		#region Fields
-		private readonly bool updateMode;
+		private readonly NpcCollection npcCollection = new();
+		private readonly Dictionary<Page, NpcData> pageNpcs = new(SimpleTitleComparer.Instance);
+		private readonly bool allowUpdates;
 		#endregion
 
 		#region Constructors
 		[JobInfo("Create Missing NPCs", "ESO Update")]
-		public EsoNpcs(JobManager jobManager, [JobParameter(DefaultValue = false)] bool updateMode)
+		public EsoNpcs(JobManager jobManager, [JobParameter(DefaultValue = false)] bool allowUpdates)
 			: base(jobManager)
 		{
-			this.updateMode = updateMode;
+			this.allowUpdates = allowUpdates;
 			this.SetResultDescription("Existing ESO NPC pages");
 		}
 		#endregion
 
+		#region Public Override Properties
+		public override string LogName => (this.allowUpdates ? "Update" : "Create missing") + " ESO NPC pages";
+		#endregion
+
 		#region Protected Override Properties
-		public override string LogName => (this.updateMode ? "Update" : "Create missing") + " ESO NPC pages";
+		protected override Action<EditJob, Page>? EditConflictAction => this.UpdatePage;
+
+		protected override string EditSummary => this.LogName;
+
+		protected override bool MinorEdit => false;
 		#endregion
 
 		#region Protected Override Methods
-		protected override void BeforeLogging()
+		protected override void BeforeLoadPages()
 		{
 			// TODO: Update mode could load pages with no loc or {{huh}} via MetaTemplate variables.
 			this.StatusWriteLine("Getting NPC data");
-			var npcCollection = this.GetNpcPages();
-			npcCollection.GetLocations();
+			this.GetNpcPages();
+			this.npcCollection.GetLocations();
 
 			this.StatusWriteLine("Getting place data");
 			var places = EsoSpace.GetPlaces(this.Site);
-			var placeInfo = EsoSpace.PlaceInfo;
-			npcCollection.ParseLocations(places);
-			foreach (var npc in npcCollection)
+			this.npcCollection.ParseLocations(places);
+			foreach (var npc in this.npcCollection)
 			{
 				npc.TrimPlaces();
 			}
-
-			if (this.updateMode)
-			{
-				foreach (var npc in npcCollection)
-				{
-					// TODO: We end up parsing the page twice with this design, one in FilterNpcsUpdate and once here. See if there's something that can be done to optimize this.
-					if (npc.Page is Page page &&
-						new ContextualParser(page) is var parser &&
-						parser.FindSiteTemplate("Online NPC Summary") is ITemplateNode template)
-					{
-						UpdateLocations(npc, template, parser.Factory, placeInfo);
-						parser.UpdatePage();
-						this.Pages.Add(page);
-					}
-					else
-					{
-						throw new InvalidOperationException();
-					}
-				}
-			}
-			else
-			{
-				foreach (var npc in npcCollection)
-				{
-					if (npc.Page is Page page)
-					{
-						page.Text = NewPageText(npc, this.Site.Culture, placeInfo);
-						page.SetMinimalStartTimestamp();
-						this.Pages.Add(page);
-					}
-				}
-			}
 		}
 
-		protected override void Main() => this.SavePages(this.LogName, false);
+		protected override void LoadPages()
+		{
+			var npcPages = new TitleCollection(this.Site);
+			foreach (var npc in this.npcCollection)
+			{
+				if (npc.Title is Title title)
+				{
+					npcPages.Add(title);
+				}
+			}
+
+			this.Pages.GetTitles(npcPages);
+		}
 		#endregion
 
 		#region Private Static Methods
-
-		private static string NewPageText(NpcData npc, CultureInfo culture, IEnumerable<PlaceInfo> placeInfo)
+		protected override void FillPage(Page page)
 		{
+			var npc = this.pageNpcs[page];
 			List<(string?, string)> parameters = new()
 			{
 				("image", string.Empty),
 				("imgdesc", string.Empty),
 				("race", string.Empty),
 				("gender", npc.GenderText),
-				("difficulty", npc.Difficulty > 0 ? npc.Difficulty.ToString(culture) : string.Empty),
+				("difficulty", npc.Difficulty > 0 ? npc.Difficulty.ToString(this.Site.Culture) : string.Empty),
 				("reaction", npc.Reaction),
 				("pickpocket", npc.PickpocketDifficulty > 0 ? npc.PickpocketDifficultyText : string.Empty),
 				("loottype", npc.LootType),
@@ -105,9 +93,9 @@
 
 			WikiNodeFactory factory = new();
 			var template = factory.TemplateNodeFromParts("Online NPC Summary", true, parameters);
-			UpdateLocations(npc, template, factory, placeInfo);
+			UpdateLocations(npc, template, factory, EsoSpace.PlaceInfo);
 
-			return new StringBuilder()
+			page.Text = new StringBuilder()
 				.Append("{{Minimal|NPC}}")
 				.AppendLine(WikiTextVisitor.Raw(template))
 				.AppendLine()
@@ -128,31 +116,47 @@
 				.AppendLine()
 				.AppendLine("{{Stub|NPC}}")
 				.ToString();
+
+			page.SetMinimalStartTimestamp();
 		}
 
-		private static int NpcComparer((NpcData Npc, string Issue) x, (NpcData Npc, string Issue) y) => SimpleTitleComparer.Instance.Compare(x.Npc.Page, y.Npc.Page);
+		private static int NpcComparer((NpcData Npc, string Issue) x, (NpcData Npc, string Issue) y) => SimpleTitleComparer.Instance.Compare(x.Npc.Title, y.Npc.Title);
 
 		private static string NpcToWikiText(NpcData npc)
 		{
-			var places = string.Join(", ", npc.Places);
-			var unknownLocs = string.Join(", ", npc.UnknownLocations);
-			var retval = $"\n* Name: {npc.Name}\n* Gender: {npc.GenderText}";
+			var sb = new StringBuilder();
+			sb
+				.Append("\n* Name: ")
+				.Append(npc.Name)
+				.Append("\n* Gender: ")
+				.Append(npc.GenderText);
 			if (!string.IsNullOrWhiteSpace(npc.LootType))
 			{
-				retval += $"\n* Loot Type: {npc.LootType}";
+				sb
+					.Append("\n* Loot Type: ")
+					.Append(npc.LootType);
 			}
 
-			if (!string.IsNullOrWhiteSpace(places))
+			var npcPlaces = string.Join(", ", npc.Places);
+			if (!string.IsNullOrWhiteSpace(npcPlaces))
 			{
-				retval += $"\n* Known Locations: {places}";
+				sb.Append("\n* Known Locations: ").Append(npcPlaces);
 			}
 
-			if (!string.IsNullOrWhiteSpace(unknownLocs))
+			var sbLoc = sb.Length;
+			foreach (var place in npc.UnknownLocations)
 			{
-				retval += $"\n* Unknown Locations: {unknownLocs}";
+				sb
+					.Append(", ")
+					.Append(place.Key.TitleName);
 			}
 
-			return retval;
+			if (sb.Length > sbLoc)
+			{
+				sb.Insert(sbLoc, "\n* Unknown Locations: ");
+			}
+
+			return sb.ToString();
 		}
 
 		private static void UpdateLocations(NpcData npc, ITemplateNode template, IWikiNodeFactory factory, IEnumerable<PlaceInfo> placeInfos)
@@ -208,7 +212,7 @@
 		#endregion
 
 		#region Private Methods
-		private NpcCollection GetNpcPages()
+		private void GetNpcPages()
 		{
 			Title NpcTitle(string pageName) => TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], pageName);
 			TitleCollection existingTitles = new(this.Site);
@@ -250,7 +254,7 @@
 
 				if (existingTitles.Contains(title))
 				{
-					if (this.updateMode)
+					if (this.allowUpdates)
 					{
 						loadNpcs.Add(npc);
 						loadTitles.Add(title);
@@ -267,7 +271,6 @@
 			loadPages.GetTitles(loadTitles);
 			loadPages.Sort();
 
-			NpcCollection retval = new();
 			List<(NpcData, string)> issues = new();
 			foreach (var npc in loadNpcs)
 			{
@@ -278,12 +281,12 @@
 
 				if (loadPages.TryGetValue(NpcTitle(npcName), out var page))
 				{
-					npc.Page = page;
+					npc.Title = page;
 					var issue = page switch
 					{
 						Page when page.IsDisambiguation == true => "is a disambiguation with no clear NPC link",
 						Page when page.IsRedirect => "is a redirect to a content page without an Online NPC Summary",
-						Page when !this.updateMode && page.IsMissing && page.PreviouslyDeleted => "was previously deleted",
+						Page when !this.allowUpdates && page.IsMissing && page.PreviouslyDeleted => "was previously deleted",
 						_ => null
 					};
 
@@ -291,7 +294,7 @@
 					{
 						ContextualParser parsed = new(page);
 						var template = parsed.FindSiteTemplate("Online NPC Summary");
-						if (this.updateMode)
+						if (this.allowUpdates)
 						{
 							if (template?.Find("city").IsNullOrWhitespace() == true &&
 								template.Find("settlement").IsNullOrWhitespace() &&
@@ -301,14 +304,14 @@
 								template.Find("loc") is IParameterNode loc &&
 								(loc.IsNullOrWhitespace() || string.Equals(loc.Value.ToValue(), "{{huh}}", StringComparison.OrdinalIgnoreCase)))
 							{
-								retval.Add(npc);
+								this.npcCollection.Add(npc);
 							}
 						}
 						else if (template is null)
 						{
 							if (page.IsMissing)
 							{
-								retval.Add(npc);
+								this.npcCollection.Add(npc);
 							}
 							else
 							{
@@ -330,13 +333,33 @@
 			foreach (var (npc, issue) in issues)
 			{
 				this.WriteLine("|-");
-				this.WriteLine($"| {npc.Page?.AsLink(LinkFormat.LabelName)}");
+				this.WriteLine($"| {npc.Title?.AsLink(LinkFormat.LabelName)}");
 				this.WriteLine($"| {issue}");
 				this.WriteLine("| " + NpcToWikiText(npc));
 			}
 
 			this.WriteLine("|}");
-			return retval;
+		}
+
+		private void UpdatePage(object sender, Page page)
+		{
+			if (this.allowUpdates)
+			{
+				var npc = this.pageNpcs[page];
+				var placeInfo = EsoSpace.PlaceInfo;
+
+				if (new ContextualParser(page) is var parser &&
+					parser.FindSiteTemplate("Online NPC Summary") is ITemplateNode template)
+				{
+					UpdateLocations(npc, template, parser.Factory, placeInfo);
+					parser.UpdatePage();
+					this.Pages.Add(page);
+				}
+				else
+				{
+					throw new InvalidOperationException();
+				}
+			}
 		}
 		#endregion
 	}

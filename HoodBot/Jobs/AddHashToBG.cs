@@ -1,7 +1,9 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
+	using System;
 	using System.Globalization;
 	using RobinHood70.CommonCode;
+	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
@@ -13,6 +15,8 @@
 			: base(jobManager)
 		{
 		}
+
+		protected override Action<EditJob, Page>? EditConflictAction => null;
 
 		protected override string EditSummary => "Add hash to BG value";
 

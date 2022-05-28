@@ -1,10 +1,9 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System;
-	using System.Diagnostics;
+	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
-	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
 	public class OneOffJob : EditJob
@@ -17,40 +16,29 @@
 		}
 		#endregion
 
-		#region Protected Override Methods
-		protected override void BeforeLogging()
-		{
-			this.Pages.PageLoaded += Pages_PageLoaded;
-			this.Pages.GetBacklinks("Template:ESO House Furnishings", BacklinksTypes.EmbeddedIn);
-			this.Pages.PageLoaded -= Pages_PageLoaded;
-		}
+		#region Protected Override Properties
+		protected override Action<EditJob, Page>? EditConflictAction => Pages_PageLoaded;
 
-		protected override void Main() => this.SavePages("Add furnished parameter");
+		protected override string EditSummary => "Add furnished parameter";
+		#endregion
+
+		#region Protected Override Methods
+		protected override void LoadPages() =>
+			this.Pages.GetNamespace(UespNamespaces.Online, CommonCode.Filter.Exclude, "Guild Reprint");
 		#endregion
 
 		#region Private Static Methods
-		private static void Pages_PageLoaded(PageCollection sender, Page page)
+		private static void Pages_PageLoaded(object sender, Page page)
 		{
 			var parser = new ContextualParser(page);
-			var sections = parser.ToSections(3);
-			foreach (var section in sections)
+			var template = parser.FindSiteTemplate("Online Furnishing Summary");
+			if (template is not null && template.Find("cat", "subcat") is null)
 			{
-				if (section.Header is IHeaderNode header && string.Equals(header.GetInnerText(true), "Furnished", StringComparison.Ordinal))
-				{
-					if (section.Content.Find<SiteTemplateNode>(template => template.TitleValue.PageNameEquals("ESO House Furnishings")) is SiteTemplateNode template)
-					{
-						template.AddIfNotExists("furnished", "1", ParameterFormat.OnePerLine);
-					}
-				}
+				template.Parameters.Insert(0, parser.Factory.ParameterNodeFromParts("cat", "Library\n"));
+				template.Parameters.Insert(1, parser.Factory.ParameterNodeFromParts("subcat", "Literature\n"));
 			}
 
-			parser.FromSections(sections);
 			parser.UpdatePage();
-
-			if (!parser.Page.TextModified)
-			{
-				Debug.WriteLine("Furnished section not found on " + parser.Page.FullPageName);
-			}
 		}
 		#endregion
 	}
