@@ -24,6 +24,16 @@
 		public static string PipeEscape { get; set; } = "{{!}}";
 		#endregion
 
+		#region Public Properties
+
+		/// <inheritdoc/>
+		public InclusionType InclusionType { get; private set; }
+
+		/// <inheritdoc/>
+		public bool StrictInclusion { get; private set; }
+
+		#endregion
+
 		#region Public Static Methods
 
 		/// <summary>Escapes any pipes and equals signs in the value.</summary>
@@ -214,6 +224,8 @@
 		public void ParseInto(NodeCollection nodes, string text, InclusionType inclusionType, bool strictInclusion)
 		{
 			nodes.ThrowNull();
+			this.InclusionType = inclusionType;
+			this.StrictInclusion = strictInclusion;
 			WikiStack stack = new(this, text, inclusionType, strictInclusion);
 			nodes.AddRange(stack.GetNodes());
 		}

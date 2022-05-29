@@ -9,6 +9,17 @@
 	/// <remarks>This should always be the primary point of entry for creating new nodes.</remarks>
 	public interface IWikiNodeFactory
 	{
+		#region Properties
+
+		/// <summary>Gets the inclusion type specified in the constructor.</summary>
+		/// <value>The inclusion type for the text. Set to <see cref="InclusionType.Transcluded"/> to return text as if transcluded to another page; <see cref="InclusionType.CurrentPage"/> to return text as it would appear on the current page; <see cref="InclusionType.Raw"/> to return all text. In each case, any ignored text will be wrapped in an IgnoreNode.</value>
+		InclusionType InclusionType { get; }
+
+		/// <summary>Gets a value indicating whether the output should include or exclude ignored text (e.g., via &lt;noinclude>. This is a copy of the strictinclusion setting specified in the <see cref="Parse(string, InclusionType, bool)"/> method.</summary>
+		/// <value><see langword="true"/> if the output should exclude IgnoreNodes; otherwise <see langword="false"/>.</value>
+		bool StrictInclusion { get; }
+		#endregion
+
 		#region Methods
 
 		/// <summary>Creates a new instance of the <see cref="ArgumentNode"/> class.</summary>
