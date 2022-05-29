@@ -30,11 +30,7 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void BeforeLogging()
-		{
-			this.GetCardPowers();
-			base.BeforeLogging();
-		}
+		protected override void BeforeLoadPages() => this.GetCardPowers();
 
 		protected override void LoadPages() => this.Pages.GetBacklinks("Template:Legends Deck Summary", BacklinksTypes.EmbeddedIn);
 

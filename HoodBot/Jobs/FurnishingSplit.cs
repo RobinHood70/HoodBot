@@ -34,7 +34,7 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void BeforeLogging()
+		protected override void BeforeLoadPages()
 		{
 			TitleCollection furnishingFiles = new(this.Site);
 			furnishingFiles.GetNamespace(MediaWikiNamespaces.File, Filter.Exclude, FurnishingPrefix);
@@ -48,7 +48,6 @@
 			allPages.GetTitles(allTitles);
 			allPages.RemoveExists(false);
 			this.existingPages = allPages;
-			base.BeforeLogging();
 		}
 
 		protected override void LoadPages() => this.Pages.GetNamespace(MediaWikiNamespaces.File, Filter.Exclude, FurnishingPrefix);
