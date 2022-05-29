@@ -119,7 +119,7 @@
 
 		protected override void AfterLoadPages() => this.GenerateReport();
 
-		protected override void BeforeLogging()
+		protected override void BeforeLoadPages()
 		{
 			this.StatusWriteLine("Fetching data");
 			EsoReplacer.Initialize(this);
