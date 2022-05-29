@@ -91,15 +91,12 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void BeforeLogging()
+		protected override void BeforeLoadPages()
 		{
 			this.sourcePages = new PageCollection(this.Site);
 			this.sourcePages.PageLoaded += AddHeaderLinks;
 			this.sourcePages.GetNamespace(UespNamespaces.Online, Filter.Exclude, CollectibleTypePrefix);
 			this.sourcePages.PageLoaded -= AddHeaderLinks;
-
-
-			base.BeforeLogging();
 		}
 
 		protected override void LoadPages()

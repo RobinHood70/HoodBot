@@ -33,15 +33,13 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void BeforeLogging()
+		protected override void BeforeLoadPages()
 		{
 			UespNamespaceList nsList = new(this.Site);
 			foreach (var ns in nsList)
 			{
 				this.nsIds.Add(ns.Id, ns);
 			}
-
-			base.BeforeLogging();
 		}
 
 		protected override void LoadPages() => this.Pages.GetQueryPage("Uncategorizedimages");
