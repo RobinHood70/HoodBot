@@ -51,7 +51,6 @@
 		#region Constructors
 		public MainViewModel()
 		{
-			this.ShowDiffs = true;
 			this.SelectedItem = App.UserSettings.GetCurrentItem();
 			var plugins = Plugins.Instance;
 			this.diffViewer = plugins.DiffViewers["Internet Explorer"];
@@ -154,8 +153,6 @@
 			}
 		}
 
-		public bool ShowDiffs { get; }
-
 		public string Status
 		{
 			get => this.status;
@@ -231,7 +228,6 @@
 				jobManager.StatusUpdated += this.JobManager_StatusUpdated;
 				jobManager.PagePreview += this.SitePagePreview;
 				jobManager.FinishedAllJobs += this.JobManager_FinishedAllJobs;
-
 				jobManager.Site.EditingEnabled = this.EditingEnabled;
 
 				var loginName = this.UserName ?? wikiInfo.UserName ?? throw new InvalidOperationException(Resources.UserNameNotSet);
@@ -353,7 +349,7 @@
 		{
 			// Until we get a menu going, specify manually.
 			// currentViewer ??= this.FindPlugin<IDiffViewer>("IeDiff");
-			if (this.diffViewer != null && this.ShowDiffs)
+			if (this.diffViewer != null && sender.ShowDiffs)
 			{
 				this.diffViewer.Compare(eventArgs);
 				this.diffViewer.Wait();
