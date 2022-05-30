@@ -364,6 +364,29 @@
 			template.Update("subcat", furnishing.FurnishingSubcategory, ParameterFormat.OnePerLine, false);
 			CheckBehavior(template, furnishing);
 
+			var craft = template.GetValue("craft");
+			if (craft is not null)
+			{
+				var craftWord = craft switch
+				{
+					"Alchemy" => "Formula",
+					"Blacksmithing" => "Diagram",
+					"Clothing" => "Pattern",
+					"Enchanting" => "Praxis",
+					"Jewelry Crafting" => "Sketch",
+					"Provisioning" => "Design",
+					"Woodworking" => "Blueprint",
+					_ => throw new InvalidOperationException()
+				};
+
+				var expectedNmae = craftWord + ": " + (template.GetValue("name") ?? page.LabelName());
+				var planname = template.GetValue("planname");
+				if (string.Equals(expectedNmae, planname, StringComparison.Ordinal))
+				{
+					template.Remove("planname");
+				}
+			}
+
 			if (furnishing.Materials.Count > 0)
 			{
 				template.Update("materials", string.Join("~", furnishing.Materials), ParameterFormat.OnePerLine, true);
