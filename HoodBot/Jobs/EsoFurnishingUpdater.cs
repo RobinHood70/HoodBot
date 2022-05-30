@@ -387,6 +387,11 @@
 				}
 			}
 
+			if (template.GetValue("planquality") is string planquality && string.Equals(template.GetValue("quality"), planquality, StringComparison.Ordinal))
+			{
+				template.Remove("planquality");
+			}
+
 			if (furnishing.Materials.Count > 0)
 			{
 				template.Update("materials", string.Join("~", furnishing.Materials), ParameterFormat.OnePerLine, true);
