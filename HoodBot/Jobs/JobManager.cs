@@ -70,6 +70,8 @@
 
 		public ResultHandler? ResultHandler { get; set; }
 
+		public bool ShowDiffs { get; set; } = true;
+
 		public Site Site { get; }
 		#endregion
 
