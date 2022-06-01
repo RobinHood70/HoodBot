@@ -29,15 +29,15 @@
 	internal sealed class EsoFurnishingUpdater : TemplateJob
 	{
 		#region Static Fields
-		private static readonly string CollectiblesQuery = $"SELECT convert(cast(convert(description using latin1) as binary) using utf8) description, furnCategory, furnLimitType, furnSubCategory, id itemId, itemLink resultitemLink, name, nickname FROM collectibles WHERE furnCategory != ''";
+		private static readonly string CollectiblesQuery = $"SELECT convert(cast(convert(description using latin1) as binary) using utf8) description, furnCategory, furnLimitType, furnSubCategory, id itemId, itemLink resultitemLink, name, nickname, tags FROM collectibles WHERE furnCategory != ''";
 		private static readonly string MinedItemsQuery = $"SELECT abilityDesc, bindType, convert(cast(convert(description using latin1) as binary) using utf8) description, furnCategory, furnLimitType, itemId, name, quality, resultitemLink, tags, type FROM uesp_esolog.minedItemSummary WHERE type IN({(int)ItemType.Container}, {(int)ItemType.Recipes}, {(int)ItemType.Furnishing})";
 		private static readonly Dictionary<FurnishingType, string> FurnishingLimitTypes = new()
 		{
 			[FurnishingType.None] = string.Empty,
-			[FurnishingType.TraditionalFurnishings] = "Traditional Furnishing",
-			[FurnishingType.SpecialFurnishings] = "Special Furnishing",
-			[FurnishingType.CollectibleFurnishings] = "Collectible Furnishing",
-			[FurnishingType.SpecialCollectibles] = "Special Collectible",
+			[FurnishingType.TraditionalFurnishings] = "Traditional Furnishings",
+			[FurnishingType.SpecialFurnishings] = "Special Furnishings",
+			[FurnishingType.CollectibleFurnishings] = "Collectible Furnishings",
+			[FurnishingType.SpecialCollectibles] = "Special Collectibles",
 		};
 		#endregion
 
@@ -157,7 +157,9 @@
 		{
 			if (furnishing.Behavior?.Length > 0)
 			{
-				if (template.GetValue("behavior")?.Trim(',').Replace(",,", ",", StringComparison.Ordinal).Length == 0)
+				if (template.GetValue("behavior")?
+					.Replace(",,", ",", StringComparison.Ordinal)
+					.Trim(',').Length == 0)
 				{
 					template.Remove("behavior");
 				}
@@ -409,7 +411,7 @@
 					: furnishing.BindType;
 			template.Update("bindtype", bindType, ParameterFormat.OnePerLine, true);
 
-			if (furnishing.FurnishingLimitType == FurnishingType.None)
+			if (furnishing.FurnishingLimitType == FurnishingType.None && string.IsNullOrEmpty(furnishing.Behavior))
 			{
 				template.Remove("collectible");
 			}
@@ -545,6 +547,9 @@
 					.Replace("|r", string.Empty, StringComparison.Ordinal);
 				this.Description = sizeMatch.Index == 0 && sizeMatch.Length == desc.Length ? null : desc;
 				var furnCategory = (string)record["furnCategory"];
+				this.Behavior = ((string)record["tags"])
+					.Replace(",,", ",", StringComparison.Ordinal)
+					.Trim(',');
 				if (collectible)
 				{
 					this.FurnishingCategory = furnCategory;
@@ -580,9 +585,6 @@
 					this.Quality = int.TryParse(quality, NumberStyles.Integer, site.Culture, out var qualityNum)
 						? "nfsel".Substring(qualityNum - 1, 1)
 						: quality;
-					this.Behavior = ((string)record["tags"])
-						.Replace(",,", ",", StringComparison.Ordinal)
-						.Trim(',');
 					this.Type = (ItemType)record["type"];
 					var abilityDesc = (string)record["abilityDesc"];
 					var ingrMatch = IngredientsFinder.Match(abilityDesc);
