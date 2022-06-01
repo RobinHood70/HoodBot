@@ -13,6 +13,11 @@
 		}
 		#endregion
 
+		#region Protected Abstract Override Properties
+		protected abstract override string EditSummary { get; }
+
+		#endregion
+
 		#region Protected Override Properties
 		protected override Action<EditJob, Page>? EditConflictAction => this.PageLoaded;
 		#endregion
