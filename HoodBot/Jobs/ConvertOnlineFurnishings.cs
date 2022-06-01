@@ -24,6 +24,7 @@
 		public ConvertOnlineFurnishings(JobManager jobManager)
 			: base(jobManager)
 		{
+			// jobManager.ShowDiffs = false;
 		}
 		#endregion
 
@@ -35,15 +36,15 @@
 
 		#region Protected Override Methods
 
-		// this.Pages.GetBacklinks("Template:Online Furnishing Summary");
-		protected override void LoadPages() => this.Pages.GetTitles(
-			"Online:Adamant Dwarven Senche (furnishing)",
-			"Online:Alinor Potted Plant, Perpetual Bloom",
-			"Online:Basket of Apples, Full",
-			"Online:Blackwood Tapestry",
-			"Online:Dwarven Puzzle Box",
-			"Online:Murkmire Totem, Stone Head",
-			"Online:Temple Doctrine, the 36 Lessons");
+		protected override void LoadPages() => this.Pages.GetBacklinks("Template:Online Furnishing Summary");
+		/* protected override void LoadPages() => this.Pages.GetTitles(
+			"Online:Sotha Sil, The Clockwork God",
+			"Online:Wild Hunt Horse (furnishing)",
+			"Online:Undaunted Chest",
+			"Online:Echalette (furnishing)",
+			"Online:Argonian Hamper, Woven",
+			"Online:Windhelm Wolfhound (furnishing)");
+		*/
 
 		protected override void PageLoaded(object sender, Page page)
 		{
@@ -59,6 +60,10 @@
 					template
 				};
 
+				/*
+				template.SetTitle("User:RobinHood70/Vav");
+				template.Add("name", page.PageName);
+				*/
 				ConvertLead(parser, template);
 				ConvertSources(parser, template);
 				ConvertAntiquity(parser, template);
@@ -66,11 +71,10 @@
 				ConvertCrafting(parser, template);
 				ConvertBooks(parser, template);
 				ConvertHouses(parser, template);
-				ConvertAchievements(parser, template);
+				//// ConvertAchievements(parser, template);
 				parser.AddText("\n");
 
 				// The following are left in the template through all calls because they're shared. Now that we're done, we can remove them.
-				template.Remove("achievement");
 				template.Remove("antiquity");
 
 				originalParser.RemoveAt(index);
@@ -81,9 +85,10 @@
 		#endregion
 
 		#region Private Static Methods
+		/*
 		private static void ConvertAchievements(ContextualParser parser, SiteTemplateNode template)
 		{
-			if (template.GetRaw("achievement") is string achievement && string.Equals(template.GetRaw("furnLimitType"), "Collectible Furnishing", StringComparison.OrdinalIgnoreCase))
+			if (template.GetRaw("achievement") is string achievement && IsCollectible(template))
 			{
 				parser.AddParsed("\n\n" +
 					"==Achievement==\n" +
@@ -98,6 +103,15 @@
 					"The following [[Online:Achievements|achievement]] grants this furnishing:" +
 					"{{ESO Achievements List|<Achievement Name>}}-->");
 			}
+		}
+		*/
+
+		private static bool IsCollectible(ITemplateNode template)
+		{
+			var furnLimitType = template.GetRaw("furnLimitType");
+			return
+				string.Equals(furnLimitType, "Collectible Furnishing", StringComparison.OrdinalIgnoreCase) ||
+				string.Equals(furnLimitType, "Special Collectible", StringComparison.OrdinalIgnoreCase);
 		}
 
 		private static void ConvertAntiquity(ContextualParser parser, SiteTemplateNode template)
@@ -270,8 +284,8 @@
 
 		private static void ConvertLead(ContextualParser parser, SiteTemplateNode template)
 		{
-			template.SetTitle("User:RobinHood70/Vav");
-			template.Parameters.Insert(0, parser.Factory.ParameterNodeFromParts("name", parser.Page.PageName + '\n'));
+			// template.SetTitle("User:RobinHood70/Vav");
+			// template.Parameters.Insert(0, parser.Factory.ParameterNodeFromParts("name", parser.Page.PageName + '\n'));
 			if (template.Find("note") is IParameterNode note)
 			{
 				parser.AddText("\n");
@@ -289,12 +303,16 @@
 
 		private static void ConvertPurchase(ContextualParser parser, SiteTemplateNode template)
 		{
+			if (IsCollectible(template) && !RewardProhibited(template))
+			{
+				template.RenameParameter("achievement", "reward");
+			}
+
 			if (template.Find(PurchaseParameters) is not null)
 			{
 				var sb = new StringBuilder();
 				sb.Append("\n\n==Purchase==\n{{Online Furnishing Purchase");
-				if (template.GetRaw("achievement") is string achievement &&
-					!string.Equals(template.GetRaw("furnLimitType"), "Collectible Furnishing", StringComparison.Ordinal))
+				if (template.GetRaw("achievement") is string achievement)
 				{
 					sb
 						.Append("\n|achievement=")
@@ -311,7 +329,6 @@
 					sb
 						.Append("\n|quest=")
 						.Append(quest);
-					template.Remove("quest");
 				}
 
 				foreach (var name in PurchaseParameters)
@@ -323,17 +340,26 @@
 							.Append(name)
 							.Append('=')
 							.Append(value);
-						template.Remove(name);
 					}
 				}
 
 				sb.Append("\n}}");
-				parser.AddParsed(sb.ToString());
+				if (sb.Length > 400)
+				{
+					parser.AddParsed(sb.ToString());
+					template.Remove("achievement");
+					template.Remove("antiquity");
+					template.Remove("quest");
+					foreach (var name in PurchaseParameters)
+					{
+						template.Remove(name);
+					}
+				}
 			}
 			else
 			{
 				parser.AddParsed("<!--Instructions: Add vendor information here.-->");
-				parser.AddParsed("<!--\n==Purchased==\n{{Online Furnishing Purchase" +
+				parser.AddParsed("<!--\n==Purchase==\n{{Online Furnishing Purchase" +
 					"|achievement=" +
 					"|antiquity=1" +
 					"|quest=" +
@@ -341,6 +367,11 @@
 					"|pricegold=" +
 					"}}\n\n-->");
 			}
+
+			static bool RewardProhibited(ITemplateNode template) =>
+				template.GetRaw("vendorcrowns") is string vendorCrowns &&
+				(vendorCrowns.Contains("Crown Store", StringComparison.OrdinalIgnoreCase) ||
+				vendorCrowns.Contains("Housing", StringComparison.OrdinalIgnoreCase));
 		}
 
 		private static void ConvertSources(ContextualParser parser, SiteTemplateNode template)
