@@ -134,11 +134,8 @@
 			{
 				var (leading, trailing) = GetSurroundingSpace(paramValue.ToValue());
 				value = TrimValue(value, format);
-				var copyNodes = parameter.Factory.Parse(value);
 				paramValue.Clear();
-				paramValue.AddText(leading);
-				paramValue.AddRange(copyNodes);
-				paramValue.AddText(trailing);
+				paramValue.AddParsed(leading + value + trailing);
 				return;
 			}
 
