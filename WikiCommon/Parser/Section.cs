@@ -33,5 +33,21 @@
 		/// <summary>Gets or sets the header node for the section (null for lead).</summary>
 		public IHeaderNode? Header { get; set; }
 		#endregion
+
+		#region Public Static Methods
+
+		/// <summary>Formats the provided text into a <see cref="Section"/>.</summary>
+		/// <param name="factory">The factory to use to parse the request.</param>
+		/// <param name="header">The header text.</param>
+		/// <param name="content">The body text.</param>
+		/// <returns>THe new Section.</returns>
+		public static Section FromText(IWikiNodeFactory factory, string header, string content)
+		{
+			var headerNode = factory.NotNull().HeaderNodeFromParts(2, header);
+			var bodyNodes = factory.Parse('\n' + content, factory.InclusionType, factory.StrictInclusion);
+
+			return new Section(headerNode, bodyNodes);
+		}
+		#endregion
 	}
 }
