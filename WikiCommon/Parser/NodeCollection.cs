@@ -159,7 +159,7 @@
 		/// <param name="text">The text to be added.</param>
 		public void AddParsed([Localizable(false)] string text)
 		{
-			var newNodes = this.Factory.Parse(text, this.Factory.InclusionType, this.Factory.StrictInclusion);
+			var newNodes = this.Parse(text);
 			this.AddRange(newNodes);
 		}
 
@@ -381,6 +381,11 @@
 				}
 			}
 		}
+
+		/// <summary>Parses the given text for use with methods expecting <see cref="IWikiNode"/>s.</summary>
+		/// <param name="text">The text to parse.</param>
+		/// <returns>A new NodeCollection created from the text.</returns>
+		public NodeCollection Parse(string text) => this.Factory.Parse(text, this.Factory.InclusionType, this.Factory.StrictInclusion);
 
 		/// <summary>Removes all nodes of the given type.</summary>
 		/// <typeparam name="T">The type of node to remove. Must be derived from <see cref="IWikiNode"/>.</typeparam>
