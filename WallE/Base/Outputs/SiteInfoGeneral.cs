@@ -6,6 +6,7 @@ namespace RobinHood70.WallE.Base
 
 	public class SiteInfoGeneral
 	{
+		#region Constructors
 		internal SiteInfoGeneral(string articlePath, string basePage, string dbType, string dbVersion, IReadOnlyList<string> externalImages, string fallback8BitEncoding, List<string> fallbackLanguages, string? favicon, SiteInfoFlags flags, string generator, string? gitBranch, string? gitHash, string? hhvmVersion, IReadOnlyDictionary<string, ImageLimitsItem> imageLimits, string language, string? legalTitleChars, string? linkPrefix, string? linkPrefixCharset, string? linkTrail, string? logo, string mainPage, long maxUploadSize, string phpSapi, string phpVersion, string? readOnlyReason, long revision, string script, string scriptPath, string server, string? serverName, string siteName, IReadOnlyDictionary<string, int> thumbLimits, DateTime time, TimeSpan timeOffset, string timeZone, string? variantArticlePath, IReadOnlyList<string> variants, string wikiId)
 		{
 			this.ArticlePath = articlePath;
@@ -47,6 +48,7 @@ namespace RobinHood70.WallE.Base
 			this.Variants = variants;
 			this.WikiId = wikiId;
 		}
+		#endregion
 
 		#region Public Properties
 		public string ArticlePath { get; }
