@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
@@ -26,7 +27,7 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override string EditSummary => "Remove empty Houses section from collectibles";
+		protected override string EditSummary => "Remove empty Houses and/or add Achievement/Reward";
 		#endregion
 
 		#region Protected Override Methods
@@ -65,12 +66,12 @@
 			if (!skip && template.Find("achievement") is IParameterNode achievement)
 			{
 				var achName = achievement.Value.ToRaw().Trim();
-				section = $"\n==Achievement==\nThis furnishing may be purchased after completing the following [[Online:Achievements|achievement]]: {{{{ESO Achievements List|{achName}}}}}\n";
+				section = $"\n==Achievement==\nThis furnishing may be purchased after completing the following [[Online:Achievements|achievement]]:\n{{{{ESO Achievements List|{achName}}}}}\n";
 			}
 			else if (!skip && template.Find("reward") is IParameterNode reward)
 			{
 				var achName = reward.Value.ToRaw().Trim();
-				section = $"\n==Reward==\nThis furnishing is rewarded after completing the following [[Online:Achievements|achievement]]: {{{{ESO Achievements List|{achName}}}}}\n";
+				section = $"\n==Reward==\nThis furnishing is rewarded after completing the following [[Online:Achievements|achievement]]:\n{{{{ESO Achievements List|{achName}}}}}\n";
 			}
 
 			if (section is not null)
