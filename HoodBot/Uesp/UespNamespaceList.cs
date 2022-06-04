@@ -50,20 +50,18 @@
 			return null;
 		}
 
-		public UespNamespace? FromNamespace(Namespace ns) =>
-			this.TryGetValue(ns.Name, out var retval) ? retval : null;
-
-		public UespNamespace? FromTitle(Title title)
+		public UespNamespace FromTitle(Title title)
 		{
 			title.ThrowNull();
 			var ns = title.Namespace.SubjectSpace;
-			var tryName = ns.DecoratedName + title.RootPageName;
-			if (!this.TryGetValue(tryName, out var retval))
-			{
-				this.TryGetValue(ns.Name, out retval);
-			}
+			return this.TryGetValue(ns.DecoratedName + title.RootPageName, out var retval) ? retval : this[ns.Name];
+		}
 
-			return retval;
+		public UespNamespace? GetNsBase(Title title, string? nsBase)
+		{
+			return nsBase != null && this.TryGetValue(nsBase, out var uespNamespace)
+				? uespNamespace
+				: this.FromTitle(title);
 		}
 
 		public UespNamespace? ParentFromTitle(Title title)
