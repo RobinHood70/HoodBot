@@ -92,14 +92,14 @@
 		protected void BulletLink(Page page, SiteTemplateNode template)
 		{
 			page.ThrowNull();
-			if ((template.NotNull().Find(1)
-				?? template.Find("link")) is not IParameterNode link)
+			template.ThrowNull();
+			if ((template.Find(1) ?? template.Find("link")) is not IParameterNode link)
 			{
 				return;
 			}
 
-			var (oldNs, nsParam) = this.GetNsBase(page, template);
-			if (oldNs is null)
+			var nsParam = template.Find("ns_base", "ns_id");
+			if (this.NamespaceList.GetNsBase(page, nsParam?.Value.ToValue()) is not UespNamespace oldNs)
 			{
 				return;
 			}
@@ -161,22 +161,20 @@
 
 		protected void Icon(Page page, SiteTemplateNode template)
 		{
-			var (oldNs, _) = this.GetNsBase(page, template);
-			if (oldNs is null)
+			var nsParam = template.Find("ns_base", "ns_id");
+			if (this.NamespaceList.GetNsBase(page, nsParam?.Value.ToValue()) is UespNamespace oldNs)
 			{
-				return;
-			}
-
-			var iconName = UespFunctions.IconAbbreviation(oldNs.Id, template);
-			var title = TitleFactory.FromUnvalidated(this.site[MediaWikiNamespaces.File], iconName);
-			if (this.globalUpdates.TryGetValue(title, out var toTitle))
-			{
-				var (_, abbr, name, _) = UespFunctions.AbbreviationFromIconName(this.NamespaceList, toTitle.PageName);
-				if (template.Find(1) is IParameterNode param1 &&
-					template.Find(2) is IParameterNode param2)
+				var iconName = UespFunctions.IconAbbreviation(oldNs.Id, template);
+				var title = TitleFactory.FromUnvalidated(this.site[MediaWikiNamespaces.File], iconName);
+				if (this.globalUpdates.TryGetValue(title, out var toTitle))
 				{
-					param1.SetValue(abbr, ParameterFormat.Copy);
-					param2.SetValue(name, ParameterFormat.Copy);
+					var (_, abbr, name, _) = UespFunctions.AbbreviationFromIconName(this.NamespaceList, toTitle.PageName);
+					if (template.Find(1) is IParameterNode param1 &&
+						template.Find(2) is IParameterNode param2)
+					{
+						param1.SetValue(abbr, ParameterFormat.Copy);
+						param2.SetValue(name, ParameterFormat.Copy);
+					}
 				}
 			}
 		}
@@ -263,16 +261,6 @@
 					param.SetValue(newValue, ParameterFormat.Copy);
 				} */
 			}
-		}
-
-		private (UespNamespace? Namespace, IParameterNode? NsParameter) GetNsBase(Page page, SiteTemplateNode template)
-		{
-			var nsBase = template.Find("ns_base", "ns_id");
-			var ns = nsBase != null && this.NamespaceList.TryGetValue(nsBase.Value.ToValue(), out var uespNamespace)
-				? uespNamespace
-				: this.NamespaceList.FromTitle(page);
-
-			return (ns, nsBase);
 		}
 
 		private void PageNameAllNumeric(Page page, SiteTemplateNode template)
