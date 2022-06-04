@@ -31,7 +31,6 @@
 		private readonly string logName;
 		private int progress;
 		private int progressMaximum = 1;
-		private bool progressing;
 		#endregion
 
 		#region Constructors
@@ -71,12 +70,6 @@
 			get => this.progressMaximum;
 			protected set
 			{
-				if (!this.progressing)
-				{
-					this.progressing = true;
-					this.JobManager.StartProgressing();
-				}
-
 				this.progressMaximum = value <= 0 ? 1 : value;
 				this.UpdateProgress();
 			}
