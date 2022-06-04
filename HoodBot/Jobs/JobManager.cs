@@ -46,8 +46,6 @@
 
 		public event StrongEventHandler<JobManager, DiffContent>? PagePreview;
 
-		public event EventHandler? ProgressStarted;
-
 		public event StrongEventHandler<JobManager, double>? ProgressUpdated;
 
 		public event StrongEventHandler<JobManager, EventArgs>? StartingAllJobs;
@@ -126,8 +124,6 @@
 
 			this.OnFinishedAllJobs(allSuccessful);
 		}
-
-		public void StartProgressing() => this.ProgressStarted?.Invoke(this, EventArgs.Empty);
 
 		public void UpdateProgress(double progressPercent) => this.OnUpdateProgress(progressPercent);
 
