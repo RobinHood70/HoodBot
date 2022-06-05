@@ -64,11 +64,7 @@
 				: this.FromTitle(title);
 		}
 
-		public UespNamespace? ParentFromTitle(Title title)
-		{
-			var retval = this.FromTitle(title);
-			return retval == null ? null : this[retval.Parent.Name];
-		}
+		public Namespace? ParentFromTitle(Title title) => this.FromTitle(title)?.Parent;
 		#endregion
 
 		#region Protected Override Methods
