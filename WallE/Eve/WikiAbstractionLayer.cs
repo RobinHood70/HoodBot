@@ -6,6 +6,7 @@
 	using System.Diagnostics.CodeAnalysis;
 	using System.Globalization;
 	using System.Net;
+	using System.Net.Http;
 	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.WallE.Base;
@@ -356,42 +357,14 @@
 		{
 			request.ThrowNull();
 			this.OnSendingRequest(new RequestEventArgs(request.NotNull()));
-			string? response = null;
-			switch (request.Type)
-			{
-				case RequestType.Post:
-					using (var content = RequestVisitorHttpContentUrl.Build(request))
-					{
-						response = this.Client.Post(request.Uri, content);
-					}
-
-					break;
-				case RequestType.PostMultipart:
-					using (var multipartData = RequestVisitorHttpContentMultipart.Build(request))
-					{
-						response = this.Client.Post(request.Uri, multipartData);
-					}
-
-					break;
-				default:
-					UriBuilder urib = new(request.Uri);
-					using (var data = RequestVisitorHttpContentUrl.Build(request))
-					{
-						urib.Query = data.ReadAsStringAsync().Result;
-						if (urib.Query.Length < 4096)
-						{
-							response = this.Client.Get(urib.Uri);
-						}
-						else
-						{
-							request.Type = RequestType.Post;
-							response = this.SendRequest(request);
-						}
-					}
-
-					break;
-			}
-
+			using HttpContent content = request.Type == RequestType.PostMultipart
+				? RequestVisitorHttpContentMultipart.Build(request)
+				: RequestVisitorHttpContentUrl.Build(request);
+			var response = request.Type == RequestType.Get &&
+				new UriBuilder(request.Uri) { Query = content.ReadAsStringAsync().Result } is var urib &&
+				urib.Query.Length < 4096
+					? this.Client.Get(urib.Uri)
+					: this.Client.Post(request.Uri, content);
 			this.OnResponseReceived(new ResponseEventArgs(response));
 			return response;
 		}
