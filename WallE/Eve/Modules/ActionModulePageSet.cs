@@ -264,7 +264,7 @@ namespace RobinHood70.WallE.Eve.Modules
 			{
 				foreach (var item in token)
 				{
-					dict.Add(item.MustHaveString("from"), item.MustHaveString("to"));
+					dict[item.MustHaveString("from")] = item.MustHaveString("to");
 				}
 			}
 		}
