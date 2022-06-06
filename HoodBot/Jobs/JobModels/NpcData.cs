@@ -92,7 +92,7 @@
 				this.Gender = (Gender)gender;
 			}
 
-			this.Name = ReplacementData.NpcNameFixes.TryGetValue(name, out var newName) ? newName : name;
+			this.Name = ReplacementData.NpcNameFixes.TryGetValue(name, out var newName) ? newName : name.Trim();
 		}
 		#endregion
 

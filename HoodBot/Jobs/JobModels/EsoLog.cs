@@ -102,7 +102,6 @@
 			// Note: for now, it's assumed that the collection should be the same across all jobs, so all filtering is done here in the query (e.g., Reaction != 6 for companions). If this becomes untrue at some point, filtering will have to be shifted to the individual jobs or we could add a query string to the call.
 			NpcCollection retval = new();
 			HashSet<string> nameClash = new(StringComparer.Ordinal);
-			var throwNameClash = false;
 			var query = "SELECT id, name, gender, difficulty, ppDifficulty, ppClass, reaction FROM uesp_esolog.npc WHERE level != -1 AND reaction != 6";
 			foreach (var npcData in Database.RunQuery(Connection, query, row => new NpcData(row)))
 			{
@@ -116,15 +115,12 @@
 					}
 					else
 					{
-						Debug.WriteLine($"Warning: an NPC with the name \"{npcData.Name}\" exists more than once in the database!");
-						throwNameClash = true;
+						retval.Duplicates.Add(npcData);
 					}
 				}
 			}
 
-			return throwNameClash
-				? throw new InvalidOperationException("Duplicate NPCs found. Operation aborted! See debug output for specifics.")
-				: retval;
+			return retval;
 		}
 
 		public static IEnumerable<(string Name, int Data)> GetZones()

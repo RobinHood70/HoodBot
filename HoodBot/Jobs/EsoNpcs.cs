@@ -219,6 +219,11 @@
 			existingTitles.GetCategoryMembers("Online-NPCs", CategoryMemberTypes.Page, false);
 			existingTitles.GetCategoryMembers("Online-Creatures-All", CategoryMemberTypes.Page, false);
 			var npcs = EsoLog.GetNpcs();
+			foreach (var dupe in npcs.Duplicates)
+			{
+				this.Warn($"Warning: an NPC with the name \"{dupe.Name}\" exists more than once in the database!");
+			}
+
 			TitleCollection checkTitles = new(this.Site);
 			foreach (var npc in npcs)
 			{
@@ -323,6 +328,10 @@
 					if (issue != null)
 					{
 						issues.Add((npc, issue));
+					}
+					else
+					{
+						this.pageNpcs.Add(page, npc);
 					}
 				}
 			}

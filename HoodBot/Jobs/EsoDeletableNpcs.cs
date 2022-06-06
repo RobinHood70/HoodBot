@@ -23,6 +23,11 @@
 		{
 			this.StatusWriteLine("Getting NPC data from database");
 			var unfilteredNpcList = EsoLog.GetNpcs();
+			foreach (var dupe in unfilteredNpcList.Duplicates)
+			{
+				this.Warn($"Warning: an NPC with the name \"{dupe.Name}\" exists more than once in the database!");
+			}
+
 			List<string> allNames = new();
 			foreach (var npc in unfilteredNpcList)
 			{
