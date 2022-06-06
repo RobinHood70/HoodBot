@@ -132,7 +132,7 @@
 				links.Clear();
 				foreach (var link in pageItem.Links)
 				{
-					links.Add(TitleFactory.CoValidate(this.Site, pageItem.Namespace, link.FullPageName));
+					links.Add(TitleFactory.FromUnvalidated(this.Site, link.FullPageName));
 				}
 			}
 
@@ -164,7 +164,7 @@
 				templates.Clear();
 				foreach (var link in pageItem.Templates)
 				{
-					templates.Add(TitleFactory.CoValidate(this.Site, pageItem.Namespace, link.FullPageName));
+					templates.Add(TitleFactory.FromUnvalidated(this.Site, link.FullPageName));
 				}
 			}
 		}
