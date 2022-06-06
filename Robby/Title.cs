@@ -123,6 +123,25 @@
 			: this.talkPage ??= TitleFactory.FromValidated(this.Namespace.TalkSpace, this.PageName);
 		#endregion
 
+		#region Public Static Methods
+
+		/// <summary>Trims the disambiguator off of a string (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
+		/// <param name="pageName">The page name to modify.</param>
+		/// <returns>The text with the final paranthetical text removed.</returns>
+		/// <remarks>No other string processing is done, making this useful when case or embedded invisible characters must be preserved.</remarks>
+		public static string ToLabelName(string pageName) => LabelParenthesesRemover.Replace(pageName.NotNull(), string.Empty, 1, 1);
+
+		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
+		/// <param name="pageName">The page name to modify.</param>
+		/// <returns>The text with the final paranthetical and/or comma-delimited text removed. Note: like the MediaWiki equivalent, when both are present, this will remove text of the form "(text), text", but text of the form ", text (text)" will become ", text".</returns>
+		/// <remarks>This doesn't precisely match the pipe trick logic - they differ in their handling of some abnormal page names. For example, with page names of "User:(Test)", ":(Test)", and "(Test)", the pipe trick gives "User:", ":", and "(Test)", respectively. Since this routine ignores the namespace completely and checks for empty return values, it returns "(Test)" consistently in all three cases.</remarks>
+		public static string ToPipeTrickName(string pageName)
+		{
+			var retval = LabelCommaRemover.Replace(pageName.NotNull(), string.Empty, 1, 1);
+			return LabelParenthesesRemover.Replace(retval, string.Empty, 1, 1);
+		}
+		#endregion
+
 		#region Public Methods
 
 		/// <summary>Returns the provided title as link text.</summary>
@@ -169,8 +188,7 @@
 
 		/// <summary>Trims the disambiguator off of a title (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		/// <returns>The text with the final paranthetical text removed.</returns>
-		[return: NotNullIfNotNull("title")]
-		public string LabelName() => this.PageName.Length == 0 ? this.PageName : LabelParenthesesRemover.Replace(this.PageName, string.Empty, 1, 1);
+		public string LabelName() => this.PageName.Length == 0 ? this.PageName : ToLabelName(this.PageName);
 
 		/// <summary>Checks if the provided page name is equal to the title's page name, based on the case-sensitivity for the namespace.</summary>
 		/// <param name="other">The title to compare to.</param>
@@ -194,8 +212,8 @@
 		}
 
 		/// <summary>Gets a name similar to the one that would appear when using the pipe trick on the page (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
-		/// <remarks>This doesn't precisely match the pipe trick logic - they differ in their handling of some abnormal page names. For example, with page names of "User:(Test)", ":(Test)", and "(Test)", the pipe trick gives "User:", ":", and "(Test)", respectively. Since this routine ignores the namespace completely and checks for empty return values, it returns "(Test)" consistently in all three cases.</remarks>
 		/// <returns>The text with the final paranthetical and/or comma-delimited text removed. Note: like the MediaWiki equivalent, when both are present, this will remove text of the form "(text), text", but text of the form ", text (text)" will become ", text".</returns>
+		/// <remarks>This doesn't precisely match the pipe trick logic - they differ in their handling of some abnormal page names. For example, with page names of "User:(Test)", ":(Test)", and "(Test)", the pipe trick gives "User:", ":", and "(Test)", respectively. Since this routine ignores the namespace completely and checks for empty return values, it returns "(Test)" consistently in all three cases.</remarks>
 		public string PipeTrick()
 		{
 			var pageName = LabelCommaRemover.Replace(this.PageName, string.Empty, 1, 1);
