@@ -29,7 +29,6 @@
 		private readonly CancellationTokenSource canceller = new();
 		private readonly IDiffViewer? diffViewer;
 		private readonly PauseTokenSource pauser = new();
-		private readonly Stopwatch timer = new();
 
 		private double completedJobs;
 		private bool editingEnabled;
@@ -227,7 +226,6 @@
 				jobManager.ProgressUpdated += this.JobManager_ProgressUpdated;
 				jobManager.StatusUpdated += this.JobManager_StatusUpdated;
 				jobManager.PagePreview += this.SitePagePreview;
-				jobManager.FinishedAllJobs += this.JobManager_FinishedAllJobs;
 				jobManager.Site.EditingEnabled = this.EditingEnabled;
 
 				var loginName = this.UserName ?? wikiInfo.UserName ?? throw new InvalidOperationException(Resources.UserNameNotSet);
@@ -239,7 +237,9 @@
 				jobManager.ResultHandler = string.IsNullOrEmpty(wikiInfo.ResultsPage)
 					? null
 					: new PageResultHandler(jobManager.Site, wikiInfo.ResultsPage);
+				var allJobsTimer = Stopwatch.StartNew();
 				await jobManager.Run(jobList).ConfigureAwait(true);
+				this.StatusWrite($"Total time for last run: {FormatTimeSpan(allJobsTimer.Elapsed)}{Environment.NewLine}");
 			}
 			finally
 			{
@@ -250,11 +250,6 @@
 
 			this.Reset();
 		}
-
-		private void JobManager_FinishedAllJobs(JobManager sender, bool eventArgs) =>
-			this.StatusWrite($"Total time for last run: {FormatTimeSpan(this.timer.Elapsed)}{Environment.NewLine}");
-
-		private void JobManager_BeforeFirstWrite(object? sender, EventArgs e) => this.timer.Restart();
 
 		private void JobManager_StartingJob(JobManager sender, JobEventArgs eventArgs)
 		{
@@ -374,15 +369,6 @@
 
 		private void UpdateProgress(double progress)
 		{
-			if (progress == 0)
-			{
-				this.timer.Restart();
-			}
-			else if (!this.timer.IsRunning)
-			{
-				throw new InvalidOperationException("Timer is not running!");
-			}
-
 			this.OverallProgress = this.completedJobs + progress;
 			var timeDiff = DateTime.UtcNow - this.jobStarted;
 			if (this.OverallProgress > 0 && timeDiff.TotalSeconds > 0)
