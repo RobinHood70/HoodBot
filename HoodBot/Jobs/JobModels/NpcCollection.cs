@@ -8,6 +8,10 @@
 
 	internal sealed class NpcCollection : KeyedCollection<long, NpcData>
 	{
+		#region Public Properties
+		public IList<NpcData> Duplicates { get; } = new List<NpcData>();
+		#endregion
+
 		#region Public Methods
 
 		public void GetLocations()
