@@ -10,7 +10,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon;
 
-	// Images should be downloaded from latest version on https://esofiles.uesp.net/ in the icons.zip file before running this job.
+	// Images should be downloaded from latest version on https://esofiles.uesp.net/ in the icons.zip file before running this job. Put the file in HoodBot's folder and extract it to the icons folder.
 	internal sealed class EsoBulkUploadIcons : WikiJob
 	{
 		#region Static Fields
@@ -66,7 +66,7 @@
 
 		private static readonly string Query = "SELECT id, name, icon FROM collectibles WHERE categoryName IN('Armor Styles', 'Weapon Styles');";
 
-		private static readonly string WikiIconFolder = Path.Combine(UespSite.GetBotDataFolder(), "WikiIcons");
+		private static readonly string WikiIconFolder = Path.Combine(UespSite.GetBotDataFolder(), "icons");
 		#endregion
 
 		#region Fields
