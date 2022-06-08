@@ -231,7 +231,7 @@
 				checkTitles.Add(npc.Name);
 			}
 
-			PageCollection checkPages = new(this.Site, new PageLoadOptions(PageModules.Info | PageModules.Properties, true));
+			PageCollection checkPages = new(this.Site, PageModules.Info | PageModules.Properties, true);
 			checkPages.GetTitles(checkTitles);
 
 			Dictionary<long, string> npcRenames = new();
@@ -273,7 +273,7 @@
 				}
 			}
 
-			PageCollection loadPages = new(this.Site, new PageLoadOptions(PageModules.Default | PageModules.DeletedRevisions | PageModules.Properties, true));
+			PageCollection loadPages = new(this.Site, PageModules.Default | PageModules.DeletedRevisions | PageModules.Properties, true);
 			loadPages.GetTitles(loadTitles);
 			loadPages.Sort();
 

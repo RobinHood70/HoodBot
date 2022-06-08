@@ -230,9 +230,8 @@
 			var namespacesToLoad = this.NamespacesInSearchList();
 			var titlesToProtect = this.LoadPageNames(namespacesToLoad);
 			this.StatusWriteLine("Loading Current Protection Levels");
-			var currentProtectionPages = titlesToProtect.Load(new PageLoadOptions(PageModules.Info)
+			var currentProtectionPages = titlesToProtect.Load(new PageLoadOptions(PageModules.Info, true)
 			{
-				FollowRedirects = true,
 				InfoGetProtection = true,
 			});
 
