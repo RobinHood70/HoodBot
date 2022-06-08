@@ -142,8 +142,6 @@
 			}
 		}
 
-		protected override void FillPage(Page page) => Debug.WriteLine($"{page.AsLink()} doesn't exist and will be created.");
-
 		protected override void ParseTemplate(SiteTemplateNode template, ContextualParser parser)
 		{
 			parser.ThrowNull();

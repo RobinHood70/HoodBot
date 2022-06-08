@@ -75,7 +75,8 @@
 		#endregion
 
 		#region Private Static Methods
-		protected override void FillPage(Page page)
+
+		protected override void NewPage(Page page)
 		{
 			var npc = this.pageNpcs[page];
 			List<(string?, string)> parameters = new()
