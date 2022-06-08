@@ -18,6 +18,7 @@
 		private readonly IReadOnlyList<string> originalTemplateNames;
 		private readonly bool respectRedirects;
 		private readonly List<string> headerOrder = new();
+		private readonly bool checkAllTemplates;
 		#endregion
 
 		#region Constructors
@@ -26,11 +27,13 @@
 			JobManager jobManager,
 			IEnumerable<string> templateNames,
 			[JobParameter(DefaultValue = true)] bool respectRedirects,
-			[JobParameterFile(Overwrite = true, DefaultValue = @"%BotData%\%templateName%.txt")] string location)
+			[JobParameterFile(Overwrite = true, DefaultValue = @"%BotData%\%templateName%.txt")] string location,
+			bool checkAllTemplates)
 			: base(jobManager)
 		{
 			location.ThrowNull();
 			this.respectRedirects = respectRedirects;
+			this.checkAllTemplates = checkAllTemplates;
 			List<string> allTemplateNames = new();
 			foreach (var templateName in templateNames.NotNull())
 			{
@@ -62,6 +65,11 @@
 
 			this.StatusWriteLine("Loading pages");
 			var results = PageCollection.Unlimited(this.Site);
+			if (this.checkAllTemplates)
+			{
+				results.GetNamespace(MediaWikiNamespaces.Template);
+			}
+
 			results.GetPageTranscludedIn(templates);
 			this.StatusWriteLine("Exporting");
 			results.Sort();
