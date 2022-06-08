@@ -76,8 +76,7 @@
 				}
 			}
 
-			PageLoadOptions pageLoadOptions = new(PageModules.Default, true);
-			var pages = titles.Load(pageLoadOptions);
+			var pages = titles.Load(PageModules.Default, true);
 			pages.Sort();
 			foreach (var entry in entries)
 			{

@@ -143,6 +143,12 @@
 		public PageCollection Load(PageModules modules) => this.Load(new PageLoadOptions(modules));
 
 		/// <summary>Loads the specified information for all pages in the collection.</summary>
+		/// <param name="modules">The page modules to load, using their default options.</param>
+		/// <param name="followRedirects">Indicates whether redirects should be followed when loading.</param>
+		/// <returns>A <see cref="PageCollection"/> containing the specified pages, including status information for pages that could not be loaded.</returns>
+		public PageCollection Load(PageModules modules, bool followRedirects) => this.Load(new PageLoadOptions(modules, followRedirects));
+
+		/// <summary>Loads the specified information for all pages in the collection.</summary>
 		/// <param name="options">The page load options.</param>
 		/// <returns>A <see cref="PageCollection"/> containing the specified pages, including status information for pages that could not be loaded.</returns>
 		public PageCollection Load(PageLoadOptions options)

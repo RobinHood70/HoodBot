@@ -44,7 +44,7 @@
 				allTitles.Add(PageFromFile(page));
 			}
 
-			PageCollection allPages = new(this.Site, PageLoadOptions.None);
+			var allPages = PageCollection.Unlimited(this.Site);
 			allPages.GetTitles(allTitles);
 			allPages.RemoveExists(false);
 			this.existingPages = allPages;

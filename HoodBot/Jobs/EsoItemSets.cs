@@ -171,7 +171,7 @@
 
 		private void MatchCategoryPages()
 		{
-			PageCollection catPages = new(this.Site, new PageLoadOptions(PageModules.Info, true));
+			PageCollection catPages = new(this.Site, PageModules.Info, true);
 			catPages.GetCategoryMembers("Online-Sets", CategoryMemberTypes.Page, false);
 			this.UpdateSetPages(catPages);
 		}
@@ -202,7 +202,7 @@
 
 			List<Page> removePages = new();
 			List<Title> addTitles = new();
-			PageCollection pages = new(this.Site, new PageLoadOptions(PageModules.Info | PageModules.Links | PageModules.Properties, true));
+			PageCollection pages = new(this.Site, PageModules.Info | PageModules.Links | PageModules.Properties, true);
 			pages.GetTitles(newTitles);
 			foreach (var page in pages)
 			{

@@ -39,6 +39,15 @@
 
 		/// <summary>Initializes a new instance of the <see cref="PageCollection"/> class.</summary>
 		/// <param name="site">The site the pages are from. All pages in a collection must belong to the same site.</param>
+		/// <param name="modules">The module types indicating which data to retrieve from the site. Using this constructor, all modules will be loaded using default parameters.</param>
+		/// <param name="followRedirects">Indicates whether redirects should be followed when loading.</param>
+		public PageCollection(Site site, PageModules modules, bool followRedirects)
+			: this(site, new PageLoadOptions(modules, followRedirects))
+		{
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="PageCollection"/> class.</summary>
+		/// <param name="site">The site the pages are from. All pages in a collection must belong to the same site.</param>
 		/// <param name="options">A <see cref="PageLoadOptions"/> object initialized with a set of modules. Using this constructor allows you to customize some options.</param>
 		public PageCollection(Site site, PageLoadOptions options)
 			: base(site)
