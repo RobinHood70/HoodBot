@@ -16,7 +16,7 @@
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
-	public class EsoCollections : EditJob
+	public class EsoCollectibles : EditJob
 	{
 		#region Private Constants
 		private const string TemplateName = "Online Collectible Summary";
@@ -49,14 +49,14 @@
 
 		#region Constructors
 		[JobInfo("Create Collectibles", "ESO Update")]
-		public EsoCollections(JobManager jobManager)
+		public EsoCollectibles(JobManager jobManager)
 			: base(jobManager)
 		{
 		}
 		#endregion
 
 		#region Public Override Properties
-		public override string LogName => "ESO Collections";
+		public override string LogName => "ESO Collectibles";
 
 		protected override Action<EditJob, Page>? EditConflictAction => this.ParseListPage;
 
@@ -261,28 +261,33 @@
 			crownCrates.GetCategoryMembers("Online-Crown Crates");
 			foreach (var crate in crownCrates)
 			{
-				ContextualParser parser = new(crate);
-				var tier = string.Empty;
-				foreach (var node in parser)
-				{
-					if (node is IHeaderNode header)
-					{
-						tier = GetSectionTitle(header);
-					}
-					else if (node is SiteTemplateNode template && template.TitleValue.PageNameEquals("ESO Crate Card List"))
-					{
-						foreach (var parameter in template.ParameterCluster(2))
-						{
-							var title = parameter[0].Value.ToRaw();
-							if (!this.crateTiers.TryGetValue(title, out var allTiers))
-							{
-								allTiers = new List<string>();
-								this.crateTiers.Add(title, allTiers);
-							}
+				this.ParseCrate(crate);
+			}
+		}
 
-							// allTiers.Add($"[[Online:{crate.PageName}#{tier}|{crate.PageName}]]");
-							allTiers.Add(crate.PageName);
+		private void ParseCrate(Page crate)
+		{
+			ContextualParser parser = new(crate);
+			//// var tier = string.Empty;
+			foreach (var node in parser)
+			{
+				if (node is IHeaderNode header)
+				{
+					//// tier = GetSectionTitle(header);
+				}
+				else if (node is SiteTemplateNode template && template.TitleValue.PageNameEquals("ESO Crate Card List"))
+				{
+					foreach (var parameter in template.ParameterCluster(2))
+					{
+						var title = parameter[0].Value.ToRaw();
+						if (!this.crateTiers.TryGetValue(title, out var allTiers))
+						{
+							allTiers = new List<string>();
+							this.crateTiers.Add(title, allTiers);
 						}
+
+						// allTiers.Add($"[[Online:{crate.PageName}#{tier}|{crate.PageName}]]");
+						allTiers.Add(crate.PageName);
 					}
 				}
 			}
