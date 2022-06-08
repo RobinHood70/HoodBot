@@ -26,29 +26,16 @@
 		#region Internal Override Methods
 		public override bool Check()
 		{
-			var retval = false;
-			if (this.Morphs.Count != 3)
-			{
-				retval = true;
-				Debug.WriteLine($"Warning: {this.Name} has {this.Morphs.Count} / 3 morphs.");
-			}
-
 			foreach (var morph in this.Morphs)
 			{
-				if (morph.Abilities.Count != 4)
-				{
-					retval = true;
-					Debug.WriteLine($"Warning: {this.Name} - {morph.Name} has {morph.Abilities.Count} / 4 abilities.");
-				}
-
 				if (morph.Description == null)
 				{
-					retval = true;
 					Debug.WriteLine($"Warning: {this.Name} - {morph.Name} has no description.");
+					return true;
 				}
 			}
 
-			return retval;
+			return false;
 		}
 
 		public override void GetData(IDataRecord row)
@@ -78,11 +65,7 @@
 			var minRange = FormatRange((int)row["minRange"]);
 			var range = string.Equals(minRange, "0", System.StringComparison.Ordinal) ? maxRange : string.Concat(minRange, "-", maxRange);
 			morph.Ranges.Add(range);
-
-			if (morph.Abilities.Count == 4)
-			{
-				morph.ParseDescription();
-			}
+			morph.ParseDescription();
 		}
 		#endregion
 	}
