@@ -135,15 +135,15 @@
 		{
 		}
 
-		protected virtual void FillPage(Page page)
+		protected virtual void NewPage(Page page)
 		{
 		}
 
 		protected virtual void PageLoaded(object sender, Page page)
 		{
-			if (page.IsMissing || page.Text.Trim().Length == 0)
+			if (page.IsMissing || string.IsNullOrWhiteSpace(page.Text))
 			{
-				this.FillPage(page);
+				this.NewPage(page);
 			}
 		}
 		#endregion
