@@ -215,8 +215,7 @@
 		public bool Exists => !this.IsMissing && !this.IsInvalid;
 
 		/// <summary>Gets a value indicating whether the page represents a disambiguation page.</summary>
-		/// <returns><see langword="true" /> if this instance is disambiguation; otherwise, <see langword="false" />.</returns>
-		/// <exception cref="InvalidOperationException">Thrown if the page properties (MW 1.21+) or templates (MW 1.20-) weren't loaded prior to checking.</exception>
+		/// <returns><see langword="true" /> if this instance is disambiguation; otherwise, <see langword="false" />. On wikis where the Disambiguator extension isn't in use, this will fall back to a template-based approach. In that event, this can also return <see langword="null"/> if the <see cref="Templates"/> for the page aren't loaded or if there are no disambiguation templates.</returns>
 		public bool? IsDisambiguation
 		{
 			get
