@@ -57,7 +57,9 @@
 
 		#region Public Override Properties
 		public override string LogName => "ESO Collectibles";
+		#endregion
 
+		#region Protected Override Methods
 		protected override Action<EditJob, Page>? EditConflictAction => this.ParseListPage;
 
 		protected override string EditSummary => "Update collectible info";
