@@ -89,6 +89,15 @@
 				return;
 			}
 
+			if (this.Shuffle && !this.Site.EditingEnabled)
+			{
+				pages.Shuffle();
+			}
+			else
+			{
+				pages.Sort(NaturalTitleComparer.Instance);
+			}
+
 			this.Progress = 0;
 			this.ProgressMaximum = pages.Count;
 			foreach (var page in pages)
@@ -105,14 +114,6 @@
 			this.BeforeLoadPages();
 			this.StatusWriteLine("Loading pages");
 			this.LoadPages();
-			if (this.Shuffle && !this.Site.EditingEnabled)
-			{
-				this.Pages.Shuffle();
-			}
-			else
-			{
-				this.Pages.Sort(NaturalTitleComparer.Instance);
-			}
 
 			foreach (var page in this.Pages)
 			{
