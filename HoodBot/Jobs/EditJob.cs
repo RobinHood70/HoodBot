@@ -33,17 +33,22 @@
 		#endregion
 
 		#region Protected Virtual Properties
+
+		protected virtual Tristate CreateOnly => Tristate.False;
+
+		/// <summary>Gets the edit conflict action.</summary>
+		/// <value>The edit conflict action.</value>
+		/// <remarks>During a SavePage, if an edit conflict occurs and this property is non-null, the page will automatically be re-loaded and the method specified here will be executed.</remarks>
+		protected virtual Action<EditJob, Page>? EditConflictAction => this.PageLoaded;
+
 		protected virtual bool MinorEdit => true;
+
+		protected virtual bool RecreateIfDeleted => true;
 
 		protected virtual bool SaveOverDeleted => true;
 		#endregion
 
 		#region Protected Abstract Properties
-
-		/// <summary>Gets the edit conflict action.</summary>
-		/// <value>The edit conflict action.</value>
-		/// <remarks>During a SavePage, if an edit conflict occurs and this property is non-null, the page will automatically be re-loaded and the method specified here will be executed.</remarks>
-		protected abstract Action<EditJob, Page>? EditConflictAction { get; }
 
 		/// <summary>Gets the edit summary to use by default for all edits.</summary>
 		protected abstract string EditSummary { get; }
@@ -62,7 +67,7 @@
 				{
 					var editSummary = this.CustomEditSummaries.TryGetValue(page, out var customSummary) ? customSummary : defaultSummary;
 					var isMinor = this.CustomMinorEdits.TryGetValue(page, out var customIsMinor) ? customIsMinor : defaultIsMinor;
-					page.Save(editSummary, isMinor);
+					page.Save(editSummary, isMinor, this.CreateOnly, this.RecreateIfDeleted);
 					saved = true;
 				}
 				catch (EditConflictException) when (editConflictAction != null)
@@ -114,14 +119,13 @@
 			this.BeforeLoadPages();
 			this.StatusWriteLine("Loading pages");
 			this.LoadPages();
-
 			foreach (var page in this.Pages)
 			{
+				// We call this manually in case the calling class is adding pages directly rather than loading them.
 				this.PageLoaded(this, page);
 			}
 
 			this.AfterLoadPages();
-			this.Results?.Clear();
 		}
 
 		protected override void Main() => this.SavePages();
@@ -140,7 +144,7 @@
 		{
 		}
 
-		protected virtual void PageLoaded(object sender, Page page)
+		protected virtual void PageLoaded(EditJob job, Page page)
 		{
 			if (page.IsMissing || string.IsNullOrWhiteSpace(page.Text))
 			{
