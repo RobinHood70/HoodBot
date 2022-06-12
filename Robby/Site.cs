@@ -284,6 +284,16 @@
 
 		/// <summary>Creates a new, blank page.</summary>
 		/// <param name="fullPageName">The full name of the page to create.</param>
+		/// <returns>The newly created page. Note that this does not automatically save the page.</returns>
+		public Page CreatePage(string fullPageName) => this.CreatePage(TitleFactory.FromUnvalidated(this, fullPageName), string.Empty);
+
+		/// <summary>Creates a new, blank page.</summary>
+		/// <param name="title">The title containing the name of the page to create.</param>
+		/// <returns>The newly created page. Note that this does not automatically save the page.</returns>
+		public Page CreatePage(Title title) => this.CreatePage(title, string.Empty);
+
+		/// <summary>Creates a new page with the specified text.</summary>
+		/// <param name="fullPageName">The full name of the page to create.</param>
 		/// <param name="text">The text of the page.</param>
 		/// <returns>The newly created page. Note that this does not automatically save the page.</returns>
 		public Page CreatePage(string fullPageName, string text) => this.CreatePage(TitleFactory.FromUnvalidated(this, fullPageName), text);
@@ -414,6 +424,42 @@
 			Messages = messages,
 			Arguments = arguments,
 		});
+
+		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
+		/// <param name="pageName">Name of the page.</param>
+		/// <returns>The text of the page.</returns>
+		public Page? LoadPage(string pageName) => this.LoadPage(TitleFactory.FromUnvalidated(this, pageName.NotNull()));
+
+		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
+		/// <param name="title">Name of the page.</param>
+		/// <returns>The text of the page.</returns>
+		public Page? LoadPage(Title title)
+		{
+			var pages = PageCollection.Unlimited(this);
+			pages.GetTitles(title.NotNull());
+			return pages.Count == 1 ? pages[0] : null;
+		}
+
+		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
+		/// <param name="title">Name of the page.</param>
+		/// <param name="subPageName">The subpage to get.</param>
+		/// <returns>The text of the page.</returns>
+		public Page? LoadPage(Title title, string subPageName)
+		{
+			var titleName = title.NotNull().PageName;
+			if (!string.IsNullOrEmpty(subPageName))
+			{
+				if (subPageName[0] != '/')
+				{
+					titleName += '/';
+				}
+
+				titleName += subPageName;
+			}
+
+			var newTitle = TitleFactory.FromUnvalidated(title.Namespace, titleName);
+			return this.LoadPage(newTitle);
+		}
 
 		/// <summary>This is a convenience method to quickly get the text of a single page.</summary>
 		/// <param name="pageName">Name of the page.</param>
