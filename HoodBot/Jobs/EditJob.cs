@@ -34,7 +34,7 @@
 
 		#region Protected Virtual Properties
 
-		protected virtual Tristate CreateOnly => Tristate.False;
+		protected virtual Tristate CreateOnly => Tristate.Unknown;
 
 		/// <summary>Gets the edit conflict action.</summary>
 		/// <value>The edit conflict action.</value>
