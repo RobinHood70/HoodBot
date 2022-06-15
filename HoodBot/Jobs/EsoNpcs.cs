@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Text;
+	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -25,6 +26,7 @@
 		public EsoNpcs(JobManager jobManager, [JobParameter(DefaultValue = false)] bool allowUpdates)
 			: base(jobManager)
 		{
+			//// jobManager.ShowDiffs = false;
 			this.allowUpdates = allowUpdates;
 			this.SetResultDescription("Existing ESO NPC pages");
 		}
@@ -81,6 +83,7 @@
 			var npc = this.pageNpcs[page];
 			List<(string?, string)> parameters = new()
 			{
+				("id", npc.Id.ToStringInvariant()),
 				("image", string.Empty),
 				("imgdesc", string.Empty),
 				("race", string.Empty),
