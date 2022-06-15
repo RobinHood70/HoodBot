@@ -55,6 +55,7 @@
 		public EsoFurnishingUpdater(JobManager jobManager)
 			: base(jobManager)
 		{
+			//// jobManager.ShowDiffs = false;
 		}
 		#endregion
 
@@ -415,20 +416,27 @@
 			}
 			else
 			{
-				template.Update("furnLimitType", FurnishingLimitTypes[furnishing.FurnishingLimitType]);
-				var showCollectible = furnishing.FurnishingLimitType switch
+				if (template.GetValue("furnLimitType") is string furnLimitType)
 				{
-					FurnishingType.TraditionalFurnishings => furnishing.Collectible,
-					FurnishingType.SpecialFurnishings => furnishing.Collectible,
-					FurnishingType.CollectibleFurnishings => !furnishing.Collectible,
-					FurnishingType.SpecialCollectibles => !furnishing.Collectible,
-					FurnishingType.None => throw new InvalidOperationException(),
-					_ => throw new InvalidOperationException()
-				};
+					var wantsToBe = FurnishingLimitTypes[furnishing.FurnishingLimitType];
+					if (!string.Equals(furnLimitType + 's', wantsToBe, StringComparison.Ordinal))
+					{
+						template.Update("furnLimitType", wantsToBe);
+					}
+					var showCollectible = furnishing.FurnishingLimitType switch
+					{
+						FurnishingType.TraditionalFurnishings => furnishing.Collectible,
+						FurnishingType.SpecialFurnishings => furnishing.Collectible,
+						FurnishingType.CollectibleFurnishings => !furnishing.Collectible,
+						FurnishingType.SpecialCollectibles => !furnishing.Collectible,
+						FurnishingType.None => throw new InvalidOperationException(),
+						_ => throw new InvalidOperationException()
+					};
 
-				if (showCollectible)
-				{
-					template.Update("collectible", furnishing.Collectible ? "1" : "0");
+					if (showCollectible)
+					{
+						template.Update("collectible", furnishing.Collectible ? "1" : "0");
+					}
 				}
 			}
 		}
@@ -589,11 +597,13 @@
 					if (ingrMatch.Success)
 					{
 						var ingredientList = ingrMatch.Groups["ingredients"].Value;
-						var entries = ingredientList.Split("), ", StringSplitOptions.None);
+						var entries = ingredientList.Split(", ", StringSplitOptions.None);
 						foreach (var entry in entries)
 						{
 							var ingSplit = entry.Split(" (", 2, StringSplitOptions.None);
-							var count = ingSplit[1];
+							var count = ingSplit.Length == 2
+								? ingSplit[1]
+								: "1";
 							var ingredient = ingSplit[0];
 							var addAs = $"{ingredient} ({count})";
 							if (AllSkills.Contains(ingredient))
@@ -622,11 +632,7 @@
 							: collectible
 								? FurnishingType.CollectibleFurnishings
 								: FurnishingType.TraditionalFurnishings;
-				}/*
-				else if (collectible)
-				{
-					furnishingLimitType += 2;
-				}*/
+				}
 
 				this.FurnishingLimitType = furnishingLimitType;
 				var itemLink = (string)record["resultitemLink"];
