@@ -32,7 +32,9 @@
 				this.ParseTemplate(template, parser);
 			}
 		}
+		#endregion
 
+		#region Protected Abstract Methods
 		protected abstract void ParseTemplate(SiteTemplateNode template, ContextualParser parser);
 		#endregion
 	}
