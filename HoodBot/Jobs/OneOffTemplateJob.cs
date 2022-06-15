@@ -57,11 +57,11 @@
 			}
 		}
 
-		protected override void PageLoaded(object sender, Page page)
+		protected override void PageLoaded(EditJob job, Page page)
 		{
 			page.Text = page.Text
 				.Replace("{{icon|", "{{subst:icon|", System.StringComparison.Ordinal);
-			base.PageLoaded(sender, page);
+			base.PageLoaded(job, page);
 		}
 		#endregion
 	}

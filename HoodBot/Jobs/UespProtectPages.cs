@@ -244,7 +244,7 @@
 			}
 		}
 
-		protected override void PageLoaded(object sender, Page page) => this.UpdatePage(page);
+		protected override void PageLoaded(EditJob sender, Page page) => this.UpdatePage(page);
 
 		protected override void Main()
 		{
