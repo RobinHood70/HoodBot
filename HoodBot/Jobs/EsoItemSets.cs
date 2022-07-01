@@ -19,7 +19,7 @@
 	{
 		#region Private Constants
 		private const string Query =
-			"SELECT id, setName, setBonusDesc1, setBonusDesc2, setBonusDesc3, setBonusDesc4, setBonusDesc5, setBonusDesc6, setBonusDesc7\n" +
+			"SELECT id, setName, setBonusDesc1, setBonusDesc2, setBonusDesc3, setBonusDesc4, setBonusDesc5, setBonusDesc6, setBonusDesc7, setBonusDesc8, setBonusDesc9, setBonusDesc10, setBonusDesc11, setBonusDesc12\n" +
 			"FROM setSummary\n";
 		#endregion
 
@@ -48,6 +48,7 @@
 		public EsoItemSets(JobManager jobManager)
 			: base(jobManager)
 		{
+			// jobManager.ShowDiffs = false;
 		}
 		#endregion
 
@@ -56,14 +57,20 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override Action<EditJob, Page>? EditConflictAction => this.SetLoaded;
-
 		protected override string EditSummary => this.LogName;
 
 		protected override bool MinorEdit => false;
 		#endregion
 
 		#region Protected Override Methods
+		protected override void AfterLoadPages()
+		{
+			this.allSets.Sort((item, item2) => string.CompareOrdinal(item.Name, item2.Name));
+
+			// Needs to be after update, since update modifies item's IsNonTrivial property.
+			this.GenerateReport();
+		}
+
 		protected override void BeforeLoadPages()
 		{
 			EsoReplacer.Initialize(this);
@@ -71,8 +78,15 @@
 			this.GetSetPages();
 		}
 
+		protected override void JobCompleted()
+		{
+			EsoReplacer.ShowUnreplaced();
+			base.JobCompleted();
+		}
+
 		protected override void LoadPages()
 		{
+			this.allSets.Sort((x, y) => SimpleTitleComparer.Instance.Compare(x.Page, y.Page));
 			TitleCollection titles = new(this.Site);
 			foreach (var set in this.allSets)
 			{
@@ -90,23 +104,68 @@
 			this.Pages.GetTitles(titles);
 		}
 
-		protected override void AfterLoadPages()
-		{
-			// Needs to be after update, since update modifies item's IsNonTrivial property.
-			this.allSets.Sort((item, item2) => string.CompareOrdinal(item.Name, item2.Name));
-			this.GenerateReport();
-		}
-
-		protected override void JobCompleted()
-		{
-			EsoReplacer.ShowUnreplaced();
-			base.JobCompleted();
-		}
-
 		protected override void Main()
 		{
 			this.SavePages();
 			EsoSpace.SetBotUpdateVersion(this, "itemset");
+		}
+
+		protected override void PageLoaded(EditJob job, Page page)
+		{
+			var setData = this.sets[page];
+			if (!page.Exists && setData.Page is not null)
+			{
+				// TODO: Check this, it's definitely not the optimal way of doing it. Why do we have loaded pages and a page object as part of .sets?
+				page.Text = setData.Page.Text;
+			}
+
+			ContextualParser oldPage = new(page, InclusionType.Transcluded, false);
+			if (oldPage.Count < 2 || !(
+					oldPage[0] is IIgnoreNode firstNode &&
+					oldPage[^1] is IIgnoreNode lastNode))
+			{
+				this.Warn($"Delimiters not found on page {page.FullPageName}\n");
+				return;
+			}
+
+			TitleCollection usedList = new(this.Site);
+			StringBuilder sb = new();
+			sb.Append('\n');
+			foreach (var (itemCount, text) in setData.BonusDescriptions)
+			{
+				sb
+					.Append("'''")
+					.Append(itemCount)
+					.Append("''': ")
+					.Append(text)
+					.Append("<br>\n");
+			}
+
+			sb.Remove(sb.Length - 5, 4);
+			ContextualParser parser = new(page, sb.ToString());
+			EsoReplacer.ReplaceGlobal(parser);
+			EsoReplacer.ReplaceEsoLinks(this.Site, parser);
+			EsoReplacer.ReplaceFirstLink(parser, usedList);
+
+			// Now that we're done parsing, re-add the IgnoreNodes.
+			parser.Insert(0, firstNode);
+			parser.Add(lastNode);
+
+			EsoReplacer replacer = new(this.Site);
+			var newLinks = replacer.CheckNewLinks(oldPage, parser);
+			if (newLinks.Count > 0)
+			{
+				this.Warn(EsoReplacer.ConstructWarning(oldPage, parser, newLinks, "links"));
+			}
+
+			var newTemplates = replacer.CheckNewTemplates(oldPage, parser);
+			if (newTemplates.Count > 0)
+			{
+				this.Warn(EsoReplacer.ConstructWarning(oldPage, parser, newTemplates, "templates"));
+			}
+
+			setData.IsNonTrivial = replacer.IsNonTrivialChange(oldPage, parser);
+			parser.UpdatePage();
 		}
 		#endregion
 
@@ -121,18 +180,6 @@
 		#endregion
 
 		#region Private Methods
-		private void BuildNewPages()
-		{
-			foreach (var set in this.allSets)
-			{
-				if (set.Page is null)
-				{
-					this.Warn($"New Page: {set.Name}");
-					set.Page = set.BuildNewPage(TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], set.Name));
-				}
-			}
-		}
-
 		private void GenerateReport()
 		{
 			StringBuilder sb = new();
@@ -166,7 +213,6 @@
 			this.GetSetData();
 			this.MatchCategoryPages();
 			this.MatchUnresolvedPages();
-			this.BuildNewPages();
 		}
 
 		private void MatchCategoryPages()
@@ -245,64 +291,6 @@
 			this.UpdateSetPages(pages);
 		}
 
-		private void SetLoaded(object sender, Page page)
-		{
-			var setData = this.sets[page];
-			if (!page.Exists && setData.Page is not null)
-			{
-				// TODO: Check this, it's definitely not the optimal way of doing it. Why do we have loaded pages and a page object as part of .sets?
-				page.Text = setData.Page.Text;
-			}
-
-			ContextualParser oldPage = new(page, InclusionType.Transcluded, false);
-			if (oldPage.Count < 2 || !(
-					oldPage[0] is IIgnoreNode firstNode &&
-					oldPage[^1] is IIgnoreNode lastNode))
-			{
-				this.Warn($"Delimiters not found on page {page.FullPageName}\n");
-				return;
-			}
-
-			TitleCollection usedList = new(this.Site);
-			StringBuilder sb = new();
-			sb.Append('\n');
-			foreach (var (itemCount, text) in setData.BonusDescriptions)
-			{
-				sb
-					.Append("'''")
-					.Append(itemCount)
-					.Append("''': ")
-					.Append(text)
-					.Append("<br>\n");
-			}
-
-			sb.Remove(sb.Length - 5, 4);
-			ContextualParser parser = new(page, sb.ToString());
-			EsoReplacer.ReplaceGlobal(parser);
-			EsoReplacer.ReplaceEsoLinks(this.Site, parser);
-			EsoReplacer.ReplaceFirstLink(parser, usedList);
-
-			// Now that we're done parsing, re-add the IgnoreNodes.
-			parser.Insert(0, firstNode);
-			parser.Add(lastNode);
-
-			EsoReplacer replacer = new(this.Site);
-			var newLinks = replacer.CheckNewLinks(oldPage, parser);
-			if (newLinks.Count > 0)
-			{
-				this.Warn(EsoReplacer.ConstructWarning(oldPage, parser, newLinks, "links"));
-			}
-
-			var newTemplates = replacer.CheckNewTemplates(oldPage, parser);
-			if (newTemplates.Count > 0)
-			{
-				this.Warn(EsoReplacer.ConstructWarning(oldPage, parser, newTemplates, "templates"));
-			}
-
-			setData.IsNonTrivial = replacer.IsNonTrivialChange(oldPage, parser);
-			parser.UpdatePage();
-		}
-
 		private void UpdateSetPageAnyCase(SetData set, PageCollection setMembers)
 		{
 			foreach (var setName in set.AllNames)
@@ -342,12 +330,9 @@
 						foreach (var setName in set.AllNames)
 						{
 							var checkTitle = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], setName);
-							if (setMembers.TryGetValue(checkTitle, out var foundPage) &&
-								foundPage.Exists)
-							{
-								set.Page = foundPage;
-								break;
-							}
+							set.Page = setMembers.TryGetValue(checkTitle, out var foundPage)
+								? foundPage
+								: set.BuildNewPage(checkTitle);
 						}
 
 						if (set.Page is null)
@@ -355,6 +340,11 @@
 							this.UpdateSetPageAnyCase(set, setMembers);
 						}
 					}
+				}
+
+				if (set.Page != null)
+				{
+					this.Pages.Add(set.Page);
 				}
 			}
 		}
@@ -377,7 +367,7 @@
 			public SetData(IDataRecord row)
 			{
 				this.Name = (string)row.NotNull()["setName"];
-				for (var i = 1; i <= 7; i++)
+				for (var i = 1; i <= 12; i++)
 				{
 					var bonusDesc = (string)row[$"setBonusDesc{i}"];
 					if (!string.IsNullOrEmpty(bonusDesc))

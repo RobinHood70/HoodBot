@@ -4,7 +4,6 @@
 	using System.Collections.Generic;
 	using System.Data;
 	using RobinHood70.CommonCode;
-
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon.Parser;
@@ -16,13 +15,17 @@
 		public EsoActiveSkillSummaries(JobManager jobManager)
 			: base(jobManager)
 		{
+			jobManager.ShowDiffs = false;
 		}
 		#endregion
 
 		#region Protected Override Properties
 		protected override string Query =>
 		"SELECT\n" +
-			"skillTree.basename, skillTree.skillTypeName, skillTree.learnedLevel, skillTree.type,\n" +
+			"skillTree.basename,\n" +
+			"skillTree.skillTypeName,\n" +
+			"skillTree.learnedLevel,\n" +
+			"skillTree.type,\n" +
 			"minedSkills.id,\n" +
 			"minedSkills.name,\n" +
 			"minedSkills.castTime,\n" +

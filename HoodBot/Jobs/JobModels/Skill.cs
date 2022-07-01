@@ -55,8 +55,6 @@
 
 		#region Public Abstract Methods
 		public abstract bool Check();
-
-		public abstract void GetData(IDataRecord row);
 		#endregion
 	}
 }

@@ -14,6 +14,7 @@
 		public EsoPassiveSkillSummaries(JobManager jobManager)
 			: base(jobManager)
 		{
+			jobManager.ShowDiffs = false;
 		}
 		#endregion
 

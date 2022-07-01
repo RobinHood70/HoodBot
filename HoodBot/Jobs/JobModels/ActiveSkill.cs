@@ -13,6 +13,32 @@
 			: base(row)
 		{
 			this.SkillType = (string)row["type"];
+			static string FormatRange(int num) => ((double)num / 100).ToString("0.##", CultureInfo.InvariantCulture);
+
+			this.LearnedLevel = (int)row["learnedLevel"];
+
+			Morph morph;
+			var morphNum = (sbyte)row["morph"];
+			if (morphNum >= this.Morphs.Count)
+			{
+				morph = new Morph(row);
+				this.Morphs.Add(morph);
+			}
+			else
+			{
+				morph = this.Morphs[this.Morphs.Count - 1];
+			}
+
+			morph.Abilities.Add(new Ability(row));
+			morph.ChannelTimes.Add(EsoSpace.TimeToText((int)row["channelTime"]));
+			morph.Costs.Add((int)row["cost"]);
+			morph.Durations.Add(EsoSpace.TimeToText((int)row["duration"]));
+			morph.Radii.Add(FormatRange((int)row["radius"]));
+			var maxRange = FormatRange((int)row["maxRange"]);
+			var minRange = FormatRange((int)row["minRange"]);
+			var range = string.Equals(minRange, "0", System.StringComparison.Ordinal) ? maxRange : string.Concat(minRange, "-", maxRange);
+			morph.Ranges.Add(range);
+			morph.ParseDescription();
 		}
 
 		#region Public Properties
@@ -36,36 +62,6 @@
 			}
 
 			return false;
-		}
-
-		public override void GetData(IDataRecord row)
-		{
-			static string FormatRange(int num) => ((double)num / 100).ToString("0.##", CultureInfo.InvariantCulture);
-
-			this.LearnedLevel = (int)row["learnedLevel"];
-
-			Morph morph;
-			var morphNum = (sbyte)row["morph"];
-			if (morphNum == this.Morphs.Count)
-			{
-				morph = new Morph(row);
-				this.Morphs.Add(morph);
-			}
-			else
-			{
-				morph = this.Morphs[this.Morphs.Count - 1];
-			}
-
-			morph.Abilities.Add(new Ability(row));
-			morph.ChannelTimes.Add(EsoSpace.TimeToText((int)row["channelTime"]));
-			morph.Costs.Add((int)row["cost"]);
-			morph.Durations.Add(EsoSpace.TimeToText((int)row["duration"]));
-			morph.Radii.Add(FormatRange((int)row["radius"]));
-			var maxRange = FormatRange((int)row["maxRange"]);
-			var minRange = FormatRange((int)row["minRange"]);
-			var range = string.Equals(minRange, "0", System.StringComparison.Ordinal) ? maxRange : string.Concat(minRange, "-", maxRange);
-			morph.Ranges.Add(range);
-			morph.ParseDescription();
 		}
 		#endregion
 	}
