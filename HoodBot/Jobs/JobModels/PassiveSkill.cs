@@ -25,6 +25,8 @@
 			{
 				this.Class = "Crafting";
 			}
+
+			this.ranks.Add(new PassiveRank(row));
 		}
 		#endregion
 
@@ -55,8 +57,6 @@
 
 			return retval;
 		}
-
-		public override void GetData(IDataRecord row) => this.ranks.Add(new PassiveRank(row));
 		#endregion
 	}
 }

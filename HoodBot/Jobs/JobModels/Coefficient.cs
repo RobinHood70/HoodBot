@@ -9,12 +9,12 @@
 	{
 		public Coefficient(IDataRecord data, char num)
 		{
-			this.A = (float)data["a" + num];
+			this.A = (float)data['a' + num];
 			if (this.IsValid)
 			{
-				this.B = (float)data["b" + num];
-				this.C = (float)data["c" + num];
-				//// this.R = (float)data["R" + num];
+				this.B = (float)data['b' + num];
+				this.C = (float)data['c' + num];
+				//// this.R = (float)data['R' + num];
 				var typeNumber = (int)(sbyte)data["type" + num];
 				if (typeNumber == -1)
 				{

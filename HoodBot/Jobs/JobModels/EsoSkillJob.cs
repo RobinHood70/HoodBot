@@ -215,18 +215,16 @@
 		private void GetSkillList()
 		{
 			var errors = false;
-			T? currentSkill = null;
 			string? lastName = null; // We use a string for comparison because the skill itself will sometimes massage the data.
-			foreach (var row in Database.RunQuery(EsoLog.Connection, this.Query))
+			foreach (var skill in Database.RunQuery(EsoLog.Connection, this.Query, row => this.GetNewSkill(row)))
 			{
-				var currentName = (string)row["skillTypeName"] + "::" + (string)row["baseName"];
+				var currentName = $"{skill.Class}::{skill.SkillLine}::{skill.Name}";
 				if (!string.Equals(lastName, currentName, StringComparison.Ordinal))
 				{
 					lastName = currentName;
-					currentSkill = this.GetNewSkill(row);
 					try
 					{
-						this.skills.Add(currentSkill.PageName, currentSkill);
+						this.skills.Add(skill.PageName, skill);
 					}
 					catch (InvalidOperationException e)
 					{
@@ -234,8 +232,6 @@
 						errors = true;
 					}
 				}
-
-				currentSkill!.GetData(row);
 			}
 
 			foreach (var checkSkill in this.skills)
