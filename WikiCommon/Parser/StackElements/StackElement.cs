@@ -18,7 +18,10 @@
 		#region Internal Abstract Properties
 		internal abstract Piece CurrentPiece { get; }
 
-		internal abstract string SearchString { get; }
+		#endregion
+
+		#region Internal Virtual Properties
+		internal virtual string SearchString { get; } = SearchBase;
 		#endregion
 
 		#region Protected Properties
@@ -30,7 +33,7 @@
 		#endregion
 
 		#region Internal Abstract Methods
-		internal abstract List<IWikiNode> BreakSyntax();
+		internal abstract List<IWikiNode> Backtrack();
 
 		internal abstract void Parse(char found);
 		#endregion

@@ -44,7 +44,7 @@
 			for (var i = sections.Count - 1; i >= 0; i--)
 			{
 				var houseSection = sections[i];
-				var sectionHeader = houseSection.Header?.GetInnerText(true) ?? string.Empty;
+				var sectionHeader = houseSection.Header?.GetTitle(true) ?? string.Empty;
 				if (string.Equals(sectionHeader, "Houses", StringComparison.Ordinal))
 				{
 					sections.RemoveAt(i);

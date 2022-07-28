@@ -423,6 +423,7 @@
 					{
 						template.Update("furnLimitType", wantsToBe);
 					}
+
 					var showCollectible = furnishing.FurnishingLimitType switch
 					{
 						FurnishingType.TraditionalFurnishings => furnishing.Collectible,

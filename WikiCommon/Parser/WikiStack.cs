@@ -25,10 +25,6 @@
 	/// <summary>This class does the core work to parse text into a list of wiki nodes. It provides factory methods for each node type, allowing implementers to override the way nodes are created.</summary>
 	public sealed class WikiStack
 	{
-		#region Internal Constants
-		internal const string CommentWhiteSpace = " \t";
-		#endregion
-
 		#region Private Constants
 		private const int StartSize = 4;
 		private const string IncludeOnlyTag = "includeonly";
@@ -143,7 +139,7 @@
 			var finalNodes = this.array[0].CurrentPiece;
 			for (var i = 1; i < this.count; i++)
 			{
-				finalNodes.Merge(this.array[i].BreakSyntax());
+				finalNodes.Merge(this.array[i].Backtrack());
 			}
 
 			foreach (var node in finalNodes.Nodes)
@@ -255,7 +251,7 @@
 				return false;
 			}
 
-			var wsStart = this.Index - this.Text.SpanReverse(CommentWhiteSpace, this.Index);
+			var wsStart = this.Index - this.Text.SpanReverse(HeaderElement.CommentWhiteSpace, this.Index);
 			var wsEnd = wsStart;
 			(wsEnd, var comments) = this.GetComments(endPos + 3, wsEnd);
 
@@ -268,7 +264,7 @@
 				if (wsLength > 0 && piece.Nodes[^1] is ITextNode last)
 				{
 					var lastValue = last.Text;
-					if (lastValue.SpanReverse(CommentWhiteSpace, lastValue.Length) == wsLength)
+					if (lastValue.SpanReverse(HeaderElement.CommentWhiteSpace, lastValue.Length) == wsLength)
 					{
 						last.Text = lastValue[..^wsLength];
 					}
@@ -325,7 +321,7 @@
 			List<Comment> comments = new();
 			do
 			{
-				var length = this.Text.Span(CommentWhiteSpace, closing);
+				var length = this.Text.Span(HeaderElement.CommentWhiteSpace, closing);
 				comments.Add(new Comment(wsEnd, closing, length));
 				wsEnd = closing + length;
 				closing = string.Compare(this.Text, wsEnd, "<!--", 0, 4, StringComparison.Ordinal) == 0
@@ -439,7 +435,7 @@
 				this.ParseLineStart();
 			}
 
-			do
+			while (this.Index < this.textLength)
 			{
 				if (this.findOnlyinclude)
 				{
@@ -483,7 +479,6 @@
 
 				this.Top.Parse(this.CurrentCharacter);
 			}
-			while (this.Index < this.textLength);
 
 			var lastHeader = this.Top as HeaderElement;
 			lastHeader?.Parse('\n');

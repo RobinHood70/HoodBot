@@ -15,15 +15,20 @@
 		/// <param name="factory">The factory to use when creating new nodes.</param>
 		/// <param name="level">The level.</param>
 		/// <param name="text">The text of the header.</param>
-		public HeaderNode(IWikiNodeFactory factory, int level, [Localizable(false)] IEnumerable<IWikiNode> text)
+		/// <param name="comment">Any text that came after the close ==.</param>
+		public HeaderNode(IWikiNodeFactory factory, int level, [Localizable(false)] IEnumerable<IWikiNode> text, IEnumerable<IWikiNode>? comment)
 		{
 			this.Factory = factory.NotNull();
 			this.Level = level;
 			this.Title = new NodeCollection(factory, text.NotNull());
+			this.Comment = comment is null ? null : new NodeCollection(factory, comment.NotNull());
 		}
 		#endregion
 
 		#region Public Properties
+
+		/// <inheritdoc/>
+		public NodeCollection? Comment { get; }
 
 		/// <inheritdoc/>
 		public bool Confirmed { get; set; }

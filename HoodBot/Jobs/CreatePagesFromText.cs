@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.IO;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Parser;
@@ -44,7 +43,7 @@
 				var header = (IHeaderNode)parser[i];
 				if (header.Title.Count < 3 || header.Title[1] is not SiteLinkNode link)
 				{
-					link = (SiteLinkNode)parser.Factory.LinkNodeFromParts("Blades:" + header.Title.ToValue().Trim(TextArrays.EqualsSign));
+					link = (SiteLinkNode)parser.Factory.LinkNodeFromParts("Blades:" + header.GetTitle(true));
 				}
 
 				var template = (ITemplateNode)parser[i + 2];

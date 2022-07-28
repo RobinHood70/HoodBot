@@ -82,7 +82,7 @@
 		#region Private Methods
 		private static bool UpdateCurrentStatus(ContextualParser parser, string status)
 		{
-			var currentTask = parser.FindIndex<IHeaderNode>(header => string.Equals(header.GetInnerText(true), "Current Task", StringComparison.Ordinal));
+			var currentTask = parser.FindIndex<IHeaderNode>(header => string.Equals(header.GetTitle(true), "Current Task", StringComparison.Ordinal));
 			var taskLog = parser.FindIndex<IHeaderNode>(currentTask + 1);
 			if (currentTask == -1 || taskLog == -1)
 			{

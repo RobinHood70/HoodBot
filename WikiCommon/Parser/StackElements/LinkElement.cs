@@ -1,6 +1,6 @@
 ﻿namespace RobinHood70.WikiCommon.Parser.StackElements
 {
-	internal sealed class LinkElement : PairedElement
+	internal sealed class LinkElement : OpenCloseElement
 	{
 		#region Constructors
 		public LinkElement(WikiStack stack, int length)
@@ -10,7 +10,7 @@
 		#endregion
 
 		#region Internal Override Properties
-		internal override string SearchString => SearchBase + "|]";
+		internal override string SearchString { get; } = SearchBase + "|]";
 		#endregion
 
 		#region Public Override Methods
@@ -23,7 +23,7 @@
 			switch (found)
 			{
 				case '|':
-					this.PairedPieces.Add(new());
+					this.DividerPieces.Add(new());
 					this.Stack.Index++;
 					break;
 				case ']':

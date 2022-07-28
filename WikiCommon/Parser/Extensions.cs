@@ -72,14 +72,18 @@
 
 		/// <summary>Gets the text inside the heading delimiters.</summary>
 		/// <param name="header">The header to get the title for.</param>
-		/// <param name="innerTrim">if set to <see langword="true"/>, trims the inner text before returning it.</param>
+		/// <param name="trim">if set to <see langword="true"/>, trims the inner text before returning it.</param>
 		/// <returns>The text inside the heading delimiters.</returns>
 		/// <remarks>This is method is provided as a temporary measure. The intent is to alter the parser itself so as to make this method unnecessary.</remarks>
-		public static string GetInnerText(this IHeaderNode header, bool innerTrim)
+		public static string GetTitle(this IHeaderNode header, bool trim)
 		{
-			var text = WikiTextVisitor.Raw(header.NotNull()).TrimEnd();
-			text = text.Substring(header.Level, text.Length - header.Level * 2);
-			return innerTrim ? text.Trim() : text;
+			if (header is null)
+			{
+				return string.Empty;
+			}
+
+			var text = WikiTextVisitor.Raw(header.Title);
+			return trim ? text.Trim() : text;
 		}
 		#endregion
 

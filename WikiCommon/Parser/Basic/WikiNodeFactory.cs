@@ -393,8 +393,8 @@
 			new CommentNode(comment);
 
 		/// <inheritdoc/>
-		public virtual IHeaderNode HeaderNode(int level, [Localizable(false)] IEnumerable<IWikiNode> text) =>
-			new HeaderNode(this, level, text);
+		public virtual IHeaderNode HeaderNode(int level, [Localizable(false)] IEnumerable<IWikiNode> text, IEnumerable<IWikiNode>? comment) =>
+			new HeaderNode(this, level, text, comment);
 
 		/// <inheritdoc/>
 		public virtual IIgnoreNode IgnoreNode(string value) =>

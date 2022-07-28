@@ -7,6 +7,10 @@
 
 	internal sealed class HeaderElement : StackElement
 	{
+		#region Internal Constants
+		internal const string CommentWhiteSpace = " \t";
+		#endregion
+
 		#region Fields
 		private readonly int length;
 		private readonly int startPos;
@@ -22,7 +26,7 @@
 		}
 		#endregion
 
-		#region Internal Override Properties
+		#region Protected Override Properties
 		internal override HeaderPiece CurrentPiece { get; } = new HeaderPiece();
 
 		internal override string SearchString => SearchBase;
@@ -33,7 +37,7 @@
 		#endregion
 
 		#region Internal Override Methods
-		internal override List<IWikiNode> BreakSyntax() => this.CurrentPiece.Nodes;
+		internal override List<IWikiNode> Backtrack() => this.CurrentPiece.Nodes;
 
 		internal override void Parse(char found)
 		{
@@ -42,10 +46,10 @@
 			{
 				var text = stack.Text;
 				var piece = this.CurrentPiece;
-				var searchStart = stack.Index - text.SpanReverse(WikiStack.CommentWhiteSpace, stack.Index);
-				if (searchStart != 0 && searchStart - 1 == piece.CommentEnd)
+				var searchStart = stack.Index - text.SpanReverse(CommentWhiteSpace, stack.Index);
+				if (searchStart > 0 && searchStart - 1 == piece.CommentEnd)
 				{
-					searchStart = piece.VisualEnd - text.SpanReverse(WikiStack.CommentWhiteSpace, searchStart);
+					searchStart = piece.VisualEnd - text.SpanReverse(CommentWhiteSpace, searchStart);
 				}
 
 				var equalsLength = text.SpanReverse('=', searchStart);
@@ -60,9 +64,24 @@
 
 					if (count > 0)
 					{
-						var headerNode = this.Stack.NodeFactory.HeaderNode(count, piece.Nodes);
+						var subparser = this.Stack.NodeFactory;
+						var innerStart = this.startPos + count;
+						var innerText = text[innerStart..(searchStart - count)];
+						var headerNodes = subparser.Parse(innerText);
+						NodeCollection? commentNodes;
+						if (endPos + count < searchStart)
+						{
+							var commentText = text[(endPos + count)..stack.Index];
+							commentNodes = subparser.Parse(commentText);
+						}
+						else
+						{
+							commentNodes = null;
+						}
+
+						var header = this.Stack.NodeFactory.HeaderNode(count, headerNodes, commentNodes);
 						stack.Pop();
-						stack.Top.CurrentPiece.Nodes.Add(headerNode);
+						stack.Top.CurrentPiece.Nodes.Add(header);
 						return;
 					}
 				}

@@ -105,7 +105,7 @@
 
 					itemList.Sort(StringComparer.Ordinal);
 					var insertText = string.Join("\n", itemList) + "\n";
-					if (string.Equals(section.Header?.GetInnerText(true), "Furnishings", StringComparison.Ordinal))
+					if (string.Equals(section.Header?.GetTitle(true), "Furnishings", StringComparison.Ordinal))
 					{
 						insertText += "furnished=1\n";
 					}
@@ -130,7 +130,7 @@
 			{
 				if (section.Header is IHeaderNode header)
 				{
-					var headerText = header.GetInnerText(true);
+					var headerText = header.GetTitle(true);
 					if (string.Equals(headerText, "Gallery", StringComparison.Ordinal))
 					{
 						yield break;
