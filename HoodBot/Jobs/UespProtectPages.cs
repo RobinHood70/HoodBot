@@ -209,16 +209,21 @@
 			foreach (var page in this.Pages)
 			{
 				var protection = this.pageProtections[page];
-				this.WriteLine("|-");
-				this.WriteLine("| " + protection.FriendlyName);
-				this.WriteLine("| " + page.AsLink());
-				this.WriteLine("| " + CombinedProtectionString(
-					ProtectionFromPage(page, "edit"),
-					ProtectionFromPage(page, "move")));
-				this.WriteLine("| " + CombinedProtectionString(
-					protection.EditProtection,
-					protection.MoveProtection));
-				this.WriteLine("| " + protection.Reason.UpperFirst(this.Site.Culture));
+				if (page.Exists &&
+					(!string.Equals(protection.FriendlyName, "Deletion Review", StringComparison.Ordinal) ||
+					page.StartTimestamp?.AddDays(30) < DateTime.Now))
+				{
+					this.WriteLine("|-");
+					this.WriteLine("| " + protection.FriendlyName);
+					this.WriteLine("| " + page.AsLink());
+					this.WriteLine("| " + CombinedProtectionString(
+						ProtectionFromPage(page, "edit"),
+						ProtectionFromPage(page, "move")));
+					this.WriteLine("| " + CombinedProtectionString(
+						protection.EditProtection,
+						protection.MoveProtection));
+					this.WriteLine("| " + protection.Reason.UpperFirst(this.Site.Culture));
+				}
 			}
 
 			this.WriteLine("|}");
@@ -261,24 +266,6 @@
 			foreach (var page in this.Pages)
 			{
 				var protection = this.pageProtections[page];
-
-				// Skip Deletion Review pages unless the last modification is at least 30 days ago. This could be incorporated into the search data itself as a delegate, but for now, since it's a one-off. I've left it as hard-coded.
-				if (page.Exists &&
-					(!string.Equals(protection.FriendlyName, "Deletion Review", StringComparison.Ordinal) ||
-					page.StartTimestamp?.AddDays(30) < DateTime.Now))
-				{
-					this.WriteLine("|-");
-					this.WriteLine("| " + protection.FriendlyName);
-					this.WriteLine("| " + page.AsLink());
-					this.WriteLine("| " + CombinedProtectionString(
-						ProtectionFromPage(page, "edit"),
-						ProtectionFromPage(page, "move")));
-					this.WriteLine("| " + CombinedProtectionString(
-						protection.EditProtection,
-						protection.MoveProtection));
-					this.WriteLine("| " + protection.Reason.UpperFirst(this.Site.Culture));
-				}
-
 				Title title = new(page);
 				title.Protect(protection.Reason, protection.EditProtection, protection.MoveProtection, DateTime.MaxValue);
 
