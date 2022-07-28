@@ -97,7 +97,7 @@
 		/// <param name="headerText">Name of the header.</param>
 		/// <returns>The first header with the specified text.</returns>
 		/// <remarks>This is a temporary function until HeaderNode can be rewritten to work more like other nodes (i.e., without capturing trailing whitespace).</remarks>
-		public int IndexOfHeader(string headerText) => this.FindIndex<IHeaderNode>(header => string.Equals(header.GetInnerText(true), headerText, StringComparison.Ordinal));
+		public int IndexOfHeader(string headerText) => this.FindIndex<IHeaderNode>(header => string.Equals(header.GetTitle(true), headerText, StringComparison.Ordinal));
 
 		/// <summary>Splits a page into its individual sections. </summary>
 		/// <returns>An enumeration of the sections of the page.</returns>

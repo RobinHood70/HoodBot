@@ -108,7 +108,7 @@
 				foreach (var headerNode in parsedPage.HeaderNodes)
 				{
 					if (headerNode.Level == 3 &&
-						!IgnoredHeaders.Contains(headerNode.GetInnerText(true), StringComparer.OrdinalIgnoreCase))
+						!IgnoredHeaders.Contains(headerNode.GetTitle(true), StringComparer.OrdinalIgnoreCase))
 					{
 						foreach (var link in headerNode.Title.FindAll<SiteLinkNode>())
 						{

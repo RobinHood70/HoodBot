@@ -27,7 +27,7 @@
 
 		#region Internal Override Methods
 		[DoesNotReturn]
-		internal override List<IWikiNode> BreakSyntax() => throw new InvalidOperationException(Globals.CurrentCulture(Resources.CalledOnRoot, nameof(this.BreakSyntax)));
+		internal override List<IWikiNode> Backtrack() => throw new InvalidOperationException(Globals.CurrentCulture(Resources.CalledOnRoot, nameof(this.Backtrack)));
 
 		internal override void Parse(char found) => this.Stack.ParseCharacter(found);
 		#endregion

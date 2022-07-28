@@ -2,10 +2,15 @@
 {
 	using RobinHood70.WikiCommon.Parser;
 
-	internal sealed class TemplateElement : PairedElement
+	internal sealed class TemplateElement : OpenCloseElement
 	{
+		#region Private Constants
+		private const string SearchTitle = SearchBase + "|}";
+		private const string SearchParam = SearchTitle + "=";
+		#endregion
+
 		#region Fields
-		// private readonly bool atLineStart;
+		//// private readonly bool atLineStart;
 		private int braceLength;
 		#endregion
 
@@ -13,14 +18,19 @@
 		public TemplateElement(WikiStack stack, int length)
 			: base(stack, '{', length)
 		{
-			this.braceLength = length; // this.atLineStart = atLineStart;
+			// this.atLineStart = atLineStart;
+
+			// Brace length is stored separately from the parent class' length because the parent modifies the value as it parses. This also allows the parent class' length to be private.
+			this.braceLength = length;
 		}
 		#endregion
 
 		#region Internal Override Properties
-		internal override string SearchString => (this.PairedPieces[^1] is PairedPiece pp && pp.SplitPos == -1)
-			? SearchBase + "|}="
-			: SearchBase + "|}";
+		internal override string SearchString => (
+			this.DividerPieces[^1] is DividerPiece pp &&
+			pp.Position == -1)
+				? SearchParam
+				: SearchTitle;
 		#endregion
 
 		#region Public Override Methods
@@ -33,20 +43,20 @@
 			switch (found)
 			{
 				case '|':
-					this.PairedPieces.Add(new());
+					this.DividerPieces.Add(new());
 					this.Stack.Index++;
 					break;
 				case '=':
-					var lastPiece = this.PairedPieces[^1];
-					lastPiece.SplitPos = lastPiece.Nodes.Count;
-					if (this.PairedPieces.Count == 1)
+					var lastDivider = this.DividerPieces[^1];
+					lastDivider.Position = lastDivider.Nodes.Count;
+					if (this.DividerPieces.Count == 1)
 					{
-						lastPiece.AddLiteral(this.Stack.NodeFactory, "=");
+						lastDivider.AddLiteral(this.Stack.NodeFactory, "=");
 					}
 					else
 					{
 						// Node type isn't really relevant here, as long as it's not a TextNode. IgnoreNode made the most sense. This is an interim value that won't ever make it to the final output. This could probably be done with SplitPos alone, but adding this makes the TextNode checks in AddLiteral and Merge fail in their own right, without having to check SplitPos.
-						lastPiece.Nodes.Add(this.Stack.NodeFactory.IgnoreNode("="));
+						lastDivider.Nodes.Add(this.Stack.NodeFactory.IgnoreNode("="));
 					}
 
 					this.Stack.Index++;

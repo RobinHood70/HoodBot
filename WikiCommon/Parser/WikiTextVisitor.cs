@@ -126,7 +126,18 @@
 		}
 
 		/// <inheritdoc/>
-		public void Visit(IHeaderNode node) => node.NotNull().Title.Accept(this);
+		public void Visit(IHeaderNode node)
+		{
+			node.ThrowNull();
+			var equalsSigns = new string('=', node.Level);
+			this.builder.Append(equalsSigns);
+			node.Title.Accept(this);
+			this.builder.Append(equalsSigns);
+			if (node.Comment is not null)
+			{
+				node.Comment.Accept(this);
+			}
+		}
 
 		/// <inheritdoc/>
 		public void Visit(IIgnoreNode node)

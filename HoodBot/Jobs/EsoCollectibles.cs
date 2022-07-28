@@ -236,7 +236,7 @@
 			//// var tier = string.Empty;
 			foreach (var node in parser)
 			{
-				if (node is IHeaderNode header)
+				if (node is IHeaderNode)
 				{
 					//// tier = GetSectionTitle(header);
 				}

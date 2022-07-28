@@ -41,7 +41,7 @@
 				ContextualParser parsedPage = new(page);
 				foreach (var node in parsedPage.HeaderNodes)
 				{
-					var header = node.GetInnerText(true);
+					var header = node.GetTitle(true);
 					if (BadHeaders.Contains(header) && !this.IsException(page, header))
 					{
 						this.WriteLine($"* {page.AsLink()} has a {header} header.");
