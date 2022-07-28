@@ -131,10 +131,9 @@
 		#endregion
 
 		#region Internal Static Methods
-#if DEBUG
+
 		// This is flagged as internal mostly to stop warnings whenever it's not in use.
 		internal static string SiteName(IWikiAbstractionLayer sender) => sender.AllSiteInfo?.General?.SiteName ?? "Site-Agnostic";
-#endif
 		#endregion
 
 		#region Protected Virtual Methods
@@ -210,6 +209,7 @@
 
 		protected virtual void SiteChanging(Site sender, ChangeArgs eventArgs)
 		{
+#if DEBUG
 			if (!sender.EditingEnabled)
 			{
 				Debug.WriteLine($"{eventArgs.MethodName} (sender: {eventArgs.RealSender})");
@@ -218,6 +218,7 @@
 					Debug.WriteLine($"  {parameter.Key} = {parameter.Value}");
 				}
 			}
+#endif
 		}
 
 		protected virtual void SiteWarningOccurred(Site sender, WarningEventArgs eventArgs) => Debug.WriteLine(eventArgs?.Warning);
@@ -295,13 +296,11 @@
 
 		private void DisposeAbstractionLayer()
 		{
-#if DEBUG
 			this.AbstractionLayer.WarningOccurred -= this.WalWarningOccurred;
 			if (this.AbstractionLayer is IInternetEntryPoint internet)
 			{
 				internet.SendingRequest -= this.WalSendingRequest;
 			}
-#endif
 		}
 
 		private void DisposeClient() => this.Client.RequestingDelay -= this.Client_RequestingDelay;
@@ -309,10 +308,8 @@
 		private void DisposeSite()
 		{
 			this.Site.PagePreview -= this.OnPagePreview;
-#if DEBUG
 			this.Site.Changing -= this.SiteChanging;
 			this.Site.WarningOccurred -= this.SiteWarningOccurred;
-#endif
 		}
 		#endregion
 	}
