@@ -123,6 +123,41 @@
 
 		#region Public Static Methods
 
+		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
+		/// <param name="site">The site.</param>
+		/// <param name="other">The collection to initialize this instance from.</param>
+		/// <returns>A new PageCollection with no namespace limitations, load options set to none, and creating only default pages rather than user-specified.</returns>
+		public static PageCollection CreateEmptyPages(Site site, IEnumerable<Title> other)
+		{
+			// Currently only used for Purge, Watch, and Unwatch when returning fake results.
+			var retval = UnlimitedDefault(site);
+			foreach (var title in other.NotNull())
+			{
+				var page = retval.pageCreator.CreateEmptyPage(title);
+				retval[page] = page;
+			}
+
+			return retval;
+		}
+
+		/// <summary>Purges all pages in the collection.</summary>
+		/// <param name="site">The site to work on.</param>
+		/// <param name="input">The input.</param>
+		/// <returns>A <see cref="PageCollection"/> with the purge results.</returns>
+		public static PageCollection Purge(Site site, PurgeInput input)
+		{
+			var result = site.NotNull().AbstractionLayer.Purge(input);
+			var retval = UnlimitedDefault(site);
+			retval.PopulateMapCollections(result);
+			foreach (var item in result)
+			{
+				var page = retval.New(item);
+				retval[page] = page;
+			}
+
+			return retval;
+		}
+
 		/// <summary>Initializes a new instance of the PageCollection class with no namespace limitations.</summary>
 		/// <param name="site">The site the pages are from. All pages in a collection must belong to the same site.</param>
 		/// <returns>A new PageCollection with all namespace limitations disabled.</returns>
@@ -143,6 +178,28 @@
 		/// <returns>A new PageCollection with all namespace limitations disabled.</returns>
 		/// <remarks>This is a simple shortcut method to create PageCollections where limitations can safely be ignored.</remarks>
 		public static PageCollection Unlimited(Site site, PageModules modules, bool followRedirects) => Unlimited(site, new PageLoadOptions(modules, followRedirects));
+
+		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
+		/// <param name="site">The site.</param>
+		/// <returns>A new PageCollection with no namespace limitations, load options set to none, and creating only default pages rather than user-specified.</returns>
+		public static PageCollection UnlimitedDefault(Site site) => new(site, PageLoadOptions.None) { LimitationType = LimitationType.None };
+
+		/// <summary>Watches or unwatches all pages in the collection.</summary>
+		/// <param name="site">The site to work on.</param>
+		/// <param name="input">The input parameters.</param>
+		/// <returns>A <see cref="PageCollection"/> with the watch/unwatch results.</returns>
+		public static PageCollection Watch(Site site, WatchInput input)
+		{
+			var result = site.NotNull().AbstractionLayer.Watch(input);
+			PageCollection retval = new(site, result);
+			foreach (var item in result)
+			{
+				var page = retval.New(item);
+				retval[page] = page;
+			}
+
+			return retval;
+		}
 		#endregion
 
 		#region Public Methods
@@ -245,66 +302,6 @@
 
 			value = default;
 			return false;
-		}
-		#endregion
-
-		#region Internal Static Methods
-
-		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
-		/// <param name="site">The site.</param>
-		/// <param name="other">The collection to initialize this instance from.</param>
-		/// <returns>A new PageCollection with no namespace limitations, load options set to none, and creating only default pages rather than user-specified.</returns>
-		internal static PageCollection CreateEmptyPages(Site site, IEnumerable<Title> other)
-		{
-			// Currently only used for Purge, Watch, and Unwatch when returning fake results.
-			var retval = UnlimitedDefault(site);
-			foreach (var title in other.NotNull())
-			{
-				var page = retval.pageCreator.CreateEmptyPage(title);
-				retval[page] = page;
-			}
-
-			return retval;
-		}
-
-		/// <summary>Purges all pages in the collection.</summary>
-		/// <param name="site">The site to work on.</param>
-		/// <param name="input">The input.</param>
-		/// <returns>A <see cref="PageCollection"/> with the purge results.</returns>
-		internal static PageCollection Purge(Site site, PurgeInput input)
-		{
-			var result = site.NotNull().AbstractionLayer.Purge(input);
-			var retval = UnlimitedDefault(site);
-			retval.PopulateMapCollections(result);
-			foreach (var item in result)
-			{
-				var page = retval.New(item);
-				retval[page] = page;
-			}
-
-			return retval;
-		}
-
-		/// <summary>Initializes a new PageCollection intended to store results of other operations like Purge, Watch, or Unwatch.</summary>
-		/// <param name="site">The site.</param>
-		/// <returns>A new PageCollection with no namespace limitations, load options set to none, and creating only default pages rather than user-specified.</returns>
-		internal static PageCollection UnlimitedDefault(Site site) => new(site, PageLoadOptions.None) { LimitationType = LimitationType.None };
-
-		/// <summary>Watches or unwatches all pages in the collection.</summary>
-		/// <param name="site">The site to work on.</param>
-		/// <param name="input">The input parameters.</param>
-		/// <returns>A <see cref="PageCollection"/> with the watch/unwatch results.</returns>
-		internal static PageCollection Watch(Site site, WatchInput input)
-		{
-			var result = site.NotNull().AbstractionLayer.Watch(input);
-			PageCollection retval = new(site, result);
-			foreach (var item in result)
-			{
-				var page = retval.New(item);
-				retval[page] = page;
-			}
-
-			return retval;
 		}
 		#endregion
 
