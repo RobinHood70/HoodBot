@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Threading;
+	using RobinHood70.Robby.Parser;
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
 
@@ -12,6 +13,12 @@
 		public TestJob(JobManager jobManager)
 			: base(jobManager)
 		{
+			var page = this.Site.CreatePage("Test", "Hello\n\n=== {{Header}} ====  <!--Whitespace--> <!--Another comment-->");
+			var parser = new ContextualParser(page);
+			foreach (var header in parser.HeaderNodes)
+			{
+				this.StatusWriteLine('"' + header.Title.ToRaw() + '"');
+			}
 		}
 		#endregion
 
