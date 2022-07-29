@@ -185,7 +185,7 @@
 
 			ChangeValue<PageCollection> ChangeFunc()
 			{
-				var pages = PageCollection.Purge(this.Site, new PurgeInput(this.ToFullPageNames()) { Method = method });
+				var pages = PageCollection.Purge(this.Site, this, method);
 				var retval = (pages.Count < this.Count)
 					? ChangeStatus.Failure
 					: ChangeStatus.Success;

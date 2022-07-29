@@ -158,6 +158,17 @@
 			return retval;
 		}
 
+		/// <summary>Purges all pages in the collection.</summary>
+		/// <param name="site">The site to work on.</param>
+		/// <param name="titles">The titles to purge.</param>
+		/// <param name="method">The type of purge to perform.</param>
+		/// <returns>A <see cref="PageCollection"/> with the purge results.</returns>
+		public static PageCollection Purge(Site site, IEnumerable<Title> titles, PurgeMethod method)
+		{
+			var input = new PurgeInput(titles.ToFullPageNames(), method);
+			return Purge(site, input);
+		}
+
 		/// <summary>Initializes a new instance of the PageCollection class with no namespace limitations.</summary>
 		/// <param name="site">The site the pages are from. All pages in a collection must belong to the same site.</param>
 		/// <returns>A new PageCollection with all namespace limitations disabled.</returns>
