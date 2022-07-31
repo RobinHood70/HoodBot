@@ -77,6 +77,12 @@
 		}
 		#endregion
 
+		#region Protected Virtual Methods
+		protected virtual bool ShouldAddPage(ContextualParser parser) => true;
+
+		protected virtual bool ShouldAddTemplate(SiteTemplateNode template, ContextualParser parser) => true;
+		#endregion
+
 		#region Private Static Methods
 		private static TitleCollection BuildRedirectList(TitleCollection titles)
 		{
@@ -113,6 +119,29 @@
 		#endregion
 
 		#region Private Methods
+		private void AddPage(IReadOnlyCollection<Title> allNames, List<(Title Page, ITemplateNode Template)> templates, Dictionary<string, string> paramTranslator, ContextualParser parser)
+		{
+			foreach (var template in parser.FindAll<SiteTemplateNode>())
+			{
+				if (this.ShouldAddTemplate(template, parser) && allNames.Contains(template.TitleValue))
+				{
+					this.AddTemplate(templates, paramTranslator, parser, template);
+				}
+			}
+		}
+
+		private void AddTemplate(List<(Title Page, ITemplateNode Template)> templates, Dictionary<string, string> paramTranslator, ContextualParser parser, SiteTemplateNode template)
+		{
+			templates.Add((parser.Page, template));
+			foreach (var (name, _) in template.GetResolvedParameters())
+			{
+				if (paramTranslator.TryAdd(name, name))
+				{
+					this.headerOrder.Add(name);
+				}
+			}
+		}
+
 		private void ExportTemplates(IReadOnlyCollection<Title> allNames, PageCollection pages)
 		{
 			var templates = this.ExtractTemplates(allNames, pages);
@@ -141,19 +170,9 @@
 			foreach (var page in pages)
 			{
 				ContextualParser parser = new(page);
-				foreach (var template in parser.FindAll<SiteTemplateNode>())
+				if (this.ShouldAddPage(parser))
 				{
-					if (allNames.Contains(template.TitleValue))
-					{
-						templates.Add((page, template));
-						foreach (var (name, _) in template.GetResolvedParameters())
-						{
-							if (paramTranslator.TryAdd(name, name))
-							{
-								this.headerOrder.Add(name);
-							}
-						}
-					}
+					this.AddPage(allNames, templates, paramTranslator, parser);
 				}
 			}
 
