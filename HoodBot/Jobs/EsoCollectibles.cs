@@ -41,6 +41,8 @@
 
 		#region Protected Override Properties
 
+		protected override Func<Title, Page>? CreatePage => this.CreateFromTitle;
+
 		protected override Tristate CreateOnly => Tristate.True;
 
 		protected override string EditSummary => "Create collectible page";
@@ -116,8 +118,6 @@
 				this.Pages.Add(this.Site.CreatePage(collectible.Key));
 			}
 		}
-
-		protected override void NewPage(Page page) => page.Text = this.blankText;
 
 		protected override void ParseText(object sender, ContextualParser parser)
 		{
@@ -208,6 +208,8 @@
 				this.collectibles.Add(title, item);
 			}
 		}
+
+		private Page CreateFromTitle(Title title) => this.Site.CreatePage(title, this.blankText.NotNull());
 
 		private void GetCrownCrates()
 		{
