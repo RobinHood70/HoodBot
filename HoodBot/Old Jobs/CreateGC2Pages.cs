@@ -297,7 +297,7 @@
 				: throw new InvalidOperationException($"Title {title.PageName} does not contain a recognized field name.");
 		}
 
-		private void NewPage(ContextualParser parser, Field field)
+		private void InsertText(ContextualParser parser, Field field)
 		{
 			this.UpdateInfobox(parser, field);
 			string difficulty;
@@ -565,7 +565,7 @@
 			}
 			else
 			{
-				this.NewPage(parser, field);
+				this.InsertText(parser, field);
 			}
 
 			page.Text = parser.ToRaw();

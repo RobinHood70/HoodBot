@@ -17,7 +17,7 @@
 	{
 		#region Fields
 		private readonly NpcCollection npcCollection = new();
-		private readonly Dictionary<Page, NpcData> pageNpcs = new(SimpleTitleComparer.Instance);
+		private readonly Dictionary<Title, NpcData> pageNpcs = new(SimpleTitleComparer.Instance);
 		private readonly bool allowUpdates;
 		#endregion
 
@@ -37,6 +37,8 @@
 		#endregion
 
 		#region Protected Override Properties
+		protected override Func<Title, Page>? CreatePage => this.CreateFromTitle;
+
 		protected override Action<EditJob, Page>? EditConflictAction => this.UpdatePage;
 
 		protected override string EditSummary => this.LogName;
@@ -77,52 +79,6 @@
 		#endregion
 
 		#region Private Static Methods
-
-		protected override void NewPage(Page page)
-		{
-			var npc = this.pageNpcs[page];
-			List<(string?, string)> parameters = new()
-			{
-				("id", npc.Id.ToStringInvariant()),
-				("image", string.Empty),
-				("imgdesc", string.Empty),
-				("race", string.Empty),
-				("gender", npc.GenderText),
-				("difficulty", npc.Difficulty > 0 ? npc.Difficulty.ToString(this.Site.Culture) : string.Empty),
-				("reaction", npc.Reaction),
-				("pickpocket", npc.PickpocketDifficulty > 0 ? npc.PickpocketDifficultyText : string.Empty),
-				("loottype", npc.LootType),
-				("faction", string.Empty)
-			};
-
-			WikiNodeFactory factory = new();
-			var template = factory.TemplateNodeFromParts("Online NPC Summary", true, parameters);
-			UpdateLocations(npc, template, factory, EsoSpace.PlaceInfo);
-
-			page.Text = new StringBuilder()
-				.Append("{{Minimal|NPC}}")
-				.AppendLine(WikiTextVisitor.Raw(template))
-				.AppendLine()
-				.AppendLine("<!-- Instructions: Provide an initial sentence summarizing the NPC (race, job, where they live). Subsequent paragraphs provide additional information about the NPC, such as related NPCs, schedule, equipment, etc. Note that quest-specific information DOES NOT belong on this page, but instead goes on the appropriate quest page. Spoilers should be avoided.-->")
-				.AppendLine("{{NewLeft}}")
-				.AppendLine()
-				.AppendLine("<!--Instructions: If this NPC is related to any quests, replace \"Quest Name\" with the quest's name.--><!--")
-				.AppendLine("==Related Quests==")
-				.AppendLine("* {{Quest Link|Quest Name}}")
-				.AppendLine("--><!--Instructions: Add any miscellaneous notes about the NPC here, with a bullet for each note.--><!--")
-				.AppendLine("==Notes==")
-				.AppendLine("* Add note here")
-				.AppendLine("--><!--Instructions: Add any bugs related to the NPC here using the format below.--><!--")
-				.AppendLine("==Bugs==")
-				.AppendLine("{{Bug|Bug description}}")
-				.AppendLine("** Workaround")
-				.AppendLine("-->")
-				.AppendLine()
-				.AppendLine("{{Stub|NPC}}")
-				.ToString();
-
-			page.SetMinimalStartTimestamp();
-		}
 
 		private static int NpcComparer((NpcData Npc, string Issue) x, (NpcData Npc, string Issue) y) => SimpleTitleComparer.Instance.Compare(x.Npc.Title, y.Npc.Title);
 
@@ -216,6 +172,55 @@
 		#endregion
 
 		#region Private Methods
+
+		private Page CreateFromTitle(Title title)
+		{
+			var npc = this.pageNpcs[title];
+			List<(string?, string)> parameters = new()
+			{
+				("id", npc.Id.ToStringInvariant()),
+				("image", string.Empty),
+				("imgdesc", string.Empty),
+				("race", string.Empty),
+				("gender", npc.GenderText),
+				("difficulty", npc.Difficulty > 0 ? npc.Difficulty.ToString(this.Site.Culture) : string.Empty),
+				("reaction", npc.Reaction),
+				("pickpocket", npc.PickpocketDifficulty > 0 ? npc.PickpocketDifficultyText : string.Empty),
+				("loottype", npc.LootType),
+				("faction", string.Empty)
+			};
+
+			WikiNodeFactory factory = new();
+			var template = factory.TemplateNodeFromParts("Online NPC Summary", true, parameters);
+			UpdateLocations(npc, template, factory, EsoSpace.PlaceInfo);
+
+			var text = new StringBuilder()
+				.Append("{{Minimal|NPC}}")
+				.AppendLine(WikiTextVisitor.Raw(template))
+				.AppendLine()
+				.AppendLine("<!-- Instructions: Provide an initial sentence summarizing the NPC (race, job, where they live). Subsequent paragraphs provide additional information about the NPC, such as related NPCs, schedule, equipment, etc. Note that quest-specific information DOES NOT belong on this page, but instead goes on the appropriate quest page. Spoilers should be avoided.-->")
+				.AppendLine("{{NewLeft}}")
+				.AppendLine()
+				.AppendLine("<!--Instructions: If this NPC is related to any quests, replace \"Quest Name\" with the quest's name.--><!--")
+				.AppendLine("==Related Quests==")
+				.AppendLine("* {{Quest Link|Quest Name}}")
+				.AppendLine("--><!--Instructions: Add any miscellaneous notes about the NPC here, with a bullet for each note.--><!--")
+				.AppendLine("==Notes==")
+				.AppendLine("* Add note here")
+				.AppendLine("--><!--Instructions: Add any bugs related to the NPC here using the format below.--><!--")
+				.AppendLine("==Bugs==")
+				.AppendLine("{{Bug|Bug description}}")
+				.AppendLine("** Workaround")
+				.AppendLine("-->")
+				.AppendLine()
+				.AppendLine("{{Stub|NPC}}")
+				.ToString();
+
+			var page = this.Site.CreatePage(title, text);
+			page.SetMinimalStartTimestamp();
+			return page;
+		}
+
 		private void GetNpcPages()
 		{
 			Title NpcTitle(string pageName) => TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], pageName);

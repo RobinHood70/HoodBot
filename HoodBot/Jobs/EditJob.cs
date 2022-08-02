@@ -22,6 +22,8 @@
 		#endregion
 
 		#region Protected Properties
+		protected virtual Func<Title, Page>? CreatePage { get; }
+
 		protected IDictionary<Title, string> CustomEditSummaries { get; } = new Dictionary<Title, string>(SimpleTitleComparer.Instance);
 
 		protected IDictionary<Title, bool> CustomMinorEdits { get; } = new Dictionary<Title, bool>(SimpleTitleComparer.Instance);
@@ -33,6 +35,7 @@
 		#endregion
 
 		#region Protected Virtual Properties
+		protected virtual bool CreateIfMissing => false;
 
 		protected virtual Tristate CreateOnly => Tristate.Unknown;
 
@@ -121,7 +124,11 @@
 			this.LoadPages();
 			foreach (var page in this.Pages)
 			{
-				// We call this manually in case the calling class is adding pages directly rather than loading them.
+				if (this.CreatePage is not null && (page.IsMissing || string.IsNullOrWhiteSpace(page.Text)))
+				{
+					this.CreatePage.NotNull()(page);
+				}
+
 				this.PageLoaded(this, page);
 			}
 
@@ -140,16 +147,8 @@
 		{
 		}
 
-		protected virtual void NewPage(Page page)
-		{
-		}
-
 		protected virtual void PageLoaded(EditJob job, Page page)
 		{
-			if (page.IsMissing || string.IsNullOrWhiteSpace(page.Text))
-			{
-				this.NewPage(page);
-			}
 		}
 		#endregion
 
