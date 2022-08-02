@@ -129,9 +129,9 @@
 		/// <value><see langword="true"/> if protection informatoin should be retrieved; otherwise, <see langword="false"/>.</value>
 		public bool InfoGetProtection { get; set; }
 
-		/// <summary>Gets the modules to load.</summary>
+		/// <summary>Gets or sets the modules to load.</summary>
 		/// <value>The modules to load.</value>
-		public PageModules Modules { get; }
+		public PageModules Modules { get; set; }
 
 		/// <summary>Gets or sets the page creator.</summary>
 		/// <value>The page creator.</value>
