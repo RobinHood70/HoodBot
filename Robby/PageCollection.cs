@@ -78,7 +78,7 @@
 
 		/// <summary>Gets or sets the load options.</summary>
 		/// <value>The load options.</value>
-		public PageLoadOptions LoadOptions { get; set; }
+		public PageLoadOptions LoadOptions { get; }
 
 		/// <summary>Gets the title map.</summary>
 		/// <value>The title map.</value>

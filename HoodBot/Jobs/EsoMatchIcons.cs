@@ -39,7 +39,7 @@
 		public EsoMatchIcons(JobManager jobManager)
 			: base(jobManager)
 		{
-			this.Pages.LoadOptions = new PageLoadOptions(PageModules.Info | PageModules.Revisions | PageModules.FileInfo);
+			this.Pages.LoadOptions.Modules = PageModules.Info | PageModules.Revisions | PageModules.FileInfo;
 			this.Pages.SetLimitations(LimitationType.FilterTo, MediaWikiNamespaces.File);
 		}
 		#endregion

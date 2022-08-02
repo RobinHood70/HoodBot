@@ -19,11 +19,7 @@
 		{
 			// TODO: Switch to loading by TitleCollection, then save TitleCollection so reloads can be much faster.
 			// Investigate why original attempt at this produced a recurring load that never completed.
-			PageCollection list = new(this.Site)
-			{
-				LoadOptions = new PageLoadOptions(PageModules.FileInfo)
-			};
-
+			PageCollection list = new(this.Site, PageModules.FileInfo);
 			list.GetCategoryMembers("Online-Icons", true);
 
 			List<FilePage> smallImages = new();
