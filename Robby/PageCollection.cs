@@ -76,7 +76,7 @@
 
 		#region Public Properties
 
-		/// <summary>Gets or sets the load options.</summary>
+		/// <summary>Gets the options used by <see cref="LoadPages(QueryPageSetInput)"/>.</summary>
 		/// <value>The load options.</value>
 		public PageLoadOptions LoadOptions { get; }
 
@@ -338,8 +338,7 @@
 
 			foreach (var item in result.Redirects)
 			{
-				FullTitle title = TitleFactory.FromUnvalidated(this.Site, result.ToString()!);
-				this.titleMap[item.Key] = title;
+				this.titleMap[item.Key] = TitleFactory.FromUnvalidated(this.Site, item.Value.ToString()!);
 			}
 		}
 		#endregion
