@@ -22,8 +22,6 @@
 		#endregion
 
 		#region Protected Properties
-		protected virtual Func<Title, Page>? CreatePage { get; }
-
 		protected IDictionary<Title, string> CustomEditSummaries { get; } = new Dictionary<Title, string>(SimpleTitleComparer.Instance);
 
 		protected IDictionary<Title, bool> CustomMinorEdits { get; } = new Dictionary<Title, bool>(SimpleTitleComparer.Instance);
@@ -124,11 +122,6 @@
 			this.LoadPages();
 			foreach (var page in this.Pages)
 			{
-				if (this.CreatePage is not null && (page.IsMissing || string.IsNullOrWhiteSpace(page.Text)))
-				{
-					this.CreatePage.NotNull()(page);
-				}
-
 				this.PageLoaded(this, page);
 			}
 
@@ -147,8 +140,14 @@
 		{
 		}
 
+		protected virtual string NewPageText(Page page) => string.Empty;
+
 		protected virtual void PageLoaded(EditJob job, Page page)
 		{
+			if (page.IsMissing || string.IsNullOrWhiteSpace(page.Text))
+			{
+				page.Text = this.NewPageText(page);
+			}
 		}
 		#endregion
 

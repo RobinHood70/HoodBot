@@ -37,10 +37,6 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override Func<Title, Page>? CreatePage => this.CreateFromTitle;
-
-		protected override Action<EditJob, Page>? EditConflictAction => this.UpdatePage;
-
 		protected override string EditSummary => this.LogName;
 
 		protected override bool MinorEdit => false;
@@ -75,6 +71,33 @@
 			}
 
 			this.Pages.GetTitles(npcPages);
+		}
+
+		protected override void PageLoaded(EditJob job, Page page)
+		{
+			if (page.IsMissing || string.IsNullOrWhiteSpace(page.Text))
+			{
+				page.Text = this.NewPageText(this.pageNpcs[page]);
+				page.SetMinimalStartTimestamp();
+			}
+
+			if (this.allowUpdates)
+			{
+				var npc = this.pageNpcs[page];
+				var placeInfo = EsoSpace.PlaceInfo;
+
+				if (new ContextualParser(page) is var parser &&
+					parser.FindSiteTemplate("Online NPC Summary") is ITemplateNode template)
+				{
+					UpdateLocations(npc, template, parser.Factory, placeInfo);
+					parser.UpdatePage();
+					this.Pages.Add(page);
+				}
+				else
+				{
+					throw new InvalidOperationException();
+				}
+			}
 		}
 		#endregion
 
@@ -173,9 +196,8 @@
 
 		#region Private Methods
 
-		private Page CreateFromTitle(Title title)
+		private string NewPageText(NpcData npc)
 		{
-			var npc = this.pageNpcs[title];
 			List<(string?, string)> parameters = new()
 			{
 				("id", npc.Id.ToStringInvariant()),
@@ -194,7 +216,7 @@
 			var template = factory.TemplateNodeFromParts("Online NPC Summary", true, parameters);
 			UpdateLocations(npc, template, factory, EsoSpace.PlaceInfo);
 
-			var text = new StringBuilder()
+			return new StringBuilder()
 				.Append("{{Minimal|NPC}}")
 				.AppendLine(WikiTextVisitor.Raw(template))
 				.AppendLine()
@@ -215,10 +237,6 @@
 				.AppendLine()
 				.AppendLine("{{Stub|NPC}}")
 				.ToString();
-
-			var page = this.Site.CreatePage(title, text);
-			page.SetMinimalStartTimestamp();
-			return page;
 		}
 
 		private void GetNpcPages()
@@ -357,27 +375,6 @@
 			}
 
 			this.WriteLine("|}");
-		}
-
-		private void UpdatePage(object sender, Page page)
-		{
-			if (this.allowUpdates)
-			{
-				var npc = this.pageNpcs[page];
-				var placeInfo = EsoSpace.PlaceInfo;
-
-				if (new ContextualParser(page) is var parser &&
-					parser.FindSiteTemplate("Online NPC Summary") is ITemplateNode template)
-				{
-					UpdateLocations(npc, template, parser.Factory, placeInfo);
-					parser.UpdatePage();
-					this.Pages.Add(page);
-				}
-				else
-				{
-					throw new InvalidOperationException();
-				}
-			}
 		}
 		#endregion
 	}
