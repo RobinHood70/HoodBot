@@ -1,12 +1,9 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System;
-	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
-	using RobinHood70.Robby.Parser;
-	using RobinHood70.WikiCommon.Parser;
+	using RobinHood70.Robby.Design;
 
-	public class OneOffJob : EditJob
+	public class OneOffJob : WikiJob
 	{
 		#region Constructors
 		[JobInfo("One-Off Job")]
@@ -14,31 +11,19 @@
 			: base(jobManager)
 		{
 		}
-		#endregion
 
-		#region Protected Override Properties
-		protected override Action<EditJob, Page>? EditConflictAction => Pages_PageLoaded;
-
-		protected override string EditSummary => "Add furnished parameter";
-		#endregion
-
-		#region Protected Override Methods
-		protected override void LoadPages() =>
-			this.Pages.GetNamespace(UespNamespaces.Online, CommonCode.Filter.Exclude, "Guild Reprint");
-		#endregion
-
-		#region Private Static Methods
-		private static void Pages_PageLoaded(object sender, Page page)
+		protected override void Main()
 		{
-			var parser = new ContextualParser(page);
-			var template = parser.FindSiteTemplate("Online Furnishing Summary");
-			if (template is not null && template.Find("cat", "subcat") is null)
+			var pages = new PageCollection(this.Site, PageModules.Backlinks);
+			pages.GetQueryPage("Unusedimages");
+			pages.Sort();
+			foreach (var page in pages)
 			{
-				template.Parameters.Insert(0, parser.Factory.ParameterNodeFromParts("cat", "Library\n"));
-				template.Parameters.Insert(1, parser.Factory.ParameterNodeFromParts("subcat", "Literature\n"));
+				if (page.Backlinks.Count > 0)
+				{
+					this.WriteLine("* " + page.AsLink());
+				}
 			}
-
-			parser.UpdatePage();
 		}
 		#endregion
 	}
