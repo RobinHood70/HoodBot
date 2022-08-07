@@ -18,7 +18,7 @@
 		NoChange,
 
 		/// <summary>Remove the protection.</summary>
-		Remove,
+		None,
 
 		/// <summary>Change to semi-protection.</summary>
 		Semi,
@@ -92,7 +92,7 @@
 		/// <returns>A value indicating the change status of the unprotection.</returns>
 		public static ChangeStatus CreateUnprotect(this Title title, string reason)
 		{
-			ProtectInputItem protection = new("create", ProtectionWord(ProtectionLevel.Remove)!);
+			ProtectInputItem protection = new("create", ProtectionWord(ProtectionLevel.None)!);
 			return Protect(title, reason, new[] { protection });
 		}
 
@@ -237,8 +237,8 @@
 		/// <returns>A value indicating the change status of the unprotection.</returns>
 		public static ChangeStatus Unprotect(this Title title, string reason, bool editUnprotect, bool moveUnprotect) => title.Protect(
 			reason,
-			editUnprotect ? ProtectionLevel.Remove : ProtectionLevel.NoChange,
-			moveUnprotect ? ProtectionLevel.Remove : ProtectionLevel.NoChange,
+			editUnprotect ? ProtectionLevel.None : ProtectionLevel.NoChange,
+			moveUnprotect ? ProtectionLevel.None : ProtectionLevel.NoChange,
 			null);
 		#endregion
 
@@ -293,7 +293,7 @@
 		// A dictionary is probably overkill for three items.
 		private static string? ProtectionWord(ProtectionLevel level) => level switch
 		{
-			ProtectionLevel.Remove => "all",
+			ProtectionLevel.None => "all",
 			ProtectionLevel.Semi => "autoconfirmed",
 			ProtectionLevel.Full => "sysop",
 			ProtectionLevel.NoChange => null,
