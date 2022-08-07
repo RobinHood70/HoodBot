@@ -532,6 +532,37 @@
 			}
 		}
 
+		/// <summary>Gets the highest-priority match based on the order of <paramref name="parameterNames"/> and returns that value or <see langword="null"/>.</summary>
+		/// <param name="template">The template to work on.</param>
+		/// <param name="parameterNames">The case-sensitive names of the parameters to search for.</param>
+		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
+		public static IParameterNode? PrioritizedFind(this ITemplateNode template, params string[] parameterNames) => PrioritizedFind(template, false, parameterNames);
+
+		/// <summary>Gets the highest-priority match based on the order of <paramref name="parameterNames"/> and returns that value or <see langword="null"/>.</summary>
+		/// <param name="template">The template to work on.</param>
+		/// <param name="ignoreCase">Whether to ignore case when checking parameter names.</param>
+		/// <param name="parameterNames">The names of the parameters to search for.</param>
+		/// <returns>The requested parameter or <see langword="null"/> if not found.</returns>
+		public static IParameterNode? PrioritizedFind(this ITemplateNode template, bool ignoreCase, params string[] parameterNames)
+		{
+			template.ThrowNull();
+			parameterNames.ThrowNull();
+
+			var paramList = new List<(string Name, IParameterNode Value)>(template.GetResolvedParameters());
+			foreach (var param in parameterNames)
+			{
+				for (var i = paramList.Count - 1; i >= 0; i--)
+				{
+					if (string.Equals(paramList[i].Name, param, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+					{
+						return paramList[i].Value;
+					}
+				}
+			}
+
+			return null;
+		}
+
 		/// <summary>Removes any parameters with the same name/index as a later parameter.</summary>
 		/// <param name="template">The template to work on.</param>
 		public static void RemoveDuplicates(this ITemplateNode template)
