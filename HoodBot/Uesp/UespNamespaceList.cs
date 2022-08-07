@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Collections.ObjectModel;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
@@ -8,6 +9,10 @@
 	// TODO: Expand to add all namespaces and allow all namespace names (including aliases) as a lookup value.
 	public class UespNamespaceList : KeyedCollection<string, UespNamespace>
 	{
+		#region Fields
+		private readonly Dictionary<string, UespNamespace> nsIds = new(StringComparer.Ordinal);
+		#endregion
+
 		#region Constructors
 		public UespNamespaceList(Site site)
 		{
@@ -19,7 +24,9 @@
 				{
 					if (line[0] is not '<' and not '#')
 					{
-						this.Add(new UespNamespace(site, line));
+						var nsData = new UespNamespace(site, line);
+						this.Add(nsData);
+						this.nsIds.Add(nsData.Id, nsData);
 					}
 				}
 			}
@@ -39,15 +46,9 @@
 
 		public UespNamespace? FromId(string id)
 		{
-			foreach (var ns in this)
-			{
-				if (string.Equals(id, ns.Id, StringComparison.Ordinal))
-				{
-					return ns;
-				}
-			}
-
-			return null;
+			return this.nsIds.TryGetValue(id, out var retval)
+				? retval
+				: null;
 		}
 
 		public UespNamespace FromTitle(Title title)
@@ -59,9 +60,16 @@
 
 		public UespNamespace? GetNsBase(Title title, string? nsBase)
 		{
-			return nsBase != null && this.TryGetValue(nsBase, out var uespNamespace)
-				? uespNamespace
-				: this.FromTitle(title);
+			UespNamespace? retval = null;
+			if (nsBase is not null)
+			{
+				if (!this.TryGetValue(nsBase, out retval))
+				{
+					retval = this.FromId(nsBase);
+				}
+			}
+
+			return retval ?? this.FromTitle(title);
 		}
 
 		public Namespace? ParentFromTitle(Title title) => this.FromTitle(title)?.Parent;
