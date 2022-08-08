@@ -64,21 +64,12 @@
 
 					if (count > 0)
 					{
+						// TODO: Remove subparser if possible. Should work like templates and links with linear processing.
 						var subparser = this.Stack.NodeFactory;
 						var innerStart = this.startPos + count;
 						var innerText = text[innerStart..(searchStart - count)];
 						var headerNodes = subparser.Parse(innerText);
-						NodeCollection? commentNodes;
-						if (endPos + count < searchStart)
-						{
-							var commentText = text[(endPos + count)..stack.Index];
-							commentNodes = subparser.Parse(commentText);
-						}
-						else
-						{
-							commentNodes = null;
-						}
-
+						var commentNodes = searchStart < stack.Index ? subparser.Parse(text[searchStart..stack.Index]) : null;
 						var header = this.Stack.NodeFactory.HeaderNode(count, headerNodes, commentNodes);
 						stack.Pop();
 						stack.Top.CurrentPiece.Nodes.Add(header);
