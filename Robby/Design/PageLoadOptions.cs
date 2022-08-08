@@ -108,7 +108,7 @@
 
 		/// <summary>Gets a new PageLoadOptions that loads all available information.</summary>
 		/// <value>A new PageLoadOptions that loads all available information.</value>
-		public static PageLoadOptions All => new(PageModules.Default);
+		public static PageLoadOptions All => new(PageModules.All);
 		#endregion
 
 		#region Public Properties
