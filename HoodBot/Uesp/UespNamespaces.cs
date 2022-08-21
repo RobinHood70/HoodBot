@@ -113,10 +113,8 @@
 		public const int BetterCitiesTalk = 175;
 		public const int MorrowindRebirth = 176;
 		public const int MorrowindRebirthTalk = 177;
-		public const int Stirk = 178;
-		public const int StirkTalk = 179;
-		public const int BeyondSkyrim = 180;
-		public const int BeyondSkyrimTalk = 181;
+		public const int BeyondSkyrim = 178;
+		public const int BeyondSkyrimTalk = 179;
 		public const int Dapel = 200;
 		public const int DapelTalk = 201;
 		public const int TimedText = 710;
@@ -144,6 +142,7 @@
 			OblivionMod,
 			Shivering,
 			Shadowkey,
+			Lore,
 			Dawnstar,
 			Skyrim,
 			OBMobile,
@@ -168,7 +167,6 @@
 			ProjectTamriel,
 			BetterCities,
 			MorrowindRebirth,
-			Stirk,
 			BeyondSkyrim,
 		};
 		#endregion
