@@ -33,6 +33,8 @@
 		#endregion
 
 		#region Public Properties
+		public Namespace AssociatedNamespace => this.BaseTitle.Namespace;
+
 		public string Base { get; }
 
 		public Title BaseTitle { get; }
