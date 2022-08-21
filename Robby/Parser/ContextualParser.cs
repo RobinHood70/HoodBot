@@ -202,9 +202,9 @@
 		/// <returns>The templates that match the title provided, if any.</returns>
 		public IEnumerable<SiteTemplateNode> FindSiteTemplates(Title find)
 		{
-			foreach (SiteTemplateNode siteTemplate in this.TemplateNodes)
+			foreach (var templateNode in this.TemplateNodes)
 			{
-				if (siteTemplate.TitleValue.SimpleEquals(find))
+				if (templateNode is SiteTemplateNode siteTemplate && siteTemplate.TitleValue.SimpleEquals(find))
 				{
 					yield return siteTemplate;
 				}
