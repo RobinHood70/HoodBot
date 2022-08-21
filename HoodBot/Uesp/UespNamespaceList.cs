@@ -58,19 +58,13 @@
 			return this.TryGetValue(ns.DecoratedName + title.RootPageName, out var retval) ? retval : this[ns.Name];
 		}
 
-		public UespNamespace? GetNsBase(Title title, string? nsBase)
-		{
-			UespNamespace? retval = null;
-			if (nsBase is not null)
-			{
-				if (!this.TryGetValue(nsBase, out retval))
-				{
-					retval = this.FromId(nsBase);
-				}
-			}
+		public UespNamespace? GetAnyBase(string? nsBase) =>
+			nsBase is null ? null :
+			this.TryGetValue(nsBase, out var retval) ? retval :
+			this.FromId(nsBase);
 
-			return retval ?? this.FromTitle(title);
-		}
+		public UespNamespace? GetNsBase(Title title, string? nsBase) =>
+			this.GetAnyBase(nsBase) ?? this.FromTitle(title);
 
 		public Namespace? ParentFromTitle(Title title) => this.FromTitle(title)?.Parent;
 		#endregion
