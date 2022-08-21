@@ -29,7 +29,8 @@
 		/// <inheritdoc/>
 		public override int Compare(string? x, string? y) =>
 			Globals.NullComparer(x, y) ??
-			(this.culture.CompareInfo is var compareInfo && this.caseSensitive
+			(this.culture.CompareInfo is var compareInfo &&
+			this.caseSensitive
 				? compareInfo.Compare(x, y, CompareOptions.None)
 				: CompareFull(x!, y!, compareInfo));
 
@@ -43,8 +44,8 @@
 		#region Private Methods
 		private static int CompareFull(string x, string y, CompareInfo compareInfo)
 		{
-			var xFirst = x.Length > 0 ? x[0..0] : string.Empty;
-			var yFirst = y.Length > 0 ? y[0..0] : string.Empty;
+			var xFirst = x.Length > 0 ? x[..1] : string.Empty;
+			var yFirst = y.Length > 0 ? y[..1] : string.Empty;
 			var firstCharCompare = compareInfo.Compare(xFirst, yFirst, CompareOptions.IgnoreCase);
 			if (firstCharCompare != 0)
 			{
