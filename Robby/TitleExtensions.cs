@@ -210,10 +210,7 @@
 		/// <remarks>title version allows custom protection values for wikis that have added protection levels beyond the default. For a wiki with the default setup, use the <see cref="Protect(Title, string, ProtectionLevel, ProtectionLevel, string)"/> version of title call.</remarks>
 		public static ChangeStatus Protect(this Title title, string reason, string? editProtection, string? moveProtection, string? duration)
 		{
-			if (duration == null)
-			{
-				duration = "infinite";
-			}
+			duration ??= "infinite";
 
 			List<ProtectInputItem> protections = new(2);
 			if (editProtection != null)

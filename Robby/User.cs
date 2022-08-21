@@ -130,10 +130,7 @@
 				var result = string.Equals(retval.Result, "Success", StringComparison.OrdinalIgnoreCase)
 					? ChangeStatus.Success
 					: ChangeStatus.Failure;
-				if (this.Info is null)
-				{
-					this.Info = new UserInfo(result == ChangeStatus.Success);
-				}
+				this.Info ??= new UserInfo(result == ChangeStatus.Success);
 
 				return new ChangeValue<string>(result, retval.Message ?? retval.Result);
 			}
