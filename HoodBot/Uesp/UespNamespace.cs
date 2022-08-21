@@ -1,10 +1,11 @@
 ﻿namespace RobinHood70.HoodBot.Uesp
 {
+	using System;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 
-	public class UespNamespace
+	public sealed class UespNamespace : IEquatable<UespNamespace>
 	{
 		#region Constructors
 		internal UespNamespace(Site site, string line)
@@ -17,10 +18,8 @@
 
 			var baseName = nsData[0];
 			this.Base = baseName;
-			this.IsPseudoNamespace = !site.Namespaces.TryGetValue(baseName, out var nsBase);
-			this.BaseTitle = nsBase is not null
-				? TitleFactory.FromUnvalidated(nsBase, string.Empty)
-				: TitleFactory.FromUnvalidated(site, baseName);
+			this.BaseTitle = TitleFactory.FromUnvalidated(site, baseName);
+			this.IsPseudoNamespace = baseName.Contains(':', StringComparison.Ordinal);
 			this.Full = baseName + (this.IsPseudoNamespace ? '/' : ':');
 			this.Id = nsData[1].Length == 0 ? baseName.ToUpperInvariant() : nsData[1];
 			var parentName = nsData[2].Length == 0 ? baseName : nsData[2];
@@ -57,7 +56,17 @@
 		public string Trail { get; }
 		#endregion
 
+		#region Public Methods
+		public bool Equals(UespNamespace? other) =>
+			other is not null &&
+			string.Equals(this.Base, other.Base, StringComparison.Ordinal);
+		#endregion
+
 		#region Public Override Methods
+		public override bool Equals(object? obj) => obj is UespNamespace other && this.Equals(other);
+
+		public override int GetHashCode() => this.Base.GetHashCode(StringComparison.Ordinal);
+
 		public override string ToString() => this.Base;
 		#endregion
 	}
