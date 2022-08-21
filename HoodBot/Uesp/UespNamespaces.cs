@@ -128,7 +128,7 @@
 		#endregion
 
 		#region Fields
-		private static readonly List<int> Gamespaces = new()
+		private static readonly HashSet<int> Gamespaces = new()
 		{
 			Arena,
 			Daggerfall,
@@ -174,7 +174,7 @@
 		#endregion
 
 		#region Public Functions
-		public static bool IsGamespace(int id) => Gamespaces.BinarySearch(id) >= 0;
+		public static bool IsGamespace(int id) => Gamespaces.Contains(id);
 		#endregion
 	}
 }
