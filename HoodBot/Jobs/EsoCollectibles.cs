@@ -88,12 +88,15 @@
 			pages.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn);
 
 			var knownIds = new HashSet<long>();
-			foreach (VariablesPage item in pages)
+			foreach (var item in pages)
 			{
-				var idText = item.GetVariable("id");
-				if (long.TryParse(idText, NumberStyles.Integer, this.Site.Culture, out var id))
+				if (item is VariablesPage vPage)
 				{
-					knownIds.Add(id);
+					var idText = vPage.GetVariable("id");
+					if (long.TryParse(idText, NumberStyles.Integer, this.Site.Culture, out var id))
+					{
+						knownIds.Add(id);
+					}
 				}
 			}
 

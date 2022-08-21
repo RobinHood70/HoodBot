@@ -243,9 +243,11 @@
 		#region Private Methods
 		private void ExcludeExisting(PageCollection pageInfo, HashSet<long> idExclusions, TitleCollection nameExclusions)
 		{
-			foreach (VariablesPage title in pageInfo)
+			foreach (var title in pageInfo)
 			{
-				if (title.GetVariable("ID") is string idText && long.TryParse(idText, System.Globalization.NumberStyles.None, this.Site.Culture, out var id))
+				if (title is VariablesPage variablesTitle &&
+					variablesTitle.GetVariable("ID") is string idText &&
+					long.TryParse(idText, System.Globalization.NumberStyles.None, this.Site.Culture, out var id))
 				{
 					idExclusions.Add(id);
 				}
