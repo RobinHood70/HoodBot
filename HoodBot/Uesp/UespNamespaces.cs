@@ -125,8 +125,8 @@
 		public const int GadgetDefinitionTalk = 2303;
 		#endregion
 
-		#region Fields
-		private static readonly HashSet<int> Gamespaces = new()
+		#region Public Properties
+		public static ICollection<int> Gamespaces { get; } = new HashSet<int>
 		{
 			Arena,
 			Daggerfall,
