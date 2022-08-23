@@ -42,7 +42,7 @@ namespace RobinHood70.WallE.Base
 
 		public static QueryPageSetInput FromPageIds(IEnumerable<long> pageIds, IGeneratorInput generator) => new(generator, pageIds, ListType.PageIds);
 
-		public static QueryPageSetInput FromRevisionIds(IEnumerable<long> pageIds) => new(pageIds, ListType.RevisionIds);
+		public static QueryPageSetInput FromRevisionIds(IEnumerable<long> revisionIds) => new(revisionIds, ListType.RevisionIds);
 
 		public static QueryPageSetInput FromRevisionIds(IEnumerable<long> pageIds, IGeneratorInput generator) => new(generator, pageIds, ListType.RevisionIds);
 		#endregion
