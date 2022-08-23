@@ -261,7 +261,7 @@
 			{
 				EditInput input = new(talkPage.FullPageName, msg)
 				{
-					Bot = true,
+					Bot = false, // A new talk page message should not be auto-ignored.
 					Minor = Tristate.False,
 					Recreate = true,
 					Section = -1,
