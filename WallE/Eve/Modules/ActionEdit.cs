@@ -39,14 +39,6 @@
 				request.Type = RequestType.PostMultipart;
 			}
 
-			var afterRevision = input.UndoAfterRevision;
-			if (input.UndoRevision > 0 && afterRevision == 0)
-			{
-				// This corrects for a bug where an unspecified or 0 value for "undoafter" sometimes causes a revision not found error. This appears to be only on new pages where there's nothing to revert to. Having both values specified as equal removes the error and the return value instead has nochange=true.
-				// This appears to be caused by https://phabricator.wikimedia.org/T190285
-				afterRevision = input.UndoRevision;
-			}
-
 			var md5Text = (input.Text ?? (input.PrependText + input.AppendText)).GetHash(HashType.Md5);
 			request
 				.AddIfNotNull("title", input.Title)
@@ -66,7 +58,7 @@
 				.AddIfPositive("watchlist", input.Watchlist)
 				.AddIfNotNull("prependtext", input.PrependText)
 				.AddIfNotNull("appendtext", input.AppendText)
-				.AddIfPositive("undo", afterRevision)
+				.AddIfPositive("undo", input.UndoRevision)
 				.AddIfPositive("undoafter", input.UndoAfterRevision)
 				.Add("redirect", input.Redirect)
 				.AddIfNotNull("contentformat", input.ContentFormat)
