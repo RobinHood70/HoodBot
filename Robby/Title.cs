@@ -186,6 +186,10 @@
 			return sb.ToString();
 		}
 
+		/// <summary>Gets the article path for the current page.</summary>
+		/// <returns>A Uri to the index.php page.</returns>
+		public Uri GetArticlePath() => this.Site.GetArticlePath(this.FullPageName);
+
 		/// <summary>Trims the disambiguator off of a title (e.g., "Harry Potter (character)" will produce "Harry Potter").</summary>
 		/// <returns>The text with the final paranthetical text removed.</returns>
 		public string LabelName() => this.PageName.Length == 0 ? this.PageName : ToLabelName(this.PageName);
@@ -230,10 +234,6 @@
 			this.Namespace == other.Namespace &&
 			this.Namespace.PageNameEquals(this.PageName, other.PageName, false);
 		*/
-
-		/// <summary>Gets the article path for the current page.</summary>
-		/// <returns>A Uri to the index.php page.</returns>
-		public Uri GetArticlePath() => this.Site.GetArticlePath(this.FullPageName);
 
 		/// <summary>Compares two objects for <see cref="Namespace"/> and <see cref="PageName"/> equality.</summary>
 		/// <param name="other">The object to compare to.</param>
