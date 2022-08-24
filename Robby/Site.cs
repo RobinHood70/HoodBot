@@ -715,6 +715,46 @@
 			}
 		}
 
+		/// <summary>Undoes an edit.</summary>
+		/// <param name="title">The page the revision is on.</param>
+		/// <param name="revisionId">The revision ID to undo.</param>
+		/// <param name="editSummary">The edit summary.</param>
+		/// <returns>A value indicating the change status of posting the new talk page message.</returns>
+		/// <exception cref="InvalidOperationException">Thrown when the user's talk page is invalid.</exception>
+		public ChangeStatus Undo(Title title, long revisionId, string editSummary)
+		{
+			title.ThrowNull();
+			editSummary.ThrowNull();
+
+			Dictionary<string, object?> parameters = new(StringComparer.Ordinal)
+			{
+				[nameof(title)] = title.FullPageName,
+				[nameof(revisionId)] = revisionId,
+				[nameof(editSummary)] = editSummary
+			};
+
+			return this.PublishChange(this, parameters, ChangeFunc);
+
+			ChangeStatus ChangeFunc()
+			{
+				EditInput input = new(title.FullPageName, revisionId)
+				{
+					Bot = true,
+					Minor = Tristate.True,
+					Recreate = false,
+					Summary = editSummary
+				};
+
+				var retval = this.AbstractionLayer.Edit(input);
+
+				return string.Equals(retval.Result, "Success", StringComparison.OrdinalIgnoreCase)
+					? (retval.Flags & EditFlags.NoChange) == 0
+						? ChangeStatus.Success
+						: ChangeStatus.NoEffect
+					: ChangeStatus.Failure;
+			}
+		}
+
 		/// <summary>Unwatches all pages in the specified namespace.</summary>
 		/// <param name="ns">The namespace to unwatch.</param>
 		/// <returns>A collection of pages that were unwatched.</returns>
