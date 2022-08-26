@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Data;
-	using System.Diagnostics;
 	using System.Globalization;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
@@ -48,30 +47,22 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void AfterLoadPages()
-		{
-			this.Pages.RemoveChanged(false);
-			this.StatusWriteLine($"{this.Pages.Count} pages will be created.");
-			this.Pages.Shuffle();
-			foreach (var page in this.Pages)
-			{
-				Debug.WriteLine(page.FullPageName);
-			}
-		}
-
 		protected override void BeforeLoadPages()
 		{
 			this.StatusWriteLine("Getting wiki info");
 			if (this.Site.LoadPage($"Template:{TemplateName}/Blank") is Page page)
 			{
-				var parser = new ContextualParser(page);
-				var pre = parser.FindSiteTemplate("Pre");
+				var extract = new ContextualParser(page);
+				var pre = extract.FindSiteTemplate("Pre");
 				if (pre?.Find(1)?.Value is NodeCollection nodes &&
 					nodes.Count > 0 &&
 					nodes[0] is ITagNode tag &&
 					string.Equals(tag.Name, "nowiki", StringComparison.Ordinal))
 				{
-					this.blankText = tag.InnerText?.Trim();
+					if (tag.InnerText?.Trim() is string blankTemplate)
+					{
+						this.blankText = blankTemplate;
+					}
 				}
 			}
 
@@ -125,6 +116,10 @@
 		protected override void ParseText(object sender, ContextualParser parser)
 		{
 			var page = parser.Page;
+			parser.ReplaceText(
+				"<gallery>\n</gallery>",
+				$"<gallery>\nON-crown store-{page.PageName}.jpg\n</gallery>",
+				StringComparison.Ordinal);
 			var collectible = this.collectibles[page];
 			if (collectible is null)
 			{
@@ -140,6 +135,8 @@
 			{
 				template.Update("collectibletype", CategorySingular(collectible.Category));
 				template.Update("type", CategorySingular(collectible.Subcategory));
+				template.UpdateIfEmpty("image", $"<!--{collectible.ImageName}-->");
+				template.UpdateIfEmpty("icon", $"<!--{collectible.IconName}-->");
 				template.Update("id", collectible.Id.ToStringInvariant());
 				template.UpdateIfEmpty("description", collectible.Description);
 				template.RenameParameter("name", "nickname");
@@ -276,6 +273,16 @@
 				this.Description = (string)row["description"];
 				this.Category = (string)row["categoryName"];
 				this.Subcategory = (string)row["subCategoryName"];
+				var fileCategory = this.Category switch
+				{
+					"Appearance" => string.Equals(this.Subcategory, "Hair Style", StringComparison.Ordinal) ? "hairstyle" : this.Subcategory,
+					"Memento" or "Mount" or "Pet" => this.Category,
+					_ => this.Subcategory
+				};
+
+				fileCategory = fileCategory.ToLowerInvariant();
+				this.ImageName = $"ON-{fileCategory}-{this.Name}";
+				this.IconName = $"ON-icon-{fileCategory}-{this.Name}";
 			}
 			#endregion
 
@@ -302,7 +309,11 @@
 
 			public string Description { get; }
 
+			public string IconName { get; }
+
 			public long Id { get; }
+
+			public string ImageName { get; }
 
 			public string Name { get; }
 
