@@ -25,13 +25,13 @@
 			var unfilteredNpcList = EsoLog.GetNpcs();
 			foreach (var dupe in unfilteredNpcList.Duplicates)
 			{
-				this.Warn($"Warning: an NPC with the name \"{dupe.Name}\" exists more than once in the database!");
+				this.Warn($"Warning: an NPC with the name \"{dupe.DataName}\" exists more than once in the database!");
 			}
 
 			List<string> allNames = new();
 			foreach (var npc in unfilteredNpcList)
 			{
-				allNames.Add(npc.Name);
+				allNames.Add(npc.DataName);
 			}
 
 			allNames.Sort(StringComparer.Ordinal);

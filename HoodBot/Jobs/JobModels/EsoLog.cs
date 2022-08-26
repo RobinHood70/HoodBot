@@ -105,11 +105,11 @@
 			var query = "SELECT id, name, gender, difficulty, ppDifficulty, ppClass, reaction FROM uesp_esolog.npc WHERE level != -1 AND reaction != 6";
 			foreach (var npcData in Database.RunQuery(Connection, query, row => new NpcData(row)))
 			{
-				if (!ColourCode.IsMatch(npcData.Name) &&
-					!TrailingDigits.IsMatch(npcData.Name) &&
-					!ReplacementData.NpcNameSkips.Contains(npcData.Name))
+				if (!ColourCode.IsMatch(npcData.DataName) &&
+					!TrailingDigits.IsMatch(npcData.DataName) &&
+					!ReplacementData.NpcNameSkips.Contains(npcData.DataName))
 				{
-					if (nameClash.Add(npcData.Name))
+					if (nameClash.Add(npcData.DataName))
 					{
 						retval.Add(npcData);
 					}

@@ -56,6 +56,10 @@
 		};
 		#endregion
 
+		#region Fields
+		private string? name;
+		#endregion
+
 		#region Constructors
 		public NpcData(IDataRecord row)
 		{
@@ -92,11 +96,17 @@
 				this.Gender = (Gender)gender;
 			}
 
-			this.Name = ReplacementData.NpcNameFixes.TryGetValue(name, out var newName) ? newName : name.Trim();
+			this.DataName = name.Trim();
+			if (ReplacementData.NpcNameFixes.TryGetValue(name, out var newName))
+			{
+				this.name = newName;
+			}
 		}
 		#endregion
 
 		#region Public Properties
+		public string DataName { get; }
+
 		public sbyte Difficulty { get; }
 
 		public Gender Gender { get; }
@@ -107,9 +117,11 @@
 
 		public string LootType { get; }
 
-		public string Name { get; }
-
-		public Title? Title { get; set; }
+		public string Name
+		{
+			get => this.name ?? this.DataName;
+			internal set => this.name = value;
+		}
 
 		public PickpocketDifficulty PickpocketDifficulty { get; }
 
@@ -118,6 +130,8 @@
 		public Dictionary<Place, int> Places { get; } = new Dictionary<Place, int>();
 
 		public string Reaction { get; }
+
+		public Title? Title { get; set; }
 
 		// TODO: This is really just a Dictionary<string, int> but converted to Place in hopes of doing something a little better with Places, cuz it's a mess right now.
 		public Dictionary<Place, int> UnknownLocations { get; } = new Dictionary<Place, int>();
@@ -187,7 +201,7 @@
 				if (placeType.Value.Count > 1)
 				{
 					wroteSomething = true;
-					Debug.Write($"[[Online:{this.Title?.FullPageName ?? this.Name}|{this.Name}]] has multiple {placeType.Key} entries: {string.Join(", ", placeType.Value)}.");
+					Debug.Write($"[[Online:{this.Title?.FullPageName ?? this.DataName}|{this.DataName}]] has multiple {placeType.Key} entries: {string.Join(", ", placeType.Value)}.");
 				}
 			}
 

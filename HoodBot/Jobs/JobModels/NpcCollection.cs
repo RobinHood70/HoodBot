@@ -59,7 +59,7 @@
 						}
 						catch (InvalidOperationException)
 						{
-							Debug.WriteLine($"Location {key.TitleName} is ambiguous for NPC {npc.Name}");
+							Debug.WriteLine($"Location {key.TitleName} is ambiguous for NPC {npc.DataName}");
 						}
 					}
 				}
