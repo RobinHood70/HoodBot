@@ -441,6 +441,14 @@
 			}
 		}
 
+		/// <summary>Replaces text found in all ITextNode nodes.</summary>
+		/// <param name="oldValue">The text to look for.</param>
+		/// <param name="newValue">The text that should replace <paramref name="oldValue"/> with.</param>
+		/// <param name="comparisonType">The string comparison method to use.</param>
+		/// <remarks>The replacement function should determine whether or not the current node will be replaced. If not, or if the function itself modified the list, it should return null; otherwise, it should return a new NodeCollection that will replace the current node.
+		/// </remarks>
+		public void ReplaceText(string oldValue, string newValue, StringComparison comparisonType) => this.Replace(match => this.ReplaceTextPrivate(match, oldValue, newValue, comparisonType), false);
+
 		/// <summary>Converts the <see cref="NodeCollection"/> to raw text.</summary>
 		/// <returns>A <see cref="string" /> that represents this instance.</returns>
 		public string ToRaw() => WikiTextVisitor.Raw(this);
@@ -469,6 +477,23 @@
 				{
 					this.RemoveAt(0);
 				}
+			}
+		}
+		#endregion
+
+		#region Private Static Methods
+		private NodeCollection? ReplaceTextPrivate(IWikiNode match, string from, string to, StringComparison comparison)
+		{
+			switch (match)
+			{
+				case ICommentNode comment:
+					comment.Comment = comment.Comment.Replace(from, to, comparison);
+					return new NodeCollection(this.Factory, comment);
+				case ITextNode text:
+					text.Text = text.Text.Replace(from, to, comparison);
+					return new NodeCollection(this.Factory, text);
+				default:
+					return null;
 			}
 		}
 		#endregion
