@@ -10,7 +10,7 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WikiCommon;
 
-	// TODO: Re-write so all lookups (Contains, IndexOf, Remove) use numeric namespace and pagename. Will probably require Key itself to be rewritten to match. Right now, things like IndexOf((string)key) will fail for alternative namespace names.
+	// TODO: Consider rewriting to use some kind of dictionary lookup all around...something like Dictionary<Title, int offset> and List<Title>. If List<Title> returns null, it's treated as a NotFoundException. Then have an Optimize or TrimExcess type thing to remove all null values and renumber. The idea here is that Remove operations could become O(log n) instead of O(n), although Removes should be the exception, so there's an argument to leave things as is, too.
 	#region Public Enumerations
 
 	/// <summary>Specifies how to limit any pages added to the collection.</summary>
@@ -68,8 +68,8 @@
 	/// <typeparam name="TTitle">The type of the title.</typeparam>
 	/// <seealso cref="IList{TTitle}" />
 	/// <seealso cref="IReadOnlyCollection{TTitle}" />
-	/// <remarks>This collection class functions similarly to a KeyedCollection, but automatically overwrites existing items with new ones. Unlike a KeyedCollection, however, it does not support changing an item's key, since <see cref="Title"/> inherently does not allow this.</remarks>
-	public abstract class TitleCollection<TTitle> : IList<TTitle>, IReadOnlyCollection<TTitle>, ISiteSpecific
+	/// <remarks>This collection class functions similarly to a KeyedCollection. Unlike a KeyedCollection, however, new items will automatically overwrite previous ones rather than throwing an error. TitleCollection also does not support changing an item's key. You must use Remove/Add in combination.</remarks>
+	public abstract class TitleCollection<TTitle> : IList<TTitle>, IReadOnlyCollection<TTitle>, IEnumerable<TTitle>, ISiteSpecific
 		where TTitle : Title
 	{
 		#region Fields
@@ -152,10 +152,10 @@
 		/// <remarks>Like a <see cref="Dictionary{TKey, TValue}"/>, this indexer will add a new entry on set if the requested entry isn't found.</remarks>
 		public virtual TTitle this[string key]
 		{
-			get => this[this.TextToTitle(key)];
+			get => this[TitleFactory.FromUnvalidated(this.Site, key.NotNull())];
 			set
 			{
-				var titleKey = this.TextToTitle(key);
+				var titleKey = TitleFactory.FromUnvalidated(this.Site, key.NotNull());
 				if (this.lookup.ContainsKey(titleKey))
 				{
 					var index = this.IndexOf(titleKey);
@@ -242,7 +242,7 @@
 		/// <returns><see langword="true" /> if the collection contains an item with the specified key; otherwise, <see langword="true" />.</returns>
 		public bool Contains(string key)
 		{
-			var title = this.TextToTitle(key.NotNull());
+			var title = TitleFactory.FromUnvalidated(this.Site, key.NotNull());
 			return this.lookup.ContainsKey(title);
 		}
 
@@ -780,7 +780,7 @@
 		/// <summary>Determines the index of a specific item in the <see cref="TitleCollection">collection</see>.</summary>
 		/// <param name="key">The key of the item to locate in the <see cref="TitleCollection">collection</see>.</param>
 		/// <returns>The index of the item with the specified <paramref name="key" /> if found in the list; otherwise, -1.</returns>
-		public int IndexOf(string key) => this.IndexOf(this.TextToTitle(key.NotNull()));
+		public int IndexOf(string key) => this.IndexOf(TitleFactory.FromUnvalidated(this.Site, key.NotNull()));
 
 		/// <summary>Inserts an item into the <see cref="TitleCollection">collection</see> at the specified index.</summary>
 		/// <param name="index">The zero-based index at which <paramref name="item" /> should be inserted.</param>
@@ -797,7 +797,7 @@
 		/// <returns><see langword="true" /> if and item with the specified <paramref name="key" /> was successfully removed from the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />. This method also returns <see langword="false" /> if an item with the specified <paramref name="key" /> is not found in the original <see cref="TitleCollection">collection</see>.</returns>
 		public bool Remove(string key)
 		{
-			var title = this.TextToTitle(key.NotNull());
+			var title = TitleFactory.FromUnvalidated(this.Site, key.NotNull());
 			return this.Remove(title);
 		}
 
@@ -814,6 +814,21 @@
 			}
 
 			return false;
+		}
+
+		/// <summary>Removes a series of items from the <see cref="TitleCollection">collection</see>.</summary>
+		/// <param name="titles">The titless to remove.</param>
+		/// <returns><see langword="true" /> if any of the <paramref name="titles" /> were removed; otherwise, <see langword="false" />.</returns>
+		public bool Remove(IEnumerable<Title> titles)
+		{
+			titles.ThrowNull();
+			var removed = false;
+			foreach (var item in titles)
+			{
+				removed |= this.Remove(item);
+			}
+
+			return removed;
 		}
 
 		/// <summary>Removes the <see cref="TitleCollection">collection</see> item at the specified index.</summary>
@@ -894,7 +909,7 @@
 		/// <returns>The requested value, or null if not found.</returns>
 		public TTitle? ValueOrDefault(string key) =>
 			key != null &&
-			this.lookup.TryGetValue(this.TextToTitle(key), out var retval)
+			this.lookup.TryGetValue(TitleFactory.FromUnvalidated(this.Site, key.NotNull()), out var retval)
 				? retval
 				: null;
 		#endregion
@@ -954,7 +969,7 @@
 		/// <exception cref="ArgumentNullException"><paramref name="key" /> is <see langword="null" />.</exception>
 		public virtual bool TryGetValue(string key, [MaybeNullWhen(false)] out TTitle value)
 		{
-			var title = this.TextToTitle(key.NotNull());
+			var title = TitleFactory.FromUnvalidated(this.Site, key.NotNull());
 			return this.lookup.TryGetValue(title, out value!);
 		}
 		#endregion
@@ -1123,11 +1138,6 @@
 		/// <summary>Adds raw watchlist pages to the collection.</summary>
 		/// <param name="input">The input parameters.</param>
 		protected abstract void GetWatchlistRaw(WatchlistRawInput input);
-		#endregion
-
-		#region Private Methods
-
-		private Title TextToTitle(string text) => new(TitleFactory.FromUnvalidated(this.Site, text));
 		#endregion
 	}
 }
