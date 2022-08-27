@@ -64,7 +64,7 @@
 		public NpcData(IDataRecord row)
 		{
 			this.Id = (long)row["id"];
-			var name = (string)row["name"];
+			var nameField = (string)row["name"];
 			var gender = (sbyte)row["gender"];
 			this.Difficulty = (sbyte)row["difficulty"];
 			this.Difficulty--;
@@ -80,10 +80,10 @@
 				}
 				: Reactions[reaction];
 
-			if (name.Length > 2 && name[^2] == '^' && gender == -1)
+			if (nameField.Length > 2 && nameField[^2] == '^' && gender == -1)
 			{
-				var genderChar = char.ToUpperInvariant(name[^1]);
-				name = name[0..^2];
+				var genderChar = char.ToUpperInvariant(nameField[^1]);
+				nameField = nameField[0..^2];
 				this.Gender = genderChar switch
 				{
 					'M' => Gender.Male,
@@ -96,8 +96,8 @@
 				this.Gender = (Gender)gender;
 			}
 
-			this.DataName = name.Trim();
-			if (ReplacementData.NpcNameFixes.TryGetValue(name, out var newName))
+			this.DataName = nameField.Trim();
+			if (ReplacementData.NpcNameFixes.TryGetValue(nameField, out var newName))
 			{
 				this.name = newName;
 			}
