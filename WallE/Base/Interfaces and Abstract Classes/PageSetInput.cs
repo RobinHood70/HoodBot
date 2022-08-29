@@ -37,7 +37,9 @@ namespace RobinHood70.WallE.Base
 		protected PageSetInput(IEnumerable<string> titles)
 		{
 			this.ListType = ListType.Titles;
-			this.Values = titles.NotNullOrWhiteSpace().AsReadOnlyList();
+			titles = titles.NotNullOrWhiteSpace();
+			var values = titles.AsReadOnlyList();
+			this.Values = values;
 		}
 
 		protected PageSetInput(IGeneratorInput generatorInput)
