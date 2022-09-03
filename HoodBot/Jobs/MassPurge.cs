@@ -20,7 +20,8 @@
 			: base(jobManager)
 		{
 			pages = pages.NotNull().Replace("\r\n", "\n", StringComparison.Ordinal);
-			this.titles = new TitleCollection(this.Site, pages.Split('\n'));
+			var values = pages.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+			this.titles = new TitleCollection(this.Site, values);
 			this.purgeMethod =
 				recursive ? PurgeMethod.RecursiveLinkUpdate :
 				linkUpdate ? PurgeMethod.LinkUpdate :
