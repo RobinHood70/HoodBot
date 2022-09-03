@@ -201,14 +201,11 @@
 		/// <param name="item">The object to add to the <see cref="TitleCollection">collection</see>.</param>
 		public void Add(TTitle item)
 		{
-			var index = this.IndexOf(item);
-			if (index != -1)
+			if (this.lookup.Remove(item))
 			{
-				// We don't touch the dictionary here because InsertItem will simply write over top of the existing entry.
-				this.items.RemoveAt(index);
+				this.Remove(item.NotNull());
+				this.InsertItem(this.items.Count, item);
 			}
-
-			this.InsertItem(this.items.Count, item);
 		}
 
 		/// <summary>Adds multiple titles to the <see cref="TitleCollection">collection</see> at once.</summary>
@@ -848,7 +845,11 @@
 		/// <param name="namespaces">The namespaces to remove.</param>
 		public void RemoveNamespaces(bool removeTalk, IEnumerable<int>? namespaces)
 		{
-			var hash = namespaces as HashSet<int> ?? new(namespaces ?? Array.Empty<int>());
+			if (namespaces is not HashSet<int> hash)
+			{
+				hash = new(namespaces ?? Array.Empty<int>());
+			}
+
 			for (var i = this.Count - 1; i >= 0; i--)
 			{
 				var ns = this[i].Namespace;
