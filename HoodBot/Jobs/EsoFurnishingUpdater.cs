@@ -408,36 +408,36 @@
 				string.Equals(bindTypeValue, "0", StringComparison.Ordinal))
 					? null
 					: furnishing.BindType;
-			template.Update("bindtype", bindType, ParameterFormat.OnePerLine, true);
+			if (bindType is not null)
+			{
+				template.Update("bindtype", bindType, ParameterFormat.OnePerLine, true);
+			}
 
 			if (furnishing.FurnishingLimitType == FurnishingType.None && string.IsNullOrEmpty(furnishing.Behavior))
 			{
 				template.Remove("collectible");
 			}
-			else
+			else if (template.GetValue("furnLimitType") is string furnLimitType)
 			{
-				if (template.GetValue("furnLimitType") is string furnLimitType)
+				var wantsToBe = FurnishingLimitTypes[furnishing.FurnishingLimitType];
+				if (!string.Equals(furnLimitType + 's', wantsToBe, StringComparison.Ordinal))
 				{
-					var wantsToBe = FurnishingLimitTypes[furnishing.FurnishingLimitType];
-					if (!string.Equals(furnLimitType + 's', wantsToBe, StringComparison.Ordinal))
-					{
-						template.Update("furnLimitType", wantsToBe);
-					}
+					template.Update("furnLimitType", wantsToBe);
+				}
 
-					var showCollectible = furnishing.FurnishingLimitType switch
-					{
-						FurnishingType.TraditionalFurnishings => furnishing.Collectible,
-						FurnishingType.SpecialFurnishings => furnishing.Collectible,
-						FurnishingType.CollectibleFurnishings => !furnishing.Collectible,
-						FurnishingType.SpecialCollectibles => !furnishing.Collectible,
-						FurnishingType.None => throw new InvalidOperationException(),
-						_ => throw new InvalidOperationException()
-					};
+				var showCollectible = furnishing.FurnishingLimitType switch
+				{
+					FurnishingType.TraditionalFurnishings => furnishing.Collectible,
+					FurnishingType.SpecialFurnishings => furnishing.Collectible,
+					FurnishingType.CollectibleFurnishings => !furnishing.Collectible,
+					FurnishingType.SpecialCollectibles => !furnishing.Collectible,
+					FurnishingType.None => throw new InvalidOperationException(),
+					_ => throw new InvalidOperationException()
+				};
 
-					if (showCollectible)
-					{
-						template.Update("collectible", furnishing.Collectible ? "1" : "0");
-					}
+				if (showCollectible)
+				{
+					template.Update("collectible", furnishing.Collectible ? "1" : "0");
 				}
 			}
 		}
@@ -491,6 +491,8 @@
 			template.RenameParameter("style", "theme");
 			template.RenameParameter("tags", "behavior");
 			template.RenameParameter("type", "furnLimitType");
+			template.RenameParameter("description", "desc");
+			template.RemoveDuplicates();
 
 			FixBehavior(template);
 			this.FixBundles(template);
