@@ -535,7 +535,7 @@
 			if (node["variantarticlepath"] is JToken variantArticlePathNode)
 			{
 				// Default value is "false", which gets emitted in JSON, so check for that.
-				variantArticlePath = variantArticlePathNode?.Type == JTokenType.Boolean ? null : (string?)variantArticlePathNode;
+				variantArticlePath = variantArticlePathNode.Type == JTokenType.Boolean ? null : (string?)variantArticlePathNode;
 			}
 
 			List<string> variants = new();
