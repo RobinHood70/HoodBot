@@ -291,7 +291,7 @@
 						retval = index;
 					}
 				}
-				else if (string.Equals(node.Name?.ToValue(), name, StringComparison.Ordinal))
+				else if (string.Equals(node.Name.ToValue(), name, StringComparison.Ordinal))
 				{
 					retval = index;
 				}
@@ -563,26 +563,38 @@
 			return null;
 		}
 
-		/// <summary>Removes any parameters with the same name/index as a later parameter.</summary>
+		/// <summary>Removes any parameters with the same name as a later parameter.</summary>
 		/// <param name="template">The template to work on.</param>
-		public static void RemoveDuplicates(this ITemplateNode template)
+		/// <param name="format">The format to use to define which template parameters have numeric names.</param>
+		/// <remarks>Anonymous parameters that are replaced with numbered parameters will be blanked but not removed. This is to prevent the issues associated with constructs like <c>{{Template|abc|def|ghi|2=def=xyz}}</c> and other edge cases that will likely require human intervention.</remarks>
+		public static void RemoveDuplicates(this ITemplateNode template, IFormatProvider format)
 		{
-			var index = template.NotNull().Parameters.Count;
-			HashSet<string> nameList = new(StringComparer.Ordinal);
+			template.ThrowNull();
+			Dictionary<string, int> nameList = new(StringComparer.Ordinal);
+			var removals = new List<int>();
 			var anonIndex = 0;
-			while (index >= 0 && index < template.Parameters.Count)
+			for (var index = 0; index < template.Parameters.Count; index++)
 			{
-				var name = template.Parameters[index].Name?.ToValue() ?? (++anonIndex).ToStringInvariant();
-				if (nameList.Contains(name))
+				var name = template.Parameters[index].Name?.ToValue()
+					?? (++anonIndex).ToStringInvariant();
+				if (nameList.TryGetValue(name, out var offset))
 				{
-					template.Parameters.RemoveAt(index);
-				}
-				else
-				{
-					nameList.Add(name);
+					if (int.TryParse(name, NumberStyles.Integer, format, out _))
+					{
+						template.Parameters[offset].Value.Clear();
+					}
+					else
+					{
+						removals.Add(offset);
+					}
 				}
 
-				index--;
+				nameList[name] = index;
+			}
+
+			for (var i = removals.Count - 1; i >= 0; i--)
+			{
+				template.Parameters.RemoveAt(removals[i]);
 			}
 		}
 
