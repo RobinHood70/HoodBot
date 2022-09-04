@@ -565,9 +565,8 @@
 
 		/// <summary>Removes any parameters with the same name as a later parameter.</summary>
 		/// <param name="template">The template to work on.</param>
-		/// <param name="format">The format to use to define which template parameters have numeric names.</param>
 		/// <remarks>Anonymous parameters that are replaced with numbered parameters will be blanked but not removed. This is to prevent the issues associated with constructs like <c>{{Template|abc|def|ghi|2=def=xyz}}</c> and other edge cases that will likely require human intervention.</remarks>
-		public static void RemoveDuplicates(this ITemplateNode template, IFormatProvider format)
+		public static void RemoveDuplicates(this ITemplateNode template)
 		{
 			template.ThrowNull();
 			Dictionary<string, int> nameList = new(StringComparer.Ordinal);
@@ -579,7 +578,8 @@
 					?? (++anonIndex).ToStringInvariant();
 				if (nameList.TryGetValue(name, out var offset))
 				{
-					if (int.TryParse(name, NumberStyles.Integer, format, out _))
+					// MediaWiki uses is_int() to process what's an integer, and this does not seem to allow for variant numeral systems like Hebrew, only Arabic digits, so InvariantCulture is used here.
+					if (int.TryParse(name, NumberStyles.Integer, CultureInfo.InvariantCulture, out _))
 					{
 						template.Parameters[offset].Value.Clear();
 					}
