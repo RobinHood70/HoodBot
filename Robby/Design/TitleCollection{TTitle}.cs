@@ -204,8 +204,9 @@
 			if (this.lookup.Remove(item))
 			{
 				this.Remove(item.NotNull());
-				this.InsertItem(this.items.Count, item);
 			}
+
+			this.InsertItem(this.items.Count, item);
 		}
 
 		/// <summary>Adds multiple titles to the <see cref="TitleCollection">collection</see> at once.</summary>
