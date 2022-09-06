@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Data;
+	using System.Globalization;
 	using System.Text;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
@@ -35,7 +36,9 @@
 			"uniqueQuest.endBackgroundText\n" +
 		"FROM\n" +
 			"uniqueQuest INNER JOIN\n" +
-			"location ON uniqueQuest.locationId = location.id";
+			"location ON uniqueQuest.locationId = location.id\n" +
+		"ORDER BY\n" +
+			"uniqueQuest.name";
 
 		private const string StageQuery =
 		"SELECT\n" +
@@ -65,13 +68,6 @@
 		#endregion
 
 		#region Static Fields
-		private static readonly Dictionary<long, string> PageNameOverrides = new()
-		{
-			[4151] = "A Bitter Pill (Deshaan)",
-			[6042] = "A Bitter Pill (Clockwork City)",
-			[6780] = "The Long Game (High Isle)"
-		};
-
 		private static readonly Dictionary<int, string> QuestTypes = new()
 		{
 			[0] = string.Empty, // "None"
@@ -112,17 +108,13 @@
 
 		#region Fields
 		private readonly Dictionary<Title, QuestData> quests = new(SimpleTitleComparer.Instance);
-		private readonly TitleCollection allTitles;
-		private readonly bool overwriteMode;
 		#endregion
 
 		#region Constructors
 		[JobInfo("Update Quests", "ESO Update")]
-		public EsoQuests(JobManager jobManager, bool overwriteMode)
+		public EsoQuests(JobManager jobManager)
 			: base(jobManager)
 		{
-			this.allTitles = new TitleCollection(this.Site);
-			this.overwriteMode = overwriteMode;
 		}
 		#endregion
 
@@ -150,31 +142,38 @@
 		protected override void BeforeLoadPages()
 		{
 			this.StatusWriteLine("Getting ESO titles");
-			this.allTitles.GetNamespace(UespNamespaces.Online);
-			this.allTitles.Sort();
-			this.GetFilteredQuests();
-			if (this.quests.Count == 0)
+			var existing = this.GetQuestIds();
+			var filteredQuests = GetQuestData(existing);
+			var questNames = filteredQuests.ConvertAll(q => q.Name);
+			var titleChecker = new TitleCollection(this.Site, UespNamespaces.Online, questNames);
+			var disambigs = titleChecker.Load(PageModules.Info | PageModules.Properties | PageModules.Links);
+
+			var ignoredQuests = this.BuildQuestInfo(existing, filteredQuests, disambigs);
+			this.ReportIgnoredQuests(ignoredQuests);
+
+			var questsById = new Dictionary<long, QuestData>();
+			var sb = new StringBuilder(this.quests.Count * 7);
+			if (this.quests.Count > 0)
 			{
-				return;
+				foreach (var (_, quest) in this.quests)
+				{
+					questsById.Add(quest.Id, quest);
+					sb
+						.Append(',')
+						.Append(quest.Id);
+				}
+
+				sb.Remove(0, 1);
 			}
 
-			var sb = new StringBuilder();
-			var idToQuest = new Dictionary<long, QuestData>();
-
-			foreach (var quest in this.quests)
-			{
-				idToQuest.Add(quest.Value.Id, quest.Value);
-				sb
-					.Append(',')
-					.Append(quest.Value.Id);
-			}
-
-			sb.Remove(0, 1);
 			var whereText = sb.ToString();
+			if (whereText.Length > 0)
+			{
+				this.GetStages(questsById, whereText);
+				this.GetConditions(questsById, whereText);
+				this.GetRewards(questsById, whereText);
+			}
 
-			this.GetStages(idToQuest, whereText);
-			this.GetConditions(idToQuest, whereText);
-			this.GetRewards(idToQuest, whereText);
 			this.GetPlaces();
 		}
 
@@ -182,265 +181,14 @@
 		{
 			foreach (var quest in this.quests)
 			{
-				var page = this.Site.CreatePage(quest.Key, this.NewPageText(quest.Value));
+				var page = this.Site.CreatePage(quest.Key);
 				this.Pages.Add(page);
 			}
 		}
 
-		#endregion
-
-		#region Private Static Methods
-		private static Title DisambigTitle(Title title) => TitleFactory.FromValidated(title.Site[UespNamespaces.Online], title.PageName + " (quest)");
-
-		private static List<string> GetJournalEntries(Dictionary<string, List<Condition>> mergedStages)
+		protected override string NewPageText(Page page)
 		{
-			List<string> journalEntries = new();
-			foreach (var kvp in mergedStages)
-			{
-				var split = kvp.Key.Split(TextArrays.At);
-				if (split[0].Length > 2)
-				{
-					journalEntries.Add(split[0]);
-				}
-
-				journalEntries.AddRange(QuestObjectives(split[1], kvp.Value));
-			}
-
-			return journalEntries;
-		}
-
-		private static List<QuestData> GetQuests()
-		{
-			var questList = new List<QuestData>();
-			foreach (var quest in Database.RunQuery(EsoLog.Connection, QuestQuery, row => new QuestData(row)))
-			{
-				questList.Add(quest);
-			}
-
-			return questList;
-		}
-
-		private static List<string> QuestObjectives(string objectiveType, List<Condition> conditions)
-		{
-			List<string> retval = new();
-			foreach (var condition in conditions)
-			{
-				if (condition.Text.Length > 0 && !string.Equals(condition.Text, "TRACKER GOAL TEXT", StringComparison.Ordinal))
-				{
-					var conditionText = condition.Text.TrimEnd(TextArrays.Colon);
-					var fullText = $"{{{{Online Quest Objective|{objectiveType}|{conditionText}}}}}";
-					if (!retval.Contains(fullText, StringComparer.Ordinal))
-					{
-						retval.Add(fullText);
-					}
-				}
-			}
-
-			return retval;
-		}
-		#endregion
-
-		#region Private Methods
-		private void ExcludeExisting(PageCollection pageInfo, HashSet<long> idExclusions, TitleCollection nameExclusions)
-		{
-			foreach (var title in pageInfo)
-			{
-				if (title is VariablesPage variablesTitle &&
-					variablesTitle.GetVariable("ID") is string idText &&
-					long.TryParse(idText, System.Globalization.NumberStyles.None, this.Site.Culture, out var id))
-				{
-					idExclusions.Add(id);
-				}
-
-				nameExclusions.Add(title);
-			}
-		}
-
-		private void ExcludeRedisambigs(List<QuestData> questList, PageCollection pageInfo, TitleCollection nameExclusions)
-		{
-			var addTitles = new TitleCollection(this.Site);
-			foreach (var quest in questList)
-			{
-				var title = this.TitleFromQuest(quest);
-				if (!pageInfo.Contains(title))
-				{
-					addTitles.Add(title);
-				}
-
-				var disambigTitle = DisambigTitle(title);
-				if (!pageInfo.Contains(disambigTitle))
-				{
-					addTitles.Add(disambigTitle);
-				}
-			}
-
-			if (addTitles.Count > 0)
-			{
-				pageInfo.Clear();
-				pageInfo.GetTitles(addTitles);
-				pageInfo.GetBacklinks("Online:Capture Keep", BacklinksTypes.Backlinks);
-				pageInfo.GetBacklinks("Online:Capture Resource", BacklinksTypes.Backlinks);
-				pageInfo.GetBacklinks("Online:Dark Brotherhood Contracts", BacklinksTypes.Backlinks);
-				foreach (var page in pageInfo)
-				{
-					if (page.IsRedirect || (page.IsDisambiguation ?? false))
-					{
-						nameExclusions.Add(page);
-					}
-				}
-			}
-		}
-
-		private void GetConditions(Dictionary<long, QuestData> idToQuest, string whereText)
-		{
-			this.StatusWriteLine("Getting condition data");
-			var conditions = Database.RunQuery(EsoLog.Connection, ConditionQuery.Replace("<questIds>", whereText, StringComparison.Ordinal), row => new Condition(row));
-			foreach (var condition in conditions)
-			{
-				var quest = idToQuest[condition.QuestId];
-				if (quest.Stages.Find(item => item.Id == condition.StageId) is Stage stage)
-				{
-					stage.Conditions.Add(condition);
-				}
-			}
-		}
-
-		private void GetFilteredQuests()
-		{
-			var questList = GetQuests();
-			var pageInfo = this.Site.CreateMetaPageCollection(PageModules.Info | PageModules.Properties, false, "ID");
-			pageInfo.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn);
-
-			var removeQuests = new[] { "A Chance for Peace", "A Father's Pride", "A Final Peace", "A Mother's Request", "A New Venture", "A Sheep in Need", "A Special Reagent", "Aiding the Archipelago", "All Hands on Deck", "An Experiment with Peace", "Arcane Research", "Ascendant Shadows", "Avarice of the Eldertide", "Balki's Map Fragment", "Blood, Books, and Steel", "Buried at the Bay", "Cards Across the Continent", "Challenges of the Past", "Cold Blood, Old Pain", "Cold Trail", "Coral Conundrum", "Deadly Investigations", "Druidic Research", "Dueling Tributes", "Escape from Amenos", "Ferone's Map Fragment", "Green with Envy", "In Secret and Shadow", "Of Knights and Knaves", "People of Import", "Pirate Problems", "Prison Problems", "Pursuit of Freedom", "Race for Honor", "Reavers of the Reef", "Rhadh's Map Fragment", "Scalding Scavengers", "Seek and Destroy", "Spies in the Shallows", "Tales of Tribute (quest)", "The All Flags Curse", "The Ascendant Storm", "The Corrupted Grove", "The Final Round", "The Intoxicating Mix", "The Large Delegate", "The Long Game (High Isle)", "The Long Way Home", "The Lost Symbol", "The Missing Prowler", "The Princess Detective", "The Sable Knight (quest)", "The Serpent Caller", "The Tournament Begins", "To Catch a Magus", "Tournament of the Heart", "Tower Full of Trouble", "Venting the Threat", "Wildhorn's Wrath", "Wisdom of the Druids" };
-			foreach (var quest in removeQuests)
-			{
-				pageInfo.Remove(TitleFactory.FromValidated(this.Site[UespNamespaces.Online], quest));
-			}
-
-			var idExclusions = new HashSet<long>();
-			var nameExclusions = new TitleCollection(this.Site);
-			this.ExcludeExisting(pageInfo, idExclusions, nameExclusions);
-			this.ExcludeRedisambigs(questList, pageInfo, nameExclusions);
-			Title? finalTitle = null;
-			foreach (var quest in questList)
-			{
-				var title = this.TitleFromQuest(quest);
-				var titleDisambig = DisambigTitle(title);
-				if (!idExclusions.Contains(quest.InternalId) && !nameExclusions.Contains(title) && !nameExclusions.Contains(titleDisambig))
-				{
-					if (this.overwriteMode)
-					{
-						if (!this.allTitles.TryGetValue(titleDisambig, out finalTitle))
-						{
-							finalTitle = title;
-						}
-					}
-					else
-					{
-						finalTitle = this.allTitles.TryGetValue(title, out finalTitle)
-							? this.allTitles.Contains(titleDisambig)
-								? throw new InvalidOperationException("Could not find valid page to add quest information to.")
-								: titleDisambig
-							: title;
-					}
-				}
-
-				if (finalTitle is not null && !this.quests.TryAdd(finalTitle, quest))
-				{
-					var dupe = this.quests[finalTitle];
-					this.Warn($"finalTitle [[{finalTitle.FullPageName}]] duplicated between [[{quest.Name}]] ({quest.Id}) and [[{dupe.Name}]] ({dupe.Id})");
-				}
-			}
-		}
-
-		private void GetPlaces()
-		{
-			var places = EsoSpace.GetPlaces(this.Site);
-			foreach (var quest in this.quests)
-			{
-				if (!string.IsNullOrEmpty(quest.Value.Zone))
-				{
-					if (places[quest.Value.Zone] is Place place)
-					{
-						while (!string.Equals(place.TypeText, "Zone", StringComparison.Ordinal) && place.Zone != null && places[place.Zone] is Place newZone)
-						{
-							place = newZone;
-						}
-
-						quest.Value.Zone = place.TitleName;
-					}
-					else
-					{
-						this.StatusWriteLine("Still need to check is Place.");
-					}
-				}
-				else
-				{
-					this.StatusWriteLine("Still need to check .Value.Zone.");
-				}
-			}
-		}
-
-		private void GetRewards(Dictionary<long, QuestData> idToQuest, string whereText)
-		{
-			this.StatusWriteLine("Getting rewards data");
-			var rewardData = Database.RunQuery(EsoLog.Connection, RewardsQuery.Replace("<questIds>", whereText, StringComparison.Ordinal), row => new Reward(row));
-			var rewards = new List<Reward>();
-			var previousRewards = new HashSet<long>();
-			foreach (var reward in rewardData)
-			{
-				var quest = idToQuest[reward.QuestId];
-				if (!previousRewards.Add(reward.ItemId))
-				{
-					quest.AddReward(reward);
-				}
-			}
-		}
-
-		private void GetStages(Dictionary<long, QuestData> idToQuest, string whereText)
-		{
-			this.StatusWriteLine("Getting stage data");
-			var stages = Database.RunQuery(EsoLog.Connection, StageQuery.Replace("<questIds>", whereText, StringComparison.Ordinal), row => new Stage(row));
-			foreach (var stage in stages)
-			{
-				var quest = idToQuest[stage.QuestId];
-				quest.Stages.Add(stage);
-			}
-		}
-
-		private Dictionary<string, List<Condition>> MergeStages(QuestData quest, SortedSet<string> locs)
-		{
-			Dictionary<string, List<Condition>> mergedStages = new(StringComparer.Ordinal);
-			foreach (var stage in quest.Stages)
-			{
-				if (!string.Equals(stage.Zone, "Tamriel", StringComparison.Ordinal) && !string.Equals(stage.Zone, quest.Zone, StringComparison.Ordinal))
-				{
-					Title title = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], stage.Zone);
-					locs.Add(title.AsLink(LinkFormat.LabelName));
-				}
-
-				var finishText = stage.FinishText;
-				var stageText = '|' + finishText + '|' + stage.Text + '@' + Visibilities[stage.Visibility];
-				if (!mergedStages.TryGetValue(stageText, out var list))
-				{
-					list = new List<Condition>();
-					mergedStages.Add(stageText, list);
-				}
-
-				foreach (var condition in stage.Conditions)
-				{
-					if (!list.Contains(condition))
-					{
-						list.Add(condition);
-					}
-				}
-			}
-
-			return mergedStages;
-		}
-
-		private string NewPageText(QuestData quest)
-		{
+			var quest = this.quests[page];
 			SortedSet<string> locs = new(StringComparer.Ordinal);
 			var mergedStages = this.MergeStages(quest, locs);
 			var journalEntries = GetJournalEntries(mergedStages);
@@ -557,8 +305,231 @@
 
 			return sb.ToString();
 		}
+		#endregion
 
-		private Title TitleFromQuest(QuestData quest) => TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], quest.Name);
+		#region Private Static Methods
+		private static List<string> GetJournalEntries(Dictionary<string, List<Condition>> mergedStages)
+		{
+			List<string> journalEntries = new();
+			foreach (var kvp in mergedStages)
+			{
+				var split = kvp.Key.Split(TextArrays.At);
+				if (split[0].Length > 2)
+				{
+					journalEntries.Add(split[0]);
+				}
+
+				journalEntries.AddRange(QuestObjectives(split[1], kvp.Value));
+			}
+
+			return journalEntries;
+		}
+
+		private static List<QuestData> GetQuestData(PageCollection existing)
+		{
+			// Compile list of existing IDs that can be ignored.
+			// Adds to pre-designated manual overrides in field declaration.
+			var ignore = new HashSet<long>(existing.Count);
+			foreach (var item in existing)
+			{
+				if (item is VariablesPage varPage &&
+					long.TryParse(varPage.GetVariable("ID"), NumberStyles.Integer, existing.Site.Culture, out var questId))
+				{
+					ignore.Add(questId);
+				}
+			}
+
+			// Retrieve quest data from database
+			var retval = new List<QuestData>();
+			foreach (var quest in Database.RunQuery(EsoLog.Connection, QuestQuery, row => new QuestData(row)))
+			{
+				var fullPageName = "Online:" + quest.Name;
+				if (!ignore.Contains(quest.InternalId) &&
+					!existing.Contains(fullPageName) &&
+					!existing.Contains(fullPageName + " (quest)"))
+				{
+					retval.Add(quest);
+				}
+			}
+
+			return retval;
+		}
+
+		private static List<string> QuestObjectives(string objectiveType, List<Condition> conditions)
+		{
+			List<string> retval = new();
+			foreach (var condition in conditions)
+			{
+				if (condition.Text.Length > 0 && !string.Equals(condition.Text, "TRACKER GOAL TEXT", StringComparison.Ordinal))
+				{
+					var conditionText = condition.Text.TrimEnd(TextArrays.Colon);
+					var fullText = $"{{{{Online Quest Objective|{objectiveType}|{conditionText}}}}}";
+					if (!retval.Contains(fullText, StringComparer.Ordinal))
+					{
+						retval.Add(fullText);
+					}
+				}
+			}
+
+			return retval;
+		}
+		#endregion
+
+		#region Private Methods
+		private Dictionary<Title, QuestData> BuildQuestInfo(PageCollection questPages, List<QuestData> allQuests, PageCollection disambigs)
+		{
+			var ignoredQuests = new Dictionary<Title, QuestData>();
+			for (var i = allQuests.Count - 1; i >= 0; i--)
+			{
+				var quest = allQuests[i];
+				var checkPage = disambigs["Online:" + quest.Name];
+				var add = true;
+				if (checkPage.IsRedirect || checkPage.IsDisambiguation == true)
+				{
+					foreach (var link in checkPage.Links)
+					{
+						if (link.Namespace == UespNamespaces.Online &&
+							questPages.Contains(link, SimpleTitleComparer.Instance))
+						{
+							add = false;
+							break;
+						}
+					}
+				}
+
+				if (add)
+				{
+					var titleName = checkPage.Exists
+						? checkPage.FullPageName + " (quest)"
+						: checkPage.FullPageName;
+					var title = (Title)TitleFactory.FromUnvalidated(this.Site, titleName);
+					if (!this.quests.TryAdd(title, quest))
+					{
+						ignoredQuests.Add(title, quest);
+					}
+				}
+			}
+
+			return ignoredQuests;
+		}
+
+		private void GetConditions(Dictionary<long, QuestData> idToQuest, string whereText)
+		{
+			this.StatusWriteLine("Getting condition data");
+			var conditions = Database.RunQuery(EsoLog.Connection, ConditionQuery.Replace("<questIds>", whereText, StringComparison.Ordinal), row => new Condition(row));
+			foreach (var condition in conditions)
+			{
+				var quest = idToQuest[condition.QuestId];
+				if (quest.Stages.Find(item => item.Id == condition.StepId) is Stage stage)
+				{
+					stage.Conditions.Add(condition);
+				}
+			}
+		}
+
+		private void GetPlaces()
+		{
+			var places = EsoSpace.GetPlaces(this.Site);
+			foreach (var quest in this.quests)
+			{
+				if (!string.IsNullOrEmpty(quest.Value.Zone))
+				{
+					if (places[quest.Value.Zone] is Place place)
+					{
+						while (!string.Equals(place.TypeText, "Zone", StringComparison.Ordinal) && place.Zone != null && places[place.Zone] is Place newZone)
+						{
+							place = newZone;
+						}
+
+						quest.Value.Zone = place.TitleName;
+					}
+					else
+					{
+						this.StatusWriteLine("Still need to check is Place.");
+					}
+				}
+				else
+				{
+					this.StatusWriteLine("Still need to check .Value.Zone.");
+				}
+			}
+		}
+
+		private PageCollection GetQuestIds()
+		{
+			var retval = this.Site.CreateMetaPageCollection(PageModules.Info | PageModules.Properties, true, "ID");
+			retval.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn);
+			return retval;
+		}
+
+		private void GetRewards(Dictionary<long, QuestData> idToQuest, string whereText)
+		{
+			this.StatusWriteLine("Getting rewards data");
+			var rewardData = Database.RunQuery(EsoLog.Connection, RewardsQuery.Replace("<questIds>", whereText, StringComparison.Ordinal), row => new Reward(row));
+			var rewards = new List<Reward>();
+			var previousRewards = new HashSet<long>();
+			foreach (var reward in rewardData)
+			{
+				var quest = idToQuest[reward.QuestId];
+				if (!previousRewards.Add(reward.ItemId))
+				{
+					quest.AddReward(reward);
+				}
+			}
+		}
+
+		private void GetStages(Dictionary<long, QuestData> idToQuest, string whereText)
+		{
+			this.StatusWriteLine("Getting stage data");
+			var stages = Database.RunQuery(EsoLog.Connection, StageQuery.Replace("<questIds>", whereText, StringComparison.Ordinal), row => new Stage(row));
+			foreach (var stage in stages)
+			{
+				var quest = idToQuest[stage.QuestId];
+				quest.Stages.Add(stage);
+			}
+		}
+
+		private Dictionary<string, List<Condition>> MergeStages(QuestData quest, SortedSet<string> locs)
+		{
+			Dictionary<string, List<Condition>> mergedStages = new(StringComparer.Ordinal);
+			foreach (var stage in quest.Stages)
+			{
+				if (!string.Equals(stage.Zone, "Tamriel", StringComparison.Ordinal) && !string.Equals(stage.Zone, quest.Zone, StringComparison.Ordinal))
+				{
+					Title title = TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], stage.Zone);
+					locs.Add(title.AsLink(LinkFormat.LabelName));
+				}
+
+				var stageText = $"|{stage.FinishText}|{stage.Text}@{Visibilities[stage.Visibility]}";
+				if (!mergedStages.TryGetValue(stageText, out var list))
+				{
+					list = new List<Condition>();
+					mergedStages.Add(stageText, list);
+				}
+
+				foreach (var condition in stage.Conditions)
+				{
+					if (!list.Contains(condition))
+					{
+						list.Add(condition);
+					}
+				}
+			}
+
+			return mergedStages;
+		}
+
+		private void ReportIgnoredQuests(Dictionary<Title, QuestData> ignoredQuests)
+		{
+			if (ignoredQuests.Count > 0)
+			{
+				this.WriteLine("The following quests were ignored because there is an existing, identically named quest which is assumed to be the parent quest. Information may need to be moved to the correct page by hand or the quest may need separate pages created to allow for faction or region differences.");
+				foreach (var quest in ignoredQuests)
+				{
+					this.WriteLine($"* {quest.Key.AsLink()} (Log: [http://esolog.uesp.net/viewlog.php?action=view&record=uniqueQuest&id={quest.Value.Id} {quest.Value}])");
+				}
+			}
+		}
 
 		#endregion
 
@@ -571,7 +542,7 @@
 				this.IsComplete = (sbyte)row["isComplete"] == 1;
 				this.IsFail = (sbyte)row["isFail"] == 1;
 				this.QuestId = (long)row["questId"];
-				this.StageId = (long)row["questStepId"];
+				this.StepId = (long)row["questStepId"];
 				this.Text = (string)row["text"];
 			}
 			#endregion
@@ -583,7 +554,7 @@
 
 			public long QuestId { get; }
 
-			public long StageId { get; }
+			public long StepId { get; }
 
 			public string Text { get; }
 
@@ -613,26 +584,24 @@
 				var fromEncoding = CodePagesEncodingProvider.Instance.GetEncoding(1252) ?? throw new InvalidOperationException();
 				var toEncoding = Encoding.UTF8;
 				var bgText = (string)row["backgroundText"];
+
+				// Fix UTF8 stored as CP-1252
 				var bgBytes = fromEncoding.GetBytes(bgText);
-				this.BackgroundText = toEncoding.GetString(bgBytes); // Fix UTF8 stored as CP-1252
+				this.BackgroundText = toEncoding.GetString(bgBytes);
+
 				this.Id = (long)row["id"];
 				this.InternalId = (int)row["internalId"];
-				if (!PageNameOverrides.TryGetValue(this.InternalId, out var name))
-				{
-					name = (string)row["name"];
-				}
-
-				name = name.Replace("  ", " ", StringComparison.Ordinal); // Handles "Capture  Farm"
+				var name = (string)row["name"];
 				var offset = name.IndexOf('\n', StringComparison.Ordinal);
 				if (offset != -1)
 				{
-					name = name[0..offset];
+					name = name[..offset];
 				}
 
 				offset = name.LastIndexOf(" (", StringComparison.Ordinal);
 				if (offset != -1)
 				{
-					name = name[0..offset];
+					name = name[..offset];
 				}
 
 				this.Name = name;
@@ -678,7 +647,7 @@
 
 			public long Id { get; }
 
-			public int InternalId { get; }
+			public int InternalId { get; internal set; }
 
 			public sbyte Level { get; }
 
