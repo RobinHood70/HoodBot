@@ -2,6 +2,7 @@
 {
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.HoodBot.Uesp;
+	using RobinHood70.Robby;
 
 	public class MovePages : MovePagesJob
 	{
@@ -16,6 +17,10 @@
 		#endregion
 
 		#region Protected Override Methods
+		protected override void PageLoaded(EditJob job, Page page)
+		{
+			// TODO: Nothing to do here. May be a good candidate for a new job type.
+		}
 
 		protected override void PopulateMoves() =>
 			this.LoadReplacementsFromFile(UespSite.GetBotDataFolder("Replacements.txt"), ReplacementActions.Move);

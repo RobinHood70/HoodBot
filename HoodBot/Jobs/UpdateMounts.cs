@@ -25,7 +25,7 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override Action<EditJob, Page>? EditConflictAction => this.Pages_PageLoaded;
+		protected override Action<EditJob, Page>? EditConflictAction => this.PageLoaded;
 
 		protected override string EditSummary => "Update mount ID";
 		#endregion
@@ -50,10 +50,8 @@
 
 			this.Pages.GetCategoryMembers("Online-Mounts", CategoryMemberTypes.Page, false);
 		}
-		#endregion
 
-		#region Private Methods
-		private void Pages_PageLoaded(object sender, Page page)
+		protected override void PageLoaded(EditJob job, Page page)
 		{
 			var idPageName = page.PageName.Replace(" (mount)", string.Empty, StringComparison.Ordinal);
 			if (this.ids.TryGetValue(idPageName, out var id))

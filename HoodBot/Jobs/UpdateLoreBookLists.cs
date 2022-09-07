@@ -21,7 +21,6 @@
 		#region Fields
 		private readonly Dictionary<string, string> titleOverrides = new(StringComparer.Ordinal);
 		private readonly Dictionary<string, List<string>> pageBooks = new(StringComparer.Ordinal);
-		private readonly PageCollection loreBookPages;
 		#endregion
 
 		#region Constructors
@@ -29,33 +28,77 @@
 		public UpdateLoreBookLists(JobManager jobManager)
 			: base(jobManager)
 		{
-			this.loreBookPages = new PageCollection(this.Site);
 		}
 		#endregion
 
 		#region Protected Override Properties
-		protected override Action<EditJob, Page>? EditConflictAction => this.LoreBookEntries_PageLoaded;
-
 		protected override string EditSummary => "Update list";
 		#endregion
 
 		#region Protected Override Methods
-		protected override void BeforeLoadPages()
-		{
-			this.loreBookPages.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn);
-			this.GetTitleOverrides();
-			var listBooks = this.FilterToListBooks();
-			this.GetPageBooks(listBooks);
-		}
-
 		protected override void LoadPages()
 		{
+			var loreBookPages = new PageCollection(this.Site);
+			loreBookPages.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn);
+			foreach (var page in loreBookPages)
+			{
+				ContextualParser parser = new(page);
+				foreach (var template in parser.FindSiteTemplates(TemplateName))
+				{
+					if (template.GetValue(2) is string value)
+					{
+						var key = template.GetValue(1) ?? throw new InvalidOperationException();
+						this.titleOverrides.Add(key, value);
+					}
+				}
+			}
+
+			var listBooks = this.FilterToListBooks();
+			this.GetPageBooks(listBooks);
+
 			this.EditConflictAction.ThrowNull();
-			foreach (var page in this.loreBookPages)
+			foreach (var page in loreBookPages)
 			{
 				// Add and update manually since we needed to parse information from the pages first.
 				this.Pages.Add(page);
-				this.EditConflictAction(this, page);
+			}
+		}
+
+		protected override void PageLoaded(EditJob job, Page page)
+		{
+			ContextualParser parser = new(page);
+			var factory = parser.Factory;
+			var first = parser.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
+			var last = parser.FindLastIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
+			if (first != -1)
+			{
+				List<IWikiNode> newNodes = new();
+				parser.RemoveRange(first, last + 1 - first);
+				var letter = page.PageName[6..];
+				var entries = this.pageBooks[letter];
+				foreach (var entry in entries)
+				{
+					var template = factory.TemplateNodeFromParts(TemplateName, (null, entry));
+					if (this.titleOverrides.TryGetValue(entry, out var linkTitle))
+					{
+						template.Add(linkTitle);
+					}
+
+					newNodes.Add(template);
+					newNodes.Add(factory.TextNode("\n"));
+				}
+
+				if (newNodes.Count > 0)
+				{
+					newNodes.RemoveAt(newNodes.Count - 1);
+				}
+
+				parser.InsertRange(first, newNodes);
+				parser.UpdatePage();
+			}
+			else
+			{
+				throw new InvalidOperationException();
 			}
 		}
 		#endregion
@@ -144,60 +187,6 @@
 				}
 
 				titles.Add(book.PageName);
-			}
-		}
-
-		private void GetTitleOverrides()
-		{
-			foreach (var page in this.loreBookPages)
-			{
-				ContextualParser parser = new(page);
-				foreach (var template in parser.FindSiteTemplates(TemplateName))
-				{
-					if (template.GetValue(2) is string value)
-					{
-						var key = template.GetValue(1) ?? throw new InvalidOperationException();
-						this.titleOverrides.Add(key, value);
-					}
-				}
-			}
-		}
-
-		private void LoreBookEntries_PageLoaded(object sender, Page page)
-		{
-			ContextualParser parser = new(page);
-			var factory = parser.Factory;
-			var first = parser.FindIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
-			var last = parser.FindLastIndex<SiteTemplateNode>(node => node.TitleValue.PageNameEquals(TemplateName));
-			if (first != -1)
-			{
-				List<IWikiNode> newNodes = new();
-				parser.RemoveRange(first, last + 1 - first);
-				var letter = page.PageName[6..];
-				var entries = this.pageBooks[letter];
-				foreach (var entry in entries)
-				{
-					var template = factory.TemplateNodeFromParts(TemplateName, (null, entry));
-					if (this.titleOverrides.TryGetValue(entry, out var linkTitle))
-					{
-						template.Add(linkTitle);
-					}
-
-					newNodes.Add(template);
-					newNodes.Add(factory.TextNode("\n"));
-				}
-
-				if (newNodes.Count > 0)
-				{
-					newNodes.RemoveAt(newNodes.Count - 1);
-				}
-
-				parser.InsertRange(first, newNodes);
-				parser.UpdatePage();
-			}
-			else
-			{
-				throw new InvalidOperationException();
 			}
 		}
 		#endregion

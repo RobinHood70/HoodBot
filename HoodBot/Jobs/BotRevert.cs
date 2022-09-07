@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
@@ -45,10 +44,14 @@
 			{
 				if (books.Contains(contribution.Title))
 				{
-					Debug.WriteLine(contribution.Title);
 					this.undos.Add(contribution.Title, contribution.Id);
 				}
 			}
+		}
+
+		protected override void PageLoaded(EditJob job, Page page)
+		{
+			// TODO: Might be candidate for a new job type.
 		}
 
 		protected override void Main()

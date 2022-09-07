@@ -29,7 +29,6 @@
 		#region Protected Override Methods
 		protected override void PageLoaded(EditJob job, Page page)
 		{
-			base.PageLoaded(job, page);
 			ContextualParser parser = new(page);
 			this.ParseText(job, parser);
 			parser.UpdatePage();
