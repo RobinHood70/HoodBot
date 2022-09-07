@@ -122,6 +122,11 @@
 			this.LoadPages();
 			foreach (var page in this.Pages)
 			{
+				if (page.IsMissing || string.IsNullOrWhiteSpace(page.Text))
+				{
+					page.Text = this.NewPageText(page);
+				}
+
 				this.PageLoaded(this, page);
 			}
 
@@ -141,18 +146,12 @@
 		}
 
 		protected virtual string NewPageText(Page page) => string.Empty;
-
-		protected virtual void PageLoaded(EditJob job, Page page)
-		{
-			if (page.IsMissing || string.IsNullOrWhiteSpace(page.Text))
-			{
-				page.Text = this.NewPageText(page);
-			}
-		}
 		#endregion
 
 		#region Protected Abstract Methods
 		protected abstract void LoadPages();
+
+		protected abstract void PageLoaded(EditJob job, Page page);
 		#endregion
 	}
 }

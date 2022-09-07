@@ -77,7 +77,6 @@
 			}
 
 			var pages = titles.Load(PageModules.Default, true);
-			pages.Sort();
 			foreach (var entry in entries)
 			{
 				var desc = entry["_description"]["_key"].Value ?? throw new InvalidOperationException();
@@ -115,6 +114,11 @@
 					}
 				}
 			}
+		}
+
+		protected override void PageLoaded(EditJob job, Page page)
+		{
+			// TODO: For now, LoadPages takes care of everything. Should be split out.
 		}
 		#endregion
 	}

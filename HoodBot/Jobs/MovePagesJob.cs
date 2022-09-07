@@ -259,6 +259,11 @@
 				this.CheckRemaining();
 			}
 		}
+
+		protected override void PageLoaded(EditJob job, Page page)
+		{
+			// TODO: Nothing to do here. May be a good candidate for a new job type.
+		}
 		#endregion
 
 		#region Protected Abstract Methods

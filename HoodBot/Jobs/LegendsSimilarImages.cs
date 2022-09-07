@@ -67,16 +67,13 @@
 			}
 		}
 
-		protected override void LoadPages()
+		protected override void LoadPages() => this.Pages.GetTitles(this.allTitles);
+
+		protected override void PageLoaded(EditJob job, Page page)
 		{
-			var allPages = this.allTitles.Load();
-			foreach (var page in allPages)
-			{
-				page.Text = page.Text.Replace("==Licensing== {{esimage}}", "==Licensing==\n{{esimage}}", StringComparison.Ordinal);
-				_ = this.primaryLookup.TryGetValue(page, out var title);
-				AddSimilarImages(page, title);
-				this.Pages.Add(page);
-			}
+			page.Text = page.Text.Replace("==Licensing== {{esimage}}", "==Licensing==\n{{esimage}}", StringComparison.Ordinal);
+			var title = this.primaryLookup[page];
+			AddSimilarImages(page, title);
 		}
 		#endregion
 

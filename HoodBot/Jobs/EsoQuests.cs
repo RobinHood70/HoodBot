@@ -305,6 +305,11 @@
 
 			return sb.ToString();
 		}
+
+		protected override void PageLoaded(EditJob job, Page page)
+		{
+			// TODO: Nothing to do here since this is a create-only job.
+		}
 		#endregion
 
 		#region Private Static Methods

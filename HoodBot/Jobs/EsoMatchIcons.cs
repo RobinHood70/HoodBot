@@ -49,7 +49,7 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override Action<EditJob, Page>? EditConflictAction => this.Pages_PageLoaded;
+		protected override Action<EditJob, Page>? EditConflictAction => this.PageLoaded;
 
 		protected override string EditSummary => this.LogName;
 		#endregion
@@ -68,6 +68,42 @@
 		}
 
 		protected override void LoadPages() => this.Pages.GetNamespace(MediaWikiNamespaces.File, Filter.Exclude, "ON-icon-achievement-");
+
+		protected override void PageLoaded(EditJob job, Page page)
+		{
+			if (page is FilePage filePage && filePage.LatestFileRevision is FileRevision latestRevision)
+			{
+				this.allIcons.TryGetValue(latestRevision.Sha1.PropertyNotNull(nameof(latestRevision), nameof(latestRevision.Sha1)), out var foundIcons);
+				ContextualParser parser = new(page);
+				this.ReplaceLicense(parser);
+				PageParts parts = new(filePage);
+				if (foundIcons == null || foundIcons.Count == 0)
+				{
+					if (parts.OriginalFiles.Count > 0)
+					{
+						this.WriteLine($"* [[{page.FullPageName}]] used to be identified, but no longer is. It may have been removed from the game.");
+						return;
+					}
+
+					if (latestRevision.Timestamp > LastRun)
+					{
+						SiteLink link = TitleFactory.FromValidated(page.Site[MediaWikiNamespaces.Category], MissingFileCategory);
+						parts.Categories.Add(link);
+					}
+				}
+				else
+				{
+					foreach (var icon in foundIcons)
+					{
+						parts.OriginalFiles.Add(icon);
+					}
+
+					this.GetUsageList(parts);
+				}
+
+				page.Text = parts.ToText();
+			}
+		}
 		#endregion
 
 		#region Private Static Methods
@@ -240,42 +276,6 @@
 				}
 
 				list.Add(item);
-			}
-		}
-
-		private void Pages_PageLoaded(object sender, Page page)
-		{
-			if (page is FilePage filePage && filePage.LatestFileRevision is FileRevision latestRevision)
-			{
-				this.allIcons.TryGetValue(latestRevision.Sha1.PropertyNotNull(nameof(latestRevision), nameof(latestRevision.Sha1)), out var foundIcons);
-				ContextualParser parser = new(page);
-				this.ReplaceLicense(parser);
-				PageParts parts = new(filePage);
-				if (foundIcons == null || foundIcons.Count == 0)
-				{
-					if (parts.OriginalFiles.Count > 0)
-					{
-						this.WriteLine($"* [[{page.FullPageName}]] used to be identified, but no longer is. It may have been removed from the game.");
-						return;
-					}
-
-					if (latestRevision.Timestamp > LastRun)
-					{
-						SiteLink link = TitleFactory.FromValidated(page.Site[MediaWikiNamespaces.Category], MissingFileCategory);
-						parts.Categories.Add(link);
-					}
-				}
-				else
-				{
-					foreach (var icon in foundIcons)
-					{
-						parts.OriginalFiles.Add(icon);
-					}
-
-					this.GetUsageList(parts);
-				}
-
-				page.Text = parts.ToText();
 			}
 		}
 
