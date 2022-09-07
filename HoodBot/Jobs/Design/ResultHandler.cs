@@ -75,12 +75,6 @@
 
 		#region Public Virtual Methods
 
-		public virtual void Append(string text)
-		{
-			this.Write(text);
-			this.Save();
-		}
-
 		/// <summary>Clears all results and sets the <see cref="Description"/> to <see langword="null"/>.</summary>
 		public virtual void Clear()
 		{

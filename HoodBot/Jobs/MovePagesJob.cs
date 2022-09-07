@@ -240,7 +240,7 @@
 			if ((this.FollowUpActions & FollowUpActions.EmitReport) != 0)
 			{
 				this.EmitReport();
-				this.Results?.Save();
+				this.Results?.Save(); // Save prematurely so results are not lost in the event of a later problem.
 			}
 
 			this.Pages.GetTitles(loadTitles);
