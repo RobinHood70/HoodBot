@@ -6,7 +6,7 @@
 	using System.Text;
 	using RobinHood70.CommonCode;
 
-	public class BladesCodeLine : BladesCodeLineCollection, IStringBuilder
+	public class BladesCodeLine : BladesCodeLineCollection
 	{
 		#region Static Fields
 		private static readonly char[] Quote = new[] { '"' };
@@ -57,8 +57,9 @@
 		#endregion
 
 		#region Public Methods
-		public StringBuilder BuildString(StringBuilder sb)
+		public string BuildString()
 		{
+			var sb = new StringBuilder();
 			sb
 				.Append(this.Name)
 				.Append(' ');
@@ -76,12 +77,12 @@
 					.Append(this.Value);
 			}
 
-			return sb;
+			return sb.ToString();
 		}
 		#endregion
 
 		#region Public Override Methods
-		public override string? ToString() => ((IStringBuilder)this).BuildString();
+		public override string? ToString() => this.BuildString();
 		#endregion
 
 		#region Private Static Methods
