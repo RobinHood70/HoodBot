@@ -178,6 +178,7 @@
 				this.Logger.EndLogEntry();
 			}
 
+			this.Results?.Save();
 			this.Completed?.Invoke(this, EventArgs.Empty);
 		}
 

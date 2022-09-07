@@ -31,9 +31,11 @@
 		/// <inheritdoc/>
 		public override void Save()
 		{
-			if (this.StringBuilder.Length > 0)
+			if (this.StringBuilder.Length > 0 &&
+				this.StringBuilder.ToString().Trim() is var text &&
+				text.Length > 0)
 			{
-				this.Page.Text = this.StringBuilder.ToString();
+				this.Page.Text = text;
 				this.Page.Save(this.Description, false);
 			}
 		}

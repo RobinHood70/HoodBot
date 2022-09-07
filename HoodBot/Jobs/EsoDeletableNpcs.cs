@@ -59,12 +59,6 @@
 				}
 			}
 		}
-
-		protected override void JobCompleted()
-		{
-			this.Results?.Save();
-			base.JobCompleted();
-		}
 		#endregion
 	}
 }
