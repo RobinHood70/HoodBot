@@ -153,8 +153,6 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override Action<EditJob, Page>? EditConflictAction => this.FullEdit;
-
 		protected override string EditSummary => this.EditSummaryUpdateLinks;
 		#endregion
 
@@ -262,7 +260,15 @@
 
 		protected override void PageLoaded(EditJob job, Page page)
 		{
-			// TODO: Nothing to do here. May be a good candidate for a new job type.
+			ContextualParser parser = new(page);
+			if (this.linkUpdates.TryGetValue(page, out var linkUpdate) &&
+				this.actions[page].HasAction(ReplacementActions.NeedsEdited))
+			{
+				this.EditPageLoaded(parser, linkUpdate);
+			}
+
+			this.BacklinkPageLoaded(parser);
+			parser.UpdatePage();
 		}
 		#endregion
 
@@ -341,7 +347,7 @@
 				this.WriteLine("|-");
 				this.Write(FormattableString.Invariant($"| {from} ([[Special:WhatLinksHere/{from}|links]]) || "));
 				List<string> actionsList = new();
-				if (action.HasAction(ReplacementActions.Move))
+				if (this.MoveAction != MoveAction.None && action.HasAction(ReplacementActions.Move))
 				{
 					actionsList.Add("move to " + this.moves[from].AsLink());
 					if (this.FollowUpActions.HasFlag(FollowUpActions.FixLinks))
@@ -800,19 +806,6 @@
 		#endregion
 
 		#region Private Methods
-		private void FullEdit(object sender, Page page)
-		{
-			ContextualParser parser = new(page);
-			if (this.linkUpdates.TryGetValue(page, out var linkUpdate) &&
-				this.actions[page].HasAction(ReplacementActions.NeedsEdited))
-			{
-				this.EditPageLoaded(parser, linkUpdate);
-			}
-
-			this.BacklinkPageLoaded(parser);
-			parser.UpdatePage();
-		}
-
 		private void GetBacklinkTitles(PageCollection pageInfo, TitleCollection backlinkTitles)
 		{
 			foreach (var linkUpdate in this.linkUpdates)
