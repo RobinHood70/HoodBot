@@ -115,6 +115,8 @@
 		public const int MorrowindRebirthTalk = 177;
 		public const int BeyondSkyrim = 178;
 		public const int BeyondSkyrimTalk = 179;
+		public const int DFUMod = 180;
+		public const int DFUModTalk = 181;
 		public const int Dapel = 200;
 		public const int DapelTalk = 201;
 		public const int TimedText = 710;
