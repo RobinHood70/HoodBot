@@ -493,9 +493,14 @@
 		/// <param name="pageValidator">A function which validates whether a page can be added to the collection.</param>
 		protected virtual void LoadPages(QueryPageSetInput pageSetInput, Func<Page, bool> pageValidator)
 		{
-			pageValidator.NotNull();
+			if (pageSetInput.NotNull().IsEmpty)
+			{
+				return;
+			}
+
+			pageValidator.ThrowNull();
 			var options = this.LoadOptions;
-			pageSetInput.NotNull().ConvertTitles = options.ConvertTitles;
+			pageSetInput.ConvertTitles = options.ConvertTitles;
 			pageSetInput.Redirects = options.FollowRedirects;
 			if (pageSetInput.GeneratorInput is ILimitableInput limited)
 			{

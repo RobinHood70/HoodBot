@@ -526,9 +526,14 @@
 		/// <param name="pageSetInput">The pageset inputs.</param>
 		protected virtual void LoadPages(QueryPageSetInput pageSetInput)
 		{
+			if (pageSetInput.NotNull().IsEmpty)
+			{
+				return;
+			}
+
 			PageLoadOptions loadOptions = new(this.Site.DefaultLoadOptions, PageModules.Info);
 			var creator = this.Site.PageCreator;
-			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput.NotNull(), creator.GetPropertyInputs(loadOptions), creator.CreatePageItem);
+			var result = this.Site.AbstractionLayer.LoadPages(pageSetInput, creator.GetPropertyInputs(loadOptions), creator.CreatePageItem);
 			this.FillFromTitleItems(result);
 		}
 		#endregion

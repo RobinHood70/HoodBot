@@ -82,6 +82,8 @@ namespace RobinHood70.WallE.Base
 
 		public IGeneratorInput? GeneratorInput { get; }
 
+		public bool IsEmpty => this.Values.Count == 0 || this.GeneratorInput is null;
+
 		public ListType ListType { get; }
 
 		public bool Redirects { get; set; }
