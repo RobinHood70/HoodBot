@@ -74,6 +74,22 @@
 		public IEnumerable<T> RunQuery<T>(string query, Func<IDataRecord, T> factory) => RunQuery(this.ConnectionString, query, -1, factory);
 
 		public IEnumerable<T> RunQuery<T>(string query, long pageSize, Func<IDataRecord, T> factory) => RunQuery(this.ConnectionString, query, pageSize, factory);
+
+		public IEnumerable<string> ShowTables() => this.ShowTables(string.Empty);
+
+		public IEnumerable<string> ShowTables(string? prefix)
+		{
+			var query = "SHOW TABLES";
+			if (!string.IsNullOrEmpty(prefix))
+			{
+				query += $" LIKE {prefix}%";
+			}
+
+			foreach (var row in this.RunQuery(query))
+			{
+				yield return (string)row[0];
+			}
+		}
 		#endregion
 	}
 }
