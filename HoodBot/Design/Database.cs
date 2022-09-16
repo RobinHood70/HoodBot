@@ -5,9 +5,23 @@
 	using System.Data;
 	using System.Diagnostics;
 	using MySql.Data.MySqlClient;
+	using RobinHood70.CommonCode;
 
-	public static class Database
+	// This is a quick conversion from a static class to a standard class. This can probably be converted to use (or inherit from) ADO.NET classes at some point, but for now, I'm leaving this as close to the original code as possible for an easy changeover.
+	public class Database
 	{
+		#region Constructors
+		public Database(string connectionString)
+		{
+			this.ConnectionString = connectionString.NotNull();
+		}
+		#endregion
+
+		#region Public Properties
+		public string ConnectionString { get; }
+		#endregion
+
+		#region Public Static Methods
 		public static IEnumerable<IDataRecord> RunQuery(string connectionString, string query) => RunQuery(connectionString, query, -1);
 
 		public static IEnumerable<IDataRecord> RunQuery(string connectionString, string query, long pageSize)
@@ -50,5 +64,16 @@
 				yield return factory(row);
 			}
 		}
+		#endregion
+
+		#region Public Methods
+		public IEnumerable<IDataRecord> RunQuery(string query) => RunQuery(this.ConnectionString, query, -1);
+
+		public IEnumerable<IDataRecord> RunQuery(string query, long pageSize) => RunQuery(this.ConnectionString, query, pageSize);
+
+		public IEnumerable<T> RunQuery<T>(string query, Func<IDataRecord, T> factory) => RunQuery(this.ConnectionString, query, -1, factory);
+
+		public IEnumerable<T> RunQuery<T>(string query, long pageSize, Func<IDataRecord, T> factory) => RunQuery(this.ConnectionString, query, pageSize, factory);
+		#endregion
 	}
 }
