@@ -46,7 +46,7 @@
 				var ns = this.NamespaceList.FromTitle(title);
 				if (ns.IsGameSpace)
 				{
-					namespaces.Add(ns.BaseTitle.Namespace);
+					namespaces.Add(ns.BaseNamespace);
 					if (ns.Parent is Namespace nsParent)
 					{
 						namespaces.Add(nsParent);
@@ -83,7 +83,7 @@
 				var nsBase = this.NamespaceList.GetNsBase(parser.Page, nsBaseValue);
 				if (nsBase is not null && template.GetValue(1) is string nameToFind)
 				{
-					var basePage = TitleFactory.FromUnvalidated(nsBase.BaseTitle.Namespace, nameToFind);
+					var basePage = TitleFactory.FromUnvalidated(nsBase.BaseNamespace, nameToFind);
 					Title? found;
 					if (parser.Page.Namespace == UespNamespaces.Lore)
 					{

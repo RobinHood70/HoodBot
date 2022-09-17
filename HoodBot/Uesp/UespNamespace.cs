@@ -10,6 +10,7 @@
 		#region Constructors
 		internal UespNamespace(Site site, string line)
 		{
+			this.Site = site.NotNull();
 			var nsData = string.Concat(line.NotNull(), ";;;;;;").Split(TextArrays.Semicolon);
 			for (var i = 0; i < nsData.Length; i++)
 			{
@@ -18,8 +19,12 @@
 
 			var baseName = nsData[0];
 			this.Base = baseName;
-			this.BaseTitle = TitleFactory.FromUnvalidated(site, baseName);
-			this.IsPseudoNamespace = baseName.Contains(':', StringComparison.Ordinal);
+			var colonLoc = baseName.IndexOf(':', StringComparison.Ordinal);
+			this.IsPseudoNamespace = colonLoc != -1;
+			var baseNamespace = this.IsPseudoNamespace
+				? baseName[..colonLoc]
+				: baseName;
+			this.BaseNamespace = site[baseNamespace];
 			this.Full = baseName + (this.IsPseudoNamespace ? '/' : ':');
 			this.Id = nsData[1].Length == 0 ? baseName.ToUpperInvariant() : nsData[1];
 			var parentName = nsData[2].Length == 0 ? baseName : nsData[2];
@@ -28,16 +33,14 @@
 			this.MainPage = TitleFactory.FromUnvalidated(site, nsData[4].Length == 0 ? this.Full + this.Name : nsData[4]);
 			this.Category = nsData[5].Length == 0 ? baseName : nsData[5];
 			this.Trail = nsData[6].Length == 0 ? string.Concat("[[", this.MainPage, "|", this.Name, "]]") : nsData[6];
-			this.IsGameSpace = UespNamespaces.IsGamespace(this.BaseTitle.Namespace.Id);
+			this.IsGameSpace = UespNamespaces.IsGamespace(this.BaseNamespace.Id);
 		}
 		#endregion
 
 		#region Public Properties
-		public Namespace AssociatedNamespace => this.BaseTitle.Namespace;
-
 		public string Base { get; }
 
-		public Title BaseTitle { get; }
+		public Namespace BaseNamespace { get; }
 
 		public string Category { get; }
 
@@ -55,6 +58,8 @@
 
 		public Namespace Parent { get; }
 
+		public Site Site { get; }
+
 		public string Trail { get; }
 		#endregion
 
@@ -62,6 +67,8 @@
 		public bool Equals(UespNamespace? other) =>
 			other is not null &&
 			string.Equals(this.Base, other.Base, StringComparison.Ordinal);
+
+		public Title GetTitle(string pageName) => TitleFactory.FromUnvalidated(this.Site, this.Full + pageName);
 		#endregion
 
 		#region Public Override Methods
