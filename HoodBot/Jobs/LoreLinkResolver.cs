@@ -123,7 +123,7 @@
 					}
 					*/
 
-					if (!isLoreLink && ns.AssociatedNamespace == UespNamespaces.Lore)
+					if (!isLoreLink && ns.BaseNamespace == UespNamespaces.Lore)
 					{
 						retval = fullName;
 					}
