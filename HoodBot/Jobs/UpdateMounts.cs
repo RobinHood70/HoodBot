@@ -25,8 +25,6 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override Action<EditJob, Page>? EditConflictAction => this.PageLoaded;
-
 		protected override string EditSummary => "Update mount ID";
 		#endregion
 

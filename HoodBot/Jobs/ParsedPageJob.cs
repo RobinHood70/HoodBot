@@ -18,10 +18,6 @@
 
 		#endregion
 
-		#region Protected Override Properties
-		protected override Action<EditJob, Page>? EditConflictAction => this.PageLoaded;
-		#endregion
-
 		#region Protected Abstract Methods
 		protected abstract void ParseText(object sender, ContextualParser parser);
 		#endregion
