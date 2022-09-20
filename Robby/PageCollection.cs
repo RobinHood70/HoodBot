@@ -69,9 +69,14 @@
 
 		#region Public Events
 
-		/// <summary>Occurs for each page when it is loaded.</summary>
+		/// <summary>This event occurs for each page when it is loaded.</summary>
 		/// <remarks>This event does not fire if a page is merely added to the collection, or a new blank page is created with the <see cref="New"/> method.</remarks>
 		public event StrongEventHandler<PageCollection, Page>? PageLoaded;
+
+		/// <summary>This event occurs when a loaded page is missing or empty.</summary>
+		/// <remarks>PageMissing always precedes <see cref="PageLoaded"/>, allowing the subscriber to initialize the page with standard text for PageLoaded to act on.</remarks>
+		public event StrongEventHandler<PageCollection, Page>? PageMissing;
+
 		#endregion
 
 		#region Public Properties
@@ -523,6 +528,11 @@
 				if (pageValidator(page))
 				{
 					this[page] = page;
+					if (page.IsMissing || string.IsNullOrWhiteSpace(page.Text))
+					{
+						this.PageMissing?.Invoke(this, page);
+					}
+
 					this.PageLoaded?.Invoke(this, page);
 				}
 			}
