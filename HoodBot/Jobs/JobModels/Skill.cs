@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Data;
 	using System.Diagnostics;
 	using System.Text.RegularExpressions;
@@ -36,11 +37,15 @@
 		#endregion
 
 		#region Public Properties
+		public bool BigChange { get; protected set; }
+
 		public string Class { get; protected set; }
 
 		public string Name { get; }
 
 		public string PageName { get; }
+
+		public IList<Rank> Ranks { get; } = new List<Rank>();
 
 		public string SkillLine { get; protected set; }
 		#endregion
@@ -55,6 +60,8 @@
 
 		#region Public Abstract Methods
 		public abstract bool Check();
+
+		public abstract void SetBigChange(Skill prev);
 		#endregion
 	}
 }
