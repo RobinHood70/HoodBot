@@ -186,7 +186,7 @@
 			}
 		}
 
-		protected override string NewPageText(Page page)
+		protected override void PageMissing(EditJob sender, Page page)
 		{
 			var quest = this.quests[page];
 			SortedSet<string> locs = new(StringComparer.Ordinal);
@@ -303,7 +303,7 @@
 				.AppendLine()
 				.AppendLine("{{Stub|Quest}}");
 
-			return sb.ToString();
+			page.Text = sb.ToString();
 		}
 
 		protected override void PageLoaded(EditJob job, Page page)

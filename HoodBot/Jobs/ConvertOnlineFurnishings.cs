@@ -29,8 +29,6 @@
 		#endregion
 
 		#region Protected Override Properties
-		protected override Action<EditJob, Page>? EditConflictAction { get; }
-
 		protected override string EditSummary => "Convert to full text";
 		#endregion
 

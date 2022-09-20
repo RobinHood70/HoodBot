@@ -27,32 +27,33 @@
 		protected IDictionary<Title, bool> CustomMinorEdits { get; } = new Dictionary<Title, bool>(SimpleTitleComparer.Instance);
 
 		// Nearly all edit jobs act on a PageCollection, so we provide a preinitialized one here for convenience.
-		protected PageCollection Pages { get; }
+		protected PageCollection Pages { get; set; }
 
 		protected bool Shuffle { get; set; }
-		#endregion
 
-		#region Protected Virtual Properties
-		protected virtual bool CreateIfMissing => false;
+		protected bool CreateIfMissing { get; set; }
 
-		protected virtual Tristate CreateOnly => Tristate.Unknown;
+		protected Tristate CreateOnly { get; set; } = Tristate.Unknown;
 
-		/// <summary>Gets the edit conflict action.</summary>
-		/// <value>The edit conflict action.</value>
-		/// <remarks>During a SavePage, if an edit conflict occurs and this property is non-null, the page will automatically be re-loaded and the method specified here will be executed.</remarks>
-		protected virtual Action<EditJob, Page>? EditConflictAction => this.PageLoaded;
+		protected bool MinorEdit { get; set; } = true;
 
-		protected virtual bool MinorEdit => true;
+		protected bool RecreateIfDeleted { get; set; } = true;
 
-		protected virtual bool RecreateIfDeleted => true;
-
-		protected virtual bool SaveOverDeleted => true;
+		protected bool SaveOverDeleted { get; set; } = true;
 		#endregion
 
 		#region Protected Abstract Properties
 
 		/// <summary>Gets the edit summary to use by default for all edits.</summary>
 		protected abstract string EditSummary { get; }
+		#endregion
+
+		#region Protected Virtual Properties
+
+		/// <summary>Gets the edit conflict action.</summary>
+		/// <value>The edit conflict action.</value>
+		/// <remarks>During a SavePage, if an edit conflict occurs and this property is non-null, the page will automatically be re-loaded and the method specified here will be executed.</remarks>
+		protected virtual Action<EditJob, Page>? EditConflictAction { get; }
 		#endregion
 
 		#region Protected Methods
@@ -74,6 +75,11 @@
 				catch (EditConflictException) when (editConflictAction != null)
 				{
 					page = new Title(page).Load();
+					if (page.IsMissing || string.IsNullOrWhiteSpace(page.Text))
+					{
+						this.PageMissing(this, page);
+					}
+
 					editConflictAction(this, page);
 				}
 				catch (WikiException we) when (!this.SaveOverDeleted && string.Equals(we.Code, "pagedeleted", StringComparison.Ordinal))
@@ -119,21 +125,21 @@
 		{
 			this.BeforeLoadPages();
 			this.StatusWriteLine("Loading pages");
+			this.Pages.PageMissing += this.Pages_PageMissing;
+			this.Pages.PageLoaded += this.Pages_PageLoaded;
 			this.LoadPages();
-			foreach (var page in this.Pages)
-			{
-				if (page.IsMissing || string.IsNullOrWhiteSpace(page.Text))
-				{
-					page.Text = this.NewPageText(page);
-				}
-
-				this.PageLoaded(this, page);
-			}
-
+			this.Pages.PageLoaded -= this.Pages_PageLoaded;
+			this.Pages.PageMissing -= this.Pages_PageMissing;
 			this.AfterLoadPages();
 		}
 
 		protected override void Main() => this.SavePages();
+		#endregion
+
+		#region Protected Abstract Methods
+		protected abstract void LoadPages();
+
+		protected abstract void PageLoaded(EditJob job, Page page);
 		#endregion
 
 		#region Protected Virtual Methods
@@ -145,13 +151,15 @@
 		{
 		}
 
-		protected virtual string NewPageText(Page page) => string.Empty;
+		protected virtual void PageMissing(EditJob sender, Page page)
+		{
+		}
 		#endregion
 
-		#region Protected Abstract Methods
-		protected abstract void LoadPages();
+		#region Private Methods
+		private void Pages_PageLoaded(PageCollection sender, Page eventArgs) => this.PageLoaded(this, eventArgs);
 
-		protected abstract void PageLoaded(EditJob job, Page page);
+		private void Pages_PageMissing(PageCollection sender, Page eventArgs) => this.PageMissing(this, eventArgs);
 		#endregion
 	}
 }

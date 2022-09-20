@@ -29,6 +29,7 @@
 		{
 			//// jobManager.ShowDiffs = false;
 			this.allowUpdates = allowUpdates;
+			this.MinorEdit = false;
 			this.SetResultDescription("Existing ESO NPC pages");
 		}
 		#endregion
@@ -39,8 +40,6 @@
 
 		#region Protected Override Properties
 		protected override string EditSummary => this.LogName;
-
-		protected override bool MinorEdit => false;
 		#endregion
 
 		#region Protected Override Methods

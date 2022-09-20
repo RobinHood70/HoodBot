@@ -55,11 +55,9 @@
 
 			var listBooks = this.FilterToListBooks();
 			this.GetPageBooks(listBooks);
-
-			this.EditConflictAction.ThrowNull();
 			foreach (var page in loreBookPages)
 			{
-				// Add and update manually since we needed to parse information from the pages first.
+				// Add and update manually since we need to parse information from the pages first.
 				this.Pages.Add(page);
 			}
 		}
