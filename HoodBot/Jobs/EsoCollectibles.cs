@@ -31,6 +31,7 @@
 		public EsoCollectibles(JobManager jobManager)
 			: base(jobManager)
 		{
+			this.CreateOnly = Tristate.True;
 		}
 		#endregion
 
@@ -39,8 +40,6 @@
 		#endregion
 
 		#region Protected Override Properties
-
-		protected override Tristate CreateOnly => Tristate.True;
 
 		protected override string EditSummary => "Create collectible page";
 
@@ -111,7 +110,7 @@
 			}
 		}
 
-		protected override string NewPageText(Page page) => this.blankText.NotNull();
+		protected override void PageMissing(EditJob sender, Page page) => page.Text = this.blankText.NotNull();
 
 		protected override void ParseText(object sender, ContextualParser parser)
 		{

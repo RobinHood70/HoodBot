@@ -49,6 +49,7 @@
 			: base(jobManager)
 		{
 			// jobManager.ShowDiffs = false;
+			this.MinorEdit = false;
 		}
 		#endregion
 
@@ -58,8 +59,6 @@
 
 		#region Protected Override Properties
 		protected override string EditSummary => this.LogName;
-
-		protected override bool MinorEdit => false;
 		#endregion
 
 		#region Protected Override Methods
