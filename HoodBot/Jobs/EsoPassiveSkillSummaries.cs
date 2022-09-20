@@ -1,10 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
 	using System.Data;
-	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
-	using RobinHood70.Robby;
-	using RobinHood70.WikiCommon.Parser;
 
 	internal sealed class EsoPassiveSkillSummaries : EsoSkillJob<PassiveSkill>
 	{
@@ -48,59 +45,7 @@
 		#endregion
 
 		#region Protected Override Methods
-		protected override void AddSkillData(PassiveSkill skill, IDataRecord row)
-		{
-			var rank = new PassiveRank(row);
-			skill.Ranks.Add(rank);
-		}
-
-		protected override PassiveSkill GetNewSkill(IDataRecord row) => new(row);
-
-		protected override void SkillPostProcess(PassiveSkill skill)
-		{
-		}
-
-		protected override void UpdateSkillTemplate(PassiveSkill skillBase, ITemplateNode template)
-		{
-			skillBase.ThrowNull();
-			template.ThrowNull();
-			this.UpdateParameter(template, "type", "Passive");
-			this.UpdateParameter(template, "id", skillBase.Ranks[^1].Id.ToStringInvariant());
-			TitleCollection usedList = new(this.Site);
-			foreach (var rank in skillBase.Ranks)
-			{
-				var splitDescription = Skill.Highlight.Split(rank.Description);
-				if (splitDescription[0].Length == 0)
-				{
-					splitDescription[1] = "<small>(" + splitDescription[1] + ")</small>";
-				}
-
-				for (var i = 0; i < splitDescription.Length; i++)
-				{
-					var coef = Coefficient.FromCollection(rank.Coefficients, splitDescription[i]);
-					if (coef != null)
-					{
-						splitDescription[i] = coef.SkillDamageText();
-					}
-
-					// Descriptions used to be done with Join("'''") but in practice, this is unintuitive, so we surround every other value with bold instead.
-					if ((i & 1) == 1)
-					{
-						splitDescription[i] = "'''" + splitDescription[i] + "'''";
-					}
-				}
-
-				var description = string.Concat(splitDescription);
-				var rankText = rank.RankNum.ToStringInvariant();
-				var paramName = "desc" + (rank.RankNum == 1 ? string.Empty : rankText);
-
-				this.UpdateParameter(template, paramName, description, usedList, skillBase.Name);
-				if (rank is PassiveRank passiveRank)
-				{
-					this.UpdateParameter(template, "linerank" + rankText, passiveRank.LearnedLevel.ToStringInvariant());
-				}
-			}
-		}
+		protected override PassiveSkill NewSkill(IDataRecord row) => new(row);
 		#endregion
 	}
 }
