@@ -10,6 +10,9 @@
 		{
 			[23234] = ("|cffffff1|r second", "|cffffff1|r seconds"),
 			[24574] = ("|cffffff1|r minute", "|cffffff1|r minutes"),
+			[33195] = ("second after leaving the path", "seconds after leaving the path"),
+			[32166] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
+			[37631] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
 			[38096] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
 			[40242] = ("|cffffff1|r second.", "|cffffff1|r seconds."),
 			[62107] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
