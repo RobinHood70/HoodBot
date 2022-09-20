@@ -1,17 +1,12 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
 	using System;
-	using System.Collections.Generic;
 	using System.Data;
 	using System.Diagnostics;
 	using RobinHood70.CommonCode;
 
 	internal sealed class PassiveSkill : Skill
 	{
-		#region Fields
-		private readonly List<PassiveRank> ranks = new();
-		#endregion
-
 		#region Constructors
 		public PassiveSkill(IDataRecord row)
 			: base(row)
@@ -25,37 +20,45 @@
 			{
 				this.Class = "Crafting";
 			}
-
-			this.ranks.Add(new PassiveRank(row));
 		}
-		#endregion
-
-		#region Public Properties
-		public int Id => this.ranks[^1].Id;
-
-		public IReadOnlyList<PassiveRank> Ranks => this.ranks;
 		#endregion
 
 		#region Public Override Methods
 		public override bool Check()
 		{
 			var retval = false;
-			if (this.ranks.Count is < 1 or > 10)
+			if (this.Ranks.Count is < 1 or > 10)
 			{
 				retval = true;
 				Debug.WriteLine($"Warning: {this.Name} has an unusual number of ranks ({this.Ranks.Count}).");
 			}
 
-			foreach (var rank in this.ranks)
+			foreach (var rank in this.Ranks)
 			{
 				if (string.IsNullOrWhiteSpace(rank.Description))
 				{
 					retval = true;
-					Debug.WriteLine($"Warning: {this.Name} - Rank {rank.Rank.ToStringInvariant()} has no description.");
+					Debug.WriteLine($"Warning: {this.Name} - Rank {rank.RankNum.ToStringInvariant()} has no description.");
 				}
 			}
 
 			return retval;
+		}
+
+		public override void SetBigChange(Skill prev)
+		{
+			if (prev is not PassiveSkill prevSkill)
+			{
+				throw new InvalidOperationException();
+			}
+
+			var retval = false;
+			for (var i = 0; i < this.Ranks.Count; i++)
+			{
+				retval |= this.Ranks[i].IsBigChange(prevSkill.Ranks[i]);
+			}
+
+			this.BigChange = retval;
 		}
 		#endregion
 	}

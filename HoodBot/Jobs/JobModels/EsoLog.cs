@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.Globalization;
 	using System.Text.RegularExpressions;
 	using MySql.Data.MySqlClient;
 	using RobinHood70.CommonCode;
@@ -13,13 +14,28 @@
 		#region Static Fields
 		private static readonly Regex ColourCode = new(@"\A\|c[0-9A-F]{6}(.*?)\|r\Z", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
 		private static readonly Regex TrailingDigits = new(@"\s*\d+\Z", RegexOptions.None, Globals.DefaultRegexTimeout);
+		private static readonly Regex UpdateFinder = new(@"(?<update>\d+)\Z", RegexOptions.ExplicitCapture, Globals.DefaultRegexTimeout);
+		private static Database? database;
+		private static int latestUpdate;
 		#endregion
 
 		#region Public Properties
 		public static string Connection { get; } = App.GetConnectionString("EsoLog") ?? throw new InvalidOperationException();
 
+		public static Database Database => database ??= new Database(Connection);
+
 		public static Dictionary<int, string> MechanicNames { get; } = new Dictionary<int, string>
 		{
+			[-1] = "Invalid",
+			//// [0] = string.Empty,
+			[1] = "Magicka",
+			[2] = "Werewolf",
+			[4] = "Stamina",
+			[8] = "Ultimate",
+			[16] = "Mount Stamina",
+			[32] = "Health",
+			[64] = "Daedric",
+
 			[-2] = "Health",
 			[0] = "Magicka",
 			[6] = "Stamina",
@@ -55,6 +71,31 @@
 			[-78] = "Magicka and Light Armor (Health Capped)",
 			[-79] = "Health or Weapon/Spell Damage",
 		};
+
+		public static int LatestUpdate
+		{
+			get
+			{
+				if (latestUpdate == 0)
+				{
+					foreach (var table in Database.ShowTables())
+					{
+						var match = UpdateFinder.Match(table);
+						if (match.Success)
+						{
+							var updateText = match.Groups["update"].Value;
+							var update = int.Parse(updateText, CultureInfo.InvariantCulture);
+							if (update > latestUpdate)
+							{
+								latestUpdate = update;
+							}
+						}
+					}
+				}
+
+				return latestUpdate;
+			}
+		}
 		#endregion
 
 		#region Public Methods

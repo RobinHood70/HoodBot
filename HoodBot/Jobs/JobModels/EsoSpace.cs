@@ -5,7 +5,6 @@
 	using System.Diagnostics;
 	using System.Globalization;
 	using System.Linq;
-	using System.Text.RegularExpressions;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
@@ -15,8 +14,7 @@
 
 	internal static class EsoSpace
 	{
-		#region Fields
-		private static readonly Regex BonusFinder = new(@"\s*Current [Bb]onus:.*?\.", RegexOptions.None, Globals.DefaultRegexTimeout);
+		#region Static Fields
 		private static string? patchVersion;
 		#endregion
 
@@ -83,8 +81,6 @@
 
 			return retval;
 		}
-
-		public static string HarmonizeDescription(string desc) => RegexLibrary.WhitespaceToSpace(BonusFinder.Replace(desc, string.Empty));
 
 		public static void SetBotUpdateVersion(WikiJob job, string pageType)
 		{

@@ -26,9 +26,7 @@
 		#endregion
 
 		#region Fields
-		private readonly SortedSet<Page> nonTrivialChanges = new(SimpleTitleComparer.Instance);
-		private readonly Dictionary<string, T> skills = new(StringComparer.Ordinal);
-		private readonly SortedSet<Page> trivialChanges = new(SimpleTitleComparer.Instance);
+		private Dictionary<string, T> skills = new(StringComparer.Ordinal);
 		#endregion
 
 		#region Constructors
@@ -38,12 +36,16 @@
 		}
 		#endregion
 
+		#region Public Properties
+		public bool BigChange { get; set; }
+		#endregion
+
 		#region Public Override Properties
 		public override string LogName => "Update ESO " + this.TypeText + " Skills";
 		#endregion
 
 		#region Protected Override Properties
-		protected override Action<EditJob, Page>? EditConflictAction => this.SkillPageLoaded;
+		protected override Action<EditJob, Page>? EditConflictAction => this.PageLoaded;
 
 		protected override string EditSummary => this.LogName;
 
@@ -76,43 +78,39 @@
 
 		protected static string MakeIcon(string lineName, string morphName) => lineName + "-" + morphName;
 
-		protected bool TrackedUpdate(ITemplateNode template, string name, string value) => this.TrackedUpdate(template, name, value, null, null);
+		protected void UpdateParameter(ITemplateNode template, string name, string value) => this.UpdateParameter(template, name, value, null, null);
 
-		protected bool TrackedUpdate(ITemplateNode template, string name, string value, TitleCollection? usedList, string? skillName)
+		protected void UpdateParameter(ITemplateNode template, string name, string value, TitleCollection? usedList, string? skillName)
 		{
-			var retval = false;
-			if (template.NotNull().Find(name) is not IParameterNode parameter)
-			{
-				parameter = template.Add(name, string.Empty);
-				retval = true;
-			}
-
 			value = value.Trim();
-			var oldValue = parameter.Value.ToValue().Trim();
-			if (!string.Equals(oldValue, value, StringComparison.Ordinal))
+			var factory = new SiteNodeFactory(this.Site);
+			var valueNodes = factory.Parse(value);
+			if (usedList != null)
 			{
-				retval = true;
-				parameter.SetValue(value, ParameterFormat.Copy);
-
-				// We use usedList as the master check, since that should always be available if we're doing checks at all.
-				if (usedList != null)
+				EsoReplacer.ReplaceGlobal(valueNodes);
+				EsoReplacer.ReplaceEsoLinks(this.Site, valueNodes);
+				EsoReplacer.ReplaceFirstLink(valueNodes, usedList);
+				if (skillName != null)
 				{
-					EsoReplacer.ReplaceGlobal(parameter.Value);
-					EsoReplacer.ReplaceEsoLinks(this.Site, parameter.Value);
-					EsoReplacer.ReplaceFirstLink(parameter.Value, usedList);
-					if (skillName != null)
-					{
-						EsoReplacer.ReplaceSkillLinks(parameter.Value, skillName);
-					}
+					EsoReplacer.ReplaceSkillLinks(valueNodes, skillName);
 				}
 			}
 
-			return retval;
+			template.Update(name, valueNodes.ToRaw(), ParameterFormat.OnePerLine, true);
 		}
 
-		protected bool TrackedUpdate(ITemplateNode template, string name, string value, bool removeCondition) => removeCondition
-			? template.NotNull().Remove(name)
-			: this.TrackedUpdate(template, name, value);
+		protected void UpdateParameter(ITemplateNode template, string name, string value, bool removeCondition)
+		{
+			template.ThrowNull();
+			if (removeCondition)
+			{
+				template.Remove(name);
+			}
+			else
+			{
+				this.UpdateParameter(template, name, value);
+			}
+		}
 		#endregion
 
 		#region Protected Override Methods
@@ -123,11 +121,20 @@
 		{
 			this.StatusWriteLine("Fetching data");
 			EsoReplacer.Initialize(this);
-			this.GetSkillList();
+			this.skills = this.GetSkillList(0);
+			var prevSkills = this.GetSkillList(EsoLog.LatestUpdate - 1);
+			foreach (var skill in this.skills)
+			{
+				if (prevSkills.TryGetValue(skill.Key, out var prevSkill))
+				{
+					skill.Value.SetBigChange(prevSkill);
+				}
+			}
 		}
 
 		protected override void LoadPages()
 		{
+			this.skills.ThrowNull();
 			TitleCollection titles = new(this.Site);
 			foreach (var skill in this.skills)
 			{
@@ -148,12 +155,22 @@
 			base.Main();
 			EsoSpace.SetBotUpdateVersion(this, this.TypeText.ToLowerInvariant());
 		}
+
+		protected override void PageLoaded(EditJob job, Page page)
+		{
+			this.skills.ThrowNull();
+			this.UpdatePageText(page, this.skills[page.FullPageName]);
+		}
 		#endregion
 
 		#region Protected Abstract Methods
+		protected abstract void AddSkillData(T skill, IDataRecord row);
+
 		protected abstract T GetNewSkill(IDataRecord row);
 
-		protected abstract bool UpdateSkillTemplate(T skillBase, ITemplateNode template);
+		protected abstract void SkillPostProcess(T skill);
+
+		protected abstract void UpdateSkillTemplate(T skillBase, ITemplateNode template);
 		#endregion
 
 		#region Private Static Methods
@@ -163,29 +180,25 @@
 		#region Private Methods
 		private void GenerateReport()
 		{
-			if (this.trivialChanges.Count > 0)
+			List<string> trivialList = new();
+			this.WriteLine($"== {this.TypeText} Skills With Non-Trivial Updates ==");
+			foreach (var skill in this.skills)
 			{
-				this.WriteLine($"== {this.TypeText} Skills With Trivial Updates ==");
-				List<string> newList = new();
-				foreach (var page in this.trivialChanges)
+				var title = (Title)TitleFactory.FromUnvalidated(this.Site, skill.Key);
+				if (skill.Value.BigChange)
 				{
-					newList.Add(page.AsLink(LinkFormat.LabelName));
+					this.WriteLine($"* {{{{Pl|{title.FullPageName}|{title.PipeTrick()}|diff=cur}}}}");
 				}
-
-				this.WriteLine(string.Join(", ", newList));
-				this.WriteLine();
+				else
+				{
+					trivialList.Add(title.AsLink(LinkFormat.LabelName));
+				}
 			}
 
-			if (this.nonTrivialChanges.Count > 0)
-			{
-				this.WriteLine($"== {this.TypeText} Skills With Non-Trivial Updates ==");
-				foreach (var page in this.nonTrivialChanges)
-				{
-					this.WriteLine($"* {{{{Pl|{page.FullPageName}|{page.PipeTrick()}|diff=cur}}}}");
-				}
-
-				this.WriteLine();
-			}
+			this.WriteLine();
+			this.WriteLine($"== {this.TypeText} Skills With Trivial Updates ==");
+			this.WriteLine(string.Join(", ", trivialList));
+			this.WriteLine();
 
 			SortedList<string, string> iconChanges = new(IconNameCache.Count, StringComparer.Ordinal);
 			foreach (var kvp in IconNameCache)
@@ -212,56 +225,46 @@
 			this.WriteLine();
 		}
 
-		private void GetSkillList()
+		private Dictionary<string, T> GetSkillList(int version)
 		{
+			Dictionary<string, T> retval = new(StringComparer.Ordinal);
+			var query = this.Query;
+			if (version > 0)
+			{
+				var versionText = version.ToStringInvariant();
+				query = this.Query
+					.Replace("skillTree", "skillTree" + versionText, StringComparison.Ordinal)
+					.Replace("minedSkills", "minedSkills" + versionText, StringComparison.Ordinal);
+			}
+
 			var errors = false;
-			string? lastName = null; // We use a string for comparison because the skill itself will sometimes massage the data.
-			foreach (var skill in Database.RunQuery(EsoLog.Connection, this.Query, row => this.GetNewSkill(row)))
+			T? baseSkill = null; // We use a string for comparison because the skill itself will sometimes massage the data.
+			foreach (var row in Database.RunQuery(EsoLog.Connection, query))
 			{
-				var currentName = $"{skill.Class}::{skill.SkillLine}::{skill.Name}";
-				if (!string.Equals(lastName, currentName, StringComparison.Ordinal))
+				var newSkill = this.GetNewSkill(row);
+				//// var currentName = $"{skill.Class}::{skill.SkillLine}::{skill.Name}";
+				if (baseSkill is null ||
+					!string.Equals(baseSkill.PageName, newSkill.PageName, StringComparison.Ordinal))
 				{
-					lastName = currentName;
-					try
-					{
-						this.skills.Add(skill.PageName, skill);
-					}
-					catch (InvalidOperationException e)
-					{
-						this.Warn(e.Message);
-						errors = true;
-					}
+					retval.Add(newSkill.PageName, newSkill);
+					baseSkill = newSkill;
 				}
+
+				this.AddSkillData(baseSkill, row);
 			}
 
-			foreach (var checkSkill in this.skills)
+			foreach (var skill in retval)
 			{
-				errors |= checkSkill.Value.Check();
+				this.SkillPostProcess(skill.Value);
+				errors |= skill.Value.Check();
 			}
 
-			if (errors)
-			{
-				throw new InvalidOperationException("Problems found in skill data.");
-			}
+			return errors
+				? throw new InvalidOperationException("Problems found in skill data.")
+				: retval;
 		}
 
-		private void SkillPageLoaded(object sender, Page page)
-		{
-			var nonTrivial = this.UpdatePageText(page, this.skills[page.FullPageName]);
-			if (sender != this && page.TextModified)
-			{
-				if (nonTrivial)
-				{
-					this.nonTrivialChanges.Add(page);
-				}
-				else
-				{
-					this.trivialChanges.Add(page);
-				}
-			}
-		}
-
-		private bool UpdatePageText(Page page, T skill)
+		private void UpdatePageText(Page page, T skill)
 		{
 			if (!page.Exists)
 			{
@@ -280,8 +283,7 @@
 			template.RemoveDuplicates();
 			template.Remove("update");
 
-			var bigChange = false;
-			bigChange |= this.TrackedUpdate(template, "line", skill.SkillLine);
+			this.UpdateParameter(template, "line", skill.SkillLine);
 			var iconValue = MakeIcon(skill.SkillLine, skill.Name);
 
 			// Special cases
@@ -300,10 +302,10 @@
 			{
 				var iconName = "icon" + (i > 0 ? (i + 1).ToStringInvariant() : string.Empty);
 				var newValue = IconValueFixup(template.Find(iconName), iconValue + (loopCount > 0 ? FormattableString.Invariant($" ({DestructionTypes[i]})") : string.Empty));
-				bigChange |= this.TrackedUpdate(template, iconName, newValue);
+				this.UpdateParameter(template, iconName, newValue);
 			}
 
-			bigChange |= this.UpdateSkillTemplate(skill, template);
+			this.UpdateSkillTemplate(skill, template);
 			template.Sort("titlename", "id", "id1", "id2", "id3", "id4", "id5", "id6", "id7", "id8", "id9", "id10", "line", "type", "icon", "icon2", "icon3", "desc", "desc1", "desc2", "desc3", "desc4", "desc5", "desc6", "desc7", "desc8", "desc9", "desc10", "linerank", "cost", "attrib", "casttime", "range", "radius", "duration", "channeltime", "target", "morph1name", "morph1id", "morph1icon", "morph1desc", "morph2name", "morph2id", "morph2icon", "morph2desc", "image", "imgdesc", "nocat", "notrail");
 
 			EsoReplacer replacer = new(this.Site);
@@ -320,7 +322,6 @@
 			}
 
 			parser.UpdatePage();
-			return bigChange;
 		}
 		#endregion
 	}
