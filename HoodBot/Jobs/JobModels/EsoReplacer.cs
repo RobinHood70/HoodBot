@@ -300,7 +300,7 @@
 				Debug.WriteLine("  " + replacement);
 			}
 
-			Debug.WriteLine("*** Remember to run all of the following, taking results only from the last one, before deleting any unused replacements: Active skills, Passive skills, Item Sets ***");
+			Debug.WriteLine("*** Remember to run both the Item Sets and Skills jobs before deleting any unused replacements ***");
 		}
 		#endregion
 

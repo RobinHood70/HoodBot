@@ -38,12 +38,13 @@
 			{
 				this.B = (float)data["b" + num];
 				this.C = (float)data["c" + num];
-				//// this.R = (float)data["R" + num];
-
 				this.Mechanic = (sbyte)data["type" + num];
 				if (this.Mechanic == -1)
 				{
-					var mechanicText = (string)data["mechanic"];
+					var mechanicType = data.GetDataTypeName(data.GetOrdinal("mechanic"));
+					var mechanicText = string.Equals(mechanicType, "INT", StringComparison.Ordinal)
+						? ((int)data["mechanic"]).ToStringInvariant()
+						: (string)data["mechanic"];
 					if (mechanicText.Contains(',', StringComparison.Ordinal))
 					{
 						throw new InvalidOperationException("Type == -1 and Mechanic is split. It's unclear how this should be handled.");

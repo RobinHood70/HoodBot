@@ -27,7 +27,10 @@
 		{
 			this.Name = (string)row["baseName"];
 			var classLine = ((string)row["skillTypeName"]).Split(DoubleColonSplit, StringSplitOptions.None);
-			this.Class = classLine[0];
+			var classValue = classLine[0];
+			this.Class = string.Equals(classValue, "Craft", StringComparison.Ordinal)
+				? classValue
+				: "Crafting";
 			this.SkillLine = classLine[1];
 			var testName = this.Name;
 			if (!ReplacementData.SkillNameFixes.TryGetValue(testName, out var newName))
@@ -52,35 +55,15 @@
 		#region Public Properties
 		public bool BigChange { get; protected set; }
 
-		public string Class { get; protected set; }
-
-		public string Name { get; }
-
 		public string PageName { get; }
-
-		public IList<Rank> Ranks { get; } = new List<Rank>();
-
-		public string SkillLine { get; protected set; }
 		#endregion
 
-		#region Private Static Properties
-		private static SortedList<string, string> IconNameCache { get; } = new(StringComparer.Ordinal);
-		#endregion
+		#region Protected Properties
+		protected string Class { get; set; }
 
-		#region Public Static Methods
-		public static SortedList<string, string> GetIconChanges()
-		{
-			SortedList<string, string> iconChanges = new(IconNameCache.Count, StringComparer.Ordinal);
-			foreach (var kvp in IconNameCache)
-			{
-				if (!string.Equals(kvp.Key, kvp.Value, StringComparison.Ordinal))
-				{
-					iconChanges.Add(kvp.Key, kvp.Value);
-				}
-			}
+		protected string Name { get; }
 
-			return iconChanges;
-		}
+		protected string SkillLine { get; set; }
 		#endregion
 
 		#region Public Methods
@@ -122,7 +105,7 @@
 			for (var i = 0; i <= loopCount; i++)
 			{
 				var iconName = "icon" + (i > 0 ? (i + 1).ToStringInvariant() : string.Empty);
-				var newValue = IconValueFixup(template.Find(iconName), iconValue + (loopCount > 0 ? FormattableString.Invariant($" ({DestructionTypes[i]})") : string.Empty));
+				var newValue = EsoSkills.IconValueFixup(template.Find(iconName), iconValue + (loopCount > 0 ? FormattableString.Invariant($" ({DestructionTypes[i]})") : string.Empty));
 				UpdateParameter(factory, template, iconName, newValue);
 			}
 
@@ -157,8 +140,6 @@
 		public abstract bool Check();
 
 		public abstract void SetBigChange(Skill prev);
-
-		public abstract void UpdateTemplate(SiteNodeFactory factory, ITemplateNode template);
 		#endregion
 
 		#region Public Virtual Methods
@@ -178,22 +159,6 @@
 			"1" => "1 second",
 			_ => $"{value} seconds"
 		};
-
-		protected static string IconValueFixup(IParameterNode? parameter, string newValue)
-		{
-			if (parameter != null)
-			{
-				var currentValue = parameter.Value.ToValue().Trim();
-				if (IconNameCache.TryGetValue(currentValue, out var oldValue))
-				{
-					return oldValue;
-				}
-
-				IconNameCache.Add(currentValue, newValue);
-			}
-
-			return newValue;
-		}
 
 		protected static string MakeIcon(string lineName, string morphName) => lineName + "-" + morphName;
 
@@ -232,6 +197,10 @@
 				UpdateParameter(factory, template, name, value);
 			}
 		}
+		#endregion
+
+		#region Protected Abstratct Methods
+		protected abstract void UpdateTemplate(SiteNodeFactory factory, ITemplateNode template);
 		#endregion
 	}
 }
