@@ -1,6 +1,7 @@
 ﻿namespace RobinHood70.HoodBot.Jobs.JobModels
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Data;
 	using System.Diagnostics;
 	using RobinHood70.CommonCode;
@@ -10,6 +11,10 @@
 
 	internal sealed class PassiveSkill : Skill
 	{
+		#region Fields
+		private readonly List<Rank> ranks = new();
+		#endregion
+
 		#region Constructors
 		public PassiveSkill(IDataRecord row)
 			: base(row)
@@ -19,10 +24,6 @@
 				.Replace("Dark Elf", "Dunmer", StringComparison.Ordinal)
 				.Replace("High Elf", "Altmer", StringComparison.Ordinal)
 				.Replace("Wood Elf", "Bosmer", StringComparison.Ordinal);
-			if (string.Equals(this.Class, "Craft", StringComparison.Ordinal))
-			{
-				this.Class = "Crafting";
-			}
 		}
 		#endregion
 
@@ -30,19 +31,19 @@
 		public override void AddData(IDataRecord row)
 		{
 			var rank = new PassiveRank(row);
-			this.Ranks.Add(rank);
+			this.ranks.Add(rank);
 		}
 
 		public override bool Check()
 		{
 			var retval = false;
-			if (this.Ranks.Count is < 1 or > 10)
+			if (this.ranks.Count is < 1 or > 10)
 			{
 				retval = true;
-				Debug.WriteLine($"Warning: {this.Name} has an unusual number of ranks ({this.Ranks.Count}).");
+				Debug.WriteLine($"Warning: {this.Name} has an unusual number of ranks ({this.ranks.Count}).");
 			}
 
-			foreach (var rank in this.Ranks)
+			foreach (var rank in this.ranks)
 			{
 				if (string.IsNullOrWhiteSpace(rank.Description))
 				{
@@ -62,22 +63,23 @@
 			}
 
 			var retval = false;
-			for (var i = 0; i < this.Ranks.Count; i++)
+			for (var i = 0; i < this.ranks.Count; i++)
 			{
-				retval |= this.Ranks[i].IsBigChange(prevSkill.Ranks[i]);
+				retval |= this.ranks[i].IsBigChange(prevSkill.ranks[i]);
 			}
 
 			this.BigChange = retval;
 		}
 		#endregion
 
-		public override void UpdateTemplate(SiteNodeFactory factory, ITemplateNode template)
+		#region Protected Override Methods
+		protected override void UpdateTemplate(SiteNodeFactory factory, ITemplateNode template)
 		{
 			template.ThrowNull();
 			UpdateParameter(factory, template, "type", "Passive");
-			UpdateParameter(factory, template, "id", this.Ranks[^1].Id.ToStringInvariant());
+			UpdateParameter(factory, template, "id", this.ranks[^1].Id.ToStringInvariant());
 			TitleCollection usedList = new(factory.Site);
-			foreach (var rank in this.Ranks)
+			foreach (var rank in this.ranks)
 			{
 				var splitDescription = Highlight.Split(rank.Description);
 				if (splitDescription[0].Length == 0)
@@ -111,5 +113,6 @@
 				}
 			}
 		}
+		#endregion
 	}
 }

@@ -12,21 +12,19 @@
 
 	internal sealed class ActiveSkill : Skill
 	{
+		#region Fields
+		private readonly int learnedLevel;
+		private readonly List<Morph> morphs = new(3);
+		private string skillType;
+		#endregion
+
 		#region Constructors
 		public ActiveSkill(IDataRecord row)
 			: base(row)
 		{
-			this.LearnedLevel = (int)row["learnedLevel"];
-			this.SkillType = (string)row["type"];
+			this.learnedLevel = (int)row["learnedLevel"];
+			this.skillType = (string)row["type"];
 		}
-		#endregion
-
-		#region Public Properties
-		public int LearnedLevel { get; private set; }
-
-		public IList<Morph> Morphs { get; } = new List<Morph>(3);
-
-		public string SkillType { get; internal set; }
 		#endregion
 
 		#region Public Override Methods
@@ -34,16 +32,16 @@
 		{
 			row.ThrowNull();
 			var morphNum = (sbyte)row["morph"];
-			if (morphNum >= this.Morphs.Count)
+			if (morphNum >= this.morphs.Count)
 			{
-				this.Morphs.Add(new Morph(row));
+				this.morphs.Add(new Morph(row));
 			}
 
-			var morph = this.Morphs[^1];
+			var morph = this.morphs[^1];
 			var rank = new ActiveRank(row);
 			if (rank.Costs.Count == 1 && rank.Costs[0].Value == -1)
 			{
-				this.SkillType = "Artifact";
+				this.skillType = "Artifact";
 			}
 
 			morph.Ranks.Add(rank);
@@ -51,7 +49,7 @@
 
 		public override bool Check()
 		{
-			foreach (var morph in this.Morphs)
+			foreach (var morph in this.morphs)
 			{
 				if (morph.Description == null)
 				{
@@ -65,7 +63,7 @@
 
 		public override void PostProcess()
 		{
-			foreach (var morph in this.Morphs)
+			foreach (var morph in this.morphs)
 			{
 				morph.ParseDescription();
 			}
@@ -79,21 +77,20 @@
 			}
 
 			var bigChange = false;
-			for (var i = 0; i < this.Morphs.Count; i++)
+			for (var i = 0; i < this.morphs.Count; i++)
 			{
-				var morph = this.Morphs[i];
-				bigChange |= morph.IsBigChange(prevSkill.Morphs[i]);
+				var morph = this.morphs[i];
+				bigChange |= morph.IsBigChange(prevSkill.morphs[i]);
 			}
 
 			this.BigChange = bigChange;
 		}
-
 		#endregion
 
-		#region Private Methods
-		public override void UpdateTemplate(SiteNodeFactory factory, ITemplateNode template)
+		#region Protected Override Methods
+		protected override void UpdateTemplate(SiteNodeFactory factory, ITemplateNode template)
 		{
-			var baseMorph = this.Morphs[0];
+			var baseMorph = this.morphs[0];
 			var baseRank = baseMorph.Ranks[^1];
 			UpdateParameter(factory, template.NotNull(), "id", baseRank.Id.ToStringInvariant());
 			var (valueText, mechanicText) = baseRank.GetCostSplit();
@@ -103,7 +100,7 @@
 			this.UpdateMorphs(factory, template, baseMorph, baseSkillCost);
 
 			UpdateParameter(factory, template, "casttime", FormatSeconds(baseMorph.CastingTime));
-			UpdateParameter(factory, template, "linerank", this.LearnedLevel.ToStringInvariant());
+			UpdateParameter(factory, template, "linerank", this.learnedLevel.ToStringInvariant());
 			UpdateParameter(factory, template, "cost", baseSkillCost);
 			if (template.Find("cost")?.Value is NodeCollection paramValue)
 			{
@@ -139,26 +136,18 @@
 			UpdateParameter(factory, template, "duration", FormatSeconds(baseRank.Duration), string.Equals(baseRank.Duration, "0", StringComparison.Ordinal));
 			UpdateParameter(factory, template, "channeltime", FormatSeconds(baseRank.ChannelTime), string.Equals(baseRank.ChannelTime, "0", StringComparison.Ordinal));
 			UpdateParameter(factory, template, "target", baseMorph.Target);
-			UpdateParameter(factory, template, "type", this.SkillType, string.Equals(this.SkillType, "Active", StringComparison.Ordinal));
+			UpdateParameter(factory, template, "type", this.skillType, string.Equals(this.skillType, "Active", StringComparison.Ordinal));
 		}
 
 		#endregion
 
-		private void UpdateMorphs(SiteNodeFactory factory, ITemplateNode template, Morph baseMorph, string baseSkillCost)
-		{
-			TitleCollection usedList = new(factory.Site);
-			for (var morphCounter = 0; morphCounter < this.Morphs.Count; morphCounter++)
-			{
-				this.UpdateMorph(factory, template, baseMorph, baseSkillCost, usedList, morphCounter);
-			}
-		}
-
+		#region Private Methods
 		private void UpdateMorph(SiteNodeFactory factory, ITemplateNode template, Morph baseMorph, string baseSkillCost, TitleCollection usedList, int morphCounter)
 		{
 			var baseRank = baseMorph.Ranks[^1];
 			List<string> descriptions = new();
 			var morphNum = morphCounter == 0 ? string.Empty : morphCounter.ToStringInvariant();
-			var morph = this.Morphs[morphCounter];
+			var morph = this.morphs[morphCounter];
 			if (!string.Equals(morph.CastingTime, baseMorph.CastingTime, StringComparison.Ordinal))
 			{
 				descriptions.Add("Casting Time: " + FormatSeconds(morph.CastingTime));
@@ -214,9 +203,19 @@
 				UpdateParameter(factory, template, morphName + "name", morph.Name);
 				UpdateParameter(factory, template, morphName + "id", morph.Ranks[^1].Id.ToStringInvariant());
 				var iconValue = MakeIcon(this.SkillLine, morph.Name);
-				UpdateParameter(factory, template, morphName + "icon", IconValueFixup(template.Find(morphName + "icon"), iconValue));
+				UpdateParameter(factory, template, morphName + "icon", EsoSkills.IconValueFixup(template.Find(morphName + "icon"), iconValue));
 				UpdateParameter(factory, template, morphName + "desc", morph.EffectLine, usedList, this.Name);
 			}
 		}
+
+		private void UpdateMorphs(SiteNodeFactory factory, ITemplateNode template, Morph baseMorph, string baseSkillCost)
+		{
+			TitleCollection usedList = new(factory.Site);
+			for (var morphCounter = 0; morphCounter < this.morphs.Count; morphCounter++)
+			{
+				this.UpdateMorph(factory, template, baseMorph, baseSkillCost, usedList, morphCounter);
+			}
+		}
+		#endregion
 	}
 }

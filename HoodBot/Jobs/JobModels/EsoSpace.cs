@@ -85,7 +85,7 @@
 		public static void SetBotUpdateVersion(WikiJob job, string pageType)
 		{
 			// Assumes EsoPatchVersion has already been updated.
-			job.StatusWriteLine("Update patch bot parameters");
+			job.StatusWriteLine("Update bot parameters");
 			var patchPage = GetPatchPage(job);
 			ContextualParser parser = new(patchPage);
 			var paramName = "bot" + pageType.NotNull();
