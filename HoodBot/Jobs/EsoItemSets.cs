@@ -44,7 +44,7 @@
 		#endregion
 
 		#region Constructors
-		[JobInfo("Update Item Sets", "ESO Update")]
+		[JobInfo("Item Sets", "ESO Update")]
 		public EsoItemSets(JobManager jobManager)
 			: base(jobManager)
 		{
