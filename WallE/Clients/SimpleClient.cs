@@ -18,7 +18,7 @@ namespace RobinHood70.WallE.Clients
 		#region Fields
 		private readonly CancellationToken cancellationToken;
 		private readonly CookieContainer cookieContainer = new();
-		private readonly string cookiesLocation;
+		private readonly string? cookiesLocation;
 		private readonly SimpleClientRetryHandler retryHandler;
 		private readonly HttpClient httpClient;
 		private readonly HttpClientHandler webHandler;
@@ -27,7 +27,7 @@ namespace RobinHood70.WallE.Clients
 
 		#region Constructors
 		public SimpleClient(CancellationToken cancellationToken)
-			: this(null, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "cookies.dat"), cancellationToken)
+			: this(null, null, cancellationToken)
 		{
 		}
 
@@ -36,7 +36,7 @@ namespace RobinHood70.WallE.Clients
 		{
 		}
 
-		public SimpleClient(string? contactInfo, string cookiesLocation, CancellationToken cancellationToken)
+		public SimpleClient(string? contactInfo, string? cookiesLocation, CancellationToken cancellationToken)
 		{
 			ServicePointManager.Expect100Continue = false;
 			this.UserAgent = ClientShared.BuildUserAgent(contactInfo);
@@ -222,7 +222,7 @@ namespace RobinHood70.WallE.Clients
 
 		private void LoadCookies()
 		{
-			if (this.cookiesLocation != null)
+			if (this.cookiesLocation is not null)
 			{
 				try
 				{
@@ -256,8 +256,11 @@ namespace RobinHood70.WallE.Clients
 		/// <summary>Saves all cookies to persistent storage.</summary>
 		private void SaveCookies()
 		{
-			var jsonCookies = JsonConvert.SerializeObject(this.cookieContainer.GetAllCookies());
-			File.WriteAllText(this.cookiesLocation, jsonCookies);
+			if (this.cookiesLocation is not null)
+			{
+				var jsonCookies = JsonConvert.SerializeObject(this.cookieContainer.GetAllCookies());
+				File.WriteAllText(this.cookiesLocation, jsonCookies);
+			}
 		}
 		#endregion
 	}
