@@ -13,13 +13,13 @@
 		private Uri? api;
 		private string? displayName;
 		private string? logPage;
-		private int maxLag;
+		private int? maxLag;
 		private string? password;
-		private int readThrottling;
+		private int? readThrottling;
 		private string? resultPage;
 		private string? siteClassIdentifier;
 		private string? userName;
-		private int writeThrottling;
+		private int? writeThrottling;
 		#endregion
 
 		#region Constructors
@@ -56,7 +56,7 @@
 			set => this.Set(ref this.logPage, value);
 		}
 
-		public int MaxLag
+		public int? MaxLag
 		{
 			get => this.maxLag;
 			set => this.Set(ref this.maxLag, value);
@@ -68,7 +68,7 @@
 			set => this.Set(ref this.password, value);
 		}
 
-		public int ReadThrottling
+		public int? ReadThrottling
 		{
 			get => this.readThrottling;
 			set => this.Set(ref this.readThrottling, value);
@@ -94,7 +94,7 @@
 
 		public WikiInfo WikiInfo { get; }
 
-		public int WriteThrottling
+		public int? WriteThrottling
 		{
 			get => this.writeThrottling;
 			set => this.Set(ref this.writeThrottling, value);
@@ -124,14 +124,26 @@
 		public void EndEdit()
 		{
 			this.WikiInfo.Api = this.Api;
-			this.WikiInfo.DisplayName = this.DisplayName;
-			this.WikiInfo.LogPage = this.LogPage;
+			this.WikiInfo.DisplayName = string.IsNullOrWhiteSpace(this.DisplayName)
+				? null
+				: this.DisplayName;
+			this.WikiInfo.LogPage = string.IsNullOrWhiteSpace(this.LogPage)
+				? null
+				: this.LogPage;
 			this.WikiInfo.MaxLag = this.MaxLag;
-			this.WikiInfo.Password = this.Password;
+			this.WikiInfo.Password = string.IsNullOrWhiteSpace(this.Password)
+				? null
+				: this.Password;
 			this.WikiInfo.ReadThrottling = this.ReadThrottling;
-			this.WikiInfo.ResultsPage = this.ResultsPage;
-			this.WikiInfo.SiteClassIdentifier = this.SiteClassIdentifier;
-			this.WikiInfo.UserName = this.UserName;
+			this.WikiInfo.ResultsPage = string.IsNullOrWhiteSpace(this.ResultsPage)
+				? null
+				: this.ResultsPage;
+			this.WikiInfo.SiteClassIdentifier = string.IsNullOrWhiteSpace(this.SiteClassIdentifier)
+				? null
+				: this.SiteClassIdentifier;
+			this.WikiInfo.UserName = string.IsNullOrWhiteSpace(this.UserName)
+				? null
+				: this.UserName;
 			this.WikiInfo.WriteThrottling = this.WriteThrottling;
 		}
 		#endregion
