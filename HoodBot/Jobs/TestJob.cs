@@ -25,7 +25,7 @@
 		#region Protected Override Methods
 		protected override void Main()
 		{
-			const int maxTimes = 30;
+			const int maxTimes = 5;
 			this.ProgressMaximum = maxTimes;
 			for (var i = 1; i <= maxTimes; i++)
 			{
