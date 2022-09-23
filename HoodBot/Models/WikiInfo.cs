@@ -8,8 +8,8 @@
 	// Note: password security for this class is minimal and fairly easily reversed. If this is a concern, it's recommended not to store passowrds and instead enter them manually every time.
 	public sealed class WikiInfo : IJsonSubSetting<WikiInfo>
 	{
-		#region Private Constants
-		private const int DefaultMaxLag = 5;
+		#region Public Constants
+		public const int DefaultMaxLag = 5;
 		#endregion
 
 		#region Public Properties
@@ -21,11 +21,11 @@
 
 		public string? LogPage { get; set; }
 
-		public int MaxLag { get; set; } = DefaultMaxLag;
+		public int? MaxLag { get; set; }
 
 		public string? Password { get; set; }
 
-		public int ReadThrottling { get; set; }
+		public int? ReadThrottling { get; set; }
 
 		public string? ResultsPage { get; set; }
 
@@ -33,11 +33,7 @@
 
 		public string? UserName { get; set; }
 
-		public int WriteThrottling { get; set; }
-		#endregion
-
-		#region Public Override Methods
-		public override string ToString() => this.DisplayName ?? this.GetType().Name;
+		public int? WriteThrottling { get; set; }
 		#endregion
 
 		#region Public Methods
@@ -55,20 +51,23 @@
 
 			this.DisplayName = (string?)json[nameof(this.DisplayName)];
 			this.LogPage = (string?)json[nameof(this.LogPage)];
-			this.MaxLag = (int?)json[nameof(this.MaxLag)] ?? DefaultMaxLag;
+			this.MaxLag = (int?)json[nameof(this.MaxLag)];
 			var password = (string?)json[nameof(this.Password)];
-			if (password != null)
+			if (password is not null)
 			{
 				this.Password = Settings.Encrypter.Decrypt(password);
 			}
 
-			this.ReadThrottling = (int?)json[nameof(this.ReadThrottling)] ?? 0;
+			this.ReadThrottling = (int?)json[nameof(this.ReadThrottling)];
 			this.ResultsPage = (string?)json[nameof(this.ResultsPage)];
 			this.SiteClassIdentifier = (string?)json[nameof(this.SiteClassIdentifier)];
 			this.UserName = (string?)json[nameof(this.UserName)];
-			this.WriteThrottling = (int?)json[nameof(this.WriteThrottling)] ?? 0;
+			this.WriteThrottling = (int?)json[nameof(this.WriteThrottling)];
 		}
 
+		#endregion
+
+		#region Public Methods
 		public JToken ToJson()
 		{
 			JObject json = new()
@@ -77,29 +76,43 @@
 				{ nameof(this.DisplayName), new JValue(this.DisplayName) }
 			};
 
-			AddToJson(nameof(this.LogPage), this.LogPage, null);
-			AddToJson(nameof(this.MaxLag), this.MaxLag, DefaultMaxLag);
 			if (this.Password != null)
 			{
+				// This one is added separately due to ensure that Password is defined prior to sending it to Encrypt(). Plus, AddToJson chokes on this.
 				json.Add(nameof(this.Password), new JValue(Settings.Encrypter.Encrypt(this.Password)));
 			}
 
-			AddToJson(nameof(this.ReadThrottling), this.ReadThrottling, 0);
-			AddToJson(nameof(this.ResultsPage), this.ResultsPage, null);
-			AddToJson(nameof(this.SiteClassIdentifier), this.SiteClassIdentifier, null);
-			AddToJson(nameof(this.UserName), this.UserName, null);
-			AddToJson(nameof(this.WriteThrottling), this.WriteThrottling, 0);
+			AddToJson(json, nameof(this.LogPage), this.LogPage, this.MaxLag > 0);
+			AddToJson(json, nameof(this.ReadThrottling), this.ReadThrottling, this.ReadThrottling > 0);
+			AddToJson(json, nameof(this.ResultsPage), this.ResultsPage, this.ResultsPage is not null);
+			AddToJson(json, nameof(this.SiteClassIdentifier), this.SiteClassIdentifier, this.SiteClassIdentifier is not null);
+			AddToJson(json, nameof(this.UserName), this.UserName, this.UserName is not null);
+			AddToJson(json, nameof(this.WriteThrottling), this.WriteThrottling, this.WriteThrottling > 0);
 
 			return json;
 
-			void AddToJson(string name, object? property, object? defaultValue)
+			static void AddToJson(JObject json, string name, object? property, bool condition)
 			{
-				if (property is null ? defaultValue is not null : !property.Equals(defaultValue))
+				if (condition && property is not null)
 				{
-					json.Add(name, new JValue(property));
+					var value = new JValue(property);
+					json.Add(name, value);
 				}
 			}
+
+			/*			static void AddToJson(JObject json, string name, object? property, bool condition)
+						{
+							if (condition && property is not null)
+							{
+								json.Add(name, new JValue(property));
+							}
+						} */
 		}
 		#endregion
+
+		#region Public Override Methods
+		public override string ToString() => this.DisplayName ?? this.GetType().Name;
+		#endregion
+
 	}
 }

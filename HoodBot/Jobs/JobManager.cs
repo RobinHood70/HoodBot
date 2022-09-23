@@ -256,7 +256,7 @@
 				: new WikiAbstractionLayer(this.Client, api);
 			if (abstractionLayer is IMaxLaggable maxLagWal)
 			{
-				maxLagWal.MaxLag = this.wikiInfo.MaxLag;
+				maxLagWal.MaxLag = this.wikiInfo.MaxLag ?? WikiInfo.DefaultMaxLag;
 			}
 
 #if DEBUG
@@ -279,8 +279,8 @@
 			{
 				client = new ThrottledClient(
 					client,
-					TimeSpan.FromMilliseconds(this.wikiInfo.ReadThrottling),
-					TimeSpan.FromMilliseconds(this.wikiInfo.WriteThrottling));
+					TimeSpan.FromMilliseconds(this.wikiInfo.ReadThrottling ?? 0),
+					TimeSpan.FromMilliseconds(this.wikiInfo.WriteThrottling ?? 1000));
 			}
 
 			client.RequestingDelay += this.Client_RequestingDelay;
