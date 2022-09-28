@@ -82,7 +82,8 @@
 				json.Add(nameof(this.Password), new JValue(Settings.Encrypter.Encrypt(this.Password)));
 			}
 
-			AddToJson(json, nameof(this.LogPage), this.LogPage, this.MaxLag > 0);
+			AddToJson(json, nameof(this.LogPage), this.LogPage, true);
+			AddToJson(json, nameof(this.MaxLag), this.MaxLag, this.MaxLag > 0);
 			AddToJson(json, nameof(this.ReadThrottling), this.ReadThrottling, this.ReadThrottling > 0);
 			AddToJson(json, nameof(this.ResultsPage), this.ResultsPage, this.ResultsPage is not null);
 			AddToJson(json, nameof(this.SiteClassIdentifier), this.SiteClassIdentifier, this.SiteClassIdentifier is not null);
@@ -99,14 +100,6 @@
 					json.Add(name, value);
 				}
 			}
-
-			/*			static void AddToJson(JObject json, string name, object? property, bool condition)
-						{
-							if (condition && property is not null)
-							{
-								json.Add(name, new JValue(property));
-							}
-						} */
 		}
 		#endregion
 
