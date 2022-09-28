@@ -200,6 +200,11 @@
 
 		private void ParseResponse(string? response)
 		{
+			if (response is null)
+			{
+				throw new InvalidDataException();
+			}
+
 			try
 			{
 				var result = ToJson(response.NotNull());

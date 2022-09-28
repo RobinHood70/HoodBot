@@ -5,6 +5,7 @@ namespace RobinHood70.WallE.Clients
 	using System.Net;
 	using System.Net.Http;
 	using System.Net.Http.Headers;
+	using System.Net.Sockets;
 	using System.Threading;
 
 	// This class adds retry functionality to the standard HttpClient.
@@ -26,7 +27,19 @@ namespace RobinHood70.WallE.Clients
 		#region Protected Override Methods
 		protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken)
 		{
-			var retval = base.Send(request, cancellationToken);
+			HttpResponseMessage retval;
+			try
+			{
+				retval = base.Send(request, cancellationToken);
+			}
+			catch (HttpRequestException hre) when
+				(hre.InnerException is SocketException se &&
+				(se.SocketErrorCode == SocketError.TimedOut ||
+				se.SocketErrorCode == SocketError.HostNotFound))
+			{
+				return new HttpResponseMessage(HttpStatusCode.RequestTimeout);
+			}
+
 			var retry = this.parent.Retries;
 			while (retry > 0)
 			{
@@ -35,11 +48,13 @@ namespace RobinHood70.WallE.Clients
 				{
 					case HttpStatusCode.OK:
 						break;
+					case HttpStatusCode.MovedPermanently: // Not sure how we're getting this, with auto-redirection enabled, but we are.
 					case HttpStatusCode.BadRequest:
 					case HttpStatusCode.Forbidden:
 					case HttpStatusCode.InternalServerError:
 					case HttpStatusCode.NotFound:
 					case HttpStatusCode.RequestUriTooLong:
+					case HttpStatusCode.ServiceUnavailable: // Theoretically we could get a response, but if it's too busy or temporarily down, stop bugging it.
 					case HttpStatusCode.Unauthorized:
 					case > HttpStatusCode.OK and < HttpStatusCode.Ambiguous:
 						return retval;
