@@ -47,6 +47,8 @@
 		{
 			this.Pages.GetBacklinks("Template:Future Link", BacklinksTypes.EmbeddedIn);
 			this.Pages.GetBacklinks("Template:Lore Link", BacklinksTypes.EmbeddedIn);
+
+			// Book Header gets all book variants in one request.
 			var books = new TitleCollection(this.Site);
 			books.GetBacklinks("Template:Book Header", BacklinksTypes.EmbeddedIn);
 			this.Pages.Remove(books);
@@ -86,7 +88,7 @@
 			}
 		}
 
-		private TitleFactory? ResolveLink(params TitleFactory[] titles)
+		private Title? ResolveLink(params Title[] titles)
 		{
 			foreach (var title in titles)
 			{
@@ -99,7 +101,7 @@
 			return null;
 		}
 
-		private TitleFactory? ResolveTemplate(SiteTemplateNode linkTemplate, UespNamespace ns)
+		private Title? ResolveTemplate(SiteTemplateNode linkTemplate, UespNamespace ns)
 		{
 			if (linkTemplate.Find($"{ns.Id}link")?.Value is NodeCollection overridden)
 			{
@@ -112,24 +114,9 @@
 				var fullName = TitleFactory.FromUnvalidated(this.Site, ns.Full + pageName);
 				var parentName = TitleFactory.FromUnvalidated(this.Site, ns.Parent.DecoratedName + pageName);
 				var loreName = TitleFactory.FromUnvalidated(this.Site, "Lore:" + pageName);
-				var retval = this.ResolveLink(fullName, parentName, loreName);
-				var isLoreLink = linkTemplate.TitleValue.PageNameEquals("Lore Link");
-				if (retval is null)
-				{
-					/*
-					if (isLoreLink && ns.AssociatedNamespace != UespNamespaces.Lore)
-					{
-						retval = loreName;
-					}
-					*/
-
-					if (!isLoreLink && ns.BaseNamespace == UespNamespaces.Lore)
-					{
-						retval = fullName;
-					}
-				}
-
-				return retval;
+				return linkTemplate.TitleValue.PageNameEquals("Future Link") && ns.BaseNamespace == UespNamespaces.Lore
+						? (Title)fullName
+						: this.ResolveLink(fullName, parentName, loreName);
 			}
 
 			throw new InvalidOperationException("Template has no valid values.");
@@ -163,7 +150,7 @@
 			var backlinkSpaces = new List<UespNamespace>(this.GetBacklinkSpaces(page));
 
 			// If link doesn't resolve to anything, do nothing.
-			if (this.ResolveTemplate(linkTemplate, ns) is not TitleFactory link)
+			if (this.ResolveTemplate(linkTemplate, ns) is not Title link)
 			{
 				return null;
 			}
