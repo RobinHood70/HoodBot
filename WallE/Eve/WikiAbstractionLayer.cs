@@ -353,7 +353,7 @@
 		/// <summary>Converts the given request into an HTML request and submits it to the site.</summary>
 		/// <param name="request">The request.</param>
 		/// <returns>The site's response to the request.</returns>
-		public string SendRequest(Request request)
+		public string? SendRequest(Request request)
 		{
 			request.ThrowNull();
 			this.OnSendingRequest(new RequestEventArgs(request.NotNull()));
@@ -365,7 +365,11 @@
 				urib.Query.Length < 4096
 					? this.Client.Get(urib.Uri)
 					: this.Client.Post(request.Uri, content);
-			this.OnResponseReceived(new ResponseEventArgs(response));
+			if (response is not null)
+			{
+				this.OnResponseReceived(new ResponseEventArgs(response));
+			}
+
 			return response;
 		}
 		#endregion
@@ -629,7 +633,7 @@
 				}
 
 				var index = this.GetFullArticlePath(this.Namespaces[MediaWikiNamespaces.UserTalk].Name + ":" + this.CurrentUserInfo.Name);
-				return this.Client.Get(index).Length > 0;
+				return this.Client.Get(index)?.Length > 0;
 			}
 		}
 

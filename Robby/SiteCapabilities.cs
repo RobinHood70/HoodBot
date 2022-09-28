@@ -118,7 +118,7 @@
 			}
 
 			/* If it doesn't look like a php page or blank path, try various methods of figuring out the php locations. */
-			if (this.client.Get(anyPage) is not string pageData)
+			if (this.client.Get(anyPage) is not string pageData || pageData.Length == 0)
 			{
 				// Web page given could not be accessed, so abort.
 				return false;
@@ -235,7 +235,11 @@
 					rsdLinkFixed = fullHost.AbsoluteUri.TrimEnd('/') + rsdLinkFixed;
 				}
 
-				var rsdInfo = this.client.Get(new Uri(rsdLinkFixed)).Trim();
+				if (this.client.Get(new Uri(rsdLinkFixed))?.Trim() is not string rsdInfo)
+				{
+					return null;
+				}
+
 				var rsd = XDocument.Parse(rsdInfo);
 				if (rsd.Root is XElement root)
 				{

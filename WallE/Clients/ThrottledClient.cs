@@ -90,7 +90,7 @@
 		/// <summary>Gets the text of the result returned by the given URI.</summary>
 		/// <param name="uri">The URI to get.</param>
 		/// <returns>The text of the result.</returns>
-		public string Get(Uri uri)
+		public string? Get(Uri uri)
 		{
 			this.Throttle();
 			var retval = this.baseClient.Get(uri);
@@ -101,7 +101,7 @@
 		}
 
 		/// <inheritdoc/>
-		public string Post(Uri uri, HttpContent content)
+		public string? Post(Uri uri, HttpContent content)
 		{
 			this.Throttle();
 			var retval = this.baseClient.Post(uri, content);
