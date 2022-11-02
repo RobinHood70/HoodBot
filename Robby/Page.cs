@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
+	using System.Diagnostics;
 	using System.Diagnostics.CodeAnalysis;
 	using RobinHood70.CommonCode;
 	using RobinHood70.Robby.Design;
@@ -192,7 +193,9 @@
 		/// <summary>Gets the current revision.</summary>
 		/// <value>The current revision.</value>
 		/// <remarks>If revisions are loaded which do not include the current revision, this will be null.</remarks>
-		public Revision? CurrentRevision => this.currentRevision ??= ((List<Revision>)this.Revisions).Find(item => item.Id == this.CurrentRevisionId);
+		public Revision? CurrentRevision => this.CurrentRevisionId == 0
+			? null
+			: this.currentRevision ??= ((List<Revision>)this.Revisions).Find(item => this.CurrentRevisionId > 0 && item.Id == this.CurrentRevisionId);
 
 		/// <summary>Gets the ID of the current revision.</summary>
 		/// <value>The ID of the current revision.</value>
