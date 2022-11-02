@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Data;
+	using System.Diagnostics;
 	using System.Globalization;
 	using System.Text;
 	using RobinHood70.CommonCode;
@@ -142,7 +143,7 @@
 		protected override void BeforeLoadPages()
 		{
 			this.StatusWriteLine("Getting ESO titles");
-			var existing = this.GetQuestIds();
+			var existing = this.GetQuestIdsFromWiki();
 			var filteredQuests = GetQuestData(existing);
 			var questNames = filteredQuests.ConvertAll(q => q.Name);
 			var titleChecker = new TitleCollection(this.Site, UespNamespaces.Online, questNames);
@@ -182,6 +183,7 @@
 			foreach (var quest in this.quests)
 			{
 				var page = this.Site.CreatePage(quest.Key);
+				this.PageMissing(this, page); // TODO: This shouldn't need to be called manually.
 				this.Pages.Add(page);
 			}
 		}
@@ -460,7 +462,7 @@
 			}
 		}
 
-		private PageCollection GetQuestIds()
+		private PageCollection GetQuestIdsFromWiki()
 		{
 			var retval = this.Site.CreateMetaPageCollection(PageModules.Info | PageModules.Properties, true, "ID");
 			retval.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn);
