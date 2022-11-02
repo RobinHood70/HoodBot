@@ -106,7 +106,10 @@
 		{
 			foreach (var collectible in this.collectibles)
 			{
-				this.Pages.Add(this.Site.CreatePage(collectible.Key));
+				// TODO: Temporary fix - should be made to call missing and/or loaded automatically, probably in EditJob.
+				var page = this.Site.CreatePage(collectible.Key, this.blankText.NotNull());
+				this.PageLoaded(this, page);
+				this.Pages.Add(page);
 			}
 		}
 
