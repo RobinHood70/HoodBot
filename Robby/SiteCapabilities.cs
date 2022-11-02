@@ -37,6 +37,7 @@
 
 		#region Fields
 		private readonly IMediaWikiClient client;
+		private int maxLagRequests;
 		#endregion
 
 		#region Constructors
@@ -235,7 +236,8 @@
 					rsdLinkFixed = fullHost.AbsoluteUri.TrimEnd('/') + rsdLinkFixed;
 				}
 
-				if (this.client.Get(new Uri(rsdLinkFixed))?.Trim() is not string rsdInfo)
+				if (this.client.Get(new Uri(rsdLinkFixed))?.Trim() is not string rsdInfo ||
+					rsdInfo.Contains("<html>", StringComparison.Ordinal))
 				{
 					return null;
 				}
@@ -304,7 +306,7 @@
 		{
 			if (eventArgs.Reason == DelayReason.MaxLag)
 			{
-				eventArgs.Cancel = true;
+				this.maxLagRequests++;
 				this.SupportsMaxLag = true;
 			}
 		}
