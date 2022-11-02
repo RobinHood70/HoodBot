@@ -12,7 +12,6 @@
 	using RobinHood70.HoodBot.Jobs.Loggers;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.HoodBot.Properties;
-	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.HoodBotPlugins;
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Base;
@@ -34,7 +33,6 @@
 			this.PauseToken = pauseSource.Token;
 			this.Client = this.CreateClient();
 			this.AbstractionLayer = this.CreateAbstractionLayer();
-			Site.RegisterSiteClass(UespSite.CreateInstance, "UespHoodBot");
 			this.Site = this.CreateSite();
 		}
 		#endregion
@@ -239,13 +237,6 @@
 				$"{eventArgs.DelayTime.TotalSeconds.ToString(CultureInfo.CurrentCulture)}s",
 				eventArgs.Description);
 			this.OnUpdateStatus(text + '\n');
-			/*
-				// Half-assed workaround for pausing and cancelling that ultimately just ends in the wiki throwing an error. See TODO in SimpleClient.RequestDelay().
-				if (this.pauser.IsPaused || this.canceller.IsCancellationRequested)
-				{
-					eventArgs.Cancel = true;
-				}
-			*/
 		}
 
 		private IWikiAbstractionLayer CreateAbstractionLayer()
