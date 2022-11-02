@@ -40,6 +40,13 @@ namespace RobinHood70.WallE.Clients
 				return new HttpResponseMessage(HttpStatusCode.RequestTimeout);
 			}
 
+			/* Temporary code, but it might make sense to add this or perhaps a more narrow version to catch more errors.
+			catch
+			{
+				return new HttpResponseMessage(HttpStatusCode.RequestTimeout);
+			}
+			*/
+
 			var retry = this.parent.Retries;
 			while (retry > 0)
 			{
