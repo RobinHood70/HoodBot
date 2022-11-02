@@ -15,6 +15,7 @@
 		{
 		}
 
+		#region Protected Override Methods
 		protected override void Main()
 		{
 			var client = (SimpleClient)((WikiAbstractionLayer)this.Site.AbstractionLayer).Client;
@@ -36,34 +37,46 @@
 					path = path[0..^2];
 					path = path.Split('?', 2)[0];
 					Uri uri = new(path);
-					SiteCapabilities capabilities = new(client);
-					try
-					{
-						if (capabilities.Get(uri))
-						{
-							this.StatusWriteLine($"Found: {capabilities.SiteName}\t{capabilities.Version}\t{originalPath} (API: {capabilities.Api})");
-						}
-						else
-						{
-							this.StatusWriteLine(capabilities.ErrorMessage ?? $"Does not appear to be a wiki: {path}");
-						}
-					}
-					catch (IOException)
-					{
-						this.StatusWriteLine($"Error response: {path}");
-					}
-					catch (WebException e)
-					{
-						this.StatusWriteLine($"Error response: {path} {e.Message}");
-					}
-					catch (InvalidDataException)
-					{
-						this.StatusWriteLine($"May be a wiki, but if so, API is blocked: {path}");
-					}
+					this.CreateSite(client, originalPath, path, uri);
 				}
 
 				this.Progress++;
 			}
 		}
+		#endregion
+
+		#region
+		private void CreateSite(SimpleClient client, string originalPath, string path, Uri uri)
+		{
+			SiteCapabilities capabilities = new(client);
+			try
+			{
+				if (capabilities.Get(uri))
+				{
+					this.StatusWriteLine($"Found: {capabilities.SiteName}\t{capabilities.Version}\t{originalPath} (API: {capabilities.Api})");
+				}
+				else
+				{
+					this.StatusWriteLine(capabilities.ErrorMessage ?? $"Does not appear to be a wiki: {path}");
+				}
+			}
+			catch (IOException)
+			{
+				this.StatusWriteLine($"Error response: {path}");
+			}
+			catch (WebException e)
+			{
+				this.StatusWriteLine($"Error response: {path} {e.Message}");
+			}
+			catch (InvalidDataException)
+			{
+				this.StatusWriteLine($"May be a wiki, but if so, API is blocked: {path}");
+			}
+			catch (Exception e)
+			{
+				this.StatusWriteLine($"Unknown error querying {capabilities.SiteName}: {e.Message}");
+			}
+		}
+		#endregion
 	}
 }
