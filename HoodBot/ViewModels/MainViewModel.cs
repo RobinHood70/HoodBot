@@ -15,8 +15,10 @@
 	using RobinHood70.HoodBot.Jobs.Loggers;
 	using RobinHood70.HoodBot.Models;
 	using RobinHood70.HoodBot.Properties;
+	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.HoodBot.Views;
 	using RobinHood70.HoodBotPlugins;
+	using RobinHood70.Robby;
 
 	public class MainViewModel : ViewModelBase
 	{
@@ -50,6 +52,9 @@
 		#region Constructors
 		public MainViewModel()
 		{
+			// This probably shouldn't be here but rather in some kind of initalization for all sites. For now, however, this is quick and dirty.
+			Site.RegisterSiteClass(UespSite.CreateInstance, "UespHoodBot");
+
 			this.SelectedItem = App.UserSettings.GetCurrentItem();
 			var plugins = Plugins.Instance;
 			this.diffViewer = plugins.DiffViewers["Internet Explorer"];
