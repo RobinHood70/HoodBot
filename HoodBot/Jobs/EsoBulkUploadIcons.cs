@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.IO;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Design;
@@ -55,18 +56,11 @@
 			new("Staff", "weapons", "Staves"),
 		};
 
-		private static readonly List<string> Styles = new()
-		{
-			"Dreadsails",
-			"Ascendant Order",
-			"Black Drake Clanwrap",
-			"Second Seed Raiment",
-			"Deadlands Gladiator",
-		};
-
-		private static readonly string Query = "SELECT id, name, icon FROM collectibles WHERE categoryName IN('Armor Styles', 'Weapon Styles');";
+		private static readonly string Query = "SELECT id, name, icon FROM collectibles WHERE categoryName IN('Armor Styles', 'Weapon Styles') AND icon LIKE '/esoui/art/icons/%'";
 
 		private static readonly string WikiIconFolder = Path.Combine(UespSite.GetBotDataFolder(), "icons");
+
+		private readonly List<string> styles;
 		#endregion
 
 		#region Fields
@@ -75,9 +69,17 @@
 
 		#region Constructors
 		[JobInfo("Bulk Upload Icons", "ESO Update")]
-		public EsoBulkUploadIcons(JobManager jobManager)
+		public EsoBulkUploadIcons(JobManager jobManager, string styles)
 			: base(jobManager)
 		{
+			var styleSplit = styles.Split(TextArrays.NewLineChars, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+			this.styles = new List<string>(styleSplit.Length);
+			foreach (var style in styleSplit)
+			{
+				this.styles.Add(style.Replace(" Style", string.Empty, StringComparison.OrdinalIgnoreCase));
+			}
+
+			this.styles.Sort(StringComparer.Ordinal);
 		}
 		#endregion
 
@@ -99,7 +101,6 @@
 				files.Add(fileName);
 			}
 
-			Styles.Sort(StringComparer.Ordinal);
 			this.uploads = this.GetUploads(files, fileTitles);
 		}
 
@@ -140,10 +141,7 @@
 				}
 
 				var icon = (string)row["icon"];
-				if (icon.StartsWith("/esoui/art/icons/", StringComparison.Ordinal))
-				{
-					iconLookup.Add(name, (id, icon[17..].Replace(".dds", ".png", StringComparison.Ordinal)));
-				}
+				iconLookup.Add(name, (id, icon[17..].Replace(".dds", ".png", StringComparison.Ordinal)));
 			}
 
 			return iconLookup;
@@ -153,9 +151,9 @@
 		#region Private Methods
 		private List<Upload> GetUploads(HashSet<string> files, TitleCollection fileTitles)
 		{
-			List<Upload> retval = new(Styles.Count * Parts.Count);
+			List<Upload> retval = new(this.styles.Count * Parts.Count);
 			var iconLookup = GetIcons();
-			foreach (var style in Styles)
+			foreach (var style in this.styles)
 			{
 				this.WriteLine($"=={style} Style==");
 				foreach (var part in Parts)
