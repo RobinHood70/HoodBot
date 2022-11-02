@@ -22,24 +22,22 @@
 		#endregion
 
 		#region Protected Properties
+		protected Tristate CreateOnly { get; set; } = Tristate.Unknown;
+
 		protected IDictionary<Title, string> CustomEditSummaries { get; } = new Dictionary<Title, string>(SimpleTitleComparer.Instance);
 
 		protected IDictionary<Title, bool> CustomMinorEdits { get; } = new Dictionary<Title, bool>(SimpleTitleComparer.Instance);
-
-		// Nearly all edit jobs act on a PageCollection, so we provide a preinitialized one here for convenience.
-		protected PageCollection Pages { get; set; }
-
-		protected bool Shuffle { get; set; }
-
-		protected bool CreateIfMissing { get; set; }
-
-		protected Tristate CreateOnly { get; set; } = Tristate.Unknown;
 
 		protected bool MinorEdit { get; set; } = true;
 
 		protected bool RecreateIfDeleted { get; set; } = true;
 
+		// Nearly all edit jobs act on a PageCollection, so we provide a preinitialized one here for convenience.
+		protected PageCollection Pages { get; set; }
+
 		protected bool SaveOverDeleted { get; set; } = true;
+
+		protected bool Shuffle { get; set; }
 		#endregion
 
 		#region Protected Abstract Properties
