@@ -42,7 +42,6 @@
 		#region Protected Override Properties
 
 		protected override string EditSummary => "Create collectible page";
-
 		#endregion
 
 		#region Protected Override Methods
@@ -65,55 +64,27 @@
 				}
 			}
 
-			if (this.blankText is null)
-			{
-				throw new InvalidOperationException();
-			}
-
+			this.blankText.ThrowNull();
 			var allTitles = new TitleCollection(this.Site);
 			allTitles.GetNamespace(UespNamespaces.Online);
-
-			var site = (UespSite)this.Site;
-			var pages = site.CreateMetaPageCollection(PageModules.None, false, "id");
-			pages.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn);
-
-			var knownIds = new HashSet<long>();
-			foreach (var item in pages)
-			{
-				if (item is VariablesPage vPage)
-				{
-					var idText = vPage.GetVariable("id");
-					if (long.TryParse(idText, NumberStyles.Integer, this.Site.Culture, out var id))
-					{
-						knownIds.Add(id);
-					}
-				}
-			}
+			var pages = this.GetBacklinks();
+			var knownIds = this.GetKnown(pages);
+			this.GetCollectibles(allTitles, pages, knownIds);
 
 			this.StatusWriteLine("Getting crown crates");
 			this.GetCrownCrates();
-
-			this.StatusWriteLine("Getting collectibles from database");
-			var (allCollectibles, dupeNames) = GetDBCollectibles();
-			foreach (var item in allCollectibles)
-			{
-				var title = this.GetGoodTitle(dupeNames, item);
-				this.AddItem(item, title, allTitles, knownIds, pages);
-			}
 		}
 
 		protected override void LoadPages()
 		{
+			this.blankText.ThrowNull();
 			foreach (var collectible in this.collectibles)
 			{
-				// TODO: Temporary fix - should be made to call missing and/or loaded automatically, probably in EditJob.
-				var page = this.Site.CreatePage(collectible.Key, this.blankText.NotNull());
-				this.PageLoaded(this, page);
+				var page = this.Site.CreatePage(collectible.Key, this.blankText);
 				this.Pages.Add(page);
+				this.PageLoaded(this, page);
 			}
 		}
-
-		protected override void PageMissing(EditJob sender, Page page) => page.Text = this.blankText.NotNull();
 
 		protected override void ParseText(object sender, ContextualParser parser)
 		{
@@ -173,10 +144,14 @@
 			var retval = new List<Collectible>();
 			foreach (var item in Database.RunQuery(EsoLog.Connection, Collectible.Query, row => new Collectible(row)))
 			{
-				retval.Add(item);
-				if (!singleNames.Add(item.Name))
+				// These IDs correspond to Mount and Pet. It's unknown what purpose these serve, but one way or another, they should not be created.
+				if (item.Id is not 10387 and not 10388)
 				{
-					dupeNames.Add(item.Name);
+					retval.Add(item);
+					if (!singleNames.Add(item.Name))
+					{
+						dupeNames.Add(item.Name);
+					}
 				}
 			}
 
@@ -211,6 +186,32 @@
 			}
 		}
 
+		private PageCollection GetBacklinks()
+		{
+			var site = (UespSite)this.Site;
+			var pages = site.CreateMetaPageCollection(PageModules.None, false, "id");
+			pages.GetBacklinks("Template:" + TemplateName, BacklinksTypes.EmbeddedIn);
+
+			return pages;
+		}
+
+		private void GetCollectibles(TitleCollection allTitles, PageCollection pages, HashSet<long> knownIds)
+		{
+			this.StatusWriteLine("Getting collectibles from database");
+			var (allCollectibles, dupeNames) = GetDBCollectibles();
+			foreach (var item in allCollectibles)
+			{
+				var titleText = item.Name;
+				if (dupeNames.Contains(item.Name))
+				{
+					var cat = item.Subcategory.Length == 0 ? item.Category : item.Subcategory;
+					titleText += $" ({cat})";
+				}
+
+				this.AddItem(item, TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], titleText), allTitles, knownIds, pages);
+			}
+		}
+
 		private void GetCrownCrates()
 		{
 			PageCollection crownCrates = new(this.Site);
@@ -221,15 +222,22 @@
 			}
 		}
 
-		private Title GetGoodTitle(HashSet<string> dupeNames, Collectible item)
+		private HashSet<long> GetKnown(PageCollection pages)
 		{
-			if (dupeNames.Contains(item.Name))
+			var knownIds = new HashSet<long>();
+			foreach (var item in pages)
 			{
-				var cat = item.Subcategory.Length == 0 ? item.Category : item.Subcategory;
-				return TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], $"{item.Name} ({cat})");
+				if (item is VariablesPage vPage)
+				{
+					var idText = vPage.GetVariable("id");
+					if (long.TryParse(idText, NumberStyles.Integer, this.Site.Culture, out var id))
+					{
+						knownIds.Add(id);
+					}
+				}
 			}
 
-			return TitleFactory.FromUnvalidated(this.Site[UespNamespaces.Online], item.Name);
+			return knownIds;
 		}
 
 		private void ParseCrate(Page crate)
