@@ -37,7 +37,6 @@
 
 		#region Fields
 		private readonly IMediaWikiClient client;
-		private int maxLagRequests;
 		#endregion
 
 		#region Constructors
@@ -306,7 +305,6 @@
 		{
 			if (eventArgs.Reason == DelayReason.MaxLag)
 			{
-				this.maxLagRequests++;
 				this.SupportsMaxLag = true;
 			}
 		}
