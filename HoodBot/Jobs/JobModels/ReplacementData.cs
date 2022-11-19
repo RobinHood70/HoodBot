@@ -15,6 +15,7 @@
 			[37631] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
 			[38096] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
 			[40242] = ("|cffffff1|r second.", "|cffffff1|r seconds."),
+			[41567] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
 			[62107] = ("|cffffff1|r minute", "|cffffff60|r seconds"),
 			[85982] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Feral Guardian|grizzly]]"),
 			[85983] = ("Rouse a grizzly", "Rouse a [[Online: Familiars#Feral Guardian|grizzly]]"),
