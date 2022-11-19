@@ -53,9 +53,11 @@
 		#region Public Methods
 		public virtual bool IsBigChange(Rank rank)
 		{
+			var curSkill = Skill.Highlight.Replace(this.Description, string.Empty);
+			var oldSkill = Skill.Highlight.Replace(rank.Description, string.Empty);
 			return
 				this.RankNum != rank.RankNum ||
-				!string.Equals(this.Description, rank.Description, StringComparison.OrdinalIgnoreCase);
+				!string.Equals(curSkill, oldSkill, StringComparison.OrdinalIgnoreCase);
 		}
 		#endregion
 
