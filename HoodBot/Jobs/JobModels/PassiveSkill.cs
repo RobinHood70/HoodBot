@@ -19,11 +19,7 @@
 		public PassiveSkill(IDataRecord row)
 			: base(row)
 		{
-			this.SkillLine = this.SkillLine
-				.Replace(" Skills", string.Empty, StringComparison.Ordinal)
-				.Replace("Dark Elf", "Dunmer", StringComparison.Ordinal)
-				.Replace("High Elf", "Altmer", StringComparison.Ordinal)
-				.Replace("Wood Elf", "Bosmer", StringComparison.Ordinal);
+			this.SkillLine = this.SkillLine.Replace(" Skills", string.Empty, StringComparison.Ordinal);
 		}
 		#endregion
 
