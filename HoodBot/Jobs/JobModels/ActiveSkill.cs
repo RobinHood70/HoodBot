@@ -76,14 +76,14 @@
 				throw new InvalidOperationException();
 			}
 
-			var bigChange = false;
+			var retval = false;
 			for (var i = 0; i < this.morphs.Count; i++)
 			{
 				var morph = this.morphs[i];
-				bigChange |= morph.IsBigChange(prevSkill.morphs[i]);
+				retval |= morph.IsBigChange(prevSkill.morphs[i]);
 			}
 
-			this.BigChange = bigChange;
+			this.BigChange = retval;
 		}
 		#endregion
 
