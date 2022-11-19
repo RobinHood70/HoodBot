@@ -139,7 +139,7 @@
 			var finalNodes = this.array[0].CurrentPiece;
 			for (var i = 1; i < this.count; i++)
 			{
-				finalNodes.Merge(this.array[i].Backtrack());
+				finalNodes.MergeText(this.array[i].Backtrack());
 			}
 
 			foreach (var node in finalNodes.Nodes)

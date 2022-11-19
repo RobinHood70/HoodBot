@@ -78,7 +78,7 @@
 				}
 
 				stack.Pop();
-				stack.Top.CurrentPiece.Merge(piece.Nodes);
+				stack.Top.CurrentPiece.MergeText(piece.Nodes);
 			}
 			else
 			{

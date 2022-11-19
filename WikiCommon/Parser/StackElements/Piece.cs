@@ -22,7 +22,7 @@
 			}
 		}
 
-		public void Merge(List<IWikiNode> newList)
+		public void MergeText(List<IWikiNode> newList)
 		{
 			if (newList.Count > 0)
 			{

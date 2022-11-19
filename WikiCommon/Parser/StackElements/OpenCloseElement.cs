@@ -38,13 +38,13 @@
 			var newPiece = new Piece();
 			newPiece.Nodes.Add(this.Stack.NodeFactory.TextNode(new string(this.open, matchingCount)));
 			var oldPiece = this.DividerPieces[0];
-			newPiece.Merge(oldPiece.Nodes);
+			newPiece.MergeText(oldPiece.Nodes);
 			var pieceCount = this.DividerPieces.Count;
 			for (var j = 1; j < pieceCount; j++)
 			{
 				oldPiece = this.DividerPieces[j];
 				newPiece.AddLiteral(this.Stack.NodeFactory, "|");
-				newPiece.Merge(oldPiece.Nodes);
+				newPiece.MergeText(oldPiece.Nodes);
 			}
 
 			return newPiece.Nodes;
