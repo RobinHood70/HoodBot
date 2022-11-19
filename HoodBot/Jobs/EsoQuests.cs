@@ -449,10 +449,6 @@
 
 						quest.Value.Zone = place.TitleName;
 					}
-					else
-					{
-						this.StatusWriteLine("Still need to check is Place.");
-					}
 				}
 				else
 				{
