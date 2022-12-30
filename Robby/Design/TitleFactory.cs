@@ -212,12 +212,12 @@
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="site">The namespace the page is in.</param>
 		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory FromUnvalidated(Site site, string pageName) => new(site.NotNull(), MediaWikiNamespaces.Main, pageName.NotNull());
+		public static TitleFactory FromUnvalidated(Site site, string pageName) => new(site.NotNull(), MediaWikiNamespaces.Main, WikiTextUtilities.DecodeAndNormalize(pageName.NotNull()));
 
 		/// <summary>Initializes a new instance of the <see cref="TitleFactory"/> class.</summary>
 		/// <param name="ns">The namespace the page is in.</param>
 		/// <param name="pageName">Name of the page.</param>
-		public static TitleFactory FromUnvalidated(Namespace ns, string pageName) => new(ns.NotNull().Site, ns.Id, pageName.NotNull());
+		public static TitleFactory FromUnvalidated(Namespace ns, string pageName) => new(ns.NotNull().Site, ns.Id, WikiTextUtilities.DecodeAndNormalize(pageName.NotNull()));
 		#endregion
 
 		#region Public Methods

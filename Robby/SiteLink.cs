@@ -316,7 +316,9 @@
 		/// <remarks>The text may include or exclude surrounding brackets. Pipes in the text are handled properly either way in order to support gallery links.</remarks>
 		public static SiteLink FromGalleryText(Site site, string link)
 		{
-			var linkNode = CreateLinkNode(site.NotNull(), link.NotNull());
+			link.ThrowNull();
+			link = WikiTextUtilities.DecodeAndNormalize(link);
+			var linkNode = CreateLinkNode(site.NotNull(), link);
 			return FromLinkNode(site[MediaWikiNamespaces.File], linkNode);
 		}
 
