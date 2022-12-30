@@ -85,7 +85,7 @@
 
 			if (!isMainPage)
 			{
-				var split = pageName.Split(TextArrays.Octothorp, 2);
+				var split = pageName.Split(TextArrays.Octothorpe, 2);
 				if (split.Length == 2)
 				{
 					this.Fragment = split[1];
@@ -116,7 +116,7 @@
 			// Shortcut constructor for times when a pre-validated, local page is be provided.
 			this.Namespace = ns;
 
-			var split = pageName.Split(TextArrays.Octothorp, 2);
+			var split = pageName.Split(TextArrays.Octothorpe, 2);
 			if (split.Length == 2)
 			{
 				this.Fragment = split[1];
