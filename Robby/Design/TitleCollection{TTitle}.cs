@@ -803,11 +803,13 @@
 		{
 			if (this.lookup.Remove(item))
 			{
-				var i = this.IndexOf(item.NotNull());
-				if (i != -1)
+				for (var i = 0; i < this.items.Count; i++)
 				{
-					this.RemoveAt(i);
-					return true;
+					if (this.items[i].SimpleEquals(item))
+					{
+						this.items.RemoveAt(i);
+						return true;
+					}
 				}
 			}
 
