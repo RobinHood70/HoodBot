@@ -201,11 +201,8 @@
 		/// <param name="item">The object to add to the <see cref="TitleCollection">collection</see>.</param>
 		public void Add(TTitle item)
 		{
-			if (this.lookup.Remove(item))
-			{
-				this.Remove(item.NotNull());
-			}
-
+			item.ThrowNull();
+			this.Remove(item);
 			this.InsertItem(this.items.Count, item);
 		}
 
@@ -804,11 +801,14 @@
 		/// <returns><see langword="true" /> if <paramref name="item" /> was successfully removed from the <see cref="TitleCollection">collection</see>; otherwise, <see langword="false" />. This method also returns <see langword="false" /> if <paramref name="item" /> is not found in the original <see cref="TitleCollection">collection</see>.</returns>
 		public bool Remove(Title item)
 		{
-			var i = this.IndexOf(item.NotNull());
-			if (i != -1)
+			if (this.lookup.Remove(item))
 			{
-				this.RemoveItem(i);
-				return true;
+				var i = this.IndexOf(item.NotNull());
+				if (i != -1)
+				{
+					this.RemoveAt(i);
+					return true;
+				}
 			}
 
 			return false;
@@ -831,7 +831,16 @@
 
 		/// <summary>Removes the <see cref="TitleCollection">collection</see> item at the specified index.</summary>
 		/// <param name="index">The zero-based index of the item to remove.</param>
-		public void RemoveAt(int index) => this.RemoveItem(index);
+		public void RemoveAt(int index)
+		{
+			if (index >= this.items.Count)
+			{
+				throw new ArgumentOutOfRangeException(nameof(index));
+			}
+
+			this.lookup.Remove(this.items[index]);
+			this.items.RemoveAt(index);
+		}
 
 		/// <summary>Removes one or more namespaces from the collection.</summary>
 		/// <param name="namespaces">The namespaces to remove.</param>
@@ -1012,21 +1021,6 @@
 				this.lookup[item] = item;
 				this.items.Insert(index, item);
 			}
-		}
-
-		/// <summary>Removes the item at a specific index in the <see cref="TitleCollection">collection</see>.</summary>
-		/// <param name="index">The index of the item to remove.</param>
-		/// <exception cref="ArgumentOutOfRangeException"><paramref name="index" /> is equal to or higher than the number of items in the collection.</exception>
-		/// <remarks>This method underlies the <see cref="RemoveAt(int)" /> method and, like <see cref="System.Collections.ObjectModel.Collection{T}.RemoveItem(int)" />, can be overridden in derived classes.</remarks>
-		protected virtual void RemoveItem(int index)
-		{
-			if (index >= this.items.Count)
-			{
-				throw new ArgumentOutOfRangeException(nameof(index));
-			}
-
-			this.lookup.Remove(this.items[index]);
-			this.items.RemoveAt(index);
 		}
 		#endregion
 
