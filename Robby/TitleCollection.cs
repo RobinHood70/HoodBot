@@ -163,12 +163,13 @@
 
 		/// <summary>Purges all pages in the collection.</summary>
 		/// <returns>A value indicating the change status of the purge along with a page collection with the purge results.</returns>
-		public ChangeValue<PageCollection> Purge() => this.Purge(PurgeMethod.Normal);
+		public ChangeValue<PageCollection> Purge() => this.Purge(PurgeMethod.Normal, 10);
 
 		/// <summary>Purges all pages in the collection.</summary>
 		/// <param name="method">The method.</param>
+		/// <param name="batchSize">The number of purge requests to send at once.</param>
 		/// <returns>A value indicating the change status of the purge along with a page collection with the purge results.</returns>
-		public ChangeValue<PageCollection> Purge(PurgeMethod method)
+		public ChangeValue<PageCollection> Purge(PurgeMethod method, int batchSize)
 		{
 			if (this.Count == 0)
 			{
@@ -185,11 +186,8 @@
 
 			ChangeValue<PageCollection> ChangeFunc()
 			{
-				var pages = PageCollection.Purge(this.Site, this, method);
-				var retval = (pages.Count < this.Count)
-					? ChangeStatus.Failure
-					: ChangeStatus.Success;
-				return new ChangeValue<PageCollection>(retval, pages);
+				var retval = PageCollection.Purge(this.Site, this, method, batchSize);
+				return new ChangeValue<PageCollection>(ChangeStatus.Success, retval);
 			}
 		}
 

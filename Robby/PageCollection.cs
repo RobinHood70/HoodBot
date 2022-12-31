@@ -88,7 +88,7 @@
 		/// <summary>Gets the title map.</summary>
 		/// <value>The title map.</value>
 		/// <remarks>
-		/// <para>The title map allows mapping from the original name you provided for a page to the actual title that was returned. If, for example, you requested "Main Page" and got redirected to "Main page", there would be an entry in the title map indicating that. Not all titles in the title map will necessarily appear in the result set. For example, if you provided an interwiki title, the result set most likely won't include that, but the title map will still include an InterwikiTitle result for it.</para>
+		/// <para>The title map allows mapping from the original name you provided for a page to the actual title that was returned. If, for example, you requested "Main Page" and got redirected to "Main page", there would be an entry in the title map indicating that. Not all titles in the title map will necessarily appear in the other set. For example, if you provided an interwiki title, the other set most likely won't include that, but the title map will still include an InterwikiTitle result for it.</para>
 		/// <para>The title map is largely for informational purposes. When accessing items in the collection, it will automatically check the title map and attempt to return the correct result.</para>
 		/// </remarks>
 		public IReadOnlyDictionary<string, FullTitle> TitleMap => this.titleMap;
@@ -151,13 +151,16 @@
 		/// <returns>A <see cref="PageCollection"/> with the purge results.</returns>
 		public static PageCollection Purge(Site site, PurgeInput input)
 		{
-			var result = site.NotNull().AbstractionLayer.Purge(input);
 			var retval = UnlimitedDefault(site);
-			retval.PopulateMapCollections(result);
-			foreach (var item in result)
+			if (site.NotNull().EditingEnabled)
 			{
-				var page = retval.New(item);
-				retval[page] = page;
+				var result = site.NotNull().AbstractionLayer.Purge(input);
+				retval.PopulateMapCollections(result);
+				foreach (var item in result)
+				{
+					var page = retval.New(item);
+					retval[page] = page;
+				}
 			}
 
 			return retval;
@@ -167,11 +170,25 @@
 		/// <param name="site">The site to work on.</param>
 		/// <param name="titles">The titles to purge.</param>
 		/// <param name="method">The type of purge to perform.</param>
+		/// <param name="batchSize">The number of purges to send with each request. Lower this value if purge returns errors.</param>
 		/// <returns>A <see cref="PageCollection"/> with the purge results.</returns>
-		public static PageCollection Purge(Site site, IEnumerable<Title> titles, PurgeMethod method)
+		public static PageCollection Purge(Site site, IEnumerable<Title> titles, PurgeMethod method, int batchSize)
 		{
-			var input = new PurgeInput(titles.ToFullPageNames(), method);
-			return Purge(site, input);
+			titles.ThrowNull();
+			var retval = UnlimitedDefault(site);
+			var subTitles = new List<string>();
+			foreach (var title in titles)
+			{
+				subTitles.Add(title.FullPageName);
+				if (subTitles.Count >= batchSize)
+				{
+					var input = new PurgeInput(subTitles, method);
+					retval.MergeWith(Purge(site, input));
+					subTitles.Clear();
+				}
+			}
+
+			return retval;
 		}
 
 		/// <summary>Initializes a new instance of the PageCollection class with no namespace limitations.</summary>
@@ -236,16 +253,15 @@
 		/// <param name="titles">The titles.</param>
 		public void GetTitles(IEnumerable<Title> titles) => this.LoadPages(new QueryPageSetInput(titles.ToFullPageNames()));
 
-		/// <summary>Removes all pages from the collection where the page's <see cref="Page.Exists"/> property equals the value provided.</summary>
-		/// <param name="exists">If <see langword="true"/>, pages that exist will be removed from the collection; if <see langword="false"/>, non-existent pages will be removed fromt he collection.</param>
-		public void RemoveExists(bool exists)
+		/// <summary>Merges the current PageCollection with another, including all <see cref="TitleMap"/> entries.</summary>
+		/// <param name="other">The PageCollection to merge with.</param>
+		public void MergeWith(PageCollection other)
 		{
-			for (var i = this.Count - 1; i >= 0; i--)
+			other.ThrowNull();
+			this.AddRange(other);
+			foreach (var entry in other.TitleMap)
 			{
-				if (this[i].Exists == exists)
-				{
-					this.RemoveAt(i);
-				}
+				this.titleMap.Add(entry.Key, entry.Value);
 			}
 		}
 
@@ -256,6 +272,19 @@
 			for (var i = this.Count - 1; i >= 0; i--)
 			{
 				if (this[i].TextModified == changed)
+				{
+					this.RemoveAt(i);
+				}
+			}
+		}
+
+		/// <summary>Removes all pages from the collection where the page's <see cref="Page.Exists"/> property equals the value provided.</summary>
+		/// <param name="exists">If <see langword="true"/>, pages that exist will be removed from the collection; if <see langword="false"/>, non-existent pages will be removed fromt he collection.</param>
+		public void RemoveExists(bool exists)
+		{
+			for (var i = this.Count - 1; i >= 0; i--)
+			{
+				if (this[i].Exists == exists)
 				{
 					this.RemoveAt(i);
 				}
@@ -324,6 +353,7 @@
 		#region Internal Methods
 		internal void PopulateMapCollections(IPageSetResult result)
 		{
+			result.ThrowNull();
 			foreach (var item in result.Interwiki)
 			{
 				FullTitle title = TitleFactory.FromUnvalidated(this.Site, item.Value.Title);
