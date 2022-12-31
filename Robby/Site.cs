@@ -834,6 +834,11 @@
 		/// <param name="atOrBelow">Wait until the job queue is at or below this value.</param>
 		public void WaitForJobQueue(TimeSpan timeBetweenChecks, int atOrBelow)
 		{
+			if (!this.EditingEnabled)
+			{
+				return;
+			}
+
 			long jobsRemaining;
 			var client = (this.AbstractionLayer as IInternetEntryPoint)?.Client;
 			do
