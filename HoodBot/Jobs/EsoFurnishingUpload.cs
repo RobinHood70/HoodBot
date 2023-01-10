@@ -11,7 +11,7 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 
-	internal sealed class EsoFurningUpload : WikiJob
+	internal sealed class EsoFurnishingUpload : WikiJob
 	{
 		#region Fields
 		private static readonly string WikiIconFolder = Path.Combine(UespSite.GetBotDataFolder(), "icons");
@@ -19,7 +19,7 @@
 
 		#region Constructors
 		[JobInfo("Furnishing Icon Upload", "ESO")]
-		public EsoFurningUpload(JobManager jobManager)
+		public EsoFurnishingUpload(JobManager jobManager)
 			: base(jobManager)
 		{
 		}
