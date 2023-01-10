@@ -30,7 +30,33 @@
 		{
 			this.site = site.NotNull();
 			this.globalUpdates = linkUpdates.NotNull();
-			this.AddAllReplacers();
+
+			this.AddGeneralReplacers(this.GenericIcon, this.GenericImage);
+			this.AddTemplateReplacers("Basic NPC Summary", this.BasicNpc);
+			this.AddTemplateReplacers("Book Link", this.LoreFirst);
+			this.AddTemplateReplacers("Bullet Link", this.BulletLink);
+			this.AddTemplateReplacers("Cat Footer", this.CatFooter);
+			this.AddTemplateReplacers("Cite Book", this.LoreFirst);
+			this.AddTemplateReplacers("Edit Link", this.FullPageNameFirst);
+			this.AddTemplateReplacers("ESO Antiquity Furnishing", this.EsoAntiquityReplacer);
+			this.AddTemplateReplacers("ESO Set List", this.PageNameAllNumeric);
+			this.AddTemplateReplacers("Furnishing Crafting Entry", this.FurnishingLink);
+			this.AddTemplateReplacers("Furnishing General Entry", this.PageNameFirst);
+			this.AddTemplateReplacers("Furnishing Link", this.FurnishingLink);
+			this.AddTemplateReplacers("Furnishing Luxury Entry", this.FurnishingLink);
+			this.AddTemplateReplacers("Furnishing Recipe Link", this.FurnishingLink);
+			this.AddTemplateReplacers("Furnishing Recipe Short", this.FurnishingLink);
+			this.AddTemplateReplacers("Game Book", this.GameBookGeneral);
+			this.AddTemplateReplacers("Icon", this.Icon);
+			this.AddTemplateReplacers("Lore Entry", this.GenericImage);
+			this.AddTemplateReplacers("Lore Link", this.LoreFirst);
+			this.AddTemplateReplacers("Multiple Images", this.MultipleImages);
+			this.AddTemplateReplacers("NPC Summary", this.NpcSummary);
+			this.AddTemplateReplacers("Online Furnishing Summary", this.GenericImage);
+			this.AddTemplateReplacers("Online NPC Summary", this.EsoNpc);
+			this.AddTemplateReplacers("Pages In Category", this.CategoryFirst);
+			this.AddTemplateReplacers("Quest Header", this.GenericIcon);
+			this.AddTemplateReplacers("Soft Redirect", this.FullPageNameFirst);
 		}
 		#endregion
 
@@ -143,6 +169,8 @@
 			}
 		}
 
+		protected void EsoAntiquityReplacer(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("img"));
+
 		protected void EsoNpc(Page page, SiteTemplateNode template)
 		{
 			this.PageNameReplace(page.Site[UespNamespaces.Online], template.Find("condition"));
@@ -157,7 +185,11 @@
 
 		protected void GenericIcon(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Namespace, template.Find("icon"));
 
-		protected void GenericImage(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("image"));
+		protected void GenericImage(Page page, SiteTemplateNode template)
+		{
+			this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("image"));
+			this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("img"));
+		}
 
 		protected void Icon(Page page, SiteTemplateNode template)
 		{
@@ -181,6 +213,20 @@
 
 		protected void LoreFirst(Page page, SiteTemplateNode template) => this.PageNameReplace(page.Site[UespNamespaces.Lore], template.Find(1));
 
+		protected void MultipleImages(Page page, SiteTemplateNode template)
+		{
+			this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("image1"));
+			this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("image2"));
+			this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("image3"));
+			this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("image4"));
+			this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("image5"));
+			this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("image6"));
+			this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("image7"));
+			this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("image8"));
+			this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("image9"));
+			this.PageNameReplace(page.Site[MediaWikiNamespaces.File], template.Find("image10"));
+		}
+
 		protected void NpcSummary(Page page, SiteTemplateNode template)
 		{
 			if (this.NamespaceList.FromTitle(page) is UespNamespace nsPage)
@@ -193,33 +239,6 @@
 		#endregion
 
 		#region Private Methods
-		private void AddAllReplacers()
-		{
-			// this.AddGeneralReplacers(this.GenericIcon, this.GenericImage);
-			this.AddTemplateReplacers("Basic NPC Summary", this.BasicNpc);
-			this.AddTemplateReplacers("Book Link", this.LoreFirst);
-			this.AddTemplateReplacers("Bullet Link", this.BulletLink);
-			this.AddTemplateReplacers("Cat Footer", this.CatFooter);
-			this.AddTemplateReplacers("Cite Book", this.LoreFirst);
-			this.AddTemplateReplacers("Edit Link", this.FullPageNameFirst);
-			this.AddTemplateReplacers("ESO Set List", this.PageNameAllNumeric);
-			this.AddTemplateReplacers("Furnishing Crafting Entry", this.FurnishingLink);
-			this.AddTemplateReplacers("Furnishing General Entry", this.PageNameFirst);
-			this.AddTemplateReplacers("Furnishing Link", this.FurnishingLink);
-			this.AddTemplateReplacers("Furnishing Luxury Entry", this.FurnishingLink);
-			this.AddTemplateReplacers("Furnishing Recipe Link", this.FurnishingLink);
-			this.AddTemplateReplacers("Furnishing Recipe Short", this.FurnishingLink);
-			this.AddTemplateReplacers("Icon", this.Icon);
-			this.AddTemplateReplacers("Lore Link", this.LoreFirst);
-			this.AddTemplateReplacers("Game Book", this.GameBookGeneral);
-			this.AddTemplateReplacers("NPC Summary", this.NpcSummary);
-			this.AddTemplateReplacers("Online Furnishing Summary", this.GenericImage);
-			this.AddTemplateReplacers("Online NPC Summary", this.EsoNpc);
-			this.AddTemplateReplacers("Pages In Category", this.CategoryFirst);
-			this.AddTemplateReplacers("Quest Header", this.GenericIcon);
-			this.AddTemplateReplacers("Soft Redirect", this.FullPageNameFirst);
-		}
-
 		private void FullPageNameReplace([NotNull] Page page, IParameterNode? param)
 		{
 			page.ThrowNull();
@@ -283,9 +302,7 @@
 			var ns2 = rep2 ? replacement2.To.Namespace : null; */
 			if (param != null)
 			{
-				var titleFactory = TitleFactory.FromUnvalidated(ns, param.Value.ToValue());
-				var title = new Title(titleFactory);
-				if (this.globalUpdates.TryGetValue(title, out var target) &&
+				if (this.globalUpdates.TryGetValue(TitleFactory.FromUnvalidated(ns, param.Value.ToValue().Trim()), out var target) &&
 					target.Namespace == ns)
 				{
 					param.SetValue(target.PageName, ParameterFormat.Copy);
