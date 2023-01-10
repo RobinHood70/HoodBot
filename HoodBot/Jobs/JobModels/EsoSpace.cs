@@ -44,7 +44,7 @@
 		public static PlaceCollection GetPlaces(Site site)
 		{
 			var places = site.NotNull().CreateMetaPageCollection(PageModules.None, true, "alliance", "settlement", "titlename", "type", "zone");
-			places.SetLimitations(LimitationType.FilterTo, UespNamespaces.Online);
+			places.SetLimitations(LimitationType.OnlyAllow, UespNamespaces.Online);
 			places.GetCategoryMembers("Online-Places");
 
 			PlaceCollection retval = new();

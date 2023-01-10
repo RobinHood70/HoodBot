@@ -87,7 +87,7 @@
 		{
 			const string mtCostName = "cost";
 			var cards = this.Site.CreateMetaPageCollection(PageModules.Custom, true, mtCostName);
-			cards.SetLimitations(LimitationType.FilterTo, UespNamespaces.Legends);
+			cards.SetLimitations(LimitationType.OnlyAllow, UespNamespaces.Legends);
 			cards.GetCategoryMembers("Legends-Cards", CategoryMemberTypes.Page, false);
 
 			foreach (var page in cards)

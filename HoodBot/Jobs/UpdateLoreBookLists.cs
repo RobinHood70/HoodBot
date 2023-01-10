@@ -129,7 +129,7 @@
 		private PageCollection FilterToListBooks()
 		{
 			var listBooks = this.Site.CreateMetaPageCollection(PageModules.Info, false, "listbook");
-			listBooks.SetLimitations(LimitationType.FilterTo, UespNamespaces.Lore);
+			listBooks.SetLimitations(LimitationType.OnlyAllow, UespNamespaces.Lore);
 			listBooks.GetCustomGenerator(new VariablesInput() { Variables = new[] { "listbook" } });
 			for (var i = listBooks.Count - 1; i >= 0; i--)
 			{

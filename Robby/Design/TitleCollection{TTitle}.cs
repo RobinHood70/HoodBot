@@ -19,11 +19,11 @@
 		/// <summary>Ignore all limitations.</summary>
 		None,
 
-		/// <summary>Automatically remove pages with namespaces specified in <see cref="TitleCollection{TTitle}.NamespaceLimitations"/> from the collection.</summary>
-		Remove,
+		/// <summary>Disallow pages with namespaces specified in <see cref="TitleCollection{TTitle}.NamespaceLimitations"/> from the collection.</summary>
+		Disallow,
 
-		/// <summary>Automatically limit pages in the collection to those with namespaces specified in <see cref="TitleCollection{TTitle}.NamespaceLimitations"/>.</summary>
-		FilterTo,
+		/// <summary>Automatically limit pages in the collection to only those with namespaces specified in <see cref="TitleCollection{TTitle}.NamespaceLimitations"/>.</summary>
+		OnlyAllow,
 	}
 
 	/// <summary>The page protection types.</summary>
@@ -116,7 +116,7 @@
 		/// <summary>Gets or sets a value indicating whether <see cref="NamespaceLimitations"/> specifies namespaces to be removed from the collection or only allowing those namepaces.</summary>
 		/// <value>The type of the namespace limitation.</value>
 		/// <remarks>Changing this property only affects newly added pages and does not affect any existing items in the collection. Use <see cref="FilterByLimitationRules"/> to do so, if needed.</remarks>
-		protected LimitationType LimitationType { get; set; } = LimitationType.Remove;
+		protected LimitationType LimitationType { get; set; } = LimitationType.Disallow;
 
 		/// <summary>Gets the namespace limitations.</summary>
 		/// <value>A set of namespace IDs that will be filtered out or filtered down to automatically as pages are added.</value>
@@ -249,11 +249,11 @@
 		/// <summary>Reapplies the namespace limitations in <see cref="NamespaceLimitations"/> to the existing collection.</summary>
 		public void FilterByLimitationRules()
 		{
-			if (this.LimitationType == LimitationType.Remove)
+			if (this.LimitationType == LimitationType.Disallow)
 			{
 				this.RemoveNamespaces(this.NamespaceLimitations);
 			}
-			else if (this.LimitationType == LimitationType.FilterTo)
+			else if (this.LimitationType == LimitationType.OnlyAllow)
 			{
 				this.FilterToNamespaces(this.NamespaceLimitations);
 			}
@@ -998,8 +998,8 @@
 			this.LimitationType switch
 			{
 				LimitationType.None => true,
-				LimitationType.Remove => !this.NamespaceLimitations.Contains(title.Namespace.Id),
-				LimitationType.FilterTo => this.NamespaceLimitations.Contains(title.Namespace.Id),
+				LimitationType.Disallow => !this.NamespaceLimitations.Contains(title.Namespace.Id),
+				LimitationType.OnlyAllow => this.NamespaceLimitations.Contains(title.Namespace.Id),
 				_ => throw new ArgumentOutOfRangeException(Resources.InvalidLimitationType)
 			};
 		#endregion
