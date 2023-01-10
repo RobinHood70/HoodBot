@@ -6,7 +6,7 @@
 	using RobinHood70.WallE.Base;
 	using RobinHood70.WallE.Clients;
 
-	public class TestJob : WikiJob
+	internal sealed class TestJob : WikiJob
 	{
 		#region Constructors
 		[JobInfo("Test Job")]

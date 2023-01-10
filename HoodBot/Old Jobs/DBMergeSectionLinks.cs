@@ -1,19 +1,6 @@
 ﻿namespace RobinHood70.HoodBot.Jobs
 {
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using Newtonsoft.Json;
-	using RobinHood70.HoodBot.Jobs.Design;
-	using RobinHood70.HoodBot.Jobs.JobModels;
-	using RobinHood70.HoodBot.Uesp;
-	using RobinHood70.Robby;
-	using RobinHood70.Robby.Design;
-	using RobinHood70.Robby.Parser;
-	using RobinHood70.WikiCommon;
-	using RobinHood70.WikiCommon.Parser;
-
-	public class DBMergeSectionLinks : WikiJob
+	internal sealed class DBMergeSectionLinks : WikiJob
 	{
 		[JobInfo("Check Dragonborn Section Links")]
 		public DBMergeSectionLinks(JobManager jobManager)

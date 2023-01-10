@@ -5,7 +5,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon;
 
-	public class FindOnPages : WikiJob
+	internal sealed class FindOnPages : WikiJob
 	{
 		#region Constructors
 		[JobInfo("Find On Pages")]

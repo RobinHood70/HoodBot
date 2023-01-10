@@ -3,7 +3,7 @@
 	using System.Threading;
 	using RobinHood70.CommonCode;
 
-	public class VoidJob : WikiJob
+	internal sealed class VoidJob : WikiJob
 	{
 		#region Constructors
 		// We want to keep this job around for testing, but don't need it to clutter up the main list, so comment out the JobInfo.

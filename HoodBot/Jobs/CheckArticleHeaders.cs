@@ -8,7 +8,7 @@
 	using RobinHood70.Robby.Parser;
 	using RobinHood70.WikiCommon.Parser;
 
-	public class CheckArticleHeaders : WikiJob
+	internal sealed class CheckArticleHeaders : WikiJob
 	{
 		private static readonly HashSet<string> BadHeaders = new(StringComparer.Ordinal)
 		{

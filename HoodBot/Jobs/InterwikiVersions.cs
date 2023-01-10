@@ -7,7 +7,7 @@
 	using RobinHood70.WallE.Clients;
 	using RobinHood70.WallE.Eve;
 
-	public class InterwikiVersions : WikiJob
+	internal sealed class InterwikiVersions : WikiJob
 	{
 		[JobInfo("Interwiki Versions", "External")]
 		public InterwikiVersions(JobManager jobManager)

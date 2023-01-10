@@ -11,7 +11,7 @@
 	using RobinHood70.WikiCommon;
 	using RobinHood70.WikiCommon.Parser;
 
-	public class TemplateUsage : WikiJob
+	internal class TemplateUsage : WikiJob
 	{
 		#region Fields
 		private readonly string saveLocation;

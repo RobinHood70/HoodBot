@@ -4,7 +4,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 
-	public class SmallImages : WikiJob
+	internal sealed class SmallImages : WikiJob
 	{
 		[JobInfo("Find Small Images")]
 		public SmallImages(JobManager jobManager)

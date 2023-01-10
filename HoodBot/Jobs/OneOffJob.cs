@@ -3,7 +3,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 
-	public class OneOffJob : WikiJob
+	internal sealed class OneOffJob : WikiJob
 	{
 		#region Constructors
 		[JobInfo("One-Off Job")]

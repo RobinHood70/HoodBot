@@ -6,7 +6,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.Robby.Design;
 
-	public class ManipulateImageCategory : WikiJob
+	internal sealed class ManipulateImageCategory : WikiJob
 	{
 		[JobInfo("Manipulate Image Category")]
 		public ManipulateImageCategory(JobManager jobManager)

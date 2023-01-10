@@ -9,7 +9,7 @@
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Uesp;
 
-	public class BladesFamilies : WikiJob
+	internal sealed class BladesFamilies : WikiJob
 	{
 		#region Fields
 		private readonly List<BladesEnemy> enemies = new();

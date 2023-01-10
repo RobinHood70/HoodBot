@@ -8,7 +8,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.WallE.Design;
 
-	public class BlockChanger : WikiJob
+	internal sealed class BlockChanger : WikiJob
 	{
 		#region Private Constants
 		private const int NumYears = 1;

@@ -3,7 +3,7 @@
 	using System.Diagnostics;
 	using RobinHood70.WikiCommon;
 
-	public class WatchTemplates : WikiJob
+	internal sealed class WatchTemplates : WikiJob
 	{
 		[JobInfo("Watch Template Space")]
 		public WatchTemplates(JobManager jobManager)

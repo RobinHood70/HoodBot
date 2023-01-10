@@ -11,7 +11,7 @@
 	using RobinHood70.WikiCommon.Parser;
 	using RobinHood70.WikiCommon.Parser.Basic;
 
-	public class VariableUsage : WikiJob
+	internal sealed class VariableUsage : WikiJob
 	{
 		#region Fields
 		private readonly List<LoadSaveCall> loadCalls = new();

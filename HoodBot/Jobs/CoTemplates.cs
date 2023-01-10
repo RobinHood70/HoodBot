@@ -5,7 +5,7 @@
 	using RobinHood70.Robby.Design;
 	using RobinHood70.WikiCommon;
 
-	public class CoTemplates : WikiJob
+	internal sealed class CoTemplates : WikiJob
 	{
 		#region Constructors
 		[JobInfo("Co-occurring Templates")]

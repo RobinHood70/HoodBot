@@ -8,7 +8,7 @@
 	using RobinHood70.HoodBot.Uesp;
 	using RobinHood70.Robby;
 
-	public class GenderedNPCsFromLang : WikiJob
+	internal sealed class GenderedNPCsFromLang : WikiJob
 	{
 		[JobInfo("NPCs from Lang")]
 		public GenderedNPCsFromLang(JobManager jobManager)

@@ -5,7 +5,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon;
 
-	public class WantedInMain : WikiJob
+	internal sealed class WantedInMain : WikiJob
 	{
 		#region Constructors
 		[JobInfo("Wanted Pages in Main Space", "Maintenance")]

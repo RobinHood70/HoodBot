@@ -4,7 +4,7 @@
 	using RobinHood70.Robby;
 	using RobinHood70.WikiCommon;
 
-	public class BulkDeleteUnused : WikiJob
+	internal sealed class BulkDeleteUnused : WikiJob
 	{
 		#region Fields
 		private readonly TitleCollection deleteTitles;
