@@ -44,12 +44,9 @@
 
 		#region Public Methods
 
-		public UespNamespace? FromId(string id)
-		{
-			return this.nsIds.TryGetValue(id, out var retval)
-				? retval
-				: null;
-		}
+		public UespNamespace? FromId(string id) => this.nsIds.TryGetValue(id, out var retval)
+			? retval
+			: null;
 
 		public UespNamespace FromTitle(Title title)
 		{
