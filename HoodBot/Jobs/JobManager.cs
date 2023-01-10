@@ -282,6 +282,7 @@
 		{
 			var retval = Site.GetFactoryMethod(this.wikiInfo.SiteClassIdentifier)(this.AbstractionLayer);
 			retval.PagePreview += this.OnPagePreview;
+			retval.Changing += this.SiteChanging;
 			return retval;
 		}
 
