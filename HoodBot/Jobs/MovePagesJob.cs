@@ -5,6 +5,7 @@
 	using System.Collections.Immutable;
 	using System.IO;
 	using System.Text;
+	using System.Threading;
 	using RobinHood70.CommonCode;
 	using RobinHood70.HoodBot.Jobs.JobModels;
 	using RobinHood70.Robby;
@@ -283,28 +284,45 @@
 		{
 			this.Site.WaitForJobQueue();
 			this.StatusWriteLine("Checking remaining pages");
-			TitleCollection leftovers = new(this.Site);
-			var allBacklinks = PageCollection.Unlimited(this.Site, PageModules.Info | PageModules.Backlinks, false);
 			TitleCollection backlinkTitles = new(this.Site);
-			foreach (var replacement in this.moves)
+			foreach (var replacement in this.linkUpdates)
 			{
 				backlinkTitles.Add(replacement.Key);
 			}
 
+			TitleCollection leftovers = new(this.Site);
+			var allBacklinks = PageCollection.Unlimited(this.Site, PageModules.Info | PageModules.Backlinks, false);
 			allBacklinks.GetTitles(backlinkTitles);
 			foreach (var page in allBacklinks)
 			{
-				foreach (var backlink in page.Backlinks)
+				foreach (var leftover in page.Backlinks)
 				{
-					if (!page.Equals(backlink.Key))
+					if (!page.SimpleEquals(leftover.Key))
 					{
-						leftovers.Add(page);
+						// This time around, we add each backlink to the list, each of which will be purged.
+						leftovers.Add(leftover.Key);
 					}
 				}
 			}
 
 			if (leftovers.Count > 0)
 			{
+				PageCollection.Purge(this.Site, leftovers, PurgeMethod.LinkUpdate, 5);
+				Thread.Sleep(15); // Arbitrary wait to roughly ensure that job queue has started.
+				this.Site.WaitForJobQueue();
+
+				leftovers.Clear();
+				allBacklinks.Clear();
+				allBacklinks.GetTitles(backlinkTitles);
+				foreach (var page in allBacklinks)
+				{
+					if ((page.Backlinks.Count > 1 && !page.Backlinks.ContainsKey(page)) || page.Backlinks.Count > 1)
+					{
+						// We no longer care about which pages link back to the moved page; this time, we want the pages that still have backlinks.
+						leftovers.Add(page);
+					}
+				}
+
 				leftovers.Sort();
 				this.WriteLine("The following pages are still linked to:");
 				foreach (var title in leftovers)
@@ -810,12 +828,16 @@
 		{
 			foreach (var linkUpdate in this.linkUpdates)
 			{
-				if (pageInfo[linkUpdate.Key] is Page fromPage)
+				if (pageInfo.TryGetValue(linkUpdate.Key, out var fromPage))
 				{
 					foreach (var backlink in fromPage.Backlinks)
 					{
 						backlinkTitles.Add(backlink.Key);
 					}
+				}
+				else
+				{
+					this.StatusWriteLine("Key not found: " + linkUpdate.Key);
 				}
 			}
 		}
